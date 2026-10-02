@@ -908,7 +908,7 @@ grouped by startup tier — Docker Compose launches each tier in parallel once a
 in the previous tier report healthy. The `neo4j-spe2` and `jad-seed` containers only start
 when their respective profiles (`federated`, `seed`) are explicitly activated.
 
-![ORB K8s cluster with the EHDS Integration Hub](image-1.png)
+![ORB K8s cluster with the EHDS Integration Hub](docs/images/orb-k8s-cluster.png)
 
 ```
 Tier 0 ──► Tier 1 ──► Tier 2 ──► Tier 3 ──► Tier 4

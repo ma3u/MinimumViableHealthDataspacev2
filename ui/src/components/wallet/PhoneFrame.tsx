@@ -2,7 +2,7 @@
 
 /**
  * WalletFlow — a generic animated phone mock-up that auto-cycles a list of
- * `WalletStep`s. Extracted from WalletSimulation so register / returning-login /
+ * `WalletStep`s. Extracted from the old WalletSimulation so register / returning-login /
  * EHR-transfer flows share one phone frame (see ui/src/components/wallet/flows.tsx).
  * Illustrative only; synthetic data. See docs/planning/eudi-wallet-flows-2026.md.
  */

@@ -3,7 +3,7 @@
 /**
  * Simulated ePA (elektronische Patientenakte) data-transfer flow from the
  * patient's Krankenkasse, authorised via GesundheitsID — a sibling of the EUDI
- * WalletSimulation but visually the insurer's app (brand-coloured, not purple).
+ * registration flow but visually the insurer's app (brand-coloured, not purple).
  *
  * Public default: a synthetic, brand-coloured consent flow (fictional insurer).
  * Live-demo mode (NEXT_PUBLIC_DEMO_TK): shows the real, git-ignored TK ePA
