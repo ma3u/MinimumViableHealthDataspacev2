@@ -116,7 +116,7 @@ export interface PatientViewInput {
  * domain and factor each one drives. Descriptions in plain words; the
  * printed reference range comes from the Observation, never from here.
  */
-export const PARAMETER_META: Record<
+const PARAMETER_META: Record<
   string,
   {
     key: string;

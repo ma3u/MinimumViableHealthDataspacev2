@@ -73,7 +73,6 @@ vi.mock("@/lib/use-demo-persona", () => ({
     displayName: "EDC Admin",
   }),
   setDemoPersona: vi.fn(),
-  getDemoPersonaUsername: vi.fn(() => "edcadmin"),
   DEMO_PERSONA_KEY: "demo-persona",
 }));
 

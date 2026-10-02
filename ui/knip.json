@@ -1,0 +1,17 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "scripts/forge-bruno-session.mjs",
+    "scripts/generate-overview-fixture.ts",
+    "scripts/record-patient-journey.ts",
+    "scripts/record-researcher-journey.ts"
+  ],
+  "ignore": ["public/**"],
+  "ignoreDependencies": [
+    "swagger-ui-dist",
+    "@typescript-eslint/typescript-estree"
+  ],
+  "rules": {
+    "types": "off"
+  }
+}

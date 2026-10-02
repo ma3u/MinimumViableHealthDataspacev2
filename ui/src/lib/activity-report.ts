@@ -10,8 +10,8 @@
  */
 import { PURPOSE_LABELS, parseGraphTime } from "@/lib/permits";
 
-export const REPORT_ARTICLE = "Regulation (EU) 2025/327, Art. 59(1)";
-export const REPORT_MONTHS = 24;
+const REPORT_ARTICLE = "Regulation (EU) 2025/327, Art. 59(1)";
+const REPORT_MONTHS = 24;
 
 /* ── Graph rows, one shape per query ───────────────────────────── */
 

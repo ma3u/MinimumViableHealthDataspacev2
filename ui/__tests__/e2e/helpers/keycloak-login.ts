@@ -1,4 +1,4 @@
-import type { Page, BrowserContext } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 export interface KeycloakLoginOptions {
   username: string;
@@ -26,22 +26,4 @@ export async function keycloakLogin(
   await page.waitForURL(
     (url) => !/openid-connect|\/auth\/signin/.test(url.href),
   );
-}
-
-/**
- * Extracts the NextAuth session cookie after a login. Returned in the
- * `name=value` form ZAP's replacer rule consumes.
- */
-export async function getSessionCookie(
-  context: BrowserContext,
-  baseUrl: string,
-): Promise<string> {
-  const cookies = await context.cookies(baseUrl);
-  const session = cookies.find(
-    (c) =>
-      c.name === "next-auth.session-token" ||
-      c.name === "__Secure-next-auth.session-token",
-  );
-  if (!session) throw new Error("session cookie not found after login");
-  return `${session.name}=${session.value}`;
 }

@@ -20,11 +20,11 @@ export const ORBIT_IDLE_MS = 30_000;
 /** Orbit speed in radians per second; negative reads as left to right */
 export const ORBIT_SPEED = -0.12;
 /** Radians per rotate key press */
-export const ROTATE_STEP = 0.08;
+const ROTATE_STEP = 0.08;
 /** Fraction of the distance per pan key press */
-export const PAN_STEP = 0.06;
+const PAN_STEP = 0.06;
 /** Zoom factor per key press */
-export const ZOOM_STEP = 1.12;
+const ZOOM_STEP = 1.12;
 export const MIN_DISTANCE = 60;
 export const MAX_DISTANCE = 6000;
 

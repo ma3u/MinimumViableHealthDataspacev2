@@ -36,7 +36,7 @@ docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d
 ```
 ui/src/app/             — Next.js 14 app router (pages + api/ routes)
 ui/src/lib/             — auth.ts, api.ts (static-export mock map), neo4j.ts
-ui/__tests__/           — unit/ (Vitest + MSW) · e2e/journeys/ (Playwright)
+ui/__tests__/           — unit/ (Vitest) · e2e/journeys/ (Playwright)
 ui/public/mock/         — JSON fixtures for NEXT_PUBLIC_STATIC_EXPORT=true
 services/neo4j-proxy/   — Express FHIR/OMOP/NLQ/federated bridge (port 9090)
 services/catalog-crawler|catalog-enricher — federated discovery pipeline (issue #8)

@@ -11,7 +11,7 @@ import {
   type ApplicantCategory,
 } from "@/lib/permits";
 
-export const FEE_ARTICLE = "Regulation (EU) 2025/327, Art. 62";
+const FEE_ARTICLE = "Regulation (EU) 2025/327, Art. 62";
 
 /** EUR. What the access body's work costs: receipt, assessment, the SPE. */
 export const BODY_FEES = {

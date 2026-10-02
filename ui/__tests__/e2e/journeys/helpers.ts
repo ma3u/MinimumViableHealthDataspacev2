@@ -40,17 +40,6 @@ export const T = 15_000;
 
 /* ── Navigation helpers ──────────────────────────────────────── */
 
-/** Open a nav dropdown by group name and click a link inside it. */
-export async function navigateViaDropdown(
-  page: Page,
-  group: string,
-  linkName: string,
-) {
-  const nav = page.locator("nav");
-  await nav.getByRole("button", { name: new RegExp(group, "i") }).click();
-  await nav.getByRole("menuitem", { name: new RegExp(linkName, "i") }).click();
-}
-
 /** Wait for the main page heading (h1 or h2) to contain the given text. */
 export async function expectHeading(page: Page, text: string) {
   await expect(

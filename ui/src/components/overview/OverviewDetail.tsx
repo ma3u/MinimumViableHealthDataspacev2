@@ -18,7 +18,7 @@ const DIR_CLASS: Record<string, string> = {
   info: "border-sky-500 text-sky-600 dark:text-sky-400",
 };
 
-export function SeriesChart({ node }: { node: OverviewNode }) {
+function SeriesChart({ node }: { node: OverviewNode }) {
   const pts = node.series ?? [];
   if (pts.length < 2) return null;
   const W = 340;

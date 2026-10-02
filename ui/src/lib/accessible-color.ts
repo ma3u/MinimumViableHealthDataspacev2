@@ -47,7 +47,7 @@ function toHex([r, g, b]: RGB): string {
 }
 
 /** WCAG contrast ratio between two colours (order-independent). */
-export function contrastRatio(a: string, b: string): number {
+function contrastRatio(a: string, b: string): number {
   const la = relativeLuminance(parseHex(a));
   const lb = relativeLuminance(parseHex(b));
   const hi = Math.max(la, lb);
@@ -72,7 +72,7 @@ function lighten([r, g, b]: RGB, amount: number): RGB {
  * Use for brand-as-text in light mode, and — since contrast is symmetric — as
  * a solid background that carries white text.
  */
-export function onLightSurface(hex: string, bg = "#ffffff"): string {
+function onLightSurface(hex: string, bg = "#ffffff"): string {
   let rgb = parseHex(hex);
   for (let i = 0; i < 48 && contrastRatio(toHex(rgb), bg) < AA_NORMAL; i++) {
     rgb = darken(rgb, 0.92);
@@ -81,7 +81,7 @@ export function onLightSurface(hex: string, bg = "#ffffff"): string {
 }
 
 /** Lighten `hex` (preserving hue) until it clears 4.5:1 on a dark `bg`. */
-export function onDarkSurface(hex: string, bg = "#060e20"): string {
+function onDarkSurface(hex: string, bg = "#060e20"): string {
   let rgb = parseHex(hex);
   for (let i = 0; i < 48 && contrastRatio(toHex(rgb), bg) < AA_NORMAL; i++) {
     rgb = lighten(rgb, 0.08);

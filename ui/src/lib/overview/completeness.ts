@@ -22,7 +22,7 @@ export interface CatalogEntryLike {
 }
 
 /** The fields Art. 77 expects a description to carry, in the words of the catalogue. */
-export const DESCRIPTION_FIELDS: {
+const DESCRIPTION_FIELDS: {
   key: keyof CatalogEntryLike;
   label: string;
   filled: (v: unknown) => boolean;

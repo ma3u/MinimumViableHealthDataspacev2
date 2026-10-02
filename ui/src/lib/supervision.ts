@@ -26,8 +26,7 @@ export const MEASURE_LABELS: Record<Measure, string> = {
   FINE: "administrative fine (Art. 64)",
 };
 
-export const FINDING_STATUSES = ["OPEN", "VIEWS_RECEIVED", "CLOSED"] as const;
-export type FindingStatus = (typeof FINDING_STATUSES)[number];
+export type FindingStatus = "OPEN" | "VIEWS_RECEIVED" | "CLOSED";
 
 export interface Finding {
   findingId: string;

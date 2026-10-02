@@ -12,7 +12,7 @@
 export const K_ANONYMITY = 5;
 
 /** NLQ templates whose result is a statistic, not a list of records. */
-export const STATISTICAL_TEMPLATES = [
+const STATISTICAL_TEMPLATES = [
   "patient_count",
   "patient_by_gender",
   "top_conditions",

@@ -20,7 +20,7 @@ export interface SeriesSpec {
 }
 
 /** The month nodes a series unfolds into, chained oldest to newest. */
-export function expandSeries(
+function expandSeries(
   parentId: string,
   parentLabel: string,
   spec: SeriesSpec,
