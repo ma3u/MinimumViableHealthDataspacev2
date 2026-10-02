@@ -4,6 +4,10 @@
  * Tests policy definition listing and creation endpoints.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
+// Run the real requireAuth() against the mocked session, so the 401/403
+// cases below pin the gate (__tests__/setup.ts mocks the guard open).
+vi.unmock("@/lib/auth-guard");
 import { NextRequest } from "next/server";
 
 vi.mock("@/lib/edc", () => ({

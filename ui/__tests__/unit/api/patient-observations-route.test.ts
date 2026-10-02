@@ -7,6 +7,10 @@
  * (404), the Bundle shape and the code filter.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
+// Run the real requireAuth() against the mocked session, so the 401/403
+// cases below pin the gate (__tests__/setup.ts mocks the guard open).
+vi.unmock("@/lib/auth-guard");
 import { getServerSession } from "next-auth/next";
 
 const mockRunQuery = vi.fn();

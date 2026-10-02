@@ -1,8 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 import { authOptions, type Role } from "@/lib/auth";
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+import { IS_STATIC } from "@/lib/static-export";
 
 export interface AuthSession {
   user: { id: string; name?: string | null; email?: string | null };

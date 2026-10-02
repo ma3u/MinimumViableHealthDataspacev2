@@ -1,8 +1,7 @@
 import { runQuery } from "@/lib/neo4j";
 import { findPermits, type PermitRow } from "@/lib/permit-gate";
 import { parseGraphTime } from "@/lib/permits";
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+import { IS_STATIC } from "@/lib/static-export";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 

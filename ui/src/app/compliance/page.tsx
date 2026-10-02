@@ -26,6 +26,7 @@ import {
   Lock,
 } from "lucide-react";
 import Link from "next/link";
+import { IS_STATIC } from "@/lib/static-export";
 
 interface TrustCenter {
   name: string;
@@ -114,8 +115,6 @@ interface DecisionResult {
   article: string;
   statisticalAlternative?: boolean;
 }
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
 function rowKey(row: Pick<MatrixRow, "applicationId" | "consumerId">): string {
   return row.applicationId ?? row.consumerId;

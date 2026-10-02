@@ -10,8 +10,8 @@ import {
   AlertCircle,
   Loader2,
 } from "lucide-react";
+import { IS_STATIC } from "@/lib/static-export";
 
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 const BASE_PATH = IS_STATIC ? "/MinimumViableHealthDataspacev2" : "";
 const OPENAPI_URL = `${BASE_PATH}/openapi.yaml`;
 const SWAGGER_CSS = `${BASE_PATH}/swagger-ui/swagger-ui.css`;

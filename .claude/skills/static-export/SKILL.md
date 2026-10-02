@@ -18,8 +18,7 @@ Sources: `ui/src/lib/use-demo-persona.ts`, `ui/src/lib/auth.ts` (`DEMO_PERSONAS`
 
 ## Procedure
 
-1. `IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true"` as a module-top
-   constant; in static mode `fetchApi()` serves `/mock/*.json` for GET and a
+1. `import { IS_STATIC } from "@/lib/static-export"` (never redeclare it); in static mode `fetchApi()` serves `/mock/*.json` for GET and a
    synthetic `{ ok: true }` for mutations.
 2. Persona-aware components call `useDemoPersona()` **unconditionally** (hooks rule).
 3. New nav items: role filter in `ui/src/components/Navigation.tsx` nav groups.

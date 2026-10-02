@@ -24,8 +24,7 @@ import type {
   OverviewView,
   Severity,
 } from "@/lib/overview/types";
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+import { IS_STATIC } from "@/lib/static-export";
 
 const OverviewScene = dynamic(
   () => import("@/components/overview/OverviewScene"),

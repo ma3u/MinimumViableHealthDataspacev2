@@ -2,6 +2,10 @@
  * Unit tests for POST /api/admin/components/[name]/restart.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+// Run the real requireAuth() against the mocked session, so the 401/403
+// cases below pin the gate (__tests__/setup.ts mocks the guard open).
+vi.unmock("@/lib/auth-guard");
 import { getServerSession } from "next-auth/next";
 
 const mockListContainerApps = vi.fn();

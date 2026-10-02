@@ -24,8 +24,7 @@ import {
   Award,
   type LucideIcon,
 } from "lucide-react";
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+import { IS_STATIC } from "@/lib/static-export";
 
 /** Routes that are most relevant for each role. */
 const ROLE_PATHS: Record<string, string[]> = {

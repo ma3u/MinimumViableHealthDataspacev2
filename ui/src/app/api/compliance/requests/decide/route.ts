@@ -5,10 +5,9 @@ import { resolveOdrlScope, userToParticipantId } from "@/lib/odrl-engine";
 import { PUBLISH_WORKING_DAYS, addWorkingDays } from "@/lib/permits";
 import { REQUEST_FEE_EUR } from "@/lib/fees";
 import { toStatisticalAnswer, type NlqAnswer } from "@/lib/statistics";
+import { NEO4J_PROXY_URL } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
-
-const PROXY_URL = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
 
 /**
  * POST /api/compliance/requests/decide: the access body decides on a health
@@ -162,7 +161,7 @@ export async function POST(req: NextRequest) {
   let nlq: NlqAnswer;
   try {
     const odrlScope = await resolveOdrlScope(applicantId);
-    const resp = await fetch(`${PROXY_URL}/nlq`, {
+    const resp = await fetch(`${NEO4J_PROXY_URL}/nlq`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

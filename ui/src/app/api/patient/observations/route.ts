@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { runQuery } from "@/lib/neo4j";
 import { rowsToBundle, type ObservationRow } from "@/lib/overview/observations";
 import { ownPatientIdForSession } from "@/lib/overview/patient";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -20,14 +21,8 @@ export const dynamic = "force-dynamic";
  * (issue #271 M1); the demo users patient1 and patient2 own P1 and P2.
  */
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  const roles = (session as { roles?: string[] } | null)?.roles ?? [];
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  if (!roles.includes("PATIENT") && !roles.includes("EDC_ADMIN")) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const auth = await requireAuth(["PATIENT", "EDC_ADMIN"]);
+  if (isAuthError(auth)) return auth;
   const url = new URL(req.url);
   const patientId = url.searchParams.get("patientId");
   const code = url.searchParams.get("code");
@@ -37,8 +32,11 @@ export async function GET(req: Request) {
       { status: 400 },
     );
   }
+  const { roles } = auth.session;
   if (roles.includes("PATIENT") && !roles.includes("EDC_ADMIN")) {
-    const own = ownPatientIdForSession(session);
+    // ownPatientIdForSession needs preferredUsername, which AuthSession does
+    // not carry, so read the full session as well (as /api/patient does).
+    const own = ownPatientIdForSession(await getServerSession(authOptions));
     if (!own || own !== patientId) {
       return NextResponse.json(
         {

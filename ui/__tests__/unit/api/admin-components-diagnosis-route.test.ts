@@ -9,6 +9,10 @@
  *   - 401/403 auth gating
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+// Run the real requireAuth() against the mocked session, so the 401/403
+// cases below pin the gate (__tests__/setup.ts mocks the guard open).
+vi.unmock("@/lib/auth-guard");
 import { getServerSession } from "next-auth/next";
 
 import { GET } from "@/app/api/admin/components/[name]/diagnosis/route";

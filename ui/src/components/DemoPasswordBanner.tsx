@@ -3,8 +3,7 @@
 import { useSession } from "next-auth/react";
 import { AlertTriangle, ExternalLink, X } from "lucide-react";
 import { useEffect, useState } from "react";
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+import { IS_STATIC } from "@/lib/static-export";
 
 /**
  * Dismissible warning banner shown to authenticated users reminding them

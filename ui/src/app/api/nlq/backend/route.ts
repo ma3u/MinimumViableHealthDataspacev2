@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
+import { NEO4J_PROXY_URL } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
-
-const PROXY_URL = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
 
 /**
  * Phase 25f (Issue #13) — proxy for /nlq/backend.
@@ -32,7 +31,9 @@ const PROXY_URL = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
  */
 export async function GET() {
   try {
-    const resp = await fetch(`${PROXY_URL}/nlq/backend`, { cache: "no-store" });
+    const resp = await fetch(`${NEO4J_PROXY_URL}/nlq/backend`, {
+      cache: "no-store",
+    });
     const data = await resp.json();
     return NextResponse.json(data, { status: resp.status });
   } catch (err: unknown) {

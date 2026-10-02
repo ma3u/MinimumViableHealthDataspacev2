@@ -13,6 +13,7 @@ import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Gavel, AlertCircle, ShieldCheck, Clock } from "lucide-react";
+import { IS_STATIC } from "@/lib/static-export";
 
 /**
  * Supervision, Regulation (EU) 2025/327 Art. 63: the access body records a
@@ -22,8 +23,6 @@ import { Gavel, AlertCircle, ShieldCheck, Clock } from "lucide-react";
  * (63(1)), which is answered on record. The access body works here; a data
  * user or holder sees what concerns it and answers. Issue #206, M4.
  */
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
 interface Party {
   id: string;

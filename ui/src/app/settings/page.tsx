@@ -21,8 +21,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+import { IS_STATIC } from "@/lib/static-export";
 
 /**
  * Maps a demo persona username to the tenant IDs they should see.

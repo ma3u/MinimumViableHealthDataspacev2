@@ -1,9 +1,8 @@
 import neo4j from "neo4j-driver";
-import { getServerSession } from "next-auth/next";
 import { NextRequest, NextResponse } from "next/server";
 
-import { authOptions } from "@/lib/auth";
 import { runQuery } from "@/lib/neo4j";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -15,14 +14,8 @@ export const dynamic = "force-dynamic";
  * HDAB_AUTHORITY (BSI C5 IAM-01 / OWASP A01).
  */
 async function requireAuditAccess(): Promise<NextResponse | null> {
-  const session = await getServerSession(authOptions);
-  const roles = (session as { roles?: string[] } | null)?.roles ?? [];
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  if (!roles.includes("EDC_ADMIN") && !roles.includes("HDAB_AUTHORITY")) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const auth = await requireAuth(["EDC_ADMIN", "HDAB_AUTHORITY"]);
+  if (isAuthError(auth)) return auth;
   return null;
 }
 
