@@ -375,19 +375,18 @@ test.describe("Navigation — role-filtered groups", () => {
     });
   });
 
-  test("graph page accessible without login", async ({ page }) => {
+  // Both were public until #404; every page that reads the API needs a
+  // session since (ADR-044).
+  test("graph page sends a signed-out visitor to sign in", async ({ page }) => {
     await page.goto("/graph");
-    await expect(page.getByText("Knowledge Graph")).toBeVisible({ timeout: T });
-    // Should NOT redirect to signin
-    expect(page.url()).toContain("/graph");
+    await expect(page).toHaveURL(/\/auth\/signin/, { timeout: T });
   });
 
-  test("catalog page accessible without login", async ({ page }) => {
+  test("catalog page sends a signed-out visitor to sign in", async ({
+    page,
+  }) => {
     await page.goto("/catalog");
-    await expect(page.getByText(/Dataset Catalog/i).first()).toBeVisible({
-      timeout: T,
-    });
-    expect(page.url()).toContain("/catalog");
+    await expect(page).toHaveURL(/\/auth\/signin/, { timeout: T });
   });
 
   test("compliance page redirects unauthenticated users to signin", async ({

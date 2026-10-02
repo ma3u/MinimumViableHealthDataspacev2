@@ -9,12 +9,15 @@
  */
 import { test, expect } from "@playwright/test";
 import { T, expectHeading, waitForDataLoad, apiGet } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("B · Dataset Upload & Metadata Definition", () => {
   /* ── J06: AlphaKlinik's FHIR patient cohort in catalog ───── */
   test("J06 — Synthea FHIR R4 Patient Cohort appears in catalog", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);
@@ -37,6 +40,8 @@ test.describe("B · Dataset Upload & Metadata Definition", () => {
   test("J07 — FHIR Encounter History has HealthDCAT-AP metadata", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);
@@ -55,6 +60,8 @@ test.describe("B · Dataset Upload & Metadata Definition", () => {
   test("J08 — FHIR Diagnostic Reports dataset visible in catalog", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);
@@ -77,6 +84,8 @@ test.describe("B · Dataset Upload & Metadata Definition", () => {
 
   /* ── J10: EHDS Article 53 legal basis on dataset ─────────── */
   test("J10 — Dataset shows EHDS Article 53 legal basis", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);
@@ -96,6 +105,8 @@ test.describe("B · Dataset Upload & Metadata Definition", () => {
   test("J11 — FHIR Immunization Records visible in catalog", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);
@@ -107,6 +118,8 @@ test.describe("B · Dataset Upload & Metadata Definition", () => {
 
   /* ── J12: Care plan registry with quality labels ─────────── */
   test("J12 — FHIR Care Plan Registry appears in catalog", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);
@@ -123,6 +136,8 @@ test.describe("B · Dataset Upload & Metadata Definition", () => {
   test("J13 — MedDRA v27 Adverse Event Classification in catalog", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);
@@ -143,6 +158,8 @@ test.describe("B · Dataset Upload & Metadata Definition", () => {
   test("J14 — Clinical Trial Phases I–IV metadata in catalog", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);
@@ -160,6 +177,8 @@ test.describe("B · Dataset Upload & Metadata Definition", () => {
   test("J15 — FHIR AllergyIntolerance Registry with FHIR R4 conformance", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);

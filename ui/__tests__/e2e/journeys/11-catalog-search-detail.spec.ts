@@ -16,6 +16,7 @@ import {
   apiGet,
   loginAsAdmin,
 } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 /**
  * Expand the Synthea dataset card and open its HealthDCAT-AP detail modal.
@@ -26,6 +27,8 @@ import {
  * in-card layout (issue #115).
  */
 async function openDatasetDetail(page: Page) {
+  // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+  await signInOrSkip(page, test.skip);
   await page.goto("/catalog");
   await expectHeading(page, "Dataset Catalog");
   await waitForDataLoad(page);
@@ -42,6 +45,8 @@ async function openDatasetDetail(page: Page) {
 test.describe("K · Catalog Search & Dataset Detail", () => {
   /* ── J82: Catalog has a search/filter input ────────────── */
   test("J82 — Catalog page has a search filter input", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);
@@ -58,6 +63,8 @@ test.describe("K · Catalog Search & Dataset Detail", () => {
   test("J83 — Typing in search filter narrows the displayed datasets", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);
@@ -107,6 +114,8 @@ test.describe("K · Catalog Search & Dataset Detail", () => {
   test("J86 — Expanded dataset shows HealthDCAT-AP Metadata heading", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);
@@ -178,6 +187,8 @@ test.describe("K · Catalog Search & Dataset Detail", () => {
   test("J91 — Catalog page description references HealthDCAT-AP", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
 
