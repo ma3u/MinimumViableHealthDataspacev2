@@ -43,27 +43,42 @@ SET tc_nl += {
 // 2. HDAB Approval → Trust Center governance relationships
 // ============================================================
 
-// Link both trust centers to the MedReg DE HDAB approval
-MATCH (ha:HDABApproval)
-WHERE ha.approvalId IN ["hdab-approval-001", "hdab-approval-002"]
+// A trust centre resolves pseudonyms for the data held in its own country,
+// under an approved access-body permit for that data. Until #404 this block
+// matched approvals (hdab-approval-001/002) and datasets (dataset-fhir-*)
+// that no seed creates, so neither edge existed on any stack.
+//
+// The approvals are MERGEd by id, not MATCHed: seed.sh runs this file before
+// seed-compliance-matrix.cypher, which creates them and sets their status.
+// MERGE on the same id lets either order produce the same graph.
+
+// MedReg DE: PharmaCo's standing permit on AlphaKlinik's OMOP data.
+MERGE (ha_de:HDABApproval {approvalId: "hdab-medreg-pharmaco-2026-001"})
 MERGE (tc_de:TrustCenter {name: "MedReg DE Trust Centre"})
-MERGE (tc_de)-[:GOVERNED_BY]->(ha);
+MERGE (tc_de)-[:GOVERNED_BY]->(ha_de);
+
+// Limburg NL: no access body of its own in the demo, so the cross-border
+// permit IRS granted LMC under Art. 51 mutual recognition (NL-FR).
+MERGE (ha_nl:HDABApproval {approvalId: "hdab-irs-lmc-2026-001"})
+MERGE (tc_nl:TrustCenter {name: "Limburg Trust Centre NL"})
+MERGE (tc_nl)-[:GOVERNED_BY]->(ha_nl);
 
 // ============================================================
 // 3. Trust Center → HealthDataset resolution scope
 // ============================================================
 
+// DE: both datasets AlphaKlinik Berlin publishes.
 MATCH (ds:HealthDataset)
 WHERE ds.datasetId IN [
-  "dataset-fhir-alphaklinik",
-  "dataset-fhir-lmc",
-  "dataset-omop-alphaklinik"
+  "dataset:synthea-fhir-r4-mvd",
+  "dataset:omop-cdm-v54-analytics"
 ]
 MERGE (tc_de:TrustCenter {name: "MedReg DE Trust Centre"})
 MERGE (tc_de)-[:RESOLVES_PSEUDONYMS_FOR]->(ds);
 
+// NL: the registry Limburg Medical Centre publishes.
 MATCH (ds:HealthDataset)
-WHERE ds.datasetId IN ["dataset-fhir-lmc"]
+WHERE ds.datasetId IN ["dataset:prostate-cancer-registry"]
 MERGE (tc_nl:TrustCenter {name: "Limburg Trust Centre NL"})
 MERGE (tc_nl)-[:RESOLVES_PSEUDONYMS_FOR]->(ds);
 
@@ -156,7 +171,7 @@ MERGE (rp1:ResearchPseudonym {rpsnId: "rpsn-study-diabetes-patient-A"})
 SET rp1 += {
   studyId: "study-diabetes-de-nl-2025",
   revoked: false,
-  issuedBy: "did:web:rki.de:trustcenter",
+  issuedBy: "did:web:medreg.de:trustcentre",
   issuedAt: datetime("2025-03-15T09:06:00Z"),
   mode: "stateless"
 };
