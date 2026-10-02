@@ -143,8 +143,24 @@ that spec is deliberately Keycloak-free so it runs where no login exists.
 Small disclosure against real coverage; the coverage wins. Revisit if that
 spec gains an authenticated request context.
 
-These two are the whole list. Any other route answering a caller with no
-session is a defect, not a policy.
+Those were the two the #377 sweep settled. The full list of routes that
+answer without a session by decision (middleware skips `/api/*`, so the route
+itself is the only gate), each saying why in its header comment:
+
+- `/api/nlq/backend`: above.
+- `/api/permits`, `/api/information`, `/api/activity-report`: the access
+  body's public register, information duty and activity report, which
+  Regulation (EU) 2025/327 Art. 58(1) and 59(1) want published (#206,
+  added after the sweep). Organisations, counts and dates, nothing personal.
+- `/api/graph`: the demo landing view, synthetic data only.
+- `/api/auth/[...nextauth]`, `/api/auth/eudi/start`, `/api/auth/eudi/status`,
+  `/api/keycloak-config`: the sign-in flows themselves.
+- `/api/health`: liveness probe.
+- `/api/mock-dsp/[participant]/catalog/request`: the demo DSP catalogue a
+  partner fetches (`06 Trust Centre/02` and `/03`).
+
+Any other route answering a caller with no session is a defect, not a
+policy. A new public route goes on this list with its reason, in the same PR.
 
 **Route tests do not check the gate.** `ui/__tests__/setup.ts` mocks
 `@/lib/auth-guard` open, so `requireAuth()` returns an `EDC_ADMIN` and

@@ -15,7 +15,7 @@ You are the **security specialist** for the EHDS Integration Hub project.
 
 - **NextAuth v4 + Keycloak OIDC**: JWT callback, role injection, `wellKnown` vs `issuer` split
 - **Role-based access control**: middleware enforcement, route-level session checks
-- **Vault**: in-memory secrets for JAD stack (Vault data lost on Docker restart)
+- **Vault**: file-backed since 2026-09-26 (`jad/vault.hcl`, `vault-unseal` sidecar); secrets survive a restart
 - **DID:web + Verifiable Credentials**: DCP v1.0 attestation, credential status lifecycle
 - **FHIR data security**: patient data is synthetic — no real PHI must enter the system
 - **Neo4j**: parameterised Cypher (no injection), credential best practices
@@ -48,7 +48,9 @@ When reviewing for security:
 - Every patient-data route requires `PATIENT` or `EDC_ADMIN` role.
 - Admin routes require `EDC_ADMIN` — no other role escalation.
 - API routes (`/api/*`) are excluded from middleware — they must perform their own session checks.
-- Check that new API routes call `getServerSession(authOptions)` and verify roles.
+- Check that new API routes gate with `requireAuth()` from `@/lib/auth-guard`; a hand-rolled
+  `getServerSession()` role check is a finding. The routes public by decision are listed in
+  `.claude/rules/api-conventions.md`; an anonymous route not on that list is a defect.
 
 ### Static export security
 
@@ -65,7 +67,8 @@ When reviewing for security:
 
 ### Vault
 
-- Vault is in-memory: secrets are lost on restart. Re-run `./scripts/bootstrap-jad.sh`.
+- Vault is file-backed; after a restart `health-dataspace-vault-unseal` must report `ready`, or
+  IdentityHub logs `Private key ... not found` (`docs/gotchas.md`, 2026-09-26).
 - Never commit Vault token, root token, or unsealed keys.
 - Check `.gitignore` covers `vault/data/`, `.env`, `*.pem`, `*.key`.
 
