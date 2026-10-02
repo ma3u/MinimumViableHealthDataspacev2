@@ -255,13 +255,40 @@ jobs:
           echo "Proxy restart triggered."
 
       # ── 6. Verify backend status ─────────────────────────────────────────
-      - name: Verify backend via public API
+      # Every API route needs a session since #404 (ADR-044), this one included, so
+      # an anonymous curl gets 401. Check the gate holds, then ask as a researcher
+      # with a session forged from NEXTAUTH_SECRET, as the API tests do.
+      - name: Setup Node.js
         if: always()
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Verify backend via the hub API
+        if: always()
+        env:
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
         run: |
           # Give ACA a moment to swap revisions
           sleep 30
-          echo "Querying https://ehds.mabu.red/api/nlq/backend ..."
-          curl -sfS https://ehds.mabu.red/api/nlq/backend | jq .
+          url=https://ehds.mabu.red/api/nlq/backend
+          anon=$(curl -s -o /dev/null -w '%{http_code}' "$url")
+          if [ "$anon" != "401" ]; then
+            echo "::error::$url answered $anon without a session; ADR-044 requires 401"
+            exit 1
+          fi
+          if [ -z "$NEXTAUTH_SECRET" ]; then
+            echo "::error::NEXTAUTH_SECRET is not set, so the backend cannot be verified"
+            exit 1
+          fi
+          (cd ui && npm ci --ignore-scripts --no-audit --no-fund)
+          cookie=$(cd ui && node scripts/forge-bruno-session.mjs researcher \
+            | awk -F= '/^COOKIE_VALUE=/{print substr($0, 14)}')
+          echo "::add-mask::$cookie"
+          echo "Querying $url as researcher ..."
+          curl -sfS -H "Cookie: __Secure-next-auth.session-token=${cookie}" "$url" | jq .
 
       - name: Summary
         if: always()
@@ -271,4 +298,4 @@ jobs:
           echo "- Foundry wiring: \`${{ !inputs.skip_foundry }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Seed re-run: \`${{ !inputs.skip_seed }}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Verify: \`curl https://ehds.mabu.red/api/nlq/backend | jq\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Verify: \`scripts/run-api-tests.sh Azure-Dev \"03 Data User\"\` (needs NEXTAUTH_SECRET; /api/nlq/backend needs a session, ADR-044)" >> "$GITHUB_STEP_SUMMARY"

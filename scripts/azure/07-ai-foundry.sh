@@ -168,11 +168,16 @@ ok "${NEO4J_PROXY_APP} updated"
 cat <<EOF
 
 Verify:
-  # Backend status (should show chat=azure-openai, embeddings=azure-openai)
-  curl -s https://ehds.mabu.red/api/nlq/backend | jq .
+  # Backend status (should show chat=azure-openai, embeddings=azure-openai).
+  # Every API route needs a session (ADR-044), so forge one from NEXTAUTH_SECRET:
+  COOKIE=\$(cd ui && node scripts/forge-bruno-session.mjs researcher \\
+    | awk -F= '/^COOKIE_VALUE=/{print substr(\$0, 14)}')
+  curl -s -H "Cookie: __Secure-next-auth.session-token=\${COOKIE}" \\
+    https://ehds.mabu.red/api/nlq/backend | jq .
 
   # Example GraphRAG query (needs GDS + FastRP seed to have run)
   curl -s https://ehds.mabu.red/api/nlq \\
+    -H "Cookie: __Secure-next-auth.session-token=\${COOKIE}" \\
     -H 'Content-Type: application/json' \\
     -d '{"question":"datasets about cardiovascular disease"}' | jq .method
 EOF
