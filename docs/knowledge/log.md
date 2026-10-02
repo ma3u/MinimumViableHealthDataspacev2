@@ -13,3 +13,6 @@
   `status: stable`. `generated.at` now comes from each file's last git commit
   rather than a hand-written date, which corrected
   `runbooks/postgres-16-to-17-azure.md` from 2026-07-15 to 2026-07-17.
+- 2026-10-02 · Added `runbooks/cost-efficient-logging.md` (status draft): logging
+  strategy for #418 / ADR-042, from a measured `mvhd-logs` baseline (91 % of 31 days'
+  console bytes were crash-loop stack traces; 14 days hit the 1 GB cap).

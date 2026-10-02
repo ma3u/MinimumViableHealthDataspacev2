@@ -46,7 +46,8 @@ frontmatter. Spec:
 [postgres-16-to-17-azure](runbooks/postgres-16-to-17-azure.md) ·
 [aca-postgres-ephemeral-recovery](runbooks/aca-postgres-ephemeral-recovery.md) ·
 [eudi-wallet-backend-local](runbooks/eudi-wallet-backend-local.md) ·
-[eudi-wallet-ios-local](runbooks/eudi-wallet-ios-local.md)
+[eudi-wallet-ios-local](runbooks/eudi-wallet-ios-local.md) ·
+[cost-efficient-logging](runbooks/cost-efficient-logging.md)
 
 ## decisions/
 

@@ -3,6 +3,39 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-02: a revision nobody sees holds Neo4j's store lock, and every new one dies
+
+`mvhd-neo4j` is in `Single` revision mode, yet revision `mvhd-neo4j--0000001`
+(created 2026-04-14, image `neo4j:5-community`) was still active and running on
+2026-10-02, at 0 % traffic and `RunningAtMaxScale`. It holds
+`/data/databases/store_lock` on the `neo4j-data` share. Revision `0000177`
+(`5.26.28-community`, created 10:55 that day) took 100 % of traffic and could
+never start: 104 restarts and 1,414 failed startup probes in a day. Every app
+reaching the graph has been talking to a dead revision since then.
+
+Why it is easy to miss:
+
+- The console shows only the plugin install lines, then nothing for five
+  minutes, then a restart. The `store_lock ... locked by another process` error
+  goes to `/logs/debug.log` on the SMB share, not to stdout.
+- The healthy-looking `debug.log` (checkpoints, query cache activity) is written
+  by the **old** revision, so reading the share suggests Neo4j is fine.
+- `az containerapp show` reports `runningStatus: Running`, describing the app,
+  not the revision that takes traffic.
+
+Check with:
+
+```bash
+az containerapp revision list -n mvhd-neo4j -g rg-mvhd-dev \
+  --query "[?properties.active].{rev:name,running:properties.runningState,traffic:properties.trafficWeight}" -o table
+```
+
+More than one active revision on an app whose store is a single-writer file
+lock is an outage. Fix: deactivate the stale revision so it shuts down and
+releases the lock, then restart the current one. Same root as gotcha 6 in
+`CLAUDE.md` (ACA keeps old `:latest` revisions alive); the log-volume side is in
+`docs/knowledge/runbooks/cost-efficient-logging.md`.
+
 ## 2026-10-02: the fix for the 2026-09-30 wipe was the thing that breaks Postgres
 
 The entry below diagnosed the 2026-09-30 data loss as a missing mount and made
