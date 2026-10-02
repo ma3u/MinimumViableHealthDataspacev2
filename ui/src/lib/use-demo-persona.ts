@@ -19,9 +19,9 @@
 import { useState, useEffect } from "react";
 import { DEMO_PERSONAS } from "@/lib/auth";
 
-export const DEMO_PERSONA_KEY = "demo-persona";
+const DEMO_PERSONA_KEY = "demo-persona";
 /** Sentinel value indicating user explicitly signed out. */
-export const SIGNED_OUT = "__signed_out__";
+const SIGNED_OUT = "__signed_out__";
 
 // Module-level EventTarget so setDemoPersona() triggers re-renders on the
 // same tab (window "storage" event only fires in *other* tabs).
@@ -55,20 +55,6 @@ export function clearDemoPersona(): void {
     /* storage unavailable — non-fatal */
   }
   emitter?.dispatchEvent(new Event("change"));
-}
-
-/** Read the active demo persona username from sessionStorage (sync, no hooks). */
-export function getDemoPersonaUsername(): string {
-  if (typeof sessionStorage === "undefined") return "edcadmin";
-  const stored = sessionStorage.getItem(DEMO_PERSONA_KEY);
-  if (!stored || stored === SIGNED_OUT) return "edcadmin";
-  return stored;
-}
-
-/** Check if user is signed out (static mode only). */
-export function isDemoSignedOut(): boolean {
-  if (typeof sessionStorage === "undefined") return false;
-  return sessionStorage.getItem(DEMO_PERSONA_KEY) === SIGNED_OUT;
 }
 
 export type DemoPersona = (typeof DEMO_PERSONAS)[number];
