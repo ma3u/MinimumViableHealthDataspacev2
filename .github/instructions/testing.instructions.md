@@ -30,9 +30,10 @@ npm run test:coverage             # v8 coverage
 npx vitest run __tests__/unit/components/Navigation.test.tsx   # single file
 ```
 
-- Global setup is `ui/__tests__/setup.ts`, which initialises MSW. API calls are
-  intercepted by MSW handlers — **do not mock `fetch` directly**.
-- MSW is for unit tests only. Playwright hits the real running server.
+- Global setup is `ui/__tests__/setup.ts`: jest-dom plus the shared module mocks
+  (`next-auth`, `@/lib/auth-guard` open). There is no MSW; a test stubs `fetch` with
+  `vi.stubGlobal` or `vi.spyOn(globalThis, "fetch")` and restores it afterwards.
+- Playwright hits the real running server.
 - Do not mock Neo4j driver internals in integration-style tests; use the fixtures
   under `ui/public/mock/`.
 

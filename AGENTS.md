@@ -49,7 +49,7 @@ pre-commit run --all-files
 | -------------------------------------------- | ----------------------------------------------------------- |
 | `ui/src/app/`                                | Next.js 14 app router — pages + `api/` routes               |
 | `ui/src/lib/`                                | `auth.ts`, `api.ts` (static-export mock map), `neo4j.ts`    |
-| `ui/__tests__/`                              | `unit/` (Vitest + MSW) · `e2e/journeys/` (Playwright)       |
+| `ui/__tests__/`                              | `unit/` (Vitest) · `e2e/journeys/` (Playwright)             |
 | `services/neo4j-proxy/`                      | Express FHIR/OMOP/NLQ/federated bridge (port 9090)          |
 | `services/catalog-crawler\|catalog-enricher` | Federated discovery pipeline (issue #8)                     |
 | `neo4j/`                                     | `init-schema.cypher` + seed cyphers (idempotent MERGE only) |

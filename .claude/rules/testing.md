@@ -72,8 +72,11 @@ npx vitest run __tests__/unit/components/Navigation.test.tsx  # single file
 
 ### Setup
 
-- Global setup in `ui/__tests__/setup.ts` — initialises MSW (Mock Service Worker).
-- API calls in unit tests are intercepted by MSW handlers; do not mock `fetch` directly.
+- Global setup in `ui/__tests__/setup.ts`: jest-dom matchers and the module mocks every test
+  shares (`next-auth`, `@/lib/auth-guard` open, `next/navigation`).
+- There is no MSW (removed in #404, nothing ever started it). A test that needs a network
+  answer stubs `fetch` itself, `vi.stubGlobal("fetch", ...)` or `vi.spyOn(globalThis, "fetch")`,
+  and restores it in `afterEach`. Neo4j is mocked at `@/lib/neo4j` (`runQuery`), never deeper.
 - Hooks that reset a mock use braces, `beforeEach(() => { m.mockReset(); })`: `mockReset()`
   returns the mock and Vitest 4 runs a function returned from a hook as the test's teardown
   (see `docs/gotchas.md`, 2026-09-18).
@@ -150,7 +153,7 @@ The spec `19-static-github-pages.spec.ts` (J221–J260) tests the static export:
 
 - Do not mock Neo4j driver internals in integration-style tests; use the mock JSON fixtures under `ui/public/mock/`.
 - Do not mock `next-auth/react` session in E2E tests; use the `setPersona` localStorage helper instead.
-- MSW is for unit tests only; Playwright tests hit the actual running server.
+- Playwright tests hit the actual running server; nothing in them is stubbed.
 
 ## iOS UI Tests (XCUITest)
 

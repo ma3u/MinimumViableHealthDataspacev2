@@ -22,13 +22,11 @@
 
 // ─── Public rate constants ───────────────────────────────────────────────────
 
-export const ACA_VCPU_USD_PER_SEC = 0.000024;
-export const ACA_MEM_USD_PER_GIB_SEC = 0.000003;
-export const ACA_REQUEST_USD_PER_M = 0.4;
+const ACA_VCPU_USD_PER_SEC = 0.000024;
+const ACA_MEM_USD_PER_GIB_SEC = 0.000003;
 
-export const ACA_FREE_VCPU_SECONDS = 180_000;
-export const ACA_FREE_MEM_GIB_SECONDS = 360_000;
-export const ACA_FREE_REQUESTS_PER_APP = 2_000_000;
+const ACA_FREE_VCPU_SECONDS = 180_000;
+const ACA_FREE_MEM_GIB_SECONDS = 360_000;
 
 export const AZURE_FILES_USD_PER_GIB = 0.16;
 export const AZURE_EGRESS_FREE_GIB = 100;
@@ -62,7 +60,7 @@ export interface AcaAppCost {
  * Compute the monthly USD cost for a single Container App assuming
  * `minReplicas` replicas running 24×7 at their full reservation.
  */
-export function costForApp(spec: AcaAppSpec): AcaAppCost {
+function costForApp(spec: AcaAppSpec): AcaAppCost {
   const replicas = Math.max(1, spec.minReplicas);
   const vcpuSeconds = spec.cpu * replicas * SECONDS_PER_MONTH;
   const memGiBSeconds = spec.memGiB * replicas * SECONDS_PER_MONTH;
