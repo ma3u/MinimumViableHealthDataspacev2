@@ -7,9 +7,9 @@
       "status": "active",
       "protocol": "deterministic-pseudonym-v1",
       "did": "did:web:medreg.de:trustcentre",
-      "hdabApprovalId": null,
-      "hdabApprovalStatus": null,
-      "datasetCount": 0,
+      "hdabApprovalId": "hdab-medreg-pharmaco-2026-001",
+      "hdabApprovalStatus": "APPROVED",
+      "datasetCount": 2,
       "recognisedCountries": ["NL"],
       "activeRpsnCount": 1
     },
@@ -20,9 +20,9 @@
       "status": "active",
       "protocol": "deterministic-pseudonym-v1",
       "did": "did:web:lmc.nl:trustcentre",
-      "hdabApprovalId": null,
-      "hdabApprovalStatus": null,
-      "datasetCount": 0,
+      "hdabApprovalId": "hdab-irs-lmc-2026-001",
+      "hdabApprovalStatus": "APPROVED",
+      "datasetCount": 1,
       "recognisedCountries": ["DE"],
       "activeRpsnCount": 0
     }

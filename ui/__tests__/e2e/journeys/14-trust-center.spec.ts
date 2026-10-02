@@ -43,6 +43,11 @@ test.describe("N · Trust Center — EHDS Art. 50/51", () => {
     expect(de.country).toBe("DE");
     expect(de.status).toBe("active");
     expect(de.did).toBe("did:web:medreg.de:trustcentre");
+    // Governed by a permit that exists and resolves AlphaKlinik's two
+    // datasets; both edges were missing on every stack until #404.
+    expect(de.hdabApprovalId).toBe("hdab-medreg-pharmaco-2026-001");
+    expect(de.datasetCount).toBe(2);
+    expect(de.activeRpsnCount).toBe(1);
   });
 
   test("J132 — /api/trust-center returns the Limburg Trust Centre NL after seeding", async ({
@@ -62,6 +67,8 @@ test.describe("N · Trust Center — EHDS Art. 50/51", () => {
     expect(nl).toBeDefined();
     expect(nl.country).toBe("NL");
     expect(nl.status).toBe("active");
+    expect(nl.hdabApprovalId).toBe("hdab-irs-lmc-2026-001");
+    expect(nl.datasetCount).toBe(1);
   });
 
   test("J133 — Trust centers include mutual recognition countries", async ({
