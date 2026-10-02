@@ -1,6 +1,6 @@
 # ADR-016: ACA Off-Hours Scale-Down
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-042](ADR-042-off-hours-scaledown-current-state.md) (2026-10-02)
 **Date:** 2026-04-13
 **Supersedes (partially):** [ADR-015](ADR-015-single-vm-dev-deployment.md) — the single-VM alternative is kept as a fallback but is no longer the preferred cost-control path.
 

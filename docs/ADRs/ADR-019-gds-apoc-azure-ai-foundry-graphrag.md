@@ -1,6 +1,6 @@
 # ADR-019: Neo4j GDS + APOC + Azure AI Foundry for GraphRAG Accuracy
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-02, #404)
 **Date:** 2026-04-15
 **Relates to:**
 [ADR-001](ADR-001-postgresql-neo4j-split.md),

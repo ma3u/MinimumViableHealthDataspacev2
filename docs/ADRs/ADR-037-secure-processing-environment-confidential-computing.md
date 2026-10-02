@@ -1,6 +1,6 @@
 # ADR-037: A secure processing environment built on confidential computing, not on trust in the operator
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-02, #404)
 **Date:** 2026-09-14
 **Relates to:** [ADR-012](ADR-012-azure-container-apps.md), [ADR-022](ADR-022-edc-connector-cost-vs-function.md)
 **Tracks:** [#27](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/27)

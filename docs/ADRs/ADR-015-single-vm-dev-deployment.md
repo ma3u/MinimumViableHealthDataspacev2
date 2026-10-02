@@ -1,6 +1,6 @@
 # ADR-015: Single-VM Dev Deployment for Personal VS Subscription
 
-**Status:** Superseded by [ADR-016](ADR-016-aca-off-hours-scaledown.md) · Kept as fallback
+**Status:** Superseded by [ADR-016](ADR-016-aca-off-hours-scaledown.md) · fallback scripts `scripts/azure-vm/` removed 2026-10-02 (#404)
 **Date:** 2026-04-13 · Superseded 2026-04-13
 
 > **Superseded note (2026-04-13):** After re-evaluation, scaling the full ACA topology down

@@ -842,7 +842,6 @@ the cost model and scheduling rationale. ADR-015 documents the single-VM fallbac
 - [Deploy workflow](.github/workflows/deploy-azure.yml) — CI/CD pipeline
 - [Deployment scripts](scripts/azure/) — 11 scripts for provisioning and lifecycle management
 - [ACA off-hours schedule (ADR-016)](.github/workflows/aca-schedule.yml) — nightly / weekend scale-down workflow
-- [Personal dev VM fallback (ADR-015)](scripts/azure-vm/README.md) — single-VM variant (superseded by ADR-016)
 
 ---
 
