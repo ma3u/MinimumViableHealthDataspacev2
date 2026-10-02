@@ -6,10 +6,12 @@ source "${SCRIPT_DIR}/env.sh"
 
 log "Phase 3: Identity services"
 
-# Workaround B (ADR-018): Postgres is an ACA container app, reached via
-# the short service name within the ACA environment. sslmode=disable because
-# the container Postgres image does not enable TLS by default.
-PG_JDBC="jdbc:postgresql://${PG_HOST}:${PG_PORT}/${KC_DB_NAME}?sslmode=disable"
+# Flexible Server (ADR-041), over TLS. The password reaches Keycloak as the
+# kc-db-password ACA secret, never as a plaintext env var. Pool capped at 10:
+# B1ms gives users 35 connections and Keycloak's default pool is 100.
+PG_JDBC="jdbc:postgresql://${PG_HOST}:${PG_PORT}/${KC_DB_NAME}?sslmode=${PG_SSLMODE}"
+KC_DB_PW="$(pg_admin_password)"
+[ -n "$KC_DB_PW" ] || { err "no Flexible Server password; run 13-postgres-flexible-server.sh 1 and 2 first"; exit 1; }
 
 # ── Push Keycloak image ─────────────────────────────────────────────────────
 log "Pulling and pushing Keycloak image..."
@@ -29,11 +31,13 @@ az containerapp create \
   --min-replicas 1 --max-replicas 1 \
   --ingress external --target-port 8080 \
   --command "/opt/keycloak/bin/kc.sh" --args "start-dev" \
+  --secrets "kc-db-password=${KC_DB_PW}" \
   --env-vars \
     "KC_DB=postgres" \
     "KC_DB_URL=${PG_JDBC}" \
     "KC_DB_USERNAME=${PG_ADMIN}" \
-    "KC_DB_PASSWORD=${PG_PASSWORD}" \
+    "KC_DB_PASSWORD=secretref:kc-db-password" \
+    "KC_DB_POOL_MAX_SIZE=10" \
     "KC_HOSTNAME=${KEYCLOAK_PUBLIC_HOSTNAME}" \
     "KC_HOSTNAME_STRICT=false" \
     "KC_HOSTNAME_STRICT_BACKCHANNEL=false" \
@@ -41,6 +45,7 @@ az containerapp create \
     "KEYCLOAK_ADMIN=${KC_ADMIN_USER}" \
     "KEYCLOAK_ADMIN_PASSWORD=$(kc_admin_password)" \
   -o none
+unset KC_DB_PW
 ok "Keycloak container app ${KEYCLOAK_APP}"
 
 # ── Push Vault image ────────────────────────────────────────────────────────

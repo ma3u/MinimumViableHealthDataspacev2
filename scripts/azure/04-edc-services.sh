@@ -7,7 +7,14 @@ eval "$(get_aca_fqdns)"
 
 log "Phase 4: EDC-V core services"
 
-# Workaround B (ADR-018): PG_HOST exported by env.sh (mvhd-postgres short name)
+# Postgres is Flexible Server (ADR-041): PG_HOST is its FQDN, over TLS. The
+# password reaches each app as the pg-flex-password ACA secret. The pool cap
+# goes in through JAVA_TOOL_OPTIONS because EDC maps env names `_` -> `.` and
+# no env name can spell `pool.connections.max-total`; commons-pool's default
+# of 8 per service would want 40 of B1ms's 35 user connections.
+EDC_DB_PW="$(pg_admin_password)"
+[ -n "$EDC_DB_PW" ] || { err "no Flexible Server password; run 13-postgres-flexible-server.sh 1 and 2 first"; exit 1; }
+EDC_POOL_OPTS="-Dedc.datasource.default.pool.connections.max-total=3"
 az acr login --name "$ACR_NAME"
 ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
 
@@ -50,10 +57,12 @@ az containerapp create \
   --cpu 1 --memory 2Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 8080 \
+  --secrets "pg-flex-password=${EDC_DB_PW}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/controlplane" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/controlplane?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
-    "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
+    "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
+    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
     "EDC_SQL_SCHEMA_AUTOCREATE=true" \
     "EDC_DSP_CALLBACK_ADDRESS=http://${CONTROLPLANE_APP}:8082/api/dsp" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
@@ -121,12 +130,14 @@ az containerapp create \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 11002 \
+  --secrets "pg-flex-password=${EDC_DB_PW}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane?sslmode=${PG_SSLMODE}" \
     "EDC_TRANSFER_PROXY_TOKEN_SIGNER_PRIVATEKEY_ALIAS=dataplane-fhir-private" \
     "EDC_TRANSFER_PROXY_TOKEN_VERIFIER_PUBLICKEY_ALIAS=dataplane-fhir-public" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
-    "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
+    "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
+    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
     "WEB_HTTP_PORT=11002" \
@@ -148,12 +159,14 @@ az containerapp create \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 11012 \
+  --secrets "pg-flex-password=${EDC_DB_PW}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane_omop" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane_omop?sslmode=${PG_SSLMODE}" \
     "EDC_TRANSFER_PROXY_TOKEN_SIGNER_PRIVATEKEY_ALIAS=dataplane-omop-private" \
     "EDC_TRANSFER_PROXY_TOKEN_VERIFIER_PUBLICKEY_ALIAS=dataplane-omop-public" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
-    "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
+    "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
+    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
     "WEB_HTTP_PORT=11012" \
@@ -175,10 +188,12 @@ az containerapp create \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 7081 \
+  --secrets "pg-flex-password=${EDC_DB_PW}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/identityhub" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/identityhub?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
-    "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
+    "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
+    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
     "EDC_SQL_SCHEMA_AUTOCREATE=true" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
@@ -214,10 +229,12 @@ az containerapp create \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 10013 \
+  --secrets "pg-flex-password=${EDC_DB_PW}" \
   --env-vars \
-    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/issuerservice" \
+    "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/issuerservice?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
-    "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
+    "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
+    "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
     "EDC_SQL_SCHEMA_AUTOCREATE=true" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \

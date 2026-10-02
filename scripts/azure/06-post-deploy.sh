@@ -11,57 +11,13 @@ log "Phase 6: Post-deployment setup"
 az acr login --name "$ACR_NAME"
 ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
 
-# ── Create additional Postgres databases (Workaround B — ADR-018) ───────────
-# Postgres auto-creates "keycloak" via POSTGRES_DB. Create the remaining 6 via
-# a one-shot exec into the running container.
-#
-# Each create is followed by a read-back, because the previous version ended in
-# `|| warn "may have failed (check manually)"` and nothing ever checked. A phase
-# that reports "databases ensured" while a database is missing is worse than one
-# that fails: `cfm` missing is enough to stop the CFM TenantManager booting,
-# which is what onboarding needs (issue #203).
-#
-# And `az containerapp exec` needs a TTY. Headless it dies inside the CLI with
-# `termios.error: (25, 'Inappropriate ioctl for device')`, which the old `|| warn`
-# swallowed, so every create here was a no-op in CI while the phase still
-# reported success. That is the likeliest reason `cfm` was absent on the live
-# environment for months. 11-claude-federation.sh already documents the same
-# TTY limitation. Refuse up front rather than pretend.
-if [ ! -t 0 ]; then
-  err "no TTY on stdin: 'az containerapp exec' cannot run here, so these"
-  err "databases would be silently skipped. Run this phase from a terminal,"
-  err "or use the .github/workflows/cfm-seed.yml job, which creates them from"
-  err "a one-shot job on the postgres image instead of through exec."
-  exit 1
-fi
-
-log "Creating additional Postgres databases..."
-MISSING_DBS=()
-for db in controlplane dataplane dataplane_omop identityhub issuerservice cfm; do
-  log "  creating ${db}..."
-  az containerapp exec \
-    --name "$PG_APP" --resource-group "$RG" \
-    --command "psql -U ${PG_ADMIN} -d postgres -tAc \"SELECT 1 FROM pg_database WHERE datname='${db}';\" | grep -q 1 || psql -U ${PG_ADMIN} -d postgres -c \"CREATE DATABASE ${db};\"" \
-    2>/dev/null || warn "db ${db} create reported a failure, verifying..."
-
-  # Read back. `containerapp exec` wraps the output in terminal chrome, so match
-  # the marker loosely rather than expecting a bare "1".
-  if az containerapp exec \
-      --name "$PG_APP" --resource-group "$RG" \
-      --command "psql -U ${PG_ADMIN} -d postgres -tAc \"SELECT 'DBFOUND' FROM pg_database WHERE datname='${db}';\"" \
-      2>/dev/null | grep -q DBFOUND; then
-    log "  ✓ ${db} present"
-  else
-    warn "  ✗ ${db} NOT present after create"
-    MISSING_DBS+=("${db}")
-  fi
-done
-
-if [ ${#MISSING_DBS[@]} -gt 0 ]; then
-  err "these databases are missing: ${MISSING_DBS[*]}"
-  exit 1
-fi
-ok "Postgres databases ensured"
+# ── Postgres databases (Flexible Server, ADR-041) ───────────────────────────
+# This used to `az containerapp exec` psql into mvhd-postgres, which needed a
+# TTY and silently created nothing in CI for months. The databases now live on
+# Flexible Server, where `az postgres flexible-server db create` is plain ARM:
+# no TTY, no exec, and phase 2 reads each one back.
+"${SCRIPT_DIR}/13-postgres-flexible-server.sh" 2
+ok "Postgres databases ensured on ${PG_FLEX_NAME}"
 
 # ── Build and run Neo4j seed job ─────────────────────────────────────────────
 log "Building Neo4j seed image..."
