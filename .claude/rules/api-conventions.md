@@ -124,7 +124,9 @@ that were public by decision: `/api/nlq/backend` (#377), the access body's
 register, information page, results register and activity report (Art. 58,
 59, 73; #206) and `/api/graph`. Those now answer any signed-in participant,
 and their pages (`/graph`, `/permits`, `/information`, `/activity-report`)
-are in `PROTECTED_PATHS`, so an anonymous visitor is sent to sign in.
+are in `PROTECTED_PATHS`, so an anonymous visitor is sent to sign in. So are `/catalog`, `/analytics`, `/query`,
+`/eehrxf` and `/tasks`, whose APIs needed a session before: a page that
+reads the API redirects a signed-out visitor rather than showing empty panels.
 
 The only routes that answer without a session are the ones that make
 signing in possible and the probe that keeps the container alive:

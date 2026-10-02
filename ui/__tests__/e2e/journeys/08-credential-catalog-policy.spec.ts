@@ -16,6 +16,7 @@ import {
   apiGet,
   skipIfNeo4jDown,
 } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", () => {
   /* ── J56: Settings credential redirect (not authenticated) ─── */
@@ -31,6 +32,8 @@ test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", 
   test("J57 — Catalog page renders dataset cards (mock fallback)", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);
@@ -104,6 +107,8 @@ test.describe("H · Credential Display, Catalog Resilience & Policy Rendering", 
   test("J61 — Catalog dataset cards expand to show metadata", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);

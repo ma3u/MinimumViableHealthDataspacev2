@@ -5,12 +5,17 @@
  * Protected pages: verify redirect to sign-in (auth middleware).
  */
 import { test, expect } from "@playwright/test";
+import { signInOrSkip } from "./helpers/forged-session";
 
 const TIMEOUT = 15_000;
 
-/* ── Public Explore pages ─────────────────────────────────────── */
+/* ── Explore pages, signed in ─────────────────────────────────────── */
 
-test.describe("Explore Pages (public)", () => {
+test.describe("Explore Pages (signed in since #404)", () => {
+  test.beforeEach(async ({ page }) => {
+    await signInOrSkip(page, test.skip);
+  });
+
   test("Dataset Catalog renders heading", async ({ page }) => {
     await page.goto("/catalog");
     await expect(
@@ -47,6 +52,11 @@ test.describe("Protected Pages (redirect to sign-in)", () => {
     "/permits",
     "/information",
     "/activity-report",
+    "/catalog",
+    "/analytics",
+    "/query",
+    "/eehrxf",
+    "/tasks",
   ]) {
     test(`${path} redirects unauthenticated users`, async ({ page }) => {
       await page.goto(path);
