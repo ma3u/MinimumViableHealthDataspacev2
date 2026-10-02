@@ -1,6 +1,6 @@
 # ADR-023: Reinstate Off-Hours ACA Scale-Down
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-042](ADR-042-off-hours-scaledown-current-state.md) (2026-10-02)
 **Date:** 2026-05-01
 **Supersedes (partially):** [ADR-018](ADR-018-24x7-workaround-b.md) — section "Disable the off-hours scale-down" no longer applies; the schedule is back on.
 **Relates to:** [ADR-016](ADR-016-aca-off-hours-scaledown.md), [ADR-022](ADR-022-edc-connector-cost-vs-function.md)

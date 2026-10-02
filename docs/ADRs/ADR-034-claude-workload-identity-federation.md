@@ -1,6 +1,6 @@
 # ADR-034: Reach the Claude API through workload identity federation, from a backend, never from the phone
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-02, #404)
 **Date:** 2026-09-13
 **Relates to:** [ADR-033](ADR-033-lab-report-extraction-pipeline.md), [ADR-029](ADR-029-dependency-version-pinning.md)
 **Tracks:** [#186](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/186)

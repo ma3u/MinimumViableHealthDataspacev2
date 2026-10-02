@@ -4,7 +4,8 @@ name: ACA Off-Hours Scale (Mon-Fri 07-20 Europe/Berlin)
 # ADR-027: extend it to the full EDC stack. ADR-024 provisioned the 8 EDC
 # apps at min=1 (24/7) but this schedule still only covered the 7 "healthy"
 # apps — so the EDC stack billed nights + weekends, the cost surge flagged by
-# FinOps in May 2026. The schedule now scales all 21 Container Apps.
+# FinOps in May 2026. The schedule now scales 18 of the 21 Container Apps;
+# ADR-042 records which, which never stop and why, and the start order.
 #
 # INF-STG-EU_EHDS no longer requires 24/7 — the public ehds.mabu.red demo is
 # documented as a weekday-hours service in the README, so off-hours

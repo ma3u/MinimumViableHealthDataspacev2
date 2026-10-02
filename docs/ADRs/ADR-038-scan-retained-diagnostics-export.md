@@ -1,6 +1,6 @@
 # ADR-038: The scan is kept, as a sealed PDF, and diagnostics leave the phone only as a deliberate export
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-02, #404)
 **Date:** 2026-09-19
 **Relates to:** [ADR-033](ADR-033-lab-report-extraction-pipeline.md), [ADR-031](ADR-031-checks-must-assert.md)
 **Tracks:** [#186](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/186)

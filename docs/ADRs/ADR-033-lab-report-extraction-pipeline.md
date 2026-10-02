@@ -1,6 +1,6 @@
 # ADR-033: Two-stage lab-report extraction: self-hosted parse, schema extraction, EU-resident models
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-02, #404)
 **Date:** 2026-09-13
 **Relates to:** [ADR-026](ADR-026-token-efficient-planning-structure.md), [ADR-028](ADR-028-patient-qr-login-eudi-wallet.md)
 **Tracks:** [#182](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/182) (W9), [#186](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/186)

@@ -1,6 +1,6 @@
 # ADR-021: Docling for AWMF Leitlinien PDF Ingestion (Layer 6)
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-02, #404)
 **Date:** 2026-04-29
 **Deciders:** Architecture, Security & Compliance, Platform/Cloud
 **Relates to:**

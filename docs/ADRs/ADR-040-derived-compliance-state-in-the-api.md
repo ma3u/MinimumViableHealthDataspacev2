@@ -1,6 +1,6 @@
 # ADR-040: Derived compliance state is computed in the API from the graph, never persisted
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-02, #404)
 **Date:** 2026-09-24
 **Relates to:** [ADR-010](ADR-010-wcag-accessibility.md), [ADR-039](ADR-039-published-reference-ranges.md)
 **Tracks:** [#271](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/271), [discussion #265](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/265)
