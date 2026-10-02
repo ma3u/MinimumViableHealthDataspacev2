@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { isAuthError } from "@/lib/auth-guard";
+import { requireSessionOrToken } from "@/lib/service-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +18,10 @@ export const dynamic = "force-dynamic";
  *
  * POST body is the crawler's empty QuerySpec; ignored. The `participant`
  * path param drives the catalog payload via MOCK_CATALOGS below.
+ *
+ * Needs a session or the crawler's bearer token (DSP_CATALOG_TOKEN), since
+ * #404: every API route needs a session (ADR-044), and the crawler is a
+ * machine. See lib/service-auth.ts.
  */
 
 type Coding = { system: string; code: string; display: string };
@@ -179,9 +185,11 @@ function buildCatalog(pub: MockPublisher) {
 }
 
 export async function POST(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ participant: string }> },
 ): Promise<NextResponse> {
+  const auth = await requireSessionOrToken(request, "DSP_CATALOG_TOKEN");
+  if (isAuthError(auth)) return auth;
   const { participant } = await params;
   const pub = MOCK_CATALOGS[participant];
   if (!pub) {
@@ -196,9 +204,11 @@ export async function POST(
 // GET mirror for manual browser inspection. Real DSP 2025-1 uses POST, but
 // a GET makes debugging from curl trivial without remembering the empty body.
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ participant: string }> },
 ): Promise<NextResponse> {
+  const auth = await requireSessionOrToken(request, "DSP_CATALOG_TOKEN");
+  if (isAuthError(auth)) return auth;
   const { participant } = await params;
   const pub = MOCK_CATALOGS[participant];
   if (!pub) {

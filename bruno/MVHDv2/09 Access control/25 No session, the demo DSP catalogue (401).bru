@@ -1,0 +1,31 @@
+meta {
+  name: 25 No session, the demo DSP catalogue (401)
+  type: http
+  seq: 25
+}
+
+post {
+  url: {{baseUrl}}/api/mock-dsp/alpha-klinik/catalog/request
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}=not-a-session
+}
+
+body:json {
+  {}
+}
+
+tests {
+  // #404, ADR-044: the demo DSP catalogue takes a session, or the catalog
+  // crawler's bearer token from Key Vault. Without either it refuses.
+  test("the demo DSP catalogue needs a session or the crawler token", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}
