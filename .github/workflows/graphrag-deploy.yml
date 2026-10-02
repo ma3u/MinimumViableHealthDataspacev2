@@ -108,26 +108,51 @@ jobs:
               'NEO4J_PLUGINS=["apoc","apoc-extended","graph-data-science"]' \
               'NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*' \
               'NEO4J_dbms_security_procedures_allowlist=apoc.*,gds.*' \
-              'NEO4J_server_memory_heap_initial__size=2G' \
-              'NEO4J_server_memory_heap_max__size=4G' \
-              'NEO4J_server_memory_pagecache_size=2G' \
+              'NEO4J_server_memory_heap_initial__size=1G' \
+              'NEO4J_server_memory_heap_max__size=1G' \
+              'NEO4J_server_memory_pagecache_size=384M' \
             -o none
           echo "Plugins + heap configured; Neo4j will restart with the new revision."
+          # Heap + pagecache + JVM overhead must fit the container's 2 GiB.
+          # 2G/4G/2G was set here from April and every revision it created was
+          # OOM-killed (exit 137) at startup (docs/gotchas.md, 2026-10-02).
+          # Single revision mode then keeps the previous ready revision alive,
+          # and it holds Neo4j's store lock, so stop every other revision.
+          latest=$(az containerapp show --name "${{ env.NEO4J_APP }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --query "properties.latestRevisionName" -o tsv)
+          for rev in $(az containerapp revision list --name "${{ env.NEO4J_APP }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" \
+              --query "[?properties.active].name" -o tsv); do
+            [ "$rev" = "$latest" ] && continue
+            echo "Deactivating $rev so $latest can take the store lock"
+            az containerapp revision deactivate --name "${{ env.NEO4J_APP }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" --revision "$rev" -o none
+          done
 
       # ── 3. Wait for Neo4j to come back online ────────────────────────────
-      - name: Wait for mvhd-neo4j to be Running
+      # The app's runningStatus describes the app, not the revision taking
+      # traffic: it read "Running" for months while every new revision
+      # crash-looped. Check the latest revision's replica, and fail if it
+      # never becomes ready (ADR-031).
+      - name: Wait for the latest mvhd-neo4j revision to be ready
         run: |
+          latest=$(az containerapp show --name "${{ env.NEO4J_APP }}" \
+            --resource-group "${{ env.RESOURCE_GROUP }}" \
+            --query "properties.latestRevisionName" -o tsv)
           for i in $(seq 1 60); do
-            st=$(az containerapp show --name "${{ env.NEO4J_APP }}" \
-              --resource-group "${{ env.RESOURCE_GROUP }}" \
-              --query "properties.runningStatus" -o tsv 2>/dev/null || echo "")
-            if [ "$st" = "Running" ]; then
-              echo "Neo4j is Running (after ${i}0s)"
-              break
+            ready=$(az containerapp replica list --name "${{ env.NEO4J_APP }}" \
+              --resource-group "${{ env.RESOURCE_GROUP }}" --revision "$latest" \
+              --query "[0].properties.containers[0].ready" -o tsv 2>/dev/null || echo "")
+            if [ "${ready,,}" = "true" ]; then
+              echo "$latest is ready (after ${i}0s)"
+              exit 0
             fi
-            echo "  attempt $i: $st"
+            echo "  attempt $i: $latest ready=${ready:-unknown}"
             sleep 10
           done
+          echo "::error::$latest never became ready; see its system logs for exit code 137 (OOM) or store_lock"
+          exit 1
 
       # ── 4. Seed Neo4j (inserts + FastRP + optional Azure OpenAI embeddings)
       - name: Inject AOAI env on the seed job so semantic embeddings run too

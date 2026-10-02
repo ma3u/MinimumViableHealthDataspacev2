@@ -3,38 +3,63 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
-## 2026-10-02: a revision nobody sees holds Neo4j's store lock, and every new one dies
+## 2026-10-02: Neo4j on Azure has run an April revision since April, and nobody saw
 
-`mvhd-neo4j` is in `Single` revision mode, yet revision `mvhd-neo4j--0000001`
-(created 2026-04-14, image `neo4j:5-community`) was still active and running on
-2026-10-02, at 0 % traffic and `RunningAtMaxScale`. It holds
-`/data/databases/store_lock` on the `neo4j-data` share. Revision `0000177`
-(`5.26.28-community`, created 10:55 that day) took 100 % of traffic and could
-never start: 104 restarts and 1,414 failed startup probes in a day. Every app
-reaching the graph has been talking to a dead revision since then.
+Found while removing the `/logs` mount (#418). Three faults, each hiding the next.
 
-Why it is easy to miss:
+**1. Every Neo4j revision since April was OOM-killed at startup.**
+`.github/workflows/graphrag-deploy.yml` set heap 2G initial / 4G max and a 2G
+page cache on a container with 2 GiB. ADR-019 planned a bigger container; it
+was never applied. Each new revision dies about 13 s after start with
+`exit code '137'` in `ContainerAppSystemLogs_CL`. The console shows only the
+plugin installs and `Changed password ...`: the kill comes before the server
+writes its first line.
 
-- The console shows only the plugin install lines, then nothing for five
-  minutes, then a restart. The `store_lock ... locked by another process` error
-  goes to `/logs/debug.log` on the SMB share, not to stdout.
-- The healthy-looking `debug.log` (checkpoints, query cache activity) is written
-  by the **old** revision, so reading the share suggests Neo4j is fine.
-- `az containerapp show` reports `runningStatus: Running`, describing the app,
-  not the revision that takes traffic.
+**2. Single revision mode kept the April revision alive, and serving.**
+ACA keeps the last _ready_ revision running until a new one is ready, and
+routes traffic to it, **whatever the traffic table says**. `revision list`
+showed `mvhd-neo4j--0000001` (image `neo4j:5-community`, APOC only, default
+memory) at 0 % and the failing revision at 100 %, yet the April revision
+answered every query; its `debug.log` showed queries up to the minute it was
+stopped. So the demo served the graph all summer **without GDS**. It also holds
+`/data/databases/store_lock` on the shared volume, so even a correctly sized new
+revision fails with `Lock file has been locked by another process`. Deactivating
+it once is not enough: the next `az containerapp update` re-activated it within
+seconds. Deactivate every other revision **after** each update.
+
+**3. The checks called it green.** The workflow waited for
+`properties.runningStatus == Running`. That field describes the app, and the
+April revision kept it `Running`.
+
+**What it cost to find out.** Reading the traffic table as the truth, we took
+the graph to be down since revision 177 (10:55) and deactivated the April
+revision to free the lock. It had been serving; that deactivation caused the
+outage, about 19:49 to 20:01 UTC (UI Neo4j errors: 0 before, 133 during, 0
+after). Before stopping a revision, check whether it is serving: the UI or
+proxy's Neo4j errors, or the revision's own query activity. Do not trust the
+traffic weight.
+
+Resolved 2026-10-02 20:01: revision 179 with the memory below and the `/logs`
+mount removed, sole active revision, `latestReadyRevisionName` current for the
+first time since April, GDS 2.13.11 loaded, existing store (system database
+created 2026-04-14).
 
 Check with:
 
 ```bash
 az containerapp revision list -n mvhd-neo4j -g rg-mvhd-dev \
   --query "[?properties.active].{rev:name,running:properties.runningState,traffic:properties.trafficWeight}" -o table
+az containerapp show -n mvhd-neo4j -g rg-mvhd-dev --query properties.latestReadyRevisionName -o tsv
 ```
 
-More than one active revision on an app whose store is a single-writer file
-lock is an outage. Fix: deactivate the stale revision so it shuts down and
-releases the lock, then restart the current one. Same root as gotcha 6 in
-`CLAUDE.md` (ACA keeps old `:latest` revisions alive); the log-volume side is in
-`docs/knowledge/runbooks/cost-efficient-logging.md`.
+More than one active revision, or a `latestReadyRevisionName` older than the
+latest revision, means Neo4j is not running what you deployed.
+
+Fixed in the repo: `graphrag-deploy.yml` sizes memory to fit 2 GiB (heap 1G
+fixed, page cache 384M, ample for a 5,300-node graph), deactivates every other
+revision, and waits on the latest revision's replica being ready, failing if it
+never is. `scripts/azure/02-data-layer.sh` deactivates other revisions too. The
+GDS sizing in the 2026-04 entry below is superseded by this.
 
 ## 2026-10-02: the fix for the 2026-09-30 wipe was the thing that breaks Postgres
 

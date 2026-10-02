@@ -148,6 +148,22 @@ az containerapp update --name "$NEO4J_APP" --resource-group "$RG" --yaml "$NEO4J
 rm -f "$NEO4J_YAML"
 ok "Neo4j volume attached (neo4j-data → /data; logs stay in the container)"
 
+# Single revision mode keeps the last *ready* revision running until the new one
+# is ready. Neo4j's store lock on the shared /data means the new one never can
+# be, so the two deadlock and the old one is re-activated on every update
+# (docs/gotchas.md, 2026-10-02). Stop every other revision; that costs a short
+# outage, which a single-writer database on a shared volume cannot avoid.
+NEO4J_LATEST=$(az containerapp show --name "$NEO4J_APP" --resource-group "$RG" \
+  --query "properties.latestRevisionName" -o tsv)
+while read -r rev; do
+  [[ -z "$rev" || "$rev" == "$NEO4J_LATEST" ]] && continue
+  log "Deactivating ${rev} so ${NEO4J_LATEST} can take the Neo4j store lock..."
+  az containerapp revision deactivate --name "$NEO4J_APP" --resource-group "$RG" \
+    --revision "$rev" -o none
+done < <(az containerapp revision list --name "$NEO4J_APP" --resource-group "$RG" \
+  --query "[?properties.active].name" -o tsv)
+ok "Only ${NEO4J_LATEST} is active"
+
 # ── Wait for Postgres to be reachable ───────────────────────────────────────
 log "Waiting for Postgres to accept connections..."
 for i in $(seq 1 30); do

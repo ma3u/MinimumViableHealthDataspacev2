@@ -127,10 +127,9 @@ on-call person sees is the loop, not the bill.
 ### Phase A: stop the loops (no new infrastructure, biggest saving)
 
 1. **Neo4j:** remove the `neo4j-logs` mount from `mvhd-neo4j` and from
-   `scripts/azure/02-data-layer.sh` (script done; live app pending). Prerequisite:
-   only one active revision. On 2026-10-02 a stale April revision still held the
-   store lock and every new revision crash-looped (`docs/gotchas.md`, 2026-10-02). Log files roll inside the container, where rename
-   works; the console keeps `neo4j.log`. Removes the 180 MB/day rollover stack traces.
+   `scripts/azure/02-data-layer.sh`. **Done 2026-10-02** (revision 179). It needed
+   two more fixes first: the memory settings did not fit the 2 GiB container, and
+   a stale April revision held the store lock (`docs/gotchas.md`, 2026-10-02).
 2. **EDC services:** finish #318 (managed Postgres, ADR-041) so the databases exist, and
    set connection retry with backoff so a missing database produces one error per
    minute, not per second.
