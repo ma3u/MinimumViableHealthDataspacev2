@@ -101,6 +101,8 @@ test.describe("Screenshot capture (run against localhost:3003)", () => {
   });
 
   test("catalog-browser", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog", { waitUntil: "networkidle" });
     await page.waitForTimeout(T);
     await shot(page, "ehds-fhir-dataset-catalog-browser.png");

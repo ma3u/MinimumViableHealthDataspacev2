@@ -17,12 +17,15 @@ import {
   apiGet,
   skipIfNeo4jDown,
 } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("J · EEHRxF Profile & Compliance Content", () => {
   /* ── J72: EEHRxF page renders 4 summary stat cards ────── */
   test("J72 — EEHRxF page shows Priority Categories and EU Profiles stats", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/eehrxf");
     await expectHeading(page, "EEHRxF Profile Alignment");
     await waitForDataLoad(page);
@@ -35,6 +38,8 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
 
   /* ── J73: EEHRxF page shows Overall Coverage percentage ── */
   test("J73 — EEHRxF page shows Overall Coverage stat", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/eehrxf");
     await expectHeading(page, "EEHRxF Profile Alignment");
     await waitForDataLoad(page);
@@ -48,6 +53,8 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
   test("J74 — EEHRxF page renders EHDS Implementation Timeline", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/eehrxf");
     await expectHeading(page, "EEHRxF Profile Alignment");
     await waitForDataLoad(page);
@@ -66,6 +73,8 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
     page,
   }) => {
     await skipIfNeo4jDown(page);
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/eehrxf");
     await expectHeading(page, "EEHRxF Profile Alignment");
     await waitForDataLoad(page);
@@ -87,6 +96,8 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
   test("J76 — EEHRxF page shows References section with regulation links", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/eehrxf");
     await expectHeading(page, "EEHRxF Profile Alignment");
     await waitForDataLoad(page);
@@ -107,6 +118,8 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
   test("J77 — EEHRxF page description mentions HL7 Europe FHIR R4", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/eehrxf");
     await expectHeading(page, "EEHRxF Profile Alignment");
 
@@ -135,6 +148,8 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
   test("J80 — EEHRxF page has NL Query and Compliance nav links", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/eehrxf");
     await expectHeading(page, "EEHRxF Profile Alignment");
 
@@ -145,6 +160,8 @@ test.describe("J · EEHRxF Profile & Compliance Content", () => {
 
   /* ── J81: EEHRxF Profiles with Data stat card ─────────── */
   test("J81 — EEHRxF page shows Profiles with Data stat", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/eehrxf");
     await expectHeading(page, "EEHRxF Profile Alignment");
     await waitForDataLoad(page);

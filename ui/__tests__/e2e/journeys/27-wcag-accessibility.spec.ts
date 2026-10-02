@@ -30,8 +30,8 @@ import { signInPage } from "../helpers/forged-session";
 /* ── Configuration ───────────────────────────────────────────────── */
 
 /** Pages to audit. Protected pages redirect to /auth/signin since CI has no
- *  Keycloak; /graph is signed in with a forged session instead (SIGNED_IN),
- *  because since #404 it needs one and it is the page most worth auditing. */
+ *  Keycloak; the pages in SIGNED_IN are audited with a forged session
+ *  instead: since #404 they need one, and they are the most worth auditing. */
 const PUBLIC_PAGES: { path: string; label: string }[] = [
   { path: "/", label: "Home" },
   { path: "/graph", label: "Graph Explorer" },
@@ -48,7 +48,7 @@ const PUBLIC_PAGES: { path: string; label: string }[] = [
 ];
 
 /** Pages that need a session since #404 (ADR-044). */
-const SIGNED_IN = new Set(["/graph"]);
+const SIGNED_IN = new Set(["/graph", "/catalog", "/analytics", "/query"]);
 
 /** Axe-core WCAG tags to enforce. */
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];

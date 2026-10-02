@@ -10,12 +10,15 @@
  */
 import { test, expect } from "@playwright/test";
 import { T, expectHeading, waitForDataLoad, skipIfNeo4jDown } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("I · Analytics & Patient Content Verification", () => {
   /* ── J62: Analytics page shows 6 stat cards ────────────── */
   test("J62 — Analytics page renders all 6 OMOP stat cards", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/analytics");
     await expectHeading(page, "OMOP Research Analytics");
     await waitForDataLoad(page);
@@ -39,6 +42,8 @@ test.describe("I · Analytics & Patient Content Verification", () => {
   test("J63 — Analytics page renders Top Conditions and Top Drug Exposures sections", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/analytics");
     await expectHeading(page, "OMOP Research Analytics");
     await waitForDataLoad(page);
@@ -59,6 +64,8 @@ test.describe("I · Analytics & Patient Content Verification", () => {
   test("J64 — Analytics page renders Gender Distribution section", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/analytics");
     await expectHeading(page, "OMOP Research Analytics");
     await waitForDataLoad(page);
@@ -78,6 +85,8 @@ test.describe("I · Analytics & Patient Content Verification", () => {
   test("J65 — Analytics stat card values are numeric or loading", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/analytics");
     await expectHeading(page, "OMOP Research Analytics");
     await waitForDataLoad(page);
@@ -148,6 +157,8 @@ test.describe("I · Analytics & Patient Content Verification", () => {
   test("J69 — Analytics page has Patient Journey and NL Query nav links", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/analytics");
     await expectHeading(page, "OMOP Research Analytics");
 
@@ -173,6 +184,8 @@ test.describe("I · Analytics & Patient Content Verification", () => {
   test("J71 — Analytics page description references OMOP CDM and Synthea", async ({
     page,
   }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/analytics");
     await expectHeading(page, "OMOP Research Analytics");
 

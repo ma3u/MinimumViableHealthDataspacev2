@@ -121,6 +121,8 @@ test.describe("M · Live Data Validation", () => {
   });
 
   test("J108 — Catalog page renders dataset entries", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await waitForDataLoad(page);
     await expectHeading(page, "Catalog");
@@ -160,6 +162,8 @@ test.describe("M · Live Data Validation", () => {
   });
 
   test("J112 — Analytics page renders stat cards", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/analytics");
     await waitForDataLoad(page);
     await expectHeading(page, "Analytics");
