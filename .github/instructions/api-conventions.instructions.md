@@ -47,8 +47,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> { ... }
 
 - Every API route needs a session (ADR-044, #404). The only exceptions make
   signing in possible or keep the container alive: `/api/auth/*`,
-  `/api/keycloak-config`, `/api/health`; plus `/api/mock-dsp/*`, which the catalog
-  crawler calls as a machine (open question in #404). `every-route-needs-a-session.test.ts`
+  `/api/keycloak-config`, `/api/health`. `/api/mock-dsp/*` takes a session or the
+  catalog crawler's bearer token (`requireSessionOrToken()`, `@/lib/service-auth`,
+  token in Key Vault per ADR-036). `every-route-needs-a-session.test.ts`
   checks each handler; a new anonymous route needs a superseding ADR.
 - Route unit tests do not check the gate: `ui/__tests__/setup.ts` mocks the guard
   open. A test that pins a 401/403 puts `vi.unmock("@/lib/auth-guard")` at the top
