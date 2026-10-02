@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { runQuery } from "@/lib/neo4j";
 import {
   buildActivityReport,
@@ -20,11 +21,14 @@ export const dynamic = "force-dynamic";
  *
  * The activity report of the health data access body, Regulation (EU)
  * 2025/327 Art. 59(1)(a) to (k), generated from the graph for the period
- * (default: the last 24 months). No session: the regulation wants the
- * report published on the body's website. Nothing personal leaves this
- * route: organisations, counts, dates and reasons. Issue #206, M6.
+ * (default: the last 24 months). The regulation wants the report published
+ * on the body's website; Every API route needs a session since #404 (ADR-044), so it is
+ * served to any signed-in participant. Nothing personal leaves this route:
+ * organisations, counts, dates and reasons. Issue #206, M6.
  */
 export async function GET(request: NextRequest) {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
   const params = request.nextUrl.searchParams;
   const { from, to } = reportPeriod(params.get("from"), params.get("to"));
   const window = { from: from.toISOString(), to: to.toISOString() };

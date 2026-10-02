@@ -56,6 +56,12 @@ const PROTECTED_PATHS = [
   "/applications",
   "/supervision",
   "/overview",
+  // #404: every API route needs a session (ADR-044), so the pages whose data
+  // was public until then send an anonymous visitor to sign in too.
+  "/graph",
+  "/permits",
+  "/information",
+  "/activity-report",
 ] as const;
 
 function generateNonce(): string {

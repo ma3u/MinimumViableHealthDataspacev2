@@ -1,17 +1,17 @@
 /**
  * E2E tests — Role-Based Navigation & Persona Graph Views (Phase 19)
  *
- * Tests the sign-in persona cards, public graph page, role-specific graph
+ * Tests the sign-in persona cards, the graph page, role-specific graph
  * persona views, and user guide persona section.
  *
- * All tests use PUBLIC pages (no auth required):
- *   /auth/signin   — persona reference cards
- *   /graph         — public graph with role-derived persona
- *   /graph?persona=X — persona-specific subgraphs
- *   /docs/user-guide — user guide with role section
+ *   /auth/signin   — persona reference cards (no session)
+ *   /graph         — graph with role-derived persona (session since #404)
+ *   /graph?persona=X — persona-specific subgraphs (session since #404)
+ *   /docs/user-guide — user guide with role section (no session)
  */
 import { test, expect } from "@playwright/test";
 import { T, apiGet, skipIfNeo4jDown } from "./journeys/helpers";
+import { signInOrSkip } from "./helpers/forged-session";
 
 // ── Sign-in persona cards ─────────────────────────────────────────────────────
 
@@ -107,8 +107,21 @@ test.describe("Sign-in — persona reference cards", () => {
 
 // ── Graph page public access ──────────────────────────────────────────────────
 
-test.describe("Graph page — public access & persona indicator", () => {
-  test("renders graph page without authentication", async ({ page }) => {
+test.describe("Graph page — without a session", () => {
+  test("sends an anonymous visitor to sign in (ADR-044)", async ({ page }) => {
+    await page.goto("/graph");
+    await expect(page).toHaveURL(/\/auth\/signin/, { timeout: T });
+  });
+});
+
+test.describe("Graph page — signed in, persona indicator", () => {
+  test.beforeEach(async ({ page }) => {
+    // The base participant role keeps the "default" view an anonymous
+    // visitor used to get before #404.
+    await signInOrSkip(page, test.skip);
+  });
+
+  test("renders graph page for a signed-in participant", async ({ page }) => {
     await page.goto("/graph");
     await expect(page.getByText("Knowledge Graph")).toBeVisible({ timeout: T });
   });
@@ -182,6 +195,10 @@ test.describe("Graph page — public access & persona indicator", () => {
 // ── Persona graph API ─────────────────────────────────────────────────────────
 
 test.describe("Persona graph API — /api/graph?persona=", () => {
+  test.beforeEach(async ({ page }) => {
+    await signInOrSkip(page, test.skip);
+  });
+
   test("default graph returns nodes and persona field", async ({ page }) => {
     await skipIfNeo4jDown(page);
     const data = await apiGet(page, "/api/graph");

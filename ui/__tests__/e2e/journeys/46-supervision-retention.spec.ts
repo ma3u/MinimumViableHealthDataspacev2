@@ -201,6 +201,8 @@ test.describe("Issue #206 · supervision (Art. 63) and retention (Art. 73(1)(e))
     page,
   }) => {
     test.setTimeout(150_000);
+    // Every API route needs a session since #404 (ADR-044).
+    await loginAs(page, "researcher", "researcher");
     const register = await apiGet(page, "/api/permits");
     const measure = (
       register.measures as {

@@ -18,9 +18,10 @@ export const dynamic = "force-dynamic";
  * POST: the holder of a data permit reports what came of the use: a
  * publication, a policy document, a regulatory procedure, an IT product. The
  * deadline is 18 months after the end of the processing (the permit's
- * validity end); the record says whether it was met. GET: public, every
- * result, because the access body publishes them (Art. 57(1)(j)(v)) and
- * reports them (Art. 59(1)(j), (k)). Issue #206, M6.
+ * validity end); the record says whether it was met. GET: every result,
+ * because the access body publishes them (Art. 57(1)(j)(v)) and reports them
+ * (Art. 59(1)(j), (k)), to any signed-in participant: every API route needs
+ * a session since #404 (ADR-044). Issue #206, M6.
  */
 
 export async function POST(req: NextRequest) {
@@ -163,6 +164,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET() {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
   try {
     const rows = await runQuery<ResultRow>(
       `MATCH (rc:ResultCommunication)

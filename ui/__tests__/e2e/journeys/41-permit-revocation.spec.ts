@@ -126,11 +126,15 @@ test.describe("Issue #206 · revocation and the public register", () => {
     await researcher.context().close();
   });
 
-  test("J932 the register lists it for everyone, without a session", async ({
+  test("J932 the register lists it for any signed-in participant, and refuses an anonymous one", async ({
     browser,
   }) => {
     const anyone = await browser.newContext();
-    const page = await anyone.newPage();
+    const refused = await (await anyone.newPage()).request.get("/api/permits");
+    expect(refused.status()).toBe(401);
+    await anyone.close();
+
+    const page = await signedInAs(browser, "researcher");
     const r = await page.request.get("/api/permits");
     expect(r.status()).toBe(200);
     const entries = (await r.json()).entries as {
@@ -143,12 +147,19 @@ test.describe("Issue #206 · revocation and the public register", () => {
     expect(mine?.outcome).toBe("permit revoked");
     expect(mine?.revocationReason).toBe(REASON);
     expect(mine?.publishBy).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    await anyone.close();
+    await page.context().close();
   });
 
-  test("J933 the public page shows the measure", async ({ browser }) => {
+  test("J933 the register page shows the measure, signed in (ADR-044)", async ({
+    browser,
+  }) => {
     const anyone = await browser.newContext();
-    const page = await anyone.newPage();
+    const visitor = await anyone.newPage();
+    await visitor.goto("/permits");
+    await expect(visitor).toHaveURL(/signin/);
+    await anyone.close();
+
+    const page = await signedInAs(browser, "researcher");
     await page.goto("/permits");
     await expect(page).not.toHaveURL(/signin/);
     await expect(page.getByText("Data permits register")).toBeVisible({
@@ -157,6 +168,6 @@ test.describe("Issue #206 · revocation and the public register", () => {
     await expect(page.getByText(REASON).first()).toBeVisible({
       timeout: 15_000,
     });
-    await anyone.close();
+    await page.context().close();
   });
 });

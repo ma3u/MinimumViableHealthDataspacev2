@@ -44,9 +44,13 @@ async function signedInAs(browser: Browser, user: string): Promise<Page> {
 }
 
 test.describe("Issue #206 · information, results, fees, trusted holder", () => {
-  test("J1000 the public information page renders without a session (Art. 58(1))", async ({
+  test("J1000 the information page needs a session and then shows every item (Art. 58(1), ADR-044)", async ({
     page,
   }) => {
+    await page.goto("/information");
+    await expect(page).toHaveURL(/signin/);
+    await skipIfKeycloakDown();
+    await loginAs(page, "researcher", "researcher");
     await page.goto("/information");
     await expect(
       page.getByRole("heading", {
@@ -143,6 +147,8 @@ test.describe("Issue #206 · information, results, fees, trusted holder", () => 
     );
     await researcher.context().close();
 
+    // Every API route needs a session since #404 (ADR-044).
+    await loginAs(page, "researcher", "researcher");
     const register = await apiGet(page, "/api/permits");
     const result = (
       register.results as { permitId: string; title: string; onTime: boolean }[]
@@ -230,6 +236,8 @@ test.describe("Issue #206 · information, results, fees, trusted holder", () => 
   test("J1004 the register says who decided under Art. 72 and what it cost", async ({
     page,
   }) => {
+    // Every API route needs a session since #404 (ADR-044).
+    await loginAs(page, "researcher", "researcher");
     const register = await apiGet(page, "/api/permits");
     const entry = (
       register.entries as {

@@ -10,10 +10,6 @@ get {
   auth: inherit
 }
 
-headers {
-  Cookie: {{cookieName}}=not-a-session
-}
-
 assert {
   res.status: eq 200
   res.body.entries: isArray

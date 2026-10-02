@@ -49,8 +49,9 @@ When reviewing for security:
 - Admin routes require `EDC_ADMIN` — no other role escalation.
 - API routes (`/api/*`) are excluded from middleware — they must perform their own session checks.
 - Check that new API routes gate with `requireAuth()` from `@/lib/auth-guard`; a hand-rolled
-  `getServerSession()` role check is a finding. The routes public by decision are listed in
-  `.claude/rules/api-conventions.md`; an anonymous route not on that list is a defect.
+  `getServerSession()` role check is a finding. Every route needs a session (ADR-044);
+  the few sign-in and probe exceptions are listed in `.claude/rules/api-conventions.md`, and any
+  other anonymous handler is a defect.
 
 ### Static export security
 

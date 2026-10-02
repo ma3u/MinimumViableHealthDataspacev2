@@ -1,0 +1,26 @@
+meta {
+  name: 22 No session, the activity report (401)
+  type: http
+  seq: 22
+}
+
+get {
+  url: {{baseUrl}}/api/activity-report
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+tests {
+  // #404, ADR-044: every API route needs a session. This one answered
+  // anybody until then.
+  test("the activity report needs a session", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

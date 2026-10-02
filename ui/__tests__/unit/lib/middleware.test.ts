@@ -196,14 +196,8 @@ describe("middleware — public paths", () => {
   // "/patient" used to be here. #357 gated it: /api/patient, the page's only
   // data call, now refuses an anonymous caller, so leaving the page public
   // would show an empty shell instead of sending the visitor to sign in.
-  const publicPaths = [
-    "/",
-    "/graph",
-    "/catalog",
-    "/analytics",
-    "/about",
-    "/some-random",
-  ];
+  // "/graph" too, since #404: every API route needs a session (ADR-044).
+  const publicPaths = ["/", "/catalog", "/analytics", "/about", "/some-random"];
 
   publicPaths.forEach((p) => {
     it(`passes ${p} through without auth check`, async () => {
@@ -217,6 +211,13 @@ describe("middleware — public paths", () => {
   it("sends an anonymous visitor on /patient to sign in (#357)", async () => {
     const res = await invoke("/patient", null);
     expect(res.headers.get("location")).toContain("/auth/signin");
+  });
+
+  ["/graph", "/permits", "/information", "/activity-report"].forEach((p) => {
+    it(`sends an anonymous visitor on ${p} to sign in (#404)`, async () => {
+      const res = await invoke(p, null);
+      expect(res.headers.get("location")).toContain("/auth/signin");
+    });
   });
 });
 

@@ -199,6 +199,8 @@ jobs:
           CI: true
           PLAYWRIGHT_BASE_URL: ${{ steps.azure-url.outputs.url }}
           KEYCLOAK_PUBLIC_URL: ${{ steps.azure-url.outputs.keycloak_url }}
+          # #404 (ADR-044): /graph needs a session; the specs forge one with it.
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
 
       - name: WCAG accessibility audit (Azure)
         continue-on-error: true
@@ -207,6 +209,8 @@ jobs:
           CI: true
           PLAYWRIGHT_BASE_URL: ${{ steps.azure-url.outputs.url }}
           KEYCLOAK_PUBLIC_URL: ${{ steps.azure-url.outputs.keycloak_url }}
+          # #404 (ADR-044): /graph needs a session; the specs forge one with it.
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
 
       - name: Security tests (Azure)
         continue-on-error: true
@@ -215,6 +219,8 @@ jobs:
           CI: true
           PLAYWRIGHT_BASE_URL: ${{ steps.azure-url.outputs.url }}
           KEYCLOAK_PUBLIC_URL: ${{ steps.azure-url.outputs.keycloak_url }}
+          # #404 (ADR-044): /graph needs a session; the specs forge one with it.
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

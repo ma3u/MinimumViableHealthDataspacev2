@@ -14,21 +14,21 @@ the work is tracked in [#349](https://github.com/ma3u/MinimumViableHealthDataspa
 
 ## The folders
 
-| Folder                      | Who                           | What it covers                                                                              |
-| --------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------- |
-| `00 Public`                 | anyone, not signed in         | Art. 56 information duty, the Art. 73 permit and results registers, the activity report     |
-| `01 Patient`                | a natural person              | Art. 3 to 12: my record, a FHIR copy of it, insights, Art. 10 consent and its withdrawal    |
-| `02 Data Holder`            | a hospital                    | Art. 51, 52, 55: the catalogue I publish, the assets and policies behind it, my exchanges   |
-| `03 Data User`              | a research organisation       | Art. 53: discovery, what I am permitted today, cohort analytics, natural-language query     |
-| `04 Access Body`            | an HDAB                       | Art. 55 to 63, 71 to 73: my inbox, findings, the audit trail and its retention rule         |
-| `05 Dataspace Operator`     | whoever runs it               | tenants, components, the participant registry, credentials, the knowledge graph             |
-| `06 Trust Centre`           | the SPE operator              | Art. 73: trust centres, open SPE sessions, the demo DSP catalogue                           |
-| `07 Journey - Data permit`  | data user **and** access body | Art. 67 to 73 end to end: application, clock, permit, results, finding, closure, revocation |
-| `08 Journey - Data request` | data user **and** access body | Art. 69: a question answered in anonymised statistics                                       |
-| `09 Access control`         | all five roles                | one request per line of the role matrix, each expecting its refusal                         |
-| `10 Connecting partner`     | your own EDC connector        | DSP 2025-1 and DCP v1.0 against the Management API, IdentityHub and IssuerService           |
-| `11 Platform`               | the platform team             | the Neo4j proxy on port 9090                                                                |
-| `12 EUDI wallet`            | optional                      | wallet sign-in, needs `docker-compose.eudi.yml`                                             |
+| Folder                      | Who                           | What it covers                                                                                                                       |
+| --------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `00 Public`                 | anyone; signed in since #404  | Health and sign-in without a session; the Art. 56 information duty, the Art. 73 registers and the activity report with one (ADR-044) |
+| `01 Patient`                | a natural person              | Art. 3 to 12: my record, a FHIR copy of it, insights, Art. 10 consent and its withdrawal                                             |
+| `02 Data Holder`            | a hospital                    | Art. 51, 52, 55: the catalogue I publish, the assets and policies behind it, my exchanges                                            |
+| `03 Data User`              | a research organisation       | Art. 53: discovery, what I am permitted today, cohort analytics, natural-language query                                              |
+| `04 Access Body`            | an HDAB                       | Art. 55 to 63, 71 to 73: my inbox, findings, the audit trail and its retention rule                                                  |
+| `05 Dataspace Operator`     | whoever runs it               | tenants, components, the participant registry, credentials, the knowledge graph                                                      |
+| `06 Trust Centre`           | the SPE operator              | Art. 73: trust centres, open SPE sessions, the demo DSP catalogue                                                                    |
+| `07 Journey - Data permit`  | data user **and** access body | Art. 67 to 73 end to end: application, clock, permit, results, finding, closure, revocation                                          |
+| `08 Journey - Data request` | data user **and** access body | Art. 69: a question answered in anonymised statistics                                                                                |
+| `09 Access control`         | all five roles                | one request per line of the role matrix, each expecting its refusal                                                                  |
+| `10 Connecting partner`     | your own EDC connector        | DSP 2025-1 and DCP v1.0 against the Management API, IdentityHub and IssuerService                                                    |
+| `11 Platform`               | the platform team             | the Neo4j proxy on port 9090                                                                                                         |
+| `12 EUDI wallet`            | optional                      | wallet sign-in, needs `docker-compose.eudi.yml`                                                                                      |
 
 Two folders hold procedures rather than personas. A data permit is a two-sided
 procedure: the data user applies, the access body decides, the data user reports,

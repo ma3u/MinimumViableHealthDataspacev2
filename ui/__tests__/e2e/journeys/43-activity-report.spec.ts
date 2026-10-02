@@ -3,23 +3,45 @@
  *
  * Regulation (EU) 2025/327, Art. 59(1): every health data access body
  * publishes an activity report every two years on its website, with the
- * items (a) to (k). The demo generates it from the graph; this journey reads
- * it without a session, as the public would, in JSON, on the page and as
- * Markdown.
+ * items (a) to (k). The demo generates it from the graph. Since #404
+ * (ADR-044) every API route needs a session, so this journey checks that an
+ * anonymous visitor is refused, then reads the report signed in, in JSON, on
+ * the page and as Markdown.
  *
  *   PLAYWRIGHT_BASE_URL=https://ehds.mabu.red \
  *     npx playwright test __tests__/e2e/journeys/43-activity-report.spec.ts
  */
-import { test, expect } from "@playwright/test";
+import { test, expect, type Browser, type Page } from "@playwright/test";
+import { loginAs, skipIfKeycloakDown } from "./helpers";
 
 const ITEMS = "abcdefghijk".split("");
 
+async function signedIn(browser: Browser): Promise<Page> {
+  const page = await (await browser.newContext()).newPage();
+  await loginAs(page, "researcher", "researcher");
+  return page;
+}
+
 test.describe("Issue #206 · the activity report (Art. 59)", () => {
-  test("J950 the report is generated for everyone, without a session", async ({
+  test("J949 an anonymous visitor is refused and sent to sign in (ADR-044)", async ({
     browser,
   }) => {
     const anyone = await browser.newContext();
     const page = await anyone.newPage();
+    const r = await page.request.get("/api/activity-report");
+    expect(r.status()).toBe(401);
+    expect((await r.json()).error).toBe("Unauthorized");
+    await page.goto("/activity-report");
+    await expect(page).toHaveURL(/signin/);
+    await anyone.close();
+  });
+
+  test("J950 the report is generated for any signed-in participant", async ({
+    browser,
+  }) => {
+    await skipIfKeycloakDown();
+    const page = await signedIn(browser);
+    const anyone = page.context();
     const r = await page.request.get("/api/activity-report");
     expect(r.status(), await r.text()).toBe(200);
     const report = await r.json();
@@ -36,8 +58,9 @@ test.describe("Issue #206 · the activity report (Art. 59)", () => {
   test("J951 the page lists the eleven items and the period", async ({
     browser,
   }) => {
-    const anyone = await browser.newContext();
-    const page = await anyone.newPage();
+    await skipIfKeycloakDown();
+    const page = await signedIn(browser);
+    const anyone = page.context();
     await page.goto("/activity-report");
     await expect(page).not.toHaveURL(/signin/);
     await expect(
@@ -58,8 +81,9 @@ test.describe("Issue #206 · the activity report (Art. 59)", () => {
   test("J952 the Markdown export carries one heading per item", async ({
     browser,
   }) => {
-    const anyone = await browser.newContext();
-    const page = await anyone.newPage();
+    await skipIfKeycloakDown();
+    const page = await signedIn(browser);
+    const anyone = page.context();
     const r = await page.request.get("/api/activity-report?format=md");
     expect(r.status(), await r.text()).toBe(200);
     expect(r.headers()["content-type"]).toContain("text/markdown");

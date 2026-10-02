@@ -9,6 +9,18 @@
  * we fail the probe; locally we still skip for convenience.
  */
 import { test, expect, Page } from "@playwright/test";
+import { signInPage, NO_FORGED_SESSION } from "./helpers/forged-session";
+
+/**
+ * Since #404 (ADR-044) /graph and /api/graph need a session. In CI against a
+ * deployment a missing secret must fail, not skip: a smoke run that skips its
+ * graph checks reports a green demo that nobody looked at.
+ */
+async function signIn(page: Page) {
+  if (await signInPage(page)) return;
+  if (process.env.CI) throw new Error(NO_FORGED_SESSION);
+  test.skip(true, NO_FORGED_SESSION);
+}
 
 /**
  * Attach pageerror + console.error collectors to a page. Returns an array
@@ -59,6 +71,10 @@ test.describe("Home Page", () => {
 });
 
 test.describe("Graph Explorer", () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page);
+  });
+
   test("should load the graph page", async ({ page }) => {
     const errors = collectClientErrors(page);
     const probe = await probeGraphApi(page);
@@ -115,6 +131,10 @@ test.describe("Patient Journey", () => {
 });
 
 test.describe("Navigation", () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page);
+  });
+
   test("should navigate between pages", async ({ page }) => {
     // Auth-gated APIs (/api/compliance, /api/credentials, /api/patient/profile)
     // return 401 for unauthenticated browsers — expected, not a regression.

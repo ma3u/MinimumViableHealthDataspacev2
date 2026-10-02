@@ -115,52 +115,35 @@ participant sees the demo cohort, a `PATIENT` sees only their own record
 (EHDS Art. 3, GDPR Art. 15). `bruno/MVHDv2/09 Access control/05` asserts the
 401 and its `{ error }` body.
 
-### The two routes that answer without a session, and why
+### Every route needs a session (ADR-044)
 
-#357 prompted a sweep: every handler was classified, then every
-public-looking GET was called with no session against a running stack.
-Ground truth, not a static scan, because several routes gate through a
-file-local helper and a scan reported them as open. It found one gap and one
-judgement call, both settled in #377.
+Decided 2026-10-02 (#404): every API route needs a session. Middleware skips
+`/api/*`, so the route itself is the only gate, and the gate is
+`requireAuth()` in every handler. This replaced the earlier list of routes
+that were public by decision: `/api/nlq/backend` (#377), the access body's
+register, information page, results register and activity report (Art. 58,
+59, 73; #206) and `/api/graph`. Those now answer any signed-in participant,
+and their pages (`/graph`, `/permits`, `/information`, `/activity-report`)
+are in `PROTECTED_PATHS`, so an anonymous visitor is sent to sign in.
 
-`/api/debug/phase26` was the gap. An operator diagnostic that answered
-anybody with participant, dataset and glossary counts, while this collection
-filed it under `05 Dataspace Operator`. Now `requireAuth(["EDC_ADMIN"])`.
-`09 Access control/17` asserts the 401 with no session and `/18` the 403 for
-a signed-in data user; `05 Dataspace Operator/28` asserts the operator still
-gets through.
+The only routes that answer without a session are the ones that make
+signing in possible and the probe that keeps the container alive:
 
-`/api/nlq/backend` stays public, deliberately. It is the one route in the
-inventory that answers anonymously by decision rather than by oversight. It
-reports which chat and embeddings providers are wired and which vector
-indexes exist: no secrets, no data. Against that,
-`__tests__/e2e/journeys/33-graphrag-nlp.spec.ts` probes it with no session
-seven times to decide which GraphRAG branches its environment can run, and
-its `fetchBackend()` feeds a null on any non-200 straight into
-`test.skip(...)`. Gating it would not fail those tests, it would silently
-stop them running, which is what ADR-031 exists to prevent, and section A of
-that spec is deliberately Keycloak-free so it runs where no login exists.
-Small disclosure against real coverage; the coverage wins. Revisit if that
-spec gains an authenticated request context.
+- `/api/auth/[...nextauth]`, `/api/auth/eudi/start`, `/api/auth/eudi/status`:
+  the sign-in flows themselves.
+- `/api/keycloak-config`: tells the sign-in banner where Keycloak is.
+- `/api/health`: the liveness and readiness probe (`k8s/probes.yaml`).
+- `/api/mock-dsp/[participant]/catalog/request`: **open question.** The
+  catalog crawler POSTs to it as a machine, with no session, to drive
+  federated discovery (ADR-020). Gating it needs a machine credential first;
+  see #404.
 
-Those were the two the #377 sweep settled. The full list of routes that
-answer without a session by decision (middleware skips `/api/*`, so the route
-itself is the only gate), each saying why in its header comment:
-
-- `/api/nlq/backend`: above.
-- `/api/permits`, `/api/information`, `/api/activity-report`: the access
-  body's public register, information duty and activity report, which
-  Regulation (EU) 2025/327 Art. 58(1) and 59(1) want published (#206,
-  added after the sweep). Organisations, counts and dates, nothing personal.
-- `/api/graph`: the demo landing view, synthetic data only.
-- `/api/auth/[...nextauth]`, `/api/auth/eudi/start`, `/api/auth/eudi/status`,
-  `/api/keycloak-config`: the sign-in flows themselves.
-- `/api/health`: liveness probe.
-- `/api/mock-dsp/[participant]/catalog/request`: the demo DSP catalogue a
-  partner fetches (`06 Trust Centre/02` and `/03`).
-
-Any other route answering a caller with no session is a defect, not a
-policy. A new public route goes on this list with its reason, in the same PR.
+`ui/__tests__/unit/api/every-route-needs-a-session.test.ts` enforces this per
+handler, not per file (a file-level scan passed `GET /api/compliance/results`
+because its `POST` was gated), and fails on a listed route that no longer
+exists. `bruno/MVHDv2/09 Access control/19` to `/24` assert the 401 and its
+`{ error }` body on the six routes gated by #404. A new anonymous route needs
+a superseding ADR, not a line in this list.
 
 **Route tests do not check the gate.** `ui/__tests__/setup.ts` mocks
 `@/lib/auth-guard` open, so `requireAuth()` returns an `EDC_ADMIN` and

@@ -1,11 +1,13 @@
 meta {
-  name: Anyone, without signing in
+  name: Anyone: the hub, signing in, and what the access body publishes
   seq: 1
 }
 
 docs {
-  What Regulation (EU) 2025/327 requires an access body to publish, and what the
-  platform exposes before any login: the Art. 56 information duty, the Art. 73
-  registers of permits and results, and the yearly activity report. A partner can
-  send every request in this folder before an account exists.
+  What Regulation (EU) 2025/327 requires an access body to publish: the Art. 56
+  information duty, the Art. 73 registers of permits and results, and the yearly
+  activity report. Since #404 (ADR-044) every API route needs a session, so these
+  are read signed in, with the collection's default session. Only requests 01 (is
+  the hub up) and 06 (where to sign in) still go without one, because they are
+  what makes signing in possible.
 }

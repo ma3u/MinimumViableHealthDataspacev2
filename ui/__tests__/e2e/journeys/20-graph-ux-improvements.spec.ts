@@ -12,8 +12,14 @@
  */
 import { test, expect } from "@playwright/test";
 import { T } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("Graph Explorer UX Improvements", () => {
+  // Every API route needs a session since #404 (ADR-044).
+  test.beforeEach(async ({ page }) => {
+    await signInOrSkip(page, test.skip);
+  });
+
   // ── API-level tests ───────────────────────────────────────────────────────
 
   test("J261 — patient graph mostly returns display names, not numeric codes", async ({
