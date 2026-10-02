@@ -164,7 +164,7 @@ Run with `PLAYWRIGHT_BASE_URL=https://ma3u.github.io/MinimumViableHealthDataspac
 ### Phase 23: Stitch Vitalis Blue — Full Design Alignment & New Features
 
 **Branch**: `feature/newdesign`
-**Reference designs**: `stitch_health_ui_redesign/` (15 HTML templates + 2 DESIGN.md specs)
+**Reference designs**: `docs/design/stitch-ui-redesign/` (15 HTML templates + 2 DESIGN.md specs)
 **Design system**: Vitalis Blue (light) + Vitalis Blue Nocturne (dark)
 
 #### Motivation

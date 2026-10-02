@@ -44,7 +44,7 @@ wallet. The demo signs the visitor in as `patient1` (sessionStorage + localStora
 - [x] Verified locally on the `DEMO_TK` static server (`localhost:3000`)
 
 Extends the patient [`/journey`](../../ui/src/app/journey/page.tsx) presentation and the
-[`WalletSimulation`](../../ui/src/components/WalletSimulation.tsx) with three coherent,
+`WalletSimulation` (removed in #404, the flow is now `WalletFlow` + `REGISTER_STEPS`) with three coherent,
 static-export-safe wallet flows that share one phone-frame primitive, and reconciles the
 owner's request to name the real **TK Krankenkasse** with the project's fictional-org policy.
 

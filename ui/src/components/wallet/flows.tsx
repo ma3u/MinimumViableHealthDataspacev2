@@ -1,7 +1,7 @@
 /**
  * Step data for the three wallet flows rendered by WalletFlow (PhoneFrame.tsx).
  * - REGISTER_STEPS: the original EUDI registration (kept VERBATIM so
- *   WalletSimulation.test.tsx keeps passing).
+ *   wallet/register-flow.test.tsx keeps passing).
  * - LOGIN_STEPS: returning-user login (the wallet skips the trust step — this is
  *   a wallet-UI difference, NOT a protocol/verifier difference).
  * - EHR_TRANSFER_STEPS: ePA data-access authorization via GesundheitsID (NOT an
