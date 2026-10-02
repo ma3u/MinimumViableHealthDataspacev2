@@ -153,5 +153,6 @@ All three core specifications are now final or near-final:
 | [040](ADRs/ADR-040-derived-compliance-state-in-the-api.md)                  | Derived compliance state is computed in the API                                                 | 2026-09-24 | Accepted          |
 | [042](ADRs/ADR-042-off-hours-scaledown-current-state.md)                    | Off-hours scale-down, the state that runs today                                                 | 2026-10-02 | Accepted          |
 | [043](ADRs/ADR-043-graph-access-direct-or-through-the-proxy.md)             | UI routes read the graph directly; the proxy serves the data planes                             | 2026-10-02 | Accepted          |
+| [044](ADRs/ADR-044-every-api-route-needs-a-session.md)                      | Every API route needs a session                                                                 | 2026-10-02 | Accepted          |
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.
