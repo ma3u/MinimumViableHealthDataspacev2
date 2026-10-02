@@ -123,6 +123,8 @@ az containerapp create \
   --ingress internal --target-port 11002 \
   --env-vars \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane" \
+    "EDC_TRANSFER_PROXY_TOKEN_SIGNER_PRIVATEKEY_ALIAS=dataplane-fhir-private" \
+    "EDC_TRANSFER_PROXY_TOKEN_VERIFIER_PUBLICKEY_ALIAS=dataplane-fhir-public" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
@@ -148,6 +150,8 @@ az containerapp create \
   --ingress internal --target-port 11012 \
   --env-vars \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane_omop" \
+    "EDC_TRANSFER_PROXY_TOKEN_SIGNER_PRIVATEKEY_ALIAS=dataplane-omop-private" \
+    "EDC_TRANSFER_PROXY_TOKEN_VERIFIER_PUBLICKEY_ALIAS=dataplane-omop-public" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=${PG_PASSWORD}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \

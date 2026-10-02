@@ -359,7 +359,10 @@ pg_app_consumers() {
     [ "$app" = "$KEYCLOAK_APP" ] && continue
     hits=$(az containerapp show --name "$app" --resource-group "$RG" \
       --query "properties.template.containers[].env[?contains(to_string(value),'${PG_APP}')].name" \
-      -o tsv 2>/dev/null | tr '\n' ' ')
+      -o tsv 2>/dev/null | tr -s '[:space:]' ' ' | sed 's/^ *//; s/ *$//')
+    # No match prints an empty line, and `tr '\n' ' '` alone turns that into
+    # a single space, which -n counts as a hit: every app then "still points
+    # at" mvhd-postgres and phase 4 refuses forever. Trimmed, empty is empty.
     [ -n "$hits" ] && out="${out}  ${app}: ${hits}"$'\n'
   done
   printf '%s' "$out"
