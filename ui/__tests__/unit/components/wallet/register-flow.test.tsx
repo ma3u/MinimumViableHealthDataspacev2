@@ -1,13 +1,20 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
-import { WalletSimulation } from "@/components/WalletSimulation";
+import { WalletFlow } from "@/components/wallet/PhoneFrame";
+import { REGISTER_STEPS } from "@/components/wallet/flows";
 
 afterEach(() => vi.useRealTimers());
 
-describe("WalletSimulation", () => {
+describe("WalletFlow with REGISTER_STEPS", () => {
   it("auto-cycles through trust → review → success → loop", () => {
     vi.useFakeTimers();
-    render(<WalletSimulation />);
+    render(
+      <WalletFlow
+        loop
+        ariaLabel="Simulated EUDI Wallet registration"
+        steps={REGISTER_STEPS}
+      />,
+    );
 
     // step 0 — trust the verifier
     expect(screen.getByText(/Do you trust EHDS/i)).toBeInTheDocument();
