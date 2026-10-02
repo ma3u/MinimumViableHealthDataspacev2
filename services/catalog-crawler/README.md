@@ -80,7 +80,10 @@ Each successful fetch publishes exactly one message:
 
 The enricher's `CrawlEnvelope` model in
 `services/catalog-enricher/src/models.py` must stay byte-compatible with
-the crawler's.
+the crawler's. The two services are separate images, so the model is
+duplicated on purpose rather than shared (#404);
+`services/catalog-enricher/tests/test_crawl_envelope_contract.py` loads
+this side's model and fails when the two diverge.
 
 ## Observability
 
