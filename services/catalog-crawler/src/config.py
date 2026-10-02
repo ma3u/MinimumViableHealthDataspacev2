@@ -1,6 +1,7 @@
 """Runtime configuration for catalog-crawler.
 
-All values read from environment; none are secret. NEO4J_URI uses the ACA
+All values read from environment. DSP_CATALOG_TOKEN is the one secret: it
+comes from Key Vault through the job's managed identity (ADR-036, ADR-044). NEO4J_URI uses the ACA
 short service name per ADR-018. Crawl interval defaults to 5 min per the
 ADR-020 decision.
 """
@@ -33,6 +34,11 @@ class Config:
     run_once: bool
     metrics_port: int
     log_level: str
+    # Bearer token for the hub's demo DSP route, which needs a session or this
+    # token since #404 (ADR-044). Sent only to the hosts in
+    # dsp_catalog_token_hosts, never to another participant's endpoint.
+    dsp_catalog_token: str | None = None
+    dsp_catalog_token_hosts: frozenset[str] = frozenset()
 
 
 def from_env() -> Config:
@@ -50,4 +56,12 @@ def from_env() -> Config:
         run_once=os.environ.get("RUN_ONCE", "false").lower() == "true",
         metrics_port=int(os.environ.get("METRICS_PORT", "9465")),
         log_level=os.environ.get("LOG_LEVEL", "INFO"),
+        dsp_catalog_token=os.environ.get("DSP_CATALOG_TOKEN") or None,
+        dsp_catalog_token_hosts=frozenset(
+            h.strip().lower()
+            for h in os.environ.get(
+                "DSP_CATALOG_TOKEN_HOSTS", "ehds.mabu.red"
+            ).split(",")
+            if h.strip()
+        ),
     )
