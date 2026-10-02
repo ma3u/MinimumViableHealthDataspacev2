@@ -1,6 +1,6 @@
 # ADR-018: 24×7 Operation on INF-STG-EU_EHDS + Postgres-on-ACA Workaround
 
-**Status:** Accepted
+**Status:** Accepted · section 1 (disable the scale-down) superseded by [ADR-042](ADR-042-off-hours-scaledown-current-state.md) (2026-10-02)
 **Date:** 2026-04-14
 **Supersedes:** [ADR-016](ADR-016-aca-off-hours-scaledown.md) — off-hours
 scale-down is no longer required and the cron schedule is disabled.

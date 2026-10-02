@@ -43,25 +43,34 @@ describe("server-cache", () => {
   });
 
   it("stale-while-revalidate: returns stale, refreshes in background after TTL", async () => {
-    const counter = { n: 0 };
-    const loader = vi.fn(async () => ++counter.n);
+    // Only Date is faked: time moves when the test says so. With real time
+    // and a 10 ms TTL, a loaded machine let the refreshed value go stale
+    // before the last read, which then started a third load (#404).
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      const counter = { n: 0 };
+      const loader = vi.fn(async () => ++counter.n);
 
-    // First call → cold, blocks until loader resolves with 1.
-    expect(await cached("k3", 10, loader)).toBe(1);
+      // First call → cold, blocks until loader resolves with 1.
+      expect(await cached("k3", 10, loader)).toBe(1);
 
-    // Fast-forward past TTL (10 ms) without polling time mocks; sleeping is
-    // simpler and the loader is synchronous-ish, so this is safe.
-    await new Promise((r) => setTimeout(r, 25));
+      // Past the TTL.
+      vi.setSystemTime(Date.now() + 25);
 
-    // Stale read returns 1 immediately; background refresh is in flight.
-    expect(await cached("k3", 10, loader)).toBe(1);
+      // Stale read returns 1 immediately; background refresh is in flight.
+      expect(await cached("k3", 10, loader)).toBe(1);
 
-    // Allow the background refresh to settle.
-    await new Promise((r) => setTimeout(r, 5));
+      // One real macrotask lets the refresh settle. Not vi.waitFor: with
+      // fake timers on, it advances them on every poll, which moves Date
+      // past the TTL again.
+      await new Promise((r) => setTimeout(r, 0));
 
-    // Subsequent caller sees the refreshed value.
-    expect(await cached("k3", 10, loader)).toBe(2);
-    expect(loader).toHaveBeenCalledTimes(2);
+      // Subsequent caller sees the refreshed value, and no third load ran.
+      expect(await cached("k3", 10, loader)).toBe(2);
+      expect(loader).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("multiple simultaneous cold callers all see the same eventual value", async () => {

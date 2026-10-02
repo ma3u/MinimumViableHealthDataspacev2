@@ -7,14 +7,13 @@ import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { BarChart2, ShieldCheck, AlertCircle, Clock } from "lucide-react";
+import { IS_STATIC } from "@/lib/static-export";
 
 /**
  * Health data requests, Regulation (EU) 2025/327 Art. 69. A data user asks a
  * question and gets, if the access body approves, an anonymised statistic
  * and nothing else. The access body decides here too. Issue #206, M5.
  */
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
 interface HealthDataRequest {
   requestId: string;

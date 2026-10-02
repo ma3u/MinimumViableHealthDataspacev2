@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { runQuery } from "@/lib/neo4j";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { ownPatientIdForSession } from "@/lib/overview/patient";
 import { EHR_SYNC_SOURCE, ehrSyncFromRow } from "@/lib/patient/ehr-sync";
 
@@ -17,13 +18,13 @@ export const dynamic = "force-dynamic";
  */
 export async function POST() {
   try {
+    const auth = await requireAuth(["PATIENT"]);
+    if (isAuthError(auth)) return auth;
+    // ownPatientIdForSession needs preferredUsername, which AuthSession does
+    // not carry, so read the full session as well (as /api/patient does).
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    const roles = (session as { roles?: string[] }).roles ?? [];
-    if (!roles.includes("PATIENT")) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
     const patientId = ownPatientIdForSession(session);
     if (!patientId) {

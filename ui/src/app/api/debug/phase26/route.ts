@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { NEO4J_PROXY_URL } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
-
-const PROXY_URL = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
 
 /**
  * Phase 26 diagnostic proxy — an operator's read-only summary of whether the
@@ -26,7 +25,7 @@ export async function GET() {
   if (isAuthError(auth)) return auth;
 
   try {
-    const resp = await fetch(`${PROXY_URL}/debug/phase26`, {
+    const resp = await fetch(`${NEO4J_PROXY_URL}/debug/phase26`, {
       cache: "no-store",
     });
     const data = await resp.json();

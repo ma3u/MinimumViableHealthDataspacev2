@@ -133,13 +133,15 @@ describe("GET /api/activity-report", () => {
     vi.mocked(requireAuth).mockClear();
   });
 
-  it("needs no session and returns the eleven items with the period", async () => {
+  it("asks for a session (ADR-044) and returns the eleven items with the period", async () => {
     graphAnswers();
     const res = await GET(req());
     const body = await res.json();
 
     expect(res.status).toBe(200);
-    expect(requireAuth).not.toHaveBeenCalled();
+    // Public until #404; every API route needs a session since (ADR-044).
+    // The 401 itself is pinned in every-route-needs-a-session.test.ts.
+    expect(requireAuth).toHaveBeenCalledWith();
     expect(Object.keys(body.items)).toEqual([
       "a",
       "b",

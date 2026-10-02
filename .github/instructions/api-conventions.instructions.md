@@ -32,9 +32,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> { ... }
 - Success: `NextResponse.json(data)`. Errors always take the shape
   `{ error: string }` — 401 unauthenticated, 403 wrong role, 404 not found,
   502 backend failure.
-- Auth: `getServerSession(authOptions)` from `next-auth/next`; roles from
-  `(session as { roles?: string[] }).roles ?? []`. Enforce role checks manually in
-  routes middleware does not cover — `/api/admin/*` requires `EDC_ADMIN`.
+- Auth: every route gates with `requireAuth()` from `@/lib/auth-guard`, never a
+  hand-rolled `getServerSession()` + `roles.includes(...)` check:
+
+  ```typescript
+  const auth = await requireAuth(["EDC_ADMIN"]); // no argument: any signed-in user
+  if (isAuthError(auth)) return auth; // 401 without a session, 403 without the role
+  const { roles, accessToken } = auth.session;
+  ```
+
+  Call `getServerSession(authOptions)` only _after_ the gate, and only for a field
+  `AuthSession` does not carry (e.g. `preferredUsername` to narrow a PATIENT to
+  their own record, as `/api/patient` does). `/api/admin/*` requires `EDC_ADMIN`.
+
+- Every API route needs a session (ADR-044, #404). The only exceptions make
+  signing in possible or keep the container alive: `/api/auth/*`,
+  `/api/keycloak-config`, `/api/health`; plus `/api/mock-dsp/*`, which the catalog
+  crawler calls as a machine (open question in #404). `every-route-needs-a-session.test.ts`
+  checks each handler; a new anonymous route needs a superseding ADR.
+- Route unit tests do not check the gate: `ui/__tests__/setup.ts` mocks the guard
+  open. A test that pins a 401/403 puts `vi.unmock("@/lib/auth-guard")` at the top
+  so the real guard runs against the mocked `getServerSession`.
 - Query Neo4j only through parameterised `runQuery()`. Never string-interpolate
   user input into Cypher.
 - **Every route needs a mock twin** in `ui/public/mock/`, matching the live

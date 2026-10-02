@@ -8,6 +8,10 @@
  * assembled view.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
+// Run the real requireAuth() against the mocked session, so the 401/403
+// cases below pin the gate (__tests__/setup.ts mocks the guard open).
+vi.unmock("@/lib/auth-guard");
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { getServerSession } from "next-auth/next";

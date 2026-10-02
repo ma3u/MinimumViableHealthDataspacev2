@@ -8,7 +8,6 @@ import { useSession, signIn } from "next-auth/react";
 import { derivePersonaId, DEMO_PERSONAS } from "@/lib/auth";
 import { useDemoPersona, setDemoPersona } from "@/lib/use-demo-persona";
 
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 import dynamic from "next/dynamic";
 import {
   Activity,
@@ -63,6 +62,7 @@ import {
   type ResearcherFilterPresetId,
   type PersonaId,
 } from "@/lib/graph-constants";
+import { IS_STATIC } from "@/lib/static-export";
 
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
   ssr: false,

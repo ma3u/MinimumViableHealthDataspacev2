@@ -1,6 +1,6 @@
 # ADR-030: Neo4j 5.26 → 2025.x calver line — migration readiness
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-02, #404)
 **Date:** 2026-07-16
 **Relates to:** [ADR-019](ADR-019-gds-apoc-azure-ai-foundry-graphrag.md), [ADR-029](ADR-029-dependency-version-pinning.md)
 **Tracks:** [Issue #97 — dependency refresh](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/97), Phase C spike

@@ -30,11 +30,25 @@ npm run test:coverage             # v8 coverage
 npx vitest run __tests__/unit/components/Navigation.test.tsx   # single file
 ```
 
-- Global setup is `ui/__tests__/setup.ts`, which initialises MSW. API calls are
-  intercepted by MSW handlers — **do not mock `fetch` directly**.
-- MSW is for unit tests only. Playwright hits the real running server.
+- Global setup is `ui/__tests__/setup.ts`: jest-dom plus the shared module mocks
+  (`next-auth`, `@/lib/auth-guard` open). There is no MSW; a test stubs `fetch` with
+  `vi.stubGlobal` or `vi.spyOn(globalThis, "fetch")` and restores it afterwards.
+- Playwright hits the real running server.
 - Do not mock Neo4j driver internals in integration-style tests; use the fixtures
   under `ui/public/mock/`.
+
+## API collection (Bruno, ADR-032)
+
+`bruno/MVHDv2/` has one folder per EHDS persona, plus journey, access-control and
+protocol folders. `./scripts/run-api-tests.sh Local|Static-mock|Azure-Dev [folder]`.
+
+- A request goes in the folder of the persona that sends it.
+- It asserts the status **and** at least one body property; `res.status: lt 500`
+  alone is what ADR-031 forbids.
+- A request whose subject cannot exist on a stack skips loudly with the reason.
+- No session cookie in a `.bru` file; the runner forges one per persona.
+  `scripts/check-bruno-coverage.py` (pre-commit and PR Gate) fails a new route with
+  no request, a request that cannot fail, or a credential in a `.bru` file.
 
 ## E2E tests (Playwright)
 
@@ -65,6 +79,13 @@ npx playwright test --project=chromium
 - CI runs `--project=chromium` only. In `pages.yml`, E2E has
   `continue-on-error: true`, so a failure does **not** block the Pages deploy —
   read the logs, don't trust a green badge alone.
+
+## iOS (clients/ios)
+
+`swift test` for units; `Scripts/run-ui-tests.sh` for XCUITest. Every UI test
+launches with `-MBDemoSeed` (two fictional in-memory reports) and `-MBShot <screen>`
+to open a screen directly. Assert on what a person sees (labels, values, frames),
+never on view-hierarchy shape. Pitfalls are in `docs/gotchas.md`.
 
 ## Quality gates
 

@@ -27,6 +27,7 @@ import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { FileText, ShieldCheck, AlertCircle, Clock } from "lucide-react";
+import { IS_STATIC } from "@/lib/static-export";
 
 /**
  * The data user's application for a data permit, Regulation (EU) 2025/327
@@ -36,8 +37,6 @@ import { FileText, ShieldCheck, AlertCircle, Clock } from "lucide-react";
  * user communicates once the work is done (Art. 61(4)). Issue #206, M1, M2
  * and M6.
  */
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
 interface Application extends ApplicationItems, ApplicationClock {
   applicationId: string;

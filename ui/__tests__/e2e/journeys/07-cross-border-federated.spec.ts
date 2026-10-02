@@ -17,6 +17,7 @@ import {
   apiGet,
   skipIfNeo4jDown,
 } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("G · Cross-Border & Federated Compliance", () => {
   /* ── J49: Full cross-border data exchange journey ────────── */
@@ -52,6 +53,8 @@ test.describe("G · Cross-Border & Federated Compliance", () => {
     await expectSigninRedirect(page);
 
     // Step 4: Graph is public — renders with canvas
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     await page.goto("/graph");
     const canvas = page.locator("canvas");
     await expect(canvas.first()).toBeVisible({ timeout: T });
