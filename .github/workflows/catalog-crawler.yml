@@ -16,6 +16,7 @@ on:
       - "scripts/azure/10-catalog-crawler.sh"
       # Sourced by the deploy script above; see scripts/check-workflow-paths.py.
       - "scripts/azure/env.sh"
+      - "scripts/azure/wire-dsp-catalog-token.sh"
       - ".github/workflows/catalog-crawler.yml"
 
 permissions:
@@ -119,6 +120,13 @@ jobs:
               --env-vars "${COMMON_ENV[@]}" \
               -o none
           fi
+
+      # #404 (ADR-044): the hub's demo DSP route needs a session or this
+      # token. Re-assert the Key Vault reference and the env on every deploy,
+      # so a job recreated above is never left without it. Wiring only; the
+      # token itself is created once by an operator with --create.
+      - name: Wire the DSP catalog token (Key Vault reference)
+        run: ./scripts/azure/wire-dsp-catalog-token.sh
 
       - name: Summary
         if: always()

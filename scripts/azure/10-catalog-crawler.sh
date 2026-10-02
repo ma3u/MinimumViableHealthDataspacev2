@@ -77,6 +77,10 @@ else
   ok "Job created"
 fi
 
+# #404 (ADR-044): the crawler authenticates to the hub's demo DSP route with a
+# token from Key Vault. --create makes the token once if the vault lacks it.
+CRAWLER_JOB="${CATALOG_CRAWLER_JOB}" "${SCRIPT_DIR}/wire-dsp-catalog-token.sh" --create
+
 cat <<EOF
 
 Crawler will run automatically every 5 minutes.

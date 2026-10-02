@@ -13,6 +13,8 @@ access see us, but no detached JWS yet.
 
 from __future__ import annotations
 
+from urllib.parse import urlparse
+
 import httpx
 
 # The QuerySpec shape DSP 2025-1 expects — empty means "return everything
@@ -30,11 +32,28 @@ def _catalog_endpoint(base_url: str) -> str:
     return base_url.rstrip("/") + "/catalog/request"
 
 
+def _auth_headers(
+    dsp_catalog_url: str, token: str | None, token_hosts: frozenset[str]
+) -> dict[str, str]:
+    """The bearer header, only for the hub's own hosts.
+
+    The token opens the hub's demo DSP route (ADR-044). Any other
+    participant's endpoint must never see it, so it is sent by host
+    allow-list and never by default.
+    """
+    host = (urlparse(dsp_catalog_url).hostname or "").lower()
+    if token and host in token_hosts:
+        return {"Authorization": f"Bearer {token}"}
+    return {}
+
+
 async def fetch_catalog(
     client: httpx.AsyncClient,
     dsp_catalog_url: str,
     crawler_did: str,
     timeout_s: float,
+    token: str | None = None,
+    token_hosts: frozenset[str] = frozenset(),
 ) -> dict:
     """Return the dcat:Catalog JSON-LD document.
 
@@ -48,6 +67,7 @@ async def fetch_catalog(
             "Accept": "application/json",
             "Content-Type": "application/json",
             "X-Crawler-Did": crawler_did,
+            **_auth_headers(dsp_catalog_url, token, token_hosts),
         },
         timeout=timeout_s,
     )

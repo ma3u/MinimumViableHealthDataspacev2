@@ -78,3 +78,75 @@ async def test_fetch_catalog_raises_on_non_object_body() -> None:
             await dsp_client.fetch_catalog(
                 client, "https://dsp.example", "did:web:crawler", 5.0
             )
+
+
+# ── Bearer token for the hub's demo DSP route (#404, ADR-044) ───────────
+
+HUB = frozenset({"ehds.mabu.red"})
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_sends_the_token_to_the_hub() -> None:
+    route = respx.post("https://ehds.mabu.red/api/mock-dsp/alpha-klinik/catalog/request").respond(
+        200, json={"ok": True}
+    )
+    async with httpx.AsyncClient() as client:
+        await dsp_client.fetch_catalog(
+            client,
+            "https://ehds.mabu.red/api/mock-dsp/alpha-klinik",
+            "did:web:crawler",
+            5.0,
+            token="t0ken",
+            token_hosts=HUB,
+        )
+    assert route.calls.last.request.headers["Authorization"] == "Bearer t0ken"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_never_sends_the_token_to_another_participant() -> None:
+    route = respx.post("https://dsp.other-hospital.example/catalog/request").respond(
+        200, json={"ok": True}
+    )
+    async with httpx.AsyncClient() as client:
+        await dsp_client.fetch_catalog(
+            client,
+            "https://dsp.other-hospital.example",
+            "did:web:crawler",
+            5.0,
+            token="t0ken",
+            token_hosts=HUB,
+        )
+    assert "Authorization" not in route.calls.last.request.headers
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_sends_no_header_without_a_token() -> None:
+    route = respx.post("https://ehds.mabu.red/api/mock-dsp/lmc/catalog/request").respond(
+        200, json={"ok": True}
+    )
+    async with httpx.AsyncClient() as client:
+        await dsp_client.fetch_catalog(
+            client,
+            "https://ehds.mabu.red/api/mock-dsp/lmc",
+            "did:web:crawler",
+            5.0,
+            token=None,
+            token_hosts=HUB,
+        )
+    assert "Authorization" not in route.calls.last.request.headers
+
+
+def test_config_reads_token_and_hosts(monkeypatch: pytest.MonkeyPatch) -> None:
+    from src import config
+
+    monkeypatch.setenv("DSP_CATALOG_TOKEN", "t0ken")
+    monkeypatch.setenv("DSP_CATALOG_TOKEN_HOSTS", "EHDS.mabu.red, mvhd-ui ")
+    cfg = config.from_env()
+    assert cfg.dsp_catalog_token == "t0ken"
+    assert cfg.dsp_catalog_token_hosts == frozenset({"ehds.mabu.red", "mvhd-ui"})
+
+    monkeypatch.setenv("DSP_CATALOG_TOKEN", "")
+    assert config.from_env().dsp_catalog_token is None
