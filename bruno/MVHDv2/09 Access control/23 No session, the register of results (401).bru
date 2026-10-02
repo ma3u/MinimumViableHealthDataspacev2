@@ -1,0 +1,26 @@
+meta {
+  name: 23 No session, the register of results (401)
+  type: http
+  seq: 23
+}
+
+get {
+  url: {{baseUrl}}/api/compliance/results
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+tests {
+  // #404, ADR-044: every API route needs a session. This one answered
+  // anybody until then.
+  test("the register of results needs a session", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

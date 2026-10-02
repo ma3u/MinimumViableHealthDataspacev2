@@ -25,11 +25,13 @@
  */
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { signInPage } from "../helpers/forged-session";
 
 /* ── Configuration ───────────────────────────────────────────────── */
 
-/** All public pages to test. Protected pages are excluded since CI
- *  has no Keycloak — they redirect to /auth/signin. */
+/** Pages to audit. Protected pages redirect to /auth/signin since CI has no
+ *  Keycloak; /graph is signed in with a forged session instead (SIGNED_IN),
+ *  because since #404 it needs one and it is the page most worth auditing. */
 const PUBLIC_PAGES: { path: string; label: string }[] = [
   { path: "/", label: "Home" },
   { path: "/graph", label: "Graph Explorer" },
@@ -44,6 +46,9 @@ const PUBLIC_PAGES: { path: string; label: string }[] = [
   { path: "/demo", label: "Demo Personas" },
   { path: "/auth/signin", label: "Sign In" },
 ];
+
+/** Pages that need a session since #404 (ADR-044). */
+const SIGNED_IN = new Set(["/graph"]);
 
 /** Axe-core WCAG tags to enforce. */
 const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
@@ -120,6 +125,7 @@ function formatViolations(
 test.describe("WCAG 2.2 AA — Dark Mode (structural)", () => {
   PUBLIC_PAGES.forEach(({ path, label }, i) => {
     test(`J${560 + i} ${label} — dark mode a11y`, async ({ page }) => {
+      if (SIGNED_IN.has(path)) await signInPage(page);
       await page.goto(path, { waitUntil: "domcontentloaded" });
 
       if (await isErrorPage(page)) {
@@ -149,6 +155,7 @@ test.describe("WCAG 2.2 AA — Dark Mode (structural)", () => {
 test.describe("WCAG 2.2 AA — Light Mode (structural)", () => {
   PUBLIC_PAGES.forEach(({ path, label }, i) => {
     test(`J${574 + i} ${label} — light mode a11y`, async ({ page }) => {
+      if (SIGNED_IN.has(path)) await signInPage(page);
       await page.goto(path, { waitUntil: "domcontentloaded" });
 
       if (await isErrorPage(page)) {
@@ -196,6 +203,7 @@ test("J598 Contrast audit — ratchet (max allowed across all pages)", async ({
 
   for (const { path, label } of PUBLIC_PAGES) {
     for (const mode of ["dark", "light"] as const) {
+      if (SIGNED_IN.has(path)) await signInPage(page);
       await page.goto(path, { waitUntil: "domcontentloaded" });
       if (await isErrorPage(page)) continue;
       await setTheme(page, mode);
@@ -246,6 +254,7 @@ test("J599 WCAG summary — all rules, all pages", async ({ page }) => {
 
   for (const { path, label } of PUBLIC_PAGES) {
     for (const mode of ["dark", "light"] as const) {
+      if (SIGNED_IN.has(path)) await signInPage(page);
       await page.goto(path, { waitUntil: "domcontentloaded" });
       if (await isErrorPage(page)) continue;
       await setTheme(page, mode);
