@@ -12,8 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+import { IS_STATIC } from "@/lib/static-export";
 
 interface PersonaJourney {
   role: string;

@@ -21,8 +21,7 @@ import {
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import Link from "next/link";
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+import { IS_STATIC } from "@/lib/static-export";
 
 /* ── Types ── */
 

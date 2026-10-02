@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { resolveOdrlScope, userToParticipantId } from "@/lib/odrl-engine";
 import { gateSecondaryUse } from "@/lib/permit-gate";
+import { NEO4J_PROXY_URL } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
-
-const PROXY_URL = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
 
 export async function POST(request: NextRequest) {
   const auth = await requireAuth();
@@ -37,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     // The proxy records the query as a TransferEvent; the gate's headers give
     // the record its permit, dataset and purpose.
-    const resp = await fetch(`${PROXY_URL}/nlq`, {
+    const resp = await fetch(`${NEO4J_PROXY_URL}/nlq`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -59,7 +58,7 @@ export async function GET() {
   if (isAuthError(auth)) return auth;
 
   try {
-    const resp = await fetch(`${PROXY_URL}/nlq/templates`);
+    const resp = await fetch(`${NEO4J_PROXY_URL}/nlq/templates`);
     const data = await resp.json();
     return NextResponse.json(data);
   } catch (err: unknown) {
