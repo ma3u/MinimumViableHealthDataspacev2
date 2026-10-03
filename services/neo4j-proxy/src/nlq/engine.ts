@@ -777,6 +777,74 @@ export function checkReIdentification(
 }
 
 /**
+ * Whether a query would show who a patient is (#475, first part).
+ *
+ * Every Cypher about to run for a caller who does not see patient identity
+ * passes through here: a template, a full-text query or one an LLM wrote. It
+ * looks for a variable bound to `:Patient` (or `:OMOPPerson`, which older
+ * transforms gave the patient's name) and refuses when the query reads that
+ * variable's name, birth or death date, address or record id, returns the
+ * whole node, or projects its properties. Researchers get aggregates and
+ * clinical values, never a person (Regulation (EU) 2025/327 Art. 66).
+ *
+ * A heuristic on the query text, deliberately on the side of refusing: a
+ * false refusal costs a researcher a rephrased question, a false pass names
+ * a patient.
+ */
+/** Who someone is: never read, not even in a WHERE (that is a lookup). */
+const NAMING_PROPS =
+  "name|given|family|address|city|postalCode|telecom|email|phone|ssn|patientId|resourceId";
+/** Dates that identify when returned, and are fine to compute an age from. */
+const DATING_PROPS = "birthDate|deathDate";
+
+/**
+ * The final RETURN of each part of a query (a UNION has several): what reaches
+ * the caller. A RETURN inside a CALL { } sub-query feeds the outer query and
+ * is not counted, so collecting patients to size a cohort is not refused.
+ */
+function finalReturns(cypher: string): string[] {
+  return cypher.split(/\bUNION(?:\s+ALL)?\b/i).map((part) => {
+    const segments = part.split(/\bRETURN\b/i);
+    return segments.length > 1 ? segments[segments.length - 1] : "";
+  });
+}
+
+export function revealsPatientIdentity(cypher: string): boolean {
+  const vars = new Set<string>();
+  for (const m of cypher.matchAll(
+    /\(\s*(\w+)\s*:\s*(?:Patient|OMOPPerson)\b/g,
+  )) {
+    vars.add(m[1]);
+  }
+  const returns = finalReturns(cypher);
+  for (const v of vars) {
+    // v.name, v.address, ... anywhere: a WHERE on a name is a lookup by name
+    if (new RegExp(`\\b${v}\\.(${NAMING_PROPS})\\b`, "i").test(cypher))
+      return true;
+    // properties(v), v {.*}, v{.name} anywhere
+    if (
+      new RegExp(`properties\\(\\s*${v}\\s*\\)|\\b${v}\\s*\\{`, "i").test(
+        cypher,
+      )
+    ) {
+      return true;
+    }
+    for (const ret of returns) {
+      // a birth or death date handed back as it is
+      if (new RegExp(`\\b${v}\\.(${DATING_PROPS})\\b`, "i").test(ret))
+        return true;
+      // the whole node: `RETURN p`, `collect(p)`; counting it returns a number
+      const bare = ret.replace(
+        new RegExp(`count\\s*\\(\\s*(?:DISTINCT\\s+)?${v}\\s*\\)`, "gi"),
+        "",
+      );
+      if (new RegExp(`(^|[\\s,(])${v}(?![\\w.])`).test(bare)) return true;
+    }
+  }
+  return false;
+}
+
+/**
  * Log a query audit event to Neo4j (best-effort, non-blocking).
  * Creates a QueryAuditEvent node for EHDS Art. 53 compliance.
  */

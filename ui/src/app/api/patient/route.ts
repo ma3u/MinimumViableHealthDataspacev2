@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import {
+  birthYear,
+  patientPseudonym,
+  seesPatientIdentity,
+} from "@/lib/patient-identity";
 import { runQuery } from "@/lib/neo4j";
 import { ownPatientIdForSession } from "@/lib/overview/patient";
 import { ehrSyncFromRow } from "@/lib/patient/ehr-sync";
@@ -214,8 +219,17 @@ export async function GET(req: Request) {
            RETURN patients, encounters, conditions, observations, medications, count(pr) AS procedures`,
         ),
       ]);
+      // A researcher, an access body or a trust centre sees the cohort under
+      // pseudonyms and birth years, never names and birth dates (#475).
+      const shown = seesPatientIdentity(roles)
+        ? patients
+        : patients.map((p) => ({
+            ...p,
+            name: patientPseudonym(p.id),
+            birthDate: birthYear(p.birthDate) ?? "",
+          }));
       return NextResponse.json({
-        patients,
+        patients: shown,
         stats: stats[0] ?? {},
         timeline: [],
         restricted: false,
