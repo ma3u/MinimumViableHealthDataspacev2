@@ -309,15 +309,15 @@ export default function Home() {
             {
               name: "Dataspace Protocol",
               abbr: "DSP",
-              desc: "IDSA Dataspace Protocol 2025-1. Governs catalogue federation, contract negotiation, and secure data transfer between dataspace participants.",
-              href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
+              desc: "Eclipse Dataspace Protocol 2025-1. Governs catalogue federation, contract negotiation, and secure data transfer between dataspace participants.",
+              href: "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
               color: "border-layer1/50 text-blue-800 dark:text-blue-300",
             },
             {
               name: "Decentralised Claims Protocol",
               abbr: "DCP",
               desc: "Verifiable credential issuance and presentation. Enables trust anchors, membership credentials, and data access permits without central authority.",
-              href: "https://docs.internationaldataspaces.org/ids-knowledgebase/decentralized-claims-protocol",
+              href: "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/",
               color: "border-purple-500/50 text-(--accent)",
             },
           ].map(({ name, abbr, desc, href, color }) => (
@@ -766,7 +766,7 @@ export default function Home() {
           </a>
           <span>·</span>
           <a
-            href="https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol"
+            href="https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-(--text-secondary) transition-colors"
@@ -775,7 +775,7 @@ export default function Home() {
           </a>
           <span>·</span>
           <a
-            href="https://docs.internationaldataspaces.org/ids-knowledgebase/decentralized-claims-protocol"
+            href="https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/"
             target="_blank"
             rel="noopener noreferrer"
             className="hover:text-(--text-secondary) transition-colors"
