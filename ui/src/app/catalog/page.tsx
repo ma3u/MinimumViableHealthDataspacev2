@@ -78,21 +78,21 @@ function providerStatus(publisher: string): {
   if (lower.includes("alphaklini") || lower.includes("limburg")) {
     return {
       label: "VERIFIED PROVIDER",
-      dotColor: "bg-[var(--role-user-text)]",
-      textColor: "text-[var(--role-user-text)]",
+      dotColor: "bg-(--role-user-text)",
+      textColor: "text-(--role-user-text)",
     };
   }
   if (lower.includes("medreg") || lower.includes("institut")) {
     return {
       label: "HDAB AUTHORITY",
-      dotColor: "bg-[var(--role-hdab-text)]",
-      textColor: "text-[var(--role-hdab-text)]",
+      dotColor: "bg-(--role-hdab-text)",
+      textColor: "text-(--role-hdab-text)",
     };
   }
   return {
     label: "PARTNER NETWORK",
-    dotColor: "bg-[var(--warning-text)]",
-    textColor: "text-[var(--warning-text)]",
+    dotColor: "bg-(--warning-text)",
+    textColor: "text-(--warning-text)",
   };
 }
 
@@ -202,7 +202,7 @@ export default function CatalogPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center gap-2 text-[var(--text-secondary)] p-10">
+        <div className="flex items-center gap-2 text-(--text-secondary) p-10">
           <Loader2 size={16} className="animate-spin" />
           Loading…
         </div>
@@ -306,25 +306,25 @@ function CatalogContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-7xl mx-auto px-6 pb-12 pt-10">
         {/* Page header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
-            <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest">
+            <p className="text-xs font-bold text-(--text-secondary) uppercase tracking-widest">
               HealthDCAT-AP · EHDS Art. 53
             </p>
-            <h1 className="text-4xl font-extrabold text-[var(--text-primary)] tracking-tight">
+            <h1 className="text-4xl font-extrabold text-(--text-primary) tracking-tight">
               Dataset Catalog
             </h1>
-            <p className="text-[var(--text-secondary)] text-base font-medium">
+            <p className="text-(--text-secondary) text-base font-medium">
               Explore curated FHIR R4 and OMOP datasets for cross-border health
               research.
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
             {!loading && (
-              <span className="text-sm font-bold text-[var(--accent)] px-4 py-2 bg-[var(--accent-surface)] rounded-full">
+              <span className="text-sm font-bold text-(--accent) px-4 py-2 bg-(--accent-surface) rounded-full">
                 {visible.length} of {datasets.length} datasets
               </span>
             )}
@@ -334,13 +334,13 @@ function CatalogContent() {
               aria-label="Search datasets"
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="px-3 py-2 bg-[var(--surface-card)] border border-[var(--border-ui)] rounded-xl text-sm outline-none focus:border-[var(--accent)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] w-52"
+              className="px-3 py-2 bg-(--surface-card) border border-(--border-ui) rounded-xl text-sm outline-hidden focus:border-(--accent) text-(--text-primary) placeholder:text-(--text-secondary) w-52"
             />
           </div>
         </div>
 
         {loading ? (
-          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+          <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
             Connecting to Neo4j…
           </div>
@@ -348,14 +348,14 @@ function CatalogContent() {
           <div className="grid grid-cols-12 gap-8">
             {/* ── Filter Sidebar ── */}
             <aside className="col-span-12 lg:col-span-3">
-              <div className="bg-[var(--surface)] rounded-xl p-6 sticky top-6">
-                <h3 className="text-xs font-black text-[var(--text-primary)] uppercase tracking-widest mb-6">
+              <div className="bg-(--surface) rounded-xl p-6 sticky top-6">
+                <h3 className="text-xs font-black text-(--text-primary) uppercase tracking-widest mb-6">
                   Refine Search
                 </h3>
 
                 {/* Theme filter */}
                 <div className="mb-6">
-                  <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-3">
+                  <p className="text-[10px] font-bold text-(--text-secondary) uppercase tracking-wider mb-3">
                     Theme
                   </p>
                   <div className="space-y-2">
@@ -368,9 +368,9 @@ function CatalogContent() {
                           type="checkbox"
                           checked={selectedThemes.includes(t)}
                           onChange={() => toggleTheme(t)}
-                          className="w-4 h-4 rounded accent-[var(--accent)]"
+                          className="w-4 h-4 rounded-sm accent-(--accent)"
                         />
-                        <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
+                        <span className="text-sm font-medium text-(--text-primary) group-hover:text-(--accent) transition-colors">
                           {t}
                         </span>
                       </label>
@@ -380,7 +380,7 @@ function CatalogContent() {
 
                 {/* DatasetType filter */}
                 <div className="mb-6">
-                  <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-3">
+                  <p className="text-[10px] font-bold text-(--text-secondary) uppercase tracking-wider mb-3">
                     Data Type
                   </p>
                   <div className="space-y-2">
@@ -393,9 +393,9 @@ function CatalogContent() {
                           type="checkbox"
                           checked={selectedTypes.includes(t)}
                           onChange={() => toggleType(t)}
-                          className="w-4 h-4 rounded accent-[var(--accent)]"
+                          className="w-4 h-4 rounded-sm accent-(--accent)"
                         />
-                        <span className="text-sm font-medium text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
+                        <span className="text-sm font-medium text-(--text-primary) group-hover:text-(--accent) transition-colors">
                           {dataTypeLabel(t)}
                         </span>
                       </label>
@@ -405,7 +405,7 @@ function CatalogContent() {
 
                 {/* Sample size range */}
                 <div className="mb-6">
-                  <p className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-3">
+                  <p className="text-[10px] font-bold text-(--text-secondary) uppercase tracking-wider mb-3">
                     Min. Sample Size
                   </p>
                   <input
@@ -416,9 +416,9 @@ function CatalogContent() {
                     value={minSamples}
                     onChange={(e) => setMinSamples(Number(e.target.value))}
                     aria-label="Minimum sample size"
-                    className="w-full h-1.5 bg-[var(--border)] rounded-lg appearance-none cursor-pointer accent-[var(--accent)]"
+                    className="w-full h-1.5 bg-(--border) rounded-lg appearance-none cursor-pointer accent-(--accent)"
                   />
-                  <div className="flex justify-between mt-2 text-[10px] font-bold text-[var(--text-secondary)]">
+                  <div className="flex justify-between mt-2 text-[10px] font-bold text-(--text-secondary)">
                     <span>0</span>
                     <span>
                       {minSamples > 0 ? minSamples.toLocaleString() : "Any"}
@@ -429,7 +429,7 @@ function CatalogContent() {
 
                 <button
                   onClick={resetFilters}
-                  className="w-full py-2.5 bg-[var(--surface-2)] text-[var(--accent)] font-bold text-xs rounded-lg uppercase tracking-wider hover:bg-[var(--accent)] hover:text-white transition-all flex items-center justify-center gap-2"
+                  className="w-full py-2.5 bg-(--surface-2) text-(--accent) font-bold text-xs rounded-lg uppercase tracking-wider hover:bg-(--accent) hover:text-white transition-all flex items-center justify-center gap-2"
                 >
                   <RotateCcw size={12} />
                   Reset All Filters
@@ -441,29 +441,29 @@ function CatalogContent() {
             <div className="col-span-12 lg:col-span-9">
               {/* Sort bar */}
               <div className="flex justify-between items-center mb-6">
-                <p className="text-sm font-semibold text-[var(--text-secondary)]">
+                <p className="text-sm font-semibold text-(--text-secondary)">
                   {visible.length} dataset{visible.length !== 1 ? "s" : ""}{" "}
                   found
                 </p>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-[var(--text-secondary)]">
+                  <span className="text-xs text-(--text-secondary)">
                     EHDS Art. 53 · HealthDCAT-AP 2.1
                   </span>
                 </div>
               </div>
 
               {visible.length === 0 ? (
-                <div className="surface-card p-8 text-center border border-[var(--border)]">
+                <div className="surface-card p-8 text-center border border-(--border)">
                   <Database
                     size={32}
-                    className="mx-auto mb-3 text-[var(--text-secondary)]"
+                    className="mx-auto mb-3 text-(--text-secondary)"
                   />
-                  <p className="text-[var(--text-secondary)]">
+                  <p className="text-(--text-secondary)">
                     No datasets match the current filters.
                   </p>
                   <button
                     onClick={resetFilters}
-                    className="mt-4 text-sm text-[var(--accent)] hover:underline"
+                    className="mt-4 text-sm text-(--accent) hover:underline"
                   >
                     Clear filters
                   </button>
@@ -476,11 +476,11 @@ function CatalogContent() {
                     return (
                       <div
                         key={d.id ?? `dataset-${idx}`}
-                        className="group bg-[var(--surface-card)] rounded-xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg"
+                        className="group bg-(--surface-card) rounded-xl overflow-hidden transition-all hover:-translate-y-1 hover:shadow-lg"
                       >
                         {/* Gradient header */}
                         <div
-                          className={`h-32 bg-gradient-to-r ${grad} p-6 relative overflow-hidden`}
+                          className={`h-32 bg-linear-to-r ${grad} p-6 relative overflow-hidden`}
                         >
                           {/* Dot pattern overlay */}
                           <div
@@ -517,7 +517,7 @@ function CatalogContent() {
                                 {status.label}
                               </span>
                             </div>
-                            <span className="text-[10px] font-mono text-[var(--text-secondary)]">
+                            <span className="text-[10px] font-mono text-(--text-secondary)">
                               {d.license ?? "—"}
                             </span>
                           </div>
@@ -525,42 +525,42 @@ function CatalogContent() {
                           {/* Stats row */}
                           <div className="grid grid-cols-3 gap-4 mb-5">
                             <div className="flex flex-col">
-                              <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+                              <span className="text-[9px] font-bold text-(--text-secondary) uppercase tracking-wider">
                                 Samples
                               </span>
-                              <span className="text-sm font-black text-[var(--text-primary)] tabular-nums">
+                              <span className="text-sm font-black text-(--text-primary) tabular-nums">
                                 {d.recordCount != null
                                   ? Number(d.recordCount).toLocaleString()
                                   : "—"}
                               </span>
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+                              <span className="text-[9px] font-bold text-(--text-secondary) uppercase tracking-wider">
                                 Data Type
                               </span>
-                              <span className="text-sm font-black text-[var(--text-primary)]">
+                              <span className="text-sm font-black text-(--text-primary)">
                                 {dataTypeLabel(d.datasetType)}
                               </span>
                             </div>
                             <div className="flex flex-col">
-                              <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
+                              <span className="text-[9px] font-bold text-(--text-secondary) uppercase tracking-wider">
                                 Provider
                               </span>
-                              <span className="text-sm font-black text-[var(--text-primary)]">
+                              <span className="text-sm font-black text-(--text-primary)">
                                 {shortPublisher(d.publisher)}
                               </span>
                             </div>
                           </div>
 
                           {/* Description */}
-                          <p className="text-sm text-[var(--text-secondary)] leading-relaxed mb-5 line-clamp-2">
+                          <p className="text-sm text-(--text-secondary) leading-relaxed mb-5 line-clamp-2">
                             {d.description}
                           </p>
 
                           {/* Legal basis tag */}
                           {d.legalBasis && (
                             <div className="mb-4">
-                              <span className="text-[10px] font-bold text-[var(--role-hdab-text)] bg-[var(--role-hdab-bg)] border border-[var(--role-hdab-border)] px-2 py-0.5 rounded-full">
+                              <span className="text-[10px] font-bold text-(--role-hdab-text) bg-(--role-hdab-bg) border border-(--role-hdab-border) px-2 py-0.5 rounded-full">
                                 {LEGAL_BASIS_LABELS[d.legalBasis] ??
                                   d.legalBasis}
                               </span>
@@ -573,13 +573,13 @@ function CatalogContent() {
                               href={`/negotiate?dataset=${encodeURIComponent(
                                 d.id,
                               )}`}
-                              className="flex-grow py-2.5 btn-gradient text-center text-sm font-bold rounded-xl active:scale-95 transition-all"
+                              className="grow py-2.5 btn-gradient text-center text-sm font-bold rounded-xl active:scale-95 transition-all"
                             >
                               Request Access
                             </Link>
                             <button
                               onClick={() => setDetailDataset(d)}
-                              className="w-11 h-11 flex items-center justify-center bg-[var(--surface-2)] text-[var(--text-secondary)] rounded-xl hover:bg-[var(--accent-surface)] hover:text-[var(--accent)] transition-colors"
+                              className="w-11 h-11 flex items-center justify-center bg-(--surface-2) text-(--text-secondary) rounded-xl hover:bg-(--accent-surface) hover:text-(--accent) transition-colors"
                               aria-label="View dataset details"
                               title="View HealthDCAT-AP metadata"
                             >
@@ -600,29 +600,29 @@ function CatalogContent() {
       {/* ── Detail / metadata modal ── */}
       {detailDataset && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs"
           onClick={() => setDetailDataset(null)}
         >
           <div
-            className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto mx-4"
+            className="bg-(--surface) border border-(--border) rounded-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto mx-4"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-(--border)">
               <div className="flex items-center gap-3">
-                <Database size={18} className="text-[var(--accent)]" />
+                <Database size={18} className="text-(--accent)" />
                 <div>
-                  <p className="font-bold text-sm text-[var(--text-primary)] line-clamp-1">
+                  <p className="font-bold text-sm text-(--text-primary) line-clamp-1">
                     {detailDataset.title}
                   </p>
-                  <p className="text-xs text-[var(--text-secondary)]">
+                  <p className="text-xs text-(--text-secondary)">
                     HealthDCAT-AP Metadata
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setDetailDataset(null)}
-                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                className="text-(--text-secondary) hover:text-(--text-primary)"
                 aria-label="Close"
               >
                 <X size={18} />
@@ -631,7 +631,7 @@ function CatalogContent() {
 
             <div className="p-6 space-y-4">
               {/* Key metadata */}
-              <div className="bg-[var(--surface-2)] rounded-xl px-4 py-3 space-y-2">
+              <div className="bg-(--surface-2) rounded-xl px-4 py-3 space-y-2">
                 {[
                   { label: "Dataset ID", value: detailDataset.id },
                   { label: "Publisher", value: detailDataset.publisher },
@@ -675,12 +675,12 @@ function CatalogContent() {
                   .map((r) => (
                     <div
                       key={r.label}
-                      className="flex gap-3 py-1.5 border-b border-[var(--border)] last:border-0"
+                      className="flex gap-3 py-1.5 border-b border-(--border) last:border-0"
                     >
-                      <span className="text-xs text-[var(--text-secondary)] w-32 shrink-0">
+                      <span className="text-xs text-(--text-secondary) w-32 shrink-0">
                         {r.label}
                       </span>
-                      <span className="text-xs text-[var(--text-primary)] break-all">
+                      <span className="text-xs text-(--text-primary) break-all">
                         {r.value}
                       </span>
                     </div>
@@ -696,7 +696,7 @@ function CatalogContent() {
                   {detailDataset.providers?.map((p) => (
                     <span
                       key={p}
-                      className="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border border-[var(--role-holder-border)]"
+                      className="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-(--role-holder-bg) text-(--role-holder-text) border border-(--role-holder-border)"
                     >
                       <ShieldCheck size={10} />
                       {p}
@@ -705,7 +705,7 @@ function CatalogContent() {
                   {detailDataset.consumers?.map((c) => (
                     <span
                       key={c}
-                      className="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]"
+                      className="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)"
                     >
                       <Users size={10} />
                       {c}
@@ -721,14 +721,14 @@ function CatalogContent() {
                     setDiagramDataset(detailDataset);
                     setDetailDataset(null);
                   }}
-                  className="inline-flex items-center gap-1.5 text-xs text-[var(--accent)] hover:underline font-medium"
+                  className="inline-flex items-center gap-1.5 text-xs text-(--accent) hover:underline font-medium"
                 >
                   <GitBranch size={12} />
                   Data Model Diagram
                 </button>
                 <button
                   onClick={() => downloadDcatAp(detailDataset)}
-                  className="inline-flex items-center gap-1.5 text-xs text-[var(--accent)] hover:underline font-medium"
+                  className="inline-flex items-center gap-1.5 text-xs text-(--accent) hover:underline font-medium"
                 >
                   <Download size={12} />
                   Download DCAT-AP
@@ -737,7 +737,7 @@ function CatalogContent() {
                   href={`/graph?highlight=${encodeURIComponent(
                     detailDataset.title || detailDataset.id,
                   )}`}
-                  className="inline-flex items-center gap-1.5 text-xs text-[var(--accent)] hover:underline font-medium"
+                  className="inline-flex items-center gap-1.5 text-xs text-(--accent) hover:underline font-medium"
                   onClick={() => setDetailDataset(null)}
                 >
                   <Network size={12} />
@@ -747,7 +747,7 @@ function CatalogContent() {
                   href="https://ehds.healthdataportal.eu/editor2/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] hover:underline font-medium"
+                  className="inline-flex items-center gap-1.5 text-xs text-(--text-secondary) hover:text-(--accent) hover:underline font-medium"
                 >
                   <Edit3 size={12} />
                   EHDS DCAT-AP Editor
@@ -756,7 +756,7 @@ function CatalogContent() {
                   href="https://healthdataeu.pages.code.europa.eu/healthdcat-ap/releases/release-6/index.html"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] hover:underline font-medium"
+                  className="inline-flex items-center gap-1.5 text-xs text-(--text-secondary) hover:text-(--accent) hover:underline font-medium"
                 >
                   <ExternalLink size={12} />
                   HealthDCAT-AP Spec
@@ -770,21 +770,21 @@ function CatalogContent() {
       {/* ── DCAT-AP data model diagram modal ── */}
       {diagramDataset && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs"
           onClick={() => setDiagramDataset(null)}
         >
           <div
-            className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto mx-4"
+            className="bg-(--surface) border border-(--border) rounded-2xl w-full max-w-3xl max-h-[85vh] overflow-y-auto mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)]">
-              <h2 className="font-semibold text-sm text-[var(--accent)]">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-(--border)">
+              <h2 className="font-semibold text-sm text-(--accent)">
                 <GitBranch size={14} className="inline mr-1.5" />
                 HealthDCAT-AP Data Model — {diagramDataset.title}
               </h2>
               <button
                 onClick={() => setDiagramDataset(null)}
-                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                className="text-(--text-secondary) hover:text-(--text-primary)"
                 aria-label="Close diagram"
               >
                 <X size={18} />

@@ -50,14 +50,14 @@ export function HomeRegisterCta() {
       <Link
         href="/journey"
         title="Passwordless & sovereign — no email or password. You approve on your phone and share only the exact claims requested. Tap to see the full patient journey."
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--accent)] hover:underline"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-(--accent) hover:underline"
       >
         <Info size={15} aria-hidden="true" />
         Why we need EUDI Wallet for the patient journey
       </Link>
       <Link
         href="/auth/eudi-qr?mode=login"
-        className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm font-medium text-(--text-secondary) hover:text-(--accent) transition-colors"
       >
         Already have it? Sign in <ArrowRight size={14} aria-hidden="true" />
       </Link>

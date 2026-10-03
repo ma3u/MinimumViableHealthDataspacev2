@@ -105,26 +105,26 @@ function stateIndex(state: DspState): number {
 
 function stateColor(state: DspState) {
   const s = state?.toUpperCase() || "";
-  if (s.includes("COMPLETED")) return "text-[var(--role-user-text)]";
+  if (s.includes("COMPLETED")) return "text-(--role-user-text)";
   if (s.includes("TERMINATED") || s.includes("ERROR"))
-    return "text-[var(--role-admin-text)]";
-  if (s.includes("STARTED")) return "text-[var(--role-holder-text)]";
-  if (s.includes("SUSPENDED")) return "text-[var(--role-hdab-text)]";
-  return "text-[var(--role-hdab-text)]";
+    return "text-(--role-admin-text)";
+  if (s.includes("STARTED")) return "text-(--role-holder-text)";
+  if (s.includes("SUSPENDED")) return "text-(--role-hdab-text)";
+  return "text-(--role-hdab-text)";
 }
 
 function stateBg(state: DspState) {
   const s = state?.toUpperCase() || "";
   if (s.includes("COMPLETED"))
-    return "bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]";
+    return "bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)";
   if (s.includes("TERMINATED") || s.includes("ERROR")) {
-    return "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border border-[var(--role-admin-border)]";
+    return "bg-(--role-admin-bg) text-(--role-admin-text) border border-(--role-admin-border)";
   }
   if (s.includes("STARTED"))
-    return "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border border-[var(--role-holder-border)]";
+    return "bg-(--role-holder-bg) text-(--role-holder-text) border border-(--role-holder-border)";
   if (s.includes("SUSPENDED"))
-    return "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border border-[var(--role-hdab-border)]";
-  return "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border border-[var(--role-hdab-border)]";
+    return "bg-(--role-hdab-bg) text-(--role-hdab-text) border border-(--role-hdab-border)";
+  return "bg-(--role-hdab-bg) text-(--role-hdab-text) border border-(--role-hdab-border)";
 }
 
 /* ── DSP Pipeline Stepper ── */
@@ -143,27 +143,20 @@ function DspPipeline({ state }: { state: DspState }) {
         const isFuture = current >= 0 && i > current;
 
         let icon;
-        let color = "text-[var(--text-secondary)]";
+        let color = "text-(--text-secondary)";
         if (isTerminated && i === 0) {
           // Show error on first uncompleted step
-          icon = (
-            <XCircle size={14} className="text-[var(--role-admin-text)]" />
-          );
-          color = "text-[var(--role-admin-text)]";
+          icon = <XCircle size={14} className="text-(--role-admin-text)" />;
+          color = "text-(--role-admin-text)";
         } else if (isPast) {
-          icon = (
-            <CheckCircle2 size={14} className="text-[var(--role-user-text)]" />
-          );
-          color = "text-[var(--role-user-text)]";
+          icon = <CheckCircle2 size={14} className="text-(--role-user-text)" />;
+          color = "text-(--role-user-text)";
         } else if (isActive) {
           if (step === "COMPLETED") {
             icon = (
-              <CheckCircle2
-                size={14}
-                className="text-[var(--role-user-text)]"
-              />
+              <CheckCircle2 size={14} className="text-(--role-user-text)" />
             );
-            color = "text-[var(--role-user-text)]";
+            color = "text-(--role-user-text)";
           } else {
             icon = (
               <div className="relative">
@@ -204,8 +197,8 @@ function DspPipeline({ state }: { state: DspState }) {
       })}
       {isTerminated && (
         <div className="flex flex-col items-center gap-0.5 ml-1">
-          <XCircle size={14} className="text-[var(--role-admin-text)]" />
-          <span className="text-[10px] text-[var(--role-admin-text)]">
+          <XCircle size={14} className="text-(--role-admin-text)" />
+          <span className="text-[10px] text-(--role-admin-text)">
             TERMINATED
           </span>
         </div>
@@ -246,31 +239,31 @@ interface DataPayload {
 /* ── FHIR Resource colors ── */
 const FHIR_RESOURCE_COLORS: Record<string, string> = {
   Patient:
-    "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border-[var(--role-holder-border)]",
+    "bg-(--role-holder-bg) text-(--role-holder-text) border-(--role-holder-border)",
   Observation:
-    "bg-[var(--role-trust-bg)] text-[var(--role-trust-text)] border-[var(--role-trust-border)]",
+    "bg-(--role-trust-bg) text-(--role-trust-text) border-(--role-trust-border)",
   Condition:
-    "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]",
+    "bg-(--role-hdab-bg) text-(--role-hdab-text) border-(--role-hdab-border)",
   Encounter:
-    "bg-[var(--role-user-bg)] text-[var(--role-user-text)] border-[var(--role-user-border)]",
+    "bg-(--role-user-bg) text-(--role-user-text) border-(--role-user-border)",
   MedicationRequest:
-    "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border-[var(--role-admin-border)]",
+    "bg-(--role-admin-bg) text-(--role-admin-text) border-(--role-admin-border)",
   DiagnosticReport:
-    "bg-[var(--role-trust-bg)] text-[var(--role-trust-text)] border-[var(--role-trust-border)]",
+    "bg-(--role-trust-bg) text-(--role-trust-text) border-(--role-trust-border)",
   Immunization:
-    "bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border-[var(--role-patient-border)]",
+    "bg-(--role-patient-bg) text-(--role-patient-text) border-(--role-patient-border)",
   AllergyIntolerance:
-    "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border-[var(--role-admin-border)]",
+    "bg-(--role-admin-bg) text-(--role-admin-text) border-(--role-admin-border)",
   Procedure:
-    "bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border-[var(--role-patient-border)]",
+    "bg-(--role-patient-bg) text-(--role-patient-text) border-(--role-patient-border)",
   CarePlan:
-    "bg-[var(--role-user-bg)] text-[var(--role-user-text)] border-[var(--role-user-border)]",
+    "bg-(--role-user-bg) text-(--role-user-text) border-(--role-user-border)",
 };
 
 function fhirColor(type: string): string {
   return (
     FHIR_RESOURCE_COLORS[type] ||
-    "bg-[var(--surface-2)] text-[var(--text-primary)] border-gray-600"
+    "bg-(--surface-2) text-(--text-primary) border-gray-600"
   );
 }
 
@@ -280,36 +273,34 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
   const [collapsed, setCollapsed] = useState(depth > 1);
 
   if (data === null || data === undefined) {
-    return <span className="text-[var(--text-secondary)]">null</span>;
+    return <span className="text-(--text-secondary)">null</span>;
   }
   if (typeof data === "boolean") {
-    return <span className="text-[var(--role-hdab-text)]">{String(data)}</span>;
+    return <span className="text-(--role-hdab-text)">{String(data)}</span>;
   }
   if (typeof data === "number") {
-    return <span className="text-[var(--role-holder-text)]">{data}</span>;
+    return <span className="text-(--role-holder-text)">{data}</span>;
   }
   if (typeof data === "string") {
-    return (
-      <span className="text-[var(--role-user-text)]">&quot;{data}&quot;</span>
-    );
+    return <span className="text-(--role-user-text)">&quot;{data}&quot;</span>;
   }
 
   if (Array.isArray(data)) {
     if (data.length === 0)
-      return <span className="text-[var(--text-secondary)]">[]</span>;
+      return <span className="text-(--text-secondary)">[]</span>;
     return (
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center"
+          className="text-(--text-secondary) hover:text-(--text-primary) inline-flex items-center"
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-          <span className="text-[var(--text-secondary)] text-xs ml-0.5">
+          <span className="text-(--text-secondary) text-xs ml-0.5">
             [{data.length}]
           </span>
         </button>
         {!collapsed && (
-          <div className="ml-4 border-l border-[var(--border)] pl-2">
+          <div className="ml-4 border-l border-(--border) pl-2">
             {data.map((item, i) => (
               <div key={i}>
                 <span className="text-gray-600 text-xs mr-1">{i}:</span>
@@ -325,27 +316,27 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
   if (typeof data === "object") {
     const entries = Object.entries(data as Record<string, unknown>);
     if (entries.length === 0) {
-      return <span className="text-[var(--text-secondary)]">{"{}"}</span>;
+      return <span className="text-(--text-secondary)">{"{}"}</span>;
     }
     return (
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center"
+          className="text-(--text-secondary) hover:text-(--text-primary) inline-flex items-center"
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-          <span className="text-[var(--text-secondary)] text-xs ml-0.5">
+          <span className="text-(--text-secondary) text-xs ml-0.5">
             {"{"}
             {entries.length}
             {"}"}
           </span>
         </button>
         {!collapsed && (
-          <div className="ml-4 border-l border-[var(--border)] pl-2">
+          <div className="ml-4 border-l border-(--border) pl-2">
             {entries.map(([key, val]) => (
               <div key={key}>
-                <span className="text-[var(--accent)]">{key}</span>
-                <span className="text-[var(--text-secondary)]">: </span>
+                <span className="text-(--accent)">{key}</span>
+                <span className="text-(--text-secondary)">: </span>
                 <JsonNode data={val} depth={depth + 1} />
               </div>
             ))}
@@ -400,15 +391,15 @@ function FhirResourceCard({ entry }: { entry: FhirBundleEntry }) {
   }
 
   return (
-    <div className="border border-[var(--border)] rounded-lg overflow-hidden">
+    <div className="border border-(--border) rounded-lg overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-[var(--surface-2)]/50 transition-colors"
+        className="w-full flex items-center gap-2 px-3 py-2 text-left hover:bg-(--surface-2)/50 transition-colors"
       >
         {expanded ? (
-          <ChevronDown size={12} className="text-[var(--text-secondary)]" />
+          <ChevronDown size={12} className="text-(--text-secondary)" />
         ) : (
-          <ChevronRight size={12} className="text-[var(--text-secondary)]" />
+          <ChevronRight size={12} className="text-(--text-secondary)" />
         )}
         <span
           className={`text-[10px] px-1.5 py-0.5 rounded border ${fhirColor(
@@ -417,13 +408,13 @@ function FhirResourceCard({ entry }: { entry: FhirBundleEntry }) {
         >
           {type}
         </span>
-        <span className="text-xs text-[var(--text-primary)] truncate flex-1">
+        <span className="text-xs text-(--text-primary) truncate flex-1">
           {summary}
         </span>
         <span className="text-[10px] text-gray-600">{r.id}</span>
       </button>
       {expanded && (
-        <div className="px-3 pb-3 pt-1 bg-[var(--surface)]/50 font-mono text-xs overflow-x-auto max-h-64 overflow-y-auto">
+        <div className="px-3 pb-3 pt-1 bg-(--surface)/50 font-mono text-xs overflow-x-auto max-h-64 overflow-y-auto">
           <JsonNode data={r} depth={0} />
         </div>
       )}
@@ -468,16 +459,16 @@ function FhirViewerPanel({
   }, [bundle, payload]);
 
   return (
-    <div className="border border-layer2/50 rounded-xl overflow-hidden bg-[var(--surface)]/80 mt-3">
+    <div className="border border-layer2/50 rounded-xl overflow-hidden bg-(--surface)/80 mt-3">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-layer2/10 border-b border-layer2/30">
         <div className="flex items-center gap-2">
           <FileJson2 size={16} className="text-teal-800 dark:text-teal-300" />
-          <span className="text-sm font-medium text-[var(--text-primary)]">
+          <span className="text-sm font-medium text-(--text-primary)">
             FHIR Data — {aId ? assetLabel(aId as string) : "Bundle"}
           </span>
           {payload?.provider && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+            <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
               from {payload.provider}
             </span>
           )}
@@ -487,7 +478,7 @@ function FhirViewerPanel({
             href={`/graph?highlight=${encodeURIComponent(
               aId ? assetLabel(aId as string) : "FHIR",
             )}`}
-            className="flex items-center gap-1 text-[11px] text-[var(--accent)] hover:underline transition-colors"
+            className="flex items-center gap-1 text-[11px] text-(--accent) hover:underline transition-colors"
           >
             View in Graph <Network size={10} />
           </a>
@@ -501,7 +492,7 @@ function FhirViewerPanel({
           </a>
           <button
             onClick={onClose}
-            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            className="text-(--text-secondary) hover:text-(--text-primary)"
           >
             <X size={16} />
           </button>
@@ -509,30 +500,30 @@ function FhirViewerPanel({
       </div>
 
       {/* Summary stats */}
-      <div className="px-4 py-3 border-b border-[var(--border)] grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="px-4 py-3 border-b border-(--border) grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
-          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
+          <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
             Total Resources
           </div>
-          <div className="text-lg font-semibold text-[var(--text-primary)]">
+          <div className="text-lg font-semibold text-(--text-primary)">
             {bundle?.entry?.length ?? payload?.total ?? "—"}
           </div>
         </div>
         <div>
-          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
+          <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
             Resource Types
           </div>
-          <div className="text-lg font-semibold text-[var(--text-primary)]">
+          <div className="text-lg font-semibold text-(--text-primary)">
             {Object.keys(resourceCounts).length ||
               payload?.containedResourceTypes?.length ||
               "—"}
           </div>
         </div>
         <div>
-          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
+          <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
             Transferred
           </div>
-          <div className="text-sm text-[var(--text-primary)]">
+          <div className="text-sm text-(--text-primary)">
             {payload?.transferredAt
               ? new Date(payload.transferredAt).toLocaleString(undefined, {
                   dateStyle: "short",
@@ -542,10 +533,10 @@ function FhirViewerPanel({
           </div>
         </div>
         <div>
-          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
+          <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
             Size
           </div>
-          <div className="text-sm text-[var(--text-primary)]">
+          <div className="text-sm text-(--text-primary)">
             {payload?.sizeBytes
               ? `${(payload.sizeBytes / 1024).toFixed(0)} KB`
               : "—"}
@@ -556,7 +547,7 @@ function FhirViewerPanel({
       {/* Resource type pills */}
       {(Object.keys(resourceCounts).length > 0 ||
         (payload?.containedResourceTypes?.length ?? 0) > 0) && (
-        <div className="px-4 py-2 border-b border-[var(--border)] flex flex-wrap gap-1.5">
+        <div className="px-4 py-2 border-b border-(--border) flex flex-wrap gap-1.5">
           {Object.keys(resourceCounts).length > 0
             ? Object.entries(resourceCounts).map(([type, count]) => (
                 <span
@@ -582,14 +573,14 @@ function FhirViewerPanel({
       )}
 
       {/* View mode tabs & actions */}
-      <div className="px-4 py-2 border-b border-[var(--border)] flex items-center justify-between">
+      <div className="px-4 py-2 border-b border-(--border) flex items-center justify-between">
         <div className="flex gap-1">
           <button
             onClick={() => setViewMode("resources")}
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "resources"
                 ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                : "text-(--text-secondary) hover:text-(--text-primary)"
             }`}
           >
             Resources
@@ -599,7 +590,7 @@ function FhirViewerPanel({
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "json"
                 ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                : "text-(--text-secondary) hover:text-(--text-primary)"
             }`}
           >
             Raw JSON
@@ -607,7 +598,7 @@ function FhirViewerPanel({
         </div>
         <button
           onClick={copyJson}
-          className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          className="flex items-center gap-1 text-[11px] text-(--text-secondary) hover:text-(--text-primary)"
         >
           <Copy size={10} />
           {copied ? "Copied!" : "Copy"}
@@ -623,7 +614,7 @@ function FhirViewerPanel({
             ))}
           </div>
         ) : viewMode === "resources" && !bundle?.entry ? (
-          <div className="p-6 text-center text-sm text-[var(--text-secondary)]">
+          <div className="p-6 text-center text-sm text-(--text-secondary)">
             <FileJson2 size={24} className="mx-auto mb-2 text-gray-600" />
             <p>Full FHIR Bundle data not available for this transfer.</p>
             <p className="text-xs mt-1">
@@ -632,7 +623,7 @@ function FhirViewerPanel({
             </p>
           </div>
         ) : (
-          <pre className="p-4 font-mono text-xs text-[var(--text-primary)] overflow-x-auto">
+          <pre className="p-4 font-mono text-xs text-(--text-primary) overflow-x-auto">
             {JSON.stringify(bundle || payload, null, 2)}
           </pre>
         )}
@@ -647,7 +638,7 @@ export default function DataTransferPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center gap-2 text-[var(--text-secondary)] p-10">
+        <div className="flex items-center gap-2 text-(--text-secondary) p-10">
           <Loader2 size={16} className="animate-spin" />
           Loading…
         </div>
@@ -922,7 +913,7 @@ function DataTransferContent() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
           title="Data Transfers"
@@ -940,14 +931,14 @@ function DataTransferContent() {
 
         {/* Participant selector */}
         <div className="mb-6">
-          <label className="text-xs text-[var(--text-secondary)] mb-1 block">
+          <label className="text-xs text-(--text-secondary) mb-1 block">
             Requesting as (your participant)
           </label>
           <select
             aria-label="Requesting as (your participant)"
             value={selectedCtx}
             onChange={(e) => setSelectedCtx(e.target.value)}
-            className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
+            className="w-full max-w-md px-3 py-2 bg-(--surface-2) border border-gray-600 rounded-sm text-sm"
           >
             {participants.map((p) => (
               <option key={p["@id"]} value={p["@id"]}>
@@ -959,24 +950,24 @@ function DataTransferContent() {
         </div>
 
         {/* ── Initiate Transfer from Agreement ── */}
-        <div className="border border-[var(--border)] rounded-xl p-5 mb-8">
+        <div className="border border-(--border) rounded-xl p-5 mb-8">
           <div className="flex items-center gap-2 mb-1">
             <Play size={16} className="text-teal-800 dark:text-teal-300" />
             <h2 className="font-semibold text-sm">
               Start Transfer from Agreement
             </h2>
           </div>
-          <p className="text-xs text-[var(--text-secondary)] mb-4">
+          <p className="text-xs text-(--text-secondary) mb-4">
             Select a finalized contract agreement to pull data via{" "}
-            <code className="text-[var(--text-secondary)]">HttpData-PULL</code>.
+            <code className="text-(--text-secondary)">HttpData-PULL</code>.
           </p>
 
           {result && (
             <div
               className={`mb-4 p-3 rounded text-sm whitespace-pre-line ${
                 result.startsWith("Error")
-                  ? "bg-[var(--role-admin-bg)] border border-[var(--role-admin-border)] text-[var(--role-admin-text)]"
-                  : "bg-[var(--role-user-bg)] border border-[var(--role-user-border)] text-[var(--role-user-text)]"
+                  ? "bg-(--role-admin-bg) border border-(--role-admin-border) text-(--role-admin-text)"
+                  : "bg-(--role-user-bg) border border-(--role-user-border) text-(--role-user-text)"
               }`}
             >
               {result}
@@ -984,7 +975,7 @@ function DataTransferContent() {
           )}
 
           {agreements.length === 0 && !loading && (
-            <p className="text-xs text-[var(--text-secondary)]">
+            <p className="text-xs text-(--text-secondary)">
               No finalized agreements found. Complete a{" "}
               <a
                 href="/negotiate"
@@ -999,7 +990,7 @@ function DataTransferContent() {
           {agreements.length > 0 && (
             <form onSubmit={handleInitiate} className="space-y-3">
               {/* Select All */}
-              <label className="flex items-center gap-2 px-3 py-2 text-xs text-[var(--text-secondary)] cursor-pointer hover:text-[var(--text-primary)]">
+              <label className="flex items-center gap-2 px-3 py-2 text-xs text-(--text-secondary) cursor-pointer hover:text-(--text-primary)">
                 <input
                   type="checkbox"
                   checked={selectedAgreements.size === agreements.length}
@@ -1025,7 +1016,7 @@ function DataTransferContent() {
                       className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                         selectedAgreements.has(agrId)
                           ? "border-layer2 bg-layer2/10"
-                          : "border-[var(--border)] hover:border-gray-500 bg-[var(--surface-2)]/50"
+                          : "border-(--border) hover:border-gray-500 bg-(--surface-2)/50"
                       }`}
                     >
                       <input
@@ -1035,10 +1026,10 @@ function DataTransferContent() {
                         className="accent-layer2"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[var(--text-primary)]">
+                        <p className="text-sm font-medium text-(--text-primary)">
                           {aId ? assetLabel(aId as string) : agrId.slice(0, 12)}
                         </p>
-                        <p className="text-xs text-[var(--text-secondary)]">
+                        <p className="text-xs text-(--text-secondary)">
                           Provider: {cp ? didToName(cp as string) : "—"}
                           {hasTransfer && (
                             <span className="ml-2 text-yellow-800 dark:text-yellow-400">
@@ -1047,7 +1038,7 @@ function DataTransferContent() {
                           )}
                         </p>
                       </div>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)">
                         AGREED
                       </span>
                     </label>
@@ -1078,7 +1069,7 @@ function DataTransferContent() {
               <button
                 type="submit"
                 disabled={initiating || selectedAgreements.size === 0}
-                className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white dark:text-gray-900 rounded text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-(--accent) text-white dark:text-gray-900 rounded-sm text-sm font-medium hover:bg-(--accent-hover) disabled:opacity-50"
               >
                 {initiating ? (
                   <Loader2 size={14} className="animate-spin" />
@@ -1097,14 +1088,14 @@ function DataTransferContent() {
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold text-sm">
             Transfer Processes{" "}
-            <span className="font-normal text-[var(--text-secondary)]">
+            <span className="font-normal text-(--text-secondary)">
               (DSP Signalling Protocol)
             </span>
           </h2>
           <button
             onClick={refreshTransfers}
             disabled={refreshing}
-            className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-50"
+            className="flex items-center gap-1 text-xs text-(--text-secondary) hover:text-(--text-primary) disabled:opacity-50"
           >
             <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
             Refresh
@@ -1132,7 +1123,7 @@ function DataTransferContent() {
                   className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
                     statusFilter === s
                       ? "bg-layer2/20 text-teal-800 dark:text-teal-300 border border-layer2/40"
-                      : "bg-[var(--surface-2)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-gray-500"
+                      : "bg-(--surface-2) text-(--text-secondary) border border-(--border) hover:border-gray-500"
                   }`}
                 >
                   {s} ({count})
@@ -1143,12 +1134,12 @@ function DataTransferContent() {
         )}
 
         {loading ? (
-          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+          <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
             Loading transfers…
           </div>
         ) : filteredTransfers.length === 0 ? (
-          <p className="text-[var(--text-secondary)] text-sm">
+          <p className="text-(--text-secondary) text-sm">
             {transfers.length === 0
               ? "No transfer processes yet. Start one from an agreed contract above."
               : `No transfers matching "${statusFilter}".`}
@@ -1175,20 +1166,20 @@ function DataTransferContent() {
                   key={t["@id"]}
                   className={`p-4 border rounded-xl space-y-3 transition-colors ${
                     isViewing
-                      ? "border-layer2/50 bg-[var(--surface-2)]/30"
-                      : "border-[var(--border)]"
+                      ? "border-layer2/50 bg-(--surface-2)/30"
+                      : "border-(--border)"
                   }`}
                 >
                   {/* Header row */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <ArrowRightLeft size={14} className={stateColor(state)} />
-                      <span className="text-sm font-medium text-[var(--text-primary)]">
+                      <span className="text-sm font-medium text-(--text-primary)">
                         {aId
                           ? assetLabel(aId as string)
                           : t["@id"].slice(0, 12)}
                       </span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                         {transferType}
                       </span>
                       {/* A demo or sample transfer moved no data and has no
@@ -1208,7 +1199,7 @@ function DataTransferContent() {
                         className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
                           isViewing
                             ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
-                            : "bg-[var(--role-user-bg)] text-[var(--role-user-text)] hover:opacity-80"
+                            : "bg-(--role-user-bg) text-(--role-user-text) hover:opacity-80"
                         }`}
                       >
                         <FileJson2 size={12} />
@@ -1228,7 +1219,7 @@ function DataTransferContent() {
                   <DspPipeline state={state} />
 
                   {/* Metadata row */}
-                  <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)]">
+                  <div className="flex items-center gap-4 text-[11px] text-(--text-secondary)">
                     {timestamp > 0 && (
                       <span>
                         Updated:{" "}
@@ -1250,7 +1241,7 @@ function DataTransferContent() {
                   {/* FHIR Viewer panel (expanded) */}
                   {isViewing &&
                     (loadingFhir ? (
-                      <div className="flex items-center gap-2 text-[var(--text-secondary)] py-4 justify-center">
+                      <div className="flex items-center gap-2 text-(--text-secondary) py-4 justify-center">
                         <Loader2 size={14} className="animate-spin" />
                         Loading FHIR data…
                       </div>

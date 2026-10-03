@@ -312,13 +312,13 @@ export default function SettingsPage() {
   // Patients do not have DCP business credentials — redirect away
   if (isPatient && !isAdmin) {
     return (
-      <div className="min-h-screen bg-[var(--bg)]">
+      <div className="min-h-screen bg-(--bg)">
         <div className="max-w-3xl mx-auto px-6 py-10 text-center">
           <Settings2
             size={40}
-            className="text-[var(--text-secondary)] mx-auto mb-4"
+            className="text-(--text-secondary) mx-auto mb-4"
           />
-          <p className="text-[var(--text-secondary)] mb-2">
+          <p className="text-(--text-secondary) mb-2">
             Patient accounts use personal health credentials (eIDAS 2.0 /
             OIDC4VP), not DCP business profiles.
           </p>
@@ -335,9 +335,9 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[var(--bg)]">
+      <div className="min-h-screen bg-(--bg)">
         <div className="max-w-3xl mx-auto px-6 py-10">
-          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+          <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
             Loading settings…
           </div>
@@ -347,7 +347,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-3xl mx-auto px-6 py-10">
         <PageIntro
           title={isAdmin ? "Dataspace Settings" : "Participant Settings"}
@@ -368,9 +368,9 @@ export default function SettingsPage() {
           <div className="text-center py-12">
             <Settings2
               size={40}
-              className="text-[var(--text-secondary)] mx-auto mb-4"
+              className="text-(--text-secondary) mx-auto mb-4"
             />
-            <p className="text-[var(--text-secondary)] mb-2">
+            <p className="text-(--text-secondary) mb-2">
               No participant profile found
             </p>
             <a
@@ -384,14 +384,14 @@ export default function SettingsPage() {
           <>
             {/* Tenant selector */}
             <div className="mb-6">
-              <label className="block text-sm text-[var(--text-secondary)] mb-1">
+              <label className="block text-sm text-(--text-secondary) mb-1">
                 Active Profile
               </label>
               <select
                 aria-label="Active Profile"
                 value={selected?.id || ""}
                 onChange={(e) => handleSelect(e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm"
+                className="w-full px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm"
               >
                 {tenants.map((t) => (
                   <option key={t.id} value={t.id}>
@@ -402,7 +402,7 @@ export default function SettingsPage() {
             </div>
 
             {selected && (
-              <div className="border border-[var(--border)] rounded-xl divide-y divide-gray-700">
+              <div className="border border-(--border) rounded-xl divide-y divide-gray-700">
                 {/* Identity (read-only) */}
                 <div className="p-6">
                   <h2 className="font-semibold mb-4 flex items-center gap-2">
@@ -414,20 +414,20 @@ export default function SettingsPage() {
                   </h2>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="text-xs text-[var(--text-secondary)]">
+                      <label className="text-xs text-(--text-secondary)">
                         EHDS Role
                       </label>
-                      <p className="text-sm font-medium text-[var(--text-primary)] mt-0.5">
+                      <p className="text-sm font-medium text-(--text-primary) mt-0.5">
                         {selected.properties.ehdsParticipantType ||
                           selected.properties.role ||
                           "—"}
                       </p>
                     </div>
                     <div>
-                      <label className="text-xs text-[var(--text-secondary)]">
+                      <label className="text-xs text-(--text-secondary)">
                         Tenant ID
                       </label>
-                      <p className="font-mono text-xs text-[var(--text-secondary)] break-all mt-0.5">
+                      <p className="font-mono text-xs text-(--text-secondary) break-all mt-0.5">
                         {selected.id}
                       </p>
                     </div>
@@ -518,7 +518,7 @@ export default function SettingsPage() {
                       }[]
                     ).map(({ key, label, icon: Icon, placeholder, type }) => (
                       <div key={key}>
-                        <label className="text-xs text-[var(--text-secondary)] flex items-center gap-1 mb-1">
+                        <label className="text-xs text-(--text-secondary) flex items-center gap-1 mb-1">
                           <Icon size={11} />
                           {label}
                         </label>
@@ -530,7 +530,7 @@ export default function SettingsPage() {
                             setForm((f) => ({ ...f, [key]: e.target.value }))
                           }
                           placeholder={placeholder}
-                          className="w-full px-3 py-1.5 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:outline-none focus:border-layer2"
+                          className="w-full px-3 py-1.5 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm text-(--text-primary) placeholder-(--text-secondary) focus:outline-hidden focus:border-layer2"
                         />
                       </div>
                     ))}
@@ -563,7 +563,7 @@ export default function SettingsPage() {
                                 ? "bg-red-100 dark:bg-red-950/30 border-red-300 dark:border-red-800/50"
                                 : allDisposed
                                   ? "bg-yellow-100 dark:bg-yellow-950/20 border-yellow-300 dark:border-yellow-800/40"
-                                  : "bg-[var(--surface-2)]/50 border-[var(--border)]"
+                                  : "bg-(--surface-2)/50 border-(--border)"
                             }`}
                           >
                             {hasError && (
@@ -577,7 +577,7 @@ export default function SettingsPage() {
                                 <AlertCircle size={12} />
                                 <span>
                                   VPAs disposed — re-run{" "}
-                                  <code className="font-mono bg-yellow-900/30 px-1 rounded">
+                                  <code className="font-mono bg-yellow-900/30 px-1 rounded-sm">
                                     seed-health-tenants.sh
                                   </code>{" "}
                                   to re-provision
@@ -585,30 +585,30 @@ export default function SettingsPage() {
                               </div>
                             )}
                             <div className="flex gap-2">
-                              <span className="text-[var(--text-secondary)] w-32 shrink-0">
+                              <span className="text-(--text-secondary) w-32 shrink-0">
                                 Profile ID
                               </span>
-                              <span className="text-[var(--text-primary)] font-mono break-all">
+                              <span className="text-(--text-primary) font-mono break-all">
                                 {pp.id}
                               </span>
                             </div>
                             <div className="flex gap-2">
-                              <span className="text-[var(--text-secondary)] w-32 shrink-0">
+                              <span className="text-(--text-secondary) w-32 shrink-0">
                                 DID
                               </span>
-                              <span className="text-[var(--text-primary)] font-mono break-all">
+                              <span className="text-(--text-primary) font-mono break-all">
                                 {did}
                               </span>
                             </div>
                             <div className="flex gap-2">
-                              <span className="text-[var(--text-secondary)] w-32 shrink-0">
+                              <span className="text-(--text-secondary) w-32 shrink-0">
                                 Participant Ctx
                               </span>
-                              <span className="text-[var(--text-primary)] font-mono">
+                              <span className="text-(--text-primary) font-mono">
                                 {ctxId !== "—" ? (
                                   ctxId
                                 ) : (
-                                  <span className="text-[var(--text-secondary)]">
+                                  <span className="text-(--text-secondary)">
                                     none
                                   </span>
                                 )}
@@ -616,7 +616,7 @@ export default function SettingsPage() {
                             </div>
                             {activeVpas.length > 0 && (
                               <div className="flex gap-2">
-                                <span className="text-[var(--text-secondary)] w-32 shrink-0">
+                                <span className="text-(--text-secondary) w-32 shrink-0">
                                   Active VPAs
                                 </span>
                                 <span className="text-green-800 dark:text-green-400">
@@ -631,7 +631,7 @@ export default function SettingsPage() {
                       })}
                     </div>
                   ) : (
-                    <p className="text-[var(--text-secondary)] text-sm">
+                    <p className="text-(--text-secondary) text-sm">
                       No dataspace profiles linked yet.
                     </p>
                   )}
@@ -650,7 +650,7 @@ export default function SettingsPage() {
                     <button
                       onClick={() => selected && loadCredentials(selected.id)}
                       disabled={credsLoading}
-                      className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1 disabled:opacity-40"
+                      className="text-xs text-(--text-secondary) hover:text-(--text-primary) flex items-center gap-1 disabled:opacity-40"
                     >
                       <RefreshCw
                         size={11}
@@ -661,25 +661,25 @@ export default function SettingsPage() {
                   </div>
 
                   {credsLoading ? (
-                    <div className="flex items-center gap-2 text-[var(--text-secondary)] text-sm">
+                    <div className="flex items-center gap-2 text-(--text-secondary) text-sm">
                       <Loader2 size={13} className="animate-spin" />
                       Fetching credentials…
                     </div>
                   ) : credentials.length === 0 ||
                     credentials.every((c) => c.credentials.length === 0) ? (
-                    <div className="rounded-lg bg-[var(--surface-2)]/40 border border-[var(--border)] p-4 text-sm">
+                    <div className="rounded-lg bg-(--surface-2)/40 border border-(--border) p-4 text-sm">
                       <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-400 mb-2">
                         <ShieldOff size={14} />
                         <span className="font-medium">
                           No credentials issued yet
                         </span>
                       </div>
-                      <p className="text-[var(--text-secondary)] text-xs leading-relaxed">
+                      <p className="text-(--text-secondary) text-xs leading-relaxed">
                         Verifiable Credentials (EHDS-compliant VCs) are issued
                         by the HDAB after participant onboarding via the
                         IdentityHub. To issue credentials, run:
                       </p>
-                      <code className="mt-2 block text-xs text-[var(--success-text)] bg-[var(--surface)] rounded px-3 py-2">
+                      <code className="mt-2 block text-xs text-(--success-text) bg-(--surface) rounded-sm px-3 py-2">
                         bash jad/issue-ehds-credentials.sh
                       </code>
                     </div>
@@ -730,18 +730,18 @@ export default function SettingsPage() {
                                 )}
                               </div>
                               <div className="flex gap-2">
-                                <span className="text-[var(--text-secondary)] w-28 shrink-0">
+                                <span className="text-(--text-secondary) w-28 shrink-0">
                                   Issuer
                                 </span>
-                                <span className="text-[var(--text-primary)] font-mono break-all">
+                                <span className="text-(--text-primary) font-mono break-all">
                                   {vc.issuer || "—"}
                                 </span>
                               </div>
                               <div className="flex gap-2">
-                                <span className="text-[var(--text-secondary)] w-28 shrink-0">
+                                <span className="text-(--text-secondary) w-28 shrink-0">
                                   Issued
                                 </span>
-                                <span className="text-[var(--text-primary)]">
+                                <span className="text-(--text-primary)">
                                   {vc.issuanceDate
                                     ? new Date(
                                         vc.issuanceDate,
@@ -751,14 +751,14 @@ export default function SettingsPage() {
                               </div>
                               {vc.expirationDate && (
                                 <div className="flex gap-2">
-                                  <span className="text-[var(--text-secondary)] w-28 shrink-0">
+                                  <span className="text-(--text-secondary) w-28 shrink-0">
                                     Expires
                                   </span>
                                   <span
                                     className={
                                       expired
                                         ? "text-red-800 dark:text-red-400"
-                                        : "text-[var(--text-primary)]"
+                                        : "text-(--text-primary)"
                                     }
                                   >
                                     {new Date(
@@ -769,10 +769,10 @@ export default function SettingsPage() {
                               )}
                               {vc.id && (
                                 <div className="flex gap-2">
-                                  <span className="text-[var(--text-secondary)] w-28 shrink-0">
+                                  <span className="text-(--text-secondary) w-28 shrink-0">
                                     Credential ID
                                   </span>
-                                  <span className="text-[var(--text-secondary)] font-mono text-[10px] break-all">
+                                  <span className="text-(--text-secondary) font-mono text-[10px] break-all">
                                     {vc.id}
                                   </span>
                                 </div>
@@ -790,7 +790,7 @@ export default function SettingsPage() {
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white dark:text-gray-900 rounded-lg text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+                    className="flex items-center gap-2 px-4 py-2 bg-(--accent) text-white dark:text-gray-900 rounded-lg text-sm font-medium hover:bg-(--accent-hover) disabled:opacity-50"
                   >
                     {saving ? (
                       <>
@@ -810,7 +810,7 @@ export default function SettingsPage() {
                     )}
                   </button>
                   {saveError && (
-                    <span className="text-xs text-[var(--danger-text)] flex items-center gap-1">
+                    <span className="text-xs text-(--danger-text) flex items-center gap-1">
                       <AlertCircle size={12} />
                       {saveError}
                     </span>

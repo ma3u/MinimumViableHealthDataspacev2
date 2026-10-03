@@ -140,12 +140,12 @@ export default function DeveloperGuidePage() {
     <div className="max-w-5xl mx-auto px-6 py-12">
       <Link
         href="/docs"
-        className="inline-flex items-center gap-1 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] mb-6"
+        className="inline-flex items-center gap-1 text-sm text-(--text-secondary) hover:text-(--text-primary) mb-6"
       >
         <ArrowLeft size={14} /> Back to Docs
       </Link>
       <h1 className="text-3xl font-bold mb-2">Developer Guide</h1>
-      <p className="text-[var(--text-secondary)] mb-6">
+      <p className="text-(--text-secondary) mb-6">
         Technical documentation for developing, testing, and deploying the
         Health Dataspace v2 platform — an EHDS regulation reference
         implementation built on Eclipse Dataspace Components.
@@ -157,13 +157,13 @@ export default function DeveloperGuidePage() {
           href={GITHUB_REPO}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-sm text-[var(--text-primary)]"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-(--border) bg-(--surface-2) hover:bg-(--surface-3) transition-colors text-sm text-(--text-primary)"
         >
           GitHub Repository <ExternalLink size={12} />
         </a>
         <Link
           href="/docs/developer/api"
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-sm text-[var(--text-primary)]"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-(--border) bg-(--surface-2) hover:bg-(--surface-3) transition-colors text-sm text-(--text-primary)"
         >
           Swagger UI →
         </Link>
@@ -171,14 +171,14 @@ export default function DeveloperGuidePage() {
           href={`${GITHUB_REPO}/tree/main/bruno/MVHDv2`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-sm text-[var(--text-primary)]"
+          className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-(--border) bg-(--surface-2) hover:bg-(--surface-3) transition-colors text-sm text-(--text-primary)"
         >
           Bruno Collection <ExternalLink size={12} />
         </a>
       </div>
 
       {/* TOC */}
-      <nav className="border border-[var(--border)] rounded-xl p-5 mb-10">
+      <nav className="border border-(--border) rounded-xl p-5 mb-10">
         <h2 className="font-semibold mb-3">Contents</h2>
         <ul className="text-sm space-y-1.5 text-indigo-700 dark:text-indigo-400 columns-1 md:columns-2">
           <TocLink href="#onboarding">Onboarding</TocLink>
@@ -207,16 +207,16 @@ export default function DeveloperGuidePage() {
         <h2 className="text-2xl font-semibold mb-3" id="onboarding">
           Onboarding
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           New to the project? Follow this quick-start path to get productive
           within your first day.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          <div className="border border-[var(--border)] rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-2 text-[var(--success-text)]">
+          <div className="border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2 text-(--success-text)">
               1. Get Running
             </h4>
-            <ol className="text-[var(--text-secondary)] text-xs space-y-1 list-decimal ml-4">
+            <ol className="text-(--text-secondary) text-xs space-y-1 list-decimal ml-4">
               <li>Clone the repository</li>
               <li>
                 <code>docker compose up -d</code> (Neo4j)
@@ -230,11 +230,11 @@ export default function DeveloperGuidePage() {
               </li>
             </ol>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2 text-amber-700 dark:text-amber-400">
               2. Explore the Platform
             </h4>
-            <ul className="text-[var(--text-secondary)] text-xs space-y-1 list-disc ml-4">
+            <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
               <li>Switch personas via the User Menu</li>
               <li>Explore the Graph Explorer (center node)</li>
               <li>Browse the Data Catalog</li>
@@ -242,11 +242,11 @@ export default function DeveloperGuidePage() {
               <li>Review ODRL policies (HDAB role)</li>
             </ul>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2 text-indigo-700 dark:text-indigo-400">
               3. Key Concepts
             </h4>
-            <ul className="text-[var(--text-secondary)] text-xs space-y-1 list-disc ml-4">
+            <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
               <li>
                 <strong>DSP:</strong> Dataspace Protocol — sovereign data
                 exchange
@@ -281,14 +281,14 @@ export default function DeveloperGuidePage() {
         <h2 className="text-2xl font-semibold mb-3" id="jad-architecture">
           JAD Stack Architecture
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           The full JAD (Java Application Deployment) stack runs 19 Docker
           services orchestrated via{" "}
-          <code className="text-xs bg-[var(--surface-2)] px-1 py-0.5 rounded">
+          <code className="text-xs bg-(--surface-2) px-1 py-0.5 rounded-sm">
             docker-compose.yml
           </code>{" "}
           +{" "}
-          <code className="text-xs bg-[var(--surface-2)] px-1 py-0.5 rounded">
+          <code className="text-xs bg-(--surface-2) px-1 py-0.5 rounded-sm">
             docker-compose.jad.yml
           </code>
           . Services are grouped into five layers:
@@ -300,27 +300,27 @@ export default function DeveloperGuidePage() {
 
         {/* Service table */}
         <div className="mt-6 overflow-x-auto">
-          <table className="w-full text-xs border border-[var(--border)] rounded-lg">
-            <thead className="bg-[var(--surface-2)]">
+          <table className="w-full text-xs border border-(--border) rounded-lg">
+            <thead className="bg-(--surface-2)">
               <tr>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Service
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Port
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Traefik
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Purpose
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Depends On
                 </th>
               </tr>
             </thead>
-            <tbody className="text-[var(--text-secondary)]">
+            <tbody className="text-(--text-secondary)">
               {[
                 [
                   "Traefik",
@@ -428,8 +428,8 @@ export default function DeveloperGuidePage() {
                   "Neo4j",
                 ],
               ].map(([service, port, traefik, purpose, deps]) => (
-                <tr key={service} className="border-t border-[var(--border)]">
-                  <td className="px-3 py-1.5 font-medium text-[var(--text-primary)]">
+                <tr key={service} className="border-t border-(--border)">
+                  <td className="px-3 py-1.5 font-medium text-(--text-primary)">
                     {service}
                   </td>
                   <td className="px-3 py-1.5 font-mono">{port}</td>
@@ -441,7 +441,7 @@ export default function DeveloperGuidePage() {
             </tbody>
           </table>
         </div>
-        <p className="text-[var(--text-secondary)] text-xs mt-2">
+        <p className="text-(--text-secondary) text-xs mt-2">
           Plus 4 background CFM agents (keycloak, edcv, registration,
           onboarding) and 1 one-shot seed container. Vault-bootstrap runs as a
           sidecar.
@@ -454,11 +454,11 @@ export default function DeveloperGuidePage() {
           Prerequisites
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border border-[var(--border)] rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-2 text-[var(--success-text)]">
+          <div className="border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2 text-(--success-text)">
               Required
             </h4>
-            <ul className="text-[var(--text-secondary)] text-xs space-y-1 list-disc ml-4">
+            <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
               <li>
                 <strong>Node.js 20+</strong> — runtime for UI and proxy
               </li>
@@ -473,11 +473,11 @@ export default function DeveloperGuidePage() {
               </li>
             </ul>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2 text-amber-700 dark:text-amber-400">
               Optional
             </h4>
-            <ul className="text-[var(--text-secondary)] text-xs space-y-1 list-disc ml-4">
+            <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
               <li>
                 <strong>Python 3.11+</strong> — for Synthea FHIR data loading
               </li>
@@ -496,11 +496,11 @@ export default function DeveloperGuidePage() {
             </ul>
           </div>
         </div>
-        <div className="mt-4 border border-[var(--border)] rounded-lg p-4">
+        <div className="mt-4 border border-(--border) rounded-lg p-4">
           <h4 className="font-semibold text-sm mb-2">Port Requirements</h4>
-          <p className="text-[var(--text-secondary)] text-xs">
+          <p className="text-(--text-secondary) text-xs">
             The JAD stack requires these ports to be free:{" "}
-            <code className="text-[var(--text-primary)]">
+            <code className="text-(--text-primary)">
               80, 3000, 3003, 4222, 5432, 7474, 7687, 8080, 8090, 8200, 8222,
               9090, 10013, 11002, 11003, 11005, 11006, 11007, 11012
             </code>
@@ -513,15 +513,15 @@ export default function DeveloperGuidePage() {
         <h2 className="text-2xl font-semibold mb-3" id="quick-start">
           Quick Start — Minimal Stack
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           Run Neo4j + Next.js UI with synthetic data. No JAD services needed.
         </p>
         <div className="space-y-4">
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-2 text-[var(--success-text)]">
+          <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2 text-(--success-text)">
               1. Start Neo4j &amp; load schema
             </h4>
-            <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`docker compose up -d
+            <pre className="text-xs text-(--text-primary) overflow-x-auto">{`docker compose up -d
 
 # Initialize schema (idempotent — safe to re-run)
 cat neo4j/init-schema.cypher | \\
@@ -534,11 +534,11 @@ cat neo4j/insert-synthetic-schema-data.cypher | \\
   cypher-shell -u neo4j -p healthdataspace`}</pre>
           </div>
 
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-2 text-[var(--success-text)]">
+          <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2 text-(--success-text)">
               2. Start the UI
             </h4>
-            <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`cd ui
+            <pre className="text-xs text-(--text-primary) overflow-x-auto">{`cd ui
 npm install
 npm run dev          # → http://localhost:3000
 
@@ -553,28 +553,28 @@ npm run lint         # ESLint (max 55 warnings)`}</pre>
         <h2 className="text-2xl font-semibold mb-3" id="jad-quick-start">
           Quick Start — Full JAD Stack
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           The bootstrap script starts all 19 services with health checks,
           initializes Vault secrets, imports the Keycloak realm, and runs the
           7-phase seed pipeline.
         </p>
         <div className="space-y-4">
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-2 text-[var(--success-text)]">
+          <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2 text-(--success-text)">
               1. Bootstrap everything
             </h4>
-            <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`# Full stack — takes ~3-5 min on first run
+            <pre className="text-xs text-(--text-primary) overflow-x-auto">{`# Full stack — takes ~3-5 min on first run
 ./scripts/bootstrap-jad.sh
 
 # Check status & endpoints
 ./scripts/bootstrap-jad.sh --status`}</pre>
           </div>
 
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-2 text-[var(--success-text)]">
+          <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2 text-(--success-text)">
               2. Seed the dataspace
             </h4>
-            <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`# Run all 7 seed phases (sequential, strict order)
+            <pre className="text-xs text-(--text-primary) overflow-x-auto">{`# Run all 7 seed phases (sequential, strict order)
 ./jad/seed-all.sh
 
 # Resume from a specific phase
@@ -584,11 +584,11 @@ npm run lint         # ESLint (max 55 warnings)`}</pre>
 ./jad/seed-all.sh --only 5`}</pre>
           </div>
 
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
-            <h4 className="font-semibold text-sm mb-2 text-[var(--success-text)]">
+          <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2 text-(--success-text)">
               3. Access the platform
             </h4>
-            <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`# Live UI (production build)
+            <pre className="text-xs text-(--text-primary) overflow-x-auto">{`# Live UI (production build)
 open http://localhost:3003
 
 # Keycloak Admin Console
@@ -601,11 +601,11 @@ open http://localhost:7474      # neo4j / healthdataspace
 open http://traefik.localhost`}</pre>
           </div>
 
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
+          <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2 text-amber-700 dark:text-amber-400">
               Common operations
             </h4>
-            <pre className="text-xs text-[var(--text-primary)] overflow-x-auto">{`./scripts/bootstrap-jad.sh --ui-only   # Rebuild UI only (fast)
+            <pre className="text-xs text-(--text-primary) overflow-x-auto">{`./scripts/bootstrap-jad.sh --ui-only   # Rebuild UI only (fast)
 ./scripts/bootstrap-jad.sh --seed      # Re-run seed pipeline
 ./scripts/bootstrap-jad.sh --pull      # Pull latest images
 ./scripts/bootstrap-jad.sh --down      # Stop all services
@@ -619,30 +619,30 @@ open http://traefik.localhost`}</pre>
         <h2 className="text-2xl font-semibold mb-3" id="seeding">
           Data Seeding Pipeline
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           The 7-phase seed pipeline populates the dataspace with tenants,
           credentials, policies, assets, and contracts. Phases must run in
           strict order — each depends on the previous.
         </p>
         <div className="overflow-x-auto">
-          <table className="w-full text-xs border border-[var(--border)] rounded-lg">
-            <thead className="bg-[var(--surface-2)]">
+          <table className="w-full text-xs border border-(--border) rounded-lg">
+            <thead className="bg-(--surface-2)">
               <tr>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Phase
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Script
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Target Service
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   What It Does
                 </th>
               </tr>
             </thead>
-            <tbody className="text-[var(--text-secondary)]">
+            <tbody className="text-(--text-secondary)">
               {[
                 [
                   "1",
@@ -687,8 +687,8 @@ open http://traefik.localhost`}</pre>
                   "Verify EDR tokens and data plane transfers",
                 ],
               ].map(([phase, script, target, desc]) => (
-                <tr key={phase} className="border-t border-[var(--border)]">
-                  <td className="px-3 py-1.5 font-mono font-bold text-[var(--text-primary)]">
+                <tr key={phase} className="border-t border-(--border)">
+                  <td className="px-3 py-1.5 font-mono font-bold text-(--text-primary)">
                     {phase}
                   </td>
                   <td className="px-3 py-1.5 font-mono">{script}</td>
@@ -700,7 +700,7 @@ open http://traefik.localhost`}</pre>
           </table>
         </div>
         <div className="mt-3 border border-amber-500/20 bg-amber-500/5 rounded-lg p-3">
-          <p className="text-[var(--text-secondary)] text-xs">
+          <p className="text-(--text-secondary) text-xs">
             <strong className="text-amber-700 dark:text-amber-400">
               Important:
             </strong>{" "}
@@ -717,8 +717,8 @@ open http://traefik.localhost`}</pre>
         <h2 className="text-2xl font-semibold mb-3" id="project-structure">
           Project Structure
         </h2>
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
-          <pre className="text-xs text-[var(--text-primary)] overflow-x-auto whitespace-pre">{`├── .github/workflows/         # CI/CD (test.yml, pages.yml, compliance.yml)
+        <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
+          <pre className="text-xs text-(--text-primary) overflow-x-auto whitespace-pre">{`├── .github/workflows/         # CI/CD (test.yml, pages.yml, compliance.yml)
 ├── connector/                 # EDC-V connector (Gradle multi-module)
 │   ├── controlplane/          # DSP + Management API
 │   ├── dataplane/             # FHIR + OMOP data planes
@@ -753,10 +753,10 @@ open http://traefik.localhost`}</pre>
         <h2 className="text-2xl font-semibold mb-3" id="graph-schema">
           Neo4j Graph Schema
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           The 5-layer knowledge graph spans 27 node labels with 70+ indexes and
           3 vector indexes for GraphRAG. Schema defined in{" "}
-          <code className="text-xs bg-[var(--surface-2)] px-1 py-0.5 rounded">
+          <code className="text-xs bg-(--surface-2) px-1 py-0.5 rounded-sm">
             neo4j/init-schema.cypher
           </code>{" "}
           (idempotent — safe to re-run).
@@ -767,9 +767,9 @@ open http://traefik.localhost`}</pre>
         />
 
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">5 Semantic Layers</h4>
-            <ul className="text-[var(--text-secondary)] text-xs space-y-1.5">
+            <ul className="text-(--text-secondary) text-xs space-y-1.5">
               <li>
                 <span className="text-[#2471A3] dark:text-[#85C1E9] font-medium">
                   L1 Marketplace:
@@ -802,9 +802,9 @@ open http://traefik.localhost`}</pre>
               </li>
             </ul>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">Key Conventions</h4>
-            <ul className="text-[var(--text-secondary)] text-xs space-y-1 list-disc ml-4">
+            <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
               <li>
                 Labels:{" "}
                 <code className="text-indigo-700 dark:text-indigo-400">
@@ -841,28 +841,28 @@ open http://traefik.localhost`}</pre>
         <h2 className="text-2xl font-semibold mb-3" id="postgres-schema">
           PostgreSQL Schema
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           PostgreSQL serves as the runtime store for all JAD services — EDC-V
           state machines, Keycloak identity, and CFM tenant metadata. Neo4j
           holds the health knowledge graph. This split follows{" "}
           <strong>ADR-1</strong>.
         </p>
         <div className="overflow-x-auto">
-          <table className="w-full text-xs border border-[var(--border)] rounded-lg">
-            <thead className="bg-[var(--surface-2)]">
+          <table className="w-full text-xs border border-(--border) rounded-lg">
+            <thead className="bg-(--surface-2)">
               <tr>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Database
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Service
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Contents
                 </th>
               </tr>
             </thead>
-            <tbody className="text-[var(--text-secondary)]">
+            <tbody className="text-(--text-secondary)">
               {[
                 [
                   "controlplane",
@@ -905,8 +905,8 @@ open http://traefik.localhost`}</pre>
                   "Provisioning tasks, resource allocation records",
                 ],
               ].map(([db, service, contents]) => (
-                <tr key={db} className="border-t border-[var(--border)]">
-                  <td className="px-3 py-1.5 font-mono font-medium text-[var(--text-primary)]">
+                <tr key={db} className="border-t border-(--border)">
+                  <td className="px-3 py-1.5 font-mono font-medium text-(--text-primary)">
                     {db}
                   </td>
                   <td className="px-3 py-1.5">{service}</td>
@@ -916,11 +916,11 @@ open http://traefik.localhost`}</pre>
             </tbody>
           </table>
         </div>
-        <div className="mt-4 border border-[var(--border)] rounded-lg p-4">
+        <div className="mt-4 border border-(--border) rounded-lg p-4">
           <h4 className="font-semibold text-sm mb-2">
             Neo4j vs PostgreSQL Split
           </h4>
-          <ul className="text-[var(--text-secondary)] text-xs space-y-1 list-disc ml-4">
+          <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
             <li>
               <strong>Neo4j:</strong> Health knowledge graph (FHIR, OMOP,
               ontologies), graph traversal queries, semantic search, GraphRAG
@@ -945,7 +945,7 @@ open http://traefik.localhost`}</pre>
         <h2 className="text-2xl font-semibold mb-3" id="integration-flows">
           Integration Flows
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           Two canonical flows cover 90% of real-world EHDS integrations. Pick
           the one that matches your role, then use the{" "}
           <Link
@@ -958,67 +958,67 @@ open http://traefik.localhost`}</pre>
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Data Consumer */}
-          <div className="border border-[var(--border)] rounded-lg p-5 bg-[var(--surface-1)]">
+          <div className="border border-(--border) rounded-lg p-5 bg-(--surface-1)">
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-500" />
-              <h3 className="font-semibold text-base text-[var(--text-primary)]">
+              <h3 className="font-semibold text-base text-(--text-primary)">
                 Data Consumer flow
               </h3>
             </div>
-            <p className="text-xs text-[var(--text-secondary)] mb-3">
+            <p className="text-xs text-(--text-secondary) mb-3">
               Researcher / pharma / HTA body discovers and requests cross-border
               health data.
             </p>
-            <ol className="text-xs text-[var(--text-secondary)] space-y-2 list-decimal ml-4">
+            <ol className="text-xs text-(--text-secondary) space-y-2 list-decimal ml-4">
               <li>
                 <strong>Discover</strong> →{" "}
-                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                   GET /api/catalog
                 </code>{" "}
                 returns HealthDCAT-AP datasets
               </li>
               <li>
                 <strong>Inspect</strong> →{" "}
-                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                   GET /api/assets
                 </code>{" "}
                 for access policies (ODRL)
               </li>
               <li>
                 <strong>Negotiate</strong> →{" "}
-                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                   POST /api/negotiations
                 </code>{" "}
                 opens a DSP 2025-1 contract
               </li>
               <li>
                 <strong>Attest</strong> →{" "}
-                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                   POST /api/credentials/present
                 </code>{" "}
                 proves role via DCP VC
               </li>
               <li>
                 <strong>Transfer</strong> →{" "}
-                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                   GET /api/transfers/:id
                 </code>{" "}
                 monitors the data plane
               </li>
               <li>
                 <strong>Analyse</strong> →{" "}
-                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                   GET /api/analytics
                 </code>{" "}
                 or{" "}
-                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                   POST /api/nlq
                 </code>
               </li>
             </ol>
-            <div className="mt-4 pt-3 border-t border-[var(--border)] text-xs text-[var(--text-secondary)]">
+            <div className="mt-4 pt-3 border-t border-(--border) text-xs text-(--text-secondary)">
               Role:{" "}
-              <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+              <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                 DATA_USER
               </code>{" "}
               · Persona: Dr. Petra Lang (PharmaCo Research)
@@ -1026,48 +1026,48 @@ open http://traefik.localhost`}</pre>
           </div>
 
           {/* Data Provider */}
-          <div className="border border-[var(--border)] rounded-lg p-5 bg-[var(--surface-1)]">
+          <div className="border border-(--border) rounded-lg p-5 bg-(--surface-1)">
             <div className="flex items-center gap-2 mb-2">
               <span className="inline-block w-2 h-2 rounded-full bg-blue-500" />
-              <h3 className="font-semibold text-base text-[var(--text-primary)]">
+              <h3 className="font-semibold text-base text-(--text-primary)">
                 Data Provider flow
               </h3>
             </div>
-            <p className="text-xs text-[var(--text-secondary)] mb-3">
+            <p className="text-xs text-(--text-secondary) mb-3">
               Hospital / clinic / registry publishes datasets for secondary use.
             </p>
-            <ol className="text-xs text-[var(--text-secondary)] space-y-2 list-decimal ml-4">
+            <ol className="text-xs text-(--text-secondary) space-y-2 list-decimal ml-4">
               <li>
                 <strong>Register</strong> →{" "}
-                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                   POST /api/participants
                 </code>{" "}
                 creates a did:web identity
               </li>
               <li>
                 <strong>Publish</strong> →{" "}
-                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                   POST /api/catalog
                 </code>{" "}
                 adds a HealthDCAT-AP dataset
               </li>
               <li>
                 <strong>Policy</strong> →{" "}
-                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                   PUT /api/assets/:id
                 </code>{" "}
                 attaches an ODRL policy
               </li>
               <li>
                 <strong>HDAB approval</strong> →{" "}
-                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                   GET /api/compliance
                 </code>{" "}
                 tracks approval state
               </li>
               <li>
                 <strong>Accept</strong> →{" "}
-                <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                   GET /api/negotiations
                 </code>{" "}
                 shows incoming contract offers
@@ -1077,9 +1077,9 @@ open http://traefik.localhost`}</pre>
                 to the consumer
               </li>
             </ol>
-            <div className="mt-4 pt-3 border-t border-[var(--border)] text-xs text-[var(--text-secondary)]">
+            <div className="mt-4 pt-3 border-t border-(--border) text-xs text-(--text-secondary)">
               Role:{" "}
-              <code className="bg-[var(--surface-2)] px-1 py-0.5 rounded">
+              <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
                 DATA_HOLDER
               </code>{" "}
               · Persona: Dr. Klaus Weber (AlphaKlinik Berlin)
@@ -1093,10 +1093,10 @@ open http://traefik.localhost`}</pre>
         <h2 className="text-2xl font-semibold mb-3" id="api-reference">
           API Reference
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           38 Next.js API routes proxy to Neo4j and EDC-V services. Routes are
           disabled in static export — mock data served from{" "}
-          <code className="text-xs bg-[var(--surface-2)] px-1 py-0.5 rounded">
+          <code className="text-xs bg-(--surface-2) px-1 py-0.5 rounded-sm">
             ui/public/mock/*.json
           </code>
           .
@@ -1110,14 +1110,14 @@ open http://traefik.localhost`}</pre>
           </Link>
           <Link
             href="/docs/developer/api"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-[var(--text-primary)]"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-(--border) bg-(--surface-2) hover:bg-(--surface-3) transition-colors text-(--text-primary)"
           >
             Swagger UI →
           </Link>
           <a
             href="/openapi.yaml"
             download="ehds-integration-hub-openapi.yaml"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-[var(--text-primary)]"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-(--border) bg-(--surface-2) hover:bg-(--surface-3) transition-colors text-(--text-primary)"
           >
             Download openapi.yaml
           </a>
@@ -1125,27 +1125,27 @@ open http://traefik.localhost`}</pre>
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/bruno/MVHDv2"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors text-[var(--text-primary)]"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-(--border) bg-(--surface-2) hover:bg-(--surface-3) transition-colors text-(--text-primary)"
           >
             Bruno collection ↗
           </a>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-xs border border-[var(--border)] rounded-lg">
-            <thead className="bg-[var(--surface-2)]">
+          <table className="w-full text-xs border border-(--border) rounded-lg">
+            <thead className="bg-(--surface-2)">
               <tr>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Route
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Methods
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Description
                 </th>
               </tr>
             </thead>
-            <tbody className="text-[var(--text-secondary)]">
+            <tbody className="text-(--text-secondary)">
               {[
                 ["/api/graph", "GET", "Knowledge graph nodes & relationships"],
                 [
@@ -1193,8 +1193,8 @@ open http://traefik.localhost`}</pre>
                 ["/api/trust-center", "GET", "Trust center configuration"],
                 ["/api/health", "GET", "Health check endpoint (public)"],
               ].map(([route, methods, desc]) => (
-                <tr key={route} className="border-t border-[var(--border)]">
-                  <td className="px-3 py-1.5 font-mono text-[var(--text-primary)]">
+                <tr key={route} className="border-t border-(--border)">
+                  <td className="px-3 py-1.5 font-mono text-(--text-primary)">
                     {route}
                   </td>
                   <td className="px-3 py-1.5 font-mono">{methods}</td>
@@ -1212,9 +1212,9 @@ open http://traefik.localhost`}</pre>
           Testing
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">Unit Tests (Vitest)</h4>
-            <ul className="text-[var(--text-secondary)] text-xs space-y-1">
+            <ul className="text-(--text-secondary) text-xs space-y-1">
               <li>
                 <strong>1,613 tests</strong> across 80+ files
               </li>
@@ -1234,15 +1234,15 @@ open http://traefik.localhost`}</pre>
                 </a>
               </li>
             </ul>
-            <pre className="text-xs text-[var(--text-secondary)] mt-2 bg-[var(--surface)] p-2 rounded">{`npm test               # Run once
+            <pre className="text-xs text-(--text-secondary) mt-2 bg-(--surface) p-2 rounded-sm">{`npm test               # Run once
 npm run test:watch     # Watch mode
 npm run test:coverage  # With v8 coverage`}</pre>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">
               E2E Tests (Playwright)
             </h4>
-            <ul className="text-[var(--text-secondary)] text-xs space-y-1">
+            <ul className="text-(--text-secondary) text-xs space-y-1">
               <li>
                 <strong>19 spec files</strong> (J001–J260 journeys)
               </li>
@@ -1263,7 +1263,7 @@ npm run test:coverage  # With v8 coverage`}</pre>
                 </a>
               </li>
             </ul>
-            <pre className="text-xs text-[var(--text-secondary)] mt-2 bg-[var(--surface)] p-2 rounded">{`npm run test:e2e       # Headless (chromium)
+            <pre className="text-xs text-(--text-secondary) mt-2 bg-(--surface) p-2 rounded-sm">{`npm run test:e2e       # Headless (chromium)
 npm run test:e2e:ui    # Interactive UI
 
 # Against JAD stack
@@ -1273,37 +1273,37 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
         </div>
 
         <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">DSP 2025-1 TCK</h4>
-            <p className="text-[var(--text-secondary)] text-xs">
+            <p className="text-(--text-secondary) text-xs">
               Validates EDC connector implements Dataspace Protocol correctly —
               catalog queries, contract negotiations, transfer processes.
             </p>
-            <pre className="text-xs text-[var(--text-secondary)] mt-2 bg-[var(--surface)] p-2 rounded">{`./scripts/run-dsp-tck.sh`}</pre>
+            <pre className="text-xs text-(--text-secondary) mt-2 bg-(--surface) p-2 rounded-sm">{`./scripts/run-dsp-tck.sh`}</pre>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">DCP v1.0</h4>
-            <p className="text-[var(--text-secondary)] text-xs">
+            <p className="text-(--text-secondary) text-xs">
               Verifies Decentralized Claims Protocol — DID resolution,
               credential presentation, trust framework.
             </p>
-            <pre className="text-xs text-[var(--text-secondary)] mt-2 bg-[var(--surface)] p-2 rounded">{`./scripts/run-dcp-tests.sh`}</pre>
+            <pre className="text-xs text-(--text-secondary) mt-2 bg-(--surface) p-2 rounded-sm">{`./scripts/run-dcp-tests.sh`}</pre>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">EHDS Domain</h4>
-            <p className="text-[var(--text-secondary)] text-xs">
+            <p className="text-(--text-secondary) text-xs">
               Health domain compliance — FHIR R4 bundles, OMOP transformation,
               HDAB approval chains, patient rights.
             </p>
-            <pre className="text-xs text-[var(--text-secondary)] mt-2 bg-[var(--surface)] p-2 rounded">{`./scripts/run-ehds-tests.sh`}</pre>
+            <pre className="text-xs text-(--text-secondary) mt-2 bg-(--surface) p-2 rounded-sm">{`./scripts/run-ehds-tests.sh`}</pre>
           </div>
         </div>
 
-        <div className="mt-4 border border-[var(--border)] rounded-lg p-4">
+        <div className="mt-4 border border-(--border) rounded-lg p-4">
           <h4 className="font-semibold text-sm mb-2" id="user-journey">
             EHDS User Journey
           </h4>
-          <p className="text-[var(--text-secondary)] text-xs mb-2">
+          <p className="text-(--text-secondary) text-xs mb-2">
             The full 8-step EHDS secondary-use journey with sequence diagrams,
             persona mappings, and E2E test coverage:
           </p>
@@ -1323,7 +1323,7 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
         <h2 className="text-2xl font-semibold mb-3" id="quality-gates">
           Quality Gates
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           Four-stage quality pipeline aligned with BSI C5, OWASP Top 10, EHDS
           regulation, and WCAG 2.2 AA.
         </p>
@@ -1336,14 +1336,12 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
           ].map(([count, label]) => (
             <div
               key={label}
-              className="border border-[var(--border)] rounded-lg p-3 text-center"
+              className="border border-(--border) rounded-lg p-3 text-center"
             >
-              <div className="text-xl font-bold text-[var(--text-primary)]">
+              <div className="text-xl font-bold text-(--text-primary)">
                 {count}
               </div>
-              <div className="text-[10px] text-[var(--text-secondary)]">
-                {label}
-              </div>
+              <div className="text-[10px] text-(--text-secondary)">{label}</div>
             </div>
           ))}
         </div>
@@ -1365,11 +1363,11 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
           caption="CI/CD workflow — test.yml (8 jobs), compliance.yml (3 suites), pages.yml (deploy)"
         />
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">
               test.yml — Every Push
             </h4>
-            <ul className="text-[var(--text-secondary)] text-xs space-y-1 list-disc ml-4">
+            <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
               <li>UI Tests (Vitest) + coverage upload</li>
               <li>Neo4j Proxy Tests (Vitest)</li>
               <li>ESLint lint check</li>
@@ -1380,11 +1378,11 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
               <li>E2E + WCAG 2.2 AA + Security pentest (main only)</li>
             </ul>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">
               pages.yml — Deploy to GitHub Pages
             </h4>
-            <ol className="text-[var(--text-secondary)] text-xs space-y-1 list-decimal ml-4">
+            <ol className="text-(--text-secondary) text-xs space-y-1 list-decimal ml-4">
               <li>Run full Vitest suite with coverage</li>
               <li>Build Next.js for E2E, run Playwright</li>
               <li>Run WCAG 2.2 AA accessibility audit</li>
@@ -1403,30 +1401,30 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
           </div>
         </div>
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">
               compliance.yml — Weekly + Push to Main
             </h4>
-            <p className="text-[var(--text-secondary)] text-xs">
+            <p className="text-(--text-secondary) text-xs">
               Runs 3 protocol compliance suites against the full JAD stack: DSP
               2025-1 TCK, DCP v1.0, and EHDS domain tests. Scheduled: Monday
               06:00 UTC.
             </p>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">
               deploy-azure.yml — Azure Deployment
             </h4>
-            <p className="text-[var(--text-secondary)] text-xs">
+            <p className="text-(--text-secondary) text-xs">
               Deploys 13 Container Apps + 3 jobs to Azure via OIDC federation.
               Includes E2E smoke tests against the live Azure environment.
             </p>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">
               reset-demo.yml — Nightly Reset
             </h4>
-            <p className="text-[var(--text-secondary)] text-xs">
+            <p className="text-(--text-secondary) text-xs">
               Scheduled at 02:00 UTC daily. Restarts stateful services,
               re-bootstraps Vault/Keycloak, reseeds data, and runs smoke tests.
               Ensures GDPR data minimisation.
@@ -1484,13 +1482,13 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
               href={r.href}
               target={r.external ? "_blank" : undefined}
               rel={r.external ? "noopener noreferrer" : undefined}
-              className="border border-[var(--border)] rounded-lg p-4 hover:border-indigo-500/50 transition-colors block"
+              className="border border-(--border) rounded-lg p-4 hover:border-indigo-500/50 transition-colors block"
             >
               <h4 className="font-semibold text-sm mb-1 text-indigo-700 dark:text-indigo-400 inline-flex items-center gap-1">
                 {r.title}
                 {r.external && <ExternalLink size={12} />}
               </h4>
-              <p className="text-[var(--text-secondary)] text-xs">{r.desc}</p>
+              <p className="text-(--text-secondary) text-xs">{r.desc}</p>
             </a>
           ))}
         </div>
@@ -1538,16 +1536,16 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
               href={`${GITHUB_REPO}/releases/tag/${r.version}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="border border-[var(--border)] rounded-lg px-4 py-3 flex items-start gap-3 hover:border-indigo-500/50 transition-colors block"
+              className="border border-(--border) rounded-lg px-4 py-3 flex items-start gap-3 hover:border-indigo-500/50 transition-colors block"
             >
-              <span className="text-xs font-mono text-[var(--success-text)] bg-[var(--success-text)]/10 px-2 py-0.5 rounded shrink-0">
+              <span className="text-xs font-mono text-(--success-text) bg-(--success-text)/10 px-2 py-0.5 rounded-sm shrink-0">
                 {r.version}
               </span>
               <div>
-                <span className="text-[var(--text-secondary)] text-xs">
+                <span className="text-(--text-secondary) text-xs">
                   {r.date}
                 </span>
-                <p className="text-[var(--text-secondary)] text-xs mt-0.5">
+                <p className="text-(--text-secondary) text-xs mt-0.5">
                   {r.highlights}
                 </p>
               </div>
@@ -1602,15 +1600,13 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="border border-[var(--border)] rounded-lg p-4 hover:border-indigo-500/50 transition-colors block"
+              className="border border-(--border) rounded-lg p-4 hover:border-indigo-500/50 transition-colors block"
             >
               <h4 className="font-semibold text-sm mb-1 text-indigo-700 dark:text-indigo-400 inline-flex items-center gap-1">
                 {link.title}
                 <ExternalLink size={12} />
               </h4>
-              <p className="text-[var(--text-secondary)] text-xs">
-                {link.desc}
-              </p>
+              <p className="text-(--text-secondary) text-xs">{link.desc}</p>
             </a>
           ))}
         </div>
@@ -1621,8 +1617,8 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
         <h2 className="text-2xl font-semibold mb-3" id="conventions">
           Conventions
         </h2>
-        <div className="border border-[var(--border)] rounded-lg p-4">
-          <ul className="text-[var(--text-secondary)] text-sm space-y-2">
+        <div className="border border-(--border) rounded-lg p-4">
+          <ul className="text-(--text-secondary) text-sm space-y-2">
             <li>
               <strong>Commit messages:</strong> Conventional Commits format
               (feat:, fix:, docs:, chore:)
@@ -1656,7 +1652,7 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
       </section>
 
       {/* Related */}
-      <section className="bg-[var(--surface-2)]/50 border border-[var(--border)] rounded-xl p-6">
+      <section className="bg-(--surface-2)/50 border border-(--border) rounded-xl p-6">
         <h2 className="font-semibold mb-2">Related Documentation</h2>
         <div className="flex flex-wrap gap-3">
           <Link

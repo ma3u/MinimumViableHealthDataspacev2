@@ -76,19 +76,19 @@ function HorizontalBar({
   return (
     <div className="flex items-center gap-3 py-1">
       <span
-        className="text-xs text-[var(--text-secondary)] text-right shrink-0"
+        className="text-xs text-(--text-secondary) text-right shrink-0"
         style={{ width: "260px", minWidth: "260px" }}
         title={label}
       >
         {shortLabel}
       </span>
-      <div className="flex-1 bg-[var(--surface-2)] rounded-full h-4 overflow-hidden">
+      <div className="flex-1 bg-(--surface-2) rounded-full h-4 overflow-hidden">
         <div
           className={`${colorClass} h-4 rounded-full transition-all`}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className="text-xs text-[var(--text-primary)] shrink-0 w-12 text-right">
+      <span className="text-xs text-(--text-primary) shrink-0 w-12 text-right">
         {count.toLocaleString()}
       </span>
     </div>
@@ -110,17 +110,15 @@ function BarSection({
 }) {
   const maxCount = data[0]?.count ?? 1;
   return (
-    <section className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5">
+    <section className="bg-(--surface) border border-(--border) rounded-xl p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Icon size={16} className="text-[var(--text-secondary)]" />
-        <h2 className="font-semibold text-sm text-[var(--text-primary)]">
-          {title}
-        </h2>
+        <Icon size={16} className="text-(--text-secondary)" />
+        <h2 className="font-semibold text-sm text-(--text-primary)">{title}</h2>
       </div>
       {loading ? (
-        <div className="text-[var(--text-secondary)] text-xs">Loading…</div>
+        <div className="text-(--text-secondary) text-xs">Loading…</div>
       ) : data.length === 0 ? (
-        <div className="text-[var(--text-secondary)] text-xs">No data</div>
+        <div className="text-(--text-secondary) text-xs">No data</div>
       ) : (
         <div className="flex flex-col gap-1">
           {data.map((d, i) => (
@@ -201,7 +199,7 @@ export default function AnalyticsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
           title="OMOP Research Analytics"
@@ -219,7 +217,7 @@ export default function AnalyticsPage() {
 
         {error && (
           <div
-            className="mb-6 p-3 rounded bg-[var(--role-admin-bg)] border border-[var(--role-admin-border)] text-[var(--role-admin-text)] text-sm"
+            className="mb-6 p-3 rounded-sm bg-(--role-admin-bg) border border-(--role-admin-border) text-(--role-admin-text) text-sm"
             data-testid="analytics-error"
           >
             {error}
@@ -228,11 +226,11 @@ export default function AnalyticsPage() {
 
         {data?.permit && (
           <div
-            className="mb-6 p-3 rounded bg-[var(--surface)] border border-[var(--border)] text-xs text-[var(--text-secondary)]"
+            className="mb-6 p-3 rounded-sm bg-(--surface) border border-(--border) text-xs text-(--text-secondary)"
             data-testid="analytics-permit"
           >
             Under data permit{" "}
-            <span className="font-mono text-[var(--text-primary)]">
+            <span className="font-mono text-(--text-primary)">
               {data.permit.permitId}
             </span>
             {data.permit.datasetId && <> for {data.permit.datasetId}</>}
@@ -248,25 +246,23 @@ export default function AnalyticsPage() {
           {statCards.map(({ label, value, icon: Icon, color }) => (
             <div
               key={label}
-              className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1"
+              className="bg-(--surface) border border-(--border) rounded-xl p-4 flex flex-col gap-1"
             >
               <Icon size={16} className={color} />
               <span className="text-2xl font-bold">
                 {loading ? "—" : (value ?? 0).toLocaleString()}
               </span>
-              <span className="text-xs text-[var(--text-secondary)]">
-                {label}
-              </span>
+              <span className="text-xs text-(--text-secondary)">{label}</span>
             </div>
           ))}
         </div>
 
         {/* Gender breakdown */}
         {!loading && data?.genderBreakdown && (
-          <div className="mb-8 bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5">
+          <div className="mb-8 bg-(--surface) border border-(--border) rounded-xl p-5">
             <div className="flex items-center gap-2 mb-3">
-              <Users size={16} className="text-[var(--text-secondary)]" />
-              <h2 className="font-semibold text-sm text-[var(--text-primary)]">
+              <Users size={16} className="text-(--text-secondary)" />
+              <h2 className="font-semibold text-sm text-(--text-primary)">
                 Gender Distribution
               </h2>
             </div>
@@ -287,10 +283,8 @@ export default function AnalyticsPage() {
                         g.gender === "Female" ? "bg-layer3" : "bg-layer4"
                       }`}
                     />
-                    <span className="text-[var(--text-primary)]">
-                      {g.gender}
-                    </span>
-                    <span className="text-[var(--text-secondary)]">
+                    <span className="text-(--text-primary)">{g.gender}</span>
+                    <span className="text-(--text-secondary)">
                       {g.count.toLocaleString()} ({pct}%)
                     </span>
                   </div>

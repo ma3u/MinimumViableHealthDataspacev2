@@ -70,21 +70,21 @@ export default function DemoHubPage() {
         <Users size={28} className="text-blue-800 dark:text-blue-300" />
         <h1 className="text-3xl font-bold">Demo Persona Selector</h1>
       </div>
-      <p className="text-[var(--text-secondary)] mb-2">
+      <p className="text-(--text-secondary) mb-2">
         Explore the Health Dataspace as any of the 7 demo participants — no
         login required.
       </p>
-      <p className="text-sm text-[var(--text-secondary)] mb-10">
+      <p className="text-sm text-(--text-secondary) mb-10">
         Select a persona below. Navigation, data, and views will update to match
         that participant&apos;s role. Switch anytime via the user menu{" "}
-        <span className="text-[var(--text-secondary)]">→</span>{" "}
+        <span className="text-(--text-secondary)">→</span>{" "}
         <em>Switch demo persona</em>.
       </p>
 
       {/* Featured journey CTA */}
       <Link
         href="/journey"
-        className="group mb-10 flex items-center justify-between gap-4 rounded-2xl border-2 p-5 transition-all hover:scale-[1.01] hover:shadow-lg bg-[var(--surface-2)]"
+        className="group mb-10 flex items-center justify-between gap-4 rounded-2xl border-2 p-5 transition-all hover:scale-[1.01] hover:shadow-lg bg-(--surface-2)"
         style={{ borderColor: "#7D3C98" }}
       >
         <div className="flex items-center gap-4">
@@ -95,10 +95,10 @@ export default function DemoHubPage() {
             <Heart size={24} />
           </span>
           <div>
-            <p className="font-bold text-lg text-[var(--text-primary)]">
+            <p className="font-bold text-lg text-(--text-primary)">
               ▶ Maria&apos;s journey — the EHDS Patient Wallet
             </p>
-            <p className="text-sm text-[var(--text-secondary)]">
+            <p className="text-sm text-(--text-secondary)">
               Register with EUDI Wallet → get your EHR → donate to research →
               see your results
             </p>
@@ -106,7 +106,7 @@ export default function DemoHubPage() {
         </div>
         <ArrowRight
           size={22}
-          className="text-[var(--text-secondary)] group-hover:translate-x-1 transition-transform shrink-0"
+          className="text-(--text-secondary) group-hover:translate-x-1 transition-transform shrink-0"
         />
       </Link>
 
@@ -127,7 +127,7 @@ export default function DemoHubPage() {
             <button
               key={persona.username}
               onClick={() => handleSelect(persona.username, persona.personaId)}
-              className={`group text-left rounded-2xl border p-6 transition-all hover:scale-[1.02] hover:shadow-lg ${persona.badge} bg-[var(--surface)] hover:bg-[var(--surface-2)]`}
+              className={`group text-left rounded-2xl border p-6 transition-all hover:scale-[1.02] hover:shadow-lg ${persona.badge} bg-(--surface) hover:bg-(--surface-2)`}
             >
               {/* Icon + username */}
               <div className={`flex items-center gap-3 mb-3 ${persona.color}`}>
@@ -138,12 +138,12 @@ export default function DemoHubPage() {
               </div>
 
               {/* Organisation */}
-              <p className="text-sm text-[var(--text-primary)] font-medium mb-1">
+              <p className="text-sm text-(--text-primary) font-medium mb-1">
                 {persona.organisation}
               </p>
 
               {/* Description */}
-              <p className="text-xs text-[var(--text-secondary)] mb-4 leading-relaxed">
+              <p className="text-xs text-(--text-secondary) mb-4 leading-relaxed">
                 {persona.description}
               </p>
 
@@ -186,7 +186,7 @@ export default function DemoHubPage() {
       </div>
 
       {/* Footer note */}
-      <p className="mt-12 text-xs text-[var(--text-secondary)] text-center">
+      <p className="mt-12 text-xs text-(--text-secondary) text-center">
         Static demo — all data is synthetic. No login, no real patient records.
         <br />
         EHDS Art. 3 · GDPR Art. 15-22 · DSP 2025-1 · FHIR R4 · OMOP CDM

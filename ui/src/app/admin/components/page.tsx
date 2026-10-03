@@ -156,22 +156,22 @@ const LAYER_META: Record<
   "edc-core": {
     label: "EDC-V Core",
     icon: Server,
-    color: "text-[var(--accent)]",
+    color: "text-(--accent)",
   },
   identity: {
     label: "Identity & Trust",
     icon: Shield,
-    color: "text-[var(--accent)]",
+    color: "text-(--accent)",
   },
   cfm: {
     label: "Connector Fabric Manager",
     icon: Workflow,
-    color: "text-[var(--success-text)]",
+    color: "text-(--success-text)",
   },
   infrastructure: {
     label: "Infrastructure",
     icon: HardDrive,
-    color: "text-[var(--warning-text)]",
+    color: "text-(--warning-text)",
   },
 };
 
@@ -199,23 +199,23 @@ const SEVERITY_STYLES: Record<
   },
   healthy: {
     dot: "bg-emerald-500",
-    border: "border-[var(--border)]",
+    border: "border-(--border)",
     bg: "",
   },
   unknown: {
     dot: "bg-gray-500",
-    border: "border-[var(--border)]",
+    border: "border-(--border)",
     bg: "",
   },
 };
 
 const ROLE_COLORS: Record<string, string> = {
-  DATA_HOLDER: "bg-blue-500/20 text-[var(--accent)]",
-  DATA_USER: "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)]",
-  HDAB: "bg-purple-500/20 text-[var(--accent)]",
-  "health-data-access-body": "bg-purple-500/20 text-[var(--accent)]",
-  "data-holder": "bg-blue-500/20 text-[var(--accent)]",
-  "data-user": "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)]",
+  DATA_HOLDER: "bg-blue-500/20 text-(--accent)",
+  DATA_USER: "bg-(--badge-active-bg) text-(--badge-active-text)",
+  HDAB: "bg-purple-500/20 text-(--accent)",
+  "health-data-access-body": "bg-purple-500/20 text-(--accent)",
+  "data-holder": "bg-blue-500/20 text-(--accent)",
+  "data-user": "bg-(--badge-active-bg) text-(--badge-active-text)",
 };
 
 // ---------------------------------------------------------------------------
@@ -237,9 +237,7 @@ function Sparkline({
 }) {
   if (data.length < 2)
     return (
-      <span className="text-[10px] text-[var(--text-secondary)]">
-        collecting…
-      </span>
+      <span className="text-[10px] text-(--text-secondary)">collecting…</span>
     );
 
   const effectiveMax = max > 0 ? max : 1;
@@ -309,7 +307,7 @@ function InfoPopover({ name }: { name: string }) {
           e.stopPropagation();
           setOpen(!open);
         }}
-        className="text-[var(--text-secondary)] hover:text-teal-800 dark:hover:text-teal-300 transition-colors p-0.5"
+        className="text-(--text-secondary) hover:text-teal-800 dark:hover:text-teal-300 transition-colors p-0.5"
         title={`Info: ${name}`}
       >
         <Info size={13} />
@@ -319,38 +317,34 @@ function InfoPopover({ name }: { name: string }) {
           {/* Backdrop */}
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
           {/* Popover */}
-          <div className="absolute z-40 left-6 top-0 w-80 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded-xl shadow-2xl p-4 text-xs space-y-2">
+          <div className="absolute z-40 left-6 top-0 w-80 bg-(--surface-2) border border-(--border-ui) rounded-xl shadow-2xl p-4 text-xs space-y-2">
             <div className="flex items-center justify-between mb-1">
-              <span className="font-semibold text-sm text-[var(--text-primary)]">
+              <span className="font-semibold text-sm text-(--text-primary)">
                 {name}
               </span>
               <button
                 onClick={() => setOpen(false)}
-                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                className="text-(--text-secondary) hover:text-(--text-primary)"
               >
                 <X size={14} />
               </button>
             </div>
-            <p className="text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-(--text-secondary) leading-relaxed">
               {meta.description}
             </p>
-            <div className="grid grid-cols-[80px_1fr] gap-y-1.5 gap-x-2 pt-1 border-t border-[var(--border)]">
-              <span className="text-[var(--text-secondary)]">Protocol</span>
-              <span className="text-[var(--text-primary)]">
-                {meta.protocol}
-              </span>
-              <span className="text-[var(--text-secondary)]">Ports</span>
-              <span className="text-[var(--text-primary)] font-mono text-[11px]">
+            <div className="grid grid-cols-[80px_1fr] gap-y-1.5 gap-x-2 pt-1 border-t border-(--border)">
+              <span className="text-(--text-secondary)">Protocol</span>
+              <span className="text-(--text-primary)">{meta.protocol}</span>
+              <span className="text-(--text-secondary)">Ports</span>
+              <span className="text-(--text-primary) font-mono text-[11px]">
                 {meta.ports}
               </span>
-              <span className="text-[var(--text-secondary)]">Depends on</span>
-              <span className="text-[var(--text-primary)]">
+              <span className="text-(--text-secondary)">Depends on</span>
+              <span className="text-(--text-primary)">
                 {meta.dependsOn.length > 0 ? meta.dependsOn.join(", ") : "None"}
               </span>
-              <span className="text-[var(--text-secondary)]">Health</span>
-              <span className="text-[var(--text-primary)]">
-                {meta.healthSource}
-              </span>
+              <span className="text-(--text-secondary)">Health</span>
+              <span className="text-(--text-primary)">{meta.healthSource}</span>
             </div>
           </div>
         </>
@@ -375,8 +369,8 @@ function ComponentRow({
   const maxCpu = Math.max(...cpuData, 1);
 
   return (
-    <tr className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/40 transition-colors">
-      <td className="py-2.5 px-3 text-sm font-medium text-[var(--text-primary)]">
+    <tr className="border-b border-(--border) hover:bg-(--surface-2)/40 transition-colors">
+      <td className="py-2.5 px-3 text-sm font-medium text-(--text-primary)">
         <span className="flex items-center gap-1.5">
           {comp.component}
           <InfoPopover name={comp.component} />
@@ -385,12 +379,12 @@ function ComponentRow({
       <td className="py-2.5 px-3">
         <StatusBadge status={comp.status} />
       </td>
-      <td className="py-2.5 px-3 text-xs text-[var(--text-secondary)] tabular-nums">
+      <td className="py-2.5 px-3 text-xs text-(--text-secondary) tabular-nums">
         {comp.uptime}
       </td>
       <td className="py-2.5 px-3">
         <div className="flex items-center gap-2">
-          <span className="text-xs tabular-nums text-[var(--text-primary)] w-12 text-right">
+          <span className="text-xs tabular-nums text-(--text-primary) w-12 text-right">
             {comp.cpu.toFixed(1)}%
           </span>
           <Sparkline data={cpuData} max={maxCpu} color="#60a5fa" />
@@ -398,7 +392,7 @@ function ComponentRow({
       </td>
       <td className="py-2.5 px-3">
         <div className="flex items-center gap-2">
-          <span className="text-xs tabular-nums text-[var(--text-primary)] w-16 text-right">
+          <span className="text-xs tabular-nums text-(--text-primary) w-16 text-right">
             {comp.mem.usedMB < 1 ? "<1" : Math.round(comp.mem.usedMB)} MB
           </span>
           <Sparkline
@@ -408,7 +402,7 @@ function ComponentRow({
           />
         </div>
       </td>
-      <td className="py-2.5 px-3 text-xs text-[var(--text-secondary)] tabular-nums">
+      <td className="py-2.5 px-3 text-xs text-(--text-secondary) tabular-nums">
         {comp.mem.percent.toFixed(1)}%
       </td>
     </tr>
@@ -456,16 +450,16 @@ function TopoComponentCard({
       className={`border rounded-lg p-3 ${sev.border} ${sev.bg} transition-colors`}
     >
       <div className="flex items-center justify-between mb-1.5">
-        <span className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-primary)]">
+        <span className="flex items-center gap-1.5 text-xs font-medium text-(--text-primary)">
           <SeverityDot severity={comp.severity} />
           {comp.name}
           <InfoPopover name={comp.name} />
         </span>
-        <span className="text-[10px] text-[var(--text-secondary)] capitalize">
+        <span className="text-[10px] text-(--text-secondary) capitalize">
           {comp.status}
           {metricsShared && (
             <span
-              className="ml-1 italic text-[9px] text-[var(--text-secondary)]"
+              className="ml-1 italic text-[9px] text-(--text-secondary)"
               title={sharedTitle}
             >
               · shared
@@ -473,7 +467,7 @@ function TopoComponentCard({
           )}
         </span>
       </div>
-      <div className="grid grid-cols-3 gap-1 text-[10px] text-[var(--text-secondary)]">
+      <div className="grid grid-cols-3 gap-1 text-[10px] text-(--text-secondary)">
         <span title={sharedTitle}>
           <Cpu size={9} className="inline mr-0.5" />
           {`${comp.cpu.toFixed(1)}%`}
@@ -519,7 +513,7 @@ function ResourceSummary({
 
   if (metricsShared) {
     return (
-      <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] italic">
+      <div className="flex items-center gap-2 text-xs text-(--text-secondary) italic">
         {label && <span className="mr-1">{label}</span>}
         <span title="Containers are shared across all participants on this deployment — per-container CPU/MEM is shown in Layer View.">
           shared infrastructure — see Layer View
@@ -529,19 +523,17 @@ function ResourceSummary({
   }
 
   return (
-    <div className="flex items-center gap-x-4 text-xs text-[var(--text-secondary)]">
-      {label && (
-        <span className="text-[var(--text-secondary)] mr-1">{label}</span>
-      )}
+    <div className="flex items-center gap-x-4 text-xs text-(--text-secondary)">
+      {label && <span className="text-(--text-secondary) mr-1">{label}</span>}
       <span className="flex items-center gap-1 tabular-nums">
-        <Cpu size={10} className="text-[var(--accent)]" />
-        <span className="text-[var(--text-primary)] font-medium">
+        <Cpu size={10} className="text-(--accent)" />
+        <span className="text-(--text-primary) font-medium">
           CPU {totalCpu.toFixed(1)}%
         </span>
       </span>
       <span className="flex items-center gap-1 tabular-nums">
-        <HardDrive size={10} className="text-[var(--accent)]" />
-        <span className="text-[var(--text-primary)] font-medium">
+        <HardDrive size={10} className="text-(--accent)" />
+        <span className="text-(--text-primary) font-medium">
           MEM {fmtMem(totalMem)}
         </span>
       </span>
@@ -562,23 +554,19 @@ function TrendArrow({
   previous: number;
   hasPrevData: boolean;
 }) {
-  if (!hasPrevData)
-    return <span className="text-[var(--text-secondary)]">—</span>;
+  if (!hasPrevData) return <span className="text-(--text-secondary)">—</span>;
   const delta = current - previous;
   const pct =
     previous > 0 ? Math.round((delta / previous) * 100) : delta > 0 ? 100 : 0;
   if (Math.abs(pct) < 3) return <span title="Stable vs yesterday">→</span>;
   if (delta > 0)
     return (
-      <span
-        className="text-[var(--danger-text)]"
-        title={`+${pct}% vs yesterday`}
-      >
+      <span className="text-(--danger-text)" title={`+${pct}% vs yesterday`}>
         ↑
       </span>
     );
   return (
-    <span className="text-[var(--success-text)]" title={`${pct}% vs yesterday`}>
+    <span className="text-(--success-text)" title={`${pct}% vs yesterday`}>
       ↓
     </span>
   );
@@ -598,32 +586,32 @@ function ClusterResourceBanner({
   const hasPrev = metrics.prev24h.samples > 0;
 
   return (
-    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border border-[var(--border)] rounded-xl px-4 py-3 mb-6 bg-[var(--surface)]/40">
-      <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border border-(--border) rounded-xl px-4 py-3 mb-6 bg-(--surface)/40">
+      <div className="flex items-center gap-2 text-xs text-(--text-secondary)">
         <Activity
           size={14}
           className="text-teal-800 dark:text-teal-300 shrink-0"
         />
-        <span className="font-medium text-[var(--text-primary)]">Cluster</span>
+        <span className="font-medium text-(--text-primary)">Cluster</span>
       </div>
 
       {/* Current */}
       <div className="flex items-center gap-1.5 text-xs">
-        <Cpu size={11} className="text-[var(--accent)]" />
-        <span className="text-[var(--text-primary)] tabular-nums">
+        <Cpu size={11} className="text-(--accent)" />
+        <span className="text-(--text-primary) tabular-nums">
           {metrics.currentCpu.toFixed(1)}%
         </span>
-        <span className="text-[var(--text-secondary)]">now</span>
+        <span className="text-(--text-secondary)">now</span>
       </div>
       <div className="flex items-center gap-1.5 text-xs">
-        <HardDrive size={11} className="text-[var(--accent)]" />
-        <span className="text-[var(--text-primary)] tabular-nums">
+        <HardDrive size={11} className="text-(--accent)" />
+        <span className="text-(--text-primary) tabular-nums">
           {fmtMem(metrics.currentMemMB)}
         </span>
-        <span className="text-[var(--text-secondary)]">now</span>
+        <span className="text-(--text-secondary)">now</span>
       </div>
 
-      <span className="text-[var(--text-secondary)]">│</span>
+      <span className="text-(--text-secondary)">│</span>
 
       {/* 24h peaks */}
       <div className="flex items-center gap-1 text-xs">
@@ -632,10 +620,10 @@ function ClusterResourceBanner({
           previous={metrics.prev24h.peakCpu}
           hasPrevData={hasPrev}
         />
-        <span className="text-[var(--accent)] tabular-nums font-medium">
+        <span className="text-(--accent) tabular-nums font-medium">
           CPU {metrics.last24h.peakCpu.toFixed(1)}%
         </span>
-        <span className="text-[var(--text-secondary)]">peak 24h</span>
+        <span className="text-(--text-secondary)">peak 24h</span>
       </div>
       <div className="flex items-center gap-1 text-xs">
         <TrendArrow
@@ -643,15 +631,15 @@ function ClusterResourceBanner({
           previous={metrics.prev24h.peakMemMB}
           hasPrevData={hasPrev}
         />
-        <span className="text-[var(--accent)] tabular-nums font-medium">
+        <span className="text-(--accent) tabular-nums font-medium">
           MEM {fmtMem(metrics.last24h.peakMemMB)}
         </span>
-        <span className="text-[var(--text-secondary)]">peak 24h</span>
+        <span className="text-(--text-secondary)">peak 24h</span>
       </div>
 
       {metrics.last24h.samples > 0 && (
         <span
-          className="text-[10px] text-[var(--text-secondary)]"
+          className="text-[10px] text-(--text-secondary)"
           title="Number of data points collected in the last 24h"
         >
           ({metrics.last24h.samples} samples)
@@ -675,8 +663,7 @@ function ParticipantTopologySection({
   );
   const sev = SEVERITY_STYLES[participant.health];
   const roleClass =
-    ROLE_COLORS[participant.role] ||
-    "bg-gray-500/20 text-[var(--text-secondary)]";
+    ROLE_COLORS[participant.role] || "bg-gray-500/20 text-(--text-secondary)";
 
   return (
     <div
@@ -685,26 +672,23 @@ function ParticipantTopologySection({
       {/* Header bar — click to expand/collapse */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[var(--surface-2)]/40 transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-(--surface-2)/40 transition-colors"
       >
         {expanded ? (
-          <ChevronDown
-            size={14}
-            className="text-[var(--text-secondary)] shrink-0"
-          />
+          <ChevronDown size={14} className="text-(--text-secondary) shrink-0" />
         ) : (
           <ChevronRight
             size={14}
-            className="text-[var(--text-secondary)] shrink-0"
+            className="text-(--text-secondary) shrink-0"
           />
         )}
         <SeverityDot severity={participant.health} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-sm text-[var(--text-primary)]">
+            <span className="font-semibold text-sm text-(--text-primary)">
               {participant.displayName}
             </span>
-            <span className="text-xs text-[var(--text-secondary)]">
+            <span className="text-xs text-(--text-secondary)">
               {participant.organization}
             </span>
           </div>
@@ -719,18 +703,18 @@ function ParticipantTopologySection({
         >
           {participant.role}
         </span>
-        <span className="text-[10px] text-[var(--text-secondary)] shrink-0">
+        <span className="text-[10px] text-(--text-secondary) shrink-0">
           {participant.components.length} services
         </span>
       </button>
 
       {/* Expanded: DID + component grid */}
       {expanded && (
-        <div className="px-4 pb-4 pt-1 border-t border-[var(--border)]/60">
-          <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)] mb-3">
+        <div className="px-4 pb-4 pt-1 border-t border-(--border)/60">
+          <div className="flex items-center gap-4 text-[11px] text-(--text-secondary) mb-3">
             <span>
               DID:{" "}
-              <span className="font-mono text-[var(--text-secondary)]">
+              <span className="font-mono text-(--text-secondary)">
                 {participant.did.length > 40
                   ? participant.did.slice(0, 40) + "…"
                   : participant.did}
@@ -741,8 +725,8 @@ function ParticipantTopologySection({
               <span
                 className={
                   participant.state === "CREATED"
-                    ? "text-[var(--success-text)]"
-                    : "text-[var(--warning-text)]"
+                    ? "text-(--success-text)"
+                    : "text-(--warning-text)"
                 }
               >
                 {participant.state}
@@ -784,12 +768,12 @@ function CriticalBanner({
 
   return (
     <div className="flex items-center gap-3 border border-red-500/40 bg-red-900/15 rounded-xl px-4 py-3 mb-6">
-      <AlertTriangle size={18} className="text-[var(--danger-text)] shrink-0" />
+      <AlertTriangle size={18} className="text-(--danger-text) shrink-0" />
       <div className="text-sm">
-        <span className="font-semibold text-[var(--danger-text)]">
+        <span className="font-semibold text-(--danger-text)">
           {degraded} of {total} participants degraded
         </span>
-        <span className="text-[var(--text-secondary)] ml-2">
+        <span className="text-(--text-secondary) ml-2">
           — {names.join(", ")}
         </span>
       </div>
@@ -899,14 +883,14 @@ function CostEstimatorPanel({
   const logTotal = (count * LOG_INJECTION_MB) / 1024; // GB/month total
 
   return (
-    <div className="border border-[var(--border)] rounded-xl p-5 mt-10 space-y-6">
+    <div className="border border-(--border) rounded-xl p-5 mt-10 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
-          <BarChart2 size={16} className="text-[var(--success-text)]" />
+        <h2 className="font-semibold text-sm flex items-center gap-2 text-(--text-primary)">
+          <BarChart2 size={16} className="text-(--success-text)" />
           Monthly Cost Estimate — STACKIT (Frankfurt)
         </h2>
-        <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)]">
+        <div className="flex items-center gap-3 text-xs text-(--text-secondary)">
           <label className="flex items-center gap-2">
             <Users size={13} />
             Participants:
@@ -918,7 +902,7 @@ function CostEstimatorPanel({
               onChange={(e) => setCount(Number(e.target.value))}
               className="w-28 accent-emerald-500"
             />
-            <span className="font-mono font-semibold text-[var(--text-primary)] w-6 text-right">
+            <span className="font-mono font-semibold text-(--text-primary) w-6 text-right">
               {count}
             </span>
           </label>
@@ -927,45 +911,45 @@ function CostEstimatorPanel({
 
       {/* StackIT node grid */}
       <div>
-        <p className="text-[11px] text-[var(--text-secondary)] mb-2 uppercase tracking-wide">
+        <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
           Shared Infrastructure (fixed)
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
           {STACKIT_NODES.map((n) => (
             <div
               key={n.id}
-              className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40"
+              className="border border-(--border) rounded-lg p-3 bg-(--surface)/40"
             >
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-medium text-[var(--text-primary)]">
+                <span className="text-xs font-medium text-(--text-primary)">
                   {n.label}
                 </span>
-                <span className="text-xs font-mono text-[var(--success-text)]">
+                <span className="text-xs font-mono text-(--success-text)">
                   €{n.eur}/mo
                 </span>
               </div>
-              <p className="text-[10px] text-[var(--text-secondary)] font-mono mb-1.5">
+              <p className="text-[10px] text-(--text-secondary) font-mono mb-1.5">
                 {n.flavor}
               </p>
               <div className="flex flex-wrap gap-1">
                 {n.components.map((c) => (
                   <span
                     key={c}
-                    className="text-[9px] px-1.5 py-0.5 rounded bg-[var(--surface-2)] text-[var(--text-secondary)]"
+                    className="text-[9px] px-1.5 py-0.5 rounded-sm bg-(--surface-2) text-(--text-secondary)"
                   >
                     {c}
                   </span>
                 ))}
               </div>
-              <p className="text-[9px] text-[var(--text-secondary)] mt-1.5 leading-relaxed">
+              <p className="text-[9px] text-(--text-secondary) mt-1.5 leading-relaxed">
                 {n.note}
               </p>
             </div>
           ))}
         </div>
-        <p className="text-xs text-[var(--text-secondary)] mt-2 text-right">
+        <p className="text-xs text-(--text-secondary) mt-2 text-right">
           Shared fixed:{" "}
-          <span className="font-mono text-[var(--text-primary)]">
+          <span className="font-mono text-(--text-primary)">
             €{SHARED_EUR}/mo
           </span>
         </p>
@@ -973,54 +957,52 @@ function CostEstimatorPanel({
 
       {/* Per-participant breakdown */}
       <div>
-        <p className="text-[11px] text-[var(--text-secondary)] mb-2 uppercase tracking-wide">
+        <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
           Per-Participant Cost (2 GB allocation)
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
-          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
-            <div className="text-[var(--text-secondary)] mb-0.5">Compute</div>
-            <div className="font-mono text-[var(--text-primary)]">
+          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
+            <div className="text-(--text-secondary) mb-0.5">Compute</div>
+            <div className="font-mono text-(--text-primary)">
               €{PER_PARTICIPANT_COMPUTE_EUR}/mo
             </div>
-            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+            <div className="text-[10px] text-(--text-secondary) mt-1">
               1 vCPU / 2 GB — Control Plane + Identity Hub + Issuer Service
             </div>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
-            <div className="text-[var(--text-secondary)] mb-0.5">Storage</div>
-            <div className="font-mono text-[var(--text-primary)]">
+          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
+            <div className="text-(--text-secondary) mb-0.5">Storage</div>
+            <div className="font-mono text-(--text-primary)">
               €{(PER_PARTICIPANT_STORAGE_GB * STORAGE_EUR_PER_GB).toFixed(2)}{" "}
-              <span className="text-[var(--text-secondary)] text-[10px]">
+              <span className="text-(--text-secondary) text-[10px]">
                 (+€{(HEALTH_DATA_STORAGE_GB * STORAGE_EUR_PER_GB).toFixed(2)}{" "}
                 data holders)
               </span>
             </div>
-            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+            <div className="text-[10px] text-(--text-secondary) mt-1">
               {PER_PARTICIPANT_STORAGE_GB} GB base · {HEALTH_DATA_STORAGE_GB} GB
               health records · €{STORAGE_EUR_PER_GB}/GB/mo
             </div>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
-            <div className="flex items-center gap-1 text-[var(--text-secondary)] mb-0.5">
+          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
+            <div className="flex items-center gap-1 text-(--text-secondary) mb-0.5">
               <Network size={11} />
               CP↔DP Network
             </div>
-            <div className="font-mono text-[var(--text-primary)]">
+            <div className="font-mono text-(--text-primary)">
               €{((CP_DP_TRAFFIC_MB / 1024) * NETWORK_EUR_PER_GB).toFixed(3)}/mo
             </div>
-            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+            <div className="text-[10px] text-(--text-secondary) mt-1">
               {CP_DP_TRAFFIC_MB} MB/mo per participant (DSP negotiation +
               transfer receipts + audit) · €{NETWORK_EUR_PER_GB}/GB egress
             </div>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
-            <div className="text-[var(--text-secondary)] mb-0.5">
-              Log Injection
-            </div>
-            <div className="font-mono text-[var(--text-primary)]">
+          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
+            <div className="text-(--text-secondary) mb-0.5">Log Injection</div>
+            <div className="font-mono text-(--text-primary)">
               €{((LOG_INJECTION_MB / 1024) * LOG_EUR_PER_GB).toFixed(3)}/mo
             </div>
-            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+            <div className="text-[10px] text-(--text-secondary) mt-1">
               {LOG_INJECTION_MB} MB/mo EHDS Article 50 audit trail → SIEM/Loki ·
               €{LOG_EUR_PER_GB}/GB
             </div>
@@ -1029,29 +1011,29 @@ function CostEstimatorPanel({
       </div>
 
       {/* Totals */}
-      <div className="border border-[var(--border)] rounded-xl p-4 bg-[var(--surface)]/60">
+      <div className="border border-(--border) rounded-xl p-4 bg-(--surface)/60">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
           <div>
-            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+            <div className="text-[10px] text-(--text-secondary) mb-1">
               Shared fixed
             </div>
-            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
+            <div className="font-mono text-lg font-semibold text-(--text-primary)">
               €{SHARED_EUR}
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+            <div className="text-[10px] text-(--text-secondary) mb-1">
               {count} × participants
             </div>
-            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
+            <div className="font-mono text-lg font-semibold text-(--text-primary)">
               €{participantCost.toFixed(0)}
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+            <div className="text-[10px] text-(--text-secondary) mb-1">
               Network ({(networkTotal + logTotal).toFixed(1)} GB/mo)
             </div>
-            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
+            <div className="font-mono text-lg font-semibold text-(--text-primary)">
               €
               {(
                 networkTotal * NETWORK_EUR_PER_GB +
@@ -1059,19 +1041,19 @@ function CostEstimatorPanel({
               ).toFixed(1)}
             </div>
           </div>
-          <div className="border-l border-[var(--border)]">
-            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+          <div className="border-l border-(--border)">
+            <div className="text-[10px] text-(--text-secondary) mb-1">
               Total / month
             </div>
-            <div className="font-mono text-xl font-bold text-[var(--success-text)]">
+            <div className="font-mono text-xl font-bold text-(--success-text)">
               €{total.toFixed(0)}
             </div>
-            <div className="text-[10px] text-[var(--text-secondary)] mt-0.5">
+            <div className="text-[10px] text-(--text-secondary) mt-0.5">
               €{perParticipant.toFixed(2)}/participant
             </div>
           </div>
         </div>
-        <p className="text-[9px] text-[var(--text-secondary)] mt-3 text-center">
+        <p className="text-[9px] text-(--text-secondary) mt-3 text-center">
           Assumes 60 % DATA_HOLDER / 40 % DATA_USER mix · STACKIT Frankfurt ·
           prices excl. VAT · does not include Kubernetes management fee or
           premium support
@@ -1172,21 +1154,21 @@ function AzureCostEstimatorPanel({
   const totalMemGiB = specs.reduce((s, a) => s + a.memGiB, 0);
 
   return (
-    <div className="border border-[var(--border)] rounded-xl p-5 mt-10 space-y-6">
+    <div className="border border-(--border) rounded-xl p-5 mt-10 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
-          <BarChart2 size={16} className="text-[var(--success-text)]" />
+        <h2 className="font-semibold text-sm flex items-center gap-2 text-(--text-primary)">
+          <BarChart2 size={16} className="text-(--success-text)" />
           Monthly Cost Estimate — Azure Container Apps (Consumption, 24×7)
         </h2>
-        <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+        <div className="flex items-center gap-4 text-xs text-(--text-secondary)">
           <span
             className="flex items-center gap-1.5"
             title={`Sum of Azure Files share quotas: neo4j-data ${SHARE_NEO4J_DATA_GIB} + neo4j-logs ${SHARE_NEO4J_LOGS_GIB} + pg-data ${SHARE_PG_DATA_GIB} + vault-data ${SHARE_VAULT_DATA_GIB} GiB. Configured in scripts/azure/env.sh.`}
           >
             <HardDrive size={13} />
             Storage:{" "}
-            <span className="font-mono font-semibold text-[var(--text-primary)]">
+            <span className="font-mono font-semibold text-(--text-primary)">
               {storageGiB} GiB
             </span>
           </span>
@@ -1196,7 +1178,7 @@ function AzureCostEstimatorPanel({
           >
             <Network size={13} />
             Egress (est.):{" "}
-            <span className="font-mono font-semibold text-[var(--text-primary)]">
+            <span className="font-mono font-semibold text-(--text-primary)">
               {egressGiB} GiB
             </span>
           </span>
@@ -1205,7 +1187,7 @@ function AzureCostEstimatorPanel({
 
       {/* App grid — sorted by cost descending */}
       <div>
-        <p className="text-[11px] text-[var(--text-secondary)] mb-2 uppercase tracking-wide">
+        <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
           Container Apps — Compute (vCPU + Memory, 24×7 minReplicas=1)
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
@@ -1216,20 +1198,20 @@ function AzureCostEstimatorPanel({
               return (
                 <div
                   key={app.name}
-                  className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40"
+                  className="border border-(--border) rounded-lg p-3 bg-(--surface)/40"
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-[var(--text-primary)] font-mono">
+                    <span className="text-xs font-medium text-(--text-primary) font-mono">
                       {app.name}
                     </span>
-                    <span className="text-xs font-mono text-[var(--success-text)]">
+                    <span className="text-xs font-mono text-(--success-text)">
                       {formatUsd(app.totalUsd)}/mo
                     </span>
                   </div>
-                  <p className="text-[10px] text-[var(--text-secondary)] font-mono mb-1">
+                  <p className="text-[10px] text-(--text-secondary) font-mono mb-1">
                     {spec.cpu} vCPU · {spec.memGiB} GiB RAM
                   </p>
-                  <div className="flex gap-3 text-[9px] text-[var(--text-secondary)]">
+                  <div className="flex gap-3 text-[9px] text-(--text-secondary)">
                     <span>CPU {formatUsd(app.vcpuUsd)}</span>
                     <span>MEM {formatUsd(app.memUsd)}</span>
                   </div>
@@ -1237,13 +1219,13 @@ function AzureCostEstimatorPanel({
               );
             })}
         </div>
-        <p className="text-xs text-[var(--text-secondary)] mt-2 text-right">
+        <p className="text-xs text-(--text-secondary) mt-2 text-right">
           Gross compute:{" "}
-          <span className="font-mono text-[var(--text-primary)]">
+          <span className="font-mono text-(--text-primary)">
             {formatUsd(cost.grossVcpuUsd + cost.grossMemUsd)}/mo
           </span>{" "}
           · Free tier credit:{" "}
-          <span className="font-mono text-[var(--success-text)]">
+          <span className="font-mono text-(--success-text)">
             −{formatUsd(cost.freeCreditUsd)}
           </span>
         </p>
@@ -1251,42 +1233,42 @@ function AzureCostEstimatorPanel({
 
       {/* Storage + egress breakdown */}
       <div>
-        <p className="text-[11px] text-[var(--text-secondary)] mb-2 uppercase tracking-wide">
+        <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
           Storage & Network
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
-            <div className="text-[var(--text-secondary)] mb-0.5">
+          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
+            <div className="text-(--text-secondary) mb-0.5">
               Azure Files (Premium ZRS)
             </div>
-            <div className="font-mono text-[var(--text-primary)]">
+            <div className="font-mono text-(--text-primary)">
               {formatUsd(cost.storageUsd)}/mo
             </div>
-            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+            <div className="text-[10px] text-(--text-secondary) mt-1">
               {storageGiB} GiB · ${AZURE_FILES_USD_PER_GIB}/GiB·mo · Neo4j + PG
               + Vault volumes
             </div>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
-            <div className="text-[var(--text-secondary)] mb-0.5">
+          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
+            <div className="text-(--text-secondary) mb-0.5">
               Egress (outbound)
             </div>
-            <div className="font-mono text-[var(--text-primary)]">
+            <div className="font-mono text-(--text-primary)">
               {formatUsd(cost.egressUsd)}/mo
             </div>
-            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+            <div className="text-[10px] text-(--text-secondary) mt-1">
               {egressGiB} GiB · first {AZURE_EGRESS_FREE_GIB} GiB free · then $
               {AZURE_EGRESS_USD_PER_GIB}/GiB
             </div>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
-            <div className="text-[var(--text-secondary)] mb-0.5">
+          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
+            <div className="text-(--text-secondary) mb-0.5">
               Environment totals
             </div>
-            <div className="font-mono text-[var(--text-primary)]">
+            <div className="font-mono text-(--text-primary)">
               {totalVcpu.toFixed(2)} vCPU · {totalMemGiB.toFixed(1)} GiB
             </div>
-            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+            <div className="text-[10px] text-(--text-secondary) mt-1">
               {specs.length} Container Apps · Workaround B (no Log Analytics)
             </div>
           </div>
@@ -1294,45 +1276,45 @@ function AzureCostEstimatorPanel({
       </div>
 
       {/* Totals */}
-      <div className="border border-[var(--border)] rounded-xl p-4 bg-[var(--surface)]/60">
+      <div className="border border-(--border) rounded-xl p-4 bg-(--surface)/60">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
           <div>
-            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+            <div className="text-[10px] text-(--text-secondary) mb-1">
               Compute (net)
             </div>
-            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
+            <div className="font-mono text-lg font-semibold text-(--text-primary)">
               {formatUsd(cost.computeUsd)}
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+            <div className="text-[10px] text-(--text-secondary) mb-1">
               Storage
             </div>
-            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
+            <div className="font-mono text-lg font-semibold text-(--text-primary)">
               {formatUsd(cost.storageUsd)}
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+            <div className="text-[10px] text-(--text-secondary) mb-1">
               Egress
             </div>
-            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
+            <div className="font-mono text-lg font-semibold text-(--text-primary)">
               {formatUsd(cost.egressUsd)}
             </div>
           </div>
-          <div className="border-l border-[var(--border)]">
-            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+          <div className="border-l border-(--border)">
+            <div className="text-[10px] text-(--text-secondary) mb-1">
               Total / month
             </div>
-            <div className="font-mono text-xl font-bold text-[var(--success-text)]">
+            <div className="font-mono text-xl font-bold text-(--success-text)">
               {formatUsd(cost.totalUsd)}
             </div>
-            <div className="text-[10px] text-[var(--text-secondary)] mt-0.5">
+            <div className="text-[10px] text-(--text-secondary) mt-0.5">
               ≈ {formatEur(cost.totalEur)} (@ {USD_TO_EUR} EUR/USD)
             </div>
           </div>
         </div>
-        <p className="text-[9px] text-[var(--text-secondary)] mt-3 text-center">
+        <p className="text-[9px] text-(--text-secondary) mt-3 text-center">
           Azure Container Apps Consumption plan · West Europe list prices · 24×7
           minReplicas=1 · free tier (180 K vCPU-s + 360 K GiB-s) applied ·
           ADR-018 Workaround B (no Log Analytics Workspace)
@@ -1460,33 +1442,33 @@ export default function AdminComponentsPage() {
     viewMode === "layer" ? snapshot?.timestamp : topology?.timestamp;
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-7xl mx-auto px-8 py-10">
         {/* ── Page header ── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
             <h1 className="page-header">EDC Components</h1>
-            <p className="text-[var(--text-secondary)] text-lg mt-1">
+            <p className="text-(--text-secondary) text-lg mt-1">
               Infrastructure health · CPU &amp; memory per service
             </p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-[var(--success)]/10 text-[var(--success-text)] rounded-full border border-[var(--success)]/20 text-sm font-bold tracking-tight">
-            <span className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
+          <div className="flex items-center gap-2 px-4 py-2 bg-(--success)/10 text-(--success-text) rounded-full border border-(--success)/20 text-sm font-bold tracking-tight">
+            <span className="w-2 h-2 rounded-full bg-(--success) animate-pulse" />
             LIVE MONITORING
           </div>
         </div>
 
         {/* Controls bar */}
         <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
-          <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+          <div className="flex items-center gap-4 text-xs text-(--text-secondary)">
             {/* View toggle */}
-            <div className="flex bg-[var(--surface)] p-1 rounded-xl border border-[var(--border)]">
+            <div className="flex bg-(--surface) p-1 rounded-xl border border-(--border)">
               <button
                 onClick={() => setViewMode("layer")}
                 className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
                   viewMode === "layer"
-                    ? "bg-[var(--surface-card)] shadow-sm text-[var(--accent)]"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    ? "bg-(--surface-card) shadow-xs text-(--accent)"
+                    : "text-(--text-secondary) hover:text-(--text-primary)"
                 }`}
               >
                 Layer View
@@ -1495,8 +1477,8 @@ export default function AdminComponentsPage() {
                 onClick={() => setViewMode("participant")}
                 className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
                   viewMode === "participant"
-                    ? "bg-[var(--surface-card)] shadow-sm text-[var(--accent)]"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    ? "bg-(--surface-card) shadow-xs text-(--accent)"
+                    : "text-(--text-secondary) hover:text-(--text-primary)"
                 }`}
               >
                 Participant View
@@ -1508,12 +1490,10 @@ export default function AdminComponentsPage() {
               <>
                 <span>{totalServices} services</span>
                 <span>·</span>
-                <span className="text-[var(--success-text)]">
+                <span className="text-(--success-text)">
                   {healthyCount} healthy
                 </span>
-                <span className="text-[var(--accent)]">
-                  {runningCount} running
-                </span>
+                <span className="text-(--accent)">{runningCount} running</span>
                 <span>·</span>
                 <span>
                   <Cpu size={11} className="inline mr-0.5" />
@@ -1539,7 +1519,7 @@ export default function AdminComponentsPage() {
                 {topology.summary.degradedParticipants > 0 && (
                   <>
                     <span>·</span>
-                    <span className="text-[var(--danger-text)]">
+                    <span className="text-(--danger-text)">
                       {topology.summary.degradedParticipants} degraded
                     </span>
                   </>
@@ -1548,7 +1528,7 @@ export default function AdminComponentsPage() {
                   <>
                     <span>·</span>
                     <span
-                      className="italic text-[var(--text-secondary)]"
+                      className="italic text-(--text-secondary)"
                       title="Participants are logical DIDs on this deployment — they share the same ACA containers. Switch to Layer View for real per-container CPU/MEM from Azure Monitor."
                     >
                       shared infrastructure (see Layer View for metrics)
@@ -1560,19 +1540,19 @@ export default function AdminComponentsPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <label className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer">
+            <label className="flex items-center gap-1.5 text-xs text-(--text-secondary) cursor-pointer">
               <input
                 type="checkbox"
                 checked={autoRefresh}
                 onChange={(e) => setAutoRefresh(e.target.checked)}
-                className="rounded border-[var(--border-ui)] bg-[var(--surface-2)] text-teal-800 dark:text-teal-300 focus:ring-layer2 w-3.5 h-3.5"
+                className="rounded-sm border-(--border-ui) bg-(--surface-2) text-teal-800 dark:text-teal-300 focus:ring-layer2 w-3.5 h-3.5"
               />
               Auto-refresh (30s)
             </label>
             <button
               onClick={() => fetchData(true)}
               disabled={refreshing}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-[var(--border)] rounded-lg hover:border-layer2 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-(--border) rounded-lg hover:border-layer2 transition-colors disabled:opacity-50"
             >
               <RefreshCw
                 size={12}
@@ -1584,7 +1564,7 @@ export default function AdminComponentsPage() {
         </div>
 
         {loading ? (
-          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+          <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
             Loading EDC components…
           </div>
@@ -1608,13 +1588,13 @@ export default function AdminComponentsPage() {
 
               {/* Participant topology sections */}
               <div className="space-y-3 mb-8">
-                <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)] mb-3">
+                <h2 className="font-semibold text-sm flex items-center gap-2 text-(--text-primary) mb-3">
                   <Users
                     size={16}
                     className="text-teal-800 dark:text-teal-300"
                   />
                   Dataspace Participants
-                  <span className="text-xs font-normal text-[var(--text-secondary)]">
+                  <span className="text-xs font-normal text-(--text-secondary)">
                     ({topology.participants.length})
                   </span>
                 </h2>
@@ -1632,13 +1612,10 @@ export default function AdminComponentsPage() {
               {topology.infrastructure.length > 0 && (
                 <div className="mb-8">
                   <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
-                    <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
-                      <HardDrive
-                        size={16}
-                        className="text-[var(--warning-text)]"
-                      />
+                    <h2 className="font-semibold text-sm flex items-center gap-2 text-(--text-primary)">
+                      <HardDrive size={16} className="text-(--warning-text)" />
                       Shared Infrastructure &amp; CFM
-                      <span className="text-xs font-normal text-[var(--text-secondary)]">
+                      <span className="text-xs font-normal text-(--text-secondary)">
                         ({topology.infrastructure.length})
                       </span>
                     </h2>
@@ -1657,7 +1634,7 @@ export default function AdminComponentsPage() {
 
               {/* Docker unavailable */}
               {!topology.dockerAvailable && (
-                <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-[var(--warning-text)]">
+                <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-(--warning-text)">
                   <strong>Docker socket not available.</strong> CPU and memory
                   metrics require the Docker socket to be mounted.
                 </div>
@@ -1672,33 +1649,33 @@ export default function AdminComponentsPage() {
             {/* Participants */}
             {snapshot && snapshot.participants.length > 0 && (
               <div className="mb-8">
-                <h2 className="font-semibold text-sm mb-4 flex items-center gap-2 text-[var(--text-primary)]">
+                <h2 className="font-semibold text-sm mb-4 flex items-center gap-2 text-(--text-primary)">
                   <Users
                     size={16}
                     className="text-teal-800 dark:text-teal-300"
                   />
                   Dataspace Participants
-                  <span className="text-xs font-normal text-[var(--text-secondary)]">
+                  <span className="text-xs font-normal text-(--text-secondary)">
                     ({snapshot.participants.length})
                   </span>
                 </h2>
-                <div className="overflow-x-auto border border-[var(--border)] rounded-xl">
+                <div className="overflow-x-auto border border-(--border) rounded-xl">
                   <table className="w-full text-left">
                     <thead>
-                      <tr className="border-b border-[var(--border)] bg-[var(--surface)]/60">
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-48">
+                      <tr className="border-b border-(--border) bg-(--surface)/60">
+                        <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-48">
                           Participant
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-32">
+                        <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-32">
                           Role
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)]">
+                        <th className="py-2 px-3 text-xs font-medium text-(--text-secondary)">
                           DID
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-28">
+                        <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-28">
                           State
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-20 text-center">
+                        <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-20 text-center">
                           Profiles
                         </th>
                       </tr>
@@ -1707,13 +1684,13 @@ export default function AdminComponentsPage() {
                       {snapshot.participants.map((p) => (
                         <tr
                           key={p.id}
-                          className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/40 transition-colors"
+                          className="border-b border-(--border) hover:bg-(--surface-2)/40 transition-colors"
                         >
                           <td className="py-2.5 px-3">
-                            <div className="font-semibold text-sm text-[var(--text-primary)]">
+                            <div className="font-semibold text-sm text-(--text-primary)">
                               {p.displayName}
                             </div>
-                            <div className="text-[11px] text-[var(--text-secondary)]">
+                            <div className="text-[11px] text-(--text-secondary)">
                               {p.organization}
                             </div>
                           </td>
@@ -1721,27 +1698,27 @@ export default function AdminComponentsPage() {
                             <span
                               className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
                                 ROLE_COLORS[p.role] ||
-                                "bg-gray-500/20 text-[var(--text-secondary)]"
+                                "bg-gray-500/20 text-(--text-secondary)"
                               }`}
                             >
                               {p.role}
                             </span>
                           </td>
-                          <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--text-secondary)]">
+                          <td className="py-2.5 px-3 font-mono text-[11px] text-(--text-secondary)">
                             {p.did}
                           </td>
                           <td className="py-2.5 px-3">
                             <span
                               className={`text-xs font-medium ${
                                 p.state === "CREATED"
-                                  ? "text-[var(--success-text)]"
-                                  : "text-[var(--warning-text)]"
+                                  ? "text-(--success-text)"
+                                  : "text-(--warning-text)"
                               }`}
                             >
                               {p.state}
                             </span>
                           </td>
-                          <td className="py-2.5 px-3 text-xs text-[var(--text-primary)] text-center">
+                          <td className="py-2.5 px-3 text-xs text-(--text-primary) text-center">
                             {p.profileCount}
                           </td>
                         </tr>
@@ -1761,33 +1738,33 @@ export default function AdminComponentsPage() {
 
               return (
                 <div key={layer} className="mb-8">
-                  <h2 className="font-semibold text-sm mb-3 flex items-center gap-2 text-[var(--text-primary)]">
+                  <h2 className="font-semibold text-sm mb-3 flex items-center gap-2 text-(--text-primary)">
                     <LayerIcon size={16} className={meta.color} />
                     {meta.label}
-                    <span className="text-xs font-normal text-[var(--text-secondary)]">
+                    <span className="text-xs font-normal text-(--text-secondary)">
                       ({items.length})
                     </span>
                   </h2>
-                  <div className="overflow-x-auto border border-[var(--border)] rounded-xl">
+                  <div className="overflow-x-auto border border-(--border) rounded-xl">
                     <table className="w-full text-left">
                       <thead>
-                        <tr className="border-b border-[var(--border)] bg-[var(--surface)]/60">
-                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-48">
+                        <tr className="border-b border-(--border) bg-(--surface)/60">
+                          <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-48">
                             Component
                           </th>
-                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-28">
+                          <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-28">
                             Health
                           </th>
-                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-24">
+                          <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-24">
                             Uptime
                           </th>
-                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-40">
+                          <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-40">
                             CPU (Last 24h)
                           </th>
-                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-44">
+                          <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-44">
                             Memory (Last 24h)
                           </th>
-                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-16">
+                          <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-16">
                             Mem %
                           </th>
                         </tr>
@@ -1816,7 +1793,7 @@ export default function AdminComponentsPage() {
               !snapshot.dockerAvailable &&
               snapshot.metricsSource !== "azure-monitor" &&
               snapshot.deploymentTarget !== "azure" && (
-                <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-[var(--warning-text)]">
+                <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-(--warning-text)">
                   <strong>Docker socket not available.</strong> CPU and memory
                   metrics require the Docker socket to be mounted.
                 </div>
@@ -1854,7 +1831,7 @@ export default function AdminComponentsPage() {
 
         {/* Timestamp */}
         {timestamp && (
-          <p className="text-[10px] text-[var(--text-secondary)] mt-4">
+          <p className="text-[10px] text-(--text-secondary) mt-4">
             Last updated: {new Date(timestamp).toLocaleString()}
           </p>
         )}

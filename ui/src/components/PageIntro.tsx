@@ -58,31 +58,31 @@ export default function PageIntro({
       <h1 className="page-header">{title}</h1>
 
       {/* Subtitle */}
-      <p className="text-[var(--text-secondary)] text-lg mt-1 max-w-3xl">
+      <p className="text-(--text-secondary) text-lg mt-1 max-w-3xl">
         {description}
       </p>
 
       {/* Workflow navigation */}
       {(prevStep || nextStep) && (
-        <div className="flex items-center gap-4 text-sm mt-3 text-[var(--text-secondary)]">
+        <div className="flex items-center gap-4 text-sm mt-3 text-(--text-secondary)">
           {prevStep && (
             <Link
               href={prevStep.href}
-              className="flex items-center gap-1 font-bold text-[var(--accent)] hover:underline"
+              className="flex items-center gap-1 font-bold text-(--accent) hover:underline"
             >
               <ArrowLeft size={13} />
               {prevStep.label}
             </Link>
           )}
           {prevStep && nextStep && (
-            <span className="text-[var(--border-ui)]" aria-hidden="true">
+            <span className="text-(--border-ui)" aria-hidden="true">
               ·
             </span>
           )}
           {nextStep && (
             <Link
               href={nextStep.href}
-              className="flex items-center gap-1 font-bold text-[var(--accent)] hover:underline"
+              className="flex items-center gap-1 font-bold text-(--accent) hover:underline"
             >
               {nextStep.label}
               <ArrowRight size={13} />
@@ -96,21 +96,21 @@ export default function PageIntro({
         <div className="mt-4">
           <button
             onClick={() => setInfoOpen(!infoOpen)}
-            className="flex items-center gap-1.5 text-xs font-bold text-[var(--accent)] hover:opacity-75 transition-opacity"
+            className="flex items-center gap-1.5 text-xs font-bold text-(--accent) hover:opacity-75 transition-opacity"
           >
             <Info size={13} />
             {infoOpen ? "Hide details" : "How does this work?"}
           </button>
 
           {infoOpen && (
-            <div className="mt-2 p-4 rounded-xl bg-[var(--accent)]/5 border border-[var(--accent)]/15 text-sm text-[var(--text-primary)] max-w-3xl">
+            <div className="mt-2 p-4 rounded-xl bg-(--accent)/5 border border-(--accent)/15 text-sm text-(--text-primary) max-w-3xl">
               {infoText && <p className="mb-2">{infoText}</p>}
               {docLink && (
                 <Link
                   href={docLink.href}
                   target={docLink.external ? "_blank" : undefined}
                   rel={docLink.external ? "noopener noreferrer" : undefined}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-[var(--accent)] hover:underline"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-(--accent) hover:underline"
                 >
                   {docLink.external ? (
                     <ExternalLink size={11} />

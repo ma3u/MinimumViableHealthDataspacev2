@@ -513,8 +513,8 @@ function NavDropdown({
         aria-haspopup="true"
         className={`flex items-center gap-1 px-3 py-2 text-sm transition-colors touch-target-sm ${
           isActive
-            ? "text-[var(--accent)] font-semibold border-b-2 border-[var(--accent)] rounded-none"
-            : "rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)]"
+            ? "text-(--accent) font-semibold border-b-2 border-(--accent) rounded-none"
+            : "rounded-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2)"
         }`}
       >
         <group.icon size={15} aria-hidden="true" />
@@ -527,7 +527,7 @@ function NavDropdown({
       </button>
       {open && (
         <div
-          className="absolute top-full left-0 mt-1 py-1 bg-[var(--surface)] border border-[var(--border)] rounded-lg shadow-xl z-50 min-w-[170px]"
+          className="absolute top-full left-0 mt-1 py-1 bg-(--surface) border border-(--border) rounded-lg shadow-xl z-50 min-w-[170px]"
           role="menu"
         >
           {group.links.map((l) => (
@@ -541,8 +541,8 @@ function NavDropdown({
               }}
               className={`flex items-center gap-2 py-2 text-sm transition-colors ${
                 pathname?.startsWith(l.href)
-                  ? "text-[var(--accent)] font-medium border-l-2 border-[var(--accent)] pl-[10px] pr-3 bg-[var(--accent-surface)]"
-                  : "text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)] px-3"
+                  ? "text-(--accent) font-medium border-l-2 border-(--accent) pl-[10px] pr-3 bg-(--accent-surface)"
+                  : "text-(--text-secondary) hover:bg-(--surface-2) hover:text-(--text-primary) px-3"
               }`}
             >
               <l.icon size={14} aria-hidden="true" />
@@ -610,14 +610,14 @@ export default function Navigation() {
 
   return (
     <nav
-      className="glass border-b border-[var(--border)] sticky top-0 z-50"
+      className="glass border-b border-(--border) sticky top-0 z-50"
       role="navigation"
       aria-label="Main navigation"
     >
       <div className="flex items-center gap-1 px-4 py-2">
         <Link
           href="/"
-          className="mr-4 font-bold text-[var(--accent)] tracking-wide text-sm hover:text-[var(--accent-hover)] transition-colors"
+          className="mr-4 font-bold text-(--accent) tracking-wide text-sm hover:text-(--accent-hover) transition-colors"
         >
           Health Dataspace
         </Link>
@@ -635,7 +635,7 @@ export default function Navigation() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] touch-target"
+            className="md:hidden p-2 rounded-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) touch-target"
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -653,11 +653,11 @@ export default function Navigation() {
       {mobileOpen && (
         <div
           id="mobile-nav"
-          className="md:hidden border-t border-[var(--border)] bg-[var(--surface)] px-4 py-3 space-y-1 animate-fade-in-up"
+          className="md:hidden border-t border-(--border) bg-(--surface) px-4 py-3 space-y-1 animate-fade-in-up"
         >
           {visibleGroups.map((g) => (
             <div key={g.label} className="mb-2">
-              <span className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider px-2">
+              <span className="text-xs font-semibold text-(--text-secondary) uppercase tracking-wider px-2">
                 {g.label}
               </span>
               <div className="mt-1 space-y-0.5">
@@ -666,7 +666,7 @@ export default function Navigation() {
                     key={l.href}
                     href={l.href}
                     onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2.5 rounded text-sm text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)] transition-colors touch-target-sm"
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-sm text-sm text-(--text-secondary) hover:bg-(--surface-2) hover:text-(--text-primary) transition-colors touch-target-sm"
                   >
                     <l.icon size={16} aria-hidden="true" />
                     {l.label}

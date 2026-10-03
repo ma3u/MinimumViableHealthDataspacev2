@@ -1,213 +1,489 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-/* ── Design Token System — Vitalis Blue (Stitch "Clinical Clarity") ───────── */
-/* Light mode — matches Stitch primary color tokens exactly */
-:root {
-  /* Surfaces & text — Stitch surface hierarchy */
-  --bg: #f9f9ff;               /* surface / background canvas */
-  --surface: #f0f3ff;          /* surface-container-low — sidebars, section bg */
-  --surface-2: #e7eefe;        /* surface-container — dividers, table rows */
-  --surface-card: #ffffff;     /* surface-container-lowest — cards, focal points */
-  --text-primary: #151c27;     /* on-surface (not pure black) */
-  --text-secondary: #424754;   /* on-surface-variant */
+@custom-variant dark (&:is(.dark *));
 
-  /* Borders — tonal, no hard lines per Stitch "No-Line" rule */
-  --border: #e2e8f8;           /* surface-container-high — ghost dividers */
-  --border-ui: #94a3b8;        /* WCAG 1.4.11 ≥3:1 — inputs, checkboxes */
+@theme {
+  --color-layer1: #5b8def;
+  --color-layer1-light: #b3ccfa;
+  --color-layer1-dark: #3a5fa8;
 
-  /* Brand accent — Stitch primary #0058be (5.2:1 on white ✅ AA) */
-  --accent: #0058be;           /* primary */
-  --accent-hover: #2170e4;     /* primary-container — gradient end / hover */
-  --accent-surface: #f0f3ff;   /* surface-container-low tint */
+  --color-layer2: #45b7aa;
+  --color-layer2-light: #8fd8cf;
+  --color-layer2-dark: #2e7e75;
 
-  /* Status — background/icon use */
-  --success: #006c49;          /* Stitch secondary (teal) */
-  --warning: #d97706;
-  --danger: #ba1a1a;           /* Stitch error */
+  --color-layer3: #6abf69;
+  --color-layer3-light: #a8dca8;
+  --color-layer3-dark: #3b6e3b;
 
-  /* Status — body-text safe variants (WCAG 1.4.3 ≥4.5:1) */
-  --success-text: #006c49;     /* Stitch secondary, 5.9:1 on white ✅ */
-  --warning-text: #92400e;     /* amber-800,  7.2:1 on white ✅ */
-  --danger-text:  #ba1a1a;     /* Stitch error, 6.5:1 on white ✅ */
+  --color-layer4: #f0a050;
+  --color-layer4-light: #f8d0a0;
+  --color-layer4-dark: #8a5520;
 
-  /* Focus ring (WCAG 2.4.11 / 2.4.12) */
-  --focus-ring: #0058be;       /* primary, 8.1:1 on white ✅ AAA */
+  --color-layer5: #a78bdb;
+  --color-layer5-light: #d0c0ed;
+  --color-layer5-dark: #7b5fb0;
 
-  /* Graph layer accent colours — fill/border use (no AA text requirement) */
-  --layer1: #5b8def;
-  --layer2: #45b7aa;
-  --layer3: #6abf69;
-  --layer4: #f0a050;
-  --layer5: #a78bdb;
+  --color-surface-2: var(--surface-2);
+  --color-surface: var(--surface);
 
-  /* Layer text tokens — WCAG-safe for text/icon on light surfaces (≥4.5:1) */
-  --layer1-text: #3a5fa8;     /* 6.2:1 on white ✅ */
-  --layer2-text: #2e7e75;     /* 4.8:1 on white ✅ */
-  --layer3-text: #3b6e3b;     /* 6.1:1 on white ✅ */
-  --layer4-text: #8a5520;     /* 6.2:1 on white ✅ */
-  --layer5-text: #7b5fb0;     /* 5.1:1 on white ✅ */
+  --color-role-admin-text: var(--role-admin-text);
+  --color-role-admin-bg: var(--role-admin-bg);
+  --color-role-admin-border: var(--role-admin-border);
 
-  /* Role badge tokens — text / background / border per persona role */
-  --role-admin-text:    #991b1b;  /* red-800,    8.1:1 ✅ */
-  --role-admin-bg:      #fef2f2;  /* red-50 */
-  --role-admin-border:  #fecaca;  /* red-200 */
+  --color-role-holder-text: var(--role-holder-text);
+  --color-role-holder-bg: var(--role-holder-bg);
+  --color-role-holder-border: var(--role-holder-border);
 
-  --role-holder-text:   #1e40af;  /* blue-800,   8.9:1 ✅ */
-  --role-holder-bg:     #eff6ff;  /* blue-50 */
-  --role-holder-border: #bfdbfe;  /* blue-200 */
+  --color-role-user-text: var(--role-user-text);
+  --color-role-user-bg: var(--role-user-bg);
+  --color-role-user-border: var(--role-user-border);
 
-  --role-user-text:     #166534;  /* green-800,  8.7:1 ✅ */
-  --role-user-bg:       #f0fdf4;  /* green-50 */
-  --role-user-border:   #bbf7d0;  /* green-200 */
+  --color-role-hdab-text: var(--role-hdab-text);
+  --color-role-hdab-bg: var(--role-hdab-bg);
+  --color-role-hdab-border: var(--role-hdab-border);
 
-  --role-hdab-text:     #92400e;  /* amber-800,  7.2:1 ✅ */
-  --role-hdab-bg:       #fffbeb;  /* amber-50 */
-  --role-hdab-border:   #fde68a;  /* amber-200 */
+  --color-role-patient-text: var(--role-patient-text);
+  --color-role-patient-bg: var(--role-patient-bg);
+  --color-role-patient-border: var(--role-patient-border);
 
-  --role-patient-text:  #134e4a;  /* teal-800,   9.1:1 ✅ */
-  --role-patient-bg:    #f0fdfa;  /* teal-50 */
-  --role-patient-border:#99f6e4;  /* teal-200 */
+  --color-role-trust-text: var(--role-trust-text);
+  --color-role-trust-bg: var(--role-trust-bg);
+  --color-role-trust-border: var(--role-trust-border);
 
-  --role-trust-text:    #4c1d95;  /* violet-800, 9.8:1 ✅ */
-  --role-trust-bg:      #f5f3ff;  /* violet-50 */
-  --role-trust-border:  #ddd6fe;  /* violet-200 */
+  --color-fhir-patient: var(--fhir-patient);
+  --color-fhir-encounter: var(--fhir-encounter);
+  --color-fhir-condition: var(--fhir-condition);
+  --color-fhir-observation: var(--fhir-observation);
+  --color-fhir-medication: var(--fhir-medication);
+  --color-fhir-procedure: var(--fhir-procedure);
+  --color-fhir-immunization: var(--fhir-immunization);
+  --color-fhir-diagnostic: var(--fhir-diagnostic);
+  --color-fhir-allergy: var(--fhir-allergy);
+  --color-fhir-careplan: var(--fhir-careplan);
 
-  /* FHIR resource type colours — text/icon on light surfaces (≥4.5:1) */
-  --fhir-patient:       #1d4ed8;  /* blue-700,      7.5:1 ✅ */
-  --fhir-encounter:     #1e3a5f;  /* custom navy,   12.1:1 ✅ */
-  --fhir-condition:     #065f46;  /* emerald-800,   9.2:1 ✅ */
-  --fhir-observation:   #166534;  /* green-800,     8.7:1 ✅ */
-  --fhir-medication:    #9a3412;  /* orange-800,    7.9:1 ✅ */
-  --fhir-procedure:     #4c1d95;  /* violet-800,    9.8:1 ✅ */
-  --fhir-immunization:  #1e40af;  /* blue-800,      8.9:1 ✅ */
-  --fhir-diagnostic:    #7c2d12;  /* orange-900,    9.6:1 ✅ */
-  --fhir-allergy:       #881337;  /* rose-900,      9.7:1 ✅ */
-  --fhir-careplan:      #14532d;  /* green-900,     10.4:1 ✅ */
+  --background-color-base: var(--bg);
 
-  /* Status badge tokens — active/inactive pills (≥4.5:1 on their bg) */
-  --badge-active-text:   #166534;  /* green-800,   8.7:1 on white ✅ */
-  --badge-active-bg:     #f0fdf4;  /* green-50 */
-  --badge-active-border: #bbf7d0;  /* green-200 */
-  --badge-inactive-text: #991b1b;  /* red-800,     8.1:1 on white ✅ */
-  --badge-inactive-bg:   #fef2f2;  /* red-50 */
-  --badge-inactive-border:#fecaca; /* red-200 */
+  /* No --text-color-base. In v3 `text-base` set font-size AND this colour; in
+     v4 the colour token wins and `text-base` silently loses its 16px, on every
+     one of its uses. body already uses --text-primary, so the colour was never
+     visible, and dropping the token restores the size. */
+  --text-color-muted: var(--text-secondary);
+  --text-color-success-safe: var(--success-text);
+  --text-color-warning-safe: var(--warning-text);
+  --text-color-danger-safe: var(--danger-text);
+  --text-color-layer1-safe: var(--layer1-text);
+  --text-color-layer2-safe: var(--layer2-text);
+  --text-color-layer3-safe: var(--layer3-text);
+  --text-color-layer4-safe: var(--layer4-text);
+  --text-color-layer5-safe: var(--layer5-text);
 
-  /* Stitch Phase 23 — metric orb & glass panel tokens */
-  --secondary-container: #6cf8bb; /* metric orb fill (teal health indicator) */
-  --secondary-container-on: #006c49; /* on-secondary-container text */
-  --primary-fixed:       #d8e2ff; /* icon background tint */
-  --primary-fixed-on:    #001a42; /* icon colour on primary-fixed bg */
-  --surface-shadow: 0px 12px 32px rgba(21, 28, 39, 0.06); /* ambient shadow */
-  --gradient-cta: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  --border-color-base: var(--border);
+  --border-color-ui: var(--border-ui);
+
+  --outline-color-focus-ring: var(--focus-ring);
 }
 
-/* Dark mode */
-/* Dark mode — Vitalis Blue Nocturne (Stitch "Clinical Nocturne") */
-.dark {
-  /* Surfaces — nocturne depth layers */
-  --bg: #0b1326;               /* base anchor */
-  --surface: #171f33;          /* surface-container — standard card bg */
-  --surface-2: #2d3449;        /* surface-container-highest — hover/elevated */
-  --surface-card: #060e20;     /* surface-container-lowest — inset areas */
-  --text-primary: #dae2fd;     /* on-surface — headlines/titles */
-  --text-secondary: #c2c6d6;   /* on-surface-variant — body text */
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
 
-  /* Borders */
-  --border: #222a3d;           /* surface-container-high — tonal boundary */
-  --border-ui: #64748b;        /* WCAG 3.8:1 on #0b1326 ✅ */
-
-  /* Brand accent — luminous blue (5.8:1 on #0b1326 ✅) */
-  --accent: #adc6ff;           /* primary-fixed-dim, breathable blue */
-  --accent-hover: #4d8eff;     /* primary-container, active glow */
-  --accent-surface: #1e3a5f;   /* deep blue tint */
-
-  /* Status */
-  --success: #4edea3;          /* secondary-fixed-dim */
-  --warning: #fcd34d;
-  --danger: #ffb4ab;           /* error in nocturne */
-
-  /* Status text — all pass ≥4.5:1 on #0b1326 */
-  --success-text: #4edea3;     /* 9.4:1 ✅ */
-  --warning-text: #fcd34d;     /* 9.8:1 ✅ */
-  --danger-text:  #ffb4ab;     /* 7.1:1 ✅ */
-
-  /* Focus ring */
-  --focus-ring: #adc6ff;       /* primary, 5.8:1 on #0b1326 ✅ */
-
-  /* Graph layer accent colours */
-  --layer1: #5b8def;
-  --layer2: #45b7aa;
-  --layer3: #6abf69;
-  --layer4: #f0a050;
-  --layer5: #a78bdb;
-
-  /* Layer text tokens — original layer colours work on dark bg (≥4.5:1) */
-  --layer1-text: #5b8def;     /* 5.7:1 on #0f172a ✅ */
-  --layer2-text: #45b7aa;     /* 7.5:1 ✅ */
-  --layer3-text: #6abf69;     /* 8.2:1 ✅ */
-  --layer4-text: #f0a050;     /* 8.7:1 ✅ */
-  --layer5-text: #a78bdb;     /* 6.5:1 ✅ */
-
-  /* Role badge tokens — dark mode */
-  --role-admin-text:    #fca5a5;  /* red-300,    6.6:1 ✅ */
-  --role-admin-bg:      #450a0a;  /* red-950 */
-  --role-admin-border:  #b91c1c;  /* red-700 */
-
-  --role-holder-text:   #93c5fd;  /* blue-300,   8.1:1 ✅ */
-  --role-holder-bg:     #172554;  /* blue-950 */
-  --role-holder-border: #1d4ed8;  /* blue-700 */
-
-  --role-user-text:     #86efac;  /* green-300,  9.6:1 ✅ */
-  --role-user-bg:       #052e16;  /* green-950 */
-  --role-user-border:   #15803d;  /* green-700 */
-
-  --role-hdab-text:     #fcd34d;  /* amber-300,  9.8:1 ✅ */
-  --role-hdab-bg:       #451a03;  /* amber-950 */
-  --role-hdab-border:   #b45309;  /* amber-700 */
-
-  --role-patient-text:  #5eead4;  /* teal-300,   9.4:1 ✅ */
-  --role-patient-bg:    #042f2e;  /* teal-950 */
-  --role-patient-border:#0f766e;  /* teal-700 */
-
-  --role-trust-text:    #c4b5fd;  /* violet-300, 8.7:1 ✅ */
-  --role-trust-bg:      #2e1065;  /* violet-950 */
-  --role-trust-border:  #6d28d9;  /* violet-700 */
-
-  /* FHIR resource type colours — text/icon on dark surfaces (≥4.5:1) */
-  --fhir-patient:       #93c5fd;  /* blue-300,    8.1:1 ✅ */
-  --fhir-encounter:     #7dd3fc;  /* sky-300,     8.4:1 ✅ */
-  --fhir-condition:     #6ee7b7;  /* emerald-300, 9.4:1 ✅ */
-  --fhir-observation:   #86efac;  /* green-300,   9.6:1 ✅ */
-  --fhir-medication:    #fdba74;  /* orange-300,  9.2:1 ✅ */
-  --fhir-procedure:     #c4b5fd;  /* violet-300,  8.7:1 ✅ */
-  --fhir-immunization:  #93c5fd;  /* blue-300,    8.1:1 ✅ */
-  --fhir-diagnostic:    #fb923c;  /* orange-400,  6.4:1 ✅ */
-  --fhir-allergy:       #fda4af;  /* rose-300,    7.2:1 ✅ */
-  --fhir-careplan:      #86efac;  /* green-300,   9.6:1 ✅ */
-
-  /* Status badge tokens — dark mode */
-  --badge-active-text:   #86efac;  /* green-300,   9.6:1 ✅ */
-  --badge-active-bg:     #052e16;  /* green-950 */
-  --badge-active-border: #15803d;  /* green-700 */
-  --badge-inactive-text: #fca5a5;  /* red-300,     6.6:1 ✅ */
-  --badge-inactive-bg:   #450a0a;  /* red-950 */
-  --badge-inactive-border:#b91c1c; /* red-700 */
-
-  /* Stitch Phase 23 — nocturne metric orb & glass tokens */
-  --secondary-container: #0a3d2e; /* metric orb — dark teal base */
-  --secondary-container-on: #4edea3; /* on-secondary-container text */
-  --primary-fixed:       #1e3a5f; /* icon background tint — nocturne */
-  --primary-fixed-on:    #adc6ff; /* icon colour on primary-fixed bg */
-  --surface-shadow: 0px 24px 48px rgba(0, 0, 0, 0.4);
-  --gradient-cta: linear-gradient(135deg, #adc6ff, #4d8eff);
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
 }
 
-/* ── Base resets ───────────────────────────────────────────────────────────── */
-body {
-  background-color: var(--bg);
+@utility touch-target {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@utility touch-target-sm {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+@utility section-label {
+  /* Stitch section label — font-black tracking-widest per Stitch HTML */
+  font-size: 0.625rem; /* 10px */
+  font-weight: 900; /* font-black */
+  letter-spacing: 0.12em; /* tracking-widest */
+  text-transform: uppercase;
   color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+@utility stat-card {
+  /* Stat card — white card with colored left border (Stitch "Active Entities") */
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-left-width: 4px; /* border-l-4 per Stitch */
+  border-radius: 0.75rem; /* rounded-xl */
+  padding: 1rem; /* p-4 */
+  box-shadow: 0 1px 3px rgba(21, 28, 39, 0.06); /* shadow-sm tinted */
+}
+
+@utility page-header {
+  /* Page header — Stitch text-4xl font-extrabold tracking-tight */
+  font-size: 2.25rem; /* text-4xl */
+  font-weight: 800; /* font-extrabold */
+  letter-spacing: -0.025em; /* tracking-tight */
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+@utility glass {
+  /* Glassmorphism — floating headers and sidebars per Stitch spec */
+  background: rgba(249, 249, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  .dark & {
+    background: rgba(23, 31, 51, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+}
+
+/* Dark-mode overrides for the glass utilities. Plain selectors on purpose:
+   the v4 upgrade tool turned them into `@utility dark`, a utility that only
+   emits CSS when the scanner happens to see the string "dark" in a source
+   file. As ordinary rules they always ship, and .dark .x out-ranks .x. */
+@layer utilities {
+  .dark .glass {
+    background: rgba(23, 31, 51, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .dark .metric-orb {
+    background: radial-gradient(circle at top left, #4edea3, #006c49);
+    box-shadow: inset 0 0 20px rgba(78, 222, 163, 0.2);
+  }
+  .dark .glass-panel {
+    background: rgba(23, 31, 51, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0px 24px 48px rgba(0, 0, 0, 0.4);
+  }
+}
+
+@utility nav-item-active {
+  /* Sidebar nav item — right-border active indicator (Stitch admin sidebar pattern) */
+  border-right: 4px solid var(--accent);
+  padding-left: 1rem;
+  padding-right: 0.75rem;
+  color: var(--accent);
+  font-weight: 700;
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-radius: 0.75rem 0 0 0.75rem; /* rounded-l-xl */
+}
+
+@utility metric-orb {
+  /* ── Phase 23: Stitch Vitalis Blue — Design System Utilities ─────────────── */
+
+  /* Metric orb — radial gradient teal circle for health vital signs */
+  background: radial-gradient(
+    circle at top left,
+    var(--secondary-container),
+    #006c49
+  );
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3);
+  border-radius: 9999px;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  flex-shrink: 0;
+  .dark & {
+    background: radial-gradient(circle at top left, #4edea3, #006c49);
+    box-shadow: inset 0 0 20px rgba(78, 222, 163, 0.2);
+  }
+}
+
+@utility glass-panel {
+  /* Glass panel — backdrop-blur floating surface (Stitch "Ethereal Trust") */
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 1rem;
+  box-shadow: 0px 12px 32px rgba(21, 28, 39, 0.08);
+  .dark & {
+    background: rgba(23, 31, 51, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0px 24px 48px rgba(0, 0, 0, 0.4);
+  }
+}
+
+@utility btn-gradient {
+  /* Gradient CTA button — Stitch primary → primary-container, 135° */
+  background: var(--gradient-cta);
+  color: white;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  transition:
+    opacity 0.15s ease,
+    box-shadow 0.15s ease;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 30%, transparent);
+  &:hover {
+    opacity: 0.92;
+    box-shadow: 0 6px 24px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+}
+
+@utility activity-timeline {
+  /* Activity timeline — vertical connector line pattern */
+  position: relative;
+  &::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--border);
+    border-radius: 1px;
+  }
+}
+
+@utility surface-card {
+  /* Surface card with ambient shadow (no hard border, Stitch "no-line" rule) */
+  background: var(--surface-card);
+  border-radius: 0.75rem;
+  box-shadow: var(--surface-shadow);
+}
+
+@utility icon-orb {
+  /* Icon orb — primary-fixed tinted circle for non-health icons */
+  background: var(--primary-fixed);
+  color: var(--primary-fixed-on);
+  border-radius: 9999px;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+@layer utilities {
+  /* ── Design Token System — Vitalis Blue (Stitch "Clinical Clarity") ───────── */
+  /* Light mode — matches Stitch primary color tokens exactly */
+  :root {
+    /* Surfaces & text — Stitch surface hierarchy */
+    --bg: #f9f9ff; /* surface / background canvas */
+    --surface: #f0f3ff; /* surface-container-low — sidebars, section bg */
+    --surface-2: #e7eefe; /* surface-container — dividers, table rows */
+    --surface-card: #ffffff; /* surface-container-lowest — cards, focal points */
+    --text-primary: #151c27; /* on-surface (not pure black) */
+    --text-secondary: #424754; /* on-surface-variant */
+
+    /* Borders — tonal, no hard lines per Stitch "No-Line" rule */
+    --border: #e2e8f8; /* surface-container-high — ghost dividers */
+    --border-ui: #94a3b8; /* WCAG 1.4.11 ≥3:1 — inputs, checkboxes */
+
+    /* Brand accent — Stitch primary #0058be (5.2:1 on white ✅ AA) */
+    --accent: #0058be; /* primary */
+    --accent-hover: #2170e4; /* primary-container — gradient end / hover */
+    --accent-surface: #f0f3ff; /* surface-container-low tint */
+
+    /* Status — background/icon use */
+    --success: #006c49; /* Stitch secondary (teal) */
+    --warning: #d97706;
+    --danger: #ba1a1a; /* Stitch error */
+
+    /* Status — body-text safe variants (WCAG 1.4.3 ≥4.5:1) */
+    --success-text: #006c49; /* Stitch secondary, 5.9:1 on white ✅ */
+    --warning-text: #92400e; /* amber-800,  7.2:1 on white ✅ */
+    --danger-text: #ba1a1a; /* Stitch error, 6.5:1 on white ✅ */
+
+    /* Focus ring (WCAG 2.4.11 / 2.4.12) */
+    --focus-ring: #0058be; /* primary, 8.1:1 on white ✅ AAA */
+
+    /* Graph layer accent colours — fill/border use (no AA text requirement) */
+    --layer1: #5b8def;
+    --layer2: #45b7aa;
+    --layer3: #6abf69;
+    --layer4: #f0a050;
+    --layer5: #a78bdb;
+
+    /* Layer text tokens — WCAG-safe for text/icon on light surfaces (≥4.5:1) */
+    --layer1-text: #3a5fa8; /* 6.2:1 on white ✅ */
+    --layer2-text: #2e7e75; /* 4.8:1 on white ✅ */
+    --layer3-text: #3b6e3b; /* 6.1:1 on white ✅ */
+    --layer4-text: #8a5520; /* 6.2:1 on white ✅ */
+    --layer5-text: #7b5fb0; /* 5.1:1 on white ✅ */
+
+    /* Role badge tokens — text / background / border per persona role */
+    --role-admin-text: #991b1b; /* red-800,    8.1:1 ✅ */
+    --role-admin-bg: #fef2f2; /* red-50 */
+    --role-admin-border: #fecaca; /* red-200 */
+
+    --role-holder-text: #1e40af; /* blue-800,   8.9:1 ✅ */
+    --role-holder-bg: #eff6ff; /* blue-50 */
+    --role-holder-border: #bfdbfe; /* blue-200 */
+
+    --role-user-text: #166534; /* green-800,  8.7:1 ✅ */
+    --role-user-bg: #f0fdf4; /* green-50 */
+    --role-user-border: #bbf7d0; /* green-200 */
+
+    --role-hdab-text: #92400e; /* amber-800,  7.2:1 ✅ */
+    --role-hdab-bg: #fffbeb; /* amber-50 */
+    --role-hdab-border: #fde68a; /* amber-200 */
+
+    --role-patient-text: #134e4a; /* teal-800,   9.1:1 ✅ */
+    --role-patient-bg: #f0fdfa; /* teal-50 */
+    --role-patient-border: #99f6e4; /* teal-200 */
+
+    --role-trust-text: #4c1d95; /* violet-800, 9.8:1 ✅ */
+    --role-trust-bg: #f5f3ff; /* violet-50 */
+    --role-trust-border: #ddd6fe; /* violet-200 */
+
+    /* FHIR resource type colours — text/icon on light surfaces (≥4.5:1) */
+    --fhir-patient: #1d4ed8; /* blue-700,      7.5:1 ✅ */
+    --fhir-encounter: #1e3a5f; /* custom navy,   12.1:1 ✅ */
+    --fhir-condition: #065f46; /* emerald-800,   9.2:1 ✅ */
+    --fhir-observation: #166534; /* green-800,     8.7:1 ✅ */
+    --fhir-medication: #9a3412; /* orange-800,    7.9:1 ✅ */
+    --fhir-procedure: #4c1d95; /* violet-800,    9.8:1 ✅ */
+    --fhir-immunization: #1e40af; /* blue-800,      8.9:1 ✅ */
+    --fhir-diagnostic: #7c2d12; /* orange-900,    9.6:1 ✅ */
+    --fhir-allergy: #881337; /* rose-900,      9.7:1 ✅ */
+    --fhir-careplan: #14532d; /* green-900,     10.4:1 ✅ */
+
+    /* Status badge tokens — active/inactive pills (≥4.5:1 on their bg) */
+    --badge-active-text: #166534; /* green-800,   8.7:1 on white ✅ */
+    --badge-active-bg: #f0fdf4; /* green-50 */
+    --badge-active-border: #bbf7d0; /* green-200 */
+    --badge-inactive-text: #991b1b; /* red-800,     8.1:1 on white ✅ */
+    --badge-inactive-bg: #fef2f2; /* red-50 */
+    --badge-inactive-border: #fecaca; /* red-200 */
+
+    /* Stitch Phase 23 — metric orb & glass panel tokens */
+    --secondary-container: #6cf8bb; /* metric orb fill (teal health indicator) */
+    --secondary-container-on: #006c49; /* on-secondary-container text */
+    --primary-fixed: #d8e2ff; /* icon background tint */
+    --primary-fixed-on: #001a42; /* icon colour on primary-fixed bg */
+    --surface-shadow: 0px 12px 32px rgba(21, 28, 39, 0.06); /* ambient shadow */
+    --gradient-cta: linear-gradient(135deg, var(--accent), var(--accent-hover));
+  }
+
+  /* Dark mode */
+  /* Dark mode — Vitalis Blue Nocturne (Stitch "Clinical Nocturne") */
+  .dark {
+    /* Surfaces — nocturne depth layers */
+    --bg: #0b1326; /* base anchor */
+    --surface: #171f33; /* surface-container — standard card bg */
+    --surface-2: #2d3449; /* surface-container-highest — hover/elevated */
+    --surface-card: #060e20; /* surface-container-lowest — inset areas */
+    --text-primary: #dae2fd; /* on-surface — headlines/titles */
+    --text-secondary: #c2c6d6; /* on-surface-variant — body text */
+
+    /* Borders */
+    --border: #222a3d; /* surface-container-high — tonal boundary */
+    --border-ui: #64748b; /* WCAG 3.8:1 on #0b1326 ✅ */
+
+    /* Brand accent — luminous blue (5.8:1 on #0b1326 ✅) */
+    --accent: #adc6ff; /* primary-fixed-dim, breathable blue */
+    --accent-hover: #4d8eff; /* primary-container, active glow */
+    --accent-surface: #1e3a5f; /* deep blue tint */
+
+    /* Status */
+    --success: #4edea3; /* secondary-fixed-dim */
+    --warning: #fcd34d;
+    --danger: #ffb4ab; /* error in nocturne */
+
+    /* Status text — all pass ≥4.5:1 on #0b1326 */
+    --success-text: #4edea3; /* 9.4:1 ✅ */
+    --warning-text: #fcd34d; /* 9.8:1 ✅ */
+    --danger-text: #ffb4ab; /* 7.1:1 ✅ */
+
+    /* Focus ring */
+    --focus-ring: #adc6ff; /* primary, 5.8:1 on #0b1326 ✅ */
+
+    /* Graph layer accent colours */
+    --layer1: #5b8def;
+    --layer2: #45b7aa;
+    --layer3: #6abf69;
+    --layer4: #f0a050;
+    --layer5: #a78bdb;
+
+    /* Layer text tokens — original layer colours work on dark bg (≥4.5:1) */
+    --layer1-text: #5b8def; /* 5.7:1 on #0f172a ✅ */
+    --layer2-text: #45b7aa; /* 7.5:1 ✅ */
+    --layer3-text: #6abf69; /* 8.2:1 ✅ */
+    --layer4-text: #f0a050; /* 8.7:1 ✅ */
+    --layer5-text: #a78bdb; /* 6.5:1 ✅ */
+
+    /* Role badge tokens — dark mode */
+    --role-admin-text: #fca5a5; /* red-300,    6.6:1 ✅ */
+    --role-admin-bg: #450a0a; /* red-950 */
+    --role-admin-border: #b91c1c; /* red-700 */
+
+    --role-holder-text: #93c5fd; /* blue-300,   8.1:1 ✅ */
+    --role-holder-bg: #172554; /* blue-950 */
+    --role-holder-border: #1d4ed8; /* blue-700 */
+
+    --role-user-text: #86efac; /* green-300,  9.6:1 ✅ */
+    --role-user-bg: #052e16; /* green-950 */
+    --role-user-border: #15803d; /* green-700 */
+
+    --role-hdab-text: #fcd34d; /* amber-300,  9.8:1 ✅ */
+    --role-hdab-bg: #451a03; /* amber-950 */
+    --role-hdab-border: #b45309; /* amber-700 */
+
+    --role-patient-text: #5eead4; /* teal-300,   9.4:1 ✅ */
+    --role-patient-bg: #042f2e; /* teal-950 */
+    --role-patient-border: #0f766e; /* teal-700 */
+
+    --role-trust-text: #c4b5fd; /* violet-300, 8.7:1 ✅ */
+    --role-trust-bg: #2e1065; /* violet-950 */
+    --role-trust-border: #6d28d9; /* violet-700 */
+
+    /* FHIR resource type colours — text/icon on dark surfaces (≥4.5:1) */
+    --fhir-patient: #93c5fd; /* blue-300,    8.1:1 ✅ */
+    --fhir-encounter: #7dd3fc; /* sky-300,     8.4:1 ✅ */
+    --fhir-condition: #6ee7b7; /* emerald-300, 9.4:1 ✅ */
+    --fhir-observation: #86efac; /* green-300,   9.6:1 ✅ */
+    --fhir-medication: #fdba74; /* orange-300,  9.2:1 ✅ */
+    --fhir-procedure: #c4b5fd; /* violet-300,  8.7:1 ✅ */
+    --fhir-immunization: #93c5fd; /* blue-300,    8.1:1 ✅ */
+    --fhir-diagnostic: #fb923c; /* orange-400,  6.4:1 ✅ */
+    --fhir-allergy: #fda4af; /* rose-300,    7.2:1 ✅ */
+    --fhir-careplan: #86efac; /* green-300,   9.6:1 ✅ */
+
+    /* Status badge tokens — dark mode */
+    --badge-active-text: #86efac; /* green-300,   9.6:1 ✅ */
+    --badge-active-bg: #052e16; /* green-950 */
+    --badge-active-border: #15803d; /* green-700 */
+    --badge-inactive-text: #fca5a5; /* red-300,     6.6:1 ✅ */
+    --badge-inactive-bg: #450a0a; /* red-950 */
+    --badge-inactive-border: #b91c1c; /* red-700 */
+
+    /* Stitch Phase 23 — nocturne metric orb & glass tokens */
+    --secondary-container: #0a3d2e; /* metric orb — dark teal base */
+    --secondary-container-on: #4edea3; /* on-secondary-container text */
+    --primary-fixed: #1e3a5f; /* icon background tint — nocturne */
+    --primary-fixed-on: #adc6ff; /* icon colour on primary-fixed bg */
+    --surface-shadow: 0px 24px 48px rgba(0, 0, 0, 0.4);
+    --gradient-cta: linear-gradient(135deg, #adc6ff, #4d8eff);
+  }
+
+  /* ── Base resets ───────────────────────────────────────────────────────────── */
+  body {
+    background-color: var(--bg);
+    color: var(--text-primary);
+  }
 }
 
 @layer base {
@@ -224,210 +500,65 @@ body {
   }
 }
 
-/* ── WCAG 2.2 Skip Navigation (2.4.1) ─────────────────────────────────────── */
-.skip-to-content {
-  @apply absolute -top-12 left-4 z-[100] bg-[var(--accent)] text-white px-4 py-2 rounded-b-lg font-semibold text-sm;
-  transition: top 0.2s ease;
-}
-.skip-to-content:focus {
-  @apply top-0;
-}
-
-/* ── WCAG 2.2 Focus Visible (2.4.7 / 2.4.11 / 2.4.12) ────────────────────── */
-/* 3 px outline → meets AAA area requirement (perimeter × 2 px)              */
-/* --focus-ring: 8.9:1 light / 5.8:1 dark — both pass AAA                   */
-*:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-  outline-style: solid;
-}
-
-/* ── WCAG 2.2 Reduced Motion (2.3.3) ──────────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* ── Fade-in animation for guided content ──────────────────────────────────── */
-@keyframes fade-in-up {
-  from {
-    transform: translateY(16px);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fade-in-up 0.5s ease-out both;
-}
-
-@keyframes slide-in-right {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.animate-slide-in-right {
-  animation: slide-in-right 0.2s ease-out;
-}
-
-/* ── WCAG 2.2 Target Size (2.5.8) — utility classes ───────────────────────── */
 @layer utilities {
-  .touch-target {
-    min-width: 44px;
-    min-height: 44px;
+  /* ── WCAG 2.2 Skip Navigation (2.4.1) ─────────────────────────────────────── */
+  .skip-to-content {
+    @apply absolute -top-12 left-4 z-100 bg-(--accent) text-white px-4 py-2 rounded-b-lg font-semibold text-sm;
+    transition: top 0.2s ease;
   }
-  .touch-target-sm {
-    min-width: 24px;
-    min-height: 24px;
-  }
-
-  /* Stitch section label — font-black tracking-widest per Stitch HTML */
-  .section-label {
-    font-size: 0.625rem;        /* 10px */
-    font-weight: 900;           /* font-black */
-    letter-spacing: 0.12em;     /* tracking-widest */
-    text-transform: uppercase;
-    color: var(--text-primary);
-    margin-bottom: 0.75rem;
+  .skip-to-content:focus {
+    @apply top-0;
   }
 
-  /* Stat card — white card with colored left border (Stitch "Active Entities") */
-  .stat-card {
-    background: var(--surface-card);
-    border: 1px solid var(--border);
-    border-left-width: 4px;     /* border-l-4 per Stitch */
-    border-radius: 0.75rem;     /* rounded-xl */
-    padding: 1rem;              /* p-4 */
-    box-shadow: 0 1px 3px rgba(21, 28, 39, 0.06); /* shadow-sm tinted */
+  /* ── WCAG 2.2 Focus Visible (2.4.7 / 2.4.11 / 2.4.12) ────────────────────── */
+  /* 3 px outline → meets AAA area requirement (perimeter × 2 px)              */
+  /* --focus-ring: 8.9:1 light / 5.8:1 dark — both pass AAA                   */
+  *:focus-visible {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+    outline-style: solid;
   }
 
-  /* Page header — Stitch text-4xl font-extrabold tracking-tight */
-  .page-header {
-    font-size: 2.25rem;         /* text-4xl */
-    font-weight: 800;           /* font-extrabold */
-    letter-spacing: -0.025em;   /* tracking-tight */
-    color: var(--text-primary);
-    line-height: 1.1;
+  /* ── WCAG 2.2 Reduced Motion (2.3.3) ──────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
-  /* Glassmorphism — floating headers and sidebars per Stitch spec */
-  .glass {
-    background: rgba(249, 249, 255, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
-  .dark .glass {
-    background: rgba(23, 31, 51, 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+  /* ── Fade-in animation for guided content ──────────────────────────────────── */
+  @keyframes fade-in-up {
+    from {
+      transform: translateY(16px);
+    }
+    to {
+      transform: translateY(0);
+    }
   }
 
-  /* Sidebar nav item — right-border active indicator (Stitch admin sidebar pattern) */
-  .nav-item-active {
-    border-right: 4px solid var(--accent);
-    padding-left: 1rem;
-    padding-right: 0.75rem;
-    color: var(--accent);
-    font-weight: 700;
-    background: color-mix(in srgb, var(--accent) 8%, transparent);
-    border-radius: 0.75rem 0 0 0.75rem; /* rounded-l-xl */
+  .animate-fade-in-up {
+    animation: fade-in-up 0.5s ease-out both;
   }
 
-  /* ── Phase 23: Stitch Vitalis Blue — Design System Utilities ─────────────── */
-
-  /* Metric orb — radial gradient teal circle for health vital signs */
-  .metric-orb {
-    background: radial-gradient(circle at top left, var(--secondary-container), #006c49);
-    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3);
-    border-radius: 9999px;
-    width: 3rem;
-    height: 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    flex-shrink: 0;
-  }
-  .dark .metric-orb {
-    background: radial-gradient(circle at top left, #4edea3, #006c49);
-    box-shadow: inset 0 0 20px rgba(78, 222, 163, 0.2);
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
   }
 
-  /* Glass panel — backdrop-blur floating surface (Stitch "Ethereal Trust") */
-  .glass-panel {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 1rem;
-    box-shadow: 0px 12px 32px rgba(21, 28, 39, 0.08);
-  }
-  .dark .glass-panel {
-    background: rgba(23, 31, 51, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0px 24px 48px rgba(0, 0, 0, 0.4);
+  .animate-slide-in-right {
+    animation: slide-in-right 0.2s ease-out;
   }
 
-  /* Gradient CTA button — Stitch primary → primary-container, 135° */
-  .btn-gradient {
-    background: var(--gradient-cta);
-    color: white;
-    font-weight: 700;
-    border-radius: 0.75rem;
-    padding: 0.75rem 1.5rem;
-    transition: opacity 0.15s ease, box-shadow 0.15s ease;
-    box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 30%, transparent);
-  }
-  .btn-gradient:hover {
-    opacity: 0.92;
-    box-shadow: 0 6px 24px color-mix(in srgb, var(--accent) 40%, transparent);
-  }
-
-  /* Activity timeline — vertical connector line pattern */
-  .activity-timeline {
-    position: relative;
-  }
-  .activity-timeline::before {
-    content: "";
-    position: absolute;
-    left: 11px;
-    top: 8px;
-    bottom: 8px;
-    width: 2px;
-    background: var(--border);
-    border-radius: 1px;
-  }
-
-  /* Surface card with ambient shadow (no hard border, Stitch "no-line" rule) */
-  .surface-card {
-    background: var(--surface-card);
-    border-radius: 0.75rem;
-    box-shadow: var(--surface-shadow);
-  }
-
-  /* Icon orb — primary-fixed tinted circle for non-health icons */
-  .icon-orb {
-    background: var(--primary-fixed);
-    color: var(--primary-fixed-on);
-    border-radius: 9999px;
-    width: 2.5rem;
-    height: 2.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
+  /* ── WCAG 2.2 Target Size (2.5.8) — utility classes ───────────────────────── */
 }

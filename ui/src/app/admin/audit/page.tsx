@@ -125,7 +125,7 @@ function RetentionLine() {
   };
   return (
     <div
-      className="mb-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-xs flex flex-wrap items-center gap-x-4 gap-y-2"
+      className="mb-4 rounded-lg border border-(--border) bg-(--surface) p-3 text-xs flex flex-wrap items-center gap-x-4 gap-y-2"
       data-testid="retention-line"
     >
       <span>
@@ -140,7 +140,7 @@ function RetentionLine() {
         type="button"
         onClick={purge}
         disabled={busy}
-        className="px-2 py-1 rounded border border-[var(--border)] disabled:opacity-50"
+        className="px-2 py-1 rounded-sm border border-(--border) disabled:opacity-50"
         title={state.policy.rule}
       >
         {busy ? "Deleting…" : "Delete expired records"}
@@ -323,22 +323,22 @@ const NEGOTIATION_STATUSES = [
 function statusBadge(status: string) {
   const map: Record<string, string> = {
     COMPLETED:
-      "bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]",
+      "bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)",
     CONFIRMED:
-      "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border border-[var(--role-holder-border)]",
+      "bg-(--role-holder-bg) text-(--role-holder-text) border border-(--role-holder-border)",
     FINALIZED:
-      "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border border-[var(--role-holder-border)]",
+      "bg-(--role-holder-bg) text-(--role-holder-text) border border-(--role-holder-border)",
     IN_PROGRESS:
-      "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border border-[var(--role-hdab-border)]",
+      "bg-(--role-hdab-bg) text-(--role-hdab-text) border border-(--role-hdab-border)",
     TERMINATED:
-      "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border border-[var(--role-admin-border)]",
+      "bg-(--role-admin-bg) text-(--role-admin-text) border border-(--role-admin-border)",
     ERROR:
-      "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border border-[var(--role-admin-border)]",
+      "bg-(--role-admin-bg) text-(--role-admin-text) border border-(--role-admin-border)",
   };
   return (
     <span
       className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
-        map[status] ?? "bg-[var(--surface-2)] text-[var(--text-secondary)]"
+        map[status] ?? "bg-(--surface-2) text-(--text-secondary)"
       }`}
     >
       {status}
@@ -349,16 +349,16 @@ function statusBadge(status: string) {
 function ehdsArticle(policyId?: string) {
   if (!policyId) return null;
   if (policyId.includes("53c") || policyId.includes("research"))
-    return <span className="text-[var(--role-trust-text)]">Art. 53(c)</span>;
+    return <span className="text-(--role-trust-text)">Art. 53(c)</span>;
   if (policyId.includes("art7") || policyId.includes("cross-border"))
-    return <span className="text-[var(--role-hdab-text)]">Art. 7</span>;
-  return <span className="text-[var(--text-secondary)]">{policyId}</span>;
+    return <span className="text-(--role-hdab-text)">Art. 7</span>;
+  return <span className="text-(--text-secondary)">{policyId}</span>;
 }
 
 function shortHash(h?: string) {
   if (!h) return "—";
   return (
-    <span title={h} className="font-mono text-[var(--text-secondary)]">
+    <span title={h} className="font-mono text-(--text-secondary)">
       {h.slice(0, 8)}
     </span>
   );
@@ -375,26 +375,26 @@ function directionBadge(direction?: string) {
   if (!direction) return null;
   if (direction === "OUTGOING")
     return (
-      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border border-[var(--role-patient-border)]">
+      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-(--role-patient-bg) text-(--role-patient-text) border border-(--role-patient-border)">
         <ArrowRight size={9} /> OUT
       </span>
     );
   return (
-    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]">
+    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)">
       <ArrowLeft size={9} /> IN
     </span>
   );
 }
 
 function accessTypeBadge(t?: string) {
-  if (!t) return <span className="text-[var(--text-secondary)]">—</span>;
+  if (!t) return <span className="text-(--text-secondary)">—</span>;
   const cls =
     t === "INITIAL_TRANSFER"
-      ? "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border border-[var(--role-holder-border)]"
-      : "bg-[var(--role-trust-bg)] text-[var(--role-trust-text)] border border-[var(--role-trust-border)]";
+      ? "bg-(--role-holder-bg) text-(--role-holder-text) border border-(--role-holder-border)"
+      : "bg-(--role-trust-bg) text-(--role-trust-text) border border-(--role-trust-border)";
   return (
     <span
-      className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls}`}
+      className={`inline-block px-1.5 py-0.5 rounded-sm text-[10px] font-semibold uppercase ${cls}`}
     >
       {t === "INITIAL_TRANSFER" ? "Transfer" : "Query"}
     </span>
@@ -407,7 +407,7 @@ function ComplianceButton({ name, email }: { name?: string; email?: string }) {
     <a
       href={`mailto:${email}?subject=Data Access Restriction Request`}
       title={`Contact compliance officer: ${name ?? email}`}
-      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border border-[var(--role-hdab-border)] hover:opacity-80 transition-opacity"
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] bg-(--role-hdab-bg) text-(--role-hdab-text) border border-(--role-hdab-border) hover:opacity-80 transition-opacity"
     >
       <Mail size={9} /> {name ?? email}
     </a>
@@ -454,43 +454,40 @@ function FilterBar({
   const hasFilters = Object.values(filters).some(Boolean);
 
   return (
-    <div className="flex flex-wrap items-end gap-2 p-3 mb-4 bg-[var(--surface)] border border-[var(--border)] rounded-lg text-xs">
-      <Filter
-        size={13}
-        className="text-[var(--text-secondary)] self-center mt-4"
-      />
+    <div className="flex flex-wrap items-end gap-2 p-3 mb-4 bg-(--surface) border border-(--border) rounded-lg text-xs">
+      <Filter size={13} className="text-(--text-secondary) self-center mt-4" />
 
       {/* Date range */}
       <div className="flex flex-col gap-1">
-        <label className="text-[var(--text-secondary)]">From</label>
+        <label className="text-(--text-secondary)">From</label>
         <input
           aria-label="From date"
           type="date"
           value={filters.dateFrom}
           onChange={(e) => onChange({ dateFrom: e.target.value })}
-          className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-32"
+          className="bg-(--surface-2) border border-(--border) rounded-sm px-2 py-1 text-(--text-primary) w-32"
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label className="text-[var(--text-secondary)]">To</label>
+        <label className="text-(--text-secondary)">To</label>
         <input
           aria-label="To date"
           type="date"
           value={filters.dateTo}
           onChange={(e) => onChange({ dateTo: e.target.value })}
-          className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-32"
+          className="bg-(--surface-2) border border-(--border) rounded-sm px-2 py-1 text-(--text-primary) w-32"
         />
       </div>
 
       {/* Status */}
       {tab !== "all" && tab !== "credentials" && (
         <div className="flex flex-col gap-1">
-          <label className="text-[var(--text-secondary)]">Status</label>
+          <label className="text-(--text-secondary)">Status</label>
           <select
             aria-label="Status"
             value={filters.status}
             onChange={(e) => onChange({ status: e.target.value })}
-            className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-36"
+            className="bg-(--surface-2) border border-(--border) rounded-sm px-2 py-1 text-(--text-primary) w-36"
           >
             <option value="">All statuses</option>
             {statuses.map((s) => (
@@ -505,12 +502,12 @@ function FilterBar({
       {/* Consumer */}
       {tab !== "credentials" && (
         <div className="flex flex-col gap-1">
-          <label className="text-[var(--text-secondary)]">Consumer</label>
+          <label className="text-(--text-secondary)">Consumer</label>
           <select
             aria-label="Consumer"
             value={filters.consumerDid}
             onChange={(e) => onChange({ consumerDid: e.target.value })}
-            className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-44"
+            className="bg-(--surface-2) border border-(--border) rounded-sm px-2 py-1 text-(--text-primary) w-44"
           >
             <option value="">All consumers</option>
             {participants.map((p) => (
@@ -525,12 +522,12 @@ function FilterBar({
       {/* Provider */}
       {tab !== "credentials" && (
         <div className="flex flex-col gap-1">
-          <label className="text-[var(--text-secondary)]">Provider</label>
+          <label className="text-(--text-secondary)">Provider</label>
           <select
             aria-label="Provider"
             value={filters.providerDid}
             onChange={(e) => onChange({ providerDid: e.target.value })}
-            className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-44"
+            className="bg-(--surface-2) border border-(--border) rounded-sm px-2 py-1 text-(--text-primary) w-44"
           >
             <option value="">All providers</option>
             {participants.map((p) => (
@@ -545,12 +542,12 @@ function FilterBar({
       {/* Cross-border */}
       {tab !== "credentials" && (
         <div className="flex flex-col gap-1">
-          <label className="text-[var(--text-secondary)]">Cross-border</label>
+          <label className="text-(--text-secondary)">Cross-border</label>
           <select
             aria-label="Cross-border"
             value={filters.crossBorder}
             onChange={(e) => onChange({ crossBorder: e.target.value })}
-            className="bg-[var(--surface-2)] border border-[var(--border)] rounded px-2 py-1 text-[var(--text-primary)] w-32"
+            className="bg-(--surface-2) border border-(--border) rounded-sm px-2 py-1 text-(--text-primary) w-32"
           >
             <option value="">All</option>
             <option value="true">Yes</option>
@@ -562,7 +559,7 @@ function FilterBar({
       {hasFilters && (
         <button
           onClick={onClear}
-          className="flex items-center gap-1 mt-4 px-2 py-1 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
+          className="flex items-center gap-1 mt-4 px-2 py-1 rounded-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) transition-colors"
         >
           <X size={11} /> Clear
         </button>
@@ -641,7 +638,7 @@ export default function AdminAuditPage() {
     setFilters((f) => ({ ...f, ...patch }));
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <main className="px-8 py-10 max-w-7xl mx-auto space-y-8">
         {/* ── Page header ── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -654,7 +651,7 @@ export default function AdminAuditPage() {
               hash, chain or seal, and HIPAA is a US statute that nothing here
               checks (issue #205). Sealed evidence is issue #204.
             */}
-            <p className="text-[var(--text-secondary)] text-lg mt-1">
+            <p className="text-(--text-secondary) text-lg mt-1">
               Access and provenance records · EHDS Art. 73 · Art. 59 · GDPR Art.
               30
             </p>
@@ -662,7 +659,7 @@ export default function AdminAuditPage() {
           <div
             data-testid="integrity-notice"
             title="Transfers, negotiations, credentials and access events are stored as ordinary Neo4j properties. Detached eIDAS seals over contract agreements are issue #204."
-            className="flex items-center gap-2 px-4 py-2 bg-[var(--warning)]/10 text-[var(--warning-text)] rounded-full border border-[var(--warning)]/20 text-sm font-bold tracking-tight"
+            className="flex items-center gap-2 px-4 py-2 bg-(--warning)/10 text-(--warning-text) rounded-full border border-(--warning)/20 text-sm font-bold tracking-tight"
           >
             <AlertTriangle size={14} />
             Records are not sealed
@@ -670,7 +667,7 @@ export default function AdminAuditPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 border-b border-[var(--border)]">
+        <div className="flex gap-1 border-b border-(--border)">
           {TABS.map((t) => (
             <button
               key={t.key}
@@ -680,8 +677,8 @@ export default function AdminAuditPage() {
               }}
               className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold border-b-2 -mb-px transition-colors ${
                 activeTab === t.key
-                  ? "border-[var(--accent)] text-[var(--accent)]"
-                  : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  ? "border-(--accent) text-(--accent)"
+                  : "border-transparent text-(--text-secondary) hover:text-(--text-primary)"
               }`}
             >
               <t.icon size={14} />
@@ -702,17 +699,15 @@ export default function AdminAuditPage() {
         )}
 
         {loading ? (
-          <div className="flex items-center gap-2 text-[var(--text-secondary)] mt-6">
+          <div className="flex items-center gap-2 text-(--text-secondary) mt-6">
             <Loader2 size={16} className="animate-spin" />
             Querying Neo4j…
           </div>
         ) : !data ? (
           <div className="mt-6 space-y-1">
-            <p className="text-[var(--text-secondary)]">
-              Failed to load audit data
-            </p>
+            <p className="text-(--text-secondary)">Failed to load audit data</p>
             {error && (
-              <p className="text-xs font-mono text-[var(--text-secondary)]">
+              <p className="text-xs font-mono text-(--text-secondary)">
                 {error}
               </p>
             )}
@@ -727,12 +722,12 @@ export default function AdminAuditPage() {
                     ([label, count]) => (
                       <div
                         key={label}
-                        className="stat-card border-l-[var(--accent)]"
+                        className="stat-card border-l-(--accent)"
                       >
-                        <p className="text-2xl font-black text-[var(--text-primary)] tabular-nums">
+                        <p className="text-2xl font-black text-(--text-primary) tabular-nums">
                           {count}
                         </p>
-                        <p className="text-xs font-medium text-[var(--text-secondary)] mt-1">
+                        <p className="text-xs font-medium text-(--text-secondary) mt-1">
                           {label}
                         </p>
                       </div>
@@ -753,7 +748,7 @@ export default function AdminAuditPage() {
                     <div className="overflow-auto">
                       <table className="w-full text-xs">
                         <thead>
-                          <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                          <tr className="text-(--text-secondary) border-b border-(--border)">
                             <th className="text-left py-2 px-2">Consumer</th>
                             <th className="text-left py-2 px-2">
                               Total Accesses
@@ -768,20 +763,20 @@ export default function AdminAuditPage() {
                           {data.summary.accessByConsumer!.map((row, i) => (
                             <tr
                               key={i}
-                              className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
+                              className="border-b border-(--border) hover:bg-(--surface-2)/50"
                             >
-                              <td className="py-2 px-2 text-[var(--text-primary)]">
+                              <td className="py-2 px-2 text-(--text-primary)">
                                 {row.consumerName ?? "—"}
                               </td>
                               <td className="py-2 px-2">
-                                <span className="inline-block px-1.5 py-0.5 rounded bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border border-[var(--role-patient-border)] text-[10px] font-semibold">
+                                <span className="inline-block px-1.5 py-0.5 rounded-sm bg-(--role-patient-bg) text-(--role-patient-text) border border-(--role-patient-border) text-[10px] font-semibold">
                                   {row.totalAccesses}×
                                 </span>
                               </td>
-                              <td className="py-2 px-2 text-[var(--text-secondary)]">
+                              <td className="py-2 px-2 text-(--text-secondary)">
                                 {formatBytes(row.totalBytes)}
                               </td>
-                              <td className="py-2 px-2 text-[var(--text-secondary)]">
+                              <td className="py-2 px-2 text-(--text-secondary)">
                                 {row.lastAccess
                                   ? row.lastAccess.slice(0, 10)
                                   : "—"}
@@ -819,21 +814,21 @@ export default function AdminAuditPage() {
                             "transfers.csv",
                           )
                         }
-                        className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                        className="flex items-center gap-1 text-xs text-(--text-secondary) hover:text-(--text-primary) transition-colors"
                       >
                         <Download size={12} /> Export CSV
                       </button>
                     )}
                   </div>
                   {data.transfers.length === 0 ? (
-                    <p className="text-[var(--text-secondary)] text-sm">
+                    <p className="text-(--text-secondary) text-sm">
                       No transfers recorded
                     </p>
                   ) : (
                     <div className="overflow-auto">
                       <table className="w-full text-xs">
                         <thead>
-                          <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                          <tr className="text-(--text-secondary) border-b border-(--border)">
                             <th className="text-left py-2 px-2">Dir</th>
                             <th className="text-left py-2 px-2">Consumer</th>
                             <th className="text-left py-2 px-2">Provider</th>
@@ -851,13 +846,13 @@ export default function AdminAuditPage() {
                           {data.transfers.map((t, i) => (
                             <tr
                               key={i}
-                              className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
+                              className="border-b border-(--border) hover:bg-(--surface-2)/50"
                             >
                               <td className="py-2 px-2">
                                 {directionBadge(t.direction)}
                               </td>
                               <td className="py-2 px-2">
-                                <div className="text-[var(--text-primary)]">
+                                <div className="text-(--text-primary)">
                                   {displayName(
                                     t.consumerName,
                                     t.consumerDid,
@@ -872,7 +867,7 @@ export default function AdminAuditPage() {
                                 </div>
                               </td>
                               <td className="py-2 px-2">
-                                <div className="text-[var(--text-primary)]">
+                                <div className="text-(--text-primary)">
                                   {displayName(
                                     t.providerName,
                                     t.providerDid,
@@ -886,11 +881,11 @@ export default function AdminAuditPage() {
                                   />
                                 </div>
                               </td>
-                              <td className="py-2 px-2 text-[var(--text-secondary)]">
+                              <td className="py-2 px-2 text-(--text-secondary)">
                                 {t.asset || t.assetId || "—"}
                               </td>
                               <td
-                                className="py-2 px-2 text-[var(--text-secondary)] max-w-[140px] truncate"
+                                className="py-2 px-2 text-(--text-secondary) max-w-[140px] truncate"
                                 title={t.purposeOfSharing}
                               >
                                 {t.purposeOfSharing || "—"}
@@ -906,23 +901,23 @@ export default function AdminAuditPage() {
                                   </span>
                                 )}
                               </td>
-                              <td className="py-2 px-2 text-[var(--text-secondary)]">
+                              <td className="py-2 px-2 text-(--text-secondary)">
                                 {(t.timestamp || t.transferDate || "—").slice(
                                   0,
                                   10,
                                 )}
                               </td>
-                              <td className="py-2 px-2 text-[var(--text-secondary)]">
+                              <td className="py-2 px-2 text-(--text-secondary)">
                                 {formatBytes(t.byteSize)}
                               </td>
                               <td className="py-2 px-2">
                                 {t.accessLogCount != null &&
                                 t.accessLogCount > 0 ? (
-                                  <span className="inline-block px-1.5 py-0.5 rounded bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border border-[var(--role-patient-border)] text-[10px] font-semibold">
+                                  <span className="inline-block px-1.5 py-0.5 rounded-sm bg-(--role-patient-bg) text-(--role-patient-text) border border-(--role-patient-border) text-[10px] font-semibold">
                                     {t.accessLogCount}×
                                   </span>
                                 ) : (
-                                  <span className="text-[var(--text-secondary)]">
+                                  <span className="text-(--text-secondary)">
                                     —
                                   </span>
                                 )}
@@ -931,7 +926,7 @@ export default function AdminAuditPage() {
                                 {t.edcProviderEndpoint ? (
                                   <span
                                     title={t.edcProviderEndpoint}
-                                    className="font-mono text-[var(--text-secondary)] text-[10px] truncate max-w-[100px] block cursor-help"
+                                    className="font-mono text-(--text-secondary) text-[10px] truncate max-w-[100px] block cursor-help"
                                   >
                                     {t.edcProviderEndpoint.replace(
                                       /^https?:\/\//,
@@ -984,21 +979,21 @@ export default function AdminAuditPage() {
                             "negotiations.csv",
                           )
                         }
-                        className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                        className="flex items-center gap-1 text-xs text-(--text-secondary) hover:text-(--text-primary) transition-colors"
                       >
                         <Download size={12} /> Export CSV
                       </button>
                     )}
                   </div>
                   {data.negotiations.length === 0 ? (
-                    <p className="text-[var(--text-secondary)] text-sm">
+                    <p className="text-(--text-secondary) text-sm">
                       No negotiations recorded
                     </p>
                   ) : (
                     <div className="overflow-auto">
                       <table className="w-full text-xs">
                         <thead>
-                          <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                          <tr className="text-(--text-secondary) border-b border-(--border)">
                             <th className="text-left py-2 px-2 w-5"></th>
                             <th className="text-left py-2 px-2">Consumer</th>
                             <th className="text-left py-2 px-2">Provider</th>
@@ -1017,7 +1012,7 @@ export default function AdminAuditPage() {
                             return (
                               <Fragment key={rowKey}>
                                 <tr
-                                  className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/40 cursor-pointer"
+                                  className="border-b border-(--border) hover:bg-(--surface-2)/40 cursor-pointer"
                                   onClick={() =>
                                     setExpandedNeg((prev) => {
                                       const next = new Set(prev);
@@ -1030,7 +1025,7 @@ export default function AdminAuditPage() {
                                     })
                                   }
                                 >
-                                  <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                  <td className="py-2 px-2 text-(--text-secondary)">
                                     {isOpen ? (
                                       <ChevronDown size={11} />
                                     ) : (
@@ -1038,7 +1033,7 @@ export default function AdminAuditPage() {
                                     )}
                                   </td>
                                   <td className="py-2 px-2">
-                                    <div className="text-[var(--text-primary)]">
+                                    <div className="text-(--text-primary)">
                                       {displayName(
                                         n.consumerName,
                                         n.consumerDid,
@@ -1053,7 +1048,7 @@ export default function AdminAuditPage() {
                                     </div>
                                   </td>
                                   <td className="py-2 px-2">
-                                    <div className="text-[var(--text-primary)]">
+                                    <div className="text-(--text-primary)">
                                       {displayName(
                                         n.providerName,
                                         n.providerDid,
@@ -1067,13 +1062,13 @@ export default function AdminAuditPage() {
                                       />
                                     </div>
                                   </td>
-                                  <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                  <td className="py-2 px-2 text-(--text-secondary)">
                                     {n.asset || n.assetId || "—"}
                                   </td>
                                   <td className="py-2 px-2">
                                     {statusBadge(n.status)}
                                   </td>
-                                  <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                  <td className="py-2 px-2 text-(--text-secondary)">
                                     {(
                                       n.timestamp ||
                                       n.negotiationDate ||
@@ -1083,11 +1078,11 @@ export default function AdminAuditPage() {
                                   <td className="py-2 px-2">
                                     {n.accessLogCount != null &&
                                     n.accessLogCount > 0 ? (
-                                      <span className="inline-block px-1.5 py-0.5 rounded bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border border-[var(--role-patient-border)] text-[10px] font-semibold">
+                                      <span className="inline-block px-1.5 py-0.5 rounded-sm bg-(--role-patient-bg) text-(--role-patient-text) border border-(--role-patient-border) text-[10px] font-semibold">
                                         {n.accessLogCount}×
                                       </span>
                                     ) : (
-                                      <span className="text-[var(--text-secondary)]">
+                                      <span className="text-(--text-secondary)">
                                         —
                                       </span>
                                     )}
@@ -1106,63 +1101,63 @@ export default function AdminAuditPage() {
 
                                 {/* Expanded policy card */}
                                 {isOpen && (
-                                  <tr className="border-b border-[var(--border)] bg-[var(--surface)]/60">
+                                  <tr className="border-b border-(--border) bg-(--surface)/60">
                                     <td colSpan={8} className="px-6 py-4">
                                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* Policy details */}
-                                        <div className="border border-[var(--border)] rounded-lg p-3">
-                                          <p className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase mb-2">
+                                        <div className="border border-(--border) rounded-lg p-3">
+                                          <p className="text-[10px] font-semibold text-(--text-secondary) uppercase mb-2">
                                             Policy Details
                                           </p>
                                           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                                            <span className="text-[var(--text-secondary)]">
+                                            <span className="text-(--text-secondary)">
                                               Purpose
                                             </span>
-                                            <span className="text-[var(--text-primary)]">
+                                            <span className="text-(--text-primary)">
                                               {n.policyPurpose ?? "—"}
                                             </span>
-                                            <span className="text-[var(--text-secondary)]">
+                                            <span className="text-(--text-secondary)">
                                               Legal Basis
                                             </span>
-                                            <span className="text-[var(--text-primary)]">
+                                            <span className="text-(--text-primary)">
                                               {n.policyLegalBasis ?? "—"}
                                             </span>
-                                            <span className="text-[var(--text-secondary)]">
+                                            <span className="text-(--text-secondary)">
                                               Permitted
                                             </span>
-                                            <span className="text-[var(--text-primary)]">
+                                            <span className="text-(--text-primary)">
                                               {n.policyPermittedUses ?? "—"}
                                             </span>
-                                            <span className="text-[var(--text-secondary)]">
+                                            <span className="text-(--text-secondary)">
                                               Prohibited
                                             </span>
                                             <span className="text-red-800 dark:text-red-400">
                                               {n.policyProhibitedUses ?? "—"}
                                             </span>
-                                            <span className="text-[var(--text-secondary)]">
+                                            <span className="text-(--text-secondary)">
                                               Data Minimisation
                                             </span>
-                                            <span className="text-[var(--text-primary)]">
+                                            <span className="text-(--text-primary)">
                                               {n.policyDataMinimisation ?? "—"}
                                             </span>
-                                            <span className="text-[var(--text-secondary)]">
+                                            <span className="text-(--text-secondary)">
                                               Retention
                                             </span>
-                                            <span className="text-[var(--text-primary)]">
+                                            <span className="text-(--text-primary)">
                                               {n.policyRetentionDays
                                                 ? `${n.policyRetentionDays} days`
                                                 : "—"}
                                             </span>
-                                            <span className="text-[var(--text-secondary)]">
+                                            <span className="text-(--text-secondary)">
                                               Total Accesses
                                             </span>
                                             <span className="text-teal-300 font-semibold">
                                               {n.accessCount ?? 0}×
                                             </span>
-                                            <span className="text-[var(--text-secondary)]">
+                                            <span className="text-(--text-secondary)">
                                               Last Access
                                             </span>
-                                            <span className="text-[var(--text-primary)]">
+                                            <span className="text-(--text-primary)">
                                               {n.lastAccessAt
                                                 ? n.lastAccessAt.slice(0, 10)
                                                 : "—"}
@@ -1171,27 +1166,27 @@ export default function AdminAuditPage() {
                                         </div>
 
                                         {/* EDC endpoints + contract ID */}
-                                        <div className="border border-[var(--border)] rounded-lg p-3">
-                                          <p className="text-[10px] font-semibold text-[var(--text-secondary)] uppercase mb-2">
+                                        <div className="border border-(--border) rounded-lg p-3">
+                                          <p className="text-[10px] font-semibold text-(--text-secondary) uppercase mb-2">
                                             EDC Endpoints &amp; Contract
                                           </p>
                                           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                                            <span className="text-[var(--text-secondary)]">
+                                            <span className="text-(--text-secondary)">
                                               Consumer EDC
                                             </span>
-                                            <span className="font-mono text-[var(--text-secondary)] break-all">
+                                            <span className="font-mono text-(--text-secondary) break-all">
                                               {n.consumerEdcEndpoint ?? "—"}
                                             </span>
-                                            <span className="text-[var(--text-secondary)]">
+                                            <span className="text-(--text-secondary)">
                                               Provider EDC
                                             </span>
-                                            <span className="font-mono text-[var(--text-secondary)] break-all">
+                                            <span className="font-mono text-(--text-secondary) break-all">
                                               {n.providerEdcEndpoint ?? "—"}
                                             </span>
-                                            <span className="text-[var(--text-secondary)]">
+                                            <span className="text-(--text-secondary)">
                                               Contract ID
                                             </span>
-                                            <span className="font-mono text-[var(--text-secondary)]">
+                                            <span className="font-mono text-(--text-secondary)">
                                               {n.contractId ?? "—"}
                                             </span>
                                           </div>
@@ -1222,14 +1217,14 @@ export default function AdminAuditPage() {
                     Verifiable Credentials ({data.credentials.length})
                   </h2>
                   {data.credentials.length === 0 ? (
-                    <p className="text-[var(--text-secondary)] text-sm">
+                    <p className="text-(--text-secondary) text-sm">
                       No credentials recorded
                     </p>
                   ) : (
                     <div className="overflow-auto">
                       <table className="w-full text-xs">
                         <thead>
-                          <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                          <tr className="text-(--text-secondary) border-b border-(--border)">
                             <th className="text-left py-2 px-2">Participant</th>
                             <th className="text-left py-2 px-2">Type</th>
                             <th className="text-left py-2 px-2">Issued</th>
@@ -1239,19 +1234,19 @@ export default function AdminAuditPage() {
                           {data.credentials.map((c, i) => (
                             <tr
                               key={i}
-                              className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50"
+                              className="border-b border-(--border) hover:bg-(--surface-2)/50"
                             >
-                              <td className="py-2 px-2 text-[var(--text-primary)]">
+                              <td className="py-2 px-2 text-(--text-primary)">
                                 {c.participant ||
                                   c.subjectDid
                                     ?.replace("did:web:", "")
                                     .replace(/%3A/g, ":") ||
                                   "—"}
                               </td>
-                              <td className="py-2 px-2 text-[var(--text-primary)]">
+                              <td className="py-2 px-2 text-(--text-primary)">
                                 {c.credentialType || c.type || "—"}
                               </td>
-                              <td className="py-2 px-2 text-[var(--text-secondary)]">
+                              <td className="py-2 px-2 text-(--text-secondary)">
                                 {(c.issuedAt || c.issuanceDate || "—").slice(
                                   0,
                                   10,
@@ -1277,14 +1272,14 @@ export default function AdminAuditPage() {
                   {data.findings?.length ?? 0})
                 </h2>
                 {!data.findings || data.findings.length === 0 ? (
-                  <p className="text-[var(--text-secondary)] text-sm mb-6">
+                  <p className="text-(--text-secondary) text-sm mb-6">
                     No finding recorded
                   </p>
                 ) : (
                   <div className="overflow-auto mb-6">
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                        <tr className="text-(--text-secondary) border-b border-(--border)">
                           <th className="text-left py-2 px-2">Party</th>
                           <th className="text-left py-2 px-2">Finding</th>
                           <th className="text-left py-2 px-2">Status</th>
@@ -1298,24 +1293,24 @@ export default function AdminAuditPage() {
                         {data.findings.map((f) => (
                           <tr
                             key={f.findingId}
-                            className="border-b border-[var(--border)] align-top"
+                            className="border-b border-(--border) align-top"
                             data-testid="finding-row"
                           >
                             <td className="py-2 px-2">
                               <div>{f.partyName ?? f.partyId}</div>
                               {f.permitId && (
-                                <div className="font-mono text-[var(--text-secondary)]">
+                                <div className="font-mono text-(--text-secondary)">
                                   {f.permitId}
                                 </div>
                               )}
                             </td>
                             <td className="py-2 px-2">
                               <div>{f.description}</div>
-                              <div className="font-mono text-[var(--text-secondary)]">
+                              <div className="font-mono text-(--text-secondary)">
                                 {f.findingId}
                               </div>
                               {f.views && (
-                                <div className="text-[var(--text-secondary)]">
+                                <div className="text-(--text-secondary)">
                                   Views: {f.views}
                                 </div>
                               )}
@@ -1351,14 +1346,14 @@ export default function AdminAuditPage() {
                 </h2>
                 {!data.informationRequests ||
                 data.informationRequests.length === 0 ? (
-                  <p className="text-[var(--text-secondary)] text-sm">
+                  <p className="text-(--text-secondary) text-sm">
                     No request recorded
                   </p>
                 ) : (
                   <div className="overflow-auto">
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                        <tr className="text-(--text-secondary) border-b border-(--border)">
                           <th className="text-left py-2 px-2">Party</th>
                           <th className="text-left py-2 px-2">Question</th>
                           <th className="text-left py-2 px-2">Status</th>
@@ -1371,7 +1366,7 @@ export default function AdminAuditPage() {
                         {data.informationRequests.map((r) => (
                           <tr
                             key={r.requestId}
-                            className="border-b border-[var(--border)] align-top"
+                            className="border-b border-(--border) align-top"
                             data-testid="information-request-row"
                           >
                             <td className="py-2 px-2">
@@ -1403,14 +1398,14 @@ export default function AdminAuditPage() {
                 </h2>
                 <RetentionLine />
                 {!data.accesslogs || data.accesslogs.length === 0 ? (
-                  <p className="text-[var(--text-secondary)] text-sm">
+                  <p className="text-(--text-secondary) text-sm">
                     No access logs recorded
                   </p>
                 ) : (
                   <div className="overflow-auto">
                     <table className="w-full text-xs">
                       <thead>
-                        <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                        <tr className="text-(--text-secondary) border-b border-(--border)">
                           <th className="text-left py-2 px-2">Consumer</th>
                           <th className="text-left py-2 px-2">Provider</th>
                           <th className="text-left py-2 px-2">Asset</th>
@@ -1497,9 +1492,9 @@ export default function AdminAuditPage() {
                                 }
                                 aria-expanded={isOpen}
                                 data-testid="access-log-row"
-                                className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/50 cursor-pointer"
+                                className="border-b border-(--border) hover:bg-(--surface-2)/50 cursor-pointer"
                               >
-                                <td className="py-2 px-2 text-[var(--text-primary)]">
+                                <td className="py-2 px-2 text-(--text-primary)">
                                   <span className="inline-flex items-center gap-1">
                                     {isOpen ? (
                                       <ChevronDown size={11} />
@@ -1509,23 +1504,23 @@ export default function AdminAuditPage() {
                                     {a.consumerName ?? a.consumerDid ?? "—"}
                                   </span>
                                   {a.consumerCountry && (
-                                    <span className="text-[var(--text-secondary)]">
+                                    <span className="text-(--text-secondary)">
                                       {" "}
                                       ({a.consumerCountry})
                                     </span>
                                   )}
                                 </td>
-                                <td className="py-2 px-2 text-[var(--text-primary)]">
+                                <td className="py-2 px-2 text-(--text-primary)">
                                   {a.providerName ?? a.providerDid ?? "—"}
                                   {a.providerCountry && (
-                                    <span className="text-[var(--text-secondary)]">
+                                    <span className="text-(--text-secondary)">
                                       {" "}
                                       ({a.providerCountry})
                                     </span>
                                   )}
                                 </td>
                                 <td
-                                  className="py-2 px-2 text-[var(--text-secondary)] max-w-[180px] truncate"
+                                  className="py-2 px-2 text-(--text-secondary) max-w-[180px] truncate"
                                   title={a.assetId ?? ""}
                                 >
                                   {a.assetTitle ?? a.assetId ?? "—"}
@@ -1534,21 +1529,21 @@ export default function AdminAuditPage() {
                                   {accessTypeBadge(a.accessType)}
                                 </td>
                                 <td
-                                  className="py-2 px-2 text-[var(--text-secondary)] max-w-[140px] truncate"
+                                  className="py-2 px-2 text-(--text-secondary) max-w-[140px] truncate"
                                   title={a.purpose}
                                 >
                                   {a.purpose ?? "—"}
                                 </td>
-                                <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                <td className="py-2 px-2 text-(--text-secondary)">
                                   {a.accessedAt
                                     ? a.accessedAt.slice(0, 10)
                                     : "—"}
                                 </td>
-                                <td className="py-2 px-2 text-[var(--text-secondary)]">
+                                <td className="py-2 px-2 text-(--text-secondary)">
                                   {formatBytes(a.bytesAccessed)}
                                 </td>
                                 <td
-                                  className="py-2 px-2 font-mono text-[var(--text-secondary)] text-[10px]"
+                                  className="py-2 px-2 font-mono text-(--text-secondary) text-[10px]"
                                   title={a.contractId ?? ""}
                                 >
                                   {a.contractId
@@ -1560,12 +1555,12 @@ export default function AdminAuditPage() {
                               </tr>
                               {isOpen && (
                                 <tr
-                                  className="border-b border-[var(--border)] bg-[var(--surface)]"
+                                  className="border-b border-(--border) bg-(--surface)"
                                   data-testid="access-log-detail"
                                 >
                                   <td colSpan={8} className="px-4 py-3">
                                     {a.name && (
-                                      <div className="text-xs font-semibold text-[var(--text-primary)] mb-2">
+                                      <div className="text-xs font-semibold text-(--text-primary) mb-2">
                                         {a.name}
                                       </div>
                                     )}
@@ -1582,10 +1577,10 @@ export default function AdminAuditPage() {
                                             key={label}
                                             className="flex gap-2 min-w-0"
                                           >
-                                            <dt className="text-[var(--text-secondary)] shrink-0">
+                                            <dt className="text-(--text-secondary) shrink-0">
                                               {label}
                                             </dt>
-                                            <dd className="font-mono text-[var(--text-primary)] break-all">
+                                            <dd className="font-mono text-(--text-primary) break-all">
                                               {String(value)}
                                             </dd>
                                           </div>

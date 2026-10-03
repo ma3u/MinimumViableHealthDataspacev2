@@ -116,7 +116,7 @@ export default function NegotiatePage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center gap-2 text-[var(--text-secondary)] p-10">
+        <div className="flex items-center gap-2 text-(--text-secondary) p-10">
           <Loader2 size={16} className="animate-spin" />
           Loading…
         </div>
@@ -326,10 +326,10 @@ function NegotiateContent() {
   function stateIcon(state: string) {
     const s = state?.toUpperCase() || "";
     if (s.includes("FINALIZED") || s.includes("AGREED"))
-      return <CheckCircle2 size={16} className="text-[var(--success-text)]" />;
+      return <CheckCircle2 size={16} className="text-(--success-text)" />;
     if (s.includes("TERMINATED") || s.includes("ERROR"))
-      return <XCircle size={16} className="text-[var(--danger-text)]" />;
-    return <Clock size={16} className="text-[var(--warning-text)]" />;
+      return <XCircle size={16} className="text-(--danger-text)" />;
+    return <Clock size={16} className="text-(--warning-text)" />;
   }
 
   function displayId(p: ParticipantCtx) {
@@ -342,7 +342,7 @@ function NegotiateContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
           title="Contract Negotiation"
@@ -360,14 +360,14 @@ function NegotiateContent() {
 
         {/* Consumer context selector */}
         <div className="mb-6">
-          <label className="text-xs text-[var(--text-secondary)] mb-1 block">
+          <label className="text-xs text-(--text-secondary) mb-1 block">
             Requesting as (your participant)
           </label>
           <select
             aria-label="Requesting as (your participant)"
             value={selectedCtx}
             onChange={(e) => setSelectedCtx(e.target.value)}
-            className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm"
+            className="w-full max-w-md px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm"
           >
             {participants.map((p) => (
               <option key={p["@id"]} value={p["@id"]}>
@@ -379,20 +379,20 @@ function NegotiateContent() {
         </div>
 
         {/* ── Step 1: Catalog discovery ── */}
-        <div className="border border-[var(--border)] rounded-xl p-5 mb-5">
+        <div className="border border-(--border) rounded-xl p-5 mb-5">
           <div className="flex items-center gap-2 mb-1">
             <Search size={16} className="text-teal-800 dark:text-teal-300" />
             <h2 className="font-semibold text-sm">
               Step 1 — Choose Data Provider
             </h2>
           </div>
-          <p className="text-xs text-[var(--text-secondary)] mb-4">
+          <p className="text-xs text-(--text-secondary) mb-4">
             Choose a data provider below — the catalog will be fetched
             automatically.
           </p>
 
           <div className="mb-4">
-            <label className="text-xs text-[var(--text-secondary)] mb-1 block">
+            <label className="text-xs text-(--text-secondary) mb-1 block">
               Data Provider
             </label>
             <select
@@ -413,7 +413,7 @@ function NegotiateContent() {
                 setCatalogError(null);
                 setCatalogNote(null);
               }}
-              className="w-full max-w-md px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm"
+              className="w-full max-w-md px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm"
               disabled={participants.length === 0}
             >
               {participants.length === 0 && (
@@ -434,7 +434,7 @@ function NegotiateContent() {
             type="button"
             disabled={catalogLoading || !selectedCtx || !selectedProviderCtx}
             onClick={handleDiscoverCatalog}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded text-sm font-medium hover:bg-gray-600 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-gray-700 text-white rounded-sm text-sm font-medium hover:bg-gray-600 disabled:opacity-50"
           >
             {catalogLoading ? (
               <Loader2 size={14} className="animate-spin" />
@@ -445,14 +445,14 @@ function NegotiateContent() {
           </button>
 
           {catalogError && (
-            <div className="mt-3 p-3 rounded bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 text-red-800 dark:text-red-300 text-xs flex gap-2">
+            <div className="mt-3 p-3 rounded-sm bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 text-red-800 dark:text-red-300 text-xs flex gap-2">
               <AlertCircle size={14} className="shrink-0 mt-0.5" />
               <span>{catalogError}</span>
             </div>
           )}
 
           {catalogNote && (
-            <div className="mt-3 p-3 rounded bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-xs flex gap-2">
+            <div className="mt-3 p-3 rounded-sm bg-amber-100 dark:bg-amber-900/30 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-xs flex gap-2">
               <AlertCircle size={14} className="shrink-0 mt-0.5" />
               <span>{catalogNote}</span>
             </div>
@@ -460,7 +460,7 @@ function NegotiateContent() {
 
           {offers.length > 0 && (
             <div className="mt-4 space-y-2">
-              <p className="text-xs text-[var(--text-secondary)] mb-2">
+              <p className="text-xs text-(--text-secondary) mb-2">
                 {offers.length} offer(s) found — select one to negotiate:
               </p>
               {offers.map((o) => (
@@ -471,16 +471,16 @@ function NegotiateContent() {
                   className={`w-full text-left p-3 rounded-lg border text-sm transition-colors ${
                     selectedOffer?.offerId === o.offerId
                       ? "border-layer2 bg-layer2/10"
-                      : "border-[var(--border)] hover:border-gray-500 bg-[var(--surface-2)]/50"
+                      : "border-(--border) hover:border-gray-500 bg-(--surface-2)/50"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-[var(--text-primary)]">
+                    <span className="font-medium text-(--text-primary)">
                       {o.name || assetLabel(o.assetId)}
                     </span>
                     <div className="flex items-center gap-2">
                       {o.contentType && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                           {o.contentType}
                         </span>
                       )}
@@ -493,7 +493,7 @@ function NegotiateContent() {
                     </div>
                   </div>
                   {o.description && (
-                    <p className="text-xs text-[var(--text-secondary)] mt-0.5 truncate">
+                    <p className="text-xs text-(--text-secondary) mt-0.5 truncate">
                       {o.description}
                     </p>
                   )}
@@ -504,7 +504,7 @@ function NegotiateContent() {
         </div>
 
         {/* ── Step 2: Negotiation ── */}
-        <div className="border border-[var(--border)] rounded-xl p-5 mb-8">
+        <div className="border border-(--border) rounded-xl p-5 mb-8">
           <div className="flex items-center gap-2 mb-1">
             <FileSignature
               size={18}
@@ -514,21 +514,19 @@ function NegotiateContent() {
               Step 2 — Initiate Negotiation
             </h2>
           </div>
-          <p className="text-xs text-[var(--text-secondary)] mb-4">
+          <p className="text-xs text-(--text-secondary) mb-4">
             Submit a DSP{" "}
-            <code className="text-[var(--text-secondary)]">
-              ContractRequest
-            </code>{" "}
+            <code className="text-(--text-secondary)">ContractRequest</code>{" "}
             with the selected ODRL offer. Protocol:{" "}
-            <code className="text-[var(--text-secondary)]">{DSP_PROTOCOL}</code>
+            <code className="text-(--text-secondary)">{DSP_PROTOCOL}</code>
           </p>
 
           {result && (
             <div
               className={`mb-4 p-3 rounded text-sm ${
                 result.startsWith("Error")
-                  ? "bg-[var(--badge-inactive-bg)] border border-[var(--badge-inactive-border)] text-[var(--badge-inactive-text)]"
-                  : "bg-[var(--badge-active-bg)] border border-[var(--badge-active-border)] text-[var(--badge-active-text)]"
+                  ? "bg-(--badge-inactive-bg) border border-(--badge-inactive-border) text-(--badge-inactive-text)"
+                  : "bg-(--badge-active-bg) border border-(--badge-active-border) text-(--badge-active-text)"
               }`}
             >
               {result}
@@ -536,7 +534,7 @@ function NegotiateContent() {
           )}
 
           {!selectedOffer && (
-            <div className="mb-4 p-3 rounded bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700/40 text-yellow-800 dark:text-yellow-400 text-xs flex gap-2">
+            <div className="mb-4 p-3 rounded-sm bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700/40 text-yellow-800 dark:text-yellow-400 text-xs flex gap-2">
               <AlertCircle size={14} className="shrink-0 mt-0.5" />
               <span>
                 Complete Step 1 first — select a dataset offer above to
@@ -546,13 +544,13 @@ function NegotiateContent() {
           )}
 
           {selectedOffer && (
-            <div className="mb-4 p-3 rounded bg-[var(--surface-2)]/60 border border-[var(--border)] text-sm">
-              <span className="text-[var(--text-secondary)]">Selected:</span>{" "}
-              <span className="text-[var(--text-primary)] font-medium">
+            <div className="mb-4 p-3 rounded-sm bg-(--surface-2)/60 border border-(--border) text-sm">
+              <span className="text-(--text-secondary)">Selected:</span>{" "}
+              <span className="text-(--text-primary) font-medium">
                 {selectedOffer.name || assetLabel(selectedOffer.assetId)}
               </span>
               {selectedOffer.contentType && (
-                <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                   {selectedOffer.contentType}
                 </span>
               )}
@@ -566,7 +564,7 @@ function NegotiateContent() {
             <button
               type="submit"
               disabled={initiating || !offerId}
-              className="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] text-white dark:text-gray-900 rounded text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-(--accent) text-white dark:text-gray-900 rounded-sm text-sm font-medium hover:bg-(--accent-hover) disabled:opacity-50"
             >
               {initiating ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -581,12 +579,12 @@ function NegotiateContent() {
         {/* Negotiation history */}
         <h2 className="font-semibold text-sm mb-3">Negotiation History</h2>
         {loading ? (
-          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+          <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
             Loading negotiations…
           </div>
         ) : negotiations.length === 0 ? (
-          <p className="text-[var(--text-secondary)] text-sm">
+          <p className="text-(--text-secondary) text-sm">
             No negotiations found
           </p>
         ) : (
@@ -598,16 +596,16 @@ function NegotiateContent() {
               return (
                 <div
                   key={n["@id"]}
-                  className="flex items-center gap-3 p-3 border border-[var(--border)] rounded-lg"
+                  className="flex items-center gap-3 p-3 border border-(--border) rounded-lg"
                 >
                   {stateIcon(state)}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-[var(--text-primary)] truncate">
+                    <p className="text-sm font-medium text-(--text-primary) truncate">
                       {n.assetId
                         ? assetLabel(n.assetId as string)
                         : n["@id"].slice(0, 12)}
                     </p>
-                    <p className="text-xs text-[var(--text-secondary)]">
+                    <p className="text-xs text-(--text-secondary)">
                       Provider: {counterParty ? didToName(counterParty) : "—"}
                       {state === "FINALIZED" && " · Agreement ready"}
                     </p>
@@ -627,9 +625,9 @@ function NegotiateContent() {
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${
                         state.includes("FINALIZED")
-                          ? "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border border-[var(--badge-active-border)]"
+                          ? "bg-(--badge-active-bg) text-(--badge-active-text) border border-(--badge-active-border)"
                           : state.includes("ERROR")
-                            ? "bg-[var(--badge-inactive-bg)] text-[var(--badge-inactive-text)] border border-[var(--badge-inactive-border)]"
+                            ? "bg-(--badge-inactive-bg) text-(--badge-inactive-text) border border-(--badge-inactive-border)"
                             : "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-400"
                       }`}
                     >

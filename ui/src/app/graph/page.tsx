@@ -278,7 +278,7 @@ export default function GraphPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex h-[calc(100vh-44px)] items-center justify-center text-[var(--text-secondary)]">
+        <div className="flex h-[calc(100vh-44px)] items-center justify-center text-(--text-secondary)">
           <Loader2 size={16} className="mr-2 animate-spin" />
           Loading…
         </div>
@@ -1088,14 +1088,14 @@ function GraphContent() {
       </div>
       {/* Left sidebar — collapsible */}
       <aside
-        className={`flex shrink-0 flex-col gap-4 overflow-y-auto border-r border-[var(--border)] bg-[var(--surface)] transition-all duration-200 ${
+        className={`flex shrink-0 flex-col gap-4 overflow-y-auto border-r border-(--border) bg-(--surface) transition-all duration-200 ${
           leftCollapsed ? "w-10 p-1" : "w-64 p-4"
         }`}
       >
         {/* Collapse/expand toggle */}
         <button
           onClick={() => setLeftCollapsed((v) => !v)}
-          className="flex items-center justify-center rounded p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+          className="flex items-center justify-center rounded-sm p-1 text-(--text-secondary) hover:text-(--text-primary) transition-colors"
           aria-label={leftCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           aria-expanded={!leftCollapsed}
           aria-controls="graph-sidebar-panel"
@@ -1109,12 +1109,12 @@ function GraphContent() {
         {leftCollapsed ? null : (
           <div id="graph-sidebar-panel" className="flex flex-col gap-3">
             {/* ── Compact header with inline stats ── */}
-            <div className="pb-2 border-b border-[var(--border)]">
+            <div className="pb-2 border-b border-(--border)">
               <div className="flex items-baseline justify-between">
-                <h1 className="text-sm font-bold text-[var(--accent)] leading-tight">
+                <h1 className="text-sm font-bold text-(--accent) leading-tight">
                   Knowledge Graph
                 </h1>
-                <span className="text-[10px] text-[var(--text-secondary)] tabular-nums">
+                <span className="text-[10px] text-(--text-secondary) tabular-nums">
                   {data.nodes.length} nodes · {data.links.length} links
                 </span>
               </div>
@@ -1125,13 +1125,13 @@ function GraphContent() {
                   const pv = PERSONA_VIEWS.find((p) => p.id === activePersona);
                   const Icon = pv ? PRESET_ICONS[pv.icon] ?? Eye : Eye;
                   return (
-                    <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-[var(--accent)]">
+                    <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-(--accent)">
                       <Icon size={10} />
                       <span className="font-semibold">
                         {pv?.label ?? activePersona}
                       </span>
                       {pv?.ehdsArticle && (
-                        <span className="text-[var(--text-secondary)]">
+                        <span className="text-(--text-secondary)">
                           · {pv.ehdsArticle}
                         </span>
                       )}
@@ -1149,7 +1149,7 @@ function GraphContent() {
                 onChange={(e) => setNodeSearch(e.target.value)}
                 placeholder="e.g. Organization, Contract, Pseudonym…"
                 aria-label="Search graph nodes by name, type, or keyword"
-                className="w-full px-3 py-1.5 text-xs bg-[var(--surface-card)] border border-[var(--border-ui)] rounded-lg text-[var(--text-primary)] placeholder-[var(--text-secondary)] outline-none focus:border-[var(--accent)] transition-colors"
+                className="w-full px-3 py-1.5 text-xs bg-(--surface-card) border border-(--border-ui) rounded-lg text-(--text-primary) placeholder-(--text-secondary) outline-hidden focus:border-(--accent) transition-colors"
               />
               {nodeSearch.trim() &&
                 (() => {
@@ -1167,7 +1167,7 @@ function GraphContent() {
                     <div className="mt-1.5 max-h-48 overflow-y-auto flex flex-col gap-0.5">
                       {matches.length > 0 ? (
                         <>
-                          <p className="text-[10px] text-[var(--text-secondary)] px-2 py-0.5">
+                          <p className="text-[10px] text-(--text-secondary) px-2 py-0.5">
                             {matches.length} result
                             {matches.length !== 1 ? "s" : ""}
                           </p>
@@ -1181,7 +1181,7 @@ function GraphContent() {
                                 setNodeSearch("");
                                 setRightCollapsed(false);
                               }}
-                              className="text-left px-2 py-1 rounded hover:bg-[var(--surface-2)] transition-colors flex items-center gap-2 text-xs"
+                              className="text-left px-2 py-1 rounded-sm hover:bg-(--surface-2) transition-colors flex items-center gap-2 text-xs"
                             >
                               <span
                                 className="w-2 h-2 rounded-full shrink-0"
@@ -1190,17 +1190,17 @@ function GraphContent() {
                                     n.color ?? "var(--text-secondary)",
                                 }}
                               />
-                              <span className="truncate text-[var(--text-primary)] font-medium">
+                              <span className="truncate text-(--text-primary) font-medium">
                                 {n.name}
                               </span>
-                              <span className="text-[var(--text-secondary)] shrink-0 text-[10px]">
+                              <span className="text-(--text-secondary) shrink-0 text-[10px]">
                                 {NODE_DISPLAY_NAMES[n.label] ?? n.label}
                               </span>
                             </button>
                           ))}
                         </>
                       ) : (
-                        <p className="text-xs text-[var(--text-secondary)] px-2 py-1">
+                        <p className="text-xs text-(--text-secondary) px-2 py-1">
                           No nodes match &ldquo;{nodeSearch}&rdquo;
                         </p>
                       )}
@@ -1243,7 +1243,7 @@ function GraphContent() {
                       className={`flex items-center gap-2 py-1.5 text-left text-xs transition-colors ${
                         isActive
                           ? "nav-item-active rounded-r"
-                          : "px-2 rounded text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
+                          : "px-2 rounded-sm text-(--text-secondary) hover:bg-(--surface-2) hover:text-(--text-primary)"
                       }`}
                     >
                       <Icon size={11} />
@@ -1253,7 +1253,7 @@ function GraphContent() {
                 })}
               </div>
               {activeFilter && (
-                <p className="mt-1.5 px-2 py-1.5 text-[10px] text-[var(--text-secondary)] bg-[var(--accent-surface)] rounded leading-snug">
+                <p className="mt-1.5 px-2 py-1.5 text-[10px] text-(--text-secondary) bg-(--accent-surface) rounded-sm leading-snug">
                   {
                     [
                       ...FILTER_PRESETS,
@@ -1268,7 +1268,7 @@ function GraphContent() {
             </div>
 
             {/* ── Quick links — compact icon row ── */}
-            <div className="border-t border-[var(--border)] pt-2">
+            <div className="border-t border-(--border) pt-2">
               <p className="section-label">Explore</p>
               <div className="grid grid-cols-2 gap-1">
                 {[
@@ -1286,7 +1286,7 @@ function GraphContent() {
                     key={href}
                     href={href}
                     target={external ? "_blank" : undefined}
-                    className="flex items-center gap-1.5 py-1 px-1.5 text-[10px] text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors rounded hover:bg-[var(--accent-surface)]"
+                    className="flex items-center gap-1.5 py-1 px-1.5 text-[10px] text-(--text-secondary) hover:text-(--accent) transition-colors rounded-sm hover:bg-(--accent-surface)"
                   >
                     <Icon size={10} aria-hidden="true" />
                     {label}
@@ -1297,16 +1297,16 @@ function GraphContent() {
 
             {/* ── Legend — always available, collapsed by default ── */}
             <details
-              className="border-t border-[var(--border)] pt-2"
+              className="border-t border-(--border) pt-2"
               open={!activeFilter}
             >
-              <summary className="section-label cursor-pointer select-none hover:text-[var(--accent)] transition-colors mb-1">
+              <summary className="section-label cursor-pointer select-none hover:text-(--accent) transition-colors mb-1">
                 Legend
               </summary>
               <div className="mt-2 space-y-3">
                 {/* Layer colors */}
                 <div>
-                  <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold mb-1">
+                  <p className="text-[10px] text-(--text-secondary) uppercase tracking-wider font-semibold mb-1">
                     Layers
                   </p>
                   {Object.entries(LAYER_LABELS)
@@ -1325,7 +1325,7 @@ function GraphContent() {
                             style={{ background: LAYER_COLORS[+k] }}
                             aria-hidden="true"
                           />
-                          <span className="text-[var(--text-primary)]">
+                          <span className="text-(--text-primary)">
                             {personaLabel}
                           </span>
                         </div>
@@ -1334,7 +1334,7 @@ function GraphContent() {
                 </div>
                 {/* Key actors */}
                 <div>
-                  <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold mb-1">
+                  <p className="text-[10px] text-(--text-secondary) uppercase tracking-wider font-semibold mb-1">
                     Key actors
                   </p>
                   {ROLE_LEGEND.map(({ label, color, description, tooltip }) => (
@@ -1349,10 +1349,10 @@ function GraphContent() {
                         aria-hidden="true"
                       />
                       <div>
-                        <span className="font-medium text-[var(--text-primary)]">
+                        <span className="font-medium text-(--text-primary)">
                           {label}
                         </span>
-                        <span className="text-[var(--text-secondary)]">
+                        <span className="text-(--text-secondary)">
                           {" "}
                           — {description}
                         </span>
@@ -1365,10 +1365,10 @@ function GraphContent() {
 
             {/* Hint — only when no selection and no filter */}
             {!selected && !activeFilter && !loading && (
-              <div className="flex items-start gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface-2)]/50 p-2 text-[10px] text-[var(--text-secondary)]">
+              <div className="flex items-start gap-1.5 rounded-lg border border-(--border) bg-(--surface-2)/50 p-2 text-[10px] text-(--text-secondary)">
                 <MousePointerClick
                   size={10}
-                  className="mt-0.5 shrink-0 text-[var(--accent)]"
+                  className="mt-0.5 shrink-0 text-(--accent)"
                   aria-hidden="true"
                 />
                 Click a node to inspect, or pick a question above.
@@ -1379,29 +1379,29 @@ function GraphContent() {
       </aside>
 
       {/* Graph canvas */}
-      <div ref={containerRef} className="relative flex-1 bg-[var(--bg)]">
+      <div ref={containerRef} className="relative flex-1 bg-(--bg)">
         {loading ? (
-          <div className="flex h-full items-center justify-center text-[var(--text-secondary)]">
+          <div className="flex h-full items-center justify-center text-(--text-secondary)">
             <Loader2 size={14} className="mr-2 animate-spin" />
             Loading {PERSONA_VALUE_NODES[activePersona]?.name ?? "graph"}…
           </div>
         ) : error === "UNAUTHENTICATED" ? (
-          <div className="flex h-full flex-col items-center justify-center gap-4 text-[var(--text-secondary)]">
+          <div className="flex h-full flex-col items-center justify-center gap-4 text-(--text-secondary)">
             <p className="text-lg">Sign in to explore the knowledge graph.</p>
-            <p className="text-sm text-[var(--text-secondary)]">
+            <p className="text-sm text-(--text-secondary)">
               The graph shows participants, data products, policies and clinical
               entities scoped to your persona.
             </p>
             <button
               type="button"
               onClick={() => signIn("keycloak")}
-              className="rounded bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white dark:text-[var(--bg)] hover:opacity-90"
+              className="rounded-sm bg-(--accent) px-4 py-2 text-sm font-medium text-white dark:text-(--bg) hover:opacity-90"
             >
               Sign in
             </button>
           </div>
         ) : error ? (
-          <div className="flex h-full items-center justify-center text-[var(--text-secondary)]">
+          <div className="flex h-full items-center justify-center text-(--text-secondary)">
             {error}
           </div>
         ) : (
@@ -1436,7 +1436,7 @@ function GraphContent() {
         {/* Canvas hover tooltip */}
         {hoveredNode && !selected && (
           <div
-            className="pointer-events-none absolute z-50 max-w-xs rounded-lg border border-[var(--border)] bg-[var(--surface)]/95 px-3 py-2 shadow-xl backdrop-blur-sm"
+            className="pointer-events-none absolute z-50 max-w-xs rounded-lg border border-(--border) bg-(--surface)/95 px-3 py-2 shadow-xl backdrop-blur-xs"
             style={{
               left: Math.min(mousePos.x + 14, dims.width - 280),
               top: Math.min(mousePos.y + 14, dims.height - 120),
@@ -1447,11 +1447,11 @@ function GraphContent() {
                 className="h-2.5 w-2.5 shrink-0 rounded-full"
                 style={{ background: hoveredNode.color }}
               />
-              <span className="truncate text-sm font-semibold text-[var(--text-primary)]">
+              <span className="truncate text-sm font-semibold text-(--text-primary)">
                 {hoveredNode.name}
               </span>
             </div>
-            <div className="mb-1 text-xs text-[var(--text-secondary)]">
+            <div className="mb-1 text-xs text-(--text-secondary)">
               {NODE_DISPLAY_NAMES[hoveredNode.label] ?? hoveredNode.label}
               {" · "}
               {(PERSONA_LAYER_LABELS[activePersona] ?? LAYER_LABELS)[
@@ -1459,7 +1459,7 @@ function GraphContent() {
               ] ?? LAYER_LABELS[hoveredNode.layer]}
             </div>
             {NODE_TOOLTIPS[hoveredNode.label] && (
-              <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
+              <p className="text-xs leading-relaxed text-(--text-secondary)">
                 {NODE_TOOLTIPS[hoveredNode.label]}
               </p>
             )}
@@ -1468,7 +1468,7 @@ function GraphContent() {
 
         {/* Expanding spinner overlay */}
         {expanding && (
-          <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-[var(--surface)]/90 px-3 py-1.5 text-xs text-[var(--text-secondary)]">
+          <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-(--surface)/90 px-3 py-1.5 text-xs text-(--text-secondary)">
             <Loader2 size={12} className="animate-spin" />
             Loading neighbours…
           </div>
@@ -1478,14 +1478,14 @@ function GraphContent() {
       {/* ── Right-side entity inspector panel ── */}
       {selected && (
         <aside
-          className={`absolute right-0 top-0 h-full overflow-y-auto border-l border-[var(--border)] bg-[var(--surface-card)] animate-slide-in-right z-40 shadow-2xl transition-[width] duration-200 ${
+          className={`absolute right-0 top-0 h-full overflow-y-auto border-l border-(--border) bg-(--surface-card) animate-slide-in-right z-40 shadow-2xl transition-[width] duration-200 ${
             rightCollapsed ? "w-10" : "w-96"
           }`}
         >
           {/* Collapse/expand toggle */}
           <button
             onClick={() => setRightCollapsed((v) => !v)}
-            className="flex w-full items-center justify-center border-b border-[var(--border)] p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            className="flex w-full items-center justify-center border-b border-(--border) p-2 text-(--text-secondary) hover:text-(--text-primary) transition-colors"
             aria-label={
               rightCollapsed ? "Expand inspector" : "Collapse inspector"
             }
@@ -1502,14 +1502,14 @@ function GraphContent() {
           {rightCollapsed ? null : (
             <div id="graph-inspector-panel">
               {/* ── Header ── */}
-              <div className="border-b border-[var(--border)] px-5 pt-5 pb-4">
+              <div className="border-b border-(--border) px-5 pt-5 pb-4">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">
+                  <p className="text-[10px] font-black text-(--text-secondary) uppercase tracking-widest">
                     Entity Details
                   </p>
                   <button
                     onClick={() => setSelected(null)}
-                    className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] rounded-lg p-1 transition-colors"
+                    className="text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) rounded-lg p-1 transition-colors"
                     aria-label="Close detail panel"
                   >
                     <X size={14} aria-hidden="true" />
@@ -1519,11 +1519,11 @@ function GraphContent() {
                 {/* Node name with color indicator */}
                 <div className="flex items-start gap-2.5 mb-3">
                   <span
-                    className="mt-1.5 h-3 w-3 shrink-0 rounded-full shadow-sm"
+                    className="mt-1.5 h-3 w-3 shrink-0 rounded-full shadow-xs"
                     style={{ background: selected.color }}
                   />
                   <h2
-                    className="text-xl font-black leading-tight tracking-tight break-words"
+                    className="text-xl font-black leading-tight tracking-tight wrap-break-word"
                     style={{ color: selected.color }}
                     title={NODE_TOOLTIPS[selected.label]}
                   >
@@ -1542,7 +1542,7 @@ function GraphContent() {
                   >
                     {NODE_DISPLAY_NAMES[selected.label] ?? selected.label}
                   </span>
-                  <span className="text-[10px] font-semibold text-[var(--text-secondary)]">
+                  <span className="text-[10px] font-semibold text-(--text-secondary)">
                     {PERSONA_LAYER_LABELS[activePersona]?.[selected.layer] ??
                       LAYER_LABELS[selected.layer]}
                   </span>
@@ -1550,8 +1550,8 @@ function GraphContent() {
               </div>
 
               {/* ── Node ID (copyable) ── */}
-              <div className="px-5 py-3 border-b border-[var(--border)] group flex items-center gap-2">
-                <p className="break-all text-[10px] leading-relaxed text-[var(--text-secondary)] font-mono flex-1">
+              <div className="px-5 py-3 border-b border-(--border) group flex items-center gap-2">
+                <p className="break-all text-[10px] leading-relaxed text-(--text-secondary) font-mono flex-1">
                   {selected.id}
                 </p>
                 <button
@@ -1560,12 +1560,12 @@ function GraphContent() {
                     setCopiedKey("__id__");
                     setTimeout(() => setCopiedKey(null), 1500);
                   }}
-                  className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--accent)] transition-colors"
+                  className="shrink-0 text-(--text-secondary) hover:text-(--accent) transition-colors"
                   title="Copy node ID"
                   aria-label="Copy node ID"
                 >
                   {copiedKey === "__id__" ? (
-                    <Check size={12} className="text-[var(--success-text)]" />
+                    <Check size={12} className="text-(--success-text)" />
                   ) : (
                     <Copy size={12} />
                   )}
@@ -1579,13 +1579,13 @@ function GraphContent() {
                 selected.label === "TrustCenter" ||
                 selected.label === "SPESession" ||
                 selected.label === "ResearchPseudonym") && (
-                <div className="px-5 py-3 border-b border-[var(--border)] flex flex-wrap gap-2">
+                <div className="px-5 py-3 border-b border-(--border) flex flex-wrap gap-2">
                   {selected.layer === 2 && (
                     <a
                       href={`/catalog?search=${encodeURIComponent(
                         selected.name,
                       )}`}
-                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[var(--layer2-text)] bg-[var(--surface-2)] px-2.5 py-1.5 rounded-full hover:bg-[var(--accent-surface)] transition-colors"
+                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-(--layer2-text) bg-(--surface-2) px-2.5 py-1.5 rounded-full hover:bg-(--accent-surface) transition-colors"
                     >
                       <BookOpen size={10} /> Dataset Catalog
                     </a>
@@ -1593,7 +1593,7 @@ function GraphContent() {
                   {(selected.layer === 3 || selected.layer === 4) && (
                     <a
                       href="/patient"
-                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[var(--layer3-text)] bg-[var(--surface-2)] px-2.5 py-1.5 rounded-full hover:bg-[var(--accent-surface)] transition-colors"
+                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-(--layer3-text) bg-(--surface-2) px-2.5 py-1.5 rounded-full hover:bg-(--accent-surface) transition-colors"
                     >
                       <Activity size={10} /> Patient Journey
                     </a>
@@ -1601,7 +1601,7 @@ function GraphContent() {
                   {selected.layer === 4 && (
                     <a
                       href="/analytics"
-                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[var(--layer4-text)] bg-[var(--surface-2)] px-2.5 py-1.5 rounded-full hover:bg-[var(--accent-surface)] transition-colors"
+                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-(--layer4-text) bg-(--surface-2) px-2.5 py-1.5 rounded-full hover:bg-(--accent-surface) transition-colors"
                     >
                       <Database size={10} /> OMOP Analytics
                     </a>
@@ -1611,7 +1611,7 @@ function GraphContent() {
                     selected.label === "ResearchPseudonym") && (
                     <a
                       href="/compliance#trust-center"
-                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[var(--layer1-text)] bg-[var(--surface-2)] px-2.5 py-1.5 rounded-full hover:bg-[var(--accent-surface)] transition-colors"
+                      className="inline-flex items-center gap-1.5 text-[10px] font-bold text-(--layer1-text) bg-(--surface-2) px-2.5 py-1.5 rounded-full hover:bg-(--accent-surface) transition-colors"
                     >
                       <Lock size={10} /> Trust Center
                     </a>
@@ -1621,9 +1621,9 @@ function GraphContent() {
 
               {/* ── Graph properties ── */}
               {!selected.isValueCenter && (
-                <div className="px-5 py-4 border-b border-[var(--border)]">
+                <div className="px-5 py-4 border-b border-(--border)">
                   {propsLoading ? (
-                    <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                    <div className="flex items-center gap-2 text-xs text-(--text-secondary)">
                       <Loader2 size={12} className="animate-spin" />
                       Loading properties…
                     </div>
@@ -1641,9 +1641,9 @@ function GraphContent() {
                           return (
                             <div
                               key={p.key}
-                              className="flex items-start justify-between gap-2 px-3 py-2.5 bg-[var(--surface)] rounded-xl text-xs group"
+                              className="flex items-start justify-between gap-2 px-3 py-2.5 bg-(--surface) rounded-xl text-xs group"
                             >
-                              <span className="text-[var(--text-secondary)] shrink-0 pt-0.5 w-24 leading-snug">
+                              <span className="text-(--text-secondary) shrink-0 pt-0.5 w-24 leading-snug">
                                 {p.label}
                               </span>
                               <div className="flex items-start gap-1.5 flex-1 min-w-0 justify-end">
@@ -1652,7 +1652,7 @@ function GraphContent() {
                                     href={p.value}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-[var(--accent)] font-medium break-all hover:underline flex items-center gap-1 text-right"
+                                    className="text-(--accent) font-medium break-all hover:underline flex items-center gap-1 text-right"
                                   >
                                     {p.value.length > 36
                                       ? p.value.slice(0, 34) + "…"
@@ -1665,19 +1665,19 @@ function GraphContent() {
                                 ) : isEmail ? (
                                   <a
                                     href={`mailto:${p.value}`}
-                                    className="text-[var(--accent)] font-medium hover:underline text-right"
+                                    className="text-(--accent) font-medium hover:underline text-right"
                                   >
                                     {p.value}
                                   </a>
                                 ) : isPhone ? (
                                   <a
                                     href={`tel:${p.value.replace(/\s/g, "")}`}
-                                    className="text-[var(--text-primary)] font-bold hover:text-[var(--accent)] text-right"
+                                    className="text-(--text-primary) font-bold hover:text-(--accent) text-right"
                                   >
                                     {p.value}
                                   </a>
                                 ) : (
-                                  <span className="text-[var(--text-primary)] font-bold text-right break-all">
+                                  <span className="text-(--text-primary) font-bold text-right break-all">
                                     {p.value.length > 45
                                       ? p.value.slice(0, 43) + "…"
                                       : p.value}
@@ -1689,14 +1689,14 @@ function GraphContent() {
                                     setCopiedKey(p.key);
                                     setTimeout(() => setCopiedKey(null), 1500);
                                   }}
-                                  className="shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity text-[var(--text-secondary)] hover:text-[var(--accent)]"
+                                  className="shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity text-(--text-secondary) hover:text-(--accent)"
                                   title={`Copy ${p.label}`}
                                   aria-label={`Copy ${p.label}`}
                                 >
                                   {isCopied ? (
                                     <Check
                                       size={10}
-                                      className="text-[var(--success-text)]"
+                                      className="text-(--success-text)"
                                     />
                                   ) : (
                                     <Copy size={10} />
@@ -1709,7 +1709,7 @@ function GraphContent() {
                       </div>
                     </>
                   ) : (
-                    <p className="text-xs text-[var(--text-secondary)] italic">
+                    <p className="text-xs text-(--text-secondary) italic">
                       No additional properties
                     </p>
                   )}
@@ -1717,9 +1717,9 @@ function GraphContent() {
               )}
 
               {/* ── Expand / neighbours loaded ── */}
-              <div className="px-5 py-4 border-b border-[var(--border)]">
+              <div className="px-5 py-4 border-b border-(--border)">
                 {selected.isValueCenter ? (
-                  <p className="text-xs text-[var(--warning-text)] italic">
+                  <p className="text-xs text-(--warning-text) italic">
                     {PERSONA_VALUE_NODES[activePersona]?.tooltip ??
                       "Your starting point in the dataspace"}
                   </p>
@@ -1742,8 +1742,8 @@ function GraphContent() {
                     )}
                   </button>
                 ) : (
-                  <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                    <span className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse shrink-0" />
+                  <div className="flex items-center gap-2 text-xs text-(--text-secondary)">
+                    <span className="w-2 h-2 rounded-full bg-(--success) animate-pulse shrink-0" />
                     {neighbours.length} connections loaded
                   </div>
                 )}
@@ -1757,7 +1757,7 @@ function GraphContent() {
                     <div className="mb-5">
                       <div className="flex items-center gap-2 mb-2">
                         <p className="section-label">Outgoing</p>
-                        <span className="text-[10px] font-bold text-[var(--text-secondary)] bg-[var(--surface)] px-1.5 py-0.5 rounded-full border border-[var(--border)]">
+                        <span className="text-[10px] font-bold text-(--text-secondary) bg-(--surface) px-1.5 py-0.5 rounded-full border border-(--border)">
                           {neighbours.filter((nb) => nb.dir === "out").length}
                         </span>
                       </div>
@@ -1768,25 +1768,25 @@ function GraphContent() {
                             <button
                               key={`out-${i}`}
                               onClick={() => setSelected(nb.node)}
-                              className="w-full flex items-center gap-2 py-2.5 px-3 text-left bg-[var(--surface)] hover:bg-[var(--accent-surface)] rounded-xl transition-colors group"
+                              className="w-full flex items-center gap-2 py-2.5 px-3 text-left bg-(--surface) hover:bg-(--accent-surface) rounded-xl transition-colors group"
                             >
                               <ArrowUpRight
                                 size={12}
-                                className="shrink-0 text-[var(--accent)] opacity-60 group-hover:opacity-100"
+                                className="shrink-0 text-(--accent) opacity-60 group-hover:opacity-100"
                               />
-                              <span className="shrink-0 font-mono text-[9px] font-black text-[var(--accent)] bg-[var(--accent-surface)] group-hover:bg-white/50 px-1.5 py-0.5 rounded max-w-[90px] truncate">
+                              <span className="shrink-0 font-mono text-[9px] font-black text-(--accent) bg-(--accent-surface) group-hover:bg-white/50 px-1.5 py-0.5 rounded-sm max-w-[90px] truncate">
                                 {FRIENDLY_REL_NAMES[nb.type] ?? nb.type}
                               </span>
                               <span
                                 className="h-2 w-2 shrink-0 rounded-full"
                                 style={{ background: nb.node.color }}
                               />
-                              <span className="truncate text-xs text-[var(--text-primary)] group-hover:text-[var(--accent)] flex-1 text-left">
+                              <span className="truncate text-xs text-(--text-primary) group-hover:text-(--accent) flex-1 text-left">
                                 {nb.node.name}
                               </span>
                               <ChevronRight
                                 size={10}
-                                className="shrink-0 text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="shrink-0 text-(--text-secondary) opacity-0 group-hover:opacity-100 transition-opacity"
                               />
                             </button>
                           ))}
@@ -1799,7 +1799,7 @@ function GraphContent() {
                     <div>
                       <div className="flex items-center gap-2 mb-2">
                         <p className="section-label">Incoming</p>
-                        <span className="text-[10px] font-bold text-[var(--text-secondary)] bg-[var(--surface)] px-1.5 py-0.5 rounded-full border border-[var(--border)]">
+                        <span className="text-[10px] font-bold text-(--text-secondary) bg-(--surface) px-1.5 py-0.5 rounded-full border border-(--border)">
                           {neighbours.filter((nb) => nb.dir === "in").length}
                         </span>
                       </div>
@@ -1810,25 +1810,25 @@ function GraphContent() {
                             <button
                               key={`in-${i}`}
                               onClick={() => setSelected(nb.node)}
-                              className="w-full flex items-center gap-2 py-2.5 px-3 text-left bg-[var(--surface)] hover:bg-[var(--surface-2)] rounded-xl transition-colors group"
+                              className="w-full flex items-center gap-2 py-2.5 px-3 text-left bg-(--surface) hover:bg-(--surface-2) rounded-xl transition-colors group"
                             >
                               <ArrowDownLeft
                                 size={12}
-                                className="shrink-0 text-[var(--layer3-text)] opacity-60 group-hover:opacity-100"
+                                className="shrink-0 text-(--layer3-text) opacity-60 group-hover:opacity-100"
                               />
-                              <span className="shrink-0 font-mono text-[9px] font-black text-[var(--layer3-text)] bg-[var(--surface-2)] px-1.5 py-0.5 rounded max-w-[90px] truncate">
+                              <span className="shrink-0 font-mono text-[9px] font-black text-(--layer3-text) bg-(--surface-2) px-1.5 py-0.5 rounded-sm max-w-[90px] truncate">
                                 {FRIENDLY_REL_NAMES[nb.type] ?? nb.type}
                               </span>
                               <span
                                 className="h-2 w-2 shrink-0 rounded-full"
                                 style={{ background: nb.node.color }}
                               />
-                              <span className="truncate text-xs text-[var(--text-primary)] group-hover:text-[var(--accent)] flex-1 text-left">
+                              <span className="truncate text-xs text-(--text-primary) group-hover:text-(--accent) flex-1 text-left">
                                 {nb.node.name}
                               </span>
                               <ChevronRight
                                 size={10}
-                                className="shrink-0 text-[var(--text-secondary)] opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="shrink-0 text-(--text-secondary) opacity-0 group-hover:opacity-100 transition-opacity"
                               />
                             </button>
                           ))}
