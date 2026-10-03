@@ -423,51 +423,6 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Health" }
 
-  /api/testflight-request:
-    post:
-      tags: [Health]
-      summary: Ask for the Klarbefund TestFlight preview (ADR-048)
-      description: >-
-        The start page's form. No session needed; the hub mails the request
-        through Azure Communication Services to a recipient fixed by the
-        deployment. Three requests per address and twenty in all per hour.
-      security: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [name, appleId]
-              properties:
-                name: { type: string, maxLength: 100 }
-                appleId: { type: string, format: email, maxLength: 254 }
-                note: { type: string, maxLength: 1000 }
-      responses:
-        "202":
-          description: Queued for delivery
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status: { type: string, enum: [queued] }
-        "400":
-          description: Missing name or invalid Apple ID
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/Error" }
-        "429":
-          description: Too many requests
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/Error" }
-        "503":
-          description: Mail not configured or refused; the form offers a mailto draft
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/Error" }
-
   /api/catalog:
     get:
       tags: [Catalog]

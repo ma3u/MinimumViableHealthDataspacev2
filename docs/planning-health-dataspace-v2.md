@@ -158,6 +158,7 @@ All three core specifications are now final or near-final:
 | [045](ADRs/ADR-045-observability-and-regulatory-audit-trail.md)             | Cloud-native, vendor-agnostic observability and a tamper-evident audit trail                    | 2026-10-02 | Proposed          |
 | [046](ADRs/ADR-046-vault-keeps-its-state-on-the-flexible-server.md)         | The Azure Vault keeps its state on the Flexible Server                                          | 2026-10-03 | Proposed          |
 | [047](ADRs/ADR-047-vault-stays-up-off-hours.md)                             | Vault stays up off-hours until it keeps its own state                                           | 2026-10-03 | Proposed          |
-| [048](ADRs/ADR-048-testflight-request-mailed-without-a-session.md)          | The TestFlight request is mailed by the hub, without a session                                  | 2026-10-03 | Proposed          |
+| [048](ADRs/ADR-048-testflight-request-mailed-without-a-session.md)          | The TestFlight request is mailed by the hub, without a session                                  | 2026-10-03 | Superseded by 050 |
+| [050](ADRs/ADR-050-klarbefund-beta-by-public-testflight-link.md)            | The Klarbefund beta is joined by a public TestFlight link                                       | 2026-10-03 | Proposed          |
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.

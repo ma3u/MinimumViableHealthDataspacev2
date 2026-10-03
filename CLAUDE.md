@@ -87,7 +87,7 @@ docs/                   — see "Knowledge & planning" below
 - `docs/knowledge/index.md` — OKF v0.2 concept bundle: services, data models, APIs, runbooks.
 - `docs/planning/index.md` — work items in `done/ · current/ · future/`; roadmap detail in
   `docs/planning/roadmap-phases-*.md`; issue table in `docs/planning-health-dataspace-v2.md`.
-- `docs/ADRs/` — canonical ADR corpus (ADR-001…047, statuses in the ADR table of `docs/planning-health-dataspace-v2.md`). `docs/adr/0000-template.md` is the
+- `docs/ADRs/` — canonical ADR corpus (ADR-001…050, statuses in the ADR table of `docs/planning-health-dataspace-v2.md`). `docs/adr/0000-template.md` is the
   Nygard template for new ones; never edit an accepted ADR — supersede it.
 - Before significant changes: check ADRs + planning index + `gh issue list`. Keep any
   routinely-loaded doc under ~15K tokens (ADR-026) — index stays small, detail in archives.
