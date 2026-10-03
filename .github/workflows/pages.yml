@@ -209,7 +209,7 @@ jobs:
           node ../scripts/generate-test-report-page.js . out/test-reports || echo "Report generation skipped"
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./ui/out
 
