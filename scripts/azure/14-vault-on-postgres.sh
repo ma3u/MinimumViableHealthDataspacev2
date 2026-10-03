@@ -176,10 +176,13 @@ config = {
     'disable_mlock': True,
     'ui': False,
 }
-# The image's entrypoint writes VAULT_LOCAL_CONFIG to /vault/config/local.json.
+# The image's entrypoint writes VAULT_LOCAL_CONFIG to /vault/config/local.json,
+# so this goes in args (the image's CMD). `command` would replace the
+# entrypoint, as in Kubernetes, and Vault would start with no config at all:
+# "A storage backend must be specified" (revision --0000177, 2026-10-03).
 # `vault` as the first word skips the entrypoint's -dev-* flags.
-vault['command'] = ['vault', 'server', '-config=/vault/config']
-vault.pop('args', None)
+vault['args'] = ['vault', 'server', '-config=/vault/config']
+vault.pop('command', None)
 vault['env'] = [
     {'name': 'SKIP_SETCAP', 'value': 'true'},
     {'name': 'VAULT_LOCAL_CONFIG', 'value': json.dumps(config, separators=(',', ':'))},
