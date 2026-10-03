@@ -98,7 +98,7 @@ phase_1() {
     say "  already there"
   else
     az postgres flexible-server db create --server-name "$PG_FLEX_NAME" \
-      --resource-group "$RG" --database-name "$VAULT_DB" -o none
+      --resource-group "$RG" --name "$VAULT_DB" -o none
   fi
   az postgres flexible-server db show --server-name "$PG_FLEX_NAME" \
     --resource-group "$RG" --name "$VAULT_DB" -o none ||
@@ -157,7 +157,7 @@ print('postgres://${PG_ADMIN}:' + urllib.parse.quote(os.environ['PW'], safe='')
   prev=$(az containerapp show --name "$VAULT_APP" --resource-group "$RG" \
     --query properties.latestRevisionName -o tsv)
   say "  rollback: az containerapp update -n ${VAULT_APP} -g ${RG} --yaml ${backup}"
-  say "  (that is ${prev}, in-memory dev mode)"
+  say "  (that is ${prev}, the revision before this run)"
 
   yaml="$(mktemp -t mvhd-vault-after.XXXXXX).yaml"
   cp "$backup" "$yaml"
@@ -176,10 +176,13 @@ config = {
     'disable_mlock': True,
     'ui': False,
 }
-# The image's entrypoint writes VAULT_LOCAL_CONFIG to /vault/config/local.json.
+# The image's entrypoint writes VAULT_LOCAL_CONFIG to /vault/config/local.json,
+# so this goes in args (the image's CMD). `command` would replace the
+# entrypoint, as in Kubernetes, and Vault would start with no config at all:
+# "A storage backend must be specified" (revision --0000177, 2026-10-03).
 # `vault` as the first word skips the entrypoint's -dev-* flags.
-vault['command'] = ['vault', 'server', '-config=/vault/config']
-vault.pop('args', None)
+vault['args'] = ['vault', 'server', '-config=/vault/config']
+vault.pop('command', None)
 vault['env'] = [
     {'name': 'SKIP_SETCAP', 'value': 'true'},
     {'name': 'VAULT_LOCAL_CONFIG', 'value': json.dumps(config, separators=(',', ':'))},
