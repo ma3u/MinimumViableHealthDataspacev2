@@ -63,9 +63,13 @@ already claims.
 3. **Azure Container Apps stays the home of everything else**, and becomes a
    candidate for the SPE's VM-level option the day a DC profile is offered in
    an EU region. A region request is filed now. Nothing moves to UAE North.
-4. **Timing.** A two-day throwaway spike now; phase 2a before the next
-   access-body demonstration (#27); re-check against the implementing acts by
-   26 March 2027.
+4. **Timing: deferred.** Decided 4 October 2026: the hub does not switch to
+   confidential compute yet. No spike, no cluster, no region request. Phase 2a
+   starts when one of three things happens: an access-body demonstration is
+   scheduled (#27), a partner conversation reaches data governance (#478), or
+   the Art. 73(5) implementing acts name a requirement (due 26 March 2027).
+   Until then the SPE stays labelled "Simulated attestation" (ADR-037 phase
+   1), which is the honest state.
 
 ## Consequences
 
@@ -75,9 +79,10 @@ already claims.
   is "this image and this configuration ran in a SEV-SNP VM", matched to the
   permit by the policy hash the hub records at approval. The manifest and
   `contrast verify` experience of ADR-037's table is what phase 2b would add.
-- A second runtime (AKS beside ACA): two scale-down schedules, one more thing
-  to keep healthy before a demo, roughly $150 to $300 a month for one node
-  while it runs. Everything that does not touch row-level data stays on ACA.
+- Nothing runs or costs anything until the trigger above. When it does: a
+  second runtime (AKS beside ACA), two scale-down schedules, one more thing to
+  keep healthy before a demo, roughly $150 to $300 a month for one node while
+  it runs. Everything that does not touch row-level data stays on ACA.
 - Preview constraints apply and are accepted: memory is the sum of container
   limits plus 2 GB, `requests` are ignored, IOPS on Azure Files are lower, and
   `exec` into a pod needs a policy change that the attestation then measures.
