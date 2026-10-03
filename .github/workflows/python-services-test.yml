@@ -75,7 +75,7 @@ jobs:
           || '[{"name":"catalog-crawler","path":"services/catalog-crawler","install":".[dev]"},{"name":"catalog-enricher","path":"services/catalog-enricher","install":".[dev]"},{"name":"leitlinien","path":"scripts/leitlinien","install":"uv"}]'
           ) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v5
         with:
