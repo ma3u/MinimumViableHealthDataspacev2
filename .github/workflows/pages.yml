@@ -128,15 +128,17 @@ jobs:
         env:
           NEXT_PUBLIC_STATIC_EXPORT: "true"
 
-      # The reports of the most recent finished test run on main. Missing on
-      # the very first run of this workflow, and then the site goes out
-      # without them rather than not at all.
+      # The reports of the most recent finished test run on the branch being
+      # built (main, for every real deploy), so a test run on another branch
+      # never reaches the site. Missing on the very first run, and then the
+      # site goes out without them rather than not at all.
       - name: Add the latest test reports
         env:
           GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
         run: |
-          run_id=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=pages-test-reports&per_page=1" \
-            --jq '.artifacts[0] | select(.expired == false) | .workflow_run.id' 2>/dev/null || true)
+          run_id=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=pages-test-reports&per_page=50" \
+            --jq "[.artifacts[] | select(.expired == false and .workflow_run.head_branch == \"$BRANCH\")][0].workflow_run.id // empty" 2>/dev/null || true)
           if [ -z "$run_id" ]; then
             echo "::notice::No pages-test-reports artifact yet; publishing without test reports."
             exit 0
