@@ -4,6 +4,12 @@ import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
+/** mvhd-issuerservice scales to zero on Azure. Waking it takes about 25 s
+ *  from the first request to a ready replica (2026-10-03: scheduled 10:56:39,
+ *  container started 10:57:01), and Container Apps holds the request until
+ *  then. The client default of 8 s gave up first and answered 502. */
+const ISSUER_COLD_START_TIMEOUT_MS = 45_000;
+
 /**
  * GET /api/credentials/definitions — List available credential definitions.
  *
@@ -22,6 +28,7 @@ export async function GET() {
       "/v1alpha/participants/issuer/credentialdefinitions/query",
       "POST",
       {}, // empty QuerySpec → return all
+      { timeoutMs: ISSUER_COLD_START_TIMEOUT_MS },
     );
 
     const definitions = Array.isArray(credDefs)
