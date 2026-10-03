@@ -11,12 +11,21 @@
  */
 const CFM_DID_BASE = process.env.CFM_DID_BASE || "did:web:identityhub%3A7083";
 
-/** The dataspace profile's role names, by the EHDS type the form sends. */
+/**
+ * The dataspace profile's role names, by EHDS type. Keys are normalised (lower
+ * case, hyphens), so "data-holder", "DATA_HOLDER" and "data_holder" agree.
+ */
 const CFM_ROLE: Record<string, string> = {
   "data-holder": "provider",
   "data-user": "consumer",
   "health-data-access-body": "operator",
+  hdab: "operator",
+  "hdab-authority": "operator",
 };
+
+function cfmRole(ehdsType: string): string {
+  return CFM_ROLE[ehdsType.toLowerCase().replace(/_/g, "-")] || "consumer";
+}
 
 /**
  * A DID path segment for a display name: ASCII, lower case, hyphens, plus a
@@ -44,7 +53,7 @@ export function buildParticipantProfile(
   return {
     identifier: `${CFM_DID_BASE}:${slug}`,
     dataspaceProfileIds: [profileId],
-    participantRoles: { [profileId]: [CFM_ROLE[ehdsType] || "consumer"] },
+    participantRoles: { [profileId]: [cfmRole(ehdsType)] },
     properties: { displayName, type: slug },
   };
 }

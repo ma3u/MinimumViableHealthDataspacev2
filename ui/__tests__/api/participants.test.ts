@@ -246,7 +246,13 @@ describe("/api/participants", () => {
       expect(mockTenant).toHaveBeenCalledWith(
         "/v1alpha1/tenants/tenant-abc/participant-profiles",
         "POST",
-        { cellId: "cell-1", dataspaceProfileId: "profile-1" },
+        expect.objectContaining({
+          identifier: expect.stringMatching(
+            /^did:web:identityhub%3A7083:test-clinic-[0-9a-f]{6}$/,
+          ),
+          dataspaceProfileIds: ["profile-1"],
+          participantRoles: { "profile-1": ["provider"] },
+        }),
       );
     });
 

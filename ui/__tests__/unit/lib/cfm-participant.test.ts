@@ -26,6 +26,8 @@ describe("buildParticipantProfile", () => {
     expect(roles("data-holder")).toEqual(["provider"]);
     expect(roles("data-user")).toEqual(["consumer"]);
     expect(roles("health-data-access-body")).toEqual(["operator"]);
+    expect(roles("DATA_HOLDER")).toEqual(["provider"]);
+    expect(roles("HDAB_AUTHORITY")).toEqual(["operator"]);
   });
 
   it("uses the EDC-layer DID base of the seeded participants", () => {
