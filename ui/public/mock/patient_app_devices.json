@@ -1,0 +1,11 @@
+{
+  "devices": [
+    {
+      "deviceId": "6f1c2b7e-3d4a-4b5c-9d8e-1a2b3c4d5e6f",
+      "deviceName": "iPhone (demo)",
+      "username": "patient1",
+      "connectedAt": "2026-10-03T10:15:00Z",
+      "lastSeenAt": "2026-10-03T10:20:00Z"
+    }
+  ]
+}

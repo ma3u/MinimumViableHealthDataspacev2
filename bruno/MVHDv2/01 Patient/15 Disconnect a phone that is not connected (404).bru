@@ -1,0 +1,26 @@
+meta {
+  name: 15 Disconnect a phone that is not connected (404)
+  type: http
+  seq: 15
+}
+
+delete {
+  url: {{baseUrl}}/api/patient/app-devices/{{unconnectedDeviceId}}
+  body: none
+  auth: inherit
+}
+
+vars:pre-request {
+  unconnectedDeviceId: 00000000-0000-4000-8000-000000000000
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+tests {
+  test("nothing to disconnect is a 404 with an error", function () {
+    expect(res.getStatus()).to.equal(404);
+    expect(res.getBody()).to.have.property("error");
+  });
+}
