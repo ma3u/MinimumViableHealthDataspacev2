@@ -1,152 +1,196 @@
 /**
- * Azure Container Apps — Consumption plan pricing model.
+ * Monthly cost model for the Azure deployment (rg-mvhd-dev, West Europe).
  *
- * Based on publicly listed West Europe rates (Nov 2025):
- *   - vCPU active time:   $0.000024 / vCPU-second      → $62.21 / vCPU-month
- *   - Memory active time: $0.000003 / GiB-second       → $7.78  / GiB-month
- *   - Requests:           $0.40 / million requests     (first 2M free / month / app)
- *   - Free tier:          180 000 vCPU-s + 360 000 GiB-s per subscription / month
+ * Everything is in EUR, the currency the subscription is billed in. Sources,
+ * read on 2026-10-03:
  *
- * The model assumes 24×7 operation (no scale-to-zero) under ADR-018 Workaround B.
+ *   - Container Apps compute: the effective rates on the bill for
+ *     2026-09-03 to 2026-10-02 (Cost Management, grouped by meter). The retail
+ *     price API rounds the per-second EUR prices to 0, so the bill is the
+ *     only EUR source; it agrees with the USD list ($0.000034 vCPU-s,
+ *     $0.000004 GiB-s) within the exchange rate.
+ *   - PostgreSQL Flexible Server, Azure Files, Container Registry, egress:
+ *     the Azure Retail Prices API (prices.azure.com, currencyCode=EUR).
+ *   - Log Analytics: the bill (EUR 43.57 for 18.3 GB ingested).
  *
- * Storage (Azure Files for persistent volumes):
- *   - Premium ZRS:        $0.16 / GiB-month
- *
- * Egress:
- *   - First 100 GiB / month free
- *   - Then $0.087 / GiB (zone 1)
- *
- * These figures are deliberately conservative; actual billing may be lower due
- * to reservations or scale-down. The panel surfaces them as "estimate" only.
+ * Off-hours: `.github/workflows/aca-schedule.yml` (ADR-042) runs most apps
+ * Mon-Fri 07:00-20:00 Europe/Berlin and scales them to zero otherwise. Apps
+ * on the "always" schedule (Keycloak, Vault, the container Postgres,
+ * the Claude federation app) bill the idle rate when the office is closed.
  */
 
-// ─── Public rate constants ───────────────────────────────────────────────────
+// ─── Rates (EUR) ─────────────────────────────────────────────────────────────
 
-const ACA_VCPU_USD_PER_SEC = 0.000024;
-const ACA_MEM_USD_PER_GIB_SEC = 0.000003;
+export const ACA_VCPU_EUR_PER_SEC = 0.0000259;
+export const ACA_MEM_EUR_PER_GIB_SEC = 0.00000304;
+export const ACA_IDLE_EUR_PER_UNIT_SEC = 0.00000301; // per vCPU-s and per GiB-s
 
 const ACA_FREE_VCPU_SECONDS = 180_000;
 const ACA_FREE_MEM_GIB_SECONDS = 360_000;
 
-export const AZURE_FILES_USD_PER_GIB = 0.16;
+// Azure Database for PostgreSQL Flexible Server (ADR-041)
+export const PG_FLEX_SKU_EUR_PER_HOUR: Record<string, number> = {
+  Standard_B1ms: 0.0175,
+  Standard_B2s: 0.07,
+  Standard_B2ms: 0.1401,
+};
+export const PG_FLEX_STORAGE_EUR_PER_GB = 0.1205;
+export const PG_FLEX_BACKUP_EUR_PER_GB = 0.0906; // beyond 100 % of provisioned storage
+
+// Azure Files, Standard LRS (stmvhddev3e2079), pay-as-you-go on data stored
+export const AZURE_FILES_EUR_PER_GB = 0.0528;
+// Transactions, which dominate on Standard Files: the bill above showed
+// EUR 11.13 for Files against at most EUR 1.95 of stored data.
+export const AZURE_FILES_TRANSACTIONS_EUR = 9.2;
+
+export const ACR_BASIC_EUR_PER_DAY = 0.1466;
+export const LOG_ANALYTICS_EUR_PER_GB = 2.38;
+
 export const AZURE_EGRESS_FREE_GIB = 100;
-export const AZURE_EGRESS_USD_PER_GIB = 0.087;
+export const AZURE_EGRESS_EUR_PER_GIB = 0.0704;
 
-// EUR conversion — billing is USD, displayed in EUR for consistency with the
-// StackIT panel. Updated manually; kept as a constant so it's auditable.
-export const USD_TO_EUR = 0.92;
+export const HOURS_PER_MONTH = 730;
+// Mon-Fri 07:00-20:00: 13 h x 5 days x 52 weeks / 12 months
+export const OFFICE_HOURS_PER_MONTH = (13 * 5 * 52) / 12;
 
-const SECONDS_PER_MONTH = 30 * 24 * 3600; // 2 592 000
+// What the resource group was actually billed, for comparison on the page.
+export const AZURE_BILLED = {
+  from: "2026-09-03",
+  to: "2026-10-02",
+  eur: 741.38,
+};
 
-// ─── App-level compute cost ──────────────────────────────────────────────────
+// ─── Inputs ──────────────────────────────────────────────────────────────────
+
+export type AcaSchedule = "office" | "always";
 
 export interface AcaAppSpec {
   name: string;
-  cpu: number; // vCPU reservation (fractional allowed)
-  memGiB: number; // memory reservation in GiB
-  minReplicas: number; // assumed always running (24×7 under ADR-018)
+  cpu: number; // vCPU reservation, all containers incl. sidecars
+  memGiB: number; // memory reservation, all containers incl. sidecars
+  schedule: AcaSchedule;
 }
+
+export interface PgFlexSpec {
+  name: string;
+  sku: string; // key of PG_FLEX_SKU_EUR_PER_HOUR
+  storageGb: number;
+}
+
+export interface AzureEnvironmentInputs {
+  pgFlex: PgFlexSpec;
+  fileSharesGib: number; // sum of share quotas, an upper bound on data stored
+  logAnalyticsGb: number;
+  egressGiB: number;
+}
+
+// ─── Results ─────────────────────────────────────────────────────────────────
 
 export interface AcaAppCost {
   name: string;
-  vcpuSeconds: number;
-  memGiBSeconds: number;
-  vcpuUsd: number;
-  memUsd: number;
-  totalUsd: number;
-}
-
-/**
- * Compute the monthly USD cost for a single Container App assuming
- * `minReplicas` replicas running 24×7 at their full reservation.
- */
-function costForApp(spec: AcaAppSpec): AcaAppCost {
-  const replicas = Math.max(1, spec.minReplicas);
-  const vcpuSeconds = spec.cpu * replicas * SECONDS_PER_MONTH;
-  const memGiBSeconds = spec.memGiB * replicas * SECONDS_PER_MONTH;
-  const vcpuUsd = vcpuSeconds * ACA_VCPU_USD_PER_SEC;
-  const memUsd = memGiBSeconds * ACA_MEM_USD_PER_GIB_SEC;
-  return {
-    name: spec.name,
-    vcpuSeconds,
-    memGiBSeconds,
-    vcpuUsd,
-    memUsd,
-    totalUsd: vcpuUsd + memUsd,
-  };
-}
-
-// ─── Environment-wide aggregation ────────────────────────────────────────────
-
-export interface AcaEnvironmentCost {
-  apps: AcaAppCost[];
-  totalVcpuSeconds: number;
-  totalMemGiBSeconds: number;
-  grossVcpuUsd: number;
-  grossMemUsd: number;
-  freeCreditUsd: number;
-  computeUsd: number;
-  storageUsd: number;
-  egressUsd: number;
-  totalUsd: number;
+  schedule: AcaSchedule;
+  activeEur: number;
+  idleEur: number;
   totalEur: number;
 }
 
-export interface AcaEnvironmentInputs {
-  storageGiB: number; // total Azure Files volumes (Neo4j + PG + Vault)
-  egressGiB: number; // monthly outbound traffic estimate
+export interface AzureEnvironmentCost {
+  apps: AcaAppCost[];
+  grossComputeEur: number;
+  freeCreditEur: number;
+  computeEur: number;
+  pgFlexEur: number;
+  pgFlexComputeEur: number;
+  pgFlexStorageEur: number;
+  filesEur: number;
+  registryEur: number;
+  logsEur: number;
+  egressEur: number;
+  totalEur: number;
 }
 
-/**
- * Aggregate monthly cost across a list of Container Apps with the free tier
- * applied at the subscription level and storage/egress added on top.
- */
-export function costForEnvironment(
-  specs: AcaAppSpec[],
-  inputs: AcaEnvironmentInputs,
-): AcaEnvironmentCost {
-  const apps = specs.map(costForApp);
-
-  const totalVcpuSeconds = apps.reduce((s, a) => s + a.vcpuSeconds, 0);
-  const totalMemGiBSeconds = apps.reduce((s, a) => s + a.memGiBSeconds, 0);
-  const grossVcpuUsd = totalVcpuSeconds * ACA_VCPU_USD_PER_SEC;
-  const grossMemUsd = totalMemGiBSeconds * ACA_MEM_USD_PER_GIB_SEC;
-
-  // Apply free tier at subscription scope (one-time deduction per month).
-  const freeVcpuUsd =
-    Math.min(totalVcpuSeconds, ACA_FREE_VCPU_SECONDS) * ACA_VCPU_USD_PER_SEC;
-  const freeMemUsd =
-    Math.min(totalMemGiBSeconds, ACA_FREE_MEM_GIB_SECONDS) *
-    ACA_MEM_USD_PER_GIB_SEC;
-  const freeCreditUsd = freeVcpuUsd + freeMemUsd;
-
-  const computeUsd = Math.max(0, grossVcpuUsd + grossMemUsd - freeCreditUsd);
-  const storageUsd = inputs.storageGiB * AZURE_FILES_USD_PER_GIB;
-  const egressUsd =
-    Math.max(0, inputs.egressGiB - AZURE_EGRESS_FREE_GIB) *
-    AZURE_EGRESS_USD_PER_GIB;
-  const totalUsd = computeUsd + storageUsd + egressUsd;
-
+export function costForApp(spec: AcaAppSpec): AcaAppCost & {
+  vcpuSeconds: number;
+  memGiBSeconds: number;
+} {
+  const activeSec = OFFICE_HOURS_PER_MONTH * 3600;
+  const idleSec =
+    spec.schedule === "always"
+      ? (HOURS_PER_MONTH - OFFICE_HOURS_PER_MONTH) * 3600
+      : 0;
+  const activeEur =
+    activeSec *
+    (spec.cpu * ACA_VCPU_EUR_PER_SEC + spec.memGiB * ACA_MEM_EUR_PER_GIB_SEC);
+  const idleEur =
+    idleSec * (spec.cpu + spec.memGiB) * ACA_IDLE_EUR_PER_UNIT_SEC;
   return {
-    apps,
-    totalVcpuSeconds,
-    totalMemGiBSeconds,
-    grossVcpuUsd,
-    grossMemUsd,
-    freeCreditUsd,
-    computeUsd,
-    storageUsd,
-    egressUsd,
-    totalUsd,
-    totalEur: totalUsd * USD_TO_EUR,
+    name: spec.name,
+    schedule: spec.schedule,
+    activeEur,
+    idleEur,
+    totalEur: activeEur + idleEur,
+    vcpuSeconds: spec.cpu * activeSec,
+    memGiBSeconds: spec.memGiB * activeSec,
   };
 }
 
-// ─── Formatting helpers ──────────────────────────────────────────────────────
-
-export function formatUsd(n: number): string {
-  return `$${n.toFixed(n >= 100 ? 0 : 2)}`;
+export function pgFlexMonthlyEur(pg: PgFlexSpec) {
+  const hourly = PG_FLEX_SKU_EUR_PER_HOUR[pg.sku] ?? 0;
+  const computeEur = hourly * HOURS_PER_MONTH;
+  // Backup storage up to 100 % of the provisioned size is included; seven
+  // days of retention on a database this small stays under it.
+  const storageEur = pg.storageGb * PG_FLEX_STORAGE_EUR_PER_GB;
+  return { computeEur, storageEur, totalEur: computeEur + storageEur };
 }
+
+/**
+ * Monthly cost of the environment: Container Apps on the off-hours schedule
+ * with the subscription's free grant taken off, plus the managed Postgres and
+ * the services every deployment pays for.
+ */
+export function costForEnvironment(
+  specs: AcaAppSpec[],
+  inputs: AzureEnvironmentInputs,
+): AzureEnvironmentCost {
+  const detailed = specs.map(costForApp);
+  const grossComputeEur = detailed.reduce((s, a) => s + a.totalEur, 0);
+
+  // The free grant is consumed by active usage first.
+  const vcpuSeconds = detailed.reduce((s, a) => s + a.vcpuSeconds, 0);
+  const memGiBSeconds = detailed.reduce((s, a) => s + a.memGiBSeconds, 0);
+  const freeCreditEur =
+    Math.min(vcpuSeconds, ACA_FREE_VCPU_SECONDS) * ACA_VCPU_EUR_PER_SEC +
+    Math.min(memGiBSeconds, ACA_FREE_MEM_GIB_SECONDS) * ACA_MEM_EUR_PER_GIB_SEC;
+  const computeEur = Math.max(0, grossComputeEur - freeCreditEur);
+
+  const pg = pgFlexMonthlyEur(inputs.pgFlex);
+  const filesEur =
+    inputs.fileSharesGib * AZURE_FILES_EUR_PER_GB +
+    AZURE_FILES_TRANSACTIONS_EUR;
+  const registryEur = ACR_BASIC_EUR_PER_DAY * (HOURS_PER_MONTH / 24);
+  const logsEur = inputs.logAnalyticsGb * LOG_ANALYTICS_EUR_PER_GB;
+  const egressEur =
+    Math.max(0, inputs.egressGiB - AZURE_EGRESS_FREE_GIB) *
+    AZURE_EGRESS_EUR_PER_GIB;
+
+  return {
+    apps: detailed.map(({ vcpuSeconds: _v, memGiBSeconds: _m, ...a }) => a),
+    grossComputeEur,
+    freeCreditEur,
+    computeEur,
+    pgFlexEur: pg.totalEur,
+    pgFlexComputeEur: pg.computeEur,
+    pgFlexStorageEur: pg.storageEur,
+    filesEur,
+    registryEur,
+    logsEur,
+    egressEur,
+    totalEur:
+      computeEur + pg.totalEur + filesEur + registryEur + logsEur + egressEur,
+  };
+}
+
+// ─── Formatting ──────────────────────────────────────────────────────────────
 
 export function formatEur(n: number): string {
   return `€${n.toFixed(n >= 100 ? 0 : 2)}`;

@@ -1,8 +1,7 @@
 "use client";
 
 import { HardDrive, Server, Shield, Workflow } from "lucide-react";
-import type { AcaAppSpec } from "@/lib/azure-pricing";
-import { perParticipantEur } from "./helpers";
+import type { AcaAppSpec, PgFlexSpec } from "@/lib/azure-pricing";
 import type { Severity } from "./types";
 
 export const REFRESH_INTERVAL = 30_000;
@@ -91,110 +90,47 @@ export const KNOWN_BROKEN_ACA_APPS = new Set<string>([
   "mvhd-provision-mgr",
 ]);
 
-// StackIT-equivalent node definitions (STACKIT Compute Engine, Frankfurt DC)
-// Prices in EUR/month, based on European sovereign cloud rates (GDPR-ready).
-export const STACKIT_NODES = [
-  {
-    id: "neo4j",
-    label: "Graph DB (Neo4j)",
-    flavor: "4 vCPU / 8 GB RAM",
-    eur: 48,
-    components: ["Neo4j", "Neo4j Proxy"],
-    note: "Handles 5 300+ nodes across FHIR, OMOP, SNOMED, ICD-10, LOINC layers",
-  },
-  {
-    id: "datastore",
-    label: "Data Store (PostgreSQL + NATS)",
-    flavor: "2 vCPU / 4 GB RAM",
-    eur: 28,
-    components: ["PostgreSQL", "NATS"],
-    note: "Metadata for all 19 JAD services + async event bus",
-  },
-  {
-    id: "identity",
-    label: "Identity & Secrets",
-    flavor: "2 vCPU / 4 GB RAM",
-    eur: 28,
-    components: ["Keycloak", "Vault", "Traefik"],
-    note: "OIDC/PKCE SSO, secrets management, TLS termination",
-  },
-  {
-    id: "cfm",
-    label: "CFM Platform",
-    flavor: "2 vCPU / 4 GB RAM",
-    eur: 28,
-    components: [
-      "Tenant Manager",
-      "Provision Manager",
-      "EDC-V Agent",
-      "Keycloak Agent",
-      "Onboarding Agent",
-      "Registration Agent",
-    ],
-    note: "Connector Fabric Manager orchestrates participant onboarding & provisioning",
-  },
-  {
-    id: "ui",
-    label: "UI / API Gateway",
-    flavor: "1 vCPU / 2 GB RAM",
-    eur: 14,
-    components: ["UI"],
-    note: "Next.js frontend + Neo4j proxy API bridge",
-  },
-];
-
-// Per-participant allocation: 2 GB RAM target (StackIT smallest compute tier)
-export const PER_PARTICIPANT_COMPUTE_EUR = 13; // 1 vCPU / 2 GB → ~€13/month
-
-export const PER_PARTICIPANT_STORAGE_GB = 2; // base allocation per participant
-
-export const HEALTH_DATA_STORAGE_GB = 10; // additional for DATA_HOLDER role (avg)
-
-export const STORAGE_EUR_PER_GB = 0.08; // StackIT block storage €0.08/GB/month
-
-// Network: Control Plane ↔ Data Plane (DSP negotiation + transfer receipts)
-export const CP_DP_TRAFFIC_MB = 300; // ~300 MB/month per participant (DSP messages + audit)
-
-export const NETWORK_EUR_PER_GB = 0.09; // StackIT egress €0.09/GB
-
-// Log injection: participant audit logs → centralised SIEM/Loki
-export const LOG_INJECTION_MB = 150; // ~150 MB/month per participant (EHDS Article 50 audit trail)
-
-export const LOG_EUR_PER_GB = 0.75; // log ingestion/storage (ELK/Loki service ~€0.75/GB)
-
-export const SHARED_EUR = STACKIT_NODES.reduce((s, n) => s + n.eur, 0);
-
-export const PER_USER_EUR = Math.round(perParticipantEur(false) * 100) / 100;
-
-export const PER_DATA_HOLDER_EUR =
-  Math.round(perParticipantEur(true) * 100) / 100;
-
-// Hard-coded reservations mirror scripts/azure/*.sh. These are the minReplicas
-// defaults under ADR-018 Workaround B (24×7, no scale-down). If Ops bumps a
-// reservation, the live panel reflects it via the `snapshot.components` memLimit
-// field; we keep this map as the fallback source of truth for names + memory.
+// Mirrors the live Container Apps in rg-mvhd-dev (read 2026-10-03), with
+// sidecars added to their app (Vault's unseal sidecar). "office" apps are in
+// the stop list of .github/workflows/aca-schedule.yml (ADR-042); "always" apps
+// are not. The live panel replaces memGiB with the reservation the API
+// reports, so this list is the fallback for names, CPU and the schedule.
 export const ACA_APP_SPECS: AcaAppSpec[] = [
-  { name: "mvhd-controlplane", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
-  { name: "mvhd-dp-fhir", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
-  { name: "mvhd-dp-omop", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
-  { name: "mvhd-identityhub", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
-  { name: "mvhd-issuerservice", cpu: 0.25, memGiB: 0.5, minReplicas: 1 },
-  { name: "mvhd-keycloak", cpu: 1.0, memGiB: 2.0, minReplicas: 1 },
-  { name: "mvhd-vault", cpu: 0.25, memGiB: 0.5, minReplicas: 1 },
-  { name: "mvhd-tenant-mgr", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
-  { name: "mvhd-provision-mgr", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
-  { name: "mvhd-postgres", cpu: 1.0, memGiB: 2.0, minReplicas: 1 },
-  { name: "mvhd-nats", cpu: 0.25, memGiB: 0.5, minReplicas: 1 },
-  { name: "mvhd-neo4j", cpu: 1.0, memGiB: 4.0, minReplicas: 1 },
-  { name: "mvhd-neo4j-proxy", cpu: 0.25, memGiB: 0.5, minReplicas: 1 },
-  { name: "mvhd-ui", cpu: 0.5, memGiB: 1.0, minReplicas: 1 },
+  { name: "mvhd-neo4j", cpu: 1.0, memGiB: 2.0, schedule: "office" },
+  { name: "mvhd-controlplane", cpu: 1.0, memGiB: 2.0, schedule: "office" },
+  { name: "mvhd-dp-fhir", cpu: 0.5, memGiB: 1.0, schedule: "office" },
+  { name: "mvhd-dp-omop", cpu: 0.5, memGiB: 1.0, schedule: "office" },
+  { name: "mvhd-identityhub", cpu: 0.5, memGiB: 1.0, schedule: "office" },
+  { name: "mvhd-issuerservice", cpu: 0.5, memGiB: 1.0, schedule: "office" },
+  { name: "mvhd-ui", cpu: 0.5, memGiB: 1.0, schedule: "office" },
+  { name: "mvhd-tenant-mgr", cpu: 0.25, memGiB: 0.5, schedule: "office" },
+  { name: "mvhd-provision-mgr", cpu: 0.25, memGiB: 0.5, schedule: "office" },
+  { name: "mvhd-nats", cpu: 0.25, memGiB: 0.5, schedule: "office" },
+  { name: "mvhd-neo4j-proxy", cpu: 0.25, memGiB: 0.5, schedule: "office" },
+  { name: "mvhd-catalog-enricher", cpu: 0.25, memGiB: 0.5, schedule: "office" },
+  { name: "mvhd-cfm-cp-shim", cpu: 0.25, memGiB: 0.5, schedule: "office" },
+  { name: "mvhd-cfm-kcagent", cpu: 0.25, memGiB: 0.5, schedule: "office" },
+  { name: "mvhd-cfm-edcvagent", cpu: 0.25, memGiB: 0.5, schedule: "office" },
+  { name: "mvhd-cfm-regagent", cpu: 0.25, memGiB: 0.5, schedule: "office" },
+  { name: "mvhd-cfm-obagent", cpu: 0.25, memGiB: 0.5, schedule: "office" },
+  { name: "mvhd-keycloak", cpu: 1.0, memGiB: 2.0, schedule: "always" },
+  { name: "mvhd-vault", cpu: 0.75, memGiB: 1.5, schedule: "always" },
+  { name: "mvhd-claude-federation", cpu: 0.5, memGiB: 1.0, schedule: "always" },
+  // Ephemeral since ADR-041 and no longer used by any service; removed in
+  // ADR-041 phase 4, which takes this line with it.
+  { name: "mvhd-postgres", cpu: 0.5, memGiB: 1.0, schedule: "always" },
 ];
 
-// Storage GiB — derived from the Azure Files share quotas declared in
-// scripts/azure/env.sh (neo4j-data 10 + neo4j-logs 5 + pg-data 20 + vault-data
-// 2 = 37 GiB). Premium tier is billed on provisioned size, so this is what
-// shows up on the bill regardless of actual usage. Constants kept inline so
-// the page stays renderable without an extra ARM call.
+// ADR-041: every database lives on this Flexible Server since 2026-10-02.
+export const AZURE_PG_FLEX: PgFlexSpec = {
+  name: "mvhd-pg-b53a0449",
+  sku: "Standard_B1ms",
+  storageGb: 32,
+};
+
+// Azure Files share quotas in scripts/azure/env.sh. Standard LRS bills data
+// stored, so the quotas are an upper bound. pg-data has had no reader since
+// ADR-041 and goes with mvhd-postgres.
 export const SHARE_NEO4J_DATA_GIB = 10;
 
 export const SHARE_NEO4J_LOGS_GIB = 5;
@@ -209,14 +145,13 @@ export const COMPUTED_STORAGE_GIB =
   SHARE_PG_DATA_GIB +
   SHARE_VAULT_DATA_GIB;
 
-// Egress estimate (per participant, GB / month):
-//   - CP_DP_TRAFFIC_MB + LOG_INJECTION_MB above (DSP messages + audit log
-//     injection) — roughly 450 MB/participant
-//   - UI traffic: ~500 MB / participant / month for typical exploratory
-//     dashboard use (graph rendering, FHIR responses)
-// Plus a small infra baseline (Keycloak introspection, NATS publish to
-// external SIEM hooks, ACR pulls when scaling).
-export const EGRESS_PER_PARTICIPANT_MB =
-  CP_DP_TRAFFIC_MB + LOG_INJECTION_MB + /* user-facing UI */ 500;
+// Billable ingestion into mvhd-logs over the 30 days to 2026-10-03 (Usage
+// table).
+export const LOG_ANALYTICS_GB_PER_MONTH = 18.3;
+
+// Egress estimate per participant and month: DSP messages and transfer
+// receipts (300 MB), the audit trail (150 MB) and the UI (500 MB), plus a
+// baseline for Keycloak, NATS and image pulls.
+export const EGRESS_PER_PARTICIPANT_MB = 300 + 150 + 500;
 
 export const EGRESS_INFRA_BASELINE_GB = 2;

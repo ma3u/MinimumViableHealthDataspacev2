@@ -1,22 +1,22 @@
 "use client";
 
 import {
+  AZURE_BILLED,
   AZURE_EGRESS_FREE_GIB,
-  AZURE_EGRESS_USD_PER_GIB,
-  AZURE_FILES_USD_PER_GIB,
   costForEnvironment,
   formatEur,
-  formatUsd,
-  USD_TO_EUR,
+  OFFICE_HOURS_PER_MONTH,
   type AcaAppSpec,
 } from "@/lib/azure-pricing";
 import { useMemo } from "react";
-import { BarChart2, HardDrive, Network } from "lucide-react";
+import { BarChart2, Clock, Database, HardDrive, Network } from "lucide-react";
 import {
   ACA_APP_SPECS,
+  AZURE_PG_FLEX,
   COMPUTED_STORAGE_GIB,
   EGRESS_INFRA_BASELINE_GB,
   EGRESS_PER_PARTICIPANT_MB,
+  LOG_ANALYTICS_GB_PER_MONTH,
   SHARE_NEO4J_DATA_GIB,
   SHARE_NEO4J_LOGS_GIB,
   SHARE_PG_DATA_GIB,
@@ -25,6 +25,24 @@ import {
 import { computeEgressGiB } from "./helpers";
 import type { ComponentInfo } from "./types";
 
+function Card({
+  title,
+  eur,
+  detail,
+}: {
+  title: string;
+  eur: number;
+  detail: string;
+}) {
+  return (
+    <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
+      <div className="text-(--text-secondary) mb-0.5">{title}</div>
+      <div className="font-mono text-(--text-primary)">{formatEur(eur)}/mo</div>
+      <div className="text-[10px] text-(--text-secondary) mt-1">{detail}</div>
+    </div>
+  );
+}
+
 export function AzureCostEstimatorPanel({
   liveComponents,
   participantCount,
@@ -32,13 +50,10 @@ export function AzureCostEstimatorPanel({
   liveComponents: ComponentInfo[];
   participantCount: number;
 }) {
-  // Storage and egress are derived from environment configuration + participant
-  // count rather than slider input, so the figure shown is what the deployment
-  // actually generates today. See COMPUTED_STORAGE_GIB / computeEgressGiB above.
   const storageGiB = COMPUTED_STORAGE_GIB;
   const egressGiB = computeEgressGiB(participantCount);
 
-  // Prefer live memory reservations from the API (more accurate if ops changed them)
+  // Prefer the live memory reservation from the API, in case ops changed it.
   const specs = useMemo<AcaAppSpec[]>(() => {
     return ACA_APP_SPECS.map((fallback) => {
       const live = liveComponents.find((c) => c.container === fallback.name);
@@ -51,12 +66,20 @@ export function AzureCostEstimatorPanel({
   }, [liveComponents]);
 
   const cost = useMemo(
-    () => costForEnvironment(specs, { storageGiB, egressGiB }),
+    () =>
+      costForEnvironment(specs, {
+        pgFlex: AZURE_PG_FLEX,
+        fileSharesGib: storageGiB,
+        logAnalyticsGb: LOG_ANALYTICS_GB_PER_MONTH,
+        egressGiB,
+      }),
     [specs, storageGiB, egressGiB],
   );
 
   const totalVcpu = specs.reduce((s, a) => s + a.cpu, 0);
   const totalMemGiB = specs.reduce((s, a) => s + a.memGiB, 0);
+  const platformEur =
+    cost.filesEur + cost.logsEur + cost.registryEur + cost.egressEur;
 
   return (
     <div className="border border-(--border) rounded-xl p-5 mt-10 space-y-6">
@@ -64,22 +87,32 @@ export function AzureCostEstimatorPanel({
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="font-semibold text-sm flex items-center gap-2 text-(--text-primary)">
           <BarChart2 size={16} className="text-(--success-text)" />
-          Monthly Cost Estimate — Azure Container Apps (Consumption, 24×7)
+          Monthly Cost Estimate: Azure (running, West Europe)
         </h2>
         <div className="flex items-center gap-4 text-xs text-(--text-secondary)">
           <span
             className="flex items-center gap-1.5"
-            title={`Sum of Azure Files share quotas: neo4j-data ${SHARE_NEO4J_DATA_GIB} + neo4j-logs ${SHARE_NEO4J_LOGS_GIB} + pg-data ${SHARE_PG_DATA_GIB} + vault-data ${SHARE_VAULT_DATA_GIB} GiB. Configured in scripts/azure/env.sh.`}
+            title="Mon-Fri 07:00-20:00 Europe/Berlin, .github/workflows/aca-schedule.yml (ADR-042). Keycloak, Vault and the Claude federation app stay up and bill the idle rate overnight."
+          >
+            <Clock size={13} />
+            Schedule:{" "}
+            <span className="font-mono font-semibold text-(--text-primary)">
+              {Math.round(OFFICE_HOURS_PER_MONTH)} h/mo
+            </span>
+          </span>
+          <span
+            className="flex items-center gap-1.5"
+            title={`Azure Files share quotas: neo4j-data ${SHARE_NEO4J_DATA_GIB} + neo4j-logs ${SHARE_NEO4J_LOGS_GIB} + pg-data ${SHARE_PG_DATA_GIB} + vault-data ${SHARE_VAULT_DATA_GIB} GiB (scripts/azure/env.sh).`}
           >
             <HardDrive size={13} />
-            Storage:{" "}
+            Files:{" "}
             <span className="font-mono font-semibold text-(--text-primary)">
               {storageGiB} GiB
             </span>
           </span>
           <span
             className="flex items-center gap-1.5"
-            title={`Estimated: (${EGRESS_PER_PARTICIPANT_MB} MB/participant × ${participantCount} participants) + ${EGRESS_INFRA_BASELINE_GB} GB infra baseline. Includes DSP messaging, audit log injection, and user-facing UI traffic.`}
+            title={`Estimated: ${EGRESS_PER_PARTICIPANT_MB} MB per participant × ${participantCount} + ${EGRESS_INFRA_BASELINE_GB} GB baseline.`}
           >
             <Network size={13} />
             Egress (est.):{" "}
@@ -90,14 +123,14 @@ export function AzureCostEstimatorPanel({
         </div>
       </div>
 
-      {/* App grid — sorted by cost descending */}
+      {/* App grid, most expensive first */}
       <div>
         <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
-          Container Apps — Compute (vCPU + Memory, 24×7 minReplicas=1)
+          Container Apps: compute (vCPU + memory reservation)
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
           {[...cost.apps]
-            .sort((a, b) => b.totalUsd - a.totalUsd)
+            .sort((a, b) => b.totalEur - a.totalEur)
             .map((app) => {
               const spec = specs.find((s) => s.name === app.name)!;
               return (
@@ -110,16 +143,19 @@ export function AzureCostEstimatorPanel({
                       {app.name}
                     </span>
                     <span className="text-xs font-mono text-(--success-text)">
-                      {formatUsd(app.totalUsd)}/mo
+                      {formatEur(app.totalEur)}/mo
                     </span>
                   </div>
                   <p className="text-[10px] text-(--text-secondary) font-mono mb-1">
-                    {spec.cpu} vCPU · {spec.memGiB} GiB RAM
+                    {spec.cpu} vCPU · {spec.memGiB} GiB RAM ·{" "}
+                    {app.schedule === "always" ? "24×7" : "office hours"}
                   </p>
-                  <div className="flex gap-3 text-[9px] text-(--text-secondary)">
-                    <span>CPU {formatUsd(app.vcpuUsd)}</span>
-                    <span>MEM {formatUsd(app.memUsd)}</span>
-                  </div>
+                  {app.schedule === "always" && (
+                    <div className="flex gap-3 text-[9px] text-(--text-secondary)">
+                      <span>active {formatEur(app.activeEur)}</span>
+                      <span>idle {formatEur(app.idleEur)}</span>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -127,56 +163,57 @@ export function AzureCostEstimatorPanel({
         <p className="text-xs text-(--text-secondary) mt-2 text-right">
           Gross compute:{" "}
           <span className="font-mono text-(--text-primary)">
-            {formatUsd(cost.grossVcpuUsd + cost.grossMemUsd)}/mo
+            {formatEur(cost.grossComputeEur)}/mo
           </span>{" "}
-          · Free tier credit:{" "}
+          · Free grant:{" "}
           <span className="font-mono text-(--success-text)">
-            −{formatUsd(cost.freeCreditUsd)}
-          </span>
+            −{formatEur(cost.freeCreditEur)}
+          </span>{" "}
+          · {specs.length} apps · {totalVcpu.toFixed(2)} vCPU ·{" "}
+          {totalMemGiB.toFixed(1)} GiB
         </p>
       </div>
 
-      {/* Storage + egress breakdown */}
+      {/* Database and platform services */}
       <div>
         <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
-          Storage & Network
+          Database and platform
         </p>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
-            <div className="text-(--text-secondary) mb-0.5">
-              Azure Files (Premium ZRS)
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 text-xs">
+          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40 lg:col-span-1">
+            <div className="flex items-center gap-1 text-(--text-secondary) mb-0.5">
+              <Database size={11} />
+              PostgreSQL Flexible Server
             </div>
             <div className="font-mono text-(--text-primary)">
-              {formatUsd(cost.storageUsd)}/mo
+              {formatEur(cost.pgFlexEur)}/mo
             </div>
             <div className="text-[10px] text-(--text-secondary) mt-1">
-              {storageGiB} GiB · ${AZURE_FILES_USD_PER_GIB}/GiB·mo · Neo4j + PG
-              + Vault volumes
+              {AZURE_PG_FLEX.sku} · 24×7 {formatEur(cost.pgFlexComputeEur)} ·{" "}
+              {AZURE_PG_FLEX.storageGb} GB {formatEur(cost.pgFlexStorageEur)} ·
+              Keycloak, EDC, CFM, Vault (ADR-041, ADR-046)
             </div>
           </div>
-          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
-            <div className="text-(--text-secondary) mb-0.5">
-              Egress (outbound)
-            </div>
-            <div className="font-mono text-(--text-primary)">
-              {formatUsd(cost.egressUsd)}/mo
-            </div>
-            <div className="text-[10px] text-(--text-secondary) mt-1">
-              {egressGiB} GiB · first {AZURE_EGRESS_FREE_GIB} GiB free · then $
-              {AZURE_EGRESS_USD_PER_GIB}/GiB
-            </div>
-          </div>
-          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
-            <div className="text-(--text-secondary) mb-0.5">
-              Environment totals
-            </div>
-            <div className="font-mono text-(--text-primary)">
-              {totalVcpu.toFixed(2)} vCPU · {totalMemGiB.toFixed(1)} GiB
-            </div>
-            <div className="text-[10px] text-(--text-secondary) mt-1">
-              {specs.length} Container Apps · Workaround B (no Log Analytics)
-            </div>
-          </div>
+          <Card
+            title="Azure Files (Standard LRS)"
+            eur={cost.filesEur}
+            detail={`≤ ${storageGiB} GiB stored + transactions, which are most of it`}
+          />
+          <Card
+            title="Log Analytics"
+            eur={cost.logsEur}
+            detail={`${LOG_ANALYTICS_GB_PER_MONTH} GB/mo ingested (measured)`}
+          />
+          <Card
+            title="Container Registry"
+            eur={cost.registryEur}
+            detail="Basic tier, per day"
+          />
+          <Card
+            title="Egress"
+            eur={cost.egressEur}
+            detail={`${egressGiB} GiB · first ${AZURE_EGRESS_FREE_GIB} GiB free`}
+          />
         </div>
       </div>
 
@@ -188,23 +225,23 @@ export function AzureCostEstimatorPanel({
               Compute (net)
             </div>
             <div className="font-mono text-lg font-semibold text-(--text-primary)">
-              {formatUsd(cost.computeUsd)}
+              {formatEur(cost.computeEur)}
             </div>
           </div>
           <div>
             <div className="text-[10px] text-(--text-secondary) mb-1">
-              Storage
+              PostgreSQL Flex
             </div>
             <div className="font-mono text-lg font-semibold text-(--text-primary)">
-              {formatUsd(cost.storageUsd)}
+              {formatEur(cost.pgFlexEur)}
             </div>
           </div>
           <div>
             <div className="text-[10px] text-(--text-secondary) mb-1">
-              Egress
+              Platform
             </div>
             <div className="font-mono text-lg font-semibold text-(--text-primary)">
-              {formatUsd(cost.egressUsd)}
+              {formatEur(platformEur)}
             </div>
           </div>
           <div className="border-l border-(--border)">
@@ -212,17 +249,22 @@ export function AzureCostEstimatorPanel({
               Total / month
             </div>
             <div className="font-mono text-xl font-bold text-(--success-text)">
-              {formatUsd(cost.totalUsd)}
+              {formatEur(cost.totalEur)}
             </div>
-            <div className="text-[10px] text-(--text-secondary) mt-0.5">
-              ≈ {formatEur(cost.totalEur)} (@ {USD_TO_EUR} EUR/USD)
+            <div
+              className="text-[10px] text-(--text-secondary) mt-0.5"
+              title="Cost Management, actual cost of rg-mvhd-dev. Higher than the estimate while crashed revisions keep replicas that the evening stop does not reach."
+            >
+              billed {AZURE_BILLED.from} to {AZURE_BILLED.to}:{" "}
+              {formatEur(AZURE_BILLED.eur)}
             </div>
           </div>
         </div>
         <p className="text-[9px] text-(--text-secondary) mt-3 text-center">
-          Azure Container Apps Consumption plan · West Europe list prices · 24×7
-          minReplicas=1 · free tier (180 K vCPU-s + 360 K GiB-s) applied ·
-          ADR-018 Workaround B (no Log Analytics Workspace)
+          EUR, as billed · Container Apps rates from the subscription&apos;s
+          bill, the rest from the Azure retail price list (2026-10-03) ·
+          office-hours apps scale to zero outside Mon-Fri 07-20 · Azure OpenAI,
+          Key Vault and Communication Services are usage based and near €0
         </p>
       </div>
     </div>
