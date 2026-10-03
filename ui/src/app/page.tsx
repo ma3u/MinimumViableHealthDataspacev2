@@ -20,6 +20,7 @@ import { DemoPersonaCards } from "@/components/DemoPersonaCards";
 import { PersonaJourneyCards } from "@/components/PersonaJourneyCards";
 import { FeatureCardGrid } from "@/components/FeatureCardGrid";
 import { HomeRegisterCta } from "@/components/HomeRegisterCta";
+import { LivingBodyHero } from "@/components/LivingBodyHero";
 
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 
@@ -28,84 +29,94 @@ export default function Home() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-16">
       {/* ── Hero section ──────────────────────────────────────────────────── */}
       <section
-        className="mb-12 sm:mb-16 animate-fade-in-up"
+        className="mb-12 sm:mb-16 animate-fade-in-up grid grid-cols-1 lg:grid-cols-[auto_minmax(0,1fr)] gap-8 lg:gap-12 items-center"
         aria-labelledby="hero-title"
       >
-        <div className="flex items-center gap-3 mb-3">
-          <h1
-            id="hero-title"
-            className="text-2xl sm:text-3xl lg:text-4xl font-bold"
-          >
-            European Health Data Space
-          </h1>
-          <a
-            href="https://github.com/ma3u/MinimumViableHealthDataspacev2"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-(--text-secondary) hover:text-(--text-primary) transition-colors touch-target-sm"
-            aria-label="View source on GitHub"
-          >
-            <Github size={24} aria-hidden="true" />
-          </a>
+        <div>
+          <div className="flex items-center gap-3 mb-3">
+            <h1
+              id="hero-title"
+              className="text-2xl sm:text-3xl lg:text-4xl font-bold"
+            >
+              European Health Data Space
+            </h1>
+            <a
+              href="https://github.com/ma3u/MinimumViableHealthDataspacev2"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-(--text-secondary) hover:text-(--text-primary) transition-colors touch-target-sm"
+              aria-label="View source on GitHub"
+            >
+              <Github size={24} aria-hidden="true" />
+            </a>
+          </div>
+
+          <p className="text-(--text-primary) text-base sm:text-lg leading-relaxed max-w-3xl mb-4">
+            This interactive demo is an{" "}
+            <strong className="text-(--accent)">
+              EHDS integration platform
+            </strong>{" "}
+            you can run, fork, and wire into your own stack. It shows how the{" "}
+            <a
+              href="https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:text-(--accent) transition-colors"
+            >
+              EHDS regulation
+            </a>{" "}
+            enables secure cross-border health data sharing across Europe —
+            publishing clinical datasets, negotiating access contracts under
+            ODRL, and transferring FHIR / OMOP data through the{" "}
+            <strong className="text-(--text-primary)">
+              Dataspace Protocol
+            </strong>
+            . Every flow is exposed as a REST API you can exercise from Swagger,
+            Scalar, Bruno, or your own client.
+          </p>
+
+          <div className="flex flex-wrap gap-3 text-sm text-(--text-secondary)">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
+              <Heart
+                size={14}
+                className="text-green-800 dark:text-green-300"
+                aria-hidden="true"
+              />
+              <span>127 synthetic patients</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
+              <Network
+                size={14}
+                className="text-blue-800 dark:text-blue-300"
+                aria-hidden="true"
+              />
+              <span>5,300+ graph nodes</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
+              <Globe
+                size={14}
+                className="text-teal-800 dark:text-teal-300"
+                aria-hidden="true"
+              />
+              <span>7 demo personas</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
+              <Lock
+                size={14}
+                className="text-purple-800 dark:text-purple-300"
+                aria-hidden="true"
+              />
+              <span>All data is synthetic</span>
+            </span>
+          </div>
+
+          {/* ── Register with the EUDI Wallet (passwordless) ── */}
+          <HomeRegisterCta />
         </div>
 
-        <p className="text-(--text-primary) text-base sm:text-lg leading-relaxed max-w-3xl mb-4">
-          This interactive demo is an{" "}
-          <strong className="text-(--accent)">EHDS integration platform</strong>{" "}
-          you can run, fork, and wire into your own stack. It shows how the{" "}
-          <a
-            href="https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:text-(--accent) transition-colors"
-          >
-            EHDS regulation
-          </a>{" "}
-          enables secure cross-border health data sharing across Europe —
-          publishing clinical datasets, negotiating access contracts under ODRL,
-          and transferring FHIR / OMOP data through the{" "}
-          <strong className="text-(--text-primary)">Dataspace Protocol</strong>.
-          Every flow is exposed as a REST API you can exercise from Swagger,
-          Scalar, Bruno, or your own client.
-        </p>
-
-        <div className="flex flex-wrap gap-3 text-sm text-(--text-secondary)">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
-            <Heart
-              size={14}
-              className="text-green-800 dark:text-green-300"
-              aria-hidden="true"
-            />
-            <span>127 synthetic patients</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
-            <Network
-              size={14}
-              className="text-blue-800 dark:text-blue-300"
-              aria-hidden="true"
-            />
-            <span>5,300+ graph nodes</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
-            <Globe
-              size={14}
-              className="text-teal-800 dark:text-teal-300"
-              aria-hidden="true"
-            />
-            <span>7 demo personas</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
-            <Lock
-              size={14}
-              className="text-purple-800 dark:text-purple-300"
-              aria-hidden="true"
-            />
-            <span>All data is synthetic</span>
-          </span>
-        </div>
-
-        {/* ── Register with the EUDI Wallet (passwordless) ── */}
-        <HomeRegisterCta />
+        {/* The living body: under the text on phones, so the heading and the
+            sign-up stay at the top; moved left of it on wide screens. */}
+        <LivingBodyHero className="aspect-9/16 w-[min(72vw,300px)] justify-self-center lg:order-first lg:w-auto lg:h-[min(72vh,620px)]" />
       </section>
 
       {/* ── Why EHDS Matters ─────────────────────────────────────────────── */}

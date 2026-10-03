@@ -17,6 +17,7 @@
     "eqeqeq": ["error", "always", { "null": "ignore" }],
     "curly": ["warn", "multi-line"]
   },
+  "ignorePatterns": ["src/lib/living-body/living-body.js"],
   "overrides": [
     {
       "files": ["__tests__/**/*.{ts,tsx}"],
