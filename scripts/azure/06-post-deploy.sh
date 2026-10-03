@@ -154,13 +154,18 @@ vault_api POST /auth/jwt/role/participant '{"role_type":"jwt","bound_audiences":
 # build time, not KC_URL: KC_URL is the internal address this job reaches
 # Keycloak on, and no token ever carries it (#455).
 #
+# The issuer is pinned as bound_claims.iss. A JWT role has no bound_issuer
+# field; that one belongs on auth/jwt/config, where it would bind the
+# participant role too. Sent on the role, Vault dropped it without an error
+# and the live role read back bound_issuer None, so the pin did nothing.
+#
 # Quote words in here with '' and never with backticks. This is an UNQUOTED
 # heredoc (<<VAULTSCRIPT), so a backtick is command substitution even inside a
 # comment: the two words above used to be backticked, which ran them as
 # commands, printed "command not found" on every deploy, and landed in the
 # generated bootstrap.sh as empty strings.
 header "Create provisioner JWT role"
-vault_api POST /auth/jwt/role/provisioner "{\"role_type\":\"jwt\",\"user_claim\":\"azp\",\"bound_issuer\":\"${KC_ISSUER}\",\"bound_claims\":{\"role\":\"provisioner\"},\"token_policies\":[\"provisioner\"],\"clock_skew_leeway\":60}"
+vault_api POST /auth/jwt/role/provisioner "{\"role_type\":\"jwt\",\"user_claim\":\"azp\",\"bound_claims\":{\"role\":\"provisioner\",\"iss\":\"${KC_ISSUER}\"},\"token_policies\":[\"provisioner\"],\"clock_skew_leeway\":60}"
 
 header "Enable transit engine"
 vault_api POST /sys/mounts/transit '{"type":"transit"}'
