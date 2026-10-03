@@ -3,10 +3,12 @@ import SwiftUI
 
 /// Where the user chooses who answers their questions.
 ///
-/// The hosted option is the default and the only one that needs no setup. The
-/// other two exist because "external configuration is preferred" is a real
-/// preference: someone who already pays a provider should not be metered by an
-/// operator, and their data should not take a detour through one.
+/// On this iPhone is the default (`BringYourOwnProvider.Configuration.onDevice`,
+/// #186 criterion 7): nothing leaves the phone and nothing needs setting up.
+/// The hosted service needs a sign-in. The two bring-your-own options exist
+/// because "external configuration is preferred" is a real preference: someone
+/// who already pays a provider should not be metered by an operator, and their
+/// data should not take a detour through one.
 struct ProviderSettings: View {
   @Binding var configuration: BringYourOwnProvider.Configuration
   @State private var apiKey: String = ""

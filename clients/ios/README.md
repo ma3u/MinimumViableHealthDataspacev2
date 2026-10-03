@@ -236,10 +236,20 @@ same source names. Every one carries its source and a link, and an analyte with
 no citable source is simply absent. That is the difference from the longevity
 tables this was modelled on, which give numbers nobody can check.
 
-**Trends** plots one analyte, in one unit, across every report. A point read by
-the recogniser is drawn differently from one that came from a laboratory's own
-document, because they are not the same evidence, and the range your laboratory
-printed is named under each series alongside the published band.
+**Trends** plots one analyte, in one unit, across every report. Each kind of
+evidence has its own shape (`SourceKind.markShape`): a circle for a
+laboratory's own file, a diamond for a value read from a photo, a triangle for
+one entered or taken from a device, with a legend in words under every chart
+that mixes them (#186 criterion 2). The range your laboratory printed is named
+under each series, as printed, alongside the published band.
+
+Wearable trends (#186 criterion 3, `Shared/Wearables.swift`) are read from
+HealthKit, read only, when the person taps **Show trends from Apple Health**.
+They are weekly means on their own charts in a section of their own, grey and
+dashed, with no range and none of the lab shapes, and with the report days
+ruled in so the two can be read against each other. They are never a
+`CodedLabValue`, never stored and never exported. Under `-MBDemoSeed` a
+fictional series replaces HealthKit.
 
 Three things make a chart answerable rather than decorative. Only seventeen
 analytes have a citable published band, so for all the others the band drawn is
@@ -319,6 +329,44 @@ two mappings drift apart.
 `range_low` and `range_high` carry the range **your laboratory printed**, which
 is what those columns mean in the CDM.
 
+The printed range is kept verbatim in `RawLabValue.referenceText` (#186
+criterion 4) beside the low and high read from it, and travels as
+`referenceRange.text` in the FHIR bundle. A range with no number in it
+(`Erw. unter 0,5`) survives only there, and FHIR's rng-2 allows a range that is
+text alone. `services/epa-ingest` does the same, and the golden bundle pins
+both writers to it.
+
+## Connect to EHDS
+
+#473, [ADR-049](../../docs/ADRs/ADR-049-klarbefund-connects-by-device-grant.md). The
+patient screen starts an OAuth 2.0 device grant for the public Keycloak client
+`klarbefund-app` and shows it as a QR code carrying a `klarbefund://connect`
+link; the app polls Keycloak for the token and registers with the hub.
+
+- `Shared/EHDSConnect.swift`: the link (refused unless its hub and issuer are on
+  `TrustedHub.production`, plus `.development` in a debug build), the poller
+  (`authorization_pending`, `slow_down`, `access_denied`, `expired_token`), and
+  the record Bundle. `EHDSConnectTests` covers each.
+- `EHDSConnection.swift`: tokens and a device id in the Keychain as
+  `ThisDeviceOnly`, refresh, register, record, disconnect (which also revokes
+  the refresh token at Keycloak). A bad link arriving while connected becomes
+  a notice and never drops the connection.
+- `ConnectView.swift`: the sheet, VisionKit's `DataScannerViewController` for QR
+  codes only (no new permission), a paste field, and "is this your account?".
+- `ConnectUITests` run against `DemoEHDSTransport` under `-MBDemoSeed`;
+  `LiveConnectUITests` runs against a real hub when given a fresh link
+  (`docs/knowledge/runbooks/klarbefund-connect.md`).
+
+## Consents
+
+`Shared/Consents.swift` keeps three decisions apart (#186 criterion 6): the
+study consent, the ePA objection and a registry consent. The ledger is
+append-only and its one mutation, `record`, takes one kind, so no code path can
+change two at once; `ConsentsTests` and `ConsentsUITests` check that from both
+ends. The app records and transmits nothing. The research export asks once
+when no registry consent is recorded, and the doctor export reminds the person
+of a recorded ePA objection.
+
 ## Reading a report again
 
 A report keeps its pages, so it can be read again after the parser improves:
@@ -338,6 +386,8 @@ backup:
 <id>.sealed         the record (LabReport)
 <id>.scan.sealed    the pages as one PDF
 <id>.diag.sealed    the scan's diagnostics (ScanDiagnostics)
+profile.sealed      sex, date of birth, height (Profile)
+consents.sealed     the three consent decisions (ConsentLedger)
 ```
 
 Records written before a field existed still decode; every later field is

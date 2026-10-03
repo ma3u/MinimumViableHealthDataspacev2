@@ -114,8 +114,11 @@ scan** shows them back, so the source is always one tap away from the reading.
 what is furthest from its range. The filters narrow it to what matters: only
 analytes measured more than once, or only those outside a band.
 
-Each chart says what it is showing. A filled point came from a laboratory's own
-document; a hollow point was read from a photograph and is preliminary. The
+Each chart says what it is showing. Every kind of evidence has its own shape:
+a circle came from a laboratory's own file, a diamond was read from a
+photograph and is preliminary, and a triangle was entered by you or taken from
+a device. A legend under every chart that mixes them names each shape in
+words, so nothing depends on colour or on tapping a point. The
 green band is the published optimal band where one exists; for everything else
 the band drawn is the range your own laboratory printed, in its own colour and
 named as such. Under the chart every point is listed with its date, where it
@@ -124,6 +127,59 @@ report.
 
 A sentence under each chart says **what the measurement is**: a definition of
 the test, in English or German. It is never a reading of your own value.
+
+At the bottom, **Show trends from Apple Health** reads your resting heart rate,
+heart rate variability, steps and weight, after asking once for permission.
+They appear in their own section, **From your devices**, as grey dashed lines
+of weekly means on the same months as your reports, with a thin blue line on
+each report's day so the two can be read against each other. They are never
+drawn as a lab value: no range, no comparison, no colour that means anything,
+and they go into no export. The app reads them while the screen is open,
+writes nothing to Health and keeps no copy.
+
+## Consents
+
+**Consents**, in the menu, keeps your own record of three decisions that are
+easy to confuse and must never be one switch:
+
+- **Study participation**, your consent to a study, held by the study centre;
+- **Electronic patient record (ePA)**, an _objection_, because the ePA exists
+  unless you object to your health insurer;
+- **Registry and research use**, your consent for a registry or research
+  database to use your values.
+
+Each has its own state, date, holder and button, and changing one never
+changes another. Withdrawing keeps the earlier grant in the history, so you can
+still show when you gave it. The app tells nobody: to give or withdraw one,
+contact whoever holds it. Two places use the record. **Export for research**
+asks once before exporting when no registry consent is recorded, and **Share
+for my doctor** reminds you, when you recorded an objection to the ePA, that
+there is no ePA to upload to while it stands.
+
+## Connect to EHDS
+
+**Connect to EHDS**, in the menu, connects the app to your record in the
+European Health Data Space demo, so it can read it. No password is typed on
+the phone:
+
+1. On a computer, open the patient screen (the app shows the address, to copy,
+   share or open) and sign in as a patient. Choose **Show QR code**.
+2. In the app, **Scan QR code**. On the computer, **Approve on this computer**
+   opens Keycloak's consent page; check that the code shown there is the one
+   the app shows, and approve.
+3. The app says which account it connected to and asks **Is this your
+   account?** A code someone else showed you would connect the phone to their
+   account, so if the name is not yours, choose **Not me, disconnect**.
+4. **Show my EHDS record** lists the measurements in your record on the hub,
+   each with its printed range and date. On the demo hub every record is
+   synthetic, and the screen says so. The record is read when you open it,
+   kept nowhere, and never mixed into your scanned reports; nothing from the
+   app is sent to the hub.
+
+On a phone holding the patient screen itself, **Open in Klarbefund** does the
+same as the QR code, and the iPhone's camera app opens Klarbefund from the code
+too. The code works once, for two minutes. **Disconnect** is in the app and on
+the patient screen, where every connected phone is listed.
 
 ## Reference values
 
@@ -191,12 +247,14 @@ only when you say so.
 | -------------------------- | ------------------- | ----------------------------------------------------------------------- |
 | Share for my doctor        | a practice, the ePA | a PDF summary with the original pages appended, plus a FHIR R4 bundle   |
 | Export for research (OMOP) | an analytics team   | OMOP CDM v5.4 `measurement.csv`, `person.csv`, `observation_period.csv` |
-| Export all my data         | you, under GDPR     | every report, page, value and profile field, readable, in one archive   |
+| Export all my data         | you, under GDPR     | every report, page, value, profile field and consent, in one archive    |
 | Delete all my data         | you                 | the store is wiped for good, and the app says so before it does it      |
 | Export diagnostics         | the developers      | the recognised text and both recogniser passes, to fix a misread line   |
 
 The FHIR bundle carries every value with its LOINC code, its UCUM unit, the
-range the laboratory printed, and the page and line it was read from. A value
+range the laboratory printed (as numbers where they can be read, and always as
+the printed text in `referenceRange.text`), and the page and line it was read
+from. A value
 read from a photograph is marked preliminary in the bundle too. The doctor
 export fits the ePA's 25 MB limit with the pages attached.
 

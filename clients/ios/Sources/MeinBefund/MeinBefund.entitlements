@@ -6,5 +6,12 @@
 	     weakening it is a deliberate decision, not a build tweak. -->
 	<key>com.apple.developer.default-data-protection</key>
 	<string>NSFileProtectionComplete</string>
+	<!-- Read only: wearable trends beside the lab values (#186 criterion 3).
+	     The App ID needs the HealthKit capability for a device or TestFlight
+	     build to sign. -->
+	<key>com.apple.developer.healthkit</key>
+	<true/>
+	<key>com.apple.developer.healthkit.access</key>
+	<array/>
 </dict>
 </plist>

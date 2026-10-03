@@ -48,6 +48,9 @@ enum DataExport {
     let manifest: Manifest
     /// What the app knows about the person, as opposed to their results.
     let profile: Profile
+    /// The three consent decisions and every change to them (#186
+    /// criterion 6). A record of what the person decided is theirs too.
+    let consents: ConsentLedger
     /// The one preference that is worth carrying: which model answers a
     /// question. Not health data, but it is a choice the person made and a
     /// copy of their data that hides their own settings is a partial copy.
@@ -60,7 +63,8 @@ enum DataExport {
   ///   seeded with demo reports holds their pages beside the store and an
   ///   archive that quietly omitted them would pass a test it should fail.
   static func build(
-    reports: [LabReport], profile: Profile, provider: BringYourOwnProvider.Kind,
+    reports: [LabReport], profile: Profile, consents: ConsentLedger,
+    provider: BringYourOwnProvider.Kind,
     pages: @Sendable (LabReport) async throws -> Data?
   ) async throws -> URL {
     let day = ISO8601DateFormatter()
@@ -132,7 +136,8 @@ enum DataExport {
       scans: scanCount,
       contents: ["data.json", "fhir/", "omop/", "pdf/", "scans/", "README.txt"])
     let archive = Archive(
-      manifest: manifest, profile: profile, analysisProvider: provider.rawValue,
+      manifest: manifest, profile: profile, consents: consents,
+      analysisProvider: provider.rawValue,
       reports: ordered)
     try write(try DiagnosticsBundle.encoder().encode(archive), "data.json", in: root)
     try write(Data(readme(manifest).utf8), "README.txt", in: root)
@@ -189,7 +194,8 @@ enum DataExport {
 
         This archive holds everything the app has stored about you: \
         \(manifest.reports) report(s), \(manifest.values) recognised value(s), \
-        \(manifest.scans) scanned document(s), and your profile. Nothing has \
+        \(manifest.scans) scanned document(s), your profile and your consent \
+        decisions. Nothing has \
         been left out, including the \(manifest.uncodedLines) line(s) that \
         matched no code and the \(manifest.unreadLines) line(s) that could not \
         be read.

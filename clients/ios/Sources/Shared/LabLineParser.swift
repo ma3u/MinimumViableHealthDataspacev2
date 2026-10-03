@@ -99,6 +99,31 @@ public enum LabLineParser {
     return ReferenceRange()
   }
 
+  /// The reference column as printed, or nil when there is none.
+  ///
+  /// Mirrors `printedReference` in `services/epa-ingest/src/parse-lab.ts`.
+  /// Whitespace and the stray separator a recogniser reads at a column edge
+  /// (`: 33-36`) are trimmed; nothing else is touched, so a unit printed in
+  /// the range column (`< 116 mg/dl`) stays. A remainder that is a whole
+  /// `label value unit` row is a second analyte merged onto the line by a
+  /// two-column layout, not a range, and is not kept as one. The label needs
+  /// four letters to count, so a qualifier like `Erw. < 5,0 mg/l` is a range.
+  public static func printedReference(_ raw: String) -> String? {
+    let t = raw.trimmingCharacters(in: .whitespaces)
+      .replacingOccurrences(of: #"^[:;,|]+\s*"#, with: "", options: .regularExpression)
+      .trimmingCharacters(in: .whitespaces)
+    guard !t.isEmpty else { return nil }
+    if let m = lineRegex.firstMatch(in: t, range: NSRange(t.startIndex..., in: t)),
+      let labelRange = Range(m.range(withName: "label"), in: t),
+      let unitRange = Range(m.range(withName: "unit"), in: t),
+      t[labelRange].filter(\.isLetter).count >= 4,
+      Analytes.normaliseUnit(String(t[unitRange])) != nil
+    {
+      return nil
+    }
+    return t
+  }
+
   /// `Analyt  [<]Wert [flag]  Einheit  [Referenz]`.
   ///
   /// The mandatory whitespace between label and value is what keeps `HbA1c` and
@@ -219,6 +244,7 @@ public enum LabLineParser {
       label: label, value: value, unitRaw: tokens[unitIndex],
       comparator: Comparator(rawValue: comparator),
       referenceLow: range.low, referenceHigh: range.high,
+      referenceText: printedReference(reference[1]),
       line: line.trimmingCharacters(in: .whitespaces), lineNumber: 0, region: nil)
   }
 
@@ -378,7 +404,8 @@ public enum LabLineParser {
         continue
       }
 
-      let reference = parseReferenceRange(cell(layout.reference))
+      let referenceCell = cell(layout.reference)
+      let reference = parseReferenceRange(referenceCell)
       values.append(
         RawLabValue(
           label: label,
@@ -387,6 +414,7 @@ public enum LabLineParser {
           comparator: comparator.flatMap(Comparator.init(rawValue:)),
           referenceLow: reference.low,
           referenceHigh: reference.high,
+          referenceText: printedReference(referenceCell),
           line: row.line,
           lineNumber: index + 1,
           region: row.region
@@ -558,7 +586,8 @@ public enum LabLineParser {
           RawLabValue(
             label: unitFirst.label, value: unitFirst.value, unitRaw: unitFirst.unitRaw,
             comparator: unitFirst.comparator, referenceLow: unitFirst.referenceLow,
-            referenceHigh: unitFirst.referenceHigh, line: unitFirst.line,
+            referenceHigh: unitFirst.referenceHigh, referenceText: unitFirst.referenceText,
+            line: unitFirst.line,
             lineNumber: lineNumber, region: entry.region))
         return true
       }
@@ -635,6 +664,7 @@ public enum LabLineParser {
           comparator: Comparator(rawValue: cmpRaw),
           referenceLow: ref.low,
           referenceHigh: ref.high,
+          referenceText: printedReference(rest),
           line: line.trimmingCharacters(in: .whitespaces),
           lineNumber: lineNumber,
           region: entry.region

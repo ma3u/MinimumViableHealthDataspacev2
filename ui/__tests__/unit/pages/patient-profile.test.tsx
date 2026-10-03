@@ -14,6 +14,10 @@ vi.mock("@/lib/api", () => ({
   fetchApi: (...args: unknown[]) => mockFetchApi(...args),
 }));
 
+// The Klarbefund card makes its own fetchApi call and has its own tests
+// (ConnectAppCard.test.tsx); here it would consume the page's mocked answers.
+vi.mock("@/components/ConnectAppCard", () => ({ default: () => null }));
+
 vi.mock("next/link", () => ({
   default: ({
     href,

@@ -1,0 +1,36 @@
+meta {
+  name: 12 Connect my phone, a QR code (#473)
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{baseUrl}}/api/patient/app-pairing
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+tests {
+  // ADR-049: the patient screen starts a device grant for klarbefund-app and
+  // shows it as a QR code. Needs the client in the realm
+  // (scripts/azure/wire-klarbefund-client.sh on a running Keycloak).
+  test("answers with a QR code and the app link", function () {
+    expect(res.getStatus()).to.equal(200);
+    const body = res.getBody();
+    expect(body.qrDataUri).to.match(/^data:image\/png;base64,/);
+    expect(body.appLink).to.match(/^klarbefund:\/\/connect\?/);
+    expect(body.userCode, "Keycloak's user code").to.be.a("string");
+    bru.setVar("pairingId", body.pairingId);
+  });
+  test("the approval page is on the public Keycloak host", function () {
+    expect(res.getBody().verificationUri).to.match(/\/realms\/edcv\/device\?user_code=/);
+  });
+}
+
+docs {
+  The QR code carries the device code; the browser only gets Keycloak's approval page, where the patient consents. The phone fetches its token from Keycloak itself.
+}

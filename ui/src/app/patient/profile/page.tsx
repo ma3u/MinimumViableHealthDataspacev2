@@ -11,6 +11,7 @@ import {
   User,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import ConnectAppCard from "@/components/ConnectAppCard";
 
 interface RiskScore {
   score: number;
@@ -90,6 +91,9 @@ export default function PatientProfilePage() {
             label: "Patient Rights Guide",
           }}
         />
+
+        {/* The Klarbefund app reads this record once connected (#473). */}
+        <ConnectAppCard />
 
         {/* GDPR rights banner */}
         <div className="mb-6 rounded-lg border border-(--border) bg-(--surface-2) p-3 flex items-start gap-2">

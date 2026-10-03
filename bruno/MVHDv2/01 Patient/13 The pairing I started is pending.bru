@@ -1,0 +1,27 @@
+meta {
+  name: 13 The pairing I started is pending
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/api/patient/app-pairing/{{pairingId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+tests {
+  test("pending until a phone registers", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().status).to.equal("pending");
+    expect(res.getBody().pairingId).to.equal(bru.getVar("pairingId"));
+  });
+}
+
+docs {
+  Polled by the patient screen while the QR code shows. No phone scans it in this run, so it stays pending.
+}

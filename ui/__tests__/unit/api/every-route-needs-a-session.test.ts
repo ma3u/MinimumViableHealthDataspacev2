@@ -3,7 +3,8 @@
  * the routes that make signing in possible and the liveness probe. (The
  * TestFlight request form of ADR-048 is gone: ADR-050.) The demo
  * DSP endpoint the catalog crawler calls takes a session or its bearer token
- * (requireSessionOrToken, lib/service-auth.ts), which counts as a gate.
+ * (requireSessionOrToken, lib/service-auth.ts), which counts as a gate, and
+ * so does the Klarbefund app's token (requireAppToken, lib/app-auth.ts, ADR-049).
  *
  * Two checks. The inventory fails when a route file never calls
  * requireAuth() and is not on the list below, so a new anonymous route
@@ -66,6 +67,7 @@ describe("every API route needs a session (ADR-044)", () => {
         const gated =
           body.includes("requireAuth(") ||
           body.includes("requireSessionOrToken(") ||
+          body.includes("requireAppToken(") ||
           helpers.some((h) => new RegExp(`\\b${h}\\(`).test(body));
         if (!gated) ungated.push(`${method} ${route}`);
       }

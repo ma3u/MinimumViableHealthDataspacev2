@@ -1,0 +1,27 @@
+meta {
+  name: 14 My connected phones
+  type: http
+  seq: 14
+}
+
+get {
+  url: {{baseUrl}}/api/patient/app-devices
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+tests {
+  test("a list, each with a name and when it connected", function () {
+    expect(res.getStatus()).to.equal(200);
+    const devices = res.getBody().devices;
+    expect(devices).to.be.an("array");
+    devices.forEach(function (d) {
+      expect(d).to.have.property("deviceName");
+      expect(d).to.have.property("connectedAt");
+    });
+  });
+}
