@@ -290,7 +290,10 @@ MinimumViableHealthDataspacev2/
 │   └── seed-audit-provenance.cypher       # Audit trail seed data
 ├── services/
 │   └── neo4j-proxy/              # DCore ↔ Neo4j bridge (TypeScript/Express)
-│       ├── src/index.ts          # 6 endpoints: FHIR, OMOP, HealthDCAT-AP
+│       ├── src/index.ts          # startup; imports the route modules in order
+│       ├── src/routes/           # one module per capability: fhir, omop, catalog,
+│       │                         #   federated, nlq, tasks, tck, trust-center, ops
+│       ├── src/nlq/engine.ts     # Text2Cypher templates, fulltext, GraphRAG, LLM
 │       ├── Dockerfile            # Multi-stage Node.js 20 build
 │       └── package.json
 ├── scripts/                      # Utility and data-prep scripts

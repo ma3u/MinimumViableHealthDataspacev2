@@ -45,7 +45,7 @@ records the last successful crawl per dataset.
 
 ## Privacy rules on the federated query path
 
-Enforced in `services/neo4j-proxy/src/index.ts` (`POST /federated/query`):
+Enforced in `services/neo4j-proxy/src/routes/federated.ts` (`POST /federated/query`):
 
 1. **Read-only Cypher** — write patterns (incl. `CALL { CREATE … }`) are
    rejected with 403 before dispatch.

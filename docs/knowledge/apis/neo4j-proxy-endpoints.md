@@ -2,7 +2,7 @@
 type: api
 title: neo4j-proxy endpoints
 description: The Express bridge's public surface — FHIR, OMOP, catalog, NLQ, federated, Trust Center.
-resource: services/neo4j-proxy/src/index.ts (startup log lists all endpoints)
+resource: services/neo4j-proxy/src/routes/ (one module per capability; index.ts startup log lists all endpoints)
 tags: [express, fhir, omop, nlq, federated]
 generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
 verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
