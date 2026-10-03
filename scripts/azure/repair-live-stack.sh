@@ -194,8 +194,6 @@ phase_5() {
     die "could not find the bootstrap heredocs in 06-post-deploy.sh (start='${start}' end='${end}')"
 
   eval "$(get_aca_fqdns)"
-  ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
-  [ -n "$ACR_PASSWORD" ] || die "could not read the ACR admin password"
 
   # The fragment expands this into the provisioner role at build time (#455).
   KC_ISSUER=$(keycloak_issuer)
@@ -215,7 +213,9 @@ phase_5() {
     die "the provisioner role in bootstrap.sh is not bound to ${KC_ISSUER}"
   say "extracted bootstrap.sh, provisioner role bound to ${KC_ISSUER}"
 
-  # buildx pushes with the local docker credentials, not the ACR password above.
+  # buildx pushes with the local docker credentials. An Entra login needs only
+  # AcrPush; the admin password this used to read needs listCredentials, which
+  # an operator with AcrPush does not have, and nothing here used it.
   az acr login --name "$ACR_NAME" >/dev/null
 
   tag="$(git -C "$REPO_ROOT" rev-parse --short HEAD)"
