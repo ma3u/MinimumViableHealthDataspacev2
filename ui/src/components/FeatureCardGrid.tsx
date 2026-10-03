@@ -75,13 +75,39 @@ const ROLE_PATHS: Record<string, string[]> = {
   TRUST_CENTER_OPERATOR: ["/overview", "/compliance", "/credentials"],
 };
 
+type Layer = 1 | 2 | 3 | 4 | 5;
+
 interface FeatureCard {
   href: string;
   icon: LucideIcon;
   label: string;
   desc: string;
-  color: string;
+  layer: Layer;
 }
+
+/** Full class names, so Tailwind's scanner sees every one of them. */
+const LAYER_STYLE: Record<Layer, { card: string; tile: string }> = {
+  1: {
+    card: "border-layer1 hover:bg-layer1/10",
+    tile: "bg-layer1/15 text-layer1-safe",
+  },
+  2: {
+    card: "border-layer2 hover:bg-layer2/10",
+    tile: "bg-layer2/15 text-layer2-safe",
+  },
+  3: {
+    card: "border-layer3 hover:bg-layer3/10",
+    tile: "bg-layer3/15 text-layer3-safe",
+  },
+  4: {
+    card: "border-layer4 hover:bg-layer4/10",
+    tile: "bg-layer4/15 text-layer4-safe",
+  },
+  5: {
+    card: "border-layer5 hover:bg-layer5/10",
+    tile: "bg-layer5/15 text-layer5-safe",
+  },
+};
 
 const exploreCards: FeatureCard[] = [
   {
@@ -89,42 +115,42 @@ const exploreCards: FeatureCard[] = [
     icon: Network,
     label: "Persona Overview",
     desc: "One view per persona: what is out of range, due, broken, and what to do next",
-    color: "border-layer1 hover:bg-layer1/10",
+    layer: 1,
   },
   {
     href: "/catalog",
     icon: BookOpen,
     label: "Dataset Catalog",
     desc: "HealthDCAT-AP metadata for all published datasets",
-    color: "border-layer2 hover:bg-layer2/10",
+    layer: 2,
   },
   {
     href: "/patient",
     icon: User,
     label: "Patient Journey",
     desc: "FHIR R4 clinical timeline with OMOP CDM mapping",
-    color: "border-layer3 hover:bg-layer3/10",
+    layer: 3,
   },
   {
     href: "/analytics",
     icon: BarChart2,
     label: "OMOP Analytics",
     desc: "Cohort-level research analytics dashboard",
-    color: "border-layer4 hover:bg-layer4/10",
+    layer: 4,
   },
   {
     href: "/eehrxf",
     icon: Layers,
     label: "EEHRxF Profiles",
     desc: "EU FHIR profile alignment and EHDS coverage gap analysis",
-    color: "border-layer2 hover:bg-layer2/10",
+    layer: 2,
   },
   {
     href: "/query",
     icon: MessageSquare,
     label: "Natural Language Query",
     desc: "Federated Cypher queries via natural language interface",
-    color: "border-layer1 hover:bg-layer1/10",
+    layer: 1,
   },
 ];
 
@@ -134,35 +160,35 @@ const exchangeCards: FeatureCard[] = [
     icon: ArrowRightLeft,
     label: "Share Data",
     desc: "Publish and register health data assets for the dataspace",
-    color: "border-layer1 hover:bg-layer1/10",
+    layer: 1,
   },
   {
     href: "/data/discover",
     icon: Search,
     label: "Discover Data",
     desc: "Search the federated catalog for available datasets",
-    color: "border-layer2 hover:bg-layer2/10",
+    layer: 2,
   },
   {
     href: "/negotiate",
     icon: Handshake,
     label: "Contract Negotiation",
     desc: "Negotiate data usage contracts with providers via DSP",
-    color: "border-layer3 hover:bg-layer3/10",
+    layer: 3,
   },
   {
     href: "/data/transfer",
     icon: FileJson2,
     label: "Data Transfer & FHIR Viewer",
     desc: "Transfer FHIR/OMOP data and inspect FHIR R4 bundles",
-    color: "border-layer4 hover:bg-layer4/10",
+    layer: 4,
   },
   {
     href: "/tasks",
     icon: ClipboardList,
     label: "EHDS Tasks",
     desc: "Track data access permit tasks and approval workflows",
-    color: "border-layer5 hover:bg-layer5/10",
+    layer: 5,
   },
 ];
 
@@ -172,42 +198,42 @@ const governCards: FeatureCard[] = [
     icon: ShieldCheck,
     label: "Governance & Compliance",
     desc: "EHDS compliance, data permits, and protocol conformance testing",
-    color: "border-layer5 hover:bg-layer5/10",
+    layer: 5,
   },
   {
     href: "/credentials",
     icon: Award,
     label: "Verifiable Credentials",
     desc: "Manage MembershipCredential, EHDS participant, and data permits",
-    color: "border-layer1 hover:bg-layer1/10",
+    layer: 1,
   },
   {
     href: "/onboarding",
     icon: UserPlus,
     label: "Onboarding",
     desc: "Register new participants and generate DID identities",
-    color: "border-layer2 hover:bg-layer2/10",
+    layer: 2,
   },
   {
     href: "/settings",
     icon: Settings,
     label: "Settings",
     desc: "Participant profile, connector endpoints, and credentials",
-    color: "border-layer3 hover:bg-layer3/10",
+    layer: 3,
   },
   {
     href: "/admin",
     icon: LayoutDashboard,
     label: "Portal Admin",
     desc: "Tenant management, policies, component topology, and audit logs",
-    color: "border-layer4 hover:bg-layer4/10",
+    layer: 4,
   },
   {
     href: "/docs",
     icon: FileText,
     label: "Documentation",
     desc: "User guide, developer docs, and architecture reference",
-    color: "border-layer3 hover:bg-layer3/10",
+    layer: 3,
   },
 ];
 
@@ -249,20 +275,27 @@ export function FeatureCardGrid({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-      {cards.map(({ href, icon: Icon, label, desc, color }, i) => {
+      {cards.map(({ href, icon: Icon, label, desc, layer }, i) => {
         const isRelevant = isLoggedIn && highlighted.has(href);
+        const style = LAYER_STYLE[layer];
         return (
+          // flex-col overrides the global a { display: inline-flex } of the
+          // WCAG target-size rule, which laid the title and the text side by side.
           <Link
             key={href}
             href={href}
-            className={`relative border rounded-xl p-4 sm:p-5 transition-colors ${color} animate-fade-in-up ${
-              isRelevant ? "ring-2 ring-white/20" : ""
-            }`}
+            className={`relative flex flex-col items-stretch gap-3 h-full border rounded-xl p-5 transition-colors ${
+              style.card
+            } animate-fade-in-up ${isRelevant ? "ring-2 ring-white/20" : ""}`}
             style={{ animationDelay: `${delay + i * 60}ms` }}
           >
-            <div className="flex items-center gap-2 mb-2">
-              <Icon size={20} aria-hidden="true" />
-              <span className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100">
+            <div className="flex items-center gap-3">
+              <span
+                className={`shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${style.tile}`}
+              >
+                <Icon size={22} strokeWidth={1.8} aria-hidden="true" />
+              </span>
+              <span className="font-semibold text-base leading-snug text-gray-900 dark:text-gray-100">
                 {label}
               </span>
               {isRelevant && (

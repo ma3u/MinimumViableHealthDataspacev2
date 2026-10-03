@@ -176,7 +176,9 @@ describe("Home Page", () => {
     render(<Home />);
     expect(screen.getByText("Explore")).toBeInTheDocument();
     expect(screen.getByText("Govern · Manage · Docs")).toBeInTheDocument();
-    expect(screen.getByText(/5-layer knowledge graph/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/each opens after you sign in/i),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(/DSP data exchange lifecycle/i),
     ).toBeInTheDocument();

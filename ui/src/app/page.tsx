@@ -635,9 +635,9 @@ export default function Home() {
           Explore
         </h2>
         <p className="text-xs text-(--text-secondary) mb-3 max-w-2xl">
-          Visualise the 5-layer knowledge graph, browse FHIR clinical data,
-          query OMOP analytics, and search the HealthDCAT-AP dataset catalogue.
-          All publicly accessible without sign-in.
+          The persona overview, the HealthDCAT-AP dataset catalogue, FHIR
+          patient journeys, OMOP analytics, EEHRxF profile coverage and natural
+          language queries. On the live demo, each opens after you sign in.
         </p>
         <FeatureCardGrid section="explore" delay={1200} />
       </section>
