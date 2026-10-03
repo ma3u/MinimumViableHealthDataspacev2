@@ -111,7 +111,7 @@ export default function ParticipantsAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-6xl mx-auto px-6 py-10">
         <PageIntro
           title="Participant Directory"
@@ -123,7 +123,7 @@ export default function ParticipantsAdminPage() {
         {notice && (
           <div
             role="status"
-            className="mb-4 rounded border border-[var(--border)] bg-[var(--surface-2)] px-4 py-2 text-sm text-[var(--text-primary)]"
+            className="mb-4 rounded-sm border border-(--border) bg-(--surface-2) px-4 py-2 text-sm text-(--text-primary)"
           >
             {notice}
           </div>
@@ -132,7 +132,7 @@ export default function ParticipantsAdminPage() {
         {/* Summary row */}
         {data && (
           <div
-            className="mb-6 flex flex-wrap gap-4 text-sm text-[var(--text-secondary)]"
+            className="mb-6 flex flex-wrap gap-4 text-sm text-(--text-secondary)"
             data-testid="participants-summary"
           >
             <span>{data.summary.total} participants</span>
@@ -146,7 +146,7 @@ export default function ParticipantsAdminPage() {
             <button
               onClick={load}
               aria-label="Refresh participants"
-              className="ml-auto flex items-center gap-1 text-[var(--accent)] hover:underline"
+              className="ml-auto flex items-center gap-1 text-(--accent) hover:underline"
             >
               <RefreshCw size={14} /> Refresh
             </button>
@@ -154,23 +154,23 @@ export default function ParticipantsAdminPage() {
         )}
 
         {loading && (
-          <div className="flex items-center gap-2 py-8 text-[var(--text-secondary)]">
+          <div className="flex items-center gap-2 py-8 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" /> Loading participant
             directory…
           </div>
         )}
         {error && !loading && (
-          <div className="rounded border border-red-700 bg-red-900/30 px-4 py-3 text-sm text-red-300">
+          <div className="rounded-sm border border-red-700 bg-red-900/30 px-4 py-3 text-sm text-red-300">
             {error}
           </div>
         )}
 
         {/* Directory table */}
         {data && !loading && (
-          <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+          <div className="overflow-x-auto rounded-lg border border-(--border)">
             <table className="w-full text-sm" data-testid="participants-table">
               <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--surface-2)] text-left text-[var(--text-secondary)]">
+                <tr className="border-b border-(--border) bg-(--surface-2) text-left text-(--text-secondary)">
                   <th className="px-4 py-3 font-medium">Participant</th>
                   <th className="px-4 py-3 font-medium">Source</th>
                   <th className="px-4 py-3 font-medium">Wallet</th>
@@ -184,13 +184,13 @@ export default function ParticipantsAdminPage() {
                 {data.participants.map((p) => (
                   <tr
                     key={p.participantId}
-                    className="border-b border-[var(--border)] last:border-0"
+                    className="border-b border-(--border) last:border-0"
                   >
                     <td className="px-4 py-3">
-                      <div className="font-medium text-[var(--text-primary)]">
+                      <div className="font-medium text-(--text-primary)">
                         {p.name ?? "—"}
                       </div>
-                      <div className="font-mono text-xs text-[var(--text-secondary)]">
+                      <div className="font-mono text-xs text-(--text-secondary)">
                         {p.participantId}
                       </div>
                     </td>
@@ -204,15 +204,15 @@ export default function ParticipantsAdminPage() {
                         {p.source ?? "unknown"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[var(--text-secondary)]">
+                    <td className="px-4 py-3 text-(--text-secondary)">
                       <span className="flex items-center gap-1">
                         <Wallet size={13} /> {p.walletType ?? "—"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[var(--text-secondary)]">
+                    <td className="px-4 py-3 text-(--text-secondary)">
                       {p.country ?? "—"}
                     </td>
-                    <td className="px-4 py-3 text-[var(--text-secondary)]">
+                    <td className="px-4 py-3 text-(--text-secondary)">
                       {p.datasetCount}
                     </td>
                     <td className="px-4 py-3">
@@ -220,8 +220,8 @@ export default function ParticipantsAdminPage() {
                         <span
                           className={`font-mono text-xs ${
                             p.crawlerEnabled
-                              ? "text-[var(--text-secondary)]"
-                              : "text-[var(--text-secondary)] line-through"
+                              ? "text-(--text-secondary)"
+                              : "text-(--text-secondary) line-through"
                           }`}
                           title={
                             p.crawlerEnabled
@@ -232,7 +232,7 @@ export default function ParticipantsAdminPage() {
                           {p.dspCatalogUrl}
                         </span>
                       ) : (
-                        <span className="text-xs text-[var(--text-secondary)]">
+                        <span className="text-xs text-(--text-secondary)">
                           not crawlable
                         </span>
                       )}
@@ -258,14 +258,14 @@ export default function ParticipantsAdminPage() {
         {/* Onboard form */}
         <form
           onSubmit={addParticipant}
-          className="mt-8 rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-6"
+          className="mt-8 rounded-lg border border-(--border) bg-(--surface-2) p-6"
           data-testid="participant-form"
         >
-          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-[var(--text-primary)]">
+          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-(--text-primary)">
             <Plus size={18} /> Onboard participant wallet
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-(--text-secondary)">
               Participant DID *
               <input
                 required
@@ -274,57 +274,57 @@ export default function ParticipantsAdminPage() {
                   setForm({ ...form, participantId: e.target.value })
                 }
                 placeholder="did:web:clinic.example:participant"
-                className="mt-1 w-full rounded border border-[var(--border)] bg-[var(--bg)] px-3 py-2 font-mono text-xs text-[var(--text-primary)]"
+                className="mt-1 w-full rounded-sm border border-(--border) bg-(--bg) px-3 py-2 font-mono text-xs text-(--text-primary)"
               />
             </label>
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-(--text-secondary)">
               Display name *
               <input
                 required
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="Fictional Clinic GmbH"
-                className="mt-1 w-full rounded border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[var(--text-primary)]"
+                className="mt-1 w-full rounded-sm border border-(--border) bg-(--bg) px-3 py-2 text-(--text-primary)"
               />
             </label>
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-(--text-secondary)">
               Participant type
               <select
                 value={form.participantType}
                 onChange={(e) =>
                   setForm({ ...form, participantType: e.target.value })
                 }
-                className="mt-1 w-full rounded border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[var(--text-primary)]"
+                className="mt-1 w-full rounded-sm border border-(--border) bg-(--bg) px-3 py-2 text-(--text-primary)"
               >
                 <option>DATA_HOLDER</option>
                 <option>DATA_USER</option>
                 <option>HDAB</option>
               </select>
             </label>
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-(--text-secondary)">
               Wallet type
               <select
                 value={form.walletType}
                 onChange={(e) =>
                   setForm({ ...form, walletType: e.target.value })
                 }
-                className="mt-1 w-full rounded border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[var(--text-primary)]"
+                className="mt-1 w-full rounded-sm border border-(--border) bg-(--bg) px-3 py-2 text-(--text-primary)"
               >
                 <option value="business">business</option>
                 <option value="private">private</option>
               </select>
             </label>
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-(--text-secondary)">
               Country (ISO-2)
               <input
                 value={form.country}
                 onChange={(e) => setForm({ ...form, country: e.target.value })}
                 placeholder="DE"
                 maxLength={2}
-                className="mt-1 w-full rounded border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[var(--text-primary)]"
+                className="mt-1 w-full rounded-sm border border-(--border) bg-(--bg) px-3 py-2 text-(--text-primary)"
               />
             </label>
-            <label className="text-sm text-[var(--text-secondary)]">
+            <label className="text-sm text-(--text-secondary)">
               DSP catalog URL
               <input
                 value={form.dspCatalogUrl}
@@ -332,14 +332,14 @@ export default function ParticipantsAdminPage() {
                   setForm({ ...form, dspCatalogUrl: e.target.value })
                 }
                 placeholder="https://clinic.example/api/dsp/catalog"
-                className="mt-1 w-full rounded border border-[var(--border)] bg-[var(--bg)] px-3 py-2 font-mono text-xs text-[var(--text-primary)]"
+                className="mt-1 w-full rounded-sm border border-(--border) bg-(--bg) px-3 py-2 font-mono text-xs text-(--text-primary)"
               />
             </label>
           </div>
           <button
             type="submit"
             disabled={saving}
-            className="mt-4 flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2 font-medium text-white transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50 dark:text-gray-900"
+            className="mt-4 flex items-center gap-2 rounded-lg bg-(--accent) px-4 py-2 font-medium text-white transition-colors hover:bg-(--accent-hover) disabled:opacity-50 dark:text-gray-900"
           >
             {saving ? (
               <Loader2 size={15} className="animate-spin" />

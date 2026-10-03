@@ -36,7 +36,7 @@ export default function ThemeToggle() {
       onClick={toggle}
       aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      className="p-2 rounded-md touch-target-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
+      className="p-2 rounded-md touch-target-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) transition-colors"
     >
       {isDark ? (
         <Sun size={18} aria-hidden="true" />

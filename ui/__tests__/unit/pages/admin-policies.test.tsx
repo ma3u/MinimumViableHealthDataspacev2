@@ -590,8 +590,8 @@ describe("AdminPoliciesPage", () => {
 
     await waitFor(() => {
       const msg = screen.getByText("Policy created successfully.");
-      // Component uses CSS variable class text-[var(--success-text)] not text-green-400
-      expect(msg.className).toContain("text-[var(--success-text)]");
+      // Component uses CSS variable class text-(--success-text) not text-green-400
+      expect(msg.className).toContain("text-(--success-text)");
     });
   });
 
@@ -683,8 +683,8 @@ describe("AdminPoliciesPage", () => {
 
     await waitFor(() => {
       const msg = screen.getByText(/Failed: Boom/);
-      // Component uses CSS variable class text-[var(--danger-text)] not text-red-400
-      expect(msg.className).toContain("text-[var(--danger-text)]");
+      // Component uses CSS variable class text-(--danger-text) not text-red-400
+      expect(msg.className).toContain("text-(--danger-text)");
     });
   });
 

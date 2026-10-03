@@ -26,14 +26,14 @@ function day(value: string | null | undefined): string {
 function Pairs({ map }: { map: Record<string, number> }) {
   const rows = Object.entries(map);
   if (rows.length === 0) {
-    return <span className="text-[var(--text-secondary)]">none</span>;
+    return <span className="text-(--text-secondary)">none</span>;
   }
   return (
     <span className="flex flex-wrap gap-1">
       {rows.map(([k, v]) => (
         <span
           key={k}
-          className="px-1.5 py-0.5 rounded bg-[var(--surface-2)] text-[var(--text-primary)] text-xs"
+          className="px-1.5 py-0.5 rounded-sm bg-(--surface-2) text-(--text-primary) text-xs"
         >
           {k}: {v}
         </span>
@@ -44,9 +44,9 @@ function Pairs({ map }: { map: Record<string, number> }) {
 
 function Stat({ label, value }: { label: string; value: number | string }) {
   return (
-    <div className="rounded border border-[var(--border)] bg-[var(--surface-2)] px-3 py-2">
-      <div className="text-xs text-[var(--text-secondary)]">{label}</div>
-      <div className="text-lg font-semibold text-[var(--text-primary)] tabular-nums">
+    <div className="rounded-sm border border-(--border) bg-(--surface-2) px-3 py-2">
+      <div className="text-xs text-(--text-secondary)">{label}</div>
+      <div className="text-lg font-semibold text-(--text-primary) tabular-nums">
         {value}
       </div>
     </div>
@@ -54,9 +54,7 @@ function Stat({ label, value }: { label: string; value: number | string }) {
 }
 
 function Note({ children }: { children: string }) {
-  return (
-    <p className="text-xs text-[var(--text-secondary)] mt-3">{children}</p>
-  );
+  return <p className="text-xs text-(--text-secondary) mt-3">{children}</p>;
 }
 
 function ItemBody({
@@ -80,7 +78,7 @@ function ItemBody({
           </div>
           <dl className="mt-3 text-sm space-y-2">
             <div className="flex gap-2 flex-wrap">
-              <dt className="text-[var(--text-secondary)] w-44 shrink-0">
+              <dt className="text-(--text-secondary) w-44 shrink-0">
                 Types of applicants
               </dt>
               <dd>
@@ -88,7 +86,7 @@ function ItemBody({
               </dd>
             </div>
             <div className="flex gap-2 flex-wrap">
-              <dt className="text-[var(--text-secondary)] w-44 shrink-0">
+              <dt className="text-(--text-secondary) w-44 shrink-0">
                 Purposes requested
               </dt>
               <dd>
@@ -96,10 +94,10 @@ function ItemBody({
               </dd>
             </div>
             <div className="flex gap-2 flex-wrap">
-              <dt className="text-[var(--text-secondary)] w-44 shrink-0">
+              <dt className="text-(--text-secondary) w-44 shrink-0">
                 Data categories accessed
               </dt>
-              <dd className="text-[var(--text-primary)]">
+              <dd className="text-(--text-primary)">
                 {items.a.dataCategoriesAccessed.length === 0
                   ? "none"
                   : items.a.dataCategoriesAccessed
@@ -108,19 +106,19 @@ function ItemBody({
               </dd>
             </div>
             <div className="flex gap-2 flex-wrap">
-              <dt className="text-[var(--text-secondary)] w-44 shrink-0">
+              <dt className="text-(--text-secondary) w-44 shrink-0">
                 Health data requests
               </dt>
-              <dd className="text-[var(--text-primary)]">
+              <dd className="text-(--text-primary)">
                 {items.a.healthDataRequests} received,{" "}
                 {items.a.healthDataRequestsAnswered} answered (Art. 69)
               </dd>
             </div>
             <div className="flex gap-2 flex-wrap">
-              <dt className="text-[var(--text-secondary)] w-44 shrink-0">
+              <dt className="text-(--text-secondary) w-44 shrink-0">
                 Results communicated
               </dt>
-              <dd className="text-[var(--text-primary)]">
+              <dd className="text-(--text-primary)">
                 {items.a.resultsCommunicated}
               </dd>
             </div>
@@ -132,17 +130,17 @@ function ItemBody({
       return (
         <>
           {items.b.measures.length === 0 ? (
-            <p className="text-sm text-[var(--text-secondary)]">
+            <p className="text-sm text-(--text-secondary)">
               No measure taken in the period.
             </p>
           ) : (
             <ul className="text-sm space-y-1">
               {items.b.measures.map((m) => (
-                <li key={m.permitId} className="text-[var(--text-primary)]">
+                <li key={m.permitId} className="text-(--text-primary)">
                   <span className="font-mono">{m.permitId}</span> of{" "}
                   {m.applicant ?? "?"} revoked on {day(m.revokedAt)}
                   {m.reason && (
-                    <span className="text-[var(--text-secondary)]">
+                    <span className="text-(--text-secondary)">
                       : {m.reason}
                     </span>
                   )}
@@ -174,7 +172,7 @@ function ItemBody({
           {items.c.byUser.length > 0 && (
             <div className="overflow-x-auto mt-3">
               <table className="w-full text-sm">
-                <thead className="text-xs text-[var(--text-secondary)] text-left">
+                <thead className="text-xs text-(--text-secondary) text-left">
                   <tr>
                     <th className="py-1 pr-3">Data user</th>
                     <th className="py-1 pr-3">Events</th>
@@ -186,9 +184,9 @@ function ItemBody({
                   {items.c.byUser.map((u) => (
                     <tr
                       key={u.consumer ?? "unknown"}
-                      className="border-t border-[var(--border)]"
+                      className="border-t border-(--border)"
                     >
-                      <td className="py-1 pr-3 text-[var(--text-primary)]">
+                      <td className="py-1 pr-3 text-(--text-primary)">
                         {u.consumerName ?? u.consumer ?? "unknown"}
                       </td>
                       <td className="py-1 pr-3 tabular-nums">{u.events}</td>
@@ -216,10 +214,7 @@ function ItemBody({
           {items.h.detail.length > 0 && (
             <ul className="text-sm mt-3 space-y-1">
               {items.h.detail.map((d) => (
-                <li
-                  key={d.applicationId}
-                  className="text-[var(--text-primary)]"
-                >
+                <li key={d.applicationId} className="text-(--text-primary)">
                   <span className="font-mono">{d.applicationId}</span> (
                   {d.applicant ?? "?"}): applied {day(d.submittedAt)}, first
                   access {day(d.accessAt)}, {d.days} days
@@ -236,7 +231,7 @@ function ItemBody({
           <div className="flex items-center gap-3 flex-wrap">
             <Stat label="Labels" value={items.i.total} />
             <div className="text-sm">
-              <div className="text-xs text-[var(--text-secondary)] mb-1">
+              <div className="text-xs text-(--text-secondary) mb-1">
                 By EEHRxF coverage
               </div>
               <Pairs map={items.i.byCoverage} />
@@ -245,7 +240,7 @@ function ItemBody({
           {items.i.labels.length > 0 && (
             <div className="overflow-x-auto mt-3">
               <table className="w-full text-sm">
-                <thead className="text-xs text-[var(--text-secondary)] text-left">
+                <thead className="text-xs text-(--text-secondary) text-left">
                   <tr>
                     <th className="py-1 pr-3">Dataset</th>
                     <th className="py-1 pr-3">Holder</th>
@@ -260,9 +255,9 @@ function ItemBody({
                   {items.i.labels.map((l) => (
                     <tr
                       key={l.credentialId}
-                      className="border-t border-[var(--border)]"
+                      className="border-t border-(--border)"
                     >
-                      <td className="py-1 pr-3 text-[var(--text-primary)]">
+                      <td className="py-1 pr-3 text-(--text-primary)">
                         {l.datasetId ?? l.credentialId}
                       </td>
                       <td className="py-1 pr-3">{l.holder ?? "—"}</td>
@@ -312,9 +307,9 @@ function ItemBody({
             : items[itemKey].entries;
       const note = items[itemKey].note;
       return list.length === 0 ? (
-        <p className="text-sm text-[var(--text-secondary)]">{note}</p>
+        <p className="text-sm text-(--text-secondary)">{note}</p>
       ) : (
-        <ul className="text-sm list-disc pl-5 text-[var(--text-primary)]">
+        <ul className="text-sm list-disc pl-5 text-(--text-primary)">
           {list.map((x) => (
             <li key={x}>{x}</li>
           ))}
@@ -360,19 +355,19 @@ export default function ActivityReportPage() {
   const stamp = report ? report.period.to.slice(0, 10) : "";
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <div className="mb-8">
           <h1 className="page-header flex items-center gap-2">
             <FileBarChart size={28} />
             Activity report of the health data access body
           </h1>
-          <p className="text-[var(--text-secondary)] text-lg mt-1">
+          <p className="text-(--text-secondary) text-lg mt-1">
             Regulation (EU) 2025/327, Art. 59 · public, no sign-in
           </p>
         </div>
 
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 mb-8 text-sm text-[var(--text-secondary)] space-y-2">
+        <div className="rounded-lg border border-(--border) bg-(--surface) p-4 mb-8 text-sm text-(--text-secondary) space-y-2">
           <p>
             Every two years the health data access body publishes a report on
             its activity with the items of Art. 59(1)(a) to (k): the
@@ -387,14 +382,14 @@ export default function ActivityReportPage() {
             Participants are fictional. Decisions are taken on{" "}
             <Link
               href="/compliance"
-              className="font-bold text-[var(--accent)] hover:underline"
+              className="font-bold text-(--accent) hover:underline"
             >
               EHDS Approval
             </Link>{" "}
             and published in the{" "}
             <Link
               href="/permits"
-              className="font-bold text-[var(--accent)] hover:underline"
+              className="font-bold text-(--accent) hover:underline"
             >
               permits register
             </Link>
@@ -403,12 +398,12 @@ export default function ActivityReportPage() {
         </div>
 
         {loading ? (
-          <p className="text-[var(--text-secondary)] text-sm">
+          <p className="text-(--text-secondary) text-sm">
             Generating the report…
           </p>
         ) : error ? (
           <div className="text-sm" data-testid="report-error">
-            <p className="text-[var(--text-secondary)]">
+            <p className="text-(--text-secondary)">
               The report could not be generated.
             </p>
             <p className="text-red-300 mt-1">{error}</p>
@@ -419,13 +414,13 @@ export default function ActivityReportPage() {
               className="flex flex-wrap items-center gap-3 mb-6 text-sm"
               data-testid="report-period"
             >
-              <span className="text-[var(--text-secondary)]">
+              <span className="text-(--text-secondary)">
                 Period{" "}
-                <span className="text-[var(--text-primary)]">
+                <span className="text-(--text-primary)">
                   {day(report.period.from)}
                 </span>{" "}
                 to{" "}
-                <span className="text-[var(--text-primary)]">
+                <span className="text-(--text-primary)">
                   {day(report.period.to)}
                 </span>
                 {" · "}generated {day(report.generatedAt)}
@@ -448,7 +443,7 @@ export default function ActivityReportPage() {
                     toMarkdown(report),
                   )
                 }
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-2)] text-[var(--text-primary)]"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm border border-(--border) bg-(--surface) hover:bg-(--surface-2) text-(--text-primary)"
               >
                 <Download size={14} /> Markdown
               </button>
@@ -461,7 +456,7 @@ export default function ActivityReportPage() {
                     JSON.stringify(report, null, 2),
                   )
                 }
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--surface-2)] text-[var(--text-primary)]"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-sm border border-(--border) bg-(--surface) hover:bg-(--surface-2) text-(--text-primary)"
               >
                 <Download size={14} /> JSON
               </button>
@@ -471,11 +466,11 @@ export default function ActivityReportPage() {
               {ITEM_KEYS.map((k) => (
                 <section
                   key={k}
-                  className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4"
+                  className="rounded-lg border border-(--border) bg-(--surface) p-4"
                   data-testid={`report-item-${k}`}
                 >
-                  <h2 className="text-base font-semibold text-[var(--text-primary)] mb-3 flex items-baseline gap-2">
-                    <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border border-[var(--role-hdab-border)]">
+                  <h2 className="text-base font-semibold text-(--text-primary) mb-3 flex items-baseline gap-2">
+                    <span className="font-mono text-xs px-1.5 py-0.5 rounded-sm bg-(--role-hdab-bg) text-(--role-hdab-text) border border-(--role-hdab-border)">
                       ({k})
                     </span>
                     {report.items[k].title}

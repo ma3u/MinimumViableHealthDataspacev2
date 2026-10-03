@@ -42,39 +42,35 @@ export default function Home() {
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors touch-target-sm"
+            className="text-(--text-secondary) hover:text-(--text-primary) transition-colors touch-target-sm"
             aria-label="View source on GitHub"
           >
             <Github size={24} aria-hidden="true" />
           </a>
         </div>
 
-        <p className="text-[var(--text-primary)] text-base sm:text-lg leading-relaxed max-w-3xl mb-4">
+        <p className="text-(--text-primary) text-base sm:text-lg leading-relaxed max-w-3xl mb-4">
           This interactive demo is an{" "}
-          <strong className="text-[var(--accent)]">
-            EHDS integration platform
-          </strong>{" "}
+          <strong className="text-(--accent)">EHDS integration platform</strong>{" "}
           you can run, fork, and wire into your own stack. It shows how the{" "}
           <a
             href="https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:text-[var(--accent)] transition-colors"
+            className="underline underline-offset-2 hover:text-(--accent) transition-colors"
           >
             EHDS regulation
           </a>{" "}
           enables secure cross-border health data sharing across Europe —
           publishing clinical datasets, negotiating access contracts under ODRL,
           and transferring FHIR / OMOP data through the{" "}
-          <strong className="text-[var(--text-primary)]">
-            Dataspace Protocol
-          </strong>
-          . Every flow is exposed as a REST API you can exercise from Swagger,
+          <strong className="text-(--text-primary)">Dataspace Protocol</strong>.
+          Every flow is exposed as a REST API you can exercise from Swagger,
           Scalar, Bruno, or your own client.
         </p>
 
-        <div className="flex flex-wrap gap-3 text-sm text-[var(--text-secondary)]">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-2)]/60 border border-[var(--border)]">
+        <div className="flex flex-wrap gap-3 text-sm text-(--text-secondary)">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
             <Heart
               size={14}
               className="text-green-800 dark:text-green-300"
@@ -82,7 +78,7 @@ export default function Home() {
             />
             <span>127 synthetic patients</span>
           </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-2)]/60 border border-[var(--border)]">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
             <Network
               size={14}
               className="text-blue-800 dark:text-blue-300"
@@ -90,7 +86,7 @@ export default function Home() {
             />
             <span>5,300+ graph nodes</span>
           </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-2)]/60 border border-[var(--border)]">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
             <Globe
               size={14}
               className="text-teal-800 dark:text-teal-300"
@@ -98,7 +94,7 @@ export default function Home() {
             />
             <span>7 demo personas</span>
           </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--surface-2)]/60 border border-[var(--border)]">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
             <Lock
               size={14}
               className="text-purple-800 dark:text-purple-300"
@@ -122,32 +118,31 @@ export default function Home() {
           Why the European Health Data Space Matters
         </h2>
 
-        <p className="text-[var(--text-secondary)] text-sm leading-relaxed max-w-3xl mb-5">
+        <p className="text-(--text-secondary) text-sm leading-relaxed max-w-3xl mb-5">
           The{" "}
           <a
             href="https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--accent)] underline underline-offset-2 hover:text-[var(--text-primary)] transition-colors"
+            className="text-(--accent) underline underline-offset-2 hover:text-(--text-primary) transition-colors"
           >
             EHDS regulation
           </a>{" "}
           creates a unified framework for sharing health data across EU member
           states while safeguarding patient rights under GDPR. It distinguishes
-          between{" "}
-          <strong className="text-[var(--text-primary)]">primary use</strong>{" "}
+          between <strong className="text-(--text-primary)">primary use</strong>{" "}
           (patients accessing their own records) and{" "}
-          <strong className="text-[var(--text-primary)]">secondary use</strong>{" "}
+          <strong className="text-(--text-primary)">secondary use</strong>{" "}
           (research, policy, innovation), each with strict governance and
           oversight.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="rounded-xl border border-[var(--role-user-border)] bg-[var(--role-user-bg)] p-4 sm:p-5">
+          <div className="rounded-xl border border-(--role-user-border) bg-(--role-user-bg) p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <FlaskConical
                 size={18}
-                className="text-[var(--role-user-text)]"
+                className="text-(--role-user-text)"
                 aria-hidden="true"
               />
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
@@ -170,11 +165,11 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-[var(--role-holder-border)] bg-[var(--role-holder-bg)] p-4 sm:p-5">
+          <div className="rounded-xl border border-(--role-holder-border) bg-(--role-holder-bg) p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <BookOpen
                 size={18}
-                className="text-[var(--role-holder-text)]"
+                className="text-(--role-holder-text)"
                 aria-hidden="true"
               />
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
@@ -196,11 +191,11 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-[var(--role-patient-border)] bg-[var(--role-patient-bg)] p-4 sm:p-5">
+          <div className="rounded-xl border border-(--role-patient-border) bg-(--role-patient-bg) p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <Heart
                 size={18}
-                className="text-[var(--role-patient-text)]"
+                className="text-(--role-patient-text)"
                 aria-hidden="true"
               />
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
@@ -222,11 +217,11 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="rounded-xl border border-[var(--role-hdab-border)] bg-[var(--role-hdab-bg)] p-4 sm:p-5">
+          <div className="rounded-xl border border-(--role-hdab-border) bg-(--role-hdab-bg) p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <ShieldCheck
                 size={18}
-                className="text-[var(--role-hdab-text)]"
+                className="text-(--role-hdab-text)"
                 aria-hidden="true"
               />
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
@@ -258,7 +253,7 @@ export default function Home() {
         <h2 id="standards-title" className="text-lg sm:text-xl font-bold mb-2">
           Standards & Interoperability
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm leading-relaxed max-w-3xl mb-5">
+        <p className="text-(--text-secondary) text-sm leading-relaxed max-w-3xl mb-5">
           The EHDS builds on established open standards to ensure
           interoperability across all EU member states. This demo implements
           each standard end-to-end.
@@ -306,7 +301,7 @@ export default function Home() {
               abbr: "DCP",
               desc: "Verifiable credential issuance and presentation. Enables trust anchors, membership credentials, and data access permits without central authority.",
               href: "https://docs.internationaldataspaces.org/ids-knowledgebase/decentralized-claims-protocol",
-              color: "border-purple-500/50 text-[var(--accent)]",
+              color: "border-purple-500/50 text-(--accent)",
             },
           ].map(({ name, abbr, desc, href, color }) => (
             <a
@@ -314,7 +309,7 @@ export default function Home() {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className={`group flex flex-col rounded-xl border p-4 sm:p-5 transition-colors hover:bg-[var(--surface-2)]/50 ${
+              className={`group flex flex-col rounded-xl border p-4 sm:p-5 transition-colors hover:bg-(--surface-2)/50 ${
                 color.split(" ")[0]
               }`}
             >
@@ -326,7 +321,7 @@ export default function Home() {
               </p>
               <ExternalLink
                 size={14}
-                className="mt-3 text-[var(--text-secondary)] group-hover:text-[var(--text-secondary)] transition-colors"
+                className="mt-3 text-(--text-secondary) group-hover:text-(--text-secondary) transition-colors"
                 aria-hidden="true"
               />
             </a>
@@ -343,11 +338,11 @@ export default function Home() {
         <h2 id="learn-title" className="text-lg sm:text-xl font-bold mb-2">
           Learn the New Principles: Dataspaces & Data Mesh
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm leading-relaxed max-w-3xl mb-5">
+        <p className="text-(--text-secondary) text-sm leading-relaxed max-w-3xl mb-5">
           Health data is no longer moved by point-to-point integrations. The
           EHDS is built on{" "}
-          <strong className="text-[var(--text-primary)]">dataspace</strong> and{" "}
-          <strong className="text-[var(--text-primary)]">data mesh</strong>{" "}
+          <strong className="text-(--text-primary)">dataspace</strong> and{" "}
+          <strong className="text-(--text-primary)">data mesh</strong>{" "}
           principles: sovereign participants own their <em>data domains</em>,
           publish them as <em>data products</em>, and exchange them through open
           protocols instead of bulk copies. Use this demo to get hands-on with
@@ -355,48 +350,46 @@ export default function Home() {
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="rounded-xl border border-layer2/50 bg-[var(--surface-2)]/40 p-4 sm:p-5">
+          <div className="rounded-xl border border-layer2/50 bg-(--surface-2)/40 p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <Boxes
                 size={18}
                 className="text-teal-800 dark:text-teal-300"
                 aria-hidden="true"
               />
-              <h3 className="font-semibold text-[var(--text-primary)] text-sm sm:text-base">
+              <h3 className="font-semibold text-(--text-primary) text-sm sm:text-base">
                 Data Domains & Data Products
               </h3>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-sm text-(--text-secondary) leading-relaxed">
               Each hospital, registry, or research org is a domain that owns its
               data end-to-end. A{" "}
-              <strong className="text-[var(--text-primary)]">
-                data product
-              </strong>{" "}
+              <strong className="text-(--text-primary)">data product</strong>{" "}
               packages a dataset with metadata (HealthDCAT-AP), contract terms
               (ODRL), and an access endpoint (FHIR / OMOP). Browse them in the
               catalogue to see what federated ownership actually looks like.
             </p>
             <Link
               href="/catalog"
-              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-(--accent) hover:underline"
             >
               Explore the catalogue{" "}
               <ExternalLink size={12} aria-hidden="true" />
             </Link>
           </div>
 
-          <div className="rounded-xl border border-layer1/50 bg-[var(--surface-2)]/40 p-4 sm:p-5">
+          <div className="rounded-xl border border-layer1/50 bg-(--surface-2)/40 p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <Workflow
                 size={18}
                 className="text-blue-800 dark:text-blue-300"
                 aria-hidden="true"
               />
-              <h3 className="font-semibold text-[var(--text-primary)] text-sm sm:text-base">
+              <h3 className="font-semibold text-(--text-primary) text-sm sm:text-base">
                 Dataspace Protocol (DSP) — Exchange
               </h3>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-sm text-(--text-secondary) leading-relaxed">
               DSP 2025-1 standardises the four exchange phases —{" "}
               <em>catalogue → negotiation → agreement → transfer</em> — so any
               two participants can trade data without bilateral glue code. Walk
@@ -405,30 +398,30 @@ export default function Home() {
             </p>
             <Link
               href="/negotiate"
-              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-(--accent) hover:underline"
             >
               Run a DSP negotiation{" "}
               <ExternalLink size={12} aria-hidden="true" />
             </Link>
           </div>
 
-          <div className="rounded-xl border border-purple-500/40 bg-[var(--surface-2)]/40 p-4 sm:p-5">
+          <div className="rounded-xl border border-purple-500/40 bg-(--surface-2)/40 p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <KeyRound
                 size={18}
                 className="text-purple-800 dark:text-purple-300"
                 aria-hidden="true"
               />
-              <h3 className="font-semibold text-[var(--text-primary)] text-sm sm:text-base">
+              <h3 className="font-semibold text-(--text-primary) text-sm sm:text-base">
                 W3C DID & Verifiable Credentials — Authentication
               </h3>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-sm text-(--text-secondary) leading-relaxed">
               Participants identify themselves with{" "}
-              <strong className="text-[var(--text-primary)]">did:web</strong>{" "}
+              <strong className="text-(--text-primary)">did:web</strong>{" "}
               identifiers and prove membership, HDAB approval, or researcher
               status with{" "}
-              <strong className="text-[var(--text-primary)]">
+              <strong className="text-(--text-primary)">
                 W3C Verifiable Credentials
               </strong>{" "}
               issued via the Decentralised Claims Protocol (DCP). No central
@@ -437,28 +430,26 @@ export default function Home() {
             </p>
             <Link
               href="/credentials"
-              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-(--accent) hover:underline"
             >
               Inspect credentials <ExternalLink size={12} aria-hidden="true" />
             </Link>
           </div>
 
-          <div className="rounded-xl border border-layer4/50 bg-[var(--surface-2)]/40 p-4 sm:p-5">
+          <div className="rounded-xl border border-layer4/50 bg-(--surface-2)/40 p-4 sm:p-5">
             <div className="flex items-center gap-2 mb-2">
               <Scale
                 size={18}
                 className="text-amber-800 dark:text-amber-300"
                 aria-hidden="true"
               />
-              <h3 className="font-semibold text-[var(--text-primary)] text-sm sm:text-base">
+              <h3 className="font-semibold text-(--text-primary) text-sm sm:text-base">
                 W3C ODRL Policies — Authorization
               </h3>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+            <p className="text-sm text-(--text-secondary) leading-relaxed">
               Every data product is governed by a machine-readable{" "}
-              <strong className="text-[var(--text-primary)]">
-                ODRL 2.2 policy
-              </strong>{" "}
+              <strong className="text-(--text-primary)">ODRL 2.2 policy</strong>{" "}
               declaring permissions, prohibitions, and duties (purpose limits,
               retention, geographic scope, anonymisation). Policies travel with
               the contract and are enforced at the data plane — not as free-text
@@ -466,7 +457,7 @@ export default function Home() {
             </p>
             <Link
               href="/admin/policies"
-              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[var(--accent)] hover:underline"
+              className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-(--accent) hover:underline"
             >
               Edit ODRL policies <ExternalLink size={12} aria-hidden="true" />
             </Link>
@@ -486,18 +477,18 @@ export default function Home() {
         >
           Integrate It: REST API Tools
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm leading-relaxed max-w-3xl mb-5">
+        <p className="text-(--text-secondary) text-sm leading-relaxed max-w-3xl mb-5">
           All 36 endpoints are documented in{" "}
-          <strong className="text-[var(--text-primary)]">OpenAPI 3.1</strong>{" "}
-          and can be exercised from three interactive explorers, a portable
-          Bruno collection, or any HTTP client. Use them to test flows, build
+          <strong className="text-(--text-primary)">OpenAPI 3.1</strong> and can
+          be exercised from three interactive explorers, a portable Bruno
+          collection, or any HTTP client. Use them to test flows, build
           integrations, or wire the platform into a downstream system.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Link
             href="/docs/developer/reference"
-            className="group flex flex-col rounded-xl border border-layer1/50 bg-[var(--surface-2)]/40 p-4 sm:p-5 transition-colors hover:bg-[var(--surface-2)]/70"
+            className="group flex flex-col rounded-xl border border-layer1/50 bg-(--surface-2)/40 p-4 sm:p-5 transition-colors hover:bg-(--surface-2)/70"
           >
             <div className="flex items-center gap-2 mb-2">
               <Code2
@@ -505,24 +496,24 @@ export default function Home() {
                 className="text-blue-800 dark:text-blue-300"
                 aria-hidden="true"
               />
-              <span className="font-semibold text-sm text-[var(--text-primary)]">
+              <span className="font-semibold text-sm text-(--text-primary)">
                 Scalar Reference
               </span>
             </div>
-            <p className="flex-1 text-xs text-[var(--text-secondary)] leading-relaxed">
+            <p className="flex-1 text-xs text-(--text-secondary) leading-relaxed">
               Modern API reference with try-it-now requests, language samples,
               and schema navigation. Powered by Scalar.
             </p>
             <ExternalLink
               size={14}
-              className="mt-3 text-[var(--text-secondary)]"
+              className="mt-3 text-(--text-secondary)"
               aria-hidden="true"
             />
           </Link>
 
           <Link
             href="/docs/developer/api"
-            className="group flex flex-col rounded-xl border border-layer3/50 bg-[var(--surface-2)]/40 p-4 sm:p-5 transition-colors hover:bg-[var(--surface-2)]/70"
+            className="group flex flex-col rounded-xl border border-layer3/50 bg-(--surface-2)/40 p-4 sm:p-5 transition-colors hover:bg-(--surface-2)/70"
           >
             <div className="flex items-center gap-2 mb-2">
               <Code2
@@ -530,24 +521,24 @@ export default function Home() {
                 className="text-green-800 dark:text-green-300"
                 aria-hidden="true"
               />
-              <span className="font-semibold text-sm text-[var(--text-primary)]">
+              <span className="font-semibold text-sm text-(--text-primary)">
                 Swagger UI
               </span>
             </div>
-            <p className="flex-1 text-xs text-[var(--text-secondary)] leading-relaxed">
+            <p className="flex-1 text-xs text-(--text-secondary) leading-relaxed">
               Classic OpenAPI explorer for testing endpoints against the live
               instance with OIDC auth.
             </p>
             <ExternalLink
               size={14}
-              className="mt-3 text-[var(--text-secondary)]"
+              className="mt-3 text-(--text-secondary)"
               aria-hidden="true"
             />
           </Link>
 
           <a
             href="/openapi.yaml"
-            className="group flex flex-col rounded-xl border border-layer2/50 bg-[var(--surface-2)]/40 p-4 sm:p-5 transition-colors hover:bg-[var(--surface-2)]/70"
+            className="group flex flex-col rounded-xl border border-layer2/50 bg-(--surface-2)/40 p-4 sm:p-5 transition-colors hover:bg-(--surface-2)/70"
             download="mvhdv2-openapi.yaml"
           >
             <div className="flex items-center gap-2 mb-2">
@@ -556,17 +547,17 @@ export default function Home() {
                 className="text-teal-800 dark:text-teal-300"
                 aria-hidden="true"
               />
-              <span className="font-semibold text-sm text-[var(--text-primary)]">
+              <span className="font-semibold text-sm text-(--text-primary)">
                 OpenAPI 3.1 Spec
               </span>
             </div>
-            <p className="flex-1 text-xs text-[var(--text-secondary)] leading-relaxed">
+            <p className="flex-1 text-xs text-(--text-secondary) leading-relaxed">
               Raw YAML spec for codegen, Postman import, or custom tooling.
               Source of truth for every route.
             </p>
             <ExternalLink
               size={14}
-              className="mt-3 text-[var(--text-secondary)]"
+              className="mt-3 text-(--text-secondary)"
               aria-hidden="true"
             />
           </a>
@@ -575,7 +566,7 @@ export default function Home() {
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/bruno/MVHDv2"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex flex-col rounded-xl border border-layer5/50 bg-[var(--surface-2)]/40 p-4 sm:p-5 transition-colors hover:bg-[var(--surface-2)]/70"
+            className="group flex flex-col rounded-xl border border-layer5/50 bg-(--surface-2)/40 p-4 sm:p-5 transition-colors hover:bg-(--surface-2)/70"
           >
             <div className="flex items-center gap-2 mb-2">
               <Github
@@ -583,17 +574,17 @@ export default function Home() {
                 className="text-purple-800 dark:text-purple-300"
                 aria-hidden="true"
               />
-              <span className="font-semibold text-sm text-[var(--text-primary)]">
+              <span className="font-semibold text-sm text-(--text-primary)">
                 Bruno Collection
               </span>
             </div>
-            <p className="flex-1 text-xs text-[var(--text-secondary)] leading-relaxed">
+            <p className="flex-1 text-xs text-(--text-secondary) leading-relaxed">
               Git-friendly, offline-capable API client. Clone the repo and run
               every DSP, FHIR, and OMOP journey locally.
             </p>
             <ExternalLink
               size={14}
-              className="mt-3 text-[var(--text-secondary)]"
+              className="mt-3 text-(--text-secondary)"
               aria-hidden="true"
             />
           </a>
@@ -609,7 +600,7 @@ export default function Home() {
         <h2 id="workflow-title" className="text-lg sm:text-xl font-bold mb-2">
           How the EHDS Demo Works
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-6 max-w-2xl">
+        <p className="text-(--text-secondary) text-sm mb-6 max-w-2xl">
           Sign in as one of 5 personas and follow their journey through the
           dataspace. Each role sees different pages, data, and actions,
           mirroring real EHDS workflows.
@@ -622,11 +613,11 @@ export default function Home() {
       <section aria-labelledby="explore-title">
         <h2
           id="explore-title"
-          className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1"
+          className="text-sm font-semibold text-(--text-secondary) uppercase tracking-wider mb-1"
         >
           Explore
         </h2>
-        <p className="text-xs text-[var(--text-secondary)] mb-3 max-w-2xl">
+        <p className="text-xs text-(--text-secondary) mb-3 max-w-2xl">
           Visualise the 5-layer knowledge graph, browse FHIR clinical data,
           query OMOP analytics, and search the HealthDCAT-AP dataset catalogue.
           All publicly accessible without sign-in.
@@ -639,11 +630,11 @@ export default function Home() {
       <section aria-labelledby="exchange-title">
         <h2
           id="exchange-title"
-          className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1"
+          className="text-sm font-semibold text-(--text-secondary) uppercase tracking-wider mb-1"
         >
           Exchange · Transfer · Negotiate
         </h2>
-        <p className="text-xs text-[var(--text-secondary)] mb-3 max-w-2xl">
+        <p className="text-xs text-(--text-secondary) mb-3 max-w-2xl">
           The DSP data exchange lifecycle: hospitals publish datasets,
           researchers discover and request access, contracts are negotiated
           under ODRL policies, and approved FHIR/OMOP data is transferred
@@ -657,11 +648,11 @@ export default function Home() {
       <section aria-labelledby="govern-title">
         <h2
           id="govern-title"
-          className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1"
+          className="text-sm font-semibold text-(--text-secondary) uppercase tracking-wider mb-1"
         >
           Govern · Manage · Docs
         </h2>
-        <p className="text-xs text-[var(--text-secondary)] mb-3 max-w-2xl">
+        <p className="text-xs text-(--text-secondary) mb-3 max-w-2xl">
           EHDS compliance monitoring, DCP verifiable credentials, participant
           onboarding with DID:web identities, portal administration, and
           architecture documentation.
@@ -682,7 +673,7 @@ export default function Home() {
         style={{ animationDelay: "1800ms" }}
         aria-labelledby="feedback-title"
       >
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-6 text-center">
+        <div className="rounded-xl border border-(--border) bg-(--surface)/60 p-6 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <MessageCircle
               size={18}
@@ -691,12 +682,12 @@ export default function Home() {
             />
             <h2
               id="feedback-title"
-              className="text-sm sm:text-base font-semibold text-[var(--text-primary)]"
+              className="text-sm sm:text-base font-semibold text-(--text-primary)"
             >
               Feedback & Contributions
             </h2>
           </div>
-          <p className="text-sm text-[var(--text-secondary)] mb-4 max-w-lg mx-auto">
+          <p className="text-sm text-(--text-secondary) mb-4 max-w-lg mx-auto">
             Found a bug, have a feature idea, or want to discuss the EHDS
             architecture? We&apos;d love to hear from you.
           </p>
@@ -705,7 +696,7 @@ export default function Home() {
               href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-[var(--surface-2)] text-[var(--text-primary)] border border-[var(--border-ui)] hover:border-layer1 hover:text-[var(--text-primary)] transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-(--surface-2) text-(--text-primary) border border-(--border-ui) hover:border-layer1 hover:text-(--text-primary) transition-colors"
             >
               <Github size={16} aria-hidden="true" />
               Report an Issue
@@ -714,7 +705,7 @@ export default function Home() {
               href="https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-[var(--surface-2)] text-[var(--text-primary)] border border-[var(--border-ui)] hover:border-layer2 hover:text-[var(--text-primary)] transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-(--surface-2) text-(--text-primary) border border-(--border-ui) hover:border-layer2 hover:text-(--text-primary) transition-colors"
             >
               <MessageCircle size={16} aria-hidden="true" />
               Join the Discussion
@@ -724,7 +715,7 @@ export default function Home() {
       </section>
 
       {/* ── Footer ────────────────────────────────────────────────────────── */}
-      <footer className="mt-8 sm:mt-10 pt-6 border-t border-[var(--border)] text-center text-xs text-[var(--text-secondary)]">
+      <footer className="mt-8 sm:mt-10 pt-6 border-t border-(--border) text-center text-xs text-(--text-secondary)">
         <p>
           Reference implementation. All data is synthetic. No real patient
           records.
@@ -734,7 +725,7 @@ export default function Home() {
             href="https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[var(--text-secondary)] transition-colors"
+            className="hover:text-(--text-secondary) transition-colors"
           >
             EHDS Art.&nbsp;3-12, 46-51
           </a>
@@ -743,7 +734,7 @@ export default function Home() {
             href="https://hl7.org/fhir/R4/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[var(--text-secondary)] transition-colors"
+            className="hover:text-(--text-secondary) transition-colors"
           >
             FHIR R4
           </a>
@@ -752,7 +743,7 @@ export default function Home() {
             href="https://ohdsi.github.io/CommonDataModel/"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[var(--text-secondary)] transition-colors"
+            className="hover:text-(--text-secondary) transition-colors"
           >
             OMOP CDM v5.4
           </a>
@@ -761,7 +752,7 @@ export default function Home() {
             href="https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[var(--text-secondary)] transition-colors"
+            className="hover:text-(--text-secondary) transition-colors"
           >
             DSP 2025-1
           </a>
@@ -770,7 +761,7 @@ export default function Home() {
             href="https://docs.internationaldataspaces.org/ids-knowledgebase/decentralized-claims-protocol"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[var(--text-secondary)] transition-colors"
+            className="hover:text-(--text-secondary) transition-colors"
           >
             DCP v1.0
           </a>

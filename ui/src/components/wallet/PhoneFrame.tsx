@@ -143,7 +143,7 @@ export function WalletFlow({
     <div
       role="group"
       aria-label={ariaLabel}
-      className="relative w-[clamp(228px,27vw,268px)] aspect-[9/19.5] rounded-[2.6rem] border-[7px] border-gray-900 bg-white shadow-2xl overflow-hidden flex flex-col"
+      className="relative w-[clamp(228px,27vw,268px)] aspect-9/19.5 rounded-[2.6rem] border-[7px] border-gray-900 bg-white shadow-2xl overflow-hidden flex flex-col"
     >
       <style>{`
         @keyframes wsimReveal { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }

@@ -22,8 +22,7 @@ export function ParticipantTopologySection({
   );
   const sev = SEVERITY_STYLES[participant.health];
   const roleClass =
-    ROLE_COLORS[participant.role] ||
-    "bg-gray-500/20 text-[var(--text-secondary)]";
+    ROLE_COLORS[participant.role] || "bg-gray-500/20 text-(--text-secondary)";
 
   return (
     <div
@@ -32,26 +31,23 @@ export function ParticipantTopologySection({
       {/* Header bar — click to expand/collapse */}
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[var(--surface-2)]/40 transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-(--surface-2)/40 transition-colors"
       >
         {expanded ? (
-          <ChevronDown
-            size={14}
-            className="text-[var(--text-secondary)] shrink-0"
-          />
+          <ChevronDown size={14} className="text-(--text-secondary) shrink-0" />
         ) : (
           <ChevronRight
             size={14}
-            className="text-[var(--text-secondary)] shrink-0"
+            className="text-(--text-secondary) shrink-0"
           />
         )}
         <SeverityDot severity={participant.health} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-sm text-[var(--text-primary)]">
+            <span className="font-semibold text-sm text-(--text-primary)">
               {participant.displayName}
             </span>
-            <span className="text-xs text-[var(--text-secondary)]">
+            <span className="text-xs text-(--text-secondary)">
               {participant.organization}
             </span>
           </div>
@@ -66,18 +62,18 @@ export function ParticipantTopologySection({
         >
           {participant.role}
         </span>
-        <span className="text-[10px] text-[var(--text-secondary)] shrink-0">
+        <span className="text-[10px] text-(--text-secondary) shrink-0">
           {participant.components.length} services
         </span>
       </button>
 
       {/* Expanded: DID + component grid */}
       {expanded && (
-        <div className="px-4 pb-4 pt-1 border-t border-[var(--border)]/60">
-          <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)] mb-3">
+        <div className="px-4 pb-4 pt-1 border-t border-(--border)/60">
+          <div className="flex items-center gap-4 text-[11px] text-(--text-secondary) mb-3">
             <span>
               DID:{" "}
-              <span className="font-mono text-[var(--text-secondary)]">
+              <span className="font-mono text-(--text-secondary)">
                 {participant.did.length > 40
                   ? participant.did.slice(0, 40) + "…"
                   : participant.did}
@@ -88,8 +84,8 @@ export function ParticipantTopologySection({
               <span
                 className={
                   participant.state === "CREATED"
-                    ? "text-[var(--success-text)]"
-                    : "text-[var(--warning-text)]"
+                    ? "text-(--success-text)"
+                    : "text-(--warning-text)"
                 }
               >
                 {participant.state}

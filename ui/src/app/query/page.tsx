@@ -112,11 +112,11 @@ interface NlqResult {
 }
 
 const LAYER_ACCENT: Record<GraphLayerId, string> = {
-  L1: "bg-[var(--accent-l1)]/20 text-[var(--accent-l1)] border-[var(--accent-l1)]/50",
-  L2: "bg-[var(--accent-l2)]/20 text-[var(--accent-l2)] border-[var(--accent-l2)]/50",
-  L3: "bg-[var(--accent-l3)]/20 text-[var(--accent-l3)] border-[var(--accent-l3)]/50",
-  L4: "bg-[var(--accent-l4)]/20 text-[var(--accent-l4)] border-[var(--accent-l4)]/50",
-  L5: "bg-[var(--accent-l5)]/20 text-[var(--accent-l5)] border-[var(--accent-l5)]/50",
+  L1: "bg-(--accent-l1)/20 text-(--accent-l1) border-(--accent-l1)/50",
+  L2: "bg-(--accent-l2)/20 text-(--accent-l2) border-(--accent-l2)/50",
+  L3: "bg-(--accent-l3)/20 text-(--accent-l3) border-(--accent-l3)/50",
+  L4: "bg-(--accent-l4)/20 text-(--accent-l4) border-(--accent-l4)/50",
+  L5: "bg-(--accent-l5)/20 text-(--accent-l5) border-(--accent-l5)/50",
 };
 
 const ALL_LAYERS: GraphLayerId[] = ["L1", "L2", "L3", "L4", "L5"];
@@ -276,19 +276,19 @@ export default function NlqPage() {
       : [];
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text-primary)]">
+    <div className="min-h-screen bg-(--bg) text-(--text-primary)">
       {/* Header with federated stats */}
-      <div className="border-b border-[var(--border)] bg-[var(--surface)]/50">
+      <div className="border-b border-(--border) bg-(--surface)/50">
         <div className="max-w-6xl mx-auto px-6 py-5">
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Search size={20} className="text-[var(--accent-l1)]" />
+                <Search size={20} className="text-(--accent-l1)" />
                 <h1 className="text-xl font-semibold">
                   Natural Language Query
                 </h1>
               </div>
-              <p className="text-sm text-[var(--text-secondary)] mt-1">
+              <p className="text-sm text-(--text-secondary) mt-1">
                 Ask questions about the Health Dataspace knowledge graph in
                 plain language. The query engine translates your question into
                 Cypher and returns structured results from all five graph
@@ -297,14 +297,14 @@ export default function NlqPage() {
               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mt-2">
                 <a
                   href="/analytics"
-                  className="hover:text-[var(--text-secondary)] transition-colors"
+                  className="hover:text-(--text-secondary) transition-colors"
                 >
                   ← OMOP Analytics
                 </a>
                 <span>|</span>
                 <a
                   href="/eehrxf"
-                  className="hover:text-[var(--text-secondary)] transition-colors"
+                  className="hover:text-(--text-secondary) transition-colors"
                 >
                   EEHRxF Profiles →
                 </a>
@@ -313,34 +313,32 @@ export default function NlqPage() {
             {stats?.totals && (
               <div className="flex gap-6 text-sm">
                 <div className="text-center">
-                  <div className="text-lg font-semibold text-[var(--accent-l1)]">
+                  <div className="text-lg font-semibold text-(--accent-l1)">
                     {stats.speCount}
                   </div>
-                  <div className="text-[var(--text-secondary)] text-xs">
-                    SPEs
-                  </div>
+                  <div className="text-(--text-secondary) text-xs">SPEs</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-semibold text-[var(--accent-l3)]">
+                  <div className="text-lg font-semibold text-(--accent-l3)">
                     {stats.totals.patients.toLocaleString()}
                   </div>
-                  <div className="text-[var(--text-secondary)] text-xs">
+                  <div className="text-(--text-secondary) text-xs">
                     Patients
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-semibold text-[var(--accent-l4)]">
+                  <div className="text-lg font-semibold text-(--accent-l4)">
                     {stats.totals.encounters.toLocaleString()}
                   </div>
-                  <div className="text-[var(--text-secondary)] text-xs">
+                  <div className="text-(--text-secondary) text-xs">
                     Encounters
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-semibold text-[var(--accent-l5)]">
+                  <div className="text-lg font-semibold text-(--accent-l5)">
                     {stats.totals.conditions.toLocaleString()}
                   </div>
-                  <div className="text-[var(--text-secondary)] text-xs">
+                  <div className="text-(--text-secondary) text-xs">
                     Conditions
                   </div>
                 </div>
@@ -352,7 +350,7 @@ export default function NlqPage() {
 
       <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
         {/* Query input */}
-        <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
+        <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -368,7 +366,7 @@ export default function NlqPage() {
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="Ask a question about the health data..."
-                className="w-full bg-[var(--surface-2)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-sm text-[var(--text-primary)] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
+                className="w-full bg-(--surface-2) border border-(--border) rounded-lg px-4 py-2.5 text-sm text-(--text-primary) placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
                 disabled={loading}
               />
             </div>
@@ -377,8 +375,8 @@ export default function NlqPage() {
               onClick={() => setFederated(!federated)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors border ${
                 federated
-                  ? "bg-blue-500/20 border-blue-500/50 text-[var(--accent)]"
-                  : "bg-[var(--surface-2)] border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  ? "bg-blue-500/20 border-blue-500/50 text-(--accent)"
+                  : "bg-(--surface-2) border-(--border) text-(--text-secondary) hover:text-(--text-primary)"
               }`}
               title="Query across all Secure Processing Environments"
             >
@@ -388,7 +386,7 @@ export default function NlqPage() {
             <button
               type="submit"
               disabled={loading || !question.trim()}
-              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-[var(--text-secondary)] text-white rounded-lg text-sm font-medium transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 disabled:text-(--text-secondary) text-white rounded-lg text-sm font-medium transition-colors"
             >
               {loading ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -405,7 +403,7 @@ export default function NlqPage() {
               <button
                 key={q}
                 onClick={() => handleExampleClick(q)}
-                className="px-3 py-1.5 rounded-full bg-[var(--surface)] border border-[var(--border)] text-xs font-medium text-[var(--text-primary)] hover:bg-[var(--surface-2)] hover:border-[var(--accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent)] transition-colors"
+                className="px-3 py-1.5 rounded-full bg-(--surface) border border-(--border) text-xs font-medium text-(--text-primary) hover:bg-(--surface-2) hover:border-(--accent) focus-visible:outline-solid focus-visible:outline-2 focus-visible:outline-(--accent) transition-colors"
                 disabled={loading}
               >
                 {q}
@@ -416,64 +414,60 @@ export default function NlqPage() {
 
         {/* ODRL Policy Scope Indicator */}
         {odrlScope && (
-          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
+          <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Shield size={14} className="text-[var(--accent-l1)]" />
-              <h3 className="text-sm font-medium text-[var(--text-primary)]">
+              <Shield size={14} className="text-(--accent-l1)" />
+              <h3 className="text-sm font-medium text-(--text-primary)">
                 Policy Scope
               </h3>
               {odrlScope.hasActiveContract && (
-                <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-500/20 text-[var(--success-text)]">
+                <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-500/20 text-(--success-text)">
                   Active Contract
                 </span>
               )}
               {odrlScope.hdabApproved && (
-                <span className="px-2 py-0.5 rounded-full text-xs bg-blue-500/20 text-[var(--accent)]">
+                <span className="px-2 py-0.5 rounded-full text-xs bg-blue-500/20 text-(--accent)">
                   HDAB Approved
                 </span>
               )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
               <div>
-                <div className="text-[var(--text-secondary)] mb-1">
-                  Permissions
-                </div>
+                <div className="text-(--text-secondary) mb-1">Permissions</div>
                 <div className="flex flex-wrap gap-1">
                   {odrlScope.permissions.length > 0 ? (
                     odrlScope.permissions.map((p) => (
                       <span
                         key={p}
-                        className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-[var(--success-text)]"
+                        className="px-1.5 py-0.5 rounded-sm bg-emerald-500/10 text-(--success-text)"
                       >
                         {p}
                       </span>
                     ))
                   ) : (
-                    <span className="text-[var(--text-secondary)]">None</span>
+                    <span className="text-(--text-secondary)">None</span>
                   )}
                 </div>
               </div>
               <div>
-                <div className="text-[var(--text-secondary)] mb-1">
-                  Prohibitions
-                </div>
+                <div className="text-(--text-secondary) mb-1">Prohibitions</div>
                 <div className="flex flex-wrap gap-1">
                   {odrlScope.prohibitions.length > 0 ? (
                     odrlScope.prohibitions.map((p) => (
                       <span
                         key={p}
-                        className="px-1.5 py-0.5 rounded bg-red-500/10 text-red-300"
+                        className="px-1.5 py-0.5 rounded-sm bg-red-500/10 text-red-300"
                       >
                         {p}
                       </span>
                     ))
                   ) : (
-                    <span className="text-[var(--text-secondary)]">None</span>
+                    <span className="text-(--text-secondary)">None</span>
                   )}
                 </div>
               </div>
               <div>
-                <div className="text-[var(--text-secondary)] mb-1">
+                <div className="text-(--text-secondary) mb-1">
                   Accessible Datasets
                 </div>
                 <div className="flex flex-wrap gap-1">
@@ -481,19 +475,19 @@ export default function NlqPage() {
                     odrlScope.accessibleDatasets.map((d) => (
                       <span
                         key={d}
-                        className="px-1.5 py-0.5 rounded bg-[var(--surface-2)] text-[var(--text-primary)]"
+                        className="px-1.5 py-0.5 rounded-sm bg-(--surface-2) text-(--text-primary)"
                       >
                         {d}
                       </span>
                     ))
                   ) : (
-                    <span className="text-[var(--text-secondary)]">All</span>
+                    <span className="text-(--text-secondary)">All</span>
                   )}
                 </div>
                 {odrlScope.temporalLimit && (
-                  <div className="mt-1 text-[var(--text-secondary)]">
+                  <div className="mt-1 text-(--text-secondary)">
                     Valid until:{" "}
-                    <span className="text-[var(--text-primary)]">
+                    <span className="text-(--text-primary)">
                       {odrlScope.temporalLimit}
                     </span>
                   </div>
@@ -504,21 +498,21 @@ export default function NlqPage() {
                 without one is refused at the gate (Art. 61(1)). */}
             {odrlScope.permits && odrlScope.permits.length > 0 && (
               <div
-                className="mt-3 pt-3 border-t border-[var(--border)] text-xs"
+                className="mt-3 pt-3 border-t border-(--border) text-xs"
                 data-testid="scope-permits"
               >
-                <div className="text-[var(--text-secondary)] mb-1">
+                <div className="text-(--text-secondary) mb-1">
                   Data permits (Art. 68)
                 </div>
                 <ul className="space-y-0.5">
                   {odrlScope.permits.map((p) => (
-                    <li key={p.permitId} className="text-[var(--text-primary)]">
+                    <li key={p.permitId} className="text-(--text-primary)">
                       <span className="font-mono">{p.permitId}</span>
                       {p.datasetId && (
                         <span> for {p.datasetTitle ?? p.datasetId}</span>
                       )}
                       {p.validUntil && (
-                        <span className="text-[var(--text-secondary)]">
+                        <span className="text-(--text-secondary)">
                           {" "}
                           · valid until {p.validUntil.slice(0, 10)}
                         </span>
@@ -539,13 +533,13 @@ export default function NlqPage() {
               <span
                 className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${
                   result.method === "template"
-                    ? "bg-emerald-500/20 text-[var(--success-text)]"
+                    ? "bg-emerald-500/20 text-(--success-text)"
                     : result.method === "fulltext"
                       ? "bg-amber-500/20 text-amber-300"
                       : result.method === "graphrag"
                         ? "bg-cyan-500/20 text-cyan-300"
                         : result.method === "llm"
-                          ? "bg-purple-500/20 text-[var(--accent)]"
+                          ? "bg-purple-500/20 text-(--accent)"
                           : "bg-red-500/20 text-red-300"
                 }`}
               >
@@ -564,7 +558,7 @@ export default function NlqPage() {
                         : "No Match"}
               </span>
               {result.federated && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-[var(--accent)]">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-(--accent)">
                   <Globe size={12} />
                   Federated
                 </span>
@@ -575,14 +569,14 @@ export default function NlqPage() {
                   ODRL Enforced
                 </span>
               )}
-              <span className="text-xs text-[var(--text-secondary)]">
+              <span className="text-xs text-(--text-secondary)">
                 {result.totalRows} row{result.totalRows !== 1 ? "s" : ""}
               </span>
 
               {/* Cypher toggle */}
               <button
                 onClick={() => setShowCypher(!showCypher)}
-                className="ml-auto flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                className="ml-auto flex items-center gap-1 text-xs text-(--text-secondary) hover:text-(--text-primary) transition-colors"
               >
                 {showCypher ? (
                   <ChevronUp size={12} />
@@ -595,14 +589,14 @@ export default function NlqPage() {
 
             {/* 5-layer graph breadcrumb — which layers answer this question */}
             {result.graphLayers && result.graphLayers.length > 0 && (
-              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
+              <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Zap size={14} className="text-[var(--accent-l1)]" />
-                  <h3 className="text-sm font-medium text-[var(--text-primary)]">
+                  <Zap size={14} className="text-(--accent-l1)" />
+                  <h3 className="text-sm font-medium text-(--text-primary)">
                     Graph layers traversed
                   </h3>
                   <span
-                    className="text-xs text-[var(--text-secondary)] cursor-help"
+                    className="text-xs text-(--text-secondary) cursor-help"
                     title="The EHDS dataspace knowledge graph is built from five stacked layers. This breadcrumb shows which layers the generated Cypher reads from to answer your question."
                   >
                     (5-layer model)
@@ -617,7 +611,7 @@ export default function NlqPage() {
                           className={`px-2.5 py-1 rounded-md border text-xs font-medium ${
                             active
                               ? LAYER_ACCENT[id]
-                              : "bg-[var(--surface-2)] text-[var(--text-secondary)] border-[var(--border)] opacity-40"
+                              : "bg-(--surface-2) text-(--text-secondary) border-(--border) opacity-40"
                           }`}
                           title={
                             active
@@ -629,9 +623,7 @@ export default function NlqPage() {
                           <span>{active?.short ?? id}</span>
                         </div>
                         {i < ALL_LAYERS.length - 1 && (
-                          <span className="text-[var(--text-secondary)]">
-                            →
-                          </span>
+                          <span className="text-(--text-secondary)">→</span>
                         )}
                       </div>
                     );
@@ -642,23 +634,23 @@ export default function NlqPage() {
 
             {/* Interpretation — how we parsed the question (issue #19) */}
             {result.interpretation && (
-              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
+              <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Info size={14} className="text-[var(--accent-l1)]" />
-                  <h3 className="text-sm font-medium text-[var(--text-primary)]">
+                  <Info size={14} className="text-(--accent-l1)" />
+                  <h3 className="text-sm font-medium text-(--text-primary)">
                     How we interpreted your question
                   </h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   {/* Drug */}
-                  <div className="bg-[var(--surface-2)]/50 border border-[var(--border)]/50 rounded-lg p-3">
-                    <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-1">
+                  <div className="bg-(--surface-2)/50 border border-(--border)/50 rounded-lg p-3">
+                    <div className="flex items-center gap-1.5 text-xs text-(--text-secondary) mb-1">
                       <Pill size={12} className="text-amber-400" />
                       Drug / product
                     </div>
                     {result.interpretation.drug ? (
                       <div className="space-y-1">
-                        <div className="text-sm font-medium text-[var(--text-primary)]">
+                        <div className="text-sm font-medium text-(--text-primary)">
                           {result.interpretation.drug.display}
                         </div>
                         <div className="flex items-center gap-1.5 text-xs">
@@ -670,14 +662,14 @@ export default function NlqPage() {
                           >
                             {codeBadge(result.interpretation.drug.system).label}
                           </span>
-                          <span className="text-[var(--text-secondary)] font-mono">
+                          <span className="text-(--text-secondary) font-mono">
                             {result.interpretation.drug.code}
                           </span>
                         </div>
                         {result.interpretation.drug.generic && (
-                          <div className="text-xs text-[var(--text-secondary)]">
+                          <div className="text-xs text-(--text-secondary)">
                             generic:{" "}
-                            <span className="text-[var(--text-primary)]">
+                            <span className="text-(--text-primary)">
                               {result.interpretation.drug.generic}
                             </span>
                           </div>
@@ -693,14 +685,14 @@ export default function NlqPage() {
                     )}
                   </div>
                   {/* Indication */}
-                  <div className="bg-[var(--surface-2)]/50 border border-[var(--border)]/50 rounded-lg p-3">
-                    <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-1">
+                  <div className="bg-(--surface-2)/50 border border-(--border)/50 rounded-lg p-3">
+                    <div className="flex items-center gap-1.5 text-xs text-(--text-secondary) mb-1">
                       <Stethoscope size={12} className="text-emerald-400" />
                       Indication (diagnosis)
                     </div>
                     {result.interpretation.indication ? (
                       <div className="space-y-1">
-                        <div className="text-sm font-medium text-[var(--text-primary)]">
+                        <div className="text-sm font-medium text-(--text-primary)">
                           {result.interpretation.indication.display}
                         </div>
                         <div className="flex items-center gap-1.5 text-xs flex-wrap">
@@ -715,7 +707,7 @@ export default function NlqPage() {
                                 .label
                             }
                           </span>
-                          <span className="text-[var(--text-secondary)] font-mono">
+                          <span className="text-(--text-secondary) font-mono">
                             {result.interpretation.indication.code}
                           </span>
                           {result.interpretation.indication.icd10 && (
@@ -727,7 +719,7 @@ export default function NlqPage() {
                               >
                                 ICD-10
                               </span>
-                              <span className="text-[var(--text-secondary)] font-mono">
+                              <span className="text-(--text-secondary) font-mono">
                                 {result.interpretation.indication.icd10}
                               </span>
                             </>
@@ -744,14 +736,14 @@ export default function NlqPage() {
                     )}
                   </div>
                   {/* Side effect */}
-                  <div className="bg-[var(--surface-2)]/50 border border-[var(--border)]/50 rounded-lg p-3">
-                    <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-1">
+                  <div className="bg-(--surface-2)/50 border border-(--border)/50 rounded-lg p-3">
+                    <div className="flex items-center gap-1.5 text-xs text-(--text-secondary) mb-1">
                       <AlertTriangle size={12} className="text-red-400" />
                       Side-effect (measured)
                     </div>
                     {result.interpretation.sideEffect ? (
                       <div className="space-y-1">
-                        <div className="text-sm font-medium text-[var(--text-primary)]">
+                        <div className="text-sm font-medium text-(--text-primary)">
                           {result.interpretation.sideEffect.display}
                         </div>
                         <div className="flex items-center gap-1.5 text-xs flex-wrap">
@@ -766,7 +758,7 @@ export default function NlqPage() {
                                 .label
                             }
                           </span>
-                          <span className="text-[var(--text-secondary)] font-mono">
+                          <span className="text-(--text-secondary) font-mono">
                             {result.interpretation.sideEffect.code}
                           </span>
                           {result.interpretation.sideEffect.icd10 && (
@@ -778,7 +770,7 @@ export default function NlqPage() {
                               >
                                 ICD-10
                               </span>
-                              <span className="text-[var(--text-secondary)] font-mono">
+                              <span className="text-(--text-secondary) font-mono">
                                 {result.interpretation.sideEffect.icd10}
                               </span>
                             </>
@@ -800,14 +792,14 @@ export default function NlqPage() {
 
             {/* Data quality snapshot (issue #19) — cohort + global */}
             {result.dataQuality && (
-              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-4">
+              <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Database size={14} className="text-[var(--accent-l5)]" />
-                  <h3 className="text-sm font-medium text-[var(--text-primary)]">
+                  <Database size={14} className="text-(--accent-l5)" />
+                  <h3 className="text-sm font-medium text-(--text-primary)">
                     Data quality for this question
                   </h3>
                   <span
-                    className="text-xs text-[var(--text-secondary)] cursor-help"
+                    className="text-xs text-(--text-secondary) cursor-help"
                     title="Share of Condition nodes with a CODED_BY SnomedConcept link, and MedicationRequest nodes with a CODED_BY RxNormConcept link. High coverage means the cohort filter is reliable."
                   >
                     (hover for details)
@@ -817,44 +809,44 @@ export default function NlqPage() {
                 {/* Cohort-scoped (preferred when we have a cohort) */}
                 {result.dataQuality.cohortSize !== undefined && (
                   <div className="mb-4">
-                    <div className="text-xs text-[var(--text-secondary)] mb-2 flex items-center gap-1.5">
-                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-l3)]"></span>
+                    <div className="text-xs text-(--text-secondary) mb-2 flex items-center gap-1.5">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-(--accent-l3)"></span>
                       In this cohort
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
                       <div>
-                        <div className="text-[var(--text-secondary)]">
+                        <div className="text-(--text-secondary)">
                           Cohort size
                         </div>
-                        <div className="text-lg font-semibold text-[var(--accent-l3)]">
+                        <div className="text-lg font-semibold text-(--accent-l3)">
                           {result.dataQuality.cohortSize.toLocaleString()}
                         </div>
                       </div>
                       <div>
-                        <div className="text-[var(--text-secondary)]">
+                        <div className="text-(--text-secondary)">
                           Conditions
                         </div>
-                        <div className="text-lg font-semibold text-[var(--text-primary)]">
+                        <div className="text-lg font-semibold text-(--text-primary)">
                           {(
                             result.dataQuality.cohortConditions ?? 0
                           ).toLocaleString()}
                         </div>
                       </div>
                       <div>
-                        <div className="text-[var(--text-secondary)]">
+                        <div className="text-(--text-secondary)">
                           Med requests
                         </div>
-                        <div className="text-lg font-semibold text-[var(--text-primary)]">
+                        <div className="text-lg font-semibold text-(--text-primary)">
                           {(
                             result.dataQuality.cohortMedicationRequests ?? 0
                           ).toLocaleString()}
                         </div>
                       </div>
                       <div>
-                        <div className="text-[var(--text-secondary)]">
+                        <div className="text-(--text-secondary)">
                           SNOMED coverage
                         </div>
-                        <div className="text-lg font-semibold text-[var(--accent-l5)]">
+                        <div className="text-lg font-semibold text-(--accent-l5)">
                           {(
                             result.dataQuality.cohortSnomedCoveragePct ?? 0
                           ).toFixed(1)}
@@ -862,7 +854,7 @@ export default function NlqPage() {
                         </div>
                       </div>
                       <div>
-                        <div className="text-[var(--text-secondary)]">
+                        <div className="text-(--text-secondary)">
                           RxNorm coverage
                         </div>
                         <div className="text-lg font-semibold text-amber-300">
@@ -878,21 +870,21 @@ export default function NlqPage() {
 
                 {/* Global graph coverage — baseline */}
                 <div>
-                  <div className="text-xs text-[var(--text-secondary)] mb-2 flex items-center gap-1.5">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[var(--accent-l5)]"></span>
+                  <div className="text-xs text-(--text-secondary) mb-2 flex items-center gap-1.5">
+                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-(--accent-l5)"></span>
                     Across the whole graph
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                     <div>
-                      <div className="text-[var(--text-secondary)]">
+                      <div className="text-(--text-secondary)">
                         SNOMED coverage
                       </div>
-                      <div className="text-lg font-semibold text-[var(--accent-l5)]">
+                      <div className="text-lg font-semibold text-(--accent-l5)">
                         {result.dataQuality.snomedCoveragePct.toFixed(1)}%
                       </div>
                     </div>
                     <div>
-                      <div className="text-[var(--text-secondary)]">
+                      <div className="text-(--text-secondary)">
                         RxNorm coverage
                       </div>
                       <div className="text-lg font-semibold text-amber-300">
@@ -900,18 +892,16 @@ export default function NlqPage() {
                       </div>
                     </div>
                     <div>
-                      <div className="text-[var(--text-secondary)]">
-                        Conditions
-                      </div>
-                      <div className="text-lg font-semibold text-[var(--text-primary)]">
+                      <div className="text-(--text-secondary)">Conditions</div>
+                      <div className="text-lg font-semibold text-(--text-primary)">
                         {result.dataQuality.totalConditions.toLocaleString()}
                       </div>
                     </div>
                     <div>
-                      <div className="text-[var(--text-secondary)]">
+                      <div className="text-(--text-secondary)">
                         Medication requests
                       </div>
-                      <div className="text-lg font-semibold text-[var(--text-primary)]">
+                      <div className="text-lg font-semibold text-(--text-primary)">
                         {result.dataQuality.totalMedicationRequests.toLocaleString()}
                       </div>
                     </div>
@@ -934,7 +924,7 @@ export default function NlqPage() {
                               "bg-",
                               "bg-opacity-10 bg-",
                             )
-                          : "bg-[var(--surface)] border-[var(--border)]"
+                          : "bg-(--surface) border-(--border)"
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-2">
@@ -947,11 +937,11 @@ export default function NlqPage() {
                             {section.layer}
                           </span>
                         )}
-                        <span className="text-xs font-medium text-[var(--text-primary)]">
+                        <span className="text-xs font-medium text-(--text-primary)">
                           {section.label}
                         </span>
                       </div>
-                      <pre className="text-xs font-mono text-[var(--text-secondary)] overflow-x-auto whitespace-pre-wrap">
+                      <pre className="text-xs font-mono text-(--text-secondary) overflow-x-auto whitespace-pre-wrap">
                         {section.cypher}
                       </pre>
                     </div>
@@ -959,7 +949,7 @@ export default function NlqPage() {
                 </div>
               ) : (
                 result.cypher && (
-                  <pre className="bg-[var(--surface)] border border-[var(--border)] rounded-lg p-3 text-xs font-mono text-[var(--text-secondary)] overflow-x-auto whitespace-pre-wrap">
+                  <pre className="bg-(--surface) border border-(--border) rounded-lg p-3 text-xs font-mono text-(--text-secondary) overflow-x-auto whitespace-pre-wrap">
                     {result.cypher}
                   </pre>
                 )
@@ -992,11 +982,11 @@ export default function NlqPage() {
 
             {/* Results table */}
             {result.results && result.results.length > 0 && (
-              <div className="border border-[var(--border)] rounded-lg overflow-hidden">
+              <div className="border border-(--border) rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="bg-[var(--surface)] border-b border-[var(--border)]">
+                      <tr className="bg-(--surface) border-b border-(--border)">
                         {columns.map((col) => (
                           <th
                             key={col}
@@ -1007,7 +997,7 @@ export default function NlqPage() {
                                   ? "Percentage of the cohort that has the side-effect recorded (0–100)."
                                   : undefined
                             }
-                            className="px-4 py-2.5 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider"
+                            className="px-4 py-2.5 text-left text-xs font-medium text-(--text-secondary) uppercase tracking-wider"
                           >
                             {col}
                             {(col === "score" || col === "frequencyPct") && (
@@ -1023,12 +1013,12 @@ export default function NlqPage() {
                       {result.results.map((row, i) => (
                         <tr
                           key={i}
-                          className="hover:bg-[var(--surface)]/50 transition-colors"
+                          className="hover:bg-(--surface)/50 transition-colors"
                         >
                           {columns.map((col) => (
                             <td
                               key={col}
-                              className="px-4 py-2 text-[var(--text-primary)] whitespace-nowrap"
+                              className="px-4 py-2 text-(--text-primary) whitespace-nowrap"
                             >
                               {formatCellValue(col, row[col])}
                             </td>
@@ -1045,21 +1035,21 @@ export default function NlqPage() {
 
         {/* Available templates */}
         {!result && templates.length > 0 && (
-          <div className="bg-[var(--surface)]/50 border border-[var(--border)] rounded-lg p-4">
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3 flex items-center gap-1.5">
-              <Database size={14} className="text-[var(--accent-l3)]" />
+          <div className="bg-(--surface)/50 border border-(--border) rounded-lg p-4">
+            <h3 className="text-sm font-medium text-(--text-primary) mb-3 flex items-center gap-1.5">
+              <Database size={14} className="text-(--accent-l3)" />
               Available Query Templates
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {templates.map((t) => (
                 <div
                   key={t.name}
-                  className="bg-[var(--surface-2)]/50 border border-[var(--border)]/50 rounded-lg p-3"
+                  className="bg-(--surface-2)/50 border border-(--border)/50 rounded-lg p-3"
                 >
-                  <div className="text-sm font-medium text-[var(--text-primary)]">
+                  <div className="text-sm font-medium text-(--text-primary)">
                     {t.name.replace(/_/g, " ")}
                   </div>
-                  <div className="text-xs text-[var(--text-secondary)] mt-1">
+                  <div className="text-xs text-(--text-secondary) mt-1">
                     {t.description}
                   </div>
                 </div>
@@ -1070,50 +1060,50 @@ export default function NlqPage() {
 
         {/* SPE breakdown */}
         {stats && stats.spes && (
-          <div className="bg-[var(--surface)]/50 border border-[var(--border)] rounded-lg p-4">
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3 flex items-center gap-1.5">
-              <Globe size={14} className="text-[var(--accent-l1)]" />
+          <div className="bg-(--surface)/50 border border-(--border) rounded-lg p-4">
+            <h3 className="text-sm font-medium text-(--text-primary) mb-3 flex items-center gap-1.5">
+              <Globe size={14} className="text-(--accent-l1)" />
               Secure Processing Environments
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {stats.spes.map((spe) => (
                 <div
                   key={spe.label}
-                  className="bg-[var(--surface-2)]/50 border border-[var(--border)]/50 rounded-lg p-3"
+                  className="bg-(--surface-2)/50 border border-(--border)/50 rounded-lg p-3"
                 >
-                  <div className="text-sm font-semibold text-[var(--text-primary)] mb-2">
+                  <div className="text-sm font-semibold text-(--text-primary) mb-2">
                     {spe.label}
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
-                      <span className="text-[var(--text-secondary)]">
+                      <span className="text-(--text-secondary)">
                         Patients:{" "}
                       </span>
-                      <span className="text-[var(--accent-l3)]">
+                      <span className="text-(--accent-l3)">
                         {spe.patients.toLocaleString()}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[var(--text-secondary)]">
+                      <span className="text-(--text-secondary)">
                         Encounters:{" "}
                       </span>
-                      <span className="text-[var(--accent-l4)]">
+                      <span className="text-(--accent-l4)">
                         {spe.encounters.toLocaleString()}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[var(--text-secondary)]">
+                      <span className="text-(--text-secondary)">
                         Conditions:{" "}
                       </span>
-                      <span className="text-[var(--accent-l5)]">
+                      <span className="text-(--accent-l5)">
                         {spe.conditions.toLocaleString()}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[var(--text-secondary)]">
+                      <span className="text-(--text-secondary)">
                         Observations:{" "}
                       </span>
-                      <span className="text-[var(--accent-l1)]">
+                      <span className="text-(--accent-l1)">
                         {spe.observations.toLocaleString()}
                       </span>
                     </div>
@@ -1126,8 +1116,8 @@ export default function NlqPage() {
 
         {/* Query history */}
         {history.length > 1 && (
-          <div className="bg-[var(--surface)]/50 border border-[var(--border)] rounded-lg p-4">
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">
+          <div className="bg-(--surface)/50 border border-(--border) rounded-lg p-4">
+            <h3 className="text-sm font-medium text-(--text-primary) mb-3">
               Recent Queries
             </h3>
             <div className="space-y-2">
@@ -1135,7 +1125,7 @@ export default function NlqPage() {
                 <button
                   key={i}
                   onClick={() => handleExampleClick(h.question)}
-                  className="w-full text-left px-3 py-2 rounded bg-[var(--surface-2)]/50 border border-[var(--border)]/50 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-gray-600 transition-colors flex items-center justify-between"
+                  className="w-full text-left px-3 py-2 rounded-sm bg-(--surface-2)/50 border border-(--border)/50 text-xs text-(--text-secondary) hover:text-(--text-primary) hover:border-gray-600 transition-colors flex items-center justify-between"
                 >
                   <span className="truncate">{h.question}</span>
                   <span className="text-gray-600 shrink-0 ml-2">

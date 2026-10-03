@@ -88,9 +88,9 @@ export function ComponentActions({ name, isBroken }: Props) {
   };
 
   return (
-    <div className="mt-2 pt-2 border-t border-[var(--border)]">
+    <div className="mt-2 pt-2 border-t border-(--border)">
       <div className="flex items-center gap-2 text-[10px]">
-        <span className="flex items-center gap-1 text-[var(--danger-text)] font-medium">
+        <span className="flex items-center gap-1 text-(--danger-text) font-medium">
           <AlertTriangle size={11} />
           Broken
         </span>
@@ -98,7 +98,7 @@ export function ComponentActions({ name, isBroken }: Props) {
           type="button"
           onClick={onRestart}
           disabled={restartState === "running"}
-          className="flex items-center gap-1 px-1.5 py-0.5 rounded border border-[var(--border)] hover:bg-[var(--surface-2)] text-[var(--text-primary)] disabled:opacity-50"
+          className="flex items-center gap-1 px-1.5 py-0.5 rounded-sm border border-(--border) hover:bg-(--surface-2) text-(--text-primary) disabled:opacity-50"
           title="Restart this Container App"
         >
           <RefreshCw
@@ -110,7 +110,7 @@ export function ComponentActions({ name, isBroken }: Props) {
         <button
           type="button"
           onClick={onToggle}
-          className="flex items-center gap-1 px-1.5 py-0.5 rounded border border-[var(--border)] hover:bg-[var(--surface-2)] text-[var(--text-primary)]"
+          className="flex items-center gap-1 px-1.5 py-0.5 rounded-sm border border-(--border) hover:bg-(--surface-2) text-(--text-primary)"
         >
           {expanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
           Why broken?
@@ -121,8 +121,8 @@ export function ComponentActions({ name, isBroken }: Props) {
         <p
           className={`text-[10px] mt-1 ${
             restartState === "failed"
-              ? "text-[var(--danger-text)]"
-              : "text-[var(--success-text)]"
+              ? "text-(--danger-text)"
+              : "text-(--success-text)"
           }`}
         >
           {restartMessage}
@@ -130,29 +130,29 @@ export function ComponentActions({ name, isBroken }: Props) {
       )}
 
       {expanded && (
-        <div className="mt-2 p-2 rounded bg-[var(--surface-2)]/60 border border-[var(--border)] text-[10px] space-y-1.5 leading-relaxed">
+        <div className="mt-2 p-2 rounded-sm bg-(--surface-2)/60 border border-(--border) text-[10px] space-y-1.5 leading-relaxed">
           {loading && (
-            <p className="text-[var(--text-secondary)]">Loading diagnosis…</p>
+            <p className="text-(--text-secondary)">Loading diagnosis…</p>
           )}
           {error && (
-            <p className="text-[var(--danger-text)]">
+            <p className="text-(--danger-text)">
               Failed to load diagnosis: {error}
             </p>
           )}
           {diagnosis && (
             <>
-              <p className="font-medium text-[var(--text-primary)]">
+              <p className="font-medium text-(--text-primary)">
                 {diagnosis.summary}
               </p>
-              <p className="text-[var(--text-secondary)]">{diagnosis.cause}</p>
+              <p className="text-(--text-secondary)">{diagnosis.cause}</p>
               {diagnosis.bootError && (
-                <pre className="font-mono text-[9px] bg-[var(--surface)]/80 p-1.5 rounded border border-[var(--border)] overflow-x-auto whitespace-pre-wrap">
+                <pre className="font-mono text-[9px] bg-(--surface)/80 p-1.5 rounded-sm border border-(--border) overflow-x-auto whitespace-pre-wrap">
                   {diagnosis.bootError}
                 </pre>
               )}
               {diagnosis.remediation && (
-                <p className="text-[var(--text-secondary)]">
-                  <span className="font-medium text-[var(--text-primary)]">
+                <p className="text-(--text-secondary)">
+                  <span className="font-medium text-(--text-primary)">
                     Remediation:
                   </span>{" "}
                   {diagnosis.remediation}
@@ -163,7 +163,7 @@ export function ComponentActions({ name, isBroken }: Props) {
                   href={diagnosis.trackingIssue}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-[var(--success-text)] hover:underline"
+                  className="inline-flex items-center gap-1 text-(--success-text) hover:underline"
                 >
                   <ExternalLink size={10} />
                   Tracking issue
