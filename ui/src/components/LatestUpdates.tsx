@@ -60,7 +60,7 @@ const LATEST_UPDATES: Update[] = [
     title: "Klarbefund, the iPhone app",
     text: "Published reference ranges for 57 more analytes, microbiome organisms named by their NCBI Taxonomy id, and a full export or deletion of everything the app holds.",
     links: [
-      { label: "See below", href: "#klarbefund-title" },
+      { label: "The app", href: "#klarbefund-title" },
       { label: "#186", href: `${REPO}/issues/186` },
     ],
   },
@@ -79,7 +79,7 @@ export function LatestUpdates() {
   return (
     <section
       className="mb-12 sm:mb-16 animate-fade-in-up"
-      style={{ animationDelay: "100ms" }}
+      style={{ animationDelay: "125ms" }}
       aria-labelledby="updates-title"
     >
       <div className="flex items-center gap-2 mb-4">
