@@ -258,6 +258,17 @@ export KC_DB_NAME="keycloak"
 # ── Vault ────────────────────────────────────────────────────────────────────
 export VAULT_ROOT_TOKEN="root"
 
+# The issuer Keycloak puts in the "iss" claim of an edcv token, read from the
+# realm's discovery document rather than built from a URL. Vault's provisioner
+# JWT role binds to it, and the bootstrap used to bind to the internal ACA URL
+# it talks to Keycloak on, so every agent token was refused (#455). Keycloak
+# answers with KC_HOSTNAME (auth.ehds.mabu.red) whichever URL it was asked on.
+# Prints nothing when Keycloak does not answer; callers must check.
+keycloak_issuer() {
+  curl -sf -m 20 "${KEYCLOAK_PUBLIC_URL:-https://auth.ehds.mabu.red}/realms/edcv/.well-known/openid-configuration" \
+    | python3 -c 'import json, sys; print(json.load(sys.stdin).get("issuer", ""))' 2>/dev/null || true
+}
+
 # ── Derived FQDNs (populated after ACA environment is created) ───────────────
 # These are set by running: eval "$(get_aca_fqdns)"
 get_aca_fqdns() {
