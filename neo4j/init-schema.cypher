@@ -180,6 +180,12 @@ CREATE CONSTRAINT odrl_policy_id IF NOT EXISTS FOR (pol:OdrlPolicy) REQUIRE pol.
 
 // Query Audit Events — EHDS Art. 53 compliance logging
 CREATE CONSTRAINT query_audit_event_id IF NOT EXISTS FOR (qa:QueryAuditEvent) REQUIRE qa.eventId IS UNIQUE;
+
+// A phone the patient connected with the Klarbefund app (#473, ADR-049):
+// (:Patient)-[:HAS_APP_CONNECTION]->(:AppConnection {deviceId, username,
+// deviceName, client, connectedAt, lastSeenAt}). One login per device id.
+CREATE CONSTRAINT app_connection_device IF NOT EXISTS FOR (a:AppConnection) REQUIRE a.deviceId IS UNIQUE;
+CREATE INDEX app_connection_username IF NOT EXISTS FOR (a:AppConnection) ON (a.username);
 CREATE INDEX query_audit_timestamp IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.timestamp);
 CREATE INDEX query_audit_participant IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.participantId);
 

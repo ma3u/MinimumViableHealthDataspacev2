@@ -68,8 +68,9 @@ targets:
         # `Sources/MeinBefund/de.lproj/InfoPlist.strings`: a permission prompt
         # in the wrong language is the first thing a person sees.
         INFOPLIST_KEY_NSCameraUsageDescription: >-
-          Klarbefund uses the camera only to scan your lab reports.
-          The photographs stay encrypted on this device.
+          Klarbefund uses the camera only to scan your lab reports and the
+          QR code that connects it to your health record. The photographs
+          stay encrypted on this device.
         # Read only, asked for on the Trends screen when the person taps
         # "Show trends from Apple Health" and never at launch (#186
         # criterion 3). No NSHealthUpdateUsageDescription: the app writes
@@ -116,6 +117,15 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: red.mabu.meinbefund.oidc
             CFBundleURLSchemes: [$(MB_OIDC_REDIRECT_SCHEME)]
+          # Connect to EHDS (#473): the patient screen's QR code and its
+          # "Open in Klarbefund" link. A custom scheme, because a universal
+          # link needs the Associated Domains capability on the App ID.
+          - CFBundleURLName: red.mabu.meinbefund.connect
+            CFBundleURLSchemes: [klarbefund]
+        # The compose stack is plain http on localhost; the live hub is https.
+        # Local networking only, nothing on the internet is exempted.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
 
   # Drives the app in a simulator the way a person does.
   #

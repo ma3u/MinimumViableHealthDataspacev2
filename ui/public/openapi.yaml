@@ -65,8 +65,26 @@ components:
       description: |
         NextAuth.js session cookie issued by Keycloak (realm `edcv`).
         Sign in via the UI at `/auth/signin` to obtain it.
+    klarbefundAppToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        A Keycloak access token issued to the public client `klarbefund-app`
+        by the device grant the patient screen starts (ADR-049, #473). Every
+        call but registration also sends `X-Klarbefund-Device` naming a
+        connected phone.
 
   schemas:
+    AppConnection:
+      type: object
+      required: [deviceId, deviceName, username, connectedAt]
+      properties:
+        deviceId: { type: string, format: uuid }
+        deviceName: { type: string }
+        username: { type: string }
+        connectedAt: { type: string, format: date-time }
+        lastSeenAt: { type: string, format: date-time, nullable: true }
     Error:
       type: object
       required: [error]
@@ -655,6 +673,187 @@ paths:
       responses:
         "204": { description: Consent revoked }
 
+  /api/patient/app-pairing:
+    post:
+      tags: [Patient]
+      summary: Start connecting the Klarbefund app (QR code, device grant)
+      description: >
+        Asks Keycloak for a device authorization for `klarbefund-app` and
+        answers with the QR code, the `klarbefund://connect` link it carries
+        and Keycloak's approval page. The code lives 120 seconds. PATIENT
+        session only (ADR-049).
+      responses:
+        "200":
+          description: The pairing
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  [
+                    pairingId,
+                    appLink,
+                    qrDataUri,
+                    userCode,
+                    verificationUri,
+                    expiresAt,
+                  ]
+                properties:
+                  pairingId: { type: string, format: uuid }
+                  appLink:
+                    {
+                      type: string,
+                      example: "klarbefund://connect?ehds=...&device_code=...",
+                    }
+                  qrDataUri:
+                    { type: string, description: PNG data URI of the QR code }
+                  userCode: { type: string, example: ABCD-EFGH }
+                  verificationUri: { type: string, format: uri }
+                  expiresAt: { type: string, format: date-time }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: Not a patient }
+        "429": { description: Too many pairings in a minute }
+        "502": { description: Keycloak refused or is unreachable }
+
+  /api/patient/app-pairing/{pairingId}:
+    get:
+      tags: [Patient]
+      summary: State of a pairing this patient started
+      parameters:
+        - {
+            name: pairingId,
+            in: path,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      responses:
+        "200":
+          description: pending, connected (with the phone's name) or expired
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [pairingId, status, expiresAt]
+                properties:
+                  pairingId: { type: string, format: uuid }
+                  status: { type: string, enum: [pending, connected, expired] }
+                  expiresAt: { type: string, format: date-time }
+                  deviceName: { type: string }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/patient/app-devices:
+    get:
+      tags: [Patient]
+      summary: The phones this patient connected
+      responses:
+        "200":
+          description: Connected phones, newest first
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [devices]
+                properties:
+                  devices:
+                    type: array
+                    items: { $ref: "#/components/schemas/AppConnection" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Patient]
+      summary: Register the phone under a pairing (called by the app)
+      security:
+        - klarbefundAppToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pairingId, deviceId]
+              properties:
+                pairingId: { type: string, format: uuid }
+                deviceId:
+                  {
+                    type: string,
+                    format: uuid,
+                    description: UUID v4 the app generated once,
+                  }
+                deviceName: { type: string, maxLength: 60 }
+      responses:
+        "201":
+          description: Connected
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [connection]
+                properties:
+                  connection: { $ref: "#/components/schemas/AppConnection" }
+        "400": { description: Not JSON, or deviceId is not a UUID v4 }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: No pairing of this login matches }
+        "409":
+          {
+            description: The QR code already connected a phone,
+            or the device id belongs to another login,
+          }
+
+  /api/patient/app-devices/{deviceId}:
+    delete:
+      tags: [Patient]
+      summary: Disconnect a phone
+      description: >
+        From the patient screen with a session, for any of the patient's
+        phones; or from the app with its token, for its own device only.
+      security:
+        - nextAuthSession: []
+        - klarbefundAppToken: []
+      parameters:
+        - {
+            name: deviceId,
+            in: path,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      responses:
+        "200":
+          description: Disconnected
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [disconnected]
+                properties:
+                  disconnected: { type: string, format: uuid }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: The app tried to disconnect another device }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/patient/app/record:
+    get:
+      tags: [Patient]
+      summary: The connected patient's own record, for the app (EHDS Art. 3)
+      description: >
+        Observations as a FHIR R4 searchset Bundle, each with the range the
+        laboratory printed; the same Bundle /api/patient/observations returns.
+        Synthetic data, tagged `fictional`.
+      security:
+        - klarbefundAppToken: []
+      parameters:
+        - {
+            name: X-Klarbefund-Device,
+            in: header,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      responses:
+        "200":
+          description: FHIR R4 Bundle
+          content:
+            application/fhir+json:
+              schema: { type: object, required: [resourceType, type, entry] }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { description: No record is assigned to this login }
   /api/compliance:
     get:
       tags: [Compliance]

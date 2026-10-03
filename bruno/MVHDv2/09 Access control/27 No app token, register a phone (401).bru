@@ -1,0 +1,30 @@
+meta {
+  name: 27 No app token, register a phone (401)
+  type: http
+  seq: 27
+}
+
+post {
+  url: {{baseUrl}}/api/patient/app-devices
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer not-a-token
+}
+
+body:json {
+  {"pairingId": "00000000-0000-4000-8000-000000000000", "deviceId": "00000000-0000-4000-8000-000000000000", "deviceName": "iPhone"}
+}
+
+tests {
+  // ADR-049: registration needs a token Keycloak issued to klarbefund-app.
+  test("a token that is not Keycloak's is refused", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

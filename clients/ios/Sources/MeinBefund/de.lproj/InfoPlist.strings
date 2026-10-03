@@ -1,3 +1,3 @@
-"NSCameraUsageDescription" = "Klarbefund nutzt die Kamera nur, um Ihre Befunde zu scannen. Die Aufnahmen bleiben verschlüsselt auf diesem Gerät.";
+"NSCameraUsageDescription" = "Klarbefund nutzt die Kamera nur, um Ihre Befunde und den QR-Code zu scannen, der die App mit Ihrer Gesundheitsakte verbindet. Die Aufnahmen bleiben verschlüsselt auf diesem Gerät.";
 "CFBundleDisplayName" = "Klarbefund";
 "NSHealthShareUsageDescription" = "Klarbefund liest Ruhepuls, Herzfrequenzvariabilität, Schritte und Gewicht, um sie neben Ihren Laborwerten zu zeigen. Die App behält keine Kopie und schreibt nichts in Health.";

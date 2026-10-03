@@ -156,6 +156,31 @@ asks once before exporting when no registry consent is recorded, and **Share
 for my doctor** reminds you, when you recorded an objection to the ePA, that
 there is no ePA to upload to while it stands.
 
+## Connect to EHDS
+
+**Connect to EHDS**, in the menu, connects the app to your record in the
+European Health Data Space demo, so it can read it. No password is typed on
+the phone:
+
+1. On a computer, open the patient screen (the app shows the address, to copy,
+   share or open) and sign in as a patient. Choose **Show QR code**.
+2. In the app, **Scan QR code**. On the computer, **Approve on this computer**
+   opens Keycloak's consent page; check that the code shown there is the one
+   the app shows, and approve.
+3. The app says which account it connected to and asks **Is this your
+   account?** A code someone else showed you would connect the phone to their
+   account, so if the name is not yours, choose **Not me, disconnect**.
+4. **Show my EHDS record** lists the measurements in your record on the hub,
+   each with its printed range and date. On the demo hub every record is
+   synthetic, and the screen says so. The record is read when you open it,
+   kept nowhere, and never mixed into your scanned reports; nothing from the
+   app is sent to the hub.
+
+On a phone holding the patient screen itself, **Open in Klarbefund** does the
+same as the QR code, and the iPhone's camera app opens Klarbefund from the code
+too. The code works once, for two minutes. **Disconnect** is in the app and on
+the patient screen, where every connected phone is listed.
+
 ## Reference values
 
 <img src="img/reference.png" width="300" alt="Reference values: one card per measurement with the guideline threshold and the optimal band per unit, each with its source">

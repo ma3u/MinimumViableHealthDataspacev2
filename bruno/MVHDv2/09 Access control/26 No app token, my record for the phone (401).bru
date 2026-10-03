@@ -1,0 +1,26 @@
+meta {
+  name: 26 No app token, my record for the phone (401)
+  type: http
+  seq: 26
+}
+
+get {
+  url: {{baseUrl}}/api/patient/app/record
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+tests {
+  // ADR-049: the phone's routes take the Klarbefund app's Keycloak token and a
+  // connected device. A browser session, even a patient's, is not that.
+  test("a session is not the app's token", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

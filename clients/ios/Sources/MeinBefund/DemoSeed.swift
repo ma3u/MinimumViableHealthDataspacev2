@@ -64,6 +64,8 @@
       case profile
       /// The three consent decisions, kept apart.
       case consents
+      /// Connect to EHDS, with the hub and Keycloak played by the demo.
+      case connect
     }
 
     static var screen: Screen? {
