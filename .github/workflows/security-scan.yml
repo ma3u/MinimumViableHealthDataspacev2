@@ -266,13 +266,24 @@ jobs:
             echo "::endgroup::"
           done < deployed-images.txt
           [ "$fail" -eq 0 ] || echo "::warning::at least one deployed image could not be scanned"
+          # One category per image. upload-sarif refuses several runs under one
+          # category ("does not support uploading multiple SARIF runs with the
+          # same category"), which failed this job every week from 2026-09-14
+          # and left the Security tab showing Grype and Trivy as erroring.
+          for f in trivy-out/*.sarif; do
+            [ -e "$f" ] || continue
+            id="trivy-deployed-$(basename "$f" .sarif)/"
+            jq --arg id "$id" '.runs |= map(.automationDetails = {id: $id})' "$f" > "$f.tmp"
+            mv "$f.tmp" "$f"
+          done
 
       - name: Upload deployed-image SARIF
         if: always() && hashFiles('trivy-out/*.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
+          # No `category:`: it would override every run's automationDetails.id
+          # and put them back under one category.
           sarif_file: trivy-out
-          category: trivy-deployed
 
   # ── Explicit gate ──
   # Separate from the scans so the reporting jobs always publish to the Security
