@@ -37,6 +37,16 @@ final class ReportUITests: XCTestCase {
       "a value names the page and line it was read from")
   }
 
+  func testThePrintedRangeIsShownAsPrinted() {
+    // #186 criterion 4. The qualifier "(unter 75 J.)" is in no number the
+    // parser can read; only the printed text keeps it, and the screen used to
+    // rebuild the range from the numbers and drop it.
+    let app = AppDriver.launch(.detail)
+    let range = AppDriver.scrollTo(
+      AppDriver.text(containing: "< 125 (unter 75 J.)", in: app), in: app)
+    XCTAssertTrue(range.exists, "the range reads exactly as the laboratory printed it")
+  }
+
   func testTheOriginalScanCanBeOpened() {
     // Demo reports used to carry no pages at all, so this button was simply
     // absent and the app looked like one that forgets what it read from.

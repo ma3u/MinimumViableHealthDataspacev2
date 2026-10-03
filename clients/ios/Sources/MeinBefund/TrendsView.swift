@@ -14,8 +14,13 @@ import SwiftUI
 /// different LOINC codes, and drawing them on one axis would invent a trend.
 ///
 /// A transcription is never drawn as if it were the laboratory's own figure.
-/// A point read by the recogniser is hollow; a value from a laboratory's own
-/// document is filled.
+/// Each kind of evidence has its own shape, a circle for the laboratory's own
+/// file, a diamond for a value read from a photo, a triangle for one entered
+/// or taken from a device, and a legend under the chart names them.
+///
+/// Wearable trends sit in their own section below, on their own charts, with
+/// no range and no shape a lab value uses, so a denser line is never mistaken
+/// for better evidence (#186 criterion 3).
 ///
 /// The band drawn behind the line is the published optimal range, labelled and
 /// sourced. The range your laboratory printed is listed under each point,
@@ -78,6 +83,8 @@ struct TrendsView: View {
                 SeriesFooter(series: item)
               }
             }
+
+            WearablesSection(reportDates: reports.map(\.effectiveDate))
 
             Section {
               RangeLegend()
@@ -291,8 +298,10 @@ private struct SeriesFooter: View {
         // The laboratory's own range, verbatim, because it describes the assay.
         Text("Your laboratory printed \(printed) beside the latest value.")
       }
+      // Under every chart that is not all laboratory files, so which point is
+      // whose never needs a tap (#186 criterion 2).
       if !series.allLabIssued {
-        Text("Hollow points were read from a photograph and are preliminary.")
+        ProvenanceLegend(sources: series.sources)
       }
       // The points are the only way to reach a measurement now, so say so.
       Text("Tap a point to see what it was. Tap the card to open that report.")
@@ -301,12 +310,9 @@ private struct SeriesFooter: View {
 
   private var printedRangeText: String? {
     guard let latest = series.latest else { return nil }
-    switch (latest.printedLow, latest.printedHigh) {
-    case let (low?, high?): return "\(Measurement.text(low)) – \(Measurement.text(high))"
-    case let (nil, high?): return "< \(Measurement.text(high))"
-    case let (low?, nil): return "> \(Measurement.text(low))"
-    default: return nil
-    }
+    return PrintedReference.text(
+      printed: latest.printedText, low: latest.printedLow, high: latest.printedHigh,
+      number: Measurement.text)
   }
 }
 
@@ -371,8 +377,8 @@ private struct SeriesChart: View {
           .foregroundStyle(.blue)
           .interpolationMethod(.monotone)
         PointMark(x: .value("Date", point.date), y: .value("Value", point.value))
-          .foregroundStyle(point.source == .labIssuedDigital ? .blue : .orange)
-          .symbol(point.source == .labIssuedDigital ? .circle : .diamond)
+          .foregroundStyle(ProvenanceStyle.colour(for: point.source))
+          .symbol(ProvenanceStyle.chartSymbol(for: point.source))
           .symbolSize(point.id == selectedPoint?.id ? 160 : 60)
       }
     }
@@ -486,5 +492,118 @@ private struct CalloutPlacement: ViewModifier {
     let above = anchor.y - PointCallout.height - 8
     if above >= 0 { return above }
     return min(anchor.y + 10, max(0, bounds.height - PointCallout.height))
+  }
+}
+
+/// Trends from a watch or a ring, beside the laboratory's values and never as
+/// one of them (#186 criterion 3).
+///
+/// Read only when asked, because asking for Health access the moment a
+/// screen opens is how a permission prompt becomes something people tap
+/// through. Drawn as a grey dashed line with no points, no band and no
+/// colour that means anything, on the same months as the reports, with a
+/// thin rule on each report's day so the two can be read against each other
+/// without being merged.
+private struct WearablesSection: View {
+  let reportDates: [Date]
+
+  private enum Phase: Equatable {
+    case idle, loading, loaded([WearableSeries]), failed(String)
+  }
+  @State private var phase: Phase = .idle
+
+  private var period: DateInterval { WearableSeries.period(reportDates: reportDates) }
+
+  var body: some View {
+    Section {
+      switch phase {
+      case .idle:
+        Button {
+          Task { await load() }
+        } label: {
+          Label("Show trends from Apple Health", systemImage: "heart.text.square")
+        }
+        .accessibilityIdentifier("wearables-load")
+      case .loading:
+        ProgressView()
+      case .failed(let message):
+        Text(message).foregroundStyle(.secondary)
+      case .loaded(let all) where all.isEmpty:
+        Text(
+          "No readings came back. Either Apple Health holds none for this period, or access was not granted: Settings, Health, Data Access & Devices, Klarbefund."
+        )
+        .foregroundStyle(.secondary)
+      case .loaded(let all):
+        ForEach(all) { item in
+          WearableChart(series: item, period: period, reportDates: reportDates)
+        }
+      }
+    } header: {
+      Text("From your devices")
+    } footer: {
+      Text(
+        "Measured by a consumer device, not by a laboratory. Shown beside your lab values, never as one of them: no range, no comparison, and not in the document for your doctor or in any export. Klarbefund reads these from Apple Health while this screen is open and keeps no copy."
+      )
+    }
+  }
+
+  private func load() async {
+    phase = .loading
+    do {
+      phase = .loaded(try await WearableSources.current.series(in: period))
+    } catch {
+      phase = .failed(error.localizedDescription)
+    }
+  }
+}
+
+private struct WearableChart: View {
+  let series: WearableSeries
+  let period: DateInterval
+  let reportDates: [Date]
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      HStack(alignment: .firstTextBaseline) {
+        Text(series.metric.title)
+        Spacer()
+        if let latest = series.points.last {
+          Text("\(Measurement.text(latest.value.rounded())) \(series.metric.unit)")
+            .font(.caption.monospacedDigit())
+            .foregroundStyle(.secondary)
+        }
+      }
+      Chart {
+        // The report days, faint, so a lab value and the device's line can be
+        // read against each other in time.
+        ForEach(reportDates, id: \.self) { date in
+          RuleMark(x: .value("Report", date))
+            .foregroundStyle(.blue.opacity(0.25))
+            .lineStyle(StrokeStyle(lineWidth: 1))
+        }
+        ForEach(series.points) { point in
+          LineMark(x: .value("Week", point.weekStart), y: .value("Value", point.value))
+            .foregroundStyle(.gray)
+            .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [4, 3]))
+            .interpolationMethod(.monotone)
+        }
+      }
+      .chartXScale(domain: period.start...period.end)
+      .chartYScale(domain: .automatic(includesZero: false))
+      .frame(height: 110)
+      .accessibilityLabel(
+        Text("\(series.metric.title), weekly mean, \(series.points.count) weeks"))
+      Text(sourceLine)
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+    }
+    .accessibilityIdentifier("wearable-\(series.metric.rawValue)")
+  }
+
+  private var sourceLine: String {
+    let devices = series.sources.joined(separator: ", ")
+    return devices.isEmpty
+      ? String(localized: "Weekly mean. Thin blue lines mark your report days.")
+      : String(localized: "Weekly mean from \(devices). Thin blue lines mark your report days.")
   }
 }

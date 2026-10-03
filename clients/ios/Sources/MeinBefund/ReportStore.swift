@@ -144,6 +144,23 @@ public actor ReportStore {
     Log.store.notice("profile saved")
   }
 
+  /// The three consent decisions (#186 criterion 6), sealed like the profile.
+  /// Not a bare UUID, so `load()` passes over it; `.sealed`, so
+  /// `deleteEverything()` takes it with the rest.
+  private var consentsURL: URL { directory.appendingPathComponent("consents.sealed") }
+
+  public func consents() throws -> ConsentLedger {
+    try ensureDirectory()
+    guard let plain = try open(consentsURL) else { return .empty }
+    return try JSONDecoder().decode(ConsentLedger.self, from: plain)
+  }
+
+  public func saveConsents(_ ledger: ConsentLedger) throws {
+    try ensureDirectory()
+    try seal(try JSONEncoder().encode(ledger), to: consentsURL)
+    Log.store.notice("consents saved")
+  }
+
   private func url(for id: UUID) -> URL {
     directory.appendingPathComponent("\(id.uuidString).sealed")
   }

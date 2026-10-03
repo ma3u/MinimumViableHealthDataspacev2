@@ -101,3 +101,27 @@ extension ReferenceRanges {
     }
   }
 }
+
+/// The laboratory's printed reference range, for a screen or a document.
+///
+/// The printed text when the record has it, exactly as the sheet shows it
+/// (ADR-033 rule 1, #186 criterion 4). Older records kept only the numbers, so
+/// for those the range is rebuilt from them, which is the most that is known.
+public enum PrintedReference {
+
+  public static func text(
+    printed: String?, low: Double?, high: Double?, number: (Double) -> String
+  ) -> String? {
+    if let printed, !printed.isEmpty { return printed }
+    switch (low, high) {
+    case let (low?, high?): return "\(number(low)) – \(number(high))"
+    case let (nil, high?): return "< \(number(high))"
+    case let (low?, nil): return "> \(number(low))"
+    default: return nil
+    }
+  }
+
+  public static func text(of raw: RawLabValue, number: (Double) -> String) -> String? {
+    text(printed: raw.referenceText, low: raw.referenceLow, high: raw.referenceHigh, number: number)
+  }
+}

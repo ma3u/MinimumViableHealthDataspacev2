@@ -25,6 +25,18 @@
 
 The archive builds. The IPA is one `codesign` run away.
 
+### HealthKit, needed from build 3 on
+
+Read-only wearable trends (#186 criterion 3) add the
+`com.apple.developer.healthkit` entitlement. A device or TestFlight build only
+signs once the App ID carries the **HealthKit** capability:
+Certificates, identifiers and profiles › Identifiers › `red.mabu.meinbefund` ›
+HealthKit, then regenerate `MeinBefund App Store`. `archive-and-upload.sh`
+passes `-allowProvisioningUpdates` with the API key, which can refresh the
+profile but cannot switch the capability on by itself. Simulator builds need
+neither. App Privacy in App Store Connect: Health data is read, never
+collected, because nothing read from HealthKit leaves the phone.
+
 ## The two things blocking the upload
 
 Both are environmental. Neither is the app.
