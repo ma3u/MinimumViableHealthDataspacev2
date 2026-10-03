@@ -3,6 +3,37 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-03: the Azure Vault was emptied every evening, and `min=0` alone would do it too
+
+Found on #455: the CFM Keycloak and EDC-V agents had never started on Azure.
+About 1,090 panics each in 14 days, every one a failed Vault login.
+
+`mvhd-vault` ran `vault server -dev` (no command, `VAULT_DEV_*` in its env),
+so it held everything in memory. ADR-017 mounted `vault-data` at
+`/vault/data`, but nothing ever told Vault to use it. Three things empty an
+in-memory Vault on Container Apps, and the stack had all three:
+
+- **The evening stop.** Setting `min=0` is a revision change, so it starts a
+  new container (`--0000175`, 2026-10-02 21:55).
+- **Scale to zero.** `min=0` with a 300 s cooldown.
+- **Any platform move of the replica.**
+
+The morning bootstrap job put the configuration back, but never the
+participant keys, and it ran a cached `:latest` image without the provisioner
+role.
+
+Three traps on the way to the fix (ADR-047 is the stopgap, ADR-046 the fix):
+
+- `hashicorp/vault:2.0` runs as the `vault` user, so `apk add` in a derived
+  image fails with `Unable to open log: Permission denied`. Add `USER root`.
+- Vault on `storage "postgresql"` exits at startup when the database is not
+  reachable (`failed to check for native upsert`), and the backend does not
+  create its own table. The sidecar creates the table; Container Apps
+  restarts Vault.
+- A local `docker run --network container:<vault>` test loses the shared
+  namespace when Vault restarts. Use a third "pod" container that owns the
+  namespace, as ACA's pause container does.
+
 ## 2026-10-02: Neo4j on Azure has run an April revision since April, and nobody saw
 
 Found while removing the `/logs` mount (#418). Three faults, each hiding the next.

@@ -10,7 +10,8 @@
 set -eu
 
 VAULT_ADDR="${VAULT_ADDR:-http://vault:8200}"
-INIT_FILE="/vault/init.json"
+# The Azure sidecar keeps it on the vault-data share instead (ADR-046).
+INIT_FILE="${VAULT_INIT_FILE:-/vault/init.json}"
 
 wait_for_vault() {
   echo "[vault-init] Waiting for Vault to start..."
@@ -31,13 +32,31 @@ INITIALIZED=$(vault status -address="$VAULT_ADDR" -format=json 2>/dev/null | gre
 
 if [ "$INITIALIZED" = "0" ]; then
   echo "[vault-init] First start — initialising Vault..."
+  # Written locally first and copied once complete, so a write that fails
+  # half way on a network share cannot leave an initialised Vault whose only
+  # copy of the unseal key is a truncated file.
   vault operator init \
     -address="$VAULT_ADDR" \
     -key-shares=1 \
     -key-threshold=1 \
-    -format=json > "$INIT_FILE"
+    -format=json > /tmp/vault-init.json
+  cp /tmp/vault-init.json "$INIT_FILE"
+  cmp -s /tmp/vault-init.json "$INIT_FILE" || {
+    echo "[vault-init] ERROR: $INIT_FILE does not match what init returned" >&2
+    exit 1
+  }
+  rm -f /tmp/vault-init.json
   echo "[vault-init] Vault initialised. Keys written to $INIT_FILE"
   echo "[vault-init] IMPORTANT: Back up $INIT_FILE securely."
+elif [ ! -s "$INIT_FILE" ]; then
+  # Initialised storage with no key file can never be unsealed again. Say what
+  # to do rather than die on the read below.
+  echo "[vault-init] ERROR: Vault storage is initialised but $INIT_FILE is missing." >&2
+  echo "[vault-init] The unseal key is gone, so this storage cannot be opened." >&2
+  echo "[vault-init] Recovery: empty the storage (Azure: TRUNCATE vault_kv_store," >&2
+  echo "[vault-init] local: remove the vault_data volume), restart, then re-run" >&2
+  echo "[vault-init] the Vault bootstrap and reseed the participants." >&2
+  exit 1
 fi
 
 # `vault operator init -format=json` pretty-prints, so the compact-JSON greps
