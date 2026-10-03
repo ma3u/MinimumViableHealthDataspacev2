@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "@scalar/api-reference-react": "^0.9.66",
-    "3d-force-graph": "^1.80.0",
-    "lucide-react": "^0.378.0",
+    "3d-force-graph": "^1.80.1",
+    "lucide-react": "^0.577.0",
     "mermaid": "^11.13.0",
     "neo4j-driver": "^5.18.0",
     "next": "^15.5.14",
@@ -37,15 +37,15 @@
     "qrcode": "^1.5.4",
     "react": "^18",
     "react-dom": "^18",
-    "react-force-graph-2d": "^1.25.5",
-    "swagger-ui-dist": "^5.32.15",
-    "three": "^0.183.2"
+    "react-force-graph-2d": "^1.29.2",
+    "swagger-ui-dist": "^5.33.0",
+    "three": "^0.186.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
-    "@testing-library/dom": "^10.4.1",
+    "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
@@ -53,8 +53,8 @@
     "@types/qrcode": "^1.5.5",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@types/three": "^0.183.0",
-    "@typescript-eslint/eslint-plugin": "^8.69.0",
+    "@types/three": "^0.186.0",
+    "@typescript-eslint/eslint-plugin": "^8.71.0",
     "@typescript-eslint/parser": "^8.57.2",
     "@typescript-eslint/typescript-estree": "^8.57.2",
     "@vitejs/plugin-react": "^5.1.4",
@@ -69,6 +69,6 @@
     "vitest": "^4.1.11"
   },
   "optionalDependencies": {
-    "@next/swc-linux-arm64-musl": "^16.3.4"
+    "@next/swc-linux-arm64-musl": "^16.3.7"
   }
 }
