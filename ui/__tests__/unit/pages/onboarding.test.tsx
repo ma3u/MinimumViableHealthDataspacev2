@@ -337,6 +337,102 @@ describe("OnboardingPage", () => {
       expect(screen.getByTitle(/no DID was registered/)).toBeInTheDocument();
     });
 
+    // The live shape since #468: the route sends the DID with the profile, so
+    // every live profile has an identifier from the start. Only the Tenant
+    // Manager's outcome may decide the badge (2026-10-03).
+    const liveProfile = {
+      participantContextId: "ctx-live",
+      identifier: "did:web:identityhub%3A7083:testpraxis-lindenhof-aa5e17",
+    };
+    const liveTenant = {
+      ...activeTenant,
+      id: "tenant-live",
+      properties: {
+        ...activeTenant.properties,
+        displayName: "Testpraxis Lindenhof",
+        organization: "Testpraxis Lindenhof",
+      },
+    };
+
+    it('shows "Provisioning failed" with the reason when an agent gave up', async () => {
+      const user = userEvent.setup();
+      mockFetchApi.mockReturnValue(
+        mockResponse([
+          {
+            ...liveTenant,
+            participantProfiles: [{ ...liveProfile, error: true }],
+            provisioningFailed: true,
+            failedReason: "A provisioning agent reported an error ...",
+            vpaSummary: {
+              total: 3,
+              pending: 0,
+              pendingTypes: [],
+              oldestPendingSince: null,
+              stalled: false,
+            },
+          },
+        ]),
+      );
+      render(<OnboardingPage />);
+      await waitFor(() => {
+        expect(screen.getByText("Provisioning failed")).toBeInTheDocument();
+      });
+      expect(screen.queryByText("Active")).toBeNull();
+      await user.click(screen.getByText("Testpraxis Lindenhof"));
+      expect(
+        screen.getByText("A provisioning agent reported an error ..."),
+      ).toBeInTheDocument();
+    });
+
+    it('shows "Provisioning", not "Active", while the activities run', async () => {
+      mockFetchApi.mockReturnValue(
+        mockResponse([
+          {
+            ...liveTenant,
+            participantProfiles: [liveProfile],
+            provisioningFailed: false,
+            provisioningComplete: false,
+            vpaSummary: {
+              total: 3,
+              pending: 3,
+              pendingTypes: ["cfm.connector"],
+              oldestPendingSince: "2026-10-03T21:48:35Z",
+              stalled: false,
+            },
+          },
+        ]),
+      );
+      render(<OnboardingPage />);
+      await waitFor(() => {
+        expect(screen.getByText("Provisioning")).toBeInTheDocument();
+      });
+      expect(screen.queryByText("Active")).toBeNull();
+    });
+
+    it('shows "Active" once every activity completed', async () => {
+      mockFetchApi.mockReturnValue(
+        mockResponse([
+          {
+            ...liveTenant,
+            participantProfiles: [liveProfile],
+            provisioningFailed: false,
+            provisioningComplete: true,
+            vpaSummary: {
+              total: 3,
+              pending: 0,
+              pendingTypes: [],
+              oldestPendingSince: null,
+              stalled: false,
+            },
+          },
+        ]),
+      );
+      render(<OnboardingPage />);
+      await waitFor(() => {
+        expect(screen.getByText("Active")).toBeInTheDocument();
+      });
+    });
+
     it("renders all three statuses side-by-side for mixed tenants", async () => {
       mockFetchApi.mockReturnValue(mockResponse(allTenants));
       render(<OnboardingPage />);

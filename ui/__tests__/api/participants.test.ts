@@ -173,28 +173,37 @@ describe("/api/participants", () => {
       expect(data.upstreamError).toContain("dataspace profile");
     });
 
-    it("records the registration when the TenantManager is unreachable", async () => {
+    // A Tenant Manager that does not answer is the hosted demo outside its
+    // operating window (ADR-042), not a deployment without provisioning. It
+    // used to be recorded as a demo participant whose reason said the stack
+    // was not deployed at all (2026-10-03).
+    it("answers 503 and records nothing when the TenantManager is unreachable", async () => {
       mockTenant.mockRejectedValue(new Error("dial tcp: connection refused"));
 
-      const response = await POST(register());
-      expect(response.status).toBe(201);
+      const response = await POST(register("Asleep Clinic"));
+      expect(response.status).toBe(503);
 
       const data = await response.json();
-      expect(data.provisioned).toBe(false);
+      expect(data.error).toMatch(/not running/i);
+      expect(data.detail).toMatch(/nothing was registered/i);
+      expect(data.detail).toMatch(/07:00 to 20:00 Europe\/Berlin/);
       // The cause travels with the answer, which is the whole point of #203.
       expect(data.upstreamError).toContain("connection refused");
-      // Nothing was created, so nothing may be claimed.
-      expect(data.participantProfiles).toEqual([]);
       expect(mockTenant).not.toHaveBeenCalledWith(
         "/v1alpha1/tenants",
         "POST",
         expect.anything(),
       );
+
+      // Nothing appears in the list the page reloads either.
+      const listed = await (await ME_GET()).json();
+      expect(listed).toEqual([]);
     });
 
     it("keeps the recorded registration in the list the page reloads", async () => {
-      mockTenant.mockRejectedValue(new Error("connection refused"));
+      mockTenant.mockResolvedValue([]); // the manager answers: no cell
       await POST(register("Recorded Clinic"));
+      mockTenant.mockRejectedValue(new Error("connection refused"));
 
       const listed = await (await ME_GET()).json();
 
@@ -366,6 +375,47 @@ describe("/api/participants", () => {
       expect(listed[0].provisioningStalled).toBe(true);
       expect(listed[0].vpaSummary.pending).toBe(2);
       expect(listed[0].stalledReason).toContain("no DID was registered");
+    });
+
+    it("reports a profile the agents rolled back as failed, with the reason", async () => {
+      mockTenant
+        .mockResolvedValueOnce([{ id: "t-1", version: 0, properties: {} }])
+        .mockResolvedValueOnce([
+          {
+            id: "p-1",
+            identifier: "did:web:identityhub%3A7083:x-1",
+            error: true,
+            vpas: [
+              { type: "cfm.connector", state: "disposed" },
+              { type: "cfm.dataplane", state: "disposed" },
+            ],
+          },
+        ]);
+
+      const listed = await (await ME_GET()).json();
+      expect(listed[0].provisioningFailed).toBe(true);
+      expect(listed[0].provisioningComplete).toBe(false);
+      expect(listed[0].failedReason).toMatch(/no DID was registered/);
+    });
+
+    it("reports a profile whose activities are all active as complete", async () => {
+      mockTenant
+        .mockResolvedValueOnce([{ id: "t-1", version: 0, properties: {} }])
+        .mockResolvedValueOnce([
+          {
+            id: "p-1",
+            error: false,
+            vpas: [
+              { type: "cfm.connector", state: "active" },
+              { type: "cfm.dataplane", state: "active" },
+            ],
+          },
+        ]);
+
+      const listed = await (await ME_GET()).json();
+      expect(listed[0].provisioningFailed).toBe(false);
+      expect(listed[0].provisioningComplete).toBe(true);
+      expect(listed[0].failedReason).toBeUndefined();
     });
 
     it("leaves a fresh registration alone", async () => {

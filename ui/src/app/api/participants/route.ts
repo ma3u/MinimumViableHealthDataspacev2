@@ -7,7 +7,11 @@ import {
   DEMO_ONBOARDING_SCOPE,
   type DemoRecord,
 } from "@/lib/demo-records";
-import { summariseVpas, type Vpa } from "@/lib/provisioning";
+import {
+  summariseVpas,
+  PROVISIONING_HOURS,
+  type Vpa,
+} from "@/lib/provisioning";
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -220,6 +224,8 @@ async function canProvision(): Promise<{
   cellId: string;
   profileId: string;
   unavailable: string;
+  /** The Tenant Manager did not answer at all, rather than answer "no". */
+  unreachable?: boolean;
 }> {
   try {
     const cells = await edcClient.tenant<{ id: string }[]>("/v1alpha1/cells");
@@ -252,6 +258,7 @@ async function canProvision(): Promise<{
       cellId: "",
       profileId: "",
       unavailable: err instanceof Error ? err.message : String(err),
+      unreachable: true,
     };
   }
 }
@@ -294,8 +301,9 @@ function buildDemoParticipant(
     provisioned: false,
     demo: true,
     demoReason:
-      "This deployment does not run the CFM provisioning stack, so the " +
-      "registration was recorded for the demonstration only. No DID was " +
+      "The CFM Tenant Manager has no cell or dataspace profile to attach a " +
+      "tenant to, so the registration was recorded for the demonstration " +
+      "only. No DID was " +
       "registered, no key pair generated and no credential issued. The five " +
       "seeded participants are unaffected. Tracked in issue #203.",
     upstreamError: reason,
@@ -331,7 +339,25 @@ export async function POST(req: NextRequest) {
     // Read together because they answer one question: can this deployment
     // provision a participant at all? See canProvision() for why that is not a
     // given, and why an answer of "no" is not a failed registration.
-    const { profileId, unavailable } = await canProvision();
+    const { profileId, unavailable, unreachable } = await canProvision();
+
+    // A Tenant Manager that does not answer is a stopped stack, not one that
+    // cannot provision. This used to record a demo participant saying "this
+    // deployment does not run the CFM provisioning stack", which has not been
+    // true since the agents came to Azure (#455): it runs, on a schedule. Say
+    // that, and record nothing (2026-10-03).
+    if (unreachable) {
+      return NextResponse.json(
+        {
+          error: "The provisioning stack is not running",
+          detail:
+            "The CFM Tenant Manager did not answer, so nothing was " +
+            `registered. ${PROVISIONING_HOURS} Please register again then.`,
+          upstreamError: unavailable,
+        },
+        { status: 503 },
+      );
+    }
 
     if (unavailable) {
       const participant = buildDemoParticipant(

@@ -145,6 +145,27 @@ write() {
   esac
 }
 
+# role NAME JSON: replace a JWT role rather than update it. A POST to an
+# existing role changes only the fields it sends and keeps the rest, so the
+# participant role kept the bound_audiences ["account"], user_claim sub and
+# claim_mappings the first Azure bootstrap gave it (177b773) through every
+# later rewrite, and once Vault became persistent (ADR-046) that role was
+# what the new participant contexts logged in with. IdentityHub stored no
+# participant token, every onboarding failed at the participant context, and
+# its log said "invalid audience (aud) claim: audience claim does not match
+# any expected audience" (2026-10-03). Delete, then write the whole role.
+role() {
+  code=\$(vault_call DELETE "/auth/jwt/role/\$1") || code=000
+  case "\$code" in
+    2??|404) ;;
+    *)
+      echo "  FAIL  DELETE /auth/jwt/role/\$1 (HTTP \$code)"
+      FAILED=\$((FAILED + 1))
+      ;;
+  esac
+  write POST "/auth/jwt/role/\$1" "\$2"
+}
+
 # policy NAME HCL
 policy() {
   write PUT "/sys/policies/acl/\$1" "\$(jq -n --arg p "\$2" '{policy: \$p}')"
@@ -187,7 +208,18 @@ echo "  ok    jwt accessor \$ACCESSOR"
 header "Participant policy and role"
 policy participants-restricted "path \"participants/data/{{identity.entity.aliases.\${ACCESSOR}.name}}/*\" { capabilities = [\"create\",\"read\",\"update\",\"delete\",\"list\"] }
 path \"participants/metadata/{{identity.entity.aliases.\${ACCESSOR}.name}}/*\" { capabilities = [\"list\"] }"
-write POST /auth/jwt/role/participant '{"role_type":"jwt","user_claim":"participant_context_id","bound_claims":{"role":"participant"},"token_policies":["participants-restricted"],"clock_skew_leeway":60}'
+role participant '{"role_type":"jwt","user_claim":"participant_context_id","bound_claims":{"role":"participant"},"token_policies":["participants-restricted"],"clock_skew_leeway":60}'
+
+# Read it back: the role this deployment logs participants in with has no
+# audience binding, keys on participant_context_id, and grants only the
+# participant policy. A stale field here fails every onboarding, silently.
+code=\$(vault_call GET /auth/jwt/role/participant) || code=000
+if [ "\$code" = 200 ] && jq -e '.data.bound_audiences == null and .data.user_claim == "participant_context_id" and .data.claim_mappings == null and .data.token_policies == ["participants-restricted"]' /tmp/resp.json >/dev/null; then
+  echo "  ok    participant role read back as written"
+else
+  echo "  FAIL  participant role read back (HTTP \$code): \$(jq -c '.data | {bound_audiences, user_claim, claim_mappings, token_policies}' /tmp/resp.json 2>/dev/null)"
+  FAILED=\$((FAILED + 1))
+fi
 
 # The provisioner role, which this script once created a POLICY for and then
 # never a ROLE. jad/bootstrap-vault.sh creates both; Azure had only the policy,
@@ -220,7 +252,7 @@ write POST /auth/jwt/role/participant '{"role_type":"jwt","user_claim":"particip
 header "Provisioner policy and role"
 policy provisioner 'path "*" { capabilities = ["create","read","update","delete","list","sudo"] }
 path "sys/*" { capabilities = ["create","read","update","delete","list","sudo"] }'
-write POST /auth/jwt/role/provisioner "{\"role_type\":\"jwt\",\"user_claim\":\"azp\",\"bound_claims\":{\"role\":\"provisioner\",\"iss\":\"${KC_ISSUER}\"},\"token_policies\":[\"provisioner\"],\"clock_skew_leeway\":60}"
+role provisioner "{\"role_type\":\"jwt\",\"user_claim\":\"azp\",\"bound_claims\":{\"role\":\"provisioner\",\"iss\":\"${KC_ISSUER}\"},\"token_policies\":[\"provisioner\"],\"clock_skew_leeway\":60}"
 
 header "Transit keys"
 write POST /transit/keys/dataspace-aes '{"type":"aes256-gcm96"}'

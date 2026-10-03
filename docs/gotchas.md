@@ -3,6 +3,36 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-03: a Vault role write keeps the fields it does not send
+
+Onboarding on Azure stopped at "Participant Context" with the whole stack up.
+The EDC-V agent logged `POST .../api/identity/v1alpha/participants giving up
+after 6 attempt(s)`; the cause was one level down, in IdentityHub:
+`Failed to obtain vault token ... invalid audience (aud) claim: audience claim
+does not match any expected audience`.
+
+That message means the role **has** `bound_audiences` and none match. The
+bootstrap did not set any. The first Azure bootstrap (177b773) did:
+`bound_audiences ["account"]`, `user_claim sub`, `claim_mappings`. A `POST` (or
+`vault write`) to an existing role updates only the fields in the body, so
+every later rewrite, #468's included, left those three in place, and once
+Vault became persistent (ADR-046) they stayed for good. Reproduced on
+`hashicorp/vault:2.0`.
+
+Replace a role, never update it: `DELETE` then `POST`, and read it back. The
+bootstrap in `scripts/azure/06-post-deploy.sh` does that for both JWT roles
+now. The same holds for anything else in Vault written as a partial update.
+
+Two more things hid it. Outside the operating window (ADR-042) the Tenant
+Manager is at zero, so `/api/participants` could not reach it and recorded a
+demo participant saying the deployment "does not run the CFM provisioning
+stack"; it now answers 503 and says when the stack runs. And `/onboarding`
+called a tenant Active as soon as its profile had an identifier, which the
+route has sent with every profile since #468, so a registration the agents
+had rolled back (`error: true`, every activity `disposed`) showed as Active.
+The page now reads the outcome off the Tenant Manager: every activity
+`active` is Active, `error: true` is "Provisioning failed".
+
 ## 2026-10-03: the Azure Vault was emptied every evening, and `min=0` alone would do it too
 
 Found on #455: the CFM Keycloak and EDC-V agents had never started on Azure.

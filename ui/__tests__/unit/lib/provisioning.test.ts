@@ -6,6 +6,8 @@ import { describe, it, expect } from "vitest";
 import {
   summariseVpas,
   stalledReason,
+  provisioningFailed,
+  provisioningComplete,
   PROVISIONING_STALL_MS,
 } from "@/lib/provisioning";
 
@@ -130,7 +132,9 @@ describe("stalledReason", () => {
     expect(reason).toContain("cfm.connector");
     expect(reason).toContain("no provisioning agent has completed them");
     expect(reason).toContain("no DID was registered");
-    expect(reason).toContain("#203");
+    // Says when the agents run, not that they are absent (2026-10-03).
+    expect(reason).toContain("07:00 to 20:00 Europe/Berlin");
+    expect(reason).not.toMatch(/does not run/);
   });
 
   it("reads correctly for a single pending activity", () => {
@@ -146,5 +150,35 @@ describe("stalledReason", () => {
     );
     expect(stalledReason(summary)).toContain("has been pending");
     expect(stalledReason(summary)).toContain("completed it");
+  });
+});
+
+// Measured on 2026-10-03: a provisioned profile has every activity "active"
+// and error false; one the agents gave up on has error true and its
+// activities "error" or "disposed". The identifier is no signal, the route
+// sends it with the profile.
+describe("provisioningFailed and provisioningComplete", () => {
+  const act = (state: string) => ({ type: "cfm.connector", state });
+
+  it("reads a rolled-back profile as failed, never complete", () => {
+    const profiles = [
+      { error: true, vpas: [act("disposed"), act("disposed")] },
+    ];
+    expect(provisioningFailed(profiles)).toBe(true);
+    expect(provisioningComplete(profiles)).toBe(false);
+  });
+
+  it("reads a profile with every activity active as complete", () => {
+    const profiles = [{ error: false, vpas: [act("active"), act("active")] }];
+    expect(provisioningFailed(profiles)).toBe(false);
+    expect(provisioningComplete(profiles)).toBe(true);
+  });
+
+  it("is neither while an activity is pending, or with no activities", () => {
+    const pending = [{ error: false, vpas: [act("active"), act("pending")] }];
+    expect(provisioningFailed(pending)).toBe(false);
+    expect(provisioningComplete(pending)).toBe(false);
+    expect(provisioningComplete([{ vpas: [] }])).toBe(false);
+    expect(provisioningComplete(undefined)).toBe(false);
   });
 });

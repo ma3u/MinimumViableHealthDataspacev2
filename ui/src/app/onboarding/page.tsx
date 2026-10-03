@@ -50,6 +50,11 @@ interface Tenant {
   /** Every provisioning activity still pending long past creation (#203). */
   provisioningStalled?: boolean;
   stalledReason?: string;
+  /** An agent reported an error and the profile was rolled back. */
+  provisioningFailed?: boolean;
+  failedReason?: string;
+  /** Every provisioning activity completed. */
+  provisioningComplete?: boolean;
   vpaSummary?: VpaSummary;
 }
 
@@ -59,6 +64,7 @@ type TenantStatus =
   | "active"
   | "provisioning"
   | "stalled"
+  | "failed"
   | "pending"
   | "not-provisioned";
 
@@ -181,11 +187,18 @@ function deriveStatus(tenant: Tenant): TenantStatus {
   }
   const profiles = tenant.participantProfiles || [];
   if (profiles.length === 0) return "pending";
+  if (tenant.provisioningFailed) return "failed";
+  // The CFM Tenant Manager says when provisioning is done. The identifier
+  // does not: the route sends the DID with the profile, so a profile has one
+  // from the first second, and one the agents rolled back keeps it
+  // (2026-10-03). The identifier rule below is for the static mock data.
+  if (tenant.provisioningComplete) return "active";
   // The tenant and the profile are real, the activities were created, and
   // nothing has completed one since. An animated "Provisioning" clock here
   // promises a DID that is not coming (issue #203, lib/provisioning.ts).
   if (tenant.provisioningStalled) return "stalled";
   // Check both live EDC-V format (identifier) and mock format (did + state)
+  if (tenant.vpaSummary && tenant.vpaSummary.total > 0) return "provisioning";
   const hasIdentity = profiles.some(
     (p) =>
       (p.identifier && p.identifier !== "null") ||
@@ -230,6 +243,16 @@ function StatusBadge({
       </span>
     );
   }
+  if (status === "failed") {
+    return (
+      <span
+        title={title}
+        className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-(--role-admin-bg) text-(--role-admin-text) border border-(--role-admin-border)"
+      >
+        <AlertTriangle size={10} /> Provisioning failed
+      </span>
+    );
+  }
   if (status === "stalled") {
     return (
       <span
@@ -265,11 +288,20 @@ function StatusBadge({
 function OnboardingSteps({ tenant }: { tenant: Tenant }) {
   const profiles = tenant.participantProfiles || [];
   const hasProfile = profiles.length > 0;
-  const hasDid = profiles.some(
-    (p) =>
-      (p.identifier && p.identifier !== "null") || (p.did && p.did !== "null"),
-  );
   const status = deriveStatus(tenant);
+  // Live tenants have activities, and only their completion means a DID was
+  // registered; the static mock data has none and states its DID directly.
+  const live = (tenant.vpaSummary?.total ?? 0) > 0;
+  const hasDid = live
+    ? status === "active"
+    : profiles.some(
+        (p) =>
+          (p.identifier && p.identifier !== "null") ||
+          (p.did && p.did !== "null"),
+      );
+  // Nothing is in progress on a registration that failed or stalled; a
+  // pulsing clock there promises what is not coming.
+  const moving = status !== "failed" && status !== "stalled";
 
   const steps = [
     {
@@ -280,26 +312,26 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
     },
     {
       label: "Participant Context",
-      done: hasProfile,
-      inProgress: !hasProfile,
+      done: hasProfile && (!live || status !== "failed"),
+      inProgress: !hasProfile && moving,
       desc: "EDC-V participant context provisioned",
     },
     {
       label: "DID Provisioned",
       done: hasDid,
-      inProgress: hasProfile && !hasDid,
+      inProgress: hasProfile && !hasDid && moving,
       desc: "Decentralised Identifier (did:web) created via IdentityHub",
     },
     {
       label: "Credentials Issued",
       done: hasDid,
-      inProgress: hasDid && status !== "active",
+      inProgress: hasDid && status !== "active" && moving,
       desc: "EHDS Verifiable Credentials available",
     },
     {
       label: "Active in Dataspace",
       done: status === "active",
-      inProgress: hasDid && status !== "active",
+      inProgress: hasDid && status !== "active" && moving,
       desc: "Ready to negotiate contracts and transfer data",
     },
   ];
@@ -410,7 +442,9 @@ function ParticipantCard({
             <p className="font-medium text-(--text-primary)">{name}</p>
             <StatusBadge
               status={status}
-              title={tenant.stalledReason ?? tenant.demoReason}
+              title={
+                tenant.failedReason ?? tenant.stalledReason ?? tenant.demoReason
+              }
             />
           </div>
           <p className="text-xs text-(--text-secondary) mt-0.5">
@@ -505,6 +539,11 @@ function ParticipantCard({
             <h4 className="text-xs font-semibold text-(--text-secondary) uppercase tracking-wide mb-3">
               Onboarding Progress
             </h4>
+            {(tenant.failedReason ?? tenant.stalledReason) && (
+              <p className="mb-3 text-xs text-(--text-secondary)">
+                {tenant.failedReason ?? tenant.stalledReason}
+              </p>
+            )}
             <OnboardingSteps tenant={tenant} />
           </div>
         </div>
