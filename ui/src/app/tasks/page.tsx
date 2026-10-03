@@ -399,7 +399,7 @@ function TasksContent() {
           }
           infoText="Tasks are aggregated from all registered participant contexts. Negotiations follow: REQUESTED → OFFERED → ACCEPTED → AGREED → VERIFIED → FINALIZED. Transfers follow: REQUESTED → STARTED → SUSPENDED → COMPLETED. The EDR badge indicates the Data Plane has been signalled via DPS and generated an Endpoint Data Reference with JWT bearer token."
           docLink={{
-            href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
+            href: "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
             label: "DSP Specification",
             external: true,
           }}

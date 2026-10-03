@@ -221,7 +221,7 @@ export default function ComplianceTckPage() {
             nextStep={{ href: "/credentials", label: "Verifiable Credentials" }}
             infoText="The TCK executes protocol-level tests covering catalog, negotiation, transfer, and identity resolution. Results indicate whether your connectors are interoperable with other EHDS participants."
             docLink={{
-              href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
+              href: "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
               label: "Dataspace Protocol Spec",
               external: true,
             }}

@@ -352,7 +352,7 @@ function NegotiateContent() {
           nextStep={{ href: "/data/transfer", label: "Data Transfer" }}
           infoText="Two steps: (1) choose a data provider and click Discover Offers to see what datasets are available; (2) select a dataset and click Start Negotiation to request access."
           docLink={{
-            href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol",
+            href: "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
             label: "DSP Specification",
             external: true,
           }}
