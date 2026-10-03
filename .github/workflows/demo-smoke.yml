@@ -32,6 +32,10 @@ on:
 env:
   DEMO_URL: https://ehds.mabu.red
 
+# Read-only token unless a job asks for more (trivy-scan does, for SARIF).
+permissions:
+  contents: read
+
 jobs:
   bruno:
     name: Bruno API (Azure-Dev)

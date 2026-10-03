@@ -35,6 +35,10 @@ on:
 env:
   NODE_VERSION: "22"
 
+# Read-only token unless a job asks for more (trivy-scan does, for SARIF).
+permissions:
+  contents: read
+
 jobs:
   # -----------------------------------------------------------------------
   # UI Unit + API Integration Tests (Vitest)

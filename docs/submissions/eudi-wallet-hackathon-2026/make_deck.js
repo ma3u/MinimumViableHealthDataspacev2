@@ -17,7 +17,8 @@ const esc = (s) =>
   String(s == null ? "" : s)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 
 // Layer accent colors (graph-constants.ts) used as a thin 5-stop spine.
 const LAYERS = ["#2471A3", "#148F77", "#1E8449", "#CA6F1E", "#7D3C98"];

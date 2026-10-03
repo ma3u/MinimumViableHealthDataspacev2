@@ -7,6 +7,7 @@ import asyncio
 import json
 import sys
 from playwright.async_api import async_playwright
+from urllib.parse import urlparse
 
 REGISTER_URL = "https://register.awmf.org/de/leitlinien/aktuelle-leitlinien"
 
@@ -26,7 +27,7 @@ async def main():
         page = await context.new_page()
 
         async def on_request(req):
-            if "leitlinien-api.awmf.org" in req.url:
+            if urlparse(req.url).hostname == "leitlinien-api.awmf.org":
                 try:
                     headers = await req.all_headers()
                 except Exception:
