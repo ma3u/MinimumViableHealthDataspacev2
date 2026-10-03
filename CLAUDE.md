@@ -59,6 +59,8 @@ docs/                   — see "Knowledge & planning" below
    in-memory, and a restart silently took every participant's signing key while the identity
    checks kept passing. If IdentityHub logs `Private key ... not found`, check that
    `health-dataspace-vault-unseal` reported `ready`; see `docs/gotchas.md` (2026-09-26).
+   On Azure, `mvhd-vault` stores in the `vault` database on the Flexible Server with a
+   `vault-unseal` sidecar (ADR-046, `scripts/azure/14-vault-on-postgres.sh`); never `-dev`.
 2. **JAD seed phases 1–7 are strictly ordered** — FHIR before OMOP (phase 4 needs phase 3).
 3. **Static export disables API routes** — CI renames `src/app/api/`; guard with
    `NEXT_PUBLIC_STATIC_EXPORT` and mirror every route in `ui/public/mock/*.json`.
