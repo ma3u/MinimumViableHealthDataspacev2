@@ -36,6 +36,10 @@
     /// The profile the demo is showing, likewise in memory only.
     @MainActor static var liveProfile = Profile.empty
 
+    /// The consents the demo is showing, in memory only and empty at launch,
+    /// so a test sees "not recorded" before it records anything.
+    @MainActor static var liveConsents = ConsentLedger.empty
+
     /// Replaces a report of the same id, or adds it, newest first.
     @MainActor static func keep(_ report: LabReport) {
       live.removeAll { $0.id == report.id }
@@ -58,6 +62,8 @@
       case history
       /// Sex, date of birth, height and the body measurements.
       case profile
+      /// The three consent decisions, kept apart.
+      case consents
     }
 
     static var screen: Screen? {
@@ -76,12 +82,13 @@
     /// compares anything.
     private static func coded(
       _ label: String, _ value: Double, _ unitRaw: String, _ ucum: String, _ loinc: String,
-      _ display: String, key: String, low: Double? = nil, high: Double? = nil, line: Int
+      _ display: String, key: String, low: Double? = nil, high: Double? = nil,
+      printed: String? = nil, line: Int
     ) -> CodedLabValue {
       CodedLabValue(
         raw: RawLabValue(
           label: label, value: value, unitRaw: unitRaw,
-          referenceLow: low, referenceHigh: high,
+          referenceLow: low, referenceHigh: high, referenceText: printed,
           line: "\(label)  \(value)  \(unitRaw)", lineNumber: line,
           region: SourceRegion(
             page: 1, x: 0.07, y: 0.82 - Double(line) * 0.04, width: 0.85, height: 0.03)),
@@ -109,7 +116,9 @@
                 "Creatinine [Mass/volume]", key: "creatinine", low: 0.7, high: 1.2, line: 7),
           // The German thousands rule, visible: 1.240 pg/mL is 1240.
           coded("NT-proBNP", 1240, "pg/ml", "pg/mL", "33762-6",
-                "Natriuretic peptide.B prohormone N-Terminal", key: "nt-probnp", high: 125, line: 8),
+                "Natriuretic peptide.B prohormone N-Terminal", key: "nt-probnp", high: 125,
+                // The qualifier is part of the range and only the text keeps it.
+                printed: "< 125 (unter 75 J.)", line: 8),
           coded("Ferritin", 210, "ug/l", "ug/L", "2276-4",
                 "Ferritin [Mass/volume]", key: "ferritin", low: 30, high: 400, line: 9),
         ],

@@ -70,6 +70,14 @@ targets:
         INFOPLIST_KEY_NSCameraUsageDescription: >-
           Klarbefund uses the camera only to scan your lab reports.
           The photographs stay encrypted on this device.
+        # Read only, asked for on the Trends screen when the person taps
+        # "Show trends from Apple Health" and never at launch (#186
+        # criterion 3). No NSHealthUpdateUsageDescription: the app writes
+        # nothing to Health. German in de.lproj/InfoPlist.strings.
+        INFOPLIST_KEY_NSHealthShareUsageDescription: >-
+          Klarbefund reads resting heart rate, heart rate variability, steps
+          and weight to show them beside your lab values. It keeps no copy and
+          writes nothing to Health.
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # Cloud analysis (ADR-034). Empty by default and checked at runtime, so
         # an unconfigured build simply does not offer the button rather than

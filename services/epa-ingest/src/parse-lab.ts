@@ -117,6 +117,32 @@ export function parseReferenceRange(raw: string): ReferenceRange {
 }
 
 /**
+ * The reference column as printed, or `undefined` when there is none.
+ *
+ * Whitespace and the stray separator a recogniser reads at a column edge
+ * (`: 33-36`) are trimmed; nothing else is touched, so a unit printed in the
+ * range column (`< 116 mg/dl`) stays. A remainder that is a whole
+ * `label value unit` row is a second analyte merged onto the line by a
+ * two-column layout, not a range, and is not kept as one. The label must have
+ * four letters to count, so a qualifier such as `Erw. < 5,0 mg/l` is a range.
+ */
+export function printedReference(raw: string): string | undefined {
+  const t = raw
+    .trim()
+    .replace(/^[:;,|]+\s*/, "")
+    .trim();
+  if (!t) return undefined;
+  const row = LINE.exec(t)?.groups;
+  if (
+    row &&
+    (row.label.match(/\p{L}/gu) ?? []).length >= 4 &&
+    normaliseUnit(row.unit.trim()) !== null
+  )
+    return undefined;
+  return t;
+}
+
+/**
  * `Analyt  [<]Wert [flag]  Einheit  [Referenz]`.
  *
  * The mandatory whitespace between label and value is what keeps `HbA1c` and
@@ -184,6 +210,7 @@ export function parseLabReport(text: string): ParseResult {
     }
 
     const range = parseReferenceRange(groups.rest ?? "");
+    const referenceText = printedReference(groups.rest ?? "");
     const comparator = parseComparator(groups.cmp);
 
     values.push({
@@ -193,6 +220,7 @@ export function parseLabReport(text: string): ParseResult {
       ...(comparator ? { comparator } : {}),
       ...(range.low !== undefined ? { referenceLow: range.low } : {}),
       ...(range.high !== undefined ? { referenceHigh: range.high } : {}),
+      ...(referenceText !== undefined ? { referenceText } : {}),
       line: line.trimEnd(),
       lineNumber,
     });

@@ -89,6 +89,7 @@ import Shared
         let raw = RawLabValue(
           label: row.label, value: row.value, unitRaw: row.unit,
           referenceLow: row.low, referenceHigh: row.high,
+          referenceText: row.printedRange.isEmpty ? nil : row.printedRange,
           line: "\(row.label)  \(Measurement.text(row.value))  \(row.unit)  \(row.printedRange)",
           lineNumber: index + 2,
           region: SourceRegion(

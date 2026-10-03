@@ -125,4 +125,39 @@ final class TrendsUITests: XCTestCase {
       "a chart says which range it is showing")
     XCTAssertFalse(text.contains("abnormal"), "no chart calls a value abnormal")
   }
+
+  // MARK: - #186 criteria 2 and 3
+
+  func testAChartNamesEachKindOfEvidenceItShows() {
+    // The demo's values were read from a photo, so every chart that is not
+    // all laboratory files carries the legend, and its words, not a tap,
+    // say whose each point is.
+    let app = openTrends()
+    let legend = AppDriver.scrollTo(
+      app.descendants(matching: .any).matching(identifier: "provenance-legend").firstMatch,
+      in: app)
+    XCTAssertTrue(
+      legend.label.contains("Read from a photo"), "the legend names the kind: \(legend.label)")
+  }
+
+  func testWearableTrendsSitBesideTheLabValuesAndNotAmongThem() {
+    let app = openTrends()
+    let load = AppDriver.scrollTo(app.buttons["wearables-load"], in: app, tries: 30)
+    load.tap()
+    let pulse = AppDriver.scrollTo(
+      app.descendants(matching: .any).matching(identifier: "wearable-resting-heart-rate")
+        .firstMatch, in: app)
+    XCTAssertTrue(pulse.exists, "the device's resting pulse is drawn")
+    // Its own section, with the words that keep it from reading as a lab value.
+    // The footer sits under the last device chart, so it is scrolled to: a
+    // `List` does not build a row nobody has looked at.
+    XCTAssertTrue(
+      AppDriver.scrollTo(AppDriver.text(containing: "not by a laboratory", in: app), in: app)
+        .exists,
+      "the section says the device is not a laboratory")
+    // And never as a lab series: no trend point carries its identifier.
+    XCTAssertEqual(
+      app.buttons.matching(identifier: "trend-point-resting-heart-rate").count, 0,
+      "a wearable metric is never a tappable lab measurement")
+  }
 }
