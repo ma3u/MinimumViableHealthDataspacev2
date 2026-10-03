@@ -144,7 +144,10 @@ jobs:
             exit 0
           fi
           echo "Using the test reports of run $run_id"
-          gh run download "$run_id" --repo "${{ github.repository }}" --name pages-test-reports --dir out
+          # Into a scratch directory first: gh will not overwrite, and the
+          # static export already holds public/test-reports/test-results.json.
+          gh run download "$run_id" --repo "${{ github.repository }}" --name pages-test-reports --dir "$RUNNER_TEMP/test-reports"
+          cp -r "$RUNNER_TEMP/test-reports/." out/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
