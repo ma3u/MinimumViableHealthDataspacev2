@@ -47,7 +47,7 @@ source "${SCRIPT_DIR}/env.sh"
 log "Deploying the CFM provisioning agents (#318)"
 
 # ── Things that must already exist ──────────────────────────────────────────
-for app in "$NATS_APP" "$PG_APP" "$KEYCLOAK_APP" "$VAULT_APP" \
+for app in "$NATS_APP" "$KEYCLOAK_APP" "$VAULT_APP" \
            "$CONTROLPLANE_APP" "$IDENTITYHUB_APP" "$ISSUER_APP" \
            "$TENANT_MGR_APP" "$PROVISION_MGR_APP"; do
   if ! az containerapp show --name "$app" --resource-group "$RG" -o none 2>/dev/null; then
@@ -79,11 +79,14 @@ if [ "$NATS_MIN" != "1" ]; then
 fi
 
 # ── Secrets: Postgres password, and the provisioner client secret ───────────
-PG_PASSWORD_LIVE=$(az containerapp secret show \
-  --name "$PG_APP" --resource-group "$RG" \
-  --secret-name pg-password --query value -o tsv 2>/dev/null || echo "")
-[ -n "$PG_PASSWORD_LIVE" ] || { err "could not read pg-password from ${PG_APP}"; exit 1; }
-log "read pg-password from ${PG_APP} (${#PG_PASSWORD_LIVE} chars)"
+# Flexible Server (ADR-041), the same cfm database the managers use through
+# 05-cfm-configure.sh; on the compose stack all six CFM components share one
+# too. Until 2026-10-03 this read the password from mvhd-postgres and pointed
+# the DSN there, so the agents kept their state in a database that empties on
+# every replica restart (#442).
+PG_PASSWORD_LIVE=$(pg_admin_password)
+[ -n "$PG_PASSWORD_LIVE" ] || { err "no Flexible Server admin password (Key Vault, or pg-flex-password on ${CONTROLPLANE_APP})"; exit 1; }
+log "read the Flexible Server password (${#PG_PASSWORD_LIVE} chars)"
 
 PG_PASSWORD_ENC=$(python3 -c '
 import sys
@@ -117,7 +120,7 @@ PROV_SECRET=$(curl -sS -m 30 -H "Authorization: Bearer $ADMIN_TOKEN" \
 log "read the provisioner client secret from Keycloak (${#PROV_SECRET} chars)"
 
 NATS_URI="nats://${NATS_APP}:4222"
-DSN="postgres://${PG_ADMIN}:${PG_PASSWORD_ENC}@${PG_APP}:5432/cfm?sslmode=disable"
+DSN="postgres://${PG_ADMIN}:${PG_PASSWORD_ENC}@${PG_HOST}:${PG_PORT}/cfm?sslmode=${PG_SSLMODE}"
 KC_TOKEN_URL="${KC_URL}/realms/edcv/protocol/openid-connect/token"
 
 # ── The shim ────────────────────────────────────────────────────────────────
