@@ -7,12 +7,12 @@ eval "$(get_aca_fqdns)"
 
 log "Phase 5: CFM + UI"
 
-# Workaround B (ADR-018): PG_HOST exported by env.sh (mvhd-postgres short name)
 az acr login --name "$ACR_NAME"
 ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
 
 # ── Tenant Manager ──────────────────────────────────────────────────────────
-# NOTE: DATABASE_URL below is inert. These managers are Go binaries that read a
+# NOTE: no DATABASE_URL here. It used to be, carrying the plaintext password,
+# and it was inert: these managers are Go binaries that read a
 # flat Viper file at /etc/appname/tm.env (and pm.env), which is what the compose
 # stack mounts from jad/tenant-manager-config.yaml. Without it the Tenant Manager
 # panics in its own launcher:
@@ -33,8 +33,6 @@ az containerapp create \
   --cpu 0.25 --memory 0.5Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 8080 \
-  --env-vars \
-    "DATABASE_URL=postgresql://${PG_ADMIN}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/cfm?sslmode=disable" \
   -o none
 ok "Tenant Manager"
 
@@ -50,7 +48,6 @@ az containerapp create \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 8080 \
   --env-vars \
-    "DATABASE_URL=postgresql://${PG_ADMIN}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/cfm?sslmode=disable" \
     "VAULT_URL=${VAULT_URL:-}" \
     "VAULT_TOKEN=${VAULT_ROOT_TOKEN}" \
   -o none

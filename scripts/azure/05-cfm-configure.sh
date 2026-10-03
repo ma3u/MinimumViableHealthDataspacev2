@@ -18,7 +18,7 @@
 #
 # The config is mounted as an ACA secret volume, the same shape the compose
 # stack uses, with the values pointed at the Azure services: NATS at
-# mvhd-nats:4222 and Postgres at mvhd-postgres:5432/cfm.
+# mvhd-nats:4222 and Postgres on Flexible Server, cfm database (ADR-041).
 #
 # Idempotent: re-running updates the secret and leaves the mount alone. When
 # ACA provisions no new revision for that, the running one is restarted, so the
@@ -35,17 +35,17 @@ source "${SCRIPT_DIR}/env.sh"
 log "Configuring the CFM managers"
 
 # ── Postgres credentials for the DSN ────────────────────────────────────────
-# The password lives in the Postgres app's secret store; the env var on that app
-# is a secretref, not a value.
-PG_PASSWORD_LIVE=$(az containerapp secret show \
-  --name "$PG_APP" --resource-group "$RG" \
-  --secret-name pg-password --query value -o tsv 2>/dev/null || echo "")
+# Flexible Server (ADR-041). This file, not DATABASE_URL, is what the managers
+# read, so it is the only place their database is really chosen. Until
+# 2026-10-02 it named mvhd-postgres, whose data does not survive a restart, and
+# a DATABASE_URL change elsewhere looked like a migration while CFM stayed put.
+PG_PASSWORD_LIVE=$(pg_admin_password)
 
 if [ -z "$PG_PASSWORD_LIVE" ]; then
-  err "could not read the pg-password secret from ${PG_APP}"
+  err "no Flexible Server admin password (Key Vault, or pg-flex-password on ${CONTROLPLANE_APP})"
   exit 1
 fi
-log "read pg-password from ${PG_APP} (${#PG_PASSWORD_LIVE} chars)"
+log "read the Flexible Server password (${#PG_PASSWORD_LIVE} chars)"
 
 # The password goes into a postgres:// URL, so percent-encode it. A raw @ / : ?
 # # or % would silently produce a DSN pointing somewhere else, and the manager
@@ -86,7 +86,7 @@ bucket: cfm-bucket
 stream: cfm-stream
 httpport: 8080
 postgres: true
-dsn: postgres://${PG_ADMIN}:${PG_PASSWORD_ENC}@${PG_APP}:5432/cfm?sslmode=disable
+dsn: postgres://${PG_ADMIN}:${PG_PASSWORD_ENC}@${PG_HOST}:${PG_PORT}/cfm?sslmode=${PG_SSLMODE}
 CONFIG
 )
 

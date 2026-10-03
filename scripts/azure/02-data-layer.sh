@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
-# Phase 2: Data layer — Postgres (container app + Azure Files) + Neo4j.
+# Phase 2: Data layer — Postgres (Flexible Server, ADR-041) + Neo4j.
 #
-# Workaround B (ADR-018): Postgres runs as an ACA container app with TCP ingress
-# on port 5432 and a persistent Azure Files volume at /var/lib/postgresql/data.
-# Neo4j mounts neo4j-data + neo4j-logs per ADR-017.
+# Neo4j mounts neo4j-data + neo4j-logs per ADR-017; Neo4j tolerates SMB.
+# Postgres does not, which is why it is a managed server and not a container.
 #
 # Two-step pattern: create each app with CLI flags (no volumes), then patch
 # with `az containerapp update --yaml` to attach Azure Files volumes. The
@@ -17,94 +16,14 @@ az acr login --name "$ACR_NAME"
 
 ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
 
-# ── Push Postgres image to ACR ──────────────────────────────────────────────
-log "Pulling and pushing postgres:16 image..."
-docker pull --platform linux/amd64 "postgres:${POSTGRES_VERSION}"
-docker tag "postgres:${POSTGRES_VERSION}" "${PG_IMAGE}"
-docker push "${PG_IMAGE}"
-ok "Postgres image in ACR"
-
-# ── Postgres container app (step 1: create with CLI flags) ─────────────────
-log "Creating Postgres container app ${PG_APP} (no volume yet)..."
-# Sized for the keycloak realm DB only — the other 6 databases (controlplane,
-# dataplane, dataplane_omop, identityhub, issuerservice, cfm) exist for the EDC
-# services that don't boot on ACA (issue #25 / ADR-022). 0.5 vCPU / 1 GiB is
-# comfortable headroom for one Keycloak realm with a handful of clients and
-# users; raise to 1.0/2Gi if/when those services come back online.
-az containerapp create \
-  --name "$PG_APP" --resource-group "$RG" --environment "$ACA_ENV" \
-  --image "$PG_IMAGE" \
-  --registry-server "$ACR_LOGIN_SERVER" \
-  --registry-username "$ACR_NAME" \
-  --registry-password "$ACR_PASSWORD" \
-  --cpu 0.5 --memory 1Gi \
-  --min-replicas 1 --max-replicas 1 \
-  --ingress internal --target-port 5432 --exposed-port 5432 --transport tcp \
-  --secrets "pg-password=${PG_PASSWORD}" \
-  --env-vars \
-    "POSTGRES_USER=${PG_ADMIN}" \
-    "POSTGRES_PASSWORD=secretref:pg-password" \
-    "POSTGRES_DB=keycloak" \
-    "PGDATA=/var/lib/postgresql/data/pgdata" \
-  -o none
-ok "Postgres container app created"
-
-# ── Postgres (step 2: patch YAML to add Azure Files volume) ────────────────
-log "Patching Postgres to mount pg-data Azure Files share..."
-PG_YAML=$(mktemp)
-az containerapp show --name "$PG_APP" --resource-group "$RG" -o yaml > "$PG_YAML"
-
-python3 - "$PG_YAML" <<'PY'
-import sys, yaml
-path = sys.argv[1]
-with open(path) as f:
-    doc = yaml.safe_load(f)
-tpl = doc['properties']['template']
-vols = tpl.get('volumes') or []
-if not any((v or {}).get('name') == 'pgdata' for v in vols):
-    vols.append({'name': 'pgdata', 'storageType': 'AzureFile', 'storageName': 'pg-data'})
-tpl['volumes'] = vols
-for c in tpl['containers']:
-    mounts = c.get('volumeMounts') or []
-    if not any((m or {}).get('volumeName') == 'pgdata' for m in mounts):
-        mounts.append({'volumeName': 'pgdata', 'mountPath': '/var/lib/postgresql/data'})
-    c['volumeMounts'] = mounts
-# `az containerapp show` returns every secret with its name and no value:
-#   [{"name": "pg-password"}, {"name": "acrmvhdehdsazurecrio-acrmvhdehds"}]
-# Feeding that straight back sets both to empty, which takes out Postgres
-# authentication and the registry pull credential in one update. Drop the
-# block instead and the existing values are kept, the way
-# 05-cfm-agents.sh:mount_config already does it.
-doc['properties']['configuration'].pop('secrets', None)
-with open(path, 'w') as f:
-    yaml.safe_dump(doc, f)
-PY
-
-az containerapp update --name "$PG_APP" --resource-group "$RG" --yaml "$PG_YAML" -o none
-rm -f "$PG_YAML"
-
-# Read the mount back. On 2026-09-30 the live app had the pgdata volume
-# declared and `volumeMounts: null`, so PGDATA was ordinary container-local
-# storage. It went unnoticed until ACA recreated the replica, initdb ran, and
-# the keycloak and cfm databases were gone (docs/gotchas.md, 2026-09-30).
-# A phase that says "volume attached" while nothing is mounted is how that
-# happens twice.
-PG_MOUNT=$(az containerapp show --name "$PG_APP" --resource-group "$RG" \
-  --query "properties.template.containers[0].volumeMounts[?volumeName=='pgdata'].mountPath | [0]" \
-  -o tsv 2>/dev/null || echo "")
-if [ "$PG_MOUNT" != "/var/lib/postgresql/data" ]; then
-  err "pgdata is not mounted (got '${PG_MOUNT}'). Postgres would run on"
-  err "ephemeral storage and lose every database on the next replica restart."
-  exit 1
-fi
-
-PG_SECRETS=$(az containerapp secret list --name "$PG_APP" --resource-group "$RG" \
-  --query "[?name=='pg-password'] | length(@)" -o tsv 2>/dev/null || echo "0")
-if [ "$PG_SECRETS" != "1" ]; then
-  err "the pg-password secret did not survive the YAML update."
-  exit 1
-fi
-ok "Postgres volume attached and verified (pg-data → /var/lib/postgresql/data)"
+# ── Postgres: Flexible Server (ADR-041) ────────────────────────────────────
+# No container app any more. Postgres on ACA had no durable storage: the SMB
+# share crash-loops initdb (chmod EPERM) and ACA has no block storage, so every
+# restart wiped every database. Phase 1 creates the server with its password
+# generated straight into Key Vault; phase 2 creates the seven databases.
+"${SCRIPT_DIR}/13-postgres-flexible-server.sh" 1
+"${SCRIPT_DIR}/13-postgres-flexible-server.sh" 2
+ok "Postgres: ${PG_FLEX_NAME} with its databases"
 
 # ── Push Neo4j image to ACR ─────────────────────────────────────────────────
 log "Pulling and pushing Neo4j image..."
@@ -162,20 +81,11 @@ az containerapp update --name "$NEO4J_APP" --resource-group "$RG" --yaml "$NEO4J
 rm -f "$NEO4J_YAML"
 ok "Neo4j volumes attached (neo4j-data → /data, neo4j-logs → /logs)"
 
-# ── Wait for Postgres to be reachable ───────────────────────────────────────
-log "Waiting for Postgres to accept connections..."
-for i in $(seq 1 30); do
-  state=$(az containerapp show --name "$PG_APP" --resource-group "$RG" \
-    --query "properties.runningStatus" -o tsv 2>/dev/null || echo "")
-  if [[ "$state" == "Running" ]]; then
-    ok "Postgres container running after ${i}x10s"
-    break
-  fi
-  sleep 10
-done
+# Postgres readiness needs no wait here: phase 1 returns only once the server
+# reports Ready, and phase 2 reads every database back.
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 log "Data layer complete"
-echo "  Postgres:  ${PG_APP} (internal TCP 5432, Azure Files pg-data)"
-echo "  Databases: (created in phase 6 after PG is reachable)"
+echo "  Postgres:  ${PG_FLEX_NAME} (Flexible Server, TLS, ADR-041)"
+echo "  Databases: keycloak, controlplane, dataplane, dataplane_omop, identityhub, issuerservice, cfm"
 echo "  Neo4j:     ${NEO4J_APP} (internal TCP 7687, Azure Files /data + /logs)"
