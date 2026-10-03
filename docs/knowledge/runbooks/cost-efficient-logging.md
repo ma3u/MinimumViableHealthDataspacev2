@@ -2,14 +2,14 @@
 type: runbook
 title: Cost-efficient logging strategy
 description: What we log, at which level, where it goes and for how long, so logs stay useful to operators and regulators while the bill tracks traffic rather than failures. Baseline measured on mvhd-logs 2026-10-02.
-resource: docs/ADRs/ADR-042-observability-and-regulatory-audit-trail.md, scripts/azure/07-observability.sh, .github/workflows/provision-aca-env-logging.yml, scripts/azure/02-data-layer.sh
+resource: docs/ADRs/ADR-045-observability-and-regulatory-audit-trail.md, scripts/azure/07-observability.sh, .github/workflows/provision-aca-env-logging.yml, scripts/azure/02-data-layer.sh
 tags: [runbook, logging, observability, cost, azure, opentelemetry]
 generated: { by: claude-code/opus-5.5, at: 2026-10-02T00:00:00Z }
 verified: { by: UNKNOWN, at: UNKNOWN }
 status: draft
 ---
 
-Implements the cost part of [ADR-042](../../ADRs/ADR-042-observability-and-regulatory-audit-trail.md).
+Implements the cost part of [ADR-045](../../ADRs/ADR-045-observability-and-regulatory-audit-trail.md).
 Tracked in [#418](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/418).
 
 ## 1. Baseline: what we pay for today
@@ -68,7 +68,7 @@ ContainerAppConsoleLogs_CL | where TimeGenerated > ago(31d)
 6. **Structured, plain, minimal.** JSON lines, no ANSI colour codes, no banners, no
    request or response bodies, no personal data.
 7. **Audit events are not logs.** Access to health data is recorded in the audit trail
-   (ADR-042 plane 2), never only in operational logs, so log sampling, filtering and
+   (ADR-045 plane 2), never only in operational logs, so log sampling, filtering and
    retention can be aggressive without touching evidence.
 8. **Pay for storage, not ingestion.** Bulk logs end in object storage (cents per
    GB-month), not per-GB ingestion (euros per GB).
@@ -106,7 +106,7 @@ patient id produces log output containing neither.
 | Traces                  | Tempo, object storage, tail-sampled    | 14 days   | cents                       |
 | Metrics                 | Prometheus / Mimir                     | 90 days   | cents                       |
 | Platform system logs    | Log Analytics `ContainerAppSystemLogs` | 30 days   | inside free 5 GB            |
-| Audit events (not logs) | Object Lock bucket, ADR-042            | 3 years   | under €1 a month            |
+| Audit events (not logs) | Object Lock bucket, ADR-045            | 3 years   | under €1 a month            |
 
 Loki's compactor applies per-stream retention by `level`; the bucket lifecycle rule moves
 objects to a cool tier after 14 days and deletes them after 90 as a backstop.
@@ -141,7 +141,7 @@ on-call person sees is the loop, not the bill.
 5. **Replace the 1 GB cap with a budget** on `rg-mvhd-dev`, alerts at 50/80/100 %.
 6. **Re-measure after 7 days** with the queries in section 1. Expected: under 200 MB/day.
 
-### Phase B: structured logs and the collector (ADR-042 plane 1)
+### Phase B: structured logs and the collector (ADR-045 plane 1)
 
 7. pino in `ui/` and `services/neo4j-proxy` with `trace_id`, plus the no-PII unit test.
 8. OpenTelemetry Collector with `recombine` (multi-line join), `filter` (drop DEBUG and
@@ -169,4 +169,4 @@ on-call person sees is the loop, not the bill.
 | After phase B, self-hosted LGTM    | under 6 GB     | €25 to 40 (compute)    | none           |
 
 Phase A alone is the largest saving and costs nothing to run. Phase B costs some of that
-back in compute, and buys portability, traces and LogQL (see ADR-042, section Cost).
+back in compute, and buys portability, traces and LogQL (see ADR-045, section Cost).

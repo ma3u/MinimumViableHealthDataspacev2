@@ -2,7 +2,7 @@
 # Phase 2: Data layer — Postgres (Flexible Server, ADR-041) + Neo4j.
 #
 # Neo4j mounts neo4j-data per ADR-017; Neo4j tolerates SMB for its store. Its /logs
-# is NOT mounted (ADR-042): log4j cannot roll its files on SMB, and from 2026-09-22
+# is NOT mounted (ADR-045): log4j cannot roll its files on SMB, and from 2026-09-22
 # printed a stack trace on every attempt, 180 MB a day of billed Log Analytics
 # ingestion. Logs stay in the container; neo4j.log reaches the console anyway.
 # Postgres does not tolerate SMB at all, which is why it is a managed server and
@@ -67,7 +67,7 @@ with open(path) as f:
     doc = yaml.safe_load(f)
 tpl = doc['properties']['template']
 vols = tpl.get('volumes') or []
-# Drop a neo4j-logs volume left by runs before ADR-042, so a re-run repairs it.
+# Drop a neo4j-logs volume left by runs before ADR-045, so a re-run repairs it.
 vols = [v for v in vols if (v or {}).get('name') != 'neo4j-logs']
 if not any((v or {}).get('name') == 'neo4j-data' for v in vols):
     vols.append({'name': 'neo4j-data', 'storageType': 'AzureFile', 'storageName': 'neo4j-data'})

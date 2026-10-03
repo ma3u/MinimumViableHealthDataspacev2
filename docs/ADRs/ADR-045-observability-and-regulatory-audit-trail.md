@@ -1,4 +1,4 @@
-# ADR-042: Cloud-native, vendor-agnostic observability, and a tamper-evident audit trail for regulators
+# ADR-045: Cloud-native, vendor-agnostic observability, and a tamper-evident audit trail for regulators
 
 **Status:** Proposed
 **Date:** 2026-10-02
