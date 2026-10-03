@@ -75,6 +75,8 @@ repos:
         stages: [pre-push]
 
   # Secret scanning — gitleaks on staged diff (BSI C5 DEV-08)
+  # A finding fails the commit. The entry used to be `gitleaks ... && ... || echo`,
+  # so a finding fell through to the echo and the hook passed (2026-10-03).
   # Catches tokens/passwords before they reach CI or remote.
   # Requires: brew install gitleaks
   - repo: local
@@ -82,7 +84,7 @@ repos:
       - id: gitleaks
         name: Secret Scan (gitleaks)
         language: system
-        entry: bash -c 'command -v gitleaks >/dev/null 2>&1 && gitleaks protect --staged --no-banner || echo "[WARN] gitleaks not installed — skipping (brew install gitleaks)"'
+        entry: 'bash -c ''if ! command -v gitleaks >/dev/null 2>&1; then echo "[WARN] gitleaks not installed, skipping (brew install gitleaks)"; exit 0; fi; gitleaks git --pre-commit --staged --redact --no-banner'''
         pass_filenames: false
         stages: [pre-commit]
 
