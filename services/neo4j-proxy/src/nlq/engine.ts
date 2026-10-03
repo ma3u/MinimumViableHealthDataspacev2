@@ -572,6 +572,16 @@ Fulltext indexes (use CALL db.index.fulltext.queryNodes):
   ontology_search — SnomedConcept.display, LoincCode.display, ICD10Code.display, RxNormConcept.display
 `;
 
+// Trailing ?.!,;: off a word. A loop, because /[?.!,;:]+$/ backtracks
+// quadratically on a long run of punctuation not at the end (CodeQL
+// js/polynomial-redos) and the word comes from the caller's question.
+const TRAILING_PUNCTUATION = new Set(["?", ".", "!", ",", ";", ":"]);
+function stripTrailingPunctuation(w: string): string {
+  let end = w.length;
+  while (end > 0 && TRAILING_PUNCTUATION.has(w[end - 1])) end--;
+  return w.slice(0, end);
+}
+
 /**
  * Match a natural language question against template patterns.
  * Returns the first matching template with extracted parameters.
@@ -960,7 +970,7 @@ export async function fulltextSearch(
     const words = question
       .trim()
       .split(/\s+/)
-      .map((w) => w.replace(/[?.!,;:]+$/g, "")) // strip trailing punctuation
+      .map(stripTrailingPunctuation)
       .filter(Boolean)
       .filter((w) => w.length > 2 && !STOP_WORDS.has(w.toLowerCase()));
     if (words.length === 0) return null;

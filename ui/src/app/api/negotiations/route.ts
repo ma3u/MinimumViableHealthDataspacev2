@@ -104,7 +104,8 @@ async function loadDemoCatalog(
  *   → "http://controlplane:8082/api/dsp/abc123/2025-1"
  */
 function buildDspEndpoint(base: string, ctxId: string): string {
-  const clean = base.replace(/\/+$/, ""); // strip trailing slash
+  let clean = base; // strip trailing slashes; a loop, as /\/+$/ backtracks
+  while (clean.endsWith("/")) clean = clean.slice(0, -1);
   // If already looks like a full DSP endpoint (contains /2025-1), use as-is
   if (clean.endsWith("/2025-1")) return clean;
   // If ctxId already embedded, just add version
