@@ -32,7 +32,7 @@ import { findConnection } from "@/lib/app-connections";
  */
 
 export const APP_CLIENT_ID = "klarbefund-app";
-export const APP_DEVICE_HEADER = "x-klarbefund-device";
+const APP_DEVICE_HEADER = "x-klarbefund-device";
 
 const keycloakServerUrl =
   process.env.KEYCLOAK_ISSUER ?? "http://keycloak:8080/realms/edcv";
@@ -40,7 +40,7 @@ const keycloakPublicUrl =
   process.env.KEYCLOAK_PUBLIC_URL ?? "http://localhost:8080/realms/edcv";
 
 /** The issuers a token may carry: the public URL first, then the internal. */
-export function acceptedIssuers(): string[] {
+function acceptedIssuers(): string[] {
   return [...new Set([keycloakPublicUrl, keycloakServerUrl])];
 }
 
