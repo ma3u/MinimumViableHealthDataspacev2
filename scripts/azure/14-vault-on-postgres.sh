@@ -98,7 +98,7 @@ phase_1() {
     say "  already there"
   else
     az postgres flexible-server db create --server-name "$PG_FLEX_NAME" \
-      --resource-group "$RG" --database-name "$VAULT_DB" -o none
+      --resource-group "$RG" --name "$VAULT_DB" -o none
   fi
   az postgres flexible-server db show --server-name "$PG_FLEX_NAME" \
     --resource-group "$RG" --name "$VAULT_DB" -o none ||
