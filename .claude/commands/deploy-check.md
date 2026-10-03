@@ -9,7 +9,7 @@ allowed-tools: Bash, Read, Grep
 - TypeScript: !`cd ui && npx tsc --noEmit -p tsconfig.build.json && echo TSC_OK`
 - Lint (budget ≤ 55 warnings): !`cd ui && npm run lint 2>&1 | tail -3`
 - Unit tests: !`cd ui && npm test 2>&1 | tail -3`
-- Prod-dependency audit (pre-push gate): !`cd ui && npm audit --audit-level=high --omit=dev 2>&1 | tail -2`
+- Prod-dependency audit (pre-push gate): !`python3 scripts/check-npm-audit.py ui --omit=dev 2>&1 | tail -2`
 - Last CI runs: !`gh run list --limit 5`
 
 ## Task
