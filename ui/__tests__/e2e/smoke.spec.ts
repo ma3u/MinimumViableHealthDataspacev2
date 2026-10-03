@@ -100,7 +100,23 @@ test.describe("Graph Explorer", () => {
 });
 
 test.describe("Dataset Catalog", () => {
-  test("should load the catalog page", async ({ page }) => {
+  // /catalog has been in PROTECTED_PATHS since #404 (ADR-044): its API needs a
+  // session, so a signed-out visitor is sent to sign in instead of being shown
+  // empty panels. Until 2026-10-03 this test still loaded the page anonymously,
+  // and that kept the Playwright half of Demo Smoke red.
+  test("sends an anonymous visitor to sign in", async ({ page }) => {
+    const errors = collectClientErrors(page);
+    await page.goto("/catalog");
+    await expect(page).toHaveURL(/\/auth\/signin\?callbackUrl=%2Fcatalog/);
+    expect(errors, `client errors on /catalog:\n${errors.join("\n")}`).toEqual(
+      [],
+    );
+  });
+
+  test("loads the catalog page for a signed-in participant", async ({
+    page,
+  }) => {
+    await signIn(page);
     const errors = collectClientErrors(page);
     await page.goto("/catalog");
     await expect(page).toHaveURL(/\/catalog/);
@@ -159,13 +175,12 @@ test.describe("Navigation", () => {
     await nav.getByRole("menuitem", { name: /Dataset Catalog/ }).click();
     await expect(page).toHaveURL(/\/catalog/);
 
-    // Navigate to patient via nav dropdown. The item is still offered to an
-    // anonymous visitor, and choosing it lands on sign in rather than on the
-    // page, because /patient is gated (#357/#376). Asserting the redirect
-    // keeps this leg meaningful instead of deleting it.
+    // Navigate to patient via nav dropdown. /patient is gated (#357/#376),
+    // and this test is signed in, so the item opens the page itself. The
+    // anonymous redirect is pinned by "Patient Journey" above.
     await explore.click();
     await nav.getByRole("menuitem", { name: /Patient Journey/ }).click();
-    await expect(page).toHaveURL(/\/auth\/signin\?callbackUrl=%2Fpatient/);
+    await expect(page).toHaveURL(/\/patient$/);
     expect(
       errors,
       `client errors during navigation:\n${errors.join("\n")}`,
