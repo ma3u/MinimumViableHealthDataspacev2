@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Consumes raw DSP catalog JSON-LD from NATS and upserts HealthDCAT-AP nodes into Neo4j"
 requires-python = ">=3.12"
 dependencies = [
-  "nats-py==2.15.0",
+  "nats-py==2.16.0",
   "neo4j==5.23.0",
   "pydantic==2.13.5",
   "prometheus-client==0.26.0",
@@ -14,7 +14,7 @@ dependencies = [
 dev = [
   "pytest==8.3.3",
   "pytest-asyncio==0.24.0",
-  "ruff==0.16.6",
+  "ruff==0.16.9",
 ]
 
 [tool.ruff]
