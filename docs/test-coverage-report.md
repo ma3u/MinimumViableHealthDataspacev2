@@ -13,12 +13,12 @@ the 2026-03-21 run and have not been regenerated.
 
 | Component        | Test Files | Tests     | Stmts % | Branch % | Funcs % | Lines % |
 | ---------------- | ---------- | --------- | ------- | -------- | ------- | ------- |
-| **UI**           | 173        | 2,300     | 81.62   | 69.74    | 80.43   | 83.19   |
+| **UI**           | 174        | 2,317     | 81.62   | 69.74    | 80.43   | 83.19   |
 | **Neo4j Proxy**  | 6          | 61        | —       | —        | —       | —       |
 | **ePA Ingest**   | 10         | 179       | —       | —        | —       | —       |
 | **iOS (Swift)**  | 47 suites  | 279       | —       | —        | —       | —       |
 | **E2E** (listed) | 58         | 1,145     | —       | —        | —       | —       |
-| **Total**        | **294**    | **3,964** | —       | —        | —       | —       |
+| **Total**        | **295**    | **3,981** | —       | —        | —       | —       |
 
 One proxy test is an evaluation against seeded Synthea data
 (`issue-19-pharmacovigilance.eval.test.ts`); it skips itself when no seeded
