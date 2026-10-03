@@ -20,7 +20,7 @@ allowed-tools: Bash(gh issue view:*), Bash(git log:*), Read, Grep, Glob
    | Static export / Pages broken | `ui/src/lib/api.ts`, `ui/public/mock/`, `IS_STATIC` guards                    |
    | Keycloak / login error       | `ui/src/lib/auth.ts`, `jad/keycloak-realm.json`, realm-drift runbook          |
    | Role-based nav wrong         | `ui/src/components/Navigation.tsx`, `ui/src/middleware.ts`                    |
-   | Neo4j query fails            | `neo4j/init-schema.cypher`, `services/neo4j-proxy/src/index.ts`               |
+   | Neo4j query fails            | `neo4j/init-schema.cypher`, `services/neo4j-proxy/src/routes/*.ts`            |
    | NLQ / federated query wrong  | proxy 4-tier resolver — see ADR-020 + `docs/architecture/federation.md`       |
    | JAD stack broken             | `docker-compose.jad.yml`, `scripts/bootstrap-jad.sh` (Vault is in-memory)     |
    | Azure deploy issue           | `scripts/azure/*.sh`, `.github/workflows/deploy-azure.yml`, `docs/gotchas.md` |
