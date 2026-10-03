@@ -108,6 +108,15 @@ describe("/api/credentials/definitions GET", () => {
     );
   });
 
+  it("waits long enough for the issuer to wake from zero replicas", async () => {
+    mockIssuer.mockResolvedValue([]);
+
+    await GetDefinitions();
+
+    const options = mockIssuer.mock.calls[0][3] as { timeoutMs?: number };
+    expect(options.timeoutMs).toBeGreaterThanOrEqual(30_000);
+  });
+
   it("returns empty array when IssuerService is unreachable", async () => {
     mockIssuer.mockRejectedValue(new Error("ECONNREFUSED"));
 
