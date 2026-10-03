@@ -20,6 +20,13 @@ updates:
       timezone: Europe/Berlin
     open-pull-requests-limit: 5
     groups:
+      # vitest and @vitest/coverage-v8 pin each other as exact peers. Bumped
+      # one at a time, npm ci fails with ERESOLVE and no test runs: Vitest 5
+      # arrived as #416, #243 and #241, all red for that reason (#426). This
+      # group comes first because a dependency joins the first group it matches,
+      # and it has no update-types so majors travel together too.
+      vitest:
+        patterns: ["vitest", "@vitest/*"]
       ui-patch-minor:
         patterns: ["*"]
         update-types: [minor, patch]
@@ -29,6 +36,17 @@ updates:
       - dependency-name: react
         update-types: [version-update:semver-major]
       - dependency-name: react-dom
+        update-types: [version-update:semver-major]
+      # Held majors (#426). Each needs a migration, not a merge; remove the
+      # line in the PR that does it.
+      # lucide-react 1.x renamed and removed icons; components render undefined (#195).
+      - dependency-name: lucide-react
+        update-types: [version-update:semver-major]
+      # mermaid 12 pulls in elkjs (EPL-2.0), which the licence gate refuses (#194).
+      - dependency-name: mermaid
+        update-types: [version-update:semver-major]
+      # Follows the Node runtime, which is 22 in the Dockerfiles and CI (#97).
+      - dependency-name: "@types/node"
         update-types: [version-update:semver-major]
     labels: [dependencies, ui]
 
@@ -42,9 +60,16 @@ updates:
       timezone: Europe/Berlin
     open-pull-requests-limit: 5
     groups:
+      # Same reason as the ui vitest group above (#243 and #241, #426).
+      vitest:
+        patterns: ["vitest", "@vitest/*"]
       proxy-patch-minor:
         patterns: ["*"]
         update-types: [minor, patch]
+    ignore:
+      # Follows the Node runtime, which is 22 in the Dockerfile and CI (#97, #426).
+      - dependency-name: "@types/node"
+        update-types: [version-update:semver-major]
     labels: [dependencies, neo4j-proxy]
 
   # ── GitHub Actions ──
@@ -83,6 +108,11 @@ updates:
       day: monday
       time: "04:00"
       timezone: Europe/Berlin
+    ignore:
+      # The Node major moves the runtime, CI's NODE_VERSION and @types/node in
+      # one change, by hand (#97). #240 and #242 offered 22 -> 26 alone (#426).
+      - dependency-name: node
+        update-types: [version-update:semver-major]
     labels: [dependencies, docker]
 
   # ── Python ──
