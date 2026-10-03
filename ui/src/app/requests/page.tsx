@@ -65,7 +65,7 @@ function DecidedUnder({ r }: { r: HealthDataRequest }) {
   if (!r.decidedUnder || !r.decidedAt) return null;
   return (
     <span
-      className="text-xs text-[var(--text-secondary)]"
+      className="text-xs text-(--text-secondary)"
       data-testid="decided-under"
     >
       {r.decidedUnder === "Art. 72"
@@ -79,12 +79,12 @@ function DecidedUnder({ r }: { r: HealthDataRequest }) {
 function StatusBadge({ status }: { status: string }) {
   const cls =
     status === "ANSWERED"
-      ? "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border-[var(--badge-active-border)]"
+      ? "bg-(--badge-active-bg) text-(--badge-active-text) border-(--badge-active-border)"
       : status === "PENDING"
-        ? "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]"
+        ? "bg-(--role-hdab-bg) text-(--role-hdab-text) border-(--role-hdab-border)"
         : status === "APPROVED"
-          ? "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border-[var(--role-holder-border)]"
-          : "bg-[var(--badge-inactive-bg)] text-[var(--badge-inactive-text)] border-[var(--badge-inactive-border)]";
+          ? "bg-(--role-holder-bg) text-(--role-holder-text) border-(--role-holder-border)"
+          : "bg-(--badge-inactive-bg) text-(--badge-inactive-text) border-(--badge-inactive-border)";
   const label =
     status === "ANSWERED"
       ? "answered"
@@ -97,7 +97,7 @@ function StatusBadge({ status }: { status: string }) {
             : status.toLowerCase();
   return (
     <span
-      className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border whitespace-nowrap ${cls}`}
+      className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-sm border whitespace-nowrap ${cls}`}
     >
       {status === "ANSWERED" ? (
         <ShieldCheck size={12} />
@@ -114,17 +114,15 @@ function StatusBadge({ status }: { status: string }) {
 function AnswerTable({ rows }: { rows: Record<string, unknown>[] }) {
   if (rows.length === 0) {
     return (
-      <p className="text-xs text-[var(--text-secondary)]">
-        The statistic is empty.
-      </p>
+      <p className="text-xs text-(--text-secondary)">The statistic is empty.</p>
     );
   }
   const columns = Array.from(new Set(rows.flatMap((r) => Object.keys(r))));
   return (
-    <div className="overflow-x-auto rounded border border-[var(--border)]">
+    <div className="overflow-x-auto rounded-sm border border-(--border)">
       <table className="text-xs border-collapse" data-testid="answer-table">
         <thead>
-          <tr className="bg-[var(--surface)] text-[var(--text-secondary)]">
+          <tr className="bg-(--surface) text-(--text-secondary)">
             {columns.map((c) => (
               <th key={c} className="text-left px-3 py-1.5 font-medium">
                 {c}
@@ -134,7 +132,7 @@ function AnswerTable({ rows }: { rows: Record<string, unknown>[] }) {
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr key={i} className="border-t border-[var(--border)]">
+            <tr key={i} className="border-t border-(--border)">
               {columns.map((c) => (
                 <td key={c} className="px-3 py-1.5 font-mono tabular-nums">
                   {r[c] === null || r[c] === undefined ? "—" : String(r[c])}
@@ -295,20 +293,20 @@ export default function RequestsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <div className="mb-8">
           <h1 className="page-header flex items-center gap-2">
             <BarChart2 size={28} />
             Statistical requests
           </h1>
-          <p className="text-[var(--text-secondary)] text-lg mt-1">
+          <p className="text-(--text-secondary) text-lg mt-1">
             Regulation (EU) 2025/327, Art. 69 · answers in anonymised
             statistical format only
           </p>
         </div>
 
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 mb-8 text-sm text-[var(--text-secondary)] space-y-2">
+        <div className="rounded-lg border border-(--border) bg-(--surface) p-4 mb-8 text-sm text-(--text-secondary) space-y-2">
           <p>
             A health data request asks the access body for a statistic, not for
             data. If the body approves, the question is run once in the
@@ -318,7 +316,7 @@ export default function RequestsPage() {
             three months (Art. 69(4)), and the decision is published on the{" "}
             <Link
               href="/permits"
-              className="font-bold text-[var(--accent)] hover:underline"
+              className="font-bold text-(--accent) hover:underline"
             >
               public register
             </Link>
@@ -328,7 +326,7 @@ export default function RequestsPage() {
 
         {trustedHolder && (
           <p
-            className="mb-6 text-sm text-[var(--text-secondary)]"
+            className="mb-6 text-sm text-(--text-secondary)"
             data-testid="trusted-holder-note"
           >
             You are a trusted data holder (Art. 72): requests for the datasets
@@ -338,8 +336,8 @@ export default function RequestsPage() {
         )}
 
         {canSubmit && (
-          <section className="mb-10 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
-            <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+          <section className="mb-10 rounded-lg border border-(--border) bg-(--surface) p-4">
+            <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
               Ask for a statistic
             </h2>
             <form
@@ -356,33 +354,33 @@ export default function RequestsPage() {
                     key={q}
                     type="button"
                     onClick={() => setQuestion(q)}
-                    className="text-xs px-2 py-1 rounded border border-[var(--border)] hover:bg-[var(--surface-2)]"
+                    className="text-xs px-2 py-1 rounded-sm border border-(--border) hover:bg-(--surface-2)"
                   >
                     {q}
                   </button>
                 ))}
               </div>
               <label className="flex flex-col gap-1">
-                <span className="text-[var(--text-secondary)]">Question</span>
+                <span className="text-(--text-secondary)">Question</span>
                 <textarea
                   id="request-question"
                   rows={2}
                   required
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
-                  className="rounded border border-[var(--border)] bg-[var(--bg)] px-2 py-1"
+                  className="rounded-sm border border-(--border) bg-(--bg) px-2 py-1"
                 />
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <label className="flex flex-col gap-1">
-                  <span className="text-[var(--text-secondary)]">
+                  <span className="text-(--text-secondary)">
                     Purpose, Art. 53(1)
                   </span>
                   <select
                     id="request-purpose"
                     value={purpose}
                     onChange={(e) => setPurpose(e.target.value)}
-                    className="rounded border border-[var(--border)] bg-[var(--bg)] px-2 py-1"
+                    className="rounded-sm border border-(--border) bg-(--bg) px-2 py-1"
                   >
                     {PURPOSES.map((p) => (
                       <option key={p} value={p}>
@@ -392,17 +390,17 @@ export default function RequestsPage() {
                   </select>
                 </label>
                 <label className="flex flex-col gap-1">
-                  <span className="text-[var(--text-secondary)]">Dataset</span>
+                  <span className="text-(--text-secondary)">Dataset</span>
                   <input
                     id="request-dataset"
                     value={datasetId}
                     onChange={(e) => setDatasetId(e.target.value)}
-                    className="rounded border border-[var(--border)] bg-[var(--bg)] px-2 py-1 font-mono"
+                    className="rounded-sm border border-(--border) bg-(--bg) px-2 py-1 font-mono"
                   />
                 </label>
               </div>
               <label className="flex flex-col gap-1">
-                <span className="text-[var(--text-secondary)]">
+                <span className="text-(--text-secondary)">
                   Statistical content, Art. 69(2)(d)
                 </span>
                 <input
@@ -411,18 +409,18 @@ export default function RequestsPage() {
                   value={statisticalContent}
                   onChange={(e) => setStatisticalContent(e.target.value)}
                   placeholder="One count of the cohort, no breakdown"
-                  className="rounded border border-[var(--border)] bg-[var(--bg)] px-2 py-1"
+                  className="rounded-sm border border-(--border) bg-(--bg) px-2 py-1"
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-[var(--text-secondary)]">
+                <span className="text-(--text-secondary)">
                   Safeguards, Art. 69(2)(e)
                 </span>
                 <input
                   id="request-safeguards"
                   value={safeguards}
                   onChange={(e) => setSafeguards(e.target.value)}
-                  className="rounded border border-[var(--border)] bg-[var(--bg)] px-2 py-1"
+                  className="rounded-sm border border-(--border) bg-(--bg) px-2 py-1"
                 />
               </label>
               <div className="flex items-center gap-3">
@@ -431,13 +429,13 @@ export default function RequestsPage() {
                   disabled={
                     submitting || !question.trim() || !statisticalContent.trim()
                   }
-                  className="px-3 py-1.5 rounded font-semibold bg-[var(--accent)] text-white disabled:opacity-60"
+                  className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
                 >
                   {submitting ? "Filing…" : "File the request"}
                 </button>
                 {submitMsg && (
                   <span
-                    className="text-xs text-[var(--text-secondary)]"
+                    className="text-xs text-(--text-secondary)"
                     role="status"
                   >
                     {submitMsg}
@@ -449,7 +447,7 @@ export default function RequestsPage() {
         )}
 
         <section>
-          <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+          <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
             {scope === "all"
               ? "All requests"
               : scope === "holder"
@@ -458,37 +456,33 @@ export default function RequestsPage() {
             ({requests.length})
           </h2>
           {loading ? (
-            <p className="text-[var(--text-secondary)] text-sm">
-              Reading requests…
-            </p>
+            <p className="text-(--text-secondary) text-sm">Reading requests…</p>
           ) : error ? (
             <div className="text-sm">
-              <p className="text-[var(--text-secondary)]">
+              <p className="text-(--text-secondary)">
                 Requests could not be read
               </p>
-              <p className="text-xs font-mono text-[var(--text-secondary)]">
+              <p className="text-xs font-mono text-(--text-secondary)">
                 {error}
               </p>
             </div>
           ) : requests.length === 0 ? (
-            <p className="text-[var(--text-secondary)] text-sm">
-              No request yet
-            </p>
+            <p className="text-(--text-secondary) text-sm">No request yet</p>
           ) : (
             <div className="space-y-3">
               {requests.map((r) => (
                 <article
                   key={r.requestId}
-                  className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 text-sm"
+                  className="rounded-lg border border-(--border) bg-(--surface) p-4 text-sm"
                   data-testid="request-card"
                   data-request-id={r.requestId}
                 >
                   <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
                     <div>
-                      <div className="font-semibold text-[var(--text-primary)]">
+                      <div className="font-semibold text-(--text-primary)">
                         {r.question ?? "—"}
                       </div>
-                      <div className="text-xs text-[var(--text-secondary)]">
+                      <div className="text-xs text-(--text-secondary)">
                         {r.applicantName ?? r.applicant ?? "—"} ·{" "}
                         {purposeLabel(r.purpose)} ·{" "}
                         {r.datasetTitle ?? r.datasetId ?? "any dataset"} · filed{" "}
@@ -509,7 +503,7 @@ export default function RequestsPage() {
                       <DecidedUnder r={r} />
                     </div>
                   </div>
-                  <div className="text-xs text-[var(--text-secondary)] grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 mb-2">
+                  <div className="text-xs text-(--text-secondary) grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 mb-2">
                     <div>
                       <span className="font-medium">Statistical content </span>
                       {r.statisticalContent ?? "—"}
@@ -526,7 +520,7 @@ export default function RequestsPage() {
 
                   {r.status === "ANSWERED" && r.answer && (
                     <div className="space-y-1 mb-2">
-                      <div className="text-xs text-[var(--text-secondary)]">
+                      <div className="text-xs text-(--text-secondary)">
                         Anonymised statistical answer
                         {r.answerTemplate ? ` (${r.answerTemplate})` : ""}
                         {r.answeredAt ? `, ${shortDate(r.answeredAt)}` : ""}
@@ -539,13 +533,13 @@ export default function RequestsPage() {
                     </div>
                   )}
                   {r.status === "APPROVED" && r.answerError && (
-                    <p className="text-xs text-[var(--warning-text)] mb-2">
+                    <p className="text-xs text-(--warning-text) mb-2">
                       Approved on {shortDate(r.decidedAt)}, but no statistic
                       could be produced: {r.answerError}
                     </p>
                   )}
                   {r.status === "REJECTED" && (
-                    <p className="text-xs text-[var(--danger-text)] mb-2">
+                    <p className="text-xs text-(--danger-text) mb-2">
                       Refused on {shortDate(r.decidedAt)}
                       {r.justification ? `: ${r.justification}` : ""}
                     </p>
@@ -553,14 +547,14 @@ export default function RequestsPage() {
 
                   {(isBody || r.canDecide === true) &&
                     r.status === "PENDING" && (
-                      <div className="mt-2 rounded border border-[var(--border)] bg-[var(--bg)] p-3 space-y-2 text-xs">
-                        <div className="font-semibold text-[var(--text-primary)]">
+                      <div className="mt-2 rounded-sm border border-(--border) bg-(--bg) p-3 space-y-2 text-xs">
+                        <div className="font-semibold text-(--text-primary)">
                           {isBody
                             ? "Decide · Art. 69(3)"
                             : "Decide as the trusted data holder · Art. 72"}
                         </div>
                         <label className="flex flex-col gap-1">
-                          <span className="text-[var(--text-secondary)]">
+                          <span className="text-(--text-secondary)">
                             Justification (required for a refusal)
                           </span>
                           <textarea
@@ -573,7 +567,7 @@ export default function RequestsPage() {
                                 [r.requestId]: e.target.value,
                               }))
                             }
-                            className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
+                            className="rounded-sm border border-(--border) bg-(--surface) px-2 py-1"
                           />
                         </label>
                         <div className="flex flex-wrap gap-2">
@@ -581,7 +575,7 @@ export default function RequestsPage() {
                             type="button"
                             disabled={busy === r.requestId}
                             onClick={() => void decide(r.requestId, "APPROVED")}
-                            className="px-3 py-1.5 rounded font-semibold bg-[var(--accent)] text-white disabled:opacity-60"
+                            className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
                           >
                             {busy === r.requestId
                               ? "Working…"
@@ -594,7 +588,7 @@ export default function RequestsPage() {
                               !(justifications[r.requestId] ?? "").trim()
                             }
                             onClick={() => void decide(r.requestId, "REJECTED")}
-                            className="px-3 py-1.5 rounded font-semibold border border-[var(--danger-text)] text-[var(--danger-text)] disabled:opacity-50"
+                            className="px-3 py-1.5 rounded-sm font-semibold border border-(--danger-text) text-(--danger-text) disabled:opacity-50"
                           >
                             Refuse
                           </button>
@@ -603,7 +597,7 @@ export default function RequestsPage() {
                     )}
                   {decideMsg[r.requestId] && (
                     <p
-                      className="text-xs text-[var(--text-secondary)] mt-2"
+                      className="text-xs text-(--text-secondary) mt-2"
                       role="status"
                     >
                       {decideMsg[r.requestId]}

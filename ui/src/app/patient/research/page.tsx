@@ -88,7 +88,7 @@ export default function ResearchProgramsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-3xl mx-auto px-6 py-10">
         <PageIntro
           title="Research Programs"
@@ -120,7 +120,7 @@ export default function ResearchProgramsPage() {
         )}
 
         {loading ? (
-          <div className="text-[var(--text-secondary)] text-sm">
+          <div className="text-(--text-secondary) text-sm">
             Loading research programs…
           </div>
         ) : (
@@ -130,7 +130,7 @@ export default function ResearchProgramsPage() {
             </h2>
 
             {programs.length === 0 && (
-              <div className="text-[var(--text-secondary)] text-sm">
+              <div className="text-(--text-secondary) text-sm">
                 No research programs found. Seed the JAD stack to populate.
               </div>
             )}
@@ -144,7 +144,7 @@ export default function ResearchProgramsPage() {
                   className={`rounded-xl border p-4 ${
                     isConsented
                       ? "border-teal-300 dark:border-teal-700 bg-teal-50 dark:bg-teal-900/10"
-                      : "border-[var(--border)] bg-[var(--surface-2)]/50"
+                      : "border-(--border) bg-(--surface-2)/50"
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
@@ -152,7 +152,7 @@ export default function ResearchProgramsPage() {
                       <div className="font-semibold text-sm">
                         {prog.studyName}
                       </div>
-                      <div className="text-xs text-[var(--text-secondary)]">
+                      <div className="text-xs text-(--text-secondary)">
                         {prog.institution}
                       </div>
                     </div>
@@ -161,15 +161,15 @@ export default function ResearchProgramsPage() {
                         <CheckCircle2 size={12} /> Donated
                       </span>
                     ) : (
-                      <span className="text-xs text-[var(--text-secondary)] border border-gray-600 rounded px-2 py-0.5">
+                      <span className="text-xs text-(--text-secondary) border border-gray-600 rounded-sm px-2 py-0.5">
                         {prog.status}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-[var(--text-secondary)] mb-2">
+                  <p className="text-xs text-(--text-secondary) mb-2">
                     {prog.description}
                   </p>
-                  <div className="text-xs text-[var(--text-secondary)] mb-3">
+                  <div className="text-xs text-(--text-secondary) mb-3">
                     <span className="text-gray-700 dark:text-gray-400">
                       Data needed:{" "}
                     </span>
@@ -194,7 +194,7 @@ export default function ResearchProgramsPage() {
                     <button
                       onClick={() => donate(prog.studyId)}
                       disabled={donating !== null}
-                      className="px-3 py-1.5 rounded bg-teal-700 hover:bg-teal-600 text-white text-xs font-medium transition-colors disabled:opacity-50"
+                      className="px-3 py-1.5 rounded-sm bg-teal-700 hover:bg-teal-600 text-white text-xs font-medium transition-colors disabled:opacity-50"
                     >
                       {donating === prog.studyId
                         ? "Registering…"
@@ -211,7 +211,7 @@ export default function ResearchProgramsPage() {
                 <h2 className="text-lg font-semibold mb-3">Consent History</h2>
                 <table className="text-xs w-full border-collapse">
                   <thead>
-                    <tr className="border-b border-[var(--border)] text-[var(--text-secondary)]">
+                    <tr className="border-b border-(--border) text-(--text-secondary)">
                       <th className="text-left pb-1">Study</th>
                       <th className="text-left pb-1">Granted</th>
                       <th className="text-left pb-1">Status</th>
@@ -221,10 +221,10 @@ export default function ResearchProgramsPage() {
                     {consents.map((c) => (
                       <tr
                         key={c.consentId}
-                        className="border-b border-[var(--border)]"
+                        className="border-b border-(--border)"
                       >
                         <td className="py-1.5 pr-3 font-mono">{c.studyId}</td>
-                        <td className="py-1.5 pr-3 text-[var(--text-secondary)]">
+                        <td className="py-1.5 pr-3 text-(--text-secondary)">
                           {c.grantedAt?.slice(0, 10) || "—"}
                         </td>
                         <td className="py-1.5">

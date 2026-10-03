@@ -436,20 +436,20 @@ export default function ArchitecturePage() {
     <div className="max-w-6xl mx-auto px-6 py-12">
       <Link
         href="/docs"
-        className="inline-flex items-center gap-1 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] mb-6"
+        className="inline-flex items-center gap-1 text-sm text-(--text-secondary) hover:text-(--text-primary) mb-6"
       >
         <ArrowLeft size={14} /> Back to Docs
       </Link>
       <h1 className="text-3xl font-bold mb-2">Architecture</h1>
-      <p className="text-[var(--text-secondary)] mb-8">
+      <p className="text-(--text-secondary) mb-8">
         Interactive diagrams of the Health Dataspace v2 architecture — 5-layer
         graph model, data flows, deployment topology, service dependencies, and
         identity trust framework.
       </p>
 
       {/* Table of Contents */}
-      <nav className="border border-[var(--border)] rounded-xl p-5 mb-12 bg-[var(--surface)]">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-3">
+      <nav className="border border-(--border) rounded-xl p-5 mb-12 bg-(--surface)">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-(--text-secondary) mb-3">
           Contents
         </h2>
         <ol className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
@@ -457,7 +457,7 @@ export default function ArchitecturePage() {
             <li key={item.id}>
               <a
                 href={`#${item.id}`}
-                className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                className="text-sm text-(--text-secondary) hover:text-(--text-primary) transition-colors"
               >
                 {item.label}
               </a>
@@ -471,7 +471,7 @@ export default function ArchitecturePage() {
         <h2 className="text-2xl font-semibold mb-3" id="five-layer-model">
           1. Five-Layer Knowledge Graph
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           The Neo4j knowledge graph organises health data across five
           architectural layers: DSP Marketplace (connector discovery),
           HealthDCAT-AP (dataset metadata), FHIR R4 (clinical data), OMOP CDM
@@ -488,7 +488,7 @@ export default function ArchitecturePage() {
         <h2 className="text-2xl font-semibold mb-3" id="data-flow">
           2. Data Flow Pipeline
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           Synthetic patient data flows from Synthea generation through FHIR R4
           resource loading into Neo4j, then transforms to OMOP CDM for research
           analytics. Each stage preserves full provenance through graph
@@ -505,7 +505,7 @@ export default function ArchitecturePage() {
         <h2 className="text-2xl font-semibold mb-3" id="deployment">
           3. Deployment Topology
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           The full JAD stack runs 19+ Docker Compose services across six layers:
           infrastructure (Traefik, PostgreSQL, Vault, NATS, Keycloak), EDC-V /
           DCore (Control Plane, dual Data Planes), Identity (Identity Hub,
@@ -516,7 +516,7 @@ export default function ArchitecturePage() {
             href="https://ehds.mabu.red"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--accent)] underline hover:opacity-80"
+            className="text-(--accent) underline hover:opacity-80"
           >
             Azure Container Apps
           </a>{" "}
@@ -525,7 +525,7 @@ export default function ArchitecturePage() {
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-012-azure-container-apps.md"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--accent)] underline hover:opacity-80"
+            className="text-(--accent) underline hover:opacity-80"
           >
             ADR-012
           </a>
@@ -542,28 +542,28 @@ export default function ArchitecturePage() {
         <h2 className="text-2xl font-semibold mb-3" id="service-dependencies">
           4. Service Dependencies
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           Complete inventory of all services in the docker-compose.yml and
           docker-compose.jad.yml stacks, their exposed ports, upstream
           dependencies, and purpose.
         </p>
-        <div className="overflow-x-auto border border-[var(--border)] rounded-xl">
+        <div className="overflow-x-auto border border-(--border) rounded-xl">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
-                <th className="text-left px-4 py-3 font-semibold text-[var(--text-primary)]">
+              <tr className="border-b border-(--border) bg-(--surface)">
+                <th className="text-left px-4 py-3 font-semibold text-(--text-primary)">
                   Service
                 </th>
-                <th className="text-left px-4 py-3 font-semibold text-[var(--text-primary)]">
+                <th className="text-left px-4 py-3 font-semibold text-(--text-primary)">
                   Layer
                 </th>
-                <th className="text-left px-4 py-3 font-semibold text-[var(--text-primary)]">
+                <th className="text-left px-4 py-3 font-semibold text-(--text-primary)">
                   Port(s)
                 </th>
-                <th className="text-left px-4 py-3 font-semibold text-[var(--text-primary)]">
+                <th className="text-left px-4 py-3 font-semibold text-(--text-primary)">
                   Depends On
                 </th>
-                <th className="text-left px-4 py-3 font-semibold text-[var(--text-primary)]">
+                <th className="text-left px-4 py-3 font-semibold text-(--text-primary)">
                   Purpose
                 </th>
               </tr>
@@ -572,11 +572,11 @@ export default function ArchitecturePage() {
               {services.map((svc, i) => (
                 <tr
                   key={svc.name}
-                  className={`border-b border-[var(--border)] ${
-                    i % 2 === 0 ? "" : "bg-[var(--surface)]/30"
+                  className={`border-b border-(--border) ${
+                    i % 2 === 0 ? "" : "bg-(--surface)/30"
                   }`}
                 >
-                  <td className="px-4 py-2.5 font-medium text-[var(--text-primary)] whitespace-nowrap">
+                  <td className="px-4 py-2.5 font-medium text-(--text-primary) whitespace-nowrap">
                     {svc.name}
                   </td>
                   <td className="px-4 py-2.5">
@@ -588,13 +588,13 @@ export default function ArchitecturePage() {
                       {svc.layer}
                     </span>
                   </td>
-                  <td className="px-4 py-2.5 text-[var(--text-secondary)] font-mono text-xs whitespace-nowrap">
+                  <td className="px-4 py-2.5 text-(--text-secondary) font-mono text-xs whitespace-nowrap">
                     {svc.port}
                   </td>
-                  <td className="px-4 py-2.5 text-[var(--text-secondary)] text-xs">
+                  <td className="px-4 py-2.5 text-(--text-secondary) text-xs">
                     {svc.depends}
                   </td>
-                  <td className="px-4 py-2.5 text-[var(--text-secondary)] text-xs">
+                  <td className="px-4 py-2.5 text-(--text-secondary) text-xs">
                     {svc.purpose}
                   </td>
                 </tr>
@@ -609,7 +609,7 @@ export default function ArchitecturePage() {
         <h2 className="text-2xl font-semibold mb-3" id="negotiation">
           5. DSP Contract Negotiation
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           The Dataspace Protocol (DSP) governs how data holders and data users
           negotiate access to health datasets. The EHDS regulation adds HDAB
           approval as a pre-requisite for data permit issuance before contract
@@ -626,7 +626,7 @@ export default function ArchitecturePage() {
         <h2 className="text-2xl font-semibold mb-3" id="identity-trust">
           6. Identity & Trust Framework
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           The Decentralized Claims Protocol (DCP) manages identity, credentials,
           and trust. Identity Hub stores DIDs and Verifiable Credentials, the
           Issuer Service mints EHDS-specific credentials, and Keycloak provides
@@ -643,15 +643,15 @@ export default function ArchitecturePage() {
         <h2 className="text-2xl font-semibold mb-3" id="simpl-compliance">
           7. SIMPL-Open & Compliance
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           This reference implementation aligns with the EU SIMPL-Open programme
           for federated data spaces. The architecture satisfies EHDS regulation,
           DSP 2025-1, DCP v1.0, and supply chain transparency requirements.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">SIMPL-Open Alignment</h4>
-            <ul className="text-[var(--text-secondary)] text-xs space-y-1.5 list-disc ml-4">
+            <ul className="text-(--text-secondary) text-xs space-y-1.5 list-disc ml-4">
               <li>
                 <strong>DSP 2025-1:</strong> Sovereign data exchange via Control
                 Plane
@@ -673,11 +673,11 @@ export default function ArchitecturePage() {
               </li>
             </ul>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">
               Regulatory Compliance
             </h4>
-            <ul className="text-[var(--text-secondary)] text-xs space-y-1.5 list-disc ml-4">
+            <ul className="text-(--text-secondary) text-xs space-y-1.5 list-disc ml-4">
               <li>
                 <strong>EHDS Art. 3-12:</strong> Patient rights (access,
                 rectification, portability)
@@ -706,7 +706,7 @@ export default function ArchitecturePage() {
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/simpl-ehds-gap-analysis.md"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-[var(--accent)] hover:underline inline-flex items-center gap-1"
+            className="text-sm text-(--accent) hover:underline inline-flex items-center gap-1"
           >
             SIMPL-Open Gap Analysis &rarr;
           </a>
@@ -714,13 +714,13 @@ export default function ArchitecturePage() {
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-013-simpl-open-alignment.md"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-[var(--accent)] hover:underline inline-flex items-center gap-1"
+            className="text-sm text-(--accent) hover:underline inline-flex items-center gap-1"
           >
             ADR-013: SIMPL Alignment &rarr;
           </a>
           <Link
             href="/docs/developer/quality-gates"
-            className="text-sm text-[var(--accent)] hover:underline inline-flex items-center gap-1"
+            className="text-sm text-(--accent) hover:underline inline-flex items-center gap-1"
           >
             Quality Gates &rarr;
           </Link>
@@ -728,7 +728,7 @@ export default function ArchitecturePage() {
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ehds-data-planes.md"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-[var(--accent)] hover:underline inline-flex items-center gap-1"
+            className="text-sm text-(--accent) hover:underline inline-flex items-center gap-1"
           >
             EHDS Data Planes (20 future planes) &rarr;
           </a>
@@ -740,7 +740,7 @@ export default function ArchitecturePage() {
         <h2 className="text-2xl font-semibold mb-3" id="adrs">
           8. Architecture Decision Records
         </h2>
-        <p className="text-[var(--text-secondary)] text-sm mb-4">
+        <p className="text-(--text-secondary) text-sm mb-4">
           All ADRs are maintained as standalone Markdown files in{" "}
           <a
             href={`${GITHUB_REPO}/tree/main/docs/ADRs`}
@@ -868,14 +868,14 @@ export default function ArchitecturePage() {
               href={`${GITHUB_REPO}/blob/main/docs/ADRs/${adr.file}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="border border-[var(--border)] rounded-lg px-4 py-3 flex items-start gap-3 hover:border-indigo-500/50 transition-colors"
+              className="border border-(--border) rounded-lg px-4 py-3 flex items-start gap-3 hover:border-indigo-500/50 transition-colors"
             >
-              <span className="text-xs font-mono text-indigo-700 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-950/50 px-2 py-0.5 rounded shrink-0">
+              <span className="text-xs font-mono text-indigo-700 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-950/50 px-2 py-0.5 rounded-sm shrink-0">
                 {adr.id}
               </span>
               <div>
                 <span className="font-semibold text-sm">{adr.title}</span>
-                <p className="text-[var(--text-secondary)] text-xs mt-0.5">
+                <p className="text-(--text-secondary) text-xs mt-0.5">
                   {adr.desc}
                 </p>
               </div>
@@ -885,24 +885,24 @@ export default function ArchitecturePage() {
       </section>
 
       {/* Legend */}
-      <section className="border border-[var(--border)] rounded-xl p-6">
+      <section className="border border-(--border) rounded-xl p-6">
         <h3 className="font-semibold mb-3">Diagram Legend</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-[var(--text-secondary)]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-(--text-secondary)">
           <div>
             <span className="text-indigo-700 dark:text-indigo-400">■</span>{" "}
             Solid lines — direct data flow or API calls
           </div>
           <div>
-            <span className="text-[var(--text-secondary)]">■</span> Dashed lines
-            — mapping / transformation relationships
+            <span className="text-(--text-secondary)">■</span> Dashed lines —
+            mapping / transformation relationships
           </div>
           <div>
             <span className="text-indigo-700 dark:text-indigo-400">●</span>{" "}
             Subgraphs — logical boundary groupings
           </div>
           <div>
-            <span className="text-[var(--text-secondary)]">●</span> Participants
-            — protocol actors in sequence diagrams
+            <span className="text-(--text-secondary)">●</span> Participants —
+            protocol actors in sequence diagrams
           </div>
         </div>
       </section>

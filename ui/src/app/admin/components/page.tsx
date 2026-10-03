@@ -140,33 +140,33 @@ export default function AdminComponentsPage() {
     viewMode === "layer" ? snapshot?.timestamp : topology?.timestamp;
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-7xl mx-auto px-8 py-10">
         {/* ── Page header ── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
             <h1 className="page-header">EDC Components</h1>
-            <p className="text-[var(--text-secondary)] text-lg mt-1">
+            <p className="text-(--text-secondary) text-lg mt-1">
               Infrastructure health · CPU &amp; memory per service
             </p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-[var(--success)]/10 text-[var(--success-text)] rounded-full border border-[var(--success)]/20 text-sm font-bold tracking-tight">
-            <span className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse" />
+          <div className="flex items-center gap-2 px-4 py-2 bg-(--success)/10 text-(--success-text) rounded-full border border-(--success)/20 text-sm font-bold tracking-tight">
+            <span className="w-2 h-2 rounded-full bg-(--success) animate-pulse" />
             LIVE MONITORING
           </div>
         </div>
 
         {/* Controls bar */}
         <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
-          <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+          <div className="flex items-center gap-4 text-xs text-(--text-secondary)">
             {/* View toggle */}
-            <div className="flex bg-[var(--surface)] p-1 rounded-xl border border-[var(--border)]">
+            <div className="flex bg-(--surface) p-1 rounded-xl border border-(--border)">
               <button
                 onClick={() => setViewMode("layer")}
                 className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
                   viewMode === "layer"
-                    ? "bg-[var(--surface-card)] shadow-sm text-[var(--accent)]"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    ? "bg-(--surface-card) shadow-xs text-(--accent)"
+                    : "text-(--text-secondary) hover:text-(--text-primary)"
                 }`}
               >
                 Layer View
@@ -175,8 +175,8 @@ export default function AdminComponentsPage() {
                 onClick={() => setViewMode("participant")}
                 className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all ${
                   viewMode === "participant"
-                    ? "bg-[var(--surface-card)] shadow-sm text-[var(--accent)]"
-                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                    ? "bg-(--surface-card) shadow-xs text-(--accent)"
+                    : "text-(--text-secondary) hover:text-(--text-primary)"
                 }`}
               >
                 Participant View
@@ -188,12 +188,10 @@ export default function AdminComponentsPage() {
               <>
                 <span>{totalServices} services</span>
                 <span>·</span>
-                <span className="text-[var(--success-text)]">
+                <span className="text-(--success-text)">
                   {healthyCount} healthy
                 </span>
-                <span className="text-[var(--accent)]">
-                  {runningCount} running
-                </span>
+                <span className="text-(--accent)">{runningCount} running</span>
                 <span>·</span>
                 <span>
                   <Cpu size={11} className="inline mr-0.5" />
@@ -219,7 +217,7 @@ export default function AdminComponentsPage() {
                 {topology.summary.degradedParticipants > 0 && (
                   <>
                     <span>·</span>
-                    <span className="text-[var(--danger-text)]">
+                    <span className="text-(--danger-text)">
                       {topology.summary.degradedParticipants} degraded
                     </span>
                   </>
@@ -228,7 +226,7 @@ export default function AdminComponentsPage() {
                   <>
                     <span>·</span>
                     <span
-                      className="italic text-[var(--text-secondary)]"
+                      className="italic text-(--text-secondary)"
                       title="Participants are logical DIDs on this deployment — they share the same ACA containers. Switch to Layer View for real per-container CPU/MEM from Azure Monitor."
                     >
                       shared infrastructure (see Layer View for metrics)
@@ -240,19 +238,19 @@ export default function AdminComponentsPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <label className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer">
+            <label className="flex items-center gap-1.5 text-xs text-(--text-secondary) cursor-pointer">
               <input
                 type="checkbox"
                 checked={autoRefresh}
                 onChange={(e) => setAutoRefresh(e.target.checked)}
-                className="rounded border-[var(--border-ui)] bg-[var(--surface-2)] text-teal-800 dark:text-teal-300 focus:ring-layer2 w-3.5 h-3.5"
+                className="rounded-sm border-(--border-ui) bg-(--surface-2) text-teal-800 dark:text-teal-300 focus:ring-layer2 w-3.5 h-3.5"
               />
               Auto-refresh (30s)
             </label>
             <button
               onClick={() => fetchData(true)}
               disabled={refreshing}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-[var(--border)] rounded-lg hover:border-layer2 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-(--border) rounded-lg hover:border-layer2 transition-colors disabled:opacity-50"
             >
               <RefreshCw
                 size={12}
@@ -264,7 +262,7 @@ export default function AdminComponentsPage() {
         </div>
 
         {loading ? (
-          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+          <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
             Loading EDC components…
           </div>
@@ -288,13 +286,13 @@ export default function AdminComponentsPage() {
 
               {/* Participant topology sections */}
               <div className="space-y-3 mb-8">
-                <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)] mb-3">
+                <h2 className="font-semibold text-sm flex items-center gap-2 text-(--text-primary) mb-3">
                   <Users
                     size={16}
                     className="text-teal-800 dark:text-teal-300"
                   />
                   Dataspace Participants
-                  <span className="text-xs font-normal text-[var(--text-secondary)]">
+                  <span className="text-xs font-normal text-(--text-secondary)">
                     ({topology.participants.length})
                   </span>
                 </h2>
@@ -312,13 +310,10 @@ export default function AdminComponentsPage() {
               {topology.infrastructure.length > 0 && (
                 <div className="mb-8">
                   <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
-                    <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
-                      <HardDrive
-                        size={16}
-                        className="text-[var(--warning-text)]"
-                      />
+                    <h2 className="font-semibold text-sm flex items-center gap-2 text-(--text-primary)">
+                      <HardDrive size={16} className="text-(--warning-text)" />
                       Shared Infrastructure &amp; CFM
-                      <span className="text-xs font-normal text-[var(--text-secondary)]">
+                      <span className="text-xs font-normal text-(--text-secondary)">
                         ({topology.infrastructure.length})
                       </span>
                     </h2>
@@ -337,7 +332,7 @@ export default function AdminComponentsPage() {
 
               {/* Docker unavailable */}
               {!topology.dockerAvailable && (
-                <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-[var(--warning-text)]">
+                <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-(--warning-text)">
                   <strong>Docker socket not available.</strong> CPU and memory
                   metrics require the Docker socket to be mounted.
                 </div>
@@ -352,33 +347,33 @@ export default function AdminComponentsPage() {
             {/* Participants */}
             {snapshot && snapshot.participants.length > 0 && (
               <div className="mb-8">
-                <h2 className="font-semibold text-sm mb-4 flex items-center gap-2 text-[var(--text-primary)]">
+                <h2 className="font-semibold text-sm mb-4 flex items-center gap-2 text-(--text-primary)">
                   <Users
                     size={16}
                     className="text-teal-800 dark:text-teal-300"
                   />
                   Dataspace Participants
-                  <span className="text-xs font-normal text-[var(--text-secondary)]">
+                  <span className="text-xs font-normal text-(--text-secondary)">
                     ({snapshot.participants.length})
                   </span>
                 </h2>
-                <div className="overflow-x-auto border border-[var(--border)] rounded-xl">
+                <div className="overflow-x-auto border border-(--border) rounded-xl">
                   <table className="w-full text-left">
                     <thead>
-                      <tr className="border-b border-[var(--border)] bg-[var(--surface)]/60">
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-48">
+                      <tr className="border-b border-(--border) bg-(--surface)/60">
+                        <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-48">
                           Participant
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-32">
+                        <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-32">
                           Role
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)]">
+                        <th className="py-2 px-3 text-xs font-medium text-(--text-secondary)">
                           DID
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-28">
+                        <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-28">
                           State
                         </th>
-                        <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-20 text-center">
+                        <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-20 text-center">
                           Profiles
                         </th>
                       </tr>
@@ -387,13 +382,13 @@ export default function AdminComponentsPage() {
                       {snapshot.participants.map((p) => (
                         <tr
                           key={p.id}
-                          className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]/40 transition-colors"
+                          className="border-b border-(--border) hover:bg-(--surface-2)/40 transition-colors"
                         >
                           <td className="py-2.5 px-3">
-                            <div className="font-semibold text-sm text-[var(--text-primary)]">
+                            <div className="font-semibold text-sm text-(--text-primary)">
                               {p.displayName}
                             </div>
-                            <div className="text-[11px] text-[var(--text-secondary)]">
+                            <div className="text-[11px] text-(--text-secondary)">
                               {p.organization}
                             </div>
                           </td>
@@ -401,27 +396,27 @@ export default function AdminComponentsPage() {
                             <span
                               className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
                                 ROLE_COLORS[p.role] ||
-                                "bg-gray-500/20 text-[var(--text-secondary)]"
+                                "bg-gray-500/20 text-(--text-secondary)"
                               }`}
                             >
                               {p.role}
                             </span>
                           </td>
-                          <td className="py-2.5 px-3 font-mono text-[11px] text-[var(--text-secondary)]">
+                          <td className="py-2.5 px-3 font-mono text-[11px] text-(--text-secondary)">
                             {p.did}
                           </td>
                           <td className="py-2.5 px-3">
                             <span
                               className={`text-xs font-medium ${
                                 p.state === "CREATED"
-                                  ? "text-[var(--success-text)]"
-                                  : "text-[var(--warning-text)]"
+                                  ? "text-(--success-text)"
+                                  : "text-(--warning-text)"
                               }`}
                             >
                               {p.state}
                             </span>
                           </td>
-                          <td className="py-2.5 px-3 text-xs text-[var(--text-primary)] text-center">
+                          <td className="py-2.5 px-3 text-xs text-(--text-primary) text-center">
                             {p.profileCount}
                           </td>
                         </tr>
@@ -441,33 +436,33 @@ export default function AdminComponentsPage() {
 
               return (
                 <div key={layer} className="mb-8">
-                  <h2 className="font-semibold text-sm mb-3 flex items-center gap-2 text-[var(--text-primary)]">
+                  <h2 className="font-semibold text-sm mb-3 flex items-center gap-2 text-(--text-primary)">
                     <LayerIcon size={16} className={meta.color} />
                     {meta.label}
-                    <span className="text-xs font-normal text-[var(--text-secondary)]">
+                    <span className="text-xs font-normal text-(--text-secondary)">
                       ({items.length})
                     </span>
                   </h2>
-                  <div className="overflow-x-auto border border-[var(--border)] rounded-xl">
+                  <div className="overflow-x-auto border border-(--border) rounded-xl">
                     <table className="w-full text-left">
                       <thead>
-                        <tr className="border-b border-[var(--border)] bg-[var(--surface)]/60">
-                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-48">
+                        <tr className="border-b border-(--border) bg-(--surface)/60">
+                          <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-48">
                             Component
                           </th>
-                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-28">
+                          <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-28">
                             Health
                           </th>
-                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-24">
+                          <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-24">
                             Uptime
                           </th>
-                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-40">
+                          <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-40">
                             CPU (Last 24h)
                           </th>
-                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-44">
+                          <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-44">
                             Memory (Last 24h)
                           </th>
-                          <th className="py-2 px-3 text-xs font-medium text-[var(--text-secondary)] w-16">
+                          <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-16">
                             Mem %
                           </th>
                         </tr>
@@ -496,7 +491,7 @@ export default function AdminComponentsPage() {
               !snapshot.dockerAvailable &&
               snapshot.metricsSource !== "azure-monitor" &&
               snapshot.deploymentTarget !== "azure" && (
-                <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-[var(--warning-text)]">
+                <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-(--warning-text)">
                   <strong>Docker socket not available.</strong> CPU and memory
                   metrics require the Docker socket to be mounted.
                 </div>
@@ -534,7 +529,7 @@ export default function AdminComponentsPage() {
 
         {/* Timestamp */}
         {timestamp && (
-          <p className="text-[10px] text-[var(--text-secondary)] mt-4">
+          <p className="text-[10px] text-(--text-secondary) mt-4">
             Last updated: {new Date(timestamp).toLocaleString()}
           </p>
         )}

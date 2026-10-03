@@ -4,7 +4,7 @@
  * RegisterDialog — a lightweight modal wrapping EudiApprovalFlow. Used by the
  * homepage "Register with EUDI Wallet" CTA and the /patient "Request EHR data"
  * button. No dialog dependency — plain Tailwind overlay with ESC/backdrop close,
- * role="dialog" + aria-modal, and body-scroll lock. z-[70] sits above the nav
+ * role="dialog" + aria-modal, and body-scroll lock. z-70 sits above the nav
  * (z-50) and UserMenu dropdown.
  */
 import { useEffect, useState } from "react";
@@ -59,19 +59,19 @@ export function RegisterDialog({
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      className="fixed inset-0 z-100 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div className="absolute inset-0 bg-black/75 backdrop-blur-md" />
       <div
-        className="relative z-10 w-full max-w-3xl rounded-2xl border-2 border-[var(--border)] bg-[var(--surface)] ring-1 ring-black/10 shadow-[0_24px_70px_rgba(0,0,0,0.45)] p-6 sm:p-8 max-h-[92vh] overflow-y-auto"
+        className="relative z-10 w-full max-w-3xl rounded-2xl border-2 border-(--border) bg-(--surface) ring-1 ring-black/10 shadow-[0_24px_70px_rgba(0,0,0,0.45)] p-6 sm:p-8 max-h-[92vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="absolute top-3 right-3 grid place-items-center w-9 h-9 rounded-full text-[var(--text-secondary)] hover:bg-[var(--surface-2)] transition-colors z-10"
+          className="absolute top-3 right-3 grid place-items-center w-9 h-9 rounded-full text-(--text-secondary) hover:bg-(--surface-2) transition-colors z-10"
         >
           <X size={18} />
         </button>
@@ -87,15 +87,15 @@ export function RegisterDialog({
           >
             <ShieldCheck size={13} /> {EYEBROW[mode]}
           </span>
-          <h2 className="text-2xl font-extrabold text-[var(--text-primary)] leading-tight">
+          <h2 className="text-2xl font-extrabold text-(--text-primary) leading-tight">
             {title}
           </h2>
           {subtitle && (
-            <p className="text-sm text-[var(--text-secondary)] mt-1.5 max-w-md mx-auto">
+            <p className="text-sm text-(--text-secondary) mt-1.5 max-w-md mx-auto">
               {subtitle}
             </p>
           )}
-          <span className="inline-flex items-center gap-1.5 mt-3 text-xs font-semibold text-[var(--text-secondary)]">
+          <span className="inline-flex items-center gap-1.5 mt-3 text-xs font-semibold text-(--text-secondary)">
             <ScanLine size={13} /> Scan the QR or approve on your phone — no
             password
           </span>

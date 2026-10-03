@@ -16,22 +16,22 @@ export const LAYER_META: Record<
   "edc-core": {
     label: "EDC-V Core",
     icon: Server,
-    color: "text-[var(--accent)]",
+    color: "text-(--accent)",
   },
   identity: {
     label: "Identity & Trust",
     icon: Shield,
-    color: "text-[var(--accent)]",
+    color: "text-(--accent)",
   },
   cfm: {
     label: "Connector Fabric Manager",
     icon: Workflow,
-    color: "text-[var(--success-text)]",
+    color: "text-(--success-text)",
   },
   infrastructure: {
     label: "Infrastructure",
     icon: HardDrive,
-    color: "text-[var(--warning-text)]",
+    color: "text-(--warning-text)",
   },
 };
 
@@ -59,23 +59,23 @@ export const SEVERITY_STYLES: Record<
   },
   healthy: {
     dot: "bg-emerald-500",
-    border: "border-[var(--border)]",
+    border: "border-(--border)",
     bg: "",
   },
   unknown: {
     dot: "bg-gray-500",
-    border: "border-[var(--border)]",
+    border: "border-(--border)",
     bg: "",
   },
 };
 
 export const ROLE_COLORS: Record<string, string> = {
-  DATA_HOLDER: "bg-blue-500/20 text-[var(--accent)]",
-  DATA_USER: "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)]",
-  HDAB: "bg-purple-500/20 text-[var(--accent)]",
-  "health-data-access-body": "bg-purple-500/20 text-[var(--accent)]",
-  "data-holder": "bg-blue-500/20 text-[var(--accent)]",
-  "data-user": "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)]",
+  DATA_HOLDER: "bg-blue-500/20 text-(--accent)",
+  DATA_USER: "bg-(--badge-active-bg) text-(--badge-active-text)",
+  HDAB: "bg-purple-500/20 text-(--accent)",
+  "health-data-access-body": "bg-purple-500/20 text-(--accent)",
+  "data-holder": "bg-blue-500/20 text-(--accent)",
+  "data-user": "bg-(--badge-active-bg) text-(--badge-active-text)",
 };
 
 // Hoisted out of AzureCostEstimatorPanel so TopoComponentCard can use it too.

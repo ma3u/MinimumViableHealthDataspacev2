@@ -32,7 +32,7 @@ export default function RowSourceBadge({
     <span
       title={title}
       data-testid={`row-source-${source}`}
-      className="text-xs px-2 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--text-secondary)] border border-[var(--border)]"
+      className="text-xs px-2 py-0.5 rounded-full bg-(--surface-2) text-(--text-secondary) border border-(--border)"
     >
       {label}
     </span>

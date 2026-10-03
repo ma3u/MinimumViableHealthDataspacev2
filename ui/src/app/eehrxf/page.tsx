@@ -78,14 +78,14 @@ function StatusBadge({ status }: { status: string }) {
     case "available":
     case "full":
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]">
+        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)">
           <CheckCircle size={12} />
           Available
         </span>
       );
     case "partial":
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border border-[var(--role-hdab-border)]">
+        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-(--role-hdab-bg) text-(--role-hdab-text) border border-(--role-hdab-border)">
           <AlertTriangle size={12} />
           Partial
         </span>
@@ -93,7 +93,7 @@ function StatusBadge({ status }: { status: string }) {
     case "none":
     default:
       return (
-        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border border-[var(--role-admin-border)]">
+        <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-(--role-admin-bg) text-(--role-admin-text) border border-(--role-admin-border)">
           <XCircle size={12} />
           Gap
         </span>
@@ -112,13 +112,13 @@ function CoverageMeter({ percent }: { percent: number }) {
           : "bg-red-500";
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 bg-[var(--surface-2)] rounded-full h-2 overflow-hidden">
+      <div className="flex-1 bg-(--surface-2) rounded-full h-2 overflow-hidden">
         <div
           className={`${color} h-2 rounded-full transition-all`}
           style={{ width: `${Math.max(percent, 2)}%` }}
         />
       </div>
-      <span className="text-xs text-[var(--text-secondary)] w-9 text-right">
+      <span className="text-xs text-(--text-secondary) w-9 text-right">
         {percent}%
       </span>
     </div>
@@ -127,25 +127,25 @@ function CoverageMeter({ percent }: { percent: number }) {
 
 function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
   return (
-    <div className="flex items-center gap-3 py-2 px-3 rounded hover:bg-[var(--surface-2)]/50 transition-colors">
+    <div className="flex items-center gap-3 py-2 px-3 rounded-sm hover:bg-(--surface-2)/50 transition-colors">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-[var(--text-primary)] truncate">
+          <span className="text-sm font-medium text-(--text-primary) truncate">
             {profile.name}
           </span>
-          <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-2)] px-1.5 py-0.5 rounded">
+          <span className="text-[10px] text-(--text-secondary) bg-(--surface-2) px-1.5 py-0.5 rounded-sm">
             {profile.fhirVersion}
           </span>
-          <span className="text-[10px] text-[var(--text-secondary)] bg-[var(--surface-2)] px-1.5 py-0.5 rounded">
+          <span className="text-[10px] text-(--text-secondary) bg-(--surface-2) px-1.5 py-0.5 rounded-sm">
             {profile.status}
           </span>
         </div>
-        <div className="text-xs text-[var(--text-secondary)] mt-0.5 truncate">
+        <div className="text-xs text-(--text-secondary) mt-0.5 truncate">
           {profile.baseResource} — {profile.igName}
         </div>
       </div>
       <div className="flex items-center gap-3 shrink-0">
-        <span className="text-xs text-[var(--text-secondary)] tabular-nums">
+        <span className="text-xs text-(--text-secondary) tabular-nums">
           {profile.resourceCount.toLocaleString()} resources
         </span>
         <StatusBadge status={profile.coverage} />
@@ -154,7 +154,7 @@ function ProfileRow({ profile }: { profile: EEHRxFProfile }) {
             href={profile.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--text-secondary)] hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
+            className="text-(--text-secondary) hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
             title="View IG specification"
           >
             <ExternalLink size={14} />
@@ -183,45 +183,42 @@ function CategoryCard({ category }: { category: EEHRxFCategory }) {
 
   return (
     <div
-      className={`bg-[var(--surface)] border rounded-xl overflow-hidden ${
-        groupColors[category.ehdsGroup] ?? "border-[var(--border)]"
+      className={`bg-(--surface) border rounded-xl overflow-hidden ${
+        groupColors[category.ehdsGroup] ?? "border-(--border)"
       }`}
     >
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center gap-3 p-5 text-left hover:bg-[var(--surface-2)]/30 transition-colors"
+        className="w-full flex items-center gap-3 p-5 text-left hover:bg-(--surface-2)/30 transition-colors"
       >
         {expanded ? (
-          <ChevronDown
-            size={16}
-            className="text-[var(--text-secondary)] shrink-0"
-          />
+          <ChevronDown size={16} className="text-(--text-secondary) shrink-0" />
         ) : (
           <ChevronRight
             size={16}
-            className="text-[var(--text-secondary)] shrink-0"
+            className="text-(--text-secondary) shrink-0"
           />
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-[var(--text-primary)]">
+            <h3 className="font-semibold text-(--text-primary)">
               {category.name}
             </h3>
             <StatusBadge status={category.status} />
           </div>
-          <p className="text-xs text-[var(--text-secondary)] line-clamp-1">
+          <p className="text-xs text-(--text-secondary) line-clamp-1">
             {category.description}
           </p>
         </div>
         <div className="shrink-0 text-right">
-          <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-1">
+          <div className="flex items-center gap-1.5 text-xs text-(--text-secondary) mb-1">
             <Clock size={12} />
             <span>
               EHDS{" "}
               {category.ehdsDeadline === "TBD" ? "TBD" : category.ehdsDeadline}
             </span>
           </div>
-          <div className="text-[10px] text-[var(--text-secondary)]">
+          <div className="text-[10px] text-(--text-secondary)">
             Group {category.ehdsGroup} ·{" "}
             {category.totalResources.toLocaleString()} resources
           </div>
@@ -229,10 +226,10 @@ function CategoryCard({ category }: { category: EEHRxFCategory }) {
       </button>
 
       {expanded && (
-        <div className="border-t border-[var(--border)] px-5 pb-4">
+        <div className="border-t border-(--border) px-5 pb-4">
           <div className="pt-3 pb-2">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-[var(--text-secondary)]">
+              <span className="text-xs text-(--text-secondary)">
                 Profile Coverage: {profileCovered}/{profileTotal} profiles
               </span>
             </div>
@@ -274,7 +271,7 @@ export default function EEHRxFPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* Header */}
         <PageIntro
@@ -296,14 +293,14 @@ export default function EEHRxFPage() {
         ) : (
           <>
             {error && (
-              <div className="mb-6 p-3 rounded bg-[var(--role-admin-bg)] border border-[var(--role-admin-border)] text-[var(--role-admin-text)] text-sm">
+              <div className="mb-6 p-3 rounded-sm bg-(--role-admin-bg) border border-(--role-admin-border) text-(--role-admin-text) text-sm">
                 {error}
               </div>
             )}
 
             {/* Summary stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
+              <div className="bg-(--surface) border border-(--border) rounded-xl p-4 flex flex-col gap-1">
                 <Layers
                   size={16}
                   className="text-teal-800 dark:text-teal-300"
@@ -311,11 +308,11 @@ export default function EEHRxFPage() {
                 <span className="text-2xl font-bold">
                   {loading ? "—" : data?.summary.totalCategories ?? 0}
                 </span>
-                <span className="text-xs text-[var(--text-secondary)]">
+                <span className="text-xs text-(--text-secondary)">
                   Priority Categories
                 </span>
               </div>
-              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
+              <div className="bg-(--surface) border border-(--border) rounded-xl p-4 flex flex-col gap-1">
                 <ShieldCheck
                   size={16}
                   className="text-green-800 dark:text-green-300"
@@ -323,38 +320,35 @@ export default function EEHRxFPage() {
                 <span className="text-2xl font-bold">
                   {loading ? "—" : data?.summary.totalProfiles ?? 0}
                 </span>
-                <span className="text-xs text-[var(--text-secondary)]">
+                <span className="text-xs text-(--text-secondary)">
                   EU Profiles Tracked
                 </span>
               </div>
-              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-                <CheckCircle size={16} className="text-[var(--success-text)]" />
+              <div className="bg-(--surface) border border-(--border) rounded-xl p-4 flex flex-col gap-1">
+                <CheckCircle size={16} className="text-(--success-text)" />
                 <span className="text-2xl font-bold">
                   {loading ? "—" : data?.summary.coveredProfiles ?? 0}
                 </span>
-                <span className="text-xs text-[var(--text-secondary)]">
+                <span className="text-xs text-(--text-secondary)">
                   Profiles with Data
                 </span>
               </div>
-              <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col gap-1">
-                <AlertTriangle
-                  size={16}
-                  className="text-[var(--warning-text)]"
-                />
+              <div className="bg-(--surface) border border-(--border) rounded-xl p-4 flex flex-col gap-1">
+                <AlertTriangle size={16} className="text-(--warning-text)" />
                 <span className="text-2xl font-bold">
                   {loading ? "—" : `${data?.summary.coveragePercent ?? 0}%`}
                 </span>
-                <span className="text-xs text-[var(--text-secondary)]">
+                <span className="text-xs text-(--text-secondary)">
                   Overall Coverage
                 </span>
               </div>
             </div>
 
             {/* EHDS Timeline */}
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-5 mb-8">
+            <div className="bg-(--surface) border border-(--border) rounded-xl p-5 mb-8">
               <div className="flex items-center gap-2 mb-4">
-                <Clock size={16} className="text-[var(--text-secondary)]" />
-                <h2 className="font-semibold text-sm text-[var(--text-primary)]">
+                <Clock size={16} className="text-(--text-secondary)" />
+                <h2 className="font-semibold text-sm text-(--text-primary)">
                   EHDS Implementation Timeline
                 </h2>
               </div>
@@ -369,19 +363,19 @@ export default function EEHRxFPage() {
                         className={`w-4 h-4 rounded-full border-2 ${
                           m.active
                             ? "bg-layer2 border-layer2"
-                            : "bg-[var(--surface)] border-[var(--border-ui)]"
+                            : "bg-(--surface) border-(--border-ui)"
                         }`}
                       />
                       <span
                         className={`text-xs font-medium mt-1 ${
                           m.active
                             ? "text-teal-800 dark:text-teal-300"
-                            : "text-[var(--text-secondary)]"
+                            : "text-(--text-secondary)"
                         }`}
                       >
                         {m.year}
                       </span>
-                      <span className="text-[10px] text-[var(--text-secondary)] text-center max-w-[100px] leading-tight mt-0.5">
+                      <span className="text-[10px] text-(--text-secondary) text-center max-w-[100px] leading-tight mt-0.5">
                         {m.label}
                       </span>
                     </div>
@@ -392,7 +386,7 @@ export default function EEHRxFPage() {
 
             {/* Category cards */}
             {loading ? (
-              <div className="text-[var(--text-secondary)] text-sm">
+              <div className="text-(--text-secondary) text-sm">
                 Loading EEHRxF profiles…
               </div>
             ) : (
@@ -406,8 +400,8 @@ export default function EEHRxFPage() {
         )}
 
         {/* Reference links */}
-        <div className="mt-10 border-t border-[var(--border)] pt-6">
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-3">
+        <div className="mt-10 border-t border-(--border) pt-6">
+          <h3 className="text-sm font-semibold text-(--text-primary) mb-3">
             References
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
@@ -442,7 +436,7 @@ export default function EEHRxFPage() {
                 href={ref.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-[var(--text-secondary)] hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
+                className="flex items-center gap-1.5 text-(--text-secondary) hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
               >
                 <ExternalLink size={12} />
                 {ref.label}

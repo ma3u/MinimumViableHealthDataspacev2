@@ -69,7 +69,7 @@ function Reveal({
 
 function Quote({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-[clamp(1.05rem,2.2vw,1.6rem)] italic text-[var(--text-primary)] leading-snug">
+    <p className="text-[clamp(1.05rem,2.2vw,1.6rem)] italic text-(--text-primary) leading-snug">
       &ldquo;{children}&rdquo;
     </p>
   );
@@ -86,19 +86,19 @@ function SlideIntro() {
   return (
     <div className="text-center max-w-3xl mx-auto">
       <Reveal>
-        <p className="uppercase tracking-[0.18em] text-sm font-semibold text-[var(--accent)] mb-3">
+        <p className="uppercase tracking-[0.18em] text-sm font-semibold text-(--accent) mb-3">
           EHDS Patient Wallet
         </p>
       </Reveal>
       <Reveal delay={120}>
-        <h1 className="font-extrabold text-[clamp(1.9rem,5.5vw,3.4rem)] leading-[1.05] text-[var(--text-primary)] mb-4">
+        <h1 className="font-extrabold text-[clamp(1.9rem,5.5vw,3.4rem)] leading-[1.05] text-(--text-primary) mb-4">
           Maria takes control of
           <br />
           her health data
         </h1>
       </Reveal>
       <Reveal delay={260}>
-        <p className="text-[clamp(1rem,2.3vw,1.4rem)] text-[var(--text-secondary)] mb-9">
+        <p className="text-[clamp(1rem,2.3vw,1.4rem)] text-(--text-secondary) mb-9">
           From digital identity to personal research insights — in four steps.
         </p>
       </Reveal>
@@ -107,7 +107,7 @@ function SlideIntro() {
           {steps.map((s) => (
             <span
               key={s.n}
-              className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium bg-[var(--surface-2)]"
+              className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium bg-(--surface-2)"
               style={{ borderColor: s.c, color: s.c }}
             >
               <span
@@ -132,18 +132,18 @@ function SlideRegister() {
   return (
     <div className="max-w-5xl mx-auto w-full">
       <Reveal>
-        <h2 className="font-extrabold text-[clamp(1.4rem,3.2vw,2.1rem)] leading-tight text-[var(--text-primary)] mb-1 text-center">
+        <h2 className="font-extrabold text-[clamp(1.4rem,3.2vw,2.1rem)] leading-tight text-(--text-primary) mb-1 text-center">
           {isReg ? "Register" : "Sign in"} with your EUDI Wallet — no password
         </h2>
       </Reveal>
       <Reveal delay={120} className="flex flex-col items-center gap-3 mb-4">
-        <p className="text-center text-sm text-[var(--text-secondary)]">
+        <p className="text-center text-sm text-(--text-secondary)">
           {isReg
             ? "First time: scan → approve → registered."
             : "Returning: scan → approve → back in. The wallet skips the trust step."}{" "}
           · OpenID4VP · eIDAS 2.0
         </p>
-        <div className="inline-flex rounded-full border border-[var(--border)] p-1 bg-[var(--surface-2)]">
+        <div className="inline-flex rounded-full border border-(--border) p-1 bg-(--surface-2)">
           {(
             [
               ["register", "First time · Register"],
@@ -154,7 +154,7 @@ function SlideRegister() {
               key={m}
               onClick={() => setMode(m)}
               className={`px-4 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                mode === m ? "text-white" : "text-[var(--text-secondary)]"
+                mode === m ? "text-white" : "text-(--text-secondary)"
               }`}
               style={mode === m ? { background: ACCENTS[0] } : undefined}
             >
@@ -175,11 +175,11 @@ function SlideRegister() {
               className="block w-[clamp(150px,24vw,230px)] h-auto"
             />
           </div>
-          <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-[var(--text-primary)]">
+          <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
             <ScanLine size={18} style={{ color: ACCENTS[0] }} />
             Scan with your EUDI Wallet
           </p>
-          <p className="text-xs text-[var(--text-secondary)] mt-1">
+          <p className="text-xs text-(--text-secondary) mt-1">
             Live flow → ehds.mabu.red/auth/eudi-qr
             {isReg ? "" : "?mode=login"}
           </p>
@@ -208,7 +208,7 @@ function SlideEhr() {
       >
         {transferred ? (
           <div className="w-full">
-            <div className="rounded-xl overflow-hidden border border-[var(--border)] shadow-lg bg-white">
+            <div className="rounded-xl overflow-hidden border border-(--border) shadow-lg bg-white">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={`${BASE_PATH}/journey/app-profile.png`}
@@ -218,7 +218,7 @@ function SlideEhr() {
                 className="block w-full h-auto"
               />
             </div>
-            <p className="text-xs text-[var(--text-secondary)] mt-2 text-center">
+            <p className="text-xs text-(--text-secondary) mt-2 text-center">
               Now in the portal as FHIR R4 — synthetic data
             </p>
           </div>
@@ -229,7 +229,7 @@ function SlideEhr() {
 
       <div className="order-1 md:order-2">
         <Reveal>
-          <h2 className="font-extrabold text-[clamp(1.5rem,3.4vw,2.3rem)] leading-tight text-[var(--text-primary)] mb-3">
+          <h2 className="font-extrabold text-[clamp(1.5rem,3.4vw,2.3rem)] leading-tight text-(--text-primary) mb-3">
             Pull my record from my insurance
           </h2>
         </Reveal>
@@ -237,16 +237,12 @@ function SlideEhr() {
           <Quote>I need my data from my Electronic Health Record (ePA)!</Quote>
         </Reveal>
         <Reveal delay={320}>
-          <div className="mt-5 flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+          <div className="mt-5 flex items-center gap-2 text-sm text-(--text-secondary)">
             <Database size={16} style={{ color: ACCENTS[1] }} />
             <span>
-              <strong className="text-[var(--text-primary)]">
-                {insurer.name}
-              </strong>{" "}
+              <strong className="text-(--text-primary)">{insurer.name}</strong>{" "}
               (health insurance) · ePA / EHR via{" "}
-              <strong className="text-[var(--text-primary)]">
-                GesundheitsID
-              </strong>
+              <strong className="text-(--text-primary)">GesundheitsID</strong>
             </span>
           </div>
         </Reveal>
@@ -261,7 +257,7 @@ function SlideEhr() {
             ).map(({ t, Icon }, i) => (
               <span
                 key={i}
-                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium border bg-[var(--surface-2)]"
+                className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium border bg-(--surface-2)"
                 style={{ borderColor: ACCENTS[1], color: ACCENTS[1] }}
               >
                 <Icon size={15} /> {t}
@@ -286,7 +282,7 @@ function SlideEhr() {
               </>
             )}
           </button>
-          <p className="mt-2 text-xs text-[var(--text-secondary)]">
+          <p className="mt-2 text-xs text-(--text-secondary)">
             GesundheitsID-authenticated · end-to-end encrypted · {insurer.short}{" "}
             cannot read it · withdraw any time
           </p>
@@ -313,7 +309,7 @@ function SourceCard({ s }: { s: DataSource }) {
   const Icon = SOURCE_ICON[s.id];
   return (
     <div
-      className="rounded-xl border bg-[var(--surface-2)] overflow-hidden h-full"
+      className="rounded-xl border bg-(--surface-2) overflow-hidden h-full"
       style={{ borderColor: s.brand }}
     >
       <div className="h-[clamp(76px,10vw,104px)] bg-white relative">
@@ -341,10 +337,10 @@ function SourceCard({ s }: { s: DataSource }) {
           style={{ color: s.brand }}
         />
         <div className="min-w-0">
-          <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+          <p className="text-xs font-semibold text-(--text-primary) truncate">
             {s.label}
           </p>
-          <p className="text-[11px] text-[var(--text-secondary)] truncate">
+          <p className="text-[11px] text-(--text-secondary) truncate">
             {s.sublabel}
           </p>
         </div>
@@ -370,7 +366,7 @@ function SlideDonate() {
   return (
     <div className="max-w-5xl mx-auto w-full">
       <Reveal>
-        <h2 className="font-extrabold text-[clamp(1.4rem,3.2vw,2.1rem)] leading-tight text-[var(--text-primary)] mb-2 text-center">
+        <h2 className="font-extrabold text-[clamp(1.4rem,3.2vw,2.1rem)] leading-tight text-(--text-primary) mb-2 text-center">
           Donate my data to research I care about
         </h2>
       </Reveal>
@@ -380,7 +376,7 @@ function SlideDonate() {
 
       {/* the three real sources Maria contributes */}
       <Reveal delay={260} className="mt-5">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)] mb-2.5">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.14em] text-(--text-secondary) mb-2.5">
           Contributing my real data
         </p>
         <div className="grid grid-cols-3 gap-3 max-w-3xl mx-auto">
@@ -392,7 +388,7 @@ function SlideDonate() {
 
       {/* into the programs she trusts */}
       <Reveal delay={420}>
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.14em] text-[var(--text-secondary)] mt-5 mb-2.5">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.14em] text-(--text-secondary) mt-5 mb-2.5">
           into programs I trust
         </p>
       </Reveal>
@@ -400,7 +396,7 @@ function SlideDonate() {
         {programs.map((p, i) => (
           <Reveal key={i} delay={500 + i * 120}>
             <div
-              className="rounded-2xl border p-4 bg-[var(--surface-2)] h-full"
+              className="rounded-2xl border p-4 bg-(--surface-2) h-full"
               style={{ borderColor: ACCENTS[2] }}
             >
               <div className="flex items-start justify-between gap-3">
@@ -412,13 +408,11 @@ function SlideDonate() {
                   CONSENT GRANTED
                 </span>
               </div>
-              <h3 className="font-bold text-[var(--text-primary)] mt-2 text-[clamp(0.95rem,1.9vw,1.15rem)]">
+              <h3 className="font-bold text-(--text-primary) mt-2 text-[clamp(0.95rem,1.9vw,1.15rem)]">
                 {p.name}
               </h3>
-              <p className="text-sm text-[var(--text-secondary)] mt-1">
-                {p.org}
-              </p>
-              <p className="text-xs text-[var(--text-secondary)] mt-1.5">
+              <p className="text-sm text-(--text-secondary) mt-1">{p.org}</p>
+              <p className="text-xs text-(--text-secondary) mt-1.5">
                 Federated across {p.countries}
               </p>
             </div>
@@ -426,7 +420,7 @@ function SlideDonate() {
         ))}
       </div>
       <Reveal delay={760}>
-        <p className="mt-4 text-center text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2">
+        <p className="mt-4 text-center text-sm text-(--text-secondary) flex items-center justify-center gap-2">
           <ShieldCheck size={16} style={{ color: ACCENTS[2] }} />
           Federated queries reach many databases — my data never leaves the
           secure environment. Withdraw any time.
@@ -458,12 +452,12 @@ function SlideResults() {
   return (
     <div className="max-w-5xl mx-auto w-full">
       <Reveal>
-        <h2 className="font-extrabold text-[clamp(1.5rem,3.4vw,2.3rem)] leading-tight text-[var(--text-primary)] mb-1 text-center">
+        <h2 className="font-extrabold text-[clamp(1.5rem,3.4vw,2.3rem)] leading-tight text-(--text-primary) mb-1 text-center">
           My personal research results
         </h2>
       </Reveal>
       <Reveal delay={120}>
-        <p className="text-center text-sm text-[var(--text-secondary)] mb-6">
+        <p className="text-center text-sm text-(--text-secondary) mb-6">
           Insights computed from my donated data — synthetic, illustrative.
         </p>
       </Reveal>
@@ -471,7 +465,7 @@ function SlideResults() {
         {results.map((x, i) => (
           <Reveal key={i} delay={240 + i * 150}>
             <div
-              className="rounded-xl border p-4 sm:p-5 bg-[var(--surface-2)] flex items-start gap-4"
+              className="rounded-xl border p-4 sm:p-5 bg-(--surface-2) flex items-start gap-4"
               style={{ borderColor: ACCENTS[3] }}
             >
               <span
@@ -481,10 +475,10 @@ function SlideResults() {
                 <x.icon size={20} />
               </span>
               <div>
-                <p className="text-[clamp(0.9rem,1.8vw,1.05rem)] italic text-[var(--text-secondary)]">
+                <p className="text-[clamp(0.9rem,1.8vw,1.05rem)] italic text-(--text-secondary)">
                   &ldquo;{x.q}&rdquo;
                 </p>
-                <p className="text-[clamp(0.95rem,2vw,1.18rem)] font-semibold text-[var(--text-primary)] mt-1">
+                <p className="text-[clamp(0.95rem,2vw,1.18rem)] font-semibold text-(--text-primary) mt-1">
                   {x.r}
                 </p>
               </div>
@@ -493,7 +487,7 @@ function SlideResults() {
         ))}
       </div>
       <Reveal delay={760}>
-        <p className="mt-6 text-center font-bold text-[clamp(1.1rem,2.6vw,1.6rem)] text-[var(--text-primary)]">
+        <p className="mt-6 text-center font-bold text-[clamp(1.1rem,2.6vw,1.6rem)] text-(--text-primary)">
           My data. My identity. My insights.{" "}
           <span style={{ color: ACCENTS[3] }}>Sovereign, by design.</span>
         </p>
@@ -531,7 +525,7 @@ export default function JourneyPage() {
   const Slide = SLIDES[step].render;
 
   return (
-    <div className="relative flex flex-col h-[calc(100dvh-3rem)] overflow-hidden bg-[var(--surface)]">
+    <div className="relative flex flex-col h-[calc(100dvh-3rem)] overflow-hidden bg-(--surface)">
       <style>{`
         @keyframes jrnyReveal {
           from { opacity: 0; transform: translateY(14px); }
@@ -544,7 +538,7 @@ export default function JourneyPage() {
       `}</style>
 
       {/* top progress bar */}
-      <div className="h-1 w-full bg-[var(--surface-2)] shrink-0">
+      <div className="h-1 w-full bg-(--surface-2) shrink-0">
         <div
           className="h-full transition-all duration-500"
           style={{
@@ -565,7 +559,7 @@ export default function JourneyPage() {
           aria-label="Previous step"
           onClick={() => go(-1)}
           disabled={step === 0}
-          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 grid place-items-center w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[var(--surface-2)] border border-[var(--border)] shadow-md text-[var(--text-primary)] hover:bg-[var(--accent)] hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 grid place-items-center w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-(--surface-2) border border-(--border) shadow-md text-(--text-primary) hover:bg-(--accent) hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
         >
           <ArrowLeft size={22} />
         </button>
@@ -581,7 +575,7 @@ export default function JourneyPage() {
       </div>
 
       {/* footer controls — dots + counter */}
-      <div className="shrink-0 flex items-center justify-center gap-4 py-3 border-t border-[var(--surface-2)]">
+      <div className="shrink-0 flex items-center justify-center gap-4 py-3 border-t border-(--surface-2)">
         <div className="flex items-center gap-2">
           {SLIDES.map((s, i) => (
             <button
@@ -598,7 +592,7 @@ export default function JourneyPage() {
             />
           ))}
         </div>
-        <span className="text-xs text-[var(--text-secondary)] tabular-nums">
+        <span className="text-xs text-(--text-secondary) tabular-nums">
           {step + 1} / {SLIDES.length}
         </span>
       </div>

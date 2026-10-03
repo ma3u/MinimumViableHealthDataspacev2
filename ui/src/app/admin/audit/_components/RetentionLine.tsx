@@ -45,7 +45,7 @@ export function RetentionLine() {
   };
   return (
     <div
-      className="mb-4 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3 text-xs flex flex-wrap items-center gap-x-4 gap-y-2"
+      className="mb-4 rounded-lg border border-(--border) bg-(--surface) p-3 text-xs flex flex-wrap items-center gap-x-4 gap-y-2"
       data-testid="retention-line"
     >
       <span>
@@ -60,7 +60,7 @@ export function RetentionLine() {
         type="button"
         onClick={purge}
         disabled={busy}
-        className="px-2 py-1 rounded border border-[var(--border)] disabled:opacity-50"
+        className="px-2 py-1 rounded-sm border border-(--border) disabled:opacity-50"
         title={state.policy.rule}
       >
         {busy ? "Deleting…" : "Delete expired records"}

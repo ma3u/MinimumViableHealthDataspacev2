@@ -99,11 +99,11 @@ export function EudiApprovalFlow({
             </span>
           )}
         </div>
-        <p className="flex items-center gap-1.5 text-sm font-semibold text-[var(--text-primary)]">
+        <p className="flex items-center gap-1.5 text-sm font-semibold text-(--text-primary)">
           <ScanLine size={16} style={{ color: accent }} aria-hidden="true" />
           {cfg.scanLabel}
         </p>
-        <p className="text-xs text-[var(--text-secondary)] text-center max-w-[210px]">
+        <p className="text-xs text-(--text-secondary) text-center max-w-[210px]">
           …or approve on the simulated phone →
         </p>
       </div>

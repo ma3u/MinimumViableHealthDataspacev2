@@ -59,21 +59,21 @@ export function AzureCostEstimatorPanel({
   const totalMemGiB = specs.reduce((s, a) => s + a.memGiB, 0);
 
   return (
-    <div className="border border-[var(--border)] rounded-xl p-5 mt-10 space-y-6">
+    <div className="border border-(--border) rounded-xl p-5 mt-10 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="font-semibold text-sm flex items-center gap-2 text-[var(--text-primary)]">
-          <BarChart2 size={16} className="text-[var(--success-text)]" />
+        <h2 className="font-semibold text-sm flex items-center gap-2 text-(--text-primary)">
+          <BarChart2 size={16} className="text-(--success-text)" />
           Monthly Cost Estimate — Azure Container Apps (Consumption, 24×7)
         </h2>
-        <div className="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+        <div className="flex items-center gap-4 text-xs text-(--text-secondary)">
           <span
             className="flex items-center gap-1.5"
             title={`Sum of Azure Files share quotas: neo4j-data ${SHARE_NEO4J_DATA_GIB} + neo4j-logs ${SHARE_NEO4J_LOGS_GIB} + pg-data ${SHARE_PG_DATA_GIB} + vault-data ${SHARE_VAULT_DATA_GIB} GiB. Configured in scripts/azure/env.sh.`}
           >
             <HardDrive size={13} />
             Storage:{" "}
-            <span className="font-mono font-semibold text-[var(--text-primary)]">
+            <span className="font-mono font-semibold text-(--text-primary)">
               {storageGiB} GiB
             </span>
           </span>
@@ -83,7 +83,7 @@ export function AzureCostEstimatorPanel({
           >
             <Network size={13} />
             Egress (est.):{" "}
-            <span className="font-mono font-semibold text-[var(--text-primary)]">
+            <span className="font-mono font-semibold text-(--text-primary)">
               {egressGiB} GiB
             </span>
           </span>
@@ -92,7 +92,7 @@ export function AzureCostEstimatorPanel({
 
       {/* App grid — sorted by cost descending */}
       <div>
-        <p className="text-[11px] text-[var(--text-secondary)] mb-2 uppercase tracking-wide">
+        <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
           Container Apps — Compute (vCPU + Memory, 24×7 minReplicas=1)
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
@@ -103,20 +103,20 @@ export function AzureCostEstimatorPanel({
               return (
                 <div
                   key={app.name}
-                  className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40"
+                  className="border border-(--border) rounded-lg p-3 bg-(--surface)/40"
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-[var(--text-primary)] font-mono">
+                    <span className="text-xs font-medium text-(--text-primary) font-mono">
                       {app.name}
                     </span>
-                    <span className="text-xs font-mono text-[var(--success-text)]">
+                    <span className="text-xs font-mono text-(--success-text)">
                       {formatUsd(app.totalUsd)}/mo
                     </span>
                   </div>
-                  <p className="text-[10px] text-[var(--text-secondary)] font-mono mb-1">
+                  <p className="text-[10px] text-(--text-secondary) font-mono mb-1">
                     {spec.cpu} vCPU · {spec.memGiB} GiB RAM
                   </p>
-                  <div className="flex gap-3 text-[9px] text-[var(--text-secondary)]">
+                  <div className="flex gap-3 text-[9px] text-(--text-secondary)">
                     <span>CPU {formatUsd(app.vcpuUsd)}</span>
                     <span>MEM {formatUsd(app.memUsd)}</span>
                   </div>
@@ -124,13 +124,13 @@ export function AzureCostEstimatorPanel({
               );
             })}
         </div>
-        <p className="text-xs text-[var(--text-secondary)] mt-2 text-right">
+        <p className="text-xs text-(--text-secondary) mt-2 text-right">
           Gross compute:{" "}
-          <span className="font-mono text-[var(--text-primary)]">
+          <span className="font-mono text-(--text-primary)">
             {formatUsd(cost.grossVcpuUsd + cost.grossMemUsd)}/mo
           </span>{" "}
           · Free tier credit:{" "}
-          <span className="font-mono text-[var(--success-text)]">
+          <span className="font-mono text-(--success-text)">
             −{formatUsd(cost.freeCreditUsd)}
           </span>
         </p>
@@ -138,42 +138,42 @@ export function AzureCostEstimatorPanel({
 
       {/* Storage + egress breakdown */}
       <div>
-        <p className="text-[11px] text-[var(--text-secondary)] mb-2 uppercase tracking-wide">
+        <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
           Storage & Network
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
-            <div className="text-[var(--text-secondary)] mb-0.5">
+          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
+            <div className="text-(--text-secondary) mb-0.5">
               Azure Files (Premium ZRS)
             </div>
-            <div className="font-mono text-[var(--text-primary)]">
+            <div className="font-mono text-(--text-primary)">
               {formatUsd(cost.storageUsd)}/mo
             </div>
-            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+            <div className="text-[10px] text-(--text-secondary) mt-1">
               {storageGiB} GiB · ${AZURE_FILES_USD_PER_GIB}/GiB·mo · Neo4j + PG
               + Vault volumes
             </div>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
-            <div className="text-[var(--text-secondary)] mb-0.5">
+          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
+            <div className="text-(--text-secondary) mb-0.5">
               Egress (outbound)
             </div>
-            <div className="font-mono text-[var(--text-primary)]">
+            <div className="font-mono text-(--text-primary)">
               {formatUsd(cost.egressUsd)}/mo
             </div>
-            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+            <div className="text-[10px] text-(--text-secondary) mt-1">
               {egressGiB} GiB · first {AZURE_EGRESS_FREE_GIB} GiB free · then $
               {AZURE_EGRESS_USD_PER_GIB}/GiB
             </div>
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-3 bg-[var(--surface)]/40">
-            <div className="text-[var(--text-secondary)] mb-0.5">
+          <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
+            <div className="text-(--text-secondary) mb-0.5">
               Environment totals
             </div>
-            <div className="font-mono text-[var(--text-primary)]">
+            <div className="font-mono text-(--text-primary)">
               {totalVcpu.toFixed(2)} vCPU · {totalMemGiB.toFixed(1)} GiB
             </div>
-            <div className="text-[10px] text-[var(--text-secondary)] mt-1">
+            <div className="text-[10px] text-(--text-secondary) mt-1">
               {specs.length} Container Apps · Workaround B (no Log Analytics)
             </div>
           </div>
@@ -181,45 +181,45 @@ export function AzureCostEstimatorPanel({
       </div>
 
       {/* Totals */}
-      <div className="border border-[var(--border)] rounded-xl p-4 bg-[var(--surface)]/60">
+      <div className="border border-(--border) rounded-xl p-4 bg-(--surface)/60">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
           <div>
-            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+            <div className="text-[10px] text-(--text-secondary) mb-1">
               Compute (net)
             </div>
-            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
+            <div className="font-mono text-lg font-semibold text-(--text-primary)">
               {formatUsd(cost.computeUsd)}
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+            <div className="text-[10px] text-(--text-secondary) mb-1">
               Storage
             </div>
-            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
+            <div className="font-mono text-lg font-semibold text-(--text-primary)">
               {formatUsd(cost.storageUsd)}
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+            <div className="text-[10px] text-(--text-secondary) mb-1">
               Egress
             </div>
-            <div className="font-mono text-lg font-semibold text-[var(--text-primary)]">
+            <div className="font-mono text-lg font-semibold text-(--text-primary)">
               {formatUsd(cost.egressUsd)}
             </div>
           </div>
-          <div className="border-l border-[var(--border)]">
-            <div className="text-[10px] text-[var(--text-secondary)] mb-1">
+          <div className="border-l border-(--border)">
+            <div className="text-[10px] text-(--text-secondary) mb-1">
               Total / month
             </div>
-            <div className="font-mono text-xl font-bold text-[var(--success-text)]">
+            <div className="font-mono text-xl font-bold text-(--success-text)">
               {formatUsd(cost.totalUsd)}
             </div>
-            <div className="text-[10px] text-[var(--text-secondary)] mt-0.5">
+            <div className="text-[10px] text-(--text-secondary) mt-0.5">
               ≈ {formatEur(cost.totalEur)} (@ {USD_TO_EUR} EUR/USD)
             </div>
           </div>
         </div>
-        <p className="text-[9px] text-[var(--text-secondary)] mt-3 text-center">
+        <p className="text-[9px] text-(--text-secondary) mt-3 text-center">
           Azure Container Apps Consumption plan · West Europe list prices · 24×7
           minReplicas=1 · free tier (180 K vCPU-s + 360 K GiB-s) applied ·
           ADR-018 Workaround B (no Log Analytics Workspace)

@@ -69,7 +69,7 @@ describe("OdrlJsonHighlighter", () => {
       <OdrlJsonHighlighter data={{ empty: null }} />,
     );
     const nullSpans = container.querySelectorAll(
-      ".text-gray-500.italic, .text-\\[var\\(--text-secondary\\)\\].italic",
+      ".text-gray-500.italic, .text-\\(--text-secondary\\).italic",
     );
     expect(nullSpans.length).toBeGreaterThan(0);
   });

@@ -20,11 +20,11 @@ export function DemoPersonaCards() {
     <div>
       <h2
         id="personas-title"
-        className="text-sm font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-3"
+        className="text-sm font-semibold text-(--text-secondary) uppercase tracking-wider mb-3"
       >
         Demo Users &amp; Roles
       </h2>
-      <p className="text-xs text-[var(--text-secondary)] mb-3">
+      <p className="text-xs text-(--text-secondary) mb-3">
         Sign in as any persona to explore role-specific views.
         <span className="text-gray-500 dark:text-gray-400">
           {" "}
@@ -51,23 +51,23 @@ export function DemoPersonaCards() {
               }
             }}
             aria-label={`Sign in as ${persona.username}, ${persona.organisation}`}
-            className={`group text-left rounded-xl border p-4 bg-[var(--surface-2)]/40 hover:bg-[var(--surface-2)] transition-colors touch-target ${
+            className={`group text-left rounded-xl border p-4 bg-(--surface-2)/40 hover:bg-(--surface-2) transition-colors touch-target ${
               persona.badge.split(" ").find((c) => c.startsWith("border-")) ??
-              "border-[var(--border)]"
+              "border-(--border)"
             }`}
           >
             <div className="flex items-center justify-between mb-1.5">
               <div>
-                <span className="font-mono text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
+                <span className="font-mono text-sm font-semibold text-(--text-primary) group-hover:text-(--accent) transition-colors">
                   {persona.username}
                 </span>
-                <span className="text-xs text-[var(--text-secondary)] ml-2">
+                <span className="text-xs text-(--text-secondary) ml-2">
                   {persona.organisation}
                 </span>
               </div>
               <LogIn
                 size={14}
-                className="text-[var(--text-secondary)] group-hover:text-[var(--accent)] transition-colors"
+                className="text-(--text-secondary) group-hover:text-(--accent) transition-colors"
                 aria-hidden="true"
               />
             </div>
@@ -80,14 +80,14 @@ export function DemoPersonaCards() {
                 .map((role) => (
                   <span
                     key={role}
-                    className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium ${persona.badge}`}
+                    className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-sm font-medium ${persona.badge}`}
                   >
                     <Shield size={8} aria-hidden="true" />
                     {ROLE_LABELS[role] ?? role}
                   </span>
                 ))}
             </div>
-            <p className="text-xs text-[var(--text-secondary)] leading-tight">
+            <p className="text-xs text-(--text-secondary) leading-tight">
               {persona.description}
             </p>
           </button>

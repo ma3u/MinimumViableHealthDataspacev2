@@ -30,7 +30,7 @@ export default function DocsPage() {
     <div className="max-w-5xl mx-auto px-6 py-12">
       <div className="mb-10">
         <h1 className="text-3xl font-bold mb-2">Documentation</h1>
-        <p className="text-[var(--text-secondary)] text-lg">
+        <p className="text-(--text-secondary) text-lg">
           Health Dataspace v2 — comprehensive guides for business users and
           developers.
         </p>
@@ -48,10 +48,10 @@ export default function DocsPage() {
               <Icon size={22} />
               <span className="font-semibold text-lg">{label}</span>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] mb-4 flex-1">
+            <p className="text-sm text-(--text-secondary) mb-4 flex-1">
               {desc}
             </p>
-            <span className="inline-flex items-center gap-1 text-sm text-[var(--accent)] group-hover:underline mt-auto">
+            <span className="inline-flex items-center gap-1 text-sm text-(--accent) group-hover:underline mt-auto">
               Read more <ArrowRight size={14} />
             </span>
           </Link>
@@ -59,11 +59,11 @@ export default function DocsPage() {
       </div>
 
       {/* About callout — WCAG-safe contrast in both light and dark */}
-      <div className="mt-2 bg-[var(--surface-2)] border border-[var(--border)] rounded-xl p-6">
-        <h3 className="font-semibold text-[var(--text-primary)] mb-2">
+      <div className="mt-2 bg-(--surface-2) border border-(--border) rounded-xl p-6">
+        <h3 className="font-semibold text-(--text-primary) mb-2">
           About Health Dataspace v2
         </h3>
-        <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+        <p className="text-sm text-(--text-secondary) leading-relaxed">
           An EHDS-compliant demonstration platform built with Eclipse EDC-V,
           DCore, CFM, Neo4j, FHIR R4, and OMOP CDM. The project implements the
           European Health Data Space regulation through a 5-layer knowledge
@@ -72,7 +72,7 @@ export default function DocsPage() {
           holders and approved research users.{" "}
           <Link
             href="/docs/architecture"
-            className="text-[var(--accent)] underline hover:opacity-80"
+            className="text-(--accent) underline hover:opacity-80"
           >
             Explore the architecture&nbsp;&rarr;
           </Link>

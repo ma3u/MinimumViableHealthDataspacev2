@@ -23,7 +23,7 @@ export function ResourceSummary({
 
   if (metricsShared) {
     return (
-      <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] italic">
+      <div className="flex items-center gap-2 text-xs text-(--text-secondary) italic">
         {label && <span className="mr-1">{label}</span>}
         <span title="Containers are shared across all participants on this deployment — per-container CPU/MEM is shown in Layer View.">
           shared infrastructure — see Layer View
@@ -33,19 +33,17 @@ export function ResourceSummary({
   }
 
   return (
-    <div className="flex items-center gap-x-4 text-xs text-[var(--text-secondary)]">
-      {label && (
-        <span className="text-[var(--text-secondary)] mr-1">{label}</span>
-      )}
+    <div className="flex items-center gap-x-4 text-xs text-(--text-secondary)">
+      {label && <span className="text-(--text-secondary) mr-1">{label}</span>}
       <span className="flex items-center gap-1 tabular-nums">
-        <Cpu size={10} className="text-[var(--accent)]" />
-        <span className="text-[var(--text-primary)] font-medium">
+        <Cpu size={10} className="text-(--accent)" />
+        <span className="text-(--text-primary) font-medium">
           CPU {totalCpu.toFixed(1)}%
         </span>
       </span>
       <span className="flex items-center gap-1 tabular-nums">
-        <HardDrive size={10} className="text-[var(--accent)]" />
-        <span className="text-[var(--text-primary)] font-medium">
+        <HardDrive size={10} className="text-(--accent)" />
+        <span className="text-(--text-primary) font-medium">
           MEM {fmtMem(totalMem)}
         </span>
       </span>

@@ -53,10 +53,10 @@ export function ApplicationItemsList({ row }: { row: MatrixRow }) {
   const c = row.completeness;
   return (
     <details
-      className="text-xs rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3"
+      className="text-xs rounded-lg border border-(--border) bg-(--bg) p-3"
       data-testid="application-items"
     >
-      <summary className="cursor-pointer font-semibold text-[var(--text-primary)]">
+      <summary className="cursor-pointer font-semibold text-(--text-primary)">
         Art. 67(2) items:{" "}
         {c
           ? c.complete
@@ -71,16 +71,14 @@ export function ApplicationItemsList({ row }: { row: MatrixRow }) {
             <li key={i.item} className="flex gap-2">
               <span
                 className={
-                  present
-                    ? "text-[var(--success-text)]"
-                    : "text-[var(--danger-text)]"
+                  present ? "text-(--success-text)" : "text-(--danger-text)"
                 }
                 aria-label={present ? "present" : "missing"}
               >
                 {present ? "✓" : "✗"}
               </span>
               <span>
-                <span className="text-[var(--text-secondary)]">
+                <span className="text-(--text-secondary)">
                   ({i.item}) {i.label}:{" "}
                 </span>
                 {present ? value(i.item) : "missing"}

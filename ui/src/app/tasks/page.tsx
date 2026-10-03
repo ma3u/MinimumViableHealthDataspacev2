@@ -85,23 +85,23 @@ const TRANSFER_STATES = [
 function stateColor(state: string): string {
   const s = state?.toUpperCase() || "";
   if (s.includes("FINALIZED") || s.includes("COMPLETED"))
-    return "text-[var(--success-text)]";
+    return "text-(--success-text)";
   if (s.includes("TERMINATED") || s.includes("ERROR"))
-    return "text-[var(--danger-text)]";
+    return "text-(--danger-text)";
   if (s.includes("STARTED") || s.includes("AGREED") || s.includes("VERIFIED"))
-    return "text-[var(--accent)]";
+    return "text-(--accent)";
   if (s.includes("SUSPENDED")) return "text-orange-800 dark:text-orange-400";
-  return "text-[var(--warning-text)]";
+  return "text-(--warning-text)";
 }
 
 function stateBg(state: string): string {
   const s = state?.toUpperCase() || "";
   if (s.includes("FINALIZED") || s.includes("COMPLETED"))
-    return "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border border-[var(--badge-active-border)]";
+    return "bg-(--badge-active-bg) text-(--badge-active-text) border border-(--badge-active-border)";
   if (s.includes("TERMINATED") || s.includes("ERROR"))
-    return "bg-[var(--badge-inactive-bg)] text-[var(--badge-inactive-text)] border border-[var(--badge-inactive-border)]";
+    return "bg-(--badge-inactive-bg) text-(--badge-inactive-text) border border-(--badge-inactive-border)";
   if (s.includes("STARTED") || s.includes("AGREED") || s.includes("VERIFIED"))
-    return "bg-[var(--accent)]/10 text-[var(--accent)]";
+    return "bg-(--accent)/10 text-(--accent)";
   if (s.includes("SUSPENDED"))
     return "bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-400";
   return "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-400";
@@ -126,21 +126,21 @@ function stateIndex(state: string, states: readonly string[]): number {
  */
 const NEGOTIATION_ACTIONS: Record<string, { label: string; color: string }[]> =
   {
-    REQUESTED: [{ label: "Offer", color: "text-[var(--accent)]" }],
-    OFFERED: [{ label: "Accept", color: "text-[var(--accent)]" }],
-    ACCEPTED: [{ label: "Agree", color: "text-[var(--accent)]" }],
-    AGREED: [{ label: "Verify", color: "text-[var(--accent)]" }],
-    VERIFIED: [{ label: "Finalize", color: "text-[var(--success-text)]" }],
+    REQUESTED: [{ label: "Offer", color: "text-(--accent)" }],
+    OFFERED: [{ label: "Accept", color: "text-(--accent)" }],
+    ACCEPTED: [{ label: "Agree", color: "text-(--accent)" }],
+    AGREED: [{ label: "Verify", color: "text-(--accent)" }],
+    VERIFIED: [{ label: "Finalize", color: "text-(--success-text)" }],
     FINALIZED: [],
   };
 
 const TRANSFER_ACTIONS: Record<string, { label: string; color: string }[]> = {
-  REQUESTED: [{ label: "Start", color: "text-[var(--accent)]" }],
+  REQUESTED: [{ label: "Start", color: "text-(--accent)" }],
   STARTED: [
     { label: "Suspend", color: "text-orange-800 dark:text-orange-400" },
-    { label: "Complete", color: "text-[var(--success-text)]" },
+    { label: "Complete", color: "text-(--success-text)" },
   ],
-  SUSPENDED: [{ label: "Resume", color: "text-[var(--accent)]" }],
+  SUSPENDED: [{ label: "Resume", color: "text-(--accent)" }],
   COMPLETED: [],
 };
 
@@ -165,23 +165,19 @@ function StatePipeline({
         const isPast = current >= 0 && i < current;
 
         let icon;
-        let color = "text-[var(--text-secondary)]";
+        let color = "text-(--text-secondary)";
 
         if (isTerminated && i === 0) {
-          icon = <XCircle size={12} className="text-[var(--danger-text)]" />;
-          color = "text-[var(--danger-text)]";
+          icon = <XCircle size={12} className="text-(--danger-text)" />;
+          color = "text-(--danger-text)";
         } else if (isPast) {
-          icon = (
-            <CheckCircle2 size={12} className="text-[var(--success-text)]" />
-          );
-          color = "text-[var(--success-text)]";
+          icon = <CheckCircle2 size={12} className="text-(--success-text)" />;
+          color = "text-(--success-text)";
         } else if (isActive) {
           const isEndState = step === "FINALIZED" || step === "COMPLETED";
           if (isEndState) {
-            icon = (
-              <CheckCircle2 size={12} className="text-[var(--success-text)]" />
-            );
-            color = "text-[var(--success-text)]";
+            icon = <CheckCircle2 size={12} className="text-(--success-text)" />;
+            color = "text-(--success-text)";
           } else {
             icon = (
               <div className="relative">
@@ -197,7 +193,7 @@ function StatePipeline({
             color = stateColor(state);
           }
         } else {
-          icon = <Circle size={12} className="text-[var(--text-secondary)]" />;
+          icon = <Circle size={12} className="text-(--text-secondary)" />;
         }
 
         return (
@@ -222,8 +218,8 @@ function StatePipeline({
       })}
       {isTerminated && (
         <div className="flex flex-col items-center gap-0.5 ml-1">
-          <XCircle size={12} className="text-[var(--danger-text)]" />
-          <span className="text-[9px] text-[var(--danger-text)] leading-none">
+          <XCircle size={12} className="text-(--danger-text)" />
+          <span className="text-[9px] text-(--danger-text) leading-none">
             TERMINATED
           </span>
         </div>
@@ -242,7 +238,7 @@ export default function TasksPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center gap-2 text-[var(--text-secondary)] p-10">
+        <div className="flex items-center gap-2 text-(--text-secondary) p-10">
           <Loader2 size={16} className="animate-spin" />
           Loading…
         </div>
@@ -389,7 +385,7 @@ function TasksContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
           title={isAdmin ? "All Tasks" : "My Tasks"}
@@ -415,31 +411,29 @@ function TasksContent() {
             {
               label: "Total Tasks",
               value: filteredCounts.total,
-              color: "text-[var(--text-primary)]",
+              color: "text-(--text-primary)",
             },
             {
               label: "Active",
               value: filteredCounts.active,
-              color: "text-[var(--warning-text)]",
+              color: "text-(--warning-text)",
             },
             {
               label: "Negotiations",
               value: filteredCounts.negotiations,
-              color: "text-[var(--accent)]",
+              color: "text-(--accent)",
             },
             {
               label: "Transfers",
               value: filteredCounts.transfers,
-              color: "text-[var(--accent)]",
+              color: "text-(--accent)",
             },
           ].map((card) => (
             <div
               key={card.label}
-              className="p-3 rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/50"
+              className="p-3 rounded-xl border border-(--border) bg-(--surface-2)/50"
             >
-              <p className="text-xs text-[var(--text-secondary)]">
-                {card.label}
-              </p>
+              <p className="text-xs text-(--text-secondary)">{card.label}</p>
               <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
             </div>
           ))}
@@ -458,7 +452,7 @@ function TasksContent() {
                   className={`flex items-center gap-1.5 px-3 py-1 text-xs rounded-full border transition-colors ${
                     selectedParticipant !== "all"
                       ? "border-layer2 bg-layer2/20 text-teal-800 dark:text-teal-300"
-                      : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-gray-500"
+                      : "border-(--border) text-(--text-secondary) hover:text-(--text-primary) hover:border-gray-500"
                   }`}
                 >
                   <Users size={12} />
@@ -470,16 +464,16 @@ function TasksContent() {
                   <ChevronDown size={10} />
                 </button>
                 {participantDropdownOpen && (
-                  <div className="absolute z-20 mt-1 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg shadow-xl py-1 min-w-[200px]">
+                  <div className="absolute z-20 mt-1 bg-(--surface-2) border border-(--border) rounded-lg shadow-xl py-1 min-w-[200px]">
                     <button
                       onClick={() => {
                         setSelectedParticipant("all");
                         setParticipantDropdownOpen(false);
                       }}
-                      className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
+                      className={`w-full text-left px-3 py-1.5 text-xs hover:bg-(--surface-2) ${
                         selectedParticipant === "all"
                           ? "text-teal-800 dark:text-teal-300"
-                          : "text-[var(--text-primary)]"
+                          : "text-(--text-primary)"
                       }`}
                     >
                       All Participants ({counts.total})
@@ -495,14 +489,14 @@ function TasksContent() {
                             setSelectedParticipant(id);
                             setParticipantDropdownOpen(false);
                           }}
-                          className={`w-full text-left px-3 py-1.5 text-xs hover:bg-[var(--surface-2)] ${
+                          className={`w-full text-left px-3 py-1.5 text-xs hover:bg-(--surface-2) ${
                             selectedParticipant === id
                               ? "text-teal-800 dark:text-teal-300"
-                              : "text-[var(--text-primary)]"
+                              : "text-(--text-primary)"
                           }`}
                         >
                           {name}{" "}
-                          <span className="text-[var(--text-secondary)]">
+                          <span className="text-(--text-secondary)">
                             ({pCount})
                           </span>
                         </button>
@@ -515,7 +509,7 @@ function TasksContent() {
 
             {/* Type/status filter tabs */}
             <div className="flex items-center gap-1">
-              <Filter size={14} className="text-[var(--text-secondary)] mr-1" />
+              <Filter size={14} className="text-(--text-secondary) mr-1" />
               {filters.map((f) => (
                 <button
                   key={f.key}
@@ -523,11 +517,11 @@ function TasksContent() {
                   className={`px-3 py-1 text-xs rounded-full border transition-colors ${
                     filter === f.key
                       ? "border-layer2 bg-layer2/20 text-teal-800 dark:text-teal-300"
-                      : "border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-gray-500"
+                      : "border-(--border) text-(--text-secondary) hover:text-(--text-primary) hover:border-gray-500"
                   }`}
                 >
                   {f.label}
-                  <span className="ml-1 text-[var(--text-secondary)]">
+                  <span className="ml-1 text-(--text-secondary)">
                     {f.count}
                   </span>
                 </button>
@@ -537,7 +531,7 @@ function TasksContent() {
           <button
             onClick={() => loadTasks(true)}
             disabled={refreshing}
-            className="flex items-center gap-1 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-50"
+            className="flex items-center gap-1 text-xs text-(--text-secondary) hover:text-(--text-primary) disabled:opacity-50"
           >
             <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
             Refresh
@@ -546,12 +540,12 @@ function TasksContent() {
 
         {/* Task List */}
         {loading ? (
-          <div className="flex items-center gap-2 text-[var(--text-secondary)] py-8">
+          <div className="flex items-center gap-2 text-(--text-secondary) py-8">
             <Loader2 size={16} className="animate-spin" />
             Loading tasks…
           </div>
         ) : filteredTasks.length === 0 ? (
-          <div className="text-center py-12 text-[var(--text-secondary)]">
+          <div className="text-center py-12 text-(--text-secondary)">
             <ClipboardList size={32} className="mx-auto mb-3 opacity-40" />
             <p className="text-sm">
               {filter === "all"
@@ -581,7 +575,7 @@ function TasksContent() {
               const TypeIcon = isNeg ? FileSignature : ArrowRightLeft;
               const typeBadge = isNeg ? "Negotiation" : "Transfer";
               const typeBadgeColor = isNeg
-                ? "bg-[var(--accent)]/10 text-[var(--accent)]"
+                ? "bg-(--accent)/10 text-(--accent)"
                 : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300";
 
               // Link to the detail page
@@ -593,29 +587,29 @@ function TasksContent() {
                 <Link
                   key={`${task.type}-${task.id}`}
                   href={detailHref}
-                  className="block p-4 border border-[var(--border)] rounded-xl hover:border-gray-500 transition-colors space-y-3"
+                  className="block p-4 border border-(--border) rounded-xl hover:border-gray-500 transition-colors space-y-3"
                 >
                   {/* Header row */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 min-w-0">
                       <TypeIcon size={14} className={stateColor(task.state)} />
-                      <span className="text-sm font-medium text-[var(--text-primary)] truncate">
+                      <span className="text-sm font-medium text-(--text-primary) truncate">
                         {task.asset}
                       </span>
                       <span
-                        className={`text-[10px] px-1.5 py-0.5 rounded ${typeBadgeColor} shrink-0`}
+                        className={`text-[10px] px-1.5 py-0.5 rounded-sm ${typeBadgeColor} shrink-0`}
                       >
                         {typeBadge}
                       </span>
                       {task.transferType && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 shrink-0">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 shrink-0">
                           {task.transferType}
                         </span>
                       )}
                       {/* DPS: EDR availability indicator — shows when Data Plane
                         has been signalled and generated an Endpoint Data Reference */}
                       {task.edrAvailable && (
-                        <span className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] shrink-0">
+                        <span className="flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-sm bg-(--badge-active-bg) text-(--badge-active-text) shrink-0">
                           <Key size={9} />
                           EDR
                         </span>
@@ -641,7 +635,7 @@ function TasksContent() {
                     if (!actions || actions.length === 0) return null;
                     return (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-[var(--text-secondary)]">
+                        <span className="text-[10px] text-(--text-secondary)">
                           Actions:
                         </span>
                         {actions.map((action) => (
@@ -657,14 +651,14 @@ function TasksContent() {
                   })()}
 
                   {/* Metadata row */}
-                  <div className="flex items-center gap-4 text-[11px] text-[var(--text-secondary)] flex-wrap">
+                  <div className="flex items-center gap-4 text-[11px] text-(--text-secondary) flex-wrap">
                     <span>
                       {task.participant}
                       {task.counterParty !== "—" && ` → ${task.counterParty}`}
                     </span>
                     {task.contractId && (
                       <span
-                        className="text-[var(--text-secondary)]"
+                        className="text-(--text-secondary)"
                         title="Contract Agreement ID"
                       >
                         📄 {task.contractId.slice(0, 12)}…
@@ -678,7 +672,7 @@ function TasksContent() {
                         })}
                       </span>
                     )}
-                    <span className="text-[var(--text-secondary)]">
+                    <span className="text-(--text-secondary)">
                       {task.id.slice(0, 8)}…
                     </span>
                   </div>

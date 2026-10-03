@@ -22,7 +22,7 @@ export function EhrTransferSim() {
 
   if (insurer.screenshot && imgOk) {
     return (
-      <div className="w-[clamp(248px,30vw,300px)] rounded-[2rem] border-[5px] border-gray-900 bg-white shadow-2xl overflow-hidden relative">
+      <div className="w-[clamp(248px,30vw,300px)] rounded-4xl border-[5px] border-gray-900 bg-white shadow-2xl overflow-hidden relative">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={insurer.screenshot}
@@ -31,7 +31,7 @@ export function EhrTransferSim() {
           className="block w-full h-auto"
         />
         <span
-          className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full text-white shadow"
+          className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-full text-white shadow-sm"
           style={{ background: insurer.brand }}
         >
           {insurer.short} · ePA → EHDS

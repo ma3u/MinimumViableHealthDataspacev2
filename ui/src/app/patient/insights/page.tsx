@@ -42,14 +42,14 @@ const PRIORITY_COLORS = {
   high: "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/10",
   medium:
     "border-yellow-300 dark:border-yellow-700 bg-yellow-50 dark:bg-yellow-900/10",
-  low: "border-[var(--border)] bg-[var(--surface-2)]/50",
+  low: "border-(--border) bg-(--surface-2)/50",
 };
 
 const EVIDENCE_BADGE: Record<string, string> = {
-  high: "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)]",
+  high: "bg-(--badge-active-bg) text-(--badge-active-text)",
   moderate:
     "bg-yellow-50 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300",
-  low: "bg-[var(--surface-2)] text-[var(--text-secondary)]",
+  low: "bg-(--surface-2) text-(--text-secondary)",
 };
 
 const DEMO_PATIENT_ID = "demo-patient-1";
@@ -66,7 +66,7 @@ export default function ResearchInsightsPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-3xl mx-auto px-6 py-10">
         <PageIntro
           title="Research Insights & Medical Recommendations"
@@ -91,11 +91,11 @@ export default function ResearchInsightsPage() {
         </div>
 
         {loading ? (
-          <div className="text-[var(--text-secondary)] text-sm">
+          <div className="text-(--text-secondary) text-sm">
             Loading insights…
           </div>
         ) : !insights ? (
-          <div className="text-[var(--text-secondary)] text-sm">
+          <div className="text-(--text-secondary) text-sm">
             No insights available.
           </div>
         ) : (
@@ -113,24 +113,22 @@ export default function ResearchInsightsPage() {
                   label: "Active SPE studies",
                   value: insights.activeStudies,
                   icon: TrendingUp,
-                  color: "text-[var(--accent)]",
+                  color: "text-(--accent)",
                 },
                 {
                   label: "Research findings",
                   value: insights.findings.length,
                   icon: Lightbulb,
-                  color: "text-[var(--warning-text)]",
+                  color: "text-(--warning-text)",
                 },
               ].map(({ label, value, icon: Icon, color }) => (
                 <div
                   key={label}
-                  className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/50 p-3 text-center"
+                  className="rounded-xl border border-(--border) bg-(--surface-2)/50 p-3 text-center"
                 >
                   <Icon size={20} className={`mx-auto mb-1 ${color}`} />
                   <div className={`text-2xl font-bold ${color}`}>{value}</div>
-                  <div className="text-xs text-[var(--text-secondary)]">
-                    {label}
-                  </div>
+                  <div className="text-xs text-(--text-secondary)">{label}</div>
                 </div>
               ))}
             </div>
@@ -139,7 +137,7 @@ export default function ResearchInsightsPage() {
             {insights.findings.length > 0 && (
               <div>
                 <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                  <TrendingUp size={18} className="text-[var(--accent)]" />
+                  <TrendingUp size={18} className="text-(--accent)" />
                   Aggregate Research Findings
                 </h2>
                 <div className="space-y-3">
@@ -147,10 +145,10 @@ export default function ResearchInsightsPage() {
                     <div
                       key={f.insightId}
                       data-testid="research-finding"
-                      className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)]/50 p-4"
+                      className="rounded-xl border border-(--border) bg-(--surface-2)/50 p-4"
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <span className="text-xs text-[var(--text-secondary)] font-mono">
+                        <span className="text-xs text-(--text-secondary) font-mono">
                           {f.studyId}
                         </span>
                         <span
@@ -162,11 +160,11 @@ export default function ResearchInsightsPage() {
                           {f.evidenceLevel} evidence
                         </span>
                       </div>
-                      <p className="text-sm text-[var(--text-primary)] mb-2">
+                      <p className="text-sm text-(--text-primary) mb-2">
                         {f.finding}
                       </p>
                       {f.recommendation && (
-                        <div className="rounded bg-teal-100 dark:bg-teal-900/20 border border-teal-300 dark:border-teal-800 p-2 text-xs text-teal-800 dark:text-teal-300">
+                        <div className="rounded-sm bg-teal-100 dark:bg-teal-900/20 border border-teal-300 dark:border-teal-800 p-2 text-xs text-teal-800 dark:text-teal-300">
                           <strong>For you:</strong> {f.recommendation}
                         </div>
                       )}
@@ -205,18 +203,18 @@ export default function ResearchInsightsPage() {
                               ? "bg-red-50 dark:bg-red-950 text-red-800 dark:text-red-300"
                               : rec.priority === "medium"
                                 ? "bg-yellow-50 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300"
-                                : "bg-[var(--surface-2)] text-[var(--text-secondary)]"
+                                : "bg-(--surface-2) text-(--text-secondary)"
                           }`}
                         >
                           {rec.priority} priority
                         </span>
                       </div>
-                      <p className="text-sm text-[var(--text-primary)] mb-1.5">
+                      <p className="text-sm text-(--text-primary) mb-1.5">
                         {rec.action}
                       </p>
-                      <div className="text-xs text-[var(--text-secondary)]">
+                      <div className="text-xs text-(--text-secondary)">
                         Based on: {rec.basedOn} ·{" "}
-                        <span className="text-[var(--text-secondary)]">
+                        <span className="text-(--text-secondary)">
                           {rec.ehdsArticle}
                         </span>
                       </div>
@@ -234,7 +232,7 @@ export default function ResearchInsightsPage() {
                 </h2>
                 <table className="text-xs w-full border-collapse">
                   <thead>
-                    <tr className="border-b border-[var(--border)] text-[var(--text-secondary)]">
+                    <tr className="border-b border-(--border) text-(--text-secondary)">
                       <th className="text-left pb-1">Study</th>
                       <th className="text-left pb-1">Consented</th>
                       <th className="text-left pb-1">Status</th>
@@ -244,12 +242,12 @@ export default function ResearchInsightsPage() {
                     {insights.donatedStudies.map((s) => (
                       <tr
                         key={s.studyId}
-                        className="border-b border-[var(--border)]"
+                        className="border-b border-(--border)"
                       >
                         <td className="py-1.5 pr-3">
                           {s.studyName || s.studyId}
                         </td>
-                        <td className="py-1.5 pr-3 text-[var(--text-secondary)]">
+                        <td className="py-1.5 pr-3 text-(--text-secondary)">
                           {s.grantedAt?.slice(0, 10) || "—"}
                         </td>
                         <td className="py-1.5">

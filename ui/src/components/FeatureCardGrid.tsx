@@ -267,12 +267,12 @@ export function FeatureCardGrid({
               </span>
               {isRelevant && (
                 <span
-                  className="ml-auto flex-shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center"
+                  className="ml-auto shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center"
                   title="Relevant for your role"
                 >
                   <Check
                     size={12}
-                    className="text-[var(--success-text)]"
+                    className="text-(--success-text)"
                     aria-hidden="true"
                   />
                 </span>

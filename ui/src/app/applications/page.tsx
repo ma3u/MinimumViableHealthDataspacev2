@@ -140,13 +140,13 @@ function StatusBadge({ app }: { app: Application }) {
               : "under decision";
   const cls =
     d === "APPROVED"
-      ? "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border-[var(--badge-active-border)]"
+      ? "bg-(--badge-active-bg) text-(--badge-active-text) border-(--badge-active-border)"
       : d === "REJECTED" || d === "REVOKED"
-        ? "bg-[var(--badge-inactive-bg)] text-[var(--badge-inactive-text)] border-[var(--badge-inactive-border)]"
-        : "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]";
+        ? "bg-(--badge-inactive-bg) text-(--badge-inactive-text) border-(--badge-inactive-border)"
+        : "bg-(--role-hdab-bg) text-(--role-hdab-text) border-(--role-hdab-border)";
   return (
     <span
-      className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border whitespace-nowrap ${cls}`}
+      className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-sm border whitespace-nowrap ${cls}`}
       data-testid="application-status"
     >
       {d === "APPROVED" ? <ShieldCheck size={12} /> : <Clock size={12} />}
@@ -156,7 +156,7 @@ function StatusBadge({ app }: { app: Application }) {
 }
 
 const inputCls =
-  "rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1 w-full";
+  "rounded-sm border border-(--border) bg-(--surface) px-2 py-1 w-full";
 
 function Field({
   id,
@@ -169,7 +169,7 @@ function Field({
 }) {
   return (
     <label htmlFor={id} className="flex flex-col gap-1">
-      <span className="text-[var(--text-secondary)]">{label}</span>
+      <span className="text-(--text-secondary)">{label}</span>
       {children}
     </label>
   );
@@ -517,7 +517,7 @@ function CompleteForm({
   };
   return (
     <form
-      className="mt-3 rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3 space-y-3 text-xs"
+      className="mt-3 rounded-lg border border-(--border) bg-(--bg) p-3 space-y-3 text-xs"
       onSubmit={(e) => {
         e.preventDefault();
         void submit();
@@ -525,9 +525,9 @@ function CompleteForm({
       aria-label="Complete the application"
       data-testid="complete-form"
     >
-      <div className="font-semibold text-[var(--text-primary)]">
+      <div className="font-semibold text-(--text-primary)">
         Complete the application by {shortDate(app.completeBy)}
-        <span className="font-normal text-[var(--text-secondary)]">
+        <span className="font-normal text-(--text-secondary)">
           {" "}
           · the access body wrote: {app.incompleteReason ?? "items missing"}
         </span>
@@ -540,12 +540,12 @@ function CompleteForm({
       <button
         type="submit"
         disabled={busy}
-        className="px-3 py-1.5 rounded font-semibold bg-[var(--accent)] text-white disabled:opacity-60"
+        className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
       >
         {busy ? "Sending…" : "Send the missing items"}
       </button>
       {msg && (
-        <p className="text-[var(--text-primary)]" role="status">
+        <p className="text-(--text-primary)" role="status">
           {msg}
         </p>
       )}
@@ -611,7 +611,7 @@ function ResultsForm({
   };
   return (
     <form
-      className="mt-3 rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3 space-y-2 text-xs"
+      className="mt-3 rounded-lg border border-(--border) bg-(--bg) p-3 space-y-2 text-xs"
       onSubmit={(e) => {
         e.preventDefault();
         void submit();
@@ -619,9 +619,9 @@ function ResultsForm({
       aria-label="Communicate results"
       data-testid="results-form"
     >
-      <div className="font-semibold text-[var(--text-primary)]">
+      <div className="font-semibold text-(--text-primary)">
         Communicate the results of the use, Art. 61(4)
-        <span className="font-normal text-[var(--text-secondary)]">
+        <span className="font-normal text-(--text-secondary)">
           {" "}
           · due by {shortDate(deadline)}, 18 months after the end of the
           processing
@@ -674,12 +674,12 @@ function ResultsForm({
       <button
         type="submit"
         disabled={busy || !title.trim()}
-        className="px-3 py-1.5 rounded font-semibold bg-[var(--accent)] text-white disabled:opacity-60"
+        className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
       >
         {busy ? "Sending…" : "Communicate results"}
       </button>
       {msg && (
-        <p className="text-[var(--text-primary)]" role="status">
+        <p className="text-(--text-primary)" role="status">
           {msg}
         </p>
       )}
@@ -697,16 +697,16 @@ function ApplicationCard({
   const c = app.completeness;
   return (
     <article
-      className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 text-sm"
+      className="rounded-lg border border-(--border) bg-(--surface) p-4 text-sm"
       data-testid="application-card"
       data-application-id={app.applicationId}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <div className="font-semibold text-[var(--text-primary)]">
+          <div className="font-semibold text-(--text-primary)">
             {app.name ?? app.applicationId}
           </div>
-          <div className="text-xs text-[var(--text-secondary)] font-mono">
+          <div className="text-xs text-(--text-secondary) font-mono">
             {app.applicationId}
           </div>
         </div>
@@ -714,19 +714,19 @@ function ApplicationCard({
       </div>
       <dl className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-xs">
         <div>
-          <dt className="inline text-[var(--text-secondary)]">Dataset </dt>
+          <dt className="inline text-(--text-secondary)">Dataset </dt>
           <dd className="inline">{app.datasetTitle ?? app.datasetId}</dd>
         </div>
         <div>
-          <dt className="inline text-[var(--text-secondary)]">Purpose </dt>
+          <dt className="inline text-(--text-secondary)">Purpose </dt>
           <dd className="inline">{purposeLabel(app.purpose)}</dd>
         </div>
         <div>
-          <dt className="inline text-[var(--text-secondary)]">Submitted </dt>
+          <dt className="inline text-(--text-secondary)">Submitted </dt>
           <dd className="inline">{shortDate(app.submittedAt)}</dd>
         </div>
         <div data-testid="application-clock">
-          <dt className="inline text-[var(--text-secondary)]">Clock </dt>
+          <dt className="inline text-(--text-secondary)">Clock </dt>
           <dd className="inline">
             {app.clockState === "paused"
               ? `stopped; complete by ${shortDate(app.completeBy)}${
@@ -748,9 +748,7 @@ function ApplicationCard({
           </dd>
         </div>
         <div className="md:col-span-2" data-testid="application-completeness">
-          <dt className="inline text-[var(--text-secondary)]">
-            Art. 67(2) items{" "}
-          </dt>
+          <dt className="inline text-(--text-secondary)">Art. 67(2) items </dt>
           <dd className="inline">
             {c.complete
               ? `complete, ${c.present} of ${c.total}`
@@ -761,7 +759,7 @@ function ApplicationCard({
         </div>
         {app.undecided && (
           <div className="md:col-span-2" data-testid="application-fee">
-            <dt className="inline text-[var(--text-secondary)]">
+            <dt className="inline text-(--text-secondary)">
               Fee estimate, Art. 62{" "}
             </dt>
             <dd className="inline">
@@ -784,7 +782,7 @@ function ApplicationCard({
         )}
         {app.extensionReason && (
           <div className="md:col-span-2">
-            <dt className="inline text-[var(--text-secondary)]">
+            <dt className="inline text-(--text-secondary)">
               Extended once because{" "}
             </dt>
             <dd className="inline">{app.extensionReason}</dd>
@@ -792,7 +790,7 @@ function ApplicationCard({
         )}
         {app.decision && (
           <div className="md:col-span-2">
-            <dt className="inline text-[var(--text-secondary)]">Decision </dt>
+            <dt className="inline text-(--text-secondary)">Decision </dt>
             <dd className="inline">
               {app.decision === "APPROVED"
                 ? `data permit ${app.permitId} issued ${shortDate(
@@ -812,7 +810,7 @@ function ApplicationCard({
         )}
       </dl>
       <details className="mt-2 text-xs">
-        <summary className="cursor-pointer text-[var(--text-secondary)]">
+        <summary className="cursor-pointer text-(--text-secondary)">
           The eleven items as filed
         </summary>
         <ol className="mt-1 space-y-0.5">
@@ -821,8 +819,8 @@ function ApplicationCard({
               <span
                 className={
                   hasApplicationItem(app, i.item)
-                    ? "text-[var(--success-text)]"
-                    : "text-[var(--danger-text)]"
+                    ? "text-(--success-text)"
+                    : "text-(--danger-text)"
                 }
               >
                 {hasApplicationItem(app, i.item) ? "✓" : "✗"}
@@ -916,20 +914,20 @@ export default function ApplicationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <div className="mb-8">
           <h1 className="page-header flex items-center gap-2">
             <FileText size={28} />
             Data permit applications
           </h1>
-          <p className="text-[var(--text-secondary)] text-lg mt-1">
+          <p className="text-(--text-secondary) text-lg mt-1">
             Regulation (EU) 2025/327, Art. 67 · the eleven items of Art. 67(2) ·
             decided within three months (Art. 68(4))
           </p>
         </div>
 
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 mb-8 text-sm text-[var(--text-secondary)] space-y-2">
+        <div className="rounded-lg border border-(--border) bg-(--surface) p-4 mb-8 text-sm text-(--text-secondary) space-y-2">
           <p>
             A data permit is what unlocks the data (Art. 61(1)); a contract with
             the holder is not enough. The application names who will access the
@@ -939,7 +937,7 @@ export default function ApplicationsPage() {
             says so and you have four weeks. Decisions are published on the{" "}
             <Link
               href="/permits"
-              className="font-bold text-[var(--accent)] hover:underline"
+              className="font-bold text-(--accent) hover:underline"
             >
               public register
             </Link>
@@ -948,8 +946,8 @@ export default function ApplicationsPage() {
         </div>
 
         {canApply && (
-          <section className="mb-10 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
-            <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+          <section className="mb-10 rounded-lg border border-(--border) bg-(--surface) p-4">
+            <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
               Apply for a data permit
             </h2>
             <form
@@ -989,7 +987,7 @@ export default function ApplicationsPage() {
               <button
                 type="submit"
                 disabled={submitting || IS_STATIC}
-                className="px-3 py-1.5 rounded font-semibold bg-[var(--accent)] text-white disabled:opacity-60"
+                className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
                 title={
                   IS_STATIC ? "Not available in the static simulation" : ""
                 }
@@ -997,7 +995,7 @@ export default function ApplicationsPage() {
                 {submitting ? "Filing…" : "File the application"}
               </button>
               {submitMsg && (
-                <p className="text-[var(--text-primary)]" role="status">
+                <p className="text-(--text-primary)" role="status">
                   {submitMsg}
                 </p>
               )}
@@ -1006,18 +1004,18 @@ export default function ApplicationsPage() {
         )}
 
         <section>
-          <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+          <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
             My applications ({applications.length})
           </h2>
           {loading ? (
-            <p className="text-[var(--text-secondary)] text-sm">Loading…</p>
+            <p className="text-(--text-secondary) text-sm">Loading…</p>
           ) : error ? (
-            <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 text-sm flex items-start gap-2">
+            <div className="rounded-lg border border-(--border) bg-(--surface) p-4 text-sm flex items-start gap-2">
               <AlertCircle size={16} className="mt-0.5" />
               <span>{error}</span>
             </div>
           ) : applications.length === 0 ? (
-            <p className="text-[var(--text-secondary)] text-sm">
+            <p className="text-(--text-secondary) text-sm">
               No application yet
             </p>
           ) : (

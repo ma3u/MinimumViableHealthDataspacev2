@@ -402,11 +402,11 @@ const futureGates: FutureGate[] = [
 
 function Badge({ blocking }: { blocking: boolean }) {
   return blocking ? (
-    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
+    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-sm bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300">
       Blocks
     </span>
   ) : (
-    <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
+    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-sm bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
       Reports
     </span>
   );
@@ -421,7 +421,9 @@ function EffortBadge({ effort }: { effort: string }) {
         ? "bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300"
         : "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300";
   return (
-    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${color}`}>
+    <span
+      className={`text-[10px] font-semibold px-2 py-0.5 rounded-sm ${color}`}
+    >
       {effort}
     </span>
   );
@@ -436,24 +438,24 @@ export default function QualityGatesPage() {
     <div className="max-w-5xl mx-auto px-6 py-12">
       <Link
         href="/docs/developer"
-        className="inline-flex items-center gap-1 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] mb-6"
+        className="inline-flex items-center gap-1 text-sm text-(--text-secondary) hover:text-(--text-primary) mb-6"
       >
         <ArrowLeft size={14} /> Back to Developer Guide
       </Link>
 
       <div className="flex items-center gap-3 mb-2">
-        <ShieldCheck size={28} className="text-[var(--accent)]" />
+        <ShieldCheck size={28} className="text-(--accent)" />
         <h1 className="text-3xl font-bold">Quality Gates</h1>
       </div>
-      <p className="text-[var(--text-secondary)] mb-8">
+      <p className="text-(--text-secondary) mb-8">
         Every check enforced from developer workstation to production deployment
         — aligned with BSI C5, OWASP Top 10, EHDS regulation, and WCAG 2.2 AA.
       </p>
 
       {/* TOC */}
-      <nav className="border border-[var(--border)] rounded-xl p-5 mb-10">
+      <nav className="border border-(--border) rounded-xl p-5 mb-10">
         <h2 className="font-semibold mb-3">Contents</h2>
-        <ul className="text-sm space-y-1.5 text-[var(--accent)]">
+        <ul className="text-sm space-y-1.5 text-(--accent)">
           {[
             ["#pipeline", "Pipeline Overview"],
             ["#pre-commit", "Stage 1 — Pre-commit Hooks"],
@@ -489,32 +491,32 @@ export default function QualityGatesPage() {
         <h2 className="text-2xl font-semibold mb-4" id="pre-commit">
           Stage 1 — Pre-commit Hooks
         </h2>
-        <p className="text-sm text-[var(--text-secondary)] mb-4">
+        <p className="text-sm text-(--text-secondary) mb-4">
           Configured in{" "}
-          <code className="text-[var(--accent)]">.pre-commit-config.yaml</code>.
-          Run automatically before every <code>git commit</code>.
+          <code className="text-(--accent)">.pre-commit-config.yaml</code>. Run
+          automatically before every <code>git commit</code>.
         </p>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm border border-[var(--border)] rounded-lg">
-            <thead className="bg-[var(--surface-2)]">
+          <table className="w-full text-sm border border-(--border) rounded-lg">
+            <thead className="bg-(--surface-2)">
               <tr>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Hook
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Tool
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Severity
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Gate
                 </th>
               </tr>
             </thead>
-            <tbody className="text-[var(--text-secondary)]">
+            <tbody className="text-(--text-secondary)">
               {preCommitGates.map((g) => (
-                <tr key={g.hook} className="border-t border-[var(--border)]">
+                <tr key={g.hook} className="border-t border-(--border)">
                   <td className="px-3 py-2 text-xs">{g.hook}</td>
                   <td className="px-3 py-2 text-xs font-mono">{g.tool}</td>
                   <td className="px-3 py-2 text-xs">{g.severity}</td>
@@ -533,21 +535,21 @@ export default function QualityGatesPage() {
         <h2 className="text-2xl font-semibold mb-4" id="pre-push">
           Stage 2 — Pre-push Gates
         </h2>
-        <p className="text-sm text-[var(--text-secondary)] mb-4">
+        <p className="text-sm text-(--text-secondary) mb-4">
           Run before <code>git push</code>. These catch issues that are too slow
           for pre-commit.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-1">Unit Tests</h4>
-            <p className="text-xs text-[var(--text-secondary)] mb-2">
+            <p className="text-xs text-(--text-secondary) mb-2">
               <code>vitest run --bail 1</code> — stops on first failure
             </p>
             <Badge blocking={true} />
           </div>
-          <div className="border border-[var(--border)] rounded-lg p-4">
+          <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-1">Dependency Audit</h4>
-            <p className="text-xs text-[var(--text-secondary)] mb-2">
+            <p className="text-xs text-(--text-secondary) mb-2">
               <code>npm audit --audit-level=high</code> — HIGH + CRITICAL CVEs
             </p>
             <Badge blocking={true} />
@@ -560,13 +562,13 @@ export default function QualityGatesPage() {
         <h2 className="text-2xl font-semibold mb-4" id="ci">
           Stage 3 — CI Pipeline
         </h2>
-        <p className="text-sm text-[var(--text-secondary)] mb-4">
+        <p className="text-sm text-(--text-secondary) mb-4">
           GitHub Actions workflow{" "}
           <a
             href={CI_WORKFLOW_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--accent)] hover:underline font-mono"
+            className="text-(--accent) hover:underline font-mono"
           >
             .github/workflows/test.yml
           </a>{" "}
@@ -575,35 +577,35 @@ export default function QualityGatesPage() {
             href={CI_WORKFLOW_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--accent)] hover:underline text-xs"
+            className="text-(--accent) hover:underline text-xs"
           >
             View latest run &rarr;
           </a>
         </p>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm border border-[var(--border)] rounded-lg">
-            <thead className="bg-[var(--surface-2)]">
+          <table className="w-full text-sm border border-(--border) rounded-lg">
+            <thead className="bg-(--surface-2)">
               <tr>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Job
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Tests
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Tool
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Standard
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Gate
                 </th>
               </tr>
             </thead>
-            <tbody className="text-[var(--text-secondary)]">
+            <tbody className="text-(--text-secondary)">
               {ciGates.map((g) => (
-                <tr key={g.job} className="border-t border-[var(--border)]">
+                <tr key={g.job} className="border-t border-(--border)">
                   <td className="px-3 py-2 text-xs font-semibold">{g.job}</td>
                   <td className="px-3 py-2 text-xs font-mono">{g.tests}</td>
                   <td className="px-3 py-2 text-xs">{g.tool}</td>
@@ -617,9 +619,9 @@ export default function QualityGatesPage() {
           </table>
         </div>
 
-        <div className="mt-4 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg p-4">
+        <div className="mt-4 bg-(--surface-2) border border-(--border) rounded-lg p-4">
           <h4 className="font-semibold text-sm mb-2">Supply-Chain Hardening</h4>
-          <ul className="text-xs text-[var(--text-secondary)] space-y-1 list-disc ml-4">
+          <ul className="text-xs text-(--text-secondary) space-y-1 list-disc ml-4">
             <li>
               Gitleaks and Trivy binaries pinned to exact versions with SHA-256
               checksum verification
@@ -635,15 +637,15 @@ export default function QualityGatesPage() {
           </ul>
         </div>
 
-        <div className="mt-4 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg p-4">
+        <div className="mt-4 bg-(--surface-2) border border-(--border) rounded-lg p-4">
           <h4 className="font-semibold text-sm mb-2">
             Security Headers (Runtime)
           </h4>
-          <p className="text-xs text-[var(--text-secondary)] mb-2">
+          <p className="text-xs text-(--text-secondary) mb-2">
             Configured in <code>next.config.js</code> (BSI C5 DEV-07 / OWASP
             A05):
           </p>
-          <div className="font-mono text-xs text-[var(--text-secondary)] space-y-0.5">
+          <div className="font-mono text-xs text-(--text-secondary) space-y-0.5">
             <div>X-Frame-Options: DENY</div>
             <div>X-Content-Type-Options: nosniff</div>
             <div>Referrer-Policy: strict-origin-when-cross-origin</div>
@@ -663,13 +665,13 @@ export default function QualityGatesPage() {
         <h2 className="text-2xl font-semibold mb-4" id="compliance">
           Stage 4 — Protocol Compliance
         </h2>
-        <p className="text-sm text-[var(--text-secondary)] mb-4">
+        <p className="text-sm text-(--text-secondary) mb-4">
           Weekly + on push to main. Workflow:{" "}
           <a
             href={COMPLIANCE_WORKFLOW_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--accent)] hover:underline font-mono"
+            className="text-(--accent) hover:underline font-mono"
           >
             .github/workflows/compliance.yml
           </a>{" "}
@@ -677,7 +679,7 @@ export default function QualityGatesPage() {
             href={COMPLIANCE_WORKFLOW_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[var(--accent)] hover:underline text-xs"
+            className="text-(--accent) hover:underline text-xs"
           >
             View latest run &rarr;
           </a>
@@ -686,46 +688,38 @@ export default function QualityGatesPage() {
           {complianceSuites.map((s) => (
             <div
               key={s.suite}
-              className="border border-[var(--border)] rounded-lg p-4"
+              className="border border-(--border) rounded-lg p-4"
             >
               <h4 className="font-semibold text-sm mb-1">{s.suite}</h4>
-              <p className="text-xs text-[var(--text-secondary)] mb-2">
+              <p className="text-xs text-(--text-secondary) mb-2">
                 {s.protocol}
               </p>
               <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-[var(--text-primary)]">
+                <span className="text-2xl font-bold text-(--text-primary)">
                   {s.rate}
                 </span>
-                <span className="text-xs text-[var(--text-secondary)]">
+                <span className="text-xs text-(--text-secondary)">
                   {s.passed}/{s.tests} passed
                 </span>
               </div>
             </div>
           ))}
         </div>
-        <div className="mt-4 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg p-4">
+        <div className="mt-4 bg-(--surface-2) border border-(--border) rounded-lg p-4">
           <h4 className="font-semibold text-sm mb-2">
             Infrastructure Requirements
           </h4>
-          <p className="text-xs text-[var(--text-secondary)] mb-2">
+          <p className="text-xs text-(--text-secondary) mb-2">
             Protocol compliance tests require the full JAD stack (19 services, 8
             GB RAM). In CI, the workflow starts JAD infrastructure with graceful
             fallback — tests produce results only when the controlplane is
             healthy.
           </p>
-          <p className="text-xs text-[var(--text-secondary)]">
+          <p className="text-xs text-(--text-secondary)">
             Local execution:{" "}
-            <code className="text-[var(--accent)]">
-              ./scripts/run-dsp-tck.sh
-            </code>
-            ,{" "}
-            <code className="text-[var(--accent)]">
-              ./scripts/run-dcp-tests.sh
-            </code>
-            ,{" "}
-            <code className="text-[var(--accent)]">
-              ./scripts/run-ehds-tests.sh
-            </code>
+            <code className="text-(--accent)">./scripts/run-dsp-tck.sh</code>,{" "}
+            <code className="text-(--accent)">./scripts/run-dcp-tests.sh</code>,{" "}
+            <code className="text-(--accent)">./scripts/run-ehds-tests.sh</code>
           </p>
         </div>
       </section>
@@ -739,44 +733,34 @@ export default function QualityGatesPage() {
           {coverageData.map((c) => (
             <div
               key={c.metric}
-              className="border border-[var(--border)] rounded-lg p-4 text-center"
+              className="border border-(--border) rounded-lg p-4 text-center"
             >
-              <div className="text-2xl font-bold text-[var(--text-primary)]">
+              <div className="text-2xl font-bold text-(--text-primary)">
                 {c.value}
               </div>
-              <div className="text-xs text-[var(--text-secondary)]">
-                {c.metric}
-              </div>
+              <div className="text-xs text-(--text-secondary)">{c.metric}</div>
               <div className="text-[10px] text-green-700 dark:text-green-400 mt-1">
                 {c.trend} from baseline
               </div>
             </div>
           ))}
         </div>
-        <div className="bg-[var(--surface-2)] border border-[var(--border)] rounded-lg p-4">
+        <div className="bg-(--surface-2) border border-(--border) rounded-lg p-4">
           <h4 className="font-semibold text-sm mb-2">Test Inventory</h4>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="text-xl font-bold text-[var(--text-primary)]">
+              <div className="text-xl font-bold text-(--text-primary)">
                 1,613
               </div>
-              <div className="text-xs text-[var(--text-secondary)]">
-                Unit Tests
-              </div>
+              <div className="text-xs text-(--text-secondary)">Unit Tests</div>
             </div>
             <div>
-              <div className="text-xl font-bold text-[var(--text-primary)]">
-                778
-              </div>
-              <div className="text-xs text-[var(--text-secondary)]">
-                E2E Tests
-              </div>
+              <div className="text-xl font-bold text-(--text-primary)">778</div>
+              <div className="text-xs text-(--text-secondary)">E2E Tests</div>
             </div>
             <div>
-              <div className="text-xl font-bold text-[var(--text-primary)]">
-                80
-              </div>
-              <div className="text-xs text-[var(--text-secondary)]">
+              <div className="text-xl font-bold text-(--text-primary)">80</div>
+              <div className="text-xs text-(--text-secondary)">
                 Compliance Tests
               </div>
             </div>
@@ -789,7 +773,7 @@ export default function QualityGatesPage() {
         <h2 className="text-2xl font-semibold mb-4" id="future">
           Future Quality Gates
         </h2>
-        <p className="text-sm text-[var(--text-secondary)] mb-6">
+        <p className="text-sm text-(--text-secondary) mb-6">
           Recommended improvements prioritised by impact and regulatory
           alignment.
         </p>
@@ -799,25 +783,25 @@ export default function QualityGatesPage() {
             return (
               <div
                 key={g.priority}
-                className="border border-[var(--border)] rounded-lg p-4"
+                className="border border-(--border) rounded-lg p-4"
               >
                 <div className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-7 h-7 rounded-full bg-[var(--accent)]/10 flex items-center justify-center text-xs font-bold text-[var(--accent)]">
+                  <span className="shrink-0 w-7 h-7 rounded-full bg-(--accent)/10 flex items-center justify-center text-xs font-bold text-(--accent)">
                     {g.priority}
                   </span>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <Icon size={16} className="text-[var(--accent)]" />
+                      <Icon size={16} className="text-(--accent)" />
                       <h4 className="font-semibold text-sm">{g.title}</h4>
                       <EffortBadge effort={g.effort} />
                     </div>
-                    <p className="text-xs text-[var(--text-secondary)] mb-2">
+                    <p className="text-xs text-(--text-secondary) mb-2">
                       {g.description}
                     </p>
-                    <p className="text-xs text-[var(--text-secondary)] italic mb-1">
+                    <p className="text-xs text-(--text-secondary) italic mb-1">
                       {g.rationale}
                     </p>
-                    <span className="text-[10px] font-mono text-[var(--text-secondary)] bg-[var(--surface)] px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-mono text-(--text-secondary) bg-(--surface) px-2 py-0.5 rounded-sm">
                       {g.standard}
                     </span>
                   </div>
@@ -834,27 +818,27 @@ export default function QualityGatesPage() {
           Compliance Mapping
         </h2>
         <div className="overflow-x-auto">
-          <table className="w-full text-sm border border-[var(--border)] rounded-lg">
-            <thead className="bg-[var(--surface-2)]">
+          <table className="w-full text-sm border border-(--border) rounded-lg">
+            <thead className="bg-(--surface-2)">
               <tr>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   Quality Gate
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   BSI C5
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   OWASP
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   EHDS
                 </th>
-                <th className="px-3 py-2 text-left text-[var(--text-primary)]">
+                <th className="px-3 py-2 text-left text-(--text-primary)">
                   WCAG
                 </th>
               </tr>
             </thead>
-            <tbody className="text-[var(--text-secondary)] text-xs">
+            <tbody className="text-(--text-secondary) text-xs">
               {[
                 ["TypeScript strict", "DEV-01", "—", "—", "—"],
                 ["ESLint", "DEV-02", "A03", "—", "—"],
@@ -874,7 +858,7 @@ export default function QualityGatesPage() {
                 ["Renovate freshness", "DEV-05", "A06", "—", "—"],
                 ["ODRL enforcement (planned)", "—", "A01", "Art. 44", "—"],
               ].map(([gate, bsi, owasp, ehds, wcag]) => (
-                <tr key={gate} className="border-t border-[var(--border)]">
+                <tr key={gate} className="border-t border-(--border)">
                   <td className="px-3 py-2 font-semibold">{gate}</td>
                   <td className="px-3 py-2">{bsi}</td>
                   <td className="px-3 py-2">{owasp}</td>
@@ -888,18 +872,18 @@ export default function QualityGatesPage() {
       </section>
 
       {/* Related */}
-      <section className="bg-[var(--surface-2)] border border-[var(--border)] rounded-xl p-6">
+      <section className="bg-(--surface-2) border border-(--border) rounded-xl p-6">
         <h2 className="font-semibold mb-2">Related Documentation</h2>
         <div className="flex flex-wrap gap-3">
           <Link
             href="/docs/developer"
-            className="text-sm text-[var(--accent)] hover:underline"
+            className="text-sm text-(--accent) hover:underline"
           >
             Developer Guide
           </Link>
           <Link
             href="/docs/architecture"
-            className="text-sm text-[var(--accent)] hover:underline"
+            className="text-sm text-(--accent) hover:underline"
           >
             Architecture
           </Link>
@@ -907,7 +891,7 @@ export default function QualityGatesPage() {
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/quality-gates.md"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-[var(--accent)] hover:underline"
+            className="text-sm text-(--accent) hover:underline"
           >
             Full Markdown (GitHub)
           </a>
@@ -915,7 +899,7 @@ export default function QualityGatesPage() {
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/test-coverage-report.md"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-[var(--accent)] hover:underline"
+            className="text-sm text-(--accent) hover:underline"
           >
             Coverage Report
           </a>
@@ -923,7 +907,7 @@ export default function QualityGatesPage() {
             href={CI_WORKFLOW_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-[var(--accent)] hover:underline"
+            className="text-sm text-(--accent) hover:underline"
           >
             CI Pipeline (latest)
           </a>
@@ -931,7 +915,7 @@ export default function QualityGatesPage() {
             href={COMPLIANCE_WORKFLOW_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-[var(--accent)] hover:underline"
+            className="text-sm text-(--accent) hover:underline"
           >
             Compliance Tests (latest)
           </a>
@@ -939,7 +923,7 @@ export default function QualityGatesPage() {
             href={PAGES_WORKFLOW_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-[var(--accent)] hover:underline"
+            className="text-sm text-(--accent) hover:underline"
           >
             Pages Deploy (latest)
           </a>

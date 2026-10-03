@@ -113,13 +113,13 @@ function purposeLabel(p: string | null): string {
 function OutcomeBadge({ outcome }: { outcome: Entry["outcome"] }) {
   const cls =
     outcome === "permit issued" || outcome === "request approved"
-      ? "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border-[var(--badge-active-border)]"
+      ? "bg-(--badge-active-bg) text-(--badge-active-text) border-(--badge-active-border)"
       : outcome === "pending"
-        ? "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]"
-        : "bg-[var(--badge-inactive-bg)] text-[var(--badge-inactive-text)] border-[var(--badge-inactive-border)]";
+        ? "bg-(--role-hdab-bg) text-(--role-hdab-text) border-(--role-hdab-border)"
+        : "bg-(--badge-inactive-bg) text-(--badge-inactive-text) border-(--badge-inactive-border)";
   return (
     <span
-      className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border whitespace-nowrap ${cls}`}
+      className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-sm border whitespace-nowrap ${cls}`}
     >
       {outcome === "permit issued" || outcome === "request approved" ? (
         <ShieldCheck size={12} />
@@ -160,20 +160,20 @@ export default function PermitsRegisterPage() {
   const pending = entries.filter((e) => e.outcome === "pending");
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <div className="mb-8">
           <h1 className="page-header flex items-center gap-2">
             <ScrollText size={28} />
             Data permits register
           </h1>
-          <p className="text-[var(--text-secondary)] text-lg mt-1">
+          <p className="text-(--text-secondary) text-lg mt-1">
             Regulation (EU) 2025/327, Art. 57(1)(j) and Art. 58(1)(f) · public,
             no sign-in
           </p>
         </div>
 
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 mb-8 text-sm text-[var(--text-secondary)] space-y-2">
+        <div className="rounded-lg border border-(--border) bg-(--surface) p-4 mb-8 text-sm text-(--text-secondary) space-y-2">
           <p>
             The health data access body publishes every health data access
             application it receives (Art. 57(1)(j)(ii)), every data permit
@@ -187,7 +187,7 @@ export default function PermitsRegisterPage() {
             Participants are fictional. The access body decides on{" "}
             <Link
               href="/compliance"
-              className="font-bold text-[var(--accent)] hover:underline"
+              className="font-bold text-(--accent) hover:underline"
             >
               EHDS Approval
             </Link>
@@ -196,33 +196,31 @@ export default function PermitsRegisterPage() {
         </div>
 
         {loading ? (
-          <p className="text-[var(--text-secondary)] text-sm">
+          <p className="text-(--text-secondary) text-sm">
             Reading the register…
           </p>
         ) : error ? (
           <div className="text-sm">
-            <p className="text-[var(--text-secondary)]">
+            <p className="text-(--text-secondary)">
               The register could not be read
             </p>
-            <p className="text-xs font-mono text-[var(--text-secondary)]">
-              {error}
-            </p>
+            <p className="text-xs font-mono text-(--text-secondary)">{error}</p>
           </div>
         ) : (
           <>
             <section className="mb-10">
-              <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+              <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
                 Decisions ({decided.length})
               </h2>
               {decided.length === 0 ? (
-                <p className="text-[var(--text-secondary)] text-sm">
+                <p className="text-(--text-secondary) text-sm">
                   No decision published yet
                 </p>
               ) : (
-                <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+                <div className="overflow-x-auto rounded-lg border border-(--border)">
                   <table className="text-xs w-full border-collapse">
                     <thead>
-                      <tr className="bg-[var(--surface)] text-[var(--text-secondary)]">
+                      <tr className="bg-(--surface) text-(--text-secondary)">
                         <th className="text-left px-3 py-2 font-medium">
                           Applicant
                         </th>
@@ -250,13 +248,13 @@ export default function PermitsRegisterPage() {
                       {decided.map((e) => (
                         <tr
                           key={e.applicationId}
-                          className="border-t border-[var(--border)] align-top"
+                          className="border-t border-(--border) align-top"
                         >
-                          <td className="px-3 py-2 text-[var(--text-primary)]">
+                          <td className="px-3 py-2 text-(--text-primary)">
                             <div className="font-medium">
                               {e.applicant ?? e.applicantDid ?? "—"}
                             </div>
-                            <div className="text-[var(--text-secondary)]">
+                            <div className="text-(--text-secondary)">
                               {e.kind === "request"
                                 ? "statistical request, Art. 69"
                                 : "access application, Art. 67"}
@@ -276,7 +274,7 @@ export default function PermitsRegisterPage() {
                           <td className="px-3 py-2">
                             <OutcomeBadge outcome={e.outcome} />
                             {e.outcome === "permit revoked" && (
-                              <div className="mt-1 text-[var(--danger-text)]">
+                              <div className="mt-1 text-(--danger-text)">
                                 revoked {shortDate(e.revokedAt)}
                                 {e.revocationReason
                                   ? `: ${e.revocationReason}`
@@ -284,25 +282,25 @@ export default function PermitsRegisterPage() {
                               </div>
                             )}
                             {e.outcome === "refused" && e.justification && (
-                              <div className="mt-1 text-[var(--text-secondary)]">
+                              <div className="mt-1 text-(--text-secondary)">
                                 {e.justification}
                               </div>
                             )}
                             {e.kind === "request" &&
                               e.decidedUnder === "Art. 72" && (
-                                <div className="mt-1 text-[var(--text-secondary)]">
+                                <div className="mt-1 text-(--text-secondary)">
                                   answered by the trusted data holder (Art. 72)
                                 </div>
                               )}
                             {e.feeEur ? (
-                              <div className="mt-1 text-[var(--text-secondary)]">
+                              <div className="mt-1 text-(--text-secondary)">
                                 fee {e.feeEur.toLocaleString("en-GB")} EUR (Art.
                                 62)
                               </div>
                             ) : null}
                             {e.results && (
                               <div
-                                className="mt-1 text-[var(--text-secondary)]"
+                                className="mt-1 text-(--text-secondary)"
                                 data-testid="results-status"
                               >
                                 {e.results.count > 0
@@ -321,7 +319,7 @@ export default function PermitsRegisterPage() {
                             {(e.outcome === "permit issued" ||
                               e.outcome === "request approved") &&
                               e.conditions.length > 0 && (
-                                <ul className="mt-1 list-disc list-inside text-[var(--text-secondary)]">
+                                <ul className="mt-1 list-disc list-inside text-(--text-secondary)">
                                   {e.conditions.map((c, i) => (
                                     <li key={i}>{c}</li>
                                   ))}
@@ -348,18 +346,18 @@ export default function PermitsRegisterPage() {
             </section>
 
             <section>
-              <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+              <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
                 Applications received, awaiting a decision ({pending.length})
               </h2>
               {pending.length === 0 ? (
-                <p className="text-[var(--text-secondary)] text-sm">
+                <p className="text-(--text-secondary) text-sm">
                   No application awaiting a decision
                 </p>
               ) : (
-                <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+                <div className="overflow-x-auto rounded-lg border border-(--border)">
                   <table className="text-xs w-full border-collapse">
                     <thead>
-                      <tr className="bg-[var(--surface)] text-[var(--text-secondary)]">
+                      <tr className="bg-(--surface) text-(--text-secondary)">
                         <th className="text-left px-3 py-2 font-medium">
                           Applicant
                         </th>
@@ -381,9 +379,9 @@ export default function PermitsRegisterPage() {
                       {pending.map((e) => (
                         <tr
                           key={e.applicationId}
-                          className="border-t border-[var(--border)]"
+                          className="border-t border-(--border)"
                         >
-                          <td className="px-3 py-2 font-medium text-[var(--text-primary)]">
+                          <td className="px-3 py-2 font-medium text-(--text-primary)">
                             {e.applicant ?? e.applicantDid ?? "—"}
                           </td>
                           <td className="px-3 py-2">
@@ -401,8 +399,8 @@ export default function PermitsRegisterPage() {
                               <span
                                 className={
                                   e.daysToDecision < 0
-                                    ? " text-[var(--danger-text)]"
-                                    : " text-[var(--text-secondary)]"
+                                    ? " text-(--danger-text)"
+                                    : " text-(--text-secondary)"
                                 }
                               >
                                 {e.daysToDecision < 0
@@ -420,19 +418,19 @@ export default function PermitsRegisterPage() {
             </section>
 
             <section className="mt-10" data-testid="results-section">
-              <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+              <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
                 Results communicated by data users, Art. 61(4) (
                 {register?.results?.length ?? 0})
               </h2>
               {!register?.results || register.results.length === 0 ? (
-                <p className="text-[var(--text-secondary)] text-sm">
+                <p className="text-(--text-secondary) text-sm">
                   No result communicated yet
                 </p>
               ) : (
-                <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+                <div className="overflow-x-auto rounded-lg border border-(--border)">
                   <table className="text-xs w-full border-collapse">
                     <thead>
-                      <tr className="bg-[var(--surface)] text-[var(--text-secondary)]">
+                      <tr className="bg-(--surface) text-(--text-secondary)">
                         <th className="text-left px-3 py-2 font-medium">
                           Data user
                         </th>
@@ -454,10 +452,10 @@ export default function PermitsRegisterPage() {
                       {register.results.map((r) => (
                         <tr
                           key={r.resultId}
-                          className="border-t border-[var(--border)] align-top"
+                          className="border-t border-(--border) align-top"
                           data-testid="result-row"
                         >
-                          <td className="px-3 py-2 font-medium text-[var(--text-primary)]">
+                          <td className="px-3 py-2 font-medium text-(--text-primary)">
                             {r.applicantName ?? "—"}
                           </td>
                           <td className="px-3 py-2">
@@ -466,7 +464,7 @@ export default function PermitsRegisterPage() {
                               {r.url ? (
                                 <a
                                   href={r.url}
-                                  className="text-[var(--accent)] hover:underline"
+                                  className="text-(--accent) hover:underline"
                                   rel="noopener noreferrer"
                                   target="_blank"
                                 >
@@ -477,7 +475,7 @@ export default function PermitsRegisterPage() {
                               )}
                             </div>
                             {r.summary && (
-                              <div className="text-[var(--text-secondary)]">
+                              <div className="text-(--text-secondary)">
                                 {r.summary}
                               </div>
                             )}
@@ -491,12 +489,12 @@ export default function PermitsRegisterPage() {
                           <td className="px-3 py-2 whitespace-nowrap">
                             {shortDate(r.deadline)}
                             {r.onTime === false ? (
-                              <span className="text-[var(--danger-text)]">
+                              <span className="text-(--danger-text)">
                                 {" "}
                                 · late
                               </span>
                             ) : r.onTime === true ? (
-                              <span className="text-[var(--text-secondary)]">
+                              <span className="text-(--text-secondary)">
                                 {" "}
                                 · met
                               </span>
@@ -511,19 +509,19 @@ export default function PermitsRegisterPage() {
             </section>
 
             <section className="mt-10" data-testid="measures-section">
-              <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+              <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
                 Measures taken on non-compliance, Art. 63 (
                 {register?.measures?.length ?? 0})
               </h2>
               {!register?.measures || register.measures.length === 0 ? (
-                <p className="text-[var(--text-secondary)] text-sm">
+                <p className="text-(--text-secondary) text-sm">
                   No measure taken
                 </p>
               ) : (
-                <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+                <div className="overflow-x-auto rounded-lg border border-(--border)">
                   <table className="text-xs w-full border-collapse">
                     <thead>
-                      <tr className="bg-[var(--surface)] text-[var(--text-secondary)]">
+                      <tr className="bg-(--surface) text-(--text-secondary)">
                         <th className="text-left px-3 py-2 font-medium">
                           Party
                         </th>
@@ -545,10 +543,10 @@ export default function PermitsRegisterPage() {
                       {register.measures.map((m) => (
                         <tr
                           key={m.findingId}
-                          className="border-t border-[var(--border)] align-top"
+                          className="border-t border-(--border) align-top"
                           data-testid="measure-row"
                         >
-                          <td className="px-3 py-2 font-medium text-[var(--text-primary)]">
+                          <td className="px-3 py-2 font-medium text-(--text-primary)">
                             {m.party ?? m.partyDid ?? "—"}
                           </td>
                           <td className="px-3 py-2">
@@ -560,7 +558,7 @@ export default function PermitsRegisterPage() {
                               ? `, ${m.fineEur.toLocaleString("en-GB")} EUR`
                               : ""}
                             {m.permitId ? (
-                              <div className="font-mono text-[var(--text-secondary)]">
+                              <div className="font-mono text-(--text-secondary)">
                                 {m.permitId}
                               </div>
                             ) : null}
@@ -581,7 +579,7 @@ export default function PermitsRegisterPage() {
             </section>
 
             {register?.generatedAt && (
-              <p className="mt-6 text-xs text-[var(--text-secondary)]">
+              <p className="mt-6 text-xs text-(--text-secondary)">
                 Register read on{" "}
                 {register.generatedAt.slice(0, 19).replace("T", " ")} UTC.
               </p>

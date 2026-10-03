@@ -31,15 +31,15 @@ export default function ApiReferencePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="px-6 py-4 border-b border-[var(--border)] bg-[var(--surface-1)]">
+      <div className="px-6 py-4 border-b border-(--border) bg-(--surface-1)">
         <Link
           href="/docs/developer"
-          className="inline-flex items-center gap-1 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          className="inline-flex items-center gap-1 text-sm text-(--text-secondary) hover:text-(--text-primary)"
         >
           <ArrowLeft size={14} /> Back to Developer Guide
         </Link>
         <h1 className="text-2xl font-bold mt-2">API Reference</h1>
-        <p className="text-sm text-[var(--text-secondary)] mt-1">
+        <p className="text-sm text-(--text-secondary) mt-1">
           Interactive, three-column reference for all REST endpoints of the EHDS
           Integration Hub. Powered by Scalar — try any endpoint directly from
           the right-hand code panel.

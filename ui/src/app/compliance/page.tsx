@@ -114,30 +114,30 @@ export default function CompliancePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* ── Page header ── */}
         <div className="mb-8">
           <h1 className="page-header">EHDS Compliance Overview</h1>
-          <p className="text-[var(--text-secondary)] text-lg mt-1">
+          <p className="text-(--text-secondary) text-lg mt-1">
             HDAB approval chain · Regulation (EU) 2025/327, Art. 67 to 73
           </p>
           <div className="flex gap-4 mt-4 text-sm">
             <Link
               href="/eehrxf"
-              className="font-bold text-[var(--accent)] hover:underline"
+              className="font-bold text-(--accent) hover:underline"
             >
               ← EEHRxF Profiles
             </Link>
             <Link
               href="/compliance/tck"
-              className="font-bold text-[var(--accent)] hover:underline"
+              className="font-bold text-(--accent) hover:underline"
             >
               Protocol TCK →
             </Link>
             <Link
               href="/permits"
-              className="font-bold text-[var(--accent)] hover:underline"
+              className="font-bold text-(--accent) hover:underline"
             >
               Public register →
             </Link>
@@ -145,10 +145,10 @@ export default function CompliancePage() {
         </div>
 
         {/* ── Intro description ── */}
-        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 mb-8 text-sm text-[var(--text-secondary)] space-y-2">
+        <div className="rounded-lg border border-(--border) bg-(--surface) p-4 mb-8 text-sm text-(--text-secondary) space-y-2">
           <p>
             The{" "}
-            <strong className="text-[var(--text-primary)]">
+            <strong className="text-(--text-primary)">
               EHDS Compliance Matrix
             </strong>{" "}
             shows the approval chain status for every dataspace participant.
@@ -157,29 +157,25 @@ export default function CompliancePage() {
           </p>
           <ol className="list-decimal list-inside space-y-1 ml-2">
             <li>
-              <strong className="text-[var(--text-primary)]">
+              <strong className="text-(--text-primary)">
                 Access Application
               </strong>{" "}
               · the data user applies with purpose, justification and ethics
               assessment (Art. 67)
             </li>
             <li>
-              <strong className="text-[var(--text-primary)]">
-                HDAB decision
-              </strong>{" "}
-              · the health data access body assesses the Art. 68(1) criteria and
+              <strong className="text-(--text-primary)">HDAB decision</strong> ·
+              the health data access body assesses the Art. 68(1) criteria and
               issues or refuses a data permit within three months (Art. 68)
             </li>
             <li>
-              <strong className="text-[var(--text-primary)]">
-                Dataset Grant
-              </strong>{" "}
-              · the permit names the dataset it grants access to (Art. 68(3))
+              <strong className="text-(--text-primary)">Dataset Grant</strong> ·
+              the permit names the dataset it grants access to (Art. 68(3))
             </li>
             <li>
-              <strong className="text-[var(--text-primary)]">Contract</strong> ·
-              the data user accesses the data only under that permit, in a
-              secure processing environment (Art. 61(1), Art. 73)
+              <strong className="text-(--text-primary)">Contract</strong> · the
+              data user accesses the data only under that permit, in a secure
+              processing environment (Art. 61(1), Art. 73)
             </li>
           </ol>
           <p>
@@ -200,22 +196,22 @@ export default function CompliancePage() {
 
         {/* ── Compliance Matrix ── */}
         <div className="mb-8">
-          <h2 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+          <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
             Participant Compliance Matrix
           </h2>
           {optionsLoading ? (
-            <div className="text-[var(--text-secondary)] text-sm">
+            <div className="text-(--text-secondary) text-sm">
               Loading compliance data from graph…
             </div>
           ) : matrix.length === 0 ? (
-            <div className="text-[var(--text-secondary)] text-sm">
+            <div className="text-(--text-secondary) text-sm">
               No participants found in the knowledge graph.
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+            <div className="overflow-x-auto rounded-lg border border-(--border)">
               <table className="text-xs w-full border-collapse">
                 <thead>
-                  <tr className="bg-[var(--surface)] text-[var(--text-secondary)]">
+                  <tr className="bg-(--surface) text-(--text-secondary)">
                     <th className="text-left px-3 py-2 font-medium">
                       Participant
                     </th>
@@ -289,17 +285,17 @@ export default function CompliancePage() {
                         key={rowKey(row)}
                         data-application-id={row.applicationId ?? undefined}
                         onClick={() => showDetail(row)}
-                        className={`border-t border-[var(--border)] cursor-pointer transition-colors ${
+                        className={`border-t border-(--border) cursor-pointer transition-colors ${
                           isSelected
-                            ? "bg-[var(--accent-surface)]"
-                            : "hover:bg-[var(--surface)]"
+                            ? "bg-(--accent-surface)"
+                            : "hover:bg-(--surface)"
                         }`}
                       >
-                        <td className="px-3 py-2 font-medium text-[var(--text-primary)]">
+                        <td className="px-3 py-2 font-medium text-(--text-primary)">
                           {row.consumerName}
                         </td>
                         <td className="px-3 py-2">
-                          <span className="text-[var(--text-secondary)]">
+                          <span className="text-(--text-secondary)">
                             {row.consumerType}
                           </span>
                         </td>
@@ -308,10 +304,10 @@ export default function CompliancePage() {
                             <span
                               className={
                                 row.applicationStatus === "APPROVED"
-                                  ? "text-[var(--success-text)]"
+                                  ? "text-(--success-text)"
                                   : row.applicationStatus === "REJECTED"
-                                    ? "text-[var(--danger-text)]"
-                                    : "text-[var(--warning-text)]"
+                                    ? "text-(--danger-text)"
+                                    : "text-(--warning-text)"
                               }
                               title={row.applicationStatus ?? ""}
                             >
@@ -328,9 +324,7 @@ export default function CompliancePage() {
                                         : row.applicationStatus ?? "✓"}
                             </span>
                           ) : (
-                            <span className="text-[var(--text-secondary)]">
-                              —
-                            </span>
+                            <span className="text-(--text-secondary)">—</span>
                           )}
                         </td>
                         <td className="px-3 py-2 text-center">
@@ -338,11 +332,11 @@ export default function CompliancePage() {
                             <span
                               className={
                                 row.approvalStatus === "APPROVED"
-                                  ? "text-[var(--success-text)]"
+                                  ? "text-(--success-text)"
                                   : row.approvalStatus === "REJECTED" ||
                                       row.approvalStatus === "REVOKED"
-                                    ? "text-[var(--danger-text)]"
-                                    : "text-[var(--warning-text)]"
+                                    ? "text-(--danger-text)"
+                                    : "text-(--warning-text)"
                               }
                               title={row.approvalStatus ?? ""}
                             >
@@ -355,56 +349,48 @@ export default function CompliancePage() {
                                     : row.approvalStatus ?? "—"}
                             </span>
                           ) : (
-                            <span className="text-[var(--text-secondary)]">
-                              —
-                            </span>
+                            <span className="text-(--text-secondary)">—</span>
                           )}
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap">
                           <DecisionClock row={row} />
                         </td>
-                        <td className="px-3 py-2 text-[var(--text-primary)]">
+                        <td className="px-3 py-2 text-(--text-primary)">
                           {row.datasetTitle ? (
                             <span title={row.datasetId ?? ""}>
                               {row.datasetTitle}
                             </span>
                           ) : (
-                            <span className="text-[var(--text-secondary)]">
-                              —
-                            </span>
+                            <span className="text-(--text-secondary)">—</span>
                           )}
                         </td>
                         <td className="px-3 py-2 text-center">
                           {row.hasContract ? (
-                            <span className="text-[var(--success-text)]">
-                              ✓
-                            </span>
+                            <span className="text-(--success-text)">✓</span>
                           ) : (
-                            <span className="text-[var(--text-secondary)]">
-                              —
-                            </span>
+                            <span className="text-(--text-secondary)">—</span>
                           )}
                         </td>
-                        <td className="px-3 py-2 text-center text-[var(--text-secondary)]">
+                        <td className="px-3 py-2 text-center text-(--text-secondary)">
                           {row.ehdsArticle ?? "—"}
                         </td>
                         <td className="px-3 py-2 text-center">
                           <span
                             className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded border ${
                               level === "full"
-                                ? "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border-[var(--badge-active-border)]"
+                                ? "bg-(--badge-active-bg) text-(--badge-active-text) border-(--badge-active-border)"
                                 : level === "approved"
-                                  ? "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border-[var(--role-holder-border)]"
+                                  ? "bg-(--role-holder-bg) text-(--role-holder-text) border-(--role-holder-border)"
                                   : level === "pending"
-                                    ? "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]"
+                                    ? "bg-(--role-hdab-bg) text-(--role-hdab-text) border-(--role-hdab-border)"
                                     : level === "review"
-                                      ? "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]"
+                                      ? "bg-(--role-hdab-bg) text-(--role-hdab-text) border-(--role-hdab-border)"
                                       : level === "rejected" ||
                                           level === "revoked"
-                                        ? "bg-[var(--badge-inactive-bg)] text-[var(--badge-inactive-text)] border-[var(--badge-inactive-border)]"
+                                        ? "bg-(--badge-inactive-bg) text-(--badge-inactive-text) border-(--badge-inactive-border)"
                                         : level === "governance"
-                                          ? "bg-[var(--role-trust-bg)] text-[var(--role-trust-text)] border-[var(--role-trust-border)]"
-                                          : "bg-[var(--surface-2)] text-[var(--text-secondary)] border-[var(--border)]"
+                                          ? "bg-(--role-trust-bg) text-(--role-trust-text) border-(--role-trust-border)"
+                                          : "bg-(--surface-2) text-(--text-secondary) border-(--border)"
                             }`}
                           >
                             {level === "full" && <ShieldCheck size={12} />}
@@ -431,9 +417,9 @@ export default function CompliancePage() {
 
           {/* Detail panel — shows when a row is clicked */}
           {detailRow && (
-            <div className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+            <div className="mt-4 rounded-xl border border-(--border) bg-(--surface) p-4">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold text-sm text-[var(--text-primary)]">
+                <h3 className="font-semibold text-sm text-(--text-primary)">
                   {detailRow.consumerName} — Approval Chain Detail
                 </h3>
                 <button
@@ -441,7 +427,7 @@ export default function CompliancePage() {
                     setDetailRow(null);
                     setDetailResult(null);
                   }}
-                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  className="text-xs text-(--text-secondary) hover:text-(--text-primary)"
                 >
                   Close
                 </button>
@@ -455,24 +441,21 @@ export default function CompliancePage() {
               />
 
               {detailLoading ? (
-                <div className="text-[var(--text-secondary)] text-xs">
+                <div className="text-(--text-secondary) text-xs">
                   Checking approval chain…
                 </div>
               ) : !detailResult ? null : detailResult.compliant ? (
                 <div>
                   <div className="flex items-center gap-2 mb-3 text-sm">
-                    <ShieldCheck
-                      size={16}
-                      className="text-[var(--success-text)]"
-                    />
-                    <span className="text-[var(--success-text)] font-medium">
+                    <ShieldCheck size={16} className="text-(--success-text)" />
+                    <span className="text-(--success-text) font-medium">
                       Full HDAB approval chain found
                     </span>
                   </div>
                   {detailResult.chain.length > 0 && (
                     <table className="text-xs w-full border-collapse">
                       <thead>
-                        <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                        <tr className="text-(--text-secondary) border-b border-(--border)">
                           <th className="text-left pb-1">Application</th>
                           <th className="text-left pb-1">Status</th>
                           <th className="text-left pb-1">Approval</th>
@@ -482,21 +465,18 @@ export default function CompliancePage() {
                       </thead>
                       <tbody>
                         {detailResult.chain.map((c, i) => (
-                          <tr
-                            key={i}
-                            className="border-b border-[var(--border)]"
-                          >
+                          <tr key={i} className="border-b border-(--border)">
                             <td className="py-1 pr-2 font-mono">
                               {c.applicationId}
                             </td>
-                            <td className="py-1 pr-2 text-[var(--success-text)]">
+                            <td className="py-1 pr-2 text-(--success-text)">
                               {c.applicationStatus}
                             </td>
                             <td className="py-1 pr-2 font-mono">
                               {c.approvalId}
                             </td>
                             <td className="py-1 pr-2">{c.ehdsArticle}</td>
-                            <td className="py-1 font-mono text-[var(--text-secondary)]">
+                            <td className="py-1 font-mono text-(--text-secondary)">
                               {c.contract ?? "—"}
                             </td>
                           </tr>
@@ -508,15 +488,12 @@ export default function CompliancePage() {
               ) : (
                 <div>
                   <div className="flex items-center gap-2 mb-2 text-sm">
-                    <AlertCircle
-                      size={16}
-                      className="text-[var(--warning-text)]"
-                    />
-                    <span className="text-[var(--warning-text)] font-medium">
+                    <AlertCircle size={16} className="text-(--warning-text)" />
+                    <span className="text-(--warning-text) font-medium">
                       Incomplete approval chain
                     </span>
                   </div>
-                  <div className="text-xs text-[var(--text-secondary)] space-y-1">
+                  <div className="text-xs text-(--text-secondary) space-y-1">
                     <p>
                       <strong>Application:</strong>{" "}
                       {detailRow.hasApplication
@@ -549,18 +526,18 @@ export default function CompliancePage() {
         </div>
 
         {/* ── Verifiable Credentials Trust Section ── */}
-        <div className="mt-12 border-t border-[var(--border)] pt-8">
+        <div className="mt-12 border-t border-(--border) pt-8">
           <div className="flex items-center gap-2 mb-1">
             <Key size={18} className="text-blue-800 dark:text-blue-300" />
             <h2 className="text-xl font-bold">EHDS Verifiable Credentials</h2>
           </div>
-          <p className="text-[var(--text-secondary)] text-sm mb-6">
+          <p className="text-(--text-secondary) text-sm mb-6">
             DCP credential definitions registered on IssuerService — presented
             during DSP negotiation
           </p>
 
           {credentials.length === 0 ? (
-            <div className="text-[var(--text-secondary)] text-sm">
+            <div className="text-(--text-secondary) text-sm">
               {optionsLoading ? "Loading…" : "No credentials found in graph."}
             </div>
           ) : (
@@ -568,7 +545,7 @@ export default function CompliancePage() {
               {credentials.map((vc) => (
                 <div
                   key={vc.credentialId}
-                  className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)]/50 p-4"
+                  className="rounded-lg border border-(--border) bg-(--surface-2)/50 p-4"
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -576,15 +553,15 @@ export default function CompliancePage() {
                         size={16}
                         className={
                           vc.status === "active"
-                            ? "text-[var(--badge-active-text)]"
-                            : "text-[var(--badge-inactive-text)]"
+                            ? "text-(--badge-active-text)"
+                            : "text-(--badge-inactive-text)"
                         }
                       />
                       <span className="font-semibold text-sm">
                         {vc.credentialType}
                       </span>
                       {vc.participantRole && (
-                        <span className="text-xs px-2 py-0.5 rounded bg-[var(--layer5)]/20 text-[var(--layer5-text)]">
+                        <span className="text-xs px-2 py-0.5 rounded-sm bg-(--layer5)/20 text-(--layer5-text)">
                           {vc.participantRole}
                         </span>
                       )}
@@ -592,31 +569,27 @@ export default function CompliancePage() {
                     <span
                       className={`text-xs font-medium px-2 py-0.5 rounded border ${
                         vc.status === "active"
-                          ? "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border-[var(--badge-active-border)]"
-                          : "bg-[var(--badge-inactive-bg)] text-[var(--badge-inactive-text)] border-[var(--badge-inactive-border)]"
+                          ? "bg-(--badge-active-bg) text-(--badge-active-text) border-(--badge-active-border)"
+                          : "bg-(--badge-inactive-bg) text-(--badge-inactive-text) border-(--badge-inactive-border)"
                       }`}
                     >
                       {vc.status}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-[var(--text-secondary)]">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-(--text-secondary)">
                     <div>
-                      <span className="text-[var(--text-secondary)]">
-                        Holder:
-                      </span>{" "}
+                      <span className="text-(--text-secondary)">Holder:</span>{" "}
                       {vc.holderName ?? "—"}
                       {vc.holderType && (
-                        <span className="text-[var(--text-secondary)]">
+                        <span className="text-(--text-secondary)">
                           {" "}
                           [{vc.holderType}]
                         </span>
                       )}
                     </div>
                     <div>
-                      <span className="text-[var(--text-secondary)]">
-                        Subject:
-                      </span>{" "}
+                      <span className="text-(--text-secondary)">Subject:</span>{" "}
                       <span className="font-mono">
                         {vc.subjectDid?.replace(
                           /did:web:identityhub%3A7083:/,
@@ -625,9 +598,7 @@ export default function CompliancePage() {
                       </span>
                     </div>
                     <div>
-                      <span className="text-[var(--text-secondary)]">
-                        Issuer:
-                      </span>{" "}
+                      <span className="text-(--text-secondary)">Issuer:</span>{" "}
                       <span className="font-mono">
                         {vc.issuerDid?.replace(
                           /did:web:issuerservice%3A10016:/,
@@ -636,16 +607,14 @@ export default function CompliancePage() {
                       </span>
                     </div>
                     <div>
-                      <span className="text-[var(--text-secondary)]">
-                        Format:
-                      </span>{" "}
+                      <span className="text-(--text-secondary)">Format:</span>{" "}
                       VC1_0_JWT
                     </div>
 
                     {/* Type-specific details */}
                     {vc.purpose && (
                       <div className="col-span-2">
-                        <span className="text-[var(--text-secondary)]">
+                        <span className="text-(--text-secondary)">
                           Purpose:
                         </span>{" "}
                         {vc.purpose}
@@ -653,7 +622,7 @@ export default function CompliancePage() {
                     )}
                     {vc.datasetId && (
                       <div className="col-span-2">
-                        <span className="text-[var(--text-secondary)]">
+                        <span className="text-(--text-secondary)">
                           Dataset:
                         </span>{" "}
                         <span className="font-mono">{vc.datasetId}</span>
@@ -661,19 +630,19 @@ export default function CompliancePage() {
                     )}
                     {vc.completeness != null && (
                       <div className="col-span-2 mt-1">
-                        <span className="text-[var(--text-secondary)]">
+                        <span className="text-(--text-secondary)">
                           Quality:
                         </span>{" "}
                         Completeness{" "}
-                        <span className="text-[var(--success-text)]">
+                        <span className="text-(--success-text)">
                           {(vc.completeness * 100).toFixed(0)}%
                         </span>
                         {" · "}Conformance{" "}
-                        <span className="text-[var(--success-text)]">
+                        <span className="text-(--success-text)">
                           {((vc.conformance ?? 0) * 100).toFixed(0)}%
                         </span>
                         {" · "}Timeliness{" "}
-                        <span className="text-[var(--success-text)]">
+                        <span className="text-(--success-text)">
                           {((vc.timeliness ?? 0) * 100).toFixed(0)}%
                         </span>
                       </div>
@@ -685,28 +654,28 @@ export default function CompliancePage() {
           )}
 
           {/* Trust chain diagram */}
-          <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 p-4">
-            <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+          <div className="mt-6 rounded-lg border border-(--border) bg-(--surface)/50 p-4">
+            <h3 className="text-sm font-semibold mb-3 text-(--text-primary)">
               DCP Trust Chain — Credential Presentation Flow
             </h3>
-            <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] flex-wrap">
-              <span className="px-2 py-1 rounded bg-layer1/20 text-blue-800 dark:text-blue-300 font-medium">
+            <div className="flex items-center gap-2 text-xs text-(--text-secondary) flex-wrap">
+              <span className="px-2 py-1 rounded-sm bg-layer1/20 text-blue-800 dark:text-blue-300 font-medium">
                 IssuerService
               </span>
               <span>→ signs VC →</span>
-              <span className="px-2 py-1 rounded bg-layer2/20 text-teal-800 dark:text-teal-300 font-medium">
+              <span className="px-2 py-1 rounded-sm bg-layer2/20 text-teal-800 dark:text-teal-300 font-medium">
                 IdentityHub
               </span>
               <span>→ stores →</span>
-              <span className="px-2 py-1 rounded bg-layer3/20 text-green-800 dark:text-green-300 font-medium">
+              <span className="px-2 py-1 rounded-sm bg-layer3/20 text-green-800 dark:text-green-300 font-medium">
                 DCP Presentation
               </span>
               <span>→ verifies →</span>
-              <span className="px-2 py-1 rounded bg-layer5/20 text-purple-800 dark:text-purple-300 font-medium">
+              <span className="px-2 py-1 rounded-sm bg-layer5/20 text-purple-800 dark:text-purple-300 font-medium">
                 Policy Engine
               </span>
               <span>→ evaluates →</span>
-              <span className="px-2 py-1 rounded bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border border-[var(--badge-active-border)] font-medium">
+              <span className="px-2 py-1 rounded-sm bg-(--badge-active-bg) text-(--badge-active-text) border border-(--badge-active-border) font-medium">
                 ✓ Access Granted
               </span>
             </div>
@@ -716,7 +685,7 @@ export default function CompliancePage() {
         {/* ── Phase 18: Trust Center Section ── */}
         <div
           id="trust-center"
-          className="mt-12 border-t border-[var(--border)] pt-8"
+          className="mt-12 border-t border-(--border) pt-8"
         >
           <div className="flex items-center gap-2 mb-1">
             <Lock size={18} className="text-blue-800 dark:text-blue-300" />
@@ -724,7 +693,7 @@ export default function CompliancePage() {
               Trust Center — Pseudonym Resolution
             </h2>
           </div>
-          <p className="text-[var(--text-secondary)] text-sm mb-6">
+          <p className="text-(--text-secondary) text-sm mb-6">
             EHDS Art. 50/51 — HDAB-designated trust centers enabling
             cross-provider longitudinal patient linkage without exposing real
             identities to researchers. Provider pseudonyms are resolved to
@@ -732,13 +701,13 @@ export default function CompliancePage() {
           </p>
 
           {optionsLoading ? (
-            <div className="text-[var(--text-secondary)] text-sm">
+            <div className="text-(--text-secondary) text-sm">
               Loading trust centers…
             </div>
           ) : trustCenters.length === 0 ? (
-            <div className="text-[var(--text-secondary)] text-sm">
+            <div className="text-(--text-secondary) text-sm">
               No trust centers found. Run{" "}
-              <code className="font-mono text-xs bg-[var(--surface-2)] px-1 py-0.5 rounded">
+              <code className="font-mono text-xs bg-(--surface-2) px-1 py-0.5 rounded-sm">
                 neo4j/seed-trust-center.cypher
               </code>{" "}
               to seed demo data.
@@ -749,7 +718,7 @@ export default function CompliancePage() {
                 <div
                   key={tc.name}
                   data-testid="trust-center-card"
-                  className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)]/50 p-4"
+                  className="rounded-lg border border-(--border) bg-(--surface-2)/50 p-4"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -758,49 +727,47 @@ export default function CompliancePage() {
                         className="text-blue-800 dark:text-blue-300"
                       />
                       <span className="font-semibold text-sm">{tc.name}</span>
-                      <span className="text-xs px-2 py-0.5 rounded bg-[var(--surface-2)] text-[var(--text-primary)]">
+                      <span className="text-xs px-2 py-0.5 rounded-sm bg-(--surface-2) text-(--text-primary)">
                         {tc.country}
                       </span>
                     </div>
                     <span
                       className={`text-xs font-medium px-2 py-0.5 rounded border ${
                         tc.status === "active"
-                          ? "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border-[var(--badge-active-border)]"
-                          : "bg-[var(--badge-inactive-bg)] text-[var(--badge-inactive-text)] border-[var(--badge-inactive-border)]"
+                          ? "bg-(--badge-active-bg) text-(--badge-active-text) border-(--badge-active-border)"
+                          : "bg-(--badge-inactive-bg) text-(--badge-inactive-text) border-(--badge-inactive-border)"
                       }`}
                     >
                       {tc.status}
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-[var(--text-secondary)] mb-3">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-(--text-secondary) mb-3">
                     <div>
-                      <span className="text-[var(--text-secondary)]">
+                      <span className="text-(--text-secondary)">
                         Operated by:
                       </span>{" "}
                       {tc.operatedBy}
                     </div>
                     <div>
-                      <span className="text-[var(--text-secondary)]">
-                        Protocol:
-                      </span>{" "}
+                      <span className="text-(--text-secondary)">Protocol:</span>{" "}
                       {tc.protocol}
                     </div>
                     <div className="col-span-2">
-                      <span className="text-[var(--text-secondary)]">DID:</span>{" "}
+                      <span className="text-(--text-secondary)">DID:</span>{" "}
                       <span className="font-mono">{tc.did}</span>
                     </div>
                     {tc.hdabApprovalId && (
                       <div>
-                        <span className="text-[var(--text-secondary)]">
+                        <span className="text-(--text-secondary)">
                           HDAB Approval:
                         </span>{" "}
                         <span className="font-mono">{tc.hdabApprovalId}</span>{" "}
                         <span
                           className={
                             tc.hdabApprovalStatus === "approved"
-                              ? "text-[var(--success-text)]"
-                              : "text-[var(--warning-text)]"
+                              ? "text-(--success-text)"
+                              : "text-(--warning-text)"
                           }
                         >
                           [{tc.hdabApprovalStatus}]
@@ -808,22 +775,22 @@ export default function CompliancePage() {
                       </div>
                     )}
                     <div>
-                      <span className="text-[var(--text-secondary)]">
+                      <span className="text-(--text-secondary)">
                         Datasets covered:
                       </span>{" "}
                       {tc.datasetCount}
                     </div>
                     <div>
-                      <span className="text-[var(--text-secondary)]">
+                      <span className="text-(--text-secondary)">
                         Active RPSNs:
                       </span>{" "}
-                      <span className="text-[var(--success-text)]">
+                      <span className="text-(--success-text)">
                         {tc.activeRpsnCount}
                       </span>
                     </div>
                     {tc.recognisedCountries.length > 0 && (
                       <div className="col-span-2">
-                        <span className="text-[var(--text-secondary)]">
+                        <span className="text-(--text-secondary)">
                           Mutual recognition (EHDS Art. 51):
                         </span>{" "}
                         {tc.recognisedCountries.join(", ")}
@@ -832,20 +799,20 @@ export default function CompliancePage() {
                   </div>
 
                   {/* Cross-border pseudonym resolution flow */}
-                  <div className="rounded bg-[var(--surface)]/60 p-3 text-xs text-[var(--text-secondary)] flex items-center gap-2 flex-wrap">
-                    <span className="px-2 py-1 rounded bg-layer1/20 text-blue-800 dark:text-blue-300 font-medium">
+                  <div className="rounded-sm bg-(--surface)/60 p-3 text-xs text-(--text-secondary) flex items-center gap-2 flex-wrap">
+                    <span className="px-2 py-1 rounded-sm bg-layer1/20 text-blue-800 dark:text-blue-300 font-medium">
                       Provider PSN
                     </span>
                     <span>→ HDAB-auth resolve →</span>
-                    <span className="px-2 py-1 rounded bg-layer5/20 text-purple-800 dark:text-purple-300 font-medium">
+                    <span className="px-2 py-1 rounded-sm bg-layer5/20 text-purple-800 dark:text-purple-300 font-medium">
                       {tc.name}
                     </span>
                     <span>→ RPSN →</span>
-                    <span className="px-2 py-1 rounded bg-layer3/20 text-green-800 dark:text-green-300 font-medium">
+                    <span className="px-2 py-1 rounded-sm bg-layer3/20 text-green-800 dark:text-green-300 font-medium">
                       SPE (TEE)
                     </span>
                     <span>→ aggregate-only →</span>
-                    <span className="px-2 py-1 rounded bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border border-[var(--badge-active-border)] font-medium">
+                    <span className="px-2 py-1 rounded-sm bg-(--badge-active-bg) text-(--badge-active-text) border border-(--badge-active-border) font-medium">
                       Researcher
                     </span>
                   </div>
@@ -857,12 +824,12 @@ export default function CompliancePage() {
           {/* SPE Sessions */}
           {speSessions.length > 0 && (
             <div className="mt-6">
-              <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+              <h3 className="text-sm font-semibold mb-3 text-(--text-primary)">
                 Active SPE Sessions (TEE-Attested)
               </h3>
               <table className="text-xs w-full border-collapse">
                 <thead>
-                  <tr className="text-[var(--text-secondary)] border-b border-[var(--border)]">
+                  <tr className="text-(--text-secondary) border-b border-(--border)">
                     <th className="text-left pb-1">Session ID</th>
                     <th className="text-left pb-1">Study</th>
                     <th className="text-left pb-1">Status</th>
@@ -875,10 +842,10 @@ export default function CompliancePage() {
                   {speSessions.map((s) => (
                     <tr
                       key={s.sessionId}
-                      className="border-b border-[var(--border)]"
+                      className="border-b border-(--border)"
                       data-testid="spe-session-row"
                     >
-                      <td className="py-1 pr-2 font-mono text-[var(--text-primary)]">
+                      <td className="py-1 pr-2 font-mono text-(--text-primary)">
                         {s.sessionId}
                       </td>
                       <td className="py-1 pr-2">{s.studyId}</td>
@@ -886,8 +853,8 @@ export default function CompliancePage() {
                         <span
                           className={
                             s.status === "active"
-                              ? "text-[var(--success-text)]"
-                              : "text-[var(--text-secondary)]"
+                              ? "text-(--success-text)"
+                              : "text-(--text-secondary)"
                           }
                         >
                           {s.status}
@@ -895,7 +862,7 @@ export default function CompliancePage() {
                       </td>
                       <td className="py-1 pr-2">≥ {s.kAnonymityThreshold}</td>
                       <td className="py-1 pr-2">{s.outputPolicy}</td>
-                      <td className="py-1 font-mono text-[var(--text-secondary)]">
+                      <td className="py-1 font-mono text-(--text-secondary)">
                         {s.createdBy?.split(":").pop()}
                       </td>
                     </tr>
@@ -906,11 +873,11 @@ export default function CompliancePage() {
           )}
 
           {/* Security model summary */}
-          <div className="mt-6 rounded-lg border border-[var(--border)] bg-[var(--surface)]/50 p-4">
-            <h3 className="text-sm font-semibold mb-3 text-[var(--text-primary)]">
+          <div className="mt-6 rounded-lg border border-(--border) bg-(--surface)/50 p-4">
+            <h3 className="text-sm font-semibold mb-3 text-(--text-primary)">
               Security Model — Threat Mitigations
             </h3>
-            <div className="space-y-1 text-xs text-[var(--text-secondary)]">
+            <div className="space-y-1 text-xs text-(--text-secondary)">
               {[
                 [
                   "Researcher accesses raw data",
@@ -934,15 +901,11 @@ export default function CompliancePage() {
                 ],
               ].map(([threat, mitigation]) => (
                 <div key={threat} className="flex gap-2">
-                  <span className="text-[var(--warning-text)] shrink-0">
-                    ⚠
-                  </span>
-                  <span className="text-[var(--text-secondary)] shrink-0 w-56">
+                  <span className="text-(--warning-text) shrink-0">⚠</span>
+                  <span className="text-(--text-secondary) shrink-0 w-56">
                     {threat}
                   </span>
-                  <span className="text-[var(--success-text)]">
-                    {mitigation}
-                  </span>
+                  <span className="text-(--success-text)">{mitigation}</span>
                 </div>
               ))}
             </div>

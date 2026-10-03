@@ -29,9 +29,9 @@ const personaJourneys: PersonaJourney[] = [
   {
     role: "Patient",
     icon: Heart,
-    color: "text-[var(--role-patient-text)]",
-    border: "border-[var(--role-patient-border)]",
-    bg: "bg-[var(--role-patient-bg)]",
+    color: "text-(--role-patient-text)",
+    border: "border-(--role-patient-border)",
+    bg: "bg-(--role-patient-bg)",
     org: "AlphaKlinik Berlin",
     loginAs: "patient1",
     steps: [
@@ -56,9 +56,9 @@ const personaJourneys: PersonaJourney[] = [
   {
     role: "Researcher",
     icon: FlaskConical,
-    color: "text-[var(--role-user-text)]",
-    border: "border-[var(--role-user-border)]",
-    bg: "bg-[var(--role-user-bg)]",
+    color: "text-(--role-user-text)",
+    border: "border-(--role-user-border)",
+    bg: "bg-(--role-user-bg)",
     org: "PharmaCo Research AG",
     loginAs: "researcher",
     steps: [
@@ -77,9 +77,9 @@ const personaJourneys: PersonaJourney[] = [
   {
     role: "Hospital",
     icon: BookOpen,
-    color: "text-[var(--role-holder-text)]",
-    border: "border-[var(--role-holder-border)]",
-    bg: "bg-[var(--role-holder-bg)]",
+    color: "text-(--role-holder-text)",
+    border: "border-(--role-holder-border)",
+    bg: "bg-(--role-holder-bg)",
     org: "AlphaKlinik Berlin",
     loginAs: "clinicuser",
     steps: [
@@ -104,9 +104,9 @@ const personaJourneys: PersonaJourney[] = [
   {
     role: "Regulator",
     icon: ShieldCheck,
-    color: "text-[var(--role-hdab-text)]",
-    border: "border-[var(--role-hdab-border)]",
-    bg: "bg-[var(--role-hdab-bg)]",
+    color: "text-(--role-hdab-text)",
+    border: "border-(--role-hdab-border)",
+    bg: "bg-(--role-hdab-bg)",
     org: "MedReg DE (HDAB)",
     loginAs: "regulator",
     steps: [
@@ -131,9 +131,9 @@ const personaJourneys: PersonaJourney[] = [
   {
     role: "Admin",
     icon: LayoutDashboard,
-    color: "text-[var(--role-admin-text)]",
-    border: "border-[var(--role-admin-border)]",
-    bg: "bg-[var(--role-admin-bg)]",
+    color: "text-(--role-admin-text)",
+    border: "border-(--role-admin-border)",
+    bg: "bg-(--role-admin-bg)",
     org: "Dataspace Operator",
     loginAs: "edcadmin",
     steps: [
@@ -197,7 +197,7 @@ export function PersonaJourneyCards() {
               {persona.steps.map((step, si) => (
                 <li key={si} className="flex gap-2 items-start">
                   <span
-                    className="flex-shrink-0 w-5 h-5 rounded-full bg-[var(--surface-2)] flex items-center justify-center text-[10px] font-bold text-gray-700 dark:text-gray-300 mt-0.5"
+                    className="shrink-0 w-5 h-5 rounded-full bg-(--surface-2) flex items-center justify-center text-[10px] font-bold text-gray-700 dark:text-gray-300 mt-0.5"
                     aria-hidden="true"
                   >
                     {si + 1}

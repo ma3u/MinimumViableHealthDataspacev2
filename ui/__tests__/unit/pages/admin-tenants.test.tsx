@@ -570,7 +570,7 @@ describe("AdminTenantsPage", () => {
 
     await waitFor(() => {
       const stateEl = screen.getByText("ACTIVE");
-      // Component uses CSS variable class text-[var(--success-text)]
+      // Component uses CSS variable class text-(--success-text)
       expect(stateEl.className).toContain("font-bold");
     });
   });
@@ -608,7 +608,7 @@ describe("AdminTenantsPage", () => {
 
     await waitFor(() => {
       const stateEl = screen.getByText("PENDING");
-      // Component uses CSS variable class text-[var(--warning-text)] for other states
+      // Component uses CSS variable class text-(--warning-text) for other states
       expect(stateEl.className).toContain("font-bold");
     });
   });

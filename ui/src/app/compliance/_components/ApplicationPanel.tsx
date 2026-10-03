@@ -98,14 +98,14 @@ export function ApplicationPanel({
     <div className="mb-4 space-y-3" data-testid="application-panel">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-xs">
         <div>
-          <span className="text-[var(--text-secondary)]">Application </span>
+          <span className="text-(--text-secondary)">Application </span>
           <span className="font-mono">{row.applicationId}</span>
         </div>
         <div>
-          <span className="text-[var(--text-secondary)]">Submitted </span>
+          <span className="text-(--text-secondary)">Submitted </span>
           {shortDate(row.submittedAt) || "—"}
           {row.decisionDue && (
-            <span className="text-[var(--text-secondary)]">
+            <span className="text-(--text-secondary)">
               {" "}
               · the access body&apos;s permit decision is due{" "}
               {shortDate(row.decisionDue)}, three months after the application
@@ -114,28 +114,28 @@ export function ApplicationPanel({
           )}
         </div>
         <div>
-          <span className="text-[var(--text-secondary)]">Purpose </span>
+          <span className="text-(--text-secondary)">Purpose </span>
           {row.requestedPurpose ?? "—"}
         </div>
         <div>
-          <span className="text-[var(--text-secondary)]">Dataset </span>
+          <span className="text-(--text-secondary)">Dataset </span>
           {row.requestedDatasetTitle ?? row.requestedDatasetId ?? "—"}
         </div>
         <div className="md:col-span-2">
-          <span className="text-[var(--text-secondary)]">Justification </span>
+          <span className="text-(--text-secondary)">Justification </span>
           {row.justification ?? "—"}
         </div>
         {row.ethicsCommitteeRef && (
           <div>
-            <span className="text-[var(--text-secondary)]">Ethics </span>
+            <span className="text-(--text-secondary)">Ethics </span>
             {row.ethicsCommitteeRef}
           </div>
         )}
         {row.completedAt && (
           <div>
-            <span className="text-[var(--text-secondary)]">Completed </span>
+            <span className="text-(--text-secondary)">Completed </span>
             {shortDate(row.completedAt)}
-            <span className="text-[var(--text-secondary)]">
+            <span className="text-(--text-secondary)">
               {" "}
               · the three months run from here (Art. 68(4))
             </span>
@@ -143,7 +143,7 @@ export function ApplicationPanel({
         )}
         {row.hasApproval && (
           <div className="md:col-span-2">
-            <span className="text-[var(--text-secondary)]">Decision </span>
+            <span className="text-(--text-secondary)">Decision </span>
             {row.approvalStatus === "REJECTED"
               ? "refused"
               : row.approvalStatus === "REVOKED"
@@ -168,7 +168,7 @@ export function ApplicationPanel({
 
       {undecided && (
         <p className="text-xs" data-testid="fee-estimate">
-          <span className="text-[var(--text-secondary)]">
+          <span className="text-(--text-secondary)">
             Fee estimate, Art. 62:{" "}
           </span>
           {(() => {
@@ -192,19 +192,19 @@ export function ApplicationPanel({
 
       {canDecide && (
         <form
-          className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3 space-y-3 text-xs"
+          className="rounded-lg border border-(--border) bg-(--bg) p-3 space-y-3 text-xs"
           onSubmit={(e) => e.preventDefault()}
           aria-label="Data permit decision"
         >
-          <div className="font-semibold text-[var(--text-primary)]">
+          <div className="font-semibold text-(--text-primary)">
             {undecided ? "Decide this application" : "Decide again"}
-            <span className="font-normal text-[var(--text-secondary)]">
+            <span className="font-normal text-(--text-secondary)">
               {" "}
               · Regulation (EU) 2025/327, Art. 68
             </span>
           </div>
           <fieldset className="space-y-1">
-            <legend className="text-[var(--text-secondary)] mb-1">
+            <legend className="text-(--text-secondary) mb-1">
               Criteria assessed, Art. 68(1)
             </legend>
             {CRITERIA.map((c) => (
@@ -225,14 +225,14 @@ export function ApplicationPanel({
           </fieldset>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <label className="flex flex-col gap-1">
-              <span className="text-[var(--text-secondary)]">
+              <span className="text-(--text-secondary)">
                 Purpose, Art. 53(1)
               </span>
               <select
                 id={`purpose-${row.applicationId}`}
                 value={purpose}
                 onChange={(e) => setPurpose(e.target.value)}
-                className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
+                className="rounded-sm border border-(--border) bg-(--surface) px-2 py-1"
               >
                 {PURPOSES.map((p) => (
                   <option key={p} value={p}>
@@ -242,18 +242,18 @@ export function ApplicationPanel({
               </select>
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-[var(--text-secondary)]">Valid until</span>
+              <span className="text-(--text-secondary)">Valid until</span>
               <input
                 id={`valid-until-${row.applicationId}`}
                 type="date"
                 value={validUntil}
                 onChange={(e) => setValidUntil(e.target.value)}
-                className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
+                className="rounded-sm border border-(--border) bg-(--surface) px-2 py-1"
               />
             </label>
           </div>
           <label className="flex flex-col gap-1">
-            <span className="text-[var(--text-secondary)]">
+            <span className="text-(--text-secondary)">
               Conditions, one per line
             </span>
             <textarea
@@ -261,11 +261,11 @@ export function ApplicationPanel({
               rows={2}
               value={conditions}
               onChange={(e) => setConditions(e.target.value)}
-              className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1 font-mono"
+              className="rounded-sm border border-(--border) bg-(--surface) px-2 py-1 font-mono"
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-[var(--text-secondary)]">
+            <span className="text-(--text-secondary)">
               Justification (required for a refusal; published with the
               decision, Art. 57(1)(j)(iii))
             </span>
@@ -274,7 +274,7 @@ export function ApplicationPanel({
               rows={2}
               value={justification}
               onChange={(e) => setJustification(e.target.value)}
-              className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
+              className="rounded-sm border border-(--border) bg-(--surface) px-2 py-1"
             />
           </label>
           <label className="flex items-start gap-2">
@@ -294,7 +294,7 @@ export function ApplicationPanel({
               type="button"
               disabled={busy !== null}
               onClick={() => decide("APPROVED")}
-              className="px-3 py-1.5 rounded font-semibold bg-[var(--accent)] text-white disabled:opacity-60"
+              className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
             >
               {busy === "APPROVED" ? "Issuing…" : "Issue data permit"}
             </button>
@@ -302,7 +302,7 @@ export function ApplicationPanel({
               type="button"
               disabled={busy !== null || !justification.trim()}
               onClick={() => decide("REJECTED")}
-              className="px-3 py-1.5 rounded font-semibold border border-[var(--danger-text)] text-[var(--danger-text)] disabled:opacity-50"
+              className="px-3 py-1.5 rounded-sm font-semibold border border-(--danger-text) text-(--danger-text) disabled:opacity-50"
               title={
                 justification.trim() ? "" : "A refusal needs a justification"
               }
@@ -311,12 +311,12 @@ export function ApplicationPanel({
             </button>
           </div>
           {error && (
-            <p className="text-[var(--danger-text)]" role="alert">
+            <p className="text-(--danger-text)" role="alert">
               {error}
             </p>
           )}
           {result && (
-            <p className="text-[var(--success-text)]" role="status">
+            <p className="text-(--success-text)" role="status">
               {result.decision === "APPROVED"
                 ? `Data permit ${
                     result.permitId

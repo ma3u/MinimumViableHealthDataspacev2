@@ -722,13 +722,13 @@ export default function AdminPoliciesPage() {
   /* ── Render ───────────────────────────────────────────────────── */
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-8 py-10">
         {/* ── Page header ── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
             <h1 className="page-header">Policy Definitions</h1>
-            <p className="text-[var(--text-secondary)] text-lg mt-1">
+            <p className="text-(--text-secondary) text-lg mt-1">
               ODRL policies · EHDS Regulation (EU) 2025/327
             </p>
           </div>
@@ -737,7 +737,7 @@ export default function AdminPoliciesPage() {
               setShowForm((v) => !v);
               setFormMsg(null);
             }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-[var(--accent)] text-white dark:text-gray-900 hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-(--accent) text-white dark:text-gray-900 hover:opacity-90 transition-opacity"
           >
             {showForm ? (
               <>
@@ -753,13 +753,13 @@ export default function AdminPoliciesPage() {
 
         {/* ── Create Form ──────────────────────────────────────────── */}
         {showForm && (
-          <div className="mb-8 border border-layer2 rounded-xl p-5 bg-[var(--surface)]/40">
+          <div className="mb-8 border border-layer2 rounded-xl p-5 bg-(--surface)/40">
             <h2 className="text-lg font-semibold mb-4">
               Create EHDS Policy Definition
             </h2>
 
             {/* Template selector */}
-            <label className="block text-xs text-[var(--text-secondary)] mb-1">
+            <label className="block text-xs text-(--text-secondary) mb-1">
               Policy Template
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4">
@@ -770,13 +770,13 @@ export default function AdminPoliciesPage() {
                   className={`text-left p-3 rounded-lg border transition-colors ${
                     selectedTemplate === t.id
                       ? "border-layer2 bg-layer2/10"
-                      : "border-[var(--border)] hover:border-gray-500"
+                      : "border-(--border) hover:border-gray-500"
                   }`}
                 >
                   <span className="text-xs font-mono text-teal-800 dark:text-teal-300">
                     {t.article}
                   </span>
-                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                  <p className="text-sm font-medium text-(--text-primary)">
                     {t.label}
                   </p>
                 </button>
@@ -784,8 +784,8 @@ export default function AdminPoliciesPage() {
             </div>
 
             {/* Selected template description */}
-            <div className="mb-4 p-3 rounded-lg bg-[var(--surface-2)]/50 border border-[var(--border)]">
-              <p className="text-xs text-[var(--text-secondary)]">
+            <div className="mb-4 p-3 rounded-lg bg-(--surface-2)/50 border border-(--border)">
+              <p className="text-xs text-(--text-secondary)">
                 {tpl.description}
               </p>
             </div>
@@ -793,14 +793,14 @@ export default function AdminPoliciesPage() {
             {/* Participant + Duration row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-xs text-[var(--text-secondary)] mb-1">
+                <label className="block text-xs text-(--text-secondary) mb-1">
                   Participant Context
                 </label>
                 <select
                   aria-label="Participant Context"
                   value={selectedParticipant}
                   onChange={(e) => setSelectedParticipant(e.target.value)}
-                  className="w-full rounded-lg bg-[var(--surface-2)] border border-[var(--border-ui)] text-sm px-3 py-2 text-[var(--text-primary)]"
+                  className="w-full rounded-lg bg-(--surface-2) border border-(--border-ui) text-sm px-3 py-2 text-(--text-primary)"
                 >
                   <option value="">— select —</option>
                   {groups.map((g) => (
@@ -813,14 +813,14 @@ export default function AdminPoliciesPage() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-[var(--text-secondary)] mb-1">
+                <label className="block text-xs text-(--text-secondary) mb-1">
                   Access Duration
                 </label>
                 <select
                   aria-label="Access Duration"
                   value={selectedDuration}
                   onChange={(e) => setSelectedDuration(e.target.value)}
-                  className="w-full rounded-lg bg-[var(--surface-2)] border border-[var(--border-ui)] text-sm px-3 py-2 text-[var(--text-primary)]"
+                  className="w-full rounded-lg bg-(--surface-2) border border-(--border-ui) text-sm px-3 py-2 text-(--text-primary)"
                 >
                   {DURATION_OPTIONS.map((d) => (
                     <option key={d.value} value={d.value}>
@@ -833,12 +833,12 @@ export default function AdminPoliciesPage() {
 
             {/* Preview */}
             <details className="mb-4">
-              <summary className="cursor-pointer text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+              <summary className="cursor-pointer text-xs text-(--text-secondary) hover:text-(--text-primary)">
                 Preview ODRL policy JSON
               </summary>
               <OdrlJsonHighlighter
                 data={tpl.build({ duration: selectedDuration })}
-                className="mt-2 p-3 rounded-lg bg-[var(--surface-2)]/50 border border-[var(--border)] max-h-60"
+                className="mt-2 p-3 rounded-lg bg-(--surface-2)/50 border border-(--border) max-h-60"
               />
             </details>
 
@@ -847,7 +847,7 @@ export default function AdminPoliciesPage() {
               <button
                 onClick={handleCreate}
                 disabled={creating || !selectedParticipant}
-                className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white dark:text-gray-900 text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                className="px-4 py-2 rounded-lg bg-(--accent) text-white dark:text-gray-900 text-sm font-medium hover:bg-(--accent-hover) disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
               >
                 {creating && <Loader2 size={14} className="animate-spin" />}
                 Create Policy
@@ -856,8 +856,8 @@ export default function AdminPoliciesPage() {
                 <span
                   className={`text-xs ${
                     formMsg.type === "ok"
-                      ? "text-[var(--success-text)]"
-                      : "text-[var(--danger-text)]"
+                      ? "text-(--success-text)"
+                      : "text-(--danger-text)"
                   }`}
                 >
                   {formMsg.text}
@@ -869,7 +869,7 @@ export default function AdminPoliciesPage() {
 
         {/* ── Stats ────────────────────────────────────────────────── */}
         {!loading && (
-          <div className="flex gap-4 mb-6 text-xs text-[var(--text-secondary)]">
+          <div className="flex gap-4 mb-6 text-xs text-(--text-secondary)">
             <span>{groups.length} participants</span>
             <span>&middot;</span>
             <span>{totalPolicies} total policies</span>
@@ -878,7 +878,7 @@ export default function AdminPoliciesPage() {
 
         {/* ── Policy List ──────────────────────────────────────────── */}
         {loading ? (
-          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+          <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
             Loading policies&hellip;
           </div>
@@ -886,9 +886,9 @@ export default function AdminPoliciesPage() {
           <div className="text-center py-12">
             <ShieldCheck
               size={40}
-              className="text-[var(--text-secondary)] mx-auto mb-4"
+              className="text-(--text-secondary) mx-auto mb-4"
             />
-            <p className="text-[var(--text-secondary)]">No policies found</p>
+            <p className="text-(--text-secondary)">No policies found</p>
           </div>
         ) : (
           <div className="grid gap-4">
@@ -900,8 +900,8 @@ export default function AdminPoliciesPage() {
                   key={g.participantId}
                   className={`border rounded-xl transition-colors ${
                     isOpen
-                      ? "border-layer2 bg-[var(--surface)]/60"
-                      : "border-[var(--border)] hover:border-layer2"
+                      ? "border-layer2 bg-(--surface)/60"
+                      : "border-(--border) hover:border-layer2"
                   }`}
                 >
                   <button
@@ -915,13 +915,13 @@ export default function AdminPoliciesPage() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-[var(--text-primary)]">
+                        <p className="font-medium text-(--text-primary)">
                           {g.identity
                             ?.replace("did:web:", "")
                             .replace(/%3A/g, ":") ||
                             g.participantId.slice(0, 16)}
                         </p>
-                        <p className="text-xs text-[var(--text-secondary)]">
+                        <p className="text-xs text-(--text-secondary)">
                           {policies.length} polic
                           {policies.length === 1 ? "y" : "ies"}
                           {g.error && (
@@ -934,21 +934,21 @@ export default function AdminPoliciesPage() {
                       {isOpen ? (
                         <ChevronUp
                           size={16}
-                          className="text-[var(--text-secondary)]"
+                          className="text-(--text-secondary)"
                         />
                       ) : (
                         <ChevronDown
                           size={16}
-                          className="text-[var(--text-secondary)]"
+                          className="text-(--text-secondary)"
                         />
                       )}
                     </div>
                   </button>
 
                   {isOpen && (
-                    <div className="px-4 pb-4 border-t border-[var(--border)] pt-3">
+                    <div className="px-4 pb-4 border-t border-(--border) pt-3">
                       {policies.length === 0 ? (
-                        <p className="text-[var(--text-secondary)] text-sm">
+                        <p className="text-(--text-secondary) text-sm">
                           No policies defined
                         </p>
                       ) : (
@@ -1025,17 +1025,17 @@ export default function AdminPoliciesPage() {
                             return (
                               <div
                                 key={i}
-                                className="rounded-lg bg-[var(--surface-2)]/50 border border-[var(--border)] overflow-hidden"
+                                className="rounded-lg bg-(--surface-2)/50 border border-(--border) overflow-hidden"
                               >
                                 {/* Header */}
-                                <div className="px-4 py-3 border-b border-[var(--border)]/50">
+                                <div className="px-4 py-3 border-b border-(--border)/50">
                                   <div className="flex items-start justify-between gap-2">
                                     <div className="min-w-0">
-                                      <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                                      <p className="text-sm font-semibold text-(--text-primary) truncate">
                                         {(pObj["@id"] as string) ||
                                           `Policy #${i + 1}`}
                                       </p>
-                                      <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-2">
+                                      <p className="text-xs text-(--text-secondary) mt-0.5 line-clamp-2">
                                         {purposeLabel}
                                       </p>
                                     </div>
@@ -1057,7 +1057,7 @@ export default function AdminPoliciesPage() {
                                           });
                                           setEditMsg(null);
                                         }}
-                                        className="p-1 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                                        className="p-1 rounded-sm hover:bg-(--surface-2) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
                                       >
                                         <Pencil size={13} />
                                       </button>
@@ -1066,7 +1066,7 @@ export default function AdminPoliciesPage() {
                                         onClick={() =>
                                           handleDuplicate(g.participantId, p)
                                         }
-                                        className="p-1 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                                        className="p-1 rounded-sm hover:bg-(--surface-2) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
                                       >
                                         <Copy size={13} />
                                       </button>
@@ -1079,7 +1079,7 @@ export default function AdminPoliciesPage() {
                                               (pObj["@id"] as string) || "",
                                           })
                                         }
-                                        className="p-1 rounded hover:bg-red-500/10 text-[var(--text-secondary)] hover:text-red-500 transition-colors"
+                                        className="p-1 rounded-sm hover:bg-red-500/10 text-(--text-secondary) hover:text-red-500 transition-colors"
                                       >
                                         <Trash2 size={13} />
                                       </button>
@@ -1100,7 +1100,7 @@ export default function AdminPoliciesPage() {
                                         <span className="font-semibold text-green-700 dark:text-green-400">
                                           Permissions
                                         </span>
-                                        <span className="text-[var(--text-secondary)] ml-1">
+                                        <span className="text-(--text-secondary) ml-1">
                                           {perms
                                             .map((pm) =>
                                               friendlyAction(
@@ -1125,7 +1125,7 @@ export default function AdminPoliciesPage() {
                                         <span className="font-semibold text-blue-700 dark:text-blue-400">
                                           Duties
                                         </span>
-                                        <span className="text-[var(--text-secondary)] ml-1">
+                                        <span className="text-(--text-secondary) ml-1">
                                           {duties
                                             .map((d) => {
                                               const act = friendlyAction(
@@ -1171,7 +1171,7 @@ export default function AdminPoliciesPage() {
                                         <span className="font-semibold text-red-700 dark:text-red-400">
                                           Prohibitions
                                         </span>
-                                        <span className="text-[var(--text-secondary)] ml-1">
+                                        <span className="text-(--text-secondary) ml-1">
                                           {prohibs
                                             .map((pr) =>
                                               friendlyAction(
@@ -1206,7 +1206,7 @@ export default function AdminPoliciesPage() {
                                         <span className="font-semibold text-amber-700 dark:text-amber-400">
                                           Constraints
                                         </span>
-                                        <span className="text-[var(--text-secondary)] ml-1">
+                                        <span className="text-(--text-secondary) ml-1">
                                           {constraints
                                             .filter(
                                               (c) =>
@@ -1245,7 +1245,7 @@ export default function AdminPoliciesPage() {
                                 {/* Raw JSON toggle */}
                                 <div className="px-4 pb-3">
                                   <details>
-                                    <summary className="cursor-pointer text-[10px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                                    <summary className="cursor-pointer text-[10px] text-(--text-secondary) hover:text-(--text-primary)">
                                       View full ODRL JSON
                                     </summary>
                                     <OdrlJsonHighlighter
@@ -1270,16 +1270,16 @@ export default function AdminPoliciesPage() {
         {/* ── Edit Modal ──────────────────────────────────────────── */}
         {editingPolicy && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
-              <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--border)]">
-                <h3 className="text-sm font-semibold text-[var(--text-primary)]">
+            <div className="bg-(--surface) border border-(--border) rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+              <div className="flex items-center justify-between px-5 py-3 border-b border-(--border)">
+                <h3 className="text-sm font-semibold text-(--text-primary)">
                   {editingPolicy.policyId
                     ? `Edit: ${editingPolicy.policyId}`
                     : "New Policy (duplicated)"}
                 </h3>
                 <button
                   onClick={() => setEditingPolicy(null)}
-                  className="p-1 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)]"
+                  className="p-1 rounded-sm hover:bg-(--surface-2) text-(--text-secondary)"
                 >
                   <X size={16} />
                 </button>
@@ -1294,17 +1294,17 @@ export default function AdminPoliciesPage() {
                     })
                   }
                   spellCheck={false}
-                  className="w-full h-80 font-mono text-xs bg-[var(--surface-2)] border border-[var(--border)] rounded-lg p-3 text-[var(--text-primary)] resize-y"
+                  className="w-full h-80 font-mono text-xs bg-(--surface-2) border border-(--border) rounded-lg p-3 text-(--text-primary) resize-y"
                 />
               </div>
-              <div className="flex items-center justify-between px-5 py-3 border-t border-[var(--border)]">
+              <div className="flex items-center justify-between px-5 py-3 border-t border-(--border)">
                 <div>
                   {editMsg && (
                     <span
                       className={`text-xs ${
                         editMsg.type === "ok"
-                          ? "text-[var(--success-text)]"
-                          : "text-[var(--danger-text)]"
+                          ? "text-(--success-text)"
+                          : "text-(--danger-text)"
                       }`}
                     >
                       {editMsg.text}
@@ -1314,14 +1314,14 @@ export default function AdminPoliciesPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setEditingPolicy(null)}
-                    className="px-3 py-1.5 rounded-lg text-xs border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                    className="px-3 py-1.5 rounded-lg text-xs border border-(--border) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleEditSave}
                     disabled={editSaving}
-                    className="px-3 py-1.5 rounded-lg text-xs bg-[var(--accent)] text-white dark:text-gray-900 font-medium hover:opacity-90 disabled:opacity-50 flex items-center gap-1.5 transition-opacity"
+                    className="px-3 py-1.5 rounded-lg text-xs bg-(--accent) text-white dark:text-gray-900 font-medium hover:opacity-90 disabled:opacity-50 flex items-center gap-1.5 transition-opacity"
                   >
                     {editSaving && (
                       <Loader2 size={12} className="animate-spin" />
@@ -1337,13 +1337,13 @@ export default function AdminPoliciesPage() {
         {/* ── Delete Confirmation ─────────────────────────────────── */}
         {deletingPolicy && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-2xl w-full max-w-md p-6">
-              <h3 className="text-sm font-semibold text-[var(--text-primary)] mb-2">
+            <div className="bg-(--surface) border border-(--border) rounded-xl shadow-2xl w-full max-w-md p-6">
+              <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
                 Delete Policy
               </h3>
-              <p className="text-xs text-[var(--text-secondary)] mb-4">
+              <p className="text-xs text-(--text-secondary) mb-4">
                 Are you sure you want to delete{" "}
-                <span className="font-mono font-medium text-[var(--text-primary)]">
+                <span className="font-mono font-medium text-(--text-primary)">
                   {deletingPolicy.policyId || "this policy"}
                 </span>
                 ? This action cannot be undone.
@@ -1351,7 +1351,7 @@ export default function AdminPoliciesPage() {
               <div className="flex items-center justify-end gap-2">
                 <button
                   onClick={() => setDeletingPolicy(null)}
-                  className="px-3 py-1.5 rounded-lg text-xs border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+                  className="px-3 py-1.5 rounded-lg text-xs border border-(--border) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
                 >
                   Cancel
                 </button>

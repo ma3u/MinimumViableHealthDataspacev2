@@ -15,9 +15,7 @@ export function Sparkline({
 }) {
   if (data.length < 2)
     return (
-      <span className="text-[10px] text-[var(--text-secondary)]">
-        collecting…
-      </span>
+      <span className="text-[10px] text-(--text-secondary)">collecting…</span>
     );
 
   const effectiveMax = max > 0 ? max : 1;

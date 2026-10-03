@@ -5,22 +5,22 @@ import { ArrowRight, ArrowLeft } from "lucide-react";
 export function statusBadge(status: string) {
   const map: Record<string, string> = {
     COMPLETED:
-      "bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]",
+      "bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)",
     CONFIRMED:
-      "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border border-[var(--role-holder-border)]",
+      "bg-(--role-holder-bg) text-(--role-holder-text) border border-(--role-holder-border)",
     FINALIZED:
-      "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border border-[var(--role-holder-border)]",
+      "bg-(--role-holder-bg) text-(--role-holder-text) border border-(--role-holder-border)",
     IN_PROGRESS:
-      "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border border-[var(--role-hdab-border)]",
+      "bg-(--role-hdab-bg) text-(--role-hdab-text) border border-(--role-hdab-border)",
     TERMINATED:
-      "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border border-[var(--role-admin-border)]",
+      "bg-(--role-admin-bg) text-(--role-admin-text) border border-(--role-admin-border)",
     ERROR:
-      "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border border-[var(--role-admin-border)]",
+      "bg-(--role-admin-bg) text-(--role-admin-text) border border-(--role-admin-border)",
   };
   return (
     <span
       className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${
-        map[status] ?? "bg-[var(--surface-2)] text-[var(--text-secondary)]"
+        map[status] ?? "bg-(--surface-2) text-(--text-secondary)"
       }`}
     >
       {status}
@@ -31,16 +31,16 @@ export function statusBadge(status: string) {
 export function ehdsArticle(policyId?: string) {
   if (!policyId) return null;
   if (policyId.includes("53c") || policyId.includes("research"))
-    return <span className="text-[var(--role-trust-text)]">Art. 53(c)</span>;
+    return <span className="text-(--role-trust-text)">Art. 53(c)</span>;
   if (policyId.includes("art7") || policyId.includes("cross-border"))
-    return <span className="text-[var(--role-hdab-text)]">Art. 7</span>;
-  return <span className="text-[var(--text-secondary)]">{policyId}</span>;
+    return <span className="text-(--role-hdab-text)">Art. 7</span>;
+  return <span className="text-(--text-secondary)">{policyId}</span>;
 }
 
 function shortHash(h?: string) {
   if (!h) return "—";
   return (
-    <span title={h} className="font-mono text-[var(--text-secondary)]">
+    <span title={h} className="font-mono text-(--text-secondary)">
       {h.slice(0, 8)}
     </span>
   );
@@ -57,26 +57,26 @@ export function directionBadge(direction?: string) {
   if (!direction) return null;
   if (direction === "OUTGOING")
     return (
-      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border border-[var(--role-patient-border)]">
+      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-(--role-patient-bg) text-(--role-patient-text) border border-(--role-patient-border)">
         <ArrowRight size={9} /> OUT
       </span>
     );
   return (
-    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]">
+    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)">
       <ArrowLeft size={9} /> IN
     </span>
   );
 }
 
 export function accessTypeBadge(t?: string) {
-  if (!t) return <span className="text-[var(--text-secondary)]">—</span>;
+  if (!t) return <span className="text-(--text-secondary)">—</span>;
   const cls =
     t === "INITIAL_TRANSFER"
-      ? "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border border-[var(--role-holder-border)]"
-      : "bg-[var(--role-trust-bg)] text-[var(--role-trust-text)] border border-[var(--role-trust-border)]";
+      ? "bg-(--role-holder-bg) text-(--role-holder-text) border border-(--role-holder-border)"
+      : "bg-(--role-trust-bg) text-(--role-trust-text) border border-(--role-trust-border)";
   return (
     <span
-      className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase ${cls}`}
+      className={`inline-block px-1.5 py-0.5 rounded-sm text-[10px] font-semibold uppercase ${cls}`}
     >
       {t === "INITIAL_TRANSFER" ? "Transfer" : "Query"}
     </span>

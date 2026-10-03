@@ -49,36 +49,34 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
   const [collapsed, setCollapsed] = useState(depth > 1);
 
   if (data === null || data === undefined) {
-    return <span className="text-[var(--text-secondary)]">null</span>;
+    return <span className="text-(--text-secondary)">null</span>;
   }
   if (typeof data === "boolean") {
-    return <span className="text-[var(--role-hdab-text)]">{String(data)}</span>;
+    return <span className="text-(--role-hdab-text)">{String(data)}</span>;
   }
   if (typeof data === "number") {
-    return <span className="text-[var(--role-holder-text)]">{data}</span>;
+    return <span className="text-(--role-holder-text)">{data}</span>;
   }
   if (typeof data === "string") {
-    return (
-      <span className="text-[var(--role-user-text)]">&quot;{data}&quot;</span>
-    );
+    return <span className="text-(--role-user-text)">&quot;{data}&quot;</span>;
   }
 
   if (Array.isArray(data)) {
     if (data.length === 0)
-      return <span className="text-[var(--text-secondary)]">[]</span>;
+      return <span className="text-(--text-secondary)">[]</span>;
     return (
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center"
+          className="text-(--text-secondary) hover:text-(--text-primary) inline-flex items-center"
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-          <span className="text-[var(--text-secondary)] text-xs ml-0.5">
+          <span className="text-(--text-secondary) text-xs ml-0.5">
             [{data.length}]
           </span>
         </button>
         {!collapsed && (
-          <div className="ml-4 border-l border-[var(--border)] pl-2">
+          <div className="ml-4 border-l border-(--border) pl-2">
             {data.map((item, i) => (
               <div key={i}>
                 <span className="text-gray-600 text-xs mr-1">{i}:</span>
@@ -94,27 +92,27 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
   if (typeof data === "object") {
     const entries = Object.entries(data as Record<string, unknown>);
     if (entries.length === 0) {
-      return <span className="text-[var(--text-secondary)]">{"{}"}</span>;
+      return <span className="text-(--text-secondary)">{"{}"}</span>;
     }
     return (
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center"
+          className="text-(--text-secondary) hover:text-(--text-primary) inline-flex items-center"
         >
           {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-          <span className="text-[var(--text-secondary)] text-xs ml-0.5">
+          <span className="text-(--text-secondary) text-xs ml-0.5">
             {"{"}
             {entries.length}
             {"}"}
           </span>
         </button>
         {!collapsed && (
-          <div className="ml-4 border-l border-[var(--border)] pl-2">
+          <div className="ml-4 border-l border-(--border) pl-2">
             {entries.map(([key, val]) => (
               <div key={key}>
-                <span className="text-[var(--accent)]">{key}</span>
-                <span className="text-[var(--text-secondary)]">: </span>
+                <span className="text-(--accent)">{key}</span>
+                <span className="text-(--text-secondary)">: </span>
                 <JsonNode data={val} depth={depth + 1} />
               </div>
             ))}
@@ -206,19 +204,19 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
     : [];
 
   return (
-    <div className="border-t border-layer2/30 bg-[var(--surface)]/80">
+    <div className="border-t border-layer2/30 bg-(--surface)/80">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 bg-layer2/10 border-b border-layer2/30">
         <div className="flex items-center gap-2">
           <FileJson2 size={14} className="text-teal-800 dark:text-teal-300" />
-          <span className="text-xs font-medium text-[var(--text-primary)]">
+          <span className="text-xs font-medium text-(--text-primary)">
             Asset Details — {name}
           </span>
         </div>
         <div className="flex items-center gap-2">
           <a
             href={`/graph?highlight=${encodeURIComponent(String(name))}`}
-            className="flex items-center gap-1 text-[11px] text-[var(--accent)] hover:underline transition-colors"
+            className="flex items-center gap-1 text-[11px] text-(--accent) hover:underline transition-colors"
           >
             View in Graph <Network size={10} />
           </a>
@@ -226,34 +224,34 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
       </div>
 
       {/* Summary metadata */}
-      <div className="px-4 py-3 border-b border-[var(--border)] grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="px-4 py-3 border-b border-(--border) grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
-          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
+          <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
             Asset ID
           </div>
-          <div className="text-sm text-[var(--text-primary)] font-mono truncate">
+          <div className="text-sm text-(--text-primary) font-mono truncate">
             {asset["@id"]}
           </div>
         </div>
         <div>
-          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
+          <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
             Type
           </div>
-          <div className="text-sm text-[var(--text-primary)]">
+          <div className="text-sm text-(--text-primary)">
             {String(asset["@type"] || "Asset")}
           </div>
         </div>
         <div>
-          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
+          <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
             Content Type
           </div>
-          <div className="text-sm text-[var(--text-primary)]">{ct || "—"}</div>
+          <div className="text-sm text-(--text-primary)">{ct || "—"}</div>
         </div>
         <div>
-          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
+          <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
             Properties
           </div>
-          <div className="text-sm text-[var(--text-primary)]">
+          <div className="text-sm text-(--text-primary)">
             {Object.keys(asset.properties || {}).length} fields
           </div>
         </div>
@@ -261,23 +259,23 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
 
       {/* Description */}
       {desc && (
-        <div className="px-4 py-2 border-b border-[var(--border)]">
-          <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide mb-1">
+        <div className="px-4 py-2 border-b border-(--border)">
+          <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide mb-1">
             Description
           </div>
-          <p className="text-xs text-[var(--text-primary)]">{desc as string}</p>
+          <p className="text-xs text-(--text-primary)">{desc as string}</p>
         </div>
       )}
 
       {/* View mode tabs & copy */}
-      <div className="px-4 py-2 border-b border-[var(--border)] flex items-center justify-between">
+      <div className="px-4 py-2 border-b border-(--border) flex items-center justify-between">
         <div className="flex gap-1">
           <button
             onClick={() => setViewMode("details")}
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "details"
                 ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                : "text-(--text-secondary) hover:text-(--text-primary)"
             }`}
           >
             Details
@@ -287,7 +285,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             className={`text-xs px-2.5 py-1 rounded ${
               viewMode === "json"
                 ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
-                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                : "text-(--text-secondary) hover:text-(--text-primary)"
             }`}
           >
             Raw JSON
@@ -300,8 +298,8 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
               }}
               className={`text-xs px-2.5 py-1 rounded inline-flex items-center gap-1 ${
                 viewMode === "fhir"
-                  ? "bg-[var(--role-user-bg)] text-[var(--role-user-text)]"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  ? "bg-(--role-user-bg) text-(--role-user-text)"
+                  : "text-(--text-secondary) hover:text-(--text-primary)"
               }`}
             >
               <Activity size={10} />
@@ -311,7 +309,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
         </div>
         <button
           onClick={copyJson}
-          className="flex items-center gap-1 text-[11px] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          className="flex items-center gap-1 text-[11px] text-(--text-secondary) hover:text-(--text-primary)"
         >
           <Copy size={10} />
           {copied ? "Copied!" : "Copy"}
@@ -323,7 +321,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
         {viewMode === "fhir" ? (
           <div className="p-4">
             {fhirLoading ? (
-              <div className="flex items-center gap-2 text-[var(--text-secondary)] py-6 justify-center">
+              <div className="flex items-center gap-2 text-(--text-secondary) py-6 justify-center">
                 <Loader2 size={14} className="animate-spin" />
                 Loading FHIR bundle…
               </div>
@@ -333,7 +331,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
                 title={`FHIR Resources — ${name}`}
               />
             ) : (
-              <p className="text-[var(--text-secondary)] text-xs text-center py-6">
+              <p className="text-(--text-secondary) text-xs text-center py-6">
                 No FHIR bundle data available for this asset.
               </p>
             )}
@@ -343,16 +341,14 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             {/* Extra top-level properties */}
             {extraEntries.length > 0 && (
               <div>
-                <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide mb-1.5">
+                <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide mb-1.5">
                   EDC Metadata
                 </div>
                 <div className="space-y-1 font-mono text-xs">
                   {extraEntries.map(([k, v]) => (
                     <div key={k} className="flex gap-2">
-                      <span className="text-[var(--accent)] shrink-0">
-                        {k}:
-                      </span>
-                      <span className="text-[var(--role-user-text)] truncate">
+                      <span className="text-(--accent) shrink-0">{k}:</span>
+                      <span className="text-(--role-user-text) truncate">
                         {typeof v === "string" ? v : JSON.stringify(v)}
                       </span>
                     </div>
@@ -363,16 +359,14 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             {/* Nested properties */}
             {propEntries.length > 0 && (
               <div>
-                <div className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide mb-1.5">
+                <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide mb-1.5">
                   Properties
                 </div>
                 <div className="space-y-1 font-mono text-xs">
                   {propEntries.map(([k, v]) => (
                     <div key={k} className="flex gap-2">
-                      <span className="text-[var(--accent)] shrink-0">
-                        {k}:
-                      </span>
-                      <span className="text-[var(--role-user-text)] truncate">
+                      <span className="text-(--accent) shrink-0">{k}:</span>
+                      <span className="text-(--role-user-text) truncate">
                         {typeof v === "string" ? v : JSON.stringify(v)}
                       </span>
                     </div>
@@ -477,7 +471,7 @@ export default function DataSharePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
           title="Share Data"
@@ -490,7 +484,7 @@ export default function DataSharePage() {
         />
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-6 border-b border-[var(--border)]">
+        <div className="flex gap-1 mb-6 border-b border-(--border)">
           {(["existing", "create"] as Tab[]).map((t) => (
             <button
               key={t}
@@ -498,7 +492,7 @@ export default function DataSharePage() {
               className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
                 tab === t
                   ? "border-layer2 text-teal-800 dark:text-teal-300"
-                  : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  : "border-transparent text-(--text-secondary) hover:text-(--text-primary)"
               }`}
             >
               {t === "existing" ? "My Assets" : "Register New"}
@@ -508,14 +502,14 @@ export default function DataSharePage() {
 
         {tab === "existing" ? (
           loading ? (
-            <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+            <div className="flex items-center gap-2 text-(--text-secondary)">
               <Loader2 size={16} className="animate-spin" />
               Loading assets…
             </div>
           ) : assets.length === 0 ? (
             <div className="text-center py-12">
               <Database size={40} className="text-gray-600 mx-auto mb-4" />
-              <p className="text-[var(--text-secondary)]">
+              <p className="text-(--text-secondary)">
                 No data assets registered yet
               </p>
               <button
@@ -535,8 +529,8 @@ export default function DataSharePage() {
                     key={id}
                     className={`border rounded-xl transition-colors ${
                       isOpen
-                        ? "border-layer2 bg-[var(--surface)]/60"
-                        : "border-[var(--border)] hover:border-layer2"
+                        ? "border-layer2 bg-(--surface)/60"
+                        : "border-(--border) hover:border-layer2"
                     }`}
                   >
                     <button
@@ -560,7 +554,7 @@ export default function DataSharePage() {
                           {(a.description ||
                             a["edc:description"] ||
                             a.properties?.description) && (
-                            <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-1">
+                            <p className="text-xs text-(--text-secondary) mt-0.5 line-clamp-1">
                               {
                                 (a.description ||
                                   a["edc:description"] ||
@@ -584,12 +578,12 @@ export default function DataSharePage() {
                           {isOpen ? (
                             <ChevronUp
                               size={16}
-                              className="text-[var(--text-secondary)]"
+                              className="text-(--text-secondary)"
                             />
                           ) : (
                             <ChevronDown
                               size={16}
-                              className="text-[var(--text-secondary)]"
+                              className="text-(--text-secondary)"
                             />
                           )}
                         </div>
@@ -603,7 +597,7 @@ export default function DataSharePage() {
           )
         ) : (
           /* Create new asset form */
-          <div className="border border-[var(--border)] rounded-xl p-6">
+          <div className="border border-(--border) rounded-xl p-6">
             <div className="flex items-center gap-2 mb-6">
               <Upload size={18} className="text-teal-800 dark:text-teal-300" />
               <h2 className="font-semibold text-sm">Register Data Asset</h2>
@@ -613,8 +607,8 @@ export default function DataSharePage() {
               <div
                 className={`mb-4 p-3 rounded text-sm ${
                   createResult.startsWith("Error")
-                    ? "bg-[var(--role-admin-bg)] border border-[var(--role-admin-border)] text-[var(--role-admin-text)]"
-                    : "bg-[var(--role-user-bg)] border border-[var(--role-user-border)] text-[var(--role-user-text)]"
+                    ? "bg-(--role-admin-bg) border border-(--role-admin-border) text-(--role-admin-text)"
+                    : "bg-(--role-user-bg) border border-(--role-user-border) text-(--role-user-text)"
                 }`}
               >
                 {createResult.startsWith("Error") ? null : (
@@ -626,14 +620,14 @@ export default function DataSharePage() {
 
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="text-xs text-[var(--text-secondary)] mb-1 block">
+                <label className="text-xs text-(--text-secondary) mb-1 block">
                   Participant Context
                 </label>
                 <select
                   aria-label="Participant Context"
                   value={selectedCtx}
                   onChange={(e) => setSelectedCtx(e.target.value)}
-                  className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
+                  className="w-full px-3 py-2 bg-(--surface-2) border border-gray-600 rounded-sm text-sm"
                 >
                   {participants.map((p) => (
                     <option key={p["@id"]} value={p["@id"]}>
@@ -647,7 +641,7 @@ export default function DataSharePage() {
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs text-[var(--text-secondary)] mb-1 block">
+                  <label className="text-xs text-(--text-secondary) mb-1 block">
                     Asset Name
                   </label>
                   <input
@@ -657,18 +651,18 @@ export default function DataSharePage() {
                     value={assetName}
                     onChange={(e) => setAssetName(e.target.value)}
                     placeholder="e.g. fhir-patient-cohort"
-                    className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+                    className="w-full px-3 py-2 bg-(--surface-2) border border-gray-600 rounded-sm text-sm outline-hidden focus:border-layer2"
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-[var(--text-secondary)] mb-1 block">
+                  <label className="text-xs text-(--text-secondary) mb-1 block">
                     Content Type
                   </label>
                   <select
                     aria-label="Content Type"
                     value={contentType}
                     onChange={(e) => setContentType(e.target.value)}
-                    className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm"
+                    className="w-full px-3 py-2 bg-(--surface-2) border border-gray-600 rounded-sm text-sm"
                   >
                     <option value="application/fhir+json">
                       FHIR R4 (application/fhir+json)
@@ -681,7 +675,7 @@ export default function DataSharePage() {
               </div>
 
               <div>
-                <label className="text-xs text-[var(--text-secondary)] mb-1 block">
+                <label className="text-xs text-(--text-secondary) mb-1 block">
                   Description
                 </label>
                 <textarea
@@ -689,12 +683,12 @@ export default function DataSharePage() {
                   onChange={(e) => setAssetDesc(e.target.value)}
                   rows={2}
                   placeholder="Describe the dataset…"
-                  className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+                  className="w-full px-3 py-2 bg-(--surface-2) border border-gray-600 rounded-sm text-sm outline-hidden focus:border-layer2"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-[var(--text-secondary)] mb-1 block">
+                <label className="text-xs text-(--text-secondary) mb-1 block">
                   Data Source URL
                 </label>
                 <input
@@ -703,14 +697,14 @@ export default function DataSharePage() {
                   value={baseUrl}
                   onChange={(e) => setBaseUrl(e.target.value)}
                   placeholder="https://fhir-server/Patient"
-                  className="w-full px-3 py-2 bg-[var(--surface-2)] border border-gray-600 rounded text-sm outline-none focus:border-layer2"
+                  className="w-full px-3 py-2 bg-(--surface-2) border border-gray-600 rounded-sm text-sm outline-hidden focus:border-layer2"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={creating}
-                className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white dark:text-gray-900 rounded-lg text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+                className="flex items-center gap-2 px-5 py-2.5 bg-(--accent) text-white dark:text-gray-900 rounded-lg text-sm font-medium hover:bg-(--accent-hover) disabled:opacity-50"
               >
                 {creating ? (
                   <Loader2 size={16} className="animate-spin" />

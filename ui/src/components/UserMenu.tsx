@@ -28,37 +28,35 @@ import { IS_STATIC } from "@/lib/static-export";
 
 /** Badge colours per role code — uses semantic CSS tokens, adapts to light/dark. */
 const ROLE_BADGE: Record<string, string> = {
-  EDC_ADMIN: "bg-[var(--role-admin-bg)]   text-[var(--role-admin-text)]",
-  EDC_USER_PARTICIPANT:
-    "bg-[var(--role-holder-bg)]  text-[var(--role-holder-text)]",
-  HDAB_AUTHORITY: "bg-[var(--role-hdab-bg)]    text-[var(--role-hdab-text)]",
-  DATA_HOLDER: "bg-[var(--role-holder-bg)]  text-[var(--role-holder-text)]",
-  DATA_USER: "bg-[var(--role-user-bg)]    text-[var(--role-user-text)]",
-  TRUST_CENTER_OPERATOR:
-    "bg-[var(--role-trust-bg)]   text-[var(--role-trust-text)]",
-  PATIENT: "bg-[var(--role-patient-bg)] text-[var(--role-patient-text)]",
+  EDC_ADMIN: "bg-(--role-admin-bg)   text-(--role-admin-text)",
+  EDC_USER_PARTICIPANT: "bg-(--role-holder-bg)  text-(--role-holder-text)",
+  HDAB_AUTHORITY: "bg-(--role-hdab-bg)    text-(--role-hdab-text)",
+  DATA_HOLDER: "bg-(--role-holder-bg)  text-(--role-holder-text)",
+  DATA_USER: "bg-(--role-user-bg)    text-(--role-user-text)",
+  TRUST_CENTER_OPERATOR: "bg-(--role-trust-bg)   text-(--role-trust-text)",
+  PATIENT: "bg-(--role-patient-bg) text-(--role-patient-text)",
 };
 
 /** Dropdown border accent per primary role. */
 const ROLE_ACCENT: Record<string, string> = {
-  EDC_ADMIN: "border-[var(--role-admin-border)]",
-  HDAB_AUTHORITY: "border-[var(--role-hdab-border)]",
-  DATA_HOLDER: "border-[var(--role-holder-border)]",
-  DATA_USER: "border-[var(--role-user-border)]",
-  TRUST_CENTER_OPERATOR: "border-[var(--role-trust-border)]",
-  EDC_USER_PARTICIPANT: "border-[var(--role-holder-border)]",
-  PATIENT: "border-[var(--role-patient-border)]",
+  EDC_ADMIN: "border-(--role-admin-border)",
+  HDAB_AUTHORITY: "border-(--role-hdab-border)",
+  DATA_HOLDER: "border-(--role-holder-border)",
+  DATA_USER: "border-(--role-user-border)",
+  TRUST_CENTER_OPERATOR: "border-(--role-trust-border)",
+  EDC_USER_PARTICIPANT: "border-(--role-holder-border)",
+  PATIENT: "border-(--role-patient-border)",
 };
 
 /** Shield icon colour per primary role. */
 const ROLE_SHIELD: Record<string, string> = {
-  EDC_ADMIN: "text-[var(--role-admin-text)]",
-  HDAB_AUTHORITY: "text-[var(--role-hdab-text)]",
-  DATA_HOLDER: "text-[var(--role-holder-text)]",
-  DATA_USER: "text-[var(--role-user-text)]",
-  TRUST_CENTER_OPERATOR: "text-[var(--role-trust-text)]",
-  EDC_USER_PARTICIPANT: "text-[var(--text-secondary)]",
-  PATIENT: "text-[var(--role-patient-text)]",
+  EDC_ADMIN: "text-(--role-admin-text)",
+  HDAB_AUTHORITY: "text-(--role-hdab-text)",
+  DATA_HOLDER: "text-(--role-holder-text)",
+  DATA_USER: "text-(--role-user-text)",
+  TRUST_CENTER_OPERATOR: "text-(--role-trust-text)",
+  EDC_USER_PARTICIPANT: "text-(--text-secondary)",
+  PATIENT: "text-(--role-patient-text)",
 };
 
 /**
@@ -240,7 +238,7 @@ export default function UserMenu() {
 
   if (status === "loading") {
     return (
-      <div className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-[var(--text-secondary)]">
+      <div className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-(--text-secondary)">
         <User size={15} />
         <span className="animate-pulse">…</span>
       </div>
@@ -254,16 +252,16 @@ export default function UserMenu() {
         <div ref={ref} className="relative">
           <button
             onClick={() => setOpen(!open)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) transition-colors"
           >
             <LogIn size={15} />
             Sign in
           </button>
           {open && (
-            <div className="absolute right-0 top-full mt-1 w-64 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg shadow-xl z-50">
+            <div className="absolute right-0 top-full mt-1 w-64 bg-(--surface-2) border border-(--border) rounded-lg shadow-xl z-50">
               <div className="px-3 pt-2 pb-1 flex items-center gap-1.5">
-                <Users size={11} className="text-[var(--text-secondary)]" />
-                <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide font-semibold">
+                <Users size={11} className="text-(--text-secondary)" />
+                <span className="text-[10px] text-(--text-secondary) uppercase tracking-wide font-semibold">
                   Choose a demo persona
                 </span>
               </div>
@@ -285,18 +283,18 @@ export default function UserMenu() {
                         setDemoPersona(persona.username);
                         setOpen(false);
                       }}
-                      className="flex items-center gap-2 w-full px-2 py-1.5 rounded text-left hover:bg-[var(--surface-2)] cursor-pointer transition-colors"
+                      className="flex items-center gap-2 w-full px-2 py-1.5 rounded-sm text-left hover:bg-(--surface-2) cursor-pointer transition-colors"
                     >
                       <span
                         className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0 ${
                           ROLE_BADGE[pRole ?? ""] ??
-                          "bg-gray-600 text-[var(--text-primary)]"
+                          "bg-gray-600 text-(--text-primary)"
                         }`}
                       >
                         <Shield size={8} />
                         {ROLE_LABELS[pRole ?? ""] ?? pRole}
                       </span>
-                      <span className="font-mono text-xs truncate text-[var(--text-primary)]">
+                      <span className="font-mono text-xs truncate text-(--text-primary)">
                         {persona.username}
                       </span>
                     </button>
@@ -314,16 +312,16 @@ export default function UserMenu() {
       <div ref={ref} className="relative">
         <button
           onClick={() => setOpen(!open)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) transition-colors"
         >
           <LogIn size={15} />
           Sign in
         </button>
         {open && (
-          <div className="absolute right-0 top-full mt-1 w-64 bg-[var(--surface-2)] border border-[var(--border)] rounded-lg shadow-xl z-50">
+          <div className="absolute right-0 top-full mt-1 w-64 bg-(--surface-2) border border-(--border) rounded-lg shadow-xl z-50">
             <div className="px-3 pt-2 pb-1 flex items-center gap-1.5">
-              <Users size={11} className="text-[var(--text-secondary)]" />
-              <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide font-semibold">
+              <Users size={11} className="text-(--text-secondary)" />
+              <span className="text-[10px] text-(--text-secondary) uppercase tracking-wide font-semibold">
                 Returning users
               </span>
             </div>
@@ -349,29 +347,29 @@ export default function UserMenu() {
                         { login_hint: persona.username },
                       );
                     }}
-                    className="flex items-center gap-2 w-full px-2 py-1.5 rounded text-left hover:bg-[var(--surface-2)] cursor-pointer transition-colors"
+                    className="flex items-center gap-2 w-full px-2 py-1.5 rounded-sm text-left hover:bg-(--surface-2) cursor-pointer transition-colors"
                   >
                     <span
                       className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0 ${
                         ROLE_BADGE[pRole ?? ""] ??
-                        "bg-gray-600 text-[var(--text-primary)]"
+                        "bg-gray-600 text-(--text-primary)"
                       }`}
                     >
                       <Shield size={8} />
                       {ROLE_LABELS[pRole ?? ""] ?? pRole}
                     </span>
-                    <span className="font-mono text-xs truncate text-[var(--text-primary)]">
+                    <span className="font-mono text-xs truncate text-(--text-primary)">
                       {persona.username}
                     </span>
                   </button>
                 );
               })}
             </div>
-            <div className="p-2 border-t border-[var(--border)]">
+            <div className="p-2 border-t border-(--border)">
               <a
                 href="/auth/signin"
                 onClick={() => setOpen(false)}
-                className="flex items-center justify-center gap-1.5 w-full px-3 py-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] rounded transition-colors"
+                className="flex items-center justify-center gap-1.5 w-full px-3 py-2 text-xs text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) rounded-sm transition-colors"
               >
                 <ShieldCheck size={12} />
                 All users &amp; details
@@ -394,15 +392,14 @@ export default function UserMenu() {
   // Short role label for the nav bar chip
   const navLabel = ROLE_LABELS[primaryRole] ?? username;
   const accentClass = ROLE_ACCENT[primaryRole] ?? "border-gray-600";
-  const shieldClass =
-    ROLE_SHIELD[primaryRole] ?? "text-[var(--text-secondary)]";
+  const shieldClass = ROLE_SHIELD[primaryRole] ?? "text-(--text-secondary)";
 
   return (
     <div ref={ref} className="relative">
       {/* ── Nav bar button ── */}
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded text-sm text-[var(--text-primary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-sm text-(--text-primary) hover:text-(--text-primary) hover:bg-(--surface-2) transition-colors"
         aria-label="User menu"
       >
         <Shield size={14} className={shieldClass} />
@@ -415,7 +412,7 @@ export default function UserMenu() {
         {/* Role chip — hidden on very small screens */}
         <span
           className={`hidden sm:inline-block text-[10px] px-1.5 py-0.5 rounded font-medium ${
-            ROLE_BADGE[primaryRole] ?? "bg-gray-600 text-[var(--text-primary)]"
+            ROLE_BADGE[primaryRole] ?? "bg-gray-600 text-(--text-primary)"
           }`}
         >
           {navLabel}
@@ -425,11 +422,11 @@ export default function UserMenu() {
       {/* ── Dropdown panel ── */}
       {open && (
         <div
-          className={`absolute right-0 top-full mt-1 w-72 bg-[var(--surface-2)] border rounded-lg shadow-xl z-50 ${accentClass}`}
+          className={`absolute right-0 top-full mt-1 w-72 bg-(--surface-2) border rounded-lg shadow-xl z-50 ${accentClass}`}
         >
           {/* Identity block */}
-          <div className="p-3 border-b border-[var(--border)]">
-            <p className="text-sm text-[var(--text-primary)] font-semibold truncate">
+          <div className="p-3 border-b border-(--border)">
+            <p className="text-sm text-(--text-primary) font-semibold truncate">
               {username}
               {IS_STATIC && (
                 <span className="ml-1.5 text-[10px] text-amber-400 font-normal">
@@ -437,7 +434,7 @@ export default function UserMenu() {
                 </span>
               )}
             </p>
-            <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">
+            <p className="text-xs text-(--text-secondary) truncate mt-0.5">
               {session.user?.email}
             </p>
             {/* Role badges */}
@@ -446,7 +443,7 @@ export default function UserMenu() {
                 <span
                   key={role}
                   className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded border font-medium ${
-                    ROLE_BADGE[role] ?? "bg-gray-600 text-[var(--text-primary)]"
+                    ROLE_BADGE[role] ?? "bg-gray-600 text-(--text-primary)"
                   } border-transparent`}
                 >
                   <Shield size={9} />
@@ -458,11 +455,11 @@ export default function UserMenu() {
 
           {/* Settings link — hidden for PATIENT (no DCP business credentials) */}
           {!roles.includes("PATIENT") && (
-            <div className="p-2 border-b border-[var(--border)]">
+            <div className="p-2 border-b border-(--border)">
               <a
                 href="/settings"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2 w-full px-3 py-2 rounded text-sm text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-colors"
+                className="flex items-center gap-2 w-full px-3 py-2 rounded-sm text-sm text-(--text-primary) hover:bg-(--surface-2) transition-colors"
               >
                 <Settings size={14} />
                 <span className="font-medium">Settings</span>
@@ -471,10 +468,10 @@ export default function UserMenu() {
           )}
 
           {/* Persona switcher — Keycloak in live mode, localStorage in static demo */}
-          <div className="border-t border-[var(--border)]">
+          <div className="border-t border-(--border)">
             <div className="px-3 pt-2 pb-1 flex items-center gap-1.5">
-              <Users size={11} className="text-[var(--text-secondary)]" />
-              <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide font-semibold">
+              <Users size={11} className="text-(--text-secondary)" />
+              <span className="text-[10px] text-(--text-secondary) uppercase tracking-wide font-semibold">
                 {IS_STATIC ? "Switch demo persona" : "Returning users"}
               </span>
             </div>
@@ -510,14 +507,14 @@ export default function UserMenu() {
                     }}
                     className={`flex items-center gap-2 w-full px-2 py-1.5 rounded text-left transition-colors ${
                       isActive
-                        ? "bg-[var(--surface-2)] cursor-default"
-                        : "hover:bg-[var(--surface-2)] cursor-pointer"
+                        ? "bg-(--surface-2) cursor-default"
+                        : "hover:bg-(--surface-2) cursor-pointer"
                     }`}
                   >
                     <span
                       className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0 ${
                         ROLE_BADGE[primaryRole ?? ""] ??
-                        "bg-gray-600 text-[var(--text-primary)]"
+                        "bg-gray-600 text-(--text-primary)"
                       }`}
                     >
                       <Shield size={8} />
@@ -526,14 +523,14 @@ export default function UserMenu() {
                     <span
                       className={`font-mono text-xs truncate ${
                         isActive
-                          ? "text-[var(--accent)] font-semibold"
-                          : "text-[var(--text-primary)]"
+                          ? "text-(--accent) font-semibold"
+                          : "text-(--text-primary)"
                       }`}
                     >
                       {persona.username}
                     </span>
                     {isActive && (
-                      <span className="ml-auto text-[9px] text-[var(--text-secondary)] shrink-0">
+                      <span className="ml-auto text-[9px] text-(--text-secondary) shrink-0">
                         active
                       </span>
                     )}
@@ -545,7 +542,7 @@ export default function UserMenu() {
 
           {/* Sign out + build info — inline on one row to save vertical
               space. Sign out stays left-aligned; BuildInfo right-aligned. */}
-          <div className="flex items-center justify-between gap-2 p-2 border-t border-[var(--border)]">
+          <div className="flex items-center justify-between gap-2 p-2 border-t border-(--border)">
             <button
               onClick={() => {
                 setOpen(false);
@@ -584,7 +581,7 @@ export default function UserMenu() {
                   signOut({ callbackUrl: "/" });
                 }
               }}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-[var(--surface-2)] rounded transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-(--surface-2) rounded-sm transition-colors"
             >
               <LogOut size={14} />
               Sign out

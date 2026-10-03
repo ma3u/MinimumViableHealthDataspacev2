@@ -6,12 +6,12 @@ import type { MatrixRow } from "./types";
 /** The Art. 68(4) clock as the access body reads it. */
 export function DecisionClock({ row }: { row: MatrixRow }) {
   if (!row.hasApplication) {
-    return <span className="text-[var(--text-secondary)]">—</span>;
+    return <span className="text-(--text-secondary)">—</span>;
   }
   if (isUndecided(row) && row.clockState === "paused") {
     return (
       <span
-        className="text-[var(--text-primary)]"
+        className="text-(--text-primary)"
         title={`The access body found the application incomplete on ${shortDate(
           row.incompleteNoticeAt,
         )}; the applicant has four weeks to complete it, and the three months of Art. 68(4) run again from the complete application.`}
@@ -29,9 +29,7 @@ export function DecisionClock({ row }: { row: MatrixRow }) {
     const overdue = row.daysToDecision < 0;
     return (
       <span
-        className={
-          overdue ? "text-[var(--danger-text)]" : "text-[var(--text-primary)]"
-        }
+        className={overdue ? "text-(--danger-text)" : "text-(--text-primary)"}
         title={
           overdue
             ? `The access body's decision on the data permit was due ${shortDate(
@@ -58,10 +56,10 @@ export function DecisionClock({ row }: { row: MatrixRow }) {
   }
   if (row.decidedAt) {
     return (
-      <span className="text-[var(--text-secondary)]">
+      <span className="text-(--text-secondary)">
         decided {shortDate(row.decidedAt)}
       </span>
     );
   }
-  return <span className="text-[var(--text-secondary)]">—</span>;
+  return <span className="text-(--text-secondary)">—</span>;
 }

@@ -40,7 +40,7 @@ export function BuildInfo() {
         href={isLocal ? releasesHref : releaseHref}
         target="_blank"
         rel="noreferrer noopener"
-        className="inline-flex items-center gap-1 font-mono text-[10px] leading-tight text-[var(--text-secondary)] hover:text-[var(--accent)] hover:underline"
+        className="inline-flex items-center gap-1 font-mono text-[10px] leading-tight text-(--text-secondary) hover:text-(--accent) hover:underline"
         aria-label={
           isLocal
             ? `Open releases page (local build ${tag})`
