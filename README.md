@@ -226,33 +226,6 @@ arranged in concentric rings by relevance (not by technical layer).
 | Hospital   | Which data do we offer? · Who is using our data? · What contracts? · Are we compliant? · Clinical data?      |
 | HDAB       | What approvals are pending? · Which policies? · What contracts? · Credentials valid? · Trust Center?         |
 
-**Node role colours in the Graph Explorer** (warm, vivid accents over the cool, muted layer colours;
-the source of truth is `NODE_ROLE_COLORS` in `ui/src/lib/graph-constants.ts`):
-
-| Node type              | Colour                 | Role                                                   |
-| ---------------------- | ---------------------- | ------------------------------------------------------ |
-| `Participant`          | 🟠 Orange `#F97316`    | Dataspace actors (data holders, data users)            |
-| `TrustCenter`          | 🔴 Red `#EF4444`       | HDAB-designated pseudonymisation authority (Art. 50)   |
-| `HDABApproval`         | 🩷 Pink `#EC4899`      | Access body decisions                                  |
-| `HealthDataRequest`    | 🩷 Deep pink `#DB2777` | Statistical data request (Art. 69)                     |
-| `NonComplianceFinding` | 🔴 Dark red `#B91C1C`  | Finding of non-compliance (Art. 63)                    |
-| `InformationRequest`   | 🟠 Orange `#F97316`    | Request for information (Art. 63(1))                   |
-| `ResultCommunication`  | 🩵 Teal `#0891B2`      | Results of the use communicated back (Art. 61(4))      |
-| `SPESession`           | 🟡 Amber `#F59E0B`     | Active secure processing sessions                      |
-| `PatientConsent`       | 🟣 Purple `#A855F7`    | Patient consent and opt-out (GDPR Art. 15-22)          |
-| `ResearchInsight`      | 🩵 Cyan `#06B6D4`      | Personalised insights from research studies            |
-| `ValueCenter`          | 🟡 Gold `#FBBF24`      | The persona's starting node at the centre of the graph |
-
-**Status colours in the persona overview** (`/overview`, the animated 3D view every login lands on):
-
-| Status             | Colour              | Meaning                       |
-| ------------------ | ------------------- | ----------------------------- |
-| Non-compliant now  | 🔴 Red `#EF4444`    | Pulsing halo; needs action    |
-| At risk / due soon | 🟡 Amber `#F59E0B`  | A deadline or expiry is close |
-| Information        | 🔵 Sky `#38BDF8`    | Context, nothing to do        |
-| In order           | 🟢 Green `#22C55E`  | Checked and fine              |
-| Dataset            | 🟣 Violet `#A78BFA` | A dataset node, not a status  |
-
 ---
 
 ## Project Structure
@@ -918,7 +891,10 @@ grouped by startup tier — Docker Compose launches each tier in parallel once a
 in the previous tier report healthy. The `neo4j-spe2` and `jad-seed` containers only start
 when their respective profiles (`federated`, `seed`) are explicitly activated.
 
-![ORB K8s cluster with the EHDS Integration Hub](docs/images/orb-k8s-cluster.png)
+![OrbStack Activity Monitor with the local stack's containers running](docs/images/container-activity-monitor.png)
+
+The stack running locally in OrbStack's Activity Monitor. The `wallet-*` containers and the separate
+`edcv-control-plane` project are not part of the 25 containers listed below.
 
 ```
 Tier 0 ──► Tier 1 ──► Tier 2 ──► Tier 3 ──► Tier 4

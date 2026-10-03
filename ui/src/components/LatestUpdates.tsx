@@ -78,8 +78,8 @@ function formatDate(iso: string): string {
 export function LatestUpdates() {
   return (
     <section
-      className="mb-12 sm:mb-16 animate-fade-in-up"
-      style={{ animationDelay: "125ms" }}
+      className="mt-12 sm:mt-16 animate-fade-in-up"
+      style={{ animationDelay: "1900ms" }}
       aria-labelledby="updates-title"
     >
       <div className="flex items-center gap-2 mb-4">

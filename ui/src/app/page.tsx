@@ -121,9 +121,8 @@ export default function Home() {
         <LivingBodyHero className="aspect-9/16 w-[min(72vw,300px)] justify-self-center lg:order-first lg:w-auto lg:h-[min(72vh,620px)]" />
       </section>
 
-      {/* ── The iPhone app, then the latest updates ─────────────────────── */}
+      {/* ── The iPhone app ──────────────────────────────────────────────── */}
       <KlarbefundShowcase />
-      <LatestUpdates />
 
       {/* ── Why EHDS Matters ─────────────────────────────────────────────── */}
       <section
@@ -730,6 +729,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ── Latest updates, the last section before the footer ──────────── */}
+      <LatestUpdates />
 
       {/* ── Footer ────────────────────────────────────────────────────────── */}
       <footer className="mt-8 sm:mt-10 pt-6 border-t border-(--border) text-center text-xs text-(--text-secondary)">
