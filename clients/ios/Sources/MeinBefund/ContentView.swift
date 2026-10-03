@@ -80,11 +80,13 @@ final class AppModel: ObservableObject {
         }
         reports = DemoSeed.live
         profile = DemoSeed.liveProfile
+        consents = DemoSeed.liveConsents
         return
       }
       if DemoSeed.isRequested {
         reports = DemoSeed.live
         profile = DemoSeed.liveProfile
+        consents = DemoSeed.liveConsents
         return
       }
     #endif
@@ -97,6 +99,25 @@ final class AppModel: ObservableObject {
         try await store.saveProfile(loaded)
       }
       profile = loaded
+      consents = try await store.consents()
+    } catch { self.error = error.localizedDescription }
+  }
+
+  /// Records one decision on one consent. Only ever one: the ledger has no
+  /// way to change two at once, and neither does this (#186 criterion 6).
+  func recordConsent(_ kind: ConsentKind, active: Bool, effective: Date, holder: String?) async {
+    var next = consents
+    next.record(kind, active: active, effective: effective, holder: holder)
+    #if DEBUG
+      if DemoSeed.isRequested || DevDataset.isRequested {
+        DemoSeed.liveConsents = next
+        consents = next
+        return
+      }
+    #endif
+    do {
+      try await store.saveConsents(next)
+      consents = next
     } catch { self.error = error.localizedDescription }
   }
 
@@ -491,7 +512,8 @@ final class AppModel: ObservableObject {
     defer { buildingData = false }
     do {
       sharingData = try await DataExport.build(
-        reports: reports, profile: profile, provider: providerConfig.kind, pages: pages(of:))
+        reports: reports, profile: profile, consents: consents, provider: providerConfig.kind,
+        pages: pages(of:))
     } catch {
       self.error = error.localizedDescription
     }
@@ -550,7 +572,8 @@ final class AppModel: ObservableObject {
       guard ProcessInfo.processInfo.arguments.contains("-MBExportData") else { return }
       do {
         let zip = try await DataExport.build(
-          reports: reports, profile: profile, provider: providerConfig.kind, pages: pages(of:))
+          reports: reports, profile: profile, consents: consents, provider: providerConfig.kind,
+          pages: pages(of:))
         let pulled = FileManager.default.temporaryDirectory
           .appendingPathComponent("pull-my-data.zip")
         try? FileManager.default.removeItem(at: pulled)
@@ -595,6 +618,14 @@ final class AppModel: ObservableObject {
   @Published var sharingOmop: URL?
   @Published var profile: Profile = .empty
   @Published var showingProfile = false
+  @Published var consents: ConsentLedger = .empty
+  @Published var showingConsents = false
+  /// The research export, held until the person confirms it, when no
+  /// registry consent is recorded.
+  @Published var confirmingResearchExport = false
+  /// A report about to be shared for a doctor, held while the person is told
+  /// that they recorded an objection to the ePA.
+  @Published var confirmingEpaShare: LabReport?
   /// The sheet for entering a run of past measurements at once.
   @Published var showingHistory = false
   /// A report the person asked to see, from a point on a chart.
@@ -708,7 +739,15 @@ struct ContentView: View {
                 if !report.extraction.coded.isEmpty {
                   ToolbarItem(placement: .primaryAction) {
                     Button {
-                      Task { await model.export(report) }
+                      // The objection is the person's, recorded by them. It
+                      // does not stop a document for a practice, which needs
+                      // no ePA, but uploading it to one they objected to would
+                      // be working against their own decision, so say so once.
+                      if model.consents.isActive(.epaObjection) {
+                        model.confirmingEpaShare = report
+                      } else {
+                        Task { await model.export(report) }
+                      }
                     } label: {
                       Label("Share for my doctor", systemImage: "square.and.arrow.up")
                     }
@@ -787,7 +826,14 @@ struct ContentView: View {
                 Label("Trends", systemImage: "chart.xyaxis.line")
               }
               Button {
-                Task { await model.exportOmop() }
+                // Research is what a registry consent is for. Without one the
+                // export still works, it is the person's own data, but they
+                // are asked once whether they mean it (#186 criterion 6).
+                if model.consents.isActive(.registry) {
+                  Task { await model.exportOmop() }
+                } else {
+                  model.confirmingResearchExport = true
+                }
               } label: {
                 Label("Export for research (OMOP)", systemImage: "tablecells")
               }
@@ -806,6 +852,11 @@ struct ContentView: View {
               model.showingHistory = true
             } label: {
               Label("Earlier measurements", systemImage: "calendar.badge.plus")
+            }
+            Button {
+              model.showingConsents = true
+            } label: {
+              Label("Consents", systemImage: "checkmark.seal")
             }
             Button {
               model.showingPrivacy = true
@@ -903,6 +954,8 @@ struct ContentView: View {
         model.showingHistory = true
       case .profile:
         model.showingProfile = true
+      case .consents:
+        model.showingConsents = true
       case .list, nil:
         break
       }
@@ -1199,6 +1252,14 @@ private struct AppDialogs: ViewModifier {
         },
         onClose: { model.showingProfile = false })
     }
+      .sheet(isPresented: $model.showingConsents) {
+      ConsentsView(
+        ledger: model.consents,
+        onRecord: { kind, active, effective, holder in
+          Task { await model.recordConsent(kind, active: active, effective: effective, holder: holder) }
+        },
+        onClose: { model.showingConsents = false })
+    }
       .sheet(item: Binding(get: { model.sharing.map(ShareBox.init) }, set: { _ in })) { box in
       ShareSheet(items: [box.artefacts.pdf, box.artefacts.fhir]) {
         // The share sheet needs real files, so a lab report is written to the
@@ -1233,6 +1294,31 @@ private struct AppDialogs: ViewModifier {
       } message: {
         Text(
           "Every report, every scanned page and your profile will be removed from this phone, along with the key that opens them. They are stored nowhere else, so this cannot be undone. Export your data first if you want to keep a copy."
+        )
+      }
+      // Alerts rather than confirmation dialogs, for the reason given above:
+      // raised from a menu, a dialog drops its Cancel button.
+      .alert("No registry consent recorded", isPresented: $model.confirmingResearchExport) {
+        Button("Export anyway") { Task { await model.exportOmop() } }
+        Button("Cancel", role: .cancel) {}
+      } message: {
+        Text(
+          "This file is for you. Give it to a registry or a study only under a consent you gave them, and record that consent under Consents."
+        )
+      }
+      .alert(
+        "You objected to the ePA",
+        isPresented: Binding(
+          get: { model.confirmingEpaShare != nil }, set: { if !$0 { model.confirmingEpaShare = nil } })
+      ) {
+        Button("Share anyway") {
+          if let report = model.confirmingEpaShare { Task { await model.export(report) } }
+          model.confirmingEpaShare = nil
+        }
+        Button("Cancel", role: .cancel) { model.confirmingEpaShare = nil }
+      } message: {
+        Text(
+          "The document still works on paper, by email or in the practice. There is no ePA to upload it to while your objection stands."
         )
       }
       .alert("Error", isPresented: Binding(get: { model.error != nil }, set: { _ in model.error = nil })) {

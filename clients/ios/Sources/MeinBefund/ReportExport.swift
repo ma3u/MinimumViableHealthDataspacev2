@@ -270,11 +270,6 @@ enum ReportExport {
   }
 
   private static func referenceText(_ value: CodedLabValue) -> String? {
-    switch (value.raw.referenceLow, value.raw.referenceHigh) {
-    case let (low?, high?): return "\(number(low)) – \(number(high))"
-    case let (nil, high?): return "< \(number(high))"
-    case let (low?, nil): return "> \(number(low))"
-    default: return nil
-    }
+    PrintedReference.text(of: value.raw, number: number)
   }
 }

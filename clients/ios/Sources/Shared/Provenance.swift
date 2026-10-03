@@ -26,6 +26,20 @@ public enum SourceKind: String, Sendable, Codable, CaseIterable {
     self == .labIssuedDigital ? "final" : "preliminary"
   }
 
+  /// The shape a chart draws this kind of value with.
+  ///
+  /// One shape per kind, all three different, so the distinction holds
+  /// without colour and without tapping a point (#186 criterion 2). Scanned
+  /// and self-tracked values were once both a diamond, which told a reader a
+  /// value was not the laboratory's own and nothing about whose it was.
+  public var markShape: MarkShape {
+    switch self {
+    case .labIssuedDigital: return .circle
+    case .ocrTranscribed: return .diamond
+    case .selfTracked: return .triangle
+    }
+  }
+
   /// Short label for the UI. Deliberately plain: no reassuring euphemisms.
   public var shortLabel: String {
     switch self {
@@ -34,6 +48,11 @@ public enum SourceKind: String, Sendable, Codable, CaseIterable {
     case .selfTracked: return "Self-tracked"
     }
   }
+}
+
+/// A chart mark's shape, kept free of SwiftUI so the rule can be tested here.
+public enum MarkShape: String, Sendable, CaseIterable {
+  case circle, diamond, triangle
 }
 
 /// A comparator on a value, as FHIR spells it.
@@ -54,6 +73,13 @@ public struct RawLabValue: Sendable, Equatable, Codable {
   public let comparator: Comparator?
   public let referenceLow: Double?
   public let referenceHigh: Double?
+  /// The reference range exactly as the laboratory printed it: `< 5,0`,
+  /// `neg.`, `Erw. 0,5 - 1,2`. The two numbers above are what could be read
+  /// out of it; this is the evidence they were read from. A range holding no
+  /// number, or a qualifier the numbers cannot carry, survives only here
+  /// (ADR-033 rule 1, #186 criterion 4). Absent on records stored before it
+  /// existed, which then show the range rebuilt from the numbers.
+  public let referenceText: String?
   /// The source line, so a reviewer can check the parse against the paper.
   public let line: String
   /// 1-based line number within the recognised text.
@@ -70,8 +96,8 @@ public struct RawLabValue: Sendable, Equatable, Codable {
 
   public init(
     label: String, value: Double, unitRaw: String, comparator: Comparator? = nil,
-    referenceLow: Double? = nil, referenceHigh: Double? = nil, line: String, lineNumber: Int,
-    region: SourceRegion? = nil
+    referenceLow: Double? = nil, referenceHigh: Double? = nil, referenceText: String? = nil,
+    line: String, lineNumber: Int, region: SourceRegion? = nil
   ) {
     self.label = label
     self.value = value
@@ -79,6 +105,7 @@ public struct RawLabValue: Sendable, Equatable, Codable {
     self.comparator = comparator
     self.referenceLow = referenceLow
     self.referenceHigh = referenceHigh
+    self.referenceText = referenceText
     self.line = line
     self.lineNumber = lineNumber
     self.region = region

@@ -13,7 +13,7 @@
  * side drifting fails that test.
  *
  * The fixture values are fictional and chosen to exercise what actually breaks:
- * a German thousands separator, a comparator, both reference-range shapes, an
+ * a German thousands separator, a comparator, both reference-range shapes, a range kept only as printed text, an
  * analyte whose unit selects its LOINC code, and a bounding region.
  *
  *   npm run golden:fhir              # write it
@@ -40,6 +40,7 @@ export const GOLDEN_VALUES: CodedLabValue[] = [
     value: 141,
     unitRaw: "mg/dl",
     referenceHigh: 116,
+    referenceText: "< 116",
     line: "LDL-Cholesterin  141  mg/dl  < 116",
     lineNumber: 3,
     analyteKey: "ldl",
@@ -57,6 +58,7 @@ export const GOLDEN_VALUES: CodedLabValue[] = [
     unitRaw: "%",
     referenceLow: 4,
     referenceHigh: 6,
+    referenceText: "4,0 - 6,0",
     line: "HbA1c  5,4  %  4,0 - 6,0",
     lineNumber: 7,
     analyteKey: "hba1c",
@@ -98,6 +100,22 @@ export const GOLDEN_VALUES: CodedLabValue[] = [
       loincNumber: "2276-4",
       display: "Ferritin [Mass/volume] in Serum or Plasma",
       ucum: "ug/L",
+    },
+  },
+  {
+    // A printed range no number can be read from: it survives as text alone,
+    // which is the only way a range like this reaches the bundle at all.
+    label: "CRP",
+    value: 0.31,
+    unitRaw: "mg/dl",
+    referenceText: "Erw. unter 0,5",
+    line: "CRP  0,31  mg/dl  Erw. unter 0,5",
+    lineNumber: 12,
+    analyteKey: "crp",
+    coding: {
+      loincNumber: "1988-5",
+      display: "C reactive protein [Mass/volume] in Serum or Plasma",
+      ucum: "mg/dL",
     },
   },
   {

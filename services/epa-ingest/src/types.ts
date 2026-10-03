@@ -69,6 +69,14 @@ export interface RawLabValue {
   comparator?: Comparator;
   referenceLow?: number;
   referenceHigh?: number;
+  /**
+   * The reference range exactly as the laboratory printed it, `< 5,0` or
+   * `neg.` or `Erw. 0,5 - 1,2`. The two numbers above are what could be read
+   * out of it; this is the evidence they were read from. A range that holds
+   * no number, or a qualifier the numbers cannot carry, survives only here
+   * (ADR-033 rule 1, #186 criterion 4).
+   */
+  referenceText?: string;
   /** The source line, so a reviewer can check the parse against the paper. */
   line: string;
   /** 1-based line number within the extracted text. */

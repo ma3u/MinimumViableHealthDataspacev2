@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 
 @testable import Shared
@@ -931,5 +932,60 @@ struct MicrobiomeTests {
     #expect(result.coded.isEmpty)
     #expect(result.unmapped.isEmpty)
     #expect(result.suspiciousLines.count == 1, "reported as unread, never as a measurement")
+  }
+}
+
+/// #186 criterion 4: the printed reference range is kept exactly as printed,
+/// beside the numbers read from it. Mirrors the cases in
+/// `services/epa-ingest/__tests__/parse-lab.test.ts`.
+@Suite("Printed reference range, kept verbatim")
+struct PrintedReferenceTests {
+  @Test("the text travels beside the numbers read from it")
+  func textBesideNumbers() throws {
+    let value = try #require(LabLineParser.parse("HbA1c  5,4  %  4,0 - 6,0").values.first)
+    #expect(value.referenceLow == 4)
+    #expect(value.referenceHigh == 6)
+    #expect(value.referenceText == "4,0 - 6,0")
+  }
+
+  @Test("a range no number can be read from survives as text alone")
+  func textOnly() throws {
+    let value = try #require(
+      LabLineParser.parse("CRP  0,31  mg/dl  Erw. unter 0,5").values.first)
+    #expect(value.referenceLow == nil)
+    #expect(value.referenceHigh == nil)
+    #expect(value.referenceText == "Erw. unter 0,5")
+  }
+
+  @Test("a unit in the range column stays, a column separator goes")
+  func trimming() {
+    #expect(LabLineParser.printedReference("< 116 mg/dl") == "< 116 mg/dl")
+    #expect(LabLineParser.printedReference("Erw. < 5,0 mg/l") == "Erw. < 5,0 mg/l")
+    #expect(LabLineParser.printedReference(" : 33-36 ") == "33-36")
+    #expect(LabLineParser.printedReference("   ") == nil)
+  }
+
+  @Test("a second analyte merged onto the line is not a range")
+  func mergedRow() {
+    #expect(LabLineParser.printedReference("Natrium  141  mmol/l  136 - 145") == nil)
+  }
+
+  @Test("the bundle carries the text, and a text-only range still makes a range")
+  func fhir() throws {
+    let raw = RawLabValue(
+      label: "CRP", value: 0.31, unitRaw: "mg/dl", referenceText: "Erw. unter 0,5",
+      line: "CRP  0,31  mg/dl  Erw. unter 0,5", lineNumber: 1)
+    #expect(PrintedReference.text(of: raw, number: { String($0) }) == "Erw. unter 0,5")
+    let older = RawLabValue(
+      label: "LDL", value: 141, unitRaw: "mg/dl", referenceHigh: 116, line: "", lineNumber: 1)
+    #expect(PrintedReference.text(of: older, number: { String(Int($0)) }) == "< 116")
+  }
+
+  @Test("a record stored before the field existed still decodes")
+  func olderRecordDecodes() throws {
+    let json = #"{"label":"LDL","value":141,"unitRaw":"mg/dl","referenceHigh":116,"line":"x","lineNumber":1}"#
+    let raw = try JSONDecoder().decode(RawLabValue.self, from: Data(json.utf8))
+    #expect(raw.referenceText == nil)
+    #expect(raw.referenceHigh == 116)
   }
 }

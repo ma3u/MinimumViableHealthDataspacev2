@@ -55,6 +55,7 @@ struct FhirBundleParityTests {
       let comparator: String?
       let referenceLow: Double?
       let referenceHigh: Double?
+      let referenceText: String?
       let line: String
       let lineNumber: Int
       let coding: Coding
@@ -88,6 +89,7 @@ struct FhirBundleParityTests {
           comparator: value.comparator.flatMap(Comparator.init(rawValue:)),
           referenceLow: value.referenceLow,
           referenceHigh: value.referenceHigh,
+          referenceText: value.referenceText,
           line: value.line,
           lineNumber: value.lineNumber,
           region: value.region.map {

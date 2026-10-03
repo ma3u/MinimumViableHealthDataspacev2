@@ -73,14 +73,17 @@ public struct TrendPoint: Sendable, Equatable, Identifiable {
   /// How the value was obtained, so a transcription is never plotted as if it
   /// were the laboratory's own figure.
   public let source: SourceKind
-  /// The range this laboratory printed beside this value, kept verbatim.
+  /// The numbers read from the range this laboratory printed beside this value.
   public let printedLow: Double?
   public let printedHigh: Double?
+  /// That range as it was printed, when the record has it.
+  public let printedText: String?
   public let reportTitle: String
 
   public init(
     reportId: UUID, date: Date, value: Double, comparator: Comparator?,
-    source: SourceKind, printedLow: Double?, printedHigh: Double?, reportTitle: String
+    source: SourceKind, printedLow: Double?, printedHigh: Double?, printedText: String? = nil,
+    reportTitle: String
   ) {
     self.reportId = reportId
     self.date = date
@@ -89,6 +92,7 @@ public struct TrendPoint: Sendable, Equatable, Identifiable {
     self.source = source
     self.printedLow = printedLow
     self.printedHigh = printedHigh
+    self.printedText = printedText
     self.reportTitle = reportTitle
   }
 }
@@ -153,6 +157,11 @@ public struct TrendSeries: Sendable, Equatable, Identifiable {
 
   /// True when every point came from a laboratory's own document.
   public var allLabIssued: Bool { points.allSatisfy { $0.source == .labIssuedDigital } }
+
+  /// The kinds of evidence on this chart, most trusted first, for its legend.
+  public var sources: [SourceKind] {
+    SourceKind.allCases.filter { kind in points.contains { $0.source == kind } }
+  }
 
   public init(
     analyteKey: String, loinc: String?, ucum: String, label: String, points: [TrendPoint],
@@ -219,7 +228,7 @@ public enum Trends {
             reportId: report.id, date: report.effectiveDate, value: value.raw.value,
             comparator: value.raw.comparator, source: value.source,
             printedLow: value.raw.referenceLow, printedHigh: value.raw.referenceHigh,
-            reportTitle: report.title))
+            printedText: value.raw.referenceText, reportTitle: report.title))
         // The label shown is the one the most recent report printed.
         if let existing = meta[key], existing.date >= report.effectiveDate { continue }
         meta[key] = (

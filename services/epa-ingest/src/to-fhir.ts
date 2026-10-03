@@ -254,7 +254,12 @@ export function buildBundle(
           ],
         }
       : {}),
-    ...(v.referenceLow !== undefined || v.referenceHigh !== undefined
+    // FHIR's rng-2: a range needs a low, a high or a text. The text is the
+    // range as printed, so a range with no number in it still travels, and
+    // one with numbers keeps the qualifier the numbers cannot carry.
+    ...(v.referenceLow !== undefined ||
+    v.referenceHigh !== undefined ||
+    v.referenceText !== undefined
       ? {
           referenceRange: [
             {
@@ -263,6 +268,9 @@ export function buildBundle(
                 : {}),
               ...(v.referenceHigh !== undefined
                 ? { high: quantity(v.referenceHigh, v.coding.ucum) }
+                : {}),
+              ...(v.referenceText !== undefined
+                ? { text: v.referenceText }
                 : {}),
             },
           ],

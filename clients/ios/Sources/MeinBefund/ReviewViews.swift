@@ -308,12 +308,7 @@ private struct CodedRow: View {
   }
 
   private var referenceText: String? {
-    switch (value.raw.referenceLow, value.raw.referenceHigh) {
-    case let (low?, high?): return "\(formatted(low)) – \(formatted(high))"
-    case let (nil, high?): return "< \(formatted(high))"
-    case let (low?, nil): return "> \(formatted(low))"
-    default: return nil
-    }
+    PrintedReference.text(of: value.raw, number: formatted)
   }
 
   private func formatted(_ value: Double) -> String {

@@ -171,13 +171,21 @@ public enum FhirWriter {
           value.raw.value, ucum: value.coding.ucum, comparator: value.raw.comparator?.rawValue),
       ]
 
-      if value.raw.referenceLow != nil || value.raw.referenceHigh != nil {
+      // FHIR's rng-2: a range needs a low, a high or a text. The text is the
+      // range as printed, so a range with no number in it still travels, and
+      // one with numbers keeps the qualifier the numbers cannot carry.
+      if value.raw.referenceLow != nil || value.raw.referenceHigh != nil
+        || value.raw.referenceText != nil
+      {
         var range: JSON = [:]
         if let low = value.raw.referenceLow {
           range["low"] = quantity(low, ucum: value.coding.ucum, comparator: nil)
         }
         if let high = value.raw.referenceHigh {
           range["high"] = quantity(high, ucum: value.coding.ucum, comparator: nil)
+        }
+        if let text = value.raw.referenceText {
+          range["text"] = .string(text)
         }
         observation["referenceRange"] = .array([range])
       }

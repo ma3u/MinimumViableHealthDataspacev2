@@ -96,6 +96,33 @@ describe("buildBundle", () => {
     expect(ldl?.referenceRange).toMatchObject([{ high: { value: 116 } }]);
   });
 
+  it("carries the printed reference range as its text (#186 criterion 4)", () => {
+    const [ldl] = codeValues(
+      parseLabReport("LDL-Cholesterin  141  mg/dl  < 116").values,
+    ).coded;
+    const [crp] = codeValues(
+      parseLabReport("C-reaktives Protein  0,31  mg/dl  Erw. unter 0,5").values,
+    ).coded;
+    const observations = ofType(
+      buildBundle([ldl, crp], {
+        meta: { patientId: "p", effectiveDateTime: "2026-09-04" },
+        source: ocrSource,
+        now: NOW,
+      }),
+      "Observation",
+    );
+    expect(observations[0].referenceRange).toEqual([
+      {
+        high: expect.objectContaining({ value: 116 }),
+        text: "< 116",
+      },
+    ]);
+    // No number to read, so the text is the whole range, and it still travels.
+    expect(observations[1].referenceRange).toEqual([
+      { text: "Erw. unter 0,5" },
+    ]);
+  });
+
   it("carries a comparator onto the quantity", () => {
     const ferritin = ofType(bundle, "Observation").find(
       (o) => (o.code as { text?: string }).text === "Ferritin",
