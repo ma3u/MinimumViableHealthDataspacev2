@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import {
+  isPatientOnly,
+  ownRecordId,
+  refuseForeignRecord,
+} from "@/lib/patient/own-record";
 
 export const dynamic = "force-dynamic";
 
@@ -17,9 +22,12 @@ export async function GET(req: Request) {
   if (isAuthError(auth)) return auth;
   const { searchParams } = new URL(req.url);
   const patientId = searchParams.get("patientId");
+  // A patient lists and opens their own record, nobody else's (#475).
+  const patientOnly = isPatientOnly(auth.session.roles);
+  const own = patientOnly ? await ownRecordId() : null;
 
   if (!patientId) {
-    // List mode — return top 20 patients for demo
+    // List mode — top 20 patients for the demo; a patient's own record only.
     const patients = await runQuery<{
       id: string;
       name: string;
@@ -28,6 +36,8 @@ export async function GET(req: Request) {
       conditionCount: number;
     }>(
       `MATCH (p:Patient)
+       WITH p WHERE $own IS NULL
+                OR coalesce(p.id, p.resourceId, elementId(p)) = $own
        OPTIONAL MATCH (p)-[:HAS_CONDITION]->(c:Condition)
        RETURN coalesce(p.id, p.resourceId, elementId(p)) AS id,
               coalesce(p.name, 'Anonymous') AS name,
@@ -36,9 +46,13 @@ export async function GET(req: Request) {
               count(c) AS conditionCount
        ORDER BY conditionCount DESC
        LIMIT 20`,
+      { own: patientOnly ? own ?? "__no_record__" : null },
     );
     return NextResponse.json({ patients });
   }
+
+  const foreign = await refuseForeignRecord(auth.session.roles, patientId);
+  if (foreign) return foreign;
 
   // Profile mode — full health profile for one patient
   const [

@@ -115,6 +115,26 @@ participant sees the demo cohort, a `PATIENT` sees only their own record
 (EHDS Art. 3, GDPR Art. 15). `bruno/MVHDv2/09 Access control/05` asserts the
 401 and its `{ error }` body.
 
+### Who sees who a patient is (#475)
+
+A session admits; it does not by itself show a patient's identity.
+`ui/src/lib/patient-identity.ts` decides, by role, never by a query
+parameter such as `persona`:
+
+- `EDC_ADMIN` and `DATA_HOLDER` see names and birth dates (primary use).
+- `PATIENT` sees their own record only: `refuseForeignRecord()` in
+  `ui/src/lib/patient/own-record.ts` answers 403 for any other `patientId`,
+  for reading and for consenting alike.
+- Everyone else (`DATA_USER`, `HDAB_AUTHORITY`, `TRUST_CENTER_OPERATOR`) sees
+  `patientPseudonym()`, the birth year and no residence, in the graph, the
+  node view and the cohort list. The NLQ proxy refuses any query that would
+  read a Patient's name, birth date or address unless the UI sends
+  `X-Patient-Identity: shown` (`revealsPatientIdentity()` in
+  `services/neo4j-proxy/src/nlq/engine.ts`).
+
+A new route that returns Patient fields asks `seesPatientIdentity()` first.
+`bruno/MVHDv2/09 Access control/28` to `/30` assert it against a real server.
+
 ### Every route needs a session (ADR-044)
 
 Decided 2026-10-02 (#404): every API route needs a session. Middleware skips

@@ -32,7 +32,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113611",
-      "name": "Institut de Recherche Sant\u00e9",
+      "name": "Institut de Recherche Santé",
       "label": "Participant",
       "layer": 1,
       "color": "#F97316",
@@ -132,7 +132,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33180",
-      "name": "EHDS Art. 53 Secondary Use \u2014 Synthetic Data",
+      "name": "EHDS Art. 53 Secondary Use — Synthetic Data",
       "label": "OdrlPolicy",
       "layer": 1,
       "color": "#94A3B8",
@@ -152,7 +152,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:9",
-      "name": "EHDS Contract (PharmaCo Research AG\u2194AlphaKlinik Berlin)",
+      "name": "EHDS Contract (PharmaCo Research AG↔AlphaKlinik Berlin)",
       "label": "Contract",
       "layer": 1,
       "color": "#94A3B8",
@@ -162,7 +162,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113650",
-      "name": "EHDS Contract (TrialCorp\u2194Riverside)",
+      "name": "EHDS Contract (TrialCorp↔Riverside)",
       "label": "Contract",
       "layer": 1,
       "color": "#94A3B8",
@@ -192,7 +192,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:33183",
-      "name": "MedReg HDAB Approval \u2014 Synthea Cohort 2026",
+      "name": "MedReg HDAB Approval — Synthea Cohort 2026",
       "label": "HDABApproval",
       "layer": 1,
       "color": "#EC4899",
@@ -202,7 +202,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113616",
-      "name": "AlphaKlinik \u2192 LMC (In Progress)",
+      "name": "AlphaKlinik → LMC (In Progress)",
       "label": "ContractNegotiation",
       "layer": 1,
       "color": "#94A3B8",
@@ -212,7 +212,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113612",
-      "name": "AlphaKlinik \u2192 PharmaCo (FHIR)",
+      "name": "AlphaKlinik → PharmaCo (FHIR)",
       "label": "ContractNegotiation",
       "layer": 1,
       "color": "#94A3B8",
@@ -222,7 +222,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113613",
-      "name": "AlphaKlinik \u2192 PharmaCo (OMOP)",
+      "name": "AlphaKlinik → PharmaCo (OMOP)",
       "label": "ContractNegotiation",
       "layer": 1,
       "color": "#94A3B8",
@@ -232,7 +232,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113614",
-      "name": "LMC \u2192 MedReg (Prostate)",
+      "name": "LMC → MedReg (Prostate)",
       "label": "ContractNegotiation",
       "layer": 1,
       "color": "#94A3B8",
@@ -242,7 +242,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:113615",
-      "name": "PharmaCo \u2192 IRS (Terminated)",
+      "name": "PharmaCo → IRS (Terminated)",
       "label": "ContractNegotiation",
       "layer": 1,
       "color": "#94A3B8",
@@ -522,7 +522,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:3306",
-      "name": "Anisha16 Grayce293 Kuvalis369",
+      "name": "Patient 1962dafc",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -532,7 +532,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:12533",
-      "name": "Bettina657 Tomeka87 Swift555",
+      "name": "Patient b7c64374",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -542,7 +542,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:13157",
-      "name": "Brett333 Waylon572 Lynch190",
+      "name": "Patient 27e92c9d",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -552,7 +552,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:16907",
-      "name": "Chantay958 Lavera253 Toy286",
+      "name": "Patient 4fd5d6eb",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -562,7 +562,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:17541",
-      "name": "Charlie254 Reginald96 Hirthe744",
+      "name": "Patient 1f519bdc",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -572,7 +572,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:24588",
-      "name": "Denver542 Riley817 Schamberger479",
+      "name": "Patient fa752782",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -582,7 +582,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:25232",
-      "name": "Dinah304 Pfannerstill264",
+      "name": "Patient bcb7ff1f",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -592,7 +592,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:26103",
-      "name": "Dona966 Rochelle550 Muller251",
+      "name": "Patient c70718d1",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -602,7 +602,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:37808",
-      "name": "Dottie687 Abshire638",
+      "name": "Patient fcfd7975",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -612,7 +612,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:38783",
-      "name": "Eloy929 Noble66 Larkin917",
+      "name": "Patient dcdbb86e",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -622,7 +622,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:39535",
-      "name": "Elwood28 Jeromy156 Herzog843",
+      "name": "Patient f423602f",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -632,7 +632,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:42074",
-      "name": "Hayden835 Balistreri607",
+      "name": "Patient 8b7d6bee",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -642,7 +642,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:45114",
-      "name": "Jayson808 Williams176 Aufderhar910",
+      "name": "Patient d7e499b3",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -652,7 +652,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:47758",
-      "name": "Jerlene697 Haag279",
+      "name": "Patient 3a2d42c2",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -662,7 +662,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:49381",
-      "name": "Lauren941 Torphy630",
+      "name": "Patient ec7e0f0f",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -672,7 +672,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:54906",
-      "name": "Nelly786 Giselle809 Abernathy524",
+      "name": "Patient b0eb6caa",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -682,7 +682,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:55997",
-      "name": "Odilia72 Londa304 Hamill307",
+      "name": "Patient 06f25a2c",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -692,7 +692,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:57040",
-      "name": "Rebecka733 Faith802 Nader710",
+      "name": "Patient 51deeeaa",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -702,7 +702,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:63397",
-      "name": "Theodore876 Leannon79",
+      "name": "Patient 542f24db",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",
@@ -712,7 +712,7 @@
     },
     {
       "id": "4:71bd54a7-13b1-4bab-a02b-1c38f404ffc5:65636",
-      "name": "Walter473 Blake449 Eichmann909",
+      "name": "Patient 7d0fe314",
       "label": "Patient",
       "layer": 3,
       "color": "#86EFAC",

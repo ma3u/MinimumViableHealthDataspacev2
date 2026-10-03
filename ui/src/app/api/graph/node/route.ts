@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { ownPatientIdForSession } from "@/lib/overview/patient";
+import {
+  redactPatientProperties,
+  seesPatientIdentity,
+} from "@/lib/patient-identity";
 
 export const dynamic = "force-dynamic";
 
@@ -121,10 +128,12 @@ const PROPERTY_LABELS: Record<string, Record<string, string>> = {
     status: "Status",
   },
   Patient: {
+    pseudonym: "Pseudonym",
     resourceId: "Resource ID",
     patientId: "Patient ID",
     name: "Name",
     birthDate: "Birth Date",
+    birthYear: "Birth Year",
     gender: "Gender",
     city: "City",
     country: "Country",
@@ -264,8 +273,31 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Node not found" }, { status: 404 });
     }
 
-    const { labels, props } = rows[0];
+    const { labels } = rows[0];
+    let { props } = rows[0];
     const primaryLabel = labels[0] ?? "Node";
+
+    // A Patient's name, birth date and record ids only for roles that see
+    // identity, or for the patient themselves (#475).
+    if (
+      primaryLabel === "Patient" &&
+      !seesPatientIdentity(auth.session.roles)
+    ) {
+      const key = String(props.id ?? props.resourceId ?? nodeId);
+      const own = auth.session.roles.includes("PATIENT")
+        ? ownPatientIdForSession(await getServerSession(authOptions))
+        : null;
+      if (key !== own) props = redactPatientProperties(props, key);
+    }
+    // An OMOP person's name was a copy of the patient's until #475; it is not
+    // shown to roles without identity either way.
+    if (
+      primaryLabel === "OMOPPerson" &&
+      !seesPatientIdentity(auth.session.roles)
+    ) {
+      const { name: _name, ...rest } = props;
+      props = rest;
+    }
     const labelMap = PROPERTY_LABELS[primaryLabel] ?? {};
 
     // Build formatted properties array

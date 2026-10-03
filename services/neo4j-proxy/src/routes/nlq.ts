@@ -20,6 +20,7 @@ import {
   QUERY_TEMPLATES,
   checkOdrlTemporal,
   checkReIdentification,
+  revealsPatientIdentity,
   computeCohortDataQuality,
   fulltextSearch,
   generateEmbedding,
@@ -216,6 +217,21 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
         });
         return;
       }
+    }
+
+    // Who a patient is stays out of every answer for a caller who does not
+    // see patient identity (#475). The UI says which in X-Patient-Identity;
+    // anything but "shown", including no header, is treated as withheld.
+    const identityShown = req.headers["x-patient-identity"] === "shown";
+    if (!identityShown && cypher && revealsPatientIdentity(cypher)) {
+      res.status(403).json({
+        error:
+          "Query blocked: it would show who a patient is. Research questions are answered with aggregates and clinical values, not with names, birth dates or addresses.",
+        method,
+        ...(templateName ? { templateName } : {}),
+      });
+      logQueryAudit(scope?.participantId, question, cypher, method, 0, true);
+      return;
     }
 
     // ODRL: check re-identification prohibition before execution

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { refuseForeignRecord } from "@/lib/patient/own-record";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,11 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const patientId = searchParams.get("patientId");
+  // A patient reads their own consents only (#475).
+  if (patientId) {
+    const foreign = await refuseForeignRecord(auth.session.roles, patientId);
+    if (foreign) return foreign;
+  }
 
   const [consentRows, insightRows, speRows] = await Promise.all([
     // Patient's active consents → studies using their data

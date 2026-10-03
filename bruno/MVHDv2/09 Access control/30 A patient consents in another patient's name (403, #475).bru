@@ -1,0 +1,31 @@
+meta {
+  name: 30 A patient consents in another patient's name (403, #475)
+  type: http
+  seq: 30
+}
+
+post {
+  url: {{baseUrl}}/api/patient/research
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+body:json {
+  {"patientId": "P2", "studyId": "study-does-not-matter"}
+}
+
+tests {
+  // GDPR Art. 7: a consent is given by the person it concerns. Until #475 a
+  // patient could record one on another patient's record.
+  test("consenting for someone else is refused", function () {
+    expect(res.getStatus()).to.equal(403);
+  });
+  test("the refusal says why", function () {
+    expect(res.getBody()).to.have.property("error");
+  });
+}

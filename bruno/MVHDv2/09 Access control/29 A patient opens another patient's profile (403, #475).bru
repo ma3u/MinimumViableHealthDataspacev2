@@ -1,0 +1,25 @@
+meta {
+  name: 29 A patient opens another patient's profile (403, #475)
+  type: http
+  seq: 29
+}
+
+get {
+  url: {{baseUrl}}/api/patient/profile?patientId=P2
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+tests {
+  // EHDS Art. 3: a patient reads their own record only. patient1 owns P1.
+  test("another patient's record is refused", function () {
+    expect(res.getStatus()).to.equal(403);
+  });
+  test("the refusal says why", function () {
+    expect(res.getBody()).to.have.property("error");
+  });
+}

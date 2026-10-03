@@ -3,6 +3,7 @@ import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { resolveOdrlScope, userToParticipantId } from "@/lib/odrl-engine";
 import { gateSecondaryUse } from "@/lib/permit-gate";
 import { NEO4J_PROXY_URL } from "@/lib/proxy";
+import { seesPatientIdentity } from "@/lib/patient-identity";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,11 @@ export async function POST(request: NextRequest) {
       headers: {
         "Content-Type": "application/json",
         "X-Participant": participantId,
+        // Whether this caller may see who a patient is (#475). The proxy
+        // refuses any query that would show it unless this says "shown".
+        "X-Patient-Identity": seesPatientIdentity(session.roles)
+          ? "shown"
+          : "withheld",
         ...gate.headers,
       },
       body: JSON.stringify({ ...body, odrlScope }),
