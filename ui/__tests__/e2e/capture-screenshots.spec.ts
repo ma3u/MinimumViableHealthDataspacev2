@@ -8,6 +8,7 @@
  */
 import { test } from "@playwright/test";
 import path from "path";
+import { signInOrSkip } from "./helpers/forged-session";
 
 const SS = path.resolve(__dirname, "../../public/images/screenshots");
 const T = 10_000;
@@ -42,30 +43,40 @@ test.describe("Screenshot capture (run against localhost:3003)", () => {
   });
 
   test("graph-explorer-neo4j", async ({ page }) => {
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     await page.goto("/graph", { waitUntil: "networkidle" });
     await page.waitForTimeout(2000);
     await shot(page, "neo4j-health-dataspace-graph-explorer.png");
   });
 
   test("graph-explorer-default", async ({ page }) => {
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     await page.goto("/graph", { waitUntil: "networkidle" });
     await page.waitForTimeout(1500);
     await shot(page, "graph-explorer-default.png");
   });
 
   test("graph-hospital-persona", async ({ page }) => {
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     await page.goto("/graph?persona=hospital", { waitUntil: "networkidle" });
     await page.waitForTimeout(2000);
     await shot(page, "graph-explorer-hospital-persona.png");
   });
 
   test("graph-researcher-persona", async ({ page }) => {
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     await page.goto("/graph?persona=researcher", { waitUntil: "networkidle" });
     await page.waitForTimeout(2000);
     await shot(page, "graph-explorer-researcher-persona.png");
   });
 
   test("graph-trust-center-persona", async ({ page }) => {
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     await page.goto("/graph?persona=trust-center", {
       waitUntil: "networkidle",
     });
@@ -74,18 +85,24 @@ test.describe("Screenshot capture (run against localhost:3003)", () => {
   });
 
   test("graph-hdab-persona", async ({ page }) => {
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     await page.goto("/graph?persona=hdab", { waitUntil: "networkidle" });
     await page.waitForTimeout(2000);
     await shot(page, "graph-explorer-hdab-persona.png");
   });
 
   test("graph-edc-admin-persona", async ({ page }) => {
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     await page.goto("/graph?persona=edc-admin", { waitUntil: "networkidle" });
     await page.waitForTimeout(2000);
     await shot(page, "graph-explorer-edc-admin-persona.png");
   });
 
   test("catalog-browser", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog", { waitUntil: "networkidle" });
     await page.waitForTimeout(T);
     await shot(page, "ehds-fhir-dataset-catalog-browser.png");

@@ -18,6 +18,7 @@ import {
   expectHeading,
   waitForDataLoad,
 } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("M · Live Data Validation", () => {
   /* ── Identity & Participants (from IdentityHub / CFM) ────── */
@@ -75,6 +76,8 @@ test.describe("M · Live Data Validation", () => {
     page,
   }) => {
     await skipIfNeo4jDown(page);
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     const data = await apiGet(page, "/api/graph");
     expect(data.nodes).toBeDefined();
     expect(data.links || data.relationships).toBeDefined();
@@ -90,6 +93,8 @@ test.describe("M · Live Data Validation", () => {
     page,
   }) => {
     await skipIfNeo4jDown(page);
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     await page.goto("/graph");
     await waitForDataLoad(page);
     await expectHeading(page, "Graph");
@@ -116,6 +121,8 @@ test.describe("M · Live Data Validation", () => {
   });
 
   test("J108 — Catalog page renders dataset entries", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await waitForDataLoad(page);
     await expectHeading(page, "Catalog");
@@ -155,6 +162,8 @@ test.describe("M · Live Data Validation", () => {
   });
 
   test("J112 — Analytics page renders stat cards", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/analytics");
     await waitForDataLoad(page);
     await expectHeading(page, "Analytics");

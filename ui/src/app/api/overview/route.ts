@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions, derivePersonaId } from "@/lib/auth";
 import { runQuery } from "@/lib/neo4j";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { GET as profileGET } from "@/app/api/patient/profile/route";
 import { GET as insightsGET } from "@/app/api/patient/insights/route";
 import { GET as researchGET } from "@/app/api/patient/research/route";
@@ -89,6 +90,10 @@ async function call<T>(
  * M1 the patient, M2 the access body, M3 the holder, M4 the researcher.
  */
 export async function GET(req: Request): Promise<Response> {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
+  // The persona is derived from preferredUsername, which AuthSession does
+  // not carry, so read the full session as well (as /api/patient does).
   const session = await getServerSession(authOptions);
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

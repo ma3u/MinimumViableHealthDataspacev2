@@ -1,0 +1,12 @@
+{
+  "_comment": "Read by scripts/check-npm-audit.py (pre-push hook and Dependency Audit). One entry per advisory, never per package. An expired entry fails the gate; renew it only with a reason that is still true.",
+  "exceptions": [
+    {
+      "advisory": "GHSA-vfj7-8cjw-p6xm",
+      "package": "braces",
+      "reason": "No patched version exists (braces <= 3.0.3, last release 2024). Reached through @scalar/api-client and @scalar/components -> @headlessui/tailwindcss -> tailwindcss 3 -> micromatch/chokidar/fast-glob. braces expands glob patterns at build time; no request path passes user input to it.",
+      "issue": 435,
+      "expires": "2026-11-15"
+    }
+  ]
+}

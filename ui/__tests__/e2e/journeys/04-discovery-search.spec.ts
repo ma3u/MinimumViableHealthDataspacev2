@@ -17,10 +17,13 @@ import {
   apiGet,
   skipIfNeo4jDown,
 } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("D · Discovery & Federated Search", () => {
   /* ── J23: Search catalog by keyword "FHIR" ───────────────── */
   test("J23 — Catalog page displays FHIR datasets", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);
@@ -63,6 +66,8 @@ test.describe("D · Discovery & Federated Search", () => {
   /* ── J27: Graph Explorer renders layer sidebar ───────────── */
   test("J27 — Graph Explorer shows all 5 graph layers", async ({ page }) => {
     await skipIfNeo4jDown(page);
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     await page.goto("/graph");
 
     await expect(page.getByText("Data layers").first()).toBeVisible({
@@ -87,6 +92,8 @@ test.describe("D · Discovery & Federated Search", () => {
   }) => {
     await skipIfNeo4jDown(page);
 
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip);
     await page.goto("/graph");
     await expect(page.getByText("Data layers").first()).toBeVisible({
       timeout: T,
@@ -114,6 +121,8 @@ test.describe("D · Discovery & Federated Search", () => {
 
   /* ── J30: OMOP Analytics page loads research data ────────── */
   test("J30 — OMOP Research Analytics page renders", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/analytics");
     await expectHeading(page, "OMOP Research Analytics");
     await waitForDataLoad(page);

@@ -14,6 +14,7 @@ import {
   waitForDataLoad,
   apiGet,
 } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("C · Policy Definition & Catalog Offering", () => {
   /* ── J16: Policies API returns policies for multiple participants ── */
@@ -70,10 +71,10 @@ test.describe("C · Policy Definition & Catalog Offering", () => {
     expect(medreg.policies.length).toBeGreaterThanOrEqual(1);
   });
 
-  /* ── J20: Catalog page shows dataset entries publicly ──── */
-  test("J20 — Catalog page renders dataset cards publicly", async ({
-    page,
-  }) => {
+  /* ── J20: Catalog page shows dataset entries (signed in since #404) ── */
+  test("J20 — Catalog page renders dataset cards", async ({ page }) => {
+    // /catalog, /analytics, /query, /eehrxf and /tasks need a session since #404.
+    await signInOrSkip(page, test.skip);
     await page.goto("/catalog");
     await expectHeading(page, "Dataset Catalog");
     await waitForDataLoad(page);

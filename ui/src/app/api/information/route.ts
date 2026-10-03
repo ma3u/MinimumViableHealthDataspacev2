@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { runQuery } from "@/lib/neo4j";
 import {
   BODY_FEES,
@@ -13,7 +14,8 @@ export const dynamic = "force-dynamic";
 
 /**
  * GET /api/information: what the access body tells the public about
- * secondary use, Regulation (EU) 2025/327 Art. 58(1). No session. The
+ * secondary use, Regulation (EU) 2025/327 Art. 58(1). Any signed-in
+ * participant: Every API route needs a session since #404 (ADR-044). The
  * fixed parts (legal basis, safeguards, rights, how to exercise them) are on
  * the page; this route serves what comes from the graph: the access bodies
  * and their contact (e), who has been granted access to which datasets and
@@ -21,6 +23,8 @@ export const dynamic = "force-dynamic";
  * (Art. 62) and the number of persons who opted out (Art. 71). Issue #206, M6.
  */
 export async function GET() {
+  const auth = await requireAuth();
+  if (isAuthError(auth)) return auth;
   try {
     const [bodies, access, results, optOuts] = await Promise.all([
       runQuery<{

@@ -60,7 +60,8 @@ jobs:
           cp neo4j/*.cypher "$SEED_DIR/"
           cp neo4j/seed.sh "$SEED_DIR/seed.sh"
           cat > "$SEED_DIR/Dockerfile" <<'DOCKERFILE'
-          FROM neo4j:5-community
+          # Same tag as docker-compose.yml (ADR-029: no floating tags).
+          FROM neo4j:5.26.28-community
           USER root
           RUN apt-get update && apt-get install -y --no-install-recommends bash curl jq \
               && rm -rf /var/lib/apt/lists/*

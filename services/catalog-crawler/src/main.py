@@ -44,6 +44,8 @@ async def _crawl_one(
     participant: Participant,
     crawler_did: str,
     timeout_s: float,
+    token: str | None = None,
+    token_hosts: frozenset[str] = frozenset(),
 ) -> None:
     """Fetch one catalog + publish envelope. Records metrics per outcome."""
     label = participant.participant_id
@@ -51,7 +53,12 @@ async def _crawl_one(
     try:
         with metrics.request_seconds.labels(participant=label).time():
             catalog = await dsp_client.fetch_catalog(
-                http, participant.dsp_catalog_url, crawler_did, timeout_s
+                http,
+                participant.dsp_catalog_url,
+                crawler_did,
+                timeout_s,
+                token,
+                token_hosts,
             )
         envelope = CrawlEnvelope(
             participant_did=participant.participant_id,
@@ -119,6 +126,8 @@ async def _run_cycle(cfg: Config) -> None:
                             t,
                             cfg.crawler_did,
                             cfg.request_timeout_s,
+                            cfg.dsp_catalog_token,
+                            cfg.dsp_catalog_token_hosts,
                         )
                         for t in targets
                     ]

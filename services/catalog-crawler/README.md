@@ -35,19 +35,21 @@ Metrics on `http://localhost:9465/metrics`.
 
 ## Environment
 
-| Variable            | Default                         | Notes                                  |
-| ------------------- | ------------------------------- | -------------------------------------- |
-| `NATS_URL`          | `nats://mvhd-nats:4222`         | ACA short-name per ADR-018             |
-| `NATS_SUBJECT`      | `dataspace.catalog.raw`         | Contract fixed by ADR-020              |
-| `NEO4J_URI`         | `bolt://mvhd-neo4j:7687`        | Short service name (ADR-018)           |
-| `NEO4J_USER`        | `neo4j`                         |                                        |
-| `NEO4J_PASSWORD`    | `healthdataspace`               |                                        |
-| `CRAWLER_DID`       | `did:web:ehds.mabu.red:crawler` | Sent as `X-Crawler-Did` header         |
-| `REQUEST_TIMEOUT_S` | `10`                            | Per-participant HTTP timeout           |
-| `CRAWL_INTERVAL_S`  | `300`                           | 5 min per ADR-020                      |
-| `RUN_ONCE`          | `false`                         | `true` on the ACA Schedule-trigger Job |
-| `METRICS_PORT`      | `9465`                          |                                        |
-| `LOG_LEVEL`         | `INFO`                          |                                        |
+| Variable                  | Default                         | Notes                                                                                                                                     |
+| ------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `NATS_URL`                | `nats://mvhd-nats:4222`         | ACA short-name per ADR-018                                                                                                                |
+| `NATS_SUBJECT`            | `dataspace.catalog.raw`         | Contract fixed by ADR-020                                                                                                                 |
+| `NEO4J_URI`               | `bolt://mvhd-neo4j:7687`        | Short service name (ADR-018)                                                                                                              |
+| `NEO4J_USER`              | `neo4j`                         |                                                                                                                                           |
+| `NEO4J_PASSWORD`          | `healthdataspace`               |                                                                                                                                           |
+| `CRAWLER_DID`             | `did:web:ehds.mabu.red:crawler` | Sent as `X-Crawler-Did` header                                                                                                            |
+| `REQUEST_TIMEOUT_S`       | `10`                            | Per-participant HTTP timeout                                                                                                              |
+| `CRAWL_INTERVAL_S`        | `300`                           | 5 min per ADR-020                                                                                                                         |
+| `RUN_ONCE`                | `false`                         | `true` on the ACA Schedule-trigger Job                                                                                                    |
+| `METRICS_PORT`            | `9465`                          |                                                                                                                                           |
+| `LOG_LEVEL`               | `INFO`                          |                                                                                                                                           |
+| `DSP_CATALOG_TOKEN`       | unset                           | Bearer token for the hub's demo DSP route (ADR-044). From Key Vault via the job's identity; see `scripts/azure/wire-dsp-catalog-token.sh` |
+| `DSP_CATALOG_TOKEN_HOSTS` | `ehds.mabu.red`                 | Comma list; the token is sent to these hosts only, never to another participant                                                           |
 
 ## Target list
 
@@ -80,7 +82,10 @@ Each successful fetch publishes exactly one message:
 
 The enricher's `CrawlEnvelope` model in
 `services/catalog-enricher/src/models.py` must stay byte-compatible with
-the crawler's.
+the crawler's. The two services are separate images, so the model is
+duplicated on purpose rather than shared (#404);
+`services/catalog-enricher/tests/test_crawl_envelope_contract.py` loads
+this side's model and fails when the two diverge.
 
 ## Observability
 

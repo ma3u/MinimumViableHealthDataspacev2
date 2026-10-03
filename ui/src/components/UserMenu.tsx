@@ -24,6 +24,7 @@ import {
 } from "@/lib/use-demo-persona";
 import { useTabSession, markSessionSwitch } from "@/lib/use-tab-session";
 import { BuildInfo } from "@/components/BuildInfo";
+import { IS_STATIC } from "@/lib/static-export";
 
 /** Badge colours per role code — uses semantic CSS tokens, adapts to light/dark. */
 const ROLE_BADGE: Record<string, string> = {
@@ -59,8 +60,6 @@ const ROLE_SHIELD: Record<string, string> = {
   EDC_USER_PARTICIPANT: "text-[var(--text-secondary)]",
   PATIENT: "text-[var(--role-patient-text)]",
 };
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
 /**
  * Returns the most meaningful roles to display.

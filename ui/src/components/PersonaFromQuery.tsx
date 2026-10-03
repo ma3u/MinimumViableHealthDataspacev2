@@ -24,8 +24,7 @@ import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { DEMO_PERSONAS } from "@/lib/auth";
 import { setDemoPersona } from "@/lib/use-demo-persona";
-
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+import { IS_STATIC } from "@/lib/static-export";
 
 export default function PersonaFromQuery() {
   const searchParams = useSearchParams();

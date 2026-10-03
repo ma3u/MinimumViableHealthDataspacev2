@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { NEO4J_PROXY_URL } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
 
@@ -21,8 +22,6 @@ interface TestResult {
   status: "pass" | "fail" | "skip";
   detail: string;
 }
-
-const NEO4J_PROXY_URL = process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
 
 export async function GET() {
   const auth = await requireAuth();

@@ -41,7 +41,9 @@ globs:
 
 ### Static export guards
 
-- Check `process.env.NEXT_PUBLIC_STATIC_EXPORT === "true"` as `IS_STATIC` constant at module top.
+- Import `IS_STATIC` from `@/lib/static-export`; do not redeclare it. Only code a test flips with
+  `vi.stubEnv` without reloading the module (`fetchApi`, the EUDI QR page) reads the variable at call time.
+- The neo4j-proxy base URL is `NEO4J_PROXY_URL` from `@/lib/proxy`; do not repeat the default.
 - In static mode, `fetchApi()` from `ui/src/lib/api.ts` routes GET requests to `/mock/*.json` fixtures and returns a synthetic `{ ok: true }` 200 for all non-GET mutations.
 - Never assume API routes are available in the static build; the CI workflow renames `src/app/api/` before building.
 

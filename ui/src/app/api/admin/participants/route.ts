@@ -1,8 +1,6 @@
-import { getServerSession } from "next-auth/next";
 import { NextRequest, NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
-
-import { authOptions } from "@/lib/auth";
+import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -32,14 +30,8 @@ interface ParticipantRow {
 }
 
 async function requireAdmin(): Promise<NextResponse | null> {
-  const session = await getServerSession(authOptions);
-  const roles = (session as { roles?: string[] } | null)?.roles ?? [];
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-  if (!roles.includes("EDC_ADMIN")) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const auth = await requireAuth(["EDC_ADMIN"]);
+  if (isAuthError(auth)) return auth;
   return null;
 }
 

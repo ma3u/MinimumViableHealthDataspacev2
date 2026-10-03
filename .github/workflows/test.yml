@@ -245,27 +245,33 @@ jobs:
           cache: npm
           cache-dependency-path: ./ui/package-lock.json
 
+      # Same gate as the pre-push hook, over all dependencies: high and
+      # critical fail unless excepted, with an expiry, in
+      # docs/npm-audit-exceptions.json (#435).
       - name: Audit UI dependencies
-        working-directory: ./ui
-        run: npm audit --audit-level=high
+        run: python3 scripts/check-npm-audit.py ui
 
       - name: Audit Neo4j proxy dependencies
-        working-directory: ./services/neo4j-proxy
         # Use --omit=dev to audit only production dependencies for the proxy
-        run: npm audit --audit-level=high --omit=dev
+        run: python3 scripts/check-npm-audit.py services/neo4j-proxy --omit=dev
         continue-on-error: true
 
       - name: Audit summary
         if: always()
+        # working-directory, not `cd ui && ... || true`: newer shellcheck flags
+        # that as SC2015, which failed PR Gate for any PR touching this file.
+        working-directory: ./ui
         run: |
-          echo "## Dependency Audit" >> $GITHUB_STEP_SUMMARY
-          echo "| Package | Severity |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
-          cd ui && npm audit --json 2>/dev/null | \
+          {
+            echo "## Dependency Audit"
+            echo "| Package | Severity |"
+            echo "| --- | --- |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          npm audit --json 2>/dev/null | \
             node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
             Object.values(d.vulnerabilities||{}).forEach(v=>
               process.stdout.write('| '+v.name+' | '+v.severity+' |\n')
-            )" >> $GITHUB_STEP_SUMMARY || true
+            )" >> "$GITHUB_STEP_SUMMARY" || true
 
   # -----------------------------------------------------------------------
   # SBOM Generation (CycloneDX) — EU CRA Art. 13, EHDS Art. 50, SIMPL-Open

@@ -165,13 +165,15 @@ repos:
         stages: [pre-commit]
 
   # npm dependency audit — HIGH/CRITICAL CVEs on pre-push (BSI C5 DEV-05)
-  # Requires: node/npm in PATH
+  # Requires: node/npm in PATH. Strict except for the advisories listed, with
+  # a reason, an issue and an expiry date, in docs/npm-audit-exceptions.json
+  # (#435: an advisory with no patched version blocked every push).
   - repo: local
     hooks:
       - id: npm-audit-ui
         name: npm audit (UI — HIGH+)
         language: system
-        entry: bash -c 'cd ui && npm audit --audit-level=high --omit=dev'
+        entry: python3 scripts/check-npm-audit.py ui --omit=dev
         pass_filenames: false
         stages: [pre-push]
 

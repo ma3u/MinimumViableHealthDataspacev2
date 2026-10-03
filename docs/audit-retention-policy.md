@@ -100,7 +100,7 @@ logging:
     labels: "service,retention"
 ```
 
-This is already included in the `docker-compose.vault-persistent.yml` override pattern.
+Not applied yet: no compose file sets a log driver today. The Vault override that this section used to point at was removed in #404; Vault is file-backed in `docker-compose.jad.yml` itself since 2026-09-26.
 
 ---
 

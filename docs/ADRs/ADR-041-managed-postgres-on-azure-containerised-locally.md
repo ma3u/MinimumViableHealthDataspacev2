@@ -94,10 +94,12 @@ EA or CSP discount.
 | Backup at default 7-day retention | included up to 100% of provisioned storage | $0.00      |
 | **Total, always on**              |                                            | **$18.91** |
 
-The repo already scales ACA down out of hours (`.github/workflows/aca-schedule.yml`,
-Mon to Fri 07-20 Europe/Berlin). Applying the same window here, 65 h/week is about
-282 h/month, so compute falls to about $5.61 and the total to about **$9.99/month**.
-A stopped Flexible Server still bills storage, so the floor is $4.38.
+**The server runs around the clock, so $18.91 is the real figure.** An earlier draft
+applied the ACA off-hours window (`.github/workflows/aca-schedule.yml`, Mon to Fri
+07-20) to reach about $9.99. That window does not apply here: since 2026-09-13 the
+stop job deliberately keeps `mvhd-keycloak` running overnight, because MeinBefund users
+sign in in the evening and the quota counter shares the database, and Keycloak cannot
+run without Postgres. Stopping the server at night would end that service.
 
 This is the cost of not losing the dataspace on a restart. It replaces an ACA container
 that was nominally free and was in practice destroying data.
@@ -132,7 +134,7 @@ being load-bearing.
 **Harder.** A failure mode appears that a local container never had: connection
 exhaustion, with no pooler available at this tier. The database is now reachable over the
 network, so a firewall rule governs access and a misconfigured one locks out the whole
-stack. Cost moves from zero to roughly $10 to $19/month. Local and Azure now differ in
+stack. Cost moves from zero to about $19/month, always on. Local and Azure now differ in
 TLS settings, which is a seam that can rot if only one side is exercised.
 
 **New constraints.** Pool sizes become part of the deployment contract. ACA on a

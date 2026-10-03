@@ -1,6 +1,6 @@
 # ADR-036: Operator secrets live in Azure Key Vault and are referenced, never copied
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-02, #404)
 **Date:** 2026-09-13
 **Relates to:** [ADR-034](ADR-034-claude-workload-identity-federation.md), [ADR-035](ADR-035-inference-provider-residency-and-quota.md), [ADR-029](ADR-029-dependency-version-pinning.md)
 **Tracks:** [#186](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/186)

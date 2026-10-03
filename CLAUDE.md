@@ -36,7 +36,7 @@ docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d
 ```
 ui/src/app/             — Next.js 14 app router (pages + api/ routes)
 ui/src/lib/             — auth.ts, api.ts (static-export mock map), neo4j.ts
-ui/__tests__/           — unit/ (Vitest + MSW) · e2e/journeys/ (Playwright)
+ui/__tests__/           — unit/ (Vitest) · e2e/journeys/ (Playwright)
 ui/public/mock/         — JSON fixtures for NEXT_PUBLIC_STATIC_EXPORT=true
 services/neo4j-proxy/   — Express FHIR/OMOP/NLQ/federated bridge (port 9090)
 services/catalog-crawler|catalog-enricher — federated discovery pipeline (issue #8)
@@ -63,7 +63,8 @@ docs/                   — see "Knowledge & planning" below
 3. **Static export disables API routes** — CI renames `src/app/api/`; guard with
    `NEXT_PUBLIC_STATIC_EXPORT` and mirror every route in `ui/public/mock/*.json`.
 4. **Pre-commit Prettier reformats staged files** — `git add` again and retry the commit;
-   pre-push runs full Vitest + `npm audit --audit-level=high --omit=dev`.
+   pre-push runs full Vitest + `scripts/check-npm-audit.py ui --omit=dev` (npm audit,
+   high+, except time-boxed entries in `docs/npm-audit-exceptions.json`).
 5. **Keycloak: never use `wellKnown` in the NextAuth provider** (container-internal
    `localhost` breaks token exchange) and the UI client is confidential + PKCE S256 —
    see `ui/src/lib/auth.ts`, `jad/keycloak-realm.json`, and the realm-drift runbook
@@ -84,7 +85,7 @@ docs/                   — see "Knowledge & planning" below
 - `docs/knowledge/index.md` — OKF v0.2 concept bundle: services, data models, APIs, runbooks.
 - `docs/planning/index.md` — work items in `done/ · current/ · future/`; roadmap detail in
   `docs/planning/roadmap-phases-*.md`; issue table in `docs/planning-health-dataspace-v2.md`.
-- `docs/ADRs/` — canonical ADR corpus (ADR-001…028). `docs/adr/0000-template.md` is the
+- `docs/ADRs/` — canonical ADR corpus (ADR-001…044, statuses in the ADR table of `docs/planning-health-dataspace-v2.md`). `docs/adr/0000-template.md` is the
   Nygard template for new ones; never edit an accepted ADR — supersede it.
 - Before significant changes: check ADRs + planning index + `gh issue list`. Keep any
   routinely-loaded doc under ~15K tokens (ADR-026) — index stays small, detail in archives.

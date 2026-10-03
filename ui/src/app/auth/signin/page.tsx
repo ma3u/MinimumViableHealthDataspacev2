@@ -5,9 +5,9 @@ import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { ShieldCheck, Shield, Smartphone } from "lucide-react";
 import { DEMO_PERSONAS, ROLE_LABELS, landingFor } from "@/lib/auth";
+import { IS_STATIC } from "@/lib/static-export";
 
 /** EUDI Wallet QR sign-in needs server API routes — absent in the static export. */
-const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
 /** Error message mapping for common OAuth errors. */
 function oauthErrorMessage(error: string): string {

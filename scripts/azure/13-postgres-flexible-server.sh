@@ -29,7 +29,7 @@
 #   B1ms compute  $0.0199/h   730 h   $14.53/month
 #   32 GiB storage $0.1369/GB          $4.38/month
 #   backup at 7-day retention, within 100% of storage, included
-#   total always-on  $18.91/month; on the 07-20 Mon-Fri window about $9.99
+#   total $18.91/month, always on: Keycloak stays up overnight and needs it
 #
 # Needs: az (logged in), Key Vault Secrets Officer on $KEY_VAULT_NAME, psql.
 # =============================================================================
@@ -68,9 +68,8 @@ MSG
 )"
 }
 
-# Never echoed, never passed on a command line that gets logged. Read back out
-# of Key Vault by the callers that need it.
-pg_admin_password() { kv_secret "$PG_SECRET_NAME" quiet; }
+# pg_admin_password comes from env.sh: Key Vault, then the pg-flex-password ACA
+# secret on the control plane. Never echoed, never on a logged command line.
 
 # ── check ───────────────────────────────────────────────────────────────────
 phase_check() {
@@ -289,12 +288,12 @@ phase_3b() {
   pw="$(pg_admin_password)"
   [ -n "$pw" ] || die "no ${PG_SECRET_NAME} in ${KEY_VAULT_NAME}; run phase 1 first"
 
-  # The old password stays in env.sh and in the mvhd-postgres secret until
+  # The old password is still the pg-password secret on mvhd-postgres until
   # phase 4, so the way back is not lost by this phase.
   say "rollback, per app, if one does not come back:"
   say "  az containerapp update -n <app> -g ${RG} --set-env-vars \\"
   say "    'EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_APP}:5432/<db>' \\"
-  say "    'EDC_DATASOURCE_DEFAULT_USER=mvhdadmin' 'EDC_DATASOURCE_DEFAULT_PASSWORD=<env.sh PG_PASSWORD>'"
+  say "    'EDC_DATASOURCE_DEFAULT_USER=mvhdadmin' 'EDC_DATASOURCE_DEFAULT_PASSWORD=<pg-password secret on mvhd-postgres>'"
 
   for entry in "${EDC_DB_APPS[@]}"; do
     app="${entry%%:*}"
@@ -311,20 +310,28 @@ phase_3b() {
       -o none || die "could not update ${app}"
   done
 
-  # lib/pq takes the whole DSN, password included, so the DSN itself is the
-  # secret. The generated password is base64 with /+= stripped plus "Aa1!",
-  # and "!" is legal in URL userinfo, so it needs no escaping.
-  local dsn
-  dsn="postgresql://${PG_FLEX_ADMIN}:${pw}@${PG_FLEX_FQDN}:5432/cfm?sslmode=require"
-  for app in "${CFM_DB_APPS[@]}"; do
-    say "  ${app} -> cfm"
-    az containerapp secret set --name "$app" --resource-group "$RG" \
-      --secrets "cfm-database-url=${dsn}" -o none || die "could not set the secret on ${app}"
-    az containerapp update --name "$app" --resource-group "$RG" \
-      --set-env-vars "DATABASE_URL=secretref:cfm-database-url" \
-      -o none || die "could not update ${app}"
+  unset pw
+
+  # The CFM managers ignore DATABASE_URL. They read `dsn:` from the tm.env /
+  # pm.env file that 05-cfm-configure.sh mounts as a secret volume, so that
+  # script is the only way to move them. The first version of this phase set
+  # DATABASE_URL instead, reported success, and left CFM on mvhd-postgres
+  # (2026-10-02). Read the mounted file back to prove it names this server.
+  "${SCRIPT_DIR}/05-cfm-configure.sh" || die "05-cfm-configure.sh failed"
+  local secret_name file_secret
+  for entry in "${CFM_DB_APPS[@]}"; do
+    case "$entry" in
+      "$TENANT_MGR_APP") secret_name=tm-env ;;
+      *) secret_name=pm-env ;;
+    esac
+    file_secret=$(az containerapp secret show --name "$entry" --resource-group "$RG" \
+      --secret-name "$secret_name" --query value -o tsv 2>/dev/null || echo "")
+    case "$file_secret" in
+      *"@${PG_FLEX_FQDN}:"*) say "  ${entry}: ${secret_name} names ${PG_FLEX_FQDN}" ;;
+      *) die "${entry}: ${secret_name} does not name ${PG_FLEX_FQDN}" ;;
+    esac
   done
-  unset pw dsn
+  unset file_secret
 
   # The process, not the knob: read each app's newest revision health back.
   say "waiting 120s for the new revisions to start"
@@ -359,7 +366,10 @@ pg_app_consumers() {
     [ "$app" = "$KEYCLOAK_APP" ] && continue
     hits=$(az containerapp show --name "$app" --resource-group "$RG" \
       --query "properties.template.containers[].env[?contains(to_string(value),'${PG_APP}')].name" \
-      -o tsv 2>/dev/null | tr '\n' ' ')
+      -o tsv 2>/dev/null | tr -s '[:space:]' ' ' | sed 's/^ *//; s/ *$//')
+    # No match prints an empty line, and `tr '\n' ' '` alone turns that into
+    # a single space, which -n counts as a hit: every app then "still points
+    # at" mvhd-postgres and phase 4 refuses forever. Trimmed, empty is empty.
     [ -n "$hits" ] && out="${out}  ${app}: ${hits}"$'\n'
   done
   printf '%s' "$out"

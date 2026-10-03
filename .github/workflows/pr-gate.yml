@@ -86,6 +86,13 @@ jobs:
           set -euo pipefail
           python3 scripts/check-bruno-coverage.py
 
+      # #404 removed the dead files, exports and dependencies knip found;
+      # this keeps it that way. ui/knip.json lists the entry points knip
+      # cannot see (scripts run by workflows) and the two dependencies used
+      # outside TypeScript. Exported types are not checked.
+      - name: No unused files, exports or dependencies (knip)
+        run: npm run --prefix ui knip
+
       # gitleaks' pre-commit hook is `gitleaks protect --staged`, which sees
       # nothing in CI because nothing is staged. Scan the PR's commits instead.
       - name: Secret scan (PR commits)

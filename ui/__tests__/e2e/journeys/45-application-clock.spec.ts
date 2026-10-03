@@ -213,6 +213,8 @@ test.describe("Issue #206 · the application and the Art. 68(4) clock", () => {
   test("J994 the public register shows the application with its clock", async ({
     page,
   }) => {
+    // Every API route needs a session since #404 (ADR-044).
+    await loginAs(page, "researcher", "researcher");
     const register = await apiGet(page, "/api/permits");
     const entry = (
       register.entries as {
