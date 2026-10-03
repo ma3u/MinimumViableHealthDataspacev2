@@ -43,6 +43,8 @@ same_in_both = {
     "RDW", "MPV", "Albumin", "IgG", "Tryptophan",
     # A measurement and its number, identical in both.
     "BMI %@",
+    # Connect to EHDS (#473): the word German uses for the platform too.
+    "Hub",
 }
 
 missing, german_in_base, total = [], [], 0

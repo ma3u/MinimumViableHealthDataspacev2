@@ -620,6 +620,8 @@ final class AppModel: ObservableObject {
   @Published var showingProfile = false
   @Published var consents: ConsentLedger = .empty
   @Published var showingConsents = false
+  /// The Connect to EHDS sheet (#473).
+  @Published var showingConnect = false
   /// The research export, held until the person confirms it, when no
   /// registry consent is recorded.
   @Published var confirmingResearchExport = false
@@ -709,6 +711,8 @@ final class AppModel: ObservableObject {
 
 struct ContentView: View {
   @StateObject private var model = AppModel()
+  /// The phone's connection to the patient's record on the hub (#473).
+  @StateObject private var connection = EHDSConnection()
   @State private var scanning = false
   @State private var path: [UUID] = []
 
@@ -859,6 +863,11 @@ struct ContentView: View {
               Label("Consents", systemImage: "checkmark.seal")
             }
             Button {
+              model.showingConnect = true
+            } label: {
+              Label("Connect to EHDS", systemImage: "link.badge.plus")
+            }
+            Button {
               model.showingPrivacy = true
             } label: {
               Label("Privacy and safety", systemImage: "hand.raised")
@@ -901,6 +910,7 @@ struct ContentView: View {
       .ignoresSafeArea()
     }
     .modifier(AppSheets(model: model))
+    .modifier(ConnectSheet(model: model, connection: connection))
     .onChange(of: model.openReport) { _, id in
       // Following a point on a chart back to the document it was read from.
       guard let id else { return }
@@ -956,6 +966,8 @@ struct ContentView: View {
         model.showingProfile = true
       case .consents:
         model.showingConsents = true
+      case .connect:
+        model.showingConnect = true
       case .list, nil:
         break
       }
@@ -1106,6 +1118,26 @@ struct ProvenanceBadge: View {
 /// inline, is more than the type checker will infer in reasonable time. The
 /// error it gives ("unable to type-check this expression in reasonable time")
 /// names no line, so the cure is structural rather than a smaller edit.
+/// Connect to EHDS (#473): its sheet, and the link that opens it.
+private struct ConnectSheet: ViewModifier {
+  @ObservedObject var model: AppModel
+  @ObservedObject var connection: EHDSConnection
+
+  func body(content: Content) -> some View {
+    content
+      .sheet(isPresented: $model.showingConnect) {
+        ConnectView(connection: connection) { model.showingConnect = false }
+      }
+      // The patient screen's "Open in Klarbefund", and the camera app reading
+      // the QR code, both arrive here as a klarbefund://connect link.
+      .onOpenURL { url in
+        guard url.scheme == "klarbefund", url.host == "connect" else { return }
+        model.showingConnect = true
+        connection.connect(with: url.absoluteString)
+      }
+  }
+}
+
 private struct AppSheets: ViewModifier {
   @ObservedObject var model: AppModel
 

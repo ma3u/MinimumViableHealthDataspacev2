@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { runQuery } from "@/lib/neo4j";
-import { rowsToBundle, type ObservationRow } from "@/lib/overview/observations";
+import { loadObservationBundle } from "@/lib/patient/observation-bundle";
 import { ownPatientIdForSession } from "@/lib/overview/patient";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
@@ -49,44 +48,14 @@ export async function GET(req: Request) {
   }
 
   try {
-    const [patientRows, rows] = await Promise.all([
-      runQuery<{ id: string; name: string }>(
-        `MATCH (p:Patient)
-         WHERE coalesce(p.id, p.resourceId, elementId(p)) = $patientId
-         RETURN coalesce(p.id, p.resourceId, elementId(p)) AS id,
-                coalesce(p.name, 'Anonymous') AS name
-         LIMIT 1`,
-        { patientId },
-      ),
-      runQuery<ObservationRow>(
-        `MATCH (p:Patient)-[:HAS_OBSERVATION]->(o:Observation)
-         WHERE coalesce(p.id, p.resourceId, elementId(p)) = $patientId
-           AND o.valueQuantity IS NOT NULL
-           AND ($code IS NULL OR o.code = $code)
-         RETURN coalesce(o.resourceId, elementId(o)) AS id,
-                coalesce(o.code, '') AS code,
-                coalesce(o.display, o.name, o.code, 'Unknown') AS display,
-                toFloat(o.valueQuantity) AS value,
-                coalesce(o.unit, o.valueUnit, '') AS unit,
-                o.referenceLow AS low,
-                o.referenceHigh AS high,
-                o.referenceText AS rangeText,
-                o.category AS category,
-                coalesce(toString(o.effectiveDate), o.dateTime, '') AS effective,
-                o.performer AS performer
-         ORDER BY code, effective
-         LIMIT 2000`,
-        { patientId, code },
-      ),
-    ]);
-    if (patientRows.length === 0) {
+    const bundle = await loadObservationBundle(
+      patientId,
+      `${url.pathname}${url.search}`,
+      code,
+    );
+    if (!bundle) {
       return NextResponse.json({ error: "Patient not found" }, { status: 404 });
     }
-    const bundle = rowsToBundle(
-      rows.filter((r) => r.code && Number.isFinite(r.value)),
-      patientRows[0],
-      `${url.pathname}${url.search}`,
-    );
     return NextResponse.json(bundle);
   } catch (err) {
     return NextResponse.json(

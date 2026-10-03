@@ -353,6 +353,46 @@
         }
       ],
       "defaultClientScopes": ["profile", "email"]
+    },
+    {
+      "clientId": "klarbefund-app",
+      "name": "Klarbefund iPhone app",
+      "description": "Public client for the Klarbefund app: connects to the patient's own record by a device grant the patient screen starts (QR code). No other flow. #473, ADR-049.",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "consentRequired": true,
+      "fullScopeAllowed": true,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {
+        "oauth2.device.authorization.grant.enabled": "true",
+        "oauth2.device.code.lifespan": "120",
+        "oauth2.device.polling.interval": "5",
+        "display.on.consent.screen": "true",
+        "consent.screen.text": "Klarbefund on your iPhone: read your own record"
+      },
+      "protocolMappers": [
+        {
+          "name": "realm-roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "realm_access.roles",
+            "multivalued": "true",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "userinfo.token.claim": "false"
+          }
+        }
+      ],
+      "defaultClientScopes": ["profile"]
     }
   ],
   "users": [

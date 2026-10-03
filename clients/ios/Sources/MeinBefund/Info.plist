@@ -26,6 +26,14 @@
 				<string>$(MB_OIDC_REDIRECT_SCHEME)</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>red.mabu.meinbefund.connect</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>klarbefund</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
@@ -39,5 +47,10 @@
 	<string>$(MB_OIDC_ISSUER)</string>
 	<key>MBOIDCRedirectScheme</key>
 	<string>$(MB_OIDC_REDIRECT_SCHEME)</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 </dict>
 </plist>
