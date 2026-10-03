@@ -22,7 +22,7 @@ The morning bootstrap job put the configuration back, but never the
 participant keys, and it ran a cached `:latest` image without the provisioner
 role.
 
-Three traps on the way to the fix (ADR-047 is the stopgap, ADR-046 the fix):
+Four traps on the way to the fix (ADR-047 is the stopgap, ADR-046 the fix):
 
 - `hashicorp/vault:2.0` runs as the `vault` user, so `apk add` in a derived
   image fails with `Unable to open log: Permission denied`. Add `USER root`.
@@ -30,6 +30,13 @@ Three traps on the way to the fix (ADR-047 is the stopgap, ADR-046 the fix):
   reachable (`failed to check for native upsert`), and the backend does not
   create its own table. The sidecar creates the table; Container Apps
   restarts Vault.
+- In Container Apps, as in Kubernetes, a container's `command` replaces the
+  image's ENTRYPOINT. Vault's `docker-entrypoint.sh` is what turns
+  `VAULT_LOCAL_CONFIG` into `/vault/config/local.json`, so with `command` set
+  Vault started with no config: `A storage backend must be specified`
+  (revision `--0000177`). Put the start words in `args`. A local
+  `docker run image vault server ...` passes them as CMD and keeps the
+  entrypoint, so it cannot show this.
 - A local `docker run --network container:<vault>` test loses the shared
   namespace when Vault restarts. Use a third "pod" container that owns the
   namespace, as ACA's pause container does.
