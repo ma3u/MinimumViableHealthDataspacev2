@@ -665,7 +665,8 @@ services:
   # CFM Tenant Manager — Multi-tenant participant lifecycle
   # ---------------------------------------------------------------------------
   tenant-manager:
-    # Pinned to the WORKING 2026-03-09 manager build (ADR-029). GHCR :latest
+    # Built from source and multi-arch since 2026-09-29 (#380), see the agents
+    # below for why. GHCR :latest
     # was overwritten 2026-04-11 by the shared CFM *agent* image, which
     # crash-loops in the manager role — found by the Phase B gate.
     #
@@ -678,7 +679,7 @@ services:
     # docs/gotchas.md (2026-09-28) and #380. An amd64 build exists for Azure
     # (GOARCH=amd64 from Metaform/cfm-fulcrum); publishing multi-arch tags to
     # GHCR is what would let CI exercise this path.
-    image: ghcr.io/ma3u/health-dataspace/cfm-tmanager:latest@sha256:fd096dc016d319faf85d25489b646d76df7c86c708f18c8facc84f3bbd41fa22
+    image: ghcr.io/ma3u/health-dataspace/cfm-tmanager:2026-03-09@sha256:141aad39763c7f3882af29fdc0da9da7896d9103df6d57a9acc9b70d88f5bc4d
     container_name: health-dataspace-tenant-manager
     volumes:
       - ./jad/tenant-manager-config.yaml:/etc/appname/tm.env:ro
@@ -701,10 +702,11 @@ services:
   # CFM Provision Manager — Automated resource provisioning
   # ---------------------------------------------------------------------------
   provision-manager:
-    # Pinned to the WORKING 2026-03-09 manager build (ADR-029). GHCR :latest
+    # Built from source and multi-arch since 2026-09-29 (#380), see the agents
+    # below for why. GHCR :latest
     # was overwritten 2026-04-11 by the shared CFM *agent* image, which
     # crash-loops in the manager role — found by the Phase B gate.
-    image: ghcr.io/ma3u/health-dataspace/cfm-pmanager:latest@sha256:f72bb345dfcd145369b4baa76fbcda6055e1b5621772876559564b6e56be533c
+    image: ghcr.io/ma3u/health-dataspace/cfm-pmanager:2026-03-09@sha256:e07d73e2788535882b26f267be44da42888631cf3d0fdf12afd117473fd4b500
     container_name: health-dataspace-provision-manager
     volumes:
       - ./jad/provision-manager-config.yaml:/etc/appname/pm.env:ro
@@ -758,11 +760,17 @@ services:
   # CFM Agents — Background provisioning agents (Keycloak, EDC-V, Registration, Onboarding)
   # ---------------------------------------------------------------------------
   cfm-agents:
-    # Pinned to the WORKING 2026-03-09 agent build (ADR-029, issue #181). GHCR
-    # :latest was overwritten 2026-04-11 by a build that requires a Fulcrum job
-    # coordinator (cfm-agent.tmanager_url / .pmanager_url), which this stack does
-    # not run, so every agent panicked at launch and VPAs never left `pending`.
-    image: ghcr.io/ma3u/health-dataspace/cfm-kcagent:latest@sha256:f9b96f905c9f8bbdc38177c48d8a2eb5b13f8ae37471cf5db28f055d4beafac6
+    # Built from source and multi-arch since 2026-09-29 (#380): linux/amd64 and
+    # linux/arm64, from Metaform/connector-fabric-manager at 9aa627f38, by
+    # scripts/build-cfm-images.sh. The digest that was here before was arm64
+    # only, so on an amd64 runner compose said `Started` and the container
+    # never served: CFM had never once run in CI, hidden because
+    # /api/admin/tenants backfills from Neo4j when it is unreachable.
+    # Do not repoint at :latest. That tag is the 2026-04-11 build which needs a
+    # Fulcrum job coordinator (cfm-agent.tmanager_url) this stack does not run,
+    # so every agent panics at launch and VPAs never leave `pending`
+    # (ADR-029, #181).
+    image: ghcr.io/ma3u/health-dataspace/cfm-kcagent:2026-03-09@sha256:a9b23f25e2d6f0c5b7e5c84ba8cb3333f416991bd6d9547009ce017905bce525
     container_name: health-dataspace-cfm-keycloak-agent
     volumes:
       - ./jad/keycloak-agent-config.yaml:/etc/appname/kcagent.env:ro
@@ -776,11 +784,17 @@ services:
     restart: unless-stopped
 
   cfm-edcv-agent:
-    # Pinned to the WORKING 2026-03-09 agent build (ADR-029, issue #181). GHCR
-    # :latest was overwritten 2026-04-11 by a build that requires a Fulcrum job
-    # coordinator (cfm-agent.tmanager_url / .pmanager_url), which this stack does
-    # not run, so every agent panicked at launch and VPAs never left `pending`.
-    image: ghcr.io/ma3u/health-dataspace/cfm-edcvagent:latest@sha256:78fbf70a14e1cc2f1f89700cdcd95cd3cef68dd647dd032a264fba34cbe34d39
+    # Built from source and multi-arch since 2026-09-29 (#380): linux/amd64 and
+    # linux/arm64, from Metaform/connector-fabric-manager at 9aa627f38, by
+    # scripts/build-cfm-images.sh. The digest that was here before was arm64
+    # only, so on an amd64 runner compose said `Started` and the container
+    # never served: CFM had never once run in CI, hidden because
+    # /api/admin/tenants backfills from Neo4j when it is unreachable.
+    # Do not repoint at :latest. That tag is the 2026-04-11 build which needs a
+    # Fulcrum job coordinator (cfm-agent.tmanager_url) this stack does not run,
+    # so every agent panics at launch and VPAs never leave `pending`
+    # (ADR-029, #181).
+    image: ghcr.io/ma3u/health-dataspace/cfm-edcvagent:2026-03-09@sha256:e6912d0868746d409da04641e009f4b4d063e06bc731833671981c54221cdd2e
     container_name: health-dataspace-cfm-edcv-agent
     volumes:
       - ./jad/edcv-agent-config.yaml:/etc/appname/edcvagent.env:ro
@@ -794,11 +808,17 @@ services:
     restart: unless-stopped
 
   cfm-registration-agent:
-    # Pinned to the WORKING 2026-03-09 agent build (ADR-029, issue #181). GHCR
-    # :latest was overwritten 2026-04-11 by a build that requires a Fulcrum job
-    # coordinator (cfm-agent.tmanager_url / .pmanager_url), which this stack does
-    # not run, so every agent panicked at launch and VPAs never left `pending`.
-    image: ghcr.io/ma3u/health-dataspace/cfm-regagent:latest@sha256:d0925810736087f10d74cd31f7d95a552518a99f8868b0f9303ce0c059605be7
+    # Built from source and multi-arch since 2026-09-29 (#380): linux/amd64 and
+    # linux/arm64, from Metaform/connector-fabric-manager at 9aa627f38, by
+    # scripts/build-cfm-images.sh. The digest that was here before was arm64
+    # only, so on an amd64 runner compose said `Started` and the container
+    # never served: CFM had never once run in CI, hidden because
+    # /api/admin/tenants backfills from Neo4j when it is unreachable.
+    # Do not repoint at :latest. That tag is the 2026-04-11 build which needs a
+    # Fulcrum job coordinator (cfm-agent.tmanager_url) this stack does not run,
+    # so every agent panics at launch and VPAs never leave `pending`
+    # (ADR-029, #181).
+    image: ghcr.io/ma3u/health-dataspace/cfm-regagent:2026-03-09@sha256:195acdc71be38eff052823eb905f56e44d1be947f5619823413dbf5c9cf14d59
     container_name: health-dataspace-cfm-registration-agent
     volumes:
       - ./jad/registration-agent-config.yaml:/etc/appname/regagent.env:ro
@@ -814,11 +834,17 @@ services:
     restart: unless-stopped
 
   cfm-onboarding-agent:
-    # Pinned to the WORKING 2026-03-09 agent build (ADR-029, issue #181). GHCR
-    # :latest was overwritten 2026-04-11 by a build that requires a Fulcrum job
-    # coordinator (cfm-agent.tmanager_url / .pmanager_url), which this stack does
-    # not run, so every agent panicked at launch and VPAs never left `pending`.
-    image: ghcr.io/ma3u/health-dataspace/cfm-obagent:latest@sha256:ffd7e5e1544c50e7a45f88b620656f31a0f118b2f3f305e55720d2762bcce3f3
+    # Built from source and multi-arch since 2026-09-29 (#380): linux/amd64 and
+    # linux/arm64, from Metaform/connector-fabric-manager at 9aa627f38, by
+    # scripts/build-cfm-images.sh. The digest that was here before was arm64
+    # only, so on an amd64 runner compose said `Started` and the container
+    # never served: CFM had never once run in CI, hidden because
+    # /api/admin/tenants backfills from Neo4j when it is unreachable.
+    # Do not repoint at :latest. That tag is the 2026-04-11 build which needs a
+    # Fulcrum job coordinator (cfm-agent.tmanager_url) this stack does not run,
+    # so every agent panics at launch and VPAs never leave `pending`
+    # (ADR-029, #181).
+    image: ghcr.io/ma3u/health-dataspace/cfm-obagent:2026-03-09@sha256:dcdf04ae1b1581333b6a9ac9ba1e05b76ec565dbf6d7f4625d1aaae437875d85
     container_name: health-dataspace-cfm-onboarding-agent
     volumes:
       - ./jad/onboarding-agent-config.yaml:/etc/appname/obagent.env:ro
