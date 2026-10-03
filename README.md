@@ -38,18 +38,6 @@
     - [All Docker Service Endpoints](#all-docker-service-endpoints)
   - [Documentation](#documentation)
   - [Implementation Status](#implementation-status)
-    - [Phase 1 — Infrastructure Migration](#phase-1--infrastructure-migration)
-    - [Phase 2 — Identity \& Trust](#phase-2--identity--trust)
-    - [Phase 3 — Health Knowledge Graph](#phase-3--health-knowledge-graph)
-    - [Phase 4 — Dataspace Integration](#phase-4--dataspace-integration)
-    - [Phase 5 — Federated Queries \& Natural Language Search](#phase-5--federated-queries--natural-language-search)
-    - [Phase 6 — Web Application \& Participant Portal](#phase-6--web-application--participant-portal)
-    - [Phase 7 — Protocol Compliance Testing](#phase-7--protocol-compliance-testing)
-    - [Phase 8 — Automated Testing](#phase-8--automated-testing)
-    - [Phase 9 — Documentation \& Navigation](#phase-9--documentation--navigation)
-    - [Phase 10 — Tasks Dashboard](#phase-10--tasks-dashboard)
-    - [Phase 11 — System Topology View](#phase-11--system-topology-view)
-    - [Phase 12 — Data Query Fix \& Policy Seeding](#phase-12--data-query-fix--policy-seeding)
     - [Container Inventory](#container-inventory)
       - [Tier 0 — Infrastructure Foundations (no dependencies, start first)](#tier-0--infrastructure-foundations-no-dependencies-start-first)
       - [Tier 1 — Core Identity \& UI (depend on Tier 0)](#tier-1--core-identity--ui-depend-on-tier-0)
@@ -185,31 +173,34 @@ by persona-specific menus for researchers (My Researches) and patients (My Healt
 | 7    | `/analytics`     | Run Analytics     | Art. 50/53   | OMOP cohort analytics in SPE                         |
 | 8    | `/query`         | Query & Export    | Art. 50      | NLQ/federated queries, export aggregate results only |
 
-**Menu items per role:**
+**Menu items per role** (Public means without signing in on the live demo. Every page but `/docs` needs a
+session ([ADR-044](docs/ADRs/ADR-044-every-api-route-needs-a-session.md)); the GitHub Pages build has no
+sign-in and opens every page with a demo persona instead):
 
-| Route                           | Public | Patient | Data Holder | Researcher | HDAB | EDC Admin |
-| ------------------------------- | :----: | :-----: | :---------: | :--------: | :--: | :-------: |
-| `/graph`                        |   ✅   |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/catalog`                      |   ✅   |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/catalog/editor`               |   —    |    —    |     ✅      |     —      |  —   |    ✅     |
-| `/patient`                      |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/patient/profile`              |   —    |   ✅    |      —      |     —      |  —   |     —     |
-| `/patient/research`             |   —    |   ✅    |      —      |     —      |  —   |     —     |
-| `/patient/insights`             |   —    |   ✅    |      —      |     —      |  —   |     —     |
-| `/analytics`                    |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
-| `/query` (NLQ)                  |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
-| `/eehrxf`                       |   ✅   |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/compliance`                   |   —    |    —    |      —      |     —      |  ✅  |    ✅     |
-| `/credentials`                  |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/data/share`                   |   —    |    —    |     ✅      |     —      |  —   |    ✅     |
-| `/data/discover`                |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
-| `/negotiate`                    |   —    |    —    |     ✅      |     ✅     |  —   |    ✅     |
-| `/tasks`                        |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/data/transfer`                |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/admin` + components + tenants |   —    |    —    |      —      |     —      |  —   |    ✅     |
-| `/admin/policies` + audit       |   —    |    —    |      —      |     —      |  ✅  |    ✅     |
-| `/onboarding`, `/settings`      |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
-| `/docs`                         |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
+| Route                                       | Public | Patient | Data Holder | Researcher | HDAB | EDC Admin |
+| ------------------------------------------- | :----: | :-----: | :---------: | :--------: | :--: | :-------: |
+| `/overview`                                 |   —    |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/graph` (by URL, no menu entry since #271) |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/catalog`                                  |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/catalog/editor`                           |   —    |    —    |     ✅      |     —      |  —   |    ✅     |
+| `/patient`                                  |   —    |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/patient/profile`                          |   —    |   ✅    |      —      |     —      |  —   |     —     |
+| `/patient/research`                         |   —    |   ✅    |      —      |     —      |  —   |     —     |
+| `/patient/insights`                         |   —    |   ✅    |      —      |     —      |  —   |     —     |
+| `/analytics`                                |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
+| `/query` (NLQ)                              |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
+| `/eehrxf`                                   |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/compliance`                               |   —    |    —    |      —      |     —      |  ✅  |    ✅     |
+| `/credentials`                              |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/data/share`                               |   —    |    —    |     ✅      |     —      |  —   |    ✅     |
+| `/data/discover`                            |   —    |    —    |      —      |     ✅     |  ✅  |    ✅     |
+| `/negotiate`                                |   —    |    —    |     ✅      |     ✅     |  —   |    ✅     |
+| `/tasks`                                    |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/data/transfer`                            |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/admin` + components + tenants             |   —    |    —    |      —      |     —      |  —   |    ✅     |
+| `/admin/policies` + audit                   |   —    |    —    |      —      |     —      |  ✅  |    ✅     |
+| `/onboarding`, `/settings`                  |   —    |    —    |     ✅      |     ✅     |  ✅  |    ✅     |
+| `/docs`                                     |   ✅   |   ✅    |     ✅      |     ✅     |  ✅  |    ✅     |
 
 ### Graph Explorer — Persona Views
 
@@ -235,16 +226,32 @@ arranged in concentric rings by relevance (not by technical layer).
 | Hospital   | Which data do we offer? · Who is using our data? · What contracts? · Are we compliant? · Clinical data?      |
 | HDAB       | What approvals are pending? · Which policies? · What contracts? · Credentials valid? · Trust Center?         |
 
-**Node role colours** (warm/vivid accents — distinct from cool/muted layer colours):
+**Node role colours in the Graph Explorer** (warm, vivid accents over the cool, muted layer colours;
+the source of truth is `NODE_ROLE_COLORS` in `ui/src/lib/graph-constants.ts`):
 
-| Node type         | Colour              | Role                                             |
-| ----------------- | ------------------- | ------------------------------------------------ |
-| `Participant`     | 🟠 Orange `#F97316` | Dataspace actors (data holders, researchers)     |
-| `TrustCenter`     | 🔴 Red `#EF4444`    | EHDS Art. 50 pseudonym authority                 |
-| `HDABApproval`    | 🩷 Pink `#EC4899`   | HDAB access decisions                            |
-| `SPESession`      | 🟡 Amber `#F59E0B`  | Active secure processing sessions                |
-| `PatientConsent`  | 🟣 Purple `#A855F7` | Patient consent for secondary use (EHDS Art. 10) |
-| `ResearchInsight` | 🩵 Cyan `#06B6D4`   | Personalised insights from research studies      |
+| Node type              | Colour                 | Role                                                   |
+| ---------------------- | ---------------------- | ------------------------------------------------------ |
+| `Participant`          | 🟠 Orange `#F97316`    | Dataspace actors (data holders, data users)            |
+| `TrustCenter`          | 🔴 Red `#EF4444`       | HDAB-designated pseudonymisation authority (Art. 50)   |
+| `HDABApproval`         | 🩷 Pink `#EC4899`      | Access body decisions                                  |
+| `HealthDataRequest`    | 🩷 Deep pink `#DB2777` | Statistical data request (Art. 69)                     |
+| `NonComplianceFinding` | 🔴 Dark red `#B91C1C`  | Finding of non-compliance (Art. 63)                    |
+| `InformationRequest`   | 🟠 Orange `#F97316`    | Request for information (Art. 63(1))                   |
+| `ResultCommunication`  | 🩵 Teal `#0891B2`      | Results of the use communicated back (Art. 61(4))      |
+| `SPESession`           | 🟡 Amber `#F59E0B`     | Active secure processing sessions                      |
+| `PatientConsent`       | 🟣 Purple `#A855F7`    | Patient consent and opt-out (GDPR Art. 15-22)          |
+| `ResearchInsight`      | 🩵 Cyan `#06B6D4`      | Personalised insights from research studies            |
+| `ValueCenter`          | 🟡 Gold `#FBBF24`      | The persona's starting node at the centre of the graph |
+
+**Status colours in the persona overview** (`/overview`, the animated 3D view every login lands on):
+
+| Status             | Colour              | Meaning                       |
+| ------------------ | ------------------- | ----------------------------- |
+| Non-compliant now  | 🔴 Red `#EF4444`    | Pulsing halo; needs action    |
+| At risk / due soon | 🟡 Amber `#F59E0B`  | A deadline or expiry is close |
+| Information        | 🔵 Sky `#38BDF8`    | Context, nothing to do        |
+| In order           | 🟢 Green `#22C55E`  | Checked and fine              |
+| Dataset            | 🟣 Violet `#A78BFA` | A dataset node, not a status  |
 
 ---
 
@@ -268,10 +275,11 @@ MinimumViableHealthDataspacev2/
 │   ├── health-dataspace-graph-schema.md  # 5-layer Neo4j schema reference
 │   └── images/
 │       ├── social-preview.svg            # GitHub social preview / OG image
-│       ├── architecture.svg              # 5-layer architecture diagram
-│       ├── graph-schema.png              # Knowledge graph schema screenshot
-│       ├── synthetic-patient-journey.png # Full patient journey screenshot
-│       └── ui-screenshot.png             # Graph Explorer UI screenshot
+│       ├── architecture.svg              # Five-layer reference architecture
+│       ├── container-dependencies.svg    # Compose services by startup tier
+│       ├── graph-schema.png              # Neo4j schema of the five layers
+│       ├── persona-overview.png          # The animated persona overview
+│       └── synthetic-patient-journey.png # Full patient journey screenshot
 ├── jad/                          # JAD stack configuration
 │   ├── edcv-assets/              # Phase 4a: EDC-V asset + policy + contract JSON
 │   ├── openapi/                  # OpenAPI specs for all JAD services
@@ -433,7 +441,7 @@ To access the protected **Portal** views (which simulate dataspace participation
 | `clinicuser` | `clinicuser` | Hospital Participant (`EDC_USER_PARTICIPANT`)     |
 | `regulator`  | `regulator`  | Health Data Access Body / HDAB (`HDAB_AUTHORITY`) |
 
-![Graph Explorer UI](docs/images/ui-screenshot.png)
+![Persona overview: the animated, layered 3D view of the access body's compliance state](docs/images/persona-overview.png)
 
 ---
 
@@ -895,17 +903,17 @@ All 12 phases are **✅ Complete** — from infrastructure migration through Azu
 
 - **WCAG 2.2 AA** — Zero accessibility violations, automated axe-core enforcement ([ADR-010](docs/ADRs/ADR-010-wcag-accessibility.md))
 - **Security Testing** — 50 automated OWASP/BSI checks, Trivy CVE scanning, Gitleaks ([ADR-011](docs/ADRs/ADR-011-security-testing.md))
-- **Azure Deployment** — 13 Container Apps + 3 Jobs with CI/CD and E2E validation ([ADR-012](docs/ADRs/ADR-012-azure-container-apps.md))
+- **Azure Deployment** — 21 Container Apps + 9 Jobs with CI/CD and E2E validation ([ADR-012](docs/ADRs/ADR-012-azure-container-apps.md))
 - **SIMPL-Open Alignment** — 5/7 EU programme requirements met ([ADR-013](docs/ADRs/ADR-013-simpl-open-alignment.md))
 - **Weekly Demo Reset** — Idempotent Sunday-night re-seed of Neo4j, Vault, and Postgres for a clean Monday-morning demo ([ADR-014](docs/ADRs/ADR-014-weekly-demo-reset.md))
-- **ACA Off-Hours Scale-Down** — Mon–Fri 07:00–20:00 Europe/Berlin schedule keeps the full ACA topology under the personal €50/month credit ([ADR-016](docs/ADRs/ADR-016-aca-off-hours-scaledown.md), supersedes [ADR-015](docs/ADRs/ADR-015-single-vm-dev-deployment.md))
-- **Persistent Storage on ACA** — Azure Files volumes for Neo4j (`/data`, `/logs`) and Vault (`/vault/data`); knowledge graph and Vault secrets survive revision restarts and morning scale-up ([ADR-017](docs/ADRs/ADR-017-persistent-storage-aca.md))
+- **ACA Off-Hours Scale-Down** — Mon–Fri 07:00–20:00 Europe/Berlin schedule keeps the full ACA topology under the personal €50/month credit ([ADR-042](docs/ADRs/ADR-042-off-hours-scaledown-current-state.md), the state that runs today)
+- **Persistent Storage on ACA** — the knowledge graph survives revision restarts on an Azure Files volume ([ADR-017](docs/ADRs/ADR-017-persistent-storage-aca.md)), and every PostgreSQL database is on Azure Database for PostgreSQL Flexible Server ([ADR-041](docs/ADRs/ADR-041-managed-postgres-on-azure-containerised-locally.md)). Vault on Azure still runs in memory and is refilled by a bootstrap job; moving it onto the Flexible Server is [#455](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/455)
 
 For detailed phase descriptions, sub-tasks, and architecture decisions, see the full **[Implementation Roadmap](docs/planning-health-dataspace-v2.md)** and **[Architecture Decision Records](docs/ADRs/)**.
 
 ### Container Inventory
 
-The full stack comprises **22 containers** across two Docker Compose files. Containers are
+The full stack comprises **25 containers** across two Docker Compose files. Containers are
 grouped by startup tier — Docker Compose launches each tier in parallel once all dependencies
 in the previous tier report healthy. The `neo4j-spe2` and `jad-seed` containers only start
 when their respective profiles (`federated`, `seed`) are explicitly activated.
@@ -918,95 +926,64 @@ Tier 0 ──► Tier 1 ──► Tier 2 ──► Tier 3 ──► Tier 4
 
 #### Tier 0 — Infrastructure Foundations (no dependencies, start first)
 
-| #   | Service        | Container Name                | Compose File             | Port(s)    | Description                                                                                                                                       |
-| --- | -------------- | ----------------------------- | ------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | `neo4j`        | `health-dataspace-neo4j`      | `docker-compose.yml`     | 7474, 7687 | Neo4j 5 Community — primary graph database with APOC + n10s plugins. Stores the 5-layer knowledge graph.                                          |
-| 2   | `postgres`     | `health-dataspace-postgres`   | `docker-compose.jad.yml` | 5432       | PostgreSQL 17 — multi-database server (8 schemas: controlplane, identityhub, issuerservice, dataplane, dataplane_omop, keycloak, cfm, redlinedb). |
-| 3   | `vault`        | `health-dataspace-vault`      | `docker-compose.jad.yml` | 8200       | HashiCorp Vault (dev mode) — secret management for signing keys, AES keys, and data plane token keys.                                             |
-| 4   | `nats`         | `health-dataspace-nats`       | `docker-compose.jad.yml` | 4222, 8222 | NATS JetStream — async messaging bus for contract negotiation and transfer process state machine events.                                          |
-| 5   | `traefik`      | `health-dataspace-traefik`    | `docker-compose.jad.yml` | 80, 8090   | Traefik v3 reverse proxy — routes `*.localhost` domains to internal services; replaces K8s Gateway API.                                           |
-| 6   | `neo4j-spe2` ¹ | `health-dataspace-neo4j-spe2` | `docker-compose.yml`     | 7475, 7688 | Neo4j 5 Community — second Secure Processing Environment for federated query testing (Phase 5).                                                   |
+| #   | Service        | Container Name                | Compose File             | Port(s)    | Description                                                                                                                                                                 |
+| --- | -------------- | ----------------------------- | ------------------------ | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `neo4j`        | `health-dataspace-neo4j`      | `docker-compose.yml`     | 7474, 7687 | Neo4j 5 Community — primary graph database with APOC + n10s plugins. Stores the 5-layer knowledge graph.                                                                    |
+| 2   | `postgres`     | `health-dataspace-postgres`   | `docker-compose.jad.yml` | 5432       | PostgreSQL 17 — multi-database server (8 schemas: controlplane, identityhub, issuerservice, dataplane, dataplane_omop, keycloak, cfm, redlinedb).                           |
+| 3   | `vault`        | `health-dataspace-vault`      | `docker-compose.jad.yml` | 8200       | HashiCorp Vault with file storage on the `vault_data` volume — secret management for signing keys, AES keys, and data plane token keys; keeps every secret across restarts. |
+| 4   | `nats`         | `health-dataspace-nats`       | `docker-compose.jad.yml` | 4222, 8222 | NATS JetStream — async messaging bus for contract negotiation and transfer process state machine events.                                                                    |
+| 5   | `traefik`      | `health-dataspace-traefik`    | `docker-compose.jad.yml` | 80, 8090   | Traefik v3 reverse proxy — routes `*.localhost` domains to internal services; replaces K8s Gateway API.                                                                     |
+| 6   | `neo4j-spe2` ¹ | `health-dataspace-neo4j-spe2` | `docker-compose.yml`     | 7475, 7688 | Neo4j 5 Community — second Secure Processing Environment for federated query testing (Phase 5).                                                                             |
 
 > ¹ Only starts with `--profile federated`.
 > ³ Port 3003 is exposed when using the `docker-compose.live.yml` overlay for live JAD cluster data.
 
 #### Tier 1 — Core Identity & UI (depend on Tier 0)
 
-| #   | Service          | Container Name              | Compose File             | Port(s)      | Dependencies | Description                                                                                                                                                        |
-| --- | ---------------- | --------------------------- | ------------------------ | ------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 7   | `keycloak`       | `health-dataspace-keycloak` | `docker-compose.jad.yml` | 8080, 9000   | `postgres`   | Keycloak — OAuth2/OIDC identity provider. Hosts `edcv` realm with 3 demo users, PKCE client, and role mappings.                                                    |
-| 8   | `graph-explorer` | `health-dataspace-ui`       | `docker-compose.yml`     | 3000, 3003 ³ | `neo4j`      | Next.js 14 UI — Graph Explorer, Catalogue, Analytics, Portal views. Connects to Neo4j (Bolt) and Keycloak (OIDC). Port 3003 via `docker-compose.live.yml` overlay. |
+| #   | Service          | Container Name                  | Compose File             | Port(s)      | Dependencies | Description                                                                                                                                                        |
+| --- | ---------------- | ------------------------------- | ------------------------ | ------------ | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 7   | `keycloak`       | `health-dataspace-keycloak`     | `docker-compose.jad.yml` | 8080, 9000   | `postgres`   | Keycloak — OAuth2/OIDC identity provider. Hosts `edcv` realm with 3 demo users, PKCE client, and role mappings.                                                    |
+| 8   | `graph-explorer` | `health-dataspace-ui`           | `docker-compose.yml`     | 3000, 3003 ³ | `neo4j`      | Next.js 14 UI — Graph Explorer, Catalogue, Analytics, Portal views. Connects to Neo4j (Bolt) and Keycloak (OIDC). Port 3003 via `docker-compose.live.yml` overlay. |
+| 9   | `vault-unseal`   | `health-dataspace-vault-unseal` | `docker-compose.jad.yml` | —            | `vault`      | Sidecar — initialises Vault once and unseals it on every start (`scripts/vault-init-or-unseal.sh`).                                                                |
+| 10  | `siglet`         | `health-dataspace-siglet`       | `docker-compose.jad.yml` | —            | `vault`      | Siglet (Eclipse Data Plane Core) — certificate exchange and token signing for the EDC 0.18 data planes.                                                            |
 
 #### Tier 2 — EDC-V Core + Identity Services (depend on Tier 0 + 1)
 
 | #   | Service           | Container Name                     | Compose File             | Port(s) | Dependencies                            | Description                                                                                                                              |
 | --- | ----------------- | ---------------------------------- | ------------------------ | ------- | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 9   | `vault-bootstrap` | `health-dataspace-vault-bootstrap` | `docker-compose.jad.yml` | —       | `vault`, `keycloak`                     | Init job (runs once, then exits) — configures JWT auth backend, secrets engine, policies, and signing keys in Vault.                     |
-| 10  | `controlplane`    | `health-dataspace-controlplane`    | `docker-compose.jad.yml` | 11003   | `postgres`, `vault`, `nats`, `keycloak` | EDC-V Control Plane — DSP protocol engine, management API, contract negotiation state machine, ODRL policy evaluation.                   |
-| 11  | `identityhub`     | `health-dataspace-identityhub`     | `docker-compose.jad.yml` | 11005   | `postgres`, `vault`, `keycloak`         | DCP v1.0 Identity Hub — stores Verifiable Credentials, handles DID resolution, and credential presentation requests.                     |
-| 12  | `issuerservice`   | `health-dataspace-issuerservice`   | `docker-compose.jad.yml` | 10013   | `postgres`, `vault`, `keycloak`         | Verifiable Credential Issuer — trust anchor that issues MembershipCredential, EHDSParticipantCredential, and DataQualityLabelCredential. |
-| 13  | `tenant-manager`  | `health-dataspace-tenant-manager`  | `docker-compose.jad.yml` | 11006   | `postgres`, `keycloak`                  | CFM Tenant Manager — multi-tenant participant lifecycle (create, activate, deactivate dataspace tenants).                                |
+| 11  | `vault-bootstrap` | `health-dataspace-vault-bootstrap` | `docker-compose.jad.yml` | —       | `vault`, `keycloak`                     | Init job (runs once, then exits) — configures JWT auth backend, secrets engine, policies, and signing keys in Vault.                     |
+| 12  | `controlplane`    | `health-dataspace-controlplane`    | `docker-compose.jad.yml` | 11003   | `postgres`, `vault`, `nats`, `keycloak` | EDC-V Control Plane — DSP protocol engine, management API, contract negotiation state machine, ODRL policy evaluation.                   |
+| 13  | `identityhub`     | `health-dataspace-identityhub`     | `docker-compose.jad.yml` | 11005   | `postgres`, `vault`, `keycloak`         | DCP v1.0 Identity Hub — stores Verifiable Credentials, handles DID resolution, and credential presentation requests.                     |
+| 14  | `issuerservice`   | `health-dataspace-issuerservice`   | `docker-compose.jad.yml` | 10013   | `postgres`, `vault`, `keycloak`         | Verifiable Credential Issuer — trust anchor that issues MembershipCredential, EHDSParticipantCredential, and DataQualityLabelCredential. |
+| 15  | `tenant-manager`  | `health-dataspace-tenant-manager`  | `docker-compose.jad.yml` | 11006   | `postgres`, `keycloak`                  | CFM Tenant Manager — multi-tenant participant lifecycle (create, activate, deactivate dataspace tenants).                                |
 
 #### Tier 3 — Data Planes, Proxy, Provisioning & CFM Agents (depend on Tier 2)
 
 | #   | Service                  | Container Name                            | Compose File             | Port(s) | Dependencies                                                     | Description                                                                                                                                            |
 | --- | ------------------------ | ----------------------------------------- | ------------------------ | ------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 14  | `dataplane-fhir`         | `health-dataspace-dataplane-fhir`         | `docker-compose.jad.yml` | 11002   | `postgres`, `vault`, `controlplane`                              | DCore Data Plane (FHIR PUSH) — transfers FHIR R4 Bundle JSON to consumer endpoints via HttpData-PUSH protocol.                                         |
-| 15  | `dataplane-omop`         | `health-dataspace-dataplane-omop`         | `docker-compose.jad.yml` | 11012   | `postgres`, `vault`, `controlplane`                              | DCore Data Plane (OMOP PULL) — serves OMOP CDM aggregate query results via HttpData-PULL protocol.                                                     |
-| 16  | `neo4j-proxy`            | `health-dataspace-neo4j-proxy`            | `docker-compose.jad.yml` | 9090    | `controlplane`                                                   | Node.js/Express bridge — translates DCore HTTP requests into Cypher queries; serialises results as FHIR JSON, OMOP JSON/CSV, or HealthDCAT-AP JSON-LD. |
-| 17  | `provision-manager`      | `health-dataspace-provision-manager`      | `docker-compose.jad.yml` | 11007   | `postgres`, `keycloak`, `controlplane`                           | CFM Provision Manager — automated resource provisioning for new tenants (Vault keys, DB schemas, EDC-V registrations).                                 |
-| 18  | `cfm-agents`             | `health-dataspace-cfm-keycloak-agent`     | `docker-compose.jad.yml` | —       | `keycloak`, `tenant-manager`                                     | CFM Keycloak Agent — watches tenant events and provisions Keycloak client registrations and role mappings.                                             |
-| 19  | `cfm-edcv-agent`         | `health-dataspace-cfm-edcv-agent`         | `docker-compose.jad.yml` | —       | `controlplane`, `tenant-manager`                                 | CFM EDC-V Agent — provisions connector resources (data plane selectors, asset definitions) for new tenants.                                            |
-| 20  | `cfm-registration-agent` | `health-dataspace-cfm-registration-agent` | `docker-compose.jad.yml` | —       | `identityhub`, `issuerservice`, `tenant-manager`                 | CFM Registration Agent — registers DID documents and requests Verifiable Credentials from IssuerService for new tenants.                               |
-| 21  | `cfm-onboarding-agent`   | `health-dataspace-cfm-onboarding-agent`   | `docker-compose.jad.yml` | —       | `controlplane`, `identityhub`, `issuerservice`, `tenant-manager` | CFM Onboarding Agent — orchestrates the full onboarding sequence: DID creation → VC issuance → connector setup → catalog entry.                        |
+| 16  | `dataplane-fhir`         | `health-dataspace-dataplane-fhir`         | `docker-compose.jad.yml` | 11002   | `postgres`, `vault`, `controlplane`, `siglet`                    | DCore Data Plane (FHIR PUSH) — transfers FHIR R4 Bundle JSON to consumer endpoints via HttpData-PUSH protocol.                                         |
+| 17  | `dataplane-omop`         | `health-dataspace-dataplane-omop`         | `docker-compose.jad.yml` | 11012   | `postgres`, `vault`, `controlplane`, `siglet`                    | DCore Data Plane (OMOP PULL) — serves OMOP CDM aggregate query results via HttpData-PULL protocol.                                                     |
+| 18  | `neo4j-proxy`            | `health-dataspace-neo4j-proxy`            | `docker-compose.jad.yml` | 9090    | `controlplane`                                                   | Node.js/Express bridge — translates DCore HTTP requests into Cypher queries; serialises results as FHIR JSON, OMOP JSON/CSV, or HealthDCAT-AP JSON-LD. |
+| 19  | `cfm-cp-shim`            | `health-dataspace-cfm-cp-shim`            | `docker-compose.jad.yml` | —       | `controlplane`                                                   | nginx shim — rewrites the CFM agents' Management API `v5alpha` calls to the `v5beta` that EDC 0.18 serves (#181).                                      |
+| 20  | `provision-manager`      | `health-dataspace-provision-manager`      | `docker-compose.jad.yml` | 11007   | `postgres`, `keycloak`, `controlplane`                           | CFM Provision Manager — automated resource provisioning for new tenants (Vault keys, DB schemas, EDC-V registrations).                                 |
+| 21  | `cfm-agents`             | `health-dataspace-cfm-keycloak-agent`     | `docker-compose.jad.yml` | —       | `keycloak`, `tenant-manager`                                     | CFM Keycloak Agent — watches tenant events and provisions Keycloak client registrations and role mappings.                                             |
+| 22  | `cfm-edcv-agent`         | `health-dataspace-cfm-edcv-agent`         | `docker-compose.jad.yml` | —       | `controlplane`, `tenant-manager`                                 | CFM EDC-V Agent — provisions connector resources (data plane selectors, asset definitions) for new tenants.                                            |
+| 23  | `cfm-registration-agent` | `health-dataspace-cfm-registration-agent` | `docker-compose.jad.yml` | —       | `identityhub`, `issuerservice`, `tenant-manager`                 | CFM Registration Agent — registers DID documents and requests Verifiable Credentials from IssuerService for new tenants.                               |
+| 24  | `cfm-onboarding-agent`   | `health-dataspace-cfm-onboarding-agent`   | `docker-compose.jad.yml` | —       | `controlplane`, `identityhub`, `issuerservice`, `tenant-manager` | CFM Onboarding Agent — orchestrates the full onboarding sequence: DID creation → VC issuance → connector setup → catalog entry.                        |
 
 #### Tier 4 — Seed Job (runs once after all services are ready)
 
 | #   | Service      | Container Name              | Compose File             | Port(s) | Dependencies                                                                          | Description                                                                                                                                    |
 | --- | ------------ | --------------------------- | ------------------------ | ------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| 22  | `jad-seed` ² | `health-dataspace-jad-seed` | `docker-compose.jad.yml` | —       | `controlplane`, `identityhub`, `issuerservice`, `tenant-manager`, `provision-manager` | One-shot seed job — initialises IssuerService credential definitions, creates demo tenants, and triggers provisioning. Exits after completion. |
+| 25  | `jad-seed` ² | `health-dataspace-jad-seed` | `docker-compose.jad.yml` | —       | `controlplane`, `identityhub`, `issuerservice`, `tenant-manager`, `provision-manager` | One-shot seed job — initialises IssuerService credential definitions, creates demo tenants, and triggers provisioning. Exits after completion. |
 
 > ² Only starts with `--profile seed`.
 
 #### Dependency Graph
 
-```
-                    ┌─────────┐
-                    │  neo4j  │
-                    └────┬────┘
-                         │
-                ┌────────▼────────┐
-                │  graph-explorer  │
-                └─────────────────┘
+Generated from the `depends_on` entries of `docker-compose.yml` and `docker-compose.jad.yml`:
 
-┌──────────┐  ┌──────────┐  ┌──────┐  ┌─────────┐
-│ postgres │  │  vault   │  │ nats │  │ traefik │
-└────┬─────┘  └────┬─────┘  └──┬───┘  └─────────┘
-     │             │            │
-     ├─────────────┼────────────┤
-     │             │            │
-     ▼             ▼            │
-┌──────────┐  ┌──────────────┐  │
-│ keycloak │  │vault-bootstrap│ │
-└────┬─────┘  └──────────────┘  │
-     │                          │
-     ├──────────────────────────┤
-     │                          │
-     ▼                          ▼
-┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────────────┐
-│ controlplane │  │ identityhub  │  │issuerservice │  │ tenant-manager │
-└──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └───────┬────────┘
-       │                 │                 │                   │
-       ├─────────────────┼─────────────────┼───────────────────┤
-       │                 │                 │                   │
-       ▼                 ▼                 ▼                   ▼
-┌───────────────┐ ┌───────────────┐ ┌───────────┐ ┌─────────────────────┐
-│dataplane-fhir │ │dataplane-omop │ │neo4j-proxy│ │ provision-manager   │
-└───────────────┘ └───────────────┘ └───────────┘ └─────────────────────┘
-                                                  ┌─────────────────────┐
-                                                  │ cfm-agents (×4)     │
-                                                  └─────────────────────┘
-```
+![Container dependencies: 25 Docker Compose services in five startup tiers](docs/images/container-dependencies.svg)
 
 ---
 
