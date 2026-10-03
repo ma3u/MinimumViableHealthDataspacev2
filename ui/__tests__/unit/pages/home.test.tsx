@@ -48,6 +48,32 @@ describe("Home Page", () => {
     expect(screen.getByText(/7 demo personas/)).toBeInTheDocument();
   });
 
+  it("lists the latest updates, newest first, each with a date", () => {
+    render(<Home />);
+    const list = screen
+      .getByRole("heading", { name: /latest updates/i })
+      .closest("section") as HTMLElement;
+    const dates = [...list.querySelectorAll("time")].map((t) =>
+      t.getAttribute("datetime"),
+    );
+    expect(dates.length).toBeGreaterThanOrEqual(3);
+    expect([...dates].sort().reverse()).toEqual(dates);
+  });
+
+  it("shows the Klarbefund app with its recording and the TestFlight request", () => {
+    render(<Home />);
+    expect(
+      screen.getByRole("heading", { name: /klarbefund/i, level: 2 }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/a tour through the klarbefund app/i),
+    ).toHaveAttribute("src", "/klarbefund/klarbefund-tour.mp4");
+    expect(screen.getByText(/private TestFlight preview/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /write the request/i }),
+    ).toBeInTheDocument();
+  });
+
   it("renders Why EHDS Matters section", () => {
     render(<Home />);
     expect(

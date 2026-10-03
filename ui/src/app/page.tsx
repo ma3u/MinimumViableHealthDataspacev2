@@ -21,6 +21,8 @@ import { PersonaJourneyCards } from "@/components/PersonaJourneyCards";
 import { FeatureCardGrid } from "@/components/FeatureCardGrid";
 import { HomeRegisterCta } from "@/components/HomeRegisterCta";
 import { LivingBodyHero } from "@/components/LivingBodyHero";
+import { LatestUpdates } from "@/components/LatestUpdates";
+import { KlarbefundShowcase } from "@/components/KlarbefundShowcase";
 
 /* ── Page ─────────────────────────────────────────────────────────────────── */
 
@@ -118,6 +120,10 @@ export default function Home() {
             sign-up stay at the top; moved left of it on wide screens. */}
         <LivingBodyHero className="aspect-9/16 w-[min(72vw,300px)] justify-self-center lg:order-first lg:w-auto lg:h-[min(72vh,620px)]" />
       </section>
+
+      {/* ── Latest updates, and the iPhone app ───────────────────────────── */}
+      <LatestUpdates />
+      <KlarbefundShowcase />
 
       {/* ── Why EHDS Matters ─────────────────────────────────────────────── */}
       <section
