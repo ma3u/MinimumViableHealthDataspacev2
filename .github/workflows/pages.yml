@@ -278,10 +278,13 @@ jobs:
       - name: Run Playwright E2E tests
         # Informational only (continue-on-error) — runs against the shared
         # server above. The uncapped full run + report artifact lives in
-        # test.yml (e2e-tests job, main).
+        # test.yml (e2e-tests job, main). The cap was 10 minutes so the tests
+        # could not delay the deploy; the 1145 tests take about that long, so
+        # the step was killed before Playwright wrote its HTML report. It no
+        # longer delays anything, so it gets room to finish.
         run: npx playwright test --project=chromium --retries=0 --workers=4
         continue-on-error: true
-        timeout-minutes: 10
+        timeout-minutes: 15
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:3000
