@@ -2,7 +2,8 @@
 -- JAD PostgreSQL Initialization Script
 -- =============================================================================
 -- Creates all databases and users required by the EDC-V / CFM services.
--- This mirrors the K8s ConfigMap in k8s/base/postgres.yaml.
+-- Local only (Compose). On Azure the databases live on Flexible Server and are
+-- created by scripts/azure/13-postgres-flexible-server.sh (ADR-041).
 -- Default database (controlplane/cp/cp) is created by POSTGRES_DB/USER/PASSWORD env vars.
 -- =============================================================================
 

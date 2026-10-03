@@ -151,6 +151,7 @@ All three core specifications are now final or near-final:
 | [038](ADRs/ADR-038-scan-retained-diagnostics-export.md)                     | The scan is kept, as a sealed PDF, and diagnostics leave the phone only as a deliberate export  | 2026-09-19 | Accepted          |
 | [039](ADRs/ADR-039-published-reference-ranges.md)                           | Published reference ranges are quoted alongside the printed one, never in place of it           | 2026-09-19 | Accepted          |
 | [040](ADRs/ADR-040-derived-compliance-state-in-the-api.md)                  | Derived compliance state is computed in the API                                                 | 2026-09-24 | Accepted          |
+| [041](ADRs/ADR-041-managed-postgres-on-azure-containerised-locally.md)      | Managed PostgreSQL on Azure, containerised locally                                              | 2026-10-02 | Proposed          |
 | [042](ADRs/ADR-042-off-hours-scaledown-current-state.md)                    | Off-hours scale-down, the state that runs today                                                 | 2026-10-02 | Accepted          |
 | [043](ADRs/ADR-043-graph-access-direct-or-through-the-proxy.md)             | UI routes read the graph directly; the proxy serves the data planes                             | 2026-10-02 | Accepted          |
 | [044](ADRs/ADR-044-every-api-route-needs-a-session.md)                      | Every API route needs a session                                                                 | 2026-10-02 | Accepted          |

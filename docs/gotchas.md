@@ -3,7 +3,73 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-02: the fix for the 2026-09-30 wipe was the thing that breaks Postgres
+
+The entry below diagnosed the 2026-09-30 data loss as a missing mount and made
+mounting `pg-data` the fix. **That diagnosis is wrong.** Mounting it does not
+give Postgres a durable disk, it stops Postgres booting.
+
+Sign-in was 404 again that morning: the `edcv` realm had never been re-imported
+after 09-30, so `/realms/edcv/...` had no realm to serve. Note the difference
+from the 500s below, and that it matters: 404 means Keycloak reached its
+database and found nothing, 5xx means it could not reach it at all. Only the
+second one makes importing the realm pointless.
+
+Running `repair-live-stack.sh 1`, the phase written as the fix, produced this
+in `mvhd-postgres`:
+
+```
+chmod: changing permissions of '/var/lib/postgresql/data/pgdata': Operation not permitted
+initdb: error: could not change permissions of directory ".../pgdata": Operation not permitted
+```
+
+The replica went `NotRunning`, the revision `Failed`. `initdb` chmods PGDATA
+unconditionally and SMB cannot do POSIX chmod, so **no `mountOptions`
+(`uid`, `gid`, `dir_mode`, `file_mode`) can make this work.** Azure Files NFS
+would, but it needs a Premium FileStorage account and a VNet-injected ACA
+environment; `stmvhddev3e2079` is `Standard_LRS` and `mvhd-env` has no VNet.
+ACA has no block-storage volume type, so no option remains.
+
+Which means the live app's `volumeMounts: null` was most likely a deliberate,
+undocumented workaround by whoever hit this first, not the drift the entry
+below calls it. `mvhd-neo4j` and `mvhd-vault` mount the same account fine
+because nothing in their startup chmods a directory.
+
+**The site stayed up, by luck.** ACA was in Single revision mode and the new
+revision never went healthy, so the old replica kept serving:
+
+```
+mvhd-postgres--0000148   Healthy     RunningAtMaxScale   traffic 0
+mvhd-postgres--0000149   Unhealthy   Failed              traffic 100
+```
+
+A replica list alone shows only the latest revision, reports `NotRunning`, and
+reads as a total outage. It was not one. Check `revision list` before declaring
+the database down, and note that the data then lives only in a replica of a
+revision receiving no traffic.
+
+The decision that ends this is
+[ADR-041](ADRs/ADR-041-managed-postgres-on-azure-containerised-locally.md):
+Azure Database for PostgreSQL Flexible Server on Azure, containerised Postgres
+locally. Verified the same day, local Kubernetes runs the identical image and
+PGDATA path with `fixing permissions ... ok`, mode `700`, and data surviving a
+pod delete. The problem is SMB, not Postgres and not the config.
+
+Two things to take from it:
+
+- A guard that checks a setting was applied is not a guard that the service
+  started. `02-data-layer.sh` and `repair-live-stack.sh` phase 1 both read the
+  `mountPath` back and reported success over a crash-looping database. Check
+  the process, not the knob.
+- The second incident was the first one's fix. A runbook written during an
+  outage encodes the theory you had at the time; it is worth re-testing the
+  theory before running it a month later.
+
 ## 2026-09-30: a declared volume that nothing mounts, and three guards that called it green
+
+> **Superseded in part by the 2026-10-02 entry above.** The failure described
+> here is real and the guard analysis still holds. The _cause_ is misattributed:
+> mounting `pg-data` is not the fix, it is a crash loop. See ADR-041.
 
 Every token grant and every browser sign-in on the live stack returned **500**
 for an hour and a half, and the deploy that ran through the middle of it was
@@ -49,11 +115,16 @@ volumeMounts:  null
 PGDATA=/var/lib/postgresql/data/pgdata
 ```
 
-`scripts/azure/02-data-layer.sh` adds both, so the live app had drifted from
-its own script. `PGDATA` was therefore ordinary container-local storage and had
-been since revision `0000148` on 2026-09-14. The data lasted sixteen days only
-because nothing restarted the replica in between. `mvhd-neo4j` and `mvhd-vault`
-mount their shares correctly, so this was one app, not the pattern.
+`scripts/azure/02-data-layer.sh` adds both, so the live app looked like it had
+drifted from its own script. `PGDATA` was therefore ordinary container-local
+storage and had been since revision `0000148` on 2026-09-14. The data lasted
+sixteen days only because nothing restarted the replica in between.
+`mvhd-neo4j` and `mvhd-vault` mount their shares correctly, so this was one
+app, not the pattern.
+
+> Read this with the 2026-10-02 entry: that "drift" was almost certainly
+> somebody removing a mount that crash-loops Postgres. The script was wrong,
+> not the app.
 
 This is also the answer to the question `.github/workflows/aca-schedule.yml`
 had carried open since 2026-09-14, about why the `edcv` realm does not survive
@@ -92,8 +163,9 @@ bother importing the realm".
 
 Three things to take from it:
 
-- A declared volume is not a mounted one. `02-data-layer.sh` now reads the
-  mount back and refuses rather than reporting "volume attached".
+- A declared volume is not a mounted one. (`02-data-layer.sh` was changed to
+  read the mount back and refuse. On 2026-10-02 that guard was inverted: it now
+  refuses if the mount is _present_, because Postgres cannot boot with it.)
 - `az containerapp show -o yaml` returns secrets with names and no values, so
   feeding that back into `az containerapp update --yaml` blanks them. Drop the
   block. `05-cfm-agents.sh:mount_config` already did; `02-data-layer.sh` was

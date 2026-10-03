@@ -32,14 +32,22 @@ export QUOTA_NEO4J_LOGS=5
 export QUOTA_VAULT_DATA=2
 export QUOTA_PG_DATA=20
 
-# ── PostgreSQL (Container App — Workaround B) ───────────────────────────────
-# PG_SERVER retained as logical name; PG_HOST resolves via ACA internal DNS.
+# ── PostgreSQL (Flexible Server, ADR-041) ───────────────────────────────────
+# Every consumer reaches Azure Database for PostgreSQL Flexible Server over TLS.
+# The mvhd-postgres container app (Workaround B, ADR-018) cannot keep its data
+# on SMB and wiped every database on each restart; it stays named here only so
+# 13-postgres-flexible-server.sh phase 4 can find and retire it.
+#
+# There is no password in this file any more. The one that was here was
+# committed to a public repository and was what all eight consumers used.
+# pg_admin_password (below, after kv_secret) reads it when a caller needs it.
 export PG_APP="mvhd-postgres"
-export PG_SERVER="$PG_APP"
-export PG_HOST="$PG_APP"
+export PG_FLEX_NAME="${PG_FLEX_NAME:-mvhd-pg-b53a0449}"
+export PG_SERVER="$PG_FLEX_NAME"
+export PG_HOST="${PG_FLEX_NAME}.postgres.database.azure.com"
 export PG_PORT=5432
 export PG_ADMIN="mvhdadmin"
-export PG_PASSWORD="H3althDataSp@ce2026!"
+export PG_SSLMODE="require"
 # Pinned per ADR-029 (issue #97 Phase A): major 16 on Azure until a
 # pg_upgrade/dump-restore migration exists — local dev runs 17.x.
 export POSTGRES_VERSION="16.14"
@@ -186,6 +194,25 @@ kv_secret() {
   if [ -z "$value" ] && [ -z "$quiet" ]; then
     echo "[env] WARNING: could not read '$name' from $KEY_VAULT_NAME." >&2
     echo "[env] Run 'az login' and check the Key Vault Secrets User role." >&2
+  fi
+  printf '%s' "$value"
+}
+
+# The Flexible Server admin password. Key Vault first, then the ACA secret
+# 13-postgres-flexible-server.sh phase 3b put on the control plane, for the same
+# reason kc_admin_password falls back: the CI service principal cannot read the
+# vault. Empty on a first deploy, before phase 1 has generated it.
+pg_admin_password() {
+  local value
+  value=$(kv_secret postgres-admin-password quiet)
+  if [ -z "$value" ]; then
+    value=$(az containerapp secret show --name "$CONTROLPLANE_APP" --resource-group "$RG" \
+      --secret-name pg-flex-password --query value -o tsv 2>/dev/null) || true
+  fi
+  if [ -z "$value" ]; then
+    echo "[env] WARNING: no postgres-admin-password from $KEY_VAULT_NAME or from" >&2
+    echo "[env] the pg-flex-password secret on $CONTROLPLANE_APP. Run 'az login', or" >&2
+    echo "[env] run 13-postgres-flexible-server.sh 1 if the server does not exist yet." >&2
   fi
   printf '%s' "$value"
 }

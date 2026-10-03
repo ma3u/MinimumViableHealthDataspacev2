@@ -163,7 +163,11 @@ echo "==> Signing in as a demo user"
 USER_TOKEN=$(curl -sf -X POST \
   "${KEYCLOAK_PUBLIC_URL}/realms/edcv/protocol/openid-connect/token" \
   -d "client_id=health-dataspace-ui" -d "username=regulator" -d "password=regulator" \
-  -d "grant_type=password" -d "scope=openid" 2>/dev/null | jq -r '.access_token // empty')
+  -d "grant_type=password" -d "scope=openid" 2>/dev/null | jq -r '.access_token // empty' || true)
+# `|| true` is load-bearing. The client is confidential + PKCE, so this grant
+# answers 401, curl -f exits 22, and under pipefail that killed the script here,
+# before the NOTE below could print. On 2026-10-02 that made a successful import
+# read as "realm import failed" in 13-postgres-flexible-server.sh phase 3.
 if [[ -n "$USER_TOKEN" ]]; then
   echo "    regulator can sign in"
 else
