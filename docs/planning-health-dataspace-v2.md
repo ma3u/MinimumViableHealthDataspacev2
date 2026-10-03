@@ -156,5 +156,6 @@ All three core specifications are now final or near-final:
 | [043](ADRs/ADR-043-graph-access-direct-or-through-the-proxy.md)             | UI routes read the graph directly; the proxy serves the data planes                             | 2026-10-02 | Accepted          |
 | [044](ADRs/ADR-044-every-api-route-needs-a-session.md)                      | Every API route needs a session                                                                 | 2026-10-02 | Accepted          |
 | [045](ADRs/ADR-045-observability-and-regulatory-audit-trail.md)             | Cloud-native, vendor-agnostic observability and a tamper-evident audit trail                    | 2026-10-02 | Proposed          |
+| [046](ADRs/ADR-046-vault-keeps-its-state-on-the-flexible-server.md)         | The Azure Vault keeps its state on the Flexible Server                                          | 2026-10-03 | Proposed          |
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.
