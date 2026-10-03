@@ -157,7 +157,7 @@ print('postgres://${PG_ADMIN}:' + urllib.parse.quote(os.environ['PW'], safe='')
   prev=$(az containerapp show --name "$VAULT_APP" --resource-group "$RG" \
     --query properties.latestRevisionName -o tsv)
   say "  rollback: az containerapp update -n ${VAULT_APP} -g ${RG} --yaml ${backup}"
-  say "  (that is ${prev}, in-memory dev mode)"
+  say "  (that is ${prev}, the revision before this run)"
 
   yaml="$(mktemp -t mvhd-vault-after.XXXXXX).yaml"
   cp "$backup" "$yaml"
