@@ -108,16 +108,30 @@ ADMIN_TOKEN=$(curl -sS -m 30 -X POST \
   | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null || echo "")
 [ -n "$ADMIN_TOKEN" ] || { err "could not get a Keycloak admin token from ${KC_URL}"; exit 1; }
 
-PROV_UUID=$(curl -sS -m 30 -H "Authorization: Bearer $ADMIN_TOKEN" \
-  "${KC_URL}/admin/realms/edcv/clients?clientId=provisioner" \
-  | python3 -c "import json,sys; d=json.load(sys.stdin); print(d[0]['id'] if d else '')" 2>/dev/null || echo "")
-[ -n "$PROV_UUID" ] || { err "the 'provisioner' client does not exist in realm edcv"; exit 1; }
+# client_secret <clientId>: a confidential client's secret in realm edcv,
+# read through the admin API and never printed.
+client_secret() {
+  local uuid secret
+  uuid=$(curl -sS -m 30 -H "Authorization: Bearer $ADMIN_TOKEN" \
+    "${KC_URL}/admin/realms/edcv/clients?clientId=$1" \
+    | python3 -c "import json,sys; d=json.load(sys.stdin); print(d[0]['id'] if d else '')" 2>/dev/null || echo "")
+  [ -n "$uuid" ] || { err "the '$1' client does not exist in realm edcv"; return 1; }
+  secret=$(curl -sS -m 30 -H "Authorization: Bearer $ADMIN_TOKEN" \
+    "${KC_URL}/admin/realms/edcv/clients/${uuid}/client-secret" \
+    | python3 -c "import json,sys; print(json.load(sys.stdin).get('value',''))" 2>/dev/null || echo "")
+  [ -n "$secret" ] || { err "could not read the $1 client secret"; return 1; }
+  printf '%s' "$secret"
+}
 
-PROV_SECRET=$(curl -sS -m 30 -H "Authorization: Bearer $ADMIN_TOKEN" \
-  "${KC_URL}/admin/realms/edcv/clients/${PROV_UUID}/client-secret" \
-  | python3 -c "import json,sys; print(json.load(sys.stdin).get('value',''))" 2>/dev/null || echo "")
-[ -n "$PROV_SECRET" ] || { err "could not read the provisioner client secret"; exit 1; }
+PROV_SECRET=$(client_secret provisioner) || exit 1
 log "read the provisioner client secret from Keycloak (${#PROV_SECRET} chars)"
+# The onboarding agent calls the IdentityHub identity API, which wants the
+# 'admin' role claim; the provisioner client carries 'provisioner', so every
+# credential query was refused with "Required user role not satisfied" (#455,
+# 2026-10-03). The compose stack gives it the admin client
+# (jad/onboarding-agent-config.yaml).
+OB_ADMIN_SECRET=$(client_secret admin) || exit 1
+log "read the admin client secret from Keycloak (${#OB_ADMIN_SECRET} chars)"
 
 NATS_URI="nats://${NATS_APP}:4222"
 DSN="postgres://${PG_ADMIN}:${PG_PASSWORD_ENC}@${PG_HOST}:${PG_PORT}/cfm?sslmode=${PG_SSLMODE}"
@@ -344,8 +358,8 @@ issuer.id: issuer"
 
 deploy_agent "$CFM_OB_AGENT_APP" "$CFM_OB_AGENT_IMAGE" obagent.env "${COMMON}
 keycloak.tokenUrl: ${KC_TOKEN_URL}
-keycloak.clientId: provisioner
-keycloak.clientSecret: ${PROV_SECRET}
+keycloak.clientId: admin
+keycloak.clientSecret: ${OB_ADMIN_SECRET}
 identityhub.url: http://${IDENTITYHUB_APP}:7082/api/identity
 issuerservice.url: http://${ISSUER_APP}/api/admin
 issuer.id: issuer"

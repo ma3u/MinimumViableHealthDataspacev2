@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient } from "@/lib/edc";
+import { buildParticipantProfile, newDidSlug } from "@/lib/cfm-participant";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import {
   recordDemo,
@@ -330,7 +331,7 @@ export async function POST(req: NextRequest) {
     // Read together because they answer one question: can this deployment
     // provision a participant at all? See canProvision() for why that is not a
     // given, and why an answer of "no" is not a failed registration.
-    const { cellId, profileId, unavailable } = await canProvision();
+    const { profileId, unavailable } = await canProvision();
 
     if (unavailable) {
       const participant = buildDemoParticipant(
@@ -360,11 +361,20 @@ export async function POST(req: NextRequest) {
       tenantPayload,
     );
 
-    // 4. Create participant profile for this tenant (triggers DID + key provisioning)
-    const participantPayload = {
-      cellId,
-      dataspaceProfileId: profileId,
-    };
+    // 4. Create participant profile for this tenant (triggers DID + key provisioning).
+    // The shape jad/seed-health-tenants.sh sends, which provisions on the
+    // compose stack. This used to send { cellId, dataspaceProfileId }: no DID
+    // and a field the manager does not read, so the EDC-V agent failed on
+    // "ParticipantID required" and the registration agent on "DID required",
+    // and no registration from this page ever got past the participant
+    // context (#455, 2026-10-03).
+    const slug = newDidSlug(displayName);
+    const participantPayload = buildParticipantProfile(
+      slug,
+      displayName,
+      profileId,
+      ehdsParticipantType || role,
+    );
 
     const participant = await edcClient.tenant<{ id: string; vpas?: Vpa[] }>(
       `/v1alpha1/tenants/${tenant.id}/participant-profiles`,
