@@ -209,7 +209,7 @@ phase_5() {
   rm -f "${dir}/_fragment.sh"
   grep -qF 'auth/jwt/role/provisioner' "${dir}/bootstrap.sh" ||
     die "the extracted bootstrap.sh has no provisioner role; check 06-post-deploy.sh"
-  grep -qF "\"bound_issuer\\\":\\\"${KC_ISSUER}\\\"" "${dir}/bootstrap.sh" ||
+  grep -qF "\"iss\\\":\\\"${KC_ISSUER}\\\"" "${dir}/bootstrap.sh" ||
     die "the provisioner role in bootstrap.sh is not bound to ${KC_ISSUER}"
   say "extracted bootstrap.sh, provisioner role bound to ${KC_ISSUER}"
 
