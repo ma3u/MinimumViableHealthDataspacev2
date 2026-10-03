@@ -4,8 +4,9 @@ name: ACA Off-Hours Scale (Mon-Fri 07-20 Europe/Berlin)
 # ADR-027: extend it to the full EDC stack. ADR-024 provisioned the 8 EDC
 # apps at min=1 (24/7) but this schedule still only covered the 7 "healthy"
 # apps — so the EDC stack billed nights + weekends, the cost surge flagged by
-# FinOps in May 2026. The schedule now scales 18 of the 21 Container Apps;
-# ADR-042 records which, which never stop and why, and the start order.
+# FinOps in May 2026. The schedule now scales 17 of the 21 Container Apps;
+# ADR-042 records which, which never stop and why, and the start order;
+# ADR-047 takes Vault out of the stop.
 #
 # INF-STG-EU_EHDS no longer requires 24/7 — the public ehds.mabu.red demo is
 # documented as a weekday-hours service in the README, so off-hours
@@ -110,8 +111,8 @@ jobs:
 
       - name: Scale all Container Apps to 0
         run: |
-          # 18 of the 21 Container Apps are scaled to 0 off-hours (ADR-027).
-          #  - 5 core apps: neo4j, vault, proxy, ui, catalog-enricher.
+          # 17 of the 21 Container Apps are scaled to 0 off-hours (ADR-027).
+          #  - 4 core apps: neo4j, proxy, ui, catalog-enricher.
           #  - 8 EDC apps: ADR-024 provisioned the full EDC stack at min=1.
           #    ADR-027 adds them here so they no longer bill nights + weekends.
           #  - 5 CFM apps: the shim and the four provisioning agents (#318),
@@ -119,7 +120,16 @@ jobs:
           #    they billed every night and no start ever restored them.
           # Stop order is irrelevant; start order is not (see the start job).
           # mvhd-postgres and mvhd-keycloak are deliberately NOT in this list
-          # since 2026-09-13, and mvhd-claude-federation never was.
+          # since 2026-09-13, mvhd-vault since 2026-10-03 (ADR-047), and
+          # mvhd-claude-federation never was.
+          #
+          # Vault runs in dev mode, in memory. Setting min=0 is a revision
+          # change, so this step restarted it empty every evening, and it never
+          # reached zero anyway: the EDC services keep calling its ingress. The
+          # only thing the evening stop did to Vault was wipe it, and the next
+          # bootstrap was the weekday morning start, so every night, weekend
+          # and holiday ran with no provisioner role and no keys (#455). Left at
+          # 1/1, the start's 1/1 update is a no-op and Vault keeps its state.
           #
           # MeinBefund is not a demo that is only looked at during office hours.
           # A person scans a lab report when they get home, and with these three
@@ -128,12 +138,11 @@ jobs:
           # needs Postgres, and the quota counter is in the same database, so
           # both have to stay.
           #
-          # 18 of 21 apps still scale down, which keeps most of the saving that
+          # 17 of 21 apps still scale down, which keeps most of the saving that
           # ADR-027 was after. Revisit if the identity and quota state moves out
           # of this cluster.
           APPS=(
             mvhd-neo4j
-            mvhd-vault
             mvhd-neo4j-proxy
             mvhd-ui
             mvhd-catalog-enricher
@@ -191,7 +200,7 @@ jobs:
           echo "## Off-Hours Scale-Down" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Time:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_STEP_SUMMARY"
-          echo "**Status:** 18 Container Apps (5 core + 8 EDC + 5 CFM) scaled to 0" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Status:** 17 Container Apps (4 core + 8 EDC + 5 CFM) scaled to 0" >> "$GITHUB_STEP_SUMMARY"
           echo "**Next start:** Monday-Friday 05:00 UTC (07:00 Europe/Berlin CEST)" >> "$GITHUB_STEP_SUMMARY"
 
   start:
