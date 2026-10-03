@@ -86,6 +86,28 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
+  # Static analysis (Semgrep CE): the registry rule sets for TypeScript,
+  # Next.js, React and secrets, plus .semgrep/ (request input must reach Cypher
+  # as a parameter). Scans the staged files only, a few seconds. CodeQL runs on
+  # GitHub for what needs data flow across files. Suppress a finding with
+  # `// nosemgrep: <rule-id> -- <reason>` on the line above.
+  # Requires: brew install semgrep
+  - repo: local
+    hooks:
+      - id: semgrep
+        name: Static analysis (Semgrep)
+        language: system
+        entry: 'bash -c ''if ! command -v semgrep >/dev/null 2>&1; then echo "[WARN] semgrep not installed, skipping (brew install semgrep)"; exit 0; fi; semgrep scan --metrics=off --quiet --error --config .semgrep/cypher.yml --config p/typescript --config p/nextjs --config p/react --config p/secrets "$@"'' --'
+        files: ^(ui/src|services/[^/]+/src|scripts)/.*\.(ts|tsx|js|mjs|sh|py)$
+        stages: [pre-commit]
+      - id: semgrep-rule-tests
+        name: Semgrep rule tests (.semgrep/)
+        language: system
+        entry: 'bash -c ''if ! command -v semgrep >/dev/null 2>&1; then echo "[WARN] semgrep not installed, skipping (brew install semgrep)"; exit 0; fi; semgrep --metrics=off --test --config .semgrep/cypher.yml .semgrep/cypher.ts'''
+        files: ^\.semgrep/
+        pass_filenames: false
+        stages: [pre-commit]
+
   # Broken link checker for Markdown files
   # Checks that local links, images, and anchors resolve to real files/paths.
   # Requires: npm i -g markdown-link-check  (or: brew install lychee)

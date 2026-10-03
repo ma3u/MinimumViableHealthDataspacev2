@@ -92,6 +92,7 @@ app.post(
         spes.map(async ({ label, driver: d }) => {
           const session = d.session({ database: "neo4j" });
           try {
+            // nosemgrep: cypher-built-from-request-input -- caller-supplied Cypher by design; WRITE_PATTERN and checkReIdentification above
             const result = await session.run(cypher, params);
             const records = result.records.map((r) => {
               const obj: Record<string, any> = { _source: label };

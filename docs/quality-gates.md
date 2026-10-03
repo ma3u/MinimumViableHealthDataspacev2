@@ -44,21 +44,30 @@ route to promoting a suite to required.
 Run automatically before every `git commit`. Configured in
 `.pre-commit-config.yaml`.
 
-| #   | Hook                   | Tool             | Severity   | Action                              |
-| --- | ---------------------- | ---------------- | ---------- | ----------------------------------- |
-| 1   | Trailing whitespace    | pre-commit       | Auto-fix   | Strips trailing spaces              |
-| 2   | End-of-file fixer      | pre-commit       | Auto-fix   | Ensures trailing newline            |
-| 3   | YAML syntax            | pre-commit       | Error      | Validates YAML files                |
-| 4   | JSON syntax            | pre-commit       | Error      | Validates JSON files                |
-| 5   | Large file check       | pre-commit       | **Blocks** | Rejects files > 5 MB                |
-| 6   | Merge conflict markers | pre-commit       | **Blocks** | Detects `<<<<<<<`                   |
-| 7   | Private key detection  | pre-commit       | **Blocks** | Catches accidental key commits      |
-| 8   | Dockerfile linting     | Hadolint v2.14   | **Blocks** | Best-practice Dockerfile rules      |
-| 9   | Shell script linting   | ShellCheck v0.11 | **Blocks** | `--severity=error`                  |
-| 10  | Code formatting        | Prettier v3.1    | Auto-fix   | JS, TS, JSON, YAML, MD              |
-| 11  | TypeScript type-check  | `tsc --noEmit`   | **Blocks** | Strict mode, `tsconfig.build.json`  |
-| 12  | ESLint                 | Next.js lint     | **Blocks** | Max 55 warnings threshold           |
-| 13  | Secret scan            | Gitleaks (local) | **Blocks** | Staged diff only (optional install) |
+| #   | Hook                   | Tool             | Severity   | Action                                                                           |
+| --- | ---------------------- | ---------------- | ---------- | -------------------------------------------------------------------------------- |
+| 1   | Trailing whitespace    | pre-commit       | Auto-fix   | Strips trailing spaces                                                           |
+| 2   | End-of-file fixer      | pre-commit       | Auto-fix   | Ensures trailing newline                                                         |
+| 3   | YAML syntax            | pre-commit       | Error      | Validates YAML files                                                             |
+| 4   | JSON syntax            | pre-commit       | Error      | Validates JSON files                                                             |
+| 5   | Large file check       | pre-commit       | **Blocks** | Rejects files > 5 MB                                                             |
+| 6   | Merge conflict markers | pre-commit       | **Blocks** | Detects `<<<<<<<`                                                                |
+| 7   | Private key detection  | pre-commit       | **Blocks** | Catches accidental key commits                                                   |
+| 8   | Dockerfile linting     | Hadolint v2.14   | **Blocks** | Best-practice Dockerfile rules                                                   |
+| 9   | Shell script linting   | ShellCheck v0.11 | **Blocks** | `--severity=error`                                                               |
+| 10  | Code formatting        | Prettier v3.1    | Auto-fix   | JS, TS, JSON, YAML, MD                                                           |
+| 11  | TypeScript type-check  | `tsc --noEmit`   | **Blocks** | Strict mode, `tsconfig.build.json`                                               |
+| 12  | ESLint                 | Next.js lint     | **Blocks** | Max 55 warnings threshold                                                        |
+| 13  | Secret scan            | Gitleaks (local) | **Blocks** | Staged diff only (optional install)                                              |
+| 14  | Static analysis        | Semgrep CE       | **Blocks** | Staged files; registry TS/Next.js/React/secrets + `.semgrep/` (optional install) |
+
+**Static analysis** has two halves. Semgrep runs in pre-commit on the staged files and
+knows the registry rule sets plus `.semgrep/cypher.yml`: request input must reach Cypher as
+a parameter, never as query text (`.semgrep/cypher.ts` is its test, run by the
+`semgrep-rule-tests` hook). Semgrep CE cannot follow data across files, so CodeQL default
+setup runs on GitHub for every PR and weekly, free on a public repo, results in the Security
+tab. Suppress a Semgrep finding with `// nosemgrep: <rule-id> -- <reason>` on the line
+above; the reason is not optional.
 
 **Key rules:**
 
