@@ -6,8 +6,12 @@ FROM hashicorp/vault:${VAULT_VERSION}
 # The image runs as 'vault'. Root here for apk, and at run time to write the
 # key file on the SMB share, as the compose sidecar does (user "0").
 # hadolint ignore=DL3002
-USER root
-RUN apk add --no-cache postgresql17-client=17.10-r0
+USER 0
+# Fuzzy pin to the 17 series, which hadolint 2.14 does not recognise: Alpine
+# main keeps only the latest patch, so an exact pin stops resolving on the
+# next release (as compliance-runner/Dockerfile does it).
+# hadolint ignore=DL3018
+RUN apk add --no-cache postgresql17-client~17
 COPY scripts/vault-init-or-unseal.sh /app/vault-init-or-unseal.sh
 COPY scripts/azure/vault-unseal/unseal-loop.sh /app/unseal-loop.sh
 COPY scripts/azure/vault-unseal/vault-pg-schema.sql /app/vault-pg-schema.sql
