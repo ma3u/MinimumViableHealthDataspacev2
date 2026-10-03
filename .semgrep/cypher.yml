@@ -1,0 +1,35 @@
+rules:
+  # Request input must reach Cypher as a parameter, never as query text.
+  # Fixed fragments and constants are fine (the dynamic WHERE clauses in
+  # routes/fhir.ts and api/admin/audit join fragments that use $params).
+  - id: cypher-built-from-request-input
+    languages: [typescript, javascript]
+    severity: ERROR
+    message: >-
+      Request input reaches the text of a Cypher query. Pass it as a parameter
+      ($name in the query, the value in the params object) so the driver
+      escapes it. A label or relationship type cannot be a parameter: check it
+      against a fixed list first.
+    mode: taint
+    pattern-sources:
+      - pattern: $REQ.query
+      - pattern: $REQ.params
+      - pattern: $REQ.body
+      - pattern: $URL.searchParams.get(...)
+      - pattern: searchParams.get(...)
+      - pattern: await $REQ.json()
+    pattern-sanitizers:
+      - pattern: neo4j.int(...)
+      - pattern: Number(...)
+      - pattern: parseInt(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: $S.run($Q, ...)
+              - pattern: runQuery($Q, ...)
+          - focus-metavariable: $Q
+      # Semgrep's TypeScript parser does not see runQuery<T>(...) as a call,
+      # and that is how every UI route calls it, so match the source text.
+      # The match ends with the first argument, so a value passed in the
+      # params object is not part of the sink.
+      - pattern-regex: runQuery<[^()]*>\(\s*(`[^`]*`|("[^"]*"|'[^']*'|[\w.]+)(\s*\+\s*("[^"]*"|'[^']*'|[\w.]+))*)
