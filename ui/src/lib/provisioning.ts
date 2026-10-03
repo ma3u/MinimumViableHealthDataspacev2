@@ -36,6 +36,7 @@ export interface Vpa {
 
 export interface ProfileWithVpas {
   vpas?: Vpa[];
+  error?: boolean;
   [key: string]: unknown;
 }
 
@@ -111,6 +112,38 @@ export function summariseVpas(
   };
 }
 
+/**
+ * Did the agents give up on a profile? The Tenant Manager marks the profile
+ * `error: true` and rolls it back: its activities end `error` or `disposed`.
+ * Measured on 2026-10-03, both stacks: a provisioned profile has every
+ * activity `active` and `error: false`.
+ */
+export function provisioningFailed(profiles: ProfileWithVpas[] | undefined) {
+  return (profiles ?? []).some((p) => p?.error === true);
+}
+
+/** Every activity of every profile completed. */
+export function provisioningComplete(profiles: ProfileWithVpas[] | undefined) {
+  const vpas = (profiles ?? []).flatMap((p) =>
+    Array.isArray(p?.vpas) ? p.vpas : [],
+  );
+  return (
+    vpas.length > 0 &&
+    !provisioningFailed(profiles) &&
+    vpas.every((v) => v?.state === "active")
+  );
+}
+
+/** The sentence the UI shows for a profile the agents gave up on. */
+export function failedReason(): string {
+  return (
+    "A provisioning agent reported an error and the Tenant Manager rolled " +
+    "the participant back, so no DID was registered and no credential " +
+    "issued. The agents' logs name the cause; register again once it is " +
+    "fixed."
+  );
+}
+
 /** The sentence the UI shows for a stalled profile. */
 export function stalledReason(summary: VpaSummary): string {
   const types = summary.pendingTypes.length
@@ -124,8 +157,19 @@ export function stalledReason(summary: VpaSummary): string {
     `${
       summary.oldestPendingSince ?? "creation"
     } and no provisioning agent has ` +
-    `completed ${summary.pendingTypes.length === 1 ? "it" : "them"}. This ` +
-    `deployment does not run the CFM provisioning agents, so no DID was ` +
-    `registered and no credential issued. Tracked in issue #203.`
+    `completed ${summary.pendingTypes.length === 1 ? "it" : "them"}, so no ` +
+    `DID was registered and no credential issued. ${PROVISIONING_HOURS}`
   );
 }
+
+/**
+ * When the hosted demo can provision at all. The off-hours schedule
+ * (.github/workflows/aca-schedule.yml, ADR-042) scales the Tenant Manager, the
+ * provision manager, NATS and the four CFM agents to zero every evening and
+ * leaves them there over weekends and Berlin public holidays. The agents have
+ * no ingress, so no request can wake them: a registration made then either
+ * cannot reach the Tenant Manager or sits pending until the next start.
+ */
+export const PROVISIONING_HOURS =
+  "On the hosted demo the provisioning stack runs Monday to Friday, " +
+  "07:00 to 20:00 Europe/Berlin, and is stopped outside those hours.";
