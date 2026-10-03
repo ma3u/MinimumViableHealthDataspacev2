@@ -9,7 +9,7 @@ verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }
 status: stable
 ---
 
-Canonical store: [`docs/ADRs/`](../../ADRs/) — ADR-001 … ADR-028, indexed with
+Canonical store: [`docs/ADRs/`](../../ADRs/) — ADR-001 … ADR-044, indexed with
 status in the ADR table of
 [`docs/planning-health-dataspace-v2.md`](../../planning-health-dataspace-v2.md).
 Process + template: [`docs/adr/0001-record-architecture-decisions.md`](../../adr/0001-record-architecture-decisions.md).
