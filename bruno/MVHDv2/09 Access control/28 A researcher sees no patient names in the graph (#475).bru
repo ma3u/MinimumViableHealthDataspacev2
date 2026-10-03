@@ -1,0 +1,31 @@
+meta {
+  name: 28 A researcher sees no patient names in the graph (#475)
+  type: http
+  seq: 28
+}
+
+get {
+  url: {{baseUrl}}/api/graph?persona=patient
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+tests {
+  // Regulation (EU) 2025/327 Art. 66: a data user sees pseudonyms, never a
+  // name. The view is chosen by a query parameter anyone can set, so the
+  // decision has to be the session's role, and this asks for the patient view.
+  test("answers with the graph", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().nodes).to.be.an("array");
+  });
+  test("every patient is a pseudonym", function () {
+    const patients = res.getBody().nodes.filter(function (n) { return n.label === "Patient"; });
+    patients.forEach(function (p) {
+      expect(p.name, "a patient node named by something other than its pseudonym").to.match(/^Patient [0-9a-f]{8}$/);
+    });
+  });
+}
