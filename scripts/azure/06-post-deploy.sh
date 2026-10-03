@@ -86,6 +86,11 @@ ok "Neo4j seed job started"
 
 # ── Build and run Vault bootstrap job ────────────────────────────────────────
 log "Building Vault bootstrap image..."
+# The provisioner role binds to this, baked in at build time; see
+# keycloak_issuer in env.sh. Refuse to build an image whose role cannot match.
+KC_ISSUER=$(keycloak_issuer)
+[ -n "$KC_ISSUER" ] || { err "Keycloak's edcv discovery did not answer; cannot bind the provisioner role"; exit 1; }
+log "Keycloak issuer: ${KC_ISSUER}"
 VAULT_DIR=$(mktemp -d)
 cp "${REPO_ROOT}/scripts/vault-init-or-unseal.sh" "${VAULT_DIR}/" 2>/dev/null || true
 
@@ -145,7 +150,9 @@ vault_api POST /auth/jwt/role/participant '{"role_type":"jwt","bound_audiences":
 # and that is #318's last blocker for the Keycloak and EDC-V agents. Measured
 # on the live stack 2026-09-29. Mirrors the local role: matched on the 'role'
 # claim the provisioner client carries, keyed on 'azp', with the issuer as
-# this deployment presents it.
+# this deployment presents it. That is the public issuer, expanded here at
+# build time, not KC_URL: KC_URL is the internal address this job reaches
+# Keycloak on, and no token ever carries it (#455).
 #
 # Quote words in here with '' and never with backticks. This is an UNQUOTED
 # heredoc (<<VAULTSCRIPT), so a backtick is command substitution even inside a
@@ -153,7 +160,7 @@ vault_api POST /auth/jwt/role/participant '{"role_type":"jwt","bound_audiences":
 # commands, printed "command not found" on every deploy, and landed in the
 # generated bootstrap.sh as empty strings.
 header "Create provisioner JWT role"
-vault_api POST /auth/jwt/role/provisioner "{\"role_type\":\"jwt\",\"user_claim\":\"azp\",\"bound_issuer\":\"\${KC_URL}/realms/edcv\",\"bound_claims\":{\"role\":\"provisioner\"},\"token_policies\":[\"provisioner\"],\"clock_skew_leeway\":60}"
+vault_api POST /auth/jwt/role/provisioner "{\"role_type\":\"jwt\",\"user_claim\":\"azp\",\"bound_issuer\":\"${KC_ISSUER}\",\"bound_claims\":{\"role\":\"provisioner\"},\"token_policies\":[\"provisioner\"],\"clock_skew_leeway\":60}"
 
 header "Enable transit engine"
 vault_api POST /sys/mounts/transit '{"type":"transit"}'
