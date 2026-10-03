@@ -1000,6 +1000,7 @@ export async function fulltextSearch(
 
     for (const idx of indexes) {
       try {
+        // nosemgrep: cypher-built-from-request-input -- fixed full-text query; the term is a parameter
         const result = await session.run(idx.query, { term: escaped });
         if (result.records.length > 0) {
           const topLabel = result.records[0].get("label");

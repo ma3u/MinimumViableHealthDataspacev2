@@ -242,6 +242,7 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
         spes.map(async ({ label, driver: d }) => {
           const session = d.session({ database: "neo4j" });
           try {
+            // nosemgrep: cypher-built-from-request-input -- generated Cypher; WRITE_PATTERN and checkReIdentification above
             const result = await session.run(cypher!, params);
             result.records.forEach((r) => {
               const obj: Record<string, any> = { _source: label };
@@ -261,6 +262,7 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       // Single SPE execution
       const session = getSession();
       try {
+        // nosemgrep: cypher-built-from-request-input -- generated Cypher; WRITE_PATTERN and checkReIdentification above
         const result = await session.run(cypher, params);
         results = result.records.map((r) => {
           const obj: Record<string, any> = {};

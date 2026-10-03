@@ -245,7 +245,7 @@ run_catalog_tests() {
   # has nothing to bind the object to, so the connector rejects the whole
   # request. This test had been sending it without one and passing anyway,
   # because the suite scored the error envelope as a response (#333).
-  cat13_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'","querySpec":{"@type":"QuerySpec","filterExpression":[]}}' "$PROVIDER_CTX" "$PROVIDER_DID")
+  cat13_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'","querySpec":{"@type":"QuerySpec","filterExpression":[]}}' "$PROVIDER_CTX" "$PROVIDER_DID")  # nosemgrep: detected-username-and-password-in-uri -- host:port followed by @type in JSON, not credentials
   resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$cat13_body") || resp=""
 
   if [ -n "$resp" ]; then
