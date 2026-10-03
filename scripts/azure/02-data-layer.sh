@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # Phase 2: Data layer — Postgres (Flexible Server, ADR-041) + Neo4j.
 #
-# Neo4j mounts neo4j-data + neo4j-logs per ADR-017; Neo4j tolerates SMB.
-# Postgres does not, which is why it is a managed server and not a container.
+# Neo4j mounts neo4j-data per ADR-017; Neo4j tolerates SMB for its store. Its /logs
+# is NOT mounted (ADR-045): log4j cannot roll its files on SMB, and from 2026-09-22
+# printed a stack trace on every attempt, 180 MB a day of billed Log Analytics
+# ingestion. Logs stay in the container; neo4j.log reaches the console anyway.
+# Postgres does not tolerate SMB at all, which is why it is a managed server and
+# not a container (ADR-041).
 #
 # Two-step pattern: create each app with CLI flags (no volumes), then patch
 # with `az containerapp update --yaml` to attach Azure Files volumes. The
@@ -52,7 +56,7 @@ az containerapp create \
 ok "Neo4j container app created"
 
 # ── Neo4j (step 2: patch YAML to add Azure Files volumes) ──────────────────
-log "Patching Neo4j to mount neo4j-data + neo4j-logs Azure Files shares..."
+log "Patching Neo4j to mount the neo4j-data Azure Files share (no /logs mount)..."
 NEO4J_YAML=$(mktemp)
 az containerapp show --name "$NEO4J_APP" --resource-group "$RG" -o yaml > "$NEO4J_YAML"
 
@@ -63,15 +67,15 @@ with open(path) as f:
     doc = yaml.safe_load(f)
 tpl = doc['properties']['template']
 vols = tpl.get('volumes') or []
-for v_name, s_name in [('neo4j-data', 'neo4j-data'), ('neo4j-logs', 'neo4j-logs')]:
-    if not any((v or {}).get('name') == v_name for v in vols):
-        vols.append({'name': v_name, 'storageType': 'AzureFile', 'storageName': s_name})
+# Drop a neo4j-logs volume left by runs before ADR-045, so a re-run repairs it.
+vols = [v for v in vols if (v or {}).get('name') != 'neo4j-logs']
+if not any((v or {}).get('name') == 'neo4j-data' for v in vols):
+    vols.append({'name': 'neo4j-data', 'storageType': 'AzureFile', 'storageName': 'neo4j-data'})
 tpl['volumes'] = vols
 for c in tpl['containers']:
-    mounts = c.get('volumeMounts') or []
-    for v_name, mnt in [('neo4j-data', '/data'), ('neo4j-logs', '/logs')]:
-        if not any((m or {}).get('volumeName') == v_name for m in mounts):
-            mounts.append({'volumeName': v_name, 'mountPath': mnt})
+    mounts = [m for m in (c.get('volumeMounts') or []) if (m or {}).get('volumeName') != 'neo4j-logs']
+    if not any((m or {}).get('volumeName') == 'neo4j-data' for m in mounts):
+        mounts.append({'volumeName': 'neo4j-data', 'mountPath': '/data'})
     c['volumeMounts'] = mounts
 with open(path, 'w') as f:
     yaml.safe_dump(doc, f)
@@ -79,7 +83,23 @@ PY
 
 az containerapp update --name "$NEO4J_APP" --resource-group "$RG" --yaml "$NEO4J_YAML" -o none
 rm -f "$NEO4J_YAML"
-ok "Neo4j volumes attached (neo4j-data → /data, neo4j-logs → /logs)"
+ok "Neo4j volume attached (neo4j-data → /data; logs stay in the container)"
+
+# Single revision mode keeps the last *ready* revision running until the new one
+# is ready. Neo4j's store lock on the shared /data means the new one never can
+# be, so the two deadlock and the old one is re-activated on every update
+# (docs/gotchas.md, 2026-10-02). Stop every other revision; that costs a short
+# outage, which a single-writer database on a shared volume cannot avoid.
+NEO4J_LATEST=$(az containerapp show --name "$NEO4J_APP" --resource-group "$RG" \
+  --query "properties.latestRevisionName" -o tsv)
+while read -r rev; do
+  [[ -z "$rev" || "$rev" == "$NEO4J_LATEST" ]] && continue
+  log "Deactivating ${rev} so ${NEO4J_LATEST} can take the Neo4j store lock..."
+  az containerapp revision deactivate --name "$NEO4J_APP" --resource-group "$RG" \
+    --revision "$rev" -o none
+done < <(az containerapp revision list --name "$NEO4J_APP" --resource-group "$RG" \
+  --query "[?properties.active].name" -o tsv)
+ok "Only ${NEO4J_LATEST} is active"
 
 # Postgres readiness needs no wait here: phase 1 returns only once the server
 # reports Ready, and phase 2 reads every database back.
@@ -88,4 +108,4 @@ ok "Neo4j volumes attached (neo4j-data → /data, neo4j-logs → /logs)"
 log "Data layer complete"
 echo "  Postgres:  ${PG_FLEX_NAME} (Flexible Server, TLS, ADR-041)"
 echo "  Databases: keycloak, controlplane, dataplane, dataplane_omop, identityhub, issuerservice, cfm"
-echo "  Neo4j:     ${NEO4J_APP} (internal TCP 7687, Azure Files /data + /logs)"
+echo "  Neo4j:     ${NEO4J_APP} (internal TCP 7687, Azure Files /data; logs stay in the container)"
