@@ -2,10 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import { Send } from "lucide-react";
+import { IS_STATIC } from "@/lib/static-export";
 
 /** Assembled at runtime so the address is not in the page source for
- *  scrapers. The request goes out from the visitor's own mail app: no mail
- *  server, no credentials, and it works in the static GitHub Pages build. */
+ *  scrapers. Only the mailto draft uses it: the static GitHub Pages build,
+ *  which has no API, and the fallback when the hub cannot send (ADR-048). */
 const RECIPIENT = ["matthias.buchhorn", "web.de"].join("@");
 
 export function buildTestflightMailto(
@@ -30,16 +31,40 @@ export function buildTestflightMailto(
   )}&body=${encodeURIComponent(body)}`;
 }
 
+type Phase = "idle" | "sending" | "sent" | "busy" | "failed" | "drafted";
+
 export function TestflightRequestForm() {
   const [name, setName] = useState("");
   const [appleId, setAppleId] = useState("");
   const [note, setNote] = useState("");
-  const [sent, setSent] = useState(false);
+  const [website, setWebsite] = useState("");
+  const [phase, setPhase] = useState<Phase>("idle");
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    window.open(buildTestflightMailto(name, appleId, note), "_self");
-    setSent(true);
+    if (IS_STATIC) {
+      window.open(buildTestflightMailto(name, appleId, note), "_self");
+      setPhase("drafted");
+      return;
+    }
+    setPhase("sending");
+    try {
+      const res = await fetch("/api/testflight-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, appleId, note, website }),
+      });
+      if (res.status === 202) {
+        setPhase("sent");
+        setName("");
+        setAppleId("");
+        setNote("");
+      } else {
+        setPhase(res.status === 429 ? "busy" : "failed");
+      }
+    } catch {
+      setPhase("failed");
+    }
   }
 
   const field =
@@ -105,30 +130,91 @@ export function TestflightRequestForm() {
           className={field}
         />
       </div>
+      {/* Honeypot: hidden from people and screen readers, filled by bots. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0">
+        <label htmlFor="tf-website">Website</label>
+        <input
+          id="tf-website"
+          tabIndex={-1}
+          autoComplete="off"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+        />
+      </div>
       <button
         type="submit"
-        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-(--surface-2) text-(--text-primary) border border-(--border-ui) hover:border-layer2 transition-colors"
+        disabled={phase === "sending"}
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-(--surface-2) text-(--text-primary) border border-(--border-ui) hover:border-layer2 transition-colors disabled:opacity-60"
       >
         <Send size={16} aria-hidden="true" />
-        Write the request
+        {IS_STATIC
+          ? "Write the request"
+          : phase === "sending"
+            ? "Sending…"
+            : "Send the request"}
       </button>
       <p className="text-xs text-(--text-secondary)" role="status">
-        {sent ? (
-          <>
-            Your mail app should now show the request, ready to send. If nothing
-            opened, write to{" "}
-            <a
-              href={`mailto:${RECIPIENT}`}
-              className="text-(--accent) underline underline-offset-2"
-            >
-              {RECIPIENT}
-            </a>
-            .
-          </>
-        ) : (
-          "This opens your own mail app with the request filled in; nothing is sent until you press send there."
-        )}
+        <TestflightStatus
+          phase={phase}
+          mailto={
+            phase === "failed" || phase === "drafted"
+              ? buildTestflightMailto(name, appleId, note)
+              : ""
+          }
+        />
       </p>
     </form>
   );
+}
+
+function TestflightStatus({ phase, mailto }: { phase: Phase; mailto: string }) {
+  const link = "text-(--accent) underline underline-offset-2";
+  switch (phase) {
+    case "sending":
+      return <>Sending your request…</>;
+    case "sent":
+      return (
+        <>
+          Thank you, your request is on its way. The TestFlight invitation will
+          arrive at your Apple ID email.
+        </>
+      );
+    case "busy":
+      return (
+        <>Too many requests from here just now. Please try again in an hour.</>
+      );
+    case "failed":
+      return (
+        <>
+          The request could not be sent from here.{" "}
+          <a href={mailto} className={link}>
+            Write it in your mail app instead
+          </a>
+          , it is filled in already.
+        </>
+      );
+    case "drafted":
+      return (
+        <>
+          Your mail app should now show the request, ready to send. If nothing
+          opened, write to{" "}
+          <a href={`mailto:${RECIPIENT}`} className={link}>
+            {RECIPIENT}
+          </a>
+          .
+        </>
+      );
+    default:
+      return IS_STATIC ? (
+        <>
+          This opens your own mail app with the request filled in; nothing is
+          sent until you press send there.
+        </>
+      ) : (
+        <>
+          Goes straight to Matthias. Your Apple ID is used only for the
+          TestFlight invitation.
+        </>
+      );
+  }
 }

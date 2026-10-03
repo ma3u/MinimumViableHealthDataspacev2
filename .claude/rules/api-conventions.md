@@ -129,12 +129,17 @@ are in `PROTECTED_PATHS`, so an anonymous visitor is sent to sign in. So are `/c
 reads the API redirects a signed-out visitor rather than showing empty panels.
 
 The only routes that answer without a session are the ones that make
-signing in possible and the probe that keeps the container alive:
+signing in possible, the probe that keeps the container alive, and the start
+page's TestFlight form:
 
 - `/api/auth/[...nextauth]`, `/api/auth/eudi/start`, `/api/auth/eudi/status`:
   the sign-in flows themselves.
 - `/api/keycloak-config`: tells the sign-in banner where Keycloak is.
 - `/api/health`: the liveness and readiness probe (`k8s/probes.yaml`).
+- `/api/testflight-request`: the start page's Klarbefund TestFlight form,
+  mailed through Azure Communication Services for visitors without an account
+  (ADR-048). Fixed recipient, honeypot, three per address and twenty in all
+  per hour.
 
 One route takes a machine credential instead of, or as well as, a session:
 `/api/mock-dsp/[participant]/catalog/request`, which the catalog crawler

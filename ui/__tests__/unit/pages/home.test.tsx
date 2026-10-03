@@ -70,7 +70,7 @@ describe("Home Page", () => {
     ).toHaveAttribute("src", "/klarbefund/klarbefund-tour.mp4");
     expect(screen.getByText(/private TestFlight preview/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /write the request/i }),
+      screen.getByRole("button", { name: /send the request/i }),
     ).toBeInTheDocument();
   });
 
