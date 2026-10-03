@@ -1,6 +1,7 @@
 import { Smartphone } from "lucide-react";
 import { IS_STATIC } from "@/lib/static-export";
 import { TestflightRequestForm } from "@/components/TestflightRequestForm";
+import { KlarbefundTourPhone } from "@/components/KlarbefundTourPhone";
 
 /** The GitHub Pages export is served under a basePath; plain <video> and <img>
  *  URLs must carry it (same pattern as the journey page). */
@@ -13,7 +14,7 @@ export function KlarbefundShowcase() {
   return (
     <section
       className="mb-12 sm:mb-16 animate-fade-in-up grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-8 lg:gap-12 items-start"
-      style={{ animationDelay: "125ms" }}
+      style={{ animationDelay: "100ms" }}
       aria-labelledby="klarbefund-title"
     >
       <div>
@@ -65,29 +66,7 @@ export function KlarbefundShowcase() {
         </div>
       </div>
 
-      {/* The phone: a looping recording of the app; a still for visitors who
-          ask for reduced motion. */}
-      <div className="justify-self-center w-[min(70vw,260px)] rounded-[2.5rem] border-8 border-gray-900 dark:border-gray-700 bg-gray-900 shadow-xl overflow-hidden">
-        <video
-          className="block w-full h-auto motion-reduce:hidden"
-          src={`${BASE_PATH}/klarbefund/klarbefund-tour.mp4`}
-          poster={`${BASE_PATH}/klarbefund/klarbefund-tour-poster.png`}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-label={TOUR_ALT}
-        />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className="hidden w-full h-auto motion-reduce:block"
-          src={`${BASE_PATH}/klarbefund/klarbefund-tour-poster.png`}
-          alt={TOUR_ALT}
-          width={440}
-          height={956}
-        />
-      </div>
+      <KlarbefundTourPhone basePath={BASE_PATH} alt={TOUR_ALT} />
     </section>
   );
 }

@@ -121,9 +121,9 @@ export default function Home() {
         <LivingBodyHero className="aspect-9/16 w-[min(72vw,300px)] justify-self-center lg:order-first lg:w-auto lg:h-[min(72vh,620px)]" />
       </section>
 
-      {/* ── Latest updates, and the iPhone app ───────────────────────────── */}
-      <LatestUpdates />
+      {/* ── The iPhone app, then the latest updates ─────────────────────── */}
       <KlarbefundShowcase />
+      <LatestUpdates />
 
       {/* ── Why EHDS Matters ─────────────────────────────────────────────── */}
       <section
