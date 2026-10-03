@@ -9,14 +9,30 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read # the site job fetches the last test run's reports artifact
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+# Two tracks instead of one long job. The site is built and published first
+# (about 6 minutes); the tests run beside it and store their reports as an
+# artifact. Until 2026-10-03 one job ran the unit tests, Playwright, the WCAG
+# audit and the security tests before it built the site, so a change waited
+# 24 minutes for a 6-second publish.
+#
+# The reports on the site (/test-reports, /ci-e2e-report) are therefore the
+# ones from the last test run that had finished when the site was built,
+# usually the previous commit's. Publishing twice per run would avoid that
+# lag, but both deployments would carry the same build version, and the
+# github-pages environment only deploys from main, so it cannot be tried out
+# on a branch.
+#
+# Concurrency is per job. Site builds and test runs are cancelled by a newer
+# push; deploys run one at a time.
 
 jobs:
-  build:
+  site:
     runs-on: ubuntu-latest
+    concurrency:
+      group: "pages-site"
+      cancel-in-progress: true
     services:
       neo4j:
         image: neo4j:5-community
@@ -52,6 +68,13 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: ui/.next/cache
+          key: nextjs-site-${{ hashFiles('ui/package-lock.json') }}-${{ hashFiles('ui/src/**', 'ui/public/**') }}
+          restore-keys: nextjs-site-${{ hashFiles('ui/package-lock.json') }}-
 
       # ── Seed Neo4j and refresh mock fixtures ─────────────────────
       - name: Install cypher-shell
@@ -95,27 +118,140 @@ jobs:
           pkill -f "next start" 2>/dev/null || true
           fuser -k 3000/tcp 2>/dev/null || true
           lsof -t -i:3000 2>/dev/null | xargs -r kill -9 2>/dev/null || true
-          # Wait for the port to be released before the next step starts Next.js again.
-          for i in $(seq 1 10); do
-            if ! lsof -i:3000 > /dev/null 2>&1; then
-              echo "Port 3000 is free"
-              break
-            fi
-            sleep 1
-          done
+
+      # --- Static Export for Pages ---
+      - name: Disable API routes for static export
+        run: mv src/app/api /tmp/api_disabled || true
+
+      - name: Build with Next.js
+        run: npx next build
+        env:
+          NEXT_PUBLIC_STATIC_EXPORT: "true"
+
+      # The reports of the most recent finished test run on the branch being
+      # built (main, for every real deploy), so a test run on another branch
+      # never reaches the site. Missing on the very first run, and then the
+      # site goes out without them rather than not at all.
+      - name: Add the latest test reports
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          run_id=$(gh api "repos/${{ github.repository }}/actions/artifacts?name=pages-test-reports&per_page=50" \
+            --jq "[.artifacts[] | select(.expired == false and .workflow_run.head_branch == \"$BRANCH\")][0].workflow_run.id // empty" 2>/dev/null || true)
+          if [ -z "$run_id" ]; then
+            echo "::notice::No pages-test-reports artifact yet; publishing without test reports."
+            exit 0
+          fi
+          echo "Using the test reports of run $run_id"
+          # Into a scratch directory first: gh will not overwrite, and the
+          # static export already holds public/test-reports/test-results.json.
+          gh run download "$run_id" --repo "${{ github.repository }}" --name pages-test-reports --dir "$RUNNER_TEMP/test-reports"
+          cp -r "$RUNNER_TEMP/test-reports/." out/
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ./ui/out
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: site
+    concurrency:
+      group: "pages-deploy"
+      cancel-in-progress: false
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # ── Tests, beside the site ────────────────────────────────────────────
+  # Unit tests with coverage, the Playwright suite, the WCAG 2.2 AA audit and
+  # the security tests, against a production build with the API routes on.
+  # All informational (continue-on-error), as before; their reports go out
+  # with the next site build.
+  tests:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: "pages-tests"
+      cancel-in-progress: true
+    services:
+      neo4j:
+        image: neo4j:5-community
+        env:
+          NEO4J_AUTH: neo4j/healthdataspace
+          NEO4J_PLUGINS: "[]"
+        ports:
+          - 7474:7474
+          - 7687:7687
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p healthdataspace 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: ./ui
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Next.js build
+        uses: actions/cache@v4
+        with:
+          path: ui/.next/cache
+          key: nextjs-tests-${{ hashFiles('ui/package-lock.json') }}-${{ hashFiles('ui/src/**', 'ui/public/**') }}
+          restore-keys: nextjs-tests-${{ hashFiles('ui/package-lock.json') }}-
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('ui/package-lock.json') }}
+
+      - name: Install cypher-shell
+        working-directory: .
+        run: |
+          wget -q https://dist.neo4j.org/cypher-shell/cypher-shell-5.26.0.zip -O /tmp/cs.zip
+          unzip -q /tmp/cs.zip -d /tmp/cs
+          echo "/tmp/cs/cypher-shell-5.26.0/bin" >> "$GITHUB_PATH"
+
+      - name: Seed Neo4j with schema and synthetic data
+        working-directory: .
+        run: |
+          cypher-shell -u neo4j -p healthdataspace -a bolt://localhost:7687 < neo4j/init-schema.cypher
+          cypher-shell -u neo4j -p healthdataspace -a bolt://localhost:7687 < neo4j/insert-synthetic-schema-data.cypher
 
       - name: Run unit tests with coverage
         run: npx vitest run --coverage --reporter=json --outputFile=test-results.json
         continue-on-error: true
 
-      # --- Playwright E2E Report ---
       - name: Build for E2E tests
         run: npx next build
         env:
           NEXT_PUBLIC_STATIC_EXPORT: "false"
 
       - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system dependencies
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       # Start ONE shared Next.js server for every Playwright step below.
       # Each step sets PLAYWRIGHT_BASE_URL, which makes playwright.config.ts
@@ -141,12 +277,14 @@ jobs:
 
       - name: Run Playwright E2E tests
         # Informational only (continue-on-error) — runs against the shared
-        # server above. --retries=0 --workers=4 keeps the full chromium suite
-        # inside the cap so it never delays the build+deploy. The uncapped
-        # full run + report artifact lives in test.yml (e2e-tests job, main).
+        # server above. The uncapped full run + report artifact lives in
+        # test.yml (e2e-tests job, main). The cap was 10 minutes so the tests
+        # could not delay the deploy; the 1145 tests take about that long, so
+        # the step was killed before Playwright wrote its HTML report. It no
+        # longer delays anything, so it gets room to finish.
         run: npx playwright test --project=chromium --retries=0 --workers=4
         continue-on-error: true
-        timeout-minutes: 10
+        timeout-minutes: 15
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:3000
@@ -186,40 +324,26 @@ jobs:
           pkill -f "next start" 2>/dev/null || true
           lsof -t -i:3000 2>/dev/null | xargs -r kill -9 2>/dev/null || true
 
-      # --- Static Export for Pages ---
-      - name: Disable API routes for static export
-        run: mv src/app/api /tmp/api_disabled || true
-
-      - name: Build with Next.js
-        run: npx next build
-        env:
-          NEXT_PUBLIC_STATIC_EXPORT: "true"
-
-      - name: Copy test reports to output (CI-generated)
+      # Laid out as the site expects them, so the site job can copy the
+      # artifact straight into out/.
+      - name: Collect test reports
+        if: always()
         run: |
-          mkdir -p out/test-reports out/ci-e2e-report
+          mkdir -p reports/test-reports reports/ci-e2e-report
           # Vitest coverage
-          cp -r coverage/ out/test-reports/coverage/ 2>/dev/null || true
-          cp test-results.json out/test-reports/ 2>/dev/null || true
+          cp -r coverage/ reports/test-reports/coverage/ 2>/dev/null || true
+          cp test-results.json reports/test-reports/ 2>/dev/null || true
           # CI Playwright report goes to ci-e2e-report/ (chromium-only).
           # The committed public/e2e-report/ (live + chromium from JAD stack)
-          # is already in out/e2e-report/ via Next.js static export.
-          cp -r playwright-report/* out/ci-e2e-report/ 2>/dev/null || true
+          # reaches the site through the static export.
+          cp -r playwright-report/* reports/ci-e2e-report/ 2>/dev/null || true
           # Generate comprehensive test report dashboard
-          node ../scripts/generate-test-report-page.js . out/test-reports || echo "Report generation skipped"
+          node ../scripts/generate-test-report-page.js . reports/test-reports || echo "Report generation skipped"
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          path: ./ui/out
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          name: pages-test-reports
+          path: ui/reports/
+          retention-days: 30
