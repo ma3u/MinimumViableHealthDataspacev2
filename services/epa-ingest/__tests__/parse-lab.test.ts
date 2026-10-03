@@ -5,6 +5,7 @@ import {
   parseLabReport,
   parseNumber,
   parseReferenceRange,
+  printedReference,
 } from "../src/parse-lab.js";
 
 const FIXTURE = readFileSync(
@@ -133,5 +134,41 @@ describe("a lone leading zero", () => {
     expect(parseNumber("0.100")).toBe(0.1);
     expect(parseNumber("1.240")).toBe(1240);
     expect(parseNumber("10.300")).toBe(10300);
+  });
+});
+
+describe("printed reference range (#186 criterion 4)", () => {
+  it("keeps the range exactly as printed beside the numbers read from it", () => {
+    const [v] = parseLabReport("HbA1c  5,4  %  4,0 - 6,0").values;
+    expect(v).toMatchObject({
+      referenceLow: 4,
+      referenceHigh: 6,
+      referenceText: "4,0 - 6,0",
+    });
+  });
+
+  it("keeps a range no number can be read from, as text alone", () => {
+    const [v] = parseLabReport("CRP  0,31  mg/dl  Erw. unter 0,5").values;
+    expect(v.referenceLow).toBeUndefined();
+    expect(v.referenceHigh).toBeUndefined();
+    expect(v.referenceText).toBe("Erw. unter 0,5");
+  });
+
+  it("keeps a unit printed in the range column", () => {
+    expect(printedReference("< 116 mg/dl")).toBe("< 116 mg/dl");
+    expect(printedReference("Erw. < 5,0 mg/l")).toBe("Erw. < 5,0 mg/l");
+  });
+
+  it("trims a recogniser's column separator and nothing else", () => {
+    expect(printedReference(" : 33-36 ")).toBe("33-36");
+  });
+
+  it("does not keep a second analyte merged onto the line as a range", () => {
+    expect(printedReference("Natrium  141  mmol/l  136 - 145")).toBeUndefined();
+  });
+
+  it("has no text when nothing follows the unit", () => {
+    const [v] = parseLabReport("Glucose  92  mg/dl").values;
+    expect(v.referenceText).toBeUndefined();
   });
 });
