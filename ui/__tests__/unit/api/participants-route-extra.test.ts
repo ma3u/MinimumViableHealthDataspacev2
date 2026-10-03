@@ -283,6 +283,39 @@ describe("/api/participants – extra coverage", () => {
     );
   });
 
+  // #455: the profile carried no DID and a field the manager does not read,
+  // so the EDC-V and registration agents rejected every registration.
+  it("POST sends the participant profile the agents provision from", async () => {
+    mockTenant
+      .mockResolvedValueOnce([{ id: "cell-1" }])
+      .mockResolvedValueOnce([{ id: "profile-1" }])
+      .mockResolvedValueOnce({ id: "tenant-new" })
+      .mockResolvedValueOnce({ id: "part-new" });
+
+    const req = new NextRequest("http://localhost/api/participants", {
+      method: "POST",
+      body: JSON.stringify({
+        displayName: "Testpraxis Lindenhof",
+        role: "data-holder",
+        ehdsParticipantType: "data-holder",
+      }),
+    });
+    const res = await POST(req);
+
+    expect(res.status).toBe(201);
+    const call = mockTenant.mock.calls.find(
+      (c) => c[0] === "/v1alpha1/tenants/tenant-new/participant-profiles",
+    );
+    expect(call?.[1]).toBe("POST");
+    const body = call?.[2] as Record<string, unknown>;
+    expect(body.identifier).toMatch(
+      /^did:web:identityhub%3A7083:testpraxis-lindenhof-[0-9a-f]{6}$/,
+    );
+    expect(body.dataspaceProfileIds).toEqual(["profile-1"]);
+    expect(body.participantRoles).toEqual({ "profile-1": ["provider"] });
+    expect(body).not.toHaveProperty("dataspaceProfileId");
+  });
+
   it("POST defaults ehdsParticipantType to role when omitted", async () => {
     mockTenant
       .mockResolvedValueOnce([{ id: "cell-1" }])
