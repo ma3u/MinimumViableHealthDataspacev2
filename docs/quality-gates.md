@@ -73,10 +73,10 @@ Run automatically before every `git commit`. Configured in
 
 Run before `git push`. Catch issues that are too slow for pre-commit.
 
-| #   | Hook             | Tool                           | Severity        | Action                 |
-| --- | ---------------- | ------------------------------ | --------------- | ---------------------- |
-| 1   | Unit tests       | Vitest `--bail 1`              | **Blocks push** | Stops on first failure |
-| 2   | Dependency audit | `npm audit --audit-level=high` | **Blocks push** | HIGH + CRITICAL CVEs   |
+| #   | Hook             | Tool                                            | Severity        | Action                                                                              |
+| --- | ---------------- | ----------------------------------------------- | --------------- | ----------------------------------------------------------------------------------- |
+| 1   | Unit tests       | Vitest `--bail 1`                               | **Blocks push** | Stops on first failure                                                              |
+| 2   | Dependency audit | `scripts/check-npm-audit.py` (npm audit, high+) | **Blocks push** | HIGH + CRITICAL CVEs, except time-boxed entries in `docs/npm-audit-exceptions.json` |
 
 ---
 

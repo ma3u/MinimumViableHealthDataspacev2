@@ -63,7 +63,8 @@ docs/                   — see "Knowledge & planning" below
 3. **Static export disables API routes** — CI renames `src/app/api/`; guard with
    `NEXT_PUBLIC_STATIC_EXPORT` and mirror every route in `ui/public/mock/*.json`.
 4. **Pre-commit Prettier reformats staged files** — `git add` again and retry the commit;
-   pre-push runs full Vitest + `npm audit --audit-level=high --omit=dev`.
+   pre-push runs full Vitest + `scripts/check-npm-audit.py ui --omit=dev` (npm audit,
+   high+, except time-boxed entries in `docs/npm-audit-exceptions.json`).
 5. **Keycloak: never use `wellKnown` in the NextAuth provider** (container-internal
    `localhost` breaks token exchange) and the UI client is confidential + PKCE S256 —
    see `ui/src/lib/auth.ts`, `jad/keycloak-realm.json`, and the realm-drift runbook

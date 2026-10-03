@@ -116,7 +116,7 @@ Configured in `.pre-commit-config.yaml`. Install once:
 | Hook         | Purpose                                            |
 | ------------ | -------------------------------------------------- |
 | vitest-ui    | `npx vitest run --bail 1` — stops on first failure |
-| npm-audit-ui | `npm audit --audit-level=high --omit=dev`          |
+| npm-audit-ui | `python3 scripts/check-npm-audit.py ui --omit=dev` |
 
 Notes:
 

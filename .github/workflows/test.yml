@@ -245,14 +245,15 @@ jobs:
           cache: npm
           cache-dependency-path: ./ui/package-lock.json
 
+      # Same gate as the pre-push hook, over all dependencies: high and
+      # critical fail unless excepted, with an expiry, in
+      # docs/npm-audit-exceptions.json (#435).
       - name: Audit UI dependencies
-        working-directory: ./ui
-        run: npm audit --audit-level=high
+        run: python3 scripts/check-npm-audit.py ui
 
       - name: Audit Neo4j proxy dependencies
-        working-directory: ./services/neo4j-proxy
         # Use --omit=dev to audit only production dependencies for the proxy
-        run: npm audit --audit-level=high --omit=dev
+        run: python3 scripts/check-npm-audit.py services/neo4j-proxy --omit=dev
         continue-on-error: true
 
       - name: Audit summary

@@ -11,7 +11,7 @@ cd ui && npx tsc --noEmit -p tsconfig.build.json   # type-check (excludes tests)
 cd ui && npm run lint                              # budget: ≤ 55 warnings
 cd ui && npm test                                  # Vitest, full suite
 cd ui && npm run build                             # production build
-cd ui && npm audit --audit-level=high --omit=dev   # pre-push gate
+python3 scripts/check-npm-audit.py ui --omit=dev   # pre-push gate (exceptions: docs/npm-audit-exceptions.json)
 pre-commit run --all-files                         # everything the hooks enforce
 ```
 
