@@ -471,7 +471,7 @@ describe("FhirResourceViewer – expanded coverage", () => {
     const { container } = render(<FhirResourceViewer bundle={bundle} />);
     // Selector covers both pre-Phase21 and post-Phase21 class names
     const groupButtons = container.querySelectorAll(
-      ".border.border-gray-700 > button, .border.border-\\[var\\(--border\\)\\] > button",
+      ".border.border-gray-700 > button, .border.border-\\(--border\\) > button",
     );
     // Patient group should come first, unknown second
     expect(groupButtons[0]?.textContent).toContain("Patients");

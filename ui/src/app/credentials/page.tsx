@@ -205,7 +205,7 @@ export default function CredentialsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
           title="Verifiable Credentials"
@@ -218,12 +218,12 @@ export default function CredentialsPage() {
         />
 
         {/* Request new credential */}
-        <div className="border border-[var(--border)] rounded-xl p-5 mb-8">
+        <div className="border border-(--border) rounded-xl p-5 mb-8">
           <div className="flex items-center gap-2 mb-2">
             <Send size={18} className="text-teal-800 dark:text-teal-300" />
             <h2 className="font-semibold text-sm">Request Credential</h2>
           </div>
-          <p className="text-xs text-[var(--text-secondary)] mb-4">
+          <p className="text-xs text-(--text-secondary) mb-4">
             Request a Verifiable Credential (VC) from the IssuerService for a
             participant. VCs prove identity, compliance, and data-access
             authorization in the EHDS dataspace. They are stored in the
@@ -232,14 +232,14 @@ export default function CredentialsPage() {
           </p>
           <div className="grid sm:grid-cols-3 gap-3 items-end">
             <div>
-              <label className="text-xs text-[var(--text-secondary)] mb-1 block">
+              <label className="text-xs text-(--text-secondary) mb-1 block">
                 Participant Context
               </label>
               <select
                 aria-label="Participant Context"
                 value={reqParticipant}
                 onChange={(e) => setReqParticipant(e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm"
+                className="w-full px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm"
               >
                 {participants.map((p) => (
                   <option key={p["@id"]} value={p["@id"]}>
@@ -251,14 +251,14 @@ export default function CredentialsPage() {
             </div>
 
             <div>
-              <label className="text-xs text-[var(--text-secondary)] mb-1 block">
+              <label className="text-xs text-(--text-secondary) mb-1 block">
                 Credential Type
               </label>
               <select
                 aria-label="Credential Type"
                 value={reqType}
                 onChange={(e) => setReqType(e.target.value)}
-                className="w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm"
+                className="w-full px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm"
               >
                 {credentialDefs.length > 0 ? (
                   credentialDefs.map((d) => (
@@ -285,7 +285,7 @@ export default function CredentialsPage() {
             <button
               onClick={handleRequest}
               disabled={requesting || !reqParticipant}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-[var(--accent)] text-white dark:text-gray-900 rounded text-sm font-medium hover:bg-[var(--accent-hover)] disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-(--accent) text-white dark:text-gray-900 rounded-sm text-sm font-medium hover:bg-(--accent-hover) disabled:opacity-50"
             >
               {requesting ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -300,8 +300,8 @@ export default function CredentialsPage() {
             <p
               className={`mt-3 text-xs ${
                 requestResult.startsWith("Error")
-                  ? "text-[var(--role-admin-text)]"
-                  : "text-[var(--role-user-text)]"
+                  ? "text-(--role-admin-text)"
+                  : "text-(--role-user-text)"
               }`}
             >
               {requestResult}
@@ -311,7 +311,7 @@ export default function CredentialsPage() {
 
         {/* Credential list */}
         {loading ? (
-          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+          <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
             Loading credentials…
           </div>
@@ -319,12 +319,12 @@ export default function CredentialsPage() {
           <div className="text-center py-12">
             <ShieldCheck
               size={40}
-              className="text-[var(--text-secondary)] mx-auto mb-4"
+              className="text-(--text-secondary) mx-auto mb-4"
             />
-            <p className="text-[var(--text-secondary)]">
+            <p className="text-(--text-secondary)">
               No credentials found in Neo4j
             </p>
-            <p className="text-[var(--text-secondary)] text-xs mt-1">
+            <p className="text-(--text-secondary) text-xs mt-1">
               Register a participant and request credentials above
             </p>
           </div>
@@ -337,8 +337,8 @@ export default function CredentialsPage() {
                   key={vc.id}
                   className={`border rounded-xl transition-colors ${
                     isOpen
-                      ? "border-layer2 bg-[var(--surface)]/60"
-                      : "border-[var(--border)] hover:border-layer2"
+                      ? "border-layer2 bg-(--surface)/60"
+                      : "border-(--border) hover:border-layer2"
                   }`}
                 >
                   <button
@@ -352,15 +352,15 @@ export default function CredentialsPage() {
                           size={18}
                           className={
                             vc.status === "Active"
-                              ? "text-[var(--role-user-text)]"
-                              : "text-[var(--text-secondary)]"
+                              ? "text-(--role-user-text)"
+                              : "text-(--text-secondary)"
                           }
                         />
                         <div>
-                          <p className="font-medium text-sm text-[var(--text-primary)]">
+                          <p className="font-medium text-sm text-(--text-primary)">
                             {vc.type}
                           </p>
-                          <p className="text-xs text-[var(--text-secondary)]">
+                          <p className="text-xs text-(--text-secondary)">
                             {vc.subject?.slice(0, 40)}… · Issued:{" "}
                             {vc.issuanceDate?.split("T")[0]}
                           </p>
@@ -370,8 +370,8 @@ export default function CredentialsPage() {
                         <span
                           className={`text-xs px-2 py-0.5 rounded-full ${
                             vc.status === "Active"
-                              ? "bg-[var(--role-user-bg)] text-[var(--role-user-text)] border border-[var(--role-user-border)]"
-                              : "bg-[var(--surface-2)] text-[var(--text-secondary)]"
+                              ? "bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)"
+                              : "bg-(--surface-2) text-(--text-secondary)"
                           }`}
                         >
                           {vc.status}
@@ -379,12 +379,12 @@ export default function CredentialsPage() {
                         {isOpen ? (
                           <ChevronUp
                             size={16}
-                            className="text-[var(--text-secondary)]"
+                            className="text-(--text-secondary)"
                           />
                         ) : (
                           <ChevronDown
                             size={16}
-                            className="text-[var(--text-secondary)]"
+                            className="text-(--text-secondary)"
                           />
                         )}
                       </div>
@@ -392,37 +392,35 @@ export default function CredentialsPage() {
                   </button>
 
                   {isOpen && (
-                    <div className="px-4 pb-4 space-y-1.5 border-t border-[var(--border)] pt-3">
+                    <div className="px-4 pb-4 space-y-1.5 border-t border-(--border) pt-3">
                       <div className="flex gap-3 text-xs">
-                        <span className="text-[var(--text-secondary)] w-28">
-                          ID
-                        </span>
-                        <span className="text-[var(--text-primary)] font-mono break-all">
+                        <span className="text-(--text-secondary) w-28">ID</span>
+                        <span className="text-(--text-primary) font-mono break-all">
                           {vc.id}
                         </span>
                       </div>
                       <div className="flex gap-3 text-xs">
-                        <span className="text-[var(--text-secondary)] w-28">
+                        <span className="text-(--text-secondary) w-28">
                           Issuer
                         </span>
-                        <span className="text-[var(--text-primary)] font-mono break-all">
+                        <span className="text-(--text-primary) font-mono break-all">
                           {vc.issuer}
                         </span>
                       </div>
                       <div className="flex gap-3 text-xs">
-                        <span className="text-[var(--text-secondary)] w-28">
+                        <span className="text-(--text-secondary) w-28">
                           Subject
                         </span>
-                        <span className="text-[var(--text-primary)] font-mono break-all">
+                        <span className="text-(--text-primary) font-mono break-all">
                           {vc.subject}
                         </span>
                       </div>
                       {vc.expirationDate && (
                         <div className="flex gap-3 text-xs">
-                          <span className="text-[var(--text-secondary)] w-28">
+                          <span className="text-(--text-secondary) w-28">
                             Expires
                           </span>
-                          <span className="text-[var(--text-primary)]">
+                          <span className="text-(--text-primary)">
                             {vc.expirationDate}
                           </span>
                         </div>
@@ -430,22 +428,22 @@ export default function CredentialsPage() {
                       {vc.claims &&
                         Object.entries(vc.claims).map(([k, v]) => (
                           <div key={k} className="flex gap-3 text-xs">
-                            <span className="text-[var(--text-secondary)] w-28">
+                            <span className="text-(--text-secondary) w-28">
                               {k}
                             </span>
-                            <span className="text-[var(--text-primary)]">
+                            <span className="text-(--text-primary)">
                               {String(v)}
                             </span>
                           </div>
                         ))}
-                      <div className="pt-3 mt-2 border-t border-[var(--border)] flex justify-end">
+                      <div className="pt-3 mt-2 border-t border-(--border) flex justify-end">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemove(vc.id);
                           }}
                           disabled={removingId === vc.id}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-[var(--role-admin-text)] border border-[var(--role-admin-border)] rounded hover:bg-[var(--role-admin-bg)] disabled:opacity-50 transition-colors"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-(--role-admin-text) border border-(--role-admin-border) rounded-sm hover:bg-(--role-admin-bg) disabled:opacity-50 transition-colors"
                         >
                           {removingId === vc.id ? (
                             <Loader2 size={12} className="animate-spin" />

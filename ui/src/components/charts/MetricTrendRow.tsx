@@ -32,16 +32,16 @@ export function MetricTrendRow({
   const span = years >= 1 ? `${years}y` : "3 mo";
 
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-2)] p-3">
+    <div className="rounded-xl border border-(--border) bg-(--surface-2) p-3">
       <div className="flex items-baseline justify-between gap-2 mb-1.5">
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-bold text-[var(--text-primary)]">
+          <span className="text-sm font-bold text-(--text-primary)">
             {s.label}
           </span>
-          <span className="text-base font-black text-[var(--text-primary)]">
+          <span className="text-base font-black text-(--text-primary)">
             {s.current}
           </span>
-          <span className="text-xs text-[var(--text-secondary)]">{s.unit}</span>
+          <span className="text-xs text-(--text-secondary)">{s.unit}</span>
         </div>
         <span
           className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full"
@@ -59,7 +59,7 @@ export function MetricTrendRow({
         markers={markers}
       />
       {fromYear && toYear && (
-        <div className="flex justify-between text-[10px] text-[var(--text-secondary)] mt-1 tabular-nums">
+        <div className="flex justify-between text-[10px] text-(--text-secondary) mt-1 tabular-nums">
           <span>{fromYear}</span>
           <span>{toYear}</span>
         </div>

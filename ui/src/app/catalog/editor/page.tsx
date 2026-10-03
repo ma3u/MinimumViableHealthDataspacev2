@@ -355,14 +355,12 @@ function FormField({
 }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-[var(--text-primary)] mb-1">
+      <label className="block text-xs font-semibold text-(--text-primary) mb-1">
         {label}
-        {required && <span className="text-[var(--danger-text)] ml-1">*</span>}
+        {required && <span className="text-(--danger-text) ml-1">*</span>}
       </label>
       {children}
-      {help && (
-        <p className="text-xs text-[var(--text-secondary)] mt-0.5">{help}</p>
-      )}
+      {help && <p className="text-xs text-(--text-secondary) mt-0.5">{help}</p>}
     </div>
   );
 }
@@ -382,7 +380,7 @@ function SelectField({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm text-[var(--text-primary)] outline-none focus:border-purple-500"
+      className="w-full px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm text-(--text-primary) outline-hidden focus:border-purple-500"
     >
       {placeholder && (
         <option value="" disabled>
@@ -415,7 +413,7 @@ function InputField({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm text-[var(--text-primary)] outline-none focus:border-purple-500"
+      className="w-full px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm text-(--text-primary) outline-hidden focus:border-purple-500"
     />
   );
 }
@@ -426,7 +424,7 @@ export default function DcatApEditorPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center gap-2 text-[var(--text-secondary)] p-10">
+        <div className="flex items-center gap-2 text-(--text-secondary) p-10">
           <Loader2 size={16} className="animate-spin" />
           Loading…
         </div>
@@ -586,7 +584,7 @@ function EditorContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
           title="HealthDCAT-AP Editor"
@@ -609,7 +607,7 @@ function EditorContent() {
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               tab === "browse"
                 ? "bg-purple-600 text-white"
-                : "bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                : "bg-(--surface-2) text-(--text-secondary) hover:text-(--text-primary)"
             }`}
           >
             Browse ({datasets.length})
@@ -619,7 +617,7 @@ function EditorContent() {
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-flex items-center gap-1.5 ${
               tab === "create" && !editingId
                 ? "bg-purple-600 text-white"
-                : "bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                : "bg-(--surface-2) text-(--text-secondary) hover:text-(--text-primary)"
             }`}
           >
             <Plus size={14} />
@@ -631,7 +629,7 @@ function EditorContent() {
           {datasets.length > 0 && (
             <button
               onClick={() => downloadAllTurtle(datasets)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border border-[var(--badge-active-border)] hover:opacity-80 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-(--badge-active-bg) text-(--badge-active-text) border border-(--badge-active-border) hover:opacity-80 transition-colors"
               title="Export all entries as RDF Turtle for the EHDS editor"
             >
               <Download size={14} />
@@ -642,7 +640,7 @@ function EditorContent() {
             href="https://ehds.healthdataportal.eu/editor2/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-(--surface-2) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
             title="Open the official EHDS HealthDCAT-AP editor"
           >
             <ExternalLink size={14} />
@@ -654,16 +652,16 @@ function EditorContent() {
         {tab === "browse" && (
           <div>
             {loading ? (
-              <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+              <div className="flex items-center gap-2 text-(--text-secondary)">
                 <Loader2 size={16} className="animate-spin" />
                 Loading catalog…
               </div>
             ) : datasets.length === 0 ? (
-              <p className="text-[var(--text-secondary)]">
+              <p className="text-(--text-secondary)">
                 No HealthDCAT-AP entries yet.{" "}
                 <button
                   onClick={startNew}
-                  className="text-[var(--accent)] hover:underline"
+                  className="text-(--accent) hover:underline"
                 >
                   Create one
                 </button>
@@ -673,25 +671,25 @@ function EditorContent() {
                 {datasets.map((d, idx) => (
                   <div
                     key={d.id ?? `entry-${idx}`}
-                    className="border border-[var(--border)] rounded-xl p-4 hover:border-purple-500/50 transition-colors group"
+                    className="border border-(--border) rounded-xl p-4 hover:border-purple-500/50 transition-colors group"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-[var(--accent)] truncate">
+                        <h3 className="font-semibold text-(--accent) truncate">
                           {d.title || d.id}
                         </h3>
-                        <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-2">
+                        <p className="text-xs text-(--text-secondary) mt-0.5 line-clamp-2">
                           {d.description}
                         </p>
-                        <div className="flex flex-wrap gap-3 mt-2 text-xs text-[var(--text-secondary)]">
+                        <div className="flex flex-wrap gap-3 mt-2 text-xs text-(--text-secondary)">
                           {d.publisher && <span>{d.publisher}</span>}
                           {d.theme && (
-                            <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-1.5 py-0.5 rounded">
+                            <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 px-1.5 py-0.5 rounded-sm">
                               {d.theme}
                             </span>
                           )}
                           {d.datasetType && (
-                            <span className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-1.5 py-0.5 rounded">
+                            <span className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-1.5 py-0.5 rounded-sm">
                               {d.datasetType}
                             </span>
                           )}
@@ -705,21 +703,21 @@ function EditorContent() {
                       <div className="flex gap-2 shrink-0 opacity-50 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => downloadTurtle(d)}
-                          className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-green-300"
+                          className="p-1.5 rounded-sm hover:bg-(--surface-2) text-(--text-secondary) hover:text-green-300"
                           title="Download as RDF Turtle (.ttl) for EHDS editor"
                         >
                           <Download size={14} />
                         </button>
                         <button
                           onClick={() => startEdit(d)}
-                          className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--accent)]"
+                          className="p-1.5 rounded-sm hover:bg-(--surface-2) text-(--text-secondary) hover:text-(--accent)"
                           title="Edit entry"
                         >
                           <Edit3 size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(d.id)}
-                          className="p-1.5 rounded hover:bg-[var(--surface-2)] text-[var(--text-secondary)] hover:text-[var(--danger-text)]"
+                          className="p-1.5 rounded-sm hover:bg-(--surface-2) text-(--text-secondary) hover:text-(--danger-text)"
                           title="Delete entry"
                         >
                           <Trash2 size={14} />
@@ -737,15 +735,15 @@ function EditorContent() {
         {tab === "create" && (
           <form onSubmit={handleSave} className="space-y-6">
             {editingId && (
-              <div className="text-xs text-[var(--text-secondary)] bg-[var(--surface-2)]/50 rounded px-3 py-2">
+              <div className="text-xs text-(--text-secondary) bg-(--surface-2)/50 rounded-sm px-3 py-2">
                 Editing:{" "}
-                <span className="text-[var(--text-primary)]">{editingId}</span>
+                <span className="text-(--text-primary)">{editingId}</span>
               </div>
             )}
 
             {/* Section: DCAT-AP Mandatory */}
             <fieldset className="space-y-4">
-              <legend className="text-sm font-semibold text-[var(--accent)] border-b border-[var(--border)] pb-1 mb-2">
+              <legend className="text-sm font-semibold text-(--accent) border-b border-(--border) pb-1 mb-2">
                 DCAT-AP Mandatory Fields
               </legend>
 
@@ -763,7 +761,7 @@ function EditorContent() {
                   onChange={(e) => setField("description", e.target.value)}
                   placeholder="Describe the dataset contents, coverage and purpose…"
                   rows={3}
-                  className="w-full px-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm text-[var(--text-primary)] outline-none focus:border-purple-500 resize-y"
+                  className="w-full px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm text-(--text-primary) outline-hidden focus:border-purple-500 resize-y"
                 />
               </FormField>
 
@@ -804,7 +802,7 @@ function EditorContent() {
 
             {/* Section: DCAT-AP Recommended */}
             <fieldset className="space-y-4">
-              <legend className="text-sm font-semibold text-[var(--accent)] border-b border-[var(--border)] pb-1 mb-2">
+              <legend className="text-sm font-semibold text-(--accent) border-b border-(--border) pb-1 mb-2">
                 DCAT-AP Recommended Fields
               </legend>
 
@@ -843,7 +841,7 @@ function EditorContent() {
 
             {/* Section: HealthDCAT-AP Extensions */}
             <fieldset className="space-y-4">
-              <legend className="text-sm font-semibold text-[var(--accent)] border-b border-[var(--border)] pb-1 mb-2">
+              <legend className="text-sm font-semibold text-(--accent) border-b border-(--border) pb-1 mb-2">
                 HealthDCAT-AP Extensions
               </legend>
 
@@ -911,11 +909,9 @@ function EditorContent() {
                       onChange={(e) =>
                         setField("personalData", e.target.checked)
                       }
-                      className="w-4 h-4 rounded bg-[var(--surface-2)] border-[var(--border-ui)]"
+                      className="w-4 h-4 rounded-sm bg-(--surface-2) border-(--border-ui)"
                     />
-                    <span className="text-sm text-[var(--text-primary)]">
-                      Yes
-                    </span>
+                    <span className="text-sm text-(--text-primary)">Yes</span>
                   </div>
                 </FormField>
 
@@ -927,11 +923,9 @@ function EditorContent() {
                       onChange={(e) =>
                         setField("sensitiveData", e.target.checked)
                       }
-                      className="w-4 h-4 rounded bg-[var(--surface-2)] border-[var(--border-ui)]"
+                      className="w-4 h-4 rounded-sm bg-(--surface-2) border-(--border-ui)"
                     />
-                    <span className="text-sm text-[var(--text-primary)]">
-                      Yes
-                    </span>
+                    <span className="text-sm text-(--text-primary)">Yes</span>
                   </div>
                 </FormField>
               </div>
@@ -939,7 +933,7 @@ function EditorContent() {
 
             {/* Section: Statistics */}
             <fieldset className="space-y-4">
-              <legend className="text-sm font-semibold text-[var(--accent)] border-b border-[var(--border)] pb-1 mb-2">
+              <legend className="text-sm font-semibold text-(--accent) border-b border-(--border) pb-1 mb-2">
                 Statistics
               </legend>
 
@@ -1035,7 +1029,7 @@ function EditorContent() {
                   setForm({ ...EMPTY_ENTRY });
                   setResult(null);
                 }}
-                className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-[var(--text-primary)] rounded-lg text-sm transition-colors"
+                className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-(--text-primary) rounded-lg text-sm transition-colors"
               >
                 Cancel
               </button>

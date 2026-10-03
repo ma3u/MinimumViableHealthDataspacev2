@@ -31,31 +31,31 @@ function SignInContent() {
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center gap-8 py-10 px-4">
       {/* ── Login card ── */}
-      <div className="bg-[var(--surface-2)] rounded-lg p-8 max-w-md w-full text-center">
+      <div className="bg-(--surface-2) rounded-lg p-8 max-w-md w-full text-center">
         <ShieldCheck
           size={48}
           className="mx-auto mb-4 text-blue-800 dark:text-blue-300"
         />
-        <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
+        <h1 className="text-2xl font-bold text-(--text-primary) mb-2">
           Health Dataspace Login
         </h1>
-        <p className="text-[var(--text-secondary)] mb-6">
+        <p className="text-(--text-secondary) mb-6">
           Sign in with your Keycloak account to access protected resources.
           <br />
-          <span className="text-[var(--text-secondary)] text-xs mt-1 block">
+          <span className="text-(--text-secondary) text-xs mt-1 block">
             Password = username (local dev only)
           </span>
         </p>
 
         {error && (
-          <div className="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded p-3 mb-4 text-sm text-red-800 dark:text-red-300">
+          <div className="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded-sm p-3 mb-4 text-sm text-red-800 dark:text-red-300">
             {oauthErrorMessage(error)}
           </div>
         )}
 
         <button
           onClick={() => signIn("keycloak", { callbackUrl })}
-          className="w-full px-4 py-3 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white dark:text-gray-900 rounded-lg font-medium transition-colors"
+          className="w-full px-4 py-3 bg-(--accent) hover:bg-(--accent-hover) text-white dark:text-gray-900 rounded-lg font-medium transition-colors"
         >
           Sign in with Keycloak
         </button>
@@ -63,32 +63,32 @@ function SignInContent() {
         {!IS_STATIC && (
           <>
             <div className="flex items-center gap-3 my-4">
-              <div className="h-px flex-1 bg-[var(--text-secondary)]/20" />
-              <span className="text-xs text-[var(--text-secondary)]">or</span>
-              <div className="h-px flex-1 bg-[var(--text-secondary)]/20" />
+              <div className="h-px flex-1 bg-(--text-secondary)/20" />
+              <span className="text-xs text-(--text-secondary)">or</span>
+              <div className="h-px flex-1 bg-(--text-secondary)/20" />
             </div>
             <a
               href={`/auth/eudi-qr?callbackUrl=${encodeURIComponent(
                 callbackUrl,
               )}`}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 border border-[var(--accent)] text-[var(--accent)] hover:bg-[var(--accent)]/10 rounded-lg font-medium transition-colors"
+              className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 border border-(--accent) text-(--accent) hover:bg-(--accent)/10 rounded-lg font-medium transition-colors"
             >
               <Smartphone size={18} /> Sign in with EUDI Wallet (QR)
             </a>
-            <p className="text-[var(--text-secondary)] text-[11px] mt-2">
+            <p className="text-(--text-secondary) text-[11px] mt-2">
               Patient login via OpenID4VP · verified against the EUDI sandbox
             </p>
           </>
         )}
 
-        <p className="text-[var(--text-secondary)] text-xs mt-4">
+        <p className="text-(--text-secondary) text-xs mt-4">
           EHDS-compliant authentication via Keycloak SSO
         </p>
       </div>
 
       {/* ── Demo persona reference cards ── */}
       <div className="w-full max-w-3xl">
-        <p className="text-xs text-[var(--text-secondary)] text-center mb-3 uppercase tracking-wide font-semibold">
+        <p className="text-xs text-(--text-secondary) text-center mb-3 uppercase tracking-wide font-semibold">
           Demo users — sign in as any of these to test role-specific views
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -100,17 +100,21 @@ function SignInContent() {
                   callbackUrl: landingFor(persona.personaId),
                 })
               }
-              className={`group text-left rounded-lg border p-3 bg-[var(--surface-2)]/60 hover:bg-[var(--surface-2)] transition-colors ${
+              // No base surface background: the first badge token is the role
+              // colour (bg-(--role-*-bg)) and that is what the card shows. A
+              // `bg-(--surface-2)/60` here was dead under Tailwind 3, which
+              // cannot apply opacity to a var(); v4 can, and it covered the role.
+              className={`group text-left rounded-lg border p-3 hover:bg-(--surface-2) transition-colors ${
                 persona.badge.replace("text-", "border-").split(" ")[0]
               }`}
             >
               {/* Username + org */}
               <div className="flex items-start justify-between gap-2 mb-1.5">
                 <div>
-                  <div className="font-mono text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
+                  <div className="font-mono text-sm font-semibold text-(--text-primary) group-hover:text-(--accent) transition-colors">
                     {persona.username}
                   </div>
-                  <div className="text-xs text-[var(--text-secondary)]">
+                  <div className="text-xs text-(--text-secondary)">
                     {persona.organisation}
                   </div>
                 </div>
@@ -126,7 +130,7 @@ function SignInContent() {
                   .map((role) => (
                     <span
                       key={role}
-                      className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-medium ${persona.badge}`}
+                      className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-sm font-medium ${persona.badge}`}
                     >
                       <Shield size={8} />
                       {ROLE_LABELS[role] ?? role}
@@ -134,17 +138,17 @@ function SignInContent() {
                   ))}
               </div>
               {/* Description */}
-              <p className="text-xs text-[var(--text-secondary)] leading-tight">
+              <p className="text-xs text-(--text-secondary) leading-tight">
                 {persona.description}
               </p>
-              <p className="text-[10px] text-[var(--text-secondary)] mt-1.5">
+              <p className="text-[10px] text-(--text-secondary) mt-1.5">
                 → opens graph:{" "}
                 <span className="font-mono">{persona.personaId}</span>
               </p>
             </button>
           ))}
         </div>
-        <p className="text-[10px] text-[var(--text-secondary)] text-center mt-3">
+        <p className="text-[10px] text-(--text-secondary) text-center mt-3">
           Password = username &nbsp;·&nbsp; Keycloak realm: EDCV &nbsp;·&nbsp;
           http://localhost:8080
         </p>
@@ -158,7 +162,7 @@ export default function SignInPage() {
     <Suspense
       fallback={
         <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="text-[var(--text-secondary)]">Loading…</div>
+          <div className="text-(--text-secondary)">Loading…</div>
         </div>
       }
     >

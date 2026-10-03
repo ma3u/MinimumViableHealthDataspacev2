@@ -31,16 +31,16 @@ export function TopoComponentCard({
       className={`border rounded-lg p-3 ${sev.border} ${sev.bg} transition-colors`}
     >
       <div className="flex items-center justify-between mb-1.5">
-        <span className="flex items-center gap-1.5 text-xs font-medium text-[var(--text-primary)]">
+        <span className="flex items-center gap-1.5 text-xs font-medium text-(--text-primary)">
           <SeverityDot severity={comp.severity} />
           {comp.name}
           <InfoPopover name={comp.name} />
         </span>
-        <span className="text-[10px] text-[var(--text-secondary)] capitalize">
+        <span className="text-[10px] text-(--text-secondary) capitalize">
           {comp.status}
           {metricsShared && (
             <span
-              className="ml-1 italic text-[9px] text-[var(--text-secondary)]"
+              className="ml-1 italic text-[9px] text-(--text-secondary)"
               title={sharedTitle}
             >
               · shared
@@ -48,7 +48,7 @@ export function TopoComponentCard({
           )}
         </span>
       </div>
-      <div className="grid grid-cols-3 gap-1 text-[10px] text-[var(--text-secondary)]">
+      <div className="grid grid-cols-3 gap-1 text-[10px] text-(--text-secondary)">
         <span title={sharedTitle}>
           <Cpu size={9} className="inline mr-0.5" />
           {`${comp.cpu.toFixed(1)}%`}

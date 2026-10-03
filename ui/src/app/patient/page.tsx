@@ -111,15 +111,13 @@ function MetricCard({
   sub?: string;
 }) {
   return (
-    <div className="surface-card p-5 flex items-start justify-between gap-3 border border-[var(--border)]">
+    <div className="surface-card p-5 flex items-start justify-between gap-3 border border-(--border)">
       <div className="min-w-0 flex-1">
-        <p className="section-label mb-1 break-words">{label}</p>
-        <p className="text-3xl font-black text-[var(--text-primary)] leading-none tracking-tight">
+        <p className="section-label mb-1 wrap-break-word">{label}</p>
+        <p className="text-3xl font-black text-(--text-primary) leading-none tracking-tight">
           {value != null ? value.toLocaleString() : "—"}
         </p>
-        {sub && (
-          <p className="text-xs text-[var(--text-secondary)] mt-1">{sub}</p>
-        )}
+        {sub && <p className="text-xs text-(--text-secondary) mt-1">{sub}</p>}
       </div>
       {isOrb ? (
         <div className="metric-orb">{icon}</div>
@@ -159,7 +157,7 @@ function PersonalHealthCard({
       type="button"
       onClick={onOpen}
       aria-label={`${s.title} — view 3-month trends`}
-      className="surface-card border border-[var(--border)] rounded-xl overflow-hidden text-left w-full transition-all hover:border-[var(--accent)] hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+      className="surface-card border border-(--border) rounded-xl overflow-hidden text-left w-full transition-all hover:border-(--accent) hover:shadow-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-(--accent)"
     >
       {s.screenshot && imgOk ? (
         <div className="h-24 bg-white relative">
@@ -187,10 +185,10 @@ function PersonalHealthCard({
             <Icon size={16} />
           </span>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-[var(--text-primary)] truncate">
+            <p className="text-sm font-bold text-(--text-primary) truncate">
               {s.title}
             </p>
-            <p className="text-[11px] text-[var(--text-secondary)] truncate">
+            <p className="text-[11px] text-(--text-secondary) truncate">
               {s.source}
             </p>
           </div>
@@ -199,19 +197,19 @@ function PersonalHealthCard({
           {s.metrics.map((m) => (
             <div
               key={m.label}
-              className="rounded-lg bg-[var(--surface-2)] px-2.5 py-1.5"
+              className="rounded-lg bg-(--surface-2) px-2.5 py-1.5"
             >
-              <p className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wide">
+              <p className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
                 {m.label}
               </p>
-              <p className="text-sm font-bold text-[var(--text-primary)]">
+              <p className="text-sm font-bold text-(--text-primary)">
                 {m.value}
               </p>
             </div>
           ))}
         </div>
         <p
-          className="mt-3 flex items-center gap-1 text-xs font-semibold text-[var(--brand-l)] dark:text-[var(--brand-d)]"
+          className="mt-3 flex items-center gap-1 text-xs font-semibold text-(--brand-l) dark:text-(--brand-d)"
           style={
             {
               "--brand-l": brandText.light,
@@ -337,7 +335,7 @@ export default function PatientPage() {
   }, [timeline]);
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-4xl mx-auto px-6 py-10">
         <PageIntro
           title="Patient Journey"
@@ -360,10 +358,10 @@ export default function PatientPage() {
                 <Heart size={22} />
               </span>
               <div>
-                <h2 className="text-xl font-extrabold text-[var(--text-primary)] leading-tight">
+                <h2 className="text-xl font-extrabold text-(--text-primary) leading-tight">
                   {selectedPatient?.name ?? "My personal health record"}
                 </h2>
-                <p className="text-xs text-[var(--text-secondary)]">
+                <p className="text-xs text-(--text-secondary)">
                   {selectedPatient ? (
                     <>
                       <span className="capitalize">
@@ -384,7 +382,7 @@ export default function PatientPage() {
                     own record. Other roles have no record of their own. */}
                 {!loading && (lastEhrSync || restricted) && (
                   <p
-                    className="text-xs text-[var(--text-secondary)] mt-0.5"
+                    className="text-xs text-(--text-secondary) mt-0.5"
                     data-testid="last-ehr-sync"
                   >
                     {lastEhrSync ? (
@@ -392,7 +390,7 @@ export default function PatientPage() {
                         Last EHR sync:{" "}
                         <time
                           dateTime={lastEhrSync.at}
-                          className="font-semibold text-[var(--text-primary)]"
+                          className="font-semibold text-(--text-primary)"
                         >
                           {formatEhrSync(lastEhrSync.at)}
                         </time>
@@ -408,7 +406,7 @@ export default function PatientPage() {
             <button
               type="button"
               onClick={() => setEhrModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm transition-all hover:scale-[1.02] shrink-0"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold shadow-xs transition-all hover:scale-[1.02] shrink-0"
               style={{ background: brandBackgroundForWhiteText(insurer.brand) }}
             >
               <ScanLine size={16} aria-hidden="true" />
@@ -417,7 +415,7 @@ export default function PatientPage() {
           </div>
 
           {ehrReceived && (
-            <div className="mb-4 px-4 py-3 rounded-xl border border-[var(--role-holder-border)] bg-[var(--role-holder-bg)] text-sm text-[var(--role-holder-text)] flex items-start gap-2">
+            <div className="mb-4 px-4 py-3 rounded-xl border border-(--role-holder-border) bg-(--role-holder-bg) text-sm text-(--role-holder-text) flex items-start gap-2">
               <ShieldCheck size={16} className="mt-0.5 shrink-0" />
               <span>
                 Your ePA from{" "}
@@ -441,7 +439,7 @@ export default function PatientPage() {
 
           <Link
             href="/patient/query"
-            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent)] hover:underline"
+            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-(--accent) hover:underline"
           >
             <Sparkles size={16} aria-hidden="true" />
             Ask research questions about my own data
@@ -514,8 +512,8 @@ export default function PatientPage() {
 
             {/* Patient selector */}
             {restricted ? (
-              <div className="mb-4 px-4 py-3 bg-[var(--role-patient-bg)] border border-[var(--role-patient-border)] rounded-xl text-sm text-[var(--role-patient-text)] flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[var(--role-patient-text)] inline-block animate-pulse" />
+              <div className="mb-4 px-4 py-3 bg-(--role-patient-bg) border border-(--role-patient-border) rounded-xl text-sm text-(--role-patient-text) flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-(--role-patient-text) inline-block animate-pulse" />
                 Showing your personal health record (EHDS Art. 3 / GDPR Art. 15)
               </div>
             ) : (
@@ -525,7 +523,7 @@ export default function PatientPage() {
                   <select
                     value={selected}
                     onChange={(e) => setSelected(e.target.value)}
-                    className="mt-1 px-3 py-2.5 bg-[var(--surface-card)] border border-[var(--border-ui)] rounded-xl text-sm outline-none focus:border-[var(--accent)] w-full text-[var(--text-primary)] block"
+                    className="mt-1 px-3 py-2.5 bg-(--surface-card) border border-(--border-ui) rounded-xl text-sm outline-hidden focus:border-(--accent) w-full text-(--text-primary) block"
                   >
                     <option value="">
                       — select patient ({patients.length} loaded) —
@@ -542,32 +540,32 @@ export default function PatientPage() {
 
             {/* Patient demographics header */}
             {selectedPatient && (
-              <div className="surface-card p-4 mb-6 flex items-center gap-6 border border-[var(--border)]">
+              <div className="surface-card p-4 mb-6 flex items-center gap-6 border border-(--border)">
                 <div className="metric-orb shrink-0">
                   <Users size={20} className="text-white" />
                 </div>
                 <div className="flex gap-6 flex-wrap text-sm">
                   <div>
                     <p className="section-label mb-0.5">Name</p>
-                    <p className="font-semibold text-[var(--text-primary)]">
+                    <p className="font-semibold text-(--text-primary)">
                       {selectedPatient.name ?? selectedPatient.id}
                     </p>
                   </div>
                   <div>
                     <p className="section-label mb-0.5">Gender</p>
-                    <p className="font-semibold text-[var(--text-primary)]">
+                    <p className="font-semibold text-(--text-primary)">
                       {selectedPatient.gender ?? "—"}
                     </p>
                   </div>
                   <div>
                     <p className="section-label mb-0.5">Born</p>
-                    <p className="font-semibold text-[var(--text-primary)]">
+                    <p className="font-semibold text-(--text-primary)">
                       {selectedPatient.birthDate ?? "—"}
                     </p>
                   </div>
                   <div>
                     <p className="section-label mb-0.5">Events</p>
-                    <p className="font-semibold text-[var(--text-primary)]">
+                    <p className="font-semibold text-(--text-primary)">
                       {timeline.length}
                     </p>
                   </div>
@@ -576,11 +574,11 @@ export default function PatientPage() {
             )}
 
             {loading && (
-              <p className="text-[var(--text-secondary)] text-sm">Loading…</p>
+              <p className="text-(--text-secondary) text-sm">Loading…</p>
             )}
 
             {!loading && selected && timeline.length === 0 && (
-              <p className="text-[var(--text-secondary)] text-sm">
+              <p className="text-(--text-secondary) text-sm">
                 No timeline events found for this patient.
               </p>
             )}
@@ -590,15 +588,15 @@ export default function PatientPage() {
               <div>
                 <div className="flex items-baseline justify-between mb-4">
                   <p className="section-label">Clinical timeline</p>
-                  <p className="text-xs text-[var(--text-secondary)]">
+                  <p className="text-xs text-(--text-secondary)">
                     Newest first
                   </p>
                 </div>
                 {timelineGroups.map((group) => (
                   <section key={group.key} className="mb-6 last:mb-0">
-                    <h3 className="text-sm font-bold text-[var(--text-primary)] mb-3 pb-1 border-b border-[var(--border)] uppercase tracking-wider">
+                    <h3 className="text-sm font-bold text-(--text-primary) mb-3 pb-1 border-b border-(--border) uppercase tracking-wider">
                       {group.label}
-                      <span className="ml-2 text-xs font-normal text-[var(--text-secondary)] normal-case tracking-normal">
+                      <span className="ml-2 text-xs font-normal text-(--text-secondary) normal-case tracking-normal">
                         {group.items.length}{" "}
                         {group.items.length === 1 ? "event" : "events"}
                       </span>
@@ -610,13 +608,13 @@ export default function PatientPage() {
                           <li key={`${group.key}-${i}`} className="relative">
                             {/* Timeline dot */}
                             <span
-                              className="absolute -left-[1.75rem] top-1 w-3.5 h-3.5 rounded-full border-2 border-[var(--surface-card)] z-10"
+                              className="absolute -left-7 top-1 w-3.5 h-3.5 rounded-full border-2 border-(--surface-card) z-10"
                               style={{
                                 background:
                                   token?.text ?? "var(--text-secondary)",
                               }}
                             />
-                            <div className="surface-card p-4 border border-[var(--border)] hover:shadow-md transition-shadow">
+                            <div className="surface-card p-4 border border-(--border) hover:shadow-md transition-shadow">
                               <div className="flex items-start justify-between gap-3 mb-1">
                                 <div className="flex items-center gap-2">
                                   {/* FHIR type badge */}
@@ -632,20 +630,20 @@ export default function PatientPage() {
                                     {token?.icon}
                                     {e.fhirType}
                                   </span>
-                                  <span className="text-xs text-[var(--text-secondary)]">
+                                  <span className="text-xs text-(--text-secondary)">
                                     {e.date ?? "—"}
                                   </span>
                                 </div>
                               </div>
-                              <p className="text-sm font-medium text-[var(--text-primary)]">
+                              <p className="text-sm font-medium text-(--text-primary)">
                                 {e.display || (
-                                  <span className="font-mono text-xs text-[var(--text-secondary)]">
+                                  <span className="font-mono text-xs text-(--text-secondary)">
                                     {e.fhirId}
                                   </span>
                                 )}
                               </p>
                               {e.omopType && (
-                                <p className="text-xs text-[var(--layer4-text)] mt-1">
+                                <p className="text-xs text-(--layer4-text) mt-1">
                                   ↳ OMOP {e.omopType}: {e.omopId}
                                 </p>
                               )}

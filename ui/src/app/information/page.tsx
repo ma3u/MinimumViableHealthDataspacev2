@@ -92,13 +92,13 @@ function Item({
 }) {
   return (
     <section
-      className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4"
+      className="rounded-lg border border-(--border) bg-(--surface) p-4"
       data-testid={testId}
     >
-      <h2 className="text-sm font-semibold mb-2 text-[var(--text-primary)]">
+      <h2 className="text-sm font-semibold mb-2 text-(--text-primary)">
         ({letter}) {title}
       </h2>
-      <div className="text-sm text-[var(--text-secondary)] space-y-2">
+      <div className="text-sm text-(--text-secondary) space-y-2">
         {children}
       </div>
     </section>
@@ -127,21 +127,21 @@ export default function InformationPage() {
   const issued = (info?.access ?? []).filter((a) => a.status === "APPROVED");
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <div className="mb-8">
           <h1 className="page-header flex items-center gap-2">
             <Info size={28} />
             Secondary use of health data: what you should know
           </h1>
-          <p className="text-[var(--text-secondary)] text-lg mt-1">
+          <p className="text-(--text-secondary) text-lg mt-1">
             Regulation (EU) 2025/327, Art. 58(1) · published by the health data
             access body, no sign-in needed
           </p>
         </div>
 
         {error && (
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 text-sm flex items-start gap-2 mb-6">
+          <div className="rounded-lg border border-(--border) bg-(--surface) p-4 text-sm flex items-start gap-2 mb-6">
             <AlertCircle size={16} className="mt-0.5" />
             <span>
               The parts of this page that come from the graph are unavailable:{" "}
@@ -234,7 +234,7 @@ export default function InformationPage() {
               Sign in to your{" "}
               <Link
                 href="/patient/research"
-                className="font-bold text-[var(--accent)] hover:underline"
+                className="font-bold text-(--accent) hover:underline"
               >
                 health record
               </Link>{" "}
@@ -255,7 +255,7 @@ export default function InformationPage() {
               <ul className="space-y-1">
                 {info.bodies.map((b) => (
                   <li key={b.did}>
-                    <span className="font-medium text-[var(--text-primary)]">
+                    <span className="font-medium text-(--text-primary)">
                       {b.name}
                     </span>
                     {b.country ? ` (${b.country})` : ""}
@@ -285,10 +285,10 @@ export default function InformationPage() {
             {issued.length === 0 ? (
               <p>No data permit is in force.</p>
             ) : (
-              <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
+              <div className="overflow-x-auto rounded-lg border border-(--border)">
                 <table className="text-xs w-full border-collapse">
                   <thead>
-                    <tr className="bg-[var(--bg)] text-[var(--text-secondary)]">
+                    <tr className="bg-(--bg) text-(--text-secondary)">
                       <th className="text-left px-3 py-2 font-medium">
                         Data user
                       </th>
@@ -308,10 +308,10 @@ export default function InformationPage() {
                     {issued.map((a) => (
                       <tr
                         key={a.permitId}
-                        className="border-t border-[var(--border)]"
+                        className="border-t border-(--border)"
                         data-testid="access-row"
                       >
-                        <td className="px-3 py-2 text-[var(--text-primary)]">
+                        <td className="px-3 py-2 text-(--text-primary)">
                           {a.applicant ?? "—"}
                           {a.applicantCountry ? ` (${a.applicantCountry})` : ""}
                         </td>
@@ -333,7 +333,7 @@ export default function InformationPage() {
               Every application, decision, revocation and measure is on the{" "}
               <Link
                 href="/permits"
-                className="font-bold text-[var(--accent)] hover:underline"
+                className="font-bold text-(--accent) hover:underline"
               >
                 public register
               </Link>
@@ -355,11 +355,11 @@ export default function InformationPage() {
               <ul className="space-y-1">
                 {info.results.map((r) => (
                   <li key={r.resultId} data-testid="info-result">
-                    <span className="font-medium text-[var(--text-primary)]">
+                    <span className="font-medium text-(--text-primary)">
                       {r.url ? (
                         <a
                           href={r.url}
-                          className="text-[var(--accent)] hover:underline"
+                          className="text-(--accent) hover:underline"
                           rel="noopener noreferrer"
                           target="_blank"
                         >
@@ -384,14 +384,14 @@ export default function InformationPage() {
           </Item>
 
           <section
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4"
+            className="rounded-lg border border-(--border) bg-(--surface) p-4"
             data-testid="info-fees"
           >
-            <h2 className="text-sm font-semibold mb-2 text-[var(--text-primary)] flex items-center gap-2">
+            <h2 className="text-sm font-semibold mb-2 text-(--text-primary) flex items-center gap-2">
               <ShieldCheck size={14} />
               Fees, Art. 62
             </h2>
-            <div className="text-sm text-[var(--text-secondary)] space-y-2">
+            <div className="text-sm text-(--text-secondary) space-y-2">
               <p>
                 Fees cover the cost of making the data available and are split
                 between the access body and the data holder. The schedule is the
@@ -433,18 +433,15 @@ export default function InformationPage() {
           </section>
         </div>
 
-        <p className="mt-6 text-xs text-[var(--text-secondary)]">
+        <p className="mt-6 text-xs text-(--text-secondary)">
           See also the{" "}
-          <Link
-            href="/permits"
-            className="text-[var(--accent)] hover:underline"
-          >
+          <Link href="/permits" className="text-(--accent) hover:underline">
             public register
           </Link>{" "}
           (Art. 57(1)(j)) and the{" "}
           <Link
             href="/activity-report"
-            className="text-[var(--accent)] hover:underline"
+            className="text-(--accent) hover:underline"
           >
             activity report
           </Link>{" "}

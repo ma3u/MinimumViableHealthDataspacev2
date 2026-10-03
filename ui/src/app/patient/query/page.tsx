@@ -63,7 +63,7 @@ export default function PersonalQueryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-3xl mx-auto px-6 py-10">
         <PageIntro
           title="Personal Research"
@@ -88,7 +88,7 @@ export default function PersonalQueryPage() {
             onChange={(e) => setInput(e.target.value)}
             aria-label="Ask a question about your own health data"
             placeholder="Ask about your own health data…"
-            className="flex-1 rounded-xl border border-[var(--border-ui)] bg-[var(--surface-card)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+            className="flex-1 rounded-xl border border-(--border-ui) bg-(--surface-card) px-4 py-3 text-sm text-(--text-primary) outline-hidden focus:border-(--accent)"
           />
           <button
             type="submit"
@@ -110,11 +110,11 @@ export default function PersonalQueryPage() {
                 key={qa.id}
                 type="button"
                 onClick={() => send(qa.question)}
-                className="inline-flex items-center gap-2 text-left rounded-full border border-[var(--border)] bg-[var(--surface-2)] px-3 py-1.5 text-xs text-[var(--text-primary)] hover:border-[var(--accent)] transition-colors"
+                className="inline-flex items-center gap-2 text-left rounded-full border border-(--border) bg-(--surface-2) px-3 py-1.5 text-xs text-(--text-primary) hover:border-(--accent) transition-colors"
               >
                 <Icon
                   size={13}
-                  className="shrink-0 text-[var(--accent)]"
+                  className="shrink-0 text-(--accent)"
                   aria-hidden="true"
                 />
                 {qa.question}
@@ -122,14 +122,14 @@ export default function PersonalQueryPage() {
             );
           })}
         </div>
-        <p className="text-[11px] text-[var(--text-secondary)] mt-2">
+        <p className="text-[11px] text-(--text-secondary) mt-2">
           Your own records only · synthetic · not medical advice
         </p>
 
         {/* Answers — below the field, newest first */}
         <div className="space-y-4 mt-6">
           {exchanges.length === 0 && (
-            <div className="text-center text-sm text-[var(--text-secondary)] py-8 rounded-xl border border-dashed border-[var(--border)]">
+            <div className="text-center text-sm text-(--text-secondary) py-8 rounded-xl border border-dashed border-(--border)">
               Ask a question above — or tap a suggestion — to see an answer from
               your own data.
             </div>
@@ -140,12 +140,12 @@ export default function PersonalQueryPage() {
               <div key={exchanges.length - i} className="space-y-2">
                 {/* question */}
                 <div className="flex justify-end">
-                  <p className="max-w-[85%] rounded-2xl rounded-br-sm bg-[var(--accent)] text-white px-4 py-2.5 text-sm">
+                  <p className="max-w-[85%] rounded-2xl rounded-br-sm bg-(--accent) text-white px-4 py-2.5 text-sm">
                     {x.question}
                   </p>
                 </div>
                 {/* answer */}
-                <div className="rounded-2xl rounded-bl-sm border border-[var(--border)] bg-[var(--surface)] p-4">
+                <div className="rounded-2xl rounded-bl-sm border border-(--border) bg-(--surface) p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <span
                       className="grid place-items-center w-8 h-8 rounded-lg text-white shrink-0"
@@ -153,13 +153,13 @@ export default function PersonalQueryPage() {
                     >
                       <Icon size={16} />
                     </span>
-                    <span className="text-xs font-bold uppercase tracking-wide text-[var(--text-secondary)]">
+                    <span className="text-xs font-bold uppercase tracking-wide text-(--text-secondary)">
                       Your data assistant
                     </span>
                   </div>
                   {x.qa ? (
                     <>
-                      <p className="text-sm text-[var(--text-primary)] leading-relaxed mb-3">
+                      <p className="text-sm text-(--text-primary) leading-relaxed mb-3">
                         {x.qa.answer}
                       </p>
                       <div className="grid sm:grid-cols-2 gap-2.5">
@@ -177,13 +177,13 @@ export default function PersonalQueryPage() {
                       </div>
                       {x.qa.events.length > 0 && (
                         <ul className="space-y-1.5 mt-2.5">
-                          <li className="text-[10px] font-bold uppercase tracking-wide text-[var(--text-secondary)]">
+                          <li className="text-[10px] font-bold uppercase tracking-wide text-(--text-secondary)">
                             Related ePA events · marked on the trends
                           </li>
                           {x.qa.events.map((e) => (
                             <li
                               key={e.label}
-                              className="flex items-center gap-2.5 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] px-3 py-2"
+                              className="flex items-center gap-2.5 rounded-lg bg-(--surface-2) border border-(--border) px-3 py-2"
                             >
                               <span
                                 className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white shrink-0 w-[88px] text-center"
@@ -194,22 +194,22 @@ export default function PersonalQueryPage() {
                               >
                                 {e.type}
                               </span>
-                              <span className="text-xs font-mono text-[var(--text-secondary)] shrink-0">
+                              <span className="text-xs font-mono text-(--text-secondary) shrink-0">
                                 {e.date}
                               </span>
-                              <span className="text-sm text-[var(--text-primary)]">
+                              <span className="text-sm text-(--text-primary)">
                                 {e.label}
                               </span>
                             </li>
                           ))}
                         </ul>
                       )}
-                      <p className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)] mt-3">
+                      <p className="flex items-center gap-1.5 text-[11px] text-(--text-secondary) mt-3">
                         <ShieldCheck size={12} /> {x.qa.source}
                       </p>
                     </>
                   ) : (
-                    <p className="text-sm text-[var(--text-primary)] leading-relaxed">
+                    <p className="text-sm text-(--text-primary) leading-relaxed">
                       I can only answer from your own fitness, lab, nutrition
                       and ePA records. Try asking about your sport routine, your
                       nutrition, or your breathing &amp; respiratory history.

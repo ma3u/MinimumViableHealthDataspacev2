@@ -70,12 +70,12 @@ export function ClockActions({
   const paused = row.clockState === "paused";
   return (
     <div
-      className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3 space-y-2 text-xs"
+      className="rounded-lg border border-(--border) bg-(--bg) p-3 space-y-2 text-xs"
       data-testid="clock-actions"
     >
-      <div className="font-semibold text-[var(--text-primary)]">
+      <div className="font-semibold text-(--text-primary)">
         The clock, Art. 68(4)
-        <span className="font-normal text-[var(--text-secondary)]">
+        <span className="font-normal text-(--text-secondary)">
           {" "}
           ·{" "}
           {paused
@@ -88,7 +88,7 @@ export function ClockActions({
         </span>
       </div>
       <label className="flex flex-col gap-1">
-        <span className="text-[var(--text-secondary)]">
+        <span className="text-(--text-secondary)">
           Reasons (what is missing, or why the extension)
         </span>
         <textarea
@@ -96,7 +96,7 @@ export function ClockActions({
           rows={2}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1"
+          className="rounded-sm border border-(--border) bg-(--surface) px-2 py-1"
         />
       </label>
       <div className="flex flex-wrap gap-2">
@@ -104,7 +104,7 @@ export function ClockActions({
           type="button"
           disabled={busy !== null || paused || !reason.trim()}
           onClick={() => act("INCOMPLETE")}
-          className="px-3 py-1.5 rounded font-semibold border border-[var(--border)] disabled:opacity-50"
+          className="px-3 py-1.5 rounded-sm font-semibold border border-(--border) disabled:opacity-50"
           title={
             paused
               ? "The applicant has already been asked to complete the application"
@@ -117,7 +117,7 @@ export function ClockActions({
           type="button"
           disabled={busy !== null || paused || row.extended || !reason.trim()}
           onClick={() => act("EXTEND")}
-          className="px-3 py-1.5 rounded font-semibold border border-[var(--border)] disabled:opacity-50"
+          className="px-3 py-1.5 rounded-sm font-semibold border border-(--border) disabled:opacity-50"
           title={
             row.extended
               ? "Art. 68(4) allows one extension"
@@ -128,12 +128,12 @@ export function ClockActions({
         </button>
       </div>
       {error && (
-        <p className="text-[var(--danger-text)]" role="alert">
+        <p className="text-(--danger-text)" role="alert">
           {error}
         </p>
       )}
       {msg && (
-        <p className="text-[var(--success-text)]" role="status">
+        <p className="text-(--success-text)" role="status">
           {msg}
         </p>
       )}

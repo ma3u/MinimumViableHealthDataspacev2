@@ -134,28 +134,26 @@ export default function OverviewDetail({
       : null;
   return (
     <aside
-      className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm overflow-auto lg:max-h-[calc(100vh-120px)]"
+      className="rounded-lg border border-(--border) bg-(--surface-2) p-4 text-sm overflow-auto lg:max-h-[calc(100vh-120px)]"
       data-testid="overview-detail"
       aria-label={`Details: ${node.title ?? node.label}`}
     >
       <div className="flex items-start justify-between gap-2">
         <div>
-          <div className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">
+          <div className="text-xs uppercase tracking-wide text-(--text-secondary)">
             {node.kind}
           </div>
           <h3 className="text-base font-semibold">
             {node.title ?? node.label}
           </h3>
           {node.sub && (
-            <div className="text-xs text-[var(--text-secondary)]">
-              {node.sub}
-            </div>
+            <div className="text-xs text-(--text-secondary)">{node.sub}</div>
           )}
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="p-1 rounded hover:bg-[var(--bg)]"
+          className="p-1 rounded-sm hover:bg-(--bg)"
           aria-label="Close details"
         >
           <X size={16} />
@@ -190,7 +188,7 @@ export default function OverviewDetail({
             </span>
           </div>
           <SeriesChart node={node} />
-          <div className="text-xs text-[var(--text-secondary)]">
+          <div className="text-xs text-(--text-secondary)">
             Reference {node.range?.text ?? "n/a"}. Green band: the expected
             range.{" "}
             {node.expand && (
@@ -208,7 +206,7 @@ export default function OverviewDetail({
           </div>
           <table className="mt-2 w-full text-xs" data-testid="overview-series">
             <thead>
-              <tr className="text-left text-[var(--text-secondary)]">
+              <tr className="text-left text-(--text-secondary)">
                 <th className="pr-3 font-medium">Date</th>
                 <th className="font-medium">Value</th>
               </tr>
@@ -238,7 +236,7 @@ export default function OverviewDetail({
         <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
           {node.facts.map(([k, v], i) => (
             <div key={`${k}-${i}`} className="contents">
-              <dt className="text-[var(--text-secondary)]">{k}</dt>
+              <dt className="text-(--text-secondary)">{k}</dt>
               <dd>{v}</dd>
             </div>
           ))}
@@ -246,7 +244,7 @@ export default function OverviewDetail({
       )}
 
       {node.article && (
-        <div className="mt-3 text-xs text-[var(--text-secondary)]">
+        <div className="mt-3 text-xs text-(--text-secondary)">
           {node.article}
         </div>
       )}
@@ -257,7 +255,7 @@ export default function OverviewDetail({
             <Link
               key={l.href}
               href={l.href}
-              className="underline text-[var(--accent)]"
+              className="underline text-(--accent)"
             >
               {l.text}
             </Link>

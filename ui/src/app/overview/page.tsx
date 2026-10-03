@@ -31,7 +31,7 @@ const OverviewScene = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full items-center justify-center text-sm text-[var(--text-secondary)]">
+      <div className="flex h-full items-center justify-center text-sm text-(--text-secondary)">
         <Loader2 className="animate-spin mr-2" size={16} /> Loading the scene
       </div>
     ),
@@ -167,7 +167,7 @@ function OverviewContent() {
   const selected = selectedId ? nodeById.get(selectedId) ?? null : null;
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="w-full px-4 py-3">
         <header
           className="mb-3 flex flex-wrap items-baseline gap-x-4 gap-y-1"
@@ -176,7 +176,7 @@ function OverviewContent() {
           <h1 className="text-lg font-semibold leading-tight">
             {view?.title ?? "In one view"}
           </h1>
-          <p className="text-sm text-[var(--text-secondary)]">
+          <p className="text-sm text-(--text-secondary)">
             {view?.question ??
               "Each persona sees the state that matters to them: what is out of range, what is due, what is broken, and what to do next."}
           </p>
@@ -193,8 +193,8 @@ function OverviewContent() {
                 href={`/overview?persona=${p.id}`}
                 className={`px-3 py-1 rounded-full border ${
                   p.id === persona
-                    ? "border-[var(--accent)] text-[var(--accent)]"
-                    : "border-[var(--border)] text-[var(--text-secondary)]"
+                    ? "border-(--accent) text-(--accent)"
+                    : "border-(--border) text-(--text-secondary)"
                 }`}
                 aria-current={p.id === persona ? "page" : undefined}
               >
@@ -206,7 +206,7 @@ function OverviewContent() {
 
         {loading && (
           <div
-            className="flex items-center gap-2 text-sm text-[var(--text-secondary)]"
+            className="flex items-center gap-2 text-sm text-(--text-secondary)"
             data-testid="overview-loading"
           >
             <Loader2 className="animate-spin" size={16} /> Computing the view
@@ -245,14 +245,14 @@ function OverviewContent() {
             }`}
           >
             {/* ── left: the view as a list ───────────────────────────────── */}
-            <aside className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-4 text-sm lg:max-h-[calc(100vh-120px)] lg:overflow-auto">
+            <aside className="rounded-lg border border-(--border) bg-(--surface-2) p-4 text-sm lg:max-h-[calc(100vh-120px)] lg:overflow-auto">
               <p className="font-medium" data-testid="overview-question">
                 {view.question}
               </p>
-              <p className="mt-1 text-xs text-[var(--text-secondary)]">
+              <p className="mt-1 text-xs text-(--text-secondary)">
                 {view.article}
               </p>
-              <h2 className="mt-4 mb-2 text-xs uppercase tracking-wide text-[var(--text-secondary)]">
+              <h2 className="mt-4 mb-2 text-xs uppercase tracking-wide text-(--text-secondary)">
                 In one view
               </h2>
               <ul className="space-y-1" data-testid="overview-signals">
@@ -263,8 +263,8 @@ function OverviewContent() {
                       onClick={() => select(s.nodeId)}
                       className={`w-full text-left flex gap-2 items-start rounded-md px-2 py-1.5 border ${
                         selectedId === s.nodeId
-                          ? "border-[var(--accent)] bg-[var(--bg)]"
-                          : "border-transparent hover:bg-[var(--bg)]"
+                          ? "border-(--accent) bg-(--bg)"
+                          : "border-transparent hover:bg-(--bg)"
                       }`}
                       data-testid="overview-signal"
                       data-severity={s.severity}
@@ -280,7 +280,7 @@ function OverviewContent() {
                       <span>
                         <span className="block">{s.text}</span>
                         {s.article && (
-                          <span className="block text-xs text-[var(--text-secondary)]">
+                          <span className="block text-xs text-(--text-secondary)">
                             {s.article}
                           </span>
                         )}
@@ -289,10 +289,10 @@ function OverviewContent() {
                   </li>
                 ))}
               </ul>
-              <h2 className="mt-4 mb-2 text-xs uppercase tracking-wide text-[var(--text-secondary)]">
+              <h2 className="mt-4 mb-2 text-xs uppercase tracking-wide text-(--text-secondary)">
                 Legend
               </h2>
-              <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-[var(--text-secondary)]">
+              <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-(--text-secondary)">
                 {view.legend.map((l) => (
                   <span key={l.text} className="flex items-center gap-1.5">
                     <span
@@ -303,13 +303,13 @@ function OverviewContent() {
                   </span>
                 ))}
               </div>
-              <p className="mt-4 text-xs text-[var(--text-secondary)]">
+              <p className="mt-4 text-xs text-(--text-secondary)">
                 As of {view.asOf}. {view.dataNote}
               </p>
             </aside>
 
             {/* ── centre: the scene ──────────────────────────────────────── */}
-            <section className="relative min-h-[520px] lg:h-[calc(100vh-120px)] rounded-lg border border-[var(--border)] overflow-hidden bg-[#0b1220]">
+            <section className="relative min-h-[520px] lg:h-[calc(100vh-120px)] rounded-lg border border-(--border) overflow-hidden bg-[#0b1220]">
               <div className="absolute left-3 top-3 z-10 flex flex-col gap-1 pointer-events-none">
                 {[...view.layers]
                   .sort((a, b) => b.z - a.z)
@@ -326,7 +326,7 @@ function OverviewContent() {
               <button
                 type="button"
                 onClick={() => setSceneOn(!showScene)}
-                className="absolute right-3 top-3 z-10 text-[11px] px-2 py-0.5 rounded border border-slate-600 text-slate-300 bg-slate-900/70"
+                className="absolute right-3 top-3 z-10 text-[11px] px-2 py-0.5 rounded-sm border border-slate-600 text-slate-300 bg-slate-900/70"
                 data-testid="overview-scene-toggle"
                 aria-pressed={showScene}
               >
@@ -377,7 +377,7 @@ export default function OverviewPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[var(--bg)] p-6 text-sm text-[var(--text-secondary)]">
+        <div className="min-h-screen bg-(--bg) p-6 text-sm text-(--text-secondary)">
           Loading
         </div>
       }

@@ -100,7 +100,7 @@ export function brandBackgroundForWhiteText(hex: string): string {
 /**
  * Light- and dark-mode text colours derived from a brand hex, each meeting
  * AA on the respective card surface (light `#ffffff`, dark `#060e20`).
- * Apply via CSS custom properties + `text-[var(--x)] dark:text-[var(--y)]`.
+ * Apply via CSS custom properties + `text-(--x) dark:text-(--y)`.
  */
 export function accessibleBrandText(hex: string): {
   light: string;

@@ -125,11 +125,11 @@ export default function ApiReferencePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)]">
+    <div className="min-h-screen bg-(--background) text-(--text-primary)">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Link
           href="/docs/developer#api-reference"
-          className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] mb-4"
+          className="inline-flex items-center gap-2 text-sm text-(--text-secondary) hover:text-(--text-primary) mb-4"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Developer Guide
@@ -137,7 +137,7 @@ export default function ApiReferencePage() {
 
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Interactive API Reference</h1>
-          <p className="text-[var(--text-secondary)]">
+          <p className="text-(--text-secondary)">
             OpenAPI 3.1 specification for all 38 Next.js API routes (DSP 2025-1,
             DCP v1.0, FHIR R4, OMOP CDM, HealthDCAT-AP). Use{" "}
             <strong>Try it out</strong> to call live endpoints — most routes
@@ -149,14 +149,14 @@ export default function ApiReferencePage() {
           <a
             href={OPENAPI_URL}
             download="mvhdv2-openapi.yaml"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-(--border) bg-(--surface-2) hover:bg-(--surface-3) transition-colors"
           >
             <Download className="w-4 h-4" />
             Download openapi.yaml
           </a>
           <Link
             href="/docs/developer#api-reference"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-(--border) bg-(--surface-2) hover:bg-(--surface-3) transition-colors"
           >
             <FileJson className="w-4 h-4" />
             Route summary table
@@ -165,7 +165,7 @@ export default function ApiReferencePage() {
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/bruno/MVHDv2"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-[var(--border)] bg-[var(--surface-2)] hover:bg-[var(--surface-3)] transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-(--border) bg-(--surface-2) hover:bg-(--surface-3) transition-colors"
           >
             <ExternalLink className="w-4 h-4" />
             Bruno collection
@@ -173,11 +173,11 @@ export default function ApiReferencePage() {
         </div>
 
         {status === "loading" && (
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-2)] p-10 flex flex-col items-center gap-3 text-[var(--text-secondary)]">
+          <div className="rounded-lg border border-(--border) bg-(--surface-2) p-10 flex flex-col items-center gap-3 text-(--text-secondary)">
             <Loader2 className="w-6 h-6 animate-spin" />
             <div className="text-sm">
               Loading Swagger UI and fetching{" "}
-              <code className="text-xs bg-[var(--surface-3)] px-1 py-0.5 rounded">
+              <code className="text-xs bg-(--surface-3) px-1 py-0.5 rounded-sm">
                 {OPENAPI_URL}
               </code>
               …
@@ -188,15 +188,13 @@ export default function ApiReferencePage() {
         {status === "error" && (
           <div className="rounded-lg border border-red-500/40 bg-red-500/10 p-6 text-sm">
             <div className="flex items-start gap-3 text-red-400">
-              <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />
               <div>
                 <div className="font-semibold mb-1">
                   Swagger UI failed to load
                 </div>
-                <div className="text-[var(--text-secondary)] mb-2">
-                  {errorMsg}
-                </div>
-                <div className="text-xs text-[var(--text-secondary)]">
+                <div className="text-(--text-secondary) mb-2">{errorMsg}</div>
+                <div className="text-xs text-(--text-secondary)">
                   Check your network connection or browser console, or download
                   the raw spec via the button above and open it in a local
                   Swagger Editor.
@@ -211,7 +209,7 @@ export default function ApiReferencePage() {
           id="swagger-ui"
           className={
             status === "ready"
-              ? "rounded-lg border border-[var(--border)] bg-white text-black overflow-hidden swagger-host"
+              ? "rounded-lg border border-(--border) bg-white text-black overflow-hidden swagger-host"
               : "hidden"
           }
         />

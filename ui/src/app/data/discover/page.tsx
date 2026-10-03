@@ -83,7 +83,7 @@ export default function DataDiscoverPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center gap-2 text-[var(--text-secondary)] p-10">
+        <div className="flex items-center gap-2 text-(--text-secondary) p-10">
           <Loader2 size={16} className="animate-spin" />
           Loading…
         </div>
@@ -155,7 +155,7 @@ function DataDiscoverContent() {
     (showCatalog ? visibleCatalog.length : 0);
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
           title="Discover Data"
@@ -171,19 +171,19 @@ function DataDiscoverContent() {
         <div className="relative mb-4">
           <Search
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-secondary)"
           />
           <input
             type="search"
             placeholder="Search by name, theme, FHIR type, publisher…"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            className="w-full pl-10 pr-3 py-2 bg-[var(--surface-2)] border border-[var(--border-ui)] rounded text-sm outline-none focus:border-layer2"
+            className="w-full pl-10 pr-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm outline-hidden focus:border-layer2"
           />
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-4 border-b border-[var(--border)]">
+        <div className="flex gap-1 mb-4 border-b border-(--border)">
           {(
             [
               { key: "all", label: "All" },
@@ -197,12 +197,12 @@ function DataDiscoverContent() {
               className={`px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors ${
                 tab === t.key
                   ? "border-layer2 text-teal-800 dark:text-teal-300"
-                  : "border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                  : "border-transparent text-(--text-secondary) hover:text-(--text-primary)"
               }`}
             >
               {t.label}
               {!loading && (
-                <span className="ml-1 text-[var(--text-secondary)]">
+                <span className="ml-1 text-(--text-secondary)">
                   (
                   {t.key === "all"
                     ? totalMatching
@@ -218,7 +218,7 @@ function DataDiscoverContent() {
 
         {/* Stats bar */}
         {!loading && (
-          <div className="flex gap-4 mb-6 text-xs text-[var(--text-secondary)]">
+          <div className="flex gap-4 mb-6 text-xs text-(--text-secondary)">
             <span>
               {groups.length} participant{groups.length !== 1 ? "s" : ""}
             </span>
@@ -236,7 +236,7 @@ function DataDiscoverContent() {
         )}
 
         {loading ? (
-          <div className="flex items-center gap-2 text-[var(--text-secondary)]">
+          <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
             Querying federated catalog…
           </div>
@@ -244,9 +244,9 @@ function DataDiscoverContent() {
           <div className="text-center py-12">
             <Database
               size={40}
-              className="text-[var(--text-secondary)] mx-auto mb-4"
+              className="text-(--text-secondary) mx-auto mb-4"
             />
-            <p className="text-[var(--text-secondary)]">
+            <p className="text-(--text-secondary)">
               {filter
                 ? "No datasets match your search"
                 : "No datasets available"}
@@ -258,7 +258,7 @@ function DataDiscoverContent() {
             {showCatalog && visibleCatalog.length > 0 && (
               <div>
                 {tab === "all" && (
-                  <h2 className="text-xs font-semibold uppercase text-[var(--text-secondary)] mb-3 flex items-center gap-1.5">
+                  <h2 className="text-xs font-semibold uppercase text-(--text-secondary) mb-3 flex items-center gap-1.5">
                     <BookOpen size={12} />
                     HealthDCAT-AP Datasets ({visibleCatalog.length})
                   </h2>
@@ -271,8 +271,8 @@ function DataDiscoverContent() {
                         key={c.id}
                         className={`border rounded-xl transition-colors ${
                           isOpen
-                            ? "border-purple-500 bg-[var(--surface)]/60"
-                            : "border-[var(--border)] hover:border-purple-500"
+                            ? "border-purple-500 bg-(--surface)/60"
+                            : "border-(--border) hover:border-purple-500"
                         }`}
                       >
                         <button
@@ -287,25 +287,25 @@ function DataDiscoverContent() {
                               <div className="flex items-center gap-2">
                                 <BookOpen
                                   size={14}
-                                  className="text-[var(--accent)] shrink-0"
+                                  className="text-(--accent) shrink-0"
                                 />
-                                <h3 className="font-semibold text-sm text-[var(--accent)]">
+                                <h3 className="font-semibold text-sm text-(--accent)">
                                   {c.title}
                                 </h3>
                               </div>
                               {c.description && (
-                                <p className="text-xs text-[var(--text-secondary)] mt-0.5 ml-5 line-clamp-2">
+                                <p className="text-xs text-(--text-secondary) mt-0.5 ml-5 line-clamp-2">
                                   {c.description}
                                 </p>
                               )}
                               <div className="flex flex-wrap gap-2 mt-1.5 ml-5">
                                 {c.publisher && (
-                                  <span className="text-xs text-[var(--text-secondary)]">
+                                  <span className="text-xs text-(--text-secondary)">
                                     {c.publisher}
                                   </span>
                                 )}
                                 {c.theme && (
-                                  <span className="text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 px-1.5 py-0.5 rounded">
+                                  <span className="text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300 px-1.5 py-0.5 rounded-sm">
                                     {c.theme}
                                   </span>
                                 )}
@@ -320,12 +320,12 @@ function DataDiscoverContent() {
                               {isOpen ? (
                                 <ChevronUp
                                   size={16}
-                                  className="text-[var(--text-secondary)]"
+                                  className="text-(--text-secondary)"
                                 />
                               ) : (
                                 <ChevronDown
                                   size={16}
-                                  className="text-[var(--text-secondary)]"
+                                  className="text-(--text-secondary)"
                                 />
                               )}
                             </div>
@@ -333,38 +333,38 @@ function DataDiscoverContent() {
                         </button>
 
                         {isOpen && (
-                          <div className="px-4 pb-4 border-t border-[var(--border)] pt-3">
+                          <div className="px-4 pb-4 border-t border-(--border) pt-3">
                             <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 mb-3">
                               {c.license && (
                                 <div className="text-xs">
-                                  <span className="text-[var(--text-secondary)]">
+                                  <span className="text-(--text-secondary)">
                                     License:
                                   </span>{" "}
-                                  <span className="text-[var(--text-primary)]">
+                                  <span className="text-(--text-primary)">
                                     {c.license}
                                   </span>
                                 </div>
                               )}
                               {c.legalBasis && (
                                 <div className="text-xs">
-                                  <span className="text-[var(--text-secondary)]">
+                                  <span className="text-(--text-secondary)">
                                     Legal Basis:
                                   </span>{" "}
-                                  <span className="text-[var(--text-primary)]">
+                                  <span className="text-(--text-primary)">
                                     {c.legalBasis}
                                   </span>
                                 </div>
                               )}
                               {c.conformsTo && (
                                 <div className="text-xs">
-                                  <span className="text-[var(--text-secondary)]">
+                                  <span className="text-(--text-secondary)">
                                     Conforms To:
                                   </span>{" "}
                                   <a
                                     href={c.conformsTo}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-[var(--accent)] hover:underline inline-flex items-center gap-0.5"
+                                    className="text-(--accent) hover:underline inline-flex items-center gap-0.5"
                                   >
                                     {c.conformsTo
                                       .replace(/^https?:\/\//, "")
@@ -375,10 +375,10 @@ function DataDiscoverContent() {
                               )}
                               {c.recordCount != null && (
                                 <div className="text-xs">
-                                  <span className="text-[var(--text-secondary)]">
+                                  <span className="text-(--text-secondary)">
                                     Records:
                                   </span>{" "}
-                                  <span className="text-[var(--text-primary)]">
+                                  <span className="text-(--text-primary)">
                                     {c.recordCount.toLocaleString()}
                                   </span>
                                 </div>
@@ -389,7 +389,7 @@ function DataDiscoverContent() {
                                 href={`/catalog?search=${encodeURIComponent(
                                   c.title,
                                 )}`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white rounded text-xs font-medium hover:bg-purple-500"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white rounded-sm text-xs font-medium hover:bg-purple-500"
                               >
                                 <BookOpen size={14} />
                                 View in Catalog
@@ -398,7 +398,7 @@ function DataDiscoverContent() {
                                 href={`/graph?highlight=${encodeURIComponent(
                                   c.title,
                                 )}`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--border-ui)] text-[var(--text-primary)] rounded text-xs font-medium hover:border-purple-500 hover:text-[var(--accent)] transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-(--border-ui) text-(--text-primary) rounded-sm text-xs font-medium hover:border-purple-500 hover:text-(--accent) transition-colors"
                               >
                                 <Network size={14} />
                                 View in Graph
@@ -417,7 +417,7 @@ function DataDiscoverContent() {
             {showAssets && visibleAssets.length > 0 && (
               <div>
                 {tab === "all" && (
-                  <h2 className="text-xs font-semibold uppercase text-[var(--text-secondary)] mb-3 flex items-center gap-1.5">
+                  <h2 className="text-xs font-semibold uppercase text-(--text-secondary) mb-3 flex items-center gap-1.5">
                     <Database size={12} />
                     EDC Data Assets ({visibleAssets.length})
                   </h2>
@@ -432,8 +432,8 @@ function DataDiscoverContent() {
                         key={uniqueKey}
                         className={`border rounded-xl transition-colors ${
                           isOpen
-                            ? "border-layer2 bg-[var(--surface)]/60"
-                            : "border-[var(--border)] hover:border-layer2"
+                            ? "border-layer2 bg-(--surface)/60"
+                            : "border-(--border) hover:border-layer2"
                         }`}
                       >
                         <button
@@ -449,11 +449,11 @@ function DataDiscoverContent() {
                                 {assetField(a, "name")}
                               </h3>
                               {assetField(a, "description") && (
-                                <p className="text-xs text-[var(--text-secondary)] mt-0.5 line-clamp-2">
+                                <p className="text-xs text-(--text-secondary) mt-0.5 line-clamp-2">
                                   {assetField(a, "description")}
                                 </p>
                               )}
-                              <p className="text-xs text-[var(--text-secondary)] mt-1">
+                              <p className="text-xs text-(--text-secondary) mt-1">
                                 Provider:{" "}
                                 {a._identity
                                   ?.replace("did:web:", "")
@@ -470,12 +470,12 @@ function DataDiscoverContent() {
                               {isOpen ? (
                                 <ChevronUp
                                   size={16}
-                                  className="text-[var(--text-secondary)]"
+                                  className="text-(--text-secondary)"
                                 />
                               ) : (
                                 <ChevronDown
                                   size={16}
-                                  className="text-[var(--text-secondary)]"
+                                  className="text-(--text-secondary)"
                                 />
                               )}
                             </div>
@@ -483,14 +483,14 @@ function DataDiscoverContent() {
                         </button>
 
                         {isOpen && (
-                          <div className="px-4 pb-4 border-t border-[var(--border)] pt-3">
-                            <pre className="text-xs text-[var(--text-secondary)] overflow-auto max-h-48 mb-3">
+                          <div className="px-4 pb-4 border-t border-(--border) pt-3">
+                            <pre className="text-xs text-(--text-secondary) overflow-auto max-h-48 mb-3">
                               {JSON.stringify(a, null, 2)}
                             </pre>
                             <div className="flex flex-wrap gap-3">
                               <a
                                 href={`/negotiate?assetId=${a["@id"]}&providerId=${a._participantId}`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent)] text-white dark:text-gray-900 rounded text-xs font-medium hover:bg-[var(--accent-hover)]"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-(--accent) text-white dark:text-gray-900 rounded-sm text-xs font-medium hover:bg-(--accent-hover)"
                               >
                                 <FileSignature size={14} />
                                 Negotiate Access
@@ -499,7 +499,7 @@ function DataDiscoverContent() {
                                 href={`/graph?highlight=${encodeURIComponent(
                                   assetField(a, "name"),
                                 )}`}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-[var(--border-ui)] text-[var(--text-primary)] rounded text-xs font-medium hover:border-layer2 hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-(--border-ui) text-(--text-primary) rounded-sm text-xs font-medium hover:border-layer2 hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
                               >
                                 <Network size={14} />
                                 View in Graph

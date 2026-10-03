@@ -127,10 +127,10 @@ function EudiQrContent() {
             size={40}
             className="mx-auto mb-2 text-blue-800 dark:text-blue-300"
           />
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-1">
+          <h1 className="text-2xl font-bold text-(--text-primary) mb-1">
             {mode === "login" ? "Sign in" : "Register"} with your EUDI Wallet
           </h1>
-          <p className="text-[var(--text-secondary)] text-sm">
+          <p className="text-(--text-secondary) text-sm">
             Scan the QR with your EU Digital Identity Wallet, or approve on the
             simulated phone (OpenID4VP).
             <br />
@@ -146,7 +146,7 @@ function EudiQrContent() {
         />
         <a
           href="/auth/signin"
-          className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] underline"
+          className="text-xs text-(--text-secondary) hover:text-(--accent) underline"
         >
           ← Back to other sign-in options
         </a>
@@ -157,15 +157,15 @@ function EudiQrContent() {
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center gap-6 py-10 px-4">
       <div className="flex flex-col lg:flex-row items-center justify-center gap-6 w-full max-w-4xl">
-        <div className="bg-[var(--surface-2)] rounded-lg p-8 max-w-md w-full text-center">
+        <div className="bg-(--surface-2) rounded-lg p-8 max-w-md w-full text-center">
           <ShieldCheck
             size={44}
             className="mx-auto mb-3 text-blue-800 dark:text-blue-300"
           />
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-1">
+          <h1 className="text-2xl font-bold text-(--text-primary) mb-1">
             {mode === "login" ? "Sign in" : "Register"} with your EUDI Wallet
           </h1>
-          <p className="text-[var(--text-secondary)] text-sm mb-6">
+          <p className="text-(--text-secondary) text-sm mb-6">
             Scan the QR code with your EU Digital Identity Wallet to verify your
             identity (OpenID4VP).
             <br />
@@ -175,7 +175,7 @@ function EudiQrContent() {
           </p>
 
           {phase === "loading" && (
-            <div className="py-10 text-[var(--text-secondary)]">
+            <div className="py-10 text-(--text-secondary)">
               Preparing a secure request…
             </div>
           )}
@@ -192,14 +192,14 @@ function EudiQrContent() {
                   className="block"
                 />
               </div>
-              <div className="flex items-center justify-center gap-2 text-sm text-[var(--text-secondary)] mb-3">
+              <div className="flex items-center justify-center gap-2 text-sm text-(--text-secondary) mb-3">
                 <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                 Waiting for your wallet…
               </div>
               {walletLink && (
                 <a
                   href={walletLink}
-                  className="text-xs text-[var(--accent)] underline break-all"
+                  className="text-xs text-(--accent) underline break-all"
                 >
                   On this phone? Tap to open your wallet
                 </a>
@@ -220,14 +220,14 @@ function EudiQrContent() {
                 size={36}
                 className="mx-auto mb-2 text-amber-500"
               />
-              <p className="text-sm text-[var(--text-secondary)] mb-4">
+              <p className="text-sm text-(--text-secondary) mb-4">
                 {phase === "expired"
                   ? "This sign-in request expired."
                   : "Could not reach the EUDI verifier."}
               </p>
               <button
                 onClick={start}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white dark:text-gray-900 rounded-lg font-medium transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-(--accent) hover:bg-(--accent-hover) text-white dark:text-gray-900 rounded-lg font-medium transition-colors"
               >
                 <RefreshCw size={16} /> Try again
               </button>
@@ -235,10 +235,10 @@ function EudiQrContent() {
           )}
 
           {phase === "unavailable" && (
-            <div className="py-8 text-sm text-[var(--text-secondary)]">
+            <div className="py-8 text-sm text-(--text-secondary)">
               EUDI Wallet sign-in is only available on the live deployment, not
               in the static demo. Use the demo personas on the{" "}
-              <a href="/auth/signin" className="text-[var(--accent)] underline">
+              <a href="/auth/signin" className="text-(--accent) underline">
                 sign-in page
               </a>{" "}
               instead.
@@ -252,7 +252,7 @@ function EudiQrContent() {
             ariaLabel={`Simulated EUDI Wallet ${mode}`}
             steps={mode === "login" ? LOGIN_STEPS : REGISTER_STEPS}
           />
-          <p className="text-xs text-[var(--text-secondary)] max-w-[280px] text-center">
+          <p className="text-xs text-(--text-secondary) max-w-[280px] text-center">
             What happens on your phone — a simulated wallet approval
           </p>
         </div>
@@ -260,7 +260,7 @@ function EudiQrContent() {
 
       <a
         href="/auth/signin"
-        className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] underline"
+        className="text-xs text-(--text-secondary) hover:text-(--accent) underline"
       >
         ← Back to other sign-in options
       </a>
@@ -273,7 +273,7 @@ export default function EudiQrPage() {
     <Suspense
       fallback={
         <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="text-[var(--text-secondary)]">Loading…</div>
+          <div className="text-(--text-secondary)">Loading…</div>
         </div>
       }
     >

@@ -42,10 +42,10 @@ interface TckData {
 function StatusIcon({ status }: { status: string }) {
   if (status === "pass")
     return (
-      <CheckCircle2 size={16} className="text-[var(--success-text)] shrink-0" />
+      <CheckCircle2 size={16} className="text-(--success-text) shrink-0" />
     );
   if (status === "fail")
-    return <XCircle size={16} className="text-[var(--danger-text)] shrink-0" />;
+    return <XCircle size={16} className="text-(--danger-text) shrink-0" />;
   // skip: distinctly *neutral* (blue), not warning-yellow — so users don't
   // confuse "intentionally skipped on this deployment" with "test failed".
   return (
@@ -70,7 +70,7 @@ function ScoreBadge({
   // actually failed.
   if (skipped > 0 && skipped === total) {
     return (
-      <span className="text-xs font-mono px-2 py-0.5 rounded border bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-700">
+      <span className="text-xs font-mono px-2 py-0.5 rounded-sm border bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-700">
         {skipped} skipped
       </span>
     );
@@ -78,12 +78,14 @@ function ScoreBadge({
   const pct = total > 0 ? Math.round((passed / total) * 100) : 0;
   const color =
     pct === 100
-      ? "bg-[var(--badge-active-bg)] text-[var(--badge-active-text)] border-[var(--badge-active-border)]"
+      ? "bg-(--badge-active-bg) text-(--badge-active-text) border-(--badge-active-border)"
       : pct >= 80
-        ? "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]"
-        : "bg-[var(--badge-inactive-bg)] text-[var(--badge-inactive-text)] border-[var(--badge-inactive-border)]";
+        ? "bg-(--role-hdab-bg) text-(--role-hdab-text) border-(--role-hdab-border)"
+        : "bg-(--badge-inactive-bg) text-(--badge-inactive-text) border-(--badge-inactive-border)";
   return (
-    <span className={`text-xs font-mono px-2 py-0.5 rounded border ${color}`}>
+    <span
+      className={`text-xs font-mono px-2 py-0.5 rounded-sm border ${color}`}
+    >
       {passed}/{total} ({pct}%)
     </span>
   );
@@ -130,10 +132,10 @@ function SuiteCard({
   );
 
   return (
-    <div className="bg-[var(--surface-2)] rounded-lg border border-[var(--border)] overflow-hidden">
+    <div className="bg-(--surface-2) rounded-lg border border-(--border) overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-[var(--surface-2)]/40 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-(--surface-2)/40 transition-colors"
       >
         <div className="flex items-center gap-3">
           <ShieldCheck
@@ -141,10 +143,10 @@ function SuiteCard({
             className="text-blue-800 dark:text-blue-300 shrink-0"
           />
           <div className="text-left">
-            <span className="font-semibold text-[var(--text-primary)]">
+            <span className="font-semibold text-(--text-primary)">
               {meta.title}
             </span>
-            <span className="block text-xs text-[var(--text-secondary)]">
+            <span className="block text-xs text-(--text-secondary)">
               {meta.description}
             </span>
           </div>
@@ -153,10 +155,10 @@ function SuiteCard({
       </button>
 
       {expanded && (
-        <div className="border-t border-[var(--border)] divide-y divide-[var(--border)]">
+        <div className="border-t border-(--border) divide-y divide-(--border)">
           {Object.entries(categories).map(([cat, tests]) => (
             <div key={cat} className="px-5 py-3">
-              <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
+              <h4 className="text-xs font-semibold text-(--text-secondary) uppercase tracking-wider mb-2">
                 {cat}
               </h4>
               <ul className="space-y-1.5">
@@ -164,13 +166,13 @@ function SuiteCard({
                   <li key={t.id} className="flex items-start gap-2 text-sm">
                     <StatusIcon status={t.status} />
                     <div>
-                      <span className="text-[var(--text-primary)]">
-                        <span className="font-mono text-xs text-[var(--text-secondary)] mr-1.5">
+                      <span className="text-(--text-primary)">
+                        <span className="font-mono text-xs text-(--text-secondary) mr-1.5">
                           {t.id}
                         </span>
                         {t.name}
                       </span>
-                      <span className="block text-xs text-[var(--text-secondary)] mt-0.5">
+                      <span className="block text-xs text-(--text-secondary) mt-0.5">
                         {t.detail}
                       </span>
                     </div>
@@ -207,7 +209,7 @@ export default function ComplianceTckPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen bg-(--bg)">
       <div className="max-w-4xl mx-auto px-6 py-10">
         {/* Header */}
         <div className="flex items-center justify-between mb-1">
@@ -227,16 +229,16 @@ export default function ComplianceTckPage() {
           <button
             onClick={load}
             disabled={loading}
-            className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded bg-[var(--surface-2)] border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--surface-2)] disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-sm bg-(--surface-2) border border-(--border) text-(--text-primary) hover:bg-(--surface-2) disabled:opacity-50 transition-colors"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
             {loading ? "Running…" : "Re-run"}
           </button>
         </div>
-        <div className="flex items-center gap-3 mb-8 text-xs text-[var(--text-secondary)]">
+        <div className="flex items-center gap-3 mb-8 text-xs text-(--text-secondary)">
           <Link
             href="/compliance"
-            className="flex items-center gap-1 hover:text-[var(--text-primary)] transition-colors"
+            className="flex items-center gap-1 hover:text-(--text-primary) transition-colors"
           >
             <ExternalLink size={12} />
             EHDS Approval Checker
@@ -248,7 +250,7 @@ export default function ComplianceTckPage() {
 
         {/* Error state */}
         {error && (
-          <div className="bg-[var(--badge-inactive-bg)] border border-[var(--badge-inactive-border)] rounded-lg p-4 mb-6 text-[var(--danger-text)] text-sm">
+          <div className="bg-(--badge-inactive-bg) border border-(--badge-inactive-border) rounded-lg p-4 mb-6 text-(--danger-text) text-sm">
             {error}
           </div>
         )}
@@ -256,7 +258,7 @@ export default function ComplianceTckPage() {
         {/* Loading skeleton — cold start only */}
         {loading && !data && (
           <>
-            <div className="flex items-center gap-3 mb-6 text-sm text-[var(--text-secondary)]">
+            <div className="flex items-center gap-3 mb-6 text-sm text-(--text-secondary)">
               <RefreshCw size={16} className="animate-spin" />
               <span>
                 Running 20 protocol probes against the live deployment — this
@@ -267,7 +269,7 @@ export default function ComplianceTckPage() {
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-32 bg-[var(--surface-2)] rounded-lg animate-pulse border border-[var(--border)]"
+                  className="h-32 bg-(--surface-2) rounded-lg animate-pulse border border-(--border)"
                 />
               ))}
             </div>
@@ -276,10 +278,10 @@ export default function ComplianceTckPage() {
 
         {/* Re-run overlay — keeps stale data visible but signals refresh */}
         {loading && data && (
-          <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-[var(--surface-2)] border border-[var(--border)] text-xs text-[var(--text-secondary)]">
+          <div className="flex items-center gap-2 mb-4 px-3 py-2 rounded-lg bg-(--surface-2) border border-(--border) text-xs text-(--text-secondary)">
             <RefreshCw
               size={14}
-              className="animate-spin text-[var(--text-primary)]"
+              className="animate-spin text-(--text-primary)"
             />
             <span>
               Re-running probes — current results may be stale until this
@@ -296,32 +298,32 @@ export default function ComplianceTckPage() {
                 {
                   label: "Total",
                   value: data.summary.total,
-                  color: "text-[var(--text-primary)]",
+                  color: "text-(--text-primary)",
                 },
                 {
                   label: "Passed",
                   value: data.summary.passed,
-                  color: "text-[var(--success-text)]",
+                  color: "text-(--success-text)",
                 },
                 {
                   label: "Failed",
                   value: data.summary.failed,
-                  color: "text-[var(--danger-text)]",
+                  color: "text-(--danger-text)",
                 },
                 {
                   label: "Skipped",
                   value: data.summary.skipped,
-                  color: "text-[var(--warning-text)]",
+                  color: "text-(--warning-text)",
                 },
               ].map((s) => (
                 <div
                   key={s.label}
-                  className="bg-[var(--surface-2)] border border-[var(--border)] rounded-lg px-4 py-3 text-center"
+                  className="bg-(--surface-2) border border-(--border) rounded-lg px-4 py-3 text-center"
                 >
                   <div className={`text-2xl font-bold ${s.color}`}>
                     {s.value}
                   </div>
-                  <div className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  <div className="text-xs text-(--text-secondary) mt-0.5">
                     {s.label}
                   </div>
                 </div>
@@ -333,19 +335,19 @@ export default function ComplianceTckPage() {
                 ACA ingress isn't configured; the local Docker stack has them
                 all green). */}
             {data.summary.skipped > 0 && (
-              <div className="mb-6 px-4 py-3 rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 text-sm text-[var(--text-primary)]">
+              <div className="mb-6 px-4 py-3 rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 text-sm text-(--text-primary)">
                 <p className="font-medium mb-1">
                   {data.summary.skipped} test
                   {data.summary.skipped === 1 ? "" : "s"} skipped — EDC services
                   not provisioned in this environment
                 </p>
-                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                <p className="text-xs text-(--text-secondary) leading-relaxed">
                   The Azure Container Apps deployment doesn&apos;t currently
                   host the EDC controlplane / IdentityHub / IssuerService
                   (single-port ingress vs EDC&apos;s 4-port architecture — see
                   ADR-012 follow-up). For full DSP/DCP validation, run the local
                   Docker stack:{" "}
-                  <code className="font-mono text-[11px] bg-[var(--surface-2)] px-1 py-0.5 rounded">
+                  <code className="font-mono text-[11px] bg-(--surface-2) px-1 py-0.5 rounded-sm">
                     docker compose -f docker-compose.yml -f
                     docker-compose.jad.yml up -d
                   </code>

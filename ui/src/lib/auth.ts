@@ -242,9 +242,9 @@ export const DEMO_PERSONAS = [
     roles: ["EDC_ADMIN"],
     personaId: "edc-admin",
     description: "Full operator access: all participants, contracts, admin",
-    color: "text-[var(--role-admin-text)]",
+    color: "text-(--role-admin-text)",
     badge:
-      "bg-[var(--role-admin-bg)] text-[var(--role-admin-text)] border-[var(--role-admin-border)]",
+      "bg-(--role-admin-bg) text-(--role-admin-text) border-(--role-admin-border)",
   },
   {
     username: "clinicuser",
@@ -253,9 +253,9 @@ export const DEMO_PERSONAS = [
     roles: ["EDC_USER_PARTICIPANT", "DATA_HOLDER"],
     personaId: "hospital",
     description: "Publishes FHIR datasets, manages contracts with researchers",
-    color: "text-[var(--role-holder-text)]",
+    color: "text-(--role-holder-text)",
     badge:
-      "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border-[var(--role-holder-border)]",
+      "bg-(--role-holder-bg) text-(--role-holder-text) border-(--role-holder-border)",
   },
   {
     username: "researcher",
@@ -264,9 +264,9 @@ export const DEMO_PERSONAS = [
     roles: ["EDC_USER_PARTICIPANT", "DATA_USER"],
     personaId: "researcher",
     description: "Discovers datasets, negotiates access, runs OMOP analytics",
-    color: "text-[var(--role-user-text)]",
+    color: "text-(--role-user-text)",
     badge:
-      "bg-[var(--role-user-bg)] text-[var(--role-user-text)] border-[var(--role-user-border)]",
+      "bg-(--role-user-bg) text-(--role-user-text) border-(--role-user-border)",
   },
   {
     username: "regulator",
@@ -275,9 +275,9 @@ export const DEMO_PERSONAS = [
     roles: ["HDAB_AUTHORITY"],
     personaId: "hdab",
     description: "Reviews access applications, governs Trust Centers",
-    color: "text-[var(--role-hdab-text)]",
+    color: "text-(--role-hdab-text)",
     badge:
-      "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]",
+      "bg-(--role-hdab-bg) text-(--role-hdab-text) border-(--role-hdab-border)",
   },
   {
     // A second access body, so EHDS Art. 14 coordination has two sides to it.
@@ -289,9 +289,9 @@ export const DEMO_PERSONAS = [
     roles: ["HDAB_AUTHORITY"],
     personaId: "hdab",
     description: "Spanish access body, cross-border permits (EHDS Art. 14)",
-    color: "text-[var(--role-hdab-text)]",
+    color: "text-(--role-hdab-text)",
     badge:
-      "bg-[var(--role-hdab-bg)] text-[var(--role-hdab-text)] border-[var(--role-hdab-border)]",
+      "bg-(--role-hdab-bg) text-(--role-hdab-text) border-(--role-hdab-border)",
   },
   {
     username: "lmcuser",
@@ -300,9 +300,9 @@ export const DEMO_PERSONAS = [
     roles: ["EDC_USER_PARTICIPANT", "DATA_HOLDER"],
     personaId: "hospital",
     description: "NL data holder, publishes cross-border datasets",
-    color: "text-[var(--role-holder-text)]",
+    color: "text-(--role-holder-text)",
     badge:
-      "bg-[var(--role-holder-bg)] text-[var(--role-holder-text)] border-[var(--role-holder-border)]",
+      "bg-(--role-holder-bg) text-(--role-holder-text) border-(--role-holder-border)",
   },
   // EHDS Chapter II / GDPR Art. 15-22 — patient primary-use access
   {
@@ -313,9 +313,9 @@ export const DEMO_PERSONAS = [
     personaId: "patient",
     description:
       "EHDS Art. 3: access own EHR, donate to research, see insights",
-    color: "text-[var(--role-patient-text)]",
+    color: "text-(--role-patient-text)",
     badge:
-      "bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border-[var(--role-patient-border)]",
+      "bg-(--role-patient-bg) text-(--role-patient-text) border-(--role-patient-border)",
   },
   {
     username: "patient2",
@@ -324,9 +324,9 @@ export const DEMO_PERSONAS = [
     roles: ["PATIENT"],
     personaId: "patient",
     description: "Cross-border NL patient, MyHealth@EU Art. 7 data portability",
-    color: "text-[var(--role-patient-text)]",
+    color: "text-(--role-patient-text)",
     badge:
-      "bg-[var(--role-patient-bg)] text-[var(--role-patient-text)] border-[var(--role-patient-border)]",
+      "bg-(--role-patient-bg) text-(--role-patient-text) border-(--role-patient-border)",
   },
 ] as const;
 
