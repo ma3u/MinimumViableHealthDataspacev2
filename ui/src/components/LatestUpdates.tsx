@@ -11,7 +11,7 @@ interface Update {
 
 /** Newest first. Each entry names what changed for a visitor and links the
  *  pull request or decision behind it; keep it to the last few weeks. */
-export const LATEST_UPDATES: Update[] = [
+const LATEST_UPDATES: Update[] = [
   {
     date: "2026-10-03",
     title: "A living body on the start page",
