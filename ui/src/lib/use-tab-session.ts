@@ -84,9 +84,11 @@ export function useTabSession(): {
   liveSession: ReturnType<typeof useSession>["data"];
 } {
   const { data: liveSession, status: liveStatus } = useSession();
-  const [tabSession, setTabSession] = useState<TabSession | null>(() =>
-    readSnapshot(),
-  );
+  // Start from null on both sides. Reading the snapshot here made the server
+  // (no sessionStorage, so null: signed-out nav) and the client's first render
+  // (snapshot: signed-in nav) disagree, which is React #418 on every signed-in
+  // page (#447). The mount effect below loads the snapshot instead.
+  const [tabSession, setTabSession] = useState<TabSession | null>(null);
 
   useEffect(() => {
     // On mount, check if a switch was pending (user explicitly switched in THIS tab)
