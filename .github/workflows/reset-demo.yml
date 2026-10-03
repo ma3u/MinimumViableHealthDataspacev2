@@ -58,7 +58,7 @@ jobs:
       reason: ${{ steps.check.outputs.reason }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2
@@ -161,7 +161,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2
@@ -565,7 +565,7 @@ jobs:
       run:
         working-directory: ./ui
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
