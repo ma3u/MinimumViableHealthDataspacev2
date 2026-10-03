@@ -9,10 +9,12 @@ permissions:
   id-token: write
   contents: read
 
-concurrency:
-  group: "azure-deploy"
-  cancel-in-progress: false
-
+# Concurrency is per job, not per workflow. A workflow-wide group made each
+# deploy wait for the previous run's E2E job (about 19 minutes against the
+# live site), although that run's site had been live for 15 of them. Deploys
+# still run one at a time and in order; an E2E run is cancelled when a newer
+# deploy brings its own, since it would only be testing a version that is
+# already gone.
 env:
   ACR_NAME: acrmvhdehds
   ACR_LOGIN_SERVER: acrmvhdehds.azurecr.io
@@ -22,6 +24,9 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    concurrency:
+      group: "azure-deploy"
+      cancel-in-progress: false
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -36,6 +41,12 @@ jobs:
       - name: ACR Login
         run: az acr login --name ${{ env.ACR_NAME }}
 
+      # The default "docker" driver cannot export a build cache; this builder
+      # can. The cache lives in ACR as a :buildcache tag per image, so the
+      # npm ci layer is reused whenever package-lock.json has not changed.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       # ── Build custom images (amd64) ──────────────────────────
       # BUILD_CHANNEL=release so the Azure demo never shows "+local" in the
       # build-info badge. BUILD_SHA + BUILD_TIME feed the commit link.
@@ -47,6 +58,8 @@ jobs:
             --build-arg BUILD_TIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
             -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:${{ github.sha }} \
             -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:latest \
+            --cache-from type=registry,ref=${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:buildcache \
+            --cache-to type=registry,ref=${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:buildcache,mode=max \
             --push ./ui
 
       - name: Build & push Neo4j Proxy image
@@ -54,6 +67,8 @@ jobs:
           docker buildx build --platform linux/amd64 \
             -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-proxy:${{ github.sha }} \
             -t ${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-proxy:latest \
+            --cache-from type=registry,ref=${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-proxy:buildcache \
+            --cache-to type=registry,ref=${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-proxy:buildcache,mode=max \
             --push ./services/neo4j-proxy
 
       # ── Deploy to Azure Container Apps ───────────────────────
@@ -137,6 +152,9 @@ jobs:
     needs: build-and-deploy
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    concurrency:
+      group: "azure-e2e"
+      cancel-in-progress: true
     defaults:
       run:
         working-directory: ./ui
@@ -153,8 +171,22 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # The browser download is keyed on the Playwright version in the lockfile;
+      # the system libraries still come from apt on every run.
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('ui/package-lock.json') }}
+
       - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system dependencies
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2
