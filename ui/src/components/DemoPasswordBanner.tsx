@@ -17,13 +17,16 @@ import { IS_STATIC } from "@/lib/static-export";
  */
 export default function DemoPasswordBanner() {
   const { data: session, status } = useSession();
-  const [dismissed, setDismissed] = useState(() => {
-    if (typeof window === "undefined") {
-      return false;
-    }
-    return sessionStorage.getItem("demo-password-banner-dismissed") === "true";
-  });
+  // Read after mount, never in the initialiser: the server has no
+  // sessionStorage, and a first client render that differs is React #418 (#447).
+  const [dismissed, setDismissed] = useState(false);
   const [passwordUrl, setPasswordUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    setDismissed(
+      sessionStorage.getItem("demo-password-banner-dismissed") === "true",
+    );
+  }, []);
 
   useEffect(() => {
     if (IS_STATIC) return;

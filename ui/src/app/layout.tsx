@@ -77,7 +77,10 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       {/* Inline script applies saved theme class before first paint — prevents flash */}
       <head>
+        {/* Browsers hide `nonce` from the DOM once the script has run, so the
+            client always reads "" and React's dev build reports a mismatch. */}
         <script
+          suppressHydrationWarning
           nonce={nonce}
           dangerouslySetInnerHTML={{
             // Default theme = light. Only applies dark when the user has
