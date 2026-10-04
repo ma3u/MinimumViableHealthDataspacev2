@@ -6,8 +6,8 @@ import { ownPatientIdForSession } from "@/lib/overview/patient";
  *
  * In Neo4j rather than memory, because a connection must survive a restart:
  * the phone holds a refresh token for half an hour and a patient who
- * disconnected it must stay disconnected. The pairing that leads here lives in
- * memory for its two minutes (`app-pairing.ts`).
+ * disconnected it must stay disconnected. The pairing that leads here is an
+ * `(:AppPairing)` for its two minutes plus grace (`app-pairing.ts`).
  *
  * `deviceId` is a random UUID the app generates once and keeps in its
  * Keychain. A connection belongs to exactly one login; registering a device id

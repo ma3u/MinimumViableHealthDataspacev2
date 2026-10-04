@@ -5,9 +5,15 @@
 #
 #   NEXTAUTH_SECRET=<the UI's secret> ./scripts/check-klarbefund-connect.sh [UI base URL]
 #
-# Local only: it signs in as the seeded test patient from jad/keycloak-realm.json
-# and talks to Keycloak on localhost:8080. The klarbefund-app client must exist
-# (scripts/azure/wire-klarbefund-client.sh --local).
+# It signs in as the seeded test patient from jad/keycloak-realm.json and talks
+# to Keycloak on localhost:8080. The klarbefund-app client must exist
+# (scripts/azure/wire-klarbefund-client.sh --local). Against the live hub:
+#
+#   KEYCLOAK_URL=https://auth.ehds.mabu.red NEXTAUTH_SECRET=<mvhd-ui secret> \
+#     ./scripts/check-klarbefund-connect.sh https://ehds.mabu.red
+#
+# Run it more than once there: the UI has several replicas, and a pairing kept
+# in one of them passed one run in three (2026-10-04).
 set -euo pipefail
 UI="${1:-http://localhost:3000}"
 KC="${KEYCLOAK_URL:-http://localhost:8080}/realms/edcv"
@@ -15,7 +21,9 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 REALM="$ROOT/jad/keycloak-realm.json"
 : "${NEXTAUTH_SECRET:?set NEXTAUTH_SECRET to the secret of the UI under test}"
 
+# NextAuth prefixes the cookie on https.
 COOKIE_NAME=next-auth.session-token
+[[ "$UI" == https://* ]] && COOKIE_NAME="__Secure-$COOKIE_NAME"
 COOKIE="$COOKIE_NAME=$(cd "$ROOT/ui" && COOKIE_NAME=$COOKIE_NAME node scripts/forge-bruno-session.mjs patient1 | awk -F= '/^COOKIE_VALUE=/{print substr($0,14)}')"
 PW="$(jq -r '.users[] | select(.username=="patient1") | .credentials[] | select(.type=="password") | .value' "$REALM")"
 JAR="$(mktemp)"; trap 'rm -f "$JAR"' EXIT

@@ -65,7 +65,13 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const pairing = getPairing(pairingId, username);
+  let pairing;
+  try {
+    pairing = await getPairing(pairingId, username);
+  } catch (err) {
+    console.error("POST /api/patient/app-devices:", err);
+    return NextResponse.json({ error: "Neo4j unavailable" }, { status: 502 });
+  }
   if (!pairing) {
     return NextResponse.json(
       {
@@ -97,7 +103,7 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
-    completePairing(pairing.id, deviceId, deviceName);
+    await completePairing(pairing.id, username, deviceId, deviceName);
     return NextResponse.json({ connection }, { status: 201 });
   } catch (err) {
     console.error("POST /api/patient/app-devices:", err);
