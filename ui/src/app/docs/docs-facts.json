@@ -988,6 +988,12 @@
       "file": "ADR-053-everything-stops-off-hours.md",
       "title": "Everything stops off hours, and the UI says so",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-055",
+      "file": "ADR-055-azure-runs-the-compose-jad-build.md",
+      "title": "Azure runs the same JAD build as compose and CI",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
