@@ -4,3 +4,4 @@
 # Security tab with the same reason, so GitHub and this file agree.
 
 swift/cleartext-transmission  Sources/Shared/EHDSConnect.swift  # TrustedHub.development: the debug-only localhost hubs (compose stack on the Mac); production is https
+swift/cleartext-transmission  Sources/MeinBefund/EHDSConnection.swift  # the same debug-only localhost hubs; a password goes nowhere unless EHDSAccount.travelsEncrypted (https, or http to localhost), ADR-054

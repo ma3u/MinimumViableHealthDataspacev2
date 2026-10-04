@@ -48,4 +48,15 @@ struct EHDSAccountTests {
       challenge: "1.abc.def", deviceId: "6f1c2b7e-3d4a-4b5c-9d8e-1a2b3c4d5e6f")
     #expect(hash.map { String(format: "%02x", $0) }.joined() == "c60a7b1f095a044f51f4c8346a3148f50d0b5afd6fa5c042e9ee61e018d50c42")
   }
+
+  @Test("a password travels only over https, or to the Mac's own localhost")
+  func encrypted() {
+    func account(_ ehds: String, _ issuer: String) -> EHDSAccount {
+      EHDSAccount(ehds: ehds, issuer: issuer, username: "kb-ab3dk7mn", password: "x", createdByApp: true)
+    }
+    #expect(account("https://ehds.mabu.red", "https://auth.ehds.mabu.red/realms/edcv").travelsEncrypted)
+    #expect(account("http://localhost:3000", "http://localhost:8080/realms/edcv").travelsEncrypted)
+    #expect(!account("http://ehds.mabu.red", "https://auth.ehds.mabu.red/realms/edcv").travelsEncrypted)
+    #expect(!account("https://ehds.mabu.red", "http://192.168.1.5:8080/realms/edcv").travelsEncrypted)
+  }
 }

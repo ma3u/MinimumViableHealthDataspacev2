@@ -437,3 +437,4 @@
 "Username" = "Benutzername";
 "Your EHDS account" = "Ihr EHDS-Konto";
 "Your own record on the EHDS demo hub. It starts empty and holds only what is added to it; nothing from this phone is sent there." = "Ihre eigene Akte auf dem EHDS-Demo-Hub. Sie ist zu Beginn leer und enthält nur, was hinzugefügt wird; von diesem Telefon wird nichts dorthin gesendet.";
+"Klarbefund sends a password only over an encrypted connection." = "Klarbefund sendet ein Passwort nur über eine verschlüsselte Verbindung.";

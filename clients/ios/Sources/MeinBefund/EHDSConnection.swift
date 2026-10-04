@@ -199,6 +199,7 @@ final class EHDSConnection: ObservableObject {
   /// for a new account, a typed one, and again whenever the session ends, so
   /// the phone stays connected without asking the person.
   private func signIn(_ account: EHDSAccount) async throws {
+    guard account.travelsEncrypted else { throw EHDSAccount.Problem.unencrypted }
     let (status, body) = try await transport.post(
       URL(string: "\(account.issuer)/protocol/openid-connect/token")!, form: account.passwordGrant)
     let json = (try? JSONSerialization.jsonObject(with: body) as? [String: Any]) ?? [:]
@@ -419,6 +420,8 @@ final class EHDSConnection: ObservableObject {
       return error.localizedDescription
     case let error as SignInError:
       return error.localizedDescription
+    case EHDSAccount.Problem.unencrypted:
+      return String(localized: "Klarbefund sends a password only over an encrypted connection.")
     case EHDSAccount.Problem.incomplete:
       return String(localized: "The hub's answer was incomplete. Try again.")
     case let EHDSAccount.Problem.untrustedHub(host):

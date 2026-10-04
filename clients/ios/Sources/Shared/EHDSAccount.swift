@@ -18,7 +18,7 @@ public struct EHDSAccount: Codable, Sendable, Equatable {
   public let createdByApp: Bool
 
   public init(
-    ehds: String, issuer: String, client: String = EHDSAccount.passwordClient,
+    ehds: String, issuer: String, client: String = EHDSAccount.accountClient,
     username: String, password: String, createdByApp: Bool
   ) {
     self.ehds = ehds
@@ -30,15 +30,27 @@ public struct EHDSAccount: Codable, Sendable, Equatable {
   }
 
   /// The public client that allows the password grant and nothing else.
-  public static let passwordClient = "klarbefund-account"
+  public static let accountClient = "klarbefund-account"
 
   public var hub: TrustedHub { TrustedHub(ehds: ehds, issuer: issuer) }
+
+  /// True when the password and the tokens travel encrypted: https, or the
+  /// compose stack on this Mac's own localhost in a debug build. The sign-in
+  /// refuses anything else, whatever list the hub came from.
+  public var travelsEncrypted: Bool {
+    [ehds, issuer].allSatisfy { address in
+      guard let url = URL(string: address), let scheme = url.scheme else { return false }
+      return scheme == "https" || (scheme == "http" && url.host == "localhost")
+    }
+  }
 
   public enum Problem: Error, Equatable, Sendable {
     /// The hub answered without a field the account needs.
     case incomplete
     /// The answer names a hub or issuer the app does not trust.
     case untrustedHub(String)
+    /// The password would travel unencrypted.
+    case unencrypted
   }
 
   /// The hub's answer to `POST /api/app-accounts`, checked against the hubs
@@ -54,7 +66,7 @@ public struct EHDSAccount: Codable, Sendable, Equatable {
       throw Problem.untrustedHub(URL(string: issuer)?.host ?? issuer)
     }
     return EHDSAccount(
-      ehds: ehds, issuer: issuer, client: (json["client"] as? String) ?? passwordClient,
+      ehds: ehds, issuer: issuer, client: (json["client"] as? String) ?? accountClient,
       username: username, password: password, createdByApp: true)
   }
 
