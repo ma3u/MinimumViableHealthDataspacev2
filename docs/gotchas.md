@@ -3,6 +3,18 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-04: the deploy smoke tests signed in on the wrong host, and continue-on-error hid it
+
+The deploy workflow's live smoke
+tests ran against the raw ACA host (`mvhd-ui.<hash>.azurecontainerapps.io`)
+while `NEXTAUTH_URL` is `https://ehds.mabu.red`. A sign-in started on one host
+sets its state cookie there and gets its callback on the other, so every
+sign-in ended in `OAuthCallbackError: State cookie was missing`, about 115
+stack traces per deploy, the largest source of billed UI log lines. The step
+is `continue-on-error`, so 39 failed tests in a run read as green.
+`reset-demo.yml` had fixed exactly this before; `deploy-azure.yml` now uses
+the same custom-domain lookup.
+
 ## 2026-10-04: an old Neo4j revision held the lock, and the one with the traffic could not start
 
 On a Sunday the graph was down while `az containerapp list` showed Neo4j

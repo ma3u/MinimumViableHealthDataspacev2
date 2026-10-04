@@ -8,7 +8,8 @@
 # push rather than after it.
 #
 # The build is the app scheme from project.yml, which compiles Sources/
-# MeinBefund and Sources/Shared, plus the Swift package for the tools. The old
+# MeinBefund and Sources/Shared; the developer tools in the Swift package do
+# not ship and are left out, as in the workflow. The old
 # default setup only ever built the package: the 30 files of the app itself
 # were never analysed.
 #
@@ -45,7 +46,6 @@ set -euo pipefail
 xcodebuild -project MeinBefund.xcodeproj -scheme MeinBefund \\
   -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \\
   -derivedDataPath "$work/dd" CODE_SIGNING_ALLOWED=NO clean build -quiet
-swift build --scratch-path "$work/spm"
 BUILD
 chmod +x "$work/build.sh"
 

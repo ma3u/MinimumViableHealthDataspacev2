@@ -132,46 +132,56 @@ on-call person sees is the loop, not the bill.
    a stale April revision held the store lock (`docs/gotchas.md`, 2026-10-02).
 2. **EDC services:** finish #318 (managed Postgres, ADR-041) so the databases exist, and
    set connection retry with backoff so a missing database produces one error per
-   minute, not per second.
-3. **EDC console monitor:** the cause is in the images. Every JAD image starts its
-   runtime with `--log-level=debug` in its own start command, and the console monitor
-   writes ANSI colour unless given `--no-color`. The images also start the
+   minute, not per second. **#318 done:** the `database ... does not exist` loops
+   stopped on 2026-10-02 19:22 UTC. Backoff is still open.
+3. **EDC console monitor:** the cause is in the images. Every `jad-*:2026-04-14` image
+   bakes `--log-level=debug` into its start command (the issuer service in its
+   ENTRYPOINT, the other three in CMD), and the console monitor writes ANSI colour
+   unless given `--no-color`; the runtime accepts `--log-level=info --no-color` (both
+   strings are in the jar's `ExtensionLoader`). The newer ghcr images also start the
    OpenTelemetry Java agent, which with no endpoint logs `Failed to export` errors
-   against `localhost:4318`. `scripts/azure/quiet-edc-logs.sh` reads each app's image
-   start command, swaps in `--log-level=info --no-color`, sets it as the container's
-   args (or command, for the issuer), and sets `OTEL_JAVAAGENT_ENABLED=false` until
-   Plane 1 has a collector. Tested on the ghcr images: no DEBUG, no colour codes, no
-   exporter errors. `04-edc-services.sh` runs it after creating the apps.
-   **Scripted 2026-10-04; apply in office hours** (`--dry-run` first): each app
-   restarts once.
+   against `localhost:4318`; the deployed April images do not.
+   `scripts/azure/quiet-edc-logs.sh` reads each app's image start command, swaps in
+   `--log-level=info --no-color`, sets it as the container's args (or command, for the
+   issuer), and sets `OTEL_JAVAAGENT_ENABLED=false` until Plane 1 has a collector.
+   `04-edc-services.sh` runs it after creating the apps. **Scripted 2026-10-04, dry run
+   against the live apps correct; apply in office hours**: each app restarts once.
 4. **Crash-loop alert:** more than 3 restarts in 15 minutes on any app, one alert per
    app, mailed through action group `mvhd-alerts`.
 5. **Replace the 1 GB cap with a budget** on `rg-mvhd-dev`, mails at 50, 80 and 100 %
    of actual cost and 100 % forecast; the cap is removed only once the budget exists.
-   Items 4 and 5: `ALERT_EMAIL=<address> scripts/azure/configure-alerts-and-budget.sh`
-   (`--dry-run` first), run through the `Configure alerts and budget` workflow on main,
-   because only `mvhd-github-actions` (Contributor) may write these. The budget is 1000 EUR a month (decided 2026-10-04;
-   `BUDGET_EUR` overrides it). The address is given at run time, not committed. **Scripted 2026-10-04; not applied yet.**
-   The older replica alerts in `07-observability.sh` have no action group and would
-   fire nightly under ADR-053; they are left as they are until Plane 1 replaces them.
+   Items 4 and 5: `scripts/azure/configure-alerts-and-budget.sh`, run through the
+   `Configure alerts and budget` workflow on main (dry run first), because only
+   `mvhd-github-actions` (Contributor) may write these; the operator's account is
+   Container Apps Contributor only. The budget is 1000 EUR a month (decided
+   2026-10-04; `BUDGET_EUR` overrides it). The address comes from the `ALERT_EMAIL`
+   secret, not the repository. The older replica alerts in `07-observability.sh` have
+   no action group and would fire nightly under ADR-053; they are left as they are
+   until Plane 1 replaces them.
 6. **Re-measure after 7 days** with the queries in section 1. Expected: under 200 MB/day.
+   Interim 2026-10-04: 91.6 MB billed on 2026-10-03, against 250 to 270 MB a day from
+   2026-09-21 to 09-28. Full reading due 2026-10-09; ADR-053's off-hours stop lowers
+   it further, so compare per running hour, not per day.
+7. **Deploy smoke tests on the custom domain.** They signed in on the raw ACA host and
+   produced about 115 `State cookie was missing` stack traces per deploy
+   (`docs/gotchas.md`, 2026-10-04). Fixed in `deploy-azure.yml`.
 
 ### Phase B: structured logs and the collector (ADR-045 plane 1)
 
-7. pino in `ui/` and `services/neo4j-proxy` with `trace_id`, plus the no-PII unit test.
-8. OpenTelemetry Collector with `recombine` (multi-line join), `filter` (drop DEBUG and
+8. pino in `ui/` and `services/neo4j-proxy` with `trace_id`, plus the no-PII unit test.
+9. OpenTelemetry Collector with `recombine` (multi-line join), `filter` (drop DEBUG and
    probe lines), rate limiting of repeats, `redaction`, and tail sampling for traces.
-9. Loki, Tempo, Prometheus and Grafana in one `mvhd-observability` app, data in a bucket,
-   following off-hours scale-down; locally `docker-compose.observability.yml`.
-10. Move the workflows that query `ContainerAppConsoleLogs_CL` (`edc-*`, `cfm-seed`,
+10. Loki, Tempo, Prometheus and Grafana in one `mvhd-observability` app, data in a bucket,
+    following off-hours scale-down; locally `docker-compose.observability.yml`.
+11. Move the workflows that query `ContainerAppConsoleLogs_CL` (`edc-*`, `cfm-seed`,
     `neo4j-seed`, `vault-bootstrap-participant-keys`) to LogQL **before** switching
     console logs away from Log Analytics.
-11. Switch ACA console logs to the collector; Log Analytics keeps system logs only.
+12. Switch ACA console logs to the collector; Log Analytics keeps system logs only.
 
 ### Phase C: keep it cheap
 
-12. Volume alerts from section 6 as code in `observability/`.
-13. Monthly: compare the bill with the budget, and review the top 10 message templates by
+13. Volume alerts from section 6 as code in `observability/`.
+14. Monthly: compare the bill with the budget, and review the top 10 message templates by
     volume. Anything in the top 10 that nobody reads gets demoted to DEBUG or turned into
     a metric.
 
