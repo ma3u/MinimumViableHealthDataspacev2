@@ -24,6 +24,8 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    outputs:
+      live: ${{ steps.auth.outputs.live }}
     concurrency:
       group: "azure-deploy"
       cancel-in-progress: false
@@ -139,10 +141,34 @@ jobs:
       # question the others do not: can anybody actually log in. Exit 2 means
       # Keycloak is up but its database is gone, which is a Postgres problem
       # and not a realm one (docs/gotchas.md, 2026-09-30).
+      #
+      # Exit 4 means Keycloak's Container App is stopped. That passes only
+      # when the UI says the demo is offline outside office hours (ADR-053),
+      # as Demo Smoke reads it: then there is no login to test, and the E2E
+      # job skips. A stopped Keycloak behind a UI that claims to be up is
+      # still red (2026-10-04: every weekend deploy failed on "realm 'edcv'
+      # does not exist" while the realm was intact).
       - name: Auth is actually working
+        id: auth
         env:
           KEYCLOAK_PUBLIC_URL: https://auth.ehds.mabu.red
-        run: ./scripts/azure/check-keycloak-health.sh "$KEYCLOAK_PUBLIC_URL" edcv
+          DEMO_URL: https://ehds.mabu.red
+        run: |
+          rc=0
+          ./scripts/azure/check-keycloak-health.sh "$KEYCLOAK_PUBLIC_URL" edcv || rc=$?
+          if [ "$rc" = "4" ]; then
+            body=$(curl -s --max-time 60 "$DEMO_URL/api/graph" -w '\n%{http_code}' || true)
+            code=$(echo "$body" | tail -n1)
+            if [ "$code" = "503" ] && echo "$body" | grep -q '"staticSite"'; then
+              echo "live=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::The stack is stopped outside office hours (ADR-053); the deploy is in place, auth and E2E not checked"
+              echo "**Auth not checked:** the stack is stopped outside office hours (ADR-053)." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "::error::Keycloak is stopped, but $DEMO_URL/api/graph answered $code, not the offline notice"
+          fi
+          [ "$rc" = "0" ] && echo "live=true" >> "$GITHUB_OUTPUT"
+          exit "$rc"
 
   # -------------------------------------------------------------------
   # E2E Tests against live Azure deployment
@@ -150,6 +176,8 @@ jobs:
   e2e-azure:
     name: E2E Tests (Azure)
     needs: build-and-deploy
+    # Off hours there is nothing live to test (see "Auth is actually working").
+    if: needs.build-and-deploy.outputs.live == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency:
