@@ -172,6 +172,8 @@ export interface ChainedEvent {
   prevHash: string;
   hash: string;
   resource: Record<string, unknown>;
+  /** Set when the chain already held this event (same dedupeKey). */
+  duplicate?: boolean;
 }
 
 export function chainEvent(
@@ -267,7 +269,7 @@ export async function appendAuditEvent(
   if (!driver) throw new Error("audit: no Neo4j driver");
   const session = driver.session({ database: "neo4j" });
   try {
-    return await session.executeWrite(async (tx) => {
+    const committed = await session.executeWrite(async (tx) => {
       // SET before RETURN: takes the head node's write lock first, so the
       // seq and head read below cannot change until this commits.
       const head = await tx.run(
@@ -292,6 +294,7 @@ export async function appendAuditEvent(
             prevHash: String(prior.get("prevHash")),
             hash: String(prior.get("hash")),
             resource: JSON.parse(String(prior.get("resource"))),
+            duplicate: true,
           };
         }
       }
@@ -325,6 +328,196 @@ export async function appendAuditEvent(
       );
       return event;
     });
+    // A Plane 1 copy for dashboards (ADR-045 decision 12): what kind of
+    // record, never who or which data. The chain stays the evidence.
+    if (committed.duplicate) {
+      logger.info(
+        { audit: { chain, seq: committed.seq } },
+        "audit duplicate ignored",
+      );
+      return committed;
+    }
+    logger.info(
+      {
+        audit: {
+          chain,
+          seq: committed.seq,
+          type: auditType(resource),
+          outcome: index.outcome,
+          source: detailValue(resource, "source"),
+          demo: detailValue(resource, "demo") === "true",
+        },
+      },
+      "audit recorded",
+    );
+    return committed;
+  } finally {
+    await session.close();
+  }
+}
+
+/** The record's kind: its first subtype code (search, transfer-process.started, ...). */
+export function auditType(resource: Record<string, unknown>): string {
+  const subtype = resource.subtype as Array<{ code?: string }> | undefined;
+  return subtype?.[0]?.code ?? "unknown";
+}
+
+function detailValue(
+  resource: Record<string, unknown>,
+  type: string,
+): string | undefined {
+  for (const entity of (resource.entity ?? []) as Array<{
+    detail?: Array<{ type: string; valueString?: string }>;
+  }>) {
+    const found = entity.detail?.find((d) => d.type === type);
+    if (found) return found.valueString;
+  }
+  return undefined;
+}
+
+export interface AuditSummary {
+  seq: number;
+  recorded: string;
+  type: string;
+  outcome: string;
+  outcomeDesc?: string;
+  agents: string[];
+  entities: Record<string, string>;
+  source?: string;
+  demo: boolean;
+  hash: string;
+}
+
+/**
+ * One record reduced to what an operator scans in a table: what happened,
+ * how it ended, who took part and under which agreement and permit. The
+ * query chain stores questions as hashes only, so nothing here is health data.
+ */
+export function summarize(event: ChainedEvent): AuditSummary {
+  const r = event.resource;
+  const entities: Record<string, string> = {};
+  for (const e of (r.entity ?? []) as Array<{
+    what?: { identifier?: { system?: string; value?: string } };
+  }>) {
+    const id = e.what?.identifier;
+    if (id?.system && id.value)
+      entities[id.system.replace(/^urn:/, "")] = id.value;
+  }
+  return {
+    seq: event.seq,
+    recorded: String(r.recorded),
+    type: auditType(r),
+    outcome: String(r.outcome),
+    ...(r.outcomeDesc ? { outcomeDesc: String(r.outcomeDesc) } : {}),
+    agents: (
+      (r.agent ?? []) as Array<{
+        who?: { identifier?: { value?: string }; display?: string };
+      }>
+    )
+      .map((a) => a.who?.identifier?.value ?? a.who?.display ?? "")
+      .filter(Boolean),
+    entities,
+    source: detailValue(r, "source"),
+    demo: detailValue(r, "demo") === "true",
+    hash: event.hash,
+  };
+}
+
+/** The last `limit` records of a chain, newest first. */
+export async function readRecent(
+  chain: string,
+  limit: number,
+): Promise<ChainedEvent[]> {
+  if (!driver) throw new Error("audit: no Neo4j driver");
+  const session = driver.session({ database: "neo4j" });
+  try {
+    const res = await session.run(
+      `MATCH (e:AuditEvent {chain: $chain})
+       RETURN e.seq AS seq, e.prevHash AS prevHash, e.hash AS hash, e.resource AS resource
+       ORDER BY e.seq DESC LIMIT $limit`,
+      { chain, limit: neo4j.int(limit) },
+    );
+    return res.records.map((r) => ({
+      chain,
+      seq: toNumber(r.get("seq")),
+      prevHash: String(r.get("prevHash")),
+      hash: String(r.get("hash")),
+      resource: JSON.parse(String(r.get("resource"))),
+    }));
+  } finally {
+    await session.close();
+  }
+}
+
+const OUTCOME_TEXT: Record<string, string> = {
+  "0": "success",
+  "4": "refused",
+  "8": "failure",
+};
+
+export interface AuditStats {
+  from: string;
+  to: string;
+  bucketSeconds: number;
+  totals: Array<{ type: string; outcome: string; count: number }>;
+  series: Array<{ time: string; type: string; count: number }>;
+}
+
+/**
+ * Counts a chain's records in [from, to] by kind and outcome, in total and per
+ * time bucket. Counted from the records themselves, so a dashboard shows what
+ * the evidence holds, not what a log pipeline happened to deliver.
+ */
+export async function chainStats(
+  chain: string,
+  fromMs: number,
+  toMs: number,
+  bucketSeconds: number,
+): Promise<AuditStats> {
+  if (!driver) throw new Error("audit: no Neo4j driver");
+  const session = driver.session({ database: "neo4j" });
+  try {
+    const res = await session.run(
+      `MATCH (e:AuditEvent {chain: $chain})
+       WHERE e.recorded >= datetime({epochMillis: $from})
+         AND e.recorded <= datetime({epochMillis: $to})
+       RETURN e.recorded.epochMillis AS at, e.resource AS resource`,
+      { chain, from: neo4j.int(fromMs), to: neo4j.int(toMs) },
+    );
+    const totals = new Map<
+      string,
+      { type: string; outcome: string; count: number }
+    >();
+    const series = new Map<
+      string,
+      { time: string; type: string; count: number }
+    >();
+    const bucketMs = bucketSeconds * 1000;
+    for (const r of res.records) {
+      const resource = JSON.parse(String(r.get("resource")));
+      const type = auditType(resource);
+      const outcome =
+        OUTCOME_TEXT[String(resource.outcome)] ?? String(resource.outcome);
+      const tKey = `${type}|${outcome}`;
+      const total = totals.get(tKey) ?? { type, outcome, count: 0 };
+      total.count += 1;
+      totals.set(tKey, total);
+      const at = toNumber(r.get("at"));
+      const bucket = new Date(
+        Math.floor(at / bucketMs) * bucketMs,
+      ).toISOString();
+      const sKey = `${bucket}|${type}`;
+      const point = series.get(sKey) ?? { time: bucket, type, count: 0 };
+      point.count += 1;
+      series.set(sKey, point);
+    }
+    return {
+      from: new Date(fromMs).toISOString(),
+      to: new Date(toMs).toISOString(),
+      bucketSeconds,
+      totals: [...totals.values()].sort((a, b) => a.type.localeCompare(b.type)),
+      series: [...series.values()].sort((a, b) => a.time.localeCompare(b.time)),
+    };
   } finally {
     await session.close();
   }

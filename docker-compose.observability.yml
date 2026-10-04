@@ -38,8 +38,19 @@ services:
       - "3300:3000" # Grafana; 3000 is the UI
     volumes:
       - lgtm_data:/data
+      # MVHD dashboards and the audit datasource, as code (ADR-045, #418).
+      - ./observability/grafana/provisioning/datasources/mvhd.yaml:/otel-lgtm/grafana/conf/provisioning/datasources/mvhd.yaml:ro
+      - ./observability/grafana/provisioning/dashboards/mvhd.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/mvhd.yaml:ro
+      - ./observability/grafana/dashboards:/otel-lgtm/mvhd-dashboards:ro
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: "false"
+      # Reads the audit trail's JSON endpoints on the neo4j-proxy.
+      GF_PLUGINS_PREINSTALL: yesoreyeram-infinity-datasource@4.1.0
+      # The proxy as this container reaches it: the compose stack publishes 9090.
+      MVHD_AUDIT_URL: ${MVHD_AUDIT_URL:-http://host.docker.internal:9090}
+      MVHD_AUDIT_TOKEN: ${MVHD_AUDIT_TOKEN:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
 volumes:
