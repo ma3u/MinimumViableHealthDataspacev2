@@ -1,5 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import {
+  STATIC_SITE_URL,
+  apiAnswersOffline,
+  isLiveDemoOffline,
+} from "@/lib/offline-mode";
 
 /**
  * Role-based route protection + per-request Content-Security-Policy.
@@ -141,10 +146,42 @@ function isProtected(pathname: string): boolean {
 }
 
 export default async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // API routes are matched only for off-hours mode (ADR-053); online they
+  // pass through untouched, without a CSP, as they always did.
+  if (pathname.startsWith("/api/")) {
+    if (isLiveDemoOffline() && !apiAnswersOffline(pathname)) {
+      return NextResponse.json(
+        {
+          error:
+            "The live demo is offline outside office hours; the static demo is always available",
+          staticSite: `${STATIC_SITE_URL}/`,
+        },
+        { status: 503, headers: { "Retry-After": "3600" } },
+      );
+    }
+    return NextResponse.next();
+  }
+
   const nonce = generateNonce();
   const isDev = process.env.NODE_ENV !== "production";
   const csp = buildCsp(nonce, isDev);
-  const { pathname } = req.nextUrl;
+
+  // Off hours (ADR-053): every backend is stopped, so every page is the
+  // offline notice. A rewrite keeps the visitor's URL, which the notice reads
+  // to link the same page on the static site.
+  if (isLiveDemoOffline() && pathname !== "/offline") {
+    const offHeaders = new Headers(req.headers);
+    offHeaders.set("x-nonce", nonce);
+    offHeaders.set("Content-Security-Policy", csp);
+    const res = NextResponse.rewrite(new URL("/offline", req.url), {
+      request: { headers: offHeaders },
+    });
+    res.headers.set("Content-Security-Policy", csp);
+    res.headers.set("Cache-Control", "no-store");
+    return res;
+  }
 
   // Auth gate for protected routes.
   if (isProtected(pathname)) {
@@ -201,7 +238,7 @@ function withCspResponse(
 }
 
 export const config = {
-  // Run on every route except API routes, Next.js static assets, and
+  // The first pattern runs on every page except Next.js static assets and
   // mock JSON fixtures. CSP is applied to HTML responses; auth checks
   // only fire on the PROTECTED_PATHS list.
   matcher: [
@@ -209,5 +246,8 @@ export const config = {
     // static prototypes, both served as files; like swagger-ui they carry
     // their own scripts, which the nonce CSP would block.
     "/((?!api|_next/static|_next/image|favicon.ico|swagger-ui|presentations|poc|mock|static).*)",
+    // Off-hours mode answers data routes with a 503 (ADR-053); the handler
+    // passes them straight through otherwise.
+    "/api/:path*",
   ],
 };
