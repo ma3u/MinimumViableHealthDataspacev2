@@ -1,0 +1,55 @@
+# ---------------------------------------------------------------------------
+# CodeQL — JavaScript/TypeScript, Python, GitHub Actions
+# ---------------------------------------------------------------------------
+# Advanced setup, replacing the repository's CodeQL default setup. The default
+# setup analysed Swift on every pull request and push: a macOS runner and
+# about 17 minutes each time, on changes that never touched clients/ios, and
+# it only built the Swift package, so the app's own 30 files were never
+# analysed. Swift now has its own path-filtered workflow (codeql-swift.yml)
+# and a local script (clients/ios/Scripts/codeql-swift.sh).
+#
+# These three languages need no build (build-mode: none), take a minute or
+# two, and keep running on everything, as the default setup did.
+# ---------------------------------------------------------------------------
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "27 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [actions, javascript-typescript, python]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+
+      - uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:${{ matrix.language }}

@@ -74,6 +74,23 @@ repos:
         pass_filenames: false
         stages: [pre-push]
 
+  # CodeQL on the iPhone app before a push that changes it. CodeQL sees Swift
+  # only through a clean build, about 15 minutes, so this runs at push (once
+  # for the batch) rather than per commit, and only when the Swift sources,
+  # Package.swift, project.yml or the accepted list change. It skips with a
+  # warning where it cannot run (no macOS, Xcode or codeql: the PR Gate runs
+  # on Linux), and `SKIP=codeql-swift git push` bypasses it once. GitHub runs
+  # the same analysis in codeql-swift.yml.
+  - repo: local
+    hooks:
+      - id: codeql-swift
+        name: CodeQL on the iPhone app (Swift, about 15 min)
+        language: system
+        entry: 'bash -c ''if [ "$(uname)" != Darwin ] || ! command -v xcodebuild >/dev/null 2>&1 || ! command -v codeql >/dev/null 2>&1; then echo "[WARN] codeql-swift skipped: needs macOS, Xcode and brew install --cask codeql"; exit 0; fi; clients/ios/Scripts/codeql-swift.sh'''
+        files: ^clients/ios/(Sources/.*\.swift|Package\.swift|project\.yml|Scripts/codeql-accepted\.txt)$
+        pass_filenames: false
+        stages: [pre-push]
+
   # Secret scanning — gitleaks on staged diff (BSI C5 DEV-08)
   # A finding fails the commit. The entry used to be `gitleaks ... && ... || echo`,
   # so a finding fell through to the echo and the hook passed (2026-10-03).

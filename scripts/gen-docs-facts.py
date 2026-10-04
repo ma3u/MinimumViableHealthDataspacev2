@@ -31,8 +31,8 @@ Usage:
     python3 scripts/gen-docs-facts.py                   # refresh (pre-commit)
     python3 scripts/gen-docs-facts.py --from-git        # rebuild every date
     python3 scripts/gen-docs-facts.py --check [--base origin/main]
-        exit 1 when the file is stale, or when a page changed since BASE
-        without its date changing too
+        exit 1 when the file is stale, or when a page changed since BASE is
+        dated before the newest commit that changed it
 """
 
 import argparse
@@ -277,13 +277,16 @@ def main():
             if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", old_dates.get(page, "")):
                 problems.append(f"no last-updated date for {page}")
         if args.base:
-            changed = set(git("diff", "--name-only", f"{args.base}...HEAD").splitlines())
-            old = git("show", f"{args.base}:{OUT}")
-            base_dates = json.loads(old).get("lastUpdated", {}) if old else {}
+            # A page changed in this branch must carry a date no older than the
+            # newest commit that changed it. Not "the date must move": a page
+            # already dated today has nowhere to move to.
             for page, spec in PAGES.items():
-                if changed & set(spec["sources"]) and base_dates.get(page) == old_dates.get(page):
+                newest = git("log", "-1", "--format=%cd", "--date=short",
+                             f"{args.base}..HEAD", "--", *spec["sources"])
+                if newest and old_dates.get(page, "") < newest:
                     problems.append(
-                        f"{page} changed but its last-updated date did not: run python3 scripts/gen-docs-facts.py"
+                        f"{page} changed on {newest} but is dated {old_dates.get(page)}: "
+                        "run python3 scripts/gen-docs-facts.py"
                     )
         for p in problems:
             print(f"gen-docs-facts: {p}", file=sys.stderr)
