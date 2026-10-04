@@ -12,7 +12,7 @@ on:
       monthly_budget:
         description: "Monthly budget for rg-mvhd-dev, in the billing currency"
         type: string
-        default: "450"
+        default: "1000"
 
 permissions:
   id-token: write
@@ -40,7 +40,11 @@ jobs:
       - name: Apply the cost guards
         env:
           MONTHLY_BUDGET: ${{ inputs.monthly_budget }}
-        run: ./scripts/azure/set-cost-guards.sh "$MONTHLY_BUDGET"
+          # The operator's address, also notified (decided 2026-10-04, #418).
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+        run: |
+          [ -n "$ALERT_EMAIL" ] && echo "::add-mask::$ALERT_EMAIL"
+          ./scripts/azure/set-cost-guards.sh "$MONTHLY_BUDGET"
 
       - name: Show what is in place
         if: always()
