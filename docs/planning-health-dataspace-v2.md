@@ -180,19 +180,17 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [042](ADRs/ADR-042-off-hours-scaledown-current-state.md)                    | Off-hours scale-down, the state that runs today                                                 | 2026-10-02 | Accepted          |
 | [043](ADRs/ADR-043-graph-access-direct-or-through-the-proxy.md)             | UI routes read the graph directly; the proxy serves the data planes                             | 2026-10-02 | Accepted          |
 | [044](ADRs/ADR-044-every-api-route-needs-a-session.md)                      | Every API route needs a session                                                                 | 2026-10-02 | Accepted          |
-| [045](ADRs/ADR-045-observability-and-regulatory-audit-trail.md)             | Cloud-native, vendor-agnostic observability and a tamper-evident audit trail                    | 2026-10-02 | Proposed          |
-| [046](ADRs/ADR-046-vault-keeps-its-state-on-the-flexible-server.md)         | The Azure Vault keeps its state on the Flexible Server                                          | 2026-10-03 | Proposed          |
-| [047](ADRs/ADR-047-vault-stays-up-off-hours.md)                             | Vault stays up off-hours until it keeps its own state                                           | 2026-10-03 | Proposed          |
-| [048](ADRs/ADR-048-testflight-request-mailed-without-a-session.md)          | The TestFlight request is mailed by the hub, without a session                                  | 2026-10-03 | Proposed          |
-| [049](ADRs/ADR-049-klarbefund-connects-by-device-grant.md)                  | Klarbefund connects to a patient's record by a device grant the website starts                  | 2026-10-03 | Proposed          |
+| [045](ADRs/ADR-045-observability-and-regulatory-audit-trail.md)             | Cloud-native, vendor-agnostic observability and a tamper-evident audit trail                    | 2026-10-02 | Accepted          |
+| [046](ADRs/ADR-046-vault-keeps-its-state-on-the-flexible-server.md)         | The Azure Vault keeps its state on the Flexible Server                                          | 2026-10-03 | Accepted          |
+| [047](ADRs/ADR-047-vault-stays-up-off-hours.md)                             | Vault stays up off-hours until it keeps its own state                                           | 2026-10-03 | Accepted          |
+| [048](ADRs/ADR-048-testflight-request-mailed-without-a-session.md)          | The TestFlight request is mailed by the hub, without a session                                  | 2026-10-03 | Accepted          |
+| [049](ADRs/ADR-049-klarbefund-connects-by-device-grant.md)                  | Klarbefund connects to a patient's record by a device grant the website starts                  | 2026-10-03 | Accepted          |
 | [052](ADRs/ADR-052-confidential-spe-on-azure-revisited.md)                  | The confidential secure processing environment, revisited against Azure and the vendors of 2026 | 2026-10-04 | Proposed          |
 | [053](ADRs/ADR-053-everything-stops-off-hours.md)                           | Everything stops off hours, and the UI says so                                                  | 2026-10-04 | Accepted          |
 
 Numbers taken by open work, so a new ADR starts at **056**: 050 (PR #477), 051
 (#475), 054 (`feat/klarbefund-account`, local), 055 (PR #517, #503).
 
-Running on Azure but still **Proposed**, to accept or revise: 045 (#418
-phase A is live), 046 (Vault on the Flexible Server since #460), 047, 048 (the
-TestFlight form is live), 049 (Klarbefund pairing merged in #476).
+ADR-045 to ADR-049 accepted on 2026-10-04.
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.

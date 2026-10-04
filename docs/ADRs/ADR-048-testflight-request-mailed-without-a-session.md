@@ -1,6 +1,6 @@
 # ADR-048: The TestFlight request is mailed by the hub, without a session
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-04, Matthias Buchhorn)
 **Date:** 2026-10-03
 **Relates to:** [ADR-036](ADR-036-operator-secrets-in-key-vault.md), [ADR-018](ADR-018-24x7-workaround-b.md)
 **Supersedes:** the list of anonymous routes in [ADR-044](ADR-044-every-api-route-needs-a-session.md), by adding one route to it
