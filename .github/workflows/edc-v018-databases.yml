@@ -1,0 +1,44 @@
+name: EDC 0.18 databases (ADR-054)
+
+# Creates the five databases the EDC apps use after ADR-054 moves Azure to
+# the build compose and CI run: controlplane_v018, dataplane_v018,
+# dataplane_omop_v018, identityhub_v018, issuerservice_v018. The April
+# databases stay untouched as the rollback.
+#
+# Runs as the CI identity because creating a database on the Flexible Server
+# needs more than the maintainer's Container Apps Contributor role. The work
+# is scripts/azure/create-edc-v018-databases.sh; running it again is a no-op.
+#
+# Manual trigger only. Runbook: docs/knowledge/runbooks/edc-v018-on-azure.md.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-reset"
+  cancel-in-progress: false
+
+jobs:
+  create:
+    name: Create the 0.18 databases
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create the databases
+        run: |
+          ./scripts/azure/create-edc-v018-databases.sh </dev/null
+          echo "**EDC 0.18 databases present** on the Flexible Server (ADR-054)." >> "$GITHUB_STEP_SUMMARY"
