@@ -27,11 +27,9 @@ export STORAGE_SKU="Standard_LRS"
 export SHARE_NEO4J_DATA="neo4j-data"
 export SHARE_NEO4J_LOGS="neo4j-logs"
 export SHARE_VAULT_DATA="vault-data"
-export SHARE_PG_DATA="pg-data"
 export QUOTA_NEO4J_DATA=10
 export QUOTA_NEO4J_LOGS=5
 export QUOTA_VAULT_DATA=2
-export QUOTA_PG_DATA=20
 
 # ── PostgreSQL (Flexible Server, ADR-041) ───────────────────────────────────
 # Every consumer reaches Azure Database for PostgreSQL Flexible Server over TLS.
