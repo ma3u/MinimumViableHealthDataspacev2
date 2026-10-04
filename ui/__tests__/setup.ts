@@ -85,6 +85,16 @@ vi.mock("next-auth/next", () => ({
 }));
 
 // Mock auth-guard — Phase 24 added requireAuth() to all API routes.
+// The contract and transfer audit client writes to the neo4j-proxy. Route
+// tests run without one, so the writes resolve by default; a test that pins
+// the fail-closed behaviour makes recordDspEvent reject, and the client's own
+// test calls vi.unmock("@/lib/dsp-audit") (ADR-045, #418).
+vi.mock("@/lib/dsp-audit", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/dsp-audit")>()),
+  recordDspEvent: vi.fn().mockResolvedValue(undefined),
+  recordDspEventAfter: vi.fn().mockResolvedValue(undefined),
+}));
+
 // Default: returns authenticated EDC_ADMIN session so route tests exercise
 // business logic. Override per-test with vi.mocked(requireAuth).
 vi.mock("@/lib/auth-guard", () => ({

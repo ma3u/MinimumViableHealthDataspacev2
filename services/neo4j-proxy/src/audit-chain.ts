@@ -233,11 +233,38 @@ function toNumber(v: unknown): number {
 export async function appendQueryAudit(
   input: QueryAuditInput,
 ): Promise<ChainedEvent> {
-  if (!driver) throw new Error("audit: no Neo4j driver");
   const resource = buildQueryAuditEvent(input, {
     id: randomUUID(),
     recorded: new Date().toISOString(),
   });
+  return appendAuditEvent(QUERY_CHAIN, resource, {
+    participantId: input.participantId ?? "anonymous",
+    outcome: input.outcome,
+  });
+}
+
+export interface AuditIndex {
+  /** Indexed on the node for the UI and queries; the resource is the record. */
+  participantId: string;
+  outcome: string;
+  /**
+   * A key the same event always carries, such as an EDC event id. An event
+   * whose key the chain already holds is not appended again, so a retried
+   * callback leaves one record, and the existing one is returned.
+   */
+  dedupeKey?: string;
+}
+
+/**
+ * Appends one AuditEvent resource to a chain. Resolves once committed,
+ * rejects otherwise. The chain is serialised on its (:AuditChain) head node.
+ */
+export async function appendAuditEvent(
+  chain: string,
+  resource: Record<string, unknown>,
+  index: AuditIndex,
+): Promise<ChainedEvent> {
+  if (!driver) throw new Error("audit: no Neo4j driver");
   const session = driver.session({ database: "neo4j" });
   try {
     return await session.executeWrite(async (tx) => {
@@ -248,12 +275,30 @@ export async function appendQueryAudit(
            ON CREATE SET c.seq = 0, c.head = $genesis
          SET c.lockedAt = datetime()
          RETURN c.seq AS seq, c.head AS head`,
-        { chain: QUERY_CHAIN, genesis: GENESIS_HASH },
+        { chain, genesis: GENESIS_HASH },
       );
+      if (index.dedupeKey) {
+        const seen = await tx.run(
+          `MATCH (e:AuditEvent {chain: $chain, dedupeKey: $key})
+           RETURN e.seq AS seq, e.prevHash AS prevHash, e.hash AS hash, e.resource AS resource
+           LIMIT 1`,
+          { chain, key: index.dedupeKey },
+        );
+        const prior = seen.records[0];
+        if (prior) {
+          return {
+            chain,
+            seq: toNumber(prior.get("seq")),
+            prevHash: String(prior.get("prevHash")),
+            hash: String(prior.get("hash")),
+            resource: JSON.parse(String(prior.get("resource"))),
+          };
+        }
+      }
       const record = head.records[0];
       const event = chainEvent(
         resource,
-        QUERY_CHAIN,
+        chain,
         toNumber(record.get("seq")) + 1,
         String(record.get("head")),
       );
@@ -262,19 +307,20 @@ export async function appendQueryAudit(
          CREATE (e:AuditEvent {
            id: $id, chain: $chain, seq: $seq, prevHash: $prevHash, hash: $hash,
            recorded: datetime($recorded), participantId: $participantId,
-           outcome: $outcome, resource: $resource
+           outcome: $outcome, resource: $resource, dedupeKey: $dedupeKey
          })
          SET c.seq = $seq, c.head = $hash`,
         {
-          chain: QUERY_CHAIN,
+          chain,
           id: resource.id,
           seq: neo4j.int(event.seq),
           prevHash: event.prevHash,
           hash: event.hash,
           recorded: resource.recorded,
-          participantId: input.participantId ?? "anonymous",
-          outcome: input.outcome,
+          participantId: index.participantId,
+          outcome: index.outcome,
           resource: canonicalJson(resource),
+          dedupeKey: index.dedupeKey ?? null,
         },
       );
       return event;

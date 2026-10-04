@@ -110,6 +110,35 @@ processors:
           - replace_pattern(body, "eyJ[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]+", "[redacted-jwt]")
           - delete_key(attributes, "lvl")
 
+  # Second line of defence for traces: no URL, query string or client address
+  # leaves the collector; http.route (the pattern) stays. The proxy already
+  # strips them (services/neo4j-proxy/src/tracing.ts); the EDC agents do not.
+  transform/scrub-spans:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - delete_matching_keys(attributes, "^(url\\.(full|path|query)|http\\.(url|target|client_ip|user_agent)|client\\.address|net\\.peer\\.ip|network\\.peer\\.(address|port)|user_agent\\.original)$")
+
+  # Tail-based: decided once the whole trace is in. Every error and every slow
+  # trace is kept, and 10 % of the rest (ADR-045 plane 1 decision 3).
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 20000
+    policies:
+      - name: errors
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+      - name: slow
+        type: latency
+        latency:
+          threshold_ms: 1000
+      - name: sample-the-rest
+        type: probabilistic
+        probabilistic:
+          sampling_percentage: 10
+
   batch:
     send_batch_size: 1024
     timeout: 5s
@@ -129,7 +158,7 @@ service:
       exporters: [otlp_http/lgtm]
     traces:
       receivers: [otlp]
-      processors: [memory_limiter, batch]
+      processors: [memory_limiter, transform/scrub-spans, tail_sampling, batch]
       exporters: [otlp_http/lgtm]
     metrics:
       receivers: [otlp]

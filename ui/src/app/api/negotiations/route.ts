@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { DSP_PROTOCOL } from "@/lib/dsp-protocol";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import {
+  auditCallbackAddresses,
+  auditUnavailableResponse,
+  recordDspEvent,
+  recordDspEventAfter,
+} from "@/lib/dsp-audit";
 import { recordDemo, listDemo } from "@/lib/demo-records";
 import { tagRows } from "@/lib/row-provenance";
 import { promises as fs } from "fs";
@@ -288,14 +294,47 @@ export async function POST(req: NextRequest) {
         // (empty arrays fail validation; non-empty ones cause policy mismatch)
         permission: [{ action: "use" }],
       },
+      // Every state the connector moves this negotiation through reaches the
+      // audit trail (ADR-045, #418).
+      ...(auditCallbackAddresses("contract.negotiation").length > 0
+        ? { callbackAddresses: auditCallbackAddresses("contract.negotiation") }
+        : {}),
     };
 
+    // On the audit trail before the connector is asked, or not at all.
+    const audited = {
+      process: "contract-negotiation" as const,
+      participantContext: participantId,
+      consumerId: participantId,
+      counterPartyId: counterPartyId || undefined,
+      providerId: providerDid || undefined,
+      assetId,
+    };
     try {
-      const result = await edcClient.management(
+      await recordDspEvent({
+        ...audited,
+        event: "requested",
+        outcome: "success",
+      });
+    } catch (err) {
+      return auditUnavailableResponse(err);
+    }
+
+    try {
+      const result = await edcClient.management<Record<string, unknown>>(
         `/v5alpha/participants/${participantId}/contractnegotiations`,
         "POST",
         negotiationPayload,
       );
+      await recordDspEventAfter({
+        ...audited,
+        event: "initiated",
+        outcome: "success",
+        processId:
+          result && typeof result["@id"] === "string"
+            ? result["@id"]
+            : undefined,
+      });
       return NextResponse.json(result, { status: 201 });
     } catch (err) {
       // An offer that came from the demo catalogue cannot be negotiated against
@@ -304,7 +343,15 @@ export async function POST(req: NextRequest) {
       // the walkthrough on a 502 the audience cannot act on. A real offer that
       // fails still fails, because that is a genuine fault worth seeing.
       const offer = String(offerId || policyId || "");
-      if (!offer.startsWith("demo-offer:")) throw err;
+      if (!offer.startsWith("demo-offer:")) {
+        await recordDspEventAfter({
+          ...audited,
+          event: "failed",
+          outcome: "failure",
+          reason: err instanceof Error ? err.message : String(err),
+        });
+        throw err;
+      }
 
       const msg = err instanceof Error ? err.message : String(err);
       console.warn("Demo offer negotiated without a connector:", msg);
@@ -339,6 +386,14 @@ export async function POST(req: NextRequest) {
       // Nothing was written to the connector, so this process is the only place
       // the record can live until the next read (lib/demo-records.ts).
       recordDemo("negotiation", participantId, negotiation);
+      await recordDspEventAfter({
+        ...audited,
+        event: "finalized",
+        outcome: "success",
+        processId: negotiation["@id"],
+        agreementId: negotiation.contractAgreementId,
+        demo: true,
+      });
 
       return NextResponse.json(negotiation, { status: 201 });
     }

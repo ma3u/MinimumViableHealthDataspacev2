@@ -46,7 +46,22 @@ export const heavyLimiter = rateLimit({
   },
 });
 
-app.use(generalLimiter);
+/**
+ * The audit endpoint has its own limit: the connector reports every
+ * negotiation and transfer state there, and a callback refused with 429 is an
+ * audit record that may never arrive (ADR-045, #418).
+ */
+export const auditLimiter = rateLimit({
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: parseInt(process.env.RATE_LIMIT_AUDIT_MAX ?? "1200", 10),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Audit rate limit exceeded." },
+});
+
+app.use((req: Request, res: Response, next: NextFunction) =>
+  req.path === "/audit/dsp" ? next() : generalLimiter(req, res, next),
+);
 
 // The audit recorder reports how much left the proxy (Art. 73(1)(e) logs say
 // what was accessed and how much). res.json is wrapped once here so every

@@ -25,7 +25,8 @@ function capture() {
       done();
     },
   });
-  return { log: createLogger(stream), lines };
+  // An explicit level: LOG_LEVEL in the environment must not silence the test.
+  return { log: createLogger(stream, "info"), lines };
 }
 
 function appWith(log: ReturnType<typeof createLogger>) {

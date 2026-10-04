@@ -14,6 +14,7 @@
  */
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomBytes } from "node:crypto";
+import { isSpanContextValid, trace } from "@opentelemetry/api";
 import type { NextFunction, Request, Response } from "express";
 import pino, { type DestinationStream, type Logger } from "pino";
 
@@ -70,10 +71,13 @@ function serializeError(err: unknown) {
   };
 }
 
-export function createLogger(destination?: DestinationStream): Logger {
+export function createLogger(
+  destination?: DestinationStream,
+  level = process.env.LOG_LEVEL ?? "info",
+): Logger {
   return pino(
     {
-      level: process.env.LOG_LEVEL ?? "info",
+      level,
       base: { service: "neo4j-proxy" },
       timestamp: pino.stdTimeFunctions.isoTime,
       formatters: { level: (label) => ({ level: label }) },
@@ -99,7 +103,13 @@ export const logger = createLogger();
 export function requestLogging(log: Logger = logger) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (req.path === "/health") return next();
-    const traceId = traceIdFrom(req.header("traceparent"));
+    // With tracing on (tracing.ts) the server span already continues the
+    // caller's trace; without it, read traceparent here.
+    const span = trace.getActiveSpan()?.spanContext();
+    const traceId =
+      span && isSpanContextValid(span)
+        ? span.traceId
+        : traceIdFrom(req.header("traceparent"));
     const started = process.hrtime.bigint();
     res.on("finish", () => {
       const route = req.route?.path
