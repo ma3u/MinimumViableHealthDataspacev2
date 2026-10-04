@@ -42,6 +42,11 @@ runner for about 17 minutes. The script runs the same suite with the same
 build here and exits 1 on any finding not listed, with its reason, in
 `Scripts/codeql-accepted.txt`. It needs `brew install --cask codeql`.
 
+The `codeql-swift` pre-push hook runs it for you when a push changes the Swift
+sources, `Package.swift`, `project.yml` or the accepted list: about 15 minutes,
+once per push. `SKIP=codeql-swift git push` skips it once; without CodeQL or
+Xcode it warns and passes.
+
 ## Two test suites, and what each is for
 
 ```bash
