@@ -133,12 +133,26 @@ on-call person sees is the loop, not the bill.
 2. **EDC services:** finish #318 (managed Postgres, ADR-041) so the databases exist, and
    set connection retry with backoff so a missing database produces one error per
    minute, not per second.
-3. **EDC console monitor:** confirm the level is `INFO` and disable ANSI colour codes
-   (seen as `[0;37mDEBUG` in `mvhd-controlplane` output). Exact setting to be verified
-   against the EDC version in use (ADR-029 pins it).
-4. **Crash-loop alert:** restart count over 3 in 15 minutes on any app raises one alert,
-   in `scripts/azure/07-observability.sh`.
-5. **Replace the 1 GB cap with a budget** on `rg-mvhd-dev`, alerts at 50/80/100 %.
+3. **EDC console monitor:** the cause is in the images. Every JAD image starts its
+   runtime with `--log-level=debug` in its own start command, and the console monitor
+   writes ANSI colour unless given `--no-color`. The images also start the
+   OpenTelemetry Java agent, which with no endpoint logs `Failed to export` errors
+   against `localhost:4318`. `scripts/azure/quiet-edc-logs.sh` reads each app's image
+   start command, swaps in `--log-level=info --no-color`, sets it as the container's
+   args (or command, for the issuer), and sets `OTEL_JAVAAGENT_ENABLED=false` until
+   Plane 1 has a collector. Tested on the ghcr images: no DEBUG, no colour codes, no
+   exporter errors. `04-edc-services.sh` runs it after creating the apps.
+   **Scripted 2026-10-04; apply in office hours** (`--dry-run` first): each app
+   restarts once.
+4. **Crash-loop alert:** more than 3 restarts in 15 minutes on any app, one alert per
+   app, mailed through action group `mvhd-alerts`.
+5. **Replace the 1 GB cap with a budget** on `rg-mvhd-dev`, mails at 50, 80 and 100 %
+   of actual cost and 100 % forecast; the cap is removed only once the budget exists.
+   Items 4 and 5: `ALERT_EMAIL=<address> BUDGET_EUR=<amount>
+scripts/azure/configure-alerts-and-budget.sh` (`--dry-run` first). The address is
+   given at run time, not committed. **Scripted 2026-10-04; not applied yet.**
+   The older replica alerts in `07-observability.sh` have no action group and would
+   fire nightly under ADR-053; they are left as they are until Plane 1 replaces them.
 6. **Re-measure after 7 days** with the queries in section 1. Expected: under 200 MB/day.
 
 ### Phase B: structured logs and the collector (ADR-045 plane 1)

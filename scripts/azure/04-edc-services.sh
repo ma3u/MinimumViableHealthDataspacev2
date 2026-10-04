@@ -278,6 +278,11 @@ az containerapp create \
   -o none
 ok "Neo4j Proxy"
 
+# ── EDC logs at INFO, no colour codes, OTel agent off (#418, ADR-045) ───────
+# The images start with --log-level=debug and the agent exports to nothing.
+log "EDC logs to INFO without colour codes..."
+"${SCRIPT_DIR}/quiet-edc-logs.sh" || warn "Some EDC apps kept their start command, see above"
+
 # ── Summary ──────────────────────────────────────────────────────────────────
 log "EDC-V services complete"
 echo "  NATS:         ${NATS_APP}"
