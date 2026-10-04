@@ -480,6 +480,17 @@ function filterGroup(
   return { ...group, links: visibleLinks };
 }
 
+/** The menu a user with these roles sees. The user guide renders its
+ *  role matrix from this, so the guide and the menu cannot disagree. */
+export function visibleNavGroups(
+  userRoles: string[],
+  isAuthenticated: boolean,
+): NavGroup[] {
+  return ALL_NAV_GROUPS.map((g) =>
+    filterGroup(g, userRoles, isAuthenticated),
+  ).filter((g): g is NavGroup => g !== null);
+}
+
 // ── NavDropdown ───────────────────────────────────────────────────────────────
 
 function NavDropdown({
@@ -598,9 +609,7 @@ export default function Navigation() {
       : baseRoles;
 
   // Filter groups/items for the current user
-  const visibleGroups = ALL_NAV_GROUPS.map((g) =>
-    filterGroup(g, effectiveRoles, isAuthenticated),
-  ).filter((g): g is NavGroup => g !== null);
+  const visibleGroups = visibleNavGroups(effectiveRoles, isAuthenticated);
 
   // Close mobile nav on route change
   const pathname = usePathname();

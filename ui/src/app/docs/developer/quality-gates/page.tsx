@@ -15,131 +15,49 @@ import {
   RefreshCw,
 } from "lucide-react";
 import MermaidDiagram from "@/components/MermaidDiagram";
+import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
+import facts from "@/app/docs/docs-facts.json";
 
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
 /* ------------------------------------------------------------------ */
 
 const pipelineDiagram = `graph LR
-  subgraph "Stage 1 — Pre-commit"
+  subgraph "Stage 1 — Pre-commit (${facts.preCommitHooks.length} hooks)"
     PC1["Prettier<br/>Auto-format"]
     PC2["TypeScript<br/>tsc --noEmit"]
     PC3["ESLint<br/>max 55 warnings"]
-    PC4["Hadolint<br/>Dockerfiles"]
-    PC5["ShellCheck<br/>severity=error"]
+    PC4["Semgrep<br/>Cypher injection rule"]
+    PC5["ShellCheck + Hadolint"]
     PC6["Gitleaks<br/>Secret scan"]
   end
 
   subgraph "Stage 2 — Pre-push"
-    PP1["Vitest<br/>--bail 1"]
-    PP2["npm audit<br/>HIGH+CRITICAL"]
+    PP1["Vitest<br/>--bail"]
+    PP2["npm audit<br/>HIGH+ with time-boxed exceptions"]
   end
 
-  subgraph "Stage 3 — CI Pipeline"
-    CI1["Unit Tests<br/>1,613 tests"]
-    CI2["Lint Check"]
-    CI3["Secret Scan<br/>gitleaks"]
-    CI4["Dep Audit<br/>npm audit"]
-    CI5["Trivy<br/>vuln + misconfig"]
-    CI6["Kubescape<br/>NSA + CIS"]
-    CI7["E2E Tests<br/>778 tests"]
-    CI8["WCAG 2.2 AA<br/>93 checks"]
+  subgraph "Stage 3 — Pull request"
+    PR1["PR Gate<br/>hooks on the diff, API spec drift,<br/>Bruno coverage, knip"]
+    CI1["Unit tests<br/>Vitest, UI + proxy"]
+    CI5["Trivy + Kubescape"]
+    CI6["CodeQL + security-scan<br/>source and image CVEs"]
+    CI7["E2E<br/>Playwright journeys"]
+    CI8["WCAG 2.2 AA<br/>axe-core"]
   end
 
-  subgraph "Stage 4 — Compliance"
-    CO1["DSP 2025-1<br/>33 tests"]
-    CO2["DCP v1.0<br/>22 tests"]
-    CO3["EHDS Domain<br/>25 tests"]
+  subgraph "Stage 4 — Compliance (floors)"
+    CO1["DSP 2025-1 TCK<br/>≥ ${facts.complianceFloors["dsp-tck-results"].min_passed} passed"]
+    CO2["DCP v1.0<br/>≥ ${facts.complianceFloors["dcp-compliance-results"].min_passed} passed"]
+    CO3["EHDS domain<br/>≥ ${facts.complianceFloors["ehds-compliance-results"].min_passed} passed"]
   end
 
   PC1 --> PC2 --> PC3
   PC4 --> PC5 --> PC6
   PC3 --> PP1 --> PP2
-  PP2 --> CI1 & CI2 & CI3 & CI4 & CI5 & CI6
+  PP2 --> PR1 & CI1 & CI5 & CI6
   CI1 --> CI7 --> CI8
   CI1 --> CO1 & CO2 & CO3`;
-
-interface GateRow {
-  hook: string;
-  tool: string;
-  severity: string;
-  blocking: boolean;
-}
-
-const preCommitGates: GateRow[] = [
-  {
-    hook: "Trailing whitespace",
-    tool: "pre-commit",
-    severity: "Auto-fix",
-    blocking: false,
-  },
-  {
-    hook: "End-of-file fixer",
-    tool: "pre-commit",
-    severity: "Auto-fix",
-    blocking: false,
-  },
-  {
-    hook: "YAML / JSON syntax",
-    tool: "pre-commit",
-    severity: "Error",
-    blocking: true,
-  },
-  {
-    hook: "Large file check (> 5 MB)",
-    tool: "pre-commit",
-    severity: "Error",
-    blocking: true,
-  },
-  {
-    hook: "Merge conflict markers",
-    tool: "pre-commit",
-    severity: "Error",
-    blocking: true,
-  },
-  {
-    hook: "Private key detection",
-    tool: "pre-commit",
-    severity: "Error",
-    blocking: true,
-  },
-  {
-    hook: "Dockerfile linting",
-    tool: "Hadolint v2.14",
-    severity: "Error",
-    blocking: true,
-  },
-  {
-    hook: "Shell script linting",
-    tool: "ShellCheck v0.11",
-    severity: "Error",
-    blocking: true,
-  },
-  {
-    hook: "Code formatting",
-    tool: "Prettier v3.1",
-    severity: "Auto-fix",
-    blocking: false,
-  },
-  {
-    hook: "TypeScript type-check",
-    tool: "tsc --noEmit",
-    severity: "Error",
-    blocking: true,
-  },
-  {
-    hook: "ESLint (max 55 warnings)",
-    tool: "Next.js lint",
-    severity: "Error",
-    blocking: true,
-  },
-  {
-    hook: "Secret scan (staged diff)",
-    tool: "Gitleaks",
-    severity: "Error",
-    blocking: true,
-  },
-];
 
 const CI_WORKFLOW_URL =
   "https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml";
@@ -150,16 +68,37 @@ const PAGES_WORKFLOW_URL =
 
 const ciGates = [
   {
+    job: "PR Gate",
+    tests: "—",
+    tool: "pre-commit on the diff, API spec drift, Bruno coverage, knip, gitleaks",
+    blocking: true,
+    standard: "BSI C5 DEV-02",
+  },
+  {
+    job: "CodeQL",
+    tests: "—",
+    tool: "GitHub code scanning, default setup",
+    blocking: false,
+    standard: "OWASP Top 10",
+  },
+  {
+    job: "Security scan",
+    tests: "—",
+    tool: "Source SBOM, image and deployed-image CVEs (security-scan.yml)",
+    blocking: true,
+    standard: "EU CRA Art. 13",
+  },
+  {
     job: "UI Tests (Vitest)",
-    tests: "1,613",
-    tool: "Vitest 4 + v8 coverage",
+    tests: "—",
+    tool: `Vitest ${facts.toolVersions.vitest} + v8 coverage`,
     blocking: true,
     standard: "BSI C5 DEV-03",
   },
   {
     job: "Neo4j Proxy Tests",
-    tests: "10",
-    tool: "Vitest 4",
+    tests: "—",
+    tool: "Vitest",
     blocking: true,
     standard: "BSI C5 DEV-03",
   },
@@ -173,7 +112,7 @@ const ciGates = [
   {
     job: "Secret Scan",
     tests: "—",
-    tool: "Gitleaks v8.27.2",
+    tool: `Gitleaks v${facts.toolVersions.gitleaks}`,
     blocking: true,
     standard: "BSI C5 DEV-08",
   },
@@ -187,7 +126,7 @@ const ciGates = [
   {
     job: "Trivy Scan",
     tests: "—",
-    tool: "Trivy v0.69.3",
+    tool: `Trivy v${facts.toolVersions.trivy}`,
     blocking: false,
     standard: "OWASP A06",
   },
@@ -200,21 +139,21 @@ const ciGates = [
   },
   {
     job: "E2E Tests",
-    tests: "778",
-    tool: "Playwright v1.58",
+    tests: "—",
+    tool: `Playwright v${facts.toolVersions.playwright}`,
     blocking: false,
     standard: "—",
   },
   {
     job: "WCAG 2.2 AA Audit",
-    tests: "93",
+    tests: "—",
     tool: "axe-core/playwright",
     blocking: true,
     standard: "EN 301 549",
   },
   {
     job: "Security Pentest",
-    tests: "40+",
+    tests: "—",
     tool: "OWASP/BSI patterns",
     blocking: false,
     standard: "OWASP Top 10",
@@ -242,36 +181,29 @@ const ciGates = [
   },
 ];
 
-const coverageData = [
-  { metric: "Statements", value: "93.78%", trend: "+793%" },
-  { metric: "Branches", value: "81.65%", trend: "+1,147%" },
-  { metric: "Functions", value: "89.57%", trend: "+1,162%" },
-  { metric: "Lines", value: "94.73%", trend: "+826%" },
-];
+const coverageData = Object.entries(facts.coverageThresholds).map(
+  ([metric, value]) => ({
+    metric: metric[0].toUpperCase() + metric.slice(1),
+    value: `≥ ${value}%`,
+  }),
+);
 
-const complianceSuites = [
-  {
-    suite: "DSP 2025-1 TCK",
-    tests: 33,
-    passed: 28,
-    rate: "84.8%",
-    protocol: "Dataspace Protocol",
-  },
-  {
-    suite: "DCP v1.0",
-    tests: 22,
-    passed: 20,
-    rate: "90.9%",
-    protocol: "Decentralised Claims",
-  },
-  {
-    suite: "EHDS Domain",
-    tests: 25,
-    passed: 16,
-    rate: "64.0%",
-    protocol: "EHDS Art. 3–51",
-  },
-];
+const SUITE_NAMES: Record<string, [string, string]> = {
+  "dsp-tck-results": ["DSP 2025-1 TCK", "Dataspace Protocol"],
+  "dcp-compliance-results": ["DCP v1.0", "Decentralised Claims"],
+  "ehds-compliance-results": ["EHDS Domain", "EHDS Art. 3–51"],
+  "bruno-api-results": ["API collection (CI)", "Bruno, persona folders"],
+  "bruno-api-azure-results": ["API collection (Azure)", "Bruno, ehds.mabu.red"],
+};
+
+const complianceSuites = Object.entries(facts.complianceFloors).map(
+  ([key, floor]) => ({
+    suite: SUITE_NAMES[key]?.[0] ?? key,
+    protocol: SUITE_NAMES[key]?.[1] ?? "",
+    minPassed: floor.min_passed,
+    maxFailed: floor.max_failed,
+  }),
+);
 
 interface FutureGate {
   priority: number;
@@ -288,11 +220,10 @@ const futureGates: FutureGate[] = [
     priority: 1,
     title: "Enforce Coverage Thresholds",
     icon: FlaskConical,
-    description:
-      "Minimum coverage thresholds in vitest.config.ts: 85% statements, 70% branches, 80% functions, 85% lines. Vitest fails if coverage drops below.",
+    description: `Minimum coverage thresholds in vitest.config.ts: ${facts.coverageThresholds.statements}% statements, ${facts.coverageThresholds.branches}% branches, ${facts.coverageThresholds.functions}% functions, ${facts.coverageThresholds.lines}% lines. Vitest fails if coverage drops below.`,
     standard: "BSI C5 DEV-03",
     rationale:
-      "Current coverage (93%+ statements) is well above these thresholds. Enforcement prevents silent regression.",
+      "Enforcement prevents silent regression; raise a floor whenever coverage rises.",
     effort: "Done — vitest.config.ts",
   },
   {
@@ -303,7 +234,7 @@ const futureGates: FutureGate[] = [
       "Add Stryker Mutator to measure test effectiveness. Target mutation score > 60%.",
     standard: "OWASP Testing Guide v4.2",
     rationale:
-      "94% line coverage does not guarantee tests catch bugs. Mutation testing verifies tests detect real defects.",
+      "Line coverage does not guarantee tests catch bugs. Mutation testing verifies tests detect real defects.",
     effort: "Medium — new tool + CI job",
   },
   {
@@ -321,12 +252,11 @@ const futureGates: FutureGate[] = [
     priority: 4,
     title: "API Contract Testing",
     icon: FileCheck,
-    description:
-      "Add OpenAPI schema validation for all 36 API routes using swagger-parser or Prism.",
+    description: `scripts/check-api-spec-drift.py already blocks any new route missing from openapi.yaml (${facts.openapi.operations} operations documented). Next: validate response shapes against the spec with swagger-parser or Prism.`,
     standard: "DSP 2025-1 §4.2",
     rationale:
       "No formal schema enforces response shapes. Contract tests prevent frontend/backend drift.",
-    effort: "Medium — schemas + validation",
+    effort: "Partly done — spec drift ratchet in the PR Gate",
   },
   {
     priority: 5,
@@ -447,6 +377,7 @@ export default function QualityGatesPage() {
         <ShieldCheck size={28} className="text-(--accent)" />
         <h1 className="text-3xl font-bold">Quality Gates</h1>
       </div>
+      <DocsLastUpdated page="/docs/developer/quality-gates" />
       <p className="text-(--text-secondary) mb-8">
         Every check enforced from developer workstation to production deployment
         — aligned with BSI C5, OWASP Top 10, EHDS regulation, and WCAG 2.2 AA.
@@ -492,9 +423,12 @@ export default function QualityGatesPage() {
           Stage 1 — Pre-commit Hooks
         </h2>
         <p className="text-sm text-(--text-secondary) mb-4">
-          Configured in{" "}
-          <code className="text-(--accent)">.pre-commit-config.yaml</code>. Run
-          automatically before every <code>git commit</code>.
+          The {facts.preCommitHooks.length} hooks configured in{" "}
+          <code className="text-(--accent)">.pre-commit-config.yaml</code>, in
+          the order they run. They run before every <code>git commit</code>, and
+          the PR Gate runs them again on the pull request&apos;s diff. Hooks
+          that rewrite a file (Prettier, end-of-file) fail the commit; stage the
+          file again and commit.
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-sm border border-(--border) rounded-lg">
@@ -504,25 +438,19 @@ export default function QualityGatesPage() {
                   Hook
                 </th>
                 <th className="px-3 py-2 text-left text-(--text-primary)">
-                  Tool
+                  Source
                 </th>
                 <th className="px-3 py-2 text-left text-(--text-primary)">
-                  Severity
-                </th>
-                <th className="px-3 py-2 text-left text-(--text-primary)">
-                  Gate
+                  Stage
                 </th>
               </tr>
             </thead>
             <tbody className="text-(--text-secondary)">
-              {preCommitGates.map((g) => (
-                <tr key={g.hook} className="border-t border-(--border)">
-                  <td className="px-3 py-2 text-xs">{g.hook}</td>
-                  <td className="px-3 py-2 text-xs font-mono">{g.tool}</td>
-                  <td className="px-3 py-2 text-xs">{g.severity}</td>
-                  <td className="px-3 py-2">
-                    <Badge blocking={g.blocking} />
-                  </td>
+              {facts.preCommitHooks.map((h) => (
+                <tr key={h.id} className="border-t border-(--border)">
+                  <td className="px-3 py-2 text-xs">{h.name}</td>
+                  <td className="px-3 py-2 text-xs font-mono">{h.source}</td>
+                  <td className="px-3 py-2 text-xs">{h.stage}</td>
                 </tr>
               ))}
             </tbody>
@@ -572,7 +500,7 @@ export default function QualityGatesPage() {
           >
             .github/workflows/test.yml
           </a>{" "}
-          — 13 jobs on every push.{" "}
+          — {facts.workflowJobs["test.yml"].length} jobs on every push.{" "}
           <a
             href={CI_WORKFLOW_URL}
             target="_blank"
@@ -666,7 +594,10 @@ export default function QualityGatesPage() {
           Stage 4 — Protocol Compliance
         </h2>
         <p className="text-sm text-(--text-secondary) mb-4">
-          Weekly + on push to main. Workflow:{" "}
+          Weekly and on pushes to main. Each suite must stay at or above the
+          floor recorded in <code>scripts/compliance-baseline.json</code>; a
+          floor is raised when a suite improves and never lowered without a
+          reason. Workflow:{" "}
           <a
             href={COMPLIANCE_WORKFLOW_URL}
             target="_blank"
@@ -696,10 +627,10 @@ export default function QualityGatesPage() {
               </p>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-bold text-(--text-primary)">
-                  {s.rate}
+                  ≥ {s.minPassed}
                 </span>
                 <span className="text-xs text-(--text-secondary)">
-                  {s.passed}/{s.tests} passed
+                  passed, at most {s.maxFailed} failed
                 </span>
               </div>
             </div>
@@ -710,7 +641,8 @@ export default function QualityGatesPage() {
             Infrastructure Requirements
           </h4>
           <p className="text-xs text-(--text-secondary) mb-2">
-            Protocol compliance tests require the full JAD stack (19 services, 8
+            Protocol compliance tests require the full JAD stack (
+            {facts.composeServices["docker-compose.jad.yml"].length} services, 8
             GB RAM). In CI, the workflow starts JAD infrastructure with graceful
             fallback — tests produce results only when the controlplane is
             healthy.
@@ -727,8 +659,13 @@ export default function QualityGatesPage() {
       {/* Coverage */}
       <section className="mb-12">
         <h2 className="text-2xl font-semibold mb-4" id="coverage">
-          Current Coverage
+          Coverage Floors
         </h2>
+        <p className="text-sm text-(--text-secondary) mb-4">
+          Enforced by <code>ui/vitest.config.ts</code>: the UI suite fails when
+          coverage drops below these. The measured numbers are in the published
+          test report.
+        </p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           {coverageData.map((c) => (
             <div
@@ -739,9 +676,6 @@ export default function QualityGatesPage() {
                 {c.value}
               </div>
               <div className="text-xs text-(--text-secondary)">{c.metric}</div>
-              <div className="text-[10px] text-green-700 dark:text-green-400 mt-1">
-                {c.trend} from baseline
-              </div>
             </div>
           ))}
         </div>
@@ -750,18 +684,26 @@ export default function QualityGatesPage() {
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-xl font-bold text-(--text-primary)">
-                1,613
+                Vitest
               </div>
-              <div className="text-xs text-(--text-secondary)">Unit Tests</div>
-            </div>
-            <div>
-              <div className="text-xl font-bold text-(--text-primary)">778</div>
-              <div className="text-xs text-(--text-secondary)">E2E Tests</div>
-            </div>
-            <div>
-              <div className="text-xl font-bold text-(--text-primary)">80</div>
               <div className="text-xs text-(--text-secondary)">
-                Compliance Tests
+                Unit tests, UI and Neo4j proxy
+              </div>
+            </div>
+            <div>
+              <div className="text-xl font-bold text-(--text-primary)">
+                Playwright
+              </div>
+              <div className="text-xs text-(--text-secondary)">
+                E2E journeys, incl. WCAG 2.2 AA
+              </div>
+            </div>
+            <div>
+              <div className="text-xl font-bold text-(--text-primary)">
+                {Object.keys(facts.complianceFloors).length}
+              </div>
+              <div className="text-xs text-(--text-secondary)">
+                Compliance suites with a floor
               </div>
             </div>
           </div>

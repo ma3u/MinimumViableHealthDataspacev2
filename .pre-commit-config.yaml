@@ -154,6 +154,22 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
+  # The /docs pages read their facts (routes, hooks, services, ADRs, test
+  # counts) and each page's last-updated date from docs-facts.json, derived
+  # from the code. This refreshes it; when it changes the file the commit
+  # fails, like Prettier: stage it and commit again. The PR Gate runs
+  # --check, which also refuses a docs page changed without its date.
+  - repo: local
+    hooks:
+      - id: docs-facts
+        name: Docs facts and last-updated dates
+        language: python
+        additional_dependencies: [pyyaml]
+        entry: python3 scripts/gen-docs-facts.py
+        files: ^(ui/src/app/.*(page|route)\.tsx?|ui/src/app/docs/.*|ui/src/components/Navigation\.tsx|ui/public/openapi\.yaml|ui/__tests__/.*|ui/vitest\.config\.ts|ui/package\.json|services/neo4j-proxy/.*\.test\.ts|\.pre-commit-config\.yaml|docker-compose(\.jad)?\.yml|jad/init-postgres\.sql|docs/ADRs/ADR-.*\.md|scripts/compliance-baseline\.json|scripts/gen-docs-facts\.py|\.github/workflows/(test|compliance|security-scan|pr-gate|deploy-azure)\.yml)$
+        pass_filenames: false
+        stages: [pre-commit]
+
   # Bruno collection vs implemented routes (#349, ADR-032). Ratcheted against
   # docs/bruno-coverage-allowlist.txt, and it also refuses a request that
   # carries neither an assert nor a test (ADR-031).

@@ -79,6 +79,14 @@ jobs:
           python -m pip install --quiet pyyaml
           python3 scripts/check-api-spec-drift.py
 
+      # The /docs pages show facts derived from the code and a last-updated
+      # date per page (scripts/gen-docs-facts.py). Stale facts, or a docs page
+      # changed in this PR without its date moving, fail here.
+      - name: Docs facts are current
+        run: |
+          set -euo pipefail
+          python3 scripts/gen-docs-facts.py --check --base "origin/${{ github.base_ref || 'main' }}"
+
       # The persona-organised API collection must cover every route and every
       # request must be able to fail (ADR-032, ADR-031).
       - name: API collection covers every route
