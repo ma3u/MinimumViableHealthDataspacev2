@@ -10,6 +10,7 @@ import {
   checkReIdentification,
 } from "../nlq/engine.js";
 import { appendQueryAudit, auditUnavailable } from "../audit-chain.js";
+import { logger } from "../logger.js";
 
 /** A refused federated query is recorded before the refusal goes out. */
 async function auditFederatedRefusal(
@@ -34,7 +35,7 @@ async function auditFederatedRefusal(
       },
     });
   } catch (err) {
-    console.error("[neo4j-proxy] audit of a refused query failed:", err);
+    logger.error({ err }, "audit of a refused query failed");
   }
 }
 

@@ -1,6 +1,7 @@
 import { type Request, type Response } from "express";
 import neo4j from "neo4j-driver";
 import { getSession } from "./db.js";
+import { logger } from "./logger.js";
 
 // ---- Audit Logging --------------------------------------------------------
 
@@ -134,7 +135,7 @@ export async function logTransferEvent(
       },
     );
   } catch (err) {
-    console.error("[neo4j-proxy] Audit log failed:", err);
+    logger.error({ err }, "Audit log failed");
   } finally {
     await session.close();
   }

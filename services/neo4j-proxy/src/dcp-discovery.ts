@@ -1,5 +1,6 @@
 import neo4j from "neo4j-driver";
 import { driver } from "./db.js";
+import { logger } from "./logger.js";
 
 // ---- Startup ---------------------------------------------------------------
 
@@ -61,28 +62,20 @@ export async function dcpDiscoveryTick(): Promise<number> {
 
 export function startDcpDiscoveryLoop(): void {
   if (!DCP_DISCOVERY_URL) {
-    console.log(
-      "[neo4j-proxy] DCP discovery disabled (set DCP_DISCOVERY_URL to enable)",
-    );
+    logger.info("DCP discovery disabled (set DCP_DISCOVERY_URL to enable)");
     return;
   }
   const tick = () =>
     dcpDiscoveryTick()
       .then((n) => {
-        if (n > 0)
-          console.log(
-            `[neo4j-proxy] DCP discovery: upserted ${n} participants`,
-          );
+        if (n > 0) logger.info({ upserted: n }, "DCP discovery tick");
       })
-      .catch((err) =>
-        console.warn("[neo4j-proxy] DCP discovery tick failed:", err.message),
-      );
+      .catch((err) => logger.warn({ err }, "DCP discovery tick failed"));
   tick();
   const timer = setInterval(tick, DCP_DISCOVERY_INTERVAL_MS);
   timer.unref();
-  console.log(
-    `[neo4j-proxy] DCP discovery loop every ${
-      DCP_DISCOVERY_INTERVAL_MS / 1000
-    }s → ${DCP_DISCOVERY_URL}`,
+  logger.info(
+    { interval_s: DCP_DISCOVERY_INTERVAL_MS / 1000 },
+    "DCP discovery loop started",
   );
 }

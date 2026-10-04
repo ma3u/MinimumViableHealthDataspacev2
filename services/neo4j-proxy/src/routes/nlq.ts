@@ -30,6 +30,7 @@ import {
   matchTemplate,
   resolveAdverseEventContext,
 } from "../nlq/engine.js";
+import { logger } from "../logger.js";
 
 /**
  * A refused query is recorded too, before the refusal goes out. The refusal
@@ -50,7 +51,7 @@ async function auditRefusal(r: {
       outcome: "refused",
     });
   } catch (err) {
-    console.error("[neo4j-proxy] audit of a refused query failed:", err);
+    logger.error({ err }, "audit of a refused query failed");
   }
 }
 
@@ -422,7 +423,7 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
   } catch (err: any) {
     // Return structured NLQ error (not generic 500) so the UI can display it
     const errMsg = err?.message ?? String(err);
-    console.error("[neo4j-proxy] NLQ execution error:", errMsg);
+    logger.error({ err, method }, "NLQ execution failed");
     res.status(200).json({
       question: req.body?.question ?? "",
       cypher: cypher ?? "",

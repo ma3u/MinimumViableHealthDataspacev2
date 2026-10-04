@@ -1,6 +1,7 @@
 import { type Request, type Response } from "express";
 import pg from "pg";
 import { app } from "../app.js";
+import { logger } from "../logger.js";
 
 // ---- Persistent Task Management (Phase 13) ---------------------------------
 
@@ -100,7 +101,7 @@ app.post("/tasks/sync", async (req: Request, res: Response) => {
 
     res.json({ upserted });
   } catch (err) {
-    console.error("[tasks/sync] Error:", err);
+    logger.error({ err }, "tasks sync failed");
     res.status(500).json({ error: "Failed to sync tasks" });
   }
 });
@@ -159,7 +160,7 @@ app.get("/tasks", async (req: Request, res: Response) => {
       },
     });
   } catch (err) {
-    console.error("[tasks] Error:", err);
+    logger.error({ err }, "tasks query failed");
     res.status(500).json({
       error: "Failed to retrieve tasks",
       tasks: [],

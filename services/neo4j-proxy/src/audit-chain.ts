@@ -2,6 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import type { Response } from "express";
 import neo4j from "neo4j-driver";
 import { driver } from "./db.js";
+import { logger } from "./logger.js";
 
 // ---------------------------------------------------------------------------
 // Tamper-evident query audit (ADR-045, plane 2; #418)
@@ -308,7 +309,7 @@ export async function readChain(chain = QUERY_CHAIN): Promise<ChainedEvent[]> {
 
 /** The answer when the record could not be written: no data, a 503. */
 export function auditUnavailable(res: Response, err: unknown): void {
-  console.error("[neo4j-proxy] audit write failed, query not answered:", err);
+  logger.error({ err }, "audit write failed, query not answered");
   res.status(503).json({
     error:
       "The query was not answered: its audit record could not be written. Try again; every query must be on the audit trail (ADR-045).",

@@ -4,12 +4,15 @@ import express, {
   type NextFunction,
 } from "express";
 import rateLimit from "express-rate-limit";
+import { requestLogging } from "./logger.js";
 
 // ---------------------------------------------------------------------------
 // Express app
 // ---------------------------------------------------------------------------
 
 export const app = express();
+// First, so every handler runs inside the request's trace context (#418).
+app.use(requestLogging());
 app.use(express.json());
 
 // ---------------------------------------------------------------------------

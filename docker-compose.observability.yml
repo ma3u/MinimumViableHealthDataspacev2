@@ -1,0 +1,46 @@
+# Local observability: OpenTelemetry Collector + Grafana LGTM (ADR-045 plane 1, #418).
+#
+#   docker compose -f docker-compose.observability.yml up -d
+#   open http://localhost:3300          (Grafana, admin/admin)
+#
+# Runs beside any of the other compose files: the collector tails every
+# container on this Docker host through the socket, so nothing in the app
+# stack changes. Services that speak OTLP send to localhost:4317 / 4318.
+#
+# grafana/otel-lgtm is Loki, Tempo, Prometheus and Grafana in one container,
+# which is what ADR-045 plans for Azure as well (one app, monolithic mode).
+# Its data is in a volume here; on Azure it goes to a bucket.
+name: mvhd-observability
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.161.0
+    container_name: mvhd-otel-collector
+    command: ["--config=/etc/otelcol/config.yaml"]
+    # Root, to read the Docker socket and the containers' json-file logs.
+    user: "0:0"
+    volumes:
+      - ./observability/otel-collector.yaml:/etc/otelcol/config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    ports:
+      - "4317:4317" # OTLP gRPC
+      - "4318:4318" # OTLP HTTP
+      - "13133:13133" # health
+    depends_on:
+      - lgtm
+    restart: unless-stopped
+
+  lgtm:
+    image: grafana/otel-lgtm:0.35.0
+    container_name: mvhd-lgtm
+    ports:
+      - "3300:3000" # Grafana; 3000 is the UI
+    volumes:
+      - lgtm_data:/data
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    restart: unless-stopped
+
+volumes:
+  lgtm_data:
