@@ -3,19 +3,27 @@
 import MermaidDiagram from "@/components/MermaidDiagram";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
+import facts from "@/app/docs/docs-facts.json";
+
+/** Services in docker-compose.yml + docker-compose.jad.yml, profiles included. */
+const COMPOSE_SERVICES = Object.values(facts.composeServices).flat().length;
 
 const GITHUB_REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
+const STATIC_SITE = "https://ma3u.github.io/MinimumViableHealthDataspacev2";
 
 const architectureOverview = `graph TB
   subgraph "Layer 1 — DSP Marketplace"
-    MP[DataspaceConnector<br/>EDC-V + DCore]
-    CAT[FederatedCatalog<br/>DSP Discovery]
+    PART[Participant]
+    DP[DataProduct]
+    POL[OdrlPolicy]
+    HDAB[HDABApproval]
   end
 
   subgraph "Layer 2 — HealthDCAT-AP"
-    DS[Dataset Metadata<br/>DCAT-AP Profiles]
-    DIST[Distributions<br/>FHIR / OMOP endpoints]
-    QUAL[Quality Metrics<br/>DQV Dimensions]
+    DS[HealthDataset]
+    DIST[Distribution<br/>FHIR / OMOP endpoints]
+    QA[QualityAssessment]
   end
 
   subgraph "Layer 3 — FHIR R4 Clinical"
@@ -28,40 +36,44 @@ const architectureOverview = `graph TB
   end
 
   subgraph "Layer 4 — OMOP CDM"
-    PERS[Person]
-    VO[VisitOccurrence]
-    CO[ConditionOccurrence]
-    MEAS[Measurement]
-    DE[DrugExposure]
-    PO[ProcedureOccurrence]
+    PERS[OMOPPerson]
+    VO[OMOPVisitOccurrence]
+    CO[OMOPConditionOccurrence]
+    MEAS[OMOPMeasurement]
+    DE[OMOPDrugExposure]
+    PO[OMOPProcedureOccurrence]
   end
 
   subgraph "Layer 5 — Ontology"
-    SNOMED[SNOMED CT]
-    LOINC[LOINC]
-    RXNORM[RxNorm]
-    ICD10[ICD-10]
+    SNOMED[SnomedConcept]
+    LOINC[LoincCode]
+    RXNORM[RxNormConcept]
+    ICD10[ICD10Code]
   end
 
-  MP --> DS
-  CAT --> DS
-  DS --> DIST
-  DS --> QUAL
-  DIST --> PAT
-  PAT --> ENC --> COND
+  PART -- OFFERS --> DP
+  DP -- GOVERNED_BY --> POL
+  DP -- DESCRIBED_BY --> DS
+  HDAB -- GRANTS_ACCESS_TO --> DS
+  DS -- HAS_DISTRIBUTION --> DIST
+  QA -- ASSESSES --> DS
+  PAT -- FROM_DATASET --> DS
+  PAT --> ENC
+  PAT --> COND
   PAT --> OBS
   PAT --> MED
   PAT --> PROC
-  PAT -. "MAPS_TO" .-> PERS
-  ENC -. "MAPS_TO" .-> VO
-  COND -. "MAPS_TO" .-> CO
-  OBS -. "MAPS_TO" .-> MEAS
-  MED -. "MAPS_TO" .-> DE
-  PROC -. "MAPS_TO" .-> PO
-  CO -. "HAS_CONCEPT" .-> SNOMED
-  MEAS -. "HAS_CONCEPT" .-> LOINC
-  DE -. "HAS_CONCEPT" .-> RXNORM
-  CO -. "HAS_CONCEPT" .-> ICD10`;
+  PAT -. "MAPPED_TO" .-> PERS
+  ENC -. "MAPPED_TO" .-> VO
+  COND -. "MAPPED_TO" .-> CO
+  OBS -. "MAPPED_TO" .-> MEAS
+  MED -. "MAPPED_TO" .-> DE
+  PROC -. "MAPPED_TO" .-> PO
+  CO -. "CODED_BY" .-> SNOMED
+  MEAS -. "CODED_BY" .-> LOINC
+  DE -. "CODED_BY" .-> RXNORM
+  PO -. "CODED_BY" .-> SNOMED
+  COND -. "CODED_BY" .-> ICD10`;
 
 const dataFlowDiagram = `sequenceDiagram
   participant SY as Synthea
@@ -74,25 +86,28 @@ const dataFlowDiagram = `sequenceDiagram
   FHIR->>NEO: load_fhir_neo4j.py<br/>(Patient, Encounter, Condition...)
   NEO->>NEO: Create FHIR nodes & relationships
   NEO->>OMOP: fhir-to-omop-transform.cypher
-  Note over NEO,OMOP: MAPS_TO relationships<br/>Patient→Person, Encounter→Visit...
-  OMOP->>OMOP: HAS_CONCEPT → SNOMED/LOINC/RxNorm
+  Note over NEO,OMOP: MAPPED_TO relationships<br/>Patient→OMOPPerson, Encounter→OMOPVisitOccurrence...
+  OMOP->>OMOP: CODED_BY → SNOMED / LOINC / RxNorm (copied from the FHIR node)
   OMOP->>AN: Cohort analytics queries
   AN->>AN: Render dashboards & charts`;
 
 const deploymentDiagram = `graph TB
   subgraph INFRA["Infrastructure Layer"]
     TFK["Traefik<br/>API Gateway<br/>:80 / :8090"]
-    PG["PostgreSQL 17<br/>8 databases<br/>:5432"]
-    VAULT["HashiCorp Vault<br/>Secrets (dev)<br/>:8200"]
+    PG["PostgreSQL 17<br/>9 databases<br/>:5432"]
+    VAULT["HashiCorp Vault<br/>file storage<br/>:8200"]
+    VU["vault-unseal<br/>Init + unseal sidecar"]
     NATS["NATS JetStream<br/>Event Mesh<br/>:4222 / :8222"]
     KC["Keycloak<br/>OIDC SSO<br/>:8080 / :9000"]
     VB["vault-bootstrap<br/>Sidecar Init"]
+    SIG["siglet<br/>Data plane token signing"]
   end
 
   subgraph EDCV["EDC-V / DCore Layer"]
     CP["Control Plane<br/>DSP + Mgmt API<br/>:11003"]
     DPFHIR["Data Plane FHIR<br/>DCore FHIR<br/>:11002"]
     DPOMOP["Data Plane OMOP<br/>DCore OMOP<br/>:11012"]
+    SHIM["cfm-cp-shim<br/>Mgmt API v5alpha → v5beta"]
   end
 
   subgraph IDENTITY["Identity Layer"]
@@ -126,8 +141,10 @@ const deploymentDiagram = `graph TB
 
   %% Infrastructure dependencies
   KC --> PG
+  VU --> VAULT
   VB --> VAULT
   VB --> KC
+  SIG --> VAULT
 
   %% EDC-V dependencies
   CP --> PG
@@ -156,7 +173,7 @@ const deploymentDiagram = `graph TB
   PM --> KC
   PM --> CP
   CFMKC --> KC
-  CFMEDCV --> CP
+  CFMEDCV --> SHIM --> CP
   CFMREG --> IH
   CFMONB --> TM
 
@@ -201,7 +218,7 @@ const identityTrustDiagram = `graph TB
   subgraph "DCP Identity Layer"
     IH[Identity Hub<br/>DID + VC Store]
     IS[Issuer Service<br/>VC Issuance]
-    STS[Secure Token Service<br/>JWT / OAuth2]
+    STS[Secure Token Service<br/>embedded in the Identity Hub]
   end
 
   subgraph "Trust Anchors"
@@ -210,11 +227,12 @@ const identityTrustDiagram = `graph TB
     TA[Trust Anchor<br/>Credential Registry]
   end
 
-  subgraph "Verifiable Credentials"
-    EHDS[EHDS Membership VC]
-    HDAB_VC[Data Permit VC<br/>Art. 46]
-    ORG[Organisation VC]
-    PART[Participant VC<br/>Gaia-X Compliance]
+  subgraph "Verifiable Credentials (issuer definitions)"
+    MEM[MembershipCredential]
+    EHDS[EHDSParticipantCredential]
+    PURP[DataProcessingPurposeCredential]
+    QUAL[DataQualityLabelCredential]
+    MANU[ManufacturerCredential]
   end
 
   subgraph "Protected Resources"
@@ -227,7 +245,7 @@ const identityTrustDiagram = `graph TB
   IS --> IH
   DID --> IH
   TA --> IS
-  IS --> EHDS & HDAB_VC & ORG & PART
+  IS --> MEM & EHDS & PURP & QUAL & MANU
   IH --> STS
   STS --> MGMT & DSP & DATA`;
 
@@ -251,15 +269,17 @@ const services: ServiceInfo[] = [
     name: "PostgreSQL 17",
     port: ":5432",
     depends: "--",
-    purpose:
-      "Shared database (8 DBs: controlplane, dataplane-fhir, dataplane-omop, identityhub, issuerservice, keycloak, tenant-mgr, provision-mgr)",
+    purpose: `Shared database (${
+      facts.postgresDbs.length
+    } DBs: ${facts.postgresDbs.join(", ")})`,
     layer: "Infrastructure",
   },
   {
     name: "HashiCorp Vault",
     port: ":8200",
     depends: "--",
-    purpose: "Secrets management (dev/in-memory mode, lost on restart)",
+    purpose:
+      "Secrets store with file storage, so a restart keeps every key (since 2026-09-26; on Azure it stores in the Flexible Server, ADR-046)",
     layer: "Infrastructure",
   },
   {
@@ -273,7 +293,7 @@ const services: ServiceInfo[] = [
     name: "Keycloak",
     port: ":8080 / :9000",
     depends: "PostgreSQL",
-    purpose: "OIDC SSO provider, realm edcv, 7 personas",
+    purpose: "OIDC SSO provider, realm edcv, 8 demo users across 5 roles",
     layer: "Infrastructure",
   },
   {
@@ -281,6 +301,22 @@ const services: ServiceInfo[] = [
     port: "--",
     depends: "Vault, Keycloak",
     purpose: "Init sidecar: seeds Vault secrets and Keycloak config",
+    layer: "Infrastructure",
+  },
+  {
+    name: "vault-unseal",
+    port: "--",
+    depends: "Vault",
+    purpose:
+      "Sidecar: initialises Vault once, then unseals it after every restart",
+    layer: "Infrastructure",
+  },
+  {
+    name: "siglet",
+    port: "--",
+    depends: "Vault",
+    purpose:
+      "Token signing and certificate exchange for the EDC 0.18 data planes (#97)",
     layer: "Infrastructure",
   },
   {
@@ -330,6 +366,14 @@ const services: ServiceInfo[] = [
     port: ":11007",
     depends: "PostgreSQL, Keycloak, Control Plane",
     purpose: "CFM: automated resource provisioning",
+    layer: "CFM",
+  },
+  {
+    name: "cfm-cp-shim",
+    port: "--",
+    depends: "Control Plane",
+    purpose:
+      "nginx shim: the CFM agents call Management API v5alpha, EDC 0.18 serves v5beta (#181)",
     layer: "CFM",
   },
   {
@@ -385,7 +429,7 @@ const services: ServiceInfo[] = [
     name: "Next.js UI",
     port: ":3000 / :3003",
     depends: "Neo4j Proxy",
-    purpose: "Graph Explorer: 16 pages, 36 API routes, 7 personas",
+    purpose: `Persona overviews, catalog, governance and exchange: ${facts.uiPages.length} pages, ${facts.apiRoutes.length} API routes`,
     layer: "Application",
   },
   {
@@ -441,6 +485,7 @@ export default function ArchitecturePage() {
         <ArrowLeft size={14} /> Back to Docs
       </Link>
       <h1 className="text-3xl font-bold mb-2">Architecture</h1>
+      <DocsLastUpdated page="/docs/architecture" />
       <p className="text-(--text-secondary) mb-8">
         Interactive diagrams of the Health Dataspace v2 architecture — 5-layer
         graph model, data flows, deployment topology, service dependencies, and
@@ -479,7 +524,7 @@ export default function ArchitecturePage() {
         </p>
         <MermaidDiagram
           chart={architectureOverview}
-          caption="Fig 1. Five-layer knowledge graph architecture"
+          caption="Fig 1. Five-layer knowledge graph, with the labels and relationships the seeds create. The FHIR nodes carry the same CODED_BY links as their OMOP counterparts; ICD-10 codes exist on Condition only."
         />
       </section>
 
@@ -506,21 +551,23 @@ export default function ArchitecturePage() {
           3. Deployment Topology
         </h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          The full JAD stack runs 19+ Docker Compose services across six layers:
-          infrastructure (Traefik, PostgreSQL, Vault, NATS, Keycloak), EDC-V /
-          DCore (Control Plane, dual Data Planes), Identity (Identity Hub,
-          Issuer Service), CFM (Tenant/Provision Managers, 4 background agents),
-          Application (Neo4j, Proxy, UI), and a static GitHub Pages export. The
-          same topology is deployed to{" "}
+          The full JAD stack runs {COMPOSE_SERVICES} Docker Compose services
+          (profiles included) across six layers: infrastructure (Traefik,
+          PostgreSQL, Vault, NATS, Keycloak), EDC-V / DCore (Control Plane, dual
+          Data Planes), Identity (Identity Hub, Issuer Service), CFM
+          (Tenant/Provision Managers, 4 background agents), Application (Neo4j,
+          Proxy, UI), and a{" "}
           <a
-            href="https://ehds.mabu.red"
+            href={STATIC_SITE}
             target="_blank"
             rel="noopener noreferrer"
             className="text-(--accent) underline hover:opacity-80"
           >
-            Azure Container Apps
-          </a>{" "}
-          (21 Container Apps and scheduled jobs, see{" "}
+            static GitHub Pages export
+          </a>
+          . The same topology is deployed to Azure Container Apps at{" "}
+          <code>ehds.mabu.red</code> (21 Container Apps and 9 Container Apps
+          jobs on 2026-10-04, see{" "}
           <a
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-012-azure-container-apps.md"
             target="_blank"
@@ -533,7 +580,7 @@ export default function ArchitecturePage() {
         </p>
         <MermaidDiagram
           chart={deploymentDiagram}
-          caption="Fig 3. Full deployment topology — 19+ services with dependency graph"
+          caption={`Fig 3. Full deployment topology — ${COMPOSE_SERVICES} services with their dependencies`}
         />
         <div
           className="mt-6 border border-(--border) rounded-lg p-4"
@@ -747,12 +794,12 @@ export default function ArchitecturePage() {
                 Credentials
               </li>
               <li>
-                <strong>Trust Framework:</strong> Gaia-X compatible credential
-                attestation
+                <strong>Trust Framework:</strong> W3C Verifiable Credentials
+                issued over DCP against the issuer&apos;s definitions
               </li>
               <li>
-                <strong>Federated Catalog:</strong> HealthDCAT-AP 3.0 metadata
-                profiles
+                <strong>Federated Catalog:</strong> HealthDCAT-AP 2.1 metadata
+                profiles (ADR-003)
               </li>
               <li>
                 <strong>SBOM:</strong> CycloneDX 1.5 supply chain transparency
@@ -827,7 +874,8 @@ export default function ArchitecturePage() {
           8. Architecture Decision Records
         </h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          All ADRs are maintained as standalone Markdown files in{" "}
+          All {facts.adrs.length} ADRs are maintained as standalone Markdown
+          files in{" "}
           <a
             href={`${GITHUB_REPO}/tree/main/docs/ADRs`}
             target="_blank"
@@ -839,122 +887,7 @@ export default function ArchitecturePage() {
           .
         </p>
         <div className="space-y-3">
-          {[
-            {
-              id: "ADR-001",
-              file: "ADR-001-postgresql-neo4j-split.md",
-              title: "PostgreSQL / Neo4j Split",
-              desc: "EDC runtime metadata in PostgreSQL (8 databases), health knowledge graph in Neo4j.",
-            },
-            {
-              id: "ADR-002",
-              file: "ADR-002-edc-data-plane-architecture.md",
-              title: "Dual EDC Data Planes",
-              desc: "Separate FHIR R4 (PUSH) and OMOP CDM (PULL) data planes for type-safe access.",
-            },
-            {
-              id: "ADR-003",
-              file: "ADR-003-healthdcat-ap-alignment.md",
-              title: "HealthDCAT-AP Alignment",
-              desc: "Graph nodes aligned with HealthDCAT-AP 3.0 profile for EU catalog interoperability.",
-            },
-            {
-              id: "ADR-004",
-              file: "ADR-004-nextjs-unified-frontend.md",
-              title: "Next.js App Router",
-              desc: "Client SPA with 36 API routes proxying to Neo4j and EDC-V; static export for demo.",
-            },
-            {
-              id: "ADR-005",
-              file: "ADR-005-jad-cfm-source-builds.md",
-              title: "Source Builds from Public Repos",
-              desc: "Build EDC-V, DCore, CFM from source using Gradle multi-module layout.",
-            },
-            {
-              id: "ADR-006",
-              file: "ADR-006-ghcr-image-publishing.md",
-              title: "GHCR Image Publishing",
-              desc: "Publish OCI images to GitHub Container Registry for consistent deployments.",
-            },
-            {
-              id: "ADR-007",
-              file: "ADR-007-did-web-dsp-negotiation.md",
-              title: "DID:web for Participant Identity",
-              desc: "W3C DID:web method for decentralised participant identification.",
-            },
-            {
-              id: "ADR-008",
-              file: "ADR-008-testing-strategy.md",
-              title: "Vitest + MSW + Playwright Testing",
-              desc: "1,613 unit tests with MSW API mocking, 19 Playwright E2E specs, pre-push gate.",
-            },
-            {
-              id: "ADR-009",
-              file: "ADR-009-issuerservice-credential-fix.md",
-              title: "Credential Issuance Flow",
-              desc: "EHDS membership, data permits, and org VCs issued via DCP Issuer Service.",
-            },
-            {
-              id: "ADR-010",
-              file: "ADR-010-wcag-accessibility.md",
-              title: "WCAG 2.2 AA Accessibility",
-              desc: "Zero WCAG violations enforced by automated axe-core audits in CI.",
-            },
-            {
-              id: "ADR-011",
-              file: "ADR-011-security-testing.md",
-              title: "Security Penetration Testing",
-              desc: "OWASP ZAP + BSI C5 baseline scans integrated into CI pipeline.",
-            },
-            {
-              id: "ADR-012",
-              file: "ADR-012-azure-container-apps.md",
-              title: "Azure Container Apps Deployment",
-              desc: "13 Container Apps + 3 jobs on Azure with OIDC federation and VNet isolation.",
-            },
-            {
-              id: "ADR-013",
-              file: "ADR-013-simpl-open-alignment.md",
-              title: "SIMPL-Open Alignment",
-              desc: "Gap analysis and alignment roadmap for EU SIMPL-Open programme compatibility.",
-            },
-            {
-              id: "ADR-014",
-              file: "ADR-014-weekly-demo-reset.md",
-              title: "Weekly Demo Reset",
-              desc: "Scheduled Monday 05:15 UTC reset of demo state for GDPR data minimisation.",
-            },
-            {
-              id: "ADR-015",
-              file: "ADR-015-single-vm-dev-deployment.md",
-              title: "Single-VM Dev Deployment",
-              desc: "Single-VM fallback deployment mode for personal Visual Studio subscription budgets.",
-            },
-            {
-              id: "ADR-016",
-              file: "ADR-016-aca-off-hours-scaledown.md",
-              title: "ACA Off-Hours Scale-Down",
-              desc: "Weekday business-hours scaling schedule to reduce Azure Container Apps cost by ~60%.",
-            },
-            {
-              id: "ADR-017",
-              file: "ADR-017-persistent-storage-aca.md",
-              title: "Persistent Storage for Stateful Services",
-              desc: "Azure Files volume mounts for Neo4j, PostgreSQL, and Vault on Container Apps.",
-            },
-            {
-              id: "ADR-018",
-              file: "ADR-018-24x7-workaround-b.md",
-              title: "24×7 Operation — Workaround B",
-              desc: "Postgres-on-ACA workaround for INF-STG-EU_EHDS subscription policy constraints.",
-            },
-            {
-              id: "ADR-053",
-              file: "ADR-053-everything-stops-off-hours.md",
-              title: "Everything Stops Off Hours",
-              desc: "Every Container App and the Flexible Server stop outside office hours; the UI shows an offline notice that links the static export.",
-            },
-          ].map((adr) => (
+          {facts.adrs.map((adr) => (
             <a
               key={adr.id}
               href={`${GITHUB_REPO}/blob/main/docs/ADRs/${adr.file}`}
@@ -968,7 +901,7 @@ export default function ArchitecturePage() {
               <div>
                 <span className="font-semibold text-sm">{adr.title}</span>
                 <p className="text-(--text-secondary) text-xs mt-0.5">
-                  {adr.desc}
+                  {adr.status}
                 </p>
               </div>
             </a>

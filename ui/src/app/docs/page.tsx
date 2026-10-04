@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Code2, Layers, Users, ArrowRight } from "lucide-react";
+import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 
 const sections = [
   {
@@ -30,6 +31,7 @@ export default function DocsPage() {
     <div className="max-w-5xl mx-auto px-6 py-12">
       <div className="mb-10">
         <h1 className="text-3xl font-bold mb-2">Documentation</h1>
+        <DocsLastUpdated page="/docs" />
         <p className="text-(--text-secondary) text-lg">
           Health Dataspace v2 — comprehensive guides for business users and
           developers.
