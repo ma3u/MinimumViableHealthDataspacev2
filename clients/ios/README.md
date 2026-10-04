@@ -33,7 +33,7 @@ that must exist in your Apple Developer account first.
 ## Static analysis
 
 ```bash
-Scripts/codeql-swift.sh       # CodeQL on the app and the package, before a push
+Scripts/codeql-swift.sh       # CodeQL on the app (and Shared), before a push
 ```
 
 CodeQL needs a real build to see Swift, so on GitHub it runs only when
