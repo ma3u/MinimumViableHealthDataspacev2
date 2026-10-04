@@ -124,6 +124,7 @@ az containerapp create \
     "NEXT_PUBLIC_KEYCLOAK_URL=${KEYCLOAK_BASE_URL}" \
     "NEXT_PUBLIC_KEYCLOAK_REALM=edcv" \
     "NEO4J_PROXY_URL=${NEO4J_PROXY_URL:-}:9090" \
+    "AUDIT_CALLBACK_URL=http://${NEO4J_PROXY_APP}/audit/dsp" \
     "NEO4J_URI=${NEO4J_BOLT_URI:-bolt://${NEO4J_APP}:7687}" \
     "NEO4J_ENCRYPTED=false" \
     "NEO4J_USER=${NEO4J_USER}" \
