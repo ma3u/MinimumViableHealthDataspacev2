@@ -3,6 +3,24 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-04: a stopped Container App answers 404, and the Keycloak check read it as a missing realm
+
+Every Azure deploy on Sunday 2026-10-04 failed in "Auth is actually working"
+with `FAIL: realm 'edcv' does not exist. Import it`. The realm was intact.
+Since ADR-053 Keycloak stops off hours, and a stopped Container App answers
+every path with 404 and Azure's own page, titled `Azure Container App -
+Unavailable`. `check-keycloak-health.sh` mapped any 404 on the authorize
+endpoint to "realm missing", the one answer that sends you to
+`restore-keycloak-realm.sh`.
+
+The check now exits 4 when the 404 is that page. The deploy step passes on 4
+only when the UI answers the offline notice (503 with `staticSite`, as Demo
+Smoke reads it) and then skips the Azure E2E job; `restore-keycloak-realm.sh`
+stops on 4 instead of importing; the start in `aca-schedule.yml` stays red on
+4, because right after a start a stopped Keycloak is a failure.
+
+Rule: on Azure, a 404 is not an answer from your app until the body says so.
+
 ## 2026-10-04: the deploy smoke tests signed in on the wrong host, and continue-on-error hid it
 
 The deploy workflow's live smoke
