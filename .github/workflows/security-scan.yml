@@ -105,7 +105,7 @@ jobs:
           - postgres:17.7-alpine
           - neo4j:5.26.28-community
           - nats:2.14.3-alpine
-          - traefik:v3.4
+          - traefik:v3.7
           - nginx:1.29-alpine
           - hashicorp/vault:2.0
           - curlimages/curl:8.21.0

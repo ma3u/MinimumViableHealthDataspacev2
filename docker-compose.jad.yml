@@ -38,7 +38,9 @@ services:
   # Traefik — API Gateway (replaces KinD Gateway API + Traefik Helm chart)
   # ---------------------------------------------------------------------------
   traefik:
-    image: traefik:v3.4
+    # v3.4 negotiated Docker API 1.24, which Docker 29 refuses (min 1.40), so
+    # its Docker provider discovered nothing and every *.localhost name 404d (#190).
+    image: traefik:v3.7
     container_name: health-dataspace-traefik
     command:
       - "--api.insecure=true"
@@ -220,7 +222,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.nats.rule=Host(`nats.localhost`)"
-      - "traefik.http.services.nats.loadbalancer.server.port=4222"
+      - "traefik.http.services.nats.loadbalancer.server.port=8222"
     healthcheck:
       test:
         [

@@ -522,10 +522,9 @@ show_status() {
   echo "  Provision Manager:   http://localhost:11007"
   echo ""
 
-  # The *.localhost names this used to print have never resolved (#190).
-  # Traefik v3 pins Docker API 1.24 and the daemon requires 1.40, so its
-  # Docker provider discovers nothing and every one of those URLs 404s. The
-  # direct ports above work, which is why it went unnoticed for months.
+  # The *.localhost names stayed dead for months (#190): Traefik v3.4 asked
+  # for Docker API 1.24, the daemon requires 1.40, and its Docker provider
+  # discovered nothing. Traefik v3.7 negotiates the version and routes them.
   #
   # Print the names only if a route actually answers, rather than printing a
   # list and asserting nothing about it — the ADR-031 shape that #181 and this

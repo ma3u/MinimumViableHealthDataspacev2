@@ -65,7 +65,7 @@ The deployment must satisfy **EHDS Art. 3–12 / 50–51**, **GDPR Art. 15–22*
 
 ### 2.3 Network Topology
 
-- Traefik v3.4 routes `*.localhost` hostnames to services
+- Traefik v3.7 routes `*.localhost` hostnames to services
 - Internal Docker network `edcv` (health-dataspace-edcv)
 - ~25 internal HTTP endpoints across services
 - Keycloak split-horizon DNS: `localhost:8080` (browser) vs `keycloak:8080` (internal)
@@ -274,7 +274,7 @@ The project uses Vault for:
 
 | Current Service | Azure Service                         | Notes                                      |
 | --------------- | ------------------------------------- | ------------------------------------------ |
-| Traefik v3.4    | Azure Container Apps built-in ingress | Envoy-based, auto-TLS with managed certs   |
+| Traefik v3.7    | Azure Container Apps built-in ingress | Envoy-based, auto-TLS with managed certs   |
 | —               | Azure Front Door (optional)           | WAF, global load balancing, custom domains |
 | —               | Azure Monitor + Log Analytics         | Replace docker logs, Traefik access logs   |
 | —               | Azure Container Registry (ACR)        | Store custom images (neo4j-proxy, UI)      |
