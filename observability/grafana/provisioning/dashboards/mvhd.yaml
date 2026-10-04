@@ -1,0 +1,13 @@
+# EHDS audit and EDC contract and transfer dashboards, as code (ADR-045
+# decision 5, #418). Edits in the UI are not kept: change the JSON here.
+apiVersion: 1
+
+providers:
+  - name: MVHD
+    folder: MVHD Health Dataspace
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    options:
+      path: /otel-lgtm/mvhd-dashboards
+      foldersFromFilesStructure: false
