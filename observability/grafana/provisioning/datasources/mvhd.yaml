@@ -1,0 +1,23 @@
+# The audit trail as Grafana reads it (ADR-045 plane 2, #418): the proxy's
+# read-only audit endpoints, through the Infinity JSON datasource.
+#
+#   GET /audit/chains/{query,dsp}/verify   chain integrity (hash links)
+#   GET /audit/chains/{query,dsp}/events   newest records, summarised
+#
+# Loki, Tempo and Prometheus come with grafana/otel-lgtm (uids loki, tempo,
+# prometheus); the dashboards use those for the time series.
+apiVersion: 1
+
+datasources:
+  - name: MVHD Audit Trail
+    uid: mvhd-audit
+    type: yesoreyeram-infinity-datasource
+    url: ${MVHD_AUDIT_URL}
+    editable: false
+    jsonData:
+      allowedHosts:
+        - ${MVHD_AUDIT_URL}
+      httpHeaderName1: x-audit-token
+    secureJsonData:
+      # Empty unless the proxy runs with AUDIT_CALLBACK_TOKEN.
+      httpHeaderValue1: ${MVHD_AUDIT_TOKEN}

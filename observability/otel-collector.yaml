@@ -39,6 +39,12 @@ receivers:
         config:
           include:
             - /var/lib/docker/containers/`container_id`/`container_id`-json.log
+          # `end`, without stored offsets. The Docker observer restarts this
+          # receiver on every health-check exec of the container (about 13 times
+          # a minute locally); stored offsets then produced duplicates and lock
+          # timeouts, so lines around a restart can be missed instead. Container
+          # logs are an operational view: the audit dashboards count the hash
+          # chain itself, not these lines (observability/grafana, #418).
           start_at: end
           operators:
             # Docker's json-file envelope: {"log": "...", "stream": "...", "time": "..."}
