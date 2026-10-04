@@ -280,6 +280,11 @@ jobs:
               --min-replicas 1 --max-replicas 1 \
               -o none || echo "::warning::Failed to scale $app"
           done
+          # A scale change is a template change, so the update above can make a
+          # new Neo4j revision, after "Retire revisions that serve nothing" ran.
+          # The old one would keep the store lock (docs/gotchas.md, 2026-10-04).
+          ./scripts/azure/retire-stale-revisions.sh mvhd-neo4j ||
+            echo "::warning::A stale mvhd-neo4j revision could not be deactivated, see above"
           # min=1 max=2 (auto-scalable read services)
           for app in mvhd-neo4j-proxy; do
             echo "  $app -> 1/2"

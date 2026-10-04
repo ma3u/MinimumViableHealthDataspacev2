@@ -132,31 +132,42 @@ on-call person sees is the loop, not the bill.
    a stale April revision held the store lock (`docs/gotchas.md`, 2026-10-02).
 2. **EDC services:** finish #318 (managed Postgres, ADR-041) so the databases exist, and
    set connection retry with backoff so a missing database produces one error per
-   minute, not per second.
+   minute, not per second. **#318 done:** the `database ... does not exist` loops
+   stopped on 2026-10-02 19:22 UTC. Backoff is still open.
 3. **EDC console monitor:** confirm the level is `INFO` and disable ANSI colour codes
    (seen as `[0;37mDEBUG` in `mvhd-controlplane` output). Exact setting to be verified
-   against the EDC version in use (ADR-029 pins it).
+   against the EDC version in use (ADR-029 pins it). **Verified 2026-10-04:** every
+   `jad-*:2026-04-14` image bakes `--log-level=debug` into its start command, and the
+   runtime accepts `--log-level=info --no-color` (both strings are in the jar's
+   `ExtensionLoader`). The issuer service sets it in its ENTRYPOINT, the other three in
+   CMD. Not yet applied.
 4. **Crash-loop alert:** restart count over 3 in 15 minutes on any app raises one alert,
    in `scripts/azure/07-observability.sh`.
 5. **Replace the 1 GB cap with a budget** on `rg-mvhd-dev`, alerts at 50/80/100 %.
 6. **Re-measure after 7 days** with the queries in section 1. Expected: under 200 MB/day.
+   Interim 2026-10-04: 91.6 MB billed on 2026-10-03, against 250 to 270 MB a day from
+   2026-09-21 to 09-28. Full reading due 2026-10-09; ADR-053's off-hours stop lowers
+   it further, so compare per running hour, not per day.
+7. **Deploy smoke tests on the custom domain.** They signed in on the raw ACA host and
+   produced about 115 `State cookie was missing` stack traces per deploy
+   (`docs/gotchas.md`, 2026-10-04). Fixed in `deploy-azure.yml`.
 
 ### Phase B: structured logs and the collector (ADR-045 plane 1)
 
-7. pino in `ui/` and `services/neo4j-proxy` with `trace_id`, plus the no-PII unit test.
-8. OpenTelemetry Collector with `recombine` (multi-line join), `filter` (drop DEBUG and
+8. pino in `ui/` and `services/neo4j-proxy` with `trace_id`, plus the no-PII unit test.
+9. OpenTelemetry Collector with `recombine` (multi-line join), `filter` (drop DEBUG and
    probe lines), rate limiting of repeats, `redaction`, and tail sampling for traces.
-9. Loki, Tempo, Prometheus and Grafana in one `mvhd-observability` app, data in a bucket,
-   following off-hours scale-down; locally `docker-compose.observability.yml`.
-10. Move the workflows that query `ContainerAppConsoleLogs_CL` (`edc-*`, `cfm-seed`,
+10. Loki, Tempo, Prometheus and Grafana in one `mvhd-observability` app, data in a bucket,
+    following off-hours scale-down; locally `docker-compose.observability.yml`.
+11. Move the workflows that query `ContainerAppConsoleLogs_CL` (`edc-*`, `cfm-seed`,
     `neo4j-seed`, `vault-bootstrap-participant-keys`) to LogQL **before** switching
     console logs away from Log Analytics.
-11. Switch ACA console logs to the collector; Log Analytics keeps system logs only.
+12. Switch ACA console logs to the collector; Log Analytics keeps system logs only.
 
 ### Phase C: keep it cheap
 
-12. Volume alerts from section 6 as code in `observability/`.
-13. Monthly: compare the bill with the budget, and review the top 10 message templates by
+13. Volume alerts from section 6 as code in `observability/`.
+14. Monthly: compare the bill with the budget, and review the top 10 message templates by
     volume. Anything in the top 10 that nobody reads gets demoted to DEBUG or turned into
     a metric.
 
