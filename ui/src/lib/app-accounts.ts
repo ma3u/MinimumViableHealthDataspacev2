@@ -16,7 +16,7 @@ export { isSandboxUsername, sandboxPatientId };
 
 /** The public client the app signs in with by password (ADR-054). */
 export const ACCOUNT_CLIENT_ID = "klarbefund-account";
-export const ACCOUNT_GROUP = "klarbefund-patients";
+const ACCOUNT_GROUP = "klarbefund-patients";
 const SERVICE_CLIENT_ID = "ehds-account-service";
 
 /** No 0/O, 1/l/I: a person may type these off the phone's screen. */

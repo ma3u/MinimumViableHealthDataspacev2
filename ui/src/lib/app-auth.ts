@@ -37,10 +37,7 @@ export const APP_CLIENT_ID = "klarbefund-app";
  * The clients whose tokens the app routes accept: the QR code's device grant,
  * and the password grant of an account the app created itself (ADR-054).
  */
-export const APP_CLIENT_IDS: readonly string[] = [
-  APP_CLIENT_ID,
-  "klarbefund-account",
-];
+const APP_CLIENT_IDS: readonly string[] = [APP_CLIENT_ID, "klarbefund-account"];
 const APP_DEVICE_HEADER = "x-klarbefund-device";
 
 const keycloakServerUrl =

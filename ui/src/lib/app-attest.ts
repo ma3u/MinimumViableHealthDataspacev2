@@ -21,7 +21,7 @@ import { APPLE_APP_ATTEST_ROOT_CA } from "@/lib/apple-app-attest-root";
  */
 
 /** Team id and bundle id: the relying party an attestation names. */
-export const APP_ID = "38R8Z4P7S8.red.mabu.meinbefund";
+const APP_ID = "38R8Z4P7S8.red.mabu.meinbefund";
 
 /** How long a challenge may be answered. */
 const CHALLENGE_MS = 5 * 60_000;
