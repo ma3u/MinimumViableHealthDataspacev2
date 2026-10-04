@@ -148,9 +148,9 @@ on-call person sees is the loop, not the bill.
    app, mailed through action group `mvhd-alerts`.
 5. **Replace the 1 GB cap with a budget** on `rg-mvhd-dev`, mails at 50, 80 and 100 %
    of actual cost and 100 % forecast; the cap is removed only once the budget exists.
-   Items 4 and 5: `ALERT_EMAIL=<address> BUDGET_EUR=<amount>
-scripts/azure/configure-alerts-and-budget.sh` (`--dry-run` first). The address is
-   given at run time, not committed. **Scripted 2026-10-04; not applied yet.**
+   Items 4 and 5: `ALERT_EMAIL=<address> scripts/azure/configure-alerts-and-budget.sh`
+   (`--dry-run` first). The budget is 1000 EUR a month (decided 2026-10-04;
+   `BUDGET_EUR` overrides it). The address is given at run time, not committed. **Scripted 2026-10-04; not applied yet.**
    The older replica alerts in `07-observability.sh` have no action group and would
    fire nightly under ADR-053; they are left as they are until Plane 1 replaces them.
 6. **Re-measure after 7 days** with the queries in section 1. Expected: under 200 MB/day.
