@@ -140,14 +140,20 @@ on-call person sees is the loop, not the bill.
    `jad-*:2026-04-14` image bakes `--log-level=debug` into its start command, and the
    runtime accepts `--log-level=info --no-color` (both strings are in the jar's
    `ExtensionLoader`). The issuer service sets it in its ENTRYPOINT, the other three in
-   CMD. Not yet applied.
+   CMD. `scripts/azure/set-edc-log-level.sh` applies it (ARM PATCH of the template, since
+   `az containerapp update --args sh -c ...` rejects `-c`). Not yet run.
 4. **Crash-loop alert:** restart count over 3 in 15 minutes on any app raises one alert,
-   in `scripts/azure/07-observability.sh`.
+   in `scripts/azure/set-cost-guards.sh`, run by the `cost-guards.yml` workflow (the
+   laptop account is Container Apps Contributor only and cannot write alert rules).
 5. **Replace the 1 GB cap with a budget** on `rg-mvhd-dev`, alerts at 50/80/100 %.
+   Same script and workflow; the cap goes only after the budget exists.
 6. **Re-measure after 7 days** with the queries in section 1. Expected: under 200 MB/day.
    Interim 2026-10-04: 91.6 MB billed on 2026-10-03, against 250 to 270 MB a day from
    2026-09-21 to 09-28. Full reading due 2026-10-09; ADR-053's off-hours stop lowers
    it further, so compare per running hour, not per day.
+   Half of it was `ContainerAppSystemLogs_CL`: about 19,000 `ProbeFailed` events every
+   three hours from two April data-plane revisions, which `retire-stale-revisions.sh`
+   (#491) deactivated on 2026-10-04.
 7. **Deploy smoke tests on the custom domain.** They signed in on the raw ACA host and
    produced about 115 `State cookie was missing` stack traces per deploy
    (`docs/gotchas.md`, 2026-10-04). Fixed in `deploy-azure.yml`.
