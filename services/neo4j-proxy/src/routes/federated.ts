@@ -8,8 +8,35 @@ import {
   OdrlScope,
   checkOdrlTemporal,
   checkReIdentification,
-  logQueryAudit,
 } from "../nlq/engine.js";
+import { appendQueryAudit, auditUnavailable } from "../audit-chain.js";
+
+/** A refused federated query is recorded before the refusal goes out. */
+async function auditFederatedRefusal(
+  callerId: string | undefined,
+  cypher: string,
+  reason: string,
+): Promise<void> {
+  try {
+    await appendQueryAudit({
+      participantId: callerId,
+      question: "(federated)",
+      cypher,
+      method: "federated",
+      resultCount: 0,
+      odrlEnforced: true,
+      outcome: "refused",
+      reason,
+      federated: {
+        contributors: [],
+        aggregateSuppressed: false,
+        suppressionReason: null,
+      },
+    });
+  } catch (err) {
+    console.error("[neo4j-proxy] audit of a refused query failed:", err);
+  }
+}
 
 // ---- Phase 5: Federated Query Endpoints ------------------------------------
 
@@ -47,27 +74,23 @@ app.post(
       if (scope) {
         const temporalViolation = checkOdrlTemporal(scope);
         if (temporalViolation) {
+          await auditFederatedRefusal(callerId, cypher, "ODRL temporal limit");
           res
             .status(403)
             .json({ error: temporalViolation, odrlEnforced: true });
-          logQueryAudit(callerId, "(federated)", cypher, "federated", 0, true, {
-            contributors: [],
-            aggregateSuppressed: false,
-            suppressionReason: null,
-          });
           return;
         }
         if (checkReIdentification(cypher, scope)) {
+          await auditFederatedRefusal(
+            callerId,
+            cypher,
+            "ODRL re-identification prohibition",
+          );
           res.status(403).json({
             error:
               "Query blocked: potential re-identification prohibited by ODRL policy",
             odrlEnforced: true,
             policyIds: scope.policyIds,
-          });
-          logQueryAudit(callerId, "(federated)", cypher, "federated", 0, true, {
-            contributors: [],
-            aggregateSuppressed: false,
-            suppressionReason: null,
           });
           return;
         }
@@ -173,6 +196,28 @@ app.post(
       }
 
       const sources = allResults.map((r) => r.source);
+
+      // Fail closed (ADR-045, #418): no record, no answer.
+      try {
+        await appendQueryAudit({
+          participantId: callerId,
+          question: "(federated)",
+          cypher,
+          method: "federated",
+          resultCount: merged.length,
+          odrlEnforced: Boolean(scope),
+          outcome: "success",
+          federated: {
+            contributors: sources,
+            aggregateSuppressed,
+            suppressionReason,
+          },
+        });
+      } catch (err) {
+        auditUnavailable(res, err);
+        return;
+      }
+
       res.json({
         results: merged,
         sources,
@@ -183,20 +228,6 @@ app.post(
         aggregateSuppressed,
         suppressionReason,
       });
-
-      logQueryAudit(
-        callerId,
-        "(federated)",
-        cypher,
-        "federated",
-        merged.length,
-        Boolean(scope),
-        {
-          contributors: sources,
-          aggregateSuppressed,
-          suppressionReason,
-        },
-      );
 
       logTransferEvent(
         "/federated/query",
