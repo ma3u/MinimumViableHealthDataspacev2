@@ -16,8 +16,11 @@ export LOCATION="westeurope"
 export SUBSCRIPTION_ID="${SUBSCRIPTION_ID:-$(az account show --query id -o tsv 2>/dev/null || echo "")}"
 export ACR_NAME="acrmvhdehds"
 export ACA_ENV="mvhd-env"
-# Log Analytics workspace (disabled under Workaround B, kept for reference)
-export LAW_NAME="law-mvhd-dev"
+# The workspace mvhd-env actually logs to. It was "law-mvhd-dev" in the first
+# deployment; the live one is mvhd-logs (customerId 6c5814cc-…, checked
+# 2026-10-04), which edc-probe-cp.yml and vault-bootstrap-participant-keys.yml
+# already used.
+export LAW_NAME="${LAW_NAME:-mvhd-logs}"
 
 # ── Persistent storage (Azure Files — ADR-017 + Workaround B) ───────────────
 # Storage account name must be 3–24 lowercase alphanumerics, globally unique.

@@ -89,7 +89,9 @@ if [ -z "$dry_run" ]; then
   az consumption budget show --budget-name mvhd-monthly --resource-group "$RG" -o none ||
     { warn "Budget not found; keeping the daily cap"; exit 1; }
 fi
-log "Log Analytics daily cap off"
+az monitor log-analytics workspace show --resource-group "$RG" --workspace-name "$LAW_NAME" -o none ||
+  { warn "Workspace $LAW_NAME not found; set LAW_NAME"; exit 1; }
+log "Log Analytics daily cap off ($LAW_NAME)"
 run az monitor log-analytics workspace update --resource-group "$RG" \
   --workspace-name "$LAW_NAME" --quota -1 -o none
 
