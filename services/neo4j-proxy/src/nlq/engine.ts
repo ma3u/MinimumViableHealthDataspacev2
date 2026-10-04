@@ -845,59 +845,6 @@ export function revealsPatientIdentity(cypher: string): boolean {
 }
 
 /**
- * Log a query audit event to Neo4j (best-effort, non-blocking).
- * Creates a QueryAuditEvent node for EHDS Art. 53 compliance.
- */
-export function logQueryAudit(
-  participantId: string | undefined,
-  question: string,
-  cypher: string | null,
-  method: string,
-  resultCount: number,
-  odrlEnforced: boolean,
-  // Phase 26e (issue #8): federated-query provenance for transparency reports
-  federatedMeta?: {
-    contributors: string[];
-    aggregateSuppressed: boolean;
-    suppressionReason: string | null;
-  },
-): void {
-  if (!driver) return;
-  const session = driver.session({ database: "neo4j" });
-  session
-    .run(
-      `MERGE (qa:QueryAuditEvent {eventId: $eventId})
-       ON CREATE SET
-         qa.participantId = $participantId,
-         qa.question = $question,
-         qa.cypher = $cypher,
-         qa.method = $method,
-         qa.resultCount = $resultCount,
-         qa.odrlEnforced = $odrlEnforced,
-         qa.federated = $federated,
-         qa.contributors = $contributors,
-         qa.aggregateSuppressed = $aggregateSuppressed,
-         qa.suppressionReason = $suppressionReason,
-         qa.timestamp = datetime()`,
-      {
-        eventId: `qa-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        participantId: participantId ?? "anonymous",
-        question: question.slice(0, 500),
-        cypher: (cypher ?? "").slice(0, 2000),
-        method,
-        resultCount,
-        odrlEnforced,
-        federated: federatedMeta !== undefined,
-        contributors: federatedMeta?.contributors ?? [],
-        aggregateSuppressed: federatedMeta?.aggregateSuppressed ?? false,
-        suppressionReason: federatedMeta?.suppressionReason ?? null,
-      },
-    )
-    .catch((err) => console.error("[neo4j-proxy] Audit log error:", err))
-    .finally(() => session.close());
-}
-
-/**
  * Fulltext search — queries Neo4j native fulltext indexes for keyword matches.
  * Tier 2 in the NLQ resolution chain (between template and GraphRAG).
  * Searches clinical_search, catalog_search, and ontology_search indexes.

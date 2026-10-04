@@ -17,6 +17,14 @@ const mockDriver = {
   close: mockDriverClose,
 };
 
+// These tests are about query logic; the audit trail has its own tests in
+// audit-chain.test.ts. Every answer now waits for its audit record (fail
+// closed, ADR-045), which this mock driver cannot write.
+vi.mock("../src/audit-chain.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../src/audit-chain.js")>()),
+  appendQueryAudit: vi.fn().mockResolvedValue({}),
+}));
+
 vi.mock("neo4j-driver", () => ({
   default: {
     driver: vi.fn(() => mockDriver),
