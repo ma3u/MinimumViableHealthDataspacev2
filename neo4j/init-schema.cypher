@@ -193,6 +193,10 @@ CREATE INDEX audit_event_chain_seq IF NOT EXISTS FOR (e:AuditEvent) ON (e.chain,
 // deviceName, client, connectedAt, lastSeenAt}). One login per device id.
 CREATE CONSTRAINT app_connection_device IF NOT EXISTS FOR (a:AppConnection) REQUIRE a.deviceId IS UNIQUE;
 CREATE INDEX app_connection_username IF NOT EXISTS FOR (a:AppConnection) ON (a.username);
+// The QR code that leads there, for its two minutes plus five of grace:
+// (:AppPairing {id, username, expiresAt, deviceId, deviceName}). In Neo4j, not
+// memory, because the UI runs more than one replica on Azure.
+CREATE CONSTRAINT app_pairing_id IF NOT EXISTS FOR (p:AppPairing) REQUIRE p.id IS UNIQUE;
 CREATE INDEX query_audit_timestamp IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.timestamp);
 CREATE INDEX query_audit_participant IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.participantId);
 

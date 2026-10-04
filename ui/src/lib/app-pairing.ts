@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 import { APP_CLIENT_ID } from "@/lib/app-auth";
+import { runQuery } from "@/lib/neo4j";
 
 /**
  * Pairing the Klarbefund app from the patient screen (#473, ADR-049).
@@ -10,9 +11,13 @@ import { APP_CLIENT_ID } from "@/lib/app-auth";
  * the token itself; the website only learns that it worked when the phone
  * registers, naming the pairing id from the link.
  *
- * Kept in memory for its lifetime plus a grace period, like the EUDI sign-in
- * transaction (single replica, ADR-028). Losing it in a restart costs a patient
- * one new QR code, nothing more.
+ * Kept in Neo4j, one `(:AppPairing)` per QR code, because three different
+ * requests touch a pairing and on Azure each may reach a different replica of
+ * `mvhd-ui` (up to three). In memory, the phone's registration and the patient
+ * screen's polling found the pairing only when they happened to reach the
+ * replica that started it: two scans in three answered "scan a new QR code"
+ * (2026-10-04). Only what those requests need is stored: the id, the login,
+ * the expiry and the phone. The device code never leaves the start request.
  */
 
 export interface Pairing {
@@ -24,31 +29,19 @@ export interface Pairing {
   verificationUri: string;
   expiresAt: number;
   interval: number;
-  /** Set when the phone registered. */
+}
+
+/** What a pairing is after the start request: no codes, and the phone once it registered. */
+export interface StoredPairing {
+  id: string;
+  username: string;
+  expiresAt: number;
   deviceId?: string;
   deviceName?: string;
 }
 
 /** After the code expires, how long a phone may still register with it. */
 const GRACE_MS = 5 * 60_000;
-
-/**
- * On globalThis rather than in the module: Next.js may load this module once
- * per route bundle, and a pairing started by one route must be found by the
- * other two (measured in `next dev`, #473: the status route answered 404 for
- * a pairing the start route had just made).
- */
-const holder = globalThis as unknown as {
-  __klarbefundPairings?: Map<string, Pairing>;
-};
-holder.__klarbefundPairings ??= new Map<string, Pairing>();
-const pairings = holder.__klarbefundPairings;
-
-function sweep(now: number): void {
-  for (const [id, p] of pairings) {
-    if (now > p.expiresAt + GRACE_MS) pairings.delete(id);
-  }
-}
 
 const keycloakServerUrl =
   process.env.KEYCLOAK_ISSUER ?? "http://keycloak:8080/realms/edcv";
@@ -83,7 +76,6 @@ export async function startPairing(
   fetcher: typeof fetch = fetch,
   now: number = Date.now(),
 ): Promise<Pairing> {
-  sweep(now);
   const res = await fetcher(
     `${keycloakServerUrl}/protocol/openid-connect/auth/device`,
     {
@@ -117,35 +109,71 @@ export async function startPairing(
     expiresAt: now + d.expires_in * 1000,
     interval: d.interval ?? 5,
   };
-  pairings.set(pairing.id, pairing);
+  // Sweeps pairings past their grace period on the way, so the label stays
+  // as small as the number of QR codes shown in the last few minutes.
+  await runQuery(
+    `MERGE (p:AppPairing {id: $id})
+       ON CREATE SET p.username = $username, p.expiresAt = $expiresAt
+     WITH p
+     OPTIONAL MATCH (old:AppPairing) WHERE old.expiresAt < $sweepBefore
+     DETACH DELETE old`,
+    {
+      id: pairing.id,
+      username,
+      expiresAt: pairing.expiresAt,
+      sweepBefore: now - GRACE_MS,
+    },
+  );
   return pairing;
 }
 
-/** The pairing, when it exists and this login started it. */
-export function getPairing(
+/** The pairing, when it exists, this login started it, and its grace period has not run out. */
+export async function getPairing(
   id: string,
   username: string,
   now: number = Date.now(),
-): Pairing | null {
-  sweep(now);
-  const p = pairings.get(id);
-  return p && p.username === username ? p : null;
+): Promise<StoredPairing | null> {
+  const rows = await runQuery<{
+    id: string;
+    username: string;
+    expiresAt: number;
+    deviceId: string | null;
+    deviceName: string | null;
+  }>(
+    `MATCH (p:AppPairing {id: $id, username: $username})
+     RETURN p.id AS id, p.username AS username, p.expiresAt AS expiresAt,
+            p.deviceId AS deviceId, p.deviceName AS deviceName`,
+    { id, username },
+  );
+  const row = rows[0];
+  if (!row || now > row.expiresAt + GRACE_MS) return null;
+  return {
+    id: row.id,
+    username: row.username,
+    expiresAt: row.expiresAt,
+    ...(row.deviceId ? { deviceId: row.deviceId } : {}),
+    ...(row.deviceName ? { deviceName: row.deviceName } : {}),
+  };
 }
 
 /** Records that the phone registered under this pairing. */
-export function completePairing(
+export async function completePairing(
   id: string,
+  username: string,
   deviceId: string,
   deviceName: string,
-): void {
-  const p = pairings.get(id);
-  if (p) Object.assign(p, { deviceId, deviceName });
+): Promise<void> {
+  await runQuery(
+    `MATCH (p:AppPairing {id: $id, username: $username})
+     SET p.deviceId = $deviceId, p.deviceName = $deviceName`,
+    { id, username, deviceId, deviceName },
+  );
 }
 
 export type PairingStatus = "pending" | "connected" | "expired";
 
 export function pairingStatus(
-  p: Pairing,
+  p: Pick<StoredPairing, "expiresAt" | "deviceId">,
   now: number = Date.now(),
 ): PairingStatus {
   if (p.deviceId) return "connected";
@@ -185,9 +213,4 @@ export function ehdsOrigin(request: Request): string {
     }
   }
   return new URL(request.url).origin;
-}
-
-/** Test seam: forget every pairing. */
-export function resetPairings(): void {
-  pairings.clear();
 }

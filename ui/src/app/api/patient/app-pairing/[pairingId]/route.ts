@@ -21,7 +21,13 @@ export async function GET(
   if (isAuthError(auth)) return auth;
   const username = await sessionUsername();
   const { pairingId } = await params;
-  const pairing = username ? getPairing(pairingId, username) : null;
+  let pairing;
+  try {
+    pairing = username ? await getPairing(pairingId, username) : null;
+  } catch (err) {
+    console.error("GET /api/patient/app-pairing/[pairingId]:", err);
+    return NextResponse.json({ error: "Neo4j unavailable" }, { status: 502 });
+  }
   if (!pairing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
