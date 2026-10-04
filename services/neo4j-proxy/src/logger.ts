@@ -71,10 +71,13 @@ function serializeError(err: unknown) {
   };
 }
 
-export function createLogger(destination?: DestinationStream): Logger {
+export function createLogger(
+  destination?: DestinationStream,
+  level = process.env.LOG_LEVEL ?? "info",
+): Logger {
   return pino(
     {
-      level: process.env.LOG_LEVEL ?? "info",
+      level,
       base: { service: "neo4j-proxy" },
       timestamp: pino.stdTimeFunctions.isoTime,
       formatters: { level: (label) => ({ level: label }) },
