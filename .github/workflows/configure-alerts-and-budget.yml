@@ -1,0 +1,61 @@
+# ---------------------------------------------------------------------------
+# Alerts and budget (#418 Phase A, ADR-045)
+# ---------------------------------------------------------------------------
+# Runs scripts/azure/configure-alerts-and-budget.sh as the mvhd-github-actions
+# identity, which holds Contributor on rg-mvhd-dev. The operator's own account
+# is Container Apps Contributor only and cannot write action groups, alerts,
+# budgets or the Log Analytics workspace (found 2026-10-04).
+#
+# The alert address comes from the ALERT_EMAIL repository secret, never from
+# the repository: it is public. Azure OIDC signs in only on main, so dispatch
+# this from main. Run with dry_run first.
+# ---------------------------------------------------------------------------
+name: Configure alerts and budget
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Print what would change, change nothing"
+        type: boolean
+        default: true
+      budget_eur:
+        description: "Monthly budget for rg-mvhd-dev in EUR"
+        type: string
+        default: "1000"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: configure-alerts-and-budget
+  cancel-in-progress: false
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Configure alerts, budget and the daily cap
+        env:
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          BUDGET_EUR: ${{ inputs.budget_eur }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          [ -n "$ALERT_EMAIL" ] || { echo "::error::Set the ALERT_EMAIL repository secret"; exit 1; }
+          echo "::add-mask::$ALERT_EMAIL"
+          if [ "$DRY_RUN" = "true" ]; then
+            ./scripts/azure/configure-alerts-and-budget.sh --dry-run
+          else
+            ./scripts/azure/configure-alerts-and-budget.sh
+          fi

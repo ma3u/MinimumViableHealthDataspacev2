@@ -24,6 +24,11 @@
 #      busy day keeps its logs and the budget is what notices a loop.
 #
 # Re-running is safe: every step replaces what it made before.
+#
+# Needs write access to action groups, metric alerts, budgets and the
+# workspace: Contributor on the resource group. The operator's account is
+# Container Apps Contributor only, so run it through the workflow
+# .github/workflows/configure-alerts-and-budget.yml (dispatch from main).
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/env.sh"
