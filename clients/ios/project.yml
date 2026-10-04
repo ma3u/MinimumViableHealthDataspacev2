@@ -19,7 +19,7 @@ settings:
     MARKETING_VERSION: "1.0"
     # Rises with every upload: App Store Connect refuses a build number it has
     # already seen, and it refuses it after the upload, having spent minutes.
-    CURRENT_PROJECT_VERSION: "2"
+    CURRENT_PROJECT_VERSION: "3"
 
 targets:
   # Mirrors the SwiftPM `Shared` target so the app and the parity tool compile
@@ -96,6 +96,14 @@ targets:
         # The store must be unreadable while the device is locked.
         CODE_SIGN_ENTITLEMENTS: Sources/MeinBefund/MeinBefund.entitlements
         TARGETED_DEVICE_FAMILY: "1"
+      # App Attest (ADR-054): a development build's keys are attested in
+      # Apple's development environment, a TestFlight or App Store build's in
+      # production. The hub accepts both and records which.
+      configs:
+        Debug:
+          MB_APP_ATTEST_ENV: development
+        Release:
+          MB_APP_ATTEST_ENV: production
     info:
       # Generated, so Info.plist must never be hand-edited: `xcodegen generate`
       # silently overwrites it, and the edit reappears as a mystery regression.

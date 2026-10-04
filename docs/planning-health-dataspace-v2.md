@@ -162,5 +162,6 @@ All three core specifications are now final or near-final:
 | [049](ADRs/ADR-049-klarbefund-connects-by-device-grant.md)                  | Klarbefund connects to a patient's record by a device grant the website starts                  | 2026-10-03 | Proposed          |
 | [052](ADRs/ADR-052-confidential-spe-on-azure-revisited.md)                  | The confidential secure processing environment, revisited against Azure and the vendors of 2026 | 2026-10-04 | Proposed          |
 | [053](ADRs/ADR-053-everything-stops-off-hours.md)                           | Everything stops off hours, and the UI says so                                                  | 2026-10-04 | Accepted          |
+| [054](ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md) | Klarbefund creates a sandbox account on the hub, gated by App Attest                            | 2026-10-04 | Proposed          |
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.

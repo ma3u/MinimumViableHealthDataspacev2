@@ -46,6 +46,14 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/app-accounts/challenge",
+      "methods": ["POST"]
+    },
+    {
+      "path": "/api/app-accounts",
+      "methods": ["POST"]
+    },
+    {
       "path": "/api/assets",
       "methods": ["GET", "POST"]
     },
@@ -240,6 +248,10 @@
     {
       "path": "/api/patient/app-pairing",
       "methods": ["POST"]
+    },
+    {
+      "path": "/api/patient/app/account",
+      "methods": ["DELETE"]
     },
     {
       "path": "/api/patient/app/record",
@@ -988,6 +1000,12 @@
       "file": "ADR-053-everything-stops-off-hours.md",
       "title": "Everything stops off hours, and the UI says so",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-054",
+      "file": "ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md",
+      "title": "Klarbefund creates a sandbox account on the hub, gated by App Attest",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1014,8 +1032,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 43,
-    "operations": 56
+    "paths": 46,
+    "operations": 59
   },
   "workflowJobs": {
     "test.yml": [
