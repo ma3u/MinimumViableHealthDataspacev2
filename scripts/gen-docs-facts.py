@@ -4,7 +4,9 @@ that the repository already knows, and the date each page last changed.
 
 The /docs pages carried hand-typed facts (16 pages, 36 API routes, 8 databases,
 15 hooks, 1,613 tests, 18 of 51 ADRs) that drifted for months because nothing
-compared them with the code. They now read those facts from this file, and
+compared them with the code. Test counts are left out on purpose: nearly every
+pull request changes them, so concurrent pull requests would keep invalidating
+each other over a number nobody needs exactly. They now read those facts from this file, and
 this script derives it from the code:
 
   apiRoutes        ui/src/app/api/**/route.ts, with the methods each exports
@@ -13,7 +15,6 @@ this script derives it from the code:
   composeServices  docker-compose.yml + docker-compose.jad.yml
   postgresDbs      jad/init-postgres.sql + POSTGRES_DB
   adrs             docs/ADRs/ADR-*.md (id, title, status)
-  testFiles        Vitest files (UI + proxy) and Playwright spec files
   complianceFloors scripts/compliance-baseline.json
   openapi          ui/public/openapi.yaml (version, paths, operations)
   workflowJobs     the job names of the main CI workflows
@@ -61,12 +62,11 @@ PAGES = {
     },
     "/docs/developer": {
         "sources": ["ui/src/app/docs/developer/page.tsx"],
-        "facts": ["apiRoutes", "uiPages", "preCommitHooks", "composeServices", "postgresDbs", "testFiles",
-                  "workflowJobs"],
+        "facts": ["apiRoutes", "uiPages", "preCommitHooks", "composeServices", "postgresDbs", "workflowJobs"],
     },
     "/docs/developer/quality-gates": {
         "sources": ["ui/src/app/docs/developer/quality-gates/page.tsx"],
-        "facts": ["preCommitHooks", "testFiles", "complianceFloors", "apiRoutes", "workflowJobs",
+        "facts": ["preCommitHooks", "complianceFloors", "apiRoutes", "workflowJobs",
                   "coverageThresholds", "toolVersions", "openapi"],
     },
     "/docs/developer/api": {
@@ -167,25 +167,6 @@ def adrs():
     return out
 
 
-def test_files():
-    def count(pattern, prune=()):
-        return len([
-            f for f in glob.glob(os.path.join(ROOT, pattern), recursive=True)
-            if not any(p in f for p in prune)
-        ])
-    specs = glob.glob(os.path.join(ROOT, "ui/__tests__/e2e/**/*.spec.ts"), recursive=True)
-    e2e_tests = sum(
-        len(re.findall(r"^\s*test(?:\.(?:only|skip|fixme))?\(", open(f, encoding="utf-8").read(), re.M))
-        for f in specs
-    )
-    return {
-        "uiUnitFiles": count("ui/__tests__/**/*.test.ts*", prune=("/e2e/",)),
-        "proxyUnitFiles": count("services/neo4j-proxy/**/*.test.ts", prune=("node_modules",)),
-        "e2eSpecFiles": len(specs),
-        "e2eTests": e2e_tests,
-    }
-
-
 def openapi():
     spec = yaml.safe_load(read("ui/public/openapi.yaml"))
     ops = sum(
@@ -242,7 +223,6 @@ def collect():
         "composeServices": compose_services(),
         "postgresDbs": postgres_dbs(),
         "adrs": adrs(),
-        "testFiles": test_files(),
         "complianceFloors": compliance_floors(),
         "openapi": openapi(),
         "workflowJobs": workflow_jobs(),

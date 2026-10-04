@@ -921,7 +921,7 @@
       "id": "ADR-041",
       "file": "ADR-041-managed-postgres-on-azure-containerised-locally.md",
       "title": "Managed PostgreSQL on Azure, containerised PostgreSQL for local development",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-042",
@@ -981,15 +981,9 @@
       "id": "ADR-053",
       "file": "ADR-053-everything-stops-off-hours.md",
       "title": "Everything stops off hours, and the UI says so",
-      "status": "Proposed"
+      "status": "Accepted"
     }
   ],
-  "testFiles": {
-    "uiUnitFiles": 177,
-    "proxyUnitFiles": 7,
-    "e2eSpecFiles": 59,
-    "e2eTests": 1042
-  },
   "complianceFloors": {
     "dsp-tck-results": {
       "min_passed": 21,

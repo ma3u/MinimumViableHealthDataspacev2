@@ -16,8 +16,6 @@ const implementedOperations = facts.apiRoutes.reduce(
 );
 const COMPOSE_SERVICES = Object.values(facts.composeServices).flat().length;
 const PRE_COMMIT_HOOKS = facts.preCommitHooks.length;
-const UNIT_TEST_FILES =
-  facts.testFiles.uiUnitFiles + facts.testFiles.proxyUnitFiles;
 
 const PAGES_BASE = "/MinimumViableHealthDataspacev2";
 const GITHUB_REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
@@ -100,7 +98,7 @@ const cicdDiagram = `graph LR
 
   subgraph "Pull request"
     GATE["PR Gate<br/>hooks on the diff, API spec drift,<br/>Bruno coverage, knip, gitleaks"]
-    TEST["test.yml<br/>${UNIT_TEST_FILES} unit test files,<br/>E2E, SBOM, Trivy, Kubescape"]
+    TEST["test.yml<br/>unit tests, E2E,<br/>SBOM, Trivy, Kubescape"]
     CQL["CodeQL<br/>default setup"]
     SEC["security-scan.yml<br/>source + image CVEs"]
     COMP["compliance.yml<br/>DSP TCK, DCP, EHDS, Bruno"]
@@ -1217,9 +1215,9 @@ open http://traefik.localhost`}</pre>
             <h4 className="font-semibold text-sm mb-2">Unit Tests (Vitest)</h4>
             <ul className="text-(--text-secondary) text-xs space-y-1">
               <li>
-                <strong>{UNIT_TEST_FILES} test files</strong> (
-                {facts.testFiles.uiUnitFiles} UI,{" "}
-                {facts.testFiles.proxyUnitFiles} Neo4j proxy)
+                <strong>UI and Neo4j proxy</strong> suites, the UI&apos;s
+                mirroring <code>ui/src/</code> under{" "}
+                <code>ui/__tests__/unit/</code>
               </li>
               <li>v8 coverage, published with the test report</li>
               <li>
@@ -1248,8 +1246,8 @@ npm run test:coverage  # With v8 coverage`}</pre>
             </h4>
             <ul className="text-(--text-secondary) text-xs space-y-1">
               <li>
-                <strong>{facts.testFiles.e2eSpecFiles} spec files</strong>,{" "}
-                {facts.testFiles.e2eTests} tests (journey IDs J001 onward)
+                <strong>Journey specs</strong> in{" "}
+                <code>ui/__tests__/e2e/journeys/</code> (IDs J001 onward)
               </li>
               <li>
                 WCAG 2.2 AA accessibility audit (

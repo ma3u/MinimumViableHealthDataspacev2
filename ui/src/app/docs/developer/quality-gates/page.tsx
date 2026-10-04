@@ -18,9 +18,6 @@ import MermaidDiagram from "@/components/MermaidDiagram";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 import facts from "@/app/docs/docs-facts.json";
 
-const UNIT_TEST_FILES =
-  facts.testFiles.uiUnitFiles + facts.testFiles.proxyUnitFiles;
-
 /* ------------------------------------------------------------------ */
 /*  Data                                                               */
 /* ------------------------------------------------------------------ */
@@ -42,10 +39,10 @@ const pipelineDiagram = `graph LR
 
   subgraph "Stage 3 — Pull request"
     PR1["PR Gate<br/>hooks on the diff, API spec drift,<br/>Bruno coverage, knip"]
-    CI1["Unit tests<br/>${UNIT_TEST_FILES} files"]
+    CI1["Unit tests<br/>Vitest, UI + proxy"]
     CI5["Trivy + Kubescape"]
     CI6["CodeQL + security-scan<br/>source and image CVEs"]
-    CI7["E2E<br/>${facts.testFiles.e2eTests} Playwright tests"]
+    CI7["E2E<br/>Playwright journeys"]
     CI8["WCAG 2.2 AA<br/>axe-core"]
   end
 
@@ -93,14 +90,14 @@ const ciGates = [
   },
   {
     job: "UI Tests (Vitest)",
-    tests: `${facts.testFiles.uiUnitFiles} files`,
+    tests: "—",
     tool: `Vitest ${facts.toolVersions.vitest} + v8 coverage`,
     blocking: true,
     standard: "BSI C5 DEV-03",
   },
   {
     job: "Neo4j Proxy Tests",
-    tests: `${facts.testFiles.proxyUnitFiles} files`,
+    tests: "—",
     tool: "Vitest",
     blocking: true,
     standard: "BSI C5 DEV-03",
@@ -142,7 +139,7 @@ const ciGates = [
   },
   {
     job: "E2E Tests",
-    tests: `${facts.testFiles.e2eTests}`,
+    tests: "—",
     tool: `Playwright v${facts.toolVersions.playwright}`,
     blocking: false,
     standard: "—",
@@ -687,18 +684,18 @@ export default function QualityGatesPage() {
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
               <div className="text-xl font-bold text-(--text-primary)">
-                {UNIT_TEST_FILES}
+                Vitest
               </div>
               <div className="text-xs text-(--text-secondary)">
-                Unit test files
+                Unit tests, UI and Neo4j proxy
               </div>
             </div>
             <div>
               <div className="text-xl font-bold text-(--text-primary)">
-                {facts.testFiles.e2eTests}
+                Playwright
               </div>
               <div className="text-xs text-(--text-secondary)">
-                E2E tests in {facts.testFiles.e2eSpecFiles} spec files
+                E2E journeys, incl. WCAG 2.2 AA
               </div>
             </div>
             <div>
