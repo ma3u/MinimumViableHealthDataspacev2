@@ -17,6 +17,12 @@
 #   ./scripts/azure/wire-klarbefund-accounts.sh            # Azure
 #   ./scripts/azure/wire-klarbefund-accounts.sh --local    # compose stack, localhost:8080
 #   ./scripts/azure/wire-klarbefund-accounts.sh --check    # report, change nothing
+#   ./scripts/azure/wire-klarbefund-accounts.sh --wire-only  # CI: only the mvhd-ui reference
+#
+# A maintainer with Container Apps Contributor cannot put a Key Vault
+# reference on mvhd-ui (it needs userAssignedIdentities/assign/action,
+# 2026-10-04), so that last step also runs as the CI identity:
+# .github/workflows/wire-klarbefund-accounts.yml, which calls --wire-only.
 #
 # Idempotent. Azure needs the Keycloak admin password (Key Vault), Key Vault
 # Secrets Officer for the secret, and Container Apps Contributor on mvhd-ui.
@@ -25,10 +31,12 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 LOCAL=false
 CHECK_ONLY=false
+WIRE_ONLY=false
 for arg in "$@"; do
   case "$arg" in
     --local) LOCAL=true ;;
     --check) CHECK_ONLY=true ;;
+    --wire-only) WIRE_ONLY=true ;;
     *) echo "unknown argument: $arg" >&2; exit 64 ;;
   esac
 done
@@ -36,6 +44,36 @@ done
 REALM_FILE="$(cd ../.. && pwd)/jad/keycloak-realm.json"
 SECRET_NAME="keycloak-account-service-secret"
 SERVICE_ROLES='["manage-users","view-users","query-groups"]'
+
+# The Key Vault reference on mvhd-ui. Wiring only: the secret is already in
+# Key Vault, and the app resolves it through its managed identity.
+wire_ui() {
+  KV_URI="$(az keyvault show --name "$KEY_VAULT_NAME" --query properties.vaultUri -o tsv)"
+  IDENTITY_ID="$(az identity show --name "${DSP_TOKEN_IDENTITY:-id-mvhd-claude-federation}" \
+    --resource-group "$RG" --query id -o tsv)"
+  REF="keyvaultref:${KV_URI%/}/secrets/${SECRET_NAME},identityref:${IDENTITY_ID}"
+  # Assigning needs Managed Identity Operator, which a maintainer may lack;
+  # wire-dsp-catalog-token.sh has normally assigned it already.
+  if ! az containerapp show --name "$UI_APP" --resource-group "$RG" \
+      --query "identity.userAssignedIdentities" -o json | grep -qi "${IDENTITY_ID##*/}"; then
+    az containerapp identity assign --name "$UI_APP" --resource-group "$RG" \
+      --user-assigned "$IDENTITY_ID" -o none
+  fi
+  az containerapp secret set --name "$UI_APP" --resource-group "$RG" \
+    --secrets "${SECRET_NAME}=${REF}" -o none
+  az containerapp update --name "$UI_APP" --resource-group "$RG" \
+    --set-env-vars "KEYCLOAK_ACCOUNT_SERVICE_SECRET=secretref:${SECRET_NAME}" -o none
+  echo "    mvhd-ui reads KEYCLOAK_ACCOUNT_SERVICE_SECRET from Key Vault"
+}
+
+if [[ "$WIRE_ONLY" == "true" ]]; then
+  # shellcheck source=env.sh
+  source ./env.sh
+  az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" \
+    --query id -o none || { echo "$SECRET_NAME is not in Key Vault; run without --wire-only first" >&2; exit 1; }
+  wire_ui
+  exit 0
+fi
 
 if [[ "$LOCAL" == "true" ]]; then
   KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8080}"
@@ -130,17 +168,9 @@ else
   [[ -n "$SECRET" ]] || { echo "could not regenerate the secret" >&2; exit 1; }
   az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" \
     --value "$SECRET" -o none
-  KV_URI="$(az keyvault show --name "$KEY_VAULT_NAME" --query properties.vaultUri -o tsv)"
-  IDENTITY_ID="$(az identity show --name "${DSP_TOKEN_IDENTITY:-id-mvhd-claude-federation}" \
-    --resource-group "$RG" --query id -o tsv)"
-  REF="keyvaultref:${KV_URI%/}/secrets/${SECRET_NAME},identityref:${IDENTITY_ID}"
-  az containerapp identity assign --name "$UI_APP" --resource-group "$RG" \
-    --user-assigned "$IDENTITY_ID" -o none
-  az containerapp secret set --name "$UI_APP" --resource-group "$RG" \
-    --secrets "${SECRET_NAME}=${REF}" -o none
-  az containerapp update --name "$UI_APP" --resource-group "$RG" \
-    --set-env-vars "KEYCLOAK_ACCOUNT_SERVICE_SECRET=secretref:${SECRET_NAME}" -o none
-  echo "    mvhd-ui reads KEYCLOAK_ACCOUNT_SERVICE_SECRET from Key Vault"
+  echo "    kept in Key Vault as ${SECRET_NAME}"
+  echo "    mvhd-ui reads it once the CI identity wires the reference:"
+  echo "      gh workflow run wire-klarbefund-accounts.yml --ref main"
 fi
 
 # ---- prove it: the service account gets a token and may list users ----
