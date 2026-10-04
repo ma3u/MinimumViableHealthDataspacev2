@@ -1,7 +1,11 @@
 # Moving the secure processing environment to Contrast
 
 **Status:** implementation plan for phase 2 of
-[ADR-037](ADRs/ADR-037-secure-processing-environment-confidential-computing.md).
+[ADR-037](ADRs/ADR-037-secure-processing-environment-confidential-computing.md),
+revisited by [ADR-052](ADRs/ADR-052-confidential-spe-on-azure-revisited.md)
+(October 2026): phase 2a is built vendor-free on AKS confidential containers,
+and Contrast is a phase 2b candidate. The Contrast steps below stay as the
+record of how that candidate would be wired up.
 **Tracks:** [#27](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/27)
 **Article numbers:** as adopted. The secure processing environment is
 **Art. 73** of Regulation (EU) 2025/327, not Art. 50, which was its number in the
@@ -21,8 +25,15 @@ work of making the word true, and this document is how.
 
 ## The blocker, stated first
 
-Contrast does not run on Azure Container Apps, and the demonstrator is on Azure
-Container Apps (ADR-012).
+Per-pod attestation does not run on Azure Container Apps, and the demonstrator
+is on Azure Container Apps (ADR-012).
+
+ACA did gain confidential compute in 2026: a DC-series dedicated workload
+profile on SEV-SNP confidential VMs, generally available since Build 2026, but
+in **UAE North only** and at **VM level**, with no attestation report for the
+app and no per-container policy (#481). When an EU region arrives it covers the
+"operator cannot read memory" half without AKS; it never covers "this exact
+code ran".
 
 Contrast installs a Kubernetes `RuntimeClass` named `contrast-cc` plus a
 DaemonSet that prepares each worker node, and it then runs each pod as its own
@@ -32,10 +43,10 @@ node pool nor a runtime class. There is no configuration of ACA that gets there.
 So phase 2 is not a deployment change, it is a second runtime. Two ways to get
 one:
 
-| Option                                           | What it costs                                                                                                                                     | Verdict                                               |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| **AKS with a Confidential Containers node pool** | A node pool in the same subscription, on AMD SEV-SNP confidential VM sizes (DCa/ECa v5 family), Azure Linux, `--workload-runtime KataCcIsolation` | **Start here.** It is a node pool, not a data centre. |
-| Bare metal K3s, SEV-SNP or TDX                   | BIOS work, AMD firmware in `/lib/firmware/amd`, kernel 6.11 or newer, a block storage provider, and TCB values filled in by hand                  | Only if sovereignty rules out the cloud.              |
+| Option                                           | What it costs                                                                                                                                          | Verdict                                                                                                                                                                         |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AKS with a Confidential Containers node pool** | A node pool in the same subscription, on AMD SEV-SNP confidential VM sizes (`Standard_DC4as_cc_v5`), Azure Linux, `--workload-runtime KataCcIsolation` | **Start here.** It is a node pool, not a data centre. Contrast's current docs describe bare-metal setup only; confirm AKS support with Edgeless before relying on it (ADR-052). |
+| Bare metal K3s, SEV-SNP or TDX                   | BIOS work, AMD firmware in `/lib/firmware/amd`, kernel 6.11 or newer, a block storage provider, and TCB values filled in by hand                       | Only if sovereignty rules out the cloud.                                                                                                                                        |
 
 AKS also matters for a second reason: on bare metal, `contrast generate` cannot
 fill in the minimum TCB values (`MinimumTCB` on SEV-SNP, `MinimumTeeTcbSvn` and
@@ -60,7 +71,7 @@ and the VM's memory is the sum of the containers' memory **limits** plus a fixed
 ## The migration, step by step
 
 Version numbers below are placeholders. Check the current release first;
-Contrast was at 1.24 when this was written.
+Contrast was at 1.24.1 (24 September 2026) when this was last checked.
 
 **0. A CoCo-enabled cluster.** An AKS cluster with a node pool created with
 `--workload-runtime KataCcIsolation`, the Azure Linux `os-sku`, and a
@@ -195,10 +206,12 @@ should not be described as available before it is.
 
 ## Cost, licence, and the honest caveats
 
-- **Licence.** Contrast is under the Business Source License: non-production use
-  is permitted, production needs a commercial licence from Edgeless Systems.
-  A demonstrator shown to a ministry sits close enough to that line to be worth
-  a written answer before the demo rather than after it.
+- **Licence.** Contrast is under the Business Source License 1.1 with an
+  Additional Use Grant of "None", converting to AGPL-3.0 four years after each
+  minor release. Edgeless describes non-production use as permitted; a public
+  demonstrator is production use, so phase 2b needs a written answer before any
+  deployment, not after. This is why ADR-052 builds phase 2a on the Apache-2.0
+  components (Kata, Confidential Containers, `genpolicy`) instead.
 - **It does not scale to zero.** ADR-023 and ADR-027 put the current stack on an
   off-hours scaledown. A confidential node pool is a node that is either running
   or being provisioned, so phase 2 has a monthly number attached to it in a way
