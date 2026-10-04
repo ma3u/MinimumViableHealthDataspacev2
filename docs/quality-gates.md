@@ -64,9 +64,13 @@ Run automatically before every `git commit`. Configured in
 **Static analysis** has two halves. Semgrep runs in pre-commit on the staged files and
 knows the registry rule sets plus `.semgrep/cypher.yml`: request input must reach Cypher as
 a parameter, never as query text (`.semgrep/cypher.ts` is its test, run by the
-`semgrep-rule-tests` hook). Semgrep CE cannot follow data across files, so CodeQL default
-setup runs on GitHub for every PR and weekly, free on a public repo, results in the Security
-tab. Suppress a Semgrep finding with `// nosemgrep: <rule-id> -- <reason>` on the line
+`semgrep-rule-tests` hook). Semgrep CE cannot follow data across files, so CodeQL runs on
+GitHub, free on a public repo, results in the Security tab: `codeql.yml` analyses
+JavaScript/TypeScript, Python and the workflows on every PR and weekly, and `codeql-swift.yml`
+analyses the iPhone app only when `clients/ios/` changes, plus weekly, because a Swift
+analysis means a macOS build of about 17 minutes. The same analysis runs on the Mac as the
+`codeql-swift` pre-push hook when a push changes the app
+(`clients/ios/Scripts/codeql-swift.sh`; `SKIP=codeql-swift git push` skips it once). Suppress a Semgrep finding with `// nosemgrep: <rule-id> -- <reason>` on the line
 above; the reason is not optional.
 
 **Key rules:**

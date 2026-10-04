@@ -99,7 +99,7 @@ const cicdDiagram = `graph LR
   subgraph "Pull request"
     GATE["PR Gate<br/>hooks on the diff, API spec drift,<br/>Bruno coverage, knip, gitleaks"]
     TEST["test.yml<br/>unit tests, E2E,<br/>SBOM, Trivy, Kubescape"]
-    CQL["CodeQL<br/>default setup"]
+    CQL["CodeQL<br/>Swift only when clients/ios changes"]
     SEC["security-scan.yml<br/>source + image CVEs"]
     COMP["compliance.yml<br/>DSP TCK, DCP, EHDS, Bruno"]
   end

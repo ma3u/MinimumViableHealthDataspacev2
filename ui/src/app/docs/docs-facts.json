@@ -450,6 +450,12 @@
       "stage": "pre-push"
     },
     {
+      "id": "codeql-swift",
+      "name": "CodeQL on the iPhone app (Swift, about 15 min)",
+      "source": "local",
+      "stage": "pre-push"
+    },
+    {
       "id": "gitleaks",
       "name": "Secret Scan (gitleaks)",
       "source": "local",
