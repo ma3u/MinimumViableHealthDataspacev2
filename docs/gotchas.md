@@ -3,6 +3,29 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-04: an old Neo4j revision held the lock, and the one with the traffic could not start
+
+On a Sunday the graph was down while `az containerapp list` showed Neo4j
+`Running`. Two revisions were active: `mvhd-neo4j--0000181` with 100 % of the
+traffic, crash-looping (104 restarts), and `--0000179`, Healthy, with none.
+`0000181` logged `FileLockException: Lock file has been locked by another
+process: /data/databases/store_lock`. Both mount the same `neo4j-data` share,
+and the old one had it.
+
+How it happens: in single-revision mode a new revision replaces the old one
+only once the new one is healthy. A replica-count change makes a new revision
+(the Saturday-night manual start did), the new one cannot take the lock, so it
+never becomes healthy, so the old one is never retired. Nothing resolves it.
+The same rule kept two April data-plane revisions (`ActivationFailed`, two
+replicas each) and an idle `mvhd-postgres--0000148` running for months.
+
+Look at revisions, not the app: `az containerapp revision list -n <app> -g
+rg-mvhd-dev --query "[?properties.active]"`. A revision that is active, not
+the latest and has no traffic serves nothing; `scripts/azure/retire-stale-revisions.sh`
+deactivates those (`--dry-run` first), and the start job of
+`aca-schedule.yml` runs it before any app starts, because a stop and start
+(ADR-053) keep every active revision.
+
 ## 2026-10-03: a Vault role write keeps the fields it does not send
 
 Onboarding on Azure stopped at "Participant Context" with the whole stack up.

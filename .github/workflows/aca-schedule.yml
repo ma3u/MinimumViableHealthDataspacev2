@@ -250,6 +250,17 @@ jobs:
           fi
           echo "$PG_FLEX_NAME is Ready."
 
+      # Before any app starts. A start brings back every active revision, and
+      # an old one without traffic still runs replicas: on 2026-10-04 an old
+      # mvhd-neo4j revision held the store lock, so the one with the traffic
+      # crash-looped and the graph was down, and two April data-plane
+      # revisions billed two replicas each. Not fatal: a stack that starts
+      # with a stale revision is what ran before this step existed.
+      - name: Retire revisions that serve nothing
+        run: |
+          ./scripts/azure/retire-stale-revisions.sh ||
+            echo "::warning::A stale revision could not be deactivated, see above"
+
       - name: Restore Container App scale profiles
         run: |
           # The evening stop stops these (ADR-053); a stop keeps their scale,
