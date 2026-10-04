@@ -3,6 +3,26 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-04: the Klarbefund QR pairing lived in one replica of three
+
+"Connect to EHDS" (#473, ADR-049) kept each QR pairing in a `Map` on
+`globalThis`, on the premise that the UI runs one replica, as the EUDI
+sign-in assumes (ADR-028). On Azure `mvhd-ui` scales from one to three, and
+three were running. A pairing touches three requests: the patient screen
+starts it, the phone registers under it, the screen polls it. Each reached
+whichever replica the ingress chose, so the phone's registration answered
+403 "scan a new QR code" two times in three, and the screen never saw
+"Connected". The compose stack has one UI, so every local check passed.
+`scripts/check-klarbefund-connect.sh` against ehds.mabu.red found it: steps 1
+to 4 passed by luck, then the status poll reached another replica and read
+nothing.
+
+Pairings are now `(:AppPairing)` nodes in Neo4j, with the id, the login, the
+expiry and the phone, never the device code. Any state that one request
+writes and another reads belongs in Neo4j or Postgres, not in the process.
+`ui/src/lib/eudi-store.ts` still keeps its transactions in memory and has the
+same fault on Azure.
+
 ## 2026-10-04: a stopped Container App answers 404, and the Keycloak check read it as a missing realm
 
 Every Azure deploy on Sunday 2026-10-04 failed in "Auth is actually working"

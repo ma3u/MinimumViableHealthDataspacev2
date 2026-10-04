@@ -26,8 +26,48 @@ vi.mock("jose", async (original) => ({
 }));
 
 const mockRunQuery = vi.fn();
+
+/**
+ * The `(:AppPairing)` nodes, as Neo4j would hold them for every replica of
+ * the UI. Pairing queries go here; every other query goes to mockRunQuery,
+ * so the cases below set the connection rows as before.
+ */
+type PairingRow = {
+  id: string;
+  username: string;
+  expiresAt: number;
+  deviceId?: string;
+  deviceName?: string;
+};
+const pairingRows = new Map<string, PairingRow>();
+function pairingQuery(cypher: string, p: Record<string, unknown>) {
+  const row = pairingRows.get(p.id as string);
+  const own = row && row.username === p.username ? row : undefined;
+  if (cypher.trimStart().startsWith("MERGE (p:AppPairing")) {
+    for (const [id, r] of pairingRows) {
+      if (r.expiresAt < (p.sweepBefore as number)) pairingRows.delete(id);
+    }
+    if (!row) {
+      pairingRows.set(p.id as string, {
+        id: p.id as string,
+        username: p.username as string,
+        expiresAt: p.expiresAt as number,
+      });
+    }
+    return [];
+  }
+  if (cypher.includes("SET p.deviceId")) {
+    if (own)
+      Object.assign(own, { deviceId: p.deviceId, deviceName: p.deviceName });
+    return [];
+  }
+  return own ? [{ deviceId: null, deviceName: null, ...own }] : [];
+}
 vi.mock("@/lib/neo4j", () => ({
-  runQuery: (...args: unknown[]) => mockRunQuery(...args),
+  runQuery: (cypher: string, params: Record<string, unknown>) =>
+    cypher.includes(":AppPairing")
+      ? Promise.resolve(pairingQuery(cypher, params))
+      : mockRunQuery(cypher, params),
 }));
 
 // The real requireAuth(), against the mocked session.
@@ -38,7 +78,6 @@ import {
   appLink,
   getPairing,
   pairingStatus,
-  resetPairings,
   startPairing,
   toPublicUrl,
 } from "@/lib/app-pairing";
@@ -115,7 +154,7 @@ function fakeKeycloak() {
 
 beforeEach(() => {
   mockRunQuery.mockReset();
-  resetPairings();
+  pairingRows.clear();
 });
 
 describe("the app's token (ADR-049)", () => {
@@ -236,10 +275,44 @@ describe("the pairing (RFC 8628, started by the website)", () => {
 
   it("shows a pairing only to the login that started it, and expires it", async () => {
     const p = await startPairing("patient1", fakeKeycloak(), 1_000_000);
-    expect(getPairing(p.id, "patient2", 1_000_001)).toBeNull();
-    const mine = getPairing(p.id, "patient1", 1_000_001)!;
+    expect(await getPairing(p.id, "patient2", 1_000_001)).toBeNull();
+    const mine = (await getPairing(p.id, "patient1", 1_000_001))!;
     expect(pairingStatus(mine, 1_000_001)).toBe("pending");
     expect(pairingStatus(mine, 1_000_000 + 121_000)).toBe("expired");
+    // Past the five minutes' grace, a phone can no longer register with it.
+    expect(
+      await getPairing(p.id, "patient1", 1_000_000 + 121_000 + 300_000),
+    ).toBeNull();
+  });
+
+  it("is found by another replica: nothing about it is kept in the process", async () => {
+    // On Azure, mvhd-ui runs up to three replicas. The QR code, the phone's
+    // registration and the screen's polling may each reach a different one;
+    // a freshly loaded module is what a second replica is (2026-10-04).
+    const p = await startPairing("patient1", fakeKeycloak(), 1_000_000);
+    vi.resetModules();
+    const other = await import("@/lib/app-pairing");
+    expect(await other.getPairing(p.id, "patient1", 1_000_001)).toMatchObject({
+      id: p.id,
+      expiresAt: 1_000_000 + 120_000,
+    });
+    await other.completePairing(p.id, "patient1", DEVICE, "iPhone");
+    const back = (await getPairing(p.id, "patient1", 1_000_002))!;
+    expect(pairingStatus(back, 1_000_002)).toBe("connected");
+  });
+
+  it("stores neither the device code nor the user code", async () => {
+    const p = await startPairing("patient1", fakeKeycloak(), 1_000_000);
+    expect(JSON.stringify(pairingRows.get(p.id))).not.toMatch(
+      /dev-code-1|ABCD-EFGH/,
+    );
+  });
+
+  it("sweeps pairings past their grace period when a new one starts", async () => {
+    const old = await startPairing("patient1", fakeKeycloak(), 1_000_000);
+    await startPairing("patient1", fakeKeycloak(), 1_000_000 + 500_000);
+    expect(pairingRows.has(old.id)).toBe(false);
+    expect(pairingRows.size).toBe(1);
   });
 });
 
@@ -314,7 +387,9 @@ describe("POST /api/patient/app-devices", () => {
       deviceName: "iPhone of P1",
       username: "patient1",
     });
-    expect(pairingStatus(getPairing(p.id, "patient1")!)).toBe("connected");
+    expect(pairingStatus((await getPairing(p.id, "patient1"))!)).toBe(
+      "connected",
+    );
   });
 
   it("refuses a token of one login with a pairing another login started", async () => {
