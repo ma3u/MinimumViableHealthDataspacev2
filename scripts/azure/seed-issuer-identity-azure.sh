@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Give the 0.18 IssuerService on Azure its identity (ADR-054, #503)
+# Give the 0.18 IssuerService on Azure its identity (ADR-055, #503)
 # =============================================================================
 #   seed-issuer-identity-azure.sh seed     key, context, activation, definitions
 #   seed-issuer-identity-azure.sh verify   restart the issuer, then check that

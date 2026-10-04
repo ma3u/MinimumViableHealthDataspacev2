@@ -76,7 +76,7 @@ EDC_IDENTITY_URL="http://${IDENTITYHUB_APP}:7082/api/identity"
 EDC_ISSUER_URL="https://${ISSUER_APP}.internal.${ACA_DOMAIN}/api/admin"
 # The client defaults to v5alpha and rewrites the segment from this
 # (ui/src/lib/edc/client.ts), so without it every call is a 404. The control
-# plane serves v5beta since ADR-054 (#503); the April build it replaced
+# plane serves v5beta since ADR-055 (#503); the April build it replaced
 # (jad-controlplane:2026-04-14) served only v4alpha.
 EDC_MGMT_API_VERSION="${EDC_MGMT_API_VERSION:-v5beta}"
 EDC_TENANT_URL="https://${TENANT_MGR_APP}.internal.${ACA_DOMAIN}/api"

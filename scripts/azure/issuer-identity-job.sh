@@ -1,7 +1,7 @@
 #!/bin/sh
 # =============================================================================
 # Runs INSIDE the ACA environment, as the job seed-issuer-identity-azure.sh
-# creates. Gives the 0.18 IssuerService its identity (ADR-054, #503).
+# creates. Gives the 0.18 IssuerService its identity (ADR-055, #503).
 # =============================================================================
 # The Azure port of what compose and CI do in jad/bootstrap-vault.sh,
 # jad/seed-jad.sh steps 2 to 4 and scripts/seed-issuer-identity.sh, with the

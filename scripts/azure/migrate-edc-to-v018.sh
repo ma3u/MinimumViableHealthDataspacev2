@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Move the EDC apps on Azure to the build compose and CI run (ADR-054, #503)
+# Move the EDC apps on Azure to the build compose and CI run (ADR-055, #503)
 # =============================================================================
 #   migrate-edc-to-v018.sh check              read-only: what each app runs
 #   migrate-edc-to-v018.sh backup             save every app's YAML first

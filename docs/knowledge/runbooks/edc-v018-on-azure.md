@@ -1,4 +1,4 @@
-# Runbook: moving Azure to the EDC 0.18 build (ADR-054)
+# Runbook: moving Azure to the EDC 0.18 build (ADR-055)
 
 Moves the five EDC apps on `rg-mvhd-dev` from the April build
 (`jad-*:2026-04-14`) to the build compose and CI run (`jad-*:4a7e5bd096c5`),

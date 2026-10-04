@@ -990,8 +990,8 @@
       "status": "Accepted"
     },
     {
-      "id": "ADR-054",
-      "file": "ADR-054-azure-runs-the-compose-jad-build.md",
+      "id": "ADR-055",
+      "file": "ADR-055-azure-runs-the-compose-jad-build.md",
       "title": "Azure runs the same JAD build as compose and CI",
       "status": "Proposed"
     }

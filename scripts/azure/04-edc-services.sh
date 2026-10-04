@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Phase 4: EDC-V core services — controlplane, dataplanes, identity hub, issuer.
 #
-# ADR-054: the EDC apps run the 0.18 build compose and CI run. This script
+# ADR-055: the EDC apps run the 0.18 build compose and CI run. This script
 # still creates them with the base settings only; the 0.18 settings, ports and
 # databases are applied by migrate-edc-to-v018.sh, after
 # create-edc-v018-databases.sh (runbook: docs/knowledge/runbooks/edc-v018-on-azure.md).

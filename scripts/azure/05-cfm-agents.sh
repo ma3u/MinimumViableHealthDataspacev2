@@ -291,7 +291,7 @@ deploy_shim
 # 08-compliance-runner.sh and 05-cfm-ui.sh already call that port.
 #
 # STS (7084), DID (7083) and the credentials API (7085; on compose it is 7082,
-# which Azure gives the identity API) exist only since ADR-054 moved
+# which Azure gives the identity API) exist only since ADR-055 moved
 # IdentityHub to the 0.18 build: the April build here served none of them,
 # and nothing answered on 7084 or 7082/api/credentials (probe of 2026-09-29).
 # migrate-edc-to-v018.sh sets those ports and maps them on the ingress.

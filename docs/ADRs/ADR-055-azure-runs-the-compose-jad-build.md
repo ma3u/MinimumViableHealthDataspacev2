@@ -1,4 +1,4 @@
-# ADR-054: Azure runs the same JAD build as compose and CI
+# ADR-055: Azure runs the same JAD build as compose and CI
 
 **Status:** Proposed
 **Date:** 2026-10-04

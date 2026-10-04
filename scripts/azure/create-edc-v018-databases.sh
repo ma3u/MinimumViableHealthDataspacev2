@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # =============================================================================
-# The five EDC databases for the 0.18 build, beside the April ones (ADR-054)
+# The five EDC databases for the 0.18 build, beside the April ones (ADR-055)
 # =============================================================================
 #   create-edc-v018-databases.sh          create what is missing, then list
 #   create-edc-v018-databases.sh check    list only
 #
-# ADR-054 moves the EDC apps to the build compose and CI run, on fresh
+# ADR-055 moves the EDC apps to the build compose and CI run, on fresh
 # databases: the April tables were made by a build whose schema is unknown,
 # and leaving them untouched keeps a rollback that is only a revision away.
 # The 0.18 services create their own tables on first start

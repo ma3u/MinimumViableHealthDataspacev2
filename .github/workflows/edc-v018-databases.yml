@@ -1,6 +1,6 @@
-name: EDC 0.18 databases (ADR-054)
+name: EDC 0.18 databases (ADR-055)
 
-# Creates the five databases the EDC apps use after ADR-054 moves Azure to
+# Creates the five databases the EDC apps use after ADR-055 moves Azure to
 # the build compose and CI run: controlplane_v018, dataplane_v018,
 # dataplane_omop_v018, identityhub_v018, issuerservice_v018. The April
 # databases stay untouched as the rollback.
@@ -41,4 +41,4 @@ jobs:
       - name: Create the databases
         run: |
           ./scripts/azure/create-edc-v018-databases.sh </dev/null
-          echo "**EDC 0.18 databases present** on the Flexible Server (ADR-054)." >> "$GITHUB_STEP_SUMMARY"
+          echo "**EDC 0.18 databases present** on the Flexible Server (ADR-055)." >> "$GITHUB_STEP_SUMMARY"

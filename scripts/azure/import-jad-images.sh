@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Copy the JAD build that compose and CI run into ACR (ADR-054, #503).
+# Copy the JAD build that compose and CI run into ACR (ADR-055, #503).
 # =============================================================================
 #   scripts/azure/import-jad-images.sh [--dry-run]
 #
