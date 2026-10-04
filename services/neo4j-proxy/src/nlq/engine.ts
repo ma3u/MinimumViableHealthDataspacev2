@@ -227,7 +227,9 @@ export const QUERY_TEMPLATES: QueryTemplate[] = [
              d.source         AS source,
              themeCodes       AS themeCodes,
              d.lastSeenAt     AS lastSeenAt
-      ORDER BY d.lastSeenAt DESC NULLS LAST, d.title
+      // Not DESC NULLS LAST: that is Cypher 25, and Neo4j 5.26 rejects it with
+      // "Invalid input 'NULLS'", so this template failed on every call.
+      ORDER BY lastSeenAt IS NULL, lastSeenAt DESC, title
       LIMIT 50
     `,
     extractParams: (_match, question) => ({ question }),
