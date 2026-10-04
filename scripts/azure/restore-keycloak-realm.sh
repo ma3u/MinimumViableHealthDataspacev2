@@ -59,6 +59,13 @@ if [[ "$HEALTH_RC" == "2" || "$HEALTH_RC" == "3" ]]; then
   echo "the schema, then re-run this script." >&2
   exit "$HEALTH_RC"
 fi
+# A stopped Keycloak answers 404 for everything; there is nothing to import into.
+if [[ "$HEALTH_RC" == "4" ]]; then
+  echo "" >&2
+  echo "Not importing the realm: mvhd-keycloak is stopped. Start the stack" >&2
+  echo "(aca-schedule.yml, action start) and re-run this script." >&2
+  exit 4
+fi
 # HEALTH_RC=1 is "realm missing", which is precisely what this script is for.
 if [[ "$HEALTH_RC" == "1" ]]; then
   echo "realm is missing; continuing with the import"
