@@ -275,7 +275,6 @@ const ACA_SERVICE_MAP: Record<string, AcaMapping> = {
   "mvhd-vault": { component: "Vault", layer: "identity" },
   "mvhd-tenant-mgr": { component: "Tenant Manager", layer: "cfm" },
   "mvhd-provision-mgr": { component: "Provision Manager", layer: "cfm" },
-  "mvhd-postgres": { component: "PostgreSQL", layer: "infrastructure" },
   "mvhd-nats": { component: "NATS", layer: "infrastructure" },
   "mvhd-neo4j": { component: "Neo4j", layer: "infrastructure" },
   "mvhd-neo4j-proxy": { component: "Neo4j Proxy", layer: "infrastructure" },

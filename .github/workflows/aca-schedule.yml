@@ -124,7 +124,7 @@ jobs:
         mvhd-cfm-cp-shim
         mvhd-provision-mgr mvhd-tenant-mgr mvhd-issuerservice mvhd-identityhub
         mvhd-dp-omop mvhd-dp-fhir mvhd-controlplane
-        mvhd-nats mvhd-claude-federation mvhd-keycloak mvhd-vault mvhd-postgres
+        mvhd-nats mvhd-claude-federation mvhd-keycloak mvhd-vault
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -256,7 +256,7 @@ jobs:
           # so the updates below are a safety net, not what brings them up.
           # Vault and Keycloak need Postgres, which is Ready by now.
           ./scripts/azure/set-app-power.sh start \
-            mvhd-postgres mvhd-vault mvhd-keycloak mvhd-claude-federation \
+            mvhd-vault mvhd-keycloak mvhd-claude-federation \
             mvhd-neo4j mvhd-nats mvhd-neo4j-proxy mvhd-catalog-enricher ||
             echo "::warning::Not every core app reported running, see above"
           echo "=== Restoring Container App replica profiles ==="

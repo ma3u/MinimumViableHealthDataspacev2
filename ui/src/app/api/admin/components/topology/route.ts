@@ -240,7 +240,9 @@ const INFRA_SERVICES: ServiceDef[] = [
   {
     name: "PostgreSQL",
     docker: "health-dataspace-postgres",
-    aca: "mvhd-postgres",
+    // On Azure, the Flexible Server (ADR-041). Not a Container App, so it has
+    // no ACA metrics and shows as unknown rather than as missing.
+    aca: "mvhd-pg-b53a0449",
     layer: "infrastructure",
   },
   {

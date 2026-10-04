@@ -1,6 +1,6 @@
 # ADR-041: Managed PostgreSQL on Azure, containerised PostgreSQL for local development
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-04, Matthias Buchhorn). The "runs around the clock" cost below is superseded by [ADR-053](ADR-053-everything-stops-off-hours.md): the server stops off hours with everything else
 **Date:** 2026-10-02
 **Relates to:** [ADR-001](ADR-001-postgresql-neo4j-split.md), [ADR-036](ADR-036-operator-secrets-in-key-vault.md)
 **Tracks:** [#318](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/318)

@@ -76,11 +76,11 @@ docs/                   — see "Knowledge & planning" below
 7. **A 200 from Keycloak discovery proves nothing.** It is served from the Infinispan
    cache and keeps answering with the `realm` table gone. Prove auth with
    `scripts/azure/check-keycloak-health.sh` (the authorize endpoint, which must reach the
-   database); exit 2 means Postgres, not the realm. `mvhd-postgres` is **ephemeral on
-   purpose** (ADR-041): it cannot mount `pg-data`, because `initdb` chmods PGDATA and SMB
-   returns EPERM, so the mount crash-loops it. Every replica restart therefore empties the
-   cluster; recover the realm with `scripts/azure/restore-keycloak-realm.sh`. Never add
-   that mount; see `docs/gotchas.md` (2026-10-02 and 2026-09-30).
+   database); exit 2 means Postgres, not the realm. On Azure, Postgres is the Flexible
+   Server `mvhd-pg-b53a0449` (ADR-041, accepted), stopped off hours with everything else
+   (ADR-053); the old `mvhd-postgres` container is retired. Never run Postgres on an
+   Azure Files share: `initdb` chmods PGDATA and SMB returns EPERM. See `docs/gotchas.md`
+   (2026-10-02 and 2026-09-30).
 
 ## Knowledge & planning
 
