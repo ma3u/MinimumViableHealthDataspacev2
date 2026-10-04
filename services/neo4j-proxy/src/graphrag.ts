@@ -21,6 +21,7 @@
  */
 
 import type { Driver } from "neo4j-driver";
+import { logger } from "./logger.js";
 
 export type GraphRagTraceStage =
   | {
@@ -136,7 +137,7 @@ async function vectorSearch(
       text: String(r.get("text") ?? ""),
     }));
   } catch (err) {
-    console.warn(`[graphrag] vector search on ${indexName} failed:`, err);
+    logger.warn({ err, index: indexName }, "vector search failed");
     return [];
   } finally {
     await session.close();
@@ -168,7 +169,7 @@ async function expandSubgraph(
     );
     return { nodeCount: Number(res.records[0]?.get("cnt") ?? 0) };
   } catch (err) {
-    console.warn("[graphrag] subgraph expansion failed:", err);
+    logger.warn({ err }, "subgraph expansion failed");
     return { nodeCount: 0 };
   } finally {
     await session.close();
@@ -298,10 +299,7 @@ export async function runGraphRag(
         };
       }
     } catch (err) {
-      console.warn(
-        "[graphrag] rerank failed, falling back to structural top-k:",
-        err,
-      );
+      logger.warn({ err }, "rerank failed, falling back to structural top-k");
     }
   }
 

@@ -1,0 +1,137 @@
+# OpenTelemetry Collector: the single egress point for logs and traces
+# (ADR-045 plane 1 decision 3; runbook cost-efficient-logging.md Phase B step 9; #418).
+#
+# Locally it tails every container of the compose stack through the Docker
+# socket, and receives OTLP from instrumented services. What it keeps is
+# decided here, not in the apps:
+#
+#   - multi-line Java stack traces become one entry (recombine), not 40 lines;
+#   - pino JSON lines are parsed, so level and trace_id are fields, not text;
+#   - DEBUG and health-probe lines are dropped (filter);
+#   - bearer tokens and JWTs are masked (transform), the second line of
+#     defence behind the apps not logging them;
+#   - the backend is one exporter; changing it is a change to this file.
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  docker_observer:
+    endpoint: unix:///var/run/docker.sock
+    # The collector's own logs and the backend's would feed back into themselves.
+    excluded_images:
+      - otel/opentelemetry-collector-contrib*
+      - grafana/otel-lgtm*
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+  # One filelog receiver per running container, created as containers appear.
+  receiver_creator/containers:
+    watch_observers: [docker_observer]
+    receivers:
+      filelog:
+        rule: type == "container"
+        config:
+          include:
+            - /var/lib/docker/containers/`container_id`/`container_id`-json.log
+          start_at: end
+          operators:
+            # Docker's json-file envelope: {"log": "...", "stream": "...", "time": "..."}
+            - type: container
+              format: docker
+              add_metadata_from_filepath: false
+            # A line that starts with whitespace, "at ", "Caused by" or "..." continues
+            # the entry before it (Java and Node stack traces).
+            - type: recombine
+              combine_field: body
+              # Docker keeps each line's trailing newline, so join with nothing.
+              combine_with: ""
+              is_first_entry: body matches "^[^\\s]" and not (body matches "^(Caused by|\\.\\.\\. \\d+ more|at )")
+              source_identifier: attributes["log.file.path"]
+              max_log_size: 64kb
+            # pino and other JSON loggers: lift level and trace_id into fields.
+            - type: json_parser
+              if: body matches "^\\{"
+              parse_to: attributes
+              severity:
+                parse_from: attributes.level
+                mapping:
+                  debug: [debug, trace]
+                  info: info
+                  warn: [warn, warning]
+                  error: [error, fatal]
+            # EDC console monitor and similar: "INFO 2026-10-04T..." or "[0;37mDEBUG ...".
+            - type: regex_parser
+              if: severity_number == nil or severity_number == 0
+              regex: '^(?:\x1b\[[0-9;]*m)?(?P<lvl>SEVERE|ERROR|WARNING|WARN|INFO|DEBUG|TRACE)\b'
+              severity:
+                parse_from: attributes.lvl
+                mapping:
+                  debug: [DEBUG, TRACE]
+                  info: INFO
+                  warn: [WARN, WARNING]
+                  error: [ERROR, SEVERE]
+              on_error: send_quiet
+        resource_attributes:
+          service.name: "`name`"
+          container.name: "`name`"
+          container.image.name: "`image`"
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+
+  # Below INFO, and probe noise, never leave the collector.
+  filter/noise:
+    error_mode: ignore
+    logs:
+      log_record:
+        - severity_number != SEVERITY_NUMBER_UNSPECIFIED and severity_number < SEVERITY_NUMBER_INFO
+        - IsMatch(body, "GET /(api/)?health")
+        - IsMatch(body, "kube-probe|ReadinessProbe|LivenessProbe")
+
+  # Second line of defence: credentials that slipped into a message body.
+  transform/redact:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          # ANSI colour codes: bytes in Loki that nobody reads (EDC, Spring, Vault).
+          - replace_all_patterns(attributes, "value", "\\x1b\\[[0-9;]*m", "")
+          - replace_pattern(body, "\\x1b\\[[0-9;]*m", "")
+          - replace_pattern(body, "(?i)(bearer\\s+)[A-Za-z0-9._~+/=-]+", "$${1}[redacted]")
+          - replace_pattern(body, "eyJ[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]+", "[redacted-jwt]")
+          - delete_key(attributes, "lvl")
+
+  batch:
+    send_batch_size: 1024
+    timeout: 5s
+
+exporters:
+  # The LGTM container takes OTLP and routes logs to Loki, traces to Tempo and
+  # metrics to Prometheus. On Azure this becomes the mvhd-observability app.
+  otlp_http/lgtm:
+    endpoint: http://lgtm:4318
+
+service:
+  extensions: [health_check, docker_observer]
+  pipelines:
+    logs:
+      receivers: [receiver_creator/containers, otlp]
+      processors: [memory_limiter, filter/noise, transform/redact, batch]
+      exporters: [otlp_http/lgtm]
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/lgtm]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/lgtm]

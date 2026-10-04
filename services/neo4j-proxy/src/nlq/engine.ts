@@ -11,6 +11,7 @@ import {
   OPENAI_MODEL,
 } from "../config.js";
 import { driver } from "../db.js";
+import { logger } from "../logger.js";
 
 // ---- Phase 5c: Natural Language Query (Text2Cypher) -------------------------
 
@@ -643,7 +644,7 @@ ${GRAPH_SCHEMA_CONTEXT}`;
           .replace(/```/g, "")
           .trim();
     } catch (err) {
-      console.error("[neo4j-proxy] Azure OpenAI Text2Cypher failed:", err);
+      logger.error({ err }, "Azure OpenAI Text2Cypher failed");
     }
   }
 
@@ -673,7 +674,7 @@ ${GRAPH_SCHEMA_CONTEXT}`;
           .replace(/```/g, "")
           .trim();
     } catch (err) {
-      console.error("[neo4j-proxy] OpenAI Text2Cypher failed:", err);
+      logger.error({ err }, "OpenAI Text2Cypher failed");
     }
   }
 
@@ -696,7 +697,7 @@ ${GRAPH_SCHEMA_CONTEXT}`;
           .replace(/```/g, "")
           .trim();
     } catch (err) {
-      console.error("[neo4j-proxy] Ollama Text2Cypher failed:", err);
+      logger.error({ err }, "Ollama Text2Cypher failed");
     }
   }
 
@@ -724,7 +725,7 @@ ${GRAPH_SCHEMA_CONTEXT}`;
           .replace(/```/g, "")
           .trim();
     } catch (err) {
-      console.error("[neo4j-proxy] Anthropic Text2Cypher failed:", err);
+      logger.error({ err }, "Anthropic Text2Cypher failed");
     }
   }
 
@@ -1106,7 +1107,7 @@ export async function fulltextSearch(
 
     return null;
   } catch (err) {
-    console.error("[neo4j-proxy] Fulltext search error:", err);
+    logger.error({ err }, "Fulltext search error");
     return null;
   } finally {
     await session.close();
@@ -1198,7 +1199,7 @@ async function graphRagSearch(
 
     return null;
   } catch (err) {
-    console.error("[neo4j-proxy] GraphRAG search error:", err);
+    logger.error({ err }, "GraphRAG search error");
     return null;
   } finally {
     await session.close();
@@ -1226,7 +1227,7 @@ export async function generateEmbedding(
       const data = (await resp.json()) as any;
       return data.data?.[0]?.embedding ?? null;
     } catch (err) {
-      console.error("[neo4j-proxy] Azure OpenAI embedding error:", err);
+      logger.error({ err }, "Azure OpenAI embedding error");
     }
   }
 
@@ -1240,7 +1241,7 @@ export async function generateEmbedding(
       const data = (await resp.json()) as any;
       return data.embedding ?? null;
     } catch (err) {
-      console.error("[neo4j-proxy] Ollama embedding error:", err);
+      logger.error({ err }, "Ollama embedding error");
     }
   }
 
@@ -1261,7 +1262,7 @@ export async function generateEmbedding(
       const data = (await resp.json()) as any;
       return data.data?.[0]?.embedding ?? null;
     } catch (err) {
-      console.error("[neo4j-proxy] OpenAI embedding error:", err);
+      logger.error({ err }, "OpenAI embedding error");
     }
   }
 
@@ -1320,11 +1321,8 @@ any write }. Return ONLY valid JSON of the form:
       }),
     });
     if (!resp.ok) {
-      console.warn(
-        "[graphrag] rerank HTTP",
-        resp.status,
-        await resp.text().catch(() => ""),
-      );
+      // Status only: the body can echo the prompt, which carries the question.
+      logger.warn({ status: resp.status }, "rerank request failed");
       return null;
     }
     const body = (await resp.json()) as {
@@ -1337,7 +1335,7 @@ any write }. Return ONLY valid JSON of the form:
       return null;
     return parsed;
   } catch (err) {
-    console.warn("[graphrag] rerank error:", err);
+    logger.warn({ err }, "rerank error");
     return null;
   }
 }
@@ -1590,7 +1588,7 @@ export async function computeCohortDataQuality(
 
     return out;
   } catch (err) {
-    console.warn("[neo4j-proxy] data-quality query failed:", err);
+    logger.warn({ err }, "data-quality query failed");
     return null;
   }
 }
