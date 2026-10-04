@@ -13,10 +13,11 @@ delete {
 assert {
   res.status: eq 200
   res.body.ok: eq true
+  res.body.seeded: eq false
 }
 
 docs {
-  Only ever the participant this folder created. A seeded participant is protected by a 409 that
-  keys on `p.source = "seed"`, which only neo4j/participant-source-init.cypher sets; on a stack where
-  that file has not run, deleting a seeded DID succeeds and orphans its graph (#349).
+  Only ever the participant this folder created. A seeded participant can be deleted as well since
+  2026-10-04; the answer then says `seeded: true` and the next deploy re-seeds it. This request
+  must never touch one, because the suites that follow read the seeded graph.
 }

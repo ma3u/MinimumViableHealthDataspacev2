@@ -45,20 +45,32 @@ MERGE (irs:Participant {participantId: "did:web:irs.fr:hdab"})
                 irs.participantType = "HDAB",
                 irs.country         = "FR";
 
+// The four below are seeds like the five above, but participant-source-init
+// does not know them, so the directory showed them as source "unknown" with
+// no wallet. SET, not ON CREATE SET: the nodes exist on Azure already.
 MERGE (riverside:Participant {participantId: "did:web:riverside.example:participant"})
   ON CREATE SET riverside.name            = "Riverside General (CLINIC)",
                 riverside.participantType = "CLINIC",
-                riverside.country         = "DE";
+                riverside.country         = "DE"
+  SET riverside.source     = coalesce(riverside.source, 'seed'),
+      riverside.walletType = coalesce(riverside.walletType, 'business'),
+      riverside.country    = coalesce(riverside.country, 'DE');
 
 MERGE (trialcorp:Participant {participantId: "did:web:trialcorp.example:research"})
   ON CREATE SET trialcorp.name            = "TrialCorp Research (CRO)",
                 trialcorp.participantType = "CRO",
-                trialcorp.country         = "DE";
+                trialcorp.country         = "DE"
+  SET trialcorp.source     = coalesce(trialcorp.source, 'seed'),
+      trialcorp.walletType = coalesce(trialcorp.walletType, 'business'),
+      trialcorp.country    = coalesce(trialcorp.country, 'DE');
 
 MERGE (healthgov:Participant {participantId: "did:web:healthgov.example:hdab"})
   ON CREATE SET healthgov.name            = "HealthGov (HDAB)",
                 healthgov.participantType = "HDAB",
-                healthgov.country         = "DE";
+                healthgov.country         = "DE"
+  SET healthgov.source     = coalesce(healthgov.source, 'seed'),
+      healthgov.walletType = coalesce(healthgov.walletType, 'business'),
+      healthgov.country    = coalesce(healthgov.country, 'DE');
 
 // Dataspace operator — owns the EDC_ADMIN role in CFM_TO_EDC_ROLE (page.tsx).
 // Without this 9th tenant the RBAC Summary "Administrators" tile reads 0 even
@@ -67,7 +79,10 @@ MERGE (operations:Participant {participantId: "did:web:operations.ehds.example:d
   ON CREATE SET operations.name            = "Health Dataspace Operations",
                 operations.legalName       = "Health Dataspace Operations (Reference Implementation)",
                 operations.participantType = "OPERATOR",
-                operations.country         = "BE";
+                operations.country         = "BE"
+  SET operations.source     = coalesce(operations.source, 'seed'),
+      operations.walletType = coalesce(operations.walletType, 'business'),
+      operations.country    = coalesce(operations.country, 'BE');
 
 // ── 2. Helper data: per-participant profile + VPA seed via UNWIND ────────────
 // One row per (participant, vpa-type). State is set per-row so we can mix

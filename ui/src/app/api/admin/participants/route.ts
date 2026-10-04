@@ -170,7 +170,15 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/** DELETE /api/admin/participants?id=<did> — remove a wallet from the directory. */
+/**
+ * DELETE /api/admin/participants?id=<did> — remove a participant from the
+ * directory, seeded ones included.
+ *
+ * A seeded participant is removed until the next deploy: the seed scripts
+ * MERGE it back (neo4j/participant-source-init.cypher,
+ * seed-tenant-profiles.cypher). Its datasets keep their publisherDid and
+ * reconnect then. The answer says so, so the page can tell the admin.
+ */
 export async function DELETE(request: NextRequest) {
   const denied = await requireAdmin();
   if (denied) return denied;
@@ -192,20 +200,13 @@ export async function DELETE(request: NextRequest) {
     if (rows.length === 0) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
-    // The 5 seeded demo participants anchor contracts, datasets, and E2E
-    // fixtures — deleting them would orphan large parts of the graph.
-    if (rows[0].source === "seed") {
-      return NextResponse.json(
-        { error: "Seeded demo participants cannot be deleted" },
-        { status: 409 },
-      );
-    }
     await runQuery(
       `MATCH (p:Participant {participantId: $participantId})
        DETACH DELETE p`,
       { participantId },
     );
-    return NextResponse.json({ ok: true });
+    const seeded = rows[0].source === "seed";
+    return NextResponse.json({ ok: true, seeded, returnsOnDeploy: seeded });
   } catch (err) {
     console.error("Failed to delete participant:", err);
     return NextResponse.json(

@@ -55,19 +55,22 @@ test.describe("Federated discovery — participant directory (J730–J739)", () 
     await expect(summary).toContainText(/\d+ crawlable/);
   });
 
-  test("J732 seeded participants cannot be deleted from the UI", async ({
+  test("J732 a seeded participant asks before it is removed", async ({
     page,
   }) => {
     await page.goto("/admin/participants");
     const table = page.getByTestId("participants-table");
     await expect(table).toBeVisible({ timeout: T });
 
-    // The AlphaKlinik row is seeded — it must not render a remove button.
+    // Seeded rows can be removed too, until the next deploy re-seeds them.
+    // The first click only asks; Cancel leaves the row alone.
     const alphaRow = table.locator("tr", { hasText: "AlphaKlinik Berlin" });
+    await alphaRow
+      .getByRole("button", { name: "Remove AlphaKlinik Berlin" })
+      .click();
+    await expect(alphaRow.getByText("Back on next deploy")).toBeVisible();
+    await alphaRow.getByRole("button", { name: "Cancel" }).click();
     await expect(alphaRow).toBeVisible();
-    await expect(alphaRow.getByRole("button", { name: /Remove/ })).toHaveCount(
-      0,
-    );
   });
 
   test("J733 onboarding form validates the DID format", async ({ page }) => {
