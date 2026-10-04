@@ -96,11 +96,15 @@ az rest --method put \
 ok "Budget mvhd-monthly"
 
 # ── 4. No ingestion cap ──────────────────────────────────────────────────────
+# ARM PATCH, not `az monitor log-analytics workspace update --quota -1`: on the
+# GitHub runner that command dies inside the CLI with "deadlock detected by
+# _ModuleLock('requests.structures')", twice in a row on 2026-10-04.
 log "Removing the Log Analytics daily cap on ${LAW_NAME}..."
-az monitor log-analytics workspace update --resource-group "$RG" \
-  --workspace-name "$LAW_NAME" --quota -1 -o none
-cap=$(az monitor log-analytics workspace show --resource-group "$RG" \
-  --workspace-name "$LAW_NAME" --query "workspaceCapping.dailyQuotaGb" -o tsv)
+law_url="https://management.azure.com${LAW_ID}?api-version=2022-10-01"
+az rest --method patch --url "$law_url" \
+  --body '{"properties": {"workspaceCapping": {"dailyQuotaGb": -1}}}' -o none
+cap=$(az rest --method get --url "$law_url" \
+  --query "properties.workspaceCapping.dailyQuotaGb" -o tsv)
 if [ "$cap" != "-1.0" ] && [ "$cap" != "-1" ]; then
   err "daily cap is ${cap} GB after the update, expected -1"
   exit 1
