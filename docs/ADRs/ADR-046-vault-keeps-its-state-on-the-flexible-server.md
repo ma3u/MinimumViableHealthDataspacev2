@@ -1,6 +1,6 @@
 # ADR-046: The Azure Vault keeps its state on the Flexible Server
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-04, Matthias Buchhorn)
 **Date:** 2026-10-03
 **Relates to:** [ADR-017](ADR-017-persistent-storage-aca.md), [ADR-036](ADR-036-operator-secrets-in-key-vault.md), [ADR-041](ADR-041-managed-postgres-on-azure-containerised-locally.md), [ADR-042](ADR-042-off-hours-scaledown-current-state.md), ADR-047 ([#458](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/458))
 **Supersedes:** the `mvhd-vault` row of ADR-017 (file backend on the `vault-data` share), and the open point in ADR-042 on whether the Azure Vault needs a bootstrap on every start

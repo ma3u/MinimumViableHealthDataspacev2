@@ -1,8 +1,8 @@
 ---
 title: EUDI Wallet cluster — issues #22, #24, #80 (Phase 27)
-status: future
+status: done
 owner: ma3u
-updated: 2026-07-15
+updated: 2026-10-04
 adr: ../../ADRs/ADR-028-patient-qr-login-eudi-wallet.md
 ---
 

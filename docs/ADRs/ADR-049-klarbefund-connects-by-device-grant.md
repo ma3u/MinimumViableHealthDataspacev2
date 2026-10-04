@@ -1,6 +1,6 @@
 # ADR-049: Klarbefund connects to a patient's record by a device grant the website starts
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-04, Matthias Buchhorn)
 **Date:** 2026-10-03
 **Relates to:** [ADR-044](ADR-044-every-api-route-needs-a-session.md), [ADR-033](ADR-033-lab-report-extraction-pipeline.md), [ADR-034](ADR-034-claude-workload-identity-federation.md)
 **Extends:** [ADR-044](ADR-044-every-api-route-needs-a-session.md), by letting three patient routes accept a Keycloak bearer token from one public client as well as a session. No route becomes anonymous.

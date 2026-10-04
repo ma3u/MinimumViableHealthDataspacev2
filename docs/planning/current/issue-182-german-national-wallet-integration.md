@@ -274,7 +274,7 @@ produces no reportable findings by their own scope definition.
 Next free number (ADR-001…031 taken). Records the German-wallet path, extends ADR-028 rather
 than superseding it, and resolves the dangling "wallet options A/B/C" ADR that the issue table
 references with no file, the `ADR-022` slot was reused for EDC connector cost
-(see `docs/planning/future/eudi-wallet-cluster.md`).
+(see `docs/planning/done/eudi-wallet-cluster.md`).
 
 ### W7: Actor journeys, roles & personas (#72 foundation)
 

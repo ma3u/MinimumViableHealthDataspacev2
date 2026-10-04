@@ -1,8 +1,8 @@
 ---
 title: Security Assessment & BSI C5 Plan — production track (issue #4)
-status: current
+status: future
 owner: ma3u
-updated: 2026-07-15
+updated: 2026-10-04
 adr: ../../ADRs/ADR-011-security-testing.md
 ---
 
