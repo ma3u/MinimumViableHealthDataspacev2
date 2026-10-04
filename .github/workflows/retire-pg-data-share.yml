@@ -1,0 +1,52 @@
+name: Retire the pg-data share (ADR-041 phase 4b)
+
+# The last step of ADR-041 phase 4: remove the pg-data Azure Files share and
+# its storage definition on mvhd-env. They only ever served the mvhd-postgres
+# container, deleted 2026-10-04. Deleting them needs Contributor on
+# rg-mvhd-dev; a maintainer with Container Apps Contributor cannot
+# (AuthorizationFailed, 2026-10-04), so this runs as the CI identity.
+#
+# scripts/azure/13-postgres-flexible-server.sh 4b does the work and refuses
+# while mvhd-postgres exists, while any app or job mounts pg-data, or while
+# the share holds data. Running it again after success is a no-op.
+#
+# Manual trigger only; type "retire" to confirm.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "retire" to delete the pg-data share and its storage definition'
+        required: true
+        type: string
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-reset"
+  cancel-in-progress: false
+
+jobs:
+  retire:
+    name: Retire pg-data
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Retire the pg-data share
+        env:
+          PG_SHARE_CONFIRM: ${{ inputs.confirm }}
+        run: |
+          ./scripts/azure/13-postgres-flexible-server.sh 4b </dev/null
+          echo "**pg-data retired** (ADR-041 phase 4b), see the log for what was removed." >> "$GITHUB_STEP_SUMMARY"
