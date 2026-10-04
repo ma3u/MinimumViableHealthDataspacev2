@@ -287,6 +287,45 @@ describe("OnboardingPage", () => {
 
   // ─── 5. deriveStatus logic ─────────────────────────────────────────
   describe("deriveStatus logic", () => {
+    // Provisioning finishes seconds after the form returns. The list used to
+    // be read once, so a finished registration said "Provisioning" until a
+    // reload (2026-10-04). It is re-read while one is still moving.
+    it("re-reads the list while a registration provisions, and stops when it is done", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      try {
+        const done = {
+          ...provisioningTenant,
+          provisioningComplete: true,
+          vpaSummary: {
+            total: 3,
+            pending: 0,
+            pendingTypes: [],
+            oldestPendingSince: null,
+            stalled: false,
+          },
+        };
+        mockFetchApi
+          .mockReturnValueOnce(mockResponse([provisioningTenant]))
+          .mockReturnValue(mockResponse([done]));
+        render(<OnboardingPage />);
+        await waitFor(() => {
+          expect(screen.getByText("Provisioning")).toBeInTheDocument();
+        });
+
+        await vi.advanceTimersByTimeAsync(5_000);
+        await waitFor(() => {
+          expect(screen.getByText("Active")).toBeInTheDocument();
+        });
+        const calls = mockFetchApi.mock.calls.length;
+
+        // Nothing is moving any more, so nothing more is read.
+        await vi.advanceTimersByTimeAsync(20_000);
+        expect(mockFetchApi.mock.calls.length).toBe(calls);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('shows "Active" badge for tenant with valid identifier', async () => {
       mockFetchApi.mockReturnValue(mockResponse([activeTenant]));
       render(<OnboardingPage />);

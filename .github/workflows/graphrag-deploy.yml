@@ -120,7 +120,7 @@ jobs:
           # Single revision mode then keeps the previous ready revision alive,
           # and it holds Neo4j's store lock, so stop every other revision.
           RESOURCE_GROUP="${{ env.RESOURCE_GROUP }}" \
-            ./scripts/azure/deactivate-old-revisions.sh "${{ env.NEO4J_APP }}"
+            ./scripts/azure/retire-stale-revisions.sh "${{ env.NEO4J_APP }}"
 
       # ── 3. Wait for Neo4j to come back online ────────────────────────────
       # The app's runningStatus describes the app, not the revision taking

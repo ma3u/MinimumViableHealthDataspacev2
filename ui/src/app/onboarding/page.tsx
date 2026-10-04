@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
+import { IS_STATIC } from "@/lib/static-export";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
@@ -59,6 +60,9 @@ interface Tenant {
 }
 
 type RegistrationStep = "form" | "submitting" | "done";
+
+/** How often the list is re-read while a registration is provisioning. */
+const POLL_MS = 5_000;
 
 type TenantStatus =
   | "active"
@@ -639,8 +643,9 @@ function OnboardingContent() {
   const [organization, setOrganization] = useState("");
   const [role, setRole] = useState("data-holder");
 
-  const loadTenants = () => {
-    setLoading(true);
+  // quiet: refresh in place, without the loading state, for the polling below.
+  const loadTenants = (quiet = false) => {
+    if (!quiet) setLoading(true);
     fetchApi("/api/participants/me")
       .then((r) => (r.ok ? r.json() : []))
       .then((d) => {
@@ -653,6 +658,19 @@ function OnboardingContent() {
   useEffect(() => {
     loadTenants();
   }, []);
+
+  // Provisioning finishes seconds after the form returns, and the list used to
+  // be read only then: a registration that completed showed "Provisioning"
+  // until the page was reloaded (2026-10-04). Re-read it while one is still
+  // moving. A stalled one stops counting after PROVISIONING_STALL_MS, a failed
+  // or active one at once, so this ends by itself.
+  const stillProvisioning =
+    !IS_STATIC && tenants.some((t) => deriveStatus(t) === "provisioning");
+  useEffect(() => {
+    if (!stillProvisioning) return;
+    const id = setInterval(() => loadTenants(true), POLL_MS);
+    return () => clearInterval(id);
+  }, [stillProvisioning]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

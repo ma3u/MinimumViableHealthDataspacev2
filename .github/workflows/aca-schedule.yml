@@ -124,7 +124,7 @@ jobs:
         mvhd-cfm-cp-shim
         mvhd-provision-mgr mvhd-tenant-mgr mvhd-issuerservice mvhd-identityhub
         mvhd-dp-omop mvhd-dp-fhir mvhd-controlplane
-        mvhd-nats mvhd-claude-federation mvhd-keycloak mvhd-vault mvhd-postgres
+        mvhd-nats mvhd-claude-federation mvhd-keycloak mvhd-vault
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -250,13 +250,24 @@ jobs:
           fi
           echo "$PG_FLEX_NAME is Ready."
 
+      # Before any app starts. A start brings back every active revision, and
+      # an old one without traffic still runs replicas: on 2026-10-04 an old
+      # mvhd-neo4j revision held the store lock, so the one with the traffic
+      # crash-looped and the graph was down, and two April data-plane
+      # revisions billed two replicas each. Not fatal: a stack that starts
+      # with a stale revision is what ran before this step existed.
+      - name: Retire revisions that serve nothing
+        run: |
+          ./scripts/azure/retire-stale-revisions.sh ||
+            echo "::warning::A stale revision could not be deactivated, see above"
+
       - name: Restore Container App scale profiles
         run: |
           # The evening stop stops these (ADR-053); a stop keeps their scale,
           # so the updates below are a safety net, not what brings them up.
           # Vault and Keycloak need Postgres, which is Ready by now.
           ./scripts/azure/set-app-power.sh start \
-            mvhd-postgres mvhd-vault mvhd-keycloak mvhd-claude-federation \
+            mvhd-vault mvhd-keycloak mvhd-claude-federation \
             mvhd-neo4j mvhd-nats mvhd-neo4j-proxy mvhd-catalog-enricher ||
             echo "::warning::Not every core app reported running, see above"
           echo "=== Restoring Container App replica profiles ==="
@@ -269,11 +280,11 @@ jobs:
               --min-replicas 1 --max-replicas 1 \
               -o none || echo "::warning::Failed to scale $app"
           done
-          # A scale change is a template change, so it makes a new revision, and
-          # a new Neo4j revision cannot take the store lock while the old one
-          # runs: 181 crash-looped 111 times that way (docs/gotchas.md, 2026-10-04).
-          ./scripts/azure/deactivate-old-revisions.sh mvhd-neo4j ||
-            echo "::error::mvhd-neo4j has more than one active revision, see above"
+          # A scale change is a template change, so the update above can make a
+          # new Neo4j revision, after "Retire revisions that serve nothing" ran.
+          # The old one would keep the store lock (docs/gotchas.md, 2026-10-04).
+          ./scripts/azure/retire-stale-revisions.sh mvhd-neo4j ||
+            echo "::warning::A stale mvhd-neo4j revision could not be deactivated, see above"
           # min=1 max=2 (auto-scalable read services)
           for app in mvhd-neo4j-proxy; do
             echo "  $app -> 1/2"

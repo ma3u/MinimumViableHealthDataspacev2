@@ -90,7 +90,7 @@ ok "Neo4j volume attached (neo4j-data → /data; logs stay in the container)"
 # be, so the two deadlock and the old one is re-activated on every update
 # (docs/gotchas.md, 2026-10-02). Stop every other revision; that costs a short
 # outage, which a single-writer database on a shared volume cannot avoid.
-RESOURCE_GROUP="$RG" "${SCRIPT_DIR}/deactivate-old-revisions.sh" "$NEO4J_APP"
+RESOURCE_GROUP="$RG" "${SCRIPT_DIR}/retire-stale-revisions.sh" "$NEO4J_APP"
 
 # Postgres readiness needs no wait here: phase 1 returns only once the server
 # reports Ready, and phase 2 reads every database back.

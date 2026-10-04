@@ -3,25 +3,9 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
-## 2026-10-04: a scale change is a new revision, and a new Neo4j revision cannot start
+## 2026-10-04: the deploy smoke tests signed in on the wrong host, and continue-on-error hid it
 
-Neo4j logged `FileLockException: Lock file has been locked by another process:
-/data/databases/store_lock` 115 times between 2026-10-02 21:56 and 2026-10-04
-07:19 UTC, two days after it was left with one active revision (entry of
-2026-10-02 below). Nobody deployed Neo4j in that time. The off-hours schedule did:
-it set `--min-replicas 0` in the evening and `1` in the morning, and
-`minReplicas` is part of the revision template, so each change made a revision
-(180 on 2026-10-02, 181 on 2026-10-03). Single revision mode kept the old one
-running until the new one was ready, the old one held the store lock, and 181
-restarted 111 times until the weekend stop ended both.
-
-ADR-053 now stops apps instead of scaling them, which keeps the revision, but the
-morning start still runs `az containerapp update --min-replicas 1` on Neo4j as a
-safety net. Any path that can create a Neo4j revision now calls
-`scripts/azure/deactivate-old-revisions.sh mvhd-neo4j` afterwards: the off-hours
-start, `graphrag-deploy.yml` and `02-data-layer.sh`.
-
-Found the same day, in the same log query: the deploy workflow's live smoke
+The deploy workflow's live smoke
 tests ran against the raw ACA host (`mvhd-ui.<hash>.azurecontainerapps.io`)
 while `NEXTAUTH_URL` is `https://ehds.mabu.red`. A sign-in started on one host
 sets its state cookie there and gets its callback on the other, so every
@@ -30,6 +14,29 @@ stack traces per deploy, the largest source of billed UI log lines. The step
 is `continue-on-error`, so 39 failed tests in a run read as green.
 `reset-demo.yml` had fixed exactly this before; `deploy-azure.yml` now uses
 the same custom-domain lookup.
+
+## 2026-10-04: an old Neo4j revision held the lock, and the one with the traffic could not start
+
+On a Sunday the graph was down while `az containerapp list` showed Neo4j
+`Running`. Two revisions were active: `mvhd-neo4j--0000181` with 100 % of the
+traffic, crash-looping (104 restarts), and `--0000179`, Healthy, with none.
+`0000181` logged `FileLockException: Lock file has been locked by another
+process: /data/databases/store_lock`. Both mount the same `neo4j-data` share,
+and the old one had it.
+
+How it happens: in single-revision mode a new revision replaces the old one
+only once the new one is healthy. A replica-count change makes a new revision
+(the Saturday-night manual start did), the new one cannot take the lock, so it
+never becomes healthy, so the old one is never retired. Nothing resolves it.
+The same rule kept two April data-plane revisions (`ActivationFailed`, two
+replicas each) and an idle `mvhd-postgres--0000148` running for months.
+
+Look at revisions, not the app: `az containerapp revision list -n <app> -g
+rg-mvhd-dev --query "[?properties.active]"`. A revision that is active, not
+the latest and has no traffic serves nothing; `scripts/azure/retire-stale-revisions.sh`
+deactivates those (`--dry-run` first), and the start job of
+`aca-schedule.yml` runs it before any app starts, because a stop and start
+(ADR-053) keep every active revision.
 
 ## 2026-10-03: a Vault role write keeps the fields it does not send
 
