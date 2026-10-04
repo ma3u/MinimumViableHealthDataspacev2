@@ -164,4 +164,16 @@ describe("POST /audit/dsp", () => {
     expect(res.status).toBe(503);
     expect(res.body.error).toMatch(/audit record could not be written/);
   });
+
+  it("is not held to the general limit of 100 a minute: a refused callback is a lost record", async () => {
+    appendDspAudit.mockResolvedValue({ chain: "dsp", seq: 1, hash: "h" });
+    const statuses: number[] = [];
+    for (let i = 0; i < 120; i++) {
+      const res = await request
+        .post("/audit/dsp")
+        .send({ ...STARTED, id: `burst-${i}` });
+      statuses.push(res.status);
+    }
+    expect(statuses.filter((s) => s !== 201)).toEqual([]);
+  });
 });

@@ -1,6 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { type Request, type Response } from "express";
-import { app } from "../app.js";
+import { app, auditLimiter } from "../app.js";
 import {
   appendDspAudit,
   dspInputFromEdcEvent,
@@ -79,7 +79,7 @@ function hubInput(body: Record<string, unknown>): DspAuditInput | null {
   return input;
 }
 
-app.post("/audit/dsp", async (req: Request, res: Response) => {
+app.post("/audit/dsp", auditLimiter, async (req: Request, res: Response) => {
   if (!authorised(req)) {
     res.status(401).json({ error: "Unauthorized" });
     return;
