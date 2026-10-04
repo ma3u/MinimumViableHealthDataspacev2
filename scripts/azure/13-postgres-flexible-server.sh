@@ -415,8 +415,12 @@ phase_4() {
   az containerapp delete --name "$PG_APP" --resource-group "$RG" --yes -o none ||
     die "could not delete ${PG_APP}"
   say "Phase 4 done. ${PG_APP} is gone, and with it the pg-data mount question."
-  say "The pg-data share and its storage definition are left in place; delete"
-  say "them by hand once you are sure nothing else references them."
+  # 01-foundation.sh no longer creates the share; an existing install still
+  # has it. On rg-mvhd-dev it was empty (0 bytes) when this ran, 2026-10-04.
+  say "The pg-data share and its storage definition are left in place. Once"
+  say "no app mounts pg-data, remove both:"
+  say "  az containerapp env storage remove -n ${ACA_ENV} -g ${RG} --storage-name pg-data --yes"
+  say "  az storage share-rm delete --storage-account ${STORAGE_ACCOUNT} -g ${RG} --name pg-data --yes"
 }
 
 case "${1:-}" in
