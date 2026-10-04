@@ -3,6 +3,12 @@ import { DSP_PROTOCOL } from "@/lib/dsp-protocol";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 import { requireAuth, isAuthError, type AuthSession } from "@/lib/auth-guard";
 import { recordDemo, listDemo, DemoRecord } from "@/lib/demo-records";
+import {
+  auditCallbackAddresses,
+  auditUnavailableResponse,
+  recordDspEvent,
+  recordDspEventAfter,
+} from "@/lib/dsp-audit";
 import { userToParticipantId } from "@/lib/odrl-engine";
 import { tagRows } from "@/lib/row-provenance";
 import {
@@ -274,6 +280,15 @@ export async function POST(req: NextRequest) {
         assetId: asset,
       });
     } catch (err) {
+      await recordDspEventAfter({
+        process: "transfer-process",
+        event: "refused",
+        outcome: "refused",
+        agreementId: contractId,
+        assetId: asset || undefined,
+        participantContext: participantId,
+        reason: "data permit register unreachable",
+      });
       return NextResponse.json(
         {
           error:
@@ -285,6 +300,19 @@ export async function POST(req: NextRequest) {
       );
     }
     if (!permit.allowed) {
+      // A refused access is on the trail too: the access body has to be able
+      // to show what was asked for without a permit, not only what flowed.
+      await recordDspEventAfter({
+        process: "transfer-process",
+        event: "refused",
+        outcome: "refused",
+        agreementId: contractId,
+        assetId: asset || undefined,
+        consumerId: permit.consumerDid ?? undefined,
+        permitId: permit.permitId ?? undefined,
+        participantContext: participantId,
+        reason: permit.reason,
+      });
       return NextResponse.json(
         {
           error: "No data permit covers this transfer",
@@ -303,6 +331,26 @@ export async function POST(req: NextRequest) {
       permitValidUntil: permit.validUntil,
       permitArticle: permit.article,
     };
+    // On the audit trail before anything is sent, or not at all (ADR-045).
+    const audited = {
+      process: "transfer-process" as const,
+      agreementId: contractId,
+      assetId: asset || undefined,
+      datasetId: permit.datasetId ?? undefined,
+      permitId: permit.permitId ?? undefined,
+      consumerId: permit.consumerDid ?? undefined,
+      participantContext: participantId,
+    };
+    try {
+      await recordDspEvent({
+        ...audited,
+        event: "requested",
+        outcome: "success",
+      });
+    } catch (err) {
+      return auditUnavailableResponse(err);
+    }
+
     const audit = (transferId: string, demo: boolean) =>
       void recordPermittedTransfer({
         transferId,
@@ -332,6 +380,13 @@ export async function POST(req: NextRequest) {
       };
       recordDemo("transfer", participantId, demo);
       audit(demo["@id"], true);
+      await recordDspEventAfter({
+        ...audited,
+        event: "started",
+        outcome: "success",
+        processId: demo["@id"],
+        demo: true,
+      });
       return NextResponse.json(demo, { status: 201 });
     }
 
@@ -347,6 +402,10 @@ export async function POST(req: NextRequest) {
         "@type": "DataAddress",
         type: "HttpProxy",
       },
+      // Every state of this transfer reaches the audit trail (ADR-045, #418).
+      ...(auditCallbackAddresses("transfer.process").length > 0
+        ? { callbackAddresses: auditCallbackAddresses("transfer.process") }
+        : {}),
     };
 
     try {
@@ -360,6 +419,12 @@ export async function POST(req: NextRequest) {
           ? (result["@id"] as string)
           : `transfer:${contractId}`;
       audit(id, false);
+      await recordDspEventAfter({
+        ...audited,
+        event: "initiated",
+        outcome: "success",
+        processId: id,
+      });
       return NextResponse.json({ ...result, ...permitStamp }, { status: 201 });
     } catch (err) {
       // An agreement that only exists in the bundled fixtures looks real (two of
@@ -367,7 +432,15 @@ export async function POST(req: NextRequest) {
       // connector first and only diverted once the connector has refused it. A
       // genuinely live agreement that fails still returns the 502 below, because
       // that is a real fault and hiding it would be worse than the original bug.
-      if (!(await isFixtureAgreement(contractId))) throw err;
+      if (!(await isFixtureAgreement(contractId))) {
+        await recordDspEventAfter({
+          ...audited,
+          event: "failed",
+          outcome: "failure",
+          reason: err instanceof Error ? err.message : String(err),
+        });
+        throw err;
+      }
 
       const msg = err instanceof Error ? err.message : String(err);
       console.warn("Demo agreement transferred without a connector:", msg);
@@ -388,6 +461,13 @@ export async function POST(req: NextRequest) {
       };
       recordDemo("transfer", participantId, demo);
       audit(demo["@id"], true);
+      await recordDspEventAfter({
+        ...audited,
+        event: "started",
+        outcome: "success",
+        processId: demo["@id"],
+        demo: true,
+      });
       return NextResponse.json(demo, { status: 201 });
     }
   } catch (err) {

@@ -39,6 +39,7 @@ import "./routes/nlq.js";
 import "./routes/tasks.js";
 import "./routes/tck.js";
 import "./routes/trust-center.js";
+import "./routes/dsp-audit.js";
 import "./error-handler.js";
 import { logger } from "./logger.js";
 
