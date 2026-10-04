@@ -1,6 +1,6 @@
 # ADR-053: Everything stops off hours, and the UI says so
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-04, Matthias Buchhorn)
 **Date:** 2026-10-04
 **Relates to:** [ADR-022](ADR-022-edc-connector-cost-vs-function.md), [ADR-027](ADR-027-edc-stack-off-hours-scaledown.md), [ADR-041](ADR-041-managed-postgres-on-azure-containerised-locally.md), [ADR-046](ADR-046-vault-keeps-its-state-on-the-flexible-server.md)
 **Supersedes:** the "never stops" list of [ADR-042](ADR-042-off-hours-scaledown-current-state.md) and [ADR-047](ADR-047-vault-stays-up-off-hours.md)

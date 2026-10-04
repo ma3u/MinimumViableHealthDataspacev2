@@ -174,7 +174,8 @@ jobs:
       - name: Restart stateful services
         run: |
           echo "=== Restarting stateful services ==="
-          for app in mvhd-neo4j mvhd-postgres mvhd-vault mvhd-keycloak; do
+          # Postgres is the Flexible Server (ADR-041), not a container app.
+          for app in mvhd-neo4j mvhd-vault mvhd-keycloak; do
             echo "Restarting $app..."
             az containerapp revision restart \
               --name "$app" \

@@ -27,11 +27,15 @@ interface DirectoryResponse {
   };
 }
 
+// Light and dark variants: the dark-only classes left "seed" light blue on
+// blue in the light theme, unreadable.
 const SOURCE_BADGE: Record<string, string> = {
-  seed: "bg-blue-900/40 text-blue-300 border-blue-700",
-  dcp: "bg-purple-900/40 text-purple-300 border-purple-700",
-  "business-wallet": "bg-emerald-900/40 text-emerald-300 border-emerald-700",
-  "private-wallet": "bg-amber-900/40 text-amber-300 border-amber-700",
+  seed: "bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700",
+  dcp: "bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-700",
+  "business-wallet":
+    "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-300 dark:border-emerald-700",
+  "private-wallet":
+    "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/40 dark:text-amber-300 dark:border-amber-700",
 };
 
 const EMPTY_FORM = {
@@ -51,6 +55,8 @@ export default function ParticipantsAdminPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  // The row whose delete waits for a second click.
+  const [confirming, setConfirming] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -96,6 +102,7 @@ export default function ParticipantsAdminPage() {
   }
 
   async function removeParticipant(participantId: string) {
+    setConfirming(null);
     setNotice(null);
     const res = await fetchApi(
       `/api/admin/participants?id=${encodeURIComponent(participantId)}`,
@@ -105,7 +112,11 @@ export default function ParticipantsAdminPage() {
     if (!res.ok) {
       setNotice(body.error ?? `HTTP ${res.status}`);
     } else {
-      setNotice(`Removed ${participantId}`);
+      setNotice(
+        body.returnsOnDeploy
+          ? `Removed ${participantId}. It is seeded, so the next deploy adds it back.`
+          : `Removed ${participantId}`,
+      );
       await load();
     }
   }
@@ -238,10 +249,37 @@ export default function ParticipantsAdminPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      {p.source !== "seed" && (
+                      {confirming === p.participantId ? (
+                        <span className="flex flex-col items-end gap-1 text-xs">
+                          <span className="whitespace-nowrap text-(--text-secondary)">
+                            {p.source === "seed"
+                              ? "Remove? Back on next deploy"
+                              : "Remove?"}
+                          </span>
+                          <span className="flex gap-2">
+                            <button
+                              onClick={() => removeParticipant(p.participantId)}
+                              className="rounded border border-red-400 px-2 py-0.5 text-red-500 hover:bg-red-500/10"
+                            >
+                              Remove
+                            </button>
+                            <button
+                              onClick={() => setConfirming(null)}
+                              className="rounded border border-(--border) px-2 py-0.5 text-(--text-secondary)"
+                            >
+                              Cancel
+                            </button>
+                          </span>
+                        </span>
+                      ) : (
                         <button
-                          onClick={() => removeParticipant(p.participantId)}
+                          onClick={() => setConfirming(p.participantId)}
                           aria-label={`Remove ${p.name ?? p.participantId}`}
+                          title={
+                            p.source === "seed"
+                              ? "Seeded: removed until the next deploy adds it back"
+                              : "Remove from the directory"
+                          }
                           className="text-red-400 hover:text-red-300"
                         >
                           <Trash2 size={15} />

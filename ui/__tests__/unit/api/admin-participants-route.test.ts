@@ -1,7 +1,7 @@
 /**
  * Unit tests for /api/admin/participants — Phase 26a participant directory
  * (issue #8). Covers RBAC, listing with summary, POST validation, and the
- * seed-protection rule on DELETE.
+ * DELETE, which removes seeded participants too until the next deploy.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
@@ -176,13 +176,20 @@ describe("DELETE /api/admin/participants", () => {
     expect(res.status).toBe(404);
   });
 
-  it("refuses to delete seeded demo participants", async () => {
-    mockRunQuery.mockResolvedValue([{ source: "seed" }]);
+  it("deletes a seeded participant and says it returns on deploy", async () => {
+    mockRunQuery
+      .mockResolvedValueOnce([{ source: "seed" }])
+      .mockResolvedValueOnce([]);
     const res = await DELETE(
       deleteRequest("did:web:alpha-klinik.de:participant"),
     );
-    expect(res.status).toBe(409);
-    expect(mockRunQuery).toHaveBeenCalledTimes(1);
+    expect(res.status).toBe(200);
+    expect(mockRunQuery.mock.calls[1][0]).toContain("DETACH DELETE");
+    expect(await res.json()).toEqual({
+      ok: true,
+      seeded: true,
+      returnsOnDeploy: true,
+    });
   });
 
   it("DETACH DELETEs non-seed participants", async () => {
@@ -194,5 +201,6 @@ describe("DELETE /api/admin/participants", () => {
     );
     expect(res.status).toBe(200);
     expect(mockRunQuery.mock.calls[1][0]).toContain("DETACH DELETE");
+    expect((await res.json()).returnsOnDeploy).toBe(false);
   });
 });
