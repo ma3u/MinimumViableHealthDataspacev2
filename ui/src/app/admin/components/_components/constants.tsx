@@ -91,10 +91,11 @@ export const KNOWN_BROKEN_ACA_APPS = new Set<string>([
 ]);
 
 // Mirrors the live Container Apps in rg-mvhd-dev (read 2026-10-03), with
-// sidecars added to their app (Vault's unseal sidecar). "office" apps are in
-// the stop list of .github/workflows/aca-schedule.yml (ADR-042); "always" apps
-// are not. The live panel replaces memGiB with the reservation the API
-// reports, so this list is the fallback for names, CPU and the schedule.
+// sidecars added to their app (Vault's unseal sidecar). Since ADR-053 every
+// app stops outside Mon-Fri 07-20, Keycloak, Vault and the federation gateway
+// included; the UI stays reachable at min=0 with the offline notice, which
+// costs next to nothing. The live panel replaces memGiB with the reservation
+// the API reports, so this list is the fallback for names, CPU and schedule.
 export const ACA_APP_SPECS: AcaAppSpec[] = [
   { name: "mvhd-neo4j", cpu: 1.0, memGiB: 2.0, schedule: "office" },
   { name: "mvhd-controlplane", cpu: 1.0, memGiB: 2.0, schedule: "office" },
@@ -113,24 +114,26 @@ export const ACA_APP_SPECS: AcaAppSpec[] = [
   { name: "mvhd-cfm-edcvagent", cpu: 0.25, memGiB: 0.5, schedule: "office" },
   { name: "mvhd-cfm-regagent", cpu: 0.25, memGiB: 0.5, schedule: "office" },
   { name: "mvhd-cfm-obagent", cpu: 0.25, memGiB: 0.5, schedule: "office" },
-  { name: "mvhd-keycloak", cpu: 1.0, memGiB: 2.0, schedule: "always" },
-  { name: "mvhd-vault", cpu: 0.75, memGiB: 1.5, schedule: "always" },
-  { name: "mvhd-claude-federation", cpu: 0.5, memGiB: 1.0, schedule: "always" },
-  // Ephemeral since ADR-041 and no longer used by any service; removed in
-  // ADR-041 phase 4, which takes this line with it.
-  { name: "mvhd-postgres", cpu: 0.5, memGiB: 1.0, schedule: "always" },
+  { name: "mvhd-keycloak", cpu: 1.0, memGiB: 2.0, schedule: "office" },
+  { name: "mvhd-vault", cpu: 0.75, memGiB: 1.5, schedule: "office" },
+  { name: "mvhd-claude-federation", cpu: 0.5, memGiB: 1.0, schedule: "office" },
+  // mvhd-postgres is retired (ADR-041 phase 4); nothing used it after the
+  // move to the Flexible Server below.
 ];
 
 // ADR-041: every database lives on this Flexible Server since 2026-10-02.
+// The evening stop stops it last and the morning start starts it first
+// (ADR-053), so compute bills office hours and storage bills around the clock.
 export const AZURE_PG_FLEX: PgFlexSpec = {
   name: "mvhd-pg-b53a0449",
   sku: "Standard_B1ms",
   storageGb: 32,
+  schedule: "office",
 };
 
 // Azure Files share quotas in scripts/azure/env.sh. Standard LRS bills data
 // stored, so the quotas are an upper bound. pg-data has had no reader since
-// ADR-041 and goes with mvhd-postgres.
+// ADR-041; it is billed until someone deletes the share by hand.
 export const SHARE_NEO4J_DATA_GIB = 10;
 
 export const SHARE_NEO4J_LOGS_GIB = 5;

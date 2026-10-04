@@ -13,10 +13,10 @@
  *     the Azure Retail Prices API (prices.azure.com, currencyCode=EUR).
  *   - Log Analytics: the bill (EUR 43.57 for 18.3 GB ingested).
  *
- * Off-hours: `.github/workflows/aca-schedule.yml` (ADR-042) runs most apps
- * Mon-Fri 07:00-20:00 Europe/Berlin and scales them to zero otherwise. Apps
- * on the "always" schedule (Keycloak, Vault, the container Postgres,
- * the Claude federation app) bill the idle rate when the office is closed.
+ * Off-hours: `.github/workflows/aca-schedule.yml` stops every app and the
+ * Flexible Server outside Mon-Fri 07:00-20:00 Europe/Berlin (ADR-053). A
+ * stopped app bills nothing. The "always" schedule stays in the model for an
+ * app that is kept up: it bills the idle rate when the office is closed.
  */
 
 // ─── Rates (EUR) ─────────────────────────────────────────────────────────────
@@ -74,6 +74,9 @@ export interface PgFlexSpec {
   name: string;
   sku: string; // key of PG_FLEX_SKU_EUR_PER_HOUR
   storageGb: number;
+  // "office": stopped off hours, so compute bills office hours only; a
+  // stopped server still pays for its storage.
+  schedule: AcaSchedule;
 }
 
 export interface AzureEnvironmentInputs {
@@ -135,7 +138,9 @@ export function costForApp(spec: AcaAppSpec): AcaAppCost & {
 
 export function pgFlexMonthlyEur(pg: PgFlexSpec) {
   const hourly = PG_FLEX_SKU_EUR_PER_HOUR[pg.sku] ?? 0;
-  const computeEur = hourly * HOURS_PER_MONTH;
+  const computeHours =
+    pg.schedule === "office" ? OFFICE_HOURS_PER_MONTH : HOURS_PER_MONTH;
+  const computeEur = hourly * computeHours;
   // Backup storage up to 100 % of the provisioned size is included; seven
   // days of retention on a database this small stays under it. Beyond it,
   // backup costs EUR 0.0906 per GB-month.

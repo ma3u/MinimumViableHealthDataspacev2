@@ -92,7 +92,7 @@ export function AzureCostEstimatorPanel({
         <div className="flex items-center gap-4 text-xs text-(--text-secondary)">
           <span
             className="flex items-center gap-1.5"
-            title="Mon-Fri 07:00-20:00 Europe/Berlin, .github/workflows/aca-schedule.yml (ADR-042). Keycloak, Vault and the Claude federation app stay up and bill the idle rate overnight."
+            title="Mon-Fri 07:00-20:00 Europe/Berlin, .github/workflows/aca-schedule.yml (ADR-053). Every app and the Flexible Server stop outside it; the UI answers with the offline notice at min=0."
           >
             <Clock size={13} />
             Schedule:{" "}
@@ -189,9 +189,11 @@ export function AzureCostEstimatorPanel({
               {formatEur(cost.pgFlexEur)}/mo
             </div>
             <div className="text-[10px] text-(--text-secondary) mt-1">
-              {AZURE_PG_FLEX.sku} · 24×7 {formatEur(cost.pgFlexComputeEur)} ·{" "}
-              {AZURE_PG_FLEX.storageGb} GB {formatEur(cost.pgFlexStorageEur)} ·
-              Keycloak, EDC, CFM, Vault (ADR-041, ADR-046)
+              {AZURE_PG_FLEX.sku} ·{" "}
+              {AZURE_PG_FLEX.schedule === "always" ? "24×7" : "office hours"}{" "}
+              {formatEur(cost.pgFlexComputeEur)} · {AZURE_PG_FLEX.storageGb} GB{" "}
+              {formatEur(cost.pgFlexStorageEur)} · Keycloak, EDC, CFM, Vault
+              (ADR-041, ADR-046)
             </div>
           </div>
           <Card
@@ -263,8 +265,8 @@ export function AzureCostEstimatorPanel({
         <p className="text-[9px] text-(--text-secondary) mt-3 text-center">
           EUR, as billed · Container Apps rates from the subscription&apos;s
           bill, the rest from the Azure retail price list (2026-10-03) ·
-          office-hours apps scale to zero outside Mon-Fri 07-20 · Azure OpenAI,
-          Key Vault and Communication Services are usage based and near €0
+          everything stops outside Mon-Fri 07-20 (ADR-053) · Azure OpenAI, Key
+          Vault and Communication Services are usage based and near €0
         </p>
       </div>
     </div>

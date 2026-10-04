@@ -14,8 +14,9 @@ describe("AzureCostEstimatorPanel", () => {
     expect(
       screen.getByText(/billed 2026-09-03 to 2026-10-02/),
     ).toBeInTheDocument();
-    // always-on apps show what the night costs
-    expect(screen.getAllByText(/^idle €/).length).toBe(4);
+    // ADR-053: nothing stays up overnight, so nothing bills the idle rate
+    expect(screen.queryAllByText(/^idle €/)).toHaveLength(0);
+    expect(screen.queryByText(/mvhd-postgres/)).not.toBeInTheDocument();
   });
 
   it("takes the live memory reservation over the fallback", () => {

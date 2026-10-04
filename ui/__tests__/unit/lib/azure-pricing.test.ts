@@ -45,15 +45,26 @@ describe("costForApp", () => {
 });
 
 describe("pgFlexMonthlyEur", () => {
-  it("prices the live B1ms with 32 GB", () => {
+  it("bills the live B1ms compute in office hours and storage always", () => {
     const pg = pgFlexMonthlyEur(AZURE_PG_FLEX);
-    expect(pg.computeEur).toBeCloseTo(12.78, 2);
+    // ADR-053 stops it off hours: 281.67 h, not 730
+    expect(pg.computeEur).toBeCloseTo(4.93, 2);
     expect(pg.storageEur).toBeCloseTo(3.86, 2);
+  });
+
+  it("bills a server kept up around the clock for 730 h", () => {
+    const pg = pgFlexMonthlyEur({ ...AZURE_PG_FLEX, schedule: "always" });
+    expect(pg.computeEur).toBeCloseTo(12.78, 2);
   });
 
   it("prices an unknown SKU at zero rather than guessing", () => {
     expect(
-      pgFlexMonthlyEur({ name: "x", sku: "Nope", storageGb: 0 }).totalEur,
+      pgFlexMonthlyEur({
+        name: "x",
+        sku: "Nope",
+        storageGb: 0,
+        schedule: "office",
+      }).totalEur,
     ).toBe(0);
   });
 });
@@ -75,12 +86,14 @@ describe("costForEnvironment", () => {
   });
 
   it("keeps the live stack in the range the schedule predicts", () => {
-    // 21 apps, 9.75 vCPU: about €350 compute and €430 in all
-    expect(cost.apps).toHaveLength(21);
-    expect(cost.computeEur).toBeGreaterThan(300);
-    expect(cost.computeEur).toBeLessThan(400);
-    expect(cost.totalEur).toBeGreaterThan(380);
-    expect(cost.totalEur).toBeLessThan(480);
+    // 20 apps, all stopped off hours (ADR-053): about €294 compute and
+    // €362 in all
+    expect(cost.apps).toHaveLength(20);
+    expect(cost.apps.every((a) => a.idleEur === 0)).toBe(true);
+    expect(cost.computeEur).toBeGreaterThan(260);
+    expect(cost.computeEur).toBeLessThan(330);
+    expect(cost.totalEur).toBeGreaterThan(330);
+    expect(cost.totalEur).toBeLessThan(400);
   });
 
   it("charges no egress inside the free 100 GiB", () => {
