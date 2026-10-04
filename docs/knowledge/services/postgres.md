@@ -2,7 +2,7 @@
 type: service
 title: PostgreSQL — JAD service metadata
 description: Relational store for EDC/CFM service state (7 databases).
-resource: docker-compose.jad.yml, ACA app mvhd-postgres, port 5432
+resource: docker-compose.jad.yml (local), Azure Database for PostgreSQL Flexible Server mvhd-pg-b53a0449 (Azure, ADR-041), port 5432
 tags: [postgres, edc]
 generated: { by: claude-code/fable-5, at: 2026-07-15T15:30:23Z }
 verified: { by: human:ma3u, at: 2026-07-15T15:30:23Z }

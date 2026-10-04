@@ -6,8 +6,14 @@ resource: incident 2026-07-16 (issue #97 rollout), .github/workflows/reset-demo.
 tags: [runbook, postgres, azure, incident, recovery]
 generated: { by: claude-code/fable-5, at: 2026-07-17T13:12:25Z }
 verified: { by: human:ma3u, at: 2026-07-17T13:12:25Z }
-status: stable
+status: deprecated
 ---
+
+> **Retired 2026-10-04.** The `mvhd-postgres` container app is deleted (ADR-041
+> phase 4); Azure runs Postgres on the Flexible Server `mvhd-pg-b53a0449`,
+> which keeps its data across restarts. Kept as the record of the 2026-07-16
+> incident. For Keycloak on the Flexible Server see
+> `scripts/azure/check-keycloak-health.sh` and `restore-keycloak-realm.sh`.
 
 **Why this exists:** `mvhd-postgres` on ACA is effectively **ephemeral**. Its
 app template contains an Azure Files mount, but `initdb` cannot `chmod` on

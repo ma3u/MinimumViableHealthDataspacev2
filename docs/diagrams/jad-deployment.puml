@@ -15,7 +15,7 @@ node "Identity" {
 }
 node "Data tier" {
   database "Neo4j 5\n7687/7474 / mvhd-neo4j" as N4
-  database "PostgreSQL\n5432 / mvhd-postgres" as PG
+  database "PostgreSQL Flexible Server\n5432 / mvhd-pg-b53a0449" as PG
   [neo4j-proxy (Express)\nport 9090 / mvhd-neo4j-proxy] as PX
 }
 node "Dataspace" {
