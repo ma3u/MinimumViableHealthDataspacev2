@@ -90,16 +90,7 @@ ok "Neo4j volume attached (neo4j-data → /data; logs stay in the container)"
 # be, so the two deadlock and the old one is re-activated on every update
 # (docs/gotchas.md, 2026-10-02). Stop every other revision; that costs a short
 # outage, which a single-writer database on a shared volume cannot avoid.
-NEO4J_LATEST=$(az containerapp show --name "$NEO4J_APP" --resource-group "$RG" \
-  --query "properties.latestRevisionName" -o tsv)
-while read -r rev; do
-  [[ -z "$rev" || "$rev" == "$NEO4J_LATEST" ]] && continue
-  log "Deactivating ${rev} so ${NEO4J_LATEST} can take the Neo4j store lock..."
-  az containerapp revision deactivate --name "$NEO4J_APP" --resource-group "$RG" \
-    --revision "$rev" -o none
-done < <(az containerapp revision list --name "$NEO4J_APP" --resource-group "$RG" \
-  --query "[?properties.active].name" -o tsv)
-ok "Only ${NEO4J_LATEST} is active"
+RESOURCE_GROUP="$RG" "${SCRIPT_DIR}/deactivate-old-revisions.sh" "$NEO4J_APP"
 
 # Postgres readiness needs no wait here: phase 1 returns only once the server
 # reports Ready, and phase 2 reads every database back.

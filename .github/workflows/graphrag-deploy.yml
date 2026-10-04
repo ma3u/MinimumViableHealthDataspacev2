@@ -119,17 +119,8 @@ jobs:
           # OOM-killed (exit 137) at startup (docs/gotchas.md, 2026-10-02).
           # Single revision mode then keeps the previous ready revision alive,
           # and it holds Neo4j's store lock, so stop every other revision.
-          latest=$(az containerapp show --name "${{ env.NEO4J_APP }}" \
-            --resource-group "${{ env.RESOURCE_GROUP }}" \
-            --query "properties.latestRevisionName" -o tsv)
-          for rev in $(az containerapp revision list --name "${{ env.NEO4J_APP }}" \
-              --resource-group "${{ env.RESOURCE_GROUP }}" \
-              --query "[?properties.active].name" -o tsv); do
-            [ "$rev" = "$latest" ] && continue
-            echo "Deactivating $rev so $latest can take the store lock"
-            az containerapp revision deactivate --name "${{ env.NEO4J_APP }}" \
-              --resource-group "${{ env.RESOURCE_GROUP }}" --revision "$rev" -o none
-          done
+          RESOURCE_GROUP="${{ env.RESOURCE_GROUP }}" \
+            ./scripts/azure/deactivate-old-revisions.sh "${{ env.NEO4J_APP }}"
 
       # ── 3. Wait for Neo4j to come back online ────────────────────────────
       # The app's runningStatus describes the app, not the revision taking

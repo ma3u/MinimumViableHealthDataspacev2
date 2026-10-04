@@ -269,6 +269,11 @@ jobs:
               --min-replicas 1 --max-replicas 1 \
               -o none || echo "::warning::Failed to scale $app"
           done
+          # A scale change is a template change, so it makes a new revision, and
+          # a new Neo4j revision cannot take the store lock while the old one
+          # runs: 181 crash-looped 111 times that way (docs/gotchas.md, 2026-10-04).
+          ./scripts/azure/deactivate-old-revisions.sh mvhd-neo4j ||
+            echo "::error::mvhd-neo4j has more than one active revision, see above"
           # min=1 max=2 (auto-scalable read services)
           for app in mvhd-neo4j-proxy; do
             echo "  $app -> 1/2"
