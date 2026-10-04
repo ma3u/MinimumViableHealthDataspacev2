@@ -36,6 +36,11 @@ env:
   NATS_APP: mvhd-nats
   NEO4J_APP: mvhd-neo4j
   CUSTOM_DOMAIN: ehds.mabu.red
+  # Office hours only (ADR-053): the stack is stopped outside them, and a
+  # crawl at night reached Neo4j and the UI every five minutes, which kept
+  # both awake around the clock. A night or weekend session starts it by
+  # hand (docs/knowledge/runbooks/live-demo-off-hours.md).
+  CRAWLER_CRON: "*/5 5-17 * * 1-5"
 
 jobs:
   # Gate the deploy on the service's own test suite. Before #173 nothing ran
@@ -101,7 +106,7 @@ jobs:
               --cpu 0.25 --memory 0.5Gi \
               --replica-timeout 600 \
               --replica-retry-limit 0 \
-              --cron-expression "*/5 * * * *" \
+              --cron-expression "$CRAWLER_CRON" \
               --set-env-vars "${COMMON_ENV[@]}" \
               -o none
           else
@@ -116,7 +121,7 @@ jobs:
               --cpu 0.25 --memory 0.5Gi \
               --trigger-type Schedule --replica-timeout 600 \
               --replica-retry-limit 0 \
-              --cron-expression "*/5 * * * *" \
+              --cron-expression "$CRAWLER_CRON" \
               --env-vars "${COMMON_ENV[@]}" \
               -o none
           fi
@@ -134,7 +139,7 @@ jobs:
           echo "## Catalog Crawler Deploy" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- Image: \`${{ env.ACR_LOGIN_SERVER }}/${{ env.JOB_NAME }}:${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Schedule: \`*/5 * * * *\` (every 5 min)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Schedule: \`$CRAWLER_CRON\` (every 5 min, weekdays 05-17 UTC)" >> "$GITHUB_STEP_SUMMARY"
           echo "- Target discovery: Neo4j \`(:Participant)\` rows with \`dspCatalogUrl\`" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Manual one-shot:" >> "$GITHUB_STEP_SUMMARY"
