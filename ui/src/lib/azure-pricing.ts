@@ -21,33 +21,32 @@
 
 // ─── Rates (EUR) ─────────────────────────────────────────────────────────────
 
-export const ACA_VCPU_EUR_PER_SEC = 0.0000259;
-export const ACA_MEM_EUR_PER_GIB_SEC = 0.00000304;
-export const ACA_IDLE_EUR_PER_UNIT_SEC = 0.00000301; // per vCPU-s and per GiB-s
+const ACA_VCPU_EUR_PER_SEC = 0.0000259;
+const ACA_MEM_EUR_PER_GIB_SEC = 0.00000304;
+const ACA_IDLE_EUR_PER_UNIT_SEC = 0.00000301; // per vCPU-s and per GiB-s
 
 const ACA_FREE_VCPU_SECONDS = 180_000;
 const ACA_FREE_MEM_GIB_SECONDS = 360_000;
 
 // Azure Database for PostgreSQL Flexible Server (ADR-041)
-export const PG_FLEX_SKU_EUR_PER_HOUR: Record<string, number> = {
+const PG_FLEX_SKU_EUR_PER_HOUR: Record<string, number> = {
   Standard_B1ms: 0.0175,
   Standard_B2s: 0.07,
   Standard_B2ms: 0.1401,
 };
-export const PG_FLEX_STORAGE_EUR_PER_GB = 0.1205;
-export const PG_FLEX_BACKUP_EUR_PER_GB = 0.0906; // beyond 100 % of provisioned storage
+const PG_FLEX_STORAGE_EUR_PER_GB = 0.1205;
 
 // Azure Files, Standard LRS (stmvhddev3e2079), pay-as-you-go on data stored
-export const AZURE_FILES_EUR_PER_GB = 0.0528;
+const AZURE_FILES_EUR_PER_GB = 0.0528;
 // Transactions, which dominate on Standard Files: the bill above showed
 // EUR 11.13 for Files against at most EUR 1.95 of stored data.
-export const AZURE_FILES_TRANSACTIONS_EUR = 9.2;
+const AZURE_FILES_TRANSACTIONS_EUR = 9.2;
 
-export const ACR_BASIC_EUR_PER_DAY = 0.1466;
-export const LOG_ANALYTICS_EUR_PER_GB = 2.38;
+const ACR_BASIC_EUR_PER_DAY = 0.1466;
+const LOG_ANALYTICS_EUR_PER_GB = 2.38;
 
 export const AZURE_EGRESS_FREE_GIB = 100;
-export const AZURE_EGRESS_EUR_PER_GIB = 0.0704;
+const AZURE_EGRESS_EUR_PER_GIB = 0.0704;
 
 export const HOURS_PER_MONTH = 730;
 // Mon-Fri 07:00-20:00: 13 h x 5 days x 52 weeks / 12 months
@@ -138,7 +137,8 @@ export function pgFlexMonthlyEur(pg: PgFlexSpec) {
   const hourly = PG_FLEX_SKU_EUR_PER_HOUR[pg.sku] ?? 0;
   const computeEur = hourly * HOURS_PER_MONTH;
   // Backup storage up to 100 % of the provisioned size is included; seven
-  // days of retention on a database this small stays under it.
+  // days of retention on a database this small stays under it. Beyond it,
+  // backup costs EUR 0.0906 per GB-month.
   const storageEur = pg.storageGb * PG_FLEX_STORAGE_EUR_PER_GB;
   return { computeEur, storageEur, totalEur: computeEur + storageEur };
 }

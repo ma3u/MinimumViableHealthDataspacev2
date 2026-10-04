@@ -86,24 +86,24 @@ export const STACKIT_PG_FLEX: StackitPgFlex = {
 
 // Block storage: every volume pays a performance class per disk plus
 // capacity per GB.
-export const STACKIT_CAPACITY_EUR_PER_GB_HOUR = 0.0000907638;
-export const STACKIT_PG_BACKUP_EUR_PER_GB_HOUR = 0.00003697772;
-export const STACKIT_PERF1_DISK_EUR_PER_HOUR = 0.01016666667; // 500 IOPS
+const STACKIT_CAPACITY_EUR_PER_GB_HOUR = 0.0000907638;
+const STACKIT_PG_BACKUP_EUR_PER_GB_HOUR = 0.00003697772;
+const STACKIT_PERF1_DISK_EUR_PER_HOUR = 0.01016666667; // 500 IOPS
 export const STACKIT_BOOT_DISK_GB = 50;
 export const STACKIT_DATA_DISK_GB = 20; // Neo4j data and logs, Vault file backend
 
-export const STACKIT_NLB_EUR_PER_HOUR = 0.01304166667; // Essential NLB 10
-export const STACKIT_PUBLIC_IP_EUR_PER_HOUR = 0.00405555556;
+const STACKIT_NLB_EUR_PER_HOUR = 0.01304166667; // Essential NLB 10
+const STACKIT_PUBLIC_IP_EUR_PER_HOUR = 0.00405555556;
 
 export const STACKIT_LOGS_EUR_PER_GB = 1.2; // ingestion
-export const STACKIT_LOGS_RETENTION_EUR_PER_GB_DAY = 0.01;
-export const STACKIT_LOGS_RETENTION_DAYS = 30;
+const STACKIT_LOGS_RETENTION_EUR_PER_GB_DAY = 0.01;
+const STACKIT_LOGS_RETENTION_DAYS = 30;
 
 // Per participant, on top of the shared stack. Participants are contexts in
 // one EDC-V deployment, so they add data and traffic, not servers.
 export const PARTICIPANT_STORAGE_GB = 2;
 export const DATA_HOLDER_EXTRA_STORAGE_GB = 10; // FHIR and OMOP data, average
-export const PARTICIPANT_LOG_GB = 150 / 1024; // EHDS Art. 50 audit trail
+const PARTICIPANT_LOG_GB = 150 / 1024; // EHDS Art. 50 audit trail
 
 export interface StackitCost {
   servers: { id: string; eur: number }[];
