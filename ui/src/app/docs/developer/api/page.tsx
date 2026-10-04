@@ -11,6 +11,13 @@ import {
   Loader2,
 } from "lucide-react";
 import { IS_STATIC } from "@/lib/static-export";
+import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
+import facts from "@/app/docs/docs-facts.json";
+
+const implementedOperations = facts.apiRoutes.reduce(
+  (n, r) => n + r.methods.length,
+  0,
+);
 
 const BASE_PATH = IS_STATIC ? "/MinimumViableHealthDataspacev2" : "";
 const OPENAPI_URL = `${BASE_PATH}/openapi.yaml`;
@@ -137,11 +144,16 @@ export default function ApiReferencePage() {
 
         <div className="mb-6">
           <h1 className="text-3xl font-bold mb-2">Interactive API Reference</h1>
+          <DocsLastUpdated page="/docs/developer/api" />
           <p className="text-(--text-secondary)">
-            OpenAPI 3.1 specification for all 38 Next.js API routes (DSP 2025-1,
-            DCP v1.0, FHIR R4, OMOP CDM, HealthDCAT-AP). Use{" "}
-            <strong>Try it out</strong> to call live endpoints — most routes
-            require a NextAuth session cookie.
+            OpenAPI {facts.openapi.version} specification of the Next.js API:{" "}
+            {facts.openapi.operations} of the {implementedOperations}{" "}
+            implemented operations are documented so far (DSP 2025-1, DCP v1.0,
+            FHIR R4, OMOP CDM, HealthDCAT-AP). The PR Gate blocks any new route
+            that is not in the spec, and the backlog only shrinks. Use{" "}
+            <strong>Try it out</strong> to call live endpoints. Every route
+            needs a session cookie except the sign-in flows, the health probe
+            and the TestFlight form (ADR-044, ADR-048).
           </p>
         </div>
 
