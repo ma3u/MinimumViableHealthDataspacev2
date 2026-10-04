@@ -34,7 +34,8 @@ ok "Image pushed: ${ACR_LOGIN_SERVER}/${CATALOG_CRAWLER_JOB}:latest"
 # ── Create / update the ACA Job ─────────────────────────────────────
 log "Creating/updating ACA Job ${CATALOG_CRAWLER_JOB}..."
 # Every 5 min; aligned with ADR-020 interval.
-CRON_EXPRESSION='*/5 * * * *'
+# Office hours only, as in .github/workflows/catalog-crawler.yml (ADR-053).
+CRON_EXPRESSION='*/5 5-17 * * 1-5'
 
 if az containerapp job show --name "$CATALOG_CRAWLER_JOB" --resource-group "$RG" -o none 2>/dev/null; then
   az containerapp job update \

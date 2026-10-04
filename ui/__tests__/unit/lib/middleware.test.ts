@@ -5,7 +5,7 @@
  * applies a per-request CSP nonce to every HTML response. Tests call the
  * default-exported `middleware()` function with mock NextRequests.
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 /* ── Mocks ─────────────────────────────────────────────────────────── */
 
@@ -36,10 +36,10 @@ async function invoke(pathname: string, token: TokenLike = null) {
 /* ── Config matcher ────────────────────────────────────────────────── */
 
 describe("middleware config matcher", () => {
-  it("exports a single universal matcher pattern", async () => {
+  it("exports the page pattern and, for off-hours mode, the API routes", async () => {
     const { config } = await import("@/middleware");
     expect(Array.isArray(config.matcher)).toBe(true);
-    expect(config.matcher).toHaveLength(1);
+    expect(config.matcher).toEqual([expect.any(String), "/api/:path*"]);
   });
 
   it("excludes api, static assets, images, favicon, swagger-ui, mock, and static", async () => {
@@ -259,5 +259,57 @@ describe("middleware — Content-Security-Policy", () => {
     const res = await invoke("/admin", { roles: [] });
     const csp = res.headers.get("Content-Security-Policy");
     expect(csp).toBeTruthy();
+  });
+});
+
+/* ── Off-hours mode (ADR-053) ──────────────────────────────────────── */
+
+describe("middleware — off-hours mode", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("passes API routes through untouched while the demo is up", async () => {
+    const res = await invoke("/api/patient");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("Content-Security-Policy")).toBeNull();
+  });
+
+  it("shows every page as the offline notice, without asking for a session", async () => {
+    vi.stubEnv("LIVE_DEMO_OFFLINE", "true");
+    for (const p of ["/", "/graph", "/admin/policies"]) {
+      getTokenMock.mockClear();
+      const res = await invoke(p);
+      expect(res.headers.get("x-middleware-rewrite")).toContain("/offline");
+      expect(res.headers.get("location")).toBeNull();
+      expect(res.headers.get("Content-Security-Policy")).toContain("nonce-");
+      expect(getTokenMock).not.toHaveBeenCalled();
+    }
+  });
+
+  it("does not rewrite the notice onto itself", async () => {
+    vi.stubEnv("LIVE_DEMO_OFFLINE", "true");
+    const res = await invoke("/offline");
+    expect(res.headers.get("x-middleware-rewrite")).toBeNull();
+  });
+
+  it("answers data routes with a 503 that points at the static site", async () => {
+    vi.stubEnv("LIVE_DEMO_OFFLINE", "true");
+    const res = await invoke("/api/graph");
+    expect(res.status).toBe(503);
+    expect(res.headers.get("Retry-After")).toBe("3600");
+    const body = await res.json();
+    expect(body.error).toMatch(/offline/);
+    expect(body.staticSite).toBe(
+      "https://ma3u.github.io/MinimumViableHealthDataspacev2/",
+    );
+  });
+
+  it("keeps the liveness probe and the session endpoint answering", async () => {
+    vi.stubEnv("LIVE_DEMO_OFFLINE", "true");
+    for (const p of ["/api/health", "/api/auth/session"]) {
+      const res = await invoke(p);
+      expect(res.status).toBe(200);
+    }
   });
 });
