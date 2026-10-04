@@ -195,17 +195,32 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      # The custom domain, not the raw ACA FQDN (as reset-demo.yml already does).
+      # mvhd-ui runs with NEXTAUTH_URL=https://ehds.mabu.red, so a sign-in started
+      # on the ACA host sets its state cookie there and gets its callback on the
+      # custom domain: "State cookie was missing", about 115 stack traces per run,
+      # the largest single source of billed UI logs (#418, ADR-045).
       - name: Get Azure service URLs
         id: azure-url
         run: |
-          UI_FQDN=$(az containerapp show --name mvhd-ui --resource-group ${{ env.RESOURCE_GROUP }} \
-            --query "properties.configuration.ingress.fqdn" -o tsv)
-          KC_FQDN=$(az containerapp show --name mvhd-keycloak --resource-group ${{ env.RESOURCE_GROUP }} \
-            --query "properties.configuration.ingress.fqdn" -o tsv)
-          echo "url=https://${UI_FQDN}" >> "$GITHUB_OUTPUT"
-          echo "keycloak_url=https://${KC_FQDN}" >> "$GITHUB_OUTPUT"
-          echo "Azure UI URL: https://${UI_FQDN}"
-          echo "Azure Keycloak URL: https://${KC_FQDN}"
+          resolve_host() {
+            local app="$1"
+            local custom
+            custom=$(az containerapp show --name "$app" --resource-group ${{ env.RESOURCE_GROUP }} \
+              --query "properties.configuration.ingress.customDomains[0].name" -o tsv 2>/dev/null || echo "")
+            if [ -n "$custom" ] && [ "$custom" != "None" ]; then
+              echo "$custom"
+              return
+            fi
+            az containerapp show --name "$app" --resource-group ${{ env.RESOURCE_GROUP }} \
+              --query "properties.configuration.ingress.fqdn" -o tsv
+          }
+          UI_HOST=$(resolve_host mvhd-ui)
+          KC_HOST=$(resolve_host mvhd-keycloak)
+          echo "url=https://${UI_HOST}" >> "$GITHUB_OUTPUT"
+          echo "keycloak_url=https://${KC_HOST}" >> "$GITHUB_OUTPUT"
+          echo "Azure UI URL: https://${UI_HOST}"
+          echo "Azure Keycloak URL: https://${KC_HOST}"
 
       # Public-page smoke only — running the full 1015-test suite against the
       # live WAN endpoint with workers=1 (CI default) cannot finish within the
