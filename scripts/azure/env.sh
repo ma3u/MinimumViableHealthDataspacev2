@@ -16,8 +16,9 @@ export LOCATION="westeurope"
 export SUBSCRIPTION_ID="${SUBSCRIPTION_ID:-$(az account show --query id -o tsv 2>/dev/null || echo "")}"
 export ACR_NAME="acrmvhdehds"
 export ACA_ENV="mvhd-env"
-# Log Analytics workspace (disabled under Workaround B, kept for reference)
-export LAW_NAME="law-mvhd-dev"
+# Log Analytics workspace. The ACA environment logs to mvhd-logs; law-mvhd-dev no longer exists, and
+# 07-observability.sh failed on its first call while this still named it.
+export LAW_NAME="mvhd-logs"
 
 # ── Persistent storage (Azure Files — ADR-017 + Workaround B) ───────────────
 # Storage account name must be 3–24 lowercase alphanumerics, globally unique.
