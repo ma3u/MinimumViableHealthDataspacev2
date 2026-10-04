@@ -3,7 +3,9 @@
 # Who hears about trouble: a crash-loop alert per app, a monthly budget, and
 # then no daily log cap (#418 Phase A, ADR-045).
 # =============================================================================
-#   ALERT_EMAIL=<address> BUDGET_EUR=<amount> configure-alerts-and-budget.sh [--dry-run]
+#   ALERT_EMAIL=<address> configure-alerts-and-budget.sh [--dry-run]
+#   BUDGET_EUR=<amount> overrides the monthly budget (default 1000, decided
+#   2026-10-04 on #418).
 #
 # Until now nothing told anyone: the replica alerts in 07-observability.sh have
 # no action group, there was no budget, and the only cost guard was a 1 GB
@@ -29,7 +31,7 @@ source "${SCRIPT_DIR}/env.sh"
 dry_run=""
 [ "${1:-}" = "--dry-run" ] && dry_run=1
 : "${ALERT_EMAIL:?set ALERT_EMAIL, the address that gets the alerts}"
-: "${BUDGET_EUR:?set BUDGET_EUR, the monthly budget for $RG in EUR}"
+BUDGET_EUR="${BUDGET_EUR:-1000}"
 
 run() {
   if [ -n "$dry_run" ]; then
