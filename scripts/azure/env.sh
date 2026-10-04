@@ -132,7 +132,14 @@ export NATS_IMAGE="${ACR_LOGIN_SERVER}/nats:${NATS_VERSION}"
 #
 # scripts/check-deployed-image-pins.sh fails if any deployed app resolves to
 # `:latest`, which is the check that was missing when #116 went unnoticed.
-export JAD_VERSION="${JAD_VERSION:-2026-04-14}"
+#
+# ADR-054 (#503) replaces the April build with the one compose and CI run:
+# ghcr.io/metaform/jad/*:4a7e5bd096c5..., EDC 0.18, which does carry its source
+# commit, so here the tag is the commit. scripts/azure/import-jad-images.sh
+# copies the images into ACR under it; docs/knowledge/runbooks/edc-v018-on-azure.md
+# moves the apps, one at a time.
+# The April images stay in ACR as :2026-04-14, the rollback target.
+export JAD_VERSION="${JAD_VERSION:-4a7e5bd096c5}"
 export CFM_VERSION="${CFM_VERSION:-2026-04-14}"
 export CONTROLPLANE_IMAGE="${ACR_LOGIN_SERVER}/jad-controlplane:${JAD_VERSION}"
 export DP_FHIR_IMAGE="${ACR_LOGIN_SERVER}/jad-dataplane:${JAD_VERSION}"
