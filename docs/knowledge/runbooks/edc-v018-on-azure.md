@@ -11,7 +11,7 @@ Run it inside office hours (ADR-053). Before starting:
 - `az login`, then `az account set --subscription INF-STG-EU_EHDS`;
 - activate the PIM role `rol-ssg-prd-project_owner` (the issuer job in phase 4
   needs it: Container Apps Contributor has no action for jobs);
-- merge PR #517, so the database workflow exists on `main` (OIDC runs only
+- the database workflow is on `main` since #517 merged (OIDC runs only
   there);
 - announce that onboarding, credentials and the TCK page are down for the window.
 
