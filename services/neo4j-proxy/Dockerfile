@@ -23,4 +23,6 @@ COPY --from=builder /app/dist ./dist
 
 EXPOSE 9090
 USER node
-CMD ["node", "dist/index.js"]
+# tracing.js first: OTel must hook the loader before express is imported.
+# It does nothing unless OTEL_EXPORTER_OTLP_ENDPOINT is set (ADR-045, #418).
+CMD ["node", "--import", "./dist/tracing.js", "dist/index.js"]
