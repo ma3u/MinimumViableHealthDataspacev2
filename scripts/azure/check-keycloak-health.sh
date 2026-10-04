@@ -75,11 +75,11 @@ case "$auth_code" in
       echo "      read that as healthy, and do not import the realm: the import" >&2
       echo "      needs the same tables." >&2
     fi
-    echo "      Check Postgres first:" >&2
-    echo "        az containerapp replica list -n mvhd-postgres -g rg-mvhd-dev \\" >&2
-    echo "          --query '[].properties.createdTime' -o tsv" >&2
-    echo "      A replica created minutes ago means initdb re-ran and the" >&2
-    echo "      cluster is empty. See docs/gotchas.md, 2026-09-30." >&2
+    echo "      Check the Flexible Server first (ADR-041):" >&2
+    echo "        az postgres flexible-server show -n mvhd-pg-b53a0449 \\" >&2
+    echo "          -g rg-mvhd-dev --query state -o tsv" >&2
+    echo "      Stopped is the off-hours stop (ADR-053); the morning start" >&2
+    echo "      starts it. Ready means look at Keycloak's KC_DB_URL next." >&2
     exit 2
     ;;
   404)
