@@ -151,7 +151,7 @@ All three core specifications are now final or near-final:
 | [038](ADRs/ADR-038-scan-retained-diagnostics-export.md)                     | The scan is kept, as a sealed PDF, and diagnostics leave the phone only as a deliberate export  | 2026-09-19 | Accepted          |
 | [039](ADRs/ADR-039-published-reference-ranges.md)                           | Published reference ranges are quoted alongside the printed one, never in place of it           | 2026-09-19 | Accepted          |
 | [040](ADRs/ADR-040-derived-compliance-state-in-the-api.md)                  | Derived compliance state is computed in the API                                                 | 2026-09-24 | Accepted          |
-| [041](ADRs/ADR-041-managed-postgres-on-azure-containerised-locally.md)      | Managed PostgreSQL on Azure, containerised locally                                              | 2026-10-02 | Proposed          |
+| [041](ADRs/ADR-041-managed-postgres-on-azure-containerised-locally.md)      | Managed PostgreSQL on Azure, containerised locally                                              | 2026-10-02 | Accepted          |
 | [042](ADRs/ADR-042-off-hours-scaledown-current-state.md)                    | Off-hours scale-down, the state that runs today                                                 | 2026-10-02 | Accepted          |
 | [043](ADRs/ADR-043-graph-access-direct-or-through-the-proxy.md)             | UI routes read the graph directly; the proxy serves the data planes                             | 2026-10-02 | Accepted          |
 | [044](ADRs/ADR-044-every-api-route-needs-a-session.md)                      | Every API route needs a session                                                                 | 2026-10-02 | Accepted          |
@@ -161,6 +161,6 @@ All three core specifications are now final or near-final:
 | [048](ADRs/ADR-048-testflight-request-mailed-without-a-session.md)          | The TestFlight request is mailed by the hub, without a session                                  | 2026-10-03 | Proposed          |
 | [049](ADRs/ADR-049-klarbefund-connects-by-device-grant.md)                  | Klarbefund connects to a patient's record by a device grant the website starts                  | 2026-10-03 | Proposed          |
 | [052](ADRs/ADR-052-confidential-spe-on-azure-revisited.md)                  | The confidential secure processing environment, revisited against Azure and the vendors of 2026 | 2026-10-04 | Proposed          |
-| [053](ADRs/ADR-053-everything-stops-off-hours.md)                           | Everything stops off hours, and the UI says so                                                  | 2026-10-04 | Proposed          |
+| [053](ADRs/ADR-053-everything-stops-off-hours.md)                           | Everything stops off hours, and the UI says so                                                  | 2026-10-04 | Accepted          |
 
 > **Note:** The full text of ADR-1 through ADR-9 has been moved into the standalone ADR documents linked in the table above. Click any row to read the full context, decision, and consequences.

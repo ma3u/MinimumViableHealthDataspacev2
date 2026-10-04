@@ -21,7 +21,6 @@ const ALLOWED_APPS = new Set([
   "mvhd-vault",
   "mvhd-tenant-mgr",
   "mvhd-provision-mgr",
-  "mvhd-postgres",
   "mvhd-nats",
   "mvhd-neo4j",
   "mvhd-neo4j-proxy",
