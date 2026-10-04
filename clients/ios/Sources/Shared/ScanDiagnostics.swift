@@ -145,8 +145,21 @@ public enum ScanReplay {
     // lab-issued document as if it had been photographed would downgrade every
     // value from final to preliminary.
     let source = diagnostics.extraction.source
-    return diagnostics.pages.reduce(ExtractionResult.empty(source: source)) {
+    let parsed = diagnostics.pages.reduce(ExtractionResult.empty(source: source)) {
       $0.merging(run($1, source: source))
     }
+    // A scale's screen goes to its own reader when the sheet grammar finds
+    // nothing, as `LabImport` does. Without this the replay reported every
+    // scale screenshot as a regression it was not (2026-10-04).
+    guard parsed.coded.isEmpty else { return parsed }
+    var readings: [DeviceScreen.Reading] = []
+    for page in diagnostics.pages where DeviceScreen.looksLikeDeviceScreen(page.plainText) {
+      guard
+        let read = DeviceScreen.read(page.plainText, fragments: page.fragments, page: page.page)
+      else { continue }
+      readings.append(read.current)
+      readings.append(contentsOf: read.history)
+    }
+    return DeviceScreen.reports(from: readings).first?.extraction ?? parsed
   }
 }

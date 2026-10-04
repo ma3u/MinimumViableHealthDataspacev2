@@ -376,13 +376,16 @@ struct BerlinSheetTests {
     #expect(lpa.coded.first?.raw.referenceHigh == 0.3)
   }
 
-  @Test("a urine row in that layout is still refused")
-  func unitFirstStillRefusesUrine() {
-    for line in ["Albumin [U]  mg/l  < 30  3.9", "Kreatinin [U]  mmol/l  1- 26  19.92"] {
+  @Test("a urine row in that layout takes the urine code, never the serum one")
+  func unitFirstCodesUrineAsUrine() {
+    for (line, loinc) in [
+      ("Albumin [U]  mg/l  < 30  4.2", "1754-1"), ("Kreatinin [U]  mmol/l  1- 26  12.5", "14683-7"),
+    ] {
       let result = LabLineParser.extract(line, source: .labIssuedDigital)
-      #expect(result.coded.isEmpty, "\(line) must not code")
-      #expect(result.unmapped.first?.reason == .specimenNotSupported, "\(line)")
+      #expect(result.coded.map(\.coding.loinc) == [loinc], "\(line)")
     }
+    let sodium = LabLineParser.extract("Natrium [U]  mmol/l  40 - 220  80", source: .labIssuedDigital)
+    #expect(sodium.unmapped.first?.reason == .specimenNotSupported)
   }
 
   @Test("one number after a unit is not enough to tell a range from a result")
@@ -499,7 +502,8 @@ struct SiLayoutTests {
   func everyRowCodes() {
     let codes = Self.result.coded.map(\.coding.loinc)
     let expected = [
-      "6690-2", "789-8", "59260-0", "4544-3", "59468-9", "59467-1", "736-9", "742-7",
+      // The two `(mikr.Diff)` rows are a microscope's count: manual-count codes.
+      "6690-2", "789-8", "59260-0", "4544-3", "59468-9", "59467-1", "737-7", "743-5",
       "14749-6", "59261-8", "14682-9", "2324-2", "14646-4", "22748-8", "2885-2", "3016-3",
     ]
     #expect(codes == expected, "got \(codes)")
@@ -574,7 +578,7 @@ struct PracticeSoftwareTests {
     // Doing the two in sequence loses the answer: the trailing rule takes the
     // `B12` that names the analyte and leaves `b12 Vitamin`.
     #expect(Self.extract("b12  Vitamin B12  243  pg/ml  180 - 914").coded.first?.coding.loinc == "2132-9")
-    #expect(Self.extract("VITDT  25-OH Vitamin D  22,2  ng/ml  30-60").coded.first?.coding.loinc == "1989-3")
+    #expect(Self.extract("VITDT  25-OH Vitamin D  22,2  ng/ml  30-60").coded.first?.coding.loinc == "62292-8")
     #expect(Self.extract("ferri  Ferritin (CLIA)  156  ng/ml  18-360").coded.first?.coding.loinc == "2276-4")
     #expect(Self.extract("Cu  Kupfer i.S.  12,4  µmol/l  11.0 - 22.0").coded.first?.coding.loinc == "14665-4")
   }
@@ -645,7 +649,7 @@ struct ScannedStudyReportTests {
   func hyphenIsNotAUnit() {
     // The counter-example that keeps the rule narrow: an unrestricted glued
     // unit matches `-OH` here and the grammar never reaches the real row.
-    #expect(Self.extract("VITDT  25-OH Vitamin D  22,2  ng/ml  30-60").coded.first?.coding.loinc == "1989-3")
+    #expect(Self.extract("VITDT  25-OH Vitamin D  22,2  ng/ml  30-60").coded.first?.coding.loinc == "62292-8")
   }
 
   @Test("a Cyrillic letter that looks Latin is folded, not stripped")

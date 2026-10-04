@@ -134,7 +134,9 @@ public enum LabLineParser {
   /// `Neutrophile %`), a `%` or `‰` may sit glued to the value (`53,7%`), and
   /// a lone `-` after the value is a "below range" flag, not a range.
   private static let linePattern =
-    #"^\s*(?<label>[\p{L}(][\p{L}0-9()/.,'+%‰\[\]\-\s]*?)"#
+    // A label may open with a number and a hyphen, `25-OH-Vitamin D`; a bare
+    // number never starts one, or a value would be read as a name.
+    #"^\s*(?<label>(?:\d{1,3}-)?[\p{L}(][\p{L}0-9()/.,'+%‰\[\]\-\s]*?)"#
     + #"\s+(?<cmp>[<>]=?|≤|≥)?\s*(?<value>\d[\d.,]*)"#
     + #"\s*(?<flag>[*+!↑↓HL;:\-]{0,2})"#
     // A unit glued to its value is either a percent sign or a per-something
@@ -506,6 +508,23 @@ public enum LabLineParser {
     "IU", "IURIN", "HARN", "IHARN",
   ]
 
+  /// Markers for spot urine. `SU`, a 24-hour collection, is not here: its
+  /// codes are per day, not per litre, and the dictionary has none.
+  static let urineSpecimens: Set<String> = ["U", "URIN", "URINE", "IU", "IURIN", "HARN", "IHARN"]
+
+  /// The urine coding for a row marked as urine, or nil.
+  ///
+  /// Each spelling of the label is looked up as `<name> im Urin`, which only
+  /// the urine entries of the dictionary carry. `Albumin [U]` becomes
+  /// `Albumin im Urin`; a urine row whose analyte has no urine entry stays
+  /// refused, as every urine row was before 2026-10-04.
+  static func urineCoding(_ candidates: [String], unit: String) -> AnalyteCoding? {
+    for candidate in candidates {
+      if let hit = Analytes.lookup(label: "\(candidate) im Urin", unit: unit) { return hit }
+    }
+    return nil
+  }
+
   /// Matrices the analyte dictionary's codings are valid for.
   ///
   /// P plasma, S serum, B whole blood, the German spellings of the same, and
@@ -616,7 +635,11 @@ public enum LabLineParser {
       // A label that closes a bracket it never opened is the tail of a
       // sentence, not the name of anything. `Landbau),` came from a paragraph
       // about where a fibre is grown, and arrived as a measurement of 20 %.
-      if label.filter({ $0 == ")" }).count > label.filter({ $0 == "(" }).count {
+      // A recogniser mixes the two kinds, `Transferrin [P)`, so they are
+      // counted together.
+      if label.filter({ $0 == ")" || $0 == "]" }).count
+        > label.filter({ $0 == "(" || $0 == "[" }).count
+      {
         suspicious.append(line)
         continue
       }
@@ -786,9 +809,14 @@ public enum LabLineParser {
           else { continue }
           let candidate = kept.joined(separator: " ")
           let candidateKey = Analytes.analyteKey(forLabel: candidate)
+          // A code that abbreviates the name it stands before is the practice
+          // system's column, whatever else it might spell: `thr Thrombozyten`
+          // is platelets although `Thr` is also threonine (2026-10-04).
+          let firstKept = Analytes.normaliseLabel(kept.first ?? "")
           let disagrees = dropped.contains { code in
             let codeKey = Analytes.analyteKey(forLabel: code)
-            return codeKey != nil && codeKey != candidateKey
+            let abbreviates = firstKept.hasPrefix(Analytes.normaliseLabel(code))
+            return codeKey != nil && codeKey != candidateKey && !abbreviates
           }
           guard !disagrees else { continue }
           remember(candidate)
@@ -804,7 +832,13 @@ public enum LabLineParser {
   /// Short, and letters and digits only, so `i.S.` and `Alk.` are left to the
   /// marker rules above and an ordinary word is never taken for a code.
   static func looksLikeLeadingCode(_ token: String) -> Bool {
-    !token.isEmpty && token.count <= 8 && token.allSatisfy { $0.isLetter || $0.isNumber }
+    if !token.isEmpty && token.count <= 8 && token.allSatisfy({ $0.isLetter || $0.isNumber }) {
+      return true
+    }
+    // A laboratory's own order code in capitals with a hyphen, `STU-FSCPC
+    // Transferrin` (2026-10-04). Capitals only, so `Gamma-GT` stays a name.
+    return token.count <= 12 && token.contains("-") && token.first != "-"
+      && token.allSatisfy { $0.isUppercase || $0.isNumber || $0 == "-" }
   }
 
   /// True for a token that annotates an analyte rather than naming one.
@@ -847,8 +881,16 @@ public enum LabLineParser {
       // is refused outright: urine albumin and serum albumin are different
       // tests that share a name.
       let analysis = analyseLabel(raw.label)
-      if analysis.nonBloodSpecimen != nil {
-        unmapped.append(UnmappedLabValue(raw: raw, reason: .specimenNotSupported))
+      if let specimen = analysis.nonBloodSpecimen {
+        // A urine row is coded only through a dictionary label that names the
+        // urine, `Albumin im Urin`, so it can never take the serum code.
+        if urineSpecimens.contains(specimen),
+          let coding = urineCoding(analysis.candidates, unit: raw.unitRaw)
+        {
+          coded.append(CodedLabValue(raw: raw, coding: coding, source: source))
+        } else {
+          unmapped.append(UnmappedLabValue(raw: raw, reason: .specimenNotSupported))
+        }
         continue
       }
 

@@ -112,6 +112,7 @@ struct TableRolesTests {
     let table = rows([
       ["Analyt", "Einheit", "Referenzbereich", "Wert"],
       ["Albumin [U]", "mg/l", "< 30", "3,9"],
+      ["Glukose [U]", "mg/dl", "< 15", "0"],
       ["Cholesterin [P]", "mg/dl", "< 200", "212"],
       ["LDL-Cholesterin [P]", "mg/dl", "< 116", "141"],
       ["HDL-Cholesterin [P]", "mg/dl", "> 40", "48"],
@@ -119,7 +120,11 @@ struct TableRolesTests {
     ])
     let result = LabLineParser.extract(rows: table, source: .ocrTranscribed)
 
-    #expect(!result.coded.contains { $0.raw.label.contains("[U]") })
+    // Since 2026-10-04 a urine albumin is coded, with the urine code; it can
+    // never take serum albumin's 1751-7.
+    let urine = result.coded.filter { $0.raw.label.contains("[U]") }
+    #expect(urine.map(\.coding.loinc) == ["1754-1"])
+    // A urine row the dictionary has no urine entry for is still refused.
     #expect(result.unmapped.contains { $0.reason == .specimenNotSupported })
     // And the blood rows on the same sheet are unaffected.
     #expect(result.coded.contains { $0.coding.loinc == "2089-1" })
