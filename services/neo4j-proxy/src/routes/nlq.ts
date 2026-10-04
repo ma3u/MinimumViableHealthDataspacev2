@@ -11,6 +11,7 @@ import {
 import { driver, getSession, getSpeDrivers, spe2Driver } from "../db.js";
 import { app } from "../app.js";
 import { auditContext, logTransferEvent } from "../audit.js";
+import { appendQueryAudit, auditUnavailable } from "../audit-chain.js";
 import {
   AdverseEventContext,
   CypherSection,
@@ -26,10 +27,32 @@ import {
   generateEmbedding,
   graphRagRerank,
   llmText2Cypher,
-  logQueryAudit,
   matchTemplate,
   resolveAdverseEventContext,
 } from "../nlq/engine.js";
+
+/**
+ * A refused query is recorded too, before the refusal goes out. The refusal
+ * stands even if the record cannot be written: nothing is released either way.
+ */
+async function auditRefusal(r: {
+  participantId?: string;
+  question: string;
+  cypher: string | null;
+  method: string;
+  reason: string;
+}): Promise<void> {
+  try {
+    await appendQueryAudit({
+      ...r,
+      resultCount: 0,
+      odrlEnforced: true,
+      outcome: "refused",
+    });
+  } catch (err) {
+    console.error("[neo4j-proxy] audit of a refused query failed:", err);
+  }
+}
 
 /**
  * POST /nlq
@@ -224,25 +247,37 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
     // anything but "shown", including no header, is treated as withheld.
     const identityShown = req.headers["x-patient-identity"] === "shown";
     if (!identityShown && cypher && revealsPatientIdentity(cypher)) {
+      await auditRefusal({
+        participantId: scope?.participantId,
+        question,
+        cypher,
+        method,
+        reason: "patient identity withheld (#475)",
+      });
       res.status(403).json({
         error:
           "Query blocked: it would show who a patient is. Research questions are answered with aggregates and clinical values, not with names, birth dates or addresses.",
         method,
         ...(templateName ? { templateName } : {}),
       });
-      logQueryAudit(scope?.participantId, question, cypher, method, 0, true);
       return;
     }
 
     // ODRL: check re-identification prohibition before execution
     if (scope && cypher && checkReIdentification(cypher, scope)) {
+      await auditRefusal({
+        participantId: scope.participantId,
+        question,
+        cypher,
+        method,
+        reason: "ODRL re-identification prohibition",
+      });
       res.status(403).json({
         error:
           "Query blocked: potential re-identification prohibited by ODRL policy",
         odrlEnforced: true,
         policyIds: scope.policyIds,
       });
-      logQueryAudit(scope.participantId, question, cypher, method, 0, true);
       return;
     }
 
@@ -318,6 +353,22 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       }
     }
 
+    // Fail closed (ADR-045, #418): no record, no answer.
+    try {
+      await appendQueryAudit({
+        participantId,
+        question,
+        cypher,
+        method,
+        resultCount: results.length,
+        odrlEnforced,
+        outcome: "success",
+      });
+    } catch (err) {
+      auditUnavailable(res, err);
+      return;
+    }
+
     res.json({
       question,
       cypher,
@@ -367,14 +418,6 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       200,
       results.length,
       auditContext(req, res),
-    );
-    logQueryAudit(
-      participantId,
-      question,
-      cypher,
-      method,
-      results.length,
-      odrlEnforced,
     );
   } catch (err: any) {
     // Return structured NLQ error (not generic 500) so the UI can display it
