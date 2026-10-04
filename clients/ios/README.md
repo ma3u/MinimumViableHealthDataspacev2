@@ -30,6 +30,18 @@ supplies one from `TEAM_ID` or from the keychain, and installs what it built.
 TestFlight: `Scripts/archive-and-upload.sh`, see its header for the four things
 that must exist in your Apple Developer account first.
 
+## Static analysis
+
+```bash
+Scripts/codeql-swift.sh       # CodeQL on the app and the package, before a push
+```
+
+CodeQL needs a real build to see Swift, so on GitHub it runs only when
+`clients/ios/` changes (`.github/workflows/codeql-swift.yml`), on a macOS
+runner for about 17 minutes. The script runs the same suite with the same
+build here and exits 1 on any finding not listed, with its reason, in
+`Scripts/codeql-accepted.txt`. It needs `brew install --cask codeql`.
+
 ## Two test suites, and what each is for
 
 ```bash

@@ -1,0 +1,6 @@
+# CodeQL findings that are known and accepted, one per line: rule id, then the
+# file relative to clients/ios, then the reason after a #. Scripts/codeql-swift.sh
+# prints these but does not fail on them. Dismiss the same alert in the
+# Security tab with the same reason, so GitHub and this file agree.
+
+swift/cleartext-transmission  Sources/Shared/EHDSConnect.swift  # TrustedHub.development: the debug-only localhost hubs (compose stack on the Mac); production is https

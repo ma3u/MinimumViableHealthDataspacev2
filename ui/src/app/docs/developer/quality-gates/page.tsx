@@ -77,7 +77,7 @@ const ciGates = [
   {
     job: "CodeQL",
     tests: "—",
-    tool: "GitHub code scanning, default setup",
+    tool: "codeql.yml (JS/TS, Python, Actions) on every PR; codeql-swift.yml when clients/ios changes, or locally with Scripts/codeql-swift.sh",
     blocking: false,
     standard: "OWASP Top 10",
   },
