@@ -195,6 +195,7 @@ export default function DeveloperGuidePage() {
           <TocLink href="#testing">Testing</TocLink>
           <TocLink href="#quality-gates">Quality Gates</TocLink>
           <TocLink href="#cicd">CI/CD Pipeline</TocLink>
+          <TocLink href="#off-hours">Live Stack Off Hours</TocLink>
           <TocLink href="#reports">Latest Reports</TocLink>
           <TocLink href="#releases">Release Notes</TocLink>
           <TocLink href="#project-links">Planning & Issues</TocLink>
@@ -1416,20 +1417,93 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
               deploy-azure.yml — Azure Deployment
             </h4>
             <p className="text-(--text-secondary) text-xs">
-              Deploys 13 Container Apps + 3 jobs to Azure via OIDC federation.
-              Includes E2E smoke tests against the live Azure environment.
+              Deploys the 21 Container Apps and their jobs to Azure via OIDC
+              federation. Includes E2E smoke tests against the live Azure
+              environment.
             </p>
           </div>
           <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">
-              reset-demo.yml — Nightly Reset
+              reset-demo.yml — Demo Reset (manual)
             </h4>
             <p className="text-(--text-secondary) text-xs">
-              Scheduled at 02:00 UTC daily. Restarts stateful services,
-              re-bootstraps Vault/Keycloak, reseeds data, and runs smoke tests.
-              Ensures GDPR data minimisation.
+              Restarts stateful services, re-bootstraps Vault and Keycloak,
+              reseeds data and runs smoke tests. Manual dispatch only since
+              2026-09-13: the Keycloak realm now holds the Klarbefund client and
+              real accounts, which a scheduled reset would delete.
             </p>
           </div>
+          <div className="border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2">
+              aca-schedule.yml — Off-Hours Stop and Start
+            </h4>
+            <p className="text-(--text-secondary) text-xs">
+              Stops every Container App except the UI, then the PostgreSQL
+              Flexible Server, daily at 18:00 UTC; starts them in dependency
+              order Monday to Friday at 05:00 UTC, skipping Berlin public
+              holidays (ADR-053). See{" "}
+              <a href="#off-hours" className="underline">
+                Live Stack Off Hours
+              </a>
+              .
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Live stack off hours (ADR-053) */}
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold mb-3" id="off-hours">
+          Live Stack Off Hours
+        </h2>
+        <p className="text-(--text-secondary) text-sm mb-4">
+          Outside office hours the Azure stack is stopped, database included,
+          and <code>ehds.mabu.red</code> answers every page with an offline
+          notice and every data route with <code>503</code>. Local development
+          is not affected: <code>docker compose</code> and{" "}
+          <code>npm run dev</code> know nothing of the schedule. To see the
+          notice locally, start the UI with <code>LIVE_DEMO_OFFLINE=true</code>.
+        </p>
+        <div className="space-y-4">
+          <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2 text-(--success-text)">
+              Working on the live stack at night or at the weekend
+            </h4>
+            <pre className="text-xs text-(--text-primary) overflow-x-auto">{`# 1. Hold it: no scheduled stop before this instant (UTC)
+gh variable set LIVE_DEMO_HOLD_UNTIL --body "2026-10-10T22:00Z"
+
+# 2. Start it (any day, about ten minutes, green only if a login works)
+gh workflow run aca-schedule.yml -f action=start
+
+# 3. Optional: one catalog crawl, it runs in office hours only
+az containerapp job start --name mvhd-catalog-crawler --resource-group rg-mvhd-dev
+
+# 4. Done: release the hold and stop it again
+gh variable delete LIVE_DEMO_HOLD_UNTIL
+gh workflow run aca-schedule.yml -f action=stop`}</pre>
+          </div>
+          <ul className="text-(--text-secondary) text-sm space-y-1 list-disc ml-5">
+            <li>
+              Start the stack before merging at night; a deploy expects the apps
+              to be running.
+            </li>
+            <li>
+              A forgotten hold ends by itself: the first scheduled stop after it
+              expires stops the stack.
+            </li>
+            <li>
+              Troubleshooting, the state check and the full procedure are in the{" "}
+              <a
+                href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/knowledge/runbooks/live-demo-off-hours.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-700 dark:text-indigo-400 underline"
+              >
+                off-hours runbook
+              </a>
+              .
+            </li>
+          </ul>
         </div>
       </section>
 

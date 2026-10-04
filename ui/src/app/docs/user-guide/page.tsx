@@ -130,6 +130,7 @@ const TOC_SECTIONS = [
   { id: "purpose", label: "Purpose" },
   { id: "personas", label: "Personas & Roles" },
   { id: "getting-started", label: "Getting Started" },
+  { id: "availability", label: "When Is the Live Demo Available?" },
   { id: "explore", label: "Explore" },
   { id: "governance", label: "Governance" },
   { id: "data-exchange", label: "Data Exchange" },
@@ -229,8 +230,12 @@ export default function UserGuidePage() {
               >
                 Azure EHDS Portal
               </a>{" "}
-              runs the full stack with live services (reset nightly). The
-              following features require the full stack:
+              runs the full stack with live services, on weekdays in office
+              hours (see{" "}
+              <a href="#availability" className="underline">
+                When Is the Live Demo Available?
+              </a>
+              ). The following features require the full stack:
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
               <li>
@@ -835,6 +840,85 @@ export default function UserGuidePage() {
             </p>
           </FeatureCard>
         </div>
+      </section>
+
+      {/* ── Availability (ADR-053) ── */}
+      <section className="mb-12" id="availability">
+        <h2 className="text-2xl font-semibold mb-3">
+          When Is the Live Demo Available?
+        </h2>
+        <p className="text-(--text-secondary) text-sm mb-4">
+          The demo exists twice. The live dataspace runs the real connectors,
+          identity services and databases, and to save running costs it is
+          stopped outside office hours. The static demo is a copy of the same
+          pages with synthetic data, and it is always available.
+        </p>
+        <div className="overflow-x-auto mb-4">
+          <table className="w-full text-sm border border-(--border) rounded-lg">
+            <thead>
+              <tr className="bg-(--surface-2) text-left">
+                <th className="px-3 py-2 font-semibold"></th>
+                <th className="px-3 py-2 font-semibold">Live demo</th>
+                <th className="px-3 py-2 font-semibold">Static demo</th>
+              </tr>
+            </thead>
+            <tbody className="text-(--text-secondary)">
+              <tr className="border-t border-(--border)">
+                <td className="px-3 py-2 font-medium">Address</td>
+                <td className="px-3 py-2">
+                  <a
+                    href="https://ehds.mabu.red"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-700 dark:text-indigo-400 underline"
+                  >
+                    ehds.mabu.red
+                  </a>
+                </td>
+                <td className="px-3 py-2">
+                  <a
+                    href={LIVE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-700 dark:text-indigo-400 underline"
+                  >
+                    GitHub Pages
+                  </a>
+                </td>
+              </tr>
+              <tr className="border-t border-(--border)">
+                <td className="px-3 py-2 font-medium">Available</td>
+                <td className="px-3 py-2">
+                  Monday to Friday, 07:00 to 20:00 Berlin time in summer and
+                  06:00 to 19:00 in winter. Closed on Berlin public holidays.
+                </td>
+                <td className="px-3 py-2">Always</td>
+              </tr>
+              <tr className="border-t border-(--border)">
+                <td className="px-3 py-2 font-medium">Sign-in</td>
+                <td className="px-3 py-2">Keycloak accounts per persona</td>
+                <td className="px-3 py-2">A persona picker, no password</td>
+              </tr>
+              <tr className="border-t border-(--border)">
+                <td className="px-3 py-2 font-medium">Data</td>
+                <td className="px-3 py-2">
+                  The live knowledge graph; negotiations and transfers really
+                  run
+                </td>
+                <td className="px-3 py-2">
+                  A fixed snapshot; actions are shown but not carried out
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="text-(--text-secondary) text-sm">
+          If you open the live demo outside these hours, every page shows a
+          notice saying when it is back, with a button that opens the same page
+          in the static demo. The Klarbefund app cannot connect to EHDS or use
+          its cloud analysis during these times either. Analysis on the phone
+          keeps working.
+        </p>
       </section>
 
       {/* ── 3. Explore ── */}

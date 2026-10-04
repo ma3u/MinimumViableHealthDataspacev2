@@ -520,7 +520,7 @@ export default function ArchitecturePage() {
           >
             Azure Container Apps
           </a>{" "}
-          (13 apps + 3 jobs, see{" "}
+          (21 Container Apps and scheduled jobs, see{" "}
           <a
             href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-012-azure-container-apps.md"
             target="_blank"
@@ -535,6 +535,92 @@ export default function ArchitecturePage() {
           chart={deploymentDiagram}
           caption="Fig 3. Full deployment topology — 19+ services with dependency graph"
         />
+        <div
+          className="mt-6 border border-(--border) rounded-lg p-4"
+          id="operating-hours"
+        >
+          <h3 className="font-semibold mb-2">Operating hours on Azure</h3>
+          <p className="text-(--text-secondary) text-sm mb-3">
+            The Azure deployment runs Monday to Friday, 05:00 to 18:00 UTC, and
+            is stopped outside those hours (
+            <a
+              href={`${GITHUB_REPO}/blob/main/docs/ADRs/ADR-053-everything-stops-off-hours.md`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-(--accent) underline hover:opacity-80"
+            >
+              ADR-053
+            </a>
+            ). Stopping is a real stop through the Container Apps API, not
+            scale-to-zero, because nearly every service is called by another one
+            and would never reach zero replicas. The UI is the exception: it
+            sleeps at zero replicas, wakes for a visitor and serves an offline
+            notice that links the static export.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="text-left text-(--text-secondary)">
+                  <th className="py-1 pr-3 font-semibold">Step</th>
+                  <th className="py-1 pr-3 font-semibold">
+                    Evening stop (18:00 UTC)
+                  </th>
+                  <th className="py-1 font-semibold">
+                    Morning start (05:00 UTC, Mon to Fri)
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="text-(--text-secondary)">
+                <tr className="border-t border-(--border)">
+                  <td className="py-1 pr-3">1</td>
+                  <td className="py-1 pr-3">UI to offline mode, min 0</td>
+                  <td className="py-1">
+                    PostgreSQL Flexible Server, wait until Ready
+                  </td>
+                </tr>
+                <tr className="border-t border-(--border)">
+                  <td className="py-1 pr-3">2</td>
+                  <td className="py-1 pr-3">
+                    20 Container Apps stopped, consumers first
+                  </td>
+                  <td className="py-1">
+                    Vault, Keycloak, Neo4j, NATS, proxy, enricher
+                  </td>
+                </tr>
+                <tr className="border-t border-(--border)">
+                  <td className="py-1 pr-3">3</td>
+                  <td className="py-1 pr-3">
+                    PostgreSQL Flexible Server stopped
+                  </td>
+                  <td className="py-1">
+                    EDC control plane, data planes, identity, CFM
+                  </td>
+                </tr>
+                <tr className="border-t border-(--border)">
+                  <td className="py-1 pr-3">4</td>
+                  <td className="py-1 pr-3"></td>
+                  <td className="py-1">
+                    UI back online, then the Keycloak login check
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="text-(--text-secondary) text-xs mt-3">
+            Berlin public holidays skip the start. The catalog crawler runs in
+            office hours only. A night or weekend session holds the stack with
+            the repository variable <code>LIVE_DEMO_HOLD_UNTIL</code>; see the{" "}
+            <a
+              href={`${GITHUB_REPO}/blob/main/docs/knowledge/runbooks/live-demo-off-hours.md`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-(--accent) underline hover:opacity-80"
+            >
+              off-hours runbook
+            </a>
+            .
+          </p>
+        </div>
       </section>
 
       {/* Service Dependencies Table */}
@@ -861,6 +947,12 @@ export default function ArchitecturePage() {
               file: "ADR-018-24x7-workaround-b.md",
               title: "24×7 Operation — Workaround B",
               desc: "Postgres-on-ACA workaround for INF-STG-EU_EHDS subscription policy constraints.",
+            },
+            {
+              id: "ADR-053",
+              file: "ADR-053-everything-stops-off-hours.md",
+              title: "Everything Stops Off Hours",
+              desc: "Every Container App and the Flexible Server stop outside office hours; the UI shows an offline notice that links the static export.",
             },
           ].map((adr) => (
             <a
