@@ -19,3 +19,6 @@
 - 2026-10-04 · `runbooks/aca-postgres-ephemeral-recovery.md` set to deprecated: the
   `mvhd-postgres` container app is deleted (ADR-041 phase 4). `services/postgres.md`
   now names the Flexible Server `mvhd-pg-b53a0449` as the Azure resource.
+- 2026-10-04 · `runbooks/cost-efficient-logging.md`: Phase B steps 8 (neo4j-proxy), 9 and 10
+  (local) marked done, with what was verified; UI logging and the Azure observability app
+  remain open.

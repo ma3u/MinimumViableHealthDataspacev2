@@ -161,10 +161,26 @@ on-call person sees is the loop, not the bill.
 ### Phase B: structured logs and the collector (ADR-045 plane 1)
 
 8. pino in `ui/` and `services/neo4j-proxy` with `trace_id`, plus the no-PII unit test.
+   **Proxy done 2026-10-04:** `services/neo4j-proxy/src/logger.ts` (JSON on stdout,
+   `trace_id` from `traceparent`, one line per request naming the route pattern, never
+   the URL; `/health` not logged; errors cut to their first line, since a Neo4j error
+   quotes its query). `__tests__/logger.test.ts` is the runbook's test, and fails with
+   redaction switched off. The 25-line startup banner is one line. **UI open** (75
+   `console` calls in 41 files, 36 of them API routes).
 9. OpenTelemetry Collector with `recombine` (multi-line join), `filter` (drop DEBUG and
    probe lines), rate limiting of repeats, `redaction`, and tail sampling for traces.
+   **Local done 2026-10-04:** `observability/otel-collector.yaml` (contrib 0.161.0)
+   discovers containers through the Docker socket, joins stack traces, parses pino JSON
+   and EDC levels, drops DEBUG and probe lines, strips ANSI codes, masks bearer tokens
+   and JWTs. Verified against the running JAD stack: 0 DEBUG and 0 ANSI lines reach Loki,
+   Java stack traces arrive as one entry. Rate limiting of repeats and tail sampling are
+   open (no traces flow yet).
 10. Loki, Tempo, Prometheus and Grafana in one `mvhd-observability` app, data in a bucket,
     following off-hours scale-down; locally `docker-compose.observability.yml`.
+    **Local done 2026-10-04:** `docker-compose.observability.yml` runs the collector and
+    `grafana/otel-lgtm:0.35.0` (Loki, Tempo, Prometheus, Grafana in one container, the
+    shape ADR-045 plans for Azure) on <http://localhost:3300>. Data in a volume, not
+    MinIO, for now. **Azure open.**
 11. Move the workflows that query `ContainerAppConsoleLogs_CL` (`edc-*`, `cfm-seed`,
     `neo4j-seed`, `vault-bootstrap-participant-keys`) to LogQL **before** switching
     console logs away from Log Analytics.
