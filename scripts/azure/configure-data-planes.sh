@@ -68,6 +68,20 @@ check_one() {
     sed 's/^/  latest revision: /'
 }
 
+wait_provisioned() {
+  local app="$1" state=""
+  for _ in $(seq 1 60); do
+    state=$(az containerapp show --name "$app" --resource-group "$RG" \
+      --query "properties.provisioningState" -o tsv)
+    [ "$state" != "InProgress" ] && break
+    sleep 5
+  done
+  if [ "$state" != "Succeeded" ]; then
+    echo "$app: provisioning is '$state', not Succeeded" >&2
+    return 1
+  fi
+}
+
 apply_one() {
   local app="$1" selector="$2" public_port="$3" transfer_type="$4"
   echo "== $app (public $public_port, $transfer_type)"
@@ -85,6 +99,10 @@ apply_one() {
       ]}}}}" \
     -o none
   ok "$app ingress: $WEB_PORT, $CONTROL_PORT, $public_port"
+
+  # The patch returns before the operation ends, and an update during it is
+  # refused with ContainerAppOperationInProgress (first apply, 2026-10-04).
+  wait_provisioned "$app"
 
   az containerapp update --name "$app" --resource-group "$RG" \
     --set-env-vars \
