@@ -139,6 +139,11 @@ export default function AdminComponentsPage() {
   const timestamp =
     viewMode === "layer" ? snapshot?.timestamp : topology?.timestamp;
 
+  const participantCount =
+    viewMode === "participant"
+      ? topology?.summary.totalParticipants ?? 5
+      : snapshot?.participants.length ?? 5;
+
   return (
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-7xl mx-auto px-8 py-10">
@@ -499,33 +504,22 @@ export default function AdminComponentsPage() {
           </>
         )}
 
-        {/* Cost estimator — Azure on ACA deployment, StackIT otherwise.
-            Azure is detected from EITHER endpoint's deploy-target signal
-            (/api/admin/components snapshot OR the topology endpoint's
-            metricsShared flag). Layered OR means the Azure panel surfaces
-            as soon as any Azure signal is present — e.g. when participant
-            topology knows we're on ACA but the snapshot call raced the
-            Azure Monitor role binding. */}
-        {snapshot?.deploymentTarget === "azure" ||
-        snapshot?.metricsSource === "azure-monitor" ||
-        topology?.metricsShared === true ? (
+        {/* Cost estimates. On Azure, the running deployment first and the
+            static STACKIT alternative under it, for comparison; elsewhere
+            only STACKIT. Azure is detected from EITHER endpoint's
+            deploy-target signal (/api/admin/components snapshot OR the
+            topology endpoint's metricsShared flag), so the Azure panel
+            surfaces as soon as any Azure signal is present, e.g. when the
+            snapshot call raced the Azure Monitor role binding. */}
+        {(snapshot?.deploymentTarget === "azure" ||
+          snapshot?.metricsSource === "azure-monitor" ||
+          topology?.metricsShared === true) && (
           <AzureCostEstimatorPanel
             liveComponents={snapshot?.components ?? []}
-            participantCount={
-              viewMode === "participant"
-                ? topology?.summary.totalParticipants ?? 5
-                : snapshot?.participants.length ?? 5
-            }
-          />
-        ) : (
-          <CostEstimatorPanel
-            participantCount={
-              viewMode === "participant"
-                ? topology?.summary.totalParticipants ?? 5
-                : snapshot?.participants.length ?? 5
-            }
+            participantCount={participantCount}
           />
         )}
+        <CostEstimatorPanel participantCount={participantCount} />
 
         {/* Timestamp */}
         {timestamp && (
