@@ -141,7 +141,7 @@
       "type": "stat",
       "id": 4,
       "title": "Failed requests",
-      "description": "Share of requests answered with 4xx or 5xx, or not at all. The SLO is under 1 %.",
+      "description": "Share of requests answered with 4xx or 5xx, or not at all (status 0), over the time range. The SLO is under 1 %.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -152,7 +152,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "max(k6_http_req_failed_rate{testid=\"$testid\"})",
+          "expr": "sum(increase(k6_http_reqs_total{testid=\"$testid\", status!~\"[23]..\"}[$__range])) / sum(increase(k6_http_reqs_total{testid=\"$testid\"}[$__range]))",
           "legendFormat": "",
           "refId": "A"
         }
@@ -262,8 +262,8 @@
     {
       "type": "stat",
       "id": 6,
-      "title": "Checks passed",
-      "description": "Status 200 and under the SLO, per request.",
+      "title": "Checks passed (worst check)",
+      "description": "The check that passed least often, e.g. \"api under 1000 ms\". Each check is status 200 or under the SLO, per request; k6 writes one rate per check.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -274,7 +274,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "max(k6_checks_rate{testid=\"$testid\"})",
+          "expr": "min(k6_checks_rate{testid=\"$testid\"})",
           "legendFormat": "",
           "refId": "A"
         }
