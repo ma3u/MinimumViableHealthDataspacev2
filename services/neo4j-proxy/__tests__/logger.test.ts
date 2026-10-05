@@ -89,6 +89,29 @@ describe("proxy logs", () => {
     expect(entries.find((e) => e.msg === "lookup")?.trace_id).toBe(TRACE_ID);
   });
 
+  // #519: a load test run's id on the access line, so Loki can filter one run.
+  it("carry the load test id when the header is well formed, and nothing otherwise", async () => {
+    const { log, lines } = capture();
+    const app = appWith(log);
+    await request(app)
+      .post(`/fhir/Patient/${PATIENT_ID}`)
+      .set("x-load-test", "20261006-0900-load-azure")
+      .send({});
+    await request(app)
+      .post(`/fhir/Patient/${PATIENT_ID}`)
+      .set("x-load-test", "not a run id; drop table")
+      .send({});
+    await request(app).post(`/fhir/Patient/${PATIENT_ID}`).send({});
+
+    const access = lines
+      .map((line) => JSON.parse(line))
+      .filter((e) => e.msg === "request failed");
+    expect(access).toHaveLength(3);
+    expect(access[0].load_test).toBe("20261006-0900-load-azure");
+    expect(access[1]).not.toHaveProperty("load_test");
+    expect(access[2]).not.toHaveProperty("load_test");
+  });
+
   it("leave health probes out", async () => {
     const { log, lines } = capture();
     await request(appWith(log)).get("/health");

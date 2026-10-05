@@ -36,6 +36,9 @@ services:
     container_name: mvhd-lgtm
     ports:
       - "3300:3000" # Grafana; 3000 is the UI
+      # Prometheus remote write, for k6 during a load test (#519). 9090 on the
+      # host is the neo4j-proxy.
+      - "9091:9090"
     volumes:
       - lgtm_data:/data
       # MVHD dashboards and the audit datasource, as code (ADR-045, #418).
@@ -44,6 +47,9 @@ services:
       - ./observability/grafana/dashboards:/otel-lgtm/mvhd-dashboards:ro
     environment:
       GF_AUTH_ANONYMOUS_ENABLED: "false"
+      # k6 sends its latency trends as native histograms, so a quantile over
+      # several endpoints is exact (#519).
+      PROMETHEUS_EXTRA_ARGS: "--enable-feature=native-histograms"
       # Reads the audit trail's JSON endpoints on the neo4j-proxy.
       GF_PLUGINS_PREINSTALL: yesoreyeram-infinity-datasource@4.1.0
       # The proxy as this container reaches it: the compose stack publishes 9090.

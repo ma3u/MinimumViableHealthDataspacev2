@@ -94,6 +94,18 @@ export function createLogger(
 
 export const logger = createLogger();
 
+const LOAD_TEST_ID = /^[A-Za-z0-9._-]{1,64}$/;
+
+/**
+ * The load test run a request belongs to, from the X-Load-Test header k6
+ * sends (#519): the same id tags the k6 metrics (`testid`), so a run's log
+ * lines and its latency series can be read together later. Absent otherwise.
+ */
+export function loadTestField(req: Request): { load_test?: string } {
+  const id = req.header("x-load-test");
+  return id && LOAD_TEST_ID.test(id) ? { load_test: id } : {};
+}
+
 /**
  * Express middleware: runs the request inside its trace context and writes one
  * line when it finishes. The line names the route pattern, never the URL, so
@@ -121,6 +133,7 @@ export function requestLogging(log: Logger = logger) {
         route,
         status: res.statusCode,
         duration_ms: Number(process.hrtime.bigint() - started) / 1e6,
+        ...loadTestField(req),
       };
       if (res.statusCode >= 500) log.error(fields, "request failed");
       else log.info(fields, "request");

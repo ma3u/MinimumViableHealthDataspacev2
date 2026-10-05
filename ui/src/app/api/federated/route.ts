@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { userToParticipantId } from "@/lib/odrl-engine";
 import { activePermitHeaders } from "@/lib/permit-gate";
-import { NEO4J_PROXY_URL } from "@/lib/proxy";
+import { NEO4J_PROXY_URL, loadTestHeaders } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const auth = await requireAuth();
   if (isAuthError(auth)) return auth;
 
@@ -21,7 +21,11 @@ export async function GET() {
     );
     const permitHeaders = await activePermitHeaders(participantId);
     const resp = await fetch(`${NEO4J_PROXY_URL}/federated/stats`, {
-      headers: { "X-Participant": participantId, ...permitHeaders },
+      headers: {
+        "X-Participant": participantId,
+        ...permitHeaders,
+        ...loadTestHeaders(request),
+      },
     });
     const data = await resp.json();
     return NextResponse.json(data);
