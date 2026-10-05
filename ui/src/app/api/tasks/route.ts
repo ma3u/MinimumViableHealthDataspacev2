@@ -70,7 +70,7 @@ interface EdcParticipant {
  *
  * Returns: { tasks: Task[], counts: { total, negotiations, transfers, active } }
  */
-export async function GET(request?: Request) {
+export async function GET(request: Request) {
   const auth = await requireAuth();
   if (isAuthError(auth)) return auth;
 
