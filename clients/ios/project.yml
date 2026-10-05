@@ -73,12 +73,18 @@ targets:
           stay encrypted on this device.
         # Read only, asked for on the Trends screen when the person taps
         # "Show trends from Apple Health" and never at launch (#186
-        # criterion 3). No NSHealthUpdateUsageDescription: the app writes
-        # nothing to Health. German in de.lproj/InfoPlist.strings.
+        # criterion 3). German in de.lproj/InfoPlist.strings.
         INFOPLIST_KEY_NSHealthShareUsageDescription: >-
           Klarbefund reads resting heart rate, heart rate variability, steps
           and weight to show them beside your lab values. It keeps no copy and
           writes nothing to Health.
+        # The app asks for no write access (toShare: []), so iOS never shows
+        # this. App Store Connect refuses an upload with the HealthKit
+        # entitlement and no update string all the same (ITMS-90683, build
+        # 1.0 (3), 2026-10-05), so it says what is true: nothing is written.
+        INFOPLIST_KEY_NSHealthUpdateUsageDescription: >-
+          Klarbefund never writes to Health. It only reads the values listed
+          in the read request, to show them beside your lab values.
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # Cloud analysis (ADR-034). Empty by default and checked at runtime, so
         # an unconfigured build simply does not offer the button rather than
