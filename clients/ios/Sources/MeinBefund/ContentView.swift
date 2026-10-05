@@ -32,6 +32,8 @@ final class AppModel: ObservableObject {
   @Published var error: String?
   /// Good news worth a moment of attention, never an error.
   @Published var notice: String?
+  /// A report without stored pages whose paper is being scanned again.
+  @Published var rescanning: LabReport?
   @Published var viewingScan: Data?
   @Published var diagnosticsRequest: DiagnosticsExport.Request?
   @Published var buildingDiagnostics = false
@@ -201,6 +203,59 @@ final class AppModel: ObservableObject {
       Log.store.notice("body measurements saved across \(saved, privacy: .public) day(s)")
       await refresh()
     } catch { self.error = error.localizedDescription }
+  }
+
+  /// Attaches a new scan of the paper to a report that has no pages, the
+  /// ones imported before the app kept them.
+  ///
+  /// The pages are kept either way, so the person can see the scan. The new
+  /// reading replaces the stored values only when it codes at least as many:
+  /// a worse photograph must not cost values. The title and a date the person
+  /// confirmed stay as they are.
+  func attachScan(_ images: [UIImage], to report: LabReport) async {
+    busy = true
+    defer {
+      busy = false
+      rescanning = nil
+    }
+    do {
+      let product = try await TextRecognizer.extract(from: images)
+      let better = product.extraction.coded.count >= report.extraction.coded.count
+      var metadata = better ? product.metadata : report.metadata
+      metadata.labDate = report.collectedOn
+      metadata.dateSource = report.metadata.dateSource
+      let updated = LabReport(
+        id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+        title: report.title, extraction: better ? product.extraction : report.extraction,
+        metadata: metadata, pageTexts: product.pageTexts,
+        scan: LabReport.ScanAttachment(
+          pageCount: product.pages.count, bytes: product.pdf.count,
+          sourcePixelWidth: product.sourcePixelWidth),
+        hasDiagnostics: true)
+      try await store.save(updated)
+      try await store.saveScan(product.pdf, for: report.id)
+      try await store.saveDiagnostics(
+        ScanDiagnostics(
+          reportId: report.id, createdAt: Date(),
+          environment: ScanDiagnostics.Environment.current, pages: product.pages,
+          extraction: product.extraction, metadata: metadata),
+        for: report.id)
+      let before = report.extraction.coded.count
+      let after = product.extraction.coded.count
+      Log.store.notice(
+        "scan attached: \(after, privacy: .public) read, \(before, privacy: .public) stored, kept \(better ? "new" : "stored", privacy: .public)"
+      )
+      notice =
+        better
+        ? String(localized: "The scan is attached and read: \(after) values.")
+        : String(
+          localized:
+            "The scan is attached. It read \(after) values where \(before) are stored, so the stored values were kept."
+        )
+      await refresh()
+    } catch {
+      self.error = error.localizedDescription
+    }
   }
 
   func process(_ images: [UIImage]) async {
@@ -823,6 +878,15 @@ struct ContentView: View {
                     }
                   }
                 }
+                if report.scan == nil {
+                  ToolbarItem(placement: .secondaryAction) {
+                    Button {
+                      model.rescanning = report
+                    } label: {
+                      Label("Scan the paper again", systemImage: "doc.viewfinder")
+                    }
+                  }
+                }
                 // Every report: one with pages is read again, one without is
                 // coded again from its stored rows.
                 ToolbarItem(placement: .secondaryAction) {
@@ -963,6 +1027,15 @@ struct ContentView: View {
           Task { await model.process(images) }
         },
         onCancel: { scanning = false }
+      )
+      .ignoresSafeArea()
+    }
+    .fullScreenCover(item: $model.rescanning) { report in
+      DocumentScanner(
+        onScan: { images in
+          Task { await model.attachScan(images, to: report) }
+        },
+        onCancel: { model.rescanning = nil }
       )
       .ignoresSafeArea()
     }

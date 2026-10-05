@@ -316,6 +316,8 @@ describe("a quantity LOINC does not code", () => {
           "visceral-fat|kg",
           "cholesterol-remnant|mg/dL",
           "cholesterol-remnant|mmol/L",
+          // NLM has no term for the night-to-day fall (searched 2026-10-05).
+          "nocturnal-dipping|%",
         ].includes(entry),
     );
     expect(outside).toEqual([]);

@@ -145,9 +145,12 @@ public enum ScanReplay {
     // lab-issued document as if it had been photographed would downgrade every
     // value from final to preliminary.
     let source = diagnostics.extraction.source
-    let parsed = diagnostics.pages.reduce(ExtractionResult.empty(source: source)) {
+    let sheet = diagnostics.pages.reduce(ExtractionResult.empty(source: source)) {
       $0.merging(run($1, source: source))
     }
+    let abpm = AmbulatoryBloodPressure.extract(
+      pageTexts: diagnostics.pages.map(\.plainText), pages: diagnostics.pages, source: source)
+    let parsed = AmbulatoryBloodPressure.withoutGridLines(sheet, read: abpm).merging(abpm)
     // A scale's screen goes to its own reader when the sheet grammar finds
     // nothing, as `LabImport` does. Without this the replay reported every
     // scale screenshot as a regression it was not (2026-10-04).
