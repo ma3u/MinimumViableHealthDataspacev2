@@ -1,0 +1,69 @@
+/* EHDS Integration Hub: the hub's colours (ui/src/app/globals.css) on the
+   keycloak.v2 login page. Light and dark follow the device, as in the hub. */
+
+:root {
+  --ehds-hub-primary: #0058be;
+  --ehds-hub-primary-hover: #2170e4;
+  --ehds-hub-on-primary: #ffffff;
+  --keycloak-card-top-color: var(--ehds-hub-primary);
+  --pf-v5-global--primary-color--100: var(--ehds-hub-primary);
+  --pf-v5-global--primary-color--200: var(--ehds-hub-primary-hover);
+  --pf-v5-global--link--Color: var(--ehds-hub-primary);
+  --pf-v5-global--link--Color--hover: var(--ehds-hub-primary-hover);
+  --pf-v5-global--active-color--100: var(--ehds-hub-primary);
+}
+
+:root.pf-v5-theme-dark {
+  --ehds-hub-primary: #adc6ff;
+  --ehds-hub-primary-hover: #4d8eff;
+  --ehds-hub-on-primary: #001a42;
+}
+
+.pf-v5-c-button.pf-m-primary {
+  --pf-v5-c-button--m-primary--Color: var(--ehds-hub-on-primary);
+  --pf-v5-c-button--m-primary--hover--Color: var(--ehds-hub-on-primary);
+  --pf-v5-c-button--m-primary--BackgroundColor: var(--ehds-hub-primary);
+  --pf-v5-c-button--m-primary--hover--BackgroundColor: var(--ehds-hub-primary-hover);
+}
+
+/* The hub's navy, running into the logo's blue and teal, in both modes. */
+.login-pf body {
+  background: radial-gradient(ellipse at 85% 110%, rgba(20, 143, 119, 0.55) 0%, rgba(20, 143, 119, 0) 55%),
+    linear-gradient(160deg, #0b1326 0%, #0f2242 55%, #1e3a5f 100%) fixed;
+  background-color: #0b1326;
+}
+
+#kc-header-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+#kc-header-wrapper::before {
+  content: "";
+  width: 56px;
+  height: 56px;
+  margin-bottom: 0.5rem;
+  background: url("../img/ehds-hub-logo.svg") no-repeat center / contain;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.ehds-hub-title {
+  display: block;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.ehds-hub-subtitle {
+  display: block;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}

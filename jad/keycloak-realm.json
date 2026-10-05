@@ -2,7 +2,7 @@
   "realm": "edcv",
   "enabled": true,
   "sslRequired": "none",
-  "displayName": "EDCV Realm",
+  "displayName": "EHDS Integration Hub",
   "roles": {
     "realm": [
       {
@@ -628,5 +628,7 @@
       "subGroups": []
     }
   ],
-  "eventsEnabled": false
+  "eventsEnabled": false,
+  "displayNameHtml": "EHDS Integration Hub",
+  "loginTheme": "ehds-hub"
 }
