@@ -1,8 +1,8 @@
 ---
 title: Weekly Demo Reset — start-of-week baseline refresh (issue #11)
-status: future
+status: done
 owner: ma3u
-updated: 2026-07-15
+updated: 2026-10-04
 adr: ../../ADRs/ADR-014-weekly-demo-reset.md
 ---
 

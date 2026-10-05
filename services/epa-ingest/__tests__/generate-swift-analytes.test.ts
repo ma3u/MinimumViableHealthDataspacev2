@@ -86,8 +86,10 @@ describe("the generated table covers the whole dictionary", () => {
   it("emits the differential, whose labels are built rather than written", () => {
     const entries = buildEntries([...ANALYTE_LABELS], [...UNIT_SPELLINGS]);
     const neutrophils = entries.filter((e) => e.analyteKey === "neutrophils");
+    // The analyser's count, the microscope's, and the microscope's count of
+    // segmented neutrophils: LOINC codes the method, so the sheet's does too.
     expect(new Set(neutrophils.map((e) => e.loinc))).toEqual(
-      new Set(["751-8", "770-8"]),
+      new Set(["751-8", "770-8", "753-4", "23761-0", "768-2", "769-0"]),
     );
   });
 

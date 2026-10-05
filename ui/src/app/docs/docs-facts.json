@@ -963,31 +963,31 @@
       "id": "ADR-045",
       "file": "ADR-045-observability-and-regulatory-audit-trail.md",
       "title": "Cloud-native, vendor-agnostic observability, and a tamper-evident audit trail for regulators",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-046",
       "file": "ADR-046-vault-keeps-its-state-on-the-flexible-server.md",
       "title": "The Azure Vault keeps its state on the Flexible Server",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-047",
       "file": "ADR-047-vault-stays-up-off-hours.md",
       "title": "Vault stays up off-hours until it keeps its own state",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-048",
       "file": "ADR-048-testflight-request-mailed-without-a-session.md",
       "title": "The TestFlight request is mailed by the hub, without a session",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-049",
       "file": "ADR-049-klarbefund-connects-by-device-grant.md",
       "title": "Klarbefund connects to a patient's record by a device grant the website starts",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-052",
@@ -1005,6 +1005,12 @@
       "id": "ADR-054",
       "file": "ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md",
       "title": "Klarbefund creates a sandbox account on the hub, gated by App Attest",
+      "status": "Proposed"
+    },
+    {
+      "id": "ADR-055",
+      "file": "ADR-055-azure-runs-the-compose-jad-build.md",
+      "title": "Azure runs the same JAD build as compose and CI",
       "status": "Proposed"
     }
   ],
@@ -1086,10 +1092,10 @@
   "lastUpdated": {
     "/docs": "2026-10-04",
     "/docs/user-guide": "2026-10-04",
-    "/docs/developer": "2026-10-04",
-    "/docs/developer/quality-gates": "2026-10-04",
-    "/docs/developer/api": "2026-10-04",
+    "/docs/developer": "2026-10-05",
+    "/docs/developer/quality-gates": "2026-10-05",
+    "/docs/developer/api": "2026-10-05",
     "/docs/developer/reference": "2026-10-04",
-    "/docs/architecture": "2026-10-04"
+    "/docs/architecture": "2026-10-05"
   }
 }

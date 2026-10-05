@@ -1,8 +1,8 @@
 ---
 title: NLQ researcher improvements — pharmacovigilance scenario (issue #19)
-status: current
+status: done
 owner: ma3u
-updated: 2026-07-15
+updated: 2026-10-04
 ---
 
 Canonical test: "Is tendon rupture frequently observed in patients treated
