@@ -87,10 +87,13 @@ is the report: `docs/loadtest/<date>-<scenario>.md`.
 
 ## Reading the result
 
-- **429s, and the failures are all 429:** a rate limit, not capacity. Since
-  #519 the proxy counts per participant (`X-Participant`), 100 requests and 20
-  analytical queries a minute each, per proxy replica. Raise `RATE_LIMIT_MAX` or
-  `RATE_LIMIT_HEAVY_MAX` on `mvhd-neo4j-proxy` if the limit is the finding.
+- **429s, and the failures are all 429:** a rate limit, not capacity. The proxy
+  counts per user (`X-Caller`, a hash of the session's user id: 100 requests and
+  20 analytical queries a minute), per participant for callers that name no user
+  (ten times that), each per proxy replica. `RATE_LIMIT_MAX`,
+  `RATE_LIMIT_HEAVY_MAX`, `RATE_LIMIT_PARTICIPANT_MAX` and
+  `RATE_LIMIT_PARTICIPANT_HEAVY_MAX` on `mvhd-neo4j-proxy` change the numbers.
+  The forged sessions are ten users per persona for the same reason.
 - **NLQ p95 climbs with parallel users while the proxy's p95 by route does not:**
   the audit chain. "Audit records per transaction" above 1 means the batch
   writer is taking the load; at 1 every query waits for its own transaction.
@@ -106,14 +109,14 @@ is the report: `docs/loadtest/<date>-<scenario>.md`.
 
 ## Hypotheses and findings
 
-| #   | Hypothesis (from the code)                       | Finding                                                                                                                                    |
-| --- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1   | The proxy's rate limits are shared by everyone   | Confirmed 2026-10-05 on compose, proxy from `main`: 20 parallel NLQ users, 86 of 202 queries answered 429 (42.6 %). Fixed: per participant |
-| 2   | Audited queries run one transaction at a time    | Fixed: batched writes. To measure after deploy with `audited`                                                                              |
-| 3   | The UI's in-memory limiter scales with replicas  | Known; left as is (3× at 3 replicas)                                                                                                       |
-| 4   | Postgres runs out of burst credit                | To measure with `signin` and `soak` on the live hub                                                                                        |
-| 5   | Neo4j is the ceiling for graph and patient pages | To measure with `load` and `stress`                                                                                                        |
-| 6   | Sign-in is a singleton                           | To measure with `signin`                                                                                                                   |
+| #   | Hypothesis (from the code)                       | Finding                                                                                                                                                                                                                       |
+| --- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | The proxy's rate limits are shared by everyone   | Confirmed 2026-10-05 on compose (proxy from `main`): 20 parallel NLQ users, 86 of 202 queries 429. Per participant alone, live: 4,071 of 4,871 (83.6 %), the 20 users of one organisation. Now per user, then per participant |
+| 2   | Audited queries run one transaction at a time    | Not seen live: 20 parallel audited queries, the successful ones p50 238 ms, p95 544 ms. Batched writes deployed in #534                                                                                                       |
+| 3   | The UI's in-memory limiter scales with replicas  | Known; left as is (3× at 3 replicas)                                                                                                                                                                                          |
+| 4   | Postgres runs out of burst credit                | A first sign: 36 of the B1ms burst credits left at 08:45 Berlin, before any test load. `signin` and `soak` to measure                                                                                                         |
+| 5   | Neo4j is the ceiling for graph and patient pages | To measure with `load` and `stress`                                                                                                                                                                                           |
+| 6   | Sign-in is a singleton                           | To measure with `signin`                                                                                                                                                                                                      |
 
 Related: [ADR-045](../../ADRs/ADR-045-observability-and-regulatory-audit-trail.md),
 [query audit chain](query-audit-chain.md), [`observability/README.md`](../../../observability/README.md).

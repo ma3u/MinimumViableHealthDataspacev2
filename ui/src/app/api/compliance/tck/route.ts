@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
-import { NEO4J_PROXY_URL } from "@/lib/proxy";
+import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +33,7 @@ export async function GET() {
   // ── DSP + DCP Suites (via neo4j-proxy running inside Docker) ─────
   try {
     const proxyRes = await fetch(`${NEO4J_PROXY_URL}/tck`, {
+      headers: callerHeaders(auth.session),
       cache: "no-store",
       signal: AbortSignal.timeout(30000),
     });

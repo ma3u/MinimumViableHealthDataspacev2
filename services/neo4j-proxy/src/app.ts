@@ -30,34 +30,56 @@ const RATE_LIMIT_WINDOW_MS = parseInt(
 ); // 1 minute
 
 /**
- * Who a limit counts against: the participant named in X-Participant, which
- * the UI, the data planes and the crawler send on every call. Until #519
- * the key was the client IP, and every request reaches the proxy from a UI
- * replica, so all users of the platform shared one bucket of 20 analytical
- * queries a minute. A call without the header counts against the IP behind
- * the ingress. The store is in memory, per proxy replica, so a participant
- * gets the limit once per replica.
+ * Who a limit counts against (#519). In order:
+ *
+ *   1. the user, when the UI names one in X-Caller (a hash of the session's
+ *      user id, never the id itself): one person's budget;
+ *   2. the participant in X-Participant, which the data planes and the
+ *      crawler send and the UI sends alongside: an organisation's budget,
+ *      ten times a person's, for callers that act for the whole organisation;
+ *   3. the address behind the ingress.
+ *
+ * Until #519 the key was the client IP, and every request reaches the proxy
+ * from a UI replica, so the whole platform shared one bucket of 20
+ * analytical queries a minute. Per participant alone was measured next: 20
+ * users of one organisation hit 100 a minute within seconds. The store is in
+ * memory, per proxy replica, so each key gets its budget once per replica.
  */
+const CALLER_HASH = /^[a-f0-9]{16,64}$/;
+
 export function rateLimitKey(req: Request): string {
+  const caller = req.header("x-caller");
+  if (caller && CALLER_HASH.test(caller)) return `u:${caller}`;
   const participant = req.header("x-participant");
   if (participant && participant.length <= 256) return `p:${participant}`;
   return ipKeyGenerator(req.ip ?? "");
 }
 
-/** General limit: 100 requests per minute per participant */
+/** A person's budget, or an organisation's when no person is named. */
+function budget(perUser: string, perParticipant: string, fallback: number) {
+  const user = parseInt(process.env[perUser] ?? String(fallback), 10);
+  const participant = parseInt(
+    process.env[perParticipant] ?? String(fallback * 10),
+    10,
+  );
+  return (req: Request) =>
+    rateLimitKey(req).startsWith("u:") ? user : participant;
+}
+
+/** General limit: 100 requests per minute per user, 1,000 per participant */
 const generalLimiter = rateLimit({
   windowMs: RATE_LIMIT_WINDOW_MS,
-  max: parseInt(process.env.RATE_LIMIT_MAX ?? "100", 10),
+  max: budget("RATE_LIMIT_MAX", "RATE_LIMIT_PARTICIPANT_MAX", 100),
   keyGenerator: rateLimitKey,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many requests — please retry after 60 seconds." },
 });
 
-/** Strict limit for expensive query endpoints: 20 requests per minute per participant */
+/** Strict limit for expensive query endpoints: 20 per minute per user, 200 per participant */
 export const heavyLimiter = rateLimit({
   windowMs: RATE_LIMIT_WINDOW_MS,
-  max: parseInt(process.env.RATE_LIMIT_HEAVY_MAX ?? "20", 10),
+  max: budget("RATE_LIMIT_HEAVY_MAX", "RATE_LIMIT_PARTICIPANT_HEAVY_MAX", 20),
   keyGenerator: rateLimitKey,
   standardHeaders: true,
   legacyHeaders: false,
