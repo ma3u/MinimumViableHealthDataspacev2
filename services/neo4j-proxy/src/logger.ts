@@ -15,6 +15,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomBytes } from "node:crypto";
 import { isSpanContextValid, trace } from "@opentelemetry/api";
+import { logs, SeverityNumber } from "@opentelemetry/api-logs";
 import type { NextFunction, Request, Response } from "express";
 import pino, { type DestinationStream, type Logger } from "pino";
 
@@ -92,7 +93,66 @@ export function createLogger(
   );
 }
 
-export const logger = createLogger();
+const SEVERITY: Record<string, SeverityNumber> = {
+  trace: SeverityNumber.TRACE,
+  debug: SeverityNumber.DEBUG,
+  info: SeverityNumber.INFO,
+  warn: SeverityNumber.WARN,
+  error: SeverityNumber.ERROR,
+  fatal: SeverityNumber.FATAL,
+};
+
+type Emit = (record: {
+  body: string;
+  severityNumber: SeverityNumber;
+  severityText: string;
+  timestamp?: number;
+}) => void;
+
+/**
+ * A pino destination that sends each finished line as an OTLP log record.
+ * It sees the line after pino's redaction, so it can carry nothing the
+ * stdout line does not. The body is that JSON line unchanged, so a Loki
+ * query that parses it (`| json`) reads the same fields whether the line
+ * came from a container's stdout or over OTLP.
+ */
+export function otlpLineStream(
+  emit: Emit = (record) => logs.getLogger("neo4j-proxy").emit(record),
+): DestinationStream {
+  return {
+    write(chunk: string) {
+      for (const line of chunk.split("\n")) {
+        if (!line) continue;
+        let level = "info";
+        let timestamp: number | undefined;
+        try {
+          const parsed = JSON.parse(line) as { level?: string; time?: string };
+          level = parsed.level ?? level;
+          timestamp = parsed.time ? Date.parse(parsed.time) : undefined;
+        } catch {
+          // Not JSON: send it as it is, at info.
+        }
+        emit({
+          body: line,
+          severityNumber: SEVERITY[level] ?? SeverityNumber.INFO,
+          severityText: level.toUpperCase(),
+          timestamp,
+        });
+      }
+    },
+  };
+}
+
+/** stdout, and OTLP as well when tracing.ts exports (OTEL_EXPORTER_OTLP_ENDPOINT). */
+function defaultDestination(): DestinationStream | undefined {
+  if (!process.env.OTEL_EXPORTER_OTLP_ENDPOINT) return undefined;
+  return pino.multistream([
+    { level: "trace", stream: pino.destination(1) },
+    { level: "trace", stream: otlpLineStream() },
+  ]);
+}
+
+export const logger = createLogger(defaultDestination());
 
 const LOAD_TEST_ID = /^[A-Za-z0-9._-]{1,64}$/;
 

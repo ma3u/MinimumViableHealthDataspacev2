@@ -125,6 +125,7 @@ jobs:
         mvhd-provision-mgr mvhd-tenant-mgr mvhd-issuerservice mvhd-identityhub
         mvhd-dp-omop mvhd-dp-fhir mvhd-controlplane
         mvhd-nats mvhd-claude-federation mvhd-keycloak mvhd-vault
+        mvhd-observability
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -268,7 +269,8 @@ jobs:
           # Vault and Keycloak need Postgres, which is Ready by now.
           ./scripts/azure/set-app-power.sh start \
             mvhd-vault mvhd-keycloak mvhd-claude-federation \
-            mvhd-neo4j mvhd-nats mvhd-neo4j-proxy mvhd-catalog-enricher ||
+            mvhd-neo4j mvhd-nats mvhd-neo4j-proxy mvhd-catalog-enricher \
+            mvhd-observability ||
             echo "::warning::Not every core app reported running, see above"
           echo "=== Restoring Container App replica profiles ==="
           # min=1 max=1 (singleton stateful / small services)

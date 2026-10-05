@@ -151,14 +151,21 @@ export const SLO_MS = { page: 2000, api: 1000, nlq: 3000, signin: 3000 };
  */
 export function thresholds(scenario) {
   const abort = ["stress", "spike", "soak"].includes(scenario);
-  const limit = (value) => ({
+  // ABORT_ON=failures: stop only when requests fail. On the live hub the API
+  // p95 misses its 1 s SLO from the first users on (/api/graph, #540), so a
+  // latency abort ended the stress run at 34 users with nothing failed; the
+  // latency is still measured and the threshold still reported.
+  const latencyAborts = abort && __ENV.ABORT_ON !== "failures";
+  const limit = (value, aborts = abort) => ({
     threshold: value,
-    abortOnFail: abort,
+    abortOnFail: aborts,
     delayAbortEval: scaled("1m"),
   });
   return {
     http_req_failed: [limit("rate<0.01")],
-    "http_req_duration{kind:api}": [limit(`p(95)<${SLO_MS.api}`)],
+    "http_req_duration{kind:api}": [
+      limit(`p(95)<${SLO_MS.api}`, latencyAborts),
+    ],
     "http_req_duration{kind:page}": [`p(95)<${SLO_MS.page}`],
     "http_req_duration{kind:nlq}": [`p(95)<${SLO_MS.nlq}`],
     "http_req_duration{kind:signin}": [`p(95)<${SLO_MS.signin}`],

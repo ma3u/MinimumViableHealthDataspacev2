@@ -10,7 +10,12 @@ import { Writable } from "node:stream";
 import express from "express";
 import request from "supertest";
 import { describe, it, expect } from "vitest";
-import { createLogger, requestLogging, traceIdFrom } from "../src/logger.js";
+import {
+  createLogger,
+  otlpLineStream,
+  requestLogging,
+  traceIdFrom,
+} from "../src/logger.js";
 
 const PATIENT_ID = "patient-4711-mueller";
 const TOKEN = "eyJhbGciOiJSUzI1NiJ9.secret-token-value";
@@ -110,6 +115,36 @@ describe("proxy logs", () => {
     expect(access[0].load_test).toBe("20261006-0900-load-azure");
     expect(access[1]).not.toHaveProperty("load_test");
     expect(access[2]).not.toHaveProperty("load_test");
+  });
+
+  // The OTLP copy (Azure, where nothing reads stdout) is the redacted line.
+  it("send the same redacted lines over OTLP, with their severity", async () => {
+    const records: {
+      body: string;
+      severityText: string;
+      severityNumber: number;
+    }[] = [];
+    const log = createLogger(
+      otlpLineStream((record) => records.push(record)),
+      "info",
+    );
+    await request(appWith(log))
+      .post(`/fhir/Patient/${PATIENT_ID}`)
+      .set("Authorization", `Bearer ${TOKEN}`)
+      .send({ question: QUESTION });
+
+    const bodies = records.map((r) => r.body).join("\n");
+    expect(records.length).toBeGreaterThanOrEqual(3);
+    expect(bodies).not.toContain(PATIENT_ID);
+    expect(bodies).not.toContain(TOKEN);
+    expect(bodies).not.toContain("Erika");
+    expect(bodies).not.toContain("MATCH");
+    const failed = records.find((r) => r.body.includes('"request failed"'));
+    expect(failed).toMatchObject({ severityText: "ERROR", severityNumber: 17 });
+    expect(JSON.parse(failed!.body)).toMatchObject({
+      route: "/fhir/Patient/:id",
+      status: 500,
+    });
   });
 
   it("leave health probes out", async () => {
