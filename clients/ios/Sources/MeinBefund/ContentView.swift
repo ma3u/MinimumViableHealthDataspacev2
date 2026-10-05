@@ -30,6 +30,8 @@ final class AppModel: ObservableObject {
   @Published var pickingPhotos = false
   @Published var picking = false
   @Published var error: String?
+  /// Good news worth a moment of attention, never an error.
+  @Published var notice: String?
   @Published var viewingScan: Data?
   @Published var diagnosticsRequest: DiagnosticsExport.Request?
   @Published var buildingDiagnostics = false
@@ -91,7 +93,7 @@ final class AppModel: ObservableObject {
       }
     #endif
     do {
-      reports = try await store.load()
+      reports = try await recodeAfterUpdate(try await store.load())
       var loaded = try await store.profile()
       // One migration: the sex used to be a preference in UserDefaults.
       if loaded.sex == .any, let legacy = LegacyRangePreference.take() {
@@ -439,6 +441,41 @@ final class AppModel: ObservableObject {
       "re-coded from stored rows: \(outcome.recovered, privacy: .public) recovered, \(outcome.recoded, privacy: .public) recoded"
     )
     await refresh()
+  }
+
+  /// Once per dictionary and build: every stored report's own rows through
+  /// the current parser and dictionary (`LabRecoder`).
+  ///
+  /// A person who updates the app should see what this version can read
+  /// without asking for it report by report: on 2026-10-05 the phone held
+  /// three reports with 22, 39 and 76 refused rows that the new dictionary
+  /// codes. Never loses a value, and does not read the pages again; that stays
+  /// with "Read again", which can also take longer.
+  private func recodeAfterUpdate(_ loaded: [LabReport]) async throws -> [LabReport] {
+    // v2: the first run multiplied a microbiome panel's rows; this one repairs it.
+    let marker = "recodedWithDictionary.v2"
+    let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
+    let current = "\(Analytes.codings.count)-\(build)"
+    guard UserDefaults.standard.string(forKey: marker) != current else { return loaded }
+    var updated = loaded
+    var recovered = 0
+    for (index, report) in loaded.enumerated() {
+      let outcome = LabRecoder.recode(report.extraction)
+      guard outcome.recovered + outcome.recoded > 0 else { continue }
+      let next = LabReport(
+        id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+        title: report.title, extraction: outcome.extraction, metadata: report.metadata,
+        pageTexts: report.pageTexts, scan: report.scan, hasDiagnostics: report.hasDiagnostics)
+      try await store.save(next)
+      updated[index] = next
+      recovered += max(0, outcome.extraction.coded.count - report.extraction.coded.count)
+    }
+    UserDefaults.standard.set(current, forKey: marker)
+    Log.store.notice("re-coded after an update: \(recovered, privacy: .public) more values")
+    if recovered > 0 {
+      notice = String(localized: "This version reads \(recovered) more values from your stored reports.")
+    }
+    return updated
   }
 
   /// Every stored report as OMOP CDM v5.4 tables, zipped for the share sheet.
@@ -1378,5 +1415,12 @@ private struct AppDialogs: ViewModifier {
     } message: {
       Text(model.error ?? "")
     }
+      .alert(
+        "Updated", isPresented: Binding(get: { model.notice != nil }, set: { _ in model.notice = nil })
+      ) {
+        Button("OK", role: .cancel) {}
+      } message: {
+        Text(model.notice ?? "")
+      }
   }
 }

@@ -63,4 +63,31 @@ struct LabRecoderTests {
     #expect(outcome.recovered == 0 && outcome.recoded == 0)
     #expect(outcome.extraction.source == .labIssuedDigital)
   }
+
+  @Test("rows split from one line each take back their own value, not their neighbours'")
+  func splitLine() {
+    let line = "Akkermansia muciniphila 0,5 % Prevotella spp. 12,0 % Prevotella copri 9,5 %"
+    let rows = [("Akkermansia muciniphila", 0.5), ("Prevotella spp.", 12.0), ("Prevotella copri", 9.5)]
+    let stored = ExtractionResult(
+      coded: [],
+      unmapped: rows.enumerated().map { index, row in
+        UnmappedLabValue(
+          raw: RawLabValue(label: row.0, value: row.1, unitRaw: "%", line: line, lineNumber: 100 + index),
+          reason: .unknownAnalyte)
+      },
+      suspiciousLines: [], source: .ocrTranscribed)
+    let outcome = LabRecoder.recode(stored)
+    #expect(outcome.extraction.coded.count == 3)
+    #expect(outcome.extraction.coded.map(\.raw.value) == [0.5, 12.0, 9.5])
+  }
+
+  @Test("exact copies collapse to one, so a multiplied record is repaired")
+  func repairsCopies() throws {
+    let line = "Akkermansia muciniphila 0,5 % Prevotella spp. 12,0 %"
+    let coded = LabLineParser.extract(line, source: .ocrTranscribed).coded
+    try #require(coded.count == 2)
+    let multiplied = ExtractionResult(
+      coded: coded + coded + coded, unmapped: [], suspiciousLines: [], source: .ocrTranscribed)
+    #expect(LabRecoder.recode(multiplied).extraction.coded.count == 2)
+  }
 }

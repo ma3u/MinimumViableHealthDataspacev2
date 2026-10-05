@@ -46,14 +46,21 @@ public enum LabRecoder {
     }
 
     for item in stored.unmapped {
-      let again = LabLineParser.extract(oneLine(item.raw.line), source: source)
-      if again.coded.isEmpty {
+      // One refused row takes back its own value and nothing else. A
+      // microbiome line holds several organisms, each stored as its own row
+      // with the whole line; taking every value the line yields, once per
+      // row, multiplied a panel of 76 into 393 (2026-10-05).
+      let again = LabLineParser.extract(oneLine(item.raw.line), source: source).coded
+      let sameValue = again.filter { abs($0.raw.value - item.raw.value) < 1e-9 }
+      let own =
+        sameValue.first { Analytes.normaliseLabel($0.raw.label) == Analytes.normaliseLabel(item.raw.label) }
+        ?? (sameValue.count == 1 ? sameValue.first : nil)
+      guard let own else {
         unmapped.append(item)
         continue
       }
       recovered += 1
-      coded += again.coded.map { keeping(item.raw, $0, source: source) }
-      unmapped += again.unmapped
+      coded.append(keeping(item.raw, own, source: source))
     }
 
     for line in stored.suspiciousLines {
@@ -67,9 +74,20 @@ public enum LabRecoder {
       unmapped += again.unmapped
     }
 
+    // Exact copies, the same value read from the same line with the same
+    // code, are one measurement. Repairs records the first version of this
+    // recoder multiplied; the same organism on two different lines stays two.
+    var seen = Set<String>()
+    let distinct = coded.filter { value in
+      let key = [value.raw.line, value.raw.label, "\(value.raw.value)", value.raw.unitRaw,
+        value.coding.loinc ?? value.coding.analyteKey].joined(separator: "|")
+      return seen.insert(key).inserted
+    }
+    if distinct.count < coded.count { recoded += 1 }
+
     return Outcome(
       extraction: ExtractionResult(
-        coded: coded, unmapped: unmapped, suspiciousLines: unread, source: source),
+        coded: distinct, unmapped: unmapped, suspiciousLines: unread, source: source),
       recovered: recovered, recoded: recoded)
   }
 
