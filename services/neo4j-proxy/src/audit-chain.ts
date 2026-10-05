@@ -24,6 +24,15 @@ import { logger } from "./logger.js";
 // The chain is serialised on one (:AuditChain) head node: the write
 // transaction locks it before reading seq and head, so two concurrent queries
 // cannot both extend the same predecessor.
+//
+// Records are written in batches (#519). One lock and one transaction per
+// query made the chain the ceiling for every audited query: one Neo4j write
+// at a time, platform-wide. Now a call enqueues its record and the writer
+// takes everything queued while the previous transaction ran, locks each
+// chain once, numbers and hashes the records in queue order, and writes them
+// in one transaction. Each caller still resolves only once its own record is
+// committed, and rejects if the transaction fails, so nothing about fail
+// closed changes; the chain in the database is the same single chain.
 
 export const QUERY_CHAIN = "query";
 export const GENESIS_HASH = "0".repeat(64);
@@ -259,7 +268,8 @@ export interface AuditIndex {
 
 /**
  * Appends one AuditEvent resource to a chain. Resolves once committed,
- * rejects otherwise. The chain is serialised on its (:AuditChain) head node.
+ * rejects otherwise. The record is written with whatever else is queued, in
+ * one transaction that holds the chain's (:AuditChain) head lock.
  */
 export async function appendAuditEvent(
   chain: string,
@@ -267,90 +277,193 @@ export async function appendAuditEvent(
   index: AuditIndex,
 ): Promise<ChainedEvent> {
   if (!driver) throw new Error("audit: no Neo4j driver");
+  // A record that cannot be serialised fails here, alone, before it joins a
+  // batch whose other members it would otherwise take down with it.
+  canonicalJson(resource);
+  return new Promise<ChainedEvent>((resolve, reject) => {
+    queue.push({ chain, resource, index, resolve, reject });
+    // One microtask later, so records enqueued in the same tick share a batch.
+    queueMicrotask(() => void flush());
+  });
+}
+
+interface PendingRecord {
+  chain: string;
+  resource: Record<string, unknown>;
+  index: AuditIndex;
+  resolve: (event: ChainedEvent) => void;
+  reject: (err: unknown) => void;
+}
+
+/** Records waiting for the next transaction, in arrival order. */
+const queue: PendingRecord[] = [];
+let flushing = false;
+/** Upper bound for one transaction; the rest waits for the next one. */
+const BATCH_MAX = Math.max(
+  1,
+  parseInt(process.env.AUDIT_BATCH_MAX ?? "100", 10) || 100,
+);
+
+/** Writes batches until the queue is empty. One flush runs at a time. */
+async function flush(): Promise<void> {
+  if (flushing) return;
+  flushing = true;
+  try {
+    while (queue.length > 0) {
+      const batch = queue.splice(0, BATCH_MAX);
+      try {
+        const events = await writeBatch(batch);
+        batch.forEach((p, i) => p.resolve(events[i]));
+      } catch (err) {
+        // Fail closed for everyone in the transaction: none was committed.
+        batch.forEach((p) => p.reject(err));
+      }
+    }
+  } finally {
+    flushing = false;
+  }
+}
+
+/**
+ * One transaction for a batch: lock each chain's head (in a fixed order, so
+ * two replicas never wait on each other), find the keys the chains already
+ * hold, then number, hash and write the rest in queue order.
+ */
+async function writeBatch(batch: PendingRecord[]): Promise<ChainedEvent[]> {
+  if (!driver) throw new Error("audit: no Neo4j driver");
   const session = driver.session({ database: "neo4j" });
   try {
-    const committed = await session.executeWrite(async (tx) => {
-      // SET before RETURN: takes the head node's write lock first, so the
-      // seq and head read below cannot change until this commits.
-      const head = await tx.run(
-        `MERGE (c:AuditChain {id: $chain})
-           ON CREATE SET c.seq = 0, c.head = $genesis
-         SET c.lockedAt = datetime()
-         RETURN c.seq AS seq, c.head AS head`,
-        { chain, genesis: GENESIS_HASH },
-      );
-      if (index.dedupeKey) {
-        const seen = await tx.run(
-          `MATCH (e:AuditEvent {chain: $chain, dedupeKey: $key})
-           RETURN e.seq AS seq, e.prevHash AS prevHash, e.hash AS hash, e.resource AS resource
-           LIMIT 1`,
-          { chain, key: index.dedupeKey },
+    const events = await session.executeWrite(async (tx) => {
+      const heads = new Map<string, { seq: number; head: string }>();
+      for (const chain of [...new Set(batch.map((p) => p.chain))].sort()) {
+        // SET before RETURN: takes the head node's write lock first, so the
+        // seq and head read below cannot change until this commits.
+        const head = await tx.run(
+          `MERGE (c:AuditChain {id: $chain})
+             ON CREATE SET c.seq = 0, c.head = $genesis
+           SET c.lockedAt = datetime()
+           RETURN c.seq AS seq, c.head AS head`,
+          { chain, genesis: GENESIS_HASH },
         );
-        const prior = seen.records[0];
-        if (prior) {
-          return {
-            chain,
-            seq: toNumber(prior.get("seq")),
-            prevHash: String(prior.get("prevHash")),
-            hash: String(prior.get("hash")),
-            resource: JSON.parse(String(prior.get("resource"))),
+        const record = head.records[0];
+        heads.set(chain, {
+          seq: toNumber(record.get("seq")),
+          head: String(record.get("head")),
+        });
+      }
+
+      // An event whose key the chain already holds is not appended again, so
+      // a retried callback leaves one record; the same key twice in one batch
+      // leaves one record too.
+      const dedupeId = (p: PendingRecord) =>
+        p.index.dedupeKey ? `${p.chain}\u0000${p.index.dedupeKey}` : null;
+      const known = new Map<string, ChainedEvent>();
+      const keyed = batch.filter((p) => p.index.dedupeKey);
+      if (keyed.length > 0) {
+        const seen = await tx.run(
+          `UNWIND $keys AS k
+           MATCH (e:AuditEvent {chain: k.chain, dedupeKey: k.key})
+           RETURN k.chain AS chain, k.key AS key, e.seq AS seq,
+                  e.prevHash AS prevHash, e.hash AS hash, e.resource AS resource`,
+          {
+            keys: keyed.map((p) => ({
+              chain: p.chain,
+              key: p.index.dedupeKey,
+            })),
+          },
+        );
+        for (const r of seen.records) {
+          known.set(`${String(r.get("chain"))}\u0000${String(r.get("key"))}`, {
+            chain: String(r.get("chain")),
+            seq: toNumber(r.get("seq")),
+            prevHash: String(r.get("prevHash")),
+            hash: String(r.get("hash")),
+            resource: JSON.parse(String(r.get("resource"))),
             duplicate: true,
-          };
+          });
         }
       }
-      const record = head.records[0];
-      const event = chainEvent(
-        resource,
-        chain,
-        toNumber(record.get("seq")) + 1,
-        String(record.get("head")),
-      );
-      await tx.run(
-        `MATCH (c:AuditChain {id: $chain})
-         CREATE (e:AuditEvent {
-           id: $id, chain: $chain, seq: $seq, prevHash: $prevHash, hash: $hash,
-           recorded: datetime($recorded), participantId: $participantId,
-           outcome: $outcome, resource: $resource, dedupeKey: $dedupeKey
-         })
-         SET c.seq = $seq, c.head = $hash`,
-        {
-          chain,
-          id: resource.id,
+
+      const out: ChainedEvent[] = [];
+      const rows: Array<Record<string, unknown>> = [];
+      for (const p of batch) {
+        const key = dedupeId(p);
+        const prior = key ? known.get(key) : undefined;
+        if (prior) {
+          out.push(prior);
+          continue;
+        }
+        const head = heads.get(p.chain)!;
+        const event = chainEvent(p.resource, p.chain, head.seq + 1, head.head);
+        head.seq = event.seq;
+        head.head = event.hash;
+        out.push(event);
+        if (key) known.set(key, { ...event, duplicate: true });
+        rows.push({
+          chain: p.chain,
+          id: p.resource.id,
           seq: neo4j.int(event.seq),
           prevHash: event.prevHash,
           hash: event.hash,
-          recorded: resource.recorded,
-          participantId: index.participantId,
-          outcome: index.outcome,
-          resource: canonicalJson(resource),
-          dedupeKey: index.dedupeKey ?? null,
-        },
-      );
-      return event;
+          recorded: p.resource.recorded,
+          participantId: p.index.participantId,
+          outcome: p.index.outcome,
+          resource: canonicalJson(p.resource),
+          dedupeKey: p.index.dedupeKey ?? null,
+        });
+      }
+      if (rows.length > 0) {
+        await tx.run(
+          `UNWIND $events AS ev
+           CREATE (e:AuditEvent {
+             id: ev.id, chain: ev.chain, seq: ev.seq, prevHash: ev.prevHash, hash: ev.hash,
+             recorded: datetime(ev.recorded), participantId: ev.participantId,
+             outcome: ev.outcome, resource: ev.resource, dedupeKey: ev.dedupeKey
+           })`,
+          { events: rows },
+        );
+        await tx.run(
+          `UNWIND $heads AS h
+           MATCH (c:AuditChain {id: h.chain})
+           SET c.seq = h.seq, c.head = h.head`,
+          {
+            heads: [...heads].map(([chain, h]) => ({
+              chain,
+              seq: neo4j.int(h.seq),
+              head: h.head,
+            })),
+          },
+        );
+      }
+      return out;
     });
     // A Plane 1 copy for dashboards (ADR-045 decision 12): what kind of
     // record, never who or which data. The chain stays the evidence.
-    if (committed.duplicate) {
+    events.forEach((committed, i) => {
+      const { chain, resource, index } = batch[i];
+      if (committed.duplicate) {
+        logger.info(
+          { audit: { chain, seq: committed.seq } },
+          "audit duplicate ignored",
+        );
+        return;
+      }
       logger.info(
-        { audit: { chain, seq: committed.seq } },
-        "audit duplicate ignored",
-      );
-      return committed;
-    }
-    logger.info(
-      {
-        audit: {
-          chain,
-          seq: committed.seq,
-          type: auditType(resource),
-          outcome: index.outcome,
-          source: detailValue(resource, "source"),
-          demo: detailValue(resource, "demo") === "true",
+        {
+          audit: {
+            chain,
+            seq: committed.seq,
+            type: auditType(resource),
+            outcome: index.outcome,
+            source: detailValue(resource, "source"),
+            demo: detailValue(resource, "demo") === "true",
+            batch: batch.length,
+          },
         },
-      },
-      "audit recorded",
-    );
-    return committed;
+        "audit recorded",
+      );
+    });
+    return events;
   } finally {
     await session.close();
   }

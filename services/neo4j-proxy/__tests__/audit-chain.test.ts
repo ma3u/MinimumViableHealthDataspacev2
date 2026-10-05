@@ -6,6 +6,7 @@
 import { describe, it, expect, vi } from "vitest";
 import {
   GENESIS_HASH,
+  appendAuditEvent,
   QUERY_CHAIN,
   appendQueryAudit,
   buildQueryAuditEvent,
@@ -17,6 +18,7 @@ import {
   type QueryAuditInput,
 } from "../src/audit-chain.js";
 import { setDriver } from "../src/db.js";
+import neo4j from "neo4j-driver";
 
 const QUESTION =
   "Which conditions does Erika Mustermann, born 1961-03-04, have?";
@@ -172,7 +174,7 @@ describe("appendQueryAudit", () => {
       .mockResolvedValueOnce({
         records: [{ get: (k: string) => (k === "seq" ? head.seq : head.head) }],
       })
-      .mockResolvedValueOnce({ records: [] });
+      .mockResolvedValue({ records: [] });
     const executeWrite = vi.fn(
       async (work: (tx: { run: typeof run }) => unknown) => work({ run }),
     );
@@ -199,10 +201,87 @@ describe("appendQueryAudit", () => {
     expect(event.hash).toBe(
       chainEvent(event.resource, QUERY_CHAIN, 42, prev).hash,
     );
-    const written = fake.run.mock.calls[1][1];
+    const written = fake.run.mock.calls[1][1].events[0];
     expect(written.hash).toBe(event.hash);
     expect(written.resource).not.toContain("Erika");
+    const heads = fake.run.mock.calls[2][1].heads;
+    expect(heads).toEqual([
+      { chain: QUERY_CHAIN, seq: neo4j.int(42), head: event.hash },
+    ]);
     expect(fake.close).toHaveBeenCalled();
+  });
+
+  // #519: records queued while a transaction runs go out together, in one
+  // transaction, each with its own place in the chain.
+  it("writes concurrent records in one transaction, chained in order", async () => {
+    const prev = "b".repeat(64);
+    const fake = fakeDriver({ seq: 7, head: prev });
+    setDriver(fake.driver as never);
+
+    const [first, second, third] = await Promise.all([
+      appendQueryAudit(input()),
+      appendQueryAudit({ ...input(), question: "second" }),
+      appendQueryAudit({ ...input(), question: "third" }),
+    ]);
+
+    const session = fake.driver.session.mock.results[0].value;
+    expect(fake.driver.session).toHaveBeenCalledTimes(1);
+    expect(session.executeWrite).toHaveBeenCalledTimes(1);
+    expect([first.seq, second.seq, third.seq]).toEqual([8, 9, 10]);
+    expect(first.prevHash).toBe(prev);
+    expect(second.prevHash).toBe(first.hash);
+    expect(third.prevHash).toBe(second.hash);
+    const rows = fake.run.mock.calls[1][1].events;
+    expect(
+      rows.map((r: { seq: { toNumber(): number } }) => r.seq.toNumber()),
+    ).toEqual([8, 9, 10]);
+    expect(fake.run.mock.calls[2][1].heads).toEqual([
+      { chain: QUERY_CHAIN, seq: neo4j.int(10), head: third.hash },
+    ]);
+  });
+
+  it("rejects every record of a batch whose transaction fails", async () => {
+    const close = vi.fn();
+    setDriver({
+      session: () => ({
+        executeWrite: vi.fn().mockRejectedValue(new Error("deadlock")),
+        close,
+      }),
+    } as never);
+    const results = await Promise.allSettled([
+      appendQueryAudit(input()),
+      appendQueryAudit({ ...input(), question: "second" }),
+    ]);
+    expect(results.map((r) => r.status)).toEqual(["rejected", "rejected"]);
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  it("writes the same dedupe key once per batch and returns the first record for the second", async () => {
+    const prev = "c".repeat(64);
+    const fake = fakeDriver({ seq: 0, head: prev });
+    setDriver(fake.driver as never);
+    const resource = (id: string) => ({
+      id,
+      recorded: "2026-10-05T08:00:00Z",
+      k: 1,
+    });
+    const [a, b] = await Promise.all([
+      appendAuditEvent("dsp", resource("e1"), {
+        participantId: "p",
+        outcome: "success",
+        dedupeKey: "evt-1",
+      }),
+      appendAuditEvent("dsp", resource("e2"), {
+        participantId: "p",
+        outcome: "success",
+        dedupeKey: "evt-1",
+      }),
+    ]);
+    expect(a.seq).toBe(1);
+    expect(b).toEqual({ ...a, duplicate: true });
+    // lock, dedupe lookup, one row written, heads
+    expect(fake.run.mock.calls[1][0]).toMatch(/UNWIND \$keys/);
+    expect(fake.run.mock.calls[2][1].events).toHaveLength(1);
   });
 
   it("rejects when the write fails, so the caller can refuse to answer", async () => {

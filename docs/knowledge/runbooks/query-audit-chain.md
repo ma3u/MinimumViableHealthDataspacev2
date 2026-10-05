@@ -28,7 +28,10 @@ is recorded too.
   record's `prevHash` is 64 zeros.
 - One `(:AuditChain {id: "query"})` node holds `seq` and `head`. The write
   transaction sets a property on it before reading them, which takes its lock, so
-  concurrent queries extend the chain one at a time. Tested on Neo4j 5.26 with 25
+  concurrent transactions extend the chain one at a time. Since #519 a
+  transaction carries every record queued while the previous one ran (up to
+  `AUDIT_BATCH_MAX`, default 100), numbered and hashed in queue order; each
+  caller still waits for its own record's commit. Tested on Neo4j 5.26 with 25
   concurrent appends: sequence 1 to 25, no gap, no duplicate.
 - Changing, removing or reordering any record breaks the hash of that record or
   the link of the next one.
