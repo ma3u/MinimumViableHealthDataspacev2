@@ -31,6 +31,10 @@ const ANONYMOUS: Record<string, string> = {
   "auth/eudi/status": "polled by the QR page until the wallet sign-in lands",
   "keycloak-config": "tells the sign-in banner where Keycloak is",
   health: "the liveness and readiness probe (k8s/probes.yaml)",
+  "app-accounts/challenge":
+    "the challenge the Klarbefund app has Apple attest, before it has an account (ADR-054)",
+  "app-accounts":
+    "creates a sandbox account, only for a request App Attest proves is the app (ADR-054)",
 };
 
 function routeFiles(dir: string): string[] {

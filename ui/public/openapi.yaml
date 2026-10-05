@@ -628,6 +628,91 @@ paths:
       responses:
         "204": { description: Consent revoked }
 
+  /api/app-accounts/challenge:
+    post:
+      tags: [Patient]
+      summary: A challenge for the Klarbefund app to have Apple attest
+      description: >
+        Answers without a session: the app has no account yet. A signed,
+        five-minute challenge and nothing else (ADR-054).
+      security: []
+      responses:
+        "200":
+          description: The challenge
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [challenge]
+                properties:
+                  challenge: { type: string }
+        "429": { description: Too many challenges in a minute }
+  /api/app-accounts:
+    post:
+      tags: [Patient]
+      summary: Create a sandbox account for the Klarbefund app
+      description: >
+        Answers without a session, and only to a request whose Apple App
+        Attest attestation verifies (ADR-054). Creates a Keycloak login with
+        a generated password, an empty record of its own, and connects the
+        phone. The password is in this answer once.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [challenge, keyId, attestation, deviceId]
+              properties:
+                challenge: { type: string }
+                keyId: { type: string, description: base64 App Attest key id }
+                attestation:
+                  { type: string, description: base64 attestation object }
+                deviceId: { type: string, format: uuid }
+                deviceName: { type: string }
+      responses:
+        "201":
+          description: The account
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [username, password, patientId, ehds, issuer, client]
+                properties:
+                  username: { type: string, example: kb-ab3dk7mn }
+                  password: { type: string }
+                  patientId: { type: string, example: KB-AB3DK7MN }
+                  ehds: { type: string, format: uri }
+                  issuer: { type: string, format: uri }
+                  client: { type: string, example: klarbefund-account }
+        "400": { description: A field is missing }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "409": { description: This key already created an account }
+        "429": { description: Too many accounts }
+        "502": { description: Keycloak or Neo4j failed }
+        "503": { description: Account creation is not configured on this hub }
+  /api/patient/app/account:
+    delete:
+      tags: [Patient]
+      summary: Delete the account the Klarbefund app created
+      description: >
+        The Keycloak login, its record and its phones (ADR-054, App Store
+        guideline 5.1.1(v)). The app's token and a connected device; a demo
+        persona is refused.
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [deleted]
+                properties:
+                  deleted: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: Not an account the app created }
+        "502": { description: Keycloak or Neo4j failed }
   /api/patient/app-pairing:
     post:
       tags: [Patient]

@@ -7,6 +7,8 @@ export const API_GROUP_DESCRIPTIONS: Record<string, string> = {
   admin:
     "Operator tools: components and their health, tenants, participants, ODRL policies, audit log and retention. EDC_ADMIN; policies and audit also HDAB_AUTHORITY",
   analytics: "OMOP cohort analytics",
+  "app-accounts":
+    "The Klarbefund app creates a sandbox account for itself, without a session but only with an Apple App Attest attestation (ADR-054)",
   assets: "EDC asset registry",
   auth: "Sign-in: NextAuth with Keycloak, and the EUDI Wallet start and status calls. No session needed",
   catalog: "HealthDCAT-AP dataset catalogue: list, publish, remove",
@@ -36,8 +38,6 @@ export const API_GROUP_DESCRIPTIONS: Record<string, string> = {
   permits: "The access body's register of applications and permits, Art. 57",
   tasks:
     "Negotiations and transfers across all participant contexts, as one task list",
-  "testflight-request":
-    "The start page's Klarbefund TestFlight form, mailed without a session (ADR-048)",
   transfers: "Data transfers",
   "trust-center": "Trust centers with their governance chain and statistics",
 };

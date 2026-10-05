@@ -149,12 +149,19 @@ are in `PROTECTED_PATHS`, so an anonymous visitor is sent to sign in. So are `/c
 reads the API redirects a signed-out visitor rather than showing empty panels.
 
 The only routes that answer without a session are the ones that make
-signing in possible and the probe that keeps the container alive:
+signing in possible, the probe that keeps the container alive, and the
+Klarbefund app's account creation:
 
 - `/api/auth/[...nextauth]`, `/api/auth/eudi/start`, `/api/auth/eudi/status`:
   the sign-in flows themselves.
 - `/api/keycloak-config`: tells the sign-in banner where Keycloak is.
 - `/api/health`: the liveness and readiness probe (`k8s/probes.yaml`).
+- `/api/app-accounts/challenge` and `/api/app-accounts`: the Klarbefund app
+  creates a sandbox account for itself, with an empty record and the phone
+  connected. Creation answers only a request whose Apple App Attest
+  attestation verifies (ADR-054); the challenge route hands out nothing but a
+  signed five-minute challenge. `DELETE /api/patient/app/account` takes the
+  app's token and deletes it again.
 
 The start page's TestFlight form (`/api/testflight-request`, ADR-048) is gone:
 Klarbefund's beta is joined by Apple's public link (ADR-050).

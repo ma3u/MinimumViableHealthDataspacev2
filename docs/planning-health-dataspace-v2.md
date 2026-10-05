@@ -188,10 +188,11 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [050](ADRs/ADR-050-klarbefund-beta-by-public-testflight-link.md)            | The Klarbefund beta is joined by a public TestFlight link                                       | 2026-10-03 | Proposed          |
 | [052](ADRs/ADR-052-confidential-spe-on-azure-revisited.md)                  | The confidential secure processing environment, revisited against Azure and the vendors of 2026 | 2026-10-04 | Proposed          |
 | [053](ADRs/ADR-053-everything-stops-off-hours.md)                           | Everything stops off hours, and the UI says so                                                  | 2026-10-04 | Accepted          |
+| [054](ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md) | Klarbefund creates a sandbox account on the hub, gated by App Attest                            | 2026-10-04 | Proposed          |
 | [055](ADRs/ADR-055-azure-runs-the-compose-jad-build.md)                     | Azure runs the same JAD build as compose and CI                                                 | 2026-10-04 | Proposed          |
 
 Numbers taken by open work, so a new ADR starts at **056**: 051 (#475). 050
-(#477) and 055 (#517) are merged.
+(#477), 054 (#520) and 055 (#517) are merged.
 
 ADR-045 to ADR-049 accepted on 2026-10-04.
 
