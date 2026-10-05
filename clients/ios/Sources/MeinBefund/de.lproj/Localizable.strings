@@ -205,8 +205,6 @@
 "Creatinine" = "Kreatinin";
 "Haemoglobin" = "Hämoglobin";
 "Read again with this version" = "Mit dieser Version neu auswerten";
-"This report has no stored pages to read again." = "Zu diesem Befund sind keine Seiten gespeichert, die neu ausgewertet werden könnten.";
-"Reading again found %lld values where %lld are stored, so the stored ones were kept." = "Beim erneuten Lesen wurden %lld Werte gefunden, gespeichert sind %lld; die gespeicherten wurden behalten.";
 "Export for research (OMOP)" = "Für die Forschung exportieren (OMOP)";
 "This report could not be read again." = "Dieser Befund konnte nicht erneut ausgewertet werden.";
 
@@ -438,3 +436,4 @@
 "Your EHDS account" = "Ihr EHDS-Konto";
 "Your own record on the EHDS demo hub. It starts empty and holds only what is added to it; nothing from this phone is sent there." = "Ihre eigene Akte auf dem EHDS-Demo-Hub. Sie ist zu Beginn leer und enthält nur, was hinzugefügt wird; von diesem Telefon wird nichts dorthin gesendet.";
 "Klarbefund sends a password only over an encrypted connection." = "Klarbefund sendet ein Passwort nur über eine verschlüsselte Verbindung.";
+"This version reads nothing more from this report." = "Diese Version liest aus diesem Befund nichts weiter.";

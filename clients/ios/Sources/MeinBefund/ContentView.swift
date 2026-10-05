@@ -344,7 +344,8 @@ final class AppModel: ObservableObject {
     defer { busy = false }
     do {
       guard let pdf = try await store.scan(for: report.id) else {
-        error = String(localized: "This report has no stored pages to read again.")
+        // Imported before the app kept pages: code its own stored rows again.
+        try await recode(report)
         return
       }
       // At the resolution the values were first read at.
@@ -379,13 +380,12 @@ final class AppModel: ObservableObject {
       let before = report.extraction.coded.count
       let after = product.extraction.coded.count
       guard after >= before else {
-        error = String(
-          localized:
-            "Reading again found \(after) values where \(before) are stored, so the stored ones were kept."
-        )
         Log.store.notice(
           "re-read discarded: \(after, privacy: .public) coded against \(before, privacy: .public) stored"
         )
+        // The pages read worse than they first did; the stored rows can still
+        // take what the parser and dictionary learned since.
+        try await recode(report)
         return
       }
 
@@ -419,6 +419,26 @@ final class AppModel: ObservableObject {
     } catch {
       self.error = error.localizedDescription
     }
+  }
+
+  /// Codes a report again from its own stored rows (`LabRecoder`): refused
+  /// rows and unread lines through the current parser and dictionary, coded
+  /// values to their current code. Never loses a coded value.
+  private func recode(_ report: LabReport) async throws {
+    let outcome = LabRecoder.recode(report.extraction)
+    guard outcome.recovered + outcome.recoded > 0 else {
+      error = String(localized: "This version reads nothing more from this report.")
+      return
+    }
+    let updated = LabReport(
+      id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+      title: report.title, extraction: outcome.extraction, metadata: report.metadata,
+      pageTexts: report.pageTexts, scan: report.scan, hasDiagnostics: report.hasDiagnostics)
+    try await store.save(updated)
+    Log.store.notice(
+      "re-coded from stored rows: \(outcome.recovered, privacy: .public) recovered, \(outcome.recoded, privacy: .public) recoded"
+    )
+    await refresh()
   }
 
   /// Every stored report as OMOP CDM v5.4 tables, zipped for the share sheet.
@@ -766,13 +786,13 @@ struct ContentView: View {
                     }
                   }
                 }
-                if report.scan != nil {
-                  ToolbarItem(placement: .secondaryAction) {
-                    Button {
-                      Task { await model.reextract(report) }
-                    } label: {
-                      Label("Read again with this version", systemImage: "arrow.clockwise")
-                    }
+                // Every report: one with pages is read again, one without is
+                // coded again from its stored rows.
+                ToolbarItem(placement: .secondaryAction) {
+                  Button {
+                    Task { await model.reextract(report) }
+                  } label: {
+                    Label("Read again with this version", systemImage: "arrow.clockwise")
                   }
                 }
                 ToolbarItem(placement: .secondaryAction) {
