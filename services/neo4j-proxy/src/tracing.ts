@@ -1,5 +1,5 @@
 /**
- * OpenTelemetry traces for the proxy (ADR-045 plane 1 decision 1, #418).
+ * OpenTelemetry traces and logs for the proxy (ADR-045 plane 1 decision 1, #418).
  *
  * Loaded before the app with `node --import ./dist/tracing.js dist/index.js`,
  * because instrumenting ESM needs the loader hook in place before express and
@@ -13,6 +13,10 @@
  * URLs never leave the process: `/fhir/Patient/<id>` carries a patient id, and
  * a query string can carry anything. scrubSpanAttributes() removes them before
  * export and keeps http.route, the pattern; the collector removes them again.
+ *
+ * Logs go out over OTLP too, where no collector reads the container's stdout
+ * (Azure Container Apps sends stdout only to Log Analytics): logger.ts hands
+ * every finished, redacted line to the log provider registered here.
  */
 import { register } from "node:module";
 import type { Attributes } from "@opentelemetry/api";
@@ -49,6 +53,8 @@ if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
   const [
     { NodeSDK },
     { OTLPTraceExporter },
+    { OTLPLogExporter },
+    { BatchLogRecordProcessor },
     { BatchSpanProcessor },
     { HttpInstrumentation },
     { ExpressInstrumentation, ExpressLayerType },
@@ -57,6 +63,8 @@ if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
   ] = await Promise.all([
     import("@opentelemetry/sdk-node"),
     import("@opentelemetry/exporter-trace-otlp-http"),
+    import("@opentelemetry/exporter-logs-otlp-http"),
+    import("@opentelemetry/sdk-logs"),
     import("@opentelemetry/sdk-trace-base"),
     import("@opentelemetry/instrumentation-http"),
     import("@opentelemetry/instrumentation-express"),
@@ -79,6 +87,10 @@ if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
         forceFlush: () => batch.forceFlush(),
         shutdown: () => batch.shutdown(),
       },
+    ],
+    // Registers the global log provider that logger.ts emits to.
+    logRecordProcessors: [
+      new BatchLogRecordProcessor({ exporter: new OTLPLogExporter() }),
     ],
     instrumentations: [
       new HttpInstrumentation({

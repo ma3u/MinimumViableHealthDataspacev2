@@ -13,7 +13,8 @@
 # Without it the run still works; only the Grafana panels stay empty.
 #
 # Variables: TESTID (default <date>-<scenario>-<target>), TIME_SCALE (0.05
-# shortens every stage for a dry run), KC_USER/KC_PASSWORD (signin), YES=1
+# shortens every stage for a dry run), ABORT_ON=failures (stress, spike, soak:
+# abort on failed requests only, not on latency), KC_USER/KC_PASSWORD (signin), YES=1
 # (skip the confirmation for a stress, spike or soak run against azure).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -61,7 +62,7 @@ fi
 # k6 → Prometheus remote write → the LGTM container's Prometheus, when it is up.
 RW="${K6_PROMETHEUS_RW_SERVER_URL:-http://localhost:9091/api/v1/write}"
 out=()
-if curl -s -o /dev/null -m 2 "${RW%/api/v1/write}/-/ready"; then
+if curl -s -o /dev/null -m 10 "${RW%/api/v1/write}/-/ready"; then
   out=(-o experimental-prometheus-rw)
   export K6_PROMETHEUS_RW_SERVER_URL="$RW"
   export K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM="${K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM:-true}"
@@ -72,9 +73,10 @@ else
 fi
 
 echo "k6 $SCENARIO against $BASE_URL, testid $TESTID"
-k6 run "${out[@]}" --tag "testid=$TESTID" \
+k6 run ${out[@]+"${out[@]}"} --tag "testid=$TESTID" \
   -e "SCENARIO=$SCENARIO" -e "BASE_URL=$BASE_URL" -e "PROXY_URL=$PROXY_URL" \
   -e "TESTID=$TESTID" -e "SESSIONS=$SESSIONS" -e "TIME_SCALE=${TIME_SCALE:-1}" \
+  -e "ABORT_ON=${ABORT_ON:-}" \
   -e "KC_USER=${KC_USER:-researcher}" -e "KC_PASSWORD=${KC_PASSWORD:-${KC_USER:-researcher}}" \
   -e "SUMMARY_PATH=$RESULTS/$TESTID.json" \
   "$HERE/platform.js"

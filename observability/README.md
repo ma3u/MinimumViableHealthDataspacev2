@@ -2,7 +2,7 @@
 
 ADR-045 ([plane 1](../docs/ADRs/ADR-045-observability-and-regulatory-audit-trail.md)
 operations, plane 2 the regulatory audit trail), issue #418. Runs locally beside any of
-the compose stacks; the Azure `mvhd-observability` app is not built yet.
+the compose stacks, and on Azure as the app `mvhd-observability` (below).
 
 ```bash
 docker compose -f docker-compose.observability.yml up -d
@@ -67,3 +67,29 @@ lock timeouts). Container logs are an operational view, the chain is the evidenc
 | `grafana/build-dashboards.py` | Builds the dashboard JSON; edit this, not the JSON                             |
 | `grafana/dashboards/*.json`   | Generated dashboards, provisioned read-only                                    |
 | `grafana/provisioning/`       | Datasource (Infinity → proxy) and dashboard provider                           |
+
+## On Azure: mvhd-observability
+
+The same dashboards for the live hub, in one Container App built from
+[`azure/Dockerfile`](azure/Dockerfile): `grafana/otel-lgtm` with the dashboards, the
+audit datasource and a collector config ([`azure/otelcol-config.yaml`](azure/otelcol-config.yaml))
+baked in.
+
+| What        | Where                                                                                |
+| ----------- | ------------------------------------------------------------------------------------ |
+| Grafana     | `https://grafana.ehds.mabu.red` once DNS is bound; before that the app's ACA address |
+| Sign-in     | Keycloak only, realm `edcv`, client `mvhd-grafana`                                   |
+| Who gets in | EDC_ADMIN (Admin), HDAB_AUTHORITY and TRUST_CENTER_OPERATOR (Viewer); nobody else    |
+| OTLP in     | `http://mvhd-observability:4318`, inside the environment only                        |
+| Deploy      | `scripts/azure/16-observability-app.sh`, then `--wire-proxy`, then `--bind-domain`   |
+| Off hours   | Stopped and started with the rest (ADR-053, `.github/workflows/aca-schedule.yml`)    |
+
+What reaches it: `mvhd-neo4j-proxy` sends traces and its log lines over OTLP
+(`OTEL_EXPORTER_OTLP_ENDPOINT`); its stdout still goes to Log Analytics as before. The
+audit dashboards read the proxy's audit endpoints directly. The load test dashboard's
+k6 rows stay on the laptop's Prometheus (k6 runs there), and its _Containers_ row reads
+Docker, so on Azure those rows are empty; the server-side rows work.
+
+Not yet: the data lives in the replica, so a restart or the nightly stop empties Loki,
+Tempo and Prometheus (Log Analytics keeps the stdout copy). Azure Blob for Loki and Tempo,
+and the UI's and the EDC services' telemetry, are the next steps in #418.
