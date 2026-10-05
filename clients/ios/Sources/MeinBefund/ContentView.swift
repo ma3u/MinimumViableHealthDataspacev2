@@ -30,6 +30,10 @@ final class AppModel: ObservableObject {
   @Published var pickingPhotos = false
   @Published var picking = false
   @Published var error: String?
+  /// Good news worth a moment of attention, never an error.
+  @Published var notice: String?
+  /// A report without stored pages whose paper is being scanned again.
+  @Published var rescanning: LabReport?
   @Published var viewingScan: Data?
   @Published var diagnosticsRequest: DiagnosticsExport.Request?
   @Published var buildingDiagnostics = false
@@ -91,7 +95,7 @@ final class AppModel: ObservableObject {
       }
     #endif
     do {
-      reports = try await store.load()
+      reports = try await recodeAfterUpdate(try await store.load())
       var loaded = try await store.profile()
       // One migration: the sex used to be a preference in UserDefaults.
       if loaded.sex == .any, let legacy = LegacyRangePreference.take() {
@@ -199,6 +203,59 @@ final class AppModel: ObservableObject {
       Log.store.notice("body measurements saved across \(saved, privacy: .public) day(s)")
       await refresh()
     } catch { self.error = error.localizedDescription }
+  }
+
+  /// Attaches a new scan of the paper to a report that has no pages, the
+  /// ones imported before the app kept them.
+  ///
+  /// The pages are kept either way, so the person can see the scan. The new
+  /// reading replaces the stored values only when it codes at least as many:
+  /// a worse photograph must not cost values. The title and a date the person
+  /// confirmed stay as they are.
+  func attachScan(_ images: [UIImage], to report: LabReport) async {
+    busy = true
+    defer {
+      busy = false
+      rescanning = nil
+    }
+    do {
+      let product = try await TextRecognizer.extract(from: images)
+      let better = product.extraction.coded.count >= report.extraction.coded.count
+      var metadata = better ? product.metadata : report.metadata
+      metadata.labDate = report.collectedOn
+      metadata.dateSource = report.metadata.dateSource
+      let updated = LabReport(
+        id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+        title: report.title, extraction: better ? product.extraction : report.extraction,
+        metadata: metadata, pageTexts: product.pageTexts,
+        scan: LabReport.ScanAttachment(
+          pageCount: product.pages.count, bytes: product.pdf.count,
+          sourcePixelWidth: product.sourcePixelWidth),
+        hasDiagnostics: true)
+      try await store.save(updated)
+      try await store.saveScan(product.pdf, for: report.id)
+      try await store.saveDiagnostics(
+        ScanDiagnostics(
+          reportId: report.id, createdAt: Date(),
+          environment: ScanDiagnostics.Environment.current, pages: product.pages,
+          extraction: product.extraction, metadata: metadata),
+        for: report.id)
+      let before = report.extraction.coded.count
+      let after = product.extraction.coded.count
+      Log.store.notice(
+        "scan attached: \(after, privacy: .public) read, \(before, privacy: .public) stored, kept \(better ? "new" : "stored", privacy: .public)"
+      )
+      notice =
+        better
+        ? String(localized: "The scan is attached and read: \(after) values.")
+        : String(
+          localized:
+            "The scan is attached. It read \(after) values where \(before) are stored, so the stored values were kept."
+        )
+      await refresh()
+    } catch {
+      self.error = error.localizedDescription
+    }
   }
 
   func process(_ images: [UIImage]) async {
@@ -344,7 +401,8 @@ final class AppModel: ObservableObject {
     defer { busy = false }
     do {
       guard let pdf = try await store.scan(for: report.id) else {
-        error = String(localized: "This report has no stored pages to read again.")
+        // Imported before the app kept pages: code its own stored rows again.
+        try await recode(report)
         return
       }
       // At the resolution the values were first read at.
@@ -379,13 +437,12 @@ final class AppModel: ObservableObject {
       let before = report.extraction.coded.count
       let after = product.extraction.coded.count
       guard after >= before else {
-        error = String(
-          localized:
-            "Reading again found \(after) values where \(before) are stored, so the stored ones were kept."
-        )
         Log.store.notice(
           "re-read discarded: \(after, privacy: .public) coded against \(before, privacy: .public) stored"
         )
+        // The pages read worse than they first did; the stored rows can still
+        // take what the parser and dictionary learned since.
+        try await recode(report)
         return
       }
 
@@ -419,6 +476,61 @@ final class AppModel: ObservableObject {
     } catch {
       self.error = error.localizedDescription
     }
+  }
+
+  /// Codes a report again from its own stored rows (`LabRecoder`): refused
+  /// rows and unread lines through the current parser and dictionary, coded
+  /// values to their current code. Never loses a coded value.
+  private func recode(_ report: LabReport) async throws {
+    let outcome = LabRecoder.recode(report.extraction)
+    guard outcome.recovered + outcome.recoded > 0 else {
+      error = String(localized: "This version reads nothing more from this report.")
+      return
+    }
+    let updated = LabReport(
+      id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+      title: report.title, extraction: outcome.extraction, metadata: report.metadata,
+      pageTexts: report.pageTexts, scan: report.scan, hasDiagnostics: report.hasDiagnostics)
+    try await store.save(updated)
+    Log.store.notice(
+      "re-coded from stored rows: \(outcome.recovered, privacy: .public) recovered, \(outcome.recoded, privacy: .public) recoded"
+    )
+    await refresh()
+  }
+
+  /// Once per dictionary and build: every stored report's own rows through
+  /// the current parser and dictionary (`LabRecoder`).
+  ///
+  /// A person who updates the app should see what this version can read
+  /// without asking for it report by report: on 2026-10-05 the phone held
+  /// three reports with 22, 39 and 76 refused rows that the new dictionary
+  /// codes. Never loses a value, and does not read the pages again; that stays
+  /// with "Read again", which can also take longer.
+  private func recodeAfterUpdate(_ loaded: [LabReport]) async throws -> [LabReport] {
+    // v2: the first run multiplied a microbiome panel's rows; this one repairs it.
+    let marker = "recodedWithDictionary.v2"
+    let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
+    let current = "\(Analytes.codings.count)-\(build)"
+    guard UserDefaults.standard.string(forKey: marker) != current else { return loaded }
+    var updated = loaded
+    var recovered = 0
+    for (index, report) in loaded.enumerated() {
+      let outcome = LabRecoder.recode(report.extraction)
+      guard outcome.recovered + outcome.recoded > 0 else { continue }
+      let next = LabReport(
+        id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+        title: report.title, extraction: outcome.extraction, metadata: report.metadata,
+        pageTexts: report.pageTexts, scan: report.scan, hasDiagnostics: report.hasDiagnostics)
+      try await store.save(next)
+      updated[index] = next
+      recovered += max(0, outcome.extraction.coded.count - report.extraction.coded.count)
+    }
+    UserDefaults.standard.set(current, forKey: marker)
+    Log.store.notice("re-coded after an update: \(recovered, privacy: .public) more values")
+    if recovered > 0 {
+      notice = String(localized: "This version reads \(recovered) more values from your stored reports.")
+    }
+    return updated
   }
 
   /// Every stored report as OMOP CDM v5.4 tables, zipped for the share sheet.
@@ -766,13 +878,22 @@ struct ContentView: View {
                     }
                   }
                 }
-                if report.scan != nil {
+                if report.scan == nil {
                   ToolbarItem(placement: .secondaryAction) {
                     Button {
-                      Task { await model.reextract(report) }
+                      model.rescanning = report
                     } label: {
-                      Label("Read again with this version", systemImage: "arrow.clockwise")
+                      Label("Scan the paper again", systemImage: "doc.viewfinder")
                     }
+                  }
+                }
+                // Every report: one with pages is read again, one without is
+                // coded again from its stored rows.
+                ToolbarItem(placement: .secondaryAction) {
+                  Button {
+                    Task { await model.reextract(report) }
+                  } label: {
+                    Label("Read again with this version", systemImage: "arrow.clockwise")
                   }
                 }
                 ToolbarItem(placement: .secondaryAction) {
@@ -906,6 +1027,15 @@ struct ContentView: View {
           Task { await model.process(images) }
         },
         onCancel: { scanning = false }
+      )
+      .ignoresSafeArea()
+    }
+    .fullScreenCover(item: $model.rescanning) { report in
+      DocumentScanner(
+        onScan: { images in
+          Task { await model.attachScan(images, to: report) }
+        },
+        onCancel: { model.rescanning = nil }
       )
       .ignoresSafeArea()
     }
@@ -1358,5 +1488,12 @@ private struct AppDialogs: ViewModifier {
     } message: {
       Text(model.error ?? "")
     }
+      .alert(
+        "Updated", isPresented: Binding(get: { model.notice != nil }, set: { _ in model.notice = nil })
+      ) {
+        Button("OK", role: .cancel) {}
+      } message: {
+        Text(model.notice ?? "")
+      }
   }
 }

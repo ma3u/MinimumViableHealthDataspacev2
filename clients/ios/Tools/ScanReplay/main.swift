@@ -81,36 +81,20 @@ func records(under url: URL) -> [URL] {
 /// shape the phone built, so a row that failed on the dictionary alone codes
 /// here, and a row that failed on the grammar still shows why.
 func replayRecordOnly(_ report: LabReport) {
-  print("no diagnostics.json: re-coding the record's refused rows with the current dictionary")
-  // A row stored before the reconciler collapsed whitespace can carry a line
-  // break from a wrapped cell. It is one row; the grammar splits on newlines.
-  func oneLine(_ text: String) -> String {
-    text.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).joined(separator: " ")
+  // The same recoding the app's "Read again" applies to a report without pages.
+  print("no diagnostics.json: re-coding the record's own rows with the current parser and dictionary")
+  let outcome = LabRecoder.recode(report.extraction)
+  let before = Set(report.extraction.coded.map { "\($0.raw.label)|\($0.raw.value)" })
+  for value in outcome.extraction.coded where !before.contains("\(value.raw.label)|\(value.raw.value)") {
+    print("  now coded: \(value.raw.label) [\(value.raw.unitRaw)] → \(value.coding.loinc ?? "uncoded")")
   }
-  var recovered = 0
-  for item in report.extraction.unmapped {
-    let again = LabLineParser.extract(oneLine(item.raw.line), source: report.extraction.source)
-    if let coded = again.coded.first {
-      recovered += 1
-      print("  now coded: \(item.raw.label) [\(item.raw.unitRaw)] → \(coded.coding.loinc) (was \(item.reason.rawValue))")
-    } else if let still = again.unmapped.first {
-      print("  still \(still.reason.rawValue): \(item.raw.label) [\(item.raw.unitRaw)]")
-    } else {
-      print("  now unread: \(item.raw.label) [\(item.raw.unitRaw)]")
-    }
+  for line in outcome.extraction.suspiciousLines { print("  still unread: \(line)") }
+  for item in outcome.extraction.unmapped {
+    print("  still \(item.reason.rawValue): \(item.raw.label) [\(item.raw.unitRaw)]")
   }
-  for line in report.extraction.suspiciousLines {
-    let again = LabLineParser.extract(oneLine(line), source: report.extraction.source)
-    if let coded = again.coded.first {
-      recovered += 1
-      print("  now coded from an unread line: \(coded.raw.label) [\(coded.raw.unitRaw)] → \(coded.coding.loinc)")
-    } else if let unmapped = again.unmapped.first {
-      print("  now unmapped from an unread line: \(unmapped.raw.label) [\(unmapped.raw.unitRaw)] (\(unmapped.reason.rawValue))")
-    } else {
-      print("  still unread: \(line)")
-    }
-  }
-  print("  \(recovered) of \(report.extraction.unmapped.count + report.extraction.suspiciousLines.count) refused rows code now")
+  print(
+    "  \(outcome.recovered) of \(report.extraction.unmapped.count + report.extraction.suspiciousLines.count) refused rows code now; \(outcome.recoded) coded values took a corrected code"
+  )
 }
 
 func number(_ value: Double) -> String {
