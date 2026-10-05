@@ -118,8 +118,12 @@ const JOURNEYS = {
 };
 
 function headersFor(persona, step) {
-  const session = SESSIONS[persona];
-  if (!session) throw new Error(`no session for persona ${persona}`);
+  // One of the persona's forged users, fixed per VU: the proxy's rate limit
+  // counts per user, so 50 VUs are 50 people (#519).
+  const users = SESSIONS[persona];
+  if (!users || users.length === 0)
+    throw new Error(`no session for persona ${persona}`);
+  const session = users[__VU % users.length];
   const headers = {
     Cookie: `${session.cookieName}=${session.cookieValue}`,
     "X-Load-Test": TESTID,

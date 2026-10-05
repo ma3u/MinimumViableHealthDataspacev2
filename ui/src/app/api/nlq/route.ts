@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { resolveOdrlScope, userToParticipantId } from "@/lib/odrl-engine";
 import { gateSecondaryUse } from "@/lib/permit-gate";
-import { NEO4J_PROXY_URL, loadTestHeaders } from "@/lib/proxy";
+import { NEO4J_PROXY_URL, callerHeaders, loadTestHeaders } from "@/lib/proxy";
 import { seesPatientIdentity } from "@/lib/patient-identity";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +49,7 @@ export async function POST(request: NextRequest) {
           : "withheld",
         ...gate.headers,
         ...loadTestHeaders(request),
+        ...callerHeaders(session),
       },
       body: JSON.stringify({ ...body, odrlScope }),
     });
