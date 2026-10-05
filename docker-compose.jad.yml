@@ -180,6 +180,8 @@ services:
       KC_DB_PASSWORD: kc
     volumes:
       - ./jad/keycloak-realm.json:/opt/keycloak/data/import/edcv-realm.json:ro
+      # The EHDS Integration Hub login theme (realm loginTheme ehds-hub).
+      - ./jad/keycloak-theme/ehds-hub:/opt/keycloak/themes/ehds-hub:ro
     ports:
       - "8080:8080" # Keycloak web UI + API
       - "9000:9000" # Health endpoint
