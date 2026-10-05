@@ -21,6 +21,13 @@ the UI and the proxy.
 | `20261005-audited-azure-2` | same, #536 live (per user)                      | 4,341    | 1,006 (23.2 %, all 429) | - / - / 434                 |
 | `20261005-load-azure`      | 50 users, 15 min, persona mix                   | 16,950   | **0**                   | 546 / **1,800** / 563       |
 
+The dashboard's client-side rows for the two main runs (the server-side and
+container rows read the local Loki and Docker, not Azure):
+
+![Load and stress test dashboard, 50 users against ehds.mabu.red](img/2026-10-05-load-azure.png)
+
+![Load and stress test dashboard, the audited run against ehds.mabu.red](img/2026-10-05-audited-azure.png)
+
 ## The platform during the 50-user run (11:40 to 11:56 UTC)
 
 | App              | Replicas | CPU max | Memory max | Ingress response time, 1-min average max |
