@@ -5,7 +5,7 @@ import { resolveOdrlScope, userToParticipantId } from "@/lib/odrl-engine";
 import { PUBLISH_WORKING_DAYS, addWorkingDays } from "@/lib/permits";
 import { REQUEST_FEE_EUR } from "@/lib/fees";
 import { toStatisticalAnswer, type NlqAnswer } from "@/lib/statistics";
-import { NEO4J_PROXY_URL } from "@/lib/proxy";
+import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
 
@@ -166,6 +166,7 @@ export async function POST(req: NextRequest) {
       headers: {
         "Content-Type": "application/json",
         "X-Participant": applicantId,
+        ...callerHeaders(auth.session),
         "X-Request": requestId,
         "X-Purpose": request.purpose ?? "",
         ...(request.datasetId ? { "X-Dataset": request.datasetId } : {}),

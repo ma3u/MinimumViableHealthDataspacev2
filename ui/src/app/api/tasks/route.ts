@@ -3,7 +3,7 @@ import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { promises as fs } from "fs";
 import path from "path";
-import { NEO4J_PROXY_URL } from "@/lib/proxy";
+import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
 
@@ -206,7 +206,10 @@ export async function GET() {
     try {
       await fetch(`${NEO4J_PROXY_URL}/tasks/sync`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...callerHeaders(auth.session),
+        },
         body: JSON.stringify({
           tasks: tasks.map((t) => ({
             id: t.id,
@@ -252,6 +255,7 @@ export async function GET() {
     // Fall back to persistent task storage (PostgreSQL via neo4j-proxy)
     try {
       const fallbackRes = await fetch(`${NEO4J_PROXY_URL}/tasks`, {
+        headers: callerHeaders(auth.session),
         signal: AbortSignal.timeout(5000),
       });
       if (fallbackRes.ok) {

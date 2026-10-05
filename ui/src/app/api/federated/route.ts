@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { userToParticipantId } from "@/lib/odrl-engine";
 import { activePermitHeaders } from "@/lib/permit-gate";
-import { NEO4J_PROXY_URL, loadTestHeaders } from "@/lib/proxy";
+import { NEO4J_PROXY_URL, callerHeaders, loadTestHeaders } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
         "X-Participant": participantId,
         ...permitHeaders,
         ...loadTestHeaders(request),
+        ...callerHeaders(session),
       },
     });
     const data = await resp.json();

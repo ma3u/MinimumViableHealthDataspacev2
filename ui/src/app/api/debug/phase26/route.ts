@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
-import { NEO4J_PROXY_URL } from "@/lib/proxy";
+import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +26,7 @@ export async function GET() {
 
   try {
     const resp = await fetch(`${NEO4J_PROXY_URL}/debug/phase26`, {
+      headers: callerHeaders(auth.session),
       cache: "no-store",
     });
     const data = await resp.json();

@@ -88,10 +88,17 @@ const MAX_AGE_SECONDS = 8 * 60 * 60; // matches ui/src/lib/auth.ts session.maxAg
 
 const now = Math.floor(Date.now() / 1000);
 
+// SESSION_SUFFIX tells sessions forged in the same second apart: the load
+// test forges many users per persona, and the proxy counts its rate limit per
+// user (#519).
+const suffix = process.env.SESSION_SUFFIX
+  ? `-${process.env.SESSION_SUFFIX}`
+  : "";
+
 const token = {
   name: profile.name,
   email: profile.email,
-  sub: `forged-${persona}-${now}`,
+  sub: `forged-${persona}-${now}${suffix}`,
   preferred_username: profile.preferred_username,
   roles: profile.roles,
   iat: now,
