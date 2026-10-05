@@ -273,16 +273,23 @@ def load_test():
              description="Concurrent users right now."),
         stat(ids, "Requests / s", prom(f"sum(rate(k6_http_reqs_total{{{K6}}}[$__rate_interval]))"), 4, 1,
              unit="reqps"),
-        stat(ids, "Failed requests", prom(f"max(k6_http_req_failed_rate{{{K6}}})"), 8, 1,
+        # Counted from the requests by status: k6 writes its rate metrics once per
+        # tag set, so the status="0" series is always 1 and a max() over them
+        # read 100 % for a run with 34 failures in 12,494 requests.
+        stat(ids, "Failed requests",
+             prom(f'sum(increase(k6_http_reqs_total{{{K6}, status!~"[23].."}}[$__range]))'
+                  f" / sum(increase(k6_http_reqs_total{{{K6}}}[$__range]))"), 8, 1,
              unit="percentunit", thresholds=fail_thresholds,
-             description="Share of requests answered with 4xx or 5xx, or not at all. The SLO is under 1 %."),
+             description="Share of requests answered with 4xx or 5xx, or not at all (status 0), over the "
+                         "time range. The SLO is under 1 %."),
         stat(ids, "Rate limited (429)",
              prom(f'sum(increase(k6_http_reqs_total{{{K6}, status="429"}}[$__range]))'), 12, 1,
              thresholds=ALERT_ON_ANY,
              description="#519 hypothesis 1: before the fix every user shared one bucket of 20 analytical queries a minute."),
-        stat(ids, "Checks passed", prom(f"max(k6_checks_rate{{{K6}}})"), 16, 1,
+        stat(ids, "Checks passed (worst check)", prom(f"min(k6_checks_rate{{{K6}}})"), 16, 1,
              unit="percentunit", thresholds=pass_thresholds,
-             description="Status 200 and under the SLO, per request."),
+             description="The check that passed least often, e.g. \"api under 1000 ms\". Each check is "
+                         "status 200 or under the SLO, per request; k6 writes one rate per check."),
         stat(ids, "Iterations", prom(f"sum(increase(k6_iterations_total{{{K6}}}[$__range]))"), 20, 1,
              description="Completed persona journeys (or sign-ins, or queries) in the run."),
         series(ids, "Virtual users and requests / s",
