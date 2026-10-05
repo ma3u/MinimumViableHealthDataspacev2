@@ -5,3 +5,16 @@
  */
 export const NEO4J_PROXY_URL =
   process.env.NEO4J_PROXY_URL ?? "http://localhost:9090";
+
+const LOAD_TEST_ID = /^[A-Za-z0-9._-]{1,64}$/;
+
+/**
+ * Headers that carry a load test's run id on to the proxy (#519). k6 sends
+ * X-Load-Test on every request; the proxy logs it as `load_test`, so a run's
+ * server-side latency and errors can be read later next to its k6 metrics.
+ * Empty for any other request.
+ */
+export function loadTestHeaders(req?: Request): Record<string, string> {
+  const id = req?.headers?.get("x-load-test");
+  return id && LOAD_TEST_ID.test(id) ? { "X-Load-Test": id } : {};
+}

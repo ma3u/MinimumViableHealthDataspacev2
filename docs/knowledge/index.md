@@ -51,6 +51,7 @@ frontmatter. Spec:
 [klarbefund-connect](runbooks/klarbefund-connect.md) ·
 [live-demo-off-hours](runbooks/live-demo-off-hours.md) ·
 [query-audit-chain](runbooks/query-audit-chain.md) ·
+[load-and-stress-test](runbooks/load-and-stress-test.md) ·
 [edc-v018-on-azure](runbooks/edc-v018-on-azure.md)
 
 ## decisions/
