@@ -39,6 +39,9 @@ esac
 
 OBS_APP="mvhd-observability"
 OTLP_PORT=4318
+# Prometheus remote write, for k6 running as a job in the environment
+# (scripts/azure/run-load-test.sh); internal only, like OTLP.
+PROM_PORT=9090
 API_VERSION="2024-03-01"
 KEYCLOAK_URL="https://auth.${CUSTOM_DOMAIN}"
 GRAFANA_HOST="grafana.${CUSTOM_DOMAIN}"
@@ -222,7 +225,8 @@ else
 fi
 unset OAUTH_SECRET ADMIN_PASSWORD KC_PASSWORD KC_TOKEN
 
-# The collector's OTLP/HTTP port, internal only: http://mvhd-observability:4318
+# The collector's OTLP/HTTP port and Prometheus' remote write, internal only:
+# http://mvhd-observability:4318 and :9090
 # from any app in the environment (as configure-data-planes.sh does, #421).
 log "Exposing OTLP port $OTLP_PORT inside the environment"
 APP_ID="$(az containerapp show --name "$OBS_APP" --resource-group "$RG" --query id -o tsv)"
@@ -231,9 +235,10 @@ az rest --method PATCH \
   --body "{\"properties\":{\"configuration\":{\"ingress\":{
     \"external\": true, \"targetPort\": 3000,
     \"additionalPortMappings\": [
-      {\"targetPort\": ${OTLP_PORT}, \"exposedPort\": ${OTLP_PORT}, \"external\": false}
+      {\"targetPort\": ${OTLP_PORT}, \"exposedPort\": ${OTLP_PORT}, \"external\": false},
+      {\"targetPort\": ${PROM_PORT}, \"exposedPort\": ${PROM_PORT}, \"external\": false}
     ]}}}}" -o none
-ok "$OBS_APP: Grafana on 3000 (public, Keycloak), OTLP on ${OTLP_PORT} (internal)"
+ok "$OBS_APP: Grafana on 3000 (public, Keycloak), OTLP ${OTLP_PORT} and Prometheus ${PROM_PORT} (internal)"
 
 log "Waiting for Grafana"
 for _ in $(seq 1 60); do
