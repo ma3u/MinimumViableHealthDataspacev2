@@ -26,12 +26,12 @@
     "express": "^4.21.2",
     "express-rate-limit": "^8.7.0",
     "neo4j-driver": "^5.28.1",
-    "pg": "^8.23.0",
+    "pg": "^8.23.1",
     "pino": "^10.4.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.2",
-    "@types/node": "^22.20.4",
+    "@types/node": "^22.20.5",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
     "@vitest/coverage-v8": "^5.0.2",
