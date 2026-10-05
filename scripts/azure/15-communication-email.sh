@@ -2,6 +2,9 @@
 set -euo pipefail
 # =============================================================================
 # Phase 15: the hub can send mail (ADR-048)
+#
+# RETIRED by ADR-050: the start page links to a public TestFlight group, and no
+# route sends mail any more. Kept for the record and for removing what it made.
 # =============================================================================
 # The start page's Klarbefund TestFlight form posts to /api/testflight-request,
 # which mails the request through Azure Communication Services Email. This
