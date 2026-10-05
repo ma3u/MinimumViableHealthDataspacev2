@@ -203,13 +203,23 @@ export function proxyDirect() {
   const headers = {
     "X-Participant": "did:web:pharmaco.de:research",
     "X-Load-Test": TESTID,
+    "Content-Type": "application/json",
   };
-  for (const path of ["/catalog/datasets", "/fhir/Patient", "/omop/cohort"]) {
-    const res = http.get(`${PROXY_URL}${path}`, {
-      headers,
-      tags: { name: `GET proxy ${path}`, kind: "api", persona: "proxy" },
-    });
-    if (res.status === 429) rateLimited.add(1, { name: `GET proxy ${path}` });
+  // /omop/cohort is a POST with the grouping in the body; a GET is a 404.
+  const calls = [
+    ["GET", "/catalog/datasets", null],
+    ["GET", "/fhir/Patient", null],
+    ["POST", "/omop/cohort", { groupBy: "concept", limit: 20 }],
+  ];
+  for (const [method, path, body] of calls) {
+    const name = `${method} proxy ${path}`;
+    const res = http.request(
+      method,
+      `${PROXY_URL}${path}`,
+      body ? JSON.stringify(body) : null,
+      { headers, tags: { name, kind: "api", persona: "proxy" } },
+    );
+    if (res.status === 429) rateLimited.add(1, { name });
     check(
       res,
       { "proxy answers 200": (r) => r.status === 200 },
