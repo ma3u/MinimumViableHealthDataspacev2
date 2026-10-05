@@ -69,6 +69,9 @@ services:
       KEYCLOAK_PUBLIC_URL: http://localhost:8080/realms/edcv
       NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL: http://localhost:8080/realms/edcv
       NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: health-dataspace-ui
+      # The service account that creates the Klarbefund app's sandbox
+      # accounts (ADR-054); the realm file's development secret.
+      KEYCLOAK_ACCOUNT_SERVICE_SECRET: dev-account-service-secret
       # EDC-V / CFM APIs (Phase 6b — Docker-internal hostnames)
       EDC_MANAGEMENT_URL: http://health-dataspace-controlplane:8081/api/mgmt
       EDC_IDENTITY_URL: http://health-dataspace-identityhub:7081/api/identity

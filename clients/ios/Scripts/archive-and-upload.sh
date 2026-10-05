@@ -37,6 +37,18 @@ UPLOAD_ONLY=false
 
 : "${TEAM_ID:=38R8Z4P7S8}"
 BUILD_DIR="${BUILD_DIR:-.build/release}"
+
+# With an API key, automatic signing talks to App Store Connect itself, so it
+# needs no Apple ID in Xcode and fetches a profile that carries every
+# capability the entitlements name. Without the key, an installed profile made
+# before a capability was added (App Attest, ADR-054) signs a build that
+# App Store Connect rejects.
+AUTH=()
+if [ -n "${ASC_KEY_ID:-}" ] && [ -n "${ASC_ISSUER_ID:-}" ]; then
+  KEY_FILE="${ASC_KEY_PATH:-$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8}"
+  AUTH=(-authenticationKeyPath "$KEY_FILE" -authenticationKeyID "$ASC_KEY_ID"
+    -authenticationKeyIssuerID "$ASC_ISSUER_ID")
+fi
 ARCHIVE="$BUILD_DIR/MeinBefund.xcarchive"
 IPA_DIR="$BUILD_DIR/ipa"
 
@@ -77,7 +89,7 @@ xcodebuild archive \
   -archivePath "$ARCHIVE" \
   DEVELOPMENT_TEAM="$TEAM_ID" \
   CODE_SIGN_STYLE=Automatic \
-  -allowProvisioningUpdates
+  -allowProvisioningUpdates "${AUTH[@]}"
 
 # Export needs a **distribution** profile, and automatic signing only creates
 # one by asking App Store Connect, which needs credentials the archive step
@@ -106,6 +118,8 @@ PY
   rm -f "$plist"
   [ -n "$name" ] && { profile_name="$name"; break; }
 done
+# The key lets automatic signing make a current profile; an old one is not used.
+[ ${#AUTH[@]} -gt 0 ] && profile_name=""
 
 echo "==> Exporting .ipa"
 {
@@ -139,7 +153,7 @@ xcodebuild -exportArchive \
   -archivePath "$ARCHIVE" \
   -exportOptionsPlist "$BUILD_DIR/ExportOptions.plist" \
   -exportPath "$IPA_DIR" \
-  -allowProvisioningUpdates
+  -allowProvisioningUpdates "${AUTH[@]}"
 
 fi  # end of the build half
 

@@ -1,0 +1,43 @@
+name: Wire the Klarbefund account secret (ADR-054)
+
+# Puts the Key Vault reference for KEYCLOAK_ACCOUNT_SERVICE_SECRET on mvhd-ui,
+# so the hub can create the Klarbefund app's sandbox accounts. The secret is
+# made by an operator with scripts/azure/wire-klarbefund-accounts.sh, which
+# also sets up Keycloak; the reference needs
+# Microsoft.ManagedIdentity/userAssignedIdentities/assign/action, which a
+# maintainer with Container Apps Contributor lacks (2026-10-04), so this runs
+# as the CI identity. Wiring only; nothing secret passes through it.
+#
+# Manual trigger only. Idempotent.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "mvhd-ui-config"
+  cancel-in-progress: false
+
+jobs:
+  wire:
+    name: Wire the account secret
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Wire the Key Vault reference on mvhd-ui
+        run: |
+          ./scripts/azure/wire-klarbefund-accounts.sh --wire-only
+          echo "**mvhd-ui reads KEYCLOAK_ACCOUNT_SERVICE_SECRET from Key Vault** (ADR-054)." >> "$GITHUB_STEP_SUMMARY"

@@ -20,6 +20,9 @@ struct ConnectView: View {
   @State private var scanning = false
   @State private var pasted = ""
   @State private var showingRecord = false
+  @State private var username = ""
+  @State private var password = ""
+  @State private var confirmingDelete = false
 
   private var hub: TrustedHub { EHDSConnection.trusted[0] }
 
@@ -43,6 +46,14 @@ struct ConnectView: View {
           confirming(hub: hub, username: username)
         case let .connected(hub, username):
           connected(hub: hub, username: username)
+        case .signingIn:
+          Section {
+            HStack(spacing: 12) {
+              ProgressView()
+              Text("Signing in to the EHDS demo hub…")
+            }
+            .accessibilityIdentifier("connect-signing-in")
+          }
         }
       }
       .navigationTitle("Connect to EHDS")
@@ -68,19 +79,75 @@ struct ConnectView: View {
   // MARK: - Not connected
 
   @ViewBuilder private var disconnected: some View {
-    Section {
-      Text(
-        "Connect Klarbefund to your record in the European Health Data Space demo, so the app can read it. You approve on the website; no password is typed on this phone."
-      )
-      .font(.footnote)
-      .foregroundStyle(.secondary)
-      if case let .failed(message) = connection.state {
+    if case let .failed(message) = connection.state {
+      Section {
         Label(message, systemImage: "exclamationmark.triangle")
           .foregroundStyle(.orange)
           .accessibilityElement(children: .ignore)
           .accessibilityLabel(Text(message))
           .accessibilityIdentifier("connect-error")
       }
+    }
+    if let account = connection.account {
+      Section {
+        AccountCredentials(account: account)
+        Button {
+          Task { await connection.signIn(username: account.username, password: account.password) }
+        } label: {
+          Label("Sign in again", systemImage: "arrow.clockwise")
+        }
+        .accessibilityIdentifier("account-sign-in-again")
+        Button("Forget on this phone", role: .destructive) { connection.forgetAccount() }
+      } header: {
+        Text("Your EHDS account")
+      } footer: {
+        Text("Forgetting removes the password from this phone only; the account stays on the hub.")
+      }
+    } else {
+      Section {
+        Button {
+          Task { await connection.createAccount() }
+        } label: {
+          Label("Create an EHDS account", systemImage: "person.crop.circle.badge.plus")
+        }
+        .disabled(!connection.canCreateAccount)
+        .accessibilityIdentifier("account-create")
+      } header: {
+        Text("No account yet?")
+      } footer: {
+        Text(
+          connection.canCreateAccount
+            ? "Creates an account with its own, empty record on the EHDS demo hub, and connects this phone to it. You get a username and password to sign in on the website too. Apple confirms to the hub that the request comes from this app."
+            : "This device cannot prove to the hub that it runs Klarbefund, so it cannot create an account. Sign in with an existing account instead."
+        )
+      }
+      Section {
+        TextField("Username", text: $username)
+          .textContentType(.username)
+          .textInputAutocapitalization(.never)
+          .autocorrectionDisabled()
+          .accessibilityIdentifier("account-username")
+        SecureField("Password", text: $password)
+          .textContentType(.password)
+          .accessibilityIdentifier("account-password")
+        Button("Sign in") {
+          Task { await connection.signIn(username: username, password: password) }
+        }
+        .disabled(username.isEmpty || password.isEmpty)
+        .accessibilityIdentifier("account-sign-in")
+      } header: {
+        Text("Sign in with an EHDS account")
+      }
+    }
+
+    Section {
+      Text(
+        "Connect Klarbefund to your record in the European Health Data Space demo, so the app can read it. You approve on the website; no password is typed on this phone."
+      )
+      .font(.footnote)
+      .foregroundStyle(.secondary)
+    } header: {
+      Text("Or connect an account by QR code")
     }
 
     Section {
@@ -192,13 +259,77 @@ struct ConnectView: View {
       } footer: {
         Text("Klarbefund reads your record when you open it and keeps no copy. Your scanned reports stay on this phone; nothing is sent to the hub.")
       }
+      if let account = connection.account {
+        Section {
+          AccountCredentials(account: account)
+        } header: {
+          Text("Your EHDS account")
+        } footer: {
+          Text("Sign in on \(hub.host) with these as well. They are kept only on this phone; Klarbefund signs in with them again by itself when a session ends.")
+        }
+      }
       Section {
         Button("Disconnect", role: .destructive) {
           Task { await connection.disconnect() }
         }
         .accessibilityIdentifier("connect-disconnect")
+        if connection.account?.createdByApp == true {
+          Button("Delete account", role: .destructive) { confirmingDelete = true }
+            .accessibilityIdentifier("account-delete")
+        }
       } footer: {
         Text("You can also disconnect this phone on the patient screen.")
+      }
+      .confirmationDialog(
+        "Delete the account and its record on the hub?", isPresented: $confirmingDelete,
+        titleVisibility: .visible
+      ) {
+        Button("Delete account", role: .destructive) {
+          Task { await connection.deleteAccount() }
+        }
+        .accessibilityIdentifier("account-delete-confirm")
+      } message: {
+        Text("This deletes the login, its record and its phones on the EHDS demo hub. Your scanned reports stay on this phone.")
+      }
+    }
+  }
+}
+
+/// The username and password of the account this phone holds, to read off
+/// or copy into the website's sign-in. The password is hidden until asked for.
+struct AccountCredentials: View {
+  let account: EHDSAccount
+  @State private var revealed = false
+
+  var body: some View {
+    LabeledContent("Username") {
+      HStack {
+        Text(account.username).font(.body.monospaced()).textSelection(.enabled)
+        Button("Copy username", systemImage: "doc.on.doc") {
+          UIPasteboard.general.string = account.username
+        }
+        .labelStyle(.iconOnly)
+        .buttonStyle(.borderless)
+      }
+    }
+    .accessibilityIdentifier("account-shown-username")
+    LabeledContent("Password") {
+      HStack {
+        Text(revealed ? account.password : "••••••••••")
+          .font(.body.monospaced())
+          .textSelection(.enabled)
+          .accessibilityIdentifier("account-shown-password")
+        Button(revealed ? "Hide password" : "Show password", systemImage: revealed ? "eye.slash" : "eye") {
+          revealed.toggle()
+        }
+        .labelStyle(.iconOnly)
+        .buttonStyle(.borderless)
+        .accessibilityIdentifier("account-reveal")
+        Button("Copy password", systemImage: "doc.on.doc") {
+          UIPasteboard.general.string = account.password
+        }
+        .labelStyle(.iconOnly)
+        .buttonStyle(.borderless)
       }
     }
   }
@@ -212,6 +343,14 @@ struct DataspaceRecordView: View {
   var body: some View {
     List {
       if let record = connection.record {
+        if connection.account?.createdByApp == true {
+          Section {
+            Text("Your own record on the EHDS demo hub. It starts empty and holds only what is added to it; nothing from this phone is sent there.")
+              .font(.footnote)
+              .foregroundStyle(.secondary)
+              .accessibilityIdentifier("record-sandbox")
+          }
+        } else {
         Section {
           Text(
             record.fictional
@@ -221,6 +360,7 @@ struct DataspaceRecordView: View {
           .font(.footnote)
           .foregroundStyle(.secondary)
           .accessibilityIdentifier("record-source")
+        }
         }
         Section("\(record.observations.count) measurements") {
           ForEach(record.observations) { o in

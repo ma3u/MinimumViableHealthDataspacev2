@@ -197,6 +197,10 @@ CREATE INDEX app_connection_username IF NOT EXISTS FOR (a:AppConnection) ON (a.u
 // (:AppPairing {id, username, expiresAt, deviceId, deviceName}). In Neo4j, not
 // memory, because the UI runs more than one replica on Azure.
 CREATE CONSTRAINT app_pairing_id IF NOT EXISTS FOR (p:AppPairing) REQUIRE p.id IS UNIQUE;
+// The App Attest key an app-created account was attested with (ADR-054):
+// (:AppAttestKey {keyId, username, createdBy, environment, createdAt}). One key,
+// one account, ever; the record outlives the account's deletion.
+CREATE CONSTRAINT app_attest_key_id IF NOT EXISTS FOR (k:AppAttestKey) REQUIRE k.keyId IS UNIQUE;
 CREATE INDEX query_audit_timestamp IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.timestamp);
 CREATE INDEX query_audit_participant IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.participantId);
 

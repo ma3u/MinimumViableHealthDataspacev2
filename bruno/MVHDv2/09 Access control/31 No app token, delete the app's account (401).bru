@@ -1,0 +1,26 @@
+meta {
+  name: 31 No app token, delete the app's account (401)
+  type: http
+  seq: 31
+}
+
+delete {
+  url: {{baseUrl}}/api/patient/app/account
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer not-a-token
+}
+
+tests {
+  // ADR-054: only the app's own token, from a connected phone, deletes the
+  // account it created.
+  test("a token that is not Keycloak's is refused", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

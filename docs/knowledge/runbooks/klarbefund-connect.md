@@ -34,6 +34,33 @@ grant answers. Neo4j needs the constraint from `neo4j/init-schema.cypher`
 (`app_connection_device`); `MERGE` works without it, but two phones could then
 race to one device id.
 
+## An account the app creates (ADR-054)
+
+Without a QR code: **More › Connect to EHDS › Create an EHDS account**. The app
+asks the hub for a challenge, has Apple attest a new Secure Enclave key over
+`SHA256(challenge|deviceId)`, and posts the attestation to
+`POST /api/app-accounts`. The hub verifies it (`ui/src/lib/app-attest.ts`),
+creates the Keycloak user `kb-xxxxxxxx` in the group `klarbefund-patients`
+through the service account `ehds-account-service`, an empty
+`(:Patient {id: "KB-XXXXXXXX", sandbox: true})` and the phone's connection, and
+answers the password once. The app keeps it in the Keychain, shows it, and
+signs in with the password grant of the public client `klarbefund-account`,
+again by itself whenever a session ends. **Delete account** calls
+`DELETE /api/patient/app/account`.
+
+Set up a running realm and, on Azure, `mvhd-ui`'s
+`KEYCLOAK_ACCOUNT_SERVICE_SECRET` (a Key Vault reference):
+
+```bash
+./scripts/azure/wire-klarbefund-accounts.sh --local   # compose stack
+./scripts/azure/wire-klarbefund-accounts.sh           # Azure
+./scripts/azure/wire-klarbefund-accounts.sh --check
+```
+
+The compose UI needs `KEYCLOAK_ACCOUNT_SERVICE_SECRET=dev-account-service-secret`
+(the realm file's development secret). The simulator cannot attest; there the
+account flow runs only under `-MBDemoSeed` (`AccountUITests`).
+
 ## Check it
 
 ```bash

@@ -46,6 +46,14 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/app-accounts/challenge",
+      "methods": ["POST"]
+    },
+    {
+      "path": "/api/app-accounts",
+      "methods": ["POST"]
+    },
+    {
       "path": "/api/assets",
       "methods": ["GET", "POST"]
     },
@@ -240,6 +248,10 @@
     {
       "path": "/api/patient/app-pairing",
       "methods": ["POST"]
+    },
+    {
+      "path": "/api/patient/app/account",
+      "methods": ["DELETE"]
     },
     {
       "path": "/api/patient/app/record",
@@ -990,6 +1002,12 @@
       "status": "Accepted"
     },
     {
+      "id": "ADR-054",
+      "file": "ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md",
+      "title": "Klarbefund creates a sandbox account on the hub, gated by App Attest",
+      "status": "Proposed"
+    },
+    {
       "id": "ADR-055",
       "file": "ADR-055-azure-runs-the-compose-jad-build.md",
       "title": "Azure runs the same JAD build as compose and CI",
@@ -1020,8 +1038,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 43,
-    "operations": 56
+    "paths": 46,
+    "operations": 59
   },
   "workflowJobs": {
     "test.yml": [
@@ -1074,10 +1092,10 @@
   "lastUpdated": {
     "/docs": "2026-10-04",
     "/docs/user-guide": "2026-10-04",
-    "/docs/developer": "2026-10-04",
-    "/docs/developer/quality-gates": "2026-10-04",
-    "/docs/developer/api": "2026-10-04",
+    "/docs/developer": "2026-10-05",
+    "/docs/developer/quality-gates": "2026-10-05",
+    "/docs/developer/api": "2026-10-05",
     "/docs/developer/reference": "2026-10-04",
-    "/docs/architecture": "2026-10-04"
+    "/docs/architecture": "2026-10-05"
   }
 }

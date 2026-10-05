@@ -156,6 +156,12 @@ page's TestFlight form:
   the sign-in flows themselves.
 - `/api/keycloak-config`: tells the sign-in banner where Keycloak is.
 - `/api/health`: the liveness and readiness probe (`k8s/probes.yaml`).
+- `/api/app-accounts/challenge` and `/api/app-accounts`: the Klarbefund app
+  creates a sandbox account for itself, with an empty record and the phone
+  connected. Creation answers only a request whose Apple App Attest
+  attestation verifies (ADR-054); the challenge route hands out nothing but a
+  signed five-minute challenge. `DELETE /api/patient/app/account` takes the
+  app's token and deletes it again.
 - `/api/testflight-request`: the start page's Klarbefund TestFlight form,
   mailed through Azure Communication Services for visitors without an account
   (ADR-048). Fixed recipient, honeypot, three per address and twenty in all

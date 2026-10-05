@@ -8,6 +8,7 @@ import {
   registerConnection,
 } from "@/lib/app-connections";
 import { completePairing, getPairing } from "@/lib/app-pairing";
+import { ACCOUNT_CLIENT_ID } from "@/lib/app-accounts";
 import { sessionUsername } from "@/lib/patient/session-username";
 
 export const dynamic = "force-dynamic";
@@ -44,7 +45,8 @@ export async function GET() {
  * theirs to yours.
  *
  * Body: `{ pairingId, deviceId, deviceName }`, deviceId a UUID v4 the app
- * generated once.
+ * generated once. A token from a password sign-in (`klarbefund-account`,
+ * ADR-054) needs no pairingId.
  */
 export async function POST(request: Request) {
   const auth = await requireAppToken(request, { device: false });
@@ -64,6 +66,29 @@ export async function POST(request: Request) {
       { error: "deviceId must be a UUID v4" },
       { status: 400 },
     );
+  }
+  // A password sign-in is a full sign-in, as on the website: the phone needs
+  // no QR code to register under its own login (ADR-054).
+  if (!pairingId && auth.app.client === ACCOUNT_CLIENT_ID) {
+    try {
+      const connection = await registerConnection({
+        deviceId,
+        deviceName: cleanDeviceName(body.deviceName),
+        username,
+      });
+      return connection
+        ? NextResponse.json({ connection }, { status: 201 })
+        : NextResponse.json(
+            {
+              error: "Conflict",
+              reason: "this device id belongs to another login",
+            },
+            { status: 409 },
+          );
+    } catch (err) {
+      console.error("POST /api/patient/app-devices:", err);
+      return NextResponse.json({ error: "Neo4j unavailable" }, { status: 502 });
+    }
   }
   let pairing;
   try {

@@ -393,6 +393,57 @@
         }
       ],
       "defaultClientScopes": ["profile"]
+    },
+    {
+      "clientId": "klarbefund-account",
+      "name": "Klarbefund sandbox account",
+      "description": "Public client for an account the Klarbefund app created for itself: the password grant and nothing else. The QR flow keeps klarbefund-app and its consent screen. ADR-054.",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "consentRequired": false,
+      "fullScopeAllowed": true,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {},
+      "protocolMappers": [
+        {
+          "name": "realm-roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "realm_access.roles",
+            "multivalued": "true",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "userinfo.token.claim": "false"
+          }
+        }
+      ],
+      "defaultClientScopes": ["profile"]
+    },
+    {
+      "clientId": "ehds-account-service",
+      "name": "EHDS account service",
+      "description": "Service account the hub creates and deletes Klarbefund sandbox accounts with: manage-users, view-users, query-groups, nothing else. ADR-054.",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "dev-account-service-secret",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "consentRequired": false,
+      "redirectUris": [],
+      "webOrigins": [],
+      "attributes": {}
     }
   ],
   "users": [
@@ -515,8 +566,23 @@
         }
       ],
       "realmRoles": ["HDAB_AUTHORITY"]
+    },
+    {
+      "username": "service-account-ehds-account-service",
+      "enabled": true,
+      "serviceAccountClientId": "ehds-account-service",
+      "clientRoles": {
+        "realm-management": ["manage-users", "view-users", "query-groups"]
+      }
     }
   ],
-  "groups": [],
+  "groups": [
+    {
+      "name": "klarbefund-patients",
+      "path": "/klarbefund-patients",
+      "realmRoles": ["PATIENT"],
+      "subGroups": []
+    }
+  ],
   "eventsEnabled": false
 }

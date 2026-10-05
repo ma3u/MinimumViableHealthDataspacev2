@@ -27,6 +27,7 @@ import type {
   OverviewSignal,
   OverviewView,
 } from "./types";
+import { sandboxPatientId } from "@/lib/sandbox-account";
 
 export interface ProfileShape {
   patient: { id: string; name: string; gender?: string; birthDate?: string };
@@ -861,7 +862,8 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
 export function ownPatientId(username?: string | null): string | null {
   if (username === "patient1") return "P1";
   if (username === "patient2") return "P2";
-  return null;
+  // A sandbox login the Klarbefund app created owns its own record (ADR-054).
+  return username ? sandboxPatientId(username) : null;
 }
 
 /**

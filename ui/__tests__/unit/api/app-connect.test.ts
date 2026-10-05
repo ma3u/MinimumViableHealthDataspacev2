@@ -165,6 +165,17 @@ describe("the app's token (ADR-049)", () => {
     });
   });
 
+  it("admits a token of klarbefund-account, an account the app created (ADR-054)", async () => {
+    expect(
+      await verifyAppToken(
+        await token({
+          azp: "klarbefund-account",
+          preferred_username: "kb-ab3dk7mn",
+        }),
+      ),
+    ).toMatchObject({ username: "kb-ab3dk7mn" });
+  });
+
   it("refuses a token another client asked for, such as the UI's own", async () => {
     expect(
       await verifyAppToken(await token({ azp: "health-dataspace-ui" })),
@@ -390,6 +401,24 @@ describe("POST /api/patient/app-devices", () => {
     expect(pairingStatus((await getPairing(p.id, "patient1"))!)).toBe(
       "connected",
     );
+  });
+
+  it("registers a phone without a QR code after a password sign-in (ADR-054)", async () => {
+    mockRunQuery.mockResolvedValue([
+      { deviceId: DEVICE, username: "kb-ab3dk7mn", deviceName: "iPhone" },
+    ]);
+    const res = await register(
+      await token({
+        azp: "klarbefund-account",
+        preferred_username: "kb-ab3dk7mn",
+      }),
+      "",
+    );
+    expect(res.status).toBe(201);
+  });
+
+  it("still needs a QR code for a token from the device grant", async () => {
+    expect((await register(await token(), "")).status).toBe(403);
   });
 
   it("refuses a token of one login with a pairing another login started", async () => {

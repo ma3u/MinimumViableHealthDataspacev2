@@ -407,3 +407,34 @@
 "This is not a Klarbefund connection code." = "Das ist kein Verbindungscode von Klarbefund.";
 "This phone is no longer connected. Scan a new code to connect again." = "Dieses Telefon ist nicht mehr verbunden. Scannen Sie einen neuen Code, um sich wieder zu verbinden.";
 "You can also disconnect this phone on the patient screen." = "Sie können dieses Telefon auch auf der Patientenseite trennen.";
+
+/* An account the app creates on the hub (ADR-054). */
+"Copy password" = "Passwort kopieren";
+"Copy username" = "Benutzernamen kopieren";
+"Create an EHDS account" = "EHDS-Konto anlegen";
+"Creates an account with its own, empty record on the EHDS demo hub, and connects this phone to it. You get a username and password to sign in on the website too. Apple confirms to the hub that the request comes from this app." = "Legt auf dem EHDS-Demo-Hub ein Konto mit einer eigenen, leeren Akte an und verbindet dieses Telefon damit. Sie erhalten einen Benutzernamen und ein Passwort, mit denen Sie sich auch auf der Website anmelden können. Apple bestätigt dem Hub, dass die Anfrage von dieser App kommt.";
+"Delete account" = "Konto löschen";
+"Delete the account and its record on the hub?" = "Konto und Akte auf dem Hub löschen?";
+"Forget on this phone" = "Auf diesem Telefon vergessen";
+"Forgetting removes the password from this phone only; the account stays on the hub." = "Vergessen entfernt das Passwort nur von diesem Telefon; das Konto bleibt auf dem Hub.";
+"Hide password" = "Passwort verbergen";
+"Klarbefund does not connect to %@. Only the EHDS demo hub is accepted." = "Klarbefund verbindet sich nicht mit %@. Nur der EHDS-Demo-Hub wird akzeptiert.";
+"No account yet?" = "Noch kein Konto?";
+"Or connect an account by QR code" = "Oder ein Konto per QR-Code verbinden";
+"Password" = "Passwort";
+"Show password" = "Passwort zeigen";
+"Sign in" = "Anmelden";
+"Sign in again" = "Erneut anmelden";
+"Sign in on %@ with these as well. They are kept only on this phone; Klarbefund signs in with them again by itself when a session ends." = "Damit können Sie sich auch auf %@ anmelden. Sie werden nur auf diesem Telefon gespeichert; Klarbefund meldet sich damit selbst erneut an, wenn eine Sitzung endet.";
+"Sign in with an EHDS account" = "Mit einem EHDS-Konto anmelden";
+"Sign-in was refused: %@" = "Die Anmeldung wurde abgelehnt: %@";
+"Signing in to the EHDS demo hub…" = "Anmeldung beim EHDS-Demo-Hub …";
+"The account %@ and its record were deleted." = "Das Konto %@ und seine Akte wurden gelöscht.";
+"The hub's answer was incomplete. Try again." = "Die Antwort des Hubs war unvollständig. Versuchen Sie es erneut.";
+"The username or password is wrong." = "Benutzername oder Passwort ist falsch.";
+"This deletes the login, its record and its phones on the EHDS demo hub. Your scanned reports stay on this phone." = "Damit werden die Anmeldung, ihre Akte und ihre Telefone auf dem EHDS-Demo-Hub gelöscht. Ihre gescannten Befunde bleiben auf diesem Telefon.";
+"This device cannot prove to the hub that it runs Klarbefund, so it cannot create an account. Sign in with an existing account instead." = "Dieses Gerät kann dem Hub nicht nachweisen, dass Klarbefund darauf läuft, und kann deshalb kein Konto anlegen. Melden Sie sich stattdessen mit einem bestehenden Konto an.";
+"Username" = "Benutzername";
+"Your EHDS account" = "Ihr EHDS-Konto";
+"Your own record on the EHDS demo hub. It starts empty and holds only what is added to it; nothing from this phone is sent there." = "Ihre eigene Akte auf dem EHDS-Demo-Hub. Sie ist zu Beginn leer und enthält nur, was hinzugefügt wird; von diesem Telefon wird nichts dorthin gesendet.";
+"Klarbefund sends a password only over an encrypted connection." = "Klarbefund sendet ein Passwort nur über eine verschlüsselte Verbindung.";

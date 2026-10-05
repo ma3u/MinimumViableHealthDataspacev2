@@ -184,7 +184,10 @@ describe("Keycloak realm configuration", () => {
   });
 
   describe("users", () => {
-    const users = realm.users;
+    // People only: a service account (ADR-054) has no password and no persona.
+    const users = realm.users.filter(
+      (u: { serviceAccountClientId?: string }) => !u.serviceAccountClientId,
+    );
 
     it("should have every demo persona, by name", () => {
       // Names rather than a count. A bare length assertion fails whenever a
@@ -310,5 +313,51 @@ describe("Keycloak realm configuration", () => {
       expect(admin.defaultClientScopes).toContain("management-api:read");
       expect(admin.defaultClientScopes).toContain("management-api:write");
     });
+  });
+});
+
+describe("the Klarbefund app's own accounts (ADR-054)", () => {
+  const client = (id: string) =>
+    realm.clients.find((c: { clientId: string }) => c.clientId === id);
+
+  it("signs in by password through a client that allows nothing else", () => {
+    const account = client("klarbefund-account");
+    expect(account).toMatchObject({
+      publicClient: true,
+      directAccessGrantsEnabled: true,
+      standardFlowEnabled: false,
+      implicitFlowEnabled: false,
+      consentRequired: false,
+    });
+  });
+
+  it("leaves the QR code's client with its consent screen and no password grant", () => {
+    expect(client("klarbefund-app")).toMatchObject({
+      consentRequired: true,
+      directAccessGrantsEnabled: false,
+    });
+  });
+
+  it("creates users through a service account that may manage users and nothing more", () => {
+    expect(client("ehds-account-service")).toMatchObject({
+      publicClient: false,
+      serviceAccountsEnabled: true,
+      directAccessGrantsEnabled: false,
+    });
+    const svc = realm.users.find(
+      (u: { serviceAccountClientId?: string }) =>
+        u.serviceAccountClientId === "ehds-account-service",
+    );
+    expect(svc.clientRoles).toEqual({
+      "realm-management": ["manage-users", "view-users", "query-groups"],
+    });
+    expect(svc.realmRoles ?? []).toEqual([]);
+  });
+
+  it("gives a new account PATIENT through its group, and nothing else", () => {
+    const group = realm.groups.find(
+      (g: { name: string }) => g.name === "klarbefund-patients",
+    );
+    expect(group.realmRoles).toEqual(["PATIENT"]);
   });
 });
