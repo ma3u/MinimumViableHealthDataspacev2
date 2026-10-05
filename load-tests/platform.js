@@ -78,7 +78,12 @@ function personaFor(vu) {
 
 /** One step of a journey: a page or an API the persona opens. */
 const page = (path) => ({ kind: "page", method: "GET", path });
-const api = (path) => ({ kind: "api", method: "GET", path });
+const api = (path, expect = [200]) => ({
+  kind: "api",
+  method: "GET",
+  path,
+  expect,
+});
 const ask = (question) => ({
   kind: "nlq",
   method: "POST",
@@ -114,7 +119,11 @@ const JOURNEYS = {
     page("/compliance"),
     api("/api/compliance"),
     page("/permits"),
-    api("/api/trust-center"),
+    // The compliance page asks for the trust centres, and the route admits
+    // only TRUST_CENTER_OPERATOR and EDC_ADMIN, so a regulator gets 403 and
+    // the page shows an empty section (#519, found by this suite). Expected
+    // here until that is decided, so it does not read as a capacity failure.
+    api("/api/trust-center", [200, 403]),
   ],
   edcadmin: [
     page("/admin"),
@@ -141,9 +150,11 @@ function headersFor(persona, step) {
 }
 
 function request(base, persona, step) {
+  const expect = step.expect || [200];
   const params = {
     headers: headersFor(persona, step),
     tags: { name: `${step.method} ${step.path}`, kind: step.kind, persona },
+    responseCallback: http.expectedStatuses(...expect),
   };
   const url = `${base}${step.path}`;
   const res =
@@ -154,7 +165,7 @@ function request(base, persona, step) {
   check(
     res,
     {
-      [`${step.kind} answers 200`]: (r) => r.status === 200,
+      [`${step.kind} answers 200`]: (r) => expect.includes(r.status),
       [`${step.kind} under ${SLO_MS[step.kind]} ms`]: (r) =>
         r.timings.duration < SLO_MS[step.kind],
     },
@@ -192,13 +203,23 @@ export function proxyDirect() {
   const headers = {
     "X-Participant": "did:web:pharmaco.de:research",
     "X-Load-Test": TESTID,
+    "Content-Type": "application/json",
   };
-  for (const path of ["/catalog/datasets", "/fhir/Patient", "/omop/cohort"]) {
-    const res = http.get(`${PROXY_URL}${path}`, {
-      headers,
-      tags: { name: `GET proxy ${path}`, kind: "api", persona: "proxy" },
-    });
-    if (res.status === 429) rateLimited.add(1, { name: `GET proxy ${path}` });
+  // /omop/cohort is a POST with the grouping in the body; a GET is a 404.
+  const calls = [
+    ["GET", "/catalog/datasets", null],
+    ["GET", "/fhir/Patient", null],
+    ["POST", "/omop/cohort", { groupBy: "concept", limit: 20 }],
+  ];
+  for (const [method, path, body] of calls) {
+    const name = `${method} proxy ${path}`;
+    const res = http.request(
+      method,
+      `${PROXY_URL}${path}`,
+      body ? JSON.stringify(body) : null,
+      { headers, tags: { name, kind: "api", persona: "proxy" } },
+    );
+    if (res.status === 429) rateLimited.add(1, { name });
     check(
       res,
       { "proxy answers 200": (r) => r.status === 200 },

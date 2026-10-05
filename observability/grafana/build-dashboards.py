@@ -273,15 +273,16 @@ def load_test():
              description="Concurrent users right now."),
         stat(ids, "Requests / s", prom(f"sum(rate(k6_http_reqs_total{{{K6}}}[$__rate_interval]))"), 4, 1,
              unit="reqps"),
-        # Counted from the requests by status: k6 writes its rate metrics once per
-        # tag set, so the status="0" series is always 1 and a max() over them
-        # read 100 % for a run with 34 failures in 12,494 requests.
+        # Counted from the requests k6 itself marks unexpected: its rate metrics
+        # are written once per tag set, so a max() over them read 100 % for a
+        # run with 34 failures in 12,494 requests, and counting by status alone
+        # would count a step's expected 403 (the regulator's trust-centre call).
         stat(ids, "Failed requests",
-             prom(f'sum(increase(k6_http_reqs_total{{{K6}, status!~"[23].."}}[$__range]))'
+             prom(f'(sum(increase(k6_http_reqs_total{{{K6}, expected_response="false"}}[$__range])) or vector(0))'
                   f" / sum(increase(k6_http_reqs_total{{{K6}}}[$__range]))"), 8, 1,
              unit="percentunit", thresholds=fail_thresholds,
-             description="Share of requests answered with 4xx or 5xx, or not at all (status 0), over the "
-                         "time range. The SLO is under 1 %."),
+             description="Share of requests with a status the step did not expect (4xx, 5xx, or no answer "
+                         "at all), over the time range. The SLO is under 1 %."),
         stat(ids, "Rate limited (429)",
              prom(f'sum(increase(k6_http_reqs_total{{{K6}, status="429"}}[$__range]))'), 12, 1,
              thresholds=ALERT_ON_ANY,
@@ -335,8 +336,15 @@ def load_test():
              0, 56, h=10),
 
         row(ids, "Containers: who saturates first (Docker stats, compose stack)", 66),
-        series(ids, "CPU by container", [prom(f"container_cpu_utilization_ratio{{{CONTAINERS}}}", "{{container_name}}")],
-               0, 67, unit="percentunit"),
+        # From the CPU time counter: the receiver's container.cpu.utilization
+        # barely moved under load (the UI read 6 to 14 % while docker stats
+        # showed 16 to 127 %), so it cannot say who saturates.
+        series(ids, "CPU by container (100 % = one core)",
+               [prom(f"sum by (container_name) (rate(container_cpu_usage_nanoseconds_total{{{CONTAINERS}}}"
+                     f"[$__rate_interval])) / 1e9", "{{container_name}}")],
+               0, 67, unit="percentunit",
+               description="CPU time per second of wall clock. A Node.js container such as the UI tops out "
+                           "near 100 %: one event loop on one core."),
         series(ids, "Memory by container", [prom(f"container_memory_usage_total_bytes{{{CONTAINERS}}}", "{{container_name}}")],
                12, 67, unit="bytes"),
         series(ids, "Network bytes / s by container",
