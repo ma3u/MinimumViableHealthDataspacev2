@@ -37,6 +37,11 @@ final class EHDSConnection: ObservableObject {
   /// The account whose password this phone holds, when it holds one: one
   /// the app created, or one the person signed in with (ADR-054).
   @Published private(set) var account: EHDSAccount?
+  /// Since when the person's reports go to their own record (#473 phase 3),
+  /// or nil while they do not. Decided once, not per report.
+  @Published private(set) var sendsReportsSince: Date?
+  /// What the last send did, for a line under the switch.
+  @Published private(set) var lastSend: String?
 
   /// Hubs a link may name: the live one, and in a debug build the local stack.
   static var trusted: [TrustedHub] {
@@ -230,6 +235,7 @@ final class EHDSConnection: ObservableObject {
       guard status == 200 else { throw HubError(status: status, body: body) }
       forget()
       forgetAccount()
+      lastSend = nil
       state = .disconnected
       notice = String(localized: "The account \(account.username) and its record were deleted.")
     } catch {
@@ -241,6 +247,70 @@ final class EHDSConnection: ObservableObject {
   func forgetAccount() {
     account = nil
     Keychain.delete(Self.accountTag)
+    setSendsReports(false)
+    UserDefaults.standard.removeObject(forKey: Self.sentTag)
+  }
+
+  // MARK: - My values into my record (#473 phase 3)
+
+  /// True when this phone may send values: an account the app created, so a
+  /// record of the person's own and never a synthetic demo record.
+  var canSendReports: Bool {
+    account?.createdByApp == true && isConnected
+  }
+
+  /// The person's one decision: their reports go to their record, or not.
+  func setSendsReports(_ on: Bool) {
+    sendsReportsSince = on ? Date() : nil
+    if let since = sendsReportsSince {
+      UserDefaults.standard.set(since, forKey: Self.sendsTag)
+    } else {
+      UserDefaults.standard.removeObject(forKey: Self.sendsTag)
+    }
+  }
+
+  /// Sends every report whose values changed since it was last sent, while
+  /// the person has switched sending on. The hub replaces a report's values
+  /// when it is sent again, so a resend never doubles anything.
+  func sync(_ reports: [LabReport]) async {
+    guard sendsReportsSince != nil, canSendReports, let hub else { return }
+    var sent = (UserDefaults.standard.dictionary(forKey: Self.sentTag) as? [String: String]) ?? [:]
+    var reportsSent = 0
+    var values = 0
+    var refused = 0
+    do {
+      for report in reports where !report.extraction.coded.isEmpty {
+        let key = report.id.uuidString.lowercased()
+        let print = Self.fingerprint(report)
+        guard sent[key] != print else { continue }
+        let token = try await freshToken()
+        let (status, body) = try await transport.sendBody(
+          method: "POST", url: URL(string: "\(hub.ehds)/api/patient/app/record")!,
+          bearer: token, device: Self.deviceId(), body: Data(ReportExport.fhirJSON(report).utf8),
+          headers: ["X-Klarbefund-Report": key])
+        guard status == 201 else { throw HubError(status: status, body: body) }
+        let json = (try? JSONSerialization.jsonObject(with: body) as? [String: Any]) ?? [:]
+        values += (json["stored"] as? Int) ?? 0
+        refused += ((json["skipped"] as? [Any]) ?? []).count
+        sent[key] = print
+        reportsSent += 1
+        UserDefaults.standard.set(sent, forKey: Self.sentTag)
+      }
+      if reportsSent > 0 {
+        lastSend = String(
+          localized: "Sent \(values) values from \(reportsSent) reports to your EHDS record; \(refused) without a LOINC code stay on this phone.")
+      }
+    } catch {
+      lastSend = Self.explain(error)
+    }
+  }
+
+  /// What a report's values are, so an unchanged report is not sent again.
+  static func fingerprint(_ report: LabReport) -> String {
+    let values = report.extraction.coded.map {
+      "\($0.coding.loinc ?? $0.coding.analyteKey)=\($0.raw.value)\($0.coding.ucum)"
+    }
+    return "\(report.effectiveDate.timeIntervalSince1970)|" + values.joined(separator: ";")
   }
 
   private func keep(_ account: EHDSAccount) {
@@ -346,6 +416,9 @@ final class EHDSConnection: ObservableObject {
   private static let tokensTag = "red.mabu.meinbefund.ehds.connection"
   private static let deviceTag = "red.mabu.meinbefund.ehds.device"
   private static let accountTag = "red.mabu.meinbefund.ehds.account"
+  /// Not secrets: a date, and which reports were sent in which state.
+  private static let sendsTag = "red.mabu.meinbefund.ehds.sendsReportsSince"
+  private static let sentTag = "red.mabu.meinbefund.ehds.sentReports"
 
   private struct Stored: Codable {
     let ehds: String
@@ -366,6 +439,7 @@ final class EHDSConnection: ObservableObject {
   }
 
   private func restore() {
+    sendsReportsSince = UserDefaults.standard.object(forKey: Self.sendsTag) as? Date
     if let data = Keychain.get(Self.accountTag),
       let account = try? JSONDecoder().decode(EHDSAccount.self, from: data),
       Self.trusted.contains(account.hub)
@@ -463,6 +537,11 @@ protocol EHDSTransport: FormTransport {
   ) async throws -> (status: Int, body: Data)
   /// A JSON request without a token: the two routes that create an account.
   func postJSON(_ url: URL, json: [String: String]) async throws -> (status: Int, body: Data)
+  /// A request with a body of its own, a FHIR Bundle, and extra headers.
+  func sendBody(
+    method: String, url: URL, bearer: String, device: String, body: Data,
+    headers: [String: String]
+  ) async throws -> (status: Int, body: Data)
 }
 
 /// Apple's App Attest, behind a protocol so the simulator and the UI tests
@@ -502,6 +581,20 @@ struct URLSessionEHDSTransport: EHDSTransport {
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     request.httpBody = try JSONSerialization.data(withJSONObject: json)
+    return try await run(request)
+  }
+
+  func sendBody(
+    method: String, url: URL, bearer: String, device: String, body: Data,
+    headers: [String: String]
+  ) async throws -> (status: Int, body: Data) {
+    var request = URLRequest(url: url)
+    request.httpMethod = method
+    request.setValue("Bearer \(bearer)", forHTTPHeaderField: "Authorization")
+    request.setValue(device, forHTTPHeaderField: "X-Klarbefund-Device")
+    request.setValue("application/fhir+json", forHTTPHeaderField: "Content-Type")
+    for (name, value) in headers { request.setValue(value, forHTTPHeaderField: name) }
+    request.httpBody = body
     return try await run(request)
   }
 
@@ -594,6 +687,13 @@ enum Keychain {
       }
       let json = #"{"access_token":"\#(Self.token)","refresh_token":"demo","expires_in":300,"refresh_expires_in":1800}"#
       return (200, Data(json.utf8))
+    }
+
+    func sendBody(
+      method: String, url: URL, bearer: String, device: String, body: Data,
+      headers: [String: String]
+    ) async throws -> (status: Int, body: Data) {
+      (201, Data(#"{"stored":3,"skipped":[]}"#.utf8))
     }
 
     /// The fictional account the demo creates; never a real login.

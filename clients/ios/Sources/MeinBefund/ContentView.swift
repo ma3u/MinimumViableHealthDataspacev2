@@ -1041,6 +1041,15 @@ struct ContentView: View {
     }
     .modifier(AppSheets(model: model))
     .modifier(ConnectSheet(model: model, connection: connection))
+    // My values into my record (#473 phase 3): whenever the reports change,
+    // and when the person switches sending on, while it is on.
+    .onChange(of: model.reports) { _, reports in
+      Task { await connection.sync(reports) }
+    }
+    .onChange(of: connection.sendsReportsSince) { _, since in
+      guard since != nil else { return }
+      Task { await connection.sync(model.reports) }
+    }
     .onChange(of: model.openReport) { _, id in
       // Following a point on a chart back to the document it was read from.
       guard let id else { return }

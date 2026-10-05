@@ -1,0 +1,32 @@
+meta {
+  name: 32 No app token, add values to my record (401)
+  type: http
+  seq: 32
+}
+
+post {
+  url: {{baseUrl}}/api/patient/app/record
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer not-a-token
+  X-Klarbefund-Report: 00000000-0000-4000-8000-000000000000
+}
+
+body:json {
+  {"resourceType": "Bundle", "type": "document", "entry": []}
+}
+
+tests {
+  // #473 phase 3: only the app's own token, from a connected phone, adds
+  // values to the account's own record.
+  test("a token that is not Keycloak's is refused", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

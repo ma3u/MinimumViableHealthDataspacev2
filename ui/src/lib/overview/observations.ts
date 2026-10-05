@@ -22,6 +22,10 @@ export interface ObservationRow {
   /** ISO date or timestamp */
   effective: string;
   performer?: string | null;
+  /** FHIR status as stored; absent for the synthetic seed, which is `final`. */
+  status?: string | null;
+  /** Provenance of a value the Klarbefund app sent (#473 phase 3). */
+  sourceKind?: string | null;
 }
 
 export interface FhirQuantity {
@@ -35,6 +39,7 @@ export interface FhirObservation {
   resourceType: "Observation";
   id: string;
   meta?: { tag?: { system?: string; code: string }[] };
+  extension?: { url: string; valueCode: string }[];
   status: string;
   category?: { coding: { system?: string; code: string }[] }[];
   code: {
@@ -63,6 +68,20 @@ const FICTIONAL_TAG = {
   code: "fictional",
 };
 
+/**
+ * A record the Klarbefund app created and filled (ADR-054, #473 phase 3):
+ * not synthetic, so never tagged `fictional`, and its values carry their own
+ * status and provenance.
+ */
+const SANDBOX_TAG = {
+  system: "https://ehds.mabu.red/tag",
+  code: "sandbox",
+};
+
+/** The app's provenance extension, the same URL its FHIR export uses. */
+export const SOURCE_KIND_EXTENSION =
+  "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind";
+
 function toIsoDateTime(v: string): string {
   const s = String(v);
   return s.length === 10 ? `${s}T00:00:00Z` : s;
@@ -71,9 +90,10 @@ function toIsoDateTime(v: string): string {
 /** The searchset Bundle for one patient's Observations. */
 export function rowsToBundle(
   rows: ObservationRow[],
-  patient: { id: string; name?: string | null },
+  patient: { id: string; name?: string | null; sandbox?: boolean | null },
   selfUrl: string,
 ): FhirBundle {
+  const tag = patient.sandbox ? SANDBOX_TAG : FICTIONAL_TAG;
   const entry = rows.map((r) => {
     const rr: FhirObservation["referenceRange"] =
       r.low != null || r.high != null
@@ -90,8 +110,15 @@ export function rowsToBundle(
     const resource: FhirObservation = {
       resourceType: "Observation",
       id: r.id,
-      meta: { tag: [FICTIONAL_TAG] },
-      status: "final",
+      meta: { tag: [tag] },
+      ...(r.sourceKind
+        ? {
+            extension: [
+              { url: SOURCE_KIND_EXTENSION, valueCode: r.sourceKind },
+            ],
+          }
+        : {}),
+      status: r.status ?? "final",
       category: [
         {
           coding: [
@@ -129,7 +156,7 @@ export function rowsToBundle(
     resourceType: "Bundle",
     id: `observations-${patient.id}`,
     type: "searchset",
-    meta: { tag: [FICTIONAL_TAG] },
+    meta: { tag: [tag] },
     total: entry.length,
     link: [{ relation: "self", url: selfUrl }],
     entry,

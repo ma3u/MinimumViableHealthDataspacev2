@@ -870,6 +870,49 @@ paths:
         "404": { $ref: "#/components/responses/NotFound" }
 
   /api/patient/app/record:
+    post:
+      tags: [Patient]
+      summary: The Klarbefund app adds one report's values to the patient's own record
+      description: >
+        Body: the FHIR R4 document the app writes for a report. Only
+        `preliminary` Observations with a LOINC code are stored, with their
+        provenance; the rest is answered as skipped. `X-Klarbefund-Report`
+        names the report, so sending it again replaces its values. Only an
+        account the app created (ADR-054); a demo persona is refused.
+        #473 phase 3.
+      parameters:
+        - in: header
+          name: X-Klarbefund-Report
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, description: FHIR R4 Bundle }
+      responses:
+        "201":
+          description: Stored
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [stored, skipped]
+                properties:
+                  stored: { type: integer }
+                  skipped:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        reason: { type: string }
+        "400": { description: No report id, or not a FHIR Bundle }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: Not an account the app created }
+        "413": { description: More than 500 values }
+        "429": { description: Too many reports in a minute }
+        "502": { description: Neo4j failed }
     get:
       tags: [Patient]
       summary: The connected patient's own record, for the app (EHDS Art. 3)

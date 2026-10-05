@@ -268,6 +268,32 @@ struct ConnectView: View {
           Text("Sign in on \(hub.host) with these as well. They are kept only on this phone; Klarbefund signs in with them again by itself when a session ends.")
         }
       }
+      if connection.canSendReports {
+        Section {
+          Toggle(
+            "Send my reports to my EHDS record",
+            isOn: Binding(
+              get: { connection.sendsReportsSince != nil },
+              set: { connection.setSendsReports($0) })
+          )
+          .accessibilityIdentifier("account-send-reports")
+          if let since = connection.sendsReportsSince {
+            LabeledContent("Since", value: since.formatted(date: .abbreviated, time: .omitted))
+          }
+          if let last = connection.lastSend {
+            Text(last)
+              .font(.footnote)
+              .foregroundStyle(.secondary)
+              .accessibilityIdentifier("account-last-send")
+          }
+        } header: {
+          Text("My values in my record")
+        } footer: {
+          Text(
+            "Decided once, here. While it is on, every report you scan or read again goes to your own record on the EHDS demo hub, as preliminary values marked as read from a scan. Values without a LOINC code stay on this phone. Switching off stops further sending; what was sent stays in the record until you delete the account."
+          )
+        }
+      }
       Section {
         Button("Disconnect", role: .destructive) {
           Task { await connection.disconnect() }
@@ -345,10 +371,14 @@ struct DataspaceRecordView: View {
       if let record = connection.record {
         if connection.account?.createdByApp == true {
           Section {
-            Text("Your own record on the EHDS demo hub. It starts empty and holds only what is added to it; nothing from this phone is sent there.")
-              .font(.footnote)
-              .foregroundStyle(.secondary)
-              .accessibilityIdentifier("record-sandbox")
+            Text(
+              connection.sendsReportsSince == nil
+                ? String(localized: "Your own record on the EHDS demo hub. It starts empty. To fill it, switch on Send my reports to my EHDS record on the Connect screen; until then nothing from this phone is sent there.")
+                : String(localized: "Your own record on the EHDS demo hub, with the values your reports sent to it.")
+            )
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+            .accessibilityIdentifier("record-sandbox")
           }
         } else {
         Section {
@@ -376,6 +406,10 @@ struct DataspaceRecordView: View {
                 if let range = o.range {
                   Text("·")
                   Text("Ref. \(range)")
+                }
+                if o.preliminary {
+                  Text("·")
+                  Text(o.sourceKind == "self-tracked" ? "Preliminary, entered by you" : "Preliminary, read from a scan")
                 }
                 if let day = o.effective {
                   Text("·")

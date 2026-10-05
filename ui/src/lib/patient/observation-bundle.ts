@@ -20,11 +20,12 @@ export async function loadObservationBundle(
   code: string | null = null,
 ): Promise<FhirBundle | null> {
   const [patientRows, rows] = await Promise.all([
-    runQuery<{ id: string; name: string }>(
+    runQuery<{ id: string; name: string; sandbox: boolean | null }>(
       `MATCH (p:Patient)
        WHERE coalesce(p.id, p.resourceId, elementId(p)) = $patientId
        RETURN coalesce(p.id, p.resourceId, elementId(p)) AS id,
-              coalesce(p.name, 'Anonymous') AS name
+              coalesce(p.name, 'Anonymous') AS name,
+              p.sandbox AS sandbox
        LIMIT 1`,
       { patientId },
     ),
@@ -43,7 +44,9 @@ export async function loadObservationBundle(
               o.referenceText AS rangeText,
               o.category AS category,
               coalesce(toString(o.effectiveDate), o.dateTime, '') AS effective,
-              o.performer AS performer
+              o.performer AS performer,
+              o.status AS status,
+              o.sourceKind AS sourceKind
        ORDER BY code, effective
        LIMIT 2000`,
       { patientId, code },
