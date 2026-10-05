@@ -38,11 +38,12 @@ UPLOAD_ONLY=false
 : "${TEAM_ID:=38R8Z4P7S8}"
 BUILD_DIR="${BUILD_DIR:-.build/release}"
 
-# With an API key, automatic signing talks to App Store Connect itself, so it
-# needs no Apple ID in Xcode and fetches a profile that carries every
-# capability the entitlements name. Without the key, an installed profile made
-# before a capability was added (App Attest, ADR-054) signs a build that
-# App Store Connect rejects.
+# With an API key, archiving needs no Apple ID in Xcode. Exporting still signs
+# with an installed distribution profile: Apple's cloud signing refuses a key
+# below the Admin role ("Cloud signing permission error", 2026-10-04). A
+# profile made before a capability was added (App Attest, ADR-054) lacks its
+# entitlement, so the newest matching profile is used; make a new one in
+# App Store Connect, or through its API, after adding a capability.
 AUTH=()
 if [ -n "${ASC_KEY_ID:-}" ] && [ -n "${ASC_ISSUER_ID:-}" ]; then
   KEY_FILE="${ASC_KEY_PATH:-$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8}"
@@ -102,6 +103,7 @@ xcodebuild archive \
 # is what the automatic path says when it cannot reach the account.
 BUNDLE_ID="${BUNDLE_ID:-red.mabu.meinbefund}"
 profile_name=""
+newest=""
 for p in ~/Library/Developer/Xcode/UserData/Provisioning\ Profiles/*.mobileprovision; do
   [ -e "$p" ] || continue
   plist="$(mktemp)"
@@ -112,14 +114,17 @@ d = plistlib.load(open(sys.argv[1], "rb"))
 app_id = d.get("Entitlements", {}).get("application-identifier", "")
 # A distribution profile provisions no specific devices.
 if app_id == f"{sys.argv[3]}.{sys.argv[2]}" and not d.get("ProvisionedDevices"):
-    print(d.get("Name", ""))
+    print(f"{d['CreationDate'].isoformat()}\t{d.get('Name', '')}")
 PY
 )"
   rm -f "$plist"
-  [ -n "$name" ] && { profile_name="$name"; break; }
+  # ISO dates sort as text: keep the most recently created profile.
+  if [ -n "$name" ] && [[ "$name" > "$newest" ]]; then
+    newest="$name"
+    profile_name="${name#*$'\t'}"
+  fi
 done
-# The key lets automatic signing make a current profile; an old one is not used.
-[ ${#AUTH[@]} -gt 0 ] && profile_name=""
+
 
 echo "==> Exporting .ipa"
 {

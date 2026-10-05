@@ -48,7 +48,8 @@ SERVICE_ROLES='["manage-users","view-users","query-groups"]'
 # The Key Vault reference on mvhd-ui. Wiring only: the secret is already in
 # Key Vault, and the app resolves it through its managed identity.
 wire_ui() {
-  KV_URI="$(az keyvault show --name "$KEY_VAULT_NAME" --query properties.vaultUri -o tsv)"
+  KV_URI="$(az keyvault show --name "$KEY_VAULT_NAME" --query properties.vaultUri -o tsv 2>/dev/null || true)"
+  KV_URI="${KV_URI:-https://${KEY_VAULT_NAME}.vault.azure.net/}"
   IDENTITY_ID="$(az identity show --name "${DSP_TOKEN_IDENTITY:-id-mvhd-claude-federation}" \
     --resource-group "$RG" --query id -o tsv)"
   REF="keyvaultref:${KV_URI%/}/secrets/${SECRET_NAME},identityref:${IDENTITY_ID}"
@@ -69,8 +70,9 @@ wire_ui() {
 if [[ "$WIRE_ONLY" == "true" ]]; then
   # shellcheck source=env.sh
   source ./env.sh
-  az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$SECRET_NAME" \
-    --query id -o none || { echo "$SECRET_NAME is not in Key Vault; run without --wire-only first" >&2; exit 1; }
+  # No read of the secret here: the CI identity may not read this vault's
+  # secrets (Forbidden, 2026-10-05), and need not. mvhd-ui's managed identity
+  # resolves the reference; a missing secret shows as a failed revision.
   wire_ui
   exit 0
 fi
