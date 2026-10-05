@@ -218,7 +218,8 @@ ok "$OBS_APP: Grafana on 3000 (public, Keycloak), OTLP on ${OTLP_PORT} (internal
 
 log "Waiting for Grafana"
 for _ in $(seq 1 60); do
-  [[ "$(curl -s -o /dev/null -w '%{http_code}' -m 10 "https://${APP_FQDN}/api/health")" == "200" ]] && break
+  # -L: with enforce_domain, the ACA name redirects to the custom domain.
+  [[ "$(curl -sL -o /dev/null -w '%{http_code}' -m 10 "https://${APP_FQDN}/api/health")" == "200" ]] && break
   sleep 10
 done
 check
