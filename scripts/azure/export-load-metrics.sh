@@ -24,9 +24,10 @@ mkdir -p "$OUT"
 
 # The apps a user's request touches, plus the ones a sign-in or a query touches.
 APPS=(mvhd-ui mvhd-neo4j-proxy mvhd-neo4j mvhd-keycloak mvhd-controlplane mvhd-identityhub mvhd-issuerservice mvhd-dp-fhir mvhd-dp-omop mvhd-vault mvhd-nats)
-# Microsoft.App/containerApps metrics: replicas, CPU in nanocores, working set
-# bytes, requests to the ingress, container restarts, network bytes.
-APP_METRICS="Replicas,UsageNanoCores,WorkingSetBytes,Requests,RestartCount,RxBytes,TxBytes"
+# Microsoft.App/containerApps metrics (names read from list-definitions on
+# 2026-10-05): replicas, CPU and memory as a share of the limit, the ingress's
+# response time, requests, restarts, network bytes.
+APP_METRICS="Replicas,CpuPercentage,MemoryPercentage,ResponseTime,Requests,RestartCount,RxBytes,TxBytes"
 PG_METRICS="cpu_percent,cpu_credits_remaining,cpu_credits_consumed,active_connections,memory_percent,iops"
 
 to_csv() {  # az monitor JSON on stdin → "time,metric,value" rows
@@ -38,9 +39,10 @@ for m in d["value"]:
     name = m["name"]["value"]
     for ts in m["timeseries"]:
         for p in ts["data"]:
+            stamp = p["timeStamp"]
             for agg in ("average", "total", "maximum"):
                 if p.get(agg) is not None:
-                    print(f"{p[\"timeStamp\"]},{name},{agg},{p[agg]}")
+                    print(f"{stamp},{name},{agg},{p[agg]}")
 '
 }
 
