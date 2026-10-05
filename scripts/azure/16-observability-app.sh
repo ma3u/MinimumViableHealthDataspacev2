@@ -136,6 +136,10 @@ ok "image built"
 
 OAUTH_SECRET="$(openssl rand -hex 32)"
 ADMIN_PASSWORD="$(openssl rand -hex 24)"
+# Kept in Key Vault too, so the API admin can be looked up, never printed.
+az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name grafana-admin-password \
+  --value "$ADMIN_PASSWORD" -o none ||
+  warn "could not write grafana-admin-password to $KEY_VAULT_NAME (needs Key Vault Secrets Officer)"
 
 log "Keycloak client mvhd-grafana at $KEYCLOAK_URL"
 KC_PASSWORD="$(kc_admin_password)"
