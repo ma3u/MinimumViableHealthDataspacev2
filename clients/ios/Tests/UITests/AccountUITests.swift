@@ -60,4 +60,17 @@ final class AccountUITests: XCTestCase {
       "the refusal")
     XCTAssertTrue(error.label.contains("wrong"), error.label)
   }
+
+  func testSendingIsSwitchedOnOnceAndThenNeedsNoConfirmation() {
+    let app = open()
+    AppDriver.require(app.buttons["account-create"], "Create an EHDS account").tap()
+    let toggle = AppDriver.scrollTo(app.switches["account-send-reports"], in: app)
+    XCTAssertEqual(toggle.value as? String, "0", "sending starts switched off")
+    toggle.switches.firstMatch.tap()
+    // The demo's reports go out at once: no dialog, no question per report.
+    let sent = AppDriver.require(
+      app.staticTexts["account-last-send"], "what the send did", timeout: 15)
+    XCTAssertTrue(sent.label.contains("Sent"), sent.label)
+    XCTAssertFalse(app.alerts.firstMatch.exists, "nothing asks again")
+  }
 }

@@ -225,6 +225,11 @@ public struct DataspaceObservation: Sendable, Equatable, Identifiable {
   public let effective: Date?
   /// The range as the laboratory printed it, or rebuilt from its bounds.
   public let range: String?
+  /// `preliminary` for a value the app sent (#473 phase 3); the synthetic
+  /// record's values are `final`.
+  public var preliminary: Bool = false
+  /// Where a value the app sent came from: `ocr-transcribed`, `self-tracked`.
+  public var sourceKind: String? = nil
 }
 
 /// The record the hub returns: a FHIR R4 searchset Bundle of Observations.
@@ -233,6 +238,8 @@ public struct DataspaceRecord: Sendable, Equatable {
   /// True when the Bundle carries the hub's `fictional` tag: every record on
   /// the demo hub is synthetic, and the screen must say so.
   public let fictional: Bool
+  /// True for the record of an account the app created: the person's own.
+  public var sandbox: Bool = false
 
   public static func parse(_ data: Data) -> DataspaceRecord? {
     guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -240,6 +247,7 @@ public struct DataspaceRecord: Sendable, Equatable {
     else { return nil }
     let tags = ((json["meta"] as? [String: Any])?["tag"] as? [[String: Any]]) ?? []
     let fictional = tags.contains { ($0["code"] as? String) == "fictional" }
+    let sandbox = tags.contains { ($0["code"] as? String) == "sandbox" }
     let iso = ISO8601DateFormatter()
     let day = DateFormatter()
     day.calendar = Calendar(identifier: .iso8601)
@@ -262,14 +270,19 @@ public struct DataspaceRecord: Sendable, Equatable {
         let high = ((range["high"] as? [String: Any])?["value"] as? NSNumber)?.doubleValue
         return PrintedReference.text(printed: nil, low: low, high: high) { String(format: "%g", $0) }
       }()
+      let source = ((r["extension"] as? [[String: Any]]) ?? []).first {
+        ($0["url"] as? String)?.hasSuffix("/epa-ingest-source-kind") == true
+      }
       return DataspaceObservation(
         id: r["id"] as? String ?? UUID().uuidString,
         loinc: coding["code"] as? String ?? "",
         display: code["text"] as? String ?? coding["display"] as? String ?? "",
         value: value, unit: quantity["unit"] as? String ?? "",
         effective: iso.date(from: effectiveText) ?? day.date(from: String(effectiveText.prefix(10))),
-        range: rangeText)
+        range: rangeText,
+        preliminary: r["status"] as? String == "preliminary",
+        sourceKind: source?["valueCode"] as? String)
     }
-    return DataspaceRecord(observations: observations, fictional: fictional)
+    return DataspaceRecord(observations: observations, fictional: fictional, sandbox: sandbox)
   }
 }

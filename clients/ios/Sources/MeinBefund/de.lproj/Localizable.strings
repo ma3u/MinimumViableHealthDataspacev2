@@ -434,7 +434,6 @@
 "This device cannot prove to the hub that it runs Klarbefund, so it cannot create an account. Sign in with an existing account instead." = "Dieses Gerät kann dem Hub nicht nachweisen, dass Klarbefund darauf läuft, und kann deshalb kein Konto anlegen. Melden Sie sich stattdessen mit einem bestehenden Konto an.";
 "Username" = "Benutzername";
 "Your EHDS account" = "Ihr EHDS-Konto";
-"Your own record on the EHDS demo hub. It starts empty and holds only what is added to it; nothing from this phone is sent there." = "Ihre eigene Akte auf dem EHDS-Demo-Hub. Sie ist zu Beginn leer und enthält nur, was hinzugefügt wird; von diesem Telefon wird nichts dorthin gesendet.";
 "Klarbefund sends a password only over an encrypted connection." = "Klarbefund sendet ein Passwort nur über eine verschlüsselte Verbindung.";
 "This version reads nothing more from this report." = "Diese Version liest aus diesem Befund nichts weiter.";
 "This version reads %lld more values from your stored reports." = "Diese Version liest %lld weitere Werte aus Ihren gespeicherten Befunden.";
@@ -442,3 +441,12 @@
 "Scan the paper again" = "Papier erneut scannen";
 "The scan is attached and read: %lld values." = "Der Scan ist angehängt und ausgewertet: %lld Werte.";
 "The scan is attached. It read %lld values where %lld are stored, so the stored values were kept." = "Der Scan ist angehängt. Er ergab %1$lld Werte, gespeichert sind %2$lld; die gespeicherten Werte bleiben.";
+"Send my reports to my EHDS record" = "Meine Befunde an meine EHDS-Akte senden";
+"Since" = "Seit";
+"My values in my record" = "Meine Werte in meiner Akte";
+"Decided once, here. While it is on, every report you scan or read again goes to your own record on the EHDS demo hub, as preliminary values marked as read from a scan. Values without a LOINC code stay on this phone. Switching off stops further sending; what was sent stays in the record until you delete the account." = "Einmal hier entschieden. Solange es eingeschaltet ist, geht jeder Befund, den Sie scannen oder neu auswerten, in Ihre eigene Akte auf dem EHDS-Demo-Hub, als vorläufige Werte, gekennzeichnet als aus einem Scan gelesen. Werte ohne LOINC-Code bleiben auf diesem Telefon. Ausschalten beendet das Senden; bereits Gesendetes bleibt in der Akte, bis Sie das Konto löschen.";
+"Your own record on the EHDS demo hub. It starts empty. To fill it, switch on Send my reports to my EHDS record on the Connect screen; until then nothing from this phone is sent there." = "Ihre eigene Akte auf dem EHDS-Demo-Hub. Sie ist zu Beginn leer. Um sie zu füllen, schalten Sie auf dem Verbinden-Bildschirm Meine Befunde an meine EHDS-Akte senden ein; bis dahin wird nichts von diesem Telefon dorthin gesendet.";
+"Your own record on the EHDS demo hub, with the values your reports sent to it." = "Ihre eigene Akte auf dem EHDS-Demo-Hub, mit den Werten, die Ihre Befunde dorthin gesendet haben.";
+"Preliminary, entered by you" = "Vorläufig, von Ihnen eingegeben";
+"Preliminary, read from a scan" = "Vorläufig, aus einem Scan gelesen";
+"Sent %lld values from %lld reports to your EHDS record; %lld without a LOINC code stay on this phone." = "%1$lld Werte aus %2$lld Befunden an Ihre EHDS-Akte gesendet; %3$lld ohne LOINC-Code bleiben auf diesem Telefon.";
