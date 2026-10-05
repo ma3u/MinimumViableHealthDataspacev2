@@ -60,7 +60,7 @@ describe("Home Page", () => {
     expect([...dates].sort().reverse()).toEqual(dates);
   });
 
-  it("shows the Klarbefund app with its recording and the TestFlight request", () => {
+  it("shows the Klarbefund app with its recording and the TestFlight link", () => {
     render(<Home />);
     expect(
       screen.getByRole("heading", { name: /klarbefund/i, level: 2 }),
@@ -68,10 +68,10 @@ describe("Home Page", () => {
     expect(
       screen.getByLabelText(/a tour through the klarbefund app/i),
     ).toHaveAttribute("src", "/klarbefund/klarbefund-tour.mp4");
-    expect(screen.getByText(/private TestFlight preview/i)).toBeInTheDocument();
+    expect(screen.getByText(/public TestFlight beta/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /send the request/i }),
-    ).toBeInTheDocument();
+      screen.getByRole("link", { name: /join the beta on testflight/i }),
+    ).toHaveAttribute("href", "https://testflight.apple.com/join/ssADSXX6");
   });
 
   it("renders Why EHDS Matters section", () => {

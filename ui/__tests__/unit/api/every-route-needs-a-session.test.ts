@@ -1,7 +1,7 @@
 /**
  * Every API route needs a session (#404, ADR-044). The only exceptions are
- * the routes that make signing in possible, the liveness probe and the
- * TestFlight request form (ADR-048). The demo
+ * the routes that make signing in possible and the liveness probe. (The
+ * TestFlight request form of ADR-048 is gone: ADR-050.) The demo
  * DSP endpoint the catalog crawler calls takes a session or its bearer token
  * (requireSessionOrToken, lib/service-auth.ts), which counts as a gate, and
  * so does the Klarbefund app's token (requireAppToken, lib/app-auth.ts, ADR-049).
@@ -35,8 +35,6 @@ const ANONYMOUS: Record<string, string> = {
     "the challenge the Klarbefund app has Apple attest, before it has an account (ADR-054)",
   "app-accounts":
     "creates a sandbox account, only for a request App Attest proves is the app (ADR-054)",
-  "testflight-request":
-    "the start page's TestFlight form, for visitors without an account (ADR-048)",
 };
 
 function routeFiles(dir: string): string[] {

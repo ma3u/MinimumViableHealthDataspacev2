@@ -290,10 +290,6 @@
       "methods": ["GET"]
     },
     {
-      "path": "/api/testflight-request",
-      "methods": ["POST"]
-    },
-    {
       "path": "/api/transfers/[id]",
       "methods": ["GET"]
     },
@@ -981,13 +977,19 @@
       "id": "ADR-048",
       "file": "ADR-048-testflight-request-mailed-without-a-session.md",
       "title": "The TestFlight request is mailed by the hub, without a session",
-      "status": "Accepted"
+      "status": "Superseded"
     },
     {
       "id": "ADR-049",
       "file": "ADR-049-klarbefund-connects-by-device-grant.md",
       "title": "Klarbefund connects to a patient's record by a device grant the website starts",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-050",
+      "file": "ADR-050-klarbefund-beta-by-public-testflight-link.md",
+      "title": "The Klarbefund beta is joined by a public TestFlight link",
+      "status": "Proposed"
     },
     {
       "id": "ADR-052",
@@ -1038,8 +1040,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 46,
-    "operations": 59
+    "paths": 45,
+    "operations": 58
   },
   "workflowJobs": {
     "test.yml": [
@@ -1095,7 +1097,7 @@
     "/docs/developer": "2026-10-05",
     "/docs/developer/quality-gates": "2026-10-05",
     "/docs/developer/api": "2026-10-05",
-    "/docs/developer/reference": "2026-10-04",
+    "/docs/developer/reference": "2026-10-05",
     "/docs/architecture": "2026-10-05"
   }
 }

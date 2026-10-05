@@ -1,6 +1,6 @@
 import { Smartphone } from "lucide-react";
 import { IS_STATIC } from "@/lib/static-export";
-import { TestflightRequestForm } from "@/components/TestflightRequestForm";
+import { TestflightJoin } from "@/components/TestflightJoin";
 import { KlarbefundTourPhone } from "@/components/KlarbefundTourPhone";
 
 /** The GitHub Pages export is served under a basePath; plain <video> and <img>
@@ -37,13 +37,12 @@ export function KlarbefundShowcase() {
           you send it.
         </p>
         <p className="text-(--text-secondary) text-sm leading-relaxed max-w-2xl mb-3">
-          The app is a{" "}
+          The app is in a{" "}
           <strong className="text-(--text-primary)">
-            private TestFlight preview
+            public TestFlight beta
           </strong>{" "}
-          for internal testers, on iPhone with iOS 26. Access is given on
-          request: send the form and you get a TestFlight invitation at your
-          Apple ID.
+          for iPhone with iOS 26. Join with one tap; no request, no account on
+          this hub.
         </p>
         <div className="flex flex-wrap gap-3 text-sm mb-5">
           <a
@@ -61,8 +60,8 @@ export function KlarbefundShowcase() {
             Privacy policy
           </a>
         </div>
-        <div className="max-w-md">
-          <TestflightRequestForm />
+        <div className="max-w-xl">
+          <TestflightJoin basePath={BASE_PATH} />
         </div>
       </div>
 
