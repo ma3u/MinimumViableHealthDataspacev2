@@ -80,7 +80,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 ```
 GET  /fhir/Patient                    — list all patients
 GET  /fhir/Patient/:id/$everything    — full FHIR bundle for one patient
-GET  /omop/cohort                     — OMOP cohort statistics
+POST /omop/cohort                     — OMOP cohort statistics (body: groupBy, concept, limit)
 GET  /catalog/datasets                — HealthDCAT-AP datasets from Neo4j
 ```
 

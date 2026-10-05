@@ -141,7 +141,7 @@
       "type": "stat",
       "id": 4,
       "title": "Failed requests",
-      "description": "Share of requests answered with 4xx or 5xx, or not at all (status 0), over the time range. The SLO is under 1 %.",
+      "description": "Share of requests with a status the step did not expect (4xx, 5xx, or no answer at all), over the time range. The SLO is under 1 %.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -152,7 +152,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(increase(k6_http_reqs_total{testid=\"$testid\", status!~\"[23]..\"}[$__range])) / sum(increase(k6_http_reqs_total{testid=\"$testid\"}[$__range]))",
+          "expr": "(sum(increase(k6_http_reqs_total{testid=\"$testid\", expected_response=\"false\"}[$__range])) or vector(0)) / sum(increase(k6_http_reqs_total{testid=\"$testid\"}[$__range]))",
           "legendFormat": "",
           "refId": "A"
         }
@@ -1087,8 +1087,8 @@
     {
       "type": "timeseries",
       "id": 22,
-      "title": "CPU by container",
-      "description": "",
+      "title": "CPU by container (100 % = one core)",
+      "description": "CPU time per second of wall clock. A Node.js container such as the UI tops out near 100 %: one event loop on one core.",
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
@@ -1099,7 +1099,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "container_cpu_utilization_ratio{container_name=~\"health-dataspace-.*\"}",
+          "expr": "sum by (container_name) (rate(container_cpu_usage_nanoseconds_total{container_name=~\"health-dataspace-.*\"}[$__rate_interval])) / 1e9",
           "legendFormat": "{{container_name}}",
           "refId": "A"
         }
