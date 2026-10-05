@@ -169,6 +169,39 @@ def text(ids, content, x, y, w=24, h=3):
             "options": {"mode": "markdown", "content": content}}
 
 
+def shift(panels, dy):
+    """Moves panels down by dy grid rows, to make room above them."""
+    for panel in panels:
+        panel["gridPos"]["y"] += dy
+    return panels
+
+
+def newest_record(ids, chain, x, y, w=6, h=3):
+    """When the chain's newest record was written, as "3 hours ago"."""
+    p = stat(ids, "Newest record", infinity(f"/audit/chains/{chain}/events?limit=1",
+                                             [("recorded", "recorded", "timestamp")]),
+             x, y, w=w, h=h, unit="dateTimeFromNow", fields="/^recorded$/",
+             description="The newest record in the chain, whatever the time range. An empty range "
+                         "with an old newest record means nothing happened since.")
+    p["fieldConfig"]["defaults"]["noValue"] = "no records yet"
+    return p
+
+
+def chain_head(ids, title, chain, x, y, w=12, h=4):
+    """The chain's head hash and length, to copy into the audit report."""
+    return table(ids, title, infinity(f"/audit/chains/{chain}/verify",
+                                      [("ok", "Intact", "string"), ("count", "Records", "number"),
+                                       ("head", "Head hash (SHA-256)", "string")]),
+                 x, y, w=w, h=h,
+                 description="Copy both values into the audit report. At the next audit the chain must "
+                             "still hold this head at the same record number; if it does not, records "
+                             "before it were rewritten.",
+                 overrides=[{"matcher": {"id": "byName", "options": "Head hash (SHA-256)"},
+                             "properties": [{"id": "custom.width", "value": 620}]}],
+                 transformations=[{"id": "organize", "options": {"indexByName": {
+                     "Intact": 0, "Records": 1, "Head hash (SHA-256)": 2}}}])
+
+
 def count_over_range(selector):
     return f"sum(count_over_time({selector} [$__range]))"
 
@@ -221,6 +254,8 @@ PROM = {"type": "prometheus", "uid": "prometheus"}
 K6 = 'testid="$testid"'
 PROXY_RUN = '{service_name=~".*neo4j-proxy.*"} | json | __error__="" | load_test="$testid"'
 CONTAINERS = 'container_name=~"health-dataspace-.*"'
+AUDIT_LINES = ('{service_name=~".*neo4j-proxy.*"} | msg="audit recorded" | keep audit_chain, audit_batch '
+               '| unwrap audit_batch | __error__=""')
 
 
 def prom(expr, legend="", instant=False, ref="A"):
@@ -316,7 +351,7 @@ def load_test():
               prom(p95("name"), instant=True, ref="A"), 0, 30, h=9,
               description="Sorted by p95. Failures are responses k6 did not expect (4xx, 5xx, none)."),
 
-        row(ids, "Server side: the proxy, log lines of this run (load_test = testid)", 39),
+        row(ids, "Server side: the proxy, log lines of this run (load_test = testid; NLQ, federated and tasks)", 39),
         series(ids, "Requests / s by route",
                [loki_target(f"sum by (route) (rate({PROXY_RUN} [$__auto]))", "{{route}}")],
                0, 40, datasource=LOKI, unit="reqps"),
@@ -324,13 +359,25 @@ def load_test():
                [loki_target(f"quantile_over_time(0.95, {PROXY_RUN} | unwrap duration_ms [$__auto]) by (route)", "{{route}}")],
                12, 40, datasource=LOKI, unit="ms",
                description="Measured in the proxy; the difference to the client-side p95 is the UI and the network."),
-        series(ids, "429 and 5xx per minute",
-               [loki_target(f'sum by (status) (count_over_time({PROXY_RUN} | status=~"429|5.." [1m]))', "{{status}}")],
-               0, 48, datasource=LOKI, draw="bars", stack=True),
+        # All statuses, so the panel is never empty during a run: a run without
+        # 429 or 5xx is the good case and used to read "No data".
+        series(ids, "Proxy responses per minute, by status",
+               [loki_target(f"sum by (status) (count_over_time({PROXY_RUN} [1m]))", "{{status}}")],
+               0, 48, datasource=LOKI, draw="bars", stack=True,
+               description="The proxy's answers to this run's calls. 429 is the rate limit, 5xx the proxy failing. "
+                           "Only the UI routes that call the proxy (NLQ, federated queries, tasks) appear here; "
+                           "the others read Neo4j directly."),
+        # Aggregated: every audit line carries its own trace id and sequence
+        # number, so without the outer avg/max each line is a series and Loki
+        # stops at 500 of them ("No data").
         series(ids, "Audit records per transaction",
-               [loki_target('avg_over_time({service_name=~".*neo4j-proxy.*"} | json | __error__="" | msg="audit recorded" | unwrap audit_batch [$__auto])', "batch size")],
+               [loki_target(f"avg by (audit_chain) (avg_over_time({AUDIT_LINES} [$__auto]))", "{{audit_chain}} average"),
+                dict(loki_target(f"max by (audit_chain) (max_over_time({AUDIT_LINES} [$__auto]))", "{{audit_chain}} largest"),
+                     refId="B")],
                12, 48, datasource=LOKI,
-               description="#519 hypothesis 2: one record per transaction was the ceiling for audited queries. Above 1 means the batch writer is doing its work."),
+               description="#519 hypothesis 2: one record per transaction was the ceiling for audited queries. Above 1 "
+                           "means the batch writer is doing its work. Audit lines carry no run id, so this is every "
+                           "audited query in the time range, not only the run's."),
         logs(ids, "Errors during the run (proxy and UI)",
              '{service_name=~".*(neo4j-proxy|ui).*"} |~ "(?i)\\\\berror\\\\b|exception|ECONN|timed? ?out" != "GET /api/health"',
              0, 56, h=10),
@@ -419,22 +466,42 @@ az containerapp logs show -n mvhd-ui -g rg-mvhd-dev --follow --tail 20 | grep -i
 
 
 
+AUDITOR_GUIDE = """### How to audit this trail, step by step
+
+**What the law asks.** Under Regulation (EU) 2025/327 (EHDS), health data for secondary use is reached only with a data permit from the health data access body (Art. 61(1), Art. 68), and access to and activity in the secure processing environment is logged, the logs kept for at least one year (Art. 73(1)(e)). In primary use a person can see who accessed their data, kept for at least three years (Art. 9). GDPR Art. 5(2) and Art. 30 ask the controller to prove compliance and keep records of processing. Here every query, every contract negotiation and every data transfer becomes a FHIR R4 `AuditEvent`, hash-chained to the one before it, and a request whose record cannot be written is refused (fail closed).
+
+1. **Set the audit period** with the time picker, top right. Records are not deleted within the retention period, so widen the range before concluding that nothing happened.
+2. **Check integrity.** Both chains must read **INTACT**: the proxy recomputes every hash from the first record on every refresh. **BROKEN** means a record was changed, removed or reordered; stop and escalate. Copy both **chain heads** (record count and hash) into your report: at the next audit each chain must still hold that head at the same record number.
+3. **Check completeness.** *Audit writes failed* must be 0, or explained. Each one is a request that was refused because its record could not be written: not a gap in the evidence, but an outage to account for.
+4. **Queries** (*Query records*). One row per natural-language or federated query: who asked (*Parties*), when, and the outcome. The question and the generated Cypher are kept only as SHA-256, so no record holds health data. *Refused* means a guard stopped the query (re-identification risk, ODRL prohibition, k-anonymity); read the reason.
+5. **Contracts and transfers** (*Contract and transfer records*, and the dashboard *EDC contracts and transfers*). Follow each negotiation from *requested* to *finalized* and each transfer from *requested* to *completed*. A transfer of health data for secondary use must name its contract agreement and its data permit (*Agreement, asset, permit*). A transfer refused for want of a permit is the gate working (Art. 61(1)). Every *terminated* or *failed* row carries the connector's reason.
+6. **Re-verify outside this dashboard.** `scripts/verify-audit-chain.sh` reads Neo4j directly and recomputes the chain. The raw records are FHIR `AuditEvent`s at `/audit/chains/query/events` and `/audit/chains/dsp/events` on the proxy.
+7. **Write down** the period, both chain heads, the counts, every refusal and failed write with its reason, and any record marked *Demo* (demonstration traffic, not real use).
+
+**Known limit (#418).** The chain lives in Neo4j. It proves order and integrity, but someone with write access to the database could rebuild it from a point onward. Comparing chain heads between audits (step 2) detects that; a signed daily digest and a write-once copy will close it.
+"""
+
+EDC_INTRO = ("**What this shows:** every DSP contract negotiation and data transfer, counted from the `dsp` hash "
+             "chain. The hub writes a record when it asks the connector (*requested*) or refuses a transfer for want "
+             "of a data permit; the connector's callbacks write every later state (*agreed*, *finalized*, *started*, "
+             "*completed*, *terminated*). **Empty?** Nothing was negotiated in the time range: widen it, or see "
+             "*Newest record*. A negotiation that was started but never shows up points to the connector: see "
+             "*Connector services* at the bottom.")
+
+
 def ehds_audit():
     ids = Ids()
     p = [
-        text(ids, "**The evidence is the hash chain**, read and re-verified by the proxy on every "
-                  "refresh: changing, removing or reordering any record breaks every hash after it. "
-                  "Counts and curves are counted from the chain's records too; only failed audit writes "
-                  "come from the proxy's logs, because a failed write leaves no record. Every query, contract negotiation and data transfer is recorded; a "
-                  "request whose record cannot be written is not carried out (fail closed). "
-                  "Regulation (EU) 2025/327 Art. 73 · GDPR Art. 5(2), 30.", 0, 0),
         row(ids, "Integrity of the evidence", 3),
+        # fields names the string column: a stat reads only numeric fields by
+        # default, so these tiles showed "0" (noValue) instead of INTACT.
         stat(ids, "Query chain", infinity("/audit/chains/query/verify", [("ok", "ok", "string")]),
-             0, 4, mappings=INTACT, description="NLQ and federated queries. Verified hash by hash."),
+             0, 4, mappings=INTACT, fields="/^ok$/", description="NLQ and federated queries. Verified hash by hash."),
         stat(ids, "Query records", infinity("/audit/chains/query/verify", [("count", "count", "number")]),
              4, 4),
         stat(ids, "Contract & transfer chain", infinity("/audit/chains/dsp/verify", [("ok", "ok", "string")]),
-             8, 4, mappings=INTACT, description="DSP negotiations and data transfers. Verified hash by hash."),
+             8, 4, mappings=INTACT, fields="/^ok$/",
+             description="DSP negotiations and data transfers. Verified hash by hash."),
         stat(ids, "Contract & transfer records", infinity("/audit/chains/dsp/verify", [("count", "count", "number")]),
              12, 4),
         stat(ids, "Audit writes failed (request refused)",
@@ -457,6 +524,12 @@ def ehds_audit():
               0, 29, h=9, overrides=OUTCOME_OVERRIDE,
               description="NLQ and federated queries. The question and the Cypher are kept as SHA-256 only, so no record holds health data."),
     ]
+    guide = [row(ids, "Auditor guide: the regulation, and how to audit this trail step by step", 0),
+             text(ids, AUDITOR_GUIDE, 0, 1, h=14)]
+    heads = [row(ids, "For the audit report: chain heads", 38),
+             chain_head(ids, "Query chain head", "query", 0, 39, w=24),
+             chain_head(ids, "Contract & transfer chain head", "dsp", 0, 43, w=24)]
+    p = guide + shift(p, 12) + shift(heads, 12)
     return dashboard("mvhd-ehds-audit", "EHDS audit trail",
                      "Integrity and content of the regulatory audit trail (ADR-045 plane 2).", p,
                      ["ehds", "audit", "mvhd"])
@@ -496,6 +569,7 @@ def edc_dsp():
                    "{{service_name}}", 12, 35),
         logs(ids, "Latest connector errors", f'{{service_name=~"{EDC}"}} | detected_level=~"(?i)error|severe" != "otel.javaagent"', 0, 43),
     ]
+    p = [text(ids, EDC_INTRO, 0, 0, w=18, h=3), newest_record(ids, "dsp", 18, 0)] + shift(p, 3)
     return dashboard("mvhd-edc-dsp", "EDC contracts and transfers",
                      "Every DSP contract negotiation and data transfer by state, with refusals, failures and the connector's errors.",
                      p, ["edc", "dsp", "audit", "mvhd"])
