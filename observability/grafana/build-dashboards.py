@@ -254,7 +254,9 @@ PROM = {"type": "prometheus", "uid": "prometheus"}
 K6 = 'testid="$testid"'
 PROXY_RUN = '{service_name=~".*neo4j-proxy.*"} | json | __error__="" | load_test="$testid"'
 CONTAINERS = 'container_name=~"health-dataspace-.*"'
-AUDIT_LINES = ('{service_name=~".*neo4j-proxy.*"} | msg="audit recorded" | keep audit_chain, audit_batch '
+# | json: over OTLP (Azure) the fields are only in the JSON body; from a
+# container's stdout (compose) the collector has already lifted them.
+AUDIT_LINES = ('{service_name=~".*neo4j-proxy.*"} | json | msg="audit recorded" | keep audit_chain, audit_batch '
                '| unwrap audit_batch | __error__=""')
 
 

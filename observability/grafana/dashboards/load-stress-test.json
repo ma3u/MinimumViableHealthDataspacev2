@@ -994,7 +994,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "avg by (audit_chain) (avg_over_time({service_name=~\".*neo4j-proxy.*\"} | msg=\"audit recorded\" | keep audit_chain, audit_batch | unwrap audit_batch | __error__=\"\" [$__auto]))",
+          "expr": "avg by (audit_chain) (avg_over_time({service_name=~\".*neo4j-proxy.*\"} | json | msg=\"audit recorded\" | keep audit_chain, audit_batch | unwrap audit_batch | __error__=\"\" [$__auto]))",
           "legendFormat": "{{audit_chain}} average",
           "queryType": "range",
           "refId": "A"
@@ -1004,7 +1004,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "max by (audit_chain) (max_over_time({service_name=~\".*neo4j-proxy.*\"} | msg=\"audit recorded\" | keep audit_chain, audit_batch | unwrap audit_batch | __error__=\"\" [$__auto]))",
+          "expr": "max by (audit_chain) (max_over_time({service_name=~\".*neo4j-proxy.*\"} | json | msg=\"audit recorded\" | keep audit_chain, audit_batch | unwrap audit_batch | __error__=\"\" [$__auto]))",
           "legendFormat": "{{audit_chain}} largest",
           "queryType": "range",
           "refId": "B"

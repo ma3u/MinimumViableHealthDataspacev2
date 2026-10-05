@@ -38,6 +38,20 @@ load-tests/run.sh signin local           # real Keycloak sign-ins, 5 → 50 a mi
 with it, every request carries it as `X-Load-Test`, and the proxy logs it as
 `load_test`. The summary goes to `load-tests/results/<testid>.json`.
 
+## Run inside Azure (metrics on grafana.ehds.mabu.red)
+
+```bash
+scripts/azure/run-load-test.sh smoke                 # or load | stress | spike | soak | audited | proxy | signin
+ABORT_ON=failures scripts/azure/run-load-test.sh stress
+```
+
+The run is the Container Apps job `mvhd-load-test` (`load-tests/azure`): k6 inside
+`mvhd-env`, writing to `mvhd-observability`'s Prometheus (`:9090`, internal), so the k6
+rows and the server-side rows of the dashboard both show on
+<https://grafana.ehds.mabu.red>. The script forges the sessions (8 h), hands them to the
+job as a secret, starts it and waits. Jobs need the PIM role `rol-ssg-prd-project_owner`
+active: Container Apps Contributor has no `Microsoft.App/jobs` action.
+
 ## Watch
 
 The dashboard **Load and stress test**, filtered by the run:
