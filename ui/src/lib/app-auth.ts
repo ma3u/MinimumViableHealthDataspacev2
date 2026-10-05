@@ -18,8 +18,9 @@ import { findConnection } from "@/lib/app-connections";
  *   the compose network).
  * - **The issuer**, which is the public URL: the phone fetched the token from
  *   there, and Keycloak stamps the host it was asked on.
- * - **`azp = klarbefund-app`.** A token from the UI's own client, or any other,
- *   is refused, so a leaked browser token does not open the app routes.
+ * - **`azp = klarbefund-app`**, or `klarbefund-account` for an account the
+ *   app created (ADR-054). A token from the UI's own client, or any other, is
+ *   refused, so a leaked browser token does not open the app routes.
  * - **The `PATIENT` role** and a `preferred_username`. This realm has no
  *   `basic` client scope, so Keycloak puts no `sub` in the token (measured on
  *   26.6.4, #473); the login name is what maps a user to their record, as
@@ -32,6 +33,11 @@ import { findConnection } from "@/lib/app-connections";
  */
 
 export const APP_CLIENT_ID = "klarbefund-app";
+/**
+ * The clients whose tokens the app routes accept: the QR code's device grant,
+ * and the password grant of an account the app created itself (ADR-054).
+ */
+const APP_CLIENT_IDS: readonly string[] = [APP_CLIENT_ID, "klarbefund-account"];
 const APP_DEVICE_HEADER = "x-klarbefund-device";
 
 const keycloakServerUrl =
@@ -58,6 +64,8 @@ export interface AppIdentity {
   roles: string[];
   /** The connected device, when the route required one. */
   deviceId?: string;
+  /** The client the token was issued to: the QR code's, or a password sign-in's. */
+  client?: string;
 }
 
 /**
@@ -73,13 +81,22 @@ export async function verifyAppToken(
       issuer: acceptedIssuers(),
       algorithms: ["RS256", "ES256", "PS256"],
     });
-    if (payload.azp !== APP_CLIENT_ID) return null;
+    if (
+      typeof payload.azp !== "string" ||
+      !APP_CLIENT_IDS.includes(payload.azp)
+    ) {
+      return null;
+    }
     const username = payload.preferred_username;
     if (typeof username !== "string" || !username) return null;
     const roles =
       (payload.realm_access as { roles?: unknown } | undefined)?.roles ?? [];
     if (!Array.isArray(roles) || !roles.includes("PATIENT")) return null;
-    return { username, roles: roles.filter((r) => typeof r === "string") };
+    return {
+      username,
+      roles: roles.filter((r) => typeof r === "string"),
+      client: payload.azp,
+    };
   } catch {
     return null;
   }

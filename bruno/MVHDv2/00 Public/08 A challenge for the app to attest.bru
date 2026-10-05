@@ -1,0 +1,22 @@
+meta {
+  name: 08 A challenge for the app to attest
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/app-accounts/challenge
+  body: none
+  auth: none
+}
+
+tests {
+  // ADR-054: the Klarbefund app has no account yet, so the challenge it has
+  // Apple attest answers without a session. It is the only thing it gives out.
+  test("a challenge is handed out without a session", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+  test("the challenge is expiry, nonce and signature", function () {
+    expect(res.getBody().challenge).to.match(/^\d+\.[\w-]+\.[\w-]+$/);
+  });
+}

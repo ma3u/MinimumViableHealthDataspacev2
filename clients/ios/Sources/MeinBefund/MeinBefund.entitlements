@@ -13,5 +13,9 @@
 	<true/>
 	<key>com.apple.developer.healthkit.access</key>
 	<array/>
+	<!-- App Attest (ADR-054): proves to the hub that an account is created by
+	     this app on a real device. The App ID needs the App Attest capability. -->
+	<key>com.apple.developer.devicecheck.appattest-environment</key>
+	<string>$(MB_APP_ATTEST_ENV)</string>
 </dict>
 </plist>

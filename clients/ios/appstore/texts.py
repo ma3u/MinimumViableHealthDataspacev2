@@ -169,7 +169,14 @@ BETA_DESCRIPTION = {
 # being asked to look at, not a changelog.
 WHAT_TO_TEST = {
     "en-GB": (
-        "Build 2. Worth trying, in this order:\n\n"
+        "Build 3. New: your own account on the EHDS demo hub. More, Connect "
+        "to EHDS, Create an EHDS account. The app shows the username and "
+        "password (sign in on ehds.mabu.red with them too), connects by "
+        "itself, and Delete account removes it again. The record starts "
+        "empty; nothing from the phone is sent there. The hub runs on "
+        "weekdays, 07:00 to 20:00 Berlin time. Older scans read more after "
+        "Read again with this version.\n\n"
+        "Worth trying, in this order:\n\n"
         "1. Scan a real lab report, or import one as a PDF. Check every value "
         "against the paper; each one names the page and line it came from.\n"
         "2. Look at what it could not read. Unmatched values and unread lines "
@@ -187,7 +194,14 @@ WHAT_TO_TEST = {
         "produce a diagnostics archive of what it saw."
     ),
     "de-DE": (
-        "Build 2. Lohnt sich in dieser Reihenfolge:\n\n"
+        "Build 3. Neu: ein eigenes Konto auf dem EHDS-Demo-Hub. Mehr, Mit "
+        "EHDS verbinden, EHDS-Konto anlegen. Die App zeigt Benutzername und "
+        "Passwort (damit auch auf ehds.mabu.red anmelden), verbindet sich "
+        "selbst, und Konto löschen entfernt es wieder. Die Akte ist zu Beginn "
+        "leer; vom Telefon wird nichts dorthin gesendet. Der Hub läuft "
+        "werktags von 07:00 bis 20:00 Uhr Berliner Zeit. Ältere Scans lesen "
+        "mehr nach Mit dieser Version neu auswerten.\n\n"
+        "Lohnt sich in dieser Reihenfolge:\n\n"
         "1. Einen echten Laborbefund scannen oder als PDF importieren. Jeden "
         "Wert mit dem Papier abgleichen; zu jedem stehen Seite und Zeile.\n"
         "2. Ansehen, was nicht gelesen werden konnte. Nicht zugeordnete Werte "

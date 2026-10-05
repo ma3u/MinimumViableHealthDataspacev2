@@ -1,0 +1,37 @@
+meta {
+  name: 09 An account without App Attest (401)
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{baseUrl}}/api/app-accounts
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "challenge": "1.not-the-hubs.signature",
+    "keyId": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+    "attestation": "AAAA",
+    "deviceId": "00000000-0000-4000-8000-000000000000"
+  }
+}
+
+tests {
+  // ADR-054: account creation answers without a session, and only to a
+  // request Apple attests comes from the genuine app. A script gets 401 and
+  // never an account, so this run creates nothing on any stack.
+  test("a request without a genuine attestation is refused", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says why in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+    expect(res.getBody()).to.have.property("reason");
+  });
+}
