@@ -290,11 +290,11 @@ deploy_shim
 # token: 7082/api/identity/v1alpha/participants answers 200 with a list, and
 # 08-compliance-runner.sh and 05-cfm-ui.sh already call that port.
 #
-# UNRESOLVED, and the EDC-V agent is the one that needs them: nothing answered
-# on 7084 (STS) or on 7082/api/credentials during the same probe. The
-# deployment never sets WEB_HTTP_STS_PORT at all, and the credentials context
-# has no port of its own here. If cfm.credentialservice activities stall, that
-# is where to look first, not at this script.
+# STS (7084), DID (7083) and the credentials API (7085; on compose it is 7082,
+# which Azure gives the identity API) exist only since ADR-055 moved
+# IdentityHub to the 0.18 build: the April build here served none of them,
+# and nothing answered on 7084 or 7082/api/credentials (probe of 2026-09-29).
+# migrate-edc-to-v018.sh sets those ports and maps them on the ingress.
 # ── ACA internal addressing, learned the hard way ───────────────────────────
 # An app is reachable inside the environment on **port 80** unless the port is
 # declared in ingress.additionalPortMappings. An explicit port that is not an
@@ -345,7 +345,7 @@ keycloak.clientSecret: ${PROV_SECRET}
 keycloak.tokenUrl: ${KC_TOKEN_URL}
 identityhub.url: http://${IDENTITYHUB_APP}:7082/api/identity
 identityhub.sts.url: http://${IDENTITYHUB_APP}:7084/api/sts/token
-identityhub.cs.url: http://${IDENTITYHUB_APP}:7082/api/credentials/v1/participants/%s
+identityhub.cs.url: http://${IDENTITYHUB_APP}:7085/api/credentials/v1/participants/%s
 controlplane.url: http://${CFM_CP_SHIM_APP}/api/mgmt
 controlplane.protocol.url: http://${CONTROLPLANE_APP}:8082/api/dsp/%s/2025-1"
 

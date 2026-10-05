@@ -29,25 +29,80 @@ import {
 } from "lucide-react";
 
 const LIVE_URL = "https://ma3u.github.io/MinimumViableHealthDataspacev2";
-const AZURE_URL = "https://ehds.mabu.red";
 
 const FULL_JOURNEY_URL =
   "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md";
 
 import MermaidDiagram from "@/components/MermaidDiagram";
+import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
+import { visibleNavGroups } from "@/components/Navigation";
+
+/** The demo personas' realm roles (jad/keycloak-realm.json). */
+const MATRIX_PERSONAS = [
+  {
+    label: "Patient",
+    roles: ["PATIENT"],
+    className: "text-teal-700 dark:text-teal-400",
+  },
+  {
+    label: "Data Holder",
+    roles: ["EDC_USER_PARTICIPANT", "DATA_HOLDER"],
+    className: "text-(--accent)",
+  },
+  {
+    label: "Researcher",
+    roles: ["EDC_USER_PARTICIPANT", "DATA_USER"],
+    className: "text-(--success-text)",
+  },
+  {
+    label: "HDAB",
+    roles: ["HDAB_AUTHORITY"],
+    className: "text-amber-700 dark:text-amber-400",
+  },
+  {
+    label: "EDC Admin",
+    roles: ["EDC_ADMIN"],
+    className: "text-(--danger-text)",
+  },
+];
+
+/** Every page in any persona's menu (the docs group aside), with who sees it. */
+const MENU_MATRIX = (() => {
+  const menus = MATRIX_PERSONAS.map(
+    (p) =>
+      new Set(
+        visibleNavGroups(p.roles, true).flatMap((g) =>
+          g.links.map((l) => l.href),
+        ),
+      ),
+  );
+  const rows = new Map<string, string>();
+  for (const p of MATRIX_PERSONAS) {
+    for (const g of visibleNavGroups(p.roles, true)) {
+      if (g.label === "Docs") continue;
+      for (const l of g.links) if (!rows.has(l.href)) rows.set(l.href, l.label);
+    }
+  }
+  return [...rows].map(([href, label]) => ({
+    href,
+    label,
+    seenBy: menus.map((m) => m.has(href)),
+  }));
+})();
 
 const userWorkflowDiagram = `graph LR
-  A[Login via<br/>Keycloak SSO] --> B{Choose Task}
-  B --> C[Explore<br/>Knowledge Graph]
+  A[Sign in<br/>Keycloak or EUDI Wallet] --> O[Persona overview<br/>one view per role]
+  O --> B{Choose task}
   B --> D[Browse<br/>Dataset Catalog]
   B --> E[Review<br/>Patient Journey]
   B --> F[Run<br/>Analytics]
-  B --> G[Check<br/>Compliance]
-  C --> H[Visualise 5-layer<br/>graph relationships]
+  B --> G[Govern<br/>permits and supervision]
+  B --> C[Explore<br/>Knowledge Graph]
   D --> I[Search HealthDCAT-AP<br/>metadata]
   E --> J[View FHIR→OMOP<br/>timeline]
   F --> K[Cohort analytics<br/>dashboards]
-  G --> L[EHDS Art. 45-52<br/>approval chain]`;
+  G --> L[EHDS Art. 57-69<br/>application to permit]
+  C --> H[Visualise the 5-layer<br/>graph]`;
 
 const complianceDiagram = `sequenceDiagram
   participant USER as Research User
@@ -130,6 +185,7 @@ const TOC_SECTIONS = [
   { id: "purpose", label: "Purpose" },
   { id: "personas", label: "Personas & Roles" },
   { id: "getting-started", label: "Getting Started" },
+  { id: "availability", label: "When Is the Live Demo Available?" },
   { id: "explore", label: "Explore" },
   { id: "governance", label: "Governance" },
   { id: "data-exchange", label: "Data Exchange" },
@@ -147,6 +203,7 @@ export default function UserGuidePage() {
         <ArrowLeft size={14} /> Back to Docs
       </Link>
       <h1 className="text-3xl font-bold mb-2">User Guide</h1>
+      <DocsLastUpdated page="/docs/user-guide" />
       <p className="text-(--text-secondary) mb-4">
         A practical guide for business users, researchers, and data stewards
         working with the Health Dataspace platform. Each section links directly
@@ -220,17 +277,13 @@ export default function UserGuidePage() {
               >
                 GitHub Pages demo
               </a>{" "}
-              runs as a static export with mock data. The{" "}
-              <a
-                href={AZURE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
-              >
-                Azure EHDS Portal
-              </a>{" "}
-              runs the full stack with live services (reset nightly). The
-              following features require the full stack:
+              runs as a static export with mock data. The Azure EHDS Portal at{" "}
+              <code>ehds.mabu.red</code> runs the full stack with live services,
+              on weekdays in office hours (see{" "}
+              <a href="#availability" className="underline">
+                When Is the Live Demo Available?
+              </a>
+              ). The following features require the full stack:
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
               <li>
@@ -542,133 +595,29 @@ export default function UserGuidePage() {
           <div className="overflow-x-auto">
             <table className="text-xs w-full border-collapse">
               <thead>
-                <tr className="border-b border-(--border) text-(--text-secondary)">
-                  <th className="text-left py-1.5 pr-2">Route</th>
-                  <th className="text-center py-1.5 px-2">Public</th>
-                  <th className="text-center py-1.5 px-2">
-                    <span className="text-(--accent)">Data Holder</span>
-                  </th>
-                  <th className="text-center py-1.5 px-2">
-                    <span className="text-(--success-text)">Researcher</span>
-                  </th>
-                  <th className="text-center py-1.5 px-2">
-                    <span className="text-amber-700 dark:text-amber-400">
-                      HDAB
-                    </span>
-                  </th>
-                  <th className="text-center py-1.5 px-2">
-                    <span className="text-(--danger-text)">EDC Admin</span>
-                  </th>
+                <tr className="border-b border-(--border)">
+                  <th className="text-left py-1.5 pr-2">Page</th>
+                  {MATRIX_PERSONAS.map((p) => (
+                    <th key={p.label} className="text-center py-1.5 px-2">
+                      <span className={p.className}>{p.label}</span>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {[
-                  ["/graph", "\u2705", "\u2705", "\u2705", "\u2705", "\u2705"],
-                  [
-                    "/catalog",
-                    "\u2705",
-                    "\u2705",
-                    "\u2705",
-                    "\u2705",
-                    "\u2705",
-                  ],
-                  [
-                    "/catalog/editor",
-                    "\u2014",
-                    "\u2705",
-                    "\u2014",
-                    "\u2014",
-                    "\u2705",
-                  ],
-                  [
-                    "/patient",
-                    "\u2705",
-                    "\u2705",
-                    "\u2705",
-                    "\u2705",
-                    "\u2705",
-                  ],
-                  [
-                    "/analytics",
-                    "\u2014",
-                    "\u2014",
-                    "\u2705",
-                    "\u2705",
-                    "\u2705",
-                  ],
-                  [
-                    "/query (NLQ)",
-                    "\u2014",
-                    "\u2014",
-                    "\u2705",
-                    "\u2705",
-                    "\u2705",
-                  ],
-                  ["/eehrxf", "\u2705", "\u2705", "\u2705", "\u2705", "\u2705"],
-                  [
-                    "/compliance",
-                    "\u2014",
-                    "\u2014",
-                    "\u2014",
-                    "\u2705",
-                    "\u2705",
-                  ],
-                  [
-                    "/data/share",
-                    "\u2014",
-                    "\u2705",
-                    "\u2014",
-                    "\u2014",
-                    "\u2705",
-                  ],
-                  [
-                    "/data/discover",
-                    "\u2014",
-                    "\u2014",
-                    "\u2705",
-                    "\u2705",
-                    "\u2705",
-                  ],
-                  [
-                    "/negotiate",
-                    "\u2014",
-                    "\u2705",
-                    "\u2705",
-                    "\u2014",
-                    "\u2705",
-                  ],
-                  [
-                    "/admin + /admin/*",
-                    "\u2014",
-                    "\u2014",
-                    "\u2014",
-                    "\u2014",
-                    "\u2705",
-                  ],
-                  [
-                    "/admin/policies + audit",
-                    "\u2014",
-                    "\u2014",
-                    "\u2014",
-                    "\u2705",
-                    "\u2705",
-                  ],
-                  ["/docs", "\u2705", "\u2705", "\u2705", "\u2705", "\u2705"],
-                ].map(([route, pub, dh, re, hdab, admin]) => (
-                  <tr key={route} className="border-b border-(--border)/50">
-                    <td className="py-1 pr-2 font-mono text-(--text-primary)">
-                      {route}
+                {MENU_MATRIX.map(({ href, label, seenBy }) => (
+                  <tr key={href} className="border-b border-(--border)/50">
+                    <td className="py-1.5 pr-2">
+                      <span className="text-(--text-primary)">{label}</span>{" "}
+                      <code className="text-(--text-secondary)">{href}</code>
                     </td>
-                    {[pub, dh, re, hdab, admin].map((v, i) => (
+                    {seenBy.map((seen, i) => (
                       <td
-                        key={i}
-                        className={`py-1 px-2 text-center ${
-                          v === "\u2705"
-                            ? "text-(--success-text)"
-                            : "text-(--text-secondary)"
-                        }`}
+                        key={MATRIX_PERSONAS[i].label}
+                        className="text-center py-1.5 px-2"
+                        aria-label={seen ? "in the menu" : "not in the menu"}
                       >
-                        {v}
+                        {seen ? "\u2705" : "\u2014"}
                       </td>
                     ))}
                   </tr>
@@ -676,6 +625,12 @@ export default function UserGuidePage() {
               </tbody>
             </table>
           </div>
+          <p className="text-(--text-secondary) text-xs mt-3">
+            Generated from the navigation itself, so it shows exactly what each
+            persona&apos;s menu holds. Every page except the start page and this
+            documentation needs a sign-in (ADR-044); a page missing from a menu
+            is not necessarily forbidden, the middleware decides that.
+          </p>
         </div>
 
         {/* Persona graph views */}
@@ -837,6 +792,78 @@ export default function UserGuidePage() {
         </div>
       </section>
 
+      {/* ── Availability (ADR-053) ── */}
+      <section className="mb-12" id="availability">
+        <h2 className="text-2xl font-semibold mb-3">
+          When Is the Live Demo Available?
+        </h2>
+        <p className="text-(--text-secondary) text-sm mb-4">
+          The demo exists twice. The live dataspace runs the real connectors,
+          identity services and databases, and to save running costs it is
+          stopped outside office hours. The static demo is a copy of the same
+          pages with synthetic data, and it is always available.
+        </p>
+        <div className="overflow-x-auto mb-4">
+          <table className="w-full text-sm border border-(--border) rounded-lg">
+            <thead>
+              <tr className="bg-(--surface-2) text-left">
+                <th className="px-3 py-2 font-semibold"></th>
+                <th className="px-3 py-2 font-semibold">Live demo</th>
+                <th className="px-3 py-2 font-semibold">Static demo</th>
+              </tr>
+            </thead>
+            <tbody className="text-(--text-secondary)">
+              <tr className="border-t border-(--border)">
+                <td className="px-3 py-2 font-medium">Address</td>
+                <td className="px-3 py-2">
+                  <code>ehds.mabu.red</code>
+                </td>
+                <td className="px-3 py-2">
+                  <a
+                    href={LIVE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-indigo-700 dark:text-indigo-400 underline"
+                  >
+                    GitHub Pages
+                  </a>
+                </td>
+              </tr>
+              <tr className="border-t border-(--border)">
+                <td className="px-3 py-2 font-medium">Available</td>
+                <td className="px-3 py-2">
+                  Monday to Friday, 07:00 to 20:00 Berlin time in summer and
+                  06:00 to 19:00 in winter. Closed on Berlin public holidays.
+                </td>
+                <td className="px-3 py-2">Always</td>
+              </tr>
+              <tr className="border-t border-(--border)">
+                <td className="px-3 py-2 font-medium">Sign-in</td>
+                <td className="px-3 py-2">Keycloak accounts per persona</td>
+                <td className="px-3 py-2">A persona picker, no password</td>
+              </tr>
+              <tr className="border-t border-(--border)">
+                <td className="px-3 py-2 font-medium">Data</td>
+                <td className="px-3 py-2">
+                  The live knowledge graph; negotiations and transfers really
+                  run
+                </td>
+                <td className="px-3 py-2">
+                  A fixed snapshot; actions are shown but not carried out
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="text-(--text-secondary) text-sm">
+          If you open the live demo outside these hours, every page shows a
+          notice saying when it is back, with a button that opens the same page
+          in the static demo. The Klarbefund app cannot connect to EHDS or use
+          its cloud analysis during these times either. Analysis on the phone
+          keeps working.
+        </p>
+      </section>
+
       {/* ── 3. Explore ── */}
       <section className="mb-12" id="explore">
         <h2 className="text-2xl font-semibold mb-4">Explore</h2>
@@ -982,6 +1009,77 @@ export default function UserGuidePage() {
         </div>
       </section>
 
+      {/* ── My Health: the patient's pages ── */}
+      <section className="mb-12" id="my-health">
+        <h2 className="text-2xl font-semibold mb-3">My Health</h2>
+        <p className="text-(--text-secondary) text-sm mb-4">
+          A signed-in patient gets their own menu: one overview, their records,
+          and the pages below. Each shows that patient&apos;s own record only;
+          any other patient&apos;s record is refused (EHDS Art. 3, GDPR Art.
+          15).
+        </p>
+        <div className="space-y-6">
+          <FeatureCard
+            href="/patient/query"
+            title="Personal Research"
+            icon={Search}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              A natural-language question over the patient&apos;s own record
+              (EHDS Art. 3, GDPR Art. 15): trends from fitness, lab and
+              nutrition data, together with the relevant ePA events, computed
+              only from that patient&apos;s data.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: A patient asks how their cholesterol has changed since
+              their last check-up.
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/patient/profile"
+            title="Health Profile &amp; Risks"
+            icon={Users}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              The patient&apos;s health profile and risk assessment, derived
+              from their own record.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: A patient reviews the risk factors the profile derives
+              from their last lab results.
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/patient/research"
+            title="Research Programs"
+            icon={TestTube}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              Research programmes the patient can join or leave, and the history
+              of every consent given or withdrawn.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: A patient withdraws consent from a study and sees the
+              withdrawal recorded in the consent history.
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/patient/insights"
+            title="Research Insights"
+            icon={Award}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              What research using the patient&apos;s data found, and the
+              recommendations that follow for them.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: A patient reads an insight from a diabetes study they
+              contributed to.
+            </p>
+          </FeatureCard>
+        </div>
+      </section>
+
       {/* ── 4. Governance ── */}
       <section className="mb-12" id="governance">
         <h2 className="text-2xl font-semibold mb-3">Governance</h2>
@@ -1033,9 +1131,10 @@ export default function UserGuidePage() {
               within the EHDS ecosystem.
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: The operator runs the TCK suite and confirms 20/20 tests
-              passing — verifying DSP-compliant catalog, negotiation, and
-              transfer process implementations.
+              Example: The operator runs the TCK suite and compares the result
+              with the floor recorded in{" "}
+              <code>scripts/compliance-baseline.json</code>; a drop below it
+              fails the compliance workflow.
             </p>
           </FeatureCard>
 
@@ -1056,6 +1155,97 @@ export default function UserGuidePage() {
               (AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg
               Medical Centre, Institut de Recherche Sant&eacute;) each hold 2
               active credentials.
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/applications"
+            title="Apply for a Permit"
+            icon={FileCheck}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              A data user applies for a data permit with the eleven items of
+              Regulation (EU) 2025/327 Art. 67(2), then follows what becomes of
+              it: the access body&apos;s clock (Art. 68(4)), a notice that items
+              are missing, the permit or the refusal, and the results the user
+              communicates afterwards (Art. 61(4)).
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: PharmaCo Research AG applies for the Type 2 Diabetes
+              Cohort and sees the access body&apos;s decision deadline count
+              down.
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/requests"
+            title="Statistical Requests"
+            icon={BarChart3}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              A health data request under Art. 69: the data user asks a question
+              and, if the access body approves, receives an anonymised statistic
+              and nothing else. The access body decides on the same page.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: A researcher asks how many patients in the cohort have
+              HbA1c above 7 % and receives a single count.
+            </p>
+          </FeatureCard>
+          <FeatureCard href="/supervision" title="Supervision" icon={Shield}>
+            <p className="text-(--text-secondary) text-sm mb-2">
+              Art. 63: the access body records a finding of non-compliance
+              against a data user or holder, the party states its views within
+              four weeks, the body takes a measure and publishes it; the body
+              can also ask a party for information, answered on record.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: MedReg DE records a finding against a data user and the
+              user responds within the four-week window.
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/permits"
+            title="Permits Register"
+            icon={ClipboardList}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              The access body&apos;s register of applications received and
+              permits granted, refused or revoked (Art. 57). Any signed-in
+              participant can read it.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: A data holder checks which permits currently cover its
+              datasets.
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/activity-report"
+            title="Activity Report"
+            icon={BarChart3}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              The access body&apos;s activity report under Art. 59(1)(a) to (k),
+              generated from the graph for a chosen period, with a Markdown
+              export.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: MedReg DE generates the report for the last 24 months
+              before publishing it.
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/information"
+            title="Secondary Use Information"
+            icon={BookOpen}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              What the access body tells the public about secondary use (Art.
+              58(1)): the legal basis, the safeguards, people&apos;s rights and
+              how to exercise them, who has access to which datasets and why,
+              and the results of the projects.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: A patient reads which research projects use data from
+              AlphaKlinik Berlin and how to opt out.
             </p>
           </FeatureCard>
         </div>
@@ -1215,13 +1405,55 @@ export default function UserGuidePage() {
             <p className="text-(--text-secondary) text-sm mb-2">
               Inspect the runtime status of Eclipse Dataspace Connector
               components — Control Plane, Data Plane, Identity Hub, Issuer
-              Service, and Credential Federated Manager. View health checks,
+              Service, and the Connector Fabric Manager. View health checks,
               versions, and configuration details.
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: The operator checks that the Control Plane (port 19193),
-              Data Plane (port 19195), and Identity Hub (port 17171) are all
-              reporting healthy status for AlphaKlinik Berlin&apos;s connector.
+              Example: The operator checks that the Control Plane (port 11003),
+              the FHIR Data Plane (port 11002) and the Identity Hub (port 11005)
+              all report healthy on the local stack.
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/admin/tenants"
+            title="Tenant Management"
+            icon={Users}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              The participants&apos; tenants in the Connector Fabric Manager:
+              their virtual participant agents and provisioning state.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: The operator checks that a newly onboarded clinic&apos;s
+              tenant finished provisioning.
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/admin/participants"
+            title="Participant Directory"
+            icon={UserPlus}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              Every participant in the dataspace with its DID and credentials;
+              the operator can add or remove one.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: The operator adds Limburg Medical Centre and confirms its
+              DID resolves.
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/admin/audit"
+            title="Audit &amp; Provenance"
+            icon={FileCheck}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              The audit log and provenance trail, with the retention settings.
+              Shared with the access body, which uses it for supervision.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: MedReg DE traces which queries touched a dataset in the
+              last month.
             </p>
           </FeatureCard>
         </div>

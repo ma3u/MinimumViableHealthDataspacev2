@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # Phase 4: EDC-V core services — controlplane, dataplanes, identity hub, issuer.
+#
+# ADR-055: the EDC apps run the 0.18 build compose and CI run. This script
+# still creates them with the base settings only; the 0.18 settings, ports and
+# databases are applied by migrate-edc-to-v018.sh, after
+# create-edc-v018-databases.sh (runbook: docs/knowledge/runbooks/edc-v018-on-azure.md).
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/env.sh"
@@ -120,6 +125,8 @@ rm -f "$NATS_YAML"
 ok "NATS (JetStream enabled)"
 
 # ── Data Plane FHIR ─────────────────────────────────────────────────────────
+# Web ports, ingress ports and the selector settings come from
+# configure-data-planes.sh after both creates (#421).
 log "Creating Data Plane FHIR container app..."
 az containerapp create \
   --name "$DP_FHIR_APP" --resource-group "$RG" --environment "$ACA_ENV" \
@@ -129,7 +136,7 @@ az containerapp create \
   --registry-password "$ACR_PASSWORD" \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
-  --ingress internal --target-port 11002 \
+  --ingress internal --target-port 8080 \
   --secrets "pg-flex-password=${EDC_DB_PW}" \
   --env-vars \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane?sslmode=${PG_SSLMODE}" \
@@ -140,11 +147,6 @@ az containerapp create \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
-    "WEB_HTTP_PORT=11002" \
-    "WEB_HTTP_PUBLIC_PORT=11002" \
-    "WEB_HTTP_PUBLIC_PATH=/api/public" \
-    "WEB_HTTP_CONTROL_PORT=11002" \
-    "WEB_HTTP_CONTROL_PATH=/api/control" \
   -o none
 ok "Data Plane FHIR"
 
@@ -158,7 +160,7 @@ az containerapp create \
   --registry-password "$ACR_PASSWORD" \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
-  --ingress internal --target-port 11012 \
+  --ingress internal --target-port 8080 \
   --secrets "pg-flex-password=${EDC_DB_PW}" \
   --env-vars \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane_omop?sslmode=${PG_SSLMODE}" \
@@ -169,13 +171,13 @@ az containerapp create \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
-    "WEB_HTTP_PORT=11012" \
-    "WEB_HTTP_PUBLIC_PORT=11012" \
-    "WEB_HTTP_PUBLIC_PATH=/api/public" \
-    "WEB_HTTP_CONTROL_PORT=11012" \
-    "WEB_HTTP_CONTROL_PATH=/api/control" \
   -o none
 ok "Data Plane OMOP"
+
+# Ports, extra ingress ports and registration with the control plane, the same
+# script that repaired the live apps (#421): distinct ports per web context,
+# which the two creates above do not set.
+"${SCRIPT_DIR}/configure-data-planes.sh" apply
 
 # ── Identity Hub ─────────────────────────────────────────────────────────────
 log "Creating Identity Hub container app..."

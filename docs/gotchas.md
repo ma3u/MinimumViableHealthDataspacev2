@@ -3,6 +3,109 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-04: the Klarbefund QR pairing lived in one replica of three
+
+"Connect to EHDS" (#473, ADR-049) kept each QR pairing in a `Map` on
+`globalThis`, on the premise that the UI runs one replica, as the EUDI
+sign-in assumes (ADR-028). On Azure `mvhd-ui` scales from one to three, and
+three were running. A pairing touches three requests: the patient screen
+starts it, the phone registers under it, the screen polls it. Each reached
+whichever replica the ingress chose, so the phone's registration answered
+403 "scan a new QR code" two times in three, and the screen never saw
+"Connected". The compose stack has one UI, so every local check passed.
+`scripts/check-klarbefund-connect.sh` against ehds.mabu.red found it: steps 1
+to 4 passed by luck, then the status poll reached another replica and read
+nothing.
+
+Pairings are now `(:AppPairing)` nodes in Neo4j, with the id, the login, the
+expiry and the phone, never the device code. Any state that one request
+writes and another reads belongs in Neo4j or Postgres, not in the process.
+`ui/src/lib/eudi-store.ts` still keeps its transactions in memory and has the
+same fault on Azure.
+
+## 2026-10-04: a stopped Container App answers 404, and the Keycloak check read it as a missing realm
+
+Every Azure deploy on Sunday 2026-10-04 failed in "Auth is actually working"
+with `FAIL: realm 'edcv' does not exist. Import it`. The realm was intact.
+Since ADR-053 Keycloak stops off hours, and a stopped Container App answers
+every path with 404 and Azure's own page, titled `Azure Container App -
+Unavailable`. `check-keycloak-health.sh` mapped any 404 on the authorize
+endpoint to "realm missing", the one answer that sends you to
+`restore-keycloak-realm.sh`.
+
+The check now exits 4 when the 404 is that page. The deploy step passes on 4
+only when the UI answers the offline notice (503 with `staticSite`, as Demo
+Smoke reads it) and then skips the Azure E2E job; `restore-keycloak-realm.sh`
+stops on 4 instead of importing; the start in `aca-schedule.yml` stays red on
+4, because right after a start a stopped Keycloak is a failure.
+
+Rule: on Azure, a 404 is not an answer from your app until the body says so.
+
+## 2026-10-04: the deploy smoke tests signed in on the wrong host, and continue-on-error hid it
+
+The deploy workflow's live smoke
+tests ran against the raw ACA host (`mvhd-ui.<hash>.azurecontainerapps.io`)
+while `NEXTAUTH_URL` is `https://ehds.mabu.red`. A sign-in started on one host
+sets its state cookie there and gets its callback on the other, so every
+sign-in ended in `OAuthCallbackError: State cookie was missing`, about 115
+stack traces per deploy, the largest source of billed UI log lines. The step
+is `continue-on-error`, so 39 failed tests in a run read as green.
+`reset-demo.yml` had fixed exactly this before; `deploy-azure.yml` now uses
+the same custom-domain lookup.
+
+## 2026-10-04: an old Neo4j revision held the lock, and the one with the traffic could not start
+
+On a Sunday the graph was down while `az containerapp list` showed Neo4j
+`Running`. Two revisions were active: `mvhd-neo4j--0000181` with 100 % of the
+traffic, crash-looping (104 restarts), and `--0000179`, Healthy, with none.
+`0000181` logged `FileLockException: Lock file has been locked by another
+process: /data/databases/store_lock`. Both mount the same `neo4j-data` share,
+and the old one had it.
+
+How it happens: in single-revision mode a new revision replaces the old one
+only once the new one is healthy. A replica-count change makes a new revision
+(the Saturday-night manual start did), the new one cannot take the lock, so it
+never becomes healthy, so the old one is never retired. Nothing resolves it.
+The same rule kept two April data-plane revisions (`ActivationFailed`, two
+replicas each) and an idle `mvhd-postgres--0000148` running for months.
+
+Look at revisions, not the app: `az containerapp revision list -n <app> -g
+rg-mvhd-dev --query "[?properties.active]"`. A revision that is active, not
+the latest and has no traffic serves nothing; `scripts/azure/retire-stale-revisions.sh`
+deactivates those (`--dry-run` first), and the start job of
+`aca-schedule.yml` runs it before any app starts, because a stop and start
+(ADR-053) keep every active revision.
+
+## 2026-10-03: a Vault role write keeps the fields it does not send
+
+Onboarding on Azure stopped at "Participant Context" with the whole stack up.
+The EDC-V agent logged `POST .../api/identity/v1alpha/participants giving up
+after 6 attempt(s)`; the cause was one level down, in IdentityHub:
+`Failed to obtain vault token ... invalid audience (aud) claim: audience claim
+does not match any expected audience`.
+
+That message means the role **has** `bound_audiences` and none match. The
+bootstrap did not set any. The first Azure bootstrap (177b773) did:
+`bound_audiences ["account"]`, `user_claim sub`, `claim_mappings`. A `POST` (or
+`vault write`) to an existing role updates only the fields in the body, so
+every later rewrite, #468's included, left those three in place, and once
+Vault became persistent (ADR-046) they stayed for good. Reproduced on
+`hashicorp/vault:2.0`.
+
+Replace a role, never update it: `DELETE` then `POST`, and read it back. The
+bootstrap in `scripts/azure/06-post-deploy.sh` does that for both JWT roles
+now. The same holds for anything else in Vault written as a partial update.
+
+Two more things hid it. Outside the operating window (ADR-042) the Tenant
+Manager is at zero, so `/api/participants` could not reach it and recorded a
+demo participant saying the deployment "does not run the CFM provisioning
+stack"; it now answers 503 and says when the stack runs. And `/onboarding`
+called a tenant Active as soon as its profile had an identifier, which the
+route has sent with every profile since #468, so a registration the agents
+had rolled back (`error: true`, every activity `disposed`) showed as Active.
+The page now reads the outcome off the Tenant Manager: every activity
+`active` is Active, `error: true` is "Provisioning failed".
+
 ## 2026-10-03: the Azure Vault was emptied every evening, and `min=0` alone would do it too
 
 Found on #455: the CFM Keycloak and EDC-V agents had never started on Azure.

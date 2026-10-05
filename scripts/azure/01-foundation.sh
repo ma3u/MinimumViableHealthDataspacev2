@@ -53,7 +53,6 @@ create_share() {
 create_share "$SHARE_NEO4J_DATA" "$QUOTA_NEO4J_DATA"
 create_share "$SHARE_NEO4J_LOGS" "$QUOTA_NEO4J_LOGS"
 create_share "$SHARE_VAULT_DATA" "$QUOTA_VAULT_DATA"
-create_share "$SHARE_PG_DATA"    "$QUOTA_PG_DATA"
 
 # ── ACA environment (no Log Analytics — Workaround B) ──────────────────────
 log "Creating ACA environment ${ACA_ENV} (logs-destination=none)..."
@@ -81,7 +80,8 @@ attach_share() {
 attach_share "neo4j-data" "$SHARE_NEO4J_DATA"
 attach_share "neo4j-logs" "$SHARE_NEO4J_LOGS"
 attach_share "vault-data" "$SHARE_VAULT_DATA"
-attach_share "pg-data"    "$SHARE_PG_DATA"
+# No pg-data share: Postgres is the Flexible Server (ADR-041), and the
+# share was only ever for the mvhd-postgres container, retired 2026-10-04.
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 ACA_DOMAIN=$(az containerapp env show --name "$ACA_ENV" --resource-group "$RG" \

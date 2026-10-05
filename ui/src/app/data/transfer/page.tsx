@@ -10,7 +10,6 @@ import {
   ChevronRight,
   Circle,
   Copy,
-  ExternalLink,
   FileJson2,
   Loader2,
   Play,
@@ -88,7 +87,7 @@ function displayParticipant(p: ParticipantCtx): string {
 
 /**
  * DSP Transfer Process state machine (Signalling Protocol).
- * @see https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol/transfer-process
+ * @see https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/#transfer-protocol
  *
  * Consumer states: REQUESTED → STARTED → SUSPENDED → COMPLETED | TERMINATED
  */
@@ -481,14 +480,6 @@ function FhirViewerPanel({
             className="flex items-center gap-1 text-[11px] text-(--accent) hover:underline transition-colors"
           >
             View in Graph <Network size={10} />
-          </a>
-          <a
-            href="https://fire.ly/fhir-tools/fhir-viewer/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 text-[11px] text-teal-800 dark:text-teal-300 hover:text-teal-800/80 dark:hover:text-teal-300/80 transition-colors"
-          >
-            Open FHIR Viewer <ExternalLink size={10} />
           </a>
           <button
             onClick={onClose}
@@ -923,7 +914,7 @@ function DataTransferContent() {
           nextStep={{ href: "/admin", label: "Operator Dashboard" }}
           infoText="The DSP Signalling Protocol defines the transfer state machine: REQUESTED → STARTED → COMPLETED (or TERMINATED on failure). Each transfer is secured by EDC-V access tokens issued during the STARTED phase."
           docLink={{
-            href: "https://docs.internationaldataspaces.org/ids-knowledgebase/dataspace-protocol/transfer-process",
+            href: "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/#transfer-protocol",
             label: "DSP Transfer Process Spec",
             external: true,
           }}

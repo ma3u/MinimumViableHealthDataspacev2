@@ -80,6 +80,10 @@ services:
       KEYCLOAK_INTERNAL_URL: http://keycloak:8080
       # neo4j-proxy TCK compliance endpoint (Docker-internal)
       NEO4J_PROXY_URL: http://neo4j-proxy:9090
+      # Where the connector reports every negotiation and transfer state for
+      # the audit trail (ADR-045, #418): the proxy as the controlplane reaches
+      # it on the health-dataspace-edcv network.
+      AUDIT_CALLBACK_URL: http://neo4j-proxy:9090/audit/dsp
     depends_on:
       - neo4j
     volumes:

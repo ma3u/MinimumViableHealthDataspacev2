@@ -1,6 +1,6 @@
 # ADR-047: Vault stays up off-hours until it keeps its own state
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-04, Matthias Buchhorn)
 **Date:** 2026-10-03
 **Relates to:** [ADR-017](ADR-017-persistent-storage-aca.md), [ADR-036](ADR-036-operator-secrets-in-key-vault.md), [ADR-041](ADR-041-managed-postgres-on-azure-containerised-locally.md)
 **Supersedes:** the `mvhd-vault` entry in the stop list of [ADR-042](ADR-042-off-hours-scaledown-current-state.md)

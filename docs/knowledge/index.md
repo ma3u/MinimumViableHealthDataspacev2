@@ -48,7 +48,10 @@ frontmatter. Spec:
 [eudi-wallet-backend-local](runbooks/eudi-wallet-backend-local.md) ·
 [eudi-wallet-ios-local](runbooks/eudi-wallet-ios-local.md) ·
 [cost-efficient-logging](runbooks/cost-efficient-logging.md) ·
-[klarbefund-connect](runbooks/klarbefund-connect.md)
+[klarbefund-connect](runbooks/klarbefund-connect.md) ·
+[live-demo-off-hours](runbooks/live-demo-off-hours.md) ·
+[query-audit-chain](runbooks/query-audit-chain.md) ·
+[edc-v018-on-azure](runbooks/edc-v018-on-azure.md)
 
 ## decisions/
 

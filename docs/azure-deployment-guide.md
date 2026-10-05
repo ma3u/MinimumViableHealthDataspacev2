@@ -97,13 +97,13 @@ cd MinimumViableHealthDataspacev2
 
 ### Resource inventory
 
-| Resource       | Type                    | Location     | SKU             |
-| -------------- | ----------------------- | ------------ | --------------- |
-| `rg-mvhd-dev`  | Resource Group          | West Europe  | —               |
-| `acrmvhddev`   | Container Registry      | West Europe  | Basic           |
-| `mvhd-env`     | ACA Environment         | West Europe  | Consumption     |
-| `pg-mvhd-dev`  | PostgreSQL Flex Server  | North Europe | B_Standard_B1ms |
-| `law-mvhd-dev` | Log Analytics Workspace | West Europe  | PerGB2018       |
+| Resource      | Type                    | Location     | SKU             |
+| ------------- | ----------------------- | ------------ | --------------- |
+| `rg-mvhd-dev` | Resource Group          | West Europe  | —               |
+| `acrmvhddev`  | Container Registry      | West Europe  | Basic           |
+| `mvhd-env`    | ACA Environment         | West Europe  | Consumption     |
+| `pg-mvhd-dev` | PostgreSQL Flex Server  | North Europe | B_Standard_B1ms |
+| `mvhd-logs`   | Log Analytics Workspace | West Europe  | PerGB2018       |
 
 ---
 
@@ -336,13 +336,13 @@ gh secret set AZURE_SUBSCRIPTION_ID -b "<SUB_ID>"
 
 ### Log Analytics
 
-- **Workspace:** `law-mvhd-dev` (ID: `924ee5c9-ecfa-4e9b-aef4-fc7d30972f91`)
+- **Workspace:** `mvhd-logs` (ID: `6c5814cc-e63f-4f4c-b996-83c6686b048e`)
 - **Retention:** 30 days
 - **Diagnostic settings:** `mvhd-diagnostics` — all ACA logs + metrics
 
 ### Saved KQL queries
 
-Access via: Azure Portal > Log Analytics > law-mvhd-dev > Saved Queries > "MVHD Monitoring"
+Access via: Azure Portal > Log Analytics > mvhd-logs > Saved Queries > "MVHD Monitoring"
 
 | Query         | Description                                       |
 | ------------- | ------------------------------------------------- |
@@ -432,7 +432,7 @@ az containerapp job logs show --name mvhd-neo4j-seed --resource-group rg-mvhd-de
   --execution <EXECUTION_NAME> --container mvhd-neo4j-seed
 
 # ACA environment logs (all services)
-az monitor log-analytics query --workspace law-mvhd-dev --analytics-query \
+az monitor log-analytics query --workspace mvhd-logs --analytics-query \
   "ContainerAppConsoleLogs_CL | where TimeGenerated > ago(1h) | take 50"
 ```
 

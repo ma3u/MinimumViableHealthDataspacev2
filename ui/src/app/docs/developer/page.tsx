@@ -3,6 +3,19 @@
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import MermaidDiagram from "@/components/MermaidDiagram";
+import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
+import {
+  API_GROUP_DESCRIPTIONS,
+  groupApiRoutes,
+} from "@/components/docs/api-groups";
+import facts from "@/app/docs/docs-facts.json";
+
+const implementedOperations = facts.apiRoutes.reduce(
+  (n, r) => n + r.methods.length,
+  0,
+);
+const COMPOSE_SERVICES = Object.values(facts.composeServices).flat().length;
+const PRE_COMMIT_HOOKS = facts.preCommitHooks.length;
 
 const PAGES_BASE = "/MinimumViableHealthDataspacev2";
 const GITHUB_REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
@@ -15,9 +28,9 @@ const jadArchitectureDiagram = `graph TB
   end
 
   subgraph "Infrastructure"
-    PG["PostgreSQL 17<br/>:5432 — 8 databases"]
+    PG["PostgreSQL 17<br/>:5432 — ${facts.postgresDbs.length} databases"]
     KC["Keycloak<br/>:8080 — OIDC SSO"]
-    VAULT["HashiCorp Vault<br/>:8200 — Secrets"]
+    VAULT["HashiCorp Vault<br/>:8200 — file storage"]
     NATS["NATS<br/>:4222 — Event Mesh"]
   end
 
@@ -57,49 +70,50 @@ const jadArchitectureDiagram = `graph TB
 
 const graphSchemaDiagram = `erDiagram
   Patient ||--o{ Encounter : HAS_ENCOUNTER
-  Encounter ||--o{ Condition : HAS_CONDITION
-  Encounter ||--o{ Observation : HAS_OBSERVATION
-  Patient ||--o{ MedicationRequest : HAS_MEDICATION
+  Patient ||--o{ Condition : HAS_CONDITION
+  Patient ||--o{ Observation : HAS_OBSERVATION
+  Patient ||--o{ MedicationRequest : HAS_MEDICATION_REQUEST
   Patient ||--o{ Procedure : HAS_PROCEDURE
-  Patient ||--|| Person : MAPS_TO
-  Encounter ||--|| VisitOccurrence : MAPS_TO
-  Condition ||--|| ConditionOccurrence : MAPS_TO
-  Observation ||--|| Measurement : MAPS_TO
-  MedicationRequest ||--|| DrugExposure : MAPS_TO
-  Procedure ||--|| ProcedureOccurrence : MAPS_TO
-  ConditionOccurrence }|--|| SnomedConcept : HAS_CONCEPT
-  Measurement }|--|| LoincConcept : HAS_CONCEPT
-  DrugExposure }|--|| RxNormConcept : HAS_CONCEPT`;
+  Patient }o--|| HealthDataset : FROM_DATASET
+  Patient ||--|| OMOPPerson : MAPPED_TO
+  Encounter ||--|| OMOPVisitOccurrence : MAPPED_TO
+  Condition ||--|| OMOPConditionOccurrence : MAPPED_TO
+  Observation ||--|| OMOPMeasurement : MAPPED_TO
+  MedicationRequest ||--|| OMOPDrugExposure : MAPPED_TO
+  Procedure ||--|| OMOPProcedureOccurrence : MAPPED_TO
+  Condition }|--|| SnomedConcept : CODED_BY
+  Condition }|--o| ICD10Code : CODED_BY
+  Observation }|--|| LoincCode : CODED_BY
+  MedicationRequest }|--|| RxNormConcept : CODED_BY
+  OMOPConditionOccurrence }|--|| SnomedConcept : CODED_BY
+  OMOPMeasurement }|--|| LoincCode : CODED_BY
+  OMOPDrugExposure }|--|| RxNormConcept : CODED_BY`;
 
 const cicdDiagram = `graph LR
-  subgraph "Developer Workflow"
+  subgraph "Developer workstation"
     DEV[Local Dev<br/>npm run dev]
-    TEST["Vitest<br/>1,613 tests"]
-    LINT[ESLint +<br/>15 pre-commit hooks]
+    HOOKS["pre-commit<br/>${PRE_COMMIT_HOOKS} hooks"]
+    PUSH["pre-push<br/>Vitest + npm audit"]
   end
 
-  subgraph "CI Pipeline — test.yml"
-    CI_UNIT["Unit Tests<br/>+ Coverage"]
-    CI_SEC["Security<br/>gitleaks + Trivy"]
-    CI_LINT[Lint + Audit]
-    CI_E2E["E2E + WCAG<br/>+ Pentest"]
-    CI_K8S["Kubescape<br/>K8s Posture"]
+  subgraph "Pull request"
+    GATE["PR Gate<br/>hooks on the diff, API spec drift,<br/>Bruno coverage, knip, gitleaks"]
+    TEST["test.yml<br/>unit tests, E2E,<br/>SBOM, Trivy, Kubescape"]
+    CQL["CodeQL<br/>Swift only when clients/ios changes"]
+    SEC["security-scan.yml<br/>source + image CVEs"]
+    COMP["compliance.yml<br/>DSP TCK, DCP, EHDS, Bruno"]
   end
 
-  subgraph "Compliance — compliance.yml"
-    DSP["DSP 2025-1<br/>TCK"]
-    DCP["DCP v1.0"]
-    EHDS["EHDS Domain"]
+  subgraph "main"
+    AZ["deploy-azure.yml<br/>ehds.mabu.red + Azure E2E"]
+    PAGES["pages.yml<br/>GitHub Pages static export"]
+    SMOKE["demo-smoke.yml<br/>Bruno + Playwright + ZAP"]
   end
 
-  subgraph "Deployment"
-    PAGES["GitHub Pages<br/>Static Export"]
-  end
-
-  DEV --> TEST --> LINT
-  LINT --> CI_UNIT & CI_SEC & CI_LINT & CI_E2E & CI_K8S
-  CI_UNIT & CI_SEC & CI_LINT --> PAGES
-  LINT -.-> DSP & DCP & EHDS`;
+  DEV --> HOOKS --> PUSH
+  PUSH --> GATE & TEST & CQL & SEC & COMP
+  GATE & TEST --> AZ & PAGES
+  AZ -.-> SMOKE`;
 
 const dataFlowDiagram = `sequenceDiagram
   participant SY as Synthea
@@ -109,7 +123,7 @@ const dataFlowDiagram = `sequenceDiagram
 
   SY->>NEO: load_fhir_neo4j.py<br/>(127 patients → FHIR R4)
   NEO->>NEO: fhir-to-omop-transform.cypher<br/>(FHIR → OMOP CDM)
-  NEO->>NEO: HAS_CONCEPT → SNOMED/LOINC/RxNorm
+  NEO->>NEO: CODED_BY → SNOMED / LOINC / RxNorm / ICD-10
   UI->>PROXY: /api/graph, /api/catalog, /nlq
   PROXY->>NEO: Parameterised Cypher
   NEO-->>PROXY: Graph data
@@ -145,6 +159,7 @@ export default function DeveloperGuidePage() {
         <ArrowLeft size={14} /> Back to Docs
       </Link>
       <h1 className="text-3xl font-bold mb-2">Developer Guide</h1>
+      <DocsLastUpdated page="/docs/developer" />
       <p className="text-(--text-secondary) mb-6">
         Technical documentation for developing, testing, and deploying the
         Health Dataspace v2 platform — an EHDS regulation reference
@@ -195,6 +210,7 @@ export default function DeveloperGuidePage() {
           <TocLink href="#testing">Testing</TocLink>
           <TocLink href="#quality-gates">Quality Gates</TocLink>
           <TocLink href="#cicd">CI/CD Pipeline</TocLink>
+          <TocLink href="#off-hours">Live Stack Off Hours</TocLink>
           <TocLink href="#reports">Latest Reports</TocLink>
           <TocLink href="#releases">Release Notes</TocLink>
           <TocLink href="#project-links">Planning & Issues</TocLink>
@@ -295,7 +311,7 @@ export default function DeveloperGuidePage() {
         </p>
         <MermaidDiagram
           chart={jadArchitectureDiagram}
-          caption="JAD stack — 19 services with dependency relationships"
+          caption={`JAD stack — ${COMPOSE_SERVICES} compose services and their dependencies`}
         />
 
         {/* Service table */}
@@ -333,14 +349,14 @@ export default function DeveloperGuidePage() {
                   "PostgreSQL 17",
                   ":5432",
                   "—",
-                  "Runtime store (8 databases)",
+                  `Runtime store (${facts.postgresDbs.length} databases)`,
                   "—",
                 ],
                 [
                   "Vault",
                   ":8200",
                   "vault.localhost",
-                  "Secret management (dev mode)",
+                  "Secrets, file storage; vault-unseal unseals it after a restart",
                   "—",
                 ],
                 [
@@ -542,7 +558,7 @@ cat neo4j/insert-synthetic-schema-data.cypher | \\
 npm install
 npm run dev          # → http://localhost:3000
 
-npm test             # Run 1,613 unit tests
+npm test             # Run the Vitest unit suite
 npm run lint         # ESLint (max 55 warnings)`}</pre>
           </div>
         </div>
@@ -554,9 +570,9 @@ npm run lint         # ESLint (max 55 warnings)`}</pre>
           Quick Start — Full JAD Stack
         </h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          The bootstrap script starts all 19 services with health checks,
-          initializes Vault secrets, imports the Keycloak realm, and runs the
-          7-phase seed pipeline.
+          The bootstrap script starts all {COMPOSE_SERVICES} services with
+          health checks, initializes Vault secrets, imports the Keycloak realm,
+          and runs the 7-phase seed pipeline.
         </p>
         <div className="space-y-4">
           <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
@@ -718,7 +734,7 @@ open http://traefik.localhost`}</pre>
           Project Structure
         </h2>
         <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
-          <pre className="text-xs text-(--text-primary) overflow-x-auto whitespace-pre">{`├── .github/workflows/         # CI/CD (test.yml, pages.yml, compliance.yml)
+          <pre className="text-xs text-(--text-primary) overflow-x-auto whitespace-pre">{`├── .github/workflows/         # CI/CD (pr-gate, test, compliance, security-scan, deploy-azure, pages, ...)
 ├── connector/                 # EDC-V connector (Gradle multi-module)
 │   ├── controlplane/          # DSP + Management API
 │   ├── dataplane/             # FHIR + OMOP data planes
@@ -736,15 +752,21 @@ open http://traefik.localhost`}</pre>
 │   └── fhir-to-omop-transform.cypher
 ├── scripts/                   # Automation (bootstrap, synthea, compliance)
 ├── services/neo4j-proxy/      # Express bridge (Neo4j ↔ UI)
-├── ui/                        # Next.js 14 application
-│   ├── src/app/               # 16 pages, 36 API routes
+├── ui/                        # Next.js ${
+            facts.toolVersions.next.split(".")[0]
+          } application
+│   ├── src/app/               # ${facts.uiPages.length} pages, ${
+            facts.apiRoutes.length
+          } API routes
 │   ├── src/components/        # Shared React components
 │   ├── src/lib/               # auth.ts, api.ts, graph-constants.ts
 │   ├── __tests__/unit/        # Vitest unit tests
 │   ├── __tests__/e2e/         # Playwright specs (journeys/)
 │   └── public/mock/           # 38 JSON fixtures for static export
 ├── docker-compose.yml         # Minimal stack (Neo4j + UI)
-└── docker-compose.jad.yml     # Full JAD stack (19 services)`}</pre>
+└── docker-compose.jad.yml     # Full JAD stack (${
+            facts.composeServices["docker-compose.jad.yml"].length
+          } services)`}</pre>
         </div>
       </section>
 
@@ -870,7 +892,7 @@ open http://traefik.localhost`}</pre>
                   "Contract negotiations, transfer processes, asset definitions, policy store",
                 ],
                 [
-                  "dataplane_fhir",
+                  "dataplane",
                   "DCore FHIR",
                   "FHIR data plane state, EDR tokens, transfer tracking",
                 ],
@@ -895,14 +917,19 @@ open http://traefik.localhost`}</pre>
                   "Users, roles, realm config, sessions, client scopes",
                 ],
                 [
-                  "cfm_tenant",
-                  "Tenant Manager",
-                  "Tenant records, VPA (Virtual Participant Agents)",
+                  "cfm",
+                  "Tenant Manager, Provision Manager, CFM agents",
+                  "Tenant records, VPAs (Virtual Participant Agents), provisioning tasks",
                 ],
                 [
-                  "cfm_provision",
-                  "Provision Manager",
-                  "Provisioning tasks, resource allocation records",
+                  "redlinedb",
+                  "—",
+                  "Created by jad/init-postgres.sql; no service in either compose stack uses it today",
+                ],
+                [
+                  "taskdb",
+                  "Neo4j proxy",
+                  "Persistent task list behind the proxy's /tasks endpoints (phase 13d)",
                 ],
               ].map(([db, service, contents]) => (
                 <tr key={db} className="border-t border-(--border)">
@@ -1054,9 +1081,9 @@ open http://traefik.localhost`}</pre>
               <li>
                 <strong>Policy</strong> →{" "}
                 <code className="bg-(--surface-2) px-1 py-0.5 rounded-sm">
-                  PUT /api/assets/:id
+                  POST /api/admin/policies
                 </code>{" "}
-                attaches an ODRL policy
+                creates an ODRL policy (EDC_ADMIN)
               </li>
               <li>
                 <strong>HDAB approval</strong> →{" "}
@@ -1094,8 +1121,12 @@ open http://traefik.localhost`}</pre>
           API Reference
         </h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          38 Next.js API routes proxy to Neo4j and EDC-V services. Routes are
-          disabled in static export — mock data served from{" "}
+          {facts.apiRoutes.length} Next.js API routes ({implementedOperations}{" "}
+          operations) proxy to Neo4j and the EDC-V services; the table is
+          generated from <code>ui/src/app/api/</code>. Every route needs a
+          session except the sign-in flows, the health probe and the TestFlight
+          form (ADR-044, ADR-048). Routes are disabled in the static export;
+          mock data is served from{" "}
           <code className="text-xs bg-(--surface-2) px-1 py-0.5 rounded-sm">
             ui/public/mock/*.json
           </code>
@@ -1135,70 +1166,38 @@ open http://traefik.localhost`}</pre>
             <thead className="bg-(--surface-2)">
               <tr>
                 <th className="px-3 py-2 text-left text-(--text-primary)">
-                  Route
+                  Area
                 </th>
                 <th className="px-3 py-2 text-left text-(--text-primary)">
-                  Methods
+                  Routes and methods
                 </th>
                 <th className="px-3 py-2 text-left text-(--text-primary)">
-                  Description
+                  What it is for
                 </th>
               </tr>
             </thead>
             <tbody className="text-(--text-secondary)">
-              {[
-                ["/api/graph", "GET", "Knowledge graph nodes & relationships"],
-                [
-                  "/api/graph/node, /expand, /validate",
-                  "GET/POST",
-                  "Node details, expansion, schema validation",
-                ],
-                [
-                  "/api/catalog",
-                  "GET/POST/DELETE",
-                  "HealthDCAT-AP dataset catalog",
-                ],
-                ["/api/analytics", "GET", "OMOP cohort analytics aggregates"],
-                [
-                  "/api/patient/*",
-                  "GET",
-                  "Patient profile, insights, research programmes",
-                ],
-                ["/api/eehrxf", "GET", "EEHRxF profile alignment data"],
-                [
-                  "/api/compliance, /tck",
-                  "GET",
-                  "EHDS compliance status, DSP TCK results",
-                ],
-                [
-                  "/api/credentials/*",
-                  "GET/POST",
-                  "Verifiable credential management",
-                ],
-                [
-                  "/api/negotiations/*",
-                  "GET/POST",
-                  "DSP contract negotiation lifecycle",
-                ],
-                [
-                  "/api/participants/*",
-                  "GET",
-                  "Participant registry and profiles",
-                ],
-                ["/api/transfers/*", "GET", "Data transfer history and status"],
-                ["/api/assets", "GET", "EDC-V asset registry"],
-                ["/api/tasks", "GET", "Transfer task queue"],
-                ["/api/nlq", "POST", "Natural language query (via proxy)"],
-                ["/api/federated", "POST", "Federated cross-participant query"],
-                ["/api/trust-center", "GET", "Trust center configuration"],
-                ["/api/health", "GET", "Health check endpoint (public)"],
-              ].map(([route, methods, desc]) => (
-                <tr key={route} className="border-t border-(--border)">
-                  <td className="px-3 py-1.5 font-mono text-(--text-primary)">
-                    {route}
+              {groupApiRoutes(facts.apiRoutes).map(([group, routes]) => (
+                <tr
+                  key={group}
+                  className="border-t border-(--border) align-top"
+                >
+                  <td className="px-3 py-2 font-mono text-(--text-primary) whitespace-nowrap">
+                    /api/{group}
                   </td>
-                  <td className="px-3 py-1.5 font-mono">{methods}</td>
-                  <td className="px-3 py-1.5">{desc}</td>
+                  <td className="px-3 py-2 font-mono">
+                    {routes.map((r) => (
+                      <div key={r.path}>
+                        {r.path.slice(`/api/${group}`.length) || "/"}{" "}
+                        <span className="text-(--text-secondary)">
+                          {r.methods.join(" ")}
+                        </span>
+                      </div>
+                    ))}
+                  </td>
+                  <td className="px-3 py-2">
+                    {API_GROUP_DESCRIPTIONS[group] ?? "—"}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -1216,13 +1215,16 @@ open http://traefik.localhost`}</pre>
             <h4 className="font-semibold text-sm mb-2">Unit Tests (Vitest)</h4>
             <ul className="text-(--text-secondary) text-xs space-y-1">
               <li>
-                <strong>1,613 tests</strong> across 80+ files
+                <strong>UI and Neo4j proxy</strong> suites, the UI&apos;s
+                mirroring <code>ui/src/</code> under{" "}
+                <code>ui/__tests__/unit/</code>
               </li>
+              <li>v8 coverage, published with the test report</li>
               <li>
-                <strong>93.8% statement</strong> / <strong>94.7% line</strong>{" "}
-                coverage
+                Testing Library for components; a test that needs the network
+                stubs <code>fetch</code> itself, and Neo4j is mocked at{" "}
+                <code>@/lib/neo4j</code> (MSW was removed in #404)
               </li>
-              <li>MSW for API mocking, Testing Library for components</li>
               <li>
                 <a
                   href={`https://ma3u.github.io${PAGES_BASE}/test-reports/`}
@@ -1244,7 +1246,8 @@ npm run test:coverage  # With v8 coverage`}</pre>
             </h4>
             <ul className="text-(--text-secondary) text-xs space-y-1">
               <li>
-                <strong>19 spec files</strong> (J001–J260 journeys)
+                <strong>Journey specs</strong> in{" "}
+                <code>ui/__tests__/e2e/journeys/</code> (IDs J001 onward)
               </li>
               <li>
                 WCAG 2.2 AA accessibility audit (
@@ -1360,22 +1363,18 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
         </h2>
         <MermaidDiagram
           chart={cicdDiagram}
-          caption="CI/CD workflow — test.yml (8 jobs), compliance.yml (3 suites), pages.yml (deploy)"
+          caption="CI/CD: the workstation hooks, the pull request checks, and what runs on main"
         />
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">
-              test.yml — Every Push
+              test.yml — {facts.workflowJobs["test.yml"].length} jobs on every
+              push
             </h4>
             <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
-              <li>UI Tests (Vitest) + coverage upload</li>
-              <li>Neo4j Proxy Tests (Vitest)</li>
-              <li>ESLint lint check</li>
-              <li>Secret scan (gitleaks v8.27.2, SHA-256 verified)</li>
-              <li>Dependency audit (npm audit --audit-level=high)</li>
-              <li>Trivy security scan (v0.69.3, CVE-2026-33634 safe)</li>
-              <li>Kubescape K8s posture (NSA + CIS frameworks)</li>
-              <li>E2E + WCAG 2.2 AA + Security pentest (main only)</li>
+              {facts.workflowJobs["test.yml"].map((job) => (
+                <li key={job}>{job}</li>
+              ))}
             </ul>
           </div>
           <div className="border border-(--border) rounded-lg p-4">
@@ -1383,6 +1382,9 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
               pages.yml — Deploy to GitHub Pages
             </h4>
             <ol className="text-(--text-secondary) text-xs space-y-1 list-decimal ml-4">
+              <li>
+                Seed Neo4j and refresh the mock fixtures from the live API
+              </li>
               <li>Run full Vitest suite with coverage</li>
               <li>Build Next.js for E2E, run Playwright</li>
               <li>Run WCAG 2.2 AA accessibility audit</li>
@@ -1406,9 +1408,11 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
               compliance.yml — Weekly + Push to Main
             </h4>
             <p className="text-(--text-secondary) text-xs">
-              Runs 3 protocol compliance suites against the full JAD stack: DSP
-              2025-1 TCK, DCP v1.0, and EHDS domain tests. Scheduled: Monday
-              06:00 UTC.
+              Runs on the full JAD stack:{" "}
+              {facts.workflowJobs["compliance.yml"].join(", ")}. Each suite is
+              held to the floor in <code>scripts/compliance-baseline.json</code>
+              . Scheduled Monday 06:00 UTC, and on pushes to main that touch the
+              scripts, seeds, API routes or the API collection.
             </p>
           </div>
           <div className="border border-(--border) rounded-lg p-4">
@@ -1416,20 +1420,93 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
               deploy-azure.yml — Azure Deployment
             </h4>
             <p className="text-(--text-secondary) text-xs">
-              Deploys 13 Container Apps + 3 jobs to Azure via OIDC federation.
-              Includes E2E smoke tests against the live Azure environment.
+              Deploys the 21 Container Apps and their jobs to Azure via OIDC
+              federation. Includes E2E smoke tests against the live Azure
+              environment.
             </p>
           </div>
           <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">
-              reset-demo.yml — Nightly Reset
+              reset-demo.yml — Demo Reset (manual)
             </h4>
             <p className="text-(--text-secondary) text-xs">
-              Scheduled at 02:00 UTC daily. Restarts stateful services,
-              re-bootstraps Vault/Keycloak, reseeds data, and runs smoke tests.
-              Ensures GDPR data minimisation.
+              Restarts stateful services, re-bootstraps Vault and Keycloak,
+              reseeds data and runs smoke tests. Manual dispatch only since
+              2026-09-13: the Keycloak realm now holds the Klarbefund client and
+              real accounts, which a scheduled reset would delete.
             </p>
           </div>
+          <div className="border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2">
+              aca-schedule.yml — Off-Hours Stop and Start
+            </h4>
+            <p className="text-(--text-secondary) text-xs">
+              Stops every Container App except the UI, then the PostgreSQL
+              Flexible Server, daily at 18:00 UTC; starts them in dependency
+              order Monday to Friday at 05:00 UTC, skipping Berlin public
+              holidays (ADR-053). See{" "}
+              <a href="#off-hours" className="underline">
+                Live Stack Off Hours
+              </a>
+              .
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Live stack off hours (ADR-053) */}
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold mb-3" id="off-hours">
+          Live Stack Off Hours
+        </h2>
+        <p className="text-(--text-secondary) text-sm mb-4">
+          Outside office hours the Azure stack is stopped, database included,
+          and <code>ehds.mabu.red</code> answers every page with an offline
+          notice and every data route with <code>503</code>. Local development
+          is not affected: <code>docker compose</code> and{" "}
+          <code>npm run dev</code> know nothing of the schedule. To see the
+          notice locally, start the UI with <code>LIVE_DEMO_OFFLINE=true</code>.
+        </p>
+        <div className="space-y-4">
+          <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2 text-(--success-text)">
+              Working on the live stack at night or at the weekend
+            </h4>
+            <pre className="text-xs text-(--text-primary) overflow-x-auto">{`# 1. Hold it: no scheduled stop before this instant (UTC)
+gh variable set LIVE_DEMO_HOLD_UNTIL --body "2026-10-10T22:00Z"
+
+# 2. Start it (any day, about ten minutes, green only if a login works)
+gh workflow run aca-schedule.yml -f action=start
+
+# 3. Optional: one catalog crawl, it runs in office hours only
+az containerapp job start --name mvhd-catalog-crawler --resource-group rg-mvhd-dev
+
+# 4. Done: release the hold and stop it again
+gh variable delete LIVE_DEMO_HOLD_UNTIL
+gh workflow run aca-schedule.yml -f action=stop`}</pre>
+          </div>
+          <ul className="text-(--text-secondary) text-sm space-y-1 list-disc ml-5">
+            <li>
+              Start the stack before merging at night; a deploy expects the apps
+              to be running.
+            </li>
+            <li>
+              A forgotten hold ends by itself: the first scheduled stop after it
+              expires stops the stack.
+            </li>
+            <li>
+              Troubleshooting, the state check and the full procedure are in the{" "}
+              <a
+                href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/knowledge/runbooks/live-demo-off-hours.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-700 dark:text-indigo-400 underline"
+              >
+                off-hours runbook
+              </a>
+              .
+            </li>
+          </ul>
         </div>
       </section>
 
@@ -1627,8 +1704,13 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
               <strong>Branch strategy:</strong> Feature branches → PR to main
             </li>
             <li>
-              <strong>Pre-commit:</strong> 15 hooks — Prettier, ESLint,
-              TypeScript, gitleaks, broken links, screenshot guard
+              <strong>Pre-commit:</strong> {PRE_COMMIT_HOOKS} hooks, listed on
+              the{" "}
+              <Link href="/docs/developer/quality-gates" className="underline">
+                quality gates page
+              </Link>
+              : Prettier, ESLint, TypeScript, Semgrep, gitleaks, the API
+              collection check and more
             </li>
             <li>
               <strong>Pre-push:</strong> Full Vitest suite (--bail), npm audit
@@ -1684,12 +1766,12 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
             Releases <ExternalLink size={12} />
           </a>
           <a
-            href="https://ehds.mabu.red"
+            href={`https://ma3u.github.io${PAGES_BASE}/docs`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-sm text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline inline-flex items-center gap-1"
           >
-            Azure EHDS Portal <ExternalLink size={12} />
+            Static docs (GitHub Pages) <ExternalLink size={12} />
           </a>
           <a
             href={GITHUB_REPO}

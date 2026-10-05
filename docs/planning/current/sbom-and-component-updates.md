@@ -68,7 +68,6 @@ digest was current when the revision was created — `2026-04-14` for every one.
 | mvhd-tenant-mgr        | `acr/cfm-tmanager:latest`      | 2026-04-14 |
 | mvhd-vault             | `acr/vault:latest`             | 2026-04-14 |
 | mvhd-keycloak          | `acr/keycloak:26.6.4`          | 2026-07-16 |
-| mvhd-postgres          | `acr/postgres:16.14`           | 2026-07-16 |
 | mvhd-neo4j             | `acr/neo4j:5.26.28-community`  | 2026-07-16 |
 
 Two consequences, both more urgent than any version bump:

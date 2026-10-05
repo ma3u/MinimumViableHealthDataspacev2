@@ -1,6 +1,6 @@
 # Test Coverage Report — Health Dataspace v2
 
-**Date:** 2026-03-21
+**Date:** 2026-03-21 (summary refreshed 2026-10-03)
 **Framework:** Vitest 4.x + @vitest/coverage-v8
 **Test Runner:** Node.js 20, jsdom environment
 
@@ -8,12 +8,22 @@
 
 ## Summary
 
-| Component       | Test Files | Tests     | Stmts % | Branch % | Funcs % | Lines % |
-| --------------- | ---------- | --------- | ------- | -------- | ------- | ------- |
-| **UI**          | 78         | 1,490     | 93.78   | 81.65    | 89.57   | 94.73   |
-| **Neo4j Proxy** | 1          | 10        | 27.95   | 26.63    | 16.66   | 28.84   |
-| **E2E**         | 29         | 778       | —       | —        | —       | —       |
-| **Total**       | **108**    | **2,278** | —       | —        | —       | —       |
+Counted on `main` on 2026-10-03. The per-module tables further down are from
+the 2026-03-21 run and have not been regenerated.
+
+| Component        | Test Files | Tests     | Stmts % | Branch % | Funcs % | Lines % |
+| ---------------- | ---------- | --------- | ------- | -------- | ------- | ------- |
+| **UI**           | 174        | 2,317     | 81.62   | 69.74    | 80.43   | 83.19   |
+| **Neo4j Proxy**  | 6          | 61        | —       | —        | —       | —       |
+| **ePA Ingest**   | 10         | 179       | —       | —        | —       | —       |
+| **iOS (Swift)**  | 47 suites  | 279       | —       | —        | —       | —       |
+| **E2E** (listed) | 58         | 1,145     | —       | —        | —       | —       |
+| **Total**        | **295**    | **3,981** | —       | —        | —       | —       |
+
+One proxy test is an evaluation against seeded Synthea data
+(`issue-19-pharmacovigilance.eval.test.ts`); it skips itself when no seeded
+Neo4j is reachable, as in CI. The E2E count is Playwright's list for the
+`chromium` project, not a run result.
 
 > E2E results from JAD stack run (2026-04-11): 581 passed, 197 skipped, 0 failed.
 > See [E2E Test Report](e2e-test-report.md) for full breakdown.
@@ -220,7 +230,7 @@ Test runs are automated via GitHub Actions (`.github/workflows/test.yml`):
 
 - **Trigger:** Every push to any branch, every PR to main
 - **Jobs:**
-  - `ui-tests` — Runs all 1,490 UI tests with coverage
+  - `ui-tests` — Runs all UI tests with coverage
   - `proxy-tests` — Runs all 10 proxy tests with coverage
   - `e2e-tests` — Runs 102 Playwright E2E tests (main branch + manual)
   - `lint` — ESLint check on UI code

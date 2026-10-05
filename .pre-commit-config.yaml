@@ -74,6 +74,23 @@ repos:
         pass_filenames: false
         stages: [pre-push]
 
+  # CodeQL on the iPhone app before a push that changes it. CodeQL sees Swift
+  # only through a clean build, about 15 minutes, so this runs at push (once
+  # for the batch) rather than per commit, and only when the Swift sources,
+  # Package.swift, project.yml or the accepted list change. It skips with a
+  # warning where it cannot run (no macOS, Xcode or codeql: the PR Gate runs
+  # on Linux), and `SKIP=codeql-swift git push` bypasses it once. GitHub runs
+  # the same analysis in codeql-swift.yml.
+  - repo: local
+    hooks:
+      - id: codeql-swift
+        name: CodeQL on the iPhone app (Swift, about 15 min)
+        language: system
+        entry: 'bash -c ''if [ "$(uname)" != Darwin ] || ! command -v xcodebuild >/dev/null 2>&1 || ! command -v codeql >/dev/null 2>&1; then echo "[WARN] codeql-swift skipped: needs macOS, Xcode and brew install --cask codeql"; exit 0; fi; clients/ios/Scripts/codeql-swift.sh'''
+        files: ^clients/ios/(Sources/.*\.swift|Package\.swift|project\.yml|Scripts/codeql-accepted\.txt)$
+        pass_filenames: false
+        stages: [pre-push]
+
   # Secret scanning — gitleaks on staged diff (BSI C5 DEV-08)
   # A finding fails the commit. The entry used to be `gitleaks ... && ... || echo`,
   # so a finding fell through to the echo and the hook passed (2026-10-03).
@@ -151,6 +168,22 @@ repos:
         language: system
         entry: python3 scripts/check-openapi-shapes.py
         files: ^(ui/public/openapi\.yaml|ui/public/mock/.*\.json|ui/src/lib/api\.ts|docs/openapi-shape-allowlist\.txt)$
+        pass_filenames: false
+        stages: [pre-commit]
+
+  # The /docs pages read their facts (routes, hooks, services, ADRs, test
+  # counts) and each page's last-updated date from docs-facts.json, derived
+  # from the code. This refreshes it; when it changes the file the commit
+  # fails, like Prettier: stage it and commit again. The PR Gate runs
+  # --check, which also refuses a docs page changed without its date.
+  - repo: local
+    hooks:
+      - id: docs-facts
+        name: Docs facts and last-updated dates
+        language: python
+        additional_dependencies: [pyyaml]
+        entry: python3 scripts/gen-docs-facts.py
+        files: ^(ui/src/app/.*(page|route)\.tsx?|ui/src/app/docs/.*|ui/src/components/Navigation\.tsx|ui/public/openapi\.yaml|ui/__tests__/.*|ui/vitest\.config\.ts|ui/package\.json|services/neo4j-proxy/.*\.test\.ts|\.pre-commit-config\.yaml|docker-compose(\.jad)?\.yml|jad/init-postgres\.sql|docs/ADRs/ADR-.*\.md|scripts/compliance-baseline\.json|scripts/gen-docs-facts\.py|\.github/workflows/(test|compliance|security-scan|pr-gate|deploy-azure)\.yml)$
         pass_filenames: false
         stages: [pre-commit]
 

@@ -1,6 +1,6 @@
 # EHDS Integration Hub
 
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github&logoColor=white)](https://github.com/ma3u/MinimumViableHealthDataspacev2) [![CI Tests](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml/badge.svg)](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml) [![Coverage 94%](https://img.shields.io/badge/coverage-94%25-brightgreen)](docs/test-coverage-report.md) [![1490 Tests](https://img.shields.io/badge/tests-1490%20passed-brightgreen)](docs/test-coverage-report.md) [![Playwright 778](https://img.shields.io/badge/E2E-778%20tests-brightgreen)](docs/e2e-test-report.md) [![Azure](https://img.shields.io/badge/Azure-Deployed-0078D4?logo=microsoftazure&logoColor=white)](docs/azure-deployment-guide.md)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github&logoColor=white)](https://github.com/ma3u/MinimumViableHealthDataspacev2) [![CI Tests](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml/badge.svg)](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/test.yml) [![Coverage 82%](https://img.shields.io/badge/coverage-82%25-yellowgreen)](docs/test-coverage-report.md) [![2835 unit tests passed](https://img.shields.io/badge/unit%20tests-2835%20passed-brightgreen)](docs/test-coverage-report.md) [![Playwright 1145 E2E tests](https://img.shields.io/badge/E2E-1145%20tests-brightgreen)](docs/e2e-test-report.md) [![Azure](https://img.shields.io/badge/Azure-Deployed-0078D4?logo=microsoftazure&logoColor=white)](docs/azure-deployment-guide.md)
 
 [![EHDS Compliant](https://img.shields.io/badge/EHDS-Compliant-0ea5e9)](https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en) [![FHIR R4](https://img.shields.io/badge/FHIR-R4-orange)](https://hl7.org/fhir/R4/) [![OMOP CDM](https://img.shields.io/badge/OMOP-CDM%20v5.4-yellow)](https://ohdsi.github.io/CommonDataModel/) [![EEHRxF](https://img.shields.io/badge/EEHRxF-HL7%20Europe-148F77)](https://hl7.eu/fhir/) [![Neo4j 5](https://img.shields.io/badge/Neo4j-5%20Community-008CC1?logo=neo4j&logoColor=white)](https://neo4j.com/) [![Next.js 14](https://img.shields.io/badge/Next.js-14-black?logo=next.js&logoColor=white)](https://nextjs.org/) [![Eclipse EDC](https://img.shields.io/badge/Eclipse-EDC--V-blue)](https://eclipse-edc.github.io/docs/) [![DSP Dataspace Protocol 2025-1](https://img.shields.io/badge/DSP-Dataspace%20Protocol%202025--1-6366f1)](https://docs.internationaldataspaces.org/ids-knowledgebase/v/dataspace-protocol) [![DCP Decentralized Claims Protocol v1.0](https://img.shields.io/badge/DCP-Decentralized%20Claims%20Protocol%20v1.0-7c3aed)](https://projects.eclipse.org/projects/technology.dataspace-dcp/releases/1.0.0) [![DPS](https://img.shields.io/badge/DPS-Data%20Plane%20Signaling-0891b2)](https://projects.eclipse.org/proposals/eclipse-data-plane-core) [![SIMPL](https://img.shields.io/badge/SIMPL-EU%20Cloud%20Federation-e11d48)](https://simpl-programme.eu/) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
@@ -60,7 +60,7 @@ This project builds that missing reference. It takes the [Eclipse Dataspace Comp
 
 The motivation comes from a practical gap: the Eclipse [JAD (Joint Architecture Demo)](https://github.com/Metaform/jad) shows how EDC-V, DCore, and CFM work together for generic cloud-provider deployments, but it has no health-domain content. Conversely, FHIR servers and OMOP databases exist in isolation, disconnected from dataspace governance. This project bridges that gap it puts EHDS governance contracts, HealthDCAT-AP catalogue metadata, FHIR patient journeys, OMOP research analytics, and SNOMED/LOINC ontologies into a single queryable graph, all accessible through the Dataspace Protocol.
 
-![MVD Health](docs/images/social-preview.svg)
+![EHDS Integration Hub: five layers of the European Health Data Space in one Neo4j knowledge graph](docs/images/social-preview.svg)
 
 For the full background, see the companion article: [European Health Dataspaces, Digital Twins: A Journey from FHIR Basics to Intelligent Patient Models](https://www.linkedin.com/pulse/european-health-dataspaces-digital-twins-journey-fhir-buchhorn-roth-8t51c/).
 
@@ -600,13 +600,18 @@ Expected result: **166 PASS**, 0 FAIL (Keycloak auth tests require SSO and are s
 The project has comprehensive test coverage across unit, API-route, and end-to-end tests.
 See the full **[Test Coverage Report](docs/test-coverage-report.md)** for detailed metrics and inventory.
 
-| Suite      | Framework    |     Tests |  Files | Status      |
-| ---------- | ------------ | --------: | -----: | ----------- |
-| Unit + API | Vitest + RTL |     1,490 |     78 | ✅ All pass |
-| E2E        | Playwright   |       166 |     18 | ✅ All pass |
-| **Total**  |              | **1,656** | **96** | ✅          |
+Counted on `main` on 2026-10-03:
 
-**Code coverage** (v8): 93.78% statements · 81.65% branches · 89.57% functions · 94.73% lines
+| Suite                | Framework           |     Tests |   Files | Status                                               |
+| -------------------- | ------------------- | --------: | ------: | ---------------------------------------------------- |
+| UI unit + API routes | Vitest + RTL        |     2,317 |     174 | all pass                                             |
+| Neo4j proxy          | Vitest              |        61 |       6 | 60 pass; 1 eval needs seeded Neo4j, skipped in CI    |
+| ePA ingest           | Vitest              |       179 |      10 | all pass                                             |
+| Klarbefund (iOS)     | Swift Testing       |       279 |      47 | all pass                                             |
+| **Unit total**       |                     | **2,836** | **237** | **2,835 pass**                                       |
+| E2E                  | Playwright Chromium |     1,145 |      58 | listed; run in CI against the static and live stacks |
+
+**Code coverage** of the UI (v8): 81.62% statements · 69.74% branches · 80.43% functions · 83.19% lines
 
 ```bash
 # Run unit tests
@@ -840,8 +845,8 @@ available online at **[ma3u.github.io/MinimumViableHealthDataspacev2/docs](https
 | [Architecture Decision Records](docs/ADRs/)                                             | Standalone ADRs (001–013): data storage, testing, Azure, WCAG, security.                                                                   |
 | [Azure Deployment Guide](docs/azure-deployment-guide.md)                                | Azure Container Apps setup, endpoints, post-deploy configuration.                                                                          |
 | [Graph Schema Reference](docs/health-dataspace-graph-schema.md)                         | Full 5-layer Neo4j schema: node labels, properties, indexes, relationships.                                                                |
-| [E2E Test Report](docs/e2e-test-report.md)                                              | Playwright E2E results: 778 tests across 29 spec files.                                                                                    |
-| [Unit Test Coverage](docs/test-coverage-report.md)                                      | Vitest coverage: 1,490 tests, 94% statement coverage across 78 files.                                                                      |
+| [E2E Test Report](docs/e2e-test-report.md)                                              | Playwright E2E run on the JAD stack of 2026-04-11 (778 tests then; 1,145 listed today).                                                    |
+| [Unit Test Coverage](docs/test-coverage-report.md)                                      | Vitest coverage: 2,317 UI tests, 81.6% statement coverage (2026-10-03); per-module detail from 2026-03-21.                                 |
 | [SIMPL-Open Gap Analysis](docs/simpl-ehds-gap-analysis.md)                              | Alignment assessment with EU SIMPL programme requirements.                                                                                 |
 | [Quality Gates](docs/quality-gates.md)                                                  | CI quality standards: lint, type-check, test thresholds.                                                                                   |
 | [Software Development Life Cycle (SDLC)](docs/SDLC.md)                                  | How the project plans, gates, tests, releases & deploys — with a next-steps outlook. **[Plain-language version](docs/SDLC-explained.md).** |
@@ -857,20 +862,20 @@ available online at **[ma3u.github.io/MinimumViableHealthDataspacev2/docs](https
 
 All 12 phases are **✅ Complete** — from infrastructure migration through Azure cloud deployment.
 
-| Phase | Description              | Key Deliverables                                                                |
-| ----- | ------------------------ | ------------------------------------------------------------------------------- |
-| 1     | Infrastructure Migration | 22-service Docker Compose (EDC-V + DCore + CFM), Vault, NATS, Traefik           |
-| 2     | Identity & Trust         | DID:web for 5 participants, 15 Verifiable Credentials (DCP v1.0), Keycloak SSO  |
-| 3     | Health Knowledge Graph   | 5-layer Neo4j schema, 127 Synthea patients, FHIR→OMOP pipeline, EEHRxF profiles |
-| 4     | Dataspace Integration    | DSP 2025-1 contract negotiation, DCore FHIR/OMOP transfers, audit trail         |
-| 5     | Federated Queries        | Multi-site federation, k-anonymity, Text2Cypher NLQ (9 templates + LLM)         |
-| 6     | Web Application          | 22 Next.js pages, 36 API routes, 7 personas, role-based navigation              |
-| 7     | Protocol Compliance      | DSP TCK (140+ tests), DCP suite, EHDS domain tests (Art. 53 enforcement)        |
-| 8     | Automated Testing        | 1,490 unit tests (94% coverage), 778 E2E tests (Playwright)                     |
-| 9     | Documentation            | 4 in-app doc pages, 5 interactive architecture diagrams, navigation restructure |
-| 10    | Tasks Dashboard          | Aggregated contract/transfer pipeline view with step indicators                 |
-| 11    | System Topology          | Per-participant service health view, component info catalog                     |
-| 12    | Policy Seeding           | QuerySpec fix, 14 EHDS access policies across 5 organisations                   |
+| Phase | Description              | Key Deliverables                                                                                  |
+| ----- | ------------------------ | ------------------------------------------------------------------------------------------------- |
+| 1     | Infrastructure Migration | 22-service Docker Compose (EDC-V + DCore + CFM), Vault, NATS, Traefik                             |
+| 2     | Identity & Trust         | DID:web for 5 participants, 15 Verifiable Credentials (DCP v1.0), Keycloak SSO                    |
+| 3     | Health Knowledge Graph   | 5-layer Neo4j schema, 127 Synthea patients, FHIR→OMOP pipeline, EEHRxF profiles                   |
+| 4     | Dataspace Integration    | DSP 2025-1 contract negotiation, DCore FHIR/OMOP transfers, audit trail                           |
+| 5     | Federated Queries        | Multi-site federation, k-anonymity, Text2Cypher NLQ (9 templates + LLM)                           |
+| 6     | Web Application          | 22 Next.js pages, 36 API routes, 7 personas, role-based navigation                                |
+| 7     | Protocol Compliance      | DSP TCK (140+ tests), DCP suite, EHDS domain tests (Art. 53 enforcement)                          |
+| 8     | Automated Testing        | Vitest unit and API tests with coverage, Playwright E2E; current counts under [Testing](#testing) |
+| 9     | Documentation            | 4 in-app doc pages, 5 interactive architecture diagrams, navigation restructure                   |
+| 10    | Tasks Dashboard          | Aggregated contract/transfer pipeline view with step indicators                                   |
+| 11    | System Topology          | Per-participant service health view, component info catalog                                       |
+| 12    | Policy Seeding           | QuerySpec fix, 14 EHDS access policies across 5 organisations                                     |
 
 **Additional capabilities:**
 

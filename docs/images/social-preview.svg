@@ -1,12 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="EHDS Integration Hub – EHDS-compliant demo with Neo4j, FHIR R4, OMOP CDM, Eclipse EDC, and HealthDCAT-AP">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-labelledby="t d">
+  <title id="t">EHDS Integration Hub</title>
+  <desc id="d">A reference implementation of the European Health Data Space: five layers in one Neo4j knowledge graph, from data access governance to clinical terminologies, with 127 synthetic patients and 5,300 graph nodes. Open source, Apache 2.0.</desc>
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#0a0e1a"/>
       <stop offset="100%" style="stop-color:#0d1b2e"/>
     </linearGradient>
     <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#0ea5e9"/>
-      <stop offset="100%" style="stop-color:#8b5cf6"/>
+      <stop offset="0" stop-color="#2471A3"/>
+      <stop offset="0.25" stop-color="#148F77"/>
+      <stop offset="0.5" stop-color="#1E8449"/>
+      <stop offset="0.75" stop-color="#CA6F1E"/>
+      <stop offset="1" stop-color="#7D3C98"/>
     </linearGradient>
     <filter id="glow">
       <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
@@ -35,89 +40,54 @@
     <line x1="1120" y1="0" x2="1120" y2="640"/>
   </g>
 
-  <!-- Top accent bar -->
+  <!-- Top accent bar: the five layer colours -->
   <rect x="0" y="0" width="1280" height="4" fill="url(#accent)"/>
 
-  <!-- EHDS badge top-right -->
-  <rect x="1120" y="24" rx="6" ry="6" width="136" height="32" fill="#1e3a5f" stroke="#0ea5e9" stroke-width="1.5"/>
-  <text x="1188" y="44" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#60c6ff" text-anchor="middle">EHDS Compliant</text>
+  <!-- What it is, top right: the regulation, not a compliance claim -->
+  <rect x="1036" y="24" rx="6" ry="6" width="220" height="32" fill="#1e3a5f" stroke="#0ea5e9" stroke-width="1.5"/>
+  <text x="1146" y="45" font-family="'Segoe UI', system-ui, sans-serif" font-size="13" font-weight="600" fill="#60c6ff" text-anchor="middle">Regulation (EU) 2025/327</text>
 
-  <!-- Main title -->
-  <text x="640" y="180" font-family="'Segoe UI', system-ui, sans-serif" font-size="64" font-weight="700" fill="#f0f9ff" text-anchor="middle" filter="url(#glow)">EHDS Integration Hub</text>
+  <!-- Title -->
+  <text x="640" y="170" font-family="'Segoe UI', system-ui, sans-serif" font-size="64" font-weight="700" fill="#f0f9ff" text-anchor="middle" filter="url(#glow)">EHDS Integration Hub</text>
+  <rect x="220" y="188" width="840" height="4" rx="2" fill="url(#accent)"/>
 
-  <!-- Gradient underline -->
-  <rect x="220" y="198" width="840" height="4" rx="2" fill="url(#accent)"/>
+  <!-- One sentence, not a list: the layers below carry the standards -->
+  <text x="640" y="236" font-family="'Segoe UI', system-ui, sans-serif" font-size="23" fill="#94a3b8" text-anchor="middle">Five layers of the European Health Data Space in one Neo4j knowledge graph</text>
+  <text x="640" y="268" font-family="'Segoe UI', system-ui, sans-serif" font-size="19" fill="#64748b" text-anchor="middle">Reference implementation · 127 synthetic patients · 5,300 graph nodes · 7 personas · Apache 2.0</text>
 
-  <!-- Subtitle -->
-  <text x="640" y="248" font-family="'Segoe UI', system-ui, sans-serif" font-size="24" fill="#94a3b8" text-anchor="middle">EHDS-compliant demo · Eclipse EDC · HealthDCAT-AP · FHIR R4 · OMOP CDM · Neo4j</text>
+  <!-- The five layers, named as in the architecture diagram -->
+  <rect x="48" y="330" rx="12" ry="12" width="224" height="88" fill="#2471A3" fill-opacity="0.14" stroke="#2471A3" stroke-width="2"/>
+  <text x="160" y="358" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#6CB4E4" text-anchor="middle" letter-spacing="1.5">LAYER 1</text>
+  <text x="160" y="382" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="700" fill="#e6edf6" text-anchor="middle">Data Access &amp; Governance</text>
+  <text x="160" y="403" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#94a3b8" text-anchor="middle">Dataspace Protocol 2025-1 · ODRL 2.2</text>
+  <text x="285" y="378" font-family="'Segoe UI', system-ui, sans-serif" font-size="20" fill="#475569" text-anchor="middle">→</text>
 
-  <!-- 5 Layer pills -->
-  <!-- Layer 1: Marketplace -->
-  <rect x="64" y="320" rx="12" ry="12" width="204" height="80" fill="#1a2744" stroke="#3b82f6" stroke-width="2"/>
-  <text x="166" y="350" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#93c5fd" text-anchor="middle" letter-spacing="1.5">LAYER 1</text>
-  <text x="166" y="374" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="700" fill="#dbeafe" text-anchor="middle">Marketplace</text>
-  <text x="166" y="393" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">Eclipse EDC · DSP</text>
+  <rect x="298" y="330" rx="12" ry="12" width="224" height="88" fill="#148F77" fill-opacity="0.14" stroke="#148F77" stroke-width="2"/>
+  <text x="410" y="358" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#4FD1B5" text-anchor="middle" letter-spacing="1.5">LAYER 2</text>
+  <text x="410" y="382" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="700" fill="#e6edf6" text-anchor="middle">Metadata Catalogue</text>
+  <text x="410" y="403" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#94a3b8" text-anchor="middle">HealthDCAT-AP · DCAT-AP 3</text>
+  <text x="535" y="378" font-family="'Segoe UI', system-ui, sans-serif" font-size="20" fill="#475569" text-anchor="middle">→</text>
 
-  <!-- Arrow -->
-  <text x="296" y="365" font-family="'Segoe UI', system-ui, sans-serif" font-size="20" fill="#475569" text-anchor="middle">→</text>
+  <rect x="548" y="330" rx="12" ry="12" width="224" height="88" fill="#1E8449" fill-opacity="0.14" stroke="#1E8449" stroke-width="2"/>
+  <text x="660" y="358" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#5FD38D" text-anchor="middle" letter-spacing="1.5">LAYER 3</text>
+  <text x="660" y="382" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="700" fill="#e6edf6" text-anchor="middle">Clinical Data</text>
+  <text x="660" y="403" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#94a3b8" text-anchor="middle">HL7 FHIR R4 · Synthea patients</text>
+  <text x="785" y="378" font-family="'Segoe UI', system-ui, sans-serif" font-size="20" fill="#475569" text-anchor="middle">→</text>
 
-  <!-- Layer 2: HealthDCAT-AP -->
-  <rect x="318" y="320" rx="12" ry="12" width="204" height="80" fill="#1a2a1a" stroke="#22c55e" stroke-width="2"/>
-  <text x="420" y="350" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#86efac" text-anchor="middle" letter-spacing="1.5">LAYER 2</text>
-  <text x="420" y="374" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="700" fill="#dcfce7" text-anchor="middle">HealthDCAT-AP</text>
-  <text x="420" y="393" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">Datasets · Policies</text>
+  <rect x="798" y="330" rx="12" ry="12" width="224" height="88" fill="#CA6F1E" fill-opacity="0.14" stroke="#CA6F1E" stroke-width="2"/>
+  <text x="910" y="358" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#F2A65A" text-anchor="middle" letter-spacing="1.5">LAYER 4</text>
+  <text x="910" y="382" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="700" fill="#e6edf6" text-anchor="middle">Research Data</text>
+  <text x="910" y="403" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#94a3b8" text-anchor="middle">OHDSI OMOP CDM v5.4</text>
+  <text x="1035" y="378" font-family="'Segoe UI', system-ui, sans-serif" font-size="20" fill="#475569" text-anchor="middle">→</text>
 
-  <!-- Arrow -->
-  <text x="550" y="365" font-family="'Segoe UI', system-ui, sans-serif" font-size="20" fill="#475569" text-anchor="middle">→</text>
+  <rect x="1048" y="330" rx="12" ry="12" width="184" height="88" fill="#7D3C98" fill-opacity="0.14" stroke="#7D3C98" stroke-width="2"/>
+  <text x="1140" y="358" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#C39BD8" text-anchor="middle" letter-spacing="1.5">LAYER 5</text>
+  <text x="1140" y="382" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="700" fill="#e6edf6" text-anchor="middle">Terminologies</text>
+  <text x="1140" y="403" font-family="'Segoe UI', system-ui, sans-serif" font-size="11.5" fill="#94a3b8" text-anchor="middle">SNOMED CT · ICD-10 · LOINC</text>
 
-  <!-- Layer 3: FHIR R4 -->
-  <rect x="572" y="320" rx="12" ry="12" width="204" height="80" fill="#1f1a2e" stroke="#a855f7" stroke-width="2"/>
-  <text x="674" y="350" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#d8b4fe" text-anchor="middle" letter-spacing="1.5">LAYER 3</text>
-  <text x="674" y="374" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="700" fill="#f3e8ff" text-anchor="middle">FHIR R4</text>
-  <text x="674" y="393" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">Patient · Observation</text>
+  <!-- Built on: the things that are not a layer -->
+  <text x="640" y="486" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#64748b" text-anchor="middle">Built on Neo4j 5 · Eclipse EDC-V · Keycloak · Next.js 15 · live on Azure Container Apps</text>
 
-  <!-- Arrow -->
-  <text x="804" y="365" font-family="'Segoe UI', system-ui, sans-serif" font-size="20" fill="#475569" text-anchor="middle">→</text>
-
-  <!-- Layer 4: OMOP CDM -->
-  <rect x="826" y="320" rx="12" ry="12" width="204" height="80" fill="#1f1a14" stroke="#f59e0b" stroke-width="2"/>
-  <text x="928" y="350" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#fcd34d" text-anchor="middle" letter-spacing="1.5">LAYER 4</text>
-  <text x="928" y="374" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="700" fill="#fef3c7" text-anchor="middle">OMOP CDM</text>
-  <text x="928" y="393" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">ConditionOccurrence</text>
-
-  <!-- Arrow -->
-  <text x="1058" y="365" font-family="'Segoe UI', system-ui, sans-serif" font-size="20" fill="#475569" text-anchor="middle">→</text>
-
-  <!-- Layer 5: Ontology -->
-  <rect x="1080" y="320" rx="12" ry="12" width="140" height="80" fill="#1a1f1f" stroke="#14b8a6" stroke-width="2"/>
-  <text x="1150" y="350" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="600" fill="#5eead4" text-anchor="middle" letter-spacing="1.5">LAYER 5</text>
-  <text x="1150" y="374" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="700" fill="#ccfbf1" text-anchor="middle">Ontology</text>
-  <text x="1150" y="393" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" fill="#64748b" text-anchor="middle">SNOMED · ICD-10</text>
-
-  <!-- Tech stack row -->
-  <!-- Neo4j -->
-  <rect x="290" y="452" rx="8" ry="8" width="120" height="36" fill="#0f1a18" stroke="#009688"/>
-  <text x="350" y="474" font-family="'Segoe UI', system-ui, sans-serif" font-size="14" font-weight="600" fill="#26a69a" text-anchor="middle">⬡ Neo4j 5</text>
-
-  <!-- FHIR -->
-  <rect x="426" y="452" rx="8" ry="8" width="120" height="36" fill="#160f1f" stroke="#7c3aed"/>
-  <text x="486" y="474" font-family="'Segoe UI', system-ui, sans-serif" font-size="14" font-weight="600" fill="#a78bfa" text-anchor="middle">⚕ FHIR R4</text>
-
-  <!-- OMOP -->
-  <rect x="562" y="452" rx="8" ry="8" width="130" height="36" fill="#1a150a" stroke="#d97706"/>
-  <text x="627" y="474" font-family="'Segoe UI', system-ui, sans-serif" font-size="14" font-weight="600" fill="#fbbf24" text-anchor="middle">◈ OMOP CDM</text>
-
-  <!-- Next.js -->
-  <rect x="708" y="452" rx="8" ry="8" width="130" height="36" fill="#111111" stroke="#6b7280"/>
-  <text x="773" y="474" font-family="'Segoe UI', system-ui, sans-serif" font-size="14" font-weight="600" fill="#e5e7eb" text-anchor="middle">▲ Next.js 14</text>
-
-  <!-- EDC -->
-  <rect x="854" y="452" rx="8" ry="8" width="140" height="36" fill="#0f1420" stroke="#0ea5e9"/>
-  <text x="924" y="474" font-family="'Segoe UI', system-ui, sans-serif" font-size="14" font-weight="600" fill="#38bdf8" text-anchor="middle">⬡ Eclipse EDC</text>
-
-  <!-- Bottom tagline -->
-  <text x="640" y="570" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" fill="#475569" text-anchor="middle">Open-source · European Health Data Space · DSP Marketplace · Synthetic Patient Data · Knowledge Graph</text>
-
-  <!-- GitHub corner hint -->
-  <text x="640" y="610" font-family="'Segoe UI', monospace, sans-serif" font-size="13" fill="#334155" text-anchor="middle">github.com/ma3u/MinimumViableHealthDataspacev2</text>
+  <!-- Where -->
+  <text x="640" y="590" font-family="'Segoe UI', monospace, sans-serif" font-size="14" fill="#475569" text-anchor="middle">github.com/ma3u/MinimumViableHealthDataspacev2 · ehds.mabu.red</text>
 </svg>

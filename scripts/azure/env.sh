@@ -16,8 +16,9 @@ export LOCATION="westeurope"
 export SUBSCRIPTION_ID="${SUBSCRIPTION_ID:-$(az account show --query id -o tsv 2>/dev/null || echo "")}"
 export ACR_NAME="acrmvhdehds"
 export ACA_ENV="mvhd-env"
-# Log Analytics workspace (disabled under Workaround B, kept for reference)
-export LAW_NAME="law-mvhd-dev"
+# Log Analytics workspace. The ACA environment logs to mvhd-logs; law-mvhd-dev no longer exists, and
+# 07-observability.sh failed on its first call while this still named it.
+export LAW_NAME="mvhd-logs"
 
 # ── Persistent storage (Azure Files — ADR-017 + Workaround B) ───────────────
 # Storage account name must be 3–24 lowercase alphanumerics, globally unique.
@@ -26,11 +27,9 @@ export STORAGE_SKU="Standard_LRS"
 export SHARE_NEO4J_DATA="neo4j-data"
 export SHARE_NEO4J_LOGS="neo4j-logs"
 export SHARE_VAULT_DATA="vault-data"
-export SHARE_PG_DATA="pg-data"
 export QUOTA_NEO4J_DATA=10
 export QUOTA_NEO4J_LOGS=5
 export QUOTA_VAULT_DATA=2
-export QUOTA_PG_DATA=20
 
 # ── PostgreSQL (Flexible Server, ADR-041) ───────────────────────────────────
 # Every consumer reaches Azure Database for PostgreSQL Flexible Server over TLS.
@@ -133,7 +132,14 @@ export NATS_IMAGE="${ACR_LOGIN_SERVER}/nats:${NATS_VERSION}"
 #
 # scripts/check-deployed-image-pins.sh fails if any deployed app resolves to
 # `:latest`, which is the check that was missing when #116 went unnoticed.
-export JAD_VERSION="${JAD_VERSION:-2026-04-14}"
+#
+# ADR-055 (#503) replaces the April build with the one compose and CI run:
+# ghcr.io/metaform/jad/*:4a7e5bd096c5..., EDC 0.18, which does carry its source
+# commit, so here the tag is the commit. scripts/azure/import-jad-images.sh
+# copies the images into ACR under it; docs/knowledge/runbooks/edc-v018-on-azure.md
+# moves the apps, one at a time.
+# The April images stay in ACR as :2026-04-14, the rollback target.
+export JAD_VERSION="${JAD_VERSION:-4a7e5bd096c5}"
 export CFM_VERSION="${CFM_VERSION:-2026-04-14}"
 export CONTROLPLANE_IMAGE="${ACR_LOGIN_SERVER}/jad-controlplane:${JAD_VERSION}"
 export DP_FHIR_IMAGE="${ACR_LOGIN_SERVER}/jad-dataplane:${JAD_VERSION}"

@@ -1,13 +1,21 @@
 import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { refuseForeignRecord } from "@/lib/patient/own-record";
 
 export const dynamic = "force-dynamic";
 
-async function requirePatient(): Promise<NextResponse | null> {
+/**
+ * PATIENT or EDC_ADMIN, and a patient only for their own record: reading
+ * another patient's consents, or consenting or withdrawing in their name, is
+ * refused (#475; EHDS Art. 3, GDPR Art. 7).
+ */
+async function requirePatient(
+  patientId: string | null,
+): Promise<NextResponse | null> {
   const auth = await requireAuth(["PATIENT", "EDC_ADMIN"]);
   if (isAuthError(auth)) return auth;
-  return null;
+  return patientId ? refuseForeignRecord(auth.session.roles, patientId) : null;
 }
 
 /**
@@ -23,11 +31,10 @@ async function requirePatient(): Promise<NextResponse | null> {
  */
 
 export async function GET(req: Request) {
-  const authError = await requirePatient();
-  if (authError) return authError;
-
   const { searchParams } = new URL(req.url);
   const patientId = searchParams.get("patientId");
+  const authError = await requirePatient(patientId);
+  if (authError) return authError;
 
   const [programs, consents] = await Promise.all([
     // Available research programs
@@ -85,8 +92,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const authError = await requirePatient();
-  if (authError) return authError;
+  const gate = await requirePatient(null);
+  if (gate) return gate;
 
   const body = (await req.json()) as {
     patientId: string;
@@ -101,6 +108,8 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
+  const authError = await requirePatient(patientId);
+  if (authError) return authError;
 
   const result = await runQuery<{ consentId: string }>(
     `MATCH (dp:DataProduct)
@@ -151,12 +160,11 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const authError = await requirePatient();
-  if (authError) return authError;
-
   const { searchParams } = new URL(req.url);
   const consentId = searchParams.get("consentId");
   const patientId = searchParams.get("patientId");
+  const authError = await requirePatient(patientId);
+  if (authError) return authError;
 
   if (!consentId || !patientId) {
     return NextResponse.json(

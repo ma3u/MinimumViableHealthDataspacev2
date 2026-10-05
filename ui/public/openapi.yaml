@@ -1027,6 +1027,20 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Participant" }
+        "503":
+          description: >-
+            The CFM Tenant Manager did not answer, so nothing was registered.
+            On the hosted demo the provisioning stack runs Monday to Friday,
+            07:00 to 20:00 Europe/Berlin (ADR-042).
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [error]
+                properties:
+                  error: { type: string }
+                  detail: { type: string }
+                  upstreamError: { type: string }
 
   /api/participants/{id}:
     patch:

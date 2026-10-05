@@ -37,8 +37,34 @@ permissions:
   contents: read
 
 jobs:
+  # Outside office hours the stack is stopped and every data route answers 503
+  # with a pointer to the static site (ADR-053). A smoke run then has nothing
+  # to test: it skips, and says so in the summary, rather than going red every
+  # weekend or passing as if it had checked something.
+  live:
+    name: Is the live demo up?
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      up: ${{ steps.probe.outputs.up }}
+    steps:
+      - id: probe
+        run: |
+          body=$(curl -s --max-time 60 "$DEMO_URL/api/graph" -w '\n%{http_code}' || true)
+          code=$(echo "$body" | tail -n1)
+          if [ "$code" = "503" ] && echo "$body" | grep -q '"staticSite"'; then
+            echo "up=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::$DEMO_URL is offline outside office hours (ADR-053); smoke skipped"
+            echo "**Skipped:** $DEMO_URL is offline outside office hours (ADR-053)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "up=true" >> "$GITHUB_OUTPUT"
+            echo "$DEMO_URL/api/graph answered $code; running the smoke"
+          fi
+
   bruno:
     name: Bruno API (Azure-Dev)
+    needs: live
+    if: needs.live.outputs.up == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -107,6 +133,8 @@ jobs:
 
   playwright-public:
     name: Playwright public routes
+    needs: live
+    if: needs.live.outputs.up == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -137,6 +165,8 @@ jobs:
 
   zap-baseline:
     name: ZAP baseline (anonymous)
+    needs: live
+    if: needs.live.outputs.up == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

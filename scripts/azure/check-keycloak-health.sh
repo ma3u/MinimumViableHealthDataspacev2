@@ -32,6 +32,15 @@
 #   2  5xx from the persistence layer       -> importing will NOT help; the
 #                                              database is the problem
 #   3  Keycloak did not answer at all
+#   4  Keycloak's Container App is stopped  -> the off-hours stop (ADR-053),
+#                                              or nobody started it; neither
+#                                              the realm nor the database is
+#                                              in question
+#
+# A stopped Container App answers every path with 404 and Azure's own page,
+# "Azure Container App - Unavailable". Read as a realm lookup, that 404 said
+# "realm 'edcv' does not exist. Import it", and failed every deploy outside
+# office hours on 2026-10-04 while the realm was intact.
 #
 # Usage:
 #   scripts/azure/check-keycloak-health.sh [BASE_URL] [REALM]
@@ -75,14 +84,21 @@ case "$auth_code" in
       echo "      read that as healthy, and do not import the realm: the import" >&2
       echo "      needs the same tables." >&2
     fi
-    echo "      Check Postgres first:" >&2
-    echo "        az containerapp replica list -n mvhd-postgres -g rg-mvhd-dev \\" >&2
-    echo "          --query '[].properties.createdTime' -o tsv" >&2
-    echo "      A replica created minutes ago means initdb re-ran and the" >&2
-    echo "      cluster is empty. See docs/gotchas.md, 2026-09-30." >&2
+    echo "      Check the Flexible Server first (ADR-041):" >&2
+    echo "        az postgres flexible-server show -n mvhd-pg-b53a0449 \\" >&2
+    echo "          -g rg-mvhd-dev --query state -o tsv" >&2
+    echo "      Stopped is the off-hours stop (ADR-053); the morning start" >&2
+    echo "      starts it. Ready means look at Keycloak's KC_DB_URL next." >&2
     exit 2
     ;;
   404)
+    if curl -s -m 20 "$AUTHORIZE" 2>/dev/null |
+      grep -q "Azure Container App - Unavailable"; then
+      echo "STOPPED: Keycloak's Container App is stopped, so nothing about the" >&2
+      echo "      realm or the database can be read. Outside office hours that" >&2
+      echo "      is the off-hours stop (ADR-053); the morning start starts it." >&2
+      exit 4
+    fi
     echo "FAIL: realm '${REALM}' does not exist. Import it:" >&2
     echo "        ./scripts/azure/restore-keycloak-realm.sh" >&2
     exit 1

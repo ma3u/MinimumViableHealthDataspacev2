@@ -878,9 +878,8 @@ req(f, "17 Data user cannot open the operator debug view (403)", "get",
     asserts=["res.status: eq 403"],
     docs="""A session is not enough: the route is EDC_ADMIN. 17 proves it refuses no
 session, this proves it refuses the wrong role, and `05 Dataspace Operator/28` proves
-the operator still gets through. /api/nlq/backend stays public by the decision recorded
-in #377 and in that route's own comment, so there is deliberately no request here for
-it.""")
+the operator still gets through. /api/nlq/backend was public by the decision in #377
+until ADR-044 (#404) gated every route; `24` asserts its 401.""")
 
 # ===========================================================================
 f = folder("10 Connecting partner", "A partner's own connector: DSP 2025-1 and DCP v1.0",

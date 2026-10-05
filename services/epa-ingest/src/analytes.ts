@@ -101,12 +101,17 @@ export function normaliseLabel(raw: string): string {
  * touching the strict key, which stays the primary lookup and the stored
  * `labelKey`. The dictionary refuses to load if two different analytes ever
  * collapse to the same loose key, so this can never pick the wrong one.
+ *
+ * `rn` folds to `m` for the same reason: at phone resolution the two letters
+ * touch and read as one. Real scans returned `Hamsäure` for `Harnsäure` and
+ * `Hamstoff` for `Harnstoff` (2026-10-04), each a known analyte refused.
  */
 export function looseLabelKey(raw: string): string {
   return normaliseLabel(raw)
     .replace(/ae/g, "a")
     .replace(/oe/g, "o")
-    .replace(/ue/g, "u");
+    .replace(/ue/g, "u")
+    .replace(/rn/g, "m");
 }
 
 /**
@@ -255,6 +260,36 @@ export function repairUnit(raw: string): string | null {
   return found.size === 1 ? [...found][0] : null;
 }
 
+/**
+ * An eGFR unit the recogniser garbled: `m/min/1.73m`, `mimin/1.73m`,
+ * `ml/min/1,73m²`. The `/1.73 m²` body-surface suffix belongs to no other
+ * unit, so anything that ends in it and starts like millilitres per minute is
+ * the eGFR unit, however the letters in between came back.
+ */
+const EGFR_UNIT = /^m[il1|]?\/?min\/1[.,]73m(2|²)?$/;
+
+/** Characters a recogniser prints in front of a unit that are not part of it. */
+const STRAY_LEADING = new Set(["I", "i", "l", "|", "!", ":"]);
+
+/**
+ * Drops one stray glyph in front of a unit: `Ing/ml`, `img/dl`, `:ng/ml`, a
+ * table rule or a column edge read as a letter (2026-10-04, a practice sheet).
+ *
+ * Refused when the glyph could have been a letter of a different unit: `ig/dl`
+ * might be `µg/dl` read badly, a thousandfold away from `g/dl`, so if putting
+ * `u`, `m`, `n` or `p` in its place also names a unit, nothing is guessed.
+ */
+export function dropStrayLeading(compact: string): string | null {
+  if (compact.length < 3 || !STRAY_LEADING.has(compact[0])) return null;
+  const rest = compact.slice(1).toLowerCase();
+  const unit = UNIT_MAP[rest];
+  if (!unit) return null;
+  for (const letter of ["u", "m", "n", "p"]) {
+    if (UNIT_MAP[letter + rest]) return null;
+  }
+  return unit;
+}
+
 export function normaliseUnit(raw: string): string | null {
   const compact = raw.trim().replace(/µ|μ/g, "u").replace(/\s+/g, "");
   // Case decides before anything is lowercased: German haematology prints
@@ -263,7 +298,10 @@ export function normaliseUnit(raw: string): string | null {
   // case first would turn a leukocyte count into a mass concentration.
   if (/^G\/[lL]$/.test(compact)) return "10*9/L";
   if (/^T\/[lL]$/.test(compact)) return "10*12/L";
-  return UNIT_MAP[compact.toLowerCase()] ?? repairUnit(raw);
+  const lower = compact.toLowerCase();
+  if (UNIT_MAP[lower]) return UNIT_MAP[lower];
+  if (EGFR_UNIT.test(lower)) return "mL/min/{1.73_m2}";
+  return dropStrayLeading(compact) ?? repairUnit(raw);
 }
 
 export interface AnalyteDefinition {
@@ -361,13 +399,49 @@ function differential(
     description: string;
     count: [loinc: string, display: string];
     share: [loinc: string, display: string];
+    /**
+     * The same cells counted under the microscope, which LOINC codes apart
+     * from the analyser's count. Bases are the names a sheet prints before
+     * the method, `Lymphozyten (mikr.Diff)`.
+     */
+    manual?: {
+      bases: string[];
+      count: [loinc: string, display: string];
+      share: [loinc: string, display: string];
+    }[];
   },
 ): AnalyteDefinition[] {
   const suffixes = ["", " absolut", " abs.", " relativ", " rel.", " %"];
   const labels = [spec.de, ...spec.long, ...spec.en].flatMap((base) =>
     suffixes.map((suffix) => `${base}${suffix}`),
   );
+  // A microscopic differential, as German sheets mark it. Punctuation folds
+  // away in the key, so `(mikr. Diff.)` and `(mikr.Diff)` are one spelling.
+  const methods = [
+    " (mikr.)",
+    " (mikr.Diff)",
+    " (mikr.Diff.abs.)",
+    " (mikr.Diff.rel.)",
+    " mikroskopisch",
+    " (manuell)",
+    " manuell",
+  ];
+  const manual = (spec.manual ?? []).map((m) => ({
+    key,
+    // No count/share suffixes: the method marker carries that, as in
+    // `(mikr.Diff.abs.)`, and the unit picks the code regardless.
+    labels: m.bases.flatMap((base) =>
+      methods.map((method) => `${base}${method}`),
+    ),
+    byUnit: {
+      "10*9/L": c(m.count[0], m.count[1], "10*9/L"),
+      "10*3/uL": c(m.count[0], m.count[1], "10*3/uL"),
+      "/uL": c(m.count[0], m.count[1], "/uL"),
+      "%": c(m.share[0], m.share[1], "%"),
+    },
+  }));
   return [
+    ...manual,
     {
       key,
       description: spec.description,
@@ -821,8 +895,10 @@ const DEFINITIONS: AnalyteDefinition[] = [
         "Cobalamin (Vitamin B12) [Mass/volume] in Serum or Plasma",
         "ng/L",
       ),
+      // 16695-9 until 2026-10-04: that is B12 by mass in whole blood, a
+      // different property and specimen. Verified against NLM.
       "pmol/L": c(
-        "16695-9",
+        "14685-2",
         "Cobalamin (Vitamin B12) [Moles/volume] in Serum or Plasma",
         "pmol/L",
       ),
@@ -832,7 +908,26 @@ const DEFINITIONS: AnalyteDefinition[] = [
     key: "vitamin-d",
     description:
       "The storage form of vitamin D, which reflects supply from sun and diet over weeks.",
-    labels: ["Vitamin D", "25-OH-Vitamin D", "25-OH-Vitamin-D3", "Calcidiol"],
+    // A sheet that prints "25-OH-Vitamin D" reports the total of D2 and D3,
+    // which is what routine immunoassays measure. Until 2026-10-04 it was
+    // coded as D3 alone (1989-3); only a label that names D3 is that now.
+    labels: ["Vitamin D", "25-OH-Vitamin D"],
+    byUnit: {
+      "ng/mL": c(
+        "62292-8",
+        "25-Hydroxyvitamin D3+25-Hydroxyvitamin D2 [Mass/volume] in Serum or Plasma",
+        "ng/mL",
+      ),
+      "nmol/L": c(
+        "68438-1",
+        "25-Hydroxyvitamin D3+25-Hydroxyvitamin D2 [Moles/volume] in Serum or Plasma",
+        "nmol/L",
+      ),
+    },
+  },
+  {
+    key: "vitamin-d",
+    labels: ["25-OH-Vitamin-D3", "Vitamin D3", "25-OH-D3", "Calcidiol"],
     byUnit: {
       "ng/mL": c(
         "1989-3",
@@ -1049,12 +1144,36 @@ const DEFINITIONS: AnalyteDefinition[] = [
     de: "Neutrophile",
     long: [
       "Neutrophile Granulozyten",
+      "Neutrophile Granu.",
       "Segmentkernige",
       "Segmentkernige Granulozyten",
     ],
     en: ["Neutrophils", "Neutro", "NEUT"],
     count: ["751-8", "Neutrophils [#/volume] in Blood by Automated count"],
     share: ["770-8", "Neutrophils/Leukocytes in Blood by Automated count"],
+    manual: [
+      {
+        bases: [
+          "Neutrophile",
+          "Neutrophile Granulozyten",
+          "Neutrophile Granu.",
+          "Neutrophils",
+        ],
+        count: ["753-4", "Neutrophils [#/volume] in Blood by Manual count"],
+        share: ["23761-0", "Neutrophils/Leukocytes in Blood by Manual count"],
+      },
+      {
+        bases: ["Segmentkernige", "Segmentkernige Granulozyten"],
+        count: [
+          "768-2",
+          "Segmented neutrophils [#/volume] in Blood by Manual count",
+        ],
+        share: [
+          "769-0",
+          "Segmented neutrophils/Leukocytes in Blood by Manual count",
+        ],
+      },
+    ],
   }),
   ...differential("lymphocytes", {
     description:
@@ -1064,6 +1183,13 @@ const DEFINITIONS: AnalyteDefinition[] = [
     en: ["Lymphocytes", "Lympho", "LYMPH"],
     count: ["731-0", "Lymphocytes [#/volume] in Blood by Automated count"],
     share: ["736-9", "Lymphocytes/Leukocytes in Blood by Automated count"],
+    manual: [
+      {
+        bases: ["Lymphozyten", "Lymphocytes"],
+        count: ["732-8", "Lymphocytes [#/volume] in Blood by Manual count"],
+        share: ["737-7", "Lymphocytes/Leukocytes in Blood by Manual count"],
+      },
+    ],
   }),
   ...differential("monocytes", {
     description:
@@ -1073,6 +1199,13 @@ const DEFINITIONS: AnalyteDefinition[] = [
     en: ["Monocytes", "Mono", "MONO"],
     count: ["742-7", "Monocytes [#/volume] in Blood by Automated count"],
     share: ["5905-5", "Monocytes/Leukocytes in Blood by Automated count"],
+    manual: [
+      {
+        bases: ["Monozyten", "Monocytes"],
+        count: ["743-5", "Monocytes [#/volume] in Blood by Manual count"],
+        share: ["744-3", "Monocytes/Leukocytes in Blood by Manual count"],
+      },
+    ],
   }),
   ...differential("eosinophils", {
     description: "White cells involved in allergy and in parasitic infection.",
@@ -1081,6 +1214,13 @@ const DEFINITIONS: AnalyteDefinition[] = [
     en: ["Eosinophils", "Eos", "EOS"],
     count: ["711-2", "Eosinophils [#/volume] in Blood by Automated count"],
     share: ["713-8", "Eosinophils/Leukocytes in Blood by Automated count"],
+    manual: [
+      {
+        bases: ["Eosinophile", "Eosinophile Granulozyten", "Eosinophils"],
+        count: ["712-0", "Eosinophils [#/volume] in Blood by Manual count"],
+        share: ["714-6", "Eosinophils/Leukocytes in Blood by Manual count"],
+      },
+    ],
   }),
   ...differential("basophils", {
     description:
@@ -1090,6 +1230,13 @@ const DEFINITIONS: AnalyteDefinition[] = [
     en: ["Basophils", "Baso", "BASO"],
     count: ["704-7", "Basophils [#/volume] in Blood by Automated count"],
     share: ["706-2", "Basophils/Leukocytes in Blood by Automated count"],
+    manual: [
+      {
+        bases: ["Basophile", "Basophile Granulozyten", "Basophils"],
+        count: ["705-4", "Basophils [#/volume] in Blood by Manual count"],
+        share: ["707-0", "Basophils/Leukocytes in Blood by Manual count"],
+      },
+    ],
   }),
   ...differential("immature-granulocytes", {
     description:
@@ -2575,6 +2722,68 @@ const DEFINITIONS: AnalyteDefinition[] = [
     },
   },
   {
+    key: "creatine-kinase",
+    description:
+      "An enzyme of muscle cells, heart muscle included, that enters the blood when muscle is strained or damaged.",
+    labels: [
+      "CK",
+      "CK gesamt",
+      "CK-NAC",
+      "Creatinkinase",
+      "Kreatinkinase",
+      "Creatin-Kinase",
+      "Creatine kinase",
+    ],
+    byUnit: {
+      "U/L": c(
+        "2157-6",
+        "Creatine kinase [Enzymatic activity/volume] in Serum or Plasma",
+        "U/L",
+      ),
+      "ukat/L": c(
+        "2157-6",
+        "Creatine kinase [Enzymatic activity/volume] in Serum or Plasma",
+        "ukat/L",
+      ),
+    },
+  },
+  // ---- Urine ----
+  // The parser refuses a urine row unless "<name> im Urin" is a label here,
+  // so serum albumin and urine albumin can never share a code. Every label
+  // below names the urine.
+  {
+    key: "albumin-urine",
+    description:
+      "Albumin passed into the urine. Healthy kidneys hold almost all of it back.",
+    labels: [
+      "Albumin im Urin",
+      "Albumin Urin",
+      "Urin-Albumin",
+      "Mikroalbumin",
+      "Mikroalbumin im Urin",
+    ],
+    byUnit: {
+      "mg/L": c("1754-1", "Albumin [Mass/volume] in Urine", "mg/L"),
+      "mg/dL": c("1754-1", "Albumin [Mass/volume] in Urine", "mg/dL"),
+    },
+  },
+  {
+    key: "creatinine-urine",
+    description:
+      "Creatinine in the urine, the reference a urine albumin is read against because it corrects for how concentrated the urine is.",
+    labels: [
+      "Kreatinin im Urin",
+      "Kreatinin Urin",
+      "Urin-Kreatinin",
+      "Creatinin im Urin",
+    ],
+    byUnit: {
+      "mg/dL": c("2161-8", "Creatinine [Mass/volume] in Urine", "mg/dL"),
+      "mmol/L": c("14683-7", "Creatinine [Moles/volume] in Urine", "mmol/L"),
+      "umol/L": c("14683-7", "Creatinine [Moles/volume] in Urine", "umol/L"),
+    },
+  },
+  {
     key: "transferrin-saturation",
     description:
       "The share of transferrin actually carrying iron. Read with ferritin to tell store from supply.",
@@ -2745,7 +2954,11 @@ export function buildIndexes(definitions: readonly AnalyteDefinition[]): {
 const { strict: BY_LABEL, loose: BY_LOOSE_LABEL } = buildIndexes(DEFINITIONS);
 
 /** Every analyte key the dictionary knows, for tests and the README table. */
-export const ANALYTE_KEYS: readonly string[] = DEFINITIONS.map((d) => d.key);
+// Unique: one analyte may have several definitions, an analyser's and a
+// microscope's count, or vitamin D in total and D3 alone.
+export const ANALYTE_KEYS: readonly string[] = [
+  ...new Set(DEFINITIONS.map((d) => d.key)),
+];
 
 /** The UCUM units each analyte is defined in, for validating other tables. */
 export const ANALYTE_UNITS: Readonly<Record<string, readonly string[]>> =
@@ -3063,6 +3276,12 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
   aptt: "Wie schnell das Blut über den Kontaktweg gerinnt. Der Test, mit dem Heparin überwacht wird.",
   urea: "Ein Abbauprodukt des Eiweißstoffwechsels, das die Niere ausscheidet. Steigt auch bei Flüssigkeitsmangel und hoher Eiweißzufuhr.",
   transferrin: "Das Protein, das Eisen im Blut transportiert.",
+  "creatine-kinase":
+    "Ein Enzym der Muskelzellen, auch des Herzmuskels, das ins Blut übertritt, wenn Muskeln beansprucht oder geschädigt werden.",
+  "albumin-urine":
+    "Albumin, das in den Urin gelangt. Gesunde Nieren halten fast alles davon zurück.",
+  "creatinine-urine":
+    "Kreatinin im Urin, die Bezugsgröße für ein Urin-Albumin, weil es ausgleicht, wie konzentriert der Urin ist.",
   "transferrin-saturation":
     "Der Anteil des Transferrins, der tatsächlich Eisen trägt. Wird mit dem Ferritin zusammen gelesen, um Speicher von Nachschub zu unterscheiden.",
   cortisol:

@@ -11,6 +11,7 @@ import {
   OPENAI_MODEL,
 } from "../config.js";
 import { driver } from "../db.js";
+import { logger } from "../logger.js";
 
 // ---- Phase 5c: Natural Language Query (Text2Cypher) -------------------------
 
@@ -227,7 +228,9 @@ export const QUERY_TEMPLATES: QueryTemplate[] = [
              d.source         AS source,
              themeCodes       AS themeCodes,
              d.lastSeenAt     AS lastSeenAt
-      ORDER BY d.lastSeenAt DESC NULLS LAST, d.title
+      // Not DESC NULLS LAST: that is Cypher 25, and Neo4j 5.26 rejects it with
+      // "Invalid input 'NULLS'", so this template failed on every call.
+      ORDER BY lastSeenAt IS NULL, lastSeenAt DESC, title
       LIMIT 50
     `,
     extractParams: (_match, question) => ({ question }),
@@ -641,7 +644,7 @@ ${GRAPH_SCHEMA_CONTEXT}`;
           .replace(/```/g, "")
           .trim();
     } catch (err) {
-      console.error("[neo4j-proxy] Azure OpenAI Text2Cypher failed:", err);
+      logger.error({ err }, "Azure OpenAI Text2Cypher failed");
     }
   }
 
@@ -671,7 +674,7 @@ ${GRAPH_SCHEMA_CONTEXT}`;
           .replace(/```/g, "")
           .trim();
     } catch (err) {
-      console.error("[neo4j-proxy] OpenAI Text2Cypher failed:", err);
+      logger.error({ err }, "OpenAI Text2Cypher failed");
     }
   }
 
@@ -694,7 +697,7 @@ ${GRAPH_SCHEMA_CONTEXT}`;
           .replace(/```/g, "")
           .trim();
     } catch (err) {
-      console.error("[neo4j-proxy] Ollama Text2Cypher failed:", err);
+      logger.error({ err }, "Ollama Text2Cypher failed");
     }
   }
 
@@ -722,7 +725,7 @@ ${GRAPH_SCHEMA_CONTEXT}`;
           .replace(/```/g, "")
           .trim();
     } catch (err) {
-      console.error("[neo4j-proxy] Anthropic Text2Cypher failed:", err);
+      logger.error({ err }, "Anthropic Text2Cypher failed");
     }
   }
 
@@ -777,56 +780,71 @@ export function checkReIdentification(
 }
 
 /**
- * Log a query audit event to Neo4j (best-effort, non-blocking).
- * Creates a QueryAuditEvent node for EHDS Art. 53 compliance.
+ * Whether a query would show who a patient is (#475, first part).
+ *
+ * Every Cypher about to run for a caller who does not see patient identity
+ * passes through here: a template, a full-text query or one an LLM wrote. It
+ * looks for a variable bound to `:Patient` (or `:OMOPPerson`, which older
+ * transforms gave the patient's name) and refuses when the query reads that
+ * variable's name, birth or death date, address or record id, returns the
+ * whole node, or projects its properties. Researchers get aggregates and
+ * clinical values, never a person (Regulation (EU) 2025/327 Art. 66).
+ *
+ * A heuristic on the query text, deliberately on the side of refusing: a
+ * false refusal costs a researcher a rephrased question, a false pass names
+ * a patient.
  */
-export function logQueryAudit(
-  participantId: string | undefined,
-  question: string,
-  cypher: string | null,
-  method: string,
-  resultCount: number,
-  odrlEnforced: boolean,
-  // Phase 26e (issue #8): federated-query provenance for transparency reports
-  federatedMeta?: {
-    contributors: string[];
-    aggregateSuppressed: boolean;
-    suppressionReason: string | null;
-  },
-): void {
-  if (!driver) return;
-  const session = driver.session({ database: "neo4j" });
-  session
-    .run(
-      `MERGE (qa:QueryAuditEvent {eventId: $eventId})
-       ON CREATE SET
-         qa.participantId = $participantId,
-         qa.question = $question,
-         qa.cypher = $cypher,
-         qa.method = $method,
-         qa.resultCount = $resultCount,
-         qa.odrlEnforced = $odrlEnforced,
-         qa.federated = $federated,
-         qa.contributors = $contributors,
-         qa.aggregateSuppressed = $aggregateSuppressed,
-         qa.suppressionReason = $suppressionReason,
-         qa.timestamp = datetime()`,
-      {
-        eventId: `qa-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        participantId: participantId ?? "anonymous",
-        question: question.slice(0, 500),
-        cypher: (cypher ?? "").slice(0, 2000),
-        method,
-        resultCount,
-        odrlEnforced,
-        federated: federatedMeta !== undefined,
-        contributors: federatedMeta?.contributors ?? [],
-        aggregateSuppressed: federatedMeta?.aggregateSuppressed ?? false,
-        suppressionReason: federatedMeta?.suppressionReason ?? null,
-      },
-    )
-    .catch((err) => console.error("[neo4j-proxy] Audit log error:", err))
-    .finally(() => session.close());
+/** Who someone is: never read, not even in a WHERE (that is a lookup). */
+const NAMING_PROPS =
+  "name|given|family|address|city|postalCode|telecom|email|phone|ssn|patientId|resourceId";
+/** Dates that identify when returned, and are fine to compute an age from. */
+const DATING_PROPS = "birthDate|deathDate";
+
+/**
+ * The final RETURN of each part of a query (a UNION has several): what reaches
+ * the caller. A RETURN inside a CALL { } sub-query feeds the outer query and
+ * is not counted, so collecting patients to size a cohort is not refused.
+ */
+function finalReturns(cypher: string): string[] {
+  return cypher.split(/\bUNION(?:\s+ALL)?\b/i).map((part) => {
+    const segments = part.split(/\bRETURN\b/i);
+    return segments.length > 1 ? segments[segments.length - 1] : "";
+  });
+}
+
+export function revealsPatientIdentity(cypher: string): boolean {
+  const vars = new Set<string>();
+  for (const m of cypher.matchAll(
+    /\(\s*(\w+)\s*:\s*(?:Patient|OMOPPerson)\b/g,
+  )) {
+    vars.add(m[1]);
+  }
+  const returns = finalReturns(cypher);
+  for (const v of vars) {
+    // v.name, v.address, ... anywhere: a WHERE on a name is a lookup by name
+    if (new RegExp(`\\b${v}\\.(${NAMING_PROPS})\\b`, "i").test(cypher))
+      return true;
+    // properties(v), v {.*}, v{.name} anywhere
+    if (
+      new RegExp(`properties\\(\\s*${v}\\s*\\)|\\b${v}\\s*\\{`, "i").test(
+        cypher,
+      )
+    ) {
+      return true;
+    }
+    for (const ret of returns) {
+      // a birth or death date handed back as it is
+      if (new RegExp(`\\b${v}\\.(${DATING_PROPS})\\b`, "i").test(ret))
+        return true;
+      // the whole node: `RETURN p`, `collect(p)`; counting it returns a number
+      const bare = ret.replace(
+        new RegExp(`count\\s*\\(\\s*(?:DISTINCT\\s+)?${v}\\s*\\)`, "gi"),
+        "",
+      );
+      if (new RegExp(`(^|[\\s,(])${v}(?![\\w.])`).test(bare)) return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -1089,7 +1107,7 @@ export async function fulltextSearch(
 
     return null;
   } catch (err) {
-    console.error("[neo4j-proxy] Fulltext search error:", err);
+    logger.error({ err }, "Fulltext search error");
     return null;
   } finally {
     await session.close();
@@ -1181,7 +1199,7 @@ async function graphRagSearch(
 
     return null;
   } catch (err) {
-    console.error("[neo4j-proxy] GraphRAG search error:", err);
+    logger.error({ err }, "GraphRAG search error");
     return null;
   } finally {
     await session.close();
@@ -1209,7 +1227,7 @@ export async function generateEmbedding(
       const data = (await resp.json()) as any;
       return data.data?.[0]?.embedding ?? null;
     } catch (err) {
-      console.error("[neo4j-proxy] Azure OpenAI embedding error:", err);
+      logger.error({ err }, "Azure OpenAI embedding error");
     }
   }
 
@@ -1223,7 +1241,7 @@ export async function generateEmbedding(
       const data = (await resp.json()) as any;
       return data.embedding ?? null;
     } catch (err) {
-      console.error("[neo4j-proxy] Ollama embedding error:", err);
+      logger.error({ err }, "Ollama embedding error");
     }
   }
 
@@ -1244,7 +1262,7 @@ export async function generateEmbedding(
       const data = (await resp.json()) as any;
       return data.data?.[0]?.embedding ?? null;
     } catch (err) {
-      console.error("[neo4j-proxy] OpenAI embedding error:", err);
+      logger.error({ err }, "OpenAI embedding error");
     }
   }
 
@@ -1303,11 +1321,8 @@ any write }. Return ONLY valid JSON of the form:
       }),
     });
     if (!resp.ok) {
-      console.warn(
-        "[graphrag] rerank HTTP",
-        resp.status,
-        await resp.text().catch(() => ""),
-      );
+      // Status only: the body can echo the prompt, which carries the question.
+      logger.warn({ status: resp.status }, "rerank request failed");
       return null;
     }
     const body = (await resp.json()) as {
@@ -1320,7 +1335,7 @@ any write }. Return ONLY valid JSON of the form:
       return null;
     return parsed;
   } catch (err) {
-    console.warn("[graphrag] rerank error:", err);
+    logger.warn({ err }, "rerank error");
     return null;
   }
 }
@@ -1573,7 +1588,7 @@ export async function computeCohortDataQuality(
 
     return out;
   } catch (err) {
-    console.warn("[neo4j-proxy] data-quality query failed:", err);
+    logger.warn({ err }, "data-quality query failed");
     return null;
   }
 }

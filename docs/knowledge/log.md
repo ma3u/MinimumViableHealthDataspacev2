@@ -16,3 +16,9 @@
 - 2026-10-02 · Added `runbooks/cost-efficient-logging.md` (status draft): logging
   strategy for #418 / ADR-045, from a measured `mvhd-logs` baseline (91 % of 31 days'
   console bytes were crash-loop stack traces; 14 days hit the 1 GB cap).
+- 2026-10-04 · `runbooks/aca-postgres-ephemeral-recovery.md` set to deprecated: the
+  `mvhd-postgres` container app is deleted (ADR-041 phase 4). `services/postgres.md`
+  now names the Flexible Server `mvhd-pg-b53a0449` as the Azure resource.
+- 2026-10-04 · `runbooks/cost-efficient-logging.md`: Phase B steps 8 (neo4j-proxy), 9 and 10
+  (local) marked done, with what was verified; UI logging and the Azure observability app
+  remain open.

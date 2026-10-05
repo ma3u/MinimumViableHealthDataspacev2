@@ -17,6 +17,7 @@
 #   ./scripts/azure/13-postgres-flexible-server.sh 3       # cut Keycloak over
 #   ./scripts/azure/13-postgres-flexible-server.sh 3b      # move EDC + CFM over
 #   ./scripts/azure/13-postgres-flexible-server.sh 4       # retire mvhd-postgres
+#   ./scripts/azure/13-postgres-flexible-server.sh 4b      # retire the pg-data share
 #
 # Run them in order and read the output. Each phase verifies itself and exits
 # non-zero rather than continuing on a bad state.
@@ -415,8 +416,83 @@ phase_4() {
   az containerapp delete --name "$PG_APP" --resource-group "$RG" --yes -o none ||
     die "could not delete ${PG_APP}"
   say "Phase 4 done. ${PG_APP} is gone, and with it the pg-data mount question."
-  say "The pg-data share and its storage definition are left in place; delete"
-  say "them by hand once you are sure nothing else references them."
+  # 01-foundation.sh no longer creates the share; an existing install still
+  # has it. On rg-mvhd-dev it was empty (0 bytes) when this ran, 2026-10-04.
+  say "The pg-data share and its storage definition are left in place. Once"
+  say "no app mounts pg-data, remove both:"
+  say "  az containerapp env storage remove -n ${ACA_ENV} -g ${RG} --storage-name pg-data --yes"
+  say "  az storage share-rm delete --storage-account ${STORAGE_ACCOUNT} -g ${RG} --name pg-data --yes"
+  say "or run phase 4b, which checks first (needs Contributor on ${RG})."
+}
+
+# ── 4b: retire the pg-data share ────────────────────────────────────────────
+# Needs Microsoft.App/managedEnvironments/storages/delete and
+# Microsoft.Storage/.../shares/delete, which Container Apps Contributor lacks;
+# .github/workflows/retire-pg-data-share.yml runs it as the CI identity.
+# Idempotent: what is already gone is reported, not an error.
+PG_SHARE="pg-data"
+
+phase_4b() {
+  say "Phase 4b: retire the ${PG_SHARE} share and its storage definition"
+  if az containerapp show --name "$PG_APP" --resource-group "$RG" -o none 2>/dev/null; then
+    die "${PG_APP} still exists. Run phase 4 first."
+  fi
+
+  local mounted
+  mounted=$(
+    {
+      az containerapp list --resource-group "$RG" \
+        --query "[?contains(to_string(properties.template.volumes), '\"${PG_SHARE}\"')].name" -o tsv
+      az containerapp job list --resource-group "$RG" \
+        --query "[?contains(to_string(properties.template.volumes), '\"${PG_SHARE}\"')].name" -o tsv
+    } | sed '/^$/d'
+  )
+  [ -z "$mounted" ] || die "still mounted by: $(echo "$mounted" | tr '\n' ' ')"
+  say "no Container App or job mounts ${PG_SHARE}"
+
+  local storage_exists=false share_exists=false usage=""
+  az containerapp env storage show --name "$ACA_ENV" --resource-group "$RG" \
+    --storage-name "$PG_SHARE" -o none 2>/dev/null && storage_exists=true
+  if usage=$(az storage share-rm show --storage-account "$STORAGE_ACCOUNT" \
+    --resource-group "$RG" --name "$PG_SHARE" --expand stats \
+    --query shareUsageBytes -o tsv 2>/dev/null); then
+    share_exists=true
+  fi
+  say "storage definition on ${ACA_ENV}: ${storage_exists}; share on ${STORAGE_ACCOUNT}: ${share_exists} (${usage:-n/a} bytes)"
+
+  if ! $storage_exists && ! $share_exists; then
+    say "Phase 4b: nothing left to retire."
+    return 0
+  fi
+  if $share_exists && [ "${usage:-0}" != "0" ] && [ "${PG_SHARE_FORCE:-0}" != "1" ]; then
+    die "${PG_SHARE} holds ${usage} bytes. Look before deleting; re-run with PG_SHARE_FORCE=1 to delete anyway."
+  fi
+
+  local answer="${PG_SHARE_CONFIRM:-}"
+  if [ -z "$answer" ]; then
+    echo "This deletes the ${PG_SHARE} share and its storage definition. Type 'retire' to continue:"
+    read -r answer
+  fi
+  [ "$answer" = "retire" ] || die "not confirmed"
+
+  if $storage_exists; then
+    az containerapp env storage remove --name "$ACA_ENV" --resource-group "$RG" \
+      --storage-name "$PG_SHARE" --yes -o none || die "could not remove the storage definition"
+    say "removed storage definition ${PG_SHARE} from ${ACA_ENV}"
+  fi
+  if $share_exists; then
+    az storage share-rm delete --storage-account "$STORAGE_ACCOUNT" --resource-group "$RG" \
+      --name "$PG_SHARE" --yes -o none || die "could not delete the share"
+    say "deleted share ${PG_SHARE} from ${STORAGE_ACCOUNT}"
+  fi
+
+  if az containerapp env storage show --name "$ACA_ENV" --resource-group "$RG" \
+    --storage-name "$PG_SHARE" -o none 2>/dev/null ||
+    az storage share-rm show --storage-account "$STORAGE_ACCOUNT" --resource-group "$RG" \
+      --name "$PG_SHARE" -o none 2>/dev/null; then
+    die "${PG_SHARE} is still there after the delete"
+  fi
+  say "Phase 4b done. ADR-041 phase 4 is complete."
 }
 
 case "${1:-}" in
@@ -426,5 +502,6 @@ case "${1:-}" in
   3) require_az; phase_3 ;;
   3b) require_az; phase_3b ;;
   4) require_az; phase_4 ;;
-  *) sed -n '14,19p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  4b) require_az; phase_4b ;;
+  *) sed -n '14,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac

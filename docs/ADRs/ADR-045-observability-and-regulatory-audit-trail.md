@@ -1,6 +1,6 @@
 # ADR-045: Cloud-native, vendor-agnostic observability, and a tamper-evident audit trail for regulators
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-04, Matthias Buchhorn)
 **Date:** 2026-10-02
 **Relates to:** [ADR-029](ADR-029-dependency-version-pinning.md), [ADR-036](ADR-036-operator-secrets-in-key-vault.md), [ADR-037](ADR-037-secure-processing-environment-confidential-computing.md), [ADR-040](ADR-040-derived-compliance-state-in-the-api.md), [ADR-041](ADR-041-managed-postgres-on-azure-containerised-locally.md)
 **Supersedes:** the `neo4j-logs` row of [ADR-017](ADR-017-persistent-storage-aca.md) (Neo4j `/logs` is no longer mounted on SMB)

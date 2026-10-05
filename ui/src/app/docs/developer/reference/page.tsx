@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import "@scalar/api-reference-react/style.css";
 import { IS_STATIC } from "@/lib/static-export";
+import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 
 const ApiReferenceReact = dynamic(
   () => import("@scalar/api-reference-react").then((m) => m.ApiReferenceReact),
@@ -39,6 +40,7 @@ export default function ApiReferencePage() {
           <ArrowLeft size={14} /> Back to Developer Guide
         </Link>
         <h1 className="text-2xl font-bold mt-2">API Reference</h1>
+        <DocsLastUpdated page="/docs/developer/reference" />
         <p className="text-sm text-(--text-secondary) mt-1">
           Interactive, three-column reference for all REST endpoints of the EHDS
           Integration Hub. Powered by Scalar — try any endpoint directly from

@@ -1,0 +1,130 @@
+/**
+ * Structured logs for the proxy (ADR-045 plane 1, runbook Phase B step 8, #418).
+ *
+ * One JSON object per line on stdout, with `trace_id` from the caller's W3C
+ * `traceparent` header (or a new one), so a collector can join log lines to a
+ * trace and Loki can index them without regex parsing.
+ *
+ * What never reaches a log line (runbook section 4): patient identifiers, NLQ
+ * question text, Cypher, FHIR or OMOP payloads, tokens, cookies, Authorization
+ * headers. The first defence is not passing them; `REDACT_PATHS` is the second,
+ * and the collector's redaction processor the third. Errors are reduced to
+ * their first line and their stack frames, because a Neo4j error quotes the
+ * query it failed on, and a Text2Cypher query can carry literals.
+ */
+import { AsyncLocalStorage } from "node:async_hooks";
+import { randomBytes } from "node:crypto";
+import { isSpanContextValid, trace } from "@opentelemetry/api";
+import type { NextFunction, Request, Response } from "express";
+import pino, { type DestinationStream, type Logger } from "pino";
+
+const traceContext = new AsyncLocalStorage<{ traceId: string }>();
+
+/** Paths pino replaces with "[redacted]", at the top level and one level down. */
+const SENSITIVE_KEYS = [
+  "question",
+  "cypher",
+  "params",
+  "parameters",
+  "body",
+  "patientId",
+  "personId",
+  "name",
+  "birthDate",
+  "address",
+  "password",
+  "token",
+  "accessToken",
+  "refreshToken",
+  "authorization",
+  "cookie",
+  "apiKey",
+];
+export const REDACT_PATHS = [
+  ...SENSITIVE_KEYS,
+  ...SENSITIVE_KEYS.map((key) => `*.${key}`),
+  'headers["x-api-key"]',
+];
+
+const TRACEPARENT = /^[\da-f]{2}-([\da-f]{32})-[\da-f]{16}-[\da-f]{2}$/;
+
+/** The trace id from a W3C traceparent header, or a new random one. */
+export function traceIdFrom(traceparent: string | undefined): string {
+  const match = traceparent?.trim().toLowerCase().match(TRACEPARENT);
+  if (match && match[1] !== "0".repeat(32)) return match[1];
+  return randomBytes(16).toString("hex");
+}
+
+/** An error without its message body: Neo4j errors quote the failed query. */
+function serializeError(err: unknown) {
+  if (!(err instanceof Error)) return { message: String(err).split("\n")[0] };
+  const withCode = err as Error & { code?: string };
+  return {
+    type: err.name,
+    code: withCode.code,
+    message: err.message.split("\n")[0].slice(0, 300),
+    stack: (err.stack ?? "")
+      .split("\n")
+      .filter((line) => line.trimStart().startsWith("at "))
+      .slice(0, 8)
+      .map((line) => line.trim()),
+  };
+}
+
+export function createLogger(
+  destination?: DestinationStream,
+  level = process.env.LOG_LEVEL ?? "info",
+): Logger {
+  return pino(
+    {
+      level,
+      base: { service: "neo4j-proxy" },
+      timestamp: pino.stdTimeFunctions.isoTime,
+      formatters: { level: (label) => ({ level: label }) },
+      serializers: { err: serializeError },
+      redact: { paths: REDACT_PATHS, censor: "[redacted]" },
+      mixin: () => {
+        const ctx = traceContext.getStore();
+        return ctx ? { trace_id: ctx.traceId } : {};
+      },
+    },
+    destination,
+  );
+}
+
+export const logger = createLogger();
+
+/**
+ * Express middleware: runs the request inside its trace context and writes one
+ * line when it finishes. The line names the route pattern, never the URL, so
+ * `/fhir/Patient/:id` does not put a patient id in the log. Health probes are
+ * not logged at all: they are most of the requests and none of the signal.
+ */
+export function requestLogging(log: Logger = logger) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (req.path === "/health") return next();
+    // With tracing on (tracing.ts) the server span already continues the
+    // caller's trace; without it, read traceparent here.
+    const span = trace.getActiveSpan()?.spanContext();
+    const traceId =
+      span && isSpanContextValid(span)
+        ? span.traceId
+        : traceIdFrom(req.header("traceparent"));
+    const started = process.hrtime.bigint();
+    res.on("finish", () => {
+      const route = req.route?.path
+        ? `${req.baseUrl}${String(req.route.path)}`
+        : "unmatched";
+      const fields = {
+        trace_id: traceId,
+        method: req.method,
+        route,
+        status: res.statusCode,
+        duration_ms: Number(process.hrtime.bigint() - started) / 1e6,
+      };
+      if (res.statusCode >= 500) log.error(fields, "request failed");
+      else log.info(fields, "request");
+    });
+    traceContext.run({ traceId }, next);
+  };
+}

@@ -5,6 +5,9 @@ import { listDemo, DEMO_ONBOARDING_SCOPE } from "@/lib/demo-records";
 import {
   summariseVpas,
   stalledReason,
+  provisioningFailed,
+  provisioningComplete,
+  failedReason,
   type ProfileWithVpas,
 } from "@/lib/provisioning";
 
@@ -54,6 +57,10 @@ export async function GET() {
           profiles = [];
         }
         const vpaSummary = summariseVpas(profiles);
+        // A profile the agents gave up on carries its DID all the same (the
+        // route sends it), so the identifier says nothing about success. Read
+        // the outcome off the profile and its activities (2026-10-03).
+        const failed = provisioningFailed(profiles);
         return {
           ...t,
           participantProfiles: profiles,
@@ -62,6 +69,9 @@ export async function GET() {
           ...(vpaSummary.stalled
             ? { stalledReason: stalledReason(vpaSummary) }
             : {}),
+          provisioningFailed: failed,
+          ...(failed ? { failedReason: failedReason() } : {}),
+          provisioningComplete: provisioningComplete(profiles),
         };
       }),
     );

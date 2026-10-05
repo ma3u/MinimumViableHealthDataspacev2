@@ -13,11 +13,15 @@
 
 // ── 1. OMOPPerson from Patient ───────────────────────────────────────────────
 // Map each FHIR Patient to an OMOPPerson with CDM-compatible fields.
+//
+// No name: the OMOP CDM has no column for one, and this is the research
+// layer. It used to copy the patient's name here, which put names in front of
+// every researcher (#475). The label is a neutral one derived from the record.
 
 MATCH (p:Patient)
 WHERE NOT (p)-[:MAPPED_TO]->(:OMOPPerson)
 MERGE (op:OMOPPerson {id: 'omop-person-' + p.id})
-SET op.name             = p.name,
+SET op.name             = 'OMOP person ' + right(p.id, 6),
     op.genderConceptId  = CASE p.gender
                             WHEN 'male'   THEN 8507
                             WHEN 'female' THEN 8532
@@ -28,6 +32,15 @@ SET op.name             = p.name,
     op.raceConceptId    = 0
 MERGE (p)-[:MAPPED_TO]->(op)
 RETURN count(op) AS omop_persons_created;
+
+// ── 1b. Repair: OMOP persons that carry a copied patient name ──────────────
+// Graphs transformed before #475 gave each OMOPPerson its patient's name.
+// Idempotent: once replaced, the name no longer equals the patient's.
+
+MATCH (p:Patient)-[:MAPPED_TO]->(op:OMOPPerson)
+WHERE op.name = p.name
+SET op.name = 'OMOP person ' + right(coalesce(p.id, op.id), 6)
+RETURN count(op) AS omop_person_names_removed;
 
 // ── 2. OMOPVisitOccurrence from Encounter ───────────────────────────────────
 

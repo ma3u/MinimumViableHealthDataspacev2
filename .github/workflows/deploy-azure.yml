@@ -24,6 +24,8 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    outputs:
+      live: ${{ steps.auth.outputs.live }}
     concurrency:
       group: "azure-deploy"
       cancel-in-progress: false
@@ -89,7 +91,8 @@ jobs:
               "EUDI_VERIFIER_PROFILE=openid4vp" \
               "EUDI_PID_DOCTYPE=eu.europa.ec.eudi.pid.1" \
               "EUDI_REQUEST_URI_METHOD=get" \
-              "EUDI_RESPONSE_MODE=direct_post"
+              "EUDI_RESPONSE_MODE=direct_post" \
+              "AUDIT_CALLBACK_URL=http://mvhd-neo4j-proxy/audit/dsp"
 
       - name: Deploy Neo4j Proxy
         run: |
@@ -139,10 +142,34 @@ jobs:
       # question the others do not: can anybody actually log in. Exit 2 means
       # Keycloak is up but its database is gone, which is a Postgres problem
       # and not a realm one (docs/gotchas.md, 2026-09-30).
+      #
+      # Exit 4 means Keycloak's Container App is stopped. That passes only
+      # when the UI says the demo is offline outside office hours (ADR-053),
+      # as Demo Smoke reads it: then there is no login to test, and the E2E
+      # job skips. A stopped Keycloak behind a UI that claims to be up is
+      # still red (2026-10-04: every weekend deploy failed on "realm 'edcv'
+      # does not exist" while the realm was intact).
       - name: Auth is actually working
+        id: auth
         env:
           KEYCLOAK_PUBLIC_URL: https://auth.ehds.mabu.red
-        run: ./scripts/azure/check-keycloak-health.sh "$KEYCLOAK_PUBLIC_URL" edcv
+          DEMO_URL: https://ehds.mabu.red
+        run: |
+          rc=0
+          ./scripts/azure/check-keycloak-health.sh "$KEYCLOAK_PUBLIC_URL" edcv || rc=$?
+          if [ "$rc" = "4" ]; then
+            body=$(curl -s --max-time 60 "$DEMO_URL/api/graph" -w '\n%{http_code}' || true)
+            code=$(echo "$body" | tail -n1)
+            if [ "$code" = "503" ] && echo "$body" | grep -q '"staticSite"'; then
+              echo "live=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::The stack is stopped outside office hours (ADR-053); the deploy is in place, auth and E2E not checked"
+              echo "**Auth not checked:** the stack is stopped outside office hours (ADR-053)." >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "::error::Keycloak is stopped, but $DEMO_URL/api/graph answered $code, not the offline notice"
+          fi
+          [ "$rc" = "0" ] && echo "live=true" >> "$GITHUB_OUTPUT"
+          exit "$rc"
 
   # -------------------------------------------------------------------
   # E2E Tests against live Azure deployment
@@ -150,6 +177,8 @@ jobs:
   e2e-azure:
     name: E2E Tests (Azure)
     needs: build-and-deploy
+    # Off hours there is nothing live to test (see "Auth is actually working").
+    if: needs.build-and-deploy.outputs.live == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     concurrency:
@@ -195,17 +224,32 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      # The custom domain, not the raw ACA FQDN (as reset-demo.yml already does).
+      # mvhd-ui runs with NEXTAUTH_URL=https://ehds.mabu.red, so a sign-in started
+      # on the ACA host sets its state cookie there and gets its callback on the
+      # custom domain: "State cookie was missing", about 115 stack traces per run,
+      # the largest single source of billed UI logs (#418, ADR-045).
       - name: Get Azure service URLs
         id: azure-url
         run: |
-          UI_FQDN=$(az containerapp show --name mvhd-ui --resource-group ${{ env.RESOURCE_GROUP }} \
-            --query "properties.configuration.ingress.fqdn" -o tsv)
-          KC_FQDN=$(az containerapp show --name mvhd-keycloak --resource-group ${{ env.RESOURCE_GROUP }} \
-            --query "properties.configuration.ingress.fqdn" -o tsv)
-          echo "url=https://${UI_FQDN}" >> "$GITHUB_OUTPUT"
-          echo "keycloak_url=https://${KC_FQDN}" >> "$GITHUB_OUTPUT"
-          echo "Azure UI URL: https://${UI_FQDN}"
-          echo "Azure Keycloak URL: https://${KC_FQDN}"
+          resolve_host() {
+            local app="$1"
+            local custom
+            custom=$(az containerapp show --name "$app" --resource-group ${{ env.RESOURCE_GROUP }} \
+              --query "properties.configuration.ingress.customDomains[0].name" -o tsv 2>/dev/null || echo "")
+            if [ -n "$custom" ] && [ "$custom" != "None" ]; then
+              echo "$custom"
+              return
+            fi
+            az containerapp show --name "$app" --resource-group ${{ env.RESOURCE_GROUP }} \
+              --query "properties.configuration.ingress.fqdn" -o tsv
+          }
+          UI_HOST=$(resolve_host mvhd-ui)
+          KC_HOST=$(resolve_host mvhd-keycloak)
+          echo "url=https://${UI_HOST}" >> "$GITHUB_OUTPUT"
+          echo "keycloak_url=https://${KC_HOST}" >> "$GITHUB_OUTPUT"
+          echo "Azure UI URL: https://${UI_HOST}"
+          echo "Azure Keycloak URL: https://${KC_HOST}"
 
       # Public-page smoke only — running the full 1015-test suite against the
       # live WAN endpoint with workers=1 (CI default) cannot finish within the

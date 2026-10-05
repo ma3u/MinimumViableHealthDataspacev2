@@ -8,6 +8,7 @@ import {
   lookupAnalyte,
   normaliseLabel,
   normaliseUnit,
+  dropStrayLeading,
 } from "../src/analytes.js";
 
 describe("normaliseLabel", () => {
@@ -411,5 +412,76 @@ describe("the microbiome names its organisms", () => {
     });
     // The sheet's misspelling still finds the organism.
     expect(taxon("Hafnia alveii")?.scientificName).toBe("Hafnia alvei");
+  });
+});
+
+describe("what nineteen real scans taught (2026-10-04)", () => {
+  const code = (label: string, unit: string) => {
+    const r = lookupAnalyte(label, unit);
+    return r.status === "ok" ? r.coding.loincNumber : r.status;
+  };
+
+  it("codes B12 in pmol/L as moles in serum, not mass in whole blood", () => {
+    expect(code("Vitamin B12", "pmol/l")).toBe("14685-2");
+    expect(code("Vitamin B12", "pg/ml")).toBe("2132-9");
+  });
+
+  it("codes 25-OH vitamin D as D2 plus D3, and D3 only when the label says so", () => {
+    expect(code("25-OH Vitamin D", "ng/ml")).toBe("62292-8");
+    expect(code("Vitamin D", "nmol/l")).toBe("68438-1");
+    expect(code("25-OH-Vitamin-D3", "ng/ml")).toBe("1989-3");
+    expect(code("Vitamin D3", "nmol/l")).toBe("14635-7");
+  });
+
+  it("codes a microscopic differential by manual count, an analyser's by automated", () => {
+    expect(code("Lymphozyten (mikr.Diff)", "%")).toBe("737-7");
+    expect(code("Lymphozyten (mikr.Diff.abs.)", "/µl")).toBe("732-8");
+    expect(code("Lymphozyten", "%")).toBe("736-9");
+    expect(code("Segmentkernige Granulozyten (mikr.)", "%")).toBe("769-0");
+    expect(code("Neutrophile Granu. (mikr.Diff.abs.)", "/µl")).toBe("753-4");
+    expect(code("Monozyten (mikr.Diff)", "%")).toBe("744-3");
+    expect(code("Eosinophile (mikr.Diff)", "%")).toBe("714-6");
+    expect(code("Basophile (mikr.Diff.abs.)", "/µl")).toBe("705-4");
+  });
+
+  it("codes urine albumin and urine creatinine apart from their serum namesakes", () => {
+    expect(code("Albumin im Urin", "mg/l")).toBe("1754-1");
+    expect(code("Albumin", "g/l")).toBe("1751-7");
+    expect(code("Kreatinin im Urin", "mmol/l")).toBe("14683-7");
+    expect(code("Kreatinin im Urin", "mg/dl")).toBe("2161-8");
+    expect(code("Kreatinin", "mg/dl")).toBe("2160-0");
+  });
+
+  it("codes creatine kinase, and refuses it in a unit that belongs to another row", () => {
+    expect(code("Creatinkinase", "U/l")).toBe("2157-6");
+    expect(code("CK", "µkat/l")).toBe("2157-6");
+    expect(code("Creatinkinase", "pg/ml")).toBe("unit-mismatch");
+  });
+
+  it("reads rn that the recogniser joined into m", () => {
+    expect(code("Hamsäure", "mg/dl")).toBe(code("Harnsäure", "mg/dl"));
+    expect(code("Hamstoff", "mg/dl")).toBe("3091-6");
+  });
+
+  it("reads an eGFR unit however its letters came back", () => {
+    for (const unit of [
+      "m/min/1.73m",
+      "mimin/1.73m",
+      "ml/min/1,73m²",
+      "ml/min/1.73m2",
+    ]) {
+      expect(normaliseUnit(unit)).toBe("mL/min/{1.73_m2}");
+    }
+    expect(normaliseUnit("m/min")).toBeNull();
+  });
+
+  it("drops a stray glyph in front of a unit, but never one that might be µ", () => {
+    expect(normaliseUnit("Ing/ml")).toBe("ng/mL");
+    expect(normaliseUnit("img/dl")).toBe("mg/dL");
+    expect(normaliseUnit(":ng/ml")).toBe("ng/mL");
+    // `ig/dl` could be `µg/dl` read badly, a millionfold from `g/dl`.
+    expect(dropStrayLeading("ig/dl")).toBeNull();
+    // A real unit is never touched.
+    expect(normaliseUnit("iu/l")).toBe("[IU]/L");
   });
 });

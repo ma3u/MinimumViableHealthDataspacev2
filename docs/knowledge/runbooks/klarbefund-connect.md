@@ -11,7 +11,7 @@ consent page, and the phone polls Keycloak for its token.
 | Part                             | Where                                                                                             |
 | -------------------------------- | ------------------------------------------------------------------------------------------------- |
 | Keycloak client `klarbefund-app` | `jad/keycloak-realm.json`; a running realm gets it from `scripts/azure/wire-klarbefund-client.sh` |
-| Pairing (in memory, 2 min)       | `ui/src/lib/app-pairing.ts`, `POST /api/patient/app-pairing`, `GET /api/patient/app-pairing/{id}` |
+| Pairing (Neo4j, 2 min + 5 grace) | `ui/src/lib/app-pairing.ts`, `POST /api/patient/app-pairing`, `GET /api/patient/app-pairing/{id}` |
 | The app's token check            | `ui/src/lib/app-auth.ts` (`requireAppToken`)                                                      |
 | Connected phones (Neo4j)         | `ui/src/lib/app-connections.ts`, `(:AppConnection)`, `/api/patient/app-devices`                   |
 | The record for the phone         | `GET /api/patient/app/record`, a FHIR R4 Bundle                                                   |

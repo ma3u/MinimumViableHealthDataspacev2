@@ -1,0 +1,60 @@
+name: Cost guards (budget, crash-loop alert, no ingestion cap)
+
+# Runs scripts/azure/set-cost-guards.sh (#418, ADR-045 decisions 13 to 16).
+# Through CI because an Owner-less laptop account cannot write action groups,
+# alert rules, budgets or the workspace cap; the CI service principal is a
+# Contributor on rg-mvhd-dev. Azure OIDC answers only on main, so dispatch it
+# from main. Safe to re-run: every call is a PUT.
+
+on:
+  workflow_dispatch:
+    inputs:
+      monthly_budget:
+        description: "Monthly budget for rg-mvhd-dev, in the billing currency"
+        type: string
+        default: "1000"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "cost-guards"
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Apply the cost guards
+        env:
+          MONTHLY_BUDGET: ${{ inputs.monthly_budget }}
+          # The operator's address, also notified (decided 2026-10-04, #418).
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+        run: |
+          [ -n "$ALERT_EMAIL" ] && echo "::add-mask::$ALERT_EMAIL"
+          ./scripts/azure/set-cost-guards.sh "$MONTHLY_BUDGET"
+
+      - name: Show what is in place
+        if: always()
+        run: |
+          {
+            echo "## Cost guards"
+            echo
+            echo "| Guard | State |"
+            echo "|---|---|"
+            echo "| Daily cap (GB) | $(az monitor log-analytics workspace show -g rg-mvhd-dev -n mvhd-logs --query workspaceCapping.dailyQuotaGb -o tsv) |"
+            echo "| Budget | $(az consumption budget show --budget-name mvhd-monthly -g rg-mvhd-dev --query amount -o tsv 2>/dev/null || echo missing) |"
+            echo "| Crash-loop alert | $(az resource show -g rg-mvhd-dev -n mvhd-crash-loop --resource-type Microsoft.Insights/scheduledQueryRules --query properties.enabled -o tsv 2>/dev/null || echo missing) |"
+          } >> "$GITHUB_STEP_SUMMARY"

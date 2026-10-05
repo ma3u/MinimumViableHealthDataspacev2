@@ -193,21 +193,41 @@ describe("GET /api/patient/profile", () => {
     expect(data.gdprRights.ehdsAccess).toBe("EHDS Art. 3");
   });
 
+  // patient1 owns P1 (#271). The session is read twice: by the role gate and
+  // by the own-record check, so it is mocked for the whole test.
+  const patient1 = {
+    user: { name: "Patient One", email: "patient1@test.example" },
+    roles: ["PATIENT"],
+    preferredUsername: "patient1",
+  } as unknown as Awaited<ReturnType<typeof getServerSession>>;
+
   it("allows a PATIENT role to read their own profile", async () => {
-    vi.mocked(getServerSession).mockResolvedValueOnce({
-      user: { name: "Patient One", email: "p1@test.example" },
-      roles: ["PATIENT"],
-    } as unknown as Awaited<ReturnType<typeof getServerSession>>);
+    vi.mocked(getServerSession).mockResolvedValue(patient1);
 
     mockRunQuery.mockResolvedValueOnce([
-      { id: "p-1", name: "Patient", gender: "female", birthDate: "1970-01-01" },
+      { id: "P1", name: "Patient", gender: "female", birthDate: "1970-01-01" },
     ]);
     mockRunQuery.mockResolvedValueOnce([]);
     mockRunQuery.mockResolvedValueOnce([]);
     mockRunQuery.mockResolvedValueOnce([]);
     mockRunQuery.mockResolvedValueOnce([{ total: 0 }]);
 
-    const res = await GET(makeReq("?patientId=p-1"));
+    const res = await GET(makeReq("?patientId=P1"));
     expect(res.status).toBe(200);
+  });
+
+  it("refuses a PATIENT another patient's profile (#475)", async () => {
+    vi.mocked(getServerSession).mockResolvedValue(patient1);
+    const res = await GET(makeReq("?patientId=P2"));
+    expect(res.status).toBe(403);
+    expect(await res.json()).toMatchObject({ error: "Forbidden" });
+    expect(mockRunQuery).not.toHaveBeenCalled();
+  });
+
+  it("lists only a PATIENT's own record (#475)", async () => {
+    vi.mocked(getServerSession).mockResolvedValue(patient1);
+    mockRunQuery.mockResolvedValueOnce([]);
+    await GET(makeReq(""));
+    expect(mockRunQuery.mock.calls[0][1]).toEqual({ own: "P1" });
   });
 });

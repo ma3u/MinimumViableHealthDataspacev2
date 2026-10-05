@@ -316,6 +316,7 @@ ${rows}
       .replacingOccurrences(of: "ae", with: "a")
       .replacingOccurrences(of: "oe", with: "o")
       .replacingOccurrences(of: "ue", with: "u")
+      .replacingOccurrences(of: "rn", with: "m")
   }
 
   public static func normaliseUnit(_ raw: String) -> String? {
@@ -327,7 +328,27 @@ ${rows}
     // \`normaliseUnit\` on the TypeScript side.
     if compact == "G/l" || compact == "G/L" { return "10*9/L" }
     if compact == "T/l" || compact == "T/L" { return "10*12/L" }
-    return unitMap[compact.lowercased()] ?? repairUnit(raw)
+    let lower = compact.lowercased()
+    if let unit = unitMap[lower] { return unit }
+    if lower.range(of: #"^m[il1|]?/?min/1[.,]73m(2|²)?$"#, options: .regularExpression) != nil {
+      return "mL/min/{1.73_m2}"
+    }
+    return dropStrayLeading(compact) ?? repairUnit(raw)
+  }
+
+  /// Glyphs a recogniser prints in front of a unit. Mirrors \`STRAY_LEADING\`.
+  static let strayLeading: Set<Character> = ["I", "i", "l", "|", "!", ":"]
+
+  /// Drops one stray glyph in front of a unit, \`Ing/ml\`, unless a letter in
+  /// its place would name another unit. Mirrors \`dropStrayLeading\`.
+  static func dropStrayLeading(_ compact: String) -> String? {
+    guard compact.count >= 3, let first = compact.first, strayLeading.contains(first) else {
+      return nil
+    }
+    let rest = String(compact.dropFirst()).lowercased()
+    guard let unit = unitMap[rest] else { return nil }
+    for letter in ["u", "m", "n", "p"] where unitMap[letter + rest] != nil { return nil }
+    return unit
   }
 
   /// Characters a recogniser confuses with one another. Mirrors \`CONFUSABLE\`.
@@ -434,7 +455,8 @@ export async function generate(): Promise<string> {
     const derived = normaliseLabel(label)
       .replace(/ae/g, "a")
       .replace(/oe/g, "o")
-      .replace(/ue/g, "u");
+      .replace(/ue/g, "u")
+      .replace(/rn/g, "m");
     if (derived !== looseLabelKey(label)) {
       throw new Error(
         `looseLabelKey("${label}") is not derivable from its strict key; update the Swift template`,

@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { ownPatientIdForSession } from "@/lib/overview/patient";
+import { patientPseudonym, seesPatientIdentity } from "@/lib/patient-identity";
 import { runQuery } from "@/lib/neo4j";
 import {
   LABEL_LAYER,
@@ -505,6 +509,45 @@ async function buildDefaultGraph() {
   ]);
 }
 
+// ── Patient identity (#475) ─────────────────────────────────────────────────
+
+/**
+ * Replaces each Patient node's name with its pseudonym, keyed on the record id
+ * so the label matches the one in the patient index. A PATIENT's own record
+ * keeps its name: it is theirs (EHDS Art. 3).
+ */
+async function pseudonymisePatients(
+  nodes: ReturnType<typeof toNode>[],
+  roles: string[],
+): Promise<ReturnType<typeof toNode>[]> {
+  // OMOP persons too: older transforms copied the patient's name onto them
+  // (neo4j/fhir-to-omop-transform.cypher step 1b repairs the data). They are
+  // labelled with their patient's pseudonym, so the two twins still match.
+  const personIds = nodes
+    .filter((n) => n.label === "Patient" || n.label === "OMOPPerson")
+    .map((n) => n.id);
+  if (personIds.length === 0) return nodes;
+  const keys = await runQuery<{ id: string; key: string }>(
+    `MATCH (p:Patient) WHERE elementId(p) IN $ids
+     RETURN elementId(p) AS id, coalesce(p.id, p.resourceId, elementId(p)) AS key
+     UNION
+     MATCH (p:Patient)-[:MAPPED_TO]->(op:OMOPPerson) WHERE elementId(op) IN $ids
+     RETURN elementId(op) AS id, coalesce(p.id, p.resourceId, elementId(p)) AS key`,
+    { ids: personIds },
+  );
+  const keyOf = new Map(keys.map((k) => [k.id, k.key]));
+  const own = roles.includes("PATIENT")
+    ? ownPatientIdForSession(await getServerSession(authOptions))
+    : null;
+  return nodes.map((n) => {
+    if (n.label !== "Patient" && n.label !== "OMOPPerson") return n;
+    const key = keyOf.get(n.id) ?? n.id;
+    if (key === own) return n;
+    const label = patientPseudonym(key);
+    return { ...n, name: n.label === "OMOPPerson" ? `OMOP ${label}` : label };
+  });
+}
+
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 /**
@@ -553,6 +596,13 @@ export async function GET(req: Request) {
         break;
       default:
         nodes = await buildDefaultGraph();
+    }
+
+    // Patients by pseudonym for every role that does not see identity
+    // (#475). Decided by the session's roles, not by `persona`, which is only
+    // a query parameter and anyone can set it. A patient keeps their own name.
+    if (!seesPatientIdentity(auth.session.roles)) {
+      nodes = await pseudonymisePatients(nodes, auth.session.roles);
     }
 
     const links = await runQuery<{
