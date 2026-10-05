@@ -5,12 +5,14 @@ Run after a change and commit both this file and its output:
 
     python3 observability/grafana/build-dashboards.py
 
-Two dashboards, both read-only provisioned:
+Three dashboards, all read-only provisioned:
 
 - EHDS audit trail: is the evidence intact (hash chains verified by the
   proxy), what was recorded, what was refused, did an audit write fail.
 - EDC contracts and transfers: every DSP negotiation and transfer by state,
   refusals and failures with their reasons, and the connector services' errors.
+- Load and stress test (#519): k6's view of a run (load, response time by kind
+  and endpoint), the proxy's own view of the same run, and container stats.
 
 Data: every audit number is counted from the hash chain itself, through the
 proxy's read-only endpoints and the Infinity datasource. Loki supplies only what
@@ -211,6 +213,197 @@ OUTCOME_OVERRIDE = [{"matcher": {"id": "byName", "options": "Outcome"},
                      "properties": [{"id": "custom.width", "value": 160}]}]
 
 
+# ---------------------------------------------------------------------------
+# Load and stress test (#519)
+# ---------------------------------------------------------------------------
+
+PROM = {"type": "prometheus", "uid": "prometheus"}
+K6 = 'testid="$testid"'
+PROXY_RUN = '{service_name=~".*neo4j-proxy.*"} | json | __error__="" | load_test="$testid"'
+CONTAINERS = 'container_name=~"health-dataspace-.*"'
+
+
+def prom(expr, legend="", instant=False, ref="A"):
+    t = {"datasource": PROM, "expr": expr, "legendFormat": legend, "refId": ref}
+    if instant:
+        t.update({"instant": True, "range": False, "format": "table"})
+    return t
+
+
+def series(ids, title, targets, x, y, w=12, h=8, unit="short", description="",
+           datasource=PROM, draw="line", stack=False, legend_calcs=("max", "last")):
+    return {
+        "type": "timeseries", "id": ids.next(), "title": title, "description": description,
+        "datasource": datasource, "targets": targets,
+        "gridPos": {"h": h, "w": w, "x": x, "y": y},
+        "fieldConfig": {"defaults": {"custom": {
+            "drawStyle": draw, "fillOpacity": 70 if draw == "bars" else 10,
+            "lineWidth": 1, "showPoints": "never",
+            "stacking": {"mode": "normal" if stack else "none", "group": "A"}},
+            "unit": unit}, "overrides": []},
+        "options": {"legend": {"displayMode": "table", "placement": "right",
+                               "calcs": list(legend_calcs), "sortBy": "Max", "sortDesc": True},
+                    "tooltip": {"mode": "multi", "sort": "desc"}},
+    }
+
+
+def p95(by):
+    return (f'histogram_quantile(0.95, sum by ({by}) '
+            f'(rate(k6_http_req_duration_seconds{{{K6}}}[$__rate_interval])))')
+
+
+def load_test():
+    """What to watch while a load, stress or soak test runs, and where it broke.
+
+    k6 streams every metric to Prometheus with the run's `testid`; the proxy logs
+    the same id as `load_test`; Docker stats say which container saturates. The
+    Azure half (replicas, CPU and the Log Analytics copy of the proxy log) is
+    pulled after the run with the commands in the last panel.
+    """
+    ids = Ids()
+    fail_thresholds = {"mode": "absolute", "steps": [
+        {"color": "green", "value": None}, {"color": "orange", "value": 0.005},
+        {"color": "red", "value": 0.01}]}
+    pass_thresholds = {"mode": "absolute", "steps": [
+        {"color": "red", "value": None}, {"color": "orange", "value": 0.95},
+        {"color": "green", "value": 0.99}]}
+    panels = [
+        row(ids, "Load (k6): what the test is doing", 0),
+        stat(ids, "Virtual users", prom(f"max(k6_vus{{{K6}}})"), 0, 1,
+             description="Concurrent users right now."),
+        stat(ids, "Requests / s", prom(f"sum(rate(k6_http_reqs_total{{{K6}}}[$__rate_interval]))"), 4, 1,
+             unit="reqps"),
+        stat(ids, "Failed requests", prom(f"max(k6_http_req_failed_rate{{{K6}}})"), 8, 1,
+             unit="percentunit", thresholds=fail_thresholds,
+             description="Share of requests answered with 4xx or 5xx, or not at all. The SLO is under 1 %."),
+        stat(ids, "Rate limited (429)",
+             prom(f'sum(increase(k6_http_reqs_total{{{K6}, status="429"}}[$__range]))'), 12, 1,
+             thresholds=ALERT_ON_ANY,
+             description="#519 hypothesis 1: before the fix every user shared one bucket of 20 analytical queries a minute."),
+        stat(ids, "Checks passed", prom(f"max(k6_checks_rate{{{K6}}})"), 16, 1,
+             unit="percentunit", thresholds=pass_thresholds,
+             description="Status 200 and under the SLO, per request."),
+        stat(ids, "Iterations", prom(f"sum(increase(k6_iterations_total{{{K6}}}[$__range]))"), 20, 1,
+             description="Completed persona journeys (or sign-ins, or queries) in the run."),
+        series(ids, "Virtual users and requests / s",
+               [prom(f"max(k6_vus{{{K6}}})", "virtual users", ref="A"),
+                prom(f"sum(rate(k6_http_reqs_total{{{K6}}}[$__rate_interval]))", "requests / s", ref="B")],
+               0, 5),
+        series(ids, "Responses by HTTP status",
+               [prom(f"sum by (status) (rate(k6_http_reqs_total{{{K6}}}[$__rate_interval]))", "{{status}}")],
+               12, 5, unit="reqps", draw="bars", stack=True,
+               description="429 is the rate limit, 5xx the hub failing, 0 a request that got no answer."),
+
+        row(ids, "Response time, as the client sees it", 13),
+        series(ids, "p95 by kind: website pages, API, NLQ, sign-in",
+               [prom(p95("kind"), "{{kind}}")], 0, 14, unit="s",
+               description="The proposed SLOs (#519): pages under 2 s, API under 1 s, NLQ under 3 s."),
+        series(ids, "p50, p95 and p99, all requests",
+               [prom(p95("testid").replace("0.95", q), f"p{q[2:]}", ref=r)
+                for q, r in (("0.50", "A"), ("0.95", "B"), ("0.99", "C"))],
+               12, 14, unit="s"),
+        series(ids, "p95 per endpoint", [prom(p95("name"), "{{name}}")], 0, 22, w=24, unit="s",
+               description="The route pattern k6 names, never a URL with an id. The legend is sorted by the worst value."),
+        table(ids, "Per endpoint: p95, requests, failures",
+              prom(p95("name"), instant=True, ref="A"), 0, 30, h=9,
+              description="Sorted by p95. Failures are responses k6 did not expect (4xx, 5xx, none)."),
+
+        row(ids, "Server side: the proxy, log lines of this run (load_test = testid)", 39),
+        series(ids, "Requests / s by route",
+               [loki_target(f"sum by (route) (rate({PROXY_RUN} [$__auto]))", "{{route}}")],
+               0, 40, datasource=LOKI, unit="reqps"),
+        series(ids, "p95 duration by route (server side)",
+               [loki_target(f"quantile_over_time(0.95, {PROXY_RUN} | unwrap duration_ms [$__auto]) by (route)", "{{route}}")],
+               12, 40, datasource=LOKI, unit="ms",
+               description="Measured in the proxy; the difference to the client-side p95 is the UI and the network."),
+        series(ids, "429 and 5xx per minute",
+               [loki_target(f'sum by (status) (count_over_time({PROXY_RUN} | status=~"429|5.." [1m]))', "{{status}}")],
+               0, 48, datasource=LOKI, draw="bars", stack=True),
+        series(ids, "Audit records per transaction",
+               [loki_target('avg_over_time({service_name=~".*neo4j-proxy.*"} | json | __error__="" | msg="audit recorded" | unwrap audit_batch [$__auto])', "batch size")],
+               12, 48, datasource=LOKI,
+               description="#519 hypothesis 2: one record per transaction was the ceiling for audited queries. Above 1 means the batch writer is doing its work."),
+        logs(ids, "Errors during the run (proxy and UI)",
+             '{service_name=~".*(neo4j-proxy|ui).*"} |~ "(?i)\\\\berror\\\\b|exception|ECONN|timed? ?out" != "GET /api/health"',
+             0, 56, h=10),
+
+        row(ids, "Containers: who saturates first (Docker stats, compose stack)", 66),
+        series(ids, "CPU by container", [prom(f"container_cpu_utilization_ratio{{{CONTAINERS}}}", "{{container_name}}")],
+               0, 67, unit="percentunit"),
+        series(ids, "Memory by container", [prom(f"container_memory_usage_total_bytes{{{CONTAINERS}}}", "{{container_name}}")],
+               12, 67, unit="bytes"),
+        series(ids, "Network bytes / s by container",
+               [prom(f"sum by (container_name) (rate(container_network_io_usage_rx_bytes_total{{{CONTAINERS}}}[$__rate_interval]) "
+                     f"+ rate(container_network_io_usage_tx_bytes_total{{{CONTAINERS}}}[$__rate_interval]))", "{{container_name}}")],
+               0, 75, w=24, h=6, unit="Bps"),
+
+        row(ids, "Azure, the live hub: pulled after the run", 81),
+        text(ids, AZURE_AFTER_RUN, 0, 82, h=9),
+    ]
+    per_endpoint = next(p for p in panels if p["title"] == "Per endpoint: p95, requests, failures")
+    per_endpoint["transformations"] = [
+        {"id": "merge"},
+        {"id": "organize", "options": {"excludeByName": {"Time": True},
+                                        "renameByName": {"Value #A": "p95 (s)", "Value #B": "requests", "Value #C": "failed"}}},
+        {"id": "sortBy", "options": {"sort": [{"field": "p95 (s)", "desc": True}]}},
+    ]
+    per_endpoint["targets"] += [
+        prom(f"sum by (name) (increase(k6_http_reqs_total{{{K6}}}[$__range]))", instant=True, ref="B"),
+        prom(f'sum by (name) (increase(k6_http_reqs_total{{{K6}, expected_response="false"}}[$__range]))', instant=True, ref="C"),
+    ]
+    board = dashboard(
+        "mvhd-load-test", "Load and stress test",
+        "What to watch while k6 runs against the hub (#519): load, client-side response time by kind "
+        "and endpoint, the proxy's own view of the same run, and which container saturates first.",
+        panels, ["mvhd", "load-test", "k6"])
+    board["time"] = {"from": "now-1h", "to": "now"}
+    board["refresh"] = "10s"
+    board["templating"]["list"] = [{
+        "name": "testid", "label": "Test run", "type": "query", "datasource": PROM,
+        "query": {"query": "label_values(k6_vus, testid)", "refId": "A"},
+        "definition": "label_values(k6_vus, testid)", "refresh": 2, "sort": 2,
+        "includeAll": False, "multi": False, "current": {}, "options": [],
+    }]
+    board["links"] = [
+        {"title": "Runbook: load and stress test", "type": "link", "targetBlank": True,
+         "url": "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/knowledge/runbooks/load-and-stress-test.md"},
+        {"title": "Issue #519", "type": "link", "targetBlank": True,
+         "url": "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/519"},
+    ]
+    return board
+
+
+def loki_target(expr, legend=""):
+    return {"datasource": LOKI, "expr": expr, "legendFormat": legend, "queryType": "range", "refId": "A"}
+
+
+AZURE_AFTER_RUN = """Grafana has no Azure credentials here, so the live hub's numbers are pulled after the run and kept with the k6 summary (`load-tests/results/<testid>/`).
+
+**Replicas, CPU, memory and requests per app** (one line per app, 1-minute grain):
+
+```
+scripts/azure/export-load-metrics.sh <testid> <start ISO> <end ISO>
+```
+
+**The proxy's log lines of the run** in Log Analytics (the same `load_test` field as the Loki panels above):
+
+```
+ContainerAppConsoleLogs_CL
+| where ContainerAppName_s == "mvhd-neo4j-proxy" and TimeGenerated between (datetime(<start>) .. datetime(<end>))
+| extend j = parse_json(Log_s)
+| where tostring(j.load_test) == "<testid>"
+| summarize requests = count(), p95_ms = percentile(toreal(j.duration_ms), 95), errors = countif(toint(j.status) >= 500), limited = countif(toint(j.status) == 429) by route = tostring(j.route), bin(TimeGenerated, 1m)
+```
+
+**Errors as they happen** (any app):
+
+```
+az containerapp logs show -n mvhd-ui -g rg-mvhd-dev --follow --tail 20 | grep -iE "error|exception|ECONN"
+```
+"""
+
+
+
 def ehds_audit():
     ids = Ids()
     p = [
@@ -295,7 +488,8 @@ def edc_dsp():
 
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
-    for name, board in (("ehds-audit-trail.json", ehds_audit()), ("edc-contracts-transfers.json", edc_dsp())):
+    for name, board in (("ehds-audit-trail.json", ehds_audit()), ("edc-contracts-transfers.json", edc_dsp()),
+                        ("load-stress-test.json", load_test())):
         with open(os.path.join(OUT, name), "w") as f:
             json.dump(board, f, indent=2)
             f.write("\n")

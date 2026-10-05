@@ -30,6 +30,22 @@ receivers:
       http:
         endpoint: 0.0.0.0:4318
 
+  # CPU, memory and network of every container, for the load and stress test
+  # dashboard (#519): which component saturates first is read here, not from
+  # the apps. The same socket the log receivers use.
+  docker_stats:
+    endpoint: unix:///var/run/docker.sock
+    collection_interval: 10s
+    excluded_images:
+      - otel/opentelemetry-collector-contrib*
+      - grafana/otel-lgtm*
+      - grafana/k6*
+    metrics:
+      container.cpu.utilization:
+        enabled: true
+      container.memory.percent:
+        enabled: true
+
   # One filelog receiver per running container, created as containers appear.
   receiver_creator/containers:
     watch_observers: [docker_observer]
@@ -167,6 +183,6 @@ service:
       processors: [memory_limiter, transform/scrub-spans, tail_sampling, batch]
       exporters: [otlp_http/lgtm]
     metrics:
-      receivers: [otlp]
+      receivers: [otlp, docker_stats]
       processors: [memory_limiter, batch]
       exporters: [otlp_http/lgtm]
