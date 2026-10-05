@@ -196,6 +196,12 @@ const UNIT_MAP: Record<string, string> = {
   "vol.%": "%",
   "ml/min/1.73m": "mL/min/{1.73_m2}",
   "ml/min/1,73m": "mL/min/{1.73_m2}",
+  // Blood pressure and pulse (FHIR vital signs: mm[Hg] and /min).
+  mmhg: "mm[Hg]",
+  "mm[hg]": "mm[Hg]",
+  "/min": "/min",
+  "1/min": "/min",
+  bpm: "/min",
 };
 
 /**
@@ -453,6 +459,44 @@ function differential(
         "/uL": c(spec.count[0], spec.count[1], "/uL"),
         "%": c(spec.share[0], spec.share[1], "%"),
       },
+    },
+  ];
+}
+
+/**
+ * A vital sign as a single reading and as the period means an ambulatory
+ * report prints (24 hours, day, night). One analyte, so reference ranges and
+ * descriptions are shared; the label picks the coding, as the method does
+ * for the differential.
+ */
+function vitalSign(
+  key: string,
+  spec: {
+    description: string;
+    labels: string[];
+    unit: string;
+    single: [loinc: string, display: string];
+    day24: [loinc: string, display: string];
+    period: [loinc: string, display: string];
+    /** The German name the ambulatory reader writes before the period. */
+    base: string;
+  },
+): AnalyteDefinition[] {
+  const one = (code: [string, string]) => ({
+    [spec.unit]: c(code[0], code[1], spec.unit),
+  });
+  return [
+    {
+      key,
+      description: spec.description,
+      labels: spec.labels,
+      byUnit: one(spec.single),
+    },
+    { key, labels: [`${spec.base} 24-h-Mittel`], byUnit: one(spec.day24) },
+    {
+      key,
+      labels: [`${spec.base} Tagesmittel`, `${spec.base} Nachtmittel`],
+      byUnit: one(spec.period),
     },
   ];
 }
@@ -2747,6 +2791,97 @@ const DEFINITIONS: AnalyteDefinition[] = [
       ),
     },
   },
+  // ---- Blood pressure and pulse (FHIR R4 vital signs) ----
+  // A single reading takes the vital-sign codes (8480-6, 8462-4, 8867-4). A
+  // 24-hour ambulatory report prints means per period: LOINC codes the 24-hour
+  // mean exactly (8490-5, 8472-3, 41924-2) and has only an undated "mean"
+  // for day and night (96608-5, 96609-3, 103205-1), so those labels name the
+  // period and the reader puts it on the line (abpm.swift). All verified
+  // against NLM, 2026-10-05.
+  ...vitalSign("systolic-bp", {
+    description:
+      "The pressure in the arteries while the heart contracts, the upper of the two blood pressure figures.",
+    labels: [
+      "Systolischer Blutdruck",
+      "Blutdruck systolisch",
+      "Systolisch",
+      "Systolic blood pressure",
+      "SYS",
+    ],
+    unit: "mm[Hg]",
+    single: ["8480-6", "Systolic blood pressure"],
+    day24: ["8490-5", "Systolic blood pressure 24 hour mean"],
+    period: ["96608-5", "Systolic blood pressure mean"],
+    base: "Systolischer Blutdruck",
+  }),
+  ...vitalSign("diastolic-bp", {
+    description:
+      "The pressure in the arteries while the heart relaxes between beats, the lower blood pressure figure.",
+    labels: [
+      "Diastolischer Blutdruck",
+      "Blutdruck diastolisch",
+      "Diastolisch",
+      "Diastolic blood pressure",
+      "DIA",
+    ],
+    unit: "mm[Hg]",
+    single: ["8462-4", "Diastolic blood pressure"],
+    day24: ["8472-3", "Diastolic blood pressure 24 hour mean"],
+    period: ["96609-3", "Diastolic blood pressure mean"],
+    base: "Diastolischer Blutdruck",
+  }),
+  ...vitalSign("heart-rate", {
+    description: "How often the heart beats in a minute.",
+    labels: ["Puls", "Herzfrequenz", "Pulsfrequenz", "Heart rate", "Pulse"],
+    unit: "/min",
+    single: ["8867-4", "Heart rate"],
+    day24: ["41924-2", "Heart rate 24 hour mean"],
+    period: ["103205-1", "Mean heart rate"],
+    base: "Puls",
+  }),
+  ...vitalSign("mean-arterial-pressure", {
+    description:
+      "The average pressure in the arteries over one heartbeat, the pressure that perfuses the organs.",
+    labels: [
+      "Mittlerer arterieller Druck",
+      "Arterieller Mitteldruck",
+      "MAD",
+      "MAP",
+      "Mean arterial pressure",
+    ],
+    unit: "mm[Hg]",
+    single: ["8478-0", "Mean blood pressure"],
+    day24: ["8478-0", "Mean blood pressure"],
+    period: ["8478-0", "Mean blood pressure"],
+    base: "Mittlerer arterieller Druck",
+  }),
+  ...vitalSign("pulse-pressure", {
+    description:
+      "The difference between the systolic and the diastolic pressure.",
+    labels: ["Pulsdruck", "Blutdruckamplitude", "PP", "Pulse pressure"],
+    unit: "mm[Hg]",
+    single: ["107146-3", "Pulse pressure"],
+    day24: ["107146-3", "Pulse pressure"],
+    period: ["107146-3", "Pulse pressure"],
+    base: "Pulsdruck",
+  }),
+  {
+    key: "nocturnal-dipping",
+    description:
+      "How far the blood pressure falls at night compared with the day, as a percentage of the day value. A fall of 10 to 20 percent is called dipping.",
+    labels: [
+      "Nächtliche Absenkung systolisch",
+      "Nächtliche Absenkung diastolisch",
+      "Nächtliche Absenkung Puls",
+    ],
+    byUnit: {
+      "%": uncoded(
+        "Nocturnal blood pressure dipping",
+        "%",
+        "LOINC has no term for the night-to-day fall an ambulatory blood pressure report computes.",
+      ),
+    },
+  },
   // ---- Urine ----
   // The parser refuses a urine row unless "<name> im Urin" is a label here,
   // so serum albumin and urine albumin can never share a code. Every label
@@ -3276,6 +3411,17 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
   aptt: "Wie schnell das Blut über den Kontaktweg gerinnt. Der Test, mit dem Heparin überwacht wird.",
   urea: "Ein Abbauprodukt des Eiweißstoffwechsels, das die Niere ausscheidet. Steigt auch bei Flüssigkeitsmangel und hoher Eiweißzufuhr.",
   transferrin: "Das Protein, das Eisen im Blut transportiert.",
+  "systolic-bp":
+    "Der Druck in den Arterien, während das Herz sich zusammenzieht, der obere der beiden Blutdruckwerte.",
+  "diastolic-bp":
+    "Der Druck in den Arterien, während das Herz zwischen zwei Schlägen erschlafft, der untere Blutdruckwert.",
+  "heart-rate": "Wie oft das Herz in einer Minute schlägt.",
+  "mean-arterial-pressure":
+    "Der mittlere Druck in den Arterien über einen Herzschlag, der Druck, mit dem die Organe durchblutet werden.",
+  "pulse-pressure":
+    "Der Unterschied zwischen systolischem und diastolischem Druck.",
+  "nocturnal-dipping":
+    "Wie weit der Blutdruck nachts gegenüber dem Tag absinkt, in Prozent des Tageswerts. Eine Absenkung um 10 bis 20 Prozent heißt Dipping.",
   "creatine-kinase":
     "Ein Enzym der Muskelzellen, auch des Herzmuskels, das ins Blut übertritt, wenn Muskeln beansprucht oder geschädigt werden.",
   "albumin-urine":

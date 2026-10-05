@@ -22,3 +22,16 @@ description = "NextAuth session cookie (JWE, dir + A256GCM)"
 regex = '''eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0\.\.[A-Za-z0-9_-]{8,}'''
 keywords = ["eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0"]
 tags = ["session", "nextauth", "jwe"]
+
+# The generated analyte dictionary (ADR-033, clients/ios) keys every coding by
+# its label folded to lowercase letters and digits, `labelKey:
+# "systolischerblutdruck24hmittel"`, and the generic-api-key rule reads a long
+# one as a credential. They are words from lab sheets, never secrets. Scoped
+# to that one file and that one field, so a real key anywhere else, or in any
+# other field of the file, is still found.
+[[allowlists]]
+description = "Normalised analyte labels in the generated dictionary"
+condition = "AND"
+paths = ['''clients/ios/Sources/Shared/Analytes\.generated\.swift''']
+regexTarget = "line"
+regexes = ['''labelKey: "[a-z0-9]+"''']
