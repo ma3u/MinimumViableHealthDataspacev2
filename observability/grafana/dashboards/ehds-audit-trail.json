@@ -15,36 +15,49 @@
   "version": 1,
   "panels": [
     {
-      "type": "text",
-      "id": 1,
-      "title": "",
+      "type": "row",
+      "id": 15,
+      "title": "Auditor guide: the regulation, and how to audit this trail step by step",
+      "collapsed": false,
       "gridPos": {
-        "h": 3,
+        "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
       },
+      "panels": []
+    },
+    {
+      "type": "text",
+      "id": 16,
+      "title": "",
+      "gridPos": {
+        "h": 14,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
       "options": {
         "mode": "markdown",
-        "content": "**The evidence is the hash chain**, read and re-verified by the proxy on every refresh: changing, removing or reordering any record breaks every hash after it. Counts and curves are counted from the chain's records too; only failed audit writes come from the proxy's logs, because a failed write leaves no record. Every query, contract negotiation and data transfer is recorded; a request whose record cannot be written is not carried out (fail closed). Regulation (EU) 2025/327 Art. 73 \u00b7 GDPR Art. 5(2), 30."
+        "content": "### How to audit this trail, step by step\n\n**What the law asks.** Under Regulation (EU) 2025/327 (EHDS), health data for secondary use is reached only with a data permit from the health data access body (Art. 61(1), Art. 68), and access to and activity in the secure processing environment is logged, the logs kept for at least one year (Art. 73(1)(e)). In primary use a person can see who accessed their data, kept for at least three years (Art. 9). GDPR Art. 5(2) and Art. 30 ask the controller to prove compliance and keep records of processing. Here every query, every contract negotiation and every data transfer becomes a FHIR R4 `AuditEvent`, hash-chained to the one before it, and a request whose record cannot be written is refused (fail closed).\n\n1. **Set the audit period** with the time picker, top right. Records are not deleted within the retention period, so widen the range before concluding that nothing happened.\n2. **Check integrity.** Both chains must read **INTACT**: the proxy recomputes every hash from the first record on every refresh. **BROKEN** means a record was changed, removed or reordered; stop and escalate. Copy both **chain heads** (record count and hash) into your report: at the next audit each chain must still hold that head at the same record number.\n3. **Check completeness.** *Audit writes failed* must be 0, or explained. Each one is a request that was refused because its record could not be written: not a gap in the evidence, but an outage to account for.\n4. **Queries** (*Query records*). One row per natural-language or federated query: who asked (*Parties*), when, and the outcome. The question and the generated Cypher are kept only as SHA-256, so no record holds health data. *Refused* means a guard stopped the query (re-identification risk, ODRL prohibition, k-anonymity); read the reason.\n5. **Contracts and transfers** (*Contract and transfer records*, and the dashboard *EDC contracts and transfers*). Follow each negotiation from *requested* to *finalized* and each transfer from *requested* to *completed*. A transfer of health data for secondary use must name its contract agreement and its data permit (*Agreement, asset, permit*). A transfer refused for want of a permit is the gate working (Art. 61(1)). Every *terminated* or *failed* row carries the connector's reason.\n6. **Re-verify outside this dashboard.** `scripts/verify-audit-chain.sh` reads Neo4j directly and recomputes the chain. The raw records are FHIR `AuditEvent`s at `/audit/chains/query/events` and `/audit/chains/dsp/events` on the proxy.\n7. **Write down** the period, both chain heads, the counts, every refusal and failed write with its reason, and any record marked *Demo* (demonstration traffic, not real use).\n\n**Known limit (#418).** The chain lives in Neo4j. It proves order and integrity, but someone with write access to the database could rebuild it from a point onward. Comparing chain heads between audits (step 2) detects that; a signed daily digest and a write-once copy will close it.\n"
       }
     },
     {
       "type": "row",
-      "id": 2,
+      "id": 1,
       "title": "Integrity of the evidence",
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 3
+        "y": 15
       },
       "panels": []
     },
     {
       "type": "stat",
-      "id": 3,
+      "id": 2,
       "title": "Query chain",
       "description": "NLQ and federated queries. Verified hash by hash.",
       "datasource": {
@@ -81,12 +94,12 @@
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 4
+        "y": 16
       },
       "options": {
         "reduceOptions": {
           "calcs": ["lastNotNull"],
-          "fields": "",
+          "fields": "/^ok$/",
           "values": false
         },
         "colorMode": "background",
@@ -130,7 +143,7 @@
     },
     {
       "type": "stat",
-      "id": 4,
+      "id": 3,
       "title": "Query records",
       "description": "",
       "datasource": {
@@ -167,7 +180,7 @@
         "h": 4,
         "w": 4,
         "x": 4,
-        "y": 4
+        "y": 16
       },
       "options": {
         "reduceOptions": {
@@ -200,7 +213,7 @@
     },
     {
       "type": "stat",
-      "id": 5,
+      "id": 4,
       "title": "Contract & transfer chain",
       "description": "DSP negotiations and data transfers. Verified hash by hash.",
       "datasource": {
@@ -237,12 +250,12 @@
         "h": 4,
         "w": 4,
         "x": 8,
-        "y": 4
+        "y": 16
       },
       "options": {
         "reduceOptions": {
           "calcs": ["lastNotNull"],
-          "fields": "",
+          "fields": "/^ok$/",
           "values": false
         },
         "colorMode": "background",
@@ -286,7 +299,7 @@
     },
     {
       "type": "stat",
-      "id": 6,
+      "id": 5,
       "title": "Contract & transfer records",
       "description": "",
       "datasource": {
@@ -323,7 +336,7 @@
         "h": 4,
         "w": 4,
         "x": 12,
-        "y": 4
+        "y": 16
       },
       "options": {
         "reduceOptions": {
@@ -356,7 +369,7 @@
     },
     {
       "type": "stat",
-      "id": 7,
+      "id": 6,
       "title": "Audit writes failed (request refused)",
       "description": "Each one is a query, negotiation or transfer that was not carried out because its record could not be written.",
       "datasource": {
@@ -379,7 +392,7 @@
         "h": 4,
         "w": 4,
         "x": 16,
-        "y": 4
+        "y": 16
       },
       "options": {
         "reduceOptions": {
@@ -416,7 +429,7 @@
     },
     {
       "type": "stat",
-      "id": 8,
+      "id": 7,
       "title": "Refused queries",
       "description": "Refused by a guard: re-identification risk, ODRL prohibition, k-anonymity.",
       "datasource": {
@@ -463,7 +476,7 @@
         "h": 4,
         "w": 2,
         "x": 20,
-        "y": 4
+        "y": 16
       },
       "options": {
         "reduceOptions": {
@@ -520,7 +533,7 @@
     },
     {
       "type": "stat",
-      "id": 9,
+      "id": 8,
       "title": "Refused transfers",
       "description": "No data permit (Art. 61(1)).",
       "datasource": {
@@ -567,7 +580,7 @@
         "h": 4,
         "w": 2,
         "x": 22,
-        "y": 4
+        "y": 16
       },
       "options": {
         "reduceOptions": {
@@ -624,20 +637,20 @@
     },
     {
       "type": "row",
-      "id": 10,
+      "id": 9,
       "title": "What was recorded",
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 8
+        "y": 20
       },
       "panels": []
     },
     {
       "type": "timeseries",
-      "id": 11,
+      "id": 10,
       "title": "Contract and transfer records by kind",
       "description": "",
       "datasource": {
@@ -684,7 +697,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 9
+        "y": 21
       },
       "transformations": [
         {
@@ -742,7 +755,7 @@
     },
     {
       "type": "timeseries",
-      "id": 12,
+      "id": 11,
       "title": "Query records by kind",
       "description": "",
       "datasource": {
@@ -789,7 +802,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 9
+        "y": 21
       },
       "transformations": [
         {
@@ -847,20 +860,20 @@
     },
     {
       "type": "row",
-      "id": 13,
+      "id": 12,
       "title": "Records, newest first (from the chain)",
       "collapsed": false,
       "gridPos": {
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 29
       },
       "panels": []
     },
     {
       "type": "table",
-      "id": 14,
+      "id": 13,
       "title": "Contract and transfer records",
       "description": "Every step of every DSP negotiation and transfer: what the hub sent, what it refused, and every state the connector reported.",
       "datasource": {
@@ -942,7 +955,7 @@
         "h": 11,
         "w": 24,
         "x": 0,
-        "y": 18
+        "y": 30
       },
       "options": {
         "showHeader": true,
@@ -1015,7 +1028,7 @@
     },
     {
       "type": "table",
-      "id": 15,
+      "id": 14,
       "title": "Query records",
       "description": "NLQ and federated queries. The question and the Cypher are kept as SHA-256 only, so no record holds health data.",
       "datasource": {
@@ -1097,7 +1110,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 41
       },
       "options": {
         "showHeader": true,
@@ -1167,6 +1180,203 @@
         ]
       },
       "transformations": []
+    },
+    {
+      "type": "row",
+      "id": 17,
+      "title": "For the audit report: chain heads",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 50
+      },
+      "panels": []
+    },
+    {
+      "type": "table",
+      "id": 18,
+      "title": "Query chain head",
+      "description": "Copy both values into the audit report. At the next audit the chain must still hold this head at the same record number; if it does not, records before it were rewritten.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "mvhd-audit"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "mvhd-audit"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "/audit/chains/query/verify",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "ok",
+              "text": "Intact",
+              "type": "string"
+            },
+            {
+              "selector": "count",
+              "text": "Records",
+              "type": "number"
+            },
+            {
+              "selector": "head",
+              "text": "Head hash (SHA-256)",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 51
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Head hash (SHA-256)"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 620
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "Intact": 0,
+              "Records": 1,
+              "Head hash (SHA-256)": 2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "id": 19,
+      "title": "Contract & transfer chain head",
+      "description": "Copy both values into the audit report. At the next audit the chain must still hold this head at the same record number; if it does not, records before it were rewritten.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "mvhd-audit"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "mvhd-audit"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "/audit/chains/dsp/verify",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "ok",
+              "text": "Intact",
+              "type": "string"
+            },
+            {
+              "selector": "count",
+              "text": "Records",
+              "type": "number"
+            },
+            {
+              "selector": "head",
+              "text": "Head hash (SHA-256)",
+              "type": "string"
+            }
+          ]
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 24,
+        "x": 0,
+        "y": 55
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "filterable": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Head hash (SHA-256)"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 620
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "Intact": 0,
+              "Records": 1,
+              "Head hash (SHA-256)": 2
+            }
+          }
+        }
+      ]
     }
   ],
   "templating": {

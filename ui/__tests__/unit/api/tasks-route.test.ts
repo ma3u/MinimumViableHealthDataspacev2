@@ -221,6 +221,23 @@ describe("/api/tasks GET", () => {
     expect(data.tasks[0].id).toBe("fallback-1");
   });
 
+  it("passes a load test's run id on to the proxy (#519)", async () => {
+    mockManagement.mockRejectedValueOnce(new Error("Connection refused"));
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ tasks: [], counts: {} }),
+    });
+
+    await GET(
+      new Request("http://localhost/api/tasks", {
+        headers: { "X-Load-Test": "20261005-load-local" },
+      }),
+    );
+
+    const [, init] = mockFetch.mock.calls[0];
+    expect(init.headers["X-Load-Test"]).toBe("20261005-load-local");
+  });
+
   it("computes active count excluding terminal states", async () => {
     mockManagement
       .mockResolvedValueOnce([{ "@id": "ctx-1", participantId: "did:1" }])

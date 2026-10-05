@@ -3,7 +3,7 @@ import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { promises as fs } from "fs";
 import path from "path";
-import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
+import { NEO4J_PROXY_URL, callerHeaders, loadTestHeaders } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
 
@@ -70,7 +70,7 @@ interface EdcParticipant {
  *
  * Returns: { tasks: Task[], counts: { total, negotiations, transfers, active } }
  */
-export async function GET() {
+export async function GET(request?: Request) {
   const auth = await requireAuth();
   if (isAuthError(auth)) return auth;
 
@@ -208,6 +208,7 @@ export async function GET() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...loadTestHeaders(request),
           ...callerHeaders(auth.session),
         },
         body: JSON.stringify({
@@ -255,7 +256,10 @@ export async function GET() {
     // Fall back to persistent task storage (PostgreSQL via neo4j-proxy)
     try {
       const fallbackRes = await fetch(`${NEO4J_PROXY_URL}/tasks`, {
-        headers: callerHeaders(auth.session),
+        headers: {
+          ...loadTestHeaders(request),
+          ...callerHeaders(auth.session),
+        },
         signal: AbortSignal.timeout(5000),
       });
       if (fallbackRes.ok) {
