@@ -26,6 +26,9 @@ vi.mock("fs", () => ({
 
 import { GET } from "@/app/api/tasks/route";
 
+/** A plain request: the route reads only the load test header from it. */
+const request = () => new Request("http://localhost/api/tasks");
+
 describe("/api/tasks GET", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -34,7 +37,7 @@ describe("/api/tasks GET", () => {
 
   it("returns empty tasks when no participants found", async () => {
     mockManagement.mockResolvedValueOnce([]);
-    const res = await GET();
+    const res = await GET(request());
     const data = await res.json();
 
     expect(data.tasks).toEqual([]);
@@ -48,7 +51,7 @@ describe("/api/tasks GET", () => {
 
   it("returns empty tasks when participants is not an array", async () => {
     mockManagement.mockResolvedValueOnce(null);
-    const res = await GET();
+    const res = await GET(request());
     const data = await res.json();
     expect(data.tasks).toEqual([]);
   });
@@ -75,7 +78,7 @@ describe("/api/tasks GET", () => {
       // transfers for ctx-1
       .mockResolvedValueOnce([]);
 
-    const res = await GET();
+    const res = await GET(request());
     const data = await res.json();
 
     expect(data.tasks).toHaveLength(1);
@@ -109,7 +112,7 @@ describe("/api/tasks GET", () => {
         },
       ]);
 
-    const res = await GET();
+    const res = await GET(request());
     const data = await res.json();
 
     expect(data.tasks).toHaveLength(1);
@@ -135,7 +138,7 @@ describe("/api/tasks GET", () => {
         },
       ]);
 
-    const res = await GET();
+    const res = await GET(request());
     const data = await res.json();
 
     expect(data.tasks[0].edrAvailable).toBe(false);
@@ -157,7 +160,7 @@ describe("/api/tasks GET", () => {
       ])
       .mockResolvedValueOnce([]);
 
-    const res = await GET();
+    const res = await GET(request());
     const data = await res.json();
 
     expect(data.tasks[0].timestamp).toBe(300);
@@ -179,7 +182,7 @@ describe("/api/tasks GET", () => {
       ])
       .mockResolvedValueOnce([]);
 
-    const res = await GET();
+    const res = await GET(request());
     const data = await res.json();
 
     expect(data.tasks[0].state).toBe("OFFERED");
@@ -192,7 +195,7 @@ describe("/api/tasks GET", () => {
       .mockRejectedValueOnce(new Error("EDC unavailable")) // negotiations fail
       .mockRejectedValueOnce(new Error("EDC unavailable")); // transfers fail
 
-    const res = await GET();
+    const res = await GET(request());
     const data = await res.json();
 
     expect(data.tasks).toEqual([]);
@@ -214,7 +217,7 @@ describe("/api/tasks GET", () => {
           }),
       });
 
-    const res = await GET();
+    const res = await GET(request());
     const data = await res.json();
 
     expect(data.tasks).toHaveLength(1);
@@ -252,7 +255,7 @@ describe("/api/tasks GET", () => {
         { "@id": "t2", state: "COMPLETED", stateTimestamp: 6, assetId: "f" },
       ]);
 
-    const res = await GET();
+    const res = await GET(request());
     const data = await res.json();
 
     expect(data.counts.total).toBe(6);
