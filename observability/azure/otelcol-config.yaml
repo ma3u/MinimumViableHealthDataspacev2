@@ -1,0 +1,103 @@
+# The collector inside mvhd-observability (ADR-045, #418). The services send
+# OTLP here; nothing reads container stdout on Azure (that goes to Log
+# Analytics). Same redaction, noise filter and tail sampling as the compose
+# collector (observability/otel-collector.yaml), minus the Docker receivers.
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+    path: "/ready"
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 80
+    spike_limit_percentage: 25
+
+  # Below INFO, and probe noise, never leave the collector.
+  filter/noise:
+    error_mode: ignore
+    logs:
+      log_record:
+        - severity_number != SEVERITY_NUMBER_UNSPECIFIED and severity_number < SEVERITY_NUMBER_INFO
+        - IsMatch(body, "GET /(api/)?health")
+        - IsMatch(body, "kube-probe|ReadinessProbe|LivenessProbe")
+
+  # Second line of defence: credentials that slipped into a message body.
+  transform/redact:
+    error_mode: ignore
+    log_statements:
+      - context: log
+        statements:
+          - replace_pattern(body, "\\x1b\\[[0-9;]*m", "")
+          - replace_pattern(body, "(?i)(bearer\\s+)[A-Za-z0-9._~+/=-]+", "$${1}[redacted]")
+          - replace_pattern(body, "eyJ[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]{8,}\\.[A-Za-z0-9_-]+", "[redacted-jwt]")
+
+  # No URL, query string or client address leaves the collector; http.route
+  # (the pattern) stays.
+  transform/scrub-spans:
+    error_mode: ignore
+    trace_statements:
+      - context: span
+        statements:
+          - delete_matching_keys(attributes, "^(url\\.(full|path|query)|http\\.(url|target|client_ip|user_agent)|client\\.address|net\\.peer\\.ip|network\\.peer\\.(address|port)|user_agent\\.original)$")
+
+  # Every error and every slow trace, and 10 % of the rest (ADR-045 plane 1
+  # decision 3).
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 20000
+    policies:
+      - name: errors
+        type: status_code
+        status_code:
+          status_codes: [ERROR]
+      - name: slow
+        type: latency
+        latency:
+          threshold_ms: 1000
+      - name: sample-the-rest
+        type: probabilistic
+        probabilistic:
+          sampling_percentage: 10
+
+  batch:
+    send_batch_size: 1024
+    timeout: 5s
+
+exporters:
+  otlp_http/metrics:
+    endpoint: http://127.0.0.1:9090/api/v1/otlp
+    tls:
+      insecure: true
+  otlp_http/traces:
+    endpoint: http://127.0.0.1:4418
+    tls:
+      insecure: true
+  otlp_http/logs:
+    endpoint: http://127.0.0.1:3100/otlp
+    tls:
+      insecure: true
+
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, transform/scrub-spans, tail_sampling, batch]
+      exporters: [otlp_http/traces]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/metrics]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, filter/noise, transform/redact, batch]
+      exporters: [otlp_http/logs]
