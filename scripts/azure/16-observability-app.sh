@@ -118,7 +118,7 @@ if [[ "$MODE" == "--bind-domain" ]]; then
   az containerapp hostname bind --name "$OBS_APP" --resource-group "$RG" \
     --hostname "$GRAFANA_HOST" --environment "$ACA_ENV" --validation-method CNAME -o none
   az containerapp update --name "$OBS_APP" --resource-group "$RG" \
-    --set-env-vars "GF_SERVER_ROOT_URL=https://${GRAFANA_HOST}" -o none
+    --set-env-vars "GF_SERVER_ROOT_URL=https://${GRAFANA_HOST}" "GF_SERVER_DOMAIN=${GRAFANA_HOST}" -o none
   ok "Grafana at https://${GRAFANA_HOST}"
   exit 0
 fi
@@ -171,8 +171,12 @@ else
 fi
 ok "Keycloak client mvhd-grafana"
 
+ROOT_URL="$(app_exists && root_url || echo "https://${APP_FQDN}")"
 ENV_VARS=(
-  "GF_SERVER_ROOT_URL=$(app_exists && root_url || echo "https://${APP_FQDN}")"
+  "GF_SERVER_ROOT_URL=${ROOT_URL}"
+  # enforce_domain compares the request's host with [server] domain, which
+  # defaults to localhost: without this every request redirects to itself.
+  "GF_SERVER_DOMAIN=${ROOT_URL#https://}"
   "GF_AUTH_GENERIC_OAUTH_AUTH_URL=${KEYCLOAK_URL}/realms/edcv/protocol/openid-connect/auth"
   "GF_AUTH_GENERIC_OAUTH_TOKEN_URL=${KEYCLOAK_URL}/realms/edcv/protocol/openid-connect/token"
   "GF_AUTH_GENERIC_OAUTH_API_URL=${KEYCLOAK_URL}/realms/edcv/protocol/openid-connect/userinfo"
