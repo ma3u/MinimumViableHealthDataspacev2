@@ -58,10 +58,17 @@ const SESSIONS = SCENARIO === "signin" ? {} : loadSessions();
 // Personas and what each one does
 // ---------------------------------------------------------------------------
 
-/** The persona of this VU, by weight, stable for the VU's lifetime. */
+/**
+ * The persona of this VU, by weight, stable for the VU's lifetime. VUs are
+ * spread over the slots by a stride coprime to the total, so any number of
+ * VUs gets the mix: with `vu % total`, VUs 1 to 50 were all patients and
+ * researchers, and the clinic, regulator and admin journeys never ran
+ * below 60 users.
+ */
+const PERSONA_STRIDE = 37;
 function personaFor(vu) {
   const total = PERSONA_MIX.reduce((n, [, w]) => n + w, 0);
-  let slot = vu % total;
+  let slot = ((vu - 1) * PERSONA_STRIDE) % total;
   for (const [persona, weight] of PERSONA_MIX) {
     if (slot < weight) return persona;
     slot -= weight;
