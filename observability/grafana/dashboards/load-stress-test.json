@@ -798,7 +798,7 @@
     {
       "type": "row",
       "id": 15,
-      "title": "Server side: the proxy, log lines of this run (load_test = testid)",
+      "title": "Server side: the proxy, log lines of this run (load_test = testid; NLQ, federated and tasks)",
       "collapsed": false,
       "gridPos": {
         "h": 1,
@@ -925,8 +925,8 @@
     {
       "type": "timeseries",
       "id": 18,
-      "title": "429 and 5xx per minute",
-      "description": "",
+      "title": "Proxy responses per minute, by status",
+      "description": "The proxy's answers to this run's calls. 429 is the rate limit, 5xx the proxy failing. Only the UI routes that call the proxy (NLQ, federated queries, tasks) appear here; the others read Neo4j directly.",
       "datasource": {
         "type": "loki",
         "uid": "loki"
@@ -937,7 +937,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "sum by (status) (count_over_time({service_name=~\".*neo4j-proxy.*\"} | json | __error__=\"\" | load_test=\"$testid\" | status=~\"429|5..\" [1m]))",
+          "expr": "sum by (status) (count_over_time({service_name=~\".*neo4j-proxy.*\"} | json | __error__=\"\" | load_test=\"$testid\" [1m]))",
           "legendFormat": "{{status}}",
           "queryType": "range",
           "refId": "A"
@@ -983,7 +983,7 @@
       "type": "timeseries",
       "id": 19,
       "title": "Audit records per transaction",
-      "description": "#519 hypothesis 2: one record per transaction was the ceiling for audited queries. Above 1 means the batch writer is doing its work.",
+      "description": "#519 hypothesis 2: one record per transaction was the ceiling for audited queries. Above 1 means the batch writer is doing its work. Audit lines carry no run id, so this is every audited query in the time range, not only the run's.",
       "datasource": {
         "type": "loki",
         "uid": "loki"
@@ -994,10 +994,20 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "avg_over_time({service_name=~\".*neo4j-proxy.*\"} | json | __error__=\"\" | msg=\"audit recorded\" | unwrap audit_batch [$__auto])",
-          "legendFormat": "batch size",
+          "expr": "avg by (audit_chain) (avg_over_time({service_name=~\".*neo4j-proxy.*\"} | msg=\"audit recorded\" | keep audit_chain, audit_batch | unwrap audit_batch | __error__=\"\" [$__auto]))",
+          "legendFormat": "{{audit_chain}} average",
           "queryType": "range",
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "max by (audit_chain) (max_over_time({service_name=~\".*neo4j-proxy.*\"} | msg=\"audit recorded\" | keep audit_chain, audit_batch | unwrap audit_batch | __error__=\"\" [$__auto]))",
+          "legendFormat": "{{audit_chain}} largest",
+          "queryType": "range",
+          "refId": "B"
         }
       ],
       "gridPos": {

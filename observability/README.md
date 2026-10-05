@@ -27,12 +27,15 @@ compose stack publishes. Point them elsewhere with `MVHD_AUDIT_URL`, and set
 **EHDS audit trail.** Is the evidence intact: the proxy re-verifies both hash chains
 (queries; contract negotiations and transfers) on every refresh, hash by hash. How many
 records, how many refused, and whether an audit write failed (each failure is a request
-that was not carried out). The newest records, from the chain.
+that was not carried out). The newest records, from the chain. It opens with the auditor
+guide: what Regulation (EU) 2025/327 and the GDPR ask, and the seven steps of an audit;
+it ends with both chain heads (record count and hash) to copy into the audit report.
 
 **EDC contracts and transfers.** Every DSP negotiation and transfer by state (requested,
 agreed, finalized, started, completed, refused for want of a permit, terminated), the
 ones that did not complete with their reasons, and the connector services' errors and log
-volume.
+volume. _Newest record_ says when the chain last grew, so an empty time range reads as
+"nothing happened since", not as a broken panel.
 
 **Load and stress test** (#519). What to watch while k6 runs (`load-tests/run.sh`): users,
 requests a second, failures and 429s; the client-side p95 by kind (website pages, API, NLQ,

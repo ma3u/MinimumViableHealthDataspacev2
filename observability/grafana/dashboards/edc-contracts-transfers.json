@@ -15,6 +15,91 @@
   "version": 1,
   "panels": [
     {
+      "type": "text",
+      "id": 20,
+      "title": "",
+      "gridPos": {
+        "h": 3,
+        "w": 18,
+        "x": 0,
+        "y": 0
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**What this shows:** every DSP contract negotiation and data transfer, counted from the `dsp` hash chain. The hub writes a record when it asks the connector (*requested*) or refuses a transfer for want of a data permit; the connector's callbacks write every later state (*agreed*, *finalized*, *started*, *completed*, *terminated*). **Empty?** Nothing was negotiated in the time range: widen it, or see *Newest record*. A negotiation that was started but never shows up points to the connector: see *Connector services* at the bottom."
+      }
+    },
+    {
+      "type": "stat",
+      "id": 21,
+      "title": "Newest record",
+      "description": "The newest record in the chain, whatever the time range. An empty range with an old newest record means nothing happened since.",
+      "datasource": {
+        "type": "yesoreyeram-infinity-datasource",
+        "uid": "mvhd-audit"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "yesoreyeram-infinity-datasource",
+            "uid": "mvhd-audit"
+          },
+          "refId": "A",
+          "type": "json",
+          "source": "url",
+          "format": "table",
+          "parser": "backend",
+          "url": "/audit/chains/dsp/events?limit=1",
+          "url_options": {
+            "method": "GET",
+            "data": ""
+          },
+          "root_selector": "",
+          "columns": [
+            {
+              "selector": "recorded",
+              "text": "recorded",
+              "type": "timestamp"
+            }
+          ]
+        }
+      ],
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "/^recorded$/",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "dateTimeFromNow",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "noValue": "no records yet"
+        },
+        "overrides": []
+      }
+    },
+    {
       "type": "row",
       "id": 1,
       "title": "Contract negotiations (DSP)",
@@ -23,7 +108,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 0
+        "y": 3
       },
       "panels": []
     },
@@ -76,7 +161,7 @@
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 1
+        "y": 4
       },
       "options": {
         "reduceOptions": {
@@ -176,7 +261,7 @@
         "h": 4,
         "w": 4,
         "x": 4,
-        "y": 1
+        "y": 4
       },
       "options": {
         "reduceOptions": {
@@ -276,7 +361,7 @@
         "h": 4,
         "w": 4,
         "x": 8,
-        "y": 1
+        "y": 4
       },
       "options": {
         "reduceOptions": {
@@ -376,7 +461,7 @@
         "h": 4,
         "w": 4,
         "x": 12,
-        "y": 1
+        "y": 4
       },
       "options": {
         "reduceOptions": {
@@ -480,7 +565,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 5
+        "y": 8
       },
       "transformations": [
         {
@@ -545,7 +630,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 12
+        "y": 15
       },
       "panels": []
     },
@@ -598,7 +683,7 @@
         "h": 4,
         "w": 4,
         "x": 0,
-        "y": 13
+        "y": 16
       },
       "options": {
         "reduceOptions": {
@@ -698,7 +783,7 @@
         "h": 4,
         "w": 4,
         "x": 4,
-        "y": 13
+        "y": 16
       },
       "options": {
         "reduceOptions": {
@@ -798,7 +883,7 @@
         "h": 4,
         "w": 4,
         "x": 8,
-        "y": 13
+        "y": 16
       },
       "options": {
         "reduceOptions": {
@@ -898,7 +983,7 @@
         "h": 4,
         "w": 4,
         "x": 12,
-        "y": 13
+        "y": 16
       },
       "options": {
         "reduceOptions": {
@@ -1002,7 +1087,7 @@
         "h": 4,
         "w": 4,
         "x": 16,
-        "y": 13
+        "y": 16
       },
       "options": {
         "reduceOptions": {
@@ -1106,7 +1191,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 17
+        "y": 20
       },
       "transformations": [
         {
@@ -1171,7 +1256,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 24
+        "y": 27
       },
       "panels": []
     },
@@ -1259,7 +1344,7 @@
         "h": 9,
         "w": 24,
         "x": 0,
-        "y": 25
+        "y": 28
       },
       "options": {
         "showHeader": true,
@@ -1358,7 +1443,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 34
+        "y": 37
       },
       "panels": []
     },
@@ -1387,7 +1472,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 35
+        "y": 38
       },
       "fieldConfig": {
         "defaults": {
@@ -1440,7 +1525,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 35
+        "y": 38
       },
       "fieldConfig": {
         "defaults": {
@@ -1493,7 +1578,7 @@
         "h": 10,
         "w": 24,
         "x": 0,
-        "y": 43
+        "y": 46
       },
       "options": {
         "showTime": true,
