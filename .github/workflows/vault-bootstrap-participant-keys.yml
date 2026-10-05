@@ -48,9 +48,13 @@ jobs:
       - name: Resolve Vault token
         id: vault
         run: |
+          # Dev-mode Vault carried its token in the app's env; since ADR-046 the
+          # Vault keeps its state on the Flexible Server and the token is the
+          # repository secret VAULT_ROOT_TOKEN (rotation: #359).
           T=$(az containerapp show -n mvhd-vault -g "$RESOURCE_GROUP" \
                 --query "properties.template.containers[0].env[?name=='VAULT_DEV_ROOT_TOKEN_ID'].value" -o tsv)
-          [ -n "$T" ] || { echo "::error::Could not resolve Vault root token"; exit 1; }
+          [ -n "$T" ] || T="${{ secrets.VAULT_ROOT_TOKEN }}"
+          [ -n "$T" ] || { echo "::error::Could not resolve Vault root token: no VAULT_DEV_ROOT_TOKEN_ID on mvhd-vault and no VAULT_ROOT_TOKEN secret"; exit 1; }
           echo "::add-mask::$T"
           echo "tok=$T" >> "$GITHUB_OUTPUT"
 
