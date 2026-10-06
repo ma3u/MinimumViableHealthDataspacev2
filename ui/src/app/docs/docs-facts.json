@@ -1014,6 +1014,12 @@
       "file": "ADR-055-azure-runs-the-compose-jad-build.md",
       "title": "Azure runs the same JAD build as compose and CI",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-058",
+      "file": "ADR-058-azure-triggers-the-off-hours-schedule.md",
+      "title": "Azure triggers the off-hours stop and start, as a managed identity",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1098,6 +1104,6 @@
     "/docs/developer/quality-gates": "2026-10-05",
     "/docs/developer/api": "2026-10-05",
     "/docs/developer/reference": "2026-10-05",
-    "/docs/architecture": "2026-10-06"
+    "/docs/architecture": "2026-10-07"
   }
 }
