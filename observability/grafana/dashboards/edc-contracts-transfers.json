@@ -26,7 +26,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "**What this shows:** every DSP contract negotiation and data transfer, counted from the `dsp` hash chain. The hub writes a record when it asks the connector (*requested*) or refuses a transfer for want of a data permit; the connector's callbacks write every later state (*agreed*, *finalized*, *started*, *completed*, *terminated*). **Empty?** Nothing was negotiated in the time range: widen it, or see *Newest record*. A negotiation that was started but never shows up points to the connector: see *Connector services* at the bottom."
+        "content": "**What this shows:** every DSP contract negotiation and data transfer, counted from the `dsp` hash chain. The hub writes a record when it asks the connector (*requested*) or refuses a transfer for want of a data permit; the connector's callbacks write every later state (*agreed*, *finalized*, *started*, *completed*, *terminated*). **Empty?** Nothing was negotiated in the time range: widen it, or see *Newest record*. A negotiation that was started but never shows up points to the connector: see *Connector services* at the bottom. **Refused?** A transfer no data permit covers is refused (Art. 61(1)) and recorded. The k6 contract journey asks for one on purpose, one time in four: those rows carry a *Load test run* and are expected (#571)."
       }
     },
     {
