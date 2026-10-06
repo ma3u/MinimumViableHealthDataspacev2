@@ -44,8 +44,13 @@ PM="${PM:?PM must be set, e.g. https://mvhd-provision-mgr.internal.<aca-domain>/
 CELL_ENVIRONMENT="${CELL_ENVIRONMENT:-health-dataspace-azure}"
 
 # The credential specs a participant is expected to hold. Same shape as
-# jad/seed-jad.sh so a participant seeded here matches one seeded locally.
-ISSUER_DID="${ISSUER_DID:-did:web:issuerservice%3A10016:issuer}"
+# jad/seed-jad.sh so a participant seeded here matches one seeded locally,
+# but with the issuer as Azure names it: the compose DID
+# (did:web:issuerservice%3A10016:issuer) does not resolve inside mvhd-env, and
+# IdentityHub's credential request failed on it at every onboarding (#503,
+# 2026-10-05). The issuer's identity on Azure is seeded with this DID
+# (seed-issuer-identity-azure.sh, ADR-055).
+ISSUER_DID="${ISSUER_DID:-did:web:mvhd-issuerservice%3A10016:issuer}"
 
 # Provisioning activity types, and the agent that claims each one. The agents are
 # not on Azure yet (see the ceiling note above); the definitions still have to
@@ -156,6 +161,35 @@ fi
 
 # ── 3. Dataspace profile ────────────────────────────────────────────────────
 PROFILE_ID=$(get_json "$TM/v1alpha1/dataspace-profiles" | first_id)
+
+# A profile has no update route, so one that names another issuer (the compose
+# default this script had until #503) is deleted and created again. The route
+# is DELETE /dataspace-profiles/{id} (tmanager/handler/assembly.go at the CFM
+# commit we build); our copy of the OpenAPI does not list it.
+if [ -n "$PROFILE_ID" ]; then
+  STALE=$(get_json "$TM/v1alpha1/dataspace-profiles/$PROFILE_ID" | ISSUER_DID="$ISSUER_DID" python3 -c "
+import json, os, sys
+try:
+    p = json.load(sys.stdin)
+except Exception:
+    p = {}
+specs = ((p.get('dataspaceSpec') or {}).get('credentialSpecs') or [])
+print(','.join(sorted({s.get('issuer', '') for s in specs if s.get('issuer') != os.environ['ISSUER_DID']})))
+")
+  if [ -n "$STALE" ]; then
+    log "dataspace profile $PROFILE_ID names issuer '$STALE', not '$ISSUER_DID': replacing it"
+    HTTP=$(curl -sS --max-time 30 -o /tmp/cfm-profile-delete.out -w '%{http_code}' \
+      -X DELETE "$TM/v1alpha1/dataspace-profiles/$PROFILE_ID" || echo 000)
+    case "$HTTP" in
+      2*) log "  deleted (HTTP $HTTP)"; PROFILE_ID="" ;;
+      *)
+        head -c 500 /tmp/cfm-profile-delete.out 2>/dev/null || true
+        printf '\n'
+        fail "could not delete the stale dataspace profile (HTTP $HTTP)"
+        ;;
+    esac
+  fi
+fi
 
 if [ -n "$PROFILE_ID" ]; then
   log "dataspace profile already present: $PROFILE_ID"
