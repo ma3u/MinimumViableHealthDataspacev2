@@ -9,6 +9,10 @@
  * participant registered here is addressed like the seeded ones (CLAUDE.md,
  * "DID Conventions").
  */
+// The host other containers reach IdentityHub's DID endpoint (7083) on: on
+// compose identityhub, on Azure mvhd-identityhub (CFM_DID_BASE in
+// deploy-azure.yml). A DID on a host that does not exist cannot be resolved,
+// and the IssuerService refuses the credential request (#503, 2026-10-06).
 const CFM_DID_BASE = process.env.CFM_DID_BASE || "did:web:identityhub%3A7083";
 
 /**
