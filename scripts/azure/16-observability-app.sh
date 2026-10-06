@@ -49,20 +49,6 @@ ENV_DOMAIN="$(az containerapp env show --name "$ACA_ENV" --resource-group "$RG" 
   --query properties.defaultDomain -o tsv)"
 APP_FQDN="${OBS_APP}.${ENV_DOMAIN}"
 
-# Waits until the app's newest revision reports Healthy (up to 10 minutes).
-wait_healthy() {
-  local app="$1" rev state=""
-  rev="$(az containerapp show --name "$app" --resource-group "$RG" --query properties.latestRevisionName -o tsv)"
-  for _ in $(seq 1 60); do
-    state="$(az containerapp revision show --name "$app" --resource-group "$RG" --revision "$rev" \
-      --query properties.healthState -o tsv 2>/dev/null || true)"
-    [[ "$state" == "Healthy" ]] && return 0
-    sleep 10
-  done
-  warn "$app revision $rev is $state, not Healthy"
-  return 1
-}
-
 app_exists() {
   az containerapp show --name "$OBS_APP" --resource-group "$RG" --query name -o tsv >/dev/null 2>&1
 }
@@ -112,8 +98,8 @@ if [[ "$MODE" == "--wire-proxy" ]]; then
     --set-env-vars "OTEL_EXPORTER_OTLP_ENDPOINT=http://${OBS_APP}:${OTLP_PORT}" \
     "OTEL_SERVICE_NAME=neo4j-proxy" -o none
   # The old revision keeps serving until the new one is healthy.
-  wait_healthy "$NEO4J_PROXY_APP" &&
-    { "${SCRIPT_DIR}/retire-stale-revisions.sh" "$NEO4J_PROXY_APP" || warn "a stale proxy revision is still active"; }
+  "${SCRIPT_DIR}/retire-stale-revisions.sh" --when-healthy "$NEO4J_PROXY_APP" ||
+    warn "a stale proxy revision is still active"
   ok "$NEO4J_PROXY_APP exports traces and logs to $OBS_APP"
   exit 0
 fi
@@ -240,15 +226,11 @@ az rest --method PATCH \
     ]}}}}" -o none
 ok "$OBS_APP: Grafana on 3000 (public, Keycloak), OTLP ${OTLP_PORT} and Prometheus ${PROM_PORT} (internal)"
 
-log "Waiting for Grafana"
-for _ in $(seq 1 60); do
-  # -L: with enforce_domain, the ACA name redirects to the custom domain.
-  [[ "$(curl -sL -o /dev/null -w '%{http_code}' -m 10 "https://${APP_FQDN}/api/health")" == "200" ]] && break
-  sleep 10
-done
-# Retire the old revision only once the new one answers, so Grafana is never
-# without a serving revision.
-"${SCRIPT_DIR}/retire-stale-revisions.sh" "$OBS_APP" || warn "a stale $OBS_APP revision is still active"
+log "Waiting for the new revision"
+# The new revision's own health, not the public address: that is still served
+# by the old revision and answered 200 while the new one was activating, so
+# the old one was retired too early and Grafana answered 404 (2026-10-06).
+"${SCRIPT_DIR}/retire-stale-revisions.sh" --when-healthy "$OBS_APP" || warn "a stale $OBS_APP revision is still active"
 check
 cat <<DNS
 
