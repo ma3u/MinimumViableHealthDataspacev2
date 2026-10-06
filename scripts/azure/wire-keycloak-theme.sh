@@ -84,9 +84,11 @@ done
 # Discovery answers from cache (CLAUDE.md gotcha 7); the authorize endpoint
 # proves the realm and its database.
 "${SCRIPT_DIR}/check-keycloak-health.sh" || { echo "Keycloak is not healthy after the update" >&2; exit 1; }
-# Only now: retiring the old revision before the new one was ready left no
-# revision serving, and sign-in was away for two minutes (2026-10-05).
-"${SCRIPT_DIR}/retire-stale-revisions.sh" "$KEYCLOAK_APP" || warn "a stale $KEYCLOAK_APP revision is still active"
+# Only once the new revision itself reports Healthy: the public address is
+# still served by the old revision, so a check through it proves nothing
+# about the new one (2026-10-05, 2026-10-06).
+"${SCRIPT_DIR}/retire-stale-revisions.sh" --when-healthy "$KEYCLOAK_APP" ||
+  warn "a stale $KEYCLOAK_APP revision is still active"
 
 set_realm
 check
