@@ -42,6 +42,11 @@ final class EHDSConnection: ObservableObject {
   @Published private(set) var sendsReportsSince: Date?
   /// What the last send did, for a line under the switch.
   @Published private(set) var lastSend: String?
+  /// True while reports are being sent.
+  @Published private(set) var syncing = false
+  /// The reports to send, handed over by the app so the Connect screen can
+  /// offer "Sync all reports now" without owning the store.
+  var reportsToSync: () -> [LabReport] = { [] }
 
   /// Hubs a link may name: the live one, and in a debug build the local stack.
   static var trusted: [TrustedHub] {
@@ -272,17 +277,25 @@ final class EHDSConnection: ObservableObject {
   /// Sends every report whose values changed since it was last sent, while
   /// the person has switched sending on. The hub replaces a report's values
   /// when it is sent again, so a resend never doubles anything.
-  func sync(_ reports: [LabReport]) async {
+  ///
+  /// `all` sends every stored report again, the older ones included, as the
+  /// "Sync all reports now" button asks: safe, because the hub replaces a
+  /// report's values rather than adding to them. One report that fails does
+  /// not stop the others; the line under the switch says how many did.
+  func sync(_ reports: [LabReport], all: Bool = false) async {
     guard sendsReportsSince != nil, canSendReports, let hub else { return }
+    syncing = true
+    defer { syncing = false }
     var sent = (UserDefaults.standard.dictionary(forKey: Self.sentTag) as? [String: String]) ?? [:]
     var reportsSent = 0
     var values = 0
     var refused = 0
-    do {
-      for report in reports where !report.extraction.coded.isEmpty {
-        let key = report.id.uuidString.lowercased()
-        let print = Self.fingerprint(report)
-        guard sent[key] != print else { continue }
+    var failed: [String] = []
+    for report in reports where !report.extraction.coded.isEmpty {
+      let key = report.id.uuidString.lowercased()
+      let print = Self.fingerprint(report)
+      guard all || sent[key] != print else { continue }
+      do {
         let token = try await freshToken()
         let (status, body) = try await transport.sendBody(
           method: "POST", url: URL(string: "\(hub.ehds)/api/patient/app/record")!,
@@ -295,14 +308,20 @@ final class EHDSConnection: ObservableObject {
         sent[key] = print
         reportsSent += 1
         UserDefaults.standard.set(sent, forKey: Self.sentTag)
+      } catch {
+        failed.append("\(report.title): \(Self.explain(error))")
       }
-      if reportsSent > 0 {
-        lastSend = String(
-          localized: "Sent \(values) values from \(reportsSent) reports to your EHDS record; \(refused) without a LOINC code stay on this phone.")
-      }
-    } catch {
-      lastSend = Self.explain(error)
     }
+    var lines: [String] = []
+    if reportsSent > 0 || all {
+      lines.append(
+        String(
+          localized: "Sent \(values) values from \(reportsSent) reports to your EHDS record; \(refused) without a LOINC code stay on this phone."))
+    }
+    if !failed.isEmpty {
+      lines.append(String(localized: "Not sent (\(failed.count)): \(failed.joined(separator: "; "))"))
+    }
+    if !lines.isEmpty { lastSend = lines.joined(separator: "\n") }
   }
 
   /// What a report's values are, so an unchanged report is not sent again.

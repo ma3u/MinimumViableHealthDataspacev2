@@ -1044,8 +1044,10 @@ struct ContentView: View {
     // My values into my record (#473 phase 3): whenever the reports change,
     // and when the person switches sending on, while it is on.
     .onChange(of: model.reports) { _, reports in
+      connection.reportsToSync = { reports }
       Task { await connection.sync(reports) }
     }
+    .onAppear { connection.reportsToSync = { [model] in model.reports } }
     .onChange(of: connection.sendsReportsSince) { _, since in
       guard since != nil else { return }
       Task { await connection.sync(model.reports) }
