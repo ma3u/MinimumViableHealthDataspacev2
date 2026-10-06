@@ -15,6 +15,7 @@ ENV GF_PLUGINS_PREINSTALL=yesoreyeram-infinity-datasource@4.1.0
 COPY azure/otelcol-config.yaml /otel-lgtm/otelcol-config.yaml
 COPY azure/grafana-custom.ini /otel-lgtm/grafana/conf/custom.ini
 COPY grafana/provisioning/datasources/mvhd.yaml /otel-lgtm/grafana/conf/provisioning/datasources/mvhd.yaml
+COPY azure/datasource-azure-monitor.yaml /otel-lgtm/grafana/conf/provisioning/datasources/azure-monitor.yaml
 COPY grafana/provisioning/dashboards/mvhd.yaml /otel-lgtm/grafana/conf/provisioning/dashboards/mvhd.yaml
 COPY grafana/dashboards /otel-lgtm/mvhd-dashboards
 
