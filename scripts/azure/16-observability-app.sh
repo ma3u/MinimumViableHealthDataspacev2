@@ -18,9 +18,8 @@
 # full run rotates both. Nobody signs in as the Grafana admin; it exists for
 # the API only, the login form is off.
 #
-# Data lives in the replica: a restart, and the nightly stop (ADR-053), empty
-# Loki, Tempo and Prometheus. Log Analytics keeps the stdout copy as before.
-# Azure Blob for Loki and Tempo is the next step in #418.
+# Data lives on the Azure Files share observability-data, mounted at /data, so
+# deploys and the nightly stop (ADR-053) keep it.
 #
 # Needs: az (logged in to INF-STG-EU_EHDS, rights on rg-mvhd-dev and the ACR),
 # jq, openssl, curl.
@@ -42,6 +41,8 @@ OTLP_PORT=4318
 # Prometheus remote write, for k6 running as a job in the environment
 # (scripts/azure/run-load-test.sh); internal only, like OTLP.
 PROM_PORT=9090
+# Azure Files share for /data (Prometheus, Loki, Tempo, Grafana).
+OBS_SHARE="observability-data"
 API_VERSION="2024-03-01"
 KEYCLOAK_URL="https://auth.${CUSTOM_DOMAIN}"
 GRAFANA_HOST="grafana.${CUSTOM_DOMAIN}"
@@ -238,6 +239,45 @@ done
 # The collector's OTLP/HTTP port and Prometheus' remote write, internal only:
 # http://mvhd-observability:4318 and :9090
 # from any app in the environment (as configure-data-planes.sh does, #421).
+# Persistence: Prometheus (the k6 runs), Loki, Tempo and Grafana keep their
+# data on an Azure Files share mounted at /data. Without it every deploy and
+# the nightly stop emptied them (2026-10-06: three deploys, the morning's k6
+# runs gone). The account is the one Neo4j and Vault already use; uid/gid 1000
+# match the image's user, nobrl and mfsymlinks are what SQLite and the TSDBs
+# need on SMB. The storage key goes from Azure into the environment, unprinted.
+log "Persistent /data on Azure Files (${OBS_SHARE})"
+if ! az storage share-rm show --storage-account "$STORAGE_ACCOUNT" --resource-group "$RG" \
+  --name "$OBS_SHARE" --query name -o tsv >/dev/null 2>&1; then
+  az storage share-rm create --storage-account "$STORAGE_ACCOUNT" --resource-group "$RG" \
+    --name "$OBS_SHARE" --quota 20 -o none
+fi
+if ! az containerapp env storage show --name "$ACA_ENV" --resource-group "$RG" \
+  --storage-name "$OBS_SHARE" --query name -o tsv >/dev/null 2>&1; then
+  az containerapp env storage set --name "$ACA_ENV" --resource-group "$RG" \
+    --storage-name "$OBS_SHARE" --azure-file-account-name "$STORAGE_ACCOUNT" \
+    --azure-file-account-key "$(az storage account keys list --account-name "$STORAGE_ACCOUNT" \
+      --resource-group "$RG" --query '[0].value' -o tsv)" \
+    --azure-file-share-name "$OBS_SHARE" --access-mode ReadWrite -o none
+fi
+APP_ID="$(az containerapp show --name "$OBS_APP" --resource-group "$RG" --query id -o tsv)"
+TEMPLATE="$(mktemp)"
+az rest --method GET --url "https://management.azure.com${APP_ID}?api-version=${API_VERSION}" \
+  --query properties.template -o json > "$TEMPLATE"
+python3 - "$TEMPLATE" "$OBS_SHARE" <<'PY'
+import json, sys
+path, share = sys.argv[1], sys.argv[2]
+t = json.load(open(path))
+t["volumes"] = [{"name": "data", "storageType": "AzureFile", "storageName": share,
+                 "mountOptions": "uid=1000,gid=1000,dir_mode=0750,file_mode=0640,mfsymlinks,nobrl"}]
+c = t["containers"][0]
+c["volumeMounts"] = [{"volumeName": "data", "mountPath": "/data"}]
+json.dump({"properties": {"template": t}}, open(path, "w"))
+PY
+az rest --method PATCH --url "https://management.azure.com${APP_ID}?api-version=${API_VERSION}" \
+  --body "@${TEMPLATE}" -o none
+rm -f "$TEMPLATE"
+ok "$OBS_APP: /data on ${STORAGE_ACCOUNT}/${OBS_SHARE}"
+
 log "Exposing OTLP port $OTLP_PORT inside the environment"
 APP_ID="$(az containerapp show --name "$OBS_APP" --resource-group "$RG" --query id -o tsv)"
 az rest --method PATCH \
