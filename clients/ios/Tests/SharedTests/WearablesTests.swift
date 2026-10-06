@@ -59,3 +59,87 @@ struct WearablesTests {
     #expect(Set(shapes).count == SourceKind.allCases.count)
   }
 }
+
+/// ADR-057: with the person's switch on, the weekly points go to their own
+/// EHDS record, exactly as the hub accepts them.
+@Suite("Wearables to the EHDS record: weekly means, coded, nothing finer")
+struct WearableFHIRTests {
+  private let calendar = Calendar.iso8601Monday
+
+  private func monday(_ y: Int, _ m: Int, _ d: Int) -> Date {
+    calendar.date(from: DateComponents(year: y, month: m, day: d))!
+  }
+
+  private func observations(_ series: [WearableSeries]) -> [[String: Any]] {
+    let bundle = WearableFHIR.bundle(series, calendar: calendar)
+    return (bundle["entry"] as! [[String: Any]]).map { $0["resource"] as! [String: Any] }
+  }
+
+  @Test("each metric is sent with the LOINC code and UCUM unit the hub accepts")
+  func codes() {
+    let expected: [WearableMetric: (String, String)] = [
+      .restingHeartRate: ("40443-4", "/min"),
+      .heartRateVariability: ("80404-7", "ms"),
+      .steps: ("41950-7", "/d"),
+      .bodyMass: ("29463-7", "kg"),
+    ]
+    for metric in WearableMetric.allCases {
+      let coding = WearableFHIR.coding(metric)
+      #expect(coding.loinc == expected[metric]!.0)
+      #expect(coding.ucum == expected[metric]!.1)
+    }
+  }
+
+  @Test("one Observation per week: final, the week as its period, the mean rounded")
+  func observationPerWeek() {
+    let series = WearableSeries(
+      metric: .restingHeartRate,
+      points: [
+        WearablePoint(weekStart: monday(2026, 9, 28), value: 54.237, days: 7),
+        WearablePoint(weekStart: monday(2026, 10, 5), value: 55.0, days: 3),
+      ],
+      sources: ["Fictional Watch"])
+    let sent = observations([series])
+    #expect(sent.count == 2)
+    let first = sent[0]
+    #expect(first["status"] as? String == "final")
+    #expect(
+      first["effectivePeriod"] as? [String: String]
+        == ["start": "2026-09-28", "end": "2026-10-04"])
+    let quantity = first["valueQuantity"] as! [String: Any]
+    #expect(quantity["value"] as? Double == 54.2)
+    #expect(quantity["code"] as? String == "/min")
+    #expect(quantity["system"] as? String == "http://unitsofmeasure.org")
+    #expect((first["device"] as? [String: String])?["display"] == "Fictional Watch")
+  }
+
+  @Test("steps per day are sent as whole steps")
+  func steps() {
+    let series = WearableSeries(
+      metric: .steps,
+      points: [WearablePoint(weekStart: monday(2026, 9, 28), value: 9012.6, days: 7)],
+      sources: [])
+    let quantity = observations([series])[0]["valueQuantity"] as! [String: Any]
+    #expect(quantity["value"] as? Double == 9013)
+    #expect(observations([series])[0]["device"] == nil)
+  }
+
+  @Test("the same series sends the same bytes, and the count is every week of every metric")
+  func stable() {
+    let series = [
+      WearableSeries(
+        metric: .bodyMass,
+        points: [WearablePoint(weekStart: monday(2026, 9, 28), value: 67.14, days: 2)],
+        sources: ["Scale"]),
+      WearableSeries(
+        metric: .heartRateVariability,
+        points: [
+          WearablePoint(weekStart: monday(2026, 9, 21), value: 33.9, days: 7),
+          WearablePoint(weekStart: monday(2026, 9, 28), value: 34.1, days: 7),
+        ],
+        sources: ["Watch"]),
+    ]
+    #expect(WearableFHIR.json(series, calendar: calendar) == WearableFHIR.json(series, calendar: calendar))
+    #expect(WearableFHIR.count(series) == 3)
+  }
+}

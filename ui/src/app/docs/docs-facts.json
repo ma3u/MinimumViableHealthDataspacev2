@@ -258,6 +258,10 @@
       "methods": ["GET", "POST"]
     },
     {
+      "path": "/api/patient/app/wearables",
+      "methods": ["POST"]
+    },
+    {
       "path": "/api/patient/ehr-sync",
       "methods": ["POST"]
     },
@@ -1018,6 +1022,12 @@
       "file": "ADR-055-azure-runs-the-compose-jad-build.md",
       "title": "Azure runs the same JAD build as compose and CI",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-057",
+      "file": "ADR-057-klarbefund-sends-weekly-device-means.md",
+      "title": "Klarbefund sends weekly device means to the person's own EHDS record, behind a switch of its own",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
@@ -1044,8 +1054,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 46,
-    "operations": 60
+    "paths": 47,
+    "operations": 61
   },
   "workflowJobs": {
     "test.yml": [

@@ -1,3 +1,4 @@
+import CryptoKit
 import DeviceCheck
 import Foundation
 import Shared
@@ -47,6 +48,14 @@ final class EHDSConnection: ObservableObject {
   /// The reports to send, handed over by the app so the Connect screen can
   /// offer "Sync all reports now" without owning the store.
   var reportsToSync: () -> [LabReport] = { [] }
+  /// Since when the person's weekly device trends go to their own record
+  /// (ADR-057), or nil while they do not. A switch of its own, apart from
+  /// the reports: device data is a different kind of data.
+  @Published private(set) var sendsWearablesSince: Date?
+  /// What the last device send did, for a line under its switch.
+  @Published private(set) var lastWearableSend: String?
+  /// True while device trends are being sent.
+  @Published private(set) var syncingWearables = false
 
   /// Hubs a link may name: the live one, and in a debug build the local stack.
   static var trusted: [TrustedHub] {
@@ -253,6 +262,7 @@ final class EHDSConnection: ObservableObject {
     account = nil
     Keychain.delete(Self.accountTag)
     setSendsReports(false)
+    setSendsWearables(false)
     UserDefaults.standard.removeObject(forKey: Self.sentTag)
   }
 
@@ -322,6 +332,49 @@ final class EHDSConnection: ObservableObject {
       lines.append(String(localized: "Not sent (\(failed.count)): \(failed.joined(separator: "; "))"))
     }
     if !lines.isEmpty { lastSend = lines.joined(separator: "\n") }
+  }
+
+  // MARK: - My device trends into my record (ADR-057)
+
+  /// The person's decision for device data, apart from the reports.
+  func setSendsWearables(_ on: Bool) {
+    sendsWearablesSince = on ? Date() : nil
+    if let since = sendsWearablesSince {
+      UserDefaults.standard.set(since, forKey: Self.sendsWearablesTag)
+    } else {
+      UserDefaults.standard.removeObject(forKey: Self.sendsWearablesTag)
+      UserDefaults.standard.removeObject(forKey: Self.wearablesSentTag)
+    }
+  }
+
+  /// Sends the weekly means the Trends screen draws, for the same period,
+  /// while the person has switched this on. The hub replaces the previous
+  /// sync, so sending again never doubles anything. `force` sends even when
+  /// the series did not change since the last send.
+  func syncWearables(reportDates: [Date], force: Bool = false) async {
+    guard sendsWearablesSince != nil, canSendReports, let hub else { return }
+    syncingWearables = true
+    defer { syncingWearables = false }
+    do {
+      let period = WearableSeries.period(reportDates: reportDates)
+      let series = try await WearableSources.current.series(in: period)
+      let body = WearableFHIR.json(series)
+      // A digest, not hashValue: that one is seeded anew at every launch.
+      let print = SHA256.hash(data: body).map { String(format: "%02x", $0) }.joined()
+      if !force, UserDefaults.standard.string(forKey: Self.wearablesSentTag) == print { return }
+      let token = try await freshToken()
+      let (status, answer) = try await transport.sendBody(
+        method: "POST", url: URL(string: "\(hub.ehds)/api/patient/app/wearables")!,
+        bearer: token, device: Self.deviceId(), body: body, headers: [:])
+      guard status == 201 else { throw HubError(status: status, body: answer) }
+      let json = (try? JSONSerialization.jsonObject(with: answer) as? [String: Any]) ?? [:]
+      let stored = (json["stored"] as? Int) ?? 0
+      UserDefaults.standard.set(print, forKey: Self.wearablesSentTag)
+      lastWearableSend = String(
+        localized: "Sent \(stored) weekly values from \(series.count) device trends to your EHDS record.")
+    } catch {
+      lastWearableSend = String(localized: "Device trends not sent: \(Self.explain(error))")
+    }
   }
 
   /// What a report's values are, so an unchanged report is not sent again.
@@ -438,6 +491,8 @@ final class EHDSConnection: ObservableObject {
   /// Not secrets: a date, and which reports were sent in which state.
   private static let sendsTag = "red.mabu.meinbefund.ehds.sendsReportsSince"
   private static let sentTag = "red.mabu.meinbefund.ehds.sentReports"
+  private static let sendsWearablesTag = "red.mabu.meinbefund.ehds.sendsWearablesSince"
+  private static let wearablesSentTag = "red.mabu.meinbefund.ehds.sentWearables"
 
   private struct Stored: Codable {
     let ehds: String
@@ -459,6 +514,7 @@ final class EHDSConnection: ObservableObject {
 
   private func restore() {
     sendsReportsSince = UserDefaults.standard.object(forKey: Self.sendsTag) as? Date
+    sendsWearablesSince = UserDefaults.standard.object(forKey: Self.sendsWearablesTag) as? Date
     if let data = Keychain.get(Self.accountTag),
       let account = try? JSONDecoder().decode(EHDSAccount.self, from: data),
       Self.trusted.contains(account.hub)

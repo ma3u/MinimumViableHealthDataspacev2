@@ -920,6 +920,57 @@ paths:
         "403": { description: The app tried to disconnect another device }
         "404": { $ref: "#/components/responses/NotFound" }
 
+  /api/patient/app/wearables:
+    post:
+      tags: [Patient]
+      summary: The Klarbefund app adds the person's weekly device values to their own record
+      description: >
+        Body: a FHIR R4 Bundle of Observations, one per metric and week, read
+        from Apple Health on the phone (ADR-057). Only the four metrics of the
+        app's Trends screen are accepted, each with its LOINC code and UCUM
+        unit: resting heart rate 40443-4 (/min), heart rate variability SDNN
+        80404-7 (ms), steps per day 41950-7 (/d), body weight 29463-7 (kg).
+        Status `final`, a plausible value and an `effectivePeriod` of at most a
+        week; the rest is answered as skipped. Each sync replaces the previous
+        one. Only an account the app created (ADR-054); a demo persona is
+        refused.
+      security:
+        - klarbefundAppToken: []
+      parameters:
+        - {
+            name: X-Klarbefund-Device,
+            in: header,
+            required: true,
+            schema: { type: string, format: uuid },
+          }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, description: FHIR R4 Bundle }
+      responses:
+        "201":
+          description: Stored, and why the rest was skipped
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stored: { type: integer }
+                  skipped:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        reason: { type: string }
+        "400": { description: Not a FHIR Bundle }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: Not an account the app created }
+        "404": { description: No record is assigned to this login }
+        "413": { description: More than 1000 weekly values }
+        "429": { description: Too many syncs in a minute }
+        "502": { description: Neo4j failed }
   /api/patient/app/record:
     post:
       tags: [Patient]
