@@ -38,10 +38,9 @@ export function TestflightJoin({ basePath = "" }: { basePath?: string }) {
           <ExternalLink size={14} aria-hidden="true" />
         </a>
         <p className="mt-2 text-(--text-secondary) leading-relaxed">
-          On your iPhone, tap the button; on a computer, scan the code with the
-          iPhone camera. TestFlight is Apple&apos;s app for trying apps before
-          release; it installs first if you do not have it. Up to 200 testers,
-          iPhone with iOS 26 or later.
+          Tap the button on your iPhone, or scan the code with its camera.
+          TestFlight is Apple&apos;s app for trying apps before release. Up to
+          200 testers, iOS 26 or later.
         </p>
       </div>
     </div>
