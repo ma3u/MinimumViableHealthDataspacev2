@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { ownPatientIdForSession } from "@/lib/overview/patient";
 import { patientPseudonym, seesPatientIdentity } from "@/lib/patient-identity";
+import neo4j from "neo4j-driver";
 import { runQuery } from "@/lib/neo4j";
 import { cached } from "@/lib/server-cache";
 import {
@@ -30,13 +31,33 @@ const GOVERNANCE_LABELS = [
   "Distribution",
   "EEHRxFProfile",
   "VerifiableCredential",
-  "TransferEvent",
   "EhdsPurpose",
   "Catalogue",
   "Organization",
   "TrustCenter",
   "SPESession",
 ];
+
+/**
+ * How many of a log-like label a view shows: the newest ones. TransferEvent
+ * is the access log (one per data access, kept 12 months, Art. 73) and
+ * DataTransfer one per transfer; both grow with use. Selected in full, the
+ * default view reached 10,521 TransferEvents and 6 MB per call after a day
+ * of load tests, and serialising it pinned the UI's CPU (#571).
+ */
+const NEWEST_EVENTS = 30;
+
+/** The newest `NEWEST_EVENTS` nodes of a log-like label, by timestamp. */
+function newestOf(label: "TransferEvent" | "DataTransfer") {
+  return runQuery<{ id: string; labels: string[]; name: string }>(
+    `MATCH (n:${label})
+     WITH n ORDER BY n.timestamp DESC LIMIT $limit
+     RETURN elementId(n) AS id, labels(n) AS labels,
+            coalesce(n.transferId, n.endpoint + ' ' + n.method, n.endpoint,
+                     n.eventId, n.id, elementId(n)) AS name`,
+    { limit: neo4j.int(NEWEST_EVENTS) },
+  );
+}
 
 function toNode(r: { id: string; labels: string[]; name: string }) {
   const label = r.labels[0] ?? "Node";
@@ -259,8 +280,12 @@ async function buildResearcherGraph() {
   ]);
 }
 
-/** EDC Admin: all participants, products, contracts, negotiations, transfers */
+/** EDC Admin: all participants, products, contracts, negotiations; the newest transfers */
 async function buildEdcAdminGraph() {
+  const [transfers, accesses] = await Promise.all([
+    newestOf("DataTransfer"),
+    newestOf("TransferEvent"),
+  ]);
   const rows = await runQuery<{ id: string; labels: string[]; name: string }>(
     `MATCH (n)
      WHERE any(l IN labels(n) WHERE l IN $labels)
@@ -278,13 +303,11 @@ async function buildEdcAdminGraph() {
         "OdrlPolicy",
         "Contract",
         "ContractNegotiation",
-        "DataTransfer",
-        "TransferEvent",
         "VerifiableCredential",
       ],
     },
   );
-  return sortAndDedup(rows);
+  return sortAndDedup([...rows, ...transfers, ...accesses]);
 }
 
 /** HDAB Authority: approval chains, credentials, trust center governance */
@@ -453,6 +476,7 @@ async function buildDefaultGraph() {
     snomedNodes,
     loincNodes,
     rxnormNodes,
+    accessNodes,
   ] = await Promise.all([
     runQuery<{ id: string; labels: string[]; name: string }>(
       `MATCH (n) WHERE any(l IN labels(n) WHERE l IN $labels)
@@ -499,9 +523,11 @@ async function buildDefaultGraph() {
                 coalesce(r.display, r.name, r.code, elementId(r)) AS name`,
       {},
     ),
+    newestOf("TransferEvent"),
   ]);
   return sortAndDedup([
     ...govNodes,
+    ...accessNodes,
     ...patientNodes,
     ...conditionNodes,
     ...snomedNodes,
