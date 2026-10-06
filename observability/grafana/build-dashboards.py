@@ -578,7 +578,9 @@ EDC_INTRO = ("**What this shows:** every DSP contract negotiation and data trans
              "of a data permit; the connector's callbacks write every later state (*agreed*, *finalized*, *started*, "
              "*completed*, *terminated*). **Empty?** Nothing was negotiated in the time range: widen it, or see "
              "*Newest record*. A negotiation that was started but never shows up points to the connector: see "
-             "*Connector services* at the bottom.")
+             "*Connector services* at the bottom. **Refused?** A transfer no data permit covers is refused "
+             "(Art. 61(1)) and recorded. The k6 contract journey asks for one on purpose, one time in four: those "
+             "rows carry a *Load test run* and are expected (#571).")
 
 
 def ehds_audit():
@@ -629,22 +631,42 @@ def ehds_audit():
 
 def edc_logs_azure(ids, y):
     """The connector services' logs on the live hub: EDC writes to stdout,
-    which Container Apps sends only to Log Analytics."""
+    which Container Apps sends only to Log Analytics.
+
+    The EDC services log at INFO only at start and on trouble, so a healthy
+    hour has no lines at all, and the panels read "No data" as if broken
+    (2026-10-06). Each series is therefore filled with zeros, one per app, and
+    the table says in words that there was no error."""
     apps = ", ".join(f"'{a}'" for a in EDC_APPS)
-    base = f"ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in ({apps})"
-    errors = base + " | where Log_s has_any ('SEVERE', 'ERROR') and Log_s !has 'otel.javaagent'"
-    err = series(ids, "Errors by service (Log Analytics)",
-                 [law_target(errors + " | summarize errors = count() by bin(TimeGenerated, $__interval), "
-                             "ContainerAppName_s | order by TimeGenerated asc")],
+    errors_only = "| where Log_s has_any ('SEVERE', 'ERROR') and Log_s !has 'otel.javaagent'"
+
+    def zero_filled(name, where=""):
+        return (f"let apps = dynamic([{apps}]); "
+                "range TimeGenerated from bin($__timeFrom(), $__interval) to $__timeTo() step $__interval "
+                "| extend ContainerAppName_s = apps | mv-expand ContainerAppName_s to typeof(string) "
+                "| extend n = 0 "
+                "| union (ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) "
+                f"| where ContainerAppName_s in (apps) {where} | extend n = 1) "
+                f"| summarize {name} = sum(n) by bin(TimeGenerated, $__interval), ContainerAppName_s "
+                "| order by TimeGenerated asc")
+
+    err = series(ids, "Errors by service (Log Analytics)", [law_target(zero_filled("errors", errors_only))],
                  0, y, unit="short", datasource=AZMON, draw="bars", stack=True,
-                 description="ERROR and SEVERE lines, without the OTel agent's own export errors.")
-    lines = series(ids, "Log lines by service (what Log Analytics bills)",
-                   [law_target(base + " | summarize lines = count() by bin(TimeGenerated, $__interval), "
-                               "ContainerAppName_s | order by TimeGenerated asc")],
-                   12, y, unit="short", datasource=AZMON, draw="bars", stack=True)
+                 description="ERROR and SEVERE lines, without the OTel agent's own export errors. "
+                             "Zero is the normal case.")
+    lines = series(ids, "Log lines by service (what Log Analytics bills)", [law_target(zero_filled("lines"))],
+                   12, y, unit="short", datasource=AZMON, draw="bars", stack=True,
+                   description="The EDC services log at INFO only at start and on trouble: a quiet hour is a "
+                               "healthy one. On Azure the hub's negotiations and transfers take the demo path "
+                               "(#25, #345), so they reach no connector and add no lines here.")
     latest = table(ids, "Latest connector errors (Log Analytics)",
-                   law_target(errors + " | project TimeGenerated, app = ContainerAppName_s, line = Log_s "
-                              "| order by TimeGenerated desc | take 100", fmt="table"),
+                   law_target(f"let errs = ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) "
+                              f"| where ContainerAppName_s in ({apps}) {errors_only} "
+                              "| project TimeGenerated, app = ContainerAppName_s, line = Log_s "
+                              "| order by TimeGenerated desc | take 100; "
+                              "errs | union (print TimeGenerated = now(), app = '-', "
+                              "line = 'No connector errors in this time range.' "
+                              "| where toscalar(errs | count) == 0)", fmt="table"),
                    0, y + 8, h=10)
     return [err, lines, latest]
 
