@@ -1,0 +1,152 @@
+CFM onboarding agent: a pending credential request is polled, not retried at once (#577)
+
+Against Metaform/connector-fabric-manager 9aa627f38 (scripts/build-cfm-images.sh).
+
+- agent/onboarding: REQUESTED is pending like CREATED (reschedule after 5 s);
+  an unknown state is a retry error with a 30 s wait.
+- pmanager/natsorchestration: handleRetryError naks with that wait when the
+  activity set one; with none it naks at once, as before, so other agents
+  behave unchanged.
+
+Without it, a request that stays REQUESTED (the issuer gave up) is redelivered
+as fast as the agent runs: about 30 times a second on Azure on 2026-10-06, each
+with a Keycloak token, an IdentityHub call and a state write. Upstream main
+still naks retry errors without a delay.
+
+diff --git a/agent/common/identityhub/identityhub.go b/agent/common/identityhub/identityhub.go
+index 0e9b041..b49e55d 100644
+--- a/agent/common/identityhub/identityhub.go
++++ b/agent/common/identityhub/identityhub.go
+@@ -29,10 +29,11 @@ const (
+ )
+ 
+ const (
+-	CredentialRequestStateCreated  = "CREATED"
+-	CredentialRequestStateIssued   = "ISSUED"
+-	CredentialRequestStateRejected = "REJECTED"
+-	CredentialRequestStateError    = "ERROR"
++	CredentialRequestStateCreated   = "CREATED"
++	CredentialRequestStateRequested = "REQUESTED"
++	CredentialRequestStateIssued    = "ISSUED"
++	CredentialRequestStateRejected  = "REJECTED"
++	CredentialRequestStateError     = "ERROR"
+ )
+ 
+ type IdentityAPIClient interface {
+diff --git a/agent/onboarding/activity/activity.go b/agent/onboarding/activity/activity.go
+index 7cdb68d..d7dc7a7 100644
+--- a/agent/onboarding/activity/activity.go
++++ b/agent/onboarding/activity/activity.go
+@@ -58,7 +58,9 @@ func (p OnboardingActivityProcessor) processExistingRequest(ctx api.ActivityCont
+ 
+ 	switch state {
+ 
+-	case identityhub.CredentialRequestStateCreated:
++	case identityhub.CredentialRequestStateCreated, identityhub.CredentialRequestStateRequested:
++		// REQUESTED means the issuer has the request and has not answered yet:
++		// still pending, so poll again later rather than retry at once.
+ 		return api.ActivityResult{Result: api.ActivityResultSchedule, WaitOnReschedule: time.Duration(5) * time.Second}
+ 	case identityhub.CredentialRequestStateIssued:
+ 		ctx.SetOutputValue("holderPid", credentialRequest.HolderPID)
+@@ -70,7 +72,7 @@ func (p OnboardingActivityProcessor) processExistingRequest(ctx api.ActivityCont
+ 	case identityhub.CredentialRequestStateError:
+ 		return api.ActivityResult{Result: api.ActivityResultFatalError, Error: fmt.Errorf("credential request for participant '%s' failed", credentialRequest.ParticipantContextID)}
+ 	default:
+-		return api.ActivityResult{Result: api.ActivityResultRetryError, Error: fmt.Errorf("unexpected credential request state '%s'", state)}
++		return api.ActivityResult{Result: api.ActivityResultRetryError, WaitOnReschedule: time.Duration(30) * time.Second, Error: fmt.Errorf("unexpected credential request state '%s'", state)}
+ 	}
+ }
+ 
+diff --git a/agent/onboarding/activity/activity_test.go b/agent/onboarding/activity/activity_test.go
+index 3110bda..e5e5e05 100644
+--- a/agent/onboarding/activity/activity_test.go
++++ b/agent/onboarding/activity/activity_test.go
+@@ -16,6 +16,7 @@ import (
+ 	"context"
+ 	"fmt"
+ 	"testing"
++	"time"
+ 
+ 	"github.com/eclipse-cfm/cfm/agent/common/identityhub"
+ 	"github.com/eclipse-cfm/cfm/common/system"
+@@ -337,11 +338,46 @@ func TestOnboardingActivityProcessor_ProcessDeploy_WhenInvalidStateReceived(t *t
+ 
+ 	assert.Equal(t, api.ActivityResultType(api.ActivityResultRetryError), result.Result)
+ 	assert.ErrorContains(t, result.Error, "unexpected credential request state ")
++	assert.Equal(t, 30*time.Second, result.WaitOnReschedule, "an unknown state must not be retried at once")
+ 
+ 	assert.Equal(t, "test-participant", activityContext.Values()["participantContextId"])
+ 	assert.Contains(t, activityContext.Values(), "holderPid")
+ }
+ 
++// A request the issuer has not answered yet is pending, not an error: the
++// agent polls again after a wait. As a retry error it was redelivered at once,
++// about 30 times a second for a request that stayed REQUESTED.
++func TestOnboardingActivityProcessor_ProcessDeploy_WhenRequested(t *testing.T) {
++	ih := MockIdentityHubClient{
++		expectedState: "REQUESTED",
++	}
++	processor := OnboardingActivityProcessor{
++		Monitor:           system.NoopMonitor{},
++		IdentityApiClient: ih,
++	}
++
++	var processingData = map[string]any{
++		"clientID.apiAccess":   "test-participant",
++		"participantContextId": "test-participant",
++		"holderPid":            "test-holder-pid",
++		"credentialRequest":    "https://example.com/credentialservice/request/123",
++	}
++
++	activity := api.Activity{
++		ID:            "test-activity",
++		Type:          "edcv",
++		Discriminator: api.DeployDiscriminator,
++	}
++
++	activityContext := api.NewActivityContext(context.Background(), "orch-123", activity, processingData, make(map[string]any))
++
++	result := processor.Process(activityContext)
++
++	assert.Equal(t, api.ActivityResultType(api.ActivityResultSchedule), result.Result)
++	assert.Equal(t, 5*time.Second, result.WaitOnReschedule)
++	assert.NoError(t, result.Error)
++}
++
+ func TestOnboardingActivityProcessor_ProcessDispose(t *testing.T) {
+ 	ih := MockIdentityHubClient{
+ 		expectedCredentials: []identityhub.VerifiableCredentialResource{
+diff --git a/pmanager/natsorchestration/activity.go b/pmanager/natsorchestration/activity.go
+index ad9f441..71389f4 100644
+--- a/pmanager/natsorchestration/activity.go
++++ b/pmanager/natsorchestration/activity.go
+@@ -112,7 +112,7 @@ func (e *NatsActivityExecutor) processMessage(ctx context.Context, message jetst
+ 
+ 	switch result.Result {
+ 	case api.ActivityResultRetryError:
+-		return e.handleRetryError(activityContext, orchestration, revision, message, result.Error)
++		return e.handleRetryError(activityContext, orchestration, revision, message, result.WaitOnReschedule, result.Error)
+ 
+ 	case api.ActivityResultFatalError:
+ 		return e.handleFatalError(activityContext, orchestration, revision, result.Error, message)
+@@ -249,11 +249,18 @@ func (e *NatsActivityExecutor) handleRetryError(
+ 	orchestration api.Orchestration,
+ 	revision uint64,
+ 	message jetstream.Msg,
++	delay time.Duration,
+ 	resultErr error) error {
+ 
+ 	e.persistState(activityContext, orchestration, revision)
+-	// Nak to redeliver the message
+-	if err := message.Nak(); err != nil {
++	// Nak to redeliver the message, after the activity's wait when it set one.
++	// A plain Nak redelivers at once, so an activity that keeps failing the
++	// same way would otherwise retry as fast as the agent can run it.
++	nak := message.Nak
++	if delay > 0 {
++		nak = func() error { return message.NakWithDelay(delay) }
++	}
++	if err := nak(); err != nil {
+ 		return fmt.Errorf("retriable failure when executing activity message and NAK response %s (errors: %w, %v)",
+ 			orchestration.ID, resultErr, err)
+ 	}

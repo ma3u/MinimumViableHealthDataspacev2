@@ -171,7 +171,12 @@ export CFM_AGENT_VERSION="${CFM_AGENT_VERSION:-2026-03-09}"
 export CFM_KC_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-kcagent:${CFM_AGENT_VERSION}"
 export CFM_EDCV_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-edcvagent:${CFM_AGENT_VERSION}"
 export CFM_REG_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-regagent:${CFM_AGENT_VERSION}"
-export CFM_OB_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-obagent:${CFM_AGENT_VERSION}"
+# The onboarding agent carries jad/cfm-patches/0001 (#577): a credential
+# request that is still REQUESTED is polled every 5 s instead of retried at
+# once, about 30 times a second. Build it with
+#   scripts/build-cfm-images.sh --only cfm-obagent --push "$ACR_LOGIN_SERVER" --tag "$CFM_OB_AGENT_VERSION"
+export CFM_OB_AGENT_VERSION="${CFM_OB_AGENT_VERSION:-2026-03-09-p1}"
+export CFM_OB_AGENT_IMAGE="${ACR_LOGIN_SERVER}/cfm-obagent:${CFM_OB_AGENT_VERSION}"
 export CFM_CP_SHIM_IMAGE="${ACR_LOGIN_SERVER}/nginx:${NGINX_VERSION:-1.29-alpine}"
 
 # ── Neo4j ────────────────────────────────────────────────────────────────────

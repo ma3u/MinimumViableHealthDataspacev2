@@ -3,6 +3,27 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-06: one stuck credential request made 30 Keycloak tokens a second
+
+Keycloak 26.8 logs a `full-scope-allowed` warning for every token a client
+with "Full scope allowed" gets, and the new revision logged thousands a minute
+for client `admin`. The upgrade had not caused it: Keycloak had answered about
+31 requests a second all day. The caller was `mvhd-cfm-obagent`, retrying the
+credential request of a failed test tenant that stayed `REQUESTED` after the
+issuer gave up (#503, fault 4). At CFM 9aa627f38 the onboarding agent treats
+`REQUESTED` as a retry error, `handleRetryError` naks it with no delay, and the
+consumer has no `MaxDeliver`, so JetStream redelivers it as fast as the agent
+runs: a Keycloak token, an IdentityHub call and a state write each time,
+about 110,000 log lines every half hour. The Tenant Manager cannot clear it:
+it disposes only active VPAs and deletes only tenants without participants.
+
+`jad/cfm-patches/0001` polls `REQUESTED` every 5 s and lets a retry error ask
+for a wait; `scripts/build-cfm-images.sh` applies it (#577).
+
+Rule: a request rate on a service that does not fall to zero at idle has a
+caller; find it before reading the rate as load. Log Analytics lines per app
+(`summarize count() by ContainerAppName_s`) names it in one query.
+
 ## 2026-10-06: every load test made the next one slower, through the graph view
 
 The Azure `load` run at 14:00 failed with every endpoint at 5 to 18 s p95, two
