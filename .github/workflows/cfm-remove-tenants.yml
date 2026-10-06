@@ -1,0 +1,152 @@
+name: CFM remove failed tenants (#574)
+
+# Failed CFM test tenants cannot be removed through the Tenant Manager:
+# DisposeProfile refuses VPAs that are not active, DeleteTenant a tenant with
+# participants. This runs scripts/azure/remove-cfm-tenants.sh inside the
+# environment: per tenant its IdentityHub context first (that ends an
+# onboarding orchestration still polling it, #577), then its control-plane
+# context, its two Keycloak clients and its CFM rows, which are copied into
+# removed_tenants and removed_participant_profiles in the cfm database first.
+# `plan` lists, `apply` removes. A tenant whose activities are all active is
+# refused (Ostsee Klinikum Rostock stays).
+#
+# Run this before edc-reseed-identity-layer.yml.
+#
+# Secrets never reach a log: the Keycloak admin password and the Postgres
+# password are read from the apps' ACA secrets (the CI identity has
+# listSecrets, not Key Vault access), the admin client secret from Keycloak's
+# admin API; masked, handed to the job as ACA secrets.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "plan (read only) or apply"
+        type: choice
+        options: [plan, apply]
+        default: plan
+      tenant_ids:
+        description: "Tenant ids, comma separated"
+        type: string
+        default: "ed10c140-94b6-4dfd-a60d-a8745abac801,03a08ee6-35ab-4f2b-acad-2416eef7fbd3,19c2688b-00ab-43bf-96ce-2b6aaacc0ae2,cc877d08-fdf6-455b-bc2c-ba1a3441f0a2"
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-identity-layer"
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  JOB: mvhd-remove-tenants
+  KC_PUBLIC: https://auth.ehds.mabu.red
+  PG_HOST: mvhd-pg-b53a0449.postgres.database.azure.com
+  PG_USER: mvhdadmin
+
+jobs:
+  remove:
+    name: Remove tenants (${{ github.event.inputs.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Read the credentials (masked)
+        run: |
+          set -euo pipefail
+          KC_ADMIN_PASS=$(az containerapp secret show --name mvhd-keycloak --resource-group "$RESOURCE_GROUP" \
+            --secret-name keycloak-admin-password --query value -o tsv)
+          echo "::add-mask::$KC_ADMIN_PASS"
+          MASTER=$(curl -sS --max-time 30 -X POST "${KC_PUBLIC}/realms/master/protocol/openid-connect/token" \
+            --data-urlencode grant_type=password --data-urlencode client_id=admin-cli \
+            --data-urlencode username=admin --data-urlencode "password=${KC_ADMIN_PASS}" | jq -r '.access_token // empty')
+          [ -n "$MASTER" ] || { echo "::error::no Keycloak admin token"; exit 1; }
+          echo "::add-mask::$MASTER"
+          uuid=$(curl -sS -H "Authorization: Bearer $MASTER" "${KC_PUBLIC}/admin/realms/edcv/clients?clientId=admin" | jq -r '.[0].id // empty')
+          ADMIN_SECRET=$(curl -sS -H "Authorization: Bearer $MASTER" "${KC_PUBLIC}/admin/realms/edcv/clients/${uuid}/client-secret" | jq -r '.value // empty')
+          [ -n "$ADMIN_SECRET" ] || { echo "::error::could not read the admin client secret"; exit 1; }
+          echo "::add-mask::$ADMIN_SECRET"
+          PG_PASSWORD=$(az containerapp secret show --name mvhd-controlplane --resource-group "$RESOURCE_GROUP" \
+            --secret-name pg-flex-password --query value -o tsv)
+          [ -n "$PG_PASSWORD" ] || { echo "::error::could not read pg-flex-password from mvhd-controlplane"; exit 1; }
+          echo "::add-mask::$PG_PASSWORD"
+          {
+            echo "KC_ADMIN_PASSWORD=$KC_ADMIN_PASS"; echo "ADMIN_SECRET=$ADMIN_SECRET"; echo "PG_PASSWORD=$PG_PASSWORD"
+          } >> "$GITHUB_ENV"
+          echo "credentials read (admin ${#ADMIN_SECRET}, postgres ${#PG_PASSWORD} chars)"
+
+      - name: Run the removal job
+        env:
+          MODE: ${{ github.event.inputs.mode }}
+          TENANT_IDS: ${{ github.event.inputs.tenant_ids }}
+        run: |
+          set -euo pipefail
+          ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query id -o tsv)
+          LOCATION=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query location -o tsv)
+          export ENV_ID LOCATION
+          python3 - /tmp/job.yaml scripts/azure/remove-cfm-tenants.sh <<'PY'
+          import os, sys, yaml
+          out, script = sys.argv[1], open(sys.argv[2]).read()
+          e = os.environ
+          env = {"MODE": e["MODE"], "TENANT_IDS": e["TENANT_IDS"], "KC": e["KC_PUBLIC"],
+                 "CP": "http://mvhd-controlplane:8081/api/mgmt",
+                 "IH": "http://mvhd-identityhub:7082/api/identity",
+                 "PGHOST": e["PG_HOST"], "PGUSER": e["PG_USER"], "PGDATABASE": "cfm", "PGSSLMODE": "require"}
+          secrets = {"pg-password": e["PG_PASSWORD"], "admin-secret": e["ADMIN_SECRET"],
+                     "kc-admin-password": e["KC_ADMIN_PASSWORD"]}
+          refs = {"PGPASSWORD": "pg-password", "ADMIN_SECRET": "admin-secret",
+                  "KC_ADMIN_PASSWORD": "kc-admin-password"}
+          body = ("set -u\napk add --no-cache bash curl jq postgresql-client >/dev/null 2>&1\n"
+                  "cat > /tmp/remove.sh <<'REMOVE_EOF'\n" + script + "\nREMOVE_EOF\n"
+                  "bash /tmp/remove.sh; rc=$?\necho \"=== remove-tenants exited with $rc ===\"\nsleep 30\nexit $rc\n")
+          doc = {"location": e["LOCATION"], "properties": {"environmentId": e["ENV_ID"],
+            "configuration": {"triggerType": "Manual", "replicaTimeout": 900, "replicaRetryLimit": 0,
+              "manualTriggerConfig": {"parallelism": 1, "replicaCompletionCount": 1},
+              "secrets": [{"name": k, "value": v} for k, v in secrets.items()]},
+            "template": {"containers": [{"name": "remove", "image": "docker.io/library/alpine:3.19",
+              "command": ["/bin/sh", "-c"], "args": [body], "resources": {"cpu": 0.25, "memory": "0.5Gi"},
+              "env": [{"name": k, "value": v} for k, v in env.items()]
+                     + [{"name": k, "secretRef": v} for k, v in refs.items()]}]}}}
+          yaml.safe_dump(doc, open(out, "w"), sort_keys=False)
+          PY
+          if az containerapp job show -n "$JOB" -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+            az containerapp job update -n "$JOB" -g "$RESOURCE_GROUP" --yaml /tmp/job.yaml -o none
+          else
+            az containerapp job create -n "$JOB" -g "$RESOURCE_GROUP" --yaml /tmp/job.yaml -o none
+          fi
+          rm -f /tmp/job.yaml
+          EXEC=$(az containerapp job start -n "$JOB" -g "$RESOURCE_GROUP" --query name -o tsv)
+          echo "EXEC=$EXEC" >> "$GITHUB_ENV"
+          STATUS=Pending
+          for _ in $(seq 1 100); do
+            STATUS=$(az containerapp job execution show -n "$JOB" -g "$RESOURCE_GROUP" \
+              --job-execution-name "$EXEC" --query properties.status -o tsv 2>/dev/null || echo Pending)
+            case "$STATUS" in Succeeded|Failed|Stopped) break ;; esac
+            sleep 15
+          done
+          echo "STATUS=$STATUS" >> "$GITHUB_ENV"
+
+      - name: Show the job log
+        if: always()
+        run: |
+          WS=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+            --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId -o tsv)
+          sleep 60
+          az monitor log-analytics query -w "$WS" --analytics-query \
+            "ContainerAppConsoleLogs_CL | where ContainerGroupName_s startswith '${EXEC}' | order by TimeGenerated asc | project Log_s" \
+            -o tsv 2>&1 | sed 's/\tPrimaryResult$//' | head -200
+
+      - name: Verdict
+        run: |
+          echo "execution ${EXEC}: ${STATUS:-unknown}"
+          [ "${STATUS:-}" = Succeeded ] || { echo "::error::the removal job did not succeed (${STATUS:-unknown})"; exit 1; }

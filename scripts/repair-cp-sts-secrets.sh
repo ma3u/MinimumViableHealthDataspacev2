@@ -34,6 +34,8 @@
 #
 # Env:
 #   VAULT_CONTAINER   default health-dataspace-vault
+#   VAULT_ADDR        Vault's HTTP address; when set, used instead of the
+#                     container (Azure, scripts/azure/reseed-identity-layer.sh)
 #   VAULT_TOKEN       default root (dev stack)
 #   EDC_MANAGEMENT_URL, KEYCLOAK_URL, EDC_CLIENT_ID, EDC_CLIENT_SECRET
 #                     used only to list the contexts when none are given
@@ -52,7 +54,31 @@ EDC_CLIENT_SECRET="${EDC_CLIENT_SECRET:-edc-v-admin-secret}"
 CYAN='\033[0;36m'; GREEN='\033[0;32m'; RED='\033[0;31m'; YELLOW='\033[0;33m'; NC='\033[0m'
 log() { echo -e "${CYAN}[sts-repair]${NC} $*"; }
 
-vault() { docker exec -e "VAULT_TOKEN=${VAULT_TOKEN}" "$VAULT_CONTAINER" vault "$@" 2>/dev/null; }
+vault_cli() { docker exec -e "VAULT_TOKEN=${VAULT_TOKEN}" "$VAULT_CONTAINER" vault "$@" 2>/dev/null; }
+
+# With VAULT_ADDR set (Azure, where Vault is an app and there is no container
+# to exec into, #574) the two calls below go to Vault's HTTP API instead:
+#   kv get -field=content <mount>/<path>    GET  /v1/<mount>/data/<path>
+#   kv put <mount>/<path> content=<value>   POST /v1/<mount>/data/<path>
+vault_http() {
+  local op="$1" path mount rest
+  if [ "$op $2" = "kv get" ] && [ "$3" = "-field=content" ]; then
+    path="$4"; mount="${path%%/*}"; rest="${path#*/}"
+    curl -sS --max-time 20 -H "X-Vault-Token: ${VAULT_TOKEN}" \
+      "${VAULT_ADDR%/}/v1/${mount}/data/${rest}" \
+      | python3 -c "import json,sys; v=(json.load(sys.stdin).get('data') or {}).get('data') or {}; c=v.get('content'); sys.exit(1) if c is None else print(c)"
+  elif [ "$op $2" = "kv put" ]; then
+    path="$3"; mount="${path%%/*}"; rest="${path#*/}"
+    python3 -c "import json,sys; print(json.dumps({'data': {'content': sys.argv[1].split('=', 1)[1]}}))" "$4" \
+      | curl -sS --max-time 20 -o /dev/null -w '%{http_code}' -X POST \
+          -H "X-Vault-Token: ${VAULT_TOKEN}" -H "Content-Type: application/json" \
+          --data-binary @- "${VAULT_ADDR%/}/v1/${mount}/data/${rest}" | grep -q '^20'
+  else
+    return 2
+  fi
+}
+
+vault() { if [ -n "${VAULT_ADDR:-}" ]; then vault_http "$@"; else vault_cli "$@"; fi; }
 
 contexts=("$@")
 if [ "${#contexts[@]}" -eq 0 ]; then

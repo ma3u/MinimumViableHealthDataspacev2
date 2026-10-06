@@ -1,0 +1,161 @@
+name: EDC re-seed the demo participants (#574)
+
+# The five demo participants on Azure carry DIDs that do not resolve there:
+# IdentityHub has the graph-layer form (did:web:alpha-klinik.de:...), the
+# control plane compose's host (did:web:identityhub%3A7083:...). This runs
+# scripts/azure/reseed-identity-layer.sh inside the environment (the EDC APIs
+# are internal): `plan` lists what would change, `apply` deletes the contexts
+# with a wrong DID and runs compose's identity-layer sequence with
+# did:web:mvhd-identityhub%3A7083:<slug>, ending with a MembershipCredential
+# for each.
+#
+# Run cfm-remove-tenants.yml first: the IdentityHub step mirrors every
+# control-plane context, failed tenants included.
+#
+# Secrets never reach a log or a person: the Keycloak admin password is read
+# from the Keycloak app (the CI identity has listSecrets there, not Key Vault
+# access, see reset-demo.yml), the client secrets from Keycloak's admin API,
+# the Vault token from the control plane's settings; all masked, all handed to
+# the job as ACA secrets.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "plan (read only) or apply"
+        type: choice
+        options: [plan, apply]
+        default: plan
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-identity-layer"
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  JOB: mvhd-reseed-identity
+  KC_PUBLIC: https://auth.ehds.mabu.red
+
+jobs:
+  reseed:
+    name: Re-seed (${{ github.event.inputs.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Read the credentials (masked)
+        run: |
+          set -euo pipefail
+          KC_ADMIN_PASS=$(az containerapp secret show --name mvhd-keycloak --resource-group "$RESOURCE_GROUP" \
+            --secret-name keycloak-admin-password --query value -o tsv)
+          echo "::add-mask::$KC_ADMIN_PASS"
+          MASTER=$(curl -sS --max-time 30 -X POST "${KC_PUBLIC}/realms/master/protocol/openid-connect/token" \
+            --data-urlencode grant_type=password --data-urlencode client_id=admin-cli \
+            --data-urlencode username=admin --data-urlencode "password=${KC_ADMIN_PASS}" | jq -r '.access_token // empty')
+          [ -n "$MASTER" ] || { echo "::error::no Keycloak admin token"; exit 1; }
+          echo "::add-mask::$MASTER"
+          secret_of() {
+            local uuid
+            uuid=$(curl -sS -H "Authorization: Bearer $MASTER" "${KC_PUBLIC}/admin/realms/edcv/clients?clientId=$1" | jq -r '.[0].id // empty')
+            curl -sS -H "Authorization: Bearer $MASTER" "${KC_PUBLIC}/admin/realms/edcv/clients/${uuid}/client-secret" | jq -r '.value // empty'
+          }
+          ADMIN_SECRET=$(secret_of admin); PROVISIONER_SECRET=$(secret_of provisioner)
+          [ -n "$ADMIN_SECRET" ] && [ -n "$PROVISIONER_SECRET" ] || { echo "::error::could not read the admin and provisioner client secrets"; exit 1; }
+          echo "::add-mask::$ADMIN_SECRET"; echo "::add-mask::$PROVISIONER_SECRET"
+          VAULT_URL=$(az containerapp show -n mvhd-controlplane -g "$RESOURCE_GROUP" \
+            --query "properties.template.containers[0].env[?name=='EDC_VAULT_HASHICORP_URL'].value | [0]" -o tsv)
+          VAULT_TOKEN=$(az containerapp show -n mvhd-controlplane -g "$RESOURCE_GROUP" \
+            --query "properties.template.containers[0].env[?name=='EDC_VAULT_HASHICORP_TOKEN'].value | [0]" -o tsv)
+          echo "::add-mask::$VAULT_TOKEN"
+          {
+            echo "ADMIN_SECRET=$ADMIN_SECRET"; echo "PROVISIONER_SECRET=$PROVISIONER_SECRET"
+            echo "VAULT_URL=$VAULT_URL"; echo "VAULT_TOKEN=$VAULT_TOKEN"
+          } >> "$GITHUB_ENV"
+          echo "credentials read (admin ${#ADMIN_SECRET}, provisioner ${#PROVISIONER_SECRET}, vault ${#VAULT_TOKEN} chars)"
+
+      - name: Run the re-seed job
+        env:
+          MODE: ${{ github.event.inputs.mode }}
+        run: |
+          set -euo pipefail
+          ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query id -o tsv)
+          LOCATION=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query location -o tsv)
+          export ENV_ID LOCATION
+          tar -czf /tmp/scripts.tgz scripts/azure/05-cp-participants.sh scripts/seed-identityhub-participants.sh \
+            scripts/repair-cp-sts-secrets.sh scripts/seed-issuer-holders.sh \
+            scripts/request-participant-credentials.sh scripts/lib/cp-participant-pairs.py
+          SCRIPTS_TGZ_B64=$(base64 -w0 < /tmp/scripts.tgz)
+          export SCRIPTS_TGZ_B64
+          python3 - /tmp/job.yaml scripts/azure/reseed-identity-layer.sh <<'PY'
+          import os, sys, yaml
+          out, script = sys.argv[1], open(sys.argv[2]).read()
+          e = os.environ
+          env = {"MODE": e["MODE"], "KC": e["KC_PUBLIC"],
+                 "CP": "http://mvhd-controlplane:8081/api/mgmt",
+                 "IH": "http://mvhd-identityhub:7082/api/identity",
+                 "ISSUER": "http://mvhd-issuerservice/api/admin",
+                 "DID_HOST": "mvhd-identityhub%3A7083",
+                 "CREDENTIALS_BASE": "http://mvhd-identityhub:7085/api/credentials/v1/participants",
+                 "PROTOCOL_BASE": "http://mvhd-controlplane:8082/api/dsp",
+                 "VAULT_ADDR": e["VAULT_URL"], "SCRIPTS_TGZ_B64": e["SCRIPTS_TGZ_B64"]}
+          secrets = {"admin-secret": e["ADMIN_SECRET"], "provisioner-secret": e["PROVISIONER_SECRET"],
+                     "vault-token": e["VAULT_TOKEN"]}
+          refs = {"ADMIN_SECRET": "admin-secret", "PROVISIONER_SECRET": "provisioner-secret",
+                  "VAULT_TOKEN": "vault-token"}
+          body = ("set -u\napk add --no-cache bash curl jq python3 >/dev/null 2>&1\n"
+                  "cat > /tmp/reseed.sh <<'RESEED_EOF'\n" + script + "\nRESEED_EOF\n"
+                  "bash /tmp/reseed.sh; rc=$?\necho \"=== reseed exited with $rc ===\"\nsleep 30\nexit $rc\n")
+          doc = {"location": e["LOCATION"], "properties": {"environmentId": e["ENV_ID"],
+            "configuration": {"triggerType": "Manual", "replicaTimeout": 1500, "replicaRetryLimit": 0,
+              "manualTriggerConfig": {"parallelism": 1, "replicaCompletionCount": 1},
+              "secrets": [{"name": k, "value": v} for k, v in secrets.items()]},
+            "template": {"containers": [{"name": "reseed", "image": "docker.io/library/alpine:3.19",
+              "command": ["/bin/sh", "-c"], "args": [body], "resources": {"cpu": 0.5, "memory": "1Gi"},
+              "env": [{"name": k, "value": v} for k, v in env.items()]
+                     + [{"name": k, "secretRef": v} for k, v in refs.items()]}]}}}
+          yaml.safe_dump(doc, open(out, "w"), sort_keys=False)
+          PY
+          if az containerapp job show -n "$JOB" -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+            az containerapp job update -n "$JOB" -g "$RESOURCE_GROUP" --yaml /tmp/job.yaml -o none
+          else
+            az containerapp job create -n "$JOB" -g "$RESOURCE_GROUP" --yaml /tmp/job.yaml -o none
+          fi
+          rm -f /tmp/job.yaml
+          EXEC=$(az containerapp job start -n "$JOB" -g "$RESOURCE_GROUP" --query name -o tsv)
+          echo "EXEC=$EXEC" >> "$GITHUB_ENV"
+          STATUS=Pending
+          for _ in $(seq 1 100); do
+            STATUS=$(az containerapp job execution show -n "$JOB" -g "$RESOURCE_GROUP" \
+              --job-execution-name "$EXEC" --query properties.status -o tsv 2>/dev/null || echo Pending)
+            case "$STATUS" in Succeeded|Failed|Stopped) break ;; esac
+            sleep 15
+          done
+          echo "STATUS=$STATUS" >> "$GITHUB_ENV"
+
+      - name: Show the job log
+        if: always()
+        run: |
+          WS=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+            --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId -o tsv)
+          sleep 60
+          az monitor log-analytics query -w "$WS" --analytics-query \
+            "ContainerAppConsoleLogs_CL | where ContainerGroupName_s startswith '${EXEC}' | order by TimeGenerated asc | project Log_s" \
+            -o tsv 2>&1 | sed 's/\tPrimaryResult$//' | head -200
+
+      - name: Verdict
+        run: |
+          echo "execution ${EXEC}: ${STATUS:-unknown}"
+          [ "${STATUS:-}" = Succeeded ] || { echo "::error::the re-seed job did not succeed (${STATUS:-unknown})"; exit 1; }
