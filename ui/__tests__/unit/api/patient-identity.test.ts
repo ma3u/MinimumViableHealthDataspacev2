@@ -23,6 +23,7 @@ import {
   redactPatientProperties,
   seesPatientIdentity,
 } from "@/lib/patient-identity";
+import { __resetCacheForTests } from "@/lib/server-cache";
 
 type Session = Awaited<ReturnType<typeof getServerSession>>;
 const as = (roles: string[], username = "someone") =>
@@ -38,6 +39,7 @@ const patient1 = as(["PATIENT"], "patient1");
 
 beforeEach(() => {
   mockRunQuery.mockReset();
+  __resetCacheForTests();
 });
 
 describe("the rule", () => {
@@ -164,6 +166,37 @@ describe("GET /api/graph", () => {
       expect(text).not.toContain("Maria Schmidt");
       expect(text).not.toContain("Jan de Vries");
     }
+  });
+
+  it("an admin who fills the graph cache does not name patients to the researcher after them", async () => {
+    // The cached graph holds names (#540); who sees them is decided per
+    // request, so the cache cannot carry an admin's view to a researcher.
+    graph();
+    const { GET } = await import("@/app/api/graph/route");
+
+    vi.mocked(getServerSession).mockResolvedValue(admin);
+    const forAdmin = await (
+      await GET(new Request("http://localhost/api/graph"))
+    ).json();
+    expect(JSON.stringify(forAdmin.nodes)).toContain("Maria Schmidt");
+    const queries = mockRunQuery.mock.calls.length;
+
+    vi.mocked(getServerSession).mockResolvedValue(researcher);
+    const forResearcher = await (
+      await GET(new Request("http://localhost/api/graph"))
+    ).json();
+    expect(mockRunQuery.mock.calls.length).toBe(queries);
+    const text = JSON.stringify(forResearcher.nodes);
+    expect(text).not.toContain("Maria Schmidt");
+    expect(text).toContain(patientPseudonym("P1"));
+
+    // And the admin's next answer still has the names: pseudonymising did
+    // not overwrite the cached nodes.
+    vi.mocked(getServerSession).mockResolvedValue(admin);
+    const again = await (
+      await GET(new Request("http://localhost/api/graph"))
+    ).json();
+    expect(JSON.stringify(again.nodes)).toContain("Maria Schmidt");
   });
 
   it("leaves a patient their own name and pseudonymises everyone else", async () => {
