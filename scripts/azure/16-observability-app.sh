@@ -141,11 +141,18 @@ az acr build --registry "$ACR_NAME" --image "${OBS_APP}:${TAG}" \
 ok "image built"
 
 OAUTH_SECRET="$(openssl rand -hex 32)"
-ADMIN_PASSWORD="$(openssl rand -hex 24)"
 # Kept in Key Vault too, so the API admin can be looked up, never printed.
-az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name grafana-admin-password \
-  --value "$ADMIN_PASSWORD" -o none ||
-  warn "could not write grafana-admin-password to $KEY_VAULT_NAME (needs Key Vault Secrets Officer)"
+# Reused, not rotated: Grafana reads GF_SECURITY_ADMIN_PASSWORD only when it
+# creates grafana.db, which now lives on the share, so a new value would leave
+# Key Vault naming a password Grafana does not have.
+ADMIN_PASSWORD="$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" \
+  --name grafana-admin-password --query value -o tsv 2>/dev/null || true)"
+if [[ -z "$ADMIN_PASSWORD" ]]; then
+  ADMIN_PASSWORD="$(openssl rand -hex 24)"
+  az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name grafana-admin-password \
+    --value "$ADMIN_PASSWORD" -o none ||
+    warn "could not write grafana-admin-password to $KEY_VAULT_NAME (needs Key Vault Secrets Officer)"
+fi
 
 log "Keycloak client mvhd-grafana at $KEYCLOAK_URL"
 KC_PASSWORD="$(kc_admin_password)"
@@ -276,6 +283,15 @@ PY
 az rest --method PATCH --url "https://management.azure.com${APP_ID}?api-version=${API_VERSION}" \
   --body "@${TEMPLATE}" -o none
 rm -f "$TEMPLATE"
+# The next PATCH is refused with ContainerAppOperationInProgress while this one
+# provisions (2026-10-06), so wait for it.
+for _ in $(seq 1 60); do
+  state="$(az containerapp show --name "$OBS_APP" --resource-group "$RG" \
+    --query properties.provisioningState -o tsv)"
+  [[ "$state" != InProgress ]] && break
+  sleep 5
+done
+if [[ "$state" != Succeeded ]]; then err "$OBS_APP: provisioning is '$state', not Succeeded"; exit 1; fi
 ok "$OBS_APP: /data on ${STORAGE_ACCOUNT}/${OBS_SHARE}"
 
 log "Exposing OTLP port $OTLP_PORT inside the environment"
