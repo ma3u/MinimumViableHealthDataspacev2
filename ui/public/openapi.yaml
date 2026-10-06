@@ -575,6 +575,57 @@ paths:
                   - $ref: "#/components/schemas/PatientProfileIndex"
         "404": { $ref: "#/components/responses/NotFound" }
 
+  /api/patient/profile/interests:
+    put:
+      tags: [Patient]
+      summary: Choose my health interests from the suggested list
+      description: >
+        A patient names their own health interests, chosen from the list the
+        profile suggests (`suggestedInterests`). The choice replaces the
+        interests computed from the record. Patients only, on their own record
+        (EHDS Art. 3, GDPR Art. 16); ids outside the list are refused.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [patientId, interests]
+              properties:
+                patientId: { type: string }
+                interests:
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - preventive-care
+                      - cardiology
+                      - endocrinology
+                      - chronic-disease-management
+                      - mental-health
+                      - longevity
+                      - nutrition
+                      - sleep
+                      - fitness
+                      - cancer-screening
+                      - respiratory
+                      - rare-diseases
+      responses:
+        "200":
+          description: The interests as stored, in the list's order
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  patientId: { type: string }
+                  interests: { type: array, items: { type: string } }
+        "400":
+          { description: "patientId missing, or an id that is not on the list" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
   /api/patient/insights:
     get:
       tags: [Patient]

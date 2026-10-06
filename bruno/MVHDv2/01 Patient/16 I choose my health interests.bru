@@ -1,0 +1,30 @@
+meta {
+  name: 16 I choose my health interests
+  type: http
+  seq: 16
+}
+
+put {
+  url: {{baseUrl}}/api/patient/profile/interests
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+body:json {
+  {
+    "patientId": "{{patientId}}",
+    "interests": ["sleep", "cardiology"]
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.patientId: eq {{patientId}}
+  res.body.interests[0]: eq cardiology
+  res.body.interests[1]: eq sleep
+}

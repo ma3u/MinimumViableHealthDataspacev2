@@ -270,6 +270,10 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/patient/profile/interests",
+      "methods": ["PUT"]
+    },
+    {
       "path": "/api/patient/profile",
       "methods": ["GET"]
     },
@@ -1040,8 +1044,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 45,
-    "operations": 59
+    "paths": 46,
+    "operations": 60
   },
   "workflowJobs": {
     "test.yml": [
@@ -1094,10 +1098,10 @@
   "lastUpdated": {
     "/docs": "2026-10-04",
     "/docs/user-guide": "2026-10-04",
-    "/docs/developer": "2026-10-05",
-    "/docs/developer/quality-gates": "2026-10-05",
-    "/docs/developer/api": "2026-10-05",
-    "/docs/developer/reference": "2026-10-05",
-    "/docs/architecture": "2026-10-06"
+    "/docs/developer": "2026-10-07",
+    "/docs/developer/quality-gates": "2026-10-07",
+    "/docs/developer/api": "2026-10-07",
+    "/docs/developer/reference": "2026-10-07",
+    "/docs/architecture": "2026-10-07"
   }
 }

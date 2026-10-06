@@ -81,6 +81,59 @@ describe("GET /api/patient/profile", () => {
     expect(mockRunQuery).toHaveBeenCalledTimes(1);
   });
 
+  it("names a Klarbefund record by its account and returns the interests the patient chose", async () => {
+    mockRunQuery.mockResolvedValueOnce([
+      {
+        id: "KB-HH2MYGDJ",
+        name: "kb-hh2mygdj",
+        gender: "unknown",
+        birthDate: "",
+        chosenInterests: ["sleep", "fitness"],
+      },
+    ]);
+    mockRunQuery.mockResolvedValueOnce([]); // conditions
+    mockRunQuery.mockResolvedValueOnce([]); // medications
+    mockRunQuery.mockResolvedValueOnce([]); // observations
+    mockRunQuery.mockResolvedValueOnce([{ total: 0 }]);
+    const res = await GET(
+      new Request("http://localhost/api/patient/profile?patientId=KB-HH2MYGDJ"),
+    );
+    const data = await res.json();
+    expect(String(mockRunQuery.mock.calls[0][0])).toMatch(
+      /coalesce\(p\.appAccount, p\.name, 'Anonymous'\) AS name/,
+    );
+    expect(data.patient.name).toBe("kb-hh2mygdj");
+    expect(data.patient).not.toHaveProperty("chosenInterests");
+    expect(data.interests).toEqual(["sleep", "fitness"]);
+    expect(data.interestsChosen).toBe(true);
+    expect(data.suggestedInterests.map((i: { id: string }) => i.id)).toContain(
+      "cardiology",
+    );
+  });
+
+  it("suggests interests from the record while the patient chose none", async () => {
+    mockRunQuery.mockResolvedValueOnce([
+      {
+        id: "P1",
+        name: "Maria",
+        gender: "female",
+        birthDate: "1979-03-15",
+        chosenInterests: null,
+      },
+    ]);
+    mockRunQuery.mockResolvedValueOnce([]);
+    mockRunQuery.mockResolvedValueOnce([]);
+    mockRunQuery.mockResolvedValueOnce([]);
+    mockRunQuery.mockResolvedValueOnce([{ total: 0 }]);
+    const data = await (
+      await GET(
+        new Request("http://localhost/api/patient/profile?patientId=P1"),
+      )
+    ).json();
+    expect(data.interestsChosen).toBe(false);
+    expect(data.interests).toContain("preventive-care");
+  });
+
   it("returns 404 when patient not found in profile mode", async () => {
     // 5 parallel queries — patient query returns []
     mockRunQuery.mockResolvedValueOnce([]); // patientRows
