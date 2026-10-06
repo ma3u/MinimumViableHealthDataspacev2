@@ -23,7 +23,7 @@ import { findConnection } from "@/lib/app-connections";
  *   refused, so a leaked browser token does not open the app routes.
  * - **The `PATIENT` role** and a `preferred_username`. This realm has no
  *   `basic` client scope, so Keycloak puts no `sub` in the token (measured on
- *   26.6.4, #473); the login name is what maps a user to their record, as
+ *   26.6.4, #473, and on 26.8.0, #556); the login name is what maps a user to their record, as
  *   ownPatientIdForSession() already does for a session.
  * - **A connected device**, for every route but registration itself. The app
  *   sends its device id in `X-Klarbefund-Device`, and the connection must

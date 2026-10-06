@@ -101,7 +101,7 @@ jobs:
         # images npm audit and Dependabot cannot reach. ghcr.io/ma3u/* images are
         # omitted: they are built from this repo and covered by the source scan.
         image:
-          - quay.io/keycloak/keycloak:26.6.4
+          - quay.io/keycloak/keycloak:26.8.0
           - postgres:17.7-alpine
           - neo4j:5.26.28-community
           - nats:2.14.3-alpine
