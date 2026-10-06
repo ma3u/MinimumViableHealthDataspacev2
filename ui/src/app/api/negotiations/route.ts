@@ -9,6 +9,7 @@ import {
   recordDspEventAfter,
 } from "@/lib/dsp-audit";
 import { recordDemo, listDemo } from "@/lib/demo-records";
+import { loadTestId } from "@/lib/proxy";
 import { tagRows } from "@/lib/row-provenance";
 import { promises as fs } from "fs";
 import path from "path";
@@ -304,6 +305,7 @@ export async function POST(req: NextRequest) {
     // On the audit trail before the connector is asked, or not at all.
     const audited = {
       process: "contract-negotiation" as const,
+      loadTest: loadTestId(req),
       participantContext: participantId,
       consumerId: participantId,
       counterPartyId: counterPartyId || undefined,

@@ -177,3 +177,125 @@ describe("POST /audit/dsp", () => {
     expect(statuses.filter((s) => s !== 201)).toEqual([]);
   });
 });
+
+// ---- Load test runs on the chains (#571) -----------------------------------
+//
+// The chains cannot be pruned, so a record a k6 run wrote carries the run's
+// id: an auditor can tell synthetic traffic from real use, and every record
+// without it keeps the shape and hash it had.
+
+const { currentLoadTest } = await import("../src/logger.js");
+const { buildQueryAuditEvent, summarize } = await import(
+  "../src/audit-chain.js"
+);
+
+describe("records of a load test run", () => {
+  const QUERY = {
+    participantId: "did:web:pharmaco.de:research",
+    question: "How many patients have diabetes?",
+    cypher: "MATCH (p:Patient) RETURN count(p)",
+    method: "template",
+    resultCount: 1,
+    odrlEnforced: true,
+    outcome: "success" as const,
+  };
+  const details = (resource: Record<string, unknown>) =>
+    JSON.stringify(resource.entity);
+
+  beforeEach(() => {
+    appendDspAudit.mockReset();
+  });
+
+  it("carries the run's id from X-Load-Test into the request the record is written in", async () => {
+    let seen: string | undefined = "not called";
+    appendDspAudit.mockImplementation(async () => {
+      seen = currentLoadTest();
+      return { chain: "dsp", seq: 5, hash: "h5" };
+    });
+    const res = await request
+      .post("/audit/dsp")
+      .set("X-Load-Test", "20261006-1300-load-aca")
+      .send(FINALIZED);
+    expect(res.status).toBe(201);
+    expect(seen).toBe("20261006-1300-load-aca");
+  });
+
+  it("has no run without the header, or with one that is not a run id", async () => {
+    const seen: (string | undefined)[] = [];
+    appendDspAudit.mockImplementation(async () => {
+      seen.push(currentLoadTest());
+      return { chain: "dsp", seq: 6, hash: "h6" };
+    });
+    await request.post("/audit/dsp").send(STARTED);
+    await request
+      .post("/audit/dsp")
+      .set("X-Load-Test", "not a run id; drop table")
+      .send({ ...STARTED, id: "evt-2" });
+    expect(seen).toEqual([undefined, undefined]);
+  });
+
+  it("stamps the run on a contract or transfer record, inside what the hash covers", () => {
+    const input: DspAuditInput = {
+      process: "transfer-process",
+      event: "started",
+      outcome: "success",
+      source: "hub-ui",
+      demo: true,
+    };
+    const marked = buildDspAuditEvent(
+      { ...input, loadTest: "20261006-1300-load-aca" },
+      META,
+    );
+    expect(details(marked)).toContain(
+      '{"type":"loadTest","valueString":"20261006-1300-load-aca"}',
+    );
+    expect(details(buildDspAuditEvent(input, META))).not.toContain("loadTest");
+  });
+
+  it("stamps the run on a query record, and leaves every other query record as it was", () => {
+    const meta = { id: "q1", recorded: META.recorded };
+    const plain = buildQueryAuditEvent(QUERY, meta);
+    const marked = buildQueryAuditEvent(
+      { ...QUERY, loadTest: "20261006-1300-load-aca" },
+      meta,
+    );
+    expect(details(plain)).not.toContain("loadTest");
+    expect(details(marked)).toContain(
+      '{"type":"loadTest","valueString":"20261006-1300-load-aca"}',
+    );
+    // Only the added detail differs.
+    const strip = (r: Record<string, unknown>) =>
+      JSON.stringify(r).replace(
+        ',{"type":"loadTest","valueString":"20261006-1300-load-aca"}',
+        "",
+      );
+    expect(strip(marked)).toBe(JSON.stringify(plain));
+  });
+
+  it("shows the run in the record summary the dashboards read", () => {
+    const resource = buildDspAuditEvent(
+      {
+        process: "contract-negotiation",
+        event: "requested",
+        outcome: "success",
+        source: "hub-ui",
+        loadTest: "20261006-1300-load-aca",
+      },
+      META,
+    );
+    const event = { chain: "dsp", seq: 1, prevHash: "0", hash: "h", resource };
+    expect(summarize(event).loadTest).toBe("20261006-1300-load-aca");
+    const plain = buildDspAuditEvent(
+      {
+        process: "contract-negotiation",
+        event: "requested",
+        outcome: "success",
+        source: "hub-ui",
+      },
+      META,
+    );
+    expect(summarize({ ...event, resource: plain })).not.toHaveProperty(
+      "loadTest",
+    );
+  });
+});

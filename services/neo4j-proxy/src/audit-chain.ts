@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import type { Response } from "express";
 import neo4j from "neo4j-driver";
 import { driver } from "./db.js";
-import { logger } from "./logger.js";
+import { currentLoadTest, logger } from "./logger.js";
 
 // ---------------------------------------------------------------------------
 // Tamper-evident query audit (ADR-045, plane 2; #418)
@@ -84,6 +84,8 @@ export interface QueryAuditInput {
     aggregateSuppressed: boolean;
     suppressionReason: string | null;
   };
+  /** The k6 run that sent this query (X-Load-Test), so test traffic stays told apart (#571). */
+  loadTest?: string;
 }
 
 /** FHIR R4 AuditEvent, BALP Query pattern, with no plaintext query. */
@@ -116,6 +118,7 @@ export function buildQueryAuditEvent(
       );
     }
   }
+  if (input.loadTest) details.push(detail("loadTest", input.loadTest));
   return {
     resourceType: "AuditEvent",
     id: meta.id,
@@ -244,10 +247,14 @@ function toNumber(v: unknown): number {
 export async function appendQueryAudit(
   input: QueryAuditInput,
 ): Promise<ChainedEvent> {
-  const resource = buildQueryAuditEvent(input, {
-    id: randomUUID(),
-    recorded: new Date().toISOString(),
-  });
+  const loadTest = input.loadTest ?? currentLoadTest();
+  const resource = buildQueryAuditEvent(
+    loadTest ? { ...input, loadTest } : input,
+    {
+      id: randomUUID(),
+      recorded: new Date().toISOString(),
+    },
+  );
   return appendAuditEvent(QUERY_CHAIN, resource, {
     participantId: input.participantId ?? "anonymous",
     outcome: input.outcome,
@@ -457,6 +464,9 @@ async function writeBatch(batch: PendingRecord[]): Promise<ChainedEvent[]> {
             outcome: index.outcome,
             source: detailValue(resource, "source"),
             demo: detailValue(resource, "demo") === "true",
+            ...(detailValue(resource, "loadTest")
+              ? { load_test: detailValue(resource, "loadTest") }
+              : {}),
             batch: batch.length,
           },
         },
@@ -498,6 +508,8 @@ export interface AuditSummary {
   entities: Record<string, string>;
   source?: string;
   demo: boolean;
+  /** Set when a load test run wrote the record (#571). */
+  loadTest?: string;
   hash: string;
 }
 
@@ -532,6 +544,9 @@ export function summarize(event: ChainedEvent): AuditSummary {
     entities,
     source: detailValue(r, "source"),
     demo: detailValue(r, "demo") === "true",
+    ...(detailValue(r, "loadTest")
+      ? { loadTest: detailValue(r, "loadTest") }
+      : {}),
     hash: event.hash,
   };
 }
