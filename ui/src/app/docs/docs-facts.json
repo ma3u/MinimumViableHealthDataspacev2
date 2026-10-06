@@ -1024,6 +1024,12 @@
       "status": "Accepted"
     },
     {
+      "id": "ADR-056",
+      "file": "ADR-056-neo4j-grows-to-2-vcpu-and-4-gib.md",
+      "title": "Neo4j on Azure grows to 2 vCPU and 4 GiB, with its memory bounded",
+      "status": "Accepted"
+    },
+    {
       "id": "ADR-057",
       "file": "ADR-057-klarbefund-sends-weekly-device-means.md",
       "title": "Klarbefund sends weekly device means to the person's own EHDS record, behind a switch of its own",
@@ -1111,7 +1117,7 @@
     "/docs/developer": "2026-10-07",
     "/docs/developer/quality-gates": "2026-10-07",
     "/docs/developer/api": "2026-10-07",
-    "/docs/developer/reference": "2026-10-07",
+    "/docs/developer/reference": "2026-10-05",
     "/docs/architecture": "2026-10-07"
   }
 }

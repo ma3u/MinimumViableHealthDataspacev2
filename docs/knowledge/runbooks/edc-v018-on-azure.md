@@ -96,6 +96,18 @@ scripts/azure/05-cfm-agents.sh                 # shim to v5beta; EDC-V agent to 
 scripts/azure/migrate-edc-to-v018.sh ui        # EDC_MGMT_API_VERSION=v5beta
 ```
 
+The four CFM agents read their configuration from a mounted file once, at
+start, and a changed secret makes no new revision. `05-cfm-agents.sh`
+therefore restarts each agent that already existed (since #574); before
+that, a rerun left them on the old configuration while their health stayed
+green. Check that each agent's latest revision restarted:
+
+```bash
+for a in mvhd-cfm-kcagent mvhd-cfm-edcvagent mvhd-cfm-regagent mvhd-cfm-obagent; do
+  az containerapp logs show -n "$a" -g rg-mvhd-dev --tail 5 --follow false | head -2
+done
+```
+
 Then re-seed what the fresh databases do not have, from the Actions tab, each
 after the one before it has succeeded:
 
@@ -108,10 +120,16 @@ after the one before it has succeeded:
 
 ### 6. Checks
 
+The health probes prove nothing here: every app was green while onboarding
+failed for weeks (#503). The check that counts is the last one, a real
+registration after `cfm-seed.yml`.
+
 1. `scripts/azure/check-keycloak-health.sh` exits 0.
 2. `./scripts/run-api-tests.sh Azure-Dev`: no new failures against the run
    before the window.
-3. Register a fictional participant at https://ehds.mabu.red/onboarding:
+3. Run `cfm-seed.yml` from the Actions tab (the cell, profile and activities
+   onboarding reads), and wait for it to succeed.
+4. Register a fictional participant at https://ehds.mabu.red/onboarding:
    all three activities reach `active`, and
    `az containerapp logs show -n mvhd-cfm-regagent -g rg-mvhd-dev --tail 50 --follow false`
    shows no `Error processing message`.
