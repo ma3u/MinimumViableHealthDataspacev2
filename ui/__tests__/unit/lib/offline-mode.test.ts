@@ -93,22 +93,22 @@ describe("the next opening", () => {
 
   it("is the next morning on a weekday evening", () => {
     // Tuesday 6 October 2026, 21:00 Berlin.
-    expect(at("2026-10-06T19:00:00Z")).toBe("2026-10-07T05:10:00.000Z");
+    expect(at("2026-10-06T19:00:00Z")).toBe("2026-10-07T05:32:00.000Z");
   });
 
   it("is Monday on a Friday evening and through the weekend", () => {
-    expect(at("2026-10-09T19:00:00Z")).toBe("2026-10-12T05:10:00.000Z");
-    expect(at("2026-10-11T12:00:00Z")).toBe("2026-10-12T05:10:00.000Z");
+    expect(at("2026-10-09T19:00:00Z")).toBe("2026-10-12T05:32:00.000Z");
+    expect(at("2026-10-11T12:00:00Z")).toBe("2026-10-12T05:32:00.000Z");
   });
 
   it("is later the same morning before the start has finished", () => {
-    expect(at("2026-10-07T03:00:00Z")).toBe("2026-10-07T05:10:00.000Z");
+    expect(at("2026-10-07T03:00:00Z")).toBe("2026-10-07T05:32:00.000Z");
   });
 
   it("skips a Berlin holiday", () => {
     // Thursday 24 December 2026; the 25th is a holiday and the 26th a Saturday.
-    expect(at("2026-12-24T19:00:00Z")).toBe("2026-12-28T05:10:00.000Z");
+    expect(at("2026-12-24T19:00:00Z")).toBe("2026-12-28T05:32:00.000Z");
     // Maundy Thursday 2027 evening: Good Friday, the weekend, Easter Monday.
-    expect(at("2027-03-25T19:00:00Z")).toBe("2027-03-30T05:10:00.000Z");
+    expect(at("2027-03-25T19:00:00Z")).toBe("2027-03-30T05:32:00.000Z");
   });
 });

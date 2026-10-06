@@ -44,11 +44,14 @@ export function staticSiteUrl(pathAndQuery: string): string {
   return `${STATIC_SITE_URL}${path}`;
 }
 
-// The start cron is "0 5 * * 1-5" (UTC). It is 07:00 in Berlin in summer and
-// 06:00 in winter; the page shows the local time the browser computes.
+// The start cron is "17 5 * * 1-5" (UTC; .github/workflows/aca-schedule.yml).
+// It is 07:17 in Berlin in summer and 06:17 in winter; the page shows the local
+// time the browser computes.
 const START_HOUR_UTC = 5;
-// The start job needs about ten minutes before the UI leaves offline mode.
-const START_DURATION_MIN = 10;
+const START_MINUTE_UTC = 17;
+// The start job needs about fifteen minutes before the UI leaves offline mode
+// (measured 2026-10-06: fourteen).
+const START_DURATION_MIN = 15;
 
 /** Easter Sunday (Gregorian), anonymous algorithm. Month is 1-based. */
 function easter(year: number): { month: number; day: number } {
@@ -116,7 +119,7 @@ export function nextOpening(now: Date): Date {
         now.getUTCMonth(),
         now.getUTCDate() + ahead,
         START_HOUR_UTC,
-        START_DURATION_MIN,
+        START_MINUTE_UTC + START_DURATION_MIN,
       ),
     );
     if (day <= now) continue;

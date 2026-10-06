@@ -45,8 +45,8 @@ export default function OfflineNotice() {
         <p className="text-(--text-secondary) mb-2">
           To save running costs, the live dataspace and its databases are
           stopped every evening, at weekends and on Berlin public holidays. It
-          runs on weekdays from 07:00 to 20:00 Berlin time in summer and from
-          06:00 to 19:00 in winter.
+          runs on weekdays from about 07:30 to 20:15 Berlin time in summer and
+          from about 06:30 to 19:15 in winter.
         </p>
         <p
           className="text-(--text-secondary) mb-6"
