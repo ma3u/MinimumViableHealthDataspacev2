@@ -11,12 +11,21 @@ session at night or at the weekend, how to keep it up, and how to put it back.
 
 | When (UTC)                    | What                                                      | Berlin time            |
 | ----------------------------- | --------------------------------------------------------- | ---------------------- |
-| Mon to Fri 05:00              | Start: Postgres, then core apps, EDC, CFM, UI goes online | 07:00 CEST / 06:00 CET |
-| Every day 18:00               | Stop: UI goes offline, all other apps stop, Postgres last | 20:00 CEST / 19:00 CET |
+| Mon to Fri 05:17, again 05:47 | Start: Postgres, then core apps, EDC, CFM, UI goes online | 07:17 CEST / 06:17 CET |
+| Every day 18:13, again 18:43  | Stop: UI goes offline, all other apps stop, Postgres last | 20:13 CEST / 19:13 CET |
 | Mon to Fri, 05:00 to 17:55    | Catalog crawler, every five minutes                       | office hours           |
 | Berlin public holiday         | No start; the stack stays stopped                         |                        |
 | Date in `KEEP_UP_DATES`       | No evening stop on that date (committed, for events)      |                        |
-| Before `LIVE_DEMO_HOLD_UNTIL` | No stop at all (repository variable, for sessions)        |                        |
+
+GitHub runs scheduled workflows best effort, and the full hour is its busiest
+time: from 2026-10-02 the 05:00 start arrived up to seven hours late or not at
+all, and the 18:00 stop up to six hours late. Hence the odd minutes and the
+second attempt of each. The second does nothing when the first has finished:
+a start is done once the UI is out of offline mode, a stop once the UI is
+offline and Vault is stopped ("Determine Action" in `aca-schedule.yml`). If
+the stack is still down at 08:00 Berlin, start it by hand:
+`gh workflow run aca-schedule.yml -f action=start`.
+| Before `LIVE_DEMO_HOLD_UNTIL` | No stop at all (repository variable, for sessions) | |
 
 Everything is in `.github/workflows/aca-schedule.yml`. The stop and start of
 single apps go through `scripts/azure/set-app-power.sh`.
@@ -39,7 +48,7 @@ gh variable set LIVE_DEMO_HOLD_UNTIL --body "2026-10-10T22:00Z"
 gh variable get LIVE_DEMO_HOLD_UNTIL
 ```
 
-Set it **before** 18:00 UTC if you are starting in the afternoon and want to
+Set it **before** 18:13 UTC if you are starting in the afternoon and want to
 carry on into the evening; then step 2 is not needed, the stack never stops.
 
 ### 2. Start it
@@ -86,7 +95,7 @@ gh workflow run aca-schedule.yml -f action=stop
 ```
 
 Forgot? The first scheduled stop after the hold expires stops it, which is
-18:00 UTC on the day after at the latest. A hold that ends on a Sunday night
+18:13 UTC on the day after at the latest. A hold that ends on a Sunday night
 leaves the stack running through Monday, which is office hours anyway.
 
 ## What state is it in

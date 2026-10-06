@@ -25,8 +25,17 @@ on:
     # Operating window is "07:00–20:00 Europe/Berlin local"; we set the cron
     # at the CEST boundaries (05:00/18:00 UTC) and accept ±1 h drift in
     # winter, same as the original ADR-016 schedule.
-    - cron: "0 5 * * 1-5" # start: Mon–Fri 07:00 Europe/Berlin (CEST)
-    - cron: "0 18 * * *" # stop:  daily 20:00 Europe/Berlin (CEST)
+    #
+    # GitHub runs scheduled workflows best effort, and the full hour is when it
+    # is busiest: from 2026-10-02 the 05:00 start arrived up to seven hours late
+    # or not at all, and the 18:00 stop up to six hours late. So the minutes are
+    # off the hour, and each run has a second attempt half an hour later. The
+    # second does nothing when the first has already done its work (see
+    # "Determine Action"), and the concurrency group runs them one at a time.
+    - cron: "17 5 * * 1-5" # start: Mon–Fri 07:17 Europe/Berlin (CEST)
+    - cron: "47 5 * * 1-5" # start again, if 07:17 did not arrive or finish
+    - cron: "13 18 * * *" # stop:  daily 20:13 Europe/Berlin (CEST)
+    - cron: "43 18 * * *" # stop again, if 20:13 did not arrive or finish
   workflow_dispatch:
     inputs:
       action:
@@ -64,11 +73,34 @@ jobs:
     outputs:
       action: ${{ steps.decide.outputs.action }}
     steps:
+      # Only a scheduled run asks Azure what state the stack is in; a manual
+      # dispatch does what it is told.
+      - name: Azure Login (OIDC)
+        if: github.event_name == 'schedule'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
       - id: decide
         run: |
+          # The UI leaves offline mode as the start's last step and enters it as
+          # the stop's first, and Vault is the stop's last app: together they
+          # say whether a start or a stop has already finished today, so the
+          # second attempt of each cron changes nothing that is already right.
+          ui_offline() {
+            az containerapp show --name mvhd-ui --resource-group "$RESOURCE_GROUP" \
+              --query "properties.template.containers[0].env[?name=='LIVE_DEMO_OFFLINE'].value | [0]" -o tsv
+          }
+          vault_state() {
+            az containerapp show --name mvhd-vault --resource-group "$RESOURCE_GROUP" \
+              --query properties.runningStatus -o tsv
+          }
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "action=${{ inputs.action }}" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event.schedule }}" = "0 5 * * 1-5" ]; then
+          elif [ "${{ github.event.schedule }}" = "17 5 * * 1-5" ] ||
+               [ "${{ github.event.schedule }}" = "47 5 * * 1-5" ]; then
             # Skip the morning scale-up on Berlin public holidays — otherwise a
             # weekday holiday (e.g. Ostermontag, Christi Himmelfahrt) would run
             # the full stack 07:00–20:00 for nobody. subdiv='BE' = Land Berlin
@@ -79,6 +111,9 @@ jobs:
             HOL=$(python3 -c "import holidays, datetime as t; print(1 if t.date.fromisoformat('$TODAY') in holidays.Germany(subdiv='BE') else 0)")
             if [ "$HOL" = "1" ]; then
               echo "Berlin public holiday ($TODAY) — skipping scale-up"
+              echo "action=noop" >> "$GITHUB_OUTPUT"
+            elif [ "$(ui_offline)" = "false" ]; then
+              echo "The UI is already out of offline mode: a start has finished today — nothing to do"
               echo "action=noop" >> "$GITHUB_OUTPUT"
             else
               echo "action=start" >> "$GITHUB_OUTPUT"
@@ -101,6 +136,9 @@ jobs:
               echo "action=noop" >> "$GITHUB_OUTPUT"
             elif [[ " $KEEP_UP_DATES " == *" $TODAY "* ]]; then
               echo "Keep-up date ($TODAY) — skipping the evening stop"
+              echo "action=noop" >> "$GITHUB_OUTPUT"
+            elif [ "$(ui_offline)" = "true" ] && [ "$(vault_state)" = "Stopped" ]; then
+              echo "The UI is offline and Vault is stopped: a stop has finished — nothing to do"
               echo "action=noop" >> "$GITHUB_OUTPUT"
             else
               echo "action=stop" >> "$GITHUB_OUTPUT"
