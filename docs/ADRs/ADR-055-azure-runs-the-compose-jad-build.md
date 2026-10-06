@@ -1,9 +1,9 @@
 # ADR-055: Azure runs the same JAD build as compose and CI
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-06, Matthias Buchhorn)
 **Date:** 2026-10-04
 **Relates to:** [ADR-005](ADR-005-jad-cfm-source-builds.md), [ADR-029](ADR-029-dependency-version-pinning.md), [ADR-041](ADR-041-managed-postgres-on-azure-containerised-locally.md), [ADR-053](ADR-053-everything-stops-off-hours.md)
-**Tracks:** [Issue #503](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/503), [Issue #97](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/97) Phase B
+**Tracks:** [Issue #503](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/503), [Issue #97](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/97) Phase B, [Issue #574](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/574) (data planes and leftovers)
 
 ## Context
 

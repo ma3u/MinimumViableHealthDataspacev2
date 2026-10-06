@@ -3,6 +3,28 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-06: Grafana on an Azure Files share lost Prometheus, and the next revision could not start
+
+`mvhd-observability` (ADR-045) kept everything in the replica, so each deploy
+and each evening stop emptied it, the morning's k6 runs included. Its `/data`
+is now the `observability-data` share. Two things broke on the way:
+
+- Grafana answered `Plugin not registered` for Prometheus, Loki, Tempo and
+  Infinity while `/api/health` said ok. Grafana 13 runs them as plugin
+  binaries, `grafana/otel-lgtm` puts `GF_PATHS_PLUGINS` under `/data`, and the
+  share is mounted `file_mode=0640`, without the exec bit. The image now keeps
+  plugins on the container's own disk (`/var/lib/grafana-plugins`).
+- The next deploy's revision stayed `ActivationFailed` for ten minutes with
+  "Prometheus exited before becoming ready" while the old one ran healthy. It
+  is the Neo4j store lock of 2026-10-04 again: Prometheus, Loki and Tempo lock
+  their directories, so a revision on the same share cannot start until the
+  old one is gone. `16-observability-app.sh` retires the old revision first
+  and restarts the new one if its first start met the lock; Grafana is away
+  for a minute or two.
+
+Rule: an app with a single-writer store on a share is stop-then-start, never
+`--when-healthy`. And check a plugin's queries, not `/api/health`.
+
 ## 2026-10-04: the Klarbefund QR pairing lived in one replica of three
 
 "Connect to EHDS" (#473, ADR-049) kept each QR pairing in a `Map` on

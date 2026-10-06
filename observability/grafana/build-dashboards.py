@@ -289,7 +289,95 @@ def p95(by):
             f'(rate(k6_http_req_duration_seconds{{{K6}}}[$__rate_interval])))')
 
 
-def load_test():
+# ---------------------------------------------------------------------------
+# Azure Monitor (the live hub's Grafana only; observability/azure)
+# ---------------------------------------------------------------------------
+
+AZMON = {"type": "grafana-azure-monitor-datasource", "uid": "azure-monitor"}
+OUT_AZURE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dashboards-azure")
+# The workspace's resource id names the subscription; that id is not a secret
+# (it is in ADR-018 already). Metric queries leave it out and use the
+# datasource's default.
+LAW_ID = ("/subscriptions/27836c51-b944-484c-bf76-8de3e9642238/resourceGroups/rg-mvhd-dev"
+          "/providers/Microsoft.OperationalInsights/workspaces/mvhd-logs")
+ACA_APPS = ["mvhd-ui", "mvhd-neo4j-proxy", "mvhd-neo4j", "mvhd-keycloak",
+            "mvhd-controlplane", "mvhd-identityhub", "mvhd-observability"]
+EDC_APPS = ["mvhd-controlplane", "mvhd-dp-fhir", "mvhd-dp-omop", "mvhd-identityhub", "mvhd-issuerservice"]
+ACA_NS = "microsoft.app/containerapps"
+PG_NS = "microsoft.dbforpostgresql/flexibleservers"
+PG_SERVER = "mvhd-pg-b53a0449"
+
+
+def azmon_target(ref, resource, metric, aggregation, ns=ACA_NS):
+    """One resource per query: a query over several resources goes through the
+    subscription-wide metrics API, and the managed identity may read only
+    rg-mvhd-dev (403 otherwise)."""
+    return {"refId": ref, "datasource": AZMON, "queryType": "Azure Monitor",
+            "azureMonitor": {"resources": [{"resourceGroup": "rg-mvhd-dev", "resourceName": resource,
+                                            "metricNamespace": ns, "region": "westeurope"}],
+                             "metricNamespace": ns, "metricName": metric, "aggregation": aggregation,
+                             "timeGrain": "auto", "region": "westeurope", "dimensionFilters": []}}
+
+
+def azmon_series(ids, title, items, x, y, w=12, h=8, unit="short", description=""):
+    """items: (label, resource, metric, aggregation, namespace); one target each, named by label."""
+    refs = [chr(ord("A") + i) for i in range(len(items))]
+    p = series(ids, title, [azmon_target(r, res, m, a, ns) for r, (_, res, m, a, ns) in zip(refs, items)],
+               x, y, w=w, h=h, unit=unit, description=description, datasource=AZMON)
+    p["fieldConfig"]["overrides"] = [
+        {"matcher": {"id": "byFrameRefID", "options": r},
+         "properties": [{"id": "displayName", "value": label}]}
+        for r, (label, *_rest) in zip(refs, items)]
+    return p
+
+
+def law_target(query, fmt="time_series"):
+    return {"refId": "A", "datasource": AZMON, "queryType": "Azure Log Analytics",
+            "azureLogAnalytics": {"query": query, "resources": [LAW_ID], "resultFormat": fmt}}
+
+
+def per_app(metric, aggregation, apps=ACA_APPS):
+    return [(a.replace("mvhd-", ""), a, metric, aggregation, ACA_NS) for a in apps]
+
+
+AZURE_LIVE = """**Live from Azure Monitor**, read by mvhd-observability's managed identity (Monitoring Reader on rg-mvhd-dev, Log Analytics Reader on mvhd-logs). CPU and memory are a share of each app's limit, one-minute grain.
+
+The proxy's log lines of a run, also in Log Analytics (the same `load_test` field as the panels above):
+
+```
+ContainerAppConsoleLogs_CL
+| where ContainerAppName_s == "mvhd-neo4j-proxy" and TimeGenerated between (datetime(<start>) .. datetime(<end>))
+| extend j = parse_json(Log_s)
+| where tostring(j.load_test) == "<testid>"
+| summarize requests = count(), p95_ms = percentile(toreal(j.duration_ms), 95), errors = countif(toint(j.status) >= 500) by route = tostring(j.route), bin(TimeGenerated, 1m)
+```
+"""
+
+
+def azure_containers(ids, y):
+    """The Containers row for the live hub: Azure Monitor, not Docker."""
+    return [
+        row(ids, "Azure: who saturates first (Azure Monitor, the live hub)", y),
+        azmon_series(ids, "CPU, % of each app's limit", per_app("CpuPercentage", "Maximum"), 0, y + 1,
+                     unit="percent", description="Maximum per minute. Neo4j at 100 % is the ceiling (#519)."),
+        azmon_series(ids, "Memory, % of each app's limit", per_app("MemoryPercentage", "Maximum"), 12, y + 1,
+                     unit="percent", description="Neo4j near 100 % ends in an out-of-memory kill (exit 137)."),
+        azmon_series(ids, "Replicas", per_app("Replicas", "Maximum", ["mvhd-ui", "mvhd-neo4j-proxy", "mvhd-neo4j"]),
+                     0, y + 9, w=8, h=7, description="ACA scales the UI to 3 and the proxy to 2; Neo4j is one."),
+        azmon_series(ids, "Restarts", per_app("RestartCount", "Maximum",
+                                              ["mvhd-ui", "mvhd-neo4j-proxy", "mvhd-neo4j", "mvhd-keycloak"]),
+                     8, y + 9, w=8, h=7, description="A restart under load is usually Neo4j killed for memory."),
+        azmon_series(ids, "Postgres (Flexible Server B1ms)",
+                     [("CPU %", PG_SERVER, "cpu_percent", "Maximum", PG_NS),
+                      ("burst credits", PG_SERVER, "cpu_credits_remaining", "Minimum", PG_NS),
+                      ("connections", PG_SERVER, "active_connections", "Maximum", PG_NS)],
+                     16, y + 9, w=8, h=7, description="B1ms bursts on credits; under about 10 it throttles everything that shares it."),
+        row(ids, "Azure, the live hub", y + 16),
+        text(ids, AZURE_LIVE, 0, y + 17, h=8),
+    ]
+
+
+def load_test(azure=False):
     """What to watch while a load, stress or soak test runs, and where it broke.
 
     k6 streams every metric to Prometheus with the run's `testid`; the proxy logs
@@ -384,6 +472,8 @@ def load_test():
              '{service_name=~".*(neo4j-proxy|ui).*"} |~ "(?i)\\\\berror\\\\b|exception|ECONN|timed? ?out" != "GET /api/health"',
              0, 56, h=10),
 
+    ]
+    panels += azure_containers(ids, 66) if azure else [
         row(ids, "Containers: who saturates first (Docker stats, compose stack)", 66),
         # From the CPU time counter: the receiver's container.cpu.utilization
         # barely moved under load (the UI read 6 to 14 % while docker stats
@@ -537,7 +627,29 @@ def ehds_audit():
                      ["ehds", "audit", "mvhd"])
 
 
-def edc_dsp():
+def edc_logs_azure(ids, y):
+    """The connector services' logs on the live hub: EDC writes to stdout,
+    which Container Apps sends only to Log Analytics."""
+    apps = ", ".join(f"'{a}'" for a in EDC_APPS)
+    base = f"ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in ({apps})"
+    errors = base + " | where Log_s has_any ('SEVERE', 'ERROR') and Log_s !has 'otel.javaagent'"
+    err = series(ids, "Errors by service (Log Analytics)",
+                 [law_target(errors + " | summarize errors = count() by bin(TimeGenerated, $__interval), "
+                             "ContainerAppName_s | order by TimeGenerated asc")],
+                 0, y, unit="short", datasource=AZMON, draw="bars", stack=True,
+                 description="ERROR and SEVERE lines, without the OTel agent's own export errors.")
+    lines = series(ids, "Log lines by service (what Log Analytics bills)",
+                   [law_target(base + " | summarize lines = count() by bin(TimeGenerated, $__interval), "
+                               "ContainerAppName_s | order by TimeGenerated asc")],
+                   12, y, unit="short", datasource=AZMON, draw="bars", stack=True)
+    latest = table(ids, "Latest connector errors (Log Analytics)",
+                   law_target(errors + " | project TimeGenerated, app = ContainerAppName_s, line = Log_s "
+                              "| order by TimeGenerated desc | take 100", fmt="table"),
+                   0, y + 8, h=10)
+    return [err, lines, latest]
+
+
+def edc_dsp(azure=False):
     ids = Ids()
     p = [
         row(ids, "Contract negotiations (DSP)", 0),
@@ -565,6 +677,8 @@ def edc_dsp():
                   "type": "exclude", "match": "any",
                   "filters": [{"fieldName": "Outcome", "config": {"id": "equal", "options": {"value": "0"}}}]}}]),
         row(ids, "Connector services (EDC)", 34),
+    ]
+    p += edc_logs_azure(ids, 35) if azure else [
         timeseries(ids, "Errors by service", f'sum by (service_name) (count_over_time({{service_name=~"{EDC}"}} | detected_level=~"(?i)error|severe" != "otel.javaagent" [$__auto]))',
                    "{{service_name}}", 0, 35, description="ERROR and SEVERE lines, without the OTel agent's own export errors."),
         timeseries(ids, "Log lines by service (what Log Analytics would bill)", f'sum by (service_name) (count_over_time({{service_name=~"{EDC}"}} [$__auto]))',
@@ -578,10 +692,16 @@ def edc_dsp():
 
 
 if __name__ == "__main__":
-    os.makedirs(OUT, exist_ok=True)
-    for name, board in (("ehds-audit-trail.json", ehds_audit()), ("edc-contracts-transfers.json", edc_dsp()),
-                        ("load-stress-test.json", load_test())):
-        with open(os.path.join(OUT, name), "w") as f:
-            json.dump(board, f, indent=2)
-            f.write("\n")
-        print(f"wrote {name}: {len(board['panels'])} panels")
+    # dashboards/: compose (Loki and Docker); dashboards-azure/: the live hub's
+    # variants (Azure Monitor), which observability/azure lays over them.
+    for out, boards in ((OUT, (("ehds-audit-trail.json", ehds_audit()),
+                               ("edc-contracts-transfers.json", edc_dsp()),
+                               ("load-stress-test.json", load_test()))),
+                        (OUT_AZURE, (("edc-contracts-transfers.json", edc_dsp(azure=True)),
+                                     ("load-stress-test.json", load_test(azure=True))))):
+        os.makedirs(out, exist_ok=True)
+        for name, board in boards:
+            with open(os.path.join(out, name), "w") as f:
+                json.dump(board, f, indent=2)
+                f.write("\n")
+            print(f"wrote {os.path.basename(out)}/{name}: {len(board['panels'])} panels")
