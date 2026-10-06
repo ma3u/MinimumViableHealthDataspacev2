@@ -56,9 +56,11 @@ describe("the suggested list", () => {
     expect(validInterests(undefined)).toBeNull();
   });
 
-  it("labels an id, and shows an unknown one as it is", () => {
+  it("labels an id, and shows an unknown one as words", () => {
     expect(interestLabel("cardiology")).toBe("Heart and circulation");
-    expect(interestLabel("legacy-id")).toBe("legacy-id");
+    expect(interestLabel("cardiovascular-health")).toBe(
+      "cardiovascular health",
+    );
   });
 });
 

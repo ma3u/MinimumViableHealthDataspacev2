@@ -26,9 +26,11 @@ export type HealthInterestId = (typeof HEALTH_INTERESTS)[number]["id"];
 
 const IDS = new Set<string>(HEALTH_INTERESTS.map((i) => i.id));
 
-/** The label for an id; an unknown id is shown as it is. */
+/** The label for an id; an unknown one (older data, fixtures) as words. */
 export function interestLabel(id: string): string {
-  return HEALTH_INTERESTS.find((i) => i.id === id)?.label ?? id;
+  return (
+    HEALTH_INTERESTS.find((i) => i.id === id)?.label ?? id.replace(/-/g, " ")
+  );
 }
 
 /**
