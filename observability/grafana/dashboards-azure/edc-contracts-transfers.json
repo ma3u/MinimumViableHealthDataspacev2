@@ -1333,6 +1333,11 @@
               "type": "boolean"
             },
             {
+              "selector": "loadTest",
+              "text": "Load test run",
+              "type": "string"
+            },
+            {
               "selector": "hash",
               "text": "Hash",
               "type": "string"

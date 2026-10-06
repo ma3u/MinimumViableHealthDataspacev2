@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { appendAuditEvent, type ChainedEvent } from "./audit-chain.js";
+import { currentLoadTest } from "./logger.js";
 
 // ---------------------------------------------------------------------------
 // Contract and transfer audit (ADR-045 plane 2, #418)
@@ -42,6 +43,8 @@ export interface DspAuditInput {
   participantContext?: string;
   reason?: string;
   demo?: boolean;
+  /** The k6 run whose request this step belongs to (X-Load-Test, #571). */
+  loadTest?: string;
   edcEventType?: string;
   edcEventId?: string;
 }
@@ -108,6 +111,7 @@ export function buildDspAuditEvent(
     ["edcEventId", input.edcEventId],
     ["participantContext", input.participantContext],
     ["demo", input.demo ? "true" : undefined],
+    ["loadTest", input.loadTest],
   ]
     .filter((d): d is [string, string] => typeof d[1] === "string")
     .map(([type, valueString]) => ({ type, valueString }));
@@ -182,10 +186,14 @@ export function buildDspAuditEvent(
 export async function appendDspAudit(
   input: DspAuditInput,
 ): Promise<ChainedEvent> {
-  const resource = buildDspAuditEvent(input, {
-    id: randomUUID(),
-    recorded: new Date().toISOString(),
-  });
+  const loadTest = input.loadTest ?? currentLoadTest();
+  const resource = buildDspAuditEvent(
+    loadTest ? { ...input, loadTest } : input,
+    {
+      id: randomUUID(),
+      recorded: new Date().toISOString(),
+    },
+  );
   return appendAuditEvent(DSP_CHAIN, resource, {
     participantId: input.consumerId ?? input.participantContext ?? "unknown",
     outcome: input.outcome,

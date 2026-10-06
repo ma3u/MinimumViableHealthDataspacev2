@@ -29,6 +29,7 @@ load-tests/run.sh stress azure           # 50 → 400 users, aborts when errors 
 load-tests/run.sh spike azure            # 10 → 200 users in 10 seconds
 load-tests/run.sh soak azure             # 50 users, 2 hours
 load-tests/run.sh audited local          # NLQ only, 1 → 20 parallel: the audit chain (hypothesis 2)
+load-tests/run.sh contracts local        # contracts and transfers only, 2 → 10 users: the dsp chain (#571)
 load-tests/run.sh proxy local            # the proxy without the UI in front (hypothesis 1)
 load-tests/run.sh signin local           # real Keycloak sign-ins, 5 → 50 a minute (hypotheses 4 and 6)
 ```
@@ -38,10 +39,29 @@ load-tests/run.sh signin local           # real Keycloak sign-ins, 5 → 50 a mi
 with it, every request carries it as `X-Load-Test`, and the proxy logs it as
 `load_test`. The summary goes to `load-tests/results/<testid>.json`.
 
+### Contracts and transfers (#571)
+
+Browsing alone writes nothing to the contract and transfer chain, so the
+dashboards **EHDS audit trail** and **EDC contracts and transfers** stayed empty under
+load. Every third visit of a researcher in `browse` (and every iteration of
+`contracts`) now runs the data user's DSP flow, as the negotiate and transfer
+pages do: PharmaCo reads AlphaKlinik's catalogue (`GET /api/negotiations
+(catalogue)`), negotiates the first offer (`POST /api/negotiations`, 201), transfers
+under its data permit (`POST /api/transfers`, 201), and one time in four asks for a
+dataset no permit covers (`POST /api/transfers (no permit)`, **403 expected**,
+Regulation (EU) 2025/327 Art. 61(1)).
+
+Each step is on the `dsp` chain, and **every record a run writes carries the run's id**
+(`loadTest`, from `X-Load-Test`), on the query chain too. The chains cannot be
+pruned, so this is how an auditor tells a load test from real use: the column
+_Load test run_ in the record tables. Where the connector cannot serve the catalogue
+(Azure today, #25), the hub falls back to its demo offers and the records say _Demo_;
+the flow and its audit writes are the same.
+
 ## Run inside Azure (metrics on grafana.ehds.mabu.red)
 
 ```bash
-scripts/azure/run-load-test.sh smoke                 # or load | stress | spike | soak | audited | proxy | signin
+scripts/azure/run-load-test.sh smoke                 # or load | stress | spike | soak | audited | contracts | proxy | signin
 ABORT_ON=failures scripts/azure/run-load-test.sh stress
 ```
 

@@ -17,8 +17,14 @@ const LOAD_TEST_ID = /^[A-Za-z0-9._-]{1,64}$/;
  * Empty for any other request.
  */
 export function loadTestHeaders(req?: Request): Record<string, string> {
+  const id = loadTestId(req);
+  return id ? { "X-Load-Test": id } : {};
+}
+
+/** The load test run a request belongs to (its valid X-Load-Test), if any. */
+export function loadTestId(req?: Request): string | undefined {
   const id = req?.headers?.get("x-load-test");
-  return id && LOAD_TEST_ID.test(id) ? { "X-Load-Test": id } : {};
+  return id && LOAD_TEST_ID.test(id) ? id : undefined;
 }
 
 /**
