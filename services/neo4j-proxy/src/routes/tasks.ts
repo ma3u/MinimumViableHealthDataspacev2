@@ -2,25 +2,41 @@ import { type Request, type Response } from "express";
 import pg from "pg";
 import { app } from "../app.js";
 import { logger } from "../logger.js";
+import { taskDbConfig } from "../task-db-config.js";
 
 // ---- Persistent Task Management (Phase 13) ---------------------------------
 
-const TASK_DB_URL =
-  process.env.TASK_DB_URL ??
-  "postgresql://taskuser:taskuser@postgres:5432/taskdb";
-
 let taskPool: pg.Pool | null = null;
+let tableReady: Promise<void> | null = null;
+let warnedUnconfigured = false;
 
-function getTaskPool(): pg.Pool {
-  if (!taskPool) {
-    taskPool = new pg.Pool({ connectionString: TASK_DB_URL, max: 5 });
+/** The pool, or null when the task store is not configured (logged once). */
+function getTaskPool(): pg.Pool | null {
+  if (taskPool) return taskPool;
+  const config = taskDbConfig();
+  if (!config) {
+    if (!warnedUnconfigured) {
+      warnedUnconfigured = true;
+      logger.error(
+        "task store not configured: set TASK_DB_URL or TASK_DB_HOST (#566)",
+      );
+    }
+    return null;
   }
+  taskPool = new pg.Pool(config);
   return taskPool;
 }
 
-/** Ensure the tasks table exists (idempotent). */
-async function ensureTaskTable(): Promise<void> {
-  const pool = getTaskPool();
+/** Ensure the tasks table exists, once per process (was twice per request). */
+function ensureTaskTable(pool: pg.Pool): Promise<void> {
+  tableReady ??= createTaskTable(pool).catch((err: unknown) => {
+    tableReady = null; // try again on the next request
+    throw err;
+  });
+  return tableReady;
+}
+
+async function createTaskTable(pool: pg.Pool): Promise<void> {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS tasks (
       id              TEXT PRIMARY KEY,
@@ -44,6 +60,8 @@ async function ensureTaskTable(): Promise<void> {
   );
 }
 
+const EMPTY_COUNTS = { total: 0, negotiations: 0, transfers: 0, active: 0 };
+
 interface TaskRow {
   id: string;
   type: "negotiation" | "transfer";
@@ -64,9 +82,13 @@ interface TaskRow {
  * Body: { tasks: Task[] }
  */
 app.post("/tasks/sync", async (req: Request, res: Response) => {
+  const pool = getTaskPool();
+  if (!pool) {
+    res.status(503).json({ error: "Task store not configured" });
+    return;
+  }
   try {
-    await ensureTaskTable();
-    const pool = getTaskPool();
+    await ensureTaskTable(pool);
     const tasks: TaskRow[] = req.body?.tasks ?? [];
 
     let upserted = 0;
@@ -111,9 +133,17 @@ app.post("/tasks/sync", async (req: Request, res: Response) => {
  * Query params: ?participantId=<ctx> (optional filter)
  */
 app.get("/tasks", async (req: Request, res: Response) => {
+  const pool = getTaskPool();
+  if (!pool) {
+    res.status(503).json({
+      error: "Task store not configured",
+      tasks: [],
+      counts: EMPTY_COUNTS,
+    });
+    return;
+  }
   try {
-    await ensureTaskTable();
-    const pool = getTaskPool();
+    await ensureTaskTable(pool);
     const participantId = req.query.participantId as string | undefined;
 
     let query = "SELECT * FROM tasks";
@@ -164,7 +194,7 @@ app.get("/tasks", async (req: Request, res: Response) => {
     res.status(500).json({
       error: "Failed to retrieve tasks",
       tasks: [],
-      counts: { total: 0, negotiations: 0, transfers: 0, active: 0 },
+      counts: EMPTY_COUNTS,
     });
   }
 });
