@@ -21,7 +21,7 @@ export const SOURCE_KIND = "device-weekly-mean";
 export const MAX_WEARABLE_OBSERVATIONS = 1000;
 
 /** The metrics the app may send: LOINC code, UCUM unit, plausible range. */
-export const WEARABLE_METRICS: Record<
+const WEARABLE_METRICS: Record<
   string,
   {
     display: string;
