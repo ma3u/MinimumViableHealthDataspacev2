@@ -1,7 +1,7 @@
 import { type Request, type Response } from "express";
 import neo4j from "neo4j-driver";
 import { getSession } from "./db.js";
-import { logger } from "./logger.js";
+import { currentLoadTest, logger } from "./logger.js";
 
 // ---- Audit Logging --------------------------------------------------------
 
@@ -50,6 +50,9 @@ export async function logTransferEvent(
   resultCount: number | undefined,
   extra: AuditExtras = {},
 ): Promise<void> {
+  // A load test's accesses are marked with the run, as its audit records are:
+  // the access register keeps them a year, and they are not real use (#571).
+  const loadTest = currentLoadTest() ?? null;
   const session = getSession();
   const consumerDid =
     participantHint &&
@@ -75,7 +78,8 @@ export async function logTransferEvent(
         permitId: $permitId,
         datasetId: $datasetId,
         purpose: $purpose,
-        contractId: $contractId
+        contractId: $contractId,
+        loadTest: $loadTest
       })
       WITH te
       // The dataset: the one the caller named, else a guess from the endpoint
@@ -132,6 +136,7 @@ export async function logTransferEvent(
         datasetId: extra.datasetId ?? null,
         purpose: extra.purpose ?? null,
         contractId: extra.contractId ?? null,
+        loadTest,
       },
     );
   } catch (err) {

@@ -57,6 +57,7 @@ describe("GET /api/graph", () => {
       .mockResolvedValueOnce([SAMPLE_NODES[5]]) // snomedNodes
       .mockResolvedValueOnce([]) // loincNodes
       .mockResolvedValueOnce([]) // rxnormNodes
+      .mockResolvedValueOnce([]) // newest TransferEvents (#571)
       .mockResolvedValueOnce(SAMPLE_LINKS) // links query
       .mockResolvedValueOnce([]); // patient keys, cached with the graph (#540)
 
@@ -111,12 +112,12 @@ describe("GET /api/graph", () => {
     expect(data.links).toEqual([]);
   });
 
-  it("should make exactly 7 Neo4j queries for default persona (6 node + 1 link)", async () => {
+  it("should make exactly 8 Neo4j queries for default persona (7 node + 1 link)", async () => {
     mockRunQuery.mockResolvedValue([]);
 
     await GET(makeRequest());
 
-    expect(mockRunQuery).toHaveBeenCalledTimes(7);
+    expect(mockRunQuery).toHaveBeenCalledTimes(8);
   });
 
   it("answers the next caller of a persona from the cache, without Neo4j (#540)", async () => {
@@ -124,11 +125,11 @@ describe("GET /api/graph", () => {
 
     await GET(makeRequest());
     await GET(makeRequest());
-    expect(mockRunQuery).toHaveBeenCalledTimes(7);
+    expect(mockRunQuery).toHaveBeenCalledTimes(8);
 
     // Another persona is its own entry.
     await GET(makeRequest({ persona: "edc-admin" }));
-    expect(mockRunQuery).toHaveBeenCalledTimes(9);
+    expect(mockRunQuery).toHaveBeenCalledTimes(12);
   });
 
   it("builds a persona once for callers that arrive together (#540)", async () => {
@@ -138,7 +139,7 @@ describe("GET /api/graph", () => {
       Array.from({ length: 5 }, () => GET(makeRequest())),
     );
     expect(responses.every((r) => r.status === 200)).toBe(true);
-    expect(mockRunQuery).toHaveBeenCalledTimes(7);
+    expect(mockRunQuery).toHaveBeenCalledTimes(8);
   });
 
   it("does not cache a failure: the next caller asks Neo4j again", async () => {
@@ -147,6 +148,33 @@ describe("GET /api/graph", () => {
 
     expect((await GET(makeRequest())).status).toBe(502);
     expect((await GET(makeRequest())).status).toBe(200);
+  });
+
+  it("shows only the newest access-log events, never the whole log (#571)", async () => {
+    mockRunQuery.mockResolvedValue([]);
+
+    await GET(makeRequest());
+    await GET(makeRequest({ persona: "edc-admin" }));
+
+    const queries = mockRunQuery.mock.calls.map(([q, p]) => ({
+      q: String(q),
+      p: (p ?? {}) as Record<string, unknown>,
+    }));
+    // No label list hands TransferEvent or DataTransfer to a query without a limit.
+    for (const { p } of queries) {
+      const labels = (p.labels ?? []) as string[];
+      expect(labels).not.toContain("TransferEvent");
+      expect(labels).not.toContain("DataTransfer");
+    }
+    const capped = queries.filter(({ q }) =>
+      /MATCH \(n:(TransferEvent|DataTransfer)\)/.test(q),
+    );
+    // default: TransferEvent; edc-admin: DataTransfer and TransferEvent
+    expect(capped).toHaveLength(3);
+    for (const { q, p } of capped) {
+      expect(q).toMatch(/ORDER BY n\.timestamp DESC LIMIT \$limit/);
+      expect(Number(p.limit)).toBe(30);
+    }
   });
 
   it("should pass GOVERNANCE_LABELS to the first node query", async () => {
@@ -173,13 +201,14 @@ describe("GET /api/graph", () => {
     expect(data.error).toBe("Neo4j unavailable");
   });
 
-  it("should use edc-admin persona builder (1 query + 1 links)", async () => {
+  it("should use edc-admin persona builder (3 queries + 1 links)", async () => {
     mockRunQuery.mockResolvedValue([]);
 
     await GET(makeRequest({ persona: "edc-admin" }));
 
-    // buildEdcAdminGraph makes 1 query; links query is 2nd → total 2
-    expect(mockRunQuery).toHaveBeenCalledTimes(2);
+    // buildEdcAdminGraph: the newest DataTransfers and TransferEvents, then
+    // the labels query; links query is 4th → total 4
+    expect(mockRunQuery).toHaveBeenCalledTimes(4);
 
     const response = await GET(makeRequest({ persona: "edc-admin" }));
     const data = await response.json();
