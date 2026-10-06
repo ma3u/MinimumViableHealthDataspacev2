@@ -402,6 +402,14 @@ services:
       edc.transfer.proxy.token.verifier.publickey.alias: "dataplane-fhir-public"
       edc.transfer.proxy.token.signer.privatekey.alias: "dataplane-fhir-private"
       edc.dpf.selector.url: "http://controlplane:8083/api/control/v1/dataplanes"
+      # Required by the 0.18 launcher (#542, #574), as upstream jad sets them
+      # (k8s/apps/dataplane-config.yaml): the siglet that signs data plane
+      # tokens, and the NATS stream the control plane creates.
+      edc.iam.siglet.issuer: "siglet-issuer"
+      edc.iam.siglet.jwks.url: "http://siglet:8080/keys"
+      edc.events.nats.url: "nats://nats:4222"
+      edc.events.nats.stream: "edc-events"
+      edc.events.nats.create: "false"
       # DPS registration — PUSH transfer for FHIR bundles
       edc.dataplane.selector.fhir.sourcetype: "HttpData"
       edc.dataplane.selector.fhir.destinationtype: "HttpData"
@@ -471,6 +479,14 @@ services:
       edc.transfer.proxy.token.verifier.publickey.alias: "dataplane-omop-public"
       edc.transfer.proxy.token.signer.privatekey.alias: "dataplane-omop-private"
       edc.dpf.selector.url: "http://controlplane:8083/api/control/v1/dataplanes"
+      # Required by the 0.18 launcher (#542, #574), as upstream jad sets them
+      # (k8s/apps/dataplane-config.yaml): the siglet that signs data plane
+      # tokens, and the NATS stream the control plane creates.
+      edc.iam.siglet.issuer: "siglet-issuer"
+      edc.iam.siglet.jwks.url: "http://siglet:8080/keys"
+      edc.events.nats.url: "nats://nats:4222"
+      edc.events.nats.stream: "edc-events"
+      edc.events.nats.create: "false"
       # DPS registration — PULL transfer for OMOP analytics
       edc.dataplane.selector.omop.sourcetype: "HttpData"
       edc.dataplane.selector.omop.destinationtype: "HttpData"

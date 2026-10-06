@@ -170,9 +170,10 @@ deploy_shim() {
 # $1 app, $2 image, $3 config file name, $4 the config body
 deploy_agent() {
   local app="$1" image="$2" file_name="$3" config="$4"
-  local secret_name="agent-env"
+  local secret_name="agent-env" existed=0
 
   if az containerapp show --name "$app" --resource-group "$RG" -o none 2>/dev/null; then
+    existed=1
     log "updating ${app}"
     az containerapp secret set --name "$app" --resource-group "$RG" \
       --secrets "${secret_name}=${config}" -o none
@@ -194,6 +195,16 @@ deploy_agent() {
   fi
 
   mount_config "$app" "$secret_name" "$file_name" /etc/appname
+
+  # A changed secret makes no new revision, and the agent reads its mounted
+  # file once, at start: without a restart a rerun of this script left every
+  # existing agent on its old configuration (#574).
+  if [[ "$existed" == 1 ]]; then
+    az containerapp revision restart --name "$app" --resource-group "$RG" \
+      --revision "$(az containerapp show --name "$app" --resource-group "$RG" \
+        --query properties.latestRevisionName -o tsv)" -o none
+    ok "${app}: restarted on its new configuration"
+  fi
 }
 
 # ── Mount a secret as a file, and prove it landed ───────────────────────────
