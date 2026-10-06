@@ -46,9 +46,20 @@ for m in d["value"]:
 '
 }
 
+exported=0
 for app in "${APPS[@]}"; do
-  id=$(az containerapp show -n "$app" -g "$RG" --query id -o tsv 2>/dev/null || true)
-  [ -n "$id" ] || { log "skip $app (not found)"; continue; }
+  # A missing app is skipped; a failed CLI (an expired token answers "az login
+  # --tenant ...") is reported once and ends the run, so nothing says ✓ with
+  # nothing exported.
+  id=$(az containerapp show -n "$app" -g "$RG" --query id -o tsv 2>"${OUT}/.az-error" || true)
+  if [ -z "$id" ]; then
+    if grep -qiE "az login|AADSTS|expired|credential" "${OUT}/.az-error"; then
+      err "Azure CLI session expired or missing: $(head -c 200 "${OUT}/.az-error")"
+      rm -f "${OUT}/.az-error"; exit 1
+    fi
+    log "skip $app (not found)"; continue
+  fi
+  exported=$((exported + 1))
   az monitor metrics list --resource "$id" --metrics "$APP_METRICS" \
     --start-time "$START" --end-time "$END" --interval PT1M \
     --aggregation Average Total Maximum -o json | to_csv > "$OUT/azure-${app}.csv"
@@ -62,4 +73,6 @@ if [ -n "$pg_id" ]; then
     --aggregation Average Maximum -o json | to_csv > "$OUT/azure-postgres.csv"
   log "postgres: $(($(wc -l < "$OUT/azure-postgres.csv") - 1)) rows"
 fi
-ok "metrics for $TESTID in $OUT"
+rm -f "${OUT}/.az-error"
+[ "$exported" -gt 0 ] || { err "no app exported; is the resource group right and the CLI logged in?"; exit 1; }
+ok "metrics for $TESTID ($exported apps) in $OUT"
