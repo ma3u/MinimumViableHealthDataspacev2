@@ -63,8 +63,21 @@ scripts/azure/migrate-edc-to-v018.sh backup   # to ~/.mvhd/edc-v018-rollback/<ti
 scripts/azure/migrate-edc-to-v018.sh app controlplane
 scripts/azure/migrate-edc-to-v018.sh app identityhub
 scripts/azure/migrate-edc-to-v018.sh app issuerservice
+scripts/azure/17-siglet.sh                        # the data planes need it first
 scripts/azure/migrate-edc-to-v018.sh app dp-fhir
 scripts/azure/migrate-edc-to-v018.sh app dp-omop
+```
+
+The 0.18 data plane launcher refuses to start without `edc.iam.siglet.*` and
+`edc.events.nats.*` (#542, #574): two attempts on 2026-10-05 were rolled back
+for exactly that. `17-siglet.sh` creates `mvhd-siglet` (database `siglet`,
+storage `postgres-vault`, the transit key `signing-siglet`, internal ingress
+on 8080), and the data planes get `EDC_IAM_SIGLET_JWKS_URL=http://mvhd-siglet/keys`.
+Check that siglet is Healthy before moving a data plane:
+
+```bash
+scripts/azure/17-siglet.sh --check
+az containerapp logs show -n mvhd-siglet -g rg-mvhd-dev --tail 30 --follow false
 ```
 
 Each writes one revision (image, `_v018` database, the compose settings, and
