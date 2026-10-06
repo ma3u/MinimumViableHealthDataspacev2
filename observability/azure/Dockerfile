@@ -24,11 +24,17 @@ COPY grafana/dashboards-azure/ /otel-lgtm/mvhd-dashboards/
 # The base image's start script turns anonymous access on (as Admin) unless
 # the environment says otherwise, and the environment beats custom.ini. Make
 # its default "off", and fail the build if the script changed under us.
+# Grafana's plugins stay on the container's own disk: /data is an Azure Files
+# share mounted without the exec bit, and Grafana 13 runs Prometheus, Loki,
+# Tempo and Infinity as plugin binaries, which then never started ("Plugin not
+# registered", 2026-10-06). They are downloaded again at every start, as before.
 # Then run as an unprivileged user: the components write to /data, and
 # Tempo its shutdown marker to /var/tempo.
 RUN sed -i 's/GF_AUTH_ANONYMOUS_ENABLED:-true/GF_AUTH_ANONYMOUS_ENABLED:-false/' /otel-lgtm/run-grafana.sh \
  && grep -q 'GF_AUTH_ANONYMOUS_ENABLED:-false' /otel-lgtm/run-grafana.sh \
- && mkdir -p /data /var/tempo \
- && chown -R 1000:1000 /data /var/tempo /otel-lgtm
+ && sed -i 's|GF_PATHS_PLUGINS=/data/grafana/plugins|GF_PATHS_PLUGINS=/var/lib/grafana-plugins|' /otel-lgtm/run-grafana.sh \
+ && grep -q 'GF_PATHS_PLUGINS=/var/lib/grafana-plugins' /otel-lgtm/run-grafana.sh \
+ && mkdir -p /data /var/tempo /var/lib/grafana-plugins \
+ && chown -R 1000:1000 /data /var/tempo /var/lib/grafana-plugins /otel-lgtm
 
 USER 1000:1000
