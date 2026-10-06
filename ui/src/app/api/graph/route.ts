@@ -5,6 +5,7 @@ import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { ownPatientIdForSession } from "@/lib/overview/patient";
 import { patientPseudonym, seesPatientIdentity } from "@/lib/patient-identity";
 import { runQuery } from "@/lib/neo4j";
+import { cached } from "@/lib/server-cache";
 import {
   LABEL_LAYER,
   LAYER_COLORS,
@@ -511,22 +512,23 @@ async function buildDefaultGraph() {
 
 // ── Patient identity (#475) ─────────────────────────────────────────────────
 
+type GraphNode = ReturnType<typeof toNode>;
+
+const isPerson = (n: GraphNode) =>
+  n.label === "Patient" || n.label === "OMOPPerson";
+
 /**
- * Replaces each Patient node's name with its pseudonym, keyed on the record id
- * so the label matches the one in the patient index. A PATIENT's own record
- * keeps its name: it is theirs (EHDS Art. 3).
+ * The record id behind each Patient and OMOPPerson node, which the pseudonym
+ * is derived from, so the label matches the one in the patient index.
  */
-async function pseudonymisePatients(
-  nodes: ReturnType<typeof toNode>[],
-  roles: string[],
-): Promise<ReturnType<typeof toNode>[]> {
+async function patientKeysOf(
+  nodes: GraphNode[],
+): Promise<Record<string, string>> {
   // OMOP persons too: older transforms copied the patient's name onto them
   // (neo4j/fhir-to-omop-transform.cypher step 1b repairs the data). They are
   // labelled with their patient's pseudonym, so the two twins still match.
-  const personIds = nodes
-    .filter((n) => n.label === "Patient" || n.label === "OMOPPerson")
-    .map((n) => n.id);
-  if (personIds.length === 0) return nodes;
+  const personIds = nodes.filter(isPerson).map((n) => n.id);
+  if (personIds.length === 0) return {};
   const keys = await runQuery<{ id: string; key: string }>(
     `MATCH (p:Patient) WHERE elementId(p) IN $ids
      RETURN elementId(p) AS id, coalesce(p.id, p.resourceId, elementId(p)) AS key
@@ -535,17 +537,120 @@ async function pseudonymisePatients(
      RETURN elementId(op) AS id, coalesce(p.id, p.resourceId, elementId(p)) AS key`,
     { ids: personIds },
   );
-  const keyOf = new Map(keys.map((k) => [k.id, k.key]));
-  const own = roles.includes("PATIENT")
-    ? ownPatientIdForSession(await getServerSession(authOptions))
-    : null;
+  return Object.fromEntries(keys.map((k) => [k.id, k.key]));
+}
+
+/**
+ * Replaces each Patient node's name with its pseudonym. A PATIENT's own
+ * record keeps its name: it is theirs (EHDS Art. 3). Returns new node objects
+ * and leaves the cached ones alone.
+ */
+function pseudonymisePatients(
+  nodes: GraphNode[],
+  patientKeys: Record<string, string>,
+  own: string | null,
+): GraphNode[] {
   return nodes.map((n) => {
-    if (n.label !== "Patient" && n.label !== "OMOPPerson") return n;
-    const key = keyOf.get(n.id) ?? n.id;
+    if (!isPerson(n)) return n;
+    const key = patientKeys[n.id] ?? n.id;
     if (key === own) return n;
     const label = patientPseudonym(key);
     return { ...n, name: n.label === "OMOPPerson" ? `OMOP ${label}` : label };
   });
+}
+
+// ── One persona's graph, cached ─────────────────────────────────────────────
+
+/**
+ * How long one persona's graph is reused. The graph changes on seeding and
+ * onboarding, not per request, and /graph is opened by every visitor: under
+ * load test the build (up to 34 queries, three over the whole graph) took
+ * Neo4j to 97 % memory and /api/graph to 10 s p95 at 50 users (#540).
+ */
+const GRAPH_CACHE_TTL_MS = 60_000;
+
+interface PersonaGraph {
+  nodes: GraphNode[];
+  links: { source: string; target: string; type: string }[];
+  isolatedRemoved: number;
+  /** Record id per Patient and OMOPPerson node, for the pseudonyms. */
+  patientKeys: Record<string, string>;
+}
+
+/**
+ * Everything about a persona's graph that is the same for every caller. Who
+ * may see a patient's name is not: that is applied per request, after the
+ * cache. The cache holds names; a response carries them only to the roles
+ * that see identity (#475).
+ */
+async function buildPersonaGraph(persona: PersonaId): Promise<PersonaGraph> {
+  let nodes: GraphNode[];
+  switch (persona) {
+    case "trust-center":
+      nodes = await buildTrustCenterGraph();
+      break;
+    case "hospital":
+      nodes = await buildHospitalGraph();
+      break;
+    case "researcher":
+      nodes = await buildResearcherGraph();
+      break;
+    case "edc-admin":
+      nodes = await buildEdcAdminGraph();
+      break;
+    case "hdab":
+      nodes = await buildHdabGraph();
+      break;
+    case "patient":
+      nodes = await buildPatientGraph();
+      break;
+    default:
+      nodes = await buildDefaultGraph();
+  }
+
+  const links = await runQuery<{
+    source: string;
+    target: string;
+    type: string;
+  }>(
+    `MATCH (a)-[r]->(b)
+     WHERE elementId(a) IN $ids AND elementId(b) IN $ids
+     RETURN DISTINCT elementId(a) AS source, elementId(b) AS target, type(r) AS type`,
+    { ids: nodes.map((n) => n.id) },
+  );
+
+  // Drop nodes that ended up with no edge in this payload.
+  //
+  // A persona builder selects nodes label-by-label, so it can pick a node
+  // whose neighbours it did not pick — and the link query above, which only
+  // joins nodes already in the set, then finds nothing for it. The result is
+  // a node rendered floating in space with "0 connections loaded" in the
+  // detail panel, which reads as missing data rather than a narrow query.
+  //
+  // The patient view was measured at 66 isolated of 95 nodes on 2026-09-09,
+  // while the same labels average degree 2-13 in Neo4j — none of those nodes
+  // is isolated in the database. This is a presentation artefact, so it is
+  // corrected in presentation. `isolatedRemoved` is returned so a persona
+  // that starts shedding nodes is visible rather than silently thinner.
+  const connected = new Set<string>();
+  for (const l of links) {
+    connected.add(l.source);
+    connected.add(l.target);
+  }
+  const linked = nodes.filter((n) => connected.has(n.id));
+  // Never prune the view down to nothing. A persona whose data is not seeded
+  // (locally, `trust-center` has no TrustCenter nodes at all) would otherwise
+  // render an empty canvas with no explanation, which is a worse answer than
+  // showing the disconnected nodes that do exist and letting the caller see
+  // isolatedRemoved.
+  const visibleNodes = linked.length > 0 ? linked : nodes;
+
+  return {
+    nodes: visibleNodes,
+    links,
+    isolatedRemoved: nodes.length - visibleNodes.length,
+    patientKeys: await patientKeysOf(visibleNodes),
+  };
 }
 
 // ── Route handler ─────────────────────────────────────────────────────────────
@@ -574,82 +679,28 @@ export async function GET(req: Request) {
   const safePersona = validPersonas.includes(persona) ? persona : "default";
 
   try {
-    let nodes;
-    switch (safePersona) {
-      case "trust-center":
-        nodes = await buildTrustCenterGraph();
-        break;
-      case "hospital":
-        nodes = await buildHospitalGraph();
-        break;
-      case "researcher":
-        nodes = await buildResearcherGraph();
-        break;
-      case "edc-admin":
-        nodes = await buildEdcAdminGraph();
-        break;
-      case "hdab":
-        nodes = await buildHdabGraph();
-        break;
-      case "patient":
-        nodes = await buildPatientGraph();
-        break;
-      default:
-        nodes = await buildDefaultGraph();
-    }
+    const graph = await cached(`graph:${safePersona}`, GRAPH_CACHE_TTL_MS, () =>
+      buildPersonaGraph(safePersona),
+    );
 
     // Patients by pseudonym for every role that does not see identity
     // (#475). Decided by the session's roles, not by `persona`, which is only
     // a query parameter and anyone can set it. A patient keeps their own name.
+    let nodes = graph.nodes;
     if (!seesPatientIdentity(auth.session.roles)) {
-      nodes = await pseudonymisePatients(nodes, auth.session.roles);
+      const own = auth.session.roles.includes("PATIENT")
+        ? ownPatientIdForSession(await getServerSession(authOptions))
+        : null;
+      nodes = pseudonymisePatients(nodes, graph.patientKeys, own);
     }
-
-    const links = await runQuery<{
-      source: string;
-      target: string;
-      type: string;
-    }>(
-      `MATCH (a)-[r]->(b)
-       WHERE elementId(a) IN $ids AND elementId(b) IN $ids
-       RETURN DISTINCT elementId(a) AS source, elementId(b) AS target, type(r) AS type`,
-      { ids: nodes.map((n) => n.id) },
-    );
-
-    // Drop nodes that ended up with no edge in this payload.
-    //
-    // A persona builder selects nodes label-by-label, so it can pick a node
-    // whose neighbours it did not pick — and the link query above, which only
-    // joins nodes already in the set, then finds nothing for it. The result is
-    // a node rendered floating in space with "0 connections loaded" in the
-    // detail panel, which reads as missing data rather than a narrow query.
-    //
-    // The patient view was measured at 66 isolated of 95 nodes on 2026-09-09,
-    // while the same labels average degree 2-13 in Neo4j — none of those nodes
-    // is isolated in the database. This is a presentation artefact, so it is
-    // corrected in presentation. `isolatedRemoved` is returned so a persona
-    // that starts shedding nodes is visible rather than silently thinner.
-    const connected = new Set<string>();
-    for (const l of links) {
-      connected.add(l.source);
-      connected.add(l.target);
-    }
-    const linked = nodes.filter((n) => connected.has(n.id));
-    // Never prune the view down to nothing. A persona whose data is not seeded
-    // (locally, `trust-center` has no TrustCenter nodes at all) would otherwise
-    // render an empty canvas with no explanation, which is a worse answer than
-    // showing the disconnected nodes that do exist and letting the caller see
-    // isolatedRemoved.
-    const visibleNodes = linked.length > 0 ? linked : nodes;
-    const isolatedRemoved = nodes.length - visibleNodes.length;
 
     const personaMeta = PERSONA_VIEWS.find((p) => p.id === safePersona);
     return NextResponse.json({
-      nodes: visibleNodes,
-      links,
+      nodes,
+      links: graph.links,
       persona: safePersona,
       question: personaMeta?.question,
-      isolatedRemoved,
+      isolatedRemoved: graph.isolatedRemoved,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

@@ -73,10 +73,9 @@ describe("server-cache", () => {
     }
   });
 
-  it("multiple simultaneous cold callers all see the same eventual value", async () => {
-    // Each caller gets its own loader promise — the current minimal
-    // implementation does not de-dupe simultaneous cold calls. We only
-    // assert that every awaiter eventually receives a usable value.
+  it("simultaneous cold callers share one load", async () => {
+    // Under load, 50 users opening /graph at once each ran the whole graph
+    // build (#540); they now wait for one.
     const loader = vi.fn(async () => "done");
 
     const [a, b, c] = await Promise.all([
@@ -85,6 +84,47 @@ describe("server-cache", () => {
       cached("k4", 1000, loader),
     ]);
     expect([a, b, c]).toEqual(["done", "done", "done"]);
+    expect(loader).toHaveBeenCalledTimes(1);
+  });
+
+  it("a failed cold load reaches every waiting caller, and the next call loads again", async () => {
+    const failing = vi.fn(async () => {
+      throw new Error("neo4j down");
+    });
+    const results = await Promise.allSettled([
+      cached("k7", 1000, failing),
+      cached("k7", 1000, failing),
+    ]);
+    expect(results.map((r) => r.status)).toEqual(["rejected", "rejected"]);
+    expect(failing).toHaveBeenCalledTimes(1);
+
+    const working = vi.fn(async () => "back");
+    expect(await cached("k7", 1000, working)).toBe("back");
+  });
+
+  it("a failed background refresh keeps the stale value and is not an unhandled rejection", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const unhandled = vi.fn();
+    process.on("unhandledRejection", unhandled);
+    try {
+      expect(await cached("k8", 10, async () => "old")).toBe("old");
+      vi.setSystemTime(Date.now() + 25);
+
+      const failing = vi.fn(async () => {
+        throw new Error("neo4j down");
+      });
+      expect(await cached("k8", 10, failing)).toBe("old");
+      await new Promise((r) => setTimeout(r, 0));
+
+      expect(unhandled).not.toHaveBeenCalled();
+      // The stale value stays, and the next caller may try again.
+      expect(await cached("k8", 10, async () => "new")).toBe("old");
+      await new Promise((r) => setTimeout(r, 0));
+      expect(await cached("k8", 10, async () => "unused")).toBe("new");
+    } finally {
+      process.off("unhandledRejection", unhandled);
+      vi.useRealTimers();
+    }
   });
 
   it("__resetCacheForTests clears between specs", async () => {
