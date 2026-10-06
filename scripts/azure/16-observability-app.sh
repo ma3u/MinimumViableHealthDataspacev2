@@ -306,11 +306,28 @@ az rest --method PATCH \
     ]}}}}" -o none
 ok "$OBS_APP: Grafana on 3000 (public, Keycloak), OTLP ${OTLP_PORT} and Prometheus ${PROM_PORT} (internal)"
 
-log "Waiting for the new revision"
-# The new revision's own health, not the public address: that is still served
-# by the old revision and answered 200 while the new one was activating, so
-# the old one was retired too early and Grafana answered 404 (2026-10-06).
-"${SCRIPT_DIR}/retire-stale-revisions.sh" --when-healthy "$OBS_APP" || warn "a stale $OBS_APP revision is still active"
+log "Replacing the old revision (stop, then start)"
+# Not --when-healthy: Prometheus, Loki and Tempo take a lock on /data, so the
+# new revision cannot start while the old one runs on the same share. It was
+# 'ActivationFailed' (Prometheus exited before becoming ready) for ten minutes
+# beside a healthy old one (2026-10-06), as mvhd-neo4j was on its store lock.
+# So the old one goes first and Grafana is away for a minute or two.
+"${SCRIPT_DIR}/retire-stale-revisions.sh" "$OBS_APP" || warn "a stale $OBS_APP revision is still active"
+LATEST="$(az containerapp show --name "$OBS_APP" --resource-group "$RG" \
+  --query properties.latestRevisionName -o tsv)"
+health=""
+for i in $(seq 1 40); do
+  health="$(az containerapp revision show --name "$OBS_APP" --resource-group "$RG" \
+    --revision "$LATEST" --query properties.healthState -o tsv)"
+  [[ "$health" == Healthy ]] && break
+  # A first start that met the old revision's lock gives up; start it again.
+  if [[ "$i" == 12 ]]; then
+    az containerapp revision restart --name "$OBS_APP" --resource-group "$RG" \
+      --revision "$LATEST" -o none
+  fi
+  sleep 15
+done
+if [[ "$health" == Healthy ]]; then ok "$LATEST healthy"; else warn "$LATEST is '$health' after 10 minutes"; fi
 check
 cat <<DNS
 
