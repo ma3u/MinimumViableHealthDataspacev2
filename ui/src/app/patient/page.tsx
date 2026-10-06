@@ -55,6 +55,9 @@ interface TimelineEntry {
   fhirId: string;
   date: string;
   display: string;
+  /** An Observation's value and unit (absent in older mock fixtures). */
+  value?: string | null;
+  unit?: string | null;
   omopType: string;
   omopId: string;
 }
@@ -642,6 +645,15 @@ export default function PatientPage() {
                                   </span>
                                 )}
                               </p>
+                              {e.value != null && e.value !== "" && (
+                                <p
+                                  className="text-sm text-(--text-primary) mt-0.5 tabular-nums"
+                                  data-testid="timeline-value"
+                                >
+                                  {e.value}
+                                  {e.unit ? ` ${e.unit}` : ""}
+                                </p>
+                              )}
                               {e.omopType && (
                                 <p className="text-xs text-(--layer4-text) mt-1">
                                   ↳ OMOP {e.omopType}: {e.omopId}
