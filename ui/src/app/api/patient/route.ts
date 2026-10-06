@@ -44,6 +44,9 @@ interface TimelineRow {
   fhirId: string;
   date: string;
   display: string;
+  /** An Observation's value and unit; null for every other type. */
+  value: string | null;
+  unit: string | null;
   omopType: string;
   omopId: string;
 }
@@ -57,8 +60,14 @@ async function loadTimeline(patientId: string): Promise<TimelineRow[]> {
      OPTIONAL MATCH (fhir)-[:MAPPED_TO]->(omop)
      RETURN labels(fhir)[0]                                                          AS fhirType,
             coalesce(fhir.id, fhir.resourceId)                                       AS fhirId,
-            coalesce(fhir.date, fhir.onsetDate, fhir.dateTime, fhir.performedStart)  AS date,
+            coalesce(fhir.date, fhir.onsetDate, fhir.dateTime, fhir.performedStart,
+                     fhir.effectiveDate)                                             AS date,
             coalesce(fhir.display, fhir.name, fhir.code)                             AS display,
+            // Synthea's observations carry valueUnit, Klarbefund's unit
+            // (lib/patient/app-observations.ts); without these the timeline
+            // showed every value as a name only.
+            toString(fhir.valueQuantity)                                             AS value,
+            coalesce(fhir.valueUnit, fhir.unit)                                      AS unit,
             labels(omop)[0]                                                          AS omopType,
             coalesce(omop.id, omop.personId, omop.visitOccurrenceId,
                      omop.conditionOccurrenceId, omop.measurementId,
@@ -120,7 +129,10 @@ export async function GET(req: Request) {
           `MATCH (p:Patient)
            WHERE coalesce(p.id, p.resourceId) IS NOT NULL
            RETURN coalesce(p.id, p.resourceId) AS id,
-                  p.name      AS name,
+                  // The patient's own record: a Klarbefund one is named by
+                  // its account (kb-...), which is how its owner signs in;
+                  // every one of them is otherwise "Klarbefund sandbox".
+                  coalesce(p.appAccount, p.name) AS name,
                   p.gender    AS gender,
                   p.birthDate AS birthDate
            ORDER BY p.name
