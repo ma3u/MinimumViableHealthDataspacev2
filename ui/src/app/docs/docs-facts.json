@@ -1014,6 +1014,12 @@
       "file": "ADR-055-azure-runs-the-compose-jad-build.md",
       "title": "Azure runs the same JAD build as compose and CI",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-056",
+      "file": "ADR-056-neo4j-grows-to-2-vcpu-and-4-gib.md",
+      "title": "Neo4j on Azure grows to 2 vCPU and 4 GiB, with its memory bounded",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
