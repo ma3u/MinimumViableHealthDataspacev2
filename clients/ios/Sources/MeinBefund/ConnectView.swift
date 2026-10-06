@@ -280,6 +280,21 @@ struct ConnectView: View {
           if let since = connection.sendsReportsSince {
             LabeledContent("Since", value: since.formatted(date: .abbreviated, time: .omitted))
           }
+          if connection.sendsReportsSince != nil {
+            Button {
+              Task { await connection.sync(connection.reportsToSync(), all: true) }
+            } label: {
+              HStack {
+                Label("Sync all reports now", systemImage: "arrow.triangle.2.circlepath")
+                if connection.syncing {
+                  Spacer()
+                  ProgressView()
+                }
+              }
+            }
+            .disabled(connection.syncing)
+            .accessibilityIdentifier("account-sync-all")
+          }
           if let last = connection.lastSend {
             Text(last)
               .font(.footnote)

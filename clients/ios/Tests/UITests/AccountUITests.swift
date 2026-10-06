@@ -72,5 +72,12 @@ final class AccountUITests: XCTestCase {
       app.staticTexts["account-last-send"], "what the send did", timeout: 15)
     XCTAssertTrue(sent.label.contains("Sent"), sent.label)
     XCTAssertFalse(app.alerts.firstMatch.exists, "nothing asks again")
+
+    // Older reports: sent again on request, without a question either.
+    AppDriver.scrollTo(app.buttons["account-sync-all"], in: app).tap()
+    let again = AppDriver.require(
+      app.staticTexts["account-last-send"], "what the sync did", timeout: 15)
+    XCTAssertTrue(again.label.contains("Sent"), again.label)
+    XCTAssertFalse(app.alerts.firstMatch.exists)
   }
 }
