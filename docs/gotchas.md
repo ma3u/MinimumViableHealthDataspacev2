@@ -24,6 +24,24 @@ Rule: a request rate on a service that does not fall to zero at idle has a
 caller; find it before reading the rate as load. Log Analytics lines per app
 (`summarize count() by ContainerAppName_s`) names it in one query.
 
+## 2026-10-06: every load test made the next one slower, through the graph view
+
+The Azure `load` run at 14:00 failed with every endpoint at 5 to 18 s p95, two
+hours after the same run passed at 151 ms. `mvhd-ui` sat at its 0.5-core limit
+while Neo4j and the proxy idled. `/api/graph` alone took 1.3 to 8 s on an idle
+hub: its default view selected every `TransferEvent` with no limit, and the
+proxy writes one per data access (the Art. 73 access log, kept a year). Each
+k6 NLQ question added one, so the day's runs had put 10,521 into the view,
+6.1 MB of JSON per call (locally 15,683 and 7.9 MB). The cache (#540) hid it
+for a while; serialising the cached answer was the cost.
+
+Log-like labels (`TransferEvent`, `DataTransfer`) are now shown as the newest
+30 (#571), and a k6 run's accesses carry `loadTest` like its audit records.
+
+Rule: a view never selects a label that grows with use without a `LIMIT`.
+When a run is slower than the last one, compare the payload sizes too, not
+only the timings.
+
 ## 2026-10-06: Grafana on an Azure Files share lost Prometheus, and the next revision could not start
 
 `mvhd-observability` (ADR-045) kept everything in the replica, so each deploy

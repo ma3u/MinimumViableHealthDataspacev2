@@ -236,7 +236,7 @@ RECORD_COLUMNS = [
     ("outcomeDesc", "Reason", "string"), ("agents", "Parties", "string"),
     ("entities", "Agreement, asset, permit", "string"),
     ("source", "Reported by", "string"), ("demo", "Demo", "boolean"),
-    ("hash", "Hash", "string"),
+    ("loadTest", "Load test run", "string"), ("hash", "Hash", "string"),
 ]
 OUTCOME_OVERRIDE = [{"matcher": {"id": "byName", "options": "Outcome"},
                      "properties": [{"id": "mappings", "value": OUTCOME_MAP},
@@ -568,7 +568,7 @@ AUDITOR_GUIDE = """### How to audit this trail, step by step
 4. **Queries** (*Query records*). One row per natural-language or federated query: who asked (*Parties*), when, and the outcome. The question and the generated Cypher are kept only as SHA-256, so no record holds health data. *Refused* means a guard stopped the query (re-identification risk, ODRL prohibition, k-anonymity); read the reason.
 5. **Contracts and transfers** (*Contract and transfer records*, and the dashboard *EDC contracts and transfers*). Follow each negotiation from *requested* to *finalized* and each transfer from *requested* to *completed*. A transfer of health data for secondary use must name its contract agreement and its data permit (*Agreement, asset, permit*). A transfer refused for want of a permit is the gate working (Art. 61(1)). Every *terminated* or *failed* row carries the connector's reason.
 6. **Re-verify outside this dashboard.** `scripts/verify-audit-chain.sh` reads Neo4j directly and recomputes the chain. The raw records are FHIR `AuditEvent`s at `/audit/chains/query/events` and `/audit/chains/dsp/events` on the proxy.
-7. **Write down** the period, both chain heads, the counts, every refusal and failed write with its reason, and any record marked *Demo* (demonstration traffic, not real use).
+7. **Write down** the period, both chain heads, the counts, every refusal and failed write with its reason, and any record marked *Demo* (demonstration traffic, not real use). A record with a *Load test run* was written by a k6 run against the hub (synthetic traffic, #571): count it apart, it is not a data user's access.
 
 **Known limit (#418).** The chain lives in Neo4j. It proves order and integrity, but someone with write access to the database could rebuild it from a point onward. Comparing chain heads between audits (step 2) detects that; a signed daily digest and a write-once copy will close it.
 """
