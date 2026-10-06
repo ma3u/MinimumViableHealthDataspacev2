@@ -2,7 +2,7 @@
 # =============================================================================
 # A k6 run against the live hub from inside the Azure environment (#519).
 # =============================================================================
-#   run-load-test.sh <scenario> [testid]     smoke | load | stress | spike | soak | audited | proxy | signin
+#   run-load-test.sh <scenario> [testid]     smoke | load | stress | spike | soak | audited | contracts | proxy | signin
 #
 # The run is the Container Apps job mvhd-load-test (load-tests/azure): its
 # metrics go to mvhd-observability's Prometheus, so the whole run, k6 rows and
@@ -23,7 +23,7 @@ source "${SCRIPT_DIR}/env.sh"
 
 SCENARIO="${1:-}"
 case "$SCENARIO" in
-  smoke | load | stress | spike | soak | audited | proxy | signin) ;;
+  smoke | load | stress | spike | soak | audited | contracts | proxy | signin) ;;
   *) sed -n '5,13p' "$0"; exit 64 ;;
 esac
 TESTID="${2:-$(date -u +%Y%m%d-%H%M)-${SCENARIO}-aca}"

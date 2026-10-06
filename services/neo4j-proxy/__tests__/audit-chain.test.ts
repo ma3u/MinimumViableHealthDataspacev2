@@ -18,6 +18,7 @@ import {
   type QueryAuditInput,
 } from "../src/audit-chain.js";
 import { setDriver } from "../src/db.js";
+import { requestLogging } from "../src/logger.js";
 import neo4j from "neo4j-driver";
 
 const QUESTION =
@@ -185,6 +186,41 @@ describe("appendQueryAudit", () => {
       driver: { session: vi.fn(() => ({ executeWrite, close })) },
     };
   }
+
+  // #571: a record written while serving a k6 request names the run, inside
+  // the hash; the run comes from X-Load-Test through the request context.
+  it("stamps the load test run of the request it is written in", async () => {
+    const inRequest = (loadTest?: string) =>
+      new Promise<ChainedEvent>((resolve, reject) => {
+        setDriver(fakeDriver({ seq: 1, head: "c".repeat(64) }).driver as never);
+        const req = {
+          path: "/nlq",
+          method: "POST",
+          baseUrl: "",
+          header: (h: string) =>
+            h.toLowerCase() === "x-load-test" ? loadTest : undefined,
+        };
+        const res = { on: vi.fn(), statusCode: 200 };
+        requestLogging({ info: vi.fn(), error: vi.fn() } as never)(
+          req as never,
+          res as never,
+          () => {
+            appendQueryAudit(input()).then(resolve, reject);
+          },
+        );
+      });
+
+    const marked = await inRequest("20261006-1300-load-aca");
+    expect(JSON.stringify(marked.resource)).toContain(
+      '{"type":"loadTest","valueString":"20261006-1300-load-aca"}',
+    );
+    expect(marked.hash).toBe(
+      chainEvent(marked.resource, QUERY_CHAIN, marked.seq, marked.prevHash)
+        .hash,
+    );
+    const plain = await inRequest(undefined);
+    expect(JSON.stringify(plain.resource)).not.toContain("loadTest");
+  });
 
   it("locks the head, extends it by one and stores the hash", async () => {
     const prev = "a".repeat(64);

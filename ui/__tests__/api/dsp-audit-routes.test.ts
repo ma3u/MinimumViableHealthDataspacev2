@@ -49,10 +49,15 @@ const PERMIT = {
   article: "Regulation (EU) 2025/327, Art. 61(1) and Art. 68",
 };
 
-const post = (url: string, body: Record<string, unknown>) =>
+const post = (
+  url: string,
+  body: Record<string, unknown>,
+  headers: Record<string, string> = {},
+) =>
   new NextRequest(`http://localhost${url}`, {
     method: "POST",
     body: JSON.stringify(body),
+    headers,
   });
 
 const NEGOTIATION = {
@@ -206,5 +211,58 @@ describe("POST /api/transfers", () => {
         expect.objectContaining({ events: ["transfer.process"] }),
       ],
     });
+  });
+});
+
+// A k6 run's contracts and transfers are on the trail with the run's id, so an
+// auditor can tell them from real ones; the chain cannot be pruned (#571).
+describe("records of a load test run", () => {
+  const RUN = { "X-Load-Test": "20261006-1300-load-aca" };
+
+  it("puts the run on every negotiation record", async () => {
+    mockManagement.mockResolvedValue({ "@id": "neg-123" });
+    await negotiate(post("/api/negotiations", NEGOTIATION, RUN));
+    expect(mockRecord.mock.calls[0][0]).toMatchObject({
+      event: "requested",
+      loadTest: "20261006-1300-load-aca",
+    });
+    expect(mockRecordAfter.mock.calls[0][0]).toMatchObject({
+      event: "initiated",
+      loadTest: "20261006-1300-load-aca",
+    });
+  });
+
+  it("puts the run on a refused transfer and on a permitted one", async () => {
+    mockCheckPermit.mockResolvedValue({
+      ...PERMIT,
+      allowed: false,
+      permitId: null,
+      reason: "holds no data permit",
+    });
+    await transfer(post("/api/transfers", TRANSFER, RUN));
+    expect(mockRecordAfter.mock.calls[0][0]).toMatchObject({
+      event: "refused",
+      loadTest: "20261006-1300-load-aca",
+    });
+
+    mockCheckPermit.mockResolvedValue(PERMIT);
+    mockManagement.mockResolvedValue({ "@id": "tp-1" });
+    await transfer(post("/api/transfers", TRANSFER, RUN));
+    expect(mockRecord.mock.calls[0][0]).toMatchObject({
+      event: "requested",
+      loadTest: "20261006-1300-load-aca",
+    });
+  });
+
+  it("names no run without the header, or with one that is not a run id", async () => {
+    mockManagement.mockResolvedValue({ "@id": "neg-1" });
+    await negotiate(post("/api/negotiations", NEGOTIATION));
+    await negotiate(
+      post("/api/negotiations", NEGOTIATION, {
+        "X-Load-Test": "x y; drop",
+      }),
+    );
+    expect(mockRecord.mock.calls[0][0].loadTest).toBeUndefined();
+    expect(mockRecord.mock.calls[1][0].loadTest).toBeUndefined();
   });
 });

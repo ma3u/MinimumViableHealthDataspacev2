@@ -10,6 +10,7 @@ import {
   recordDspEventAfter,
 } from "@/lib/dsp-audit";
 import { userToParticipantId } from "@/lib/odrl-engine";
+import { loadTestId } from "@/lib/proxy";
 import { tagRows } from "@/lib/row-provenance";
 import {
   PERMIT_ARTICLE,
@@ -284,6 +285,7 @@ export async function POST(req: NextRequest) {
         process: "transfer-process",
         event: "refused",
         outcome: "refused",
+        loadTest: loadTestId(req),
         agreementId: contractId,
         assetId: asset || undefined,
         participantContext: participantId,
@@ -306,6 +308,7 @@ export async function POST(req: NextRequest) {
         process: "transfer-process",
         event: "refused",
         outcome: "refused",
+        loadTest: loadTestId(req),
         agreementId: contractId,
         assetId: asset || undefined,
         consumerId: permit.consumerDid ?? undefined,
@@ -334,6 +337,7 @@ export async function POST(req: NextRequest) {
     // On the audit trail before anything is sent, or not at all (ADR-045).
     const audited = {
       process: "transfer-process" as const,
+      loadTest: loadTestId(req),
       agreementId: contractId,
       assetId: asset || undefined,
       datasetId: permit.datasetId ?? undefined,

@@ -104,6 +104,18 @@ export const SCENARIOS = {
       ["30s", 0],
     ]),
   },
+  // contracts and transfers only: catalogue, negotiation, transfer, a refused
+  // transfer, each on the audit trail (#571)
+  contracts: {
+    executor: "ramping-vus",
+    exec: "contracts",
+    startVUs: 1,
+    stages: stages([
+      ["1m", 2],
+      ["2m", 10],
+      ["30s", 0],
+    ]),
+  },
   // the proxy directly, from inside the network (hypothesis 1)
   proxy: {
     executor: "ramping-vus",

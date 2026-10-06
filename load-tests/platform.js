@@ -133,6 +133,147 @@ const JOURNEYS = {
   ],
 };
 
+// ---------------------------------------------------------------------------
+// The data user's contract journey (#571)
+// ---------------------------------------------------------------------------
+//
+// Browsing alone writes nothing to the contract and transfer chain, so the
+// EHDS audit trail and the EDC dashboards stayed empty under load. This is
+// the DSP flow the negotiate and transfer pages run: PharmaCo (data user)
+// reads AlphaKlinik's catalogue, negotiates an offer and transfers under its
+// data permit; one time in four it also asks for a dataset no permit covers,
+// which the hub refuses (Regulation (EU) 2025/327, Art. 61(1)).
+//
+// Every record it writes carries the run's id (X-Load-Test), so an auditor
+// can tell it from real use. Where the connector cannot serve the catalogue
+// (on Azure today, #25) the hub falls back to its demo offers; the records
+// then say demo, and the flow and its audit writes are the same.
+
+const CONSUMER = "pharmaco";
+const PROVIDER = "alpha-klinik";
+const DSP_ADDRESS = "http://controlplane:8082/api/dsp";
+/** A dataset no permit names: the transfer the access body's rule refuses. */
+const UNPERMITTED_DATASET = "dataset:load-test-no-permit";
+
+/** This VU's participant contexts, looked up once (each VU has its own copy). */
+let contexts = null;
+
+function participantContexts(persona) {
+  if (contexts) return contexts;
+  const res = request(BASE_URL, persona, api("/api/participants"));
+  let list = [];
+  try {
+    const body = res.json();
+    list = Array.isArray(body) ? body : body.participants || [];
+  } catch (_err) {
+    return null;
+  }
+  const find = (slug) =>
+    list.find((p) =>
+      String(p.identity || p.participantId || "").includes(slug),
+    );
+  const consumer = find(CONSUMER);
+  const provider = find(PROVIDER);
+  if (!consumer || !provider) return null;
+  contexts = {
+    consumer: consumer["@id"],
+    provider: provider["@id"],
+    providerDid: provider.identity || provider.participantId,
+  };
+  return contexts;
+}
+
+function firstOffer(catalog) {
+  let datasets = catalog.dataset || catalog["dcat:dataset"] || [];
+  if (!Array.isArray(datasets)) datasets = [datasets];
+  for (const ds of datasets) {
+    let policies = ds.hasPolicy || ds["odrl:hasPolicy"] || [];
+    if (!Array.isArray(policies)) policies = [policies];
+    const offer = policies.find((p) => p && p["@id"]);
+    if (ds["@id"] && offer)
+      return { assetId: ds["@id"], offerId: offer["@id"] };
+  }
+  return null;
+}
+
+/** Catalogue, contract, transfer, and now and then a refused transfer. */
+function contractJourney(persona) {
+  const ctx = participantContexts(persona);
+  if (!ctx) return;
+  const think = () => sleep(1 + Math.random() * 2);
+
+  const query = `participantId=${
+    ctx.consumer
+  }&catalog=true&providerDid=${encodeURIComponent(ctx.providerDid)}`;
+  const catalog = request(BASE_URL, persona, {
+    ...api(`/api/negotiations?${query}`),
+    name: "GET /api/negotiations (catalogue)",
+  });
+  let offer = null;
+  try {
+    offer = firstOffer(catalog.json());
+  } catch (_err) {
+    offer = null;
+  }
+  if (!offer) return;
+  think();
+
+  const negotiation = request(BASE_URL, persona, {
+    kind: "api",
+    method: "POST",
+    path: "/api/negotiations",
+    expect: [201],
+    body: {
+      participantId: ctx.consumer,
+      assetId: offer.assetId,
+      counterPartyAddress: DSP_ADDRESS,
+      counterPartyId: ctx.provider,
+      providerDid: ctx.providerDid,
+      offerId: offer.offerId,
+    },
+  });
+  let agreement = null;
+  try {
+    agreement = negotiation.json().contractAgreementId || null;
+  } catch (_err) {
+    agreement = null;
+  }
+  think();
+
+  // A live negotiation has no agreement yet when the POST answers (the
+  // connector agrees later, and reports it to the chain itself), so the
+  // transfer runs only on an agreement the answer names: a demo one today.
+  if (agreement) {
+    const transfer = {
+      kind: "api",
+      method: "POST",
+      path: "/api/transfers",
+      expect: [201],
+      body: {
+        participantId: ctx.consumer,
+        contractId: agreement,
+        assetId: offer.assetId,
+        counterPartyAddress: DSP_ADDRESS,
+      },
+    };
+    request(BASE_URL, persona, transfer);
+    think();
+    if (__ITER % 4 === 0) {
+      request(BASE_URL, persona, {
+        ...transfer,
+        name: "POST /api/transfers (no permit)",
+        expect: [403],
+        body: { ...transfer.body, datasetId: UNPERMITTED_DATASET },
+      });
+      think();
+    }
+  }
+  request(BASE_URL, persona, {
+    ...api(`/api/transfers?participantId=${ctx.consumer}`),
+    name: "GET /api/transfers",
+  });
+}
+
 function headersFor(persona, step) {
   // One of the persona's forged users, fixed per VU: the proxy's rate limit
   // counts per user, so 50 VUs are 50 people (#519).
@@ -153,7 +294,13 @@ function request(base, persona, step) {
   const expect = step.expect || [200];
   const params = {
     headers: headersFor(persona, step),
-    tags: { name: `${step.method} ${step.path}`, kind: step.kind, persona },
+    // `name` is the route; a step whose path carries ids or a query names
+    // itself, so the dashboard keeps one series per endpoint.
+    tags: {
+      name: step.name || `${step.method} ${step.path}`,
+      kind: step.kind,
+      persona,
+    },
     responseCallback: http.expectedStatuses(...expect),
   };
   const url = `${base}${step.path}`;
@@ -165,7 +312,7 @@ function request(base, persona, step) {
   check(
     res,
     {
-      [`${step.kind} answers 200`]: (r) => expect.includes(r.status),
+      [`${step.kind} answers as expected`]: (r) => expect.includes(r.status),
       [`${step.kind} under ${SLO_MS[step.kind]} ms`]: (r) =>
         r.timings.duration < SLO_MS[step.kind],
     },
@@ -178,13 +325,23 @@ function request(base, persona, step) {
 // Scenario functions
 // ---------------------------------------------------------------------------
 
-/** The persona mix, each VU walking its persona's journey with think time. */
+/**
+ * The persona mix, each VU walking its persona's journey with think time.
+ * A researcher negotiates and transfers every third visit, not every one: a
+ * data user reads far more than they contract.
+ */
 export function browse() {
   const persona = personaFor(__VU);
   for (const step of JOURNEYS[persona]) {
     request(BASE_URL, persona, step);
     sleep(1 + Math.random() * 2);
   }
+  if (persona === "researcher" && __ITER % 3 === 0) contractJourney(persona);
+}
+
+/** The contract journey alone, to try it or to load the audit writes. */
+export function contracts() {
+  contractJourney("researcher");
 }
 
 /** Audited queries only, as fast as the hub answers them. */

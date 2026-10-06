@@ -49,6 +49,28 @@ describe("recordDspEvent", () => {
     await expect(recordDspEvent(RECORD)).rejects.toThrow(/unreachable/);
   });
 
+  it("names a load test run as X-Load-Test, so the proxy stamps it on the record (#571)", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response("{}", { status: 201 }));
+    await recordDspEvent({ ...RECORD, loadTest: "20261006-1300-load-aca" });
+    const init = fetchSpy.mock.calls[0][1];
+    expect(init?.headers).toMatchObject({
+      "X-Load-Test": "20261006-1300-load-aca",
+    });
+    expect(JSON.parse(String(init?.body))).not.toHaveProperty("loadTest");
+  });
+
+  it("sends no run for a request that is not part of one", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response("{}", { status: 201 }));
+    await recordDspEvent(RECORD);
+    expect(fetchSpy.mock.calls[0][1]?.headers).not.toHaveProperty(
+      "X-Load-Test",
+    );
+  });
+
   it("sends the shared token when one is configured", async () => {
     vi.stubEnv("AUDIT_CALLBACK_TOKEN", "t0ken");
     const fetchSpy = vi

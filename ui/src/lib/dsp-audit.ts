@@ -31,6 +31,12 @@ export interface DspAuditRecord {
   participantContext?: string;
   reason?: string;
   demo?: boolean;
+  /**
+   * The k6 run the request belongs to (loadTestId(req)). Sent as X-Load-Test,
+   * and the proxy stamps it on the record, so an auditor can tell a load
+   * test's contracts and transfers from real ones (#571).
+   */
+  loadTest?: string;
 }
 
 export class AuditUnavailableError extends Error {}
@@ -38,6 +44,11 @@ export class AuditUnavailableError extends Error {}
 /** Writes one record; rejects unless the proxy committed it (201). */
 export async function recordDspEvent(record: DspAuditRecord): Promise<void> {
   const token = process.env.AUDIT_CALLBACK_TOKEN;
+  const { loadTest, ...fields } = record;
+  // Validated by loadTestId() where the route read it, and again by the proxy.
+  const run: Record<string, string> = loadTest
+    ? { "X-Load-Test": loadTest }
+    : {};
   let status = 0;
   try {
     const res = await fetch(`${NEO4J_PROXY_URL}/audit/dsp`, {
@@ -45,8 +56,9 @@ export async function recordDspEvent(record: DspAuditRecord): Promise<void> {
       headers: {
         "Content-Type": "application/json",
         ...(token ? { "x-audit-token": token } : {}),
+        ...run,
       },
-      body: JSON.stringify({ source: "hub-ui", ...record }),
+      body: JSON.stringify({ source: "hub-ui", ...fields }),
       cache: "no-store",
       signal: AbortSignal.timeout(5000),
     });

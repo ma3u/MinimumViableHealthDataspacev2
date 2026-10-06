@@ -4,7 +4,7 @@
 #
 #   load-tests/run.sh <scenario> [local|azure|<base url>]
 #
-#   scenario   smoke | load | stress | spike | soak | audited | proxy | signin
+#   scenario   smoke | load | stress | spike | soak | audited | contracts | proxy | signin
 #   target     local  = http://localhost:3003 (default), proxy on :9090
 #              azure  = https://ehds.mabu.red; needs NEXTAUTH_SECRET exported
 #
@@ -22,7 +22,7 @@ HERE="$ROOT/load-tests"
 SCENARIO="${1:-}"
 TARGET="${2:-local}"
 case "$SCENARIO" in
-  smoke|load|stress|spike|soak|audited|proxy|signin) ;;
+  smoke|load|stress|spike|soak|audited|contracts|proxy|signin) ;;
   *) sed -n '2,20p' "$0"; exit 2 ;;
 esac
 command -v k6 >/dev/null || { echo "k6 is not installed (brew install k6)" >&2; exit 1; }

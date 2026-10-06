@@ -19,7 +19,10 @@ import { logs, SeverityNumber } from "@opentelemetry/api-logs";
 import type { NextFunction, Request, Response } from "express";
 import pino, { type DestinationStream, type Logger } from "pino";
 
-const traceContext = new AsyncLocalStorage<{ traceId: string }>();
+const traceContext = new AsyncLocalStorage<{
+  traceId: string;
+  loadTest?: string;
+}>();
 
 /** Paths pino replaces with "[redacted]", at the top level and one level down. */
 const SENSITIVE_KEYS = [
@@ -167,6 +170,15 @@ export function loadTestField(req: Request): { load_test?: string } {
 }
 
 /**
+ * The load test run of the request being served, if any. The audit chains
+ * stamp it on every record a run writes (#571), so an auditor can tell the
+ * synthetic traffic of a k6 run from real use: the chain cannot be pruned.
+ */
+export function currentLoadTest(): string | undefined {
+  return traceContext.getStore()?.loadTest;
+}
+
+/**
  * Express middleware: runs the request inside its trace context and writes one
  * line when it finishes. The line names the route pattern, never the URL, so
  * `/fhir/Patient/:id` does not put a patient id in the log. Health probes are
@@ -198,6 +210,7 @@ export function requestLogging(log: Logger = logger) {
       if (res.statusCode >= 500) log.error(fields, "request failed");
       else log.info(fields, "request");
     });
-    traceContext.run({ traceId }, next);
+    const { load_test: loadTest } = loadTestField(req);
+    traceContext.run({ traceId, ...(loadTest ? { loadTest } : {}) }, next);
   };
 }
