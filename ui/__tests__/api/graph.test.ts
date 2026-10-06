@@ -15,6 +15,7 @@ vi.mock("@/lib/neo4j", () => ({
 
 import { runQuery } from "@/lib/neo4j";
 import { GET } from "@/app/api/graph/route";
+import { __resetCacheForTests } from "@/lib/server-cache";
 
 const mockRunQuery = vi.mocked(runQuery);
 
@@ -43,6 +44,7 @@ const SAMPLE_LINKS = [
 describe("GET /api/graph", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    __resetCacheForTests();
   });
 
   it("should return nodes and links with layer colors", async () => {
@@ -55,7 +57,8 @@ describe("GET /api/graph", () => {
       .mockResolvedValueOnce([SAMPLE_NODES[5]]) // snomedNodes
       .mockResolvedValueOnce([]) // loincNodes
       .mockResolvedValueOnce([]) // rxnormNodes
-      .mockResolvedValueOnce(SAMPLE_LINKS); // links query
+      .mockResolvedValueOnce(SAMPLE_LINKS) // links query
+      .mockResolvedValueOnce([]); // patient keys, cached with the graph (#540)
 
     const response = await GET(makeRequest());
     const data = await response.json();
@@ -114,6 +117,36 @@ describe("GET /api/graph", () => {
     await GET(makeRequest());
 
     expect(mockRunQuery).toHaveBeenCalledTimes(7);
+  });
+
+  it("answers the next caller of a persona from the cache, without Neo4j (#540)", async () => {
+    mockRunQuery.mockResolvedValue([]);
+
+    await GET(makeRequest());
+    await GET(makeRequest());
+    expect(mockRunQuery).toHaveBeenCalledTimes(7);
+
+    // Another persona is its own entry.
+    await GET(makeRequest({ persona: "edc-admin" }));
+    expect(mockRunQuery).toHaveBeenCalledTimes(9);
+  });
+
+  it("builds a persona once for callers that arrive together (#540)", async () => {
+    mockRunQuery.mockResolvedValue([]);
+
+    const responses = await Promise.all(
+      Array.from({ length: 5 }, () => GET(makeRequest())),
+    );
+    expect(responses.every((r) => r.status === 200)).toBe(true);
+    expect(mockRunQuery).toHaveBeenCalledTimes(7);
+  });
+
+  it("does not cache a failure: the next caller asks Neo4j again", async () => {
+    mockRunQuery.mockRejectedValueOnce(new Error("Connection refused"));
+    mockRunQuery.mockResolvedValue([]);
+
+    expect((await GET(makeRequest())).status).toBe(502);
+    expect((await GET(makeRequest())).status).toBe(200);
   });
 
   it("should pass GOVERNANCE_LABELS to the first node query", async () => {
