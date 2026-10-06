@@ -101,6 +101,10 @@ jobs:
       # ── 2. Enable GDS + APOC on Azure Neo4j ──────────────────────────────
       - name: Enable GDS + APOC on mvhd-neo4j
         run: |
+          # The memory settings are ADR-056's, from env.sh, so this step does
+          # not undo them (it set heap 1G and page cache 384M until #571).
+          # shellcheck source=/dev/null
+          source scripts/azure/env.sh
           echo "Enabling GDS + APOC plugins on ${{ env.NEO4J_APP }}..."
           az containerapp update \
             --name "${{ env.NEO4J_APP }}" \
@@ -109,12 +113,14 @@ jobs:
               'NEO4J_PLUGINS=["apoc","apoc-extended","graph-data-science"]' \
               'NEO4J_dbms_security_procedures_unrestricted=apoc.*,gds.*' \
               'NEO4J_dbms_security_procedures_allowlist=apoc.*,gds.*' \
-              'NEO4J_server_memory_heap_initial__size=1G' \
-              'NEO4J_server_memory_heap_max__size=1G' \
-              'NEO4J_server_memory_pagecache_size=384M' \
+              "NEO4J_server_memory_heap_initial__size=${NEO4J_HEAP}" \
+              "NEO4J_server_memory_heap_max__size=${NEO4J_HEAP}" \
+              "NEO4J_server_memory_pagecache_size=${NEO4J_PAGECACHE}" \
+              "NEO4J_server_jvm_additional=-XX:MaxDirectMemorySize=${NEO4J_DIRECT_MEMORY}" \
             -o none
           echo "Plugins + heap configured; Neo4j will restart with the new revision."
-          # Heap + pagecache + JVM overhead must fit the container's 2 GiB.
+          # Heap + pagecache + direct memory + JVM overhead must fit the
+          # container (4 GiB since ADR-056; size-neo4j.sh sets CPU and memory).
           # 2G/4G/2G was set here from April and every revision it created was
           # OOM-killed (exit 137) at startup (docs/gotchas.md, 2026-10-02).
           # Single revision mode then keeps the previous ready revision alive,

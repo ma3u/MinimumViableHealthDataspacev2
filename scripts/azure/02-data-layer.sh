@@ -44,7 +44,7 @@ az containerapp create \
   --registry-server "$ACR_LOGIN_SERVER" \
   --registry-username "$ACR_NAME" \
   --registry-password "$ACR_PASSWORD" \
-  --cpu 1.0 --memory 2Gi \
+  --cpu "$NEO4J_CPU" --memory "$NEO4J_MEMORY" \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 7687 --exposed-port 7687 --transport tcp \
   --env-vars \
@@ -52,8 +52,12 @@ az containerapp create \
     "NEO4J_PLUGINS=[\"apoc\"]" \
     "NEO4J_dbms_security_procedures_unrestricted=apoc.*" \
     "NEO4J_server_default__listen__address=0.0.0.0" \
+    "NEO4J_server_memory_heap_initial__size=${NEO4J_HEAP}" \
+    "NEO4J_server_memory_heap_max__size=${NEO4J_HEAP}" \
+    "NEO4J_server_memory_pagecache_size=${NEO4J_PAGECACHE}" \
+    "NEO4J_server_jvm_additional=-XX:MaxDirectMemorySize=${NEO4J_DIRECT_MEMORY}" \
   -o none
-ok "Neo4j container app created"
+ok "Neo4j container app created (${NEO4J_CPU} vCPU, ${NEO4J_MEMORY}, ADR-056)"
 
 # ── Neo4j (step 2: patch YAML to add Azure Files volumes) ──────────────────
 log "Patching Neo4j to mount the neo4j-data Azure Files share (no /logs mount)..."
