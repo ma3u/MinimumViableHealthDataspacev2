@@ -1,0 +1,2271 @@
+{
+  "uid": "mvhd-load-test",
+  "title": "Load and stress test",
+  "description": "What to watch while k6 runs against the hub (#519): load, client-side response time by kind and endpoint, the proxy's own view of the same run, and which container saturates first.",
+  "tags": ["mvhd", "load-test", "k6"],
+  "timezone": "browser",
+  "editable": false,
+  "graphTooltip": 1,
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "row",
+      "id": 1,
+      "title": "Load (k6): what the test is doing",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "id": 2,
+      "title": "Virtual users",
+      "description": "Concurrent users right now.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max(k6_vus{testid=\"$testid\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 1
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "id": 3,
+      "title": "Requests / s",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(rate(k6_http_reqs_total{testid=\"$testid\"}[$__rate_interval]))",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 1
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "id": 4,
+      "title": "Failed requests",
+      "description": "Share of requests with a status the step did not expect (4xx, 5xx, or no answer at all), over the time range. The SLO is under 1 %.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "(sum(increase(k6_http_reqs_total{testid=\"$testid\", expected_response=\"false\"}[$__range])) or vector(0)) / sum(increase(k6_http_reqs_total{testid=\"$testid\"}[$__range]))",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 1
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.005
+              },
+              {
+                "color": "red",
+                "value": 0.01
+              }
+            ]
+          },
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "id": 5,
+      "title": "Rate limited (429)",
+      "description": "#519 hypothesis 1: before the fix every user shared one bucket of 20 analytical queries a minute.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(increase(k6_http_reqs_total{testid=\"$testid\", status=\"429\"}[$__range]))",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 1
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "id": 6,
+      "title": "Checks passed (worst check)",
+      "description": "The check that passed least often, e.g. \"api under 1000 ms\". Each check is status 200 or under the SLO, per request; k6 writes one rate per check.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "min(k6_checks_rate{testid=\"$testid\"})",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 1
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 0.95
+              },
+              {
+                "color": "green",
+                "value": 0.99
+              }
+            ]
+          },
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "stat",
+      "id": 7,
+      "title": "Iterations",
+      "description": "Completed persona journeys (or sign-ins, or queries) in the run.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(increase(k6_iterations_total{testid=\"$testid\"}[$__range]))",
+          "legendFormat": "",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 1
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "value",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "noValue": "0"
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 8,
+      "title": "Virtual users and requests / s",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max(k6_vus{testid=\"$testid\"})",
+          "legendFormat": "virtual users",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(rate(k6_http_reqs_total{testid=\"$testid\"}[$__rate_interval]))",
+          "legendFormat": "requests / s",
+          "refId": "B"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 9,
+      "title": "Responses by HTTP status",
+      "description": "429 is the rate limit, 5xx the hub failing, 0 a request that got no answer.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (status) (rate(k6_http_reqs_total{testid=\"$testid\"}[$__rate_interval]))",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "row",
+      "id": 10,
+      "title": "Response time, as the client sees it",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "id": 11,
+      "title": "p95 by kind: website pages, API, NLQ, sign-in",
+      "description": "The proposed SLOs (#519): pages under 2 s, API under 1 s, NLQ under 3 s.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum by (kind) (rate(k6_http_req_duration_seconds{testid=\"$testid\"}[$__rate_interval])))",
+          "legendFormat": "{{kind}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 14
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 12,
+      "title": "p50, p95 and p99, all requests",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.50, sum by (testid) (rate(k6_http_req_duration_seconds{testid=\"$testid\"}[$__rate_interval])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum by (testid) (rate(k6_http_req_duration_seconds{testid=\"$testid\"}[$__rate_interval])))",
+          "legendFormat": "p95",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.99, sum by (testid) (rate(k6_http_req_duration_seconds{testid=\"$testid\"}[$__rate_interval])))",
+          "legendFormat": "p99",
+          "refId": "C"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 14
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 13,
+      "title": "p95 per endpoint",
+      "description": "The route pattern k6 names, never a URL with an id. The legend is sorted by the worst value.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum by (name) (rate(k6_http_req_duration_seconds{testid=\"$testid\"}[$__rate_interval])))",
+          "legendFormat": "{{name}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "table",
+      "id": 14,
+      "title": "Per endpoint: p95, requests, failures",
+      "description": "Sorted by p95. Failures are responses k6 did not expect (4xx, 5xx, none).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "histogram_quantile(0.95, sum by (name) (rate(k6_http_req_duration_seconds{testid=\"$testid\"}[$__rate_interval])))",
+          "legendFormat": "",
+          "refId": "A",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (name) (increase(k6_http_reqs_total{testid=\"$testid\"}[$__range]))",
+          "legendFormat": "",
+          "refId": "B",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (name) (increase(k6_http_reqs_total{testid=\"$testid\", expected_response=\"false\"}[$__range]))",
+          "legendFormat": "",
+          "refId": "C",
+          "instant": true,
+          "range": false,
+          "format": "table"
+        }
+      ],
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "filterable": true
+          }
+        },
+        "overrides": []
+      },
+      "transformations": [
+        {
+          "id": "merge"
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "renameByName": {
+              "Value #A": "p95 (s)",
+              "Value #B": "requests",
+              "Value #C": "failed"
+            }
+          }
+        },
+        {
+          "id": "sortBy",
+          "options": {
+            "sort": [
+              {
+                "field": "p95 (s)",
+                "desc": true
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "id": 15,
+      "title": "Server side: the proxy, log lines of this run (load_test = testid; NLQ, federated and tasks)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 39
+      },
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "id": 16,
+      "title": "Requests / s by route",
+      "description": "",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum by (route) (rate({service_name=~\".*neo4j-proxy.*\"} | json | __error__=\"\" | load_test=\"$testid\" [$__auto]))",
+          "legendFormat": "{{route}}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 40
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "reqps"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 17,
+      "title": "p95 duration by route (server side)",
+      "description": "Measured in the proxy; the difference to the client-side p95 is the UI and the network.",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "quantile_over_time(0.95, {service_name=~\".*neo4j-proxy.*\"} | json | __error__=\"\" | load_test=\"$testid\" | unwrap duration_ms [$__auto]) by (route)",
+          "legendFormat": "{{route}}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 18,
+      "title": "Proxy responses per minute, by status",
+      "description": "The proxy's answers to this run's calls. 429 is the rate limit, 5xx the proxy failing. Only the UI routes that call the proxy (NLQ, federated queries, tasks) appear here; the others read Neo4j directly.",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "sum by (status) (count_over_time({service_name=~\".*neo4j-proxy.*\"} | json | __error__=\"\" | load_test=\"$testid\" [1m]))",
+          "legendFormat": "{{status}}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 48
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 19,
+      "title": "Audit records per transaction",
+      "description": "#519 hypothesis 2: one record per transaction was the ceiling for audited queries. Above 1 means the batch writer is doing its work. Audit lines carry no run id, so this is every audited query in the time range, not only the run's.",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "avg by (audit_chain) (avg_over_time({service_name=~\".*neo4j-proxy.*\"} | json | msg=\"audit recorded\" | keep audit_chain, audit_batch | unwrap audit_batch | __error__=\"\" [$__auto]))",
+          "legendFormat": "{{audit_chain}} average",
+          "queryType": "range",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "max by (audit_chain) (max_over_time({service_name=~\".*neo4j-proxy.*\"} | json | msg=\"audit recorded\" | keep audit_chain, audit_batch | unwrap audit_batch | __error__=\"\" [$__auto]))",
+          "legendFormat": "{{audit_chain}} largest",
+          "queryType": "range",
+          "refId": "B"
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 48
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "logs",
+      "id": 20,
+      "title": "Errors during the run (proxy and UI)",
+      "description": "",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "loki"
+          },
+          "expr": "{service_name=~\".*(neo4j-proxy|ui).*\"} |~ \"(?i)\\\\berror\\\\b|exception|ECONN|timed? ?out\" != \"GET /api/health\"",
+          "legendFormat": "",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 56
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "sortOrder": "Descending",
+        "enableLogDetails": true,
+        "dedupStrategy": "none"
+      }
+    },
+    {
+      "type": "row",
+      "id": 21,
+      "title": "Azure: who saturates first (Azure Monitor, the live hub)",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 66
+      },
+      "panels": []
+    },
+    {
+      "type": "timeseries",
+      "id": 22,
+      "title": "CPU, % of each app's limit",
+      "description": "Maximum per minute. Neo4j at 100 % is the ceiling (#519).",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "azure-monitor"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-ui",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "CpuPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-neo4j-proxy",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "CpuPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-neo4j",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "CpuPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-keycloak",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "CpuPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-controlplane",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "CpuPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "F",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-identityhub",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "CpuPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "G",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-observability",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "CpuPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 67
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "ui"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "neo4j-proxy"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "neo4j"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "D"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "keycloak"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "E"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "controlplane"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "F"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "identityhub"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "G"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "observability"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 23,
+      "title": "Memory, % of each app's limit",
+      "description": "Neo4j near 100 % ends in an out-of-memory kill (exit 137).",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "azure-monitor"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-ui",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "MemoryPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-neo4j-proxy",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "MemoryPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-neo4j",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "MemoryPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-keycloak",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "MemoryPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "E",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-controlplane",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "MemoryPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "F",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-identityhub",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "MemoryPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "G",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-observability",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "MemoryPercentage",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 67
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "percent"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "ui"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "neo4j-proxy"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "neo4j"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "D"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "keycloak"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "E"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "controlplane"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "F"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "identityhub"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "G"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "observability"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 24,
+      "title": "Replicas",
+      "description": "ACA scales the UI to 3 and the proxy to 2; Neo4j is one.",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "azure-monitor"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-ui",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "Replicas",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-neo4j-proxy",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "Replicas",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-neo4j",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "Replicas",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 75
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "ui"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "neo4j-proxy"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "neo4j"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 25,
+      "title": "Restarts",
+      "description": "A restart under load is usually Neo4j killed for memory.",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "azure-monitor"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-ui",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "RestartCount",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-neo4j-proxy",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "RestartCount",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-neo4j",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "RestartCount",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "D",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-keycloak",
+                "metricNamespace": "microsoft.app/containerapps",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.app/containerapps",
+            "metricName": "RestartCount",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 75
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "ui"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "neo4j-proxy"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "neo4j"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "D"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "keycloak"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "id": 26,
+      "title": "Postgres (Flexible Server B1ms)",
+      "description": "B1ms bursts on credits; under about 10 it throttles everything that shares it.",
+      "datasource": {
+        "type": "grafana-azure-monitor-datasource",
+        "uid": "azure-monitor"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-pg-b53a0449",
+                "metricNamespace": "microsoft.dbforpostgresql/flexibleservers",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.dbforpostgresql/flexibleservers",
+            "metricName": "cpu_percent",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-pg-b53a0449",
+                "metricNamespace": "microsoft.dbforpostgresql/flexibleservers",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.dbforpostgresql/flexibleservers",
+            "metricName": "cpu_credits_remaining",
+            "aggregation": "Minimum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        },
+        {
+          "refId": "C",
+          "datasource": {
+            "type": "grafana-azure-monitor-datasource",
+            "uid": "azure-monitor"
+          },
+          "queryType": "Azure Monitor",
+          "azureMonitor": {
+            "resources": [
+              {
+                "resourceGroup": "rg-mvhd-dev",
+                "resourceName": "mvhd-pg-b53a0449",
+                "metricNamespace": "microsoft.dbforpostgresql/flexibleservers",
+                "region": "westeurope"
+              }
+            ],
+            "metricNamespace": "microsoft.dbforpostgresql/flexibleservers",
+            "metricName": "active_connections",
+            "aggregation": "Maximum",
+            "timeGrain": "auto",
+            "region": "westeurope",
+            "dimensionFilters": []
+          }
+        }
+      ],
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 75
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 1,
+            "showPoints": "never",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            }
+          },
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "A"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "CPU %"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "B"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "burst credits"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byFrameRefID",
+              "options": "C"
+            },
+            "properties": [
+              {
+                "id": "displayName",
+                "value": "connections"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": ["max", "last"],
+          "sortBy": "Max",
+          "sortDesc": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
+    },
+    {
+      "type": "row",
+      "id": 27,
+      "title": "Azure, the live hub",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 82
+      },
+      "panels": []
+    },
+    {
+      "type": "text",
+      "id": 28,
+      "title": "",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 83
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Live from Azure Monitor**, read by mvhd-observability's managed identity (Monitoring Reader on rg-mvhd-dev, Log Analytics Reader on mvhd-logs). CPU and memory are a share of each app's limit, one-minute grain.\n\nThe proxy's log lines of a run, also in Log Analytics (the same `load_test` field as the panels above):\n\n```\nContainerAppConsoleLogs_CL\n| where ContainerAppName_s == \"mvhd-neo4j-proxy\" and TimeGenerated between (datetime(<start>) .. datetime(<end>))\n| extend j = parse_json(Log_s)\n| where tostring(j.load_test) == \"<testid>\"\n| summarize requests = count(), p95_ms = percentile(toreal(j.duration_ms), 95), errors = countif(toint(j.status) >= 500) by route = tostring(j.route), bin(TimeGenerated, 1m)\n```\n"
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "testid",
+        "label": "Test run",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus"
+        },
+        "query": {
+          "query": "label_values(k6_vus, testid)",
+          "refId": "A"
+        },
+        "definition": "label_values(k6_vus, testid)",
+        "refresh": 2,
+        "sort": 2,
+        "includeAll": false,
+        "multi": false,
+        "current": {},
+        "options": []
+      }
+    ]
+  },
+  "annotations": {
+    "list": []
+  },
+  "links": [
+    {
+      "title": "Runbook: load and stress test",
+      "type": "link",
+      "targetBlank": true,
+      "url": "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/knowledge/runbooks/load-and-stress-test.md"
+    },
+    {
+      "title": "Issue #519",
+      "type": "link",
+      "targetBlank": true,
+      "url": "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/519"
+    }
+  ]
+}

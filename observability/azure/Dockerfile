@@ -18,6 +18,8 @@ COPY grafana/provisioning/datasources/mvhd.yaml /otel-lgtm/grafana/conf/provisio
 COPY azure/datasource-azure-monitor.yaml /otel-lgtm/grafana/conf/provisioning/datasources/azure-monitor.yaml
 COPY grafana/provisioning/dashboards/mvhd.yaml /otel-lgtm/grafana/conf/provisioning/dashboards/mvhd.yaml
 COPY grafana/dashboards /otel-lgtm/mvhd-dashboards
+# The live hub's variants (Azure Monitor instead of Docker and Loki), same uids.
+COPY grafana/dashboards-azure/ /otel-lgtm/mvhd-dashboards/
 
 # The base image's start script turns anonymous access on (as Admin) unless
 # the environment says otherwise, and the environment beats custom.ini. Make
