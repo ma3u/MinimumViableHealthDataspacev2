@@ -103,6 +103,30 @@ describe("GET /api/patient as a PATIENT", () => {
     expect(timelineParams).toEqual({ patientId: "P1" });
   });
 
+  it("names a Klarbefund record by its account and gives observations their value, unit and date", async () => {
+    mockRunQuery
+      .mockResolvedValueOnce(PATIENTS)
+      .mockResolvedValueOnce(STATS)
+      .mockResolvedValueOnce(TIMELINE);
+    await GET(new Request("http://localhost/api/patient"));
+    const [ownQuery] = mockRunQuery.mock.calls[0];
+    // kb-... is how a Klarbefund owner signs in; the record is otherwise
+    // only "Klarbefund sandbox", like every other one.
+    expect(String(ownQuery)).toMatch(
+      /coalesce\(p\.appAccount, p\.name\) AS name/,
+    );
+    const [timelineQuery] = mockRunQuery.mock.calls[2];
+    // The app stores effectiveDate and unit, Synthea dateTime and valueUnit:
+    // without these every app value was undated and had no number.
+    expect(String(timelineQuery)).toMatch(/fhir\.effectiveDate/);
+    expect(String(timelineQuery)).toMatch(
+      /toString\(fhir\.valueQuantity\)\s+AS value/,
+    );
+    expect(String(timelineQuery)).toMatch(
+      /coalesce\(fhir\.valueUnit, fhir\.unit\)\s+AS unit/,
+    );
+  });
+
   it("says so when the record was never synced", async () => {
     mockRunQuery
       .mockResolvedValueOnce(PATIENTS)
