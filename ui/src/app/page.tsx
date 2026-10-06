@@ -121,9 +121,6 @@ export default function Home() {
         <LivingBodyHero className="aspect-9/16 w-[min(72vw,300px)] justify-self-center lg:order-first lg:w-auto lg:h-[min(72vh,620px)]" />
       </section>
 
-      {/* ── The iPhone app ──────────────────────────────────────────────── */}
-      <KlarbefundShowcase />
-
       {/* ── Why EHDS Matters ─────────────────────────────────────────────── */}
       <section
         className="mb-12 sm:mb-16 animate-fade-in-up"
@@ -606,6 +603,9 @@ export default function Home() {
           </a>
         </div>
       </section>
+
+      {/* ── The iPhone app: real data, held by the person ───────────────── */}
+      <KlarbefundShowcase />
 
       {/* ── Persona Journeys ─────────────────────────────────────────────── */}
       <section
