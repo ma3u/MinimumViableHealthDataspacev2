@@ -8,12 +8,12 @@ import { KlarbefundTourPhone } from "@/components/KlarbefundTourPhone";
 const BASE_PATH = IS_STATIC ? "/MinimumViableHealthDataspacev2" : "";
 const REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
 const TOUR_ALT =
-  "A tour through the Klarbefund app with invented data: the list of reports, a report's values, trends against published ranges, and earlier measurements";
+  "A tour through the Klarbefund app with invented data: the list of reports, a report's values and its scan, trends against published ranges, earlier measurements, connecting to the EHDS record, the three consents, asking an AI, and the privacy page";
 
 export function KlarbefundShowcase() {
   return (
     <section
-      className="mb-12 sm:mb-16 animate-fade-in-up grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-8 lg:gap-12 items-start"
+      className="mb-12 sm:mb-16 animate-fade-in-up grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-8 lg:gap-12 items-center"
       style={{ animationDelay: "100ms" }}
       aria-labelledby="klarbefund-title"
     >
@@ -29,40 +29,34 @@ export function KlarbefundShowcase() {
           </h2>
         </div>
         <p className="text-(--text-secondary) text-sm leading-relaxed max-w-2xl mb-3">
-          Health dataspaces are shown with synthetic patients, this one
-          included. That demonstrates the plumbing, but not the rules: GDPR, the
-          EHDS and the AI Act are about data that belongs to a person, who holds
-          it, where it came from, and what its owner agreed to. Real data is
-          what is missing, and it is the hardest to bring in lawfully.
+          Health dataspaces run on synthetic patients, this one included. That
+          shows the plumbing, not the rules: GDPR, the EHDS and the AI Act are
+          about data that belongs to a person. Real data is what is missing, and
+          it is the hardest to bring in lawfully.
         </p>
         <p className="text-(--text-secondary) text-sm leading-relaxed max-w-2xl mb-4">
           Klarbefund brings it in from the person&apos;s side. Scan a paper lab
-          report or import the PDF, and the iPhone turns it into values coded
-          with LOINC where a code exists, set against published reference
-          ranges, and marked with where each one came from. They go to the
-          dataspace only when the person decides they should.
+          report or import the PDF, and the iPhone turns it into LOINC-coded
+          values set against published reference ranges, each marked with its
+          source. They reach the dataspace only when the person decides.
         </p>
         <ul className="text-(--text-secondary) text-sm leading-relaxed max-w-2xl mb-4 space-y-2">
           <li>
-            <strong className="text-(--text-primary)">GDPR.</strong> Values are
-            read and stored on the phone, encrypted, and nothing leaves it
-            unless the person sends it (privacy by design, Art. 25). Everything
-            can be exported as PDF, FHIR and OMOP (portability, Art. 20), and
-            the account deleted in the app (erasure, Art. 17).
+            <strong className="text-(--text-primary)">GDPR.</strong> Values stay
+            on the phone, encrypted, until the person sends them (Art. 25).
+            Export as PDF, FHIR and OMOP (Art. 20); delete the account in the
+            app (Art. 17).
           </li>
           <li>
             <strong className="text-(--text-primary)">EHDS.</strong> The person
-            creates an account on this hub and adds their own values to their
-            own record, decided once: FHIR R4 Observations, coded with LOINC,
-            marked preliminary and with their source, never mistaken for a
-            laboratory&apos;s result. Registry and research use stay a separate
-            consent.
+            creates an account on this hub and adds their values to their own
+            record: FHIR R4 Observations, LOINC-coded, marked preliminary and
+            with their source. Research use is a separate consent.
           </li>
           <li>
-            <strong className="text-(--text-primary)">AI Act.</strong> Asking an
-            AI about one&apos;s values happens only on request, names the
-            provider and model each time, and every answer says it is not a
-            diagnosis (transparency, Art. 50).
+            <strong className="text-(--text-primary)">AI Act.</strong> An AI
+            answers only when asked, names provider and model each time, and
+            never calls it a diagnosis (Art. 50).
           </li>
         </ul>
         <p className="text-(--text-secondary) text-sm leading-relaxed max-w-2xl mb-3">
@@ -70,7 +64,7 @@ export function KlarbefundShowcase() {
           <strong className="text-(--text-primary)">
             public TestFlight beta
           </strong>{" "}
-          for iPhone with iOS 26. Join with one tap, no request needed.
+          for iPhone with iOS 26. Join with one tap.
         </p>
         <div className="flex flex-wrap gap-3 text-sm mb-5">
           <a
