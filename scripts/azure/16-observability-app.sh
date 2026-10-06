@@ -189,6 +189,8 @@ ENV_VARS=(
   "GF_SECURITY_ADMIN_PASSWORD=secretref:grafana-admin-password"
   # The proxy's read-only audit endpoints, by app name inside the environment.
   "MVHD_AUDIT_URL=http://${NEO4J_PROXY_APP}"
+  # Azure Monitor datasource (managed identity, observability/azure).
+  "AZURE_SUBSCRIPTION_ID=$(az account show --query id -o tsv)"
 )
 
 if app_exists; then
@@ -210,6 +212,28 @@ else
     --env-vars "${ENV_VARS[@]}" -o none
 fi
 unset OAUTH_SECRET ADMIN_PASSWORD KC_PASSWORD KC_TOKEN
+
+# Azure Monitor without a secret: the app's system-assigned identity, allowed
+# to read metrics in the resource group and the Log Analytics workspace, and
+# nothing else. Granting needs Microsoft.Authorization/roleAssignments/write
+# (the PIM role rol-ssg-prd-project_owner has it; Container Apps Contributor
+# does not).
+log "Managed identity for Azure Monitor"
+PRINCIPAL_ID="$(az containerapp identity assign --name "$OBS_APP" --resource-group "$RG" \
+  --system-assigned --query principalId -o tsv)"
+LAW_ID="$(az monitor log-analytics workspace show --resource-group "$RG" --workspace-name "$LAW_NAME" --query id -o tsv)"
+RG_ID="$(az group show --name "$RG" --query id -o tsv)"
+for grant in "Monitoring Reader|${RG_ID}" "Log Analytics Reader|${LAW_ID}"; do
+  role="${grant%%|*}" scope="${grant#*|}"
+  if [[ -n "$(az role assignment list --assignee "$PRINCIPAL_ID" --role "$role" --scope "$scope" --query '[0].id' -o tsv 2>/dev/null)" ]]; then
+    ok "$role already granted"
+  elif az role assignment create --assignee-object-id "$PRINCIPAL_ID" --assignee-principal-type ServicePrincipal \
+    --role "$role" --scope "$scope" -o none; then
+    ok "$role granted to $OBS_APP"
+  else
+    warn "could not grant $role (needs roleAssignments/write): the Azure panels stay empty"
+  fi
+done
 
 # The collector's OTLP/HTTP port and Prometheus' remote write, internal only:
 # http://mvhd-observability:4318 and :9090

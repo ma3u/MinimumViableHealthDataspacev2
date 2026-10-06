@@ -1,0 +1,17 @@
+# Azure Monitor for the live hub's Grafana (#418): the Container Apps' replicas,
+# CPU, memory and requests, the Flexible Server's metrics, and Log Analytics
+# (the EDC services log only to stdout, which goes nowhere else).
+#
+# Signs in as mvhd-observability's system-assigned managed identity: no secret.
+# The identity reads only: Monitoring Reader on rg-mvhd-dev and Log Analytics
+# Reader on mvhd-logs (scripts/azure/16-observability-app.sh grants both).
+apiVersion: 1
+
+datasources:
+  - name: Azure Monitor
+    uid: azure-monitor
+    type: grafana-azure-monitor-datasource
+    editable: false
+    jsonData:
+      azureAuthType: msi
+      subscriptionId: ${AZURE_SUBSCRIPTION_ID}
