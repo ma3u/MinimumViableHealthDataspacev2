@@ -154,7 +154,7 @@ services:
   # Keycloak — OAuth2/OIDC identity provider
   # ---------------------------------------------------------------------------
   keycloak:
-    image: quay.io/keycloak/keycloak:26.6.4
+    image: quay.io/keycloak/keycloak:26.8.0
     container_name: health-dataspace-keycloak
     command:
       - "start-dev"
@@ -169,7 +169,8 @@ services:
       # Docker-internal services still reach Keycloak via Docker DNS (keycloak:8080).
       KC_HOSTNAME: "http://localhost:8080"
       KC_HOSTNAME_STRICT: "false"
-      KC_PROXY: edge
+      # As on Azure (03-identity.sh); KC_PROXY is a hostname v1 option 26.8 warns about (#556).
+      KC_PROXY_HEADERS: xforwarded
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
       KC_LOG_LEVEL: INFO

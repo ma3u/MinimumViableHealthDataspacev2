@@ -43,7 +43,7 @@ deployed images were read from ACA on 2026-09-08 (`rg-mvhd-dev`, subscription
 
 | Component           | Declared          | Latest upstream      | Gap                       |
 | ------------------- | ----------------- | -------------------- | ------------------------- |
-| Keycloak            | 26.6.4            | 26.7.3               | 1 minor                   |
+| Keycloak            | 26.8.0            | 26.8.0               | none (#556)               |
 | Neo4j               | 5.26.28-community | 5.26.30-community    | 2 patch                   |
 | Postgres (compose)  | 17.7-alpine       | 17.9-alpine          | 2 patch                   |
 | Postgres (`env.sh`) | 16.14             | —                    | **major skew, see below** |
@@ -211,7 +211,7 @@ scheduled image scan confirm the CVE count drops.
 
 ### Wave 3 — needs its own change window
 
-- **Keycloak 26.6.4 → 26.7.3.** A minor. Re-import `jad/keycloak-realm.json`
+- **Keycloak 26.6.4 → 26.8.0** (#556, was planned as 26.7.3). A minor. Re-import `jad/keycloak-realm.json`
   against the new version in a local container first and run the 7-persona
   password grant — the procedure is in the realm-drift runbook and was exercised
   on 2026-09-08 during the login incident.

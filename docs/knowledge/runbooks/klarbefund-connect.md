@@ -89,7 +89,7 @@ issuer `http://localhost:8080/realms/edcv`; a release build trusts only
 
 - **No `sub` in the token.** The realm defines its client scopes without
   Keycloak's `basic` scope, so access tokens carry `preferred_username` but no
-  `sub` (Keycloak 26.6.4). The hub identifies the user by the login name, as
+  `sub` (Keycloak 26.6.4, and still on 26.8.0, #556). The hub identifies the user by the login name, as
   `ownPatientIdForSession()` already did.
 - **A client description over 255 characters** makes the admin API answer 500
   (`value too long for type character varying(255)`), and would break a fresh
