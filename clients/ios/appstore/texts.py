@@ -169,11 +169,12 @@ BETA_DESCRIPTION = {
 # being asked to look at, not a changelog.
 WHAT_TO_TEST = {
     "en-GB": (
-        "Build 4. New: your own account on the EHDS demo hub. More, Connect "
+        "Build 5. New: your own account on the EHDS demo hub. More, Connect "
         "to EHDS, Create an EHDS account. The app shows the username and "
         "password (sign in on ehds.mabu.red with them too). Switch on Send "
         "my reports to my EHDS record once, and your reports go to your own "
-        "record as preliminary values, marked as read from a scan; Delete "
+        "record as preliminary values, marked as read from a scan; Sync all "
+        "reports now sends the older ones again. Delete "
         "account removes everything. 24-hour blood pressure reports are read "
         "too. The hub runs on weekdays, 07:00 to 20:00 Berlin time.\n\n"
         "Worth trying, in this order:\n\n"
@@ -194,12 +195,13 @@ WHAT_TO_TEST = {
         "produce a diagnostics archive of what it saw."
     ),
     "de-DE": (
-        "Build 4. Neu: ein eigenes Konto auf dem EHDS-Demo-Hub. Mehr, Mit "
+        "Build 5. Neu: ein eigenes Konto auf dem EHDS-Demo-Hub. Mehr, Mit "
         "EHDS verbinden, EHDS-Konto anlegen. Die App zeigt Benutzername und "
         "Passwort (damit auch auf ehds.mabu.red anmelden). Einmal Meine "
         "Befunde an meine EHDS-Akte senden einschalten, und Ihre Befunde gehen "
         "als vorläufige Werte, gekennzeichnet als aus einem Scan gelesen, in "
-        "Ihre eigene Akte; Konto löschen entfernt alles. Auch "
+        "Ihre eigene Akte; Alle Befunde jetzt abgleichen sendet auch die "
+        "älteren erneut. Konto löschen entfernt alles. Auch "
         "24-Stunden-Blutdruckberichte werden gelesen. Der Hub läuft werktags "
         "von 07:00 bis 20:00 Uhr Berliner Zeit.\n\n"
         "Lohnt sich in dieser Reihenfolge:\n\n"

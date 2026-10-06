@@ -450,3 +450,5 @@
 "Preliminary, entered by you" = "Vorläufig, von Ihnen eingegeben";
 "Preliminary, read from a scan" = "Vorläufig, aus einem Scan gelesen";
 "Sent %lld values from %lld reports to your EHDS record; %lld without a LOINC code stay on this phone." = "%1$lld Werte aus %2$lld Befunden an Ihre EHDS-Akte gesendet; %3$lld ohne LOINC-Code bleiben auf diesem Telefon.";
+"Sync all reports now" = "Alle Befunde jetzt abgleichen";
+"Not sent (%lld): %@" = "Nicht gesendet (%1$lld): %2$@";
