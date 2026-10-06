@@ -25,24 +25,52 @@ export function KlarbefundShowcase() {
             aria-hidden="true"
           />
           <h2 id="klarbefund-title" className="text-lg sm:text-xl font-bold">
-            Klarbefund: your lab reports on the iPhone
+            Klarbefund: real data for the dataspace, held by the patient
           </h2>
         </div>
         <p className="text-(--text-secondary) text-sm leading-relaxed max-w-2xl mb-3">
-          Scan a paper lab report or import the PDF, and Klarbefund turns it
-          into values you can check against the paper and follow over time:
-          coded with LOINC where a code exists, set against published reference
-          ranges, and marked with where each one came from. Everything runs on
-          the phone and stays encrypted there; nothing leaves the device unless
-          you send it.
+          Health dataspaces are shown with synthetic patients, this one
+          included. That demonstrates the plumbing, but not the rules: GDPR, the
+          EHDS and the AI Act are about data that belongs to a person, who holds
+          it, where it came from, and what its owner agreed to. Real data is
+          what is missing, and it is the hardest to bring in lawfully.
         </p>
+        <p className="text-(--text-secondary) text-sm leading-relaxed max-w-2xl mb-4">
+          Klarbefund brings it in from the person&apos;s side. Scan a paper lab
+          report or import the PDF, and the iPhone turns it into values coded
+          with LOINC where a code exists, set against published reference
+          ranges, and marked with where each one came from. They go to the
+          dataspace only when the person decides they should.
+        </p>
+        <ul className="text-(--text-secondary) text-sm leading-relaxed max-w-2xl mb-4 space-y-2">
+          <li>
+            <strong className="text-(--text-primary)">GDPR.</strong> Values are
+            read and stored on the phone, encrypted, and nothing leaves it
+            unless the person sends it (privacy by design, Art. 25). Everything
+            can be exported as PDF, FHIR and OMOP (portability, Art. 20), and
+            the account deleted in the app (erasure, Art. 17).
+          </li>
+          <li>
+            <strong className="text-(--text-primary)">EHDS.</strong> The person
+            creates an account on this hub and adds their own values to their
+            own record, decided once: FHIR R4 Observations, coded with LOINC,
+            marked preliminary and with their source, never mistaken for a
+            laboratory&apos;s result. Registry and research use stay a separate
+            consent.
+          </li>
+          <li>
+            <strong className="text-(--text-primary)">AI Act.</strong> Asking an
+            AI about one&apos;s values happens only on request, names the
+            provider and model each time, and every answer says it is not a
+            diagnosis (transparency, Art. 50).
+          </li>
+        </ul>
         <p className="text-(--text-secondary) text-sm leading-relaxed max-w-2xl mb-3">
           The app is in a{" "}
           <strong className="text-(--text-primary)">
             public TestFlight beta
           </strong>{" "}
-          for iPhone with iOS 26. Join with one tap; no request, no account on
-          this hub.
+          for iPhone with iOS 26. Join with one tap, no request needed.
         </p>
         <div className="flex flex-wrap gap-3 text-sm mb-5">
           <a
