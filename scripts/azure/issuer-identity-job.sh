@@ -47,6 +47,14 @@ trap finish EXIT
 DID="did:web:${ISSUER_HOST}%3A10016:issuer"
 KID="${DID}#key-1"
 ENC=$(jq -rn --arg s "$KID" '$s|@uri')
+# The name EDC reads is the URL-encoded alias itself: its Vault client encodes
+# the alias, and its HTTP client then encodes the '%' again, so Vault stores
+# and looks up the literal "did%3Aweb%3A...%23key-1" (jad/bootstrap-vault.sh
+# writes it with the CLI, which does the same). Over curl the path has to be
+# encoded twice to arrive as that name; once was the first version of this job,
+# which stored the plain alias, and the IssuerService could not find its key
+# to sign with ("Private key ... not found", #503, 2026-10-06).
+ENC2=$(jq -rn --arg s "$ENC" '$s|@uri')
 ISS="http://${ISSUER_HOST}"
 
 vault() {  # vault <METHOD> <path> [body-file]
@@ -61,9 +69,15 @@ b64url() { base64 | tr -d '\n=' | tr '+/' '-_'; }
 
 # --- 1. Signing key ----------------------------------------------------------
 step "Signing key ${KID}"
-if [ "$(vault GET "/participants/data/issuer/${ENC}")" = 200 ]; then
+# The key the issuer already has is kept: its public half is in the DID
+# document and the activation records. Looked up under the right name first,
+# then under the plain alias the first version of this job wrote.
+if [ "$(vault GET "/participants/data/issuer/${ENC2}")" = 200 ]; then
   JWK=$(jq -r '.data.data.content' /tmp/v.json)
   echo "  kept  participants/issuer/<kid> (present)"
+elif [ "$(vault GET "/participants/data/issuer/${ENC}")" = 200 ]; then
+  JWK=$(jq -r '.data.data.content' /tmp/v.json)
+  echo "  kept  the key stored under the plain alias; writing it under the name EDC reads"
 else
   openssl genpkey -algorithm ed25519 -out /tmp/k.pem 2>/dev/null
   D=$(openssl pkey -in /tmp/k.pem -outform DER | tail -c 32 | b64url)
@@ -75,7 +89,7 @@ fi
 X=$(printf '%s' "$JWK" | jq -r .x)
 jq -n --arg c "$JWK" '{data:{content:$c}}' > /tmp/body.json
 for mount in participants/data/issuer secret/data; do
-  code=$(vault POST "/${mount}/${ENC}" /tmp/body.json) || code=000
+  code=$(vault POST "/${mount}/${ENC2}" /tmp/body.json) || code=000
   case "$code" in 2??) echo "  ok    ${mount}/<kid>" ;; *) fail "${mount}/<kid> (HTTP ${code}) $(head -c 200 /tmp/v.json)" ;; esac
 done
 rm -f /tmp/body.json
