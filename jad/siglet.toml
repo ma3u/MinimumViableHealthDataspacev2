@@ -1,0 +1,15 @@
+# Siglet transfer types for the compose stack (#542), as upstream jad's
+# k8s/apps/siglet-config.yaml declares them. Without an entry the siglet
+# answers every start message with "Data flow handler cannot handle this
+# flow" and the transfer ends TERMINATED. Storage, Vault and auth come from
+# the SIGLET__* environment in docker-compose.jad.yml.
+#
+# The endpoint goes into the consumer's EDR: the FHIR data plane's data API
+# (web.http.certs.port / .path on dataplane-fhir), called with the token the
+# consumer fetches from the siglet.
+
+[[transfer_types]]
+transfer_type = "HttpData-PULL"
+endpoint_type = "HTTP"
+endpoint = "http://dataplane-fhir:8186/api/data"
+token_source = "provider"

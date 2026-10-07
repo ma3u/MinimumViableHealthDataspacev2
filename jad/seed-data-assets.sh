@@ -490,15 +490,20 @@ echo "────────────────────────�
 echo "Step 6: Register Data Planes"
 echo "────────────────────────────────────────────────"
 
-DATAPLANE_FHIR_URL="http://dataplane-fhir:8083/api/control/v1/dataflows"
+# The control plane signals the siglet, per participant context, as upstream
+# jad's DataTransferEndToEndTest registers it. The data plane's own
+# /api/control/v1/dataflows answers 404 on the 0.18 launcher (#542).
+SIGLET_SIGNALING_URL="http://siglet:8081/api/v1"
 
 register_dataplane() {
   local ctx_id="$1" label="$2"
+  # A plain registration, not JSON-LD: v5beta has no "url" field and answered
+  # this body with 500 (#542). The id is global, so it carries the context id;
+  # one shared id left the data plane with the last participant registered.
   local payload="{
-    \"@context\": [\"$EDC_CTX\"],
-    \"allowedSourceTypes\": [\"HttpData\", \"HttpCertData\"],
-    \"allowedTransferTypes\": [\"HttpData-PULL\"],
-    \"url\": \"$DATAPLANE_FHIR_URL\"
+    \"dataplaneId\": \"dataplane-fhir-$ctx_id\",
+    \"endpoint\": \"$SIGLET_SIGNALING_URL/$ctx_id/dataflows\",
+    \"transferTypes\": [\"HttpData-PULL\"]
   }"
   local token
   token=$(get_token)
