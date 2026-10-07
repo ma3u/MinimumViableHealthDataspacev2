@@ -48,15 +48,46 @@ PHARMACO_DID="did:web:identityhub%3A7083:pharmaco"
 MEDREG_DID="did:web:identityhub%3A7083:medreg"
 IRS_DID="did:web:identityhub%3A7083:irs"
 
+# DSP_PROTOCOL, the dataspace profile id (#180). It was used below and never
+# set, so under `set -u` the first negotiation aborted the script (#542).
+# shellcheck source=../scripts/lib/dsp-protocol.sh
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")/../scripts/lib" && pwd)/dsp-protocol.sh"
+
 # DSP endpoints (Docker-internal controlplane address: port 8082 = protocol port)
-# Format: http://controlplane:8082/api/dsp/{ctxId}/2025-1  (filled in after ctx discovery)
+# Format: http://controlplane:8082/api/dsp/{ctxId}/{profileId}. The EDC 0.18
+# connector routes /{participantContextId}/{profileId}/catalog|negotiations|
+# transfers, so the segment is the profile id, not the DSP version: .../2025-1
+# answers 404 (#542).
 DSP_BASE="http://controlplane:8082/api/dsp"
 
 # Data plane (Docker-internal)
-DATAPLANE_FHIR_URL="http://dataplane-fhir:8083/api/control/v1/dataflows"
+# The control plane signals the siglet, per participant context, as upstream
+# jad's DataTransferEndToEndTest registers it. The data plane's own
+# /api/control/v1/dataflows answers 404 on the 0.18 launcher (#542).
+SIGLET_SIGNALING_URL="http://siglet:8081/api/v1"
 
 # JSON-LD context
 EDC_CTX="https://w3id.org/edc/connector/management/v2"
+
+# Where the connector reports each negotiation and transfer state, so they
+# reach the audit trail's dsp chain as edc-callback records (ADR-045, #418).
+# The hub UI sets the same callback on its own requests (AUDIT_CALLBACK_URL in
+# docker-compose.yml); without it these seeded flows left no record (#542).
+# AUDIT_CALLBACK_URL="" leaves the callback out.
+AUDIT_CALLBACK_URL="${AUDIT_CALLBACK_URL-http://neo4j-proxy:9090/audit/dsp}"
+if [ -n "$AUDIT_CALLBACK_URL" ] && [ -n "${AUDIT_CALLBACK_TOKEN:-}" ]; then
+  AUDIT_CALLBACK_URL="${AUDIT_CALLBACK_URL}?token=${AUDIT_CALLBACK_TOKEN}"
+fi
+
+# callback_addresses <event group> → the JSON for a request's callbackAddresses
+callback_addresses() {
+  if [ -z "$AUDIT_CALLBACK_URL" ]; then
+    echo "[]"
+    return
+  fi
+  printf '[{"@type":"CallbackAddress","uri":"%s","events":["%s"],"transactional":false}]' \
+    "$AUDIT_CALLBACK_URL" "$1"
+}
 
 # Protocol identifier. Not the DSP version string: the connector registers its
 # dispatcher under the dataspace profile id (#180). Defined once in
@@ -183,9 +214,9 @@ fi
 echo ""
 
 # Build DSP endpoint for each provider participant (Docker-internal address)
-# Format: {DSP_BASE}/{providerCtxId}/2025-1  (version suffix required by EDC-V)
-[ -n "$ALPHAKLINIK_CTX" ] && ALPHAKLINIK_DSP="$DSP_BASE/$ALPHAKLINIK_CTX/2025-1"
-[ -n "$LMC_CTX" ]         && LMC_DSP="$DSP_BASE/$LMC_CTX/2025-1"   # for future cross-clinic flows
+# Format: {DSP_BASE}/{providerCtxId}/{profileId}
+[ -n "$ALPHAKLINIK_CTX" ] && ALPHAKLINIK_DSP="$DSP_BASE/$ALPHAKLINIK_CTX/$DSP_PROTOCOL"
+[ -n "$LMC_CTX" ]         && LMC_DSP="$DSP_BASE/$LMC_CTX/$DSP_PROTOCOL"   # for future cross-clinic flows
 
 # =============================================================================
 # Step 1: Register Data Planes
@@ -196,15 +227,20 @@ echo "────────────────────────�
 
 register_dataplane() {
   local ctx_id="$1" label="$2"
+  # v5beta takes a plain registration (dataplaneId, endpoint, transferTypes),
+  # not JSON-LD, under the participant and as a PUT. The old body's "url" is
+  # not a field there, so the controller hit a null endpoint and answered 500;
+  # the old path POST /dataplanes/<ctx> answers 404 (#542). The id is global:
+  # one shared id moved the data plane to whichever participant registered it
+  # last, and every other provider's transfer ended "No dataplane found".
   local payload="{
-    \"@context\": [\"$EDC_CTX\"],
-    \"allowedSourceTypes\": [\"HttpData\", \"HttpCertData\"],
-    \"allowedTransferTypes\": [\"HttpData-PULL\"],
-    \"url\": \"$DATAPLANE_FHIR_URL\"
+    \"dataplaneId\": \"dataplane-fhir-$ctx_id\",
+    \"endpoint\": \"$SIGLET_SIGNALING_URL/$ctx_id/dataflows\",
+    \"transferTypes\": [\"HttpData-PULL\"]
   }"
   local http_code
-  http_code=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
-    "$MGMT_URL/${MGMT_V}/dataplanes/$ctx_id" \
+  http_code=$(curl -s -o /dev/null -w '%{http_code}' -X PUT \
+    "$MGMT_URL/${MGMT_V}/participants/$ctx_id/dataplanes" \
     -H "Authorization: Bearer $(get_token)" \
     -H "Content-Type: application/json" \
     -d "$payload")
@@ -237,8 +273,20 @@ if [ -z "$ALPHAKLINIK_CTX" ]; then
   fail "AlphaKlinik context not found — cannot perform catalog discovery"
 fi
 
-CATALOG=$(mgmt_call POST "v1alpha/participants/$PHARMACO_CTX/catalog" \
-  "{\"counterPartyDid\":\"$ALPHAKLINIK_DID\"}")
+# The v1alpha catalog-by-DID endpoint is gone in EDC 0.18 (404). The
+# management API's catalog/request takes the provider's DSP address instead.
+catalog_request() {
+  local consumer_ctx="$1" provider_dsp="$2" provider_did="$3"
+  mgmt_call POST "${MGMT_V}/participants/$consumer_ctx/catalog/request" "{
+    \"@context\": [\"$EDC_CTX\"],
+    \"@type\": \"CatalogRequest\",
+    \"counterPartyAddress\": \"$provider_dsp\",
+    \"counterPartyId\": \"$provider_did\",
+    \"protocol\": \"$DSP_PROTOCOL\"
+  }"
+}
+
+CATALOG=$(catalog_request "$PHARMACO_CTX" "$ALPHAKLINIK_DSP" "$ALPHAKLINIK_DID")
 
 # Parse datasets, offers, and permission arrays from catalog
 OFFERS=$(echo "$CATALOG" | python3 -c "
@@ -321,6 +369,7 @@ while IFS='|' read -r asset_id offer_id perms_json; do
     \"@type\": \"ContractRequest\",
     \"counterPartyAddress\": \"$ALPHAKLINIK_DSP\",
     \"protocol\": \"$DSP_PROTOCOL\",
+    \"callbackAddresses\": $(callback_addresses contract.negotiation),
     \"policy\": {
       \"@type\": \"Offer\",
       \"@id\": \"$offer_id\",
@@ -380,6 +429,7 @@ print(d.get('contractAgreementId', ''))
     \"contractId\": \"$AGREEMENT_ID\",
     \"assetId\": \"$asset_id\",
     \"transferType\": \"HttpData-PULL\",
+    \"callbackAddresses\": $(callback_addresses transfer.process),
     \"dataDestination\": { \"@type\": \"DataAddress\", \"type\": \"HttpProxy\" }
   }")
 
@@ -423,8 +473,7 @@ echo "────────────────────────�
 echo "Step 4: MedReg discovers AlphaKlinik's catalog (operator)"
 echo "────────────────────────────────────────────────"
 
-MEDREG_CATALOG=$(mgmt_call POST "v1alpha/participants/$MEDREG_CTX/catalog" \
-  "{\"counterPartyDid\":\"$ALPHAKLINIK_DID\"}")
+MEDREG_CATALOG=$(catalog_request "$MEDREG_CTX" "$ALPHAKLINIK_DSP" "$ALPHAKLINIK_DID")
 
 MEDREG_DATASETS=$(echo "$MEDREG_CATALOG" | python3 -c "
 import json, sys

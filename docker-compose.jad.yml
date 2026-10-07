@@ -288,15 +288,25 @@ services:
       web.http.path: "/api"
       web.http.protocol.port: "8082"
       web.http.protocol.path: "/api/dsp"
-      # Outbound DSP address. Without it the connector cannot address a
-      # counterparty and every negotiation dies with
-      #   "No callback address found for protocol: dataspace-protocol-http:2025-1"
-      # while catalog requests return
-      #   502 "No provider dispatcher registered for protocol: ..."
-      # Azure already sets this (scripts/azure/04-edc-services.sh), so the DSP
-      # path worked there and was broken only in the local stack — the two
-      # configurations had drifted.
-      edc.dsp.callback.address: "http://controlplane:8082/api/dsp"
+      # The DSP callback address, as upstream jad sets it: no
+      # edc.dsp.callback.address, and `virtual` makes the connector build
+      # http://controlplane:8082/api/dsp/%s, filling in the participant
+      # context id per message. The explicit address that stood here had no
+      # %s, so a provider sent its agreement to
+      # /api/dsp/http-dsp-profile-2025-1/negotiations/... with no consumer
+      # context in the path, got 404, and every negotiation stopped at
+      # REQUESTED (#542). The "No callback address found" and "No provider
+      # dispatcher registered" errors it was added for came from the wrong
+      # protocol id (#180), not from a missing address.
+      web.http.protocol.virtual: "true"
+      # In virtual mode a participant context speaks only the DSP profiles named
+      # in its own config entry `edc.dsp.profiles`, and nothing here or in CFM
+      # writes that entry. Every context therefore answered
+      # `/.well-known/dspace-version` with {"protocolVersions":[]} and 404'd on
+      # every /api/dsp/{ctx}/2025-1/... path, so no catalog, negotiation or
+      # transfer could start (#542). This lets every context use every profile
+      # the connector registers (today only http-dsp-profile-2025-1).
+      edc.dsp.profiles.enable.all: "true"
       web.http.management.port: "8081"
       web.http.management.path: "/api/mgmt"
       web.http.control.port: "8083"
@@ -333,26 +343,30 @@ services:
       # OAuth2 / Keycloak — issuer must match KC_HOSTNAME (iss claim in tokens)
       edc.iam.oauth2.issuer: "http://localhost:8080/realms/edcv"
       edc.iam.oauth2.jwks.url: "http://keycloak:8080/realms/edcv/protocol/openid-connect/certs"
-      # DCP scopes
+      # DCP scopes. The 0.18 IdentityHub accepts only the alias
+      # org.eclipse.dspace.dcp.vc.type; with the old org.eclipse.edc.vc.type it
+      # answers every presentation query with 403 "Scope alias MUST be
+      # org.eclipse.dspace.dcp.vc.type", and the provider refuses the DSP
+      # request with 401 (#542).
       edc.iam.dcp.scopes.membership.id: "membership-scope"
       edc.iam.dcp.scopes.membership.type: "DEFAULT"
-      edc.iam.dcp.scopes.membership.value: "org.eclipse.edc.vc.type:MembershipCredential:read"
+      edc.iam.dcp.scopes.membership.value: "org.eclipse.dspace.dcp.vc.type:MembershipCredential:read"
       edc.iam.dcp.scopes.manufacturer.id: "manufacturer-scope"
       edc.iam.dcp.scopes.manufacturer.type: "POLICY"
-      edc.iam.dcp.scopes.manufacturer.value: "org.eclipse.edc.vc.type:ManufacturerCredential:read"
+      edc.iam.dcp.scopes.manufacturer.value: "org.eclipse.dspace.dcp.vc.type:ManufacturerCredential:read"
       edc.iam.dcp.scopes.manufacturer.prefix-mapping: "ManufacturerCredential"
       # EHDS credential scopes (Phase 2b)
       edc.iam.dcp.scopes.ehds-participant.id: "ehds-participant-scope"
       edc.iam.dcp.scopes.ehds-participant.type: "POLICY"
-      edc.iam.dcp.scopes.ehds-participant.value: "org.eclipse.edc.vc.type:EHDSParticipantCredential:read"
+      edc.iam.dcp.scopes.ehds-participant.value: "org.eclipse.dspace.dcp.vc.type:EHDSParticipantCredential:read"
       edc.iam.dcp.scopes.ehds-participant.prefix-mapping: "EHDSParticipantCredential"
       edc.iam.dcp.scopes.data-processing-purpose.id: "data-processing-purpose-scope"
       edc.iam.dcp.scopes.data-processing-purpose.type: "POLICY"
-      edc.iam.dcp.scopes.data-processing-purpose.value: "org.eclipse.edc.vc.type:DataProcessingPurposeCredential:read"
+      edc.iam.dcp.scopes.data-processing-purpose.value: "org.eclipse.dspace.dcp.vc.type:DataProcessingPurposeCredential:read"
       edc.iam.dcp.scopes.data-processing-purpose.prefix-mapping: "DataProcessingPurposeCredential"
       edc.iam.dcp.scopes.data-quality-label.id: "data-quality-label-scope"
       edc.iam.dcp.scopes.data-quality-label.type: "POLICY"
-      edc.iam.dcp.scopes.data-quality-label.value: "org.eclipse.edc.vc.type:DataQualityLabelCredential:read"
+      edc.iam.dcp.scopes.data-quality-label.value: "org.eclipse.dspace.dcp.vc.type:DataQualityLabelCredential:read"
       edc.iam.dcp.scopes.data-quality-label.prefix-mapping: "DataQualityLabelCredential"
       # Trusted issuers
       edc.iam.trusted-issuer.issuer.id: "did:web:issuerservice%3A10016:issuer"
@@ -928,7 +942,13 @@ services:
   # scripts/bootstrap-jad.sh. postgres-vault backend is the Azure path.
   # ---------------------------------------------------------------------------
   siglet:
-    image: ghcr.io/eclipse-dataplane-core/dsdk-facet-rs/siglet:main@sha256:2e90595c3042631c8eebbc5e7766dbe75311e10f5f7d340efada4c7133bd88d2
+    # Pinned to the last build before the dataplane SDK update of 2026-06-16
+    # (dsdk-facet-rs 797cfac), which made `profile` a required field of the
+    # signaling start message. The jad 4a7e5bd control plane (2026-05-18) does
+    # not send it, so the newer build answered every transfer with 422
+    # "missing field `profile`" (#542). Move this together with the jad images.
+    # scripts/azure/17-siglet.sh imports the digest from this line.
+    image: ghcr.io/eclipse-dataplane-core/dsdk-facet-rs/siglet:sha-54382c8@sha256:abaeb9f6ebace23450a4024f1bd92f48453ed4a2c77b7950d060925bace687c3
     container_name: health-dataspace-siglet
     environment:
       SIGLET__STORAGE_BACKEND__TYPE: "memory"
@@ -937,6 +957,9 @@ services:
       SIGLET__VAULT__TOKEN: "root" # dev-mode Vault root token (compose only)
       SIGLET__SIGNALING_AUTH__MODE: "disabled" # dev: skip JWT verification
       SIGLET__MANAGEMENT_API_AUTH__MODE: "disabled"
+      SIGLET_CONFIG_FILE: "/config/siglet.toml"
+    volumes:
+      - ./jad/siglet.toml:/config/siglet.toml:ro
     depends_on:
       vault:
         condition: service_healthy
