@@ -23,9 +23,13 @@ CP_HOST="${CP_HOST:-http://localhost:11003}"
 CP_MGMT="${CP_HOST}/api/mgmt"
 KC_HOST="${KC_HOST:-http://localhost:8080}"
 KC_REALM="edcv"
+# Compose's admin client secret; on Azure the seed job passes the live one
+# (.github/workflows/edc-seed-data-assets.yml, #542).
+KC_CLIENT_SECRET="${KC_CLIENT_SECRET:-edc-v-admin-secret}"
 
-# Neo4j Proxy (internal Docker network address, accessed by dataplane)
-NEO4J_PROXY_URL="http://neo4j-proxy:9090"
+# Neo4j Proxy as the data plane reaches it: compose's service name, or
+# http://mvhd-neo4j-proxy inside the Azure environment.
+NEO4J_PROXY_URL="${NEO4J_PROXY_URL:-http://neo4j-proxy:9090}"
 
 # JSON-LD context required by EDC Management API v5alpha
 EDC_CTX="https://w3id.org/edc/connector/management/v2"
@@ -44,7 +48,8 @@ fail() { echo -e "${RED}✗${NC} $*"; exit 1; }
 get_token() {
   local token
   token=$(curl -sf -X POST "$KC_HOST/realms/$KC_REALM/protocol/openid-connect/token" \
-    -d "grant_type=client_credentials&client_id=admin&client_secret=edc-v-admin-secret" \
+    --data-urlencode grant_type=client_credentials --data-urlencode client_id=admin \
+    --data-urlencode "client_secret=${KC_CLIENT_SECRET}" \
     | python3 -c "import json,sys; print(json.load(sys.stdin)['access_token'])")
   [ -n "$token" ] || fail "Failed to obtain Keycloak token"
   echo "$token"
@@ -449,6 +454,13 @@ echo "────────────────────────�
 echo "Step 5: Activate Participant Contexts"
 echo "────────────────────────────────────────────────"
 
+# Compose only: Azure has no health-dataspace-postgres container, and there
+# CFM activates the contexts (#328). Without this guard the `|| echo` below
+# turned "no docker" into "already activated".
+if ! command -v docker >/dev/null 2>&1 || ! docker inspect health-dataspace-postgres >/dev/null 2>&1; then
+  warn "No compose Postgres here; context activation skipped (CFM activates them on Azure, #328)"
+else
+
 # IdentityHub: state 200 → 300 (ACTIVATED)
 ACTIVATED=$(docker exec health-dataspace-postgres psql -U ih -d identityhub -tAc \
   "UPDATE participant_context SET state = 300 WHERE state = 200 RETURNING participant_context_id;" 2>/dev/null || echo "")
@@ -477,6 +489,7 @@ else
   CP_ACTIVE=$(docker exec health-dataspace-postgres psql -U cp -d controlplane -tAc \
     "SELECT COUNT(*) FROM participant_context WHERE state = 200;" 2>/dev/null || echo "0")
   ok "All $CP_ACTIVE participant context(s) already activated in ControlPlane"
+fi
 fi
 
 echo ""

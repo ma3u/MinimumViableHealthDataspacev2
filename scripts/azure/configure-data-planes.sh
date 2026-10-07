@@ -22,10 +22,12 @@
 #   web (health)      8080    8080   targetPort
 #   control           8083    8083   additionalPortMappings, internal
 #   public            11002   11012  additionalPortMappings, internal
-#   certs             8186    8186   inside the replica only
+#   certs             8186    8186   additionalPortMappings, internal
 #
 # The control plane reaches a data plane at http://<app>:8083/api/control,
-# which is what the data plane registers through edc.hostname.
+# which is what the data plane registers through edc.hostname. The siglet
+# puts http://<app>:8186/api/data into the consumer's EDR for HttpData-PULL
+# (jad/siglet.toml, 17-siglet.sh), so certs is on the ingress too (#542).
 #
 # `apply` changes the ingress first (app scope, no new revision), then the
 # environment, whose new revision boots with the ports already exposed.
@@ -95,10 +97,11 @@ apply_one() {
       \"targetPort\": ${WEB_PORT},
       \"additionalPortMappings\": [
         {\"targetPort\": ${CONTROL_PORT}, \"exposedPort\": ${CONTROL_PORT}, \"external\": false},
-        {\"targetPort\": ${public_port}, \"exposedPort\": ${public_port}, \"external\": false}
+        {\"targetPort\": ${public_port}, \"exposedPort\": ${public_port}, \"external\": false},
+        {\"targetPort\": ${CERTS_PORT}, \"exposedPort\": ${CERTS_PORT}, \"external\": false}
       ]}}}}" \
     -o none
-  ok "$app ingress: $WEB_PORT, $CONTROL_PORT, $public_port"
+  ok "$app ingress: $WEB_PORT, $CONTROL_PORT, $public_port, $CERTS_PORT"
 
   # The patch returns before the operation ends, and an update during it is
   # refused with ContainerAppOperationInProgress (first apply, 2026-10-04).

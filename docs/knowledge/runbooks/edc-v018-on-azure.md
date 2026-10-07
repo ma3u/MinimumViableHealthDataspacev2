@@ -217,7 +217,19 @@ Checks, from a container in the environment:
 - The hub's negotiate page (PharmaCo, AlphaKlinik) shows offers without the
   demo label.
 
-Still open for a transfer on Azure: no Azure script registers data planes or
-assets. Register them with `SIGLET_SIGNALING_URL=http://mvhd-siglet:8081/api/v1`
-(jad/seed-data-assets.sh) from a job inside the environment, and check that
-`mvhd-dp-fhir` serves its data API on 8186 (`SIGLET_PULL_ENDPOINT` otherwise).
+## 8. Assets and data planes, for a transfer (#542)
+
+The siglet's PULL endpoint is `http://mvhd-dp-fhir:8186/api/data`, compose's
+`web.http.certs` context, which the data plane already serves; the ingress
+exposes 8186 inside the environment since `configure-data-planes.sh` lists it.
+Then register compose's assets, policies, contract definitions and one siglet
+data plane per context, from a job inside the environment:
+
+```bash
+scripts/azure/configure-data-planes.sh apply      # ingress 8080, 8083, public, 8186
+gh workflow run edc-seed-data-assets.yml -f mode=plan    # state, assets, contracts per context
+gh workflow run edc-seed-data-assets.yml -f mode=apply
+```
+
+Assets point at `http://mvhd-neo4j-proxy`. The contexts must read `ACTIVATED`
+before the DSP side answers for them (#328); `plan` shows the state.
