@@ -92,6 +92,7 @@ jobs:
               "EUDI_PID_DOCTYPE=eu.europa.ec.eudi.pid.1" \
               "EUDI_REQUEST_URI_METHOD=get" \
               "EUDI_RESPONSE_MODE=direct_post" \
+              "EUDI_DEMO_WALLET=true" \
               "AUDIT_CALLBACK_URL=http://mvhd-neo4j-proxy/audit/dsp" \
               "CFM_DID_BASE=did:web:mvhd-identityhub%3A7083"
 

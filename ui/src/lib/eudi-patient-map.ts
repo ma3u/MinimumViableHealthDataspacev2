@@ -36,3 +36,13 @@ export function mapPidToPatient(pid: VerifiedPid): EudiVerifiedPatient {
     roles: ["PATIENT"],
   };
 }
+
+/**
+ * The patient a *simulated* wallet approval signs in as, when the deployment
+ * allows it (`EUDI_DEMO_WALLET=true`, see the start route). Same mapping as a
+ * real presentation, with the demo persona's name (`DEMO_PERSONAS` in auth.ts)
+ * standing in for the PID claims.
+ */
+export function demoPatient(): EudiVerifiedPatient {
+  return mapPidToPatient({ givenName: "Maria", familyName: "Schmidt" });
+}

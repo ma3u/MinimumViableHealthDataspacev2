@@ -81,7 +81,7 @@ describe("HomeRegisterCta", () => {
     render(<HomeRegisterCta />);
     expect(screen.queryByRole("dialog")).toBeNull();
     fireEvent.click(
-      screen.getByRole("button", { name: /Register with EUDI Wallet/i }),
+      screen.getByRole("button", { name: /Register with d-you/i }),
     );
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     // drive the wallet to completion → router.push("/patient") + persona set

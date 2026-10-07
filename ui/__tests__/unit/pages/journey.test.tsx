@@ -13,9 +13,7 @@ describe("JourneyPage (presentation)", () => {
     render(<JourneyPage />);
     const next = screen.getByRole("button", { name: /next step/i });
     fireEvent.click(next);
-    expect(
-      screen.getByText(/Register with your EUDI Wallet/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Register with d-you/i)).toBeInTheDocument();
     fireEvent.click(next);
     expect(
       screen.getByText(/Pull my record from my insurance/i),
@@ -45,8 +43,6 @@ describe("JourneyPage (presentation)", () => {
   it("advances with the ArrowRight key", () => {
     render(<JourneyPage />);
     fireEvent.keyDown(window, { key: "ArrowRight" });
-    expect(
-      screen.getByText(/Register with your EUDI Wallet/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Register with d-you/i)).toBeInTheDocument();
   });
 });

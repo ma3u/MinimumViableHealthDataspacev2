@@ -316,6 +316,13 @@ describe("ownPatientIdForSession", () => {
         },
       }),
     ).toBe("P1");
+    // what the session callback actually produces: the login name on
+    // user.preferredUsername, and a wallet login (d-you) carries no email
+    expect(
+      ownPatientIdForSession({
+        user: { name: "Maria Schmidt", preferredUsername: "patient1" },
+      }),
+    ).toBe("P1");
     // the static demo and the unit tests: login name in user.name
     expect(ownPatientIdForSession({ user: { name: "patient2" } })).toBe("P2");
     // the mail's local part as the last resort

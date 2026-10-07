@@ -100,6 +100,8 @@ export async function GET(req: Request): Promise<Response> {
   }
   const roles = (session as { roles?: string[] }).roles ?? [];
   const username =
+    (session.user as { preferredUsername?: string } | undefined)
+      ?.preferredUsername ||
     (session as { preferredUsername?: string }).preferredUsername ||
     session.user?.name ||
     null;

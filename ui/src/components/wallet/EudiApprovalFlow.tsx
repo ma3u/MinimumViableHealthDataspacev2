@@ -11,7 +11,9 @@
  * through trust → review → done, and the final click fires `onComplete`.
  *
  * This is a simulation of the cross-device OpenID4VP / GesundheitsID approval —
- * synthetic data, illustrative. See docs/planning/eudi-wallet-flows-2026.md.
+ * synthetic data, illustrative. The citizen wallet is shown as d-you, the German
+ * EUDI Wallet (`CITIZEN_WALLET`); the ePA flow is the insurer's app. See
+ * docs/planning/eudi-wallet-flows-2026.md.
  */
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
@@ -23,6 +25,7 @@ import {
   EHR_TRANSFER_STEPS,
 } from "@/components/wallet/flows";
 import { insurer } from "@/lib/journey-config";
+import { CITIZEN_WALLET } from "@/lib/wallet-config";
 
 export type ApprovalMode = "register" | "login" | "ehr";
 
@@ -30,20 +33,23 @@ const FLOWS = {
   register: {
     steps: REGISTER_STEPS,
     qrUrl: "https://ehds.mabu.red/auth/eudi-qr?mode=register",
-    scanLabel: "Scan with your EUDI Wallet",
+    scanLabel: `Scan with ${CITIZEN_WALLET.name}`,
     brand: undefined as { name: string; color: string } | undefined,
+    theme: "dyou" as const,
   },
   login: {
     steps: LOGIN_STEPS,
     qrUrl: "https://ehds.mabu.red/auth/eudi-qr?mode=login",
-    scanLabel: "Scan with your EUDI Wallet",
+    scanLabel: `Scan with ${CITIZEN_WALLET.name}`,
     brand: undefined as { name: string; color: string } | undefined,
+    theme: "dyou" as const,
   },
   ehr: {
     steps: EHR_TRANSFER_STEPS,
     qrUrl: "https://ehds.mabu.red/patient/ehr-transfer",
     scanLabel: "Scan with your insurer app",
     brand: { name: insurer.name, color: insurer.brand },
+    theme: "classic" as const,
   },
 } as const;
 
@@ -57,7 +63,7 @@ export function EudiApprovalFlow({
   onCancel?: () => void;
 }) {
   const cfg = FLOWS[mode];
-  const accent = cfg.brand?.color ?? "#5b3df5";
+  const accent = cfg.brand?.color ?? CITIZEN_WALLET.color;
   const [qr, setQr] = useState<string | null>(null);
 
   useEffect(() => {
@@ -115,7 +121,10 @@ export function EudiApprovalFlow({
           loop={false}
           steps={[...cfg.steps]}
           brand={cfg.brand}
-          ariaLabel={`Approve EUDI Wallet ${mode}`}
+          theme={cfg.theme}
+          ariaLabel={`Approve ${
+            mode === "ehr" ? "insurer app" : CITIZEN_WALLET.name
+          } ${mode}`}
           onComplete={onComplete}
           onCancel={onCancel}
         />
