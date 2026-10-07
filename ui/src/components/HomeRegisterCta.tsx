@@ -67,7 +67,7 @@ export function HomeRegisterCta() {
         <RegisterDialog
           mode="register"
           title="Register in the European Health Dataspace"
-          subtitle={`Create your EHDS patient account with ${CITIZEN_WALLET.description}. You share only the exact identity claims requested (name, date of birth).`}
+          subtitle={`Create your EHDS patient account with ${CITIZEN_WALLET.description}. You share only the exact identity claims requested (name, age over 18).`}
           onClose={() => setOpen(false)}
           onComplete={onComplete}
         />

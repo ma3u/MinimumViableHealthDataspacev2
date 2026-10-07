@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
-import { ownPatientIdForSession } from "@/lib/overview/patient";
 import { patientPseudonym, seesPatientIdentity } from "@/lib/patient-identity";
 import neo4j from "neo4j-driver";
 import { runQuery } from "@/lib/neo4j";
@@ -567,9 +564,10 @@ async function patientKeysOf(
 }
 
 /**
- * Replaces each Patient node's name with its pseudonym. A PATIENT's own
- * record keeps its name: it is theirs (EHDS Art. 3). Returns new node objects
- * and leaves the cached ones alone.
+ * Replaces each Patient node's name with its pseudonym. `own` names a record
+ * to leave as it is; since 2026-10-07 every caller passes null, a patient
+ * sees their own node pseudonymised too (#475). Returns new node objects and
+ * leaves the cached ones alone.
  */
 function pseudonymisePatients(
   nodes: GraphNode[],
@@ -711,13 +709,11 @@ export async function GET(req: Request) {
 
     // Patients by pseudonym for every role that does not see identity
     // (#475). Decided by the session's roles, not by `persona`, which is only
-    // a query parameter and anyone can set it. A patient keeps their own name.
+    // a query parameter and anyone can set it. A patient's own node is
+    // pseudonymised too (since 2026-10-07): a patient session sees no name.
     let nodes = graph.nodes;
     if (!seesPatientIdentity(auth.session.roles)) {
-      const own = auth.session.roles.includes("PATIENT")
-        ? ownPatientIdForSession(await getServerSession(authOptions))
-        : null;
-      nodes = pseudonymisePatients(nodes, graph.patientKeys, own);
+      nodes = pseudonymisePatients(nodes, graph.patientKeys, null);
     }
 
     const personaMeta = PERSONA_VIEWS.find((p) => p.id === safePersona);

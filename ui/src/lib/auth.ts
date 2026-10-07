@@ -2,6 +2,8 @@ import { type NextAuthOptions, type User } from "next-auth";
 import type { OAuthConfig } from "next-auth/providers/oauth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { getTransaction, updateTransaction } from "@/lib/eudi-store";
+import { patientPseudonym } from "@/lib/patient-identity";
+import { ownPatientId } from "@/lib/overview/patient";
 
 const keycloakServerUrl =
   process.env.KEYCLOAK_ISSUER ?? "http://keycloak:8080/realms/edcv";
@@ -178,16 +180,28 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
+      const roles = (token.roles as string[]) ?? [];
+      const preferredUsername = (token.preferredUsername as string) ?? "";
+      // A patient session carries no name (#475, 2026-10-07): the record's
+      // pseudonym stands in for it, in the menu and wherever the session's
+      // name is shown. A Keycloak profile or a wallet's PID may hold a real
+      // person's name; it stays in the token and never reaches a screen.
+      const patientOnly =
+        roles.includes("PATIENT") && !roles.includes("EDC_ADMIN");
+      const name = patientOnly
+        ? patientPseudonym(ownPatientId(preferredUsername) ?? preferredUsername)
+        : session.user?.name;
       return {
         ...session,
         accessToken: token.accessToken as string,
         idToken: token.idToken as string,
-        roles: (token.roles as string[]) ?? [],
+        roles,
         user: {
           ...session.user,
+          name,
           id: token.sub as string,
           // Expose preferred_username so tab-session can use it for derivation
-          preferredUsername: (token.preferredUsername as string) ?? "",
+          preferredUsername,
         },
       };
     },
@@ -307,7 +321,10 @@ export const DEMO_PERSONAS = [
   // EHDS Chapter II / GDPR Art. 15-22 — patient primary-use access
   {
     username: "patient1",
-    displayName: "Maria Schmidt",
+    // The static demo shows a patient their record's pseudonym, never a name
+    // (#475): the label the fixtures carry, patientPseudonym("P1") under the
+    // development key.
+    displayName: "Patient 7f915eed",
     organisation: "AlphaKlinik Berlin (patient)",
     roles: ["PATIENT"],
     personaId: "patient",
@@ -319,7 +336,7 @@ export const DEMO_PERSONAS = [
   },
   {
     username: "patient2",
-    displayName: "Jan de Vries",
+    displayName: "Patient 2ed9f177",
     organisation: "Limburg Medical Centre (patient)",
     roles: ["PATIENT"],
     personaId: "patient",

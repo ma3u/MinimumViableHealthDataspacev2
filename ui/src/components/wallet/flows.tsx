@@ -31,7 +31,7 @@ const card: React.CSSProperties = {
   borderRadius: 12,
 };
 
-const PID_CLAIMS = ["First name", "Last name", "Date of birth"];
+const PID_CLAIMS = ["First name", "Last name", "Age over 18"];
 
 export const REGISTER_STEPS: WalletStep[] = [
   {

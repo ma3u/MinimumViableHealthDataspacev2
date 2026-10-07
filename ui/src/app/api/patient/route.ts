@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import {
   birthYear,
+  ownRecordView,
   patientPseudonym,
   seesPatientIdentity,
 } from "@/lib/patient-identity";
@@ -187,7 +188,8 @@ export async function GET(req: Request) {
           ehrSyncSource: null,
         };
         return NextResponse.json({
-          patients: myPatient,
+          // Their own record, under its pseudonym and with an age (#475).
+          patients: myPatient.map(ownRecordView),
           stats: { patients: 1, ...counts },
           // The page renders this timeline directly for the own record.
           timeline: myId ? await loadTimeline(myId) : [],

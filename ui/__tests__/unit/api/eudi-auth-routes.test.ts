@@ -12,6 +12,7 @@ import { POST } from "@/app/api/auth/eudi/start/route";
 import { GET } from "@/app/api/auth/eudi/status/route";
 import { startPresentation, getPresentationResult } from "@/lib/eudi-verifier";
 import { getTransaction } from "@/lib/eudi-store";
+import { patientPseudonym } from "@/lib/patient-identity";
 
 const started = {
   transactionId: "tx",
@@ -90,7 +91,7 @@ describe("POST /api/auth/eudi/start with { demo: true }", () => {
     expect(tx?.status).toBe("completed");
     expect(tx?.verifiedPatient).toEqual({
       username: "patient1",
-      displayName: "Maria Schmidt",
+      displayName: patientPseudonym("P1"),
       roles: ["PATIENT"],
     });
     expect(tx?.consumed).toBeFalsy();

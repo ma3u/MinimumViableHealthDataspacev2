@@ -30,7 +30,14 @@ import type {
 import { sandboxPatientId } from "@/lib/sandbox-account";
 
 export interface ProfileShape {
-  patient: { id: string; name: string; gender?: string; birthDate?: string };
+  patient: {
+    id: string;
+    name: string;
+    gender?: string;
+    birthDate?: string;
+    /** set in place of the birth date when the patient reads their own record */
+    age?: number | null;
+  };
   conditions: { code: string; display: string; onsetDate?: string }[];
   medications: { code: string; display: string }[];
   riskScores: Record<
@@ -248,7 +255,9 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
     color: "#fbbf24",
     pin: [0, 0],
     title: me.name,
-    sub: `born ${fmtDate(me.birthDate)}, ${
+    sub: `${
+      me.age != null ? `age ${me.age}` : `born ${fmtDate(me.birthDate)}`
+    }, ${
       profile.totalConditionCount ?? profile.conditions.length
     } diagnoses on record`,
     facts: Object.entries(profile.gdprRights ?? {}).map(([k, v]) => [k, v]),

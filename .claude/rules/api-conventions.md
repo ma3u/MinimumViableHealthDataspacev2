@@ -124,7 +124,13 @@ parameter such as `persona`:
 - `EDC_ADMIN` and `DATA_HOLDER` see names and birth dates (primary use).
 - `PATIENT` sees their own record only: `refuseForeignRecord()` in
   `ui/src/lib/patient/own-record.ts` answers 403 for any other `patientId`,
-  for reading and for consenting alike.
+  for reading and for consenting alike. And they see it as `ownRecordView()`
+  returns it (since 2026-10-07): `patientPseudonym()` for the name, an `age`
+  in place of the birth date, which stays empty. A wallet login carries a
+  real person's PID, so a patient session shows no name and no birth date
+  anywhere: `/api/patient`, `/api/patient/profile`, `/api/overview`, the
+  graph (the own node included) and the session's display name. The wallet
+  request asks for `age_over_18`, never for `birth_date`.
 - Everyone else (`DATA_USER`, `HDAB_AUTHORITY`, `TRUST_CENTER_OPERATOR`) sees
   `patientPseudonym()`, the birth year and no residence, in the graph, the
   node view and the cohort list. The NLQ proxy refuses any query that would

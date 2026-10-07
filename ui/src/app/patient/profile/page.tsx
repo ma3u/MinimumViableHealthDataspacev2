@@ -22,7 +22,13 @@ interface RiskScore {
 }
 
 interface Profile {
-  patient: { id: string; name: string; gender: string; birthDate: string };
+  patient: {
+    id: string;
+    name: string;
+    gender: string;
+    birthDate: string;
+    age?: number | null;
+  };
   conditions: { code: string; display: string; onsetDate: string }[];
   medications: { code: string; display: string }[];
   riskScores: { cardiovascular: RiskScore; diabetes: RiskScore };
@@ -38,6 +44,7 @@ interface PatientItem {
   name: string;
   gender: string;
   birthDate: string;
+  age?: number | null;
   conditionCount: number;
 }
 
@@ -129,7 +136,11 @@ export default function PatientProfilePage() {
                     {[
                       p.name,
                       p.gender && p.gender !== "unknown" ? p.gender : null,
-                      p.birthDate ? `born ${p.birthDate}` : null,
+                      p.age != null
+                        ? `age ${p.age}`
+                        : p.birthDate
+                          ? `born ${p.birthDate}`
+                          : null,
                     ]
                       .filter(Boolean)
                       .join(", ")}{" "}
@@ -164,9 +175,11 @@ export default function PatientProfilePage() {
                 </div>
                 <div>
                   <span className="text-(--text-secondary)">
-                    Date of birth:
+                    {profile.patient.age != null ? "Age:" : "Date of birth:"}
                   </span>{" "}
-                  {profile.patient.birthDate || "—"}
+                  {profile.patient.age != null
+                    ? profile.patient.age
+                    : profile.patient.birthDate || "—"}
                 </div>
                 <div>
                   <span className="text-(--text-secondary)">
