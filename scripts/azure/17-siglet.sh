@@ -44,6 +44,9 @@ SRC=$(grep -oE 'ghcr.io/eclipse-dataplane-core/dsdk-facet-rs/siglet:[a-z0-9.-]+@
   "${REPO_ROOT}/docker-compose.jad.yml" | head -1)
 [ -n "$SRC" ] || { err "no pinned siglet image in docker-compose.jad.yml"; exit 1; }
 DIGEST="${SRC##*@sha256:}"
+# ACR import refuses a source with both a tag and a digest (InvalidImportImageParameter).
+SRC_REPO="${SRC%@sha256:*}"
+SRC="${SRC_REPO%:*}@sha256:${DIGEST}"
 TAG="sha-${DIGEST:0:12}"
 IMAGE="${ACR_LOGIN_SERVER}/siglet:${TAG}"
 
