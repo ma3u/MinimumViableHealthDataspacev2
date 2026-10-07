@@ -161,7 +161,7 @@ jobs:
         mvhd-cfm-obagent mvhd-cfm-regagent mvhd-cfm-edcvagent mvhd-cfm-kcagent
         mvhd-cfm-cp-shim
         mvhd-provision-mgr mvhd-tenant-mgr mvhd-issuerservice mvhd-identityhub
-        mvhd-dp-omop mvhd-dp-fhir mvhd-controlplane
+        mvhd-dp-omop mvhd-dp-fhir mvhd-siglet mvhd-controlplane
         mvhd-nats mvhd-claude-federation mvhd-keycloak mvhd-vault
         mvhd-observability
     steps:
@@ -389,12 +389,12 @@ jobs:
           # controlplane needs both; the data planes, identity hub, issuer
           # service and CFM managers need Postgres.
           ./scripts/azure/set-app-power.sh start \
-            mvhd-controlplane mvhd-dp-fhir mvhd-dp-omop \
+            mvhd-controlplane mvhd-siglet mvhd-dp-fhir mvhd-dp-omop \
             mvhd-identityhub mvhd-issuerservice \
             mvhd-tenant-mgr mvhd-provision-mgr ||
             echo "::warning::Not every EDC app reported running, see above"
-          echo "=== Restoring 7 EDC Container Apps to 1/1 ==="
-          for app in mvhd-controlplane mvhd-dp-fhir mvhd-dp-omop \
+          echo "=== Restoring 8 EDC Container Apps to 1/1 ==="
+          for app in mvhd-controlplane mvhd-siglet mvhd-dp-fhir mvhd-dp-omop \
                      mvhd-identityhub mvhd-issuerservice \
                      mvhd-tenant-mgr mvhd-provision-mgr; do
             echo "  $app -> 1/1"

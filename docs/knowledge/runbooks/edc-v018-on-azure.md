@@ -63,8 +63,21 @@ scripts/azure/migrate-edc-to-v018.sh backup   # to ~/.mvhd/edc-v018-rollback/<ti
 scripts/azure/migrate-edc-to-v018.sh app controlplane
 scripts/azure/migrate-edc-to-v018.sh app identityhub
 scripts/azure/migrate-edc-to-v018.sh app issuerservice
+scripts/azure/17-siglet.sh                        # the data planes need it first
 scripts/azure/migrate-edc-to-v018.sh app dp-fhir
 scripts/azure/migrate-edc-to-v018.sh app dp-omop
+```
+
+The 0.18 data plane launcher refuses to start without `edc.iam.siglet.*` and
+`edc.events.nats.*` (#542, #574): two attempts on 2026-10-05 were rolled back
+for exactly that. `17-siglet.sh` creates `mvhd-siglet` (database `siglet`,
+storage `postgres-vault`, the transit key `signing-siglet`, internal ingress
+on 8080), and the data planes get `EDC_IAM_SIGLET_JWKS_URL=http://mvhd-siglet/keys`.
+Check that siglet is Healthy before moving a data plane:
+
+```bash
+scripts/azure/17-siglet.sh --check
+az containerapp logs show -n mvhd-siglet -g rg-mvhd-dev --tail 30 --follow false
 ```
 
 Each writes one revision (image, `_v018` database, the compose settings, and
@@ -111,12 +124,19 @@ done
 Then re-seed what the fresh databases do not have, from the Actions tab, each
 after the one before it has succeeded:
 
-1. `vault-bootstrap-participant-keys.yml`: the keys must be in Vault first, or
-   IdentityHub skips the key pairs without an error;
-2. `edc-seed-participants.yml`: the five participants in IdentityHub;
-3. `edc-seed-cp-participants.yml`: their contexts on the control plane (it
-   asks the control plane which API version it serves);
-4. `cfm-seed.yml`: the cell, profile and activities onboarding reads.
+1. `cfm-remove-tenants.yml`, `plan` then `apply`: failed test tenants out of
+   IdentityHub (first: an onboarding still polling one stops only then, #577),
+   the control plane, Keycloak and the CFM database (rows copied into
+   `removed_tenants` and `removed_participant_profiles`). A tenant whose
+   activities are all active is refused.
+2. `edc-reseed-identity-layer.yml`, `plan` then `apply`: the five demo
+   participants with `did:web:mvhd-identityhub%3A7083:<slug>`, through
+   compose's own sequence (control plane, IdentityHub with generated keys, the
+   STS secrets, holders, a MembershipCredential each). It mirrors every
+   control-plane context, so step 1 goes first. It replaces
+   `edc-seed-participants.yml`, whose script seeded the graph-layer DIDs and
+   one shared fake key and now refuses to run (#574);
+3. `cfm-seed.yml`: the cell, profile and activities onboarding reads.
 
 ### 6. Checks
 

@@ -42,6 +42,11 @@ BACKUP_DIR="${MVHD_ROLLBACK_DIR:-${HOME}/.mvhd/edc-v018-rollback}"
 KC_ISSUER="${KEYCLOAK_PUBLIC_URL:-https://auth.ehds.mabu.red}/realms/edcv"
 ISSUER_DID="did:web:${ISSUER_APP}%3A10016:issuer"
 NATS_URL="nats://${NATS_APP}:4222"
+# The 0.18 data planes refuse to start without the siglet that signs their
+# tokens (edc.iam.siglet.*) and the event stream the control plane creates
+# (#542, #574); compose since #584, from upstream jad's dataplane-config.yaml.
+# The siglet serves its JWKS at /keys; 17-siglet.sh makes the app.
+SIGLET_JWKS_URL="http://${SIGLET_APP}/keys"
 
 app_name() {
   case "$1" in
@@ -145,11 +150,21 @@ EOF
     dp-fhir) cat <<EOF
 IMAGE=${ACR_LOGIN_SERVER}/jad-dataplane:${JAD_VERSION}
 DB=dataplane_v018
+EDC_IAM_SIGLET_ISSUER=siglet-issuer
+EDC_IAM_SIGLET_JWKS_URL=${SIGLET_JWKS_URL}
+EDC_EVENTS_NATS_URL=${NATS_URL}
+EDC_EVENTS_NATS_STREAM=edc-events
+EDC_EVENTS_NATS_CREATE=false
 EOF
       ;;
     dp-omop) cat <<EOF
 IMAGE=${ACR_LOGIN_SERVER}/jad-dataplane:${JAD_VERSION}
 DB=dataplane_omop_v018
+EDC_IAM_SIGLET_ISSUER=siglet-issuer
+EDC_IAM_SIGLET_JWKS_URL=${SIGLET_JWKS_URL}
+EDC_EVENTS_NATS_URL=${NATS_URL}
+EDC_EVENTS_NATS_STREAM=edc-events
+EDC_EVENTS_NATS_CREATE=false
 EOF
       ;;
   esac
