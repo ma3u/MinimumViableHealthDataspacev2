@@ -31,8 +31,13 @@ const REQUEST_URI_METHOD = process.env.EUDI_REQUEST_URI_METHOD ?? "get";
 /** "direct_post" (cleartext) or "direct_post.jwt" (encrypted). Cleartext keeps polling simple. */
 const RESPONSE_MODE = process.env.EUDI_RESPONSE_MODE ?? "direct_post";
 
-/** PID claims we request — name + birth date are enough to prove a real wallet. */
-const PID_CLAIMS = ["family_name", "given_name", "birth_date"];
+/**
+ * PID claims we request: the name, for a later binding of the wallet to a
+ * record (#182), and "age over 18" in place of a birth date, which the hub
+ * never needs (#475, 2026-10-07). Nothing of it is shown: a patient session
+ * sees the record's pseudonym.
+ */
+const PID_CLAIMS = ["family_name", "given_name", "age_over_18"];
 
 export interface StartedPresentation {
   transactionId: string;

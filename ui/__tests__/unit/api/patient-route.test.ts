@@ -4,6 +4,7 @@
  * page renders straight from this answer.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { ownRecordView } from "@/lib/patient-identity";
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
@@ -88,7 +89,8 @@ describe("GET /api/patient as a PATIENT", () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.restricted).toBe(true);
-    expect(data.patients).toEqual([PATIENTS[1]]);
+    // their own record, under its pseudonym and with an age (#475)
+    expect(data.patients).toEqual([ownRecordView(PATIENTS[1])]);
     expect(data.stats.encounters).toBe(6);
     expect(data.stats).not.toHaveProperty("ehrSyncedAt");
     // when the ePA was last transferred into the portal

@@ -609,7 +609,7 @@ test.describe("S · Patient1 — My Health pages with mock data", () => {
     "Requires NEXT_PUBLIC_STATIC_EXPORT=true",
   );
 
-  test("J261 — /patient/profile shows Maria Schmidt demographics", async ({
+  test("J261 — /patient/profile shows the patient's own record as a pseudonym with an age", async ({
     page,
   }) => {
     await gotoAs(page, "/patient/profile", "patient1");
@@ -617,10 +617,13 @@ test.describe("S · Patient1 — My Health pages with mock data", () => {
     await expect(
       page.getByRole("heading", { name: /Health Profile/ }),
     ).toBeVisible({ timeout: T });
-    // Demographics in the profile card — use nth(1) to skip hidden <option> duplicates
-    await expect(page.getByText("1979-03-15").nth(1)).toBeVisible({
+    // Demographics in the profile card: the pseudonym and an age, never the
+    // name or the birth date (#475). nth(1) skips the hidden <option> copy.
+    await expect(page.getByText("Patient 7f915eed").nth(1)).toBeVisible({
       timeout: T,
     });
+    await expect(page.getByText(/Age:/)).toBeVisible({ timeout: T });
+    await expect(page.getByText("1979-03-15")).toHaveCount(0);
     await expect(page.getByText(/Medications:/).first()).toBeVisible({
       timeout: T,
     });

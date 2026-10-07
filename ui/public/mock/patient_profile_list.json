@@ -2,17 +2,19 @@
   "patients": [
     {
       "id": "P1",
-      "name": "Maria Schmidt",
+      "name": "Patient 7f915eed",
       "gender": "female",
-      "birthDate": "1979-03-15",
-      "conditionCount": 8
+      "birthDate": "",
+      "conditionCount": 8,
+      "age": 47
     },
     {
       "id": "P2",
-      "name": "Jan de Vries",
+      "name": "Patient 2ed9f177",
       "gender": "male",
-      "birthDate": "1965-07-22",
-      "conditionCount": 12
+      "birthDate": "",
+      "conditionCount": 12,
+      "age": 61
     }
   ]
 }
