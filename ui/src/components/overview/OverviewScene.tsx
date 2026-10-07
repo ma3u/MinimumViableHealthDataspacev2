@@ -36,7 +36,7 @@ import type {
   OverviewView,
 } from "@/lib/overview/types";
 
-export const STATUS_COLOR: Record<string, string> = {
+const STATUS_COLOR: Record<string, string> = {
   ok: "#22c55e",
   warn: "#f59e0b",
   bad: "#ef4444",
