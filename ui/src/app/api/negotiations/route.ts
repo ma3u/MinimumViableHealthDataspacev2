@@ -16,6 +16,13 @@ import path from "path";
 
 export const dynamic = "force-dynamic";
 
+/** The connector's DSP base, as the containers next to it reach it. */
+const DSP_BASE =
+  process.env.EDC_PROTOCOL_URL || "http://controlplane:8082/api/dsp";
+
+/** Before EDC 0.18 a participant's DSP address ended in the DSP version. */
+const LEGACY_VERSION_SUFFIX = "/2025-1";
+
 /** Load demo negotiations from the bundled mock JSON file. */
 async function loadMockNegotiations(): Promise<unknown[]> {
   try {
@@ -104,20 +111,43 @@ async function loadDemoCatalog(
 
 /**
  * Build the full per-participant DSP endpoint from a base URL + ctx ID.
- * EDC-V DSP format: {dspBase}/{providerCtxId}/2025-1
+ * EDC 0.18 format: {dspBase}/{providerCtxId}/{profileId}. The connector routes
+ * /{participantContextId}/{profileId}/catalog|negotiations|transfers, so the
+ * last segment is the profile id; /{ctx}/2025-1 answers 404 (#542). An address
+ * still ending in /2025-1 has that segment replaced.
  *
  * Examples:
  *   buildDspEndpoint("http://controlplane:8082/api/dsp", "abc123")
- *   → "http://controlplane:8082/api/dsp/abc123/2025-1"
+ *   → "http://controlplane:8082/api/dsp/abc123/http-dsp-profile-2025-1"
  */
 function buildDspEndpoint(base: string, ctxId: string): string {
   let clean = base; // strip trailing slashes; a loop, as /\/+$/ backtracks
   while (clean.endsWith("/")) clean = clean.slice(0, -1);
-  // If already looks like a full DSP endpoint (contains /2025-1), use as-is
-  if (clean.endsWith("/2025-1")) return clean;
-  // If ctxId already embedded, just add version
-  if (clean.includes(ctxId)) return `${clean}/2025-1`;
-  return `${clean}/${ctxId}/2025-1`;
+  if (clean.endsWith(`/${DSP_PROTOCOL}`)) return clean;
+  if (clean.endsWith(LEGACY_VERSION_SUFFIX)) {
+    return `${clean.slice(0, -LEGACY_VERSION_SUFFIX.length)}/${DSP_PROTOCOL}`;
+  }
+  // If ctxId already embedded, just add the profile id
+  if (clean.includes(ctxId)) return `${clean}/${DSP_PROTOCOL}`;
+  return `${clean}/${ctxId}/${DSP_PROTOCOL}`;
+}
+
+/**
+ * The participant context whose identity is this DID. The catalog request
+ * takes the provider's DSP address, which carries its context id, while the
+ * page only knows the provider's DID.
+ */
+async function providerContextId(did: string): Promise<string> {
+  const participants = await edcClient.management<
+    { "@id"?: string; identity?: string }[]
+  >("/v5alpha/participants");
+  const match = Array.isArray(participants)
+    ? participants.find((p) => p.identity === did)
+    : undefined;
+  if (!match?.["@id"]) {
+    throw new Error(`No participant context has the identity ${did}`);
+  }
+  return match["@id"];
 }
 
 /**
@@ -160,11 +190,19 @@ export async function GET(req: NextRequest) {
       );
     }
     try {
-      // v1alpha catalog endpoint — DCP-compliant catalog discovery by DID
+      // The v1alpha catalog-by-DID endpoint is gone in EDC 0.18 (404, #542);
+      // catalog/request takes the provider's DSP address instead.
+      const providerCtx = await providerContextId(providerDid);
       const catalogData = await edcClient.management(
-        `/v1alpha/participants/${participantId}/catalog`,
+        `/v5alpha/participants/${participantId}/catalog/request`,
         "POST",
-        { counterPartyDid: providerDid },
+        {
+          "@context": [EDC_CONTEXT],
+          "@type": "CatalogRequest",
+          counterPartyAddress: buildDspEndpoint(DSP_BASE, providerCtx),
+          counterPartyId: providerDid,
+          protocol: DSP_PROTOCOL,
+        },
       );
       return NextResponse.json(catalogData);
     } catch (err) {
@@ -271,8 +309,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Construct the full DSP endpoint with participant context ID and version suffix
-    // DSP format: {dspBase}/{providerCtxId}/2025-1
+    // Construct the full DSP endpoint: {dspBase}/{providerCtxId}/{profileId}
     const dspEndpoint = buildDspEndpoint(counterPartyAddress, counterPartyId);
 
     // The ODRL assigner must be the provider's DID (for DCP credential verification)
