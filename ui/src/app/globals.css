@@ -141,14 +141,18 @@
 }
 
 @utility glass {
-  /* Glassmorphism — floating headers and sidebars per Stitch spec */
+  /* Glassmorphism — floating headers and sidebars per Stitch spec.
+     The prefixed backdrop-filter comes first, everywhere in this file:
+     lightningcss keeps only the last of the two, so with the unprefixed one
+     first Chrome got no blur and the page read through the sticky nav
+     (2026-10-07). __tests__/unit/config/backdrop-filter-order.test.ts. */
   background: rgba(249, 249, 255, 0.8);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   .dark & {
     background: rgba(23, 31, 51, 0.8);
-    backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
   }
 }
 
@@ -159,8 +163,8 @@
 @layer utilities {
   .dark .glass {
     background: rgba(23, 31, 51, 0.8);
-    backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
   }
   .dark .metric-orb {
     background: radial-gradient(circle at top left, #4edea3, #006c49);
@@ -168,8 +172,8 @@
   }
   .dark .glass-panel {
     background: rgba(23, 31, 51, 0.85);
-    backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
     box-shadow: 0px 24px 48px rgba(0, 0, 0, 0.4);
   }
 }
@@ -212,14 +216,14 @@
 @utility glass-panel {
   /* Glass panel — backdrop-blur floating surface (Stitch "Ethereal Trust") */
   background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   border-radius: 1rem;
   box-shadow: 0px 12px 32px rgba(21, 28, 39, 0.08);
   .dark & {
     background: rgba(23, 31, 51, 0.85);
-    backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
     box-shadow: 0px 24px 48px rgba(0, 0, 0, 0.4);
   }
 }
