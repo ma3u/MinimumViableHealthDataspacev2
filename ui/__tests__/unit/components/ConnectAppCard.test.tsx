@@ -72,6 +72,36 @@ describe("ConnectAppCard", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Forbidden");
   });
 
+  it("leads with the connection when a phone is connected: no scan steps, a quiet way to add another", async () => {
+    devices.list = [
+      {
+        deviceId: "d-1",
+        deviceName: "iPhone",
+        connectedAt: "2026-10-05T19:18:00Z",
+        lastSeenAt: "2026-10-06T23:29:00Z",
+      },
+    ];
+    render(<ConnectAppCard />);
+    expect(
+      await screen.findByRole("heading", { name: "Klarbefund is connected" }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/scan the code/)).not.toBeInTheDocument();
+    expect(screen.queryByTestId("connect-app-qr")).not.toBeInTheDocument();
+    expect(screen.getByTestId("connect-app-start")).toHaveTextContent(
+      "Connect another phone",
+    );
+  });
+
+  it("asks a patient with no phone to connect one", async () => {
+    render(<ConnectAppCard />);
+    expect(
+      screen.getByRole("heading", { name: "Connect the Klarbefund app" }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("connect-app-start")).toHaveTextContent(
+      "Show QR code",
+    );
+  });
+
   it("lists connected phones with a way to disconnect each", async () => {
     devices.list = [
       {

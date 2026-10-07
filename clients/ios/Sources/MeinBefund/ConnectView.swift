@@ -308,6 +308,48 @@ struct ConnectView: View {
             "Decided once, here. While it is on, every report you scan or read again goes to your own record on the EHDS demo hub, as preliminary values marked as read from a scan. Values without a LOINC code stay on this phone. Switching off stops further sending; what was sent stays in the record until you delete the account."
           )
         }
+        // Device data is a different kind of data, so it has its own switch
+        // and its own consent (ADR-057).
+        Section {
+          Toggle(
+            "Send my device trends to my EHDS record",
+            isOn: Binding(
+              get: { connection.sendsWearablesSince != nil },
+              set: { connection.setSendsWearables($0) })
+          )
+          .accessibilityIdentifier("account-send-wearables")
+          if let since = connection.sendsWearablesSince {
+            LabeledContent("Since", value: since.formatted(date: .abbreviated, time: .omitted))
+            Button {
+              Task {
+                await connection.syncWearables(
+                  reportDates: connection.reportsToSync().map(\.effectiveDate), force: true)
+              }
+            } label: {
+              HStack {
+                Label("Sync device trends now", systemImage: "arrow.triangle.2.circlepath")
+                if connection.syncingWearables {
+                  Spacer()
+                  ProgressView()
+                }
+              }
+            }
+            .disabled(connection.syncingWearables)
+            .accessibilityIdentifier("account-sync-wearables")
+          }
+          if let last = connection.lastWearableSend {
+            Text(last)
+              .font(.footnote)
+              .foregroundStyle(.secondary)
+              .accessibilityIdentifier("account-last-wearable-send")
+          }
+        } header: {
+          Text("My device trends in my record")
+        } footer: {
+          Text(
+            "Resting heart rate, heart rate variability, steps and body weight from Apple Health, as the Trends screen shows them: one mean per week, never a single day or a single reading. While it is on, they go to your own record on the EHDS demo hub, and each sync replaces the last. Switching off stops further sending; what was sent stays in the record until you delete the account."
+          )
+        }
       }
       Section {
         Button("Disconnect", role: .destructive) {

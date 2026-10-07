@@ -119,6 +119,10 @@ export default function ConnectAppCard() {
     if (r.ok || r.status === 404) loadDevices();
   }
 
+  // A connected patient sees their phones first, and the QR code only on
+  // request: it pairs a further phone, not the one already connected.
+  const connected = devices.length > 0;
+
   return (
     <section
       className="mb-6 rounded-lg border border-(--border) bg-(--surface) p-4"
@@ -130,36 +134,24 @@ export default function ConnectAppCard() {
         className="text-lg font-semibold flex items-center gap-2 mb-1"
       >
         <Smartphone size={18} className="text-(--accent)" aria-hidden />
-        Connect the Klarbefund app
+        {connected ? "Klarbefund is connected" : "Connect the Klarbefund app"}
       </h2>
-      <p className="text-sm text-(--text-secondary) mb-3">
-        Klarbefund turns your paper lab reports into structured values on your
-        iPhone. Connected, it can read your record here. In the app, choose{" "}
-        <strong>More, Connect to EHDS</strong> and scan the code.
-      </p>
-
-      {IS_STATIC ? (
-        <p className="text-sm" data-testid="connect-app-static">
-          Connecting needs the live demo, where you sign in as a patient:{" "}
-          <a
-            className="underline text-(--accent)"
-            href="https://ehds.mabu.red/patient/profile"
-          >
-            ehds.mabu.red/patient/profile
-          </a>
-          .
+      {connected ? (
+        <p className="text-sm text-(--text-secondary) mb-3">
+          Your iPhone reads your record here and sends the values you allowed in
+          the app. Nothing to scan: a QR code is needed only to connect another
+          phone.
         </p>
       ) : (
-        <PairingPanel
-          phase={phase}
-          secondsLeft={secondsLeft}
-          onStart={start}
-          onReset={() => setPhase({ kind: "idle" })}
-        />
+        <p className="text-sm text-(--text-secondary) mb-3">
+          Klarbefund turns your paper lab reports into structured values on your
+          iPhone. Connected, it can read your record here. In the app, choose{" "}
+          <strong>More, Connect to EHDS</strong> and scan the code.
+        </p>
       )}
 
       {devices.length > 0 && (
-        <div className="mt-4" data-testid="connected-devices">
+        <div className="mb-3" data-testid="connected-devices">
           <h3 className="text-sm font-semibold mb-2">Connected phones</h3>
           <ul className="space-y-2">
             {devices.map((d) => (
@@ -191,6 +183,26 @@ export default function ConnectAppCard() {
           </ul>
         </div>
       )}
+      {IS_STATIC ? (
+        <p className="text-sm" data-testid="connect-app-static">
+          Connecting needs the live demo, where you sign in as a patient:{" "}
+          <a
+            className="underline text-(--accent)"
+            href="https://ehds.mabu.red/patient/profile"
+          >
+            ehds.mabu.red/patient/profile
+          </a>
+          .
+        </p>
+      ) : (
+        <PairingPanel
+          phase={phase}
+          secondsLeft={secondsLeft}
+          onStart={start}
+          onReset={() => setPhase({ kind: "idle" })}
+          another={connected}
+        />
+      )}
     </section>
   );
 }
@@ -200,11 +212,14 @@ function PairingPanel({
   secondsLeft,
   onStart,
   onReset,
+  another = false,
 }: {
   phase: Phase;
   secondsLeft: number;
   onStart: () => void;
   onReset: () => void;
+  /** A phone is connected already: offer the code for another one, quietly. */
+  another?: boolean;
 }) {
   switch (phase.kind) {
     case "idle":
@@ -214,11 +229,19 @@ function PairingPanel({
           type="button"
           onClick={onStart}
           disabled={phase.kind === "starting"}
-          className="inline-flex items-center gap-2 rounded bg-(--accent) px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+          className={
+            another
+              ? "inline-flex items-center gap-2 rounded border border-(--border) px-3 py-1.5 text-sm hover:bg-(--surface-2) disabled:opacity-60"
+              : "inline-flex items-center gap-2 rounded bg-(--accent) px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+          }
           data-testid="connect-app-start"
         >
           <QrCode size={16} aria-hidden />
-          {phase.kind === "starting" ? "Preparing..." : "Show QR code"}
+          {phase.kind === "starting"
+            ? "Preparing..."
+            : another
+              ? "Connect another phone"
+              : "Show QR code"}
         </button>
       );
     case "showing": {

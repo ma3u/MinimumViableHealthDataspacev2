@@ -8,11 +8,14 @@ import Foundation
 /// for it; a wearable estimates continuously with a consumer sensor and has no
 /// range at all. So everything here is built to stay apart:
 ///
-/// - **Never a `CodedLabValue`.** No LOINC code, no provenance that could be
-///   mistaken for a transcription, no path into a report, the FHIR bundle,
-///   the OMOP tables or the document for a doctor. A series lives for as long
-///   as a screen shows it and is never stored: the phone's own Health store
-///   already holds it, and a second copy would be one more thing to protect.
+/// - **Never a `CodedLabValue`.** No provenance that could be mistaken for a
+///   transcription, no path into a report, its FHIR bundle, the OMOP tables or
+///   the document for a doctor. A series lives for as long as a screen shows
+///   it and is never stored on the phone: the Health store already holds it,
+///   and a second copy would be one more thing to protect. Only when the
+///   person turns on "Send my device trends to my EHDS record" do the weekly
+///   points go to their own record, as Observations of their own
+///   (`WearableFHIR`, ADR-057).
 /// - **Never compared with a range.** There is no `placement`, no band, no
 ///   colour that means anything. A resting pulse of 58 is a number on a line.
 /// - **Weekly means, not daily readings.** Day-to-day noise on a consumer

@@ -6,6 +6,7 @@ import {
   ownRecordId,
   refuseForeignRecord,
 } from "@/lib/patient/own-record";
+import { HEALTH_INTERESTS } from "@/lib/patient/interests";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +41,9 @@ export async function GET(req: Request) {
                 OR coalesce(p.id, p.resourceId, elementId(p)) = $own
        OPTIONAL MATCH (p)-[:HAS_CONDITION]->(c:Condition)
        RETURN coalesce(p.id, p.resourceId, elementId(p)) AS id,
-              coalesce(p.name, 'Anonymous') AS name,
+              // A Klarbefund record by its account (kb-...), as its owner
+              // signs in; otherwise every one is "Klarbefund sandbox".
+              coalesce(p.appAccount, p.name, 'Anonymous') AS name,
               coalesce(p.gender, 'unknown') AS gender,
               coalesce(p.birthDate, '') AS birthDate,
               count(c) AS conditionCount
@@ -67,13 +70,15 @@ export async function GET(req: Request) {
       name: string;
       gender: string;
       birthDate: string;
+      chosenInterests: string[] | null;
     }>(
       `MATCH (p:Patient)
          WHERE coalesce(p.id, p.resourceId, elementId(p)) = $patientId
          RETURN coalesce(p.id, p.resourceId, elementId(p)) AS id,
-                coalesce(p.name, 'Anonymous') AS name,
+                coalesce(p.appAccount, p.name, 'Anonymous') AS name,
                 coalesce(p.gender, 'unknown') AS gender,
-                coalesce(p.birthDate, '') AS birthDate
+                coalesce(p.birthDate, '') AS birthDate,
+                p.interests AS chosenInterests
          LIMIT 1`,
       { patientId },
     ),
@@ -118,7 +123,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Patient not found" }, { status: 404 });
   }
 
-  const patient = patientRows[0];
+  const { chosenInterests, ...patient } = patientRows[0];
 
   // Compute risk scores: ICD codes + SNOMED codes + social determinants of health
   const conditionCodes = conditionRows.map((c) => c.code.toLowerCase());
@@ -279,7 +284,11 @@ export async function GET(req: Request) {
         ].filter(Boolean),
       },
     },
-    interests,
+    // The patient's own choice when they made one, else what the record
+    // suggests (PUT /api/patient/profile/interests).
+    interests: chosenInterests ?? interests,
+    interestsChosen: Array.isArray(chosenInterests),
+    suggestedInterests: HEALTH_INTERESTS,
     gdprRights: {
       rightToAccess: "GDPR Art. 15",
       rightToPortability: "GDPR Art. 20",

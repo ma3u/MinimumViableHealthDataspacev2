@@ -1052,6 +1052,16 @@ struct ContentView: View {
       guard since != nil else { return }
       Task { await connection.sync(model.reports) }
     }
+    // My device trends into my record (ADR-057): when the person switches
+    // sending on, and each time the app comes up while it is on. A series
+    // that did not change since the last send is not sent again.
+    .onChange(of: connection.sendsWearablesSince) { _, since in
+      guard since != nil else { return }
+      Task { await connection.syncWearables(reportDates: model.reports.map(\.effectiveDate)) }
+    }
+    .task {
+      await connection.syncWearables(reportDates: model.reports.map(\.effectiveDate))
+    }
     .onChange(of: model.openReport) { _, id in
       // Following a point on a chart back to the document it was read from.
       guard let id else { return }
