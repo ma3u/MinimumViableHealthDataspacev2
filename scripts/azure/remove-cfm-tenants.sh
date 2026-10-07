@@ -27,7 +27,13 @@
 #
 # Environment: MODE, TENANT_IDS (space or comma separated), CP, IH, KC,
 # PGHOST, PGUSER, PGDATABASE=cfm, PGSSLMODE=require; secrets PGPASSWORD,
-# ADMIN_SECRET (Keycloak client `admin`), KC_ADMIN_PASSWORD (Keycloak master).
+# ADMIN_SECRET (Keycloak client `admin`), PROVISIONER_SECRET (client
+# `provisioner`), KC_ADMIN_PASSWORD (Keycloak master).
+#
+# IdentityHub wants the `admin` role claim; the control plane's participant API
+# wants `provisioner`, as 05-cp-participants.sh creates the contexts with it.
+# The admin token lists control-plane contexts but its DELETE is refused with
+# 403 "Required user role not satisfied" (2026-10-07, Elbufer).
 # =============================================================================
 set -uo pipefail
 MODE="${MODE:-plan}"
@@ -48,6 +54,10 @@ ADMIN_TOKEN=$(curl -sS --max-time 20 -X POST "${KC}/realms/edcv/protocol/openid-
   --data-urlencode grant_type=client_credentials --data-urlencode client_id=admin \
   --data-urlencode "client_secret=${ADMIN_SECRET}" | jq -r '.access_token // empty')
 [ -n "$ADMIN_TOKEN" ] || fail "no token for the admin client"
+PROV_TOKEN=$(curl -sS --max-time 20 -X POST "${KC}/realms/edcv/protocol/openid-connect/token" \
+  --data-urlencode grant_type=client_credentials --data-urlencode client_id=provisioner \
+  --data-urlencode "client_secret=${PROVISIONER_SECRET}" | jq -r '.access_token // empty')
+[ -n "$PROV_TOKEN" ] || fail "no token for the provisioner client"
 master_token() {
   curl -sS --max-time 20 -X POST "${KC}/realms/master/protocol/openid-connect/token" \
     --data-urlencode grant_type=password --data-urlencode client_id=admin-cli \
@@ -66,6 +76,7 @@ delete() {  # delete <label> <url> <bearer>
   esac
 }
 
+any_failed=0
 for t in $IDS; do
   name=$(psql_q -c "select coalesce(properties->>'displayName', properties->>'name', '') from tenants where id = '$t'")
   exists=$(psql_q -c "select count(*) from tenants where id = '$t'")
@@ -104,7 +115,7 @@ EOF
     cp_ctx=$(printf '%s' "$CP_LIST" | jq -r --arg d "$did" '.[]? | select(.identity == $d) | ."@id"' | head -1)
     ih_ctx=$(printf '%s' "$IH_LIST" | jq -r --arg d "$did" '.[]? | select(.did == $d) | .participantContextId' | head -1)
     if [ -n "$ih_ctx" ]; then delete "identityhub ${ih_ctx}" "${IH}/v1alpha/participants/${ih_ctx}" "$ADMIN_TOKEN" || failed=1; fi
-    if [ -n "$cp_ctx" ]; then delete "control plane ${cp_ctx}" "${CP}/${MGMT_V}/participants/${cp_ctx}" "$ADMIN_TOKEN" || failed=1; fi
+    if [ -n "$cp_ctx" ]; then delete "control plane ${cp_ctx}" "${CP}/${MGMT_V}/participants/${cp_ctx}" "$PROV_TOKEN" || failed=1; fi
     ctx="${cp_ctx:-$ih_ctx}"
     if [ -n "$ctx" ]; then
       mt=$(master_token)
@@ -119,7 +130,7 @@ EOF
   done <<EOF
 $profiles
 EOF
-  [ "$failed" = 0 ] || { log "  kept the CFM rows: a delete above failed; rerun after fixing it"; continue; }
+  [ "$failed" = 0 ] || { log "  kept the CFM rows: a delete above failed; rerun after fixing it"; any_failed=1; continue; }
 
   psql_q <<SQL || fail "could not move the CFM rows of ${t}"
 begin;
@@ -136,3 +147,4 @@ done
 
 [ "$MODE" = apply ] || { log "MODE=${MODE}: nothing changed"; exit 0; }
 log "remaining tenants: $(psql_q -c "select count(*) from tenants")"
+[ "$any_failed" = 0 ] || fail "a tenant kept its CFM rows (a delete failed); the job fails so the workflow does"
