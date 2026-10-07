@@ -1,0 +1,52 @@
+name: EDC drop the April databases (#594)
+
+# Drops the five April EDC databases ADR-055 kept as a rollback (controlplane,
+# dataplane, dataplane_omop, identityhub, issuerservice) once that window is
+# over. scripts/azure/drop-edc-april-databases.sh refuses before 2026-10-12 and
+# while any active revision of an EDC app still uses a database without the
+# _v018 suffix; `plan` shows those guards and changes nothing.
+#
+# Runs as the CI identity: dropping a database needs write access to the
+# Flexible Server, which the maintainer account does not have. Manual trigger
+# only. Runbook: docs/knowledge/runbooks/edc-v018-on-azure.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "plan (read only) or drop"
+        type: choice
+        options: [plan, drop]
+        default: plan
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-reset"
+  cancel-in-progress: false
+
+jobs:
+  drop:
+    name: April databases (${{ github.event.inputs.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Guards and databases
+        env:
+          MODE: ${{ github.event.inputs.mode }}
+        run: |
+          set -o pipefail
+          ./scripts/azure/drop-edc-april-databases.sh "$MODE" </dev/null | tee /tmp/out.txt
+          { echo "### April EDC databases (${MODE})"; echo '```'; sed 's/\x1b\[[0-9;]*m//g' /tmp/out.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
