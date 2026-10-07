@@ -98,6 +98,10 @@ if [ -z "${NEXTAUTH_SECRET:-}" ]; then
   log "NEXTAUTH_SECRET was not set; generated a fresh 256-bit one for this app."
 fi
 
+# EDC_SERVICE_CLIENT_SECRET is not set here: on a fresh realm the client's
+# built-in default matches, and rotate-edc-admin-client-secret.sh then moves
+# the admin client off it and wires the UI to Key Vault. A literal here would
+# put the public default back on every rerun.
 log "Creating UI container app..."
 az containerapp create \
   --name "$UI_APP" --resource-group "$RG" --environment "$ACA_ENV" \
@@ -138,7 +142,6 @@ az containerapp create \
     "EDC_TENANT_URL=${EDC_TENANT_URL}" \
     "EDC_PROVISION_URL=${EDC_PROVISION_URL}" \
     "EDC_SERVICE_CLIENT_ID=admin" \
-    "EDC_SERVICE_CLIENT_SECRET=edc-v-admin-secret" \
     "EUDI_VERIFIER_BASE_URL=${EUDI_VERIFIER_BASE_URL:-https://verifier-backend.eudiw.dev}" \
     "EUDI_VERIFIER_SCHEME=${EUDI_VERIFIER_SCHEME:-openid4vp://}" \
     "EUDI_VERIFIER_PROFILE=${EUDI_VERIFIER_PROFILE:-openid4vp}" \
