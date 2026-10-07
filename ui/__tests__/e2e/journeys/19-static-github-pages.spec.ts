@@ -1349,11 +1349,9 @@ test.describe("S · Patient EUDI Wallet journey (static)", () => {
     await expect(page.getByText("First time · Register")).toBeVisible({
       timeout: T,
     });
-    await expect(
-      page.getByText(/Register with your EUDI Wallet/i),
-    ).toBeVisible();
+    await expect(page.getByText(/Register with d-you/i)).toBeVisible();
     await page.getByText("Returning · Login").click();
-    await expect(page.getByText(/Sign in with your EUDI Wallet/i)).toBeVisible({
+    await expect(page.getByText(/Sign in with d-you/i)).toBeVisible({
       timeout: T,
     });
   });
@@ -1447,9 +1445,7 @@ test.describe("S · Interactive EUDI Wallet approval (static)", () => {
     page,
   }) => {
     await page.goto(P("/"));
-    await page
-      .getByRole("button", { name: /Register with EUDI Wallet/i })
-      .click();
+    await page.getByRole("button", { name: /Register with d-you/i }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible({ timeout: T });
     await expect(dialog.locator('img[alt*="QR code"]')).toBeVisible({

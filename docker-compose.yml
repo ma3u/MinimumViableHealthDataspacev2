@@ -62,6 +62,8 @@ services:
       NEO4J_PASSWORD: healthdataspace
       # Keycloak SSO (Phase 2c)
       NEXTAUTH_URL: http://localhost:3003
+      # The simulated wallet on /auth/eudi-qr may sign in as the demo patient (ADR-028 demo).
+      EUDI_DEMO_WALLET: "true"
       NEXTAUTH_SECRET: health-dataspace-dev-secret-change-in-prod
       KEYCLOAK_CLIENT_ID: health-dataspace-ui
       KEYCLOAK_CLIENT_SECRET: health-dataspace-ui-secret

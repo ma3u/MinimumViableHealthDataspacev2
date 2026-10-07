@@ -148,6 +148,7 @@ az containerapp create \
     "EUDI_PID_DOCTYPE=${EUDI_PID_DOCTYPE:-eu.europa.ec.eudi.pid.1}" \
     "EUDI_REQUEST_URI_METHOD=${EUDI_REQUEST_URI_METHOD:-get}" \
     "EUDI_RESPONSE_MODE=${EUDI_RESPONSE_MODE:-direct_post}" \
+    "EUDI_DEMO_WALLET=${EUDI_DEMO_WALLET:-true}" \
   -o none
 ok "UI container app"
 

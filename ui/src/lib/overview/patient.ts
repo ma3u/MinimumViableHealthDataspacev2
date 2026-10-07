@@ -875,13 +875,23 @@ export function ownPatientIdForSession(
   session:
     | {
         preferredUsername?: string | null;
-        user?: { name?: string | null; email?: string | null } | null;
+        user?: {
+          name?: string | null;
+          email?: string | null;
+          preferredUsername?: string | null;
+        } | null;
       }
     | null
     | undefined,
 ): string | null {
   if (!session) return null;
+  // The session callback in auth.ts puts the login name on user.preferredUsername
+  // (a Keycloak login and a wallet login alike); the top-level field is what
+  // the static demo and older callers pass. The wallet session has no email,
+  // so without the first candidate a patient signed in with d-you was refused
+  // their own record.
   const candidates = [
+    session.user?.preferredUsername,
     session.preferredUsername,
     session.user?.name,
     session.user?.email?.split("@")[0],

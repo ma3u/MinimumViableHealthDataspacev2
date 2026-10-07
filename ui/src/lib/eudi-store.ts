@@ -42,7 +42,15 @@ export interface EudiTransaction {
 }
 
 const TTL_MS = 5 * 60 * 1000;
-const store = new Map<string, EudiTransaction>();
+// One Map per process, not per route bundle: Next.js compiles each route on its
+// own (and recompiles on the fly in dev), so a module-level Map would give the
+// start route, the status route and the NextAuth callback three different
+// stores. The usual globalThis anchor keeps it one.
+const g = globalThis as unknown as {
+  __eudiTxStore?: Map<string, EudiTransaction>;
+};
+const store: Map<string, EudiTransaction> =
+  g.__eudiTxStore ?? (g.__eudiTxStore = new Map());
 
 /** Remove expired transactions so the Map can't grow unbounded. */
 function sweep(): void {

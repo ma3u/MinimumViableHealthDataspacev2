@@ -160,3 +160,22 @@ portal") → Donate → Results`. Live aside: `Home [Already have it? Sign in �
 The git-ignored screenshots contain real personal health data — the TK ePA shows medications and a
 real physician's name (Dr. med. André Wierth). For any **recorded or publicly shared** talk, blur the
 physician name and consider redacting specific medications. Local in-person demo is fine.
+
+## 2026-10-07: the citizen wallet is d-you
+
+The German national EUDI Wallet has a name, **d-you**, and a launch date, 2 January 2027
+(BMDS press release of 9 September 2026). The demo now shows the citizen's wallet under
+that name, from one place, `ui/src/lib/wallet-config.ts` (`CITIZEN_WALLET`): the homepage
+CTA, `/auth/eudi-qr`, the `/journey` slide, the sign-in page and the demo hub. The flows
+themselves did not change: OpenID4VP for sign-in, and any certified EUDI wallet is accepted
+(eIDAS 2.0), which every page says in a footnote. Nothing wallet-specific entered the code.
+
+**The simulated phone signs in.** On the live `/auth/eudi-qr` the phone next to the real QR
+is interactive, as it already was on the static site. Approving it asks
+`POST /api/auth/eudi/start` with `{ "demo": true }`; the route completes a transaction for
+the demo patient (`patient1`, Maria Schmidt) and the same `eudi-wallet` Credentials provider
+mints the `PATIENT` session, so a visitor without d-you lands on the patient overview after
+three taps. This is allowed only where `EUDI_DEMO_WALLET=true` (compose and the Azure demo
+set it); anywhere else the route answers 404 and the page says "Simulation only on this
+deployment". The static export keeps the demo-persona path (ADR-028 §5: no fixture fakes an
+auth). Plan and the real d-you path: issue #182.
