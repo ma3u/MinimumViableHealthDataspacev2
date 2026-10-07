@@ -154,6 +154,13 @@ registration after `cfm-seed.yml`.
    `az containerapp logs show -n mvhd-cfm-regagent -g rg-mvhd-dev --tail 50 --follow false`
    shows no `Error processing message`.
 
+What passing looks like, from the first registration on the 0.18 build
+(2026-10-07, #574): every step of the onboarding progress is green and the
+DID is on `mvhd-identityhub%3A7083`. In the CFM database the tenant's three
+VPAs are `active`, and IdentityHub and the control plane hold the same context.
+
+![Stadtkrankenhaus Lichtenberg onboarded on Azure, 2026-10-07](img/2026-10-07-onboarding-azure.png)
+
 ## Rollback
 
 Per app, from the saved definition:
