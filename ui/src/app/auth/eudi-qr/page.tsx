@@ -281,7 +281,7 @@ function EudiQrContent() {
           <WalletFlow
             interactive
             loop={false}
-            brand={{ name: WALLET.name, color: WALLET.color }}
+            theme="dyou"
             ariaLabel={`Simulated ${WALLET.name} ${mode}`}
             steps={mode === "login" ? LOGIN_STEPS : REGISTER_STEPS}
             onComplete={approveSimulated}

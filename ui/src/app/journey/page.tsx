@@ -189,7 +189,7 @@ function SlideRegister() {
         <Reveal delay={340} key={mode} className="flex justify-center">
           <WalletFlow
             loop
-            brand={{ name: CITIZEN_WALLET.name, color: CITIZEN_WALLET.color }}
+            theme="dyou"
             ariaLabel={`Simulated ${CITIZEN_WALLET.name} ${mode}`}
             steps={isReg ? REGISTER_STEPS : LOGIN_STEPS}
           />

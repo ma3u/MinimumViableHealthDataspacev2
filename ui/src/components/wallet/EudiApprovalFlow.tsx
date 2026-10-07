@@ -29,26 +29,27 @@ import { CITIZEN_WALLET } from "@/lib/wallet-config";
 
 export type ApprovalMode = "register" | "login" | "ehr";
 
-const WALLET_BRAND = { name: CITIZEN_WALLET.name, color: CITIZEN_WALLET.color };
-
 const FLOWS = {
   register: {
     steps: REGISTER_STEPS,
     qrUrl: "https://ehds.mabu.red/auth/eudi-qr?mode=register",
     scanLabel: `Scan with ${CITIZEN_WALLET.name}`,
-    brand: WALLET_BRAND as { name: string; color: string } | undefined,
+    brand: undefined as { name: string; color: string } | undefined,
+    theme: "dyou" as const,
   },
   login: {
     steps: LOGIN_STEPS,
     qrUrl: "https://ehds.mabu.red/auth/eudi-qr?mode=login",
     scanLabel: `Scan with ${CITIZEN_WALLET.name}`,
-    brand: WALLET_BRAND as { name: string; color: string } | undefined,
+    brand: undefined as { name: string; color: string } | undefined,
+    theme: "dyou" as const,
   },
   ehr: {
     steps: EHR_TRANSFER_STEPS,
     qrUrl: "https://ehds.mabu.red/patient/ehr-transfer",
     scanLabel: "Scan with your insurer app",
     brand: { name: insurer.name, color: insurer.brand },
+    theme: "classic" as const,
   },
 } as const;
 
@@ -120,6 +121,7 @@ export function EudiApprovalFlow({
           loop={false}
           steps={[...cfg.steps]}
           brand={cfg.brand}
+          theme={cfg.theme}
           ariaLabel={`Approve ${
             mode === "ehr" ? "insurer app" : CITIZEN_WALLET.name
           } ${mode}`}
