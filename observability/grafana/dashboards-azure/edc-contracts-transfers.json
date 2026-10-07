@@ -26,7 +26,7 @@
       },
       "options": {
         "mode": "markdown",
-        "content": "**What this shows:** every DSP contract negotiation and data transfer, counted from the `dsp` hash chain. The hub writes a record when it asks the connector (*requested*) or refuses a transfer for want of a data permit; the connector's callbacks write every later state (*agreed*, *finalized*, *started*, *completed*, *terminated*). **Empty?** Nothing was negotiated in the time range: widen it, or see *Newest record*. A negotiation that was started but never shows up points to the connector: see *Connector services* at the bottom."
+        "content": "**What this shows:** every DSP contract negotiation and data transfer, counted from the `dsp` hash chain. The hub writes a record when it asks the connector (*requested*) or refuses a transfer for want of a data permit; the connector's callbacks write every later state (*agreed*, *finalized*, *started*, *completed*, *terminated*). **Empty?** Nothing was negotiated in the time range: widen it, or see *Newest record*. A negotiation that was started but never shows up points to the connector: see *Connector services* at the bottom. **Refused?** A transfer no data permit covers is refused (Art. 61(1)) and recorded. The k6 contract journey asks for one on purpose, one time in four: those rows carry a *Load test run* and are expected (#571)."
       }
     },
     {
@@ -1456,7 +1456,7 @@
       "type": "timeseries",
       "id": 17,
       "title": "Errors by service (Log Analytics)",
-      "description": "ERROR and SEVERE lines, without the OTel agent's own export errors.",
+      "description": "ERROR and SEVERE lines, without the OTel agent's own export errors. Zero is the normal case.",
       "datasource": {
         "type": "grafana-azure-monitor-datasource",
         "uid": "azure-monitor"
@@ -1470,7 +1470,7 @@
           },
           "queryType": "Azure Log Analytics",
           "azureLogAnalytics": {
-            "query": "ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in ('mvhd-controlplane', 'mvhd-dp-fhir', 'mvhd-dp-omop', 'mvhd-identityhub', 'mvhd-issuerservice') | where Log_s has_any ('SEVERE', 'ERROR') and Log_s !has 'otel.javaagent' | summarize errors = count() by bin(TimeGenerated, $__interval), ContainerAppName_s | order by TimeGenerated asc",
+            "query": "let apps = dynamic(['mvhd-controlplane', 'mvhd-dp-fhir', 'mvhd-dp-omop', 'mvhd-identityhub', 'mvhd-issuerservice']); range TimeGenerated from bin($__timeFrom(), $__interval) to $__timeTo() step $__interval | extend ContainerAppName_s = apps | mv-expand ContainerAppName_s to typeof(string) | extend n = 0 | union (ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in (apps) | where Log_s has_any ('SEVERE', 'ERROR') and Log_s !has 'otel.javaagent' | extend n = 1) | summarize errors = sum(n) by bin(TimeGenerated, $__interval), ContainerAppName_s | order by TimeGenerated asc",
             "resources": [
               "/subscriptions/27836c51-b944-484c-bf76-8de3e9642238/resourceGroups/rg-mvhd-dev/providers/Microsoft.OperationalInsights/workspaces/mvhd-logs"
             ],
@@ -1518,7 +1518,7 @@
       "type": "timeseries",
       "id": 18,
       "title": "Log lines by service (what Log Analytics bills)",
-      "description": "",
+      "description": "The EDC services log at INFO only at start and on trouble: a quiet hour is a healthy one. On Azure the hub's negotiations and transfers take the demo path (#25, #345), so they reach no connector and add no lines here.",
       "datasource": {
         "type": "grafana-azure-monitor-datasource",
         "uid": "azure-monitor"
@@ -1532,7 +1532,7 @@
           },
           "queryType": "Azure Log Analytics",
           "azureLogAnalytics": {
-            "query": "ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in ('mvhd-controlplane', 'mvhd-dp-fhir', 'mvhd-dp-omop', 'mvhd-identityhub', 'mvhd-issuerservice') | summarize lines = count() by bin(TimeGenerated, $__interval), ContainerAppName_s | order by TimeGenerated asc",
+            "query": "let apps = dynamic(['mvhd-controlplane', 'mvhd-dp-fhir', 'mvhd-dp-omop', 'mvhd-identityhub', 'mvhd-issuerservice']); range TimeGenerated from bin($__timeFrom(), $__interval) to $__timeTo() step $__interval | extend ContainerAppName_s = apps | mv-expand ContainerAppName_s to typeof(string) | extend n = 0 | union (ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in (apps)  | extend n = 1) | summarize lines = sum(n) by bin(TimeGenerated, $__interval), ContainerAppName_s | order by TimeGenerated asc",
             "resources": [
               "/subscriptions/27836c51-b944-484c-bf76-8de3e9642238/resourceGroups/rg-mvhd-dev/providers/Microsoft.OperationalInsights/workspaces/mvhd-logs"
             ],
@@ -1594,7 +1594,7 @@
           },
           "queryType": "Azure Log Analytics",
           "azureLogAnalytics": {
-            "query": "ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in ('mvhd-controlplane', 'mvhd-dp-fhir', 'mvhd-dp-omop', 'mvhd-identityhub', 'mvhd-issuerservice') | where Log_s has_any ('SEVERE', 'ERROR') and Log_s !has 'otel.javaagent' | project TimeGenerated, app = ContainerAppName_s, line = Log_s | order by TimeGenerated desc | take 100",
+            "query": "let errs = ContainerAppConsoleLogs_CL | where $__timeFilter(TimeGenerated) | where ContainerAppName_s in ('mvhd-controlplane', 'mvhd-dp-fhir', 'mvhd-dp-omop', 'mvhd-identityhub', 'mvhd-issuerservice') | where Log_s has_any ('SEVERE', 'ERROR') and Log_s !has 'otel.javaagent' | project TimeGenerated, app = ContainerAppName_s, line = Log_s | order by TimeGenerated desc | take 100; errs | union (print TimeGenerated = now(), app = '-', line = 'No connector errors in this time range.' | where toscalar(errs | count) == 0)",
             "resources": [
               "/subscriptions/27836c51-b944-484c-bf76-8de3e9642238/resourceGroups/rg-mvhd-dev/providers/Microsoft.OperationalInsights/workspaces/mvhd-logs"
             ],

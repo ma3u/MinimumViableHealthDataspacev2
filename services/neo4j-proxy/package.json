@@ -37,7 +37,7 @@
     "@types/node": "^22.20.4",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
-    "@vitest/coverage-v8": "^5.0.2",
+    "@vitest/coverage-v8": "^5.0.3",
     "supertest": "^7.3.0",
     "tsx": "^4.23.15",
     "typescript": "^5.8.3",

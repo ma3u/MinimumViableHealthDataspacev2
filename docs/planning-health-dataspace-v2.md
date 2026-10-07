@@ -194,6 +194,7 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [055](ADRs/ADR-055-azure-runs-the-compose-jad-build.md)                     | Azure runs the same JAD build as compose and CI                                                 | 2026-10-04 | Accepted          |
 | [056](ADRs/ADR-056-neo4j-grows-to-2-vcpu-and-4-gib.md)                      | Neo4j on Azure grows to 2 vCPU and 4 GiB, with its memory bounded                               | 2026-10-06 | Accepted          |
 | [057](ADRs/ADR-057-klarbefund-sends-weekly-device-means.md)                 | Klarbefund sends weekly device means to the person's own record, behind its own switch          | 2026-10-07 | Accepted          |
+| [058](ADRs/ADR-058-azure-triggers-the-off-hours-schedule.md)                | Azure triggers the off-hours stop and start, as a managed identity                              | 2026-10-07 | Accepted          |
 
 Numbers taken by open work, so a new ADR starts at **058**: 051 (#475). 050
 (#477), 054 (#520) and 055 (#517) are merged.

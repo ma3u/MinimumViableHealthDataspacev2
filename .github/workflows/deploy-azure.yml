@@ -102,6 +102,23 @@ jobs:
             --resource-group ${{ env.RESOURCE_GROUP }} \
             --image ${{ env.ACR_LOGIN_SERVER }}/mvhd-neo4j-proxy:${{ github.sha }}
 
+      # The off-hours jobs download scripts/azure/offhours.sh and the scripts
+      # it calls at REPO_REF (ADR-058, #595), so they run the code just
+      # deployed. Before 18-offhours-jobs.sh has created them there is nothing
+      # to point, and the deploy goes on.
+      - name: Point the off-hours jobs at this commit
+        run: |
+          if az containerapp job show -n mvhd-offhours-stop -g ${{ env.RESOURCE_GROUP }} -o none 2>/dev/null; then
+            for job in mvhd-offhours-stop mvhd-offhours-start mvhd-offhours-check; do
+              az containerapp job update -n "$job" -g ${{ env.RESOURCE_GROUP }} \
+                --set-env-vars "REPO_REF=${{ github.sha }}" -o none ||
+                echo "::warning::could not point $job at ${{ github.sha }}"
+            done
+            echo "off-hours jobs run ${GITHUB_SHA:0:7}"
+          else
+            echo "::warning::the off-hours jobs do not exist yet (scripts/azure/18-offhours-jobs.sh, ADR-058)"
+          fi
+
       - name: Verify deployments
         id: verify
         run: |
@@ -205,7 +222,7 @@ jobs:
       # the system libraries still come from apt on every run.
       - name: Cache Playwright browsers
         id: pw-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('ui/package-lock.json') }}

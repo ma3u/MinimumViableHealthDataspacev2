@@ -59,6 +59,7 @@ export CUSTOM_DOMAIN="ehds.mabu.red"
 # ── Container Apps ───────────────────────────────────────────────────────────
 export NEO4J_APP="mvhd-neo4j"
 export NEO4J_PROXY_APP="mvhd-neo4j-proxy"
+export SIGLET_APP="mvhd-siglet"
 export UI_APP="mvhd-ui"
 export KEYCLOAK_APP="mvhd-keycloak"
 export VAULT_APP="mvhd-vault"
