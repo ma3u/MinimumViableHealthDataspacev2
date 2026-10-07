@@ -1,0 +1,31 @@
+meta {
+  name: 33 No app token, add device values to my record (401)
+  type: http
+  seq: 33
+}
+
+post {
+  url: {{baseUrl}}/api/patient/app/wearables
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer not-a-token
+}
+
+body:json {
+  {"resourceType": "Bundle", "type": "collection", "entry": []}
+}
+
+tests {
+  // ADR-057: only the app's own token, from a connected phone, adds the
+  // person's weekly device values to their own record.
+  test("a token that is not Keycloak's is refused", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

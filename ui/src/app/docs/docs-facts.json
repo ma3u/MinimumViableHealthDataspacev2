@@ -258,6 +258,10 @@
       "methods": ["GET", "POST"]
     },
     {
+      "path": "/api/patient/app/wearables",
+      "methods": ["POST"]
+    },
+    {
       "path": "/api/patient/ehr-sync",
       "methods": ["POST"]
     },
@@ -268,6 +272,10 @@
     {
       "path": "/api/patient/observations",
       "methods": ["GET"]
+    },
+    {
+      "path": "/api/patient/profile/interests",
+      "methods": ["PUT"]
     },
     {
       "path": "/api/patient/profile",
@@ -1022,6 +1030,12 @@
       "status": "Accepted"
     },
     {
+      "id": "ADR-057",
+      "file": "ADR-057-klarbefund-sends-weekly-device-means.md",
+      "title": "Klarbefund sends weekly device means to the person's own EHDS record, behind a switch of its own",
+      "status": "Accepted"
+    },
+    {
       "id": "ADR-058",
       "file": "ADR-058-azure-triggers-the-off-hours-schedule.md",
       "title": "Azure triggers the off-hours stop and start, as a managed identity",
@@ -1052,8 +1066,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 45,
-    "operations": 59
+    "paths": 47,
+    "operations": 61
   },
   "workflowJobs": {
     "test.yml": [
@@ -1106,10 +1120,10 @@
   "lastUpdated": {
     "/docs": "2026-10-04",
     "/docs/user-guide": "2026-10-04",
-    "/docs/developer": "2026-10-05",
-    "/docs/developer/quality-gates": "2026-10-05",
-    "/docs/developer/api": "2026-10-05",
-    "/docs/developer/reference": "2026-10-05",
+    "/docs/developer": "2026-10-07",
+    "/docs/developer/quality-gates": "2026-10-07",
+    "/docs/developer/api": "2026-10-07",
+    "/docs/developer/reference": "2026-10-07",
     "/docs/architecture": "2026-10-07"
   }
 }

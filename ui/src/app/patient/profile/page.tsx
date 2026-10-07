@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import ConnectAppCard from "@/components/ConnectAppCard";
+import HealthInterests from "@/components/HealthInterests";
+import { useSession } from "next-auth/react";
 
 interface RiskScore {
   score: number;
@@ -25,6 +27,8 @@ interface Profile {
   medications: { code: string; display: string }[];
   riskScores: { cardiovascular: RiskScore; diabetes: RiskScore };
   interests: string[];
+  interestsChosen?: boolean;
+  suggestedInterests?: { id: string; label: string }[];
   gdprRights: Record<string, string>;
   totalConditionCount?: number;
 }
@@ -56,6 +60,10 @@ export default function PatientProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
+  // Only the patient names their own interests; the route refuses others.
+  const { data: session } = useSession();
+  const roles = (session as { roles?: string[] } | null)?.roles ?? [];
+  const canEditInterests = roles.includes("PATIENT");
 
   useEffect(() => {
     fetchApi("/api/patient/profile")
@@ -118,8 +126,14 @@ export default function PatientProfilePage() {
               >
                 {patients.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} — {p.gender}, born {p.birthDate} (
-                    {p.conditionCount} conditions)
+                    {[
+                      p.name,
+                      p.gender && p.gender !== "unknown" ? p.gender : null,
+                      p.birthDate ? `born ${p.birthDate}` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(", ")}{" "}
+                    ({p.conditionCount} conditions)
                   </option>
                 ))}
               </select>
@@ -212,24 +226,15 @@ export default function PatientProfilePage() {
               </div>
             </div>
 
-            {/* Interests */}
-            {profile.interests.length > 0 && (
-              <div>
-                <h2 className="text-lg font-semibold mb-2">
-                  Health Interests & Goals
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {profile.interests.map((i) => (
-                    <span
-                      key={i}
-                      className="text-xs px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300 border border-teal-300 dark:border-teal-700 capitalize"
-                    >
-                      {i.replace(/-/g, " ")}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Interests: suggested from the record, editable by the patient */}
+            <HealthInterests
+              key={profile.patient.id}
+              patientId={profile.patient.id}
+              interests={profile.interests}
+              chosen={profile.interestsChosen ?? false}
+              suggested={profile.suggestedInterests ?? []}
+              canEdit={canEditInterests}
+            />
 
             {/* Conditions */}
             {profile.conditions.length > 0 && (

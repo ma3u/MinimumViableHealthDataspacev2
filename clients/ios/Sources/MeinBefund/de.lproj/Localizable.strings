@@ -452,3 +452,9 @@
 "Sent %lld values from %lld reports to your EHDS record; %lld without a LOINC code stay on this phone." = "%1$lld Werte aus %2$lld Befunden an Ihre EHDS-Akte gesendet; %3$lld ohne LOINC-Code bleiben auf diesem Telefon.";
 "Sync all reports now" = "Alle Befunde jetzt abgleichen";
 "Not sent (%lld): %@" = "Nicht gesendet (%1$lld): %2$@";
+"Send my device trends to my EHDS record" = "Meine Geräte-Trends an meine EHDS-Akte senden";
+"Sync device trends now" = "Geräte-Trends jetzt abgleichen";
+"My device trends in my record" = "Meine Geräte-Trends in meiner Akte";
+"Resting heart rate, heart rate variability, steps and body weight from Apple Health, as the Trends screen shows them: one mean per week, never a single day or a single reading. While it is on, they go to your own record on the EHDS demo hub, and each sync replaces the last. Switching off stops further sending; what was sent stays in the record until you delete the account." = "Ruhepuls, Herzfrequenzvariabilität, Schritte und Körpergewicht aus Apple Health, so wie der Trends-Bildschirm sie zeigt: ein Mittelwert pro Woche, nie ein einzelner Tag oder eine einzelne Messung. Solange der Schalter an ist, gehen sie in Ihre eigene Akte auf dem EHDS-Demo-Hub, und jeder Abgleich ersetzt den vorigen. Ausschalten beendet das Senden; was gesendet wurde, bleibt in der Akte, bis Sie das Konto löschen.";
+"Sent %lld weekly values from %lld device trends to your EHDS record." = "%1$lld Wochenwerte aus %2$lld Geräte-Trends an Ihre EHDS-Akte gesendet.";
+"Device trends not sent: %@" = "Geräte-Trends nicht gesendet: %@";
