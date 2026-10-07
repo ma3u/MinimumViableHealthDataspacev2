@@ -1,4 +1,5 @@
 "use client";
+import { CITIZEN_WALLET } from "@/lib/wallet-config";
 
 /**
  * EHDS Patient Wallet — Maria's journey (presentation mode).
@@ -125,7 +126,7 @@ function SlideIntro() {
   );
 }
 
-/** ── Slide 1 — register via QR + EUDI Wallet ─────────────────────────────── */
+/** ── Slide 1 — register via QR + the citizen wallet (d-you) ─────────────────────────────── */
 function SlideRegister() {
   const [mode, setMode] = useState<"register" | "login">("register");
   const isReg = mode === "register";
@@ -133,7 +134,8 @@ function SlideRegister() {
     <div className="max-w-5xl mx-auto w-full">
       <Reveal>
         <h2 className="font-extrabold text-[clamp(1.4rem,3.2vw,2.1rem)] leading-tight text-(--text-primary) mb-1 text-center">
-          {isReg ? "Register" : "Sign in"} with your EUDI Wallet — no password
+          {isReg ? "Register" : "Sign in"} with {CITIZEN_WALLET.name}, no
+          password
         </h2>
       </Reveal>
       <Reveal delay={120} className="flex flex-col items-center gap-3 mb-4">
@@ -169,7 +171,7 @@ function SlideRegister() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`${BASE_PATH}/journey/qr-register.png`}
-              alt="QR code to register with your EUDI Wallet"
+              alt={`QR code to register with ${CITIZEN_WALLET.name}`}
               width={230}
               height={230}
               className="block w-[clamp(150px,24vw,230px)] h-auto"
@@ -177,7 +179,7 @@ function SlideRegister() {
           </div>
           <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
             <ScanLine size={18} style={{ color: ACCENTS[0] }} />
-            Scan with your EUDI Wallet
+            Scan with {CITIZEN_WALLET.name}
           </p>
           <p className="text-xs text-(--text-secondary) mt-1">
             Live flow → ehds.mabu.red/auth/eudi-qr
@@ -187,7 +189,8 @@ function SlideRegister() {
         <Reveal delay={340} key={mode} className="flex justify-center">
           <WalletFlow
             loop
-            ariaLabel={`Simulated EUDI Wallet ${mode}`}
+            brand={{ name: CITIZEN_WALLET.name, color: CITIZEN_WALLET.color }}
+            ariaLabel={`Simulated ${CITIZEN_WALLET.name} ${mode}`}
             steps={isReg ? REGISTER_STEPS : LOGIN_STEPS}
           />
         </Reveal>

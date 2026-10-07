@@ -13,9 +13,11 @@ import { WalletFlow } from "@/components/wallet/PhoneFrame";
 import { REGISTER_STEPS, LOGIN_STEPS } from "@/components/wallet/flows";
 import { EudiApprovalFlow } from "@/components/wallet/EudiApprovalFlow";
 import { setDemoPersona } from "@/lib/use-demo-persona";
+import { CITIZEN_WALLET } from "@/lib/wallet-config";
 
 const POLL_MS = 2000;
 const TIMEOUT_MS = 5 * 60 * 1000;
+const WALLET = CITIZEN_WALLET;
 
 type Phase =
   | "loading"
@@ -39,6 +41,7 @@ function EudiQrContent() {
   );
   const [qr, setQr] = useState<string | null>(null);
   const [walletLink, setWalletLink] = useState<string | null>(null);
+  const [demoHint, setDemoHint] = useState<string | null>(null);
   const sidRef = useRef<string | null>(null);
   const startedAtRef = useRef<number>(0);
 
@@ -107,6 +110,34 @@ function EudiQrContent() {
     };
   }, [phase, callbackUrl]);
 
+  // The simulated phone next to the real QR. Approving it asks the server for a
+  // demo transaction (allowed only where EUDI_DEMO_WALLET=true) and signs in as
+  // the demo patient through the same Credentials provider a real presentation
+  // uses. Where the deployment refuses, the phone stays a picture and says so.
+  const approveSimulated = useCallback(async () => {
+    const simulationOnly = `Simulation only on this deployment. Scan the QR code with ${WALLET.name} to sign in.`;
+    try {
+      const res = await fetch("/api/auth/eudi/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ demo: true }),
+      });
+      if (!res.ok) {
+        setDemoHint(simulationOnly);
+        return;
+      }
+      const data = (await res.json()) as { sid: string };
+      setPhase("completed");
+      await signIn("eudi-wallet", { sid: data.sid, callbackUrl });
+    } catch {
+      setDemoHint(simulationOnly);
+    }
+  }, [callbackUrl]);
+
+  const title = `${mode === "login" ? "Sign in" : "Register"} with ${
+    WALLET.name
+  }`;
+
   // Static export / demo: no live verifier backend, so drive an interactive
   // QR + wallet-approval simulation; on approval, sign in as the demo patient
   // and forward to their personal health record (the "EHR page").
@@ -128,14 +159,14 @@ function EudiQrContent() {
             className="mx-auto mb-2 text-blue-800 dark:text-blue-300"
           />
           <h1 className="text-2xl font-bold text-(--text-primary) mb-1">
-            {mode === "login" ? "Sign in" : "Register"} with your EUDI Wallet
+            {title}
           </h1>
           <p className="text-(--text-secondary) text-sm">
-            Scan the QR with your EU Digital Identity Wallet, or approve on the
-            simulated phone (OpenID4VP).
+            Scan the QR with {WALLET.description}, {WALLET.alternatives}, or
+            approve on the simulated phone (OpenID4VP).
             <br />
             <span className="text-xs">
-              Synthetic demo · maps to a demo patient
+              Synthetic demo · signs you in as the demo patient
             </span>
           </p>
         </div>
@@ -163,14 +194,14 @@ function EudiQrContent() {
             className="mx-auto mb-3 text-blue-800 dark:text-blue-300"
           />
           <h1 className="text-2xl font-bold text-(--text-primary) mb-1">
-            {mode === "login" ? "Sign in" : "Register"} with your EUDI Wallet
+            {title}
           </h1>
           <p className="text-(--text-secondary) text-sm mb-6">
-            Scan the QR code with your EU Digital Identity Wallet to verify your
-            identity (OpenID4VP).
+            Scan the QR code with {WALLET.description}, {WALLET.alternatives},
+            to prove who you are (OpenID4VP).
             <br />
             <span className="text-xs">
-              Synthetic demo · maps to a demo patient
+              Synthetic demo · signs you in as the demo patient
             </span>
           </p>
 
@@ -186,7 +217,7 @@ function EudiQrContent() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={qr}
-                  alt="EUDI Wallet OpenID4VP QR code"
+                  alt={`${WALLET.name} OpenID4VP QR code`}
                   width={256}
                   height={256}
                   className="block"
@@ -201,7 +232,7 @@ function EudiQrContent() {
                   href={walletLink}
                   className="text-xs text-(--accent) underline break-all"
                 >
-                  On this phone? Tap to open your wallet
+                  On this phone? Tap to open {WALLET.name}
                 </a>
               )}
             </>
@@ -236,8 +267,8 @@ function EudiQrContent() {
 
           {phase === "unavailable" && (
             <div className="py-8 text-sm text-(--text-secondary)">
-              EUDI Wallet sign-in is only available on the live deployment, not
-              in the static demo. Use the demo personas on the{" "}
+              Wallet sign-in is only available on the live deployment, not in
+              the static demo. Use the demo personas on the{" "}
               <a href="/auth/signin" className="text-(--accent) underline">
                 sign-in page
               </a>{" "}
@@ -248,13 +279,26 @@ function EudiQrContent() {
 
         <div className="flex flex-col items-center gap-2 shrink-0">
           <WalletFlow
-            loop
-            ariaLabel={`Simulated EUDI Wallet ${mode}`}
+            interactive
+            loop={false}
+            brand={{ name: WALLET.name, color: WALLET.color }}
+            ariaLabel={`Simulated ${WALLET.name} ${mode}`}
             steps={mode === "login" ? LOGIN_STEPS : REGISTER_STEPS}
+            onComplete={approveSimulated}
+            onCancel={() => router.push("/auth/signin")}
           />
           <p className="text-xs text-(--text-secondary) max-w-[280px] text-center">
-            What happens on your phone — a simulated wallet approval
+            What happens on your phone. No {WALLET.name} yet? Approve here to
+            sign in as the demo patient.
           </p>
+          {demoHint && (
+            <p
+              role="status"
+              className="text-xs text-amber-600 dark:text-amber-400 max-w-[280px] text-center"
+            >
+              {demoHint}
+            </p>
+          )}
         </div>
       </div>
 

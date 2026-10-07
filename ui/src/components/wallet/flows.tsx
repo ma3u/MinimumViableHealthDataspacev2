@@ -1,6 +1,6 @@
 /**
  * Step data for the three wallet flows rendered by WalletFlow (PhoneFrame.tsx).
- * - REGISTER_STEPS: the original EUDI registration (kept VERBATIM so
+ * - REGISTER_STEPS: the original EUDI registration (shown as d-you, the German wallet) (kept VERBATIM so
  *   wallet/register-flow.test.tsx keeps passing).
  * - LOGIN_STEPS: returning-user login (the wallet skips the trust step — this is
  *   a wallet-UI difference, NOT a protocol/verifier difference).

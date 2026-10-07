@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Homepage hero CTA cluster. "Register with EUDI Wallet" opens the RegisterDialog
+ * Homepage hero CTA cluster. "Register with d-you" opens the RegisterDialog
  * (QR + interactive wallet approval); on approval the demo signs the visitor in
  * as the demo patient and forwards them to their personal health record.
  * The other two links (journey explainer, returning-user sign-in) are unchanged.
@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { ScanLine, ArrowRight, Info } from "lucide-react";
 import { RegisterDialog } from "@/components/RegisterDialog";
 import { setDemoPersona } from "@/lib/use-demo-persona";
+import { CITIZEN_WALLET } from "@/lib/wallet-config";
 
 export function HomeRegisterCta() {
   const [open, setOpen] = useState(false);
@@ -40,7 +41,7 @@ export function HomeRegisterCta() {
         style={{ background: "linear-gradient(135deg,#7D3C98,#2471A3)" }}
       >
         <ScanLine size={20} aria-hidden="true" />
-        Register with EUDI Wallet
+        Register with {CITIZEN_WALLET.name}
         <ArrowRight
           size={18}
           aria-hidden="true"
@@ -53,7 +54,7 @@ export function HomeRegisterCta() {
         className="inline-flex items-center gap-1.5 text-sm font-medium text-(--accent) hover:underline"
       >
         <Info size={15} aria-hidden="true" />
-        Why we need EUDI Wallet for the patient journey
+        Why the patient journey needs an EUDI wallet
       </Link>
       <Link
         href="/auth/eudi-qr?mode=login"
@@ -66,7 +67,7 @@ export function HomeRegisterCta() {
         <RegisterDialog
           mode="register"
           title="Register in the European Health Dataspace"
-          subtitle="Create your EHDS patient account with your EUDI Wallet — you share only the exact identity claims requested (name, date of birth)."
+          subtitle={`Create your EHDS patient account with ${CITIZEN_WALLET.description}. You share only the exact identity claims requested (name, date of birth).`}
           onClose={() => setOpen(false)}
           onComplete={onComplete}
         />
