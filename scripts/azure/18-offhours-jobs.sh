@@ -149,8 +149,9 @@ az login --identity --client-id "\$AZURE_CLIENT_ID" -o none
 az account set --subscription "\$SUBSCRIPTION_ID"
 echo "[offhours] \${ACTION} at \${REPO_REF:0:7} as id-mvhd-offhours"
 case "\$ACTION" in
-  decide-*) bash scripts/azure/offhours.sh decide "\${ACTION#decide-}" ;;
+  # decide-all before decide-*, which would match it and run "decide all".
   decide-all) for a in stop start; do echo "[offhours] decide \$a: \$(bash scripts/azure/offhours.sh decide \$a)"; done ;;
+  decide-*) bash scripts/azure/offhours.sh decide "\${ACTION#decide-}" ;;
   *) bash scripts/azure/offhours.sh "auto-\${ACTION}" ;;
 esac
 '''
