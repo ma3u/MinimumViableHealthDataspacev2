@@ -73,7 +73,9 @@ jobs:
             curl -sS -H "Authorization: Bearer $MASTER" "${KC_PUBLIC}/admin/realms/edcv/clients/${uuid}/client-secret" | jq -r '.value // empty'
           }
           ADMIN_SECRET=$(secret_of admin); PROVISIONER_SECRET=$(secret_of provisioner)
-          [ -n "$ADMIN_SECRET" ] && [ -n "$PROVISIONER_SECRET" ] || { echo "::error::could not read the admin and provisioner client secrets"; exit 1; }
+          if [ -z "$ADMIN_SECRET" ] || [ -z "$PROVISIONER_SECRET" ]; then
+            echo "::error::could not read the admin and provisioner client secrets"; exit 1
+          fi
           echo "::add-mask::$ADMIN_SECRET"; echo "::add-mask::$PROVISIONER_SECRET"
           VAULT_URL=$(az containerapp show -n mvhd-controlplane -g "$RESOURCE_GROUP" \
             --query "properties.template.containers[0].env[?name=='EDC_VAULT_HASHICORP_URL'].value | [0]" -o tsv)

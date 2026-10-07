@@ -94,6 +94,16 @@ export CATALOG_ENRICHER_APP="mvhd-catalog-enricher"
 # time (Docker Hub/Quay digests verified). Bumps are deliberate PRs, not pulls.
 # POSTGRES_VERSION is pinned above next to PG_IMAGE.
 export NEO4J_VERSION="5.26.28-community"
+# Neo4j's size (ADR-056). Community has no cluster, so up is the only way.
+# Heap + page cache + direct memory + the JVM's rest must fit the container:
+# 1.5 + 1 + 0.5 + about 0.3 GiB of 4. At 1 vCPU / 2 GiB (heap 1 GiB, page
+# cache 384 MiB) it ran at 2.0 to 2.09 GB idle and was killed for memory
+# (exit 137) under stress (#571). size-neo4j.sh applies these to the live app.
+export NEO4J_CPU="2.0"
+export NEO4J_MEMORY="4Gi"
+export NEO4J_HEAP="1536m"
+export NEO4J_PAGECACHE="1g"
+export NEO4J_DIRECT_MEMORY="512m"
 export KEYCLOAK_VERSION="26.8.0" # minor bump from 26.6.4 (#556, ADR-029 cadence)
 export VAULT_VERSION="2.0"
 export NATS_VERSION="2.14.3-alpine"

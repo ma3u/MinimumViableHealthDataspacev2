@@ -14,7 +14,10 @@ import {
   cleanup,
 } from "@testing-library/react";
 
-type FakeSession = { user: { name: string; email: string } };
+type FakeSession = {
+  user: { name: string; email: string };
+  preferredUsername?: string;
+};
 
 const sessionState: {
   data: FakeSession | null;
@@ -25,13 +28,20 @@ vi.mock("next-auth/react", () => ({
   useSession: () => sessionState,
 }));
 
-import DemoPasswordBanner from "@/components/DemoPasswordBanner";
+import { readFileSync } from "fs";
+import path from "path";
+import DemoPasswordBanner, {
+  DEMO_ACCOUNTS,
+} from "@/components/DemoPasswordBanner";
 
 const KC_URL = "https://mvhd-keycloak.example.com/realms/edcv";
 const fetchMock = vi.fn();
 
 beforeEach(() => {
-  sessionState.data = { user: { name: "researcher", email: "r@ex" } };
+  sessionState.data = {
+    user: { name: "researcher", email: "r@ex" },
+    preferredUsername: "researcher",
+  };
   sessionState.status = "authenticated";
   sessionStorage.clear();
   fetchMock.mockReset();
@@ -112,5 +122,40 @@ describe("DemoPasswordBanner", () => {
     expect(
       screen.queryByRole("link", { name: /change your password/i }),
     ).toBeNull();
+  });
+});
+
+describe("who is warned about a default password", () => {
+  it("not a Klarbefund account: its password is random, made by the app", async () => {
+    sessionState.data = {
+      user: {
+        name: "Klarbefund Sandbox",
+        email: "kb-hh2mygdj@klarbefund.invalid",
+      },
+      preferredUsername: "kb-hh2mygdj",
+    };
+    const { container } = render(<DemoPasswordBanner />);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(container.textContent).toBe("");
+  });
+
+  it("not a session without a login name", async () => {
+    sessionState.data = { user: { name: "someone", email: "s@ex" } };
+    const { container } = render(<DemoPasswordBanner />);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    expect(container.textContent).toBe("");
+  });
+
+  it("names exactly the realm's demo users, the service account aside", () => {
+    const realm = JSON.parse(
+      readFileSync(
+        path.resolve(__dirname, "../../../../jad/keycloak-realm.json"),
+        "utf8",
+      ),
+    ) as { users: { username: string }[] };
+    const seeded = realm.users
+      .map((u) => u.username)
+      .filter((u) => !u.startsWith("service-account-"));
+    expect([...DEMO_ACCOUNTS].sort()).toEqual(seeded.sort());
   });
 });

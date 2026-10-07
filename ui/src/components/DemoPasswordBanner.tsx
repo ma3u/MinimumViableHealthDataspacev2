@@ -6,8 +6,25 @@ import { useEffect, useState } from "react";
 import { IS_STATIC } from "@/lib/static-export";
 
 /**
- * Dismissible warning banner shown to authenticated users reminding them
- * to change the default demo password. Links to Keycloak account security.
+ * The shared demo logins of jad/keycloak-realm.json, whose passwords are
+ * public. Only they are warned: a Klarbefund account (kb-...) has a random
+ * password the app generated, and told its owner it used a default one.
+ * __tests__ compares this list with the realm file.
+ */
+export const DEMO_ACCOUNTS: readonly string[] = [
+  "edcadmin",
+  "clinicuser",
+  "regulator",
+  "researcher",
+  "lmcuser",
+  "patient1",
+  "patient2",
+  "regulator-es",
+];
+
+/**
+ * Dismissible warning banner shown to the shared demo accounts reminding
+ * them to change the default demo password. Links to Keycloak account security.
  *
  * - Hidden in static export mode (no real auth)
  * - Dismissed state stored in sessionStorage (reappears next browser session)
@@ -61,6 +78,9 @@ export default function DemoPasswordBanner() {
   if (IS_STATIC || status !== "authenticated" || !session || dismissed) {
     return null;
   }
+  const username = (session as { preferredUsername?: string })
+    .preferredUsername;
+  if (!username || !DEMO_ACCOUNTS.includes(username)) return null;
   if (!passwordUrl) return null;
 
   function handleDismiss() {

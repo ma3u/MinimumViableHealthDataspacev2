@@ -1016,6 +1016,12 @@
       "status": "Accepted"
     },
     {
+      "id": "ADR-056",
+      "file": "ADR-056-neo4j-grows-to-2-vcpu-and-4-gib.md",
+      "title": "Neo4j on Azure grows to 2 vCPU and 4 GiB, with its memory bounded",
+      "status": "Accepted"
+    },
+    {
       "id": "ADR-058",
       "file": "ADR-058-azure-triggers-the-off-hours-schedule.md",
       "title": "Azure triggers the off-hours stop and start, as a managed identity",
