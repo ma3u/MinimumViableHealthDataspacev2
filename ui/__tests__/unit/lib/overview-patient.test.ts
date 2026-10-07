@@ -67,7 +67,7 @@ describe("buildPatientView", () => {
 
   it("answers the patient's question with the adopted articles", () => {
     expect(view.persona).toBe("patient");
-    expect(view.me).toEqual({ id: "P1", name: "Maria Schmidt" });
+    expect(view.me).toEqual({ id: "P1", name: "Patient 7f915eed" });
     expect(view.article).toContain("Art. 3");
     expect(view.article).not.toMatch(/Art\. (46|50|51)\b/);
     expect(view.layers.map((l) => l.id)).toEqual([
@@ -163,7 +163,7 @@ describe("buildPatientView", () => {
   it("names one patient only and speaks no Neo4j", () => {
     const patients = view.nodes.filter((n) => n.kind === "Patient");
     expect(patients).toHaveLength(1);
-    expect(patients[0].label).toBe("Maria Schmidt");
+    expect(patients[0].label).toBe("Patient 7f915eed");
     const text = JSON.stringify(view);
     expect(text).not.toContain("OMOPConditionOccurrence");
     expect(text).not.toContain("FROM_DATASET");

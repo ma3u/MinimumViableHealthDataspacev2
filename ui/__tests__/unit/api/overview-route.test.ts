@@ -242,7 +242,9 @@ describe("GET /api/overview", () => {
     const view = await res.json();
     expect(view.persona).toBe("patient");
     expect(view.asOf).toBe("2026-09-23");
-    expect(view.me.name).toBe("Maria Schmidt");
+    // the patient reads their own record under its pseudonym (#475)
+    expect(view.me.name).toBe("Patient 7f915eed");
+    expect(JSON.stringify(view)).not.toMatch(/Maria Schmidt|1979-03-15/);
     expect(calls).toEqual([
       "/api/patient/profile?patientId=P1",
       "/api/patient/insights?patientId=P1",

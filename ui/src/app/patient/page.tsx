@@ -39,6 +39,8 @@ interface PatientListItem {
   name: string;
   gender: string;
   birthDate: string;
+  /** the patient's own record carries an age, never a birth date (#475) */
+  age?: number | null;
 }
 
 interface CohortStats {
@@ -370,9 +372,11 @@ export default function PatientPage() {
                       <span className="capitalize">
                         {selectedPatient.gender}
                       </span>
-                      {selectedPatient.birthDate
-                        ? ` · born ${selectedPatient.birthDate}`
-                        : ""}
+                      {selectedPatient.age != null
+                        ? ` · age ${selectedPatient.age}`
+                        : selectedPatient.birthDate
+                          ? ` · born ${selectedPatient.birthDate}`
+                          : ""}
                       {" · "}
                       {timeline.length} event
                       {timeline.length === 1 ? "" : "s"} on record
@@ -561,9 +565,13 @@ export default function PatientPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="section-label mb-0.5">Born</p>
+                    <p className="section-label mb-0.5">
+                      {selectedPatient.age != null ? "Age" : "Born"}
+                    </p>
                     <p className="font-semibold text-(--text-primary)">
-                      {selectedPatient.birthDate ?? "—"}
+                      {selectedPatient.age != null
+                        ? selectedPatient.age
+                        : selectedPatient.birthDate ?? "—"}
                     </p>
                   </div>
                   <div>

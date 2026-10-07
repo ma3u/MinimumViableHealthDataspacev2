@@ -22,6 +22,8 @@ import {
   patientPseudonym,
   redactPatientProperties,
   seesPatientIdentity,
+  patientAge,
+  ownRecordView,
 } from "@/lib/patient-identity";
 import { __resetCacheForTests } from "@/lib/server-cache";
 
@@ -62,6 +64,25 @@ describe("the rule", () => {
     expect(patientPseudonym("P1")).toBe(patientPseudonym("P1"));
     expect(patientPseudonym("P1")).not.toBe(patientPseudonym("P2"));
     expect(patientPseudonym("P1")).toMatch(/^Patient [0-9a-f]{8}$/);
+  });
+
+  it("gives a patient their own record as a pseudonym with an age, no birth date", () => {
+    const asOf = new Date("2026-10-07T12:00:00Z");
+    expect(patientAge("1979-03-15", asOf)).toBe(47);
+    expect(patientAge("1979-10-08", asOf)).toBe(46);
+    expect(patientAge({ year: 1965, month: 7, day: 22 }, asOf)).toBe(61);
+    expect(patientAge("1965", asOf)).toBe(61);
+    expect(patientAge("", asOf)).toBeNull();
+    const own = ownRecordView({
+      id: "P1",
+      name: "Maria Schmidt",
+      gender: "female",
+      birthDate: "1979-03-15",
+    });
+    expect(own.name).toBe(patientPseudonym("P1"));
+    expect(own.birthDate).toBe("");
+    expect(own.age).toBeGreaterThanOrEqual(47);
+    expect(own.gender).toBe("female");
   });
 
   it("keeps the birth year and drops every identifying property", () => {
@@ -199,7 +220,7 @@ describe("GET /api/graph", () => {
     expect(JSON.stringify(again.nodes)).toContain("Maria Schmidt");
   });
 
-  it("leaves a patient their own name and pseudonymises everyone else", async () => {
+  it("shows a patient their own node under its pseudonym too, never a name", async () => {
     vi.mocked(getServerSession).mockResolvedValue(patient1);
     graph("P1");
     const { GET } = await import("@/app/api/graph/route");
@@ -207,8 +228,9 @@ describe("GET /api/graph", () => {
       await GET(new Request("http://localhost/api/graph"))
     ).json();
     const names = body.nodes.map((n: { name: string }) => n.name);
-    expect(names).toContain("Maria Schmidt");
+    expect(names).not.toContain("Maria Schmidt");
     expect(names).not.toContain("Jan de Vries");
+    expect(names).toContain(patientPseudonym("P1"));
     expect(names).toContain(patientPseudonym("P2"));
   });
 });
@@ -261,7 +283,9 @@ describe("the public static site", () => {
   it("carries no patient names in the graph and cohort fixtures", () => {
     const dir = path.resolve(__dirname, "../../../public/mock");
     const files = readdirSync(dir).filter((f) =>
-      /^graph.*\.json$|^patient\.json$/.test(f),
+      /^graph.*\.json$|^patient\.json$|^patient_profile.*\.json$|^overview_patient\.json$/.test(
+        f,
+      ),
     );
     expect(files.length).toBeGreaterThan(3);
     const synthea = /[A-Z][a-z]+\d{2,3} [A-Z][a-z]+\d{2,3}/;
@@ -269,6 +293,18 @@ describe("the public static site", () => {
       synthea.test(readFileSync(path.join(dir, f), "utf8")),
     );
     expect(offenders).toEqual([]);
+    // The patient's own fixtures carry the pseudonym and an age, no name and
+    // no birth date (2026-10-07).
+    for (const f of [
+      "patient_profile_patient1",
+      "patient_profile_list",
+      "overview_patient",
+    ]) {
+      const text = readFileSync(path.join(dir, `${f}.json`), "utf8");
+      expect(text).not.toMatch(
+        /Maria Schmidt|Jan de Vries|1979-03-15|1965-07-22/,
+      );
+    }
   });
 });
 
