@@ -1025,7 +1025,7 @@
       "id": "ADR-058",
       "file": "ADR-058-azure-triggers-the-off-hours-schedule.md",
       "title": "Azure triggers the off-hours stop and start, as a managed identity",
-      "status": "Proposed"
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
