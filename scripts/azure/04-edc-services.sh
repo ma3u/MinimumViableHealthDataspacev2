@@ -261,6 +261,9 @@ ok "Issuer Service"
 # don't resolve in ACA, and every DSP/DCP test fails with "unreachable".
 # TCK_CONTROLPLANE_MGMT_URL overrides the default /api/mgmt path because the
 # controlplane on ACA is started with WEB_HTTP_MANAGEMENT_PATH=/management.
+# TCK_CLIENT_SECRET is not set here, for the same reason as
+# EDC_SERVICE_CLIENT_SECRET in 05-cfm-ui.sh: rotate-edc-admin-client-secret.sh
+# wires it from Key Vault.
 log "Creating Neo4j Proxy container app..."
 az containerapp create \
   --name "$NEO4J_PROXY_APP" --resource-group "$RG" --environment "$ACA_ENV" \
@@ -280,7 +283,6 @@ az containerapp create \
     "TCK_KEYCLOAK_URL=${KEYCLOAK_PUBLIC_URL:-}" \
     "TCK_KEYCLOAK_REALM=edcv" \
     "TCK_CLIENT_ID=admin" \
-    "TCK_CLIENT_SECRET=edc-v-admin-secret" \
     "TCK_CONTROLPLANE_DEFAULT_URL=https://${CONTROLPLANE_APP}.internal.${ACA_DOMAIN}" \
     "TCK_CONTROLPLANE_MGMT_URL=https://${CONTROLPLANE_APP}.internal.${ACA_DOMAIN}/management" \
     "TCK_IDENTITY_URL=https://${IDENTITYHUB_APP}.internal.${ACA_DOMAIN}/api/identity" \

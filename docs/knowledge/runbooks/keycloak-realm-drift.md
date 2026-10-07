@@ -115,6 +115,16 @@ Two things that make this recoverable, both worth preserving:
   re-import restores working logins without touching the client. The redirect
   step in the script only matters when the ACA FQDN has changed.
 
+One thing a re-import undoes: the `admin` client comes back with the public
+default secret from `jad/keycloak-realm.json`, while the UI and the proxy read
+the rotated one from Key Vault, so every EDC management call fails with 401.
+Rotate again right after the import (#542):
+
+```bash
+KEYCLOAK_PUBLIC_HOSTNAME=auth.ehds.mabu.red \
+  ./scripts/azure/rotate-edc-admin-client-secret.sh --rotate
+```
+
 Verify with the real thing rather than with discovery alone:
 
 ```bash
