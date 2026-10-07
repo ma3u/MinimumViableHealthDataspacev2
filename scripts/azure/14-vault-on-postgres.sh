@@ -161,7 +161,16 @@ print('postgres://${PG_ADMIN}:' + urllib.parse.quote(os.environ['PW'], safe='')
 
   yaml="$(mktemp -t mvhd-vault-after.XXXXXX).yaml"
   cp "$backup" "$yaml"
-  python3 - "$yaml" "$img" "$VAULT_PG_SECRET" "$VAULT_ROOT_TOKEN" "$INIT_FILE" <<'PY'
+  # After rotate-vault-token.sh the services hold their own token and "root"
+  # is revoked; recreating it here would undo #359, so the sidecar gets no
+  # VAULT_ENSURE_TOKEN_ID once the control plane has the secret vault-token.
+  ensure_id="$VAULT_ROOT_TOKEN"
+  if az containerapp secret show --name "$CONTROLPLANE_APP" --resource-group "$RG" \
+    --secret-name vault-token -o none 2>/dev/null; then
+    ensure_id=""
+    say "  token rotated (#359): the sidecar will not recreate \"${VAULT_ROOT_TOKEN}\""
+  fi
+  python3 - "$yaml" "$img" "$VAULT_PG_SECRET" "$ensure_id" "$INIT_FILE" <<'PY'
 import json, sys, yaml
 path, img, secret, token_id, init_file = sys.argv[1:]
 with open(path) as f:
@@ -197,10 +206,9 @@ unseal = {
     'resources': {'cpu': 0.25, 'memory': '0.5Gi'},
     'env': [
         {'name': 'VAULT_ADDR', 'value': 'http://127.0.0.1:8200'},
-        {'name': 'VAULT_ENSURE_TOKEN_ID', 'value': token_id},
         {'name': 'VAULT_INIT_FILE', 'value': init_file},
         {'name': 'VAULT_PG_CONNECTION_URL', 'secretRef': secret},
-    ],
+    ] + ([{'name': 'VAULT_ENSURE_TOKEN_ID', 'value': token_id}] if token_id else []),
     'volumeMounts': [{'volumeName': 'vault-data', 'mountPath': '/vault/data'}],
 }
 tpl['containers'] = [vault, unseal]

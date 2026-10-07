@@ -278,7 +278,24 @@ kc_admin_password() {
 export KC_DB_NAME="keycloak"
 
 # ── Vault ────────────────────────────────────────────────────────────────────
+# The fixed-id token a fresh environment starts with (the vault-unseal sidecar
+# creates it, VAULT_ENSURE_TOKEN_ID). rotate-vault-token.sh replaces it on the
+# services and revokes it (#359); read the live one with vault_service_token.
 export VAULT_ROOT_TOKEN="root"
+
+# The token the EDC services use against Vault: the ACA secret vault-token on
+# the control plane once rotate-vault-token.sh has run, before that the plain
+# env value the apps were created with, then the fresh-environment default.
+# Prints the token for a variable; never echo it.
+vault_service_token() {
+  local t
+  t=$(az containerapp secret show --name "$CONTROLPLANE_APP" --resource-group "$RG" \
+    --secret-name vault-token --query value -o tsv 2>/dev/null || true)
+  [ -n "$t" ] || t=$(az containerapp show --name "$CONTROLPLANE_APP" --resource-group "$RG" \
+    --query "properties.template.containers[0].env[?name=='EDC_VAULT_HASHICORP_TOKEN'].value | [0]" \
+    -o tsv 2>/dev/null || true)
+  printf '%s' "${t:-$VAULT_ROOT_TOKEN}"
+}
 
 # The issuer Keycloak puts in the "iss" claim of an edcv token, read from the
 # realm's discovery document rather than built from a URL. Vault's provisioner
