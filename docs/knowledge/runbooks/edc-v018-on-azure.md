@@ -189,9 +189,16 @@ role (17-siglet.sh needs it):
 scripts/azure/migrate-edc-to-v018.sh backup
 scripts/azure/migrate-edc-to-v018.sh app controlplane   # profiles, virtual callback, scope alias
 scripts/azure/05-cfm-agents.sh                          # protocol.url with the profile id; agents restart
-scripts/azure/17-siglet.sh                              # siglet sha-54382c8, HttpData-PULL transfer type
+SIGLET_DB=siglet_v2 scripts/azure/17-siglet.sh        # siglet sha-54382c8 on a fresh database, HttpData-PULL
 scripts/azure/migrate-edc-to-v018.sh ui                 # EDC_PROTOCOL_URL for the hub's catalog call
 ```
+
+The siglet needs its own database: on 2026-10-07 the pinned build refused
+the `siglet` database the July build had migrated (`DataPlane SDK error` at
+start), and since the app runs one revision at a time, the failing revision
+took all traffic for about 20 minutes until the old image was put back.
+`17-siglet.sh` now goes back to the previous image by itself when the new
+revision does not become healthy.
 
 What each setting fixes, measured on compose:
 

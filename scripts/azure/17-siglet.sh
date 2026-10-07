@@ -36,7 +36,11 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 source "$SCRIPT_DIR/env.sh"
 
 MODE="${1:-apply}"
-DB="siglet"
+# The database. SIGLET_DB moves the siglet to a fresh one: a siglet build
+# refuses a database whose migrations a newer build wrote ("DataPlane SDK
+# error" at start), which is what pinning sha-54382c8 over the July build
+# met on 2026-10-07 (#542). The old database stays as it was.
+DB="${SIGLET_DB:-siglet}"
 SECRET_NAME="pg-password"
 IDENTITY_NAME="${SIGLET_IDENTITY:-id-mvhd-claude-federation}"
 
@@ -111,6 +115,11 @@ VAULT_TOKEN=$(az containerapp show --name "$CONTROLPLANE_APP" --resource-group "
   --query "properties.template.containers[0].env[?name=='EDC_VAULT_HASHICORP_TOKEN'].value | [0]" -o tsv)
 [ -n "$VAULT_TOKEN" ] || { err "no EDC_VAULT_HASHICORP_TOKEN on ${CONTROLPLANE_APP}"; exit 1; }
 
+# The image running now, to go back to if the new revision does not become
+# healthy. The app runs one revision at a time, so a revision that never
+# starts still takes all traffic and the data planes lose the key set.
+PREV_IMAGE=$(az containerapp show --name "$SIGLET_APP" --resource-group "$RG" \
+  --query "properties.template.containers[0].image" -o tsv 2>/dev/null || echo "")
 if az containerapp show --name "$SIGLET_APP" --resource-group "$RG" -o none 2>/dev/null; then
   log "updating ${SIGLET_APP}"
   az containerapp identity assign --name "$SIGLET_APP" --resource-group "$RG" \
@@ -204,6 +213,18 @@ done
 [ "$state" = Healthy ] || {
   err "${rev} is '${state:-unknown}'. Its log:"
   err "  az containerapp logs show -n ${SIGLET_APP} -g ${RG} --revision ${rev} --tail 80 --follow false"
+  if [ -n "$PREV_IMAGE" ] && [ "$PREV_IMAGE" != "$IMAGE" ]; then
+    err "going back to ${PREV_IMAGE} so the data planes keep their key set"
+    az containerapp update --name "$SIGLET_APP" --resource-group "$RG" --image "$PREV_IMAGE" -o none
+    back=$(az containerapp show --name "$SIGLET_APP" --resource-group "$RG" --query properties.latestRevisionName -o tsv)
+    for _ in $(seq 1 40); do
+      state=$(az containerapp revision show --name "$SIGLET_APP" --resource-group "$RG" --revision "$back" \
+        --query properties.healthState -o tsv 2>/dev/null || echo "")
+      [ "$state" = Healthy ] && break
+      sleep 15
+    done
+    err "${back} on ${PREV_IMAGE}: ${state:-unknown}"
+  fi
   exit 1
 }
 ok "${rev} Healthy"
