@@ -56,6 +56,11 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: eslint-config-next
         update-types: [version-update:semver-major]
+      # Next 16 removed `next lint`, so the lint script needs the eslint CLI
+      # and the flat config above; it also changes the request APIs (#609).
+      # It moves with eslint-config-next 16 in the same migration.
+      - dependency-name: next
+        update-types: [version-update:semver-major]
     labels: [dependencies, ui]
 
   # ── npm: Neo4j proxy ──
