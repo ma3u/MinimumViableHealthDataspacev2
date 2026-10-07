@@ -134,6 +134,11 @@ export KEYCLOAK_URL="$KC" EDC_MANAGEMENT_URL="$CP" EDC_IDENTITY_URL="$IH" EDC_IS
 export EDC_MGMT_API_VERSION="$MGMT_V" DID_HOST CREDENTIALS_BASE PROTOCOL_BASE
 export EDC_CLIENT_ID=admin EDC_CLIENT_SECRET="$ADMIN_SECRET" PROBE_DID_DOCS=0
 export VAULT_ADDR VAULT_TOKEN
+# The issuer as mvhd-env resolves it. request-participant-credentials.sh
+# defaults to compose's did:web:issuerservice%3A10016:issuer, which IdentityHub
+# cannot resolve here (UnknownHostException), so every request went to ERROR
+# (2026-10-07). 05-cfm-seed.sh and migrate-edc-to-v018.sh use this one.
+export ISSUER_DID="${ISSUER_DID:-did:web:mvhd-issuerservice%3A10016:issuer}"
 
 log "2/6 control-plane contexts"
 CP="$CP" TOKEN="$PROV_TOKEN" MGMT_V_CANDIDATES="$MGMT_V" bash scripts/azure/05-cp-participants.sh || fail "step 2"
