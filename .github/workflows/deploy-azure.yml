@@ -47,7 +47,7 @@ jobs:
       # can. The cache lives in ACR as a :buildcache tag per image, so the
       # npm ci layer is reused whenever package-lock.json has not changed.
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       # ── Build custom images (amd64) ──────────────────────────
       # BUILD_CHANNEL=release so the Azure demo never shows "+local" in the
