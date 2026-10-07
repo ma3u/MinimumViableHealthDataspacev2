@@ -1,0 +1,134 @@
+name: EDC data assets and data planes on Azure (#542)
+
+# The demo participants on Azure have identities and credentials (#574) but no
+# assets, policies, contract definitions or data planes, so the hub's negotiate
+# page has nothing to offer and no transfer can start. This runs
+# jad/seed-data-assets.sh inside the environment (the EDC APIs are internal)
+# through scripts/azure/seed-data-assets-job.sh: `plan` lists each context's
+# state, assets and contract definitions; `apply` registers compose's assets on
+# the same participants, plus one data plane per context that the control plane
+# signals through the siglet (http://mvhd-siglet:8081/api/v1).
+#
+# The admin client secret is read from Keycloak's admin API, masked, and handed
+# to the job as an ACA secret, as edc-reseed-identity-layer.yml does.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "plan (read only) or apply"
+        type: choice
+        options: [plan, apply]
+        default: plan
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-identity-layer"
+  cancel-in-progress: false
+
+env:
+  RESOURCE_GROUP: rg-mvhd-dev
+  ACA_ENV: mvhd-env
+  JOB: mvhd-seed-data-assets
+  KC_PUBLIC: https://auth.ehds.mabu.red
+
+jobs:
+  seed:
+    name: Data assets (${{ github.event.inputs.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Read the admin client secret (masked)
+        run: |
+          set -euo pipefail
+          KC_ADMIN_PASS=$(az containerapp secret show --name mvhd-keycloak --resource-group "$RESOURCE_GROUP" \
+            --secret-name keycloak-admin-password --query value -o tsv)
+          echo "::add-mask::$KC_ADMIN_PASS"
+          MASTER=$(curl -sS --max-time 30 -X POST "${KC_PUBLIC}/realms/master/protocol/openid-connect/token" \
+            --data-urlencode grant_type=password --data-urlencode client_id=admin-cli \
+            --data-urlencode username=admin --data-urlencode "password=${KC_ADMIN_PASS}" | jq -r '.access_token // empty')
+          [ -n "$MASTER" ] || { echo "::error::no Keycloak admin token"; exit 1; }
+          echo "::add-mask::$MASTER"
+          uuid=$(curl -sS -H "Authorization: Bearer $MASTER" "${KC_PUBLIC}/admin/realms/edcv/clients?clientId=admin" | jq -r '.[0].id // empty')
+          ADMIN_SECRET=$(curl -sS -H "Authorization: Bearer $MASTER" "${KC_PUBLIC}/admin/realms/edcv/clients/${uuid}/client-secret" | jq -r '.value // empty')
+          [ -n "$ADMIN_SECRET" ] || { echo "::error::could not read the admin client secret"; exit 1; }
+          echo "::add-mask::$ADMIN_SECRET"
+          echo "ADMIN_SECRET=$ADMIN_SECRET" >> "$GITHUB_ENV"
+          echo "admin client secret read (${#ADMIN_SECRET} chars)"
+
+      - name: Run the seed job
+        env:
+          MODE: ${{ github.event.inputs.mode }}
+        run: |
+          set -euo pipefail
+          ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query id -o tsv)
+          LOCATION=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query location -o tsv)
+          export ENV_ID LOCATION
+          tar -czf /tmp/scripts.tgz -C scripts/azure seed-data-assets-job.sh -C ../../jad seed-data-assets.sh
+          SCRIPTS_TGZ_B64=$(base64 -w0 < /tmp/scripts.tgz)
+          export SCRIPTS_TGZ_B64
+          python3 - /tmp/job.yaml <<'PY'
+          import os, sys, yaml
+          out = sys.argv[1]
+          e = os.environ
+          env = {"MODE": e["MODE"], "KC_HOST": e["KC_PUBLIC"],
+                 "CP_HOST": "http://mvhd-controlplane:8081",
+                 "NEO4J_PROXY_URL": "http://mvhd-neo4j-proxy",
+                 "SIGLET_SIGNALING_URL": "http://mvhd-siglet:8081/api/v1",
+                 "SCRIPTS_TGZ_B64": e["SCRIPTS_TGZ_B64"]}
+          body = ("set -u\napk add --no-cache bash curl jq python3 >/dev/null 2>&1\n"
+                  "mkdir -p /tmp/s && echo \"$SCRIPTS_TGZ_B64\" | base64 -d | tar -xz -C /tmp/s\n"
+                  "bash /tmp/s/seed-data-assets-job.sh; rc=$?\necho \"=== seed exited with $rc ===\"\nsleep 30\nexit $rc\n")
+          doc = {"location": e["LOCATION"], "properties": {"environmentId": e["ENV_ID"],
+            "configuration": {"triggerType": "Manual", "replicaTimeout": 1500, "replicaRetryLimit": 0,
+              "manualTriggerConfig": {"parallelism": 1, "replicaCompletionCount": 1},
+              "secrets": [{"name": "admin-secret", "value": e["ADMIN_SECRET"]}]},
+            "template": {"containers": [{"name": "seed", "image": "docker.io/library/alpine:3.19",
+              "command": ["/bin/sh", "-c"], "args": [body], "resources": {"cpu": 0.5, "memory": "1Gi"},
+              "env": [{"name": k, "value": v} for k, v in env.items()]
+                     + [{"name": "KC_CLIENT_SECRET", "secretRef": "admin-secret"}]}]}}}
+          yaml.safe_dump(doc, open(out, "w"), sort_keys=False)
+          PY
+          if az containerapp job show -n "$JOB" -g "$RESOURCE_GROUP" -o none 2>/dev/null; then
+            az containerapp job update -n "$JOB" -g "$RESOURCE_GROUP" --yaml /tmp/job.yaml -o none
+          else
+            az containerapp job create -n "$JOB" -g "$RESOURCE_GROUP" --yaml /tmp/job.yaml -o none
+          fi
+          rm -f /tmp/job.yaml
+          EXEC=$(az containerapp job start -n "$JOB" -g "$RESOURCE_GROUP" --query name -o tsv)
+          echo "EXEC=$EXEC" >> "$GITHUB_ENV"
+          STATUS=Pending
+          for _ in $(seq 1 100); do
+            STATUS=$(az containerapp job execution show -n "$JOB" -g "$RESOURCE_GROUP" \
+              --job-execution-name "$EXEC" --query properties.status -o tsv 2>/dev/null || echo Pending)
+            case "$STATUS" in Succeeded|Failed|Stopped) break ;; esac
+            sleep 15
+          done
+          echo "STATUS=$STATUS" >> "$GITHUB_ENV"
+
+      - name: Show the job log
+        if: always()
+        run: |
+          WS=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" \
+            --query properties.appLogsConfiguration.logAnalyticsConfiguration.customerId -o tsv)
+          sleep 60
+          az monitor log-analytics query -w "$WS" --analytics-query \
+            "ContainerAppConsoleLogs_CL | where ContainerGroupName_s startswith '${EXEC}' | order by TimeGenerated asc | project Log_s" \
+            -o tsv 2>&1 | sed 's/\tPrimaryResult$//' | head -300
+
+      - name: Verdict
+        run: |
+          echo "execution ${EXEC}: ${STATUS:-unknown}"
+          [ "${STATUS:-}" = Succeeded ] || { echo "::error::the seed job did not succeed (${STATUS:-unknown})"; exit 1; }
