@@ -73,7 +73,9 @@ describe("/api/negotiations catalog fallback", () => {
 
   it("serves the demo catalogue when the connector 404s on the context", async () => {
     mockManagement.mockRejectedValue(
-      new Error("EDC API error [management] POST /v1alpha/... 404 Not Found"),
+      new Error(
+        "EDC API error [management] POST /v5beta/.../catalog/request 404 Not Found",
+      ),
     );
 
     const res = await GET(
@@ -96,10 +98,20 @@ describe("/api/negotiations catalog fallback", () => {
   });
 
   it("never labels a live catalogue as demo data", async () => {
-    mockManagement.mockResolvedValue({
-      "@type": "dcat:Catalog",
-      dataset: [{ "@id": "real-asset", hasPolicy: [{ "@id": "real-offer" }] }],
-    });
+    // First the provider's participant context by DID, then its catalog (#542).
+    mockManagement
+      .mockResolvedValueOnce([
+        {
+          "@id": "alpha-ctx",
+          identity: "did:web:identityhub%3A7083:alpha-klinik",
+        },
+      ])
+      .mockResolvedValueOnce({
+        "@type": "dcat:Catalog",
+        dataset: [
+          { "@id": "real-asset", hasPolicy: [{ "@id": "real-offer" }] },
+        ],
+      });
 
     const res = await GET(
       catalogRequest("did:web:identityhub%3A7083:alpha-klinik"),
