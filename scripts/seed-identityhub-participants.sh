@@ -30,6 +30,9 @@
 # ---------------------------------------------------------------------------
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# DSP_PROTOCOL, the profile id that goes into each DID document (#542).
+# shellcheck source=lib/dsp-protocol.sh
+source "$SCRIPT_DIR/lib/dsp-protocol.sh"
 
 IDENTITY_API="${EDC_IDENTITY_URL:-http://localhost:11005/api/identity}"
 MGMT_API="${EDC_MANAGEMENT_URL:-http://localhost:11003/api/mgmt}"
@@ -101,9 +104,9 @@ while read -r ctx did; do
   # request and then sat at APPROVED with nowhere to deliver (#345, run
   # 36266312446: "<no CredentialService in DID document>"). Shapes copied from
   # a CFM-made participant's did.json on the local stack.
-  body=$(python3 - "$ctx" "$did" "${CREDENTIALS_BASE:-http://identityhub:7082/api/credentials/v1/participants}" "${PROTOCOL_BASE:-http://controlplane:8082/api/dsp}" <<'PY'
+  body=$(python3 - "$ctx" "$did" "${CREDENTIALS_BASE:-http://identityhub:7082/api/credentials/v1/participants}" "${PROTOCOL_BASE:-http://controlplane:8082/api/dsp}" "$DSP_PROTOCOL" <<'PY'
 import json, sys
-ctx, did, cred_base, proto_base = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+ctx, did, cred_base, proto_base, profile = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5]
 print(json.dumps({
     "participantContextId": ctx,
     "did": did,
@@ -111,7 +114,8 @@ print(json.dumps({
     "roles": ["participant"],
     "serviceEndpoints": [
         {"type": "CredentialService", "serviceEndpoint": f"{cred_base}/{ctx}", "id": f"{ctx}-credentialservice"},
-        {"type": "ProtocolEndpoint",  "serviceEndpoint": f"{proto_base}/{ctx}/2025-1", "id": f"{ctx}-dsp"},
+        # Context id, then the profile id, as the CFM agent writes it (#542).
+        {"type": "ProtocolEndpoint",  "serviceEndpoint": f"{proto_base}/{ctx}/{profile}", "id": f"{ctx}-dsp"},
     ],
     "keys": [{
         "keyId": f"{did}#key1",

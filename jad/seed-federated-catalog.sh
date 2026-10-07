@@ -52,15 +52,30 @@ if [ -z "$MGMT_V" ]; then
 fi
 echo "Management API version: $MGMT_V"
 
+# The provider's DSP address: its context id, then the profile id. The EDC 0.18
+# connector routes /{ctx}/{profileId}/..., and /{ctx}/2025-1 answers 404 (#542).
+dsp_address() {
+  echo "http://controlplane:8082/api/dsp/$1/$DSP_PROTOCOL"
+}
+
+# v5beta catalog/request with the provider's DSP address. The v1alpha
+# catalog-by-DID endpoint this called is gone in EDC 0.18 (404).
 catalog_request() {
   local consumer_ctx="$1"
-  local provider_did="$2"
+  local provider_ctx="$2"
+  local provider_did="$3"
   local token
   token=$(get_token)
-  curl -sf -X POST "${MGMT_URL}/api/mgmt/v1alpha/participants/${consumer_ctx}/catalog" \
+  curl -sf -X POST "${MGMT_URL}/api/mgmt/${MGMT_V}/participants/${consumer_ctx}/catalog/request" \
     -H "Authorization: Bearer ${token}" \
     -H "Content-Type: application/json" \
-    -d "{\"@context\":${EDC_CTX},\"counterPartyDid\":\"${provider_did}\"}"
+    -d "{
+      \"@context\": ${EDC_CTX},
+      \"@type\": \"CatalogRequest\",
+      \"counterPartyAddress\": \"$(dsp_address "$provider_ctx")\",
+      \"counterPartyId\": \"${provider_did}\",
+      \"protocol\": \"$DSP_PROTOCOL\"
+    }"
 }
 
 negotiate_contract() {
@@ -77,7 +92,7 @@ negotiate_contract() {
     -d "{
       \"@context\": ${EDC_CTX},
       \"@type\": \"ContractRequest\",
-      \"counterPartyAddress\": \"http://controlplane:8082/api/dsp/${provider_ctx}/2025-1\",
+      \"counterPartyAddress\": \"$(dsp_address "$provider_ctx")\",
       \"protocol\": \"$DSP_PROTOCOL\",
       \"policy\": {
         \"@type\": \"Offer\",
@@ -172,7 +187,7 @@ echo ""
 
 # -- Step 1: CRO discovers AlphaKlinik catalog -------------------------------
 echo "━━━ Step 1: CRO discovers AlphaKlinik catalog via DSP 2025-1 ━━━"
-CRO_CATALOG=$(catalog_request "$CRO_CTX" "$CLINIC_DID")
+CRO_CATALOG=$(catalog_request "$CRO_CTX" "$CLINIC_CTX" "$CLINIC_DID")
 CRO_DS_COUNT=$(echo "$CRO_CATALOG" | python3 -c "import json,sys; print(len(json.load(sys.stdin).get('dataset',[])))")
 echo "  CRO discovered ${CRO_DS_COUNT} datasets from AlphaKlinik"
 echo "$CRO_CATALOG" | python3 -c "
@@ -184,7 +199,7 @@ echo ""
 
 # -- Step 2: HDAB discovers LMC catalog (HealthDCAT-AP is on LMC) ------------
 echo "━━━ Step 2: HDAB discovers LMC catalog via DSP 2025-1 ━━━"
-HDAB_CATALOG=$(catalog_request "$HDAB_CTX" "$LMC_DID")
+HDAB_CATALOG=$(catalog_request "$HDAB_CTX" "$LMC_CTX" "$LMC_DID")
 HDAB_DS_COUNT=$(echo "$HDAB_CATALOG" | python3 -c "import json,sys; print(len(json.load(sys.stdin).get('dataset',[])))")
 echo "  HDAB discovered ${HDAB_DS_COUNT} datasets from LMC"
 echo "$HDAB_CATALOG" | python3 -c "
@@ -249,7 +264,7 @@ if [ "${STATE:-}" = "FINALIZED" ]; then
       \"@context\": ${EDC_CTX},
       \"@type\": \"TransferRequest\",
       \"protocol\": \"$DSP_PROTOCOL\",
-      \"counterPartyAddress\": \"http://controlplane:8082/api/dsp/${LMC_CTX}/2025-1\",
+      \"counterPartyAddress\": \"$(dsp_address "$LMC_CTX")\",
       \"contractId\": \"${AGREEMENT_ID}\",
       \"assetId\": \"healthdcatap-catalog\",
       \"transferType\": \"HttpData-PULL\",

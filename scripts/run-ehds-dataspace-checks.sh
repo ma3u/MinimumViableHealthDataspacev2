@@ -187,7 +187,9 @@ run_catalog_tests() {
 
   # 1.1 — Catalog request returns valid response for each participant
   # Consumer (pharmaco) queries each participant as provider.
-  # counterPartyAddress must include the provider's context ID and protocol version.
+  # counterPartyAddress is the provider's context id and the profile id: the
+  # EDC 0.18 connector routes /{ctx}/{profileId}/catalog, and /{ctx}/2025-1
+  # answers 404 (#542).
   for i in "${!PARTICIPANT_SLUGS[@]}"; do
     local slug="${PARTICIPANT_SLUGS[$i]}"
     local ctx="${PARTICIPANT_CTXS[$i]}"
@@ -195,7 +197,7 @@ run_catalog_tests() {
     local resp
     local catalog_body
     local provider_did="${PARTICIPANT_DIDS[$i]}"
-    catalog_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'"}' "$ctx" "$provider_did")
+    catalog_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/'"$DSP_PROTOCOL"'","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'"}' "$ctx" "$provider_did")
     resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$catalog_body") || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e '.["@type"]' >/dev/null 2>&1; then
@@ -219,7 +221,7 @@ run_catalog_tests() {
   local test_id="CAT-1.2"
   local resp
   local cat12_body
-  cat12_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'"}' "$PROVIDER_CTX" "$PROVIDER_DID")
+  cat12_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/'"$DSP_PROTOCOL"'","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'"}' "$PROVIDER_CTX" "$PROVIDER_DID")
   resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$cat12_body") || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.dataset' >/dev/null 2>&1; then
@@ -245,7 +247,7 @@ run_catalog_tests() {
   # has nothing to bind the object to, so the connector rejects the whole
   # request. This test had been sending it without one and passing anyway,
   # because the suite scored the error envelope as a response (#333).
-  cat13_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/2025-1","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'","querySpec":{"@type":"QuerySpec","filterExpression":[]}}' "$PROVIDER_CTX" "$PROVIDER_DID")  # nosemgrep: detected-username-and-password-in-uri -- host:port followed by @type in JSON, not credentials
+  cat13_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/'"$DSP_PROTOCOL"'","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'","querySpec":{"@type":"QuerySpec","filterExpression":[]}}' "$PROVIDER_CTX" "$PROVIDER_DID")  # nosemgrep: detected-username-and-password-in-uri -- host:port followed by @type in JSON, not credentials
   resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$cat13_body") || resp=""
 
   if [ -n "$resp" ]; then

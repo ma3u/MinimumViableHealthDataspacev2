@@ -126,7 +126,8 @@ describe("/api/negotiations", () => {
         "POST",
         expect.objectContaining({
           "@type": "ContractRequest",
-          counterPartyAddress: "http://counter.party:8081/api/dsp/spe-2/2025-1",
+          counterPartyAddress:
+            "http://counter.party:8081/api/dsp/spe-2/http-dsp-profile-2025-1",
           protocol: "http-dsp-profile-2025-1",
         }),
       );

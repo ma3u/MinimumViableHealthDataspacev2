@@ -29,4 +29,7 @@ identityhub.cs.url: http://identityhub:7082/api/credentials/v1/participants/%s
 # Point back at http://controlplane:8081/api/mgmt and drop the shim service
 # once CFM is rebuilt against EDC 0.18.
 controlplane.url: http://cfm-cp-shim:8081/api/mgmt
-controlplane.protocol.url: http://controlplane:8082/api/dsp/%s/2025-1
+# The participant's DSP address as upstream jad writes it: context id, then
+# the profile id. The EDC 0.18 connector routes /{ctx}/{profileId}/..., and
+# /{ctx}/2025-1 answers 404 (#542).
+controlplane.protocol.url: http://controlplane:8082/api/dsp/%s/http-dsp-profile-2025-1

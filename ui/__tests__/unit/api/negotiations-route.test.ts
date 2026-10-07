@@ -58,7 +58,12 @@ describe("GET /api/negotiations", () => {
       "@type": "dcat:Catalog",
       "dcat:dataset": [{ "@id": "asset-1" }],
     };
-    mockManagement.mockResolvedValue(mockCatalog);
+    mockManagement
+      .mockResolvedValueOnce([
+        { "@id": "other-ctx", identity: "did:web:pharmaco.de:research" },
+        { "@id": "alpha-ctx", identity: "did:web:alpha-klinik.de" },
+      ])
+      .mockResolvedValueOnce(mockCatalog);
 
     const res = await GET(
       new NextRequest(
@@ -69,11 +74,38 @@ describe("GET /api/negotiations", () => {
 
     expect(res.status).toBe(200);
     expect(data["@type"]).toBe("dcat:Catalog");
+    expect(mockManagement).toHaveBeenCalledWith("/v5alpha/participants");
+    // The provider's DSP address carries its context id and the profile id;
+    // the v1alpha catalog-by-DID endpoint is gone in EDC 0.18 (#542).
     expect(mockManagement).toHaveBeenCalledWith(
-      "/v1alpha/participants/ctx-1/catalog",
+      "/v5alpha/participants/ctx-1/catalog/request",
       "POST",
-      { counterPartyDid: "did:web:alpha-klinik.de" },
+      {
+        "@context": ["https://w3id.org/edc/connector/management/v2"],
+        "@type": "CatalogRequest",
+        counterPartyAddress:
+          "http://controlplane:8082/api/dsp/alpha-ctx/http-dsp-profile-2025-1",
+        counterPartyId: "did:web:alpha-klinik.de",
+        protocol: "http-dsp-profile-2025-1",
+      },
     );
+  });
+
+  it("should answer 502 naming the DID when no participant context has it", async () => {
+    mockManagement.mockResolvedValueOnce([
+      { "@id": "other-ctx", identity: "did:web:pharmaco.de:research" },
+    ]);
+
+    const res = await GET(
+      new NextRequest(
+        "http://localhost:3000/api/negotiations?participantId=ctx-1&catalog=true&providerDid=did:web:unknown.example",
+      ),
+    );
+    const data = await res.json();
+
+    expect(res.status).toBe(502);
+    expect(data.detail).toContain("did:web:unknown.example");
+    expect(mockManagement).toHaveBeenCalledTimes(1);
   });
 
   it("should return 400 when catalog=true but providerDid is missing", async () => {
@@ -301,7 +333,7 @@ describe("POST /api/negotiations", () => {
 
   // ── DSP endpoint building ─────────────────────────────────────────
 
-  it("should build DSP endpoint with counterPartyId and version suffix", async () => {
+  it("should build DSP endpoint with counterPartyId and profile id", async () => {
     mockManagement.mockResolvedValue({ "@id": "neg-1" });
 
     await POST(
@@ -318,18 +350,20 @@ describe("POST /api/negotiations", () => {
       expect.any(String),
       "POST",
       expect.objectContaining({
-        counterPartyAddress: "http://cp:8082/api/dsp/provider-ctx/2025-1",
+        counterPartyAddress:
+          "http://cp:8082/api/dsp/provider-ctx/http-dsp-profile-2025-1",
       }),
     );
   });
 
-  it("should not add version suffix when endpoint already ends with /2025-1", async () => {
+  it("should keep an endpoint that already ends with the profile id", async () => {
     mockManagement.mockResolvedValue({ "@id": "neg-1" });
 
     await POST(
       postReq({
         participantId: "ctx-1",
-        counterPartyAddress: "http://cp:8082/api/dsp/provider-ctx/2025-1",
+        counterPartyAddress:
+          "http://cp:8082/api/dsp/provider-ctx/http-dsp-profile-2025-1",
         counterPartyId: "provider-ctx",
         assetId: "a1",
         offerId: "offer-1",
@@ -340,7 +374,31 @@ describe("POST /api/negotiations", () => {
       expect.any(String),
       "POST",
       expect.objectContaining({
+        counterPartyAddress:
+          "http://cp:8082/api/dsp/provider-ctx/http-dsp-profile-2025-1",
+      }),
+    );
+  });
+
+  it("should replace a pre-0.18 /2025-1 suffix with the profile id", async () => {
+    mockManagement.mockResolvedValue({ "@id": "neg-1" });
+
+    await POST(
+      postReq({
+        participantId: "ctx-1",
         counterPartyAddress: "http://cp:8082/api/dsp/provider-ctx/2025-1",
+        counterPartyId: "other-ctx",
+        assetId: "a1",
+        offerId: "offer-1",
+      }),
+    );
+
+    expect(mockManagement).toHaveBeenCalledWith(
+      expect.any(String),
+      "POST",
+      expect.objectContaining({
+        counterPartyAddress:
+          "http://cp:8082/api/dsp/provider-ctx/http-dsp-profile-2025-1",
       }),
     );
   });
@@ -362,7 +420,8 @@ describe("POST /api/negotiations", () => {
       expect.any(String),
       "POST",
       expect.objectContaining({
-        counterPartyAddress: "http://cp:8082/api/dsp/prov/2025-1",
+        counterPartyAddress:
+          "http://cp:8082/api/dsp/prov/http-dsp-profile-2025-1",
       }),
     );
   });
@@ -384,7 +443,8 @@ describe("POST /api/negotiations", () => {
       expect.any(String),
       "POST",
       expect.objectContaining({
-        counterPartyAddress: "http://cp:8082/api/dsp/prov-id/2025-1",
+        counterPartyAddress:
+          "http://cp:8082/api/dsp/prov-id/http-dsp-profile-2025-1",
       }),
     );
   });
