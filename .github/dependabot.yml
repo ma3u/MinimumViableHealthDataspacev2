@@ -48,6 +48,14 @@ updates:
       # Follows the Node runtime, which is 22 in the Dockerfiles and CI (#97).
       - dependency-name: "@types/node"
         update-types: [version-update:semver-major]
+      # eslint 10 drops the eslintrc format (ui/.eslintrc.json), and the two
+      # refuse each other as peers: eslint-config-next 16 needs a newer eslint
+      # than 8, 15 refuses eslint 10. Each alone fails npm ci with ERESOLVE
+      # (#525, #526). They move together with a flat-config migration.
+      - dependency-name: eslint
+        update-types: [version-update:semver-major]
+      - dependency-name: eslint-config-next
+        update-types: [version-update:semver-major]
     labels: [dependencies, ui]
 
   # ── npm: Neo4j proxy ──
