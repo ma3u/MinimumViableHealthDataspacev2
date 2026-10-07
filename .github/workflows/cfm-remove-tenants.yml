@@ -72,18 +72,26 @@ jobs:
             --data-urlencode username=admin --data-urlencode "password=${KC_ADMIN_PASS}" | jq -r '.access_token // empty')
           [ -n "$MASTER" ] || { echo "::error::no Keycloak admin token"; exit 1; }
           echo "::add-mask::$MASTER"
-          uuid=$(curl -sS -H "Authorization: Bearer $MASTER" "${KC_PUBLIC}/admin/realms/edcv/clients?clientId=admin" | jq -r '.[0].id // empty')
-          ADMIN_SECRET=$(curl -sS -H "Authorization: Bearer $MASTER" "${KC_PUBLIC}/admin/realms/edcv/clients/${uuid}/client-secret" | jq -r '.value // empty')
-          [ -n "$ADMIN_SECRET" ] || { echo "::error::could not read the admin client secret"; exit 1; }
-          echo "::add-mask::$ADMIN_SECRET"
+          secret_of() {
+            local uuid
+            uuid=$(curl -sS -H "Authorization: Bearer $MASTER" "${KC_PUBLIC}/admin/realms/edcv/clients?clientId=$1" | jq -r '.[0].id // empty')
+            curl -sS -H "Authorization: Bearer $MASTER" "${KC_PUBLIC}/admin/realms/edcv/clients/${uuid}/client-secret" | jq -r '.value // empty'
+          }
+          # IdentityHub wants the admin role, the control plane's participant API the provisioner role.
+          ADMIN_SECRET=$(secret_of admin); PROVISIONER_SECRET=$(secret_of provisioner)
+          if [ -z "$ADMIN_SECRET" ] || [ -z "$PROVISIONER_SECRET" ]; then
+            echo "::error::could not read the admin and provisioner client secrets"; exit 1
+          fi
+          echo "::add-mask::$ADMIN_SECRET"; echo "::add-mask::$PROVISIONER_SECRET"
           PG_PASSWORD=$(az containerapp secret show --name mvhd-controlplane --resource-group "$RESOURCE_GROUP" \
             --secret-name pg-flex-password --query value -o tsv)
           [ -n "$PG_PASSWORD" ] || { echo "::error::could not read pg-flex-password from mvhd-controlplane"; exit 1; }
           echo "::add-mask::$PG_PASSWORD"
           {
-            echo "KC_ADMIN_PASSWORD=$KC_ADMIN_PASS"; echo "ADMIN_SECRET=$ADMIN_SECRET"; echo "PG_PASSWORD=$PG_PASSWORD"
+            echo "KC_ADMIN_PASSWORD=$KC_ADMIN_PASS"; echo "ADMIN_SECRET=$ADMIN_SECRET"
+            echo "PROVISIONER_SECRET=$PROVISIONER_SECRET"; echo "PG_PASSWORD=$PG_PASSWORD"
           } >> "$GITHUB_ENV"
-          echo "credentials read (admin ${#ADMIN_SECRET}, postgres ${#PG_PASSWORD} chars)"
+          echo "credentials read (admin ${#ADMIN_SECRET}, provisioner ${#PROVISIONER_SECRET}, postgres ${#PG_PASSWORD} chars)"
 
       - name: Run the removal job
         env:
@@ -103,8 +111,10 @@ jobs:
                  "IH": "http://mvhd-identityhub:7082/api/identity",
                  "PGHOST": e["PG_HOST"], "PGUSER": e["PG_USER"], "PGDATABASE": "cfm", "PGSSLMODE": "require"}
           secrets = {"pg-password": e["PG_PASSWORD"], "admin-secret": e["ADMIN_SECRET"],
+                     "provisioner-secret": e["PROVISIONER_SECRET"],
                      "kc-admin-password": e["KC_ADMIN_PASSWORD"]}
           refs = {"PGPASSWORD": "pg-password", "ADMIN_SECRET": "admin-secret",
+                  "PROVISIONER_SECRET": "provisioner-secret",
                   "KC_ADMIN_PASSWORD": "kc-admin-password"}
           body = ("set -u\napk add --no-cache bash curl jq postgresql-client >/dev/null 2>&1\n"
                   "cat > /tmp/remove.sh <<'REMOVE_EOF'\n" + script + "\nREMOVE_EOF\n"

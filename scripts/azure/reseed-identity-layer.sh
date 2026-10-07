@@ -50,6 +50,10 @@ token() {  # token <client_id> <secret>
 ADMIN_TOKEN=$(token admin "$ADMIN_SECRET")
 [ -n "$ADMIN_TOKEN" ] || fail "no token for the admin client from ${KC}"
 log "admin token: ok"
+# The control plane's participant API wants the provisioner role; the admin
+# token's DELETE there is refused with 403 (cfm-remove-tenants, 2026-10-07).
+PROV_TOKEN=$(token provisioner "$PROVISIONER_SECRET")
+[ -n "$PROV_TOKEN" ] || fail "no token for the provisioner client"
 
 target_did() { printf 'did:web:%s:%s' "$DID_HOST" "$1"; }
 
@@ -109,8 +113,9 @@ while read -r store id did slug; do
     cp) url="${CP}/${MGMT_V}/participants/${id}" ;;
     *) continue ;;
   esac
+  bearer="$ADMIN_TOKEN"; [ "$store" = cp ] && bearer="$PROV_TOKEN"
   code=$(curl -sS --max-time 30 -o /tmp/del.out -w '%{http_code}' -X DELETE \
-    -H "Authorization: Bearer ${ADMIN_TOKEN}" "$url")
+    -H "Authorization: Bearer ${bearer}" "$url")
   case "$code" in
     2??|404) log "  deleted ${store} ${id} (${did}) HTTP ${code}"; deleted=$((deleted + 1)) ;;
     *) log "  could not delete ${store} ${id}: HTTP ${code} $(head -c 200 /tmp/del.out)"; exit 1 ;;
@@ -131,8 +136,6 @@ export EDC_CLIENT_ID=admin EDC_CLIENT_SECRET="$ADMIN_SECRET" PROBE_DID_DOCS=0
 export VAULT_ADDR VAULT_TOKEN
 
 log "2/6 control-plane contexts"
-PROV_TOKEN=$(token provisioner "$PROVISIONER_SECRET")
-[ -n "$PROV_TOKEN" ] || fail "no token for the provisioner client"
 CP="$CP" TOKEN="$PROV_TOKEN" MGMT_V_CANDIDATES="$MGMT_V" bash scripts/azure/05-cp-participants.sh || fail "step 2"
 
 log "3/6 IdentityHub records"
