@@ -22,6 +22,10 @@ docker push "${KEYCLOAK_IMAGE}"
 ok "Keycloak image in ACR"
 
 # ── Keycloak container app ──────────────────────────────────────────────────
+# Prod profile, not start-dev (#577). TLS ends at the ACA ingress, so HTTP is
+# on behind it; one replica, so the cache is local. `start` on the plain image
+# builds at startup; wire-keycloak-theme.sh then swaps in the image built
+# ahead and `start --optimized`.
 log "Creating Keycloak container app..."
 az containerapp create \
   --name "$KEYCLOAK_APP" --resource-group "$RG" --environment "$ACA_ENV" \
@@ -30,7 +34,7 @@ az containerapp create \
   --cpu 1 --memory 2Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress external --target-port 8080 \
-  --command "/opt/keycloak/bin/kc.sh" --args "start-dev" \
+  --command "/opt/keycloak/bin/kc.sh" --args "start" \
   --secrets "kc-db-password=${KC_DB_PW}" \
   --env-vars \
     "KC_DB=postgres" \
@@ -42,6 +46,8 @@ az containerapp create \
     "KC_HOSTNAME_STRICT=false" \
     "KC_HOSTNAME_STRICT_BACKCHANNEL=false" \
     "KC_PROXY_HEADERS=xforwarded" \
+    "KC_HTTP_ENABLED=true" \
+    "KC_CACHE=local" \
     "KEYCLOAK_ADMIN=${KC_ADMIN_USER}" \
     "KEYCLOAK_ADMIN_PASSWORD=$(kc_admin_password)" \
   -o none
