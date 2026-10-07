@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Cost guards for rg-mvhd-dev: a budget, a crash-loop alert, no ingestion cap.
+# Cost guards for rg-mvhd-dev: a budget, a crash-loop alert, an alert on a
+# failed off-hours job, no ingestion cap.
 # =============================================================================
 #   [ALERT_EMAIL=<address>] set-cost-guards.sh [monthly budget, default 1000]
 #
@@ -16,6 +17,12 @@
 #    data planes on one port. Each looked "Running" to `az containerapp list`.
 #    One evening stop or one deploy terminates one or two containers per app,
 #    which stays under the threshold.
+# 2b. Metric alerts `mvhd-offhours-stop-failed` and `mvhd-offhours-start-failed`:
+#    an execution of either off-hours job ended Failed (#595, ADR-058). The
+#    stop is what keeps the bill down at night (ADR-053), and a failed one
+#    leaves the whole stack running. A run that never fires is covered by
+#    aca-schedule.yml, which runs an hour later and decides for itself.
+#    The jobs' `Executions` metric counts executions by `state` once a minute.
 # 3. Monthly budget `mvhd-monthly` on the resource group, alerts at 50, 80 and
 #    100 % of actual cost and at 100 % of forecast, to the same recipients. The budget, not a cap, is the
 #    guard: a cap stops ingestion, and with it the logs a crash loop leaves.
@@ -82,6 +89,41 @@ az rest --method put \
   --url "https://management.azure.com${RG_ID}/providers/Microsoft.Insights/scheduledQueryRules/mvhd-crash-loop?api-version=2023-03-15-preview" \
   --body "$body" -o none
 ok "Log alert mvhd-crash-loop"
+
+# ── 2b. Off-hours job failures ───────────────────────────────────────────────
+for job in mvhd-offhours-stop mvhd-offhours-start; do
+  rule="${job}-failed"
+  log "Metric alert ${rule}..."
+  job_id="${RG_ID}/providers/Microsoft.App/jobs/${job}"
+  az rest --method get --url "https://management.azure.com${job_id}?api-version=2024-03-01" -o none \
+    || { err "${job} does not exist; run scripts/azure/18-offhours-jobs.sh first"; exit 1; }
+  body=$(JOB="$job" JOB_ID="$job_id" AG_ID="$AG_ID" python3 - <<'PY'
+import json, os
+job = os.environ["JOB"]
+print(json.dumps({
+  "location": "global",
+  "properties": {
+    "description": f"An execution of {job} ended Failed (#595, ADR-058). Its log: "
+                   f"az containerapp job execution list -n {job} -g rg-mvhd-dev",
+    "severity": 2, "enabled": True,
+    "scopes": [os.environ["JOB_ID"]],
+    "evaluationFrequency": "PT5M", "windowSize": "PT30M",
+    "criteria": {
+      "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+      "allOf": [{
+        "name": "failed-executions", "criterionType": "StaticThresholdCriterion",
+        "metricName": "Executions", "metricNamespace": "Microsoft.App/jobs",
+        "dimensions": [{"name": "state", "operator": "Include", "values": ["Failed"]}],
+        "operator": "GreaterThan", "threshold": 0, "timeAggregation": "Maximum"}]},
+    "autoMitigate": True,
+    "actions": [{"actionGroupId": os.environ["AG_ID"]}]}}))
+PY
+)
+  az rest --method put \
+    --url "https://management.azure.com${RG_ID}/providers/Microsoft.Insights/metricAlerts/${rule}?api-version=2018-03-01" \
+    --body "$body" -o none
+  ok "Metric alert ${rule}"
+done
 
 # ── 3. Budget ────────────────────────────────────────────────────────────────
 log "Budget mvhd-monthly (${amount} per month)..."
