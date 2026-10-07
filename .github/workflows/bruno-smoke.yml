@@ -135,7 +135,7 @@ jobs:
 
       - name: Publish JUnit results
         if: ${{ always() && hashFiles('bruno-report/*.xml') != '' }}
-        uses: dorny/test-reporter@v2
+        uses: dorny/test-reporter@v3
         with:
           name: Bruno results (${{ env.ENV_NAME }})
           path: ${{ github.workspace }}/bruno-report/*.xml
