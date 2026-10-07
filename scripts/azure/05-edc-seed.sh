@@ -24,6 +24,16 @@
 # =============================================================================
 set -uo pipefail
 
+# Superseded (#574). This seeded IdentityHub with the graph-layer DIDs
+# (did:web:alpha-klinik.de:..., which no host serves, #345) and one shared
+# fake key, so no credential could ever be issued to these five on Azure.
+# .github/workflows/edc-reseed-identity-layer.yml now runs compose's sequence
+# with mvhd-identityhub DIDs. Kept so the history reads; it refuses to run.
+if [ "${FORCE_OLD_SEED:-}" != 1 ]; then
+  echo "[seed] superseded by .github/workflows/edc-reseed-identity-layer.yml (#574); not running" >&2
+  exit 1
+fi
+
 IH="${IH:?IH must be set, e.g. http://mvhd-identityhub:7082/api/identity}"
 KC="${KC:?KC must be set, e.g. https://auth.ehds.mabu.red}"
 KC_REALM="${KC_REALM:-edcv}"
