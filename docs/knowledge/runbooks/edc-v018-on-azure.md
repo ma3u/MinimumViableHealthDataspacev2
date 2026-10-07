@@ -170,8 +170,18 @@ scripts/azure/migrate-edc-to-v018.sh rollback controlplane   # or identityhub, i
 ```
 
 For the shim, check out `jad/cfm-cp-shim-azure.conf` from before #517 and run
-`05-cfm-agents.sh`. The April databases stay untouched until a week after
-the window; then a note on #503, and they are dropped.
+`05-cfm-agents.sh`. The April databases stay untouched until 2026-10-12,
+a week after the window (#594). Then, as the CI identity:
+
+```bash
+gh workflow run edc-drop-april-databases.yml -f mode=plan   # guards, changes nothing
+gh workflow run edc-drop-april-databases.yml -f mode=drop
+```
+
+Afterwards delete the folder `~/.mvhd/edc-v018-rollback/` on the laptop that
+ran the migration: its definitions name the dropped databases.
+`scripts/azure/drop-edc-april-databases.sh` refuses before 2026-10-12 and
+while any active revision of the five apps uses a database without `_v018`.
 
 ## A fresh install
 
