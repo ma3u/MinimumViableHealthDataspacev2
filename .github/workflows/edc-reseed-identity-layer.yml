@@ -79,7 +79,11 @@ jobs:
           echo "::add-mask::$ADMIN_SECRET"; echo "::add-mask::$PROVISIONER_SECRET"
           VAULT_URL=$(az containerapp show -n mvhd-controlplane -g "$RESOURCE_GROUP" \
             --query "properties.template.containers[0].env[?name=='EDC_VAULT_HASHICORP_URL'].value | [0]" -o tsv)
-          VAULT_TOKEN=$(az containerapp show -n mvhd-controlplane -g "$RESOURCE_GROUP" \
+          # The rotated token is the control plane's ACA secret vault-token (#359);
+          # before the rotation it is the plain env value.
+          VAULT_TOKEN=$(az containerapp secret show -n mvhd-controlplane -g "$RESOURCE_GROUP" \
+            --secret-name vault-token --query value -o tsv 2>/dev/null || true)
+          [ -n "$VAULT_TOKEN" ] || VAULT_TOKEN=$(az containerapp show -n mvhd-controlplane -g "$RESOURCE_GROUP" \
             --query "properties.template.containers[0].env[?name=='EDC_VAULT_HASHICORP_TOKEN'].value | [0]" -o tsv)
           echo "::add-mask::$VAULT_TOKEN"
           {

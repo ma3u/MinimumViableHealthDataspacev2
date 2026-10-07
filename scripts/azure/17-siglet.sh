@@ -109,11 +109,10 @@ ENV_VARS=(
   "SIGLET__TOKEN_API_AUTH__MODE=disabled"
   "SIGLET__MANAGEMENT_API_AUTH__MODE=disabled"
 )
-# The EDC apps' Vault token, read from the control plane and kept in a
-# variable only, never printed (#359 rotates it with the others).
-VAULT_TOKEN=$(az containerapp show --name "$CONTROLPLANE_APP" --resource-group "$RG" \
-  --query "properties.template.containers[0].env[?name=='EDC_VAULT_HASHICORP_TOKEN'].value | [0]" -o tsv)
-[ -n "$VAULT_TOKEN" ] || { err "no EDC_VAULT_HASHICORP_TOKEN on ${CONTROLPLANE_APP}"; exit 1; }
+# The EDC apps' Vault token (env.sh, #359), kept in a variable only, never
+# printed.
+VAULT_TOKEN=$(vault_service_token)
+[ -n "$VAULT_TOKEN" ] || { err "no Vault token for the services"; exit 1; }
 
 # The image running now, to go back to if the new revision does not become
 # healthy. The app runs one revision at a time, so a revision that never

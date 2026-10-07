@@ -19,6 +19,9 @@ log "Phase 4: EDC-V core services"
 # of 8 per service would want 40 of B1ms's 35 user connections.
 EDC_DB_PW="$(pg_admin_password)"
 [ -n "$EDC_DB_PW" ] || { err "no Flexible Server password; run 13-postgres-flexible-server.sh 1 and 2 first"; exit 1; }
+# The services' Vault token as an ACA secret, never a plain env value (#359):
+# the rotated one when it exists, otherwise the fresh-environment default.
+VAULT_SVC_TOKEN="$(vault_service_token)"
 EDC_POOL_OPTS="-Dedc.datasource.default.pool.connections.max-total=3"
 az acr login --name "$ACR_NAME"
 ACR_PASSWORD=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
@@ -67,7 +70,7 @@ az containerapp create \
   --cpu 1 --memory 2Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 8080 \
-  --secrets "pg-flex-password=${EDC_DB_PW}" \
+  --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/controlplane?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
@@ -77,7 +80,7 @@ az containerapp create \
     "EDC_DSP_PROFILES_ENABLE_ALL=true" \
     "WEB_HTTP_PROTOCOL_VIRTUAL=true" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
-    "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
+    "EDC_VAULT_HASHICORP_TOKEN=secretref:vault-token" \
     "EDC_NATS_CN_SUBSCRIBER_URL=nats://${NATS_APP}:4222" \
     "EDC_NATS_CN_SUBSCRIBER_AUTOCREATE=true" \
     "EDC_NATS_CN_PUBLISHER_URL=nats://${NATS_APP}:4222" \
@@ -143,7 +146,7 @@ az containerapp create \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 8080 \
-  --secrets "pg-flex-password=${EDC_DB_PW}" \
+  --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane?sslmode=${PG_SSLMODE}" \
     "EDC_TRANSFER_PROXY_TOKEN_SIGNER_PRIVATEKEY_ALIAS=dataplane-fhir-private" \
@@ -152,7 +155,7 @@ az containerapp create \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
-    "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
+    "EDC_VAULT_HASHICORP_TOKEN=secretref:vault-token" \
   -o none
 ok "Data Plane FHIR"
 
@@ -167,7 +170,7 @@ az containerapp create \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 8080 \
-  --secrets "pg-flex-password=${EDC_DB_PW}" \
+  --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/dataplane_omop?sslmode=${PG_SSLMODE}" \
     "EDC_TRANSFER_PROXY_TOKEN_SIGNER_PRIVATEKEY_ALIAS=dataplane-omop-private" \
@@ -176,7 +179,7 @@ az containerapp create \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
-    "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
+    "EDC_VAULT_HASHICORP_TOKEN=secretref:vault-token" \
   -o none
 ok "Data Plane OMOP"
 
@@ -196,7 +199,7 @@ az containerapp create \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 7081 \
-  --secrets "pg-flex-password=${EDC_DB_PW}" \
+  --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/identityhub?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
@@ -204,7 +207,7 @@ az containerapp create \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
     "EDC_SQL_SCHEMA_AUTOCREATE=true" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
-    "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
+    "EDC_VAULT_HASHICORP_TOKEN=secretref:vault-token" \
     "EDC_ENCRYPTION_AES_KEY_ALIAS=aes-key-alias" \
     "EDC_IAM_OAUTH2_JWKS_URL=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv/protocol/openid-connect/certs" \
     "WEB_HTTP_PORT=7081" \
@@ -237,7 +240,7 @@ az containerapp create \
   --cpu 0.5 --memory 1Gi \
   --min-replicas 1 --max-replicas 1 \
   --ingress internal --target-port 10013 \
-  --secrets "pg-flex-password=${EDC_DB_PW}" \
+  --secrets "pg-flex-password=${EDC_DB_PW}" "vault-token=${VAULT_SVC_TOKEN}" \
   --env-vars \
     "EDC_DATASOURCE_DEFAULT_URL=jdbc:postgresql://${PG_HOST}:${PG_PORT}/issuerservice?sslmode=${PG_SSLMODE}" \
     "EDC_DATASOURCE_DEFAULT_USER=${PG_ADMIN}" \
@@ -245,7 +248,7 @@ az containerapp create \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
     "EDC_SQL_SCHEMA_AUTOCREATE=true" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
-    "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
+    "EDC_VAULT_HASHICORP_TOKEN=secretref:vault-token" \
     "EDC_ENCRYPTION_AES_KEY_ALIAS=aes-key-alias" \
     "EDC_IAM_OAUTH2_JWKS_URL=${KEYCLOAK_PUBLIC_URL:-}/realms/edcv/protocol/openid-connect/certs" \
     "WEB_HTTP_PORT=10010" \

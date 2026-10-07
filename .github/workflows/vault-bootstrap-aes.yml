@@ -50,7 +50,11 @@ jobs:
       - name: Resolve Vault token from ACA secret
         id: vault
         run: |
-          TOKEN=$(az containerapp secret show -n mvhd-vault -g "$RESOURCE_GROUP" \
+          # The services' token (#359): the control plane's ACA secret once
+          # rotated, else the older places a root token was kept.
+          TOKEN=$(az containerapp secret show -n mvhd-controlplane -g "$RESOURCE_GROUP" \
+                    --secret-name vault-token --query "value" -o tsv 2>/dev/null || true)
+          [ -n "$TOKEN" ] || TOKEN=$(az containerapp secret show -n mvhd-vault -g "$RESOURCE_GROUP" \
                     --secret-name vault-root-token --query "value" -o tsv 2>/dev/null \
                   || az containerapp show -n mvhd-vault -g "$RESOURCE_GROUP" \
                        --query "properties.template.containers[0].env[?name=='VAULT_DEV_ROOT_TOKEN_ID'].value" -o tsv)

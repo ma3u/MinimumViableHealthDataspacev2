@@ -84,7 +84,7 @@ yaml=$(mktemp)
 trap 'rm -f "$yaml"' EXIT
 ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RG" --query id -o tsv)
 LOCATION=$(az containerapp env show -n "$ACA_ENV" -g "$RG" --query location -o tsv)
-VAULT_TOKEN="$VAULT_ROOT_TOKEN" PROV_SECRET="$PROV_SECRET" ISSUER_SECRET="$ISSUER_SECRET" PG_PW="$PG_PW" \
+VAULT_TOKEN="$(vault_service_token)" PROV_SECRET="$PROV_SECRET" ISSUER_SECRET="$ISSUER_SECRET" PG_PW="$PG_PW" \
 python3 - "$yaml" "${SCRIPT_DIR}/issuer-identity-job.sh" <<PY
 import os, sys, yaml
 out, script = sys.argv[1], open(sys.argv[2]).read()
