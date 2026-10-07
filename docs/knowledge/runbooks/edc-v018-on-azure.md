@@ -171,8 +171,39 @@ the window; then a note on #503, and they are dropped.
 `04-edc-services.sh` still creates the apps the April way. On a new
 environment: run it, then `create-edc-v018-databases.sh` and phases 2 to 5.
 
-## Known after the move
+## 7. DSP: catalog, negotiation, transfer (#542)
 
-In 0.18's virtual mode the DSP provider side answers 404 for every path
-(#345, local stack). Azure has never completed a negotiation (#180), so
-nothing regresses, but #345 becomes the next blocker on both stacks.
+In 0.18's virtual mode the DSP side answered 404 for every path. #542 found
+why on compose and fixed it there (#602, #615); this phase brings Azure to
+the same settings. Run inside office hours, after `az login`, with the PIM
+role (17-siglet.sh needs it):
+
+```bash
+scripts/azure/migrate-edc-to-v018.sh backup
+scripts/azure/migrate-edc-to-v018.sh app controlplane   # profiles, virtual callback, scope alias
+scripts/azure/05-cfm-agents.sh                          # protocol.url with the profile id; agents restart
+scripts/azure/17-siglet.sh                              # siglet sha-54382c8, HttpData-PULL transfer type
+scripts/azure/migrate-edc-to-v018.sh ui                 # EDC_PROTOCOL_URL for the hub's catalog call
+```
+
+What each setting fixes, measured on compose:
+
+| Setting                                                         | Without it                                                                                          |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `EDC_DSP_PROFILES_ENABLE_ALL=true`                              | `.well-known/dspace-version` answers `{"protocolVersions":[]}`, every `/api/dsp/{ctx}/...` path 404 |
+| scope alias `org.eclipse.dspace.dcp.vc.type`                    | IdentityHub refuses the presentation query (403), the provider answers 401                          |
+| `WEB_HTTP_PROTOCOL_VIRTUAL=true`, no `EDC_DSP_CALLBACK_ADDRESS` | the agreement goes to a callback without the consumer's context, 404, negotiation stays REQUESTED   |
+| siglet pinned to `sha-54382c8`                                  | 422 `missing field 'profile'`: newer siglets need a field the `4a7e5bd` control plane does not send |
+| siglet transfer type `HttpData-PULL`                            | "Data flow handler cannot handle this flow", transfer TERMINATED                                    |
+
+Checks, from a container in the environment:
+
+- `http://mvhd-controlplane:8082/api/dsp/<ctx>/.well-known/dspace-version`
+  lists version `2025-1`.
+- The hub's negotiate page (PharmaCo, AlphaKlinik) shows offers without the
+  demo label.
+
+Still open for a transfer on Azure: no Azure script registers data planes or
+assets. Register them with `SIGLET_SIGNALING_URL=http://mvhd-siglet:8081/api/v1`
+(jad/seed-data-assets.sh) from a job inside the environment, and check that
+`mvhd-dp-fhir` serves its data API on 8186 (`SIGLET_PULL_ENDPOINT` otherwise).

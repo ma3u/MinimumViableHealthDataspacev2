@@ -31,6 +31,8 @@
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # DSP_PROTOCOL, the profile id that goes into each DID document (#542).
+# .github/workflows/edc-reseed-identity-layer.yml runs this script from a
+# tarball of named files; that list has to carry lib/dsp-protocol.sh too.
 # shellcheck source=lib/dsp-protocol.sh
 source "$SCRIPT_DIR/lib/dsp-protocol.sh"
 
