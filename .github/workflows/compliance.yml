@@ -213,7 +213,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload TCK results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: dsp-tck-results
@@ -391,7 +391,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload DCP results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: dcp-compliance-results
@@ -533,7 +533,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload EHDS results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ehds-compliance-results
@@ -648,7 +648,7 @@ jobs:
             ./scripts/run-api-tests.sh Local
 
       - name: Upload Bruno results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: bruno-api-results
@@ -755,7 +755,7 @@ jobs:
           cat compliance-report.md
 
       - name: Upload compliance report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: compliance-report
           path: compliance-report.md

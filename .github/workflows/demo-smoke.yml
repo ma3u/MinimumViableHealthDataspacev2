@@ -124,7 +124,7 @@ jobs:
           python3 scripts/check-compliance-baseline.py --results test-results \
             | tee -a "$GITHUB_STEP_SUMMARY"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: bruno-azure-dev
@@ -156,7 +156,7 @@ jobs:
           # with the live secret, and fails in CI without it rather than skip.
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
         run: npx playwright test __tests__/e2e/smoke.spec.ts --project=chromium
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-public
@@ -180,7 +180,7 @@ jobs:
           fail_action: false
           allow_issue_writing: false
           artifact_name: zap_scan_${{ github.run_id }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: zap-baseline-${{ github.run_id }}
