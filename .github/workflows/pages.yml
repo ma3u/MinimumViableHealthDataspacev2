@@ -70,7 +70,7 @@ jobs:
         run: npm ci
 
       - name: Cache Next.js build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ui/.next/cache
           key: nextjs-site-${{ hashFiles('ui/package-lock.json') }}-${{ hashFiles('ui/src/**', 'ui/public/**') }}
@@ -210,7 +210,7 @@ jobs:
         run: npm ci
 
       - name: Cache Next.js build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ui/.next/cache
           key: nextjs-tests-${{ hashFiles('ui/package-lock.json') }}-${{ hashFiles('ui/src/**', 'ui/public/**') }}
@@ -218,7 +218,7 @@ jobs:
 
       - name: Cache Playwright browsers
         id: pw-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('ui/package-lock.json') }}
