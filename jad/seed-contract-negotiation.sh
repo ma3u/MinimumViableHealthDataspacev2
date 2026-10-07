@@ -64,7 +64,7 @@ DSP_BASE="http://controlplane:8082/api/dsp"
 # The control plane signals the siglet, per participant context, as upstream
 # jad's DataTransferEndToEndTest registers it. The data plane's own
 # /api/control/v1/dataflows answers 404 on the 0.18 launcher (#542).
-SIGLET_SIGNALING_URL="http://siglet:8081/api/v1"
+SIGLET_SIGNALING_URL="${SIGLET_SIGNALING_URL:-http://siglet:8081/api/v1}"   # Azure: http://mvhd-siglet:8081/api/v1
 
 # JSON-LD context
 EDC_CTX="https://w3id.org/edc/connector/management/v2"

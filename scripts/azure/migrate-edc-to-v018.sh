@@ -5,7 +5,7 @@
 #   migrate-edc-to-v018.sh check              read-only: what each app runs
 #   migrate-edc-to-v018.sh backup             save every app's YAML first
 #   migrate-edc-to-v018.sh app <name>         move one app
-#   migrate-edc-to-v018.sh ui                 the UI asks for v5beta
+#   migrate-edc-to-v018.sh ui                 the UI asks for v5beta and knows the DSP base
 #   migrate-edc-to-v018.sh rollback <name>    put one app back from its backup
 #
 #   <name>: controlplane | identityhub | issuerservice | dp-fhir | dp-omop
@@ -60,7 +60,15 @@ app_name() {
 }
 
 # The settings per service, as KEY=VALUE lines. A line starting with -D goes
-# into JAVA_TOOL_OPTIONS. Values from docker-compose.jad.yml, jad/identityhub.env
+# into JAVA_TOOL_OPTIONS; UNSET=<name> removes that variable.
+#
+# The control plane's DSP settings match docker-compose.jad.yml (#542): every
+# participant context may use every profile (without it .well-known/
+# dspace-version answers {"protocolVersions":[]}); `virtual` builds the
+# callback address with the participant context in it, which the fixed
+# EDC_DSP_CALLBACK_ADDRESS from 04-edc-services.sh lacked, so agreements went
+# to a 404; and the 0.18 IdentityHub accepts only the scope alias
+# org.eclipse.dspace.dcp.vc.type. Values from docker-compose.jad.yml, jad/identityhub.env
 # and jad/issuerservice.env, hosts rewritten to the Container App names.
 settings() {
   case "$1" in
@@ -75,24 +83,27 @@ EDC_ENCRYPTION_AES_KEY_ALIAS=aes-key-alias
 EDC_EVENTS_NATS_URL=${NATS_URL}
 EDC_EVENTS_NATS_STREAM=edc-events
 EDC_EVENTS_NATS_STREAM_CREATE=true
+EDC_DSP_PROFILES_ENABLE_ALL=true
+WEB_HTTP_PROTOCOL_VIRTUAL=true
+UNSET=EDC_DSP_CALLBACK_ADDRESS
 EDC_IAM_DCP_SCOPES_MEMBERSHIP_ID=membership-scope
 EDC_IAM_DCP_SCOPES_MEMBERSHIP_TYPE=DEFAULT
-EDC_IAM_DCP_SCOPES_MEMBERSHIP_VALUE=org.eclipse.edc.vc.type:MembershipCredential:read
+EDC_IAM_DCP_SCOPES_MEMBERSHIP_VALUE=org.eclipse.dspace.dcp.vc.type:MembershipCredential:read
 EDC_IAM_DCP_SCOPES_MANUFACTURER_ID=manufacturer-scope
 EDC_IAM_DCP_SCOPES_MANUFACTURER_TYPE=POLICY
-EDC_IAM_DCP_SCOPES_MANUFACTURER_VALUE=org.eclipse.edc.vc.type:ManufacturerCredential:read
+EDC_IAM_DCP_SCOPES_MANUFACTURER_VALUE=org.eclipse.dspace.dcp.vc.type:ManufacturerCredential:read
 -Dedc.iam.dcp.scopes.manufacturer.prefix-mapping=ManufacturerCredential
 -Dedc.iam.dcp.scopes.ehds-participant.id=ehds-participant-scope
 -Dedc.iam.dcp.scopes.ehds-participant.type=POLICY
--Dedc.iam.dcp.scopes.ehds-participant.value=org.eclipse.edc.vc.type:EHDSParticipantCredential:read
+-Dedc.iam.dcp.scopes.ehds-participant.value=org.eclipse.dspace.dcp.vc.type:EHDSParticipantCredential:read
 -Dedc.iam.dcp.scopes.ehds-participant.prefix-mapping=EHDSParticipantCredential
 -Dedc.iam.dcp.scopes.data-processing-purpose.id=data-processing-purpose-scope
 -Dedc.iam.dcp.scopes.data-processing-purpose.type=POLICY
--Dedc.iam.dcp.scopes.data-processing-purpose.value=org.eclipse.edc.vc.type:DataProcessingPurposeCredential:read
+-Dedc.iam.dcp.scopes.data-processing-purpose.value=org.eclipse.dspace.dcp.vc.type:DataProcessingPurposeCredential:read
 -Dedc.iam.dcp.scopes.data-processing-purpose.prefix-mapping=DataProcessingPurposeCredential
 -Dedc.iam.dcp.scopes.data-quality-label.id=data-quality-label-scope
 -Dedc.iam.dcp.scopes.data-quality-label.type=POLICY
--Dedc.iam.dcp.scopes.data-quality-label.value=org.eclipse.edc.vc.type:DataQualityLabelCredential:read
+-Dedc.iam.dcp.scopes.data-quality-label.value=org.eclipse.dspace.dcp.vc.type:DataQualityLabelCredential:read
 -Dedc.iam.dcp.scopes.data-quality-label.prefix-mapping=DataQualityLabelCredential
 -Dedc.iam.trusted-issuer.issuer.id=${ISSUER_DID}
 EOF
@@ -200,6 +211,7 @@ for line in spec:
         env['EDC_DATASOURCE_MEMBERSHIP_USER'] = {'name': 'EDC_DATASOURCE_MEMBERSHIP_USER', 'value': pg_admin}
         env['EDC_DATASOURCE_MEMBERSHIP_PASSWORD'] = {'name': 'EDC_DATASOURCE_MEMBERSHIP_PASSWORD', 'secretRef': 'pg-flex-password'}
     elif k == 'PORTS': ports = [int(p) for p in v.split()]
+    elif k == 'UNSET': env.pop(v, None)
     else: env[k] = {'name': k, 'value': v}
 # JAVA_TOOL_OPTIONS: keep what is there (the pool cap), replace our -D keys.
 jto = env.get('JAVA_TOOL_OPTIONS', {}).get('value', '')
@@ -281,9 +293,12 @@ cmd_app() {
 }
 
 cmd_ui() {
-  log "UI: EDC_MGMT_API_VERSION=v5beta"
+  # EDC_PROTOCOL_URL: the DSP base the hub's catalog request addresses a
+  # provider under (ui/src/app/api/negotiations/route.ts, #542).
+  log "UI: EDC_MGMT_API_VERSION=v5beta, EDC_PROTOCOL_URL"
   az containerapp update --name "$UI_APP" --resource-group "$RG" \
-    --set-env-vars "EDC_MGMT_API_VERSION=v5beta" -o none
+    --set-env-vars "EDC_MGMT_API_VERSION=v5beta" \
+    "EDC_PROTOCOL_URL=http://${CONTROLPLANE_APP}:8082/api/dsp" -o none
   wait_healthy "$UI_APP" "$(latest_rev "$UI_APP")"
 }
 

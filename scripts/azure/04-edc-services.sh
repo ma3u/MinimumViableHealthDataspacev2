@@ -52,6 +52,11 @@ ok "NATS container app"
 # targetPort to 8080 (web/health endpoints, matches local docker-compose) and
 # add 8081 (mgmt) / 8082 (protocol-DSP) / 8083 (control-API) as additional
 # port mappings via a YAML patch right after create.
+# DSP as docker-compose.jad.yml and upstream jad set it (#542): every
+# participant context may use every profile, and `virtual` builds the
+# callback address with the participant context in it. A fixed
+# EDC_DSP_CALLBACK_ADDRESS (http://<cp>:8082/api/dsp) lacks it, so a
+# provider's agreement went to a 404 and negotiations stopped at REQUESTED.
 log "Creating Control Plane container app..."
 az containerapp create \
   --name "$CONTROLPLANE_APP" --resource-group "$RG" --environment "$ACA_ENV" \
@@ -69,7 +74,8 @@ az containerapp create \
     "EDC_DATASOURCE_DEFAULT_PASSWORD=secretref:pg-flex-password" \
     "JAVA_TOOL_OPTIONS=${EDC_POOL_OPTS}" \
     "EDC_SQL_SCHEMA_AUTOCREATE=true" \
-    "EDC_DSP_CALLBACK_ADDRESS=http://${CONTROLPLANE_APP}:8082/api/dsp" \
+    "EDC_DSP_PROFILES_ENABLE_ALL=true" \
+    "WEB_HTTP_PROTOCOL_VIRTUAL=true" \
     "EDC_VAULT_HASHICORP_URL=${VAULT_URL:-}" \
     "EDC_VAULT_HASHICORP_TOKEN=${VAULT_ROOT_TOKEN}" \
     "EDC_NATS_CN_SUBSCRIBER_URL=nats://${NATS_APP}:4222" \

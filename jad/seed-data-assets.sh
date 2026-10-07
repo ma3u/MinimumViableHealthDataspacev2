@@ -493,7 +493,7 @@ echo "────────────────────────�
 # The control plane signals the siglet, per participant context, as upstream
 # jad's DataTransferEndToEndTest registers it. The data plane's own
 # /api/control/v1/dataflows answers 404 on the 0.18 launcher (#542).
-SIGLET_SIGNALING_URL="http://siglet:8081/api/v1"
+SIGLET_SIGNALING_URL="${SIGLET_SIGNALING_URL:-http://siglet:8081/api/v1}"   # Azure: http://mvhd-siglet:8081/api/v1
 
 register_dataplane() {
   local ctx_id="$1" label="$2"
