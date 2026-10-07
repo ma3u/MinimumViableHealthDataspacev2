@@ -134,6 +134,45 @@ else
 fi
 unset VAULT_TOKEN
 
+# ── 3b. Transfer types (#542) ───────────────────────────────────────────────
+# The siglet answers every start message for a transfer type it has no entry
+# for with "Data flow handler cannot handle this flow", and the transfer ends
+# TERMINATED. Compose mounts jad/siglet.toml; here the same file, with this
+# environment's data plane, is the secret siglet-toml mounted at /config, as
+# upstream jad mounts its siglet-config ConfigMap. The endpoint goes into the
+# consumer's EDR: the FHIR data plane's data API.
+SIGLET_PULL_ENDPOINT="${SIGLET_PULL_ENDPOINT:-http://${DP_FHIR_APP}:8186/api/data}"
+SIGLET_TOML=$(sed "s#^endpoint = .*#endpoint = \"${SIGLET_PULL_ENDPOINT}\"#" "${REPO_ROOT}/jad/siglet.toml")
+az containerapp secret set --name "$SIGLET_APP" --resource-group "$RG" \
+  --secrets "siglet-toml=${SIGLET_TOML}" -o none
+python3 - "$SIGLET_APP" "$RG" <<'PY2'
+import json, subprocess, sys, tempfile
+app, rg = sys.argv[1:3]
+doc = json.loads(subprocess.check_output(["az", "containerapp", "show", "-n", app, "-g", rg, "-o", "json"]))
+t = doc["properties"]["template"]
+vols = [v for v in t.get("volumes") or [] if v.get("name") != "siglet-config"]
+vols.append({"name": "siglet-config", "storageType": "Secret",
+             "secrets": [{"secretRef": "siglet-toml", "path": "siglet.toml"}]})
+t["volumes"] = vols
+c = t["containers"][0]
+mounts = [m for m in c.get("volumeMounts") or [] if m.get("volumeName") != "siglet-config"]
+mounts.append({"volumeName": "siglet-config", "mountPath": "/config"})
+c["volumeMounts"] = mounts
+env = [e for e in c.get("env") or [] if e.get("name") != "SIGLET_CONFIG_FILE"]
+env.append({"name": "SIGLET_CONFIG_FILE", "value": "/config/siglet.toml"})
+c["env"] = env
+# `show` returns secrets without values; sent back empty they would be wiped.
+doc["properties"]["configuration"].pop("secrets", None)
+for k in ("latestRevisionName", "latestReadyRevisionName", "latestRevisionFqdn",
+          "outboundIpAddresses", "eventStreamEndpoint", "runningStatus", "provisioningState"):
+    doc["properties"].pop(k, None)
+with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+    json.dump(doc, f)
+subprocess.check_call(["az", "containerapp", "update", "-n", app, "-g", rg, "--yaml", f.name, "-o", "none"])
+print("transfer types mounted at /config/siglet.toml")
+PY2
+ok "siglet HttpData-PULL -> ${SIGLET_PULL_ENDPOINT}"
+
 # Signaling 8081, token refresh 8082, management 8083 (siglet's defaults),
 # reachable inside the environment as http://mvhd-siglet:<port>.
 az containerapp ingress update --name "$SIGLET_APP" --resource-group "$RG" \

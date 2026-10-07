@@ -358,7 +358,7 @@ identityhub.url: http://${IDENTITYHUB_APP}:7082/api/identity
 identityhub.sts.url: http://${IDENTITYHUB_APP}:7084/api/sts/token
 identityhub.cs.url: http://${IDENTITYHUB_APP}:7085/api/credentials/v1/participants/%s
 controlplane.url: http://${CFM_CP_SHIM_APP}/api/mgmt
-controlplane.protocol.url: http://${CONTROLPLANE_APP}:8082/api/dsp/%s/2025-1"
+controlplane.protocol.url: http://${CONTROLPLANE_APP}:8082/api/dsp/%s/http-dsp-profile-2025-1"
 
 deploy_agent "$CFM_REG_AGENT_APP" "$CFM_REG_AGENT_IMAGE" regagent.env "${COMMON}
 keycloak.tokenUrl: ${KC_TOKEN_URL}

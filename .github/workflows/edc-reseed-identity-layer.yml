@@ -98,7 +98,8 @@ jobs:
           export ENV_ID LOCATION
           tar -czf /tmp/scripts.tgz scripts/azure/05-cp-participants.sh scripts/seed-identityhub-participants.sh \
             scripts/repair-cp-sts-secrets.sh scripts/seed-issuer-holders.sh \
-            scripts/request-participant-credentials.sh scripts/lib/cp-participant-pairs.py
+            scripts/request-participant-credentials.sh scripts/lib/cp-participant-pairs.py \
+            scripts/lib/dsp-protocol.sh
           SCRIPTS_TGZ_B64=$(base64 -w0 < /tmp/scripts.tgz)
           export SCRIPTS_TGZ_B64
           python3 - /tmp/job.yaml scripts/azure/reseed-identity-layer.sh <<'PY'
