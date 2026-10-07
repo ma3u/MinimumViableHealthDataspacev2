@@ -4,7 +4,7 @@
     {
       "advisory": "GHSA-vfj7-8cjw-p6xm",
       "package": "braces",
-      "reason": "No patched version exists (braces <= 3.0.3, last release 2024). Reached through @scalar/api-client and @scalar/components -> @headlessui/tailwindcss -> tailwindcss 3 -> micromatch/chokidar/fast-glob. braces expands glob patterns at build time; no request path passes user input to it.",
+      "reason": "No patched version exists (braces <= 3.0.3, last release 2024). Dev only since Tailwind 4 (#443): the one path left is eslint-config-next 15 -> @next/eslint-plugin-next -> fast-glob -> micromatch -> braces, so the pre-push gate (--omit=dev) no longer sees it and only Dependency Audit needs this entry. braces expands glob patterns when ESLint runs; nothing at runtime reaches it. @next/eslint-plugin-next 16.4 still pins fast-glob 3.3.1, so the eslint-config-next 16 migration does not remove it either.",
       "issue": 435,
       "expires": "2026-11-15"
     }
