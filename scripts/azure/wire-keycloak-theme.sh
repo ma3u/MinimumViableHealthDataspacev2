@@ -9,6 +9,7 @@
 # The realm file (jad/keycloak-realm.json) is imported only when the realm is
 # created, so a running realm gets loginTheme and displayName from here.
 # Deploying the image restarts Keycloak: sign-in is away for about a minute.
+# The image is an optimized build and runs `kc.sh start --optimized` (#577).
 # The realm is set only after the new revision answers, because a realm that
 # names a theme its Keycloak does not have falls back to the default.
 set -euo pipefail
@@ -72,8 +73,37 @@ az acr build --registry "$ACR_NAME" --image "keycloak-ehds:${KEYCLOAK_VERSION}-$
   --no-logs -o none
 ok "image built"
 
+# The image is built ahead (Dockerfile), so Keycloak starts with
+# `start --optimized` in the prod profile rather than `start-dev` (#577).
+# `az containerapp update --args` reads --optimized as its own flag, hence the
+# definition round trip. KC_PROXY went with Keycloak 25; KC_PROXY_HEADERS does
+# its job. The previous definition is kept for rollback (secrets are not in it).
 log "Deploying it to $KEYCLOAK_APP (Keycloak restarts)"
-az containerapp update --name "$KEYCLOAK_APP" --resource-group "$RG" --image "$IMAGE" -o none
+BACKUP_DIR="${HOME}/.mvhd/keycloak-rollback"
+mkdir -p "$BACKUP_DIR" && chmod 700 "$BACKUP_DIR"
+python3 - "$KEYCLOAK_APP" "$RG" "$IMAGE" "$BACKUP_DIR" <<'PY'
+import json, os, subprocess, sys, tempfile, time
+app, rg, image, backup_dir = sys.argv[1:5]
+doc = json.loads(subprocess.check_output(["az", "containerapp", "show", "-n", app, "-g", rg, "-o", "json"]))
+backup = os.path.join(backup_dir, time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + ".json")
+with open(os.open(backup, os.O_WRONLY | os.O_CREAT, 0o600), "w") as f:
+    json.dump(doc, f)
+c = doc["properties"]["template"]["containers"][0]
+c["image"] = image
+c["command"] = ["/opt/keycloak/bin/kc.sh"]
+c["args"] = ["start", "--optimized"]
+c["env"] = [e for e in c.get("env") or [] if e.get("name") != "KC_PROXY"]
+# `show` returns secrets without values; sent back empty they would be wiped.
+doc["properties"]["configuration"].pop("secrets", None)
+for k in ("latestRevisionName", "latestReadyRevisionName", "latestRevisionFqdn",
+          "outboundIpAddresses", "eventStreamEndpoint", "runningStatus", "provisioningState"):
+    doc["properties"].pop(k, None)
+with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+    json.dump(doc, f)
+subprocess.check_call(["az", "containerapp", "update", "-n", app, "-g", rg, "--yaml", f.name, "-o", "none"])
+os.unlink(f.name)
+print(f"previous definition: {backup}")
+PY
 
 log "Waiting for Keycloak"
 for _ in $(seq 1 60); do
