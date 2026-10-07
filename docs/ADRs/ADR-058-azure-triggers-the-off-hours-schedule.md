@@ -1,6 +1,6 @@
 # ADR-058: Azure triggers the off-hours stop and start, as a managed identity
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-07, Matthias Buchhorn)
 **Date:** 2026-10-07
 **Amends:** [ADR-053](ADR-053-everything-stops-off-hours.md) (what stops and in which order is unchanged; who triggers it changes)
 **Relates to:** [ADR-029](ADR-029-dependency-version-pinning.md), [ADR-036](ADR-036-operator-secrets-in-key-vault.md), [ADR-041](ADR-041-managed-postgres-on-azure-containerised-locally.md)
