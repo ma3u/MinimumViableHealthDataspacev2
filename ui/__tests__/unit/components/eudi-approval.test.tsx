@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 
 // qrcode runs in the browser via canvas (unavailable in jsdom) — mock it so the
 // QR <img> renders deterministically; the interactive approval is what we test.
@@ -20,16 +26,24 @@ afterEach(() => {
 });
 
 describe("EudiApprovalFlow (interactive approval)", () => {
-  it("register: trust → review → success → onComplete", () => {
+  it("register: dashboard → request → consent → code → sent → onComplete", () => {
     const onComplete = vi.fn();
     render(<EudiApprovalFlow mode="register" onComplete={onComplete} />);
-    expect(screen.getByText(/Do you trust EHDS/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Yes, continue" }));
-    expect(screen.getByText(/Review the request/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Share" }));
-    expect(screen.getByText(/Success/i)).toBeInTheDocument();
+    expect(screen.getByText("Digital ID")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Scan QR code" }));
+    expect(
+      screen.getByText(/This service is requesting data/i),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(
+      screen.getByText(/These data will be transferred/i),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByText(/Enter Digital ID code/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Transfer data" }));
+    expect(screen.getByText(/Data sent successfully/i)).toBeInTheDocument();
     expect(onComplete).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Go to wallet" }));
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(onComplete).toHaveBeenCalledTimes(1);
   });
 
@@ -40,7 +54,7 @@ describe("EudiApprovalFlow (interactive approval)", () => {
     );
   });
 
-  it("Cancel fires onCancel", () => {
+  it("Reject fires onCancel", () => {
     const onCancel = vi.fn();
     render(
       <EudiApprovalFlow
@@ -49,7 +63,7 @@ describe("EudiApprovalFlow (interactive approval)", () => {
         onCancel={onCancel}
       />,
     );
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    fireEvent.click(screen.getByRole("button", { name: "Reject" }));
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 });
@@ -85,9 +99,13 @@ describe("HomeRegisterCta", () => {
     );
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     // drive the wallet to completion → router.push("/patient") + persona set
-    fireEvent.click(screen.getByRole("button", { name: "Yes, continue" }));
-    fireEvent.click(screen.getByRole("button", { name: "Share" }));
-    fireEvent.click(screen.getByRole("button", { name: "Go to wallet" }));
+    fireEvent.click(screen.getByRole("button", { name: "Scan QR code" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Transfer data" }));
+    // the phone's Close, not the dialog's close cross
+    const phone = screen.getByRole("group", { name: /Approve d-you register/ });
+    fireEvent.click(within(phone).getByRole("button", { name: "Close" }));
     expect(push).toHaveBeenCalledWith("/patient");
     expect(sessionStorage.getItem("demo-persona")).toBe("patient1");
   });

@@ -37,9 +37,11 @@ function stubFetch(demo: { ok: boolean; status?: number; sid?: string }) {
 
 /** Tap through the register flow on the simulated phone. */
 function approveOnPhone() {
-  fireEvent.click(screen.getByRole("button", { name: "Yes, continue" }));
-  fireEvent.click(screen.getByRole("button", { name: "Share" }));
-  fireEvent.click(screen.getByRole("button", { name: "Go to wallet" }));
+  fireEvent.click(screen.getByRole("button", { name: "Scan QR code" }));
+  fireEvent.click(screen.getByRole("button", { name: "Next" }));
+  fireEvent.click(screen.getByRole("button", { name: "Next" }));
+  fireEvent.click(screen.getByRole("button", { name: "Transfer data" }));
+  fireEvent.click(screen.getByRole("button", { name: "Close" }));
 }
 
 beforeEach(() => {

@@ -1454,9 +1454,15 @@ test.describe("S · Interactive EUDI Wallet approval (static)", () => {
     await expect(dialog.locator('img[alt*="QR code"]')).toBeVisible({
       timeout: T,
     });
-    await tap(page, "Yes, continue");
-    await tap(page, "Share");
-    await tap(page, "Go to wallet");
+    await tap(page, "Scan QR code");
+    await tap(page, "Next");
+    await tap(page, "Next");
+    await tap(page, "Transfer data");
+    // the phone's Close, not the dialog's close cross
+    await dialog
+      .getByRole("group", { name: /Approve d-you register/ })
+      .getByRole("button", { name: "Close" })
+      .click();
     await page.waitForURL(/\/patient(\/|$|\?)/, { timeout: T });
   });
 
@@ -1470,8 +1476,10 @@ test.describe("S · Interactive EUDI Wallet approval (static)", () => {
     await expect(
       page.getByText(/only available on the live deployment/i),
     ).toHaveCount(0);
-    await tap(page, "Approve");
-    await tap(page, "Done");
+    await tap(page, "Next");
+    await tap(page, "Next");
+    await tap(page, "Transfer data");
+    await tap(page, "Close");
     await page.waitForURL(/\/patient(\/|$|\?)/, { timeout: T });
   });
 
