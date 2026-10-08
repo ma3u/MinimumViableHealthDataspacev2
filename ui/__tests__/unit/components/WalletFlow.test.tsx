@@ -11,34 +11,49 @@ import { insurer, donationSources, personalHealth } from "@/lib/journey-config";
 afterEach(() => vi.useRealTimers());
 
 describe("wallet flows", () => {
-  it("REGISTER cycles trust → review → success", () => {
+  it("REGISTER cycles dashboard → request → consent → code → sent", () => {
     vi.useFakeTimers();
-    render(<WalletFlow loop steps={REGISTER_STEPS} />);
-    expect(screen.getByText(/Do you trust EHDS/i)).toBeInTheDocument();
-    expect(screen.getByText("Yes, continue")).toBeInTheDocument();
+    render(<WalletFlow loop theme="dyou" steps={REGISTER_STEPS} />);
+    expect(screen.getByText("Digital ID")).toBeInTheDocument();
+    expect(screen.getByText("Scan QR code")).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(2700);
+    });
+    expect(
+      screen.getByText(/This service is requesting data/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Next")).toBeInTheDocument();
     act(() => {
       vi.advanceTimersByTime(3300);
     });
-    expect(screen.getByText(/Review the request/i)).toBeInTheDocument();
-    expect(screen.getByText("Share")).toBeInTheDocument();
+    expect(
+      screen.getByText(/These data will be transferred/i),
+    ).toBeInTheDocument();
     act(() => {
       vi.advanceTimersByTime(3700);
     });
-    expect(screen.getByText(/Success/i)).toBeInTheDocument();
-    expect(screen.getByText("Go to wallet")).toBeInTheDocument();
+    expect(screen.getByText(/Enter Digital ID code/i)).toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(2300);
+    });
+    expect(screen.getByText(/Data sent successfully/i)).toBeInTheDocument();
+    expect(REGISTER_STEPS).toHaveLength(5);
   });
 
-  it("LOGIN is a 2-step returning flow that skips the trust step", () => {
+  it("LOGIN is the same presentation without the dashboard in front", () => {
     vi.useFakeTimers();
-    render(<WalletFlow loop steps={LOGIN_STEPS} />);
-    expect(screen.getByText(/Sign in to EHDS/i)).toBeInTheDocument();
-    expect(screen.getByText(/shared with EHDS before/i)).toBeInTheDocument();
-    expect(screen.getByText("Approve")).toBeInTheDocument();
+    render(<WalletFlow loop theme="dyou" steps={LOGIN_STEPS} />);
+    expect(
+      screen.getByText(/This service is requesting data/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText("European Health Dataspace")).toBeInTheDocument();
     act(() => {
-      vi.advanceTimersByTime(2500);
+      vi.advanceTimersByTime(3300);
     });
-    expect(screen.getByText(/Welcome back/i)).toBeInTheDocument();
-    expect(LOGIN_STEPS).toHaveLength(2);
+    expect(
+      screen.getByText(/These data will be transferred/i),
+    ).toBeInTheDocument();
+    expect(LOGIN_STEPS).toHaveLength(4);
   });
 
   it("EHR transfer authorises an ePA pull to the EHDS portal", () => {
@@ -77,15 +92,20 @@ describe("wallet flows", () => {
         interactive
         loop={false}
         steps={LOGIN_STEPS}
+        theme="dyou"
         onComplete={onComplete}
         onCancel={onCancel}
       />,
     );
-    expect(screen.getByText(/Sign in to EHDS/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Approve" }));
-    expect(screen.getByText(/Welcome back/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/This service is requesting data/i),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("button", { name: "Transfer data" }));
+    expect(screen.getByText(/Data sent successfully/i)).toBeInTheDocument();
     expect(onComplete).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Done" }));
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(onComplete).toHaveBeenCalledTimes(1);
     expect(onCancel).not.toHaveBeenCalled();
   });
