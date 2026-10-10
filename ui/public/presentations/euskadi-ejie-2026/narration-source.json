@@ -7,7 +7,10 @@
     {
       "id": "cover",
       "cues": [
-        { "es": "Buenos días. Egun on.", "eu": "Egun on." },
+        {
+          "es": "Buenos días. Egun on.",
+          "eu": "Egun on."
+        },
         {
           "es": "Gracias por la invitación.",
           "eu": "Eskerrik asko gonbidapenagatik."
@@ -75,7 +78,10 @@
     {
       "id": "q2",
       "cues": [
-        { "es": "Cuatro lecciones.", "eu": "Lau ikasgai." },
+        {
+          "es": "Cuatro lecciones.",
+          "eu": "Lau ikasgai."
+        },
         {
           "es": "Una: construir sobre lo que ya existe, como FHIR, SNOMED CT, CIE-10, OMOP y HealthDCAT-AP.",
           "eu": "Bat: dagoeneko dagoenaren gainean eraiki, hala nola FHIR, SNOMED CT, GNS-10, OMOP eta HealthDCAT-AP."
@@ -244,6 +250,14 @@
         {
           "es": "Después, la operación cuesta entre un quince y un veinticinco por ciento al año.",
           "eu": "Ondoren, eragiketak urtean ehuneko hamabost eta hogeita bost artean kostatzen du."
+        },
+        {
+          "es": "Para el alojamiento planificamos tres entornos, producción, pruebas y desarrollo, con unos mil euros al mes cada uno: treinta y seis mil euros al año.",
+          "eu": "Ostatatzerako hiru ingurune aurreikusten ditugu, produkzioa, probak eta garapena, bakoitza hilean mila euro inguru: urtean hogeita hamasei mila euro."
+        },
+        {
+          "es": "A eso se suman las herramientas de desarrollo y del ciclo de vida del software.",
+          "eu": "Horri softwarearen bizi-zikloko eta garapeneko tresnak gehitzen zaizkio."
         }
       ]
     },
@@ -459,7 +473,10 @@
     {
       "id": "discussion",
       "cues": [
-        { "es": "Eskerrik asko. Gracias.", "eu": "Eskerrik asko." },
+        {
+          "es": "Eskerrik asko. Gracias.",
+          "eu": "Eskerrik asko."
+        },
         {
           "es": "Si queréis seguir la conversación, escanead el código: abre mi perfil de LinkedIn.",
           "eu": "Elkarrizketarekin jarraitu nahi baduzue, eskaneatu kodea: nire LinkedIn profila irekitzen du."

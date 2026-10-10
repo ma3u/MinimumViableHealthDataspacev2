@@ -442,22 +442,26 @@ def q7(prs):
         textbox(s, x + 0.35, 3.75, 3.4, 0.5, [text], 13, BODY)
     textbox(s, 0.6, 4.6, 6.0, 0.4, ["Basque regional pilot, our estimate"], 14, FAINT, bold=True)
     est = [
-        (TEAL, "€0.8 – 1.5M", "To build the pilot", "Engineering, hosting, onboarding."),
-        (RED, "15 – 25% per year", "To operate it", "About €120,000 – 375,000 a year."),
+        (TEAL, "€0.8 – 1.5M", "To build the pilot", "Engineering and onboarding."),
+        (RED, "15 – 25% a year", "To operate it", "Of the build cost: about €120,000 – 375,000 a year."),
+        (AMBER, "€3,000 a month", "Hosting: prod, test and dev",
+         "€1,000 per environment, €36,000 a year. Plus SDLC and developer tools."),
     ]
     for i, (accent, big, head, text) in enumerate(est):
-        x = 0.6 + i * 6.18
-        shape(s, MSO_SHAPE.ROUNDED_RECTANGLE, x, 5.0, 5.95, 1.85, NAVY)
+        x = 0.6 + i * 4.12
+        shape(s, MSO_SHAPE.ROUNDED_RECTANGLE, x, 5.0, 3.9, 1.85, NAVY)
         shape(s, MSO_SHAPE.RECTANGLE, x, 5.0, 0.12, 1.85, accent)
-        textbox(s, x + 0.4, 5.15, 5.3, 0.75, [big], 34, WHITE, bold=True)
-        textbox(s, x + 0.4, 5.95, 5.3, 0.4, [head], 16, AMBER, bold=True)
-        textbox(s, x + 0.4, 6.35, 5.3, 0.4, [text], 13, WHITE)
+        textbox(s, x + 0.35, 5.1, 3.4, 0.6, [big], 26, WHITE, bold=True)
+        textbox(s, x + 0.35, 5.72, 3.4, 0.35, [head], 15, AMBER, bold=True)
+        textbox(s, x + 0.35, 6.08, 3.4, 0.7, [text], 12, WHITE, spacing=1.05)
     sources(s, "catena-x.net  ·  cofinity-x.com  ·  operations: share of the build cost per year")
     notes(s, """[1:45]  Licence costs are close to zero, because the core stack is open source. The real costs are engineering, hosting and operations.
 
 For reference: Catena-X received more than 100 million euros of public funding. But that was for a whole industry. Each participant pays the operator between 1,500 and 71,000 euros a year.
 
-For a regional pilot in the Basque Country we estimate 0.8 to 1.5 million euros to build. Operations then cost about 15 to 25 percent of that every year. That is roughly 120,000 to 375,000 euros a year.""")
+For a regional pilot in the Basque Country we estimate 0.8 to 1.5 million euros to build. Operations then cost about 15 to 25 percent of that every year. That is roughly 120,000 to 375,000 euros a year.
+
+For hosting we plan three environments: production, test and development, at about 1,000 euros a month each. That is 3,000 euros a month, or 36,000 euros a year. On top of that come the SDLC and developer tools: CI/CD, repositories, testing and security scanning.""")
 
 
 def q8(prs):
