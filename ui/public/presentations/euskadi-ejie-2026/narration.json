@@ -40,25 +40,68 @@
       "id": "overview",
       "audio": "audio/slide-2.mp3",
       "subtitles": "subtitles/slide-2.eu.vtt",
-      "duration": 10.077,
+      "duration": 36.502,
+      "spoken": "43d404f899d581c5",
       "cues": [
         {
           "start": 0.0,
-          "end": 4.156,
+          "end": 3.518,
           "eu": "Hemen dituzue zortzi erantzunak, orrialde bakar batean."
         },
         {
-          "start": 4.156,
-          "end": 7.906,
-          "eu": "Diapositiba bakarra gogoratzen baduzue, izan dadila hau."
+          "start": 3.518,
+          "end": 5.991,
+          "eu": "Bat: kultura, ez teknologia.",
+          "frag": 0
         },
         {
-          "start": 7.906,
-          "end": 10.077,
-          "eu": "Goazen banan-banan!"
+          "start": 5.991,
+          "end": 10.112,
+          "eu": "Bi: dauden estandarren gainean eraiki.",
+          "frag": 1
+        },
+        {
+          "start": 10.112,
+          "end": 13.804,
+          "eu": "Hiru: estandar irekiak, publikoan erabakiak.",
+          "frag": 2
+        },
+        {
+          "start": 13.804,
+          "end": 17.276,
+          "eu": "Lau: Catena-Xen eredu operatiboa.",
+          "frag": 3
+        },
+        {
+          "start": 17.276,
+          "end": 22.605,
+          "eu": "Bost: protokoloa egonkorra da; ingurune seguruak, oraindik gazteak.",
+          "frag": 4
+        },
+        {
+          "start": 22.605,
+          "end": 25.67,
+          "eu": "Sei: arauak eta eragiketa bereiztu.",
+          "frag": 5
+        },
+        {
+          "start": 25.67,
+          "end": 29.35,
+          "eu": "Zazpi: ez dago lizentziarik; jendea ordaintzen da.",
+          "frag": 6
+        },
+        {
+          "start": 29.35,
+          "end": 32.404,
+          "eu": "Zortzi: zortzitik hamabi pertsonara pilotu baterako.",
+          "frag": 7
+        },
+        {
+          "start": 32.404,
+          "end": 36.502,
+          "eu": "Diapositiba bakarra gogoratzen baduzue, izan dadila hau. Goazen banan-banan!"
         }
-      ],
-      "spoken": "e6b656fba710498d"
+      ]
     },
     {
       "id": "q1",
@@ -176,37 +219,51 @@
       "id": "q4",
       "audio": "audio/slide-6.mp3",
       "subtitles": "subtitles/slide-6.eu.vtt",
-      "duration": 28.235,
+      "duration": 44.583,
+      "spoken": "ab6653801ac29c9b",
       "cues": [
         {
           "start": 0.0,
-          "end": 7.105,
+          "end": 7.175,
           "eu": "Arkitektura: Catena-Xen eredu operatiboa. Zerbitzu bakoitza, arduradun argi batekin.",
           "frag": 0
         },
         {
-          "start": 7.105,
-          "end": 16.091,
-          "eu": "Europako erregelamenduak dagoeneko definitzen ditu rolak: sarbide-erakundea, titularrak, erabiltzaileak eta ingurune seguruak."
-        },
-        {
-          "start": 16.091,
-          "end": 18.901,
-          "eu": "Baina ez du esaten nork kudeatzen duen egunero.",
+          "start": 7.175,
+          "end": 14.408,
+          "eu": "Goian, Europar Batasuna: Europako katalogoa, bideratzea eta kontrolak. Legez itxia.",
           "frag": 1
         },
         {
-          "start": 18.901,
-          "end": 25.02,
+          "start": 14.408,
+          "end": 20.968,
+          "eu": "Azpian, estatu kidea: datu-baimenak, ikuskapena eta tasak. Hori ez da eskuordetzen.",
+          "frag": 2
+        },
+        {
+          "start": 20.968,
+          "end": 27.702,
+          "eu": "Erregelamenduak rol horiek guztiak definitzen ditu. Baina ez du esaten nork kudeatzen duen sistema egunero.",
+          "frag": 3
+        },
+        {
+          "start": 27.702,
+          "end": 34.075,
           "eu": "Nork konektatzen du ospitale berri bat? Nork erantzuten du goizeko hiruretan zerbaitek huts egiten duenean?"
         },
         {
-          "start": 25.02,
-          "end": 28.235,
-          "eu": "Hori da geruza laranja: enpresa operadorea."
+          "start": 34.075,
+          "end": 38.035,
+          "eu": "Hori da geruza laranja: enpresa operadorea. Eta irekita dago.",
+          "frag": 4
+        },
+        {
+          "start": 38.035,
+          "end": 44.583,
+          "eu": "Eta hori guztia, ospitaleen, ikertzaileen eta herritarren zerbitzura.",
+          "frag": 5
         }
-      ],
-      "spoken": "7113584efc2e95e9"
+      ]
     },
     {
       "id": "q5",
@@ -631,7 +688,8 @@
         {
           "start": 2.485,
           "end": 7.651,
-          "eu": "Hitz egiten jarraituko dugu? Eskaneatu kodea: nire LinkedIn profila irekitzen du."
+          "eu": "Hitz egiten jarraituko dugu? Eskaneatu kodea: nire LinkedIn profila irekitzen du.",
+          "frag": 0
         },
         {
           "start": 7.651,
@@ -642,19 +700,19 @@
           "start": 10.426,
           "end": 14.35,
           "eu": "Zein erabilera-kasu batek edo bik erakutsiko lukete balioa lehenik?",
-          "frag": 0
+          "frag": 1
         },
         {
           "start": 14.35,
           "end": 18.437,
           "eu": "Nork finkatuko ditu arauak, eta nork kudeatuko ditu zerbitzuak?",
-          "frag": 1
+          "frag": 2
         },
         {
           "start": 18.437,
           "end": 21.131,
           "eu": "Zein ospitale batuko litzateke lehen lan-taldera?",
-          "frag": 2
+          "frag": 3
         }
       ],
       "spoken": "f40320ae50d466f5"
