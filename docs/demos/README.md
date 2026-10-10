@@ -1,14 +1,15 @@
 # Demo material
 
-Everything for showing the demonstrator to a ministry or an access body. Two
-decks, two guides, two generators.
+Everything for showing the demonstrator to a ministry or an access body. Three
+decks, two guides, three generators.
 
 ## Decks
 
-| File                                                             | Slides | When to use it                                                                                                                                                                 |
-| ---------------------------------------------------------------- | -----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`spain-ehds-5-slides.pptx`](spain-ehds-5-slides.pptx)           |  **5** | A short slot, or leaving something behind. **Secondary use**: the problem, what the Regulation puts in place, the demonstrated journey, the proposed operating model, the ask. |
-| [`spain-ehds-ministry-deck.pptx`](spain-ehds-ministry-deck.pptx) | **24** | The full story, primary and secondary use: personas, the federated architecture, integration, outcomes, roadmap, and five closing slides on who operates it.                   |
+| File                                                             | Slides | When to use it                                                                                                                                                                                                                   |
+| ---------------------------------------------------------------- | -----: | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`spain-ehds-5-slides.pptx`](spain-ehds-5-slides.pptx)           |  **5** | A short slot, or leaving something behind. **Secondary use**: the problem, what the Regulation puts in place, the demonstrated journey, the proposed operating model, the ask.                                                   |
+| [`spain-ehds-ministry-deck.pptx`](spain-ehds-ministry-deck.pptx) | **24** | The full story, primary and secondary use: personas, the federated architecture, integration, outcomes, roadmap, and five closing slides on who operates it.                                                                     |
+| [`basque-ehds-15min.pptx`](basque-ehds-15min.pptx)               | **11** | 15 minutes for the Basque Government's Department of Health. Answers its eight questions in order: challenges, lessons, decision criteria, architecture, maturity, governance, costs, team. Simple English, timed speaker notes. |
 
 The five-slide deck is not a subset of the long one. It is a separate file built
 by a generator, so the long deck is never edited to produce it and nothing gets
@@ -24,10 +25,11 @@ rather than the 1.3:1 original, which on a 16:9 slide can only be shown at half
 width and is then unreadable from the back of a room. The 1.3:1 version stays
 the right one for a document or an issue, where height is free.
 
-| Generator                                                        | What it does                                                                             |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| [`build-5-slide-deck.py`](build-5-slide-deck.py)                 | Builds the five-slide deck from scratch. Safe to re-run; it overwrites its own output.   |
-| [`add-operating-model-slides.py`](add-operating-model-slides.py) | Inserted the five closing slides into the long deck. One-shot, and refuses to run twice. |
+| Generator                                                        | What it does                                                                                                                                            |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`build-5-slide-deck.py`](build-5-slide-deck.py)                 | Builds the five-slide deck from scratch. Safe to re-run; it overwrites its own output.                                                                  |
+| [`add-operating-model-slides.py`](add-operating-model-slides.py) | Inserted the five closing slides into the long deck. One-shot, and refuses to run twice.                                                                |
+| [`build-basque-deck.py`](build-basque-deck.py)                   | Builds the Basque deck from scratch. Takes the Basque Country photo from the long deck and the layer diagram from `../diagrams/ehds-layers-simple.png`. |
 
 Both reproduce the long deck's house style, which was read back out of its
 existing slides rather than invented: navy rule across the top, 30pt bold navy
