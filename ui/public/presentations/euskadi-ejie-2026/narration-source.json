@@ -37,12 +37,48 @@
           "eu": "Hemen dituzue zortzi erantzunak, orrialde bakar batean."
         },
         {
-          "es": "Si os quedáis con una sola diapositiva, que sea esta.",
-          "eu": "Diapositiba bakarra gogoratzen baduzue, izan dadila hau."
+          "es": "Uno: la cultura, no la tecnología.",
+          "eu": "Bat: kultura, ez teknologia.",
+          "frag": 0
         },
         {
-          "es": "¡Vamos una por una!",
-          "eu": "Goazen banan-banan!"
+          "es": "Dos: construir sobre los estándares que ya existen.",
+          "eu": "Bi: dauden estandarren gainean eraiki.",
+          "frag": 1
+        },
+        {
+          "es": "Tres: estándares abiertos, decididos en público.",
+          "eu": "Hiru: estandar irekiak, publikoan erabakiak.",
+          "frag": 2
+        },
+        {
+          "es": "Cuatro: el modelo operativo de Catena-X.",
+          "eu": "Lau: Catena-Xen eredu operatiboa.",
+          "frag": 3
+        },
+        {
+          "es": "Cinco: el protocolo es estable; los entornos seguros, todavía jóvenes.",
+          "eu": "Bost: protokoloa egonkorra da; ingurune seguruak, oraindik gazteak.",
+          "frag": 4
+        },
+        {
+          "es": "Seis: separar las reglas de la operación.",
+          "eu": "Sei: arauak eta eragiketa bereiztu.",
+          "frag": 5
+        },
+        {
+          "es": "Siete: no hay licencias; se paga a la gente.",
+          "eu": "Zazpi: ez dago lizentziarik; jendea ordaintzen da.",
+          "frag": 6
+        },
+        {
+          "es": "Ocho: de ocho a doce personas para un piloto.",
+          "eu": "Zortzi: zortzitik hamabi pertsonara pilotu baterako.",
+          "frag": 7
+        },
+        {
+          "es": "Si os quedáis con una sola diapositiva, que sea esta. ¡Vamos una por una!",
+          "eu": "Diapositiba bakarra gogoratzen baduzue, izan dadila hau. Goazen banan-banan!"
         }
       ]
     },
@@ -140,21 +176,33 @@
           "frag": 0
         },
         {
-          "es": "El reglamento europeo ya define los roles: organismo de acceso, titulares, usuarios y entornos seguros.",
-          "eu": "Europako erregelamenduak dagoeneko definitzen ditu rolak: sarbide-erakundea, titularrak, erabiltzaileak eta ingurune seguruak."
+          "es": "Arriba, la Unión Europea: el catálogo europeo, el enrutamiento y los controles. Cerrado por ley.",
+          "eu": "Goian, Europar Batasuna: Europako katalogoa, bideratzea eta kontrolak. Legez itxia.",
+          "frag": 1
         },
         {
-          "es": "Pero no dice quién lo opera cada día.",
-          "eu": "Baina ez du esaten nork kudeatzen duen egunero.",
-          "frag": 1
+          "es": "Debajo, el Estado miembro: permisos de datos, supervisión y tasas. Eso no se delega.",
+          "eu": "Azpian, estatu kidea: datu-baimenak, ikuskapena eta tasak. Hori ez da eskuordetzen.",
+          "frag": 2
+        },
+        {
+          "es": "El reglamento define todos estos roles. Pero no dice quién opera el sistema cada día.",
+          "eu": "Erregelamenduak rol horiek guztiak definitzen ditu. Baina ez du esaten nork kudeatzen duen sistema egunero.",
+          "frag": 3
         },
         {
           "es": "¿Quién conecta un hospital nuevo? ¿Quién responde cuando algo falla a las tres de la mañana?",
           "eu": "Nork konektatzen du ospitale berri bat? Nork erantzuten du goizeko hiruretan zerbaitek huts egiten duenean?"
         },
         {
-          "es": "Esa es la capa naranja: la empresa operadora.",
-          "eu": "Hori da geruza laranja: enpresa operadorea."
+          "es": "Esa es la capa naranja: la empresa operadora. Y está abierta.",
+          "eu": "Hori da geruza laranja: enpresa operadorea. Eta irekita dago.",
+          "frag": 4
+        },
+        {
+          "es": "Y todo ello, al servicio de los hospitales, los investigadores y los ciudadanos.",
+          "eu": "Eta hori guztia, ospitaleen, ikertzaileen eta herritarren zerbitzura.",
+          "frag": 5
         }
       ]
     },
@@ -483,7 +531,8 @@
         },
         {
           "es": "¿Seguimos hablando? Escanead el código: abre mi perfil de LinkedIn.",
-          "eu": "Hitz egiten jarraituko dugu? Eskaneatu kodea: nire LinkedIn profila irekitzen du."
+          "eu": "Hitz egiten jarraituko dugu? Eskaneatu kodea: nire LinkedIn profila irekitzen du.",
+          "frag": 0
         },
         {
           "es": "Y para arrancar el debate, tres preguntas.",
@@ -492,17 +541,17 @@
         {
           "es": "¿Qué uno o dos casos de uso mostrarían valor primero?",
           "eu": "Zein erabilera-kasu batek edo bik erakutsiko lukete balioa lehenik?",
-          "frag": 0
+          "frag": 1
         },
         {
           "es": "¿Quién fijará las reglas, y quién operará los servicios?",
           "eu": "Nork finkatuko ditu arauak, eta nork kudeatuko ditu zerbitzuak?",
-          "frag": 1
+          "frag": 2
         },
         {
           "es": "¿Qué hospitales se unirían al primer grupo de trabajo?",
           "eu": "Zein ospitale batuko litzateke lehen lan-taldera?",
-          "frag": 2
+          "frag": 3
         }
       ]
     }
