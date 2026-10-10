@@ -40,8 +40,18 @@ def load_dotenv(path: pathlib.Path) -> None:
         os.environ.setdefault(k, v)
 
 
-for candidate in (ROOT / ".env", ROOT / "docs/.env", ROOT / "ui/.env"):
-    load_dotenv(candidate)
+def main_checkout() -> pathlib.Path:
+    """The main working tree, where the git-ignored .env lives when this runs in a worktree."""
+    common = ROOT / ".git"
+    if common.is_file():  # a worktree: .git is a file pointing into the main repository
+        gitdir = pathlib.Path(common.read_text().split("gitdir:", 1)[1].strip())
+        return gitdir.parent.parent.parent
+    return ROOT
+
+
+for base in dict.fromkeys((ROOT, main_checkout())):
+    for candidate in (base / ".env", base / "docs/.env", base / "ui/.env"):
+        load_dotenv(candidate)
 key = os.environ.get("ELEVENLABS_API_KEY")
 if not key:
     sys.exit("no ELEVENLABS_API_KEY in the environment or in .env")
