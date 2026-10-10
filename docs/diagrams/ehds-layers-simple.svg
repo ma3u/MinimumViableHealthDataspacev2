@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="800" viewBox="0 0 2400 800" font-family="Inter, Helvetica Neue, Helvetica, Arial, sans-serif">
+<rect width="2400" height="800" fill="#FFFFFF"/>
+<rect x="50" y="30" width="2300" height="165" rx="16" fill="#EDF3F9" stroke="#2471A3" stroke-opacity="0.3" stroke-width="1.5"/>
+<rect x="50" y="30" width="14" height="165" rx="7" fill="#2471A3"/>
+<text x="96" y="88" font-size="34" fill="#16324F" font-weight="700" text-anchor="start">European Union</text>
+<text x="2300" y="84" font-size="27" fill="#2471A3" font-weight="700" text-anchor="end">Closed by law</text>
+<text x="2300" y="118" font-size="19" fill="#9AA7B3" font-weight="normal" text-anchor="end">Catena-X: the Association and CSP-B</text>
+<rect x="96" y="121" width="272" height="50" rx="25" fill="#FFFFFF" stroke="#2471A3" stroke-opacity="0.5"/>
+<text x="232" y="154" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">EU dataset catalogue</text>
+<rect x="384" y="121" width="272" height="50" rx="25" fill="#FFFFFF" stroke="#2471A3" stroke-opacity="0.5"/>
+<text x="520" y="154" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Cross-border routing</text>
+<rect x="672" y="121" width="239" height="50" rx="25" fill="#FFFFFF" stroke="#2471A3" stroke-opacity="0.5"/>
+<text x="792" y="154" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Compliance checks</text>
+<rect x="50" y="215" width="2300" height="165" rx="16" fill="#EBF6F2" stroke="#148F77" stroke-opacity="0.3" stroke-width="1.5"/>
+<rect x="50" y="215" width="14" height="165" rx="7" fill="#148F77"/>
+<text x="96" y="273" font-size="34" fill="#16324F" font-weight="700" text-anchor="start">Member State</text>
+<text x="2300" y="269" font-size="27" fill="#148F77" font-weight="700" text-anchor="end">Cannot be delegated</text>
+<text x="2300" y="303" font-size="19" fill="#9AA7B3" font-weight="normal" text-anchor="end">Catena-X: nothing, EHDS adds this</text>
+<rect x="96" y="306" width="173" height="50" rx="25" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.5"/>
+<text x="182" y="339" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Data permit</text>
+<rect x="285" y="306" width="173" height="50" rx="25" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.5"/>
+<text x="372" y="339" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Enforcement</text>
+<rect x="474" y="306" width="96" height="50" rx="25" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.5"/>
+<text x="522" y="339" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Fees</text>
+<rect x="586" y="306" width="162" height="50" rx="25" fill="#FFFFFF" stroke="#148F77" stroke-opacity="0.5"/>
+<text x="667" y="339" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Controller</text>
+<rect x="50" y="400" width="2300" height="185" rx="16" fill="#FBEFE1" stroke="#CA6F1E" stroke-opacity="0.9" stroke-width="3"/>
+<rect x="50" y="400" width="14" height="185" rx="7" fill="#CA6F1E"/>
+<text x="96" y="458" font-size="38" fill="#16324F" font-weight="700" text-anchor="start">The Operating Company</text>
+<text x="2300" y="454" font-size="40" fill="#CA6F1E" font-weight="700" text-anchor="end">OPEN</text>
+<text x="2300" y="488" font-size="19" fill="#9AA7B3" font-weight="normal" text-anchor="end">Catena-X: Cofinity-X</text>
+<rect x="96" y="511" width="162" height="50" rx="25" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.5"/>
+<text x="177" y="544" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Onboarding</text>
+<rect x="274" y="511" width="261" height="50" rx="25" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.5"/>
+<text x="404" y="544" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Catalogue and label</text>
+<rect x="551" y="511" width="250" height="50" rx="25" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.5"/>
+<text x="676" y="544" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Secure environment</text>
+<rect x="817" y="511" width="151" height="50" rx="25" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.5"/>
+<text x="892" y="544" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Incidents</text>
+<rect x="984" y="511" width="129" height="50" rx="25" fill="#FFFFFF" stroke="#CA6F1E" stroke-opacity="0.5"/>
+<text x="1048" y="544" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Support</text>
+<rect x="50" y="610" width="2300" height="118" rx="16" fill="#F5F1F8" stroke="#7D3C98" stroke-opacity="0.3"/>
+<rect x="50" y="610" width="14" height="118" rx="7" fill="#7D3C98"/>
+<text x="96" y="655" font-size="26" fill="#5A6B7B" font-weight="700" text-anchor="start">Who it serves</text>
+<rect x="356" y="632" width="261" height="50" rx="25" fill="#FFFFFF" stroke="#7D3C98" stroke-opacity="0.5"/>
+<text x="486" y="665" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Health data holders</text>
+<rect x="633" y="632" width="338" height="50" rx="25" fill="#FFFFFF" stroke="#7D3C98" stroke-opacity="0.5"/>
+<text x="802" y="665" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Researchers and regulators</text>
+<rect x="987" y="632" width="140" height="50" rx="25" fill="#FFFFFF" stroke="#7D3C98" stroke-opacity="0.5"/>
+<text x="1057" y="665" font-size="21" fill="#16324F" font-weight="600" text-anchor="middle">Citizens</text>
+<text x="50" y="776" font-size="19" fill="#9AA7B3" font-weight="normal" text-anchor="start">Regulation (EU) 2025/327, Chapter IV   ·   the full model in docs/ehds-operating-company.md</text>
+</svg>

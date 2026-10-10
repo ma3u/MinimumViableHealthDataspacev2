@@ -1,0 +1,20 @@
+WEBVTT
+Language: eu
+
+00:00:00.000 --> 00:00:11.006
+Ezkerrean, zerbitzu-mapa: konektoreak, identitatea eta kredentzialak, katalogoa, partaideen sarrera eta adostasun-probak.
+
+00:00:11.006 --> 00:00:17.357
+Datu-espazioen protokoloa egonkorra da eta ISO arau bihurtzeko bidean dago.
+
+00:00:17.357 --> 00:00:19.563
+FHIR eta OMOP helduak dira.
+
+00:00:19.563 --> 00:00:30.523
+Tractus-X konektorea 2023tik dabil produkzioan, baina oraindik zero bertsioan dago eta hiruhilero aldatzen da.
+
+00:00:30.523 --> 00:00:37.605
+Heldutasun txikiena dutenak tratamendu-ingurune seguruak eta datu-baimenak dira.
+
+00:00:37.605 --> 00:00:41.378
+Hor denbora eta aurrekontu gehiago gorde behar dira.
