@@ -1,0 +1,29 @@
+WEBVTT
+Language: eu
+
+00:00:00.000 --> 00:00:02.566
+Lehen urratsa, Euskadiko pilotua.
+
+00:00:02.566 --> 00:00:08.034
+Osasun Datuen Euskal Bulegoa 2025eko urtarrilean iragarri zen.
+
+00:00:08.034 --> 00:00:13.781
+Aragoik Espainiako lehen eskualde-bulegoa ireki zuen 2025eko urrian.
+
+00:00:13.781 --> 00:00:20.225
+Osakidetzaren datu-lakua dagoeneko finantzatuta dago espazio nazionalaren euskal zati gisa.
+
+00:00:20.225 --> 00:00:24.288
+Datuak FHIR eta OMOP formatuetan prestatzen ditugu.
+
+00:00:24.288 --> 00:00:29.362
+Eskualde-nodo bat, konektore eta katalogo batekin, EJIEk kudeatua.
+
+00:00:29.362 --> 00:00:34.412
+Erabaki irekia: ingurune seguru propioa, ala nazionala?
+
+00:00:34.412 --> 00:00:39.335
+Bi kasuetan Segurtasun Eskema Nazionala bete behar du.
+
+00:00:39.335 --> 00:00:50.945
+Eta bi erabilera-kasu: kohorteak aurkitzea eta gaixotasun-erregistro bat, adibidez ospitaleetako minbizi-erregistroak.
