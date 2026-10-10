@@ -23,7 +23,7 @@ Run from the repository root:
     python3 scripts/narrate-euskadi-deck.py              # every slide
     python3 scripts/narrate-euskadi-deck.py q3 pilot1    # only these slide ids
 """
-import base64, json, os, pathlib, sys, urllib.error, urllib.request
+import base64, hashlib, json, os, pathlib, sys, urllib.error, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DECK = ROOT / "ui/public/presentations/euskadi-ejie-2026"
@@ -93,10 +93,42 @@ if unknown:
 
 (DECK / "audio").mkdir(exist_ok=True)
 (DECK / "subtitles").mkdir(exist_ok=True)
+
+
+def spoken_key(slide: dict) -> str:
+    """What the audio depends on: the sentences, where they break, the model and the voice settings.
+
+    Subtitles and fragment indices are not in it, so changing those reuses the audio.
+    """
+    what = [[c["es"] for c in slide["cues"]], src["model"], src.get("voice_settings", DEFAULT_VOICE_SETTINGS)]
+    return hashlib.sha256(json.dumps(what, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:16]
+
+
+def write_vtt(n: int, cues: list) -> None:
+    vtt = ["WEBVTT", "Language: eu", ""]
+    for c in cues:
+        vtt += [f"{vtt_time(c['start'])} --> {vtt_time(c['end'])}", c["eu"], ""]
+    (DECK / f"subtitles/slide-{n}.eu.vtt").write_text("\n".join(vtt))
+
+
 result = []
 for n, slide in enumerate(src["slides"], 1):
     sid = slide["id"]
-    if only and sid not in only and sid in previous:
+    key = spoken_key(slide)
+    old = previous.get(sid)
+    if old and old.get("spoken") == key and (DECK / old["audio"]).is_file():
+        # Same words, same breaks: keep the audio and its times, take the subtitles and builds anew.
+        cues = []
+        for cue, t in zip(slide["cues"], old["cues"]):
+            c = {"start": t["start"], "end": t["end"], "eu": cue["eu"]}
+            if "frag" in cue:
+                c["frag"] = cue["frag"]
+            cues.append(c)
+        write_vtt(n, cues)
+        result.append({**old, "cues": cues})
+        print(f"slide {n:2d} {sid:10s} audio kept, cues refreshed")
+        continue
+    if only and sid not in only and old:
         result.append(previous[sid])
         continue
     # One request per slide; remember where each sentence starts in the text.
@@ -133,12 +165,9 @@ for n, slide in enumerate(src["slides"], 1):
         if "frag" in cue:
             c["frag"] = cue["frag"]
         cues.append(c)
-    vtt = ["WEBVTT", "Language: eu", ""]
-    for c in cues:
-        vtt += [f"{vtt_time(c['start'])} --> {vtt_time(c['end'])}", c["eu"], ""]
-    (DECK / f"subtitles/slide-{n}.eu.vtt").write_text("\n".join(vtt))
+    write_vtt(n, cues)
     result.append({"id": sid, "audio": audio, "subtitles": f"subtitles/slide-{n}.eu.vtt",
-                   "duration": duration, "cues": cues})
+                   "duration": duration, "spoken": key, "cues": cues})
     print(f"slide {n:2d} {sid:10s} {duration:6.1f}s  {len(text)} characters")
 
 OUT_JSON.write_text(json.dumps({"language": src["language"], "subtitles": "eu", "slides": result},
