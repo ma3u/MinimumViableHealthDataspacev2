@@ -798,6 +798,11 @@
         var shownFrag = -1;
         var advanceTimer = null;
         var player = new Audio();
+        // ElevenLabs stops at speed 1.2 and the voice is still slow in Spanish, so the
+        // player adds fifteen percent on top, pitch kept. Cue times are media time, so the
+        // subtitles and builds stay in step. Set again on every load, which resets it.
+        var RATE = 1.15;
+        player.preservesPitch = true;
         var btn = document.getElementById("narrate");
         var subsBtn = document.getElementById("subs");
         var state = document.getElementById("narrate-state");
@@ -837,6 +842,8 @@
           shownFrag = -1;
           Reveal.slide(Reveal.getIndices().h, 0, -1);
           player.src = s.audio;
+          player.defaultPlaybackRate = RATE;
+          player.playbackRate = RATE;
           state.textContent = "";
           player.play().catch(function (err) {
             if (err && err.name === "AbortError") return;
@@ -869,7 +876,7 @@
           }
           advanceTimer = setTimeout(function () {
             Reveal.slide(h + 1, 0, -1);
-          }, 900);
+          }, 400);
         });
         function setOn(v) {
           on = v;
