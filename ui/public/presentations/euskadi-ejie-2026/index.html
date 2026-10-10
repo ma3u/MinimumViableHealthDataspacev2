@@ -9,8 +9,10 @@
       content="A connected health system for the Basque Country: what we learned from Catena-X, and what it means for the EHDS. Narrated in Spanish, with Basque subtitles."
     />
     <link rel="icon" href="../../favicon.svg" />
-    <link rel="stylesheet" href="reveal/reset.css" />
-    <link rel="stylesheet" href="reveal/reveal.css" />
+    <!-- reveal.js is the HL7 deck's vendored copy, shared rather than duplicated (its CodeQL
+         alerts are triaged there once). Keep ../hl7-showcase-2026/reveal/ while this deck uses it. -->
+    <link rel="stylesheet" href="../hl7-showcase-2026/reveal/reset.css" />
+    <link rel="stylesheet" href="../hl7-showcase-2026/reveal/reveal.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
       rel="stylesheet"
@@ -757,8 +759,8 @@
     </div>
     <div id="subtitle" lang="eu" role="status" aria-live="polite" hidden></div>
 
-    <script src="reveal/reveal.js"></script>
-    <script src="reveal/plugin/notes/notes.js"></script>
+    <script src="../hl7-showcase-2026/reveal/reveal.js"></script>
+    <script src="../hl7-showcase-2026/reveal/plugin/notes/notes.js"></script>
     <script>
       Reveal.initialize({
         hash: true,
