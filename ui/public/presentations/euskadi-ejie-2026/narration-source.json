@@ -51,7 +51,8 @@
       "cues": [
         {
           "es": "¿Cuál fue el mayor reto? No fue la tecnología. Fue la cultura.",
-          "eu": "Zein izan zen erronkarik handiena? Ez teknologia. Kultura baizik."
+          "eu": "Zein izan zen erronkarik handiena? Ez teknologia. Kultura baizik.",
+          "frag": 0
         },
         {
           "es": "Las empresas sabían comprar productos. No sabían construir juntas, en abierto.",
@@ -63,7 +64,8 @@
         },
         {
           "es": "Mover datos es fácil. Ponerse de acuerdo sobre lo que significan: eso es lo difícil.",
-          "eu": "Datuak mugitzea erraza da. Zer esan nahi duten adostea: hori da zaila."
+          "eu": "Datuak mugitzea erraza da. Zer esan nahi duten adostea: hori da zaila.",
+          "frag": 1
         }
       ]
     },
@@ -76,19 +78,23 @@
         },
         {
           "es": "Una: no inventéis nada. FHIR, SNOMED, OMOP, HealthDCAT-AP ya existen. ¡Usadlos!",
-          "eu": "Bat: ez asmatu ezer. FHIR, SNOMED, OMOP, HealthDCAT-AP badaude. Erabili itzazue!"
+          "eu": "Bat: ez asmatu ezer. FHIR, SNOMED, OMOP, HealthDCAT-AP badaude. Erabili itzazue!",
+          "frag": 0
         },
         {
           "es": "Dos: empezad pequeño. Uno o dos casos de uso, y un resultado que se pueda medir.",
-          "eu": "Bi: hasi txiki. Erabilera-kasu bat edo bi, eta neur daitekeen emaitza bat."
+          "eu": "Bi: hasi txiki. Erabilera-kasu bat edo bi, eta neur daitekeen emaitza bat.",
+          "frag": 1
         },
         {
           "es": "Tres: devolved las mejoras al código abierto. Una copia privada la pagáis para siempre.",
-          "eu": "Hiru: itzuli hobekuntzak kode irekira. Kopia pribatu bat betiko ordainduko duzue."
+          "eu": "Hiru: itzuli hobekuntzak kode irekira. Kopia pribatu bat betiko ordainduko duzue.",
+          "frag": 2
         },
         {
           "es": "Cuatro: en la licitación, pedid estándares y pruebas de conformidad, no un producto.",
-          "eu": "Lau: lizitazioan, eskatu estandarrak eta adostasun-probak, ez produktu bat."
+          "eu": "Lau: lizitazioan, eskatu estandarrak eta adostasun-probak, ez produktu bat.",
+          "frag": 3
         },
         {
           "es": "Así nunca dependéis de un solo proveedor.",
@@ -101,15 +107,18 @@
       "cues": [
         {
           "es": "¿Cómo decidimos? En público.",
-          "eu": "Nola erabaki genuen? Publikoan."
+          "eu": "Nola erabaki genuen? Publikoan.",
+          "frag": 0
         },
         {
           "es": "Cada decisión de arquitectura quedó escrita, con su porqué, para que cualquiera pudiera leerla.",
-          "eu": "Arkitektura-erabaki bakoitza idatzita geratu zen, bere zergatiarekin, edonork irakur zezan."
+          "eu": "Arkitektura-erabaki bakoitza idatzita geratu zen, bere zergatiarekin, edonork irakur zezan.",
+          "frag": 1
         },
         {
           "es": "Cinco criterios: estándares abiertos, soberanía de los datos, encaje legal, madurez y una salida clara.",
-          "eu": "Bost irizpide: estandar irekiak, datuen subiranotasuna, legezko egokitzapena, heldutasuna eta irteera argi bat."
+          "eu": "Bost irizpide: estandar irekiak, datuen subiranotasuna, legezko egokitzapena, heldutasuna eta irteera argi bat.",
+          "frag": 2
         },
         {
           "es": "Para un organismo público, poder cambiar de proveedor no es un detalle. Es esencial.",
@@ -117,7 +126,8 @@
         },
         {
           "es": "Nuestro demostrador hace lo mismo: cincuenta y siete decisiones, todas públicas.",
-          "eu": "Gure erakusleak gauza bera egiten du: berrogeita hamazazpi erabaki, guztiak publikoak."
+          "eu": "Gure erakusleak gauza bera egiten du: berrogeita hamazazpi erabaki, guztiak publikoak.",
+          "frag": 3
         }
       ]
     },
@@ -126,7 +136,8 @@
       "cues": [
         {
           "es": "La arquitectura: el modelo operativo de Catena-X. Cada servicio, con un responsable claro.",
-          "eu": "Arkitektura: Catena-Xen eredu operatiboa. Zerbitzu bakoitza, arduradun argi batekin."
+          "eu": "Arkitektura: Catena-Xen eredu operatiboa. Zerbitzu bakoitza, arduradun argi batekin.",
+          "frag": 0
         },
         {
           "es": "El reglamento europeo ya define los roles: organismo de acceso, titulares, usuarios y entornos seguros.",
@@ -134,7 +145,8 @@
         },
         {
           "es": "Pero no dice quién lo opera cada día.",
-          "eu": "Baina ez du esaten nork kudeatzen duen egunero."
+          "eu": "Baina ez du esaten nork kudeatzen duen egunero.",
+          "frag": 1
         },
         {
           "es": "¿Quién conecta un hospital nuevo? ¿Quién responde cuando algo falla a las tres de la mañana?",
@@ -151,19 +163,23 @@
       "cues": [
         {
           "es": "¿Qué está maduro? El protocolo de espacios de datos es estable, y va camino de ser norma ISO.",
-          "eu": "Zer dago heldu? Datu-espazioen protokoloa egonkorra da, eta ISO arau bihurtzeko bidean dago."
+          "eu": "Zer dago heldu? Datu-espazioen protokoloa egonkorra da, eta ISO arau bihurtzeko bidean dago.",
+          "frag": 0
         },
         {
           "es": "FHIR y OMOP: maduros.",
-          "eu": "FHIR eta OMOP: helduak."
+          "eu": "FHIR eta OMOP: helduak.",
+          "frag": 1
         },
         {
           "es": "El conector Tractus-X funciona en producción desde 2023, aunque todavía cambia cada trimestre.",
-          "eu": "Tractus-X konektorea 2023tik dabil ekoizpenean, nahiz eta oraindik hiruhileko bakoitzean aldatzen den."
+          "eu": "Tractus-X konektorea 2023tik dabil ekoizpenean, nahiz eta oraindik hiruhileko bakoitzean aldatzen den.",
+          "frag": 2
         },
         {
           "es": "¿Lo más joven? Los entornos de tratamiento seguro y los permisos de datos.",
-          "eu": "Gazteena? Tratamendu seguruko inguruneak eta datu-baimenak."
+          "eu": "Gazteena? Tratamendu seguruko inguruneak eta datu-baimenak.",
+          "frag": 3
         },
         {
           "es": "Ahí, reservad más tiempo y más presupuesto.",
@@ -176,7 +192,8 @@
       "cues": [
         {
           "es": "Gobernanza. Catena-X separa tres papeles.",
-          "eu": "Gobernantza. Catena-Xek hiru rol bereizten ditu."
+          "eu": "Gobernantza. Catena-Xek hiru rol bereizten ditu.",
+          "frag": 0
         },
         {
           "es": "La asociación fija las reglas y certifica. Eclipse aloja el código. Y Cofinity-X opera.",
@@ -184,11 +201,13 @@
         },
         {
           "es": "En Euskadi podría ser así: la Oficina de Datos de Salud como organismo de acceso, y EJIE operando los servicios centrales.",
-          "eu": "Euskadin honela izan liteke: Osasun Datuen Bulegoa sarbide-erakunde gisa, eta EJIE zerbitzu nagusiak kudeatzen."
+          "eu": "Euskadin honela izan liteke: Osasun Datuen Bulegoa sarbide-erakunde gisa, eta EJIE zerbitzu nagusiak kudeatzen.",
+          "frag": 1
         },
         {
           "es": "Nuestro consejo: quien fija las reglas no debe ser quien opera.",
-          "eu": "Gure aholkua: arauak finkatzen dituena ez da izan behar kudeatzen duena."
+          "eu": "Gure aholkua: arauak finkatzen dituena ez da izan behar kudeatzen duena.",
+          "frag": 2
         },
         {
           "es": "Y pensad en varios dominios desde el primer día, no solo en salud.",
@@ -201,7 +220,8 @@
       "cues": [
         {
           "es": "Hablemos de dinero. Licencias: casi cero, porque el núcleo es código abierto.",
-          "eu": "Hitz egin dezagun diruaz. Lizentziak: ia zero, muina kode irekia delako."
+          "eu": "Hitz egin dezagun diruaz. Lizentziak: ia zero, muina kode irekia delako.",
+          "frag": 0
         },
         {
           "es": "Lo que cuesta es la gente: ingeniería, alojamiento y operación.",
@@ -209,23 +229,28 @@
         },
         {
           "es": "Como referencia: Catena-X recibió más de cien millones de euros de fondos públicos, para toda una industria.",
-          "eu": "Erreferentzia gisa: Catena-Xek ehun milioi euro baino gehiago jaso zituen funts publikoetatik, industria oso batentzat."
+          "eu": "Erreferentzia gisa: Catena-Xek ehun milioi euro baino gehiago jaso zituen funts publikoetatik, industria oso batentzat.",
+          "frag": 1
         },
         {
           "es": "Cada participante paga al operador entre mil quinientos y setenta y un mil euros al año.",
-          "eu": "Parte-hartzaile bakoitzak urtean mila eta bostehun eta hirurogeita hamaika mila euro artean ordaintzen dio operadoreari."
+          "eu": "Parte-hartzaile bakoitzak urtean mila eta bostehun eta hirurogeita hamaika mila euro artean ordaintzen dio operadoreari.",
+          "frag": 2
         },
         {
           "es": "¿Un piloto regional? Entre ochocientos mil euros y un millón y medio.",
-          "eu": "Eskualdeko pilotu bat? Zortziehun mila euro eta milioi eta erdi artean."
+          "eu": "Eskualdeko pilotu bat? Zortziehun mila euro eta milioi eta erdi artean.",
+          "frag": 3
         },
         {
           "es": "Después, operarlo cuesta entre un quince y un veinticinco por ciento al año.",
-          "eu": "Ondoren, kudeatzeak urtean ehuneko hamabost eta hogeita bost artean kostatzen du."
+          "eu": "Ondoren, kudeatzeak urtean ehuneko hamabost eta hogeita bost artean kostatzen du.",
+          "frag": 4
         },
         {
           "es": "Alojamiento: tres entornos, producción, pruebas y desarrollo, a unos mil euros al mes cada uno.",
-          "eu": "Ostatatzea: hiru ingurune, ekoizpena, probak eta garapena, hilean mila euro inguru bakoitza."
+          "eu": "Ostatatzea: hiru ingurune, ekoizpena, probak eta garapena, hilean mila euro inguru bakoitza.",
+          "frag": 5
         },
         {
           "es": "Más las herramientas de desarrollo y del ciclo de vida del software.",
@@ -238,11 +263,13 @@
       "cues": [
         {
           "es": "¿Y el equipo? Entre ocho y doce personas, a tiempo completo.",
-          "eu": "Eta taldea? Zortzi eta hamabi pertsona artean, lanaldi osoan."
+          "eu": "Eta taldea? Zortzi eta hamabi pertsona artean, lanaldi osoan.",
+          "frag": 0
         },
         {
           "es": "Arquitectura, conectores, plataforma y seguridad, FHIR y OMOP, protección de datos y derecho.",
-          "eu": "Arkitektura, konektoreak, plataforma eta segurtasuna, FHIR eta OMOP, datuen babesa eta zuzenbidea."
+          "eu": "Arkitektura, konektoreak, plataforma eta segurtasuna, FHIR eta OMOP, datuen babesa eta zuzenbidea.",
+          "frag": 1
         },
         {
           "es": "Y recordad la primera respuesta: sin tiempo y sin mandato de la dirección, no funciona.",
@@ -258,12 +285,29 @@
           "eu": "Eta orain zer? Lau urrats, denak txikiak."
         },
         {
-          "es": "Elegir uno o dos casos de uso. Acordar los roles. Abrir grupos de trabajo con los hospitales. Y construir el piloto.",
-          "eu": "Erabilera-kasu bat edo bi aukeratu. Rolak adostu. Lan-taldeak ireki ospitaleekin. Eta pilotua eraiki."
+          "es": "Elegir uno o dos casos de uso.",
+          "eu": "Erabilera-kasu bat edo bi aukeratu.",
+          "frag": 0
+        },
+        {
+          "es": "Acordar los roles.",
+          "eu": "Rolak adostu.",
+          "frag": 1
+        },
+        {
+          "es": "Abrir grupos de trabajo con los hospitales.",
+          "eu": "Lan-taldeak ireki ospitaleekin.",
+          "frag": 2
+        },
+        {
+          "es": "Y construir el piloto.",
+          "eu": "Eta pilotua eraiki.",
+          "frag": 3
         },
         {
           "es": "El reloj ya corre: organismos de acceso en marzo de 2027, uso secundario completo en marzo de 2029.",
-          "eu": "Erlojua martxan dago: sarbide-erakundeak 2027ko martxoan, bigarren mailako erabilera osoa 2029ko martxoan."
+          "eu": "Erlojua martxan dago: sarbide-erakundeak 2027ko martxoan, bigarren mailako erabilera osoa 2029ko martxoan.",
+          "frag": 4
         }
       ]
     },
