@@ -51,7 +51,9 @@ python3 scripts/frames-to-gif.py /tmp/patient public/presentations/hl7-showcase-
 
 The frames are screenshots taken at chosen moments, so loading time never ends up in the
 animation; about 57 frames, 22 seconds, under 2 MB. `img/klarbefund-tour.gif` is built
-from the app screenshots in `docs/klarbefund/img/` (fictional dev dataset).
+from the app screenshots in `docs/klarbefund/img/` (fictional dev dataset). The deck shows
+the start page's newer tour instead, `ui/public/klarbefund/klarbefund-tour.webp` (#578),
+which has the Connect to EHDS and Consents screens.
 
 ## Notes
 
