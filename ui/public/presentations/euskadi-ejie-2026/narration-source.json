@@ -8,24 +8,24 @@
       "id": "cover",
       "cues": [
         {
-          "es": "Buenos días. Egun on.",
-          "eu": "Egun on."
+          "es": "¡Egun on! Buenos días.",
+          "eu": "Egun on!"
         },
         {
-          "es": "Gracias por la invitación.",
-          "eu": "Eskerrik asko gonbidapenagatik."
+          "es": "Gracias por invitarnos. Vamos al grano.",
+          "eu": "Eskerrik asko gonbidapenagatik. Goazen harira."
         },
         {
-          "es": "Hoy respondo a las ocho preguntas que nos enviasteis, en vuestro orden.",
-          "eu": "Gaur, bidali zenizkiguten zortzi galderei erantzungo diet, zuen ordenan."
+          "es": "Nos enviasteis ocho preguntas. Hoy tenéis ocho respuestas, en vuestro orden.",
+          "eu": "Zortzi galdera bidali zenizkiguten. Gaur zortzi erantzun dituzue, zuen ordenan."
         },
         {
-          "es": "Hablo desde la experiencia en Catena-X, el espacio de datos de la industria del automóvil.",
-          "eu": "Catena-Xen esperientziatik hitz egiten dut, automobilgintzaren datu-espaziotik."
+          "es": "Vengo de Catena-X, el espacio de datos del automóvil, que ya funciona en producción.",
+          "eu": "Catena-Xetik nator, automobilgintzaren datu-espaziotik, dagoeneko ekoizpenean dabilena."
         },
         {
-          "es": "Y desde un demostrador del Espacio Europeo de Datos Sanitarios que hoy funciona en directo.",
-          "eu": "Eta gaur zuzenean dabilen Osasun Datuen Europako Espazioaren erakusgarri batetik."
+          "es": "Y traigo un demostrador del Espacio Europeo de Datos Sanitarios que funciona hoy, en directo.",
+          "eu": "Eta Osasun Datuen Europako Espazioaren erakusle bat dakart, gaur zuzenean dabilena."
         }
       ]
     },
@@ -33,16 +33,16 @@
       "id": "overview",
       "cues": [
         {
-          "es": "Aquí están las ocho respuestas en una sola página.",
-          "eu": "Hemen dituzue zortzi erantzunak orrialde bakarrean."
+          "es": "Aquí tenéis las ocho respuestas, en una sola página.",
+          "eu": "Hemen dituzue zortzi erantzunak, orrialde bakar batean."
         },
         {
-          "es": "Si recordáis una sola diapositiva, que sea esta.",
+          "es": "Si os quedáis con una sola diapositiva, que sea esta.",
           "eu": "Diapositiba bakarra gogoratzen baduzue, izan dadila hau."
         },
         {
-          "es": "Ahora las vemos una por una.",
-          "eu": "Orain banan-banan ikusiko ditugu."
+          "es": "¡Vamos una por una!",
+          "eu": "Goazen banan-banan!"
         }
       ]
     },
@@ -50,28 +50,20 @@
       "id": "q1",
       "cues": [
         {
-          "es": "El mayor reto fue la cultura, no la tecnología.",
-          "eu": "Erronkarik handiena kultura izan zen, ez teknologia."
+          "es": "¿Cuál fue el mayor reto? No fue la tecnología. Fue la cultura.",
+          "eu": "Zein izan zen erronkarik handiena? Ez teknologia. Kultura baizik."
         },
         {
-          "es": "El código abierto era nuevo para la mayoría de las empresas.",
-          "eu": "Kode irekia berria zen enpresa gehienentzat."
+          "es": "Las empresas sabían comprar productos. No sabían construir juntas, en abierto.",
+          "eu": "Enpresek bazekiten produktuak erosten. Ez zekiten elkarrekin eraikitzen, irekian."
         },
         {
-          "es": "Estaban acostumbradas a comprar productos, no a construir juntas en público.",
-          "eu": "Produktuak erostera ohituta zeuden, ez elkarrekin publikoki eraikitzera."
+          "es": "Los grupos de trabajo solo avanzaban cuando la dirección les daba tiempo y un mandato claro.",
+          "eu": "Lan-taldeek zuzendaritzak denbora eta agindu argia ematen zienean bakarrik egiten zuten aurrera."
         },
         {
-          "es": "Los grupos de trabajo solo entregaban cuando la dirección daba a sus expertos tiempo y un mandato claro.",
-          "eu": "Lan-taldeek emaitzak ematen zituzten, zuzendaritzak bere adituei denbora eta agindu argia ematen zienean bakarrik."
-        },
-        {
-          "es": "En lo técnico, mover datos es fácil.",
-          "eu": "Alderdi teknikoan, datuak mugitzea erraza da."
-        },
-        {
-          "es": "Lo difícil es ponerse de acuerdo sobre lo que significan: FHIR, las terminologías y OMOP.",
-          "eu": "Zaila da esan nahi dutenaz ados jartzea: FHIR, terminologiak eta OMOP."
+          "es": "Mover datos es fácil. Ponerse de acuerdo sobre lo que significan: eso es lo difícil.",
+          "eu": "Datuak mugitzea erraza da. Zer esan nahi duten adostea: hori da zaila."
         }
       ]
     },
@@ -83,32 +75,24 @@
           "eu": "Lau ikasgai."
         },
         {
-          "es": "Una: construir sobre lo que ya existe, como FHIR, SNOMED CT, CIE-10, OMOP y HealthDCAT-AP.",
-          "eu": "Bat: dagoeneko dagoenaren gainean eraiki, hala nola FHIR, SNOMED CT, GNS-10, OMOP eta HealthDCAT-AP."
+          "es": "Una: no inventéis nada. FHIR, SNOMED, OMOP, HealthDCAT-AP ya existen. ¡Usadlos!",
+          "eu": "Bat: ez asmatu ezer. FHIR, SNOMED, OMOP, HealthDCAT-AP badaude. Erabili itzazue!"
         },
         {
-          "es": "No inventéis un estándar propio.",
-          "eu": "Ez asmatu zuen estandar propiorik."
+          "es": "Dos: empezad pequeño. Uno o dos casos de uso, y un resultado que se pueda medir.",
+          "eu": "Bi: hasi txiki. Erabilera-kasu bat edo bi, eta neur daitekeen emaitza bat."
         },
         {
-          "es": "Dos: empezar pequeño, con uno o dos casos de uso y un resultado medible.",
-          "eu": "Bi: txikitik hasi, erabilera-kasu batekin edo birekin eta neur daitekeen emaitza batekin."
-        },
-        {
-          "es": "Tres: devolver las mejoras a los proyectos de código abierto.",
-          "eu": "Hiru: hobekuntzak kode irekiko proiektuei itzuli."
-        },
-        {
-          "es": "Una copia privada se convierte en vuestro propio producto, y lo pagáis para siempre.",
-          "eu": "Kopia pribatua zuen produktu propio bihurtzen da, eta betiko ordaintzen duzue."
+          "es": "Tres: devolved las mejoras al código abierto. Una copia privada la pagáis para siempre.",
+          "eu": "Hiru: itzuli hobekuntzak kode irekira. Kopia pribatu bat betiko ordainduko duzue."
         },
         {
           "es": "Cuatro: en la licitación, pedid estándares y pruebas de conformidad, no un producto.",
           "eu": "Lau: lizitazioan, eskatu estandarrak eta adostasun-probak, ez produktu bat."
         },
         {
-          "es": "Así se evita depender de un solo proveedor.",
-          "eu": "Horrela saihesten da hornitzaile bakar baten menpe egotea."
+          "es": "Así nunca dependéis de un solo proveedor.",
+          "eu": "Horrela ez zarete inoiz hornitzaile bakar baten menpe egongo."
         }
       ]
     },
@@ -116,28 +100,24 @@
       "id": "q3",
       "cues": [
         {
-          "es": "Cada decisión se escribió como un registro de decisión de arquitectura.",
-          "eu": "Erabaki bakoitza arkitektura-erabakien erregistro gisa idatzi zen."
+          "es": "¿Cómo decidimos? En público.",
+          "eu": "Nola erabaki genuen? Publikoan."
         },
         {
-          "es": "Toda la comunidad podía leerlo y entender el porqué.",
-          "eu": "Komunitate osoak irakur zezakeen eta zergatia uler."
+          "es": "Cada decisión de arquitectura quedó escrita, con su porqué, para que cualquiera pudiera leerla.",
+          "eu": "Arkitektura-erabaki bakoitza idatzita geratu zen, bere zergatiarekin, edonork irakur zezan."
         },
         {
-          "es": "Los grupos de trabajo proponían, pero al final las prioridades las decidían quienes construyen el software.",
-          "eu": "Lan-taldeek proposatzen zuten, baina azkenean softwarea eraikitzen dutenek erabakitzen zituzten lehentasunak."
+          "es": "Cinco criterios: estándares abiertos, soberanía de los datos, encaje legal, madurez y una salida clara.",
+          "eu": "Bost irizpide: estandar irekiak, datuen subiranotasuna, legezko egokitzapena, heldutasuna eta irteera argi bat."
         },
         {
-          "es": "Cinco criterios: estándares abiertos, soberanía de los datos, encaje con la ley, tecnología madura y una estrategia de salida clara.",
-          "eu": "Bost irizpide: estandar irekiak, datuen subiranotasuna, legearekiko egokitasuna, teknologia heldua eta irteera-estrategia argia."
+          "es": "Para un organismo público, poder cambiar de proveedor no es un detalle. Es esencial.",
+          "eu": "Erakunde publiko batentzat, hornitzailez aldatu ahal izatea ez da xehetasun bat. Funtsezkoa da."
         },
         {
-          "es": "Para un organismo público, poder cambiar de proveedor es esencial.",
-          "eu": "Erakunde publiko batentzat, hornitzailez aldatu ahal izatea funtsezkoa da."
-        },
-        {
-          "es": "Nuestro demostrador sigue la misma regla, con cincuenta y siete decisiones públicas.",
-          "eu": "Gure erakusgarriak arau bera jarraitzen du, berrogeita hamazazpi erabaki publikorekin."
+          "es": "Nuestro demostrador hace lo mismo: cincuenta y siete decisiones, todas públicas.",
+          "eu": "Gure erakusleak gauza bera egiten du: berrogeita hamazazpi erabaki, guztiak publikoak."
         }
       ]
     },
@@ -145,20 +125,20 @@
       "id": "q4",
       "cues": [
         {
-          "es": "Implantamos el modelo operativo de Catena-X: un mapa de servicios, cada uno con un responsable claro.",
-          "eu": "Catena-Xen eredu operatiboa ezarri genuen: zerbitzu-mapa bat, bakoitza arduradun argi batekin."
+          "es": "La arquitectura: el modelo operativo de Catena-X. Cada servicio, con un responsable claro.",
+          "eu": "Arkitektura: Catena-Xen eredu operatiboa. Zerbitzu bakoitza, arduradun argi batekin."
         },
         {
-          "es": "El reglamento europeo ya define los roles: el organismo de acceso, los titulares de datos, los usuarios y los entornos seguros.",
-          "eu": "Europako erregelamenduak dagoeneko definitzen ditu rolak: sarbide-erakundea, datuen titularrak, erabiltzaileak eta ingurune seguruak."
+          "es": "El reglamento europeo ya define los roles: organismo de acceso, titulares, usuarios y entornos seguros.",
+          "eu": "Europako erregelamenduak dagoeneko definitzen ditu rolak: sarbide-erakundea, titularrak, erabiltzaileak eta ingurune seguruak."
         },
         {
-          "es": "Pero no dice quién opera el sistema cada día.",
-          "eu": "Baina ez du esaten nork kudeatzen duen sistema egunero."
+          "es": "Pero no dice quién lo opera cada día.",
+          "eu": "Baina ez du esaten nork kudeatzen duen egunero."
         },
         {
-          "es": "¿Quién conecta un hospital nuevo? ¿Quién responde cuando algo falla?",
-          "eu": "Nork konektatzen du ospitale berri bat? Nork erantzuten du zerbaitek huts egiten duenean?"
+          "es": "¿Quién conecta un hospital nuevo? ¿Quién responde cuando algo falla a las tres de la mañana?",
+          "eu": "Nork konektatzen du ospitale berri bat? Nork erantzuten du goizeko hiruretan zerbaitek huts egiten duenean?"
         },
         {
           "es": "Esa es la capa naranja: la empresa operadora.",
@@ -170,28 +150,24 @@
       "id": "q5",
       "cues": [
         {
-          "es": "A la izquierda, el mapa de servicios: conectores, identidad y credenciales, catálogo, incorporación de participantes y pruebas de conformidad.",
-          "eu": "Ezkerrean, zerbitzu-mapa: konektoreak, identitatea eta kredentzialak, katalogoa, partaideen sarrera eta adostasun-probak."
+          "es": "¿Qué está maduro? El protocolo de espacios de datos es estable, y va camino de ser norma ISO.",
+          "eu": "Zer dago heldu? Datu-espazioen protokoloa egonkorra da, eta ISO arau bihurtzeko bidean dago."
         },
         {
-          "es": "El protocolo de espacios de datos es estable y va camino de ser norma ISO.",
-          "eu": "Datu-espazioen protokoloa egonkorra da eta ISO arau bihurtzeko bidean dago."
+          "es": "FHIR y OMOP: maduros.",
+          "eu": "FHIR eta OMOP: helduak."
         },
         {
-          "es": "FHIR y OMOP son maduros.",
-          "eu": "FHIR eta OMOP helduak dira."
+          "es": "El conector Tractus-X funciona en producción desde 2023, aunque todavía cambia cada trimestre.",
+          "eu": "Tractus-X konektorea 2023tik dabil ekoizpenean, nahiz eta oraindik hiruhileko bakoitzean aldatzen den."
         },
         {
-          "es": "El conector Tractus-X funciona en producción desde 2023, pero sigue en versión cero y cambia cada trimestre.",
-          "eu": "Tractus-X konektorea 2023tik dabil produkzioan, baina oraindik zero bertsioan dago eta hiruhilero aldatzen da."
+          "es": "¿Lo más joven? Los entornos de tratamiento seguro y los permisos de datos.",
+          "eu": "Gazteena? Tratamendu seguruko inguruneak eta datu-baimenak."
         },
         {
-          "es": "Lo menos maduro son los entornos de tratamiento seguro y los permisos de datos.",
-          "eu": "Heldutasun txikiena dutenak tratamendu-ingurune seguruak eta datu-baimenak dira."
-        },
-        {
-          "es": "Ahí hay que reservar más tiempo y presupuesto.",
-          "eu": "Hor denbora eta aurrekontu gehiago gorde behar dira."
+          "es": "Ahí, reservad más tiempo y más presupuesto.",
+          "eu": "Hor, gorde denbora eta aurrekontu gehiago."
         }
       ]
     },
@@ -199,28 +175,24 @@
       "id": "q6",
       "cues": [
         {
-          "es": "Catena-X separa tres funciones.",
-          "eu": "Catena-Xek hiru funtzio bereizten ditu."
+          "es": "Gobernanza. Catena-X separa tres papeles.",
+          "eu": "Gobernantza. Catena-Xek hiru rol bereizten ditu."
         },
         {
-          "es": "La asociación fija los estándares y certifica.",
-          "eu": "Elkarteak estandarrak finkatzen ditu eta ziurtagiriak ematen ditu."
+          "es": "La asociación fija las reglas y certifica. Eclipse aloja el código. Y Cofinity-X opera.",
+          "eu": "Elkarteak arauak finkatzen ditu eta ziurtatzen du. Eclipsek kodea hartzen du. Eta Cofinity-Xek kudeatzen du."
         },
         {
-          "es": "La Fundación Eclipse aloja el código abierto, y Cofinity-X opera el sistema.",
-          "eu": "Eclipse Fundazioak kode irekia hartzen du, eta Cofinity-Xek sistema kudeatzen du."
-        },
-        {
-          "es": "En el País Vasco podría ser así: la Oficina de Datos de Salud como organismo de acceso, y EJIE operando los servicios centrales.",
+          "es": "En Euskadi podría ser así: la Oficina de Datos de Salud como organismo de acceso, y EJIE operando los servicios centrales.",
           "eu": "Euskadin honela izan liteke: Osasun Datuen Bulegoa sarbide-erakunde gisa, eta EJIE zerbitzu nagusiak kudeatzen."
         },
         {
-          "es": "Nuestra recomendación: separar a quien fija las reglas de quien opera.",
-          "eu": "Gure gomendioa: arauak finkatzen dituena eta kudeatzen duena bereiztea."
+          "es": "Nuestro consejo: quien fija las reglas no debe ser quien opera.",
+          "eu": "Gure aholkua: arauak finkatzen dituena ez da izan behar kudeatzen duena."
         },
         {
-          "es": "Y diseñar la gobernanza para varios dominios desde el principio, no solo para salud.",
-          "eu": "Eta gobernantza hasieratik hainbat domeinutarako diseinatzea, ez osasunerako bakarrik."
+          "es": "Y pensad en varios dominios desde el primer día, no solo en salud.",
+          "eu": "Eta pentsatu hainbat domeinutan lehen egunetik, ez osasunean bakarrik."
         }
       ]
     },
@@ -228,36 +200,36 @@
       "id": "q7",
       "cues": [
         {
-          "es": "Las licencias cuestan casi cero, porque el núcleo es código abierto.",
-          "eu": "Lizentziek ia ezer ez dute kostatzen, nukleoa kode irekia delako."
+          "es": "Hablemos de dinero. Licencias: casi cero, porque el núcleo es código abierto.",
+          "eu": "Hitz egin dezagun diruaz. Lizentziak: ia zero, muina kode irekia delako."
         },
         {
-          "es": "Los costes reales son ingeniería, alojamiento y operación.",
-          "eu": "Benetako kostuak ingeniaritza, ostatatzea eta eragiketa dira."
+          "es": "Lo que cuesta es la gente: ingeniería, alojamiento y operación.",
+          "eu": "Kostatzen dena jendea da: ingeniaritza, ostatatzea eta eragiketa."
         },
         {
-          "es": "Como referencia, Catena-X recibió más de cien millones de euros de fondos públicos, para toda una industria.",
-          "eu": "Erreferentzia gisa, Catena-Xek ehun milioi euro baino gehiago jaso zituen funts publikoetatik, industria oso batentzat."
+          "es": "Como referencia: Catena-X recibió más de cien millones de euros de fondos públicos, para toda una industria.",
+          "eu": "Erreferentzia gisa: Catena-Xek ehun milioi euro baino gehiago jaso zituen funts publikoetatik, industria oso batentzat."
         },
         {
           "es": "Cada participante paga al operador entre mil quinientos y setenta y un mil euros al año.",
-          "eu": "Partaide bakoitzak mila eta bostehun eta hirurogeita hamaika mila euro artean ordaintzen dio operadoreari urtean."
+          "eu": "Parte-hartzaile bakoitzak urtean mila eta bostehun eta hirurogeita hamaika mila euro artean ordaintzen dio operadoreari."
         },
         {
-          "es": "Para un piloto regional estimamos entre ochocientos mil euros y un millón y medio.",
-          "eu": "Eskualdeko pilotu baterako zortziehun mila euro eta milioi eta erdi artean kalkulatzen dugu."
+          "es": "¿Un piloto regional? Entre ochocientos mil euros y un millón y medio.",
+          "eu": "Eskualdeko pilotu bat? Zortziehun mila euro eta milioi eta erdi artean."
         },
         {
-          "es": "Después, la operación cuesta entre un quince y un veinticinco por ciento al año.",
-          "eu": "Ondoren, eragiketak urtean ehuneko hamabost eta hogeita bost artean kostatzen du."
+          "es": "Después, operarlo cuesta entre un quince y un veinticinco por ciento al año.",
+          "eu": "Ondoren, kudeatzeak urtean ehuneko hamabost eta hogeita bost artean kostatzen du."
         },
         {
-          "es": "Para el alojamiento planificamos tres entornos, producción, pruebas y desarrollo, con unos mil euros al mes cada uno: treinta y seis mil euros al año.",
-          "eu": "Ostatatzerako hiru ingurune aurreikusten ditugu, produkzioa, probak eta garapena, bakoitza hilean mila euro inguru: urtean hogeita hamasei mila euro."
+          "es": "Alojamiento: tres entornos, producción, pruebas y desarrollo, a unos mil euros al mes cada uno.",
+          "eu": "Ostatatzea: hiru ingurune, ekoizpena, probak eta garapena, hilean mila euro inguru bakoitza."
         },
         {
-          "es": "A eso se suman las herramientas de desarrollo y del ciclo de vida del software.",
-          "eu": "Horri softwarearen bizi-zikloko eta garapeneko tresnak gehitzen zaizkio."
+          "es": "Más las herramientas de desarrollo y del ciclo de vida del software.",
+          "eu": "Gehi garapen-tresnak eta softwarearen bizi-zikloko tresnak."
         }
       ]
     },
@@ -265,16 +237,16 @@
       "id": "q8",
       "cues": [
         {
-          "es": "Un piloto necesita entre ocho y doce personas a tiempo completo.",
-          "eu": "Pilotu batek zortzi eta hamabi pertsona artean behar ditu lanaldi osoan."
+          "es": "¿Y el equipo? Entre ocho y doce personas, a tiempo completo.",
+          "eu": "Eta taldea? Zortzi eta hamabi pertsona artean, lanaldi osoan."
         },
         {
-          "es": "Un arquitecto, ingenieros de conectores, ingenieros de plataforma y seguridad, un especialista en FHIR y OMOP, y expertos en protección de datos y derecho.",
-          "eu": "Arkitekto bat, konektore-ingeniariak, plataforma- eta segurtasun-ingeniariak, FHIR eta OMOP espezialista bat, eta datuen babesean eta zuzenbidean adituak."
+          "es": "Arquitectura, conectores, plataforma y seguridad, FHIR y OMOP, protección de datos y derecho.",
+          "eu": "Arkitektura, konektoreak, plataforma eta segurtasuna, FHIR eta OMOP, datuen babesa eta zuzenbidea."
         },
         {
-          "es": "Y recordad la primera pregunta: estas personas necesitan tiempo y un mandato de la dirección.",
-          "eu": "Eta gogoratu lehen galdera: pertsona hauek denbora eta zuzendaritzaren agindua behar dituzte."
+          "es": "Y recordad la primera respuesta: sin tiempo y sin mandato de la dirección, no funciona.",
+          "eu": "Eta gogoratu lehen erantzuna: zuzendaritzaren denborarik eta agindurik gabe, ez dabil."
         }
       ]
     },
@@ -282,16 +254,16 @@
       "id": "nextsteps",
       "cues": [
         {
-          "es": "¿Qué viene después? Cuatro pasos pequeños.",
-          "eu": "Zer dator ondoren? Lau urrats txiki."
+          "es": "¿Y ahora qué? Cuatro pasos, todos pequeños.",
+          "eu": "Eta orain zer? Lau urrats, denak txikiak."
         },
         {
-          "es": "Elegir uno o dos casos de uso. Acordar los roles. Abrir grupos de trabajo con los hospitales. Y construir un piloto.",
-          "eu": "Erabilera-kasu bat edo bi aukeratu. Rolak adostu. Lan-taldeak ireki ospitaleekin. Eta pilotu bat eraiki."
+          "es": "Elegir uno o dos casos de uso. Acordar los roles. Abrir grupos de trabajo con los hospitales. Y construir el piloto.",
+          "eu": "Erabilera-kasu bat edo bi aukeratu. Rolak adostu. Lan-taldeak ireki ospitaleekin. Eta pilotua eraiki."
         },
         {
-          "es": "Las fechas las fija el reglamento: los organismos de acceso en marzo de 2027, y el uso secundario completo en marzo de 2029.",
-          "eu": "Datak erregelamenduak finkatzen ditu: sarbide-erakundeak 2027ko martxoan, eta erabilera sekundario osoa 2029ko martxoan."
+          "es": "El reloj ya corre: organismos de acceso en marzo de 2027, uso secundario completo en marzo de 2029.",
+          "eu": "Erlojua martxan dago: sarbide-erakundeak 2027ko martxoan, bigarren mailako erabilera osoa 2029ko martxoan."
         }
       ]
     },
@@ -299,37 +271,37 @@
       "id": "pilot",
       "cues": [
         {
-          "es": "Este es el piloto que proponemos: empezar en la región y conectar hacia arriba.",
-          "eu": "Hau da proposatzen dugun pilotua: eskualdean hasi eta gorantz konektatu."
+          "es": "Esta es nuestra propuesta: empezar en Euskadi, y conectar hacia arriba.",
+          "eu": "Hau da gure proposamena: Euskadin hasi, eta gorantz konektatu."
         },
         {
-          "es": "Paso uno, en 2027: el piloto de Euskadi, con Osakidetza y EJIE.",
-          "eu": "Lehen urratsa, 2027an: Euskadiko pilotua, Osakidetzarekin eta EJIErekin.",
+          "es": "Paso uno, 2027: el piloto de Euskadi, con Osakidetza y EJIE.",
+          "eu": "Lehen urratsa, 2027: Euskadiko pilotua, Osakidetzarekin eta EJIErekin.",
           "frag": 0
         },
         {
-          "es": "Después conectamos con España.",
-          "eu": "Gero Espainiarekin konektatzen gara.",
+          "es": "Luego, España.",
+          "eu": "Gero, Espainia.",
           "frag": 1
         },
         {
-          "es": "Paso dos, en 2028: el Espacio Nacional de Datos de Salud, el organismo de acceso y la nueva ley de salud digital.",
-          "eu": "Bigarren urratsa, 2028an: Osasun Datuen Espazio Nazionala, sarbide-erakundea eta osasun digitalaren lege berria.",
+          "es": "Paso dos, 2028: el Espacio Nacional de Datos de Salud, su organismo de acceso y la nueva ley de salud digital.",
+          "eu": "Bigarren urratsa, 2028: Osasun Datuen Espazio Nazionala, bere sarbide-erakundea eta osasun digitalaren lege berria.",
           "frag": 2
         },
         {
-          "es": "Y después, con Europa.",
-          "eu": "Eta gero, Europarekin.",
+          "es": "Y luego, Europa.",
+          "eu": "Eta gero, Europa.",
           "frag": 3
         },
         {
-          "es": "Paso tres, en marzo de 2029: HealthData@EU entra en servicio para el uso secundario.",
-          "eu": "Hirugarren urratsa, 2029ko martxoan: HealthData@EU martxan jartzen da erabilera sekundariorako.",
+          "es": "Paso tres, marzo de 2029: HealthData@EU arranca para el uso secundario.",
+          "eu": "Hirugarren urratsa, 2029ko martxoa: HealthData@EU abian jartzen da bigarren mailako erabilerarako.",
           "frag": 4
         },
         {
-          "es": "Y no empezamos de cero: la base ya está disponible hoy.",
-          "eu": "Eta ez gara zerotik hasten: oinarria gaur bertan dago eskuragarri.",
+          "es": "Y lo mejor: no empezamos de cero. La base ya existe hoy.",
+          "eu": "Eta onena: ez gara zerotik hasten. Oinarria gaur badago.",
           "frag": 5
         }
       ]
@@ -338,8 +310,8 @@
       "id": "pilot1",
       "cues": [
         {
-          "es": "Paso uno, el piloto de Euskadi.",
-          "eu": "Lehen urratsa, Euskadiko pilotua."
+          "es": "Paso uno: el piloto de Euskadi.",
+          "eu": "Lehen urratsa: Euskadiko pilotua."
         },
         {
           "es": "La Oficina Vasca de Datos de Salud se anunció en enero de 2025.",
@@ -347,8 +319,8 @@
           "frag": 0
         },
         {
-          "es": "Aragón abrió la primera oficina regional de España en octubre de 2025.",
-          "eu": "Aragoik Espainiako lehen eskualde-bulegoa ireki zuen 2025eko urrian."
+          "es": "Y Aragón ya abrió la primera oficina regional de España, en octubre de 2025.",
+          "eu": "Eta Aragoik Espainiako lehen eskualde-bulegoa ireki zuen jada, 2025eko urrian."
         },
         {
           "es": "El data lake de Osakidetza ya está financiado como la parte vasca del espacio nacional.",
@@ -360,22 +332,18 @@
           "eu": "Datuak FHIR eta OMOP formatuetan prestatzen ditugu."
         },
         {
-          "es": "Un nodo regional, con un conector y un catálogo, operado por EJIE.",
-          "eu": "Eskualde-nodo bat, konektore eta katalogo batekin, EJIEk kudeatua.",
+          "es": "Un nodo regional, con conector y catálogo, operado por EJIE.",
+          "eu": "Eskualde-nodo bat, konektore eta katalogoarekin, EJIEk kudeatua.",
           "frag": 2
         },
         {
-          "es": "La decisión abierta: ¿un entorno seguro propio, o el nacional?",
-          "eu": "Erabaki irekia: ingurune seguru propioa, ala nazionala?",
+          "es": "La decisión abierta: ¿un entorno seguro propio, o el nacional? En los dos casos, con el Esquema Nacional de Seguridad.",
+          "eu": "Erabaki irekia: ingurune seguru propioa, ala nazionala? Bi kasuetan, Segurtasun Eskema Nazionalarekin.",
           "frag": 3
         },
         {
-          "es": "En los dos casos debe cumplir el Esquema Nacional de Seguridad.",
-          "eu": "Bi kasuetan Segurtasun Eskema Nazionala bete behar du."
-        },
-        {
-          "es": "Y dos casos de uso: descubrir cohortes y un registro de enfermedades, por ejemplo los registros hospitalarios de cáncer.",
-          "eu": "Eta bi erabilera-kasu: kohorteak aurkitzea eta gaixotasun-erregistro bat, adibidez ospitaleetako minbizi-erregistroak.",
+          "es": "Y dos casos de uso: descubrir cohortes, y un registro de enfermedades, como los registros hospitalarios de cáncer.",
+          "eu": "Eta bi erabilera-kasu: kohorteak aurkitzea, eta gaixotasun-erregistro bat, ospitaleetako minbizi-erregistroak bezala.",
           "frag": 4
         }
       ]
@@ -384,39 +352,31 @@
       "id": "pilot2",
       "cues": [
         {
-          "es": "Paso dos, conectar con España.",
-          "eu": "Bigarren urratsa, Espainiarekin konektatu."
+          "es": "Paso dos: conectar con España.",
+          "eu": "Bigarren urratsa: Espainiarekin konektatu."
         },
         {
-          "es": "El Espacio Nacional de Datos de Salud se abrió en enero de 2026, como una red de plataformas regionales con protocolos comunes.",
-          "eu": "Osasun Datuen Espazio Nazionala 2026ko urtarrilean ireki zen, protokolo komunak dituzten eskualde-plataformen sare gisa.",
+          "es": "El Espacio Nacional de Datos de Salud se abrió en enero de 2026: una red de plataformas regionales con protocolos comunes.",
+          "eu": "Osasun Datuen Espazio Nazionala 2026ko urtarrilean ireki zen: protokolo komunak dituzten eskualde-plataformen sarea.",
           "frag": 0
         },
         {
-          "es": "Es decir, el enfoque de abajo arriba ya es el diseño nacional.",
-          "eu": "Hau da, behetik gorako ikuspegia dagoeneko diseinu nazionala da."
+          "es": "Es decir: el enfoque de abajo arriba ya es el diseño nacional.",
+          "eu": "Hau da: behetik gorako ikuspegia dagoeneko diseinu nazionala da."
         },
         {
-          "es": "La decisión abierta: España debe designar su organismo de acceso antes de marzo de 2027.",
-          "eu": "Erabaki irekia: Espainiak bere sarbide-erakundea izendatu behar du 2027ko martxoa baino lehen.",
+          "es": "La decisión abierta: España debe designar su organismo de acceso antes de marzo de 2027. ¿Tendrá Euskadi el suyo?",
+          "eu": "Erabaki irekia: Espainiak bere sarbide-erakundea izendatu behar du 2027ko martxoa baino lehen. Euskadik izango al du berea?",
           "frag": 1
         },
         {
-          "es": "¿Tendrá Euskadi el suyo?",
-          "eu": "Euskadik izango al du berea?"
-        },
-        {
-          "es": "La ley de salud digital definirá el papel de las regiones.",
-          "eu": "Osasun digitalaren legeak eskualdeen papera zehaztuko du.",
+          "es": "La ley de salud digital definirá el papel de las regiones. Todavía es un borrador: aclaradlo con el Ministerio en paralelo.",
+          "eu": "Osasun digitalaren legeak eskualdeen papera zehaztuko du. Zirriborroa da oraindik: argitu Ministerioarekin batera.",
           "frag": 2
         },
         {
-          "es": "Sigue siendo un borrador, así que conviene aclararlo con el Ministerio en paralelo.",
-          "eu": "Zirriborro bat da oraindik; beraz, komeni da Ministerioarekin batera argitzea."
-        },
-        {
-          "es": "Para el uso primario el camino ya funciona: el País Vasco está conectado a MyHealth@EU desde 2023.",
-          "eu": "Erabilera primariorako bideak dagoeneko funtzionatzen du: Euskadi MyHealth@EUra konektatuta dago 2023tik.",
+          "es": "Y para el uso primario, el camino ya funciona: Euskadi está conectada a MyHealth@EU desde 2023.",
+          "eu": "Eta erabilera primariorako, bideak dagoeneko funtzionatzen du: Euskadi MyHealth@EUra konektatuta dago 2023tik.",
           "frag": 3
         }
       ]
@@ -425,8 +385,8 @@
       "id": "pilot3",
       "cues": [
         {
-          "es": "Paso tres, conectar con Europa.",
-          "eu": "Hirugarren urratsa, Europarekin konektatu."
+          "es": "Paso tres: conectar con Europa.",
+          "eu": "Hirugarren urratsa: Europarekin konektatu."
         },
         {
           "es": "HealthData@EU, la red europea para la investigación, se conecta en marzo de 2029.",
@@ -444,8 +404,8 @@
           "frag": 2
         },
         {
-          "es": "Y la base está disponible hoy:",
-          "eu": "Eta oinarria gaur dago eskuragarri:",
+          "es": "Y la base ya está aquí:",
+          "eu": "Eta oinarria hemen dago jada:",
           "frag": 3
         },
         {
@@ -474,16 +434,16 @@
       "id": "discussion",
       "cues": [
         {
-          "es": "Eskerrik asko. Gracias.",
-          "eu": "Eskerrik asko."
+          "es": "¡Eskerrik asko! ¡Muchas gracias!",
+          "eu": "Eskerrik asko!"
         },
         {
-          "es": "Si queréis seguir la conversación, escanead el código: abre mi perfil de LinkedIn.",
-          "eu": "Elkarrizketarekin jarraitu nahi baduzue, eskaneatu kodea: nire LinkedIn profila irekitzen du."
+          "es": "¿Seguimos hablando? Escanead el código: abre mi perfil de LinkedIn.",
+          "eu": "Hitz egiten jarraituko dugu? Eskaneatu kodea: nire LinkedIn profila irekitzen du."
         },
         {
-          "es": "Para empezar el debate, tres preguntas.",
-          "eu": "Eztabaidari ekiteko, hiru galdera."
+          "es": "Y para arrancar el debate, tres preguntas.",
+          "eu": "Eta eztabaidari ekiteko, hiru galdera."
         },
         {
           "es": "¿Qué uno o dos casos de uso mostrarían valor primero?",
@@ -502,5 +462,12 @@
         }
       ]
     }
-  ]
+  ],
+  "voice_settings": {
+    "stability": 0.3,
+    "similarity_boost": 0.8,
+    "style": 0.6,
+    "use_speaker_boost": true,
+    "speed": 1.2
+  }
 }

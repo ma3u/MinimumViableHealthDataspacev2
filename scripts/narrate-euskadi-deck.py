@@ -28,6 +28,9 @@ import base64, json, os, pathlib, sys, urllib.error, urllib.request
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DECK = ROOT / "ui/public/presentations/euskadi-ejie-2026"
 SOURCE = DECK / "narration-source.json"
+# The source file's "voice_settings" win; these were the first version's, which Spanish
+# listeners found too slow and too flat.
+DEFAULT_VOICE_SETTINGS = {"stability": 0.5, "similarity_boost": 0.8, "style": 0.2}
 OUT_JSON = DECK / "narration.json"
 FORMAT = "mp3_44100_96"
 
@@ -106,7 +109,7 @@ for n, slide in enumerate(src["slides"], 1):
     req = urllib.request.Request(
         f"https://api.elevenlabs.io/v1/text-to-speech/{voice}/with-timestamps?output_format={FORMAT}",
         data=json.dumps({"text": text, "model_id": src["model"],
-                         "voice_settings": {"stability": 0.5, "similarity_boost": 0.8, "style": 0.2}}).encode(),
+                         "voice_settings": src.get("voice_settings", DEFAULT_VOICE_SETTINGS)}).encode(),
         headers=HEADERS,
     )
     try:

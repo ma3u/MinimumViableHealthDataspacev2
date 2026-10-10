@@ -6,32 +6,32 @@
       "id": "cover",
       "audio": "audio/slide-1.mp3",
       "subtitles": "subtitles/slide-1.eu.vtt",
-      "duration": 24.288,
+      "duration": 22.198,
       "cues": [
         {
           "start": 0.0,
-          "end": 2.299,
-          "eu": "Egun on."
+          "end": 1.718,
+          "eu": "Egun on!"
         },
         {
-          "start": 2.299,
-          "end": 3.889,
-          "eu": "Eskerrik asko gonbidapenagatik."
+          "start": 1.718,
+          "end": 4.319,
+          "eu": "Eskerrik asko gonbidapenagatik. Goazen harira."
         },
         {
-          "start": 3.889,
-          "end": 9.033,
-          "eu": "Gaur, bidali zenizkiguten zortzi galderei erantzungo diet, zuen ordenan."
+          "start": 4.319,
+          "end": 9.706,
+          "eu": "Zortzi galdera bidali zenizkiguten. Gaur zortzi erantzun dituzue, zuen ordenan."
         },
         {
-          "start": 9.033,
-          "end": 16.893,
-          "eu": "Catena-Xen esperientziatik hitz egiten dut, automobilgintzaren datu-espaziotik."
+          "start": 9.706,
+          "end": 16.312,
+          "eu": "Catena-Xetik nator, automobilgintzaren datu-espaziotik, dagoeneko ekoizpenean dabilena."
         },
         {
-          "start": 16.893,
-          "end": 24.288,
-          "eu": "Eta gaur zuzenean dabilen Osasun Datuen Europako Espazioaren erakusgarri batetik."
+          "start": 16.312,
+          "end": 22.198,
+          "eu": "Eta Osasun Datuen Europako Espazioaren erakusle bat dakart, gaur zuzenean dabilena."
         }
       ]
     },
@@ -39,22 +39,22 @@
       "id": "overview",
       "audio": "audio/slide-2.mp3",
       "subtitles": "subtitles/slide-2.eu.vtt",
-      "duration": 13.375,
+      "duration": 10.077,
       "cues": [
         {
           "start": 0.0,
-          "end": 5.724,
-          "eu": "Hemen dituzue zortzi erantzunak orrialde bakarrean."
+          "end": 4.156,
+          "eu": "Hemen dituzue zortzi erantzunak, orrialde bakar batean."
         },
         {
-          "start": 5.724,
-          "end": 10.437,
+          "start": 4.156,
+          "end": 7.906,
           "eu": "Diapositiba bakarra gogoratzen baduzue, izan dadila hau."
         },
         {
-          "start": 10.437,
-          "end": 13.375,
-          "eu": "Orain banan-banan ikusiko ditugu."
+          "start": 7.906,
+          "end": 10.077,
+          "eu": "Goazen banan-banan!"
         }
       ]
     },
@@ -62,37 +62,27 @@
       "id": "q1",
       "audio": "audio/slide-3.mp3",
       "subtitles": "subtitles/slide-3.eu.vtt",
-      "duration": 37.523,
+      "duration": 24.799,
       "cues": [
         {
           "start": 0.0,
-          "end": 4.11,
-          "eu": "Erronkarik handiena kultura izan zen, ez teknologia."
+          "end": 4.841,
+          "eu": "Zein izan zen erronkarik handiena? Ez teknologia. Kultura baizik."
         },
         {
-          "start": 4.11,
-          "end": 8.742,
-          "eu": "Kode irekia berria zen enpresa gehienentzat."
+          "start": 4.841,
+          "end": 11.262,
+          "eu": "Enpresek bazekiten produktuak erosten. Ez zekiten elkarrekin eraikitzen, irekian."
         },
         {
-          "start": 8.742,
-          "end": 15.256,
-          "eu": "Produktuak erostera ohituta zeuden, ez elkarrekin publikoki eraikitzera."
+          "start": 11.262,
+          "end": 17.926,
+          "eu": "Lan-taldeek zuzendaritzak denbora eta agindu argia ematen zienean bakarrik egiten zuten aurrera."
         },
         {
-          "start": 15.256,
-          "end": 24.241,
-          "eu": "Lan-taldeek emaitzak ematen zituzten, zuzendaritzak bere adituei denbora eta agindu argia ematen zienean bakarrik."
-        },
-        {
-          "start": 24.241,
-          "end": 27.922,
-          "eu": "Alderdi teknikoan, datuak mugitzea erraza da."
-        },
-        {
-          "start": 27.922,
-          "end": 37.523,
-          "eu": "Zaila da esan nahi dutenaz ados jartzea: FHIR, terminologiak eta OMOP."
+          "start": 17.926,
+          "end": 24.799,
+          "eu": "Datuak mugitzea erraza da. Zer esan nahi duten adostea: hori da zaila."
         }
       ]
     },
@@ -100,47 +90,37 @@
       "id": "q2",
       "audio": "audio/slide-4.mp3",
       "subtitles": "subtitles/slide-4.eu.vtt",
-      "duration": 41.099,
+      "duration": 30.0,
       "cues": [
         {
           "start": 0.0,
-          "end": 1.358,
+          "end": 1.207,
           "eu": "Lau ikasgai."
         },
         {
-          "start": 1.358,
-          "end": 12.272,
-          "eu": "Bat: dagoeneko dagoenaren gainean eraiki, hala nola FHIR, SNOMED CT, GNS-10, OMOP eta HealthDCAT-AP."
+          "start": 1.207,
+          "end": 10.948,
+          "eu": "Bat: ez asmatu ezer. FHIR, SNOMED, OMOP, HealthDCAT-AP badaude. Erabili itzazue!"
         },
         {
-          "start": 12.272,
-          "end": 14.478,
-          "eu": "Ez asmatu zuen estandar propiorik."
+          "start": 10.948,
+          "end": 15.557,
+          "eu": "Bi: hasi txiki. Erabilera-kasu bat edo bi, eta neur daitekeen emaitza bat."
         },
         {
-          "start": 14.478,
-          "end": 19.598,
-          "eu": "Bi: txikitik hasi, erabilera-kasu batekin edo birekin eta neur daitekeen emaitza batekin."
+          "start": 15.557,
+          "end": 20.991,
+          "eu": "Hiru: itzuli hobekuntzak kode irekira. Kopia pribatu bat betiko ordainduko duzue."
         },
         {
-          "start": 19.598,
-          "end": 23.348,
-          "eu": "Hiru: hobekuntzak kode irekiko proiektuei itzuli."
-        },
-        {
-          "start": 23.348,
-          "end": 30.337,
-          "eu": "Kopia pribatua zuen produktu propio bihurtzen da, eta betiko ordaintzen duzue."
-        },
-        {
-          "start": 30.337,
-          "end": 37.732,
+          "start": 20.991,
+          "end": 27.237,
           "eu": "Lau: lizitazioan, eskatu estandarrak eta adostasun-probak, ez produktu bat."
         },
         {
-          "start": 37.732,
-          "end": 41.099,
-          "eu": "Horrela saihesten da hornitzaile bakar baten menpe egotea."
+          "start": 27.237,
+          "end": 30.0,
+          "eu": "Horrela ez zarete inoiz hornitzaile bakar baten menpe egongo."
         }
       ]
     },
@@ -148,37 +128,32 @@
       "id": "q3",
       "audio": "audio/slide-5.mp3",
       "subtitles": "subtitles/slide-5.eu.vtt",
-      "duration": 42.585,
+      "duration": 29.165,
       "cues": [
         {
           "start": 0.0,
-          "end": 6.827,
-          "eu": "Erabaki bakoitza arkitektura-erabakien erregistro gisa idatzi zen."
+          "end": 2.218,
+          "eu": "Nola erabaki genuen? Publikoan."
         },
         {
-          "start": 6.827,
-          "end": 11.32,
-          "eu": "Komunitate osoak irakur zezakeen eta zergatia uler."
+          "start": 2.218,
+          "end": 9.822,
+          "eu": "Arkitektura-erabaki bakoitza idatzita geratu zen, bere zergatiarekin, edonork irakur zezan."
         },
         {
-          "start": 11.32,
-          "end": 19.307,
-          "eu": "Lan-taldeek proposatzen zuten, baina azkenean softwarea eraikitzen dutenek erabakitzen zituzten lehentasunak."
+          "start": 9.822,
+          "end": 17.485,
+          "eu": "Bost irizpide: estandar irekiak, datuen subiranotasuna, legezko egokitzapena, heldutasuna eta irteera argi bat."
         },
         {
-          "start": 19.307,
-          "end": 30.696,
-          "eu": "Bost irizpide: estandar irekiak, datuen subiranotasuna, legearekiko egokitasuna, teknologia heldua eta irteera-estrategia argia."
+          "start": 17.485,
+          "end": 23.302,
+          "eu": "Erakunde publiko batentzat, hornitzailez aldatu ahal izatea ez da xehetasun bat. Funtsezkoa da."
         },
         {
-          "start": 30.696,
-          "end": 36.118,
-          "eu": "Erakunde publiko batentzat, hornitzailez aldatu ahal izatea funtsezkoa da."
-        },
-        {
-          "start": 36.118,
-          "end": 42.585,
-          "eu": "Gure erakusgarriak arau bera jarraitzen du, berrogeita hamazazpi erabaki publikorekin."
+          "start": 23.302,
+          "end": 29.165,
+          "eu": "Gure erakusleak gauza bera egiten du: berrogeita hamazazpi erabaki, guztiak publikoak."
         }
       ]
     },
@@ -186,31 +161,31 @@
       "id": "q4",
       "audio": "audio/slide-6.mp3",
       "subtitles": "subtitles/slide-6.eu.vtt",
-      "duration": 32.972,
+      "duration": 28.235,
       "cues": [
         {
           "start": 0.0,
-          "end": 8.696,
-          "eu": "Catena-Xen eredu operatiboa ezarri genuen: zerbitzu-mapa bat, bakoitza arduradun argi batekin."
+          "end": 7.105,
+          "eu": "Arkitektura: Catena-Xen eredu operatiboa. Zerbitzu bakoitza, arduradun argi batekin."
         },
         {
-          "start": 8.696,
-          "end": 19.482,
-          "eu": "Europako erregelamenduak dagoeneko definitzen ditu rolak: sarbide-erakundea, datuen titularrak, erabiltzaileak eta ingurune seguruak."
+          "start": 7.105,
+          "end": 16.091,
+          "eu": "Europako erregelamenduak dagoeneko definitzen ditu rolak: sarbide-erakundea, titularrak, erabiltzaileak eta ingurune seguruak."
         },
         {
-          "start": 19.482,
-          "end": 23.185,
-          "eu": "Baina ez du esaten nork kudeatzen duen sistema egunero."
+          "start": 16.091,
+          "end": 18.901,
+          "eu": "Baina ez du esaten nork kudeatzen duen egunero."
         },
         {
-          "start": 23.185,
-          "end": 28.909,
-          "eu": "Nork konektatzen du ospitale berri bat? Nork erantzuten du zerbaitek huts egiten duenean?"
+          "start": 18.901,
+          "end": 25.02,
+          "eu": "Nork konektatzen du ospitale berri bat? Nork erantzuten du goizeko hiruretan zerbaitek huts egiten duenean?"
         },
         {
-          "start": 28.909,
-          "end": 32.972,
+          "start": 25.02,
+          "end": 28.235,
           "eu": "Hori da geruza laranja: enpresa operadorea."
         }
       ]
@@ -219,37 +194,32 @@
       "id": "q5",
       "audio": "audio/slide-7.mp3",
       "subtitles": "subtitles/slide-7.eu.vtt",
-      "duration": 41.378,
+      "duration": 25.077,
       "cues": [
         {
           "start": 0.0,
-          "end": 11.006,
-          "eu": "Ezkerrean, zerbitzu-mapa: konektoreak, identitatea eta kredentzialak, katalogoa, partaideen sarrera eta adostasun-probak."
+          "end": 7.14,
+          "eu": "Zer dago heldu? Datu-espazioen protokoloa egonkorra da, eta ISO arau bihurtzeko bidean dago."
         },
         {
-          "start": 11.006,
-          "end": 17.357,
-          "eu": "Datu-espazioen protokoloa egonkorra da eta ISO arau bihurtzeko bidean dago."
+          "start": 7.14,
+          "end": 10.217,
+          "eu": "FHIR eta OMOP: helduak."
         },
         {
-          "start": 17.357,
-          "end": 19.563,
-          "eu": "FHIR eta OMOP helduak dira."
+          "start": 10.217,
+          "end": 17.647,
+          "eu": "Tractus-X konektorea 2023tik dabil ekoizpenean, nahiz eta oraindik hiruhileko bakoitzean aldatzen den."
         },
         {
-          "start": 19.563,
-          "end": 30.523,
-          "eu": "Tractus-X konektorea 2023tik dabil produkzioan, baina oraindik zero bertsioan dago eta hiruhilero aldatzen da."
+          "start": 17.647,
+          "end": 21.618,
+          "eu": "Gazteena? Tratamendu seguruko inguruneak eta datu-baimenak."
         },
         {
-          "start": 30.523,
-          "end": 37.605,
-          "eu": "Heldutasun txikiena dutenak tratamendu-ingurune seguruak eta datu-baimenak dira."
-        },
-        {
-          "start": 37.605,
-          "end": 41.378,
-          "eu": "Hor denbora eta aurrekontu gehiago gorde behar dira."
+          "start": 21.618,
+          "end": 25.077,
+          "eu": "Hor, gorde denbora eta aurrekontu gehiago."
         }
       ]
     },
@@ -257,37 +227,32 @@
       "id": "q6",
       "audio": "audio/slide-8.mp3",
       "subtitles": "subtitles/slide-8.eu.vtt",
-      "duration": 40.728,
+      "duration": 30.929,
       "cues": [
         {
           "start": 0.0,
-          "end": 3.889,
-          "eu": "Catena-Xek hiru funtzio bereizten ditu."
+          "end": 4.934,
+          "eu": "Gobernantza. Catena-Xek hiru rol bereizten ditu."
         },
         {
-          "start": 3.889,
-          "end": 8.034,
-          "eu": "Elkarteak estandarrak finkatzen ditu eta ziurtagiriak ematen ditu."
+          "start": 4.934,
+          "end": 13.026,
+          "eu": "Elkarteak arauak finkatzen ditu eta ziurtatzen du. Eclipsek kodea hartzen du. Eta Cofinity-Xek kudeatzen du."
         },
         {
-          "start": 8.034,
-          "end": 14.512,
-          "eu": "Eclipse Fundazioak kode irekia hartzen du, eta Cofinity-Xek sistema kudeatzen du."
-        },
-        {
-          "start": 14.512,
-          "end": 25.496,
+          "start": 13.026,
+          "end": 21.107,
           "eu": "Euskadin honela izan liteke: Osasun Datuen Bulegoa sarbide-erakunde gisa, eta EJIE zerbitzu nagusiak kudeatzen."
         },
         {
-          "start": 25.496,
-          "end": 33.135,
-          "eu": "Gure gomendioa: arauak finkatzen dituena eta kudeatzen duena bereiztea."
+          "start": 21.107,
+          "end": 25.995,
+          "eu": "Gure aholkua: arauak finkatzen dituena ez da izan behar kudeatzen duena."
         },
         {
-          "start": 33.135,
-          "end": 40.728,
-          "eu": "Eta gobernantza hasieratik hainbat domeinutarako diseinatzea, ez osasunerako bakarrik."
+          "start": 25.995,
+          "end": 30.929,
+          "eu": "Eta pentsatu hainbat domeinutan lehen egunetik, ez osasunean bakarrik."
         }
       ]
     },
@@ -295,47 +260,47 @@
       "id": "q7",
       "audio": "audio/slide-9.mp3",
       "subtitles": "subtitles/slide-9.eu.vtt",
-      "duration": 55.914,
+      "duration": 53.545,
       "cues": [
         {
           "start": 0.0,
-          "end": 5.375,
-          "eu": "Lizentziek ia ezer ez dute kostatzen, nukleoa kode irekia delako."
+          "end": 6.269,
+          "eu": "Hitz egin dezagun diruaz. Lizentziak: ia zero, muina kode irekia delako."
         },
         {
-          "start": 5.375,
-          "end": 10.112,
-          "eu": "Benetako kostuak ingeniaritza, ostatatzea eta eragiketa dira."
+          "start": 6.269,
+          "end": 11.134,
+          "eu": "Kostatzen dena jendea da: ingeniaritza, ostatatzea eta eragiketa."
         },
         {
-          "start": 10.112,
-          "end": 19.029,
-          "eu": "Erreferentzia gisa, Catena-Xek ehun milioi euro baino gehiago jaso zituen funts publikoetatik, industria oso batentzat."
+          "start": 11.134,
+          "end": 19.354,
+          "eu": "Erreferentzia gisa: Catena-Xek ehun milioi euro baino gehiago jaso zituen funts publikoetatik, industria oso batentzat."
         },
         {
-          "start": 19.029,
-          "end": 26.378,
-          "eu": "Partaide bakoitzak mila eta bostehun eta hirurogeita hamaika mila euro artean ordaintzen dio operadoreari urtean."
+          "start": 19.354,
+          "end": 26.332,
+          "eu": "Parte-hartzaile bakoitzak urtean mila eta bostehun eta hirurogeita hamaika mila euro artean ordaintzen dio operadoreari."
         },
         {
-          "start": 26.378,
-          "end": 33.24,
-          "eu": "Eskualdeko pilotu baterako zortziehun mila euro eta milioi eta erdi artean kalkulatzen dugu."
+          "start": 26.332,
+          "end": 30.592,
+          "eu": "Eskualdeko pilotu bat? Zortziehun mila euro eta milioi eta erdi artean."
         },
         {
-          "start": 33.24,
-          "end": 38.801,
-          "eu": "Ondoren, eragiketak urtean ehuneko hamabost eta hogeita bost artean kostatzen du."
+          "start": 30.592,
+          "end": 36.502,
+          "eu": "Ondoren, kudeatzeak urtean ehuneko hamabost eta hogeita bost artean kostatzen du."
         },
         {
-          "start": 38.801,
-          "end": 50.144,
-          "eu": "Ostatatzerako hiru ingurune aurreikusten ditugu, produkzioa, probak eta garapena, bakoitza hilean mila euro inguru: urtean hogeita hamasei mila euro."
+          "start": 36.502,
+          "end": 48.019,
+          "eu": "Ostatatzea: hiru ingurune, ekoizpena, probak eta garapena, hilean mila euro inguru bakoitza."
         },
         {
-          "start": 50.144,
-          "end": 55.914,
-          "eu": "Horri softwarearen bizi-zikloko eta garapeneko tresnak gehitzen zaizkio."
+          "start": 48.019,
+          "end": 53.545,
+          "eu": "Gehi garapen-tresnak eta softwarearen bizi-zikloko tresnak."
         }
       ]
     },
@@ -343,22 +308,22 @@
       "id": "q8",
       "audio": "audio/slide-10.mp3",
       "subtitles": "subtitles/slide-10.eu.vtt",
-      "duration": 26.1,
+      "duration": 18.622,
       "cues": [
         {
           "start": 0.0,
-          "end": 5.492,
-          "eu": "Pilotu batek zortzi eta hamabi pertsona artean behar ditu lanaldi osoan."
+          "end": 4.261,
+          "eu": "Eta taldea? Zortzi eta hamabi pertsona artean, lanaldi osoan."
         },
         {
-          "start": 5.492,
-          "end": 18.68,
-          "eu": "Arkitekto bat, konektore-ingeniariak, plataforma- eta segurtasun-ingeniariak, FHIR eta OMOP espezialista bat, eta datuen babesean eta zuzenbidean adituak."
+          "start": 4.261,
+          "end": 12.04,
+          "eu": "Arkitektura, konektoreak, plataforma eta segurtasuna, FHIR eta OMOP, datuen babesa eta zuzenbidea."
         },
         {
-          "start": 18.68,
-          "end": 26.1,
-          "eu": "Eta gogoratu lehen galdera: pertsona hauek denbora eta zuzendaritzaren agindua behar dituzte."
+          "start": 12.04,
+          "end": 18.622,
+          "eu": "Eta gogoratu lehen erantzuna: zuzendaritzaren denborarik eta agindurik gabe, ez dabil."
         }
       ]
     },
@@ -370,18 +335,18 @@
       "cues": [
         {
           "start": 0.0,
-          "end": 3.402,
-          "eu": "Zer dator ondoren? Lau urrats txiki."
+          "end": 4.284,
+          "eu": "Eta orain zer? Lau urrats, denak txikiak."
         },
         {
-          "start": 3.402,
-          "end": 13.247,
-          "eu": "Erabilera-kasu bat edo bi aukeratu. Rolak adostu. Lan-taldeak ireki ospitaleekin. Eta pilotu bat eraiki."
+          "start": 4.284,
+          "end": 14.547,
+          "eu": "Erabilera-kasu bat edo bi aukeratu. Rolak adostu. Lan-taldeak ireki ospitaleekin. Eta pilotua eraiki."
         },
         {
-          "start": 13.247,
+          "start": 14.547,
           "end": 23.684,
-          "eu": "Datak erregelamenduak finkatzen ditu: sarbide-erakundeak 2027ko martxoan, eta erabilera sekundario osoa 2029ko martxoan."
+          "eu": "Erlojua martxan dago: sarbide-erakundeak 2027ko martxoan, bigarren mailako erabilera osoa 2029ko martxoan."
         }
       ]
     },
@@ -389,47 +354,47 @@
       "id": "pilot",
       "audio": "audio/slide-12.mp3",
       "subtitles": "subtitles/slide-12.eu.vtt",
-      "duration": 40.171,
+      "duration": 33.065,
       "cues": [
         {
           "start": 0.0,
-          "end": 6.142,
-          "eu": "Hau da proposatzen dugun pilotua: eskualdean hasi eta gorantz konektatu."
+          "end": 5.596,
+          "eu": "Hau da gure proposamena: Euskadin hasi, eta gorantz konektatu."
         },
         {
-          "start": 6.142,
-          "end": 12.411,
-          "eu": "Lehen urratsa, 2027an: Euskadiko pilotua, Osakidetzarekin eta EJIErekin.",
+          "start": 5.596,
+          "end": 10.971,
+          "eu": "Lehen urratsa, 2027: Euskadiko pilotua, Osakidetzarekin eta EJIErekin.",
           "frag": 0
         },
         {
-          "start": 12.411,
-          "end": 14.675,
-          "eu": "Gero Espainiarekin konektatzen gara.",
+          "start": 10.971,
+          "end": 12.365,
+          "eu": "Gero, Espainia.",
           "frag": 1
         },
         {
-          "start": 14.675,
-          "end": 24.021,
-          "eu": "Bigarren urratsa, 2028an: Osasun Datuen Espazio Nazionala, sarbide-erakundea eta osasun digitalaren lege berria.",
+          "start": 12.365,
+          "end": 19.725,
+          "eu": "Bigarren urratsa, 2028: Osasun Datuen Espazio Nazionala, bere sarbide-erakundea eta osasun digitalaren lege berria.",
           "frag": 2
         },
         {
-          "start": 24.021,
-          "end": 26.076,
-          "eu": "Eta gero, Europarekin.",
+          "start": 19.725,
+          "end": 21.49,
+          "eu": "Eta gero, Europa.",
           "frag": 3
         },
         {
-          "start": 26.076,
-          "end": 35.271,
-          "eu": "Hirugarren urratsa, 2029ko martxoan: HealthData@EU martxan jartzen da erabilera sekundariorako.",
+          "start": 21.49,
+          "end": 29.315,
+          "eu": "Hirugarren urratsa, 2029ko martxoa: HealthData@EU abian jartzen da bigarren mailako erabilerarako.",
           "frag": 4
         },
         {
-          "start": 35.271,
-          "end": 40.171,
-          "eu": "Eta ez gara zerotik hasten: oinarria gaur bertan dago eskuragarri.",
+          "start": 29.315,
+          "end": 33.065,
+          "eu": "Eta onena: ez gara zerotik hasten. Oinarria gaur badago.",
           "frag": 5
         }
       ]
@@ -438,56 +403,51 @@
       "id": "pilot1",
       "audio": "audio/slide-13.mp3",
       "subtitles": "subtitles/slide-13.eu.vtt",
-      "duration": 50.945,
+      "duration": 44.025,
       "cues": [
         {
           "start": 0.0,
-          "end": 2.566,
-          "eu": "Lehen urratsa, Euskadiko pilotua."
+          "end": 3.17,
+          "eu": "Lehen urratsa: Euskadiko pilotua."
         },
         {
-          "start": 2.566,
-          "end": 8.034,
+          "start": 3.17,
+          "end": 8.301,
           "eu": "Osasun Datuen Euskal Bulegoa 2025eko urtarrilean iragarri zen.",
           "frag": 0
         },
         {
-          "start": 8.034,
-          "end": 13.781,
-          "eu": "Aragoik Espainiako lehen eskualde-bulegoa ireki zuen 2025eko urrian."
+          "start": 8.301,
+          "end": 14.756,
+          "eu": "Eta Aragoik Espainiako lehen eskualde-bulegoa ireki zuen jada, 2025eko urrian."
         },
         {
-          "start": 13.781,
-          "end": 20.225,
+          "start": 14.756,
+          "end": 20.678,
           "eu": "Osakidetzaren datu-lakua dagoeneko finantzatuta dago espazio nazionalaren euskal zati gisa.",
           "frag": 1
         },
         {
-          "start": 20.225,
-          "end": 24.288,
+          "start": 20.678,
+          "end": 24.242,
           "eu": "Datuak FHIR eta OMOP formatuetan prestatzen ditugu."
         },
         {
-          "start": 24.288,
-          "end": 29.362,
-          "eu": "Eskualde-nodo bat, konektore eta katalogo batekin, EJIEk kudeatua.",
+          "start": 24.242,
+          "end": 28.479,
+          "eu": "Eskualde-nodo bat, konektore eta katalogoarekin, EJIEk kudeatua.",
           "frag": 2
         },
         {
-          "start": 29.362,
-          "end": 34.412,
-          "eu": "Erabaki irekia: ingurune seguru propioa, ala nazionala?",
+          "start": 28.479,
+          "end": 35.736,
+          "eu": "Erabaki irekia: ingurune seguru propioa, ala nazionala? Bi kasuetan, Segurtasun Eskema Nazionalarekin.",
           "frag": 3
         },
         {
-          "start": 34.412,
-          "end": 39.335,
-          "eu": "Bi kasuetan Segurtasun Eskema Nazionala bete behar du."
-        },
-        {
-          "start": 39.335,
-          "end": 50.945,
-          "eu": "Eta bi erabilera-kasu: kohorteak aurkitzea eta gaixotasun-erregistro bat, adibidez ospitaleetako minbizi-erregistroak.",
+          "start": 35.736,
+          "end": 44.025,
+          "eu": "Eta bi erabilera-kasu: kohorteak aurkitzea, eta gaixotasun-erregistro bat, ospitaleetako minbizi-erregistroak bezala.",
           "frag": 4
         }
       ]
@@ -496,50 +456,40 @@
       "id": "pilot2",
       "audio": "audio/slide-14.mp3",
       "subtitles": "subtitles/slide-14.eu.vtt",
-      "duration": 47.276,
+      "duration": 44.955,
       "cues": [
         {
           "start": 0.0,
-          "end": 2.902,
-          "eu": "Bigarren urratsa, Espainiarekin konektatu."
+          "end": 4.052,
+          "eu": "Bigarren urratsa: Espainiarekin konektatu."
         },
         {
-          "start": 2.902,
-          "end": 12.19,
-          "eu": "Osasun Datuen Espazio Nazionala 2026ko urtarrilean ireki zen, protokolo komunak dituzten eskualde-plataformen sare gisa.",
+          "start": 4.052,
+          "end": 14.036,
+          "eu": "Osasun Datuen Espazio Nazionala 2026ko urtarrilean ireki zen: protokolo komunak dituzten eskualde-plataformen sarea.",
           "frag": 0
         },
         {
-          "start": 12.19,
-          "end": 17.148,
-          "eu": "Hau da, behetik gorako ikuspegia dagoeneko diseinu nazionala da."
+          "start": 14.036,
+          "end": 18.077,
+          "eu": "Hau da: behetik gorako ikuspegia dagoeneko diseinu nazionala da."
         },
         {
-          "start": 17.148,
-          "end": 25.437,
-          "eu": "Erabaki irekia: Espainiak bere sarbide-erakundea izendatu behar du 2027ko martxoa baino lehen.",
+          "start": 18.077,
+          "end": 27.621,
+          "eu": "Erabaki irekia: Espainiak bere sarbide-erakundea izendatu behar du 2027ko martxoa baino lehen. Euskadik izango al du berea?",
           "frag": 1
         },
         {
-          "start": 25.437,
-          "end": 27.307,
-          "eu": "Euskadik izango al du berea?"
-        },
-        {
-          "start": 27.307,
-          "end": 31.811,
-          "eu": "Osasun digitalaren legeak eskualdeen papera zehaztuko du.",
+          "start": 27.621,
+          "end": 35.631,
+          "eu": "Osasun digitalaren legeak eskualdeen papera zehaztuko du. Zirriborroa da oraindik: argitu Ministerioarekin batera.",
           "frag": 2
         },
         {
-          "start": 31.811,
-          "end": 38.0,
-          "eu": "Zirriborro bat da oraindik; beraz, komeni da Ministerioarekin batera argitzea."
-        },
-        {
-          "start": 38.0,
-          "end": 47.276,
-          "eu": "Erabilera primariorako bideak dagoeneko funtzionatzen du: Euskadi MyHealth@EUra konektatuta dago 2023tik.",
+          "start": 35.631,
+          "end": 44.955,
+          "eu": "Eta erabilera primariorako, bideak dagoeneko funtzionatzen du: Euskadi MyHealth@EUra konektatuta dago 2023tik.",
           "frag": 3
         }
       ]
@@ -548,58 +498,58 @@
       "id": "pilot3",
       "audio": "audio/slide-15.mp3",
       "subtitles": "subtitles/slide-15.eu.vtt",
-      "duration": 42.261,
+      "duration": 39.66,
       "cues": [
         {
           "start": 0.0,
-          "end": 2.74,
-          "eu": "Hirugarren urratsa, Europarekin konektatu."
+          "end": 3.355,
+          "eu": "Hirugarren urratsa: Europarekin konektatu."
         },
         {
-          "start": 2.74,
-          "end": 10.391,
+          "start": 3.355,
+          "end": 10.112,
           "eu": "HealthData@EU, ikerketarako Europako sarea, 2029ko martxoan konektatzen da.",
           "frag": 0
         },
         {
-          "start": 10.391,
-          "end": 17.984,
+          "start": 10.112,
+          "end": 18.146,
           "eu": "Betearazpen-egintzak lehenago iristen dira, 2027ko martxoan, eta lehen urratsean eraikitzen duguna zehazten dute.",
           "frag": 1
         },
         {
-          "start": 17.984,
-          "end": 26.204,
+          "start": 18.146,
+          "end": 25.774,
           "eu": "Estatu kide bakoitzak identitate digitaleko zorro bat eskaini behar du 2026a amaitu baino lehen.",
           "frag": 2
         },
         {
-          "start": 26.204,
-          "end": 28.654,
-          "eu": "Eta oinarria gaur dago eskuragarri:",
+          "start": 25.774,
+          "end": 27.318,
+          "eu": "Eta oinarria hemen dago jada:",
           "frag": 3
         },
         {
-          "start": 28.654,
-          "end": 31.997,
+          "start": 27.318,
+          "end": 30.186,
           "eu": "kode irekiko konektorea eta Simpl-Open,",
           "frag": 4
         },
         {
-          "start": 31.997,
-          "end": 36.096,
+          "start": 30.186,
+          "end": 33.948,
           "eu": "HealthData@EU plataformaren kode irekia,",
           "frag": 5
         },
         {
-          "start": 36.096,
-          "end": 37.756,
+          "start": 33.948,
+          "end": 35.399,
           "eu": "osasun-estandarrak,",
           "frag": 6
         },
         {
-          "start": 37.756,
-          "end": 42.261,
+          "start": 35.399,
+          "end": 39.66,
           "eu": "eta identitate, ziurtagiri eta segurtasuneko Espainiako zerbitzuak.",
           "frag": 7
         }
@@ -609,38 +559,38 @@
       "id": "discussion",
       "audio": "audio/slide-16.mp3",
       "subtitles": "subtitles/slide-16.eu.vtt",
-      "duration": 24.613,
+      "duration": 21.131,
       "cues": [
         {
           "start": 0.0,
-          "end": 2.229,
-          "eu": "Eskerrik asko."
+          "end": 2.485,
+          "eu": "Eskerrik asko!"
         },
         {
-          "start": 2.229,
-          "end": 8.057,
-          "eu": "Elkarrizketarekin jarraitu nahi baduzue, eskaneatu kodea: nire LinkedIn profila irekitzen du."
+          "start": 2.485,
+          "end": 7.651,
+          "eu": "Hitz egiten jarraituko dugu? Eskaneatu kodea: nire LinkedIn profila irekitzen du."
         },
         {
-          "start": 8.057,
-          "end": 11.54,
-          "eu": "Eztabaidari ekiteko, hiru galdera."
+          "start": 7.651,
+          "end": 10.426,
+          "eu": "Eta eztabaidari ekiteko, hiru galdera."
         },
         {
-          "start": 11.54,
-          "end": 16.893,
+          "start": 10.426,
+          "end": 14.35,
           "eu": "Zein erabilera-kasu batek edo bik erakutsiko lukete balioa lehenik?",
           "frag": 0
         },
         {
-          "start": 16.893,
-          "end": 20.712,
+          "start": 14.35,
+          "end": 18.437,
           "eu": "Nork finkatuko ditu arauak, eta nork kudeatuko ditu zerbitzuak?",
           "frag": 1
         },
         {
-          "start": 20.712,
-          "end": 24.613,
+          "start": 18.437,
+          "end": 21.131,
           "eu": "Zein ospitale batuko litzateke lehen lan-taldera?",
           "frag": 2
         }
