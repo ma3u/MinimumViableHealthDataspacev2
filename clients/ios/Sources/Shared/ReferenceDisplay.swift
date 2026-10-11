@@ -34,6 +34,11 @@ public enum UnitText {
     "{beats}": "",
     "mm[Hg]": "mmHg",
     "{ratio}": "",
+    // An exercise test's and a DXA scan's, as their reports print them.
+    "mL/{beat}": "mL/beat",
+    "{MET}": "MET",
+    "{SD}": "SD",
+    "g/cm2": "g/cm²",
   ]
 
   public static func display(_ ucum: String) -> String {

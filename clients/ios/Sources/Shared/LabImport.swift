@@ -40,6 +40,9 @@ public enum LabImport {
     /// What to call this report, when the document says. The laboratory that
     /// issued it, or the kind of screen it came from.
     public let suggestedTitle: String?
+    /// Pages photographed too blurred to read, left out of the reading
+    /// (`PageQuality`), so the person can photograph them again.
+    public var unreadablePages: [Int] { PageQuality.unreadablePages(pages) }
     public var source: SourceKind { extraction.source }
 
     /// The widest page's pixel width, when the pages were recognised as
@@ -151,6 +154,12 @@ public enum LabImport {
         "page \(index + 1, privacy: .public): \(reading.tableCount, privacy: .public) table(s), \(reading.rows.count, privacy: .public) rows, \(reading.fragments.count, privacy: .public) fragments, \(reading.orphanedFragments.count, privacy: .public) orphans, \(seconds, format: .fixed(precision: 2), privacy: .public) s"
       )
 
+      // A blurred page's text is nonsense, and what the grammar reads in
+      // it is too.
+      if PageQuality.isUnreadable(pages[pages.count - 1]) {
+        Log.scan.notice("page \(index + 1, privacy: .public) unreadable, left out")
+        continue
+      }
       if reading.rows.isEmpty {
         merged = merged.merging(LabLineParser.extract(reading.plainText, source: .ocrTranscribed))
         continue
@@ -265,14 +274,10 @@ public enum LabImport {
     extraction: ExtractionResult, pageTexts: [String], pdf: Data, pages: [ScanDiagnostics.Page],
     images: [CGImage] = []
   ) throws -> Result {
-    // A 24-hour blood pressure report's summary grid, read by geometry
-    // (AmbulatoryBloodPressure); the line grammar cannot place its numbers.
-    // An ECG printout's measurement block, read by geometry likewise.
-    let extraction = HolterReport.applied(
-      to: Electrocardiogram.applied(
-        to: AmbulatoryBloodPressure.applied(to: extraction, pageTexts: pageTexts, pages: pages),
-        pageTexts: pageTexts, pages: pages),
-      pageTexts: pageTexts)
+    // Documents that are not lab sheets have readers of their own
+    // (DocumentReaders). A blurred page is shown to none of them.
+    let readable = PageQuality.readableTexts(pageTexts, pages: pages)
+    let extraction = DocumentReaders.applied(to: extraction, pageTexts: readable, pages: pages)
     // A body-composition scale's screen is not a lab sheet and has its own
     // reader. It is tried only when the ordinary parse found no values, so a
     // report that happens to carry the word "aktualisiert" is unaffected.
@@ -311,7 +316,7 @@ public enum LabImport {
       throw ImportError.notALabReport
     }
 
-    let metadata = ReportMetadataExtractor.extract(pages: pageTexts)
+    let metadata = ReportMetadataExtractor.extract(pages: readable)
     let dateRole = metadata.labDate == nil ? "not found" : (metadata.labDateRole?.rawValue ?? "found")
     Log.scan.notice(
       "import complete: \(extraction.source.rawValue, privacy: .public), \(extraction.coded.count, privacy: .public) coded, \(extraction.unmapped.count, privacy: .public) unmapped, \(extraction.suspiciousLines.count, privacy: .public) unread, lab date \(dateRole, privacy: .public), pdf \(pdf.count, privacy: .public) bytes"

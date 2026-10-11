@@ -464,8 +464,16 @@ final class AppModel: ObservableObject {
       }
 
       var metadata = product.metadata
-      // A date the person confirmed outranks one read from the sheet again.
-      if report.metadata.dateSource == .user {
+      // A date the person confirmed outranks one read from the sheet again,
+      // unless it is the day of the scan and the sheet now gives a date:
+      // with no date found, the review offers the scan day, and a person who
+      // saves it has confirmed nothing (measured: a glucose sensor's report
+      // filed under the day it was photographed, months after it was worn).
+      let acceptedFallback =
+        report.metadata.dateSource == .user && metadata.dateSource == .printed
+        && report.collectedOn.map { ReportMetadata.calendarDay($0) }
+          == ReportMetadata.calendarDay(report.scannedAt)
+      if report.metadata.dateSource == .user && !acceptedFallback {
         metadata.labDate = report.collectedOn
         metadata.dateSource = .user
       }

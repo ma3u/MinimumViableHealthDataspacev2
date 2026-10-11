@@ -17,7 +17,7 @@ import type {
   SourceRegion,
   TextSource,
 } from "./types.js";
-import { OBSERVATION_CATEGORIES } from "./analytes.js";
+import { ELECTROCARDIOGRAM_CODES, OBSERVATION_CATEGORIES } from "./analytes.js";
 
 const EXT_BASE = "https://ehds.mabu.red/fhir/StructureDefinition";
 export const EXT_SOURCE_KIND = `${EXT_BASE}/epa-ingest-source-kind`;
@@ -66,6 +66,7 @@ const CATEGORY_DISPLAY = {
   laboratory: "Laboratory",
   "vital-signs": "Vital Signs",
   procedure: "Procedure",
+  imaging: "Imaging",
 } as const;
 
 /**
@@ -87,14 +88,20 @@ export function observationCategory(
 const categoryOf = (v: CodedLabValue) =>
   observationCategory(v.coding.loincNumber, v.analyteKey);
 
+const ECG = new Set(ELECTROCARDIOGRAM_CODES);
+const isEcgValue = (v: CodedLabValue) =>
+  ECG.has(v.coding.loincNumber ?? "") || ECG.has(v.analyteKey);
+
 /**
  * A report whose every value is an ECG measurement is an ECG, not a
- * laboratory report: v2-0074 `EC` (electrocardiac) and LOINC 11524-6.
+ * laboratory report: v2-0074 `EC` (electrocardiac) and LOINC 11524-6. Vital
+ * signs may sit beside them; an exercise test's procedure values may not.
  */
 export function isElectrocardiogram(values: CodedLabValue[]): boolean {
   return (
-    values.some((v) => categoryOf(v) === "procedure") &&
-    values.every((v) => categoryOf(v) !== "laboratory")
+    values.some(isEcgValue) &&
+    values.every((v) => categoryOf(v) !== "laboratory") &&
+    values.every((v) => categoryOf(v) !== "procedure" || isEcgValue(v))
   );
 }
 

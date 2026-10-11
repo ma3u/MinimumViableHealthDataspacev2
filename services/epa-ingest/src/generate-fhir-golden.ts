@@ -254,6 +254,68 @@ export const GOLDEN_HOLTER_VALUES: CodedLabValue[] = [
   },
 ];
 
+/**
+ * A bicycle ergometry, fictional: a peak load and a lactate threshold beside
+ * a count of ventricular ectopics. The count is an ECG measurement, the
+ * rest are not, so the report must not be exported as an "EKG study".
+ */
+export const GOLDEN_EXERCISE_VALUES: CodedLabValue[] = [
+  {
+    label: "Maximale Belastung",
+    value: 225,
+    unitRaw: "watts",
+    line: "max. Last 225 W",
+    lineNumber: 9600,
+    analyteKey: "exercise-peak-power",
+    coding: {
+      loincNumber: "93342-4",
+      display: "Power level --peak during exercise",
+      ucum: "W",
+    },
+  },
+  {
+    label: "Ventrikuläre Extrasystolen",
+    value: 2,
+    unitRaw: "{beats}",
+    line: "VES: 2",
+    lineNumber: 9611,
+    analyteKey: "ventricular-ectopics",
+    coding: {
+      loincNumber: "76126-2",
+      display: "Premature ventricular contractions [#]",
+      ucum: "{beats}",
+    },
+  },
+  {
+    label: "Leistung an der individuellen anaeroben Schwelle",
+    value: 162,
+    unitRaw: "watts",
+    line: "IAS 162 Watt",
+    lineNumber: 9800,
+    analyteKey: "anaerobic-threshold-power",
+    coding: {
+      loincNumber: null,
+      display:
+        "The highest load that can be held for a long time without lactate piling up (individual anaerobic threshold, IAS)",
+      ucum: "W",
+      uncodedReason:
+        "LOINC has no term for the thresholds and estimates a lactate test derives from its curve.",
+    },
+  },
+];
+
+export const GOLDEN_EXERCISE_TARGET = resolve(
+  HERE,
+  "../../../clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-exercise.json",
+);
+
+const GOLDEN_EXERCISE_META = {
+  patientId: "example-patient",
+  effectiveDateTime: "2026-08-26",
+  performer: "Praxis Dr. Muster",
+  title: "Belastungs-EKG",
+} as const;
+
 export const GOLDEN_HOLTER_TARGET = resolve(
   HERE,
   "../../../clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-holter.json",
@@ -302,7 +364,11 @@ const GOLDEN_SOURCE = {
  */
 function render(
   values: CodedLabValue[],
-  meta: typeof GOLDEN_META | typeof GOLDEN_ECG_META | typeof GOLDEN_HOLTER_META,
+  meta:
+    | typeof GOLDEN_META
+    | typeof GOLDEN_ECG_META
+    | typeof GOLDEN_HOLTER_META
+    | typeof GOLDEN_EXERCISE_META,
 ): string {
   const bundle = buildBundle(values, {
     meta,
@@ -330,12 +396,17 @@ export function goldenHolterBundle(): string {
   return render(GOLDEN_HOLTER_VALUES, GOLDEN_HOLTER_META);
 }
 
+export function goldenExerciseBundle(): string {
+  return render(GOLDEN_EXERCISE_VALUES, GOLDEN_EXERCISE_META);
+}
+
 async function main(): Promise<void> {
   const check = process.argv.includes("--check");
   for (const [target, next] of [
     [GOLDEN_TARGET, goldenBundle()],
     [GOLDEN_ECG_TARGET, goldenEcgBundle()],
     [GOLDEN_HOLTER_TARGET, goldenHolterBundle()],
+    [GOLDEN_EXERCISE_TARGET, goldenExerciseBundle()],
   ] as const) {
     if (check) {
       const current = await readFile(target, "utf8").catch(() => null);

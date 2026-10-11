@@ -522,6 +522,84 @@ import Shared
           Row("Artefakte", 2, "%"),
         ]),
 
+      // A performance diagnostics morning, five documents from one practice,
+      // as their readers read them (BodyComposition, ExerciseECG,
+      // CardiopulmonaryExercise, LactateTest, GlucoseProfile). Most of a
+      // lactate test and much of a DXA scan has no LOINC term and is
+      // carried uncoded with the reason; an ergometry is not an ECG study.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D016", year: 2026, month: 5, day: 12,
+        title: "Körperzusammensetzung (DXA), Praxis Muster", laboratory: "Praxis Muster - Sportmedizin",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Körperfettanteil", 23.4, "%"),
+          Row("Körperfettmasse", 14.28, "kg"),
+          Row("Mager-Weichteilmasse", 46.74, "kg"),
+          Row("Knochenmineralgehalt", 2.15, "kg"),
+          Row("Android-Fettanteil", 28.1, "%"),
+          Row("Gynoid-Fettanteil", 20.8, "%"),
+          Row("Android/Gynoid-Verhältnis", 1.35, "{ratio}"),
+          Row("Viszerales Fett", 0.508, "kg"),
+          Row("Viszerales Fett", 57, "cm2"),
+          Row("Knochendichte Ganzkörper", 1.153, "g/cm2"),
+          Row("Knochendichte Ganzkörper, T-Wert", -0.6, "{SD}"),
+          Row("Knochendichte Ganzkörper, Z-Wert", -0.2, "{SD}"),
+          Row("Relativer Skelettmuskelindex", 7.85, "kg/m2"),
+        ]),
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D017", year: 2026, month: 5, day: 12,
+        title: "Belastungs-EKG, Praxis Muster", laboratory: "Praxis Muster - Sportmedizin",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Maximale Belastung", 225, "watts"),
+          Row("Belastungsdauer", 11.87, "minutes"),
+          Row("Ruheherzfrequenz", 71, "/min"),
+          Row("Maximale Herzfrequenz unter Belastung", 158, "/min"),
+          Row("Systolischer Blutdruck unter Belastung, maximal", 196, "mmHg"),
+          Row("Diastolischer Blutdruck unter Belastung", 88, "mmHg"),
+          Row("MET, maximal", 11.4, "{MET}"),
+          Row("PWC 170", 200, "watts"),
+          Row("PWC 150", 170, "watts"),
+          Row("PWC 130", 132, "watts"),
+          Row("Ventrikuläre Extrasystolen", 2, "{beats}"),
+        ]),
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D018", year: 2026, month: 5, day: 12,
+        title: "Spiroergometrie, Praxis Muster", laboratory: "Praxis Muster - Sportmedizin",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Forcierte Vitalkapazität", 3.92, "litres"),
+          Row("Einsekundenkapazität", 3.21, "litres"),
+          Row("FEV1/FVC", 81.9, "%"),
+          Row("Maximale Sauerstoffaufnahme", 2650, "ml/min"),
+          Row("Maximale Sauerstoffaufnahme pro kg", 41.1, "ml/min/kg"),
+          Row("Sauerstoffpuls, maximal", 15.8, "ml/beat"),
+          Row("Erste ventilatorische Schwelle pro kg", 29.3, "ml/min/kg"),
+          Row("VE/VCO2-Steigung", 25.1, "{ratio}"),
+          Row("Atemreserve", 38.2, "%"),
+          Row("Respiratorischer Quotient, maximal", 1.08, "{ratio}"),
+          Row("Maximale Herzfrequenz unter Belastung", 168, "/min"),
+          Row("Herzfrequenzerholung nach 1 Minute", 31, "/min"),
+        ]),
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D019", year: 2026, month: 5, day: 12,
+        title: "Leistungsdiagnostik, Praxis Muster", laboratory: "Praxis Muster - Sportmedizin",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Leistung an der Laktatschwelle", 103.7, "watts"),
+          Row("Leistung an der individuellen anaeroben Schwelle", 162, "watts"),
+          Row("Leistung an der individuellen anaeroben Schwelle pro kg", 2.38, "watts/kg"),
+          Row("Herzfrequenz an der individuellen anaeroben Schwelle", 152, "/min"),
+          Row("Leistung bei 4 mmol/l Laktat", 194.2, "watts"),
+          Row("Maximale glykolytische Leistung (VLaMax)", 0.31, "mmol/l/s"),
+          Row("Maximale Sauerstoffaufnahme pro kg (berechnet)", 45.9, "ml/min/kg"),
+        ]),
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D020", year: 2026, month: 3, day: 3,
+        title: "Glukoseprofil (Sensor), Praxis Muster", laboratory: "Praxis Muster - Sportmedizin",
+        source: .ocrTranscribed,
+        rows: [Row("Durchschnittliche Glukose (Sensor)", 118, "mg/dL")]),
+
       // A resting 12-lead ECG: the measurements the electrocardiograph prints
       // above its tracing, as `Electrocardiogram` reads them. Every one has
       // a LOINC ECG term; the report is filed as an ECG, not a lab report.

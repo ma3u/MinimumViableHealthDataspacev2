@@ -334,7 +334,7 @@ public enum AmbulatoryBloodPressure {
       ),
       (
         "Body-Mass-Index", #"^BMI$"#,
-        #"\bBMI\s*:?\s*(\d{2}(?:[.,]\d{1,2})?)(?![\d.,%])"#, "kg/m2", 12...70
+        #"\bBMI\s*[:=]?\s*(\d{2}(?:[.,]\d{1,2})?)(?![\d.,%])"#, "kg/m2", 12...70
       ),
     ]
 

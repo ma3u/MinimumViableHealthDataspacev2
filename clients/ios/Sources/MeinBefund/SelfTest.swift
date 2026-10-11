@@ -135,8 +135,13 @@
     /// The same work the per-report button does, for a shelf of reports at
     /// once after a parser fix, without tapping through them.
     func reextractAllIfRequested() async {
-      guard ProcessInfo.processInfo.arguments.contains("-MBReextract") else { return }
-      for report in reports where report.scan != nil {
+      let arguments = ProcessInfo.processInfo.arguments
+      guard let flag = arguments.firstIndex(of: "-MBReextract") else { return }
+      // `-MBReextract <id> <id> ...` reads only those reports again, so a
+      // reader written for one kind of document is tried on the person's
+      // own copies of it without touching every other report.
+      let only = Set(arguments[(flag + 1)...].prefix { !$0.hasPrefix("-") }.compactMap(UUID.init))
+      for report in reports where report.scan != nil && (only.isEmpty || only.contains(report.id)) {
         let before = report.extraction.coded.count
         await reextract(report)
         let after = reports.first { $0.id == report.id }?.extraction.coded.count ?? before

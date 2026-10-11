@@ -19,6 +19,22 @@ public enum ReportSuggestion {
     if !codes.isDisjoint(with: ["8490-5", "8472-3"]) {
       return String(localized: "24-hour blood pressure")
     }
+    if !codes.isDisjoint(with: ["103749-8", "94122-9", "94124-5"]) {
+      return String(localized: "Cardiopulmonary exercise test")
+    }
+    if !codes.isDisjoint(with: ["19868-9", "20150-9"]) {
+      return String(localized: "Spirometry")
+    }
+    if !keys.isDisjoint(with: ["anaerobic-threshold-power", "lactate-threshold-power"]) {
+      return String(localized: "Lactate test")
+    }
+    if codes.contains("93342-4") || !keys.isDisjoint(with: ["pwc-130", "pwc-150", "pwc-170"]) {
+      return String(localized: "Exercise ECG")
+    }
+    if !keys.isDisjoint(with: ["lean-soft-tissue", "bmd-total-body", "android-fat"]) {
+      return String(localized: "Body composition (DXA)")
+    }
+    if codes.contains("97507-8") { return String(localized: "Glucose sensor") }
     guard !coded.isEmpty else { return nil }
     let bloodCount: Set<String> = [
       "haemoglobin", "hemoglobin", "leukocytes", "erythrocytes", "platelets", "haematocrit",

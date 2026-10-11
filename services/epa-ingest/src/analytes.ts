@@ -223,6 +223,23 @@ const UNIT_MAP: Record<string, string> = {
   "{beats}": "{beats}",
   deg: "deg",
   "°": "deg",
+  // Exercise testing, spirometry and DXA, in the spellings their readers
+  // write (ExerciseECG, CardiopulmonaryExercise, LactateTest,
+  // BodyComposition). Deliberately no bare `l`, `W` or `g`: a stray letter
+  // after a number on a lab sheet would then read as a volume, a power or a
+  // mass.
+  litres: "L",
+  "litres/s": "L/s",
+  "l/min": "L/min",
+  "ml/min/kg": "mL/min/kg",
+  "ml/min/watts": "mL/min/W",
+  "ml/beat": "mL/{beat}",
+  watts: "W",
+  "watts/kg": "W/kg",
+  "mmol/l/s": "mmol/L/s",
+  "{met}": "{MET}",
+  "{sd}": "{SD}",
+  "g/cm2": "g/cm2",
 };
 
 /**
@@ -3270,6 +3287,521 @@ const DEFINITIONS: AnalyteDefinition[] = [
       ),
     },
   },
+  // ---- Exercise testing ----
+  // A bicycle ergometry with ECG, a cardiopulmonary exercise test (CPET) and
+  // a lactate test print their results in prose and in scattered columns;
+  // their readers (ExerciseECG.swift, CardiopulmonaryExercise.swift,
+  // LactateTest.swift) name the values with these labels. LOINC codes peak
+  // power, peak oxygen uptake (absolute, per kilogram, per beat), the
+  // ventilatory threshold, the exercise blood pressure and the resting and
+  // peak heart rate; it has no terms for lactate thresholds, physical working
+  // capacity or the ventilatory efficiency slope, so those are carried
+  // uncoded. Verified against NLM, 2026-10-11.
+  {
+    key: "heart-rate-resting",
+    description: "The heart rate at rest, before the exercise starts.",
+    labels: ["Ruheherzfrequenz"],
+    byUnit: { "/min": c("40443-4", "Heart rate --resting", "/min") },
+  },
+  {
+    key: "heart-rate-exercise-max",
+    description: "The highest heart rate reached during the exercise test.",
+    labels: ["Maximale Herzfrequenz unter Belastung"],
+    byUnit: { "/min": c("55422-0", "Heart rate Encounter maximum", "/min") },
+  },
+  {
+    key: "exercise-peak-power",
+    description: "The highest load the test reached, in watts.",
+    labels: ["Maximale Belastung"],
+    byUnit: { W: c("93342-4", "Power level --peak during exercise", "W") },
+  },
+  {
+    key: "exercise-duration",
+    description: "How long the load phase of the test lasted.",
+    labels: ["Belastungsdauer"],
+    byUnit: { min: c("55411-3", "Exercise duration", "min") },
+  },
+  {
+    key: "systolic-bp-exercise",
+    description:
+      "The highest systolic blood pressure measured under load. It rises with the load in a healthy circulation.",
+    labels: ["Systolischer Blutdruck unter Belastung, maximal"],
+    byUnit: {
+      "mm[Hg]": c("87739-9", "Systolic blood pressure--W exercise", "mm[Hg]"),
+    },
+  },
+  {
+    key: "diastolic-bp-exercise",
+    description:
+      "The diastolic blood pressure measured with the highest systolic one under load.",
+    labels: ["Diastolischer Blutdruck unter Belastung"],
+    byUnit: {
+      "mm[Hg]": c("87740-7", "Diastolic blood pressure--W exercise", "mm[Hg]"),
+    },
+  },
+  {
+    key: "exercise-met-max",
+    description:
+      "The peak effort as a multiple of the energy used at rest (one MET).",
+    labels: ["MET, maximal"],
+    byUnit: {
+      "{MET}": uncoded(
+        "Metabolic equivalent at peak exercise",
+        "{MET}",
+        "LOINC codes MET only within activity panels, not as the peak of an exercise test.",
+      ),
+    },
+  },
+  ...[130, 150, 170].map((rate) => ({
+    key: `pwc-${rate}`,
+    description: `The load at which the heart rate reaches ${rate} beats per minute (physical working capacity).`,
+    labels: [`PWC ${rate}`],
+    byUnit: {
+      W: uncoded(
+        `Physical working capacity at heart rate ${rate}`,
+        "W",
+        "LOINC has no term for the physical working capacity of an ergometry.",
+      ),
+    },
+  })),
+  {
+    key: "vo2-peak",
+    description:
+      "The most oxygen the body took up per minute at the peak of the test, the measure of aerobic capacity.",
+    labels: ["Maximale Sauerstoffaufnahme"],
+    byUnit: {
+      "mL/min": c("103749-8", "Oxygen consumption (VO2) --peak", "mL/min"),
+    },
+  },
+  {
+    key: "vo2-peak-per-kg",
+    description:
+      "The peak oxygen uptake per kilogram of body weight, which makes people of different size comparable.",
+    labels: ["Maximale Sauerstoffaufnahme pro kg"],
+    byUnit: {
+      "mL/min/kg": c(
+        "94122-9",
+        "Oxygen consumption (VO2)/Body weight [Volume Rate Content] --peak during exercise",
+        "mL/min/kg",
+      ),
+    },
+  },
+  {
+    key: "oxygen-pulse-peak",
+    description:
+      "The oxygen taken up per heartbeat at the peak of the test, a measure of how much blood the heart moves per beat.",
+    labels: ["Sauerstoffpuls, maximal"],
+    byUnit: {
+      "mL/{beat}": c(
+        "94120-3",
+        "Oxygen consumption (VO2)/Heart rate --peak during exercise",
+        "mL/{beat}",
+      ),
+    },
+  },
+  {
+    key: "ventilatory-threshold-1",
+    description:
+      "The oxygen uptake per kilogram at the first ventilatory threshold, the point where breathing starts to rise faster than the load.",
+    labels: ["Erste ventilatorische Schwelle pro kg"],
+    byUnit: {
+      "mL/min/kg": c(
+        "94124-5",
+        "Ventilatory threshold [Volume Rate Content]",
+        "mL/min/kg",
+      ),
+    },
+  },
+  {
+    key: "ventilatory-threshold-1-absolute",
+    description:
+      "The oxygen uptake per minute at the first ventilatory threshold.",
+    labels: ["Erste ventilatorische Schwelle"],
+    byUnit: {
+      "mL/min": uncoded(
+        "Oxygen consumption at the first ventilatory threshold",
+        "mL/min",
+        "LOINC codes the ventilatory threshold per kilogram of body weight (94124-5), not as an absolute uptake.",
+      ),
+    },
+  },
+  {
+    key: "ve-vco2-slope",
+    description:
+      "How much air is breathed per litre of carbon dioxide produced, as the slope over the test: the ventilatory efficiency.",
+    labels: ["VE/VCO2-Steigung"],
+    byUnit: {
+      "{ratio}": uncoded(
+        "Minute ventilation/carbon dioxide production slope",
+        "{ratio}",
+        "LOINC codes VE/VCO2 as a ratio during exercise, not as the slope of the test.",
+      ),
+    },
+  },
+  {
+    key: "breathing-reserve",
+    description:
+      "How much of the maximal voluntary ventilation was left unused at the peak of the test.",
+    labels: ["Atemreserve"],
+    byUnit: {
+      "%": uncoded(
+        "Breathing reserve at peak exercise",
+        "%",
+        "LOINC has no term for the breathing reserve of an exercise test.",
+      ),
+    },
+  },
+  {
+    key: "minute-ventilation-peak",
+    description: "The most air breathed per minute at the peak of the test.",
+    labels: ["Atemminutenvolumen, maximal"],
+    byUnit: {
+      "L/min": uncoded(
+        "Minute ventilation at peak exercise",
+        "L/min",
+        "LOINC has no term for the peak minute ventilation of an exercise test.",
+      ),
+    },
+  },
+  {
+    key: "rer-peak",
+    description:
+      "Carbon dioxide given off per oxygen taken up at the peak of the test. Above 1.1 means the test went to exhaustion.",
+    labels: ["Respiratorischer Quotient, maximal"],
+    byUnit: {
+      "{ratio}": uncoded(
+        "Respiratory exchange ratio at peak exercise",
+        "{ratio}",
+        "LOINC's respiratory quotient (76269-0) is the cells' ratio at rest, not the exchange ratio measured at the mouth under load.",
+      ),
+    },
+  },
+  {
+    key: "heart-rate-reserve",
+    description:
+      "How far the peak heart rate stayed below the predicted maximum.",
+    labels: ["Herzfrequenzreserve"],
+    byUnit: {
+      "/min": uncoded(
+        "Heart rate reserve at peak exercise",
+        "/min",
+        "LOINC has no term for the heart rate reserve of an exercise test.",
+      ),
+    },
+  },
+  {
+    key: "heart-rate-recovery-1min",
+    description:
+      "How far the heart rate fell in the first minute after the load stopped. A large drop is a good sign.",
+    labels: ["Herzfrequenzerholung nach 1 Minute"],
+    byUnit: {
+      "/min": uncoded(
+        "Heart rate recovery 1 minute after exercise",
+        "/min",
+        "LOINC has no term for the heart rate recovery after an exercise test.",
+      ),
+    },
+  },
+  {
+    key: "vo2-work-rate-slope",
+    description:
+      "How much more oxygen is taken up per watt of added load: the aerobic work efficiency.",
+    labels: ["VO2/Leistung-Steigung"],
+    byUnit: {
+      "mL/min/W": uncoded(
+        "Oxygen consumption/work rate slope",
+        "mL/min/W",
+        "LOINC has no term for the slope of oxygen uptake against load.",
+      ),
+    },
+  },
+  // ---- Lactate test ----
+  ...(
+    [
+      [
+        "lactate-threshold-power",
+        "Leistung an der Laktatschwelle",
+        "W",
+        "The load at which lactate first rises above its resting level (lactate threshold, LT).",
+      ],
+      [
+        "lactate-threshold-lactate",
+        "Laktat an der Laktatschwelle",
+        "mmol/L",
+        "The lactate concentration at the lactate threshold.",
+      ],
+      [
+        "lactate-threshold-heart-rate",
+        "Herzfrequenz an der Laktatschwelle",
+        "/min",
+        "The heart rate at the lactate threshold.",
+      ],
+      [
+        "anaerobic-threshold-power",
+        "Leistung an der individuellen anaeroben Schwelle",
+        "W",
+        "The highest load that can be held for a long time without lactate piling up (individual anaerobic threshold, IAS).",
+      ],
+      [
+        "anaerobic-threshold-power-per-kg",
+        "Leistung an der individuellen anaeroben Schwelle pro kg",
+        "W/kg",
+        "The load at the individual anaerobic threshold per kilogram of body weight.",
+      ],
+      [
+        "anaerobic-threshold-lactate",
+        "Laktat an der individuellen anaeroben Schwelle",
+        "mmol/L",
+        "The lactate concentration at the individual anaerobic threshold.",
+      ],
+      [
+        "anaerobic-threshold-heart-rate",
+        "Herzfrequenz an der individuellen anaeroben Schwelle",
+        "/min",
+        "The heart rate at the individual anaerobic threshold, the usual anchor for training zones.",
+      ],
+      [
+        "power-at-lactate-2",
+        "Leistung bei 2 mmol/l Laktat",
+        "W",
+        "The load at which the lactate reaches 2 mmol/l.",
+      ],
+      [
+        "heart-rate-at-lactate-2",
+        "Herzfrequenz bei 2 mmol/l Laktat",
+        "/min",
+        "The heart rate at which the lactate reaches 2 mmol/l.",
+      ],
+      [
+        "power-at-lactate-4",
+        "Leistung bei 4 mmol/l Laktat",
+        "W",
+        "The load at which the lactate reaches 4 mmol/l, the classic threshold.",
+      ],
+      [
+        "heart-rate-at-lactate-4",
+        "Herzfrequenz bei 4 mmol/l Laktat",
+        "/min",
+        "The heart rate at which the lactate reaches 4 mmol/l.",
+      ],
+      [
+        "vlamax",
+        "Maximale glykolytische Leistung (VLaMax)",
+        "mmol/L/s",
+        "How fast the muscles can produce lactate at most: the capacity of the sugar-burning energy supply.",
+      ],
+      [
+        "critical-power",
+        "Critical Power",
+        "W",
+        "The load that could in theory be held for a very long time, from the power profile.",
+      ],
+      [
+        "vo2-max-estimated",
+        "Maximale Sauerstoffaufnahme (berechnet)",
+        "L/min",
+        "The aerobic capacity estimated from the lactate test, not measured from the breath.",
+      ],
+      [
+        "vo2-max-estimated-per-kg",
+        "Maximale Sauerstoffaufnahme pro kg (berechnet)",
+        "mL/min/kg",
+        "The estimated aerobic capacity per kilogram of body weight.",
+      ],
+    ] as const
+  ).map(([key, label, unit, description]) => ({
+    key,
+    description,
+    labels: [label],
+    byUnit: {
+      [unit]: uncoded(
+        description.replace(/\.$/, ""),
+        unit,
+        "LOINC has no term for the thresholds and estimates a lactate test derives from its curve.",
+      ),
+    },
+  })),
+  // ---- Spirometry ----
+  {
+    key: "fvc",
+    description:
+      "The most air that can be blown out after breathing in fully (forced vital capacity).",
+    labels: ["Forcierte Vitalkapazität", "FVC"],
+    byUnit: {
+      L: c(
+        "19868-9",
+        "Forced vital capacity [Volume] Respiratory system by Spirometry",
+        "L",
+      ),
+    },
+  },
+  {
+    key: "fev1",
+    description: "The air blown out in the first second of a forced breath.",
+    labels: ["Einsekundenkapazität", "FEV1"],
+    byUnit: { L: c("20150-9", "FEV1", "L") },
+  },
+  {
+    key: "fev1-fvc",
+    description:
+      "The share of the vital capacity blown out in the first second. A low share points to narrowed airways.",
+    labels: ["FEV1/FVC", "Tiffeneau-Index"],
+    byUnit: { "%": c("19926-5", "FEV1/FVC", "%") },
+  },
+  {
+    key: "fef25-75",
+    description: "The mean flow in the middle half of a forced breath.",
+    labels: ["FEF25-75"],
+    byUnit: { "L/s": c("19927-3", "Gas flow FEV 25%-75%", "L/s") },
+  },
+  {
+    key: "pef",
+    description: "The fastest flow of a forced breath (peak expiratory flow).",
+    labels: ["Peak Expiratory Flow", "PEF"],
+    byUnit: {
+      "L/s": c(
+        "33452-4",
+        "Maximum expiratory gas flow Respiratory system airway",
+        "L/s",
+      ),
+    },
+  },
+  // ---- Body composition by DXA ----
+  // A whole-body DXA scan's tables, read by BodyComposition.swift. Fat mass
+  // and fat share share the bioimpedance labels and codes above; the rest of
+  // a DXA report has no LOINC term (no whole-body bone density, no lean soft
+  // tissue, no android fat), and is carried uncoded. Its visceral fat is
+  // the bioimpedance entry's: an area LOINC codes, a mass it does not.
+  // Verified against NLM, 2026-10-11.
+  {
+    key: "lean-soft-tissue",
+    description:
+      "Everything in the body that is neither fat nor bone, as a DXA scan measures it: muscle, organs and water.",
+    labels: ["Mager-Weichteilmasse"],
+    byUnit: {
+      kg: uncoded(
+        "Lean soft tissue mass by DXA",
+        "kg",
+        "LOINC's lean body weight (88334-8) includes the bone; a DXA scan's lean mass does not.",
+      ),
+    },
+  },
+  {
+    key: "bone-mineral-content",
+    description: "The mass of mineral in the whole skeleton.",
+    labels: ["Knochenmineralgehalt"],
+    byUnit: {
+      kg: uncoded(
+        "Bone mineral content whole body by DXA",
+        "kg",
+        "LOINC has no term for the whole-body bone mineral content of a DXA scan.",
+      ),
+    },
+  },
+  {
+    key: "android-fat",
+    description:
+      "The fat share around the waist. Fat stored there is linked to a higher risk for the heart and the metabolism.",
+    labels: ["Android-Fettanteil"],
+    byUnit: {
+      "%": uncoded(
+        "Android fat percentage by DXA",
+        "%",
+        "LOINC has no term for regional body fat.",
+      ),
+    },
+  },
+  {
+    key: "gynoid-fat",
+    description: "The fat share around the hips and thighs.",
+    labels: ["Gynoid-Fettanteil"],
+    byUnit: {
+      "%": uncoded(
+        "Gynoid fat percentage by DXA",
+        "%",
+        "LOINC has no term for regional body fat.",
+      ),
+    },
+  },
+  {
+    key: "android-gynoid-ratio",
+    description:
+      "Waist fat share divided by hip fat share. Above 1, more of the fat sits at the waist.",
+    labels: ["Android/Gynoid-Verhältnis"],
+    byUnit: {
+      "{ratio}": uncoded(
+        "Android/gynoid fat ratio by DXA",
+        "{ratio}",
+        "LOINC has no term for regional body fat.",
+      ),
+    },
+  },
+  {
+    key: "bmd-total-body",
+    description:
+      "The mineral density of the whole skeleton, in grams per square centimetre.",
+    labels: ["Knochendichte Ganzkörper"],
+    byUnit: {
+      "g/cm2": uncoded(
+        "Bone mineral density whole body by DXA",
+        "g/cm2",
+        "LOINC codes bone density by site (femur, hip, spine), not for the whole body.",
+      ),
+    },
+  },
+  {
+    key: "bmd-total-body-t-score",
+    description:
+      "The whole-body bone density compared with young adults, in standard deviations.",
+    labels: ["Knochendichte Ganzkörper, T-Wert"],
+    byUnit: {
+      "{SD}": uncoded(
+        "Bone mineral density whole body T-score by DXA",
+        "{SD}",
+        "LOINC codes bone density by site (femur, hip, spine), not for the whole body.",
+      ),
+    },
+  },
+  {
+    key: "bmd-total-body-z-score",
+    description:
+      "The whole-body bone density compared with people of the same age, in standard deviations.",
+    labels: ["Knochendichte Ganzkörper, Z-Wert"],
+    byUnit: {
+      "{SD}": uncoded(
+        "Bone mineral density whole body Z-score by DXA",
+        "{SD}",
+        "LOINC codes bone density by site (femur, hip, spine), not for the whole body.",
+      ),
+    },
+  },
+  {
+    key: "rsmi",
+    description:
+      "The muscle mass of arms and legs per square metre of height (relative skeletal muscle index). Low values point to muscle loss.",
+    labels: ["Relativer Skelettmuskelindex"],
+    byUnit: {
+      "kg/m2": uncoded(
+        "Appendicular lean mass index by DXA",
+        "kg/m2",
+        "LOINC has no term for the appendicular lean mass index.",
+      ),
+    },
+  },
+  // ---- Continuous glucose monitoring ----
+  {
+    key: "glucose-mean-cgm",
+    description:
+      "The average of a glucose sensor's readings over the days it was worn.",
+    labels: ["Durchschnittliche Glukose (Sensor)"],
+    byUnit: {
+      "mg/dL": c(
+        "97507-8",
+        "Average glucose [Mass/volume] in Interstitial fluid during Reporting Period",
+        "mg/dL",
+      ),
+    },
+  },
   // ---- Urine ----
   // The parser refuses a urine row unless "<name> im Urin" is a label here,
   // so serum albumin and urine albumin can never share a code. Every label
@@ -3882,6 +4414,100 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
   ldh: "Ein Enzym nahezu jeder Zelle, das bei deren Zerfall frei wird. Empfindlich, und nicht auf ein Organ beschränkt.",
   reticulocytes:
     "Neu freigesetzte rote Blutkörperchen. Sie zeigen, wie schnell das Knochenmark sie ersetzt.",
+  "heart-rate-resting":
+    "Die Herzfrequenz in Ruhe, bevor die Belastung beginnt.",
+  "heart-rate-exercise-max":
+    "Die höchste Herzfrequenz, die während des Belastungstests erreicht wurde.",
+  "exercise-peak-power":
+    "Die höchste Belastung, die der Test erreicht hat, in Watt.",
+  "exercise-duration": "Wie lange die Belastungsphase des Tests gedauert hat.",
+  "systolic-bp-exercise":
+    "Der höchste systolische Blutdruck unter Belastung. Bei gesundem Kreislauf steigt er mit der Belastung.",
+  "diastolic-bp-exercise":
+    "Der diastolische Blutdruck, gemessen zusammen mit dem höchsten systolischen unter Belastung.",
+  "exercise-met-max":
+    "Die höchste Leistung als Vielfaches des Energieumsatzes in Ruhe (ein MET).",
+  "pwc-130":
+    "Die Belastung, bei der die Herzfrequenz 130 Schläge pro Minute erreicht (physical working capacity).",
+  "pwc-150":
+    "Die Belastung, bei der die Herzfrequenz 150 Schläge pro Minute erreicht (physical working capacity).",
+  "pwc-170":
+    "Die Belastung, bei der die Herzfrequenz 170 Schläge pro Minute erreicht (physical working capacity).",
+  "vo2-peak":
+    "Die größte Sauerstoffmenge, die der Körper an der Belastungsspitze pro Minute aufgenommen hat, das Maß der Ausdauerleistungsfähigkeit.",
+  "vo2-peak-per-kg":
+    "Die maximale Sauerstoffaufnahme pro Kilogramm Körpergewicht, womit Menschen verschiedener Größe vergleichbar werden.",
+  "oxygen-pulse-peak":
+    "Der Sauerstoff, der an der Belastungsspitze pro Herzschlag aufgenommen wird, ein Maß dafür, wie viel Blut das Herz pro Schlag fördert.",
+  "ventilatory-threshold-1":
+    "Die Sauerstoffaufnahme pro Kilogramm an der ersten ventilatorischen Schwelle, dem Punkt, ab dem die Atmung schneller steigt als die Belastung.",
+  "ventilatory-threshold-1-absolute":
+    "Die Sauerstoffaufnahme pro Minute an der ersten ventilatorischen Schwelle.",
+  "ve-vco2-slope":
+    "Wie viel Luft pro Liter abgegebenem Kohlendioxid geatmet wird, als Steigung über den Test: die Atemeffizienz.",
+  "breathing-reserve":
+    "Welcher Anteil der maximal möglichen Atmung an der Belastungsspitze ungenutzt blieb.",
+  "minute-ventilation-peak":
+    "Die größte Luftmenge, die an der Belastungsspitze pro Minute geatmet wurde.",
+  "rer-peak":
+    "Abgegebenes Kohlendioxid pro aufgenommenem Sauerstoff an der Belastungsspitze. Über 1,1 heißt, der Test ging bis zur Ausbelastung.",
+  "heart-rate-reserve":
+    "Wie weit die höchste Herzfrequenz unter dem vorhergesagten Maximum blieb.",
+  "heart-rate-recovery-1min":
+    "Wie weit die Herzfrequenz in der ersten Minute nach dem Ende der Belastung gefallen ist. Ein großer Abfall ist ein gutes Zeichen.",
+  "vo2-work-rate-slope":
+    "Wie viel mehr Sauerstoff pro Watt zusätzlicher Belastung aufgenommen wird: die aerobe Arbeitseffizienz.",
+  "lactate-threshold-power":
+    "Die Belastung, ab der das Laktat erstmals über den Ruhewert steigt (Laktatschwelle, LT).",
+  "lactate-threshold-lactate": "Die Laktatkonzentration an der Laktatschwelle.",
+  "lactate-threshold-heart-rate": "Die Herzfrequenz an der Laktatschwelle.",
+  "anaerobic-threshold-power":
+    "Die höchste Belastung, die lange gehalten werden kann, ohne dass sich Laktat anhäuft (individuelle anaerobe Schwelle, IAS).",
+  "anaerobic-threshold-power-per-kg":
+    "Die Belastung an der individuellen anaeroben Schwelle pro Kilogramm Körpergewicht.",
+  "anaerobic-threshold-lactate":
+    "Die Laktatkonzentration an der individuellen anaeroben Schwelle.",
+  "anaerobic-threshold-heart-rate":
+    "Die Herzfrequenz an der individuellen anaeroben Schwelle, der übliche Anker für Trainingsbereiche.",
+  "power-at-lactate-2": "Die Belastung, bei der das Laktat 2 mmol/l erreicht.",
+  "heart-rate-at-lactate-2":
+    "Die Herzfrequenz, bei der das Laktat 2 mmol/l erreicht.",
+  "power-at-lactate-4":
+    "Die Belastung, bei der das Laktat 4 mmol/l erreicht, die klassische Schwelle.",
+  "heart-rate-at-lactate-4":
+    "Die Herzfrequenz, bei der das Laktat 4 mmol/l erreicht.",
+  vlamax:
+    "Wie schnell die Muskulatur höchstens Laktat bilden kann: die Kapazität der Energiegewinnung aus Zucker.",
+  "critical-power":
+    "Die Belastung, die sich theoretisch sehr lange halten ließe, aus dem Leistungsprofil.",
+  "vo2-max-estimated":
+    "Die Ausdauerleistungsfähigkeit, aus dem Laktattest geschätzt, nicht aus der Atemluft gemessen.",
+  "vo2-max-estimated-per-kg":
+    "Die geschätzte maximale Sauerstoffaufnahme pro Kilogramm Körpergewicht.",
+  fvc: "Die größte Luftmenge, die nach vollem Einatmen ausgeatmet werden kann (forcierte Vitalkapazität).",
+  fev1: "Die Luft, die in der ersten Sekunde eines forcierten Atemstoßes ausgeatmet wird.",
+  "fev1-fvc":
+    "Der Anteil der Vitalkapazität, der in der ersten Sekunde ausgeatmet wird. Ein niedriger Anteil spricht für verengte Atemwege.",
+  "fef25-75":
+    "Der mittlere Fluss in der mittleren Hälfte eines forcierten Atemstoßes.",
+  pef: "Der schnellste Fluss eines forcierten Atemstoßes (Spitzenfluss).",
+  "lean-soft-tissue":
+    "Alles im Körper, was weder Fett noch Knochen ist, wie ein DXA-Scan es misst: Muskeln, Organe und Wasser.",
+  "bone-mineral-content": "Die Masse des Minerals im ganzen Skelett.",
+  "android-fat":
+    "Der Fettanteil um die Taille. Dort gespeichertes Fett geht mit einem höheren Risiko für Herz und Stoffwechsel einher.",
+  "gynoid-fat": "Der Fettanteil um Hüften und Oberschenkel.",
+  "android-gynoid-ratio":
+    "Fettanteil der Taille geteilt durch den der Hüfte. Über 1 sitzt mehr Fett an der Taille.",
+  "bmd-total-body":
+    "Die Mineraldichte des ganzen Skeletts, in Gramm pro Quadratzentimeter.",
+  "bmd-total-body-t-score":
+    "Die Knochendichte des ganzen Körpers im Vergleich mit jungen Erwachsenen, in Standardabweichungen.",
+  "bmd-total-body-z-score":
+    "Die Knochendichte des ganzen Körpers im Vergleich mit Gleichaltrigen, in Standardabweichungen.",
+  rsmi: "Die Muskelmasse von Armen und Beinen pro Quadratmeter Körpergröße (relativer Skelettmuskelindex). Niedrige Werte sprechen für Muskelschwund.",
+  "glucose-mean-cgm":
+    "Der Durchschnitt der Messwerte eines Glukosesensors über die Tage, an denen er getragen wurde.",
 };
 
 /** Every printed label the dictionary knows, for the Swift generator. */
@@ -3930,10 +4556,13 @@ export function lookupAnalyte(label: string, unitRaw: string): LookupResult {
  *   the FHIR vital signs profile and the 24-hour and period means of an
  *   ambulatory recording.
  * - `procedure`: what an electrocardiogram measures, resting or over 24
- *   hours. FHIR files electrodiagnostics under procedure. A report with such
- *   values and no laboratory value is an ECG, and the writers say so on the
+ *   hours, and what an exercise test or a spirometry measures. FHIR files
+ *   electrodiagnostics and function tests under procedure. A report whose
+ *   procedure values are all ECG measurements (ELECTROCARDIOGRAM_CODES) and
+ *   that holds no laboratory value is an ECG, and the writers say so on the
  *   DiagnosticReport too (v2-0074 `EC`, LOINC 11524-6 "EKG study", or
  *   18754-2 for a Holter study, told by its total beat count).
+ * - `imaging`: what a DXA scan measures beyond body fat.
  *
  * Keyed by LOINC code, and by analyte key for a value LOINC does not code.
  *
@@ -3941,7 +4570,7 @@ export function lookupAnalyte(label: string, unitRaw: string): LookupResult {
  * writer and this one read the same table.
  */
 export const OBSERVATION_CATEGORIES: Readonly<
-  Record<string, "vital-signs" | "procedure">
+  Record<string, "vital-signs" | "procedure" | "imaging">
 > = {
   "8480-6": "vital-signs",
   "8462-4": "vital-signs",
@@ -3976,4 +4605,91 @@ export const OBSERVATION_CATEGORIES: Readonly<
   "time-heart-rate-high": "procedure",
   "time-heart-rate-low": "procedure",
   "ecg-artifacts": "procedure",
+  // Exercise testing and spirometry: procedures, like the ECG.
+  "40443-4": "procedure",
+  "55422-0": "procedure",
+  "93342-4": "procedure",
+  "55411-3": "procedure",
+  "87739-9": "procedure",
+  "87740-7": "procedure",
+  "103749-8": "procedure",
+  "94122-9": "procedure",
+  "94120-3": "procedure",
+  "94124-5": "procedure",
+  "19868-9": "procedure",
+  "20150-9": "procedure",
+  "19926-5": "procedure",
+  "19927-3": "procedure",
+  "33452-4": "procedure",
+  "exercise-met-max": "procedure",
+  "pwc-130": "procedure",
+  "pwc-150": "procedure",
+  "pwc-170": "procedure",
+  "ventilatory-threshold-1-absolute": "procedure",
+  "ve-vco2-slope": "procedure",
+  "breathing-reserve": "procedure",
+  "minute-ventilation-peak": "procedure",
+  "rer-peak": "procedure",
+  "heart-rate-reserve": "procedure",
+  "heart-rate-recovery-1min": "procedure",
+  "vo2-work-rate-slope": "procedure",
+  "lactate-threshold-power": "procedure",
+  "lactate-threshold-lactate": "procedure",
+  "lactate-threshold-heart-rate": "procedure",
+  "anaerobic-threshold-power": "procedure",
+  "anaerobic-threshold-power-per-kg": "procedure",
+  "anaerobic-threshold-lactate": "procedure",
+  "anaerobic-threshold-heart-rate": "procedure",
+  "power-at-lactate-2": "procedure",
+  "heart-rate-at-lactate-2": "procedure",
+  "power-at-lactate-4": "procedure",
+  "heart-rate-at-lactate-4": "procedure",
+  vlamax: "procedure",
+  "critical-power": "procedure",
+  "vo2-max-estimated": "procedure",
+  "vo2-max-estimated-per-kg": "procedure",
+  // A DXA scan is an X-ray, so its own values are imaging. Its fat mass and
+  // share (73708-0, 41982-0) are the codes a scale's reading carries too,
+  // and the code cannot tell the two devices apart, so they stay as they are.
+  "lean-soft-tissue": "imaging",
+  "bone-mineral-content": "imaging",
+  "android-fat": "imaging",
+  "gynoid-fat": "imaging",
+  "android-gynoid-ratio": "imaging",
+  "bmd-total-body": "imaging",
+  "bmd-total-body-t-score": "imaging",
+  "bmd-total-body-z-score": "imaging",
+  rsmi: "imaging",
 };
+
+/**
+ * The measurements that make a report an ECG: a resting ECG's intervals and
+ * axes and a Holter recording's summary. Keyed like OBSERVATION_CATEGORIES.
+ *
+ * An exercise test is filed under procedure too, and an ergometry counts
+ * ventricular ectopics as a Holter does; without this list a cycle test
+ * would be exported as an "EKG study". A report is an ECG only when every
+ * procedure value it holds is one of these.
+ *
+ * Generated into Swift (`Analytes.electrocardiogramCodes`).
+ */
+export const ELECTROCARDIOGRAM_CODES: readonly string[] = [
+  "8897-1",
+  "8625-6",
+  "8633-0",
+  "8634-8",
+  "76635-2",
+  "8626-4",
+  "8632-2",
+  "8638-9",
+  "8883-1",
+  "8873-2",
+  "76637-8",
+  "8618-1",
+  "76126-2",
+  "supraventricular-ectopics",
+  "ecg-pauses",
+  "time-heart-rate-high",
+  "time-heart-rate-low",
+  "ecg-artifacts",
+];

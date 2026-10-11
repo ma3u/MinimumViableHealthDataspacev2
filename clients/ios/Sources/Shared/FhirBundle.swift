@@ -117,6 +117,7 @@ public enum FhirWriter {
   /// bundle in tests, which is what makes the golden-file parity check possible.
   static let categoryDisplay = [
     "laboratory": "Laboratory", "vital-signs": "Vital Signs", "procedure": "Procedure",
+    "imaging": "Imaging",
   ]
 
   /// FHIR's observation category for a code: `laboratory` unless the
@@ -132,11 +133,20 @@ public enum FhirWriter {
     observationCategory(value.coding.loinc, analyteKey: value.coding.analyteKey)
   }
 
+  /// A measurement that makes a report an ECG (`Analytes.electrocardiogramCodes`).
+  static func isEcgValue(_ value: CodedLabValue) -> Bool {
+    value.coding.loinc.map(Analytes.electrocardiogramCodes.contains) == true
+      || Analytes.electrocardiogramCodes.contains(value.coding.analyteKey)
+  }
+
   /// True when the report holds ECG measurements and no laboratory value: it
-  /// is then an ECG (v2-0074 `EC`), not a laboratory report.
+  /// is then an ECG (v2-0074 `EC`), not a laboratory report. Vital signs may
+  /// sit beside them; an exercise test's procedure values may not, or a
+  /// cycle ergometry that counted its ectopic beats would be an "EKG study".
   public static func isElectrocardiogram(_ values: [CodedLabValue]) -> Bool {
-    values.contains { category($0) == "procedure" }
+    values.contains(where: isEcgValue)
       && values.allSatisfy { category($0) != "laboratory" }
+      && values.allSatisfy { category($0) != "procedure" || isEcgValue($0) }
   }
 
   /// An ECG report that counts every beat of a recording: a Holter study

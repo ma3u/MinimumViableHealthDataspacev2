@@ -255,7 +255,9 @@ for file in found {
     describe(replayed)
   }
 
-  let metadata = ReportMetadataExtractor.extract(pages: diagnostics.pages.map(\.plainText))
+  let metadata = ReportMetadataExtractor.extract(
+    pages: PageQuality.readableTexts(
+      diagnostics.pages.map(\.plainText), pages: diagnostics.pages))
   if metadata != diagnostics.metadata {
     print("metadata with the current extractor differs from the phone's:")
     print("  laboratory: \(metadata.laboratory ?? "-")  lab date: \(metadata.labDate.map { $0.formatted(date: .long, time: .omitted) } ?? "-")  (\(metadata.labDateRole?.rawValue ?? "-"))")

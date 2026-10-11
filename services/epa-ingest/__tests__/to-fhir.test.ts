@@ -17,6 +17,7 @@ import {
 import { lookupAnalyte } from "../src/analytes.js";
 import {
   GOLDEN_ECG_VALUES,
+  GOLDEN_EXERCISE_VALUES,
   GOLDEN_HOLTER_VALUES,
 } from "../src/generate-fhir-golden.js";
 import type { CodedLabValue, TextSource } from "../src/types.js";
@@ -341,5 +342,25 @@ describe("Holter study", () => {
       .filter((e) => e.resource.resourceType === "Observation")
       .map((e) => e.resource.category?.[0].coding[0].code);
     expect(categories).toEqual(["procedure", "vital-signs", "procedure"]);
+  });
+});
+
+describe("exercise testing and DXA", () => {
+  it("keeps an ergometry that counted ectopic beats out of the ECG studies", () => {
+    expect(isElectrocardiogram(GOLDEN_EXERCISE_VALUES)).toBe(false);
+    // The count alone, or beside a vital sign, is still an ECG.
+    expect(isElectrocardiogram([GOLDEN_EXERCISE_VALUES[1]])).toBe(true);
+    expect(
+      GOLDEN_EXERCISE_VALUES.map((v) =>
+        observationCategory(v.coding.loincNumber, v.analyteKey),
+      ),
+    ).toEqual(["procedure", "procedure", "procedure"]);
+  });
+
+  it("files a DXA scan's own values as imaging", () => {
+    expect(observationCategory(null, "lean-soft-tissue")).toBe("imaging");
+    expect(observationCategory(null, "bmd-total-body")).toBe("imaging");
+    // Body fat is the code a scale's reading carries too.
+    expect(observationCategory("41982-0", "body-fat")).toBe("laboratory");
   });
 });

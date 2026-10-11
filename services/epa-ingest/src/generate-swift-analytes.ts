@@ -21,6 +21,7 @@ import {
 import {
   ANALYTE_DESCRIPTIONS,
   ANALYTE_DESCRIPTIONS_DE,
+  ELECTROCARDIOGRAM_CODES,
   OBSERVATION_CATEGORIES,
   ANALYTE_KEYS,
   ANALYTE_LABELS,
@@ -128,6 +129,10 @@ export function renderSwift(
   const descriptions = table(ANALYTE_DESCRIPTIONS);
   const descriptionsDe = table(ANALYTE_DESCRIPTIONS_DE);
   const categories = table(OBSERVATION_CATEGORIES);
+  const electrocardiogram = [...ELECTROCARDIOGRAM_CODES]
+    .sort()
+    .map((code) => `    ${swiftString(code)},`)
+    .join("\n");
   // A codeless coding must say why, or a reader of the data cannot tell a
   // deliberate absence from a lookup nobody got round to.
   for (const e of entries) {
@@ -279,6 +284,12 @@ ${rows}
   /// laboratory tests. Mirrors \`OBSERVATION_CATEGORIES\`.
   public static let observationCategories: [String: String] = [
 ${categories}
+  ]
+
+  /// The measurements that make a report an ECG. Mirrors
+  /// \`ELECTROCARDIOGRAM_CODES\`.
+  public static let electrocardiogramCodes: Set<String> = [
+${electrocardiogram}
   ]
 
   /// Latin letters OCR returns as their Cyrillic or Greek twins. Mirrors

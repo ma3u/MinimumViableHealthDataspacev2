@@ -83,6 +83,15 @@ struct ReviewSheet: View {
             } else {
                 Text("These values were read from a photo and are preliminary, not confirmed.")
             }
+            if !product.unreadablePages.isEmpty {
+              // A blurred page reads as nonsense, and its values and dates
+              // with it; it was left out, and only a new photograph helps.
+              Text(
+                "Page \(product.unreadablePages.map(String.init).joined(separator: ", ")) was too blurred to read and was left out. Discard this scan and photograph it again, holding the phone still."
+              )
+              .foregroundStyle(.orange)
+              .accessibilityIdentifier("unreadable-pages")
+            }
             if !product.extraReports.isEmpty {
               // Saying so before the tap, because a person who saves one
               // report and finds three should have been told.

@@ -241,6 +241,27 @@ final class DevDatasetUITests: XCTestCase {
       AppDriver.text(containing: "°", in: app).exists, "an axis is shown in degrees")
   }
 
+  func testADXAScanShowsItsBoneDensityAndRegionalFat() {
+    let app = launch()
+    AppDriver.scrollTo(
+      app.staticTexts["Körperzusammensetzung (DXA), Praxis Muster"], in: app
+    ).tap()
+    AppDriver.scrollTo(AppDriver.text(containing: "Android-Fettanteil", in: app), in: app)
+    AppDriver.scrollTo(AppDriver.text(containing: "Knochendichte Ganzkörper", in: app), in: app)
+    XCTAssertTrue(
+      AppDriver.text(containing: "g/cm²", in: app).exists, "a density in g/cm², not g/cm2")
+  }
+
+  func testACardiopulmonaryExerciseTestShowsItsOxygenUptake() {
+    let app = launch()
+    AppDriver.scrollTo(app.staticTexts["Spiroergometrie, Praxis Muster"], in: app).tap()
+    AppDriver.scrollTo(AppDriver.text(containing: "Maximale Sauerstoffaufnahme", in: app), in: app)
+    AppDriver.scrollTo(AppDriver.text(containing: "Sauerstoffpuls", in: app), in: app)
+    XCTAssertTrue(
+      AppDriver.text(containing: "mL/beat", in: app).exists, "an oxygen pulse per beat")
+    XCTAssertFalse(AppDriver.visibleText(app).contains("{"), "no UCUM braces on screen")
+  }
+
   func testAScaleReadingIsCarriedWithoutALoincCode() {
     let app = launch()
     AppDriver.scrollTo(

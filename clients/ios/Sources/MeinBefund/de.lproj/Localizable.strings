@@ -484,6 +484,13 @@
 "24-hour blood pressure" = "24-h-Blutdruckmessung";
 "Lipid profile" = "Lipidprofil";
 "Blood count" = "Blutbild";
+"Cardiopulmonary exercise test" = "Spiroergometrie";
+"Spirometry" = "Spirometrie";
+"Lactate test" = "Laktat-Leistungsdiagnostik";
+"Exercise ECG" = "Belastungs-EKG";
+"Body composition (DXA)" = "Körperzusammensetzung (DXA)";
+"Glucose sensor" = "Glukosesensor";
+"Page %@ was too blurred to read and was left out. Discard this scan and photograph it again, holding the phone still." = "Seite %@ war zu unscharf zum Lesen und wurde ausgelassen. Verwerfen Sie diesen Scan und fotografieren Sie sie erneut, mit ruhig gehaltenem Telefon.";
 "Name and laboratory are suggested from the scan. Change them as you like." = "Name und Labor sind aus dem Scan vorgeschlagen. Ändern Sie sie nach Belieben.";
 
 /* Checking and correcting values */

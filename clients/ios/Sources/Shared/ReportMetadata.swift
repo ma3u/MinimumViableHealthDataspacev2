@@ -208,6 +208,7 @@ public enum ReportMetadataExtractor {
   static let documentTitleWords: Set<String> = [
     "laborbefund", "laborbericht", "laborergebnis", "laborergebnisse", "befund",
     "befundbericht", "arztbrief", "laborblatt", "analysenbericht", "laboratory report",
+    "leistungsdiagnostik",
   ]
 
   static let physicianWords = [
@@ -216,8 +217,24 @@ public enum ReportMetadataExtractor {
 
   private static let germanDate = try! NSRegularExpression(
     pattern: #"(?<!\d)(\d{1,2})\.\s?(\d{1,2})\.\s?(\d{4}|\d{2})(?!\d)"#)
+  // Year first, with a hyphen or, as a glucose sensor's software prints its
+  // date, with dots: `DATUM:2026.03.11`.
   private static let isoDate = try! NSRegularExpression(
-    pattern: #"(?<!\d)(\d{4})-(\d{2})-(\d{2})(?!\d)"#)
+    pattern: #"(?<!\d)(\d{4})([-.])(\d{2})\2(\d{2})(?!\d)"#)
+  /// A date with the month as a word: `3. März 2026`.
+  private static let monthNameDate = try! NSRegularExpression(
+    pattern:
+      #"(?<!\d)(\d{1,2})\.\s?(Januar|Jan|Februar|Feb|März|Maerz|Mär|April|Apr|Mai|Juni|Jun|Juli|Jul|August|Aug|September|Sept?|Oktober|Okt|November|Nov|Dezember|Dez)\.?\s+(\d{4})(?!\d)"#,
+    options: [.caseInsensitive])
+  static let monthNumbers: [String: Int] = [
+    "jan": 1, "feb": 2, "mar": 3, "mae": 3, "apr": 4, "mai": 5, "jun": 6, "jul": 7, "aug": 8,
+    "sep": 9, "okt": 10, "nov": 11, "dez": 12,
+  ]
+  /// A measuring period: two dates and how many days they span,
+  /// `3. März 2026 - 4. März 2026 (2 Tage)`. Its dates are when the
+  /// measurements were taken.
+  private static let period = try! NSRegularExpression(
+    pattern: #"\b\d{1,3}\s*tage?\b|messzeitraum|aufzeichnungszeitraum"#)
   private static let reportNumber = try! NSRegularExpression(
     pattern:
       #"(?:auftrag(?:s-?nr\.?|snummer|s-?nummer)?|befund-?nr\.?|befundnummer|labor-?nr\.?|labornummer|proben-?nr\.?|probennummer|barcode)\s*[:.]?\s*((?=[A-Za-z0-9\-/]*\d)[A-Za-z0-9][A-Za-z0-9\-/]{3,})"#,
@@ -313,8 +330,15 @@ public enum ReportMetadataExtractor {
         if let date = day(y, mo, d) { matches.append((date, m.range.location)) }
       }
       for m in isoDate.matches(in: text, range: range) {
-        guard let y = Int(group(m, 1, text)), let mo = Int(group(m, 2, text)),
-          let d = Int(group(m, 3, text))
+        guard let y = Int(group(m, 1, text)), let mo = Int(group(m, 3, text)),
+          let d = Int(group(m, 4, text))
+        else { continue }
+        if let date = day(y, mo, d) { matches.append((date, m.range.location)) }
+      }
+      for m in monthNameDate.matches(in: text, range: range) {
+        let word = fold(group(m, 2, text)).replacingOccurrences(of: "ä", with: "a")
+        guard let d = Int(group(m, 1, text)), let y = Int(group(m, 3, text)),
+          let mo = monthNumbers[String(word.prefix(3))]
         else { continue }
         if let date = day(y, mo, d) { matches.append((date, m.range.location)) }
       }
@@ -345,7 +369,16 @@ public enum ReportMetadataExtractor {
           folded.dropFirst(min(start, folded.count)).prefix(max(0, match.location - start)))
         let after = (text as NSString).substring(from: min(match.location + 6, (text as NSString).length))
         var role: (role: ReportMetadata.DateRole, keyword: String)?
-        if sexMarker.firstMatch(
+        let marker = (text as NSString).substring(to: match.location)
+          .trimmingCharacters(in: .whitespaces).last
+        if marker == "*" {
+          // The genealogical star: `Analyse für ..., *01.01.1970`.
+          role = (.birth, "*")
+        } else if matches.count == 2,
+          period.firstMatch(in: folded, range: NSRange(folded.startIndex..., in: folded)) != nil
+        {
+          role = (.collection, "period")
+        } else if sexMarker.firstMatch(
           in: String(after.drop { $0.isNumber || $0 == "." }),
           range: NSRange(location: 0, length: (String(after.drop { $0.isNumber || $0 == "." }) as NSString).length))
           != nil
@@ -423,7 +456,19 @@ public enum ReportMetadataExtractor {
     pattern: #"LA\([^)]*\)\s*-\s*(Labor\b.*)$"#)
 
   static func detectLaboratory(_ lines: [(text: String, page: Int)]) -> String? {
-    for (index, entry) in lines.enumerated() where entry.page == 1 {
+    // The first page with text: a blurred first page is left out of the
+    // reading (PageQuality) and leaves no lines.
+    let first = lines.first?.page ?? 1
+    // A device's software prints whom it is licensed to, which is the
+    // practice: `Lizenznehmer: Praxis Muster - Kardiologie  Seite 1/5`.
+    for entry in lines {
+      guard let range = fold(entry.text).range(of: "lizenznehmer") else { continue }
+      let after = entry.text.dropFirst(fold(entry.text).distance(from: fold(entry.text).startIndex, to: range.upperBound))
+        .drop { $0 == ":" || $0 == " " }
+      let name = withoutHeaderTail(trimPageNumber(String(after)))
+      if name.count > 3 { return String(name.prefix(80)) }
+    }
+    for (index, entry) in lines.enumerated() where entry.page == first {
       let range = NSRange(entry.text.startIndex..., in: entry.text)
       guard let m = practiceGroupLaboratory.firstMatch(in: entry.text, range: range),
         let r = Range(m.range(at: 1), in: entry.text)
@@ -437,7 +482,8 @@ public enum ReportMetadataExtractor {
       }
       if name.count > 6 { return name }
     }
-    for entry in lines.prefix(14) where entry.page == 1 {
+    let page = lines.filter { $0.page == first }
+    for (index, entry) in page.prefix(14).enumerated() {
       let folded = fold(entry.text)
       let bare = folded.filter { $0.isLetter || $0.isWhitespace }
         .trimmingCharacters(in: .whitespaces)
@@ -447,9 +493,46 @@ public enum ReportMetadataExtractor {
         germanDate.firstMatch(in: entry.text, range: NSRange(entry.text.startIndex..., in: entry.text)) == nil,
         laboratoryWords.contains(where: { folded.contains($0) })
       else { continue }
-      return trimPageNumber(entry.text)
+      let name = withoutHeaderTail(trimPageNumber(logo(ending: index, in: page.map(\.text))))
+      // `Praxis` alone is the heading of an empty field (a recorder's
+      // report prints `Praxis  <the device's maker>  Adresse ...`).
+      if laboratoryWords.contains(fold(name).trimmingCharacters(in: .whitespaces)) { continue }
+      return name
     }
     return nil
+  }
+
+  /// A name set as a logo, one or two words a line, read as separate lines:
+  /// `PRAXIS MUSTER` / `Kardiologie` / `Prevention` / `Center Nord`. When
+  /// the line found starts with the generic word that ends such a logo, and
+  /// every line above it on the page is a word or two of letters, they are
+  /// one name. Only from the top of the page, so a patient's name printed
+  /// above a laboratory is never joined to it.
+  static func logo(ending index: Int, in lines: [String]) -> String {
+    let line = lines[index].trimmingCharacters(in: .whitespaces)
+    guard index > 0, index <= 4,
+      ["center", "centrum", "zentrum"].contains(where: { fold(line).hasPrefix($0) })
+    else { return line }
+    let above = lines[..<index].map { $0.trimmingCharacters(in: .whitespaces) }
+    guard above.allSatisfy({ part in
+      !part.isEmpty && part.split(separator: " ").count <= 3
+        && part.allSatisfy { $0.isLetter || $0 == " " || $0 == "-" || $0 == "&" }
+    })
+    else { return line }
+    return (above + [line]).joined(separator: " ")
+  }
+
+  /// The part of a line that names the issuer, when the line holds more:
+  /// a column heading to its right (`Praxis Muster - Kardiologie  Datum
+  /// Visite`) or a logo the recogniser misread to its left. The recogniser
+  /// separates such parts by two or more spaces.
+  static func withoutHeaderTail(_ text: String) -> String {
+    let parts = text.components(separatedBy: "  ").map { $0.trimmingCharacters(in: .whitespaces) }
+      .filter { !$0.isEmpty }
+    guard parts.count > 1,
+      let named = parts.first(where: { part in laboratoryWords.contains { fold(part).contains($0) } })
+    else { return text.trimmingCharacters(in: .whitespaces) }
+    return named
   }
 
   /// Removes a trailing `Seite 1` / `Page 2 of 3`.
