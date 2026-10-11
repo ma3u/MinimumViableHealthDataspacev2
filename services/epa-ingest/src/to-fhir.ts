@@ -17,7 +17,12 @@ import type {
   SourceRegion,
   TextSource,
 } from "./types.js";
-import { ELECTROCARDIOGRAM_CODES, OBSERVATION_CATEGORIES } from "./analytes.js";
+import {
+  ELECTROCARDIOGRAM_CODES,
+  OBSERVATION_CATEGORIES,
+  REPORT_KINDS,
+  type ReportKind,
+} from "./analytes.js";
 
 const EXT_BASE = "https://ehds.mabu.red/fhir/StructureDefinition";
 export const EXT_SOURCE_KIND = `${EXT_BASE}/epa-ingest-source-kind`;
@@ -110,6 +115,24 @@ export function isHolter(values: CodedLabValue[]): boolean {
   return (
     isElectrocardiogram(values) &&
     values.some((v) => v.coding.loincNumber === "76637-8")
+  );
+}
+
+/**
+ * The kind of report the values make (REPORT_KINDS), or undefined for a
+ * laboratory report. An ECG or Holter report is decided before this.
+ */
+export function reportKind(values: CodedLabValue[]): ReportKind | undefined {
+  const keys = (v: CodedLabValue) =>
+    [v.coding.loincNumber ?? "", v.analyteKey].filter((k) => k !== "");
+  return REPORT_KINDS.find(
+    (kind) =>
+      values.some((v) => keys(v).some((k) => kind.triggers.includes(k))) &&
+      values.every(
+        (v) =>
+          categoryOf(v) === "vital-signs" ||
+          keys(v).some((k) => kind.members.includes(k)),
+      ),
   );
 }
 
@@ -347,6 +370,7 @@ export function buildBundle(
   }));
 
   const ecg = isElectrocardiogram(values);
+  const kind = ecg ? undefined : reportKind(values);
   const report: FhirResource = {
     resourceType: "DiagnosticReport",
     id: "report-1",
@@ -362,8 +386,8 @@ export function buildBundle(
               }
             : {
                 system: "http://terminology.hl7.org/CodeSystem/v2-0074",
-                code: "LAB",
-                display: "Laboratory",
+                code: kind?.section ?? "LAB",
+                display: kind?.sectionDisplay ?? "Laboratory",
               }) satisfies Coding,
         ],
       },
@@ -380,8 +404,8 @@ export function buildBundle(
             : { system: LOINC, code: "11524-6", display: "EKG study" }
           : {
               system: LOINC,
-              code: "11502-2",
-              display: "Laboratory report",
+              code: kind?.loinc ?? "11502-2",
+              display: kind?.display ?? "Laboratory report",
             }) satisfies Coding,
       ],
       ...(meta.title ? { text: meta.title } : {}),

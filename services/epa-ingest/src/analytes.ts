@@ -187,6 +187,10 @@ const UNIT_MAP: Record<string, string> = {
   "gpt/l": "10*9/L",
   "tpt/l": "10*12/L",
   "ukat/l": "ukat/L",
+  // The same, spelled out, as a university laboratory prints it.
+  "ukatal/l": "ukat/L",
+  // A urine albumin over creatinine.
+  "mg/g": "mg/g",
   "nkat/l": "nkat/L",
   fmol: "fmol",
   // Micro international units per millilitre, numerically equal to mIU/L but
@@ -751,6 +755,31 @@ const DEFINITIONS: AnalyteDefinition[] = [
         "1988-5",
         "C reactive protein [Mass/volume] in Serum or Plasma",
         "mg/dL",
+      ),
+    },
+  },
+  {
+    key: "troponin-i-hs",
+    description:
+      "A protein of heart muscle cells, measured with a high-sensitivity test. It rises when heart muscle is damaged.",
+    labels: [
+      "hs-Troponin I",
+      "hs cTroponin I",
+      "hs-cTnI",
+      "Troponin I hs",
+      "hs-TnI",
+    ],
+    byUnit: {
+      // Verified against NLM, 2026-10-11. ng/L and pg/mL are one unit.
+      "ng/L": c(
+        "89579-7",
+        "Troponin I.cardiac [Mass/volume] in Serum or Plasma by High sensitivity method",
+        "ng/L",
+      ),
+      "pg/mL": c(
+        "89579-7",
+        "Troponin I.cardiac [Mass/volume] in Serum or Plasma by High sensitivity method",
+        "pg/mL",
       ),
     },
   },
@@ -3924,6 +3953,22 @@ const DEFINITIONS: AnalyteDefinition[] = [
   // so serum albumin and urine albumin can never share a code. Every label
   // below names the urine.
   {
+    key: "albumin-creatinine-urine",
+    description:
+      "Urine albumin over urine creatinine, which corrects for how concentrated the urine is. The screening test for early kidney damage.",
+    labels: [
+      "Albumin/Kreatinin im Urin",
+      "Albumin / Kreatinin im Urin",
+      "Albumin-Kreatinin-Quotient im Urin",
+      "Albumin/Kreatinin-Quotient im Urin",
+      "ACR im Urin",
+    ],
+    byUnit: {
+      // Verified against NLM, 2026-10-11.
+      "mg/g": c("9318-7", "Albumin/Creatinine [Mass Ratio] in Urine", "mg/g"),
+    },
+  },
+  {
     key: "albumin-urine",
     description:
       "Albumin passed into the urine. Healthy kidneys hold almost all of it back.",
@@ -4623,6 +4668,10 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
   "bmd-total-body-z-score":
     "Die Knochendichte des ganzen Körpers im Vergleich mit Gleichaltrigen, in Standardabweichungen.",
   rsmi: "Die Muskelmasse von Armen und Beinen pro Quadratmeter Körpergröße (relativer Skelettmuskelindex). Niedrige Werte sprechen für Muskelschwund.",
+  "albumin-creatinine-urine":
+    "Albumin im Urin geteilt durch Kreatinin im Urin, was ausgleicht, wie konzentriert der Urin ist. Der Suchtest auf eine beginnende Nierenschädigung.",
+  "troponin-i-hs":
+    "Ein Eiweiß der Herzmuskelzellen, mit einem hochempfindlichen Test gemessen. Es steigt, wenn Herzmuskel geschädigt wird.",
   "cgm-time-in-range":
     "Der Anteil der Sensorwerte im Zielbereich, meist 70 bis 180 mg/dl. Das Konsensusziel sind mehr als 70 %.",
   "cgm-time-above-range":
@@ -4826,4 +4875,162 @@ export const ELECTROCARDIOGRAM_CODES: readonly string[] = [
   "time-heart-rate-high",
   "time-heart-rate-low",
   "ecg-artifacts",
+];
+
+/**
+ * What kind of report a set of values makes, for the DiagnosticReport's
+ * category (HL7 v2-0074) and code (a LOINC study or report code). Verified
+ * against NLM and terminology.hl7.org, 2026-10-11.
+ *
+ * A report is of a kind when it holds one of the kind's `triggers` and every
+ * value it holds is one of the kind's `members` or a vital sign: a lab
+ * sheet with one stray value stays a laboratory report. The first kind that
+ * fits wins, so a cardiopulmonary exercise test, which prints a spirometry
+ * as well, is not taken for a spirometry. ECG and Holter reports are told
+ * apart before this table (ELECTROCARDIOGRAM_CODES); anything that fits no
+ * kind is a laboratory report (LAB, 11502-2).
+ *
+ * LOINC has no study code for a cardiopulmonary exercise test or a lactate
+ * test; both are exercise tests (18752-6), filed under pulmonary function
+ * and "other" respectively. A whole-body DXA scan for body composition is
+ * still a DXA study of the skeleton (38269-7). Keyed like
+ * OBSERVATION_CATEGORIES. Generated into Swift (`Analytes.reportKinds`).
+ */
+export interface ReportKind {
+  kind: string;
+  section: string;
+  sectionDisplay: string;
+  loinc: string;
+  display: string;
+  triggers: readonly string[];
+  members: readonly string[];
+}
+
+const SPIROMETRY = ["19868-9", "20150-9", "19926-5", "19927-3", "33452-4"];
+const ERGOMETRY = [
+  "93342-4",
+  "55411-3",
+  "40443-4",
+  "55422-0",
+  "87739-9",
+  "87740-7",
+  "76126-2",
+  "exercise-met-max",
+  "pwc-130",
+  "pwc-150",
+  "pwc-170",
+];
+const CPET = [
+  "103749-8",
+  "94122-9",
+  "94120-3",
+  "94124-5",
+  "ventilatory-threshold-1-absolute",
+  "ve-vco2-slope",
+  "breathing-reserve",
+  "minute-ventilation-peak",
+  "rer-peak",
+  "heart-rate-reserve",
+  "heart-rate-recovery-1min",
+  "vo2-work-rate-slope",
+];
+const LACTATE = [
+  "lactate-threshold-power",
+  "lactate-threshold-lactate",
+  "lactate-threshold-heart-rate",
+  "anaerobic-threshold-power",
+  "anaerobic-threshold-power-per-kg",
+  "anaerobic-threshold-lactate",
+  "anaerobic-threshold-heart-rate",
+  "power-at-lactate-2",
+  "heart-rate-at-lactate-2",
+  "power-at-lactate-4",
+  "heart-rate-at-lactate-4",
+  "vlamax",
+  "critical-power",
+  "vo2-max-estimated",
+  "vo2-max-estimated-per-kg",
+];
+const DXA = [
+  "lean-soft-tissue",
+  "bone-mineral-content",
+  "android-fat",
+  "gynoid-fat",
+  "android-gynoid-ratio",
+  "bmd-total-body",
+  "bmd-total-body-t-score",
+  "bmd-total-body-z-score",
+  "rsmi",
+];
+const CGM = [
+  "97507-8",
+  "105273-7",
+  "97510-2",
+  "104640-8",
+  "104639-0",
+  "104641-6",
+  "104642-4",
+  "97506-0",
+  "104638-2",
+  "97505-2",
+  "104637-4",
+];
+
+export const REPORT_KINDS: readonly ReportKind[] = [
+  {
+    kind: "cardiopulmonary-exercise-test",
+    section: "PF",
+    sectionDisplay: "Pulmonary Function",
+    loinc: "18752-6",
+    display: "Exercise stress test study",
+    triggers: ["103749-8", "94122-9", "94124-5"],
+    members: [...CPET, ...SPIROMETRY, ...ERGOMETRY],
+  },
+  {
+    kind: "spirometry",
+    section: "PF",
+    sectionDisplay: "Pulmonary Function",
+    loinc: "18759-1",
+    display: "Spirometry study",
+    triggers: ["19868-9", "20150-9"],
+    members: SPIROMETRY,
+  },
+  {
+    kind: "exercise-stress-test",
+    section: "EC",
+    sectionDisplay: "Electrocardiac (e.g., EKG, EEC, Holter)",
+    loinc: "18752-6",
+    display: "Exercise stress test study",
+    triggers: ["93342-4", "pwc-130", "pwc-150", "pwc-170"],
+    members: ERGOMETRY,
+  },
+  {
+    kind: "lactate-test",
+    section: "OTH",
+    sectionDisplay: "Other",
+    loinc: "18752-6",
+    display: "Exercise stress test study",
+    triggers: ["anaerobic-threshold-power", "lactate-threshold-power"],
+    members: LACTATE,
+  },
+  {
+    kind: "dxa-body-composition",
+    section: "RAD",
+    sectionDisplay: "Radiology",
+    loinc: "38269-7",
+    display: "Study report Skeletal system DXA",
+    triggers: ["lean-soft-tissue", "bmd-total-body", "android-fat"],
+    // A DXA scan's fat mass, fat share and visceral fat carry the codes a
+    // scale's reading carries.
+    members: [...DXA, "41982-0", "73708-0", "73707-2", "visceral-fat"],
+  },
+  {
+    kind: "continuous-glucose-monitoring",
+    section: "LAB",
+    sectionDisplay: "Laboratory",
+    loinc: "107930-0",
+    display: "Continuous glucose monitoring summary report Document",
+    triggers: ["97507-8", "105273-7", "97510-2"],
+    members: CGM,
+  },
 ];

@@ -81,7 +81,9 @@ struct FhirBundleParityTests {
   /// The laboratory golden, and an ECG report's (every value an ECG term).
   static let goldens = [
     "fhir-golden-bundle.json", "fhir-golden-bundle-ecg.json", "fhir-golden-bundle-holter.json",
-    "fhir-golden-bundle-exercise.json",
+    "fhir-golden-bundle-exercise.json", "fhir-golden-bundle-cpet.json",
+    "fhir-golden-bundle-spirometry.json", "fhir-golden-bundle-lactate.json",
+    "fhir-golden-bundle-dxa.json", "fhir-golden-bundle-cgm.json",
   ]
 
   private static func loadFixture(_ name: String = goldens[0]) throws -> (raw: String, fixture: Fixture) {

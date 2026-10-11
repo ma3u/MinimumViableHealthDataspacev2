@@ -22,6 +22,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { lookupAnalyte } from "./analytes.js";
 import { buildBundle } from "./to-fhir.js";
 import type { CodedLabValue } from "./types.js";
 
@@ -255,9 +256,35 @@ export const GOLDEN_HOLTER_VALUES: CodedLabValue[] = [
 ];
 
 /**
- * A bicycle ergometry, fictional: a peak load and a lactate threshold beside
+ * One value coded by the dictionary itself, so a golden built from it cannot
+ * disagree with the dictionary about a code.
+ */
+function dictionaryValue(
+  label: string,
+  value: number,
+  unitRaw: string,
+  line: string,
+  lineNumber: number,
+): CodedLabValue {
+  const hit = lookupAnalyte(label, unitRaw);
+  if (hit.status !== "ok")
+    throw new Error(`${label} in ${unitRaw}: ${hit.status}`);
+  return {
+    label,
+    value,
+    unitRaw,
+    line,
+    lineNumber,
+    analyteKey: hit.analyteKey,
+    coding: hit.coding,
+  };
+}
+
+/**
+ * A bicycle ergometry, fictional: a peak load and a working capacity beside
  * a count of ventricular ectopics. The count is an ECG measurement, the
- * rest are not, so the report must not be exported as an "EKG study".
+ * rest are not, so the report is an exercise stress test (EC, 18752-6) and
+ * not an "EKG study".
  */
 export const GOLDEN_EXERCISE_VALUES: CodedLabValue[] = [
   {
@@ -286,22 +313,7 @@ export const GOLDEN_EXERCISE_VALUES: CodedLabValue[] = [
       ucum: "{beats}",
     },
   },
-  {
-    label: "Leistung an der individuellen anaeroben Schwelle",
-    value: 162,
-    unitRaw: "watts",
-    line: "IAS 162 Watt",
-    lineNumber: 9800,
-    analyteKey: "anaerobic-threshold-power",
-    coding: {
-      loincNumber: null,
-      display:
-        "The highest load that can be held for a long time without lactate piling up (individual anaerobic threshold, IAS)",
-      ucum: "W",
-      uncodedReason:
-        "LOINC has no term for the thresholds and estimates a lactate test derives from its curve.",
-    },
-  },
+  dictionaryValue("PWC 170", 200, "watts", "PWC 170  200 W  2.9 W/kg", 9612),
 ];
 
 export const GOLDEN_EXERCISE_TARGET = resolve(
@@ -315,6 +327,127 @@ const GOLDEN_EXERCISE_META = {
   performer: "Praxis Dr. Muster",
   title: "Belastungs-EKG",
 } as const;
+
+/**
+ * One report of each kind REPORT_KINDS names, fictional, so both writers are
+ * pinned on every DiagnosticReport category and code.
+ */
+export const GOLDEN_KIND_REPORTS: {
+  name: string;
+  title: string;
+  values: CodedLabValue[];
+}[] = [
+  {
+    name: "cpet",
+    title: "Spiroergometrie",
+    values: [
+      dictionaryValue(
+        "Maximale Sauerstoffaufnahme",
+        2650,
+        "ml/min",
+        "VO2 peak 2650 mL/min",
+        9700,
+      ),
+      dictionaryValue(
+        "Forcierte Vitalkapazität",
+        3.92,
+        "litres",
+        "FVC 3,92 L",
+        9701,
+      ),
+      dictionaryValue("Atemreserve", 38.2, "%", "Atemreserve 38,2 %", 9702),
+      dictionaryValue("Körpergewicht", 64.5, "kg", "Gewicht 64,50 kg", 9703),
+    ],
+  },
+  {
+    name: "spirometry",
+    title: "Spirometrie",
+    values: [
+      dictionaryValue(
+        "Forcierte Vitalkapazität",
+        3.92,
+        "litres",
+        "FVC 3,92 L",
+        9701,
+      ),
+      dictionaryValue(
+        "Einsekundenkapazität",
+        3.21,
+        "litres",
+        "FEV1 3,21 L",
+        9702,
+      ),
+    ],
+  },
+  {
+    name: "lactate",
+    title: "Leistungsdiagnostik",
+    values: [
+      dictionaryValue(
+        "Leistung an der individuellen anaeroben Schwelle",
+        162,
+        "watts",
+        "IAS 162 Watt",
+        9800,
+      ),
+      dictionaryValue("Körpergewicht", 68, "kg", "Körpergewicht 68.0 kg", 9801),
+    ],
+  },
+  {
+    name: "dxa",
+    title: "Körperzusammensetzung (DXA)",
+    values: [
+      dictionaryValue(
+        "Körperfettanteil",
+        23.4,
+        "%",
+        "Gesamt Gewebe %Fett 23,4",
+        9500,
+      ),
+      dictionaryValue(
+        "Mager-Weichteilmasse",
+        46.74,
+        "kg",
+        "Gesamt Mager 46.740 g",
+        9501,
+      ),
+      dictionaryValue(
+        "Viszerales Fett",
+        57,
+        "cm2",
+        "540 cm³  508 g  57 cm²",
+        9502,
+      ),
+    ],
+  },
+  {
+    name: "cgm",
+    title: "Glukoseprofil (Sensor)",
+    values: [
+      dictionaryValue(
+        "Durchschnittliche Glukose (Sensor)",
+        128,
+        "mg/dL",
+        "128 mg/dL",
+        9910,
+      ),
+      dictionaryValue("Zeit im Zielbereich", 86, "%", "70-180 mg/dL 86%", 9911),
+      dictionaryValue(
+        "Glukosemanagement-Indikator (GMI)",
+        6.4,
+        "%",
+        "GMI 6,4 %",
+        9912,
+      ),
+    ],
+  },
+];
+
+const kindTarget = (name: string) =>
+  resolve(
+    HERE,
+    `../../../clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-${name}.json`,
+  );
 
 export const GOLDEN_HOLTER_TARGET = resolve(
   HERE,
@@ -364,11 +497,12 @@ const GOLDEN_SOURCE = {
  */
 function render(
   values: CodedLabValue[],
-  meta:
-    | typeof GOLDEN_META
-    | typeof GOLDEN_ECG_META
-    | typeof GOLDEN_HOLTER_META
-    | typeof GOLDEN_EXERCISE_META,
+  meta: {
+    patientId: string;
+    effectiveDateTime: string;
+    performer: string;
+    title: string;
+  },
 ): string {
   const bundle = buildBundle(values, {
     meta,
@@ -400,6 +534,15 @@ export function goldenExerciseBundle(): string {
   return render(GOLDEN_EXERCISE_VALUES, GOLDEN_EXERCISE_META);
 }
 
+export function goldenKindBundle(name: string): string {
+  const report = GOLDEN_KIND_REPORTS.find((r) => r.name === name);
+  if (!report) throw new Error(`no golden report ${name}`);
+  return render(report.values, {
+    ...GOLDEN_EXERCISE_META,
+    title: report.title,
+  });
+}
+
 async function main(): Promise<void> {
   const check = process.argv.includes("--check");
   for (const [target, next] of [
@@ -407,7 +550,10 @@ async function main(): Promise<void> {
     [GOLDEN_ECG_TARGET, goldenEcgBundle()],
     [GOLDEN_HOLTER_TARGET, goldenHolterBundle()],
     [GOLDEN_EXERCISE_TARGET, goldenExerciseBundle()],
-  ] as const) {
+    ...GOLDEN_KIND_REPORTS.map(
+      (r) => [kindTarget(r.name), goldenKindBundle(r.name)] as const,
+    ),
+  ]) {
     if (check) {
       const current = await readFile(target, "utf8").catch(() => null);
       if (current === null) {

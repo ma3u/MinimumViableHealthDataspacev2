@@ -40,17 +40,17 @@
       }
     },
     {
-      "label": "Leistung an der individuellen anaeroben Schwelle",
-      "value": 162,
+      "label": "PWC 170",
+      "value": 200,
       "unitRaw": "watts",
-      "line": "IAS 162 Watt",
-      "lineNumber": 9800,
-      "analyteKey": "anaerobic-threshold-power",
+      "line": "PWC 170  200 W  2.9 W/kg",
+      "lineNumber": 9612,
+      "analyteKey": "pwc-170",
       "coding": {
         "loincNumber": null,
-        "display": "The highest load that can be held for a long time without lactate piling up (individual anaerobic threshold, IAS)",
+        "display": "Physical working capacity at heart rate 170",
         "ucum": "W",
-        "uncodedReason": "LOINC has no term for the thresholds and estimates a lactate test derives from its curve."
+        "uncodedReason": "LOINC has no term for the physical working capacity of an ergometry."
       }
     }
   ],
@@ -98,8 +98,8 @@
               "coding": [
                 {
                   "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
-                  "code": "LAB",
-                  "display": "Laboratory"
+                  "code": "EC",
+                  "display": "Electrocardiac (e.g., EKG, EEC, Holter)"
                 }
               ]
             }
@@ -108,8 +108,8 @@
             "coding": [
               {
                 "system": "http://loinc.org",
-                "code": "11502-2",
-                "display": "Laboratory report"
+                "code": "18752-6",
+                "display": "Exercise stress test study"
               }
             ],
             "text": "Belastungs-EKG"
@@ -261,7 +261,7 @@
             },
             {
               "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
-              "valueString": "IAS 162 Watt"
+              "valueString": "PWC 170  200 W  2.9 W/kg"
             },
             {
               "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
@@ -288,20 +288,20 @@
                   "extension": [
                     {
                       "url": "http://hl7.org/fhir/StructureDefinition/rendered-value",
-                      "valueString": "LOINC has no term for the thresholds and estimates a lactate test derives from its curve."
+                      "valueString": "LOINC has no term for the physical working capacity of an ergometry."
                     }
                   ]
                 }
               }
             ],
-            "text": "Leistung an der individuellen anaeroben Schwelle"
+            "text": "PWC 170"
           },
           "subject": {
             "reference": "Patient/example-patient"
           },
           "effectiveDateTime": "2026-08-26",
           "valueQuantity": {
-            "value": 162,
+            "value": 200,
             "unit": "W",
             "system": "http://unitsofmeasure.org",
             "code": "W"

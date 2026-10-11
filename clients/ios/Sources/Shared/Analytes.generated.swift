@@ -118,6 +118,7 @@ public enum Analytes {
     "litres": "L",
     "litres/s": "L/s",
     "mg/dl": "mg/dL",
+    "mg/g": "mg/g",
     "mg/l": "mg/L",
     "minutes": "min",
     "mio./ul": "10*6/uL",
@@ -162,6 +163,7 @@ public enum Analytes {
     "ug/ml": "ug/mL",
     "uiu/ml": "u[IU]/mL",
     "ukat/l": "ukat/L",
+    "ukatal/l": "ukat/L",
     "umol/l": "umol/L",
     "umoli": "umol/L",
     "umoll": "umol/L",
@@ -180,6 +182,7 @@ public enum Analytes {
   public static let descriptions: [String: String] = [
     "alanine": "Carries nitrogen from muscle to the liver, where it becomes glucose.",
     "albumin": "The most abundant protein in blood, made by the liver. Carries hormones and drugs and holds fluid in the vessels.",
+    "albumin-creatinine-urine": "Urine albumin over urine creatinine, which corrects for how concentrated the urine is. The screening test for early kidney damage.",
     "albumin-urine": "Albumin passed into the urine. Healthy kidneys hold almost all of it back.",
     "alkaline-phosphatase": "An enzyme of bile ducts and bone. A raised value asks which of the two, which other tests answer.",
     "alt": "A liver enzyme released when liver cells are damaged. The more liver-specific of the two transaminases.",
@@ -423,6 +426,7 @@ public enum Analytes {
     "transferrin": "The protein that carries iron in the blood.",
     "transferrin-saturation": "The share of transferrin actually carrying iron. Read with ferritin to tell store from supply.",
     "triglycerides": "The main fat carried in blood, from food and made by the liver. Rises after eating, so it is measured fasting.",
+    "troponin-i-hs": "A protein of heart muscle cells, measured with a high-sensitivity test. It rises when heart muscle is damaged.",
     "tryptophan": "The starting point for serotonin and melatonin, and by another route for niacin.",
     "tsh": "The pituitary's signal to the thyroid. It moves opposite to thyroid hormone, so it is the first test of thyroid function.",
     "tyrosine": "Made from phenylalanine, the precursor of dopamine, adrenaline and the thyroid hormones.",
@@ -456,6 +460,7 @@ public enum Analytes {
   public static let descriptionsDe: [String: String] = [
     "alanine": "Trägt Stickstoff aus dem Muskel zur Leber, wo daraus Glukose wird.",
     "albumin": "Das häufigste Protein im Blut, von der Leber gebildet. Transportiert Hormone und Arzneistoffe und hält Flüssigkeit in den Gefäßen.",
+    "albumin-creatinine-urine": "Albumin im Urin geteilt durch Kreatinin im Urin, was ausgleicht, wie konzentriert der Urin ist. Der Suchtest auf eine beginnende Nierenschädigung.",
     "albumin-urine": "Albumin, das in den Urin gelangt. Gesunde Nieren halten fast alles davon zurück.",
     "alkaline-phosphatase": "Ein Enzym aus Gallenwegen und Knochen. Ein erhöhter Wert wirft die Frage auf, welches von beidem; andere Tests beantworten sie.",
     "alt": "Ein Leberenzym, das bei Schädigung von Leberzellen frei wird. Die leberspezifischere der beiden Transaminasen.",
@@ -699,6 +704,7 @@ public enum Analytes {
     "transferrin": "Das Protein, das Eisen im Blut transportiert.",
     "transferrin-saturation": "Der Anteil des Transferrins, der tatsächlich Eisen trägt. Wird mit dem Ferritin zusammen gelesen, um Speicher von Nachschub zu unterscheiden.",
     "triglycerides": "Das wichtigste Blutfett, aus der Nahrung und von der Leber gebildet. Steigt nach dem Essen, deshalb wird nüchtern gemessen.",
+    "troponin-i-hs": "Ein Eiweiß der Herzmuskelzellen, mit einem hochempfindlichen Test gemessen. Es steigt, wenn Herzmuskel geschädigt wird.",
     "tryptophan": "Die Ausgangssubstanz für Serotonin und Melatonin, und über einen zweiten Weg für Niacin.",
     "tsh": "Das Signal der Hirnanhangsdrüse an die Schilddrüse. Es bewegt sich gegenläufig zum Schilddrüsenhormon und ist daher der erste Test der Schilddrüsenfunktion.",
     "tyrosine": "Aus Phenylalanin gebildet, Vorstufe von Dopamin, Adrenalin und der Schilddrüsenhormone.",
@@ -737,6 +743,7 @@ public enum Analytes {
     AnalyteCoding(labelKey: "abgeleitetemittlereglukose", ucum: "mg/dL", loinc: "27353-2", display: "Glucose mean value [Mass/volume] in Blood Estimated from glycated hemoglobin", analyteKey: "glucose-mean-estimated"),
     AnalyteCoding(labelKey: "abgeleitetemittlereglukose", ucum: "mmol/L", loinc: "53553-4", display: "Glucose mean value [Moles/volume] in Blood Estimated from glycated hemoglobin", analyteKey: "glucose-mean-estimated"),
     AnalyteCoding(labelKey: "acetatundpropionatproduktion", ucum: "%", loinc: nil, display: "Acetat- und Propionatproduktion [relative abundance] in Stool", analyteKey: "mb-acetat-und-propionatproduktion", uncodedReason: "LOINC has no term for the share of a microbiome's functional capacity that a stool report prints."),
+    AnalyteCoding(labelKey: "acrimurin", ucum: "mg/g", loinc: "9318-7", display: "Albumin/Creatinine [Mass Ratio] in Urine", analyteKey: "albumin-creatinine-urine"),
     AnalyteCoding(labelKey: "actinobacteria", ucum: "%", loinc: nil, display: "Actinobacteria [relative abundance] in Stool", analyteKey: "mb-actinobacteria", uncodedReason: "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. The organism is named by its NCBI Taxonomy id instead.", taxon: Taxon(ncbiTaxId: "201174", scientificName: "Actinomycetota", rank: "phylum")),
     AnalyteCoding(labelKey: "akkermansiamuciniphila", ucum: "%", loinc: nil, display: "Akkermansia muciniphila [relative abundance] in Stool", analyteKey: "mb-akkermansia-muciniphila", uncodedReason: "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. The organism is named by its NCBI Taxonomy id instead.", taxon: Taxon(ncbiTaxId: "239935", scientificName: "Akkermansia muciniphila", rank: "species")),
     AnalyteCoding(labelKey: "aktivesb12", ucum: "pmol/L", loinc: "72160-5", display: "Holo-transcobalamin II [Moles/volume] in Serum", analyteKey: "holotranscobalamin"),
@@ -753,6 +760,8 @@ public enum Analytes {
     AnalyteCoding(labelKey: "albuminkorrigiertescalcium", ucum: "mmol/L", loinc: "29265-6", display: "Calcium [Moles/volume] corrected for albumin in Serum or Plasma", analyteKey: "calcium-albumin-corrected"),
     AnalyteCoding(labelKey: "albuminkorrigierteskalzium", ucum: "mg/dL", loinc: "46099-8", display: "Calcium [Mass/volume] corrected for albumin in Serum or Plasma", analyteKey: "calcium-albumin-corrected"),
     AnalyteCoding(labelKey: "albuminkorrigierteskalzium", ucum: "mmol/L", loinc: "29265-6", display: "Calcium [Moles/volume] corrected for albumin in Serum or Plasma", analyteKey: "calcium-albumin-corrected"),
+    AnalyteCoding(labelKey: "albuminkreatininimurin", ucum: "mg/g", loinc: "9318-7", display: "Albumin/Creatinine [Mass Ratio] in Urine", analyteKey: "albumin-creatinine-urine"),
+    AnalyteCoding(labelKey: "albuminkreatininquotientimurin", ucum: "mg/g", loinc: "9318-7", display: "Albumin/Creatinine [Mass Ratio] in Urine", analyteKey: "albumin-creatinine-urine"),
     AnalyteCoding(labelKey: "albuminurin", ucum: "mg/dL", loinc: "1754-1", display: "Albumin [Mass/volume] in Urine", analyteKey: "albumin-urine"),
     AnalyteCoding(labelKey: "albuminurin", ucum: "mg/L", loinc: "1754-1", display: "Albumin [Mass/volume] in Urine", analyteKey: "albumin-urine"),
     AnalyteCoding(labelKey: "alistipesspecies", ucum: "%", loinc: nil, display: "Alistipes spp. [relative abundance] in Stool", analyteKey: "mb-alistipes-spp", uncodedReason: "LOINC names tests, not organisms: it has no term for the relative abundance of a taxon in stool. The organism is named by its NCBI Taxonomy id instead.", taxon: Taxon(ncbiTaxId: "239759", scientificName: "Alistipes", rank: "genus")),
@@ -1434,6 +1443,14 @@ public enum Analytes {
     AnalyteCoding(labelKey: "homozystein", ucum: "umol/L", loinc: "13965-9", display: "Homocysteine [Moles/volume] in Serum or Plasma", analyteKey: "homocysteine"),
     AnalyteCoding(labelKey: "hscrp", ucum: "mg/L", loinc: "30522-7", display: "C reactive protein [Mass/volume] in Serum or Plasma by High sensitivity method", analyteKey: "crp-hs"),
     AnalyteCoding(labelKey: "hscrp", ucum: "ug/mL", loinc: "30522-7", display: "C reactive protein [Mass/volume] in Serum or Plasma by High sensitivity method", analyteKey: "crp-hs"),
+    AnalyteCoding(labelKey: "hsctni", ucum: "ng/L", loinc: "89579-7", display: "Troponin I.cardiac [Mass/volume] in Serum or Plasma by High sensitivity method", analyteKey: "troponin-i-hs"),
+    AnalyteCoding(labelKey: "hsctni", ucum: "pg/mL", loinc: "89579-7", display: "Troponin I.cardiac [Mass/volume] in Serum or Plasma by High sensitivity method", analyteKey: "troponin-i-hs"),
+    AnalyteCoding(labelKey: "hsctroponini", ucum: "ng/L", loinc: "89579-7", display: "Troponin I.cardiac [Mass/volume] in Serum or Plasma by High sensitivity method", analyteKey: "troponin-i-hs"),
+    AnalyteCoding(labelKey: "hsctroponini", ucum: "pg/mL", loinc: "89579-7", display: "Troponin I.cardiac [Mass/volume] in Serum or Plasma by High sensitivity method", analyteKey: "troponin-i-hs"),
+    AnalyteCoding(labelKey: "hstni", ucum: "ng/L", loinc: "89579-7", display: "Troponin I.cardiac [Mass/volume] in Serum or Plasma by High sensitivity method", analyteKey: "troponin-i-hs"),
+    AnalyteCoding(labelKey: "hstni", ucum: "pg/mL", loinc: "89579-7", display: "Troponin I.cardiac [Mass/volume] in Serum or Plasma by High sensitivity method", analyteKey: "troponin-i-hs"),
+    AnalyteCoding(labelKey: "hstroponini", ucum: "ng/L", loinc: "89579-7", display: "Troponin I.cardiac [Mass/volume] in Serum or Plasma by High sensitivity method", analyteKey: "troponin-i-hs"),
+    AnalyteCoding(labelKey: "hstroponini", ucum: "pg/mL", loinc: "89579-7", display: "Troponin I.cardiac [Mass/volume] in Serum or Plasma by High sensitivity method", analyteKey: "troponin-i-hs"),
     AnalyteCoding(labelKey: "ig", ucum: "/uL", loinc: "53115-2", display: "Immature granulocytes [#/volume] in Blood by Automated count", analyteKey: "immature-granulocytes"),
     AnalyteCoding(labelKey: "ig", ucum: "%", loinc: "71695-1", display: "Immature granulocytes/Leukocytes in Blood by Automated count", analyteKey: "immature-granulocytes"),
     AnalyteCoding(labelKey: "ig", ucum: "10*3/uL", loinc: "53115-2", display: "Immature granulocytes [#/volume] in Blood by Automated count", analyteKey: "immature-granulocytes"),
@@ -2369,6 +2386,8 @@ public enum Analytes {
     AnalyteCoding(labelKey: "triglyzeridegesamt", ucum: "mg/dL", loinc: "2571-8", display: "Triglyceride [Mass/volume] in Serum or Plasma", analyteKey: "triglycerides"),
     AnalyteCoding(labelKey: "triglyzeridegesamt", ucum: "mmol/L", loinc: "14927-8", display: "Triglyceride [Moles/volume] in Serum or Plasma", analyteKey: "triglycerides"),
     AnalyteCoding(labelKey: "triglyzeridehdl", ucum: "{ratio}", loinc: nil, display: "Triglyceride to HDL cholesterol ratio", analyteKey: "ratio-tg-hdl", uncodedReason: "LOINC's nearest term (55607-6) is a molar ratio, and this is the mass ratio on a mg/dL basis that the published cut-point uses."),
+    AnalyteCoding(labelKey: "troponinihs", ucum: "ng/L", loinc: "89579-7", display: "Troponin I.cardiac [Mass/volume] in Serum or Plasma by High sensitivity method", analyteKey: "troponin-i-hs"),
+    AnalyteCoding(labelKey: "troponinihs", ucum: "pg/mL", loinc: "89579-7", display: "Troponin I.cardiac [Mass/volume] in Serum or Plasma by High sensitivity method", analyteKey: "troponin-i-hs"),
     AnalyteCoding(labelKey: "trp", ucum: "umol/L", loinc: "20659-9", display: "Tryptophan [Moles/volume] in Serum or Plasma", analyteKey: "tryptophan"),
     AnalyteCoding(labelKey: "tryptophan", ucum: "umol/L", loinc: "20659-9", display: "Tryptophan [Moles/volume] in Serum or Plasma", analyteKey: "tryptophan"),
     AnalyteCoding(labelKey: "tsat", ucum: "%", loinc: "2502-3", display: "Iron saturation [Mass Fraction] in Serum or Plasma", analyteKey: "transferrin-saturation"),
@@ -2573,6 +2592,47 @@ public enum Analytes {
     "supraventricular-ectopics",
     "time-heart-rate-high",
     "time-heart-rate-low",
+  ]
+
+  /// The kinds of report a set of values makes, first fit wins. Mirrors
+  /// `REPORT_KINDS`.
+  public static let reportKinds: [ReportKind] = [
+    ReportKind(
+      kind: "cardiopulmonary-exercise-test", section: "PF",
+      sectionDisplay: "Pulmonary Function",
+      loinc: "18752-6", display: "Exercise stress test study",
+      triggers: ["103749-8", "94122-9", "94124-5"],
+      members: ["103749-8", "94122-9", "94120-3", "94124-5", "ventilatory-threshold-1-absolute", "ve-vco2-slope", "breathing-reserve", "minute-ventilation-peak", "rer-peak", "heart-rate-reserve", "heart-rate-recovery-1min", "vo2-work-rate-slope", "19868-9", "20150-9", "19926-5", "19927-3", "33452-4", "93342-4", "55411-3", "40443-4", "55422-0", "87739-9", "87740-7", "76126-2", "exercise-met-max", "pwc-130", "pwc-150", "pwc-170"]),
+    ReportKind(
+      kind: "spirometry", section: "PF",
+      sectionDisplay: "Pulmonary Function",
+      loinc: "18759-1", display: "Spirometry study",
+      triggers: ["19868-9", "20150-9"],
+      members: ["19868-9", "20150-9", "19926-5", "19927-3", "33452-4"]),
+    ReportKind(
+      kind: "exercise-stress-test", section: "EC",
+      sectionDisplay: "Electrocardiac (e.g., EKG, EEC, Holter)",
+      loinc: "18752-6", display: "Exercise stress test study",
+      triggers: ["93342-4", "pwc-130", "pwc-150", "pwc-170"],
+      members: ["93342-4", "55411-3", "40443-4", "55422-0", "87739-9", "87740-7", "76126-2", "exercise-met-max", "pwc-130", "pwc-150", "pwc-170"]),
+    ReportKind(
+      kind: "lactate-test", section: "OTH",
+      sectionDisplay: "Other",
+      loinc: "18752-6", display: "Exercise stress test study",
+      triggers: ["anaerobic-threshold-power", "lactate-threshold-power"],
+      members: ["lactate-threshold-power", "lactate-threshold-lactate", "lactate-threshold-heart-rate", "anaerobic-threshold-power", "anaerobic-threshold-power-per-kg", "anaerobic-threshold-lactate", "anaerobic-threshold-heart-rate", "power-at-lactate-2", "heart-rate-at-lactate-2", "power-at-lactate-4", "heart-rate-at-lactate-4", "vlamax", "critical-power", "vo2-max-estimated", "vo2-max-estimated-per-kg"]),
+    ReportKind(
+      kind: "dxa-body-composition", section: "RAD",
+      sectionDisplay: "Radiology",
+      loinc: "38269-7", display: "Study report Skeletal system DXA",
+      triggers: ["lean-soft-tissue", "bmd-total-body", "android-fat"],
+      members: ["lean-soft-tissue", "bone-mineral-content", "android-fat", "gynoid-fat", "android-gynoid-ratio", "bmd-total-body", "bmd-total-body-t-score", "bmd-total-body-z-score", "rsmi", "41982-0", "73708-0", "73707-2", "visceral-fat"]),
+    ReportKind(
+      kind: "continuous-glucose-monitoring", section: "LAB",
+      sectionDisplay: "Laboratory",
+      loinc: "107930-0", display: "Continuous glucose monitoring summary report Document",
+      triggers: ["97507-8", "105273-7", "97510-2"],
+      members: ["97507-8", "105273-7", "97510-2", "104640-8", "104639-0", "104641-6", "104642-4", "97506-0", "104638-2", "97505-2", "104637-4"]),
   ]
 
   /// Latin letters OCR returns as their Cyrillic or Greek twins. Mirrors

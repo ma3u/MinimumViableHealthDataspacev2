@@ -22,6 +22,7 @@ import {
   ANALYTE_DESCRIPTIONS,
   ANALYTE_DESCRIPTIONS_DE,
   ELECTROCARDIOGRAM_CODES,
+  REPORT_KINDS,
   OBSERVATION_CATEGORIES,
   ANALYTE_KEYS,
   ANALYTE_LABELS,
@@ -129,6 +130,21 @@ export function renderSwift(
   const descriptions = table(ANALYTE_DESCRIPTIONS);
   const descriptionsDe = table(ANALYTE_DESCRIPTIONS_DE);
   const categories = table(OBSERVATION_CATEGORIES);
+  const list = (items: readonly string[]) =>
+    "[" + items.map((i) => swiftString(i)).join(", ") + "]";
+  const reportKinds = REPORT_KINDS.map(
+    (k) =>
+      `    ReportKind(\n      kind: ${swiftString(
+        k.kind,
+      )}, section: ${swiftString(k.section)},\n` +
+      `      sectionDisplay: ${swiftString(k.sectionDisplay)},\n` +
+      `      loinc: ${swiftString(k.loinc)}, display: ${swiftString(
+        k.display,
+      )},\n` +
+      `      triggers: ${list(k.triggers)},\n      members: ${list(
+        k.members,
+      )}),`,
+  ).join("\n");
   const electrocardiogram = [...ELECTROCARDIOGRAM_CODES]
     .sort()
     .map((code) => `    ${swiftString(code)},`)
@@ -290,6 +306,12 @@ ${categories}
   /// \`ELECTROCARDIOGRAM_CODES\`.
   public static let electrocardiogramCodes: Set<String> = [
 ${electrocardiogram}
+  ]
+
+  /// The kinds of report a set of values makes, first fit wins. Mirrors
+  /// \`REPORT_KINDS\`.
+  public static let reportKinds: [ReportKind] = [
+${reportKinds}
   ]
 
   /// Latin letters OCR returns as their Cyrillic or Greek twins. Mirrors

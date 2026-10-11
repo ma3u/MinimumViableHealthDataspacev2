@@ -1,0 +1,368 @@
+{
+  "now": "2026-09-13T12:00:00.000Z",
+  "meta": {
+    "patientId": "example-patient",
+    "effectiveDateTime": "2026-08-26",
+    "performer": "Praxis Dr. Muster",
+    "title": "Körperzusammensetzung (DXA)"
+  },
+  "source": {
+    "kind": "ocr-transcribed",
+    "sourceDocument": "laborbefund-2026-09-04.pdf",
+    "ocrConfidence": 0.94,
+    "extractor": "tesseract"
+  },
+  "values": [
+    {
+      "label": "Körperfettanteil",
+      "value": 23.4,
+      "unitRaw": "%",
+      "line": "Gesamt Gewebe %Fett 23,4",
+      "lineNumber": 9500,
+      "analyteKey": "body-fat",
+      "coding": {
+        "loincNumber": "41982-0",
+        "display": "Percentage of body fat Measured",
+        "ucum": "%"
+      }
+    },
+    {
+      "label": "Mager-Weichteilmasse",
+      "value": 46.74,
+      "unitRaw": "kg",
+      "line": "Gesamt Mager 46.740 g",
+      "lineNumber": 9501,
+      "analyteKey": "lean-soft-tissue",
+      "coding": {
+        "loincNumber": null,
+        "display": "Lean soft tissue mass by DXA",
+        "ucum": "kg",
+        "uncodedReason": "LOINC's lean body weight (88334-8) includes the bone; a DXA scan's lean mass does not."
+      }
+    },
+    {
+      "label": "Viszerales Fett",
+      "value": 57,
+      "unitRaw": "cm2",
+      "line": "540 cm³  508 g  57 cm²",
+      "lineNumber": 9502,
+      "analyteKey": "visceral-fat",
+      "coding": {
+        "loincNumber": "73707-2",
+        "display": "Visceral fat [Area] Measured",
+        "ucum": "cm2"
+      }
+    }
+  ],
+  "bundle": {
+    "resourceType": "Bundle",
+    "type": "collection",
+    "timestamp": "2026-09-13T12:00:00.000Z",
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:Patient-example-patient",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "example-patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:DocumentReference-source-document",
+        "resource": {
+          "resourceType": "DocumentReference",
+          "id": "source-document",
+          "status": "current",
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "date": "2026-09-13T12:00:00.000Z",
+          "description": "laborbefund-2026-09-04.pdf",
+          "content": [
+            {
+              "attachment": {
+                "title": "laborbefund-2026-09-04.pdf",
+                "creation": "2026-08-26"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:DiagnosticReport-report-1",
+        "resource": {
+          "resourceType": "DiagnosticReport",
+          "id": "report-1",
+          "status": "preliminary",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                  "code": "RAD",
+                  "display": "Radiology"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "38269-7",
+                "display": "Study report Skeletal system DXA"
+              }
+            ],
+            "text": "Körperzusammensetzung (DXA)"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-08-26",
+          "issued": "2026-09-13T12:00:00.000Z",
+          "performer": [
+            {
+              "display": "Praxis Dr. Muster"
+            }
+          ],
+          "result": [
+            {
+              "reference": "Observation/obs-1"
+            },
+            {
+              "reference": "Observation/obs-2"
+            },
+            {
+              "reference": "Observation/obs-3"
+            }
+          ],
+          "presentedForm": [
+            {
+              "title": "laborbefund-2026-09-04.pdf"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:Observation-obs-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-1",
+          "status": "preliminary",
+          "extension": [
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+              "valueCode": "ocr-transcribed"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+              "valueString": "Gesamt Gewebe %Fett 23,4"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+              "valueDecimal": 0.94
+            }
+          ],
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "laboratory",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "41982-0",
+                "display": "Percentage of body fat Measured"
+              }
+            ],
+            "text": "Körperfettanteil"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-08-26",
+          "valueQuantity": {
+            "value": 23.4,
+            "unit": "%",
+            "system": "http://unitsofmeasure.org",
+            "code": "%"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:Observation-obs-2",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-2",
+          "status": "preliminary",
+          "extension": [
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+              "valueCode": "ocr-transcribed"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+              "valueString": "Gesamt Mager 46.740 g"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+              "valueDecimal": 0.94
+            }
+          ],
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "imaging",
+                  "display": "Imaging"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "extension": [
+              {
+                "url": "http://hl7.org/fhir/StructureDefinition/data-absent-reason",
+                "valueCode": "not-applicable",
+                "_valueCode": {
+                  "extension": [
+                    {
+                      "url": "http://hl7.org/fhir/StructureDefinition/rendered-value",
+                      "valueString": "LOINC's lean body weight (88334-8) includes the bone; a DXA scan's lean mass does not."
+                    }
+                  ]
+                }
+              }
+            ],
+            "text": "Mager-Weichteilmasse"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-08-26",
+          "valueQuantity": {
+            "value": 46.74,
+            "unit": "kg",
+            "system": "http://unitsofmeasure.org",
+            "code": "kg"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:Observation-obs-3",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-3",
+          "status": "preliminary",
+          "extension": [
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+              "valueCode": "ocr-transcribed"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+              "valueString": "540 cm³  508 g  57 cm²"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+              "valueDecimal": 0.94
+            }
+          ],
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "laboratory",
+                  "display": "Laboratory"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "73707-2",
+                "display": "Visceral fat [Area] Measured"
+              }
+            ],
+            "text": "Viszerales Fett"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-08-26",
+          "valueQuantity": {
+            "value": 57,
+            "unit": "cm2",
+            "system": "http://unitsofmeasure.org",
+            "code": "cm2"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:Provenance-provenance-1",
+        "resource": {
+          "resourceType": "Provenance",
+          "id": "provenance-1",
+          "target": [
+            {
+              "reference": "DiagnosticReport/report-1"
+            },
+            {
+              "reference": "Observation/obs-1"
+            },
+            {
+              "reference": "Observation/obs-2"
+            },
+            {
+              "reference": "Observation/obs-3"
+            }
+          ],
+          "recorded": "2026-09-13T12:00:00.000Z",
+          "activity": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
+                "code": "DERIVE",
+                "display": "derive"
+              }
+            ],
+            "text": "Values transcribed from a scanned document by OCR"
+          },
+          "agent": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                    "code": "assembler"
+                  }
+                ]
+              },
+              "who": {
+                "display": "epa-ingest (tesseract)"
+              }
+            }
+          ],
+          "entity": [
+            {
+              "role": "source",
+              "what": {
+                "reference": "DocumentReference/source-document"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

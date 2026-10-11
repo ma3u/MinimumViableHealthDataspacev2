@@ -11,6 +11,7 @@ import {
   buildBundle,
   isElectrocardiogram,
   isHolter,
+  reportKind,
   observationCategory,
   statusForSource,
 } from "../src/to-fhir.js";
@@ -19,6 +20,8 @@ import {
   GOLDEN_ECG_VALUES,
   GOLDEN_EXERCISE_VALUES,
   GOLDEN_HOLTER_VALUES,
+  GOLDEN_KIND_REPORTS,
+  GOLDEN_VALUES,
 } from "../src/generate-fhir-golden.js";
 import type { CodedLabValue, TextSource } from "../src/types.js";
 
@@ -362,5 +365,36 @@ describe("exercise testing and DXA", () => {
     expect(observationCategory(null, "bmd-total-body")).toBe("imaging");
     // Body fat is the code a scale's reading carries too.
     expect(observationCategory("41982-0", "body-fat")).toBe("laboratory");
+  });
+});
+
+describe("the kind of report", () => {
+  const kindOf = (name: string) =>
+    reportKind(GOLDEN_KIND_REPORTS.find((r) => r.name === name)!.values);
+
+  it("files each kind under its department and study code", () => {
+    expect(kindOf("cpet")).toMatchObject({ section: "PF", loinc: "18752-6" });
+    expect(kindOf("spirometry")).toMatchObject({
+      section: "PF",
+      loinc: "18759-1",
+    });
+    expect(kindOf("lactate")).toMatchObject({
+      section: "OTH",
+      loinc: "18752-6",
+    });
+    expect(kindOf("dxa")).toMatchObject({ section: "RAD", loinc: "38269-7" });
+    expect(kindOf("cgm")).toMatchObject({ section: "LAB", loinc: "107930-0" });
+    expect(reportKind(GOLDEN_EXERCISE_VALUES)).toMatchObject({
+      section: "EC",
+      loinc: "18752-6",
+    });
+  });
+
+  it("keeps a laboratory report with one stray value a laboratory report", () => {
+    const fvc = GOLDEN_KIND_REPORTS.find((r) => r.name === "spirometry")!
+      .values[0];
+    expect(reportKind([...GOLDEN_VALUES, fvc])).toBeUndefined();
+    expect(reportKind(GOLDEN_VALUES)).toBeUndefined();
+    expect(reportKind([])).toBeUndefined();
   });
 });

@@ -155,6 +155,21 @@ public enum FhirWriter {
     isElectrocardiogram(values) && values.contains { $0.coding.loinc == "76637-8" }
   }
 
+  /// The kind of report the values make (`Analytes.reportKinds`), or nil
+  /// for a laboratory report. An ECG or Holter report is decided before
+  /// this. Mirrors `reportKind` in the TypeScript writer.
+  public static func reportKind(_ values: [CodedLabValue]) -> ReportKind? {
+    func keys(_ value: CodedLabValue) -> [String] {
+      [value.coding.loinc ?? "", value.coding.analyteKey].filter { !$0.isEmpty }
+    }
+    return Analytes.reportKinds.first { kind in
+      values.contains { keys($0).contains(where: kind.triggers.contains) }
+        && values.allSatisfy {
+          category($0) == "vital-signs" || keys($0).contains(where: kind.members.contains)
+        }
+    }
+  }
+
   public static func buildBundle(
     values: [CodedLabValue], meta: ReportMeta, source: TextSource, now: String
   ) -> JSON {
@@ -268,6 +283,7 @@ public enum FhirWriter {
 
     // A report whose every value is an ECG measurement is an ECG.
     let ecg = isElectrocardiogram(values)
+    let kind = ecg ? nil : reportKind(values)
     var report: JSON = [
       "resourceType": "DiagnosticReport",
       "id": "report-1",
@@ -283,8 +299,8 @@ public enum FhirWriter {
               ]
               : [
                 "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
-                "code": "LAB",
-                "display": "Laboratory",
+                "code": .string(kind?.section ?? "LAB"),
+                "display": .string(kind?.sectionDisplay ?? "Laboratory"),
               ]
           ])
         ]
@@ -301,8 +317,8 @@ public enum FhirWriter {
                 : ["system": .string(loincSystem), "code": "11524-6", "display": "EKG study"])
               : [
                 "system": .string(loincSystem),
-                "code": "11502-2",
-                "display": "Laboratory report",
+                "code": .string(kind?.loinc ?? "11502-2"),
+                "display": .string(kind?.display ?? "Laboratory report"),
               ]
           ])
         ]
@@ -455,5 +471,31 @@ public enum FhirWriter {
       }
     }
     return extensions
+  }
+}
+
+/// A kind of report and how the export files it: the DiagnosticReport's
+/// category (HL7 v2-0074) and code (LOINC). Generated from `REPORT_KINDS`
+/// (`Analytes.reportKinds`).
+public struct ReportKind: Sendable, Equatable {
+  public let kind: String
+  public let section: String
+  public let sectionDisplay: String
+  public let loinc: String
+  public let display: String
+  public let triggers: Set<String>
+  public let members: Set<String>
+
+  public init(
+    kind: String, section: String, sectionDisplay: String, loinc: String, display: String,
+    triggers: Set<String>, members: Set<String>
+  ) {
+    self.kind = kind
+    self.section = section
+    self.sectionDisplay = sectionDisplay
+    self.loinc = loinc
+    self.display = display
+    self.triggers = triggers
+    self.members = members
   }
 }
