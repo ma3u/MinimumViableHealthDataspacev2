@@ -360,6 +360,119 @@
         font-weight: 600;
         line-height: 1.3;
       }
+      /* Findings: the app with a scanned sheet, as a loop. The sheet is read
+         line by line, two lines are picked out, then the coded list shows the
+         same value with its code and its page and line. */
+      .reveal .scanphone {
+        position: relative;
+        height: 900px;
+        aspect-ratio: 480 / 1043;
+        border-radius: 22px 0 0 22px;
+        overflow: hidden;
+        background: #eef2f1;
+        border: 1px solid var(--card-border);
+        border-right: 0;
+      }
+      .reveal .scanphone img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        max-width: none;
+        max-height: none;
+      }
+      .reveal .scanphone .detail,
+      .reveal .scanphone .beam,
+      .reveal .scanphone .hl,
+      .reveal .scanphone .pill {
+        opacity: 0;
+      }
+      .reveal .scanphone .beam,
+      .reveal .scanphone .hl,
+      .reveal .scanphone .pill {
+        position: absolute;
+      }
+      .reveal .scanphone .beam {
+        background: linear-gradient(180deg, rgba(23, 165, 137, 0), rgba(23, 165, 137, 0.55) 70%, rgba(23, 165, 137, 0.9));
+        box-shadow: 0 6px 18px rgba(23, 165, 137, 0.45);
+      }
+      .reveal .scanphone .hl {
+        border: 3px solid #17a589;
+        background: rgba(23, 165, 137, 0.12);
+        border-radius: 6px;
+      }
+      .reveal .scanphone .hl.amber {
+        border-color: #d68910;
+        background: rgba(214, 137, 16, 0.12);
+      }
+      .reveal .scanphone .pill {
+        background: #0d3b3a;
+        color: #fbfbf8;
+        font: 600 15px/1.3 "Public Sans", Arial, sans-serif;
+        padding: 6px 12px;
+        border-radius: 10px;
+        white-space: nowrap;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      }
+      .reveal .scanphone .pill.amber {
+        background: #5a3a08;
+      }
+      .reveal .scanphone .pill span {
+        font-weight: 400;
+        color: #f4d29a;
+      }
+      .reveal .scanphone .sheet {
+        position: absolute;
+        inset: 0;
+        transform-origin: 5.83% 45%;
+      }
+      .reveal .scanphone .sheet .pill {
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 7px;
+      }
+      .reveal section.present .scanphone .sheet { animation: scan-zoom 15s ease-in-out infinite; }
+      @keyframes scan-zoom {
+        0%, 20% { transform: none; }
+        24%, 44% { transform: scale(1.45); }
+        49%, 100% { transform: none; }
+      }
+      .reveal section.present .scanphone .beam { animation: scan-beam 15s linear infinite; }
+      .reveal section.present .scanphone .hl-chol,
+      .reveal section.present .scanphone .pill-chol { animation: scan-chol 15s ease infinite; }
+      .reveal section.present .scanphone .hl-lpa,
+      .reveal section.present .scanphone .pill-lpa { animation: scan-lpa 15s ease infinite; }
+      .reveal section.present .scanphone .detail { animation: scan-detail 15s ease infinite; }
+      .reveal section.present .scanphone .hl-code,
+      .reveal section.present .scanphone .hl-line,
+      .reveal section.present .scanphone .pill-detail { animation: scan-coded 15s ease infinite; }
+      @keyframes scan-beam {
+        0%, 4% { opacity: 0; transform: translateY(0); }
+        5% { opacity: 1; transform: translateY(0); }
+        19% { opacity: 1; transform: translateY(2400%); }
+        20%, 100% { opacity: 0; transform: translateY(2400%); }
+      }
+      @keyframes scan-chol {
+        0%, 20% { opacity: 0; }
+        23%, 40% { opacity: 1; }
+        43%, 100% { opacity: 0; }
+      }
+      @keyframes scan-lpa {
+        0%, 27% { opacity: 0; }
+        30%, 44% { opacity: 1; }
+        47%, 100% { opacity: 0; }
+      }
+      @keyframes scan-detail {
+        0%, 46% { opacity: 0; }
+        51%, 92% { opacity: 1; }
+        97%, 100% { opacity: 0; }
+      }
+      @keyframes scan-coded {
+        0%, 54% { opacity: 0; }
+        57%, 90% { opacity: 1; }
+        93%, 100% { opacity: 0; }
+      }
       .reveal .kgsvg {
         width: 100%;
         height: auto;
@@ -884,7 +997,9 @@
 
         <!-- 9 Findings, 1:00 -->
         <section>
-          <p class="eyebrow">What we found · why refusing matters</p>
+          <div class="split">
+            <div class="left">
+              <p class="eyebrow">What we found · why refusing matters</p>
           <h2>Four findings from coding real sheets to LOINC</h2>
           <div class="cols">
             <div class="card teal fragment"><h3>The unit selects the code</h3><p>Same label, two units: two measurements.</p></div>
@@ -894,8 +1009,26 @@
             <div class="card amber fragment"><h3>LOINC names tests, not organisms</h3><p>57 stool taxa: NCBI Taxonomy instead.</p></div>
             <div class="card amber fragment"><h3>Provenance must be first-class</h3><p>A transcription marked final is the failure that matters.</p></div>
           </div>
+            </div>
+            <div class="right">
+              <div class="scanphone" role="img" aria-label="Klarbefund with a scanned lab sheet: the sheet is read line by line, Lipoprotein (a) in g/l gets the LOINC code for Lp(a) by mass, and the coded list shows each value with its LOINC code and its page and line on the paper">
+                <div class="sheet">
+                  <img src="img/phone-scan.png" alt="" />
+                  <div class="beam" style="left: 0.83%; top: 25.12%; width: 98.33%; height: 2.68%"></div>
+                  <div class="hl hl-chol" style="left: 5.83%; top: 38.83%; width: 63.75%; height: 1.92%"></div>
+                  <div class="pill pill-chol" style="left: 31.25%; top: 36.53%">p. 1, line 6</div>
+                  <div class="hl hl-lpa amber" style="left: 5.83%; top: 52.06%; width: 63.75%; height: 1.92%"></div>
+                  <div class="pill pill-lpa amber" style="left: 7.08%; top: 55.03%">g/l: LOINC 10835-7, Lp(a) by mass<br /><span>nmol/l would be 43583-4, another test</span></div>
+                </div>
+                <img class="detail" src="img/phone-detail.png" alt="" />
+                <div class="hl hl-code" style="left: 8.33%; top: 59.25%; width: 18.75%; height: 1.92%"></div>
+                <div class="hl hl-line" style="left: 47.08%; top: 59.25%; width: 15.83%; height: 1.92%"></div>
+                <div class="pill pill-detail" style="left: 9.17%; top: 51.39%">the code, and where on the paper</div>
+              </div>
+            </div>
+          </div>
           <aside class="notes">
-            8:15. These came out of scanning my own sheets and the tests that grew around each mistake. First: the same label in two units is two measurements; trusting the label alone put wrong codes on real values until the rule was made absolute. Second: both LOINC codes for RDW-SD are deprecated, so the value is carried unmatched rather than mis-coded. That one is my favourite: the honest answer was to refuse. Third: a stool report's 57 organisms have no LOINC term and never will, so NCBI Taxonomy names them. Fourth: final or preliminary is decided by the document, not by its file extension.
+            8:15. On the right, the app with a scanned sheet: it reads every line, Lipoprotein (a) printed in grams per litre gets the code for Lp(a) by mass, and in the coded list every value keeps its LOINC code and its page and line on the paper. The four findings came out of scanning my own sheets and the tests that grew around each mistake. First: the same label in two units is two measurements; trusting the label alone put wrong codes on real values until the rule was made absolute. Second: both LOINC codes for RDW-SD are deprecated, so the value is carried unmatched rather than mis-coded. That one is my favourite: the honest answer was to refuse. Third: a stool report's 57 organisms have no LOINC term and never will, so NCBI Taxonomy names them. Fourth: final or preliminary is decided by the document, not by its file extension.
           </aside>
         </section>
 
