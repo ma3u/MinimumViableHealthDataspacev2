@@ -412,6 +412,39 @@ import Shared
           Row("Candida albicans", 0.011, "%"),
         ]),
 
+      // A 24-hour ambulatory blood pressure report: the means of the summary
+      // grid for the whole recording, the day and the night, the night-time
+      // fall, and the height and weight its header prints. What
+      // `AmbulatoryBloodPressure` reads from such a page, by the labels it
+      // gives them. Only the 24-hour means have LOINC codes of their own; a
+      // day or night mean carries the plain mean code, and the dipping
+      // figures carry none. A normotensive dipper whose maxima, not shown
+      // here, came from a bicycle ride; the means are what ESC/ESH judge by.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D011", year: 2026, month: 8, day: 27,
+        title: "24-h-Blutdruckmessung, Praxis Dr. Muster", laboratory: "Praxis Dr. Muster",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Systolischer Blutdruck 24-h-Mittel", 122, "mmHg"),
+          Row("Systolischer Blutdruck Tagesmittel", 128, "mmHg"),
+          Row("Systolischer Blutdruck Nachtmittel", 110, "mmHg"),
+          Row("Diastolischer Blutdruck 24-h-Mittel", 72, "mmHg"),
+          Row("Diastolischer Blutdruck Tagesmittel", 78, "mmHg"),
+          Row("Diastolischer Blutdruck Nachtmittel", 60, "mmHg"),
+          Row("Puls 24-h-Mittel", 64, "/min"),
+          Row("Puls Tagesmittel", 68, "/min"),
+          Row("Puls Nachtmittel", 58, "/min"),
+          Row("Mittlerer arterieller Druck 24-h-Mittel", 88, "mmHg"),
+          Row("Pulsdruck 24-h-Mittel", 50, "mmHg"),
+          Row("Nächtliche Absenkung systolisch", -14.1, "%"),
+          Row("Nächtliche Absenkung diastolisch", -23, "%"),
+          Row("Nächtliche Absenkung Puls", -14.7, "%"),
+          Row("Körpergröße", 182, "cm"),
+          Row("Körpergewicht", 80, "kg"),
+          Row("Body-Mass-Index", 24.2, "kg/m2"),
+        ],
+        unread: ["Limit : SYS=135, DIA=85, Puls=80, MAD=100, PP=50"]),
+
       // A home aminogram: eight essential amino acids, in micromoles per
       // litre, with the ranges such a test prints. Invented values on a real
       // layout, like everything else here.

@@ -17,7 +17,21 @@ import Foundation
 /// those are what ESC/ESH 2023 judges by. A mean is kept only when the
 /// minimum and maximum of its period are found in the same row and bracket it;
 /// anything else is refused, never guessed. The night-to-day fall (dipping)
-/// is read from its own small table.
+/// is read from its own small table and checked against those means.
+///
+/// The codes follow what LOINC has. It names the 24-hour means (`8490-5`,
+/// `8472-3`, `41924-2`) and has no daytime or nighttime mean at all, only
+/// fixed 8- and 12-hour windows that a 16-hour day or a 7-hour night is not
+/// (checked against the NLM clinical tables, 2026-10-11). So a day or night
+/// mean carries the plain mean code (`96608-5`, `96609-3`, `103205-1`) and
+/// its period in the label; the dipping figures carry no code.
+///
+/// The patient header prints height, weight and body-mass index as one row
+/// of pairs, which the line grammar reads one value of at best; they are read
+/// here too, each checked against the other two.
+///
+/// Where a comment below quotes a sheet, the shape is a real sheet's and the
+/// numbers are invented (README, rule 1).
 public enum AmbulatoryBloodPressure {
 
   /// True for a page that prints the ambulatory summary grid.
@@ -65,7 +79,23 @@ public enum AmbulatoryBloodPressure {
     // lose a row of the dipping table that another kept (measured on a real
     // sheet: only the table pass had `Puls -13,8%` whole).
     let lines = ([text] + cells.map(\.text) + fragments.map(\.text)).joined(separator: "\n")
-    return means(in: fragments) + dipping(in: lines)
+    let means = means(in: fragments)
+    // The header as printed rows, so a label and a value the recogniser
+    // returned as separate fragments (`BMI`, `24,2`) are on one line again.
+    let rows = fragments.isEmpty ? "" : VisionDocumentReader.readingOrder(fragments)
+    let header = (text + "\n" + rows).components(separatedBy: .newlines)
+    return means + corroborated(dipping(in: lines), by: means)
+      + bodyMeasures(in: header, fragments: fragments)
+  }
+
+  /// The line grammar's reading of a sheet with this reader's values in it
+  /// and the rows this reader accounts for taken out. The import and the
+  /// replay both call this, so the phone and `ScanReplay` cannot differ.
+  public static func applied(
+    to sheet: ExtractionResult, pageTexts: [String], pages: [ScanDiagnostics.Page]
+  ) -> ExtractionResult {
+    let read = extract(pageTexts: pageTexts, pages: pages, source: sheet.source)
+    return withoutGridLines(sheet, read: read).merging(read)
   }
 
   /// Every page's ambulatory summary, coded. The import and the replay call
@@ -89,19 +119,53 @@ public enum AmbulatoryBloodPressure {
     return ExtractionResult(coded: coded, unmapped: unmapped, suspiciousLines: [], source: source)
   }
 
-  /// The grid's own rows, which the line grammar lists as unread although
-  /// this reader has taken their values. Dropped only when it has.
+  /// What the line grammar made of the rows this reader has taken. Dropped
+  /// only when it has taken something, so an ordinary sheet is untouched.
+  ///
+  /// - A value under one of the grid's row labels is a grid or dipping cell
+  ///   the grammar took for an analyte. Measured on a real sheet: `DIA 23 %`,
+  ///   the dipping row, arrived as a diastolic pressure in percent.
+  /// - A code this reader produced is this reader's. The grammar's copy of a
+  ///   header field (on the phone, `Gewicht 80 kg` with `BMI 24,2` taken for
+  ///   its reference range) would otherwise be listed twice.
+  /// - Unread lines that are grid rows, the device's limit lines, or lines
+  ///   whose every number this reader took (`182 cm 24,2`, the header broken
+  ///   differently) are not unread.
   public static func withoutGridLines(_ extraction: ExtractionResult, read: ExtractionResult)
     -> ExtractionResult
   {
-    guard !read.coded.isEmpty else { return extraction }
-    let grid = #"^\s*(SYS|DIA|Puls|MAD|PP)\s+-?\d"#
+    let taken = read.coded.map(\.raw) + read.unmapped.map(\.raw)
+    guard !taken.isEmpty else { return extraction }
+    let gridLabels = Set(rows.map(\.printed))
+    let codes = Set(read.coded.compactMap(\.coding.loinc))
+    func isGridCell(_ raw: RawLabValue) -> Bool {
+      gridLabels.contains(raw.label.trimmingCharacters(in: .whitespaces))
+    }
+    let grid = #"^\s*(SYS|DIA|Puls|MAD|PP)\s+-?\s?\d"#
+    let limits = #"^\s*Limi\S*\s*:"#
+    let values = taken.map(\.value)
     return ExtractionResult(
-      coded: extraction.coded, unmapped: extraction.unmapped,
-      suspiciousLines: extraction.suspiciousLines.filter {
-        $0.range(of: grid, options: .regularExpression) == nil
+      coded: extraction.coded.filter {
+        !isGridCell($0.raw) && !($0.coding.loinc.map(codes.contains) ?? false)
+      },
+      unmapped: extraction.unmapped.filter { !isGridCell($0.raw) },
+      suspiciousLines: extraction.suspiciousLines.filter { line in
+        line.range(of: grid, options: .regularExpression) == nil
+          && line.range(of: limits, options: .regularExpression) == nil
+          && !accountedFor(line, by: values)
       },
       source: extraction.source)
+  }
+
+  /// True when the line has numbers and every one of them is a value this
+  /// reader took, sign aside.
+  static func accountedFor(_ line: String, by values: [Double]) -> Bool {
+    guard let re = try? NSRegularExpression(pattern: #"\d+(?:[.,]\d+)?"#) else { return false }
+    let ns = line as NSString
+    let numbers = re.matches(in: line, range: NSRange(location: 0, length: ns.length))
+      .compactMap { LabLineParser.parseNumber(ns.substring(with: $0.range)) }
+    guard !numbers.isEmpty else { return false }
+    return numbers.allSatisfy { n in values.contains { abs(abs($0) - n) < 0.0001 } }
   }
 
   static func means(in fragments: [DocumentReconciler.TextFragment]) -> [RawLabValue] {
@@ -207,6 +271,136 @@ public enum AmbulatoryBloodPressure {
       }
     }
     return values
+  }
+
+  /// The dipping figures, checked against the grid's means.
+  ///
+  /// The device computes the fall as (night mean − day mean) / day mean, so
+  /// the two tables state it twice. A figure that agrees is kept. A figure
+  /// whose size agrees and which was read with no sign at all takes the sign
+  /// of the means: measured on a real sheet, the recogniser returned the
+  /// diastolic `-23 %` as `23%`, which would read as a rise at night where
+  /// the sheet says "Extreme Dipper". Anything else is refused. Without both
+  /// means there is nothing to check against, and the figure stands as read.
+  static func corroborated(_ dips: [RawLabValue], by means: [RawLabValue]) -> [RawLabValue] {
+    let rowFor = [
+      "systolisch": "Systolischer Blutdruck", "diastolisch": "Diastolischer Blutdruck",
+      "Puls": "Puls",
+    ]
+    func mean(_ label: String) -> Double? { means.first { $0.label == label }?.value }
+    return dips.compactMap { dip in
+      let key = dip.label.replacingOccurrences(of: "Nächtliche Absenkung ", with: "")
+      guard let row = rowFor[key], let day = mean("\(row) Tagesmittel"),
+        let night = mean("\(row) Nachtmittel"), day > 0
+      else { return dip }
+      let expected = (night - day) / day * 100
+      // The means are printed as whole numbers. This is how far that rounding
+      // alone can move the fall, plus the last printed digit of the figure.
+      let tolerance = (0.5 / day + 0.5 * night / (day * day)) * 100 + 0.1
+      if abs(dip.value - expected) <= tolerance { return dip }
+      let figure = dip.line.drop { !$0.isWhitespace }
+      let signed = figure.contains { "-+−".contains($0) }
+      guard !signed, abs(-dip.value - expected) <= tolerance else { return nil }
+      return RawLabValue(
+        label: dip.label, value: -dip.value, unitRaw: dip.unitRaw, line: dip.line,
+        lineNumber: dip.lineNumber, region: dip.region)
+    }
+  }
+
+  /// Height, weight and body-mass index from the patient header:
+  /// `Größe 182 cm   Gewicht 80 kg   BMI 24,2`, as one printed row.
+  ///
+  /// The line grammar takes one value from a line, does not take a unit
+  /// glued to its number (`80kg`, as the recogniser read a real sheet) and
+  /// refuses the BMI, which prints no unit. On a tilted photograph the
+  /// recogniser's reading order also puts a field's name and its value on
+  /// different lines (measured on the phone: `Größe  Alter  Pacemaker`, then
+  /// `182 cm  52  24,2`), so each name is also paired with the nearest number
+  /// to its right. A field is kept only when every place it was read agrees
+  /// on it, and when all three are present the BMI must be the weight over
+  /// the squared height, or none of them is kept: one of the three is then
+  /// misread and nothing says which.
+  static func bodyMeasures(in lines: [String], fragments: [DocumentReconciler.TextFragment])
+    -> [RawLabValue]
+  {
+    let fields: [(label: String, head: String, pattern: String, unit: String, range: ClosedRange<Double>)] = [
+      (
+        "Körpergröße", #"^Gr(?:ö|o|oe)(?:ß|ss)e$"#,
+        #"\bGr(?:ö|o|oe)(?:ß|ss)e\s*:?\s*(\d{2,3}(?:[.,]\d)?)\s*cm\b"#, "cm", 100...230
+      ),
+      (
+        "Körpergewicht", #"^Gewicht$"#,
+        #"\bGewicht\s*:?\s*(\d{2,3}(?:[.,]\d{1,2})?)\s*kg\b"#, "kg", 25...300
+      ),
+      (
+        "Body-Mass-Index", #"^BMI$"#,
+        #"\bBMI\s*:?\s*(\d{2}(?:[.,]\d{1,2})?)(?![\d.,%])"#, "kg/m2", 12...70
+      ),
+    ]
+
+    // Every place a field can be read: the lines as given, each fragment on
+    // its own (`Gewicht 80kg` is often one), and each name paired with its
+    // value. A pair is written in the printed form, so one grammar reads all.
+    var sources: [(text: String, region: SourceRegion?)] =
+      lines.map { ($0, nil) } + fragments.map { ($0.text, $0.region) }
+    let number = #"^(\d{2,3}(?:[.,]\d{1,2})?)\s*(cm|kg)?$"#
+    for field in fields {
+      for head in fragments where head.text.trimmingCharacters(in: .whitespaces)
+        .range(of: field.head, options: [.regularExpression, .caseInsensitive]) != nil
+      {
+        let right = head.region.x + head.region.width
+        let candidates = fragments.filter {
+          $0.region.x > right && $0.region.x < right + 0.2
+            && abs($0.region.midY - head.region.midY) < head.region.height * 1.5
+            && $0.text.trimmingCharacters(in: .whitespaces)
+              .range(of: number, options: .regularExpression) != nil
+        }
+        // The nearest in height wins; the next field's value sits a column on.
+        guard
+          let value = candidates.min(by: {
+            abs($0.region.midY - head.region.midY) < abs($1.region.midY - head.region.midY)
+          })
+        else { continue }
+        var text = value.text.trimmingCharacters(in: .whitespaces)
+        if field.unit != "kg/m2", text.range(of: #"\d$"#, options: .regularExpression) != nil {
+          text += " " + field.unit
+        }
+        sources.append(("\(head.text.trimmingCharacters(in: .whitespaces)) \(text)", value.region))
+      }
+    }
+
+    var picked: [String: (value: Double, line: String, region: SourceRegion?)] = [:]
+    for field in fields {
+      guard let re = try? NSRegularExpression(pattern: field.pattern, options: [.caseInsensitive])
+      else { continue }
+      var seen: [(value: Double, line: String, region: SourceRegion?)] = []
+      for source in sources {
+        let ns = source.text as NSString
+        for match in re.matches(in: source.text, range: NSRange(location: 0, length: ns.length)) {
+          guard let value = LabLineParser.parseNumber(ns.substring(with: match.range(at: 1))),
+            field.range.contains(value)
+          else { continue }
+          let printed = ns.substring(with: match.range)
+            .components(separatedBy: .whitespaces).filter { !$0.isEmpty }.joined(separator: " ")
+          seen.append((value, printed, source.region))
+        }
+      }
+      guard let first = seen.first, seen.allSatisfy({ $0.value == first.value }) else { continue }
+      picked[field.label] = (first.value, first.line, seen.compactMap(\.region).first)
+    }
+    if let height = picked["Körpergröße"]?.value, let weight = picked["Körpergewicht"]?.value,
+      let bmi = picked["Body-Mass-Index"]?.value
+    {
+      // Whole centimetres and kilograms move a BMI by up to about 0.35.
+      guard abs(weight / ((height / 100) * (height / 100)) - bmi) <= 0.4 else { return [] }
+    }
+
+    return fields.enumerated().compactMap { index, field in
+      guard let found = picked[field.label] else { return nil }
+      return RawLabValue(
+        label: field.label, value: found.value, unitRaw: field.unit, line: found.line,
+        lineNumber: 9200 + index, region: found.region)
+    }
   }
 
   /// The night-to-day fall, from the small "Dipping" table: `SYS -14,5 %`.

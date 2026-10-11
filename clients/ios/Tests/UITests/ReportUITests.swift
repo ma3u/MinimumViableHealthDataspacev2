@@ -130,6 +130,24 @@ final class DevDatasetUITests: XCTestCase {
       "and the section says how many were not matched")
   }
 
+  func testA24HourBloodPressureReportShowsItsMeansAndItsFall() {
+    // The summary of a day of cuff readings: the means by period and the
+    // night-time fall, which must keep its minus sign.
+    let app = launch()
+    AppDriver.scrollTo(
+      app.staticTexts["24-h-Blutdruckmessung, Praxis Dr. Muster"], in: app
+    ).tap()
+    AppDriver.require(
+      AppDriver.text(containing: "Systolischer Blutdruck Tagesmittel", in: app),
+      "the day mean of the systolic pressure")
+    AppDriver.scrollTo(
+      AppDriver.text(containing: "Nächtliche Absenkung diastolisch", in: app), in: app)
+    XCTAssertTrue(
+      AppDriver.text(containing: "-23", in: app).exists
+        || AppDriver.text(containing: "−23", in: app).exists,
+      "the diastolic fall is shown as a fall")
+  }
+
   func testAScaleReadingIsCarriedWithoutALoincCode() {
     let app = launch()
     AppDriver.scrollTo(
