@@ -307,6 +307,59 @@
         opacity: 1;
         transition: opacity 0.15s linear calc(var(--d) + 0.55s);
       }
+      /* The close: compact demo cards on the left, the QR code in the middle,
+         clear of the researcher's graph on the right. */
+      .reveal .close-grid {
+        display: grid;
+        grid-template-columns: 560px 380px;
+        gap: 56px;
+        align-items: center;
+      }
+      .reveal .card.compact {
+        padding: 12px 18px 10px;
+        font-size: 0.6em;
+        margin-bottom: 12px;
+      }
+      .reveal .card.compact h3 {
+        font-size: 1em;
+        margin: 0 0 4px;
+      }
+      .reveal .card.compact.links p {
+        margin: 2px 0;
+        font-size: 0.95em;
+      }
+      .reveal .card.compact.links b {
+        display: inline-block;
+        width: 6.2em;
+        color: var(--teal-light);
+      }
+      .reveal .btn.sm {
+        padding: 7px 13px;
+        font-size: 0.82em;
+        border-radius: 9px;
+        margin: 4px 6px 4px 0;
+      }
+      .reveal .close-grid .qr {
+        text-align: center;
+        background: #14213d;
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 20px 20px 14px;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+      }
+      .reveal .close-grid .qr img {
+        display: block;
+        width: 300px;
+        height: 300px;
+        margin: 0 auto;
+        border-radius: 10px;
+      }
+      .reveal .close-grid .qr p {
+        margin: 10px 0 0;
+        font-size: 0.6em;
+        font-weight: 600;
+        line-height: 1.3;
+      }
       .reveal .kgsvg {
         width: 100%;
         height: auto;
@@ -869,39 +922,35 @@
 
         <!-- 11 Demo and close, 1:00 -->
         <section class="graph-slide" data-background-color="#14213d">
-          <div class="kg3d-live" data-persona="researcher" data-shift="600" data-shifty="110" data-elev="0.75" data-zoom="0.85" aria-hidden="true"></div>
+          <div class="kg3d-live" data-persona="researcher" data-shift="650" data-shifty="110" data-elev="0.75" data-zoom="0.85" aria-hidden="true"></div>
           <div class="veil bright" aria-hidden="true"></div>
           <p class="caption">Behind: the researcher's view · <a href="https://ehds.mabu.red/overview?persona=researcher" target="_blank" rel="noopener">ehds.mabu.red/overview</a></p>
           <div class="over">
           <p class="eyebrow">Refuses to guess · provenance in FHIR · both ends · governed · open</p>
           <h2 style="font-size: 1.3em; max-width: 1000px">Two minutes of demo, then your questions</h2>
-          <div class="cols" style="max-width: 1360px">
-            <div class="card amber">
-              <h3>Demo · the researcher</h3>
-              <a class="btn amber" href="https://ehds.mabu.red/data/discover" data-path="/data/discover" target="_blank" rel="noopener">Discover</a>
-              <a class="btn amber" href="https://ehds.mabu.red/negotiate" data-path="/negotiate" target="_blank" rel="noopener">Negotiate</a>
-              <a class="btn amber" href="https://ehds.mabu.red/analytics" data-path="/analytics" target="_blank" rel="noopener">OMOP</a>
-              <a class="btn amber" href="https://ehds.mabu.red/query" data-path="/query" target="_blank" rel="noopener">Ask</a>
+          <div class="close-grid">
+            <div>
+              <div class="card compact amber">
+                <h3>Demo · the researcher</h3>
+                <a class="btn sm amber" href="https://ehds.mabu.red/data/discover" data-path="/data/discover" target="_blank" rel="noopener">Discover</a><a class="btn sm amber" href="https://ehds.mabu.red/negotiate" data-path="/negotiate" target="_blank" rel="noopener">Negotiate</a><a class="btn sm amber" href="https://ehds.mabu.red/analytics" data-path="/analytics" target="_blank" rel="noopener">OMOP</a><a class="btn sm amber" href="https://ehds.mabu.red/query" data-path="/query" target="_blank" rel="noopener">Ask</a>
+              </div>
+              <div class="card compact teal">
+                <h3>Demo · the person</h3>
+                <a class="btn sm" href="https://ehds.mabu.red/auth/eudi-qr" data-path="/auth/eudi-qr" target="_blank" rel="noopener">d-you sign-in</a><a class="btn sm" href="https://ehds.mabu.red/patient/profile" data-path="/patient/profile" target="_blank" rel="noopener">My record</a><a class="btn sm" href="https://ehds.mabu.red/patient/research" data-path="/patient/research" target="_blank" rel="noopener">My consents</a><a class="btn sm" href="https://ehds.mabu.red/patient/insights" data-path="/patient/insights" target="_blank" rel="noopener">What came back</a>
+                <p class="muted" style="margin: 6px 0 0; font-size: 0.9em">Deep links: <span class="toggle"><button type="button" data-base="https://ehds.mabu.red" class="on">live</button><button type="button" data-base="https://ma3u.github.io/MinimumViableHealthDataspacev2">static</button></span></p>
+              </div>
+              <div class="card compact links">
+                <p><b>Platform</b> <a href="https://ehds.mabu.red" target="_blank" rel="noopener">ehds.mabu.red</a> · <a href="https://ma3u.github.io/MinimumViableHealthDataspacev2/" target="_blank" rel="noopener">static simulation</a></p>
+                <p><b>Source</b> <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2" target="_blank" rel="noopener">GitHub</a>, Apache 2.0</p>
+                <p><b>Klarbefund</b> <a href="https://testflight.apple.com/join/ssADSXX6" target="_blank" rel="noopener">TestFlight beta</a> · <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/klarbefund/README.md" target="_blank" rel="noopener">screen by screen</a></p>
+              </div>
             </div>
-            <div class="card teal">
-              <h3>Demo · the person</h3>
-              <a class="btn" href="https://ehds.mabu.red/auth/eudi-qr" data-path="/auth/eudi-qr" target="_blank" rel="noopener">d-you sign-in</a>
-              <a class="btn" href="https://ehds.mabu.red/patient/profile" data-path="/patient/profile" target="_blank" rel="noopener">My record</a>
-              <a class="btn" href="https://ehds.mabu.red/patient/research" data-path="/patient/research" target="_blank" rel="noopener">My consents</a>
-              <a class="btn" href="https://ehds.mabu.red/patient/insights" data-path="/patient/insights" target="_blank" rel="noopener">What came back</a>
-              <p class="small muted" style="margin: 10px 0 0">Deep links: <span class="toggle"><button type="button" data-base="https://ehds.mabu.red" class="on">live</button><button type="button" data-base="https://ma3u.github.io/MinimumViableHealthDataspacev2">static</button></span></p>
-            </div>
-            <div class="card" style="flex: 0 0 auto; text-align: center">
-              <h3 class="kicker">This deck</h3>
-              <a href="https://ma3u.github.io/MinimumViableHealthDataspacev2/presentations/hl7-showcase-2026/" target="_blank" rel="noopener"><img src="img/qr-deck.svg" alt="QR code that opens this deck on GitHub Pages: ma3u.github.io/MinimumViableHealthDataspacev2/presentations/hl7-showcase-2026" style="display: block; width: 210px; height: 210px; margin: 6px auto 0; border-radius: 8px" /></a>
+            <div class="qr">
+              <a href="https://ma3u.github.io/MinimumViableHealthDataspacev2/presentations/hl7-showcase-2026/" target="_blank" rel="noopener"><img src="img/qr-deck.svg" alt="QR code that opens this deck on GitHub Pages: ma3u.github.io/MinimumViableHealthDataspacev2/presentations/hl7-showcase-2026" /></a>
+              <p>Scan for this deck<br /><span class="muted">every demo, no sign-in</span></p>
             </div>
           </div>
-          <div class="cols" style="max-width: 1120px; margin-top: 16px">
-            <div class="card"><h3 class="kicker">Platform</h3><p class="small"><a href="https://ehds.mabu.red" target="_blank" rel="noopener">ehds.mabu.red</a><br /><a href="https://ma3u.github.io/MinimumViableHealthDataspacev2/" target="_blank" rel="noopener">Static simulation</a></p></div>
-            <div class="card"><h3 class="kicker">Source</h3><p class="small"><a href="https://github.com/ma3u/MinimumViableHealthDataspacev2" target="_blank" rel="noopener">GitHub</a>, Apache 2.0<br /><a href="https://ehds.mabu.red/presentations/hl7-showcase-2026" target="_blank" rel="noopener">This deck</a></p></div>
-            <div class="card"><h3 class="kicker">Klarbefund</h3><p class="small"><a href="https://testflight.apple.com/join/ssADSXX6" target="_blank" rel="noopener">TestFlight beta</a><br /><a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/klarbefund/README.md" target="_blank" rel="noopener">Screen by screen</a></p></div>
-          </div>
-          <p class="small muted" style="margin-top: 0.9em">Matthias Buchhorn · <a href="https://linkedin.com/in/mbuchhorn" target="_blank" rel="noopener">linkedin.com/in/mbuchhorn</a> · Thank you, HL7.</p>
+          <p class="small muted" style="margin-top: 0.7em">Matthias Buchhorn · <a href="https://linkedin.com/in/mbuchhorn" target="_blank" rel="noopener">linkedin.com/in/mbuchhorn</a> · Thank you, HL7.</p>
           </div>
           <aside class="notes">
             10:30. To sum up: an AI that refuses rather than guesses, says where every value came from, works at both ends with one code between them, and answers only under a permit. Behind me now is the researcher's view: permits, what they may use today, their studies and the datasets near them. Browser: the person signs in with d-you, then the researcher: discover, the OMOP dashboard, one plain-language question. Phone: open the lipid panel, tap Original scan, open Trends. Two minutes, then questions. The QR code opens this deck on GitHub Pages, with every demo link working without sign-in. If the network fails, the static simulation has every screen on fixtures.
