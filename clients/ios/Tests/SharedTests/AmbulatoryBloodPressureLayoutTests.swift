@@ -76,6 +76,49 @@ struct AmbulatoryBloodPressureLayoutTests {
     #expect(byCode["39156-5"]?.map(\.raw.value) == [24.2])
   }
 
+  /// Pages 2 and 3 of the same report: the single readings, with error rows
+  /// (`E2`, `E14`) and cells the recogniser merged or garbled, and the
+  /// averages by activity level. Real geometry and cells, invented readings
+  /// (`Fixtures/abpm-24h-readings-layout.json`).
+  static let readingPages: [ScanDiagnostics.Page] = {
+    struct Pages: Decodable {
+      struct Page: Decodable {
+        let page: Int
+        let fragments: [DocumentReconciler.TextFragment]
+        let cells: [DocumentReconciler.Cell]
+      }
+      let pages: [Page]
+    }
+    let url = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+      .appendingPathComponent("Fixtures/abpm-24h-readings-layout.json")
+    let fixture = try! JSONDecoder().decode(Pages.self, from: Data(contentsOf: url))
+    return fixture.pages.map { page in
+      let reconciled = DocumentReconciler.reconcile(cells: page.cells, fragments: page.fragments)
+      return ScanDiagnostics.Page(
+        page: page.page, imageWidth: 1, imageHeight: 1, tableCount: 1, cells: page.cells,
+        fragments: page.fragments, rows: reconciled.rows,
+        orphanedFragments: reconciled.orphanedFragments, layout: nil,
+        plainText: VisionDocumentReader.readingOrder(page.fragments), recognitionSeconds: 0)
+    }
+  }()
+
+  @Test("the readings pages add no value and refuse nothing: the summary stays the whole result")
+  func readingPages() {
+    let pages = [Self.page] + Self.readingPages
+    let sheet = pages.reduce(ExtractionResult.empty(source: .ocrTranscribed)) {
+      $0.merging(ScanReplay.run($1))
+    }
+    let result = AmbulatoryBloodPressure.applied(
+      to: sheet, pageTexts: pages.map(\.plainText), pages: pages)
+    // Exactly what the summary page gives on its own: 15 means, 3 falls,
+    // height, weight and BMI. A reading row coded as a lab value, or a
+    // time read as a number, would show up here.
+    #expect(result.coded.count == Self.result.coded.count)
+    #expect(Set(result.coded.map(\.raw.label)) == Set(Self.result.coded.map(\.raw.label)))
+    #expect(result.unmapped.isEmpty)
+    #expect(value("Systolischer Blutdruck 24-h-Mittel") == 122)
+  }
+
   @Test("leaves no grid cell, dipping row or limit line behind as unread or unmatched")
   func leftovers() {
     #expect(!Self.result.unmapped.contains { ["SYS", "DIA", "Puls", "MAD", "PP"].contains($0.raw.label) })

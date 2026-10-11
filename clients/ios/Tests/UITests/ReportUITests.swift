@@ -137,6 +137,10 @@ final class DevDatasetUITests: XCTestCase {
     AppDriver.scrollTo(
       app.staticTexts["24-h-Blutdruckmessung, Praxis Dr. Muster"], in: app
     ).tap()
+    // The summary, the single readings and the averages by activity level.
+    AppDriver.require(
+      app.buttons.containing(NSPredicate(format: "label CONTAINS 'Original scan, 3 page'"))
+        .firstMatch, "three pages of scan")
     AppDriver.require(
       AppDriver.text(containing: "Systolischer Blutdruck Tagesmittel", in: app),
       "the day mean of the systolic pressure")
