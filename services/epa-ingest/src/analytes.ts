@@ -3793,6 +3793,10 @@ const DEFINITIONS: AnalyteDefinition[] = [
     },
   },
   // ---- Continuous glucose monitoring ----
+  // The figures of the international consensus AGP report (Battelino et
+  // al., Diabetes Care 2019), as the glucose sensor reader names them; the
+  // codes are the HL7 CGM implementation guide's. Verified against NLM,
+  // 2026-10-11.
   {
     key: "glucose-mean-cgm",
     description:
@@ -3803,6 +3807,115 @@ const DEFINITIONS: AnalyteDefinition[] = [
         "97507-8",
         "Average glucose [Mass/volume] in Interstitial fluid during Reporting Period",
         "mg/dL",
+      ),
+      "mmol/L": c(
+        "105273-7",
+        "Glucose [Moles/volume] in Reporting Period mean Interstitial fluid by calculation",
+        "mmol/L",
+      ),
+    },
+  },
+  {
+    key: "cgm-time-in-range",
+    description:
+      "The share of the sensor's readings in the target range, usually 70 to 180 mg/dl. The consensus aim is more than 70 %.",
+    labels: ["Zeit im Zielbereich"],
+    byUnit: {
+      "%": c(
+        "97510-2",
+        "Glucose measurements in range out of Total glucose measurements during reporting period",
+        "%",
+      ),
+    },
+  },
+  {
+    key: "cgm-time-above-range",
+    description:
+      "The share of the time the glucose was high, 181 to 250 mg/dl.",
+    labels: ["Zeit über dem Zielbereich"],
+    byUnit: {
+      "%": c(
+        "104640-8",
+        "Time above range, high in Reporting Period Interstitial fluid by calculation",
+        "%",
+      ),
+    },
+  },
+  {
+    key: "cgm-time-very-high",
+    description: "The share of the time the glucose was above 250 mg/dl.",
+    labels: ["Zeit deutlich über dem Zielbereich"],
+    byUnit: {
+      "%": c(
+        "104639-0",
+        "Time above range, very high in Reporting Period Interstitial fluid by calculation",
+        "%",
+      ),
+    },
+  },
+  {
+    key: "cgm-time-below-range",
+    description: "The share of the time the glucose was low, 54 to 69 mg/dl.",
+    labels: ["Zeit unter dem Zielbereich"],
+    byUnit: {
+      "%": c(
+        "104641-6",
+        "Time below range, low in Reporting Period Interstitial fluid by calculation",
+        "%",
+      ),
+    },
+  },
+  {
+    key: "cgm-time-very-low",
+    description:
+      "The share of the time the glucose was below 54 mg/dl, a level that needs attention.",
+    labels: ["Zeit deutlich unter dem Zielbereich"],
+    byUnit: {
+      "%": c(
+        "104642-4",
+        "Time below range, very low in Reporting Period Interstitial fluid by calculation",
+        "%",
+      ),
+    },
+  },
+  {
+    key: "cgm-gmi",
+    description:
+      "The HbA1c that the sensor's average glucose corresponds to (glucose management indicator). Meaningful from about 14 days of readings.",
+    labels: ["Glukosemanagement-Indikator (GMI)"],
+    byUnit: { "%": c("97506-0", "Glucose management indicator", "%") },
+  },
+  {
+    key: "cgm-coefficient-of-variation",
+    description:
+      "How much the glucose swings: its standard deviation as a share of its mean. At or below 36 % counts as stable.",
+    labels: ["Glukosevariabilität (VK)"],
+    byUnit: {
+      "%": c(
+        "104638-2",
+        "Glucose standard deviation/Glucose mean in Reporting Period Interstitial fluid by calculation",
+        "%",
+      ),
+    },
+  },
+  {
+    key: "cgm-standard-deviation",
+    description: "How far the sensor's readings spread around their mean.",
+    labels: ["Standardabweichung der Glukose (Sensor)"],
+    byUnit: {
+      "mg/dL": c("97505-2", "Glucose standard deviation Calculated", "mg/dL"),
+    },
+  },
+  {
+    key: "cgm-wear-time",
+    description:
+      "The share of the reporting period the sensor was recording. The consensus asks for at least 70 % of 14 days.",
+    labels: ["Sensor aktiv"],
+    byUnit: {
+      "%": c(
+        "104637-4",
+        "Percentage of time continuous glucose monitor device worn Reporting Period Calculated",
+        "%",
       ),
     },
   },
@@ -4510,6 +4623,23 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
   "bmd-total-body-z-score":
     "Die Knochendichte des ganzen Körpers im Vergleich mit Gleichaltrigen, in Standardabweichungen.",
   rsmi: "Die Muskelmasse von Armen und Beinen pro Quadratmeter Körpergröße (relativer Skelettmuskelindex). Niedrige Werte sprechen für Muskelschwund.",
+  "cgm-time-in-range":
+    "Der Anteil der Sensorwerte im Zielbereich, meist 70 bis 180 mg/dl. Das Konsensusziel sind mehr als 70 %.",
+  "cgm-time-above-range":
+    "Der Anteil der Zeit mit hohem Zucker, 181 bis 250 mg/dl.",
+  "cgm-time-very-high": "Der Anteil der Zeit mit Zucker über 250 mg/dl.",
+  "cgm-time-below-range":
+    "Der Anteil der Zeit mit niedrigem Zucker, 54 bis 69 mg/dl.",
+  "cgm-time-very-low":
+    "Der Anteil der Zeit mit Zucker unter 54 mg/dl, ein Wert, der Aufmerksamkeit braucht.",
+  "cgm-gmi":
+    "Der HbA1c-Wert, dem der durchschnittliche Sensorzucker entspricht (Glukosemanagement-Indikator). Aussagekräftig ab etwa 14 Tagen Messung.",
+  "cgm-coefficient-of-variation":
+    "Wie stark der Zucker schwankt: seine Standardabweichung als Anteil des Mittelwerts. Bis 36 % gilt als stabil.",
+  "cgm-standard-deviation":
+    "Wie weit die Sensorwerte um ihren Mittelwert streuen.",
+  "cgm-wear-time":
+    "Der Anteil des Berichtszeitraums, in dem der Sensor gemessen hat. Der Konsens verlangt mindestens 70 % von 14 Tagen.",
   "glucose-mean-cgm":
     "Der Durchschnitt der Messwerte eines Glukosesensors über die Tage, an denen er getragen wurde.",
 };

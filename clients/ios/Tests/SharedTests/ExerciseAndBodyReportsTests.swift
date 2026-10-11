@@ -21,6 +21,7 @@ struct ExerciseAndBodyReportsTests {
     let ergometry: [String]
     let cpet: [String]
     let lactate: Lactate
+    let agpSummary: String
   }
 
   static let fixture: Fixture = {
@@ -311,6 +312,61 @@ struct ExerciseAndBodyReportsTests {
     #expect(metadata.labDate == ReportMetadataExtractor.day(2026, 3, 3))
     #expect(metadata.labDateRole == .collection)
     #expect(metadata.dates.contains { $0.date == ReportMetadataExtractor.day(2026, 3, 11) })
+  }
+
+  @Test("an AGP summary: the time in ranges, GMI, variability and wear time, coded")
+  func agpSummary() {
+    let values = GlucoseProfile.summary(pageTexts: [Self.fixture.agpSummary])
+    let v = read(values)
+    #expect(v["Zeit im Zielbereich|%"] == 86)
+    #expect(v["Zeit über dem Zielbereich|%"] == 9)
+    #expect(v["Zeit deutlich über dem Zielbereich|%"] == 1)
+    #expect(v["Zeit unter dem Zielbereich|%"] == 3)
+    #expect(v["Zeit deutlich unter dem Zielbereich|%"] == 1)
+    #expect(v["Durchschnittliche Glukose (Sensor)|mg/dL"] == 128)
+    #expect(v["Glukosemanagement-Indikator (GMI)|%"] == 6.4)
+    #expect(v["Glukosevariabilität (VK)|%"] == 31.2)
+    #expect(v["Standardabweichung der Glukose (Sensor)|mg/dL"] == 40)
+    #expect(v["Sensor aktiv|%"] == 97.8)
+    let c = codes(values)
+    #expect(c["Zeit im Zielbereich|%"] == "97510-2")
+    #expect(c["Zeit über dem Zielbereich|%"] == "104640-8")
+    #expect(c["Zeit deutlich über dem Zielbereich|%"] == "104639-0")
+    #expect(c["Zeit unter dem Zielbereich|%"] == "104641-6")
+    #expect(c["Zeit deutlich unter dem Zielbereich|%"] == "104642-4")
+    #expect(c["Glukosemanagement-Indikator (GMI)|%"] == "97506-0")
+    #expect(c["Glukosevariabilität (VK)|%"] == "104638-2")
+    #expect(c["Sensor aktiv|%"] == "104637-4")
+    #expect(values.count == 10)
+  }
+
+  @Test("ranges that do not add up to 100 %, or a GMI that is not the mean's, are not read")
+  func agpChecks() {
+    let page = Self.fixture.agpSummary
+      .replacingOccurrences(of: "70-180 mg/dL  86%", with: "70-180 mg/dL  68%")
+      .replacingOccurrences(of: "(GMI)  6,4%", with: "(GMI)  7,4%")
+    let v = read(GlucoseProfile.summary(pageTexts: [page]))
+    #expect(v["Zeit im Zielbereich|%"] == nil)
+    #expect(v["Zeit unter dem Zielbereich|%"] == nil)
+    #expect(v["Glukosemanagement-Indikator (GMI)|%"] == nil)
+    #expect(v["Durchschnittliche Glukose (Sensor)|mg/dL"] == 128)
+  }
+
+  @Test("with the summary page scanned too, its average is the report's, read once")
+  func agpWithDailyPattern() {
+    let daily = VisionDocumentReader.readingOrder(Self.glucose)
+    let pages = [
+      page(Self.fixture.agpSummary, confidence: 0.95),
+      ScanDiagnostics.Page(
+        page: 2, imageWidth: 1, imageHeight: 1, tableCount: 0, cells: [], fragments: Self.glucose,
+        rows: [], orphanedFragments: Self.glucose, layout: nil, plainText: daily, recognitionSeconds: 0),
+    ]
+    let result = DocumentReaders.applied(
+      to: .empty(source: .ocrTranscribed), pageTexts: pages.map(\.plainText), pages: pages)
+    let means = result.coded.filter { $0.coding.loinc == "97507-8" }
+    #expect(means.map(\.raw.value) == [128])
+    #expect(result.coded.count == 10)
+    #expect(ReportSuggestion.kind(of: result.coded) == "Glucose sensor")
   }
 
   // MARK: - A blurred page

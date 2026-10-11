@@ -598,7 +598,18 @@ import Shared
         id: "00000000-0000-0000-0000-00000000D020", year: 2026, month: 3, day: 3,
         title: "Glukoseprofil (Sensor), Praxis Muster", laboratory: "Praxis Muster - Sportmedizin",
         source: .ocrTranscribed,
-        rows: [Row("Durchschnittliche Glukose (Sensor)", 118, "mg/dL")]),
+        // The AGP summary's consensus figures (Battelino et al. 2019).
+        rows: [
+          Row("Durchschnittliche Glukose (Sensor)", 128, "mg/dL"),
+          Row("Zeit im Zielbereich", 86, "%"),
+          Row("Zeit über dem Zielbereich", 9, "%"),
+          Row("Zeit deutlich über dem Zielbereich", 1, "%"),
+          Row("Zeit unter dem Zielbereich", 3, "%"),
+          Row("Zeit deutlich unter dem Zielbereich", 1, "%"),
+          Row("Glukosemanagement-Indikator (GMI)", 6.4, "%"),
+          Row("Glukosevariabilität (VK)", 31.2, "%"),
+          Row("Sensor aktiv", 97.8, "%"),
+        ]),
 
       // A resting 12-lead ECG: the measurements the electrocardiograph prints
       // above its tracing, as `Electrocardiogram` reads them. Every one has

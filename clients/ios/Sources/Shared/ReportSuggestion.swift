@@ -34,7 +34,9 @@ public enum ReportSuggestion {
     if !keys.isDisjoint(with: ["lean-soft-tissue", "bmd-total-body", "android-fat"]) {
       return String(localized: "Body composition (DXA)")
     }
-    if codes.contains("97507-8") { return String(localized: "Glucose sensor") }
+    if !codes.isDisjoint(with: ["97507-8", "105273-7", "97510-2", "97506-0"]) {
+      return String(localized: "Glucose sensor")
+    }
     guard !coded.isEmpty else { return nil }
     let bloodCount: Set<String> = [
       "haemoglobin", "hemoglobin", "leukocytes", "erythrocytes", "platelets", "haematocrit",
