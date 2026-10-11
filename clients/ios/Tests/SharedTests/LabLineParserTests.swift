@@ -992,4 +992,20 @@ struct PrintedReferenceTests {
     #expect(raw.referenceText == nil)
     #expect(raw.referenceHigh == 116)
   }
+
+  @Test("a unit printed under its value on an Einheit line, with a note after it")
+  func unitOnTheNextLine() {
+    let result = LabLineParser.extract(
+      "geschätzte GFR(eGFR n.CKD-EPI)  84\nEinheit: ml / min / (1,73 m^2) Berechnung nach Formel von 2009",
+      source: .ocrTranscribed)
+    #expect(result.coded.map(\.coding.loinc) == ["62238-1"])
+    #expect(result.coded.first?.raw.value == 84)
+    #expect(result.suspiciousLines.isEmpty)
+  }
+
+  @Test("Hamnstoff is Harnstoff: an r read as m, the n kept")
+  func hamnstoff() {
+    let result = LabLineParser.extract("Hamnstoff HP  31  mg/dl  17 - 43", source: .ocrTranscribed)
+    #expect(result.coded.map(\.coding.loinc) == ["3091-6"])
+  }
 }

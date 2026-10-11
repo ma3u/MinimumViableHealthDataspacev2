@@ -1303,6 +1303,7 @@ public enum Analytes {
     AnalyteCoding(labelKey: "gesamtprotein", ucum: "g/L", loinc: "2885-2", display: "Protein [Mass/volume] in Serum or Plasma", analyteKey: "protein-total"),
     AnalyteCoding(labelKey: "geschaetztegfr", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
     AnalyteCoding(labelKey: "geschaetztegfrckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
+    AnalyteCoding(labelKey: "geschaetztegfregfrnckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
     AnalyteCoding(labelKey: "gewicht", ucum: "kg", loinc: "29463-7", display: "Body weight", analyteKey: "body-weight"),
     AnalyteCoding(labelKey: "gfr", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
     AnalyteCoding(labelKey: "gfrberechnungnckdepi", ucum: "mL/min/{1.73_m2}", loinc: "62238-1", display: "Glomerular filtration rate/1.73 sq M.predicted [Volume Rate/Area] ... by Creatinine-based formula (CKD-EPI)", analyteKey: "egfr"),
@@ -2590,6 +2591,7 @@ public enum Analytes {
       .replacingOccurrences(of: "oe", with: "o")
       .replacingOccurrences(of: "ue", with: "u")
       .replacingOccurrences(of: "rn", with: "m")
+      .replacingOccurrences(of: "mn", with: "m")
   }
 
   public static func normaliseUnit(_ raw: String) -> String? {

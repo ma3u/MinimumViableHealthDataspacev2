@@ -105,13 +105,16 @@ export function normaliseLabel(raw: string): string {
  * `rn` folds to `m` for the same reason: at phone resolution the two letters
  * touch and read as one. Real scans returned `Hamsäure` for `Harnsäure` and
  * `Hamstoff` for `Harnstoff` (2026-10-04), each a known analyte refused.
+ * The `r` alone can read as `m` with the `n` kept: `Hamnstoff` (2026-10-11),
+ * so `mn` folds to `m` too.
  */
 export function looseLabelKey(raw: string): string {
   return normaliseLabel(raw)
     .replace(/ae/g, "a")
     .replace(/oe/g, "o")
     .replace(/ue/g, "u")
-    .replace(/rn/g, "m");
+    .replace(/rn/g, "m")
+    .replace(/mn/g, "m");
 }
 
 /**
@@ -883,6 +886,7 @@ const DEFINITIONS: AnalyteDefinition[] = [
       "geschätzte GFR",
       "geschätzte GFR (CKD-EPI)",
       "eGFR n.CKD-EPI",
+      "geschätzte GFR (eGFR n.CKD-EPI)",
     ],
     byUnit: {
       "mL/min/{1.73_m2}": c(

@@ -190,6 +190,11 @@ describe("OCR that drops the umlaut", () => {
     if (hit.status === "ok") expect(hit.coding.loincNumber).toBe("718-7");
   });
 
+  it("codes Hamnstoff, an r read as m with the n kept", () => {
+    const hit = lookupAnalyte("Hamnstoff", "mg/dl");
+    expect(hit.status === "ok" && hit.coding.loincNumber).toBe("3091-6");
+  });
+
   it("still refuses an analyte it has never heard of", () => {
     expect(lookupAnalyte("Hamatologie", "g/dl")).toEqual({
       status: "unknown-analyte",

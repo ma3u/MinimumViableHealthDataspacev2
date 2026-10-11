@@ -336,6 +336,7 @@ ${electrocardiogram}
       .replacingOccurrences(of: "oe", with: "o")
       .replacingOccurrences(of: "ue", with: "u")
       .replacingOccurrences(of: "rn", with: "m")
+      .replacingOccurrences(of: "mn", with: "m")
   }
 
   public static func normaliseUnit(_ raw: String) -> String? {
@@ -475,7 +476,8 @@ export async function generate(): Promise<string> {
       .replace(/ae/g, "a")
       .replace(/oe/g, "o")
       .replace(/ue/g, "u")
-      .replace(/rn/g, "m");
+      .replace(/rn/g, "m")
+      .replace(/mn/g, "m");
     if (derived !== looseLabelKey(label)) {
       throw new Error(
         `looseLabelKey("${label}") is not derivable from its strict key; update the Swift template`,

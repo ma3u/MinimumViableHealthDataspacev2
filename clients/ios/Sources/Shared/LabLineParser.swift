@@ -340,12 +340,41 @@ public enum LabLineParser {
           break
         }
       }
+      // A unit printed under its value as a line of its own: `geschätzte
+      // GFR (CKD-EPI)  72`, then `Einheit: ml / min / (1,73 m^2)` (measured
+      // on a laboratory's sheet, value invented). Joined only when the line
+      // above ends in a number and the line below is a unit and nothing else.
+      if !joined, index + 1 < lines.count,
+        let number = tokens.last, parseNumber(number) != nil,
+        let unit = unitLine(lines[index + 1].line)
+      {
+        out.append((trimmed + " " + unit, entry.lineNumber, entry.region))
+        index += 2
+        joined = true
+      }
       if !joined {
         out.append(entry)
         index += 1
       }
     }
     return out
+  }
+
+  /// The unit of an `Einheit: ...` line, written compactly, or nil when the
+  /// line names no unit the dictionary knows. The longest run of words after
+  /// the colon that is a unit wins, so a note after it (`Berechnung nach
+  /// Formel von 2009`) is left out.
+  static func unitLine(_ line: String) -> String? {
+    guard
+      let range = line.range(
+        of: #"^\s*Einheit\s*:\s*"#, options: [.regularExpression, .caseInsensitive])
+    else { return nil }
+    let words = line[range.upperBound...].split(separator: " ")
+    for count in stride(from: words.count, through: 1, by: -1) {
+      let unit = words.prefix(count).joined().filter { !"()^".contains($0) }
+      if Analytes.normaliseUnit(unit) != nil { return unit }
+    }
+    return nil
   }
 
   /// A line of a laboratory's explanatory note, which starts like a value
