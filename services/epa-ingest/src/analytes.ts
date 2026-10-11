@@ -215,6 +215,12 @@ const UNIT_MAP: Record<string, string> = {
   // ECG reader gives them `deg`.
   ms: "ms",
   msec: "ms",
+  // A Holter recording's durations and beat counts, in the spellings the
+  // Holter reader writes. Deliberately not a bare `min` or `beats`: measured
+  // on real sheets, `Stunde (2 x 30 min` and `Einheit: ml / min` then read
+  // as values.
+  minutes: "min",
+  "{beats}": "{beats}",
   deg: "deg",
   "°": "deg",
 };
@@ -3149,6 +3155,121 @@ const DEFINITIONS: AnalyteDefinition[] = [
     labels: ["T-Achse", "T axis"],
     byUnit: { deg: c("8638-9", "T wave axis", "deg") },
   },
+  // ---- Ambulatory ECG (Holter) ----
+  // The summary a 24-hour ECG recorder prints. The Holter reader
+  // (HolterReport.swift) names the values with these labels. LOINC codes the
+  // 24-hour minimum, mean and maximum heart rate, the total beats and the
+  // ventricular ectopic count; it has rates but no counts for supraventricular
+  // ectopics and pauses, and no term for time spent above or below a rate
+  // limit, so those are carried uncoded. Verified against NLM, 2026-10-11.
+  {
+    key: "heart-rate",
+    labels: ["Herzfrequenz 24-h-Mittel"],
+    byUnit: { "/min": c("41924-2", "Heart rate 24 hour mean", "/min") },
+  },
+  {
+    key: "heart-rate-24h-min",
+    description:
+      "The slowest heart rate of a 24-hour recording, usually reached in sleep.",
+    labels: ["Herzfrequenz 24-h-Minimum"],
+    byUnit: { "/min": c("8883-1", "Heart rate 24 hour minimum", "/min") },
+  },
+  {
+    key: "heart-rate-24h-max",
+    description:
+      "The fastest heart rate of a 24-hour recording, usually reached under exertion.",
+    labels: ["Herzfrequenz 24-h-Maximum"],
+    byUnit: { "/min": c("8873-2", "Heart rate 24 hour maximum", "/min") },
+  },
+  {
+    key: "ecg-total-beats",
+    description: "Every heartbeat the recorder counted over the recording.",
+    labels: ["Herzschläge gesamt"],
+    byUnit: { "{beats}": c("76637-8", "Total beats during EKG", "{beats}") },
+  },
+  {
+    key: "ecg-recording-duration",
+    description: "How long the recorder recorded.",
+    labels: ["Aufzeichnungsdauer"],
+    byUnit: { min: c("8618-1", "Recording duration by EKG", "min") },
+  },
+  {
+    key: "ventricular-ectopics",
+    description:
+      "Extra beats starting in the ventricles, counted over the recording. A few are common in healthy hearts.",
+    labels: ["Ventrikuläre Extrasystolen"],
+    byUnit: {
+      "{beats}": c(
+        "76126-2",
+        "Premature ventricular contractions [#]",
+        "{beats}",
+      ),
+    },
+  },
+  {
+    key: "supraventricular-ectopics",
+    description:
+      "Extra beats starting above the ventricles, counted over the recording. A few are common in healthy hearts.",
+    labels: ["Supraventrikuläre Extrasystolen"],
+    byUnit: {
+      "{beats}": uncoded(
+        "Premature atrial contractions [#]",
+        "{beats}",
+        "LOINC codes premature atrial contractions as a rate (8615-7), not as a count over a recording.",
+      ),
+    },
+  },
+  {
+    key: "ecg-pauses",
+    description:
+      "Gaps between beats longer than the recorder's limit, counted over the recording.",
+    labels: ["Pausen"],
+    byUnit: {
+      "{beats}": uncoded(
+        "Pauses [#]",
+        "{beats}",
+        "LOINC codes pauses as a rate (8614-0), not as a count over a recording.",
+      ),
+    },
+  },
+  {
+    key: "time-heart-rate-high",
+    description:
+      "How long the heart rate stayed at or above the recorder's tachycardia limit.",
+    labels: ["Zeit über der Tachykardiegrenze"],
+    byUnit: {
+      min: uncoded(
+        "Duration of heart rate at or above tachycardia limit",
+        "min",
+        "LOINC has no term for the time a recording spends above a heart rate limit.",
+      ),
+    },
+  },
+  {
+    key: "time-heart-rate-low",
+    description:
+      "How long the heart rate stayed at or below the recorder's bradycardia limit.",
+    labels: ["Zeit unter der Bradykardiegrenze"],
+    byUnit: {
+      min: uncoded(
+        "Duration of heart rate at or below bradycardia limit",
+        "min",
+        "LOINC has no term for the time a recording spends below a heart rate limit.",
+      ),
+    },
+  },
+  {
+    key: "ecg-artifacts",
+    description: "The share of the recording the analysis could not use.",
+    labels: ["Artefakte"],
+    byUnit: {
+      "%": uncoded(
+        "Artifacts in ambulatory EKG recording",
+        "%",
+        "LOINC has no term for the share of a Holter recording lost to artefacts.",
+      ),
+    },
+  },
   // ---- Urine ----
   // The parser refuses a urine row unless "<name> im Urin" is a label here,
   // so serum albumin and urine albumin can never share a code. Every label
@@ -3723,6 +3844,25 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
   "omega-3-index":
     "EPA und DHA zusammen als Anteil an allen Fettsäuren der Membranen der roten Blutkörperchen.",
   "fatty-acids-total-rbc": "Alle Fettsäuren der roten Blutkörperchen zusammen.",
+  "heart-rate-24h-min":
+    "Die langsamste Herzfrequenz einer 24-Stunden-Aufzeichnung, meist im Schlaf erreicht.",
+  "heart-rate-24h-max":
+    "Die schnellste Herzfrequenz einer 24-Stunden-Aufzeichnung, meist unter Belastung erreicht.",
+  "ecg-total-beats":
+    "Alle Herzschläge, die der Rekorder während der Aufzeichnung gezählt hat.",
+  "ecg-recording-duration": "Wie lange der Rekorder aufgezeichnet hat.",
+  "ventricular-ectopics":
+    "Zusätzliche Schläge aus den Herzkammern, über die Aufzeichnung gezählt. Einige sind auch bei gesunden Herzen üblich.",
+  "supraventricular-ectopics":
+    "Zusätzliche Schläge von oberhalb der Herzkammern, über die Aufzeichnung gezählt. Einige sind auch bei gesunden Herzen üblich.",
+  "ecg-pauses":
+    "Lücken zwischen zwei Schlägen, länger als die Grenze des Rekorders, über die Aufzeichnung gezählt.",
+  "time-heart-rate-high":
+    "Wie lange die Herzfrequenz an oder über der Tachykardiegrenze des Rekorders lag.",
+  "time-heart-rate-low":
+    "Wie lange die Herzfrequenz an oder unter der Bradykardiegrenze des Rekorders lag.",
+  "ecg-artifacts":
+    "Der Anteil der Aufzeichnung, den die Auswertung nicht nutzen konnte.",
   "creatine-kinase":
     "Ein Enzym der Muskelzellen, auch des Herzmuskels, das ins Blut übertritt, wenn Muskeln beansprucht oder geschädigt werden.",
   "albumin-urine":
@@ -3789,10 +3929,13 @@ export function lookupAnalyte(label: string, unitRaw: string): LookupResult {
  * - `vital-signs`: blood pressure, pulse and body measurements, the codes of
  *   the FHIR vital signs profile and the 24-hour and period means of an
  *   ambulatory recording.
- * - `procedure`: what an electrocardiogram measures. FHIR files
- *   electrodiagnostics under procedure. A report whose every value is one of
- *   these is an ECG, and the writers say so on the DiagnosticReport too
- *   (v2-0074 `EC`, LOINC 11524-6 "EKG study").
+ * - `procedure`: what an electrocardiogram measures, resting or over 24
+ *   hours. FHIR files electrodiagnostics under procedure. A report with such
+ *   values and no laboratory value is an ECG, and the writers say so on the
+ *   DiagnosticReport too (v2-0074 `EC`, LOINC 11524-6 "EKG study", or
+ *   18754-2 for a Holter study, told by its total beat count).
+ *
+ * Keyed by LOINC code, and by analyte key for a value LOINC does not code.
  *
  * Generated into Swift (`Analytes.observationCategories`), so the phone's
  * writer and this one read the same table.
@@ -3822,4 +3965,15 @@ export const OBSERVATION_CATEGORIES: Readonly<
   "8626-4": "procedure",
   "8632-2": "procedure",
   "8638-9": "procedure",
+  "8883-1": "procedure",
+  "8873-2": "procedure",
+  "76637-8": "procedure",
+  "8618-1": "procedure",
+  "76126-2": "procedure",
+  // Uncoded values carry their analyte key instead of a code.
+  "supraventricular-ectopics": "procedure",
+  "ecg-pauses": "procedure",
+  "time-heart-rate-high": "procedure",
+  "time-heart-rate-low": "procedure",
+  "ecg-artifacts": "procedure",
 };

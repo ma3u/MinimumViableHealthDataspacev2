@@ -328,6 +328,13 @@ describe("a quantity LOINC does not code", () => {
           // Pyridoxal phosphate by mass in whole blood: LOINC has it by
           // amount in blood and by mass only in serum (searched 2026-10-11).
           "vitamin-b6-blood|ng/mL",
+          // A Holter summary: counts LOINC has only as rates, and times above
+          // or below a rate limit it has no term for (searched 2026-10-11).
+          "supraventricular-ectopics|{beats}",
+          "ecg-pauses|{beats}",
+          "time-heart-rate-high|min",
+          "time-heart-rate-low|min",
+          "ecg-artifacts|%",
         ].includes(entry),
     );
     expect(outside).toEqual([]);

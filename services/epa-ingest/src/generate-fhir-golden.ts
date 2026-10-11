@@ -198,6 +198,67 @@ export const GOLDEN_ECG_VALUES: CodedLabValue[] = [
   },
 ];
 
+/**
+ * A Holter summary, fictional: total beats make it a Holter study (LOINC
+ * 18754-2); the 24-hour mean heart rate is a vital sign; an uncoded count
+ * takes its category from its analyte key.
+ */
+export const GOLDEN_HOLTER_VALUES: CodedLabValue[] = [
+  {
+    label: "Herzschläge gesamt",
+    value: 94212,
+    unitRaw: "{beats}",
+    line: "Herzschläge gesamt 94.212",
+    lineNumber: 9401,
+    analyteKey: "ecg-total-beats",
+    coding: {
+      loincNumber: "76637-8",
+      display: "Total beats during EKG",
+      ucum: "{beats}",
+    },
+  },
+  {
+    label: "Herzfrequenz 24-h-Mittel",
+    value: 68,
+    unitRaw: "/min",
+    line: "Herzfrequenz 24-h-Mittel 68",
+    lineNumber: 9403,
+    analyteKey: "heart-rate",
+    coding: {
+      loincNumber: "41924-2",
+      display: "Heart rate 24 hour mean",
+      ucum: "/min",
+    },
+  },
+  {
+    label: "Supraventrikuläre Extrasystolen",
+    value: 6,
+    unitRaw: "{beats}",
+    line: "Supraventrikuläre Extrasystolen 6",
+    lineNumber: 9406,
+    analyteKey: "supraventricular-ectopics",
+    coding: {
+      loincNumber: null,
+      display: "Premature atrial contractions [#]",
+      ucum: "{beats}",
+      uncodedReason:
+        "LOINC codes premature atrial contractions as a rate (8615-7), not as a count over a recording.",
+    },
+  },
+];
+
+export const GOLDEN_HOLTER_TARGET = resolve(
+  HERE,
+  "../../../clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-holter.json",
+);
+
+const GOLDEN_HOLTER_META = {
+  patientId: "example-patient",
+  effectiveDateTime: "2026-08-26",
+  performer: "Praxis Dr. Muster",
+  title: "Langzeit-EKG",
+} as const;
+
 export const GOLDEN_ECG_TARGET = resolve(
   HERE,
   "../../../clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-ecg.json",
@@ -234,7 +295,7 @@ const GOLDEN_SOURCE = {
  */
 function render(
   values: CodedLabValue[],
-  meta: typeof GOLDEN_META | typeof GOLDEN_ECG_META,
+  meta: typeof GOLDEN_META | typeof GOLDEN_ECG_META | typeof GOLDEN_HOLTER_META,
 ): string {
   const bundle = buildBundle(values, {
     meta,
@@ -258,11 +319,16 @@ export function goldenEcgBundle(): string {
   return render(GOLDEN_ECG_VALUES, GOLDEN_ECG_META);
 }
 
+export function goldenHolterBundle(): string {
+  return render(GOLDEN_HOLTER_VALUES, GOLDEN_HOLTER_META);
+}
+
 async function main(): Promise<void> {
   const check = process.argv.includes("--check");
   for (const [target, next] of [
     [GOLDEN_TARGET, goldenBundle()],
     [GOLDEN_ECG_TARGET, goldenEcgBundle()],
+    [GOLDEN_HOLTER_TARGET, goldenHolterBundle()],
   ] as const) {
     if (check) {
       const current = await readFile(target, "utf8").catch(() => null);

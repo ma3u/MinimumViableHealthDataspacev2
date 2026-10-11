@@ -169,6 +169,16 @@ final class DevDatasetUITests: XCTestCase {
     AppDriver.require(app.staticTexts["Lipidprofil, Labor Musterstadt"], "the whole report stays")
   }
 
+  func testAHolterReportShowsItsHeartRateSummary() {
+    let app = launch()
+    AppDriver.scrollTo(app.staticTexts["Langzeit-EKG, Praxis Dr. Muster"], in: app).tap()
+    AppDriver.require(
+      AppDriver.text(containing: "Herzfrequenz 24-h-Minimum", in: app), "the slowest heart rate")
+    AppDriver.scrollTo(AppDriver.text(containing: "Herzschläge gesamt", in: app), in: app)
+    XCTAssertFalse(
+      AppDriver.visibleText(app).contains("{beats}"), "a count is shown without UCUM's braces")
+  }
+
   func testAnECGShowsItsIntervalsAndAxes() {
     let app = launch()
     AppDriver.scrollTo(app.staticTexts["Ruhe-EKG, Praxis Dr. Muster"], in: app).tap()

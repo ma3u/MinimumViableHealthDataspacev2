@@ -10,11 +10,15 @@ import {
   NCBI_TAXONOMY,
   buildBundle,
   isElectrocardiogram,
+  isHolter,
   observationCategory,
   statusForSource,
 } from "../src/to-fhir.js";
 import { lookupAnalyte } from "../src/analytes.js";
-import { GOLDEN_ECG_VALUES } from "../src/generate-fhir-golden.js";
+import {
+  GOLDEN_ECG_VALUES,
+  GOLDEN_HOLTER_VALUES,
+} from "../src/generate-fhir-golden.js";
 import type { CodedLabValue, TextSource } from "../src/types.js";
 
 const FIXTURE = readFileSync(
@@ -307,3 +311,35 @@ describe("observation and report category", () => {
 function goldenEcgValues(): CodedLabValue[] {
   return GOLDEN_ECG_VALUES;
 }
+
+describe("Holter study", () => {
+  it("files a Holter summary as a Holter study, an uncoded count as a procedure", () => {
+    const values = GOLDEN_HOLTER_VALUES;
+    expect(isHolter(values)).toBe(true);
+    const bundle = buildBundle(values, {
+      meta: { patientId: "p", effectiveDateTime: "2026-08-26" },
+      source: {
+        kind: "ocr-transcribed",
+        sourceDocument: "holter.pdf",
+        extractor: "vision",
+      },
+      now: "2026-09-13T12:00:00.000Z",
+    }) as {
+      entry: {
+        resource: {
+          resourceType: string;
+          code?: { coding?: { code: string }[] };
+          category?: { coding: { code: string }[] }[];
+        };
+      }[];
+    };
+    const report = bundle.entry.find(
+      (e) => e.resource.resourceType === "DiagnosticReport",
+    )!;
+    expect(report.resource.code?.coding?.[0].code).toBe("18754-2");
+    const categories = bundle.entry
+      .filter((e) => e.resource.resourceType === "Observation")
+      .map((e) => e.resource.category?.[0].coding[0].code);
+    expect(categories).toEqual(["procedure", "vital-signs", "procedure"]);
+  });
+});

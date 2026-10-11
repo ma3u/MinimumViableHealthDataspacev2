@@ -121,14 +121,26 @@ public enum FhirWriter {
   /// dictionary says it is a vital sign or an ECG measurement
   /// (`Analytes.observationCategories`, generated from the TypeScript table
   /// the server's writer reads).
-  public static func observationCategory(_ loinc: String?) -> String {
-    loinc.flatMap { Analytes.observationCategories[$0] } ?? "laboratory"
+  public static func observationCategory(_ loinc: String?, analyteKey: String? = nil) -> String {
+    loinc.flatMap { Analytes.observationCategories[$0] }
+      ?? analyteKey.flatMap { Analytes.observationCategories[$0] } ?? "laboratory"
   }
 
-  /// True when every value is an ECG measurement: the report is then an ECG
-  /// (v2-0074 `EC`, LOINC 11524-6), not a laboratory report.
+  static func category(_ value: CodedLabValue) -> String {
+    observationCategory(value.coding.loinc, analyteKey: value.coding.analyteKey)
+  }
+
+  /// True when the report holds ECG measurements and no laboratory value: it
+  /// is then an ECG (v2-0074 `EC`), not a laboratory report.
   public static func isElectrocardiogram(_ values: [CodedLabValue]) -> Bool {
-    !values.isEmpty && values.allSatisfy { observationCategory($0.coding.loinc) == "procedure" }
+    values.contains { category($0) == "procedure" }
+      && values.allSatisfy { category($0) != "laboratory" }
+  }
+
+  /// An ECG report that counts every beat of a recording: a Holter study
+  /// (LOINC 18754-2).
+  public static func isHolter(_ values: [CodedLabValue]) -> Bool {
+    isElectrocardiogram(values) && values.contains { $0.coding.loinc == "76637-8" }
   }
 
   public static func buildBundle(
@@ -173,8 +185,8 @@ public enum FhirWriter {
             "coding": .array([
               [
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
-                "code": .string(observationCategory(value.coding.loinc)),
-                "display": .string(categoryDisplay[observationCategory(value.coding.loinc)] ?? ""),
+                "code": .string(category(value)),
+                "display": .string(categoryDisplay[category(value)] ?? ""),
               ]
             ])
           ]
@@ -269,7 +281,12 @@ public enum FhirWriter {
         var code: JSON = [
           "coding": .array([
             ecg
-              ? ["system": .string(loincSystem), "code": "11524-6", "display": "EKG study"]
+              ? (isHolter(values)
+                ? [
+                  "system": .string(loincSystem), "code": "18754-2",
+                  "display": "Ambulatory cardiac rhythm monitor (Holter) study",
+                ]
+                : ["system": .string(loincSystem), "code": "11524-6", "display": "EKG study"])
               : [
                 "system": .string(loincSystem),
                 "code": "11502-2",

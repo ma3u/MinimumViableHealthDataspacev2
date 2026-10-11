@@ -30,6 +30,8 @@ public enum UnitText {
     "[pH]": "pH",
     // An ECG axis, and a blood pressure as every device prints it.
     "deg": "°",
+    // A count of beats: no unit to show, as `{ratio}`.
+    "{beats}": "",
     "mm[Hg]": "mmHg",
     "{ratio}": "",
   ]

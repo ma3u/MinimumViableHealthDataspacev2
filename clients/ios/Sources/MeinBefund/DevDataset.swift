@@ -499,6 +499,29 @@ import Shared
         ],
         unread: ["Folsäure  ng/ml  > 25.0  1.8 - 9.0"]),
 
+      // A 24-hour Holter recording's summary, as `HolterReport` reads it: the
+      // heart rate's minimum, mean and maximum, the beats counted, the
+      // recording's length and the ectopic beats. A report of ECG values, so
+      // the FHIR export files it as a Holter study. The counts LOINC has only
+      // as rates are carried uncoded.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D015", year: 2026, month: 8, day: 27,
+        title: "Langzeit-EKG, Praxis Dr. Muster", laboratory: "Praxis Dr. Muster",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Aufzeichnungsdauer", 1438, "minutes"),
+          Row("Herzschläge gesamt", 94212, "{beats}"),
+          Row("Herzfrequenz 24-h-Minimum", 47, "/min"),
+          Row("Herzfrequenz 24-h-Mittel", 68, "/min"),
+          Row("Herzfrequenz 24-h-Maximum", 136, "/min"),
+          Row("Ventrikuläre Extrasystolen", 3, "{beats}"),
+          Row("Supraventrikuläre Extrasystolen", 6, "{beats}"),
+          Row("Pausen", 0, "{beats}"),
+          Row("Zeit über der Tachykardiegrenze", 4.85, "minutes"),
+          Row("Zeit unter der Bradykardiegrenze", 72.15, "minutes"),
+          Row("Artefakte", 2, "%"),
+        ]),
+
       // A resting 12-lead ECG: the measurements the electrocardiograph prints
       // above its tracing, as `Electrocardiogram` reads them. Every one has
       // a LOINC ECG term; the report is filed as an ECG, not a lab report.

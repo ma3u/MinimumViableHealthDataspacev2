@@ -70,9 +70,18 @@ const CATEGORY_DISPLAY = {
  */
 export function observationCategory(
   loincNumber: string | null,
+  analyteKey?: string,
 ): keyof typeof CATEGORY_DISPLAY {
-  return (loincNumber && OBSERVATION_CATEGORIES[loincNumber]) || "laboratory";
+  return (
+    (loincNumber && OBSERVATION_CATEGORIES[loincNumber]) ||
+    (analyteKey && OBSERVATION_CATEGORIES[analyteKey]) ||
+    "laboratory"
+  );
 }
+
+/** The category of one coded value. */
+const categoryOf = (v: CodedLabValue) =>
+  observationCategory(v.coding.loincNumber, v.analyteKey);
 
 /**
  * A report whose every value is an ECG measurement is an ECG, not a
@@ -80,10 +89,16 @@ export function observationCategory(
  */
 export function isElectrocardiogram(values: CodedLabValue[]): boolean {
   return (
-    values.length > 0 &&
-    values.every(
-      (v) => observationCategory(v.coding.loincNumber) === "procedure",
-    )
+    values.some((v) => categoryOf(v) === "procedure") &&
+    values.every((v) => categoryOf(v) !== "laboratory")
+  );
+}
+
+/** A Holter study: an ECG report that counts every beat of a recording. */
+export function isHolter(values: CodedLabValue[]): boolean {
+  return (
+    isElectrocardiogram(values) &&
+    values.some((v) => v.coding.loincNumber === "76637-8")
   );
 }
 
@@ -212,9 +227,8 @@ export function buildBundle(
           {
             system:
               "http://terminology.hl7.org/CodeSystem/observation-category",
-            code: observationCategory(v.coding.loincNumber),
-            display:
-              CATEGORY_DISPLAY[observationCategory(v.coding.loincNumber)],
+            code: categoryOf(v),
+            display: CATEGORY_DISPLAY[categoryOf(v)],
           } satisfies Coding,
         ],
       },
@@ -334,7 +348,13 @@ export function buildBundle(
     code: {
       coding: [
         (ecg
-          ? { system: LOINC, code: "11524-6", display: "EKG study" }
+          ? isHolter(values)
+            ? {
+                system: LOINC,
+                code: "18754-2",
+                display: "Ambulatory cardiac rhythm monitor (Holter) study",
+              }
+            : { system: LOINC, code: "11524-6", display: "EKG study" }
           : {
               system: LOINC,
               code: "11502-2",
