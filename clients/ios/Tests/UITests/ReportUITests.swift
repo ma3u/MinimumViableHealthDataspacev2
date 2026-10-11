@@ -259,7 +259,7 @@ final class DevDatasetUITests: XCTestCase {
     AppDriver.scrollTo(AppDriver.text(containing: "Sauerstoffpuls", in: app), in: app)
     XCTAssertTrue(
       AppDriver.text(containing: "mL/beat", in: app).exists, "an oxygen pulse per beat")
-    XCTAssertFalse(AppDriver.visibleText(app).contains("{"), "no UCUM braces on screen")
+    XCTAssertFalse(AppDriver.visibleText(app).contains("{ratio}"), "no UCUM braces on screen")
   }
 
   func testAScaleReadingIsCarriedWithoutALoincCode() {

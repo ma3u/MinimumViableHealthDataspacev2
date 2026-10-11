@@ -98,14 +98,19 @@ public enum CardiopulmonaryExercise {
           peakShare.map({ $0 == share }) ?? true
         else { continue }
         add("Maximale Sauerstoffaufnahme pro kg", perKilogram, "ml/min/kg", "VO2/kg \(g[0]) mL/min/kg")
-        // A MET is 3.5 mL/min/kg; the device prints it beside its share.
-        if let met = PrintedFields.firstGroup(#"Stoffwechsel\s+(\d{1,2}[.,]\d)\b"#, in: all)
-          .flatMap(PrintedFields.decimal),
-          PrintedFields.agree(perKilogram / 3.5, met, within: 0.1)
-        {
+        break
+      }
+      // A MET is 3.5 mL/min/kg of uptake. The table's METs line also holds
+      // the rest and threshold values, and a second reading of a photograph
+      // ran other columns into it, so the peak is the figure that is the
+      // uptake per kilogram over 3.5.
+      if let line = PrintedFields.lineGroups(#"Stoffwechsel\s+(.*)$"#, in: all).first?.first {
+        let figures = line.split(separator: " ").compactMap { PrintedFields.decimal(String($0)) }
+        if let met = figures.first(where: {
+          PrintedFields.agree(peak / weight / 3.5, $0, within: 0.06) && $0 != $0.rounded()
+        }) {
           add("MET, maximal", met, "{MET}", "METS \(PrintedFields.text(met))")
         }
-        break
       }
     }
 
@@ -189,7 +194,7 @@ public enum CardiopulmonaryExercise {
 
     // The load at the two thresholds and at the peak, in that order.
     if let g = PrintedFields.groups(
-      #"Last\s+Watt\s+(\d{2,3}[.,]\d)\s+(\d{2,3}[.,]\d)\s+(\d{2,3}[.,]\d)"#, in: all),
+      #"(?:Protokoll|Last)\s+(?:Last\s+)?Watt\s+(\d{2,3}[.,]\d)\s+(\d{2,3}[.,]\d)\s+(\d{2,3}[.,]\d)"#, in: all),
       let first = PrintedFields.decimal(g[0]), let second = PrintedFields.decimal(g[1]),
       let top = PrintedFields.decimal(g[2]), first < second, second < top, top <= 800
     {

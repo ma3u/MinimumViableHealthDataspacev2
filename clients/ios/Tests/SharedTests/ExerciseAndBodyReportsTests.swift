@@ -85,6 +85,20 @@ struct ExerciseAndBodyReportsTests {
     #expect(v["Android-Fettanteil|%"] == 28.1)
   }
 
+  @Test("a totals row whose bone column the recogniser lost still gives its fat and lean")
+  func dxaWithoutBone() {
+    let pages = Self.fixture.dxa.map {
+      $0.replacingOccurrences(of: "46.740  2.150  63,2", with: "46.740  63,2")
+        .replacingOccurrences(of: "7.620  241  9,9", with: "7.620  9,9")
+    }
+    let v = read(BodyComposition.read(pageTexts: pages))
+    #expect(v["Körperfettanteil|%"] == 23.4)
+    #expect(v["Mager-Weichteilmasse|kg"] == 46.74)
+    #expect(v["Knochenmineralgehalt|kg"] == nil)
+    #expect(v["Gynoid-Fettanteil|%"] == 20.8)
+    #expect(v["Android/Gynoid-Verhältnis|{ratio}"] == 1.35)
+  }
+
   @Test("a bone density row whose centile is not its Z-score's is not read")
   func dxaBoneCentile() {
     var pages = Self.fixture.dxa
@@ -196,6 +210,20 @@ struct ExerciseAndBodyReportsTests {
     #expect(c["Maximale Sauerstoffaufnahme pro kg|ml/min/kg"] == "94122-9")
     #expect(c["Sauerstoffpuls, maximal|ml/beat"] == "94120-3")
     #expect(c["Erste ventilatorische Schwelle pro kg|ml/min/kg"] == "94124-5")
+  }
+
+  @Test("a second reading of the tables: a lost label, columns run together")
+  func cpetSecondReading() {
+    let pages = Self.fixture.cpet.map {
+      $0.replacingOccurrences(of: "Protokoll  Last  Watt", with: "Protokoll  Watt")
+        .replacingOccurrences(of: "41,1  104  >21,5\n", with: "")
+        .replacingOccurrences(of: "Stoffwechsel  11,7  104", with: "Stoffwechsel  11,9  11,7  9,6  104")
+    }
+    let v = read(CardiopulmonaryExercise.read(pageTexts: pages))
+    #expect(v["Maximale Belastung|watts"] == 225)
+    #expect(v["MET, maximal|{MET}"] == 11.7)
+    // Not printed in this reading, so not read.
+    #expect(v["Maximale Sauerstoffaufnahme pro kg|ml/min/kg"] == nil)
   }
 
   @Test("an FEV1/FVC that its two volumes contradict is not read")

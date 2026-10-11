@@ -40,13 +40,14 @@ public enum BodyComposition {
     let tissue: Double
     let fat: Double
     let lean: Double
-    let bone: Double
+    /// Nil when the recogniser lost the bone column.
+    let bone: Double?
     let total: Double
     let line: String
 
     /// The four identities every row of the table satisfies.
     var isConsistent: Bool {
-      guard tissue > 0, tissue + bone > 0 else { return false }
+      guard let bone, tissue > 0, tissue + bone > 0 else { return false }
       return PrintedFields.agree(fat + lean, tissue, within: 2)
         && PrintedFields.agree(fat / tissue * 100, tissueShare, within: 0.06)
         && PrintedFields.agree(fat / (tissue + bone) * 100, regionShare, within: 0.06)
@@ -71,6 +72,28 @@ public enum BodyComposition {
         bone: bone, total: total, line: g.joined(separator: "  "))
       if row.isConsistent { return row }
     }
+    // The same row with its bone column lost, as a second reading of the
+    // same photograph gave it: `Gesamt  23,4  22,6  61.020  14.280  46.740
+    // 63,2`. The shares and masses still check each other; the bone mass is
+    // what the total leaves over, known only to the rounding of the total,
+    // so it is not read.
+    let shorter =
+      #"^\s*(?:\(e\)\s*)?"# + name + #"\s+"# + share + #"\s+"# + share + #"\s+"# + grams + #"\s+"#
+      + grams + #"\s+"# + grams + #"\s+"# + share + #"\s*$"#
+    for g in PrintedFields.lineGroups(shorter, in: text) {
+      guard g.count == 6,
+        let tissueShare = PrintedFields.decimal(g[0]), let regionShare = PrintedFields.decimal(g[1]),
+        let tissue = PrintedFields.count(g[2]), let fat = PrintedFields.count(g[3]),
+        let lean = PrintedFields.count(g[4]), let total = PrintedFields.decimal(g[5]), total > 0,
+        tissue > 0, total * 1000 >= tissue,
+        PrintedFields.agree(fat + lean, tissue, within: 2),
+        PrintedFields.agree(fat / tissue * 100, tissueShare, within: 0.06),
+        PrintedFields.agree(fat / (total * 1000) * 100, regionShare, within: 0.15)
+      else { continue }
+      return Region(
+        tissueShare: tissueShare, regionShare: regionShare, tissue: tissue, fat: fat, lean: lean,
+        bone: nil, total: total, line: g.joined(separator: "  "))
+    }
     return nil
   }
 
@@ -90,7 +113,9 @@ public enum BodyComposition {
       add("Körperfettanteil", total.tissueShare, "%", "Gesamt Gewebe %Fett \(total.line)")
       add("Körperfettmasse", total.fat / 1000, "kg", "Gesamt Fett (g) \(total.line)")
       add("Mager-Weichteilmasse", total.lean / 1000, "kg", "Gesamt Mager (g) \(total.line)")
-      add("Knochenmineralgehalt", total.bone / 1000, "kg", "Gesamt BMC (g) \(total.line)")
+      if let bone = total.bone {
+        add("Knochenmineralgehalt", bone / 1000, "kg", "Gesamt BMC (g) \(total.line)")
+      }
     }
     let android = region("Android", in: all)
     let gynoid = region("Gynoid", in: all)
