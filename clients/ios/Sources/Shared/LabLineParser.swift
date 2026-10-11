@@ -69,13 +69,23 @@ public enum LabLineParser {
     }
   }
 
+  /// A laboratory's legend marker after the range, `*W` (sent to another
+  /// laboratory) or `*N` (not accredited): a note about the test, not part of
+  /// the range.
+  static func withoutLegendMarker(_ raw: String) -> String {
+    raw.replacingOccurrences(of: #"\s*\*[A-Z]\s*$"#, with: "", options: .regularExpression)
+  }
+
   /// Reads the reference-range column.
   ///
   /// Handles the four forms German labs actually print: an interval
   /// (`0,70 - 1,20`, hyphen, en dash or `bis`), an upper bound (`< 200`,
   /// `bis 200`), a lower bound (`> 40`), and nothing at all.
   public static func parseReferenceRange(_ raw: String) -> ReferenceRange {
-    var t = raw
+    var t = withoutLegendMarker(raw)
+      // "of total fatty acids", before an omega-3 index's bound: `ges. FS>8.0`.
+      .replacingOccurrences(
+        of: #"^\s*ges\.?\s*FS\s*"#, with: "", options: [.regularExpression, .caseInsensitive])
       .replacingOccurrences(
         of: "referenz(bereich)?\\s*:?", with: "", options: [.regularExpression, .caseInsensitive]
       )
@@ -109,7 +119,7 @@ public enum LabLineParser {
   /// two-column layout, not a range, and is not kept as one. The label needs
   /// four letters to count, so a qualifier like `Erw. < 5,0 mg/l` is a range.
   public static func printedReference(_ raw: String) -> String? {
-    let t = raw.trimmingCharacters(in: .whitespaces)
+    let t = withoutLegendMarker(raw).trimmingCharacters(in: .whitespaces)
       .replacingOccurrences(of: #"^[:;,|]+\s*"#, with: "", options: .regularExpression)
       .trimmingCharacters(in: .whitespaces)
     guard !t.isEmpty else { return nil }
@@ -136,7 +146,9 @@ public enum LabLineParser {
   private static let linePattern =
     // A label may open with a number and a hyphen, `25-OH-Vitamin D`; a bare
     // number never starts one, or a value would be read as a name.
-    #"^\s*(?<label>(?:\d{1,3}-)?[\p{L}(][\p{L}0-9()/.,'+%‰\[\]\-\s]*?)"#
+    // A colon only between digits, the chain notation of a fatty acid,
+    // `Eicosapentaensäure (EPA) 20:5 w3`: anywhere else it is a separator.
+    #"^\s*(?<label>(?:\d{1,3}-)?[\p{L}(](?:[\p{L}0-9()/.,'+%‰\[\]\-\s]|(?<=\d):(?=\d))*?)"#
     + #"\s+(?<cmp>[<>]=?|≤|≥)?\s*(?<value>\d[\d.,]*)"#
     + #"\s*(?<flag>[*+!↑↓HL;:\-]{0,2})"#
     // A unit glued to its value is either a percent sign or a per-something
@@ -256,6 +268,69 @@ public enum LabLineParser {
     /// Surfaced so a human can check them, a silently dropped line is
     /// indistinguishable from a line that was never there.
     public let suspiciousLines: [String]
+  }
+
+  /// Puts a unit the laboratory wrapped back together.
+  ///
+  /// Measured on a laboratory's own PDF: `GFR (CKD-EPI-Formel) (SE) 84 ml/`,
+  /// then the reference `>60` on a line of its own, then `m/1.73m²`. A line
+  /// whose last token ends in `/` and is no unit takes the first of the next
+  /// two lines that completes it as one, and a line in between that is
+  /// exactly a reference range comes along as the range. Nothing else is
+  /// joined, so an ordinary sheet passes through untouched.
+  static func joiningWrappedUnits(
+    _ lines: [(line: String, lineNumber: Int, region: SourceRegion?)]
+  ) -> [(line: String, lineNumber: Int, region: SourceRegion?)] {
+    var out: [(line: String, lineNumber: Int, region: SourceRegion?)] = []
+    var index = 0
+    while index < lines.count {
+      let entry = lines[index]
+      var trimmed = entry.line.trimmingCharacters(in: .whitespaces)
+      var tokens = trimmed.split(separator: " ").map(String.init)
+      // The range may already sit after the broken unit, `84 ml/ >60`, when
+      // the lines were rebuilt from the page's geometry.
+      var range = ""
+      if tokens.count > 2, isExactlyReferenceRange(tokens[tokens.count - 1]),
+        tokens[tokens.count - 2].hasSuffix("/")
+      {
+        range = tokens.removeLast()
+        trimmed = tokens.joined(separator: " ")
+      }
+      let last = tokens.last ?? ""
+      var joined = false
+      if last.hasSuffix("/"), last.count > 1, Analytes.normaliseUnit(last) == nil {
+        for ahead in 1...2 where index + ahead < lines.count {
+          let tail = lines[index + ahead].line.trimmingCharacters(in: .whitespaces)
+          guard !tail.contains(" "), Analytes.normaliseUnit(last + tail) != nil else { continue }
+          var between = ahead == 2 ? lines[index + 1].line.trimmingCharacters(in: .whitespaces) : ""
+          guard between.isEmpty || isExactlyReferenceRange(between) else { break }
+          if between.isEmpty { between = range }
+          let line = (trimmed + tail + (between.isEmpty ? "" : " " + between))
+          out.append((line, entry.lineNumber, entry.region))
+          index += ahead + 1
+          joined = true
+          break
+        }
+      }
+      if !joined {
+        out.append(entry)
+        index += 1
+      }
+    }
+    return out
+  }
+
+  /// A line of a laboratory's explanatory note, which starts like a value
+  /// and goes on in words: `<130 mg/dl bzw. <3.38 mmol/l. Non-HDL-Cholesterin`,
+  /// `1.0-3.0 µg/ml mittleres Risiko`. Not a result anyone could have read.
+  /// A bare value and range, `0.52 µkat/l <0.75`, has no word and stays.
+  static func isFootnote(_ line: String) -> Bool {
+    guard
+      let m = firstMatch(
+        #"^\s*[<>≤≥]?\s*\d[\d.,]*(?:\s*[-–]\s*\d[\d.,]*)?\s+(\S+)\s+(.*)$"#, in: line),
+      Analytes.normaliseUnit(m[1].trimmingCharacters(in: CharacterSet(charactersIn: ".,;"))) != nil
+    else { return false }
+    return m[2].range(of: #"\p{L}{4,}"#, options: .regularExpression) != nil
   }
 
   private static func looksLikeMeasurement(_ line: String) -> Bool {
@@ -536,10 +611,11 @@ public enum LabLineParser {
   ]
 
   private static func parse(
-    lines: [(line: String, lineNumber: Int, region: SourceRegion?)]
+    lines given: [(line: String, lineNumber: Int, region: SourceRegion?)]
   ) -> ParseResult {
     var values: [RawLabValue] = []
     var suspicious: [String] = []
+    let lines = joiningWrappedUnits(given)
 
     for entry in lines {
       let line = entry.line
@@ -613,7 +689,7 @@ public enum LabLineParser {
 
       guard let (m, segment) = matched else {
         if fallback() { continue }
-        if looksLikeMeasurement(line) { suspicious.append(line) }
+        if looksLikeMeasurement(line), !isFootnote(line) { suspicious.append(line) }
         continue
       }
       // Everything before the match belongs to the label, not to nothing.
@@ -671,7 +747,7 @@ public enum LabLineParser {
       // reference range or a comment and should not pretend otherwise.
       guard let value = parseNumber(group("value")), Analytes.normaliseUnit(unitRaw) != nil else {
         if fallback() { continue }
-        if looksLikeMeasurement(line) { suspicious.append(line) }
+        if looksLikeMeasurement(line), !isFootnote(line) { suspicious.append(line) }
         continue
       }
 
@@ -770,6 +846,9 @@ public enum LabLineParser {
         #"^(.*?)\s+(HP|SE|SP|EDTA|CB|ZP|NAF|LH|EB)\s*$"#, in: current)
       {
         // A bare tube code, `Harnstoff HP`.
+        current = m[1]
+      } else if let m = firstMatch(#"^(.*?)\s+Gen\.?\s*\d+\s*$"#, in: current) {
+        // The reagent's generation, `Folsäure (restandardisiert) Gen.3`.
         current = m[1]
       } else {
         break

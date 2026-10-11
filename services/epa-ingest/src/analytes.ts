@@ -129,6 +129,9 @@ const UNIT_MAP: Record<string, string> = {
   "g/dl": "g/dL",
   "g/l": "g/L",
   "ug/l": "ug/L",
+  // Micrograms per millilitre: a sensitive CRP's unit at some laboratories,
+  // numerically equal to mg/L. Never converted, only recognised.
+  "ug/ml": "ug/mL",
   "ug/dl": "ug/dL",
   "ng/ml": "ng/mL",
   "ng/l": "ng/L",
@@ -278,7 +281,9 @@ export function repairUnit(raw: string): string | null {
  * unit, so anything that ends in it and starts like millilitres per minute is
  * the eGFR unit, however the letters in between came back.
  */
-const EGFR_UNIT = /^m[il1|]?\/?min\/1[.,]73m(2|²)?$/;
+// `ml/m/1.73m²`: a laboratory that wraps the unit after `ml/` prints the
+// rest as `m/1.73m²`, the "in" lost at the fold (measured on a real PDF).
+const EGFR_UNIT = /^m[il1|]?\/?m(?:in)?\/1[.,]73m(2|²)?$/;
 
 /** Characters a recogniser prints in front of a unit that are not part of it. */
 const STRAY_LEADING = new Set(["I", "i", "l", "|", "!", ":"]);
@@ -680,8 +685,15 @@ const DEFINITIONS: AnalyteDefinition[] = [
       "CRP hochsensitiv",
       "CRP high sensitive",
       "hochsensitives CRP",
+      "C-reaktives Protein (ultrasensitiv)",
+      "CRP ultrasensitiv",
     ],
     byUnit: {
+      "ug/mL": c(
+        "30522-7",
+        "C reactive protein [Mass/volume] in Serum or Plasma by High sensitivity method",
+        "ug/mL",
+      ),
       "mg/L": c(
         "30522-7",
         "C reactive protein [Mass/volume] in Serum or Plasma by High sensitivity method",
@@ -1537,6 +1549,79 @@ const DEFINITIONS: AnalyteDefinition[] = [
     byUnit: {
       "ug/dL": c("5763-8", "Zinc [Mass/volume] in Serum or Plasma", "ug/dL"),
       "ug/L": c("5763-8", "Zinc [Mass/volume] in Serum or Plasma", "ug/L"),
+    },
+  },
+  {
+    key: "magnesium-rbc",
+    description:
+      "Magnesium inside the red blood cells, where most of the body's magnesium is held, so it can show a shortage the serum value misses.",
+    labels: [
+      "Magnesium in Erythrozyten",
+      "Mg in Erythrozyten",
+      "Erythrozyten-Magnesium",
+    ],
+    byUnit: {
+      "mmol/L": c(
+        "2597-3",
+        "Magnesium [Moles/volume] in Red Blood Cells",
+        "mmol/L",
+      ),
+    },
+  },
+  // ---- Fatty acids in red blood cells ----
+  // LOINC codes EPA, DHA and the omega-3 index in serum or plasma, or as an
+  // amount of substance in red cells, not as the mass per volume of blood a
+  // German laboratory prints. Carried uncoded, with the reason. Verified
+  // against NLM, 2026-10-11.
+  {
+    key: "epa",
+    description:
+      "Eicosapentaenoic acid, an omega-3 fatty acid from oily fish, measured in the red blood cells.",
+    labels: ["Eicosapentaensäure (EPA) 20:5 w3", "Eicosapentaensäure", "EPA"],
+    byUnit: {
+      "mg/L": uncoded(
+        "Eicosapentaenoate (C20:5w3) [Mass/volume] in Blood",
+        "mg/L",
+        "LOINC codes EPA in serum or plasma, or as an amount of substance in red blood cells (75097-6), not as a mass per volume of blood.",
+      ),
+    },
+  },
+  {
+    key: "dha",
+    description:
+      "Docosahexaenoic acid, an omega-3 fatty acid from oily fish, measured in the red blood cells.",
+    labels: ["Docosahexaensäure (DHA) 22:6 w3", "Docosahexaensäure", "DHA"],
+    byUnit: {
+      "mg/L": uncoded(
+        "Docosahexaenoate (C22:6w3) [Mass/volume] in Blood",
+        "mg/L",
+        "LOINC codes DHA in serum or plasma, or as an amount of substance in red blood cells (75095-0), not as a mass per volume of blood.",
+      ),
+    },
+  },
+  {
+    key: "omega-3-index",
+    description:
+      "EPA and DHA together as a share of all fatty acids in the red blood cell membranes.",
+    labels: ["Omega-3-Index", "Omega-3-Index (EPA und DHA)", "Omega-3 index"],
+    byUnit: {
+      "%": uncoded(
+        "Omega-3 (EPA+DHA) index in Red Blood Cells",
+        "%",
+        "LOINC's omega-3 index is measured in serum or plasma (88998-0), and its blood term includes DPA (90911-9). Neither is the red-cell EPA and DHA share a laboratory prints.",
+      ),
+    },
+  },
+  {
+    key: "fatty-acids-total-rbc",
+    description: "All fatty acids measured in the red blood cells together.",
+    labels: ["Fettsäuren, gesamt", "Fettsäuren gesamt", "Gesamtfettsäuren"],
+    byUnit: {
+      "mg/L": uncoded(
+        "Fatty acids [Mass/volume] in Blood",
+        "mg/L",
+        "LOINC codes total fatty acids in serum or plasma (2275-6), or as an amount of substance in red blood cells (75100-8), not as a mass per volume of blood.",
+      ),
     },
   },
   {
@@ -2769,6 +2854,11 @@ const DEFINITIONS: AnalyteDefinition[] = [
         "Transferrin [Mass/volume] in Serum or Plasma",
         "mg/dL",
       ),
+      "umol/L": c(
+        "22674-6",
+        "Transferrin [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
     },
   },
   {
@@ -3508,6 +3598,13 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
     "Die Hauptrichtung der Kammererregung in der Frontalebene, in Grad: die elektrische Herzachse.",
   "ecg-t-axis":
     "Die Hauptrichtung der Erregungsrückbildung der Kammern in der Frontalebene, in Grad.",
+  "magnesium-rbc":
+    "Magnesium in den roten Blutkörperchen, wo der Körper den Großteil seines Magnesiums hält. Kann einen Mangel zeigen, den der Serumwert übersieht.",
+  epa: "Eicosapentaensäure, eine Omega-3-Fettsäure aus fettem Fisch, gemessen in den roten Blutkörperchen.",
+  dha: "Docosahexaensäure, eine Omega-3-Fettsäure aus fettem Fisch, gemessen in den roten Blutkörperchen.",
+  "omega-3-index":
+    "EPA und DHA zusammen als Anteil an allen Fettsäuren der Membranen der roten Blutkörperchen.",
+  "fatty-acids-total-rbc": "Alle Fettsäuren der roten Blutkörperchen zusammen.",
   "creatine-kinase":
     "Ein Enzym der Muskelzellen, auch des Herzmuskels, das ins Blut übertritt, wenn Muskeln beansprucht oder geschädigt werden.",
   "albumin-urine":

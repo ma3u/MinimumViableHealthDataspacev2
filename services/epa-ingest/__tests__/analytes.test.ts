@@ -76,7 +76,7 @@ describe("lookupAnalyte", () => {
   });
 
   it("reports an unknown analyte rather than guessing", () => {
-    expect(lookupAnalyte("Omega-3-Index", "%")).toEqual({
+    expect(lookupAnalyte("Zonulin", "ng/ml")).toEqual({
       status: "unknown-analyte",
     });
   });
@@ -318,6 +318,13 @@ describe("a quantity LOINC does not code", () => {
           "cholesterol-remnant|mmol/L",
           // NLM has no term for the night-to-day fall (searched 2026-10-05).
           "nocturnal-dipping|%",
+          // Red-cell fatty acids as mass per volume of blood, or as the
+          // red-cell omega-3 share: LOINC codes them in serum or plasma, or
+          // as an amount of substance (searched 2026-10-11).
+          "epa|mg/L",
+          "dha|mg/L",
+          "omega-3-index|%",
+          "fatty-acids-total-rbc|mg/L",
         ].includes(entry),
     );
     expect(outside).toEqual([]);

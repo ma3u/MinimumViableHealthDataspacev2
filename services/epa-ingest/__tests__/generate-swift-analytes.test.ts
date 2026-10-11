@@ -30,7 +30,7 @@ describe("buildEntries", () => {
   });
 
   it("skips pairs the dictionary refuses rather than inventing a coding", () => {
-    expect(buildEntries(["Omega-3-Index"], ["%"])).toHaveLength(0);
+    expect(buildEntries(["Zonulin"], ["ng/ml"])).toHaveLength(0);
     expect(buildEntries(["HbA1c"], ["mg/dl"])).toHaveLength(0);
     expect(buildEntries(["Ferritin"], ["Titer"])).toHaveLength(0);
   });

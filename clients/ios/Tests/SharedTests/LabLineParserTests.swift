@@ -92,7 +92,7 @@ struct LineTests {
     Vitamin B12                 412     pg/ml          197 - 771
     NT-proBNP                 1.240     pg/ml          < 125
     Troponin T hs              n.b.     ng/l           < 14
-    Omega-3-Index               4,1     %              > 8
+    Zonulin                     41      ng/ml          < 55
     """
 
   static let parsed = LabLineParser.parse(report)
@@ -168,8 +168,8 @@ struct ExtractionTests {
   @Test("an unknown analyte is reported, not guessed")
   func unknownAnalyte() {
     let result = LabLineParser.extract(LineTests.report, source: .ocrTranscribed)
-    let omega = result.unmapped.first { $0.raw.label.hasPrefix("Omega-3") }
-    #expect(omega?.reason == .unknownAnalyte)
+    let unknown = result.unmapped.first { $0.raw.label.hasPrefix("Zonulin") }
+    #expect(unknown?.reason == .unknownAnalyte)
   }
 
   @Test("a known analyte in the wrong unit is a mismatch, not an unknown")

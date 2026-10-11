@@ -201,8 +201,22 @@ public enum LabImport {
   static func fromText(_ texts: [String], pdf: Data) throws -> Result {
     var merged = ExtractionResult.empty(source: .labIssuedDigital)
     var pages: [ScanDiagnostics.Page] = []
-    for (index, text) in texts.enumerated() {
-      merged = merged.merging(LabLineParser.extract(text, source: .labIssuedDigital))
+    // The same text in reading order rebuilt from its geometry
+    // (PDFTextRows). Whichever codes more values is kept, page by page, and
+    // the diagnostics record the one that was parsed, so a replay reads it
+    // the same way.
+    let rebuilt = PDFTextRows.lines(pdf: pdf)
+    for (index, original) in texts.enumerated() {
+      var text = original
+      var extraction = LabLineParser.extract(original, source: .labIssuedDigital)
+      if let rebuilt, index < rebuilt.count {
+        let alternative = LabLineParser.extract(rebuilt[index], source: .labIssuedDigital)
+        if alternative.coded.count > extraction.coded.count {
+          text = rebuilt[index]
+          extraction = alternative
+        }
+      }
+      merged = merged.merging(extraction)
       // No Vision pass ran, so the record carries the text and nothing else.
       // `ScanReplay` falls back to it, which keeps a text-layer import as
       // replayable as a scan.

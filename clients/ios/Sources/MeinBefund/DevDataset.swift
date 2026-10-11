@@ -220,10 +220,10 @@ import Shared
           Row("Ferritin", 188, "ug/l", 30, 400),
           Row("Vitamin B12", 412, "pg/ml", 191, 663),
           Row("Homocystein", 11.4, "umol/l", nil, 12),
-          // Known to the dictionary in this unit and to LOINC in no unit at
-          // all: it lands in the unmatched list, which is where the screen
-          // that shows unmatched values gets something to show.
-          Row("Omega-3-Index", 6.8, "%", 8, nil),
+          // An analyte the dictionary does not know: it lands in the
+          // unmatched list, which is where the screen that shows unmatched
+          // values gets something to show.
+          Row("Zonulin", 48, "ng/ml", nil, 55),
         ],
         unread: ["Probeneingang 14.09.2025 08:12"]),
 
@@ -510,6 +510,20 @@ import Shared
           Row("Threonin", 96.4, "µmol/l", 70, 200),
           Row("Tryptophan", 48.9, "µmol/l", 30, 90),
           Row("Valin", 212, "µmol/l", 150, 330),
+        ]),
+
+      // The first page of the lipid profile below, scanned again on its own:
+      // every value is already in the whole report, so "Find duplicate
+      // reports" has something to find.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D013", year: 2026, month: 9, day: 4,
+        title: "Lipidprofil, Seite 1", laboratory: "Labor Musterstadt",
+        source: .labIssuedDigital,
+        rows: [
+          Row("Cholesterin gesamt", 212, "mg/dl", nil, 200),
+          Row("LDL-Cholesterin", 141, "mg/dl", nil, 116),
+          Row("HDL-Cholesterin", 48, "mg/dl", 40, nil),
+          Row("Triglyceride", 168, "mg/dl", nil, 150),
         ]),
 
       Sheet(

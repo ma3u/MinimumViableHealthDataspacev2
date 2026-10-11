@@ -9,19 +9,28 @@ import SwiftUI
 /// the sheet is offered, its evidence shown, and the person decides.
 struct ReviewSheet: View {
   let product: ScanProduct
-  let onConfirm: (_ title: String, _ labDate: Date, _ laboratory: String) -> Void
+  /// The reports already stored, to tell the person when this scan is one of
+  /// them (`DuplicateReports`).
+  var existing: [LabReport] = []
+  let onConfirm:
+    (_ title: String, _ labDate: Date, _ laboratory: String, _ removing: UUID?) -> Void
   let onDiscard: () -> Void
 
   @State private var title = ""
   @State private var laboratory: String
   @State private var labDate: Date
+  @State private var duplicate: DuplicateReports.Match?
 
   init(
     product: ScanProduct,
-    onConfirm: @escaping (_ title: String, _ labDate: Date, _ laboratory: String) -> Void,
+    existing: [LabReport] = [],
+    onConfirm: @escaping (
+      _ title: String, _ labDate: Date, _ laboratory: String, _ removing: UUID?
+    ) -> Void,
     onDiscard: @escaping () -> Void
   ) {
     self.product = product
+    self.existing = existing
     self.onConfirm = onConfirm
     self.onDiscard = onDiscard
     _laboratory = State(initialValue: product.metadata.laboratory ?? "")
@@ -84,10 +93,71 @@ struct ReviewSheet: View {
         }
         ToolbarItem(placement: .confirmationAction) {
           Button("Save") {
-            onConfirm(title.isEmpty ? defaultTitle : title, labDate, laboratory)
+            // The scan as it would be stored, compared with what is.
+            let candidate = LabReport(
+              id: UUID(), scannedAt: Date(), collectedOn: ReportMetadata.calendarDay(labDate),
+              title: finalTitle, extraction: product.extraction, metadata: product.metadata)
+            if let match = DuplicateReports.matches(for: candidate, among: existing).first {
+              duplicate = match
+            } else {
+              onConfirm(finalTitle, labDate, laboratory, nil)
+            }
           }
         }
       }
+      // An alert rather than a confirmation dialog: three choices, and the
+      // way out has to be a button.
+      .alert(
+        duplicateTitle,
+        isPresented: Binding(get: { duplicate != nil }, set: { if !$0 { duplicate = nil } }),
+        presenting: duplicate
+      ) { match in
+        switch match.relation {
+        case .supersedes:
+          Button("Save and delete the older scan", role: .destructive) {
+            onConfirm(finalTitle, labDate, laboratory, match.existing.id)
+          }
+          Button("Save and keep both") { onConfirm(finalTitle, labDate, laboratory, nil) }
+        case .identical, .contained:
+          Button("Don't save", role: .destructive) { onDiscard() }
+          if match.relation == .identical, match.redundant.id == match.existing.id {
+            Button("Save and delete the older copy") {
+              onConfirm(finalTitle, labDate, laboratory, match.existing.id)
+            }
+          }
+          Button("Save anyway") { onConfirm(finalTitle, labDate, laboratory, nil) }
+        }
+        Button("Cancel", role: .cancel) {}
+      } message: { match in
+        Text(Self.describe(match))
+      }
+    }
+  }
+
+  private var finalTitle: String { title.isEmpty ? defaultTitle : title }
+
+  private var duplicateTitle: String {
+    duplicate?.relation == .supersedes
+      ? String(localized: "This scan reads more of a report you have")
+      : String(localized: "Already on this phone")
+  }
+
+  static func describe(_ match: DuplicateReports.Match) -> String {
+    let date = match.existing.effectiveDate.formatted(date: .abbreviated, time: .omitted)
+    let count = Duplicates.keys(of: match.existing).count
+    switch match.relation {
+    case .identical:
+      return String(
+        localized:
+          "“\(match.existing.title)” of \(date) has the same \(count) values. Saving this scan would show each of them twice.")
+    case .contained:
+      return String(
+        localized:
+          "Every value of this scan is already in “\(match.existing.title)” of \(date). Saving it would show them twice.")
+    case .supersedes:
+      return String(
+        localized:
+          "All \(count) values of “\(match.existing.title)” of \(date) are in this scan as well, and this scan reads more. The older scan is no longer needed.")
     }
   }
 }

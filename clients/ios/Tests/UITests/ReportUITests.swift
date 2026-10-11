@@ -124,7 +124,7 @@ final class DevDatasetUITests: XCTestCase {
     let app = launch()
     AppDriver.scrollTo(
       app.staticTexts["Studienlabor, Studienzentrum Musterklinik"], in: app).tap()
-    AppDriver.scrollTo(AppDriver.text(containing: "Omega-3-Index", in: app), in: app)
+    AppDriver.scrollTo(AppDriver.text(containing: "Zonulin", in: app), in: app)
     XCTAssertTrue(
       AppDriver.text(containing: "unmatched", in: app).exists,
       "and the section says how many were not matched")
@@ -150,6 +150,23 @@ final class DevDatasetUITests: XCTestCase {
       AppDriver.text(containing: "-23", in: app).exists
         || AppDriver.text(containing: "−23", in: app).exists,
       "the diastolic fall is shown as a fall")
+  }
+
+  func testFindDuplicateReportsOffersTheRedundantOneAndDeletesIt() {
+    let app = launch()
+    AppDriver.require(app.staticTexts["Lipidprofil, Seite 1"], "the rescanned first page")
+    app.buttons["More"].firstMatch.tap()
+    AppDriver.require(app.buttons["Find duplicate reports"], "the menu entry").tap()
+    let alert = app.alerts["Duplicate report"]
+    AppDriver.require(alert, "the duplicate is reported")
+    XCTAssertTrue(
+      alert.staticTexts.containing(NSPredicate(format: "label CONTAINS 'Lipidprofil, Labor Musterstadt'"))
+        .firstMatch.exists, "and the report that holds every value is named")
+    alert.buttons.containing(NSPredicate(format: "label BEGINSWITH 'Delete'")).firstMatch.tap()
+    XCTAssertTrue(
+      app.staticTexts["Lipidprofil, Seite 1"].waitForNonExistence(timeout: 5),
+      "the redundant page is gone")
+    AppDriver.require(app.staticTexts["Lipidprofil, Labor Musterstadt"], "the whole report stays")
   }
 
   func testAnECGShowsItsIntervalsAndAxes() {

@@ -43,6 +43,10 @@ final class AppModel: ObservableObject {
   @Published var buildingData = false
   /// True while the "delete everything" question is on screen.
   @Published var erasing = false
+  /// The stored duplicate being asked about, from "Find duplicate reports".
+  @Published var duplicatePair: DuplicateReports.Match?
+  /// Pairs the person chose to keep, so the search moves on to the next.
+  private var keptDuplicates = Set<UUID>()
 
   /// Internal rather than private so the DEBUG self-test can reach it, and a
   /// `let` set once at init so the self-test's own store cannot be swapped in
@@ -331,7 +335,7 @@ final class AppModel: ObservableObject {
   /// The date is always the one confirmed on the review screen. Where it
   /// matches what was read from the sheet its provenance stays `printed`;
   /// where the person changed it, or nothing was found, it is `user`.
-  func confirm(title: String, labDate: Date, laboratory: String) async {
+  func confirm(title: String, labDate: Date, laboratory: String, removing: UUID? = nil) async {
     guard let product = pending else { return }
     let day = ReportMetadata.calendarDay(labDate)
     var metadata = product.metadata
@@ -379,6 +383,12 @@ final class AppModel: ObservableObject {
       Log.store.notice(
         "further measurement dates: \(saved, privacy: .public) saved, \(skipped, privacy: .public) already known"
       )
+      // The older scan this one supersedes, deleted only because the person
+      // chose to on the review screen.
+      if let removing {
+        try await store.delete(removing)
+        Log.store.notice("an older duplicate scan deleted on request")
+      }
       pending = nil
       await refresh()
     } catch {
@@ -641,7 +651,39 @@ final class AppModel: ObservableObject {
     } catch { self.error = error.localizedDescription }
   }
 
+  /// Looks for a stored report that another one makes redundant and asks
+  /// about the first; each answer moves on to the next.
+  func findDuplicates(startingOver: Bool = true) {
+    if startingOver { keptDuplicates = [] }
+    duplicatePair = DuplicateReports.pairs(in: reports)
+      .first { !keptDuplicates.contains($0.redundant.id) }
+    if duplicatePair == nil, startingOver {
+      notice = String(localized: "No duplicate reports found.")
+    }
+    Log.store.notice("duplicate search: \(self.duplicatePair == nil ? "none" : "one found", privacy: .public)")
+  }
+
+  /// The match is passed in, not read back: dismissing the alert clears
+  /// `duplicatePair` before the button's action runs.
+  func resolveDuplicate(_ match: DuplicateReports.Match, delete: Bool) async {
+    duplicatePair = nil
+    if delete {
+      await self.delete(match.redundant.id)
+    } else {
+      keptDuplicates.insert(match.redundant.id)
+    }
+    findDuplicates(startingOver: false)
+  }
+
   func delete(_ id: UUID) async {
+    #if DEBUG
+      // Demo data lives in memory and never reaches the store.
+      if DemoSeed.isRequested {
+        DemoSeed.forget(id)
+        await refresh()
+        return
+      }
+    #endif
     do {
       try await store.delete(id)
       await refresh()
@@ -1019,6 +1061,11 @@ struct ContentView: View {
               // looking for, and "diagnostics" reads like something for
               // somebody else.
               Button {
+                model.findDuplicates()
+              } label: {
+                Label("Find duplicate reports", systemImage: "doc.on.doc")
+              }
+              Button {
                 Task { await model.exportData() }
               } label: {
                 Label("Export all my data", systemImage: "square.and.arrow.up.on.square")
@@ -1335,8 +1382,11 @@ private struct AppSheets: ViewModifier {
       }
     }
       .sheet(item: Binding(get: { model.pending.map(PendingBox.init) }, set: { _ in })) { box in
-      ReviewSheet(product: box.product) { title, labDate, laboratory in
-        Task { await model.confirm(title: title, labDate: labDate, laboratory: laboratory) }
+      ReviewSheet(product: box.product, existing: model.reports) { title, labDate, laboratory, removing in
+        Task {
+          await model.confirm(
+            title: title, labDate: labDate, laboratory: laboratory, removing: removing)
+        }
       } onDiscard: {
         model.pending = nil
       }
@@ -1502,6 +1552,7 @@ private struct AppDialogs: ViewModifier {
       }
       // Alerts rather than confirmation dialogs, for the reason given above:
       // raised from a menu, a dialog drops its Cancel button.
+      .modifier(DuplicateAlert(model: model))
       .alert("No registry consent recorded", isPresented: $model.confirmingResearchExport) {
         Button("Export anyway") { Task { await model.exportOmop() } }
         Button("Cancel", role: .cancel) {}
@@ -1537,5 +1588,36 @@ private struct AppDialogs: ViewModifier {
       } message: {
         Text(model.notice ?? "")
       }
+  }
+}
+
+/// "Find duplicate reports": one redundant report at a time, deleted or kept
+/// by the person (`DuplicateReports`). Its own modifier, because the root
+/// view's chain of alerts is already as long as the type checker allows.
+struct DuplicateAlert: ViewModifier {
+  @ObservedObject var model: AppModel
+
+  func body(content: Content) -> some View {
+    content.alert(
+      "Duplicate report",
+      isPresented: Binding(
+        get: { model.duplicatePair != nil }, set: { if !$0 { model.duplicatePair = nil } }),
+      presenting: model.duplicatePair
+    ) { match in
+      Button(Self.deleteLabel(match.redundant), role: .destructive) {
+        Task { await model.resolveDuplicate(match, delete: true) }
+      }
+      Button("Keep both", role: .cancel) {
+        Task { await model.resolveDuplicate(match, delete: false) }
+      }
+    } message: { match in
+      Text(DuplicateReports.sentence(match))
+    }
+  }
+
+  /// "Delete “Title”, scanned 4 Sep 2026": which copy goes, in words.
+  static func deleteLabel(_ report: LabReport) -> String {
+    let scanned = report.scannedAt.formatted(date: .abbreviated, time: .omitted)
+    return String(localized: "Delete “\(report.title)”, scanned \(scanned)")
   }
 }

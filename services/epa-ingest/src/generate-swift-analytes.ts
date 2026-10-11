@@ -338,7 +338,7 @@ ${categories}
     if compact == "T/l" || compact == "T/L" { return "10*12/L" }
     let lower = compact.lowercased()
     if let unit = unitMap[lower] { return unit }
-    if lower.range(of: #"^m[il1|]?/?min/1[.,]73m(2|²)?$"#, options: .regularExpression) != nil {
+    if lower.range(of: #"^m[il1|]?/?m(?:in)?/1[.,]73m(2|²)?$"#, options: .regularExpression) != nil {
       return "mL/min/{1.73_m2}"
     }
     return dropStrayLeading(compact) ?? repairUnit(raw)
