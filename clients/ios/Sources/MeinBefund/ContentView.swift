@@ -237,7 +237,9 @@ final class AppModel: ObservableObject {
       metadata.dateSource = report.metadata.dateSource
       let updated = LabReport(
         id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
-        title: report.title, extraction: better ? product.extraction : report.extraction,
+        title: report.title,
+        extraction: better
+          ? product.extraction.keepingChecks(of: report.extraction.coded) : report.extraction,
         metadata: metadata, pageTexts: product.pageTexts,
         scan: LabReport.ScanAttachment(
           pageCount: product.pages.count, bytes: product.pdf.count,
@@ -451,8 +453,10 @@ final class AppModel: ObservableObject {
       // round trip through PDF and back are not always the pages the
       // recogniser first saw, so a worse reading is discarded rather than
       // saved over a better one.
+      // What the person checked against the paper outranks a new reading.
+      let extraction = product.extraction.keepingChecks(of: report.extraction.coded)
       let before = report.extraction.coded.count
-      let after = product.extraction.coded.count
+      let after = extraction.coded.count
       guard after >= before else {
         Log.store.notice(
           "re-read discarded: \(after, privacy: .public) coded against \(before, privacy: .public) stored"
@@ -464,6 +468,8 @@ final class AppModel: ObservableObject {
       }
 
       var metadata = product.metadata
+      // A laboratory the person typed, where the sheet names none.
+      if metadata.laboratory == nil { metadata.laboratory = report.metadata.laboratory }
       // A date the person confirmed outranks one read from the sheet again,
       // unless it is the day of the scan and the sheet now gives a date:
       // with no date found, the review offers the scan day, and a person who
@@ -479,7 +485,7 @@ final class AppModel: ObservableObject {
       }
       let updated = LabReport(
         id: report.id, scannedAt: report.scannedAt, collectedOn: metadata.labDate ?? report.collectedOn,
-        title: report.title, extraction: product.extraction, metadata: metadata,
+        title: report.title, extraction: extraction, metadata: metadata,
         pageTexts: product.pageTexts,
         scan: report.scan.map {
           LabReport.ScanAttachment(
@@ -1232,6 +1238,7 @@ struct ContentView: View {
         await model.debugDeleteIfRequested()
         await model.debugImportIfRequested()
         await model.reextractAllIfRequested()
+        await model.restoreChecksIfRequested()
         await openScreenshotScreen()
         await model.debugExportIfRequested()
         await model.debugExportDataIfRequested()
@@ -1366,9 +1373,35 @@ private struct ReportRow: View {
       }
       .font(.caption)
       .foregroundStyle(.secondary)
-      ProvenanceBadge(source: report.extraction.source)
+      HStack(spacing: 8) {
+        ProvenanceBadge(source: report.extraction.source)
+        CheckedBadge(checked: report.extraction.checkedCount, of: report.extraction.coded.count)
+      }
     }
     .padding(.vertical, 2)
+  }
+}
+
+/// How much of a report the person has checked against the paper, so the
+/// list shows it without opening every report. Nothing when nothing is.
+struct CheckedBadge: View {
+  let checked: Int
+  let of: Int
+
+  var body: some View {
+    if checked > 0 {
+      Label(
+        checked == of
+          ? String(localized: "Checked") : String(localized: "\(checked) of \(of) checked"),
+        systemImage: checked == of ? "checkmark.seal.fill" : "checkmark.seal"
+      )
+      .font(.caption.weight(.medium))
+      .foregroundStyle(.green)
+      .padding(.horizontal, 8)
+      .padding(.vertical, 3)
+      .background(Color.green.opacity(0.15), in: RoundedRectangle(cornerRadius: 6))
+      .accessibilityIdentifier("checked-badge")
+    }
   }
 }
 

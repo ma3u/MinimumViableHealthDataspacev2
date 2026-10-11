@@ -92,6 +92,45 @@ extension ExtractionResult {
       coded: coded, unmapped: unmapped, suspiciousLines: suspiciousLines, source: source)
   }
 
+  /// A new reading of the same report, with what the person checked kept.
+  ///
+  /// Reading the stored pages again replaced the extraction, and with it
+  /// every check the person had made against the paper (measured: 49 checks
+  /// on three reports, gone after one re-read). A check is the person's
+  /// decision and outranks the machine:
+  /// - a new value of the same coding and number takes over the check;
+  /// - a new value of the same coding and another number is replaced by the
+  ///   checked one, because the person read it on the paper;
+  /// - a checked value the new reading did not find at all is kept.
+  /// Each checked value is used once, so a coding read twice stays twice.
+  public func keepingChecks(of previous: [CodedLabValue]) -> ExtractionResult {
+    var coded = self.coded
+    var claimed = Set<Int>()
+    var unplaced: [CodedLabValue] = []
+    for old in previous where old.verification != nil {
+      let key = old.coding.codeKey
+      if let same = coded.indices.first(where: {
+        !claimed.contains($0) && coded[$0].coding.codeKey == key
+          && abs(coded[$0].raw.value - old.raw.value) < 1e-9
+      }) {
+        coded[same].verification = old.verification
+        claimed.insert(same)
+      } else if let other = coded.indices.first(where: {
+        !claimed.contains($0) && coded[$0].coding.codeKey == key && coded[$0].verification == nil
+      }) {
+        coded[other] = old
+        claimed.insert(other)
+      } else {
+        unplaced.append(old)
+      }
+    }
+    return ExtractionResult(
+      coded: coded + unplaced, unmapped: unmapped, suspiciousLines: suspiciousLines, source: source)
+  }
+
+  /// How many coded values the person has checked against the paper.
+  public var checkedCount: Int { coded.filter { $0.verification != nil }.count }
+
   /// Every coded value confirmed at once.
   public func verifyingAll(at date: Date = Date()) -> ExtractionResult {
     ExtractionResult(

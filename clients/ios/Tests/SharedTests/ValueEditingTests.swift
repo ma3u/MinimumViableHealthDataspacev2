@@ -120,4 +120,44 @@ struct ValueEditingTests {
     let url = try #require(FeedbackIssue.url(title: draft.title, body: draft.body))
     #expect(url.absoluteString.hasPrefix("https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/new?"))
   }
+
+  @Test("a new reading keeps every check: the same value, a checked number, a value it missed")
+  func keepingChecks() {
+    func value(_ label: String, _ number: Double, _ unit: String) -> CodedLabValue {
+      let raw = RawLabValue(label: label, value: number, unitRaw: unit, line: "\(label) \(number)", lineNumber: 1)
+      return CodedLabValue(raw: raw, coding: Analytes.lookup(label: label, unit: unit)!, source: .ocrTranscribed)
+    }
+    let checked = ExtractionResult(
+      coded: [
+        value("Harnstoff", 36, "mg/dl"), value("Kreatinin", 0.9, "mg/dl"),
+        value("Natrium", 140, "mmol/l"), value("Kalium", 4.1, "mmol/l"),
+      ],
+      unmapped: [], suspiciousLines: [], source: .ocrTranscribed
+    ).verifyingAll()
+    let unchecked = Array(checked.coded.dropLast()) + [value("Kalium", 4.1, "mmol/l")]
+    let again = ExtractionResult(
+      coded: [
+        value("Harnstoff", 36, "mg/dl"),  // read alike
+        value("Kreatinin", 0.6, "mg/dl"),  // read differently
+        value("Glukose", 92, "mg/dl"),  // new
+      ],
+      unmapped: [], suspiciousLines: [], source: .ocrTranscribed)
+    let kept = again.keepingChecks(of: Array(checked.coded.prefix(3)) + [unchecked[3].unverified])
+    let byLabel = Dictionary(kept.coded.map { ($0.raw.label, $0) }) { a, _ in a }
+    #expect(byLabel["Harnstoff"]?.verification != nil)
+    #expect(byLabel["Kreatinin"]?.raw.value == 0.9, "the number the person checked")
+    #expect(byLabel["Natrium"]?.verification != nil, "not found again, and kept")
+    #expect(byLabel["Glukose"]?.verification == nil)
+    #expect(byLabel["Kalium"] == nil, "an unchecked value is the new reading's to keep or lose")
+    #expect(kept.checkedCount == 3)
+    #expect(kept.coded.count == 4)
+  }
+}
+
+private extension CodedLabValue {
+  var unverified: CodedLabValue {
+    var copy = self
+    copy.verification = nil
+    return copy
+  }
 }
