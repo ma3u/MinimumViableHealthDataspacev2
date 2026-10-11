@@ -474,6 +474,31 @@ import Shared
             ]),
         ]),
 
+      // A practice system's printed lab sheet, as a family doctor hands it
+      // over: trace elements and vitamins next to the blood count, a fasting
+      // glucose with its own LOINC code, vitamin B6 in whole blood carried
+      // uncoded rather than under a serum code, and a value printed only as
+      // a result text above the measuring range.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D014", year: 2026, month: 5, day: 5,
+        title: "Laborblatt, Praxis Muster", laboratory: "Labor Muster",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Magnesium", 0.86, "mmol/l", 0.75, 1.10),
+          Row("Vitamin B6 i. Blut", 21.4, "ng/ml", 4.4, 40.0),
+          Row("25-OH Vitamin D", 38.2, "ng/ml", 30, 60),
+          Row("Holotranscobalamin", 96, "pmol/l", 50, nil),
+          Row("Kupfer", 14.2, "µmol/l", 10.7, 26.6),
+          Row("Zink", 84, "µg/dl", 60, 120),
+          Row("Selen", 101, "µg/l", 50, 120),
+          Row("Mangan im Serum", 0.92, "µg/l", 0.6, 1.3),
+          Row("Hämoglobin", 13.4, "g/dl", 12, 16),
+          Row("HbA1c", 34, "mmol/mol", 20, 40),
+          Row("Glukose nüchtern", 88, "mg/dl", 60, 100),
+          Row("Ferritin", 64, "ng/ml", 13, 140),
+        ],
+        unread: ["Folsäure  ng/ml  > 25.0  1.8 - 9.0"]),
+
       // A resting 12-lead ECG: the measurements the electrocardiograph prints
       // above its tracing, as `Electrocardiogram` reads them. Every one has
       // a LOINC ECG term; the report is filed as an ECG, not a lab report.

@@ -148,7 +148,9 @@ public enum LabLineParser {
     // number never starts one, or a value would be read as a name.
     // A colon only between digits, the chain notation of a fatty acid,
     // `Eicosapentaensäure (EPA) 20:5 w3`: anywhere else it is a separator.
-    #"^\s*(?<label>(?:\d{1,3}-)?[\p{L}(](?:[\p{L}0-9()/.,'+%‰\[\]\-\s]|(?<=\d):(?=\d))*?)"#
+    // A footnote star and a practice code's underscore may sit in it too:
+    // `Kupfer i.S.*`, `mangan_S Mangan im Serum*`.
+    #"^\s*(?<label>(?:\d{1,3}-)?[\p{L}(](?:[\p{L}0-9()/.,'+%‰\[\]\-\s*_]|(?<=\d):(?=\d))*?)"#
     + #"\s+(?<cmp>[<>]=?|≤|≥)?\s*(?<value>\d[\d.,]*)"#
     + #"\s*(?<flag>[*+!↑↓HL;:\-]{0,2})"#
     // A unit glued to its value is either a percent sign or a per-something
@@ -244,12 +246,38 @@ public enum LabLineParser {
     let bound = #"(?:<=?|>=?|≤|≥)\s*\d[\d.,]*"#
     let interval = #"\d[\d.,]*\s*(?:-|–|—|bis)\s*\d[\d.,]*"#
     guard
-      let reference = firstMatch(
+      var reference = firstMatch(
         "^\\s*(" + bound + "|" + interval + ")\\s+(.*)$", in: tail, caseInsensitive: true)
     else { return nil }
-    guard let measured = firstMatch(#"^\s*([<>]=?|≤|≥)?\s*(\d[\d.,]*)"#, in: reference[2]),
+    // A practice system prints its result-text column before the range:
+    // `Folsäure  ng/ml  >27.10  1.8 - 9.0`. A bound followed by exactly an
+    // interval is a result and its range, never the other way round, since
+    // a value cannot be an interval. Two bounds stay refused: either could
+    // be the result.
+    if let swapped = firstMatch(
+      "^\\s*(" + bound + ")\\.?\\s+(" + interval + ")\\s*$", in: tail, caseInsensitive: true)
+    {
+      reference = [swapped[0], swapped[2], swapped[1]]
+    }
+    // The value must not open a range. Measured on a real sheet: without
+    // this the `1.8` that opens `1.8 - 9.0` was read as the result. What
+    // follows a value otherwise stays allowed, a flag or the same result in
+    // another unit (`4.51  +  173 mg/dL`).
+    guard
+      let measured = firstMatch(
+        #"^\s*([<>]=?|≤|≥)?\s*(\d[\d.,]*?)\.?(?![\d.,])(?!\s*[-–]\s*\d)"#, in: reference[2]),
       let value = parseNumber(measured[2])
     else { return nil }
+    // A bound, then a bound, is read as range then result, the order of the
+    // sheets this path was written for (`pg/ml  <125  <35`). A first bound
+    // ending in a full stop is a practice system's result text instead
+    // (`pmol/l  > 131.  >50`, the shape measured), and which is the result is then not
+    // on the line, so neither is taken.
+    if !measured[1].isEmpty,
+      reference[1].trimmingCharacters(in: .whitespaces).hasSuffix(".")
+    {
+      return nil
+    }
 
     let range = parseReferenceRange(reference[1])
     let comparator = measured[1].replacingOccurrences(of: "≤", with: "<=")
@@ -816,6 +844,11 @@ public enum LabLineParser {
 
     var current = printed.trimmingCharacters(in: .whitespaces)
     remember(current)
+    // A footnote star, `Selen i.S.* (AAS)`, marks the test, not its name, and
+    // stands in the way of every marker rule below.
+    current = current.replacingOccurrences(of: "*", with: "")
+      .replacingOccurrences(of: #"\s{2,}"#, with: " ", options: .regularExpression)
+    remember(current)
     current = stripTrailingFlag(current)
     remember(current)
 
@@ -911,7 +944,9 @@ public enum LabLineParser {
   /// Short, and letters and digits only, so `i.S.` and `Alk.` are left to the
   /// marker rules above and an ordinary word is never taken for a code.
   static func looksLikeLeadingCode(_ token: String) -> Bool {
-    if !token.isEmpty && token.count <= 8 && token.allSatisfy({ $0.isLetter || $0.isNumber }) {
+    if !token.isEmpty && token.count <= 9
+      && token.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" })
+    {
       return true
     }
     // A laboratory's own order code in capitals with a hyphen, `STU-FSCPC

@@ -76,6 +76,21 @@ import Foundation
 /// cell the structured pass read correctly is a rule that can only lose
 /// information on a good scan. Recovery from *empty* cannot.
 ///
+/// Two later rules keep to that lesson, because neither rewrites a character
+/// the table pass read:
+///
+/// - **Garbled script:** a cell holding CJK, Hangul or Cyrillic letters is
+///   treated as empty. A German lab sheet prints none, and on a real
+///   photograph the table pass returned `UЛ` for `U/l` and a run of Hangul
+///   where the text pass read the result correctly.
+/// - **Value before the unit:** a cell with no digit in it, holding a whole
+///   fragment the text pass read as a value, gets that value put before it,
+///   and only in a row where no cell holds a value at all. On a real practice
+///   sheet the table pass merged value, flag and unit into one column and
+///   kept only `g/dl`; the value (`10,4`, say) sat inside the cell, read, and unused.
+///   A row that already has its value is never touched, so a skewed scan
+///   cannot gain a second one.
+///
 /// Fragments are assigned to a cell by their **centre**, not by overlap, so a
 /// fragment can land in exactly one cell and text cannot be duplicated into two
 /// columns. A fragment whose centre falls in no cell is reported in
@@ -84,6 +99,20 @@ import Foundation
 /// hides, and silently discarding it would make a bad parse look like a clean
 /// one.
 public enum DocumentReconciler {
+
+  /// True when the text holds letters of a script a German lab sheet never
+  /// prints: what the table pass makes of a cell it could not read.
+  static func hasForeignScript(_ text: String) -> Bool {
+    text.unicodeScalars.contains { scalar in
+      switch scalar.value {
+      case 0x0400...0x04FF, 0x1100...0x11FF, 0x3040...0x30FF, 0x3130...0x318F,
+        0x4E00...0x9FFF, 0xAC00...0xD7AF:
+        return true
+      default:
+        return false
+      }
+    }
+  }
 
   /// One run of recognised text, with no structural claim attached.
   public struct TextFragment: Sendable, Equatable, Codable {
@@ -199,6 +228,7 @@ public enum DocumentReconciler {
     }
 
     var claimed = Set<Int>()
+    var valueInside: [Int: String] = [:]
     var reconciled: [ReconciledCell] = []
     reconciled.reserveCapacity(cells.count)
 
@@ -220,14 +250,33 @@ public enum DocumentReconciler {
 
       // Only an empty cell is ever filled in. See the type's documentation for
       // the measurement that removed the second rule.
+      let empty = fromCell.isEmpty || hasForeignScript(fromCell)
       let resolved: (String, Origin) =
-        fromCell.isEmpty && !fromText.isEmpty
+        empty && !fromText.isEmpty
         ? (fromText, .recovered)
         : (fromCell, .document)
 
       reconciled.append(
         ReconciledCell(
           text: resolved.0, region: cell.region, column: cell.column, origin: resolved.1))
+      // A value the text pass read inside a cell the table pass read without
+      // one, applied below only where the whole row has no value.
+      if resolved.1 == .document, !fromCell.contains(where: \.isNumber),
+        let value = inside.map(\.fragment.text).first(where: TableRoles.looksLikeValue)
+      {
+        valueInside[reconciled.count - 1] = collapsingWhitespace(value)
+      }
+    }
+    for (index, value) in valueInside {
+      let row = cells[index].row
+      let rowHasValue = zip(reconciled, cells).contains {
+        $1.row == row && TableRoles.looksLikeValue($0.text)
+      }
+      guard !rowHasValue else { continue }
+      let cell = reconciled[index]
+      reconciled[index] = ReconciledCell(
+        text: value + " " + cell.text, region: cell.region, column: cell.column,
+        origin: .recovered)
     }
 
     // Rebuild rows in the table pass's own row order.

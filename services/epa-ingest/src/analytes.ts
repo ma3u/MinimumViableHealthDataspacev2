@@ -132,6 +132,12 @@ const UNIT_MAP: Record<string, string> = {
   // Micrograms per millilitre: a sensitive CRP's unit at some laboratories,
   // numerically equal to mg/L. Never converted, only recognised.
   "ug/ml": "ug/mL",
+  // `µmol/l` with its slash lost, as a photographed practice sheet reads it.
+  umoll: "umol/L",
+  umoli: "umol/L",
+  // The HbA1c IFCC unit printed with the reference substance.
+  "mmol/molhb": "mmol/mol",
+  "mmol/mol hb": "mmol/mol",
   "ug/dl": "ug/dL",
   "ng/ml": "ng/mL",
   "ng/l": "ng/L",
@@ -236,7 +242,10 @@ export const UNIT_SPELLINGS: readonly string[] = [
  * `µIU/ml` as `ulU/ml`. Those rows carried a perfectly good analyte and value
  * and were refused for a unit that differs from a real one by a glyph.
  */
-const CONFUSABLE = new Set(["I", "l", "i", "1", "|", "!", "/"]);
+// A slash is a target, never a source: it keeps its place. Measured on a
+// real sheet: a truncated `IU/` became `/ul` once the slash could turn into
+// an `l`, a count per microlitre for an antibody titre.
+const CONFUSABLE = new Set(["I", "l", "i", "1", "|", "!"]);
 const CONFUSABLE_TARGETS = ["l", "i", "/"];
 
 /**
@@ -772,10 +781,6 @@ const DEFINITIONS: AnalyteDefinition[] = [
     labels: [
       "Glucose",
       "Glukose",
-      "Nüchternglucose",
-      "Nüchternglukose",
-      "Glucose nüchtern",
-      "Glukose nüchtern",
       "Blutzucker",
       "Glucose im Fluorid",
       "Glukose im Fluorid",
@@ -786,6 +791,31 @@ const DEFINITIONS: AnalyteDefinition[] = [
       "mmol/L": c(
         "14749-6",
         "Glucose [Moles/volume] in Serum or Plasma",
+        "mmol/L",
+      ),
+    },
+  },
+  {
+    // Fasting is part of the test's definition, and LOINC codes it apart.
+    key: "glucose-fasting",
+    description:
+      "Blood sugar after at least eight hours without food, the reading diabetes thresholds are stated for.",
+    labels: [
+      "Nüchternglucose",
+      "Nüchternglukose",
+      "Glucose nüchtern",
+      "Glukose nüchtern",
+      "Nüchtern-Blutzucker",
+    ],
+    byUnit: {
+      "mg/dL": c(
+        "1558-6",
+        "Fasting glucose [Mass/volume] in Serum or Plasma",
+        "mg/dL",
+      ),
+      "mmol/L": c(
+        "14771-0",
+        "Fasting glucose [Moles/volume] in Serum or Plasma",
         "mmol/L",
       ),
     },
@@ -1549,6 +1579,83 @@ const DEFINITIONS: AnalyteDefinition[] = [
     byUnit: {
       "ug/dL": c("5763-8", "Zinc [Mass/volume] in Serum or Plasma", "ug/dL"),
       "ug/L": c("5763-8", "Zinc [Mass/volume] in Serum or Plasma", "ug/L"),
+    },
+  },
+  {
+    key: "holotranscobalamin",
+    description:
+      "The share of vitamin B12 bound to the protein that delivers it to cells, often called active B12.",
+    labels: [
+      "Holotranscobalamin",
+      "Holo-Transcobalamin",
+      "HoloTC",
+      "Holotranscobalamin (aktives B12)",
+      "Holotranscobalamin(akt.B12)",
+      "aktives B12",
+      "Aktives Vitamin B12",
+    ],
+    byUnit: {
+      "pmol/L": c(
+        "72160-5",
+        "Holo-transcobalamin II [Moles/volume] in Serum",
+        "pmol/L",
+      ),
+    },
+  },
+  {
+    key: "manganese",
+    description: "A trace element needed by several enzymes.",
+    labels: ["Mangan", "Mangan im Serum", "Manganese"],
+    byUnit: {
+      "ug/L": c("5683-8", "Manganese [Mass/volume] in Serum or Plasma", "ug/L"),
+    },
+  },
+  {
+    key: "selenium",
+    description:
+      "A trace element needed by the enzymes that protect cells from oxidation and by the thyroid.",
+    labels: ["Selen", "Selenium", "Selen i.S. (AAS)"],
+    byUnit: {
+      "ug/L": c("5724-0", "Selenium [Mass/volume] in Serum or Plasma", "ug/L"),
+    },
+  },
+  {
+    // Measured in whole blood. LOINC codes the amount of pyridoxal phosphate
+    // in blood and only serum or plasma by mass, so a mass in blood is
+    // carried uncoded and never takes a serum code (NLM, 2026-10-11).
+    key: "vitamin-b6-blood",
+    description:
+      "Vitamin B6 in whole blood, as pyridoxal phosphate, the form the body uses.",
+    labels: [
+      "Vitamin B6 i. Blut",
+      "Vitamin B6 im Blut",
+      "Vitamin B6 i. Blut (HPLC)",
+      "Vitamin B6 (Vollblut)",
+    ],
+    byUnit: {
+      "nmol/L": c(
+        "74442-5",
+        "Pyridoxal phosphate [Moles/volume] in Blood",
+        "nmol/L",
+      ),
+      "ng/mL": uncoded(
+        "Pyridoxal phosphate [Mass/volume] in Blood",
+        "ng/mL",
+        "LOINC codes pyridoxal phosphate in blood as an amount of substance (74442-5), and by mass only in serum or plasma.",
+      ),
+    },
+  },
+  {
+    key: "hbs-antibody",
+    description:
+      "Antibodies against the hepatitis B surface antigen, the measure of protection after vaccination or a past infection.",
+    labels: ["HBs-Ak quant.", "HBs-Ak", "Anti-HBs", "HBs-Antikörper"],
+    byUnit: {
+      "[IU]/L": c(
+        "5193-8",
+        "Hepatitis B virus surface Ab [Units/volume] in Serum or Plasma by Immunoassay",
+        "[IU]/L",
+      ),
     },
   },
   {
@@ -3598,6 +3705,17 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
     "Die Hauptrichtung der Kammererregung in der Frontalebene, in Grad: die elektrische Herzachse.",
   "ecg-t-axis":
     "Die Hauptrichtung der Erregungsrückbildung der Kammern in der Frontalebene, in Grad.",
+  "glucose-fasting":
+    "Der Blutzucker nach mindestens acht Stunden ohne Essen, der Wert, für den die Diabetes-Grenzen angegeben sind.",
+  holotranscobalamin:
+    "Der Anteil des Vitamin B12, der an das Transportprotein gebunden ist, das es in die Zellen bringt, oft aktives B12 genannt.",
+  manganese: "Ein Spurenelement, das mehrere Enzyme brauchen.",
+  selenium:
+    "Ein Spurenelement für die Enzyme, die Zellen vor Oxidation schützen, und für die Schilddrüse.",
+  "vitamin-b6-blood":
+    "Vitamin B6 im Vollblut, als Pyridoxalphosphat, die Form, die der Körper nutzt.",
+  "hbs-antibody":
+    "Antikörper gegen das Oberflächenantigen des Hepatitis-B-Virus, das Maß für den Schutz nach einer Impfung oder einer früheren Infektion.",
   "magnesium-rbc":
     "Magnesium in den roten Blutkörperchen, wo der Körper den Großteil seines Magnesiums hält. Kann einen Mangel zeigen, den der Serumwert übersieht.",
   epa: "Eicosapentaensäure, eine Omega-3-Fettsäure aus fettem Fisch, gemessen in den roten Blutkörperchen.",

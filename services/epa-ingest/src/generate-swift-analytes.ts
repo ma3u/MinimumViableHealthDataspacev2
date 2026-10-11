@@ -360,7 +360,7 @@ ${categories}
   }
 
   /// Characters a recogniser confuses with one another. Mirrors \`CONFUSABLE\`.
-  static let confusable: Set<Character> = ["I", "l", "i", "1", "|", "!", "/"]
+  static let confusable: Set<Character> = ["I", "l", "i", "1", "|", "!"]
   static let confusableTargets: [Character] = ["l", "i", "/"]
 
   /// Repairs a unit a recogniser mangled, or nil. Mirrors \`repairUnit\`.

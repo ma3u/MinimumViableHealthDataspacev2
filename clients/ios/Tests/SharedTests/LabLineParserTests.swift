@@ -600,7 +600,7 @@ struct PracticeSoftwareTests {
   @Test("a specimen marker whose brackets the recogniser mangled is still read")
   func mixedDelimiters() {
     let result = Self.extract("bzP  Glukose nüchtern (i.Plasma]  94  mg/dl  60-100")
-    #expect(result.coded.first?.coding.loinc == "2345-7")
+    #expect(result.coded.first?.coding.loinc == "1558-6")  // fasting, its own LOINC code
   }
 
   @Test("a urine row is refused, never coded as the serum test of the same name")

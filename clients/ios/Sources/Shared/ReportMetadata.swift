@@ -161,16 +161,34 @@ public enum ReportMetadataExtractor {
       .reported,
       [
         "befunddatum", "befund vom", "befundausgabe", "befundbericht", "befund", "validiert",
-        "validierung", "freigegeben", "freigabe", "ausdruck", "druckdatum", "gedruckt", "erstellt",
-        "berichtsdatum", "report date", "printed",
+        "validierung", "freigegeben", "freigabe", "erstellt", "berichtsdatum", "bericht vom",
+        "laborbericht", "facharzt-bericht", "report date",
       ]
     ),
   ]
+
+  /// Words that date the paper rather than the result: when it was printed.
+  /// Such a date is kept as `other` with this keyword and ranks below every
+  /// other date (measured on a practice system's lab sheet: the header's
+  /// "Datum: 14.05.2026 Seite: 1" is the print, the result is a week older; dates invented).
+  static let printWords = ["ausdruck", "druckdatum", "gedruckt", "printed", "print date"]
 
   /// Words that say "a date" without saying which. Consulted only when no
   /// specific keyword is on the line, so `Entnahmedatum` stays a collection
   /// and is not outranked by its own suffix.
   static let genericDateWords = ["datum", "date"]
+
+  /// A generic date word on a line that also numbers the page is a print
+  /// header: `Datum: 14.05.2026 Seite: 1`.
+  static let pageNumber = try! NSRegularExpression(
+    pattern: #"\b(seite|page|blatt)\s*:?\s*\d"#, options: [.caseInsensitive])
+
+  /// A software version, `Build: (25.2.67)`, reads as a date and is not one.
+  static let versionLine = try! NSRegularExpression(
+    pattern: #"\b(version|build|update|release)\b"#, options: [.caseInsensitive])
+
+  /// A date followed by a sex marker is a birth date: `01.01.1970; W,`.
+  static let sexMarker = try! NSRegularExpression(pattern: #"^\s*[;,]\s*[MWDXmwdx]\b"#)
 
   static let laboratoryWords = [
     "labor", "laboratorium", "mvz", "institut", "klinik", "praxis", "zentrum", "center",
@@ -213,6 +231,9 @@ public enum ReportMetadataExtractor {
       .replacingOccurrences(of: "ö", with: "o")
       .replacingOccurrences(of: "ü", with: "u")
       .replacingOccurrences(of: "ß", with: "ss")
+      // Same length, so positions on the folded line still line up.
+      .map { "()[]".contains($0) ? " " : $0 }
+      .reduce(into: "") { $0.append($1) }
   }
 
   /// Noon UTC, so the calendar day survives display in any time zone.
@@ -260,9 +281,13 @@ public enum ReportMetadataExtractor {
     } else if let reported = metadata.reportedOn {
       metadata.labDate = reported
       metadata.labDateRole = .reported
-    } else if let latest = usable.filter({ $0.role == .other }).max(by: { $0.date < $1.date }) {
+    } else if let latest =
+      usable.filter({ $0.role == .other && !isPrintDate($0) }).max(by: { $0.date < $1.date })
+      ?? usable.filter({ $0.role == .other }).max(by: { $0.date < $1.date })
+    {
       // The latest unlabelled date on a report is normally its issue date; a
-      // birth date is earlier and a future date cannot be a result.
+      // birth date is earlier and a future date cannot be a result. A date
+      // that only says when the paper was printed comes last of all.
       metadata.labDate = latest.date
       metadata.labDateRole = .other
     }
@@ -294,19 +319,48 @@ public enum ReportMetadataExtractor {
         if let date = day(y, mo, d) { matches.append((date, m.range.location)) }
       }
       guard !matches.isEmpty else { continue }
+      // A version string's digits are not a date.
+      if versionLine.firstMatch(in: text, range: range) != nil,
+        !text.lowercased().contains("datum")
+      {
+        continue
+      }
+      matches.sort { $0.location < $1.location }
 
       let folded = fold(text)
+      let printHeader = pageNumber.firstMatch(in: text, range: range) != nil
       let previous = index > 0 ? fold(lines[index - 1].text) : ""
       // A row of bare dates under a row of headings: pair them by position,
       // which is the only geometry the text still carries.
       let headings = folded.contains(where: \.isLetter) ? [] : keywordsInOrder(previous)
       for (offset, match) in matches.enumerated() {
-        // The words before the date on its own line decide first; then the
-        // whole line; then the heading above it.
-        let before = String(folded.prefix(max(0, match.location)))
-        let role =
-          classify(before) ?? classify(folded)
-          ?? (headings.count == matches.count ? headings[offset] : nil)
+        // The words between the previous date and this one decide first;
+        // then, only when the line holds this one date, the whole line; then
+        // the heading above it. A line with two dates must not lend the
+        // second one's keyword to the first: measured on a lab sheet, a birth
+        // date took "Endbefund" from the end of its line and became the
+        // report date.
+        let start = offset == 0 ? 0 : matches[offset - 1].location + 6
+        let before = String(
+          folded.dropFirst(min(start, folded.count)).prefix(max(0, match.location - start)))
+        let after = (text as NSString).substring(from: min(match.location + 6, (text as NSString).length))
+        var role: (role: ReportMetadata.DateRole, keyword: String)?
+        if sexMarker.firstMatch(
+          in: String(after.drop { $0.isNumber || $0 == "." }),
+          range: NSRange(location: 0, length: (String(after.drop { $0.isNumber || $0 == "." }) as NSString).length))
+          != nil
+        {
+          role = (.birth, "sex marker")
+        } else if let printed = printWords.first(where: { before.contains($0) }) {
+          role = (.other, printed)
+        } else if let classified = classify(before) {
+          role =
+            classified.role == .reported && genericDateWords.contains(classified.keyword) && printHeader
+            ? (.other, "print header") : classified
+        } else if matches.count == 1 {
+          role = classify(folded)
+        }
+        role = role ?? (headings.count == matches.count ? headings[offset] : nil)
         found.append(
           ReportMetadata.DetectedDate(
             date: match.date, role: role?.role ?? .other, keyword: role?.keyword,
@@ -321,10 +375,19 @@ public enum ReportMetadataExtractor {
   /// word (`Datum`) counts only when nothing specific is there.
   static func classify(_ folded: String) -> (role: ReportMetadata.DateRole, keyword: String)? {
     if let last = keywordsInOrder(folded).last { return last }
-    if let generic = genericDateWords.first(where: { folded.contains($0) }) {
+    // A whole word only: `date` inside `update` dates nothing.
+    if let generic = genericDateWords.first(where: {
+      folded.range(of: "\\b\($0)\\b", options: .regularExpression) != nil
+    }) {
       return (.reported, generic)
     }
     return nil
+  }
+
+  /// A date the page gives only as when it was printed.
+  static func isPrintDate(_ date: ReportMetadata.DetectedDate) -> Bool {
+    guard let keyword = date.keyword else { return false }
+    return keyword == "print header" || printWords.contains(keyword)
   }
 
   /// Every specific keyword in the text, left to right. Overlapping hits at

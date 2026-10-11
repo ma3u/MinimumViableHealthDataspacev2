@@ -325,6 +325,9 @@ describe("a quantity LOINC does not code", () => {
           "dha|mg/L",
           "omega-3-index|%",
           "fatty-acids-total-rbc|mg/L",
+          // Pyridoxal phosphate by mass in whole blood: LOINC has it by
+          // amount in blood and by mass only in serum (searched 2026-10-11).
+          "vitamin-b6-blood|ng/mL",
         ].includes(entry),
     );
     expect(outside).toEqual([]);
