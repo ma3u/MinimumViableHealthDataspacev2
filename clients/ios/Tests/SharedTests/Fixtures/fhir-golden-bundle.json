@@ -56,6 +56,9 @@
         "y": 0.6525,
         "width": 0.8466,
         "height": 0.0292
+      },
+      "verification": {
+        "verifiedAt": "2026-09-05T08:01:00Z"
       }
     },
     {
@@ -138,6 +141,14 @@
         "loincNumber": "29463-7",
         "display": "Body weight",
         "ucum": "kg"
+      },
+      "verification": {
+        "verifiedAt": "2026-09-05T08:00:00Z",
+        "original": {
+          "label": "Körpergewicht",
+          "value": 30,
+          "unitRaw": "kg"
+        }
       }
     }
   ],
@@ -331,6 +342,10 @@
             {
               "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-region",
               "valueString": "1@0.0706,0.6525,0.8466,0.0292"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-verified-by-patient",
+              "valueDateTime": "2026-09-05T08:01:00Z"
             }
           ],
           "category": [
@@ -673,6 +688,14 @@
             {
               "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
               "valueDecimal": 0.94
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-verified-by-patient",
+              "valueDateTime": "2026-09-05T08:00:00Z"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-original-reading",
+              "valueString": "Körpergewicht 30 kg"
             }
           ],
           "category": [

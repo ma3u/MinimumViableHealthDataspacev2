@@ -169,6 +169,59 @@ final class DevDatasetUITests: XCTestCase {
     AppDriver.require(app.staticTexts["Lipidprofil, Labor Musterstadt"], "the whole report stays")
   }
 
+  private func openLipidProfile(_ app: XCUIApplication) {
+    AppDriver.require(app.staticTexts["Lipidprofil, Labor Musterstadt"], "the lipid profile").tap()
+  }
+
+  func testAValueIsCorrectedAndMarkedAsChecked() {
+    let app = launch()
+    openLipidProfile(app)
+    AppDriver.require(app.buttons["coded-row-0"], "the first value").tap()
+    let value = AppDriver.require(app.textFields["edit-value"], "the value field")
+    value.tap()
+    value.press(forDuration: 1.0)
+    if app.menuItems["Select All"].waitForExistence(timeout: 2) { app.menuItems["Select All"].tap() }
+    value.typeText("199")
+    app.buttons["edit-save"].tap()
+    AppDriver.require(app.images["Corrected by you"], "the correction is marked")
+  }
+
+  func testAllValuesAreMarkedAsCheckedAtOnce() {
+    let app = launch()
+    openLipidProfile(app)
+    AppDriver.require(app.buttons["verify-all"], "the verify-all button").tap()
+    AppDriver.require(
+      AppDriver.text(containing: "All values checked against the paper", in: app),
+      "every value is checked")
+  }
+
+  func testMissingValuesAreDraftedAsAMaskedIssue() {
+    let app = launch()
+    AppDriver.scrollTo(
+      app.staticTexts["Studienlabor, Studienzentrum Musterklinik"], in: app).tap()
+    app.buttons["More"].firstMatch.tap()
+    AppDriver.require(app.buttons["Report missing values"], "the menu entry").tap()
+    let body = AppDriver.require(app.textViews["feedback-body"], "the drafted issue")
+    let text = body.value as? String ?? ""
+    XCTAssertTrue(text.contains("`Zonulin` · `ng/ml`"), "the unmatched row is named, without its value")
+    XCTAssertFalse(text.contains("48 ng"), "its value is not in the issue")
+    XCTAssertFalse(text.contains("Musterklinik"), "the laboratory is left out")
+    app.buttons["Cancel"].firstMatch.tap()
+  }
+
+  func testAReportIsDeletedAfterAConfirmation() {
+    let app = launch()
+    openLipidProfile(app)
+    app.buttons["More"].firstMatch.tap()
+    AppDriver.require(app.buttons["Delete report"], "the menu entry").tap()
+    let alert = app.alerts["Delete this report?"]
+    AppDriver.require(alert, "a confirmation first")
+    alert.buttons["Delete"].tap()
+    XCTAssertTrue(
+      app.staticTexts["Lipidprofil, Labor Musterstadt"].waitForNonExistence(timeout: 5),
+      "the report is gone")
+  }
+
   func testAHolterReportShowsItsHeartRateSummary() {
     let app = launch()
     AppDriver.scrollTo(app.staticTexts["Langzeit-EKG, Praxis Dr. Muster"], in: app).tap()
@@ -182,7 +235,7 @@ final class DevDatasetUITests: XCTestCase {
   func testAnECGShowsItsIntervalsAndAxes() {
     let app = launch()
     AppDriver.scrollTo(app.staticTexts["Ruhe-EKG, Praxis Dr. Muster"], in: app).tap()
-    AppDriver.require(AppDriver.text(containing: "QTc nach Bazett", in: app), "the corrected QT")
+    AppDriver.scrollTo(AppDriver.text(containing: "QTc nach Bazett", in: app), in: app)
     AppDriver.scrollTo(AppDriver.text(containing: "T-Achse", in: app), in: app)
     XCTAssertTrue(
       AppDriver.text(containing: "°", in: app).exists, "an axis is shown in degrees")

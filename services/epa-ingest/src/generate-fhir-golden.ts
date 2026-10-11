@@ -68,6 +68,8 @@ export const GOLDEN_VALUES: CodedLabValue[] = [
       ucum: "%",
     },
     region: { page: 1, x: 0.0706, y: 0.6525, width: 0.8466, height: 0.0292 },
+    // Confirmed by the person as read.
+    verification: { verifiedAt: "2026-09-05T08:01:00Z" },
   },
   {
     // 1.240 pg/mL is 1240, not 1.24: a normal result and a cardiology referral.
@@ -151,6 +153,11 @@ export const GOLDEN_VALUES: CodedLabValue[] = [
     lineNumber: 16,
     analyteKey: "body-weight",
     coding: { loincNumber: "29463-7", display: "Body weight", ucum: "kg" },
+    // Corrected by the person: the recogniser read 30, they typed 80.
+    verification: {
+      verifiedAt: "2026-09-05T08:00:00Z",
+      original: { label: "Körpergewicht", value: 30, unitRaw: "kg" },
+    },
   },
 ];
 

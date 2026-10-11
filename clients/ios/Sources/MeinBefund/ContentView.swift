@@ -43,6 +43,13 @@ final class AppModel: ObservableObject {
   @Published var buildingData = false
   /// True while the "delete everything" question is on screen.
   @Published var erasing = false
+  /// The report whose name and laboratory are being edited.
+  @Published var editingReport: LabReport?
+  /// The report a GitHub issue about missing values is being drafted for.
+  @Published var feedbackReport: LabReport?
+  /// A report the person asked to delete, and whether to scan the paper
+  /// again afterwards. Asked about in an alert before anything is deleted.
+  @Published var deleteRequest: (report: LabReport, rescan: Bool)?
   /// The stored duplicate being asked about, from "Find duplicate reports".
   @Published var duplicatePair: DuplicateReports.Match?
   /// Pairs the person chose to keep, so the search moves on to the next.
@@ -651,6 +658,45 @@ final class AppModel: ObservableObject {
     } catch { self.error = error.localizedDescription }
   }
 
+  /// Stores a report with corrected or confirmed values.
+  func update(_ report: LabReport, extraction: ExtractionResult) async {
+    await persist(
+      LabReport(
+        id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+        title: report.title, extraction: extraction, metadata: report.metadata,
+        pageTexts: report.pageTexts, scan: report.scan, hasDiagnostics: report.hasDiagnostics))
+    Log.store.notice(
+      "values checked: \(extraction.coded.filter { $0.verification != nil }.count, privacy: .public) of \(extraction.coded.count, privacy: .public)"
+    )
+  }
+
+  /// Stores a report under the name and laboratory the person gave it.
+  func update(_ report: LabReport, title: String, laboratory: String) async {
+    var metadata = report.metadata
+    let lab = laboratory.trimmingCharacters(in: .whitespaces)
+    metadata.laboratory = lab.isEmpty ? nil : lab
+    await persist(
+      LabReport(
+        id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+        title: title.trimmingCharacters(in: .whitespaces), extraction: report.extraction,
+        metadata: metadata, pageTexts: report.pageTexts, scan: report.scan,
+        hasDiagnostics: report.hasDiagnostics))
+  }
+
+  private func persist(_ report: LabReport) async {
+    #if DEBUG
+      if DemoSeed.isRequested {
+        DemoSeed.keep(report)
+        await refresh()
+        return
+      }
+    #endif
+    do {
+      try await store.save(report)
+      await refresh()
+    } catch { self.error = error.localizedDescription }
+  }
+
   /// Looks for a stored report that another one makes redundant and asks
   /// about the first; each answer moves on to the next.
   func findDuplicates(startingOver: Bool = true) {
@@ -911,7 +957,8 @@ struct ContentView: View {
             if let report = model.reports.first(where: { $0.id == id }) {
               ResultList(
                 report: report, sex: model.profile.sex,
-                onOpenScan: report.scan == nil ? nil : { Task { await model.openScan(report) } }
+                onOpenScan: report.scan == nil ? nil : { Task { await model.openScan(report) } },
+                onChange: { extraction in Task { await model.update(report, extraction: extraction) } }
               )
               .toolbar {
                 if !report.extraction.coded.isEmpty {
@@ -963,6 +1010,34 @@ struct ContentView: View {
                     model.diagnosticsRequest = .report(report.id)
                   } label: {
                     Label("Export diagnostics for this report", systemImage: "ladybug")
+                  }
+                }
+                ToolbarItem(placement: .secondaryAction) {
+                  Button {
+                    model.editingReport = report
+                  } label: {
+                    Label("Edit name and laboratory", systemImage: "pencil")
+                  }
+                }
+                ToolbarItem(placement: .secondaryAction) {
+                  Button {
+                    model.feedbackReport = report
+                  } label: {
+                    Label("Report missing values", systemImage: "exclamationmark.bubble")
+                  }
+                }
+                ToolbarItem(placement: .secondaryAction) {
+                  Button(role: .destructive) {
+                    model.deleteRequest = (report, true)
+                  } label: {
+                    Label("Delete and scan again", systemImage: "doc.viewfinder")
+                  }
+                }
+                ToolbarItem(placement: .secondaryAction) {
+                  Button(role: .destructive) {
+                    model.deleteRequest = (report, false)
+                  } label: {
+                    Label("Delete report", systemImage: "trash")
                   }
                 }
               }
@@ -1107,6 +1182,7 @@ struct ContentView: View {
       .ignoresSafeArea()
     }
     .modifier(AppSheets(model: model))
+    .modifier(ReportActions(model: model, path: $path, scanning: $scanning))
     .modifier(ConnectSheet(model: model, connection: connection))
     // My values into my record (#473 phase 3): whenever the reports change,
     // and when the person switches sending on, while it is on.
@@ -1619,5 +1695,55 @@ struct DuplicateAlert: ViewModifier {
   static func deleteLabel(_ report: LabReport) -> String {
     let scanned = report.scannedAt.formatted(date: .abbreviated, time: .omitted)
     return String(localized: "Delete “\(report.title)”, scanned \(scanned)")
+  }
+}
+
+/// The per-report actions that need a sheet or a confirmation: the name and
+/// laboratory, a GitHub issue about missing values, and deleting the report,
+/// with or without scanning the paper again. Its own modifier for the same
+/// reason as `DuplicateAlert`.
+struct ReportActions: ViewModifier {
+  @ObservedObject var model: AppModel
+  @Binding var path: [UUID]
+  @Binding var scanning: Bool
+
+  func body(content: Content) -> some View {
+    content
+      .sheet(item: $model.editingReport) { report in
+        EditReportSheet(
+          report: report,
+          onSave: { title, laboratory in
+            model.editingReport = nil
+            Task { await model.update(report, title: title, laboratory: laboratory) }
+          },
+          onCancel: { model.editingReport = nil })
+      }
+      .sheet(item: $model.feedbackReport) { report in
+        FeedbackSheet(report: report) { model.feedbackReport = nil }
+      }
+      // An alert, for the reason given at "Delete all your data?": there is no
+      // undo, so the way out has to be a button.
+      .alert(
+        model.deleteRequest?.rescan == true ? "Delete and scan again?" : "Delete this report?",
+        isPresented: Binding(
+          get: { model.deleteRequest != nil }, set: { if !$0 { model.deleteRequest = nil } }),
+        presenting: model.deleteRequest
+      ) { request in
+        Button(request.rescan ? "Delete and scan" : "Delete", role: .destructive) {
+          let id = request.report.id
+          path.removeAll()
+          Task {
+            await model.delete(id)
+            if request.rescan { scanning = true }
+          }
+        }
+        Button("Cancel", role: .cancel) {}
+      } message: { request in
+        Text(
+          request.rescan
+            ? "“\(request.report.title)”, its scanned pages and every value will be deleted from this phone, and the scanner opens for the paper. This cannot be undone."
+            : "“\(request.report.title)”, its scanned pages and every value will be deleted from this phone. This cannot be undone."
+        )
+      }
   }
 }

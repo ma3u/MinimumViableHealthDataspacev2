@@ -23,6 +23,10 @@ const EXT_BASE = "https://ehds.mabu.red/fhir/StructureDefinition";
 export const EXT_SOURCE_KIND = `${EXT_BASE}/epa-ingest-source-kind`;
 export const EXT_OCR_CONFIDENCE = `${EXT_BASE}/epa-ingest-ocr-confidence`;
 export const EXT_SOURCE_LINE = `${EXT_BASE}/epa-ingest-source-line`;
+/** When the person checked the value against the paper. */
+export const EXT_VERIFIED = `${EXT_BASE}/epa-ingest-verified-by-patient`;
+/** The recogniser's reading, when the person corrected it: `label value unit`. */
+export const EXT_ORIGINAL_READING = `${EXT_BASE}/epa-ingest-original-reading`;
 /**
  * Page and bounding box of the row this value was read from.
  *
@@ -116,6 +120,7 @@ interface Extension {
   valueCode?: string;
   valueDecimal?: number;
   valueString?: string;
+  valueDateTime?: string;
 }
 interface Reference {
   reference: string;
@@ -162,6 +167,7 @@ function provenanceExtensions(
   source: TextSource,
   line: string,
   region?: SourceRegion,
+  verification?: CodedLabValue["verification"],
 ): Extension[] {
   const ext: Extension[] = [
     { url: EXT_SOURCE_KIND, valueCode: source.kind },
@@ -172,6 +178,16 @@ function provenanceExtensions(
   }
   if (region !== undefined) {
     ext.push({ url: EXT_SOURCE_REGION, valueString: formatRegion(region) });
+  }
+  if (verification !== undefined) {
+    ext.push({ url: EXT_VERIFIED, valueDateTime: verification.verifiedAt });
+    if (verification.original !== undefined) {
+      const o = verification.original;
+      ext.push({
+        url: EXT_ORIGINAL_READING,
+        valueString: `${o.label} ${String(o.value)} ${o.unitRaw}`,
+      });
+    }
   }
   return ext;
 }
@@ -220,7 +236,7 @@ export function buildBundle(
     resourceType: "Observation",
     id: `obs-${i + 1}`,
     status,
-    extension: provenanceExtensions(source, v.line, v.region),
+    extension: provenanceExtensions(source, v.line, v.region, v.verification),
     category: [
       {
         coding: [

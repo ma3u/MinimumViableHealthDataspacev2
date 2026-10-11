@@ -29,6 +29,8 @@ public enum FhirWriter {
   public static let extSourceKind = "\(extensionBase)/epa-ingest-source-kind"
   public static let extOcrConfidence = "\(extensionBase)/epa-ingest-ocr-confidence"
   public static let extSourceLine = "\(extensionBase)/epa-ingest-source-line"
+  public static let extVerified = "\(extensionBase)/epa-ingest-verified-by-patient"
+  public static let extOriginalReading = "\(extensionBase)/epa-ingest-original-reading"
   public static let extSourceRegion = "\(extensionBase)/epa-ingest-source-region"
 
   static let ucumSystem = "http://unitsofmeasure.org"
@@ -421,6 +423,26 @@ public enum FhirWriter {
     if let region = value.raw.region {
       extensions.append(
         ["url": .string(extSourceRegion), "valueString": .string(format(region))])
+    }
+    // The person's check of the value against the paper, and the reading
+    // they corrected. Mirrors `provenanceExtensions` in to-fhir.ts.
+    if let verification = value.verification {
+      let formatter = ISO8601DateFormatter()
+      extensions.append(
+        [
+          "url": .string(extVerified),
+          "valueDateTime": .string(formatter.string(from: verification.verifiedAt)),
+        ])
+      if let original = verification.original {
+        let number =
+          original.value == original.value.rounded() && abs(original.value) < 1e15
+          ? String(Int(original.value)) : String(original.value)
+        extensions.append(
+          [
+            "url": .string(extOriginalReading),
+            "valueString": .string("\(original.label) \(number) \(original.unitRaw)"),
+          ])
+      }
     }
     return extensions
   }

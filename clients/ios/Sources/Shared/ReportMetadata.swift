@@ -416,7 +416,27 @@ public enum ReportMetadataExtractor {
     return kept.sorted { $0.position < $1.position }.map { ($0.role, $0.keyword) }
   }
 
+  /// A practice system names the laboratory a result came from on its group
+  /// row: `ID: 1234567, LA(Endbefund) - Labor Muster`, the last word often
+  /// wrapped onto the next line.
+  static let practiceGroupLaboratory = try! NSRegularExpression(
+    pattern: #"LA\([^)]*\)\s*-\s*(Labor\b.*)$"#)
+
   static func detectLaboratory(_ lines: [(text: String, page: Int)]) -> String? {
+    for (index, entry) in lines.enumerated() where entry.page == 1 {
+      let range = NSRange(entry.text.startIndex..., in: entry.text)
+      guard let m = practiceGroupLaboratory.firstMatch(in: entry.text, range: range),
+        let r = Range(m.range(at: 1), in: entry.text)
+      else { continue }
+      var name = entry.text[r].trimmingCharacters(in: .whitespaces)
+      if name.split(separator: " ").count == 1, index + 1 < lines.count {
+        let next = lines[index + 1].text.trimmingCharacters(in: .whitespaces)
+        if !next.isEmpty, next.split(separator: " ").count <= 2, next.allSatisfy({ $0.isLetter || $0 == " " || $0 == "-" }) {
+          name += " " + next
+        }
+      }
+      if name.count > 6 { return name }
+    }
     for entry in lines.prefix(14) where entry.page == 1 {
       let folded = fold(entry.text)
       let bare = folded.filter { $0.isLetter || $0.isWhitespace }

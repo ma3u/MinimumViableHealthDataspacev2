@@ -61,6 +61,16 @@ struct FhirBundleParityTests {
       let coding: Coding
       let region: Region?
       let analyteKey: String
+      let verification: Check?
+    }
+    struct Check: Decodable {
+      struct Original: Decodable {
+        let label: String
+        let value: Double
+        let unitRaw: String
+      }
+      let verifiedAt: String
+      let original: Original?
     }
     let now: String
     let meta: Meta
@@ -110,7 +120,14 @@ struct FhirBundleParityTests {
           uncodedReason: value.coding.uncodedReason,
           taxon: value.coding.taxon
         ),
-        source: SourceKind(rawValue: fixture.source.kind)!
+        source: SourceKind(rawValue: fixture.source.kind)!,
+        verification: value.verification.map { check in
+          Verification(
+            verifiedAt: ISO8601DateFormatter().date(from: check.verifiedAt)!,
+            original: check.original.map {
+              RawLabValue(label: $0.label, value: $0.value, unitRaw: $0.unitRaw, line: "", lineNumber: 0)
+            })
+        }
       )
     }
 

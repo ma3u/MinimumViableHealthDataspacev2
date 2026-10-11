@@ -980,7 +980,7 @@ public enum LabLineParser {
     code(parse(rows: rows), source: source)
   }
 
-  private static func code(_ parsed: ParseResult, source: SourceKind) -> ExtractionResult {
+  static func code(_ parsed: ParseResult, source: SourceKind) -> ExtractionResult {
     var coded: [CodedLabValue] = []
     var unmapped: [UnmappedLabValue] = []
 
