@@ -148,8 +148,10 @@ public enum ScanReplay {
     let sheet = diagnostics.pages.reduce(ExtractionResult.empty(source: source)) {
       $0.merging(run($1, source: source))
     }
-    let parsed = AmbulatoryBloodPressure.applied(
-      to: sheet, pageTexts: diagnostics.pages.map(\.plainText), pages: diagnostics.pages)
+    let texts = diagnostics.pages.map(\.plainText)
+    let parsed = Electrocardiogram.applied(
+      to: AmbulatoryBloodPressure.applied(to: sheet, pageTexts: texts, pages: diagnostics.pages),
+      pageTexts: texts, pages: diagnostics.pages)
     // A scale's screen goes to its own reader when the sheet grammar finds
     // nothing, as `LabImport` does. Without this the replay reported every
     // scale screenshot as a regression it was not (2026-10-04).

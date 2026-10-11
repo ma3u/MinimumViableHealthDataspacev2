@@ -474,6 +474,26 @@ import Shared
             ]),
         ]),
 
+      // A resting 12-lead ECG: the measurements the electrocardiograph prints
+      // above its tracing, as `Electrocardiogram` reads them. Every one has
+      // a LOINC ECG term; the report is filed as an ECG, not a lab report.
+      // The device's written interpretation is not carried: it is
+      // unconfirmed until a physician signs it.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D012", year: 2026, month: 8, day: 26,
+        title: "Ruhe-EKG, Praxis Dr. Muster", laboratory: "Praxis Dr. Muster",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Ventrikuläre Frequenz", 62, "/min"),
+          Row("PQ-Intervall", 148, "ms"),
+          Row("QRS-Dauer", 98, "ms"),
+          Row("QT-Intervall", 392, "ms"),
+          Row("QTc nach Bazett", 398, "ms"),
+          Row("P-Achse", -12, "deg"),
+          Row("QRS-Achse", 41, "deg"),
+          Row("T-Achse", 18, "deg"),
+        ]),
+
       // A home aminogram: eight essential amino acids, in micromoles per
       // litre, with the ranges such a test prints. Invented values on a real
       // layout, like everything else here.

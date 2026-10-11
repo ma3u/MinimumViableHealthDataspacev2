@@ -113,6 +113,24 @@ public enum FhirWriter {
 
   /// Builds the bundle. `now` is injectable so the same input yields the same
   /// bundle in tests, which is what makes the golden-file parity check possible.
+  static let categoryDisplay = [
+    "laboratory": "Laboratory", "vital-signs": "Vital Signs", "procedure": "Procedure",
+  ]
+
+  /// FHIR's observation category for a code: `laboratory` unless the
+  /// dictionary says it is a vital sign or an ECG measurement
+  /// (`Analytes.observationCategories`, generated from the TypeScript table
+  /// the server's writer reads).
+  public static func observationCategory(_ loinc: String?) -> String {
+    loinc.flatMap { Analytes.observationCategories[$0] } ?? "laboratory"
+  }
+
+  /// True when every value is an ECG measurement: the report is then an ECG
+  /// (v2-0074 `EC`, LOINC 11524-6), not a laboratory report.
+  public static func isElectrocardiogram(_ values: [CodedLabValue]) -> Bool {
+    !values.isEmpty && values.allSatisfy { observationCategory($0.coding.loinc) == "procedure" }
+  }
+
   public static func buildBundle(
     values: [CodedLabValue], meta: ReportMeta, source: TextSource, now: String
   ) -> JSON {
@@ -155,8 +173,8 @@ public enum FhirWriter {
             "coding": .array([
               [
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
-                "code": "laboratory",
-                "display": "Laboratory",
+                "code": .string(observationCategory(value.coding.loinc)),
+                "display": .string(categoryDisplay[observationCategory(value.coding.loinc)] ?? ""),
               ]
             ])
           ]
@@ -224,6 +242,8 @@ public enum FhirWriter {
       observations.append(observation)
     }
 
+    // A report whose every value is an ECG measurement is an ECG.
+    let ecg = isElectrocardiogram(values)
     var report: JSON = [
       "resourceType": "DiagnosticReport",
       "id": "report-1",
@@ -231,22 +251,30 @@ public enum FhirWriter {
       "category": .array([
         [
           "coding": .array([
-            [
-              "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
-              "code": "LAB",
-              "display": "Laboratory",
-            ]
+            ecg
+              ? [
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "EC",
+                "display": "Electrocardiac (e.g., EKG, EEC, Holter)",
+              ]
+              : [
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "LAB",
+                "display": "Laboratory",
+              ]
           ])
         ]
       ]),
       "code": {
         var code: JSON = [
           "coding": .array([
-            [
-              "system": .string(loincSystem),
-              "code": "11502-2",
-              "display": "Laboratory report",
-            ]
+            ecg
+              ? ["system": .string(loincSystem), "code": "11524-6", "display": "EKG study"]
+              : [
+                "system": .string(loincSystem),
+                "code": "11502-2",
+                "display": "Laboratory report",
+              ]
           ])
         ]
         if let title = meta.title { code["text"] = .string(title) }

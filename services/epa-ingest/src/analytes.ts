@@ -202,6 +202,12 @@ const UNIT_MAP: Record<string, string> = {
   "/min": "/min",
   "1/min": "/min",
   bpm: "/min",
+  // An electrocardiogram's intervals and axes. The axes print no unit; the
+  // ECG reader gives them `deg`.
+  ms: "ms",
+  msec: "ms",
+  deg: "deg",
+  "°": "deg",
 };
 
 /**
@@ -2882,6 +2888,70 @@ const DEFINITIONS: AnalyteDefinition[] = [
       ),
     },
   },
+  // ---- Resting 12-lead electrocardiogram ----
+  // The measurements an electrocardiograph prints above its tracing. The ECG
+  // reader (Electrocardiogram.swift) names them with these labels; the
+  // German "PQ" is the PR interval. All verified against NLM, 2026-10-11.
+  {
+    key: "ecg-ventricular-rate",
+    description:
+      "How often the ventricles beat in a minute, as the electrocardiograph counts the QRS complexes.",
+    labels: ["Ventrikuläre Frequenz", "Kammerfrequenz", "Ventricular rate"],
+    byUnit: {
+      "/min": c("8897-1", "QRS complex Ventricles by EKG", "/min"),
+    },
+  },
+  {
+    key: "ecg-pr-interval",
+    description:
+      "The time from the start of the atrial beat to the start of the ventricular beat: how long the impulse takes to cross from atria to ventricles.",
+    labels: ["PQ-Intervall", "PR-Intervall", "PQ-Zeit", "PR interval"],
+    byUnit: { ms: c("8625-6", "P-R Interval", "ms") },
+  },
+  {
+    key: "ecg-qrs-duration",
+    description:
+      "How long the electrical activation of the ventricles takes. A wide QRS can mean the impulse travels a slower route.",
+    labels: ["QRS-Dauer", "QRS-Breite", "QRS duration"],
+    byUnit: { ms: c("8633-0", "QRS duration", "ms") },
+  },
+  {
+    key: "ecg-qt-interval",
+    description:
+      "The time from the start of ventricular activation to the end of its recovery. It shortens as the heart beats faster.",
+    labels: ["QT-Intervall", "QT-Zeit", "QT interval"],
+    byUnit: { ms: c("8634-8", "Q-T interval", "ms") },
+  },
+  {
+    key: "ecg-qtc-bazett",
+    description:
+      "The QT interval corrected for heart rate by Bazett's formula, QT divided by the square root of the beat-to-beat interval, so readings at different rates can be compared.",
+    labels: ["QTc nach Bazett", "QTc-Baz", "QTc Bazett"],
+    byUnit: {
+      ms: c("76635-2", "Q-T interval corrected based on Bazett formula", "ms"),
+    },
+  },
+  {
+    key: "ecg-p-axis",
+    description:
+      "The main direction of the atrial activation in the frontal plane, in degrees.",
+    labels: ["P-Achse", "P axis"],
+    byUnit: { deg: c("8626-4", "P wave axis", "deg") },
+  },
+  {
+    key: "ecg-qrs-axis",
+    description:
+      "The main direction of the ventricular activation in the frontal plane, in degrees: the electrical heart axis.",
+    labels: ["QRS-Achse", "R-Achse", "QRS axis"],
+    byUnit: { deg: c("8632-2", "QRS axis", "deg") },
+  },
+  {
+    key: "ecg-t-axis",
+    description:
+      "The main direction of the ventricular recovery in the frontal plane, in degrees.",
+    labels: ["T-Achse", "T axis"],
+    byUnit: { deg: c("8638-9", "T wave axis", "deg") },
+  },
   // ---- Urine ----
   // The parser refuses a urine row unless "<name> im Urin" is a label here,
   // so serum albumin and urine albumin can never share a code. Every label
@@ -3422,6 +3492,22 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
     "Der Unterschied zwischen systolischem und diastolischem Druck.",
   "nocturnal-dipping":
     "Wie weit der Blutdruck nachts gegenüber dem Tag absinkt, in Prozent des Tageswerts. Eine Absenkung um 10 bis 20 Prozent heißt Dipping.",
+  "ecg-ventricular-rate":
+    "Wie oft die Herzkammern in einer Minute schlagen, gezählt an den QRS-Komplexen des EKG.",
+  "ecg-pr-interval":
+    "Die Zeit vom Beginn der Vorhoferregung bis zum Beginn der Kammererregung: wie lange die Erregung von den Vorhöfen zu den Kammern braucht.",
+  "ecg-qrs-duration":
+    "Wie lange die elektrische Erregung der Herzkammern dauert. Ein breiter QRS-Komplex kann heißen, dass die Erregung einen langsameren Weg nimmt.",
+  "ecg-qt-interval":
+    "Die Zeit vom Beginn der Kammererregung bis zum Ende ihrer Rückbildung. Sie wird kürzer, je schneller das Herz schlägt.",
+  "ecg-qtc-bazett":
+    "Das QT-Intervall, nach der Formel von Bazett auf die Herzfrequenz korrigiert (QT geteilt durch die Wurzel des Schlagabstands), damit Messungen bei verschiedener Frequenz vergleichbar sind.",
+  "ecg-p-axis":
+    "Die Hauptrichtung der Vorhoferregung in der Frontalebene, in Grad.",
+  "ecg-qrs-axis":
+    "Die Hauptrichtung der Kammererregung in der Frontalebene, in Grad: die elektrische Herzachse.",
+  "ecg-t-axis":
+    "Die Hauptrichtung der Erregungsrückbildung der Kammern in der Frontalebene, in Grad.",
   "creatine-kinase":
     "Ein Enzym der Muskelzellen, auch des Herzmuskels, das ins Blut übertritt, wenn Muskeln beansprucht oder geschädigt werden.",
   "albumin-urine":
@@ -3480,3 +3566,45 @@ export function lookupAnalyte(label: string, unitRaw: string): LookupResult {
   }
   return { status: "ok", analyteKey: def.key, coding, ucum };
 }
+
+/**
+ * FHIR's observation category for the codes that are not laboratory tests.
+ * Every other coded value is `laboratory`.
+ *
+ * - `vital-signs`: blood pressure, pulse and body measurements, the codes of
+ *   the FHIR vital signs profile and the 24-hour and period means of an
+ *   ambulatory recording.
+ * - `procedure`: what an electrocardiogram measures. FHIR files
+ *   electrodiagnostics under procedure. A report whose every value is one of
+ *   these is an ECG, and the writers say so on the DiagnosticReport too
+ *   (v2-0074 `EC`, LOINC 11524-6 "EKG study").
+ *
+ * Generated into Swift (`Analytes.observationCategories`), so the phone's
+ * writer and this one read the same table.
+ */
+export const OBSERVATION_CATEGORIES: Readonly<
+  Record<string, "vital-signs" | "procedure">
+> = {
+  "8480-6": "vital-signs",
+  "8462-4": "vital-signs",
+  "8867-4": "vital-signs",
+  "8490-5": "vital-signs",
+  "8472-3": "vital-signs",
+  "41924-2": "vital-signs",
+  "96608-5": "vital-signs",
+  "96609-3": "vital-signs",
+  "103205-1": "vital-signs",
+  "8478-0": "vital-signs",
+  "107146-3": "vital-signs",
+  "8302-2": "vital-signs",
+  "29463-7": "vital-signs",
+  "39156-5": "vital-signs",
+  "8897-1": "procedure",
+  "8625-6": "procedure",
+  "8633-0": "procedure",
+  "8634-8": "procedure",
+  "76635-2": "procedure",
+  "8626-4": "procedure",
+  "8632-2": "procedure",
+  "8638-9": "procedure",
+};

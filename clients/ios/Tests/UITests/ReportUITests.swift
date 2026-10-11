@@ -152,6 +152,15 @@ final class DevDatasetUITests: XCTestCase {
       "the diastolic fall is shown as a fall")
   }
 
+  func testAnECGShowsItsIntervalsAndAxes() {
+    let app = launch()
+    AppDriver.scrollTo(app.staticTexts["Ruhe-EKG, Praxis Dr. Muster"], in: app).tap()
+    AppDriver.require(AppDriver.text(containing: "QTc nach Bazett", in: app), "the corrected QT")
+    AppDriver.scrollTo(AppDriver.text(containing: "T-Achse", in: app), in: app)
+    XCTAssertTrue(
+      AppDriver.text(containing: "°", in: app).exists, "an axis is shown in degrees")
+  }
+
   func testAScaleReadingIsCarriedWithoutALoincCode() {
     let app = launch()
     AppDriver.scrollTo(

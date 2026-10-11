@@ -1,0 +1,371 @@
+{
+  "now": "2026-09-13T12:00:00.000Z",
+  "meta": {
+    "patientId": "example-patient",
+    "effectiveDateTime": "2026-08-26",
+    "performer": "Praxis Dr. Muster",
+    "title": "Ruhe-EKG"
+  },
+  "source": {
+    "kind": "ocr-transcribed",
+    "sourceDocument": "laborbefund-2026-09-04.pdf",
+    "ocrConfidence": 0.94,
+    "extractor": "tesseract"
+  },
+  "values": [
+    {
+      "label": "Ventrikuläre Frequenz",
+      "value": 62,
+      "unitRaw": "/min",
+      "line": "Ventrikuläre Frequenz 62 /min",
+      "lineNumber": 9300,
+      "analyteKey": "ecg-ventricular-rate",
+      "coding": {
+        "loincNumber": "8897-1",
+        "display": "QRS complex Ventricles by EKG",
+        "ucum": "/min"
+      },
+      "region": {
+        "page": 1,
+        "x": 0.9502,
+        "y": 0.5701,
+        "width": 0.015,
+        "height": 0.048
+      }
+    },
+    {
+      "label": "QTc nach Bazett",
+      "value": 398,
+      "unitRaw": "ms",
+      "line": "QTc nach Bazett 398 ms",
+      "lineNumber": 9304,
+      "analyteKey": "ecg-qtc-bazett",
+      "coding": {
+        "loincNumber": "76635-2",
+        "display": "Q-T interval corrected based on Bazett formula",
+        "ucum": "ms"
+      }
+    },
+    {
+      "label": "QRS-Achse",
+      "value": -12,
+      "unitRaw": "deg",
+      "line": "QRS-Achse -12 °",
+      "lineNumber": 9306,
+      "analyteKey": "ecg-qrs-axis",
+      "coding": {
+        "loincNumber": "8632-2",
+        "display": "QRS axis",
+        "ucum": "deg"
+      }
+    }
+  ],
+  "bundle": {
+    "resourceType": "Bundle",
+    "type": "collection",
+    "timestamp": "2026-09-13T12:00:00.000Z",
+    "entry": [
+      {
+        "fullUrl": "urn:uuid:Patient-example-patient",
+        "resource": {
+          "resourceType": "Patient",
+          "id": "example-patient"
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:DocumentReference-source-document",
+        "resource": {
+          "resourceType": "DocumentReference",
+          "id": "source-document",
+          "status": "current",
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "date": "2026-09-13T12:00:00.000Z",
+          "description": "laborbefund-2026-09-04.pdf",
+          "content": [
+            {
+              "attachment": {
+                "title": "laborbefund-2026-09-04.pdf",
+                "creation": "2026-08-26"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:DiagnosticReport-report-1",
+        "resource": {
+          "resourceType": "DiagnosticReport",
+          "id": "report-1",
+          "status": "preliminary",
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                  "code": "EC",
+                  "display": "Electrocardiac (e.g., EKG, EEC, Holter)"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "11524-6",
+                "display": "EKG study"
+              }
+            ],
+            "text": "Ruhe-EKG"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-08-26",
+          "issued": "2026-09-13T12:00:00.000Z",
+          "performer": [
+            {
+              "display": "Praxis Dr. Muster"
+            }
+          ],
+          "result": [
+            {
+              "reference": "Observation/obs-1"
+            },
+            {
+              "reference": "Observation/obs-2"
+            },
+            {
+              "reference": "Observation/obs-3"
+            }
+          ],
+          "presentedForm": [
+            {
+              "title": "laborbefund-2026-09-04.pdf"
+            }
+          ]
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:Observation-obs-1",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-1",
+          "status": "preliminary",
+          "extension": [
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+              "valueCode": "ocr-transcribed"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+              "valueString": "Ventrikuläre Frequenz 62 /min"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+              "valueDecimal": 0.94
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-region",
+              "valueString": "1@0.9502,0.5701,0.015,0.048"
+            }
+          ],
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "procedure",
+                  "display": "Procedure"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "8897-1",
+                "display": "QRS complex Ventricles by EKG"
+              }
+            ],
+            "text": "Ventrikuläre Frequenz"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-08-26",
+          "valueQuantity": {
+            "value": 62,
+            "unit": "/min",
+            "system": "http://unitsofmeasure.org",
+            "code": "/min"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:Observation-obs-2",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-2",
+          "status": "preliminary",
+          "extension": [
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+              "valueCode": "ocr-transcribed"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+              "valueString": "QTc nach Bazett 398 ms"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+              "valueDecimal": 0.94
+            }
+          ],
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "procedure",
+                  "display": "Procedure"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "76635-2",
+                "display": "Q-T interval corrected based on Bazett formula"
+              }
+            ],
+            "text": "QTc nach Bazett"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-08-26",
+          "valueQuantity": {
+            "value": 398,
+            "unit": "ms",
+            "system": "http://unitsofmeasure.org",
+            "code": "ms"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:Observation-obs-3",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-3",
+          "status": "preliminary",
+          "extension": [
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+              "valueCode": "ocr-transcribed"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+              "valueString": "QRS-Achse -12 °"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+              "valueDecimal": 0.94
+            }
+          ],
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "procedure",
+                  "display": "Procedure"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "8632-2",
+                "display": "QRS axis"
+              }
+            ],
+            "text": "QRS-Achse"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-08-26",
+          "valueQuantity": {
+            "value": -12,
+            "unit": "deg",
+            "system": "http://unitsofmeasure.org",
+            "code": "deg"
+          }
+        }
+      },
+      {
+        "fullUrl": "urn:uuid:Provenance-provenance-1",
+        "resource": {
+          "resourceType": "Provenance",
+          "id": "provenance-1",
+          "target": [
+            {
+              "reference": "DiagnosticReport/report-1"
+            },
+            {
+              "reference": "Observation/obs-1"
+            },
+            {
+              "reference": "Observation/obs-2"
+            },
+            {
+              "reference": "Observation/obs-3"
+            }
+          ],
+          "recorded": "2026-09-13T12:00:00.000Z",
+          "activity": {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/v3-DataOperation",
+                "code": "DERIVE",
+                "display": "derive"
+              }
+            ],
+            "text": "Values transcribed from a scanned document by OCR"
+          },
+          "agent": [
+            {
+              "type": {
+                "coding": [
+                  {
+                    "system": "http://terminology.hl7.org/CodeSystem/provenance-participant-type",
+                    "code": "assembler"
+                  }
+                ]
+              },
+              "who": {
+                "display": "epa-ingest (tesseract)"
+              }
+            }
+          ],
+          "entity": [
+            {
+              "role": "source",
+              "what": {
+                "reference": "DocumentReference/source-document"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

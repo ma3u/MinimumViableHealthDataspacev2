@@ -21,6 +21,7 @@ import {
 import {
   ANALYTE_DESCRIPTIONS,
   ANALYTE_DESCRIPTIONS_DE,
+  OBSERVATION_CATEGORIES,
   ANALYTE_KEYS,
   ANALYTE_LABELS,
   UNIT_SPELLINGS,
@@ -126,6 +127,7 @@ export function renderSwift(
       .join("\n");
   const descriptions = table(ANALYTE_DESCRIPTIONS);
   const descriptionsDe = table(ANALYTE_DESCRIPTIONS_DE);
+  const categories = table(OBSERVATION_CATEGORIES);
   // A codeless coding must say why, or a reader of the data cannot tell a
   // deliberate absence from a lookup nobody got round to.
   for (const e of entries) {
@@ -271,6 +273,12 @@ ${descriptionsDe}
 
   public static let codings: [AnalyteCoding] = [
 ${rows}
+  ]
+
+  /// FHIR observation category by LOINC code, for the codes that are not
+  /// laboratory tests. Mirrors \`OBSERVATION_CATEGORIES\`.
+  public static let observationCategories: [String: String] = [
+${categories}
   ]
 
   /// Latin letters OCR returns as their Cyrillic or Greek twins. Mirrors

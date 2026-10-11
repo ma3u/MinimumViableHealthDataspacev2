@@ -68,13 +68,16 @@ struct FhirBundleParityTests {
     let values: [Value]
   }
 
-  private static func loadFixture() throws -> (raw: String, fixture: Fixture) {
+  /// The laboratory golden, and an ECG report's (every value an ECG term).
+  static let goldens = ["fhir-golden-bundle.json", "fhir-golden-bundle-ecg.json"]
+
+  private static func loadFixture(_ name: String = goldens[0]) throws -> (raw: String, fixture: Fixture) {
     // #filePath rather than Bundle.module: the fixture is shared with the
     // TypeScript generator that writes it, so it lives next to the test source
     // rather than being copied into a test bundle.
     let url = URL(fileURLWithPath: #filePath)
       .deletingLastPathComponent()
-      .appendingPathComponent("Fixtures/fhir-golden-bundle.json")
+      .appendingPathComponent("Fixtures/\(name)")
     let raw = try String(contentsOf: url, encoding: .utf8)
     return (raw, try JSONDecoder().decode(Fixture.self, from: Data(raw.utf8)))
   }
@@ -127,9 +130,9 @@ struct FhirBundleParityTests {
     )
   }
 
-  @Test("the Swift writer produces the same bundle as the TypeScript writer")
-  func bundlesAgree() throws {
-    let (raw, fixture) = try Self.loadFixture()
+  @Test("the Swift writer produces the same bundle as the TypeScript writer", arguments: goldens)
+  func bundlesAgree(golden: String) throws {
+    let (raw, fixture) = try Self.loadFixture(golden)
     let expected = try JSON.parse(raw)["bundle"]
     let actual = Self.build(from: fixture)
 

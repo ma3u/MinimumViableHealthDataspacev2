@@ -126,6 +126,19 @@
           "rank": "species"
         }
       }
+    },
+    {
+      "label": "Körpergewicht",
+      "value": 80,
+      "unitRaw": "kg",
+      "line": "Körpergewicht  80  kg",
+      "lineNumber": 16,
+      "analyteKey": "body-weight",
+      "coding": {
+        "loincNumber": "29463-7",
+        "display": "Body weight",
+        "ucum": "kg"
+      }
     }
   ],
   "bundle": {
@@ -216,6 +229,9 @@
             },
             {
               "reference": "Observation/obs-6"
+            },
+            {
+              "reference": "Observation/obs-7"
             }
           ],
           "presentedForm": [
@@ -640,6 +656,59 @@
         }
       },
       {
+        "fullUrl": "urn:uuid:Observation-obs-7",
+        "resource": {
+          "resourceType": "Observation",
+          "id": "obs-7",
+          "status": "preliminary",
+          "extension": [
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-kind",
+              "valueCode": "ocr-transcribed"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-source-line",
+              "valueString": "Körpergewicht  80  kg"
+            },
+            {
+              "url": "https://ehds.mabu.red/fhir/StructureDefinition/epa-ingest-ocr-confidence",
+              "valueDecimal": 0.94
+            }
+          ],
+          "category": [
+            {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                  "code": "vital-signs",
+                  "display": "Vital Signs"
+                }
+              ]
+            }
+          ],
+          "code": {
+            "coding": [
+              {
+                "system": "http://loinc.org",
+                "code": "29463-7",
+                "display": "Body weight"
+              }
+            ],
+            "text": "Körpergewicht"
+          },
+          "subject": {
+            "reference": "Patient/example-patient"
+          },
+          "effectiveDateTime": "2026-09-04",
+          "valueQuantity": {
+            "value": 80,
+            "unit": "kg",
+            "system": "http://unitsofmeasure.org",
+            "code": "kg"
+          }
+        }
+      },
+      {
         "fullUrl": "urn:uuid:Provenance-provenance-1",
         "resource": {
           "resourceType": "Provenance",
@@ -665,6 +734,9 @@
             },
             {
               "reference": "Observation/obs-6"
+            },
+            {
+              "reference": "Observation/obs-7"
             }
           ],
           "recorded": "2026-09-13T12:00:00.000Z",
