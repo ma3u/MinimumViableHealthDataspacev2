@@ -491,6 +491,7 @@
 "Body composition (DXA)" = "Körperzusammensetzung (DXA)";
 "Glucose sensor" = "Glukosesensor";
 "Checked" = "Geprüft";
+"Read again. These values you checked now read differently; your checked value is kept. Please compare them with the paper:\n%@" = "Neu ausgewertet. Diese von Ihnen geprüften Werte werden jetzt anders gelesen; Ihr geprüfter Wert bleibt erhalten. Bitte gleichen Sie sie mit dem Papier ab:\n%@";
 "%lld of %lld checked" = "%1$lld von %2$lld geprüft";
 "Page %@ was too blurred to read and was left out. Discard this scan and photograph it again, holding the phone still." = "Seite %@ war zu unscharf zum Lesen und wurde ausgelassen. Verwerfen Sie diesen Scan und fotografieren Sie sie erneut, mit ruhig gehaltenem Telefon.";
 "Name and laboratory are suggested from the scan. Change them as you like." = "Name und Labor sind aus dem Scan vorgeschlagen. Ändern Sie sie nach Belieben.";

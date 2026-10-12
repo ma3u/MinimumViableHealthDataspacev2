@@ -454,7 +454,8 @@ final class AppModel: ObservableObject {
       // recogniser first saw, so a worse reading is discarded rather than
       // saved over a better one.
       // What the person checked against the paper outranks a new reading.
-      let extraction = product.extraction.keepingChecks(of: report.extraction.coded)
+      let kept = product.extraction.keepingChecksReporting(of: report.extraction.coded)
+      let extraction = kept.extraction
       let before = report.extraction.coded.count
       let after = extraction.coded.count
       guard after >= before else {
@@ -503,6 +504,7 @@ final class AppModel: ObservableObject {
       Log.store.notice(
         "re-read: \(report.extraction.coded.count, privacy: .public) coded before, \(product.extraction.coded.count, privacy: .public) now"
       )
+      notice = Self.conflictNotice(kept.conflicts)
       await refresh()
     } catch {
       self.error = error.localizedDescription
@@ -513,6 +515,27 @@ final class AppModel: ObservableObject {
   /// rows and unread lines through the current parser and dictionary, coded
   /// values to their current code. Never loses a coded value.
   private func recode(_ report: LabReport) async throws {
+    // The text of the first recognition, parsed again, when it reads more
+    // than the stored rows do. What the person checked is kept, and a check
+    // the new parse reads differently is named, not overwritten.
+    if !report.pageTexts.isEmpty {
+      let reparsed = LabRecoder.fromPageTexts(report.pageTexts, source: report.extraction.source)
+        .keepingChecksReporting(of: report.extraction.coded)
+      let rows = LabRecoder.recode(report.extraction).extraction.coded.count
+      if reparsed.extraction.coded.count > max(report.extraction.coded.count, rows) {
+        try await store.save(
+          LabReport(
+            id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+            title: report.title, extraction: reparsed.extraction, metadata: report.metadata,
+            pageTexts: report.pageTexts, scan: report.scan, hasDiagnostics: report.hasDiagnostics))
+        Log.store.notice(
+          "re-read from the stored text: \(report.extraction.coded.count, privacy: .public) coded before, \(reparsed.extraction.coded.count, privacy: .public) now, \(reparsed.conflicts.count, privacy: .public) checked value(s) read differently"
+        )
+        notice = Self.conflictNotice(reparsed.conflicts)
+        await refresh()
+        return
+      }
+    }
     let outcome = LabRecoder.recode(report.extraction)
     guard outcome.recovered + outcome.recoded > 0 else {
       error = String(localized: "This version reads nothing more from this report.")
@@ -527,6 +550,18 @@ final class AppModel: ObservableObject {
       "re-coded from stored rows: \(outcome.recovered, privacy: .public) recovered, \(outcome.recoded, privacy: .public) recoded"
     )
     await refresh()
+  }
+
+  /// What to tell the person when a value they checked now reads differently.
+  static func conflictNotice(_ conflicts: [ExtractionResult.CheckConflict]) -> String? {
+    guard !conflicts.isEmpty else { return nil }
+    let list = conflicts.map {
+      "\($0.label): \(Measurement.text($0.checked)) → \(Measurement.text($0.readNow)) \(UnitText.display($0.unit))"
+    }.joined(separator: "\n")
+    return String(
+      localized:
+        "Read again. These values you checked now read differently; your checked value is kept. Please compare them with the paper:\n\(list)"
+    )
   }
 
   /// Once per dictionary and build: every stored report's own rows through

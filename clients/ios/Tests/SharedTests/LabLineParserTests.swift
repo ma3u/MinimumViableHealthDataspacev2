@@ -1090,4 +1090,11 @@ struct PrintedReferenceTests {
     #expect(values["potassium"] == 4.1)
     #expect(values["calcium"] == 2.4)
   }
+
+  @Test("the stored text of a first recognition, parsed again, reads the shifted rows")
+  func fromPageTexts() {
+    let result = LabRecoder.fromPageTexts([Self.shiftedCumulative], source: .ocrTranscribed)
+    #expect(result.coded.count == 9)
+    #expect(result.source == .ocrTranscribed)
+  }
 }

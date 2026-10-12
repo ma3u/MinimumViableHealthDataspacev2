@@ -104,6 +104,25 @@ extension ExtractionResult {
   /// - a checked value the new reading did not find at all is kept.
   /// Each checked value is used once, so a coding read twice stays twice.
   public func keepingChecks(of previous: [CodedLabValue]) -> ExtractionResult {
+    keepingChecksReporting(of: previous).extraction
+  }
+
+  /// A checked value the new reading reads as another number: the checked
+  /// one is kept, and the person is told, because a check made in one tap
+  /// for a whole report can cover a misread value (measured: a range's
+  /// bound stored and checked as an LDL result).
+  public struct CheckConflict: Sendable, Equatable {
+    public let label: String
+    public let checked: Double
+    public let readNow: Double
+    public let unit: String
+  }
+
+  /// `keepingChecks`, and every checked value the new reading disagrees with.
+  public func keepingChecksReporting(of previous: [CodedLabValue])
+    -> (extraction: ExtractionResult, conflicts: [CheckConflict])
+  {
+    var conflicts: [CheckConflict] = []
     var coded = self.coded
     var claimed = Set<Int>()
     var unplaced: [CodedLabValue] = []
@@ -118,14 +137,22 @@ extension ExtractionResult {
       } else if let other = coded.indices.first(where: {
         !claimed.contains($0) && coded[$0].coding.codeKey == key && coded[$0].verification == nil
       }) {
+        conflicts.append(
+          CheckConflict(
+            label: old.raw.label, checked: old.raw.value, readNow: coded[other].raw.value,
+            unit: old.coding.ucum))
         coded[other] = old
         claimed.insert(other)
       } else {
         unplaced.append(old)
       }
     }
-    return ExtractionResult(
-      coded: coded + unplaced, unmapped: unmapped, suspiciousLines: suspiciousLines, source: source)
+    return (
+      ExtractionResult(
+        coded: coded + unplaced, unmapped: unmapped, suspiciousLines: suspiciousLines,
+        source: source),
+      conflicts
+    )
   }
 
   /// How many coded values the person has checked against the paper.

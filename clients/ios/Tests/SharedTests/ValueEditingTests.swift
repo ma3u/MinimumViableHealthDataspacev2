@@ -151,6 +151,11 @@ struct ValueEditingTests {
     #expect(byLabel["Kalium"] == nil, "an unchecked value is the new reading's to keep or lose")
     #expect(kept.checkedCount == 3)
     #expect(kept.coded.count == 4)
+    // The one that reads differently is named, not overwritten.
+    let conflicts = again.keepingChecksReporting(of: Array(checked.coded.prefix(3))).conflicts
+    #expect(conflicts.map(\.label) == ["Kreatinin"])
+    #expect(conflicts.first?.checked == 0.9)
+    #expect(conflicts.first?.readNow == 0.6)
   }
 }
 
