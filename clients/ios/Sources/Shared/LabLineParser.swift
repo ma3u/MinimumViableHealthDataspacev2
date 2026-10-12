@@ -369,6 +369,156 @@ public enum LabLineParser {
     return out
   }
 
+  /// Puts a cumulative report's rows back together when the recogniser read
+  /// each name half a line away from its numbers.
+  ///
+  /// Measured on a university laboratory's cumulative report (values
+  /// invented here):
+  ///
+  ///     Natrium [P)
+  ///     Kalium [P]  mmol/  136 - 145  140
+  ///     mmol/l  3.4-4.5  4.1
+  ///     Gamma-GT [P]  ukatal/l
+  ///     LDH [P)  < 1.22  0.38
+  ///     ukatal/l  2-4.1  3.20
+  ///
+  /// The sodium's unit, range and value are on the potassium's line, and the
+  /// GGT's range and value on the LDH's. Read in order, every unit, range
+  /// and value belongs to the oldest name still waiting for its value. A
+  /// block that starts with a name the dictionary knows and no value is
+  /// rebuilt that way, and kept only when it comes out whole: every name
+  /// with one value, no number left over. A sheet whose rows are aligned
+  /// cannot come out whole this way, because its last name would still be
+  /// waiting, so it passes through untouched.
+  static func reassemblingShiftedRows(
+    _ lines: [(line: String, lineNumber: Int, region: SourceRegion?)]
+  ) -> [(line: String, lineNumber: Int, region: SourceRegion?)] {
+    struct Record {
+      let label: String
+      let lineNumber: Int
+      let region: SourceRegion?
+      var unit: String?
+      var range: String?
+      var value: String?
+    }
+    let marker = #"[\[(]\s*[A-Za-zÄÖÜäöü]{1,4}\s*[\])]"#
+    let token =
+      #"(\d+(?:[.,]\d+)?\s*[-–]\s*\d+(?:[.,]\d+)?)|([<>]=?\s*\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?[+*]?)|([A-Za-zµμ%][A-Za-zµμ%/\d.^]*)"#
+
+    /// A line's name (through its matrix marker) and the text after it.
+    func split(_ line: String) -> (label: String?, data: String) {
+      let trimmed = line.trimmingCharacters(in: .whitespaces)
+      guard let first = trimmed.first, first.isLetter,
+        // Through the last marker: `ALAT (GPT) [P)` names a method first.
+        let m = trimmed.range(of: "^.*" + marker, options: .regularExpression)
+      else { return (nil, trimmed) }
+      return (String(trimmed[m]), String(trimmed[m.upperBound...]))
+    }
+    /// The data tokens of a text, or nil when it holds anything else.
+    func tokens(_ text: String) -> [(kind: Int, text: String)]? {
+      guard let re = try? NSRegularExpression(pattern: token) else { return nil }
+      var out: [(Int, String)] = []
+      var covered = 0
+      let ns = text as NSString
+      for m in re.matches(in: text, range: NSRange(location: 0, length: ns.length)) {
+        guard ns.substring(with: NSRange(location: covered, length: m.range.location - covered))
+          .trimmingCharacters(in: .whitespaces).isEmpty
+        else { return nil }
+        for group in 1...4 where m.range(at: group).location != NSNotFound {
+          let piece = ns.substring(with: m.range(at: group))
+          // A word that is no unit is not data.
+          if group == 4, Analytes.normaliseUnit(piece) == nil,
+            Analytes.normaliseUnit(piece + "l") == nil
+          {
+            return nil
+          }
+          out.append((group, piece))
+        }
+        covered = m.range.location + m.range.length
+      }
+      guard ns.substring(from: covered).trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
+      return out
+    }
+    func known(_ label: String) -> Bool {
+      analyseLabel(label).candidates.contains { Analytes.knowsLabel($0) || Analytes.knowsLabel("\($0) im Urin") }
+    }
+
+    var out: [(line: String, lineNumber: Int, region: SourceRegion?)] = []
+    var index = 0
+    while index < lines.count {
+      // A name still waiting for its value at the end of its own line: no
+      // number that could be one (`Ferritin [P]  ug/l  22 - 322`, then the
+      // value alone below it).
+      let start = split(lines[index].line)
+      guard let label = start.label, let data = tokens(start.data), known(label),
+        !data.contains(where: { $0.kind == 3 }), data.filter({ $0.kind == 2 }).count <= 1,
+        !(data.contains { $0.kind == 1 } && data.contains { $0.kind == 2 })
+      else {
+        out.append(lines[index])
+        index += 1
+        continue
+      }
+      // A name waiting for its value: read on while every line is names and
+      // data, handing each piece to the oldest name still waiting.
+      var queue: [Record] = []
+      var done: [Record] = []
+      var cursor = index
+      var whole = false
+      while cursor < lines.count {
+        let piece = split(lines[cursor].line)
+        guard let data = tokens(piece.data) else { break }
+        if let name = piece.label {
+          queue.append(
+            Record(
+              label: name, lineNumber: lines[cursor].lineNumber, region: lines[cursor].region))
+        } else if data.isEmpty || queue.isEmpty {
+          break
+        }
+        var orphan = false
+        for item in data {
+          guard !queue.isEmpty else {
+            orphan = true
+            break
+          }
+          switch item.kind {
+          case 4 where queue[0].unit == nil && queue[0].range == nil: queue[0].unit = item.text
+          case 1 where queue[0].range == nil: queue[0].range = item.text
+          case 2 where queue[0].range == nil: queue[0].range = item.text
+          case 2, 3: queue[0].value = item.text
+          default: orphan = true
+          }
+          if orphan { break }
+          if queue[0].value != nil { done.append(queue.removeFirst()) }
+        }
+        if orphan { break }
+        cursor += 1
+        if queue.isEmpty {
+          whole = true
+          break
+        }
+      }
+      // Whole, and actually shifted: some name took numbers from another
+      // line. A single name with its numbers on the next line is the same
+      // layout, a row the recogniser wrapped.
+      guard whole, cursor - index > done.count else {
+        out.append(lines[index])
+        index += 1
+        continue
+      }
+      for record in done {
+        var unit = record.unit ?? ""
+        if Analytes.normaliseUnit(unit) == nil, Analytes.normaliseUnit(unit + "l") != nil {
+          unit += "l"
+        }
+        let line = [record.label, unit, record.range ?? "", record.value ?? ""]
+          .filter { !$0.isEmpty }.joined(separator: "  ")
+        out.append((line, record.lineNumber, record.region))
+      }
+      index = cursor
+    }
+    return out
+  }
+
   /// The unit of an `Einheit: ...` line, written compactly, or nil when the
   /// line names no unit the dictionary knows. The longest run of words after
   /// the colon that is a unit wins, so a note after it (`Berechnung nach
@@ -681,7 +831,7 @@ public enum LabLineParser {
   ) -> ParseResult {
     var values: [RawLabValue] = []
     var suspicious: [String] = []
-    let lines = joiningWrappedUnits(given)
+    let lines = reassemblingShiftedRows(joiningWrappedUnits(given))
 
     for entry in lines {
       let line = entry.line

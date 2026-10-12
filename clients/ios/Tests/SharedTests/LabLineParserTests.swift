@@ -1033,4 +1033,61 @@ struct PrintedReferenceTests {
       "hs cTroponin | [P]  ng/l  <53  4", source: .ocrTranscribed)
     #expect(result.coded.map(\.coding.loinc) == ["89579-7"])
   }
+
+  /// A university laboratory's cumulative report, as the recogniser read it:
+  /// each name half a line away from its numbers. Layout and quirks real,
+  /// values invented.
+  static let shiftedCumulative = """
+    Klinische Chemie  s.Bem.
+    Natrium [P)
+    Kalium [P]  mmol/  136 - 145  140
+    mmol/l  3.4-4.5  4.1
+    hs cTroponin | [P)
+    ng/l  <53  4
+    ALAT (GPT) [P)
+    ukatal/l  0.12 - 0.67  0.41
+    ASAT (GOT) [P)  ukatal/l
+    0.22 - 0.67  0.36
+    Gamma-GT [P]  ukatal/l
+    LDH [P)  < 1.22  0.38
+    ukatal/l  2-4.1  3.20
+    Ferritin [P]  ug/l  22 - 322
+    188
+    Transferrin-Sättigung [P]  %  16-45  31.2
+    """
+
+  @Test("a cumulative report's names half a line from their numbers are put back together")
+  func shiftedRows() {
+    let result = LabLineParser.extract(Self.shiftedCumulative, source: .ocrTranscribed)
+    let values = Dictionary(result.coded.map { ($0.coding.analyteKey, $0.raw.value) }) { a, _ in a }
+    #expect(values["sodium"] == 140)
+    #expect(values["potassium"] == 4.1)
+    #expect(values["troponin-i-hs"] == 4)
+    #expect(values["alt"] == 0.41)
+    #expect(values["ast"] == 0.36)
+    #expect(values["ggt"] == 0.38)
+    #expect(values["ldh"] == 3.2)
+    #expect(values["ferritin"] == 188)
+    #expect(values["transferrin-saturation"] == 31.2)
+    #expect(result.coded.count == 9)
+    #expect(result.unmapped.isEmpty)
+    #expect(result.suspiciousLines.isEmpty, "\(result.suspiciousLines)")
+    // The sodium's range came with it.
+    #expect(result.coded.first { $0.coding.analyteKey == "sodium" }?.raw.referenceHigh == 145)
+  }
+
+  @Test("an aligned sheet with a name still waiting for its result is not shifted")
+  func alignedNotShifted() {
+    let sheet = """
+      Natrium [P]  in Arbeit
+      Natrium [P]
+      Kalium [P]  mmol/l  3.4-4.5  4.1
+      Calcium [P]  mmol/l  2.2-2.6  2.4
+      """
+    let result = LabLineParser.extract(sheet, source: .ocrTranscribed)
+    let values = Dictionary(result.coded.map { ($0.coding.analyteKey, $0.raw.value) }) { a, _ in a }
+    #expect(values["sodium"] == nil, "no value of another row is handed to it")
+    #expect(values["potassium"] == 4.1)
+    #expect(values["calcium"] == 2.4)
+  }
 }
