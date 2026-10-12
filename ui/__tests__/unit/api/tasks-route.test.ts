@@ -12,17 +12,9 @@ vi.mock("@/lib/edc", () => ({
   EDC_CONTEXT: "https://w3id.org/edc/v0.0.1/ns/",
 }));
 
-// Mock fetch for neo4j-proxy fallback & sync
+// Mock fetch for the task store (proxy) and the sync
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
-
-// Mock fs for mock data fallback
-vi.mock("fs", () => ({
-  default: {},
-  promises: {
-    readFile: vi.fn().mockRejectedValue(new Error("No mock file")),
-  },
-}));
 
 import { GET } from "@/app/api/tasks/route";
 
@@ -40,6 +32,8 @@ describe("/api/tasks GET", () => {
     const res = await GET(request());
     const data = await res.json();
 
+    expect(res.status).toBe(200);
+    expect(data.source).toBe("edc");
     expect(data.tasks).toEqual([]);
     expect(data.counts).toEqual({
       total: 0,
@@ -202,12 +196,12 @@ describe("/api/tasks GET", () => {
     expect(data.counts.total).toBe(0);
   });
 
-  it("falls back to neo4j-proxy when EDC-V is completely offline", async () => {
+  it("serves the store's tasks, marked, when the connector is offline (#571)", async () => {
     mockManagement.mockRejectedValueOnce(new Error("Connection refused"));
 
     mockFetch
       // sync call won't happen
-      // persistent fallback
+      // the task store
       .mockResolvedValueOnce({
         ok: true,
         json: () =>
@@ -220,8 +214,46 @@ describe("/api/tasks GET", () => {
     const res = await GET(request());
     const data = await res.json();
 
+    expect(res.status).toBe(200);
     expect(data.tasks).toHaveLength(1);
     expect(data.tasks[0].id).toBe("fallback-1");
+    expect(data.source).toBe("store");
+    expect(data.backend).toEqual({ edc: "Connection refused" });
+  });
+
+  it("answers 502 with both errors when the store fails too; never fixtures (#571)", async () => {
+    mockManagement.mockRejectedValueOnce(new Error("404 Not Found"));
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 500,
+      json: () => Promise.resolve({ error: "must be owner of table tasks" }),
+    });
+
+    const res = await GET(request());
+    const data = await res.json();
+
+    expect(res.status).toBe(502);
+    expect(data.tasks).toEqual([]);
+    expect(data.backend).toEqual({
+      edc: "404 Not Found",
+      store: "must be owner of table tasks",
+    });
+    expect(data.error).toContain("404 Not Found");
+    expect(data.error).toContain("must be owner of table tasks");
+  });
+
+  it("answers 502 when the store cannot be reached at all", async () => {
+    mockManagement.mockRejectedValueOnce(new Error("ECONNREFUSED"));
+    mockFetch.mockRejectedValueOnce(new Error("fetch failed"));
+
+    const res = await GET(request());
+    const data = await res.json();
+
+    expect(res.status).toBe(502);
+    expect(data.backend).toEqual({
+      edc: "ECONNREFUSED",
+      store: "fetch failed",
+    });
   });
 
   it("passes a load test's run id on to the proxy (#519)", async () => {

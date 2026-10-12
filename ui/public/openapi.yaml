@@ -1344,6 +1344,34 @@ paths:
                   counts:
                     type: object
                     description: How many tasks sit in each state.
+                  source:
+                    type: string
+                    enum: [edc, store]
+                    description: >-
+                      Who answered: the connector's management API, or the
+                      tasks the hub last synced to its store when the
+                      connector could not be reached (#571).
+                  backend:
+                    type: object
+                    description: What failed on the way, when `source` is not the connector.
+                    properties:
+                      edc: { type: string }
+                      store: { type: string }
+        "502":
+          description: Neither the connector nor the task store answered; both errors in `backend`.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+                  tasks: { type: array, items: {} }
+                  counts: { type: object }
+                  backend:
+                    type: object
+                    properties:
+                      edc: { type: string }
+                      store: { type: string }
 
   /api/trust-center:
     get:

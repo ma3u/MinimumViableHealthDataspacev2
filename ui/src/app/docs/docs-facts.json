@@ -1040,6 +1040,12 @@
       "file": "ADR-058-azure-triggers-the-off-hours-schedule.md",
       "title": "Azure triggers the off-hours stop and start, as a managed identity",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-059",
+      "file": "ADR-059-the-ui-scales-out-on-whole-cores.md",
+      "title": "The UI on Azure scales out on whole cores, on its own HTTP concurrency rule",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1122,8 +1128,8 @@
     "/docs/user-guide": "2026-10-04",
     "/docs/developer": "2026-10-07",
     "/docs/developer/quality-gates": "2026-10-07",
-    "/docs/developer/api": "2026-10-07",
-    "/docs/developer/reference": "2026-10-07",
-    "/docs/architecture": "2026-10-07"
+    "/docs/developer/api": "2026-10-12",
+    "/docs/developer/reference": "2026-10-12",
+    "/docs/architecture": "2026-10-12"
   }
 }

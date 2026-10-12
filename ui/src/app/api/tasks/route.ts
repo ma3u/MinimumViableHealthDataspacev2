@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { edcClient, EDC_CONTEXT } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
-import { promises as fs } from "fs";
-import path from "path";
 import { NEO4J_PROXY_URL, callerHeaders, loadTestHeaders } from "@/lib/proxy";
 
 export const dynamic = "force-dynamic";
@@ -59,6 +57,12 @@ interface EdcParticipant {
   [key: string]: unknown;
 }
 
+const EMPTY_COUNTS = { total: 0, negotiations: 0, transfers: 0, active: 0 };
+
+function errorText(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
 /**
  * GET /api/tasks — Aggregate all negotiations and transfers across
  * all participant contexts into a unified task list.
@@ -68,7 +72,14 @@ interface EdcParticipant {
  * - Transfers follow DSP: REQUESTED → STARTED → SUSPENDED → COMPLETED
  * - EDR availability is checked for STARTED transfers via contentDataAddress
  *
- * Returns: { tasks: Task[], counts: { total, negotiations, transfers, active } }
+ * Returns: { tasks: Task[], counts: { total, negotiations, transfers, active },
+ *            source: "edc" | "store", backend?: { edc?: string, store?: string } }
+ *
+ * `source` says who answered. When the connector's management API cannot be
+ * reached, the hub serves the tasks it last synced to its store and says so in
+ * `backend.edc`; when the store is down too, it answers 502 with both errors.
+ * It never serves fixtures: under load on Azure the fixtures hid an EDC 404
+ * on every call (#571).
  */
 export async function GET(request: Request) {
   const auth = await requireAuth();
@@ -81,8 +92,12 @@ export async function GET(request: Request) {
     );
 
     if (!Array.isArray(participants) || participants.length === 0) {
-      // No participant contexts in EDC-V — fall through to mock data
-      throw new Error("No participant contexts in EDC-V");
+      // The connector answered and holds no participant context: no tasks.
+      return NextResponse.json({
+        tasks: [],
+        counts: EMPTY_COUNTS,
+        source: "edc",
+      });
     }
 
     const tasks: Task[] = [];
@@ -249,43 +264,49 @@ export async function GET(request: Request) {
         transfers: tasks.filter((t) => t.type === "transfer").length,
         active,
       },
+      source: "edc",
     });
   } catch (err) {
-    console.error("Failed to aggregate tasks from EDC-V:", err);
+    const edcError = errorText(err);
+    console.error("Failed to aggregate tasks from EDC-V:", edcError);
 
-    // Fall back to persistent task storage (PostgreSQL via neo4j-proxy)
+    // The tasks the hub last synced to its store (Postgres via the proxy),
+    // marked as such.
+    let storeError: string;
     try {
-      const fallbackRes = await fetch(`${NEO4J_PROXY_URL}/tasks`, {
+      const storeRes = await fetch(`${NEO4J_PROXY_URL}/tasks`, {
         headers: {
           ...loadTestHeaders(request),
           ...callerHeaders(auth.session),
         },
         signal: AbortSignal.timeout(5000),
       });
-      if (fallbackRes.ok) {
-        const data = await fallbackRes.json();
-        return NextResponse.json(data);
+      if (storeRes.ok) {
+        const data = (await storeRes.json()) as {
+          tasks?: Task[];
+          counts?: typeof EMPTY_COUNTS;
+        };
+        return NextResponse.json({
+          tasks: data.tasks ?? [],
+          counts: data.counts ?? EMPTY_COUNTS,
+          source: "store",
+          backend: { edc: edcError },
+        });
       }
-    } catch {
-      // Both EDC-V and persistent storage unavailable
-    }
-
-    // Fall back to bundled mock data so the UI works offline
-    try {
-      const mockPath = path.join(process.cwd(), "public", "mock", "tasks.json");
-      const raw = await fs.readFile(mockPath, "utf-8");
-      const mock = JSON.parse(raw);
-      console.warn("EDC-V offline — serving mock tasks");
-      return NextResponse.json(mock);
-    } catch {
-      // Mock file not available either
+      const body = (await storeRes.json().catch(() => ({}))) as {
+        error?: string;
+      };
+      storeError = body.error ?? `HTTP ${storeRes.status}`;
+    } catch (storeErr) {
+      storeError = errorText(storeErr);
     }
 
     return NextResponse.json(
       {
-        error: "Failed to aggregate tasks",
+        error: `Tasks unavailable: the connector (${edcError}) and the task store (${storeError}) both failed`,
         tasks: [],
-        counts: { total: 0, negotiations: 0, transfers: 0, active: 0 },
+        counts: EMPTY_COUNTS,
+        backend: { edc: edcError, store: storeError },
       },
       { status: 502 },
     );

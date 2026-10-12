@@ -275,6 +275,30 @@ describe("CompliancePage", () => {
       });
     });
 
+    it("says when the trust centre register refuses the role (#571)", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/compliance")
+          return mockResponse({ consumers: [], datasets: [], matrix: [] });
+        if (url === "/api/credentials")
+          return mockResponse({ credentials: [] });
+        if (url === "/api/trust-center")
+          return Promise.resolve({
+            ok: false,
+            status: 403,
+            json: () => Promise.resolve({ error: "Forbidden" }),
+          });
+        return mockResponse({});
+      });
+      render(<CompliancePage />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("trust-center-refused")).toHaveTextContent(
+          /cannot read the trust centre register/i,
+        );
+      });
+      expect(screen.queryByText(/No trust centers found/i)).toBeNull();
+    });
+
     it("renders matrix rows for each participant", async () => {
       const matrixData = {
         consumers: [],

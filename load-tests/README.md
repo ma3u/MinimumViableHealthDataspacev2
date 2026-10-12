@@ -24,5 +24,8 @@ The Grafana dashboard is `observability/grafana/dashboards/load-stress-test.json
 | `neo4j-endurance.js` | Older: ten minutes against the proxy's FHIR and OMOP routes, no session needed                         |
 | `results/`           | k6 summaries and the Azure metric exports, per `testid` (git-ignored)                                  |
 
-`PRODUCTION-READINESS.md` and `STACKIT-COST-MODEL.md` are the assessment of
-March 2026; the platform has moved since (ADR-041, ADR-044, ADR-045, ADR-053).
+`STACKIT-COST-MODEL.md` is the cost model of March 2026. The readiness
+assessment of that month is archived as
+[`docs/loadtest/2026-03-production-readiness.md`](../docs/loadtest/2026-03-production-readiness.md);
+what the platform does under load today is in the reports next to it and in
+ADR-056 and ADR-059.

@@ -38,6 +38,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export RESOURCE_GROUP="${RESOURCE_GROUP:-rg-mvhd-dev}"
 PG_FLEX_NAME="${PG_FLEX_NAME:-mvhd-pg-b53a0449}"
 KEYCLOAK_PUBLIC_HOSTNAME="${KEYCLOAK_PUBLIC_HOSTNAME:-auth.ehds.mabu.red}"
+# The UI's replica range for the day (ADR-059; the same numbers as
+# UI_MIN_REPLICAS/UI_MAX_REPLICAS in env.sh, which this script does not source).
+UI_MIN_REPLICAS="${UI_MIN_REPLICAS:-1}"
+UI_MAX_REPLICAS="${UI_MAX_REPLICAS:-6}"
 
 # Dates (Europe/Berlin) on which the evening stop is skipped, so the stack
 # runs through the night into the next scheduled stop. One reason per date:
@@ -213,7 +217,8 @@ do_start() {
   # Last, so a visitor sees the offline notice until the stack is up.
   log "UI out of offline mode"
   az containerapp update --name mvhd-ui --resource-group "$RESOURCE_GROUP" \
-    --min-replicas 1 --max-replicas 3 --set-env-vars LIVE_DEMO_OFFLINE=false -o none
+    --min-replicas "$UI_MIN_REPLICAS" --max-replicas "$UI_MAX_REPLICAS" \
+    --set-env-vars LIVE_DEMO_OFFLINE=false -o none
   [ "$(ui_flag)" = false ] || { error "mvhd-ui LIVE_DEMO_OFFLINE=$(ui_flag) after the start (expected false)"; exit 1; }
 
   local fqdn code
