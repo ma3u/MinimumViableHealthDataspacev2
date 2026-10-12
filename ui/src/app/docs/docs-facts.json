@@ -1045,7 +1045,7 @@
       "id": "ADR-059",
       "file": "ADR-059-the-ui-scales-out-on-whole-cores.md",
       "title": "The UI on Azure scales out on whole cores, on its own HTTP concurrency rule",
-      "status": "Proposed"
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {

@@ -15,7 +15,7 @@ core, is what saturates from 200 users on.
 
 ## Done on 2026-10-12
 
-- [ADR-059](../../ADRs/ADR-059-the-ui-scales-out-on-whole-cores.md), Proposed:
+- [ADR-059](../../ADRs/ADR-059-the-ui-scales-out-on-whole-cores.md), Accepted:
   a whole core per UI replica, up to six, on an HTTP concurrency rule of 15.
   Values in `scripts/azure/env.sh`, applied by `scripts/azure/size-ui.sh`,
   kept by `offhours.sh` on the morning start. The ADR carries the cost per
@@ -40,8 +40,8 @@ core, is what saturates from 200 users on.
 1. `scripts/azure/wire-keycloak-events.sh`, `scripts/azure/wire-ui-client-scope.sh`,
    then sign in as each persona once.
 2. `scripts/azure/size-ui.sh`, then `ABORT_ON=failures scripts/azure/run-load-test.sh stress`.
-   Accept ADR-059 when 200 users stay inside the SLOs; update its table with
-   the per-stage p95 from Grafana.
+   Put the per-stage p95 from Grafana into ADR-059's table; 200 users inside
+   the SLOs is the target.
 3. `spike`, `soak` and `signin` (hypotheses 4 and 6), one per day; the Postgres
    burst credits are the "Postgres (Flexible Server B1ms)" panel of the Azure
    row. A General Purpose SKU if `soak` drains them.

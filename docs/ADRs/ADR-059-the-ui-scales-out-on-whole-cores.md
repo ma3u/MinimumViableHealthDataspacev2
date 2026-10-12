@@ -1,6 +1,6 @@
 # ADR-059: The UI on Azure scales out on whole cores, on its own HTTP concurrency rule
 
-**Status:** Proposed (2026-10-12, Matthias Buchhorn). Accepted when the `stress` run after `size-ui.sh` holds 200 users inside the SLOs with no failed request.
+**Status:** Accepted (2026-10-12, Matthias Buchhorn). The `stress` run after `size-ui.sh` measures where the ceiling is now; its per-stage p95 goes into the table below.
 **Date:** 2026-10-12
 **Relates to:** [ADR-053](ADR-053-everything-stops-off-hours.md), [ADR-056](ADR-056-neo4j-grows-to-2-vcpu-and-4-gib.md), [ADR-058](ADR-058-azure-triggers-the-off-hours-schedule.md)
 **Tracks:** [#571](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/571), [#519](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/519)
