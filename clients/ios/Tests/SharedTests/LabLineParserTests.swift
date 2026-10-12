@@ -1008,4 +1008,29 @@ struct PrintedReferenceTests {
     let result = LabLineParser.extract("Hamnstoff HP  31  mg/dl  17 - 43", source: .ocrTranscribed)
     #expect(result.coded.map(\.coding.loinc) == ["3091-6"])
   }
+
+  @Test("a reference range read twice is the range, and the result follows it")
+  func rangeReadTwice() {
+    let result = LabLineParser.extract(
+      "LDL-Cholesterin [P]  mmol/l  <3.10  < 3.10  4.20 +  162 mg/dL", source: .ocrTranscribed)
+    #expect(result.coded.map(\.raw.value) == [4.2])
+    #expect(result.coded.first?.raw.comparator == nil)
+    // A result that really is the bound, alone after the range, is still read.
+    let bound = LabLineParser.extract("CRP [P]  mg/l  < 5.0  < 5.0", source: .ocrTranscribed)
+    #expect(bound.coded.map(\.raw.value) == [5])
+  }
+
+  @Test("a word after the matrix marker is not part of the name")
+  func wordAfterMarker() {
+    let result = LabLineParser.extract(
+      "Albumin [U]  Alhaminrn  mg/l  < 30  4.6  20", source: .ocrTranscribed)
+    #expect(result.coded.map(\.coding.loinc) == ["1754-1"], "urine albumin, never serum")
+  }
+
+  @Test("a lone | is the I of troponin I")
+  func pipeAsI() {
+    let result = LabLineParser.extract(
+      "hs cTroponin | [P]  ng/l  <53  4", source: .ocrTranscribed)
+    #expect(result.coded.map(\.coding.loinc) == ["89579-7"])
+  }
 }

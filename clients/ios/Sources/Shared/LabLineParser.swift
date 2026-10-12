@@ -259,6 +259,15 @@ public enum LabLineParser {
     {
       reference = [swapped[0], swapped[2], swapped[1]]
     }
+    // The range read twice, `<3.34  < 3.34  4.51 +  173 mg/dL` (measured,
+    // values invented): the second copy is the range again, and the result
+    // follows it. Skipped only when a number does follow, so a result that
+    // really is the bound, alone on the line, is still read.
+    if let again = firstMatch("^\\s*(" + bound + ")\\s+(\\d.*)$", in: reference[2]),
+      again[1].filter({ !$0.isWhitespace }) == reference[1].filter({ !$0.isWhitespace })
+    {
+      reference[2] = again[2]
+    }
     // The value must not open a range. Measured on a real sheet: without
     // this the `1.8` that opens `1.8 - 9.0` was read as the result. What
     // follows a value otherwise stays allowed, a flag or the same result in
@@ -873,6 +882,21 @@ public enum LabLineParser {
 
     var current = printed.trimmingCharacters(in: .whitespaces)
     remember(current)
+    // A word after the matrix marker is not part of the name: a university
+    // laboratory's annotation column, which the recogniser read as
+    // `Albumin [U]  Alhaminrn`. Taken off, so the marker is the end again.
+    if let m = firstMatch(
+      #"^(.*[\[(]\s*[A-Za-zÄÖÜäöü]{1,4}\s*[\])])\s+[A-Za-zÄÖÜäöü]{3,}$"#, in: current)
+    {
+      current = m[1]
+      remember(current)
+    }
+    // A lone `|` is a capital I the recogniser lost: `hs cTroponin | [P]`.
+    if current.range(of: #"\s\|(\s|$)"#, options: .regularExpression) != nil {
+      current = current.replacingOccurrences(
+        of: #"\s\|(\s|$)"#, with: " I$1", options: .regularExpression)
+      remember(current)
+    }
     // A footnote star, `Selen i.S.* (AAS)`, marks the test, not its name, and
     // stands in the way of every marker rule below.
     current = current.replacingOccurrences(of: "*", with: "")
