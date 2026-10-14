@@ -57,6 +57,24 @@ as its own copy `img/klarbefund-tour.webp`: off hours the hub answers `/klarbefu
 offline page (ADR-053), and only `presentations/` is served regardless. Copy it again when
 `ui/public/klarbefund/klarbefund-tour.webp` is re-shot.
 
+## Regenerate the deck's preview card and animation
+
+The deck's head carries Open Graph and Twitter card tags, a canonical link to the GitHub
+Pages copy and a JSON-LD description, so a pasted link shows a title, a text and a picture.
+The picture is `img/og-image.png` (1200 x 630) and the animation the README shows is
+`img/preview.gif`: both the cover slide as it renders, with the knowledge graph turning
+behind the title. From `ui/`, after the deck is deployed:
+
+![The deck's cover, with the knowledge graph turning behind the title](../../../ui/public/presentations/hl7-showcase-2026/img/preview.gif)
+
+```bash
+npx tsx scripts/record-deck-preview.ts
+python3 scripts/frames-to-gif.py recordings/deck public/presentations/hl7-showcase-2026/img/preview.gif
+```
+
+Social networks cache a card by URL; after a change, ask LinkedIn's Post Inspector or
+Facebook's Sharing Debugger to fetch the GitHub Pages address again.
+
 ## Notes
 
 - Figures in the document are drawn from this repository and marked approximate; verify
