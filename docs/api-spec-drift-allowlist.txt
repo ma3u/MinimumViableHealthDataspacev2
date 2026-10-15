@@ -7,7 +7,7 @@
 # why. Documenting an operation means deleting its line here in the same
 # commit, which the check enforces.
 #
-# Remaining: 38
+# Remaining: 37
 
 GET /api/activity-report
 GET /api/admin/audit/retention
@@ -45,5 +45,4 @@ POST /api/mock-dsp/{participant}/catalog/request
 GET /api/nlq/backend
 GET /api/overview
 POST /api/patient/ehr-sync
-GET /api/patient/observations
 GET /api/permits

@@ -35,3 +35,12 @@ condition = "AND"
 paths = ['''clients/ios/Sources/Shared/Analytes\.generated\.swift''']
 regexTarget = "line"
 regexes = ['''labelKey: "[a-z0-9]+"''']
+
+[[allowlists]]
+description = "The compose stack's IdentityHub superuser key: a published development default for the local JAD stack only; Azure takes its keys from Vault (ADR-046). Found by scripts/security/scan-repo.sh on 2026-10-15."
+paths = ['''jad/issuerservice\.env''']
+
+[[allowlists]]
+description = "The AWMF guideline register's public search key, embedded in its own public web page; it grants read access any browser already has. Found by scripts/security/scan-repo.sh on 2026-10-15."
+paths = ['''scripts/leitlinien/fetch_index\.py''']
+regexes = ['''AWMF_PUBLIC_API_KEY''']

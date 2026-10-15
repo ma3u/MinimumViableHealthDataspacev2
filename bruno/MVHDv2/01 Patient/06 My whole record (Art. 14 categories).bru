@@ -1,0 +1,41 @@
+meta {
+  name: 06 My whole record (Art. 14 categories)
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/patient/observations?patientId={{patientId}}&include=all
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.resourceType: eq Bundle
+  res.body.type: eq searchset
+  res.body.entry: isArray
+  res.body.total: gte 1
+}
+
+tests {
+  // The seeded record P1 carries four of the five EHDS Art. 14 categories
+  // (ADR-059). A hub whose seed has not run answers Observations only, which
+  // is a finding for the operator, not a pass.
+  const types = new Set(res.body.entry.map((e) => e.resource.resourceType));
+  test("laboratory results (Observation)", () => expect(types.has("Observation")).to.equal(true));
+  test("medical reports (DiagnosticReport)", () => expect(types.has("DiagnosticReport")).to.equal(true));
+  test("vaccination record (Immunization)", () => expect(types.has("Immunization")).to.equal(true));
+  test("medication plan (MedicationStatement)", () => expect(types.has("MedicationStatement")).to.equal(true));
+}
+
+docs {
+  Art. 3(2) and Art. 14: the record in an interoperable format, beyond laboratory
+  values. With include=all the Bundle carries the resting ECG and imaging reports,
+  the vaccination record (CVX) and the medication plan (ATC, 1-0-1 dosing) that
+  neo4j/seed-study-results.cypher seeds for P1.
+}

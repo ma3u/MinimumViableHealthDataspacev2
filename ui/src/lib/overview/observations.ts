@@ -53,6 +53,18 @@ export interface FhirObservation {
   referenceRange?: { low?: FhirQuantity; high?: FhirQuantity; text?: string }[];
 }
 
+/**
+ * The other resources a record holds besides Observations (ADR-059): a
+ * DiagnosticReport (ECG, imaging), an Immunization or a MedicationStatement.
+ * Typed loosely on purpose: the Bundle carries them through, the readers that
+ * understand Observations only skip them by `resourceType`.
+ */
+export interface FhirRecordResource {
+  resourceType: "DiagnosticReport" | "Immunization" | "MedicationStatement";
+  id: string;
+  [key: string]: unknown;
+}
+
 export interface FhirBundle {
   resourceType: "Bundle";
   id?: string;
@@ -60,7 +72,7 @@ export interface FhirBundle {
   meta?: { tag?: { system?: string; code: string }[] };
   total: number;
   link?: { relation: string; url: string }[];
-  entry: { fullUrl?: string; resource: FhirObservation }[];
+  entry: { fullUrl?: string; resource: FhirObservation | FhirRecordResource }[];
 }
 
 const FICTIONAL_TAG = {
@@ -177,6 +189,7 @@ export interface Parameter {
 export function bundleToParameters(bundle: FhirBundle): Parameter[] {
   const byCode = new Map<string, Parameter>();
   for (const { resource: r } of bundle.entry ?? []) {
+    if (r.resourceType !== "Observation") continue;
     const coding = r.code?.coding?.[0];
     if (!coding || !r.valueQuantity) continue;
     const rr = r.referenceRange?.[0];

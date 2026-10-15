@@ -15,4 +15,7 @@ RUN apk add --no-cache postgresql17-client~17
 COPY scripts/vault-init-or-unseal.sh /app/vault-init-or-unseal.sh
 COPY scripts/azure/vault-unseal/unseal-loop.sh /app/unseal-loop.sh
 COPY scripts/azure/vault-unseal/vault-pg-schema.sql /app/vault-pg-schema.sql
+# Root was needed for apk only; the loop runs psql and the vault CLI and writes
+# nothing but /tmp, so it drops to the image's vault user (trivy DS-0002).
+USER vault
 ENTRYPOINT ["/bin/sh", "/app/unseal-loop.sh"]

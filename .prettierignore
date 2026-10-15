@@ -1,0 +1,3 @@
+
+# Generated bills of materials: syft output, byte-compared by scripts/security/generate-sbom.sh --check
+docs/sbom/*.cdx.json
