@@ -89,15 +89,15 @@ spec:
       # Pod-level security context (KSV-0118 / BSI C5 DEV-07)
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
+        runAsUser: 10001 # above 10000 so no host account can collide (trivy KSV-0020); the image's files are world-readable
+        runAsGroup: 10001
+        fsGroup: 10001
         seccompProfile:
           type: RuntimeDefault
       containers:
         - name: ui
           # Production: pin to registry digest, e.g. ghcr.io/ma3u/health-dataspace-ui@sha256:...
-          image: health-dataspace-ui:latest
+          image: health-dataspace-ui:2.0.0 # the version in ui/package.json; build with  docker build -t health-dataspace-ui:2.0.0 ui
           imagePullPolicy: IfNotPresent
           # Container-level security context (KSV-0014 / DS-0002)
           securityContext:

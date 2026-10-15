@@ -8,13 +8,33 @@ import UniformTypeIdentifiers
 @main
 struct KlarbefundApp: App {
   @Environment(\.scenePhase) private var scenePhase
+  @StateObject private var lock = AppLock()
 
   var body: some Scene {
     WindowGroup { ContentView() }
       .onChange(of: scenePhase) { _, phase in
         // `.inactive` is the moment the switcher snapshot is taken;
         // `.background` is already too late to cover it.
-        if phase == .active { PrivacyCover.hide() } else { PrivacyCover.show() }
+        switch phase {
+        case .active:
+          if lock.locked {
+            // The cover stays, now with an Unlock button, until the person
+            // proves it is them (ADR-060). The system prompt makes the scene
+            // inactive and active again; `didBecomeActive` is idempotent.
+            PrivacyCover.show { Task { await lock.authenticate() } }
+            Task { await lock.didBecomeActive() }
+          } else {
+            PrivacyCover.hide()
+          }
+        case .background:
+          lock.didEnterBackground()
+          PrivacyCover.show()
+        default:
+          if !lock.locked { PrivacyCover.show() }
+        }
+      }
+      .onChange(of: lock.locked) { _, locked in
+        if !locked, scenePhase == .active { PrivacyCover.hide() }
       }
   }
 }

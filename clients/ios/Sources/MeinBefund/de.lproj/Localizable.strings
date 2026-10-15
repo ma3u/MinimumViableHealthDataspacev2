@@ -532,3 +532,12 @@
 "Delete" = "Löschen";
 "“%@”, its scanned pages and every value will be deleted from this phone, and the scanner opens for the paper. This cannot be undone." = "„%@“, die eingelesenen Seiten und alle Werte werden von diesem Telefon gelöscht, und der Scanner öffnet sich für das Papier. Das lässt sich nicht rückgängig machen.";
 "“%@”, its scanned pages and every value will be deleted from this phone. This cannot be undone." = "„%@“, die eingelesenen Seiten und alle Werte werden von diesem Telefon gelöscht. Das lässt sich nicht rückgängig machen.";
+
+/* App lock (ADR-060) */
+"Require Face ID or passcode to open" = "Face ID oder Code zum Öffnen verlangen";
+"Protection" = "Schutz";
+"On: your results open only after Face ID, Touch ID or your passcode. Off: whoever holds the unlocked phone can open them." = "An: Deine Ergebnisse öffnen sich nur nach Face ID, Touch ID oder deinem Code. Aus: Wer das entsperrte iPhone in der Hand hat, kann sie öffnen.";
+"Your results open with Face ID, Touch ID or your passcode." = "Deine Ergebnisse öffnen sich mit Face ID, Touch ID oder deinem Code.";
+"Unlock" = "Entsperren";
+"Unlock your results" = "Ergebnisse entsperren";
+"Not now" = "Jetzt nicht";

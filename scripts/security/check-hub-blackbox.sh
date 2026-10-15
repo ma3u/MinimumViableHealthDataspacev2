@@ -79,6 +79,8 @@ echo | openssl s_client -connect "$HOST:443" -servername "$HOST" 2>/dev/null | o
 echo "-- Keycloak: discovery public, admin console and metrics not"
 expect 200 "GET /realms/edcv/.well-known/openid-configuration" "https://$AUTH/realms/edcv/.well-known/openid-configuration"
 expect "404,403" "GET /admin/master/console/" "https://$AUTH/admin/master/console/"
+expect "404,403" "GET /admin/edcv/console/" "https://$AUTH/admin/edcv/console/"
+expect 401 "GET /admin/realms/edcv (REST, no token)" "https://$AUTH/admin/realms/edcv"
 expect "404,403" "GET /metrics" "https://$AUTH/metrics"
 
 echo "== $n checks, $([ "$fail" = 0 ] && echo all passed || echo 'some FAILED')"

@@ -15,9 +15,20 @@ struct ProviderSettings: View {
   @State private var saved = false
   let onClose: () -> Void
 
+  @AppStorage(AppLockPolicy.defaultsKey) private var appLockEnabled = true
+
   var body: some View {
     NavigationStack {
       Form {
+        Section {
+          Toggle("Require Face ID or passcode to open", isOn: $appLockEnabled)
+        } header: {
+          Text("Protection")
+        } footer: {
+          Text(
+            "On: your results open only after Face ID, Touch ID or your passcode. Off: whoever holds the unlocked phone can open them."
+          )
+        }
         Section("Provider") {
           Picker("Provider", selection: $configuration.kind) {
             ForEach(BringYourOwnProvider.Kind.allCases, id: \.self) { kind in
