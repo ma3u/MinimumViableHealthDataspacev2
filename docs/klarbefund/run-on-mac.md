@@ -28,9 +28,9 @@ swift run AnalyteParity           # the Swift dictionary matches its TypeScript 
 KLARBEFUND_BENCHMARK_OUT=$HOME/Desktop/klarbefund-accuracy-benchmark.json swift test
 ```
 
-`swift test` runs the whole suite, about 320 tests. The scanning and benchmark
-suites render A4 sheets and read them with Vision, serially, so expect a few
-minutes. Two suites are new on this branch:
+`swift test` runs the whole suite, 319 tests in 54 suites. The scanning and
+benchmark suites render A4 sheets and read them with Vision, serially; on an
+Apple-silicon Mac the whole suite took about ten seconds after the build. Two suites are new on this branch:
 
 - `ExtractionAccuracyTests`: the accuracy measure itself, no Vision needed;
 - `AccuracyBenchmarkTests`: nine scan conditions, zero silent errors required

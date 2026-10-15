@@ -114,6 +114,50 @@ Two ways to run it:
 Target values per field are fixed before a pilot is measured, and the pilot's
 sample size is stated next to every number.
 
+## Run record
+
+The checklist in [`run-on-mac.md`](run-on-mac.md) was last run on 2026-10-15 at
+commit `1474295d` of this branch, on macOS 26.7.1 with Xcode 26 (Swift 6.4).
+Everything below is the synthetic benchmark; no real report was involved, so the
+counts are published as they are in
+[`accuracy-benchmark.json`](accuracy-benchmark.json), the file the run wrote.
+This is the project checking itself: a reviewer reproduces it with the same
+three commands, and a pilot on real reports is still open.
+
+| Step                      | Result                                                |
+| ------------------------- | ----------------------------------------------------- |
+| `swift build`             | Shared, AnalyteParity, ScanReplay and LabFile built   |
+| `swift run AnalyteParity` | parity ok: 1589 codings, 71 units                     |
+| `swift test`              | 319 tests in 54 suites passed, 0 failures, about 10 s |
+
+One synthetic panel of 8 rows, read with Vision under nine conditions, 72
+truth rows in all. `AccuracyBenchmarkTests` asserts zero silent errors under
+each condition; the other columns are reported, not asserted.
+
+| Condition          | Found | Exact | Silent errors | Spurious | Unread lines | Reference right |
+| ------------------ | ----: | ----: | ------------: | -------: | -----------: | --------------: |
+| clean 150 dpi scan |     8 |     8 |             0 |        0 |            0 |           8 / 8 |
+| skewed 1 degree    |     8 |     8 |             0 |        0 |            0 |           8 / 8 |
+| skewed 2 degrees   |     7 |     5 |             0 |        0 |            0 |           5 / 7 |
+| skewed 5 degrees   |     5 |     0 |             0 |        0 |            2 |           0 / 5 |
+| dim room           |     8 |     8 |             0 |        0 |            0 |           8 / 8 |
+| flash glare        |     8 |     8 |             0 |        0 |            0 |           8 / 8 |
+| slight motion blur |     7 |     7 |             0 |        0 |            1 |           7 / 7 |
+| heavy blur         |     0 |     0 |             0 |        0 |            0 |           0 / 0 |
+| low resolution     |     7 |     6 |             0 |        0 |            1 |           7 / 7 |
+| **all nine**       |    58 |    50 |         **0** |    **0** |            4 |         51 / 58 |
+
+What the numbers say: a clean, dim, glaring or slightly skewed sheet is read
+in full and exactly. As the sheet degrades the app loses rows, first in the
+reference-range column, then whole rows, until heavy blur yields nothing at
+all. At no point does it show a value, unit or code that is wrong, which is
+the property the suite enforces.
+
+One finding from the run itself: the test target did not compile with
+Swift 6.4, because `Comparator` had become ambiguous between `Shared` and the
+platform SDK. The test now names `Shared.Comparator`, as `OmopExportTests`
+already did.
+
 ## Open
 
 | Topic                                      | What is missing                                                                                                                                                                                                                                                                                                                                  |

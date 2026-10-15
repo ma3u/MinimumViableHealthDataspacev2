@@ -9,7 +9,7 @@ struct ExtractionAccuracyTests {
 
   private func coded(
     _ label: String, _ value: Double, _ unit: String, reference: String? = nil,
-    comparator: Comparator? = nil, line: Int = 1
+    comparator: Shared.Comparator? = nil, line: Int = 1
   ) throws -> CodedLabValue {
     let coding = try #require(
       Analytes.lookup(label: label, unit: unit), "\(label) [\(unit)] must be in the dictionary")
