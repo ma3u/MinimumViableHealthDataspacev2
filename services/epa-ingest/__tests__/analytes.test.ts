@@ -76,7 +76,7 @@ describe("lookupAnalyte", () => {
   });
 
   it("reports an unknown analyte rather than guessing", () => {
-    expect(lookupAnalyte("Omega-3-Index", "%")).toEqual({
+    expect(lookupAnalyte("Zonulin", "ng/ml")).toEqual({
       status: "unknown-analyte",
     });
   });
@@ -188,6 +188,11 @@ describe("OCR that drops the umlaut", () => {
     const hit = lookupAnalyte("Hamoglobin", "g/dl");
     expect(hit).toMatchObject({ status: "ok", analyteKey: "haemoglobin" });
     if (hit.status === "ok") expect(hit.coding.loincNumber).toBe("718-7");
+  });
+
+  it("codes Hamnstoff, an r read as m with the n kept", () => {
+    const hit = lookupAnalyte("Hamnstoff", "mg/dl");
+    expect(hit.status === "ok" && hit.coding.loincNumber).toBe("3091-6");
   });
 
   it("still refuses an analyte it has never heard of", () => {
@@ -318,6 +323,63 @@ describe("a quantity LOINC does not code", () => {
           "cholesterol-remnant|mmol/L",
           // NLM has no term for the night-to-day fall (searched 2026-10-05).
           "nocturnal-dipping|%",
+          // Red-cell fatty acids as mass per volume of blood, or as the
+          // red-cell omega-3 share: LOINC codes them in serum or plasma, or
+          // as an amount of substance (searched 2026-10-11).
+          "epa|mg/L",
+          "dha|mg/L",
+          "omega-3-index|%",
+          "fatty-acids-total-rbc|mg/L",
+          // Pyridoxal phosphate by mass in whole blood: LOINC has it by
+          // amount in blood and by mass only in serum (searched 2026-10-11).
+          "vitamin-b6-blood|ng/mL",
+          // A Holter summary: counts LOINC has only as rates, and times above
+          // or below a rate limit it has no term for (searched 2026-10-11).
+          "supraventricular-ectopics|{beats}",
+          "ecg-pauses|{beats}",
+          "time-heart-rate-high|min",
+          "time-heart-rate-low|min",
+          "ecg-artifacts|%",
+          // Exercise testing: lactate thresholds, working capacity, the
+          // ventilatory slope and reserves have no term; nor has a DXA
+          // scan's lean tissue, bone, regional fat or whole-body density
+          // (searched 2026-10-11).
+          "exercise-met-max|{MET}",
+          "pwc-130|W",
+          "pwc-150|W",
+          "pwc-170|W",
+          "ventilatory-threshold-1-absolute|mL/min",
+          "ve-vco2-slope|{ratio}",
+          "breathing-reserve|%",
+          "minute-ventilation-peak|L/min",
+          "rer-peak|{ratio}",
+          "heart-rate-reserve|/min",
+          "heart-rate-recovery-1min|/min",
+          "vo2-work-rate-slope|mL/min/W",
+          "lactate-threshold-power|W",
+          "lactate-threshold-lactate|mmol/L",
+          "lactate-threshold-heart-rate|/min",
+          "anaerobic-threshold-power|W",
+          "anaerobic-threshold-power-per-kg|W/kg",
+          "anaerobic-threshold-lactate|mmol/L",
+          "anaerobic-threshold-heart-rate|/min",
+          "power-at-lactate-2|W",
+          "heart-rate-at-lactate-2|/min",
+          "power-at-lactate-4|W",
+          "heart-rate-at-lactate-4|/min",
+          "vlamax|mmol/L/s",
+          "critical-power|W",
+          "vo2-max-estimated|L/min",
+          "vo2-max-estimated-per-kg|mL/min/kg",
+          "lean-soft-tissue|kg",
+          "bone-mineral-content|kg",
+          "android-fat|%",
+          "gynoid-fat|%",
+          "android-gynoid-ratio|{ratio}",
+          "bmd-total-body|g/cm2",
+          "bmd-total-body-t-score|{SD}",
+          "bmd-total-body-z-score|{SD}",
+          "rsmi|kg/m2",
         ].includes(entry),
     );
     expect(outside).toEqual([]);

@@ -14,3 +14,5 @@ RUN /opt/keycloak/bin/kc.sh build
 
 FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
+# Keycloak's own image runs as 1000; stating it keeps the scanner honest (trivy DS-0002).
+USER 1000

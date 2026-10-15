@@ -79,6 +79,12 @@ app.get(
 
 /**
  * GET /fhir/Patient/:id/$everything
+ *
+ * The id is the FHIR id of a loaded patient, or the id or resourceId of a
+ * seeded one, so the demo record P1 answers as well. Resources hang off an
+ * Encounter (the loader's shape) or directly off the Patient (the seeds'
+ * shape); both are collected. Since ADR-059 the Bundle also carries the
+ * record's DiagnosticReports, Immunizations and MedicationStatements.
  * Returns a FHIR R4 Bundle containing all resources for a single patient.
  */
 app.get(
@@ -91,17 +97,28 @@ app.get(
       // Fetch the patient node and all directly connected clinical resources.
       const result = await session.run(
         `
-      MATCH (p:Patient {fhirId: $patientId})
+      MATCH (p:Patient)
+      WHERE p.fhirId = $patientId OR p.id = $patientId OR p.resourceId = $patientId
+      WITH p LIMIT 1
       OPTIONAL MATCH (p)-[:HAS_ENCOUNTER]->(enc:Encounter)
-      OPTIONAL MATCH (enc)-[:HAS_CONDITION]->(cond:Condition)
-      OPTIONAL MATCH (enc)-[:HAS_OBSERVATION]->(obs:Observation)
+      OPTIONAL MATCH (enc)-[:HAS_CONDITION]->(encCond:Condition)
+      OPTIONAL MATCH (enc)-[:HAS_OBSERVATION]->(encObs:Observation)
       OPTIONAL MATCH (enc)-[:HAS_PROCEDURE]->(proc:Procedure)
-      OPTIONAL MATCH (enc)-[:HAS_MEDICATION_REQUEST]->(med:MedicationRequest)
+      OPTIONAL MATCH (enc)-[:HAS_MEDICATION_REQUEST]->(encMed:MedicationRequest)
+      OPTIONAL MATCH (p)-[:HAS_CONDITION]->(cond:Condition)
+      OPTIONAL MATCH (p)-[:HAS_OBSERVATION]->(obs:Observation)
+      OPTIONAL MATCH (p)-[:HAS_MEDICATION_REQUEST|HAS_MEDICATION]->(med:MedicationRequest)
+      OPTIONAL MATCH (p)-[:HAS_DIAGNOSTIC_REPORT]->(rep:DiagnosticReport)
+      OPTIONAL MATCH (p)-[:HAS_IMMUNIZATION]->(imm:Immunization)
+      OPTIONAL MATCH (p)-[:HAS_MEDICATION_STATEMENT]->(stm:MedicationStatement)
       RETURN p, collect(DISTINCT enc) AS encounters,
-             collect(DISTINCT cond) AS conditions,
-             collect(DISTINCT obs)  AS observations,
+             collect(DISTINCT encCond) + collect(DISTINCT cond) AS conditions,
+             collect(DISTINCT encObs) + collect(DISTINCT obs)   AS observations,
              collect(DISTINCT proc) AS procedures,
-             collect(DISTINCT med)  AS medications
+             collect(DISTINCT encMed) + collect(DISTINCT med)   AS medications,
+             collect(DISTINCT rep)  AS reports,
+             collect(DISTINCT imm)  AS immunizations,
+             collect(DISTINCT stm)  AS statements
       `,
         { patientId },
       );
@@ -129,6 +146,13 @@ app.get(
         .map((n: any) => n.properties);
       const procedures = rec.get("procedures").map((n: any) => n.properties);
       const medications = rec.get("medications").map((n: any) => n.properties);
+      // Study results beyond laboratory values (ADR-059): reports, the
+      // vaccination record and the medication plan, as the hub seeds them.
+      const props = (key: string) =>
+        (rec.has?.(key) ? rec.get(key) : []).map((n: any) => n.properties);
+      const reports = props("reports");
+      const immunizations = props("immunizations");
+      const statements = props("statements");
 
       const entries = [
         { resource: { resourceType: "Patient", ...patient } },
@@ -146,6 +170,15 @@ app.get(
         })),
         ...medications.map((m: any) => ({
           resource: { resourceType: "MedicationRequest", ...m },
+        })),
+        ...reports.map((r: any) => ({
+          resource: { resourceType: "DiagnosticReport", ...r },
+        })),
+        ...immunizations.map((i: any) => ({
+          resource: { resourceType: "Immunization", ...i },
+        })),
+        ...statements.map((s: any) => ({
+          resource: { resourceType: "MedicationStatement", ...s },
         })),
       ];
 

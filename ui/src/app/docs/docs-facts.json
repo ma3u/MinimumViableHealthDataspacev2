@@ -1040,6 +1040,12 @@
       "file": "ADR-058-azure-triggers-the-off-hours-schedule.md",
       "title": "Azure triggers the off-hours stop and start, as a managed identity",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-059",
+      "file": "ADR-059-the-record-holds-reports-vaccinations-and-the-medication-plan.md",
+      "title": "The record holds reports, vaccinations and the medication plan, not laboratory values alone",
+      "status": ""
     }
   ],
   "complianceFloors": {
@@ -1066,8 +1072,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 47,
-    "operations": 61
+    "paths": 48,
+    "operations": 62
   },
   "workflowJobs": {
     "test.yml": [
@@ -1121,9 +1127,9 @@
     "/docs": "2026-10-04",
     "/docs/user-guide": "2026-10-04",
     "/docs/developer": "2026-10-07",
-    "/docs/developer/quality-gates": "2026-10-07",
-    "/docs/developer/api": "2026-10-07",
-    "/docs/developer/reference": "2026-10-07",
-    "/docs/architecture": "2026-10-07"
+    "/docs/developer/quality-gates": "2026-10-15",
+    "/docs/developer/api": "2026-10-15",
+    "/docs/developer/reference": "2026-10-15",
+    "/docs/architecture": "2026-10-15"
   }
 }

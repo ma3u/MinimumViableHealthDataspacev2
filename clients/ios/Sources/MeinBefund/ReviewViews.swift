@@ -9,23 +9,41 @@ import SwiftUI
 /// the sheet is offered, its evidence shown, and the person decides.
 struct ReviewSheet: View {
   let product: ScanProduct
-  let onConfirm: (_ title: String, _ labDate: Date, _ laboratory: String) -> Void
+  /// The reports already stored, to tell the person when this scan is one of
+  /// them (`DuplicateReports`).
+  var existing: [LabReport] = []
+  let onConfirm:
+    (_ title: String, _ labDate: Date, _ laboratory: String, _ removing: UUID?) -> Void
   let onDiscard: () -> Void
 
   @State private var title = ""
   @State private var laboratory: String
   @State private var labDate: Date
+  @State private var duplicate: DuplicateReports.Match?
 
   init(
     product: ScanProduct,
-    onConfirm: @escaping (_ title: String, _ labDate: Date, _ laboratory: String) -> Void,
+    existing: [LabReport] = [],
+    onConfirm: @escaping (
+      _ title: String, _ labDate: Date, _ laboratory: String, _ removing: UUID?
+    ) -> Void,
     onDiscard: @escaping () -> Void
   ) {
     self.product = product
+    self.existing = existing
     self.onConfirm = onConfirm
     self.onDiscard = onDiscard
     _laboratory = State(initialValue: product.metadata.laboratory ?? "")
     _labDate = State(initialValue: product.metadata.labDate ?? Date())
+    // A suggested name, filled in so it can be kept or changed: the kind of
+    // report the values make and the laboratory, or what a device's screen
+    // calls itself.
+    _title = State(
+      initialValue: product.extraction.source == .selfTracked
+        ? (product.suggestedTitle ?? "")
+        : ReportSuggestion.title(
+          coded: product.extraction.coded, laboratory: product.metadata.laboratory,
+          fallback: product.suggestedTitle))
   }
 
   private var defaultTitle: String {
@@ -47,6 +65,7 @@ struct ReviewSheet: View {
           Text("Report")
         } footer: {
           VStack(alignment: .leading, spacing: 6) {
+            Text("Name and laboratory are suggested from the scan. Change them as you like.")
             if let evidence = product.metadata.labDateEvidence {
               Text("Read from the sheet: \(evidence.line)")
             } else {
@@ -63,6 +82,15 @@ struct ReviewSheet: View {
               )
             } else {
                 Text("These values were read from a photo and are preliminary, not confirmed.")
+            }
+            if !product.unreadablePages.isEmpty {
+              // A blurred page reads as nonsense, and its values and dates
+              // with it; it was left out, and only a new photograph helps.
+              Text(
+                "Page \(product.unreadablePages.map(String.init).joined(separator: ", ")) was too blurred to read and was left out. Discard this scan and photograph it again, holding the phone still."
+              )
+              .foregroundStyle(.orange)
+              .accessibilityIdentifier("unreadable-pages")
             }
             if !product.extraReports.isEmpty {
               // Saying so before the tap, because a person who saves one
@@ -84,10 +112,71 @@ struct ReviewSheet: View {
         }
         ToolbarItem(placement: .confirmationAction) {
           Button("Save") {
-            onConfirm(title.isEmpty ? defaultTitle : title, labDate, laboratory)
+            // The scan as it would be stored, compared with what is.
+            let candidate = LabReport(
+              id: UUID(), scannedAt: Date(), collectedOn: ReportMetadata.calendarDay(labDate),
+              title: finalTitle, extraction: product.extraction, metadata: product.metadata)
+            if let match = DuplicateReports.matches(for: candidate, among: existing).first {
+              duplicate = match
+            } else {
+              onConfirm(finalTitle, labDate, laboratory, nil)
+            }
           }
         }
       }
+      // An alert rather than a confirmation dialog: three choices, and the
+      // way out has to be a button.
+      .alert(
+        duplicateTitle,
+        isPresented: Binding(get: { duplicate != nil }, set: { if !$0 { duplicate = nil } }),
+        presenting: duplicate
+      ) { match in
+        switch match.relation {
+        case .supersedes:
+          Button("Save and delete the older scan", role: .destructive) {
+            onConfirm(finalTitle, labDate, laboratory, match.existing.id)
+          }
+          Button("Save and keep both") { onConfirm(finalTitle, labDate, laboratory, nil) }
+        case .identical, .contained:
+          Button("Don't save", role: .destructive) { onDiscard() }
+          if match.relation == .identical, match.redundant.id == match.existing.id {
+            Button("Save and delete the older copy") {
+              onConfirm(finalTitle, labDate, laboratory, match.existing.id)
+            }
+          }
+          Button("Save anyway") { onConfirm(finalTitle, labDate, laboratory, nil) }
+        }
+        Button("Cancel", role: .cancel) {}
+      } message: { match in
+        Text(Self.describe(match))
+      }
+    }
+  }
+
+  private var finalTitle: String { title.isEmpty ? defaultTitle : title }
+
+  private var duplicateTitle: String {
+    duplicate?.relation == .supersedes
+      ? String(localized: "This scan reads more of a report you have")
+      : String(localized: "Already on this phone")
+  }
+
+  static func describe(_ match: DuplicateReports.Match) -> String {
+    let date = match.existing.effectiveDate.formatted(date: .abbreviated, time: .omitted)
+    let count = Duplicates.keys(of: match.existing).count
+    switch match.relation {
+    case .identical:
+      return String(
+        localized:
+          "“\(match.existing.title)” of \(date) has the same \(count) values. Saving this scan would show each of them twice.")
+    case .contained:
+      return String(
+        localized:
+          "Every value of this scan is already in “\(match.existing.title)” of \(date). Saving it would show them twice.")
+    case .supersedes:
+      return String(
+        localized:
+          "All \(count) values of “\(match.existing.title)” of \(date) are in this scan as well, and this scan reads more. The older scan is no longer needed.")
     }
   }
 }
@@ -98,11 +187,43 @@ struct ResultList: View {
   var sex: RangeSex = .any
   /// Opens the stored pages; nil when the record has none.
   let onOpenScan: (() -> Void)?
+  /// Stores a corrected extraction; nil where the list is read-only.
+  var onChange: ((ExtractionResult) -> Void)? = nil
+
+  @State private var editing: EditTarget?
+
+  private func raw(_ target: EditTarget) -> RawLabValue? {
+    switch target {
+    case .coded(let i): report.extraction.coded.indices.contains(i) ? report.extraction.coded[i].raw : nil
+    case .unmapped(let i):
+      report.extraction.unmapped.indices.contains(i) ? report.extraction.unmapped[i].raw : nil
+    }
+  }
 
   var body: some View {
     Form {
       ReportDetails(report: report, onOpenScan: onOpenScan)
-      ResultSections(extraction: report.extraction, sex: sex)
+      if onChange != nil, !report.extraction.coded.isEmpty {
+        let checked = report.extraction.coded.filter { $0.verification != nil }.count
+        Section {
+          Text("Tap a value to correct its name, number or unit against the paper.")
+            .font(.caption).foregroundStyle(.secondary)
+          if checked < report.extraction.coded.count {
+            Button {
+              onChange?(report.extraction.verifyingAll())
+            } label: {
+              Label("Mark all values as checked", systemImage: "checkmark.seal")
+            }
+            .accessibilityIdentifier("verify-all")
+          } else {
+            Label("All values checked against the paper", systemImage: "checkmark.seal.fill")
+              .foregroundStyle(.green)
+          }
+        }
+      }
+      ResultSections(
+        extraction: report.extraction, sex: sex,
+        onEdit: onChange == nil ? nil : { editing = $0 })
       // Guideline 1.4.1 asks that a medical app remind people to check with a
       // doctor before acting. The moment that matters is while they are looking
       // at their own numbers, so it lives here rather than in a settings screen
@@ -111,6 +232,24 @@ struct ResultList: View {
     }
     .navigationTitle(report.title)
     .navigationBarTitleDisplayMode(.inline)
+    .sheet(item: $editing) { target in
+      if let raw = raw(target) {
+        EditValueSheet(
+          raw: raw, source: report.extraction.source,
+          alreadyVerified: {
+            if case .coded(let i) = target { return report.extraction.coded[i].verification != nil }
+            return false
+          }(),
+          onSave: { outcome in
+            switch target {
+            case .coded(let i): onChange?(report.extraction.replacingCoded(at: i, with: outcome))
+            case .unmapped(let i): onChange?(report.extraction.replacingUnmapped(at: i, with: outcome))
+            }
+            editing = nil
+          },
+          onCancel: { editing = nil })
+      }
+    }
   }
 }
 
@@ -180,6 +319,8 @@ private struct ReportDetails: View {
 struct ResultSections: View {
   let extraction: ExtractionResult
   var sex: RangeSex = .any
+  /// Opens a value for correction; nil where the values cannot be changed.
+  var onEdit: ((EditTarget) -> Void)? = nil
 
   /// `UnmappedReason.explanation` is the wire wording, shared with
   /// `services/epa-ingest` and written into a PDF export, so it stays English
@@ -197,8 +338,14 @@ struct ResultSections: View {
 
   var body: some View {
     Section {
-      ForEach(Array(extraction.coded.enumerated()), id: \.offset) { _, value in
-        CodedRow(value: value, sex: sex)
+      ForEach(Array(extraction.coded.enumerated()), id: \.offset) { index, value in
+        if let onEdit {
+          Button { onEdit(.coded(index)) } label: { CodedRow(value: value, sex: sex) }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("coded-row-\(index)")
+        } else {
+          CodedRow(value: value, sex: sex)
+        }
       }
     } header: {
       Label("\(extraction.coded.count) recognised", systemImage: "checkmark.circle")
@@ -206,12 +353,19 @@ struct ResultSections: View {
 
     if !extraction.unmapped.isEmpty {
       Section {
-        ForEach(Array(extraction.unmapped.enumerated()), id: \.offset) { _, item in
-          VStack(alignment: .leading, spacing: 2) {
+        ForEach(Array(extraction.unmapped.enumerated()), id: \.offset) { index, item in
+          let row = VStack(alignment: .leading, spacing: 2) {
             Text("\(item.raw.label)  \(formatted(item.raw.value)) \(item.raw.unitRaw)")
             Text(localised(item.reason))
               .font(.caption)
               .foregroundStyle(.secondary)
+          }
+          if let onEdit {
+            Button { onEdit(.unmapped(index)) } label: { row }
+              .buttonStyle(.plain)
+              .accessibilityIdentifier("unmapped-row-\(index)")
+          } else {
+            row
           }
         }
       } header: {
@@ -247,6 +401,12 @@ private struct CodedRow: View {
     VStack(alignment: .leading, spacing: 4) {
       HStack {
         Text(value.raw.label).font(.body)
+        if let check = value.verification {
+          // Checked by the person, and corrected if the pencil shows.
+          Image(systemName: check.edited ? "pencil.and.outline" : "checkmark.seal.fill")
+            .foregroundStyle(.green)
+            .accessibilityLabel(check.edited ? Text("Corrected by you") : Text("Checked by you"))
+        }
         Spacer()
         Text(
           "\(value.raw.comparator?.rawValue ?? "")\(formatted(value.raw.value)) \(UnitText.display(value.coding.ucum))"

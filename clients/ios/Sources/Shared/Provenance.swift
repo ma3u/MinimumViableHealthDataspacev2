@@ -117,12 +117,40 @@ public struct CodedLabValue: Sendable, Equatable, Codable {
   public let raw: RawLabValue
   public let coding: AnalyteCoding
   public let source: SourceKind
+  /// Set when the person checked this value against the paper, and the
+  /// reading before they changed it, if they did. Absent on every value a
+  /// person has not looked at, and on records stored before it existed.
+  public var verification: Verification?
 
-  public init(raw: RawLabValue, coding: AnalyteCoding, source: SourceKind) {
+  public init(
+    raw: RawLabValue, coding: AnalyteCoding, source: SourceKind,
+    verification: Verification? = nil
+  ) {
     self.raw = raw
     self.coding = coding
     self.source = source
+    self.verification = verification
   }
+}
+
+/// A person's check of one value against the paper.
+///
+/// It records that a person confirmed the value and, when they corrected it,
+/// what the recogniser had read. It is not a laboratory's validation: an OCR
+/// transcription stays `preliminary` in FHIR however carefully it was
+/// checked, because the laboratory did not issue it in this form.
+public struct Verification: Sendable, Equatable, Codable {
+  public let verifiedAt: Date
+  /// What the recogniser read, when the person changed the label, the
+  /// number or the unit. Nil when they confirmed it unchanged.
+  public let original: RawLabValue?
+
+  public init(verifiedAt: Date, original: RawLabValue? = nil) {
+    self.verifiedAt = verifiedAt
+    self.original = original
+  }
+
+  public var edited: Bool { original != nil }
 }
 
 /// Why a parsed row could not be coded. Reported, never silently dropped.

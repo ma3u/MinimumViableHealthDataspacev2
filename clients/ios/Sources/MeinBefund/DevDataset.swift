@@ -74,6 +74,16 @@ import Shared
       /// Measured off the drawing rather than read from it, because the chart
       /// printed no number beside the point.
       var estimated: Bool = false
+      /// Pages after the first that hold a table the app does not read, as a
+      /// device report prints its single readings. Drawn, never coded.
+      var tables: [Table] = []
+    }
+
+    /// A page of one table under a title.
+    struct Table {
+      let title: String
+      let columns: [String]
+      let rows: [[String]]
     }
 
     static func date(_ s: Sheet) -> Date {
@@ -119,7 +129,7 @@ import Shared
       // was read from is the one thing this app is meant not to be.
       if let pages = scan(for: sheet) {
         report.scan = LabReport.ScanAttachment(
-          pageCount: 1, bytes: pages.count, sourcePixelWidth: 1240)
+          pageCount: 1 + sheet.tables.count, bytes: pages.count, sourcePixelWidth: 1240)
       }
       return report
     }
@@ -140,7 +150,12 @@ import Shared
         rows: rows,
         header: SyntheticSheet.Header(
           collected: printed, received: printed, reported: printed))
-      return try? ScanDocument.pdf(pages: [page])
+      let tables = sheet.tables.enumerated().map { index, table in
+        SyntheticSheet.renderTable(
+          title: table.title, columns: table.columns, rows: table.rows, page: index + 2,
+          footer: "\(sheet.title), Messung vom \(printed)")
+      }
+      return try? ScanDocument.pdf(pages: [page] + tables)
     }
 
     // ---- The corpus -------------------------------------------------------
@@ -205,10 +220,10 @@ import Shared
           Row("Ferritin", 188, "ug/l", 30, 400),
           Row("Vitamin B12", 412, "pg/ml", 191, 663),
           Row("Homocystein", 11.4, "umol/l", nil, 12),
-          // Known to the dictionary in this unit and to LOINC in no unit at
-          // all: it lands in the unmatched list, which is where the screen
-          // that shows unmatched values gets something to show.
-          Row("Omega-3-Index", 6.8, "%", 8, nil),
+          // An analyte the dictionary does not know: it lands in the
+          // unmatched list, which is where the screen that shows unmatched
+          // values gets something to show.
+          Row("Zonulin", 48, "ng/ml", nil, 55),
         ],
         unread: ["Probeneingang 14.09.2025 08:12"]),
 
@@ -412,6 +427,210 @@ import Shared
           Row("Candida albicans", 0.011, "%"),
         ]),
 
+      // A 24-hour ambulatory blood pressure report: the means of the summary
+      // grid for the whole recording, the day and the night, the night-time
+      // fall, and the height and weight its header prints. What
+      // `AmbulatoryBloodPressure` reads from such a page, by the labels it
+      // gives them. Only the 24-hour means have LOINC codes of their own; a
+      // day or night mean carries the plain mean code, and the dipping
+      // figures carry none. A normotensive dipper whose maxima, not shown
+      // here, came from a bicycle ride; the means are what ESC/ESH judge by.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D011", year: 2026, month: 8, day: 27,
+        title: "24-h-Blutdruckmessung, Praxis Dr. Muster", laboratory: "Praxis Dr. Muster",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Systolischer Blutdruck 24-h-Mittel", 122, "mmHg"),
+          Row("Systolischer Blutdruck Tagesmittel", 128, "mmHg"),
+          Row("Systolischer Blutdruck Nachtmittel", 110, "mmHg"),
+          Row("Diastolischer Blutdruck 24-h-Mittel", 72, "mmHg"),
+          Row("Diastolischer Blutdruck Tagesmittel", 78, "mmHg"),
+          Row("Diastolischer Blutdruck Nachtmittel", 60, "mmHg"),
+          Row("Puls 24-h-Mittel", 64, "/min"),
+          Row("Puls Tagesmittel", 68, "/min"),
+          Row("Puls Nachtmittel", 58, "/min"),
+          Row("Mittlerer arterieller Druck 24-h-Mittel", 88, "mmHg"),
+          Row("Pulsdruck 24-h-Mittel", 50, "mmHg"),
+          Row("Nächtliche Absenkung systolisch", -14.1, "%"),
+          Row("Nächtliche Absenkung diastolisch", -23, "%"),
+          Row("Nächtliche Absenkung Puls", -14.7, "%"),
+          Row("Körpergröße", 182, "cm"),
+          Row("Körpergewicht", 80, "kg"),
+          Row("Body-Mass-Index", 24.2, "kg/m2"),
+        ],
+        unread: ["Limit : SYS=135, DIA=85, Puls=80, MAD=100, PP=50"],
+        tables: [
+          Table(
+            title: "Blutdruck-Tabelle",
+            columns: ["Zeit", "Sys [mmHg]", "MAD [mmHg]", "Dia [mmHg]", "PP [mmHg]", "Puls [bpm]", "Akt [mg]"],
+            rows: abpmReadings),
+          Table(
+            title: "Durchschnittlicher Blutdruck nach Aktivitätslevel",
+            columns: ["Aktivitätslevel", "Sys [mmHg]", "MAD [mmHg]", "Dia [mmHg]", "PP [mmHg]", "Puls [bpm]", "# Messungen"],
+            rows: [
+              ["niedrig", "121", "95", "71", "50", "61", "31"],
+              ["mittel", "136", "104", "77", "59", "102", "4"],
+              ["hoch", "", "", "", "", "", "0"],
+            ]),
+        ]),
+
+      // A practice system's printed lab sheet, as a family doctor hands it
+      // over: trace elements and vitamins next to the blood count, a fasting
+      // glucose with its own LOINC code, vitamin B6 in whole blood carried
+      // uncoded rather than under a serum code, and a value printed only as
+      // a result text above the measuring range.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D014", year: 2026, month: 5, day: 5,
+        title: "Laborblatt, Praxis Muster", laboratory: "Labor Muster",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Magnesium", 0.86, "mmol/l", 0.75, 1.10),
+          Row("Vitamin B6 i. Blut", 21.4, "ng/ml", 4.4, 40.0),
+          Row("25-OH Vitamin D", 38.2, "ng/ml", 30, 60),
+          Row("Holotranscobalamin", 96, "pmol/l", 50, nil),
+          Row("Kupfer", 14.2, "µmol/l", 10.7, 26.6),
+          Row("Zink", 84, "µg/dl", 60, 120),
+          Row("Selen", 101, "µg/l", 50, 120),
+          Row("Mangan im Serum", 0.92, "µg/l", 0.6, 1.3),
+          Row("Hämoglobin", 13.4, "g/dl", 12, 16),
+          Row("HbA1c", 34, "mmol/mol", 20, 40),
+          Row("Glukose nüchtern", 88, "mg/dl", 60, 100),
+          Row("Ferritin", 64, "ng/ml", 13, 140),
+        ],
+        unread: ["Folsäure  ng/ml  > 25.0  1.8 - 9.0"]),
+
+      // A 24-hour Holter recording's summary, as `HolterReport` reads it: the
+      // heart rate's minimum, mean and maximum, the beats counted, the
+      // recording's length and the ectopic beats. A report of ECG values, so
+      // the FHIR export files it as a Holter study. The counts LOINC has only
+      // as rates are carried uncoded.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D015", year: 2026, month: 8, day: 27,
+        title: "Langzeit-EKG, Praxis Dr. Muster", laboratory: "Praxis Dr. Muster",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Aufzeichnungsdauer", 1438, "minutes"),
+          Row("Herzschläge gesamt", 94212, "{beats}"),
+          Row("Herzfrequenz 24-h-Minimum", 47, "/min"),
+          Row("Herzfrequenz 24-h-Mittel", 68, "/min"),
+          Row("Herzfrequenz 24-h-Maximum", 136, "/min"),
+          Row("Ventrikuläre Extrasystolen", 3, "{beats}"),
+          Row("Supraventrikuläre Extrasystolen", 6, "{beats}"),
+          Row("Pausen", 0, "{beats}"),
+          Row("Zeit über der Tachykardiegrenze", 4.85, "minutes"),
+          Row("Zeit unter der Bradykardiegrenze", 72.15, "minutes"),
+          Row("Artefakte", 2, "%"),
+        ]),
+
+      // A performance diagnostics morning, five documents from one practice,
+      // as their readers read them (BodyComposition, ExerciseECG,
+      // CardiopulmonaryExercise, LactateTest, GlucoseProfile). Most of a
+      // lactate test and much of a DXA scan has no LOINC term and is
+      // carried uncoded with the reason; an ergometry is not an ECG study.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D016", year: 2026, month: 5, day: 12,
+        title: "Körperzusammensetzung (DXA), Praxis Muster", laboratory: "Praxis Muster - Sportmedizin",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Körperfettanteil", 23.4, "%"),
+          Row("Körperfettmasse", 14.28, "kg"),
+          Row("Mager-Weichteilmasse", 46.74, "kg"),
+          Row("Knochenmineralgehalt", 2.15, "kg"),
+          Row("Android-Fettanteil", 28.1, "%"),
+          Row("Gynoid-Fettanteil", 20.8, "%"),
+          Row("Android/Gynoid-Verhältnis", 1.35, "{ratio}"),
+          Row("Viszerales Fett", 0.508, "kg"),
+          Row("Viszerales Fett", 57, "cm2"),
+          Row("Knochendichte Ganzkörper", 1.153, "g/cm2"),
+          Row("Knochendichte Ganzkörper, T-Wert", -0.6, "{SD}"),
+          Row("Knochendichte Ganzkörper, Z-Wert", -0.2, "{SD}"),
+          Row("Relativer Skelettmuskelindex", 7.85, "kg/m2"),
+        ]),
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D017", year: 2026, month: 5, day: 12,
+        title: "Belastungs-EKG, Praxis Muster", laboratory: "Praxis Muster - Sportmedizin",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Maximale Belastung", 225, "watts"),
+          Row("Belastungsdauer", 11.87, "minutes"),
+          Row("Ruheherzfrequenz", 71, "/min"),
+          Row("Maximale Herzfrequenz unter Belastung", 158, "/min"),
+          Row("Systolischer Blutdruck unter Belastung, maximal", 196, "mmHg"),
+          Row("Diastolischer Blutdruck unter Belastung", 88, "mmHg"),
+          Row("MET, maximal", 11.4, "{MET}"),
+          Row("PWC 170", 200, "watts"),
+          Row("PWC 150", 170, "watts"),
+          Row("PWC 130", 132, "watts"),
+          Row("Ventrikuläre Extrasystolen", 2, "{beats}"),
+        ]),
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D018", year: 2026, month: 5, day: 12,
+        title: "Spiroergometrie, Praxis Muster", laboratory: "Praxis Muster - Sportmedizin",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Forcierte Vitalkapazität", 3.92, "litres"),
+          Row("Einsekundenkapazität", 3.21, "litres"),
+          Row("FEV1/FVC", 81.9, "%"),
+          Row("Maximale Sauerstoffaufnahme", 2650, "ml/min"),
+          Row("Maximale Sauerstoffaufnahme pro kg", 41.1, "ml/min/kg"),
+          Row("Sauerstoffpuls, maximal", 15.8, "ml/beat"),
+          Row("Erste ventilatorische Schwelle pro kg", 29.3, "ml/min/kg"),
+          Row("VE/VCO2-Steigung", 25.1, "{ratio}"),
+          Row("Atemreserve", 38.2, "%"),
+          Row("Respiratorischer Quotient, maximal", 1.08, "{ratio}"),
+          Row("Maximale Herzfrequenz unter Belastung", 168, "/min"),
+          Row("Herzfrequenzerholung nach 1 Minute", 31, "/min"),
+        ]),
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D019", year: 2026, month: 5, day: 12,
+        title: "Leistungsdiagnostik, Praxis Muster", laboratory: "Praxis Muster - Sportmedizin",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Leistung an der Laktatschwelle", 103.7, "watts"),
+          Row("Leistung an der individuellen anaeroben Schwelle", 162, "watts"),
+          Row("Leistung an der individuellen anaeroben Schwelle pro kg", 2.38, "watts/kg"),
+          Row("Herzfrequenz an der individuellen anaeroben Schwelle", 152, "/min"),
+          Row("Leistung bei 4 mmol/l Laktat", 194.2, "watts"),
+          Row("Maximale glykolytische Leistung (VLaMax)", 0.31, "mmol/l/s"),
+          Row("Maximale Sauerstoffaufnahme pro kg (berechnet)", 45.9, "ml/min/kg"),
+        ]),
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D020", year: 2026, month: 3, day: 3,
+        title: "Glukoseprofil (Sensor), Praxis Muster", laboratory: "Praxis Muster - Sportmedizin",
+        source: .ocrTranscribed,
+        // The AGP summary's consensus figures (Battelino et al. 2019).
+        rows: [
+          Row("Durchschnittliche Glukose (Sensor)", 128, "mg/dL"),
+          Row("Zeit im Zielbereich", 86, "%"),
+          Row("Zeit über dem Zielbereich", 9, "%"),
+          Row("Zeit deutlich über dem Zielbereich", 1, "%"),
+          Row("Zeit unter dem Zielbereich", 3, "%"),
+          Row("Zeit deutlich unter dem Zielbereich", 1, "%"),
+          Row("Glukosemanagement-Indikator (GMI)", 6.4, "%"),
+          Row("Glukosevariabilität (VK)", 31.2, "%"),
+          Row("Sensor aktiv", 97.8, "%"),
+        ]),
+
+      // A resting 12-lead ECG: the measurements the electrocardiograph prints
+      // above its tracing, as `Electrocardiogram` reads them. Every one has
+      // a LOINC ECG term; the report is filed as an ECG, not a lab report.
+      // The device's written interpretation is not carried: it is
+      // unconfirmed until a physician signs it.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D012", year: 2026, month: 8, day: 26,
+        title: "Ruhe-EKG, Praxis Dr. Muster", laboratory: "Praxis Dr. Muster",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Ventrikuläre Frequenz", 62, "/min"),
+          Row("PQ-Intervall", 148, "ms"),
+          Row("QRS-Dauer", 98, "ms"),
+          Row("QT-Intervall", 392, "ms"),
+          Row("QTc nach Bazett", 398, "ms"),
+          Row("P-Achse", -12, "deg"),
+          Row("QRS-Achse", 41, "deg"),
+          Row("T-Achse", 18, "deg"),
+        ]),
+
       // A home aminogram: eight essential amino acids, in micromoles per
       // litre, with the ranges such a test prints. Invented values on a real
       // layout, like everything else here.
@@ -430,6 +649,20 @@ import Shared
           Row("Valin", 212, "µmol/l", 150, 330),
         ]),
 
+      // The first page of the lipid profile below, scanned again on its own:
+      // every value is already in the whole report, so "Find duplicate
+      // reports" has something to find.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D013", year: 2026, month: 9, day: 4,
+        title: "Lipidprofil, Seite 1", laboratory: "Labor Musterstadt",
+        source: .labIssuedDigital,
+        rows: [
+          Row("Cholesterin gesamt", 212, "mg/dl", nil, 200),
+          Row("LDL-Cholesterin", 141, "mg/dl", nil, 116),
+          Row("HDL-Cholesterin", 48, "mg/dl", 40, nil),
+          Row("Triglyceride", 168, "mg/dl", nil, 150),
+        ]),
+
       Sheet(
         id: "00000000-0000-0000-0000-00000000D007", year: 2026, month: 9, day: 4,
         title: "Lipidprofil, Labor Musterstadt", laboratory: "Labor Musterstadt",
@@ -444,6 +677,54 @@ import Shared
           Row("Ferritin", 210, "ug/l", 30, 400),
           Row("Lipoprotein (a)", 0.3, "g/l", nil, 0.5),
         ]),
+    ]
+
+    /// The single readings of the 24-hour report: every 30 minutes by day and
+    /// every hour by night, four failed cuff inflations (`E14`), a bicycle
+    /// ride in the evening and exercise in the morning. Invented; generated
+    /// once with a fixed seed and kept here so a diff shows every number.
+    static let abpmReadings: [[String]] = [
+      ["09:12", "133", "98", "71", "62", "62", "94"],
+      ["09:42", "134", "105", "76", "58", "64", "44"],
+      ["10:12", "120", "97", "75", "45", "63", "26"],
+      ["10:42", "E14", "", "", "", "", "100"],
+      ["11:12", "120", "99", "74", "46", "61", "160"],
+      ["11:42", "133", "107", "77", "56", "63", "152"],
+      ["12:12", "133", "97", "73", "60", "68", "153"],
+      ["12:42", "125", "102", "78", "47", "63", "152"],
+      ["13:12", "E14", "", "", "", "", "98"],
+      ["13:42", "135", "106", "74", "61", "69", "104"],
+      ["14:12", "133", "108", "84", "49", "71", "59"],
+      ["14:42", "123", "107", "83", "40", "65", "77"],
+      ["15:12", "131", "103", "81", "50", "75", "132"],
+      ["15:42", "130", "101", "72", "58", "64", "107"],
+      ["16:12", "125", "108", "85", "40", "76", "20"],
+      ["16:42", "134", "107", "85", "49", "69", "16"],
+      ["17:12", "118", "97", "77", "41", "74", "136"],
+      ["17:42", "148", "107", "80", "68", "117", "368"],
+      ["18:12", "148", "112", "82", "66", "116", "382"],
+      ["18:42", "137", "106", "73", "64", "68", "43"],
+      ["19:12", "123", "92", "71", "52", "65", "93"],
+      ["19:42", "E14", "", "", "", "", "277"],
+      ["20:12", "125", "109", "84", "41", "69", "50"],
+      ["20:42", "135", "104", "70", "65", "71", "45"],
+      ["21:12", "129", "99", "70", "59", "68", "40"],
+      ["21:42", "130", "103", "83", "47", "76", "102"],
+      ["22:12", "120", "97", "75", "45", "75", "77"],
+      ["22:42", "135", "102", "73", "62", "65", "94"],
+      ["23:12", "106", "88", "63", "43", "58", "5"],
+      ["00:12", "108", "85", "56", "52", "60", "6"],
+      ["01:12", "105", "78", "59", "46", "57", "23"],
+      ["02:12", "E14", "", "", "", "", "257"],
+      ["03:12", "107", "85", "58", "49", "61", "9"],
+      ["04:12", "106", "83", "61", "45", "61", "25"],
+      ["05:12", "111", "84", "64", "47", "55", "25"],
+      ["06:12", "119", "94", "76", "43", "68", "44"],
+      ["06:42", "122", "98", "73", "49", "75", "45"],
+      ["07:12", "137", "107", "85", "52", "66", "110"],
+      ["07:42", "138", "103", "76", "62", "99", "268"],
+      ["08:12", "119", "104", "83", "36", "65", "42"],
+      ["08:42", "130", "99", "76", "54", "73", "133"],
     ]
 
     /// The corpus, newest first, as the app lists reports.

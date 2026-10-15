@@ -183,7 +183,14 @@ protection at all (measured: the sealed store answers `EPERM`).
 ```bash
 swift run ScanReplay ~/Downloads/klarbefund-diagnostics-2026-09-19        # every report
 swift run ScanReplay ~/Downloads/klarbefund-diagnostics-2026-09-19 --ocr  # re-run Vision on scan.pdf
+swift run ScanReplay ~/Downloads/klarbefund-diagnostics-2026-09-19 --truth  # accuracy against truth.json
 ```
+
+`--truth` measures each replayed report against a hand-written `truth.json`
+beside its `diagnostics.json` (format and pilot procedure in
+[`docs/klarbefund/evidence.md`](../../docs/klarbefund/evidence.md)). It prints
+which fields of which rows were wrong, never the values, and with `--json` only
+the counts, which is the part that may be published.
 
 The tool prints what the phone coded, what codes now, what is newly coded or
 lost, and every row with its reason. A record written before diagnostics

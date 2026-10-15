@@ -2,13 +2,19 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { loadObservationBundle } from "@/lib/patient/observation-bundle";
+import { loadRecordExtras } from "@/lib/patient/record-extras";
 import { ownPatientIdForSession } from "@/lib/overview/patient";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/patient/observations?patientId=<id>[&code=<loinc>]
+ * GET /api/patient/observations?patientId=<id>[&code=<loinc>][&include=all]
+ *
+ * With `include=all` the Bundle also carries the record's DiagnosticReports
+ * (ECG, imaging), Immunizations and MedicationStatements (ADR-059), the
+ * EHDS Art. 14 categories an ePA or EHR integrator asks for next; without it
+ * the Bundle is Observations only, as the Klarbefund app expects.
  *
  * Regulation (EU) 2025/327 Art. 3 (access to one's own electronic health
  * data) and Art. 14 (priority category: laboratory results). Returns the
@@ -25,6 +31,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const patientId = url.searchParams.get("patientId");
   const code = url.searchParams.get("code");
+  const includeAll = url.searchParams.get("include") === "all";
   if (!patientId) {
     return NextResponse.json(
       { error: "patientId is required" },
@@ -55,6 +62,16 @@ export async function GET(req: Request) {
     );
     if (!bundle) {
       return NextResponse.json({ error: "Patient not found" }, { status: 404 });
+    }
+    if (includeAll) {
+      const extras = await loadRecordExtras(patientId);
+      bundle.entry.push(
+        ...extras.map((resource) => ({
+          fullUrl: `urn:uuid:${resource.id}`,
+          resource,
+        })),
+      );
+      bundle.total = bundle.entry.length;
     }
     return NextResponse.json(bundle);
   } catch (err) {

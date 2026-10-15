@@ -68,7 +68,7 @@ describe("codeValues", () => {
   it("separates coded from unmapped without losing a row", () => {
     const result = codeValues([
       row("LDL-Cholesterin", "mg/dl"),
-      row("Omega-3-Index", "%"),
+      row("Zonulin", "ng/ml"),
       row("HbA1c", "mg/dl"),
       row("Ferritin", "Titer"),
     ]);
@@ -78,7 +78,7 @@ describe("codeValues", () => {
 
   it("says why each row could not be coded", () => {
     const { unmapped } = codeValues([
-      row("Omega-3-Index", "%"),
+      row("Zonulin", "ng/ml"),
       row("HbA1c", "mg/dl"),
       row("Ferritin", "Titer"),
     ]);
@@ -97,7 +97,7 @@ describe("codeValues", () => {
   });
 
   it("keeps the source line on an unmapped row so it can be checked against the paper", () => {
-    const { unmapped } = codeValues([row("Omega-3-Index", "%")]);
-    expect(unmapped[0].line).toContain("Omega-3-Index");
+    const { unmapped } = codeValues([row("Zonulin", "ng/ml")]);
+    expect(unmapped[0].line).toContain("Zonulin");
   });
 });

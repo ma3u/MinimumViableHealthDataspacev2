@@ -141,6 +141,15 @@ export interface CodedLabValue extends RawLabValue {
   coding: AnalyteCoding;
   /** Canonical key of the matched analyte definition. */
   analyteKey: string;
+  /**
+   * Set when the person checked the value against the paper. `original` is
+   * the recogniser's reading when they corrected it. Not a laboratory's
+   * validation: the Observation's status stays what the source decides.
+   */
+  verification?: {
+    verifiedAt: string;
+    original?: { label: string; value: number; unitRaw: string };
+  };
 }
 
 /** A raw value no analyte definition matched. Reported, never silently dropped. */

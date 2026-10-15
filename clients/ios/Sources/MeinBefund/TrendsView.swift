@@ -127,7 +127,7 @@ private struct SeriesHeader: View {
         HStack(spacing: 4) {
           Image(systemName: RangePalette.symbol(for: series.placement))
           Text(
-            "\(latest.comparator?.rawValue ?? "")\(Measurement.text(latest.value)) \(series.ucum)"
+            "\(latest.comparator?.rawValue ?? "")\(Measurement.text(latest.value)) \(UnitText.display(series.ucum))"
           )
         }
         .font(.caption.monospacedDigit())
@@ -193,7 +193,7 @@ private struct PointCallout: View {
 
   private var card: some View {
     VStack(alignment: .leading, spacing: 2) {
-      Text("\(point.comparator?.rawValue ?? "")\(Measurement.text(point.value)) \(series.ucum)")
+      Text("\(point.comparator?.rawValue ?? "")\(Measurement.text(point.value)) \(UnitText.display(series.ucum))")
         .font(.callout.monospacedDigit().weight(.medium))
       Text(point.date.formatted(date: .abbreviated, time: .omitted))
         .font(.caption2)
@@ -266,7 +266,7 @@ private struct SeriesFooter: View {
     // this one shipped in English to German phones because of that.
     return String(
       format: String(localized: "%1$@ %2$@ %3$@ since the previous measurement"),
-      arrow, Measurement.text(abs(change)), series.ucum)
+      arrow, Measurement.text(abs(change)), UnitText.display(series.ucum))
   }
 
   var body: some View {
@@ -279,7 +279,7 @@ private struct SeriesFooter: View {
       if let range = series.range {
         // The published band, named and sourced. Never presented as a verdict.
         if let optimal = range.optimalText(formatter: Measurement.text) {
-          Text("Optimal \(optimal) \(series.ucum). Latest value is \(series.placement.label).")
+          Text("Optimal \(optimal) \(UnitText.display(series.ucum)). Latest value is \(series.placement.label).")
         }
         Link(range.source.label, destination: URL(string: range.source.url)!)
           .font(.caption2)
@@ -428,7 +428,7 @@ private struct SeriesChart: View {
               .position(x: anchor.x, y: anchor.y)
               .accessibilityLabel(
                 Text(
-                  "\(Measurement.text(point.value)) \(series.ucum), \(point.date.formatted(date: .abbreviated, time: .omitted))"
+                  "\(Measurement.text(point.value)) \(UnitText.display(series.ucum)), \(point.date.formatted(date: .abbreviated, time: .omitted))"
                 ))
             }
           }

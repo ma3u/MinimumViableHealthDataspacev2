@@ -92,7 +92,7 @@ struct LineTests {
     Vitamin B12                 412     pg/ml          197 - 771
     NT-proBNP                 1.240     pg/ml          < 125
     Troponin T hs              n.b.     ng/l           < 14
-    Omega-3-Index               4,1     %              > 8
+    Zonulin                     41      ng/ml          < 55
     """
 
   static let parsed = LabLineParser.parse(report)
@@ -168,8 +168,8 @@ struct ExtractionTests {
   @Test("an unknown analyte is reported, not guessed")
   func unknownAnalyte() {
     let result = LabLineParser.extract(LineTests.report, source: .ocrTranscribed)
-    let omega = result.unmapped.first { $0.raw.label.hasPrefix("Omega-3") }
-    #expect(omega?.reason == .unknownAnalyte)
+    let unknown = result.unmapped.first { $0.raw.label.hasPrefix("Zonulin") }
+    #expect(unknown?.reason == .unknownAnalyte)
   }
 
   @Test("a known analyte in the wrong unit is a mismatch, not an unknown")
@@ -600,7 +600,7 @@ struct PracticeSoftwareTests {
   @Test("a specimen marker whose brackets the recogniser mangled is still read")
   func mixedDelimiters() {
     let result = Self.extract("bzP  Glukose nüchtern (i.Plasma]  94  mg/dl  60-100")
-    #expect(result.coded.first?.coding.loinc == "2345-7")
+    #expect(result.coded.first?.coding.loinc == "1558-6")  // fasting, its own LOINC code
   }
 
   @Test("a urine row is refused, never coded as the serum test of the same name")
@@ -991,5 +991,110 @@ struct PrintedReferenceTests {
     let raw = try JSONDecoder().decode(RawLabValue.self, from: Data(json.utf8))
     #expect(raw.referenceText == nil)
     #expect(raw.referenceHigh == 116)
+  }
+
+  @Test("a unit printed under its value on an Einheit line, with a note after it")
+  func unitOnTheNextLine() {
+    let result = LabLineParser.extract(
+      "geschätzte GFR(eGFR n.CKD-EPI)  84\nEinheit: ml / min / (1,73 m^2) Berechnung nach Formel von 2009",
+      source: .ocrTranscribed)
+    #expect(result.coded.map(\.coding.loinc) == ["62238-1"])
+    #expect(result.coded.first?.raw.value == 84)
+    #expect(result.suspiciousLines.isEmpty)
+  }
+
+  @Test("Hamnstoff is Harnstoff: an r read as m, the n kept")
+  func hamnstoff() {
+    let result = LabLineParser.extract("Hamnstoff HP  31  mg/dl  17 - 43", source: .ocrTranscribed)
+    #expect(result.coded.map(\.coding.loinc) == ["3091-6"])
+  }
+
+  @Test("a reference range read twice is the range, and the result follows it")
+  func rangeReadTwice() {
+    let result = LabLineParser.extract(
+      "LDL-Cholesterin [P]  mmol/l  <3.10  < 3.10  4.20 +  162 mg/dL", source: .ocrTranscribed)
+    #expect(result.coded.map(\.raw.value) == [4.2])
+    #expect(result.coded.first?.raw.comparator == nil)
+    // A result that really is the bound, alone after the range, is still read.
+    let bound = LabLineParser.extract("CRP [P]  mg/l  < 5.0  < 5.0", source: .ocrTranscribed)
+    #expect(bound.coded.map(\.raw.value) == [5])
+  }
+
+  @Test("a word after the matrix marker is not part of the name")
+  func wordAfterMarker() {
+    let result = LabLineParser.extract(
+      "Albumin [U]  Alhaminrn  mg/l  < 30  4.6  20", source: .ocrTranscribed)
+    #expect(result.coded.map(\.coding.loinc) == ["1754-1"], "urine albumin, never serum")
+  }
+
+  @Test("a lone | is the I of troponin I")
+  func pipeAsI() {
+    let result = LabLineParser.extract(
+      "hs cTroponin | [P]  ng/l  <53  4", source: .ocrTranscribed)
+    #expect(result.coded.map(\.coding.loinc) == ["89579-7"])
+  }
+
+  /// A university laboratory's cumulative report, as the recogniser read it:
+  /// each name half a line away from its numbers. Layout and quirks real,
+  /// values invented.
+  static let shiftedCumulative = """
+    Klinische Chemie  s.Bem.
+    Natrium [P)
+    Kalium [P]  mmol/  136 - 145  140
+    mmol/l  3.4-4.5  4.1
+    hs cTroponin | [P)
+    ng/l  <53  4
+    ALAT (GPT) [P)
+    ukatal/l  0.12 - 0.67  0.41
+    ASAT (GOT) [P)  ukatal/l
+    0.22 - 0.67  0.36
+    Gamma-GT [P]  ukatal/l
+    LDH [P)  < 1.22  0.38
+    ukatal/l  2-4.1  3.20
+    Ferritin [P]  ug/l  22 - 322
+    188
+    Transferrin-Sättigung [P]  %  16-45  31.2
+    """
+
+  @Test("a cumulative report's names half a line from their numbers are put back together")
+  func shiftedRows() {
+    let result = LabLineParser.extract(Self.shiftedCumulative, source: .ocrTranscribed)
+    let values = Dictionary(result.coded.map { ($0.coding.analyteKey, $0.raw.value) }) { a, _ in a }
+    #expect(values["sodium"] == 140)
+    #expect(values["potassium"] == 4.1)
+    #expect(values["troponin-i-hs"] == 4)
+    #expect(values["alt"] == 0.41)
+    #expect(values["ast"] == 0.36)
+    #expect(values["ggt"] == 0.38)
+    #expect(values["ldh"] == 3.2)
+    #expect(values["ferritin"] == 188)
+    #expect(values["transferrin-saturation"] == 31.2)
+    #expect(result.coded.count == 9)
+    #expect(result.unmapped.isEmpty)
+    #expect(result.suspiciousLines.isEmpty, "\(result.suspiciousLines)")
+    // The sodium's range came with it.
+    #expect(result.coded.first { $0.coding.analyteKey == "sodium" }?.raw.referenceHigh == 145)
+  }
+
+  @Test("an aligned sheet with a name still waiting for its result is not shifted")
+  func alignedNotShifted() {
+    let sheet = """
+      Natrium [P]  in Arbeit
+      Natrium [P]
+      Kalium [P]  mmol/l  3.4-4.5  4.1
+      Calcium [P]  mmol/l  2.2-2.6  2.4
+      """
+    let result = LabLineParser.extract(sheet, source: .ocrTranscribed)
+    let values = Dictionary(result.coded.map { ($0.coding.analyteKey, $0.raw.value) }) { a, _ in a }
+    #expect(values["sodium"] == nil, "no value of another row is handed to it")
+    #expect(values["potassium"] == 4.1)
+    #expect(values["calcium"] == 2.4)
+  }
+
+  @Test("the stored text of a first recognition, parsed again, reads the shifted rows")
+  func fromPageTexts() {
+    let result = LabRecoder.fromPageTexts([Self.shiftedCumulative], source: .ocrTranscribed)
+    #expect(result.coded.count == 9)
+    #expect(result.source == .ocrTranscribed)
   }
 }

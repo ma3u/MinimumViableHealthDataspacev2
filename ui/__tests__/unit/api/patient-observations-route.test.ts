@@ -175,3 +175,120 @@ describe("GET /api/patient/observations", () => {
     expect(res.status).toBe(502);
   });
 });
+
+describe("GET /api/patient/observations?include=all (ADR-059)", () => {
+  beforeEach(() => {
+    mockRunQuery.mockReset();
+    vi.mocked(getServerSession).mockResolvedValue(session(["EDC_ADMIN"]));
+  });
+
+  const REPORT = {
+    id: "dr-ecg-p1-2026-03-04",
+    code: "11524-6",
+    display: "EKG study",
+    category: "EC",
+    categoryDisplay: "Electrocardiac (e.g., EKG, EEC, Holter)",
+    status: "final",
+    effective: "2026-03-04",
+    issued: "2026-03-04T10:00:00Z",
+    performer: "AlphaKlinik Berlin, Kardiologie (fictional)",
+    conclusion: "Sinus rhythm, normal intervals.",
+    results: ["dr-ecg-p1-2026-03-04-8867-4"],
+  };
+  const IMMUNIZATION = {
+    id: "imm-p1-2025-10-14-150",
+    code: "150",
+    system: "http://hl7.org/fhir/sid/cvx",
+    display: "Influenza, injectable, quadrivalent, preservative free",
+    status: "completed",
+    occurrence: "2025-10-14",
+    lot: "FLU25-7731",
+    performer: "Hausarztpraxis Musterstadt (fictional)",
+  };
+  const STATEMENT = {
+    id: "ms-p1-A10BA02",
+    code: "A10BA02",
+    system: "http://www.whocc.no/atc",
+    display: "Metformin 500 mg",
+    status: "active",
+    dosage: "1-0-1",
+    dose: 500,
+    doseUnit: "mg",
+    reason: "Diabetes mellitus type 2",
+    since: "2018-04-10",
+    planId: "bmp-p1-2026-08-21",
+    planPrinted: "2026-08-21",
+    source: "Bundeseinheitlicher Medikationsplan (fictional)",
+  };
+
+  it("appends the reports, vaccinations and the medication plan to the Bundle", async () => {
+    mockRunQuery
+      .mockResolvedValueOnce([{ id: "P1", name: "Anna Müller" }])
+      .mockResolvedValueOnce(ROWS)
+      .mockResolvedValueOnce([REPORT])
+      .mockResolvedValueOnce([IMMUNIZATION])
+      .mockResolvedValueOnce([STATEMENT]);
+    const res = await GET(makeReq("?patientId=P1&include=all"));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    const types = body.entry.map(
+      (e: { resource: { resourceType: string } }) => e.resource.resourceType,
+    );
+    expect(types.filter((t: string) => t === "Observation")).toHaveLength(
+      ROWS.length,
+    );
+    expect(types).toContain("DiagnosticReport");
+    expect(types).toContain("Immunization");
+    expect(types).toContain("MedicationStatement");
+    expect(body.total).toBe(ROWS.length + 3);
+    expect(mockRunQuery).toHaveBeenCalledTimes(5);
+
+    const report = body.entry.find(
+      (e: { resource: { resourceType: string } }) =>
+        e.resource.resourceType === "DiagnosticReport",
+    ).resource;
+    expect(report.code.coding[0]).toEqual({
+      system: "http://loinc.org",
+      code: "11524-6",
+      display: "EKG study",
+    });
+    expect(report.category[0].coding[0].code).toBe("EC");
+    expect(report.result).toEqual([
+      { reference: "urn:uuid:dr-ecg-p1-2026-03-04-8867-4" },
+    ]);
+    const statement = body.entry.find(
+      (e: { resource: { resourceType: string } }) =>
+        e.resource.resourceType === "MedicationStatement",
+    ).resource;
+    expect(statement.dosage[0].text).toBe("1-0-1");
+    expect(statement.dosage[0].doseAndRate[0].doseQuantity).toEqual({
+      value: 500,
+      unit: "mg",
+    });
+    expect(statement.identifier[0].value).toBe("bmp-p1-2026-08-21");
+  });
+
+  it("leaves the Bundle Observations only without include", async () => {
+    mockRunQuery
+      .mockResolvedValueOnce([{ id: "P1", name: "Anna Müller" }])
+      .mockResolvedValueOnce(ROWS);
+    const res = await GET(makeReq("?patientId=P1"));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.total).toBe(ROWS.length);
+    expect(mockRunQuery).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps a record without extras a valid Bundle", async () => {
+    mockRunQuery
+      .mockResolvedValueOnce([{ id: "P1", name: "Anna Müller" }])
+      .mockResolvedValueOnce(ROWS)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([]);
+    const res = await GET(makeReq("?patientId=P1&include=all"));
+    const body = await res.json();
+    expect(body.total).toBe(ROWS.length);
+    expect(body.entry).toHaveLength(ROWS.length);
+  });
+});

@@ -6,4 +6,6 @@
 FROM grafana/k6:2.3.0
 COPY config.js platform.js signin.js /scripts/
 COPY azure/entrypoint.sh /scripts/entrypoint.sh
+# The k6 image already runs as this user; stating it keeps the scanner honest (trivy DS-0002).
+USER 12345
 ENTRYPOINT ["/bin/sh", "/scripts/entrypoint.sh"]
