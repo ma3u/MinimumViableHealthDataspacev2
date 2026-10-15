@@ -289,8 +289,9 @@ published bands beside them are quotations with a source, not a verdict.
 
 Always consult a doctor before making any decision about your health.
 
-What has been tested, how accuracy is measured, and what is still open is in
-[`evidence.md`](evidence.md).
+What has been tested and how accuracy is measured is in
+[`evidence.md`](evidence.md); data protection, security (BSI TR-03161) and
+regulation are assessed in [`self-assessment.md`](self-assessment.md).
 
 ## How these screenshots are made
 

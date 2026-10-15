@@ -4,7 +4,9 @@ What a reviewer outside this project can check about Klarbefund, the iPhone
 lab-report scanner ([#186](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/186)),
 and what is still missing. Written for an insurer's, a hospital's or an
 auditor's first question: _is the extraction right, is the data safe, and is
-this a medical device?_ The person-facing description is in
+this a medical device?_ Data protection, BSI TR-03161 and regulation are
+assessed in [`self-assessment.md`](self-assessment.md); how to run all of this
+on a Mac is in [`run-on-mac.md`](run-on-mac.md). The person-facing description is in
 [`README.md`](README.md), the developer side in
 [`clients/ios/README.md`](../../clients/ios/README.md).
 
@@ -58,7 +60,8 @@ Two ways to run it:
    synthetic panel under nine scan conditions, reads it with Vision and asserts
    zero silent errors under each. Locally: `cd clients/ios && swift test`; with
    `KLARBEFUND_BENCHMARK_OUT=<file>` set, the counts are written there as JSON.
-   An `ios-unit-tests` job for `.github/workflows/test.yml` (pending) runs the
+   An `ios-unit-tests` job for `.github/workflows/test.yml` (pending, YAML in
+   [`run-on-mac.md`](run-on-mac.md#4-put-the-swift-suite-into-ci)) runs the
    whole Swift suite on `macos-26` and keeps that JSON as the
    `klarbefund-accuracy-benchmark` artifact; until it lands, CI builds only the
    `Shared` target. No real data is involved, so the JSON can be published as
