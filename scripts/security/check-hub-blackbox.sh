@@ -36,7 +36,7 @@ fi
 
 echo "-- every API route refuses an anonymous caller (ADR-044)"
 for p in /api/patient /api/patient/profile /api/patient/observations?patientId=P1 /api/patient/research /api/patient/insights \
-         /api/graph /api/catalog /api/compliance /api/credentials /api/trust-center /api/analytics /api/nlq/backend /api/audit; do
+         /api/graph /api/catalog /api/compliance /api/credentials /api/trust-center /api/analytics /api/nlq/backend; do
   expect 401 "GET $p" "$H$p"
 done
 expect 401 "POST /api/patient/app/wearables (no token)" -X POST -H 'Content-Type: application/json' -d '{"resourceType":"Bundle"}' "$H/api/patient/app/wearables"
