@@ -1,0 +1,5 @@
+# KSV-01010 flags the ConfigMap in k8s/health-dataspace-ui.yaml because the key
+# names KEYCLOAK_CLIENT_ID and KEYCLOAK_ISSUER look sensitive. They are a public
+# client id and a public issuer URL; the secrets of that manifest are in the
+# Secret below it. Reviewed 2026-10-15, security test report F5.
+KSV-01010
