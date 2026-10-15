@@ -2,7 +2,7 @@
 
 /**
  * RegisterDialog — a lightweight modal wrapping EudiApprovalFlow. Used by the
- * homepage "Register with EUDI Wallet" CTA and the /patient "Request EHR data"
+ * homepage "Register with d-you" CTA and the /patient "Request EHR data"
  * button. No dialog dependency — plain Tailwind overlay with ESC/backdrop close,
  * role="dialog" + aria-modal, and body-scroll lock. z-70 sits above the nav
  * (z-50) and UserMenu dropdown.

@@ -610,9 +610,9 @@ test.describe("Login flow — Keycloak integration", () => {
   test("patient1 shows correct display name after login", async ({ page }) => {
     await loginAs(page, "patient1", "patient1");
     // The user menu should show the display name
-    await expect(page.getByText(/Maria Schmidt|patient1/i).first()).toBeVisible(
-      { timeout: T },
-    );
+    await expect(
+      page.getByText(/Patient [0-9a-f]{8}|patient1/i).first(),
+    ).toBeVisible({ timeout: T });
   });
 
   // Issue #28 (closed 2026-05-10): sign-in flow stays within

@@ -51,7 +51,29 @@ python3 scripts/frames-to-gif.py /tmp/patient public/presentations/hl7-showcase-
 
 The frames are screenshots taken at chosen moments, so loading time never ends up in the
 animation; about 57 frames, 22 seconds, under 2 MB. `img/klarbefund-tour.gif` is built
-from the app screenshots in `docs/klarbefund/img/` (fictional dev dataset).
+from the app screenshots in `docs/klarbefund/img/` (fictional dev dataset). The deck shows
+the start page's newer tour instead (#578), with the Connect to EHDS and Consents screens,
+as its own copy `img/klarbefund-tour.webp`: off hours the hub answers `/klarbefund/` with the
+offline page (ADR-053), and only `presentations/` is served regardless. Copy it again when
+`ui/public/klarbefund/klarbefund-tour.webp` is re-shot.
+
+## Regenerate the deck's preview card and animation
+
+The deck's head carries Open Graph and Twitter card tags, a canonical link to the GitHub
+Pages copy and a JSON-LD description, so a pasted link shows a title, a text and a picture.
+The picture is `img/og-image.png` (1200 x 630) and the animation the README shows is
+`img/preview.gif`: both the cover slide as it renders, with the knowledge graph turning
+behind the title. From `ui/`, after the deck is deployed:
+
+![The deck's cover, with the knowledge graph turning behind the title](../../../ui/public/presentations/hl7-showcase-2026/img/preview.gif)
+
+```bash
+npx tsx scripts/record-deck-preview.ts
+python3 scripts/frames-to-gif.py recordings/deck public/presentations/hl7-showcase-2026/img/preview.gif
+```
+
+Social networks cache a card by URL; after a change, ask LinkedIn's Post Inspector or
+Facebook's Sharing Debugger to fetch the GitHub Pages address again.
 
 ## Notes
 

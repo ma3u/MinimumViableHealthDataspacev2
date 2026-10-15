@@ -1,4 +1,5 @@
 "use client";
+import { CITIZEN_WALLET } from "@/lib/wallet-config";
 
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
@@ -7,7 +8,7 @@ import { ShieldCheck, Shield, Smartphone } from "lucide-react";
 import { DEMO_PERSONAS, ROLE_LABELS, landingFor } from "@/lib/auth";
 import { IS_STATIC } from "@/lib/static-export";
 
-/** EUDI Wallet QR sign-in needs server API routes — absent in the static export. */
+/** Wallet QR sign-in needs server API routes — absent in the static export. */
 
 /** Error message mapping for common OAuth errors. */
 function oauthErrorMessage(error: string): string {
@@ -73,10 +74,11 @@ function SignInContent() {
               )}`}
               className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 border border-(--accent) text-(--accent) hover:bg-(--accent)/10 rounded-lg font-medium transition-colors"
             >
-              <Smartphone size={18} /> Sign in with EUDI Wallet (QR)
+              <Smartphone size={18} /> Sign in with {CITIZEN_WALLET.name} (QR)
             </a>
             <p className="text-(--text-secondary) text-[11px] mt-2">
-              Patient login via OpenID4VP · verified against the EUDI sandbox
+              Patient login via OpenID4VP · {CITIZEN_WALLET.description},{" "}
+              {CITIZEN_WALLET.alternatives}
             </p>
           </>
         )}

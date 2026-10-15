@@ -1,4 +1,4 @@
-name: Cost guards (budget, crash-loop alert, no ingestion cap)
+name: Cost guards (budget, crash-loop and off-hours alerts, no ingestion cap)
 
 # Runs scripts/azure/set-cost-guards.sh (#418, ADR-045 decisions 13 to 16).
 # Through CI because an Owner-less laptop account cannot write action groups,
@@ -57,4 +57,7 @@ jobs:
             echo "| Daily cap (GB) | $(az monitor log-analytics workspace show -g rg-mvhd-dev -n mvhd-logs --query workspaceCapping.dailyQuotaGb -o tsv) |"
             echo "| Budget | $(az consumption budget show --budget-name mvhd-monthly -g rg-mvhd-dev --query amount -o tsv 2>/dev/null || echo missing) |"
             echo "| Crash-loop alert | $(az resource show -g rg-mvhd-dev -n mvhd-crash-loop --resource-type Microsoft.Insights/scheduledQueryRules --query properties.enabled -o tsv 2>/dev/null || echo missing) |"
+            for rule in mvhd-offhours-stop-failed mvhd-offhours-start-failed; do
+              echo "| ${rule} | $(az resource show -g rg-mvhd-dev -n "$rule" --resource-type Microsoft.Insights/metricAlerts --query properties.enabled -o tsv 2>/dev/null || echo missing) |"
+            done
           } >> "$GITHUB_STEP_SUMMARY"

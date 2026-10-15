@@ -245,6 +245,8 @@ The app is EUPL-1.2 and stays outside this repo, the scripts operate on a clone 
 
 ### W4: Demo journey & UI
 
+**Status 2026-10-07: the demo names the wallet d-you** (`CITIZEN_WALLET` in `ui/src/lib/wallet-config.ts`) and the simulated phone on the live `/auth/eudi-qr` signs in as the demo patient through the `eudi-wallet` provider when `EUDI_DEMO_WALLET=true` (compose, Azure). See `planning/eudi-wallet-flows-2026.md`, 2026-10-07. The chooser and the German verifier path are still open below.
+
 - Wallet chooser on `/auth/eudi-qr` (EU reference ⟷ German), the German entry gated on the
   verifier configuration actually being present.
 - Static export: the button and page stay gated on `NEXT_PUBLIC_STATIC_EXPORT`; per ADR-028

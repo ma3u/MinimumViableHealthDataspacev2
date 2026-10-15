@@ -1,9 +1,10 @@
 {
   "patient": {
     "id": "P1",
-    "name": "Maria Schmidt",
+    "name": "Patient 7f915eed",
     "gender": "female",
-    "birthDate": "1979-03-15"
+    "birthDate": "",
+    "age": 47
   },
   "conditions": [
     {
@@ -41,13 +42,29 @@
       "display": "Chronic sinusitis",
       "onsetDate": "2013-09-14"
     },
-    { "code": "195967001", "display": "Asthma", "onsetDate": "2009-02-27" }
+    {
+      "code": "195967001",
+      "display": "Asthma",
+      "onsetDate": "2009-02-27"
+    }
   ],
   "medications": [
-    { "code": "860975", "display": "Metformin 500 mg oral tablet" },
-    { "code": "197361", "display": "Lisinopril 10 mg oral tablet" },
-    { "code": "308460", "display": "Salbutamol 100 mcg inhaler" },
-    { "code": "209459", "display": "Atorvastatin 20 mg oral tablet" }
+    {
+      "code": "860975",
+      "display": "Metformin 500 mg oral tablet"
+    },
+    {
+      "code": "197361",
+      "display": "Lisinopril 10 mg oral tablet"
+    },
+    {
+      "code": "308460",
+      "display": "Salbutamol 100 mcg inhaler"
+    },
+    {
+      "code": "209459",
+      "display": "Atorvastatin 20 mg oral tablet"
+    }
   ],
   "riskScores": {
     "cardiovascular": {
@@ -77,10 +94,10 @@
     "stress-reduction"
   ],
   "gdprRights": {
-    "rightToAccess": "GDPR Art. 15 — request a copy of your electronic health record",
-    "rightToPortability": "GDPR Art. 20 — export your data in FHIR R4 format",
-    "rightToErasure": "GDPR Art. 17 — request deletion of non-mandatory records",
-    "ehdsAccess": "EHDS Art. 3 — access your EHR via the EU national contact point"
+    "rightToAccess": "GDPR Art. 15 \u2014 request a copy of your electronic health record",
+    "rightToPortability": "GDPR Art. 20 \u2014 export your data in FHIR R4 format",
+    "rightToErasure": "GDPR Art. 17 \u2014 request deletion of non-mandatory records",
+    "ehdsAccess": "EHDS Art. 3 \u2014 access your EHR via the EU national contact point"
   },
   "totalConditionCount": 8
 }

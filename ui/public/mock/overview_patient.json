@@ -3,7 +3,7 @@
   "asOf": "2026-09-23",
   "me": {
     "id": "P1",
-    "name": "Maria Schmidt"
+    "name": "Patient 7f915eed"
   },
   "title": "My health, in one view",
   "question": "Which parameters put me at risk, what should I do about them, and who is using my data?",
@@ -37,14 +37,14 @@
   "nodes": [
     {
       "id": "me",
-      "label": "Maria Schmidt",
+      "label": "Patient 7f915eed",
       "layer": "me",
       "kind": "Patient",
       "size": 4,
       "color": "#fbbf24",
       "pin": [0, 0],
-      "title": "Maria Schmidt",
-      "sub": "born 1979-03-15, 8 diagnoses on record",
+      "title": "Patient 7f915eed",
+      "sub": "age 47, 8 diagnoses on record",
       "facts": [
         [
           "rightToAccess",

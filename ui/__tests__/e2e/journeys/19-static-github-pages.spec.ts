@@ -609,7 +609,7 @@ test.describe("S · Patient1 — My Health pages with mock data", () => {
     "Requires NEXT_PUBLIC_STATIC_EXPORT=true",
   );
 
-  test("J261 — /patient/profile shows Maria Schmidt demographics", async ({
+  test("J261 — /patient/profile shows the patient's own record as a pseudonym with an age", async ({
     page,
   }) => {
     await gotoAs(page, "/patient/profile", "patient1");
@@ -617,10 +617,13 @@ test.describe("S · Patient1 — My Health pages with mock data", () => {
     await expect(
       page.getByRole("heading", { name: /Health Profile/ }),
     ).toBeVisible({ timeout: T });
-    // Demographics in the profile card — use nth(1) to skip hidden <option> duplicates
-    await expect(page.getByText("1979-03-15").nth(1)).toBeVisible({
+    // Demographics in the profile card: the pseudonym and an age, never the
+    // name or the birth date (#475). nth(1) skips the hidden <option> copy.
+    await expect(page.getByText("Patient 7f915eed").nth(1)).toBeVisible({
       timeout: T,
     });
+    await expect(page.getByText(/Age:/)).toBeVisible({ timeout: T });
+    await expect(page.getByText("1979-03-15")).toHaveCount(0);
     await expect(page.getByText(/Medications:/).first()).toBeVisible({
       timeout: T,
     });
@@ -1349,11 +1352,9 @@ test.describe("S · Patient EUDI Wallet journey (static)", () => {
     await expect(page.getByText("First time · Register")).toBeVisible({
       timeout: T,
     });
-    await expect(
-      page.getByText(/Register with your EUDI Wallet/i),
-    ).toBeVisible();
+    await expect(page.getByText(/Register with d-you/i)).toBeVisible();
     await page.getByText("Returning · Login").click();
-    await expect(page.getByText(/Sign in with your EUDI Wallet/i)).toBeVisible({
+    await expect(page.getByText(/Sign in with d-you/i)).toBeVisible({
       timeout: T,
     });
   });
@@ -1447,17 +1448,21 @@ test.describe("S · Interactive EUDI Wallet approval (static)", () => {
     page,
   }) => {
     await page.goto(P("/"));
-    await page
-      .getByRole("button", { name: /Register with EUDI Wallet/i })
-      .click();
+    await page.getByRole("button", { name: /Register with d-you/i }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible({ timeout: T });
     await expect(dialog.locator('img[alt*="QR code"]')).toBeVisible({
       timeout: T,
     });
-    await tap(page, "Yes, continue");
-    await tap(page, "Share");
-    await tap(page, "Go to wallet");
+    await tap(page, "Scan QR code");
+    await tap(page, "Next");
+    await tap(page, "Next");
+    await tap(page, "Transfer data");
+    // the phone's Close, not the dialog's close cross
+    await dialog
+      .getByRole("group", { name: /Approve d-you register/ })
+      .getByRole("button", { name: "Close" })
+      .click();
     await page.waitForURL(/\/patient(\/|$|\?)/, { timeout: T });
   });
 
@@ -1471,8 +1476,10 @@ test.describe("S · Interactive EUDI Wallet approval (static)", () => {
     await expect(
       page.getByText(/only available on the live deployment/i),
     ).toHaveCount(0);
-    await tap(page, "Approve");
-    await tap(page, "Done");
+    await tap(page, "Next");
+    await tap(page, "Next");
+    await tap(page, "Transfer data");
+    await tap(page, "Close");
     await page.waitForURL(/\/patient(\/|$|\?)/, { timeout: T });
   });
 

@@ -30,7 +30,14 @@ import type {
 import { sandboxPatientId } from "@/lib/sandbox-account";
 
 export interface ProfileShape {
-  patient: { id: string; name: string; gender?: string; birthDate?: string };
+  patient: {
+    id: string;
+    name: string;
+    gender?: string;
+    birthDate?: string;
+    /** set in place of the birth date when the patient reads their own record */
+    age?: number | null;
+  };
   conditions: { code: string; display: string; onsetDate?: string }[];
   medications: { code: string; display: string }[];
   riskScores: Record<
@@ -248,7 +255,9 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
     color: "#fbbf24",
     pin: [0, 0],
     title: me.name,
-    sub: `born ${fmtDate(me.birthDate)}, ${
+    sub: `${
+      me.age != null ? `age ${me.age}` : `born ${fmtDate(me.birthDate)}`
+    }, ${
       profile.totalConditionCount ?? profile.conditions.length
     } diagnoses on record`,
     facts: Object.entries(profile.gdprRights ?? {}).map(([k, v]) => [k, v]),
@@ -875,13 +884,23 @@ export function ownPatientIdForSession(
   session:
     | {
         preferredUsername?: string | null;
-        user?: { name?: string | null; email?: string | null } | null;
+        user?: {
+          name?: string | null;
+          email?: string | null;
+          preferredUsername?: string | null;
+        } | null;
       }
     | null
     | undefined,
 ): string | null {
   if (!session) return null;
+  // The session callback in auth.ts puts the login name on user.preferredUsername
+  // (a Keycloak login and a wallet login alike); the top-level field is what
+  // the static demo and older callers pass. The wallet session has no email,
+  // so without the first candidate a patient signed in with d-you was refused
+  // their own record.
   const candidates = [
+    session.user?.preferredUsername,
     session.preferredUsername,
     session.user?.name,
     session.user?.email?.split("@")[0],

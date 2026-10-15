@@ -13,7 +13,11 @@ import { createHmac } from "crypto";
  *
  * - **Sees identity:** `EDC_ADMIN` (operates the demo and its records) and
  *   `DATA_HOLDER` (the clinic that holds the records, primary use).
- * - **Sees their own identity only:** `PATIENT`.
+ * - **`PATIENT`:** sees their own record only, and even that under its
+ *   pseudonym with an age in place of the birth date (since 2026-10-07). A
+ *   wallet login carries a real person's PID, and the hub shows a patient
+ *   session no name and no birth date, so nothing identifying is ever on a
+ *   screen of the demo. `ownRecordView()` is that rule.
  * - **Everyone else** (`DATA_USER`, `HDAB_AUTHORITY`, `TRUST_CENTER_OPERATOR`,
  *   a bare participant) sees a stable pseudonym, the birth year instead of the
  *   birth date, and no place of residence.
@@ -103,4 +107,54 @@ export function redactPatientProperties(
     if (!IDENTIFYING_PROPERTIES.has(key)) out[key] = value;
   }
   return out;
+}
+
+/**
+ * Full years between a birth date (`YYYY-MM-DD`, or Neo4j's `{year, month,
+ * day}`) and `asOf`. A bare year gives the year difference. Null when unknown.
+ */
+export function patientAge(
+  birthDate: unknown,
+  asOf: Date = new Date(),
+): number | null {
+  const obj =
+    birthDate && typeof birthDate === "object"
+      ? (birthDate as { year?: unknown; month?: unknown; day?: unknown })
+      : null;
+  const text =
+    typeof birthDate === "string"
+      ? birthDate
+      : obj && obj.year !== undefined
+        ? `${obj.year}-${String(obj.month ?? 1).padStart(2, "0")}-${String(
+            obj.day ?? 1,
+          ).padStart(2, "0")}`
+        : "";
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(text);
+  let age: number;
+  if (m) {
+    const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+    age = asOf.getUTCFullYear() - y;
+    const month = asOf.getUTCMonth() + 1;
+    if (month < mo || (month === mo && asOf.getUTCDate() < d)) age--;
+  } else {
+    const y = birthYear(birthDate);
+    if (!y) return null;
+    age = asOf.getUTCFullYear() - Number(y);
+  }
+  return age >= 0 && age < 130 ? age : null;
+}
+
+/**
+ * A patient's own record as the patient sees it: the pseudonym for the name,
+ * the age for the birth date, which is left empty. Everything else as it is.
+ */
+export function ownRecordView<T extends { id: string; birthDate?: string }>(
+  p: T,
+): T & { name: string; age: number | null } {
+  return {
+    ...p,
+    name: patientPseudonym(p.id),
+    age: patientAge(p.birthDate),
+    birthDate: "",
+  };
 }

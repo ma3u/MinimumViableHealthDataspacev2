@@ -7,6 +7,7 @@ import {
   refuseForeignRecord,
 } from "@/lib/patient/own-record";
 import { HEALTH_INTERESTS } from "@/lib/patient/interests";
+import { ownRecordView } from "@/lib/patient-identity";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +52,10 @@ export async function GET(req: Request) {
        LIMIT 20`,
       { own: patientOnly ? own ?? "__no_record__" : null },
     );
-    return NextResponse.json({ patients });
+    // A patient sees their own record under its pseudonym, with an age (#475).
+    return NextResponse.json({
+      patients: patientOnly ? patients.map(ownRecordView) : patients,
+    });
   }
 
   const foreign = await refuseForeignRecord(auth.session.roles, patientId);
@@ -123,7 +127,9 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Patient not found" }, { status: 404 });
   }
 
-  const { chosenInterests, ...patient } = patientRows[0];
+  const { chosenInterests, ...patientRow } = patientRows[0];
+  // A patient sees their own record under its pseudonym, with an age (#475).
+  const patient = patientOnly ? ownRecordView(patientRow) : patientRow;
 
   // Compute risk scores: ICD codes + SNOMED codes + social determinants of health
   const conditionCodes = conditionRows.map((c) => c.code.toLowerCase());

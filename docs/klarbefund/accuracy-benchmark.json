@@ -1,0 +1,244 @@
+{
+  "conditions": [
+    {
+      "condition": "clean 150 dpi scan",
+      "summary": {
+        "codeCorrect": 8,
+        "exact": 8,
+        "found": 8,
+        "inexactCodes": [],
+        "labDateChecked": 0,
+        "labDateCorrect": 0,
+        "referenceChecked": 8,
+        "referenceCorrect": 8,
+        "sheets": 1,
+        "silentErrors": 0,
+        "spurious": 0,
+        "truthRows": 8,
+        "unitCorrect": 8,
+        "unreadLines": 0,
+        "valueCorrect": 8
+      }
+    },
+    {
+      "condition": "skewed 1 degree",
+      "summary": {
+        "codeCorrect": 8,
+        "exact": 8,
+        "found": 8,
+        "inexactCodes": [],
+        "labDateChecked": 0,
+        "labDateCorrect": 0,
+        "referenceChecked": 8,
+        "referenceCorrect": 8,
+        "sheets": 1,
+        "silentErrors": 0,
+        "spurious": 0,
+        "truthRows": 8,
+        "unitCorrect": 8,
+        "unreadLines": 0,
+        "valueCorrect": 8
+      }
+    },
+    {
+      "condition": "skewed 2 degrees",
+      "summary": {
+        "codeCorrect": 5,
+        "exact": 5,
+        "found": 7,
+        "inexactCodes": ["4548-4", "2160-0", "33762-6"],
+        "labDateChecked": 0,
+        "labDateCorrect": 0,
+        "referenceChecked": 7,
+        "referenceCorrect": 5,
+        "sheets": 1,
+        "silentErrors": 0,
+        "spurious": 0,
+        "truthRows": 8,
+        "unitCorrect": 5,
+        "unreadLines": 0,
+        "valueCorrect": 5
+      }
+    },
+    {
+      "condition": "skewed 5 degrees",
+      "summary": {
+        "codeCorrect": 2,
+        "exact": 0,
+        "found": 5,
+        "inexactCodes": [
+          "2093-3",
+          "2089-1",
+          "2085-9",
+          "2571-8",
+          "4548-4",
+          "2160-0",
+          "33762-6",
+          "2276-4"
+        ],
+        "labDateChecked": 0,
+        "labDateCorrect": 0,
+        "referenceChecked": 5,
+        "referenceCorrect": 0,
+        "sheets": 1,
+        "silentErrors": 0,
+        "spurious": 0,
+        "truthRows": 8,
+        "unitCorrect": 2,
+        "unreadLines": 2,
+        "valueCorrect": 3
+      }
+    },
+    {
+      "condition": "dim room",
+      "summary": {
+        "codeCorrect": 8,
+        "exact": 8,
+        "found": 8,
+        "inexactCodes": [],
+        "labDateChecked": 0,
+        "labDateCorrect": 0,
+        "referenceChecked": 8,
+        "referenceCorrect": 8,
+        "sheets": 1,
+        "silentErrors": 0,
+        "spurious": 0,
+        "truthRows": 8,
+        "unitCorrect": 8,
+        "unreadLines": 0,
+        "valueCorrect": 8
+      }
+    },
+    {
+      "condition": "flash glare",
+      "summary": {
+        "codeCorrect": 8,
+        "exact": 8,
+        "found": 8,
+        "inexactCodes": [],
+        "labDateChecked": 0,
+        "labDateCorrect": 0,
+        "referenceChecked": 8,
+        "referenceCorrect": 8,
+        "sheets": 1,
+        "silentErrors": 0,
+        "spurious": 0,
+        "truthRows": 8,
+        "unitCorrect": 8,
+        "unreadLines": 0,
+        "valueCorrect": 8
+      }
+    },
+    {
+      "condition": "slight motion blur",
+      "summary": {
+        "codeCorrect": 7,
+        "exact": 7,
+        "found": 7,
+        "inexactCodes": ["4548-4"],
+        "labDateChecked": 0,
+        "labDateCorrect": 0,
+        "referenceChecked": 7,
+        "referenceCorrect": 7,
+        "sheets": 1,
+        "silentErrors": 0,
+        "spurious": 0,
+        "truthRows": 8,
+        "unitCorrect": 7,
+        "unreadLines": 1,
+        "valueCorrect": 7
+      }
+    },
+    {
+      "condition": "heavy blur",
+      "summary": {
+        "codeCorrect": 0,
+        "exact": 0,
+        "found": 0,
+        "inexactCodes": [
+          "2093-3",
+          "2089-1",
+          "2085-9",
+          "2571-8",
+          "4548-4",
+          "2160-0",
+          "33762-6",
+          "2276-4"
+        ],
+        "labDateChecked": 0,
+        "labDateCorrect": 0,
+        "referenceChecked": 0,
+        "referenceCorrect": 0,
+        "sheets": 1,
+        "silentErrors": 0,
+        "spurious": 0,
+        "truthRows": 8,
+        "unitCorrect": 0,
+        "unreadLines": 0,
+        "valueCorrect": 0
+      }
+    },
+    {
+      "condition": "low resolution",
+      "summary": {
+        "codeCorrect": 6,
+        "exact": 6,
+        "found": 7,
+        "inexactCodes": ["4548-4", "2276-4"],
+        "labDateChecked": 0,
+        "labDateCorrect": 0,
+        "referenceChecked": 7,
+        "referenceCorrect": 7,
+        "sheets": 1,
+        "silentErrors": 0,
+        "spurious": 0,
+        "truthRows": 8,
+        "unitCorrect": 6,
+        "unreadLines": 1,
+        "valueCorrect": 7
+      }
+    }
+  ],
+  "generatedAt": "2026-10-15T17:39:37Z",
+  "panelRows": 8,
+  "total": {
+    "codeCorrect": 52,
+    "exact": 50,
+    "found": 58,
+    "inexactCodes": [
+      "4548-4",
+      "2160-0",
+      "33762-6",
+      "2093-3",
+      "2089-1",
+      "2085-9",
+      "2571-8",
+      "4548-4",
+      "2160-0",
+      "33762-6",
+      "2276-4",
+      "4548-4",
+      "2093-3",
+      "2089-1",
+      "2085-9",
+      "2571-8",
+      "4548-4",
+      "2160-0",
+      "33762-6",
+      "2276-4",
+      "4548-4",
+      "2276-4"
+    ],
+    "labDateChecked": 0,
+    "labDateCorrect": 0,
+    "referenceChecked": 58,
+    "referenceCorrect": 51,
+    "sheets": 9,
+    "silentErrors": 0,
+    "spurious": 0,
+    "truthRows": 72,
+    "unitCorrect": 52,
+    "unreadLines": 4,
+    "valueCorrect": 54
+  }
+}

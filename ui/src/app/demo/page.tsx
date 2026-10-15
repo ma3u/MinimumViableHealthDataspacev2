@@ -1,4 +1,5 @@
 "use client";
+import { CITIZEN_WALLET } from "@/lib/wallet-config";
 
 /**
  * Demo Persona Hub — /demo
@@ -99,8 +100,8 @@ export default function DemoHubPage() {
               ▶ Maria&apos;s journey — the EHDS Patient Wallet
             </p>
             <p className="text-sm text-(--text-secondary)">
-              Register with EUDI Wallet → get your EHR → donate to research →
-              see your results
+              Register with {CITIZEN_WALLET.name} → get your EHR → donate to
+              research → see your results
             </p>
           </div>
         </div>
