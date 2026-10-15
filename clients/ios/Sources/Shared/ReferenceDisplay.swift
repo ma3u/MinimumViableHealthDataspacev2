@@ -28,6 +28,9 @@ public enum UnitText {
     "cm2": "cm²",
     "kg/m2": "kg/m²",
     "[pH]": "pH",
+    // An ECG axis, and a blood pressure as every device prints it.
+    "deg": "°",
+    "mm[Hg]": "mmHg",
     "{ratio}": "",
   ]
 

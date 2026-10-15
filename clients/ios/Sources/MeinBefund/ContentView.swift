@@ -676,6 +676,26 @@ final class AppModel: ObservableObject {
       }
     }
 
+    /// `-MBDeleteReport <id>`: deletes one stored report, its pages and its
+    /// diagnostics, as a swipe in the list does, so a duplicate scan can be
+    /// removed from the Mac over the network. Debug builds only. It takes the
+    /// full id and nothing shorter, so a typo deletes nothing, and it does
+    /// nothing in demo mode, whose reports are not in the store.
+    func debugDeleteIfRequested() async {
+      let arguments = ProcessInfo.processInfo.arguments
+      guard let flag = arguments.firstIndex(of: "-MBDeleteReport"), flag + 1 < arguments.count,
+        !DemoSeed.isRequested
+      else { return }
+      guard let id = UUID(uuidString: arguments[flag + 1]),
+        reports.contains(where: { $0.id == id })
+      else {
+        Log.store.notice("delete on request: no report with that id, nothing deleted")
+        return
+      }
+      await delete(id)
+      Log.store.notice("delete on request: one report deleted")
+    }
+
     /// `-MBExportData`: the same for the person's own archive, so that a test
     /// can open what a share sheet would have handed over and check that
     /// every report, every page and the profile are really in it. Debug builds
@@ -1078,6 +1098,7 @@ struct ContentView: View {
         // The self-test first: with `-MBSelfTest` the report it saves is the
         // one a screenshot should open, and it does not exist until it has run.
         await model.runSelfTestIfRequested()
+        await model.debugDeleteIfRequested()
         await model.debugImportIfRequested()
         await model.reextractAllIfRequested()
         await openScreenshotScreen()

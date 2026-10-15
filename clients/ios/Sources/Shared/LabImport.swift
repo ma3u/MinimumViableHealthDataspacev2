@@ -253,10 +253,10 @@ public enum LabImport {
   ) throws -> Result {
     // A 24-hour blood pressure report's summary grid, read by geometry
     // (AmbulatoryBloodPressure); the line grammar cannot place its numbers.
-    let abpm = AmbulatoryBloodPressure.extract(
-      pageTexts: pageTexts, pages: pages, source: extraction.source)
-    let extraction = AmbulatoryBloodPressure.withoutGridLines(extraction, read: abpm)
-      .merging(abpm)
+    // An ECG printout's measurement block, read by geometry likewise.
+    let extraction = Electrocardiogram.applied(
+      to: AmbulatoryBloodPressure.applied(to: extraction, pageTexts: pageTexts, pages: pages),
+      pageTexts: pageTexts, pages: pages)
     // A body-composition scale's screen is not a lab sheet and has its own
     // reader. It is tried only when the ordinary parse found no values, so a
     // report that happens to carry the word "aktualisiert" is unaffected.

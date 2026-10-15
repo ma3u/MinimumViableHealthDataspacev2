@@ -141,7 +141,74 @@ export const GOLDEN_VALUES: CodedLabValue[] = [
       },
     },
   },
+  {
+    // A vital sign on a laboratory report: its Observation is `vital-signs`,
+    // the report stays a laboratory report.
+    label: "Körpergewicht",
+    value: 80,
+    unitRaw: "kg",
+    line: "Körpergewicht  80  kg",
+    lineNumber: 16,
+    analyteKey: "body-weight",
+    coding: { loincNumber: "29463-7", display: "Body weight", ucum: "kg" },
+  },
 ];
+
+/**
+ * An ECG printout's measurements, fictional: every value is an ECG term, so
+ * the DiagnosticReport is an ECG (v2-0074 `EC`, LOINC 11524-6) and every
+ * Observation is a `procedure`. Pins the axis unit `deg` too.
+ */
+export const GOLDEN_ECG_VALUES: CodedLabValue[] = [
+  {
+    label: "Ventrikuläre Frequenz",
+    value: 62,
+    unitRaw: "/min",
+    line: "Ventrikuläre Frequenz 62 /min",
+    lineNumber: 9300,
+    analyteKey: "ecg-ventricular-rate",
+    coding: {
+      loincNumber: "8897-1",
+      display: "QRS complex Ventricles by EKG",
+      ucum: "/min",
+    },
+    region: { page: 1, x: 0.9502, y: 0.5701, width: 0.015, height: 0.048 },
+  },
+  {
+    label: "QTc nach Bazett",
+    value: 398,
+    unitRaw: "ms",
+    line: "QTc nach Bazett 398 ms",
+    lineNumber: 9304,
+    analyteKey: "ecg-qtc-bazett",
+    coding: {
+      loincNumber: "76635-2",
+      display: "Q-T interval corrected based on Bazett formula",
+      ucum: "ms",
+    },
+  },
+  {
+    label: "QRS-Achse",
+    value: -12,
+    unitRaw: "deg",
+    line: "QRS-Achse -12 °",
+    lineNumber: 9306,
+    analyteKey: "ecg-qrs-axis",
+    coding: { loincNumber: "8632-2", display: "QRS axis", ucum: "deg" },
+  },
+];
+
+export const GOLDEN_ECG_TARGET = resolve(
+  HERE,
+  "../../../clients/ios/Tests/SharedTests/Fixtures/fhir-golden-bundle-ecg.json",
+);
+
+const GOLDEN_ECG_META = {
+  patientId: "example-patient",
+  effectiveDateTime: "2026-08-26",
+  performer: "Praxis Dr. Muster",
+  title: "Ruhe-EKG",
+} as const;
 
 const GOLDEN_META = {
   patientId: "example-patient",
@@ -165,53 +232,58 @@ const GOLDEN_SOURCE = {
  * fed different inputs would pass while proving nothing. So both writers read
  * one input from one file.
  */
-export function goldenBundle(): string {
-  const bundle = buildBundle(GOLDEN_VALUES, {
-    meta: GOLDEN_META,
+function render(
+  values: CodedLabValue[],
+  meta: typeof GOLDEN_META | typeof GOLDEN_ECG_META,
+): string {
+  const bundle = buildBundle(values, {
+    meta,
     source: GOLDEN_SOURCE,
     now: NOW,
   });
   return (
     JSON.stringify(
-      {
-        now: NOW,
-        meta: GOLDEN_META,
-        source: GOLDEN_SOURCE,
-        values: GOLDEN_VALUES,
-        bundle,
-      },
+      { now: NOW, meta, source: GOLDEN_SOURCE, values, bundle },
       null,
       2,
     ) + "\n"
   );
 }
 
+export function goldenBundle(): string {
+  return render(GOLDEN_VALUES, GOLDEN_META);
+}
+
+export function goldenEcgBundle(): string {
+  return render(GOLDEN_ECG_VALUES, GOLDEN_ECG_META);
+}
+
 async function main(): Promise<void> {
   const check = process.argv.includes("--check");
-  const next = goldenBundle();
-
-  if (check) {
-    const current = await readFile(GOLDEN_TARGET, "utf8").catch(() => null);
-    if (current === null) {
-      console.error(
-        `${GOLDEN_TARGET} does not exist. Run: npm run golden:fhir`,
-      );
-      process.exit(1);
+  for (const [target, next] of [
+    [GOLDEN_TARGET, goldenBundle()],
+    [GOLDEN_ECG_TARGET, goldenEcgBundle()],
+  ] as const) {
+    if (check) {
+      const current = await readFile(target, "utf8").catch(() => null);
+      if (current === null) {
+        console.error(`${target} does not exist. Run: npm run golden:fhir`);
+        process.exit(1);
+      }
+      if (current !== next) {
+        console.error(
+          `${target} is out of date with the FHIR writer.\n` +
+            "Run: npm run golden:fhir, then re-run the Swift tests, which will " +
+            "tell you whether the Swift writer still agrees.",
+        );
+        process.exit(1);
+      }
+      console.log(`${target} is up to date`);
+      continue;
     }
-    if (current !== next) {
-      console.error(
-        `${GOLDEN_TARGET} is out of date with the FHIR writer.\n` +
-          "Run: npm run golden:fhir, then re-run the Swift tests, which will " +
-          "tell you whether the Swift writer still agrees.",
-      );
-      process.exit(1);
-    }
-    console.log(`${GOLDEN_TARGET} is up to date`);
-    return;
+    await writeFile(target, next, "utf8");
+    console.log(`wrote ${target}`);
   }
-
-  await writeFile(GOLDEN_TARGET, next, "utf8");
-  console.log(`wrote ${GOLDEN_TARGET}`);
 }
 
 if (

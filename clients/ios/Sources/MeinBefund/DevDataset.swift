@@ -74,6 +74,16 @@ import Shared
       /// Measured off the drawing rather than read from it, because the chart
       /// printed no number beside the point.
       var estimated: Bool = false
+      /// Pages after the first that hold a table the app does not read, as a
+      /// device report prints its single readings. Drawn, never coded.
+      var tables: [Table] = []
+    }
+
+    /// A page of one table under a title.
+    struct Table {
+      let title: String
+      let columns: [String]
+      let rows: [[String]]
     }
 
     static func date(_ s: Sheet) -> Date {
@@ -119,7 +129,7 @@ import Shared
       // was read from is the one thing this app is meant not to be.
       if let pages = scan(for: sheet) {
         report.scan = LabReport.ScanAttachment(
-          pageCount: 1, bytes: pages.count, sourcePixelWidth: 1240)
+          pageCount: 1 + sheet.tables.count, bytes: pages.count, sourcePixelWidth: 1240)
       }
       return report
     }
@@ -140,7 +150,12 @@ import Shared
         rows: rows,
         header: SyntheticSheet.Header(
           collected: printed, received: printed, reported: printed))
-      return try? ScanDocument.pdf(pages: [page])
+      let tables = sheet.tables.enumerated().map { index, table in
+        SyntheticSheet.renderTable(
+          title: table.title, columns: table.columns, rows: table.rows, page: index + 2,
+          footer: "\(sheet.title), Messung vom \(printed)")
+      }
+      return try? ScanDocument.pdf(pages: [page] + tables)
     }
 
     // ---- The corpus -------------------------------------------------------
@@ -412,6 +427,73 @@ import Shared
           Row("Candida albicans", 0.011, "%"),
         ]),
 
+      // A 24-hour ambulatory blood pressure report: the means of the summary
+      // grid for the whole recording, the day and the night, the night-time
+      // fall, and the height and weight its header prints. What
+      // `AmbulatoryBloodPressure` reads from such a page, by the labels it
+      // gives them. Only the 24-hour means have LOINC codes of their own; a
+      // day or night mean carries the plain mean code, and the dipping
+      // figures carry none. A normotensive dipper whose maxima, not shown
+      // here, came from a bicycle ride; the means are what ESC/ESH judge by.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D011", year: 2026, month: 8, day: 27,
+        title: "24-h-Blutdruckmessung, Praxis Dr. Muster", laboratory: "Praxis Dr. Muster",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Systolischer Blutdruck 24-h-Mittel", 122, "mmHg"),
+          Row("Systolischer Blutdruck Tagesmittel", 128, "mmHg"),
+          Row("Systolischer Blutdruck Nachtmittel", 110, "mmHg"),
+          Row("Diastolischer Blutdruck 24-h-Mittel", 72, "mmHg"),
+          Row("Diastolischer Blutdruck Tagesmittel", 78, "mmHg"),
+          Row("Diastolischer Blutdruck Nachtmittel", 60, "mmHg"),
+          Row("Puls 24-h-Mittel", 64, "/min"),
+          Row("Puls Tagesmittel", 68, "/min"),
+          Row("Puls Nachtmittel", 58, "/min"),
+          Row("Mittlerer arterieller Druck 24-h-Mittel", 88, "mmHg"),
+          Row("Pulsdruck 24-h-Mittel", 50, "mmHg"),
+          Row("Nächtliche Absenkung systolisch", -14.1, "%"),
+          Row("Nächtliche Absenkung diastolisch", -23, "%"),
+          Row("Nächtliche Absenkung Puls", -14.7, "%"),
+          Row("Körpergröße", 182, "cm"),
+          Row("Körpergewicht", 80, "kg"),
+          Row("Body-Mass-Index", 24.2, "kg/m2"),
+        ],
+        unread: ["Limit : SYS=135, DIA=85, Puls=80, MAD=100, PP=50"],
+        tables: [
+          Table(
+            title: "Blutdruck-Tabelle",
+            columns: ["Zeit", "Sys [mmHg]", "MAD [mmHg]", "Dia [mmHg]", "PP [mmHg]", "Puls [bpm]", "Akt [mg]"],
+            rows: abpmReadings),
+          Table(
+            title: "Durchschnittlicher Blutdruck nach Aktivitätslevel",
+            columns: ["Aktivitätslevel", "Sys [mmHg]", "MAD [mmHg]", "Dia [mmHg]", "PP [mmHg]", "Puls [bpm]", "# Messungen"],
+            rows: [
+              ["niedrig", "121", "95", "71", "50", "61", "31"],
+              ["mittel", "136", "104", "77", "59", "102", "4"],
+              ["hoch", "", "", "", "", "", "0"],
+            ]),
+        ]),
+
+      // A resting 12-lead ECG: the measurements the electrocardiograph prints
+      // above its tracing, as `Electrocardiogram` reads them. Every one has
+      // a LOINC ECG term; the report is filed as an ECG, not a lab report.
+      // The device's written interpretation is not carried: it is
+      // unconfirmed until a physician signs it.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D012", year: 2026, month: 8, day: 26,
+        title: "Ruhe-EKG, Praxis Dr. Muster", laboratory: "Praxis Dr. Muster",
+        source: .ocrTranscribed,
+        rows: [
+          Row("Ventrikuläre Frequenz", 62, "/min"),
+          Row("PQ-Intervall", 148, "ms"),
+          Row("QRS-Dauer", 98, "ms"),
+          Row("QT-Intervall", 392, "ms"),
+          Row("QTc nach Bazett", 398, "ms"),
+          Row("P-Achse", -12, "deg"),
+          Row("QRS-Achse", 41, "deg"),
+          Row("T-Achse", 18, "deg"),
+        ]),
+
       // A home aminogram: eight essential amino acids, in micromoles per
       // litre, with the ranges such a test prints. Invented values on a real
       // layout, like everything else here.
@@ -444,6 +526,54 @@ import Shared
           Row("Ferritin", 210, "ug/l", 30, 400),
           Row("Lipoprotein (a)", 0.3, "g/l", nil, 0.5),
         ]),
+    ]
+
+    /// The single readings of the 24-hour report: every 30 minutes by day and
+    /// every hour by night, four failed cuff inflations (`E14`), a bicycle
+    /// ride in the evening and exercise in the morning. Invented; generated
+    /// once with a fixed seed and kept here so a diff shows every number.
+    static let abpmReadings: [[String]] = [
+      ["09:12", "133", "98", "71", "62", "62", "94"],
+      ["09:42", "134", "105", "76", "58", "64", "44"],
+      ["10:12", "120", "97", "75", "45", "63", "26"],
+      ["10:42", "E14", "", "", "", "", "100"],
+      ["11:12", "120", "99", "74", "46", "61", "160"],
+      ["11:42", "133", "107", "77", "56", "63", "152"],
+      ["12:12", "133", "97", "73", "60", "68", "153"],
+      ["12:42", "125", "102", "78", "47", "63", "152"],
+      ["13:12", "E14", "", "", "", "", "98"],
+      ["13:42", "135", "106", "74", "61", "69", "104"],
+      ["14:12", "133", "108", "84", "49", "71", "59"],
+      ["14:42", "123", "107", "83", "40", "65", "77"],
+      ["15:12", "131", "103", "81", "50", "75", "132"],
+      ["15:42", "130", "101", "72", "58", "64", "107"],
+      ["16:12", "125", "108", "85", "40", "76", "20"],
+      ["16:42", "134", "107", "85", "49", "69", "16"],
+      ["17:12", "118", "97", "77", "41", "74", "136"],
+      ["17:42", "148", "107", "80", "68", "117", "368"],
+      ["18:12", "148", "112", "82", "66", "116", "382"],
+      ["18:42", "137", "106", "73", "64", "68", "43"],
+      ["19:12", "123", "92", "71", "52", "65", "93"],
+      ["19:42", "E14", "", "", "", "", "277"],
+      ["20:12", "125", "109", "84", "41", "69", "50"],
+      ["20:42", "135", "104", "70", "65", "71", "45"],
+      ["21:12", "129", "99", "70", "59", "68", "40"],
+      ["21:42", "130", "103", "83", "47", "76", "102"],
+      ["22:12", "120", "97", "75", "45", "75", "77"],
+      ["22:42", "135", "102", "73", "62", "65", "94"],
+      ["23:12", "106", "88", "63", "43", "58", "5"],
+      ["00:12", "108", "85", "56", "52", "60", "6"],
+      ["01:12", "105", "78", "59", "46", "57", "23"],
+      ["02:12", "E14", "", "", "", "", "257"],
+      ["03:12", "107", "85", "58", "49", "61", "9"],
+      ["04:12", "106", "83", "61", "45", "61", "25"],
+      ["05:12", "111", "84", "64", "47", "55", "25"],
+      ["06:12", "119", "94", "76", "43", "68", "44"],
+      ["06:42", "122", "98", "73", "49", "75", "45"],
+      ["07:12", "137", "107", "85", "52", "66", "110"],
+      ["07:42", "138", "103", "76", "62", "99", "268"],
+      ["08:12", "119", "104", "83", "36", "65", "42"],
+      ["08:42", "130", "99", "76", "54", "73", "133"],
     ]
 
     /// The corpus, newest first, as the app lists reports.

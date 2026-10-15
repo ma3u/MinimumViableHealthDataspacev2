@@ -17,6 +17,7 @@ import type {
   SourceRegion,
   TextSource,
 } from "./types.js";
+import { OBSERVATION_CATEGORIES } from "./analytes.js";
 
 const EXT_BASE = "https://ehds.mabu.red/fhir/StructureDefinition";
 export const EXT_SOURCE_KIND = `${EXT_BASE}/epa-ingest-source-kind`;
@@ -57,6 +58,35 @@ const ORGANISM_IDENTIFIED: Coding = {
  * the transcription in this bundle is ours and unverified, and a receiving
  * system must be able to see that without reading an extension.
  */
+const CATEGORY_DISPLAY = {
+  laboratory: "Laboratory",
+  "vital-signs": "Vital Signs",
+  procedure: "Procedure",
+} as const;
+
+/**
+ * FHIR's observation category for a code: `laboratory` unless the dictionary
+ * says it is a vital sign or an ECG measurement (OBSERVATION_CATEGORIES).
+ */
+export function observationCategory(
+  loincNumber: string | null,
+): keyof typeof CATEGORY_DISPLAY {
+  return (loincNumber && OBSERVATION_CATEGORIES[loincNumber]) || "laboratory";
+}
+
+/**
+ * A report whose every value is an ECG measurement is an ECG, not a
+ * laboratory report: v2-0074 `EC` (electrocardiac) and LOINC 11524-6.
+ */
+export function isElectrocardiogram(values: CodedLabValue[]): boolean {
+  return (
+    values.length > 0 &&
+    values.every(
+      (v) => observationCategory(v.coding.loincNumber) === "procedure",
+    )
+  );
+}
+
 export function statusForSource(kind: SourceKind): "final" | "preliminary" {
   return kind === "lab-issued-digital" ? "final" : "preliminary";
 }
@@ -182,8 +212,9 @@ export function buildBundle(
           {
             system:
               "http://terminology.hl7.org/CodeSystem/observation-category",
-            code: "laboratory",
-            display: "Laboratory",
+            code: observationCategory(v.coding.loincNumber),
+            display:
+              CATEGORY_DISPLAY[observationCategory(v.coding.loincNumber)],
           } satisfies Coding,
         ],
       },
@@ -278,6 +309,7 @@ export function buildBundle(
       : {}),
   }));
 
+  const ecg = isElectrocardiogram(values);
   const report: FhirResource = {
     resourceType: "DiagnosticReport",
     id: "report-1",
@@ -285,21 +317,29 @@ export function buildBundle(
     category: [
       {
         coding: [
-          {
-            system: "http://terminology.hl7.org/CodeSystem/v2-0074",
-            code: "LAB",
-            display: "Laboratory",
-          } satisfies Coding,
+          (ecg
+            ? {
+                system: "http://terminology.hl7.org/CodeSystem/v2-0074",
+                code: "EC",
+                display: "Electrocardiac (e.g., EKG, EEC, Holter)",
+              }
+            : {
+                system: "http://terminology.hl7.org/CodeSystem/v2-0074",
+                code: "LAB",
+                display: "Laboratory",
+              }) satisfies Coding,
         ],
       },
     ],
     code: {
       coding: [
-        {
-          system: LOINC,
-          code: "11502-2",
-          display: "Laboratory report",
-        } satisfies Coding,
+        (ecg
+          ? { system: LOINC, code: "11524-6", display: "EKG study" }
+          : {
+              system: LOINC,
+              code: "11502-2",
+              display: "Laboratory report",
+            }) satisfies Coding,
       ],
       ...(meta.title ? { text: meta.title } : {}),
     },

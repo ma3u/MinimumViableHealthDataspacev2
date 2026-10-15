@@ -9,9 +9,12 @@ import {
   EXT_SOURCE_LINE,
   NCBI_TAXONOMY,
   buildBundle,
+  isElectrocardiogram,
+  observationCategory,
   statusForSource,
 } from "../src/to-fhir.js";
 import { lookupAnalyte } from "../src/analytes.js";
+import { GOLDEN_ECG_VALUES } from "../src/generate-fhir-golden.js";
 import type { CodedLabValue, TextSource } from "../src/types.js";
 
 const FIXTURE = readFileSync(
@@ -259,3 +262,48 @@ describe("an organism from a stool report", () => {
     }
   });
 });
+
+describe("observation and report category", () => {
+  const ecg = goldenEcgValues();
+  const now = "2026-09-13T12:00:00.000Z";
+  const meta = { patientId: "p", effectiveDateTime: "2026-08-26" };
+  const source: TextSource = {
+    kind: "ocr-transcribed",
+    sourceDocument: "ekg.pdf",
+    extractor: "vision",
+  };
+  type R = {
+    resourceType: string;
+    category?: { coding: { code: string }[] }[];
+    code?: { coding?: { code: string }[] };
+  };
+  const resources = (values: CodedLabValue[]): R[] =>
+    (
+      buildBundle(values, { meta, source, now }) as {
+        entry: { resource: R }[];
+      }
+    ).entry.map((e) => e.resource);
+
+  it("files ECG measurements under procedure and the report as an ECG", () => {
+    const all = resources(ecg);
+    const report = all.find((r) => r.resourceType === "DiagnosticReport")!;
+    expect(report.category?.[0].coding[0].code).toBe("EC");
+    expect(report.code?.coding?.[0].code).toBe("11524-6");
+    const categories = all
+      .filter((r) => r.resourceType === "Observation")
+      .map((r) => r.category?.[0].coding[0].code);
+    expect(new Set(categories)).toEqual(new Set(["procedure"]));
+  });
+
+  it("files a vital sign as vital-signs and keeps a mixed report a lab report", () => {
+    expect(observationCategory("29463-7")).toBe("vital-signs");
+    expect(observationCategory("8490-5")).toBe("vital-signs");
+    expect(observationCategory("2089-1")).toBe("laboratory");
+    expect(observationCategory(null)).toBe("laboratory");
+    expect(isElectrocardiogram([])).toBe(false);
+  });
+});
+
+function goldenEcgValues(): CodedLabValue[] {
+  return GOLDEN_ECG_VALUES;
+}

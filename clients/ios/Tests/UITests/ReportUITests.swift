@@ -130,6 +130,37 @@ final class DevDatasetUITests: XCTestCase {
       "and the section says how many were not matched")
   }
 
+  func testA24HourBloodPressureReportShowsItsMeansAndItsFall() {
+    // The summary of a day of cuff readings: the means by period and the
+    // night-time fall, which must keep its minus sign.
+    let app = launch()
+    AppDriver.scrollTo(
+      app.staticTexts["24-h-Blutdruckmessung, Praxis Dr. Muster"], in: app
+    ).tap()
+    // The summary, the single readings and the averages by activity level.
+    AppDriver.require(
+      app.buttons.containing(NSPredicate(format: "label CONTAINS 'Original scan, 3 page'"))
+        .firstMatch, "three pages of scan")
+    AppDriver.require(
+      AppDriver.text(containing: "Systolischer Blutdruck Tagesmittel", in: app),
+      "the day mean of the systolic pressure")
+    AppDriver.scrollTo(
+      AppDriver.text(containing: "Nächtliche Absenkung diastolisch", in: app), in: app)
+    XCTAssertTrue(
+      AppDriver.text(containing: "-23", in: app).exists
+        || AppDriver.text(containing: "−23", in: app).exists,
+      "the diastolic fall is shown as a fall")
+  }
+
+  func testAnECGShowsItsIntervalsAndAxes() {
+    let app = launch()
+    AppDriver.scrollTo(app.staticTexts["Ruhe-EKG, Praxis Dr. Muster"], in: app).tap()
+    AppDriver.require(AppDriver.text(containing: "QTc nach Bazett", in: app), "the corrected QT")
+    AppDriver.scrollTo(AppDriver.text(containing: "T-Achse", in: app), in: app)
+    XCTAssertTrue(
+      AppDriver.text(containing: "°", in: app).exists, "an axis is shown in degrees")
+  }
+
   func testAScaleReadingIsCarriedWithoutALoincCode() {
     let app = launch()
     AppDriver.scrollTo(
