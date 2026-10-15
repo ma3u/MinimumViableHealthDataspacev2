@@ -1,6 +1,8 @@
 import Foundation
 import Testing
 
+@testable import Shared
+
 /// The security posture the self-assessment claims, pinned as tests
 /// (docs/klarbefund/self-assessment.md, BSI TR-03161 part 1). Each test reads
 /// the build files the claim points at, so a change that weakens the posture
@@ -103,6 +105,28 @@ struct SecurityPostureTests {
   func cloudQuestionCap() throws {
     let cloud = try text("Sources/Shared/CloudAnalysis.swift")
     #expect(cloud.contains("maxValues = 40"))
+  }
+
+  // O.Auth: Face ID, Touch ID or the passcode in front of the results, on by default (ADR-060).
+  @Test("App lock: on by default, device-owner authentication, Face ID usage string present")
+  func appLock() throws {
+    #expect(AppLockPolicy().enabled, "the lock is on unless the person switches it off")
+    let lock = try text("Sources/MeinBefund/AppLock.swift")
+    #expect(lock.contains(".deviceOwnerAuthentication"), "biometrics with the passcode as the system fallback")
+    let project = try text("project.yml")
+    #expect(project.contains("INFOPLIST_KEY_NSFaceIDUsageDescription"))
+    let german = try text("Sources/MeinBefund/de.lproj/InfoPlist.strings")
+    #expect(german.contains("NSFaceIDUsageDescription"))
+  }
+
+  // EU AI Act Art. 50: every model answer says which model answered, on device as well as hosted.
+  @Test("Every explanation names its provider and model")
+  func aiAnswersAreLabelled() throws {
+    let onDevice = try text("Sources/MeinBefund/OnDeviceAnalysis.swift")
+    #expect(onDevice.contains("provider: \"on-device\""))
+    #expect(onDevice.contains("Apple on-device model"))
+    let sheet = try text("Sources/MeinBefund/CloudConsentSheet.swift")
+    #expect(sheet.contains("Answered by \\(reply.provider), model \\(reply.model)"))
   }
 
   // Export compliance: the app uses only Apple's cryptography.

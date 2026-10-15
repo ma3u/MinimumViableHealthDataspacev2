@@ -48,16 +48,16 @@ boundary and does so only after a consent the person gave for that purpose.
 | A fake app creates hub accounts or pushes data as the app | Account creation needs an Apple App Attest attestation the hub verifies (ADR-054); every later call carries the app token            | met    |
 | A fake hub harvests tokens                                | OIDC discovery from the configured issuer only, PKCE S256, `ASWebAuthenticationSession`; ATS forbids plaintext (`OIDCSession.swift`) | met    |
 | A fake explanation service reads values                   | The provider is named in the request the person approves (`CloudConsentSheet.swift`); HTTPS by ATS                                   | met    |
-| Someone else at the unlocked phone                        | Device lock only; no app lock                                                                                                        | open   |
+| Someone else at the unlocked phone                        | App lock: Face ID, Touch ID or the passcode before the cover lifts, on by default (`AppLock.swift`, ADR-060)                         | met    |
 
 ### Tampering
 
-| Threat                                         | Mitigation                                                                                                            | Status |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------ |
-| Stored records altered on disk or over a cable | Each record AES-GCM sealed (authenticated), key in the Keychain; a cable test could not copy stored data              | met    |
-| A misread value treated as a laboratory result | Provenance keeps OCR values `preliminary`; only a laboratory's own PDF text layer yields `final` (`Provenance.swift`) | met    |
-| A tampered build                               | App Attest proves the app to the hub, not to itself; no jailbreak or debugger detection                               | open   |
-| A dependency with a backdoor                   | No third-party package at all (`Package.swift`, `project.yml`, `docs/sbom/klarbefund-ios.cdx.json`)                   | met    |
+| Threat                                         | Mitigation                                                                                                            | Status   |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------- |
+| Stored records altered on disk or over a cable | Each record AES-GCM sealed (authenticated), key in the Keychain; a cable test could not copy stored data              | met      |
+| A misread value treated as a laboratory result | Provenance keeps OCR values `preliminary`; only a laboratory's own PDF text layer yields `final` (`Provenance.swift`) | met      |
+| A tampered build                               | App Attest proves the app to the hub, not to itself; jailbreak and debugger detection declined with reasons (ADR-060) | accepted |
+| A dependency with a backdoor                   | No third-party package at all (`Package.swift`, `project.yml`, `docs/sbom/klarbefund-ios.cdx.json`)                   | met      |
 
 ### Repudiation
 
@@ -96,14 +96,9 @@ boundary and does so only after a consent the person gave for that purpose.
 
 ## Residual risks and what closes them
 
-1. **No app lock.** A person who hands over an unlocked phone hands over the
-   values. Decide: Face ID or passcode in front of the reports, or document
-   the reliance on the device lock. (TR-03161 O.Auth)
-2. **No tamper or jailbreak detection.** On a jailbroken device the data
-   protection guarantees weaken. Decide: detect and warn, or document why App
-   Attest at the hub boundary is enough for a personal-use app. (O.Resi)
-3. **No certificate pinning.** ATS plus the system trust store; pinning would
-   break on certificate rotation without an update. Document the choice. (O.Ntwk)
+1. **App lock**: decided and implemented 2026-10-15 (ADR-060). (TR-03161 O.Auth)
+2. **No tamper or jailbreak detection**: declined with reasons in ADR-060; the sealed store and App Attest are the controls. (O.Resi)
+3. **No certificate pinning**: declined with reasons in ADR-060; ATS without an exception domain, managed rotation. (O.Ntwk)
 4. **Hosted Anthropic option.** Opt-in, named on screen, but a transfer to the
    United States; the operator needs a transfer basis or must switch it off.
 5. **Independent test.** This model and the tests are the project's own. An
