@@ -85,7 +85,11 @@
       }
 
       // The clean sheet is the baseline every other number is read against.
-      #expect((measured.first?.summary.exact ?? 0) >= 7, "a clean scan reads the panel")
+      // Pinned on value and code, the same bar as ScanningTests; the printed
+      // range is counted but not pinned, so `exact` is reported, not asserted.
+      let clean = measured.first?.summary
+      #expect((clean?.valueCorrect ?? 0) >= 7, "a clean scan reads the panel's values")
+      #expect((clean?.codeCorrect ?? 0) >= 7, "a clean scan codes the panel")
 
       if let path = ProcessInfo.processInfo.environment["KLARBEFUND_BENCHMARK_OUT"],
         !path.isEmpty

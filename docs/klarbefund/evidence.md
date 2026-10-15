@@ -56,10 +56,13 @@ Two ways to run it:
 
 1. **Synthetic benchmark, in CI.** `AccuracyBenchmarkTests` renders the
    synthetic panel under nine scan conditions, reads it with Vision and asserts
-   zero silent errors under each. The `ios-unit-tests` job in
-   `.github/workflows/test.yml` runs the whole Swift suite on `macos-26` and
-   keeps the counts as the `klarbefund-accuracy-benchmark` artifact. No real
-   data is involved, so the artifact can be published as it is.
+   zero silent errors under each. Locally: `cd clients/ios && swift test`; with
+   `KLARBEFUND_BENCHMARK_OUT=<file>` set, the counts are written there as JSON.
+   An `ios-unit-tests` job for `.github/workflows/test.yml` (pending) runs the
+   whole Swift suite on `macos-26` and keeps that JSON as the
+   `klarbefund-accuracy-benchmark` artifact; until it lands, CI builds only the
+   `Shared` target. No real data is involved, so the JSON can be published as
+   it is.
 2. **Pilot on real reports, never in the repository.** A participant exports
    diagnostics from the app (ADR-038), and a `truth.json` is written beside each
    `diagnostics.json` from the paper:
