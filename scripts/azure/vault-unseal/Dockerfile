@@ -16,6 +16,7 @@ COPY scripts/vault-init-or-unseal.sh /app/vault-init-or-unseal.sh
 COPY scripts/azure/vault-unseal/unseal-loop.sh /app/unseal-loop.sh
 COPY scripts/azure/vault-unseal/vault-pg-schema.sql /app/vault-pg-schema.sql
 # Root was needed for apk only; the loop runs psql and the vault CLI and writes
-# nothing but /tmp, so it drops to the image's vault user (trivy DS-0002).
-USER vault
+# nothing but /tmp, so it drops to the image's vault user, uid 100 as the
+# official image creates it (trivy DS-0002; hadolint DL3066 wants the number).
+USER 100
 ENTRYPOINT ["/bin/sh", "/app/unseal-loop.sh"]
