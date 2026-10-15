@@ -289,6 +289,9 @@ published bands beside them are quotations with a source, not a verdict.
 
 Always consult a doctor before making any decision about your health.
 
+What has been tested, how accuracy is measured, and what is still open is in
+[`evidence.md`](evidence.md).
+
 ## How these screenshots are made
 
 The images on this page are shot from a simulator by
