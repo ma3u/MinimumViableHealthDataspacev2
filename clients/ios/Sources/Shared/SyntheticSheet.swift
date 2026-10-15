@@ -212,6 +212,50 @@
       return degrade(base, condition)
     }
 
+    /// A page that is one table under a title, as a device report prints its
+    /// single readings: `Zeit  Sys [mmHg]  MAD [mmHg]  …`, one row per line.
+    public static func renderTable(
+      title: String, columns: [String], rows: [[String]], page: Int, footer: String? = nil
+    ) -> CGImage {
+      let width = 1240
+      let height = 1754
+      let context = CGContext(
+        data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+        space: CGColorSpace(name: CGColorSpace.sRGB)!,
+        bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
+      context.setFillColor(gray: 1, alpha: 1)
+      context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+
+      func draw(_ text: String, x: CGFloat, y: CGFloat, size: CGFloat) {
+        let font = CTFontCreateWithName("Helvetica" as CFString, size, nil)
+        let attributes: [CFString: Any] = [
+          kCTFontAttributeName: font,
+          kCTForegroundColorAttributeName: CGColor(gray: 0, alpha: 1),
+        ]
+        let attributed = CFAttributedStringCreate(
+          nil, text as CFString, attributes as CFDictionary)!
+        context.textPosition = CGPoint(x: x, y: y)
+        CTLineDraw(CTLineCreateWithAttributedString(attributed), context)
+      }
+
+      draw(title, x: 90, y: CGFloat(height) - 120, size: 30)
+      draw("Seite \(page)", x: 1040, y: CGFloat(height) - 120, size: 20)
+      let step = CGFloat(width - 180) / CGFloat(max(columns.count, 1))
+      var y = CGFloat(height) - 190
+      for (index, column) in columns.enumerated() {
+        draw(column, x: 90 + CGFloat(index) * step, y: y, size: 20)
+      }
+      y -= 40
+      for row in rows {
+        for (index, cell) in row.enumerated() {
+          draw(cell, x: 90 + CGFloat(index) * step, y: y, size: 20)
+        }
+        y -= 30
+      }
+      if let footer { draw(footer, x: 90, y: 60, size: 18) }
+      return context.makeImage()!
+    }
+
     /// One context for the whole suite. Building a `CIContext` per render
     /// allocates a fresh GPU command queue and texture cache each time, which
     /// is what tipped the test process into being killed for memory.

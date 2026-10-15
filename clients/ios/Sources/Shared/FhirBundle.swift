@@ -29,6 +29,8 @@ public enum FhirWriter {
   public static let extSourceKind = "\(extensionBase)/epa-ingest-source-kind"
   public static let extOcrConfidence = "\(extensionBase)/epa-ingest-ocr-confidence"
   public static let extSourceLine = "\(extensionBase)/epa-ingest-source-line"
+  public static let extVerified = "\(extensionBase)/epa-ingest-verified-by-patient"
+  public static let extOriginalReading = "\(extensionBase)/epa-ingest-original-reading"
   public static let extSourceRegion = "\(extensionBase)/epa-ingest-source-region"
 
   static let ucumSystem = "http://unitsofmeasure.org"
@@ -113,6 +115,61 @@ public enum FhirWriter {
 
   /// Builds the bundle. `now` is injectable so the same input yields the same
   /// bundle in tests, which is what makes the golden-file parity check possible.
+  static let categoryDisplay = [
+    "laboratory": "Laboratory", "vital-signs": "Vital Signs", "procedure": "Procedure",
+    "imaging": "Imaging",
+  ]
+
+  /// FHIR's observation category for a code: `laboratory` unless the
+  /// dictionary says it is a vital sign or an ECG measurement
+  /// (`Analytes.observationCategories`, generated from the TypeScript table
+  /// the server's writer reads).
+  public static func observationCategory(_ loinc: String?, analyteKey: String? = nil) -> String {
+    loinc.flatMap { Analytes.observationCategories[$0] }
+      ?? analyteKey.flatMap { Analytes.observationCategories[$0] } ?? "laboratory"
+  }
+
+  static func category(_ value: CodedLabValue) -> String {
+    observationCategory(value.coding.loinc, analyteKey: value.coding.analyteKey)
+  }
+
+  /// A measurement that makes a report an ECG (`Analytes.electrocardiogramCodes`).
+  static func isEcgValue(_ value: CodedLabValue) -> Bool {
+    value.coding.loinc.map(Analytes.electrocardiogramCodes.contains) == true
+      || Analytes.electrocardiogramCodes.contains(value.coding.analyteKey)
+  }
+
+  /// True when the report holds ECG measurements and no laboratory value: it
+  /// is then an ECG (v2-0074 `EC`), not a laboratory report. Vital signs may
+  /// sit beside them; an exercise test's procedure values may not, or a
+  /// cycle ergometry that counted its ectopic beats would be an "EKG study".
+  public static func isElectrocardiogram(_ values: [CodedLabValue]) -> Bool {
+    values.contains(where: isEcgValue)
+      && values.allSatisfy { category($0) != "laboratory" }
+      && values.allSatisfy { category($0) != "procedure" || isEcgValue($0) }
+  }
+
+  /// An ECG report that counts every beat of a recording: a Holter study
+  /// (LOINC 18754-2).
+  public static func isHolter(_ values: [CodedLabValue]) -> Bool {
+    isElectrocardiogram(values) && values.contains { $0.coding.loinc == "76637-8" }
+  }
+
+  /// The kind of report the values make (`Analytes.reportKinds`), or nil
+  /// for a laboratory report. An ECG or Holter report is decided before
+  /// this. Mirrors `reportKind` in the TypeScript writer.
+  public static func reportKind(_ values: [CodedLabValue]) -> ReportKind? {
+    func keys(_ value: CodedLabValue) -> [String] {
+      [value.coding.loinc ?? "", value.coding.analyteKey].filter { !$0.isEmpty }
+    }
+    return Analytes.reportKinds.first { kind in
+      values.contains { keys($0).contains(where: kind.triggers.contains) }
+        && values.allSatisfy {
+          category($0) == "vital-signs" || keys($0).contains(where: kind.members.contains)
+        }
+    }
+  }
+
   public static func buildBundle(
     values: [CodedLabValue], meta: ReportMeta, source: TextSource, now: String
   ) -> JSON {
@@ -155,8 +212,8 @@ public enum FhirWriter {
             "coding": .array([
               [
                 "system": "http://terminology.hl7.org/CodeSystem/observation-category",
-                "code": "laboratory",
-                "display": "Laboratory",
+                "code": .string(category(value)),
+                "display": .string(categoryDisplay[category(value)] ?? ""),
               ]
             ])
           ]
@@ -224,6 +281,9 @@ public enum FhirWriter {
       observations.append(observation)
     }
 
+    // A report whose every value is an ECG measurement is an ECG.
+    let ecg = isElectrocardiogram(values)
+    let kind = ecg ? nil : reportKind(values)
     var report: JSON = [
       "resourceType": "DiagnosticReport",
       "id": "report-1",
@@ -231,22 +291,35 @@ public enum FhirWriter {
       "category": .array([
         [
           "coding": .array([
-            [
-              "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
-              "code": "LAB",
-              "display": "Laboratory",
-            ]
+            ecg
+              ? [
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": "EC",
+                "display": "Electrocardiac (e.g., EKG, EEC, Holter)",
+              ]
+              : [
+                "system": "http://terminology.hl7.org/CodeSystem/v2-0074",
+                "code": .string(kind?.section ?? "LAB"),
+                "display": .string(kind?.sectionDisplay ?? "Laboratory"),
+              ]
           ])
         ]
       ]),
       "code": {
         var code: JSON = [
           "coding": .array([
-            [
-              "system": .string(loincSystem),
-              "code": "11502-2",
-              "display": "Laboratory report",
-            ]
+            ecg
+              ? (isHolter(values)
+                ? [
+                  "system": .string(loincSystem), "code": "18754-2",
+                  "display": "Ambulatory cardiac rhythm monitor (Holter) study",
+                ]
+                : ["system": .string(loincSystem), "code": "11524-6", "display": "EKG study"])
+              : [
+                "system": .string(loincSystem),
+                "code": .string(kind?.loinc ?? "11502-2"),
+                "display": .string(kind?.display ?? "Laboratory report"),
+              ]
           ])
         ]
         if let title = meta.title { code["text"] = .string(title) }
@@ -377,6 +450,52 @@ public enum FhirWriter {
       extensions.append(
         ["url": .string(extSourceRegion), "valueString": .string(format(region))])
     }
+    // The person's check of the value against the paper, and the reading
+    // they corrected. Mirrors `provenanceExtensions` in to-fhir.ts.
+    if let verification = value.verification {
+      let formatter = ISO8601DateFormatter()
+      extensions.append(
+        [
+          "url": .string(extVerified),
+          "valueDateTime": .string(formatter.string(from: verification.verifiedAt)),
+        ])
+      if let original = verification.original {
+        let number =
+          original.value == original.value.rounded() && abs(original.value) < 1e15
+          ? String(Int(original.value)) : String(original.value)
+        extensions.append(
+          [
+            "url": .string(extOriginalReading),
+            "valueString": .string("\(original.label) \(number) \(original.unitRaw)"),
+          ])
+      }
+    }
     return extensions
+  }
+}
+
+/// A kind of report and how the export files it: the DiagnosticReport's
+/// category (HL7 v2-0074) and code (LOINC). Generated from `REPORT_KINDS`
+/// (`Analytes.reportKinds`).
+public struct ReportKind: Sendable, Equatable {
+  public let kind: String
+  public let section: String
+  public let sectionDisplay: String
+  public let loinc: String
+  public let display: String
+  public let triggers: Set<String>
+  public let members: Set<String>
+
+  public init(
+    kind: String, section: String, sectionDisplay: String, loinc: String, display: String,
+    triggers: Set<String>, members: Set<String>
+  ) {
+    self.kind = kind
+    self.section = section
+    self.sectionDisplay = sectionDisplay
+    self.loinc = loinc
+    self.display = display
+    self.triggers = triggers
+    self.members = members
   }
 }

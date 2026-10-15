@@ -1,0 +1,489 @@
+{
+  "_note": "Synthetic: invented values on the geometry of a real rotated page (README rule 1).",
+  "fragments": [
+    {
+      "text": "DATENQUELLE: Sensor Pro 1.4.1",
+      "region": {
+        "page": 1,
+        "x": 0.396,
+        "y": 0.89,
+        "width": 0.292,
+        "height": 0.013
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "SEITE: 2 /5",
+      "region": {
+        "page": 1,
+        "x": 0.858,
+        "y": 0.895,
+        "width": 0.078,
+        "height": 0.013
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "DATUM:2026.03.11",
+      "region": {
+        "page": 1,
+        "x": 0.804,
+        "y": 0.881,
+        "width": 0.133,
+        "height": 0.014
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "Tagesmuster(mit Glukose-Messwerten)",
+      "region": {
+        "page": 1,
+        "x": 0.943,
+        "y": 0.559,
+        "width": 0.043,
+        "height": 0.295
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "3. März 2026 - 4. März 2026 (2 Tage)",
+      "region": {
+        "page": 1,
+        "x": 0.917,
+        "y": 0.604,
+        "width": 0.034,
+        "height": 0.249
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "Tages-",
+      "region": {
+        "page": 1,
+        "x": 0.865,
+        "y": 0.726,
+        "width": 0.022,
+        "height": 0.034
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "Durchschnitt",
+      "region": {
+        "page": 1,
+        "x": 0.856,
+        "y": 0.715,
+        "width": 0.012,
+        "height": 0.057
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "Glukose",
+      "region": {
+        "page": 1,
+        "x": 0.812,
+        "y": 0.783,
+        "width": 0.021,
+        "height": 0.049
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "mg/dL",
+      "region": {
+        "page": 1,
+        "x": 0.801,
+        "y": 0.807,
+        "width": 0.012,
+        "height": 0.026
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "118",
+      "region": {
+        "page": 1,
+        "x": 0.813,
+        "y": 0.73,
+        "width": 0.014,
+        "height": 0.023
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "00:00",
+      "region": {
+        "page": 1,
+        "x": 0.852,
+        "y": 0.663,
+        "width": 0.013,
+        "height": 0.027
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "102",
+      "region": {
+        "page": 1,
+        "x": 0.809,
+        "y": 0.651,
+        "width": 0.015,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "02:00",
+      "region": {
+        "page": 1,
+        "x": 0.852,
+        "y": 0.6085,
+        "width": 0.013,
+        "height": 0.027
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "99",
+      "region": {
+        "page": 1,
+        "x": 0.809,
+        "y": 0.5965,
+        "width": 0.015,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "04:00",
+      "region": {
+        "page": 1,
+        "x": 0.852,
+        "y": 0.554,
+        "width": 0.013,
+        "height": 0.027
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "104",
+      "region": {
+        "page": 1,
+        "x": 0.809,
+        "y": 0.542,
+        "width": 0.015,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "06:00",
+      "region": {
+        "page": 1,
+        "x": 0.852,
+        "y": 0.49950000000000006,
+        "width": 0.013,
+        "height": 0.027
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "113",
+      "region": {
+        "page": 1,
+        "x": 0.809,
+        "y": 0.48750000000000004,
+        "width": 0.015,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "08:00",
+      "region": {
+        "page": 1,
+        "x": 0.852,
+        "y": 0.44500000000000006,
+        "width": 0.013,
+        "height": 0.027
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "121",
+      "region": {
+        "page": 1,
+        "x": 0.809,
+        "y": 0.43300000000000005,
+        "width": 0.015,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "10:00",
+      "region": {
+        "page": 1,
+        "x": 0.852,
+        "y": 0.3905,
+        "width": 0.013,
+        "height": 0.027
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "118",
+      "region": {
+        "page": 1,
+        "x": 0.809,
+        "y": 0.3785,
+        "width": 0.015,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "12:00",
+      "region": {
+        "page": 1,
+        "x": 0.852,
+        "y": 0.336,
+        "width": 0.013,
+        "height": 0.027
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "125",
+      "region": {
+        "page": 1,
+        "x": 0.809,
+        "y": 0.324,
+        "width": 0.015,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "14:00",
+      "region": {
+        "page": 1,
+        "x": 0.852,
+        "y": 0.28150000000000003,
+        "width": 0.013,
+        "height": 0.027
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "122",
+      "region": {
+        "page": 1,
+        "x": 0.809,
+        "y": 0.2695,
+        "width": 0.015,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "16:00",
+      "region": {
+        "page": 1,
+        "x": 0.852,
+        "y": 0.22700000000000004,
+        "width": 0.013,
+        "height": 0.027
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "117",
+      "region": {
+        "page": 1,
+        "x": 0.809,
+        "y": 0.21500000000000002,
+        "width": 0.015,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "18:00",
+      "region": {
+        "page": 1,
+        "x": 0.852,
+        "y": 0.17250000000000004,
+        "width": 0.013,
+        "height": 0.027
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "136",
+      "region": {
+        "page": 1,
+        "x": 0.809,
+        "y": 0.16050000000000003,
+        "width": 0.015,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "20:00",
+      "region": {
+        "page": 1,
+        "x": 0.852,
+        "y": 0.118,
+        "width": 0.013,
+        "height": 0.027
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "131",
+      "region": {
+        "page": 1,
+        "x": 0.809,
+        "y": 0.106,
+        "width": 0.015,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "22:00",
+      "region": {
+        "page": 1,
+        "x": 0.852,
+        "y": 0.0635,
+        "width": 0.013,
+        "height": 0.027
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "114",
+      "region": {
+        "page": 1,
+        "x": 0.809,
+        "y": 0.051500000000000004,
+        "width": 0.015,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "180",
+      "region": {
+        "page": 1,
+        "x": 0.602,
+        "y": 0.725,
+        "width": 0.01,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "Ziel-",
+      "region": {
+        "page": 1,
+        "x": 0.552,
+        "y": 0.759,
+        "width": 0.016,
+        "height": 0.022
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "Bereich",
+      "region": {
+        "page": 1,
+        "x": 0.54,
+        "y": 0.746,
+        "width": 0.012,
+        "height": 0.035
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "70-",
+      "region": {
+        "page": 1,
+        "x": 0.47,
+        "y": 0.722,
+        "width": 0.012,
+        "height": 0.02
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "350",
+      "region": {
+        "page": 1,
+        "x": 0.762,
+        "y": 0.693,
+        "width": 0.012,
+        "height": 0.017
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "300",
+      "region": {
+        "page": 1,
+        "x": 0.715,
+        "y": 0.693,
+        "width": 0.012,
+        "height": 0.017
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "250-",
+      "region": {
+        "page": 1,
+        "x": 0.665,
+        "y": 0.693,
+        "width": 0.012,
+        "height": 0.017
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "200→",
+      "region": {
+        "page": 1,
+        "x": 0.618,
+        "y": 0.693,
+        "width": 0.012,
+        "height": 0.017
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "150-",
+      "region": {
+        "page": 1,
+        "x": 0.573,
+        "y": 0.693,
+        "width": 0.012,
+        "height": 0.017
+      },
+      "confidence": 0.95
+    },
+    {
+      "text": "100—",
+      "region": {
+        "page": 1,
+        "x": 0.52,
+        "y": 0.693,
+        "width": 0.012,
+        "height": 0.017
+      },
+      "confidence": 0.95
+    }
+  ]
+}

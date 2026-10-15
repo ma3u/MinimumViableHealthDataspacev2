@@ -130,12 +130,35 @@ public enum VisionDocumentReader {
   /// rather than the mechanism, so it will fail loudly if that happens, and it
   /// will pass without changes if the new stack is fixed and this is swapped
   /// back.
-  private static func recogniseFragments(
+  static func recogniseFragments(
     _ image: CGImage, page: Int
   ) async throws -> [DocumentReconciler.TextFragment] {
     let bands = bandCount(for: image)
-    guard bands > 1 else { return try recogniseBand(image, page: page) }
+    guard bands > 1 else {
+      let whole = try recogniseBand(image, page: page)
+      // A full page photographed close is still more than the downsampled
+      // copy Vision reads can resolve: on a real practice lab sheet, 1870 by
+      // 2354 pixels, the whole-page pass returned no fragment for most of
+      // the value column, and two halves read every one of them. So a large
+      // page is read in halves too, and the halves are kept only when they
+      // find clearly more numbers. An ordinary scan keeps its whole-page
+      // reading, and with it every measurement made on one.
+      guard image.height >= 2000 else { return whole }
+      let halves = try await recogniseBands(image, page: page, bands: 2)
+      return numbers(in: halves) > numbers(in: whole) + max(3, numbers(in: whole) / 6)
+        ? halves : whole
+    }
+    return try await recogniseBands(image, page: page, bands: bands)
+  }
 
+  /// How many fragments carry a digit: the measure of a reading's yield.
+  static func numbers(in fragments: [DocumentReconciler.TextFragment]) -> Int {
+    fragments.filter { $0.text.contains(where: \.isNumber) }.count
+  }
+
+  static func recogniseBands(
+    _ image: CGImage, page: Int, bands: Int
+  ) async throws -> [DocumentReconciler.TextFragment] {
     // Overlapping bands, so a line sitting on a boundary is read whole in at
     // least one of them.
     var collected: [DocumentReconciler.TextFragment] = []

@@ -743,6 +743,78 @@ paths:
         "429": { description: Too many accounts }
         "502": { description: Keycloak or Neo4j failed }
         "503": { description: Account creation is not configured on this hub }
+  /api/patient/observations:
+    get:
+      tags: [Patient]
+      summary: The patient's own record as a FHIR R4 Bundle (EHDS Art. 3, Art. 14)
+      description: >
+        Observations as a FHIR R4 searchset Bundle, each with the range the
+        laboratory printed, oldest first per code. With `include=all` the
+        Bundle also carries the record's DiagnosticReports (resting ECG,
+        imaging), Immunizations (the vaccination record) and
+        MedicationStatements (the medication plan), the Art. 14 categories an
+        ePA or EHR integrator asks for next (ADR-059). A PATIENT reads their
+        own record only; EDC_ADMIN any. Synthetic data, tagged `fictional`.
+      parameters:
+        - name: patientId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: code
+          in: query
+          required: false
+          schema: { type: string, description: one LOINC code }
+        - name: include
+          in: query
+          required: false
+          schema: { type: string, enum: [all] }
+      responses:
+        "200":
+          description: FHIR R4 Bundle
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [resourceType, type, total, entry]
+                properties:
+                  resourceType: { type: string, enum: [Bundle] }
+                  id: { type: string }
+                  meta: { type: object }
+                  type: { type: string, enum: [searchset] }
+                  total: { type: integer }
+                  link:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        relation: { type: string }
+                        url: { type: string }
+                  entry:
+                    type: array
+                    items:
+                      type: object
+                      required: [resource]
+                      properties:
+                        fullUrl: { type: string }
+                        resource:
+                          type: object
+                          required: [resourceType, id]
+                          properties:
+                            resourceType:
+                              type: string
+                              enum:
+                                [
+                                  Observation,
+                                  DiagnosticReport,
+                                  Immunization,
+                                  MedicationStatement,
+                                ]
+                            id: { type: string }
+        "400": { description: patientId is required }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: A patient reads their own record only }
+        "404": { description: Patient not found }
+        "502": { description: Neo4j unavailable }
   /api/patient/app/account:
     delete:
       tags: [Patient]

@@ -51,8 +51,32 @@ struct ReportMetadataTests {
   func suffixDoesNotOutrank() {
     let metadata = Self.extract("Entnahmedatum 11.09.2026   Druckdatum 13.09.2026")
     #expect(metadata.collectedOn == Self.day(2026, 9, 11))
-    #expect(metadata.reportedOn == Self.day(2026, 9, 13))
+    // The print date dates the paper, not the result.
+    #expect(metadata.reportedOn == nil)
+    #expect(metadata.dates.contains { $0.date == Self.day(2026, 9, 13) && $0.keyword == "druckdatum" })
     #expect(metadata.labDate == Self.day(2026, 9, 11))
+  }
+
+  @Test("a practice system's lab sheet: the final report's date, not the print header's")
+  func practiceSheetHeader() {
+    // The layout of a real x.isynet "Laborblatt"; name and dates invented.
+    let metadata = Self.extract(
+      """
+      x.isynet - Version Quartalsupdate 25.2 Build: (0) (25.2.67) Praxis Muster   Datum: 14.05.2026 Seite: 1
+      für: Praxis Muster Musterstraße 1 12345 Musterstadt
+      Laborblatt: Tagesansicht (12345) Muster, Erika 01.01.1970; W, Facharzt-Bericht(Endbefund) vom 05.05.2026
+      """)
+    #expect(metadata.labDate == Self.day(2026, 5, 5))
+    #expect(metadata.reportedOn == Self.day(2026, 5, 5))
+    #expect(metadata.dates.contains { $0.date == Self.day(1970, 1, 1) && $0.role == .birth })
+    #expect(
+      metadata.dates.contains { $0.date == Self.day(2026, 5, 14) && $0.keyword == "print header" })
+  }
+
+  @Test("a print header alone still dates the report when nothing else does")
+  func printHeaderLast() {
+    let metadata = Self.extract("Laborblatt   Datum: 14.05.2026 Seite: 1\nNatrium 140 mmol/l")
+    #expect(metadata.labDate == Self.day(2026, 5, 14))
   }
 
   @Test("receipt stands in when no collection date is printed, then issue")

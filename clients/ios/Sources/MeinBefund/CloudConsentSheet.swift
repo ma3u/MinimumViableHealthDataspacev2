@@ -72,7 +72,7 @@ struct CloudConsentSheet: View {
                 .foregroundStyle(selected.contains(key(for: value)) ? Color.accentColor : .secondary)
                 VStack(alignment: .leading, spacing: 2) {
                   Text(value.raw.label)
-                  Text("\(formatted(value.raw.value)) \(value.coding.ucum) · \(value.coding.codeLabel)")
+                  Text("\(formatted(value.raw.value)) \(UnitText.display(value.coding.ucum)) · \(value.coding.codeLabel)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 }

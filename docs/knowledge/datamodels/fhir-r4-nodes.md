@@ -14,6 +14,10 @@ status: stable
   -[:HAS_CONDITION]->          (:Condition {resourceId, code, display, onset})
   -[:HAS_OBSERVATION]->        (:Observation {resourceId, code, display, value, unit, effectiveDate})
   -[:HAS_MEDICATION_REQUEST]-> (:MedicationRequest {resourceId, medicationCode, display})
+  -[:HAS_DIAGNOSTIC_REPORT]->  (:DiagnosticReport {resourceId, code, category (EC, RAD), conclusion, effectiveDate})
+                                   -[:HAS_RESULT]-> (:Observation)        ADR-059
+  -[:HAS_IMMUNIZATION]->       (:Immunization {resourceId, vaccineCode (CVX), occurrenceDate, lotNumber})
+  -[:HAS_MEDICATION_STATEMENT]-> (:MedicationStatement {resourceId, medicationCode (ATC), dosageText, planId})
 ```
 
 Coded via `-[:CODED_BY]->` to L5 concepts (SNOMED/LOINC/RxNorm). Mapped to L4

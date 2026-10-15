@@ -69,13 +69,23 @@ public enum LabLineParser {
     }
   }
 
+  /// A laboratory's legend marker after the range, `*W` (sent to another
+  /// laboratory) or `*N` (not accredited): a note about the test, not part of
+  /// the range.
+  static func withoutLegendMarker(_ raw: String) -> String {
+    raw.replacingOccurrences(of: #"\s*\*[A-Z]\s*$"#, with: "", options: .regularExpression)
+  }
+
   /// Reads the reference-range column.
   ///
   /// Handles the four forms German labs actually print: an interval
   /// (`0,70 - 1,20`, hyphen, en dash or `bis`), an upper bound (`< 200`,
   /// `bis 200`), a lower bound (`> 40`), and nothing at all.
   public static func parseReferenceRange(_ raw: String) -> ReferenceRange {
-    var t = raw
+    var t = withoutLegendMarker(raw)
+      // "of total fatty acids", before an omega-3 index's bound: `ges. FS>8.0`.
+      .replacingOccurrences(
+        of: #"^\s*ges\.?\s*FS\s*"#, with: "", options: [.regularExpression, .caseInsensitive])
       .replacingOccurrences(
         of: "referenz(bereich)?\\s*:?", with: "", options: [.regularExpression, .caseInsensitive]
       )
@@ -109,7 +119,7 @@ public enum LabLineParser {
   /// two-column layout, not a range, and is not kept as one. The label needs
   /// four letters to count, so a qualifier like `Erw. < 5,0 mg/l` is a range.
   public static func printedReference(_ raw: String) -> String? {
-    let t = raw.trimmingCharacters(in: .whitespaces)
+    let t = withoutLegendMarker(raw).trimmingCharacters(in: .whitespaces)
       .replacingOccurrences(of: #"^[:;,|]+\s*"#, with: "", options: .regularExpression)
       .trimmingCharacters(in: .whitespaces)
     guard !t.isEmpty else { return nil }
@@ -136,7 +146,11 @@ public enum LabLineParser {
   private static let linePattern =
     // A label may open with a number and a hyphen, `25-OH-Vitamin D`; a bare
     // number never starts one, or a value would be read as a name.
-    #"^\s*(?<label>(?:\d{1,3}-)?[\p{L}(][\p{L}0-9()/.,'+%‰\[\]\-\s]*?)"#
+    // A colon only between digits, the chain notation of a fatty acid,
+    // `Eicosapentaensäure (EPA) 20:5 w3`: anywhere else it is a separator.
+    // A footnote star and a practice code's underscore may sit in it too:
+    // `Kupfer i.S.*`, `mangan_S Mangan im Serum*`.
+    #"^\s*(?<label>(?:\d{1,3}-)?[\p{L}(](?:[\p{L}0-9()/.,'+%‰\[\]\-\s*_]|(?<=\d):(?=\d))*?)"#
     + #"\s+(?<cmp>[<>]=?|≤|≥)?\s*(?<value>\d[\d.,]*)"#
     + #"\s*(?<flag>[*+!↑↓HL;:\-]{0,2})"#
     // A unit glued to its value is either a percent sign or a per-something
@@ -232,12 +246,47 @@ public enum LabLineParser {
     let bound = #"(?:<=?|>=?|≤|≥)\s*\d[\d.,]*"#
     let interval = #"\d[\d.,]*\s*(?:-|–|—|bis)\s*\d[\d.,]*"#
     guard
-      let reference = firstMatch(
+      var reference = firstMatch(
         "^\\s*(" + bound + "|" + interval + ")\\s+(.*)$", in: tail, caseInsensitive: true)
     else { return nil }
-    guard let measured = firstMatch(#"^\s*([<>]=?|≤|≥)?\s*(\d[\d.,]*)"#, in: reference[2]),
+    // A practice system prints its result-text column before the range:
+    // `Folsäure  ng/ml  >27.10  1.8 - 9.0`. A bound followed by exactly an
+    // interval is a result and its range, never the other way round, since
+    // a value cannot be an interval. Two bounds stay refused: either could
+    // be the result.
+    if let swapped = firstMatch(
+      "^\\s*(" + bound + ")\\.?\\s+(" + interval + ")\\s*$", in: tail, caseInsensitive: true)
+    {
+      reference = [swapped[0], swapped[2], swapped[1]]
+    }
+    // The range read twice, `<3.34  < 3.34  4.51 +  173 mg/dL` (measured,
+    // values invented): the second copy is the range again, and the result
+    // follows it. Skipped only when a number does follow, so a result that
+    // really is the bound, alone on the line, is still read.
+    if let again = firstMatch("^\\s*(" + bound + ")\\s+(\\d.*)$", in: reference[2]),
+      again[1].filter({ !$0.isWhitespace }) == reference[1].filter({ !$0.isWhitespace })
+    {
+      reference[2] = again[2]
+    }
+    // The value must not open a range. Measured on a real sheet: without
+    // this the `1.8` that opens `1.8 - 9.0` was read as the result. What
+    // follows a value otherwise stays allowed, a flag or the same result in
+    // another unit (`4.51  +  173 mg/dL`).
+    guard
+      let measured = firstMatch(
+        #"^\s*([<>]=?|≤|≥)?\s*(\d[\d.,]*?)\.?(?![\d.,])(?!\s*[-–]\s*\d)"#, in: reference[2]),
       let value = parseNumber(measured[2])
     else { return nil }
+    // A bound, then a bound, is read as range then result, the order of the
+    // sheets this path was written for (`pg/ml  <125  <35`). A first bound
+    // ending in a full stop is a practice system's result text instead
+    // (`pmol/l  > 131.  >50`, the shape measured), and which is the result is then not
+    // on the line, so neither is taken.
+    if !measured[1].isEmpty,
+      reference[1].trimmingCharacters(in: .whitespaces).hasSuffix(".")
+    {
+      return nil
+    }
 
     let range = parseReferenceRange(reference[1])
     let comparator = measured[1].replacingOccurrences(of: "≤", with: "<=")
@@ -256,6 +305,248 @@ public enum LabLineParser {
     /// Surfaced so a human can check them, a silently dropped line is
     /// indistinguishable from a line that was never there.
     public let suspiciousLines: [String]
+  }
+
+  /// Puts a unit the laboratory wrapped back together.
+  ///
+  /// Measured on a laboratory's own PDF: `GFR (CKD-EPI-Formel) (SE) 84 ml/`,
+  /// then the reference `>60` on a line of its own, then `m/1.73m²`. A line
+  /// whose last token ends in `/` and is no unit takes the first of the next
+  /// two lines that completes it as one, and a line in between that is
+  /// exactly a reference range comes along as the range. Nothing else is
+  /// joined, so an ordinary sheet passes through untouched.
+  static func joiningWrappedUnits(
+    _ lines: [(line: String, lineNumber: Int, region: SourceRegion?)]
+  ) -> [(line: String, lineNumber: Int, region: SourceRegion?)] {
+    var out: [(line: String, lineNumber: Int, region: SourceRegion?)] = []
+    var index = 0
+    while index < lines.count {
+      let entry = lines[index]
+      var trimmed = entry.line.trimmingCharacters(in: .whitespaces)
+      var tokens = trimmed.split(separator: " ").map(String.init)
+      // The range may already sit after the broken unit, `84 ml/ >60`, when
+      // the lines were rebuilt from the page's geometry.
+      var range = ""
+      if tokens.count > 2, isExactlyReferenceRange(tokens[tokens.count - 1]),
+        tokens[tokens.count - 2].hasSuffix("/")
+      {
+        range = tokens.removeLast()
+        trimmed = tokens.joined(separator: " ")
+      }
+      let last = tokens.last ?? ""
+      var joined = false
+      if last.hasSuffix("/"), last.count > 1, Analytes.normaliseUnit(last) == nil {
+        for ahead in 1...2 where index + ahead < lines.count {
+          let tail = lines[index + ahead].line.trimmingCharacters(in: .whitespaces)
+          guard !tail.contains(" "), Analytes.normaliseUnit(last + tail) != nil else { continue }
+          var between = ahead == 2 ? lines[index + 1].line.trimmingCharacters(in: .whitespaces) : ""
+          guard between.isEmpty || isExactlyReferenceRange(between) else { break }
+          if between.isEmpty { between = range }
+          let line = (trimmed + tail + (between.isEmpty ? "" : " " + between))
+          out.append((line, entry.lineNumber, entry.region))
+          index += ahead + 1
+          joined = true
+          break
+        }
+      }
+      // A unit printed under its value as a line of its own: `geschätzte
+      // GFR (CKD-EPI)  72`, then `Einheit: ml / min / (1,73 m^2)` (measured
+      // on a laboratory's sheet, value invented). Joined only when the line
+      // above ends in a number and the line below is a unit and nothing else.
+      if !joined, index + 1 < lines.count,
+        let number = tokens.last, parseNumber(number) != nil,
+        let unit = unitLine(lines[index + 1].line)
+      {
+        out.append((trimmed + " " + unit, entry.lineNumber, entry.region))
+        index += 2
+        joined = true
+      }
+      if !joined {
+        out.append(entry)
+        index += 1
+      }
+    }
+    return out
+  }
+
+  /// Puts a cumulative report's rows back together when the recogniser read
+  /// each name half a line away from its numbers.
+  ///
+  /// Measured on a university laboratory's cumulative report (values
+  /// invented here):
+  ///
+  ///     Natrium [P)
+  ///     Kalium [P]  mmol/  136 - 145  140
+  ///     mmol/l  3.4-4.5  4.1
+  ///     Gamma-GT [P]  ukatal/l
+  ///     LDH [P)  < 1.22  0.38
+  ///     ukatal/l  2-4.1  3.20
+  ///
+  /// The sodium's unit, range and value are on the potassium's line, and the
+  /// GGT's range and value on the LDH's. Read in order, every unit, range
+  /// and value belongs to the oldest name still waiting for its value. A
+  /// block that starts with a name the dictionary knows and no value is
+  /// rebuilt that way, and kept only when it comes out whole: every name
+  /// with one value, no number left over. A sheet whose rows are aligned
+  /// cannot come out whole this way, because its last name would still be
+  /// waiting, so it passes through untouched.
+  static func reassemblingShiftedRows(
+    _ lines: [(line: String, lineNumber: Int, region: SourceRegion?)]
+  ) -> [(line: String, lineNumber: Int, region: SourceRegion?)] {
+    struct Record {
+      let label: String
+      let lineNumber: Int
+      let region: SourceRegion?
+      var unit: String?
+      var range: String?
+      var value: String?
+    }
+    let marker = #"[\[(]\s*[A-Za-zÄÖÜäöü]{1,4}\s*[\])]"#
+    let token =
+      #"(\d+(?:[.,]\d+)?\s*[-–]\s*\d+(?:[.,]\d+)?)|([<>]=?\s*\d+(?:[.,]\d+)?)|(\d+(?:[.,]\d+)?[+*]?)|([A-Za-zµμ%][A-Za-zµμ%/\d.^]*)"#
+
+    /// A line's name (through its matrix marker) and the text after it.
+    func split(_ line: String) -> (label: String?, data: String) {
+      let trimmed = line.trimmingCharacters(in: .whitespaces)
+      guard let first = trimmed.first, first.isLetter,
+        // Through the last marker: `ALAT (GPT) [P)` names a method first.
+        let m = trimmed.range(of: "^.*" + marker, options: .regularExpression)
+      else { return (nil, trimmed) }
+      return (String(trimmed[m]), String(trimmed[m.upperBound...]))
+    }
+    /// The data tokens of a text, or nil when it holds anything else.
+    func tokens(_ text: String) -> [(kind: Int, text: String)]? {
+      guard let re = try? NSRegularExpression(pattern: token) else { return nil }
+      var out: [(Int, String)] = []
+      var covered = 0
+      let ns = text as NSString
+      for m in re.matches(in: text, range: NSRange(location: 0, length: ns.length)) {
+        guard ns.substring(with: NSRange(location: covered, length: m.range.location - covered))
+          .trimmingCharacters(in: .whitespaces).isEmpty
+        else { return nil }
+        for group in 1...4 where m.range(at: group).location != NSNotFound {
+          let piece = ns.substring(with: m.range(at: group))
+          // A word that is no unit is not data.
+          if group == 4, Analytes.normaliseUnit(piece) == nil,
+            Analytes.normaliseUnit(piece + "l") == nil
+          {
+            return nil
+          }
+          out.append((group, piece))
+        }
+        covered = m.range.location + m.range.length
+      }
+      guard ns.substring(from: covered).trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
+      return out
+    }
+    func known(_ label: String) -> Bool {
+      analyseLabel(label).candidates.contains { Analytes.knowsLabel($0) || Analytes.knowsLabel("\($0) im Urin") }
+    }
+
+    var out: [(line: String, lineNumber: Int, region: SourceRegion?)] = []
+    var index = 0
+    while index < lines.count {
+      // A name still waiting for its value at the end of its own line: no
+      // number that could be one (`Ferritin [P]  ug/l  22 - 322`, then the
+      // value alone below it).
+      let start = split(lines[index].line)
+      guard let label = start.label, let data = tokens(start.data), known(label),
+        !data.contains(where: { $0.kind == 3 }), data.filter({ $0.kind == 2 }).count <= 1,
+        !(data.contains { $0.kind == 1 } && data.contains { $0.kind == 2 })
+      else {
+        out.append(lines[index])
+        index += 1
+        continue
+      }
+      // A name waiting for its value: read on while every line is names and
+      // data, handing each piece to the oldest name still waiting.
+      var queue: [Record] = []
+      var done: [Record] = []
+      var cursor = index
+      var whole = false
+      while cursor < lines.count {
+        let piece = split(lines[cursor].line)
+        guard let data = tokens(piece.data) else { break }
+        if let name = piece.label {
+          queue.append(
+            Record(
+              label: name, lineNumber: lines[cursor].lineNumber, region: lines[cursor].region))
+        } else if data.isEmpty || queue.isEmpty {
+          break
+        }
+        var orphan = false
+        for item in data {
+          guard !queue.isEmpty else {
+            orphan = true
+            break
+          }
+          switch item.kind {
+          case 4 where queue[0].unit == nil && queue[0].range == nil: queue[0].unit = item.text
+          case 1 where queue[0].range == nil: queue[0].range = item.text
+          case 2 where queue[0].range == nil: queue[0].range = item.text
+          case 2, 3: queue[0].value = item.text
+          default: orphan = true
+          }
+          if orphan { break }
+          if queue[0].value != nil { done.append(queue.removeFirst()) }
+        }
+        if orphan { break }
+        cursor += 1
+        if queue.isEmpty {
+          whole = true
+          break
+        }
+      }
+      // Whole, and actually shifted: some name took numbers from another
+      // line. A single name with its numbers on the next line is the same
+      // layout, a row the recogniser wrapped.
+      guard whole, cursor - index > done.count else {
+        out.append(lines[index])
+        index += 1
+        continue
+      }
+      for record in done {
+        var unit = record.unit ?? ""
+        if Analytes.normaliseUnit(unit) == nil, Analytes.normaliseUnit(unit + "l") != nil {
+          unit += "l"
+        }
+        let line = [record.label, unit, record.range ?? "", record.value ?? ""]
+          .filter { !$0.isEmpty }.joined(separator: "  ")
+        out.append((line, record.lineNumber, record.region))
+      }
+      index = cursor
+    }
+    return out
+  }
+
+  /// The unit of an `Einheit: ...` line, written compactly, or nil when the
+  /// line names no unit the dictionary knows. The longest run of words after
+  /// the colon that is a unit wins, so a note after it (`Berechnung nach
+  /// Formel von 2009`) is left out.
+  static func unitLine(_ line: String) -> String? {
+    guard
+      let range = line.range(
+        of: #"^\s*Einheit\s*:\s*"#, options: [.regularExpression, .caseInsensitive])
+    else { return nil }
+    let words = line[range.upperBound...].split(separator: " ")
+    for count in stride(from: words.count, through: 1, by: -1) {
+      let unit = words.prefix(count).joined().filter { !"()^".contains($0) }
+      if Analytes.normaliseUnit(unit) != nil { return unit }
+    }
+    return nil
+  }
+
+  /// A line of a laboratory's explanatory note, which starts like a value
+  /// and goes on in words: `<130 mg/dl bzw. <3.38 mmol/l. Non-HDL-Cholesterin`,
+  /// `1.0-3.0 µg/ml mittleres Risiko`. Not a result anyone could have read.
+  /// A bare value and range, `0.52 µkat/l <0.75`, has no word and stays.
+  static func isFootnote(_ line: String) -> Bool {
+    guard
+      let m = firstMatch(
+        #"^\s*[<>≤≥]?\s*\d[\d.,]*(?:\s*[-–]\s*\d[\d.,]*)?\s+(\S+)\s+(.*)$"#, in: line),
+      Analytes.normaliseUnit(m[1].trimmingCharacters(in: CharacterSet(charactersIn: ".,;"))) != nil
+    else { return false }
+    return m[2].range(of: #"\p{L}{4,}"#, options: .regularExpression) != nil
   }
 
   private static func looksLikeMeasurement(_ line: String) -> Bool {
@@ -536,10 +827,11 @@ public enum LabLineParser {
   ]
 
   private static func parse(
-    lines: [(line: String, lineNumber: Int, region: SourceRegion?)]
+    lines given: [(line: String, lineNumber: Int, region: SourceRegion?)]
   ) -> ParseResult {
     var values: [RawLabValue] = []
     var suspicious: [String] = []
+    let lines = reassemblingShiftedRows(joiningWrappedUnits(given))
 
     for entry in lines {
       let line = entry.line
@@ -613,7 +905,7 @@ public enum LabLineParser {
 
       guard let (m, segment) = matched else {
         if fallback() { continue }
-        if looksLikeMeasurement(line) { suspicious.append(line) }
+        if looksLikeMeasurement(line), !isFootnote(line) { suspicious.append(line) }
         continue
       }
       // Everything before the match belongs to the label, not to nothing.
@@ -671,7 +963,7 @@ public enum LabLineParser {
       // reference range or a comment and should not pretend otherwise.
       guard let value = parseNumber(group("value")), Analytes.normaliseUnit(unitRaw) != nil else {
         if fallback() { continue }
-        if looksLikeMeasurement(line) { suspicious.append(line) }
+        if looksLikeMeasurement(line), !isFootnote(line) { suspicious.append(line) }
         continue
       }
 
@@ -740,6 +1032,26 @@ public enum LabLineParser {
 
     var current = printed.trimmingCharacters(in: .whitespaces)
     remember(current)
+    // A word after the matrix marker is not part of the name: a university
+    // laboratory's annotation column, which the recogniser read as
+    // `Albumin [U]  Alhaminrn`. Taken off, so the marker is the end again.
+    if let m = firstMatch(
+      #"^(.*[\[(]\s*[A-Za-zÄÖÜäöü]{1,4}\s*[\])])\s+[A-Za-zÄÖÜäöü]{3,}$"#, in: current)
+    {
+      current = m[1]
+      remember(current)
+    }
+    // A lone `|` is a capital I the recogniser lost: `hs cTroponin | [P]`.
+    if current.range(of: #"\s\|(\s|$)"#, options: .regularExpression) != nil {
+      current = current.replacingOccurrences(
+        of: #"\s\|(\s|$)"#, with: " I$1", options: .regularExpression)
+      remember(current)
+    }
+    // A footnote star, `Selen i.S.* (AAS)`, marks the test, not its name, and
+    // stands in the way of every marker rule below.
+    current = current.replacingOccurrences(of: "*", with: "")
+      .replacingOccurrences(of: #"\s{2,}"#, with: " ", options: .regularExpression)
+    remember(current)
     current = stripTrailingFlag(current)
     remember(current)
 
@@ -770,6 +1082,9 @@ public enum LabLineParser {
         #"^(.*?)\s+(HP|SE|SP|EDTA|CB|ZP|NAF|LH|EB)\s*$"#, in: current)
       {
         // A bare tube code, `Harnstoff HP`.
+        current = m[1]
+      } else if let m = firstMatch(#"^(.*?)\s+Gen\.?\s*\d+\s*$"#, in: current) {
+        // The reagent's generation, `Folsäure (restandardisiert) Gen.3`.
         current = m[1]
       } else {
         break
@@ -832,7 +1147,9 @@ public enum LabLineParser {
   /// Short, and letters and digits only, so `i.S.` and `Alk.` are left to the
   /// marker rules above and an ordinary word is never taken for a code.
   static func looksLikeLeadingCode(_ token: String) -> Bool {
-    if !token.isEmpty && token.count <= 8 && token.allSatisfy({ $0.isLetter || $0.isNumber }) {
+    if !token.isEmpty && token.count <= 9
+      && token.allSatisfy({ $0.isLetter || $0.isNumber || $0 == "_" })
+    {
       return true
     }
     // A laboratory's own order code in capitals with a hyphen, `STU-FSCPC
@@ -866,7 +1183,7 @@ public enum LabLineParser {
     code(parse(rows: rows), source: source)
   }
 
-  private static func code(_ parsed: ParseResult, source: SourceKind) -> ExtractionResult {
+  static func code(_ parsed: ParseResult, source: SourceKind) -> ExtractionResult {
     var coded: [CodedLabValue] = []
     var unmapped: [UnmappedLabValue] = []
 

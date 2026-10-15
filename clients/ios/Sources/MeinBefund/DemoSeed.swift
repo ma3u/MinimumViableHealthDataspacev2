@@ -47,6 +47,11 @@
       live.sort { $0.effectiveDate > $1.effectiveDate }
     }
 
+    /// Removes a report from what the demo is showing, as a delete does.
+    @MainActor static func forget(_ id: UUID) {
+      live.removeAll { $0.id == id }
+    }
+
     /// Which screen to open on launch.
     ///
     /// Screenshots are taken by launching straight into a screen rather than by
@@ -127,8 +132,8 @@
         unmapped: [
           UnmappedLabValue(
             raw: RawLabValue(
-              label: "Omega-3-Index", value: 6.8, unitRaw: "%",
-              line: "Omega-3-Index  6,8 %", lineNumber: 10),
+              label: "Zonulin", value: 48, unitRaw: "ng/ml",
+              line: "Zonulin  48 ng/ml", lineNumber: 10),
             reason: .unknownAnalyte)
         ],
         suspiciousLines: ["Lipoprotein-Elektrophorese   siehe Anlage"],

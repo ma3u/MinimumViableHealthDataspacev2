@@ -458,3 +458,77 @@
 "Resting heart rate, heart rate variability, steps and body weight from Apple Health, as the Trends screen shows them: one mean per week, never a single day or a single reading. While it is on, they go to your own record on the EHDS demo hub, and each sync replaces the last. Switching off stops further sending; what was sent stays in the record until you delete the account." = "Ruhepuls, Herzfrequenzvariabilität, Schritte und Körpergewicht aus Apple Health, so wie der Trends-Bildschirm sie zeigt: ein Mittelwert pro Woche, nie ein einzelner Tag oder eine einzelne Messung. Solange der Schalter an ist, gehen sie in Ihre eigene Akte auf dem EHDS-Demo-Hub, und jeder Abgleich ersetzt den vorigen. Ausschalten beendet das Senden; was gesendet wurde, bleibt in der Akte, bis Sie das Konto löschen.";
 "Sent %lld weekly values from %lld device trends to your EHDS record." = "%1$lld Wochenwerte aus %2$lld Geräte-Trends an Ihre EHDS-Akte gesendet.";
 "Device trends not sent: %@" = "Geräte-Trends nicht gesendet: %@";
+
+/* Duplicate reports */
+"This scan reads more of a report you have" = "Dieser Scan liest mehr aus einem Befund, den Sie schon haben";
+"Already on this phone" = "Schon auf diesem Telefon";
+"“%@” of %@ has the same %lld values. Saving this scan would show each of them twice." = "„%1$@“ vom %2$@ hat dieselben %3$lld Werte. Mit diesem Scan stünde jeder doppelt da.";
+"Every value of this scan is already in “%@” of %@. Saving it would show them twice." = "Jeder Wert dieses Scans steht schon in „%1$@“ vom %2$@. Gespeichert stünden sie doppelt da.";
+"All %lld values of “%@” of %@ are in this scan as well, and this scan reads more. The older scan is no longer needed." = "Alle %1$lld Werte von „%2$@“ vom %3$@ stehen auch in diesem Scan, und dieser liest mehr. Der ältere Scan wird nicht mehr gebraucht.";
+"Save and delete the older scan" = "Speichern und älteren Scan löschen";
+"Save and keep both" = "Speichern und beide behalten";
+"Don't save" = "Nicht speichern";
+"Save and delete the older copy" = "Speichern und ältere Kopie löschen";
+"Save anyway" = "Trotzdem speichern";
+"Find duplicate reports" = "Doppelte Befunde finden";
+"No duplicate reports found." = "Keine doppelten Befunde gefunden.";
+"Duplicate report" = "Doppelter Befund";
+"Keep both" = "Beide behalten";
+"Delete “%@”, scanned %@" = "„%1$@“ löschen, eingelesen am %2$@";
+"“%@” and “%@” of %@ have the same %lld values. Deleting one loses none of them." = "„%1$@“ und „%2$@“ vom %3$@ haben dieselben %4$lld Werte. Wer einen löscht, verliert keinen davon.";
+"All %lld values of “%@” are also in “%@” of %@. Deleting it loses none of them." = "Alle %1$lld Werte von „%2$@“ stehen auch in „%3$@“ vom %4$@. Wer ihn löscht, verliert keinen davon.";
+
+/* Suggested report names */
+"Holter ECG" = "Langzeit-EKG";
+"Resting ECG" = "Ruhe-EKG";
+"24-hour blood pressure" = "24-h-Blutdruckmessung";
+"Lipid profile" = "Lipidprofil";
+"Blood count" = "Blutbild";
+"Cardiopulmonary exercise test" = "Spiroergometrie";
+"Spirometry" = "Spirometrie";
+"Lactate test" = "Laktat-Leistungsdiagnostik";
+"Exercise ECG" = "Belastungs-EKG";
+"Body composition (DXA)" = "Körperzusammensetzung (DXA)";
+"Glucose sensor" = "Glukosesensor";
+"Checked" = "Geprüft";
+"Read again. These values you checked now read differently; your checked value is kept. Please compare them with the paper:\n%@" = "Neu ausgewertet. Diese von Ihnen geprüften Werte werden jetzt anders gelesen; Ihr geprüfter Wert bleibt erhalten. Bitte gleichen Sie sie mit dem Papier ab:\n%@";
+"%lld of %lld checked" = "%1$lld von %2$lld geprüft";
+"Page %@ was too blurred to read and was left out. Discard this scan and photograph it again, holding the phone still." = "Seite %@ war zu unscharf zum Lesen und wurde ausgelassen. Verwerfen Sie diesen Scan und fotografieren Sie sie erneut, mit ruhig gehaltenem Telefon.";
+"Name and laboratory are suggested from the scan. Change them as you like." = "Name und Labor sind aus dem Scan vorgeschlagen. Ändern Sie sie nach Belieben.";
+
+/* Checking and correcting values */
+"Name" = "Bezeichnung";
+"Code" = "Kodierung";
+"As on the paper" = "Wie auf dem Papier";
+"Read from: %@" = "Gelesen aus: %@";
+"Enter the value as a number." = "Geben Sie den Wert als Zahl ein.";
+"No code for this name and unit. The value is kept as unmatched." = "Kein Code für diesen Namen und diese Einheit. Der Wert bleibt als nicht zugeordnet erhalten.";
+"Saving marks the value as checked by you. Your correction is kept beside what the scan read; the scan itself is not changed." = "Beim Speichern wird der Wert als von Ihnen geprüft markiert. Ihre Korrektur steht neben dem, was der Scan gelesen hat; der Scan selbst bleibt unverändert.";
+"Check value" = "Wert prüfen";
+"Save as checked" = "Als geprüft speichern";
+"Tap a value to correct its name, number or unit against the paper." = "Tippen Sie auf einen Wert, um Name, Zahl oder Einheit mit dem Papier abzugleichen.";
+"Mark all values as checked" = "Alle Werte als geprüft markieren";
+"All values checked against the paper" = "Alle Werte mit dem Papier geprüft";
+"Corrected by you" = "Von Ihnen korrigiert";
+"Checked by you" = "Von Ihnen geprüft";
+"Use the suggestion: %@" = "Vorschlag übernehmen: %@";
+"Name and laboratory" = "Name und Labor";
+"Edit name and laboratory" = "Name und Labor bearbeiten";
+
+/* Reporting missing values */
+"Report missing values" = "Fehlende Werte melden";
+"Which values are missing or wrong? Name them, not their numbers." = "Welche Werte fehlen oder sind falsch? Nennen Sie die Namen, nicht die Zahlen.";
+"What is missing" = "Was fehlt";
+"The issue, as it will be sent" = "Die Meldung, so wie sie gesendet wird";
+"GitHub issues are public. Every digit is replaced by #, and the report's title, laboratory, dates and your name are left out. Read it through and remove anything you do not want to share. GitHub opens in your browser, and you send the issue from there with your GitHub account." = "GitHub-Issues sind öffentlich. Jede Ziffer ist durch # ersetzt, und Titel, Labor, Daten und Ihr Name sind nicht enthalten. Lesen Sie den Text durch und entfernen Sie alles, was Sie nicht teilen möchten. GitHub öffnet sich im Browser, und Sie senden das Issue von dort mit Ihrem GitHub-Konto.";
+"Open in GitHub" = "In GitHub öffnen";
+
+/* Deleting a report */
+"Delete and scan again" = "Löschen und neu einscannen";
+"Delete report" = "Befund löschen";
+"Delete and scan again?" = "Löschen und neu einscannen?";
+"Delete this report?" = "Diesen Befund löschen?";
+"Delete and scan" = "Löschen und einscannen";
+"Delete" = "Löschen";
+"“%@”, its scanned pages and every value will be deleted from this phone, and the scanner opens for the paper. This cannot be undone." = "„%@“, die eingelesenen Seiten und alle Werte werden von diesem Telefon gelöscht, und der Scanner öffnet sich für das Papier. Das lässt sich nicht rückgängig machen.";
+"“%@”, its scanned pages and every value will be deleted from this phone. This cannot be undone." = "„%@“, die eingelesenen Seiten und alle Werte werden von diesem Telefon gelöscht. Das lässt sich nicht rückgängig machen.";
