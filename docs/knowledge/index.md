@@ -58,6 +58,7 @@ frontmatter. Spec:
 
 Security and data protection are tested by the project itself; see
 [README: Security and data protection](../../README.md#security-and-data-protection).
+[operational-guideline](../security/operational-guideline.md) ·
 [security-test-report-2026-10-15](../security/security-test-report-2026-10-15.md) ·
 [threat-model (hub)](../security/threat-model.md) ·
 [threat-model-klarbefund](../security/threat-model-klarbefund.md) ·
