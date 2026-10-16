@@ -32,7 +32,12 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-USER nextjs
+USER 1001:1001
 EXPOSE 3000
+# Container Apps takes its probes from the app definition, not the image; this
+# check is for compose and for anyone who runs the image by hand (security
+# test report 2026-10-15, F6).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD ["/bin/sh", "-c", "wget -q --spider http://127.0.0.1:${PORT:-3000}/api/health || exit 1"]
 ENV PORT=3000
 CMD ["node", "server.js"]

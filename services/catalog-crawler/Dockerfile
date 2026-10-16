@@ -15,10 +15,15 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app
 
 EXPOSE 9465
+# Container Apps takes its probes from the app definition, not the image; this
+# check (the Prometheus endpoint; python:slim has neither curl nor wget) is for compose and for anyone who runs the image by hand (security
+# test report 2026-10-15, F6).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD ["python", "-c", "import os,urllib.request;urllib.request.urlopen('http://127.0.0.1:%s/metrics'%os.environ.get('METRICS_PORT','9465'),timeout=3)"]
 
 # Run unprivileged (Trivy DS-0002). The Prometheus port is >1024, so dropping
 # root costs no capability. Nothing is written inside the image at run time.
 RUN useradd --system --no-create-home --uid 10001 crawler
-USER crawler
+USER 10001
 
 ENTRYPOINT ["python", "-m", "src.main"]

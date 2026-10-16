@@ -8,4 +8,7 @@ COPY config.js platform.js signin.js /scripts/
 COPY azure/entrypoint.sh /scripts/entrypoint.sh
 # The k6 image already runs as this user; stating it keeps the scanner honest (trivy DS-0002).
 USER 12345
+# A one-shot job: k6 runs one scenario and exits, there is nothing to probe
+# (security test report 2026-10-15, F6).
+HEALTHCHECK NONE
 ENTRYPOINT ["/bin/sh", "/scripts/entrypoint.sh"]
