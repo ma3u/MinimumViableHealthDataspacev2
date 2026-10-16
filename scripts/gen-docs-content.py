@@ -42,6 +42,9 @@ DOCS = [
      "How to host the hub and Klarbefund for real: which EHDS role (Regulation (EU) 2025/327) operates "
      "which part, what BSI C5, IT-Grundschutz, TR-02102 and TR-03161 ask of each part, the clocks for "
      "incidents, retention, and the go-live checklist by role."),
+    ("operations", "dashboards", "docs/operations/dashboards.md",
+     "The three Grafana dashboards of the live hub, with screenshots: EDC contracts and transfers, the EHDS "
+     "audit trail, and the load and stress test; what each row shows, how to read it, and how to sign in."),
     ("operations", "load-tests", "docs/loadtest/README.md",
      "Every load, stress and spike run against the live hub and the compose stack, with the Grafana "
      "dashboard of each, what it found, what changed because of it, and the runs still to do."),
