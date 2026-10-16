@@ -96,12 +96,11 @@ describe("ArchitecturePage", () => {
     expect(screen.getByText("Architecture")).toBeInTheDocument();
   });
 
-  it("shows the five ArchiMate views and two sequences from the hub, each opening at full size", () => {
+  it("shows the four ArchiMate views and two sequences from the hub, each opening at full size", () => {
     render(<ArchitecturePage />);
     const figures = document.querySelectorAll("a.doc-figure");
     expect([...figures].map((a) => a.getAttribute("href"))).toEqual([
       "/published-docs/knowledge-graph-layers.svg",
-      "/published-docs/data-flow.svg",
       "/published-docs/data-flow-sequence.svg",
       "/published-docs/deployment.svg",
       "/published-docs/dsp-negotiation-sequence.svg",
