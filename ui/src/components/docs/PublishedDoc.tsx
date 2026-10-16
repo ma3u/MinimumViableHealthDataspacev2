@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { DocFigureViewer } from "@/components/docs/DocFigureViewer";
-import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
+import {
+  DocsLastUpdated,
+  type DocsPage,
+} from "@/components/docs/DocsLastUpdated";
 import MermaidDiagram from "@/components/MermaidDiagram";
 import { splitMermaid } from "@/lib/docs/markdown";
 import { REPO_URL, type PublishedDoc } from "@/lib/docs/published-docs";
@@ -17,7 +20,7 @@ export function PublishedDocPage({
   doc: PublishedDoc;
   backHref: string;
   backLabel: string;
-  lastUpdatedPage: string;
+  lastUpdatedPage: DocsPage;
 }) {
   // Images the documents embed are copied to public/published-docs by
   // scripts/gen-docs-content.py and referenced through a placeholder, so the

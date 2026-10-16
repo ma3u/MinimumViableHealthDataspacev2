@@ -1,0 +1,76 @@
+@startuml klarbefund-architecture
+title Klarbefund: what runs where\nthe app on the phone, the Shared package on the phone and on a Mac, the hub elsewhere
+top to bottom direction
+skinparam componentStyle rectangle
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam nodesep 14
+skinparam ranksep 36
+skinparam ArrowColor #475569
+skinparam packageBorderColor #94A3B8
+skinparam component {
+  BackgroundColor #FFFFFF
+  BorderColor #64748B
+}
+
+package "iPhone app: Sources/MeinBefund" #F0F9FF {
+  [ContentView, ReviewViews\nlist, report, menu, correct a value] as UI
+  [Scanning\nVisionKit camera, Photos, Files] as Scan
+  [ReportStore\nAES-GCM per file, Keychain key,\ncomplete protection, no backup] as Store
+  [ReportExport, DataExport\nPDF + FHIR for the doctor, OMOP,\nthe GDPR archive, share sheet] as Export
+  [EHDSConnection, ConnectView\ndevice grant, account,\nthe two sync switches] as Connect
+  [AppLock, PrivacyCover\nFace ID or passcode] as Lock
+  [Analysis\non device, cloud, your own key] as Analysis
+  [DemoSeed, DevDataset, SelfTest\nDEBUG builds only] as Demo
+}
+
+package "Shared package: Sources/Shared (iOS and macOS, no network, no store)" #F8FAFC {
+  [LabImport\nprovenance, then the pipeline] as Import
+  [VisionDocumentReader\nDocumentReconciler, TableRoles] as Read
+  [LabLineParser\nand the sheet readers] as Parser
+  [Analytes.generated\nReferenceRanges.generated] as Dictionary
+  [LabReport, Provenance\nReportMetadata, Consents, Profile] as Model
+  [FhirBundle, OmopExport\nDiagnosticsBundle] as Formats
+  [Trends, Wearables\nEHDSConnect, AppLockPolicy] as Domain
+}
+
+package "Tools: swift run, on a Mac" #FFFBEB {
+  [LabFile] as LabFile
+  [ScanReplay] as Replay
+  [AnalyteParity] as Parity
+  [IconGen] as Icon
+}
+
+cloud "Outside the phone" #FDF2F8 {
+  [services/epa-ingest\nanalytes.ts, reference-ranges.ts] as Ingest
+  [EHDS demo hub\nehds.mabu.red + Keycloak] as Hub
+  [Apple Health] as Health
+  [Analysis provider] as Provider
+}
+
+Scan -down-> Import
+UI -down-> Model
+Store -down-> Model
+Export -down-> Formats
+Connect -down-> Domain
+Lock -down-> Domain
+Import -down-> Read
+Read -down-> Parser
+Parser -down-> Dictionary
+Parser -right-> Model
+Formats -up-> Model
+LabFile -up-> Import
+Replay -up-> Import
+Replay -up-> Formats
+Parity -up-> Dictionary
+Ingest .up.> Dictionary : generates
+Connect -right-> Hub : HTTPS, OAuth 2.0 device grant,\nApp Attest for a new account
+UI -right-> Health : HealthKit, read only
+Analysis -right-> Provider : only the chosen values\nand the question
+Demo -[hidden]down-> Import
+Icon -[hidden]up-> Dictionary
+
+legend bottom right
+  Solid arrow: calls at run time. Dotted: generated at build time.
+endlegend
+@enduml

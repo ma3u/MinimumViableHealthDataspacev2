@@ -6,7 +6,6 @@ import { KlarbefundTourPhone } from "@/components/KlarbefundTourPhone";
 /** The GitHub Pages export is served under a basePath; plain <video> and <img>
  *  URLs must carry it (same pattern as the journey page). */
 const BASE_PATH = IS_STATIC ? "/MinimumViableHealthDataspacev2" : "";
-const REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
 const TOUR_ALT =
   "A tour through the Klarbefund app with invented data: the list of reports, a report's values and its scan, trends against published ranges, earlier measurements, connecting to the EHDS record, the three consents, asking an AI, and the privacy page";
 
@@ -68,9 +67,7 @@ export function KlarbefundShowcase() {
         </p>
         <div className="flex flex-wrap gap-3 text-sm mb-5">
           <a
-            href={`${REPO}/blob/main/docs/klarbefund/README.md`}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`${BASE_PATH}/docs/klarbefund/klarbefund-user-guide`}
             className="text-(--accent) underline underline-offset-2 hover:text-(--text-primary) transition-colors"
           >
             The app, screen by screen

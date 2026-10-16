@@ -567,6 +567,12 @@
   /* ── WCAG 2.2 Target Size (2.5.8) — utility classes ───────────────────────── */
 }
 
+/* ── Documentation: a heading reached from the "On this page" index stops
+   below the sticky navigation instead of under it. ─────────────────────── */
+#main-content :is(h1, h2, h3, h4, section)[id] {
+  scroll-margin-top: 5.5rem;
+}
+
 /* ── Published reports (/docs/security/<slug>): Markdown rendered by
    src/lib/docs/markdown.ts. Colours come from the theme tokens above. ──── */
 .doc-prose {
@@ -669,6 +675,17 @@
 }
 .doc-prose img {
   max-width: 100%;
+  cursor: zoom-in;
+}
+/* A phone screenshot written as <img width="..."> keeps its width and sits
+   beside the next one when the column allows; the viewer opens it full size. */
+.doc-prose p > img[width] {
+  display: inline-block;
+  vertical-align: top;
+  height: auto;
+  margin: 0 0.5rem 0.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
 }
 .doc-prose a.doc-figure {
   display: block;

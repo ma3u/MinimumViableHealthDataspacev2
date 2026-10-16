@@ -243,7 +243,7 @@ MinimumViableHealthDataspacev2/
 ├── LICENSE
 ├── clients/ios/                  # Klarbefund, the iPhone lab-report scanner (issue #186)
 ├── docs/
-│   ├── klarbefund/README.md              # The iPhone app screen by screen, with screenshots
+│   ├── klarbefund/                       # The iPhone app: user guide and developer guide with screenshots, evidence
 │   ├── planning-health-dataspace-v2.md   # 7-phase implementation roadmap
 │   ├── health-dataspace-graph-schema.md  # 5-layer Neo4j schema reference
 │   └── images/

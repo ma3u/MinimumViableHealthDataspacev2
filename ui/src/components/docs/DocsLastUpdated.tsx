@@ -1,7 +1,7 @@
 import { CalendarClock } from "lucide-react";
 import facts from "@/app/docs/docs-facts.json";
 
-type DocsPage = keyof typeof facts.lastUpdated;
+export type DocsPage = keyof typeof facts.lastUpdated;
 
 /** "Last updated" under a docs page title. The date is the page's last
  *  content change, kept by scripts/gen-docs-facts.py (pre-commit and the PR

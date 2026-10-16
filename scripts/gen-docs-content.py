@@ -168,6 +168,7 @@ def main():
     if args.check:
         print(f"gen-docs-content: {OUT} is stale: run python3 scripts/gen-docs-content.py", file=sys.stderr)
         return 1
+    os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
         f.write(want)
     print(f"gen-docs-content: wrote {OUT}")

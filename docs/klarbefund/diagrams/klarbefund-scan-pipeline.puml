@@ -1,0 +1,68 @@
+@startuml klarbefund-scan-pipeline
+title From the camera to the sealed store\nwhat happens to one paper lab report, and which type does it
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam sequence {
+  ArrowColor #475569
+  LifeLineBorderColor #94A3B8
+  ParticipantBorderColor #64748B
+  ParticipantBackgroundColor #FFFFFF
+}
+
+actor Person
+box "iPhone app" #F0F9FF
+  participant "Scanning\n(VisionKit)" as Scan
+  participant "ReviewViews" as Review
+  participant "ReportStore" as Store
+end box
+box "Shared package" #F8FAFC
+  participant "LabImport" as Import
+  participant "VisionDocumentReader" as Vision
+  participant "DocumentReconciler\n+ TableRoles" as Rec
+  participant "LabLineParser\n+ sheet readers" as Parser
+  participant "Analytes\n(generated)" as Dict
+  participant "ReportMetadata" as Meta
+end box
+
+Person -> Scan : Scan report / Import a PDF or photo
+Scan -> Import : pages (images or a PDF)
+Import -> Import : decide the provenance\nPDF with its own text layer: lab-issued, final\nanything recognised: scanned, preliminary
+alt the PDF carries the laboratory's text
+  Import -> Rec : PDFTextRows, the text as printed
+else a photograph or a scanned PDF
+  Import -> Vision : recognise, two passes\n(German + English, language correction off)
+  Vision --> Import : words with their positions
+  Import -> Rec : both passes
+  Rec -> Rec : reconcile the passes,\ninfer each column's role per table
+end
+Rec --> Import : rows in reading order, with page, line and region
+Import -> Parser : rows
+Parser -> Parser : the ordinary lab parse first;\nthen ABPM, ECG, Holter, CPET, lactate, CGM,\nDXA, body-composition readers when it finds nothing
+loop every row that looks like a measurement
+  Parser -> Dict : lookup(label, unit)
+  alt the unit and label are known
+    Dict --> Parser : LOINC, UCUM, display, analyte key
+  else the quantity has no LOINC code
+    Dict --> Parser : unit, no code, reason\n(visceral fat in kg, an organism: NCBI Taxonomy id)
+  else unknown
+    Dict --> Parser : nothing: the row goes to "unmatched"
+  end
+end
+Parser -> Meta : header lines
+Meta --> Parser : laboratory, lab date, issue date, report number
+Parser --> Import : ExtractionResult: coded, unmatched, unread\n(conservation: every printed row is in one of the three)
+Import --> Scan : LabReport + ScanDiagnostics
+Scan -> Review : show what was read
+Review -> Person : confirm the lab date,\ncorrect a value against the paper
+Person --> Review : Save
+Review -> Store : save(report, pages, diagnostics)
+Store -> Store : three sealed files, AES-GCM under one Keychain key\n<id>.sealed, <id>.scan.sealed, <id>.diag.sealed\ncomplete protection, excluded from backup
+Store --> Person : the report in the list,\n"Scanned, preliminary" until checked
+
+note over Import, Meta
+  Everything in the Shared package also runs on a Mac:
+  swift run LabFile <pdf> reproduces this path for one file,
+  swift run ScanReplay <export> re-runs it on a diagnostics export.
+end note
+@enduml

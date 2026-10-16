@@ -1,6 +1,6 @@
 /**
  * The published security and data-protection reports: /docs/security and
- * /docs/security/<slug>, rendered from ui/src/content/security-docs.json.
+ * /docs/security/<slug>, rendered from ui/src/content/published-docs.json.
  */
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
@@ -39,6 +39,7 @@ import SecurityDocPage, {
   generateStaticParams,
 } from "@/app/docs/security/[slug]/page";
 import { securityDocs } from "@/lib/docs/security-docs";
+import { publishedDocs } from "@/lib/docs/published-docs";
 
 describe("the published reports", () => {
   it("are the ten reports, each with a title, a summary, a source and a body", () => {
@@ -63,12 +64,16 @@ describe("the published reports", () => {
   });
 
   it("link only to reports that are published, never to a bare .md file", () => {
-    const slugs = new Set(securityDocs.map((d) => d.slug));
+    const routes = new Set(
+      publishedDocs.map((d) => `/docs/${d.section}/${d.slug}`),
+    );
     for (const d of securityDocs) {
       for (const [, target] of d.markdown.matchAll(/\]\(([^)\s]+)\)/g)) {
-        if (target.startsWith("/docs/security/")) {
-          const slug = target.slice("/docs/security/".length).split("#")[0];
-          expect(slugs.has(slug), `${d.slug} links to ${target}`).toBe(true);
+        if (target.startsWith("/docs/")) {
+          expect(
+            routes.has(target.split("#")[0]),
+            `${d.slug} links to ${target}`,
+          ).toBe(true);
         } else if (target.startsWith("__BASE_PATH__/published-docs/")) {
           const file = target.slice("__BASE_PATH__/".length);
           expect(
