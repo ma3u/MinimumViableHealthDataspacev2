@@ -232,12 +232,19 @@ line carries a health value or a name where a pseudonym does.
 
 ### Incident coordination between the parties
 
-The same notation; the red boxes are the legal clocks, and the parallel
-bar is the notifications that run at the same time.
+An escalation is a set of notifications with deadlines, so it is drawn as a
+sequence: one lifeline per party, one message per notification, the legal
+clocks in bold on the message, and the branches that run at the same time in
+one parallel block.
 
-![Incident coordination: the operator triages and contains, the controller notifies the data protection authority within 72 hours, the operator warns the CSIRT within 24 hours, the access body revokes a misused permit, the holders may suspend](img/ehds-incident-coordination.svg)
+![Incident coordination as a sequence: the operator detects, triages and contains within the hour; then in parallel the controller notifies the data protection authority within 72 hours and the persons without undue delay, the operator warns the CSIRT within 24 hours and reports within 72 hours and one month, the access body revokes a misused permit and the holders may suspend; then the fix, the post-incident report and the corrective action after an SPE audit](img/ehds-incident-coordination.svg)
 
-Source: [`diagrams/ehds-incident-coordination.puml`](diagrams/ehds-incident-coordination.puml).
+Source: [`diagrams/ehds-incident-coordination.puml`](diagrams/ehds-incident-coordination.puml),
+rendered with `scripts/render-plantuml.sh`. The clocks come from
+[GDPR Art. 33 and 34](https://eur-lex.europa.eu/eli/reg/2016/679/oj),
+[NIS2 Art. 23](https://eur-lex.europa.eu/eli/dir/2022/2555/oj) as transposed
+in the BSIG, and [Regulation (EU) 2025/327](https://eur-lex.europa.eu/eli/reg/2025/327/oj)
+Art. 61, 63(2) and 73(3); the table above names each.
 
 The clocks are not the operator's to negotiate: the controller owns the
 GDPR ones, the operator the NIS2 ones, the access body the EHDS ones. The
