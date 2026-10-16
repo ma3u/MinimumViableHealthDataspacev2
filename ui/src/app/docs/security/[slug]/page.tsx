@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
+import { DocFigureViewer } from "@/components/docs/DocFigureViewer";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 import MermaidDiagram from "@/components/MermaidDiagram";
 import { splitMermaid } from "@/lib/docs/markdown";
@@ -63,18 +64,21 @@ export default async function SecurityDocPage({
           <code>{doc.source}</code> on GitHub <ExternalLink size={11} />
         </a>
       </div>
+      {/* A click on a diagram opens it full screen with zoom (DocFigureViewer). */}
       <article className="doc-prose" data-testid="security-doc">
-        {segments.map((seg, i) =>
-          seg.kind === "mermaid" ? (
-            <MermaidDiagram key={i} chart={seg.chart} />
-          ) : (
-            <div
-              key={i}
-              // The HTML comes from the repository's own Markdown, rendered at build time.
-              dangerouslySetInnerHTML={{ __html: seg.html }}
-            />
-          ),
-        )}
+        <DocFigureViewer>
+          {segments.map((seg, i) =>
+            seg.kind === "mermaid" ? (
+              <MermaidDiagram key={i} chart={seg.chart} />
+            ) : (
+              <div
+                key={i}
+                // The HTML comes from the repository's own Markdown, rendered at build time.
+                dangerouslySetInnerHTML={{ __html: seg.html }}
+              />
+            ),
+          )}
+        </DocFigureViewer>
       </article>
     </div>
   );
