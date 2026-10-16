@@ -51,6 +51,10 @@ describe("DocsPage (Hub)", () => {
       "href",
       "/docs/klarbefund",
     );
+    expect(screen.getByText("Operations").closest("a")).toHaveAttribute(
+      "href",
+      "/docs/operations",
+    );
   });
 
   it("renders correct links", () => {
