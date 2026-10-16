@@ -44,9 +44,10 @@ import { docsInSection, publishedDocs } from "@/lib/docs/published-docs";
 const PUBLIC = join(__dirname, "../../../public");
 
 describe("the operations documents", () => {
-  it("are the operational guideline, the latest results and the latest assessment", () => {
+  it("are the guideline, the dashboards, the latest results and the latest assessment", () => {
     expect(docsInSection("operations").map((d) => d.slug)).toEqual([
       "operational-guideline",
+      "dashboards",
       "load-tests",
       "production-readiness-2026-10",
     ]);
@@ -117,7 +118,7 @@ describe("OperationsDocsPage", () => {
       "https://grafana.ehds.mabu.red/d/mvhd-load-test/load-and-stress-test",
     );
     expect(
-      screen.getByRole("link", { name: /EDC contracts and transfers/ }),
+      screen.getByRole("link", { name: /^EDC contracts and transfers$/ }),
     ).toHaveAttribute(
       "href",
       "https://grafana.ehds.mabu.red/d/mvhd-edc-dsp/edc-contracts-and-transfers",
