@@ -44,14 +44,11 @@ import { docsInSection, publishedDocs } from "@/lib/docs/published-docs";
 const PUBLIC = join(__dirname, "../../../public");
 
 describe("the operations documents", () => {
-  it("start with the operational guideline and the results index, then the reports", () => {
+  it("are the operational guideline, the latest results and the latest assessment", () => {
     expect(docsInSection("operations").map((d) => d.slug)).toEqual([
       "operational-guideline",
       "load-tests",
-      "load-test-azure-2026-10-05",
-      "load-test-compose-2026-10-05",
       "production-readiness-2026-10",
-      "production-readiness-2026-03",
     ]);
     expect(generateStaticParams().map((p) => p.slug)).toEqual(
       docsInSection("operations").map((d) => d.slug),
