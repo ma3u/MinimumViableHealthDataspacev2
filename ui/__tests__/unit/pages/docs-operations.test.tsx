@@ -49,6 +49,7 @@ describe("the operations documents", () => {
       "load-tests",
       "load-test-azure-2026-10-05",
       "load-test-compose-2026-10-05",
+      "production-readiness-2026-10",
       "production-readiness-2026-03",
     ]);
     expect(generateStaticParams().map((p) => p.slug)).toEqual(

@@ -47,6 +47,10 @@ DOCS = [
     ("operations", "load-test-compose-2026-10-05", "docs/loadtest/2026-10-05-local.md",
      "The compose stack on a laptop under the same suite: load, stress to 200 users, audited queries, "
      "the proxy alone and sign-in, with the bugs the runs found in the suite and the dashboard."),
+    ("operations", "production-readiness-2026-10", "docs/loadtest/2026-10-production-readiness.md",
+     "The Well-Architected and Cloud Adoption assessment as of 2026-10-16: every line of the March "
+     "assessment answered with what was done and the evidence, the scores side by side, and what "
+     "still stands between the demonstrator and an operable platform."),
     ("operations", "production-readiness-2026-03", "docs/loadtest/2026-03-production-readiness.md",
      "The production-readiness assessment of March 2026, kept as the starting point the later runs are "
      "measured against."),
