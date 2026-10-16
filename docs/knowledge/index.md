@@ -63,6 +63,8 @@ Security and data protection are tested by the project itself; see
 [threat-model (hub)](../security/threat-model.md) ·
 [threat-model-klarbefund](../security/threat-model-klarbefund.md) ·
 [bsi-c5-gap-analysis](../security/bsi-c5-gap-analysis.md) ·
+[klarbefund user guide](../klarbefund/user-guide.md) ·
+[klarbefund developer guide](../klarbefund/developer-guide.md) ·
 [klarbefund self-assessment](../klarbefund/self-assessment.md) ·
 [klarbefund evidence](../klarbefund/evidence.md) ·
 [report-for-health-insurers](../klarbefund/report-for-health-insurers.md) ·

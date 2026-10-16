@@ -45,6 +45,10 @@ describe("DocsPage (Hub)", () => {
     expect(
       screen.getByText("Security and Data Protection").closest("a"),
     ).toHaveAttribute("href", "/docs/security");
+    expect(screen.getByText("Klarbefund").closest("a")).toHaveAttribute(
+      "href",
+      "/docs/klarbefund",
+    );
   });
 
   it("renders correct links", () => {

@@ -47,6 +47,41 @@ describe("renderMarkdown images", () => {
   });
 });
 
+describe("section numbers", () => {
+  it("numbers h2 and h3 of a document, keeps GitHub's anchors", () => {
+    const [seg] = splitMermaid(
+      "# T\n\n## Alpha\n\n### Beta\n\n### Gamma\n\n## Delta\n",
+    );
+    expect(seg.kind).toBe("html");
+    const html = seg.kind === "html" ? seg.html : "";
+    expect(html).toContain(
+      '<h2 id="alpha"><span class="doc-num">1.</span> Alpha</h2>',
+    );
+    expect(html).toContain(
+      '<h3 id="beta"><span class="doc-num">1.1</span> Beta</h3>',
+    );
+    expect(html).toContain(
+      '<h3 id="gamma"><span class="doc-num">1.2</span> Gamma</h3>',
+    );
+    expect(html).toContain(
+      '<h2 id="delta"><span class="doc-num">2.</span> Delta</h2>',
+    );
+  });
+
+  it("leaves a document alone that numbers its own headings", () => {
+    const [seg] = splitMermaid("## 1. Roles\n\n### Sub\n\n## 2. Zones\n");
+    const html = seg.kind === "html" ? seg.html : "";
+    expect(html).not.toContain("doc-num");
+    expect(html).toContain('<h2 id="1-roles">1. Roles</h2>');
+  });
+
+  it("does not number through renderMarkdown on its own", () => {
+    expect(renderMarkdown("## Run record\n")).toContain(
+      '<h2 id="run-record">Run record</h2>',
+    );
+  });
+});
+
 describe("splitMermaid", () => {
   it("cuts a mermaid fence out and renders the text around it", () => {
     const segs = splitMermaid(

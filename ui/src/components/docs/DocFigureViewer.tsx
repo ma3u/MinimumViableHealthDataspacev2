@@ -5,8 +5,8 @@
  *
  * The reports' Markdown is rendered to HTML at build time, so the figures are
  * plain `<a class="doc-figure"><img></a>` elements and not React components.
- * This wrapper listens for a click on one of them and opens the image in an
- * overlay that fills the viewport, with zoom (buttons, mouse wheel, pinch,
+ * This wrapper listens for a click on one of them, or on a bare <img> such
+ * as a screenshot, and opens the image in an overlay that fills the viewport, with zoom (buttons, mouse wheel, pinch,
  * double click, keyboard) and drag to pan. A click with a modifier key keeps
  * the link's own behaviour, so the file still opens in a new tab on request.
  */
@@ -58,15 +58,25 @@ export function DocFigureViewer({ children }: { children: ReactNode }) {
   const onClick = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
     if (e.defaultPrevented || e.button !== 0) return;
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    const anchor = (e.target as HTMLElement).closest?.("a.doc-figure");
-    if (!(anchor instanceof HTMLAnchorElement)) return;
-    const img = anchor.querySelector("img");
+    const target = e.target as HTMLElement;
+    const anchor = target.closest?.("a.doc-figure");
+    let img: HTMLImageElement | null = null;
+    let opener: HTMLElement | null = null;
+    if (anchor instanceof HTMLAnchorElement) {
+      // A diagram: the link around it opens the file, a plain click the viewer.
+      img = anchor.querySelector("img");
+      opener = anchor;
+    } else if (target instanceof HTMLImageElement && !target.closest("a")) {
+      // A screenshot written as a bare <img> in the Markdown.
+      img = target;
+      opener = target;
+    }
     if (!img) return;
     e.preventDefault();
     setFigure({
-      src: img.getAttribute("src") ?? anchor.href,
-      alt: img.alt || "Diagram",
-      opener: anchor,
+      src: img.getAttribute("src") ?? img.src,
+      alt: img.alt || "Figure",
+      opener,
     });
   }, []);
 

@@ -75,6 +75,27 @@ describe("DocFigureViewer", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  it("opens a bare screenshot image as well", () => {
+    render(
+      <DocFigureViewer>
+        <div
+          dangerouslySetInnerHTML={{
+            __html:
+              '<p><img src="/published-docs/list.png" width="300" alt="The list of reports in the app" /></p>',
+          }}
+        />
+      </DocFigureViewer>,
+    );
+    fireEvent.click(screen.getByRole("img"));
+    expect(
+      screen.getByRole("dialog", { name: "The list of reports in the app" }),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("doc-figure-image")).toHaveAttribute(
+      "src",
+      "/published-docs/list.png",
+    );
+  });
+
   it("ignores a click outside a figure", () => {
     renderFigure();
     fireEvent.click(screen.getByText("Some prose"));

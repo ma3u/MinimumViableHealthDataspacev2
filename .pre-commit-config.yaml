@@ -193,7 +193,7 @@ repos:
         name: Published reports match their sources (docs/security, docs/klarbefund)
         language: python
         entry: python3 scripts/gen-docs-content.py --check
-        files: ^(docs/security/.*\.md|docs/klarbefund/.*\.md|docs/sbom/README\.md|ui/src/content/security-docs\.json|scripts/gen-docs-content\.py)$
+        files: ^(docs/security/.*\.md|docs/klarbefund/.*\.md|docs/sbom/README\.md|ui/src/content/published-docs\.json|scripts/gen-docs-content\.py)$
         pass_filenames: false
         stages: [pre-commit]
 
