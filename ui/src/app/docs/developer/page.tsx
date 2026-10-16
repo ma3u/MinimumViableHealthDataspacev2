@@ -214,6 +214,7 @@ export default function DeveloperGuidePage() {
           <TocLink href="#off-hours">Live Stack Off Hours</TocLink>
           <TocLink href="#reports">Latest Reports</TocLink>
           <TocLink href="#security">Security and Data Protection</TocLink>
+          <TocLink href="#documentation">Writing the Documentation</TocLink>
           <TocLink href="#releases">Release Notes</TocLink>
           <TocLink href="#project-links">Planning & Issues</TocLink>
           <TocLink href="#conventions">Conventions</TocLink>
@@ -1640,6 +1641,94 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
           ADR-060 (the app lock; why pinning and jailbreak detection were
           declined).
         </p>
+      </section>
+
+      {/* Documentation */}
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold mb-3" id="documentation">
+          Writing the Documentation
+        </h2>
+        <p className="text-(--text-secondary) mb-4">
+          The documentation is part of the repository and the hub publishes it
+          from there. Every page under <code>/docs</code> gets an index of its
+          headings at the right (a disclosure at the top on a phone), and every
+          diagram or screenshot opens full screen with zoom on click.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2">Published documents</h4>
+            <p className="text-(--text-secondary) text-xs mb-2">
+              A Markdown file under <code>docs/</code> becomes a page when it is
+              listed in <code>scripts/gen-docs-content.py</code> with a section
+              (<code>security</code> or <code>klarbefund</code>), a slug and a
+              one-line summary. The script writes{" "}
+              <code>ui/src/content/published-docs.json</code>, rewrites relative
+              links to the published route or to GitHub, copies every embedded
+              image to <code>ui/public/published-docs/</code>, and its{" "}
+              <code>--check</code> runs in pre-commit so the copy never drifts
+              from the source. Headings are numbered when rendered unless the
+              document numbers its own; anchors stay GitHub&apos;s.
+            </p>
+            <p className="text-(--text-secondary) text-xs">
+              <Link href="/docs/security" className="underline">
+                /docs/security
+              </Link>{" "}
+              holds the reports,{" "}
+              <Link href="/docs/klarbefund" className="underline">
+                /docs/klarbefund
+              </Link>{" "}
+              the app&apos;s user and developer guides.
+            </p>
+          </div>
+          <div className="border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2">
+              Diagrams in ArchiMate and UML
+            </h4>
+            <p className="text-(--text-secondary) text-xs mb-2">
+              Architecture figures are PlantUML sources under{" "}
+              <code>docs/&lt;section&gt;/diagrams/*.puml</code>, ArchiMate 3.2
+              for structure (business, application and technology as horizontal
+              bands) and sequence diagrams where the order of messages matters.{" "}
+              <code>scripts/render-plantuml.sh</code> renders them to the
+              sibling <code>img/</code> folder (needs{" "}
+              <code>brew install plantuml</code>); the content generator copies
+              the SVGs to the hub. A hand-written page embeds one with{" "}
+              <code>DocFigure</code> inside a <code>DocFigureViewer</code>.
+            </p>
+            <p className="text-(--text-secondary) text-xs">
+              Two things the ArchiMate library rejects: a <code>;line:</code>{" "}
+              colour suffix on a band, and relations that point downward across
+              layers, which flips the band order. Use the <code>_Up</code>,{" "}
+              <code>_Right</code> and <code>_Left</code> variants of each
+              relation.
+            </p>
+          </div>
+          <div className="border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2">Screenshots</h4>
+            <p className="text-(--text-secondary) text-xs">
+              Klarbefund&apos;s screenshots come from a simulator through{" "}
+              <code>clients/ios/Scripts/capture-screenshots.sh</code>, which
+              launches each screen by argument with the fictional dev dataset (
+              <code>-MBDevData -MBShot &lt;screen&gt;</code>); a demo launch
+              never shows the app lock. They are stored at half the
+              simulator&apos;s resolution under{" "}
+              <code>docs/klarbefund/img/</code>. No real report, value or
+              organisation may ever appear in one.
+            </p>
+          </div>
+          <div className="border border-(--border) rounded-lg p-4">
+            <h4 className="font-semibold text-sm mb-2">Facts and dates</h4>
+            <p className="text-(--text-secondary) text-xs">
+              Numbers on these pages (routes, services, hooks, versions) come
+              from <code>ui/src/app/docs/docs-facts.json</code>, written by{" "}
+              <code>scripts/gen-docs-facts.py</code> from the repository; the
+              same script keeps each page&apos;s last-updated date, and its
+              check fails a commit whose page changed without it. Run{" "}
+              <code>python3 scripts/gen-docs-facts.py</code> after editing a
+              docs page.
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* Data Flow */}
