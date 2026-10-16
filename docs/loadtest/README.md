@@ -80,6 +80,13 @@ between 100 and 200 users on the UI's CPU.
 
 ![Load and stress test dashboard, 50 users against ehds.mabu.red on 2026-10-05](img/2026-10-05-load-azure.png)
 
+## Where the platform stands
+
+The [production readiness assessment of October 2026](2026-10-production-readiness.md)
+reads these runs together with the security work and the ADRs against the
+Well-Architected and Cloud Adoption frameworks, pillar by pillar, next to the
+[assessment of March 2026](2026-03-production-readiness.md) it updates.
+
 ## What the dashboard shows
 
 The **Load and stress test** dashboard (`observability/grafana/dashboards-azure/load-stress-test.json`)
