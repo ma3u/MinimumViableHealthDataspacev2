@@ -1,5 +1,7 @@
 > **Archived 2026-10-12 (#571).** The assessment of 2026-03-25, kept as it was
-> written. Since then: Postgres on the Flexible Server (ADR-041), every route
+> written. The current one is
+> [the assessment of October 2026](2026-10-production-readiness.md), which
+> answers every line below. Since then: Postgres on the Flexible Server (ADR-041), every route
 > behind a session (ADR-044), the observability stack and the audit trail
 > (ADR-045), Vault with state (ADR-046), everything stopped off hours
 > (ADR-053), Neo4j at 2 vCPU and 4 GiB (ADR-056) and the UI on whole cores
