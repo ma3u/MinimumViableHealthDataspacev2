@@ -54,7 +54,9 @@ DOCS = [
      "tests and the anonymous black-box checks of the live hub; findings F1 to F10 with their "
      "status after the fixes, and what an independent test would add."),
     ("security", "threat-model-hub", "docs/security/threat-model.md",
-     "STRIDE analysis of the UI, the graph, the DSP contract flow and the DCP credential exchange."),
+     "STRIDE for the hub on Azure: the data flows and trust boundaries, the four attackers, one exchange with "
+     "every threat at its step, and each mitigation naming the code, the test or the decision that shows it; "
+     "what the demo accepts and what real data needs, and how to verify every row."),
     ("security", "threat-model-klarbefund", "docs/security/threat-model-klarbefund.md",
      "STRIDE analysis of the iPhone app; each mitigation names the code or test that shows it."),
     ("security", "klarbefund-self-assessment", "docs/klarbefund/self-assessment.md",
