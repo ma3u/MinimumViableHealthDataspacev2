@@ -33,8 +33,14 @@ describe("docs last-updated dates", () => {
 
   it.each(pages)("%s shows its date", (route) => {
     expect(existsSync(pageFile(route))).toBe(true);
-    expect(readFileSync(pageFile(route), "utf8")).toContain(
-      `<DocsLastUpdated page="${route}" />`,
+    // Directly, or through PublishedDocPage, which renders it for a section.
+    expect(readFileSync(pageFile(route), "utf8")).toMatch(
+      new RegExp(
+        `(<DocsLastUpdated page|lastUpdatedPage)="${route.replace(
+          /[[\]]/g,
+          "\\$&",
+        )}"`,
+      ),
     );
   });
 
