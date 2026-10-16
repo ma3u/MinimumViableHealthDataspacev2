@@ -1,3 +1,6 @@
 
 # Generated bills of materials: syft output, byte-compared by scripts/security/generate-sbom.sh --check
 docs/sbom/*.cdx.json
+
+# Published copy of the security reports, written by scripts/gen-docs-content.py and byte-compared by --check
+ui/src/content/security-docs.json

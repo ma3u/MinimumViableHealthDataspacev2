@@ -7,11 +7,11 @@
       "hashes": [
         {
           "alg": "SHA-1",
-          "content": "42c9246c89d15b8c5f0c9e845063bcaba6a4b157"
+          "content": "66c06c1b1967023975cc78b1a6256b397733c7c4"
         },
         {
           "alg": "SHA-256",
-          "content": "0d0d63cc450c8479c11c7aaec550eecc4c0e7bfe2b45036590e30119777cbead"
+          "content": "e92e2c531f6343ee33d2b979aba42bf7b9689e680e32e4b8bae107a42676b459"
         }
       ],
       "name": "/private/tmp/claude-502/-Users-mbuchhorn-projects-dataspaces-MinimumViableHealthDataspacev2/e78bc092-5d75-4e73-a6ce-26b5d2be8680/scratchpad/wt-insurer/ui/package-lock.json",
@@ -17423,7 +17423,7 @@
       "version": "9.0.1"
     },
     {
-      "bom-ref": "pkg:npm/health-dataspace-ui@2.0.0?package-id=bed1afa1568ec0b9",
+      "bom-ref": "pkg:npm/health-dataspace-ui@2.0.0?package-id=31737a5c8f6c844e",
       "cpe": "cpe:2.3:a:health-dataspace-ui:health-dataspace-ui:2.0.0:*:*:*:*:*:*:*",
       "licenses": [
         {
@@ -19304,6 +19304,43 @@
       "purl": "pkg:npm/marked@16.4.2",
       "type": "library",
       "version": "16.4.2"
+    },
+    {
+      "bom-ref": "pkg:npm/marked@18.1.1?package-id=8caa167621bda7aa",
+      "cpe": "cpe:2.3:a:marked_project:marked:18.1.1:*:*:*:*:node.js:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "marked",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/marked@18.1.1",
+      "type": "library",
+      "version": "18.1.1"
     },
     {
       "bom-ref": "pkg:npm/mdast-util-find-and-replace@3.0.2?package-id=96abae4240275ccd",
@@ -31695,6 +31732,8 @@
         "pkg:npm/jose@4.15.9?package-id=0246497cf4065c27",
         "pkg:npm/jose@6.2.12?package-id=eba4cf7a0d8b19f0",
         "pkg:npm/lucide-react@0.577.0?package-id=308f9e1f4b8cbbb2",
+        "pkg:npm/marked@16.4.2?package-id=b251c039584abd45",
+        "pkg:npm/marked@18.1.1?package-id=8caa167621bda7aa",
         "pkg:npm/mermaid@11.17.2?package-id=1eb5fe6c420aae7e",
         "pkg:npm/neo4j-driver@5.28.3?package-id=45382c89c55f2f25",
         "pkg:npm/next-auth@4.24.15?package-id=e7cce0fb61808c94",
@@ -31706,7 +31745,7 @@
         "pkg:npm/swagger-ui-dist@5.33.1?package-id=146d5abaff6589ad",
         "pkg:npm/three@0.186.1?package-id=0237829d5aec19b0"
       ],
-      "ref": "pkg:npm/health-dataspace-ui@2.0.0?package-id=bed1afa1568ec0b9"
+      "ref": "pkg:npm/health-dataspace-ui@2.0.0?package-id=31737a5c8f6c844e"
     },
     {
       "dependsOn": [
@@ -31908,6 +31947,7 @@
         "pkg:npm/katex@0.18.10?package-id=fac85e9aef350980",
         "pkg:npm/khroma@2.1.0?package-id=c6b84ed40fbec4f1",
         "pkg:npm/marked@16.4.2?package-id=b251c039584abd45",
+        "pkg:npm/marked@18.1.1?package-id=8caa167621bda7aa",
         "pkg:npm/roughjs@4.6.6?package-id=7d426973ab47bfef",
         "pkg:npm/stylis@4.3.6?package-id=c170376605550bda",
         "pkg:npm/ts-dedent@2.2.0?package-id=e9fe8ae2499119d8",

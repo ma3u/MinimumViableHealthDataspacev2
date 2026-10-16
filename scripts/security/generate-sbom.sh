@@ -62,7 +62,11 @@ PY
 for part in "${PARTS[@]}"; do
   name="${part%%:*}"; path="${part#*:}"
   [ -d "$ROOT/$path" ] || continue
-  syft "dir:$ROOT/$path" -o "cyclonedx-json=$TMP/$name.cdx.json" -q
+  # Only the lockfile: an installed node_modules (or a build output) would add
+  # every package's own CI workflow files and make the bill depend on the
+  # machine it ran on.
+  syft "dir:$ROOT/$path" -o "cyclonedx-json=$TMP/$name.cdx.json" -q \
+    --exclude '**/node_modules/**' --exclude '**/.next/**' --exclude '**/dist/**' --exclude '**/coverage/**' --exclude '**/test-results/**' --exclude '**/playwright-report/**'
   emit "$name" "$TMP/$name.cdx.json"
 done
 

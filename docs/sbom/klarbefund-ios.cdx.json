@@ -152,6 +152,10 @@
       "properties": [
         {
           "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/AppLock.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
           "value": "Sources/MeinBefund/BringYourOwnProvider.swift"
         },
         {
@@ -217,6 +221,10 @@
         {
           "name": "klarbefund:imported-by",
           "value": "Sources/Shared/Analytes.generated.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/AppLockPolicy.swift"
         },
         {
           "name": "klarbefund:imported-by",
@@ -454,6 +462,21 @@
         {
           "name": "klarbefund:imported-by",
           "value": "Sources/Shared/ScanDocument.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "LocalAuthentication",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/AppLock.swift"
         }
       ],
       "scope": "required",
