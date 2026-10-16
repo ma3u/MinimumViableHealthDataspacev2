@@ -54,6 +54,22 @@ frontmatter. Spec:
 [load-and-stress-test](runbooks/load-and-stress-test.md) ·
 [edc-v018-on-azure](runbooks/edc-v018-on-azure.md)
 
+## security/ — reports and assessments
+
+Security and data protection are tested by the project itself; see
+[README: Security and data protection](../../README.md#security-and-data-protection).
+[operational-guideline](../security/operational-guideline.md) ·
+[security-test-report-2026-10-15](../security/security-test-report-2026-10-15.md) ·
+[threat-model (hub)](../security/threat-model.md) ·
+[threat-model-klarbefund](../security/threat-model-klarbefund.md) ·
+[bsi-c5-gap-analysis](../security/bsi-c5-gap-analysis.md) ·
+[klarbefund user guide](../klarbefund/user-guide.md) ·
+[klarbefund developer guide](../klarbefund/developer-guide.md) ·
+[klarbefund self-assessment](../klarbefund/self-assessment.md) ·
+[klarbefund evidence](../klarbefund/evidence.md) ·
+[report-for-health-insurers](../klarbefund/report-for-health-insurers.md) ·
+[sbom](../sbom/README.md)
+
 ## decisions/
 
 [decisions/index.md](decisions/index.md) → canonical ADR corpus in `docs/ADRs/`.

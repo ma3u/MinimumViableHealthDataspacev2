@@ -61,6 +61,16 @@ struct FhirBundleParityTests {
       let coding: Coding
       let region: Region?
       let analyteKey: String
+      let verification: Check?
+    }
+    struct Check: Decodable {
+      struct Original: Decodable {
+        let label: String
+        let value: Double
+        let unitRaw: String
+      }
+      let verifiedAt: String
+      let original: Original?
     }
     let now: String
     let meta: Meta
@@ -68,13 +78,21 @@ struct FhirBundleParityTests {
     let values: [Value]
   }
 
-  private static func loadFixture() throws -> (raw: String, fixture: Fixture) {
+  /// The laboratory golden, and an ECG report's (every value an ECG term).
+  static let goldens = [
+    "fhir-golden-bundle.json", "fhir-golden-bundle-ecg.json", "fhir-golden-bundle-holter.json",
+    "fhir-golden-bundle-exercise.json", "fhir-golden-bundle-cpet.json",
+    "fhir-golden-bundle-spirometry.json", "fhir-golden-bundle-lactate.json",
+    "fhir-golden-bundle-dxa.json", "fhir-golden-bundle-cgm.json",
+  ]
+
+  private static func loadFixture(_ name: String = goldens[0]) throws -> (raw: String, fixture: Fixture) {
     // #filePath rather than Bundle.module: the fixture is shared with the
     // TypeScript generator that writes it, so it lives next to the test source
     // rather than being copied into a test bundle.
     let url = URL(fileURLWithPath: #filePath)
       .deletingLastPathComponent()
-      .appendingPathComponent("Fixtures/fhir-golden-bundle.json")
+      .appendingPathComponent("Fixtures/\(name)")
     let raw = try String(contentsOf: url, encoding: .utf8)
     return (raw, try JSONDecoder().decode(Fixture.self, from: Data(raw.utf8)))
   }
@@ -105,7 +123,14 @@ struct FhirBundleParityTests {
           uncodedReason: value.coding.uncodedReason,
           taxon: value.coding.taxon
         ),
-        source: SourceKind(rawValue: fixture.source.kind)!
+        source: SourceKind(rawValue: fixture.source.kind)!,
+        verification: value.verification.map { check in
+          Verification(
+            verifiedAt: ISO8601DateFormatter().date(from: check.verifiedAt)!,
+            original: check.original.map {
+              RawLabValue(label: $0.label, value: $0.value, unitRaw: $0.unitRaw, line: "", lineNumber: 0)
+            })
+        }
       )
     }
 
@@ -127,9 +152,9 @@ struct FhirBundleParityTests {
     )
   }
 
-  @Test("the Swift writer produces the same bundle as the TypeScript writer")
-  func bundlesAgree() throws {
-    let (raw, fixture) = try Self.loadFixture()
+  @Test("the Swift writer produces the same bundle as the TypeScript writer", arguments: goldens)
+  func bundlesAgree(golden: String) throws {
+    let (raw, fixture) = try Self.loadFixture(golden)
     let expected = try JSON.parse(raw)["bundle"]
     let actual = Self.build(from: fixture)
 

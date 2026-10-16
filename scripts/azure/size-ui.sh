@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Gives mvhd-ui the size and scale rule env.sh names (ADR-059).
+# Gives mvhd-ui the size and scale rule env.sh names (ADR-061).
 # =============================================================================
 #   size-ui.sh           apply UI_CPU, UI_MEMORY, UI_MIN_REPLICAS, UI_MAX_REPLICAS
 #                        and the HTTP concurrency rule to the live app

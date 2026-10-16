@@ -37,7 +37,7 @@ struct AmbulatoryBloodPressureTests {
     return out
   }
 
-  static let text = "24-H ABPM report\nManschette Blutdruck [mmHg]\nGesamt Tag Nacht\nMittel.\nSYS DIA\nDipping\nSYS -12,0 %\nDIA -22 %\nPuls -11,5%\n"
+  static let text = "24-H ABPM report\nManschette Blutdruck [mmHg]\nGesamt Tag Nacht\nMittel.\nSYS DIA\nDipping\nSYS -14,2 %\nDIA -22 %\nPuls -13,4%\n"
 
   private func value(_ values: [RawLabValue], _ label: String) -> Double? {
     values.first { $0.label == label }?.value
@@ -81,9 +81,9 @@ struct AmbulatoryBloodPressureTests {
   @Test("reads the dipping table, sign and all")
   func dipping() {
     let values = AmbulatoryBloodPressure.read(text: Self.text, fragments: [])
-    #expect(value(values, "Nächtliche Absenkung systolisch") == -12)
+    #expect(value(values, "Nächtliche Absenkung systolisch") == -14.2)
     #expect(value(values, "Nächtliche Absenkung diastolisch") == -22)
-    #expect(value(values, "Nächtliche Absenkung Puls") == -11.5)
+    #expect(value(values, "Nächtliche Absenkung Puls") == -13.4)
   }
 
   @Test("refuses a mean its own minimum and maximum do not bracket")
@@ -103,6 +103,78 @@ struct AmbulatoryBloodPressureTests {
     let fewer = Self.fragments().filter { !($0.region.x > 0.7 && $0.region.x < 0.75) }
     let values = AmbulatoryBloodPressure.read(text: Self.text, fragments: fewer)
     #expect(values.allSatisfy { $0.label.hasPrefix("Nächtliche") })
+  }
+
+  @Test("a dipping figure read without its minus takes the sign of the grid's means")
+  func dippingSignFromMeans() {
+    // The recogniser lost the minus of the DIA row on a real sheet. The grid
+    // says 77 by day and 60 by night: a fall of 22 %, not a rise.
+    let unsigned = Self.text.replacingOccurrences(of: "DIA -22 %", with: "DIA 22%")
+    let values = AmbulatoryBloodPressure.read(text: unsigned, fragments: Self.fragments())
+    #expect(value(values, "Nächtliche Absenkung diastolisch") == -22)
+    #expect(value(values, "Nächtliche Absenkung systolisch") == -14.2)
+  }
+
+  @Test("a dipping figure the grid's means contradict is refused")
+  func dippingContradicted() {
+    // SYS 127 by day and 109 by night is a fall of 14.2 %, not 30 %.
+    let wrong = Self.text.replacingOccurrences(of: "SYS -14,2 %", with: "SYS -30,0 %")
+    let values = AmbulatoryBloodPressure.read(text: wrong, fragments: Self.fragments())
+    #expect(value(values, "Nächtliche Absenkung systolisch") == nil)
+    // A printed sign is never overruled: a signed rise the means call a fall
+    // is refused, not flipped.
+    let rise = Self.text.replacingOccurrences(of: "DIA -22 %", with: "DIA +22 %")
+    let flipped = AmbulatoryBloodPressure.read(text: rise, fragments: Self.fragments())
+    #expect(value(flipped, "Nächtliche Absenkung diastolisch") == nil)
+  }
+
+  @Test("reads height, weight and BMI from the header row, unit glued or missing")
+  func bodyMeasures() {
+    let header = ["Größe 182 cm   Gewicht 80kg   BMI 24,2"]
+    let values = AmbulatoryBloodPressure.bodyMeasures(in: header, fragments: [])
+    #expect(value(values, "Körpergröße") == 182)
+    #expect(value(values, "Körpergewicht") == 80)
+    #expect(value(values, "Body-Mass-Index") == 24.2)
+    // The recogniser's spelling of the same header on a real photograph.
+    let lost = AmbulatoryBloodPressure.bodyMeasures(in: ["Große 182 cm"], fragments: [])
+    #expect(value(lost, "Körpergröße") == 182)
+  }
+
+  @Test("pairs each header name with its value on a tilted photograph")
+  func bodyMeasuresTilted() {
+    // The layout of the phone's reading of a real header: the photograph
+    // tilts, so a name and its value are a line apart in reading order and
+    // the BMI's value sits higher than its name. Invented values.
+    func f(_ text: String, _ x: Double, _ y: Double, _ w: Double, _ h: Double)
+      -> DocumentReconciler.TextFragment
+    {
+      DocumentReconciler.TextFragment(
+        text: text, region: SourceRegion(page: 1, x: x, y: y, width: w, height: h))
+    }
+    let fragments = [
+      f("Größe", 0.087, 0.832, 0.047, 0.015), f("182 cm", 0.192, 0.824, 0.050, 0.013),
+      f("Alter", 0.418, 0.832, 0.031, 0.009), f("52", 0.493, 0.831, 0.018, 0.009),
+      f("Gewicht", 0.418, 0.816, 0.055, 0.009), f("80 kg", 0.493, 0.814, 0.036, 0.010),
+      f("Pacemaker", 0.735, 0.835, 0.075, 0.014), f("24,2", 0.840, 0.828, 0.031, 0.011),
+      f("BMI", 0.737, 0.821, 0.027, 0.008),
+    ]
+    let lines = ["Größe  Alter  Pacemaker", "182 cm  52  24,2", "Gewicht  BMI"]
+    let values = AmbulatoryBloodPressure.bodyMeasures(in: lines, fragments: fragments)
+    #expect(value(values, "Körpergröße") == 182)
+    #expect(value(values, "Körpergewicht") == 80)
+    #expect(value(values, "Body-Mass-Index") == 24.2)
+    #expect(values.allSatisfy { $0.region != nil })
+  }
+
+  @Test("refuses the header when the BMI is not the weight over the squared height")
+  func bodyMeasuresDisagree() {
+    let header = ["Größe 182 cm   Gewicht 89kg   BMI 24,2"]
+    #expect(AmbulatoryBloodPressure.bodyMeasures(in: header, fragments: []).isEmpty)
+    // Two readings of one field that differ: that field is refused.
+    let twice = ["Gewicht 80 kg", "Gewicht 86 kg", "Größe 182 cm"]
+    let values = AmbulatoryBloodPressure.bodyMeasures(in: twice, fragments: [])
+    #expect(value(values, "Körpergewicht") == nil)
+    #expect(value(values, "Körpergröße") == 182)
   }
 
   @Test("a lab report is not taken for one")

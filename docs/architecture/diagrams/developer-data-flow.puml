@@ -1,0 +1,28 @@
+@startuml developer-data-flow
+title Data pipeline, as a sequence\nSynthea to Neo4j, then the proxy to the UI
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam sequence {
+  ArrowColor #475569
+  LifeLineBorderColor #94A3B8
+  ParticipantBorderColor #64748B
+  ParticipantBackgroundColor #FFFFFF
+}
+
+participant "Synthea" as SY
+participant "Neo4j graph" as NEO
+participant "neo4j-proxy\n:9090" as PROXY
+participant "Next.js UI\n:3000" as UI
+
+== Seeding ==
+SY -> NEO : load_fhir_neo4j.py\n127 patients as FHIR R4
+NEO -> NEO : fhir-to-omop-transform.cypher\nFHIR to OMOP CDM, MAPPED_TO
+NEO -> NEO : CODED_BY to SNOMED, LOINC,\nRxNorm and ICD-10
+
+== Serving ==
+UI -> PROXY : /api/graph, /api/catalog, /nlq
+PROXY -> NEO : parameterised Cypher
+NEO --> PROXY : graph data
+PROXY --> UI : JSON response
+@enduml

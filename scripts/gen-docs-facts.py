@@ -81,6 +81,24 @@ PAGES = {
         "sources": ["ui/src/app/docs/architecture/page.tsx"],
         "facts": ["adrs", "apiRoutes", "uiPages", "composeServices", "postgresDbs"],
     },
+    "/docs/security": {
+        "sources": ["ui/src/app/docs/security/page.tsx", "ui/src/content/published-docs.json"],
+        "facts": [],
+    },
+    "/docs/security/[slug]": {
+        "sources": ["ui/src/app/docs/security/[slug]/page.tsx", "ui/src/components/docs/PublishedDoc.tsx",
+                    "ui/src/content/published-docs.json"],
+        "facts": [],
+    },
+    "/docs/klarbefund": {
+        "sources": ["ui/src/app/docs/klarbefund/page.tsx", "ui/src/content/published-docs.json"],
+        "facts": [],
+    },
+    "/docs/klarbefund/[slug]": {
+        "sources": ["ui/src/app/docs/klarbefund/[slug]/page.tsx", "ui/src/components/docs/PublishedDoc.tsx",
+                    "ui/src/content/published-docs.json"],
+        "facts": [],
+    },
 }
 
 METHODS = ("GET", "POST", "PUT", "PATCH", "DELETE")

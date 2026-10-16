@@ -29,7 +29,7 @@ Haemoglobin                14,8     g/dl           13,5 - 17,2
 Thrombozyten                248     /nl            150 - 400
 
 Troponin T hs              n.b.    ng/l           < 14
-Omega-3-Index               4,1     %              > 8
+Zonulin                     41      ng/ml          < 55
 LDL/HDL-Quotient            2,9
 
 Befund erstellt am 16.08.2026

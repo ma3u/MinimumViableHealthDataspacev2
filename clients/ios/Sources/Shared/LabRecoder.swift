@@ -26,6 +26,23 @@ public enum LabRecoder {
     public let recoded: Int
   }
 
+  /// A report's stored page texts read again by the current parser and the
+  /// document readers.
+  ///
+  /// "Read again" recognises the stored pages a second time, and a stored
+  /// photograph is compressed: measured on a real cumulative report, the
+  /// second recognition coded nothing where the first had coded 13. The text
+  /// the first recognition produced is kept with the report, and parsing it
+  /// again takes what the parser has learned since without the recogniser's
+  /// second, worse look (the same report: 25 coded). A page that needed its
+  /// geometry (a glucose sensor's rotated table) is not read this way.
+  public static func fromPageTexts(_ texts: [String], source: SourceKind) -> ExtractionResult {
+    let sheet = texts.reduce(ExtractionResult.empty(source: source)) {
+      $0.merging(LabLineParser.extract($1, source: source))
+    }
+    return DocumentReaders.applied(to: sheet, pageTexts: texts, pages: [])
+  }
+
   public static func recode(_ stored: ExtractionResult) -> Outcome {
     let source = stored.source
     var coded: [CodedLabValue] = []

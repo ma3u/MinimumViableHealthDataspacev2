@@ -1,0 +1,129 @@
+@startuml deployment
+!include <archimate/Archimate>
+title Deployment topology (ArchiMate 3.2, technology view)\nthe JAD stack as Docker Compose runs it; the same services are Container Apps on Azure
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam nodesep 14
+skinparam ranksep 46
+skinparam rectangle {
+  BorderColor #64748B
+  FontStyle bold
+}
+
+rectangle "Edge and clients" as EDGE #C9E7B7 {
+  Technology_SystemSoftware(tfk, "Traefik\nAPI gateway, :80 and :8090")
+  Technology_Node(ghp, "GitHub Pages\nstatic demo site")
+}
+rectangle "Application" as APP #D9F0CB {
+  Technology_SystemSoftware(ui, "Next.js UI\ngraph explorer, :3000 and :3003")
+  Technology_SystemSoftware(proxy, "neo4j-proxy\nExpress bridge, :9090")
+  Technology_SystemSoftware(neo4j, "Neo4j 5\nknowledge graph, :7474 and :7687")
+  Technology_SystemSoftware(neo4j2, "Neo4j SPE2\nfederated, :7475 and :7688")
+  Technology_Process(seed, "jad-seed\nphases 1 to 7, one shot")
+}
+rectangle "EDC-V and DCore" as EDC #D9F0CB {
+  Technology_SystemSoftware(cp, "Control plane\nDSP and management API, :11003")
+  Technology_SystemSoftware(dpf, "Data plane FHIR\nDCore FHIR, :11002")
+  Technology_SystemSoftware(dpo, "Data plane OMOP\nDCore OMOP, :11012")
+  Technology_SystemSoftware(shim, "cfm-cp-shim\nmanagement API v5alpha to v5beta")
+}
+rectangle "Identity and CFM" as IDM #D9F0CB {
+  Technology_SystemSoftware(ih, "Identity Hub\nDCP, credential store, :11005")
+  Technology_SystemSoftware(is, "Issuer Service\ncredential issuance, :10013")
+  Technology_SystemSoftware(tm, "Tenant Manager\n:11006")
+  Technology_SystemSoftware(pm, "Provision Manager\n:11007")
+  Technology_SystemSoftware(agents, "CFM agents\nkeycloak, edcv, registration, onboarding")
+}
+rectangle "Infrastructure" as INFRA #C9E7B7 {
+  Technology_SystemSoftware(kc, "Keycloak\nOIDC SSO, :8080 and :9000")
+  Technology_Node(pg, "PostgreSQL 17\nnine databases, :5432")
+  Technology_SystemSoftware(vault, "HashiCorp Vault\nfile storage, :8200")
+  Technology_SystemSoftware(vu, "vault-unseal and vault-bootstrap\ninit sidecars")
+  Technology_SystemSoftware(sig, "siglet\ndata plane token signing")
+  Technology_SystemSoftware(nats, "NATS JetStream\nevent mesh, :4222 and :8222")
+}
+
+' ── Routing and the static export ────────────────────────────────────────────
+Rel_Flow(tfk, ui, "routes")
+Rel_Flow(tfk, cp, " ")
+Rel_Flow(tfk, dpf, " ")
+Rel_Flow(tfk, dpo, " ")
+Rel_Flow(tfk, ih, " ")
+Rel_Flow(tfk, is, " ")
+Rel_Flow(tfk, tm, " ")
+Rel_Flow(tfk, pm, " ")
+Rel_Flow_Up(ui, ghp, "next export")
+
+' ── Application depends on ───────────────────────────────────────────────────
+Rel_Serving_Right(proxy, ui)
+Rel_Serving_Up(cp, ui)
+Rel_Serving_Up(cp, proxy)
+Rel_Serving_Right(neo4j, proxy)
+Rel_Flow_Right(seed, neo4j, "seeds")
+Rel_Flow(seed, cp, "seeds participants")
+Rel_Flow(seed, ih, " ")
+
+' ── EDC-V depends on ─────────────────────────────────────────────────────────
+Rel_Serving_Up(pg, cp)
+Rel_Serving_Up(vault, cp)
+Rel_Serving_Up(nats, cp)
+Rel_Serving_Up(kc, cp)
+Rel_Serving_Left(cp, dpf)
+Rel_Serving_Left(cp, dpo)
+Rel_Serving_Up(pg, dpf)
+Rel_Serving_Up(vault, dpf)
+Rel_Serving_Up(pg, dpo)
+Rel_Serving_Up(vault, dpo)
+Rel_Serving_Up(sig, dpf)
+Rel_Serving_Up(sig, dpo)
+Rel_Serving_Left(shim, cp)
+
+' ── Identity and CFM depend on ───────────────────────────────────────────────
+Rel_Serving_Up(pg, ih)
+Rel_Serving_Up(vault, ih)
+Rel_Serving_Up(kc, ih)
+Rel_Serving_Up(pg, is)
+Rel_Serving_Up(vault, is)
+Rel_Serving_Up(kc, is)
+Rel_Serving_Up(pg, tm)
+Rel_Serving_Up(kc, tm)
+Rel_Serving_Up(pg, pm)
+Rel_Serving_Up(kc, pm)
+Rel_Serving_Up(cp, pm)
+Rel_Serving_Up(kc, agents)
+Rel_Serving_Up(shim, agents)
+Rel_Serving_Right(ih, agents)
+Rel_Serving_Right(tm, agents)
+
+' ── Infrastructure ───────────────────────────────────────────────────────────
+Rel_Serving_Right(pg, kc)
+Rel_Serving_Right(vu, vault)
+Rel_Serving_Right(vu, kc)
+Rel_Serving_Right(vault, sig)
+
+' ── Rows ────────────────────────────────────────────────────────────────────
+tfk -[hidden]right- ghp
+ui -[hidden]right- proxy
+proxy -[hidden]right- neo4j
+neo4j -[hidden]right- neo4j2
+neo4j2 -[hidden]right- seed
+cp -[hidden]right- dpf
+dpf -[hidden]right- dpo
+dpo -[hidden]right- shim
+ih -[hidden]right- is
+is -[hidden]right- tm
+tm -[hidden]right- pm
+pm -[hidden]right- agents
+kc -[hidden]right- pg
+pg -[hidden]right- vault
+vault -[hidden]right- vu
+vu -[hidden]right- sig
+sig -[hidden]right- nats
+EDC -[hidden]right- IDM
+
+legend bottom left
+|= Relationship |= Meaning |
+| solid line, open arrow | serving: the lower service is what the upper one depends on at run time |
+| dashed arrow | flow: traffic routed, data seeded, the export published |
+endlegend
+@enduml

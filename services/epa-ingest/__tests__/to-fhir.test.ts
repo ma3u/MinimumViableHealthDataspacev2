@@ -9,9 +9,20 @@ import {
   EXT_SOURCE_LINE,
   NCBI_TAXONOMY,
   buildBundle,
+  isElectrocardiogram,
+  isHolter,
+  reportKind,
+  observationCategory,
   statusForSource,
 } from "../src/to-fhir.js";
 import { lookupAnalyte } from "../src/analytes.js";
+import {
+  GOLDEN_ECG_VALUES,
+  GOLDEN_EXERCISE_VALUES,
+  GOLDEN_HOLTER_VALUES,
+  GOLDEN_KIND_REPORTS,
+  GOLDEN_VALUES,
+} from "../src/generate-fhir-golden.js";
 import type { CodedLabValue, TextSource } from "../src/types.js";
 
 const FIXTURE = readFileSync(
@@ -257,5 +268,133 @@ describe("an organism from a stool report", () => {
       expect(obs.component).toBeUndefined();
       expect(obs.code.extension).toBeUndefined();
     }
+  });
+});
+
+describe("observation and report category", () => {
+  const ecg = goldenEcgValues();
+  const now = "2026-09-13T12:00:00.000Z";
+  const meta = { patientId: "p", effectiveDateTime: "2026-08-26" };
+  const source: TextSource = {
+    kind: "ocr-transcribed",
+    sourceDocument: "ekg.pdf",
+    extractor: "vision",
+  };
+  type R = {
+    resourceType: string;
+    category?: { coding: { code: string }[] }[];
+    code?: { coding?: { code: string }[] };
+  };
+  const resources = (values: CodedLabValue[]): R[] =>
+    (
+      buildBundle(values, { meta, source, now }) as {
+        entry: { resource: R }[];
+      }
+    ).entry.map((e) => e.resource);
+
+  it("files ECG measurements under procedure and the report as an ECG", () => {
+    const all = resources(ecg);
+    const report = all.find((r) => r.resourceType === "DiagnosticReport")!;
+    expect(report.category?.[0].coding[0].code).toBe("EC");
+    expect(report.code?.coding?.[0].code).toBe("11524-6");
+    const categories = all
+      .filter((r) => r.resourceType === "Observation")
+      .map((r) => r.category?.[0].coding[0].code);
+    expect(new Set(categories)).toEqual(new Set(["procedure"]));
+  });
+
+  it("files a vital sign as vital-signs and keeps a mixed report a lab report", () => {
+    expect(observationCategory("29463-7")).toBe("vital-signs");
+    expect(observationCategory("8490-5")).toBe("vital-signs");
+    expect(observationCategory("2089-1")).toBe("laboratory");
+    expect(observationCategory(null)).toBe("laboratory");
+    expect(isElectrocardiogram([])).toBe(false);
+  });
+});
+
+function goldenEcgValues(): CodedLabValue[] {
+  return GOLDEN_ECG_VALUES;
+}
+
+describe("Holter study", () => {
+  it("files a Holter summary as a Holter study, an uncoded count as a procedure", () => {
+    const values = GOLDEN_HOLTER_VALUES;
+    expect(isHolter(values)).toBe(true);
+    const bundle = buildBundle(values, {
+      meta: { patientId: "p", effectiveDateTime: "2026-08-26" },
+      source: {
+        kind: "ocr-transcribed",
+        sourceDocument: "holter.pdf",
+        extractor: "vision",
+      },
+      now: "2026-09-13T12:00:00.000Z",
+    }) as {
+      entry: {
+        resource: {
+          resourceType: string;
+          code?: { coding?: { code: string }[] };
+          category?: { coding: { code: string }[] }[];
+        };
+      }[];
+    };
+    const report = bundle.entry.find(
+      (e) => e.resource.resourceType === "DiagnosticReport",
+    )!;
+    expect(report.resource.code?.coding?.[0].code).toBe("18754-2");
+    const categories = bundle.entry
+      .filter((e) => e.resource.resourceType === "Observation")
+      .map((e) => e.resource.category?.[0].coding[0].code);
+    expect(categories).toEqual(["procedure", "vital-signs", "procedure"]);
+  });
+});
+
+describe("exercise testing and DXA", () => {
+  it("keeps an ergometry that counted ectopic beats out of the ECG studies", () => {
+    expect(isElectrocardiogram(GOLDEN_EXERCISE_VALUES)).toBe(false);
+    // The count alone, or beside a vital sign, is still an ECG.
+    expect(isElectrocardiogram([GOLDEN_EXERCISE_VALUES[1]])).toBe(true);
+    expect(
+      GOLDEN_EXERCISE_VALUES.map((v) =>
+        observationCategory(v.coding.loincNumber, v.analyteKey),
+      ),
+    ).toEqual(["procedure", "procedure", "procedure"]);
+  });
+
+  it("files a DXA scan's own values as imaging", () => {
+    expect(observationCategory(null, "lean-soft-tissue")).toBe("imaging");
+    expect(observationCategory(null, "bmd-total-body")).toBe("imaging");
+    // Body fat is the code a scale's reading carries too.
+    expect(observationCategory("41982-0", "body-fat")).toBe("laboratory");
+  });
+});
+
+describe("the kind of report", () => {
+  const kindOf = (name: string) =>
+    reportKind(GOLDEN_KIND_REPORTS.find((r) => r.name === name)!.values);
+
+  it("files each kind under its department and study code", () => {
+    expect(kindOf("cpet")).toMatchObject({ section: "PF", loinc: "18752-6" });
+    expect(kindOf("spirometry")).toMatchObject({
+      section: "PF",
+      loinc: "18759-1",
+    });
+    expect(kindOf("lactate")).toMatchObject({
+      section: "OTH",
+      loinc: "18752-6",
+    });
+    expect(kindOf("dxa")).toMatchObject({ section: "RAD", loinc: "38269-7" });
+    expect(kindOf("cgm")).toMatchObject({ section: "LAB", loinc: "107930-0" });
+    expect(reportKind(GOLDEN_EXERCISE_VALUES)).toMatchObject({
+      section: "EC",
+      loinc: "18752-6",
+    });
+  });
+
+  it("keeps a laboratory report with one stray value a laboratory report", () => {
+    const fvc = GOLDEN_KIND_REPORTS.find((r) => r.name === "spirometry")!
+      .values[0];
+    expect(reportKind([...GOLDEN_VALUES, fvc])).toBeUndefined();
+    expect(reportKind(GOLDEN_VALUES)).toBeUndefined();
+    expect(reportKind([])).toBeUndefined();
   });
 });

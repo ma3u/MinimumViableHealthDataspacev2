@@ -1,0 +1,770 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "AuthenticationServices",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/OIDCSession.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "Charts",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ProvenanceStyle.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/TrendsView.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "CoreGraphics",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ContentView.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/ChartPlot.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/DeviceScreen.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/LabImport.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/ScanDocument.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/SyntheticSheet.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/VisionDocumentReader.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "CoreImage",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/SyntheticSheet.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "CoreText",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/SyntheticSheet.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "CryptoKit",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/EHDSConnection.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/OIDCSession.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ReportStore.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/EHDSAccount.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "DeviceCheck",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/EHDSConnection.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "Foundation",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/AppLock.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/BringYourOwnProvider.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/CloudClient.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/DataExport.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/DemoSeed.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/DevDataset.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/Diagnostics.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/EHDSConnection.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/OIDCSession.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/OnDeviceAnalysis.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/RangePreferences.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ReportExport.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ReportStore.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/SelfTest.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/WearableSource.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/AmbulatoryBloodPressure.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/AnalyteDescriptions.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/Analytes.generated.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/AppLockPolicy.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/BodyComposition.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/CardiopulmonaryExercise.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/ChartPlot.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/CloudAnalysis.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/Consents.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/DerivedValues.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/DeviceScreen.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/DeviceScreenHistory.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/DiagnosticsBundle.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/DocumentReaders.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/DocumentReconciler.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/DuplicateReports.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/EHDSAccount.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/EHDSConnect.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/Electrocardiogram.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/ExerciseECG.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/ExtractionAccuracy.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/FeedbackIssue.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/FhirBundle.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/GlucoseProfile.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/HolterReport.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/JSON.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/LabImport.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/LabLineParser.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/LabRecoder.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/LabReport.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/LactateTest.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/OmopExport.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/PDFTextRows.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/PrintedFields.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/Profile.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/PromptText.generated.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/Provenance.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/ReferenceDisplay.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/ReferenceRanges.generated.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/ReportMetadata.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/ReportSuggestion.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/ScanDiagnostics.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/ScanDocument.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/SourceRegion.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/SyntheticSheet.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/TableRoles.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/Trends.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/ValueEditing.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/VisionDocumentReader.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/WearableFHIR.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/Wearables.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "FoundationModels",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/OnDeviceAnalysis.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "HealthKit",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/WearableSource.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "ImageIO",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/LabImport.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/ScanDocument.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "LocalAuthentication",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/AppLock.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "OSLog",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/DiagnosticsBundle.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/Logging.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "PDFKit",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ReportExport.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ScanViewer.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/LabImport.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/PDFTextRows.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "PhotosUI",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ContentView.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "Security",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/BringYourOwnProvider.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "SwiftUI",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/CloudConsentSheet.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ConnectView.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ConsentsView.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ContentView.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/LegalViews.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/MeasurementHistoryView.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/PrivacyCover.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ProfileView.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ProvenanceStyle.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ProviderSettings.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/RangePalette.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ReferenceValuesView.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ReviewViews.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ScanViewer.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/Scanning.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/TrendsView.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ValueEditViews.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "UIKit",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ContentView.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/DataExport.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/Diagnostics.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/EHDSConnection.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/OIDCSession.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/PrivacyCover.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ReportExport.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/SelfTest.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "UniformTypeIdentifiers",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ContentView.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "Vision",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/Scanning.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/Shared/VisionDocumentReader.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    },
+    {
+      "description": "Apple system framework, shipped with iOS; not bundled with the app",
+      "name": "VisionKit",
+      "properties": [
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/ConnectView.swift"
+        },
+        {
+          "name": "klarbefund:imported-by",
+          "value": "Sources/MeinBefund/Scanning.swift"
+        }
+      ],
+      "scope": "required",
+      "supplier": {
+        "name": "Apple Inc."
+      },
+      "type": "framework"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "description": "iPhone lab-report scanner, clients/ios; no third-party package",
+      "name": "Klarbefund",
+      "properties": [
+        {
+          "name": "klarbefund:build",
+          "value": "8"
+        },
+        {
+          "name": "klarbefund:platforms",
+          "value": ".macOS(\"26.0\"), .iOS(\"26.0\")"
+        },
+        {
+          "name": "klarbefund:third-party-packages",
+          "value": "0"
+        }
+      ],
+      "type": "application",
+      "version": "1.0"
+    },
+    "tools": [
+      {
+        "name": "generate-ios-sbom.py",
+        "vendor": "MinimumViableHealthDataspace"
+      }
+    ]
+  },
+  "specVersion": "1.5",
+  "version": 1
+}

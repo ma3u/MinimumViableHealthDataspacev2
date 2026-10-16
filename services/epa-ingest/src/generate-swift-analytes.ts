@@ -21,6 +21,9 @@ import {
 import {
   ANALYTE_DESCRIPTIONS,
   ANALYTE_DESCRIPTIONS_DE,
+  ELECTROCARDIOGRAM_CODES,
+  REPORT_KINDS,
+  OBSERVATION_CATEGORIES,
   ANALYTE_KEYS,
   ANALYTE_LABELS,
   UNIT_SPELLINGS,
@@ -126,6 +129,26 @@ export function renderSwift(
       .join("\n");
   const descriptions = table(ANALYTE_DESCRIPTIONS);
   const descriptionsDe = table(ANALYTE_DESCRIPTIONS_DE);
+  const categories = table(OBSERVATION_CATEGORIES);
+  const list = (items: readonly string[]) =>
+    "[" + items.map((i) => swiftString(i)).join(", ") + "]";
+  const reportKinds = REPORT_KINDS.map(
+    (k) =>
+      `    ReportKind(\n      kind: ${swiftString(
+        k.kind,
+      )}, section: ${swiftString(k.section)},\n` +
+      `      sectionDisplay: ${swiftString(k.sectionDisplay)},\n` +
+      `      loinc: ${swiftString(k.loinc)}, display: ${swiftString(
+        k.display,
+      )},\n` +
+      `      triggers: ${list(k.triggers)},\n      members: ${list(
+        k.members,
+      )}),`,
+  ).join("\n");
+  const electrocardiogram = [...ELECTROCARDIOGRAM_CODES]
+    .sort()
+    .map((code) => `    ${swiftString(code)},`)
+    .join("\n");
   // A codeless coding must say why, or a reader of the data cannot tell a
   // deliberate absence from a lookup nobody got round to.
   for (const e of entries) {
@@ -273,6 +296,24 @@ ${descriptionsDe}
 ${rows}
   ]
 
+  /// FHIR observation category by LOINC code, for the codes that are not
+  /// laboratory tests. Mirrors \`OBSERVATION_CATEGORIES\`.
+  public static let observationCategories: [String: String] = [
+${categories}
+  ]
+
+  /// The measurements that make a report an ECG. Mirrors
+  /// \`ELECTROCARDIOGRAM_CODES\`.
+  public static let electrocardiogramCodes: Set<String> = [
+${electrocardiogram}
+  ]
+
+  /// The kinds of report a set of values makes, first fit wins. Mirrors
+  /// \`REPORT_KINDS\`.
+  public static let reportKinds: [ReportKind] = [
+${reportKinds}
+  ]
+
   /// Latin letters OCR returns as their Cyrillic or Greek twins. Mirrors
   /// \`HOMOGLYPHS\`: a recogniser produced \`МСH\` for \`MCH\`, identical on
   /// screen and a different code point, which \`normaliseLabel\` then stripped.
@@ -317,6 +358,7 @@ ${rows}
       .replacingOccurrences(of: "oe", with: "o")
       .replacingOccurrences(of: "ue", with: "u")
       .replacingOccurrences(of: "rn", with: "m")
+      .replacingOccurrences(of: "mn", with: "m")
   }
 
   public static func normaliseUnit(_ raw: String) -> String? {
@@ -330,7 +372,7 @@ ${rows}
     if compact == "T/l" || compact == "T/L" { return "10*12/L" }
     let lower = compact.lowercased()
     if let unit = unitMap[lower] { return unit }
-    if lower.range(of: #"^m[il1|]?/?min/1[.,]73m(2|²)?$"#, options: .regularExpression) != nil {
+    if lower.range(of: #"^m[il1|]?/?m(?:in)?/1[.,]73m(2|²)?$"#, options: .regularExpression) != nil {
       return "mL/min/{1.73_m2}"
     }
     return dropStrayLeading(compact) ?? repairUnit(raw)
@@ -352,7 +394,7 @@ ${rows}
   }
 
   /// Characters a recogniser confuses with one another. Mirrors \`CONFUSABLE\`.
-  static let confusable: Set<Character> = ["I", "l", "i", "1", "|", "!", "/"]
+  static let confusable: Set<Character> = ["I", "l", "i", "1", "|", "!"]
   static let confusableTargets: [Character] = ["l", "i", "/"]
 
   /// Repairs a unit a recogniser mangled, or nil. Mirrors \`repairUnit\`.
@@ -456,7 +498,8 @@ export async function generate(): Promise<string> {
       .replace(/ae/g, "a")
       .replace(/oe/g, "o")
       .replace(/ue/g, "u")
-      .replace(/rn/g, "m");
+      .replace(/rn/g, "m")
+      .replace(/mn/g, "m");
     if (derived !== looseLabelKey(label)) {
       throw new Error(
         `looseLabelKey("${label}") is not derivable from its strict key; update the Swift template`,

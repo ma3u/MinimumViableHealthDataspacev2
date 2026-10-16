@@ -28,4 +28,4 @@ The Grafana dashboard is `observability/grafana/dashboards/load-stress-test.json
 assessment of that month is archived as
 [`docs/loadtest/2026-03-production-readiness.md`](../docs/loadtest/2026-03-production-readiness.md);
 what the platform does under load today is in the reports next to it and in
-ADR-056 and ADR-059.
+ADR-056 and ADR-061.

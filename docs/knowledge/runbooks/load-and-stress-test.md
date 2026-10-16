@@ -81,7 +81,7 @@ than four. With `WAIT=0` the variable stays set: clear it after the run with
 `gh variable delete LOAD_TEST_RUNNING`. The hold needs `gh` signed in on the
 laptop; without it the script warns and runs anyway.
 
-### Scale the UI (ADR-059)
+### Scale the UI (ADR-061)
 
 The UI is one Node process per replica, and three replicas of 0.5 vCPU were
 the ceiling at 200 users. `scripts/azure/env.sh` names its size

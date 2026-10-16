@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -249,7 +249,7 @@
   /* Activity timeline — vertical connector line pattern */
   position: relative;
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     left: 11px;
     top: 8px;
@@ -565,4 +565,147 @@
   }
 
   /* ── WCAG 2.2 Target Size (2.5.8) — utility classes ───────────────────────── */
+}
+
+/* ── Documentation: a heading reached from the "On this page" index stops
+   below the sticky navigation instead of under it. ─────────────────────── */
+#main-content :is(h1, h2, h3, h4, section)[id] {
+  scroll-margin-top: 5.5rem;
+}
+
+/* ── Published reports (/docs/security/<slug>): Markdown rendered by
+   src/lib/docs/markdown.ts. Colours come from the theme tokens above. ──── */
+.doc-prose {
+  line-height: 1.65;
+}
+.doc-prose h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 1rem;
+  text-wrap: balance;
+}
+.doc-prose .doc-num {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  margin-right: 0.15em;
+}
+.doc-prose h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 2.25rem 0 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+.doc-prose h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 1.5rem 0 0.5rem;
+}
+.doc-prose h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.5rem;
+}
+.doc-prose p,
+.doc-prose ul,
+.doc-prose ol,
+.doc-prose blockquote {
+  margin: 0 0 1rem;
+}
+.doc-prose ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+.doc-prose ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+.doc-prose li {
+  margin: 0.25rem 0;
+}
+.doc-prose a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.doc-prose code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.875em;
+  background: var(--surface-2);
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+}
+.doc-prose pre {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.doc-prose pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+}
+.doc-prose table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  margin: 0 0 1.25rem;
+  font-size: 0.9rem;
+}
+.doc-prose th,
+.doc-prose td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.6rem;
+  vertical-align: top;
+  text-align: left;
+}
+.doc-prose th {
+  background: var(--surface-2);
+  font-weight: 600;
+}
+.doc-prose blockquote {
+  border-left: 3px solid var(--border-ui);
+  padding-left: 1rem;
+  color: var(--text-secondary);
+}
+.doc-prose hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+.doc-prose img {
+  max-width: 100%;
+  cursor: zoom-in;
+}
+/* A phone screenshot written as <img width="..."> keeps its width and sits
+   beside the next one when the column allows; the viewer opens it full size. */
+.doc-prose p > img[width] {
+  display: inline-block;
+  vertical-align: top;
+  height: auto;
+  margin: 0 0.5rem 0.5rem 0;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+.doc-prose a.doc-figure {
+  display: block;
+  margin: 0 0 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: #ffffff; /* the SVGs are drawn on white in both themes */
+  overflow-x: auto;
+  cursor: zoom-in;
+}
+.doc-prose a.doc-figure::after {
+  content: "Click to open full screen and zoom";
+  display: block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border);
 }

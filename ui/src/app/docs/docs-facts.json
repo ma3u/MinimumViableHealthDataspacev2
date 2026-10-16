@@ -340,6 +340,10 @@
     "/docs/developer/api",
     "/docs/developer/quality-gates",
     "/docs/developer/reference",
+    "/docs/klarbefund",
+    "/docs/klarbefund/[slug]",
+    "/docs/security",
+    "/docs/security/[slug]",
     "/docs/user-guide",
     "/eehrxf",
     "/graph",
@@ -516,6 +520,12 @@
     {
       "id": "docs-facts",
       "name": "Docs facts and last-updated dates",
+      "source": "local",
+      "stage": "pre-commit"
+    },
+    {
+      "id": "docs-content",
+      "name": "Published reports match their sources (docs/security, docs/klarbefund)",
       "source": "local",
       "stage": "pre-commit"
     },
@@ -1043,7 +1053,19 @@
     },
     {
       "id": "ADR-059",
-      "file": "ADR-059-the-ui-scales-out-on-whole-cores.md",
+      "file": "ADR-059-the-record-holds-reports-vaccinations-and-the-medication-plan.md",
+      "title": "The record holds reports, vaccinations and the medication plan, not laboratory values alone",
+      "status": ""
+    },
+    {
+      "id": "ADR-060",
+      "file": "ADR-060-the-app-locks-with-face-id-and-answers-pinning-and-jailbreak-detection.md",
+      "title": "The app locks with Face ID or the passcode; certificate pinning and jailbreak detection are declined with reasons",
+      "status": ""
+    },
+    {
+      "id": "ADR-061",
+      "file": "ADR-061-the-ui-scales-out-on-whole-cores.md",
       "title": "The UI on Azure scales out on whole cores, on its own HTTP concurrency rule",
       "status": "Accepted"
     }
@@ -1072,8 +1094,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 47,
-    "operations": 61
+    "paths": 48,
+    "operations": 62
   },
   "workflowJobs": {
     "test.yml": [
@@ -1124,12 +1146,16 @@
     "trivy": "0.69.3"
   },
   "lastUpdated": {
-    "/docs": "2026-10-04",
-    "/docs/user-guide": "2026-10-04",
-    "/docs/developer": "2026-10-07",
-    "/docs/developer/quality-gates": "2026-10-07",
-    "/docs/developer/api": "2026-10-12",
-    "/docs/developer/reference": "2026-10-12",
-    "/docs/architecture": "2026-10-12"
+    "/docs": "2026-10-16",
+    "/docs/user-guide": "2026-10-16",
+    "/docs/developer": "2026-10-16",
+    "/docs/developer/quality-gates": "2026-10-16",
+    "/docs/developer/api": "2026-10-16",
+    "/docs/developer/reference": "2026-10-16",
+    "/docs/architecture": "2026-10-16",
+    "/docs/security": "2026-10-16",
+    "/docs/security/[slug]": "2026-10-16",
+    "/docs/klarbefund": "2026-10-16",
+    "/docs/klarbefund/[slug]": "2026-10-16"
   }
 }

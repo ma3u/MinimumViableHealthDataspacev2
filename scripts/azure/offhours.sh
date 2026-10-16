@@ -38,7 +38,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export RESOURCE_GROUP="${RESOURCE_GROUP:-rg-mvhd-dev}"
 PG_FLEX_NAME="${PG_FLEX_NAME:-mvhd-pg-b53a0449}"
 KEYCLOAK_PUBLIC_HOSTNAME="${KEYCLOAK_PUBLIC_HOSTNAME:-auth.ehds.mabu.red}"
-# The UI's replica range for the day (ADR-059; the same numbers as
+# The UI's replica range for the day (ADR-061; the same numbers as
 # UI_MIN_REPLICAS/UI_MAX_REPLICAS in env.sh, which this script does not source).
 UI_MIN_REPLICAS="${UI_MIN_REPLICAS:-1}"
 UI_MAX_REPLICAS="${UI_MAX_REPLICAS:-6}"

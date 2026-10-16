@@ -28,7 +28,17 @@ public enum UnitText {
     "cm2": "cm²",
     "kg/m2": "kg/m²",
     "[pH]": "pH",
+    // An ECG axis, and a blood pressure as every device prints it.
+    "deg": "°",
+    // A count of beats: no unit to show, as `{ratio}`.
+    "{beats}": "",
+    "mm[Hg]": "mmHg",
     "{ratio}": "",
+    // An exercise test's and a DXA scan's, as their reports print them.
+    "mL/{beat}": "mL/beat",
+    "{MET}": "MET",
+    "{SD}": "SD",
+    "g/cm2": "g/cm²",
   ]
 
   public static func display(_ ucum: String) -> String {

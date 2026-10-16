@@ -47,7 +47,7 @@
       - [Dependency Graph](#dependency-graph)
   - [Contributing](#contributing)
   - [Background](#background)
-  - [Security](#security)
+  - [Security and data protection](#security-and-data-protection)
   - [License](#license)
 
 ---
@@ -243,7 +243,7 @@ MinimumViableHealthDataspacev2/
 ├── LICENSE
 ├── clients/ios/                  # Klarbefund, the iPhone lab-report scanner (issue #186)
 ├── docs/
-│   ├── klarbefund/README.md              # The iPhone app screen by screen, with screenshots
+│   ├── klarbefund/                       # The iPhone app: user guide and developer guide with screenshots, evidence
 │   ├── planning-health-dataspace-v2.md   # 7-phase implementation roadmap
 │   ├── health-dataspace-graph-schema.md  # 5-layer Neo4j schema reference
 │   └── images/
@@ -839,22 +839,23 @@ the cost model and scheduling rationale. ADR-015 documents the single-VM fallbac
 Detailed reference documents live in the `docs/` directory. The UI documentation is also
 available online at **[ma3u.github.io/MinimumViableHealthDataspacev2/docs](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs)**.
 
-| Document                                                                                | Description                                                                                                                                |
-| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| [Implementation Roadmap](docs/planning-health-dataspace-v2.md)                          | Full planning document: 12 phases, 9+ ADRs, architecture decisions.                                                                        |
-| [Architecture Decision Records](docs/ADRs/)                                             | Standalone ADRs (001–013): data storage, testing, Azure, WCAG, security.                                                                   |
-| [Azure Deployment Guide](docs/azure-deployment-guide.md)                                | Azure Container Apps setup, endpoints, post-deploy configuration.                                                                          |
-| [Graph Schema Reference](docs/health-dataspace-graph-schema.md)                         | Full 5-layer Neo4j schema: node labels, properties, indexes, relationships.                                                                |
-| [E2E Test Report](docs/e2e-test-report.md)                                              | Playwright E2E run on the JAD stack of 2026-04-11 (778 tests then; 1,145 listed today).                                                    |
-| [Unit Test Coverage](docs/test-coverage-report.md)                                      | Vitest coverage: 2,317 UI tests, 81.6% statement coverage (2026-10-03); per-module detail from 2026-03-21.                                 |
-| [SIMPL-Open Gap Analysis](docs/simpl-ehds-gap-analysis.md)                              | Alignment assessment with EU SIMPL programme requirements.                                                                                 |
-| [Quality Gates](docs/quality-gates.md)                                                  | CI quality standards: lint, type-check, test thresholds.                                                                                   |
-| [Software Development Life Cycle (SDLC)](docs/SDLC.md)                                  | How the project plans, gates, tests, releases & deploys — with a next-steps outlook. **[Plain-language version](docs/SDLC-explained.md).** |
-| [Agentic AI Development with Claude Code](docs/AGENTIC-DEVELOPMENT-WITH-CLAUDE-CODE.md) | How AI-assisted development is kept deterministic, reviewable & safe. **[Plain-language version](docs/AGENTIC-AI-explained.md).**          |
-| [Full User Journey](docs/FULL_USER_JOURNEY.md)                                          | EHDS 8-step journey from onboarding to analytics with sequence diagram.                                                                    |
-| [OpenAPI Specs](jad/openapi/)                                                           | OpenAPI specs for all JAD services (Management, Identity, Issuer APIs).                                                                    |
-| [Bruno API Collection](bruno/MVHDv2/)                                                   | 151 requests organised by EHDS persona: one folder per role, two for the Chapter IV procedures, 100% of the API routes (ADR-032).          |
-| [Interactive API Reference](ui/public/openapi.yaml)                                     | OpenAPI 3.1 spec rendered as Swagger UI at `/docs/developer/api`.                                                                          |
+| Document                                                                                | Description                                                                                                                                        |
+| --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Implementation Roadmap](docs/planning-health-dataspace-v2.md)                          | Full planning document: 12 phases, 9+ ADRs, architecture decisions.                                                                                |
+| [Architecture Decision Records](docs/ADRs/)                                             | Standalone ADRs (001–013): data storage, testing, Azure, WCAG, security.                                                                           |
+| [Azure Deployment Guide](docs/azure-deployment-guide.md)                                | Azure Container Apps setup, endpoints, post-deploy configuration.                                                                                  |
+| [Graph Schema Reference](docs/health-dataspace-graph-schema.md)                         | Full 5-layer Neo4j schema: node labels, properties, indexes, relationships.                                                                        |
+| [E2E Test Report](docs/e2e-test-report.md)                                              | Playwright E2E run on the JAD stack of 2026-04-11 (778 tests then; 1,145 listed today).                                                            |
+| [Unit Test Coverage](docs/test-coverage-report.md)                                      | Vitest coverage: 2,317 UI tests, 81.6% statement coverage (2026-10-03); per-module detail from 2026-03-21.                                         |
+| [SIMPL-Open Gap Analysis](docs/simpl-ehds-gap-analysis.md)                              | Alignment assessment with EU SIMPL programme requirements.                                                                                         |
+| [Quality Gates](docs/quality-gates.md)                                                  | CI quality standards: lint, type-check, test thresholds.                                                                                           |
+| [Software Development Life Cycle (SDLC)](docs/SDLC.md)                                  | How the project plans, gates, tests, releases & deploys — with a next-steps outlook. **[Plain-language version](docs/SDLC-explained.md).**         |
+| [Agentic AI Development with Claude Code](docs/AGENTIC-DEVELOPMENT-WITH-CLAUDE-CODE.md) | How AI-assisted development is kept deterministic, reviewable & safe. **[Plain-language version](docs/AGENTIC-AI-explained.md).**                  |
+| [Full User Journey](docs/FULL_USER_JOURNEY.md)                                          | EHDS 8-step journey from onboarding to analytics with sequence diagram.                                                                            |
+| [OpenAPI Specs](jad/openapi/)                                                           | OpenAPI specs for all JAD services (Management, Identity, Issuer APIs).                                                                            |
+| [Bruno API Collection](bruno/MVHDv2/)                                                   | 151 requests organised by EHDS persona: one folder per role, two for the Chapter IV procedures, 100% of the API routes (ADR-032).                  |
+| [Interactive API Reference](ui/public/openapi.yaml)                                     | OpenAPI 3.1 spec rendered as Swagger UI at `/docs/developer/api`.                                                                                  |
+| [Security and data protection](#security-and-data-protection)                           | Security test report with the findings' status, threat models, the Klarbefund self-assessment and evidence, the report for health insurers, SBOMs. |
 
 ---
 
@@ -981,11 +982,49 @@ schema change rules, and the PR checklist.
 
 ---
 
-## Security
+## Security and data protection
 
-- **No patient data** — all clinical records are synthetic (Synthea-generated) and are excluded from the repository via `.gitignore`. Never commit real patient data.
-- **Local credentials only** — the default Neo4j credentials (`neo4j` / `healthdataspace`) are intentionally weak and suitable only for local development. They must not be used in any internet-facing deployment.
-- **Environment files** — production deployments should inject credentials via `.env` files or secret managers. `.env` is excluded from version control via `.gitignore`.
+Security and data protection are tested by the project itself with tools anyone can run on
+the repository, and every finding is either fixed or named as open. The test of 2026-10-15
+found ten findings (F1 to F10); after the fixes, nine are closed and one is reviewed and accepted (F3, the
+published development default key of the local compose stack; Azure takes its keys from Vault). None of this is an independent penetration test or a certification.
+
+| Report                                                                                                                                                   | What it holds                                                                                                                                                                                                                                                                                                                                             |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Operational guideline](docs/security/operational-guideline.md)                                                                                          | How to host the hub and the app for real: which EHDS role operates which part, what the BSI standards (C5, IT-Grundschutz, TR-02102, TR-03161) ask of each, incident clocks, retention, the go-live checklist by role.                                                                                                                                    |
+| [Security test report, 2026-10-15](docs/security/security-test-report-2026-10-15.md)                                                                     | CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, the app's posture tests and 48 anonymous black-box checks of the live hub; the findings F1 to F10 with their status after the fixes, and what an independent test would add.                                                                                                    |
+| [Threat model, the hub](docs/security/threat-model.md)                                                                                                   | STRIDE analysis of the UI, the graph, the DSP contract flow and the DCP credential exchange.                                                                                                                                                                                                                                                              |
+| [Threat model, the Klarbefund app](docs/security/threat-model-klarbefund.md)                                                                             | STRIDE analysis of the iPhone app; each mitigation names the code or test that shows it.                                                                                                                                                                                                                                                                  |
+| [Klarbefund self-assessment](docs/klarbefund/self-assessment.md)                                                                                         | Data protection (GDPR), BSI TR-03161 objective by objective, the EU AI Act label and the MDR status of the app, each line pointing to the code or test that shows it.                                                                                                                                                                                     |
+| [Klarbefund evidence](docs/klarbefund/evidence.md)                                                                                                       | The accuracy benchmark, the dictionary parity check, the run record, and what is still missing.                                                                                                                                                                                                                                                           |
+| [Evidence report for health insurers](docs/klarbefund/report-for-health-insurers.md)                                                                     | The three questions an insurer asks (is the extraction right, is the data safe, is it a medical device) answered with the evidence above, plus the white-label and consulting offer. Also [on one page](docs/klarbefund/report-for-health-insurers.html), served at [ehds.mabu.red](https://ehds.mabu.red/published-docs/klarbefund-insurer-report.html). |
+| [Software bills of materials](docs/sbom/)                                                                                                                | One CycloneDX file per deployable part, byte-stable; `generate-sbom.sh --check` fails when a bill no longer matches its lockfile.                                                                                                                                                                                                                         |
+| [BSI C5 gap analysis](docs/security/bsi-c5-gap-analysis.md)                                                                                              | The hub against the C5:2020 criteria catalogue, for EHDS Art. 50(6).                                                                                                                                                                                                                                                                                      |
+| [ADR-011](docs/ADRs/ADR-011-security-testing.md), [ADR-060](docs/ADRs/ADR-060-the-app-locks-with-face-id-and-answers-pinning-and-jailbreak-detection.md) | The security testing strategy; the app lock, and why certificate pinning and jailbreak detection were declined.                                                                                                                                                                                                                                           |
+
+All of these are published on the hub at [ehds.mabu.red/docs/security](https://ehds.mabu.red/docs/security)
+and on [GitHub Pages](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/security/), copied from
+`docs/` by `scripts/gen-docs-content.py` (a pre-commit hook fails when the copy is stale).
+
+How to run it again:
+
+```bash
+scripts/security/generate-sbom.sh --check   # the bills still match the lockfiles
+scripts/security/scan-repo.sh               # grype, npm audit, trivy, gitleaks, semgrep, hadolint, shellcheck
+scripts/security/check-hub-blackbox.sh      # 48 anonymous checks of the live hub (exits 3 off hours)
+cd clients/ios && swift test --filter SecurityPostureTests
+```
+
+CI runs the dependency and container scans on every push (`.github/workflows/security-scan.yml`,
+results in the [Security tab](https://github.com/ma3u/MinimumViableHealthDataspacev2/security))
+and CodeQL for TypeScript and Swift (`codeql.yml`, `codeql-swift.yml`). The Keycloak admin
+console is kept off the internet by a Caddy sidecar (`scripts/azure/guard-keycloak-console.sh`).
+
+The basics still hold:
+
+- **No patient data.** All clinical records are synthetic (Synthea and the fictional seeds) and real reports are excluded from the repository by `.gitignore`. Never commit real patient data, not even as a picture.
+- **Local credentials only.** The default Neo4j credentials (`neo4j` / `healthdataspace`) are intentionally weak and suitable only for local development. They must not be used in any internet-facing deployment.
+- **Secrets by reference.** On Azure every secret is a Key Vault reference in the app definition; locally, environment files are excluded from version control.
 
 ---
 

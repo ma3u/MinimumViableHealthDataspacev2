@@ -1,0 +1,127 @@
+@startuml klarbefund-architecture
+!include <archimate/Archimate>
+title Klarbefund, layered view (ArchiMate 3.2)\nwhat a person does, what the software provides, and what it runs on
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam nodesep 16
+skinparam ranksep 48
+skinparam rectangle {
+  BorderColor #64748B
+  FontStyle bold
+}
+
+' ── Business layer ───────────────────────────────────────────────────────────
+rectangle "Business layer" as BL #FFFFB5 {
+  Business_Actor(person, "Person with\na lab report")
+  Business_Object(paper, "Paper report,\nlaboratory PDF")
+  Business_Role(doctor, "Doctor, practice,\nthe ePA")
+  Business_Role(research, "Registry or\nresearch team")
+  Business_Process(p_scan, "Scan or import\na report")
+  Business_Process(p_check, "Check every value\nagainst the paper")
+  Business_Process(p_follow, "Follow trends and\npublished ranges")
+  Business_Process(p_consent, "Record the three\nconsent decisions")
+  Business_Process(p_share, "Share for the doctor,\nexport for research")
+  Business_Process(p_ehds, "Read and feed\nthe EHDS record")
+}
+
+' ── Application layer ────────────────────────────────────────────────────────
+rectangle "Application layer" as AL #B5FFFF {
+  Application_Service(s_extract, "Extraction service\nOCR, parse, LOINC coding, provenance")
+  Application_Service(s_store, "Sealed record service\nreports, pages, diagnostics, profile, consents")
+  Application_Service(s_export, "Export service\nPDF, FHIR R4, OMOP CDM, GDPR archive")
+  Application_Service(s_sync, "Record sync service\ndevice grant, account, two switches")
+  Application_Component(c_tools, "Tools\nLabFile, ScanReplay,\nAnalyteParity")
+  Application_Component(c_shared, "Shared package\nSources/Shared: LabImport,\nLabLineParser, Analytes,\nFhirBundle, OmopExport")
+  Application_Component(c_app, "Klarbefund app\nSources/MeinBefund")
+  Application_Component(c_hub, "EHDS demo hub\nehds.mabu.red, Keycloak")
+  Application_Component(c_ingest, "services/epa-ingest\nanalytes.ts,\nreference-ranges.ts")
+  Application_DataObject(d_report, "LabReport\nvalues, codes, printed ranges,\npage and line, sealed")
+  Application_DataObject(d_fhir, "FHIR R4 bundle,\nOMOP CDM tables")
+}
+
+' ── Technology layer ─────────────────────────────────────────────────────────
+rectangle "Technology layer" as TL #C9E7B7 {
+  rectangle "iPhone, iOS 26" as phone #D9F0CB {
+    Technology_SystemSoftware(vision, "VisionKit, Vision\ncamera and OCR")
+    Technology_SystemSoftware(keychain, "Data Protection, Keychain\nSecure Enclave key,\nThisDeviceOnly")
+    Technology_SystemSoftware(localauth, "LocalAuthentication\nFace ID, Touch ID,\npasscode")
+    Technology_SystemSoftware(health, "HealthKit\nread only")
+    Technology_SystemSoftware(attest, "App Attest")
+  }
+  Technology_Device(mac, "Mac with Xcode\nswift test, swift run")
+  Technology_Node(aca, "Azure Container Apps\nthe hub, Keycloak, Postgres")
+}
+
+' ── Business: who does what, on what ─────────────────────────────────────────
+Rel_Assignment(person, p_scan)
+Rel_Assignment(person, p_check)
+Rel_Assignment(person, p_follow)
+Rel_Assignment(person, p_consent)
+Rel_Assignment(person, p_ehds)
+Rel_Access_Up(p_scan, paper)
+Rel_Flow_Up(p_share, doctor, "PDF + FHIR")
+Rel_Flow_Up(p_share, research, "OMOP")
+
+' ── Application serves business ──────────────────────────────────────────────
+Rel_Serving_Up(s_extract, p_scan)
+Rel_Serving_Up(s_store, p_check)
+Rel_Serving_Up(s_store, p_follow)
+Rel_Serving_Up(s_store, p_consent)
+Rel_Serving_Up(s_export, p_share)
+Rel_Serving_Up(s_sync, p_ehds)
+
+' ── Components realise services and access data ──────────────────────────────
+Rel_Realization_Up(c_shared, s_extract)
+Rel_Realization_Up(c_app, s_store)
+Rel_Realization_Up(c_shared, s_export)
+Rel_Realization_Up(c_app, s_sync)
+Rel_Access(c_app, d_report)
+Rel_Access(c_shared, d_fhir)
+Rel_Flow_Right(c_app, c_hub, "HTTPS, OAuth 2.0")
+Rel_Realization_Left(c_ingest, c_shared, "generates")
+Rel_Serving_Left(c_shared, c_tools)
+
+' ── Technology serves application ────────────────────────────────────────────
+Rel_Serving_Up(vision, c_shared)
+Rel_Serving_Up(keychain, c_app)
+Rel_Serving_Up(localauth, c_app)
+Rel_Serving_Up(health, c_app)
+Rel_Serving_Up(attest, c_app)
+Rel_Serving_Up(mac, c_tools)
+Rel_Serving_Up(aca, c_hub)
+
+' ── Keep each band a row, and the bands aligned at the left ─────────────────
+person -[hidden]right- paper
+paper -[hidden]right- doctor
+doctor -[hidden]right- research
+p_scan -[hidden]right- p_check
+p_check -[hidden]right- p_follow
+p_follow -[hidden]right- p_consent
+p_consent -[hidden]right- p_share
+p_share -[hidden]right- p_ehds
+s_extract -[hidden]right- s_store
+s_store -[hidden]right- s_export
+s_export -[hidden]right- s_sync
+c_tools -[hidden]right- c_shared
+c_shared -[hidden]right- c_app
+c_app -[hidden]right- c_hub
+c_hub -[hidden]right- c_ingest
+d_report -[hidden]right- d_fhir
+vision -[hidden]right- keychain
+keychain -[hidden]right- localauth
+localauth -[hidden]right- health
+health -[hidden]right- attest
+phone -[hidden]right- mac
+mac -[hidden]right- aca
+p_scan -[hidden]down- s_extract
+d_report -[hidden]down- vision
+
+legend bottom left
+|= Relationship |= Meaning |
+| solid line, open arrow | serving: the lower element provides what the upper one uses |
+| dotted line, hollow head | realization: the component makes the service real |
+| dashed arrow | flow: data moving, with what moves |
+| dotted, no head | access: reads or writes the object |
+| filled dot | assignment: who performs the process |
+endlegend
+@enduml

@@ -185,7 +185,15 @@ repos:
         language: python
         additional_dependencies: [pyyaml]
         entry: python3 scripts/gen-docs-facts.py
-        files: ^(ui/src/app/.*(page|route)\.tsx?|ui/src/app/docs/.*|ui/src/components/Navigation\.tsx|ui/public/openapi\.yaml|ui/__tests__/.*|ui/vitest\.config\.ts|ui/package\.json|services/neo4j-proxy/.*\.test\.ts|\.pre-commit-config\.yaml|docker-compose(\.jad)?\.yml|jad/init-postgres\.sql|docs/ADRs/ADR-.*\.md|scripts/compliance-baseline\.json|scripts/gen-docs-facts\.py|\.github/workflows/(test|compliance|security-scan|pr-gate|deploy-azure)\.yml)$
+        files: ^(ui/src/app/.*(page|route)\.tsx?|ui/src/app/docs/.*|ui/src/content/.*|ui/src/components/Navigation\.tsx|ui/public/openapi\.yaml|ui/__tests__/.*|ui/vitest\.config\.ts|ui/package\.json|services/neo4j-proxy/.*\.test\.ts|\.pre-commit-config\.yaml|docker-compose(\.jad)?\.yml|jad/init-postgres\.sql|docs/ADRs/ADR-.*\.md|scripts/compliance-baseline\.json|scripts/gen-docs-facts\.py|\.github/workflows/(test|compliance|security-scan|pr-gate|deploy-azure)\.yml)$
+        pass_filenames: false
+        stages: [pre-commit]
+
+      - id: docs-content
+        name: Published reports match their sources (docs/security, docs/klarbefund)
+        language: python
+        entry: python3 scripts/gen-docs-content.py --check
+        files: ^(docs/security/.*\.md|docs/klarbefund/.*\.(md|html)|docs/sbom/README\.md|docs/(security|klarbefund|architecture)/img/.*|ui/public/published-docs/.*|ui/src/content/published-docs\.json|scripts/gen-docs-content\.py)$
         pass_filenames: false
         stages: [pre-commit]
 

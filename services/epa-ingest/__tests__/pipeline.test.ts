@@ -37,8 +37,8 @@ describe("end to end over the fixture", () => {
     expect(bnp?.value).toBe(1240);
   });
 
-  it("reports the Omega-3-Index as unmapped rather than dropping or guessing it", () => {
-    const omega = unmapped.find((u) => u.label.startsWith("Omega-3"));
+  it("reports an analyte the dictionary lacks as unmapped rather than dropping or guessing it", () => {
+    const omega = unmapped.find((u) => u.label.startsWith("Zonulin"));
     expect(omega).toBeDefined();
     expect(omega?.reason).toBe("unknown-analyte");
   });
@@ -101,9 +101,9 @@ describe("formatReport", () => {
       [
         {
           lineNumber: 30,
-          label: "Omega-3-Index",
-          value: 4.1,
-          unitRaw: "%",
+          label: "Zonulin",
+          value: 41,
+          unitRaw: "ng/ml",
           reason: "unknown-analyte",
         },
       ],
@@ -113,7 +113,7 @@ describe("formatReport", () => {
     expect(out).toContain(
       'ocr-transcribed -> Observation.status "preliminary"',
     );
-    expect(out).toContain("Omega-3-Index");
+    expect(out).toContain("Zonulin");
     expect(out).toContain("LDL/HDL-Quotient");
   });
 });

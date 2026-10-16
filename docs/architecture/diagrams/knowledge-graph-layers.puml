@@ -1,0 +1,95 @@
+@startuml knowledge-graph-layers
+!include <archimate/Archimate>
+title The five-layer knowledge graph (ArchiMate 3.2, information structure view)\nthe node labels and relationships the seeds create in Neo4j
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam nodesep 14
+skinparam ranksep 44
+skinparam rectangle {
+  BorderColor #64748B
+  FontStyle bold
+}
+
+rectangle "Layer 1: DSP marketplace" as L1 #E8F1FA {
+  Application_DataObject(part, "Participant")
+  Application_DataObject(dp, "DataProduct")
+  Application_DataObject(pol, "OdrlPolicy")
+  Application_DataObject(hdab, "HDABApproval")
+}
+rectangle "Layer 2: HealthDCAT-AP" as L2 #E6F4F1 {
+  Application_DataObject(qa, "QualityAssessment")
+  Application_DataObject(ds, "HealthDataset")
+  Application_DataObject(dist, "Distribution\nFHIR and OMOP endpoints")
+}
+rectangle "Layer 3: FHIR R4 clinical" as L3 #E8F5EA {
+  Application_DataObject(pat, "Patient")
+  Application_DataObject(enc, "Encounter")
+  Application_DataObject(cond, "Condition")
+  Application_DataObject(obs, "Observation")
+  Application_DataObject(med, "MedicationRequest")
+  Application_DataObject(proc, "Procedure")
+}
+rectangle "Layer 4: OMOP CDM" as L4 #FBEFE2 {
+  Application_DataObject(pers, "OMOPPerson")
+  Application_DataObject(vo, "OMOPVisitOccurrence")
+  Application_DataObject(co, "OMOPConditionOccurrence")
+  Application_DataObject(meas, "OMOPMeasurement")
+  Application_DataObject(de, "OMOPDrugExposure")
+  Application_DataObject(po, "OMOPProcedureOccurrence")
+}
+rectangle "Layer 5: ontology" as L5 #F1E8F5 {
+  Application_DataObject(snomed, "SnomedConcept")
+  Application_DataObject(icd, "ICD10Code")
+  Application_DataObject(loinc, "LoincCode")
+  Application_DataObject(rxnorm, "RxNormConcept")
+}
+
+' ── Layer 1 and 2 ────────────────────────────────────────────────────────────
+Rel_Association_Right(part, dp, "OFFERS")
+Rel_Association_Right(dp, pol, "GOVERNED_BY")
+Rel_Association(dp, ds, "DESCRIBED_BY")
+Rel_Association(hdab, ds, "GRANTS_ACCESS_TO")
+Rel_Association_Left(qa, ds, "ASSESSES")
+Rel_Association_Right(ds, dist, "HAS_DISTRIBUTION")
+
+' ── Layer 3: the patient's record, and where it came from ───────────────────
+Rel_Association_Up(pat, ds, "FROM_DATASET")
+Rel_Association_Right(pat, enc, "HAS_ENCOUNTER")
+Rel_Association_Right(enc, cond, " ")
+Rel_Association_Right(cond, obs, " ")
+Rel_Association_Right(obs, med, " ")
+Rel_Association_Right(med, proc, " ")
+
+' ── Layer 3 to 4: MAPPED_TO ──────────────────────────────────────────────────
+Rel_Association(pat, pers, "MAPPED_TO")
+Rel_Association(enc, vo, "MAPPED_TO")
+Rel_Association(cond, co, "MAPPED_TO")
+Rel_Association(obs, meas, "MAPPED_TO")
+Rel_Association(med, de, "MAPPED_TO")
+Rel_Association(proc, po, "MAPPED_TO")
+
+' ── Layer 4 to 5: CODED_BY (the FHIR nodes carry the same links) ─────────────
+Rel_Association(co, snomed, "CODED_BY")
+Rel_Association(po, snomed, "CODED_BY")
+Rel_Association(meas, loinc, "CODED_BY")
+Rel_Association(de, rxnorm, "CODED_BY")
+Rel_Association(cond, icd, "CODED_BY\n(Condition only)")
+
+' ── Rows ────────────────────────────────────────────────────────────────────
+pol -[hidden]right- hdab
+qa -[hidden]right- ds
+pers -[hidden]right- vo
+vo -[hidden]right- co
+co -[hidden]right- meas
+meas -[hidden]right- de
+de -[hidden]right- po
+snomed -[hidden]right- icd
+icd -[hidden]right- loinc
+loinc -[hidden]right- rxnorm
+
+legend bottom left
+|= Line |= Meaning |
+| plain line with a label | association: the Neo4j relationship type between the two labels |
+| Patient to Encounter and on | the HAS_* relationships of the patient's record |
+endlegend
+@enduml

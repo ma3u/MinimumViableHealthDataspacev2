@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Klarbefund, the evidence for health insurers on one page: accuracy, security and data protection, the regulatory position, the test database, the integration paths and what is still open.">
+<!-- Source of https://ehds.mabu.red/published-docs/klarbefund-insurer-report.html: docs/klarbefund/report-for-health-insurers.html, copied by scripts/gen-docs-content.py. The long form is docs/klarbefund/report-for-health-insurers.md. -->
+<title>Klarbefund Evidence Report</title>
+<style>
+  /* Layout: one reading column, a summary table first, then the evidence sections; tables scroll in their own box. */
+  :root {
+    --bg: #f7f8f8;
+    --surface: #ffffff;
+    --fg: #1d2426;
+    --muted: #5a6669;
+    --line: #d5dcde;
+    --accent: #0f6e6e;
+    --accent-ink: #0b5252;
+    --ok: #1f7a4d;
+    --warn: #9a6b00;
+    --open: #8c3a2b;
+    --tint: #e7f1f1;
+    --display: "Newsreader", Georgia, "Times New Roman", serif;
+    --body: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+    --mono: "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #141a1b; --surface: #1b2224; --fg: #e4e9ea; --muted: #9aa7aa; --line: #30393c;
+      --accent: #5fc1b8; --accent-ink: #8fd8d1; --ok: #6fc695; --warn: #e2b55a; --open: #e39280; --tint: #1f2d2e;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141a1b; --surface: #1b2224; --fg: #e4e9ea; --muted: #9aa7aa; --line: #30393c;
+    --accent: #5fc1b8; --accent-ink: #8fd8d1; --ok: #6fc695; --warn: #e2b55a; --open: #e39280; --tint: #1f2d2e;
+    color-scheme: dark;
+  }
+  body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 17px; line-height: 1.5;
+         padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 64px; }
+  .page { max-width: 880px; margin: 0 auto; }
+  header { padding-block: 40px 24px; border-bottom: 1px solid var(--line); }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-ink); }
+  h1 { font-family: var(--display); font-weight: 500; font-size: clamp(32px, 5vw, 46px); line-height: 1.1; margin: 10px 0 12px; text-wrap: balance; }
+  h2 { font-family: var(--display); font-weight: 600; font-size: 26px; margin: 40px 0 10px; text-wrap: balance; }
+  h3 { font-size: 17px; font-weight: 600; margin: 24px 0 6px; }
+  p { max-width: 68ch; margin: 0 0 12px; }
+  .lede { font-size: 19px; color: var(--muted); max-width: 64ch; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 24px; font-family: var(--mono); font-size: 13px; color: var(--muted); margin-top: 14px; }
+  .offer { background: var(--tint); border-left: 3px solid var(--accent); padding: 14px 18px; margin: 24px 0; }
+  .offer p { margin: 0; max-width: none; }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--line); background: var(--surface); margin: 12px 0 18px; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+  th { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; background: var(--bg); }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); font-size: 14px; }
+  .pill { display: inline-block; font-family: var(--mono); font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid; white-space: nowrap; }
+  .ok { color: var(--ok); border-color: var(--ok); }
+  .warn { color: var(--warn); border-color: var(--warn); }
+  .open { color: var(--open); border-color: var(--open); }
+  .na { color: var(--muted); border-color: var(--line); }
+  .new { color: var(--accent-ink); border-color: var(--accent); background: var(--tint); }
+  .figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0; }
+  .figure { background: var(--surface); border: 1px solid var(--line); padding: 12px 14px; min-width: 0; }
+  .figure .n { font-family: var(--mono); font-size: 26px; font-weight: 500; color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+  .figure .l { font-size: 13px; color: var(--muted); }
+  code { font-family: var(--mono); font-size: 0.88em; background: var(--tint); padding: 1px 5px; border-radius: 3px; }
+  pre { background: var(--surface); border: 1px solid var(--line); padding: 14px 16px; overflow-x: auto; font-family: var(--mono); font-size: 13.5px; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  ol, ul { padding-left: 22px; max-width: 70ch; }
+  li { margin-bottom: 6px; }
+  a { color: var(--accent-ink); text-underline-offset: 2px; }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .chart { width: 100%; max-width: 760px; height: auto; display: block; margin: 8px 0 4px; }
+  .chart text { font-family: var(--mono); font-size: 11px; fill: var(--fg); }
+  .chart .axis { stroke: var(--line); }
+  .chart .lab { fill: var(--muted); }
+  .chart .found { fill: var(--line); }
+  .chart .exact { fill: var(--accent); }
+  .caption { font-size: 13px; color: var(--muted); }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+  @media (prefers-reduced-motion: no-preference) { a { transition: color 120ms; } }
+</style>
+</head>
+<body>
+
+<div class="page">
+<header>
+  <div class="eyebrow">Evidence report for health insurers</div>
+  <h1>Klarbefund: is the extraction right, is the data safe, is it a medical device?</h1>
+  <p class="lede">What a statutory or private health insurer, a hospital group or an ePA vendor can check about the Klarbefund iPhone lab-report scanner, produced by tools anyone can run on the repository. Every open item is named as open.</p>
+  <div class="meta"><span>2026-10-15</span><span>commit c3d8a4b8</span><span>Apache 2.0</span><span>github.com/ma3u/MinimumViableHealthDataspacev2</span></div>
+</header>
+
+<div class="offer"><p><strong>What is on offer.</strong> Klarbefund is a demo environment and an open-source reference implementation, not a product with a vendor behind it. The project offers either a <strong>white-label version</strong> of the app under the insurer's name and operator responsibility, or <strong>technical consulting</strong> to integrate the scanner, the coding dictionary and the FHIR writer into an ePA or EHR app the insurer already runs. Both paths start from the evidence below.</p></div>
+
+<h2>Summary</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Question</th><th>Answer, with the evidence</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Does it read laboratory values correctly?</td><td>Synthetic benchmark under nine scan conditions: 0 silent errors, 0 invented values, 50 of 72 rows exact. Degraded scans lose rows; they never show a wrong value. 1751 analyte codings, 71 units, LOINC and UCUM.</td><td><span class="pill ok">evidenced</span> <span class="pill open">pilot open</span></td></tr>
+<tr><td>Is the data safe?</td><td>On the device by default, Face ID or passcode in front of the results, AES-GCM per record, key in the Keychain bound to the device, no third-party package, read-only Apple Health. CodeQL 0 findings, 0 known vulnerabilities, 9 posture tests, threat model, SBOM.</td><td><span class="pill ok">self-tested</span> <span class="pill open">independent test open</span></td></tr>
+<tr><td>Is it a medical device?</td><td>Intended purpose: store, display, export and explain what a measurement is. No diagnosis, no verdict. Under MDCG 2019-11 generally not a device; the trends colouring is the borderline the project has written down.</td><td><span class="pill warn">position written</span> <span class="pill open">external opinion open</span></td></tr>
+<tr><td>Does it fit the ePA and the EHDS?</td><td>FHIR R4 with LOINC, UCUM, SNOMED CT, CVX and ATC. The test database carries four of the five EHDS Art. 14 priority categories; the hub exports the whole record in one Bundle. Art. 47 wellness label applies if marketed as interoperable.</td><td><span class="pill ok">yes</span></td></tr>
+<tr><td>Is it a DiGA?</td><td>No, by design: a DiGA must be a CE-marked device. No DiGA certificates are claimed.</td><td><span class="pill na">n/a</span></td></tr>
+<tr><td>Can my team verify this?</td><td>Yes. Every number has a command; the scans and tests run on a Mac with Xcode; the hub's API collection rehearses the integration.</td><td><span class="pill ok">yes</span></td></tr>
+</tbody></table></div>
+
+<h2>1. What Klarbefund does</h2>
+<p>A person photographs a laboratory report or opens the laboratory's PDF. The app reads it on the device, codes every row with LOINC and UCUM, keeps the printed reference range, shows trends across reports, and exports the record as FHIR R4, OMOP CDM, JSON or PDF. Values read from a photograph stay <code>preliminary</code> until the person checks them; only a laboratory's own PDF text layer yields <code>final</code>. With consent the app writes the person's record into their own account on the EHDS demo hub, and weekly means from Apple Health beside it. Nothing leaves the phone otherwise.</p>
+
+<h2>2. Accuracy</h2>
+<p>The measure compares an extraction with a hand-checked truth, field by field: value, unit, code, reference range and date. The number that matters clinically is <strong>silent errors</strong>, rows the app showed as a value and got wrong. The benchmark asserts zero under every condition.</p>
+<div class="figures">
+  <div class="figure"><div class="n">0</div><div class="l">silent errors, all nine conditions</div></div>
+  <div class="figure"><div class="n">0</div><div class="l">invented values</div></div>
+  <div class="figure"><div class="n">50 / 72</div><div class="l">rows exact in every field</div></div>
+  <div class="figure"><div class="n">1751</div><div class="l">analyte codings, 71 units</div></div>
+</div>
+<svg class="chart" viewBox="0 0 760 250" role="img" aria-label="Rows found and rows exact per scan condition, out of 8 rows each">
+  <g transform="translate(150,10)">
+    <!-- one scale: 0 to 8 rows across 560 px -->
+    <line class="axis" x1="0" y1="0" x2="0" y2="225"/>
+    <g class="lab"><text x="0" y="240" text-anchor="middle">0</text><text x="280" y="240" text-anchor="middle">4</text><text x="560" y="240" text-anchor="middle">8 rows</text></g>
+    <g transform="translate(0,2)">
+      <text class="lab" x="-8" y="11" text-anchor="end">clean 150 dpi</text><rect class="found" x="0" y="0" width="560" height="14"/><rect class="exact" x="0" y="0" width="560" height="14"/>
+    </g>
+    <g transform="translate(0,26)">
+      <text class="lab" x="-8" y="11" text-anchor="end">skew 1°</text><rect class="found" x="0" y="0" width="560" height="14"/><rect class="exact" x="0" y="0" width="560" height="14"/>
+    </g>
+    <g transform="translate(0,50)">
+      <text class="lab" x="-8" y="11" text-anchor="end">skew 2°</text><rect class="found" x="0" y="0" width="490" height="14"/><rect class="exact" x="0" y="0" width="350" height="14"/>
+    </g>
+    <g transform="translate(0,74)">
+      <text class="lab" x="-8" y="11" text-anchor="end">skew 5°</text><rect class="found" x="0" y="0" width="350" height="14"/><rect class="exact" x="0" y="0" width="0" height="14"/>
+    </g>
+    <g transform="translate(0,98)">
+      <text class="lab" x="-8" y="11" text-anchor="end">dim room</text><rect class="found" x="0" y="0" width="560" height="14"/><rect class="exact" x="0" y="0" width="560" height="14"/>
+    </g>
+    <g transform="translate(0,122)">
+      <text class="lab" x="-8" y="11" text-anchor="end">flash glare</text><rect class="found" x="0" y="0" width="560" height="14"/><rect class="exact" x="0" y="0" width="560" height="14"/>
+    </g>
+    <g transform="translate(0,146)">
+      <text class="lab" x="-8" y="11" text-anchor="end">slight blur</text><rect class="found" x="0" y="0" width="490" height="14"/><rect class="exact" x="0" y="0" width="490" height="14"/>
+    </g>
+    <g transform="translate(0,170)">
+      <text class="lab" x="-8" y="11" text-anchor="end">heavy blur</text><rect class="found" x="0" y="0" width="0" height="14"/><rect class="exact" x="0" y="0" width="0" height="14"/>
+    </g>
+    <g transform="translate(0,194)">
+      <text class="lab" x="-8" y="11" text-anchor="end">low resolution</text><rect class="found" x="0" y="0" width="490" height="14"/><rect class="exact" x="0" y="0" width="420" height="14"/>
+    </g>
+  </g>
+</svg>
+<p class="caption">Teal: rows exact in every field. Grey: rows found. Each sheet has 8 rows; synthetic sheets read with Apple Vision on 2026-10-15. Heavy blur yields nothing rather than something wrong. Silent errors and spurious values were 0 in every row of this chart.</p>
+<p>A pilot on real reports, with written consent and only counts leaving the participant's folder, is designed and not yet run. An insurer's own pilot is the natural next step.</p>
+
+<h2>3. Security and data protection</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Layer</th><th>What was done</th><th>Result, 2026-10-15</th></tr></thead>
+<tbody>
+<tr><td>Static analysis</td><td>CodeQL over the app (82 Swift files); CodeQL and Semgrep over the hub in CI</td><td>0 findings</td></tr>
+<tr><td>Dependencies</td><td>CycloneDX bills for the app and every hub service; grype and npm audit against them</td><td>0 known vulnerabilities; the app has 0 third-party packages</td></tr>
+<tr><td>Secrets</td><td>gitleaks over the tree and the last 200 commits</td><td>0 after review</td></tr>
+<tr><td>Containers, manifests</td><td>trivy over Dockerfiles and Kubernetes manifests</td><td>0 HIGH after two fixes; 2 MEDIUM, 12 LOW accepted or open</td></tr>
+<tr><td>Build configuration</td><td>11 posture tests: entitlements, privacy manifest, ATS, cryptography, PKCE, HealthKit read-only, export compliance</td><td>11 of 11 pass</td></tr>
+<tr><td>Threat model</td><td>STRIDE for the app, beside the hub's</td><td>written; residual risks listed</td></tr>
+<tr><td>Live hub, from outside</td><td>40 anonymous black-box checks: route gates, redirects, headers, TLS, Keycloak console</td><td>TLS and console checks pass; gate checks need office hours</td></tr>
+<tr><td>GDPR</td><td>By default (Art. 25), minimisation (Art. 5), consents (Art. 6, 9), rights (Art. 15, 17, 20) met in code; transparency and transfers partly; DPIA and controller role open</td><td>see the self-assessment</td></tr>
+<tr><td>BSI TR-03161 part 1</td><td>Assessed by objective group</td><td>9 met, 3 partly, 1 open (declined with reasons), 2 n/a</td></tr>
+</tbody></table></div>
+<p>This is the project testing itself. An independent penetration test, which an insurer will rightly ask for, is listed in the security test report with what it would add: a release build on a device, the hub as each of the seven roles in office hours, the requirement-level TR-03161 list, a Keycloak and connector configuration review.</p>
+
+<h2>4. Regulatory position</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Framework</th><th>Position</th><th>Open</th></tr></thead>
+<tbody>
+<tr><td>MDR / IVDR</td><td>Storage, display, export and explanation of what a measurement is; no diagnosis, risk score or treatment advice. Generally not a device under MDCG 2019-11 Rev.1. The trends screen colours values against published, sourced bands; the project's position is that a comparison with a quoted number is not a finding.</td><td>written qualification, external opinion</td></tr>
+<tr><td>DiGA (§ 139e SGB V)</td><td>Not applicable; deliberately not a device</td><td>none</td></tr>
+<tr><td>EU AI Act</td><td>Not high-risk while not a device; every answer, on device or hosted, names its provider and model (Art. 50)</td><td>none</td></tr>
+<tr><td>EHDS 2025/327</td><td>Art. 3 record access with consent; Art. 47 wellness label if marketed as interoperable with EHR systems</td><td>label text when marketed</td></tr>
+<tr><td>Apple</td><td>TestFlight beta approved for external testers; App Privacy label: health data, not linked, not tracked</td><td>none</td></tr>
+</tbody></table></div>
+
+<h2>5. The test database and the kinds of result it holds</h2>
+<p>The demo hub runs on 127 synthetic patients plus hand-seeded records, in a graph that mirrors FHIR R4 and OMOP CDM. On 2026-10-15 it gained the four result types an ePA integrator asks for first.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Result type</th><th>Coding</th><th>In the app</th><th>In the test database</th><th>How an integrator gets it</th></tr></thead>
+<tbody>
+<tr><td>Laboratory, blood and urine</td><td>LOINC, UCUM</td><td>yes</td><td>yes</td><td>FHIR Bundle from the record endpoint</td></tr>
+<tr><td>Resting ECG, Holter</td><td>LOINC 11524-6, EC</td><td>yes</td><td><span class="pill new">new</span></td><td>DiagnosticReport with its Observations</td></tr>
+<tr><td>Spirometry, CPET, stress test, lactate</td><td>LOINC, PF and EC</td><td>yes</td><td>planned</td><td></td></tr>
+<tr><td>DXA body composition</td><td>LOINC 38269-7, RAD</td><td>yes</td><td>planned</td><td></td></tr>
+<tr><td>Continuous glucose monitoring</td><td>LOINC 107930-0</td><td>yes</td><td>planned</td><td></td></tr>
+<tr><td>24 h blood pressure, device screens</td><td>LOINC</td><td>yes</td><td>planned</td><td></td></tr>
+<tr><td>Wearable weekly means</td><td>LOINC</td><td>yes</td><td>yes</td><td>written by the app</td></tr>
+<tr><td>Imaging reports (X-ray, echo, ultrasound)</td><td>LOINC, RAD</td><td>narrative only</td><td><span class="pill new">new</span></td><td>DiagnosticReport with conclusion</td></tr>
+<tr><td>Vaccination record</td><td>CVX</td><td>no</td><td><span class="pill new">new</span></td><td>Immunization</td></tr>
+<tr><td>Medication plan (BMP)</td><td>ATC, 1-0-1 dosing</td><td>no</td><td><span class="pill new">new</span></td><td>MedicationStatement</td></tr>
+<tr><td>Conditions, medications</td><td>SNOMED CT, RxNorm</td><td>via hub</td><td>yes</td><td>profile API, $everything</td></tr>
+</tbody></table></div>
+<p>Candidates after these, by EHDS Art. 14 category: microbiology, allergy panels, genetics (laboratory results); pathology, sleep studies, ECG narratives (reports); patient-reported outcomes and discharge letters (patient summary, discharge reports). Each is one seed file and one mapper.</p>
+
+<h2>6. Integration paths</h2>
+<ol>
+<li><strong>White-label app.</strong> The app as it is, renamed and signed by the insurer, with the insurer as operator: privacy notice, DPIA, processor agreement for the hosted explanation service (Azure OpenAI, EU data zone, by default), and the Apple account. The code stays open source.</li>
+<li><strong>Components into an existing ePA or EHR app.</strong> The shared Swift package (scanning, the 1751-coding dictionary, provenance, FHIR and OMOP writers, consents) has no third-party dependency and is covered by 419 tests; it drops into an existing iOS app. The same dictionary exists in TypeScript for a server-side path.</li>
+<li><strong>Hub-side only.</strong> An insurer's platform reads the record as FHIR R4 from the hub's API, or runs the ePA ingest tool against PDFs it already holds, without the app.</li>
+</ol>
+<p>In every path the insurer owns the data protection roles; the project supplies the templates and the evidence.</p>
+
+<h2>7. What is still open</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>Item</th><th>Who closes it</th></tr></thead>
+<tbody>
+<tr><td>Independent penetration test, TR-03161 gap list</td><td>a BSI-recognised laboratory</td></tr>
+<tr><td>Pilot accuracy on real reports</td><td>the insurer's pilot, with consents</td></tr>
+<tr><td>Written MDR qualification, external opinion</td><td>regulatory counsel</td></tr>
+<tr><td>DPIA, records of processing, controller role</td><td>the operator</td></tr>
+
+<tr><td>Profile page sections for the new result types</td><td>the project</td></tr>
+<tr><td>Swift suite in CI</td><td>the repository owner</td></tr>
+</tbody></table></div>
+
+<h2>8. Verify it yourself</h2>
+<pre><code>git clone https://github.com/ma3u/MinimumViableHealthDataspacev2 &amp;&amp; cd MinimumViableHealthDataspacev2
+cd clients/ios &amp;&amp; swift test                   # 419 tests, incl. the benchmark and the posture tests
+cd ../.. &amp;&amp; scripts/security/scan-repo.sh      # SBOM check, grype, trivy, gitleaks, semgrep, hadolint, npm audit
+scripts/security/check-hub-blackbox.sh         # the live hub from outside, office hours Mon-Fri 05:17-18:13 UTC
+./scripts/run-api-tests.sh Local "01 Patient"  # the record as an integrator receives it</code></pre>
+<p>Documents in the repository: <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/klarbefund/report-for-health-insurers.md">this report</a>, <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/klarbefund/evidence.md">evidence</a>, <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/klarbefund/self-assessment.md">self-assessment</a>, <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/security/security-test-report-2026-10-15.md">security test report</a>, <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/security/threat-model-klarbefund.md">threat model</a>, <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/654">pull request #654</a>, <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/655">open items #655</a>.</p>
+
+<footer>Prepared by the project on 2026-10-15. Fictional data throughout; no real patient, laboratory or insurer is named. Not a certification, an audit or a legal opinion.</footer>
+</div>
+
+</body>
+</html>

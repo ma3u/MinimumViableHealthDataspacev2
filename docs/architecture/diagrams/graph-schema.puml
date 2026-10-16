@@ -1,0 +1,92 @@
+@startuml graph-schema
+title Core graph schema (UML, entity relationships)\nthe FHIR record, its OMOP counterparts and the codes both are coded by
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 24
+skinparam ranksep 50
+skinparam ArrowColor #475569
+skinparam packageBorderColor #94A3B8
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #64748B
+  ArrowColor #475569
+}
+set namespaceSeparator none
+hide circle
+hide empty members
+
+package "Layer 2: HealthDCAT-AP" #E6F4F1 {
+  entity HealthDataset {
+    datasetId
+    title, publisher, license
+  }
+}
+package "Layer 3: FHIR R4" #E8F5EA {
+  entity Patient {
+    resourceId, patientId
+    name, birthDate, gender
+  }
+  entity Encounter
+  entity Condition {
+    code, display, onset
+  }
+  entity Observation {
+    code, value, unit, effectiveDate
+  }
+  entity MedicationRequest {
+    medicationCode, display
+  }
+  entity Procedure
+}
+package "Layer 4: OMOP CDM v5.4" #FBEFE2 {
+  entity OMOPPerson {
+    personId, genderConceptId, yearOfBirth
+  }
+  entity OMOPVisitOccurrence
+  entity OMOPConditionOccurrence {
+    conditionConceptId, startDate
+  }
+  entity OMOPMeasurement {
+    measurementConceptId, valueAsNumber, unit
+  }
+  entity OMOPDrugExposure {
+    drugConceptId, startDate
+  }
+  entity OMOPProcedureOccurrence
+}
+package "Layer 5: ontology" #F1E8F5 {
+  entity SnomedConcept
+  entity ICD10Code
+  entity LoincCode
+  entity RxNormConcept
+}
+
+HealthDataset ||--o{ Patient : FROM_DATASET
+Patient ||--o{ Encounter : HAS_ENCOUNTER
+Patient ||--o{ Condition : HAS_CONDITION
+Patient ||--o{ Observation : HAS_OBSERVATION
+Patient ||--o{ MedicationRequest : HAS_MEDICATION_REQUEST
+Patient ||--o{ Procedure : HAS_PROCEDURE
+
+Patient ||--|| OMOPPerson : MAPPED_TO
+Encounter ||--|| OMOPVisitOccurrence : MAPPED_TO
+Condition ||--|| OMOPConditionOccurrence : MAPPED_TO
+Observation ||--|| OMOPMeasurement : MAPPED_TO
+MedicationRequest ||--|| OMOPDrugExposure : MAPPED_TO
+Procedure ||--|| OMOPProcedureOccurrence : MAPPED_TO
+
+Condition }|--|| SnomedConcept : CODED_BY
+Condition }|--o| ICD10Code : CODED_BY
+Observation }|--|| LoincCode : CODED_BY
+MedicationRequest }|--|| RxNormConcept : CODED_BY
+OMOPConditionOccurrence }|--|| SnomedConcept : CODED_BY
+OMOPMeasurement }|--|| LoincCode : CODED_BY
+OMOPDrugExposure }|--|| RxNormConcept : CODED_BY
+
+legend bottom left
+  Crow's foot: many. Double bar: exactly one. Circle: optional.
+  Labels are the Neo4j relationship types; a FHIR node and its OMOP
+  counterpart carry the same CODED_BY link. Schema: neo4j/init-schema.cypher.
+endlegend
+@enduml

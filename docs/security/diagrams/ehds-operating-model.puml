@@ -1,0 +1,108 @@
+@startuml ehds-operating-model
+' Rendered by scripts/render-plantuml.sh into docs/security/img/.
+title EHDS operating model, secondary use: from onboarding to published results\nResponsibilities by role, Regulation (EU) 2025/327 (adopted numbering)
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #64748B
+skinparam ActivityDiamondBackgroundColor #FFFBEB
+skinparam ActivityDiamondBorderColor #D97706
+skinparam ActivityStartColor #059669
+skinparam ActivityEndColor #059669
+skinparam ArrowColor #334155
+skinparam SwimlaneTitleFontStyle bold
+skinparam SwimlaneBorderColor #94A3B8
+
+|#F0FDF4|Natural person|
+|#EEF2FF|Health data holder|
+start
+:Registers, proves its identity with a
+verifiable credential (DCP, did:web);
+|#F8FAFC|Operating company (platform operator)|
+:Validates the entity against the national
+register, issues the credential;
+:Provisions the holder's connector,
+keys in the holder's own Vault namespace;
+|Health data holder|
+:Describes the dataset (Art. 77)
+and applies the quality label (Art. 78);
+|Operating company (platform operator)|
+:Publishes the description in the national
+catalogue (HealthDCAT-AP), federates it;
+|#FDF2F8|Health data user|
+:Discovers the dataset in the catalogue;
+:Submits the access application (Art. 67):
+purpose, data, safeguards, duration;
+|#FFF7ED|Health data access body|
+:Checks the application: purpose in Art. 53,
+not prohibited by Art. 54, applicant verified;
+if (Anonymised data answer the question? (Art. 66)) then (yes)
+  :Decides on a data request (Art. 69):
+  anonymised statistics only;
+else (no)
+  :Decides on a permit for
+  pseudonymised data (Art. 68);
+endif
+if (Granted? (decision within three months)) then (no)
+  :Refuses with reasons,
+  right to complain (Art. 81);
+  stop
+else (yes)
+  :Issues the permit: datasets, purpose,
+  conditions, duration, fee (Art. 62);
+  :Records it in the public register
+  of permits (Art. 58);
+endif
+|Natural person|
+:Is informed about secondary use (Art. 58);
+if (Objects?) then (yes)
+  :Records the opt-out (Art. 71);
+else (no)
+endif
+|Operating company (platform operator)|
+:Evaluates the ODRL policy and the opt-out
+register before every extraction;
+|Health data holder|
+:Extracts the permitted data, pseudonymised,
+within the deadline (Art. 60);
+:Transfers it through its connector:
+DSP contract, data plane;
+|Operating company (platform operator)|
+:Writes the audit trail: contract, transfer,
+every later access (ADR-045);
+|#ECFEFF|SPE operator|
+:Provides the isolated workspace (Art. 73): no
+download, no internet egress, authorised persons only;
+repeat
+  |Health data user|
+  :Works inside the secure processing
+  environment on the permitted data only;
+  :Requests the release of the results;
+  |SPE operator|
+  :Logs every access and every output (Art. 73);
+  :Checks the output technically:
+  cell sizes, direct identifiers;
+  |Health data access body|
+repeat while (Output free of personal data?) is (no, back to the user) not (yes)
+:Releases the results;
+|Health data user|
+:Publishes the results, naming the
+permit and the datasets (Art. 61);
+|Health data access body|
+:Reports annually (Art. 59),
+enforces on misuse (Art. 63);
+|SPE operator|
+:Is audited at least yearly,
+corrective action (Art. 73(3));
+stop
+
+legend right
+  Controllership: the access body for the secure processing
+  environment and the permit data (Art. 74), the holder for its
+  source data; the operating company is a processor (GDPR Art. 28).
+  The person's opt-out reaches extraction through the operator's
+  policy evaluation. No output leaves the SPE without the access body.
+endlegend
+@enduml

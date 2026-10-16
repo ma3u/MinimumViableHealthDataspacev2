@@ -1,4 +1,4 @@
-# ADR-059: The UI on Azure scales out on whole cores, on its own HTTP concurrency rule
+# ADR-061: The UI on Azure scales out on whole cores, on its own HTTP concurrency rule
 
 **Status:** Accepted (2026-10-12, Matthias Buchhorn). The `stress` run after `size-ui.sh` measures where the ceiling is now; its per-stage p95 goes into the table below.
 **Date:** 2026-10-12

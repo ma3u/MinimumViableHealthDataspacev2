@@ -134,9 +134,47 @@
     ///
     /// The same work the per-report button does, for a shelf of reports at
     /// once after a parser fix, without tapping through them.
+    /// `-MBRestoreChecks`: puts back the checks a person made, from earlier
+    /// copies of their reports (`report.json` from a diagnostics pull,
+    /// copied into `tmp/restore-checks/`), onto the reports as they are now
+    /// (`ExtractionResult.keepingChecks`). Written after a re-read on the
+    /// phone dropped 49 checks; debug builds only. The copies are deleted
+    /// once read, because they hold the person's values.
+    func restoreChecksIfRequested() async {
+      guard ProcessInfo.processInfo.arguments.contains("-MBRestoreChecks") else { return }
+      struct Copy: Decodable {
+        let id: UUID
+        let extraction: ExtractionResult
+      }
+      let folder = FileManager.default.temporaryDirectory.appendingPathComponent("restore-checks")
+      let files =
+        (try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil))
+        ?? []
+      let decoder = JSONDecoder()
+      decoder.dateDecodingStrategy = .iso8601
+      var restored = 0
+      for url in files where url.pathExtension == "json" {
+        guard let data = try? Data(contentsOf: url),
+          let copy = try? decoder.decode(Copy.self, from: data),
+          let report = reports.first(where: { $0.id == copy.id })
+        else { continue }
+        let kept = report.extraction.keepingChecks(of: copy.extraction.coded)
+        guard kept.checkedCount > report.extraction.checkedCount else { continue }
+        restored += kept.checkedCount - report.extraction.checkedCount
+        await update(report, extraction: kept)
+      }
+      try? FileManager.default.removeItem(at: folder)
+      Log.diagnostics.notice("restore checks: \(restored, privacy: .public) check(s) restored")
+    }
+
     func reextractAllIfRequested() async {
-      guard ProcessInfo.processInfo.arguments.contains("-MBReextract") else { return }
-      for report in reports where report.scan != nil {
+      let arguments = ProcessInfo.processInfo.arguments
+      guard let flag = arguments.firstIndex(of: "-MBReextract") else { return }
+      // `-MBReextract <id> <id> ...` reads only those reports again, so a
+      // reader written for one kind of document is tried on the person's
+      // own copies of it without touching every other report.
+      let only = Set(arguments[(flag + 1)...].prefix { !$0.hasPrefix("-") }.compactMap(UUID.init))
+      for report in reports where report.scan != nil && (only.isEmpty || only.contains(report.id)) {
         let before = report.extraction.coded.count
         await reextract(report)
         let after = reports.first { $0.id == report.id }?.extraction.coded.count ?? before

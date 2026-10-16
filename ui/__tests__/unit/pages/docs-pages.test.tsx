@@ -3,6 +3,8 @@
  */
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 vi.mock("next/link", () => ({
   default: ({
@@ -42,6 +44,13 @@ describe("DocsPage (Hub)", () => {
     expect(screen.getByText("User Guide")).toBeInTheDocument();
     expect(screen.getByText("Developer Guide")).toBeInTheDocument();
     expect(screen.getByText("Architecture")).toBeInTheDocument();
+    expect(
+      screen.getByText("Security and Data Protection").closest("a"),
+    ).toHaveAttribute("href", "/docs/security");
+    expect(screen.getByText("Klarbefund").closest("a")).toHaveAttribute(
+      "href",
+      "/docs/klarbefund",
+    );
   });
 
   it("renders correct links", () => {
@@ -67,10 +76,22 @@ describe("DeveloperPage", () => {
     expect(screen.getByText("Developer Guide")).toBeInTheDocument();
   });
 
-  it("renders Mermaid diagrams", () => {
+  it("shows its four diagrams from the hub, each opening at full size", () => {
     render(<DeveloperPage />);
-    const diagrams = screen.getAllByTestId("mermaid-diagram");
-    expect(diagrams.length).toBeGreaterThan(0);
+    const figures = document.querySelectorAll("a.doc-figure");
+    expect([...figures].map((a) => a.getAttribute("href"))).toEqual([
+      "/published-docs/deployment.svg",
+      "/published-docs/graph-schema.svg",
+      "/published-docs/cicd-pipeline.svg",
+      "/published-docs/developer-data-flow.svg",
+    ]);
+    for (const a of figures) {
+      expect(
+        existsSync(join(__dirname, "../../../public", a.getAttribute("href")!)),
+        `${a.getAttribute("href")} is not copied to public/`,
+      ).toBe(true);
+    }
+    expect(screen.queryByTestId("mermaid-diagram")).not.toBeInTheDocument();
   });
 
   it("renders key sections", () => {
@@ -87,10 +108,26 @@ describe("ArchitecturePage", () => {
     expect(screen.getByText("Architecture")).toBeInTheDocument();
   });
 
-  it("renders Mermaid diagrams", () => {
+  it("shows the four ArchiMate views and two sequences from the hub, each opening at full size", () => {
     render(<ArchitecturePage />);
-    const diagrams = screen.getAllByTestId("mermaid-diagram");
-    expect(diagrams.length).toBeGreaterThan(0);
+    const figures = document.querySelectorAll("a.doc-figure");
+    expect([...figures].map((a) => a.getAttribute("href"))).toEqual([
+      "/published-docs/knowledge-graph-layers.svg",
+      "/published-docs/data-flow-sequence.svg",
+      "/published-docs/deployment.svg",
+      "/published-docs/dsp-negotiation-sequence.svg",
+      "/published-docs/dsp-negotiation.svg",
+      "/published-docs/identity-trust.svg",
+    ]);
+    for (const a of figures) {
+      const img = a.querySelector("img")!;
+      expect(img.getAttribute("alt")).toMatch(/ArchiMate|sequence diagram/);
+      expect(
+        existsSync(join(__dirname, "../../../public", a.getAttribute("href")!)),
+        `${a.getAttribute("href")} is not copied to public/`,
+      ).toBe(true);
+    }
+    expect(screen.queryByTestId("mermaid-diagram")).not.toBeInTheDocument();
   });
 });
 

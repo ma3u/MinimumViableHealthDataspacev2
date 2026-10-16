@@ -1,0 +1,92 @@
+@startuml dsp-negotiation
+!include <archimate/Archimate>
+title Data permit and contract negotiation (ArchiMate 3.2, business process view)\nthree phases: the EHDS permit of Chapter IV, the Dataspace Protocol's negotiation, the transfer
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam nodesep 16
+skinparam ranksep 40
+skinparam rectangle {
+  BorderColor #64748B
+  FontStyle bold
+}
+
+rectangle "Roles" as RO #FFFFB5 {
+  Business_Role(user, "Health data user\nconsumer connector, Art. 2(2)(u)")
+  Business_Role(hdab, "Health data access body\nArt. 55, 57")
+  Business_Role(holder, "Health data holder\nprovider connector, Art. 2(2)(t)")
+}
+rectangle "Phase 1: discovery and the data permit (Regulation (EU) 2025/327, Chapter IV)" as P1 #FFFFB5 {
+  Business_Process(p1, "User: query the\nfederated catalogue")
+  Business_Process(p2, "User: apply for data\nArt. 67")
+  Business_Process(p3, "Access body: assess\nthe application\nArt. 67, 68")
+  Business_Process(p4, "Access body: issue the\npermit, register it\nArt. 68, 58")
+  Business_Object(o_permit, "Data permit\nas a verifiable credential")
+}
+rectangle "Phase 2: contract negotiation (Dataspace Protocol)" as P2 #FFFFB5 {
+  Business_Process(p5, "User: request the\ncontract, with the permit")
+  Business_Process(p6, "Holder: verify the\npermit credential, DCP")
+  Business_Process(p7, "Holder: evaluate\nthe ODRL policy")
+  Business_Process(p8, "Holder: return the\ncontract agreement")
+  Business_Object(o_agree, "Contract agreement")
+}
+rectangle "Phase 3: transfer" as P3 #FFFFB5 {
+  Business_Process(p9, "User: request\nthe transfer")
+  Business_Process(p10, "Holder: transfer the\ndata, with the audit trail")
+  Business_Object(o_data, "FHIR or OMOP data\nunder the agreement")
+}
+rectangle "Application services" as AS #B5FFFF {
+  Application_Service(s_catalog, "Federated catalogue\nHealthDCAT-AP")
+  Application_Service(s_permit, "Permit workflow\nand public register")
+  Application_Service(s_dsp, "DSP protocol\ncontrol planes")
+  Application_Service(s_dcp, "DCP credentials\nIdentity Hub, Issuer Service")
+  Application_Service(s_dp, "Data planes\nFHIR, OMOP")
+}
+
+' ── Who starts each phase ────────────────────────────────────────────────────
+Rel_Assignment(user, p1)
+Rel_Assignment(hdab, p3)
+Rel_Assignment(holder, p6)
+
+' ── The chain, phase by phase ────────────────────────────────────────────────
+Rel_Triggering_Right(p1, p2)
+Rel_Triggering_Right(p2, p3)
+Rel_Triggering_Right(p3, p4)
+Rel_Access_Right(p4, o_permit, "issues")
+Rel_Triggering(p4, p5)
+Rel_Triggering_Right(p5, p6)
+Rel_Triggering_Right(p6, p7)
+Rel_Triggering_Right(p7, p8)
+Rel_Access_Right(p8, o_agree, "writes")
+Rel_Triggering(p8, p9)
+Rel_Triggering_Right(p9, p10)
+Rel_Access_Right(p10, o_data, "delivers")
+Rel_Flow(o_permit, p6, "verified")
+
+' ── The service each step runs on ────────────────────────────────────────────
+Rel_Serving_Up(s_catalog, p1)
+Rel_Serving_Up(s_permit, p3)
+Rel_Serving_Up(s_dsp, p5)
+Rel_Serving_Up(s_dcp, p6)
+Rel_Serving_Up(s_dsp, p9)
+Rel_Serving_Up(s_dp, p10)
+
+' ── Rows ────────────────────────────────────────────────────────────────────
+user -[hidden]right- hdab
+hdab -[hidden]right- holder
+s_catalog -[hidden]right- s_permit
+s_permit -[hidden]right- s_dsp
+s_dsp -[hidden]right- s_dcp
+s_dcp -[hidden]right- s_dp
+p1 -[hidden]down- p5
+p5 -[hidden]down- p9
+p9 -[hidden]down- s_catalog
+
+legend bottom left
+|= Relationship |= Meaning |
+| line with a dot | assignment: the role that starts the phase; every step names its role |
+| solid line, filled head | triggering: one step starts the next |
+| dotted, no head | access: issues, writes or delivers the object |
+| dashed arrow | flow: the permit travels with the request |
+| solid line, open arrow | serving: the application service the step runs on |
+endlegend
+@enduml

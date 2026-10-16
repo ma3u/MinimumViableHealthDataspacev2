@@ -104,7 +104,7 @@ export NEO4J_MEMORY="4Gi"
 export NEO4J_HEAP="1536m"
 export NEO4J_PAGECACHE="1g"
 export NEO4J_DIRECT_MEMORY="512m"
-# The UI's size (ADR-059). One Node process per replica, so a whole core each
+# The UI's size (ADR-061). One Node process per replica, so a whole core each
 # and more replicas on an HTTP concurrency rule, instead of three halves on
 # ACA's default rule of 10 concurrent requests: the stress runs of 2026-10-06
 # pinned 3 x 0.5 vCPU from 200 users on (#571). size-ui.sh applies these;

@@ -17,11 +17,21 @@ import type {
   SourceRegion,
   TextSource,
 } from "./types.js";
+import {
+  ELECTROCARDIOGRAM_CODES,
+  OBSERVATION_CATEGORIES,
+  REPORT_KINDS,
+  type ReportKind,
+} from "./analytes.js";
 
 const EXT_BASE = "https://ehds.mabu.red/fhir/StructureDefinition";
 export const EXT_SOURCE_KIND = `${EXT_BASE}/epa-ingest-source-kind`;
 export const EXT_OCR_CONFIDENCE = `${EXT_BASE}/epa-ingest-ocr-confidence`;
 export const EXT_SOURCE_LINE = `${EXT_BASE}/epa-ingest-source-line`;
+/** When the person checked the value against the paper. */
+export const EXT_VERIFIED = `${EXT_BASE}/epa-ingest-verified-by-patient`;
+/** The recogniser's reading, when the person corrected it: `label value unit`. */
+export const EXT_ORIGINAL_READING = `${EXT_BASE}/epa-ingest-original-reading`;
 /**
  * Page and bounding box of the row this value was read from.
  *
@@ -57,6 +67,75 @@ const ORGANISM_IDENTIFIED: Coding = {
  * the transcription in this bundle is ours and unverified, and a receiving
  * system must be able to see that without reading an extension.
  */
+const CATEGORY_DISPLAY = {
+  laboratory: "Laboratory",
+  "vital-signs": "Vital Signs",
+  procedure: "Procedure",
+  imaging: "Imaging",
+} as const;
+
+/**
+ * FHIR's observation category for a code: `laboratory` unless the dictionary
+ * says it is a vital sign or an ECG measurement (OBSERVATION_CATEGORIES).
+ */
+export function observationCategory(
+  loincNumber: string | null,
+  analyteKey?: string,
+): keyof typeof CATEGORY_DISPLAY {
+  return (
+    (loincNumber && OBSERVATION_CATEGORIES[loincNumber]) ||
+    (analyteKey && OBSERVATION_CATEGORIES[analyteKey]) ||
+    "laboratory"
+  );
+}
+
+/** The category of one coded value. */
+const categoryOf = (v: CodedLabValue) =>
+  observationCategory(v.coding.loincNumber, v.analyteKey);
+
+const ECG = new Set(ELECTROCARDIOGRAM_CODES);
+const isEcgValue = (v: CodedLabValue) =>
+  ECG.has(v.coding.loincNumber ?? "") || ECG.has(v.analyteKey);
+
+/**
+ * A report whose every value is an ECG measurement is an ECG, not a
+ * laboratory report: v2-0074 `EC` (electrocardiac) and LOINC 11524-6. Vital
+ * signs may sit beside them; an exercise test's procedure values may not.
+ */
+export function isElectrocardiogram(values: CodedLabValue[]): boolean {
+  return (
+    values.some(isEcgValue) &&
+    values.every((v) => categoryOf(v) !== "laboratory") &&
+    values.every((v) => categoryOf(v) !== "procedure" || isEcgValue(v))
+  );
+}
+
+/** A Holter study: an ECG report that counts every beat of a recording. */
+export function isHolter(values: CodedLabValue[]): boolean {
+  return (
+    isElectrocardiogram(values) &&
+    values.some((v) => v.coding.loincNumber === "76637-8")
+  );
+}
+
+/**
+ * The kind of report the values make (REPORT_KINDS), or undefined for a
+ * laboratory report. An ECG or Holter report is decided before this.
+ */
+export function reportKind(values: CodedLabValue[]): ReportKind | undefined {
+  const keys = (v: CodedLabValue) =>
+    [v.coding.loincNumber ?? "", v.analyteKey].filter((k) => k !== "");
+  return REPORT_KINDS.find(
+    (kind) =>
+      values.some((v) => keys(v).some((k) => kind.triggers.includes(k))) &&
+      values.every(
+        (v) =>
+          categoryOf(v) === "vital-signs" ||
+          keys(v).some((k) => kind.members.includes(k)),
+      ),
+  );
+}
+
 export function statusForSource(kind: SourceKind): "final" | "preliminary" {
   return kind === "lab-issued-digital" ? "final" : "preliminary";
 }
@@ -71,6 +150,7 @@ interface Extension {
   valueCode?: string;
   valueDecimal?: number;
   valueString?: string;
+  valueDateTime?: string;
 }
 interface Reference {
   reference: string;
@@ -117,6 +197,7 @@ function provenanceExtensions(
   source: TextSource,
   line: string,
   region?: SourceRegion,
+  verification?: CodedLabValue["verification"],
 ): Extension[] {
   const ext: Extension[] = [
     { url: EXT_SOURCE_KIND, valueCode: source.kind },
@@ -127,6 +208,16 @@ function provenanceExtensions(
   }
   if (region !== undefined) {
     ext.push({ url: EXT_SOURCE_REGION, valueString: formatRegion(region) });
+  }
+  if (verification !== undefined) {
+    ext.push({ url: EXT_VERIFIED, valueDateTime: verification.verifiedAt });
+    if (verification.original !== undefined) {
+      const o = verification.original;
+      ext.push({
+        url: EXT_ORIGINAL_READING,
+        valueString: `${o.label} ${String(o.value)} ${o.unitRaw}`,
+      });
+    }
   }
   return ext;
 }
@@ -175,15 +266,15 @@ export function buildBundle(
     resourceType: "Observation",
     id: `obs-${i + 1}`,
     status,
-    extension: provenanceExtensions(source, v.line, v.region),
+    extension: provenanceExtensions(source, v.line, v.region, v.verification),
     category: [
       {
         coding: [
           {
             system:
               "http://terminology.hl7.org/CodeSystem/observation-category",
-            code: "laboratory",
-            display: "Laboratory",
+            code: categoryOf(v),
+            display: CATEGORY_DISPLAY[categoryOf(v)],
           } satisfies Coding,
         ],
       },
@@ -278,6 +369,8 @@ export function buildBundle(
       : {}),
   }));
 
+  const ecg = isElectrocardiogram(values);
+  const kind = ecg ? undefined : reportKind(values);
   const report: FhirResource = {
     resourceType: "DiagnosticReport",
     id: "report-1",
@@ -285,21 +378,35 @@ export function buildBundle(
     category: [
       {
         coding: [
-          {
-            system: "http://terminology.hl7.org/CodeSystem/v2-0074",
-            code: "LAB",
-            display: "Laboratory",
-          } satisfies Coding,
+          (ecg
+            ? {
+                system: "http://terminology.hl7.org/CodeSystem/v2-0074",
+                code: "EC",
+                display: "Electrocardiac (e.g., EKG, EEC, Holter)",
+              }
+            : {
+                system: "http://terminology.hl7.org/CodeSystem/v2-0074",
+                code: kind?.section ?? "LAB",
+                display: kind?.sectionDisplay ?? "Laboratory",
+              }) satisfies Coding,
         ],
       },
     ],
     code: {
       coding: [
-        {
-          system: LOINC,
-          code: "11502-2",
-          display: "Laboratory report",
-        } satisfies Coding,
+        (ecg
+          ? isHolter(values)
+            ? {
+                system: LOINC,
+                code: "18754-2",
+                display: "Ambulatory cardiac rhythm monitor (Holter) study",
+              }
+            : { system: LOINC, code: "11524-6", display: "EKG study" }
+          : {
+              system: LOINC,
+              code: kind?.loinc ?? "11502-2",
+              display: kind?.display ?? "Laboratory report",
+            }) satisfies Coding,
       ],
       ...(meta.title ? { text: meta.title } : {}),
     },

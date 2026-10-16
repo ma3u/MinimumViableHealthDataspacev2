@@ -19,7 +19,7 @@ settings:
     MARKETING_VERSION: "1.0"
     # Rises with every upload: App Store Connect refuses a build number it has
     # already seen, and it refuses it after the upload, having spent minutes.
-    CURRENT_PROJECT_VERSION: "5"
+    CURRENT_PROJECT_VERSION: "8"
 
 targets:
   # Mirrors the SwiftPM `Shared` target so the app and the parity tool compile
@@ -85,6 +85,11 @@ targets:
         INFOPLIST_KEY_NSHealthUpdateUsageDescription: >-
           Klarbefund never writes to Health. It only reads the values listed
           in the read request, to show them beside your lab values.
+        # The app lock (ADR-060): Face ID in front of the results, with the
+        # passcode as the system's own fallback. German in de.lproj/InfoPlist.strings.
+        INFOPLIST_KEY_NSFaceIDUsageDescription: >-
+          Klarbefund uses Face ID to open your results, so nobody else holding
+          the phone can read them. Your passcode works as well.
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # Cloud analysis (ADR-034). Empty by default and checked at runtime, so
         # an unconfigured build simply does not offer the button rather than

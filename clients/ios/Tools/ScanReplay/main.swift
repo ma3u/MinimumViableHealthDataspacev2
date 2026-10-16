@@ -5,6 +5,13 @@
 //   swift run ScanReplay <folder>/diagnostics.json                        # one report
 //   swift run ScanReplay <folder> --ocr                                   # re-run Vision on scan.pdf
 //   swift run ScanReplay <folder> --json                                  # the replayed extraction
+//   swift run ScanReplay <folder> --truth                                 # accuracy against truth.json
+//
+// `--truth` pairs every replayed report with a `truth.json` beside its
+// `diagnostics.json`: the rows as the paper says them, written by hand
+// (`ExtractionAccuracy.TruthFile`). It prints, per row, which fields came out
+// wrong, never the values, and ends with counts across the whole export. With
+// `--json` the counts are printed as JSON, the one part meant to be published.
 //
 // The record holds what both Vision passes saw on the phone, so reconciliation,
 // layout inference, parsing and coding run again here without the image. Change
@@ -28,6 +35,8 @@ struct Options {
   var json = false
   /// Build the OMOP CDM tables from every report in the export.
   var omop = false
+  /// Measure the replay against a hand-written `truth.json` per report.
+  var truth = false
 }
 
 var options = Options()
@@ -36,13 +45,16 @@ for argument in CommandLine.arguments.dropFirst() {
   case "--ocr": options.ocr = true
   case "--json": options.json = true
   case "--omop": options.omop = true
+  case "--truth": options.truth = true
   default: options.path = argument
   }
 }
 
 guard let path = options.path else {
   FileHandle.standardError.write(
-    Data("usage: swift run ScanReplay <diagnostics.json | report folder | export folder> [--ocr] [--json]\n".utf8))
+    Data(
+      "usage: swift run ScanReplay <diagnostics.json | report folder | export folder> [--ocr] [--json] [--truth]\n"
+        .utf8))
   exit(2)
 }
 
@@ -106,7 +118,7 @@ func describe(_ result: ExtractionResult, indent: String = "  ") {
     let comparator = value.raw.comparator?.rawValue ?? ""
     print(
       "\(indent)ok      \(value.raw.label)  \(comparator)\(number(value.raw.value)) \(value.raw.unitRaw)"
-        + "  → \(value.coding.loinc) \(value.coding.ucum)")
+        + "  → \(value.coding.loinc ?? "uncoded") \(value.coding.ucum)")
   }
   for item in result.unmapped {
     print(
@@ -132,12 +144,41 @@ func compare(phone: ExtractionResult, now: ExtractionResult) {
     "  now:   \(now.coded.count) coded, \(now.unmapped.count) unmapped, "
       + "\(now.suspiciousLines.count) unread")
   for value in now.coded where !before.contains(key(value)) {
-    print("  newly coded: \(value.raw.label) → \(value.coding.loinc)")
+    print("  newly coded: \(value.raw.label) → \(value.coding.loinc ?? "uncoded")")
   }
   for value in phone.coded where !after.contains(key(value)) {
-    print("  no longer coded: \(value.raw.label) (was \(value.coding.loinc))")
+    print("  no longer coded: \(value.raw.label) (was \(value.coding.loinc ?? "uncoded"))")
   }
 }
+
+/// Prints one sheet's accuracy: which fields of which rows were wrong, never
+/// the values, so the output can be pasted into an issue like `LabFile`'s.
+func describe(_ report: ExtractionAccuracy.Report) {
+  for row in report.rows {
+    if row.exact {
+      print("  exact     \(row.label)")
+      continue
+    }
+    guard row.found else {
+      print("  missed    \(row.label)")
+      continue
+    }
+    var wrong: [String] = []
+    if !row.valueCorrect { wrong.append("value") }
+    if !row.unitCorrect { wrong.append("unit") }
+    if !row.codeCorrect { wrong.append("code") }
+    if row.referenceCorrect == false { wrong.append("reference") }
+    let tag = row.silentError ? "SILENT   " : "wrong    "
+    print("  \(tag) \(row.label): \(wrong.joined(separator: ", "))")
+  }
+  print("  lab date: \(report.labDate.rawValue)")
+  let s = report.summary
+  print(
+    "  \(s.exact) of \(s.truthRows) exact, \(s.found) found, \(s.silentErrors) silent errors, "
+      + "\(s.spurious) spurious, \(s.unreadLines) unread lines")
+}
+
+var accuracy = ExtractionAccuracy.Summary()
 
 #if canImport(Vision)
   func reread(pdf: Data, pages: Int) async throws -> ExtractionResult {
@@ -255,12 +296,32 @@ for file in found {
     describe(replayed)
   }
 
-  let metadata = ReportMetadataExtractor.extract(pages: diagnostics.pages.map(\.plainText))
+  let metadata = ReportMetadataExtractor.extract(
+    pages: PageQuality.readableTexts(
+      diagnostics.pages.map(\.plainText), pages: diagnostics.pages))
   if metadata != diagnostics.metadata {
     print("metadata with the current extractor differs from the phone's:")
     print("  laboratory: \(metadata.laboratory ?? "-")  lab date: \(metadata.labDate.map { $0.formatted(date: .long, time: .omitted) } ?? "-")  (\(metadata.labDateRole?.rawValue ?? "-"))")
     for date in metadata.dates {
       print("  \(date.role.rawValue) \(date.date.formatted(date: .numeric, time: .omitted)) ← \(date.keyword ?? "no keyword"): \(date.line)")
+    }
+  }
+
+  if options.truth {
+    let truthURL = folder.appendingPathComponent("truth.json")
+    if let data = try? Data(contentsOf: truthURL) {
+      do {
+        let truth = try JSONDecoder().decode(ExtractionAccuracy.TruthFile.self, from: data)
+        let report = ExtractionAccuracy.compare(
+          truth: truth, extraction: replayed, labDate: metadata.labDate)
+        print("accuracy against truth.json:")
+        describe(report)
+        accuracy.add(report.summary)
+      } catch {
+        print("  --truth: cannot decode \(truthURL.lastPathComponent): \(error)")
+      }
+    } else {
+      print("  --truth: no truth.json next to \(file.lastPathComponent)")
     }
   }
 
@@ -278,5 +339,27 @@ for file in found {
     #else
       print("  --ocr needs Vision, which this platform does not have")
     #endif
+  }
+}
+
+if options.truth {
+  print(String(repeating: "=", count: 72))
+  let s = accuracy
+  if s.sheets == 0 {
+    print("accuracy: no report had a truth.json beside it")
+  } else if options.json {
+    let encoder = JSONEncoder()
+    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+    print(String(decoding: try encoder.encode(s), as: UTF8.self))
+  } else {
+    print(
+      "accuracy across \(s.sheets) sheet(s), \(s.truthRows) rows: "
+        + "\(s.exact) exact (\(String(format: "%.1f", s.exactRate * 100)) %), "
+        + "\(s.found) found, value \(s.valueCorrect), unit \(s.unitCorrect), code \(s.codeCorrect), "
+        + "reference \(s.referenceCorrect)/\(s.referenceChecked), "
+        + "lab date \(s.labDateCorrect)/\(s.labDateChecked)")
+    print(
+      "  \(s.silentErrors) silent errors (coded and wrong), \(s.spurious) spurious, "
+        + "\(s.unreadLines) unread lines handed to the reviewer")
   }
 }

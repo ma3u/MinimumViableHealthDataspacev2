@@ -14,3 +14,11 @@ RUN /opt/keycloak/bin/kc.sh build
 
 FROM quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
+# Keycloak's own image runs as 1000; stating it keeps the scanner honest (trivy DS-0002).
+USER 1000
+# The health endpoints live on the management port 9000, which no ingress
+# exposes; the image has neither curl nor wget, so bash opens the socket, as
+# the compose stack's check does (security test report 2026-10-15, F6).
+ENV KC_HEALTH_ENABLED=true
+HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=5 \
+  CMD ["/bin/bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/9000; printf 'GET /health/ready HTTP/1.0\\r\\n\\r\\n' >&3; grep -q ' 200 ' <&3"]

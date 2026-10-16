@@ -1,0 +1,2098 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.7.schema.json",
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "fd71c2238fc07657",
+      "hashes": [
+        {
+          "alg": "SHA-1",
+          "content": "1d173a37e39e9d78e62080d25a9706af2ee1518e"
+        },
+        {
+          "alg": "SHA-256",
+          "content": "828a4d699cb125ea62052714e6f2951cab36a00e5e7ed05d5e0783dabbbb61aa"
+        }
+      ],
+      "name": "/private/tmp/claude-502/-Users-mbuchhorn-projects-dataspaces-MinimumViableHealthDataspacev2/e78bc092-5d75-4e73-a6ce-26b5d2be8680/scratchpad/wt-insurer/services/epa-ingest/package-lock.json",
+      "type": "file"
+    },
+    {
+      "bom-ref": "pkg:npm/%40health-dataspace/epa-ingest@0.1.0?package-id=6e7795b7909c78de",
+      "cpe": "cpe:2.3:a:\\@health-dataspace\\/epa-ingest:\\@health-dataspace\\/epa-ingest:0.1.0:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "@health-dataspace/epa-ingest",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@health-dataspace\\/epa-ingest:\\@health_dataspace\\/epa_ingest:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@health_dataspace\\/epa_ingest:\\@health-dataspace\\/epa-ingest:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@health_dataspace\\/epa_ingest:\\@health_dataspace\\/epa_ingest:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@health-dataspace\\/epa:\\@health-dataspace\\/epa-ingest:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@health-dataspace\\/epa:\\@health_dataspace\\/epa_ingest:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@health_dataspace\\/epa:\\@health-dataspace\\/epa-ingest:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@health_dataspace\\/epa:\\@health_dataspace\\/epa_ingest:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@health:\\@health-dataspace\\/epa-ingest:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@health:\\@health_dataspace\\/epa_ingest:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/%40health-dataspace/epa-ingest@0.1.0",
+      "type": "library",
+      "version": "0.1.0"
+    },
+    {
+      "bom-ref": "pkg:npm/%40napi-rs/canvas@0.1.100?package-id=a6a069410e6cfe39",
+      "cpe": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi-rs\\/canvas:0.1.100:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "@napi-rs/canvas",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi_rs\\/canvas:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi-rs\\/canvas:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi_rs\\/canvas:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi-rs\\/canvas:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi_rs\\/canvas:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas@0.1.100",
+      "type": "library",
+      "version": "0.1.100"
+    },
+    {
+      "bom-ref": "pkg:npm/%40napi-rs/canvas-android-arm64@0.1.100?package-id=5d381f9de8098137",
+      "cpe": "cpe:2.3:a:\\@napi-rs\\/canvas-android-arm64:\\@napi-rs\\/canvas-android-arm64:0.1.100:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "@napi-rs/canvas-android-arm64",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-android-arm64:\\@napi_rs\\/canvas_android_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_android_arm64:\\@napi-rs\\/canvas-android-arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_android_arm64:\\@napi_rs\\/canvas_android_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-android:\\@napi-rs\\/canvas-android-arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-android:\\@napi_rs\\/canvas_android_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_android:\\@napi-rs\\/canvas-android-arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_android:\\@napi_rs\\/canvas_android_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi-rs\\/canvas-android-arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi_rs\\/canvas_android_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi-rs\\/canvas-android-arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi_rs\\/canvas_android_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi-rs\\/canvas-android-arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi_rs\\/canvas_android_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas-android-arm64@0.1.100",
+      "type": "library",
+      "version": "0.1.100"
+    },
+    {
+      "bom-ref": "pkg:npm/%40napi-rs/canvas-darwin-arm64@0.1.100?package-id=b7378ea81dfbc4ba",
+      "cpe": "cpe:2.3:a:\\@napi-rs\\/canvas-darwin-arm64:\\@napi-rs\\/canvas-darwin-arm64:0.1.100:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "@napi-rs/canvas-darwin-arm64",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-darwin-arm64:\\@napi_rs\\/canvas_darwin_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_darwin_arm64:\\@napi-rs\\/canvas-darwin-arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_darwin_arm64:\\@napi_rs\\/canvas_darwin_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-darwin:\\@napi-rs\\/canvas-darwin-arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-darwin:\\@napi_rs\\/canvas_darwin_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_darwin:\\@napi-rs\\/canvas-darwin-arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_darwin:\\@napi_rs\\/canvas_darwin_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi-rs\\/canvas-darwin-arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi_rs\\/canvas_darwin_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi-rs\\/canvas-darwin-arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi_rs\\/canvas_darwin_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi-rs\\/canvas-darwin-arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi_rs\\/canvas_darwin_arm64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas-darwin-arm64@0.1.100",
+      "type": "library",
+      "version": "0.1.100"
+    },
+    {
+      "bom-ref": "pkg:npm/%40napi-rs/canvas-darwin-x64@0.1.100?package-id=21e9ca562929b955",
+      "cpe": "cpe:2.3:a:\\@napi-rs\\/canvas-darwin-x64:\\@napi-rs\\/canvas-darwin-x64:0.1.100:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "@napi-rs/canvas-darwin-x64",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-darwin-x64:\\@napi_rs\\/canvas_darwin_x64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_darwin_x64:\\@napi-rs\\/canvas-darwin-x64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_darwin_x64:\\@napi_rs\\/canvas_darwin_x64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-darwin:\\@napi-rs\\/canvas-darwin-x64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-darwin:\\@napi_rs\\/canvas_darwin_x64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_darwin:\\@napi-rs\\/canvas-darwin-x64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_darwin:\\@napi_rs\\/canvas_darwin_x64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi-rs\\/canvas-darwin-x64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi_rs\\/canvas_darwin_x64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi-rs\\/canvas-darwin-x64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi_rs\\/canvas_darwin_x64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi-rs\\/canvas-darwin-x64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi_rs\\/canvas_darwin_x64:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas-darwin-x64@0.1.100",
+      "type": "library",
+      "version": "0.1.100"
+    },
+    {
+      "bom-ref": "pkg:npm/%40napi-rs/canvas-linux-arm-gnueabihf@0.1.100?package-id=7f390847e78ca6e3",
+      "cpe": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-arm-gnueabihf:\\@napi-rs\\/canvas-linux-arm-gnueabihf:0.1.100:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "@napi-rs/canvas-linux-arm-gnueabihf",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-arm-gnueabihf:\\@napi_rs\\/canvas_linux_arm_gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_arm_gnueabihf:\\@napi-rs\\/canvas-linux-arm-gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_arm_gnueabihf:\\@napi_rs\\/canvas_linux_arm_gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-arm:\\@napi-rs\\/canvas-linux-arm-gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-arm:\\@napi_rs\\/canvas_linux_arm_gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_arm:\\@napi-rs\\/canvas-linux-arm-gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_arm:\\@napi_rs\\/canvas_linux_arm_gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux:\\@napi-rs\\/canvas-linux-arm-gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux:\\@napi_rs\\/canvas_linux_arm_gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux:\\@napi-rs\\/canvas-linux-arm-gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux:\\@napi_rs\\/canvas_linux_arm_gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi-rs\\/canvas-linux-arm-gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi_rs\\/canvas_linux_arm_gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi-rs\\/canvas-linux-arm-gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi_rs\\/canvas_linux_arm_gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi-rs\\/canvas-linux-arm-gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi_rs\\/canvas_linux_arm_gnueabihf:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas-linux-arm-gnueabihf@0.1.100",
+      "type": "library",
+      "version": "0.1.100"
+    },
+    {
+      "bom-ref": "pkg:npm/%40napi-rs/canvas-linux-arm64-gnu@0.1.100?package-id=7c72d8f16e0078c8",
+      "cpe": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-arm64-gnu:\\@napi-rs\\/canvas-linux-arm64-gnu:0.1.100:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "@napi-rs/canvas-linux-arm64-gnu",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-arm64-gnu:\\@napi_rs\\/canvas_linux_arm64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_arm64_gnu:\\@napi-rs\\/canvas-linux-arm64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_arm64_gnu:\\@napi_rs\\/canvas_linux_arm64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-arm64:\\@napi-rs\\/canvas-linux-arm64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-arm64:\\@napi_rs\\/canvas_linux_arm64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_arm64:\\@napi-rs\\/canvas-linux-arm64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_arm64:\\@napi_rs\\/canvas_linux_arm64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux:\\@napi-rs\\/canvas-linux-arm64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux:\\@napi_rs\\/canvas_linux_arm64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux:\\@napi-rs\\/canvas-linux-arm64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux:\\@napi_rs\\/canvas_linux_arm64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi-rs\\/canvas-linux-arm64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi_rs\\/canvas_linux_arm64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi-rs\\/canvas-linux-arm64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi_rs\\/canvas_linux_arm64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi-rs\\/canvas-linux-arm64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi_rs\\/canvas_linux_arm64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas-linux-arm64-gnu@0.1.100",
+      "type": "library",
+      "version": "0.1.100"
+    },
+    {
+      "bom-ref": "pkg:npm/%40napi-rs/canvas-linux-arm64-musl@0.1.100?package-id=2ba789eff99a2ea7",
+      "cpe": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-arm64-musl:\\@napi-rs\\/canvas-linux-arm64-musl:0.1.100:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "@napi-rs/canvas-linux-arm64-musl",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-arm64-musl:\\@napi_rs\\/canvas_linux_arm64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_arm64_musl:\\@napi-rs\\/canvas-linux-arm64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_arm64_musl:\\@napi_rs\\/canvas_linux_arm64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-arm64:\\@napi-rs\\/canvas-linux-arm64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-arm64:\\@napi_rs\\/canvas_linux_arm64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_arm64:\\@napi-rs\\/canvas-linux-arm64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_arm64:\\@napi_rs\\/canvas_linux_arm64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux:\\@napi-rs\\/canvas-linux-arm64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux:\\@napi_rs\\/canvas_linux_arm64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux:\\@napi-rs\\/canvas-linux-arm64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux:\\@napi_rs\\/canvas_linux_arm64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi-rs\\/canvas-linux-arm64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi_rs\\/canvas_linux_arm64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi-rs\\/canvas-linux-arm64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi_rs\\/canvas_linux_arm64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi-rs\\/canvas-linux-arm64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi_rs\\/canvas_linux_arm64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas-linux-arm64-musl@0.1.100",
+      "type": "library",
+      "version": "0.1.100"
+    },
+    {
+      "bom-ref": "pkg:npm/%40napi-rs/canvas-linux-riscv64-gnu@0.1.100?package-id=92351ed5de4bfaac",
+      "cpe": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-riscv64-gnu:\\@napi-rs\\/canvas-linux-riscv64-gnu:0.1.100:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "@napi-rs/canvas-linux-riscv64-gnu",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-riscv64-gnu:\\@napi_rs\\/canvas_linux_riscv64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_riscv64_gnu:\\@napi-rs\\/canvas-linux-riscv64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_riscv64_gnu:\\@napi_rs\\/canvas_linux_riscv64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-riscv64:\\@napi-rs\\/canvas-linux-riscv64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-riscv64:\\@napi_rs\\/canvas_linux_riscv64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_riscv64:\\@napi-rs\\/canvas-linux-riscv64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_riscv64:\\@napi_rs\\/canvas_linux_riscv64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux:\\@napi-rs\\/canvas-linux-riscv64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux:\\@napi_rs\\/canvas_linux_riscv64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux:\\@napi-rs\\/canvas-linux-riscv64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux:\\@napi_rs\\/canvas_linux_riscv64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi-rs\\/canvas-linux-riscv64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi_rs\\/canvas_linux_riscv64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi-rs\\/canvas-linux-riscv64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi_rs\\/canvas_linux_riscv64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi-rs\\/canvas-linux-riscv64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi_rs\\/canvas_linux_riscv64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas-linux-riscv64-gnu@0.1.100",
+      "type": "library",
+      "version": "0.1.100"
+    },
+    {
+      "bom-ref": "pkg:npm/%40napi-rs/canvas-linux-x64-gnu@0.1.100?package-id=d74a72bd1d587091",
+      "cpe": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-x64-gnu:\\@napi-rs\\/canvas-linux-x64-gnu:0.1.100:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "@napi-rs/canvas-linux-x64-gnu",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-x64-gnu:\\@napi_rs\\/canvas_linux_x64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_x64_gnu:\\@napi-rs\\/canvas-linux-x64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_x64_gnu:\\@napi_rs\\/canvas_linux_x64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-x64:\\@napi-rs\\/canvas-linux-x64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-x64:\\@napi_rs\\/canvas_linux_x64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_x64:\\@napi-rs\\/canvas-linux-x64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_x64:\\@napi_rs\\/canvas_linux_x64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux:\\@napi-rs\\/canvas-linux-x64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux:\\@napi_rs\\/canvas_linux_x64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux:\\@napi-rs\\/canvas-linux-x64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux:\\@napi_rs\\/canvas_linux_x64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi-rs\\/canvas-linux-x64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi_rs\\/canvas_linux_x64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi-rs\\/canvas-linux-x64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi_rs\\/canvas_linux_x64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi-rs\\/canvas-linux-x64-gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi_rs\\/canvas_linux_x64_gnu:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas-linux-x64-gnu@0.1.100",
+      "type": "library",
+      "version": "0.1.100"
+    },
+    {
+      "bom-ref": "pkg:npm/%40napi-rs/canvas-linux-x64-musl@0.1.100?package-id=48fe339285ae6fce",
+      "cpe": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-x64-musl:\\@napi-rs\\/canvas-linux-x64-musl:0.1.100:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "@napi-rs/canvas-linux-x64-musl",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-x64-musl:\\@napi_rs\\/canvas_linux_x64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_x64_musl:\\@napi-rs\\/canvas-linux-x64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_x64_musl:\\@napi_rs\\/canvas_linux_x64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-x64:\\@napi-rs\\/canvas-linux-x64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux-x64:\\@napi_rs\\/canvas_linux_x64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_x64:\\@napi-rs\\/canvas-linux-x64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux_x64:\\@napi_rs\\/canvas_linux_x64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux:\\@napi-rs\\/canvas-linux-x64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-linux:\\@napi_rs\\/canvas_linux_x64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux:\\@napi-rs\\/canvas-linux-x64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_linux:\\@napi_rs\\/canvas_linux_x64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi-rs\\/canvas-linux-x64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi_rs\\/canvas_linux_x64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi-rs\\/canvas-linux-x64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi_rs\\/canvas_linux_x64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi-rs\\/canvas-linux-x64-musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi_rs\\/canvas_linux_x64_musl:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas-linux-x64-musl@0.1.100",
+      "type": "library",
+      "version": "0.1.100"
+    },
+    {
+      "bom-ref": "pkg:npm/%40napi-rs/canvas-win32-arm64-msvc@0.1.100?package-id=33658790a174a3ba",
+      "cpe": "cpe:2.3:a:\\@napi-rs\\/canvas-win32-arm64-msvc:\\@napi-rs\\/canvas-win32-arm64-msvc:0.1.100:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "@napi-rs/canvas-win32-arm64-msvc",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-win32-arm64-msvc:\\@napi_rs\\/canvas_win32_arm64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_win32_arm64_msvc:\\@napi-rs\\/canvas-win32-arm64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_win32_arm64_msvc:\\@napi_rs\\/canvas_win32_arm64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-win32-arm64:\\@napi-rs\\/canvas-win32-arm64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-win32-arm64:\\@napi_rs\\/canvas_win32_arm64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_win32_arm64:\\@napi-rs\\/canvas-win32-arm64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_win32_arm64:\\@napi_rs\\/canvas_win32_arm64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-win32:\\@napi-rs\\/canvas-win32-arm64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-win32:\\@napi_rs\\/canvas_win32_arm64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_win32:\\@napi-rs\\/canvas-win32-arm64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_win32:\\@napi_rs\\/canvas_win32_arm64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi-rs\\/canvas-win32-arm64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi_rs\\/canvas_win32_arm64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi-rs\\/canvas-win32-arm64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi_rs\\/canvas_win32_arm64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi-rs\\/canvas-win32-arm64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi_rs\\/canvas_win32_arm64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas-win32-arm64-msvc@0.1.100",
+      "type": "library",
+      "version": "0.1.100"
+    },
+    {
+      "bom-ref": "pkg:npm/%40napi-rs/canvas-win32-x64-msvc@0.1.100?package-id=0b1f20c1f82fd7f7",
+      "cpe": "cpe:2.3:a:\\@napi-rs\\/canvas-win32-x64-msvc:\\@napi-rs\\/canvas-win32-x64-msvc:0.1.100:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "@napi-rs/canvas-win32-x64-msvc",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-win32-x64-msvc:\\@napi_rs\\/canvas_win32_x64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_win32_x64_msvc:\\@napi-rs\\/canvas-win32-x64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_win32_x64_msvc:\\@napi_rs\\/canvas_win32_x64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-win32-x64:\\@napi-rs\\/canvas-win32-x64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-win32-x64:\\@napi_rs\\/canvas_win32_x64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_win32_x64:\\@napi-rs\\/canvas-win32-x64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_win32_x64:\\@napi_rs\\/canvas_win32_x64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-win32:\\@napi-rs\\/canvas-win32-x64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas-win32:\\@napi_rs\\/canvas_win32_x64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_win32:\\@napi-rs\\/canvas-win32-x64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas_win32:\\@napi_rs\\/canvas_win32_x64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi-rs\\/canvas-win32-x64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi-rs\\/canvas:\\@napi_rs\\/canvas_win32_x64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi-rs\\/canvas-win32-x64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi_rs\\/canvas:\\@napi_rs\\/canvas_win32_x64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi-rs\\/canvas-win32-x64-msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:\\@napi:\\@napi_rs\\/canvas_win32_x64_msvc:0.1.100:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/%40napi-rs/canvas-win32-x64-msvc@0.1.100",
+      "type": "library",
+      "version": "0.1.100"
+    },
+    {
+      "bom-ref": "pkg:npm/bmp-js@0.1.0?package-id=0b742a9833703c56",
+      "cpe": "cpe:2.3:a:bmp-js:bmp-js:0.1.0:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "bmp-js",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:bmp-js:bmp_js:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:bmp_js:bmp-js:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:bmp_js:bmp_js:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:bmp:bmp-js:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:bmp:bmp_js:0.1.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/bmp-js@0.1.0",
+      "type": "library",
+      "version": "0.1.0"
+    },
+    {
+      "bom-ref": "pkg:npm/idb-keyval@6.3.0?package-id=1aec9b31c80f723c",
+      "cpe": "cpe:2.3:a:idb-keyval:idb-keyval:6.3.0:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "idb-keyval",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:idb-keyval:idb_keyval:6.3.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:idb_keyval:idb-keyval:6.3.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:idb_keyval:idb_keyval:6.3.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:idb:idb-keyval:6.3.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:idb:idb_keyval:6.3.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/idb-keyval@6.3.0",
+      "type": "library",
+      "version": "6.3.0"
+    },
+    {
+      "bom-ref": "pkg:npm/is-electron@2.2.2?package-id=d15051f8bf080980",
+      "cpe": "cpe:2.3:a:is-electron:is-electron:2.2.2:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "is-electron",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:is-electron:is_electron:2.2.2:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:is_electron:is-electron:2.2.2:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:is_electron:is_electron:2.2.2:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:is:is-electron:2.2.2:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:is:is_electron:2.2.2:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/is-electron@2.2.2",
+      "type": "library",
+      "version": "2.2.2"
+    },
+    {
+      "bom-ref": "pkg:npm/is-url@1.2.4?package-id=0055323086e6dbe0",
+      "cpe": "cpe:2.3:a:is-url:is-url:1.2.4:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "is-url",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:is-url:is_url:1.2.4:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:is_url:is-url:1.2.4:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:is_url:is_url:1.2.4:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:is:is-url:1.2.4:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:is:is_url:1.2.4:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/is-url@1.2.4",
+      "type": "library",
+      "version": "1.2.4"
+    },
+    {
+      "bom-ref": "pkg:npm/node-fetch@2.7.0?package-id=71294da0e67ef2a3",
+      "cpe": "cpe:2.3:a:node-fetch_project:node-fetch:2.7.0:*:*:*:*:node.js:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "node-fetch",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/node-fetch@2.7.0",
+      "type": "library",
+      "version": "2.7.0"
+    },
+    {
+      "bom-ref": "pkg:npm/opencollective-postinstall@2.0.3?package-id=9e23722cbcba04c3",
+      "cpe": "cpe:2.3:a:opencollective-postinstall:opencollective-postinstall:2.0.3:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "opencollective-postinstall",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:opencollective-postinstall:opencollective_postinstall:2.0.3:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:opencollective_postinstall:opencollective-postinstall:2.0.3:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:opencollective_postinstall:opencollective_postinstall:2.0.3:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:opencollective:opencollective-postinstall:2.0.3:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:opencollective:opencollective_postinstall:2.0.3:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/opencollective-postinstall@2.0.3",
+      "type": "library",
+      "version": "2.0.3"
+    },
+    {
+      "bom-ref": "pkg:npm/pdfjs-dist@4.10.38?package-id=23e7e1448bcfffd1",
+      "cpe": "cpe:2.3:a:pdfjs-dist:pdfjs-dist:4.10.38:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "pdfjs-dist",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:pdfjs-dist:pdfjs_dist:4.10.38:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:pdfjs_dist:pdfjs-dist:4.10.38:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:pdfjs_dist:pdfjs_dist:4.10.38:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:pdfjs:pdfjs-dist:4.10.38:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:pdfjs:pdfjs_dist:4.10.38:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/pdfjs-dist@4.10.38",
+      "type": "library",
+      "version": "4.10.38"
+    },
+    {
+      "bom-ref": "pkg:npm/regenerator-runtime@0.13.11?package-id=d8b3e0c9412302b6",
+      "cpe": "cpe:2.3:a:regenerator-runtime:regenerator-runtime:0.13.11:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "regenerator-runtime",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:regenerator-runtime:regenerator_runtime:0.13.11:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:regenerator_runtime:regenerator-runtime:0.13.11:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:regenerator_runtime:regenerator_runtime:0.13.11:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:regenerator:regenerator-runtime:0.13.11:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:regenerator:regenerator_runtime:0.13.11:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/regenerator-runtime@0.13.11",
+      "type": "library",
+      "version": "0.13.11"
+    },
+    {
+      "bom-ref": "pkg:npm/tesseract.js@5.1.1?package-id=6ab3f370c4a43468",
+      "cpe": "cpe:2.3:a:tesseract.js:tesseract.js:5.1.1:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "tesseract.js",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/tesseract.js@5.1.1",
+      "type": "library",
+      "version": "5.1.1"
+    },
+    {
+      "bom-ref": "pkg:npm/tesseract.js-core@5.1.1?package-id=86189b78253a0f3a",
+      "cpe": "cpe:2.3:a:tesseract.js-core:tesseract.js-core:5.1.1:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "tesseract.js-core",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:tesseract.js-core:tesseract.js_core:5.1.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:tesseract.js_core:tesseract.js-core:5.1.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:tesseract.js_core:tesseract.js_core:5.1.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:tesseract.js:tesseract.js-core:5.1.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:tesseract.js:tesseract.js_core:5.1.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/tesseract.js-core@5.1.1",
+      "type": "library",
+      "version": "5.1.1"
+    },
+    {
+      "bom-ref": "pkg:npm/tr46@0.0.3?package-id=44b5fbfc3cffc498",
+      "cpe": "cpe:2.3:a:tr46:tr46:0.0.3:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "tr46",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/tr46@0.0.3",
+      "type": "library",
+      "version": "0.0.3"
+    },
+    {
+      "bom-ref": "pkg:npm/wasm-feature-detect@1.9.0?package-id=e5b71f8050467505",
+      "cpe": "cpe:2.3:a:wasm-feature-detect:wasm-feature-detect:1.9.0:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "wasm-feature-detect",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:wasm-feature-detect:wasm_feature_detect:1.9.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:wasm_feature_detect:wasm-feature-detect:1.9.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:wasm_feature_detect:wasm_feature_detect:1.9.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:wasm-feature:wasm-feature-detect:1.9.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:wasm-feature:wasm_feature_detect:1.9.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:wasm_feature:wasm-feature-detect:1.9.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:wasm_feature:wasm_feature_detect:1.9.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:wasm:wasm-feature-detect:1.9.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:wasm:wasm_feature_detect:1.9.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/wasm-feature-detect@1.9.0",
+      "type": "library",
+      "version": "1.9.0"
+    },
+    {
+      "bom-ref": "pkg:npm/webidl-conversions@3.0.1?package-id=770e2f7ad3b1c524",
+      "cpe": "cpe:2.3:a:webidl-conversions:webidl-conversions:3.0.1:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "BSD-2-Clause"
+          }
+        }
+      ],
+      "name": "webidl-conversions",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:webidl-conversions:webidl_conversions:3.0.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:webidl_conversions:webidl-conversions:3.0.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:webidl_conversions:webidl_conversions:3.0.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:webidl:webidl-conversions:3.0.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:webidl:webidl_conversions:3.0.1:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/webidl-conversions@3.0.1",
+      "type": "library",
+      "version": "3.0.1"
+    },
+    {
+      "bom-ref": "pkg:npm/whatwg-url@5.0.0?package-id=0827d54a7a5ea1e5",
+      "cpe": "cpe:2.3:a:whatwg-url:whatwg-url:5.0.0:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "whatwg-url",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:whatwg-url:whatwg_url:5.0.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:whatwg_url:whatwg-url:5.0.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:whatwg_url:whatwg_url:5.0.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:whatwg:whatwg-url:5.0.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:cpe23",
+          "value": "cpe:2.3:a:whatwg:whatwg_url:5.0.0:*:*:*:*:*:*:*"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/whatwg-url@5.0.0",
+      "type": "library",
+      "version": "5.0.0"
+    },
+    {
+      "bom-ref": "pkg:npm/zlibjs@0.3.1?package-id=a6a3ba6f7ac14778",
+      "cpe": "cpe:2.3:a:zlibjs:zlibjs:0.3.1:*:*:*:*:*:*:*",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "zlibjs",
+      "properties": [
+        {
+          "name": "syft:package:foundBy",
+          "value": "javascript-lock-cataloger"
+        },
+        {
+          "name": "syft:package:language",
+          "value": "javascript"
+        },
+        {
+          "name": "syft:package:type",
+          "value": "npm"
+        },
+        {
+          "name": "syft:package:metadataType",
+          "value": "javascript-npm-package-lock-entry"
+        },
+        {
+          "name": "syft:location:0:path",
+          "value": "/package-lock.json"
+        }
+      ],
+      "purl": "pkg:npm/zlibjs@0.3.1",
+      "type": "library",
+      "version": "0.3.1"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "pkg:npm/whatwg-url@5.0.0?package-id=0827d54a7a5ea1e5"
+      ],
+      "ref": "pkg:npm/node-fetch@2.7.0?package-id=71294da0e67ef2a3"
+    },
+    {
+      "dependsOn": [
+        "pkg:npm/bmp-js@0.1.0?package-id=0b742a9833703c56",
+        "pkg:npm/idb-keyval@6.3.0?package-id=1aec9b31c80f723c",
+        "pkg:npm/is-electron@2.2.2?package-id=d15051f8bf080980",
+        "pkg:npm/is-url@1.2.4?package-id=0055323086e6dbe0",
+        "pkg:npm/node-fetch@2.7.0?package-id=71294da0e67ef2a3",
+        "pkg:npm/opencollective-postinstall@2.0.3?package-id=9e23722cbcba04c3",
+        "pkg:npm/regenerator-runtime@0.13.11?package-id=d8b3e0c9412302b6",
+        "pkg:npm/tesseract.js-core@5.1.1?package-id=86189b78253a0f3a",
+        "pkg:npm/wasm-feature-detect@1.9.0?package-id=e5b71f8050467505",
+        "pkg:npm/zlibjs@0.3.1?package-id=a6a3ba6f7ac14778"
+      ],
+      "ref": "pkg:npm/tesseract.js@5.1.1?package-id=6ab3f370c4a43468"
+    },
+    {
+      "dependsOn": [
+        "pkg:npm/tr46@0.0.3?package-id=44b5fbfc3cffc498",
+        "pkg:npm/webidl-conversions@3.0.1?package-id=770e2f7ad3b1c524"
+      ],
+      "ref": "pkg:npm/whatwg-url@5.0.0?package-id=0827d54a7a5ea1e5"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "bom-ref": "bb76179ef52b30da",
+      "name": "/private/tmp/claude-502/-Users-mbuchhorn-projects-dataspaces-MinimumViableHealthDataspacev2/e78bc092-5d75-4e73-a6ce-26b5d2be8680/scratchpad/wt-insurer/services/epa-ingest",
+      "type": "file"
+    },
+    "tools": {
+      "components": [
+        {
+          "author": "anchore",
+          "name": "syft",
+          "type": "application",
+          "version": "1.51.1"
+        }
+      ]
+    }
+  },
+  "specVersion": "1.7",
+  "version": 1
+}

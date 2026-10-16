@@ -57,6 +57,12 @@ CREATE CONSTRAINT observation_id IF NOT EXISTS FOR (o:Observation) REQUIRE o.res
 CREATE INDEX observation_code IF NOT EXISTS FOR (o:Observation) ON (o.code);
 CREATE INDEX observation_category IF NOT EXISTS FOR (o:Observation) ON (o.category);
 CREATE CONSTRAINT medication_request_id IF NOT EXISTS FOR (mr:MedicationRequest) REQUIRE mr.resourceId IS UNIQUE;
+// Study results beyond laboratory values (ADR-059): reports, vaccinations, the medication plan
+CREATE CONSTRAINT diagnostic_report_id IF NOT EXISTS FOR (dr:DiagnosticReport) REQUIRE dr.resourceId IS UNIQUE;
+CREATE INDEX diagnostic_report_category IF NOT EXISTS FOR (dr:DiagnosticReport) ON (dr.category);
+CREATE CONSTRAINT immunization_id IF NOT EXISTS FOR (im:Immunization) REQUIRE im.resourceId IS UNIQUE;
+CREATE CONSTRAINT medication_statement_id IF NOT EXISTS FOR (ms:MedicationStatement) REQUIRE ms.resourceId IS UNIQUE;
+CREATE INDEX medication_statement_plan IF NOT EXISTS FOR (ms:MedicationStatement) ON (ms.planId);
 CREATE INDEX medication_code IF NOT EXISTS FOR (mr:MedicationRequest) ON (mr.medicationCode);
 CREATE CONSTRAINT encounter_id IF NOT EXISTS FOR (e:Encounter) REQUIRE e.resourceId IS UNIQUE;
 CREATE CONSTRAINT procedure_id IF NOT EXISTS FOR (pr:Procedure) REQUIRE pr.resourceId IS UNIQUE;

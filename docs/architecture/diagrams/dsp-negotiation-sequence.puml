@@ -1,0 +1,33 @@
+@startuml dsp-negotiation-sequence
+title DSP contract negotiation with the EHDS data permit, as a sequence\nRegulation (EU) 2025/327 Chapter IV first, then the Dataspace Protocol
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam sequence {
+  ArrowColor #475569
+  LifeLineBorderColor #94A3B8
+  ParticipantBorderColor #64748B
+  ParticipantBackgroundColor #FFFFFF
+}
+
+participant "Health data user\nconsumer connector" as DU
+participant "Federated catalogue\nHealthDCAT-AP" as CAT
+participant "Health data access body\nHDAB" as HDAB
+participant "Health data holder\nprovider connector" as DH
+
+DU -> CAT : query the catalogue
+CAT --> DU : dataset metadata and access policies
+DU -> HDAB : apply for data (Art. 67)
+HDAB -> HDAB : assess: purpose (Art. 53), not prohibited (Art. 54),\napplicant verified
+HDAB --> DU : data permit (Art. 68), as a verifiable credential;\nrecorded in the public register (Art. 58)
+DU -> DH : contract negotiation request (DSP),\nwith the permit credential
+DH -> DH : verify the permit credential (DCP)
+DH -> DH : evaluate the ODRL access policy
+DH --> DU : contract agreement
+DU -> DH : transfer request
+DH --> DU : data transfer (FHIR or OMOP)
+note over DH, DU
+  Sovereign data exchange with a full audit trail;
+  the data plane serves only what the agreement covers.
+end note
+@enduml

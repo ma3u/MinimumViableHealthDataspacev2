@@ -8,13 +8,33 @@ import UniformTypeIdentifiers
 @main
 struct KlarbefundApp: App {
   @Environment(\.scenePhase) private var scenePhase
+  @StateObject private var lock = AppLock()
 
   var body: some Scene {
     WindowGroup { ContentView() }
       .onChange(of: scenePhase) { _, phase in
         // `.inactive` is the moment the switcher snapshot is taken;
         // `.background` is already too late to cover it.
-        if phase == .active { PrivacyCover.hide() } else { PrivacyCover.show() }
+        switch phase {
+        case .active:
+          if lock.locked {
+            // The cover stays, now with an Unlock button, until the person
+            // proves it is them (ADR-060). The system prompt makes the scene
+            // inactive and active again; `didBecomeActive` is idempotent.
+            PrivacyCover.show { Task { await lock.authenticate() } }
+            Task { await lock.didBecomeActive() }
+          } else {
+            PrivacyCover.hide()
+          }
+        case .background:
+          lock.didEnterBackground()
+          PrivacyCover.show()
+        default:
+          if !lock.locked { PrivacyCover.show() }
+        }
+      }
+      .onChange(of: lock.locked) { _, locked in
+        if !locked, scenePhase == .active { PrivacyCover.hide() }
       }
   }
 }
@@ -43,6 +63,17 @@ final class AppModel: ObservableObject {
   @Published var buildingData = false
   /// True while the "delete everything" question is on screen.
   @Published var erasing = false
+  /// The report whose name and laboratory are being edited.
+  @Published var editingReport: LabReport?
+  /// The report a GitHub issue about missing values is being drafted for.
+  @Published var feedbackReport: LabReport?
+  /// A report the person asked to delete, and whether to scan the paper
+  /// again afterwards. Asked about in an alert before anything is deleted.
+  @Published var deleteRequest: (report: LabReport, rescan: Bool)?
+  /// The stored duplicate being asked about, from "Find duplicate reports".
+  @Published var duplicatePair: DuplicateReports.Match?
+  /// Pairs the person chose to keep, so the search moves on to the next.
+  private var keptDuplicates = Set<UUID>()
 
   /// Internal rather than private so the DEBUG self-test can reach it, and a
   /// `let` set once at init so the self-test's own store cannot be swapped in
@@ -226,7 +257,9 @@ final class AppModel: ObservableObject {
       metadata.dateSource = report.metadata.dateSource
       let updated = LabReport(
         id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
-        title: report.title, extraction: better ? product.extraction : report.extraction,
+        title: report.title,
+        extraction: better
+          ? product.extraction.keepingChecks(of: report.extraction.coded) : report.extraction,
         metadata: metadata, pageTexts: product.pageTexts,
         scan: LabReport.ScanAttachment(
           pageCount: product.pages.count, bytes: product.pdf.count,
@@ -331,7 +364,7 @@ final class AppModel: ObservableObject {
   /// The date is always the one confirmed on the review screen. Where it
   /// matches what was read from the sheet its provenance stays `printed`;
   /// where the person changed it, or nothing was found, it is `user`.
-  func confirm(title: String, labDate: Date, laboratory: String) async {
+  func confirm(title: String, labDate: Date, laboratory: String, removing: UUID? = nil) async {
     guard let product = pending else { return }
     let day = ReportMetadata.calendarDay(labDate)
     var metadata = product.metadata
@@ -379,6 +412,12 @@ final class AppModel: ObservableObject {
       Log.store.notice(
         "further measurement dates: \(saved, privacy: .public) saved, \(skipped, privacy: .public) already known"
       )
+      // The older scan this one supersedes, deleted only because the person
+      // chose to on the review screen.
+      if let removing {
+        try await store.delete(removing)
+        Log.store.notice("an older duplicate scan deleted on request")
+      }
       pending = nil
       await refresh()
     } catch {
@@ -434,8 +473,11 @@ final class AppModel: ObservableObject {
       // round trip through PDF and back are not always the pages the
       // recogniser first saw, so a worse reading is discarded rather than
       // saved over a better one.
+      // What the person checked against the paper outranks a new reading.
+      let kept = product.extraction.keepingChecksReporting(of: report.extraction.coded)
+      let extraction = kept.extraction
       let before = report.extraction.coded.count
-      let after = product.extraction.coded.count
+      let after = extraction.coded.count
       guard after >= before else {
         Log.store.notice(
           "re-read discarded: \(after, privacy: .public) coded against \(before, privacy: .public) stored"
@@ -447,14 +489,24 @@ final class AppModel: ObservableObject {
       }
 
       var metadata = product.metadata
-      // A date the person confirmed outranks one read from the sheet again.
-      if report.metadata.dateSource == .user {
+      // A laboratory the person typed, where the sheet names none.
+      if metadata.laboratory == nil { metadata.laboratory = report.metadata.laboratory }
+      // A date the person confirmed outranks one read from the sheet again,
+      // unless it is the day of the scan and the sheet now gives a date:
+      // with no date found, the review offers the scan day, and a person who
+      // saves it has confirmed nothing (measured: a glucose sensor's report
+      // filed under the day it was photographed, months after it was worn).
+      let acceptedFallback =
+        report.metadata.dateSource == .user && metadata.dateSource == .printed
+        && report.collectedOn.map { ReportMetadata.calendarDay($0) }
+          == ReportMetadata.calendarDay(report.scannedAt)
+      if report.metadata.dateSource == .user && !acceptedFallback {
         metadata.labDate = report.collectedOn
         metadata.dateSource = .user
       }
       let updated = LabReport(
         id: report.id, scannedAt: report.scannedAt, collectedOn: metadata.labDate ?? report.collectedOn,
-        title: report.title, extraction: product.extraction, metadata: metadata,
+        title: report.title, extraction: extraction, metadata: metadata,
         pageTexts: product.pageTexts,
         scan: report.scan.map {
           LabReport.ScanAttachment(
@@ -472,6 +524,7 @@ final class AppModel: ObservableObject {
       Log.store.notice(
         "re-read: \(report.extraction.coded.count, privacy: .public) coded before, \(product.extraction.coded.count, privacy: .public) now"
       )
+      notice = Self.conflictNotice(kept.conflicts)
       await refresh()
     } catch {
       self.error = error.localizedDescription
@@ -482,6 +535,27 @@ final class AppModel: ObservableObject {
   /// rows and unread lines through the current parser and dictionary, coded
   /// values to their current code. Never loses a coded value.
   private func recode(_ report: LabReport) async throws {
+    // The text of the first recognition, parsed again, when it reads more
+    // than the stored rows do. What the person checked is kept, and a check
+    // the new parse reads differently is named, not overwritten.
+    if !report.pageTexts.isEmpty {
+      let reparsed = LabRecoder.fromPageTexts(report.pageTexts, source: report.extraction.source)
+        .keepingChecksReporting(of: report.extraction.coded)
+      let rows = LabRecoder.recode(report.extraction).extraction.coded.count
+      if reparsed.extraction.coded.count > max(report.extraction.coded.count, rows) {
+        try await store.save(
+          LabReport(
+            id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+            title: report.title, extraction: reparsed.extraction, metadata: report.metadata,
+            pageTexts: report.pageTexts, scan: report.scan, hasDiagnostics: report.hasDiagnostics))
+        Log.store.notice(
+          "re-read from the stored text: \(report.extraction.coded.count, privacy: .public) coded before, \(reparsed.extraction.coded.count, privacy: .public) now, \(reparsed.conflicts.count, privacy: .public) checked value(s) read differently"
+        )
+        notice = Self.conflictNotice(reparsed.conflicts)
+        await refresh()
+        return
+      }
+    }
     let outcome = LabRecoder.recode(report.extraction)
     guard outcome.recovered + outcome.recoded > 0 else {
       error = String(localized: "This version reads nothing more from this report.")
@@ -496,6 +570,18 @@ final class AppModel: ObservableObject {
       "re-coded from stored rows: \(outcome.recovered, privacy: .public) recovered, \(outcome.recoded, privacy: .public) recoded"
     )
     await refresh()
+  }
+
+  /// What to tell the person when a value they checked now reads differently.
+  static func conflictNotice(_ conflicts: [ExtractionResult.CheckConflict]) -> String? {
+    guard !conflicts.isEmpty else { return nil }
+    let list = conflicts.map {
+      "\($0.label): \(Measurement.text($0.checked)) → \(Measurement.text($0.readNow)) \(UnitText.display($0.unit))"
+    }.joined(separator: "\n")
+    return String(
+      localized:
+        "Read again. These values you checked now read differently; your checked value is kept. Please compare them with the paper:\n\(list)"
+    )
   }
 
   /// Once per dictionary and build: every stored report's own rows through
@@ -641,7 +727,78 @@ final class AppModel: ObservableObject {
     } catch { self.error = error.localizedDescription }
   }
 
+  /// Stores a report with corrected or confirmed values.
+  func update(_ report: LabReport, extraction: ExtractionResult) async {
+    await persist(
+      LabReport(
+        id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+        title: report.title, extraction: extraction, metadata: report.metadata,
+        pageTexts: report.pageTexts, scan: report.scan, hasDiagnostics: report.hasDiagnostics))
+    Log.store.notice(
+      "values checked: \(extraction.coded.filter { $0.verification != nil }.count, privacy: .public) of \(extraction.coded.count, privacy: .public)"
+    )
+  }
+
+  /// Stores a report under the name and laboratory the person gave it.
+  func update(_ report: LabReport, title: String, laboratory: String) async {
+    var metadata = report.metadata
+    let lab = laboratory.trimmingCharacters(in: .whitespaces)
+    metadata.laboratory = lab.isEmpty ? nil : lab
+    await persist(
+      LabReport(
+        id: report.id, scannedAt: report.scannedAt, collectedOn: report.collectedOn,
+        title: title.trimmingCharacters(in: .whitespaces), extraction: report.extraction,
+        metadata: metadata, pageTexts: report.pageTexts, scan: report.scan,
+        hasDiagnostics: report.hasDiagnostics))
+  }
+
+  private func persist(_ report: LabReport) async {
+    #if DEBUG
+      if DemoSeed.isRequested {
+        DemoSeed.keep(report)
+        await refresh()
+        return
+      }
+    #endif
+    do {
+      try await store.save(report)
+      await refresh()
+    } catch { self.error = error.localizedDescription }
+  }
+
+  /// Looks for a stored report that another one makes redundant and asks
+  /// about the first; each answer moves on to the next.
+  func findDuplicates(startingOver: Bool = true) {
+    if startingOver { keptDuplicates = [] }
+    duplicatePair = DuplicateReports.pairs(in: reports)
+      .first { !keptDuplicates.contains($0.redundant.id) }
+    if duplicatePair == nil, startingOver {
+      notice = String(localized: "No duplicate reports found.")
+    }
+    Log.store.notice("duplicate search: \(self.duplicatePair == nil ? "none" : "one found", privacy: .public)")
+  }
+
+  /// The match is passed in, not read back: dismissing the alert clears
+  /// `duplicatePair` before the button's action runs.
+  func resolveDuplicate(_ match: DuplicateReports.Match, delete: Bool) async {
+    duplicatePair = nil
+    if delete {
+      await self.delete(match.redundant.id)
+    } else {
+      keptDuplicates.insert(match.redundant.id)
+    }
+    findDuplicates(startingOver: false)
+  }
+
   func delete(_ id: UUID) async {
+    #if DEBUG
+      // Demo data lives in memory and never reaches the store.
+      if DemoSeed.isRequested {
+        DemoSeed.forget(id)
+        await refresh()
+        return
+      }
+    #endif
     do {
       try await store.delete(id)
       await refresh()
@@ -674,6 +831,26 @@ final class AppModel: ObservableObject {
       } catch {
         self.error = error.localizedDescription
       }
+    }
+
+    /// `-MBDeleteReport <id>`: deletes one stored report, its pages and its
+    /// diagnostics, as a swipe in the list does, so a duplicate scan can be
+    /// removed from the Mac over the network. Debug builds only. It takes the
+    /// full id and nothing shorter, so a typo deletes nothing, and it does
+    /// nothing in demo mode, whose reports are not in the store.
+    func debugDeleteIfRequested() async {
+      let arguments = ProcessInfo.processInfo.arguments
+      guard let flag = arguments.firstIndex(of: "-MBDeleteReport"), flag + 1 < arguments.count,
+        !DemoSeed.isRequested
+      else { return }
+      guard let id = UUID(uuidString: arguments[flag + 1]),
+        reports.contains(where: { $0.id == id })
+      else {
+        Log.store.notice("delete on request: no report with that id, nothing deleted")
+        return
+      }
+      await delete(id)
+      Log.store.notice("delete on request: one report deleted")
     }
 
     /// `-MBExportData`: the same for the person's own archive, so that a test
@@ -849,7 +1026,8 @@ struct ContentView: View {
             if let report = model.reports.first(where: { $0.id == id }) {
               ResultList(
                 report: report, sex: model.profile.sex,
-                onOpenScan: report.scan == nil ? nil : { Task { await model.openScan(report) } }
+                onOpenScan: report.scan == nil ? nil : { Task { await model.openScan(report) } },
+                onChange: { extraction in Task { await model.update(report, extraction: extraction) } }
               )
               .toolbar {
                 if !report.extraction.coded.isEmpty {
@@ -901,6 +1079,34 @@ struct ContentView: View {
                     model.diagnosticsRequest = .report(report.id)
                   } label: {
                     Label("Export diagnostics for this report", systemImage: "ladybug")
+                  }
+                }
+                ToolbarItem(placement: .secondaryAction) {
+                  Button {
+                    model.editingReport = report
+                  } label: {
+                    Label("Edit name and laboratory", systemImage: "pencil")
+                  }
+                }
+                ToolbarItem(placement: .secondaryAction) {
+                  Button {
+                    model.feedbackReport = report
+                  } label: {
+                    Label("Report missing values", systemImage: "exclamationmark.bubble")
+                  }
+                }
+                ToolbarItem(placement: .secondaryAction) {
+                  Button(role: .destructive) {
+                    model.deleteRequest = (report, true)
+                  } label: {
+                    Label("Delete and scan again", systemImage: "doc.viewfinder")
+                  }
+                }
+                ToolbarItem(placement: .secondaryAction) {
+                  Button(role: .destructive) {
+                    model.deleteRequest = (report, false)
+                  } label: {
+                    Label("Delete report", systemImage: "trash")
                   }
                 }
               }
@@ -999,6 +1205,11 @@ struct ContentView: View {
               // looking for, and "diagnostics" reads like something for
               // somebody else.
               Button {
+                model.findDuplicates()
+              } label: {
+                Label("Find duplicate reports", systemImage: "doc.on.doc")
+              }
+              Button {
                 Task { await model.exportData() }
               } label: {
                 Label("Export all my data", systemImage: "square.and.arrow.up.on.square")
@@ -1040,6 +1251,7 @@ struct ContentView: View {
       .ignoresSafeArea()
     }
     .modifier(AppSheets(model: model))
+    .modifier(ReportActions(model: model, path: $path, scanning: $scanning))
     .modifier(ConnectSheet(model: model, connection: connection))
     // My values into my record (#473 phase 3): whenever the reports change,
     // and when the person switches sending on, while it is on.
@@ -1078,8 +1290,10 @@ struct ContentView: View {
         // The self-test first: with `-MBSelfTest` the report it saves is the
         // one a screenshot should open, and it does not exist until it has run.
         await model.runSelfTestIfRequested()
+        await model.debugDeleteIfRequested()
         await model.debugImportIfRequested()
         await model.reextractAllIfRequested()
+        await model.restoreChecksIfRequested()
         await openScreenshotScreen()
         await model.debugExportIfRequested()
         await model.debugExportDataIfRequested()
@@ -1214,9 +1428,35 @@ private struct ReportRow: View {
       }
       .font(.caption)
       .foregroundStyle(.secondary)
-      ProvenanceBadge(source: report.extraction.source)
+      HStack(spacing: 8) {
+        ProvenanceBadge(source: report.extraction.source)
+        CheckedBadge(checked: report.extraction.checkedCount, of: report.extraction.coded.count)
+      }
     }
     .padding(.vertical, 2)
+  }
+}
+
+/// How much of a report the person has checked against the paper, so the
+/// list shows it without opening every report. Nothing when nothing is.
+struct CheckedBadge: View {
+  let checked: Int
+  let of: Int
+
+  var body: some View {
+    if checked > 0 {
+      Label(
+        checked == of
+          ? String(localized: "Checked") : String(localized: "\(checked) of \(of) checked"),
+        systemImage: checked == of ? "checkmark.seal.fill" : "checkmark.seal"
+      )
+      .font(.caption.weight(.medium))
+      .foregroundStyle(.green)
+      .padding(.horizontal, 8)
+      .padding(.vertical, 3)
+      .background(Color.green.opacity(0.15), in: RoundedRectangle(cornerRadius: 6))
+      .accessibilityIdentifier("checked-badge")
+    }
   }
 }
 
@@ -1314,8 +1554,11 @@ private struct AppSheets: ViewModifier {
       }
     }
       .sheet(item: Binding(get: { model.pending.map(PendingBox.init) }, set: { _ in })) { box in
-      ReviewSheet(product: box.product) { title, labDate, laboratory in
-        Task { await model.confirm(title: title, labDate: labDate, laboratory: laboratory) }
+      ReviewSheet(product: box.product, existing: model.reports) { title, labDate, laboratory, removing in
+        Task {
+          await model.confirm(
+            title: title, labDate: labDate, laboratory: laboratory, removing: removing)
+        }
       } onDiscard: {
         model.pending = nil
       }
@@ -1481,6 +1724,7 @@ private struct AppDialogs: ViewModifier {
       }
       // Alerts rather than confirmation dialogs, for the reason given above:
       // raised from a menu, a dialog drops its Cancel button.
+      .modifier(DuplicateAlert(model: model))
       .alert("No registry consent recorded", isPresented: $model.confirmingResearchExport) {
         Button("Export anyway") { Task { await model.exportOmop() } }
         Button("Cancel", role: .cancel) {}
@@ -1515,6 +1759,87 @@ private struct AppDialogs: ViewModifier {
         Button("OK", role: .cancel) {}
       } message: {
         Text(model.notice ?? "")
+      }
+  }
+}
+
+/// "Find duplicate reports": one redundant report at a time, deleted or kept
+/// by the person (`DuplicateReports`). Its own modifier, because the root
+/// view's chain of alerts is already as long as the type checker allows.
+struct DuplicateAlert: ViewModifier {
+  @ObservedObject var model: AppModel
+
+  func body(content: Content) -> some View {
+    content.alert(
+      "Duplicate report",
+      isPresented: Binding(
+        get: { model.duplicatePair != nil }, set: { if !$0 { model.duplicatePair = nil } }),
+      presenting: model.duplicatePair
+    ) { match in
+      Button(Self.deleteLabel(match.redundant), role: .destructive) {
+        Task { await model.resolveDuplicate(match, delete: true) }
+      }
+      Button("Keep both", role: .cancel) {
+        Task { await model.resolveDuplicate(match, delete: false) }
+      }
+    } message: { match in
+      Text(DuplicateReports.sentence(match))
+    }
+  }
+
+  /// "Delete “Title”, scanned 4 Sep 2026": which copy goes, in words.
+  static func deleteLabel(_ report: LabReport) -> String {
+    let scanned = report.scannedAt.formatted(date: .abbreviated, time: .omitted)
+    return String(localized: "Delete “\(report.title)”, scanned \(scanned)")
+  }
+}
+
+/// The per-report actions that need a sheet or a confirmation: the name and
+/// laboratory, a GitHub issue about missing values, and deleting the report,
+/// with or without scanning the paper again. Its own modifier for the same
+/// reason as `DuplicateAlert`.
+struct ReportActions: ViewModifier {
+  @ObservedObject var model: AppModel
+  @Binding var path: [UUID]
+  @Binding var scanning: Bool
+
+  func body(content: Content) -> some View {
+    content
+      .sheet(item: $model.editingReport) { report in
+        EditReportSheet(
+          report: report,
+          onSave: { title, laboratory in
+            model.editingReport = nil
+            Task { await model.update(report, title: title, laboratory: laboratory) }
+          },
+          onCancel: { model.editingReport = nil })
+      }
+      .sheet(item: $model.feedbackReport) { report in
+        FeedbackSheet(report: report) { model.feedbackReport = nil }
+      }
+      // An alert, for the reason given at "Delete all your data?": there is no
+      // undo, so the way out has to be a button.
+      .alert(
+        model.deleteRequest?.rescan == true ? "Delete and scan again?" : "Delete this report?",
+        isPresented: Binding(
+          get: { model.deleteRequest != nil }, set: { if !$0 { model.deleteRequest = nil } }),
+        presenting: model.deleteRequest
+      ) { request in
+        Button(request.rescan ? "Delete and scan" : "Delete", role: .destructive) {
+          let id = request.report.id
+          path.removeAll()
+          Task {
+            await model.delete(id)
+            if request.rescan { scanning = true }
+          }
+        }
+        Button("Cancel", role: .cancel) {}
+      } message: { request in
+        Text(
+          request.rescan
+            ? "“\(request.report.title)”, its scanned pages and every value will be deleted from this phone, and the scanner opens for the paper. This cannot be undone."
+            : "“\(request.report.title)”, its scanned pages and every value will be deleted from this phone. This cannot be undone."
+        )
       }
   }
 }
