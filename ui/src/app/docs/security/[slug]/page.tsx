@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
-import { renderMarkdown } from "@/lib/docs/markdown";
+import MermaidDiagram from "@/components/MermaidDiagram";
+import { splitMermaid } from "@/lib/docs/markdown";
 import {
   findSecurityDoc,
   REPO_URL,
@@ -31,7 +32,18 @@ export default async function SecurityDocPage({
 }) {
   const doc = findSecurityDoc((await params).slug);
   if (!doc) notFound();
-  const html = renderMarkdown(doc.markdown);
+  // Images the reports embed are copied to public/published-docs by
+  // scripts/gen-docs-content.py and referenced through a placeholder, so the
+  // GitHub Pages build (basePath) and the hub (none) both find them.
+  const basePath =
+    process.env.NEXT_PUBLIC_STATIC_EXPORT === "true"
+      ? "/MinimumViableHealthDataspacev2"
+      : "";
+  const segments = splitMermaid(doc.markdown).map((seg) =>
+    seg.kind === "html"
+      ? { ...seg, html: seg.html.replaceAll("__BASE_PATH__/", `${basePath}/`) }
+      : seg,
+  );
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
       <Link
@@ -51,12 +63,19 @@ export default async function SecurityDocPage({
           <code>{doc.source}</code> on GitHub <ExternalLink size={11} />
         </a>
       </div>
-      <article
-        className="doc-prose"
-        data-testid="security-doc"
-        // The HTML comes from the repository's own Markdown, rendered at build time.
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
+      <article className="doc-prose" data-testid="security-doc">
+        {segments.map((seg, i) =>
+          seg.kind === "mermaid" ? (
+            <MermaidDiagram key={i} chart={seg.chart} />
+          ) : (
+            <div
+              key={i}
+              // The HTML comes from the repository's own Markdown, rendered at build time.
+              dangerouslySetInnerHTML={{ __html: seg.html }}
+            />
+          ),
+        )}
+      </article>
     </div>
   );
 }

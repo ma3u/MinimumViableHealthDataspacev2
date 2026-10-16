@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { headingId, renderMarkdown } from "@/lib/docs/markdown";
+import { headingId, renderMarkdown, splitMermaid } from "@/lib/docs/markdown";
 
 describe("headingId", () => {
   it("matches GitHub's anchor for a numbered heading", () => {
@@ -33,5 +33,34 @@ describe("renderMarkdown", () => {
       '<a href="https://github.com/x" target="_blank" rel="noopener noreferrer">gh</a>',
     );
     expect(html).toContain('<a href="/docs/security/sbom#x">here</a>');
+  });
+});
+
+describe("renderMarkdown images", () => {
+  it("links a diagram to its full-size file", () => {
+    const html = renderMarkdown(
+      "![A diagram](__BASE_PATH__/published-docs/x.svg)",
+    );
+    expect(html).toContain(
+      '<a href="__BASE_PATH__/published-docs/x.svg" target="_blank" rel="noopener noreferrer" class="doc-figure"><img src="__BASE_PATH__/published-docs/x.svg" alt="A diagram" loading="lazy" /></a>',
+    );
+  });
+});
+
+describe("splitMermaid", () => {
+  it("cuts a mermaid fence out and renders the text around it", () => {
+    const segs = splitMermaid(
+      "# T\n\nbefore\n\n```mermaid\nflowchart LR\n  a --> b\n```\n\nafter\n",
+    );
+    expect(segs.map((s) => s.kind)).toEqual(["html", "mermaid", "html"]);
+    expect(segs[1]).toEqual({
+      kind: "mermaid",
+      chart: "flowchart LR\n  a --> b",
+    });
+    expect((segs[2] as { html: string }).html).toContain("<p>after</p>");
+  });
+
+  it("leaves a document without diagrams as one html segment", () => {
+    expect(splitMermaid("just text\n").map((s) => s.kind)).toEqual(["html"]);
   });
 });
