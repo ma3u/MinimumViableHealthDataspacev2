@@ -33,8 +33,9 @@ import SecurityDocPage, {
 import { securityDocs } from "@/lib/docs/security-docs";
 
 describe("the published reports", () => {
-  it("are the nine reports, each with a title, a summary, a source and a body", () => {
+  it("are the ten reports, each with a title, a summary, a source and a body", () => {
     expect(securityDocs.map((d) => d.slug)).toEqual([
+      "operational-guideline",
       "security-test-report",
       "threat-model-hub",
       "threat-model-klarbefund",
