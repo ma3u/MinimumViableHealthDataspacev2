@@ -1,0 +1,82 @@
+@startuml hub-trust-boundaries
+title The hub's data flows and trust boundaries\nexternal entities, processes, stores, and the boundary each flow crosses (the STRIDE tables refer to these)
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam nodesep 18
+skinparam ranksep 40
+skinparam ArrowColor #475569
+skinparam rectangle {
+  BorderColor #64748B
+  BackgroundColor #FFFFFF
+  FontStyle bold
+}
+skinparam actor {
+  BorderColor #64748B
+  BackgroundColor #FFFFFF
+}
+skinparam database {
+  BorderColor #64748B
+  BackgroundColor #FFFFFF
+}
+
+' external entities
+actor "Person\n(patient, researcher,\nholder, access body)" as person
+actor "Operator\n(az, gh, scripts)" as operator
+rectangle "Klarbefund app\n(iPhone)" as app
+rectangle "Another participant's\nconnector" as peer
+
+rectangle "B1  Internet edge: TLS terminated by the Container Apps ingress" #FEF2F2 {
+  rectangle "Hub UI and API\nNext.js, session cookie,\nCSP with a nonce,\nrequireAuth() on every route" as hub
+  rectangle "Keycloak\nrealm edcv, OIDC + PKCE,\nconsole behind the guard" as kc
+}
+
+rectangle "B2  The environment: internal ingress only, one managed identity" #FFFBEB {
+  rectangle "neo4j-proxy\nFHIR, OMOP, NLQ, federation;\nrate limits per user and participant;\nk-anonymity, cohort of 5;\naudit chain" as proxy
+  rectangle "EDC connectors\ncontrol plane, data planes,\nIdentityHub, IssuerService;\nDSP and DCP" as edc
+  rectangle "Catalog crawler\nand enricher" as crawler
+  rectangle "Observability\nOpenTelemetry, Loki, Tempo, Grafana" as obs
+}
+
+rectangle "B3  Data and secrets: reachable from the environment only" #ECFDF5 {
+  database "Neo4j\nthe five-layer graph,\nsynthetic patients, audit chain" as neo4j
+  database "PostgreSQL Flexible Server\nKeycloak, EDC state,\ntask store, Vault state" as pg
+  database "Vault\nparticipant keys" as vault
+  database "Azure Key Vault\noperator secrets" as kv
+}
+
+' flows across B1
+person --> hub : F1  HTTPS, session cookie
+person --> kc : F2  sign-in, OIDC + PKCE
+app --> hub : F3  HTTPS, bearer token,\nApp Attest for a new account
+app --> kc : F4  device grant
+peer --> edc : F5  DSP, DCP\n(public control plane)
+operator --> kc : F6  admin REST, bearer token
+operator --> hub : F7  deploy (GitHub Actions, OIDC)
+
+' flows inside B2
+hub --> kc : F8  token exchange, userinfo
+hub --> proxy : F9  X-Caller, load-test headers
+hub --> edc : F10 management API, catalog token
+crawler --> edc : F11 catalog requests, DSP_CATALOG_TOKEN
+proxy --> edc : F12 data planes
+hub --> obs : F13 traces, logs
+proxy --> obs : F13
+
+' flows into B3
+hub --> neo4j : F14 bolt, direct reads (ADR-043)
+proxy --> neo4j : F15 bolt, writes, audit records
+proxy --> pg : F16 task store
+kc --> pg : F17 realm
+edc --> pg : F18 state machines
+edc --> vault : F19 keys
+vault --> pg : F20 sealed state
+hub --> kv : F21 secret references at start
+
+legend bottom left
+|= Boundary |= What crossing it means |
+| B1 red | anyone on the internet can send the request; identity is proven by the cookie, token or credential it carries |
+| B2 amber | only workloads of the environment reach it; the caller is a known app or job, named in the headers it sends |
+| B3 green | only the environment reads or writes; a secret or a record lives here and nowhere else |
+Every F-number is a data flow the STRIDE tables cite.
+endlegend
+@enduml

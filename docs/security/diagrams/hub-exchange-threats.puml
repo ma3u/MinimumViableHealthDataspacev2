@@ -1,0 +1,74 @@
+@startuml hub-exchange-threats
+title One data exchange, and where each threat sits\nthe sign-in, the request through the hub, the DSP negotiation and the DCP credential check, with the STRIDE ids
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam maxMessageSize 240
+skinparam sequence {
+  ArrowColor #475569
+  LifeLineBorderColor #94A3B8
+  ParticipantBorderColor #64748B
+  ParticipantBackgroundColor #FFFFFF
+  GroupBorderColor #94A3B8
+  GroupBackgroundColor #F8FAFC
+  DividerBackgroundColor #E2E8F0
+}
+
+actor "Person\n(data user)" as P
+participant "Keycloak" as KC
+box "Hub" #F0F9FF
+  participant "UI and API" as UI
+  participant "neo4j-proxy" as PX
+end box
+box "Connectors" #FFFBEB
+  participant "Consumer\ncontrol plane" as CCP
+  participant "IdentityHub\n+ IssuerService" as IH
+  participant "Provider\ncontrol plane" as PCP
+  participant "Data plane" as DP
+end box
+database "Neo4j" as DB
+
+== Sign in and ask ==
+P -> KC : sign in (OIDC + PKCE)
+note right: S-02 forged session, S-04 realm takeover
+KC --> UI : code, then tokens; roles from the realm only
+note right: E-03 role injection
+P -> UI : request a page or an API route
+note right: I-01 anonymous read, E-01 and E-02 wrong role, T-04 CSRF
+UI -> UI : requireAuth(): session, roles;\nseesPatientIdentity() by role
+UI -> PX : X-Caller (hash of the user), the query
+note right: D-01 and D-04 per-user and per-participant rate limit
+PX -> DB : parameterised Cypher
+note right: T-01 injection, D-03 unbounded query
+PX -> DB : audit record, hash-chained
+note right: R-01 and R-03 denied access or edited trail
+DB --> PX : result, minimum cohort of 5 where federated
+note right: I-07 re-identification
+PX --> UI : JSON
+UI --> P : page
+
+== Negotiate and transfer (DSP 2025-1, DCP v1.0) ==
+UI -> CCP : management API, catalog token
+note right: I-02 management API exposed, E-04 token misuse
+CCP -> PCP : catalog request, contract request
+note right: S-01 impersonated participant, T-02 terms changed in transit
+PCP -> IH : presentation request (DCP)
+IH --> PCP : verifiable presentation: membership, EHDS participant, permit
+note right: S-03 replayed presentation, T-03 forged claim,\nI-08 expired or revoked credential accepted
+PCP -> PCP : state machine: REQUESTED, AGREED, FINALIZED
+note right: T-05 state jump, R-02 denied agreement
+PCP --> CCP : contract agreement, signed
+CCP -> PCP : transfer request, contractId
+PCP -> DP : EDR for this agreement only
+note right: E-05 transfer without a contract, D-02 flood
+DP --> CCP : FHIR or OMOP data
+CCP --> UI : transfer completed
+UI -> PX : TransferEvent for the audit trail
+PX -> DB : record, hash-chained
+
+legend bottom left
+  Each note names the STRIDE ids of the table where that step is analysed. Steps in
+  the connectors are the EDC-V implementation's; the project tests them with the
+  DSP TCK, the DCP checks and the EHDS suites on every pull request.
+endlegend
+@enduml
