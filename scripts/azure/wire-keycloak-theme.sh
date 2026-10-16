@@ -37,7 +37,7 @@ check() {
   echo "image: $(az containerapp show --name "$KEYCLOAK_APP" --resource-group "$RG" \
     --query 'properties.template.containers[0].image' -o tsv)"
   local token
-  token="$(admin_token)"
+  token="$(admin_token || true)"
   curl -sf -H "Authorization: Bearer $token" "${KEYCLOAK_URL}/admin/realms/edcv" |
     jq '{displayName, loginTheme}'
   # The sign-in page itself (the account console only redirects in a browser;
@@ -48,7 +48,7 @@ check() {
 
 set_realm() {
   local token
-  token="$(admin_token)"
+  token="$(admin_token || true)"
   [[ -n "$token" ]] || { echo "Keycloak admin login failed" >&2; exit 1; }
   local code
   code="$(curl -s -o /dev/null -w '%{http_code}' -X PUT -H "Authorization: Bearer $token" \
