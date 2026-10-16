@@ -5,6 +5,7 @@ import {
   Users,
   ShieldCheck,
   Smartphone,
+  Activity,
   ArrowRight,
 } from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
@@ -44,6 +45,13 @@ const sections = [
     label: "Klarbefund",
     desc: "The iPhone app that turns a paper lab report into checkable values: the user guide and the developer guide, screen by screen with screenshots.",
     color: "border-layer5 hover:bg-layer5/10",
+  },
+  {
+    href: "/docs/operations",
+    icon: Activity,
+    label: "Operations",
+    desc: "The live hub under load: every load, stress and spike run with its Grafana dashboard, what each found, and how to run the next one.",
+    color: "border-layer1 hover:bg-layer1/10",
   },
 ];
 

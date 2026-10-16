@@ -342,6 +342,8 @@
     "/docs/developer/reference",
     "/docs/klarbefund",
     "/docs/klarbefund/[slug]",
+    "/docs/operations",
+    "/docs/operations/[slug]",
     "/docs/security",
     "/docs/security/[slug]",
     "/docs/user-guide",
@@ -1156,6 +1158,8 @@
     "/docs/security": "2026-10-16",
     "/docs/security/[slug]": "2026-10-16",
     "/docs/klarbefund": "2026-10-16",
+    "/docs/operations": "2026-10-16",
+    "/docs/operations/[slug]": "2026-10-16",
     "/docs/klarbefund/[slug]": "2026-10-16"
   }
 }

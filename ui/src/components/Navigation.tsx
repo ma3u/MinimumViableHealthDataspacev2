@@ -445,6 +445,7 @@ const docsGroup: NavGroup = {
       icon: ShieldCheck,
     },
     { href: "/docs/klarbefund", label: "Klarbefund", icon: Smartphone },
+    { href: "/docs/operations", label: "Operations", icon: Activity },
   ],
 };
 
