@@ -27,6 +27,10 @@ REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2"
 
 # slug, source, one-line summary for the index page. Order is the index order.
 DOCS = [
+    ("operational-guideline", "docs/security/operational-guideline.md",
+     "How to host the hub and Klarbefund for real: which EHDS role (Regulation (EU) 2025/327) operates "
+     "which part, what BSI C5, IT-Grundschutz, TR-02102 and TR-03161 ask of each part, the clocks for "
+     "incidents, retention, and the go-live checklist by role."),
     ("security-test-report", "docs/security/security-test-report-2026-10-15.md",
      "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, the app's posture "
      "tests and the anonymous black-box checks of the live hub; findings F1 to F10 with their "
