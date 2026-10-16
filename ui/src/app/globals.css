@@ -677,9 +677,10 @@
   border-radius: 0.5rem;
   background: #ffffff; /* the SVGs are drawn on white in both themes */
   overflow-x: auto;
+  cursor: zoom-in;
 }
 .doc-prose a.doc-figure::after {
-  content: "Open at full size";
+  content: "Click to open full screen and zoom";
   display: block;
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
