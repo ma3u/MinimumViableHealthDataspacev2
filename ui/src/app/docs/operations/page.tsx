@@ -6,7 +6,7 @@ import { docsInSection, REPO_URL } from "@/lib/docs/published-docs";
 export const metadata = {
   title: "Operations",
   description:
-    "How the live hub behaves under load: the load, stress and spike test results with their Grafana dashboards, the baseline and the local runs, and the runbook to repeat them.",
+    "How to operate the hub and what it does under load: the operational guideline for hosting under the EHDS and the BSI standards, the Grafana dashboards with screenshots, the latest load, stress and spike results, the latest readiness assessment, and the runbook to repeat a run.",
 };
 
 /** The Grafana on Azure; a sign-in is required. */
@@ -29,10 +29,13 @@ export default function OperationsDocsPage() {
         </h1>
         <DocsLastUpdated page="/docs/operations" />
         <p className="text-(--text-secondary) text-lg">
-          What the live hub does under load, measured with the k6 suite of the
-          repository and recorded on the Grafana dashboards of the platform: the
-          results of every load, stress and spike run, what each one found, what
-          changed because of it, and how to run the next one.
+          How the hub is operated and what it does under load. The operational
+          guideline says which EHDS role runs which part and what the BSI
+          standards ask of each; the dashboards page shows the three Grafana
+          dashboards and how to read them; the load-test page holds the results
+          of every load, stress and spike run, what each found and what changed
+          because of it; the readiness assessment reads all of it against the
+          Well-Architected Framework.
         </p>
       </div>
 
