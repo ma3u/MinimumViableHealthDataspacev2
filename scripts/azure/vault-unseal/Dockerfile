@@ -19,4 +19,9 @@ COPY scripts/azure/vault-unseal/vault-pg-schema.sql /app/vault-pg-schema.sql
 # nothing but /tmp, so it drops to the image's vault user, uid 100 as the
 # official image creates it (trivy DS-0002; hadolint DL3066 wants the number).
 USER 100
+# The sidecar is healthy when the Vault it tends answers unsealed: `vault
+# status` exits 0 unsealed, 2 sealed, 1 unreachable (security test report
+# 2026-10-15, F6).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD ["/bin/sh", "-c", "VAULT_ADDR=${VAULT_ADDR:-http://127.0.0.1:8200} vault status >/dev/null 2>&1"]
 ENTRYPOINT ["/bin/sh", "/app/unseal-loop.sh"]

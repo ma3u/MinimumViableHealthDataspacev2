@@ -38,3 +38,8 @@ RUN sed -i 's/GF_AUTH_ANONYMOUS_ENABLED:-true/GF_AUTH_ANONYMOUS_ENABLED:-false/'
  && chown -R 1000:1000 /data /var/tempo /var/lib/grafana-plugins /otel-lgtm
 
 USER 1000:1000
+# Grafana answers /api/health on 3000 once the stack is up; bash opens the
+# socket so the check does not depend on curl being in the base image
+# (security test report 2026-10-15, F6).
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=5 \
+  CMD ["/bin/bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/3000; printf 'GET /api/health HTTP/1.0\\r\\n\\r\\n' >&3; grep -q ' 200 ' <&3"]

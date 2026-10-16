@@ -34,5 +34,8 @@ RUN addgroup -g 10001 compliance \
 # Numeric, because hadolint DL3066 is right that a host cannot resolve a name
 # from the image's own /etc/passwd. Same uid:gid as the account created above.
 USER 10001:10001
+# A one-shot job: the suites run and the container exits, there is nothing to
+# probe (security test report 2026-10-15, F6).
+HEALTHCHECK NONE
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
