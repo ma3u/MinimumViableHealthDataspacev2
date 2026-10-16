@@ -104,6 +104,17 @@ export NEO4J_MEMORY="4Gi"
 export NEO4J_HEAP="1536m"
 export NEO4J_PAGECACHE="1g"
 export NEO4J_DIRECT_MEMORY="512m"
+# The UI's size (ADR-061). One Node process per replica, so a whole core each
+# and more replicas on an HTTP concurrency rule, instead of three halves on
+# ACA's default rule of 10 concurrent requests: the stress runs of 2026-10-06
+# pinned 3 x 0.5 vCPU from 200 users on (#571). size-ui.sh applies these;
+# offhours.sh restores the replica range on the morning start (keep its
+# UI_MAX_REPLICAS equal to this one, it does not source this file).
+export UI_CPU="1.0"
+export UI_MEMORY="2Gi"
+export UI_MIN_REPLICAS="1"
+export UI_MAX_REPLICAS="6"
+export UI_SCALE_CONCURRENCY="15"
 export KEYCLOAK_VERSION="26.8.0" # minor bump from 26.6.4 (#556, ADR-029 cadence)
 export VAULT_VERSION="2.0"
 export NATS_VERSION="2.14.3-alpine"

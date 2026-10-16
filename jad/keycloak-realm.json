@@ -315,7 +315,7 @@
       "serviceAccountsEnabled": false,
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": true,
-      "fullScopeAllowed": true,
+      "fullScopeAllowed": false,
       "redirectUris": [
         "http://localhost:3000/api/auth/callback/keycloak",
         "http://localhost:3000/*",
@@ -628,7 +628,39 @@
       "subGroups": []
     }
   ],
-  "eventsEnabled": false,
+  "eventsEnabled": true,
+  "eventsExpiration": 604800,
+  "enabledEventTypes": [
+    "LOGIN",
+    "LOGIN_ERROR",
+    "LOGOUT",
+    "CODE_TO_TOKEN_ERROR",
+    "REFRESH_TOKEN_ERROR",
+    "CLIENT_LOGIN_ERROR",
+    "USER_DISABLED_BY_PERMANENT_LOCKOUT",
+    "USER_DISABLED_BY_TEMPORARY_LOCKOUT",
+    "RESET_PASSWORD",
+    "UPDATE_PASSWORD",
+    "IDENTITY_PROVIDER_LOGIN",
+    "IDENTITY_PROVIDER_LOGIN_ERROR"
+  ],
+  "eventsListeners": ["jboss-logging"],
+  "adminEventsEnabled": false,
+  "adminEventsDetailsEnabled": false,
+  "scopeMappings": [
+    {
+      "client": "health-dataspace-ui",
+      "roles": [
+        "EDC_ADMIN",
+        "EDC_USER_PARTICIPANT",
+        "HDAB_AUTHORITY",
+        "DATA_HOLDER",
+        "DATA_USER",
+        "PATIENT",
+        "TRUST_CENTER_OPERATOR"
+      ]
+    }
+  ],
   "displayNameHtml": "EHDS Integration Hub",
   "loginTheme": "ehds-hub"
 }

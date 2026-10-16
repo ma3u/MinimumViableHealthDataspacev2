@@ -48,6 +48,10 @@ interface TasksResponse {
     transfers: number;
     active: number;
   };
+  /** Who answered: the connector, or the hub's store of last synced tasks. */
+  source?: "edc" | "store";
+  /** What failed on the way (#571). */
+  backend?: { edc?: string; store?: string };
 }
 
 /* ── DSP State helpers ── */
@@ -277,6 +281,7 @@ function TasksContent() {
   const [data, setData] = useState<TasksResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [filter, setFilter] = useState<FilterType>("all");
   const [selectedParticipant, setSelectedParticipant] = useState<string>("all");
   const [participantDropdownOpen, setParticipantDropdownOpen] = useState(false);
@@ -287,12 +292,18 @@ function TasksContent() {
 
     try {
       const res = await fetchApi("/api/tasks");
+      const json = (await res.json().catch(() => ({}))) as TasksResponse & {
+        error?: string;
+      };
       if (res.ok) {
-        const json = await res.json();
         setData(json);
+        setLoadError(null);
+      } else {
+        // Keep the last list on screen, but say that this refresh failed.
+        setLoadError(json.error ?? `HTTP ${res.status}`);
       }
-    } catch {
-      /* ignore */
+    } catch (err) {
+      setLoadError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -404,6 +415,32 @@ function TasksContent() {
             external: true,
           }}
         />
+
+        {/* Where the list comes from, when it is not the connector (#571) */}
+        {loadError && (
+          <div
+            role="alert"
+            data-testid="tasks-unavailable"
+            className="mb-6 flex items-start gap-2 rounded-lg border border-(--danger-border) bg-(--danger-bg) p-3 text-sm text-(--danger-text)"
+          >
+            <XCircle size={16} className="mt-0.5 shrink-0" />
+            <span>Tasks could not be loaded: {loadError}</span>
+          </div>
+        )}
+        {!loadError && data?.source === "store" && (
+          <div
+            role="status"
+            data-testid="tasks-from-store"
+            className="mb-6 flex items-start gap-2 rounded-lg border border-(--warning-border) bg-(--warning-bg) p-3 text-sm text-(--warning-text)"
+          >
+            <Circle size={16} className="mt-0.5 shrink-0" />
+            <span>
+              The connector&apos;s management API is not answering
+              {data.backend?.edc ? ` (${data.backend.edc})` : ""}. These are the
+              tasks the hub last synced to its store; they may be stale.
+            </span>
+          </div>
+        )}
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

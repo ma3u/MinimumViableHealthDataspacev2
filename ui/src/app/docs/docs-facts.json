@@ -1062,6 +1062,12 @@
       "file": "ADR-060-the-app-locks-with-face-id-and-answers-pinning-and-jailbreak-detection.md",
       "title": "The app locks with Face ID or the passcode; certificate pinning and jailbreak detection are declined with reasons",
       "status": ""
+    },
+    {
+      "id": "ADR-061",
+      "file": "ADR-061-the-ui-scales-out-on-whole-cores.md",
+      "title": "The UI on Azure scales out on whole cores, on its own HTTP concurrency rule",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
@@ -1144,8 +1150,8 @@
     "/docs/user-guide": "2026-10-16",
     "/docs/developer": "2026-10-16",
     "/docs/developer/quality-gates": "2026-10-16",
-    "/docs/developer/api": "2026-10-15",
-    "/docs/developer/reference": "2026-10-15",
+    "/docs/developer/api": "2026-10-16",
+    "/docs/developer/reference": "2026-10-16",
     "/docs/architecture": "2026-10-16",
     "/docs/security": "2026-10-16",
     "/docs/security/[slug]": "2026-10-16",

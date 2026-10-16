@@ -72,6 +72,48 @@ rows and the server-side rows of the dashboard both show on
 job as a secret, starts it and waits. Jobs need the PIM role `rol-ssg-prd-project_owner`
 active: Container Apps Contributor has no `Microsoft.App/jobs` action.
 
+**No merge while a run is on.** A merge to `main` redeploys the UI and the proxy
+(#559 landed in the middle of the stress run of 2026-10-06). Both run scripts set
+the repository variable `LOAD_TEST_RUNNING` to `<testid> <start>` for a run
+against the live hub and clear it at the end; `deploy-azure.yml` waits for it to
+clear, up to three hours, and goes ahead with a warning when the value is older
+than four. With `WAIT=0` the variable stays set: clear it after the run with
+`gh variable delete LOAD_TEST_RUNNING`. The hold needs `gh` signed in on the
+laptop; without it the script warns and runs anyway.
+
+### Scale the UI (ADR-061)
+
+The UI is one Node process per replica, and three replicas of 0.5 vCPU were
+the ceiling at 200 users. `scripts/azure/env.sh` names its size
+(`UI_CPU`, `UI_MEMORY`, `UI_MIN_REPLICAS`, `UI_MAX_REPLICAS`,
+`UI_SCALE_CONCURRENCY`):
+
+```bash
+scripts/azure/size-ui.sh --check     # what the app runs with now
+scripts/azure/size-ui.sh             # apply; a rolling revision, no outage, not during a run
+ABORT_ON=failures scripts/azure/run-load-test.sh stress   # then measure again
+```
+
+`offhours.sh` restores the replica range on the morning start, so a change
+to the range is a change to env.sh and the same number in offhours.sh.
+
+### The runs still to do
+
+`spike`, `soak` and `signin` on Azure (hypotheses 4 and 6), each inside office
+hours, one a day, with the deploy hold above in place:
+
+```bash
+scripts/azure/run-load-test.sh spike                    # 10 → 200 users in 10 s
+scripts/azure/run-load-test.sh soak                     # 50 users, 2 h: the burst credits
+KC_USER=researcher KC_PASSWORD=... scripts/azure/run-load-test.sh signin   # real Keycloak sign-ins
+```
+
+The Flexible Server's burst credits are the "Postgres (Flexible Server B1ms)"
+panel of the Azure row; under about 10 it throttles everything that shares it,
+and the answer is a General Purpose SKU. A failed sign-in during `signin` is
+an event on the live realm since #571 (`scripts/azure/wire-keycloak-events.sh
+--check` lists the newest), not only a WARN line in Log Analytics.
+
 ## Watch
 
 The dashboard **Load and stress test**, filtered by the run:

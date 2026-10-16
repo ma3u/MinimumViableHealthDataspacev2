@@ -1,3 +1,12 @@
+> **Archived 2026-10-12 (#571).** The assessment of 2026-03-25, kept as it was
+> written. Since then: Postgres on the Flexible Server (ADR-041), every route
+> behind a session (ADR-044), the observability stack and the audit trail
+> (ADR-045), Vault with state (ADR-046), everything stopped off hours
+> (ADR-053), Neo4j at 2 vCPU and 4 GiB (ADR-056) and the UI on whole cores
+> (ADR-061). What the platform does under load today is in
+> [`2026-10-baseline.md`](2026-10-baseline.md), [`2026-10-05-local.md`](2026-10-05-local.md)
+> and the runbook [`load-and-stress-test.md`](../knowledge/runbooks/load-and-stress-test.md).
+
 # Production Readiness Assessment
 
 ## Well-Architected Framework (WAF) + Cloud Adoption Framework (CAF)

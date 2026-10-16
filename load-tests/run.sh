@@ -16,6 +16,9 @@
 # shortens every stage for a dry run), ABORT_ON=failures (stress, spike, soak:
 # abort on failed requests only, not on latency), KC_USER/KC_PASSWORD (signin), YES=1
 # (skip the confirmation for a stress, spike or soak run against azure).
+#
+# A run against azure sets the repository variable LOAD_TEST_RUNNING for its
+# duration, and deploy-azure.yml waits for it to clear (#571).
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 HERE="$ROOT/load-tests"
@@ -70,6 +73,16 @@ if curl -s -o /dev/null -m 10 "${RW%/api/v1/write}/-/ready"; then
   echo "dashboard: http://localhost:3300/d/mvhd-load-test/load-and-stress-test?var-testid=$TESTID"
 else
   echo "no Prometheus at $RW; metrics stay in the summary only"
+fi
+
+if [ "$TARGET" = azure ]; then
+  # Deploys wait on this variable (deploy-azure.yml); cleared when k6 exits.
+  if (cd "$ROOT" && gh variable set LOAD_TEST_RUNNING --body "$TESTID $(date -u +%Y-%m-%dT%H:%M:%SZ)" 2>/dev/null); then
+    trap '(cd "$ROOT" && gh variable delete LOAD_TEST_RUNNING 2>/dev/null) || echo "clear the hold: gh variable delete LOAD_TEST_RUNNING" >&2' EXIT
+    echo "deploys wait: LOAD_TEST_RUNNING=$TESTID"
+  else
+    echo "could not set LOAD_TEST_RUNNING (gh signed in?): a merge to main would redeploy during the run" >&2
+  fi
 fi
 
 echo "k6 $SCENARIO against $BASE_URL, testid $TESTID"

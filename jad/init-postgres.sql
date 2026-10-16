@@ -81,3 +81,9 @@ CREATE TABLE IF NOT EXISTS tasks (
 CREATE INDEX IF NOT EXISTS idx_tasks_participant_id ON tasks(participant_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_type ON tasks(type);
 CREATE INDEX IF NOT EXISTS idx_tasks_state ON tasks(state);
+
+-- This script runs as the superuser, so the table above would belong to it
+-- and the proxy's CREATE INDEX IF NOT EXISTS (routes/tasks.ts) failed with
+-- "must be owner of table tasks" on every /tasks call (#571). The indexes
+-- follow the table's owner.
+ALTER TABLE tasks OWNER TO taskuser;
