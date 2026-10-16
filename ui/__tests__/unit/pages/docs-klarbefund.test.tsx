@@ -138,7 +138,7 @@ describe("KlarbefundDocPage", () => {
     expect(srcs).toContain("/published-docs/connect.png");
     expect(srcs).toContain("/published-docs/consents.png");
     expect(
-      screen.getByRole("heading", { name: "Connect to EHDS" }),
+      screen.getByRole("heading", { name: /^\d+\. Connect to EHDS$/ }),
     ).toHaveAttribute("id", "connect-to-ehds");
   });
 

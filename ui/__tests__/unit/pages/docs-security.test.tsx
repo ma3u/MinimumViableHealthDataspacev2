@@ -126,10 +126,9 @@ describe("SecurityDocPage", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: /Security test report/ }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Findings" })).toHaveAttribute(
-      "id",
-      "findings",
-    );
+    expect(
+      screen.getByRole("heading", { name: /^\d+\. Findings$/ }),
+    ).toHaveAttribute("id", "findings");
     expect(screen.getByText("F10")).toBeInTheDocument();
     expect(screen.getByText(/on GitHub/).closest("a")).toHaveAttribute(
       "href",

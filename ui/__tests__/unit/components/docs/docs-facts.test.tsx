@@ -34,14 +34,12 @@ describe("docs last-updated dates", () => {
   it.each(pages)("%s shows its date", (route) => {
     expect(existsSync(pageFile(route))).toBe(true);
     // Directly, or through PublishedDocPage, which renders it for a section.
-    expect(readFileSync(pageFile(route), "utf8")).toMatch(
-      new RegExp(
-        `(<DocsLastUpdated page|lastUpdatedPage)="${route.replace(
-          /[[\]]/g,
-          "\\$&",
-        )}"`,
-      ),
-    );
+    const src = readFileSync(pageFile(route), "utf8");
+    expect(
+      src.includes(`<DocsLastUpdated page="${route}" />`) ||
+        src.includes(`lastUpdatedPage="${route}"`),
+      `${route} carries no last-updated marker`,
+    ).toBe(true);
   });
 
   it.each(pages)(

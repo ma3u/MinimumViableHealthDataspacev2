@@ -585,6 +585,11 @@
   margin: 0 0 1rem;
   text-wrap: balance;
 }
+.doc-prose .doc-num {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  margin-right: 0.15em;
+}
 .doc-prose h2 {
   font-size: 1.5rem;
   font-weight: 600;

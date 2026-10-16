@@ -53,7 +53,7 @@ export function collectHeadings(root: ParentNode): TocEntry[] {
 }
 
 /** The headings of the page, and which one is current while scrolling. */
-export function useDocsToc(): { entries: TocEntry[]; active: string } {
+function useDocsToc(): { entries: TocEntry[]; active: string } {
   const [entries, setEntries] = useState<TocEntry[]>([]);
   const [active, setActive] = useState("");
 
