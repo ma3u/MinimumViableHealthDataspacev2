@@ -3,4 +3,4 @@
 docs/sbom/*.cdx.json
 
 # Published copy of the security reports, written by scripts/gen-docs-content.py and byte-compared by --check
-ui/src/content/security-docs.json
+ui/src/content/published-docs.json

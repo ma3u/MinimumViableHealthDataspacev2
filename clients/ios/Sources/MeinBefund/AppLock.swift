@@ -17,15 +17,23 @@ final class AppLock: ObservableObject {
   private var authenticating = false
 
   var policy: AppLockPolicy {
-    let defaults = UserDefaults.standard
-    let enabled = defaults.object(forKey: AppLockPolicy.defaultsKey) as? Bool ?? true
-    return AppLockPolicy(enabled: enabled, graceSeconds: 0)
+    AppLockPolicy(enabled: Self.enabledByDefaults, graceSeconds: 0)
   }
 
   init() {
-    let defaults = UserDefaults.standard
-    let enabled = defaults.object(forKey: AppLockPolicy.defaultsKey) as? Bool ?? true
-    locked = AppLockPolicy(enabled: enabled).locksAtLaunch
+    locked = AppLockPolicy(enabled: Self.enabledByDefaults).locksAtLaunch
+  }
+
+  /// The person's choice, on unless switched off. A demo launch (the UI
+  /// tests and the screenshots, `-MBDemoSeed` or `-MBDevData`) shows
+  /// fictional data only and runs where nobody can answer a passcode
+  /// prompt, so it is never locked; the check is compiled out of a release
+  /// build with the seed itself.
+  private static var enabledByDefaults: Bool {
+    #if DEBUG
+      if DemoSeed.isRequested { return false }
+    #endif
+    return UserDefaults.standard.object(forKey: AppLockPolicy.defaultsKey) as? Bool ?? true
   }
 
   /// The app left the foreground: note when, and lock if the policy is on.

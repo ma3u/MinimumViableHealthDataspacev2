@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Copy the security and data-protection reports into the UI so the hub
-publishes them at /docs/security/<slug>.
+"""Copy the published documents into the UI so the hub serves them at
+/docs/<section>/<slug>: the security and data-protection reports under
+/docs/security, the Klarbefund guides under /docs/klarbefund.
 
-The UI image is built from ui/ alone, so a report under docs/ is not in the
+The UI image is built from ui/ alone, so a document under docs/ is not in the
 build context. This script writes the published copy,
-ui/src/content/security-docs.json, from the sources listed in DOCS, with
-every relative link rewritten: a link to another published report becomes
-its /docs/security/<slug> route, anything else becomes the file on GitHub.
+ui/src/content/published-docs.json, from the sources listed in DOCS, with
+every relative link rewritten: a link to another published document becomes
+its /docs/<section>/<slug> route, anything else becomes the file on GitHub.
+Images, Markdown or HTML <img>, are copied next to the UI.
 
     python3 scripts/gen-docs-content.py          # write the copy
     python3 scripts/gen-docs-content.py --check  # exit 1 when it is stale
@@ -22,44 +24,51 @@ import re
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = "ui/src/content/security-docs.json"
+OUT = "ui/src/content/published-docs.json"
 IMG_DIR = "ui/public/published-docs"  # copies of the images the reports embed
 BASE = "__BASE_PATH__"  # the page replaces it with Next's basePath
 REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2"
 
-# slug, source, one-line summary for the index page. Order is the index order.
+# section, slug, source, one-line summary for the index page. Order is the index order.
 DOCS = [
-    ("operational-guideline", "docs/security/operational-guideline.md",
+    ("klarbefund", "klarbefund-user-guide", "docs/klarbefund/user-guide.md",
+     "The app as a person uses it, screen by screen with screenshots: getting a report in, checking a "
+     "value against the paper, trends, consents, connecting to the EHDS, exports and your data rights."),
+    ("klarbefund", "klarbefund-developer-guide", "docs/klarbefund/developer-guide.md",
+     "Building, running and testing the app: the pipeline from camera to sealed store, the shared "
+     "dictionary, the store layout, the dev dataset, the two test suites, diagnostics and TestFlight."),
+    ("security", "operational-guideline", "docs/security/operational-guideline.md",
      "How to host the hub and Klarbefund for real: which EHDS role (Regulation (EU) 2025/327) operates "
      "which part, what BSI C5, IT-Grundschutz, TR-02102 and TR-03161 ask of each part, the clocks for "
      "incidents, retention, and the go-live checklist by role."),
-    ("security-test-report", "docs/security/security-test-report-2026-10-15.md",
+    ("security", "security-test-report", "docs/security/security-test-report-2026-10-15.md",
      "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, the app's posture "
      "tests and the anonymous black-box checks of the live hub; findings F1 to F10 with their "
      "status after the fixes, and what an independent test would add."),
-    ("threat-model-hub", "docs/security/threat-model.md",
+    ("security", "threat-model-hub", "docs/security/threat-model.md",
      "STRIDE analysis of the UI, the graph, the DSP contract flow and the DCP credential exchange."),
-    ("threat-model-klarbefund", "docs/security/threat-model-klarbefund.md",
+    ("security", "threat-model-klarbefund", "docs/security/threat-model-klarbefund.md",
      "STRIDE analysis of the iPhone app; each mitigation names the code or test that shows it."),
-    ("klarbefund-self-assessment", "docs/klarbefund/self-assessment.md",
+    ("security", "klarbefund-self-assessment", "docs/klarbefund/self-assessment.md",
      "Data protection (GDPR), BSI TR-03161 objective by objective, the EU AI Act label and the "
      "MDR status of the app, each line pointing to the code or test that shows it."),
-    ("klarbefund-evidence", "docs/klarbefund/evidence.md",
+    ("security", "klarbefund-evidence", "docs/klarbefund/evidence.md",
      "The accuracy benchmark, the dictionary parity check, the run record, and what is still missing."),
-    ("report-for-health-insurers", "docs/klarbefund/report-for-health-insurers.md",
+    ("security", "report-for-health-insurers", "docs/klarbefund/report-for-health-insurers.md",
      "The three questions an insurer asks, is the extraction right, is the data safe, is it a "
      "medical device, answered with the evidence, plus the white-label and consulting offer."),
-    ("klarbefund-run-on-mac", "docs/klarbefund/run-on-mac.md",
+    ("security", "klarbefund-run-on-mac", "docs/klarbefund/run-on-mac.md",
      "How to reproduce every number in the evidence on a Mac with Xcode."),
-    ("bsi-c5-gap-analysis", "docs/security/bsi-c5-gap-analysis.md",
+    ("security", "bsi-c5-gap-analysis", "docs/security/bsi-c5-gap-analysis.md",
      "The hub against the BSI C5:2020 criteria catalogue, for EHDS Art. 50(6)."),
-    ("sbom", "docs/sbom/README.md",
+    ("security", "sbom", "docs/sbom/README.md",
      "One CycloneDX bill of materials per deployable part, byte-stable; the --check fails when a bill no longer matches its lockfile."),
 ]
 
-BY_SOURCE = {src: slug for slug, src, _ in DOCS}
+BY_SOURCE = {src: (section, slug) for section, slug, src, _ in DOCS}
 LINK = re.compile(r"(?<!!)\]\(([^)\s]+)\)")
 IMAGE = re.compile(r"!\[([^\]]*)\]\(([^)\s]+)\)")
+HTML_IMG = re.compile(r'(<img\b[^>]*?\bsrc=")([^"]+)(")')
 
 
 def rewrite_link(target, source_dir):
@@ -68,7 +77,8 @@ def rewrite_link(target, source_dir):
     path, _, anchor = target.partition("#")
     resolved = posixpath.normpath(posixpath.join(source_dir, path))
     if resolved in BY_SOURCE:
-        return f"/docs/security/{BY_SOURCE[resolved]}" + (f"#{anchor}" if anchor else "")
+        section, slug = BY_SOURCE[resolved]
+        return f"/docs/{section}/{slug}" + (f"#{anchor}" if anchor else "")
     kind = "tree" if os.path.isdir(os.path.join(ROOT, resolved)) else "blob"
     return f"{REPO}/{kind}/main/{resolved}" + (f"#{anchor}" if anchor else "")
 
@@ -87,14 +97,16 @@ def rewrite_image(target, source_dir, images):
 def build():
     docs = []
     images = {}
-    for slug, src, summary in DOCS:
+    for section, slug, src, summary in DOCS:
         with open(os.path.join(ROOT, src), encoding="utf-8") as f:
             text = f.read()
         title = re.search(r"^#\s+(.+?)\s*$", text, re.M)
         source_dir = posixpath.dirname(src)
         body = IMAGE.sub(lambda m: "![" + m.group(1) + "](" + rewrite_image(m.group(2), source_dir, images) + ")", text)
+        body = HTML_IMG.sub(lambda m: m.group(1) + rewrite_image(m.group(2), source_dir, images) + m.group(3), body)
         body = LINK.sub(lambda m: "](" + rewrite_link(m.group(1), source_dir) + ")", body)
         docs.append({
+            "section": section,
             "slug": slug,
             "title": title.group(1) if title else slug,
             "summary": summary,
