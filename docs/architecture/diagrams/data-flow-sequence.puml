@@ -1,0 +1,31 @@
+@startuml data-flow-sequence
+title End-to-end data flow, as a sequence\nfrom Synthea to the analytics dashboard
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam sequence {
+  ArrowColor #475569
+  LifeLineBorderColor #94A3B8
+  ParticipantBorderColor #64748B
+  ParticipantBackgroundColor #FFFFFF
+}
+
+participant "Synthea" as SY
+participant "FHIR R4 bundles" as FHIR
+participant "Neo4j graph" as NEO
+participant "OMOP CDM layer" as OMOP
+participant "Analytics dashboard" as AN
+
+SY -> FHIR : generate synthetic patients
+FHIR -> NEO : load_fhir_neo4j.py\nPatient, Encounter, Condition, Observation,\nMedicationRequest, Procedure
+NEO -> NEO : create the FHIR nodes\nand relationships (layer 3)
+NEO -> OMOP : fhir-to-omop-transform.cypher
+note over NEO, OMOP
+  MAPPED_TO relationships:
+  Patient to OMOPPerson, Encounter to OMOPVisitOccurrence,
+  Condition to OMOPConditionOccurrence, and so on
+end note
+OMOP -> OMOP : CODED_BY to SNOMED, LOINC, RxNorm\n(copied from the FHIR node)
+OMOP -> AN : cohort analytics queries\n(neo4j-proxy, /omop/cohort)
+AN -> AN : render dashboards and charts
+@enduml
