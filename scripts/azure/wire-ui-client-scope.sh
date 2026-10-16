@@ -35,7 +35,9 @@ admin_token() {
     -d grant_type=password | jq -r '.access_token // empty'
 }
 
-TOKEN="$(admin_token)"
+# `|| true`: with pipefail a refused login would end the script here, before
+# the message below; the guard did exactly that for a day (2026-10-16).
+TOKEN="$(admin_token || true)"
 [[ -n "$TOKEN" ]] || { err "Keycloak admin login failed"; exit 1; }
 auth=(-H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json")
 

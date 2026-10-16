@@ -38,6 +38,10 @@ check() {
   [ "$code" = 401 ] && echo "ok    admin REST without a token 401 (reachable, protected)" || { echo "FAIL  admin REST $code (wanted 401)"; rc=1; }
   code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' -X POST -d 'grant_type=client_credentials' "https://${HOST}/realms/edcv/protocol/openid-connect/token")
   [[ "$code" =~ ^40[01]$ ]] && echo "ok    token endpoint answers ($code)" || { echo "FAIL  token endpoint $code"; rc=1; }
+  # The master realm requires HTTPS for an external request; 403 here means
+  # Caddy told Keycloak the request was plain HTTP, and no admin script works.
+  code=$(curl -s -o /dev/null -m 20 -w '%{http_code}' -X POST -d 'client_id=admin-cli&grant_type=password&username=x&password=x' "https://${HOST}/realms/master/protocol/openid-connect/token")
+  [ "$code" = 401 ] && echo "ok    master realm token endpoint answers 401 (HTTPS seen)" || { echo "FAIL  master realm token endpoint $code (wanted 401; 403 is 'HTTPS required')"; rc=1; }
   return $rc
 }
 
@@ -71,7 +75,14 @@ CADDYFILE=$(cat <<CADDY
 	@console path /admin /admin/ /admin/*/console /admin/*/console/*
 	respond @console 403
 	reverse_proxy 127.0.0.1:8080 {
-		trusted_proxies private_ranges
+		# The ingress terminates TLS and reaches Caddy from the environment's
+		# own range, which is not in private_ranges: without these two lines
+		# Caddy rewrote X-Forwarded-Proto to http and X-Forwarded-For to the
+		# ingress, Keycloak saw a plain-HTTP request from one address, and the
+		# master realm (sslRequired external) answered 403 "HTTPS required"
+		# to every admin script from 2026-10-15 on.
+		trusted_proxies private_ranges 100.64.0.0/10
+		header_up X-Forwarded-Proto https
 	}
 }
 CADDY
@@ -117,6 +128,15 @@ os.unlink(f.name)
 print(f"previous definition: {backup}")
 PY
 
+# A changed Caddyfile alone changes no revision: the secret is read when the
+# sidecar starts, so an unchanged template keeps the old rules running. When
+# the update created no revision, restart the one that serves.
+before=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["properties"].get("latestRevisionName",""))' "$(ls -t "$BACKUP_DIR"/*.json | head -1)")
+after=$(az containerapp show -n "$APP" -g "$RG" --query properties.latestRevisionName -o tsv)
+if [ -n "$after" ] && [ "$after" = "$before" ]; then
+  echo "No new revision ($after): restarting it so the guard reads the new Caddyfile"
+  az containerapp revision restart -n "$APP" -g "$RG" --revision "$after" -o none
+fi
 status=$(az containerapp show -n "$APP" -g "$RG" --query properties.runningStatus -o tsv)
 if [ "$status" != "Running" ]; then
   echo "$APP is $status: the new revision takes effect at the next start; run '$0 --check' then"

@@ -3,6 +3,34 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-16: the console guard told Keycloak every request was plain HTTP
+
+The Caddy sidecar of `guard-keycloak-console.sh` (F10, 2026-10-15) proxies to
+Keycloak over `127.0.0.1:8080` with `trusted_proxies private_ranges`. The
+Container Apps ingress reaches it from `100.100.0.0/16`, which is not a
+private range, so Caddy discarded the ingress's `X-Forwarded-Proto: https`
+and sent its own `http`. Keycloak then logged "Non-secure context detected"
+on every request, and the master realm, whose `sslRequired` is `external`,
+answered `403 {"error":"invalid_request","error_description":"HTTPS required"}`
+to the token endpoint. Sign-in kept working because the `edcv` realm allows
+plain HTTP, so nothing noticed for a day; every admin script that logs in to
+the master realm (`wire-keycloak-events.sh`, `wire-ui-client-scope.sh`,
+`wire-keycloak-theme.sh`, the reseed and restore scripts) failed. They failed
+silently too: `TOKEN="$(admin_token)"` under `set -o pipefail` ends the script
+before its own "login failed" line, hence `|| true` there now.
+
+The fix is two lines in the Caddyfile: `trusted_proxies private_ranges
+100.64.0.0/10` and `header_up X-Forwarded-Proto https`, which is the truth
+since the ingress terminates TLS. `--check` now probes the master realm's
+token endpoint and wants 401, not 403.
+
+Second lesson: `az containerapp secret set` changes the secret and nothing
+else. The Caddyfile is a secret mounted as a file, read when the sidecar
+starts, so re-running the guard script with an unchanged template created no
+revision and the old rules kept serving. `az containerapp revision restart`
+on the serving revision is what picks the new file up; the script does that
+itself now when the update produced no revision.
+
 ## 2026-10-12: fixtures hid two broken backends behind `/api/tasks`
 
 Under load on Azure every Tasks page was fixtures plus a failed round trip:
