@@ -96,19 +96,21 @@ describe("ArchitecturePage", () => {
     expect(screen.getByText("Architecture")).toBeInTheDocument();
   });
 
-  it("shows the five ArchiMate views from the hub, each opening at full size", () => {
+  it("shows the five ArchiMate views and two sequences from the hub, each opening at full size", () => {
     render(<ArchitecturePage />);
     const figures = document.querySelectorAll("a.doc-figure");
     expect([...figures].map((a) => a.getAttribute("href"))).toEqual([
       "/published-docs/knowledge-graph-layers.svg",
       "/published-docs/data-flow.svg",
+      "/published-docs/data-flow-sequence.svg",
       "/published-docs/deployment.svg",
+      "/published-docs/dsp-negotiation-sequence.svg",
       "/published-docs/dsp-negotiation.svg",
       "/published-docs/identity-trust.svg",
     ]);
     for (const a of figures) {
       const img = a.querySelector("img")!;
-      expect(img.getAttribute("alt")).toMatch(/ArchiMate/);
+      expect(img.getAttribute("alt")).toMatch(/ArchiMate|sequence diagram/);
       expect(
         existsSync(join(__dirname, "../../../public", a.getAttribute("href")!)),
         `${a.getAttribute("href")} is not copied to public/`,

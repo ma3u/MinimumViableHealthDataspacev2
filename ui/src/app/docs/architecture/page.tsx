@@ -252,11 +252,11 @@ export default function ArchitecturePage() {
         <h1 className="text-3xl font-bold mb-2">Architecture</h1>
         <DocsLastUpdated page="/docs/architecture" />
         <p className="text-(--text-secondary) mb-8">
-          The Health Dataspace v2 architecture in ArchiMate 3.2 views: the
-          five-layer graph model, the data flow, the deployment topology, the
-          service dependencies, the permit and negotiation process, and the
-          identity and trust framework. Click a diagram to open it full screen
-          and zoom.
+          The Health Dataspace v2 architecture in ArchiMate 3.2 views, with a
+          sequence diagram wherever an order of messages matters: the five-layer
+          graph model, the data flow, the deployment topology, the service
+          dependencies, the permit and negotiation procedure, and the identity
+          and trust framework. Click a diagram to open it full screen and zoom.
         </p>
 
         {/* Table of Contents */}
@@ -310,7 +310,12 @@ export default function ArchitecturePage() {
           <DocFigure
             file="data-flow.svg"
             alt="The data flow as an ArchiMate application process view: six processes from generating synthetic patients to rendering dashboards, the data each writes, the components that perform them, and the graph underneath"
-            caption="Fig 2. End-to-end data flow from Synthea to analytics"
+            caption="Fig 2. End-to-end data flow from Synthea to analytics, as processes, data and components"
+          />
+          <DocFigure
+            file="data-flow-sequence.svg"
+            alt="The same data flow as a sequence diagram: Synthea generates the bundles, the loader writes the FHIR nodes, the Cypher transform maps them to OMOP and copies the codings, the dashboard queries the cohorts"
+            caption="Fig 3. The same flow as a sequence, step by step"
           />
         </section>
 
@@ -350,7 +355,7 @@ export default function ArchitecturePage() {
           <DocFigure
             file="deployment.svg"
             alt="The deployment topology as an ArchiMate technology view: the edge, the application, the EDC-V and identity services and the infrastructure as bands, with the run-time dependencies between them"
-            caption={`Fig 3. Full deployment topology, ${COMPOSE_SERVICES} services with their dependencies`}
+            caption={`Fig 4. Full deployment topology, ${COMPOSE_SERVICES} services with their dependencies`}
           />
           <div
             className="mt-6 border border-(--border) rounded-lg p-4"
@@ -519,9 +524,14 @@ export default function ArchitecturePage() {
             negotiation can proceed.
           </p>
           <DocFigure
+            file="dsp-negotiation-sequence.svg"
+            alt="DSP contract negotiation as a sequence diagram: the user queries the catalogue, applies to the access body and receives the permit as a credential, then negotiates the contract with the holder, who verifies the permit and evaluates the policy before agreeing and transferring the data"
+            caption="Fig 5. DSP contract negotiation with the EHDS data permit, as a sequence"
+          />
+          <DocFigure
             file="dsp-negotiation.svg"
             alt="Data permit and contract negotiation as an ArchiMate business process cooperation view: the access body assesses and issues the permit, the user queries, applies, negotiates and requests the transfer, the holder verifies, evaluates, agrees and transfers, over the application services"
-            caption="Fig 4. The EHDS data permit, then the DSP contract negotiation and transfer"
+            caption="Fig 6. The same procedure as an ArchiMate business process view: three phases, the roles and the services"
           />
         </section>
 
@@ -539,7 +549,7 @@ export default function ArchitecturePage() {
           <DocFigure
             file="identity-trust.svg"
             alt="Identity and trust as an ArchiMate application cooperation view: the trust anchors, the DCP identity layer with Identity Hub, Issuer Service and the Secure Token Service, the five credentials the issuer defines, and the interfaces the tokens protect"
-            caption="Fig 5. DCP identity and trust architecture"
+            caption="Fig 7. DCP identity and trust architecture"
           />
         </section>
 
