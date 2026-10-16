@@ -212,6 +212,7 @@ export default function DeveloperGuidePage() {
           <TocLink href="#cicd">CI/CD Pipeline</TocLink>
           <TocLink href="#off-hours">Live Stack Off Hours</TocLink>
           <TocLink href="#reports">Latest Reports</TocLink>
+          <TocLink href="#security">Security and Data Protection</TocLink>
           <TocLink href="#releases">Release Notes</TocLink>
           <TocLink href="#project-links">Planning & Issues</TocLink>
           <TocLink href="#conventions">Conventions</TocLink>
@@ -1569,6 +1570,98 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
             </a>
           ))}
         </div>
+      </section>
+
+      {/* Security and data protection */}
+      <section className="mb-10">
+        <h2 className="text-2xl font-semibold mb-3" id="security">
+          Security and Data Protection
+        </h2>
+        <p className="text-(--text-secondary) mb-4">
+          Tested by the project itself with tools anyone can run on the
+          repository; every finding is fixed or named as open. The test of
+          2026-10-15 found ten findings, F1 to F10: after the fixes eight are
+          closed, one is reviewed and accepted (F3) and one is open and accepted
+          for Azure (F6). None of this is an independent penetration test or a
+          certification.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            {
+              title: "Security test report, 2026-10-15",
+              href: `${GITHUB_REPO}/blob/main/docs/security/security-test-report-2026-10-15.md`,
+              desc: "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, posture tests, 48 black-box checks of the live hub; findings F1 to F10 with their status after the fixes",
+            },
+            {
+              title: "Threat model, the hub",
+              href: `${GITHUB_REPO}/blob/main/docs/security/threat-model.md`,
+              desc: "STRIDE analysis of the UI, the graph, the DSP contract flow and the DCP credential exchange",
+            },
+            {
+              title: "Threat model, the Klarbefund app",
+              href: `${GITHUB_REPO}/blob/main/docs/security/threat-model-klarbefund.md`,
+              desc: "STRIDE analysis of the iPhone app; each mitigation names the code or test that shows it",
+            },
+            {
+              title: "Klarbefund self-assessment",
+              href: `${GITHUB_REPO}/blob/main/docs/klarbefund/self-assessment.md`,
+              desc: "GDPR, BSI TR-03161 objective by objective, the EU AI Act label and the MDR status, each line pointing to code or a test",
+            },
+            {
+              title: "Klarbefund evidence",
+              href: `${GITHUB_REPO}/blob/main/docs/klarbefund/evidence.md`,
+              desc: "Accuracy benchmark, dictionary parity, the run record, and what is still missing",
+            },
+            {
+              title: "Evidence report for health insurers",
+              href: `${GITHUB_REPO}/blob/main/docs/klarbefund/report-for-health-insurers.md`,
+              desc: "Is the extraction right, is the data safe, is it a medical device: answered with the evidence, plus the white-label and consulting offer",
+            },
+            {
+              title: "Report for health insurers, shareable page",
+              href: "https://claude.ai/artifact/DVmxYWDdfv9LdVMkR74m1h",
+              desc: "The same report as one page for a steering meeting",
+            },
+            {
+              title: "Software bills of materials",
+              href: `${GITHUB_REPO}/tree/main/docs/sbom`,
+              desc: "One CycloneDX file per deployable part, checked in CI against the lockfiles",
+            },
+            {
+              title: "BSI C5 gap analysis",
+              href: `${GITHUB_REPO}/blob/main/docs/security/bsi-c5-gap-analysis.md`,
+              desc: "The hub against the C5:2020 criteria catalogue, for EHDS Art. 50(6)",
+            },
+            {
+              title: "Security scans in CI",
+              href: `${GITHUB_REPO}/actions/workflows/security-scan.yml`,
+              desc: "grype over the bills and trivy over the images on every push; CodeQL for TypeScript and Swift in their own workflows",
+            },
+          ].map((r) => (
+            <a
+              key={r.title}
+              href={r.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border border-(--border) rounded-lg p-4 hover:border-indigo-500/50 transition-colors block"
+            >
+              <h4 className="font-semibold text-sm mb-1 text-indigo-700 dark:text-indigo-400 inline-flex items-center gap-1">
+                {r.title}
+                <ExternalLink size={12} />
+              </h4>
+              <p className="text-(--text-secondary) text-xs">{r.desc}</p>
+            </a>
+          ))}
+        </div>
+        <p className="text-(--text-secondary) text-sm mt-4">
+          Run it again: <code>scripts/security/generate-sbom.sh --check</code>,{" "}
+          <code>scripts/security/scan-repo.sh</code>,{" "}
+          <code>scripts/security/check-hub-blackbox.sh</code> and{" "}
+          <code>swift test --filter SecurityPostureTests</code> in{" "}
+          <code>clients/ios</code>. Decisions: ADR-011 (testing strategy) and
+          ADR-060 (the app lock; why pinning and jailbreak detection were
+          declined).
+        </p>
       </section>
 
       {/* Data Flow */}
