@@ -146,6 +146,7 @@ describe("SecurityDocPage", () => {
     const images = screen.getAllByRole("img");
     expect(images.map((i) => i.getAttribute("src"))).toEqual([
       "/published-docs/ehds-operating-model.svg",
+      "/published-docs/ehds-solution-layers.svg",
       "/published-docs/ehds-incident-coordination.svg",
     ]);
     for (const img of images) {

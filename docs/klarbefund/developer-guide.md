@@ -24,12 +24,16 @@ say why that is not negotiable.
 
 ## How it is put together
 
-![Klarbefund architecture: the app's views and store on the phone, the Shared package of parser, dictionary and formats that also runs on a Mac, the four command-line tools, and the hub, Apple Health and the analysis providers outside](img/klarbefund-architecture.svg)
+![Klarbefund as an ArchiMate layered view: the business layer with the person, the doctor and the research team and the six things a person does; the application layer with the four services, the app, the Shared package, the tools, the hub and the generator; the technology layer with the iPhone's frameworks, the Mac and Azure Container Apps](img/klarbefund-architecture.svg)
 
 Source: [`diagrams/klarbefund-architecture.puml`](diagrams/klarbefund-architecture.puml),
 rendered with `scripts/render-plantuml.sh docs/klarbefund/diagrams/*.puml`.
 
-Three layers, and a rule about the boundary between them:
+The view follows ArchiMate 3.2: the business layer (yellow) holds who does
+what, the application layer (blue) the services the software provides and
+the components that realise them, the technology layer (green) what it all
+runs on. An arrow from a lower band to an upper one means "serves"; a dotted
+arrow with a hollow head means "realises". Three things to read off it:
 
 - **`Sources/Shared`** is a Swift package that compiles for iOS and macOS. It
   holds the parser, the recogniser's post-processing, the generated analyte
