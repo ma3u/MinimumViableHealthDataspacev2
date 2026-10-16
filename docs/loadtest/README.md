@@ -84,8 +84,10 @@ between 100 and 200 users on the UI's CPU.
 
 The [production readiness assessment of October 2026](2026-10-production-readiness.md)
 reads these runs together with the security work and the ADRs against the
-Well-Architected and Cloud Adoption frameworks, pillar by pillar, next to the
-[assessment of March 2026](2026-03-production-readiness.md) it updates.
+Well-Architected and Cloud Adoption frameworks, pillar by pillar: what is in
+place, what is open, and what stands between the demonstrator and an
+operable platform. The [assessment of March 2026](2026-03-production-readiness.md)
+is kept as the archived starting point.
 
 ## What the dashboard shows
 
