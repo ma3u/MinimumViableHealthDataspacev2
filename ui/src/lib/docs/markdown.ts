@@ -20,6 +20,12 @@ const marked = new Marked({
       );
       return `<h${depth} id="${id}">${html}</h${depth}>\n`;
     },
+    image({ href, title, text }: Tokens.Image) {
+      // A diagram is scaled to the column; the link opens it at full size.
+      const alt = text.replace(/"/g, "&quot;");
+      const t = title ? ` title="${title.replace(/"/g, "&quot;")}"` : "";
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="doc-figure"><img src="${href}" alt="${alt}"${t} loading="lazy" /></a>`;
+    },
     link({ href, title, tokens }: Tokens.Link) {
       const text = this.parser.parseInline(tokens);
       const external = /^https?:\/\//.test(href);
@@ -39,4 +45,26 @@ const marked = new Marked({
  *  input is the repository's own documentation, never a visitor's. */
 export function renderMarkdown(markdown: string): string {
   return marked.parse(markdown) as string;
+}
+
+export type DocSegment =
+  | { kind: "html"; html: string }
+  | { kind: "mermaid"; chart: string };
+
+/** Split a document at its ```mermaid fences: the text between them is
+ *  rendered to HTML, each fence becomes a diagram the page draws with
+ *  MermaidDiagram (marked would only show the source as code). */
+export function splitMermaid(markdown: string): DocSegment[] {
+  const out: DocSegment[] = [];
+  const fence = /^```mermaid[ \t]*\n([\s\S]*?)^```[ \t]*$/gm;
+  let last = 0;
+  for (const m of markdown.matchAll(fence)) {
+    const before = markdown.slice(last, m.index);
+    if (before.trim()) out.push({ kind: "html", html: renderMarkdown(before) });
+    out.push({ kind: "mermaid", chart: m[1].trim() });
+    last = (m.index ?? 0) + m[0].length;
+  }
+  const rest = markdown.slice(last);
+  if (rest.trim()) out.push({ kind: "html", html: renderMarkdown(rest) });
+  return out;
 }

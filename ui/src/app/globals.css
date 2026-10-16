@@ -670,3 +670,19 @@
 .doc-prose img {
   max-width: 100%;
 }
+.doc-prose a.doc-figure {
+  display: block;
+  margin: 0 0 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: #ffffff; /* the SVGs are drawn on white in both themes */
+  overflow-x: auto;
+}
+.doc-prose a.doc-figure::after {
+  content: "Open at full size";
+  display: block;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border);
+}
