@@ -110,8 +110,10 @@ az containerapp create \
   --registry-username "$ACR_NAME" \
   --registry-password "$ACR_PASSWORD" \
   --secrets "nextauth-secret=$NEXTAUTH_SECRET" \
-  --cpu 0.5 --memory 1Gi \
-  --min-replicas 1 --max-replicas 1 \
+  --cpu "$UI_CPU" --memory "$UI_MEMORY" \
+  --min-replicas "$UI_MIN_REPLICAS" --max-replicas "$UI_MAX_REPLICAS" \
+  --scale-rule-name http-concurrency --scale-rule-type http \
+  --scale-rule-http-concurrency "$UI_SCALE_CONCURRENCY" \
   --ingress external --target-port 3000 \
   --env-vars \
     "NEXT_PUBLIC_STATIC_EXPORT=false" \

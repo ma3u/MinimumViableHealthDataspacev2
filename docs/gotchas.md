@@ -3,6 +3,24 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-12: fixtures hid two broken backends behind `/api/tasks`
+
+Under load on Azure every Tasks page was fixtures plus a failed round trip:
+the UI's `EDC_MANAGEMENT_URL` had drifted to the ingress FQDN, which reaches
+only port 8080, so the management API answered 404 on every call, and on
+compose the proxy's task store answered 500 (`must be owner of table tasks`:
+`jad/init-postgres.sql` created the table as the superuser, so the proxy's
+`CREATE INDEX IF NOT EXISTS` failed before it could read). Neither showed,
+because the route fell back to `public/mock/tasks.json` and answered 200 with
+plausible tasks. Two days of k6 runs measured fixture reads.
+
+The route now says who answered (`source`: `edc` or `store`, with the
+connector's error in `backend.edc`) and answers 502 with both errors when the
+store fails too; the page shows either. `deploy-azure.yml` sets the two EDC
+URLs on every deploy, and the table belongs to `taskuser`. A fallback that
+answers 200 with made-up data is a fault that cannot be seen; a fallback has
+to say that it is one (#571).
+
 ## 2026-10-06: one stuck credential request made 30 Keycloak tokens a second
 
 Keycloak 26.8 logs a `full-scope-allowed` warning for every token a client

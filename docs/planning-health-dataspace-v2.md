@@ -197,6 +197,7 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [058](ADRs/ADR-058-azure-triggers-the-off-hours-schedule.md)                                  | Azure triggers the off-hours stop and start, as a managed identity                                | 2026-10-07 | Accepted          |
 | [059](ADRs/ADR-059-the-record-holds-reports-vaccinations-and-the-medication-plan.md)          | The record holds reports, vaccinations and the medication plan, not laboratory values alone       | 2026-10-15 | Accepted          |
 | [060](ADRs/ADR-060-the-app-locks-with-face-id-and-answers-pinning-and-jailbreak-detection.md) | The app locks with Face ID or the passcode; pinning and jailbreak detection declined with reasons | 2026-10-15 | Accepted          |
+| [061](ADRs/ADR-061-the-ui-scales-out-on-whole-cores.md)                                       | The UI on Azure scales out on whole cores, on its own HTTP concurrency rule                       | 2026-10-12 | Accepted          |
 
 Numbers taken by open work, so a new ADR starts at **058**: 051 (#475). 050
 (#477), 054 (#520) and 055 (#517) are merged.

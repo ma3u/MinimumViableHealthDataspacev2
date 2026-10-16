@@ -36,6 +36,7 @@ export default function CompliancePage() {
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [trustCenters, setTrustCenters] = useState<TrustCenter[]>([]);
   const [speSessions, setSpeSessions] = useState<SpeSession[]>([]);
+  const [trustCenterRefused, setTrustCenterRefused] = useState(false);
   const [optionsLoading, setOptionsLoading] = useState(true);
   const [detailRow, setDetailRow] = useState<MatrixRow | null>(null);
   const [detailResult, setDetailResult] = useState<Result | null>(null);
@@ -81,8 +82,18 @@ export default function CompliancePage() {
         .then((d) => setCredentials(d.credentials ?? []))
         .catch(() => {}),
       fetchApi("/api/trust-center")
-        .then((r) => r.json())
+        .then((r) => {
+          // The register admits trust centre operators and the administrator;
+          // an access body gets 403 until #571 decides otherwise. Say so
+          // rather than show an empty section.
+          if (r.status === 403) {
+            setTrustCenterRefused(true);
+            return null;
+          }
+          return r.json();
+        })
         .then((d) => {
+          if (!d) return;
           setTrustCenters(d.trustCenters ?? []);
           setSpeSessions(d.speSessions ?? []);
         })
@@ -703,6 +714,16 @@ export default function CompliancePage() {
           {optionsLoading ? (
             <div className="text-(--text-secondary) text-sm">
               Loading trust centers…
+            </div>
+          ) : trustCenterRefused ? (
+            <div
+              role="status"
+              data-testid="trust-center-refused"
+              className="text-(--text-secondary) text-sm"
+            >
+              Your role cannot read the trust centre register. It is open to
+              trust centre operators and the dataspace administrator; whether a
+              health data access body may read it is still to be decided.
             </div>
           ) : trustCenters.length === 0 ? (
             <div className="text-(--text-secondary) text-sm">
