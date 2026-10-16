@@ -44,6 +44,12 @@ rectangle "B3  Data and secrets: reachable from the environment only" #ECFDF5 {
   database "Azure Key Vault\noperator secrets" as kv
 }
 
+' the external entities in one row above the edge
+operator -[hidden]right- person
+person -[hidden]right- app
+app -[hidden]right- peer
+peer -[hidden]down- edc
+
 ' flows across B1
 person --> hub : F1  HTTPS, session cookie
 person --> kc : F2  sign-in, OIDC + PKCE
