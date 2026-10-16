@@ -76,10 +76,22 @@ describe("DeveloperPage", () => {
     expect(screen.getByText("Developer Guide")).toBeInTheDocument();
   });
 
-  it("renders Mermaid diagrams", () => {
+  it("shows its four diagrams from the hub, each opening at full size", () => {
     render(<DeveloperPage />);
-    const diagrams = screen.getAllByTestId("mermaid-diagram");
-    expect(diagrams.length).toBeGreaterThan(0);
+    const figures = document.querySelectorAll("a.doc-figure");
+    expect([...figures].map((a) => a.getAttribute("href"))).toEqual([
+      "/published-docs/deployment.svg",
+      "/published-docs/graph-schema.svg",
+      "/published-docs/cicd-pipeline.svg",
+      "/published-docs/developer-data-flow.svg",
+    ]);
+    for (const a of figures) {
+      expect(
+        existsSync(join(__dirname, "../../../public", a.getAttribute("href")!)),
+        `${a.getAttribute("href")} is not copied to public/`,
+      ).toBe(true);
+    }
+    expect(screen.queryByTestId("mermaid-diagram")).not.toBeInTheDocument();
   });
 
   it("renders key sections", () => {
