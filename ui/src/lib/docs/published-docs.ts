@@ -1,7 +1,7 @@
 import data from "@/content/published-docs.json";
 
 /** A section of the published documentation, one route under /docs each. */
-export type DocSection = "security" | "klarbefund";
+export type DocSection = "security" | "klarbefund" | "operations";
 
 export interface PublishedDoc {
   section: DocSection;

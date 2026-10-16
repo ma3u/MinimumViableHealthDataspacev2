@@ -38,6 +38,18 @@ DOCS = [
     ("klarbefund", "klarbefund-developer-guide", "docs/klarbefund/developer-guide.md",
      "Building, running and testing the app: the pipeline from camera to sealed store, the shared "
      "dictionary, the store layout, the dev dataset, the two test suites, diagnostics and TestFlight."),
+    ("operations", "load-tests", "docs/loadtest/README.md",
+     "Every load, stress and spike run against the live hub and the compose stack, with the Grafana "
+     "dashboard of each, what it found, what changed because of it, and the runs still to do."),
+    ("operations", "load-test-azure-2026-10-05", "docs/loadtest/2026-10-baseline.md",
+     "The Azure baseline of 2026-10-05: smoke, the audited queries and 50 users for 15 minutes, with the "
+     "platform's side from Azure Monitor and the findings that set the work of October."),
+    ("operations", "load-test-compose-2026-10-05", "docs/loadtest/2026-10-05-local.md",
+     "The compose stack on a laptop under the same suite: load, stress to 200 users, audited queries, "
+     "the proxy alone and sign-in, with the bugs the runs found in the suite and the dashboard."),
+    ("operations", "production-readiness-2026-03", "docs/loadtest/2026-03-production-readiness.md",
+     "The production-readiness assessment of March 2026, kept as the starting point the later runs are "
+     "measured against."),
     ("security", "operational-guideline", "docs/security/operational-guideline.md",
      "How to host the hub and Klarbefund for real: which EHDS role (Regulation (EU) 2025/327) operates "
      "which part, what BSI C5, IT-Grundschutz, TR-02102 and TR-03161 ask of each part, the clocks for "

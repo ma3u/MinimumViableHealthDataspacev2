@@ -223,3 +223,22 @@ independently: `az group show` can fail with AADSTS70043 while
 plane, so it can succeed when `az` looks broken. It skips the redirect-URI step
 in that case, which is safe, because `jad/keycloak-realm.json` already carries
 the `ehds.mabu.red` URIs.
+
+## Accounts that are not demo logins
+
+The demo personas of `jad/keycloak-realm.json` keep their published passwords:
+they are the demo. Every other user of the live realm, and `edcadmin`, whose
+`EDC_ADMIN` role reads a patient's record without a contract negotiation, gets
+a generated password that lives only in Key Vault:
+
+```bash
+scripts/azure/secure-accounts.sh --check          # users, roles, demo or operator, Key Vault yes/no
+scripts/azure/secure-accounts.sh --all-non-demo   # every operator account and edcadmin
+scripts/azure/secure-accounts.sh edcadmin         # one account
+az keyvault secret show --vault-name kv-mvhd-b53a0449 --name keycloak-user-edcadmin-password --query value -o tsv
+```
+
+The secret carries the sign-in URL and the username as tags. Key Vault is
+written before the password is set, so a failure between the two leaves a
+secret that holds the new value, never an account nobody can open. Every
+session of the account is ended when its password changes.
