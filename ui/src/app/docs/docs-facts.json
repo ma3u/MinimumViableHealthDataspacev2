@@ -340,6 +340,8 @@
     "/docs/developer/api",
     "/docs/developer/quality-gates",
     "/docs/developer/reference",
+    "/docs/security",
+    "/docs/security/[slug]",
     "/docs/user-guide",
     "/eehrxf",
     "/graph",
@@ -516,6 +518,12 @@
     {
       "id": "docs-facts",
       "name": "Docs facts and last-updated dates",
+      "source": "local",
+      "stage": "pre-commit"
+    },
+    {
+      "id": "docs-content",
+      "name": "Published reports match their sources (docs/security, docs/klarbefund)",
       "source": "local",
       "stage": "pre-commit"
     },
@@ -1130,12 +1138,14 @@
     "trivy": "0.69.3"
   },
   "lastUpdated": {
-    "/docs": "2026-10-04",
+    "/docs": "2026-10-16",
     "/docs/user-guide": "2026-10-04",
     "/docs/developer": "2026-10-16",
-    "/docs/developer/quality-gates": "2026-10-15",
+    "/docs/developer/quality-gates": "2026-10-16",
     "/docs/developer/api": "2026-10-15",
     "/docs/developer/reference": "2026-10-15",
-    "/docs/architecture": "2026-10-15"
+    "/docs/architecture": "2026-10-16",
+    "/docs/security": "2026-10-16",
+    "/docs/security/[slug]": "2026-10-16"
   }
 }

@@ -42,6 +42,9 @@ describe("DocsPage (Hub)", () => {
     expect(screen.getByText("User Guide")).toBeInTheDocument();
     expect(screen.getByText("Developer Guide")).toBeInTheDocument();
     expect(screen.getByText("Architecture")).toBeInTheDocument();
+    expect(
+      screen.getByText("Security and Data Protection").closest("a"),
+    ).toHaveAttribute("href", "/docs/security");
   });
 
   it("renders correct links", () => {

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Code2, Layers, Users, ArrowRight } from "lucide-react";
+import { Code2, Layers, Users, ShieldCheck, ArrowRight } from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 
 const sections = [
@@ -24,6 +24,13 @@ const sections = [
     desc: "Interactive Mermaid diagrams: 5-layer graph model, data flows, deployment topology, and identity trust.",
     color: "border-layer3 hover:bg-layer3/10",
   },
+  {
+    href: "/docs/security",
+    icon: ShieldCheck,
+    label: "Security and Data Protection",
+    desc: "The security test report with its findings after the fixes, both threat models, the Klarbefund self-assessment and evidence, the report for health insurers, the bills of materials.",
+    color: "border-layer4 hover:bg-layer4/10",
+  },
 ];
 
 export default function DocsPage() {
@@ -39,7 +46,7 @@ export default function DocsPage() {
       </div>
 
       {/* Main sections — horizontal 3-card layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-12">
         {sections.map(({ href, icon: Icon, label, desc, color }) => (
           <Link
             key={href}
