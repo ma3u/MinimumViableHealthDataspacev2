@@ -89,10 +89,9 @@ export default function SecurityDocsPage() {
               rel="noopener noreferrer"
               className="text-(--accent) underline inline-flex items-center gap-1"
             >
-              Report for health insurers, shareable page{" "}
-              <ExternalLink size={12} />
+              Report for health insurers, on one page <ExternalLink size={12} />
             </a>{" "}
-            for a steering meeting.
+            for a steering meeting; the long form is the published report above.
           </li>
           <li>
             <a

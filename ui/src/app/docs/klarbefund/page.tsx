@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, ExternalLink, Smartphone } from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 import { docsInSection, REPO_URL } from "@/lib/docs/published-docs";
+import { INSURER_REPORT_PAGE } from "@/lib/docs/security-docs";
 
 export const metadata = {
   title: "Klarbefund",
@@ -87,6 +88,17 @@ export default function KlarbefundDocsPage() {
               </Link>
             </li>
           ))}
+          <li>
+            <a
+              href={INSURER_REPORT_PAGE}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-(--accent) underline inline-flex items-center gap-1"
+            >
+              Report for health insurers, on one page <ExternalLink size={12} />
+            </a>{" "}
+            for a steering meeting.
+          </li>
         </ul>
       </section>
 
