@@ -1,0 +1,149 @@
+@startuml ehds-solution-layers
+!include <archimate/Archimate>
+title The solution in layers (ArchiMate 3.2)\nthe EHDS roles and their processes, the applications that serve them, and the platform they run on
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam nodesep 16
+skinparam ranksep 52
+skinparam rectangle {
+  BorderColor #64748B
+  FontStyle bold
+}
+
+' ── Business layer: the roles of Regulation (EU) 2025/327 ───────────────────
+rectangle "Business layer: EHDS roles and processes" as BL #FFFFB5 {
+  Business_Actor(citizen, "Natural person\nArt. 3, Art. 71 opt-out")
+  Business_Role(holder, "Health data holder\nArt. 2(2)(t), Art. 60")
+  Business_Role(user, "Health data user\nArt. 2(2)(u), Art. 61")
+  Business_Role(hdab, "Health data access body\nArt. 55, 57")
+  Business_Role(spe, "SPE operator\nArt. 73")
+  Business_Role(operator, "Operating company\nhub operator, Art. 50(6)")
+  Business_Process(p_primary, "Access and manage\nmy record")
+  Business_Process(p_optout, "Record an opt-out\nfrom secondary use")
+  Business_Process(p_catalog, "Describe and publish\ndatasets")
+  Business_Process(p_apply, "Apply for data,\nreceive a permit")
+  Business_Process(p_permit, "Assess, decide,\nregister the permit")
+  Business_Process(p_process, "Process in the SPE,\ncontrol the output")
+  Business_Process(p_operate, "Operate, monitor,\nhandle incidents")
+}
+
+' ── Application layer ────────────────────────────────────────────────────────
+rectangle "Application layer" as AL #B5FFFF {
+  Application_Service(s_record, "Patient record service\nFHIR R4, consents, data rights")
+  Application_Service(s_identity, "Identity service\nOIDC roles, EUDI wallet, device grant")
+  Application_Service(s_catalog, "Catalogue service\nHealthDCAT-AP, federated discovery")
+  Application_Service(s_permit, "Permit workflow service\napplication, decision, public register")
+  Application_Service(s_exchange, "Sovereign exchange service\nDSP negotiation, DCP credentials, transfer")
+  Application_Service(s_spe, "Secure processing service\nOMOP cohorts, NLQ, output control")
+  Application_Component(c_app, "Klarbefund\niPhone app")
+  Application_Component(c_hub, "Hub UI and API\nNext.js, ui/")
+  Application_Component(c_keycloak, "Keycloak\nrealm edcv")
+  Application_Component(c_crawler, "Catalog crawler\nand enricher")
+  Application_Component(c_edc, "EDC connectors\ncontrol plane, data plane,\nIdentityHub, IssuerService,\none set per participant")
+  Application_Component(c_proxy, "neo4j-proxy\nFHIR, OMOP, NLQ, federation")
+  Application_Component(c_obs, "Observability\nOpenTelemetry, Grafana,\nLoki, Tempo")
+  Application_DataObject(d_graph, "5-layer knowledge graph\nDSP, DCAT-AP, FHIR, OMOP, ontologies")
+}
+
+' ── Technology layer ─────────────────────────────────────────────────────────
+rectangle "Technology layer: Azure, rg-mvhd-dev" as TL #C9E7B7 {
+  Technology_Device(phone, "iPhone, iOS 26\nSecure Enclave, Face ID")
+  Technology_SystemSoftware(tls, "Managed TLS ingress\nTR-02102-2 profile at the edge")
+  Technology_Node(aca, "Azure Container Apps\none environment,\ninternal and public ingress")
+  Technology_SystemSoftware(kv, "Azure Key Vault\noperator secrets as references")
+  Technology_Node(pg, "PostgreSQL Flexible Server\nKeycloak, EDC, Vault state")
+  Technology_SystemSoftware(vault, "HashiCorp Vault\nparticipant keys, unseal sidecar")
+  Technology_Node(neo4j, "Neo4j\ngraph database")
+  Technology_Node(monitor, "Azure Monitor\nlogs, off-hours schedule")
+}
+
+' ── Who performs which process ───────────────────────────────────────────────
+Rel_Assignment(citizen, p_primary)
+Rel_Assignment(citizen, p_optout)
+Rel_Assignment(holder, p_catalog)
+Rel_Assignment(user, p_apply)
+Rel_Assignment(hdab, p_permit)
+Rel_Assignment(spe, p_process)
+Rel_Assignment(operator, p_operate)
+Rel_Triggering_Right(p_apply, p_permit)
+Rel_Triggering_Right(p_permit, p_process)
+
+' ── Services serve processes ─────────────────────────────────────────────────
+Rel_Serving_Up(s_record, p_primary)
+Rel_Serving_Up(s_record, p_optout)
+Rel_Serving_Up(s_identity, p_primary)
+Rel_Serving_Up(s_catalog, p_catalog)
+Rel_Serving_Up(s_exchange, p_catalog)
+Rel_Serving_Up(s_permit, p_apply)
+Rel_Serving_Up(s_permit, p_permit)
+Rel_Serving_Up(s_spe, p_process)
+
+' ── Components realise services ──────────────────────────────────────────────
+Rel_Realization_Up(c_app, s_record)
+Rel_Realization_Up(c_hub, s_record)
+Rel_Realization_Up(c_hub, s_permit)
+Rel_Realization_Up(c_keycloak, s_identity)
+Rel_Realization_Up(c_crawler, s_catalog)
+Rel_Realization_Up(c_edc, s_exchange)
+Rel_Realization_Up(c_proxy, s_spe)
+Rel_Access_Right(c_proxy, d_graph)
+Rel_Flow_Right(c_app, c_hub, "HTTPS, OAuth 2.0\ndevice grant")
+Rel_Serving_Left(c_obs, d_graph)
+
+' ── Technology serves application ────────────────────────────────────────────
+Rel_Serving_Up(phone, c_app)
+Rel_Serving_Up(tls, c_hub)
+Rel_Serving_Up(aca, c_hub)
+Rel_Serving_Up(aca, c_keycloak)
+Rel_Serving_Up(aca, c_crawler)
+Rel_Serving_Up(aca, c_edc)
+Rel_Serving_Up(aca, c_proxy)
+Rel_Serving_Up(aca, c_obs)
+Rel_Serving_Up(kv, c_hub)
+Rel_Serving_Up(pg, c_keycloak)
+Rel_Serving_Up(pg, c_edc)
+Rel_Serving_Up(vault, c_edc)
+Rel_Serving_Up(neo4j, c_proxy)
+Rel_Serving_Up(monitor, c_obs)
+Rel_Serving_Right(pg, vault)
+
+' ── Keep each band a row, and the bands aligned at the left ─────────────────
+citizen -[hidden]right- holder
+holder -[hidden]right- user
+user -[hidden]right- hdab
+hdab -[hidden]right- spe
+spe -[hidden]right- operator
+p_primary -[hidden]right- p_optout
+p_optout -[hidden]right- p_catalog
+p_catalog -[hidden]right- p_apply
+p_process -[hidden]right- p_operate
+s_record -[hidden]right- s_identity
+s_identity -[hidden]right- s_catalog
+s_catalog -[hidden]right- s_permit
+s_permit -[hidden]right- s_exchange
+s_exchange -[hidden]right- s_spe
+c_hub -[hidden]right- c_keycloak
+c_keycloak -[hidden]right- c_crawler
+c_crawler -[hidden]right- c_edc
+c_edc -[hidden]right- c_proxy
+c_proxy -[hidden]right- d_graph
+d_graph -[hidden]right- c_obs
+phone -[hidden]right- tls
+tls -[hidden]right- aca
+aca -[hidden]right- kv
+kv -[hidden]right- pg
+vault -[hidden]right- neo4j
+neo4j -[hidden]right- monitor
+p_primary -[hidden]down- s_record
+c_app -[hidden]down- phone
+
+legend bottom left
+|= Relationship |= Meaning |
+| solid line, open arrow | serving: the lower element provides what the upper one uses |
+| dotted line, hollow head | realization: the component makes the service real |
+| solid line, filled head | triggering: one process starts the next |
+| dashed arrow | flow: data moving |
+| dotted, no head | access: reads or writes the object |
+| filled dot | assignment: who performs the process |
+endlegend
+@enduml

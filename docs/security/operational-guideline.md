@@ -75,6 +75,18 @@ The demo runs everything in one Azure Container Apps environment,
 `rg-mvhd-dev` (ADR-012), stopped off hours (ADR-053, ADR-058). The shape
 below keeps the components and changes how they are placed.
 
+### The solution in layers
+
+![The solution as an ArchiMate layered view: the business layer with the six EHDS roles and the processes each performs, the application layer with the six services and the components that realise them, the technology layer with the Azure platform, the databases, the vaults and the iPhone](img/ehds-solution-layers.svg)
+
+Source: [`diagrams/ehds-solution-layers.puml`](diagrams/ehds-solution-layers.puml),
+ArchiMate 3.2 notation. The business layer is section 1 of this guideline:
+each role performs its own processes, and the two-sided procedure of Chapter
+IV (apply, decide, process) runs left to right. The application layer names
+what the hub provides to those processes and which component realises it;
+the technology layer is the platform of the table below, as the demo runs it
+today. An arrow from a lower band to an upper one reads "serves".
+
 | Zone              | Components                                                                | Demo today                                                                               | Required for real data                                                                                                                                                                                                                                                                |
 | ----------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Edge              | TLS termination, WAF, rate limits                                         | ACA ingress with managed certificates; headers set by `next.config` (F8)                 | A web application firewall in front of every public hostname; TLS per BSI TR-02102-2 (TLS 1.2 minimum, 1.3 preferred, no CBC suites); HSTS preloaded; rate limits per route and per identity; bot and DDoS protection from the cloud.                                                 |

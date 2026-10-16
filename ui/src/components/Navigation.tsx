@@ -6,6 +6,7 @@ import {
   Network,
   BookOpen,
   ShieldCheck,
+  Smartphone,
   User,
   BarChart2,
   Search,
@@ -438,6 +439,12 @@ const docsGroup: NavGroup = {
     { href: "/docs/user-guide", label: "User Guide", icon: BookOpen },
     { href: "/docs/developer", label: "Developer Guide", icon: Code2 },
     { href: "/docs/architecture", label: "Architecture", icon: Layers },
+    {
+      href: "/docs/security",
+      label: "Security and Data Protection",
+      icon: ShieldCheck,
+    },
+    { href: "/docs/klarbefund", label: "Klarbefund", icon: Smartphone },
   ],
 };
 

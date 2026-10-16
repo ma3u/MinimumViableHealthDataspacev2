@@ -10,15 +10,42 @@ export function headingId(text: string): string {
     .replace(/\s+/g, "-");
 }
 
+/** A heading that already carries its number in the source, "## 7. Incidents"
+ *  or "### 7.2 Clocks": the document numbers itself, so the renderer does not. */
+const NUMBERED = /^\d+(\.\d+)*\.?\s/;
+
+/** Section numbers for the document being rendered: h2 counts "1.", h3
+ *  "1.1"; off for a document whose own headings are numbered, and off for
+ *  renderMarkdown on its own. splitMermaid switches it on for one document
+ *  and renders it in order. */
+const numbering = { on: false, h2: 0, h3: 0 };
+
+function sectionNumber(depth: number, text: string): string {
+  if (!numbering.on || NUMBERED.test(text)) return "";
+  if (depth === 2) {
+    numbering.h2 += 1;
+    numbering.h3 = 0;
+    return `${numbering.h2}.`;
+  }
+  if (depth === 3 && numbering.h2 > 0) {
+    numbering.h3 += 1;
+    return `${numbering.h2}.${numbering.h3}`;
+  }
+  return "";
+}
+
 const marked = new Marked({
   gfm: true,
   renderer: {
     heading({ tokens, depth }: Tokens.Heading) {
       const html = this.parser.parseInline(tokens);
-      const id = headingId(
-        tokens.map((t) => ("text" in t ? t.text : t.raw)).join(""),
-      );
-      return `<h${depth} id="${id}">${html}</h${depth}>\n`;
+      const text = tokens.map((t) => ("text" in t ? t.text : t.raw)).join("");
+      // The anchor stays GitHub's, from the text without the number, so a
+      // link written against the file on GitHub still lands here.
+      const id = headingId(text);
+      const n = sectionNumber(depth, text);
+      const label = n ? `<span class="doc-num">${n}</span> ` : "";
+      return `<h${depth} id="${id}">${label}${html}</h${depth}>\n`;
     },
     image({ href, title, text }: Tokens.Image) {
       // A diagram is scaled to the column; the link opens it at full size.
@@ -55,6 +82,10 @@ export type DocSegment =
  *  rendered to HTML, each fence becomes a diagram the page draws with
  *  MermaidDiagram (marked would only show the source as code). */
 export function splitMermaid(markdown: string): DocSegment[] {
+  // A document that numbers its own h2 headings keeps its numbers.
+  numbering.on = !/^##\s+\d+(\.\d+)*\.?\s/m.test(markdown);
+  numbering.h2 = 0;
+  numbering.h3 = 0;
   const out: DocSegment[] = [];
   const fence = /^```mermaid[ \t]*\n([\s\S]*?)^```[ \t]*$/gm;
   let last = 0;
@@ -66,5 +97,6 @@ export function splitMermaid(markdown: string): DocSegment[] {
   }
   const rest = markdown.slice(last);
   if (rest.trim()) out.push({ kind: "html", html: renderMarkdown(rest) });
+  numbering.on = false;
   return out;
 }
