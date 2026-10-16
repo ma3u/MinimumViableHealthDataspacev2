@@ -55,7 +55,12 @@ export default function SecurityDocsPage() {
           to F10: after the fixes nine are closed and one is reviewed and
           accepted (F3, the published development default key of the local
           compose stack; Azure takes its keys from Vault). None of this is an
-          independent penetration test or a certification.
+          independent penetration test or a certification. How the platform is
+          operated for real, role by role, is the operational guideline in the{" "}
+          <Link href="/docs/operations" className="underline">
+            Operations section
+          </Link>
+          .
         </p>
       </div>
 

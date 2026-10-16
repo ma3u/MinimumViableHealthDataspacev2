@@ -44,8 +44,9 @@ import { docsInSection, publishedDocs } from "@/lib/docs/published-docs";
 const PUBLIC = join(__dirname, "../../../public");
 
 describe("the operations documents", () => {
-  it("start with the results index, then the reports", () => {
+  it("start with the operational guideline and the results index, then the reports", () => {
     expect(docsInSection("operations").map((d) => d.slug)).toEqual([
+      "operational-guideline",
       "load-tests",
       "load-test-azure-2026-10-05",
       "load-test-compose-2026-10-05",
@@ -58,7 +59,9 @@ describe("the operations documents", () => {
   });
 
   it("link every live run to its dashboard on the run's testid and time range", () => {
-    const index = docsInSection("operations")[0];
+    const index = docsInSection("operations").find(
+      (d) => d.slug === "load-tests",
+    )!;
     const links = [
       ...index.markdown.matchAll(
         /https:\/\/grafana\.ehds\.mabu\.red\/d\/mvhd-load-test\/[^)\s]+/g,
@@ -143,6 +146,31 @@ describe("OperationsDocPage", () => {
       "src",
       "/published-docs/2026-10-05-load-azure.png",
     );
+  });
+
+  it("shows the operating-model diagrams of the guideline from the hub itself", async () => {
+    render(
+      await OperationsDocPage({
+        params: Promise.resolve({ slug: "operational-guideline" }),
+      }),
+    );
+    const images = screen.getAllByRole("img");
+    expect(images.map((i) => i.getAttribute("src"))).toEqual([
+      "/published-docs/ehds-operating-model.svg",
+      "/published-docs/ehds-solution-layers.svg",
+      "/published-docs/ehds-incident-coordination.svg",
+    ]);
+    for (const img of images) {
+      expect(img.getAttribute("alt")).toMatch(/.{40,}/);
+      expect(
+        existsSync(
+          join(__dirname, "../../../public", img.getAttribute("src")!),
+        ),
+      ).toBe(true);
+    }
+    expect(
+      screen.getByRole("heading", { name: "The operating model as a process" }),
+    ).toBeInTheDocument();
   });
 
   it("answers an unknown slug with not found", async () => {

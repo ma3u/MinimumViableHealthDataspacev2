@@ -42,9 +42,8 @@ import { securityDocs } from "@/lib/docs/security-docs";
 import { publishedDocs } from "@/lib/docs/published-docs";
 
 describe("the published reports", () => {
-  it("are the ten reports, each with a title, a summary, a source and a body", () => {
+  it("are the nine reports, each with a title, a summary, a source and a body", () => {
     expect(securityDocs.map((d) => d.slug)).toEqual([
-      "operational-guideline",
       "security-test-report",
       "threat-model-hub",
       "threat-model-klarbefund",
@@ -134,31 +133,6 @@ describe("SecurityDocPage", () => {
       "href",
       "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/security/security-test-report-2026-10-15.md",
     );
-  });
-
-  it("shows the operating-model diagrams of the guideline from the hub itself", async () => {
-    render(
-      await SecurityDocPage({
-        params: Promise.resolve({ slug: "operational-guideline" }),
-      }),
-    );
-    const images = screen.getAllByRole("img");
-    expect(images.map((i) => i.getAttribute("src"))).toEqual([
-      "/published-docs/ehds-operating-model.svg",
-      "/published-docs/ehds-solution-layers.svg",
-      "/published-docs/ehds-incident-coordination.svg",
-    ]);
-    for (const img of images) {
-      expect(img.getAttribute("alt")).toMatch(/.{40,}/);
-      expect(
-        existsSync(
-          join(__dirname, "../../../public", img.getAttribute("src")!),
-        ),
-      ).toBe(true);
-    }
-    expect(
-      screen.getByRole("heading", { name: "The operating model as a process" }),
-    ).toBeInTheDocument();
   });
 
   it("answers an unknown slug with not found", async () => {
