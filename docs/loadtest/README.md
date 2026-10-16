@@ -86,8 +86,7 @@ The [production readiness assessment of October 2026](2026-10-production-readine
 reads these runs together with the security work and the ADRs against the
 Well-Architected and Cloud Adoption frameworks, pillar by pillar: what is in
 place, what is open, and what stands between the demonstrator and an
-operable platform. The [assessment of March 2026](2026-03-production-readiness.md)
-is kept as the archived starting point.
+operable platform.
 
 ## What the dashboard shows
 
