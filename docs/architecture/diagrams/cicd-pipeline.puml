@@ -1,0 +1,56 @@
+@startuml cicd-pipeline
+!include <archimate/Archimate>
+title CI/CD (ArchiMate 3.2, technology process view)\nthe workstation hooks, the pull request checks, and what runs on main
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam nodesep 16
+skinparam ranksep 44
+skinparam rectangle {
+  BorderColor #64748B
+  FontStyle bold
+}
+
+rectangle "Developer workstation" as WS #C9E7B7 {
+  Technology_Process(dev, "Local development\nnpm run dev, docker compose")
+  Technology_Process(hooks, "pre-commit\nPrettier, ESLint, tsc, shellcheck,\nthe docs and content checks")
+  Technology_Process(push, "pre-push\nVitest, npm audit, CodeQL for Swift")
+}
+rectangle "Pull request" as PR #D9F0CB {
+  Technology_Process(gate, "PR Gate\nhooks on the diff, API spec drift,\nBruno coverage, knip, gitleaks")
+  Technology_Process(test, "test.yml\nunit tests, E2E,\nSBOM, Trivy, Kubescape")
+  Technology_Process(cql, "CodeQL\nTypeScript; Swift when\nclients/ios changes")
+  Technology_Process(sec, "security-scan.yml\nsource and image CVEs")
+  Technology_Process(comp, "compliance.yml\nDSP TCK, DCP, EHDS, Bruno")
+}
+rectangle "main" as MAIN #C9E7B7 {
+  Technology_Process(az, "deploy-azure.yml\nehds.mabu.red, then the Azure E2E")
+  Technology_Process(pages, "pages.yml\nGitHub Pages static export")
+  Technology_Process(smoke, "demo-smoke.yml\nBruno, Playwright, ZAP")
+}
+
+Rel_Triggering_Right(dev, hooks)
+Rel_Triggering_Right(hooks, push)
+Rel_Triggering(push, gate)
+Rel_Triggering(push, test)
+Rel_Triggering(push, cql)
+Rel_Triggering(push, sec)
+Rel_Triggering(push, comp)
+Rel_Triggering(gate, az, "squash merge")
+Rel_Triggering(test, az)
+Rel_Triggering(gate, pages)
+Rel_Triggering(test, pages)
+Rel_Flow_Right(az, smoke, "after the deploy")
+
+gate -[hidden]right- test
+test -[hidden]right- cql
+cql -[hidden]right- sec
+sec -[hidden]right- comp
+pages -[hidden]right- az
+dev -[hidden]down- gate
+
+legend bottom left
+|= Relationship |= Meaning |
+| solid line, filled head | triggering: the next stage runs when the previous one passes |
+| dashed arrow | flow: the smoke test runs against what the deploy published |
+endlegend
+@enduml
