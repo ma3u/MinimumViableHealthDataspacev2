@@ -33,6 +33,7 @@
     "3d-force-graph": "^1.80.1",
     "jose": "^6.2.12",
     "lucide-react": "^0.577.0",
+    "marked": "^18.1.1",
     "mermaid": "^11.13.0",
     "neo4j-driver": "^5.18.0",
     "next": "^15.5.27",

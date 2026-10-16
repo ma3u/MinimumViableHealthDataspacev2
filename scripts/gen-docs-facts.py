@@ -81,6 +81,14 @@ PAGES = {
         "sources": ["ui/src/app/docs/architecture/page.tsx"],
         "facts": ["adrs", "apiRoutes", "uiPages", "composeServices", "postgresDbs"],
     },
+    "/docs/security": {
+        "sources": ["ui/src/app/docs/security/page.tsx", "ui/src/content/security-docs.json"],
+        "facts": [],
+    },
+    "/docs/security/[slug]": {
+        "sources": ["ui/src/app/docs/security/[slug]/page.tsx", "ui/src/content/security-docs.json"],
+        "facts": [],
+    },
 }
 
 METHODS = ("GET", "POST", "PUT", "PATCH", "DELETE")
