@@ -52,10 +52,10 @@ export default function SecurityDocsPage() {
           Security and data protection are tested by the project itself with
           tools anyone can run on the repository, and every finding is either
           fixed or named as open. The test of 2026-10-15 found ten findings, F1
-          to F10: after the fixes eight are closed, one is reviewed and accepted
-          (F3, a published development default of the local stack) and one is
-          open and accepted for Azure (F6, probes come from the app definition).
-          None of this is an independent penetration test or a certification.
+          to F10: after the fixes nine are closed and one is reviewed and
+          accepted (F3, the published development default key of the local
+          compose stack; Azure takes its keys from Vault). None of this is an
+          independent penetration test or a certification.
         </p>
       </div>
 

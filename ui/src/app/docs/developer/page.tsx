@@ -1581,10 +1581,11 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
         <p className="text-(--text-secondary) mb-4">
           Tested by the project itself with tools anyone can run on the
           repository; every finding is fixed or named as open. The test of
-          2026-10-15 found ten findings, F1 to F10: after the fixes eight are
-          closed, one is reviewed and accepted (F3) and one is open and accepted
-          for Azure (F6). None of this is an independent penetration test or a
-          certification. The reports are published under{" "}
+          2026-10-15 found ten findings, F1 to F10: after the fixes nine are
+          closed and one is reviewed and accepted (F3, the published development
+          default key of the local compose stack). None of this is an
+          independent penetration test or a certification. The reports are
+          published under{" "}
           <Link href="/docs/security" className="underline">
             /docs/security
           </Link>

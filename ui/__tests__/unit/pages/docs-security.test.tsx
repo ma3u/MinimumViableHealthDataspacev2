@@ -86,7 +86,7 @@ describe("SecurityDocsPage", () => {
 
   it("states the findings' status after the fixes", () => {
     render(<SecurityDocsPage />);
-    expect(screen.getByText(/eight are closed/)).toBeInTheDocument();
+    expect(screen.getByText(/nine are closed/)).toBeInTheDocument();
   });
 });
 
