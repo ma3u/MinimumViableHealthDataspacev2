@@ -4,6 +4,8 @@
  */
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 vi.mock("next/link", () => ({
   default: ({
@@ -17,6 +19,12 @@ vi.mock("next/link", () => ({
     <a href={href} {...props}>
       {children}
     </a>
+  ),
+}));
+
+vi.mock("@/components/MermaidDiagram", () => ({
+  default: ({ chart }: { chart: string }) => (
+    <pre data-testid="mermaid-diagram">{chart}</pre>
   ),
 }));
 
@@ -61,6 +69,12 @@ describe("the published reports", () => {
         if (target.startsWith("/docs/security/")) {
           const slug = target.slice("/docs/security/".length).split("#")[0];
           expect(slugs.has(slug), `${d.slug} links to ${target}`).toBe(true);
+        } else if (target.startsWith("__BASE_PATH__/published-docs/")) {
+          const file = target.slice("__BASE_PATH__/".length);
+          expect(
+            existsSync(join(__dirname, "../../../public", file)),
+            `${d.slug} embeds ${file}, which is not copied to public/`,
+          ).toBe(true);
         } else {
           expect(target, `${d.slug} keeps a relative link: ${target}`).toMatch(
             /^(https?:|#)/,
@@ -116,6 +130,30 @@ describe("SecurityDocPage", () => {
       "href",
       "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/security/security-test-report-2026-10-15.md",
     );
+  });
+
+  it("shows the operating-model diagrams of the guideline from the hub itself", async () => {
+    render(
+      await SecurityDocPage({
+        params: Promise.resolve({ slug: "operational-guideline" }),
+      }),
+    );
+    const images = screen.getAllByRole("img");
+    expect(images.map((i) => i.getAttribute("src"))).toEqual([
+      "/published-docs/ehds-operating-model.svg",
+      "/published-docs/ehds-incident-coordination.svg",
+    ]);
+    for (const img of images) {
+      expect(img.getAttribute("alt")).toMatch(/.{40,}/);
+      expect(
+        existsSync(
+          join(__dirname, "../../../public", img.getAttribute("src")!),
+        ),
+      ).toBe(true);
+    }
+    expect(
+      screen.getByRole("heading", { name: "The operating model as a process" }),
+    ).toBeInTheDocument();
   });
 
   it("answers an unknown slug with not found", async () => {

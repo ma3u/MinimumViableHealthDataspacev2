@@ -1,0 +1,90 @@
+@startuml ehds-incident-coordination
+' Rendered by scripts/render-plantuml.sh into docs/security/img/.
+title Incident coordination between the parties: who notifies whom, and the clocks
+
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam ActivityBackgroundColor #FFFFFF
+skinparam ActivityBorderColor #64748B
+skinparam ActivityDiamondBackgroundColor #FFFBEB
+skinparam ActivityDiamondBorderColor #D97706
+skinparam ActivityStartColor #059669
+skinparam ActivityEndColor #059669
+skinparam ArrowColor #334155
+skinparam SwimlaneTitleFontStyle bold
+skinparam SwimlaneBorderColor #94A3B8
+
+|#F8FAFC|Operating company (security operations)|
+start
+:Alert from the SIEM, or a report from a party
+(a data user must report its own breach at once, Art. 61);
+:Triages within the hour: scope,
+data categories, parties affected;
+:Contains: revokes credentials, isolates
+the connector or the SPE session;
+fork
+  if (Personal data affected?) then (yes)
+    |#FFF7ED|Controller: access body (SPE, permits) or holder (its data)|
+    :Is informed without undue delay;
+    if (Likely risk to the persons' rights?) then (yes)
+      #FEF2F2:Notifies the data protection authority
+      within 72 hours (GDPR Art. 33);
+      #FEF2F2:Informs the persons without
+      undue delay (GDPR Art. 34);
+    else (no)
+      :Records the breach internally
+      (GDPR Art. 33(5));
+    endif
+  else (no)
+  endif
+fork again
+  |Operating company (security operations)|
+  if (Significant incident? (NIS2 as transposed)) then (yes)
+    |#F1F5F9|BSI, national CSIRT|
+    #FEF2F2:Receives the early warning
+    within 24 hours;
+    #FEF2F2:Receives the incident notification
+    within 72 hours;
+    #FEF2F2:Receives the final report
+    within one month;
+  else (no)
+  endif
+fork again
+  |Operating company (security operations)|
+  if (Data used outside the permit?) then (yes)
+    |Controller: access body (SPE, permits) or holder (its data)|
+    #FEF2F2:Revokes the permit, stops the processing
+    without undue delay (EHDS Art. 63(2));
+    :Informs the supervisory authority
+    immediately if a GDPR breach is possible (Art. 63(2));
+    |#FDF2F8|Health data user|
+    :Loses access to the SPE until
+    the access body decides;
+  else (no)
+  endif
+fork again
+  :Informs the affected holders in parallel;
+  |#EEF2FF|Affected health data holders|
+  :May suspend provision
+  until the cause is known;
+end fork
+|Operating company (security operations)|
+:Preserves the evidence: audit trail,
+SIEM export, connector logs;
+:Fixes, redeploys through the gated
+pipeline, verifies the fix;
+:Post-incident report, lessons learned,
+an ADR where a decision changed;
+|Controller: access body (SPE, permits) or holder (its data)|
+:Corrective action where an SPE audit
+found the cause (Art. 73(3));
+stop
+
+legend right
+  The clocks are owned by role: the controller owns the GDPR ones,
+  the operator the NIS2 ones, the access body the EHDS ones. The
+  incident procedure names a person and a deputy for each lane; the
+  tabletop exercise before go-live walks this diagram once.
+endlegend
+@enduml

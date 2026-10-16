@@ -40,6 +40,26 @@ technical one when the system leaves the demo.
 | **Platform operator** (not an EHDS role; the operating company of `docs/ehds-operating-company.md`)                 | Runs identity, catalogue, connectors, SPE and monitoring for the actors above; a processor under GDPR Art. 28 for each of them.                                                             | `EDC_ADMIN`; `/admin/*`, the Azure resource group, Keycloak, Vault, Key Vault, the pipelines           | A contracted operator with an ISO 27001 ISMS on the basis of IT-Grundschutz and a C5-attested cloud underneath.                                  |
 | **Supervisory authorities**: data protection (GDPR), market surveillance (Chapter III), BSI / national CSIRT (NIS2) | Receive breach notifications, audit, enforce.                                                                                                                                               | The audit trail (ADR-045), the activity report, the permit register                                    | Not operators; the operator must be able to answer them within the clocks in section 7.                                                          |
 
+### The operating model as a process
+
+The diagram is a BPMN-style process with one swimlane per role: boxes are
+tasks, diamonds are decisions, the loop at the end is the output control,
+the green dots are start and end. Article numbers are the adopted ones. The
+lanes of the holder, the user and the person are their own; the access
+body's lane is where every decision sits; the operating company's and the
+SPE operator's lanes hold the technical work that this repository
+implements.
+
+![EHDS operating model: one swimlane per role, from the holder's onboarding through application, permit, opt-out, extraction, the secure processing environment and output control to the published results](img/ehds-operating-model.svg)
+
+Source: [`diagrams/ehds-operating-model.puml`](diagrams/ehds-operating-model.puml), rendered with `scripts/render-plantuml.sh`.
+
+Three responsibilities that the diagram makes visible and a contract must
+repeat: the access body decides and the operator executes; the person's
+opt-out reaches the holder's extraction through the operator's policy
+evaluation, not through goodwill; and no output leaves the SPE on the
+operator's say-so, only on the access body's.
+
 Two things follow. **Controllership is never the operator's.** The access
 body is controller for the SPE and the permit data (Art. 74); the holder is
 controller of its source data; the operator processes on instruction. Every
@@ -197,6 +217,20 @@ line carries a health value or a name where a pseudonym does.
 | SPE audit finds a shortcoming                           | Art. 73(3): corrective action                                                                     | The access body instructs the operator; the fix is evidenced in the next audit.                                                                                |
 | Serious incident of an EHR system or app                | Art. 44 (risks and serious incidents)                                                             | The manufacturer to the market surveillance authority; for the white-label app, the entity placing it on the market.                                           |
 | Vulnerability in a dependency, high or critical         | Project rule: fixed or time-boxed exception within the CI gate (`docs/npm-audit-exceptions.json`) | The operator's security team; the scan runs on every push (`security-scan.yml`).                                                                               |
+
+### Incident coordination between the parties
+
+The same notation; the red boxes are the legal clocks, and the parallel
+bar is the notifications that run at the same time.
+
+![Incident coordination: the operator triages and contains, the controller notifies the data protection authority within 72 hours, the operator warns the CSIRT within 24 hours, the access body revokes a misused permit, the holders may suspend](img/ehds-incident-coordination.svg)
+
+Source: [`diagrams/ehds-incident-coordination.puml`](diagrams/ehds-incident-coordination.puml).
+
+The clocks are not the operator's to negotiate: the controller owns the
+GDPR ones, the operator the NIS2 ones, the access body the EHDS ones. The
+contact list in the incident procedure names a person for each, with a
+deputy, and the tabletop exercise before go-live walks this diagram once.
 
 The alerting that feeds this table, at minimum: a privileged sign-in from a
 new location, an admin-console request reaching Keycloak at all, a query
