@@ -63,6 +63,13 @@ const nextConfig = {
           destination: "/poc/:name/index.html",
           permanent: false,
         },
+        // The operational guideline moved from the security reports to the
+        // Operations section on 2026-10-16; links to the old route still land.
+        {
+          source: "/docs/security/operational-guideline",
+          destination: "/docs/operations/operational-guideline",
+          permanent: true,
+        },
       ];
     },
   }),

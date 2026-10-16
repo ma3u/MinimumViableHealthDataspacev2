@@ -38,6 +38,10 @@ DOCS = [
     ("klarbefund", "klarbefund-developer-guide", "docs/klarbefund/developer-guide.md",
      "Building, running and testing the app: the pipeline from camera to sealed store, the shared "
      "dictionary, the store layout, the dev dataset, the two test suites, diagnostics and TestFlight."),
+    ("operations", "operational-guideline", "docs/security/operational-guideline.md",
+     "How to host the hub and Klarbefund for real: which EHDS role (Regulation (EU) 2025/327) operates "
+     "which part, what BSI C5, IT-Grundschutz, TR-02102 and TR-03161 ask of each part, the clocks for "
+     "incidents, retention, and the go-live checklist by role."),
     ("operations", "load-tests", "docs/loadtest/README.md",
      "Every load, stress and spike run against the live hub and the compose stack, with the Grafana "
      "dashboard of each, what it found, what changed because of it, and the runs still to do."),
@@ -54,10 +58,6 @@ DOCS = [
     ("operations", "production-readiness-2026-03", "docs/loadtest/2026-03-production-readiness.md",
      "The production-readiness assessment of March 2026, kept as the starting point the later runs are "
      "measured against."),
-    ("security", "operational-guideline", "docs/security/operational-guideline.md",
-     "How to host the hub and Klarbefund for real: which EHDS role (Regulation (EU) 2025/327) operates "
-     "which part, what BSI C5, IT-Grundschutz, TR-02102 and TR-03161 ask of each part, the clocks for "
-     "incidents, retention, and the go-live checklist by role."),
     ("security", "security-test-report", "docs/security/security-test-report-2026-10-15.md",
      "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, the app's posture "
      "tests and the anonymous black-box checks of the live hub; findings F1 to F10 with their "
