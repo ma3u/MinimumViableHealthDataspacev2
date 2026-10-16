@@ -1606,9 +1606,9 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
           ))}
           {[
             {
-              title: "Report for health insurers, shareable page",
+              title: "Report for health insurers, on one page",
               href: INSURER_REPORT_PAGE,
-              desc: "The same report as one page for a steering meeting",
+              desc: "The same report as one page for a steering meeting, served by the hub",
             },
             {
               title: "Security scans in CI",

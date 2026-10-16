@@ -3,6 +3,8 @@
  */
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 vi.mock("next/link", () => ({
   default: ({
@@ -94,10 +96,25 @@ describe("ArchitecturePage", () => {
     expect(screen.getByText("Architecture")).toBeInTheDocument();
   });
 
-  it("renders Mermaid diagrams", () => {
+  it("shows the five ArchiMate views from the hub, each opening at full size", () => {
     render(<ArchitecturePage />);
-    const diagrams = screen.getAllByTestId("mermaid-diagram");
-    expect(diagrams.length).toBeGreaterThan(0);
+    const figures = document.querySelectorAll("a.doc-figure");
+    expect([...figures].map((a) => a.getAttribute("href"))).toEqual([
+      "/published-docs/knowledge-graph-layers.svg",
+      "/published-docs/data-flow.svg",
+      "/published-docs/deployment.svg",
+      "/published-docs/dsp-negotiation.svg",
+      "/published-docs/identity-trust.svg",
+    ]);
+    for (const a of figures) {
+      const img = a.querySelector("img")!;
+      expect(img.getAttribute("alt")).toMatch(/ArchiMate/);
+      expect(
+        existsSync(join(__dirname, "../../../public", a.getAttribute("href")!)),
+        `${a.getAttribute("href")} is not copied to public/`,
+      ).toBe(true);
+    }
+    expect(screen.queryByTestId("mermaid-diagram")).not.toBeInTheDocument();
   });
 });
 

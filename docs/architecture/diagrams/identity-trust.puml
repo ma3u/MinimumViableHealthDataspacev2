@@ -1,0 +1,69 @@
+@startuml identity-trust
+!include <archimate/Archimate>
+title Identity and trust (ArchiMate 3.2, application cooperation view)\nDCP credentials, the trust anchors they rest on, and the interfaces they protect
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam nodesep 16
+skinparam ranksep 46
+skinparam rectangle {
+  BorderColor #64748B
+  FontStyle bold
+}
+
+rectangle "Trust anchors" as TA #C9E7B7 {
+  Technology_Service(did, "did:web resolution\none DID document per participant")
+  Technology_Service(registry, "Trust anchor\ncredential registry")
+  Application_Component(kc, "Keycloak\nOIDC SSO, realm edcv")
+}
+rectangle "DCP identity layer" as DCP #B5FFFF {
+  Application_Component(is, "Issuer Service\ncredential issuance, :10013")
+  Application_Component(ih, "Identity Hub\nDID and credential store, :11005")
+  Application_Component(sts, "Secure Token Service\nembedded in the Identity Hub")
+}
+rectangle "Verifiable credentials, as the issuer defines them" as VC #D6FFFF {
+  Application_DataObject(mem, "MembershipCredential")
+  Application_DataObject(ehds, "EHDSParticipantCredential")
+  Application_DataObject(purp, "DataProcessingPurposeCredential")
+  Application_DataObject(qual, "DataQualityLabelCredential")
+  Application_DataObject(manu, "ManufacturerCredential")
+}
+rectangle "Protected interfaces" as PI #B5FFFF {
+  Application_Interface(mgmt, "Management API")
+  Application_Interface(dsp, "DSP endpoints")
+  Application_Interface(dp, "Data planes")
+}
+
+Rel_Serving(did, ih, "resolves")
+Rel_Serving(registry, is, "anchors")
+Rel_Serving(kc, sts, "authenticates")
+Rel_Flow_Right(is, ih, "issues into")
+Rel_Composition_Right(ih, sts)
+Rel_Access(is, mem, "writes")
+Rel_Access(is, ehds, "writes")
+Rel_Access(is, purp, "writes")
+Rel_Access(is, qual, "writes")
+Rel_Access(is, manu, "writes")
+Rel_Access(ih, ehds, "presents")
+Rel_Serving(sts, mgmt, "tokens")
+Rel_Serving(sts, dsp, " ")
+Rel_Serving(sts, dp, " ")
+
+did -[hidden]right- registry
+registry -[hidden]right- kc
+mem -[hidden]right- ehds
+ehds -[hidden]right- purp
+purp -[hidden]right- qual
+qual -[hidden]right- manu
+manu -[hidden]right- mgmt
+mgmt -[hidden]right- dsp
+dsp -[hidden]right- dp
+VC -[hidden]right- PI
+
+legend bottom left
+|= Relationship |= Meaning |
+| solid line, open arrow | serving: what the target relies on |
+| dashed arrow | flow: credentials issued into the store |
+| dotted, no head | access: writes or presents the credential |
+| filled diamond | composition: the STS is part of the Identity Hub |
+endlegend
+@enduml
