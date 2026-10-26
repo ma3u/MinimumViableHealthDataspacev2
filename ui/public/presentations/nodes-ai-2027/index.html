@@ -1,0 +1,1367 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>When the Graph Says No · NODES AI 2027</title>
+    <meta
+      name="description"
+      content="Governance-gated GraphRAG for the European Health Data Space: a five-layer Neo4j knowledge graph, a query chain from Cypher templates to Text2Cypher, and guardrails on the generated Cypher. Talk for NODES AI 2027, narrated in the presenter's voice."
+    />
+    <link rel="icon" href="../../favicon.svg" />
+    <!-- reveal.js is the HL7 deck's vendored copy, shared rather than duplicated (its CodeQL
+         alerts are triaged there once). Keep ../hl7-showcase-2026/reveal/ while this deck uses it. -->
+    <link rel="stylesheet" href="../hl7-showcase-2026/reveal/reset.css" />
+    <link rel="stylesheet" href="../hl7-showcase-2026/reveal/reveal.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400..700&family=DM+Sans:wght@400..700&family=JetBrains+Mono:wght@400;600&display=swap"
+    />
+    <style>
+      :root {
+        --bg: #0d1b26;
+        --bg-2: #13283a;
+        --card: #172f42;
+        --rule: #2a4558;
+        --ink: #eef3f6;
+        --body: #b9c7d1;
+        --muted: #8399a8;
+        --accent: #4fc3f7;
+        --amber: #f2b632;
+        --ok: #3fb950;
+        --no: #f85149;
+        /* Layer accents, as in ui/src/lib/graph-constants.ts */
+        --l1: #2471a3;
+        --l2: #148f77;
+        --l3: #1e8449;
+        --l4: #ca6f1e;
+        --l5: #7d3c98;
+      }
+      html,
+      body,
+      .reveal-viewport {
+        background: var(--bg);
+      }
+      .reveal {
+        font-family: "DM Sans", Arial, sans-serif;
+        font-size: 30px;
+        color: var(--ink);
+      }
+      .reveal .slides {
+        text-align: left;
+      }
+      .reveal .slides > section {
+        height: 1080px;
+        padding: 96px 128px 120px;
+        box-sizing: border-box;
+      }
+      .reveal h1,
+      .reveal h2,
+      .reveal h3 {
+        font-family: "Sora", Verdana, sans-serif;
+        font-weight: 700;
+        color: var(--ink);
+        text-transform: none;
+        letter-spacing: 0;
+        margin: 0;
+      }
+      .reveal p {
+        margin: 0;
+        line-height: 1.4;
+      }
+      .reveal a {
+        color: var(--accent);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .reveal code,
+      .reveal pre,
+      .mono {
+        font-family: "JetBrains Mono", Menlo, monospace;
+      }
+      .eyebrow {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: 4px;
+        color: var(--accent);
+        margin-bottom: 14px !important;
+      }
+      .h2 {
+        font-size: 60px;
+        line-height: 1.1;
+      }
+      .stand {
+        font-size: 30px;
+        color: var(--body);
+        margin-top: 18px !important;
+      }
+      .body {
+        margin-top: 44px;
+      }
+      .foot {
+        position: absolute;
+        left: 128px;
+        bottom: 56px;
+        font-size: 22px;
+        color: var(--muted);
+      }
+      .row {
+        display: flex;
+        gap: 32px;
+      }
+      .card {
+        flex: 1;
+        background: var(--card);
+        border: 1px solid var(--rule);
+        border-top: 8px solid var(--c, var(--accent));
+        border-radius: 20px;
+        padding: 32px 36px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .card h3 {
+        font-size: 34px;
+      }
+      .card p {
+        font-size: 28px;
+        color: var(--body);
+      }
+      .band {
+        margin-top: 32px;
+        background: var(--bg-2);
+        border-left: 8px solid var(--amber);
+        border-radius: 14px;
+        padding: 26px 40px;
+        font-family: "Sora", sans-serif;
+        font-size: 32px;
+        font-weight: 700;
+      }
+      .band span {
+        color: var(--amber);
+      }
+      pre.cy {
+        margin: 0;
+        background: #08131b;
+        border: 1px solid var(--rule);
+        border-radius: 14px;
+        padding: 22px 26px;
+        font-size: 22px;
+        line-height: 1.45;
+        color: #d6e4ee;
+        white-space: pre-wrap;
+        box-shadow: none;
+        width: auto;
+      }
+      .kw {
+        color: #ff9e64;
+      }
+      .lb {
+        color: #7dcfff;
+      }
+      .cm {
+        color: var(--muted);
+      }
+      /* Cover */
+      .cover h1 {
+        font-size: 104px;
+        line-height: 1.02;
+        max-width: 1500px;
+      }
+      .cover .sub {
+        font-size: 40px;
+        color: var(--body);
+        margin-top: 30px !important;
+        max-width: 1050px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 16px;
+        margin-top: 56px;
+        padding: 16px 28px;
+        border-radius: 999px;
+        border: 2px solid var(--amber);
+        color: var(--amber);
+        font-weight: 700;
+        font-size: 28px;
+      }
+      .who {
+        position: absolute;
+        left: 128px;
+        bottom: 96px;
+        font-size: 28px;
+        color: var(--body);
+      }
+      .who b {
+        color: var(--ink);
+      }
+      .cover-graph {
+        position: absolute;
+        right: 110px;
+        top: 380px;
+        width: 620px;
+      }
+      .nodes-mark {
+        position: absolute;
+        right: 128px;
+        top: 96px;
+        font-family: "Sora", sans-serif;
+        font-size: 26px;
+        letter-spacing: 6px;
+        color: var(--muted);
+      }
+      /* Rules */
+      .rule {
+        display: flex;
+        gap: 26px;
+        align-items: flex-start;
+        background: var(--card);
+        border: 1px solid var(--rule);
+        border-radius: 18px;
+        padding: 40px 40px;
+      }
+      .rule .n {
+        flex: none;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: var(--bg);
+        font: 700 28px "Sora", sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .rule h3 {
+        font-size: 38px;
+      }
+      .rule p {
+        font-size: 28px;
+        color: var(--body);
+        margin-top: 6px !important;
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+      }
+      /* Layer explorer */
+      .layers {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        width: 640px;
+        flex: none;
+      }
+      .layer {
+        all: unset;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 18px 24px;
+        border-radius: 14px;
+        background: var(--card);
+        border: 2px solid transparent;
+        border-left: 14px solid var(--c);
+        font-size: 26px;
+        color: var(--body);
+        transition: border-color 0.2s, background 0.2s;
+      }
+      .layer b {
+        color: var(--ink);
+        font-family: "Sora", sans-serif;
+        font-size: 28px;
+        min-width: 56px;
+      }
+      .layer.sel {
+        border-color: var(--c);
+        background: var(--bg-2);
+        color: var(--ink);
+      }
+      .layer:focus-visible {
+        outline: 3px solid var(--accent);
+      }
+      .panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .panel h3 {
+        font-size: 36px;
+        color: var(--c, var(--ink));
+      }
+      .panel .labels {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .pill {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 999px;
+        border: 2px solid var(--c, var(--rule));
+        font: 600 21px "JetBrains Mono", monospace;
+        color: var(--ink);
+      }
+      .panel p {
+        font-size: 24px;
+        color: var(--body);
+      }
+      /* Chain */
+      .chain {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+      }
+      .tier {
+        all: unset;
+        cursor: pointer;
+        flex: 1;
+        background: var(--card);
+        border: 2px solid var(--rule);
+        border-radius: 18px;
+        padding: 24px 26px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .tier .t {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: 3px;
+        color: var(--muted);
+      }
+      .tier h3 {
+        font-size: 31px;
+      }
+      .tier p {
+        font-size: 24px;
+        color: var(--body);
+      }
+      .tier.sel {
+        border-color: var(--accent);
+        background: var(--bg-2);
+      }
+      .tier:focus-visible {
+        outline: 3px solid var(--accent);
+      }
+      .arrow {
+        flex: none;
+        width: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        font-size: 40px;
+      }
+      .meter {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 14px;
+        font-size: 22px;
+        color: var(--muted);
+      }
+      .meter span:first-child {
+        color: var(--ok);
+      }
+      .meter span:last-child {
+        color: var(--amber);
+      }
+      /* Guardrail playground */
+      .play {
+        display: flex;
+        gap: 36px;
+        margin-top: 34px;
+      }
+      .presets {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 520px;
+        flex: none;
+      }
+      .preset {
+        all: unset;
+        cursor: pointer;
+        padding: 14px 20px;
+        border-radius: 12px;
+        background: var(--card);
+        border: 2px solid var(--rule);
+        font-size: 23px;
+        color: var(--body);
+      }
+      .preset.sel {
+        border-color: var(--accent);
+        color: var(--ink);
+      }
+      .preset:focus-visible {
+        outline: 3px solid var(--accent);
+      }
+      .editor {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      #cypher {
+        width: 100%;
+        height: 300px;
+        box-sizing: border-box;
+        background: #08131b;
+        color: #d6e4ee;
+        border: 1px solid var(--rule);
+        border-radius: 14px;
+        padding: 20px 24px;
+        font: 22px/1.45 "JetBrains Mono", monospace;
+        resize: none;
+      }
+      #cypher:focus {
+        outline: 3px solid var(--accent);
+      }
+      .verdict {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 20px 26px;
+        border-radius: 14px;
+        font-size: 26px;
+        background: var(--card);
+        border: 2px solid var(--rule);
+      }
+      .verdict .v {
+        flex: none;
+        font: 700 28px "Sora", sans-serif;
+        padding: 8px 22px;
+        border-radius: 999px;
+      }
+      .verdict.ok {
+        border-color: var(--ok);
+      }
+      .verdict.ok .v {
+        background: var(--ok);
+        color: #06210d;
+      }
+      .verdict.no {
+        border-color: var(--no);
+      }
+      .verdict.no .v {
+        background: var(--no);
+        color: #2a0505;
+      }
+      .verdict p {
+        font-size: 23px;
+        color: var(--body);
+      }
+      /* Policy path */
+      .path {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 40px;
+      }
+      .node {
+        padding: 16px 24px;
+        border-radius: 999px;
+        background: var(--card);
+        border: 3px solid var(--c, var(--l1));
+        font: 600 24px "JetBrains Mono", monospace;
+      }
+      .edge {
+        font: 600 19px "JetBrains Mono", monospace;
+        color: var(--muted);
+      }
+      /* Lessons */
+      .lesson {
+        display: flex;
+        gap: 22px;
+        align-items: baseline;
+        padding: 26px 0;
+        border-bottom: 1px solid var(--rule);
+      }
+      .lesson .n {
+        font: 700 36px "Sora", sans-serif;
+        color: var(--amber);
+        width: 48px;
+        flex: none;
+      }
+      .lesson h3 {
+        font-size: 38px;
+      }
+      .lesson p {
+        font-size: 28px;
+        color: var(--body);
+        margin-top: 4px !important;
+      }
+      .winners {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px 36px;
+        margin-top: 10px;
+      }
+      .winners div {
+        font-size: 27px;
+        color: var(--body);
+        padding-left: 18px;
+        border-left: 4px solid var(--rule);
+      }
+      .winners div.us {
+        border-left-color: var(--amber);
+        color: var(--ink);
+      }
+      .links {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-top: 44px;
+      }
+      .links a.card {
+        text-decoration: none;
+      }
+      .links .card p {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 22px;
+        color: var(--accent);
+      }
+      /* Entrance animations: everything marked .rise comes in when its slide does. */
+      .reveal .slides section .rise {
+        opacity: 0;
+        transform: translateY(26px);
+      }
+      .reveal .slides section.present .rise {
+        animation: rise 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+        animation-delay: var(--d, 0s);
+      }
+      @keyframes rise {
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      html.print-pdf .reveal .slides section .rise,
+      html.still .reveal .slides section .rise {
+        opacity: 1;
+        transform: none;
+        animation: none;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .reveal .slides section .rise {
+          opacity: 1;
+          transform: none;
+          animation: none !important;
+        }
+      }
+      /* Narration and captions. */
+      .narration {
+        position: fixed;
+        left: 16px;
+        bottom: 14px;
+        z-index: 30;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        font-family: "DM Sans", Arial, sans-serif;
+      }
+      .narration button {
+        font: 600 15px "DM Sans", Arial, sans-serif;
+        border: 1px solid rgba(238, 243, 246, 0.35);
+        background: rgba(13, 27, 38, 0.92);
+        color: var(--ink);
+        border-radius: 999px;
+        padding: 7px 14px;
+        cursor: pointer;
+      }
+      .narration button.on {
+        background: var(--accent);
+        color: var(--bg);
+      }
+      .narration span {
+        font-size: 14px;
+        color: var(--muted);
+      }
+      #caption {
+        position: fixed;
+        left: 50%;
+        bottom: 7vh;
+        transform: translateX(-50%);
+        z-index: 25;
+        max-width: min(78vw, 1100px);
+        padding: 0.45em 0.9em;
+        border-radius: 10px;
+        background: rgba(5, 12, 18, 0.88);
+        color: #fff;
+        font: 500 clamp(16px, 2.2vw, 30px) / 1.35 "DM Sans", Arial, sans-serif;
+        text-align: center;
+        pointer-events: none;
+      }
+      #caption[hidden],
+      html.still .narration {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <!-- 1 · cover -->
+        <section data-id-slide="cover" class="cover">
+          <div class="nodes-mark">NODES AI 2027</div>
+          <p class="eyebrow rise">KNOWLEDGE GRAPHS &amp; GRAPHRAG</p>
+          <h1 class="rise" style="--d: 0.1s">When the graph says no</h1>
+          <p class="sub rise" style="--d: 0.25s">
+            Governance-gated GraphRAG for the European Health Data Space, on one Neo4j graph
+          </p>
+          <a
+            class="badge rise"
+            style="--d: 0.4s; text-decoration: none"
+            href="https://info.hl7.org/ai-challenge"
+            target="_blank"
+            rel="noopener"
+            >★ Open Solution Award · 2026 HL7 AI Challenge</a
+          >
+          <svg class="cover-graph rise" style="--d: 0.5s" viewBox="0 0 640 520" aria-hidden="true">
+            <g stroke="#2a4558" stroke-width="3">
+              <line x1="120" y1="90" x2="300" y2="60" /><line x1="300" y1="60" x2="470" y2="130" />
+              <line x1="120" y1="90" x2="210" y2="220" /><line x1="300" y1="60" x2="330" y2="220" />
+              <line x1="470" y1="130" x2="520" y2="270" /><line x1="210" y1="220" x2="330" y2="220" />
+              <line x1="330" y1="220" x2="520" y2="270" /><line x1="210" y1="220" x2="150" y2="360" />
+              <line x1="330" y1="220" x2="300" y2="370" /><line x1="520" y1="270" x2="450" y2="400" />
+              <line x1="150" y1="360" x2="300" y2="370" /><line x1="300" y1="370" x2="450" y2="400" />
+              <line x1="150" y1="360" x2="230" y2="470" /><line x1="300" y1="370" x2="230" y2="470" />
+              <line x1="450" y1="400" x2="380" y2="480" /><line x1="300" y1="370" x2="380" y2="480" />
+            </g>
+            <g stroke="#0d1b26" stroke-width="5">
+              <circle cx="120" cy="90" r="30" fill="#2471a3" /><circle cx="300" cy="60" r="34" fill="#2471a3" />
+              <circle cx="470" cy="130" r="28" fill="#148f77" /><circle cx="210" cy="220" r="30" fill="#148f77" />
+              <circle cx="330" cy="220" r="38" fill="#1e8449" /><circle cx="520" cy="270" r="30" fill="#1e8449" />
+              <circle cx="150" cy="360" r="28" fill="#ca6f1e" /><circle cx="300" cy="370" r="34" fill="#ca6f1e" />
+              <circle cx="450" cy="400" r="30" fill="#7d3c98" /><circle cx="230" cy="470" r="26" fill="#7d3c98" />
+              <circle cx="380" cy="480" r="30" fill="#f85149" />
+            </g>
+            <text x="380" y="489" text-anchor="middle" fill="#fff" font-family="Sora" font-weight="700" font-size="26">✕</text>
+          </svg>
+          <p class="who"><b>Matthias Buchhorn-Roth</b> · Cloud and AI Engineer, Berlin</p>
+          <aside class="notes">[1:00] Who I am, the award, the one-line thesis: a graph that knows when to say no.</aside>
+        </section>
+
+        <!-- 2 · the rules -->
+        <section data-id-slide="rules">
+          <p class="eyebrow">THE PROBLEM</p>
+          <h2 class="h2">From 2029, health data is open to research. On four conditions.</h2>
+          <p class="stand">
+            Chapter IV of the
+            <a href="https://eur-lex.europa.eu/eli/reg/2025/327/oj" target="_blank" rel="noopener"
+              >EHDS Regulation (EU) 2025/327</a
+            >. An AI assistant over that data has to keep the same four, on every query.
+          </p>
+          <div class="grid2 body">
+            <div class="rule fragment" data-fragment-index="1">
+              <div class="n">1</div>
+              <div>
+                <h3>A permit</h3>
+                <p>A Health Data Access Body decides each application (Art. 67, 68).</p>
+              </div>
+            </div>
+            <div class="rule fragment" data-fragment-index="2">
+              <div class="n">2</div>
+              <div>
+                <h3>An opt-out</h3>
+                <p>Citizens may refuse secondary use of their data (Art. 71).</p>
+              </div>
+            </div>
+            <div class="rule fragment" data-fragment-index="3">
+              <div class="n">3</div>
+              <div>
+                <h3>A secure environment</h3>
+                <p>Analysis happens inside it; only results leave (Art. 73).</p>
+              </div>
+            </div>
+            <div class="rule fragment" data-fragment-index="4">
+              <div class="n">4</div>
+              <div>
+                <h3>Nobody identified</h3>
+                <p>Re-identifying a person is prohibited (Art. 61, 66).</p>
+              </div>
+            </div>
+          </div>
+          <aside class="notes">[2:00] Permit, opt-out, secure environment, no re-identification. Whoever or whatever writes the query.</aside>
+        </section>
+
+        <!-- 3 · five layers -->
+        <section data-id-slide="layers">
+          <p class="eyebrow">ONE GRAPH</p>
+          <h2 class="h2">Five standards, five layers, one traversal</h2>
+          <div class="row body" style="gap: 48px">
+            <div class="layers" role="tablist" aria-label="Graph layers">
+              <button class="layer fragment" data-fragment-index="1" data-layer="0" style="--c: var(--l1)">
+                <b>L1</b> Dataspace: DSP contracts, ODRL
+              </button>
+              <button class="layer fragment" data-fragment-index="2" data-layer="1" style="--c: var(--l2)">
+                <b>L2</b> Catalogue: HealthDCAT-AP
+              </button>
+              <button class="layer fragment" data-fragment-index="3" data-layer="2" style="--c: var(--l3)">
+                <b>L3</b> Clinical: HL7 FHIR R4
+              </button>
+              <button class="layer fragment" data-fragment-index="4" data-layer="3" style="--c: var(--l4)">
+                <b>L4</b> Analytics: OMOP CDM 5.4
+              </button>
+              <button class="layer fragment" data-fragment-index="5" data-layer="4" style="--c: var(--l5)">
+                <b>L5</b> Codes: SNOMED CT, LOINC, ICD-10
+              </button>
+            </div>
+            <div class="panel" id="layer-panel" aria-live="polite">
+              <h3 id="lp-title">Click a layer</h3>
+              <div class="labels" id="lp-labels"></div>
+              <p id="lp-text">Each layer is a standard. The edges between them are the point.</p>
+              <pre class="cy" id="lp-cypher"></pre>
+            </div>
+          </div>
+          <p class="foot">
+            Neo4j 5.26 Community with APOC and GDS ·
+            <a
+              href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/neo4j/init-schema.cypher"
+              target="_blank"
+              rel="noopener"
+              >neo4j/init-schema.cypher</a
+            >
+          </p>
+          <aside class="notes">[3:00] Walk the layers top to bottom, then run the cross-layer query live in the Browser if time allows.</aside>
+        </section>
+
+        <!-- 4 · what the community gave us -->
+        <section data-id-slide="community">
+          <p class="eyebrow">STANDING ON THE COMMUNITY</p>
+          <h2 class="h2">What the Neo4j community gave this project</h2>
+          <div class="row body">
+            <div class="card fragment" data-fragment-index="1" style="--c: var(--l1)">
+              <h3>APOC</h3>
+              <p>Two-hop neighbourhood expansion with <code>apoc.path.subgraphAll</code>, batched embedding runs.</p>
+            </div>
+            <div class="card fragment" data-fragment-index="2" style="--c: var(--l2)">
+              <h3>GDS FastRP</h3>
+              <p>256-d structural embeddings over all five layers. Offline, no API key: sovereign by default.</p>
+            </div>
+            <div class="card fragment" data-fragment-index="3" style="--c: var(--l4)">
+              <h3>Vector indexes</h3>
+              <p>Native, next to the data. No second store to secure, audit and keep in sync.</p>
+            </div>
+            <div class="card fragment" data-fragment-index="4" style="--c: var(--l5)">
+              <h3>Text2Cypher &amp; GraphRAG</h3>
+              <p>The community's patterns gave the query chain its shape, and its order.</p>
+            </div>
+          </div>
+          <div class="band fragment" data-fragment-index="5">
+            Neo4j 5.26 <span>Community Edition</span>, APOC and GDS. Nothing here needs a licence.
+          </div>
+          <p class="foot">
+            <a
+              href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/neo4j/register-embeddings-fastrp.cypher"
+              target="_blank"
+              rel="noopener"
+              >register-embeddings-fastrp.cypher</a
+            >
+            ·
+            <a
+              href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/services/neo4j-proxy/src/graphrag.ts"
+              target="_blank"
+              rel="noopener"
+              >graphrag.ts</a
+            >
+          </p>
+          <aside class="notes">[2:30] Credit where it is due. FastRP is the sovereignty point: it runs with no external model.</aside>
+        </section>
+
+        <!-- 5 · the chain -->
+        <section data-id-slide="chain">
+          <p class="eyebrow">THE QUERY CHAIN</p>
+          <h2 class="h2">Cheapest and most predictable first</h2>
+          <div class="chain body" role="tablist" aria-label="Query tiers">
+            <button class="tier fragment" data-fragment-index="1" data-tier="0">
+              <span class="t">TIER 1</span>
+              <h3>Cypher template</h3>
+              <p>Reviewed, deterministic, parameterised.</p>
+            </button>
+            <div class="arrow fragment" data-fragment-index="2">→</div>
+            <button class="tier fragment" data-fragment-index="2" data-tier="1">
+              <span class="t">TIER 2</span>
+              <h3>Full-text</h3>
+              <p>Index search over names and codes.</p>
+            </button>
+            <div class="arrow fragment" data-fragment-index="3">→</div>
+            <button class="tier fragment" data-fragment-index="3" data-tier="2">
+              <span class="t">TIER 3</span>
+              <h3>GraphRAG</h3>
+              <p>Embed, vector search, expand, rerank.</p>
+            </button>
+            <div class="arrow fragment" data-fragment-index="4">→</div>
+            <button class="tier fragment" data-fragment-index="4" data-tier="3">
+              <span class="t">TIER 4</span>
+              <h3>Text2Cypher</h3>
+              <p>A model writes the query. Last resort.</p>
+            </button>
+          </div>
+          <div class="meter"><span>◀ deterministic, cheap</span><span>flexible, needs a model ▶</span></div>
+          <pre class="cy" id="tier-cypher" style="margin-top: 26px; min-height: 230px"></pre>
+          <p class="foot">
+            Every step leaves a trace the user can read on
+            <a href="https://ehds.mabu.red/query" target="_blank" rel="noopener">ehds.mabu.red/query</a> ·
+            <a
+              href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/services/neo4j-proxy/src/nlq/engine.ts"
+              target="_blank"
+              rel="noopener"
+              >nlq/engine.ts</a
+            >
+          </p>
+          <aside class="notes">[3:30] Click through the tiers; show a real trace on /query.</aside>
+        </section>
+
+        <!-- 6 · guardrail playground -->
+        <section data-id-slide="guard">
+          <p class="eyebrow">THE GUARDRAIL</p>
+          <h2 class="h2">Guard the Cypher, not the prompt</h2>
+          <p class="stand fragment" data-fragment-index="1">
+            Template, search or model: every query passes the same check before it runs. Try it.
+          </p>
+          <div class="play">
+            <div class="presets" role="tablist" aria-label="Example queries">
+              <button class="preset" data-q="0">Count patients by gender</button>
+              <button class="preset" data-q="1">Return the patient node</button>
+              <button class="preset" data-q="2">Look a patient up by name</button>
+              <button class="preset" data-q="3">Age from birth date, aggregated</button>
+              <button class="preset" data-q="4">Hand back the birth date</button>
+              <button class="preset" data-q="5">Size a cohort in a sub-query</button>
+            </div>
+            <div class="editor">
+              <textarea id="cypher" spellcheck="false" aria-label="Cypher to check"></textarea>
+              <div class="verdict fragment" data-fragment-index="2" id="verdict" aria-live="polite">
+                <span class="v" id="v-badge">…</span>
+                <p id="v-text"></p>
+              </div>
+            </div>
+          </div>
+          <div class="band fragment" data-fragment-index="3">
+            A false refusal costs one rephrased question. <span>A false pass names a patient.</span>
+          </div>
+          <aside class="notes">[4:00] Live: type a query, watch the verdict. The function is revealsPatientIdentity() from the proxy, ported line by line.</aside>
+        </section>
+
+        <!-- 7 · policy is data -->
+        <section data-id-slide="policy">
+          <p class="eyebrow">POLICY IS DATA</p>
+          <h2 class="h2">The scope of every check is read from the graph</h2>
+          <div class="path">
+            <span class="node fragment" data-fragment-index="1" style="--c: var(--l1)">(:Participant)</span>
+            <span class="edge fragment" data-fragment-index="1">-[:HAS_CONTRACT]→</span>
+            <span class="node fragment" data-fragment-index="1" style="--c: var(--l1)">(:Contract)</span>
+            <span class="edge fragment" data-fragment-index="2">-[:COVERS]→</span>
+            <span class="node fragment" data-fragment-index="2" style="--c: var(--l1)">(:DataProduct)</span>
+            <span class="edge fragment" data-fragment-index="3">-[:GOVERNED_BY]→</span>
+            <span class="node fragment" data-fragment-index="3" style="--c: var(--l5)">(:OdrlPolicy)</span>
+          </div>
+          <div class="path" style="margin-top: 18px; padding-left: 430px">
+            <span class="edge fragment" data-fragment-index="4">(:DataProduct)-[:DESCRIBED_BY]→</span>
+            <span class="node fragment" data-fragment-index="4" style="--c: var(--l2)">(:HealthDataset)</span>
+            <span class="edge fragment" data-fragment-index="4">←[:GRANTS_ACCESS_TO]-</span>
+            <span class="node fragment" data-fragment-index="4" style="--c: var(--amber)">(:HDABApproval)</span>
+          </div>
+          <div class="row body">
+            <pre class="cy fragment" data-fragment-index="5" style="flex: 2; font-size: 19px"><span class="cm">// ui/src/lib/odrl-engine.ts: the scope behind every check</span>
+<span class="kw">MATCH</span> (p<span class="lb">:Participant</span>) <span class="kw">WHERE</span> p.participantId = $participantId
+<span class="kw">OPTIONAL MATCH</span> (p)-[<span class="lb">:OFFERS</span>|CONSUMES]->(<span class="lb">:DataProduct</span>)
+               -[<span class="lb">:GOVERNED_BY</span>]->(pol<span class="lb">:OdrlPolicy</span>)
+<span class="kw">OPTIONAL MATCH</span> (p)-[<span class="lb">:HAS_CONTRACT</span>]->(c<span class="lb">:Contract</span>)-[<span class="lb">:COVERS</span>]->(<span class="lb">:DataProduct</span>)
+               -[<span class="lb">:DESCRIBED_BY</span>]->(ds<span class="lb">:HealthDataset</span>)
+<span class="kw">OPTIONAL MATCH</span> (a<span class="lb">:HDABApproval</span>)-[<span class="lb">:GRANTS_ACCESS_TO</span>]->(ds)</pre>
+            <div class="card fragment" data-fragment-index="6" style="--c: var(--amber)">
+              <h3>The permit expires</h3>
+              <p>The next query fails. No redeploy, no config change, no prompt edit.</p>
+            </div>
+          </div>
+          <p class="foot">
+            <a
+              href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/src/lib/odrl-engine.ts"
+              target="_blank"
+              rel="noopener"
+              >ui/src/lib/odrl-engine.ts</a
+            >
+          </p>
+          <aside class="notes">[2:30] Contract, product, policy, approval: one path. When the permit expires the next query fails.</aside>
+        </section>
+
+        <!-- 8 · HL7 AI Challenge -->
+        <section data-id-slide="hl7">
+          <p class="eyebrow">THE HL7 AI CHALLENGE</p>
+          <h2 class="h2">Standards-based AI, judged by the people who write the standards</h2>
+          <p class="stand">
+            HL7 International's 2026 challenge. Its winners show where health AI is heading, and how many of
+            those problems are graph problems.
+          </p>
+          <div class="winners body">
+            <div class="us fragment" data-fragment-index="1">
+              <b>EHDS Demo &amp; Integration Platform</b>: FHIR-grounded, governance-gated AI · Open Solution
+            </div>
+            <div class="fragment" data-fragment-index="2">MCP Server for Health Information Exchange · Student Award</div>
+            <div class="fragment" data-fragment-index="2">Notes-to-FHIR · Transparency Into AI</div>
+            <div class="fragment" data-fragment-index="2">Closing the Semantic Gaps Between C-CDA and OMOP · Data Quality</div>
+            <div class="fragment" data-fragment-index="2">Reconstructing longitudinal patient context · Overall Winner</div>
+            <div class="fragment" data-fragment-index="2">Aletheia: a provenance-first clinical record · Overall Winner</div>
+          </div>
+          <div class="band fragment" data-fragment-index="3">
+            The 2027 challenge is coming. <span>Bring a graph.</span>
+            <a href="https://info.hl7.org/ai-challenge" target="_blank" rel="noopener" style="font-size: 26px; margin-left: 18px"
+              >info.hl7.org/ai-challenge</a
+            >
+          </div>
+          <aside class="notes">[2:00] The award, the neighbours on the winners list, an invitation to the Neo4j community for 2027.</aside>
+        </section>
+
+        <!-- 9 · lessons for EHDS -->
+        <section data-id-slide="for-ehds">
+          <p class="eyebrow">WHAT EHDS BUILDERS CAN LEARN FROM GRAPH PEOPLE</p>
+          <h2 class="h2">Five lessons</h2>
+          <div class="body">
+            <div class="lesson fragment" data-fragment-index="1">
+              <span class="n">1</span>
+              <div><h3>One graph across standards</h3><p>beats one pipeline per standard. FHIR, OMOP and DCAT meet in edges, not in ETL.</p></div>
+            </div>
+            <div class="lesson fragment" data-fragment-index="2">
+              <span class="n">2</span>
+              <div><h3>Ground on codes, not text</h3><p>SNOMED CT and LOINC nodes are the anchors an answer can be checked against.</p></div>
+            </div>
+            <div class="lesson fragment" data-fragment-index="3">
+              <span class="n">3</span>
+              <div><h3>Deterministic first</h3><p>A reviewed template answers most questions. The model is the fallback.</p></div>
+            </div>
+            <div class="lesson fragment" data-fragment-index="4">
+              <span class="n">4</span>
+              <div><h3>Structural embeddings keep you sovereign</h3><p>FastRP needs no external model and no data leaves the graph.</p></div>
+            </div>
+            <div class="lesson fragment" data-fragment-index="5">
+              <span class="n">5</span>
+              <div><h3>Show the trace</h3><p>Which tier answered, which index, which rerank: the explainability the AI Act asks for.</p></div>
+            </div>
+          </div>
+          <aside class="notes">[2:00] Five lessons for EHDS implementers.</aside>
+        </section>
+
+        <!-- 10 · lessons for graph builders -->
+        <section data-id-slide="for-graph">
+          <p class="eyebrow">WHAT GRAPH BUILDERS CAN LEARN FROM THE EHDS</p>
+          <h2 class="h2">Four lessons</h2>
+          <div class="grid2 body" style="gap: 32px">
+            <div class="card fragment" data-fragment-index="1" style="--c: var(--no); padding: 48px 44px">
+              <h3>Refusing is a feature</h3>
+              <p>A wrong answer about a person is worse than no answer.</p>
+            </div>
+            <div class="card fragment" data-fragment-index="2" style="--c: var(--l1); padding: 48px 44px">
+              <h3>Policy lives in the graph</h3>
+              <p>Next to the data it governs, versioned and queryable.</p>
+            </div>
+            <div class="card fragment" data-fragment-index="3" style="--c: var(--l3); padding: 48px 44px">
+              <h3>Identity is a role decision</h3>
+              <p>Who may see a person is decided by the session, never by a prompt or a parameter.</p>
+            </div>
+            <div class="card fragment" data-fragment-index="4" style="--c: var(--l5); padding: 48px 44px">
+              <h3>Provenance is a node</h3>
+              <p>Where a value came from is first-class data, not a log line.</p>
+            </div>
+          </div>
+          <aside class="notes">[2:00] Four lessons going the other way.</aside>
+        </section>
+
+        <!-- 11 · try it -->
+        <section data-id-slide="try">
+          <p class="eyebrow">TRY IT, BREAK IT</p>
+          <h2 class="h2">Open source, Apache 2.0, runs on a laptop</h2>
+          <p class="stand">127 synthetic patients, five layers, every guardrail in the open.</p>
+          <div class="links">
+            <a class="card" style="--c: var(--l1)" href="https://ehds.mabu.red" target="_blank" rel="noopener"
+              ><h3>Live demo</h3><p>ehds.mabu.red</p></a
+            >
+            <a
+              class="card"
+              style="--c: var(--l2)"
+              href="https://ma3u.github.io/MinimumViableHealthDataspacev2/"
+              target="_blank"
+              rel="noopener"
+              ><h3>Static simulation, no sign-in</h3><p>ma3u.github.io/MinimumViableHealthDataspacev2</p></a
+            >
+            <a
+              class="card"
+              style="--c: var(--l3)"
+              href="https://github.com/ma3u/MinimumViableHealthDataspacev2"
+              target="_blank"
+              rel="noopener"
+              ><h3>Source, ADRs, runbooks</h3><p>github.com/ma3u/MinimumViableHealthDataspacev2</p></a
+            >
+            <a class="card" style="--c: var(--amber)" href="https://info.hl7.org/ai-challenge" target="_blank" rel="noopener"
+              ><h3>HL7 AI Challenge 2027</h3><p>info.hl7.org/ai-challenge</p></a
+            >
+          </div>
+          <p class="foot">Matthias Buchhorn-Roth · linkedin.com/in/mbuchhorn · github.com/ma3u</p>
+          <aside class="notes">[1:00] Links, thanks, questions.</aside>
+        </section>
+      </div>
+    </div>
+
+    <div class="narration" aria-label="Narration">
+      <button type="button" id="narrate" title="Narration in the presenter's voice (key N)">▶ Narration</button>
+      <button type="button" id="caps" class="on" title="Captions (key C)">CC</button>
+      <span id="narrate-state"></span>
+    </div>
+    <div id="caption" role="status" aria-live="polite" hidden></div>
+
+    <script src="../hl7-showcase-2026/reveal/reveal.js"></script>
+    <script src="../hl7-showcase-2026/reveal/plugin/notes/notes.js"></script>
+    <script>
+      // ?still renders every slide without entrance animations or the narration bar, for the video.
+      var STILL = /[?&]still\b/.test(location.search);
+      if (STILL) document.documentElement.classList.add("still");
+      Reveal.initialize({
+        hash: true,
+        slideNumber: STILL ? false : "c/t",
+        transition: STILL ? "none" : "fade",
+        backgroundTransition: STILL ? "none" : "fade",
+        fragments: true,
+        width: 1920,
+        height: 1080,
+        margin: 0,
+        center: false,
+        controls: !STILL,
+        progress: !STILL,
+        plugins: [RevealNotes],
+      });
+      (function () {
+        var done = false;
+        function ready() {
+          if (done) return;
+          done = true;
+          Reveal.layout();
+        }
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(ready);
+        setTimeout(ready, 2000);
+      })();
+
+      function esc(s) {
+        return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      }
+      // Light Cypher highlighting: keywords, labels, comments.
+      function hl(cy) {
+        return esc(cy)
+          .replace(/(\/\/[^\n]*)/g, '<span class="cm">$1</span>')
+          .replace(
+            /\b(MATCH|OPTIONAL|WHERE|RETURN|WITH|CALL|YIELD|ORDER BY|LIMIT|AND|OR|IN|AS|DISTINCT|count|collect|UNION)\b/g,
+            '<span class="kw">$1</span>',
+          )
+          .replace(/(:[A-Z][A-Za-z]+)/g, '<span class="lb">$1</span>');
+      }
+
+      // ── Slide 3: the layer explorer ──────────────────────────────────────────
+      (function () {
+        var LAYERS = [
+          {
+            t: "L1 · Dataspace",
+            c: "var(--l1)",
+            labels: ["Participant", "DataProduct", "OdrlPolicy", "Contract", "TransferEvent", "HDABApproval"],
+            text: "Who offers what, under which policy, with which contract. Straight from the Eclipse Dataspace Protocol and ODRL.",
+            cy: "MATCH (p:Participant)-[:OFFERS]->(d:DataProduct)\n      -[:GOVERNED_BY]->(o:OdrlPolicy)\nRETURN p.name, d.title, o.policyId",
+          },
+          {
+            t: "L2 · Catalogue",
+            c: "var(--l2)",
+            labels: ["Catalogue", "HealthDataset", "Distribution"],
+            text: "HealthDCAT-AP metadata: what a dataset holds, its formats, its publisher. What a researcher discovers.",
+            cy: "MATCH (c:Catalogue)-[:CONTAINS]->(d:HealthDataset)\n      -[:HAS_DISTRIBUTION]->(x:Distribution)\nRETURN d.title, collect(x.format)",
+          },
+          {
+            t: "L3 · Clinical",
+            c: "var(--l3)",
+            labels: ["Patient", "Encounter", "Condition", "Observation", "MedicationRequest"],
+            text: "HL7 FHIR R4 resources as nodes. The primary-use view of a person's care.",
+            cy: "MATCH (p:Patient)-[:HAS_CONDITION]->(c:Condition)\nRETURN c.display, count(DISTINCT p) AS patients\nORDER BY patients DESC LIMIT 5",
+          },
+          {
+            t: "L4 · Analytics",
+            c: "var(--l4)",
+            labels: ["OMOPPerson", "OMOPConditionOccurrence", "OMOPMeasurement", "OMOPDrugExposure"],
+            text: "The same care transformed to OMOP CDM 5.4, where research and network studies happen.",
+            cy: "MATCH (o:OMOPPerson)-[:HAS_MEASUREMENT]->(m:OMOPMeasurement)\nRETURN m.measurementConceptId, avg(m.valueAsNumber)",
+          },
+          {
+            t: "L5 · Codes",
+            c: "var(--l5)",
+            labels: ["SnomedConcept", "LoincCode", "ICD10Code", "RxNormConcept"],
+            text: "The terminologies every layer points at. FHIR, OMOP and SNOMED CT in one traversal:",
+            cy: "MATCH (p:Patient)-[:HAS_CONDITION]->(c:Condition)\n      -[:CODED_BY]->(s:SnomedConcept)\nMATCH (p)-[:MAPPED_TO]->(o:OMOPPerson)\n      -[:HAS_CONDITION_OCCURRENCE]->(co)\nRETURN s.display, count(DISTINCT o) AS persons",
+          },
+        ];
+        var buttons = document.querySelectorAll(".layer");
+        function select(i) {
+          var L = LAYERS[i];
+          buttons.forEach(function (b) {
+            b.classList.toggle("sel", +b.dataset.layer === i);
+          });
+          var panel = document.getElementById("layer-panel");
+          panel.style.setProperty("--c", L.c);
+          document.getElementById("lp-title").textContent = L.t;
+          document.getElementById("lp-labels").innerHTML = L.labels
+            .map(function (l) {
+              return '<span class="pill">:' + l + "</span>";
+            })
+            .join("");
+          document.getElementById("lp-text").textContent = L.text;
+          document.getElementById("lp-cypher").innerHTML = hl(L.cy);
+        }
+        buttons.forEach(function (b) {
+          b.addEventListener("click", function () {
+            select(+b.dataset.layer);
+          });
+        });
+        Reveal.on("fragmentshown", function (e) {
+          e.fragments.forEach(function (f) {
+            if (f.dataset.layer !== undefined) select(+f.dataset.layer);
+          });
+        });
+        Reveal.on("fragmenthidden", function (e) {
+          e.fragments.forEach(function (f) {
+            var i = f.dataset.layer;
+            if (i !== undefined && +i > 0) select(+i - 1);
+          });
+        });
+        select(0);
+      })();
+
+      // ── Slide 5: the chain ───────────────────────────────────────────────────
+      (function () {
+        var TIERS = [
+          "// Tier 1 · \"how many patients by gender?\" matches a reviewed template\nMATCH (p:Patient)\nRETURN p.gender AS gender, count(p) AS count\nORDER BY count DESC",
+          "// Tier 2 · no template fits: full-text index over names and codes\nCALL db.index.fulltext.queryNodes('clinical_search', $term)\nYIELD node, score\nRETURN labels(node)[0], node.display, score LIMIT 10",
+          "// Tier 3 · GraphRAG: embed, vector search, 2-hop expand, rerank\nCALL db.index.vector.queryNodes('node_fastrp_index', 5, $embedding)\nYIELD node, score WHERE score > 0.5\nCALL apoc.path.subgraphAll(node, {maxLevel: 2}) YIELD nodes\n// a model reranks the subgraph and plans the final Cypher",
+          "// Tier 4 · Text2Cypher: a model writes the query from the schema.\n// It runs only after the same guardrail as every other tier.\nMATCH (p:Patient)-[:HAS_CONDITION]->(c:Condition)\nWHERE c.display CONTAINS 'diabetes'\nRETURN count(DISTINCT p) AS patients",
+        ];
+        var tiers = document.querySelectorAll(".tier");
+        function select(i) {
+          tiers.forEach(function (t) {
+            t.classList.toggle("sel", +t.dataset.tier === i);
+          });
+          document.getElementById("tier-cypher").innerHTML = hl(TIERS[i]);
+        }
+        tiers.forEach(function (t) {
+          t.addEventListener("click", function () {
+            select(+t.dataset.tier);
+          });
+        });
+        Reveal.on("fragmentshown", function (e) {
+          e.fragments.forEach(function (f) {
+            if (f.dataset.tier !== undefined) select(+f.dataset.tier);
+          });
+        });
+        Reveal.on("fragmenthidden", function (e) {
+          e.fragments.forEach(function (f) {
+            var i = f.dataset.tier;
+            if (i !== undefined && +i > 0) select(+i - 1);
+          });
+        });
+        select(0);
+      })();
+
+      // ── Slide 6: the guardrail playground ────────────────────────────────────
+      // revealsPatientIdentity() from services/neo4j-proxy/src/nlq/engine.ts, ported as it is.
+      var NAMING_PROPS =
+        "name|given|family|address|city|postalCode|telecom|email|phone|ssn|patientId|resourceId";
+      var DATING_PROPS = "birthDate|deathDate";
+      function finalReturns(cypher) {
+        return cypher.split(/\bUNION(?:\s+ALL)?\b/i).map(function (part) {
+          var segments = part.split(/\bRETURN\b/i);
+          return segments.length > 1 ? segments[segments.length - 1] : "";
+        });
+      }
+      function revealsPatientIdentity(cypher) {
+        var vars = new Set();
+        var re = /\(\s*(\w+)\s*:\s*(?:Patient|OMOPPerson)\b/g;
+        var m;
+        while ((m = re.exec(cypher))) vars.add(m[1]);
+        var returns = finalReturns(cypher);
+        for (var v of vars) {
+          if (new RegExp("\\b" + v + "\\.(" + NAMING_PROPS + ")\\b", "i").test(cypher))
+            return "reads " + v + "." + cypher.match(new RegExp("\\b" + v + "\\.(" + NAMING_PROPS + ")\\b", "i"))[1] + ": who someone is, even in a WHERE, is a lookup";
+          if (new RegExp("properties\\(\\s*" + v + "\\s*\\)|\\b" + v + "\\s*\\{", "i").test(cypher))
+            return "projects the properties of " + v;
+          for (var ret of returns) {
+            if (new RegExp("\\b" + v + "\\.(" + DATING_PROPS + ")\\b", "i").test(ret))
+              return "hands back a birth or death date as it is";
+            var bare = ret.replace(new RegExp("count\\s*\\(\\s*(?:DISTINCT\\s+)?" + v + "\\s*\\)", "gi"), "");
+            if (new RegExp("(^|[\\s,(])" + v + "(?![\\w.])").test(bare)) return "returns the whole :Patient node " + v;
+          }
+        }
+        return null;
+      }
+      (function () {
+        var PRESETS = [
+          "MATCH (p:Patient)\nRETURN p.gender AS gender, count(p) AS count",
+          "MATCH (p:Patient)-[:HAS_CONDITION]->(c:Condition)\nWHERE c.display CONTAINS 'diabetes'\nRETURN p",
+          "MATCH (p:Patient)\nWHERE toLower(p.name) CONTAINS 'garcia'\nOPTIONAL MATCH (p)-[:HAS_ENCOUNTER]->(e:Encounter)\nRETURN count(e)",
+          "MATCH (p:Patient)\nWITH date().year - date(p.birthDate).year AS age\nRETURN age / 10 * 10 AS decade, count(*) AS n",
+          "MATCH (p:Patient)-[:HAS_CONDITION]->(c:Condition)\nRETURN c.display, p.birthDate",
+          "CALL {\n  MATCH (p:Patient)-[:HAS_CONDITION]->(:Condition {code: '44054006'})\n  RETURN collect(p) AS cohort\n}\nRETURN size(cohort) AS cohortSize",
+        ];
+        var ta = document.getElementById("cypher");
+        var box = document.getElementById("verdict");
+        var badge = document.getElementById("v-badge");
+        var text = document.getElementById("v-text");
+        var presets = document.querySelectorAll(".preset");
+        function check() {
+          var why = revealsPatientIdentity(ta.value);
+          box.classList.toggle("no", !!why);
+          box.classList.toggle("ok", !why);
+          badge.textContent = why ? "REFUSED" : "RUNS";
+          text.textContent = why
+            ? "For a researcher this query " + why + ". (EHDS Art. 66)"
+            : "Aggregates and clinical values only. No person leaves the graph.";
+        }
+        function load(i) {
+          presets.forEach(function (p) {
+            p.classList.toggle("sel", +p.dataset.q === i);
+          });
+          ta.value = PRESETS[i];
+          check();
+        }
+        presets.forEach(function (p) {
+          p.addEventListener("click", function () {
+            load(+p.dataset.q);
+          });
+        });
+        ta.addEventListener("input", function () {
+          presets.forEach(function (p) {
+            p.classList.remove("sel");
+          });
+          check();
+        });
+        // Keys typed in the editor are Cypher, not slide navigation.
+        ta.addEventListener("keydown", function (e) {
+          e.stopPropagation();
+        });
+        // The narration walks one allowed and one refused query.
+        Reveal.on("fragmentshown", function (e) {
+          if (e.fragment.id === "verdict") load(1);
+        });
+        Reveal.on("fragmenthidden", function (e) {
+          if (e.fragment.id === "verdict") load(0);
+        });
+        load(0);
+      })();
+
+      // ── Narration: English audio in the presenter's voice, one file per slide, with
+      // captions and the slide's builds timed to the spoken sentences. Everything comes
+      // from narration.json (scripts/narrate-nodes-ai-deck.py). Off by default, so a live
+      // talk is never talked over; on, the deck plays itself.
+      (function () {
+        var data = null;
+        var on = false;
+        var capsOn = true;
+        var shownFrag = -1;
+        var advanceTimer = null;
+        var player = new Audio();
+        var btn = document.getElementById("narrate");
+        var capsBtn = document.getElementById("caps");
+        var state = document.getElementById("narrate-state");
+        var cap = document.getElementById("caption");
+        fetch("narration.json")
+          .then(function (r) {
+            return r.json();
+          })
+          .then(function (j) {
+            data = j;
+          })
+          .catch(function () {
+            state.textContent = "no narration file";
+          });
+        function current() {
+          if (!data) return null;
+          return data.slides[Reveal.getIndices().h] || null;
+        }
+        function showCap(text) {
+          cap.textContent = text || "";
+          cap.hidden = !(on && capsOn && text);
+        }
+        function stop() {
+          clearTimeout(advanceTimer);
+          player.pause();
+          showCap("");
+        }
+        function play() {
+          stop();
+          if (!on) return;
+          var s = current();
+          if (!s) {
+            state.textContent = data ? "no narration for this slide" : "loading…";
+            return;
+          }
+          shownFrag = -1;
+          Reveal.slide(Reveal.getIndices().h, 0, -1);
+          player.src = s.audio;
+          state.textContent = "";
+          player.play().catch(function (err) {
+            if (err && err.name === "AbortError") return;
+            state.textContent =
+              err && err.name === "NotAllowedError" ? "click once more to allow audio" : "audio failed";
+          });
+        }
+        player.addEventListener("timeupdate", function () {
+          var s = current();
+          if (!s || !on) return;
+          var t = player.currentTime;
+          var cue = null;
+          for (var i = 0; i < s.cues.length; i++) {
+            if (t >= s.cues[i].start && t < s.cues[i].end) cue = s.cues[i];
+            if (s.cues[i].frag !== undefined && t >= s.cues[i].start && s.cues[i].frag > shownFrag) {
+              shownFrag = s.cues[i].frag;
+              Reveal.navigateFragment(shownFrag - 1);
+            }
+          }
+          showCap(cue ? cue.text : "");
+        });
+        player.addEventListener("ended", function () {
+          showCap("");
+          if (!on) return;
+          var h = Reveal.getIndices().h;
+          if (h + 1 >= Reveal.getTotalSlides()) {
+            setOn(false);
+            return;
+          }
+          advanceTimer = setTimeout(function () {
+            Reveal.slide(h + 1, 0, -1);
+          }, 500);
+        });
+        function setOn(v) {
+          on = v;
+          btn.classList.toggle("on", on);
+          btn.textContent = on ? "■ Narration" : "▶ Narration";
+          if (on) play();
+          else stop();
+        }
+        btn.addEventListener("click", function () {
+          setOn(!on);
+        });
+        capsBtn.addEventListener("click", function () {
+          capsOn = !capsOn;
+          capsBtn.classList.toggle("on", capsOn);
+          if (!capsOn) cap.hidden = true;
+        });
+        Reveal.on("slidechanged", function () {
+          if (on) play();
+        });
+        Reveal.addKeyBinding({ keyCode: 78, key: "N", description: "Narration" }, function () {
+          setOn(!on);
+        });
+        Reveal.addKeyBinding({ keyCode: 67, key: "C", description: "Captions" }, function () {
+          capsBtn.click();
+        });
+      })();
+    </script>
+  </body>
+</html>

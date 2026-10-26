@@ -1,0 +1,491 @@
+{
+  "language": "en",
+  "slides": [
+    {
+      "id": "cover",
+      "audio": "audio/slide-1.mp3",
+      "duration": 23.684,
+      "spoken": "baaa22ecd252c54b",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 6.293,
+          "text": "Hello NODES! I'm Matthias Buchhorn-Roth, a cloud and AI engineer in Berlin."
+        },
+        {
+          "start": 6.293,
+          "end": 10.693,
+          "text": "This talk is about a graph that knows when to say no."
+        },
+        {
+          "start": 10.693,
+          "end": 23.684,
+          "text": "Our open-source platform for the European Health Data Space received the Open Solution Award in the 2026 HL7 AI Challenge, and Neo4j sits right at its centre."
+        }
+      ]
+    },
+    {
+      "id": "rules",
+      "audio": "audio/slide-2.mp3",
+      "duration": 33.251,
+      "spoken": "443006beca3a3aac",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 9.683,
+          "text": "From 2029, the European Health Data Space opens health data to research across the Union. But only on four conditions."
+        },
+        {
+          "start": 9.683,
+          "end": 13.026,
+          "text": "First, a permit from a Health Data Access Body.",
+          "frag": 1
+        },
+        {
+          "start": 13.026,
+          "end": 15.604,
+          "text": "Second, citizens can opt out.",
+          "frag": 2
+        },
+        {
+          "start": 15.604,
+          "end": 21.827,
+          "text": "Third, the analysis happens inside a secure environment, and only results leave it.",
+          "frag": 3
+        },
+        {
+          "start": 21.827,
+          "end": 25.681,
+          "text": "And fourth, no result may ever identify a person.",
+          "frag": 4
+        },
+        {
+          "start": 25.681,
+          "end": 33.251,
+          "text": "An AI assistant over this data has to keep the same four rules, on every query, no matter who or what wrote it."
+        }
+      ]
+    },
+    {
+      "id": "layers",
+      "audio": "audio/slide-3.mp3",
+      "duration": 40.96,
+      "spoken": "b86572c68394b1ed",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 4.853,
+          "text": "So we put everything into one Neo4j graph, with one layer per standard."
+        },
+        {
+          "start": 4.853,
+          "end": 11.981,
+          "text": "Layer one is the dataspace: participants, contracts and ODRL policies from the Dataspace Protocol.",
+          "frag": 1
+        },
+        {
+          "start": 11.981,
+          "end": 15.859,
+          "text": "Layer two is the catalogue, in HealthDCAT-AP.",
+          "frag": 2
+        },
+        {
+          "start": 15.859,
+          "end": 22.767,
+          "text": "Layer three holds the clinical records as HL7 FHIR resources.",
+          "frag": 3
+        },
+        {
+          "start": 22.767,
+          "end": 26.412,
+          "text": "Layer four is the same care in OMOP, where research happens.",
+          "frag": 4
+        },
+        {
+          "start": 26.412,
+          "end": 32.345,
+          "text": "And layer five holds the codes: SNOMED CT, LOINC, ICD-10.",
+          "frag": 5
+        },
+        {
+          "start": 32.345,
+          "end": 40.96,
+          "text": "The point is the edges. A patient's condition, its SNOMED concept and the same person in OMOP are a single traversal apart."
+        }
+      ]
+    },
+    {
+      "id": "community",
+      "audio": "audio/slide-4.mp3",
+      "duration": 35.712,
+      "spoken": "4fc66bbe898fdc97",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 3.402,
+          "text": "Very little of this is ours alone."
+        },
+        {
+          "start": 3.402,
+          "end": 7.198,
+          "text": "APOC expands the neighbourhood around a match.",
+          "frag": 1
+        },
+        {
+          "start": 7.198,
+          "end": 18.425,
+          "text": "Graph Data Science computes FastRP embeddings. They run offline, with no API key, and for health data that is a sovereignty argument.",
+          "frag": 2
+        },
+        {
+          "start": 18.425,
+          "end": 24.625,
+          "text": "Native vector indexes sit next to the data, so there is no second store to secure.",
+          "frag": 3
+        },
+        {
+          "start": 24.625,
+          "end": 32.52,
+          "text": "And the community's Text2Cypher and GraphRAG patterns gave our query chain its shape.",
+          "frag": 4
+        },
+        {
+          "start": 32.52,
+          "end": 35.712,
+          "text": "All of it runs on the Community Edition.",
+          "frag": 5
+        }
+      ]
+    },
+    {
+      "id": "chain",
+      "audio": "audio/slide-5.mp3",
+      "duration": 34.133,
+      "spoken": "ee7d3b2eae0f03e2",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 4.272,
+          "text": "Here is that chain. Cheapest and most predictable first."
+        },
+        {
+          "start": 4.272,
+          "end": 13.282,
+          "text": "A question first tries a reviewed Cypher template. That is deterministic, and it answers most real questions.",
+          "frag": 1
+        },
+        {
+          "start": 13.282,
+          "end": 17.473,
+          "text": "If no template fits, we search the full-text indexes.",
+          "frag": 2
+        },
+        {
+          "start": 17.473,
+          "end": 25.971,
+          "text": "Then GraphRAG: embed the question, search the vector index, expand two hops, and let a model rerank.",
+          "frag": 3
+        },
+        {
+          "start": 25.971,
+          "end": 30.847,
+          "text": "Only at the very end does a model write free Cypher.",
+          "frag": 4
+        },
+        {
+          "start": 30.847,
+          "end": 34.133,
+          "text": "Every step leaves a trace that the user can read."
+        }
+      ]
+    },
+    {
+      "id": "guard",
+      "audio": "audio/slide-6.mp3",
+      "duration": 31.58,
+      "spoken": "a0508be025d29ff0",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 1.892,
+          "text": "Now the important part."
+        },
+        {
+          "start": 1.892,
+          "end": 11.111,
+          "text": "We do not guard the prompt. We guard the Cypher. Template, search or model, every query passes the same check before it runs.",
+          "frag": 1
+        },
+        {
+          "start": 11.111,
+          "end": 22.721,
+          "text": "This query returns the whole patient node. For a researcher, that is refused. So is a lookup by name, or a birth date handed back as it is.",
+          "frag": 2
+        },
+        {
+          "start": 22.721,
+          "end": 29.35,
+          "text": "A false refusal costs a researcher one rephrased question. A false pass names a patient.",
+          "frag": 3
+        },
+        {
+          "start": 29.35,
+          "end": 31.58,
+          "text": "Try it yourself on this slide."
+        }
+      ]
+    },
+    {
+      "id": "policy",
+      "audio": "audio/slide-7.mp3",
+      "duration": 31.022,
+      "spoken": "ceb8cd284131bafd",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 4.365,
+          "text": "Where does the scope for these checks come from? From the graph."
+        },
+        {
+          "start": 4.365,
+          "end": 6.896,
+          "text": "The participant holds a contract.",
+          "frag": 1
+        },
+        {
+          "start": 6.896,
+          "end": 9.532,
+          "text": "The contract covers a data product.",
+          "frag": 2
+        },
+        {
+          "start": 9.532,
+          "end": 13.34,
+          "text": "The product is governed by an ODRL policy.",
+          "frag": 3
+        },
+        {
+          "start": 13.34,
+          "end": 17.833,
+          "text": "And it describes a dataset that the access body approved.",
+          "frag": 4
+        },
+        {
+          "start": 17.833,
+          "end": 22.21,
+          "text": "One query reads that path into the scope for every check.",
+          "frag": 5
+        },
+        {
+          "start": 22.21,
+          "end": 31.022,
+          "text": "When the permit expires, the next query fails. No redeploy, no config change, no prompt edit. Policy is data.",
+          "frag": 6
+        }
+      ]
+    },
+    {
+      "id": "hl7",
+      "audio": "audio/slide-8.mp3",
+      "duration": 31.115,
+      "spoken": "f6c09b037537aa72",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 5.108,
+          "text": "This is what the HL7 AI Challenge rewarded."
+        },
+        {
+          "start": 5.108,
+          "end": 9.706,
+          "text": "In 2026, our platform received the Open Solution Award.",
+          "frag": 1
+        },
+        {
+          "start": 9.706,
+          "end": 23.975,
+          "text": "Look at the other winners: an MCP server for health information exchange, Notes-to-FHIR, closing the semantic gap between C-CDA and OMOP, provenance-first records. Many of these are graph problems.",
+          "frag": 2
+        },
+        {
+          "start": 23.975,
+          "end": 31.115,
+          "text": "The 2027 challenge is coming. I would love to see the Neo4j community in it. Bring a graph.",
+          "frag": 3
+        }
+      ]
+    },
+    {
+      "id": "for-ehds",
+      "audio": "audio/slide-9.mp3",
+      "duration": 24.009,
+      "spoken": "07657980b2d3980c",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 5.921,
+          "text": "So what can EHDS builders learn from graph people?"
+        },
+        {
+          "start": 5.921,
+          "end": 9.973,
+          "text": "One graph across standards beats one pipeline per standard.",
+          "frag": 1
+        },
+        {
+          "start": 9.973,
+          "end": 13.56,
+          "text": "Ground answers on codes, not on text.",
+          "frag": 2
+        },
+        {
+          "start": 13.56,
+          "end": 16.138,
+          "text": "Try the deterministic path first.",
+          "frag": 3
+        },
+        {
+          "start": 16.138,
+          "end": 19.237,
+          "text": "Structural embeddings keep you sovereign.",
+          "frag": 4
+        },
+        {
+          "start": 19.237,
+          "end": 24.009,
+          "text": "And show the trace. That is the explainability the AI Act will ask for.",
+          "frag": 5
+        }
+      ]
+    },
+    {
+      "id": "for-graph",
+      "audio": "audio/slide-10.mp3",
+      "duration": 19.226,
+      "spoken": "73071856e3d7447a",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 4.331,
+          "text": "And what can graph builders learn from the EHDS?"
+        },
+        {
+          "start": 4.331,
+          "end": 6.92,
+          "text": "Refusing is a feature.",
+          "frag": 1
+        },
+        {
+          "start": 6.92,
+          "end": 11.413,
+          "text": "Policy belongs in the graph, next to the data it governs.",
+          "frag": 2
+        },
+        {
+          "start": 11.413,
+          "end": 15.662,
+          "text": "Who may see a person is a role decision, never a prompt.",
+          "frag": 3
+        },
+        {
+          "start": 15.662,
+          "end": 19.226,
+          "text": "And provenance is a node, not a log line.",
+          "frag": 4
+        }
+      ]
+    },
+    {
+      "id": "try",
+      "audio": "audio/slide-11.mp3",
+      "duration": 25.82,
+      "spoken": "98af9bd94c6aed79",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 4.423,
+          "text": "Everything is open source, under Apache 2.0."
+        },
+        {
+          "start": 4.423,
+          "end": 19.435,
+          "text": "The live demo runs at ehds.mabu.red. A static simulation needs no sign-in, and the whole stack runs on a laptop with 127 synthetic patients."
+        },
+        {
+          "start": 19.435,
+          "end": 23.359,
+          "text": "Come and try to break the guardrails. Pull requests are welcome."
+        },
+        {
+          "start": 23.359,
+          "end": 25.82,
+          "text": "Thank you, and see you at NODES!"
+        }
+      ]
+    }
+  ],
+  "pitch": {
+    "id": "pitch",
+    "audio": "audio/pitch.mp3",
+    "duration": 54.52,
+    "spoken": "4e79e9e02b46deef",
+    "cues": [
+      {
+        "start": 0.0,
+        "end": 2.763,
+        "text": "Hi, I'm Matthias Buchhorn-Roth.",
+        "slide": "cover",
+        "step": 0
+      },
+      {
+        "start": 2.763,
+        "end": 16.451,
+        "text": "From 2029, Europe's Health Data Space opens health data to research, under strict rules: a permit, an opt-out, a secure environment, and no patient ever identified.",
+        "slide": "rules",
+        "step": 4
+      },
+      {
+        "start": 16.451,
+        "end": 21.908,
+        "text": "So what happens when an AI assistant answers questions over that data?",
+        "slide": "rules",
+        "step": 4
+      },
+      {
+        "start": 21.908,
+        "end": 33.031,
+        "text": "In our open-source platform, Neo4j is where the rules and the data meet: five standards, from dataspace contracts to SNOMED codes, in one graph.",
+        "slide": "layers",
+        "step": 5
+      },
+      {
+        "start": 33.031,
+        "end": 37.604,
+        "text": "GraphRAG, with embeddings that run without an API key.",
+        "slide": "chain",
+        "step": 3
+      },
+      {
+        "start": 37.604,
+        "end": 42.005,
+        "text": "And guardrails that check the generated Cypher, not the prompt.",
+        "slide": "guard",
+        "step": 3
+      },
+      {
+        "start": 42.005,
+        "end": 49.249,
+        "text": "It won the Open Solution Award in the 2026 HL7 AI Challenge.",
+        "slide": "hl7",
+        "step": 1
+      },
+      {
+        "start": 49.249,
+        "end": 54.52,
+        "text": "At NODES AI, I'll show you how a graph learns to say no. See you there!",
+        "slide": "cover",
+        "step": 0
+      }
+    ]
+  }
+}

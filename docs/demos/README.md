@@ -63,6 +63,25 @@ machine translation and needs a native proofread.
 `python3 scripts/narrate-euskadi-deck.py [slide-id …]` regenerates the audio,
 `subtitles/*.eu.vtt` and the cue times in `narration.json`.
 
+## NODES AI 2027 talk
+
+[`ui/public/presentations/nodes-ai-2027/`](../../ui/public/presentations/nodes-ai-2027/index.html),
+served at
+[ehds.mabu.red/presentations/nodes-ai-2027/](https://ehds.mabu.red/presentations/nodes-ai-2027/)
+and on GitHub Pages under the same path. "When the graph says no": the five-layer
+Neo4j graph, the query chain from Cypher templates to Text2Cypher, and the
+guardrail on the generated Cypher, for the Neo4j community's NODES AI conference
+(15 April 2027). Eleven slides, three of them interactive: a layer explorer, the
+chain stepper and a guardrail playground that runs `revealsPatientIdentity()`
+from `services/neo4j-proxy/src/nlq/engine.ts`, ported as it is, on whatever
+Cypher you type.
+
+**Narration** (N) plays English audio in the presenter's cloned voice with
+captions (C) and reveals the builds as they are named. `narration-source.json`
+also holds the pitch for the call for speakers, under a minute.
+`python3 scripts/narrate-nodes-ai-deck.py [slide-id … | pitch]` regenerates the
+audio and `narration.json`. The rendered videos are not in the repository.
+
 ## Guides
 
 | File                                                                         | What it is                                                                                                           |
