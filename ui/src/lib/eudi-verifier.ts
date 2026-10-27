@@ -99,7 +99,7 @@ async function safeText(res: Response): Promise<string> {
  * declares (over-asking, ETSI TS 119 472-2). Nothing of it is shown: a
  * patient session sees the record's pseudonym.
  */
-export function pidQuery(doctype: string, vct: string[]) {
+function pidQuery(doctype: string, vct: string[]) {
   return {
     credentials: [
       {
