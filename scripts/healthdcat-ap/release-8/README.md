@@ -18,9 +18,14 @@ Downloaded 2026-10-27, byte for byte (the whitespace hooks skip this folder);
 matches. The specification is published under
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), European Commission.
 
+The validator runs two stages, as the specification describes: DCAT-AP
+3.0.1 first ([`../dcat-ap-3.0.1/`](../dcat-ap-3.0.1/README.md)), then these
+shapes.
+
 `vocabularies.ttl` is not upstream: it is a snapshot, made the same day, of
 the EU controlled vocabularies the shapes check against, cut to each
-concept's type, scheme and English label: health categories (Art. 51),
+concept's scheme, English label and type (only where the vocabulary states
+one), and each scheme's title: health categories (Art. 51),
 coding systems, standards and health themes from
 `hdeu-dcat.data.health.europa.eu/resource/authority/`, and access rights, data
 themes, dataset types, file types and the 24 official EU languages from

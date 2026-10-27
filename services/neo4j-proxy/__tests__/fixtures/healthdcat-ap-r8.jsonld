@@ -24,6 +24,11 @@
     "@id": "http://data.europa.eu/eli/reg/2025/327/oj",
     "@type": "eli:LegalResource"
   },
+  "dct:publisher": {
+    "@id": "https://ehds.mabu.red/agents/operator",
+    "@type": "foaf:Agent",
+    "foaf:name": "EHDS integration hub operator"
+  },
   "dct:conformsTo": {
     "@id": "https://data.health.europa.eu/healthdcat-ap/releases/release-8/"
   },
@@ -38,7 +43,8 @@
       "dct:title": "AlphaKlinik Berlin Cardiac Registry",
       "dct:description": "Synthetic registry of cardiac outcomes at AlphaKlinik Berlin, FHIR R4.",
       "dct:accessRights": {
-        "@id": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC"
+        "@id": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC",
+        "@type": "dct:RightsStatement"
       },
       "dcatap:applicableLegislation": [
         {
@@ -47,10 +53,20 @@
         }
       ],
       "dct:type": {
-        "@id": "http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC_DATA"
+        "@id": "http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC_DATA",
+        "@type": "skos:Concept",
+        "skos:prefLabel": {
+          "@value": "Synthetic data",
+          "@language": "en"
+        }
       },
       "dcat:theme": {
-        "@id": "http://publications.europa.eu/resource/authority/data-theme/HEAL"
+        "@id": "http://publications.europa.eu/resource/authority/data-theme/HEAL",
+        "@type": "skos:Concept",
+        "skos:prefLabel": {
+          "@value": "Health",
+          "@language": "en"
+        }
       },
       "dcat:keyword": [
         "Cardiology",
@@ -65,21 +81,34 @@
       "healthdcatap:healthCategory": [
         {
           "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/EHRS",
-          "@type": "skos:Concept"
+          "@type": "skos:Concept",
+          "skos:prefLabel": {
+            "@value": "Electronic health data from EHRs",
+            "@language": "en"
+          }
         },
         {
           "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/MRMR",
-          "@type": "skos:Concept"
+          "@type": "skos:Concept",
+          "skos:prefLabel": {
+            "@value": "Data from medical registries and mortality registries",
+            "@language": "en"
+          }
         }
       ],
       "healthdcatap:healthTheme": [
         {
           "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/NONCOMMUNICABLE_DISEASES",
-          "@type": "skos:Concept"
+          "@type": "skos:Concept",
+          "skos:prefLabel": {
+            "@value": "Noncommunicable diseases – metabolic & cardiopulmonary",
+            "@language": "en"
+          }
         }
       ],
       "dct:language": {
-        "@id": "http://publications.europa.eu/resource/authority/language/ENG"
+        "@id": "http://publications.europa.eu/resource/authority/language/ENG",
+        "@type": "dct:LinguisticSystem"
       },
       "dcat:landingPage": {
         "@id": "https://ehds.mabu.red/data/discover?dataset=dataset%3Aalpha-klinik-cardio-registry",
@@ -226,10 +255,12 @@
             }
           ],
           "dcat:mediaType": {
-            "@id": "https://www.iana.org/assignments/media-types/application/fhir+json"
+            "@id": "https://www.iana.org/assignments/media-types/application/fhir+json",
+            "@type": "dct:MediaType"
           },
           "dct:format": {
-            "@id": "http://publications.europa.eu/resource/authority/file-type/JSON"
+            "@id": "http://publications.europa.eu/resource/authority/file-type/JSON",
+            "@type": "dct:MediaTypeOrExtent"
           },
           "dct:conformsTo": {
             "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/FHIR",
@@ -246,7 +277,8 @@
       "dct:title": "Limburg Medical Centre OMOP Analytics",
       "dct:description": "Synthetic OMOP CDM 5.4 warehouse at Limburg Medical Centre.",
       "dct:accessRights": {
-        "@id": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC"
+        "@id": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC",
+        "@type": "dct:RightsStatement"
       },
       "dcatap:applicableLegislation": [
         {
@@ -255,10 +287,20 @@
         }
       ],
       "dct:type": {
-        "@id": "http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC_DATA"
+        "@id": "http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC_DATA",
+        "@type": "skos:Concept",
+        "skos:prefLabel": {
+          "@value": "Synthetic data",
+          "@language": "en"
+        }
       },
       "dcat:theme": {
-        "@id": "http://publications.europa.eu/resource/authority/data-theme/HEAL"
+        "@id": "http://publications.europa.eu/resource/authority/data-theme/HEAL",
+        "@type": "skos:Concept",
+        "skos:prefLabel": {
+          "@value": "Health",
+          "@language": "en"
+        }
       },
       "dcat:keyword": [
         "Clinical Research",
@@ -272,17 +314,26 @@
       "healthdcatap:healthCategory": [
         {
           "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/EHRS",
-          "@type": "skos:Concept"
+          "@type": "skos:Concept",
+          "skos:prefLabel": {
+            "@value": "Electronic health data from EHRs",
+            "@language": "en"
+          }
         }
       ],
       "healthdcatap:healthTheme": [
         {
           "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/HEALTH_PRODUCTS",
-          "@type": "skos:Concept"
+          "@type": "skos:Concept",
+          "skos:prefLabel": {
+            "@value": "Health products, technologies, data & research",
+            "@language": "en"
+          }
         }
       ],
       "dct:language": {
-        "@id": "http://publications.europa.eu/resource/authority/language/ENG"
+        "@id": "http://publications.europa.eu/resource/authority/language/ENG",
+        "@type": "dct:LinguisticSystem"
       },
       "dcat:landingPage": {
         "@id": "https://ehds.mabu.red/data/discover?dataset=dataset%3Almc-omop-analytics",
@@ -401,10 +452,12 @@
             }
           ],
           "dcat:mediaType": {
-            "@id": "https://www.iana.org/assignments/media-types/application/parquet"
+            "@id": "https://www.iana.org/assignments/media-types/application/parquet",
+            "@type": "dct:MediaType"
           },
           "dct:format": {
-            "@id": "http://publications.europa.eu/resource/authority/file-type/PARQUET"
+            "@id": "http://publications.europa.eu/resource/authority/file-type/PARQUET",
+            "@type": "dct:MediaTypeOrExtent"
           },
           "dct:conformsTo": {
             "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/OMOP-CDM",

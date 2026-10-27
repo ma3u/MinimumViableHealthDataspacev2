@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Validate HealthDCAT-AP JSON-LD with the official Release 8 SHACL (#700).
 
-The shapes are the European Commission's, vendored unchanged under
-scripts/healthdcat-ap/release-8/ (see the README there for the source and
-checksums). A non-public health dataset, which is what the hub serves, is
-checked against:
+Two stages, as the Release 8 specification describes: first DCAT-AP 3.0.1,
+the profile HealthDCAT-AP extends (scripts/healthdcat-ap/dcat-ap-3.0.1/), then
+the health constraints. The shapes are the publishers', vendored unchanged
+(see the README in each folder for the source and checksums). A non-public
+health dataset, which is what the hub serves, is checked in the second stage
+against:
 
   non-public-shapes.ttl        what must be there, cardinalities, literal kinds
   range.ttl                    the class of every object
@@ -39,18 +41,20 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 RELEASE = os.path.join(HERE, "release-8")
 SH = Namespace("http://www.w3.org/ns/shacl#")
 
+DCAT_AP = "../dcat-ap-3.0.1/dcat-ap-SHACL.ttl"
 SHAPES = ["non-public-shapes.ttl", "range.ttl", "mdr-vocabularies.shape.ttl"]
 RECOMMENDED = ["non-public-shapes_recommended.ttl"]
 
 
 def checked(name):
     """The path of a vendored file, after its checksum matched the README."""
-    path = os.path.join(RELEASE, name)
-    with open(os.path.join(RELEASE, "SHA256SUMS"), encoding="utf-8") as f:
+    path = os.path.normpath(os.path.join(RELEASE, name))
+    folder, base = os.path.split(path)
+    with open(os.path.join(folder, "SHA256SUMS"), encoding="utf-8") as f:
         sums = dict(line.split()[::-1] for line in f if line.strip())
     with open(path, "rb") as f:
         digest = hashlib.sha256(f.read()).hexdigest()
-    if sums.get(name) != digest:
+    if sums.get(base) != digest:
         print(f"{name}: checksum {digest} is not the recorded one", file=sys.stderr)
         sys.exit(2)
     return path
@@ -102,15 +106,21 @@ def main():
     data = load(args.source)
     triples = len(data)
     data.parse(checked("vocabularies.ttl"), format="turtle")
+
+    base = Graph().parse(checked(DCAT_AP), format="turtle")
+    base_ok, base_results, _ = validate(data, shacl_graph=base, inference="none", allow_warnings=True)
+    print(f"1. DCAT-AP 3.0.1: {triples} triples, {'conforms' if base_ok else 'DOES NOT CONFORM'}")
+    report(base_results, "dcat-ap ")
+
     shapes = Graph()
     for name in SHAPES:
         shapes.parse(checked(name), format="turtle")
     fixed = repair(shapes)
-
     conforms, results, _ = validate(data, shacl_graph=shapes, inference="none", allow_warnings=True)
-    print(f"HealthDCAT-AP Release 8, non-public: {triples} triples, "
+    print(f"2. HealthDCAT-AP Release 8, non-public: "
           f"{'conforms' if conforms else 'DOES NOT CONFORM'} (shape repairs: {fixed})")
     report(results, "required")
+    conforms = conforms and base_ok
 
     if args.recommended:
         rec = Graph()

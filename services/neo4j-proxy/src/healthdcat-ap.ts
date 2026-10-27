@@ -52,6 +52,64 @@ const NAL = {
   mediaType: "https://www.iana.org/assignments/media-types/",
 };
 
+/**
+ * English labels of the HealthDCAT-AP concepts the hub uses. DCAT-AP wants a
+ * skos:prefLabel on every concept a description names, and the published
+ * scheme documents of these two vocabularies carry none (only each concept's
+ * own document does), so the description states them.
+ */
+const HEALTH_CATEGORY_LABELS: Record<string, string> = {
+  EHRS: "Electronic health data from EHRs",
+  DIOH: "Data on factors impacting on health, including socio-economic, environmental and behavioural determinants of health",
+  NRPE: "Aggregated data on healthcare needs, resources allocated to healthcare, the provision of and access to healthcare, healthcare expenditure and financing",
+  RPDG: "Data on pathogens that impact human health",
+  HRAD: "Healthcare-related administrative data, including on dispensations, reimbursement claims and reimbursements",
+  HGPD: "Human genetic, epigenomic and genomic data",
+  HPML: "Other human molecular data such as proteomic, transcriptomic, metabolomic, lipidomic and other omic data",
+  PGEH: "Personal electronic health data automatically generated through medical devices",
+  WELA: "Data from wellness applications",
+  IDHP: "Data on professional status, and on the specialisation and institution of health professionals involved in the treatment of a natural person",
+  PHDR: "Data from population-based health data registries such as public health registries",
+  MRMR: "Data from medical registries and mortality registries",
+  EHCT: "Data from clinical trials, clinical studies, clinical investigations and performance studies",
+  EMRD: "Other health data from medical devices",
+  RMMD: "Data from registries for medicinal products and medical devices",
+  RQSH: "Data from research cohorts, questionnaires and surveys related to health, after the first publication of the related results",
+  EINS: "Health data from biobanks and associated databases",
+};
+const HEALTH_THEME_LABELS: Record<string, string> = {
+  ANTIMICROBIAL_CONTROL: "Antimicrobial resistance & infection control",
+  CANCER_DISEASE: "Cancer",
+  ENVIRONMENTAL_HEALTH:
+    "Environmental, occupational & radiation health (incl. WASH & urban)",
+  HEALTH_PRODUCTS: "Health products, technologies, data & research",
+  HEALTH_SYSTEMS: "Health systems, quality, care models & determinants",
+  LIFECOURSE_HEALTH:
+    "Life-course health: maternal, newborn, child, adolescent & ageing",
+  MENTAL_HEALTH: "Mental, neurological & substance use",
+  NONCOMMUNICABLE_DISEASES:
+    "Noncommunicable diseases – metabolic & cardiopulmonary",
+  RESPIRATORY_DISEASES: "Respiratory infectious diseases",
+  SENSORY_HEALTH: "Oral, eye & sensory health",
+};
+
+/** The EU vocabulary concepts every description names. */
+const EU_LABELS: Record<string, string> = {
+  HEAL: "Health",
+  SYNTHETIC_DATA: "Synthetic data",
+};
+
+/** A concept of a vocabulary, typed and labelled as DCAT-AP expects. */
+function concept(base: string, code: string, labels?: Record<string, string>) {
+  return {
+    "@id": base + code,
+    "@type": "skos:Concept",
+    ...(labels?.[code]
+      ? { "skos:prefLabel": { "@value": labels[code], "@language": "en" } }
+      : {}),
+  };
+}
+
 /** A format as the graph writes it, to the EU file-type vocabulary. */
 const FILE_TYPES: [RegExp, string][] = [
   [/json-ld|ld\+json/i, "JSON_LD"],
@@ -76,7 +134,8 @@ function fromList(table: [RegExp, string][], v: unknown): string | undefined {
 function fileType(...values: unknown[]) {
   for (const v of values) {
     const code = fromList(FILE_TYPES, v);
-    if (code) return iri(NAL.fileType + code);
+    if (code)
+      return { "@id": NAL.fileType + code, "@type": "dct:MediaTypeOrExtent" };
   }
   return undefined;
 }
@@ -94,7 +153,9 @@ function mediaType(...values: unknown[]) {
   const mt = values
     .map((v) => String(v ?? ""))
     .find((v) => /^[a-z]+\/[\w.+-]+$/i.test(v));
-  return mt ? iri(NAL.mediaType + mt) : undefined;
+  return mt
+    ? { "@id": NAL.mediaType + mt, "@type": "dct:MediaType" }
+    : undefined;
 }
 
 /** Where a dataset's description lives; the IRI of the dcat:Dataset. */
@@ -198,33 +259,35 @@ export function toDataset(r: DatasetRecord): Record<string, unknown> {
     "dct:identifier": id,
     "dct:title": ds.title,
     "dct:description": ds.description ?? ds.title,
-    "dct:accessRights": iri(
-      NAL.accessRight + String(ds.hdcatapAccessRights ?? "NON_PUBLIC"),
-    ),
+    "dct:accessRights": {
+      "@id": NAL.accessRight + String(ds.hdcatapAccessRights ?? "NON_PUBLIC"),
+      "@type": "dct:RightsStatement",
+    },
     "dcatap:applicableLegislation": (legislation.length
       ? legislation
       : [EHDS_ELI]
     ).map((l) => ({ "@id": l, "@type": "eli:LegalResource" })),
-    "dct:type": iri(
-      NAL.datasetType + String(ds.hdcatapDctType ?? "SYNTHETIC_DATA"),
+    "dct:type": concept(
+      NAL.datasetType,
+      String(ds.hdcatapDctType ?? "SYNTHETIC_DATA"),
+      EU_LABELS,
     ),
-    "dcat:theme": iri(NAL.dataTheme + "HEAL"),
+    "dcat:theme": concept(NAL.dataTheme, "HEAL", EU_LABELS),
     "dcat:keyword": list(ds.hdcatapKeywords),
     "dct:provenance": {
       "@type": "dct:ProvenanceStatement",
       "rdfs:label": String(ds.hdcatapProvenance ?? "Synthetic data"),
     },
-    "healthdcatap:healthCategory": list(ds.hdcatapHealthCategories).map(
-      (c) => ({
-        "@id": NAL.healthCategory + c,
-        "@type": "skos:Concept",
-      }),
+    "healthdcatap:healthCategory": list(ds.hdcatapHealthCategories).map((c) =>
+      concept(NAL.healthCategory, c, HEALTH_CATEGORY_LABELS),
     ),
-    "healthdcatap:healthTheme": list(ds.hdcatapHealthThemes).map((c) => ({
-      "@id": NAL.healthTheme + c,
-      "@type": "skos:Concept",
-    })),
-    "dct:language": iri(NAL.language + "ENG"),
+    "healthdcatap:healthTheme": list(ds.hdcatapHealthThemes).map((c) =>
+      concept(NAL.healthTheme, c, HEALTH_THEME_LABELS),
+    ),
+    "dct:language": {
+      "@id": NAL.language + "ENG",
+      "@type": "dct:LinguisticSystem",
+    },
     "dcat:landingPage": {
       "@id": `${BASE}/data/discover?dataset=${encodeURIComponent(id)}`,
       "@type": "foaf:Document",
@@ -348,6 +411,12 @@ export function toCatalog(records: DatasetRecord[]): Record<string, unknown> {
     "dcatap:applicableLegislation": {
       "@id": EHDS_ELI,
       "@type": "eli:LegalResource",
+    },
+    // DCAT-AP: a catalogue has a publisher, the operator of the hub.
+    "dct:publisher": {
+      "@id": `${BASE}/agents/operator`,
+      "@type": "foaf:Agent",
+      "foaf:name": "EHDS integration hub operator",
     },
     "dct:conformsTo": iri(
       "https://data.health.europa.eu/healthdcat-ap/releases/release-8/",
