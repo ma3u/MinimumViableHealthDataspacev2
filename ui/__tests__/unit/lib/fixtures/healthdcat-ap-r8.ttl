@@ -1,0 +1,278 @@
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix csvw: <http://www.w3.org/ns/csvw#> .
+@prefix cv: <http://data.europa.eu/m8g/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcatap: <http://data.europa.eu/r5r/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix dpv: <https://w3id.org/dpv#> .
+@prefix eli: <http://data.europa.eu/eli/ontology#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix geodcatap: <http://data.europa.eu/930/> .
+@prefix healthdcatap: <http://healthdataportal.eu/ns/health#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://ehds.mabu.red/catalog>
+    a dcat:Catalog ;
+    dct:title "EHDS integration hub, HealthDCAT-AP catalogue" ;
+    dct:description "Health datasets of the hub, described in HealthDCAT-AP Release 8. All are synthetic." ;
+    dcatap:applicableLegislation <http://data.europa.eu/eli/reg/2025/327/oj> ;
+    dct:publisher <https://ehds.mabu.red/agents/operator> ;
+    dct:conformsTo <https://data.health.europa.eu/healthdcat-ap/releases/release-8/> ;
+    dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ;
+    dcat:dataset <https://ehds.mabu.red/catalog/datasets/dataset%3Aalpha-klinik-cardio-registry>, <https://ehds.mabu.red/catalog/datasets/dataset%3Almc-omop-analytics> .
+
+<http://data.europa.eu/eli/reg/2025/327/oj>
+    a eli:LegalResource .
+
+<https://ehds.mabu.red/agents/operator>
+    a foaf:Agent ;
+    foaf:name "EHDS integration hub operator" .
+
+<https://ehds.mabu.red/catalog/datasets/dataset%3Aalpha-klinik-cardio-registry>
+    a dcat:Dataset ;
+    dct:identifier "dataset:alpha-klinik-cardio-registry" ;
+    dct:title "AlphaKlinik Berlin Cardiac Registry" ;
+    dct:description "Synthetic registry of cardiac outcomes at AlphaKlinik Berlin, FHIR R4." ;
+    dct:accessRights <http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC> ;
+    dcatap:applicableLegislation <http://data.europa.eu/eli/reg/2025/327/oj> ;
+    dct:type <http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC_DATA> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/HEAL> ;
+    dcat:keyword "Cardiology", "RegistryData", "synthetic data", "EHDS secondary use" ;
+    dct:provenance [ a dct:ProvenanceStatement ; rdfs:label "Synthetic data generated for the EHDS integration hub; it describes no real person." ] ;
+    healthdcatap:healthCategory <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/EHRS>, <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/MRMR> ;
+    healthdcatap:healthTheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/NONCOMMUNICABLE_DISEASES> ;
+    dct:language <http://publications.europa.eu/resource/authority/language/ENG> ;
+    dcat:landingPage <https://ehds.mabu.red/data/discover?dataset=dataset%3Aalpha-klinik-cardio-registry> ;
+    dpv:hasPurpose <https://w3id.org/dpv#ScientificResearch> ;
+    dpv:hasLegalBasis <https://ehds.mabu.red/legal-basis/ehds-data-permit> ;
+    healthdcatap:hasCodingSystem <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/SNOMED-CT>, <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/LOINC>, <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ICD-10>, <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/RXNORM> ;
+    healthdcatap:hasStructuredData "true"^^xsd:boolean ;
+    healthdcatap:numberOfRecords "4200"^^xsd:nonNegativeInteger ;
+    healthdcatap:numberOfUniqueIndividuals "1200"^^xsd:nonNegativeInteger ;
+    healthdcatap:minTypicalAge "18"^^xsd:nonNegativeInteger ;
+    healthdcatap:maxTypicalAge "90"^^xsd:nonNegativeInteger ;
+    dct:temporal [ a dct:PeriodOfTime ; dcat:startDate "2020-01-01"^^xsd:date ; dcat:endDate "2025-12-31"^^xsd:date ] ;
+    healthdcatap:retentionPeriod [ a dct:PeriodOfTime ; dcat:startDate "2020-01-01"^^xsd:date ; dcat:endDate "2035-12-31"^^xsd:date ] ;
+    healthdcatap:populationCoverage "Synthetic adults after an acute coronary syndrome, Berlin"@en ;
+    healthdcatap:hasCodeValues "ICD-10:I21", "ICD-10:I50" ;
+    dct:accrualPeriodicity <http://publications.europa.eu/resource/authority/frequency/IRREG> ;
+    dcat:temporalResolution "P1D"^^xsd:duration ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    foaf:page <https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/ehds> ;
+    dct:issued "2026-01-15" ;
+    dct:conformsTo <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/FHIR> ;
+    healthdcatap:analytics [ a dcat:Distribution ; dct:title "Aggregate statistics of the hub's OMOP CDM data, which include this dataset" ; dcat:accessURL <https://ehds.mabu.red/analytics> ; dcatap:applicableLegislation <http://data.europa.eu/eli/reg/2025/327/oj> ] ;
+    healthdcatap:hasVariables <https://ehds.mabu.red/catalog/variables/vars%3Afhir-r4> ;
+    healthdcatap:hdab <did:web:medreg.de:hdab> ;
+    geodcatap:custodian <did:web:alpha-klinik.de:participant> ;
+    dct:publisher <did:web:alpha-klinik.de:participant> ;
+    dcat:contactPoint [ a vcard:Kind ; vcard:fn "AlphaKlinik Berlin data access desk" ; vcard:hasEmail <mailto:data-access@alphaklinik-berlin.example> ] ;
+    dcat:distribution [ a dcat:Distribution ; dcat:accessURL <https://ehds.mabu.red/data/discover?dataset=dataset%3Aalpha-klinik-cardio-registry> ; dcatap:applicableLegislation <http://data.europa.eu/eli/reg/2025/327/oj> ; dcat:mediaType <https://www.iana.org/assignments/media-types/application/fhir+json> ; dct:format <http://publications.europa.eu/resource/authority/file-type/JSON> ; dct:conformsTo <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/FHIR> ; dct:title "FHIR R4 Bundle" ; dct:description "Reached through the health data access body, under a data permit (Regulation (EU) 2025/327, Art. 68)" ; dcatap:availability <http://publications.europa.eu/resource/authority/planned-availability/STABLE> ] .
+
+<http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC>
+    a dct:RightsStatement .
+
+<http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC_DATA>
+    a skos:Concept ;
+    skos:prefLabel "Synthetic data"@en .
+
+<http://publications.europa.eu/resource/authority/data-theme/HEAL>
+    a skos:Concept ;
+    skos:prefLabel "Health"@en .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/EHRS>
+    a skos:Concept ;
+    skos:prefLabel "Electronic health data from EHRs"@en .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/MRMR>
+    a skos:Concept ;
+    skos:prefLabel "Data from medical registries and mortality registries"@en .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/NONCOMMUNICABLE_DISEASES>
+    a skos:Concept ;
+    skos:prefLabel "Noncommunicable diseases – metabolic & cardiopulmonary"@en .
+
+<http://publications.europa.eu/resource/authority/language/ENG>
+    a dct:LinguisticSystem .
+
+<https://ehds.mabu.red/data/discover?dataset=dataset%3Aalpha-klinik-cardio-registry>
+    a foaf:Document .
+
+<https://w3id.org/dpv#ScientificResearch>
+    a dpv:Purpose .
+
+<https://ehds.mabu.red/legal-basis/ehds-data-permit>
+    a dpv:LegalBasis ;
+    rdfs:label "Data permit of a health data access body, Regulation (EU) 2025/327, Art. 68" ;
+    dct:source <http://data.europa.eu/eli/reg/2025/327/oj> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/SNOMED-CT>
+    a dct:Standard .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/LOINC>
+    a dct:Standard .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ICD-10>
+    a dct:Standard .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/RXNORM>
+    a dct:Standard .
+
+<http://publications.europa.eu/resource/authority/frequency/IRREG>
+    a skos:Concept, dct:Frequency ;
+    skos:prefLabel "irregular"@en .
+
+<https://creativecommons.org/licenses/by/4.0/>
+    a dct:LicenseDocument .
+
+<https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/ehds>
+    a foaf:Document .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/FHIR>
+    a dct:Standard .
+
+<https://ehds.mabu.red/catalog/variables/vars%3Afhir-r4>
+    a csvw:TableGroup ;
+    dct:title "FHIR R4 resources of the dataset" ;
+    csvw:table <https://ehds.mabu.red/catalog/variables/vars%3Afhir-r4%3ACondition> .
+
+<https://ehds.mabu.red/catalog/variables/vars%3Afhir-r4%3ACondition>
+    a csvw:Table ;
+    dct:title "Condition" ;
+    csvw:column <https://ehds.mabu.red/catalog/variables/vars%3Afhir-r4%3ACondition#code>, <https://ehds.mabu.red/catalog/variables/vars%3Afhir-r4%3ACondition#onsetDateTime> .
+
+<https://ehds.mabu.red/catalog/variables/vars%3Afhir-r4%3ACondition#code>
+    a csvw:Column ;
+    csvw:name "code" ;
+    csvw:title "Diagnosis code" ;
+    dct:description "SNOMED CT or ICD-10 code of the condition" ;
+    csvw:datatype "string" .
+
+<https://ehds.mabu.red/catalog/variables/vars%3Afhir-r4%3ACondition#onsetDateTime>
+    a csvw:Column ;
+    csvw:name "onsetDateTime" ;
+    csvw:title "Onset" ;
+    dct:description "When the condition began" ;
+    csvw:datatype "dateTime" .
+
+<did:web:medreg.de:hdab>
+    a foaf:Agent ;
+    foaf:name "MedReg DE" ;
+    cv:contactPoint <did:web:medreg.de:hdab#contact-point> .
+
+<did:web:medreg.de:hdab#contact-point>
+    a cv:ContactPoint ;
+    cv:contactPage <https://ehds.mabu.red/information> .
+
+<did:web:alpha-klinik.de:participant>
+    a foaf:Agent ;
+    foaf:name "AlphaKlinik Berlin" ;
+    cv:contactPoint <did:web:alpha-klinik.de:participant#contact-point> .
+
+<did:web:alpha-klinik.de:participant#contact-point>
+    a cv:ContactPoint ;
+    cv:email "data-access@alphaklinik-berlin.example" .
+
+<https://www.iana.org/assignments/media-types/application/fhir+json>
+    a dct:MediaType .
+
+<http://publications.europa.eu/resource/authority/file-type/JSON>
+    a dct:MediaTypeOrExtent .
+
+<http://publications.europa.eu/resource/authority/planned-availability/STABLE>
+    a skos:Concept ;
+    skos:prefLabel "stable"@en .
+
+<https://ehds.mabu.red/catalog/datasets/dataset%3Almc-omop-analytics>
+    a dcat:Dataset ;
+    dct:identifier "dataset:lmc-omop-analytics" ;
+    dct:title "Limburg Medical Centre OMOP Analytics" ;
+    dct:description "Synthetic OMOP CDM 5.4 warehouse at Limburg Medical Centre." ;
+    dct:accessRights <http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC> ;
+    dcatap:applicableLegislation <http://data.europa.eu/eli/reg/2025/327/oj> ;
+    dct:type <http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC_DATA> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/HEAL> ;
+    dcat:keyword "Clinical Research", "AnalyticsData", "synthetic data" ;
+    dct:provenance [ a dct:ProvenanceStatement ; rdfs:label "Synthetic data transformed from FHIR R4 to OMOP CDM 5.4; it describes no real person." ] ;
+    healthdcatap:healthCategory <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/EHRS> ;
+    healthdcatap:healthTheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/HEALTH_PRODUCTS> ;
+    dct:language <http://publications.europa.eu/resource/authority/language/ENG> ;
+    dcat:landingPage <https://ehds.mabu.red/data/discover?dataset=dataset%3Almc-omop-analytics> ;
+    dpv:hasPurpose <https://w3id.org/dpv#ScientificResearch> ;
+    dpv:hasLegalBasis <https://ehds.mabu.red/legal-basis/ehds-data-permit> ;
+    healthdcatap:hasCodingSystem <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/OHDSI-VOCAB>, <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/SNOMED-CT>, <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/LOINC>, <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/RXNORM> ;
+    healthdcatap:hasStructuredData "true"^^xsd:boolean ;
+    dct:accrualPeriodicity <http://publications.europa.eu/resource/authority/frequency/IRREG> ;
+    dcat:temporalResolution "P1D"^^xsd:duration ;
+    foaf:page <https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/ehds> ;
+    dct:conformsTo <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/OMOP-CDM> ;
+    healthdcatap:hasVariables <https://ehds.mabu.red/catalog/variables/vars%3Aomop-cdm-54> ;
+    healthdcatap:hdab <did:web:irs.fr:hdab> ;
+    geodcatap:custodian <did:web:lmc.nl:clinic> ;
+    dct:publisher <did:web:lmc.nl:clinic> ;
+    dcat:contactPoint [ a vcard:Kind ; vcard:fn "Limburg Medical Centre data access desk" ; vcard:hasEmail <mailto:data-access@limburg-medical-centre.example> ] ;
+    dcat:distribution [ a dcat:Distribution ; dcat:accessURL <https://ehds.mabu.red/data/discover?dataset=dataset%3Almc-omop-analytics> ; dcatap:applicableLegislation <http://data.europa.eu/eli/reg/2025/327/oj> ; dcat:mediaType <https://www.iana.org/assignments/media-types/application/parquet> ; dct:format <http://publications.europa.eu/resource/authority/file-type/PARQUET> ; dct:conformsTo <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/OMOP-CDM> ; dct:title "OMOP tables" ; dct:description "Reached through the health data access body, under a data permit (Regulation (EU) 2025/327, Art. 68)" ; dcatap:availability <http://publications.europa.eu/resource/authority/planned-availability/STABLE> ] .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/HEALTH_PRODUCTS>
+    a skos:Concept ;
+    skos:prefLabel "Health products, technologies, data & research"@en .
+
+<https://ehds.mabu.red/data/discover?dataset=dataset%3Almc-omop-analytics>
+    a foaf:Document .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/OHDSI-VOCAB>
+    a dct:Standard .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/OMOP-CDM>
+    a dct:Standard .
+
+<https://ehds.mabu.red/catalog/variables/vars%3Aomop-cdm-54>
+    a csvw:TableGroup ;
+    dct:title "OMOP CDM 5.4 tables of the dataset" ;
+    csvw:table <https://ehds.mabu.red/catalog/variables/vars%3Aomop-cdm-54%3Aperson> .
+
+<https://ehds.mabu.red/catalog/variables/vars%3Aomop-cdm-54%3Aperson>
+    a csvw:Table ;
+    dct:title "Person" ;
+    csvw:column <https://ehds.mabu.red/catalog/variables/vars%3Aomop-cdm-54%3Aperson#person_id>, <https://ehds.mabu.red/catalog/variables/vars%3Aomop-cdm-54%3Aperson#year_of_birth> .
+
+<https://ehds.mabu.red/catalog/variables/vars%3Aomop-cdm-54%3Aperson#person_id>
+    a csvw:Column ;
+    csvw:name "person_id" ;
+    csvw:title "Person id" ;
+    dct:description "Pseudonymous person identifier" ;
+    csvw:datatype "integer" .
+
+<https://ehds.mabu.red/catalog/variables/vars%3Aomop-cdm-54%3Aperson#year_of_birth>
+    a csvw:Column ;
+    csvw:name "year_of_birth" ;
+    csvw:title "Year of birth" ;
+    dct:description "Year of birth of the person" ;
+    csvw:datatype "integer" .
+
+<did:web:irs.fr:hdab>
+    a foaf:Agent ;
+    foaf:name "Institut de Recherche Santé" ;
+    cv:contactPoint <did:web:irs.fr:hdab#contact-point> .
+
+<did:web:irs.fr:hdab#contact-point>
+    a cv:ContactPoint ;
+    cv:contactPage <https://ehds.mabu.red/information> .
+
+<did:web:lmc.nl:clinic>
+    a foaf:Agent ;
+    foaf:name "Limburg Medical Centre" ;
+    cv:contactPoint <did:web:lmc.nl:clinic#contact-point> .
+
+<did:web:lmc.nl:clinic#contact-point>
+    a cv:ContactPoint ;
+    cv:email "data-access@limburg-medical-centre.example" .
+
+<https://www.iana.org/assignments/media-types/application/parquet>
+    a dct:MediaType .
+
+<http://publications.europa.eu/resource/authority/file-type/PARQUET>
+    a dct:MediaTypeOrExtent .

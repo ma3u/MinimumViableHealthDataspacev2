@@ -111,6 +111,7 @@ def test_release_8_properties_survive_federation():
     assert fhir.coding_systems == ["SNOMED-CT", "LOINC", "ICD-10", "RXNORM"]
     assert fhir.has_structured_data is True
     assert fhir.hdab_did == "did:web:medreg.de:hdab"
+    assert fhir.license == "https://creativecommons.org/licenses/by/4.0/"
     assert "Cardiology" in fhir.keywords
     assert fhir.distributions[0]["accessUrl"].startswith("https://ehds.mabu.red/data/discover")
     assert omop.coding_systems[0] == "OHDSI-VOCAB"
