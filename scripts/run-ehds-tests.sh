@@ -327,7 +327,7 @@ run_healthdcatap_tests() {
 
   # 2.3 — Health-specific extensions: datasetType, legalBasis
   local test_id="HDCAT-2.3"
-  resp=$(neo4j_query "MATCH (ds:HealthDataset) WHERE ds.datasetType IS NOT NULL OR ds.legalBasis IS NOT NULL RETURN count(ds) AS cnt") || resp=""
+  resp=$(neo4j_query "MATCH (ds:HealthDataset) WHERE ds.hdcatapDatasetType IS NOT NULL OR ds.hdcatapHealthCategories IS NOT NULL OR ds.datasetType IS NOT NULL OR ds.legalBasis IS NOT NULL RETURN count(ds) AS cnt") || resp=""
 
   if [ -n "$resp" ]; then
     local count
@@ -365,7 +365,8 @@ run_healthdcatap_tests() {
 
   # 2.5 — Publisher (Participant) linked to datasets
   local test_id="HDCAT-2.5"
-  resp=$(neo4j_query "MATCH (p:Participant)-[:PUBLISHES]->(ds:HealthDataset) RETURN count(*) AS cnt") || resp=""
+  # The seeds link a holder either way round; both mean the same.
+  resp=$(neo4j_query "MATCH (p:Participant)-[r]-(ds:HealthDataset) WHERE type(r) IN ['PUBLISHES', 'PUBLISHED_BY'] RETURN count(*) AS cnt") || resp=""
 
   if [ -n "$resp" ]; then
     local count
@@ -379,6 +380,28 @@ run_healthdcatap_tests() {
     fi
   else
     fail "$test_id: Cannot query publisher links"
+    record_result "$test_id" "healthdcatap" "failed"
+  fi
+
+  # 2.6 — Release 8 (#700): every dataset carries what the non-public profile
+  # makes mandatory: access rights, legislation, health category, an access
+  # body, structured data with its variables, a distribution. The JSON-LD the
+  # proxy makes of it is checked with the official SHACL in CI.
+  local test_id="HDCAT-2.6"
+  resp=$(neo4j_query "MATCH (ds:HealthDataset) WHERE ds.hdcatapAccessRights IS NULL OR ds.hdcatapApplicableLegislation IS NULL OR size(coalesce(ds.hdcatapHealthCategories, [])) = 0 OR ds.hdcatapHasStructuredData IS NULL OR NOT EXISTS { MATCH (:Participant)-[:GOVERNS]->(ds) } OR NOT EXISTS { MATCH (ds)-[:HAS_DISTRIBUTION]->(:Distribution) } OR (ds.hdcatapHasStructuredData = true AND NOT EXISTS { MATCH (ds)-[:HAS_VARIABLES]->(:VariablesTableGroup) }) RETURN count(ds) AS cnt") || resp=""
+
+  if [ -n "$resp" ]; then
+    local count
+    count=$(echo "$resp" | jq '.results[0].data[0].row[0] // 0') || count=0
+    if [ "$count" -eq 0 ]; then
+      pass "$test_id: every dataset carries the HealthDCAT-AP Release 8 mandatory properties"
+      record_result "$test_id" "healthdcatap" "passed" "release 8"
+    else
+      fail "$test_id: ${count} dataset(s) lack a Release 8 mandatory property (run neo4j/register-healthdcat-ap-r8.cypher)"
+      record_result "$test_id" "healthdcatap" "failed" "${count} incomplete"
+    fi
+  else
+    fail "$test_id: Cannot query the Release 8 properties"
     record_result "$test_id" "healthdcatap" "failed"
   fi
 }

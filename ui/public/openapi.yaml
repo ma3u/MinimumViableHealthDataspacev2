@@ -461,6 +461,63 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/Health" }
 
+  /api/catalog/jsonld:
+    get:
+      tags: [Catalog]
+      summary: A dataset, or the catalogue, in HealthDCAT-AP Release 8 JSON-LD
+      description: >
+        Passed through from the neo4j-proxy, whose output CI validates with the
+        official Release 8 SHACL for non-public health data (#700).
+      parameters:
+        - name: id
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: JSON-LD (application/ld+json)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: ["@context", "@type"]
+                properties:
+                  "@context": { type: object }
+                  "@type": { type: string }
+                  "@id": { type: string }
+                  "dct:identifier": { type: string }
+                  "dct:title": { type: string }
+                  "dct:description": { type: string }
+                  "dct:accessRights": { type: object }
+                  "dcatap:applicableLegislation": { type: array }
+                  "dct:type": { type: object }
+                  "dcat:theme": { type: object }
+                  "dcat:keyword": { type: array }
+                  "dct:provenance": { type: object }
+                  "healthdcatap:healthCategory": { type: array }
+                  "healthdcatap:healthTheme": { type: array }
+                  "dct:language": { type: object }
+                  "dcat:landingPage": { type: object }
+                  "dpv:hasPurpose": { type: object }
+                  "dpv:hasLegalBasis": { type: object }
+                  "healthdcatap:hasCodingSystem": { type: array }
+                  "healthdcatap:hasStructuredData": { type: object }
+                  "healthdcatap:numberOfRecords": { type: object }
+                  "healthdcatap:numberOfUniqueIndividuals": { type: object }
+                  "healthdcatap:minTypicalAge": { type: object }
+                  "healthdcatap:maxTypicalAge": { type: object }
+                  "dct:temporal": { type: object }
+                  "dct:issued": { type: string }
+                  "dct:conformsTo": { type: object }
+                  "healthdcatap:hasVariables": { type: array }
+                  "healthdcatap:hdab": { type: object }
+                  "geodcatap:custodian": { type: object }
+                  "dct:publisher": { type: object }
+                  "dcat:contactPoint": { type: object }
+                  "dcat:distribution": { type: array }
+        "404": { description: No dataset with this id }
+        "502": { description: The catalogue is unavailable }
+
   /api/catalog:
     get:
       tags: [Catalog]

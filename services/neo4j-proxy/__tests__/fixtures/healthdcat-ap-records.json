@@ -1,0 +1,162 @@
+{
+  "about": "Catalogue records as CATALOG_CYPHER returns them, for the HealthDCAT-AP Release 8 serialiser (#700). Fictional organisations, synthetic datasets. healthdcat-ap-r8.jsonld is what toCatalog() makes of them; CI validates it with the official SHACL (scripts/healthdcat-ap/validate.py).",
+  "records": [
+    {
+      "ds": {
+        "datasetId": "dataset:alpha-klinik-cardio-registry",
+        "title": "AlphaKlinik Berlin Cardiac Registry",
+        "description": "Synthetic registry of cardiac outcomes at AlphaKlinik Berlin, FHIR R4.",
+        "conformsTo": "http://hl7.org/fhir/R4",
+        "theme": "Cardiology",
+        "hdcatapDatasetType": "RegistryData",
+        "hdcatapNumberOfRecords": 4200,
+        "hdcatapNumberOfUniqueIndividuals": 1200,
+        "hdcatapMinTypicalAge": 18,
+        "hdcatapMaxTypicalAge": 90,
+        "dctTemporalStart": "2020-01-01",
+        "dctTemporalEnd": "2025-12-31",
+        "issued": "2026-01-15",
+        "hdcatapAccessRights": "NON_PUBLIC",
+        "hdcatapApplicableLegislation": [
+          "http://data.europa.eu/eli/reg/2025/327/oj"
+        ],
+        "hdcatapDctType": "SYNTHETIC_DATA",
+        "hdcatapHasStructuredData": true,
+        "hdcatapHealthCategories": ["EHRS", "MRMR"],
+        "hdcatapHealthThemes": ["NONCOMMUNICABLE_DISEASES"],
+        "hdcatapCodingSystems": ["SNOMED-CT", "LOINC", "ICD-10", "RXNORM"],
+        "hdcatapKeywords": [
+          "Cardiology",
+          "RegistryData",
+          "synthetic data",
+          "EHDS secondary use"
+        ],
+        "hdcatapProvenance": "Synthetic data generated for the EHDS integration hub; it describes no real person."
+      },
+      "distributions": [
+        {
+          "distributionId": "dist:alpha-cardio:fhir",
+          "title": "FHIR R4 Bundle",
+          "format": "FHIR R4 Bundle",
+          "mediaType": "application/fhir+json",
+          "conformsTo": "http://hl7.org/fhir/R4",
+          "accessURL": "https://ehds.mabu.red/data/discover?dataset=dataset%3Aalpha-klinik-cardio-registry",
+          "hdcatapApplicableLegislation": [
+            "http://data.europa.eu/eli/reg/2025/327/oj"
+          ]
+        }
+      ],
+      "publisher": {
+        "participantId": "did:web:alpha-klinik.de:participant",
+        "name": "AlphaKlinik Berlin"
+      },
+      "contact": {
+        "contactId": "contact:alphaklinik-berlin",
+        "name": "AlphaKlinik Berlin data access desk",
+        "email": "data-access@alphaklinik-berlin.example"
+      },
+      "hdab": {
+        "participantId": "did:web:medreg.de:hdab",
+        "name": "MedReg DE"
+      },
+      "variables": [
+        {
+          "groupId": "vars:fhir-r4",
+          "title": "FHIR R4 resources of the dataset",
+          "tables": [
+            {
+              "tableId": "vars:fhir-r4:Condition",
+              "name": "Condition",
+              "title": "Condition",
+              "columns": [
+                {
+                  "name": "code",
+                  "title": "Diagnosis code",
+                  "description": "SNOMED CT or ICD-10 code of the condition",
+                  "datatype": "string"
+                },
+                {
+                  "name": "onsetDateTime",
+                  "title": "Onset",
+                  "description": "When the condition began",
+                  "datatype": "dateTime"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "ds": {
+        "datasetId": "dataset:lmc-omop-analytics",
+        "title": "Limburg Medical Centre OMOP Analytics",
+        "description": "Synthetic OMOP CDM 5.4 warehouse at Limburg Medical Centre.",
+        "conformsTo": "https://ohdsi.github.io/CommonDataModel/cdm54.html",
+        "theme": "Clinical Research",
+        "hdcatapDatasetType": "AnalyticsData",
+        "hdcatapAccessRights": "NON_PUBLIC",
+        "hdcatapDctType": "SYNTHETIC_DATA",
+        "hdcatapHasStructuredData": true,
+        "hdcatapHealthCategories": ["EHRS"],
+        "hdcatapHealthThemes": ["HEALTH_PRODUCTS"],
+        "hdcatapCodingSystems": ["OHDSI-VOCAB", "SNOMED-CT", "LOINC", "RXNORM"],
+        "hdcatapKeywords": [
+          "Clinical Research",
+          "AnalyticsData",
+          "synthetic data"
+        ],
+        "hdcatapProvenance": "Synthetic data transformed from FHIR R4 to OMOP CDM 5.4; it describes no real person."
+      },
+      "distributions": [
+        {
+          "distributionId": "dist:lmc-omop:parquet",
+          "title": "OMOP tables",
+          "format": "application/parquet",
+          "conformsTo": "OMOP_CDM_v5.4",
+          "accessURL": "https://ehds.mabu.red/data/discover?dataset=dataset%3Almc-omop-analytics"
+        }
+      ],
+      "publisher": {
+        "participantId": "did:web:lmc.nl:clinic",
+        "name": "Limburg Medical Centre"
+      },
+      "contact": {
+        "contactId": "contact:limburg-medical-centre",
+        "name": "Limburg Medical Centre data access desk",
+        "email": "data-access@limburg-medical-centre.example"
+      },
+      "hdab": {
+        "participantId": "did:web:irs.fr:hdab",
+        "name": "Institut de Recherche Santé"
+      },
+      "variables": [
+        {
+          "groupId": "vars:omop-cdm-54",
+          "title": "OMOP CDM 5.4 tables of the dataset",
+          "tables": [
+            {
+              "tableId": "vars:omop-cdm-54:person",
+              "name": "person",
+              "title": "Person",
+              "columns": [
+                {
+                  "name": "person_id",
+                  "title": "Person id",
+                  "description": "Pseudonymous person identifier",
+                  "datatype": "integer"
+                },
+                {
+                  "name": "year_of_birth",
+                  "title": "Year of birth",
+                  "description": "Year of birth of the person",
+                  "datatype": "integer"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

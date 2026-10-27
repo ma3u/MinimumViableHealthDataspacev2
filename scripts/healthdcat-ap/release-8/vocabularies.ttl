@@ -1,0 +1,1211 @@
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<http://publications.europa.eu/resource/authority/access-right/CONFIDENTIAL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/access-right> .
+
+<http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/access-right> .
+
+<http://publications.europa.eu/resource/authority/access-right/NORMAL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/access-right> .
+
+<http://publications.europa.eu/resource/authority/access-right/OP_DATPRO> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/access-right> .
+
+<http://publications.europa.eu/resource/authority/access-right/PUBLIC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/access-right> .
+
+<http://publications.europa.eu/resource/authority/access-right/RESTRICTED> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/access-right> .
+
+<http://publications.europa.eu/resource/authority/access-right/SENSITIVE> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/access-right> .
+
+<http://publications.europa.eu/resource/authority/data-theme/AGRI> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/data-theme/ECON> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/data-theme/EDUC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/data-theme/ENER> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/data-theme/ENVI> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/data-theme/GOVE> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/data-theme/HEAL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/data-theme/INTR> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/data-theme/JUST> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/data-theme/OP_DATPRO> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/data-theme/REGI> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/data-theme/SOCI> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/data-theme/TECH> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/data-theme/TRAN> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/data-theme> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/APROF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/ATTO_LEX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/ATTO_PUB> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/CODE_LIST> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/CORE_COMP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/DIRECTORY> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/DOMAIN_MODEL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/DSCRP_SERV> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/ENVIRONMENTAL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/GEOSPATIAL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/GLOSSARY> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/HVD> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/IEPD> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/MAPPING> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/NAL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/ONTOLOGY> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/OP_DATPRO> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/RELEASE> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/SCHEMA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/STYLES> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/SYNTAX_ECD_SCHEME> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC_DATA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/TAXONOMY> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/TEST_DATA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/dataset-type/THESAURUS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/dataset-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/7Z> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/AAB> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/AAC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/AKN4EU> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/AKN4EU_LEG> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/AKN4EU_ZIP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/APK> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/APPX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/APRX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ARC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ARCINFO_COV> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ARC_GZ> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ARFF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ARJ> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ARROW_FILE> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ARROW_STREAM> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ATOM> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/AZW> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/BIN> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/BITS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/BMP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/BWF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/BZIP2> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/COG> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/CSS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/CSV> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DAPK> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DBF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DCR> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DEB> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DGN> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DMG> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DMP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DOC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DOCX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DTD_SGML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DTD_XML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DWCA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DWG> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/DXF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/E00> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/EAR> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ECW> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/EFORMS_XML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/EPS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/EPUB> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ETSI_TSL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ETSI_XML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/EXE> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/FMX2> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/FMX3> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/FMX4> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/FMX4_ZIP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/GDB> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/GEOJSON> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/GEOPARQUET> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/GEOTIFF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/GIF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/GML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/GMZ> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/GPKG> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/GPX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/GRID> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/GRID_ASCII> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/GTFS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/GZIP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/HDF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/HDT> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/HTML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/HTML5> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/HTML_SIMPL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ICS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/IMMC_XML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/INDD> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/IPA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ISO> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ISO_ZIP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/JAR> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/JATS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/JPEG> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/JPEG2000> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/JS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/JSON> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/JSON_LD> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/KML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/KMZ> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/LAS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/LAZ> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/LEG> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/LEGALHTML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/LHA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/LPK> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/LZIP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/LZMA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/LZO> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MAP_PRVW> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MAP_SRVC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MARKDOWN> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MATHML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MATLAB_MAT> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MBOX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MDB> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/METS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/METS_ZIP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MHTML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MIF_MID> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MOBI> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MOP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MOV> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MP3> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MPEG2> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MPEG4> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MPEG4_AVC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MRSID> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MSG_HTTP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MSI> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/MXD> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/N3> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/NETCDF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/OAPK> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/OCTET> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ODB> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ODC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ODF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ODG> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ODP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ODS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ODT> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/OGCFEAT> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/OP_DATPRO> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/OVF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/OWL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PARQUET> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDF1X> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDFA1A> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDFA1B> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDFA2A> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDFA2B> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDFA3> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDFA3A> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDFA3B> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDFA3U> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDFUA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDFX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDFX1A> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDFX2A> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PDFX4> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PNG> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PPS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PPSX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PPT> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PPTX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PSD> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/PWP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/QGS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RAR> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RDATA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RDF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RDFA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RDF_N_QUADS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RDF_N_TRIPLES> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RDF_THRIFT> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RDF_TRIG> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RDF_TRIX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RDF_XML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/REST> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RPM> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RSS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/RTF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SAS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SB3> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SCH> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SCHEMA_XML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SDMX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SGML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SHP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SKOS_XML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SPARQLQ> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SPARQLQRES> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SPSS_SAV> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SQL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/STATA_DTA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/STL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SVG> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/SWM> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/TAB> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/TAB_RSTR> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/TAR> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/TAR_GZ> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/TAR_XZ> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/THRIFT_BINARY> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/THRIFT_COMPACT> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/THRIFT_JSON> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/TIFF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/TIFF_FX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/TMX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/TSV> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/TXT> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/UNGEN> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/VCF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/WAR> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/WARC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/WARC_GZ> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/WAV> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/WCS_SRVC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/WEBP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/WFS_SRVC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/WIM> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/WMS_SRVC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/WMTS_SRVC> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/WORLD> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/XHTML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/XHTML5> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/XHTML_SIMPL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/XLIFF> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/XLS> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/XLSB> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/XLSM> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/XLSX> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/XML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/XSLFO> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/XSLT> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/XYZ> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/XZ> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/YAML> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/Z> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ZARR> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/file-type/ZIP> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
+
+<http://publications.europa.eu/resource/authority/language/BUL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/CES> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/DAN> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/DEU> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/ELL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/ENG> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/EST> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/FIN> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/FRA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/GLE> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/HRV> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/HUN> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/ITA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/LAV> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/LIT> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/MLT> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/NLD> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/POL> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/POR> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/RON> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/SLK> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/SLV> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/SPA> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/language/SWE> a skos:Concept ;
+    skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ATC> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/DICOM-CT> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/EDQM> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/EMA-SPOR> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/EMDN> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/GMDN> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/HGNC> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/HPO> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ICD-10> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ICD-10-NAT> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ICD-11> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ICD-9-CM> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ICD-O> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ICF> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ICHI> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ICPC-2> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ICPC-3> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/LOINC> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/MEDDRA> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/MESH> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/NCIT> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/NPU> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/OHDSI-VOCAB> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/OPS> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ORDO> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ORPHACODE> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/PROC-CODES-NAT> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/RXNORM> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/SNOMED-CT> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/UCUM> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/UMLS> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/WHODRUG> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/ANTIMICROBIAL_CONTROL> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/BLOOD_INFECTIONS> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/CANCER_DISEASE> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/CLIMATE_HEALTH> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/EMERGENCY_SETTINGS> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/ENTERIC_INFECTIONS> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/ENVIRONMENTAL_HEALTH> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/HEALTH_PRODUCTS> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/HEALTH_SYSTEMS> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/IMMUNIZATION_DISEASES> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/INJURY_PREVENTION> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/LIFECOURSE_HEALTH> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/MENTAL_HEALTH> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/NONCOMMUNICABLE_DISEASES> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/NUTRITION_SECURITY> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/REPRODUCTIVE_HEALTH> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/RESPIRATORY_DISEASES> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/SENSORY_HEALTH> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/TROPICAL_DISEASES> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/VECTOR_DISEASES> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/DIOH> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/EHCT> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/EHRS> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/EINS> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/EMRD> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/HGPD> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/HPML> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/HRAD> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/IDHP> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/MRMR> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/NRPE> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/PGEH> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/PHDR> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/RMMD> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/RPDG> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/RQSH> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/WELA> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/API> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/BEACON> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/CDA> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/CDISC-SDTM> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/DICOM> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/DOCUMENT-FORMAT> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/ECRIN-CRMDR> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/FAIRSHARING> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/FHIR> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/HL7> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/HL7-CCOW> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/IDMP> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/IEEE-11073-20702> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/IHE-XDS.b> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/INFORMATION-MODEL> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/INSPIRE> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/ISO-13606-1> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/ISO-13940> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/MEDDRA> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/MESSAGING-STANDARD> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/MIABIS> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/OMOP-CDM> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/OPENEHR> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/PHIRI> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/TERMINOLOGY-ONTOLOGY-STANDARD> a skos:Concept ;
+    skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
+
+<http://publications.europa.eu/resource/authority/access-right> a skos:ConceptScheme .
+
+<http://publications.europa.eu/resource/authority/data-theme> a skos:ConceptScheme .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories> a skos:ConceptScheme .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme> a skos:ConceptScheme .
+
+<http://publications.europa.eu/resource/authority/language> a skos:ConceptScheme .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> a skos:ConceptScheme .
+
+<http://publications.europa.eu/resource/authority/dataset-type> a skos:ConceptScheme .
+
+<https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> a skos:ConceptScheme .
+
+<http://publications.europa.eu/resource/authority/file-type> a skos:ConceptScheme .
+

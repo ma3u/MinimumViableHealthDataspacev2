@@ -1,0 +1,131 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <https://semiceu.github.io/DCAT-AP/releases/3.0.0/html/shacl/range.ttl#> .
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix cc: <http://creativecommons.org/ns#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lcon: <http://www.w3.org/ns/locn#> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix spdx: <http://spdx.org/rdf/terms#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcatap: <http://data.europa.eu/r5r/> .
+# HealthDCAT-AP
+@prefix eli: <http://data.europa.eu/eli/ontology#> .
+@prefix dqv: <http://www.w3.org/ns/dqv#> .
+@prefix dpv: <https://w3id.org/dpv#> .
+#To be changed when the Heathdcat-AP namespace is created
+@prefix healthdcatap: <http://healthdataportal.eu/ns/health#> .
+@prefix csvw: <http://www.w3.org/ns/csvw#> .
+@prefix geodcatap: <http://data.europa.eu/930/> .
+
+<https://code.europa.eu/healthdataeu/healthdcat-ap/range.ttl>
+    dct:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> ;
+    dct:conformsTo <https://www.w3.org/TR/shacl> ;
+    dct:description "This file defines the SHACL class range constraints applied to DCAT-AP properties."@en .
+
+
+#-------------------------------------------------------------------------
+# This file defines all class range constraints specific to HealthDCAT-AP, extending those provided by DCAT-AP.
+# It complements the core shapes file, which covers structural and cardinality constraints.
+# By importing DCAT-AP range constraints via owl:imports, this file ensures clear distinction between reused and extended constraints, promoting reusability and easing future upgrades.
+# Author : Mohamed CHOUAIECH, DG SANTE
+#-------------------------------------------------------------------------
+<https://semiceu.github.io/DCAT-AP/releases/3.0.0/html/shacl/range.ttl>
+  rdf:type owl:Ontology ;
+  owl:imports <https://semiceu.github.io/DCAT-AP/releases/3.0.0/html/shacl/range.ttl> ;
+  .
+  
+:Dataset_Shape
+    a sh:NodeShape ;
+    rdfs:label "Dataset"@en ;
+    sh:property [
+        sh:class dcat:Distribution ;
+        sh:path healthdcatap:analytics ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dpv:Purpose ;
+        sh:path dpv:hasPurpose ;
+        sh:severity sh:Violation
+    ], [
+        sh:class foaf:Agent ;
+        sh:path healthdcatap:hdab ;
+        sh:severity sh:Violation
+    ], [
+        sh:class foaf:Agent ;
+        sh:path healthdcatap:hdabCoordinator ;
+        sh:severity sh:Violation
+    ], [
+        sh:class foaf:Agent ;
+        sh:path geodcatap:custodian ;
+        sh:severity sh:Violation
+    ], [
+        sh:class skos:Concept ;
+        sh:path healthdcatap:healthCategory ;
+        sh:severity sh:Violation
+    ], [
+        sh:class skos:Concept ;
+        sh:path healthdcatap:healthTheme ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dpv:LegalBasis ;
+        sh:path dpv:hasLegalBasis ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dpv:PersonalData ;
+        sh:path dpv:hasPersonalData ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dqv:QualityCertificate ;
+        sh:path dqv:hasQualityAnnotation ;
+        sh:severity sh:Violation
+    ], [
+        sh:class csvw:TableGroup ;
+        sh:path healthdcatap:hasVariables ;
+        sh:severity sh:Violation
+    ], [
+		#Change healthdcatap:hasCodeValues from skos:Concept to rdfs:Literal
+        #sh:class skos:Concept ;
+        sh:path healthdcatap:hasCodeValues ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:Standard ;
+        sh:path healthdcatap:hasCodingSystem ;
+        sh:severity sh:Violation
+    ], [
+        sh:class dct:PeriodOfTime ;
+        sh:path healthdcatap:retentionPeriod ;
+        sh:severity sh:Violation
+    ] ;
+    sh:targetClass dcat:Dataset .
+
+
+:CSVWTableGroup_Shape
+    a sh:NodeShape ;
+    rdfs:label "Csvw Table Group"@en ;
+    sh:property [
+        sh:class csvw:Table ;
+        sh:path csvw:table ;
+        sh:severity sh:Violation
+    ] ;
+    sh:targetClass csvw:TableGroup .
+
+:CSVWTable_Shape
+    a sh:NodeShape ;
+    rdfs:label "Csvw Table"@en ;
+    sh:property [
+        sh:class csvw:Column ;
+        sh:path csvw:column ;
+        sh:severity sh:Violation
+    ] ;
+    sh:targetClass csvw:Table .

@@ -6,8 +6,10 @@ repos:
     hooks:
       - id: trailing-whitespace
         # A patch's blank context lines are a single space; stripping it breaks the patch.
-        exclude: \.patch$
+        # The vendored HealthDCAT-AP shapes stay byte-identical to the release (#700).
+        exclude: (\.patch$|^scripts/healthdcat-ap/release-8/)
       - id: end-of-file-fixer
+        exclude: ^scripts/healthdcat-ap/release-8/
       - id: check-yaml
         exclude: ^jad/openapi/
         args: ["--allow-multiple-documents"]
