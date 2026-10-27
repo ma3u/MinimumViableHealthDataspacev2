@@ -270,8 +270,23 @@ describe("POST /api/catalog", () => {
 
     expect(mockRunQuery).toHaveBeenCalledOnce();
     const cypher = mockRunQuery.mock.calls[0][0] as string;
-    expect(cypher).toContain("MERGE (d:HealthDataset {id: $id})");
-    expect(cypher).toContain("MERGE (p)-[:PUBLISHES]->(d)");
+    // Keyed and linked as the proxy's serialiser reads it (#700).
+    expect(cypher).toContain("MERGE (d:HealthDataset {datasetId: $id})");
+    expect(cypher).toContain("MERGE (d)-[:PUBLISHED_BY]->(p)");
+  });
+
+  it("gives a saved dataset what Release 8 requires, so it validates at once", async () => {
+    mockRunQuery.mockResolvedValue([]);
+    await POST(jsonBody({ id: "dataset:test", title: "Test" }));
+
+    const cypher = mockRunQuery.mock.calls[0][0] as string;
+    expect(cypher).toContain("MERGE (hdab)-[:GOVERNS]->(d)");
+    expect(cypher).toContain("MERGE (d)-[:HAS_DISTRIBUTION]->(x)");
+    expect(cypher).toContain("MERGE (d)-[:HAS_CONTACT_POINT]->(cp)");
+    expect(cypher).toContain("MERGE (d)-[:HAS_VARIABLES]->(tg)");
+    expect(cypher).toContain(
+      "hdcatapAccessRights = coalesce(d.hdcatapAccessRights, 'NON_PUBLIC')",
+    );
   });
 
   /**
@@ -317,7 +332,7 @@ describe("POST /api/catalog", () => {
       purpose: "Research",
       populationCoverage: "EU",
       numberOfUniqueIndividuals: 50,
-      healthCategory: "Cardiology",
+      healthCategories: ["EHRS", "MRMR"],
       minTypicalAge: 18,
       maxTypicalAge: 80,
       publisherType: "Hospital",
@@ -334,7 +349,15 @@ describe("POST /api/catalog", () => {
     expect(params.language).toBe("de");
     expect(params.spatial).toBe("DE");
     expect(params.recordCount).toBe(100);
-    expect(params.healthCategory).toBe("Cardiology");
+    expect(params.healthCategories).toEqual(["EHRS", "MRMR"]);
+  });
+
+  it("passes no categories when the holder states none, so the seed's rule applies", async () => {
+    mockRunQuery.mockResolvedValue([]);
+    await POST(jsonBody({ id: "ds:x", title: "X", healthCategories: "EHRS" }));
+
+    const params = mockRunQuery.mock.calls[0][1] as Record<string, unknown>;
+    expect(params.healthCategories).toEqual([]);
   });
 
   it("returns 400 when id is missing", async () => {

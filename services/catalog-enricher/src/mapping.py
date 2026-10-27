@@ -108,7 +108,9 @@ def extract_datasets(env: CrawlEnvelope) -> list[DatasetUpsert]:
                 publisher_did=env.participant_did,
                 country=raw.get("dct:spatial")
                 or (raw.get("publisher") or {}).get("country"),
-                license=raw.get("dct:license") or raw.get("license"),
+                # A Release 8 licence is a dct:LicenseDocument node, older
+                # catalogues give the IRI or a code as a string.
+                license=_iri(raw.get("dct:license") or raw.get("license")),
                 themes=themes,
                 distributions=distributions,
                 odrl_policy=raw.get("odrl:hasPolicy") or raw.get("policy"),

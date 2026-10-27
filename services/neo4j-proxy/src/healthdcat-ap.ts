@@ -50,6 +50,9 @@ const NAL = {
   standard:
     "https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/",
   mediaType: "https://www.iana.org/assignments/media-types/",
+  frequency: "http://publications.europa.eu/resource/authority/frequency/",
+  availability:
+    "http://publications.europa.eu/resource/authority/planned-availability/",
 };
 
 /**
@@ -97,6 +100,27 @@ const HEALTH_THEME_LABELS: Record<string, string> = {
 const EU_LABELS: Record<string, string> = {
   HEAL: "Health",
   SYNTHETIC_DATA: "Synthetic data",
+  STABLE: "stable",
+};
+const FREQUENCY_LABELS: Record<string, string> = {
+  ANNUAL: "annual",
+  DAILY: "daily",
+  IRREG: "irregular",
+  MONTHLY: "monthly",
+  QUARTERLY: "quarterly",
+  WEEKLY: "weekly",
+};
+
+/** The licences the seeds name, as the IRIs of their texts. */
+const LICENCES: Record<string, string> = {
+  "CC-BY-4.0": "https://creativecommons.org/licenses/by/4.0/",
+  "CC-BY-SA-4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "CC-BY-NC-4.0": "https://creativecommons.org/licenses/by-nc/4.0/",
+  "CC-BY-NC-SA-4.0": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+  "CC-BY-NC-ND-4.0": "https://creativecommons.org/licenses/by-nc-nd/4.0/",
+  "CC0-1.0": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "OGL-UK-3.0":
+    "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
 };
 
 /** A concept of a vocabulary, typed and labelled as DCAT-AP expects. */
@@ -162,6 +186,9 @@ function mediaType(...values: unknown[]) {
 const BASE = process.env.CATALOG_BASE_URL ?? "https://ehds.mabu.red";
 /** Where the public information of the access body is (Art. 58). */
 const HDAB_PAGE = `${BASE}/information`;
+/** What the hub implements of the Regulation, on the static documentation. */
+const DOCS_PAGE =
+  "https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/ehds";
 
 type Props = Record<string, unknown>;
 
@@ -232,19 +259,38 @@ function variablesGroup(g: VariablesGroup) {
     "@id": `${BASE}/catalog/variables/${encodeURIComponent(g.groupId)}`,
     "@type": "csvw:TableGroup",
     "dct:title": g.title,
-    "csvw:table": g.tables.map((t) => ({
-      "@id": `${BASE}/catalog/variables/${encodeURIComponent(t.tableId)}`,
-      "@type": "csvw:Table",
-      "dct:title": t.title,
-      "csvw:column": t.columns.map((c) => ({
-        "@type": "csvw:Column",
-        "csvw:name": c.name,
-        "csvw:title": c.title,
-        "dct:description": c.description,
-        "csvw:datatype": c.datatype,
-      })),
-    })),
+    "csvw:table": g.tables.map((t) => {
+      const table = `${BASE}/catalog/variables/${encodeURIComponent(
+        t.tableId,
+      )}`;
+      return {
+        "@id": table,
+        "@type": "csvw:Table",
+        "dct:title": t.title,
+        // Datasets share a table, so its columns are named: a blank node
+        // would be a new column for every dataset that names the table.
+        "csvw:column": t.columns.map((c) => ({
+          "@id": `${table}#${encodeURIComponent(c.name)}`,
+          "@type": "csvw:Column",
+          "csvw:name": c.name,
+          "csvw:title": c.title,
+          "dct:description": c.description,
+          "csvw:datatype": c.datatype,
+        })),
+      };
+    }),
   };
+}
+
+/** A dct:PeriodOfTime, when both ends are known. */
+function period(start: unknown, end: unknown) {
+  return start && end
+    ? {
+        "@type": "dct:PeriodOfTime",
+        "dcat:startDate": { "@value": String(start), "@type": "xsd:date" },
+        "dcat:endDate": { "@value": String(end), "@type": "xsd:date" },
+      }
+    : undefined;
 }
 
 /** A dcat:Dataset in Release 8, for the non-public profile. */
@@ -318,24 +364,53 @@ export function toDataset(r: DatasetRecord): Record<string, unknown> {
     ),
     "healthdcatap:minTypicalAge": nonNegative(ds.hdcatapMinTypicalAge),
     "healthdcatap:maxTypicalAge": nonNegative(ds.hdcatapMaxTypicalAge),
-    "dct:temporal":
-      ds.dctTemporalStart && ds.dctTemporalEnd
-        ? {
-            "@type": "dct:PeriodOfTime",
-            "dcat:startDate": {
-              "@value": String(ds.dctTemporalStart),
-              "@type": "xsd:date",
-            },
-            "dcat:endDate": {
-              "@value": String(ds.dctTemporalEnd),
-              "@type": "xsd:date",
-            },
-          }
-        : undefined,
+    "dct:temporal": period(ds.dctTemporalStart, ds.dctTemporalEnd),
+    "healthdcatap:retentionPeriod": period(
+      ds.hdcatapRetentionStart,
+      ds.hdcatapRetentionEnd,
+    ),
+    "healthdcatap:populationCoverage": ds.hdcatapPopulationCoverage
+      ? { "@value": String(ds.hdcatapPopulationCoverage), "@language": "en" }
+      : undefined,
+    "healthdcatap:hasCodeValues": list(ds.hdcatapCodeValues),
+    "dct:accrualPeriodicity": ds.hdcatapAccrualPeriodicity
+      ? {
+          ...concept(
+            NAL.frequency,
+            String(ds.hdcatapAccrualPeriodicity),
+            FREQUENCY_LABELS,
+          ),
+          "@type": ["skos:Concept", "dct:Frequency"],
+        }
+      : undefined,
+    "dcat:temporalResolution": ds.hdcatapTemporalResolution
+      ? {
+          "@value": String(ds.hdcatapTemporalResolution),
+          "@type": "xsd:duration",
+        }
+      : undefined,
+    "dct:license": LICENCES[String(ds.license)]
+      ? { "@id": LICENCES[String(ds.license)], "@type": "dct:LicenseDocument" }
+      : undefined,
+    "foaf:page": { "@id": DOCS_PAGE, "@type": "foaf:Document" },
     "dct:issued": ds.issued,
     "dct:modified": ds.modified,
     "dct:conformsTo": standard(ds.conformsTo),
   };
+  // Aggregate statistics, where the dataset's patients are in the graph and
+  // so in the hub's OMOP CDM analytics (neo4j/register-healthdcat-ap-r8.cypher).
+  if (ds.hdcatapAnalyticsURL) {
+    out["healthdcatap:analytics"] = {
+      "@type": "dcat:Distribution",
+      "dct:title":
+        "Aggregate statistics of the hub's OMOP CDM data, which include this dataset",
+      "dcat:accessURL": iri(String(ds.hdcatapAnalyticsURL)),
+      "dcatap:applicableLegislation": {
+        "@id": EHDS_ELI,
+        "@type": "eli:LegalResource",
+      },
+    };
+  }
   if (structured && r.variables.length) {
     out["healthdcatap:hasVariables"] = r.variables.map(variablesGroup);
   }
@@ -395,6 +470,9 @@ export function toDataset(r: DatasetRecord): Record<string, unknown> {
       "dct:format": fileType(d.format, d.mediaType),
       "dct:conformsTo": standard(d.conformsTo),
       "dct:title": d.title ?? d.name,
+      "dct:description":
+        "Reached through the health data access body, under a data permit (Regulation (EU) 2025/327, Art. 68)",
+      "dcatap:availability": concept(NAL.availability, "STABLE", EU_LABELS),
     };
   });
   return out;

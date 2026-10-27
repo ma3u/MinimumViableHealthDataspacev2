@@ -158,6 +158,17 @@ components:
         legalBasis: { type: string }
         recordCount: { type: integer, nullable: true }
         theme: { type: string, nullable: true }
+        healthCategories:
+          description: >
+            Art. 51(1) categories as HealthDCAT-AP health-category codes
+            (EHRS, MRMR, ...), as the data holder stated them in the editor.
+          type: array
+          nullable: true
+          items: { type: string }
+        populationCoverage: { type: string, nullable: true }
+        numberOfUniqueIndividuals: { type: integer, nullable: true }
+        minTypicalAge: { type: integer, nullable: true }
+        maxTypicalAge: { type: integer, nullable: true }
         providers:
           type: array
           items: { type: string }
@@ -507,6 +518,14 @@ paths:
                   "healthdcatap:minTypicalAge": { type: object }
                   "healthdcatap:maxTypicalAge": { type: object }
                   "dct:temporal": { type: object }
+                  "healthdcatap:retentionPeriod": { type: object }
+                  "healthdcatap:populationCoverage": { type: object }
+                  "healthdcatap:hasCodeValues": { type: array }
+                  "healthdcatap:analytics": { type: object }
+                  "dct:accrualPeriodicity": { type: object }
+                  "dcat:temporalResolution": { type: object }
+                  "dct:license": { type: object }
+                  "foaf:page": { type: object }
                   "dct:issued": { type: string }
                   "dct:conformsTo": { type: object }
                   "healthdcatap:hasVariables": { type: array }

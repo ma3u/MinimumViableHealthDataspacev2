@@ -999,9 +999,42 @@ describe("CatalogEditorPage", () => {
       await user.click(screen.getByTitle("Edit entry"));
 
       await waitFor(() => {
+        // The Art. 51 categories come first; personal and sensitive data last.
         const checkboxes = screen.getAllByRole("checkbox");
-        expect(checkboxes[0]).toBeChecked();
-        expect(checkboxes[1]).toBeChecked();
+        expect(checkboxes.at(-2)).toBeChecked();
+        expect(checkboxes.at(-1)).toBeChecked();
+      });
+    });
+
+    it("offers the 17 Art. 51(1) categories and sends the ones chosen", async () => {
+      const user = userEvent.setup();
+      mockFetchApi.mockReturnValue(mockResponse([]));
+      render(<DcatApEditorPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Create one/)).toBeInTheDocument();
+      });
+      await user.click(screen.getByText(/Create one/));
+
+      expect(
+        screen.getByText("Health categories (Art. 51(1))"),
+      ).toBeInTheDocument();
+      await user.click(screen.getByRole("checkbox", { name: /^EHRS / }));
+      await user.click(screen.getByRole("checkbox", { name: /^MRMR / }));
+      await user.type(
+        screen.getByPlaceholderText("e.g. Synthetic FHIR R4 Patient Cohort"),
+        "Registry",
+      );
+      mockFetchApi.mockReturnValue(mockResponse({ ok: true }));
+      await user.click(screen.getByRole("button", { name: /Create Entry/ }));
+
+      await waitFor(() => {
+        const post = mockFetchApi.mock.calls.find(
+          (c) => (c[1] as RequestInit | undefined)?.method === "POST",
+        );
+        expect(post).toBeDefined();
+        const body = JSON.parse(String((post![1] as RequestInit).body));
+        expect(body.healthCategories).toEqual(["EHRS", "MRMR"]);
       });
     });
   });

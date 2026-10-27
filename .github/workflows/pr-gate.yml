@@ -97,11 +97,15 @@ jobs:
       # The catalogue's JSON-LD is HealthDCAT-AP Release 8 (#700): the
       # serialiser's golden output, pinned by a proxy unit test, must pass the
       # official SHACL for non-public health data (scripts/healthdcat-ap/).
+      # The editor's Turtle export, pinned by a UI unit test, must pass too
+      # and be the same graph as the JSON-LD it was written from.
       - name: HealthDCAT-AP Release 8 conformance
         run: |
           set -euo pipefail
           python -m pip install --quiet "pyshacl==0.30.1"
           python3 scripts/healthdcat-ap/validate.py services/neo4j-proxy/__tests__/fixtures/healthdcat-ap-r8.jsonld
+          python3 scripts/healthdcat-ap/validate.py ui/__tests__/unit/lib/fixtures/healthdcat-ap-r8.ttl \
+            --same-as services/neo4j-proxy/__tests__/fixtures/healthdcat-ap-r8.jsonld
 
       # #404 removed the dead files, exports and dependencies knip found;
       # this keeps it that way. ui/knip.json lists the entry points knip

@@ -559,6 +559,88 @@
 
 <http://publications.europa.eu/resource/authority/file-type/ZIP> skos:inScheme <http://publications.europa.eu/resource/authority/file-type> .
 
+<http://publications.europa.eu/resource/authority/frequency/10MIN> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/12HRS> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/15MIN> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/1MIN> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/30MIN> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/5MIN> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/ANNUAL> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/ANNUAL_2> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/ANNUAL_3> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/AS_NEEDED> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/BIDECENNIAL> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/BIENNIAL> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/BIHOURLY> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/BIMONTHLY> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/BIWEEKLY> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/CONT> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/DAILY> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/DAILY_2> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/DECENNIAL> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/HOURLY> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/IRREG> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/MONTHLY> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/MONTHLY_2> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/MONTHLY_3> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/NEVER> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/NOT_PLANNED> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/OP_DATPRO> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/OTHER> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/QUADRENNIAL> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/QUARTERLY> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/QUINQUENNIAL> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/SEXENNIAL> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/TRIDECENNIAL> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/TRIENNIAL> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/TRIHOURLY> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/UNKNOWN> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/UPDATE_CONT> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/WEEKLY> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/WEEKLY_2> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/WEEKLY_3> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
+<http://publications.europa.eu/resource/authority/frequency/WEEKLY_5> skos:inScheme <http://publications.europa.eu/resource/authority/frequency> .
+
 <http://publications.europa.eu/resource/authority/language/BUL> skos:inScheme <http://publications.europa.eu/resource/authority/language> .
 
 <http://publications.europa.eu/resource/authority/language/CES> skos:inScheme <http://publications.europa.eu/resource/authority/language> .
@@ -606,6 +688,16 @@
 <http://publications.europa.eu/resource/authority/language/SPA> skos:inScheme <http://publications.europa.eu/resource/authority/language> .
 
 <http://publications.europa.eu/resource/authority/language/SWE> skos:inScheme <http://publications.europa.eu/resource/authority/language> .
+
+<http://publications.europa.eu/resource/authority/planned-availability/AVAILABLE> skos:inScheme <http://publications.europa.eu/resource/authority/planned-availability> .
+
+<http://publications.europa.eu/resource/authority/planned-availability/EXPERIMENTAL> skos:inScheme <http://publications.europa.eu/resource/authority/planned-availability> .
+
+<http://publications.europa.eu/resource/authority/planned-availability/OP_DATPRO> skos:inScheme <http://publications.europa.eu/resource/authority/planned-availability> .
+
+<http://publications.europa.eu/resource/authority/planned-availability/STABLE> skos:inScheme <http://publications.europa.eu/resource/authority/planned-availability> .
+
+<http://publications.europa.eu/resource/authority/planned-availability/TEMPORARY> skos:inScheme <http://publications.europa.eu/resource/authority/planned-availability> .
 
 <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ATC> skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> .
 
@@ -795,6 +887,10 @@
 
 <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/TERMINOLOGY-ONTOLOGY-STANDARD> skos:inScheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/standard> .
 
+<http://publications.europa.eu/resource/authority/planned-availability> a skos:ConceptScheme ;
+    dcterms:title "Planned availability"@en ;
+    skos:prefLabel "Planned availability"@en .
+
 <http://publications.europa.eu/resource/authority/access-right> a skos:ConceptScheme ;
     dcterms:title "Access right"@en ;
     skos:prefLabel "Access right"@en .
@@ -825,6 +921,10 @@
 <https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system> a skos:ConceptScheme ;
     dcterms:title "Coding Systems"@en ;
     skos:prefLabel "Coding Systems"@en .
+
+<http://publications.europa.eu/resource/authority/frequency> a skos:ConceptScheme ;
+    dcterms:title "Frequency"@en ;
+    skos:prefLabel "Frequency"@en .
 
 <http://publications.europa.eu/resource/authority/file-type> a skos:ConceptScheme ;
     dcterms:title "File type"@en ;

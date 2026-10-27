@@ -31,6 +31,9 @@ are listed, named as that issue, and do not fail the run; --strict counts them.
     python3 scripts/healthdcat-ap/validate.py http://localhost:9090/catalog/datasets
     python3 scripts/healthdcat-ap/validate.py <file> --recommended   # list the warnings too
     python3 scripts/healthdcat-ap/validate.py <file> --strict        # count the catalogue's too
+    python3 scripts/healthdcat-ap/validate.py a.ttl --same-as a.jsonld  # also: the same graph?
+
+A source ending in .ttl is read as Turtle, anything else as JSON-LD.
 
 Exit 0 when the data conforms (warnings allowed), 1 on any violation, 2 when
 a vendored file does not match its recorded checksum.
@@ -44,6 +47,7 @@ import urllib.request
 
 from pyshacl import validate
 from rdflib import RDF, Graph, Namespace
+from rdflib.compare import isomorphic
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RELEASE = os.path.join(HERE, "release-8")
@@ -90,6 +94,8 @@ def load(source):
     else:
         with open(source, encoding="utf-8") as f:
             text = f.read()
+    if source.endswith(".ttl"):
+        return Graph().parse(data=text, format="turtle")
     json.loads(text)  # a clear error for something that is not JSON at all
     return Graph().parse(data=text, format="json-ld")
 
@@ -136,9 +142,15 @@ def main():
     ap.add_argument("source", help="a JSON-LD file or URL")
     ap.add_argument("--recommended", action="store_true", help="also list the recommended-property warnings")
     ap.add_argument("--strict", action="store_true", help="also fail on the catalogue's violations from the Dataset shapes")
+    ap.add_argument("--same-as", metavar="OTHER", help="also fail unless OTHER holds the same graph (e.g. the Turtle of a JSON-LD)")
     args = ap.parse_args()
 
     data = load(args.source)
+    if args.same_as:
+        same = isomorphic(data, load(args.same_as))
+        print(f"0. Same graph as {args.same_as}: {'yes' if same else 'NO'}")
+        if not same:
+            return 1
     triples = len(data)
     catalogues = set(data.subjects(RDF.type, DCAT.Catalog))
     data.parse(checked("vocabularies.ttl"), format="turtle")

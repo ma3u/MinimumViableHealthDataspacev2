@@ -16,6 +16,12 @@ import {
   ExternalLink,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import { IS_STATIC } from "@/lib/static-export";
+import {
+  HEALTH_CATEGORIES,
+  minimalDescription,
+  toTurtle,
+} from "@/lib/healthdcat-ap";
 
 /* ── Types ─────────────────────────────────────────── */
 
@@ -36,7 +42,7 @@ interface DatasetEntry {
   purpose?: string;
   populationCoverage?: string;
   numberOfUniqueIndividuals?: number | null;
-  healthCategory?: string;
+  healthCategories?: string[];
   minTypicalAge?: number | null;
   maxTypicalAge?: number | null;
   publisherType?: string;
@@ -54,14 +60,14 @@ const EMPTY_ENTRY: Omit<DatasetEntry, "id"> = {
   publisher: "",
   theme: "",
   datasetType: "",
-  legalBasis: "EHDS Article 53 Secondary Use",
+  legalBasis: "EHDS Art. 68 data permit (secondary use)",
   recordCount: null,
   personalData: false,
   sensitiveData: false,
   purpose: "",
   populationCoverage: "",
   numberOfUniqueIndividuals: null,
-  healthCategory: "",
+  healthCategories: [],
   minTypicalAge: null,
   maxTypicalAge: null,
   publisherType: "",
@@ -69,37 +75,53 @@ const EMPTY_ENTRY: Omit<DatasetEntry, "id"> = {
   spatial: "",
 };
 
+// The kinds the graph uses; the seed derives Art. 51 categories from them
+// when a holder states none (neo4j/register-healthdcat-ap-r8.cypher).
 const DATASET_TYPES = [
-  "SyntheticData",
-  "RealWorldData",
+  "RegistryData",
   "ClinicalTrial",
-  "Registry",
-  "AnalyticsData",
   "ObservationalStudy",
-  "Biobank",
-  "AdminHealth",
+  "CohortStudy",
+  "OutcomeStudy",
+  "SurveyData",
+  "SurveillanceData",
+  "ResourceData",
+  "SafetyData",
+  "GenomicData",
+  "ImagingData",
+  "AnalyticsData",
+  "SecondaryUse",
 ];
 
 const PUBLISHER_TYPES = ["DataHolder", "HDAB", "Researcher", "DataUser"];
 
+// Article numbers of the adopted Regulation (EU) 2025/327
+// (docs/ehds-article-numbering.md).
 const LEGAL_BASIS_OPTIONS = [
-  "EHDS Article 33 Primary Use",
-  "EHDS Article 53 Secondary Use",
-  "GDPR Article 6(1)(a) Consent",
-  "GDPR Article 9(2)(j) Research",
+  "EHDS Art. 68 data permit (secondary use)",
+  "EHDS Art. 69 health data request (anonymised statistics)",
+  "GDPR Art. 9(2)(j) research",
 ];
 
+// The clinical areas the graph uses; the seed maps them to the HealthDCAT-AP
+// health-theme vocabulary.
 const THEMES = [
-  "Patient Summary",
+  "Cardiology",
   "Clinical Research",
-  "Cancer Registry",
-  "Rare Disease",
+  "Dentistry",
   "Genomics",
-  "Epidemiology",
-  "Drug Safety",
-  "Public Health",
-  "Medical Imaging",
-  "Lab & Diagnostics",
+  "Geriatrics",
+  "Infectious Disease",
+  "Maternal Health",
+  "Neurology",
+  "Occupational Health",
+  "Oncology",
+  "Ophthalmology",
+  "Paediatrics",
+  "Pharmacovigilance",
+  "Psychiatry",
+  "Rare Diseases",
+  "Transplant Medicine",
 ];
 
 const LICENSES = [
@@ -129,215 +151,61 @@ function generateId(title: string): string {
   return `dataset:${slug || "untitled"}-${Date.now().toString(36)}`;
 }
 
-/* ── RDF Turtle export (EHDS editor compatible) ────── */
+/* ── RDF Turtle export ─────────────────────────────── */
 
-/** Escape a string for Turtle literal */
-function ttlEscape(s: string): string {
-  return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n");
-}
+// The Turtle is the proxy's HealthDCAT-AP Release 8 document, the one CI
+// validates with the official SHACL, in another syntax (#700). The static
+// export has no proxy and writes the page's minimal description instead.
 
-/** Map legal basis label → ELI URI used by the EHDS editor */
-const LEGAL_BASIS_URI: Record<string, string> = {
-  "EHDS Article 33 Primary Use": "http://data.europa.eu/eli/reg/2025/327/oj",
-  "EHDS Article 53 Secondary Use": "http://data.europa.eu/eli/reg/2025/327/oj",
-  "GDPR Article 6(1)(a) Consent": "http://data.europa.eu/eli/reg/2016/679/oj",
-  "GDPR Article 9(2)(j) Research": "http://data.europa.eu/eli/reg/2016/679/oj",
-};
-
-/** Map dataset type → EU authority table URI */
-const DATASET_TYPE_URI: Record<string, string> = {
-  SyntheticData:
-    "http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC",
-  RealWorldData:
-    "http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL",
-  ClinicalTrial:
-    "http://publications.europa.eu/resource/authority/dataset-type/CLINICAL_TRIAL",
-  Registry:
-    "http://publications.europa.eu/resource/authority/dataset-type/CODE_LIST",
-  AnalyticsData:
-    "http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL",
-  ObservationalStudy:
-    "http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL",
-  Biobank:
-    "http://publications.europa.eu/resource/authority/dataset-type/CODE_LIST",
-  AdminHealth:
-    "http://publications.europa.eu/resource/authority/dataset-type/STATISTICAL",
-};
-
-/**
- * Serialize a DatasetEntry as RDF Turtle compatible with the EHDS
- * HealthDCAT-AP Editor at https://ehds.healthdataportal.eu/editor2/
- */
-function buildTurtle(entry: DatasetEntry): string {
-  const datasetUri = `<https://ehds-demo.local/dataset/${encodeURIComponent(
-    entry.id,
-  )}>`;
-  const lang = entry.language || "en";
-  const now = new Date().toISOString().split("T")[0];
-
-  const lines: string[] = [
-    `@prefix dcat: <http://www.w3.org/ns/dcat#> .`,
-    `@prefix dct: <http://purl.org/dc/terms/> .`,
-    `@prefix foaf: <http://xmlns.com/foaf/0.1/> .`,
-    `@prefix healthdcatap: <http://healthdataportal.eu/ns/health#> .`,
-    `@prefix dcatap: <http://data.europa.eu/r5r/> .`,
-    `@prefix dpv: <https://w3id.org/dpv#> .`,
-    `@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .`,
-    `@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .`,
-    ``,
-    `${datasetUri} a dcat:Dataset ;`,
-  ];
-
-  // Mandatory fields
-  lines.push(`    dct:title "${ttlEscape(entry.title)}"@${lang} ;`);
-  if (entry.description) {
-    lines.push(
-      `    dct:description "${ttlEscape(entry.description)}"@${lang} ;`,
-    );
-  }
-  lines.push(`    dct:identifier "${ttlEscape(entry.id)}" ;`);
-  lines.push(`    dct:issued "${now}"^^xsd:date ;`);
-  lines.push(`    dct:modified "${now}"^^xsd:date ;`);
-
-  // Publisher
-  if (entry.publisher) {
-    lines.push(
-      `    dct:publisher [ a foaf:Organization ; foaf:name "${ttlEscape(
-        entry.publisher,
-      )}"@${lang} ] ;`,
-    );
-  }
-
-  // Theme / keyword
-  if (entry.theme) {
-    lines.push(`    dcat:keyword "${ttlEscape(entry.theme)}"@${lang} ;`);
-    lines.push(`    dcat:theme "${ttlEscape(entry.theme)}" ;`);
-  }
-
-  // Language
-  if (entry.language) {
-    const langUri = `http://publications.europa.eu/resource/authority/language/${entry.language.toUpperCase()}`;
-    lines.push(`    dct:language <${langUri}> ;`);
-  }
-
-  // Spatial coverage
-  if (entry.spatial) {
-    lines.push(
-      `    dct:spatial <http://publications.europa.eu/resource/authority/country/${entry.spatial.toUpperCase()}> ;`,
-    );
-  }
-
-  // Conforms to
-  if (entry.conformsTo) {
-    lines.push(`    dct:conformsTo <${entry.conformsTo}> ;`);
-  }
-
-  // License
-  if (entry.license) {
-    lines.push(
-      `    dct:license <https://creativecommons.org/licenses/${entry.license
-        .toLowerCase()
-        .replace("cc-", "")
-        .replace("-4.0", "/4.0/")}> ;`,
-    );
-  }
-
-  // Dataset type
-  if (entry.datasetType && DATASET_TYPE_URI[entry.datasetType]) {
-    lines.push(`    dct:type <${DATASET_TYPE_URI[entry.datasetType]}> ;`);
-  }
-
-  // Applicable legislation (EHDS)
-  const legalUri = entry.legalBasis
-    ? LEGAL_BASIS_URI[entry.legalBasis]
-    : undefined;
-  if (legalUri) {
-    lines.push(`    dcatap:applicableLegislation <${legalUri}> ;`);
-  }
-
-  // HealthDCAT-AP extensions
-  if (entry.healthCategory) {
-    lines.push(
-      `    healthdcatap:healthCategory "${ttlEscape(
-        entry.healthCategory,
-      )}"@${lang} ;`,
-    );
-  }
-  if (entry.purpose) {
-    lines.push(
-      `    healthdcatap:purpose "${ttlEscape(entry.purpose)}"@${lang} ;`,
-    );
-  }
-  if (entry.populationCoverage) {
-    lines.push(
-      `    healthdcatap:populationCoverage "${ttlEscape(
-        entry.populationCoverage,
-      )}"@${lang} ;`,
-    );
-  }
-  if (entry.personalData != null) {
-    lines.push(
-      `    dpv:hasPersonalData "${entry.personalData}"^^xsd:boolean ;`,
-    );
-  }
-  if (entry.recordCount != null) {
-    lines.push(
-      `    healthdcatap:numberOfRecords "${entry.recordCount}"^^xsd:integer ;`,
-    );
-  }
-  if (entry.numberOfUniqueIndividuals != null) {
-    lines.push(
-      `    healthdcatap:numberOfUniqueIndividuals "${entry.numberOfUniqueIndividuals}"^^xsd:integer ;`,
-    );
-  }
-  if (entry.minTypicalAge != null) {
-    lines.push(
-      `    healthdcatap:minTypicalAge "${entry.minTypicalAge}"^^xsd:integer ;`,
-    );
-  }
-  if (entry.maxTypicalAge != null) {
-    lines.push(
-      `    healthdcatap:maxTypicalAge "${entry.maxTypicalAge}"^^xsd:integer ;`,
-    );
-  }
-
-  // Close the dataset with a period (replace last semicolon)
-  const last = lines.length - 1;
-  lines[last] = lines[last].replace(/ ;$/, " .");
-
-  return lines.join("\n") + "\n";
-}
-
-/** Download a single dataset entry as RDF Turtle */
-function downloadTurtle(entry: DatasetEntry) {
-  const ttl = buildTurtle(entry);
+function save(ttl: string, name: string) {
   const blob = new Blob([ttl], { type: "text/turtle" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function releaseEight(
+  path: string,
+): Promise<Record<string, unknown> | null> {
+  if (IS_STATIC) return null;
+  try {
+    const r = await fetchApi(path);
+    return r.ok ? ((await r.json()) as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Download one dataset's description as RDF Turtle */
+async function downloadTurtle(entry: DatasetEntry) {
+  const doc =
+    (await releaseEight(
+      `/api/catalog/jsonld?id=${encodeURIComponent(entry.id)}`,
+    )) ?? minimalDescription(entry);
   const slug = entry.title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_|_$/g, "");
-  a.download = `healthDCATAP_${slug || "dataset"}.ttl`;
-  a.click();
-  URL.revokeObjectURL(url);
+  save(toTurtle(doc), `healthDCATAP_${slug || "dataset"}.ttl`);
 }
 
-/** Download all datasets as a single RDF Turtle file */
-function downloadAllTurtle(entries: DatasetEntry[]) {
-  const ttl = entries.map((e) => buildTurtle(e)).join("\n");
-  const blob = new Blob([ttl], { type: "text/turtle" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
+/** Download the whole catalogue as one RDF Turtle file */
+async function downloadAllTurtle(entries: DatasetEntry[]) {
+  const doc = (await releaseEight("/api/catalog/jsonld")) ?? {
+    ...minimalDescription(entries[0]),
+    "@graph": entries.map((e) => {
+      const { "@context": _context, ...node } = minimalDescription(e);
+      return node;
+    }),
+  };
   const ts = new Date()
     .toISOString()
     .replace(/[-:]/g, "")
     .replace(/\.\d+Z/, "");
-  a.download = `healthDCATAP_RDF_${ts}.ttl`;
-  a.click();
-  URL.revokeObjectURL(url);
+  save(toTurtle(doc), `healthDCATAP_RDF_${ts}.ttl`);
 }
 
 /* ── Components ────────────────────────────────────── */
@@ -500,7 +368,7 @@ function EditorContent() {
       purpose: entry.purpose ?? "",
       populationCoverage: entry.populationCoverage ?? "",
       numberOfUniqueIndividuals: entry.numberOfUniqueIndividuals ?? null,
-      healthCategory: entry.healthCategory ?? "",
+      healthCategories: entry.healthCategories ?? [],
       minTypicalAge: entry.minTypicalAge ?? null,
       maxTypicalAge: entry.maxTypicalAge ?? null,
       publisherType: entry.publisherType ?? "",
@@ -589,13 +457,13 @@ function EditorContent() {
         <PageIntro
           title="HealthDCAT-AP Editor"
           icon={BookOpen}
-          description="Create and edit HealthDCAT-AP metadata entries for EHDS secondary-use datasets. This editor follows the HealthDCAT-AP 3.0 profile — an application profile of DCAT-AP extending W3C DCAT 3 with health-domain extensions required by the EHDS Regulation."
+          description="Create and edit dataset descriptions for EHDS secondary use. The hub serves them in HealthDCAT-AP Release 8, the DCAT-AP 3.0 profile for health data that Implementing Regulation (EU) 2026/2098 makes the form of every dataset description."
           prevStep={{ href: "/catalog", label: "Dataset Catalog" }}
           nextStep={{ href: "/data/discover", label: "Discover Data" }}
-          infoText="Fields marked with * are mandatory per the HealthDCAT-AP specification. The editor generates unique dataset identifiers and stores metadata in the Neo4j graph database."
+          infoText="Fields marked with * are mandatory in HealthDCAT-AP Release 8. A saved entry gets what Release 8 requires of every dataset (access body, distribution, variables, contact point), so it passes the official validation at once."
           docLink={{
-            href: "https://healthdcat-ap.github.io/",
-            label: "HealthDCAT-AP Specification",
+            href: "https://data.health.europa.eu/healthdcat-ap/releases/release-8/",
+            label: "HealthDCAT-AP Release 8",
             external: true,
           }}
         />
@@ -630,7 +498,7 @@ function EditorContent() {
             <button
               onClick={() => downloadAllTurtle(datasets)}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-(--badge-active-bg) text-(--badge-active-text) border border-(--badge-active-border) hover:opacity-80 transition-colors"
-              title="Export all entries as RDF Turtle for the EHDS editor"
+              title="Export the catalogue in HealthDCAT-AP Release 8, as RDF Turtle"
             >
               <Download size={14} />
               Export All (.ttl)
@@ -704,7 +572,7 @@ function EditorContent() {
                         <button
                           onClick={() => downloadTurtle(d)}
                           className="p-1.5 rounded-sm hover:bg-(--surface-2) text-(--text-secondary) hover:text-green-300"
-                          title="Download as RDF Turtle (.ttl) for EHDS editor"
+                          title="Download in HealthDCAT-AP Release 8, as RDF Turtle (.ttl)"
                         >
                           <Download size={14} />
                         </button>
@@ -777,7 +645,7 @@ function EditorContent() {
 
                 <FormField
                   label="Theme"
-                  help="EuroVoc health theme classification"
+                  help="Clinical area, mapped to the HealthDCAT-AP health theme"
                 >
                   <SelectField
                     value={form.theme}
@@ -890,14 +758,38 @@ function EditorContent() {
               </FormField>
 
               <FormField
-                label="Health Category"
-                help="EEHRxF priority category"
+                label="Health categories (Art. 51(1))"
+                required
+                help="The categories of electronic health data the dataset holds, as the data holder states them. Without one, the hub chooses from the dataset type."
               >
-                <InputField
-                  value={form.healthCategory ?? ""}
-                  onChange={(v) => setField("healthCategory", v)}
-                  placeholder="e.g. Patient Summary, ePrescription"
-                />
+                <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1 mt-1">
+                  {HEALTH_CATEGORIES.map((c) => {
+                    const chosen = form.healthCategories ?? [];
+                    return (
+                      <label
+                        key={c.code}
+                        className="flex items-start gap-2 text-xs text-(--text-primary)"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={chosen.includes(c.code)}
+                          onChange={(e) =>
+                            setField(
+                              "healthCategories",
+                              e.target.checked
+                                ? [...chosen, c.code]
+                                : chosen.filter((x) => x !== c.code),
+                            )
+                          }
+                          className="w-4 h-4 mt-0.5 rounded-sm bg-(--surface-2) border-(--border-ui)"
+                        />
+                        <span>
+                          <span className="font-mono">{c.code}</span> {c.label}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
               </FormField>
 
               <div className="grid grid-cols-2 gap-4">

@@ -31,7 +31,15 @@
           "synthetic data",
           "EHDS secondary use"
         ],
-        "hdcatapProvenance": "Synthetic data generated for the EHDS integration hub; it describes no real person."
+        "hdcatapProvenance": "Synthetic data generated for the EHDS integration hub; it describes no real person.",
+        "license": "CC-BY-4.0",
+        "hdcatapPopulationCoverage": "Synthetic adults after an acute coronary syndrome, Berlin",
+        "hdcatapCodeValues": ["ICD-10:I21", "ICD-10:I50"],
+        "hdcatapAccrualPeriodicity": "IRREG",
+        "hdcatapTemporalResolution": "P1D",
+        "hdcatapRetentionStart": "2020-01-01",
+        "hdcatapRetentionEnd": "2035-12-31",
+        "hdcatapAnalyticsURL": "https://ehds.mabu.red/analytics"
       },
       "distributions": [
         {
@@ -106,7 +114,10 @@
           "AnalyticsData",
           "synthetic data"
         ],
-        "hdcatapProvenance": "Synthetic data transformed from FHIR R4 to OMOP CDM 5.4; it describes no real person."
+        "hdcatapProvenance": "Synthetic data transformed from FHIR R4 to OMOP CDM 5.4; it describes no real person.",
+        "license": "EU-ODP-1.0",
+        "hdcatapAccrualPeriodicity": "IRREG",
+        "hdcatapTemporalResolution": "P1D"
       },
       "distributions": [
         {
