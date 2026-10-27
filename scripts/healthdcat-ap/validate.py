@@ -20,9 +20,17 @@ healthdcatap:hasVariables" is an sh:or placed in an sh:property without
 sh:path, which SHACL processors refuse as malformed. It is moved to the node
 shape it belongs to; the constraint itself is unchanged. (Reported upstream.)
 
+The data graph also gets imports-hierarchy.ttl, the rdfs:subClassOf triples of
+the ontologies the HealthData@EU validator imports (snapshot-imports.py), so
+shapes target what they target there. One consequence is upstream's, not the
+hub's: DCAT 2 makes dcat:Catalog a dcat:Dataset, so the Dataset shapes also
+judge the catalogue (hdab, healthCategory, provenance, ...). Those violations
+are listed, named as that issue, and do not fail the run; --strict counts them.
+
     python3 scripts/healthdcat-ap/validate.py services/neo4j-proxy/__tests__/fixtures/healthdcat-ap-r8.jsonld
     python3 scripts/healthdcat-ap/validate.py http://localhost:9090/catalog/datasets
     python3 scripts/healthdcat-ap/validate.py <file> --recommended   # list the warnings too
+    python3 scripts/healthdcat-ap/validate.py <file> --strict        # count the catalogue's too
 
 Exit 0 when the data conforms (warnings allowed), 1 on any violation, 2 when
 a vendored file does not match its recorded checksum.
@@ -35,15 +43,18 @@ import sys
 import urllib.request
 
 from pyshacl import validate
-from rdflib import Graph, Namespace
+from rdflib import RDF, Graph, Namespace
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RELEASE = os.path.join(HERE, "release-8")
 SH = Namespace("http://www.w3.org/ns/shacl#")
+DCAT = Namespace("http://www.w3.org/ns/dcat#")
+UPSTREAM = "https://code.europa.eu/healthdataeu/healthdcat-ap/-/issues"
 
 DCAT_AP = "../dcat-ap-3.0.1/dcat-ap-SHACL.ttl"
 SHAPES = ["non-public-shapes.ttl", "range.ttl", "mdr-vocabularies.shape.ttl"]
 RECOMMENDED = ["non-public-shapes_recommended.ttl"]
+IMPORTS = "imports-hierarchy.ttl"
 
 
 def checked(name):
@@ -87,7 +98,7 @@ def report(results, label):
     rows = results.query(
         """PREFIX sh: <http://www.w3.org/ns/shacl#>
         SELECT ?sev ?path ?msg (COUNT(*) AS ?n) WHERE {
-          ?r a sh:ValidationResult ; sh:resultSeverity ?sev .
+          ?report sh:result ?r . ?r sh:resultSeverity ?sev .
           OPTIONAL { ?r sh:resultPath ?path } OPTIONAL { ?r sh:resultMessage ?msg }
         } GROUP BY ?sev ?path ?msg ORDER BY DESC(?n)"""
     )
@@ -97,28 +108,55 @@ def report(results, label):
         print(f"  {label} {int(r.n):4d} {sev:9s} {path:30s} {str(r.msg or '')[:100]}")
 
 
+def violations(results, catalogues):
+    """Top-level violations: (on a dcat:Catalog, elsewhere). Nested sh:detail results are not counted."""
+    on_catalogue = elsewhere = 0
+    for report in results.subjects(RDF.type, SH.ValidationReport):
+        for r in results.objects(report, SH.result):
+            if results.value(r, SH.resultSeverity) == SH.Violation:
+                if results.value(r, SH.focusNode) in catalogues:
+                    on_catalogue += 1
+                else:
+                    elsewhere += 1
+    return on_catalogue, elsewhere
+
+
+def verdict(results, catalogues, strict):
+    on_catalogue, elsewhere = violations(results, catalogues)
+    ok = elsewhere == 0 and (on_catalogue == 0 or not strict)
+    note = ""
+    if on_catalogue:
+        note = (f"; {on_catalogue} on the catalogue from the Dataset shapes (dcat:Catalog is a dcat:Dataset "
+                f"in DCAT 2), the upstream issue, {'counted' if strict else 'not counted'}")
+    return ok, f"{'conforms' if ok else 'DOES NOT CONFORM'} ({elsewhere} violation{'' if elsewhere == 1 else 's'}{note})"
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("source", help="a JSON-LD file or URL")
     ap.add_argument("--recommended", action="store_true", help="also list the recommended-property warnings")
+    ap.add_argument("--strict", action="store_true", help="also fail on the catalogue's violations from the Dataset shapes")
     args = ap.parse_args()
 
     data = load(args.source)
     triples = len(data)
+    catalogues = set(data.subjects(RDF.type, DCAT.Catalog))
     data.parse(checked("vocabularies.ttl"), format="turtle")
+    data.parse(checked(IMPORTS), format="turtle")
 
     base = Graph().parse(checked(DCAT_AP), format="turtle")
-    base_ok, base_results, _ = validate(data, shacl_graph=base, inference="none", allow_warnings=True)
-    print(f"1. DCAT-AP 3.0.1: {triples} triples, {'conforms' if base_ok else 'DOES NOT CONFORM'}")
+    _, base_results, _ = validate(data, shacl_graph=base, inference="none", allow_warnings=True)
+    base_ok, text = verdict(base_results, catalogues, args.strict)
+    print(f"1. DCAT-AP 3.0.1: {triples} triples, {text}")
     report(base_results, "dcat-ap ")
 
     shapes = Graph()
     for name in SHAPES:
         shapes.parse(checked(name), format="turtle")
     fixed = repair(shapes)
-    conforms, results, _ = validate(data, shacl_graph=shapes, inference="none", allow_warnings=True)
-    print(f"2. HealthDCAT-AP Release 8, non-public: "
-          f"{'conforms' if conforms else 'DOES NOT CONFORM'} (shape repairs: {fixed})")
+    _, results, _ = validate(data, shacl_graph=shapes, inference="none", allow_warnings=True)
+    conforms, text = verdict(results, catalogues, args.strict)
+    print(f"2. HealthDCAT-AP Release 8, non-public: {text}; shape repairs: {fixed}")
     report(results, "required")
     conforms = conforms and base_ok
 
@@ -128,6 +166,8 @@ def main():
             rec.parse(checked(name), format="turtle")
         _, rec_results, _ = validate(data, shacl_graph=rec, inference="none", allow_warnings=True)
         report(rec_results, "recommended")
+    if not args.strict and violations(results, catalogues)[0]:
+        print(f"   The catalogue's violations are an upstream question, not the hub's: {UPSTREAM}")
     return 0 if conforms else 1
 
 
