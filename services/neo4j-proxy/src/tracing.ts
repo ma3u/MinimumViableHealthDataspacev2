@@ -65,14 +65,14 @@ if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
     import("@opentelemetry/exporter-trace-otlp-http"),
     import("@opentelemetry/exporter-logs-otlp-http"),
     import("@opentelemetry/sdk-logs"),
-    import("@opentelemetry/sdk-trace-base"),
+    import("@opentelemetry/sdk-trace"),
     import("@opentelemetry/instrumentation-http"),
     import("@opentelemetry/instrumentation-express"),
     import("@opentelemetry/resources"),
     import("@opentelemetry/semantic-conventions"),
   ]);
 
-  const batch = new BatchSpanProcessor(new OTLPTraceExporter());
+  const batch = new BatchSpanProcessor({ exporter: new OTLPTraceExporter() });
   const sdk = new NodeSDK({
     resource: resourceFromAttributes({
       [ATTR_SERVICE_NAME]: process.env.OTEL_SERVICE_NAME ?? "neo4j-proxy",
