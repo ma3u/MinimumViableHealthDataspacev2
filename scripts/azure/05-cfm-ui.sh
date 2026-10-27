@@ -146,10 +146,11 @@ az containerapp create \
     "EDC_SERVICE_CLIENT_ID=admin" \
     "EUDI_VERIFIER_BASE_URL=${EUDI_VERIFIER_BASE_URL:-https://verifier-backend.eudiw.dev}" \
     "EUDI_VERIFIER_SCHEME=${EUDI_VERIFIER_SCHEME:-openid4vp://}" \
-    "EUDI_VERIFIER_PROFILE=${EUDI_VERIFIER_PROFILE:-openid4vp}" \
+    "EUDI_VERIFIER_PROFILE=${EUDI_VERIFIER_PROFILE:-haip}" \
     "EUDI_PID_DOCTYPE=${EUDI_PID_DOCTYPE:-eu.europa.ec.eudi.pid.1}" \
+    "EUDI_INTENDED_USE_ID=${EUDI_INTENDED_USE_ID:-TEST-01}" \
     "EUDI_REQUEST_URI_METHOD=${EUDI_REQUEST_URI_METHOD:-get}" \
-    "EUDI_RESPONSE_MODE=${EUDI_RESPONSE_MODE:-direct_post}" \
+    "EUDI_RESPONSE_MODE=${EUDI_RESPONSE_MODE:-direct_post.jwt}" \
     "EUDI_DEMO_WALLET=${EUDI_DEMO_WALLET:-true}" \
   -o none
 ok "UI container app"

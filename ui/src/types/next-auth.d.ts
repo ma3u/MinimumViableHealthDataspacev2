@@ -9,6 +9,8 @@ declare module "next-auth" {
     /** Keycloak id_token — used as id_token_hint on RP-initiated logout. */
     idToken?: string;
     roles: string[];
+    /** eIDAS level of the sign-in (#708): high for an EUDI Wallet PID, low for a password */
+    assurance?: import("@/lib/assurance").AssuranceLevel;
     user: {
       id: string;
     } & DefaultSession["user"];
@@ -28,5 +30,6 @@ declare module "next-auth/jwt" {
     refreshToken?: string;
     idToken?: string;
     roles?: string[];
+    assurance?: import("@/lib/assurance").AssuranceLevel;
   }
 }

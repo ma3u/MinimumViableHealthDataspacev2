@@ -1,6 +1,7 @@
 import { type NextAuthOptions, type User } from "next-auth";
 import type { OAuthConfig } from "next-auth/providers/oauth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import type { AssuranceLevel } from "@/lib/assurance";
 import { getTransaction, updateTransaction } from "@/lib/eudi-store";
 import { patientPseudonym } from "@/lib/patient-identity";
 import { ownPatientId } from "@/lib/overview/patient";
@@ -84,6 +85,7 @@ const eudiWalletProvider = CredentialsProvider({
       name: p.displayName,
       roles: p.roles,
       preferredUsername: p.username,
+      assurance: p.assurance,
     } as unknown as User;
   },
 });
@@ -147,9 +149,11 @@ export const authOptions: NextAuthOptions = {
           id?: string;
           roles?: string[];
           preferredUsername?: string;
+          assurance?: AssuranceLevel;
         };
         token.roles = u.roles ?? ["PATIENT"];
         token.preferredUsername = u.preferredUsername ?? "";
+        token.assurance = u.assurance ?? "low";
         if (u.id) token.sub = u.id;
         return token;
       }
@@ -176,6 +180,8 @@ export const authOptions: NextAuthOptions = {
         }
         token.roles = roles;
         token.sub = profile.sub;
+        // A password at Keycloak identifies nobody beyond level low (#708).
+        token.assurance = "low";
       }
       return token;
     },
@@ -196,6 +202,7 @@ export const authOptions: NextAuthOptions = {
         accessToken: token.accessToken as string,
         idToken: token.idToken as string,
         roles,
+        assurance: token.assurance ?? "low",
         user: {
           ...session.user,
           name,

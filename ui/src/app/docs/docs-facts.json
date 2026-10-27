@@ -1098,6 +1098,12 @@
       "file": "ADR-064-simpl-open-through-the-outside-agent-dcp-path.md",
       "title": "The hub meets Simpl-Open as a connector outside its agent, over DSP and DCP, with the Governance Authority as a trusted issuer",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-065",
+      "file": "ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md",
+      "title": "The EUDI Wallet sign-in identifies the person: HAIP, both PID formats, one record per PID",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {

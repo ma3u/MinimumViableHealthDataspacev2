@@ -93,6 +93,7 @@ describe("POST /api/auth/eudi/start with { demo: true }", () => {
       username: "patient1",
       displayName: patientPseudonym("P1"),
       roles: ["PATIENT"],
+      assurance: "low",
     });
     expect(tx?.consumed).toBeFalsy();
     expect(startPresentation).not.toHaveBeenCalled();
@@ -126,24 +127,60 @@ describe("GET /api/auth/eudi/status", () => {
     expect((await res.json()).status).toBe("pending");
   });
 
-  it("completed maps to a patient and pins it to the sid", async () => {
+  it("pins the patient the PID belongs to, at level high (#708)", async () => {
     const sid = await startSid("tx3");
     vi.mocked(getPresentationResult).mockResolvedValue({
       status: "completed",
-      pid: { givenName: "Erika", familyName: "Mustermann" },
+      pid: { givenName: "Jan", familyName: "de Vries" },
     });
     const res = await GET(
       new Request(`http://x/api/auth/eudi/status?sid=${sid}`),
     );
     expect((await res.json()).status).toBe("completed");
-    expect(getTransaction(sid)?.verifiedPatient?.username).toBe("patient1");
+    expect(getTransaction(sid)?.verifiedPatient).toMatchObject({
+      username: "patient2",
+      assurance: "high",
+    });
+  });
+
+  it("refuses a PID that belongs to no record with 403, and keeps refusing (#708)", async () => {
+    const sid = await startSid("tx6");
+    vi.mocked(getPresentationResult).mockResolvedValue({
+      status: "completed",
+      pid: { givenName: "Erika", familyName: "Mustermann" },
+    });
+    const url = `http://x/api/auth/eudi/status?sid=${sid}`;
+    const res = await GET(new Request(url));
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({
+      status: "refused",
+      error: expect.stringMatching(/no record/i),
+    });
+    expect(getTransaction(sid)?.verifiedPatient).toBeUndefined();
+    // the sid stays refused; nothing asks the verifier again
+    vi.mocked(getPresentationResult).mockClear();
+    expect((await GET(new Request(url))).status).toBe(403);
+    expect(getPresentationResult).not.toHaveBeenCalled();
+  });
+
+  it("refuses with 403 when the wallet declined or sent no readable PID", async () => {
+    const sid = await startSid("tx7");
+    vi.mocked(getPresentationResult).mockResolvedValue({
+      status: "failed",
+      reason: "wallet: access_denied",
+    });
+    const res = await GET(
+      new Request(`http://x/api/auth/eudi/status?sid=${sid}`),
+    );
+    expect(res.status).toBe(403);
+    expect((await res.json()).status).toBe("refused");
   });
 
   it("short-circuits to completed once already completed", async () => {
     const sid = await startSid("tx4");
     vi.mocked(getPresentationResult).mockResolvedValue({
       status: "completed",
-      pid: {},
+      pid: { givenName: "Maria", familyName: "Schmidt" },
     });
     await GET(new Request(`http://x/api/auth/eudi/status?sid=${sid}`));
     const res2 = await GET(

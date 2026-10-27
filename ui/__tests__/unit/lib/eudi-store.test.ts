@@ -31,6 +31,7 @@ describe("eudi-store", () => {
         username: "patient1",
         displayName: "Erika Mustermann",
         roles: ["PATIENT"],
+        assurance: "high",
       },
     });
     const tx = getTransaction(sid);

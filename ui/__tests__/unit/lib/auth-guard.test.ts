@@ -50,6 +50,37 @@ describe("auth-guard", () => {
   });
 
   describe("requireAuth()", () => {
+    describe("the patient identification floor (#708)", () => {
+      afterEach(() => vi.unstubAllEnvs());
+      const patient = (assurance?: string) => ({
+        user: { id: "eudi:patient1", name: "Patient 1" },
+        roles: ["PATIENT"],
+        ...(assurance ? { assurance } : {}),
+      });
+
+      it("refuses a password sign-in with 403 when the floor is substantial", async () => {
+        vi.stubEnv("PATIENT_MIN_ASSURANCE", "substantial");
+        mockGetServerSession.mockResolvedValue(patient("low"));
+        const result = await requireAuth(["PATIENT"]);
+        expect(isAuthError(result)).toBe(true);
+        const res = result as NextResponse;
+        expect(res.status).toBe(403);
+        expect((await res.json()).error).toMatch(/EUDI Wallet.*substantial/);
+      });
+
+      it("admits an EUDI Wallet sign-in at level high", async () => {
+        vi.stubEnv("PATIENT_MIN_ASSURANCE", "substantial");
+        mockGetServerSession.mockResolvedValue(patient("high"));
+        expect(isAuthError(await requireAuth(["PATIENT"]))).toBe(false);
+      });
+
+      it("admits any patient session while no floor is set", async () => {
+        vi.stubEnv("PATIENT_MIN_ASSURANCE", "");
+        mockGetServerSession.mockResolvedValue(patient());
+        expect(isAuthError(await requireAuth(["PATIENT"]))).toBe(false);
+      });
+    });
+
     it("should return session for authenticated user", async () => {
       mockGetServerSession.mockResolvedValue({
         user: { id: "u1", name: "Alice", email: "alice@test.com" },
