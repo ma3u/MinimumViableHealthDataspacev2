@@ -6,7 +6,7 @@ import { auditContext, logTransferEvent } from "../audit.js";
 
 // ============================================================
 // Phase 18: Trust Center — Pseudonym Resolution Protocol
-// EHDS Art. 50/51 — HDAB-authenticated endpoints only
+// EHDS Art. 66 (pseudonymisation) and Art. 73 (SPE): HDAB-authenticated endpoints only
 // ============================================================
 
 // Trust Center HMAC key (in production: loaded from Vault / HSM)

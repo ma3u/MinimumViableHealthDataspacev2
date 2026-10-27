@@ -1,0 +1,36 @@
+meta {
+  name: 17 I opt out of secondary use (Art. 71)
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{baseUrl}}/api/patient/opt-out
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+body:json {
+  {
+    "patientId": "{{patientId}}",
+    "source": "api-collection"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.optedOut: eq true
+  res.body.article: contains Art. 71
+}
+
+tests {
+  // ADR-062: at once, without a reason; opting out twice keeps one open record.
+  test("the opt-out has a date", function () {
+    expect(res.getBody().since, "since").to.be.a("string");
+  });
+}

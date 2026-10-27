@@ -108,7 +108,7 @@ function generateReport(summary: Summary | null, policyCount: number | null) {
     "",
     "- DSP 2025-1: Conformant (contract negotiation + transfer)",
     "- DCP v1.0: Conformant (VC attestation via IdentityHub)",
-    "- EHDS Art. 33/50-51: Secondary use data permits implemented",
+    "- EHDS Art. 67-69, 71, 73: Secondary use applications, permits, requests, opt-out, SPE",
     "- GDPR Art. 15-22: Patient access rights via /patient portal",
     "",
     "---",

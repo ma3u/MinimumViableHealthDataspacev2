@@ -743,6 +743,8 @@ export interface OdrlScope {
   policyIds: string[];
   hasActiveContract: boolean;
   hdabApproved: boolean;
+  /** An approved permit whose application invoked Art. 71(4) (ADR-062). */
+  art71Exception?: boolean;
 }
 
 /**

@@ -22,6 +22,7 @@
 
 import type { Driver } from "neo4j-driver";
 import { logger } from "./logger.js";
+import { OPTED_OUT_LABEL } from "./opt-out.js";
 
 export type GraphRagTraceStage =
   | {
@@ -121,8 +122,11 @@ async function vectorSearch(
   const session = driver.session({ database: "neo4j" });
   try {
     const res = await session.run(
+      // Art. 71 (ADR-062): a person who opted out is no candidate, so nothing
+      // of theirs reaches the reranking model either.
       `CALL db.index.vector.queryNodes($indexName, $k, $embedding)
        YIELD node, score
+       WHERE NOT node:${OPTED_OUT_LABEL}
        RETURN elementId(node) AS nodeId,
               labels(node) AS labels,
               score,
@@ -164,7 +168,11 @@ async function expandSubgraph(
       {
         seedIds,
         maxLevel: EXPAND_MAX_LEVELS,
-        labelFilter: TYPED_EXPAND_LABELS.map((l) => `+${l}`).join("|"),
+        // `-OptedOut` keeps the expansion off the persons who opted out (Art. 71).
+        labelFilter: [
+          ...TYPED_EXPAND_LABELS.map((l) => `+${l}`),
+          `-${OPTED_OUT_LABEL}`,
+        ].join("|"),
       },
     );
     return { nodeCount: Number(res.records[0]?.get("cnt") ?? 0) };
@@ -203,9 +211,9 @@ function buildFallbackCypher(candidates: RerankCandidate[]): {
   // The caller treats the Cypher as read-only; we inline $topIds via
   // parameter binding, never string-interpolate.
   return {
-    cypher: `MATCH (n) WHERE elementId(n) IN $topIds
+    cypher: `MATCH (n) WHERE elementId(n) IN $topIds AND NOT n:${OPTED_OUT_LABEL}
              WITH n
-             OPTIONAL MATCH (n)-[r]-(m)
+             OPTIONAL MATCH (n)-[r]-(m) WHERE NOT m:${OPTED_OUT_LABEL}
              WITH n, collect(DISTINCT {type: type(r), other: coalesce(m.display,m.title,m.name,elementId(m))})[0..5] AS context
              RETURN coalesce(n.display, n.title, n.name, elementId(n)) AS match,
                     labels(n)[0] AS type,

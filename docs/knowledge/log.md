@@ -22,3 +22,6 @@
 - 2026-10-04 · `runbooks/cost-efficient-logging.md`: Phase B steps 8 (neo4j-proxy), 9 and 10
   (local) marked done, with what was verified; UI logging and the Azure observability app
   remain open.
+- 2026-10-27 · Added `datamodels/secondary-use-opt-out.md` (status draft) for the
+  Art. 71 opt-out of #694 / ADR-062. `datamodels/healthdcat-ap.md` now names
+  HealthDCAT-AP Release 8 and its namespace (ADR-063, superseding ADR-003).

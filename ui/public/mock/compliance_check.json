@@ -7,7 +7,7 @@
       "applicationStatus": "APPROVED",
       "approvalId": "hdab-synthea-healthgov-2026-001",
       "approvalStatus": "APPROVED",
-      "ehdsArticle": "EHDS_Art_53",
+      "ehdsArticle": "Art. 68",
       "dataset": "dataset:synthea-fhir-r4-mvd",
       "contract": "contract-ehds-53-synthea-2026"
     }

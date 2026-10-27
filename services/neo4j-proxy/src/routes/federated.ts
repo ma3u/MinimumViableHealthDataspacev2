@@ -11,6 +11,7 @@ import {
 } from "../nlq/engine.js";
 import { appendQueryAudit, auditUnavailable } from "../audit-chain.js";
 import { logger } from "../logger.js";
+import { secondaryUseSession } from "../opt-out.js";
 
 /** A refused federated query is recorded before the refusal goes out. */
 async function auditFederatedRefusal(
@@ -114,7 +115,11 @@ app.post(
       // Dispatch to all SPEs in parallel
       await Promise.all(
         spes.map(async ({ label, driver: d }) => {
-          const session = d.session({ database: "neo4j" });
+          // Art. 71 (ADR-062): each SPE answers without the persons who opted out.
+          const session = secondaryUseSession(
+            d.session({ database: "neo4j" }),
+            scope,
+          );
           try {
             // nosemgrep: cypher-built-from-request-input -- caller-supplied Cypher by design; WRITE_PATTERN and checkReIdentification above
             const result = await session.run(cypher, params);
@@ -267,7 +272,8 @@ app.get(
 
       await Promise.all(
         spes.map(async ({ label, driver: d }) => {
-          const session = d.session({ database: "neo4j" });
+          // Art. 71 (ADR-062): the statistics leave out the persons who opted out.
+          const session = secondaryUseSession(d.session({ database: "neo4j" }));
           try {
             // Get counts
             const counts = await session.run(`

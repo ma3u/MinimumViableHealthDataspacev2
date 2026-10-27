@@ -208,7 +208,7 @@ describe("Keycloak realm configuration", () => {
       );
     });
 
-    it("regulator-es is the second access body, for EHDS Art. 14", () => {
+    it("regulator-es is the second access body, for EHDS Art. 67(3)", () => {
       const user = users.find(
         (u: { username: string }) => u.username === "regulator-es",
       );

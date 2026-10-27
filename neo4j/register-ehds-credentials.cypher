@@ -87,6 +87,12 @@ SET vc.credentialType    = 'MembershipCredential',
 
 // ── 3. EHDSParticipantCredentials — all 5 participants ───────────────────────
 
+// ehdsArticle names the role's article in Regulation (EU) 2025/327, adopted
+// numbering, as "Art. NN": Art. 55 health data access body, Art. 60 duties of
+// health data holders, Art. 61 duties of health data users. Until #694 these
+// were the 2022 proposal's "Article 36", "Article 49" and "Article 46";
+// neo4j/migrate-ehds-article-labels.cypher corrects a graph seeded before.
+
 MERGE (vc:VerifiableCredential {credentialId: 'vc:ehds-participant:clinic-alphaklinik'})
 SET vc.credentialType    = 'EHDSParticipantCredential',
     vc.issuerDid         = 'did:web:issuerservice%3A10016:issuer',
@@ -98,7 +104,7 @@ SET vc.credentialType    = 'EHDSParticipantCredential',
     vc.participantRole   = 'DataHolder',
     vc.registrationDate  = date('2025-01-15'),
     vc.jurisdiction      = 'DE',
-    vc.ehdsArticle       = 'Article 49',
+    vc.ehdsArticle       = 'Art. 60',
     vc.issuedAt          = datetime(),
     vc.expiresAt         = datetime() + duration('P365D');
 
@@ -113,7 +119,7 @@ SET vc.credentialType    = 'EHDSParticipantCredential',
     vc.participantRole   = 'DataUser',
     vc.registrationDate  = date('2025-02-01'),
     vc.jurisdiction      = 'DE',
-    vc.ehdsArticle       = 'Article 46',
+    vc.ehdsArticle       = 'Art. 61',
     vc.issuedAt          = datetime(),
     vc.expiresAt         = datetime() + duration('P365D');
 
@@ -128,7 +134,7 @@ SET vc.credentialType    = 'EHDSParticipantCredential',
     vc.participantRole   = 'HealthDataAccessBody',
     vc.registrationDate  = date('2024-06-01'),
     vc.jurisdiction      = 'DE',
-    vc.ehdsArticle       = 'Article 36',
+    vc.ehdsArticle       = 'Art. 55',
     vc.issuedAt          = datetime(),
     vc.expiresAt         = datetime() + duration('P365D');
 
@@ -143,7 +149,7 @@ SET vc.credentialType    = 'EHDSParticipantCredential',
     vc.participantRole   = 'DataHolder',
     vc.registrationDate  = date('2025-03-01'),
     vc.jurisdiction      = 'NL',
-    vc.ehdsArticle       = 'Article 49',
+    vc.ehdsArticle       = 'Art. 60',
     vc.issuedAt          = datetime(),
     vc.expiresAt         = datetime() + duration('P365D');
 
@@ -158,7 +164,7 @@ SET vc.credentialType    = 'EHDSParticipantCredential',
     vc.participantRole   = 'HealthDataAccessBody',
     vc.registrationDate  = date('2025-03-15'),
     vc.jurisdiction      = 'FR',
-    vc.ehdsArticle       = 'Article 36',
+    vc.ehdsArticle       = 'Art. 55',
     vc.issuedAt          = datetime(),
     vc.expiresAt         = datetime() + duration('P365D');
 
@@ -170,7 +176,7 @@ SET vc.credentialType    = 'DataProcessingPurposeCredential',
     vc.format            = 'VC1_0_JWT',
     vc.status            = 'active',
     vc.purpose           = 'Scientific research on therapeutic outcomes',
-    vc.ehdsArticle       = 'Article 53',
+    vc.ehdsArticle       = 'Art. 53',
     vc.permittedUses     = 'scientific-research,statistics,public-health-monitoring,education,ai-training',
     vc.prohibitedUses    = 're-identification,commercial-exploitation,insurance-decisions,advertising',
     vc.approvalId        = 'hdab-approval-alpha-klinik-diab',

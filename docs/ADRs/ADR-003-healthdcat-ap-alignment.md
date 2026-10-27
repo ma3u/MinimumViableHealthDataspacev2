@@ -1,6 +1,6 @@
 # ADR-003: W3C HealthDCAT-AP Alignment
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-063](ADR-063-healthdcat-ap-release-8-and-its-namespace.md) (2026-10-27)
 **Date:** 2025-07-24
 **Supersedes:** —
 

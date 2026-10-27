@@ -1,0 +1,28 @@
+meta {
+  name: 18 My opt-out is on record
+  type: http
+  seq: 18
+}
+
+get {
+  url: {{baseUrl}}/api/patient/opt-out?patientId={{patientId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.optedOut: eq true
+  res.body.history: isArray
+}
+
+tests {
+  test("exactly one opt-out is open", function () {
+    const open = (res.getBody().history || []).filter((h) => !h.reversedAt);
+    expect(open.length).to.equal(1);
+  });
+}

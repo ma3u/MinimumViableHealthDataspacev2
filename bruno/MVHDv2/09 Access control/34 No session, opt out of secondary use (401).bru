@@ -1,0 +1,30 @@
+meta {
+  name: 34 No session, opt out of secondary use (401)
+  type: http
+  seq: 34
+}
+
+post {
+  url: {{baseUrl}}/api/patient/opt-out
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}=not-a-session
+}
+
+body:json {
+  {"patientId": "P1"}
+}
+
+tests {
+  // ADR-044 and ADR-062: only the person, signed in, opts out of their own record.
+  test("an anonymous caller is refused", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

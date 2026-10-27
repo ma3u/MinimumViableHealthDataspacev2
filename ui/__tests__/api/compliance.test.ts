@@ -71,7 +71,7 @@ describe("GET /api/compliance", () => {
           applicationStatus: "approved",
           approvalId: "approval-001",
           approvalStatus: "granted",
-          ehdsArticle: "Art.46",
+          ehdsArticle: "Art. 68",
           dataset: "ds-001",
           contract: "contract-001",
         },
@@ -88,7 +88,7 @@ describe("GET /api/compliance", () => {
       expect(response.status).toBe(200);
       expect(data.compliant).toBe(true);
       expect(data.chain).toHaveLength(1);
-      expect(data.chain[0].ehdsArticle).toBe("Art.46");
+      expect(data.chain[0].ehdsArticle).toBe("Art. 68");
     });
 
     it("should return non-compliant when no approval chain exists", async () => {

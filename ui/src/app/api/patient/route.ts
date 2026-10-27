@@ -9,6 +9,7 @@ import {
   seesPatientIdentity,
 } from "@/lib/patient-identity";
 import { runQuery } from "@/lib/neo4j";
+import { forRoles } from "@/lib/opt-out";
 import { ownPatientIdForSession } from "@/lib/overview/patient";
 import { ehrSyncFromRow } from "@/lib/patient/ehr-sync";
 
@@ -199,7 +200,9 @@ export async function GET(req: Request) {
         });
       }
 
-      // Non-patient roles: return all patients + full cohort stats
+      // Non-patient roles: return all patients + full cohort stats. For a data
+      // user, an access body or a trust centre that is secondary use, and the
+      // persons who opted out are left out (Art. 71, ADR-062).
       const [patients, stats] = await Promise.all([
         runQuery<{
           id: string;
@@ -207,7 +210,8 @@ export async function GET(req: Request) {
           gender: string;
           birthDate: string;
         }>(
-          `MATCH (p:Patient)
+          forRoles(
+            `MATCH (p:Patient)
            WHERE coalesce(p.id, p.resourceId) IS NOT NULL
            RETURN coalesce(p.id, p.resourceId) AS id,
                   p.name      AS name,
@@ -215,6 +219,8 @@ export async function GET(req: Request) {
                   p.birthDate AS birthDate
            ORDER BY p.name
            LIMIT 200`,
+            roles,
+          ),
         ),
         runQuery<{
           patients: number;
@@ -224,13 +230,16 @@ export async function GET(req: Request) {
           medications: number;
           procedures: number;
         }>(
-          `MATCH (p:Patient)   WITH count(p) AS patients
+          forRoles(
+            `MATCH (p:Patient)   WITH count(p) AS patients
            MATCH (e:Encounter)  WITH patients, count(e) AS encounters
            MATCH (c:Condition)  WITH patients, encounters, count(c) AS conditions
            MATCH (o:Observation) WITH patients, encounters, conditions, count(o) AS observations
            OPTIONAL MATCH (m:MedicationRequest) WITH patients, encounters, conditions, observations, count(m) AS medications
            OPTIONAL MATCH (pr:Procedure)
            RETURN patients, encounters, conditions, observations, medications, count(pr) AS procedures`,
+            roles,
+          ),
         ),
       ]);
       // A researcher, an access body or a trust centre sees the cohort under

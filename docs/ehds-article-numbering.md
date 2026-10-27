@@ -78,10 +78,9 @@ Art. 50 by 23. Look it up rather than adding a number.
 | 26 March 2031 | The further data categories in Art. 51(1)(b), (f), (g), (m), (p), and Chapter III for EHR systems already in service. |
 | 26 March 2035 | Third-country participation in HealthData@EU, Art. 75(5).                                                             |
 
-## One claim worth re-checking
+## The retention claim, resolved
 
-`docs/audit-retention-policy.md` cites "EHDS Art. 50(3)" for a ten-year retention
-duty on access events. The adopted Art. 73(1)(e) requires access logs to be kept
-"for the period necessary to verify and audit all processing operations", and at
-least one year. Whatever the ten years rests on, it is not that paragraph, so the
-source needs establishing before the number is quoted to anyone.
+`docs/audit-retention-policy.md` used to cite "EHDS Art. 50(3)" for a ten-year
+retention duty on access events. Nothing sourced the ten years. The adopted
+Art. 73(1)(e) requires access logs for at least one year, and the policy now
+keeps twelve months as that floor (#694).

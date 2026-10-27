@@ -304,7 +304,7 @@ test.describe("Deep-link mechanics the demo script depends on", () => {
   test("J887 the Spanish access body is in the participant data", async ({
     request,
   }) => {
-    // EHDS Art. 14 is coordination between access bodies in different member
+    // EHDS Art. 67(3) is coordination between access bodies in different member
     // states, which needs two of them to exist. With only MedReg DE on the
     // graph the cross-border story has nothing to point at.
     const res = await request.get(`${BP}/mock/admin_participants.json`);

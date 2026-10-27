@@ -8,8 +8,9 @@ export const dynamic = "force-dynamic";
 /**
  * GET /api/patient/insights?patientId=<id>
  *
- * EHDS Art. 50 §4 — Patients receive anonymised aggregate findings from
- * studies using their donated data. Never returns pseudonym IDs or
+ * Patients receive anonymised aggregate findings from studies their data
+ * went into (EHDS Art. 58(1)(g); results leave the SPE only as
+ * non-personal data, Art. 73). Never returns pseudonym IDs or
  * individual-level results (k-anonymity enforced by SPE).
  *
  * Returns:
@@ -125,7 +126,7 @@ export async function GET(req: Request) {
       action: "Participate in the T2D Longevity research program",
       priority: "medium",
       basedOn: "Patient interest profile",
-      ehdsArticle: "EHDS Art. 10 — data donation",
+      ehdsArticle: "GDPR Art. 9(2)(a) — consent to join a study",
     },
   ];
 
@@ -140,8 +141,9 @@ export async function GET(req: Request) {
       "All findings are aggregate results (k ≥ 5). Your individual data is never shared with researchers — only pseudonymised summaries reach the Secure Processing Environment.",
     ehdsArticles: {
       primaryAccess: "EHDS Art. 3",
-      secondaryConsent: "EHDS Art. 10",
-      speProtection: "EHDS Art. 50",
+      secondaryConsent:
+        "EHDS Art. 71 — secondary use is the default, with an opt-out; joining a study is a separate GDPR consent",
+      speProtection: "EHDS Art. 73",
     },
   });
 }

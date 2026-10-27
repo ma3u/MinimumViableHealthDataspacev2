@@ -129,9 +129,9 @@ const REQUIREMENTS = [
   {
     category: "EHDS Regulation (EU 2025/327) — Secondary Use",
     items: [
-      "Art. 5: Data holders are mandated to share health data for approved secondary-use purposes on request via HDAB.",
+      "Art. 60(1): Data holders make health data available for approved secondary-use purposes on request of the HDAB.",
       "Purpose limitation: only approved uses — research, policy analysis, education, statistics.",
-      "Pseudonymisation required before transfer; re-identification is prohibited (Art. 33).",
+      "Pseudonymisation required before transfer (Art. 66); re-identification is prohibited (Art. 61(3)).",
       "Data must be provided via an accredited Secure Processing Environment (SPE) listed in the HealthDCAT-AP catalogue.",
       "Interoperability: FHIR R4 and OMOP CDM formats required for clinical data exchange.",
       "Audit log retention for 10 years (Art. 34 accountability).",

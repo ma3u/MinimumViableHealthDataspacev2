@@ -21,13 +21,16 @@ async function requirePatient(
 /**
  * GET /api/patient/research?patientId=<id>
  *
- * EHDS Art. 10 — Research program discovery and consent management.
- * Returns available research programs (DataProduct nodes with research purpose)
- * and existing patient consents.
+ * Research programme discovery and study consent. Joining a study is a
+ * consent under GDPR Art. 6(1)(a) and 9(2)(a), withdrawable at any time
+ * (Art. 7(3)); it is separate from the EHDS, where secondary use under a
+ * permit is the default and the person may opt out (Art. 71,
+ * /api/patient/opt-out). Returns the programmes (DataProduct nodes with a
+ * research purpose) and the patient's study consents.
  *
  * POST /api/patient/research
  * Body: { patientId, studyId, purpose }
- * Creates a PatientConsent node (EHDS Art. 10 — explicit consent).
+ * Creates a PatientConsent node: consent to one study (GDPR Art. 9(2)(a)).
  */
 
 export async function GET(req: Request) {
@@ -87,7 +90,8 @@ export async function GET(req: Request) {
   return NextResponse.json({
     programs,
     consents,
-    ehdsArticle: "EHDS Art. 10 — Consent for secondary use of health data",
+    ehdsArticle:
+      "Study consent, GDPR Art. 9(2)(a); the EHDS opt-out from secondary use is Art. 71",
   });
 }
 
@@ -155,7 +159,7 @@ export async function POST(req: Request) {
     grantedAt: new Date().toISOString(),
     message:
       "EHR donation registered. Your pseudonymised data will be used in this study.",
-    ehdsArticle: "EHDS Art. 10",
+    ehdsArticle: "GDPR Art. 9(2)(a), study consent",
   });
 }
 
@@ -188,6 +192,6 @@ export async function DELETE(req: Request) {
     revoked: true,
     consentId,
     revokedAt: new Date().toISOString(),
-    gdprArticle: "GDPR Art. 17 — Right to erasure / restriction of processing",
+    gdprArticle: "GDPR Art. 7(3) — withdrawal of consent",
   });
 }

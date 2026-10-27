@@ -432,7 +432,7 @@ const POLICY_TEMPLATES: EhdsPolicyTemplate[] = [
   {
     id: "ehds-art50-crossborder-secondary",
     label: "Cross-border Secondary Use",
-    article: "Art. 50–51",
+    article: "Art. 67(3), 73, 75",
     description:
       "Cross-border secondary use requiring approval from all participating HDABs. Data must remain in secure processing environment and cannot be extracted.",
     build: ({ duration }) => ({
@@ -443,8 +443,8 @@ const POLICY_TEMPLATES: EhdsPolicyTemplate[] = [
         "odrl:permission": [
           odrlPermission(
             [
-              "EHDS Article 50 — cross-border secondary use",
-              "EHDS Article 51 — multi-state research collaboration",
+              "EHDS Article 67(3): one application across Member States",
+              "EHDS Article 75: cross-border access over HealthData@EU",
             ],
             duration,
             [

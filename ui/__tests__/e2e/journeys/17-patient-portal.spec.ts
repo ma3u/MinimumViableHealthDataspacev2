@@ -5,8 +5,8 @@
  * EHDS Chapter II (Art. 3-12) patient data rights:
  *
  *   J176–J180 — /api/patient/profile  (GDPR Art. 15 / EHDS Art. 3)
- *   J181–J185 — /api/patient/research (EHDS Art. 10 — consent)
- *   J186–J190 — /api/patient/insights (EHDS Art. 50 — findings)
+ *   J181–J185 — /api/patient/research (study consent, GDPR Art. 9(2)(a))
+ *   J186–J190 — /api/patient/insights (findings; SPE, EHDS Art. 73)
  *   J191–J195 — Patient portal UI pages
  *   J196–J200 — Patient persona graph + navigation
  *
@@ -100,7 +100,7 @@ test.describe("P · Patient Profile — GDPR Art. 15 / EHDS Art. 3", () => {
 
 // ── J181–J185: Research program API ──────────────────────────────────────────
 
-test.describe("P · Research Programs — EHDS Art. 10 Consent", () => {
+test.describe("P · Research Programs — study consent and the Art. 71 opt-out", () => {
   test.beforeEach(async ({ page }) => {
     await skipIfKeycloakDown();
     await skipIfNeo4jDown(page);
@@ -113,7 +113,7 @@ test.describe("P · Research Programs — EHDS Art. 10 Consent", () => {
     const data = await apiGet(page, "/api/patient/research");
     expect(Array.isArray(data.programs)).toBe(true);
     expect(typeof data.ehdsArticle).toBe("string");
-    expect(data.ehdsArticle).toContain("Art. 10");
+    expect(data.ehdsArticle).toContain("GDPR Art. 9(2)(a)");
   });
 
   test("J182 — Programs have required fields", async ({ page }) => {
@@ -142,7 +142,7 @@ test.describe("P · Research Programs — EHDS Art. 10 Consent", () => {
     expect(res.ok()).toBe(true);
     const data = await res.json();
     expect(typeof data.consentId).toBe("string");
-    expect(data.ehdsArticle).toContain("Art. 10");
+    expect(data.ehdsArticle).toContain("GDPR Art. 9(2)(a)");
   });
 
   test("J184 — GET with patientId returns consents array", async ({ page }) => {
@@ -186,7 +186,7 @@ test.describe("P · Research Programs — EHDS Art. 10 Consent", () => {
 
 // ── J186–J190: Research insights API ─────────────────────────────────────────
 
-test.describe("P · Research Insights — EHDS Art. 50", () => {
+test.describe("P · Research Insights — EHDS Art. 73", () => {
   test.beforeEach(async ({ page }) => {
     await skipIfKeycloakDown();
     await skipIfNeo4jDown(page);
@@ -223,7 +223,7 @@ test.describe("P · Research Insights — EHDS Art. 50", () => {
     );
     expect(data.ehdsArticles).toBeDefined();
     expect(data.ehdsArticles.primaryAccess).toContain("Art. 3");
-    expect(data.ehdsArticles.speProtection).toContain("Art. 50");
+    expect(data.ehdsArticles.speProtection).toContain("Art. 73");
   });
 
   test("J189 — Findings have required fields", async ({ page }) => {
@@ -283,11 +283,13 @@ test.describe("P · Patient Portal UI", () => {
     });
   });
 
-  test("J194 — Research page shows EHDS Art. 10 banner", async ({ page }) => {
+  test("J194 — Research page shows the Art. 71 opt-out panel", async ({
+    page,
+  }) => {
     await page.goto("/patient/research");
-    await expect(page.getByText(/EHDS Art\. 10/i).first()).toBeVisible({
-      timeout: T,
-    });
+    await expect(
+      page.getByText(/Secondary use of your health data \(EHDS Art\. 71\)/i),
+    ).toBeVisible({ timeout: T });
   });
 
   test("J195 — /patient/insights page renders", async ({ page }) => {

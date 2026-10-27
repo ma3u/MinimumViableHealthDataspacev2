@@ -133,7 +133,7 @@ MERGE (approval:HDABApproval {approvalId: 'hdab-synthea-healthgov-2026-001'})
     approval.validUntil       = datetime('2027-01-20T23:59:59'),
     approval.permittedPurpose = 'SCIENTIFIC_RESEARCH',
     approval.status           = 'APPROVED',
-    approval.ehdsArticle      = 'EHDS_Art_53',
+    approval.ehdsArticle      = 'Art. 68',
     approval.conditions       = ['Synthetic data only — no re-identification possible',
                                  'Results must be aggregated before export',
                                  'Quarterly usage reports to HealthGov'],

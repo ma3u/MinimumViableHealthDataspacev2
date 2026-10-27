@@ -3,6 +3,7 @@ import neo4j from "neo4j-driver";
 import { getSession } from "../db.js";
 import { app } from "../app.js";
 import { auditContext, logTransferEvent } from "../audit.js";
+import { releasable, secondaryUseSession } from "../opt-out.js";
 
 // ---- FHIR Endpoints -------------------------------------------------------
 
@@ -16,7 +17,8 @@ import { auditContext, logTransferEvent } from "../audit.js";
 app.get(
   "/fhir/Patient",
   async (req: Request, res: Response, next: NextFunction) => {
-    const session = getSession();
+    // Art. 71 (ADR-062): the data plane serves research; persons who opted out are left out.
+    const session = secondaryUseSession(getSession());
     try {
       const count = Math.min(Number(req.query._count) || 100, 1000);
       const gender = req.query.gender as string | undefined;
@@ -43,13 +45,15 @@ app.get(
 
       const result = await session.run(cypher, params);
 
-      const entries = result.records.map((r) => {
-        const props = r.get("p").properties;
-        return {
-          fullUrl: `Patient/${props.fhirId}`,
-          resource: { resourceType: "Patient", ...props },
-        };
-      });
+      const entries = result.records
+        .filter((r) => releasable(r.get("p")))
+        .map((r) => {
+          const props = r.get("p").properties;
+          return {
+            fullUrl: `Patient/${props.fhirId}`,
+            resource: { resourceType: "Patient", ...props },
+          };
+        });
 
       const bundle = {
         resourceType: "Bundle",
@@ -90,7 +94,8 @@ app.get(
 app.get(
   "/fhir/Patient/:id/\\$everything",
   async (req: Request, res: Response, next: NextFunction) => {
-    const session = getSession();
+    // Art. 71 (ADR-062): the data plane serves research; persons who opted out are left out.
+    const session = secondaryUseSession(getSession());
     try {
       const patientId = req.params.id;
 
@@ -123,7 +128,12 @@ app.get(
         { patientId },
       );
 
-      if (result.records.length === 0) {
+      // Checked again before release (Art. 71, ADR-062): a person who opted
+      // out is answered like one who is not there.
+      if (
+        result.records.length === 0 ||
+        !releasable(result.records[0].get("p"))
+      ) {
         res.status(404).json({
           resourceType: "OperationOutcome",
           issue: [
@@ -139,17 +149,32 @@ app.get(
 
       const rec = result.records[0];
       const patient = rec.get("p").properties;
-      const encounters = rec.get("encounters").map((n: any) => n.properties);
-      const conditions = rec.get("conditions").map((n: any) => n.properties);
+      const encounters = rec
+        .get("encounters")
+        .filter(releasable)
+        .map((n: any) => n.properties);
+      const conditions = rec
+        .get("conditions")
+        .filter(releasable)
+        .map((n: any) => n.properties);
       const observations = rec
         .get("observations")
+        .filter(releasable)
         .map((n: any) => n.properties);
-      const procedures = rec.get("procedures").map((n: any) => n.properties);
-      const medications = rec.get("medications").map((n: any) => n.properties);
+      const procedures = rec
+        .get("procedures")
+        .filter(releasable)
+        .map((n: any) => n.properties);
+      const medications = rec
+        .get("medications")
+        .filter(releasable)
+        .map((n: any) => n.properties);
       // Study results beyond laboratory values (ADR-059): reports, the
       // vaccination record and the medication plan, as the hub seeds them.
       const props = (key: string) =>
-        (rec.has?.(key) ? rec.get(key) : []).map((n: any) => n.properties);
+        (rec.has?.(key) ? rec.get(key) : [])
+          .filter(releasable)
+          .map((n: any) => n.properties);
       const reports = props("reports");
       const immunizations = props("immunizations");
       const statements = props("statements");
@@ -215,7 +240,8 @@ app.get(
 app.post(
   "/fhir/Bundle",
   async (req: Request, res: Response, next: NextFunction) => {
-    const session = getSession();
+    // Art. 71 (ADR-062): the data plane serves research; persons who opted out are left out.
+    const session = secondaryUseSession(getSession());
     try {
       const { gender, minAge, maxAge, condition, limit = 100 } = req.body ?? {};
 
@@ -242,9 +268,11 @@ app.post(
 
       const result = await session.run(cypher, params);
 
-      const entries = result.records.map((r) => ({
-        resource: { resourceType: "Patient", ...r.get("p").properties },
-      }));
+      const entries = result.records
+        .filter((r) => releasable(r.get("p")))
+        .map((r) => ({
+          resource: { resourceType: "Patient", ...r.get("p").properties },
+        }));
 
       res.setHeader("Content-Type", "application/fhir+json");
       res.json({

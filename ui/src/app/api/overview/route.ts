@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions, derivePersonaId } from "@/lib/auth";
 import { runQuery } from "@/lib/neo4j";
+import {
+  OPT_OUT_HISTORY_CYPHER,
+  openOptOut,
+  type OptOutRecordRow,
+} from "@/lib/opt-out";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { GET as profileGET } from "@/app/api/patient/profile/route";
 import { GET as insightsGET } from "@/app/api/patient/insights/route";
@@ -219,6 +224,10 @@ export async function GET(req: Request): Promise<Response> {
     ]);
 
     const holder = holderRows[0] ?? null;
+    // The Art. 71 opt-out from secondary use, separate from any study (ADR-062).
+    const optOut = openOptOut(
+      await runQuery<OptOutRecordRow>(OPT_OUT_HISTORY_CYPHER, { patientId }),
+    );
     const recordLog = await runQuery<AccessLogEntry>(
       `MATCH (te:TransferEvent)-[:READ]->(p:Patient)
        WHERE coalesce(p.id, p.resourceId, elementId(p)) = $patientId
@@ -285,6 +294,7 @@ export async function GET(req: Request): Promise<Response> {
       accessLog,
       recordLog,
       holder,
+      optOut: { optedOut: optOut !== null, since: optOut?.optedOutAt ?? null },
     });
     return NextResponse.json(view);
   } catch (err) {
