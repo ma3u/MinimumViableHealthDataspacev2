@@ -37,6 +37,11 @@ CREATE CONSTRAINT catalog_id IF NOT EXISTS FOR (cat:Catalog) REQUIRE cat.catalog
 CREATE CONSTRAINT dataset_id IF NOT EXISTS FOR (hd:HealthDataset) REQUIRE hd.datasetId IS UNIQUE;
 CREATE CONSTRAINT distribution_id IF NOT EXISTS FOR (d:Distribution) REQUIRE d.distributionId IS UNIQUE;
 CREATE CONSTRAINT contact_point_id IF NOT EXISTS FOR (cp:ContactPoint) REQUIRE cp.contactId IS UNIQUE;
+// HealthDCAT-AP Release 8 variables (#700): healthdcatap:hasVariables -> csvw:TableGroup
+// (:HealthDataset)-[:HAS_VARIABLES]->(:VariablesTableGroup)-[:HAS_TABLE]->(:VariablesTable)-[:HAS_COLUMN]->(:VariablesColumn)
+CREATE CONSTRAINT variables_table_group_id IF NOT EXISTS FOR (tg:VariablesTableGroup) REQUIRE tg.groupId IS UNIQUE;
+CREATE CONSTRAINT variables_table_id IF NOT EXISTS FOR (tb:VariablesTable) REQUIRE tb.tableId IS UNIQUE;
+CREATE CONSTRAINT variables_column_id IF NOT EXISTS FOR (c:VariablesColumn) REQUIRE c.columnId IS UNIQUE;
 CREATE CONSTRAINT organization_id IF NOT EXISTS FOR (org:Organization) REQUIRE org.organizationId IS UNIQUE;
 
 // ============================================================

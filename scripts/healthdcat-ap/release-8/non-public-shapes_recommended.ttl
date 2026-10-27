@@ -1,0 +1,157 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <http://data.europa.eu/r5r#> .
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix cc: <http://creativecommons.org/ns#> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lcon: <http://www.w3.org/ns/locn#> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix spdx: <http://spdx.org/rdf/terms#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcatap: <http://data.europa.eu/r5r/> .
+@prefix healthdcatap: <http://healthdataportal.eu/ns/health#> .
+# HealthDCAT-AP
+@prefix dqv: <http://www.w3.org/ns/dqv#> .
+@prefix dpv: <https://w3id.org/dpv#> .
+#To be changed when the Heathdcat-AP namespace is created
+@prefix healthdcatap: <http://healthdataportal.eu/ns/health#> .
+@prefix csvw: <http://www.w3.org/ns/csvw#> .
+@prefix geodcatap: <http://data.europa.eu/930/> .
+
+<https://code.europa.eu/healthdataeu/healthdcat-ap/shapes_recommended.ttl>
+    dct:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> ;
+    dct:conformsTo <https://www.w3.org/TR/shacl> ;
+    dct:description "This file defines the recommended SHACL constraints used by HealthDCAT-AP to support additional metadata quality for NON_PUBLIC data."@en .
+
+#-------------------------------------------------------------------------
+# This file defines SHACL shapes covering all recommended properties in the HealthDCAT-AP NON_PUBLIC data specification.
+# Author : Mohamed CHOUAIECH, DG SANTE
+#-------------------------------------------------------------------------
+
+<https://semiceu.github.io/DCAT-AP/releases/3.0.0/html/shacl/shapes_recommended.ttl>
+  rdf:type owl:Ontology ;
+  owl:imports <https://semiceu.github.io/DCAT-AP/releases/3.0.0/html/shacl/shapes_recommended.ttl> ;  
+  .
+
+
+
+:Dataset_Shape
+    a sh:NodeShape ;
+    rdfs:label "Dataset"@en ;
+	sh:property [
+        sh:minCount 1 ;
+        sh:path healthdcatap:analytics ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path healthdcatap:hasCodeValues ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path healthdcatap:hasCodingSystem ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path dct:conformsTo ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path foaf:page ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path dct:accrualPeriodicity ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path healthdcatap:healthTheme ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path dct:isReferencedBy ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path dct:language ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path dpv:hasLegalBasis ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path healthdcatap:maxTypicalAge ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path healthdcatap:minTypicalAge ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path healthdcatap:numberOfRecords ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path healthdcatap:numberOfUniqueIndividuals ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path dpv:hasPersonalData ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path healthdcatap:populationCoverage ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path dpv:hasPurpose ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path dqv:hasQualityAnnotation ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path healthdcatap:retentionPeriod ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path adms:sample ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path dct:source ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path dct:temporal ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path dcat:temporalResolution ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path dcat:landingPage ;
+        sh:severity sh:Warning ;
+    ], [
+        sh:minCount 1 ;
+        sh:path dct:relation ;
+        sh:severity sh:Warning ;
+    ] , [		
+        sh:minCount 1 ;
+        sh:path geodcatap:custodian ;
+        sh:severity sh:Warning ;
+    ] ;
+    sh:targetClass dcat:Dataset .

@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
+import { IS_STATIC } from "@/lib/static-export";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
@@ -227,8 +228,21 @@ function CatalogContent() {
   const [detailDataset, setDetailDataset] = useState<Dataset | null>(null);
   const [diagramDataset, setDiagramDataset] = useState<Dataset | null>(null);
 
-  const downloadDcatAp = (d: Dataset) => {
-    const jsonLd = buildDcatApJsonLd(d);
+  // The live hub hands over the proxy's HealthDCAT-AP Release 8 document, the
+  // one CI validates with the official SHACL (#700); the static export has no
+  // proxy and builds a minimal description in the page.
+  const downloadDcatAp = async (d: Dataset) => {
+    let jsonLd: object = buildDcatApJsonLd(d);
+    if (!IS_STATIC) {
+      try {
+        const r = await fetchApi(
+          `/api/catalog/jsonld?id=${encodeURIComponent(d.id)}`,
+        );
+        if (r.ok) jsonLd = await r.json();
+      } catch {
+        // keep the page's own description
+      }
+    }
     const blob = new Blob([JSON.stringify(jsonLd, null, 2)], {
       type: "application/ld+json",
     });

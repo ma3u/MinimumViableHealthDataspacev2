@@ -19,6 +19,14 @@ from .models import DatasetUpsert
 log = logging.getLogger(__name__)
 
 
+# The access body that governs the dataset (healthdcatap:hdab, Release 8).
+LINK_HDAB = """
+MATCH (d:HealthDataset {datasetId: $datasetId})
+MERGE (h:Participant {participantId: $hdabDid})
+  ON CREATE SET h.source = 'federated-crawl'
+MERGE (h)-[:GOVERNS]->(d)
+"""
+
 UPSERT_DATASET = """
 MERGE (d:HealthDataset {datasetId: $datasetId})
 SET d.title        = $title,
@@ -27,7 +35,21 @@ SET d.title        = $title,
     d.country       = $country,
     d.source        = 'federated',
     d.publisherDid  = $publisherDid,
-    d.lastSeenAt    = datetime($lastSeenAt)
+    d.lastSeenAt    = datetime($lastSeenAt),
+    // HealthDCAT-AP Release 8 (#700): what the publisher states wins; an
+    // absent value keeps what the graph has.
+    d.hdcatapAccessRights          = coalesce($accessRights, d.hdcatapAccessRights),
+    d.hdcatapApplicableLegislation = CASE WHEN size($applicableLegislation) > 0
+                                     THEN $applicableLegislation ELSE d.hdcatapApplicableLegislation END,
+    d.hdcatapHealthCategories      = CASE WHEN size($healthCategories) > 0
+                                     THEN $healthCategories ELSE d.hdcatapHealthCategories END,
+    d.hdcatapHealthThemes          = CASE WHEN size($healthThemes) > 0
+                                     THEN $healthThemes ELSE d.hdcatapHealthThemes END,
+    d.hdcatapCodingSystems         = CASE WHEN size($codingSystems) > 0
+                                     THEN $codingSystems ELSE d.hdcatapCodingSystems END,
+    d.hdcatapHasStructuredData     = coalesce($hasStructuredData, d.hdcatapHasStructuredData),
+    d.hdcatapKeywords              = CASE WHEN size($keywords) > 0
+                                     THEN $keywords ELSE d.hdcatapKeywords END
 MERGE (p:Participant {participantId: $publisherDid})
   ON CREATE SET p.source = 'dcp',
                 p.walletType = 'business',
@@ -104,7 +126,16 @@ def write_datasets(
                 country=ds.country,
                 publisherDid=ds.publisher_did,
                 lastSeenAt=ds.last_seen_at.isoformat(),
+                accessRights=ds.access_rights,
+                applicableLegislation=ds.applicable_legislation,
+                healthCategories=ds.health_categories,
+                healthThemes=ds.health_themes,
+                codingSystems=ds.coding_systems,
+                hasStructuredData=ds.has_structured_data,
+                keywords=ds.keywords,
             )
+            if ds.hdab_did:
+                session.run(LINK_HDAB, datasetId=ds.dataset_id, hdabDid=ds.hdab_did)
             for dist in ds.distributions:
                 session.run(
                     UPSERT_DISTRIBUTION,

@@ -1,0 +1,40 @@
+meta {
+  name: 12 A dataset in HealthDCAT-AP Release 8
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{baseUrl}}/api/catalog/jsonld?id=dataset:omop-cdm-v54-analytics
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body['@type']: eq dcat:Dataset
+}
+
+tests {
+  // #700: the description a data user discovers is HealthDCAT-AP Release 8,
+  // with what the non-public profile makes mandatory.
+  test("the mandatory Release 8 properties are there", function () {
+    const d = res.getBody();
+    for (const p of [
+      "dct:identifier",
+      "dct:accessRights",
+      "dcatap:applicableLegislation",
+      "healthdcatap:healthCategory",
+      "healthdcatap:hdab",
+      "healthdcatap:hasStructuredData",
+      "dcat:distribution",
+    ]) {
+      expect(d, p).to.have.property(p);
+    }
+    expect(d["@context"].healthdcatap).to.equal("http://healthdataportal.eu/ns/health#");
+  });
+}

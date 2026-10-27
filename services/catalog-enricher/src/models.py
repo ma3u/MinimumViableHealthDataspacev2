@@ -37,3 +37,13 @@ class DatasetUpsert(BaseModel):
     distributions: list[dict[str, str]] = Field(default_factory=list)
     odrl_policy: dict[str, Any] | None = None
     last_seen_at: datetime
+    # HealthDCAT-AP Release 8 (#700), as vocabulary codes like the hub's own
+    # datasets carry them (neo4j/register-healthdcat-ap-r8.cypher).
+    access_rights: str | None = None
+    applicable_legislation: list[str] = Field(default_factory=list)
+    health_categories: list[str] = Field(default_factory=list)
+    health_themes: list[str] = Field(default_factory=list)
+    coding_systems: list[str] = Field(default_factory=list)
+    has_structured_data: bool | None = None
+    hdab_did: str | None = None
+    keywords: list[str] = Field(default_factory=list)
