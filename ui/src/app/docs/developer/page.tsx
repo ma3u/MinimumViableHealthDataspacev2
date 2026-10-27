@@ -1735,7 +1735,7 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
               {
                 title: "SIMPL-Open Gap Analysis",
                 href: `${GITHUB_REPO}/blob/main/docs/simpl-ehds-gap-analysis.md`,
-                desc: "Comprehensive SIMPL vs EHDS gap analysis — DID/SSI rationale, supply chain transparency",
+                desc: "Simpl-Open, the adopted EHDS and the hub compared: identity, catalogue, permits, fees, opt-out, DOME",
               },
               {
                 title: "Onboarding Guide",
