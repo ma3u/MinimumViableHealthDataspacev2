@@ -2,6 +2,7 @@
 
 import { fetchApi } from "@/lib/api";
 import { IS_STATIC } from "@/lib/static-export";
+import { minimalDescription } from "@/lib/healthdcat-ap";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
@@ -175,31 +176,6 @@ function buildDcatApDiagram(d: Dataset): string {
   return lines.join("\n");
 }
 
-function buildDcatApJsonLd(d: Dataset): object {
-  return {
-    "@context": {
-      dcat: "http://www.w3.org/ns/dcat#",
-      dct: "http://purl.org/dc/terms/",
-      // The HealthDCAT-AP namespace (Release 8, ADR-063).
-      healthdcatap: "http://healthdataportal.eu/ns/health#",
-      foaf: "http://xmlns.com/foaf/0.1/",
-    },
-    "@type": "dcat:Dataset",
-    "@id": d.id,
-    "dct:title": d.title,
-    "dct:description": d.description,
-    "dct:license": d.license,
-    "dct:conformsTo": d.conformsTo,
-    "dct:publisher": d.publisher
-      ? { "@type": "foaf:Organization", "foaf:name": d.publisher }
-      : undefined,
-    "dcat:theme": d.theme,
-    "healthdcatap:datasetType": d.datasetType,
-    "healthdcatap:legalBasisForAccess": d.legalBasis,
-    "healthdcatap:numberOfRecords": d.recordCount,
-  };
-}
-
 export default function CatalogPage() {
   return (
     <Suspense
@@ -232,7 +208,7 @@ function CatalogContent() {
   // one CI validates with the official SHACL (#700); the static export has no
   // proxy and builds a minimal description in the page.
   const downloadDcatAp = async (d: Dataset) => {
-    let jsonLd: object = buildDcatApJsonLd(d);
+    let jsonLd: object = minimalDescription(d);
     if (!IS_STATIC) {
       try {
         const r = await fetchApi(

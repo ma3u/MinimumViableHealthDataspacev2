@@ -154,10 +154,57 @@
       "@type": "xsd:date"
     }
   },
+  "healthdcatap:retentionPeriod": {
+    "@type": "dct:PeriodOfTime",
+    "dcat:startDate": {
+      "@value": "2020-01-01",
+      "@type": "xsd:date"
+    },
+    "dcat:endDate": {
+      "@value": "2035-12-31",
+      "@type": "xsd:date"
+    }
+  },
+  "healthdcatap:populationCoverage": {
+    "@value": "Synthetic adults after an acute coronary syndrome, Berlin",
+    "@language": "en"
+  },
+  "healthdcatap:hasCodeValues": ["ICD-10:I21", "ICD-10:I50"],
+  "dct:accrualPeriodicity": {
+    "@id": "http://publications.europa.eu/resource/authority/frequency/IRREG",
+    "@type": ["skos:Concept", "dct:Frequency"],
+    "skos:prefLabel": {
+      "@value": "irregular",
+      "@language": "en"
+    }
+  },
+  "dcat:temporalResolution": {
+    "@value": "P1D",
+    "@type": "xsd:duration"
+  },
+  "dct:license": {
+    "@id": "https://creativecommons.org/licenses/by/4.0/",
+    "@type": "dct:LicenseDocument"
+  },
+  "foaf:page": {
+    "@id": "https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/ehds",
+    "@type": "foaf:Document"
+  },
   "dct:issued": "2026-01-15",
   "dct:conformsTo": {
     "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/FHIR",
     "@type": "dct:Standard"
+  },
+  "healthdcatap:analytics": {
+    "@type": "dcat:Distribution",
+    "dct:title": "Aggregate statistics of the hub's OMOP CDM data, which include this dataset",
+    "dcat:accessURL": {
+      "@id": "https://ehds.mabu.red/analytics"
+    },
+    "dcatap:applicableLegislation": {
+      "@id": "http://data.europa.eu/eli/reg/2025/327/oj",
+      "@type": "eli:LegalResource"
+    }
   },
   "healthdcatap:hasVariables": [
     {
@@ -245,7 +292,16 @@
         "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/FHIR",
         "@type": "dct:Standard"
       },
-      "dct:title": "FHIR R4 Bundle"
+      "dct:title": "FHIR R4 Bundle",
+      "dct:description": "Reached through the health data access body, under a data permit (Regulation (EU) 2025/327, Art. 68)",
+      "dcatap:availability": {
+        "@id": "http://publications.europa.eu/resource/authority/planned-availability/STABLE",
+        "@type": "skos:Concept",
+        "skos:prefLabel": {
+          "@value": "stable",
+          "@language": "en"
+        }
+      }
     }
   ]
 }

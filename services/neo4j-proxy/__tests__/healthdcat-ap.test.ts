@@ -82,6 +82,40 @@ describe("toDataset", () => {
     });
   });
 
+  it("states the recommended properties the dataset has, typed as the ranges ask", () => {
+    const ds = toDataset(fhir) as Record<string, any>;
+    expect(ds["healthdcatap:populationCoverage"]).toEqual({
+      "@value": "Synthetic adults after an acute coronary syndrome, Berlin",
+      "@language": "en",
+    });
+    expect(ds["healthdcatap:hasCodeValues"]).toEqual([
+      "ICD-10:I21",
+      "ICD-10:I50",
+    ]);
+    expect(ds["dct:accrualPeriodicity"]["@type"]).toEqual([
+      "skos:Concept",
+      "dct:Frequency",
+    ]);
+    expect(ds["dcat:temporalResolution"]).toEqual({
+      "@value": "P1D",
+      "@type": "xsd:duration",
+    });
+    expect(ds["healthdcatap:retentionPeriod"]["@type"]).toBe(
+      "dct:PeriodOfTime",
+    );
+    expect(ds["dct:license"]["@type"]).toBe("dct:LicenseDocument");
+    expect(ds["healthdcatap:analytics"]["@type"]).toBe("dcat:Distribution");
+    expect(ds["foaf:page"]["@id"]).toMatch(/^https:\/\/ma3u\.github\.io\//);
+  });
+
+  it("leaves out what it cannot state rather than guessing", () => {
+    const ds = toDataset(omop) as Record<string, any>;
+    // A licence with no stable IRI, no analytics, no population text.
+    expect(ds["dct:license"]).toBeUndefined();
+    expect(ds["healthdcatap:analytics"]).toBeUndefined();
+    expect(ds["healthdcatap:populationCoverage"]).toBeUndefined();
+  });
+
   it("falls back to the Regulation and to non-public access", () => {
     const bare = toDataset({
       ds: { datasetId: "x", title: "X" },
