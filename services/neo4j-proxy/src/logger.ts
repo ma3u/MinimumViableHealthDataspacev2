@@ -14,8 +14,12 @@
  */
 import { AsyncLocalStorage } from "node:async_hooks";
 import { randomBytes } from "node:crypto";
-import { isSpanContextValid, trace } from "@opentelemetry/api";
-import { logs, SeverityNumber } from "@opentelemetry/api-logs";
+import {
+  isSpanContextValid,
+  logs,
+  SeverityNumber,
+  trace,
+} from "@opentelemetry/api";
 import type { NextFunction, Request, Response } from "express";
 import pino, { type DestinationStream, type Logger } from "pino";
 
