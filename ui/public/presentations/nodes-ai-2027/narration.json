@@ -398,27 +398,32 @@
     {
       "id": "try",
       "audio": "audio/slide-11.mp3",
-      "duration": 25.82,
-      "spoken": "98af9bd94c6aed79",
+      "duration": 28.885,
+      "spoken": "1e4915bc61c2e2aa",
       "cues": [
         {
           "start": 0.0,
-          "end": 4.423,
+          "end": 4.168,
           "text": "Everything is open source, under Apache 2.0."
         },
         {
-          "start": 4.423,
-          "end": 19.435,
+          "start": 4.168,
+          "end": 17.995,
           "text": "The live demo runs at ehds.mabu.red. A static simulation needs no sign-in, and the whole stack runs on a laptop with 127 synthetic patients."
         },
         {
-          "start": 19.435,
-          "end": 23.359,
+          "start": 17.995,
+          "end": 22.21,
           "text": "Come and try to break the guardrails. Pull requests are welcome."
         },
         {
-          "start": 23.359,
-          "end": 25.82,
+          "start": 22.21,
+          "end": 26.459,
+          "text": "To stay in touch, scan the code and connect with me on LinkedIn."
+        },
+        {
+          "start": 26.459,
+          "end": 28.885,
           "text": "Thank you, and see you at NODES!"
         }
       ]

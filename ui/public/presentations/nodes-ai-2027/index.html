@@ -527,6 +527,104 @@
         font-size: 22px;
         color: var(--accent);
       }
+      /* The cover shows the researcher's overview, the same scene as /overview, drawn by
+         the HL7 deck's scene.js into a div inside the slide. Until it is up, and if it
+         never comes (no WebGL, no CDN), the slide keeps its drawn graph. */
+      .graph-slide .kg3d-live,
+      .graph-slide .veil {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+        z-index: 0;
+        display: none;
+        pointer-events: none;
+      }
+      .graph-slide.live .kg3d-live,
+      .graph-slide.live .veil {
+        display: block;
+      }
+      .graph-slide.live .cover-graph {
+        display: none;
+      }
+      .graph-slide .veil {
+        background: linear-gradient(
+          90deg,
+          rgba(13, 27, 38, 0.97) 0%,
+          rgba(13, 27, 38, 0.86) 36%,
+          rgba(13, 27, 38, 0.3) 62%,
+          rgba(13, 27, 38, 0.05) 100%
+        );
+      }
+      .graph-slide .over {
+        position: relative;
+        z-index: 1;
+      }
+      .graph-slide .who,
+      .graph-slide .nodes-mark,
+      .graph-slide .behind {
+        z-index: 2;
+      }
+      .behind {
+        position: absolute;
+        right: 128px;
+        bottom: 56px;
+        font-size: 20px;
+        color: var(--muted);
+      }
+      /* The close: links and the speaker card */
+      .close {
+        display: flex;
+        gap: 56px;
+        margin-top: 40px;
+        align-items: flex-start;
+      }
+      .close .links {
+        flex: 1;
+        margin-top: 0;
+      }
+      .speaker {
+        width: 520px;
+        flex: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        background: var(--card);
+        border: 1px solid var(--rule);
+        border-radius: 24px;
+        padding: 36px 32px 30px;
+      }
+      .speaker .portrait {
+        width: 210px;
+        height: 210px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid var(--accent);
+        margin: 0;
+      }
+      .speaker .name {
+        font: 700 34px "Sora", sans-serif;
+        margin-top: 8px !important;
+      }
+      .speaker .role {
+        font-size: 24px;
+        color: var(--body);
+      }
+      .speaker .qr img {
+        width: 230px;
+        height: 230px;
+        image-rendering: pixelated;
+        background: #fff;
+        padding: 12px;
+        border-radius: 14px;
+        margin: 14px 0 4px;
+        display: block;
+      }
+      .speaker .li {
+        font: 600 24px "JetBrains Mono", monospace;
+      }
       /* Entrance animations: everything marked .rise comes in when its slide does. */
       .reveal .slides section .rise {
         opacity: 0;
@@ -608,21 +706,25 @@
     <div class="reveal">
       <div class="slides">
         <!-- 1 · cover -->
-        <section data-id-slide="cover" class="cover">
+        <section data-id-slide="cover" class="cover graph-slide">
+          <div class="kg3d-live" data-persona="researcher" data-shift="420" data-shifty="70" data-zoom="1.3" aria-hidden="true"></div>
+          <div class="veil" aria-hidden="true"></div>
           <div class="nodes-mark">NODES AI 2027</div>
-          <p class="eyebrow rise">KNOWLEDGE GRAPHS &amp; GRAPHRAG</p>
-          <h1 class="rise" style="--d: 0.1s">When the graph says no</h1>
-          <p class="sub rise" style="--d: 0.25s">
-            Governance-gated GraphRAG for the European Health Data Space, on one Neo4j graph
-          </p>
-          <a
-            class="badge rise"
-            style="--d: 0.4s; text-decoration: none"
-            href="https://info.hl7.org/ai-challenge"
-            target="_blank"
-            rel="noopener"
-            >★ Open Solution Award · 2026 HL7 AI Challenge</a
-          >
+          <div class="over">
+            <p class="eyebrow rise">KNOWLEDGE GRAPHS &amp; GRAPHRAG</p>
+            <h1 class="rise" style="--d: 0.1s">When the graph says no</h1>
+            <p class="sub rise" style="--d: 0.25s">
+              Governance-gated GraphRAG for the European Health Data Space, on one Neo4j graph
+            </p>
+            <a
+              class="badge rise"
+              style="--d: 0.4s; text-decoration: none"
+              href="https://info.hl7.org/ai-challenge"
+              target="_blank"
+              rel="noopener"
+              >★ Open Solution Award · 2026 HL7 AI Challenge</a
+            >
+          </div>
           <svg class="cover-graph rise" style="--d: 0.5s" viewBox="0 0 640 520" aria-hidden="true">
             <g stroke="#2a4558" stroke-width="3">
               <line x1="120" y1="90" x2="300" y2="60" /><line x1="300" y1="60" x2="470" y2="130" />
@@ -645,7 +747,11 @@
             <text x="380" y="489" text-anchor="middle" fill="#fff" font-family="Sora" font-weight="700" font-size="26">✕</text>
           </svg>
           <p class="who"><b>Matthias Buchhorn-Roth</b> · Cloud and AI Engineer, Berlin</p>
-          <aside class="notes">[1:00] Who I am, the award, the one-line thesis: a graph that knows when to say no.</aside>
+          <p class="behind">
+            Behind: the researcher's view of the EHDS, live from
+            <a href="https://ehds.mabu.red/overview?persona=researcher" target="_blank" rel="noopener">ehds.mabu.red/overview</a>
+          </p>
+          <aside class="notes">[1:00] Who I am, the award, the one-line thesis: a graph that knows when to say no. Behind: the researcher's overview, the same scene as /overview.</aside>
         </section>
 
         <!-- 2 · the rules -->
@@ -978,32 +1084,43 @@
           <p class="eyebrow">TRY IT, BREAK IT</p>
           <h2 class="h2">Open source, Apache 2.0, runs on a laptop</h2>
           <p class="stand">127 synthetic patients, five layers, every guardrail in the open.</p>
-          <div class="links">
-            <a class="card" style="--c: var(--l1)" href="https://ehds.mabu.red" target="_blank" rel="noopener"
-              ><h3>Live demo</h3><p>ehds.mabu.red</p></a
-            >
-            <a
-              class="card"
-              style="--c: var(--l2)"
-              href="https://ma3u.github.io/MinimumViableHealthDataspacev2/"
-              target="_blank"
-              rel="noopener"
-              ><h3>Static simulation, no sign-in</h3><p>ma3u.github.io/MinimumViableHealthDataspacev2</p></a
-            >
-            <a
-              class="card"
-              style="--c: var(--l3)"
-              href="https://github.com/ma3u/MinimumViableHealthDataspacev2"
-              target="_blank"
-              rel="noopener"
-              ><h3>Source, ADRs, runbooks</h3><p>github.com/ma3u/MinimumViableHealthDataspacev2</p></a
-            >
-            <a class="card" style="--c: var(--amber)" href="https://info.hl7.org/ai-challenge" target="_blank" rel="noopener"
-              ><h3>HL7 AI Challenge 2027</h3><p>info.hl7.org/ai-challenge</p></a
-            >
+          <div class="close">
+            <div class="links">
+              <a class="card" style="--c: var(--l1)" href="https://ehds.mabu.red" target="_blank" rel="noopener"
+                ><h3>Live demo</h3><p>ehds.mabu.red</p></a
+              >
+              <a
+                class="card"
+                style="--c: var(--l2)"
+                href="https://ma3u.github.io/MinimumViableHealthDataspacev2/"
+                target="_blank"
+                rel="noopener"
+                ><h3>Static simulation</h3><p>ma3u.github.io/<wbr />MinimumViableHealthDataspacev2</p></a
+              >
+              <a
+                class="card"
+                style="--c: var(--l3)"
+                href="https://github.com/ma3u/MinimumViableHealthDataspacev2"
+                target="_blank"
+                rel="noopener"
+                ><h3>Source, ADRs, runbooks</h3><p>github.com/ma3u/<wbr />MinimumViableHealthDataspacev2</p></a
+              >
+              <a class="card" style="--c: var(--amber)" href="https://info.hl7.org/ai-challenge" target="_blank" rel="noopener"
+                ><h3>HL7 AI Challenge 2027</h3><p>info.hl7.org/ai-challenge</p></a
+              >
+            </div>
+            <div class="speaker">
+              <img class="portrait" src="img/matthias.jpg" alt="Matthias Buchhorn-Roth" width="600" height="600" />
+              <p class="name">Matthias Buchhorn-Roth</p>
+              <p class="role">Cloud and AI Engineer, Berlin</p>
+              <a class="qr" href="https://www.linkedin.com/in/mbuchhorn/" target="_blank" rel="noopener">
+                <!-- The EJIE deck's LinkedIn code, shared rather than copied. -->
+                <img src="../euskadi-ejie-2026/img/qr-linkedin.png" alt="QR code that opens linkedin.com/in/mbuchhorn" />
+              </a>
+              <a class="li" href="https://www.linkedin.com/in/mbuchhorn/" target="_blank" rel="noopener">linkedin.com/in/mbuchhorn</a>
+            </div>
           </div>
-          <p class="foot">Matthias Buchhorn-Roth · linkedin.com/in/mbuchhorn · github.com/ma3u</p>
-          <aside class="notes">[1:00] Links, thanks, questions.</aside>
+          <aside class="notes">[1:00] Links, thanks, the QR code for LinkedIn, questions.</aside>
         </section>
       </div>
     </div>
@@ -1044,6 +1161,51 @@
         }
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(ready);
         setTimeout(ready, 2000);
+      })();
+
+      // The researcher's overview behind the cover (the HL7 deck's scene.js, sized to this
+      // canvas). It mounts once the cover is first shown and pauses while it is away.
+      (function () {
+        var scene = null;
+        var loading = null;
+        function ensure(sec) {
+          var host = sec.querySelector(".kg3d-live");
+          if (!host || host.dataset.state) return;
+          host.dataset.state = "loading";
+          loading = loading || import("../hl7-showcase-2026/scene.js");
+          loading
+            .then(function (mod) {
+              return mod.mountBackground(host, host.dataset.persona, {
+                width: 1920,
+                height: 1080,
+                background: "#0d1b26",
+                shiftX: Number(host.dataset.shift || 0),
+                shiftY: Number(host.dataset.shifty || 0),
+                zoom: Number(host.dataset.zoom || 1),
+              });
+            })
+            .then(function (s) {
+              sec.classList.add("live");
+              host.dataset.state = "on";
+              host.dataset.source = s.source;
+              scene = { sec: sec, scene: s };
+              if (!sec.classList.contains("present")) s.pause();
+            })
+            .catch(function (err) {
+              host.dataset.state = "failed";
+              sec.classList.remove("live");
+              console.warn("overview scene", err);
+            });
+        }
+        function sync() {
+          document.querySelectorAll("section.graph-slide.present").forEach(ensure);
+          if (!scene) return;
+          if (scene.sec.classList.contains("present")) scene.scene.resume();
+          else scene.scene.pause();
+        }
+        Reveal.on("ready", sync);
+        Reveal.on("slidechanged", sync);
+        if (Reveal.isReady()) sync();
       })();
 
       function esc(s) {

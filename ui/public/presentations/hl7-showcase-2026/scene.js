@@ -55,6 +55,7 @@ export async function loadView(persona) {
  * Mount one view into `root` (1600 x 900, the slide canvas), slowly orbiting.
  * opts.shiftX and opts.shiftY move the stack right and down, in slide
  * pixels, so it sits beside the text; opts.zoom scales the camera distance.
+ * opts.width, opts.height and opts.background fit it to another deck's canvas.
  * Returns { pause, resume, source }.
  */
 export async function mountBackground(root, persona, opts = {}) {
@@ -76,8 +77,8 @@ export async function mountBackground(root, persona, opts = {}) {
     .map((l) => ({ ...l }));
 
   const Graph = ForceGraph3D({ controlType: "orbit" })(root)
-    .width(W)
-    .height(H)
+    .width(opts.width ?? W)
+    .height(opts.height ?? H)
     .backgroundColor(opts.background ?? "#14213d")
     .showNavInfo(false)
     .enablePointerInteraction(false)
