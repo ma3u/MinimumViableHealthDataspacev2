@@ -82,8 +82,8 @@ HealthData@EU](https://tehdas.eu/results/new-specification-supports-member-state
 | "HealthDCAT-AP 2.1"                                                                 | this document, ADR-003 | There is no 2.1. The hub follows the release the implementing act points to, Release 8 (ADR-063, which supersedes ADR-003).                                                                                                                                                                                                                                         |
 | Proposal-era article numbers (SPE "Art. 50", HDAB "Art. 37", permit "Art. 46")      | this document, ADR-013 | Adopted numbers: SPE Art. 73, access body tasks Art. 57, permit Art. 68.                                                                                                                                                                                                                                                                                            |
 
-ADR-013 is accepted and therefore not edited; a superseding ADR is the first
-recommendation for the hub below.
+[ADR-064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md) supersedes ADR-013 with the
+decision that follows from these corrections.
 
 ## 1. Simpl-Open in October 2026
 
@@ -324,8 +324,9 @@ Preview:
 
 ### For the hub
 
-1. A new ADR superseding ADR-013: Simpl interoperability through the
-   outside-agent DCP path, with the corrections above.
+1. Decided in [ADR-064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md): the hub meets Simpl-Open
+   as a connector outside its agent, over DSP and DCP, with the Governance
+   Authority as a trusted issuer; EHDS rules stay in the hub.
 2. When Hamburg 4.1 code is public: trust a Governance Authority as issuer in
    the IdentityHub, and run the DSP TCK against a Simpl agent.
 3. Map HealthDCAT-AP Release 8 onto Simpl's DCAT-AP and XFSC resource

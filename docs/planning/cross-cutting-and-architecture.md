@@ -20,7 +20,7 @@ The [Simpl-Open](https://simpl-programme.ec.europa.eu/dashboard/simpl-open) prog
 | Policy       | Policy decision point, no named language                            | ODRL 2.2                                        | Gap                                               |
 | Contracts    | Bilateral consumer and provider                                     | DSP agreements plus data permits (Art. 68)      | Gap: a permit binds several parties               |
 
-ADR-013's claims that Simpl uses DCP and ODRL do not hold; it needs a superseding ADR. Full comparison: [Simpl-Open and the EHDS: gap analysis](../simpl-ehds-gap-analysis.md).
+ADR-013's claims that Simpl uses DCP and ODRL do not hold; [ADR-064](../ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md) supersedes it. Full comparison: [Simpl-Open and the EHDS: gap analysis](../simpl-ehds-gap-analysis.md).
 
 ### WCAG 2.2 AA Accessibility
 

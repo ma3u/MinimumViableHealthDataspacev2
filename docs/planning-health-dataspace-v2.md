@@ -150,7 +150,7 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [010](ADRs/ADR-010-wcag-accessibility.md)                                                     | WCAG 2.2 AA Accessibility Compliance                                                                                 | 2026-04-01 | Accepted          |
 | [011](ADRs/ADR-011-security-testing.md)                                                       | Security Penetration Testing Strategy                                                                                | 2026-04-01 | Accepted          |
 | [012](ADRs/ADR-012-azure-container-apps.md)                                                   | Azure Container Apps Deployment                                                                                      | 2026-04-10 | Accepted          |
-| [013](ADRs/ADR-013-simpl-open-alignment.md)                                                   | SIMPL-Open EU Programme Alignment                                                                                    | 2026-04-05 | Accepted          |
+| [013](ADRs/ADR-013-simpl-open-alignment.md)                                                   | SIMPL-Open EU Programme Alignment                                                                                    | 2026-04-05 | Superseded by 064 |
 | [014](ADRs/ADR-014-weekly-demo-reset.md)                                                      | Weekly Demo Environment Reset                                                                                        | 2026-04-12 | Accepted          |
 | [015](ADRs/ADR-015-single-vm-dev-deployment.md)                                               | Single-VM Dev Deployment (VS Subscription)                                                                           | 2026-04-13 | Superseded        |
 | [016](ADRs/ADR-016-aca-off-hours-scaledown.md)                                                | ACA Off-Hours Scale-Down                                                                                             | 2026-04-13 | Superseded by 042 |
@@ -200,8 +200,9 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [061](ADRs/ADR-061-the-ui-scales-out-on-whole-cores.md)                                       | The UI on Azure scales out on whole cores, on its own HTTP concurrency rule                                          | 2026-10-12 | Accepted          |
 | [062](ADRs/ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md)                             | The Art. 71 opt-out is a dated record and a label every secondary-use query excludes                                 | 2026-10-27 | Accepted          |
 | [063](ADRs/ADR-063-healthdcat-ap-release-8-and-its-namespace.md)                              | HealthDCAT-AP follows the release Implementing Regulation 2026/2098 points to, today Release 8, in its own namespace | 2026-10-27 | Accepted          |
+| [064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md)                          | The hub meets Simpl-Open as a connector outside its agent, over DSP and DCP                                          | 2026-10-27 | Accepted          |
 
-Numbers taken by open work, so a new ADR starts at **058**: 051 (#475). 050
+Numbers taken by open work, so a new ADR starts at **065**: 051 (#475). 050
 (#477), 054 (#520) and 055 (#517) are merged.
 
 ADR-045 to ADR-049 accepted on 2026-10-04.
