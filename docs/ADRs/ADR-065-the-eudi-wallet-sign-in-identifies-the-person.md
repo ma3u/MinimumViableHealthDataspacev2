@@ -24,11 +24,22 @@ Three things changed:
   relying-party registration certificate** (`MissingRegistrationCertificate`).
   On 2026-10-27 the live start route answered 502 for that reason. The
   verifier offers a public test intended use, `TEST-01`.
+- **The German wallet d-you refuses a relying party it does not know.** A
+  scan on 2026-10-27 showed its "This service does not have permission to
+  verify your data" dialog (`pid_presentation_dialog_rp_unkown`): it trusts
+  only access and registration certificates from the German registrar, and
+  checks the request against the registration (over-asking). Its SD-JWT PID
+  is `urn:eudi:pid:de:1`, its names are UPPERCASE, and its mdoc age
+  thresholds live in the `eu.europa.ec.eudi.pid.de.1` namespace.
 
 ## Decision
 
-1. **Ask as HAIP does.** The DCQL query offers the PID as SD-JWT VC or as mdoc,
-   whichever the wallet holds; profile `haip`, response mode
+1. **Ask as HAIP does, and only for the name.** The DCQL query offers the PID
+   as SD-JWT VC or as mdoc, whichever the wallet holds, and asks for
+   `family_name` and `given_name`, nothing else: no birth date (#475) and no
+   age, which the hub does not use and no registration of ours declares. The
+   SD-JWT type is `EUDI_PID_VCT` (`urn:eudi:pid:1` by default,
+   `urn:eudi:pid:de:1` for d-you). Profile `haip`, response mode
    `direct_post.jwt`. Cleartext stays possible only by setting
    `EUDI_VERIFIER_PROFILE=openid4vp` and `EUDI_RESPONSE_MODE=direct_post`.
 2. **Name the relying party.** A request carries our own registration
@@ -63,6 +74,19 @@ Three things changed:
 - The registration certificate switch is the only code-free step left
   between the hub and a self-hosted verifier for d-you.
 
+### To reach d-you
+
+The code needs no change; the relying party does. In the SPRIND sandbox EUDI
+Hub (`sandbox.eudi-wallet.org`): an access certificate from a CSR whose key
+stays with us, and a credential request (`dc+sd-jwt`, `urn:eudi:pid:de:1`,
+and `mso_mdoc`, `eu.europa.ec.eudi.pid.1`, each with `family_name` and
+`given_name`, the reason in German and English), which yields the
+registration certificate. A self-hosted reference verifier signs with that
+key and puts only the access certificate in `x5c` (#182); the hosted one
+cannot sign as us. Then `EUDI_VERIFIER_BASE_URL`, `EUDI_REGISTRATION_CERTIFICATE`
+and `EUDI_PID_VCT=urn:eudi:pid:de:1`, tested with the sandbox wallet app.
+A production registration follows for the public d-you (2 January 2027).
+
 ### Negative
 
 - A tester needs a test PID with a persona's name, issued at the EU
@@ -81,5 +105,8 @@ Three things changed:
 - **Keep `patient1` for every PID.** Contradicts 2026/2099; rejected.
 - **Decode mdoc CBOR in the UI.** A new dependency and hand-rolled checks
   the verifier already does; rejected.
+- **A copy of d-you that trusts our certificates.** Proves nothing about
+  the wallet people install, and a national wallet with a weakened trust
+  check must not be handed to anyone; rejected.
 - **Enforce substantial now.** Would lock out the password personas the
   demo relies on; the floor is a setting a real deployment turns on.

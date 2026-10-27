@@ -85,13 +85,35 @@ describe("startPresentation", () => {
       [PID_SD_JWT_QUERY],
       [PID_MDOC_QUERY],
     ]);
-    // never a birth date (#475)
-    expect(JSON.stringify(body.dcql_query)).not.toContain("birth");
+    // only the name: no birth date (#475), no age (outside TEST-01's registration)
+    for (const c of body.dcql_query.credentials) {
+      expect(c.claims.map((cl: { path: string[] }) => cl.path.at(-1))).toEqual([
+        "family_name",
+        "given_name",
+      ]);
+    }
+    expect(JSON.stringify(body.dcql_query)).not.toMatch(/birth|age_/);
     expect(body.nonce).toBe("nonce123");
     expect(body.response_mode).toBe("direct_post.jwt");
     expect(body.profile).toBe("haip");
     expect(body.intended_use_id).toBe("TEST-01");
     expect(body.registration_certificate).toBeUndefined();
+  });
+
+  it("asks for the German PID type when the deployment names it (d-you)", async () => {
+    vi.stubEnv("EUDI_PID_VCT", "urn:eudi:pid:de:1");
+    const fetchMock = vi.fn(async () =>
+      okJson({ transaction_id: "t", request_uri: "https://v/r" }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await startPresentation("n");
+    const body = JSON.parse(
+      (fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1]
+        .body as string,
+    );
+    expect(body.dcql_query.credentials[0].meta.vct_values).toEqual([
+      "urn:eudi:pid:de:1",
+    ]);
   });
 
   it("sends our own registration certificate instead of the test intended use", async () => {

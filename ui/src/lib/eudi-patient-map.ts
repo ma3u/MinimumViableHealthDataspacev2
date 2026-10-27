@@ -18,11 +18,15 @@
 import type { EudiVerifiedPatient } from "@/lib/eudi-store";
 import { patientPseudonym } from "@/lib/patient-identity";
 
-/** Normalised PID claims (mdoc eu.europa.ec.eudi.pid.1 / SD-JWT VC urn:eudi:pid:1). */
+/**
+ * Normalised PID claims (mdoc eu.europa.ec.eudi.pid.1 / SD-JWT VC
+ * urn:eudi:pid:1 or urn:eudi:pid:de:1). The German PID writes names in
+ * UPPERCASE (ICAO Doc 9303); matching ignores case.
+ */
 export interface VerifiedPid {
   familyName?: string;
   givenName?: string;
-  /** `age_over_18` / `age_equal_or_over.18`: the hub asks for this, never for a birth date */
+  /** read when a wallet discloses it unasked; the hub requests only the name */
   ageOver18?: boolean;
 }
 

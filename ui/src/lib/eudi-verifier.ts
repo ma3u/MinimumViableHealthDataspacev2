@@ -46,8 +46,15 @@ function settings() {
     /** QR / wallet deep-link scheme. The EU reference wallet reads openid4vp://; haip-vp:// and eudi-openid4vp:// are alternatives. */
     scheme: env.EUDI_VERIFIER_SCHEME ?? "openid4vp://",
     doctype: env.EUDI_PID_DOCTYPE ?? "eu.europa.ec.eudi.pid.1",
-    /** The SD-JWT VC type of the PID, per the PID rulebook. */
-    vct: env.EUDI_PID_VCT ?? "urn:eudi:pid:1",
+    /**
+     * The SD-JWT VC types of the PID, comma-separated: `urn:eudi:pid:1` (PID
+     * rulebook, EU reference wallet), `urn:eudi:pid:de:1` (German PID, d-you).
+     * List only what the registration certificate declares.
+     */
+    vct: (env.EUDI_PID_VCT || "urn:eudi:pid:1")
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean),
     /** "haip" needs "direct_post.jwt"; "openid4vp" also allows cleartext. */
     profile: env.EUDI_VERIFIER_PROFILE ?? "haip",
     /** "get" (wallet GETs the signed request — broadest compat) or "post". */
@@ -84,23 +91,22 @@ async function safeText(res: Response): Promise<string> {
 }
 
 /**
- * The DCQL query: the PID as SD-JWT VC or as mdoc, with the name, for binding
- * the wallet to a record, and "age over 18" in place of a birth date, which
- * the hub never needs (#475, 2026-10-07). Nothing of it is shown: a patient
- * session sees the record's pseudonym.
+ * The DCQL query: the PID as SD-JWT VC or as mdoc, and of it only the name,
+ * which binds the wallet to a record. Nothing else: no birth date (#475,
+ * 2026-10-07), and no age, which the hub does not use and which neither the
+ * reference verifier's registration (`TEST-01`) nor ours declares; a wallet
+ * refuses a request that asks for more than the registration certificate
+ * declares (over-asking, ETSI TS 119 472-2). Nothing of it is shown: a
+ * patient session sees the record's pseudonym.
  */
-export function pidQuery(doctype: string, vct: string) {
+export function pidQuery(doctype: string, vct: string[]) {
   return {
     credentials: [
       {
         id: PID_SD_JWT_QUERY,
         format: "dc+sd-jwt",
-        meta: { vct_values: [vct] },
-        claims: [
-          { path: ["family_name"] },
-          { path: ["given_name"] },
-          { path: ["age_equal_or_over", "18"] },
-        ],
+        meta: { vct_values: vct },
+        claims: [{ path: ["family_name"] }, { path: ["given_name"] }],
       },
       {
         id: PID_MDOC_QUERY,
@@ -109,7 +115,6 @@ export function pidQuery(doctype: string, vct: string) {
         claims: [
           { path: [doctype, "family_name"] },
           { path: [doctype, "given_name"] },
-          { path: [doctype, "age_over_18"] },
         ],
       },
     ],

@@ -36,6 +36,15 @@ describe("mapPidToPatient (#708)", () => {
     ).toBe("patient2");
   });
 
+  it("binds a German PID, whose names are UPPERCASE (ICAO Doc 9303)", () => {
+    expect(
+      mapPidToPatient({ givenName: "MARIA", familyName: "SCHMIDT" })?.username,
+    ).toBe("patient1");
+    expect(
+      mapPidToPatient({ givenName: "JAN", familyName: "DE VRIES" })?.username,
+    ).toBe("patient2");
+  });
+
   it("refuses a PID that belongs to nobody: no demo patient as a fallback", () => {
     expect(
       mapPidToPatient({ givenName: "Erika", familyName: "Mustermann" }),
