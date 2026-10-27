@@ -74,7 +74,9 @@ guardrail on the generated Cypher, for the Neo4j community's NODES AI conference
 (15 April 2027). Eleven slides, three of them interactive: a layer explorer, the
 chain stepper and a guardrail playground that runs `revealsPatientIdentity()`
 from `services/neo4j-proxy/src/nlq/engine.ts`, ported as it is, on whatever
-Cypher you type.
+Cypher you type. The cover runs the researcher's overview behind the title,
+the HL7 deck's `scene.js` sized to this canvas; the close has the speaker's
+photo and the EJIE deck's LinkedIn QR code.
 
 **Narration** (N) plays English audio in the presenter's cloned voice with
 captions (C) and reveals the builds as they are named. `narration-source.json`
