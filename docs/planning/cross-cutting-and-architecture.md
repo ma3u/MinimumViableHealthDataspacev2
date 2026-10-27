@@ -10,19 +10,17 @@
 
 ### SIMPL-Open EU Programme Alignment
 
-The [SIMPL-Open](https://simpl-programme.eu/) programme provides EU open-source middleware for common European data spaces. This implementation aligns with SIMPL requirements:
+The [Simpl-Open](https://simpl-programme.ec.europa.eu/dashboard/simpl-open) programme provides EU open-source middleware for common European data spaces. Checked against Simpl's own sources on 2026-10-27 (discussion #701):
 
-| SIMPL Requirement       | Status       | Implementation                                    |
-| ----------------------- | ------------ | ------------------------------------------------- |
-| DSP 2025-1              | ✅ Compliant | EDC-V control plane + TCK validation (140+ tests) |
-| DCP v1.0                | ✅ Compliant | IdentityHub + IssuerService (15 VCs issued)       |
-| DID:web                 | ✅ Compliant | 5 participants with DID documents                 |
-| DCAT-AP federation      | ✅ Compliant | HealthDCAT-AP JSON-LD serialization               |
-| ODRL policies           | ✅ Compliant | 14 EHDS policies across 5 participants            |
-| Gaia-X labels           | ⚠️ Gap       | Not yet required for EHDS pilot phase             |
-| Connector certification | ⚠️ Gap       | SIMPL certification process TBD                   |
+| Area         | Simpl-Open                                                          | This hub                                        | Fit                                               |
+| ------------ | ------------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------- |
+| Connector    | Eclipse EDC, the three DSP parts; version not published             | EDC-V, DSP 2025-1, TCK in `compliance.yml`      | Shared foundation; Simpl's DSP version to confirm |
+| Organisation | x509 from the Governance Authority inside its agent; DCP outside it | DCP v1.0, `did:web`, IdentityHub, IssuerService | Bridge through the outside-agent DCP path         |
+| Catalogue    | XFSC today; DCAT-AP in Innsbruck (Q4 2026)                          | HealthDCAT-AP Release 8 (ADR-063)               | HealthDCAT-AP as a profile of Simpl's DCAT-AP     |
+| Policy       | Policy decision point, no named language                            | ODRL 2.2                                        | Gap                                               |
+| Contracts    | Bilateral consumer and provider                                     | DSP agreements plus data permits (Art. 68)      | Gap: a permit binds several parties               |
 
-See [ADR-013: SIMPL-Open Alignment](ADRs/ADR-013-simpl-open-alignment.md) and [Gap Analysis](simpl-ehds-gap-analysis.md).
+ADR-013's claims that Simpl uses DCP and ODRL do not hold; [ADR-064](../ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md) supersedes it. Full comparison: [Simpl-Open and the EHDS: gap analysis](../simpl-ehds-gap-analysis.md).
 
 ### WCAG 2.2 AA Accessibility
 

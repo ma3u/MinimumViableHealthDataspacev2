@@ -797,7 +797,7 @@
       "id": "ADR-013",
       "file": "ADR-013-simpl-open-alignment.md",
       "title": "SIMPL-Open EU Programme Alignment",
-      "status": "Accepted"
+      "status": "Superseded"
     },
     {
       "id": "ADR-014",
@@ -1091,6 +1091,12 @@
       "id": "ADR-063",
       "file": "ADR-063-healthdcat-ap-release-8-and-its-namespace.md",
       "title": "HealthDCAT-AP follows the release Implementing Regulation 2026/2098 points to, today Release 8, in its own namespace",
+      "status": "Accepted"
+    },
+    {
+      "id": "ADR-064",
+      "file": "ADR-064-simpl-open-through-the-outside-agent-dcp-path.md",
+      "title": "The hub meets Simpl-Open as a connector outside its agent, over DSP and DCP, with the Governance Authority as a trusted issuer",
       "status": "Accepted"
     }
   ],
