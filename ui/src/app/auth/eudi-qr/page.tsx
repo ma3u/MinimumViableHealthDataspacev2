@@ -24,6 +24,7 @@ type Phase =
   | "scanning"
   | "completed"
   | "error"
+  | "refused"
   | "expired"
   | "unavailable";
 
@@ -42,6 +43,7 @@ function EudiQrContent() {
   const [qr, setQr] = useState<string | null>(null);
   const [walletLink, setWalletLink] = useState<string | null>(null);
   const [demoHint, setDemoHint] = useState<string | null>(null);
+  const [refusal, setRefusal] = useState<string | null>(null);
   const sidRef = useRef<string | null>(null);
   const startedAtRef = useRef<number>(0);
 
@@ -95,7 +97,13 @@ function EudiQrContent() {
           if (active) setPhase("expired");
           return;
         }
-        const data = (await res.json()) as { status: string };
+        const data = (await res.json()) as { status: string; error?: string };
+        // A PID that belongs to no record here, or a declined wallet (#708).
+        if (res.status === 403 && active) {
+          setRefusal(data.error ?? "The wallet could not sign you in.");
+          setPhase("refused");
+          return;
+        }
         if (data.status === "completed" && active) {
           setPhase("completed");
           await signIn("eudi-wallet", { sid, callbackUrl });
@@ -245,7 +253,9 @@ function EudiQrContent() {
             </div>
           )}
 
-          {(phase === "error" || phase === "expired") && (
+          {(phase === "error" ||
+            phase === "expired" ||
+            phase === "refused") && (
             <div className="py-6">
               <AlertTriangle
                 size={36}
@@ -254,7 +264,9 @@ function EudiQrContent() {
               <p className="text-sm text-(--text-secondary) mb-4">
                 {phase === "expired"
                   ? "This sign-in request expired."
-                  : "Could not reach the EUDI verifier."}
+                  : phase === "refused"
+                    ? refusal
+                    : "Could not reach the EUDI verifier."}
               </p>
               <button
                 onClick={start}

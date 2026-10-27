@@ -3,6 +3,7 @@
 - **Status:** Final, as of 27 October 2026
 - **Discussion:** [#701, Simpl-Open vs. this EHDS hub](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/701)
 - **Decision:** [ADR-064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md)
+- **Plan:** [#725, closing the EHDS and Simpl-Open gaps](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/725), one issue per gap, prioritised
 - **Compares:** Simpl-Open as its programme describes it; the European Health
   Data Space as adopted, [Regulation (EU) 2025/327](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng),
   with its implementing acts; and this hub, whose article-by-article status is
@@ -190,7 +191,8 @@ bodies, a trust centre, persons) on an Eclipse EDC virtual runtime:
   the public register, information page and activity report (Art. 57–59).
 - **Opt-out:** a dated record and a label that every secondary-use query
   excludes ([ADR-062](ADRs/ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md)).
-- **Persons:** sign-in with the EUDI Wallet over OpenID4VP (ADR-028).
+- **Persons:** sign-in with the EUDI Wallet over OpenID4VP 1.0 and HAIP, the
+  PID as SD-JWT VC or mdoc, bound to one record (ADR-028, ADR-065).
 
 ## 4. Layer by layer
 
@@ -198,7 +200,7 @@ bodies, a trust centre, persons) on an Eclipse EDC virtual runtime:
 | -------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | Connector                  | EDC-based, the three DSP parts; version not published                                                         | EDC virtual runtime; DSP 2025-1, checked by the TCK in `compliance.yml`                                           | Confirm Simpl's DSP version; run the TCK against a Simpl agent                                                          |
 | Organisation identity      | Inside the agent: Governance Authority x509, mTLS. Outside: DCP. DIDs and VCs in Innsbruck                    | DCP 1.0, `did:web`, IdentityHub and IssuerService; membership, participant, purpose and quality-label credentials | The outside-agent path: the Governance Authority as a credential issuer the hub's IdentityHub trusts                    |
-| Person identity            | Keycloak; EU Login and eIDAS login in EHDS2; wallet credentials in Hamburg                                    | EUDI PID over OpenID4VP (`mso_mdoc`), asking `age_over_18`, never a birth date (ADR-028)                          | Both sides: healthcare attestations of 2026/2099                                                                        |
+| Person identity            | Keycloak; EU Login and eIDAS login in EHDS2; wallet credentials in Hamburg                                    | EUDI PID over OpenID4VP and HAIP (SD-JWT VC or mdoc), bound to one record, asking only the name (ADR-065)         | Both sides: healthcare attestations of 2026/2099                                                                        |
 | Acting for an organisation | Not described                                                                                                 | Not yet                                                                                                           | DOME uses LEAR credentials; the European Business Wallet is still in negotiation. Neither side has a mandate credential |
 | Catalogue                  | XFSC federated catalogue; DCAT-AP as the Innsbruck model; HealthDCAT-AP not named                             | HealthDCAT-AP Release 8 over the DSP catalogue, validated with the official SHACL; federated crawler (ADR-020)    | A HealthDCAT-AP profile for Simpl's DCAT-AP adoption, which 2026/2098 requires for health from 2029                     |
 | Policy                     | Decision point, no named language; access policies on the provider's connector                                | ODRL 2.2, evaluated per query in front of the SPEs                                                                | Usage control inside the SPE is where the EHDS needs it most (Art. 73)                                                  |
@@ -218,7 +220,7 @@ evidence and the tracking issue for each gap.
 | Art.  | Duty                                            | Applies                  | Simpl                                              | Hub                                                                                                                                           |
 | ----- | ----------------------------------------------- | ------------------------ | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | 3–10  | Rights of the person, primary use               | 2029 and 2031            | Not named                                          | Access implemented; insert, rectification, portability, information on access partial; restriction and the primary-use opt-out not yet (#698) |
-| 16    | Identification, cross-border (2026/2099)        | 2027; 2029               | Keycloak, EU Login, eIDAS login; wallet in Hamburg | EUDI PID login; every PID maps to one demo patient; no professionals (#698)                                                                   |
+| 16    | Identification, cross-border (2026/2099)        | 2027; 2029               | Keycloak, EU Login, eIDAS login; wallet in Hamburg | EUDI PID login, a PID bound to one record, the session's assurance level recorded (#708); no professionals (#712)                             |
 | 51    | Minimum categories of data                      | 2029; 2031               | Not named                                          | Every dataset tagged with the Art. 51(1) categories                                                                                           |
 | 53–54 | Purposes, prohibited purposes                   | 2029                     | Generic policy decision point                      | Purposes enforced; prohibited purposes named, not checked on applications (#697)                                                              |
 | 55–57 | Access bodies, their tasks, the public register | 2027 (designation); 2029 | One Governance Authority per data space            | Access body desk, register of permits                                                                                                         |
@@ -339,6 +341,9 @@ Comments on the proposed requirements and questions for the programme:
    attributes on offerings (SPE certification, permit required).
 
 ### For the hub
+
+Each gap is an issue in the plan [#725](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/725),
+with its priority (P1 to P3) and the evidence that closes it.
 
 1. When Hamburg 4.1 code is public: trust a Governance Authority as issuer in
    the IdentityHub, and run the DSP TCK against a Simpl agent.

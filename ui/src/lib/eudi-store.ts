@@ -15,6 +15,7 @@
  * ADR-028.
  */
 import { randomUUID, randomBytes } from "crypto";
+import type { AssuranceLevel } from "@/lib/assurance";
 
 export type EudiTxStatus = "pending" | "completed" | "error";
 
@@ -24,6 +25,8 @@ export interface EudiVerifiedPatient {
   /** display name — the verified wallet holder's name when available */
   displayName: string;
   roles: string[];
+  /** the sign-in's eIDAS level: high for a PID, low for the simulated wallet (#708) */
+  assurance: AssuranceLevel;
 }
 
 export interface EudiTransaction {

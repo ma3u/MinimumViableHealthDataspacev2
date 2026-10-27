@@ -1,49 +1,92 @@
 /**
- * Maps a cryptographically-verified EUDI Wallet PID presentation to a demo
- * patient identity in this dataspace.
+ * Binds a verified EUDI Wallet PID to the one record it belongs to (#708).
  *
- * Demo semantics (decided for the hackathon): every successfully verified wallet
- * is mapped to a fixed synthetic patient (`patient1`). A real wallet's PID will
- * not match the synthetic Synthea cohort, so a name+birthDate lookup would lock
- * the holder out. The *identity* is therefore cosmetic — the point is that the
- * holder proved control of a real EUDI Wallet credential. The verified name is
- * surfaced as the display name so the demo shows "you, verified via your wallet"
- * over a synthetic health record. The verified name is never shown, though:
- * the session carries the record's pseudonym (#475, 2026-10-07), because a
- * real person's PID name must not appear on a screen of the demo.
+ * Until 2026-10-27 every verified wallet signed in as `patient1`. Under
+ * Implementing Regulation (EU) 2026/2099 a PID identifies a person, so it may
+ * open only that person's record, and a PID that belongs to nobody here is
+ * refused rather than handed a demo patient.
  *
- * Swap `mapPidToPatient` for a real Neo4j name+birthDate resolver later; the
- * call sites (status route, Credentials provider) depend only on this contract.
+ * The hub holds no real person's data, so the only people a PID can match are
+ * the fictional patient personas of the Keycloak realm (`jad/keycloak-realm.json`,
+ * pinned by a unit test). A tester issues a test PID with one of their names
+ * at the EU reference issuer and signs in as that patient. Matching ignores
+ * case, accents and extra spaces; nothing else of the PID is stored.
+ *
+ * The verified name is never shown: the session carries the record's
+ * pseudonym (#475, 2026-10-07).
  */
 import type { EudiVerifiedPatient } from "@/lib/eudi-store";
 import { patientPseudonym } from "@/lib/patient-identity";
 
-/** Normalised PID claims (mdoc eu.europa.ec.eudi.pid.1 / SD-JWT pid). */
+/**
+ * Normalised PID claims (mdoc eu.europa.ec.eudi.pid.1 / SD-JWT VC
+ * urn:eudi:pid:1 or urn:eudi:pid:de:1). The German PID writes names in
+ * UPPERCASE (ICAO Doc 9303); matching ignores case.
+ */
 export interface VerifiedPid {
   familyName?: string;
   givenName?: string;
-  /** `age_over_18`: the hub asks for this, never for a birth date */
+  /** read when a wallet discloses it unasked; the hub requests only the name */
   ageOver18?: boolean;
 }
 
-/** Fixed demo patient every verified wallet resolves to. */
-export const DEMO_EUDI_PATIENT_USERNAME = "patient1";
-/** The record that login owns (`ownPatientId("patient1")`). */
-export const DEMO_EUDI_PATIENT_RECORD = "P1";
+/** The persons a PID can belong to: the realm's patient personas and their records. */
+export const PID_BINDINGS = [
+  {
+    givenName: "Maria",
+    familyName: "Schmidt",
+    username: "patient1",
+    record: "P1",
+  },
+  {
+    givenName: "Jan",
+    familyName: "de Vries",
+    username: "patient2",
+    record: "P2",
+  },
+] as const;
 
-export function mapPidToPatient(_pid: VerifiedPid): EudiVerifiedPatient {
+function normalise(s: string): string {
+  return s
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function patientOf(
+  b: (typeof PID_BINDINGS)[number],
+  assurance: EudiVerifiedPatient["assurance"],
+): EudiVerifiedPatient {
   return {
-    username: DEMO_EUDI_PATIENT_USERNAME,
-    displayName: patientPseudonym(DEMO_EUDI_PATIENT_RECORD),
+    username: b.username,
+    displayName: patientPseudonym(b.record),
     roles: ["PATIENT"],
+    assurance,
   };
 }
 
 /**
+ * The patient this PID belongs to, or null when it belongs to nobody on this
+ * hub. A PID sign-in is at assurance level high (the EUDI Wallet's).
+ */
+export function mapPidToPatient(pid: VerifiedPid): EudiVerifiedPatient | null {
+  if (!pid.givenName || !pid.familyName) return null;
+  const given = normalise(pid.givenName);
+  const family = normalise(pid.familyName);
+  const b = PID_BINDINGS.find(
+    (x) =>
+      normalise(x.givenName) === given && normalise(x.familyName) === family,
+  );
+  return b ? patientOf(b, "high") : null;
+}
+
+/**
  * The patient a *simulated* wallet approval signs in as, when the deployment
- * allows it (`EUDI_DEMO_WALLET=true`, see the start route). Same mapping as a
- * real presentation.
+ * allows it (`EUDI_DEMO_WALLET=true`, see the start route). No PID is
+ * presented, so the sign-in proves nothing about the person: level low.
  */
 export function demoPatient(): EudiVerifiedPatient {
-  return mapPidToPatient({});
+  return patientOf(PID_BINDINGS[0], "low");
 }

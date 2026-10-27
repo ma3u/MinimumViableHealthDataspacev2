@@ -124,10 +124,11 @@ jobs:
               "DEPLOYMENT_TARGET=azure" \
               "EUDI_VERIFIER_BASE_URL=https://verifier-backend.eudiw.dev" \
               "EUDI_VERIFIER_SCHEME=openid4vp://" \
-              "EUDI_VERIFIER_PROFILE=openid4vp" \
+              "EUDI_VERIFIER_PROFILE=haip" \
               "EUDI_PID_DOCTYPE=eu.europa.ec.eudi.pid.1" \
+              "EUDI_INTENDED_USE_ID=TEST-01" \
               "EUDI_REQUEST_URI_METHOD=get" \
-              "EUDI_RESPONSE_MODE=direct_post" \
+              "EUDI_RESPONSE_MODE=direct_post.jwt" \
               "EUDI_DEMO_WALLET=true" \
               "AUDIT_CALLBACK_URL=http://mvhd-neo4j-proxy/audit/dsp" \
               "CFM_DID_BASE=did:web:mvhd-identityhub%3A7083" \

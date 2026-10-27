@@ -93,6 +93,39 @@ describe("EudiQrPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("says why when the PID belongs to no record, and does not sign in (#708)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) =>
+        String(url).includes("/start")
+          ? startOk
+          : {
+              status: 403,
+              ok: false,
+              json: async () => ({
+                status: "refused",
+                error:
+                  "No record on this hub belongs to the PID in this wallet.",
+              }),
+            },
+      ),
+    );
+    render(<EudiQrPage />);
+    expect(
+      await screen.findByText(
+        /No record on this hub belongs to the PID/i,
+        {},
+        {
+          timeout: 6000,
+        },
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Try again/i }),
+    ).toBeInTheDocument();
+    expect(signIn).not.toHaveBeenCalled();
+  });
+
   it("signs in when the wallet completes the presentation", async () => {
     // Real timers + waitFor (not fake timers): the async start() resolves on the
     // microtask queue, which fake-timer advancement raced — making this flaky.
@@ -129,6 +162,37 @@ describe("EudiQrPage", () => {
       "eudi-wallet",
       expect.objectContaining({ sid: "s2" }),
     );
+  });
+
+  it("shows the refusal and does not sign in when no record belongs to the PID (#708)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) =>
+        String(url).includes("/start")
+          ? startOk
+          : {
+              status: 403,
+              ok: false,
+              json: async () => ({
+                status: "refused",
+                error:
+                  "No record on this hub belongs to the PID in this wallet.",
+              }),
+            },
+      ),
+    );
+    render(<EudiQrPage />);
+    expect(
+      await screen.findByText(
+        /No record on this hub belongs to the PID/i,
+        {},
+        { timeout: 6000 },
+      ),
+    ).toBeInTheDocument();
+    expect(signIn).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", { name: /Try again/i }),
+    ).toBeInTheDocument();
   });
 
   it("approving on the simulated phone signs in as the demo patient when the deployment allows it", async () => {

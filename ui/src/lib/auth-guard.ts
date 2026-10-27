@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 import { authOptions, type Role } from "@/lib/auth";
 import { IS_STATIC } from "@/lib/static-export";
+import { patientAssuranceShortfall } from "@/lib/assurance";
 
 export interface AuthSession {
   user: { id: string; name?: string | null; email?: string | null };
@@ -43,6 +44,21 @@ export async function requireAuth(
     if (!hasAny) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
+  }
+
+  // A person's own session must meet the deployment's identification floor
+  // (Implementing Reg. (EU) 2026/2099; PATIENT_MIN_ASSURANCE, #708).
+  const lacking = patientAssuranceShortfall(
+    roles,
+    (session as { assurance?: unknown }).assurance,
+  );
+  if (lacking) {
+    return NextResponse.json(
+      {
+        error: `Sign in with the EUDI Wallet: this needs assurance level ${lacking}`,
+      },
+      { status: 403 },
+    );
   }
 
   return {
