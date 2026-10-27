@@ -40,5 +40,10 @@ variables:
 `services/neo4j-proxy/src/healthdcat-ap.ts` serialises it as JSON-LD with the
 EU vocabularies' IRIs; `scripts/healthdcat-ap/validate.py` checks it with the
 official SHACL for non-public data, in CI on the golden fixture
-(`services/neo4j-proxy/__tests__/fixtures/healthdcat-ap-r8.jsonld`). The
+(`services/neo4j-proxy/__tests__/fixtures/healthdcat-ap-r8.jsonld`). It loads
+the class hierarchy the HealthData@EU validator imports, so both agree: 0
+violations on every dataset, and 17 on the catalogue node, where DCAT 2's
+`dcat:Catalog rdfs:subClassOf dcat:Dataset` brings in the Dataset shapes. That
+is an upstream question; the validator names it and does not fail on it
+(`--strict` does). The
 catalogue enricher carries the properties through federation.
