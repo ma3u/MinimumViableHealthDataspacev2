@@ -303,7 +303,7 @@
       "status": "active"
     },
     {
-      "ehdsArticle": "Article 53",
+      "ehdsArticle": "Art. 53",
       "purpose": "Scientific research on therapeutic outcomes",
       "format": "VC1_0_JWT",
       "participant": null,
@@ -320,7 +320,7 @@
       "status": "active"
     },
     {
-      "ehdsArticle": "Article 36",
+      "ehdsArticle": "Art. 55",
       "jurisdiction": "FR",
       "format": "VC1_0_JWT",
       "participantRole": "HealthDataAccessBody",
@@ -337,7 +337,7 @@
       "status": "active"
     },
     {
-      "ehdsArticle": "Article 49",
+      "ehdsArticle": "Art. 60",
       "jurisdiction": "NL",
       "format": "VC1_0_JWT",
       "participantRole": "DataHolder",
@@ -354,7 +354,7 @@
       "status": "active"
     },
     {
-      "ehdsArticle": "Article 36",
+      "ehdsArticle": "Art. 55",
       "jurisdiction": "DE",
       "format": "VC1_0_JWT",
       "participantRole": "HealthDataAccessBody",
@@ -371,7 +371,7 @@
       "status": "active"
     },
     {
-      "ehdsArticle": "Article 46",
+      "ehdsArticle": "Art. 61",
       "jurisdiction": "DE",
       "format": "VC1_0_JWT",
       "participantRole": "DataUser",
@@ -388,7 +388,7 @@
       "status": "active"
     },
     {
-      "ehdsArticle": "Article 49",
+      "ehdsArticle": "Art. 60",
       "jurisdiction": "DE",
       "format": "VC1_0_JWT",
       "participantRole": "DataHolder",

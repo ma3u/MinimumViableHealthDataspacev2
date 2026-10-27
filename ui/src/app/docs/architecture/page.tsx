@@ -578,8 +578,8 @@ export default function ArchitecturePage() {
                   issued over DCP against the issuer&apos;s definitions
                 </li>
                 <li>
-                  <strong>Federated Catalog:</strong> HealthDCAT-AP 2.1 metadata
-                  profiles (ADR-003)
+                  <strong>Federated Catalog:</strong> HealthDCAT-AP metadata
+                  (Release 8 vocabulary) profiles (ADR-003)
                 </li>
                 <li>
                   <strong>SBOM:</strong> CycloneDX 1.5 supply chain transparency

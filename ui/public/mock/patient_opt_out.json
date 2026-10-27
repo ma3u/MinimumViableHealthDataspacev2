@@ -1,0 +1,15 @@
+{
+  "patientId": "P1",
+  "optedOut": false,
+  "since": null,
+  "history": [
+    {
+      "optOutId": "optout-demo-p1-1",
+      "optedOutAt": "2026-03-02T09:00:00Z",
+      "source": "patient-portal",
+      "reversedAt": "2026-04-15T10:30:00Z",
+      "reversalSource": "patient-portal"
+    }
+  ],
+  "article": "Regulation (EU) 2025/327, Art. 71"
+}

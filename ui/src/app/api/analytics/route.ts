@@ -3,6 +3,7 @@ import { runQuery } from "@/lib/neo4j";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { userToParticipantId } from "@/lib/odrl-engine";
 import { gateSecondaryUse } from "@/lib/permit-gate";
+import { forRoles } from "@/lib/opt-out";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,11 @@ export async function GET() {
       }
     : null;
 
+  // Art. 71 (ADR-062): for a data user, an access body or a trust centre
+  // the statistics leave out the persons who opted out of secondary use.
+  const query = <T>(cypher: string) =>
+    runQuery<T>(forRoles(cypher, session.roles));
+
   try {
     const [
       summary,
@@ -45,7 +51,7 @@ export async function GET() {
       topProcedures,
       genderBreakdown,
     ] = await Promise.all([
-      runQuery<{
+      query<{
         persons: number;
         conditions: number;
         drugs: number;
@@ -67,31 +73,31 @@ export async function GET() {
          RETURN persons, conditions, drugs, measurements, procedures, count(ov) AS visits`,
       ),
 
-      runQuery<{ label: string; count: number }>(
+      query<{ label: string; count: number }>(
         `MATCH (oc:OMOPConditionOccurrence)
          RETURN oc.name AS label, count(oc) AS count
          ORDER BY count DESC LIMIT 15`,
       ),
 
-      runQuery<{ label: string; count: number }>(
+      query<{ label: string; count: number }>(
         `MATCH (od:OMOPDrugExposure)
          RETURN od.name AS label, count(od) AS count
          ORDER BY count DESC LIMIT 15`,
       ),
 
-      runQuery<{ label: string; count: number }>(
+      query<{ label: string; count: number }>(
         `MATCH (om:OMOPMeasurement)
          RETURN om.name AS label, count(om) AS count
          ORDER BY count DESC LIMIT 15`,
       ),
 
-      runQuery<{ label: string; count: number }>(
+      query<{ label: string; count: number }>(
         `MATCH (opo:OMOPProcedureOccurrence)
          RETURN opo.name AS label, count(opo) AS count
          ORDER BY count DESC LIMIT 15`,
       ),
 
-      runQuery<{ gender: string; count: number }>(
+      query<{ gender: string; count: number }>(
         `MATCH (op:OMOPPerson)
          RETURN CASE op.genderConceptId
                   WHEN 8507 THEN 'Male'

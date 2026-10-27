@@ -35,6 +35,8 @@ export interface PermitRow {
   applicationId: string | null;
   revokedAt?: string | null;
   revocationReason?: string | null;
+  /** The application invoked the Art. 71(4) exception (ADR-062). */
+  art71Exception?: boolean | null;
 }
 
 export interface PermitCheck {
@@ -64,7 +66,8 @@ export async function findPermits(consumerDid: string): Promise<PermitRow[]> {
             coalesce(permit.permittedPurpose, app.requestedPurpose) AS purpose,
             app.applicationId                                       AS applicationId,
             toString(permit.revokedAt)                              AS revokedAt,
-            permit.revocationReason                                 AS revocationReason
+            permit.revocationReason                                 AS revocationReason,
+            app.art71Exception = true                               AS art71Exception
      ORDER BY permit.validUntil DESC`,
     { consumerDid },
   );

@@ -1,7 +1,7 @@
 /**
  * Tests for /api/patient/insights/route.ts
  *
- * EHDS Art. 50 §4 — patients receive anonymised aggregate findings from
+ * EHDS Art. 58(1)(g) and Art. 73: patients receive anonymised aggregate findings from
  * studies using their donated data. Never returns pseudonym IDs or
  * individual-level results. Tests cover:
  *   - Auth (401/403)
@@ -138,8 +138,9 @@ describe("GET /api/patient/insights", () => {
 
     expect(data.ehdsArticles).toEqual({
       primaryAccess: "EHDS Art. 3",
-      secondaryConsent: "EHDS Art. 10",
-      speProtection: "EHDS Art. 50",
+      secondaryConsent:
+        "EHDS Art. 71 — secondary use is the default, with an opt-out; joining a study is a separate GDPR consent",
+      speProtection: "EHDS Art. 73",
     });
     // k-anonymity note is part of the contract
     expect(data.privacyNote).toContain("aggregate");

@@ -247,7 +247,7 @@ SET en.asOf = date(e.at),
     en.studyId = e.study
 MERGE (st)-[:HAS_ENROLMENT]->(en);
 
-// ── 5. The patient's consents (Art. 71 opt-out state per study) ─────────────
+// ── 5. The patient's study consents (GDPR Art. 9(2)(a), withdrawable) ───────
 MATCH (p:Patient {resourceId: 'P1'})
 UNWIND [
   {id: 'CONSENT-001', study: 'STUDY-CARDIO-2024', at: '2024-03-10T09:00:00Z', scope: 'FHIR Conditions + Observations', tc: 'MedReg DE Trust Centre', revokedAt: null},
@@ -262,7 +262,7 @@ SET pc.patientId = 'P1',
     pc.revokedAt = CASE WHEN c.revokedAt IS NULL THEN null ELSE datetime(c.revokedAt) END,
     pc.purpose = 'secondary-use',
     pc.dataScope = c.scope,
-    pc.ehdsArticle = 'Art. 71',
+    pc.ehdsArticle = 'GDPR Art. 9(2)(a)',
     pc.fictional = true
 MERGE (p)-[:GAVE_CONSENT]->(pc)
 WITH pc, c

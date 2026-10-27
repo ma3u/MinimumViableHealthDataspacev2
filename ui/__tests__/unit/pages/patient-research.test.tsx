@@ -2,16 +2,22 @@
  * Tests for Research Programs page (ui/src/app/patient/research/page.tsx)
  *
  * Covers: loading state, program list rendering, consent status display,
- * donate action, revoke consent action, consent history table, EHDS banner,
- * and empty state.
+ * donate action, consent withdrawal, consent history table, the Art. 71
+ * opt-out panel (ADR-062), and empty state.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 const mockFetchApi = vi.fn();
+// The opt-out panel has its own route; its calls go to their own mock so the
+// research route's call sequence below stays as it was.
+const mockOptOutApi = vi.fn();
 vi.mock("@/lib/api", () => ({
-  fetchApi: (...args: unknown[]) => mockFetchApi(...args),
+  fetchApi: (url: string, init?: unknown) =>
+    url.startsWith("/api/patient/opt-out")
+      ? mockOptOutApi(url, init)
+      : mockFetchApi(url, init),
 }));
 
 vi.mock("next/link", () => ({
@@ -67,9 +73,19 @@ const RESEARCH_DATA = {
   ],
 };
 
+const NOT_OPTED_OUT = {
+  patientId: "P1",
+  optedOut: false,
+  since: null,
+  history: [],
+  article: "Regulation (EU) 2025/327, Art. 71",
+};
+
 describe("ResearchProgramsPage", () => {
   beforeEach(() => {
     mockFetchApi.mockReset();
+    mockOptOutApi.mockReset();
+    mockOptOutApi.mockImplementation(() => mockResponse(NOT_OPTED_OUT));
   });
 
   it("shows loading state initially", () => {
@@ -78,16 +94,83 @@ describe("ResearchProgramsPage", () => {
     expect(screen.getByText(/Loading research programs/i)).toBeInTheDocument();
   });
 
-  it("renders page heading and EHDS Art. 10 banner", async () => {
+  it("renders the heading, the Art. 71 opt-out and the study consent as separate things", async () => {
     mockFetchApi.mockReturnValueOnce(mockResponse(RESEARCH_DATA));
     render(<ResearchProgramsPage />);
     await waitFor(() => {
       expect(screen.getByText("Research Programs")).toBeInTheDocument();
     });
-    // EHDS Art. 10 appears in both PageIntro and the banner
-    expect(screen.getAllByText(/EHDS Art. 10/).length).toBeGreaterThanOrEqual(
-      1,
+    expect(
+      screen.getByText(/Secondary use of your health data \(EHDS Art. 71\)/),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(/GDPR Art. 9\(2\)\(a\)/).length).toBeGreaterThan(
+      0,
     );
+    // The proposal's "Art. 10 consent" is gone: Art. 10 is the primary-use opt-out.
+    expect(screen.queryByText(/EHDS Art. 10/)).toBeNull();
+  });
+
+  it("shows that the patient has not opted out, and opts out on a click", async () => {
+    const user = userEvent.setup();
+    mockFetchApi.mockReturnValue(mockResponse(RESEARCH_DATA));
+    mockOptOutApi
+      .mockImplementationOnce(() => mockResponse(NOT_OPTED_OUT))
+      .mockImplementationOnce(() =>
+        mockResponse({ message: "You have opted out of secondary use." }),
+      )
+      .mockImplementation(() =>
+        mockResponse({
+          ...NOT_OPTED_OUT,
+          optedOut: true,
+          since: "2026-10-27T10:00:00Z",
+          history: [
+            {
+              optOutId: "o-1",
+              optedOutAt: "2026-10-27T10:00:00Z",
+              source: "patient-portal",
+              reversedAt: null,
+            },
+          ],
+        }),
+      );
+    render(<ResearchProgramsPage />);
+    await waitFor(() => {
+      expect(screen.getByTestId("opt-out-state")).toHaveTextContent(
+        /have not opted out/,
+      );
+    });
+    await user.click(screen.getByTestId("opt-out-switch"));
+    await waitFor(() => {
+      expect(mockOptOutApi).toHaveBeenCalledWith(
+        "/api/patient/opt-out",
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+    await waitFor(() => {
+      expect(screen.getByTestId("opt-out-state")).toHaveTextContent(
+        "You opted out on 2026-10-27.",
+      );
+    });
+    expect(screen.getByTestId("opt-out-switch")).toHaveTextContent(
+      "Opt back in",
+    );
+  });
+
+  it("says when the opt-out is not available to the session", async () => {
+    mockFetchApi.mockReturnValueOnce(mockResponse(RESEARCH_DATA));
+    mockOptOutApi.mockImplementation(() =>
+      Promise.resolve({
+        ok: false,
+        status: 400,
+        json: () => Promise.resolve({ error: "patientId is required" }),
+      }),
+    );
+    render(<ResearchProgramsPage />);
+    await waitFor(() => {
+      expect(screen.getByTestId("opt-out-panel")).toHaveTextContent(
+        /available to a signed-in patient/,
+      );
+    });
   });
 
   it("renders program cards", async () => {
@@ -135,7 +218,7 @@ describe("ResearchProgramsPage", () => {
     mockFetchApi.mockReturnValueOnce(mockResponse(RESEARCH_DATA));
     render(<ResearchProgramsPage />);
     await waitFor(() => {
-      expect(screen.getByText(/Revoke consent/)).toBeInTheDocument();
+      expect(screen.getByText(/Withdraw consent/)).toBeInTheDocument();
     });
   });
 
@@ -168,9 +251,9 @@ describe("ResearchProgramsPage", () => {
       .mockReturnValueOnce(mockResponse({ ...RESEARCH_DATA, consents: [] }));
     render(<ResearchProgramsPage />);
     await waitFor(() => {
-      expect(screen.getByText(/Revoke consent/)).toBeInTheDocument();
+      expect(screen.getByText(/Withdraw consent/)).toBeInTheDocument();
     });
-    await user.click(screen.getByText(/Revoke consent/));
+    await user.click(screen.getByText(/Withdraw consent/));
     await waitFor(() => {
       expect(mockFetchApi).toHaveBeenCalledWith(
         expect.stringContaining("consentId=CONSENT-001"),

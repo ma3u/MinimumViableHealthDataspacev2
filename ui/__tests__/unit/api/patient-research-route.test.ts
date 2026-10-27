@@ -1,7 +1,8 @@
 /**
  * Tests for /api/patient/research/route.ts
  *
- * EHDS Art. 10 — patient consent management for secondary use of health data.
+ * Study consent (GDPR Art. 9(2)(a), withdrawable Art. 7(3)); the EHDS
+ * opt-out from secondary use is separate (Art. 71, /api/patient/opt-out).
  *
  *   GET    → list available DataProduct research programs + patient consents
  *   POST   → create a PatientConsent (idempotent MERGE)
@@ -72,7 +73,8 @@ describe("/api/patient/research", () => {
       const data = await res.json();
       expect(data.programs).toHaveLength(1);
       expect(data.consents).toEqual([]);
-      expect(data.ehdsArticle).toContain("EHDS Art. 10");
+      expect(data.ehdsArticle).toContain("GDPR Art. 9(2)(a)");
+      expect(data.ehdsArticle).toContain("Art. 71");
       // Only the programs query runs when patientId is absent
       expect(mockRunQuery).toHaveBeenCalledTimes(1);
     });
@@ -161,7 +163,7 @@ describe("/api/patient/research", () => {
       expect(data.consentId).toBe("new-uuid-123");
       expect(data.patientId).toBe("p-1");
       expect(data.studyId).toBe("s-1");
-      expect(data.ehdsArticle).toBe("EHDS Art. 10");
+      expect(data.ehdsArticle).toBe("GDPR Art. 9(2)(a), study consent");
       // grantedAt should be a parseable ISO string close to "now"
       const drift = Math.abs(Date.now() - Date.parse(data.grantedAt));
       expect(drift).toBeLessThan(5_000);
@@ -243,7 +245,7 @@ describe("/api/patient/research", () => {
       const data = await res.json();
       expect(data.revoked).toBe(true);
       expect(data.consentId).toBe("c-1");
-      expect(data.gdprArticle).toContain("GDPR Art. 17");
+      expect(data.gdprArticle).toContain("GDPR Art. 7(3)");
     });
   });
 });

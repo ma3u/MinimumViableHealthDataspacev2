@@ -165,7 +165,7 @@ describe("seed-persona-overview.cypher", () => {
     }
   });
 
-  it("records which accesses read the patient's record (Art. 8)", () => {
+  it("records which accesses read the patient's record (Art. 9)", () => {
     const reads = seed.match(/reads: \['P1'\]/g) ?? [];
     expect(reads.length).toBeGreaterThan(10);
     expect(seed).toContain("MERGE (te)-[:READ]->(pat)");
@@ -202,7 +202,7 @@ describe("seed-persona-overview.cypher", () => {
     // Proposal-era numbers the discussion asked to retire (Art. 46, 50, 51).
     expect(seed).not.toMatch(/Art\. (46|50|51)\b/);
     for (const article of [
-      "Art. 71",
+      "GDPR Art. 9(2)(a)",
       "Art. 78",
       "Art. 61(1)",
       "Art. 73(1)(e)",

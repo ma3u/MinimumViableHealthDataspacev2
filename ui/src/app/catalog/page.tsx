@@ -179,7 +179,8 @@ function buildDcatApJsonLd(d: Dataset): object {
     "@context": {
       dcat: "http://www.w3.org/ns/dcat#",
       dct: "http://purl.org/dc/terms/",
-      healthdcatap: "https://healthdcat-ap.github.io/ns#",
+      // The HealthDCAT-AP namespace (Release 8, ADR-063).
+      healthdcatap: "http://healthdataportal.eu/ns/health#",
       foaf: "http://xmlns.com/foaf/0.1/",
     },
     "@type": "dcat:Dataset",
@@ -447,7 +448,7 @@ function CatalogContent() {
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-(--text-secondary)">
-                    EHDS Art. 53 · HealthDCAT-AP 2.1
+                    EHDS Art. 77 · HealthDCAT-AP Release 8
                   </span>
                 </div>
               </div>

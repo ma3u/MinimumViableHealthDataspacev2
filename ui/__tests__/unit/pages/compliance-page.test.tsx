@@ -104,7 +104,7 @@ const COMPLIANT_RESULT = {
       applicationStatus: "approved",
       approvalId: "appr-001",
       approvalStatus: "granted",
-      ehdsArticle: "Article 53",
+      ehdsArticle: "Art. 68(1)",
       dataset: "dataset:fhir-patients",
       contract: "contract:abc-123",
     },
@@ -125,7 +125,7 @@ const MULTI_CHAIN_RESULT = {
       applicationStatus: "approved",
       approvalId: "appr-001",
       approvalStatus: "granted",
-      ehdsArticle: "Article 53",
+      ehdsArticle: "Art. 68(1)",
       dataset: "dataset:fhir-patients",
       contract: "contract:abc-123",
     },
@@ -135,7 +135,7 @@ const MULTI_CHAIN_RESULT = {
       applicationStatus: "approved",
       approvalId: "appr-002",
       approvalStatus: "granted",
-      ehdsArticle: "Article 46",
+      ehdsArticle: "Art. 72",
       dataset: "dataset:fhir-patients",
       contract: null,
     },
@@ -315,7 +315,7 @@ describe("CompliancePage", () => {
             datasetId: "dataset:fhir-patients",
             datasetTitle: "Synthetic FHIR Cohort",
             hasContract: true,
-            ehdsArticle: "Art. 53",
+            ehdsArticle: "Art. 68",
           },
         ],
       };
@@ -353,7 +353,7 @@ describe("CompliancePage", () => {
           datasetId: "dataset:fhir-patients",
           datasetTitle: "Synthetic FHIR Cohort",
           hasContract: true,
-          ehdsArticle: "Art. 53",
+          ehdsArticle: "Art. 68",
         },
       ],
     };
@@ -407,7 +407,7 @@ describe("CompliancePage", () => {
         expect(screen.getByText("app-001")).toBeInTheDocument();
         expect(screen.getByText("approved")).toBeInTheDocument();
         expect(screen.getByText("appr-001")).toBeInTheDocument();
-        expect(screen.getByText("Article 53")).toBeInTheDocument();
+        expect(screen.getByText("Art. 68(1)")).toBeInTheDocument();
         expect(screen.getByText("contract:abc-123")).toBeInTheDocument();
       });
     });
@@ -462,7 +462,7 @@ describe("CompliancePage", () => {
       await waitFor(() => {
         expect(screen.getByText("app-001")).toBeInTheDocument();
         expect(screen.getByText("app-002")).toBeInTheDocument();
-        expect(screen.getByText("Article 46")).toBeInTheDocument();
+        expect(screen.getByText("Art. 72")).toBeInTheDocument();
       });
     });
 
@@ -981,7 +981,7 @@ describe("CompliancePage", () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText(/Mutual recognition.*EHDS Art. 51/i),
+          screen.getByText(/Mutual recognition.*EHDS Art. 75/i),
         ).toBeInTheDocument();
         expect(screen.getByText(/NL/)).toBeInTheDocument();
       });

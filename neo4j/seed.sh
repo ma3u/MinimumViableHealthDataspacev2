@@ -92,6 +92,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   run_file /seed/seed-compliance-matrix.cypher "compliance matrix"
   run_file /seed/seed-persona-overview.cypher "persona overview (discussion #265)"
   run_file /seed/seed-study-results.cypher "study results: ECG, imaging, vaccinations, medication plan (ADR-059)"
+  run_file /seed/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
   echo ""
   echo "=== Verifying ==="
   cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
@@ -132,6 +133,12 @@ run_file /seed/seed-compliance-matrix.cypher "compliance matrix"
 # scripts/generate-persona-overview-seed.py. Idempotent MERGE.
 run_file /seed/seed-persona-overview.cypher "persona overview (discussion #265)"
 run_file /seed/seed-study-results.cypher "study results: ECG, imaging, vaccinations, medication plan (ADR-059)"
+
+# Issue #694: the seeds above now write ehdsArticle as "Art. NN" with the
+# adopted numbers of Regulation (EU) 2025/327. Some of them only SET it ON
+# CREATE, so a graph seeded before keeps the proposal-era labels; this
+# migration corrects them. Idempotent: it matches only the old values.
+run_file /seed/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
 
 # Phase 26a: bootstrap :Participant source labels + dspCatalogUrl so the
 # catalog-crawler has targets and the enricher can link federated datasets

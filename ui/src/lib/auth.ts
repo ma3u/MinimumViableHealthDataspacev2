@@ -294,7 +294,8 @@ export const DEMO_PERSONAS = [
       "bg-(--role-hdab-bg) text-(--role-hdab-text) border-(--role-hdab-border)",
   },
   {
-    // A second access body, so EHDS Art. 14 coordination has two sides to it.
+    // A second access body, so the coordination between access bodies of EHDS
+    // Art. 67(3) (one application, forwarded to the others) has two sides to it.
     // Shares personaId "hdab" with MedReg DE: same role, same navigation, and
     // the demo switches between them to show the cross-border permit.
     username: "regulator-es",
@@ -302,7 +303,7 @@ export const DEMO_PERSONAS = [
     organisation: "MedReg ES",
     roles: ["HDAB_AUTHORITY"],
     personaId: "hdab",
-    description: "Spanish access body, cross-border permits (EHDS Art. 14)",
+    description: "Spanish access body, cross-border permits (EHDS Art. 67(3))",
     color: "text-(--role-hdab-text)",
     badge:
       "bg-(--role-hdab-bg) text-(--role-hdab-text) border-(--role-hdab-border)",
@@ -340,7 +341,8 @@ export const DEMO_PERSONAS = [
     organisation: "Limburg Medical Centre (patient)",
     roles: ["PATIENT"],
     personaId: "patient",
-    description: "Cross-border NL patient, MyHealth@EU Art. 7 data portability",
+    description:
+      "Cross-border NL patient, data portability (Art. 7) via MyHealth@EU (Art. 23)",
     color: "text-(--role-patient-text)",
     badge:
       "bg-(--role-patient-bg) text-(--role-patient-text) border-(--role-patient-border)",

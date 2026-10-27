@@ -1,0 +1,65 @@
+{
+  "about": "Art. 71 opt-out rewrite (ADR-062): each query and what secondaryUseView() must turn it into. Shared by services/neo4j-proxy/src/opt-out.ts and ui/src/lib/opt-out.ts, so the two copies of the rewrite cannot drift.",
+  "vectors": [
+    {
+      "name": "a patient count",
+      "in": "MATCH (p:Patient) RETURN count(p) AS patientCount",
+      "out": "MATCH (p:(Patient)&!OptedOut) RETURN count(p) AS patientCount"
+    },
+    {
+      "name": "an anonymous clinical node",
+      "in": "MATCH (:Condition) RETURN count(*)",
+      "out": "MATCH (:(Condition)&!OptedOut) RETURN count(*)"
+    },
+    {
+      "name": "properties after the label",
+      "in": "MATCH (p:Patient {id: $id})-[:HAS_CONDITION]->(c:Condition{code:'44054006'}) RETURN c",
+      "out": "MATCH (p:(Patient)&!OptedOut {id: $id})-[:HAS_CONDITION]->(c:(Condition)&!OptedOut{code:'44054006'}) RETURN c"
+    },
+    {
+      "name": "the legacy colon conjunction",
+      "in": "MATCH (p:Patient:Person) RETURN p.gender",
+      "out": "MATCH (p:(Patient&Person)&!OptedOut) RETURN p.gender"
+    },
+    {
+      "name": "a label disjunction in parentheses",
+      "in": "MATCH (n:(Patient|OMOPPerson)) RETURN count(n)",
+      "out": "MATCH (n:((Patient|OMOPPerson))&!OptedOut) RETURN count(n)"
+    },
+    {
+      "name": "OMOP rows",
+      "in": "MATCH (co:OMOPConditionOccurrence) WHERE co.conditionSourceValue CONTAINS $concept RETURN co.conditionSourceValue AS group, count(co) AS count",
+      "out": "MATCH (co:(OMOPConditionOccurrence)&!OptedOut) WHERE co.conditionSourceValue CONTAINS $concept RETURN co.conditionSourceValue AS group, count(co) AS count"
+    },
+    {
+      "name": "metadata is left alone",
+      "in": "MATCH (d:HealthDataset)<-[:CONTAINS]-(c:Catalogue) RETURN d.title, c.name",
+      "out": "MATCH (d:HealthDataset)<-[:CONTAINS]-(c:Catalogue) RETURN d.title, c.name"
+    },
+    {
+      "name": "relationship types and function calls are left alone",
+      "in": "MATCH (s:SnomedConcept)<-[:CODED_BY]-(x) RETURN coalesce(s.display, s.name), count(x)",
+      "out": "MATCH (s:SnomedConcept)<-[:CODED_BY]-(x) RETURN coalesce(s.display, s.name), count(x)"
+    },
+    {
+      "name": "string literals and comments are left alone",
+      "in": "// (p:Patient) in a comment\nMATCH (d:HealthDataset) WHERE d.title = '(p:Patient)' RETURN d",
+      "out": "// (p:Patient) in a comment\nMATCH (d:HealthDataset) WHERE d.title = '(p:Patient)' RETURN d"
+    },
+    {
+      "name": "a pattern that already excludes the marker",
+      "in": "MATCH (p:Patient&!OptedOut) RETURN count(p)",
+      "out": "MATCH (p:Patient&!OptedOut) RETURN count(p)"
+    },
+    {
+      "name": "a pattern inside EXISTS and a sub-query",
+      "in": "MATCH (d:HealthDataset) WHERE EXISTS { (d)<-[:FROM_DATASET]-(:Patient) } CALL { MATCH (p:Patient) RETURN collect(p) AS cohort } RETURN size(cohort)",
+      "out": "MATCH (d:HealthDataset) WHERE EXISTS { (d)<-[:FROM_DATASET]-(:(Patient)&!OptedOut) } CALL { MATCH (p:(Patient)&!OptedOut) RETURN collect(p) AS cohort } RETURN size(cohort)"
+    },
+    {
+      "name": "a vector search call and its expansion",
+      "in": "CALL db.index.vector.queryNodes('condition_embedding', 5, $embedding) YIELD node, score MATCH (pt:Patient)-[:HAS_CONDITION]->(node) RETURN count(DISTINCT pt)",
+      "out": "CALL db.index.vector.queryNodes('condition_embedding', 5, $embedding) YIELD node, score MATCH (pt:(Patient)&!OptedOut)-[:HAS_CONDITION]->(node) RETURN count(DISTINCT pt)"
+    }
+  ]
+}

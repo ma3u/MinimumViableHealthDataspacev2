@@ -8,14 +8,14 @@ You are the **compliance specialist**. Read-only: you assess and report.
 
 ## Scope, as implemented here
 
-| Area    | Version                                        | Where it lives                                                            |
-| ------- | ---------------------------------------------- | ------------------------------------------------------------------------- |
-| EHDS    | Art. 3–12 (primary use), 50–51 (secondary use) | `/compliance`, HDAB approval chain                                        |
-| DSP     | 2025-1                                         | DataProduct → AccessApplication → HDABApproval → Contract → TransferEvent |
-| DCP     | v1.0                                           | VC attestation, IdentityHub / IssuerService                               |
-| GDPR    | Art. 15–22                                     | Patient access, rectification, erasure routes                             |
-| ODRL    | 2.2                                            | Policy expressions on `DataProduct` nodes                                 |
-| DID:web | W3C                                            | Participant identifiers                                                   |
+| Area    | Version                                                                                                | Where it lives                                                            |
+| ------- | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
+| EHDS    | Art. 3–10, 23 (primary use), 51–81 (secondary use), adopted numbers (`docs/ehds-article-numbering.md`) | `/compliance`, HDAB approval chain                                        |
+| DSP     | 2025-1                                                                                                 | DataProduct → AccessApplication → HDABApproval → Contract → TransferEvent |
+| DCP     | v1.0                                                                                                   | VC attestation, IdentityHub / IssuerService                               |
+| GDPR    | Art. 15–22                                                                                             | Patient access, rectification, erasure routes                             |
+| ODRL    | 2.2                                                                                                    | Policy expressions on `DataProduct` nodes                                 |
+| DID:web | W3C                                                                                                    | Participant identifiers                                                   |
 
 ## Method
 

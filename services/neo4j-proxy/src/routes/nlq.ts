@@ -31,6 +31,7 @@ import {
   resolveAdverseEventContext,
 } from "../nlq/engine.js";
 import { logger } from "../logger.js";
+import { forSecondaryUse, secondaryUseSession } from "../opt-out.js";
 
 /**
  * A refused query is recorded too, before the refusal goes out. The refusal
@@ -282,6 +283,11 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
 
+    // Art. 71 (ADR-062): whoever wrote the query, it runs without the persons
+    // who opted out of secondary use, unless the permit carries an approved
+    // Art. 71(4) exception. The audit and the answer show the query as run.
+    cypher = forSecondaryUse(cypher, scope);
+
     // Execute query
     let results: any[];
 
@@ -342,13 +348,16 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       const dqSession = driver.session({ database: "neo4j" });
       try {
         dataQuality =
-          (await computeCohortDataQuality(dqSession, {
-            drugCode: interpretation?.drug?.code ?? null,
-            drugText: interpretation?.raw.drugText?.toLowerCase() ?? null,
-            indicationCode: interpretation?.indication?.code ?? null,
-            indicationText:
-              interpretation?.raw.indicationText?.toLowerCase() ?? null,
-          })) ?? undefined;
+          (await computeCohortDataQuality(
+            secondaryUseSession(dqSession, scope),
+            {
+              drugCode: interpretation?.drug?.code ?? null,
+              drugText: interpretation?.raw.drugText?.toLowerCase() ?? null,
+              indicationCode: interpretation?.indication?.code ?? null,
+              indicationText:
+                interpretation?.raw.indicationText?.toLowerCase() ?? null,
+            },
+          )) ?? undefined;
       } finally {
         await dqSession.close();
       }

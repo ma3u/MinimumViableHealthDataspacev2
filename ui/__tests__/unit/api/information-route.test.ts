@@ -55,6 +55,10 @@ describe("GET /api/information", () => {
       optedOut: 1,
       patients: 127,
     });
+    // The open Art. 71 opt-outs (ADR-062), not consent fields nothing writes.
+    const optOutQuery = String(mockRunQuery.mock.calls[3][0]);
+    expect(optOutQuery).toContain("OptOutRecord");
+    expect(optOutQuery).toContain("reversedAt IS NULL");
     expect(body.retention.months).toBe(12);
     expect(body.fees.reductions.ACADEMIC).toBe(0.5);
     expect(body.fees.requestEur).toBe(300);

@@ -90,10 +90,11 @@ export async function GET() {
          ORDER BY rc.communicatedAt DESC`,
       ),
       runQuery<{ optedOut: number; patients: number }>(
-        `OPTIONAL MATCH (c:PatientConsent)
-           WHERE toLower(coalesce(c.consentType, c.type, '')) CONTAINS 'secondary'
-             AND toLower(coalesce(c.status, '')) IN ['withdrawn', 'denied', 'opted_out', 'opt-out', 'refused']
-         WITH count(c) AS optedOut
+        // The persons with an open Art. 71 opt-out (ADR-062). It used to count
+        // PatientConsent fields nothing writes, so a live graph always said 0.
+        `OPTIONAL MATCH (o:OptOutRecord)
+           WHERE o.reversedAt IS NULL
+         WITH count(DISTINCT o.patientId) AS optedOut
          OPTIONAL MATCH (p:Patient)
          RETURN optedOut, count(p) AS patients`,
       ),

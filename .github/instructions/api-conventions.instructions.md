@@ -9,18 +9,18 @@ Mirror of `.claude/rules/api-conventions.md` — change both together.
 
 ## Protocols
 
-| Protocol      | Version          | Usage                                                           |
-| ------------- | ---------------- | --------------------------------------------------------------- |
-| DSP           | 2025-1           | Dataspace Protocol — contract negotiation, transfer             |
-| DCP           | v1.0             | Decentralised Claims Protocol — VC attestation                  |
-| FHIR          | R4               | Clinical exchange (Patient, Condition, Observation, Medication) |
-| OMOP CDM      | v5.4             | Analytics (Person, ConditionOccurrence, DrugExposure)           |
-| HealthDCAT-AP | 2.1              | Dataset catalogue metadata                                      |
-| EHDS          | Art. 3–12, 50–51 | Primary use (patient rights) + secondary use (research)         |
-| GDPR          | Art. 15–22       | Access, rectification, erasure                                  |
-| ODRL          | 2.2              | Policy expressions on `DataProduct` nodes                       |
-| DID:web       | W3C              | Decentralised identifiers for participants                      |
-| OIDC          | 1.0              | Keycloak authentication (realm `edcv`)                          |
+| Protocol      | Version              | Usage                                                                                                             |
+| ------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| DSP           | 2025-1               | Dataspace Protocol — contract negotiation, transfer                                                               |
+| DCP           | v1.0                 | Decentralised Claims Protocol — VC attestation                                                                    |
+| FHIR          | R4                   | Clinical exchange (Patient, Condition, Observation, Medication)                                                   |
+| OMOP CDM      | v5.4                 | Analytics (Person, ConditionOccurrence, DrugExposure)                                                             |
+| HealthDCAT-AP | 2.1                  | Dataset catalogue metadata                                                                                        |
+| EHDS          | Art. 3–10, 23, 51–81 | Primary use (rights, MyHealth@EU) + secondary use (Chapter IV), adopted numbers: `docs/ehds-article-numbering.md` |
+| GDPR          | Art. 15–22           | Access, rectification, erasure                                                                                    |
+| ODRL          | 2.2                  | Policy expressions on `DataProduct` nodes                                                                         |
+| DID:web       | W3C                  | Decentralised identifiers for participants                                                                        |
+| OIDC          | 1.0                  | Keycloak authentication (realm `edcv`)                                                                            |
 
 ## Next.js API routes
 

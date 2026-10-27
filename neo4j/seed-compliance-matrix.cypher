@@ -1,7 +1,8 @@
 // ==============================================================================
 // EHDS Compliance Matrix — diverse approval chain states for all participants
 //
-// Demonstrates the full range of EHDS Art. 45-53 compliance levels:
+// Demonstrates the full range of compliance levels for the EHDS Art. 67 and 68
+// application and permit chain (adopted numbers, Regulation (EU) 2025/327):
 //   FULL    — Application → HDAB Approval → Dataset grant → Contract
 //   PARTIAL — Some chain elements present but incomplete
 //   NONE    — No access application submitted
@@ -17,14 +18,14 @@
 MATCH (approval:HDABApproval {approvalId: 'hdab-decision-healthgov-2025-001'})
 MATCH (ds:HealthDataset {datasetId: 'urn:uuid:riverside:dataset:diab-001'})
 SET approval.status = 'APPROVED',
-    approval.ehdsArticle = 'EHDS Art. 46'
+    approval.ehdsArticle = 'Art. 68'
 MERGE (approval)-[:GRANTS_ACCESS_TO]->(ds);
 
 // PharmaCo's original approval is also missing status
 MATCH (approval:HDABApproval {approvalId: 'hdab-decision-medreg-2025-001'})
 MATCH (ds:HealthDataset {datasetId: 'urn:uuid:alphaklinik:dataset:diab-001'})
 SET approval.status = 'APPROVED',
-    approval.ehdsArticle = 'EHDS Art. 46'
+    approval.ehdsArticle = 'Art. 68'
 MERGE (approval)-[:GRANTS_ACCESS_TO]->(ds);
 
 // ── 2. PharmaCo Research AG — FULL compliance (second dataset) ────────────
@@ -45,7 +46,7 @@ MERGE (appAlpha:AccessApplication {applicationId: 'app-alpha-medreg-2026-001'})
       appAlpha.requestedPurpose = 'PUBLIC_HEALTH',
       appAlpha.submittedAt = datetime('2026-03-15T10:00:00'),
       appAlpha.status = 'PENDING',
-      appAlpha.justification = 'Cross-border hospital benchmarking study for post-pandemic readmission rates under EHDS Art. 34.',
+      appAlpha.justification = 'Cross-border hospital benchmarking study for post-pandemic readmission rates under EHDS Art. 53(1).',
       appAlpha.ethicsCommitteeRef = 'EC-AlphaKlinik-2026-042',
       appAlpha.dataMinimisationStatement = 'Aggregate cohort statistics only; no patient-level export.'
 MERGE (alpha)-[:SUBMITTED]->(appAlpha)
@@ -63,7 +64,7 @@ MERGE (appLmc:AccessApplication {applicationId: 'app-lmc-irs-2026-001'})
       appLmc.requestedPurpose = 'SCIENTIFIC_RESEARCH',
       appLmc.submittedAt = datetime('2026-02-01T08:30:00'),
       appLmc.status = 'APPROVED',
-      appLmc.justification = 'Multi-centre diabetes outcomes study under EHDS Art. 51 mutual recognition (NL↔FR).',
+      appLmc.justification = 'Multi-centre diabetes outcomes study on a single cross-border application (EHDS Art. 67(3), NL↔FR).',
       appLmc.ethicsCommitteeRef = 'EC-METC-Limburg-2026-007',
       appLmc.dataMinimisationStatement = 'Pseudonymized cohort data via Trust Center resolution.'
 MERGE (lmc)-[:SUBMITTED]->(appLmc)
@@ -78,7 +79,7 @@ MERGE (approvalLmc:HDABApproval {approvalId: 'hdab-irs-lmc-2026-001'})
       approvalLmc.permittedPurpose = 'SCIENTIFIC_RESEARCH',
       approvalLmc.conditions = ['Trust Center pseudonym resolution required', 'SPE aggregate-only output', 'Annual renewal review'],
       approvalLmc.hdabOfficer = 'Dr. Marie Dubois (Institut de Recherche Santé)',
-      approvalLmc.ehdsArticle = 'EHDS Art. 51'
+      approvalLmc.ehdsArticle = 'Art. 68'
 MERGE (approvalLmc)-[:APPROVES]->(appLmc)
 MERGE (approvalLmc)-[:GRANTS_ACCESS_TO]->(synthea);
 
@@ -107,7 +108,7 @@ MERGE (rejectedApproval:HDABApproval {approvalId: 'hdab-medreg-irs-2026-001'})
       rejectedApproval.permittedPurpose = 'NONE',
       rejectedApproval.conditions = ['Insufficient data minimisation plan', 'Ethics committee approval expired'],
       rejectedApproval.hdabOfficer = 'Dr. Klaus Weber (MedReg DE)',
-      rejectedApproval.ehdsArticle = 'EHDS Art. 46'
+      rejectedApproval.ehdsArticle = 'Art. 68'
 MERGE (rejectedApproval)-[:APPROVES]->(appIrs);
 
 // ── 6. MedReg DE — not an applicant (HDAB role, reviews others) ───────────
@@ -286,7 +287,7 @@ MERGE (appPharma:AccessApplication {applicationId: 'app-pharmaco-medreg-omop-sta
       appPharma.submittedAt = datetime('2026-01-15T09:00:00'),
       appPharma.applicantCategory = 'COMMERCIAL',
       appPharma.dataMinimisationStatement = 'OMOP condition, measurement and drug tables only; aggregate output.',
-      appPharma.ehdsArticle = 'EHDS Art. 67'
+      appPharma.ehdsArticle = 'Art. 67'
 MERGE (pharmaco)-[:SUBMITTED]->(appPharma)
 MERGE (medreg)-[:REVIEWED]->(appPharma)
 
@@ -299,6 +300,6 @@ MERGE (approvalPharma:HDABApproval {approvalId: 'hdab-medreg-pharmaco-2026-001'}
       approvalPharma.permittedPurpose = 'SCIENTIFIC_RESEARCH',
       approvalPharma.conditions = ['Secure processing environment only', 'Aggregate output, k-anonymity 5', 'Results communicated under Art. 61(4)'],
       approvalPharma.hdabOfficer = 'Anke Hoffmann (MedReg DE)',
-      approvalPharma.ehdsArticle = 'EHDS Art. 68'
+      approvalPharma.ehdsArticle = 'Art. 68'
 MERGE (approvalPharma)-[:APPROVES]->(appPharma)
 MERGE (approvalPharma)-[:GRANTS_ACCESS_TO]->(omop);

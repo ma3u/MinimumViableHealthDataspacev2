@@ -14,7 +14,7 @@
 // Vocabulary alignment:
 //   W3C DCAT 3:        https://www.w3.org/TR/vocab-dcat-3/
 //   DCAT-AP 3.0:       https://semiceu.github.io/DCAT-AP/releases/3.0.0/
-//   HealthDCAT-AP 1.0: https://healthdcat-ap.github.io/
+//   HealthDCAT-AP Release 8 (ADR-063): https://data.health.europa.eu/healthdcat-ap/releases/latest/
 // =============================================================================
 
 // ---------------------------------------------------------------------------

@@ -89,7 +89,8 @@ app.get(
           dct: "http://purl.org/dc/terms/",
           foaf: "http://xmlns.com/foaf/0.1/",
           vcard: "http://www.w3.org/2006/vcard/ns#",
-          healthdcatap: "http://healthdcat-ap.eu/ns#",
+          // The HealthDCAT-AP namespace (Release 8, ADR-063).
+          healthdcatap: "http://healthdataportal.eu/ns/health#",
         },
         "@type": "dcat:Catalog",
         "dct:title": "Health Dataspace v2 — HealthDCAT-AP Catalog",
@@ -156,7 +157,8 @@ app.get(
           dct: "http://purl.org/dc/terms/",
           foaf: "http://xmlns.com/foaf/0.1/",
           vcard: "http://www.w3.org/2006/vcard/ns#",
-          healthdcatap: "http://healthdcat-ap.eu/ns#",
+          // The HealthDCAT-AP namespace (Release 8, ADR-063).
+          healthdcatap: "http://healthdataportal.eu/ns/health#",
         },
         "@type": "dcat:Dataset",
         "dct:identifier": ds.dctIdentifier ?? ds.datasetId,
