@@ -1,0 +1,471 @@
+{
+  "@context": {
+    "adms": "http://www.w3.org/ns/adms#",
+    "csvw": "http://www.w3.org/ns/csvw#",
+    "cv": "http://data.europa.eu/m8g/",
+    "dcat": "http://www.w3.org/ns/dcat#",
+    "dcatap": "http://data.europa.eu/r5r/",
+    "dct": "http://purl.org/dc/terms/",
+    "dpv": "https://w3id.org/dpv#",
+    "eli": "http://data.europa.eu/eli/ontology#",
+    "foaf": "http://xmlns.com/foaf/0.1/",
+    "geodcatap": "http://data.europa.eu/930/",
+    "healthdcatap": "http://healthdataportal.eu/ns/health#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "vcard": "http://www.w3.org/2006/vcard/ns#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@id": "https://ehds.mabu.red/catalog",
+  "@type": "dcat:Catalog",
+  "dct:title": "EHDS integration hub, HealthDCAT-AP catalogue",
+  "dct:description": "Health datasets of the hub, described in HealthDCAT-AP Release 8. All are synthetic.",
+  "dcatap:applicableLegislation": {
+    "@id": "http://data.europa.eu/eli/reg/2025/327/oj",
+    "@type": "eli:LegalResource"
+  },
+  "dct:publisher": {
+    "@id": "https://ehds.mabu.red/agents/operator",
+    "@type": "foaf:Agent",
+    "foaf:name": "EHDS integration hub operator"
+  },
+  "dct:conformsTo": {
+    "@id": "https://data.health.europa.eu/healthdcat-ap/releases/release-8/"
+  },
+  "dcat:themeTaxonomy": {
+    "@id": "http://publications.europa.eu/resource/authority/data-theme"
+  },
+  "dcat:dataset": [
+    {
+      "@id": "https://ehds.mabu.red/catalog/datasets/dataset%3Aalpha-klinik-cardio-registry",
+      "@type": "dcat:Dataset",
+      "dct:identifier": "dataset:alpha-klinik-cardio-registry",
+      "dct:title": "AlphaKlinik Berlin Cardiac Registry",
+      "dct:description": "Synthetic registry of cardiac outcomes at AlphaKlinik Berlin, FHIR R4.",
+      "dct:accessRights": {
+        "@id": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC",
+        "@type": "dct:RightsStatement"
+      },
+      "dcatap:applicableLegislation": [
+        {
+          "@id": "http://data.europa.eu/eli/reg/2025/327/oj",
+          "@type": "eli:LegalResource"
+        }
+      ],
+      "dct:type": {
+        "@id": "http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC_DATA",
+        "@type": "skos:Concept",
+        "skos:prefLabel": {
+          "@value": "Synthetic data",
+          "@language": "en"
+        }
+      },
+      "dcat:theme": {
+        "@id": "http://publications.europa.eu/resource/authority/data-theme/HEAL",
+        "@type": "skos:Concept",
+        "skos:prefLabel": {
+          "@value": "Health",
+          "@language": "en"
+        }
+      },
+      "dcat:keyword": [
+        "Cardiology",
+        "RegistryData",
+        "synthetic data",
+        "EHDS secondary use"
+      ],
+      "dct:provenance": {
+        "@type": "dct:ProvenanceStatement",
+        "rdfs:label": "Synthetic data generated for the EHDS integration hub; it describes no real person."
+      },
+      "healthdcatap:healthCategory": [
+        {
+          "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/EHRS",
+          "@type": "skos:Concept",
+          "skos:prefLabel": {
+            "@value": "Electronic health data from EHRs",
+            "@language": "en"
+          }
+        },
+        {
+          "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/MRMR",
+          "@type": "skos:Concept",
+          "skos:prefLabel": {
+            "@value": "Data from medical registries and mortality registries",
+            "@language": "en"
+          }
+        }
+      ],
+      "healthdcatap:healthTheme": [
+        {
+          "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/NONCOMMUNICABLE_DISEASES",
+          "@type": "skos:Concept",
+          "skos:prefLabel": {
+            "@value": "Noncommunicable diseases – metabolic & cardiopulmonary",
+            "@language": "en"
+          }
+        }
+      ],
+      "dct:language": {
+        "@id": "http://publications.europa.eu/resource/authority/language/ENG",
+        "@type": "dct:LinguisticSystem"
+      },
+      "dcat:landingPage": {
+        "@id": "https://ehds.mabu.red/data/discover?dataset=dataset%3Aalpha-klinik-cardio-registry",
+        "@type": "foaf:Document"
+      },
+      "dpv:hasPurpose": {
+        "@id": "https://w3id.org/dpv#ScientificResearch",
+        "@type": "dpv:Purpose"
+      },
+      "dpv:hasLegalBasis": {
+        "@id": "https://ehds.mabu.red/legal-basis/ehds-data-permit",
+        "@type": "dpv:LegalBasis",
+        "rdfs:label": "Data permit of a health data access body, Regulation (EU) 2025/327, Art. 68",
+        "dct:source": {
+          "@id": "http://data.europa.eu/eli/reg/2025/327/oj"
+        }
+      },
+      "healthdcatap:hasCodingSystem": [
+        {
+          "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/SNOMED-CT",
+          "@type": "dct:Standard"
+        },
+        {
+          "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/LOINC",
+          "@type": "dct:Standard"
+        },
+        {
+          "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/ICD-10",
+          "@type": "dct:Standard"
+        },
+        {
+          "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/RXNORM",
+          "@type": "dct:Standard"
+        }
+      ],
+      "healthdcatap:hasStructuredData": {
+        "@value": "true",
+        "@type": "xsd:boolean"
+      },
+      "healthdcatap:numberOfRecords": {
+        "@value": "4200",
+        "@type": "xsd:nonNegativeInteger"
+      },
+      "healthdcatap:numberOfUniqueIndividuals": {
+        "@value": "1200",
+        "@type": "xsd:nonNegativeInteger"
+      },
+      "healthdcatap:minTypicalAge": {
+        "@value": "18",
+        "@type": "xsd:nonNegativeInteger"
+      },
+      "healthdcatap:maxTypicalAge": {
+        "@value": "90",
+        "@type": "xsd:nonNegativeInteger"
+      },
+      "dct:temporal": {
+        "@type": "dct:PeriodOfTime",
+        "dcat:startDate": {
+          "@value": "2020-01-01",
+          "@type": "xsd:date"
+        },
+        "dcat:endDate": {
+          "@value": "2025-12-31",
+          "@type": "xsd:date"
+        }
+      },
+      "dct:issued": "2026-01-15",
+      "dct:conformsTo": {
+        "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/FHIR",
+        "@type": "dct:Standard"
+      },
+      "healthdcatap:hasVariables": [
+        {
+          "@id": "https://ehds.mabu.red/catalog/variables/vars%3Afhir-r4",
+          "@type": "csvw:TableGroup",
+          "dct:title": "FHIR R4 resources of the dataset",
+          "csvw:table": [
+            {
+              "@id": "https://ehds.mabu.red/catalog/variables/vars%3Afhir-r4%3ACondition",
+              "@type": "csvw:Table",
+              "dct:title": "Condition",
+              "csvw:column": [
+                {
+                  "@type": "csvw:Column",
+                  "csvw:name": "code",
+                  "csvw:title": "Diagnosis code",
+                  "dct:description": "SNOMED CT or ICD-10 code of the condition",
+                  "csvw:datatype": "string"
+                },
+                {
+                  "@type": "csvw:Column",
+                  "csvw:name": "onsetDateTime",
+                  "csvw:title": "Onset",
+                  "dct:description": "When the condition began",
+                  "csvw:datatype": "dateTime"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "healthdcatap:hdab": {
+        "@id": "did:web:medreg.de:hdab",
+        "@type": "foaf:Agent",
+        "foaf:name": "MedReg DE",
+        "cv:contactPoint": {
+          "@id": "did:web:medreg.de:hdab#contact-point",
+          "@type": "cv:ContactPoint",
+          "cv:contactPage": {
+            "@id": "https://ehds.mabu.red/information"
+          }
+        }
+      },
+      "geodcatap:custodian": {
+        "@id": "did:web:alpha-klinik.de:participant"
+      },
+      "dct:publisher": {
+        "@id": "did:web:alpha-klinik.de:participant",
+        "@type": "foaf:Agent",
+        "foaf:name": "AlphaKlinik Berlin",
+        "cv:contactPoint": {
+          "@id": "did:web:alpha-klinik.de:participant#contact-point",
+          "@type": "cv:ContactPoint",
+          "cv:email": "data-access@alphaklinik-berlin.example"
+        }
+      },
+      "dcat:contactPoint": {
+        "@type": "vcard:Kind",
+        "vcard:fn": "AlphaKlinik Berlin data access desk",
+        "vcard:hasEmail": {
+          "@id": "mailto:data-access@alphaklinik-berlin.example"
+        }
+      },
+      "dcat:distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "dcat:accessURL": {
+            "@id": "https://ehds.mabu.red/data/discover?dataset=dataset%3Aalpha-klinik-cardio-registry"
+          },
+          "dcatap:applicableLegislation": [
+            {
+              "@id": "http://data.europa.eu/eli/reg/2025/327/oj",
+              "@type": "eli:LegalResource"
+            }
+          ],
+          "dcat:mediaType": {
+            "@id": "https://www.iana.org/assignments/media-types/application/fhir+json",
+            "@type": "dct:MediaType"
+          },
+          "dct:format": {
+            "@id": "http://publications.europa.eu/resource/authority/file-type/JSON",
+            "@type": "dct:MediaTypeOrExtent"
+          },
+          "dct:conformsTo": {
+            "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/FHIR",
+            "@type": "dct:Standard"
+          },
+          "dct:title": "FHIR R4 Bundle"
+        }
+      ]
+    },
+    {
+      "@id": "https://ehds.mabu.red/catalog/datasets/dataset%3Almc-omop-analytics",
+      "@type": "dcat:Dataset",
+      "dct:identifier": "dataset:lmc-omop-analytics",
+      "dct:title": "Limburg Medical Centre OMOP Analytics",
+      "dct:description": "Synthetic OMOP CDM 5.4 warehouse at Limburg Medical Centre.",
+      "dct:accessRights": {
+        "@id": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC",
+        "@type": "dct:RightsStatement"
+      },
+      "dcatap:applicableLegislation": [
+        {
+          "@id": "http://data.europa.eu/eli/reg/2025/327/oj",
+          "@type": "eli:LegalResource"
+        }
+      ],
+      "dct:type": {
+        "@id": "http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC_DATA",
+        "@type": "skos:Concept",
+        "skos:prefLabel": {
+          "@value": "Synthetic data",
+          "@language": "en"
+        }
+      },
+      "dcat:theme": {
+        "@id": "http://publications.europa.eu/resource/authority/data-theme/HEAL",
+        "@type": "skos:Concept",
+        "skos:prefLabel": {
+          "@value": "Health",
+          "@language": "en"
+        }
+      },
+      "dcat:keyword": [
+        "Clinical Research",
+        "AnalyticsData",
+        "synthetic data"
+      ],
+      "dct:provenance": {
+        "@type": "dct:ProvenanceStatement",
+        "rdfs:label": "Synthetic data transformed from FHIR R4 to OMOP CDM 5.4; it describes no real person."
+      },
+      "healthdcatap:healthCategory": [
+        {
+          "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/EHRS",
+          "@type": "skos:Concept",
+          "skos:prefLabel": {
+            "@value": "Electronic health data from EHRs",
+            "@language": "en"
+          }
+        }
+      ],
+      "healthdcatap:healthTheme": [
+        {
+          "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/HEALTH_PRODUCTS",
+          "@type": "skos:Concept",
+          "skos:prefLabel": {
+            "@value": "Health products, technologies, data & research",
+            "@language": "en"
+          }
+        }
+      ],
+      "dct:language": {
+        "@id": "http://publications.europa.eu/resource/authority/language/ENG",
+        "@type": "dct:LinguisticSystem"
+      },
+      "dcat:landingPage": {
+        "@id": "https://ehds.mabu.red/data/discover?dataset=dataset%3Almc-omop-analytics",
+        "@type": "foaf:Document"
+      },
+      "dpv:hasPurpose": {
+        "@id": "https://w3id.org/dpv#ScientificResearch",
+        "@type": "dpv:Purpose"
+      },
+      "dpv:hasLegalBasis": {
+        "@id": "https://ehds.mabu.red/legal-basis/ehds-data-permit",
+        "@type": "dpv:LegalBasis",
+        "rdfs:label": "Data permit of a health data access body, Regulation (EU) 2025/327, Art. 68",
+        "dct:source": {
+          "@id": "http://data.europa.eu/eli/reg/2025/327/oj"
+        }
+      },
+      "healthdcatap:hasCodingSystem": [
+        {
+          "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/OHDSI-VOCAB",
+          "@type": "dct:Standard"
+        },
+        {
+          "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/SNOMED-CT",
+          "@type": "dct:Standard"
+        },
+        {
+          "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/LOINC",
+          "@type": "dct:Standard"
+        },
+        {
+          "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/coding-system/RXNORM",
+          "@type": "dct:Standard"
+        }
+      ],
+      "healthdcatap:hasStructuredData": {
+        "@value": "true",
+        "@type": "xsd:boolean"
+      },
+      "dct:conformsTo": {
+        "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/OMOP-CDM",
+        "@type": "dct:Standard"
+      },
+      "healthdcatap:hasVariables": [
+        {
+          "@id": "https://ehds.mabu.red/catalog/variables/vars%3Aomop-cdm-54",
+          "@type": "csvw:TableGroup",
+          "dct:title": "OMOP CDM 5.4 tables of the dataset",
+          "csvw:table": [
+            {
+              "@id": "https://ehds.mabu.red/catalog/variables/vars%3Aomop-cdm-54%3Aperson",
+              "@type": "csvw:Table",
+              "dct:title": "Person",
+              "csvw:column": [
+                {
+                  "@type": "csvw:Column",
+                  "csvw:name": "person_id",
+                  "csvw:title": "Person id",
+                  "dct:description": "Pseudonymous person identifier",
+                  "csvw:datatype": "integer"
+                },
+                {
+                  "@type": "csvw:Column",
+                  "csvw:name": "year_of_birth",
+                  "csvw:title": "Year of birth",
+                  "dct:description": "Year of birth of the person",
+                  "csvw:datatype": "integer"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "healthdcatap:hdab": {
+        "@id": "did:web:irs.fr:hdab",
+        "@type": "foaf:Agent",
+        "foaf:name": "Institut de Recherche Santé",
+        "cv:contactPoint": {
+          "@id": "did:web:irs.fr:hdab#contact-point",
+          "@type": "cv:ContactPoint",
+          "cv:contactPage": {
+            "@id": "https://ehds.mabu.red/information"
+          }
+        }
+      },
+      "geodcatap:custodian": {
+        "@id": "did:web:lmc.nl:clinic"
+      },
+      "dct:publisher": {
+        "@id": "did:web:lmc.nl:clinic",
+        "@type": "foaf:Agent",
+        "foaf:name": "Limburg Medical Centre",
+        "cv:contactPoint": {
+          "@id": "did:web:lmc.nl:clinic#contact-point",
+          "@type": "cv:ContactPoint",
+          "cv:email": "data-access@limburg-medical-centre.example"
+        }
+      },
+      "dcat:contactPoint": {
+        "@type": "vcard:Kind",
+        "vcard:fn": "Limburg Medical Centre data access desk",
+        "vcard:hasEmail": {
+          "@id": "mailto:data-access@limburg-medical-centre.example"
+        }
+      },
+      "dcat:distribution": [
+        {
+          "@type": "dcat:Distribution",
+          "dcat:accessURL": {
+            "@id": "https://ehds.mabu.red/data/discover?dataset=dataset%3Almc-omop-analytics"
+          },
+          "dcatap:applicableLegislation": [
+            {
+              "@id": "http://data.europa.eu/eli/reg/2025/327/oj",
+              "@type": "eli:LegalResource"
+            }
+          ],
+          "dcat:mediaType": {
+            "@id": "https://www.iana.org/assignments/media-types/application/parquet",
+            "@type": "dct:MediaType"
+          },
+          "dct:format": {
+            "@id": "http://publications.europa.eu/resource/authority/file-type/PARQUET",
+            "@type": "dct:MediaTypeOrExtent"
+          },
+          "dct:conformsTo": {
+            "@id": "https://hdeu-dcat.data.health.europa.eu/resource/authority/standard/OMOP-CDM",
+            "@type": "dct:Standard"
+          },
+          "dct:title": "OMOP tables"
+        }
+      ]
+    }
+  ]
+}

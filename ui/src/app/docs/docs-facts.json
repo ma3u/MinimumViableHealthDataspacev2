@@ -70,6 +70,10 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/catalog/jsonld",
+      "methods": ["GET"]
+    },
+    {
       "path": "/api/catalog",
       "methods": ["GET", "POST", "DELETE"]
     },
@@ -1114,8 +1118,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 49,
-    "operations": 65
+    "paths": 50,
+    "operations": 66
   },
   "workflowJobs": {
     "test.yml": [

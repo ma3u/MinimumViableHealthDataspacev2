@@ -1,7 +1,7 @@
 """DSP dcat:Catalog JSON-LD → HealthDCAT-AP DatasetUpsert.
 
 Pure function: no Neo4j, no NATS, no I/O. Easy to unit-test.
-Per ADR-003 HealthDCAT-AP shape. Per ADR-020: themes that map to a known
+HealthDCAT-AP Release 8 (ADR-063, #700). Per ADR-020: themes that map to a known
 :SnomedConcept / :LoincCode / :ICD10Code are linked; unknown themes are
 preserved on the node and counted via enricher_unknown_theme_total.
 """
@@ -28,6 +28,34 @@ def _coerce_theme_code(theme: Any) -> str | None:
         if system and code:
             return f"{system}|{code}"
         return code or None
+    return None
+
+
+def _values(value: Any) -> list[Any]:
+    if value is None:
+        return []
+    return value if isinstance(value, list) else [value]
+
+
+def _iri(value: Any) -> str | None:
+    """The IRI of a JSON-LD node or value: {"@id": ...} or a bare string."""
+    if isinstance(value, dict):
+        value = value.get("@id")
+    return str(value) if value else None
+
+
+def _codes(value: Any) -> list[str]:
+    """Vocabulary codes from IRIs: .../healthcategories/EHRS -> EHRS."""
+    return [iri.rstrip("/").rsplit("/", 1)[-1] for iri in map(_iri, _values(value)) if iri]
+
+
+def _bool(value: Any) -> bool | None:
+    if isinstance(value, dict):
+        value = value.get("@value")
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str) and value.lower() in ("true", "false"):
+        return value.lower() == "true"
     return None
 
 
@@ -59,10 +87,14 @@ def extract_datasets(env: CrawlEnvelope) -> list[DatasetUpsert]:
         distributions_raw = raw.get("dcat:distribution") or raw.get("distributions") or []
         if not isinstance(distributions_raw, list):
             distributions_raw = [distributions_raw]
+        # Release 8 writes the access URL, media type and format as IRIs.
         distributions = [
             {
-                "format": d.get("dcat:mediaType") or d.get("format") or "",
-                "accessUrl": d.get("dcat:accessURL") or d.get("accessUrl") or "",
+                "format": _iri(d.get("dcat:mediaType"))
+                or _iri(d.get("dct:format"))
+                or _iri(d.get("format"))
+                or "",
+                "accessUrl": _iri(d.get("dcat:accessURL")) or _iri(d.get("accessUrl")) or "",
             }
             for d in distributions_raw
             if isinstance(d, dict)
@@ -81,6 +113,18 @@ def extract_datasets(env: CrawlEnvelope) -> list[DatasetUpsert]:
                 distributions=distributions,
                 odrl_policy=raw.get("odrl:hasPolicy") or raw.get("policy"),
                 last_seen_at=env.fetched_at,
+                # HealthDCAT-AP Release 8 (#700): carried through federation
+                # instead of dropped, as codes of the EU vocabularies.
+                access_rights=next(iter(_codes(raw.get("dct:accessRights"))), None),
+                applicable_legislation=[
+                    i for i in map(_iri, _values(raw.get("dcatap:applicableLegislation"))) if i
+                ],
+                health_categories=_codes(raw.get("healthdcatap:healthCategory")),
+                health_themes=_codes(raw.get("healthdcatap:healthTheme")),
+                coding_systems=_codes(raw.get("healthdcatap:hasCodingSystem")),
+                has_structured_data=_bool(raw.get("healthdcatap:hasStructuredData")),
+                hdab_did=_iri(raw.get("healthdcatap:hdab")),
+                keywords=[str(k) for k in _values(raw.get("dcat:keyword")) if k],
             )
         )
     return out

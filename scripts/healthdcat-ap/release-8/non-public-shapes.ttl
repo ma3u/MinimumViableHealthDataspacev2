@@ -1,0 +1,519 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <https://semiceu.github.io/DCAT-AP/releases/3.0.0/html/shacl/shapes.ttl#>  .
+@prefix adms: <http://www.w3.org/ns/adms#> .
+@prefix cc: <http://creativecommons.org/ns#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lcon: <http://www.w3.org/ns/locn#> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix schema: <http://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix spdx: <http://spdx.org/rdf/terms#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcatap: <http://data.europa.eu/r5r/> .
+# HealthDCAT-AP
+@prefix dqv: <http://www.w3.org/ns/dqv#> .
+@prefix dpv: <https://w3id.org/dpv#> .
+#To be changed when the Heathdcat-AP namespace is created
+@prefix healthdcatap: <http://healthdataportal.eu/ns/health#> .
+@prefix csvw: <http://www.w3.org/ns/csvw#> .
+@prefix cv: <http://data.europa.eu/m8g/> .
+@prefix geodcatap: <http://data.europa.eu/930/> .
+
+
+
+<https://code.europa.eu/healthdataeu/healthdcat-ap/shapes.ttl>
+    dct:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> ;
+    dct:conformsTo <https://www.w3.org/TR/shacl> ;
+    dct:description "This file defines the core SHACL constraints used by HealthDCAT-AP to validate classes and properties."@en .
+	
+	
+#-------------------------------------------------------------------------
+# This file defines SHACL shapes for all classes included in the HealthDCAT-AP NON_PUBLIC data specification.
+# It includes all constraints to be satisfied, except for class range constraints, which are defined separately.
+# By importing DCAT-AP shapes via owl:imports, this file ensures clear distinction between reused and extended constraints, promoting reusability and easing future upgrades.
+# Author : Mohamed CHOUAIECH, DG SANTE
+#-------------------------------------------------------------------------
+
+<https://semiceu.github.io/DCAT-AP/releases/3.0.0/html/shacl/shapes.ttl>
+  rdf:type owl:Ontology ;
+  owl:imports <https://semiceu.github.io/DCAT-AP/releases/3.0.0/html/shacl/shapes.ttl> ;  
+  .
+
+
+:Kind_Shape
+    a sh:NodeShape ;
+    rdfs:comment "vcard Kind must have at least one of vcard:hasURL or vcard:hasEmail as an IRI" ;
+    rdfs:label "vcard Kind" ;
+	sh:property [
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:path vcard:hasURL ;
+        sh:severity sh:Violation ;
+    ], [
+        sh:maxCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:path vcard:hasEmail ;
+        sh:severity sh:Violation ;
+    ];
+	sh:property [
+        sh:path [ sh:alternativePath (vcard:hasURL vcard:hasEmail) ] ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "Provide at least one of vcard:hasURL or vcard:hasEmail as an IRI." ;
+    ] ;
+    sh:targetClass vcard:Kind .
+
+:Catalog_Shape
+    a sh:NodeShape ;
+    rdfs:label "Catalog"@en ;
+    sh:property [
+        sh:minCount 1 ;
+        sh:path dcatap:applicableLegislation;
+        sh:nodeKind sh:IRI;
+        sh:severity sh:Violation ;
+        sh:message "dcatap:applicableLegislation for dcat:Catalogue is required."
+    ] ;
+    sh:targetClass dcat:Catalog .
+
+
+:Dataset_Shape
+    a sh:NodeShape ;
+    rdfs:label "Dataset"@en ;
+    sh:property [
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:path dct:accessRights ;
+        sh:severity sh:Violation ;
+		sh:hasValue <http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC> ;
+        sh:message "Each Dataset must have exactly one dct:accessRights, and its value must be http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC."
+    ],  [
+        sh:minCount 1 ;
+        sh:nodeKind sh:IRI ;
+  	    sh:path dcatap:applicableLegislation;
+        sh:severity sh:Violation;
+        sh:message "Each dcat:Dataset must have at least one dcatap:applicableLegislation."
+    ], [
+        sh:minCount 1 ;        
+		sh:node :Distribution_Shape ;
+        sh:path dcat:distribution ;
+        sh:severity sh:Violation ;
+        sh:message "Each dcat:Dataset must have at least one dcat:distribution."
+    ],  [
+        sh:minCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:path dct:identifier ;
+        sh:severity sh:Violation ;
+        sh:message "Each dcat:Dataset must have at least one dct:identifier."
+    ],  [
+        sh:maxCount 1 ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:path dct:publisher ;
+		sh:message "Each dcat:Dataset may have at most one dct:publisher." ;
+        sh:severity sh:Violation 
+    ], [        
+        sh:node :HealthPublisherAgent_Shape;        
+        sh:path dct:publisher ;
+		sh:message "dct:publisher must conform to the :HealthPublisherAgent_Shape, which requires exactly one cv:contactPoint, at most one dct:description" ;
+        sh:severity sh:Violation 
+    ], [
+        sh:node :Distribution_Shape;
+        sh:path adms:sample ;
+        sh:severity sh:Violation
+    ], [
+        sh:minCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:path dcat:theme ;
+        sh:severity sh:Violation ;
+        sh:message "Each dcat:Dataset must have at least one dcat:theme."
+    ], [
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:path dpv:hasPurpose ;
+        sh:severity sh:Violation
+    ], [
+        sh:minCount 1 ;
+        sh:maxCount 1 ;        
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:path healthdcatap:hdab ;        
+        sh:message "Each dcat:Dataset must have exactly one healthdcatap:hdab" ;
+		sh:severity sh:Violation ;
+    ], [        
+        sh:node :HealthAgent_Shape;
+        sh:path healthdcatap:hdab ;                
+		sh:severity sh:Violation ;
+		sh:message "healthdcatap:hdab must conform to the :HealthAgent_Shape, which requires exactly one cv:contactPoint." ;
+    ] , [
+        sh:maxCount 1 ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:path healthdcatap:hdabCoordinator ;
+        sh:message "Each dcat:Dataset may have at most one healthdcatap:hdabCoordinator." ;
+		sh:severity sh:Violation ;
+    ], [        
+        sh:node :HealthAgent_Shape;
+        sh:path healthdcatap:hdabCoordinator ;                
+		sh:severity sh:Violation ;
+		sh:message "healthdcatap:hdabCoordinator must conform to the :HealthAgent_Shape, which requires exactly one cv:contactPoint." ;
+    ] , [
+        sh:maxCount 1 ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:path geodcatap:custodian ;
+		sh:message "Each dcat:Dataset may have at most one geodcatap:custodian." ;
+        sh:severity sh:Violation 
+    ],	[        
+        sh:node :HealthAgent_Shape;
+        sh:path geodcatap:custodian ;                
+		sh:severity sh:Violation ;
+		sh:message "geodcatap:custodian (Data holder) must conform to the :HealthAgent_Shape, which requires exactly one cv:contactPoint." ;
+    ], [
+        sh:minCount 1 ;
+        sh:nodeKind sh:IRI ;
+        sh:path healthdcatap:healthCategory ;
+        sh:severity sh:Violation ;
+        sh:message "Each dcat:Dataset must have at least one healthdcatap:healthCategory."
+    ], [
+        sh:nodeKind sh:BlankNodeOrIRI ;
+		#Once the controlled vocabulary becomes available, it will be expressed as an IRI
+        sh:path healthdcatap:healthTheme ;
+        sh:severity sh:Violation
+    ], [
+        sh:path dpv:hasLegalBasis ;
+        sh:severity sh:Violation
+    ], [
+        sh:path dpv:hasPersonalData ;
+        sh:severity sh:Violation
+    ], [
+        sh:path dqv:hasQualityAnnotation ;
+        sh:severity sh:Violation
+    ], [
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:path healthdcatap:hasStructuredData ;
+        sh:datatype xsd:boolean ;
+        sh:severity sh:Violation ;
+        sh:message "Each dcat:Dataset must have exactly one healthdcatap:hasStructuredData as an xsd:boolean."
+    ], [
+        sh:path healthdcatap:hasVariables ;
+        sh:node :CSVWTableGroup_Shape ;
+        sh:severity sh:Violation ;
+        sh:message "Each healthdcatap:hasVariables value must conform to :CSVWTableGroup_Shape."
+    ], [
+        sh:node :Distribution_Shape ;
+        sh:path healthdcatap:analytics ;
+        sh:severity sh:Violation
+    ], [
+        #Change healthdcatap:hasCodeValues from skos:Concept to rdfs:Literal
+		sh:nodeKind sh:Literal ;
+        sh:path healthdcatap:hasCodeValues ;
+        sh:severity sh:Violation
+    ], [
+        sh:nodeKind sh:BlankNodeOrIRI ;
+		#Once the controlled vocabulary becomes available, it will be expressed as an IRI
+        sh:path healthdcatap:hasCodingSystem ;
+        sh:severity sh:Violation
+    ], [
+		sh:maxCount 1 ;
+        sh:path healthdcatap:minTypicalAge ;
+        sh:datatype xsd:nonNegativeInteger ;
+        sh:severity sh:Violation;
+		sh:message "Each dcat:Dataset must have at most one healthdcatap:minTypicalAge as a xsd:nonNegativeInteger."
+    ], [
+		sh:maxCount 1 ;
+        sh:path healthdcatap:maxTypicalAge ;
+        sh:datatype xsd:nonNegativeInteger ;
+        sh:severity sh:Violation ;
+		sh:message "Each dcat:Dataset must have at most one healthdcatap:maxTypicalAge as a xsd:nonNegativeInteger."
+    ], [
+		sh:maxCount 1 ;
+        sh:path healthdcatap:numberOfRecords ;
+        sh:datatype xsd:nonNegativeInteger ;
+        sh:severity sh:Violation ;
+		sh:message "Each dcat:Dataset must have at most one healthdcatap:numberOfRecords as a xsd:nonNegativeInteger."
+    ], [
+		sh:maxCount 1 ;
+        sh:path healthdcatap:numberOfUniqueIndividuals ;
+        sh:datatype xsd:nonNegativeInteger ;
+        sh:severity sh:Violation ;
+		sh:message "Each dcat:Dataset must have at most one healthdcatap:numberOfUniqueIndividuals as a xsd:nonNegativeInteger."
+    ], [
+        sh:nodeKind sh:Literal ;
+        sh:path healthdcatap:populationCoverage ;
+        sh:severity sh:Violation
+    ], [
+        sh:nodeKind sh:Literal ;
+        sh:path dct:alternative ;
+        sh:severity sh:Violation
+    ], [
+		sh:maxCount 1 ;
+        sh:node :PeriodOfTime_Shape ;
+        sh:path healthdcatap:retentionPeriod ;
+        sh:severity sh:Violation ;
+		sh:message "Each dcat:Dataset must have at most one healthdcatap:retentionPeriod as a dct:PeriodOfTime."
+    ] , 
+	# The following fields are mandatory for datasets with NON_PUBLIC access level, in addition to those required for PUBLIC datasets.
+	[
+        sh:minCount 1 ;
+		sh:nodeKind sh:BlankNodeOrIRI ;		
+        sh:path dcat:contactPoint ;
+        sh:severity sh:Violation ;
+		sh:message "Each dcat:Dataset must have at least one dcat:contactPoint."
+    ], [
+		sh:minCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:path dcat:keyword ;
+        sh:severity sh:Violation ;
+		sh:message "Each dcat:Dataset must have at least one dcat:keyword."
+    ], [
+		sh:minCount 1 ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:path dct:type ;
+        sh:severity sh:Violation ;
+		sh:message "Each dcat:Dataset must have at least one dct:type."
+    ] , [
+		sh:minCount 1 ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:path dct:provenance ;
+        sh:severity sh:Violation ;
+		sh:message "Each dcat:Dataset must have at least one dct:provenance."
+    ], [
+        sh:or (
+            [
+                sh:property [
+                    sh:path healthdcatap:hasStructuredData ;
+                    sh:hasValue true ;
+                ] ;
+                sh:property [
+                    sh:minCount 1 ;
+                    sh:path healthdcatap:hasVariables ;
+                ]
+            ]
+            [
+                sh:property [
+                    sh:path healthdcatap:hasStructuredData ;
+                    sh:hasValue false ;
+                ]
+            ]
+            [
+                sh:property [
+                    sh:maxCount 0 ;
+                    sh:path healthdcatap:hasStructuredData ;
+                ]
+            ]
+        ) ;
+        sh:severity sh:Violation ;
+        sh:message "If healthdcatap:hasStructuredData is true, the dataset must include at least one healthdcatap:hasVariables."
+    ];
+    sh:targetClass dcat:Dataset .
+
+
+:Distribution_Shape
+    a sh:NodeShape ;
+    rdfs:label "Distribution"@en ;
+    sh:property [
+		sh:minCount 1 ;
+        sh:nodeKind sh:IRI ;
+  	    sh:path dcatap:applicableLegislation;
+        sh:severity sh:Violation ;
+		sh:message "dcatap:applicableLegislation for dcat:Distribution is required."
+    ] ;
+    sh:targetClass dcat:Distribution .
+
+:DatasetSeries_Shape
+    a sh:NodeShape ;
+    rdfs:label "Dataset Series"@en ;
+    sh:property [
+        sh:minCount 1 ;
+        sh:nodeKind sh:IRI;
+        sh:path dcatap:applicableLegislation;
+        sh:severity sh:Violation ;
+        sh:message "A dcatap:applicableLegislation for dcat:DatasetSeries is required."
+    ] ;
+    sh:targetClass dcat:DatasetSeries .	
+	
+:CSVWTableGroup_Shape
+    a sh:NodeShape ;
+    rdfs:label "Csvw Table Group"@en ;
+    sh:property [
+        sh:path csvw:table ;
+		sh:minCount 1 ;
+        sh:severity sh:Violation ;
+		sh:message "Each csvw:TableGroup must have at least one Table (csvw:table)."
+    ], [
+        sh:path dct:title ;
+        sh:minCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:severity sh:Violation ;
+        sh:message "Each csvw:TableGroup must have at least one title (dct:title) as a literal."
+    ] ;
+    sh:targetClass csvw:TableGroup .
+	
+:CSVWTable_Shape
+    a sh:NodeShape ;
+    sh:targetClass csvw:Table ;
+    sh:property [
+        sh:path csvw:url ;
+        sh:nodeKind sh:IRI ;
+		sh:maxCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "Each csvw:Table must have at most one valid URL (csvw:url) as an IRI."
+    ], [
+        sh:minCount 1 ;
+        sh:path dct:title ;
+        sh:nodeKind sh:Literal ;
+        sh:severity sh:Violation ;
+        sh:message "Each csvw:Table must have at least one title (dct:title) as a literal."
+    ], [				
+        sh:path dcat:keyword ;
+        sh:nodeKind sh:Literal ;
+        sh:severity sh:Violation ;
+        sh:message "Each csvw:Table should have one or many keyword (dcat:keyword) as a literal."
+	],	
+	#We separate the constraints into two distinct blocks : one for cardinality and node kind, and another for conformance to CSVWColumnShape
+	#because if they are merged, the error message related to cardinality and node kind will always be triggered, even when the actual validation failure concerns only the conformance to CSVWColumnShape.
+	[
+        sh:minCount 1 ;
+        sh:path csvw:column ;
+		sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:severity sh:Violation ;
+        sh:message "Each csvw:Table must have at least one column (csvw:column) defined as a blank node or IRI."
+    ], [
+        sh:path csvw:column ;		
+        sh:node :CSVWColumnShape ;
+        sh:severity sh:Violation ;
+    ]  .
+
+
+:CSVWColumnShape
+    a sh:NodeShape ;
+    sh:targetClass csvw:Column ;
+    sh:property [
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:path csvw:name ;
+        sh:nodeKind sh:Literal ;
+        sh:message "Each csvw:Column must have exactly one name (csvw:name) as a literal."
+    ], [
+		sh:minCount 1 ;
+        sh:path dct:description ;
+        sh:nodeKind sh:Literal ;
+        sh:message "Each csvw:Column must have at least one description (dct:description) as a literal."
+    ], [
+        sh:minCount 1 ;
+        sh:path csvw:title ;
+        sh:nodeKind sh:Literal ;
+        sh:message "Each csvw:Column must have at least one title (csvw:title) as a literal."
+    ], [
+        sh:minCount 1 ;
+		sh:maxCount 1 ;
+        sh:path csvw:datatype ;
+        sh:nodeKind sh:Literal ;
+        sh:message "Each csvw:Column must have exactly one datatype (csvw:datatype) as a literal (e.g., 'string', 'integer'). See https://w3c.github.io/csvw/metadata/#datatypes"
+    ], [
+		sh:maxCount 1 ;
+        sh:path csvw:propertyUrl ;
+        sh:nodeKind sh:IRI ;
+        sh:severity sh:Violation ;
+        sh:message "Each csvw:Column may have at most one property URL (csvw:propertyUrl), which must be a valid IRI referencing a semantic property."
+    ] .
+
+# Health Data Access Body Shape (Only for dcat:Dataset hdab, custodian and publisher)
+:HealthAgent_Shape
+    a sh:NodeShape ;
+    sh:extends :Agent_Shape;
+    rdfs:label "Health Agent"@en ;
+    sh:property [
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+		sh:class cv:ContactPoint;
+        sh:path cv:contactPoint;
+        sh:severity sh:Violation ;
+        sh:message "Each Health Agent must have exactly one cv:contactPoint."
+    ] .
+
+# Health Publisher Agent Shape (Only for dcat:Dataset publisher)
+:HealthPublisherAgent_Shape
+    a sh:NodeShape ;
+	#The HealthPublisherAgent_Shape was intended to extend HealthAgent_Shape by adding specific constraints (dct:description and healthdcatap:trustedDataHolder), but due to inconsistent support for multi-level inheritance across SHACL validators, we opted to inherit directly from Agent_Shape and duplicate the dcat:contactPoint constraint.
+	#sh:extends :HealthAgent_Shape ;
+    sh:extends :Agent_Shape ;
+    rdfs:label "Health Publisher Agent"@en ;
+    sh:property [
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+		sh:class cv:ContactPoint;
+        sh:path cv:contactPoint;
+        sh:severity sh:Violation ;
+        sh:description "Each foaf:Agent must have exactly one cv:contactPoint."
+    ] ,	[
+        sh:maxCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:path dct:description ;
+        sh:severity sh:Violation ;
+        sh:description "Each dct:publisher must have at most one dct:description (Publisher Note) as a literal."
+    ] .
+
+:ContactPoint_Shape
+    a sh:NodeShape ;
+    rdfs:comment "Contact Point constraints for hdab, custodian and publisher of Dataset, must have at least one of cv:email or cv:contactPage" ;
+    rdfs:label "Contact Point" ;
+    sh:property [
+        sh:path cv:email ;
+        sh:nodeKind sh:Literal ;
+        sh:severity sh:Violation ;
+        sh:message "cv:email must be a literal value."
+    ], [
+        sh:path cv:contactPage ;
+        sh:nodeKind sh:IRI ;
+        sh:severity sh:Violation ;
+        sh:message "cv:contactPage must be an IRI."
+    ], [
+        sh:path cv:telephone ;
+        sh:nodeKind sh:Literal ;
+        sh:severity sh:Violation ;
+        sh:message "cv:telephone must be a literal value."
+    ], [
+        sh:path cv:openingHours ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:class time:TemporalEntity ;
+        sh:severity sh:Violation ;
+        sh:message "cv:openingHours must be a time:TemporalEntity."
+    ], [
+        sh:path cv:specialOpeningHoursSpecification ;
+        sh:nodeKind sh:BlankNodeOrIRI ;
+        sh:class time:TemporalEntity ;
+        sh:severity sh:Violation ;
+        sh:message "cv:specialOpeningHoursSpecification must be a time:TemporalEntity."
+    ], [
+        sh:path [ sh:alternativePath (cv:email cv:contactPage) ] ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "Provide at least one of cv:email or cv:contactPage." ;
+    ] ;
+    sh:targetClass cv:ContactPoint .
+
+:TemporalEntity_Shape
+    a sh:NodeShape ;
+    rdfs:comment "Temporal Entity constraints for opening hours" ;
+    rdfs:label "Temporal Entity" ;
+    sh:property [
+        sh:minCount 1 ;
+        sh:nodeKind sh:Literal ;
+        sh:path dct:description ;
+        sh:severity sh:Violation ;
+        sh:message "Each time:TemporalEntity must have at least one dct:description as a literal."
+    ], [
+        sh:nodeKind sh:IRI ;
+        sh:path cv:frequency ;
+		sh:class dct:Frequency;
+        sh:severity sh:Violation ;
+        sh:message "cv:frequency must be an IRI referencing a dct:Frequency from the EU frequency vocabulary."
+    ] ;
+    sh:targetClass time:TemporalEntity .
+

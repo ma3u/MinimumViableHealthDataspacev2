@@ -1,6 +1,7 @@
 /** Static-export mock path mapping — keyed by exact endpoint or prefix */
 const STATIC_MOCK_MAP: Record<string, string> = {
   "/api/catalog": "/mock/catalog.json",
+  "/api/catalog/jsonld": "/mock/catalog_jsonld.json",
   "/api/graph": "/mock/graph.json",
   "/api/compliance": "/mock/compliance.json",
   "/api/compliance/tck": "/mock/compliance_tck.json",
@@ -39,6 +40,8 @@ const STATIC_MOCK_MAP: Record<string, string> = {
 
 /** Prefix-based mock paths — matched via startsWith (checked after exact, first match wins) */
 const STATIC_MOCK_PREFIX: [string, string][] = [
+  // HealthDCAT-AP Release 8 JSON-LD of one dataset (#700)
+  ["/api/catalog/jsonld?", "/mock/catalog_jsonld.json"],
   // Persona-specific graph views (checked before default /api/graph)
   ["/api/graph?persona=patient", "/mock/graph_patient.json"],
   ["/api/graph?persona=hospital", "/mock/graph_hospital.json"],

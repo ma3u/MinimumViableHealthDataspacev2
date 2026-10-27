@@ -210,19 +210,15 @@ describe("Neo4j Proxy API", () => {
               switch (key) {
                 case "ds":
                   return {
-                    properties: {
-                      datasetId: "ds-001",
-                      title: "FHIR Cohort Alpha",
-                      description: "Test dataset",
-                      license: "CC-BY-4.0",
-                    },
+                    datasetId: "ds-001",
+                    title: "FHIR Cohort Alpha",
+                    description: "Test dataset",
+                    license: "CC-BY-4.0",
                   };
                 case "distributions":
                   return [];
-                case "pub":
-                  return { properties: { name: "SPE-1" } };
-                case "cp":
-                  return null;
+                case "publisher":
+                  return { name: "SPE-1" };
                 default:
                   return null;
               }
@@ -234,8 +230,10 @@ describe("Neo4j Proxy API", () => {
       const res = await request.get("/catalog/datasets");
 
       expect(res.status).toBe(200);
-      expect(res.body["@context"]).toBeDefined();
-      expect(res.body["dcat:dataset"]).toBeDefined();
+      expect(res.body["@context"].healthdcatap).toBe(
+        "http://healthdataportal.eu/ns/health#",
+      );
+      expect(res.body["dcat:dataset"][0]["dct:identifier"]).toBe("ds-001");
     });
   });
 
