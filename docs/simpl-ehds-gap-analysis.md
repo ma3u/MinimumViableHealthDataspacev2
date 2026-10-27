@@ -1,14 +1,14 @@
-# Simpl-Open and the EHDS: gap analysis
+# Simpl-Open and the European Health Data Space: gap analysis
 
-- **Date:** 2026-10-27. Replaces the version of 2026-04-11.
+- **Status:** Final, as of 27 October 2026
 - **Discussion:** [#701, Simpl-Open vs. this EHDS hub](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/701)
-- **Compares three things:** Simpl-Open as its programme describes it in
-  October 2026; the EHDS as adopted, [Regulation (EU) 2025/327](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng),
-  with the implementing acts of September 2026; and this hub, whose
-  article-by-article status is in
-  [What the integration hub implements of the EHDS Regulation](ehds/regulation-implementation.md).
-- **Article numbers** are the adopted ones throughout; older material may cite
-  the 2022 proposal ([numbering reference](ehds-article-numbering.md)).
+- **Decision:** [ADR-064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md)
+- **Compares:** Simpl-Open as its programme describes it; the European Health
+  Data Space as adopted, [Regulation (EU) 2025/327](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng),
+  with its implementing acts; and this hub, whose article-by-article status is
+  in [What the integration hub implements of the EHDS Regulation](ehds/regulation-implementation.md).
+- **Article numbers** are those of the adopted Regulation ([numbering
+  reference](ehds-article-numbering.md)).
 
 The hub is a demonstrator on synthetic data with fictional organisations. When
 this document says "the hub implements", it means the hub shows the duty end to
@@ -26,26 +26,27 @@ body, holders and a user (Art. 68), regulated fees with category reductions
 (Art. 62), and processing only inside a secure processing environment
 (Art. 73).
 
-The way in is the path Simpl already describes for connectors outside its own
-agent: decentralised claims (DCP) through an IdentityHub, with credentials
-issued by the data space's Governance Authority. The hub speaks DCP 1.0 today.
+The way in is the path Simpl describes for connectors outside its own agent:
+decentralised claims (DCP) through an IdentityHub, with credentials issued by
+the data space's Governance Authority. The hub speaks DCP 1.0, so it can meet
+Simpl-Open there without running a Simpl agent, and keeps the EHDS rules in its
+own health extension ([ADR-064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md)).
 
-The Simpl requirements that touch the EHDS most directly are still at
-"proposed" status and open for comment: DOME onboarding and discovery (BP02F,
-BP02G), AI services in DOME (SA12) and the monetisation model (BP02E).
+The Simpl requirements that touch the EHDS most directly are at "proposed"
+status and open for comment: DOME onboarding and discovery (BP02F, BP02G), AI
+services in DOME (SA12) and the monetisation model (BP02E).
 
-## What changed since April 2026
+## 1. The regulatory baseline
 
-**Simpl-Open.** Release Gdynia 4.0 shipped in July 2026; Hamburg 4.1 and
-Innsbruck 5.0 are targeted for October and Q4 2026 ([development
-status](https://simpl-programme.ec.europa.eu/development/development-status)).
-The EHDS secondary-use data space (EHDS2) is a wave 1 Simpl-Live data space,
-and [integration workshops started in May 2026](https://ec.europa.eu/newsroom/simpl/redirection/item/940026).
-The programme published proposed requirements for DOME Marketplace integration
-and for monetisation, presented in a [Community Preview on 28 October
-2026](https://simpl-programme.ec.europa.eu/event/simpl-open-community-preview).
+The Regulation applies in stages (Art. 105): generally and for the designation
+of access bodies and national contact points from 26 March 2027; Chapter IV,
+secondary use, in full and Chapter II for the first priority categories from
+26 March 2029; further data categories and Chapter III for EHR systems in
+service from 26 March 2031; third-country participation in HealthData@EU from
+26 March 2035.
 
-**The EHDS.** The Commission adopted the first implementing acts:
+The implementing acts adopted so far, and the one in preparation that matters
+most here:
 
 | Act                                                                                                                                             | Fixes                                                                                                                                                     | Applies                   |
 | ----------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
@@ -54,38 +55,25 @@ and for monetisation, presented in a [Community Preview on 28 October
 | [Implementing Regulation (EU) 2026/2083](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=OJ:L_202602083) (Art. 23)                     | MyHealth@EU central services                                                                                                                              | 26 March 2027             |
 | [Draft act on HealthData@EU](https://www.lexisnexis.co.uk/legal/news/commission-consults-on-technical-requirements-for-healthdata-eu) (Art. 75) | Architecture, connection conditions, an enforcement information exchange tool; adoption planned Q4 2026                                                   | 26 March 2029             |
 
-The TEHDAS2 joint action published non-binding guidance the hub follows:
-[how to implement the opt-out](https://tehdas.eu/results/tehdas2-provides-guidance-on-implementing-the-ehds-right-to-opt-out/),
+The TEHDAS2 joint action's non-binding guidance fills in what the acts leave
+open: [how to implement the opt-out](https://tehdas.eu/results/tehdas2-provides-guidance-on-implementing-the-ehds-right-to-opt-out/),
 the [specification for secure processing environments](https://tehdas.eu/results-by-user-group/)
 (D7.4) and the [specification for connecting to
 HealthData@EU](https://tehdas.eu/results/new-specification-supports-member-state-connection-to-healthdataeu/)
 (D7.3).
 
-**The hub.** On 2026-10-27 the hub moved to the adopted text (#694, #699):
+## 2. Simpl-Open
 
-- The Art. 71 opt-out is a dated record and a label that every secondary-use
-  query excludes ([ADR-062](ADRs/ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md)).
-- Dataset descriptions are HealthDCAT-AP Release 8, validated in CI with the
-  official SHACL shapes ([ADR-063](ADRs/ADR-063-healthdcat-ap-release-8-and-its-namespace.md), #700).
-- Adopted article numbers in the steering files, code, seeds and the API
-  collection; audit logs kept at least 12 months (Art. 73(1)(e)).
+### Status
 
-### Corrections to the April version and to ADR-013
-
-| April claim                                                                         | Where                  | What the sources say                                                                                                                                                                                                                                                                                                                                                |
-| ----------------------------------------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Simpl uses DCP for trust and recommends `did:web`                                   | ADR-013                | Inside the Simpl-Open agent, connectors identify each other with x509 certificates issued by the Governance Authority, over mTLS, and need no DCP. DCP through an IdentityHub applies to EDC connectors outside the agent, with credentials issued by the Governance Authority ([Simpl-Open Q&A](https://simpl-programme.ec.europa.eu/landing-page/simpl-open-qa)). |
-| Simpl uses a central X.509 registry, a "DAPS"                                       | this document          | x509 and mTLS are right; DAPS is IDS vocabulary that Simpl does not use. Organisation credentials and DIDs arrive with SSI Tier 2 in Innsbruck ([roadmap](https://simpl-programme.ec.europa.eu/development/development-status/simpl-open-roadmap-items-q4)).                                                                                                        |
-| ODRL is a Simpl requirement the hub meets                                           | ADR-013                | The [architecture specification](https://ssg-website-ad5a79.pages.code.europa.eu/resources/architecture) names no policy language.                                                                                                                                                                                                                                  |
-| DCAT-AP federation is a Simpl requirement the hub meets                             | ADR-013                | Today's catalogue is the XFSC federated catalogue; DCAT-AP is the target metadata model in Innsbruck.                                                                                                                                                                                                                                                               |
-| Simpl publishes no SBOM, no E2E tests, has basic CI, binary roles, no accessibility | this document          | Removed: no source supports them. This analysis compares what Simpl publishes about its architecture and requirements, not its engineering practice.                                                                                                                                                                                                                |
-| "HealthDCAT-AP 2.1"                                                                 | this document, ADR-003 | There is no 2.1. The hub follows the release the implementing act points to, Release 8 (ADR-063, which supersedes ADR-003).                                                                                                                                                                                                                                         |
-| Proposal-era article numbers (SPE "Art. 50", HDAB "Art. 37", permit "Art. 46")      | this document, ADR-013 | Adopted numbers: SPE Art. 73, access body tasks Art. 57, permit Art. 68.                                                                                                                                                                                                                                                                                            |
-
-[ADR-064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md) supersedes ADR-013 with the
-decision that follows from these corrections.
-
-## 1. Simpl-Open in October 2026
+Release Gdynia 4.0 shipped in July 2026; Hamburg 4.1 and Innsbruck 5.0 are
+targeted for October and Q4 2026 ([development
+status](https://simpl-programme.ec.europa.eu/development/development-status)).
+The EHDS secondary-use data space (EHDS2) is a wave 1 Simpl-Live data space,
+and [integration workshops started in May 2026](https://ec.europa.eu/newsroom/simpl/redirection/item/940026).
+Proposed requirements for DOME Marketplace integration and for monetisation
+were presented in a [Community Preview on 28 October
+2026](https://simpl-programme.ec.europa.eu/event/simpl-open-community-preview).
 
 ### Roles and agents
 
@@ -113,8 +101,8 @@ analysed ([Q&A](https://simpl-programme.ec.europa.eu/landing-page/from-vision-to
 - **Tier 2, organisations and agents:** inside the agent, x509 certificates
   issued by the Governance Authority, mTLS, attribute-based access. Outside the
   agent, DCP through an IdentityHub with credentials issued by the Governance
-  Authority. SSI Tier 2 will give "identity attributes as VC and x509
-  credentials as DID" ([Simpl-Open Q&A](https://simpl-programme.ec.europa.eu/landing-page/simpl-open-qa)).
+  Authority. SSI Tier 2 in Innsbruck will give "identity attributes as VC and
+  x509 credentials as DID" ([Simpl-Open Q&A](https://simpl-programme.ec.europa.eu/landing-page/simpl-open-qa)).
 - **EHDS2:** the feasibility study lists Keycloak, EU Login and eIDAS login
   for the central platform ([Simpl-Live feasibility study](https://simpl-programme.ec.europa.eu/system/files/2025-06/Simpl-Live-Feasibility-Study-Report-%28Consolidated%29_Simpl_20250328_V1.2%28A%29.pdf)).
 
@@ -148,9 +136,9 @@ in onboarding.
 - [BP10](https://simpl-programme.ec.europa.eu/book-page/bp10-provider-bills-consumer-based-resource-consumption):
   the provider bills the consumer from a billing schema in the resource
   description; invoicing and payment are outside Simpl-Open.
-- BP14, BP14A, BP14B and SA11 (added 2 September 2026): the Governance
-  Authority bills participants, detects payable events, enforces dunning
-  rules ([requirements changelog](https://simpl-programme.ec.europa.eu/page/requirements-changelog)).
+- BP14, BP14A, BP14B and SA11: the Governance Authority bills participants,
+  detects payable events and enforces dunning rules ([requirements
+  changelog](https://simpl-programme.ec.europa.eu/page/requirements-changelog)).
 
 ### DOME Marketplace integration
 
@@ -182,9 +170,31 @@ plane in March 2025 ([announcement](https://ec.europa.eu/digital-building-blocks
 no results were found. No source names FHIR, OMOP or HealthDCAT-AP support, or
 says that HealthData@EU or a national access body will run on Simpl-Open.
 
-## 2. Layer by layer
+## 3. The hub
 
-| Layer                      | Simpl-Open, October 2026                                                                                      | The hub                                                                                                           | Gap and bridge                                                                                                          |
+The hub plays the roles of the Regulation (data holders, a data user, access
+bodies, a trust centre, persons) on an Eclipse EDC virtual runtime:
+
+- **Exchange:** DSP 2025-1, checked by the DSP technology compatibility kit in
+  `compliance.yml`; DCP v1.0 with an IdentityHub and an IssuerService issuing
+  membership, participant, processing purpose and quality label credentials
+  to `did:web` participants.
+- **Data:** FHIR R4 and OMOP CDM 5.4 in one Neo4j graph with SNOMED CT, LOINC,
+  ICD-10 and RxNorm; two secure processing environments behind a query proxy
+  with a permit gate, an ODRL 2.2 check per query, a k-anonymity floor of 5
+  and a hash-chained audit log kept at least 12 months (Art. 73(1)(e)).
+- **Catalogue:** dataset descriptions in HealthDCAT-AP Release 8, validated in
+  CI with the official SHACL shapes ([ADR-063](ADRs/ADR-063-healthdcat-ap-release-8-and-its-namespace.md)).
+- **Access body procedures:** applications, permits and health data requests
+  (Art. 67–69), fees with category reductions (Art. 62), enforcement (Art. 63),
+  the public register, information page and activity report (Art. 57–59).
+- **Opt-out:** a dated record and a label that every secondary-use query
+  excludes ([ADR-062](ADRs/ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md)).
+- **Persons:** sign-in with the EUDI Wallet over OpenID4VP (ADR-028).
+
+## 4. Layer by layer
+
+| Layer                      | Simpl-Open                                                                                                    | The hub                                                                                                           | Gap and bridge                                                                                                          |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
 | Connector                  | EDC-based, the three DSP parts; version not published                                                         | EDC virtual runtime; DSP 2025-1, checked by the TCK in `compliance.yml`                                           | Confirm Simpl's DSP version; run the TCK against a Simpl agent                                                          |
 | Organisation identity      | Inside the agent: Governance Authority x509, mTLS. Outside: DCP. DIDs and VCs in Innsbruck                    | DCP 1.0, `did:web`, IdentityHub and IssuerService; membership, participant, purpose and quality-label credentials | The outside-agent path: the Governance Authority as a credential issuer the hub's IdentityHub trusts                    |
@@ -199,13 +209,11 @@ says that HealthData@EU or a national access body will run on Simpl-Open.
 | Health semantics           | Not named                                                                                                     | FHIR R4, OMOP CDM 5.4, SNOMED CT, LOINC, ICD-10, RxNorm in one graph                                              | A health extension on top of Simpl                                                                                      |
 | Cross-border secondary use | Federated search across data spaces (Innsbruck); eDelivery proof of concept announced                         | Federated statistics and queries across two SPEs; a second access body                                            | HealthData@EU connects national contact points over dispatchers and eDelivery (TEHDAS2 D7.3), not over DSP              |
 
-## 3. EHDS duties against Simpl and the hub
+## 5. EHDS duties against Simpl and the hub
 
-Dates are those of Art. 105. "Simpl" says what Simpl-Open offers for the duty;
-"generic" means a building block exists but nothing health-specific. The hub
-column summarises
+"Simpl" says what Simpl-Open offers for the duty. The hub column summarises
 [the implementation page](ehds/regulation-implementation.md), which has the
-evidence and the issue for each gap.
+evidence and the tracking issue for each gap.
 
 | Art.  | Duty                                            | Applies                  | Simpl                                              | Hub                                                                                                                                           |
 | ----- | ----------------------------------------------- | ------------------------ | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -230,7 +238,7 @@ evidence and the issue for each gap.
 | 79    | EU dataset catalogue                            | 2029                     | DOME discovery (proposed) is a different catalogue | Federated discovery between participants; nothing published to an EU catalogue                                                                |
 | 81    | Complaint to the access body                    | 2029                     | Not named                                          | Not yet (#697)                                                                                                                                |
 
-## 4. Where the EHDS does not fit Simpl's model
+## 6. Where the EHDS does not fit Simpl's model
 
 1. **One Governance Authority, many access bodies.** Simpl's Governance
    Authority agent is centralised, one per data space. The EHDS has an access
@@ -274,16 +282,16 @@ evidence and the issue for each gap.
    (TEHDAS2 D7.3). A Simpl agent would sit behind a national contact point,
    unless the announced eDelivery proof of concept becomes part of Simpl.
 
-## 5. Identity and trust
+## 7. Identity and trust
 
-The April version argued that decentralised identity should replace x509 in
-Simpl. That is no longer the question: Simpl describes both, x509 inside its
-agent and DCP outside it, and plans DIDs and credentials for organisations in
-Innsbruck. What matters for the EHDS is which issuers are trusted for what:
+Simpl describes two trust models, x509 inside its agent and DCP outside it,
+and plans DIDs and credentials for organisations in Innsbruck. The choice
+between centralised certificates and decentralised identity is therefore not
+the open question for the EHDS; which issuers are trusted for what is:
 
 - **Organisations.** The hub issues membership, participant, processing purpose
-  and quality label credentials over DCP. A Simpl data space would issue its
-  own through the Governance Authority. The bridge is trust configuration: the
+  and quality label credentials over DCP. A Simpl data space issues its own
+  through the Governance Authority. The bridge is trust configuration: the
   hub's IdentityHub accepts the Governance Authority as an issuer, and Simpl's
   outside-agent path accepts the hub's credentials.
 - **People.** The EUDI Wallet is the identity for persons, and 2026/2099 adds
@@ -297,12 +305,20 @@ Innsbruck. What matters for the EHDS is which issuers are trusted for what:
   legislative negotiation. Neither Simpl nor the hub has this today, and it is
   the credential an access body most needs to check.
 
-## 6. Recommendations
+## 8. Decision and recommendations
+
+### The hub's position
+
+[ADR-064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md): the
+hub meets Simpl-Open as an EDC connector outside the Simpl-Open agent, over DSP
+2025-1 and DCP v1.0, with a data space's Governance Authority as a trusted
+issuer in its IdentityHub. Permits, the opt-out filter, fees and the SPE gate
+stay in the hub. "Aligned" is claimed only for a capability with a published
+Simpl source and a check in the hub that exercises it.
 
 ### For the Simpl programme
 
-Comments on the proposed requirements and questions for the Community
-Preview:
+Comments on the proposed requirements and questions for the programme:
 
 1. Publish the EDC and DSP versions of the Simpl-Open connector, with
    conformance evidence from the DSP technology compatibility kit.
@@ -324,21 +340,18 @@ Preview:
 
 ### For the hub
 
-1. Decided in [ADR-064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md): the hub meets Simpl-Open
-   as a connector outside its agent, over DSP and DCP, with the Governance
-   Authority as a trusted issuer; EHDS rules stay in the hub.
-2. When Hamburg 4.1 code is public: trust a Governance Authority as issuer in
+1. When Hamburg 4.1 code is public: trust a Governance Authority as issuer in
    the IdentityHub, and run the DSP TCK against a Simpl agent.
-3. Map HealthDCAT-AP Release 8 onto Simpl's DCAT-AP and XFSC resource
+2. Map HealthDCAT-AP Release 8 onto Simpl's DCAT-AP and XFSC resource
    descriptions.
-4. Express the `fees.ts` schedule as a BP02E monetisation model and record what
+3. Express the `fees.ts` schedule as a BP02E monetisation model and record what
    does not fit.
-5. Contact the EHDS2 Simpl-Live pilot.
-6. The open EHDS items: #696 (opt-out follow-ups), #697 (implementing acts
-   2026 and Chapter IV duties), #698 (Chapter II rights, EU FHIR guides, EUDI
+4. Contact the EHDS2 Simpl-Live pilot.
+5. Close the open EHDS items: #696 (opt-out follow-ups), #697 (implementing
+   acts and Chapter IV duties), #698 (Chapter II rights, EU FHIR guides, EUDI
    health attestations).
 
-## 7. The hub as a health extension on Simpl
+## 9. The hub as a health extension on Simpl
 
 ```
 Simpl-Open (generic)
@@ -368,6 +381,6 @@ The architecture specification on code.europa.eu could not be read directly; a
 [rendered copy (D1.3.4, version 0.1, December 2025)](https://ssg-website-ad5a79.pages.code.europa.eu/resources/architecture)
 was used. Not found anywhere: the EDC and DSP versions of the Simpl connector,
 a named policy language, support for FHIR, OMOP or HealthDCAT-AP, and the
-outcome of the eDelivery proof of concept. Requirement pages marked
-"proposed" may change after the Community Preview. Corrections go to
+outcome of the eDelivery proof of concept. Requirements marked "proposed" may
+change after the Community Preview. Corrections go to
 [#701](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/701).
