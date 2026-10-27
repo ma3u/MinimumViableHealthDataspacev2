@@ -1,0 +1,324 @@
+@prefix csvw: <http://www.w3.org/ns/csvw#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcmitype: <http://purl.org/dc/dcmitype/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix org: <http://www.w3.org/ns/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix qb: <http://purl.org/linked-data/cube#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://data.europa.eu/m8g/BusinessEvent> rdfs:subClassOf <http://data.europa.eu/m8g/Event> .
+
+<http://data.europa.eu/m8g/Constraint> rdfs:subClassOf <http://data.europa.eu/m8g/Requirement> .
+
+<http://data.europa.eu/m8g/Criterion> rdfs:subClassOf <http://data.europa.eu/m8g/Requirement> .
+
+<http://data.europa.eu/m8g/InformationRequirement> rdfs:subClassOf <http://data.europa.eu/m8g/Requirement> .
+
+<http://data.europa.eu/m8g/LifeEvent> rdfs:subClassOf <http://data.europa.eu/m8g/Event> .
+
+<http://data.europa.eu/m8g/PublicOrganisation> rdfs:subClassOf org:Organization .
+
+<http://data.europa.eu/m8g/ServiceConcessionContract> rdfs:subClassOf <http://data.europa.eu/a4g/ontology#ConcessionContract> .
+
+dcterms:AgentClass rdfs:subClassOf rdfs:Class .
+
+dcterms:FileFormat rdfs:subClassOf dcterms:MediaType .
+
+dcterms:Jurisdiction rdfs:subClassOf dcterms:LocationPeriodOrJurisdiction .
+
+dcterms:LicenseDocument rdfs:subClassOf dcterms:RightsStatement .
+
+dcterms:Location rdfs:subClassOf dcterms:LocationPeriodOrJurisdiction .
+
+dcterms:PeriodOfTime rdfs:subClassOf dcterms:LocationPeriodOrJurisdiction .
+
+dcterms:PhysicalMedium rdfs:subClassOf dcterms:MediaType .
+
+dcterms:SizeOrDuration rdfs:subClassOf dcterms:MediaTypeOrExtent .
+
+<http://spdx.org/rdf/terms#ConjunctiveLicenseSet> rdfs:subClassOf <http://spdx.org/rdf/terms#AnyLicenseInfo>,
+        rdfs:Container .
+
+<http://spdx.org/rdf/terms#DisjunctiveLicenseSet> rdfs:subClassOf <http://spdx.org/rdf/terms#AnyLicenseInfo>,
+        rdfs:Container .
+
+<http://spdx.org/rdf/terms#ExtractedLicensingInfo> rdfs:subClassOf <http://spdx.org/rdf/terms#SimpleLicensingInfo> .
+
+<http://spdx.org/rdf/terms#File> rdfs:subClassOf <http://spdx.org/rdf/terms#SpdxItem> .
+
+<http://spdx.org/rdf/terms#ListedLicense> rdfs:subClassOf <http://spdx.org/rdf/terms#License> .
+
+<http://spdx.org/rdf/terms#ListedLicenseException> rdfs:subClassOf <http://spdx.org/rdf/terms#LicenseException> .
+
+<http://spdx.org/rdf/terms#OrLaterOperator> rdfs:subClassOf <http://spdx.org/rdf/terms#AnyLicenseInfo> .
+
+<http://spdx.org/rdf/terms#Package> rdfs:subClassOf <http://spdx.org/rdf/terms#SpdxItem> .
+
+<http://spdx.org/rdf/terms#Snippet> rdfs:subClassOf <http://spdx.org/rdf/terms#SpdxItem> .
+
+<http://spdx.org/rdf/terms#SpdxDocument> rdfs:subClassOf <http://spdx.org/rdf/terms#SpdxElement> .
+
+<http://spdx.org/rdf/terms#WithExceptionOperator> rdfs:subClassOf <http://spdx.org/rdf/terms#AnyLicenseInfo> .
+
+time:DateTimeInterval rdfs:subClassOf time:ProperInterval .
+
+time:DayOfWeek rdfs:subClassOf owl:Thing .
+
+time:Duration rdfs:subClassOf time:TemporalDuration .
+
+time:Instant rdfs:subClassOf time:TemporalEntity .
+
+time:January rdfs:subClassOf time:DateTimeDescription .
+
+time:MonthOfYear rdfs:subClassOf time:DateTimeDescription .
+
+time:TemporalUnit rdfs:subClassOf time:TemporalDuration .
+
+time:TimePosition rdfs:subClassOf time:TemporalPosition .
+
+time:Year rdfs:subClassOf time:DurationDescription .
+
+<http://www.w3.org/2006/vcard/ns#Acquaintance> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Agent> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#BBS> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#TelephoneType> .
+
+<http://www.w3.org/2006/vcard/ns#Car> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#TelephoneType> .
+
+<http://www.w3.org/2006/vcard/ns#Cell> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#TelephoneType> .
+
+<http://www.w3.org/2006/vcard/ns#Child> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Colleague> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Contact> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Coresident> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Coworker> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Crush> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Date> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Dom> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Type> .
+
+<http://www.w3.org/2006/vcard/ns#Emergency> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Fax> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#TelephoneType> .
+
+<http://www.w3.org/2006/vcard/ns#Female> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Gender> .
+
+<http://www.w3.org/2006/vcard/ns#Friend> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Group> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Kind> .
+
+<http://www.w3.org/2006/vcard/ns#Home> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Type> .
+
+<http://www.w3.org/2006/vcard/ns#ISDN> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Type> .
+
+<http://www.w3.org/2006/vcard/ns#Individual> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Kind> .
+
+<http://www.w3.org/2006/vcard/ns#Internet> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Type> .
+
+<http://www.w3.org/2006/vcard/ns#Intl> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Type> .
+
+<http://www.w3.org/2006/vcard/ns#Kin> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Label> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Type> .
+
+<http://www.w3.org/2006/vcard/ns#Location> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Kind> .
+
+<http://www.w3.org/2006/vcard/ns#Male> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Gender> .
+
+<http://www.w3.org/2006/vcard/ns#Me> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Met> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Modem> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#TelephoneType> .
+
+<http://www.w3.org/2006/vcard/ns#Msg> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#TelephoneType> .
+
+<http://www.w3.org/2006/vcard/ns#Muse> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Neighbor> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#None> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Gender> .
+
+<http://www.w3.org/2006/vcard/ns#Organization> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Kind> .
+
+<http://www.w3.org/2006/vcard/ns#Other> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Gender> .
+
+<http://www.w3.org/2006/vcard/ns#PCS> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#TelephoneType> .
+
+<http://www.w3.org/2006/vcard/ns#Pager> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#TelephoneType> .
+
+<http://www.w3.org/2006/vcard/ns#Parcel> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Type> .
+
+<http://www.w3.org/2006/vcard/ns#Parent> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Postal> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Type> .
+
+<http://www.w3.org/2006/vcard/ns#Pref> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Type> .
+
+<http://www.w3.org/2006/vcard/ns#Sibling> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Spouse> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Sweetheart> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#RelatedType> .
+
+<http://www.w3.org/2006/vcard/ns#Text> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#TelephoneType> .
+
+<http://www.w3.org/2006/vcard/ns#TextPhone> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#TelephoneType> .
+
+<http://www.w3.org/2006/vcard/ns#Unknown> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Gender> .
+
+<http://www.w3.org/2006/vcard/ns#Video> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#TelephoneType> .
+
+<http://www.w3.org/2006/vcard/ns#Voice> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#TelephoneType> .
+
+<http://www.w3.org/2006/vcard/ns#Work> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Type> .
+
+<http://www.w3.org/2006/vcard/ns#X400> rdfs:subClassOf <http://www.w3.org/2006/vcard/ns#Type> .
+
+<http://www.w3.org/2009/pointers#ByteOffsetPointer> rdfs:subClassOf <http://www.w3.org/2009/pointers#OffsetPointer> .
+
+<http://www.w3.org/2009/pointers#LineCharPointer> rdfs:subClassOf <http://www.w3.org/2009/pointers#OffsetPointer> .
+
+<http://www.w3.org/2009/pointers#StartEndPointer> rdfs:subClassOf <http://www.w3.org/2009/pointers#CompoundPointer> .
+
+csvw:JSON rdfs:subClassOf xsd:string .
+
+csvw:uriTemplate rdfs:subClassOf xsd:string .
+
+dcat:Catalog rdfs:subClassOf dcat:Dataset .
+
+dcat:DataService rdfs:subClassOf dcmitype:Service,
+        dcat:Resource .
+
+dcat:Role rdfs:subClassOf skos:Concept .
+
+<http://www.w3.org/ns/dqv#Category> rdfs:subClassOf skos:Concept .
+
+<http://www.w3.org/ns/dqv#Dimension> rdfs:subClassOf skos:Concept .
+
+<http://www.w3.org/ns/dqv#QualityCertificate> rdfs:subClassOf <http://www.w3.org/ns/dqv#QualityAnnotation> .
+
+<http://www.w3.org/ns/dqv#QualityMeasurement> rdfs:subClassOf qb:Observation .
+
+<http://www.w3.org/ns/dqv#QualityMeasurementDataset> rdfs:subClassOf qb:DataSet .
+
+<http://www.w3.org/ns/dqv#QualityMetadata> rdfs:subClassOf <http://www.w3.org/2004/03/trix/rdfg-1/Graph> .
+
+<http://www.w3.org/ns/dqv#UserQualityFeedback> rdfs:subClassOf <http://www.w3.org/ns/dqv#QualityAnnotation>,
+        <http://www.w3.org/ns/duv#UserFeedback> .
+
+prov:Association rdfs:subClassOf prov:AgentInfluence .
+
+prov:Attribution rdfs:subClassOf prov:AgentInfluence .
+
+prov:Bundle rdfs:subClassOf prov:Entity .
+
+prov:Communication rdfs:subClassOf prov:ActivityInfluence .
+
+prov:Delegation rdfs:subClassOf prov:AgentInfluence .
+
+prov:EmptyCollection rdfs:subClassOf prov:Collection .
+
+prov:End rdfs:subClassOf prov:EntityInfluence,
+        prov:InstantaneousEvent .
+
+prov:Generation rdfs:subClassOf prov:ActivityInfluence,
+        prov:InstantaneousEvent .
+
+prov:Invalidation rdfs:subClassOf prov:ActivityInfluence,
+        prov:InstantaneousEvent .
+
+prov:Organization rdfs:subClassOf prov:Agent .
+
+prov:Person rdfs:subClassOf prov:Agent .
+
+prov:Plan rdfs:subClassOf prov:Entity .
+
+prov:PrimarySource rdfs:subClassOf prov:Derivation .
+
+prov:Quotation rdfs:subClassOf prov:Derivation .
+
+prov:Revision rdfs:subClassOf prov:Derivation .
+
+prov:SoftwareAgent rdfs:subClassOf prov:Agent .
+
+prov:Start rdfs:subClassOf prov:EntityInfluence,
+        prov:InstantaneousEvent .
+
+prov:Usage rdfs:subClassOf prov:EntityInfluence,
+        prov:InstantaneousEvent .
+
+foaf:Group rdfs:subClassOf foaf:Agent .
+
+foaf:Image rdfs:subClassOf foaf:Document .
+
+foaf:OnlineChatAccount rdfs:subClassOf foaf:OnlineAccount .
+
+foaf:OnlineEcommerceAccount rdfs:subClassOf foaf:OnlineAccount .
+
+foaf:OnlineGamingAccount rdfs:subClassOf foaf:OnlineAccount .
+
+foaf:Organization rdfs:subClassOf foaf:Agent .
+
+foaf:Person rdfs:subClassOf <http://www.w3.org/2003/01/geo/wgs84_pos#SpatialThing>,
+        foaf:Agent .
+
+foaf:PersonalProfileDocument rdfs:subClassOf foaf:Document .
+
+<http://spdx.org/rdf/terms#License> rdfs:subClassOf <http://spdx.org/rdf/terms#SimpleLicensingInfo> .
+
+time:DurationDescription rdfs:subClassOf time:GeneralDurationDescription .
+
+time:GeneralDateTimeDescription rdfs:subClassOf time:TemporalPosition .
+
+time:GeneralDurationDescription rdfs:subClassOf time:TemporalDuration .
+
+time:Interval rdfs:subClassOf time:TemporalEntity .
+
+time:ProperInterval rdfs:subClassOf time:Interval .
+
+<http://www.w3.org/2009/pointers#CompoundPointer> rdfs:subClassOf <http://www.w3.org/2009/pointers#Pointer> .
+
+<http://www.w3.org/2009/pointers#SinglePointer> rdfs:subClassOf <http://www.w3.org/2009/pointers#Pointer> .
+
+dcat:Dataset rdfs:subClassOf dcat:Resource .
+
+prov:Collection rdfs:subClassOf prov:Entity .
+
+dcterms:MediaType rdfs:subClassOf dcterms:MediaTypeOrExtent .
+
+<http://spdx.org/rdf/terms#SimpleLicensingInfo> rdfs:subClassOf <http://spdx.org/rdf/terms#AnyLicenseInfo> .
+
+time:DateTimeDescription rdfs:subClassOf time:GeneralDateTimeDescription .
+
+time:TemporalEntity rdfs:subClassOf owl:Thing .
+
+<http://www.w3.org/2009/pointers#OffsetPointer> rdfs:subClassOf <http://www.w3.org/2009/pointers#SinglePointer> .
+
+<http://www.w3.org/ns/dqv#QualityAnnotation> rdfs:subClassOf <http://www.w3.org/ns/oa#Annotation> .
+
+<http://spdx.org/rdf/terms#SpdxItem> rdfs:subClassOf <http://spdx.org/rdf/terms#SpdxElement> .
+
+prov:ActivityInfluence rdfs:subClassOf prov:Influence .
+
+prov:AgentInfluence rdfs:subClassOf prov:Influence .
+
+prov:Derivation rdfs:subClassOf prov:EntityInfluence .
+
+foaf:OnlineAccount rdfs:subClassOf owl:Thing .
+
+prov:EntityInfluence rdfs:subClassOf prov:Influence .
+
