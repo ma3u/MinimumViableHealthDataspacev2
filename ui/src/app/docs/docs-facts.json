@@ -1170,8 +1170,8 @@
   },
   "toolVersions": {
     "vitest": "5.0.2",
-    "playwright": "1.63.0",
-    "next": "15.5.27",
+    "playwright": "1.64.1",
+    "next": "15.5.28",
     "gitleaks": "8.27.2",
     "trivy": "0.69.3"
   },
