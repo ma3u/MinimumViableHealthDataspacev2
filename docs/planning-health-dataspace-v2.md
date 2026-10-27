@@ -165,7 +165,7 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [025](ADRs/ADR-025-keycloak-custom-domain.md)                                                 | Keycloak Custom Domain (auth.ehds.mabu.red)                                                                          | 2026-05-10 | Accepted          |
 | [026](ADRs/ADR-026-token-efficient-planning-structure.md)                                     | Token-Efficient Planning & ADR Structure                                                                             | 2026-05-17 | Accepted          |
 | [027](ADRs/ADR-027-edc-stack-off-hours-scaledown.md)                                          | EDC Stack in Off-Hours Scale-Down (FinOps)                                                                           | 2026-05-18 | Superseded by 042 |
-| [028](ADRs/ADR-028-patient-qr-login-eudi-wallet.md)                                           | Patient QR Login via EUDI Wallet (OpenID4VP)                                                                         | 2026-06-04 | Accepted          |
+| [028](ADRs/ADR-028-patient-qr-login-eudi-wallet.md)                                           | Patient QR Login via EUDI Wallet (OpenID4VP)                                                                         | 2026-06-04 | Partly superseded |
 | [029](ADRs/ADR-029-dependency-version-pinning.md)                                             | Dependency Version Pinning & Refresh Cadence                                                                         | 2026-07-15 | Accepted          |
 | [030](ADRs/ADR-030-neo4j-2025-lts-migration.md)                                               | Neo4j 5.26 → 2025.x Migration Readiness                                                                              | 2026-07-16 | Accepted          |
 | [031](ADRs/ADR-031-checks-must-assert.md)                                                     | Checks must assert and exit non-zero                                                                                 | 2026-09-09 | Accepted          |
@@ -201,8 +201,9 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [062](ADRs/ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md)                             | The Art. 71 opt-out is a dated record and a label every secondary-use query excludes                                 | 2026-10-27 | Accepted          |
 | [063](ADRs/ADR-063-healthdcat-ap-release-8-and-its-namespace.md)                              | HealthDCAT-AP follows the release Implementing Regulation 2026/2098 points to, today Release 8, in its own namespace | 2026-10-27 | Accepted          |
 | [064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md)                          | The hub meets Simpl-Open as a connector outside its agent, over DSP and DCP                                          | 2026-10-27 | Accepted          |
+| [065](ADRs/ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md)                          | The EUDI Wallet sign-in identifies the person: HAIP, both PID formats, one record per PID                            | 2026-10-27 | Accepted          |
 
-Numbers taken by open work, so a new ADR starts at **065**: 051 (#475). 050
+Numbers taken by open work, so a new ADR starts at **066**: 051 (#475). 050
 (#477), 054 (#520) and 055 (#517) are merged.
 
 ADR-045 to ADR-049 accepted on 2026-10-04.

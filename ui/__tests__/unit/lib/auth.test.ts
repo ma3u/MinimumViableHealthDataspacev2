@@ -64,6 +64,7 @@ describe("lib/auth", () => {
           username: "patient1",
           displayName: "Erika Mustermann",
           roles: ["PATIENT"],
+          assurance: "high",
         },
       });
       const provider = authOptions.providers.find(

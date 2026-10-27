@@ -1,6 +1,6 @@
 # ADR-028 — Patient QR login via the EUDI Wallet (OpenID4VP)
 
-**Status:** Accepted · **Date:** 2026-06-04 · **Relates to:** #22, #72 (EUDI hackathon)
+**Status:** Accepted; decision 4 superseded by [ADR-065](ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md) (2026-10-27) · **Date:** 2026-06-04 · **Relates to:** #22, #72 (EUDI hackathon)
 
 ## Context
 
