@@ -351,10 +351,15 @@ jobs:
       # and services/neo4j-proxy/package.json carry
       # "license": "Apache-2.0" so the self-package passes its own
       # allowlist without needing a version-pinned excludePackages entry.
+      # lightningcss (MPL-2.0) is the build-time CSS compiler; the image ships
+      # .next/standalone, which does not contain it. It shows under --production
+      # only because @unhead/bundler (via Scalar) declares it an optional peer,
+      # which marks the dev install devOptional. Excluded by name, not by
+      # adding MPL-2.0 to the allowlist.
       - name: Check licences (UI)
         working-directory: ./ui
         run: |
-          npx --yes license-checker-rseidelsohn@4.4.2 --production --excludePrivatePackages --onlyAllow "MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0;LGPL-3.0-or-later" --summary
+          npx --yes license-checker-rseidelsohn@4.4.2 --production --excludePrivatePackages --excludePackagesStartingWith "lightningcss" --onlyAllow "MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0;LGPL-3.0-or-later" --summary
 
       - name: Check licences (Neo4j Proxy)
         working-directory: ./services/neo4j-proxy
