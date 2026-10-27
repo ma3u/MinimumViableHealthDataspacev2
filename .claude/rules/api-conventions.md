@@ -141,6 +141,28 @@ parameter such as `persona`:
 A new route that returns Patient fields asks `seesPatientIdentity()` first.
 `bruno/MVHDv2/09 Access control/28` to `/30` assert it against a real server.
 
+### Who is left out of secondary use (#694, ADR-062)
+
+A person may opt out of secondary use at any time (Regulation (EU) 2025/327,
+Art. 71). While an opt-out is open, their Patient, OMOPPerson and person-level
+nodes carry the `OptedOut` label, and every secondary-use query excludes it:
+
+- A UI route that reads person-level data (Patient, the FHIR resources, the
+  OMOP rows) for `DATA_USER`, `HDAB_AUTHORITY` or `TRUST_CENTER_OPERATOR`
+  passes its Cypher through `forRoles(cypher, roles)` or `secondaryUseView()`
+  from `@/lib/opt-out`. `EDC_ADMIN`, `DATA_HOLDER` and `PATIENT` read for care
+  or for themselves and are not narrowed.
+- In the proxy, a route that serves secondary use runs through
+  `secondaryUseSession()` or `runSecondaryUse()` from `src/opt-out.ts`, and a
+  FHIR response drops any node `releasable()` refuses.
+- The only way past the filter is an approved Art. 71(4) exception on the
+  ODRL scope (`art71Exception`), built on the server.
+- The two copies of the rewrite share `services/neo4j-proxy/__tests__/fixtures/opt-out-vectors.json`;
+  a new pattern the rewrite must handle goes there, and both suites run it.
+
+Study participation is a separate GDPR consent (`PatientConsent`, Art.
+9(2)(a), withdrawable under Art. 7(3)); never label it as the EHDS opt-out.
+
 ### Every route needs a session (ADR-044)
 
 Decided 2026-10-02 (#404): every API route needs a session. Middleware skips

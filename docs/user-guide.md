@@ -32,19 +32,37 @@ The platform adapts navigation, graph views, and actions to the signed-in user's
 
 | Username   | Organisation           | Role           | Graph View | EHDS Basis                         |
 | ---------- | ---------------------- | -------------- | ---------- | ---------------------------------- |
-| edcadmin   | Dataspace Operator     | EDC Admin      | edc-admin  | Art. 52 — infrastructure operation |
-| clinicuser | AlphaKlinik Berlin     | Data Holder    | hospital   | Art. 33-34 — data provision        |
-| lmcuser    | Limburg Medical Centre | Data Holder    | hospital   | Art. 33-34 — data provision        |
-| researcher | PharmaCo Research AG   | Researcher     | researcher | Art. 34(1)/45-46 — secondary use   |
-| regulator  | MedReg DE              | HDAB Authority | hdab       | Art. 36-37 — approval body         |
+| edcadmin   | Dataspace Operator     | EDC Admin      | edc-admin  | Art. 75 — infrastructure operation |
+| clinicuser | AlphaKlinik Berlin     | Data Holder    | hospital   | Art. 51, 60 — data provision       |
+| lmcuser    | Limburg Medical Centre | Data Holder    | hospital   | Art. 51, 60 — data provision       |
+| researcher | PharmaCo Research AG   | Researcher     | researcher | Art. 53, 67-68 — secondary use     |
+| regulator  | MedReg DE              | HDAB Authority | hdab       | Art. 55, 57 — approval body        |
 
 ### Why These Roles? (EHDS Regulation)
 
-- **Data Holder** (Art. 33-34): Hospitals and clinics that generate and hold health data. Required to make data available for secondary use.
-- **Researcher / Data User** (Art. 34(1), 45-46): Research organisations requesting access to health data for studies.
-- **HDAB Authority** (Art. 36-37): Health Data Access Body — national authority approving data access applications.
-- **EDC Admin** (Art. 52): Dataspace operator managing infrastructure, participants, and credentials.
-- **Trust Center** (Art. 50(1)(e)): Manages pseudonymisation and re-identification protection.
+- **Data Holder** (Art. 51, 60): Hospitals and clinics that generate and hold health data. Required to make data available for secondary use.
+- **Researcher / Data User** (Art. 53, 61, 67-68): Research organisations requesting access to health data for studies.
+- **HDAB Authority** (Art. 55, 57): Health Data Access Body — national authority approving data access applications.
+- **EDC Admin** (Art. 75, HealthData@EU): Dataspace operator managing infrastructure, participants, and credentials.
+- **Trust Center** (Art. 66, 73): Manages pseudonymisation and re-identification protection.
+
+Article numbers follow the adopted Regulation (EU) 2025/327; the mapping from
+the 2022 proposal is in [ehds-article-numbering.md](ehds-article-numbering.md),
+and what the hub implements of each article is in
+[the EHDS implementation page](ehds/regulation-implementation.md).
+
+### Patients: opting out of secondary use (Art. 71)
+
+Under the EHDS, a person's health data may be used for research, innovation,
+policy and statistics, but only under a permit from a health data access body,
+pseudonymised, inside a secure processing environment. A patient can opt out
+of that at any time, without giving a reason, and opt back in: on
+**/patient/research**, the panel _Secondary use of your health data_. From that
+moment every new research query leaves the person out (the researcher's
+counts drop by one); the opt-out and its reversal are kept with their dates.
+Joining a single study below that panel is a separate choice, a consent under
+GDPR Art. 9(2)(a) that can be withdrawn at any time. How it works:
+[ADR-062](ADRs/ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md).
 
 ### Graph Explorer — Persona Views
 
@@ -62,24 +80,24 @@ After authenticating through Keycloak SSO, you land on a graph view personalised
 
 ### Features
 
-| Feature                | Route             | Description                                      | JAD Required? |
-| ---------------------- | ----------------- | ------------------------------------------------ | ------------- |
-| Home Dashboard         | /                 | Participant overview, statistics, quick actions  | No            |
-| Graph Explorer         | /graph            | 5-layer force-directed knowledge graph           | No            |
-| Dataset Catalog        | /catalog          | HealthDCAT-AP metadata browser (EHDS Art. 8)     | No            |
-| Patient Journey        | /patient          | FHIR R4 clinical timeline with OMOP mapping      | No            |
-| OMOP Analytics         | /analytics        | Cohort analytics dashboards                      | No            |
-| EEHRxF Profiles        | /eehrxf           | European EHR Exchange Format alignment           | No            |
-| NL / Federated Query   | /query            | Natural language graph queries                   | Yes           |
-| EHDS Approval          | /compliance       | HDAB permit workflow (Art. 45-49)                | Yes           |
-| Protocol TCK           | /compliance/tck   | DSP 2025-1 validation suite                      | Yes           |
-| Verifiable Credentials | /credentials      | DCP v1.0 credential management                   | No            |
-| Share Data             | /data/share       | Publish datasets with ODRL policies (Art. 33-34) | Yes           |
-| Discover               | /data/discover    | Federated catalog search                         | Yes           |
-| Negotiate              | /negotiate        | DSP contract negotiation lifecycle               | Yes           |
-| Tasks                  | /tasks            | Transfer task queue                              | Yes           |
-| Transfer               | /data/transfer    | Transfer history with audit trail                | Yes           |
-| Admin Dashboard        | /admin            | Operator overview                                | Yes           |
-| EDC Components         | /admin/components | EDC-V runtime component status                   | Yes           |
-| Participant Onboarding | /onboarding       | DID registration wizard                          | Yes           |
-| Participant Settings   | /settings         | Profile and credential management                | Yes           |
+| Feature                | Route             | Description                                       | JAD Required? |
+| ---------------------- | ----------------- | ------------------------------------------------- | ------------- |
+| Home Dashboard         | /                 | Participant overview, statistics, quick actions   | No            |
+| Graph Explorer         | /graph            | 5-layer force-directed knowledge graph            | No            |
+| Dataset Catalog        | /catalog          | HealthDCAT-AP metadata browser (EHDS Art. 77)     | No            |
+| Patient Journey        | /patient          | FHIR R4 clinical timeline with OMOP mapping       | No            |
+| OMOP Analytics         | /analytics        | Cohort analytics dashboards                       | No            |
+| EEHRxF Profiles        | /eehrxf           | European EHR Exchange Format alignment            | No            |
+| NL / Federated Query   | /query            | Natural language graph queries                    | Yes           |
+| EHDS Approval          | /compliance       | HDAB permit workflow (Art. 67-69)                 | Yes           |
+| Protocol TCK           | /compliance/tck   | DSP 2025-1 validation suite                       | Yes           |
+| Verifiable Credentials | /credentials      | DCP v1.0 credential management                    | No            |
+| Share Data             | /data/share       | Publish datasets with ODRL policies (Art. 51, 60) | Yes           |
+| Discover               | /data/discover    | Federated catalog search                          | Yes           |
+| Negotiate              | /negotiate        | DSP contract negotiation lifecycle                | Yes           |
+| Tasks                  | /tasks            | Transfer task queue                               | Yes           |
+| Transfer               | /data/transfer    | Transfer history with audit trail                 | Yes           |
+| Admin Dashboard        | /admin            | Operator overview                                 | Yes           |
+| EDC Components         | /admin/components | EDC-V runtime component status                    | Yes           |
+| Participant Onboarding | /onboarding       | DID registration wizard                           | Yes           |
+| Participant Settings   | /settings         | Profile and credential management                 | Yes           |

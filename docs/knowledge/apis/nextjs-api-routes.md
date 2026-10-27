@@ -16,3 +16,8 @@ Auth: `getServerSession(authOptions)` + role check from
 Neo4j via parameterised `runQuery()` only. Every route has a mock twin:
 [mock-fixtures](mock-fixtures.md). Full role table:
 `.claude/rules/api-conventions.md`.
+
+A route that reads person-level data for secondary use passes its Cypher
+through `forRoles()` or `secondaryUseView()` from `@/lib/opt-out`, so persons
+who opted out (Art. 71) are left out:
+[secondary-use-opt-out](../datamodels/secondary-use-opt-out.md).

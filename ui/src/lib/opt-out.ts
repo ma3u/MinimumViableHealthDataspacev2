@@ -21,7 +21,7 @@
  */
 
 /** The marker label secondary-use queries exclude. */
-export const OPTED_OUT_LABEL = "OptedOut";
+const OPTED_OUT_LABEL = "OptedOut";
 
 /** Labels that hold data about one person: FHIR R4 resources and OMOP CDM rows. */
 export const PERSON_LABELS: readonly string[] = [
@@ -135,7 +135,7 @@ export function secondaryUseView(cypher: string): string {
 }
 
 /** The roles whose reads of person-level data are secondary use. */
-export const SECONDARY_USE_ROLES: readonly string[] = [
+const SECONDARY_USE_ROLES: readonly string[] = [
   "DATA_USER",
   "HDAB_AUTHORITY",
   "TRUST_CENTER_OPERATOR",

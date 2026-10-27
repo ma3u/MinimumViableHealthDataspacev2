@@ -754,7 +754,7 @@ function CatalogContent() {
                   EHDS DCAT-AP Editor
                 </a>
                 <a
-                  href="https://healthdataeu.pages.code.europa.eu/healthdcat-ap/releases/release-6/index.html"
+                  href="https://data.health.europa.eu/healthdcat-ap/releases/latest/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-xs text-(--text-secondary) hover:text-(--accent) hover:underline font-medium"

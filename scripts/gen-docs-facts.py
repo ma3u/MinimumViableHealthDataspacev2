@@ -94,6 +94,15 @@ PAGES = {
         "sources": ["ui/src/app/docs/klarbefund/page.tsx", "ui/src/content/published-docs.json"],
         "facts": [],
     },
+    "/docs/ehds": {
+        "sources": ["ui/src/app/docs/ehds/page.tsx", "ui/src/content/published-docs.json"],
+        "facts": [],
+    },
+    "/docs/ehds/[slug]": {
+        "sources": ["ui/src/app/docs/ehds/[slug]/page.tsx", "ui/src/components/docs/PublishedDoc.tsx",
+                    "ui/src/content/published-docs.json"],
+        "facts": [],
+    },
     "/docs/operations": {
         "sources": ["ui/src/app/docs/operations/page.tsx", "ui/src/content/published-docs.json"],
         "facts": [],

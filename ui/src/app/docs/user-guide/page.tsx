@@ -1055,12 +1055,15 @@ export default function UserGuidePage() {
             icon={TestTube}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Research programmes the patient can join or leave, and the history
-              of every consent given or withdrawn.
+              The opt-out from all secondary use (EHDS Art. 71), at any time and
+              reversible, and, separately, the research programmes the patient
+              can join or leave, with the history of every consent given or
+              withdrawn (GDPR Art. 7(3)).
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A patient withdraws consent from a study and sees the
-              withdrawal recorded in the consent history.
+              Example: A patient opts out of secondary use; from then on every
+              new research query leaves them out, and the opt-out is kept with
+              its date until they opt back in.
             </p>
           </FeatureCard>
           <FeatureCard

@@ -7,6 +7,7 @@ import {
   Smartphone,
   Activity,
   ArrowRight,
+  Scale,
 } from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 
@@ -45,6 +46,13 @@ const sections = [
     label: "Klarbefund",
     desc: "The iPhone app that turns a paper lab report into checkable values: the user guide and the developer guide, screen by screen with screenshots.",
     color: "border-layer5 hover:bg-layer5/10",
+  },
+  {
+    href: "/docs/ehds",
+    icon: Scale,
+    label: "EHDS Regulation",
+    desc: "What the hub implements of Regulation (EU) 2025/327, article by article, with the page, the code and the test for each, the gaps with their issues, and the proposal-to-adopted numbering.",
+    color: "border-layer2 hover:bg-layer2/10",
   },
   {
     href: "/docs/operations",
