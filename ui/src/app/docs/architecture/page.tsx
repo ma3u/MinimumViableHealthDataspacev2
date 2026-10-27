@@ -624,12 +624,12 @@ export default function ArchitecturePage() {
               SIMPL-Open Gap Analysis &rarr;
             </a>
             <a
-              href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-013-simpl-open-alignment.md"
+              href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-(--accent) hover:underline inline-flex items-center gap-1"
             >
-              ADR-013: SIMPL Alignment &rarr;
+              ADR-064: Simpl-Open interoperability &rarr;
             </a>
             <Link
               href="/docs/developer/quality-gates"

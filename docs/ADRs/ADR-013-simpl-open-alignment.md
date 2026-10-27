@@ -1,6 +1,6 @@
 # ADR-013: SIMPL-Open EU Programme Alignment
 
-**Status:** Accepted
+**Status:** Superseded by [ADR-064](ADR-064-simpl-open-through-the-outside-agent-dcp-path.md) (2026-10-27)
 **Date:** 2026-04-05
 
 ## Context
