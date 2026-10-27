@@ -10,7 +10,7 @@ info:
     - **DCP v1.0** — Verifiable Credential attestation
     - **FHIR R4** — clinical data exchange
     - **OMOP CDM v5.4** — observational analytics
-    - **HealthDCAT-AP 2.1** — dataset catalogue metadata
+    - **HealthDCAT-AP Release 8** — dataset catalogue metadata (ADR-063)
     - **GDPR Art. 15–22** — patient data rights
     - **ODRL 2.2** — policy expressions
 
@@ -76,6 +76,26 @@ components:
         connected phone.
 
   schemas:
+    OptOutState:
+      type: object
+      required: [patientId, optedOut, since, history, article]
+      properties:
+        patientId: { type: string }
+        optedOut: { type: boolean }
+        since: { type: [string, "null"] }
+        history:
+          type: array
+          items:
+            type: object
+            required: [optOutId, optedOutAt]
+            properties:
+              optOutId: { type: string }
+              optedOutAt: { type: string }
+              source: { type: [string, "null"] }
+              reversedAt: { type: [string, "null"] }
+              reversalSource: { type: [string, "null"] }
+        article: { type: string }
+        message: { type: string }
     AppConnection:
       type: object
       required: [deviceId, deviceName, username, connectedAt]
@@ -678,6 +698,73 @@ paths:
           schema: { type: string }
       responses:
         "204": { description: Consent revoked }
+
+  /api/patient/opt-out:
+    get:
+      tags: [Patient]
+      summary: My opt-out from secondary use (EHDS Art. 71)
+      description: >
+        Whether the person is opted out, since when, and every earlier opt-out
+        and its reversal (ADR-062). A PATIENT reads their own record without
+        naming it; EDC_ADMIN names it with patientId.
+      parameters:
+        - name: patientId
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: The opt-out state and its history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OptOutState"
+        "400": { description: No record named and none on the session }
+        "403": { description: Another person's record }
+    post:
+      tags: [Patient]
+      summary: Opt out of secondary use (EHDS Art. 71)
+      description: >
+        At once and without a reason; idempotent. Every new secondary-use
+        extraction leaves the person out; what a permit received before is not
+        recalled.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                patientId: { type: string }
+                source: { type: string, default: patient-portal }
+      responses:
+        "200":
+          description: Opted out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OptOutState"
+        "404": { description: No record with this id }
+    delete:
+      tags: [Patient]
+      summary: Reverse the opt-out
+      parameters:
+        - name: patientId
+          in: query
+          required: false
+          schema: { type: string }
+        - name: source
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Opted back in; the earlier opt-out stays on record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OptOutState"
+        "404": { description: There is no open opt-out to reverse }
 
   /api/app-accounts/challenge:
     post:

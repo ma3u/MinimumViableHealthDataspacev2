@@ -36,10 +36,16 @@ export const COMPONENT_INFO: Record<string, ComponentMeta> = {
     dependsOn: ["Control Plane", "Vault", "Neo4j Proxy"],
     healthSource: "Docker healthcheck (/api/check/health)",
   },
+  // DCP v1.0 is what the stack speaks: the JAD images are built on EDC
+  // 0.18.0-SNAPSHOT, whose IdentityHub uses the
+  // https://w3id.org/dspace-dcp/v1.0/ namespace and the
+  // org.eclipse.dspace.dcp.vc.type scopes. The "dcp-2025-1" in
+  // jad/seed-jad.sh and scripts/azure/05-cfm-seed.sh is only the tag CFM
+  // stores in a dataspace profile's protocolStack; nothing negotiates on it.
   "Identity Hub": {
     description:
       "DCP v1.0 credential storage and presentation service. Stores W3C Verifiable Credentials. Creates Verifiable Presentations for DSP protocol handshake authentication.",
-    protocol: "DCP v1.0 (Credential Protocol)",
+    protocol: "DCP v1.0 (Decentralized Claims Protocol)",
     ports: "11005 → 7081 (HTTP)",
     dependsOn: ["PostgreSQL", "Vault"],
     healthSource: "Docker healthcheck (/api/check/health)",

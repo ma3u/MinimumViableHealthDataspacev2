@@ -769,6 +769,49 @@ write_report() {
 }
 
 # ---------------------------------------------------------------------------
+# Category 6: Art. 71 opt-out from secondary use (ADR-062)
+# ---------------------------------------------------------------------------
+# The OptedOut label is the filter every secondary-use query excludes; the
+# OptOutRecord is the dated register behind it. They must agree, or a person
+# who opted out is in a researcher's answer (label missing) or a person who
+# did not is left out (label without a record).
+optout_check() {
+  local test_id="$1" what="$2" cypher="$3" resp count
+  resp=$(neo4j_query "$cypher") || resp=""
+  if [ -z "$resp" ]; then
+    skip "$test_id: cannot query the graph"
+    record_result "$test_id" "opt-out" "skipped"
+    return
+  fi
+  count=$(echo "$resp" | jq '.results[0].data[0].row[0] // 0' 2>/dev/null) || count=0
+  if [ "$count" -eq 0 ]; then
+    pass "$test_id: $what"
+    record_result "$test_id" "opt-out" "passed" "$what"
+  else
+    fail "$test_id: $count node(s) break it: $what"
+    record_result "$test_id" "opt-out" "failed" "$count: $what"
+  fi
+}
+
+run_optout_tests() {
+  log "Category 6: Art. 71 opt-out from secondary use"
+
+  local open
+  open=$(neo4j_query "MATCH (o:OptOutRecord) WHERE o.reversedAt IS NULL RETURN count(DISTINCT o.patientId)" |
+    jq '.results[0].data[0].row[0] // 0' 2>/dev/null) || open=0
+  log "  ${open} person(s) opted out today"
+
+  optout_check "OPTOUT-6.1" "every marked patient has an open opt-out record" \
+    "MATCH (p:Patient:OptedOut) WHERE NOT EXISTS { MATCH (p)-[:OPTED_OUT]->(o:OptOutRecord) WHERE o.reversedAt IS NULL } RETURN count(p)"
+  optout_check "OPTOUT-6.2" "every open opt-out record has its patient marked" \
+    "MATCH (p:Patient)-[:OPTED_OUT]->(o:OptOutRecord) WHERE o.reversedAt IS NULL AND NOT p:OptedOut RETURN count(DISTINCT p)"
+  optout_check "OPTOUT-6.3" "every marked node belongs to a person who opted out" \
+    "MATCH (n:OptedOut) WHERE NOT n:Patient AND NOT EXISTS { MATCH (p:Patient:OptedOut)-[*1..3]->(n) } RETURN count(n)"
+  optout_check "OPTOUT-6.4" "an opted-out person's OMOP record is marked too" \
+    "MATCH (p:Patient:OptedOut)-[:MAPPED_TO]->(op:OMOPPerson) WHERE NOT op:OptedOut RETURN count(op)"
+}
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 main() {
@@ -790,6 +833,8 @@ main() {
   run_omop_tests
   echo ""
   run_graph_integrity_tests
+  echo ""
+  run_optout_tests
 
   echo ""
   echo "═══════════════════════════════════════════════════════════════"

@@ -112,12 +112,23 @@ CREATE INDEX vpa_type IF NOT EXISTS FOR (v:VPA) ON (v.vpaType);
 
 // ============================================================
 // Phase 20: Patient Portal — GDPR Art. 15-22 / EHDS Chapter II
-// Patient consent for research (EHDS Art. 10), insights
+// Consent to join a study (GDPR Art. 9(2)(a), withdrawable Art. 7(3)), insights
 // ============================================================
 CREATE CONSTRAINT patient_consent_id IF NOT EXISTS FOR (pc:PatientConsent) REQUIRE pc.consentId IS UNIQUE;
 CREATE INDEX patient_consent_patient IF NOT EXISTS FOR (pc:PatientConsent) ON (pc.patientId);
 CREATE INDEX patient_consent_study IF NOT EXISTS FOR (pc:PatientConsent) ON (pc.studyId);
 CREATE INDEX patient_consent_revoked IF NOT EXISTS FOR (pc:PatientConsent) ON (pc.revoked);
+
+// Opt-out from secondary use, EHDS Art. 71 (ADR-062). One OptOutRecord per
+// opt-out, (:Patient)-[:OPTED_OUT]->(:OptOutRecord {optOutId, patientId,
+// optedOutAt, source, reversedAt, reversalSource}), never deleted, so the
+// state on any date can be reconstructed. While one is open, the person's
+// Patient, OMOPPerson and person-level nodes carry the OptedOut label, which
+// every secondary-use query excludes (ui/src/lib/opt-out.ts,
+// services/neo4j-proxy/src/opt-out.ts).
+CREATE CONSTRAINT opt_out_record_id IF NOT EXISTS FOR (o:OptOutRecord) REQUIRE o.optOutId IS UNIQUE;
+CREATE INDEX opt_out_record_patient IF NOT EXISTS FOR (o:OptOutRecord) ON (o.patientId);
+CREATE INDEX opt_out_record_open IF NOT EXISTS FOR (o:OptOutRecord) ON (o.reversedAt);
 
 CREATE CONSTRAINT research_insight_id IF NOT EXISTS FOR (ri:ResearchInsight) REQUIRE ri.insightId IS UNIQUE;
 CREATE INDEX research_insight_study IF NOT EXISTS FOR (ri:ResearchInsight) ON (ri.studyId);
@@ -136,7 +147,8 @@ CREATE INDEX transfer_event_month IF NOT EXISTS FOR (te:TransferEvent) ON (te.ti
 
 // ============================================================
 // Phase 18: Trust Center & Federated Pseudonym Resolution
-// EHDS Art. 50 (Secure Processing Environment) + Art. 51 (Cross-Border)
+// EHDS Art. 66 (pseudonymisation), Art. 73 (secure processing environment),
+// Art. 75 (HealthData@EU, cross-border); adopted numbers, Reg. (EU) 2025/327
 // ============================================================
 
 // Trust Center nodes — operated by national HDAB-designated authorities
@@ -184,7 +196,7 @@ CREATE INDEX transfer_event_permit IF NOT EXISTS FOR (te:TransferEvent) ON (te.p
 // ODRL Policy — runtime-enforced access control policies
 CREATE CONSTRAINT odrl_policy_id IF NOT EXISTS FOR (pol:OdrlPolicy) REQUIRE pol.policyId IS UNIQUE;
 
-// Query Audit Events — EHDS Art. 53 compliance logging. Superseded for new
+// Query Audit Events, EHDS Art. 73(1)(e) logging. Superseded for new
 // records by the hash-chained AuditEvent below (#418); kept for history.
 CREATE CONSTRAINT query_audit_event_id IF NOT EXISTS FOR (qa:QueryAuditEvent) REQUIRE qa.eventId IS UNIQUE;
 

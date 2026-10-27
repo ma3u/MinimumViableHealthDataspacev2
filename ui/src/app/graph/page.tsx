@@ -122,13 +122,13 @@ const ROLE_LEGEND: Array<{
     label: "Access Decision",
     color: NODE_ROLE_COLORS.HDABApproval,
     description: "Approval to use health data",
-    tooltip: "EHDS Art. 46 — HDAB access decision",
+    tooltip: "EHDS Art. 68: data permit, the access body's decision",
   },
   {
     label: "Secure Processing",
     color: NODE_ROLE_COLORS.SPESession,
     description: "Active data processing session",
-    tooltip: "EHDS Art. 50 — Secure Processing Environment",
+    tooltip: "EHDS Art. 73: Secure Processing Environment",
   },
   {
     label: "My Consent",

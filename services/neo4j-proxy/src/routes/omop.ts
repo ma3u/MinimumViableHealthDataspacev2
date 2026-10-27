@@ -3,6 +3,7 @@ import neo4j from "neo4j-driver";
 import { getSession } from "../db.js";
 import { app, heavyLimiter } from "../app.js";
 import { auditContext, logTransferEvent } from "../audit.js";
+import { secondaryUseSession } from "../opt-out.js";
 
 // ---- OMOP Endpoints --------------------------------------------------------
 
@@ -15,7 +16,8 @@ app.post(
   "/omop/cohort",
   heavyLimiter,
   async (req: Request, res: Response, next: NextFunction) => {
-    const session = getSession();
+    // Art. 71 (ADR-062): the data plane serves research; persons who opted out are left out.
+    const session = secondaryUseSession(getSession());
     try {
       const { concept, groupBy = "concept", limit = 50 } = req.body ?? {};
       const params: Record<string, any> = {
@@ -89,7 +91,8 @@ app.post(
 app.get(
   "/omop/person/:id/timeline",
   async (req: Request, res: Response, next: NextFunction) => {
-    const session = getSession();
+    // Art. 71 (ADR-062): the data plane serves research; persons who opted out are left out.
+    const session = secondaryUseSession(getSession());
     try {
       const personId = req.params.id;
 

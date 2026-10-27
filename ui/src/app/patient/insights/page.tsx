@@ -86,7 +86,7 @@ export default function ResearchInsightsPage() {
           />
           <div className="text-xs text-violet-800 dark:text-violet-300">
             {insights?.privacyNote ??
-              "All findings are aggregate results (k ≥ 5). Your individual data is never shared with researchers — only pseudonymised summaries reach the Secure Processing Environment (EHDS Art. 50)."}
+              "All findings are aggregate results (k ≥ 5). Your individual data is never shared with researchers — only pseudonymised summaries reach the Secure Processing Environment (EHDS Art. 73)."}
           </div>
         </div>
 

@@ -49,23 +49,23 @@ B = "{{baseUrl}}"
 # ===========================================================================
 f = folder("00 Public", "Anyone, without signing in",
 """What Regulation (EU) 2025/327 requires an access body to publish, and what the
-platform exposes before any login: the Art. 56 information duty, the Art. 73
-registers of permits and results, and the yearly activity report. A partner can
-send every request in this folder before an account exists.""")
+platform exposes before any login: the Art. 58 information duty, the Art. 57(1)(j)
+registers of permits and results (Art. 61(4)), and the Art. 59 activity report. A
+partner can send every request in this folder before an account exists.""")
 req(f, "01 Is the hub up", "get", f"{B}/api/health", persona="anon",
     asserts=["res.status: eq 200", "res.body: isJson"],
     docs="Liveness of the integration hub. No session needed.")
-req(f, "02 Public information (Art. 56)", "get", f"{B}/api/information", persona="anon", mock=True,
+req(f, "02 Public information (Art. 58)", "get", f"{B}/api/information", persona="anon", mock=True,
     asserts=["res.status: eq 200", "res.body.article: isDefined", "res.body.bodies: isArray",
              "res.body.access: isArray", "res.body.optOut: isDefined", "res.body.fees: isDefined"],
     docs="Access bodies, access conditions, results, the Art. 71(2) opt-out, retention and fees.")
-req(f, "03 Register of data permits (Art. 73)", "get", f"{B}/api/permits", persona="anon", mock=True,
+req(f, "03 Register of data permits (Art. 57(1)(j))", "get", f"{B}/api/permits", persona="anon", mock=True,
     asserts=["res.status: eq 200", "res.body.entries: isArray", "res.body.articles: isDefined"],
     docs="Every permit the access body issued, with its purpose, its dataset and its conditions.")
-req(f, "04 Register of results (Art. 70)", "get", f"{B}/api/compliance/results", persona="anon", mock=True,
+req(f, "04 Register of results (Art. 61(4))", "get", f"{B}/api/compliance/results", persona="anon", mock=True,
     asserts=["res.status: eq 200", "res.body.results: isArray"],
     docs="What data users published from the data they were permitted.")
-req(f, "05 Activity report (Art. 73)", "get", f"{B}/api/activity-report", persona="anon", mock=True,
+req(f, "05 Activity report (Art. 59)", "get", f"{B}/api/activity-report", persona="anon", mock=True,
     asserts=["res.status: eq 200", "res.body.article: isDefined", "res.body.accessBodies: isArray",
              "res.body.items: isDefined"])
 req(f, "06 Where to sign in", "get", f"{B}/api/keycloak-config", persona="anon",
@@ -76,9 +76,10 @@ req(f, "06 Where to sign in", "get", f"{B}/api/keycloak-config", persona="anon",
 f = folder("01 Patient", "A patient: Maria Garcia (PATIENT)",
 """Chapter II, primary use. What a natural person may see and decide about their own
 electronic health data: the record itself (Art. 3), a copy in an interoperable format,
-insights drawn from it, and control over whether it is used for research (Art. 10 consent,
-GDPR Art. 7(3) withdrawal). The consent granted here is withdrawn two requests later, so
-the folder leaves no state behind.""")
+insights drawn from it, and control over whether it is used for research (a consent per
+programme, withdrawn under GDPR Art. 7(3); the Art. 71 opt-out from secondary use is
+tracked in #694). The consent granted here is withdrawn two requests later, so the
+folder leaves no state behind.""")
 req(f, "01 My record (Art. 3)", "get", f"{B}/api/patient/profile?patientId={{{{patientId}}}}", persona="patient",
     asserts=["res.status: eq 200", "res.body.patient: isDefined", "res.body.conditions: isArray",
              "res.body.medications: isArray", "res.body.gdprRights: isDefined"],
@@ -106,7 +107,7 @@ test("captures a programme I could consent to", function () {
 });
 """,
     docs="The study id comes from this list, not from the environment: a consent for an id no programme carries is silently not written (see request 11).")
-req(f, "06 I consent to one programme (Art. 10)", "post", f"{B}/api/patient/research", persona="patient",
+req(f, "06 I consent to one programme", "post", f"{B}/api/patient/research", persona="patient",
     body={"patientId": "{{patientId}}", "studyId": "{{studyId}}", "purpose": "RESEARCH"},
     asserts=["res.status: eq 200", "res.body.patientId: eq {{patientId}}", "res.body.studyId: eq {{studyId}}",
              "res.body.grantedAt: isDefined"])
@@ -144,12 +145,12 @@ test("a consent for an unknown programme is refused, not silently dropped", func
 # ===========================================================================
 f = folder("02 Data Holder", "A hospital: AlphaKlinik Berlin (DATA_HOLDER)",
 """Chapter IV duties of a health data holder: describe the datasets you hold so an access
-body and a data user can find them (Art. 55, HealthDCAT-AP), keep the technical asset and
+body and a data user can find them (Art. 77, HealthDCAT-AP), keep the technical asset and
 its ODRL policy behind each description, and see the exchanges your connector took part in.
 The dataset published here is withdrawn two requests later.""")
 req(f, "01 My organisation", "get", f"{B}/api/participants/me", persona="clinic", mock=True,
     asserts=["res.status: eq 200", "res.body: isArray"])
-req(f, "02 The catalogue I publish (Art. 55)", "get", f"{B}/api/catalog", persona="clinic", mock=True,
+req(f, "02 The catalogue I publish (Art. 77)", "get", f"{B}/api/catalog", persona="clinic", mock=True,
     asserts=["res.status: eq 200", "res.body: isArray", "res.body[0].id: isDefined", "res.body[0].title: isDefined"],
     docs="HealthDCAT-AP dataset descriptions. This is what a data user discovers.")
 req(f, "03 I describe a new dataset", "post", f"{B}/api/catalog", persona="clinic",
@@ -265,7 +266,7 @@ f = folder("03 Data User", "A research organisation: PharmaCo Research AG (DATA_
 the datasets, read what they contain and under what conditions, see what this organisation
 is permitted to do today, and work in the analytics the permit allows. Applying for a permit
 is the cross-persona journey in folder 07.""")
-req(f, "01 Discover the catalogue (Art. 55)", "get", f"{B}/api/catalog", persona="researcher", mock=True,
+req(f, "01 Discover the catalogue (Art. 77)", "get", f"{B}/api/catalog", persona="researcher", mock=True,
     asserts=["res.status: eq 200", "res.body: isArray", "res.body[0].id: isDefined"],
     tests="""
 test("captures a dataset to work with", function () {
@@ -621,8 +622,8 @@ supervision cycle to the graph.
   data user   -> an application carrying the eleven Art. 67(2) items
   data user   -> declares it complete, the three-month clock starts (Art. 68(4))
   access body -> extends the clock, then issues the permit (Art. 68)
-  anyone      -> the permit appears in the Art. 73 register
-  data user   -> communicates its results (Art. 70)
+  anyone      -> the permit appears in the Art. 57(1)(j) register
+  data user   -> communicates its results (Art. 61(4))
   access body -> opens a finding (Art. 63); the party states its views (Art. 63(2))
   access body -> asks for information; the party answers (Art. 63(1))
   access body -> closes the finding with a measure and revokes the permit (Art. 63(3))""")
@@ -690,15 +691,15 @@ test("captures permitId", function () {
   bru.setVar("permitId", res.getBody().permitId);
 });
 """)
-req(f, "06 The permit is in the public register (Art. 73)", "get", f"{B}/api/permits", persona="anon",
+req(f, "06 The permit is in the public register (Art. 57(1)(j))", "get", f"{B}/api/permits", persona="anon",
     asserts=["res.status: eq 200", "res.body.entries: isArray"],
     tests="""
 test("the permit just issued is published", function () {
   const ids = (res.getBody().entries || []).map((e) => e.permitId || e.id);
-  expect(ids, "the permit is not in the Art. 73 register").to.include(bru.getVar("permitId"));
+  expect(ids, "the permit is not in the Art. 57(1)(j) register").to.include(bru.getVar("permitId"));
 });
 """)
-req(f, "07 Data user communicates results (Art. 70)", "post", f"{B}/api/compliance/results", persona="researcher",
+req(f, "07 Data user communicates results (Art. 61(4))", "post", f"{B}/api/compliance/results", persona="researcher",
     body={"permitId": "{{permitId}}", "title": "HbA1c trajectories under second-line therapy, preprint",
           "summary": "Aggregate results only; no record-level data left the secure processing environment",
           "kind": "PUBLICATION", "url": "https://example.org/preprints/hba1c-trajectories"},

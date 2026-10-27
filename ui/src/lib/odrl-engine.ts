@@ -12,6 +12,8 @@ export interface ScopePermit {
   datasetTitle: string | null;
   purpose: string | null;
   validUntil: string | null;
+  /** The application invoked the Art. 71(4) exception and was approved. */
+  art71Exception?: boolean;
 }
 
 export interface OdrlScope {
@@ -31,6 +33,12 @@ export interface OdrlScope {
    * that never applied, for instance a data holder querying its own data.
    */
   permits: ScopePermit[];
+  /**
+   * A valid permit was granted on an application that invoked the Art. 71(4)
+   * exception: only then may the persons who opted out be included (ADR-062).
+   * The proxy reads it from the forwarded scope; absent means no exception.
+   */
+  art71Exception?: boolean;
 }
 
 /* ── Participant mapping ───────────────────────────────────────── */
@@ -119,6 +127,7 @@ function validPermits(rows: PermitRow[], now: number): ScopePermit[] {
       datasetTitle: r.datasetTitle,
       purpose: r.purpose,
       validUntil: isoOrNull(r.validUntil),
+      art71Exception: r.art71Exception === true,
     }));
 }
 
@@ -245,6 +254,7 @@ export async function resolveOdrlScope(
       hasActiveContract,
       hdabApproved,
       permits,
+      art71Exception: permits.some((p) => p.art71Exception === true),
     };
   } catch (err) {
     console.error("resolveOdrlScope error:", err);

@@ -1,0 +1,30 @@
+meta {
+  name: 19 I opt back in
+  type: http
+  seq: 19
+}
+
+delete {
+  url: {{baseUrl}}/api/patient/opt-out?patientId={{patientId}}&source=api-collection
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.optedOut: eq false
+}
+
+tests {
+  // The reversal closes the record; it is kept, so the state on any earlier
+  // date can be reconstructed (TEHDAS2 opt-out guideline).
+  test("the earlier opt-out stays on record, reversed", function () {
+    const h = res.getBody().history || [];
+    expect(h.length).to.be.greaterThan(0);
+    expect(h[0].reversedAt, "reversedAt").to.be.a("string");
+  });
+}

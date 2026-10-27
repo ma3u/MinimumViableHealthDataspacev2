@@ -1,0 +1,118 @@
+# What the integration hub implements of the EHDS Regulation
+
+The European Health Data Space is [Regulation (EU) 2025/327](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:32025R0327).
+This page says, article by article, what the integration hub implements of it:
+the page, the route or the file that does it, the test that shows it, and
+where it falls short, with the issue that tracks the gap. Article numbers are
+the adopted ones; older material in the repository may cite the 2022 proposal,
+and [the numbering reference](../ehds-article-numbering.md) maps one to the
+other.
+
+The hub is a demonstrator on synthetic data. It plays the roles of the
+Regulation (a data holder, a data user, an access body, a trust centre, a
+person) with fictional organisations; it is not an access body and holds no
+real person's data.
+
+Checked against the code on 2026-10-27 (#694). Status:
+
+- **Implemented**: the duty is carried out end to end and a test shows it.
+- **Partial**: part of it is there; the gap column says what is missing.
+- **Not yet**: nothing does it; the issue says when.
+
+## Dates (Art. 105)
+
+| Date          | What applies                                                                   | Hub                                 |
+| ------------- | ------------------------------------------------------------------------------ | ----------------------------------- |
+| 26 March 2027 | The Regulation generally; access bodies and national contact points designated | Roles and access body desk in place |
+| 26 March 2029 | Chapter IV in full; Chapter II for the first priority categories               | Gaps tracked in #697, #698, #700    |
+| 26 March 2031 | Further data categories of Art. 51(1); Chapter III for EHR systems in service  | Out of scope until then             |
+| 26 March 2035 | Third-country participation in HealthData@EU                                   | Out of scope                        |
+
+## Chapter II: primary use, the person's own data
+
+| Art. | What it asks                | Status      | Where                                                                                         | Evidence                                                 | Gap, issue                                                                |
+| ---- | --------------------------- | ----------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------- |
+| 3    | Access to one's own data    | Implemented | `/patient`, `/patient/profile`; `/api/patient`, `/api/patient/observations`; own-record guard | Bruno `01 Patient/01-02`, `09 Access control`; J176-J180 | Records are synthetic                                                     |
+| 4    | Access services and proxies | Partial     | The portal and the Klarbefund app are access services                                         |                                                          | No proxy or delegation (#698)                                             |
+| 5    | Insert into one's record    | Partial     | `POST /api/patient/app/record`, `/api/patient/app/wearables` from the app                     | `app-record-post`, `app-wearables-post` tests            | Only from the app, as preliminary values (#698)                           |
+| 6    | Rectification               | Partial     | `PUT /api/patient/profile/interests`                                                          | Bruno `01 Patient/16`                                    | Clinical data cannot be corrected (#698)                                  |
+| 7    | Portability                 | Partial     | FHIR R4 Bundle from `/api/patient/observations?include=all`                                   | Bruno `01 Patient/02`, `/06`                             | No download and no transmission to another provider (#698)                |
+| 8    | Restrict access             | Not yet     |                                                                                               |                                                          | Needs a health-professional role and a restriction register (#698)        |
+| 9    | Information on access       | Partial     | The access log in the patient's [overview](https://ehds.mabu.red/overview)                    | `overview-patient` tests; J962                           | Per-record reads only from seeds; professionals' access not logged (#698) |
+| 10   | Primary-use opt-out         | Not yet     |                                                                                               |                                                          | Member State option (#698)                                                |
+| 14   | Priority categories         | Partial     | Laboratory results, reports, vaccinations, medication plan in the record                      | Bruno `01 Patient/06`                                    | No patient summary document, no ePrescription exchange (#698)             |
+| 15   | European exchange format    | Partial     | `/eehrxf`; profile registry `neo4j/register-eehrxf-profiles.cypher`                           | J72-J76                                                  | Profiles registered, resources not validated against them (#698)          |
+| 16   | Identification, EUDI wallet | Partial     | `/auth/eudi-qr`, `/api/auth/eudi/*`, OpenID4VP in `ui/src/lib/eudi-verifier.ts`               | Bruno `12 EUDI wallet`; `eudi-*` tests                   | Every PID maps to one demo patient; no professionals (#698, #182)         |
+| 23   | MyHealth@EU                 | Not yet     |                                                                                               |                                                          | Cross-border primary use is out of the demonstrator's scope               |
+
+## Chapter IV: secondary use
+
+| Art. | What it asks                                   | Status      | Where                                                                                                                                                                       | Evidence                                                                                                                                    | Gap, issue                                                                                                                 |
+| ---- | ---------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| 51   | Minimum categories of data                     | Partial     | Datasets tagged by category in the catalogue                                                                                                                                | J06-J15                                                                                                                                     | Tagged with EEHRxF categories, not the Art. 51(1) list (#700)                                                              |
+| 53   | Purposes                                       | Implemented | Purposes (a) to (f) in `ui/src/lib/permits.ts`, enforced on applications and requests                                                                                       | Bruno `07 Journey - Data permit/15`; J10                                                                                                    |                                                                                                                            |
+| 54   | Prohibited purposes                            | Partial     | Named on `/information`; re-identification blocked by the ODRL check in the query proxy                                                                                     | proxy NLQ and federated tests                                                                                                               | The listed purposes are not checked on an application (#697)                                                               |
+| 55   | Health data access bodies                      | Implemented | The `HDAB_AUTHORITY` role; MedReg DE and a second body for Spain                                                                                                            | Bruno `04 Access Body`; J887                                                                                                                |                                                                                                                            |
+| 57   | Tasks of the access body, the public register  | Implemented | The desk on [/compliance](https://ehds.mabu.red/compliance); the register on [/permits](https://ehds.mabu.red/permits) with its publication deadline                        | Bruno `00 Public/03`, `07/06`; J932-J933, J994                                                                                              | The register needs a sign-in (ADR-044)                                                                                     |
+| 58   | Information to natural persons                 | Implemented | [/information](https://ehds.mabu.red/information): legal basis, safeguards, rights, who has access, results, fees, opt-out count                                            | Bruno `00 Public/02`; J1000                                                                                                                 | Needs a sign-in                                                                                                            |
+| 59   | Activity report                                | Implemented | [/activity-report](https://ehds.mabu.red/activity-report)                                                                                                                   | Bruno `00 Public/05`; J949-J952                                                                                                             | Needs a sign-in                                                                                                            |
+| 60   | Duties of data holders                         | Partial     | Publishing datasets on `/data/share`, `/catalog/editor`, `POST /api/catalog`                                                                                                | Bruno `02 Data Holder/03-05`                                                                                                                | No delivery flow after a permit                                                                                            |
+| 61   | Duties of data users, results (61(4))          | Implemented | Permit gate on transfers, federated queries and NLQ; results on `/api/compliance/results`                                                                                   | J920-J923, J1002; Bruno `07/07`, `00/04`                                                                                                    |                                                                                                                            |
+| 62   | Fees                                           | Implemented | Fee schedule in `ui/src/lib/fees.ts`, applied to permits, shown on `/information`                                                                                           | J1001                                                                                                                                       | Amounts are fictional                                                                                                      |
+| 63   | Enforcement                                    | Implemented | [/supervision](https://ehds.mabu.red/supervision): findings, requests for information, revocation                                                                           | Bruno `07/08-13`; J931, J995-J998                                                                                                           | Fines are recorded, not collected                                                                                          |
+| 66   | Minimisation, pseudonymisation                 | Partial     | k-anonymity floor of 5 in the proxy; research pseudonyms from the trust centre; minimisation items on the application                                                       | `federated-k-anonymity` test; J135, J141                                                                                                    | No anonymisation beyond suppressing small counts                                                                           |
+| 67   | Applications, cross-border (67(3))             | Partial     | The eleven Art. 67(2) items on [/applications](https://ehds.mabu.red/applications); completeness check                                                                      | Bruno `07/02`, `07/14`; J920, J990                                                                                                          | 67(3) forwarding to other access bodies exists only as seed data (#697)                                                    |
+| 68   | Permits and the decision clock (68(4))         | Implemented | Decision with criteria (a) to (h), refusal with a statistical alternative; incomplete and extension on the clock                                                            | Bruno `07/03-05`; J922, J990-J993                                                                                                           |                                                                                                                            |
+| 69   | Data requests                                  | Implemented | [/requests](https://ehds.mabu.red/requests): anonymised statistical answers                                                                                                 | Bruno `08 Journey - Data request`; J940-J943                                                                                                |                                                                                                                            |
+| 70   | Templates                                      | Not yet     |                                                                                                                                                                             |                                                                                                                                             | Implementing act due 26 March 2027 (#697)                                                                                  |
+| 71   | Opt-out from secondary use                     | Implemented | Panel on [/patient/research](https://ehds.mabu.red/patient/research); `/api/patient/opt-out`; every secondary-use query excludes opted-out persons; count on `/information` | Bruno `01 Patient/17-19`, `09/34`; `run-ehds-tests.sh` category 6; [ADR-062](../ADRs/ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md) | Earlier permits filtered too, stricter than Art. 71(3); other holders not marked (#696)                                    |
+| 72   | Trusted data holder                            | Partial     | Simplified procedure for data requests                                                                                                                                      | J1003-J1004                                                                                                                                 | Not for applications (#697)                                                                                                |
+| 73   | Secure processing environment, logs (73(1)(e)) | Partial     | Two SPEs behind the query proxy; hash-chained audit log, kept 12 months; [/admin/audit](https://ehds.mabu.red/admin/audit)                                                  | Bruno `04/07-09`; J910-J913, J999; `audit-chain` tests                                                                                      | The SPE is a query proxy, not an isolated workspace with tools                                                             |
+| 74   | Controllership                                 | Not yet     |                                                                                                                                                                             |                                                                                                                                             | To be documented (#697)                                                                                                    |
+| 75   | HealthData@EU                                  | Partial     | Federated statistics and queries across SPEs; a second access body                                                                                                          | J49, J133, J887                                                                                                                             | No national contact point, no eDelivery (#697)                                                                             |
+| 77   | Dataset description                            | Implemented | [/catalog](https://ehds.mabu.red/catalog), `/catalog/editor`; HealthDCAT-AP JSON-LD from the proxy                                                                          | Bruno `02/02-05`, `03/01`; J06-J15                                                                                                          | Not all Release 8 mandatory properties yet (#700, [ADR-063](../ADRs/ADR-063-healthdcat-ap-release-8-and-its-namespace.md)) |
+| 78   | Quality and utility label                      | Partial     | Quality label credentials, shown on `/credentials` and in the activity report                                                                                               | J05                                                                                                                                         | Seeded, not assessed; not in the dataset metadata (#697)                                                                   |
+| 79   | EU dataset catalogue                           | Partial     | Federated discovery between participants (catalog crawler and enricher)                                                                                                     | crawler and enricher tests                                                                                                                  | Nothing published to an EU catalogue                                                                                       |
+| 81   | Right to complain to the access body           | Not yet     | One sentence on `/information`                                                                                                                                              |                                                                                                                                             | Route and page (#697)                                                                                                      |
+
+## Implementing acts
+
+| Act                                                                                               | Fixes                                                      | Hub                                                  |
+| ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------- |
+| [2026/2098](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=OJ:L_202602098) (Art. 77(4)) | Dataset descriptions in HealthDCAT-AP, 27 minimum elements | Release 8 namespace and labels done; content in #700 |
+| [2026/2099](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=OJ:L_202602099) (Art. 16(2)) | Healthcare attributes as EUDI wallet attestations          | #698                                                 |
+| [2026/2083](https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=OJ:L_202602083) (Art. 23)    | MyHealth@EU central services                               | Out of scope                                         |
+| Draft, HealthData@EU technical requirements (Art. 75)                                             | Architecture, connection conditions                        | #697                                                 |
+
+## Standards the code speaks
+
+| Standard               | Version                                            | Proof in the code                                                               |
+| ---------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Dataspace Protocol     | 2025-1                                             | `ui/src/lib/dsp-protocol.ts`                                                    |
+| Decentralized Claims   | v1.0                                               | `ui/src/lib/edc/component-info.ts`, `services/neo4j-proxy/src/dcp-discovery.ts` |
+| ODRL                   | 2.2                                                | `ui/src/lib/odrl-engine.ts`                                                     |
+| HL7 FHIR               | R4; EU IG versions registered, not validated       | `neo4j/register-eehrxf-profiles.cypher` (#698)                                  |
+| OMOP CDM               | 5.4                                                | `neo4j/fhir-to-omop-transform.cypher`                                           |
+| HealthDCAT-AP          | Release 8, `http://healthdataportal.eu/ns/health#` | `services/neo4j-proxy/src/routes/catalog.ts` (ADR-063, #700)                    |
+| EUDI wallet, OpenID4VP | DCQL, `eu.europa.ec.eudi.pid.1`                    | `ui/src/lib/eudi-verifier.ts`                                                   |
+
+## GDPR rights alongside
+
+Access (GDPR Art. 15) is the Art. 3 routes; withdrawal of a study consent
+(Art. 7(3)) is `DELETE /api/patient/research`; erasure (Art. 17) exists for
+accounts the Klarbefund app created; rectification (Art. 16) is limited to the
+person's health interests; restriction, objection and automated decisions
+(Art. 18, 21, 22) are not implemented. The EHDS opt-out of Art. 71 is the
+objection to secondary use.
+
+## Keeping this page true
+
+The page is checked against the code, not written from the plan. When a
+change moves an article, change its row in the same pull request, with the
+test that shows it. The checks behind the rows:
+
+- `./scripts/run-ehds-tests.sh`: the graph, the catalogue, OMOP, the opt-out.
+- `./scripts/run-api-tests.sh Local`: the Bruno collection, one folder per
+  role of the Regulation.
+- `cd ui && npm test` and `npm run test:e2e`: the routes, the pages and the
+  journeys named above.

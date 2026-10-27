@@ -131,16 +131,16 @@ git commit  # retry
 
 ## Key Concepts
 
-| Concept               | What It Does                                                                                 |
-| --------------------- | -------------------------------------------------------------------------------------------- |
-| **DSP 2025-1**        | Dataspace Protocol for contract negotiation and secure data transfer between participants    |
-| **DCP v1.0**          | Decentralised Claims Protocol — Verifiable Credential attestation for participant identity   |
-| **HealthDCAT-AP 2.1** | Metadata standard for health dataset catalogues (based on DCAT-AP)                           |
-| **FHIR R4**           | HL7 standard for clinical data (Patient, Condition, Observation, MedicationRequest)          |
-| **OMOP CDM v5.4**     | Common Data Model for observational research analytics                                       |
-| **ODRL 2.2**          | Policy language expressing usage constraints on DataProduct nodes                            |
-| **DID:web**           | W3C decentralised identifiers for participants (e.g., `did:web:alpha-klinik.de:participant`) |
-| **HDAB**              | Health Data Access Body — regulatory authority approving secondary use requests              |
+| Concept                     | What It Does                                                                                 |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| **DSP 2025-1**              | Dataspace Protocol for contract negotiation and secure data transfer between participants    |
+| **DCP v1.0**                | Decentralised Claims Protocol — Verifiable Credential attestation for participant identity   |
+| **HealthDCAT-AP Release 8** | Metadata standard for health dataset catalogues (based on DCAT-AP)                           |
+| **FHIR R4**                 | HL7 standard for clinical data (Patient, Condition, Observation, MedicationRequest)          |
+| **OMOP CDM v5.4**           | Common Data Model for observational research analytics                                       |
+| **ODRL 2.2**                | Policy language expressing usage constraints on DataProduct nodes                            |
+| **DID:web**                 | W3C decentralised identifiers for participants (e.g., `did:web:alpha-klinik.de:participant`) |
+| **HDAB**                    | Health Data Access Body — regulatory authority approving secondary use requests              |
 
 ---
 

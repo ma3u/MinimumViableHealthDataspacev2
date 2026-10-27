@@ -1,6 +1,7 @@
 /**
  * Journey Group N — Trust Center & Pseudonym Resolution (Phase 18)
- * EHDS Art. 50 (Secure Processing Environment) + Art. 51 (Cross-Border)
+ * EHDS Art. 66 (pseudonymisation), Art. 73 (Secure Processing Environment),
+ * Art. 75 (HealthData@EU, cross-border); adopted numbers, Reg. (EU) 2025/327
  *
  * Tests the Trust Center UI section on /compliance and the
  * /api/trust-center API endpoint with seeded graph data.
@@ -11,7 +12,7 @@
 import { test, expect } from "@playwright/test";
 import { T, apiGet, skipIfNeo4jDown, expectHeading } from "./helpers";
 
-test.describe("N · Trust Center — EHDS Art. 50/51", () => {
+test.describe("N · Trust Center: EHDS Art. 66 and 73", () => {
   /* ── API: Trust Center status endpoint ────────────────────── */
 
   test("J130 — /api/trust-center returns trust centers array", async ({
@@ -125,11 +126,11 @@ test.describe("N · Trust Center — EHDS Art. 50/51", () => {
     });
   });
 
-  test("J137 — /compliance page renders EHDS Art. 50/51 description", async ({
+  test("J137 — /compliance page renders EHDS Art. 66 and 73 description", async ({
     page,
   }) => {
     await page.goto("/compliance");
-    await expect(page.getByText(/EHDS Art\. 50\/51/i).first()).toBeVisible({
+    await expect(page.getByText(/EHDS Art\. 66 and 73/i).first()).toBeVisible({
       timeout: T,
     });
   });

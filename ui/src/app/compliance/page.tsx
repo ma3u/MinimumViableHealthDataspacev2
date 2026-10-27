@@ -705,7 +705,7 @@ export default function CompliancePage() {
             </h2>
           </div>
           <p className="text-(--text-secondary) text-sm mb-6">
-            EHDS Art. 50/51 — HDAB-designated trust centers enabling
+            EHDS Art. 66 and 73: HDAB-designated trust centers enabling
             cross-provider longitudinal patient linkage without exposing real
             identities to researchers. Provider pseudonyms are resolved to
             research pseudonyms inside the Secure Processing Environment only.
@@ -812,7 +812,7 @@ export default function CompliancePage() {
                     {tc.recognisedCountries.length > 0 && (
                       <div className="col-span-2">
                         <span className="text-(--text-secondary)">
-                          Mutual recognition (EHDS Art. 51):
+                          Mutual recognition (HealthData@EU, EHDS Art. 75):
                         </span>{" "}
                         {tc.recognisedCountries.join(", ")}
                       </div>

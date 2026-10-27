@@ -11,18 +11,18 @@ globs:
 
 ## Protocols
 
-| Protocol      | Version          | Usage                                                                |
-| ------------- | ---------------- | -------------------------------------------------------------------- |
-| DSP           | 2025-1           | Data Sovereignty Protocol — contract negotiation, transfer           |
-| DCP           | v1.0             | Decentralised Claims Protocol — VC attestation                       |
-| FHIR          | R4               | Clinical data exchange (Patient, Condition, Observation, Medication) |
-| OMOP CDM      | v5.4             | Observational analytics (Person, ConditionOccurrence, DrugExposure)  |
-| HealthDCAT-AP | 2.1              | Dataset catalogue metadata (Catalogue, Dataset, Distribution)        |
-| EHDS          | Art. 3–12, 50–51 | Primary use (patient rights) + secondary use (research)              |
-| GDPR          | Art. 15–22       | Patient data access, rectification, erasure rights                   |
-| ODRL          | 2.2              | Policy expressions on DataProduct nodes                              |
-| DID:web       | W3C              | Decentralised identifiers for participants                           |
-| OIDC          | 1.0              | Keycloak authentication (realm: `edcv`)                              |
+| Protocol      | Version              | Usage                                                                                                                                                                    |
+| ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| DSP           | 2025-1               | Data Sovereignty Protocol — contract negotiation, transfer                                                                                                               |
+| DCP           | v1.0                 | Decentralised Claims Protocol, VC attestation (`dcp-2025-1` is only the CFM profile tag)                                                                                 |
+| FHIR          | R4                   | Clinical data exchange (Patient, Condition, Observation, Medication)                                                                                                     |
+| OMOP CDM      | v5.4                 | Observational analytics (Person, ConditionOccurrence, DrugExposure)                                                                                                      |
+| HealthDCAT-AP | Release 8            | Dataset catalogue metadata (Catalogue, Dataset, Distribution); ADR-063                                                                                                   |
+| EHDS          | Art. 3–10, 23, 51–81 | Reg. (EU) 2025/327: primary use (rights Art. 3–10, MyHealth@EU Art. 23) + secondary use (Chapter IV, Art. 51–81). Adopted numbers only: `docs/ehds-article-numbering.md` |
+| GDPR          | Art. 15–22           | Patient data access, rectification, erasure rights                                                                                                                       |
+| ODRL          | 2.2                  | Policy expressions on DataProduct nodes                                                                                                                                  |
+| DID:web       | W3C                  | Decentralised identifiers for participants                                                                                                                               |
+| OIDC          | 1.0                  | Keycloak authentication (realm: `edcv`)                                                                                                                                  |
 
 ## Next.js API Routes (`ui/src/app/api/`)
 
@@ -141,14 +141,36 @@ parameter such as `persona`:
 A new route that returns Patient fields asks `seesPatientIdentity()` first.
 `bruno/MVHDv2/09 Access control/28` to `/30` assert it against a real server.
 
+### Who is left out of secondary use (#694, ADR-062)
+
+A person may opt out of secondary use at any time (Regulation (EU) 2025/327,
+Art. 71). While an opt-out is open, their Patient, OMOPPerson and person-level
+nodes carry the `OptedOut` label, and every secondary-use query excludes it:
+
+- A UI route that reads person-level data (Patient, the FHIR resources, the
+  OMOP rows) for `DATA_USER`, `HDAB_AUTHORITY` or `TRUST_CENTER_OPERATOR`
+  passes its Cypher through `forRoles(cypher, roles)` or `secondaryUseView()`
+  from `@/lib/opt-out`. `EDC_ADMIN`, `DATA_HOLDER` and `PATIENT` read for care
+  or for themselves and are not narrowed.
+- In the proxy, a route that serves secondary use runs through
+  `secondaryUseSession()` or `runSecondaryUse()` from `src/opt-out.ts`, and a
+  FHIR response drops any node `releasable()` refuses.
+- The only way past the filter is an approved Art. 71(4) exception on the
+  ODRL scope (`art71Exception`), built on the server.
+- The two copies of the rewrite share `services/neo4j-proxy/__tests__/fixtures/opt-out-vectors.json`;
+  a new pattern the rewrite must handle goes there, and both suites run it.
+
+Study participation is a separate GDPR consent (`PatientConsent`, Art.
+9(2)(a), withdrawable under Art. 7(3)); never label it as the EHDS opt-out.
+
 ### Every route needs a session (ADR-044)
 
 Decided 2026-10-02 (#404): every API route needs a session. Middleware skips
 `/api/*`, so the route itself is the only gate, and the gate is
 `requireAuth()` in every handler. This replaced the earlier list of routes
 that were public by decision: `/api/nlq/backend` (#377), the access body's
-register, information page, results register and activity report (Art. 58,
-59, 73; #206) and `/api/graph`. Those now answer any signed-in participant,
+register, information page, results register and activity report (Art. 57(1)(j),
+58, 61(4), 59; #206) and `/api/graph`. Those now answer any signed-in participant,
 and their pages (`/graph`, `/permits`, `/information`, `/activity-report`)
 are in `PROTECTED_PATHS`, so an anonymous visitor is sent to sign in. So are `/catalog`, `/analytics`, `/query`,
 `/eehrxf` and `/tasks`, whose APIs needed a session before: a page that

@@ -142,7 +142,7 @@ ENROLMENT_DATES = [
 ]
 
 CONSENTS = [
-    # id, study, granted, scope, trust centre, revoked at (Art. 71 opt-out)
+    # id, study, granted, scope, trust centre, withdrawn at (GDPR Art. 7(3))
     ("CONSENT-001", "STUDY-CARDIO-2024", "2024-03-10T09:00:00Z",
      "FHIR Conditions + Observations", "MedReg DE Trust Centre", None),
     ("CONSENT-002", "STUDY-DIAB-2023", "2023-11-15T14:30:00Z",
@@ -427,7 +427,7 @@ def cypher() -> str:
     w("    en.studyId = e.study")
     w("MERGE (st)-[:HAS_ENROLMENT]->(en);")
     w("")
-    w("// ── 5. The patient's consents (Art. 71 opt-out state per study) ─────────────")
+    w("// ── 5. The patient's study consents (GDPR Art. 9(2)(a), withdrawable) ───────")
     w("MATCH (p:Patient {resourceId: 'P1'})")
     w("UNWIND [")
     rows = []
@@ -443,7 +443,7 @@ def cypher() -> str:
     w("    pc.revokedAt = CASE WHEN c.revokedAt IS NULL THEN null ELSE datetime(c.revokedAt) END,")
     w("    pc.purpose = 'secondary-use',")
     w("    pc.dataScope = c.scope,")
-    w("    pc.ehdsArticle = 'Art. 71',")
+    w("    pc.ehdsArticle = 'GDPR Art. 9(2)(a)',")
     w("    pc.fictional = true")
     w("MERGE (p)-[:GAVE_CONSENT]->(pc)")
     w("WITH pc, c")

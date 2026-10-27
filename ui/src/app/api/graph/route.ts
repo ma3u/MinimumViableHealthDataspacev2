@@ -3,6 +3,7 @@ import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { patientPseudonym, seesPatientIdentity } from "@/lib/patient-identity";
 import neo4j from "neo4j-driver";
 import { runQuery } from "@/lib/neo4j";
+import { secondaryUseView } from "@/lib/opt-out";
 import { cached } from "@/lib/server-cache";
 import {
   LABEL_LAYER,
@@ -200,9 +201,13 @@ async function buildHospitalGraph() {
 
 /** Researcher: datasets + OMOP analytics + pseudonym chain + clinical conditions */
 async function buildResearcherGraph() {
+  // The researcher's view is secondary use: persons who opted out are not in
+  // it (Art. 71, ADR-062).
+  const researcherQuery = <T>(cypher: string) =>
+    runQuery<T>(secondaryUseView(cypher));
   const [datasetNodes, omopNodes, conditionNodes, ontologyNodes, speNodes] =
     await Promise.all([
-      runQuery<{ id: string; labels: string[]; name: string }>(
+      researcherQuery<{ id: string; labels: string[]; name: string }>(
         `MATCH (ds:HealthDataset)
          RETURN elementId(ds) AS id, labels(ds) AS labels,
                 coalesce(ds.title, ds.datasetId, elementId(ds)) AS name
@@ -218,7 +223,7 @@ async function buildResearcherGraph() {
                 coalesce(ep.title, ep.profileId, elementId(ep)) AS name
          LIMIT 10`,
       ),
-      runQuery<{ id: string; labels: string[]; name: string }>(
+      researcherQuery<{ id: string; labels: string[]; name: string }>(
         `MATCH (op:OMOPPerson)-[:HAS_CONDITION_OCCURRENCE]->(:OMOPConditionOccurrence)
          WITH op, count(*) AS cnt ORDER BY cnt DESC LIMIT 15
          RETURN elementId(op) AS id, labels(op) AS labels,
@@ -234,13 +239,13 @@ async function buildResearcherGraph() {
                 coalesce(om.name, toString(om.measurementConceptId), elementId(om)) AS name
          LIMIT 10`,
       ),
-      runQuery<{ id: string; labels: string[]; name: string }>(
+      researcherQuery<{ id: string; labels: string[]; name: string }>(
         `MATCH (c:Condition)<-[:HAS_CONDITION]-(:Patient)
          WITH c, count(*) AS freq ORDER BY freq DESC LIMIT 30
          RETURN elementId(c) AS id, labels(c) AS labels,
                 coalesce(c.display, c.name, c.code, elementId(c)) AS name`,
       ),
-      runQuery<{ id: string; labels: string[]; name: string }>(
+      researcherQuery<{ id: string; labels: string[]; name: string }>(
         `MATCH (s:SnomedConcept)
          WITH s, count{(s)-[]-()} AS deg ORDER BY deg DESC LIMIT 20
          RETURN elementId(s) AS id, labels(s) AS labels,
@@ -256,7 +261,7 @@ async function buildResearcherGraph() {
          RETURN elementId(rx) AS id, labels(rx) AS labels,
                 coalesce(rx.display, rx.name, rx.code, elementId(rx)) AS name`,
       ),
-      runQuery<{ id: string; labels: string[]; name: string }>(
+      researcherQuery<{ id: string; labels: string[]; name: string }>(
         `MATCH (rp:ResearchPseudonym {revoked: false})
          RETURN elementId(rp) AS id, labels(rp) AS labels,
                 coalesce(rp.studyId, rp.rpsnId, elementId(rp)) AS name

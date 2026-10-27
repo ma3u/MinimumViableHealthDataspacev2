@@ -7,10 +7,10 @@
 #
 # Regenerate with: ./scripts/check-bruno-strength.py --write
 00 Public/01 Is the hub up
-00 Public/02 Public information (Art. 56)
-00 Public/03 Register of data permits (Art. 73)
-00 Public/04 Register of results (Art. 70)
-00 Public/05 Activity report (Art. 73)
+00 Public/02 Public information (Art. 58)
+00 Public/03 Register of data permits (Art. 57(1)(j))
+00 Public/04 Register of results (Art. 61(4))
+00 Public/05 Activity report (Art. 59)
 01 Patient/01 My record (Art. 3)
 01 Patient/07 My consent is on record
 01 Patient/08 I withdraw it (GDPR Art. 7(3))

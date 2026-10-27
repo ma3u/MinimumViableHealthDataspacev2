@@ -111,12 +111,14 @@ export interface PatientViewInput {
   insights: InsightsShape;
   research: ResearchShape;
   observations: FhirBundle;
-  /** The holder's access log, last twelve months (Art. 8 until a per-record log exists) */
+  /** The holder's access log, last twelve months (Art. 9 until a per-record log exists) */
   accessLog?: AccessLogEntry[];
   /** The holder that treats the patient */
   holder?: { did: string; name: string } | null;
-  /** The accesses that read this patient's record (Art. 8), when the log knows */
+  /** The accesses that read this patient's record (Art. 9), when the log knows */
   recordLog?: AccessLogEntry[];
+  /** The Art. 71 opt-out from secondary use, when known (ADR-062) */
+  optOut?: { optedOut: boolean; since: string | null } | null;
 }
 
 /**
@@ -494,8 +496,8 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
         ["ethics", p.ethicsApproval ?? "n/a"],
       ],
       article: consent
-        ? "My consent is on file and can be withdrawn (Art. 71 opt-out from secondary use)"
-        : "Not joined. Art. 71: secondary use continues unless I opt out; a study invitation is a separate consent",
+        ? "My consent to this study is on file and can be withdrawn (GDPR Art. 7(3)); the opt-out from all secondary use is separate (Art. 71)"
+        : "Not joined. Secondary use under a permit continues unless I opt out (Art. 71); joining a study is a separate consent",
       links: [{ href: "/patient/research", text: "Research programmes" }],
     });
     for (const f of insights.findings ?? []) {
@@ -528,7 +530,7 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
       add({
         id: cid,
         label: consent.revoked
-          ? `opted out ${fmtDate(consent.revokedAt)}`
+          ? `withdrawn ${fmtDate(consent.revokedAt)}`
           : `consent ${fmtDate(consent.grantedAt)}`,
         layer: "use",
         kind: "Consent",
@@ -541,7 +543,7 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
           [
             "state",
             consent.revoked
-              ? `withdrawn on ${fmtDate(consent.revokedAt)} (Art. 71 opt-out)`
+              ? `withdrawn on ${fmtDate(consent.revokedAt)} (GDPR Art. 7(3))`
               : "active",
           ],
           [
@@ -549,7 +551,9 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
             consent.trustCenter ?? consent.trustCenterDid ?? "trust centre",
           ],
         ],
-        article: research.gdprBasis ?? "Art. 71 opt-out; GDPR Art. 9(2)(j)",
+        article:
+          research.gdprBasis ??
+          "Study consent, GDPR Art. 9(2)(a); withdrawable, Art. 7(3)",
       });
       link("me", cid, {
         kind: "consent",
@@ -566,12 +570,12 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
       if (consent.revoked) {
         signals.push({
           severity: "info",
-          code: "opt-out",
+          code: "consent-withdrawn",
           nodeId: cid,
-          text: `I opted out of ${p.studyName} on ${fmtDate(
+          text: `I withdrew my consent to ${p.studyName} on ${fmtDate(
             consent.revokedAt,
-          )}; nothing new of mine reaches it.`,
-          article: "Art. 71 opt-out from secondary use",
+          )}; nothing new of mine reaches that study.`,
+          article: "Consent withdrawn, GDPR Art. 7(3)",
         });
       }
       const tcName = consent.trustCenter ?? consent.trustCenterDid;
@@ -605,10 +609,55 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
           text: `${p.studyName} is ${p.status ?? "open"} and matches my ${
             nodes.find((n) => n.id === rel)?.label ?? "record"
           }`,
-          article: "Art. 71 opt-out, GDPR Art. 9(2)(j)",
+          article: "Study invitation; joining is a consent, GDPR Art. 9(2)(a)",
         });
       }
     }
+  }
+  // ── the Art. 71 opt-out from all secondary use, separate from any study ───
+  if (input.optOut) {
+    const out = input.optOut.optedOut;
+    add({
+      id: "secondary-use",
+      label: out
+        ? `opted out ${fmtDate(input.optOut.since)}`
+        : "secondary use: on",
+      layer: "use",
+      kind: "Opt-out",
+      size: 1.4,
+      status: out ? "none" : "info",
+      title: "Secondary use of my data",
+      sub: out
+        ? "left out of every new extraction"
+        : "the default, under permits only",
+      facts: [
+        [
+          "state",
+          out
+            ? `opted out since ${fmtDate(input.optOut.since)}`
+            : "not opted out",
+        ],
+        ["reversible", "yes, at any time and without a reason"],
+      ],
+      article: "Art. 71 opt-out from secondary use",
+      links: [{ href: "/patient/research", text: "Opt out or back in" }],
+    });
+    link("me", "secondary-use", {
+      kind: "opt-out",
+      status: out ? "none" : "info",
+      distance: 70,
+    });
+    signals.push({
+      severity: "info",
+      code: "opt-out",
+      nodeId: "secondary-use",
+      text: out
+        ? `I opted out of secondary use on ${fmtDate(
+            input.optOut.since,
+          )}; new permits get nothing of mine.`
+        : "Secondary use under a permit is the default; I can opt out at any time.",
+      article: "Art. 71 opt-out from secondary use",
+    });
   }
   signals.push({
     severity: "ok",
@@ -617,10 +666,10 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
     text: `${activeConsents} consents active, all revocable. ${
       (insights.privacyNote ?? "").split(".")[0]
     }`.trim(),
-    article: "Art. 8: who accessed my data, Art. 71 opt-out",
+    article: "Art. 9: who accessed my data; study consents, GDPR Art. 7(3)",
   });
 
-  // ── the access log of my holder (Art. 8) ──────────────────────────────────
+  // ── the access log of my holder (Art. 9) ──────────────────────────────────
   const log = input.accessLog ?? [];
   const record = input.recordLog ?? [];
   const useRecord = record.length > 0;
@@ -669,8 +718,8 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
         higherIsWorse: true,
         facts: [["did", did]],
         article: useRecord
-          ? "Art. 8: information on who accessed my data, from the reads of my record in the holder's Art. 73(1)(e) log"
-          : "Art. 8: information on who accessed my data. The log is the holder's, per dataset; no read of my record is on file.",
+          ? "Art. 9: information on who accessed my data, from the reads of my record in the holder's Art. 73(1)(e) log"
+          : "Art. 9: information on who accessed my data. The log is the holder's, per dataset; no read of my record is on file.",
       });
       link(hid, id, {
         kind: "accessed by",
@@ -689,7 +738,7 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
         : consumers > 0
           ? `${consumers} organisations read data from ${input.holder.name} in the last 12 months (${served.length} accesses); no read of my record is on file. Click to see who.`
           : `No access to ${input.holder.name}'s data recorded in the last 12 months.`,
-      article: "Art. 8 information on access, Art. 73(1)(e) log",
+      article: "Art. 9 information on access, Art. 73(1)(e) log",
     });
   }
 
@@ -737,7 +786,7 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
           ["resource", `Observation/${m.id}`],
         ] as [string, string][],
         article:
-          "One FHIR R4 Observation. Art. 3: I can read and export it; Art. 6: portable.",
+          "One FHIR R4 Observation. Art. 3: I can read it; Art. 7: portable.",
       } satisfies OverviewNode;
     });
     const expandLinks: OverviewLink[] = [];
@@ -835,7 +884,7 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
         observations.total ?? observations.entry.length
       } FHIR Observations. Click a parameter to see its trend and unfold the single measurements.`,
       article:
-        "Art. 14 priority category: laboratory results; Art. 6 portability",
+        "Art. 14 priority category: laboratory results; Art. 7 portability",
     });
   }
 
@@ -847,7 +896,7 @@ export function buildPatientView(input: PatientViewInput): OverviewView {
     title: "My health, in one view",
     question:
       "Which parameters put me at risk, what should I do about them, and who is using my data?",
-    article: "Regulation (EU) 2025/327 Art. 3, 8, 14, 71, 73",
+    article: "Regulation (EU) 2025/327 Art. 3, 7, 9, 14, 71, 73",
     layers,
     nodes,
     links: links.filter((l) => known.has(l.source) && known.has(l.target)),

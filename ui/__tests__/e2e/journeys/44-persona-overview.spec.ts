@@ -375,10 +375,12 @@ test.describe("Issue #271 · M6 the data behind the views", () => {
       (n: { id: string }) => n.id === "consent:CONSENT-003",
     );
     expect(consent.status).toBe("none");
-    expect(consent.label).toContain("opted out");
-    const s = view.signals.find((x: { code: string }) => x.code === "opt-out");
+    expect(consent.label).toContain("withdrawn");
+    const s = view.signals.find(
+      (x: { code: string }) => x.code === "consent-withdrawn",
+    );
     expect(s.nodeId).toBe("consent:CONSENT-003");
-    expect(s.article).toContain("Art. 71");
+    expect(s.article).toContain("GDPR Art. 7(3)");
   });
 
   test("J978 the holder's datasets carry their Art. 77 description completeness", async ({

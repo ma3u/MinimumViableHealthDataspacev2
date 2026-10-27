@@ -1,5 +1,5 @@
 meta {
-  name: 06 The permit is in the public register (Art. 73)
+  name: 06 The permit is in the public register (Art. 57(1)(j))
   type: http
   seq: 6
 }
@@ -18,6 +18,6 @@ assert {
 tests {
   test("the permit just issued is published", function () {
     const ids = (res.getBody().entries || []).map((e) => e.permitId || e.id);
-    expect(ids, "the permit is not in the Art. 73 register").to.include(bru.getVar("permitId"));
+    expect(ids, "the permit is not in the Art. 57(1)(j) register").to.include(bru.getVar("permitId"));
   });
 }

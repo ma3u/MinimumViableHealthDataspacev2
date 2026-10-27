@@ -1,5 +1,7 @@
 // Phase 18: Trust Center & Federated Pseudonym Resolution — Seed Data
-// EHDS Art. 50 (Secure Processing Environment) + Art. 51 (Cross-Border)
+// EHDS Art. 66 (pseudonymisation), Art. 73 (secure processing environment) and
+// Art. 75 (HealthData@EU, cross-border). Adopted numbers of Regulation (EU)
+// 2025/327; this file used to cite the proposal's Art. 50 and 51 (#694).
 //
 // Run after init-schema.cypher and insert-synthetic-schema-data.cypher:
 //   cat neo4j/seed-trust-center.cypher | docker exec -i health-dataspace-neo4j \
@@ -34,7 +36,8 @@ SET tc_de += {
   endpoint: "https://trustcentre.medreg.de/resolve",
   did: "did:web:medreg.de:trustcentre",
   createdAt: datetime("2025-01-01T00:00:00Z"),
-  description: "German national trust center designated under EHDS Art. 50. " +
+  description: "German national trust center serving the secure processing " +
+               "environment (EHDS Art. 73). " +
                "Implements stateless HMAC-based pseudonym resolution for " +
                "cross-provider longitudinal patient linkage."
 };
@@ -50,8 +53,8 @@ SET tc_nl += {
   did: "did:web:lmc.nl:trustcentre",
   createdAt: datetime("2025-02-01T00:00:00Z"),
   description: "Dutch national trust center under HDAB authority. " +
-               "Supports cross-border mutual recognition with the German " +
-               "under EHDS Art. 51."
+               "Recognises the German trust centre's pseudonyms for " +
+               "cross-border studies over HealthData@EU (EHDS Art. 75)."
 };
 
 // ============================================================
@@ -73,7 +76,7 @@ MERGE (tc_de:TrustCenter {name: "MedReg DE Trust Centre"})
 MERGE (tc_de)-[:GOVERNED_BY]->(ha_de);
 
 // Limburg NL: no access body of its own in the demo, so the cross-border
-// permit IRS granted LMC under Art. 51 mutual recognition (NL-FR).
+// permit IRS granted LMC on a single application across NL and FR (Art. 67(3)).
 MERGE (ha_nl:HDABApproval {approvalId: "hdab-irs-lmc-2026-001"})
 MERGE (tc_nl:TrustCenter {name: "Limburg Trust Centre NL"})
 MERGE (tc_nl)-[:GOVERNED_BY]->(ha_nl);
@@ -101,18 +104,22 @@ MERGE (tc_nl)-[:RESOLVES_PSEUDONYMS_FOR]->(ds);
 // 4. Cross-border mutual recognition
 // ============================================================
 
+// The adopted Regulation has no article on trust centres recognising each
+// other; the closest provision is HealthData@EU, the cross-border
+// infrastructure (Art. 75). The edge used to cite "EHDS Art. 51", the
+// proposal's numbering, which in the adopted text is minimum data categories.
+// MERGE on the edge alone and SET the properties, so a graph seeded with the
+// old framework gets it corrected rather than a second edge next to it.
 MERGE (tc_de:TrustCenter {name: "MedReg DE Trust Centre"})
 MERGE (tc_nl:TrustCenter {name: "Limburg Trust Centre NL"})
-MERGE (tc_de)-[:MUTUALLY_RECOGNISES {
-  since: date("2025-03-01"),
-  framework: "EHDS Art. 51",
-  status: "active"
-}]->(tc_nl)
-MERGE (tc_nl)-[:MUTUALLY_RECOGNISES {
-  since: date("2025-03-01"),
-  framework: "EHDS Art. 51",
-  status: "active"
-}]->(tc_de);
+MERGE (tc_de)-[r1:MUTUALLY_RECOGNISES]->(tc_nl)
+  ON CREATE SET r1.since = date("2025-03-01"), r1.status = "active"
+  ON MATCH SET r1.status = coalesce(r1.status, "active")
+SET r1.framework = "Art. 75"
+MERGE (tc_nl)-[r2:MUTUALLY_RECOGNISES]->(tc_de)
+  ON CREATE SET r2.since = date("2025-03-01"), r2.status = "active"
+  ON MATCH SET r2.status = coalesce(r2.status, "active")
+SET r2.framework = "Art. 75";
 
 // ============================================================
 // 5. Sample SPE Sessions (TEE-attested)

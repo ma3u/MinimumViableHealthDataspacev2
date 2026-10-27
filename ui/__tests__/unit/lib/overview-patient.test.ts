@@ -146,7 +146,7 @@ describe("buildPatientView", () => {
     expect(consent?.text).toContain("2 consents active");
   });
 
-  it("shows who read data from my holder in the last twelve months (Art. 8)", () => {
+  it("shows who read data from my holder in the last twelve months (Art. 9)", () => {
     const holder = byId.get("holder:did-web-alpha-klinik-de-participant")!;
     expect(holder.kind).toBe("Health data holder");
     const pharmaco = byId.get("access:did-web-pharmaco-de-research")!;
@@ -157,7 +157,7 @@ describe("buildPatientView", () => {
     expect(byId.has("access:did-web-irs-fr-hdab")).toBe(false);
     const signal = view.signals.find((s) => s.code === "access-log");
     expect(signal?.text).toContain("1 organisations");
-    expect(signal?.article).toContain("Art. 8");
+    expect(signal?.article).toContain("Art. 9");
   });
 
   it("names one patient only and speaks no Neo4j", () => {
@@ -222,7 +222,7 @@ describe("buildPatientView", () => {
 });
 
 describe("buildPatientView, M6", () => {
-  it("names who read my record when the log knows (Art. 8)", () => {
+  it("names who read my record when the log knows (Art. 9)", () => {
     const v = buildPatientView(
       input({
         recordLog: [
@@ -286,12 +286,12 @@ describe("buildPatientView, M6", () => {
       }),
     );
     const consent = v.nodes.find((n) => n.id === "consent:CONSENT-003")!;
-    expect(consent.label).toBe("opted out 2026-05-01");
+    expect(consent.label).toBe("withdrawn 2026-05-01");
     expect(consent.status).toBe("none");
     expect(consent.facts!.find(([k]) => k === "state")?.[1]).toContain(
-      "Art. 71",
+      "GDPR Art. 7(3)",
     );
-    const s = v.signals.find((x) => x.code === "opt-out")!;
+    const s = v.signals.find((x) => x.code === "consent-withdrawn")!;
     expect(s.nodeId).toBe(consent.id);
     expect(s.text).toContain("Respiratory EHDS Cohort");
     expect(v.signals.find((x) => x.code === "consent-summary")?.text).toContain(
@@ -344,5 +344,33 @@ describe("ownPatientId", () => {
     expect(ownPatientId("patient2")).toBe("P2");
     expect(ownPatientId("edcadmin")).toBeNull();
     expect(ownPatientId(null)).toBeNull();
+  });
+});
+
+describe("the Art. 71 opt-out in the patient's overview (ADR-062)", () => {
+  it("is its own node, apart from the study consents", () => {
+    const v = buildPatientView(
+      input({ optOut: { optedOut: true, since: "2026-10-27T10:00:00Z" } }),
+    );
+    const node = v.nodes.find((n) => n.id === "secondary-use")!;
+    expect(node.label).toBe("opted out 2026-10-27");
+    expect(node.article).toBe("Art. 71 opt-out from secondary use");
+    const s = v.signals.find((x) => x.code === "opt-out")!;
+    expect(s.nodeId).toBe("secondary-use");
+    expect(s.text).toContain("new permits get nothing of mine");
+  });
+
+  it("says secondary use is the default when the person has not opted out", () => {
+    const v = buildPatientView(
+      input({ optOut: { optedOut: false, since: null } }),
+    );
+    expect(v.nodes.find((n) => n.id === "secondary-use")?.label).toBe(
+      "secondary use: on",
+    );
+  });
+
+  it("shows nothing when the state is not known", () => {
+    const v = buildPatientView(input());
+    expect(v.nodes.find((n) => n.id === "secondary-use")).toBeUndefined();
   });
 });

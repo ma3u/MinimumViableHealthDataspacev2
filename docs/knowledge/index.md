@@ -26,7 +26,8 @@ frontmatter. Spec:
 [omop-cdm-nodes](datamodels/omop-cdm-nodes.md) ·
 [dsp-contract-chain](datamodels/dsp-contract-chain.md) ·
 [healthdcat-ap](datamodels/healthdcat-ap.md) ·
-[participant-directory](datamodels/participant-directory.md)
+[participant-directory](datamodels/participant-directory.md) ·
+[secondary-use-opt-out](datamodels/secondary-use-opt-out.md)
 
 ## apis/ — surfaces & contracts
 

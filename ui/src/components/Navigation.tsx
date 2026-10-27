@@ -35,6 +35,7 @@ import {
   Menu,
   X,
   Globe,
+  Scale,
 } from "lucide-react";
 import UserMenu from "./UserMenu";
 import ThemeToggle from "./ThemeToggle";
@@ -445,6 +446,7 @@ const docsGroup: NavGroup = {
       icon: ShieldCheck,
     },
     { href: "/docs/klarbefund", label: "Klarbefund", icon: Smartphone },
+    { href: "/docs/ehds", label: "EHDS Regulation", icon: Scale },
     { href: "/docs/operations", label: "Operations", icon: Activity },
   ],
 };
