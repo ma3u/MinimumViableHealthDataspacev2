@@ -488,3 +488,144 @@ SET vc.expiresAt = datetime('2026-06-20T00:06:57Z'), vc.status = 'expired';
 MATCH (vc:VerifiableCredential)
 WHERE vc.credentialId IN ['vc:data-quality-label:clinic-alphaklinik', 'vc:data-quality-label:clinic-lmc']
 SET vc.expiresAt = datetime('2026-09-18T00:06:57Z'), vc.status = 'expired';
+
+// ── 9. The second demo patient, treated at Limburg Medical Centre (#708) ──
+// Jan de Vries, the patient2 login. A verified EUDI Wallet PID with his name
+// signs in to this record, so it has to exist (ui/src/lib/eudi-patient-map.ts).
+MERGE (p:Patient {resourceId: 'P2'})
+SET p.id = 'P2',
+    p.name = 'Jan de Vries',
+    p.gender = 'male',
+    p.birthDate = date('1965-06-02'),
+    p.city = 'Maastricht',
+    p.country = 'NL',
+    p.demo = true,
+    p.fictional = true
+WITH p
+MATCH (holder:Participant {participantId: 'did:web:lmc.nl:clinic'})
+MERGE (p)-[:TREATED_AT]->(holder);
+
+MATCH (p:Patient {resourceId: 'P2'})
+UNWIND [
+  {id: 'cond-p2-49436004', code: '49436004', display: 'Atrial fibrillation', onset: '2019-08-03'},
+  {id: 'cond-p2-38341003', code: '38341003', display: 'Hypertension', onset: '2010-05-17'},
+  {id: 'cond-p2-44054006', code: '44054006', display: 'Type 2 diabetes mellitus', onset: '2022-01-11'},
+  {id: 'cond-p2-414916001', code: '414916001', display: 'Obesity (BMI 33.8)', onset: '2016-03-22'},
+  {id: 'cond-p2-77176002', code: '77176002', display: 'Smoker', onset: '1985-01-01'},
+  {id: 'cond-p2-53741008', code: '53741008', display: 'Coronary artery disease', onset: '2020-11-30'},
+  {id: 'cond-p2-13644009', code: '13644009', display: 'Hypercholesterolaemia', onset: '2014-07-09'},
+  {id: 'cond-p2-84114007', code: '84114007', display: 'Heart failure (stage B)', onset: '2023-02-14'},
+  {id: 'cond-p2-13645005', code: '13645005', display: 'Chronic obstructive pulmonary disease', onset: '2018-10-05'},
+  {id: 'cond-p2-73430006', code: '73430006', display: 'Sleep apnea', onset: '2021-06-18'},
+  {id: 'cond-p2-73595000', code: '73595000', display: 'Work-related stress', onset: '2017-04-01'},
+  {id: 'cond-p2-90560007', code: '90560007', display: 'Gout', onset: '2022-09-27'}
+] AS c
+MERGE (cond:Condition {resourceId: c.id})
+SET cond.code = c.code,
+    cond.codeSystem = 'http://snomed.info/sct',
+    cond.display = c.display,
+    cond.name = c.display,
+    cond.clinicalStatus = 'active',
+    cond.onsetDate = c.onset,
+    cond.fictional = true
+MERGE (p)-[:HAS_CONDITION]->(cond);
+
+MATCH (p:Patient {resourceId: 'P2'})
+UNWIND [
+  {id: 'med-p2-855332', code: '855332', display: 'Warfarin 5 mg oral tablet', since: '2019-08-03'},
+  {id: 'med-p2-314077', code: '314077', display: 'Lisinopril 20 mg oral tablet', since: '2010-05-17'},
+  {id: 'med-p2-854905', code: '854905', display: 'Bisoprolol 5 mg oral tablet', since: '2019-08-03'},
+  {id: 'med-p2-617311', code: '617311', display: 'Atorvastatin 40 mg oral tablet', since: '2020-11-30'},
+  {id: 'med-p2-861004', code: '861004', display: 'Metformin 1000 mg oral tablet', since: '2022-01-11'},
+  {id: 'med-p2-313988', code: '313988', display: 'Furosemide 40 mg oral tablet', since: '2023-02-14'}
+] AS m
+MERGE (med:MedicationRequest {resourceId: m.id})
+SET med.medicationCode = m.code,
+    med.code = m.code,
+    med.codeSystem = 'http://www.nlm.nih.gov/research/umls/rxnorm',
+    med.display = m.display,
+    med.name = m.display,
+    med.status = 'active',
+    med.intent = 'order',
+    med.date = m.since,
+    med.fictional = true
+MERGE (p)-[:HAS_MEDICATION_REQUEST]->(med);
+
+MATCH (p:Patient {resourceId: 'P2'})
+UNWIND [
+  {id: 'enc-p2-2025-03-04', at: '2025-03-04', n: 1},
+  {id: 'enc-p2-2025-09-16', at: '2025-09-16', n: 2},
+  {id: 'enc-p2-2026-03-10', at: '2026-03-10', n: 3},
+  {id: 'enc-p2-2026-09-08', at: '2026-09-08', n: 4}
+] AS e
+MERGE (enc:Encounter {resourceId: e.id})
+SET enc.name = 'Laboratory visit ' + toString(e.n) + ' of 4',
+    enc.display = 'Laboratory visit, Limburg Medical Centre (fictional)',
+    enc.class = 'ambulatory',
+    enc.status = 'finished',
+    enc.date = e.at + 'T08:00:00Z',
+    enc.period = e.at,
+    enc.serviceProvider = 'Limburg Medical Centre',
+    enc.fictional = true
+MERGE (p)-[:HAS_ENCOUNTER]->(enc);
+
+// NT-proBNP rising, LDL falling under atorvastatin, INR in the warfarin
+// band (above the printed range by design), eGFR slipping.
+MATCH (p:Patient {resourceId: 'P2'})
+UNWIND [
+  {id: 'obs-p2-4548-4-2025-03-04', code: '4548-4', display: 'Hemoglobin A1c/Hemoglobin.total in Blood', unit: '%', value: 6.9, low: 4.0, high: 6.0, category: 'laboratory', at: '2025-03-04'},
+  {id: 'obs-p2-4548-4-2025-09-16', code: '4548-4', display: 'Hemoglobin A1c/Hemoglobin.total in Blood', unit: '%', value: 7.2, low: 4.0, high: 6.0, category: 'laboratory', at: '2025-09-16'},
+  {id: 'obs-p2-4548-4-2026-03-10', code: '4548-4', display: 'Hemoglobin A1c/Hemoglobin.total in Blood', unit: '%', value: 6.8, low: 4.0, high: 6.0, category: 'laboratory', at: '2026-03-10'},
+  {id: 'obs-p2-4548-4-2026-09-08', code: '4548-4', display: 'Hemoglobin A1c/Hemoglobin.total in Blood', unit: '%', value: 6.6, low: 4.0, high: 6.0, category: 'laboratory', at: '2026-09-08'},
+  {id: 'obs-p2-22748-8-2025-03-04', code: '22748-8', display: 'Cholesterol in LDL [Moles/volume] in Serum or Plasma', unit: 'mmol/L', value: 3.4, low: 0, high: 3.0, category: 'laboratory', at: '2025-03-04'},
+  {id: 'obs-p2-22748-8-2025-09-16', code: '22748-8', display: 'Cholesterol in LDL [Moles/volume] in Serum or Plasma', unit: 'mmol/L', value: 2.6, low: 0, high: 3.0, category: 'laboratory', at: '2025-09-16'},
+  {id: 'obs-p2-22748-8-2026-03-10', code: '22748-8', display: 'Cholesterol in LDL [Moles/volume] in Serum or Plasma', unit: 'mmol/L', value: 2.1, low: 0, high: 3.0, category: 'laboratory', at: '2026-03-10'},
+  {id: 'obs-p2-22748-8-2026-09-08', code: '22748-8', display: 'Cholesterol in LDL [Moles/volume] in Serum or Plasma', unit: 'mmol/L', value: 1.9, low: 0, high: 3.0, category: 'laboratory', at: '2026-09-08'},
+  {id: 'obs-p2-33762-6-2025-03-04', code: '33762-6', display: 'Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma', unit: 'pg/mL', value: 310, low: 0, high: 125, category: 'laboratory', at: '2025-03-04'},
+  {id: 'obs-p2-33762-6-2025-09-16', code: '33762-6', display: 'Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma', unit: 'pg/mL', value: 355, low: 0, high: 125, category: 'laboratory', at: '2025-09-16'},
+  {id: 'obs-p2-33762-6-2026-03-10', code: '33762-6', display: 'Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma', unit: 'pg/mL', value: 390, low: 0, high: 125, category: 'laboratory', at: '2026-03-10'},
+  {id: 'obs-p2-33762-6-2026-09-08', code: '33762-6', display: 'Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma', unit: 'pg/mL', value: 420, low: 0, high: 125, category: 'laboratory', at: '2026-09-08'},
+  {id: 'obs-p2-6301-6-2025-03-04', code: '6301-6', display: 'INR in Platelet poor plasma by Coagulation assay', unit: '{INR}', value: 2.6, low: 0.8, high: 1.2, category: 'laboratory', at: '2025-03-04'},
+  {id: 'obs-p2-6301-6-2025-09-16', code: '6301-6', display: 'INR in Platelet poor plasma by Coagulation assay', unit: '{INR}', value: 3.4, low: 0.8, high: 1.2, category: 'laboratory', at: '2025-09-16'},
+  {id: 'obs-p2-6301-6-2026-03-10', code: '6301-6', display: 'INR in Platelet poor plasma by Coagulation assay', unit: '{INR}', value: 2.4, low: 0.8, high: 1.2, category: 'laboratory', at: '2026-03-10'},
+  {id: 'obs-p2-6301-6-2026-09-08', code: '6301-6', display: 'INR in Platelet poor plasma by Coagulation assay', unit: '{INR}', value: 2.8, low: 0.8, high: 1.2, category: 'laboratory', at: '2026-09-08'},
+  {id: 'obs-p2-62238-1-2025-03-04', code: '62238-1', display: 'Glomerular filtration rate/1.73 sq M.predicted by CKD-EPI', unit: 'mL/min/{1.73_m2}', value: 74, low: 90, high: null, category: 'laboratory', at: '2025-03-04'},
+  {id: 'obs-p2-62238-1-2025-09-16', code: '62238-1', display: 'Glomerular filtration rate/1.73 sq M.predicted by CKD-EPI', unit: 'mL/min/{1.73_m2}', value: 71, low: 90, high: null, category: 'laboratory', at: '2025-09-16'},
+  {id: 'obs-p2-62238-1-2026-03-10', code: '62238-1', display: 'Glomerular filtration rate/1.73 sq M.predicted by CKD-EPI', unit: 'mL/min/{1.73_m2}', value: 69, low: 90, high: null, category: 'laboratory', at: '2026-03-10'},
+  {id: 'obs-p2-62238-1-2026-09-08', code: '62238-1', display: 'Glomerular filtration rate/1.73 sq M.predicted by CKD-EPI', unit: 'mL/min/{1.73_m2}', value: 66, low: 90, high: null, category: 'laboratory', at: '2026-09-08'},
+  {id: 'obs-p2-8480-6-2025-03-04', code: '8480-6', display: 'Systolic blood pressure', unit: 'mm[Hg]', value: 152, low: 100, high: 130, category: 'vital-signs', at: '2025-03-04'},
+  {id: 'obs-p2-8480-6-2025-09-16', code: '8480-6', display: 'Systolic blood pressure', unit: 'mm[Hg]', value: 144, low: 100, high: 130, category: 'vital-signs', at: '2025-09-16'},
+  {id: 'obs-p2-8480-6-2026-03-10', code: '8480-6', display: 'Systolic blood pressure', unit: 'mm[Hg]', value: 138, low: 100, high: 130, category: 'vital-signs', at: '2026-03-10'},
+  {id: 'obs-p2-8480-6-2026-09-08', code: '8480-6', display: 'Systolic blood pressure', unit: 'mm[Hg]', value: 136, low: 100, high: 130, category: 'vital-signs', at: '2026-09-08'},
+  {id: 'obs-p2-39156-5-2025-03-04', code: '39156-5', display: 'Body mass index (BMI) [Ratio]', unit: 'kg/m2', value: 34.6, low: 18.5, high: 25.0, category: 'vital-signs', at: '2025-03-04'},
+  {id: 'obs-p2-39156-5-2025-09-16', code: '39156-5', display: 'Body mass index (BMI) [Ratio]', unit: 'kg/m2', value: 34.1, low: 18.5, high: 25.0, category: 'vital-signs', at: '2025-09-16'},
+  {id: 'obs-p2-39156-5-2026-03-10', code: '39156-5', display: 'Body mass index (BMI) [Ratio]', unit: 'kg/m2', value: 33.9, low: 18.5, high: 25.0, category: 'vital-signs', at: '2026-03-10'},
+  {id: 'obs-p2-39156-5-2026-09-08', code: '39156-5', display: 'Body mass index (BMI) [Ratio]', unit: 'kg/m2', value: 33.8, low: 18.5, high: 25.0, category: 'vital-signs', at: '2026-09-08'}
+] AS o
+MERGE (obs:Observation {resourceId: o.id})
+SET obs.code = o.code,
+    obs.codeSystem = 'http://loinc.org',
+    obs.display = o.display,
+    obs.name = o.display + ' ' + toString(o.value) + ' ' + o.unit,
+    obs.status = 'final',
+    obs.category = o.category,
+    obs.valueQuantity = o.value,
+    obs.value = o.value,
+    obs.unit = o.unit,
+    obs.valueUnit = o.unit,
+    obs.referenceLow = o.low,
+    obs.referenceHigh = o.high,
+    obs.referenceText = CASE WHEN o.high IS NULL THEN '> ' + toString(o.low) ELSE toString(o.low) + ' - ' + toString(o.high) END + ' ' + o.unit + ' (as printed on the report)',
+    obs.effectiveDate = date(o.at),
+    obs.dateTime = o.at + 'T08:30:00Z',
+    obs.performer = 'Limburg Medical Centre, Klinisch Laboratorium (fictional)',
+    obs.fictional = true
+MERGE (p)-[:HAS_OBSERVATION]->(obs)
+WITH p, obs, o
+MATCH (enc:Encounter {resourceId: 'enc-p2-' + o.at})
+MERGE (obs)-[:PART_OF]->(enc)
+WITH obs, o
+MERGE (lc:LoincCode {loincNumber: o.code})
+  ON CREATE SET lc.name = o.display + ' (LOINC ' + o.code + ')',
+                lc.longCommonName = o.display
+MERGE (obs)-[:CODED_BY]->(lc);

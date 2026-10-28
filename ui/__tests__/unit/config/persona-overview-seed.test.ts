@@ -212,6 +212,42 @@ describe("seed-persona-overview.cypher", () => {
   });
 });
 
+describe("the second demo patient, P2 (#708)", () => {
+  const profile = JSON.parse(
+    read("ui/public/mock/patient_profile_patient2.json"),
+  );
+
+  it("seeds Jan de Vries, the patient2 login, at Limburg Medical Centre", () => {
+    expect(seed).toMatch(/MERGE \(p:Patient \{resourceId: 'P2'\}\)/);
+    expect(seed).toContain("p.name = 'Jan de Vries'");
+    expect(seed).toContain("p.country = 'NL'");
+    expect(seed).toMatch(
+      /participantId: 'did:web:lmc\.nl:clinic'\}\)\nMERGE \(p\)-\[:TREATED_AT\]->\(holder\);/,
+    );
+  });
+
+  it("carries the diagnoses and medications the patient2 profile shows, under the same codes", () => {
+    const conds = seed.match(/\{id: 'cond-p2-[^\n]+/g) ?? [];
+    const meds = seed.match(/\{id: 'med-p2-[^\n]+/g) ?? [];
+    expect(conds).toHaveLength(profile.conditions.length);
+    expect(meds).toHaveLength(profile.medications.length);
+    for (const c of profile.conditions) {
+      expect(seed).toContain(`{id: 'cond-p2-${c.code}', code: '${c.code}'`);
+    }
+    for (const m of profile.medications) {
+      expect(seed).toContain(`{id: 'med-p2-${m.code}', code: '${m.code}'`);
+    }
+  });
+
+  it("seeds 28 observations, 7 LOINC parameters at 4 visits, each part of a visit", () => {
+    expect(seed.match(/\{id: 'obs-p2-[^']+'/g)).toHaveLength(28);
+    expect(seed.match(/\{id: 'enc-p2-\d{4}-\d{2}-\d{2}'/g)).toHaveLength(4);
+    expect(seed).toContain(
+      "MATCH (enc:Encounter {resourceId: 'enc-p2-' + o.at})",
+    );
+  });
+});
+
 describe("wiring of the seed", () => {
   it("seed.sh runs the file on the full path and on the demo-only path, after the compliance matrix", () => {
     const runs = seedSh.match(
