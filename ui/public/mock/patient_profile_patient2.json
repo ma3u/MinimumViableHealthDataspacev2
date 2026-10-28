@@ -38,7 +38,7 @@
       "onsetDate": "2020-11-30"
     },
     {
-      "code": "73211009",
+      "code": "13644009",
       "display": "Hypercholesterolaemia",
       "onsetDate": "2014-07-09"
     },
@@ -48,12 +48,12 @@
       "onsetDate": "2023-02-14"
     },
     {
-      "code": "195967001",
+      "code": "13645005",
       "display": "Chronic obstructive pulmonary disease",
       "onsetDate": "2018-10-05"
     },
     {
-      "code": "271825005",
+      "code": "73430006",
       "display": "Sleep apnea",
       "onsetDate": "2021-06-18"
     },
@@ -63,7 +63,7 @@
       "onsetDate": "2017-04-01"
     },
     {
-      "code": "40055000",
+      "code": "90560007",
       "display": "Gout",
       "onsetDate": "2022-09-27"
     }
@@ -74,23 +74,23 @@
       "display": "Warfarin 5 mg oral tablet"
     },
     {
-      "code": "197361",
+      "code": "314077",
       "display": "Lisinopril 20 mg oral tablet"
     },
     {
-      "code": "308460",
+      "code": "854905",
       "display": "Bisoprolol 5 mg oral tablet"
     },
     {
-      "code": "209459",
+      "code": "617311",
       "display": "Atorvastatin 40 mg oral tablet"
     },
     {
-      "code": "860975",
+      "code": "861004",
       "display": "Metformin 1000 mg oral tablet"
     },
     {
-      "code": "1049502",
+      "code": "313988",
       "display": "Furosemide 40 mg oral tablet"
     }
   ],
