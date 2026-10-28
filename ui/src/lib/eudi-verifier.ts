@@ -217,6 +217,31 @@ export async function getPresentationResult(
   return { status: "failed", reason: "no PID in the wallet's response" };
 }
 
+/**
+ * Whether the wallet has fetched the signed request, from the verifier's
+ * event log. A wallet that will not present to this relying party fetches the
+ * request and then sends nothing: d-you without our own registration
+ * certificate did exactly that (#708, 2026-10-28). The fetch is the only sign
+ * the page can show that the scan reached the wallet.
+ */
+export async function walletFetchedRequest(
+  transactionId: string,
+): Promise<boolean> {
+  const s = settings();
+  const res = await fetch(
+    `${s.base}/ui/presentations/${encodeURIComponent(transactionId)}/events`,
+    { headers: { accept: "application/json" }, cache: "no-store" },
+  );
+  if (!res.ok) return false;
+  type Event = { actor?: string };
+  const json = (await res.json().catch(() => null)) as
+    | { events?: Event[] }
+    | Event[]
+    | null;
+  const events = Array.isArray(json) ? json : json?.events ?? [];
+  return events.some((e) => e.actor === "Wallet");
+}
+
 function fromClaims(pid: VerifiedPid | null): PresentationResult {
   return pid
     ? { status: "completed", pid }

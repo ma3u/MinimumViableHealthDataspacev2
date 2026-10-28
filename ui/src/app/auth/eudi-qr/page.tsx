@@ -17,6 +17,8 @@ import { CITIZEN_WALLET } from "@/lib/wallet-config";
 
 const POLL_MS = 2000;
 const TIMEOUT_MS = 5 * 60 * 1000;
+/** How long a wallet that opened the request may stay silent before we say so. */
+const SILENT_MS = 20 * 1000;
 const WALLET = CITIZEN_WALLET;
 
 type Phase =
@@ -44,6 +46,9 @@ function EudiQrContent() {
   const [walletLink, setWalletLink] = useState<string | null>(null);
   const [demoHint, setDemoHint] = useState<string | null>(null);
   const [refusal, setRefusal] = useState<string | null>(null);
+  const [walletOpened, setWalletOpened] = useState(false);
+  const [walletSilent, setWalletSilent] = useState(false);
+  const openedAtRef = useRef<number>(0);
   const sidRef = useRef<string | null>(null);
   const startedAtRef = useRef<number>(0);
 
@@ -55,6 +60,9 @@ function EudiQrContent() {
     setPhase("loading");
     setQr(null);
     setWalletLink(null);
+    setWalletOpened(false);
+    setWalletSilent(false);
+    openedAtRef.current = 0;
     sidRef.current = null;
     try {
       const res = await fetch("/api/auth/eudi/start", { method: "POST" });
@@ -97,7 +105,11 @@ function EudiQrContent() {
           if (active) setPhase("expired");
           return;
         }
-        const data = (await res.json()) as { status: string; error?: string };
+        const data = (await res.json()) as {
+          status: string;
+          error?: string;
+          walletOpened?: boolean;
+        };
         // A PID that belongs to no record here, or a declined wallet (#708).
         if (res.status === 403 && active) {
           setRefusal(data.error ?? "The wallet could not sign you in.");
@@ -107,6 +119,13 @@ function EudiQrContent() {
         if (data.status === "completed" && active) {
           setPhase("completed");
           await signIn("eudi-wallet", { sid, callbackUrl });
+          return;
+        }
+        // The wallet fetched the request but has not answered (#708).
+        if (data.walletOpened && active) {
+          if (!openedAtRef.current) openedAtRef.current = Date.now();
+          setWalletOpened(true);
+          setWalletSilent(Date.now() - openedAtRef.current > SILENT_MS);
         }
       } catch {
         /* transient — keep polling */
@@ -209,7 +228,7 @@ function EudiQrContent() {
             to prove who you are (OpenID4VP).
             <br />
             <span className="text-xs">
-              Synthetic demo · signs you in as the demo patient
+              Synthetic records · your PID opens the one in your name
             </span>
           </p>
 
@@ -233,8 +252,20 @@ function EudiQrContent() {
               </div>
               <div className="flex items-center justify-center gap-2 text-sm text-(--text-secondary) mb-3">
                 <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                Waiting for your wallet…
+                {walletOpened
+                  ? "Your wallet opened the request…"
+                  : "Waiting for your wallet…"}
               </div>
+              {walletSilent && (
+                <p
+                  role="status"
+                  className="text-xs text-amber-600 dark:text-amber-400 mb-3"
+                >
+                  Your wallet opened the request but has not answered. If it
+                  says this service may not verify your data, this hub is not
+                  registered with that wallet yet.
+                </p>
+              )}
               {walletLink && (
                 <a
                   href={walletLink}

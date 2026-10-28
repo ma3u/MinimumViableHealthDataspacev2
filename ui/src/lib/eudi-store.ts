@@ -39,6 +39,8 @@ export interface EudiTransaction {
   createdAt: number;
   /** pinned only after the verifier confirms a valid presentation */
   verifiedPatient?: EudiVerifiedPatient;
+  /** when the verifier first saw the wallet fetch the request (#708) */
+  walletOpenedAt?: number;
   /** true once a session has been minted from this sid (single-use) */
   consumed?: boolean;
   error?: string;
