@@ -317,5 +317,7 @@ CFM creates the EDC-layer contexts locally; `scripts/azure/05-cp-participants.sh
 (`DID_HOST`), `scripts/seed-identityhub-participants.sh` and
 `scripts/seed-issuer-holders.sh` create them where CFM is absent, and all three
 must carry the same id and DID for a participant or the suites cannot match
-them. The compliance suites match on the slug inside the identity, so either
+them. A context they create also needs the config CFM would write (STS client
+id, token URL, secret alias), or every DSP call for it answers 500;
+`scripts/seed-cp-participant-config.sh` writes it (#710). The compliance suites match on the slug inside the identity, so either
 form satisfies them; only the EDC layer's protocol flows need the resolvable one.

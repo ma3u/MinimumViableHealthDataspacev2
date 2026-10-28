@@ -160,6 +160,7 @@ else
   }
 
   log "restarting ${ISSUER_CONTAINER} to load the identity"
+  restarted_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
   docker restart "$ISSUER_CONTAINER" >/dev/null
   deadline=$(( $(date +%s) + ISSUER_RESTART_TIMEOUT )); ok=0
   while [ "$(date +%s)" -lt "$deadline" ]; do
@@ -179,8 +180,13 @@ else
     docker inspect "$ISSUER_CONTAINER" \
       --format '{{if .State.Health}}{{range .State.Health.Log}}{{.Output}}{{end}}{{end}}' 2>/dev/null \
       | tail -5 | sed 's/^/    /' >&2
-    echo "  the last 40 lines it logged since the restart:" >&2
-    docker logs --tail 40 "$ISSUER_CONTAINER" 2>&1 | sed 's/^/    /' >&2 || true
+    # Without the OpenTelemetry agent's export errors: with no collector in CI
+    # it logs a stack trace every few seconds, and on 2026-10-28 those were all
+    # 40 of the lines this printed.
+    echo "  what it logged since the restart, without the OpenTelemetry exporter's errors (last 40 lines):" >&2
+    { docker logs --since "$restarted_at" "$ISSUER_CONTAINER" 2>&1 || true; } \
+      | grep -v -E 'otel\.javaagent|opentelemetry|OkHttp|localhost/[^ ]*:431[78]|^[[:space:]]+at |^[[:space:]]*((Suppressed|Caused by): )?java\.net\.ConnectException|^[[:space:]]+\.\.\. [0-9]+ more' \
+      | tail -40 | sed 's/^/    /' >&2 || true
     echo "  the ports it is listening on:" >&2
     docker exec "$ISSUER_CONTAINER" sh -c \
       '(netstat -ltn 2>/dev/null || ss -ltn 2>/dev/null) | tail -12' 2>&1 | sed 's/^/    /' >&2 || true

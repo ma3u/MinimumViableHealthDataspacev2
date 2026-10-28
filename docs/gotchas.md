@@ -3,6 +3,39 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-28: a participant context without its config cannot send DSP, and CI never had one
+
+CI never had a DSP path: CAT-1.1 failed for every participant, Bruno's
+`10 Connecting partner/16` answered 502, and the trust checks TRUST-6.3 to 6.5
+skipped. The control plane said why, but no CI job printed its log:
+
+```
+500  EdcException: No configuration found for participant context <ctx>
+```
+
+Before the control plane sends a DSP message for a participant, it fetches
+that participant's token from the IdentityHub's STS. The client id, the token
+URL and the Vault alias of the client secret come from the context's config
+(`PUT <v>/participants/{id}/config`), not from the context itself. Locally, the
+CFM EDC-V agent writes that config when it provisions. CI creates its contexts
+with `scripts/azure/05-cp-participants.sh`, which wrote none, so every call
+died before it left. The secret needs no copying: an IdentityHub participant
+created without a per-participant Vault config keeps its STS secret at
+`secret/<ctx>-sts-client-secret`, the mount the control plane reads.
+
+`scripts/seed-cp-participant-config.sh` writes the config for every context
+that has none and never touches one that has (CFM's also carries an encrypted
+per-participant Vault config). It runs in the DCP job and in
+`scripts/seed-identity-layer.sh`, which the TCK and Bruno jobs now both use.
+Reproduced and fixed on the local stack with a throwaway participant made the
+CI way: 500 before the config; after it, 401 until the participant had a
+membership; then the catalogue.
+
+A second finding from the same day: when the IssuerService did not come back
+after its restart, the diagnostic printed the last 40 log lines, and all 40
+were the OpenTelemetry agent failing to reach a collector CI does not run.
+`seed-issuer-identity.sh` now prints the log since the restart without them.
+
 ## 2026-10-28: an IssuerService issues each credential type once, and IdentityHub's list hides new credentials
 
 Three things found while making a second issuer trusted for membership (#710).
