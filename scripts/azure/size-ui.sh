@@ -13,6 +13,11 @@
 # on the number of concurrent requests a replica holds, instead of ACA's
 # default rule of 10. A new revision rolls in without an outage: the UI holds
 # no lock, unlike Neo4j (size-neo4j.sh). Not during a k6 run.
+#
+# Sticky sessions stay on with more than one replica: an EUDI Wallet sign-in
+# lives in the memory of the replica that started it (ui/src/lib/eudi-store.ts),
+# so a status poll that reaches another replica answers 404 and the page says
+# the request expired before a QR code shows (#708, docs/gotchas.md).
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=env.sh
@@ -25,6 +30,7 @@ show() {
       minReplicas: properties.template.scale.minReplicas,
       maxReplicas: properties.template.scale.maxReplicas,
       rules: properties.template.scale.rules,
+      affinity: properties.configuration.ingress.stickySessions.affinity,
       latestRevision: properties.latestRevisionName}" -o json
   az containerapp revision list --name "$UI_APP" --resource-group "$RG" \
     --query "[?properties.active].{revision: name, health: properties.healthState, running: properties.runningState, replicas: properties.replicas}" -o table
@@ -42,6 +48,8 @@ az containerapp update --name "$UI_APP" --resource-group "$RG" \
   --scale-rule-name http-concurrency --scale-rule-type http \
   --scale-rule-http-concurrency "$UI_SCALE_CONCURRENCY" \
   -o none
+az containerapp ingress sticky-sessions set --name "$UI_APP" --resource-group "$RG" \
+  --affinity sticky -o none
 
 LATEST="$(az containerapp show --name "$UI_APP" --resource-group "$RG" \
   --query properties.latestRevisionName -o tsv)"

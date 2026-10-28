@@ -8,11 +8,13 @@
  * and, on completion, calls `signIn("eudi-wallet", { sid })`; the Credentials
  * provider re-reads the pinned, server-verified result for that `sid`.
  *
- * Persistence: an in-memory Map is acceptable because the Azure Container Apps
- * UI runs a single replica (min=max=1, see scripts/azure/05-cfm-ui.sh). It does
- * NOT survive a revision rollover/restart — in-flight logins would drop. A
- * durable store (Neo4j / Vault / Postgres) is the production path. Flagged in
- * ADR-028.
+ * Persistence: an in-memory Map, one per replica. The Azure UI runs up to six
+ * replicas (ADR-061), so its ingress has sticky sessions on
+ * (scripts/azure/size-ui.sh) and every poll from a browser reaches the replica
+ * that started its sign-in; without them the first poll answered 404 (#708).
+ * It does NOT survive a revision rollover/restart — in-flight logins would
+ * drop. A durable store (Neo4j / Vault / Postgres) is the production path.
+ * Flagged in ADR-028.
  */
 import { randomUUID, randomBytes } from "crypto";
 import type { AssuranceLevel } from "@/lib/assurance";

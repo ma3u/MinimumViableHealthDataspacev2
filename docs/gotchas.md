@@ -3,6 +3,24 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-28: the wallet sign-in expired at once on six UI replicas
+
+On https://ehds.mabu.red/auth/eudi-qr the page said "This sign-in request
+expired." about two seconds after it loaded, before any QR code showed.
+`POST /api/auth/eudi/start` answered 200 and the first
+`GET /api/auth/eudi/status` answered 404 `unknown or expired session`.
+
+The sign-in lives in an in-memory Map (`ui/src/lib/eudi-store.ts`), whose
+comment said the Azure UI runs one replica. ADR-061 (#648, 2026-10-16) raised
+`UI_MAX_REPLICAS` to 6 with no session affinity, so a poll mostly reached a
+replica that had never seen the sign-in. Nothing caught it: the unit tests run
+one process, and the compose stack runs one UI.
+
+Fix: sticky sessions on the `mvhd-ui` ingress, set by `size-ui.sh` and by
+`05-cfm-ui.sh` on a fresh deploy. `size-ui.sh --check` shows `affinity`. The
+wallet never calls the UI (it posts to the verifier), so the browser's cookie is
+the only affinity needed. A store shared by the replicas is still the lasting fix.
+
 ## 2026-10-28: a participant context without its config cannot send DSP, and CI never had one
 
 CI never had a DSP path: CAT-1.1 failed for every participant, Bruno's
