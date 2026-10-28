@@ -7,6 +7,7 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 
 ## current/
 
+- [Roadmap to 2035: EHDS, wallets and Simpl](../planning-health-dataspace-v2.md#roadmap-to-2035-ehds-wallets-and-simpl): the dates, P1 to P3, plan #725 over issues #708 to #724, from the [gap analysis](../simpl-ehds-gap-analysis.md)
 - [issue-182-german-national-wallet-integration](current/issue-182-german-national-wallet-integration.md) — German EUDI Wallet (RP contract, self-hosted verifier, wallet-provider backend) **+ the #72 citizen consent demo** it enables (W7–W9)
 - [persona-journeys/registration-identification-exchange](../persona-journeys/registration-identification-exchange.md) — the seven-actor map: registration · identification · data exchange, primary and secondary use
 - [sbom-and-component-updates](current/sbom-and-component-updates.md) — SBOM, automated CVE scanning, evidence-based update queue
