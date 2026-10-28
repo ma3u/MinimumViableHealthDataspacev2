@@ -617,7 +617,8 @@ f = folder("07 Journey - Data permit", "Art. 67 to 73: application, permit, resu
 """The two-sided procedure the regulation defines, in the order it runs. The acting persona
 changes from request to request; each request says which one it is and the collection carries
 the ids between them. One run adds one application, one permit, one finding and one closed
-supervision cycle to the graph.
+supervision cycle to the graph. Against the live hub, Demo Smoke removes them afterwards
+(neo4j/remove-api-collection-runs.cypher), found from the application's "Bruno:" name.
 
   data user   -> an application carrying the eleven Art. 67(2) items
   data user   -> declares it complete, the three-month clock starts (Art. 68(4))
@@ -759,9 +760,10 @@ f = folder("08 Journey - Data request", "Art. 69: a question answered in anonymi
 """The lighter of the two procedures: a data user asks a question whose answer is an anonymised
 statistic, and the access body decides it without issuing a permit. The route also tries to
 answer the question through the statistical service, which may be down; the decision is what
-is asserted here.""")
+is asserted here. The question starts with "Bruno:" so that Demo Smoke can remove the request
+from the live hub afterwards (neo4j/remove-api-collection-runs.cypher).""")
 req(f, "01 Data user asks a question (Art. 69)", "post", f"{B}/api/compliance/requests", persona="researcher",
-    body={"question": "How many patients with type 2 diabetes had an HbA1c above 9 percent in 2024?",
+    body={"question": "Bruno: How many patients with type 2 diabetes had an HbA1c above 9 percent in 2024?",
           "purpose": "SCIENTIFIC_RESEARCH", "statisticalContent": "One count, k-anonymity threshold 5",
           "datasetId": "{{datasetId}}", "safeguards": "aggregate only",
           "legalBasis": "Regulation (EU) 2025/327, Art. 69"},

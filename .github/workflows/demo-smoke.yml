@@ -131,6 +131,24 @@ jobs:
           path: test-results/bruno-api-azure-results/
           retention-days: 14
 
+  # The collection's two journeys file a whole procedure on the live hub each
+  # run (an application with its permit, results, finding and revocation; a
+  # data request), and nothing removed them: /compliance filled with identical
+  # rows, one revoked PharmaCo permit per run. This removes them afterwards
+  # through the seed job (neo4j/remove-api-collection-runs.cypher), and fails
+  # if any are left. Only on main, where the Azure login works (OIDC).
+  cleanup:
+    name: Remove the API collection's runs from the live graph
+    needs: [live, bruno]
+    if: always() && needs.live.outputs.up == 'true' && github.ref == 'refs/heads/main'
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/neo4j-seed.yml
+    with:
+      phase: api-cleanup
+    secrets: inherit
+
   playwright-public:
     name: Playwright public routes
     needs: live

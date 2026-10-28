@@ -17,13 +17,21 @@ on:
   workflow_dispatch:
     inputs:
       phase:
-        description: "full: every seed file. demo-only: governance and audit seeds, under a minute. phase26-only: the Phase 26 fast path."
+        description: "full: every seed file. demo-only: governance and audit seeds, under a minute. phase26-only: the Phase 26 fast path. api-cleanup: remove what the API collection's journeys added."
         type: choice
         default: full
         options:
           - full
           - demo-only
           - phase26-only
+          - api-cleanup
+  # Demo Smoke calls this with api-cleanup after the API collection has run
+  # against the live hub (neo4j/remove-api-collection-runs.cypher).
+  workflow_call:
+    inputs:
+      phase:
+        type: string
+        default: full
 
 permissions:
   id-token: write
@@ -39,6 +47,12 @@ env:
 jobs:
   seed:
     runs-on: ubuntu-latest
+    # One run at a time: each sets the job's image and SEED_PHASE before it
+    # starts it, so two at once (a manual seed and Demo Smoke's clean-up) would
+    # run each other's phase.
+    concurrency:
+      group: neo4j-seed-job
+      cancel-in-progress: false
     timeout-minutes: 80
     steps:
       - name: Checkout

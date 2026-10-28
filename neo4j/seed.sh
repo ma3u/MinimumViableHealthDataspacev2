@@ -75,6 +75,24 @@ finish() {
   exit 0
 }
 
+# After a Demo Smoke run: remove the procedures the API collection's journeys
+# added to the live graph (neo4j/remove-api-collection-runs.cypher). Demo
+# Smoke starts this through .github/workflows/neo4j-seed.yml.
+if [ "${SEED_PHASE:-}" = "api-cleanup" ]; then
+  echo ""
+  echo "=== SEED_PHASE=api-cleanup — removing what the API collection's journeys added ==="
+  run_file /seed/remove-api-collection-runs.cypher "API collection runs (Demo Smoke)"
+  echo ""
+  echo "=== Verifying ==="
+  left=$(cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
+    --non-interactive --format plain \
+    "RETURN COUNT { MATCH (a:AccessApplication) WHERE a.name STARTS WITH 'Bruno:' } + COUNT { MATCH (r:HealthDataRequest) WHERE r.question STARTS WITH 'Bruno:' OR r.question = 'How many patients with type 2 diabetes had an HbA1c above 9 percent in 2024?' } AS left;" \
+    2>/dev/null | tail -1)
+  echo "left from API collection runs: ${left:-unknown}"
+  [ "$left" = "0" ] || failed+=("API collection runs left: ${left:-unknown}")
+  finish
+fi
+
 # Phase 26 fast-path: when re-seeding just the federated discovery bits
 # on Azure, the full pipeline takes too long (FastRP on 100k+ nodes blew
 # past the 60 min replica-timeout last time). SEED_PHASE=phase26-only
