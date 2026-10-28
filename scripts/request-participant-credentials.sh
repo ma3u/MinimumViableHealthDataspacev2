@@ -146,11 +146,12 @@ if [ "${#WATCH_CTX[@]}" -gt 0 ]; then
   log "waiting up to ${WAIT_SECONDS}s for ${CREDENTIAL_TYPE} to arrive via DCP"
   deadline=$(( $(date +%s) + WAIT_SECONDS ))
   pending=1
-  declare -a ERRORED=()
+  declare -a ERRORED=() ISSUED=()
   while [ "$pending" -gt 0 ] && [ "$(date +%s)" -lt "$deadline" ]; do
     pending=0
     for i in "${!WATCH_CTX[@]}"; do
       [ -n "${ERRORED[$i]:-}" ] && continue
+      [ -n "${ISSUED[$i]:-}" ] && continue
       now=$(issued_count "${WATCH_CTX[$i]}")
       if [ "$now" -gt "${WATCH_BEFORE[$i]}" ]; then continue; fi
       # Ask the hub how the request is going; an ERROR is final and diagnosable.
@@ -165,6 +166,11 @@ except Exception: print('|')" 2>/dev/null || echo '|')
           # run hit exactly that, and an empty string read as "not errored", so
           # the wait ended after one pass and the reason never reached the log.
           ERROR) ERRORED[$i]="${st#*|}"; [ -n "${ERRORED[$i]}" ] || ERRORED[$i]="(hub reports ERROR with no errorDetail)"; continue ;;
+          # The hub stored the credential. Counting the list is not enough to
+          # see that: on a holder with several credentials IdentityHub's list
+          # left out the ones newly issued (2026-10-28, #710), and this script
+          # reported a credential that had arrived as missing.
+          ISSUED) ISSUED[$i]=1; continue ;;
         esac
       fi
       pending=$((pending + 1))
@@ -183,6 +189,8 @@ for i in "${!WATCH_CTX[@]}"; do
     missing=$((missing + 1))
   elif [ "$now" -gt "${WATCH_BEFORE[$i]}" ]; then
     echo -e "  ${GREEN}✓${NC} ${slug}: ${CREDENTIAL_TYPE} arrived over DCP (${WATCH_BEFORE[$i]} -> ${now})"
+  elif [ -n "${ISSUED[$i]:-}" ]; then
+    echo -e "  ${GREEN}✓${NC} ${slug}: ${CREDENTIAL_TYPE} arrived over DCP (request ${WATCH_HPID[$i]} ISSUED)"
   else
     echo -e "  ${RED}✗${NC} ${slug}: no new ${CREDENTIAL_TYPE} after ${elapsed}s (still ${now})"
     missing=$((missing + 1))

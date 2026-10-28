@@ -664,6 +664,16 @@
         "ports": ["10013:10013"]
       },
       {
+        "name": "simpl-ga-issuer",
+        "profiles": [],
+        "ports": ["10023:10013"]
+      },
+      {
+        "name": "rogue-issuer",
+        "profiles": ["trust-check"],
+        "ports": ["10033:10013"]
+      },
+      {
         "name": "tenant-manager",
         "profiles": [],
         "ports": ["11006:8080"]
@@ -719,6 +729,8 @@
     "issuerservice",
     "keycloak",
     "redlinedb",
+    "rogueissuer",
+    "simplga",
     "taskdb"
   ],
   "adrs": [

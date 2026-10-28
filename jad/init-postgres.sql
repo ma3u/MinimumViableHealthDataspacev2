@@ -87,3 +87,19 @@ CREATE INDEX IF NOT EXISTS idx_tasks_state ON tasks(state);
 -- "must be owner of table tasks" on every /tasks call (#571). The indexes
 -- follow the table's owner.
 ALTER TABLE tasks OWNER TO taskuser;
+
+-- #710: the IssuerService of a fictional Simpl Governance Authority, a trusted
+-- issuer for MembershipCredential (ADR-064), and of an issuer on no trust
+-- list, which the identity checks start only to see it refused.
+-- scripts/seed-test-issuer.sh creates both for a volume initialised earlier.
+CREATE DATABASE simplga;
+CREATE USER simplga WITH PASSWORD 'simplga';
+GRANT ALL PRIVILEGES ON DATABASE simplga TO simplga;
+\c simplga
+GRANT ALL ON SCHEMA public TO simplga;
+
+CREATE DATABASE rogueissuer;
+CREATE USER rogueissuer WITH PASSWORD 'rogueissuer';
+GRANT ALL PRIVILEGES ON DATABASE rogueissuer TO rogueissuer;
+\c rogueissuer
+GRANT ALL ON SCHEMA public TO rogueissuer;

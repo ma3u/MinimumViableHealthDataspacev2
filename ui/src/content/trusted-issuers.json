@@ -1,0 +1,27 @@
+{
+  "description": "The issuers the hub's control plane trusts, each for the credential types it may issue (#710, ADR-064). docker-compose.jad.yml sets edc.iam.trusted-issuer.<alias>.id and .supportedtypes from this; scripts/run-ehds-identity-checks.sh (TRUST-6.1) fails when the two differ, and /compliance shows this list.",
+  "issuers": [
+    {
+      "alias": "issuer",
+      "did": "did:web:issuerservice%3A10016:issuer",
+      "name": "Health Dataspace issuer",
+      "role": "The hub's own IssuerService: membership of the hub's data space and its EHDS credentials.",
+      "types": [
+        "MembershipCredential",
+        "ManufacturerCredential",
+        "EHDSParticipantCredential",
+        "DataProcessingPurposeCredential",
+        "DataQualityLabelCredential"
+      ],
+      "environments": ["compose", "ci", "azure"]
+    },
+    {
+      "alias": "simpl-ga",
+      "did": "did:web:simpl-ga-issuer%3A10016:simpl-ga",
+      "name": "Simpl test data space, Governance Authority (fictional)",
+      "role": "A Simpl data space's Governance Authority: membership of its data space, accepted as membership of the hub's (ADR-064, decision 2). Institut de Recherche Santé holds its membership from it.",
+      "types": ["MembershipCredential"],
+      "environments": ["compose", "ci"]
+    }
+  ]
+}

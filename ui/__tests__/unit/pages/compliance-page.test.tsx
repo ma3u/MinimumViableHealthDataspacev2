@@ -674,9 +674,12 @@ describe("CompliancePage", () => {
       render(<CompliancePage />);
 
       await waitFor(() => {
-        expect(
-          screen.getByText("EHDSParticipantCredential"),
-        ).toBeInTheDocument();
+        // The trusted issuers list (#710) names the type too, so look for the
+        // card outside it.
+        const cards = screen
+          .getAllByText("EHDSParticipantCredential")
+          .filter((el) => !el.closest('[data-testid="trusted-issuers"]'));
+        expect(cards).toHaveLength(1);
         expect(screen.getByText("DataQualityCredential")).toBeInTheDocument();
       });
     });

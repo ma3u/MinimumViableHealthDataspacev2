@@ -3,6 +3,39 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-10-28: an IssuerService issues each credential type once, and IdentityHub's list hides new credentials
+
+Three things found while making a second issuer trusted for membership (#710).
+
+**One IssuerService, one definition per credential type.** A second issuer
+context on the hub's IssuerService was created by API without trouble, key
+and DID document included, but its `MembershipCredential` definition answered
+409 "A Credential definition with credential type 'MembershipCredential'
+already exists": the check is across every context of the service. A second
+issuer of a type the hub already issues needs its own IssuerService, which is
+why the fictional Simpl Governance Authority and the rogue issuer are
+containers of their own (`simpl-ga-issuer`, `rogue-issuer`).
+
+**IdentityHub's credential list leaves out what it just stored.**
+`GET /v1alpha/participants/<ctx>/credentials` returned five credentials for a
+holder whose `credential_resource` table had eight, and never the newly
+ISSUED ones (state 500), with or without `limit` and `offset`.
+`request-participant-credentials.sh` counted that list to see a credential
+arrive and reported a delivered one as missing. It now also takes the request
+record's `ISSUED` status as arrival; the trust checks read the table.
+
+**A local stack older than a week refuses every DSP request.** Membership
+credentials are valid for 604800 seconds. After that a holder presents none,
+the provider logs "Number of requested credentials does not match the number
+of returned credentials" and answers 401, and the catalogue request comes back 502. Nothing else is wrong: `scripts/request-participant-credentials.sh` (and
+`scripts/seed-simpl-ga.sh` for irs) issues fresh ones.
+
+The control plane names the refused issuer, which is what TRUST-6.4 reads:
+"Credential types '[VerifiableCredential, MembershipCredential]' are not
+supported for issuer '<did>'". Read it from a captured `docker logs`, not
+through `docker logs | grep -q`, which fails under `pipefail` (see
+`scripts/seed-issuer-identity.sh`).
+
 ## 2026-10-16: the console guard told Keycloak every request was plain HTTP
 
 The Caddy sidecar of `guard-keycloak-console.sh` (F10, 2026-10-15) proxies to
