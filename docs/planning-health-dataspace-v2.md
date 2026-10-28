@@ -1,14 +1,101 @@
 # Planning: Health Dataspace v2
 
-Status checked against GitHub on **2026-10-04**. The latest release is
+Status checked against GitHub on **2026-10-28** (the release tables were
+written on 2026-10-04; on 2026-10-28 only whether each issue is open or closed
+was rechecked). The latest release is
 [v2.0.0](https://github.com/ma3u/MinimumViableHealthDataspacev2/releases/tag/v2.0.0)
 (2026-09-29); everything merged since then goes out with the next one. Work
 items flow `future/ → current/ → done/` in [`planning/index.md`](planning/index.md);
 live tracking is in [GitHub Issues](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues).
 
+- [Roadmap to 2035](#roadmap-to-2035-ehds-wallets-and-simpl): the EHDS dates, the EUDI and Business Wallets, Simpl-Open, and the work each one sets.
 - [Done](#done): the releases, what is on `main` since v2.0.0, and the roadmap phases.
 - [Next release](#next-release-v210): v2.1.0, the open work already under way.
 - [Future releases](#future-releases): planned, waiting on someone else, or not started.
+
+---
+
+## Roadmap to 2035: EHDS, wallets and Simpl
+
+The direction since 2026-10-27, from the
+[Simpl-Open and EHDS gap analysis](simpl-ehds-gap-analysis.md) (#707) and its
+plan [#725](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/725).
+Article numbers are the adopted ones; what the hub implements per article is in
+[What the integration hub implements](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/ehds).
+
+**Principle.** Build only toward the specifications that carry the EHDS from
+2027 on: the EUDI Wallet (Implementing Regulation 2026/2099, OpenID4VP 1.0,
+HAIP 1.0, SD-JWT VC), the European Business Wallet, DSP 2025-1 and DCP 1.0,
+HealthDCAT-AP Release 8 (2026/2098), HealthData@EU over eDelivery. Nothing that
+keeps an older specification alive.
+
+**Priority.** P1: applies 26 March 2027, or unblocks interoperability now. P2:
+applies 26 March 2029, and the specification or act is published or due. P3:
+waits on a proposed Simpl requirement or an act not yet adopted; comment, don't
+build.
+
+### Dates that set the work
+
+| When          | What applies or happens                                                                                                                                                                                    | The hub                                                                                                                                                       |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Q4 2026       | Simpl-Open Hamburg 4.1 (October) and Innsbruck 5.0; the Community Preview of the DOME and monetisation requirements (28 October); the HealthData@EU act (Art. 75) planned for adoption                     | DSP compatibility kit against Simpl-Open once 4.1 code is public (#711); recommendations to the Simpl programme (gap analysis, section 8)                     |
+| End of 2026   | European Business Wallet, COM(2025) 838: Council position 9 June 2026, Parliament and Council aim for agreement by the end of 2026                                                                         | ADR and spike now, implementation after adoption (#709)                                                                                                       |
+| 2 Jan 2027    | The German EUDI Wallet (d-you) goes into production                                                                                                                                                        | SPRIND sandbox registration, our own relying-party certificates and verifier ([ADR-065](ADRs/ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md), #182) |
+| 26 March 2027 | The EHDS applies generally; access bodies and national contact points designated. 2026/2099: persons identify with the EUDI Wallet at assurance level substantial. 2026/2083: MyHealth@EU central services | P1: #708, #709, #710, #711                                                                                                                                    |
+| 26 March 2029 | Chapter IV in full, Chapter II for the first priority categories; 2026/2098 dataset descriptions; HealthData@EU                                                                                            | P2: #712 to #722, with #204 sealed permits                                                                                                                    |
+| 2030          | 2026/2099: assurance level high                                                                                                                                                                            | The session carries the level; the floor is the `PATIENT_MIN_ASSURANCE` setting (ADR-065)                                                                     |
+| 26 March 2031 | Further Art. 51(1) categories; Chapter III for EHR systems in service                                                                                                                                      | Out of scope until then                                                                                                                                       |
+| 26 March 2035 | Third countries in HealthData@EU                                                                                                                                                                           | Out of scope                                                                                                                                                  |
+
+### P1: now to 26 March 2027
+
+| Issue                                                                     | What                                                                                                                   | Where it stands (2026-10-28)                                                                                                                                                                                             |
+| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [#708](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/708) | EUDI Wallet sign-in to 2026/2099: both PID formats, encrypted responses, one record per PID                            | Live since 2026-10-27 (#728, ADR-065): HAIP, `direct_post.jwt`, the name only, a PID that matches nobody refused. The P2 record is PR #731. Open: a scan with the EU reference wallet; d-you after SPRIND sandbox access |
+| [#709](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/709) | European Business Wallet: a person applies for a data permit for an organisation, the access body verifies the mandate | Not started; ADR and spike first                                                                                                                                                                                         |
+| [#710](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/710) | Trust a Simpl Governance Authority as a credential issuer in the IdentityHub                                           | Not started (ADR-064, decision 2)                                                                                                                                                                                        |
+| [#711](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/711) | The DSP compatibility kit against a Simpl-Open connector, both directions                                              | Blocked until Hamburg 4.1 code is public                                                                                                                                                                                 |
+
+### P2: by 26 March 2029
+
+| Area                 | Issues                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Identity and trust   | [#712](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/712) healthcare attestations and health professionals in the wallet (after #708) · [#722](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/722) several access bodies as several Governance Authorities (after #710) · [#204](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/204) sealed data permits as credentials                                                                                                                                                                                      |
+| Permits and opt-out  | [#720](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/720) one Art. 68 permit, one DSP agreement per holder · [#721](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/721) the Art. 71 opt-out at the holder's connector · [#716](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/716) the Art. 73 secure processing environment per permit · [#717](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/717) applications: Art. 54, Art. 81, Art. 70 templates                                                                                        |
+| Catalogue and border | [#714](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/714) Art. 79 catalogue for harvesting · [#715](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/715) Art. 78 quality label · [#719](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/719) HealthDCAT-AP as a profile of Simpl's DCAT-AP (after Innsbruck) · [#713](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/713) Art. 75 national contact point over eDelivery · [#718](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/718) Art. 7 portability on the HL7 Europe guides |
+
+### P3: comment, don't build
+
+[#723](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/723) Art. 62
+fees against Simpl's monetisation model (BP02E, BP14) and
+[#724](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/724) DOME:
+health analytics services findable, usable only inside an SPE (BP02F, BP02G,
+SA12). Both wait on the feedback to the Community Preview.
+
+### Done for this roadmap (October 2026)
+
+[#694](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/694) the
+adopted article numbers and the 2026 implementing acts ·
+[#700](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/700)
+HealthDCAT-AP Release 8, valid against the official SHACL shapes
+([ADR-063](ADRs/ADR-063-healthdcat-ap-release-8-and-its-namespace.md)) · the
+Art. 71 opt-out as a record and a label
+([ADR-062](ADRs/ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md)) · the
+Simpl-Open position
+([ADR-064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md)) ·
+the EUDI Wallet sign-in
+([ADR-065](ADRs/ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md)).
+
+### Not on this roadmap
+
+A Simpl-Open agent of our own; DOME LEAR credentials as the hub's mechanism (the
+Business Wallet is the target); OpenID4VP drafts before 1.0, Presentation
+Exchange, mdoc-only requests, cleartext wallet responses; HealthDCAT-AP before
+Release 8, DCAT-AP 2; Gaia-X self-descriptions before Innsbruck. Remaining
+EHDS items stay in
+[#696](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/696) (opt-out),
+[#697](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/697) (2026 implementing acts) and
+[#698](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/698) (Chapter II rights, Art. 5 to 10).
 
 ---
 
@@ -77,7 +164,7 @@ by what blocks what.
 | -------------------------------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [#503](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/503)  | Onboarding on Azure fails (control plane 500, issuer base64 ids)      | Onboarding works on Azure since 2026-10-06 (control plane, IdentityHub and IssuerService on 0.18, ADR-055 Accepted); closed. Data planes and leftovers: [#574](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/574) |
 | [#97](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/97)    | Dependency refresh, EDC 0.18 (Phase B)                                | 8 of 15 done. Compose and CI on 0.18; Azure is #503; three majors held (lucide-react 1.x and two more)                                                                                                                            |
-| [#345](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/345)  | CI stack had an empty IdentityHub and Neo4j; DSP provider answers 404 | The next blocker after #503, on both stacks: 0.18 virtual mode returns 404 for every DSP provider path                                                                                                                            |
+| [#345](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/345)  | CI stack had an empty IdentityHub and Neo4j; DSP provider answers 404 | Closed 2026-10-07                                                                                                                                                                                                                 |
 | [#519](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/519)  | Load, stress and scalability test on Azure                            | Planned 2026-10-04, replaces #14. Six hypotheses from the code to measure, among them proxy rate limits shared by all users and audited queries serialised on one node                                                            |
 | [#473](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/473)  | Klarbefund: connect to EHDS, QR sign-in                               | QR pairing merged (#476, #511, ADR-049). The App Attest account is on the local branch `feat/klarbefund-account` (ADR-054), not pushed                                                                                            |
 | [#475](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/475)  | A research identity per patient                                       | First part merged (#479): researchers see pseudonyms. 2 of 10 boxes; ADR-051 reserved                                                                                                                                             |
@@ -89,7 +176,7 @@ by what blocks what.
 | [#435](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/435)  | braces advisory with no patch                                         | Production half gone with Tailwind 4 (#443); dev-only remainder under a time-boxed exception                                                                                                                                      |
 | [#514](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/514)  | `PUBLISHED_BY` points at two node types                               | Open, 0 of 3                                                                                                                                                                                                                      |
 | [#513](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/513)  | Klarbefund scan rows still unread                                     | First fixes in #515; 0 of 8 boxes ticked                                                                                                                                                                                          |
-| PR [#477](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/477) | Join the Klarbefund beta by a public TestFlight link                  | Open, not a draft, checks green; ADR-050                                                                                                                                                                                          |
+| PR [#477](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/477) | Join the Klarbefund beta by a public TestFlight link                  | Merged 2026-10-05; ADR-050                                                                                                                                                                                                        |
 
 ---
 
@@ -97,19 +184,19 @@ by what blocks what.
 
 Not started, waiting on an outside party, or larger than one release.
 
-| Issue                                                                     | What                                                           | Status (2026-10-04)                                                                                               |
-| ------------------------------------------------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| [#182](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/182) | German national EUDI wallet ("d-you") and the #72 consent demo | 2 of 47. RP side now published upstream; [plan](planning/current/issue-182-german-national-wallet-integration.md) |
-| [#478](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/478) | Klarbefund into the real ePA: a statutory insurer as partner   | Waiting: Steckbrief submitted 2026-10-04, review takes 6 to 8 weeks                                               |
-| [#204](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/204) | Non-repudiable contract agreements: eIDAS-sealed data permits  | Not started, 0 of 16                                                                                              |
-| [#413](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/413) | Lab reports: specimen type and ISO 15189:2022 report content   | Not started, 0 of 12; outreach to laboratories sent                                                               |
-| [#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338) | Specifications as oracles: API drift                           | 6 of 24                                                                                                           |
-| [#375](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/375) | API checks that pass on an empty answer                        | 2 of 4                                                                                                            |
-| [#5](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/5)     | Pentest checklist, the items that need a harness               | Reopened; J840–J848 automated, 25 boxes open ([plan](planning/current/issue-5-pentest-completion.md))             |
-| [#27](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/27)   | Spanish HDAB 30-minute demo                                    | 13 of 18; three items settled elsewhere on 2026-10-04                                                             |
-| [#26](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/26)   | SHACL and ShEx validation of HealthDCAT-AP                     | Inventory done 2026-07-17, no work since ([plan](planning/future/issue-26-healthdcat-ap-validation.md))           |
-| [#20](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/20)   | AWMF Leitlinien as Layer 6 (Docling, ADR-021)                  | Branches merged April; 0 of 8 boxes, no activity since 2026-04-29                                                 |
-| [#16](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/16)   | CDISC SDTM export                                              | Plan only, no activity since 2026-04-29                                                                           |
+| Issue                                                                     | What                                                           | Status (2026-10-04)                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [#182](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/182) | German national EUDI wallet ("d-you") and the #72 consent demo | 2 of 47. The sign-in itself is #708 (live, ADR-065); d-you refuses the hub until it has its own relying-party certificates from the SPRIND sandbox; [plan](planning/current/issue-182-german-national-wallet-integration.md) |
+| [#478](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/478) | Klarbefund into the real ePA: a statutory insurer as partner   | Waiting: Steckbrief submitted 2026-10-04, review takes 6 to 8 weeks                                                                                                                                                          |
+| [#204](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/204) | Non-repudiable contract agreements: eIDAS-sealed data permits  | Not started, 0 of 16                                                                                                                                                                                                         |
+| [#413](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/413) | Lab reports: specimen type and ISO 15189:2022 report content   | Not started, 0 of 12; outreach to laboratories sent                                                                                                                                                                          |
+| [#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338) | Specifications as oracles: API drift                           | 6 of 24                                                                                                                                                                                                                      |
+| [#375](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/375) | API checks that pass on an empty answer                        | 2 of 4                                                                                                                                                                                                                       |
+| [#5](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/5)     | Pentest checklist, the items that need a harness               | Reopened; J840–J848 automated, 25 boxes open ([plan](planning/current/issue-5-pentest-completion.md))                                                                                                                        |
+| [#27](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/27)   | Spanish HDAB 30-minute demo                                    | 13 of 18; three items settled elsewhere on 2026-10-04                                                                                                                                                                        |
+| [#26](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/26)   | SHACL and ShEx validation of HealthDCAT-AP                     | Inventory done 2026-07-17, no work since ([plan](planning/future/issue-26-healthdcat-ap-validation.md))                                                                                                                      |
+| [#20](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/20)   | AWMF Leitlinien as Layer 6 (Docling, ADR-021)                  | Branches merged April; 0 of 8 boxes, no activity since 2026-04-29                                                                                                                                                            |
+| [#16](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/16)   | CDISC SDTM export                                              | Plan only, no activity since 2026-04-29                                                                                                                                                                                      |
 
 Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-c5-production.md) (#4 closed with the demo track done), [operating company](planning/future/ehds-operating-company.md),
 [longevity community data sharing](planning/future/longevity-community-data-sharing.md),

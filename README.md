@@ -894,6 +894,8 @@ All 12 phases are **✅ Complete** — from infrastructure migration through Azu
 - **ACA Off-Hours Scale-Down** — Mon–Fri 07:00–20:00 Europe/Berlin schedule keeps the full ACA topology under the personal €50/month credit ([ADR-042](docs/ADRs/ADR-042-off-hours-scaledown-current-state.md), the state that runs today)
 - **Persistent Storage on ACA** — the knowledge graph survives revision restarts on an Azure Files volume ([ADR-017](docs/ADRs/ADR-017-persistent-storage-aca.md)), and every PostgreSQL database is on Azure Database for PostgreSQL Flexible Server ([ADR-041](docs/ADRs/ADR-041-managed-postgres-on-azure-containerised-locally.md)). Vault on Azure still runs in memory and is refilled by a bootstrap job; moving it onto the Flexible Server is [#455](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/455)
 
+What comes next, by the dates of the EHDS, the EUDI and Business Wallets and Simpl-Open, is the **[Roadmap to 2035](docs/planning-health-dataspace-v2.md#roadmap-to-2035-ehds-wallets-and-simpl)** (plan [#725](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/725)).
+
 For detailed phase descriptions, sub-tasks, and architecture decisions, see the full **[Implementation Roadmap](docs/planning-health-dataspace-v2.md)** and **[Architecture Decision Records](docs/ADRs/)**.
 
 ### Container Inventory
