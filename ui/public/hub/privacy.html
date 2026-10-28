@@ -69,19 +69,71 @@
 
     <h2>Signing in with an EUDI Wallet</h2>
     <p>
-      When you sign in with a European Digital Identity Wallet, the hub asks
-      your wallet for two attributes of your person identification data (PID)
-      and nothing else: your <strong>family name</strong> and your
-      <strong>given name</strong>. Your wallet shows you this request, and
+      When you sign in with a European Digital Identity Wallet, or connect it
+      to an account, the hub asks your wallet for three attributes of your
+      person identification data (PID) and nothing else: your
+      <strong>family name</strong>, your <strong>given name</strong> and your
+      <strong>birth date</strong>. Your wallet shows you this request, and
       nothing is shared unless you confirm it there.
     </p>
     <p>
-      The hub compares the name with its synthetic records. If one carries
-      that name, you are signed in to that record; if none does, the sign-in
-      is refused. Either way the name is not stored. Your session carries a
-      pseudonym and the record it opens, not your name. A sign-in in progress
-      is held in the server's memory for at most five minutes and then
-      discarded.
+      The hub first compares the name with its two synthetic demo patients. If
+      one carries that name, you are signed in to that record. Otherwise the
+      hub computes a <strong>secure hash</strong> of your name and birth date
+      and looks for an account that carries the same hash: if one does, you
+      are signed in to it; if none does, the sign-in is refused and you may
+      create an account (see below). The name and the birth date are not
+      stored: they are held in the server's memory only while the hash is
+      computed. Your session carries a pseudonym and the record it opens, not
+      your name. A sign-in in progress is held in the server's memory for at
+      most five minutes and then discarded.
+    </p>
+
+    <h2>Connecting your wallet to an account</h2>
+    <p>
+      An account the Klarbefund app or a wallet sign-in created (a login
+      <code>kb-…</code> with an empty sandbox record) can be connected to your
+      wallet, so that you sign in to it with your wallet. When you connect it,
+      or create an account from a wallet sign-in, the hub keeps
+      <strong>one secure hash per connected account</strong>, in the
+      account's entry in the hub's sign-in service (Keycloak), and nothing
+      else of your PID.
+    </p>
+    <table>
+      <tr>
+        <th>Data</th>
+        <th>Stored?</th>
+        <th>Why</th>
+      </tr>
+      <tr>
+        <td>Given name, family name, birth date</td>
+        <td>No, in memory while the hash is computed</td>
+        <td>Input of the hash only</td>
+      </tr>
+      <tr>
+        <td>The secure hash</td>
+        <td>Yes, one value per connected account, in Keycloak</td>
+        <td>Recognises you at your next wallet sign-in</td>
+      </tr>
+      <tr>
+        <td>The key of the hash</td>
+        <td>Yes, in Azure Key Vault, apart from Keycloak</td>
+        <td>Without it the hash can be neither computed nor checked</td>
+      </tr>
+    </table>
+    <p>
+      The hash is a keyed one-way function (HMAC-SHA256): it cannot be turned
+      back into your name or birth date, and without the key it cannot even
+      be checked against a guess. It is still personal data, pseudonymised in
+      the sense of Art. 4(5) GDPR, because it lets the hub recognise you. Two
+      people with the same name and birth date would have the same hash; the
+      second one to connect is refused and told why.
+    </p>
+    <p>
+      Legal basis: your consent, given when you connect the wallet or create
+      the account (Art. 6(1)(a) GDPR). You withdraw it with
+      <strong>Disconnect wallet</strong> on the page where you connected it,
+      which removes the hash at once. Deleting the account removes it too.
     </p>
     <p>
       Your wallet does not send the attributes to the hub directly but to a
@@ -93,9 +145,10 @@
       the hub.
     </p>
     <p>
-      Legal basis: your consent, given in the wallet for each sign-in (Art.
-      6(1)(a) GDPR). You can withdraw it by not signing in again; there is
-      nothing stored to delete.
+      Legal basis for a sign-in: your consent, given in the wallet for each
+      sign-in (Art. 6(1)(a) GDPR). You can withdraw it by not signing in
+      again; a sign-in stores nothing of your PID unless you connect your
+      wallet to an account, below.
     </p>
 
     <h2>Demo accounts</h2>
@@ -137,14 +190,21 @@
     </p>
     <p>
       The hub's own logs hold technical events and errors. They never contain
-      the attributes from your wallet. They are kept for at most 90 days
+      the attributes from your wallet, nor their hash. They are kept for at
+      most 90 days
       (Art. 6(1)(f) GDPR: keeping the demo running and secure).
     </p>
 
     <h2>What the hub never does</h2>
     <ul>
-      <li>store your name, or any other attribute from your wallet;</li>
-      <li>ask your wallet for more than your family and given name;</li>
+      <li>
+        store your name, your birth date, or any other attribute from your
+        wallet; only their secure hash, and only on an account you connected;
+      </li>
+      <li>
+        ask your wallet for more than your family name, given name and birth
+        date;
+      </li>
       <li>hold real health data;</li>
       <li>share, sell or profile anything about you.</li>
     </ul>
@@ -152,9 +212,11 @@
     <h2>Your rights</h2>
     <p>
       You have the rights under Arts. 15 to 21 GDPR: access, rectification,
-      erasure, restriction, portability and objection. Since the hub keeps
-      nothing that names you, a request is usually answered by saying so;
-      write to the address above. You also have the right to complain to a
+      erasure, restriction, portability and objection. The hub keeps nothing
+      that names you in clear; if you connected a wallet, it keeps the secure
+      hash on that account, which you remove yourself with Disconnect wallet
+      or by deleting the account. For anything else, write to the address
+      above. You also have the right to complain to a
       data protection supervisory authority, in particular in the member
       state where you live or work.
     </p>

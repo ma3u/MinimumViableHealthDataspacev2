@@ -44,7 +44,7 @@ const keycloakServerUrl =
   process.env.KEYCLOAK_ISSUER ?? "http://keycloak:8080/realms/edcv";
 
 /** `…/realms/edcv` → `…/admin/realms/edcv`. */
-function adminBase(): string {
+export function adminBase(): string {
   return keycloakServerUrl.replace(/\/realms\/([^/]+)\/?$/, "/admin/realms/$1");
 }
 
@@ -57,7 +57,13 @@ export class AccountError extends Error {
   }
 }
 
-async function serviceToken(fetcher: typeof fetch): Promise<string> {
+/** True when the hub holds the account service's secret at all. */
+export function accountServiceConfigured(): boolean {
+  return Boolean(process.env.KEYCLOAK_ACCOUNT_SERVICE_SECRET);
+}
+
+/** A token of the service account `ehds-account-service`, for the admin API. */
+export async function serviceToken(fetcher: typeof fetch): Promise<string> {
   const secret = process.env.KEYCLOAK_ACCOUNT_SERVICE_SECRET;
   if (!secret) {
     throw new AccountError(
@@ -89,10 +95,15 @@ async function serviceToken(fetcher: typeof fetch): Promise<string> {
   return json.access_token;
 }
 
-/** Creates the Keycloak user. Throws AccountError when Keycloak refuses. */
+/**
+ * Creates the Keycloak user. Throws AccountError when Keycloak refuses.
+ * `attributes` go in the same call, so an account made from a PID carries
+ * its secure hash from its first moment (ADR-067).
+ */
 export async function createKeycloakUser(
   credentials: { username: string; password: string },
   fetcher: typeof fetch = fetch,
+  attributes?: Record<string, string[]>,
 ): Promise<void> {
   const token = await serviceToken(fetcher);
   const res = await fetcher(`${adminBase()}/users`, {
@@ -112,6 +123,7 @@ export async function createKeycloakUser(
       firstName: "Klarbefund",
       lastName: "Sandbox",
       groups: [`/${ACCOUNT_GROUP}`],
+      ...(attributes ? { attributes } : {}),
       credentials: [
         { type: "password", value: credentials.password, temporary: false },
       ],
@@ -181,6 +193,24 @@ export async function createSandboxRecord(input: {
     { ...input, patientId },
   );
   return rows[0]?.fresh === true;
+}
+
+/**
+ * Creates the empty record of an account made from a verified PID (ADR-067).
+ * There is no App Attest key here: the PID's secure hash, on at most one
+ * Keycloak account, is the guard. Nothing of the PID is written to Neo4j.
+ */
+export async function createPidSandboxRecord(username: string): Promise<void> {
+  const patientId = sandboxPatientId(username);
+  if (!patientId) throw new AccountError("not a sandbox login", 400);
+  await runQuery(
+    `MERGE (p:Patient {id: $patientId})
+       ON CREATE SET p.resourceId = $patientId, p.name = 'Klarbefund sandbox',
+                     p.sandbox = true, p.appAccount = $username,
+                     p.createdAt = datetime()
+       ON MATCH SET p.appAccount = $username`,
+    { patientId, username },
+  );
 }
 
 /**

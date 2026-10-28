@@ -1,0 +1,25 @@
+meta {
+  name: 36 No session, my wallet link (401)
+  type: http
+  seq: 36
+}
+
+get {
+  url: {{baseUrl}}/api/patient/wallet-link
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+tests {
+  // ADR-044 and ADR-067: only the person, signed in, reads their own link.
+  test("an anonymous caller is refused", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

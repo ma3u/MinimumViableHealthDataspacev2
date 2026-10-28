@@ -1,0 +1,31 @@
+meta {
+  name: 35 No session, connect a wallet to an account (401)
+  type: http
+  seq: 35
+}
+
+post {
+  url: {{baseUrl}}/api/auth/eudi/start
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}=not-a-session
+}
+
+body:json {
+  {"purpose": "link"}
+}
+
+tests {
+  // ADR-067: a plain start signs in and needs no session; a link writes to
+  // the signed-in account, so it needs one, before the verifier is asked.
+  test("an anonymous caller cannot start a link", function () {
+    expect(res.getStatus()).to.equal(401);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody(), "an { error } body").to.have.property("error");
+  });
+}

@@ -85,6 +85,31 @@ describe("lib/auth", () => {
       expect(await authorize({})).toBeNull();
     });
 
+    it("eudi-wallet authorize never signs in from a link presentation (ADR-067)", async () => {
+      const sid = newSid();
+      putTransaction({
+        sid,
+        transactionId: "t-link",
+        nonce: "n",
+        purpose: "link",
+        linkUsername: "kb-ab3dk7mn",
+      });
+      updateTransaction(sid, {
+        status: "completed",
+        verifiedPatient: {
+          username: "kb-ab3dk7mn",
+          displayName: "Patient x",
+          roles: ["PATIENT"],
+          assurance: "high",
+        },
+      });
+      const provider = authOptions.providers.find(
+        (p) =>
+          (p as { options?: { id?: string } }).options?.id === "eudi-wallet",
+      ) as { options: { authorize: (c: unknown) => Promise<unknown> } };
+      expect(await provider.options.authorize({ sid })).toBeNull();
+    });
+
     it("jwt callback carries roles for the eudi-wallet credentials user", async () => {
       const jwt = authOptions.callbacks!.jwt!;
       const token = (await jwt({

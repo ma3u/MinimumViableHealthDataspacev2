@@ -32,6 +32,8 @@ import {
   sandboxPatientId,
 } from "@/lib/app-accounts";
 import { ownPatientId } from "@/lib/overview/patient";
+import { accountLimiter } from "@/lib/account-rate-limit";
+import { fakeKeycloak as keycloakWithUsers } from "../../fixtures/fake-keycloak";
 
 const DEVICE = "6f1c2b7e-3d4a-4b5c-9d8e-1a2b3c4d5e6f";
 
@@ -88,6 +90,7 @@ beforeEach(() => {
   mockRunQuery.mockReset();
   verifyAttestation.mockReset();
   requireAppToken.mockReset();
+  accountLimiter.reset();
   verifyAttestation.mockReturnValue({
     environment: "development",
     publicKey: "",
@@ -229,6 +232,26 @@ describe("DELETE /api/patient/app/account", () => {
       patientId: "KB-AB3DK7MN",
       username: "kb-ab3dk7mn",
     });
+  });
+
+  it("takes the wallet link with the login: the PID opens nothing afterwards (ADR-067)", async () => {
+    const fp = `k1:${"c".repeat(64)}`;
+    const kc = keycloakWithUsers([
+      {
+        id: "u-7",
+        username: "kb-ab3dk7mn",
+        attributes: { pid_fingerprint: [fp] },
+      },
+    ]);
+    requireAppToken.mockResolvedValue({
+      app: { username: "kb-ab3dk7mn", roles: ["PATIENT"], deviceId: DEVICE },
+    });
+    mockRunQuery.mockResolvedValue([]);
+    const { findUsernameByFingerprint } = await import("@/lib/pid-link");
+    expect(await findUsernameByFingerprint(fp)).toBe("kb-ab3dk7mn");
+    expect((await remove()).status).toBe(200);
+    expect(kc.users.size).toBe(0);
+    expect(await findUsernameByFingerprint(fp)).toBeNull();
   });
 
   it("refuses to delete a demo persona", async () => {

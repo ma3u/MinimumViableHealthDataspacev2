@@ -906,6 +906,94 @@ paths:
         "429": { description: Too many accounts }
         "502": { description: Keycloak or Neo4j failed }
         "503": { description: Account creation is not configured on this hub }
+  /api/auth/eudi/register:
+    post:
+      tags: [Patient]
+      summary: Create a sandbox account from a verified PID (ADR-067)
+      description: >
+        Part of the EUDI Wallet sign-in, so it answers without a session.
+        Only for a `sid` whose sign-in the status route refused with
+        `canRegister: true`: a verified PID whose secure hash is on no
+        account. Creates a Keycloak login `kb-…` with a generated password
+        and the hash as the attribute `pid_fingerprint`, and an empty record
+        of its own; the `sid` then signs in to it once, at assurance high.
+        One account per hash; the same rate limit as `/api/app-accounts`.
+        The password is in this answer once. The hub keeps neither the name
+        nor the birth date of the PID.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sid]
+              properties:
+                sid: { type: string }
+      responses:
+        "201":
+          description: The account
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, username, password]
+                properties:
+                  status: { type: string, enum: [completed] }
+                  username: { type: string, example: kb-ab3dk7mn }
+                  password: { type: string }
+        "400": { description: The body is not JSON }
+        "403": { description: This sign-in cannot create an account }
+        "404": { description: Unknown or expired sign-in }
+        "409": { description: This PID already has an account }
+        "429": { description: Too many accounts }
+        "502": { description: Keycloak or Neo4j failed }
+  /api/patient/wallet-link:
+    get:
+      tags: [Patient]
+      summary: Whether the patient's account is linked to an EUDI Wallet PID
+      description: >
+        ADR-067. Only a sandbox account (`kb-`) can be linked; a demo persona
+        is answered `eligible: false`. The secure hash itself is never
+        answered. The link is made by presenting the PID
+        (`POST /api/auth/eudi/start` with `{ "purpose": "link" }`).
+      responses:
+        "200":
+          description: The link state
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [eligible, available, linked]
+                properties:
+                  eligible: { type: boolean }
+                  available:
+                    type: boolean
+                    description: the hub has the hash key and the account service
+                  linked: { type: boolean }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "502": { description: Keycloak failed }
+    delete:
+      tags: [Patient]
+      summary: Disconnect the EUDI Wallet (ADR-067)
+      description: >
+        Removes the attribute `pid_fingerprint` from the patient's own
+        sandbox account; the account stays.
+      responses:
+        "200":
+          description: Disconnected
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [linked]
+                properties:
+                  linked: { type: boolean }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { description: Not a sandbox account }
+        "404": { description: The account is gone }
+        "502": { description: Keycloak failed }
   /api/patient/observations:
     get:
       tags: [Patient]

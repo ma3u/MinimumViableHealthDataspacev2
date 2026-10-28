@@ -174,6 +174,132 @@ describe("EudiQrPage", () => {
     expect(signIn).not.toHaveBeenCalled();
   });
 
+  it("offers an account for a PID on no account, shows the password once, then signs in (ADR-067)", async () => {
+    const calls: { url: string; body?: string }[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        calls.push({ url: String(url), body: init?.body as string });
+        if (String(url).includes("/start")) return startOk;
+        if (String(url).includes("/register")) {
+          return {
+            ok: true,
+            status: 201,
+            json: async () => ({
+              status: "completed",
+              username: "kb-ab3dk7mn",
+              password: "Abcde-fghjk-mnpqr-stuvw",
+            }),
+          };
+        }
+        return {
+          status: 403,
+          ok: false,
+          json: async () => ({
+            status: "refused",
+            error: "No record on this hub belongs to the PID in this wallet.",
+            canRegister: true,
+          }),
+        };
+      }),
+    );
+    render(<EudiQrPage />);
+    const create = await screen.findByRole(
+      "button",
+      { name: "Create an account with this PID" },
+      { timeout: 6000 },
+    );
+    expect(screen.getByText(/never the name or the date/i)).toBeInTheDocument();
+    fireEvent.click(create);
+    expect(await screen.findByTestId("new-account-password")).toHaveTextContent(
+      "Abcde-fghjk-mnpqr-stuvw",
+    );
+    expect(screen.getByTestId("new-account-username")).toHaveTextContent(
+      "kb-ab3dk7mn",
+    );
+    expect(
+      screen.getByText(/shows the password only now/i),
+    ).toBeInTheDocument();
+    const reg = calls.find((c) => c.url.includes("/api/auth/eudi/register"))!;
+    expect(JSON.parse(reg.body!)).toEqual({ sid: "s1" });
+    // the person goes on when they have saved it, not before
+    expect(signIn).not.toHaveBeenCalled();
+    fireEvent.click(
+      screen.getByRole("button", { name: "I have saved them, sign me in" }),
+    );
+    await waitFor(() =>
+      expect(signIn).toHaveBeenCalledWith(
+        "eudi-wallet",
+        expect.objectContaining({ sid: "s1", callbackUrl: "/overview" }),
+      ),
+    );
+    expect(
+      screen.queryByTestId("new-account-password"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("says why when the hub could not create the account", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (String(url).includes("/start")) return startOk;
+        if (String(url).includes("/register")) {
+          return {
+            ok: false,
+            status: 409,
+            json: async () => ({
+              error: "This PID already has an account on this hub",
+            }),
+          };
+        }
+        return {
+          status: 403,
+          ok: false,
+          json: async () => ({
+            status: "refused",
+            error: "No record on this hub belongs to the PID in this wallet.",
+            canRegister: true,
+          }),
+        };
+      }),
+    );
+    render(<EudiQrPage />);
+    fireEvent.click(
+      await screen.findByRole(
+        "button",
+        { name: "Create an account with this PID" },
+        { timeout: 6000 },
+      ),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /already has an account/,
+    );
+    expect(signIn).not.toHaveBeenCalled();
+  });
+
+  it("offers no account when the refusal does not allow one", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) =>
+        String(url).includes("/start")
+          ? startOk
+          : {
+              status: 403,
+              ok: false,
+              json: async () => ({
+                status: "refused",
+                error: "The wallet did not share a PID this hub can read.",
+              }),
+            },
+      ),
+    );
+    render(<EudiQrPage />);
+    await screen.findByText(/did not share a PID/i, {}, { timeout: 6000 });
+    expect(
+      screen.queryByRole("button", { name: /Create an account/ }),
+    ).not.toBeInTheDocument();
+  });
+
   it("signs in when the wallet completes the presentation", async () => {
     // Real timers + waitFor (not fake timers): the async start() resolves on the
     // microtask queue, which fake-timer advancement raced — making this flaky.
