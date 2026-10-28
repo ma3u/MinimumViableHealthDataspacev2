@@ -57,9 +57,14 @@ means the values were read from a photograph, of a paper sheet or of a
 device's screen, and a photograph can be misread. A value stays preliminary
 until you have checked it against the original.
 
-The **+** button starts a scan or an import. The **⋯** button holds everything
-else: trends, reference values, your profile, earlier measurements, consents,
-the connection to the EHDS, exports, privacy and the analysis provider.
+The top of the list has what belongs to looking at your reports: **Trends**,
+**My EHDS record** with the state of your connection, and **Possible
+duplicates** when two reports look like the same one. The **+** button starts
+a scan, an import, or **Earlier measurements** entered by hand. The **⋯**
+button holds settings and your rights over your data, in three groups: _About
+you_ (profile, reference values), _Privacy and sharing_ (consents, analysis
+provider, privacy and safety) and _Your data_ (export, delete, and under
+_Research and support_ the OMOP export and the diagnostics).
 
 ## Getting a report in
 
@@ -89,8 +94,8 @@ a guideline's.
 
 Before anything is saved, the app shows what it read and asks you to confirm
 the laboratory date it found on the sheet. A report that looks like one you
-already have is pointed out; **Find duplicate reports** in the menu does the
-same for the whole list later.
+already have is pointed out; **Possible duplicates**, at the top of the list,
+appears whenever two stored reports look like the same one.
 
 ## Checking a report, value by value
 
@@ -198,7 +203,7 @@ and visceral fat. Each measurement keeps its own date and says where it came
 from. A value read from a scale's photograph is labelled as such; one you type
 is labelled as entered by you.
 
-**Earlier measurements** is for catching up: one date per line, with whatever
+**Earlier measurements**, in the **+** menu, is for catching up: one date per line, with whatever
 you measured that day. Saving stores each date as its own report, marked as
 entered by you, and works out the BMI and waist-to-height ratio from the
 height in the profile. They join the trends and the exports through the same
@@ -249,7 +254,8 @@ there is no ePA to upload to while it stands.
 
 <img src="img/connect.png" width="300" alt="Connect to EHDS: create an account, sign in with an account, or connect by QR code from the patient screen">
 
-**Connect to EHDS**, in the menu, connects the app to your record in the
+**My EHDS record**, at the top of the list, says whether the app is connected
+and sending, and opens **Connect to EHDS**, which connects the app to your record in the
 European Health Data Space demo hub, so it can read it and, if you decide so,
 add to it. There are three ways in, and no password is typed into a web page
 on the phone:

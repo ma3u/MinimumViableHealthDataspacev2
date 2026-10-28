@@ -70,10 +70,15 @@ final class AppModel: ObservableObject {
   /// A report the person asked to delete, and whether to scan the paper
   /// again afterwards. Asked about in an alert before anything is deleted.
   @Published var deleteRequest: (report: LabReport, rescan: Bool)?
-  /// The stored duplicate being asked about, from "Find duplicate reports".
+  /// The stored duplicate being asked about, from "Possible duplicates".
   @Published var duplicatePair: DuplicateReports.Match?
   /// Pairs the person chose to keep, so the search moves on to the next.
   private var keptDuplicates = Set<UUID>()
+  /// Whether two reports look like the same one and the person has not said
+  /// to keep both: the home list offers the review only then.
+  var hasDuplicates: Bool {
+    DuplicateReports.pairs(in: reports).contains { !keptDuplicates.contains($0.redundant.id) }
+  }
 
   /// Internal rather than private so the DEBUG self-test can reach it, and a
   /// `let` set once at init so the self-test's own store cannot be swapped in
@@ -1013,14 +1018,17 @@ struct ContentView: View {
           EmptyStateView()
         } else {
           List {
-            ForEach(model.reports) { report in
-              NavigationLink(value: report.id) {
-                ReportRow(report: report)
+            HomeShortcuts(model: model, connection: connection)
+            Section("Reports") {
+              ForEach(model.reports) { report in
+                NavigationLink(value: report.id) {
+                  ReportRow(report: report)
+                }
               }
-            }
-            .onDelete { offsets in
-              let ids = offsets.map { model.reports[$0].id }
-              Task { for id in ids { await model.delete(id) } }
+              .onDelete { offsets in
+                let ids = offsets.map { model.reports[$0].id }
+                Task { for id in ids { await model.delete(id) } }
+              }
             }
           }
           .navigationDestination(for: UUID.self) { id in
@@ -1048,66 +1056,66 @@ struct ContentView: View {
                     }
                   }
                 }
-                if model.analysisAvailable, !report.extraction.coded.isEmpty {
-                  ToolbarItem(placement: .secondaryAction) {
-                    Button {
-                      model.consenting = report.extraction.coded
-                    } label: {
-                      Label("Ask about these values", systemImage: "sparkles")
+                // One menu in four groups (2026-10-29), where there were
+                // eight entries in a row: ask, correct, help improve, delete.
+                ToolbarItem(placement: .topBarTrailing) {
+                  Menu {
+                    if model.analysisAvailable, !report.extraction.coded.isEmpty {
+                      Section {
+                        Button {
+                          model.consenting = report.extraction.coded
+                        } label: {
+                          Label("Ask about these values", systemImage: "sparkles")
+                        }
+                      }
                     }
-                  }
-                }
-                if report.scan == nil {
-                  ToolbarItem(placement: .secondaryAction) {
-                    Button {
-                      model.rescanning = report
-                    } label: {
-                      Label("Scan the paper again", systemImage: "doc.viewfinder")
+                    Section("Correct") {
+                      Button {
+                        model.editingReport = report
+                      } label: {
+                        Label("Edit name and laboratory", systemImage: "pencil")
+                      }
+                      // Every report: one with pages is read again, one
+                      // without is coded again from its stored rows.
+                      Button {
+                        Task { await model.reextract(report) }
+                      } label: {
+                        Label("Read again with this version", systemImage: "arrow.clockwise")
+                      }
+                      if report.scan == nil {
+                        Button {
+                          model.rescanning = report
+                        } label: {
+                          Label("Scan the paper again", systemImage: "doc.viewfinder")
+                        }
+                      }
                     }
-                  }
-                }
-                // Every report: one with pages is read again, one without is
-                // coded again from its stored rows.
-                ToolbarItem(placement: .secondaryAction) {
-                  Button {
-                    Task { await model.reextract(report) }
+                    Section("Help improve Klarbefund") {
+                      Button {
+                        model.feedbackReport = report
+                      } label: {
+                        Label("Report missing values", systemImage: "exclamationmark.bubble")
+                      }
+                      Button {
+                        model.diagnosticsRequest = .report(report.id)
+                      } label: {
+                        Label("Export diagnostics for this report", systemImage: "ladybug")
+                      }
+                    }
+                    Section {
+                      Button(role: .destructive) {
+                        model.deleteRequest = (report, true)
+                      } label: {
+                        Label("Delete and scan again", systemImage: "doc.viewfinder")
+                      }
+                      Button(role: .destructive) {
+                        model.deleteRequest = (report, false)
+                      } label: {
+                        Label("Delete report", systemImage: "trash")
+                      }
+                    }
                   } label: {
-                    Label("Read again with this version", systemImage: "arrow.clockwise")
-                  }
-                }
-                ToolbarItem(placement: .secondaryAction) {
-                  Button {
-                    model.diagnosticsRequest = .report(report.id)
-                  } label: {
-                    Label("Export diagnostics for this report", systemImage: "ladybug")
-                  }
-                }
-                ToolbarItem(placement: .secondaryAction) {
-                  Button {
-                    model.editingReport = report
-                  } label: {
-                    Label("Edit name and laboratory", systemImage: "pencil")
-                  }
-                }
-                ToolbarItem(placement: .secondaryAction) {
-                  Button {
-                    model.feedbackReport = report
-                  } label: {
-                    Label("Report missing values", systemImage: "exclamationmark.bubble")
-                  }
-                }
-                ToolbarItem(placement: .secondaryAction) {
-                  Button(role: .destructive) {
-                    model.deleteRequest = (report, true)
-                  } label: {
-                    Label("Delete and scan again", systemImage: "doc.viewfinder")
-                  }
-                }
-                ToolbarItem(placement: .secondaryAction) {
-                  Button(role: .destructive) {
-                    model.deleteRequest = (report, false)
-                  } label: {
-                    Label("Delete report", systemImage: "trash")
+                    Label("More", systemImage: "ellipsis.circle")
                   }
                 }
               }
@@ -1140,90 +1148,88 @@ struct ContentView: View {
             } label: {
               Label("Import from Photos", systemImage: "photo.on.rectangle")
             }
+            // Values from a notebook are data coming in too, so they are
+            // added where reports are added, not from the settings menu.
+            Section {
+              Button {
+                model.showingHistory = true
+              } label: {
+                Label("Earlier measurements", systemImage: "calendar.badge.plus")
+              }
+            }
           } label: {
             Label("Add report", systemImage: "plus")
           }
         }
+        // Settings and the rights over your data, grouped (2026-10-29). Trends,
+        // the EHDS record and duplicates moved into the list (HomeShortcuts),
+        // earlier measurements into the + menu.
         ToolbarItem(placement: .topBarLeading) {
           Menu {
-            Button {
-              model.showingSettings = true
-            } label: {
-              Label("Analysis provider", systemImage: "gearshape")
-            }
-            if !model.reports.isEmpty {
+            Section("About you") {
               Button {
-                model.showingTrends = true
+                model.showingProfile = true
               } label: {
-                Label("Trends", systemImage: "chart.xyaxis.line")
+                Label("Profile", systemImage: "person.text.rectangle")
               }
               Button {
-                // Research is what a registry consent is for. Without one the
-                // export still works, it is the person's own data, but they
-                // are asked once whether they mean it (#186 criterion 6).
-                if model.consents.isActive(.registry) {
-                  Task { await model.exportOmop() }
-                } else {
-                  model.confirmingResearchExport = true
+                model.showingReference = true
+              } label: {
+                Label("Reference values", systemImage: "text.book.closed")
+              }
+            }
+            Section("Privacy and sharing") {
+              Button {
+                model.showingConsents = true
+              } label: {
+                Label("Consents", systemImage: "checkmark.seal")
+              }
+              Button {
+                model.showingSettings = true
+              } label: {
+                Label("Analysis provider", systemImage: "gearshape")
+              }
+              Button {
+                model.showingPrivacy = true
+              } label: {
+                Label("Privacy and safety", systemImage: "hand.raised")
+              }
+            }
+            if !model.reports.isEmpty {
+              // Article 15 and 17 stay one tap from the menu; the two exports
+              // for somebody else share a submenu.
+              Section("Your data") {
+                Button {
+                  Task { await model.exportData() }
+                } label: {
+                  Label("Export all my data", systemImage: "square.and.arrow.up.on.square")
                 }
-              } label: {
-                Label("Export for research (OMOP)", systemImage: "tablecells")
-              }
-            }
-            Button {
-              model.showingReference = true
-            } label: {
-              Label("Reference values", systemImage: "text.book.closed")
-            }
-            Button {
-              model.showingProfile = true
-            } label: {
-              Label("Profile", systemImage: "person.text.rectangle")
-            }
-            Button {
-              model.showingHistory = true
-            } label: {
-              Label("Earlier measurements", systemImage: "calendar.badge.plus")
-            }
-            Button {
-              model.showingConsents = true
-            } label: {
-              Label("Consents", systemImage: "checkmark.seal")
-            }
-            Button {
-              model.showingConnect = true
-            } label: {
-              Label("Connect to EHDS", systemImage: "link.badge.plus")
-            }
-            Button {
-              model.showingPrivacy = true
-            } label: {
-              Label("Privacy and safety", systemImage: "hand.raised")
-            }
-            if !model.reports.isEmpty {
-              // Above diagnostics and phrased for a person rather than a
-              // tester: this is the one a person looking for their data is
-              // looking for, and "diagnostics" reads like something for
-              // somebody else.
-              Button {
-                model.findDuplicates()
-              } label: {
-                Label("Find duplicate reports", systemImage: "doc.on.doc")
-              }
-              Button {
-                Task { await model.exportData() }
-              } label: {
-                Label("Export all my data", systemImage: "square.and.arrow.up.on.square")
-              }
-              Button {
-                model.diagnosticsRequest = .everything
-              } label: {
-                Label("Export diagnostics", systemImage: "ladybug")
-              }
-              Button(role: .destructive) {
-                model.erasing = true
-              } label: {
-                Label("Delete all my data", systemImage: "trash")
+                Menu {
+                  Button {
+                    // Research is what a registry consent is for. Without one
+                    // the export still works, it is the person's own data, but
+                    // they are asked once whether they mean it (#186 criterion 6).
+                    if model.consents.isActive(.registry) {
+                      Task { await model.exportOmop() }
+                    } else {
+                      model.confirmingResearchExport = true
+                    }
+                  } label: {
+                    Label("Export for research (OMOP)", systemImage: "tablecells")
+                  }
+                  Button {
+                    model.diagnosticsRequest = .everything
+                  } label: {
+                    Label("Export diagnostics", systemImage: "ladybug")
+                  }
+                } label: {
+                  Label("Research and support", systemImage: "shippingbox")
+                }
+                Button(role: .destructive) {
+                  model.erasing = true
+                } label: {
+                  Label("Delete all my data", systemImage: "trash")
+                }
               }
             }
           } label: {
