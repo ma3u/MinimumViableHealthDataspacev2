@@ -117,6 +117,45 @@ describe("startPresentation", () => {
     ]);
   });
 
+  it("asks for SD-JWT VC only when the registration covers nothing else (#708)", async () => {
+    vi.stubEnv("EUDI_PID_FORMATS", "dc+sd-jwt");
+    vi.stubEnv("EUDI_PID_VCT", "urn:eudi:pid:de:1");
+    const fetchMock = vi.fn(async () =>
+      okJson({ transaction_id: "t", request_uri: "https://v/r" }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await startPresentation("n");
+    const body = JSON.parse(
+      (fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1]
+        .body as string,
+    );
+    expect(body.dcql_query.credentials).toHaveLength(1);
+    expect(body.dcql_query.credentials[0]).toMatchObject({
+      id: PID_SD_JWT_QUERY,
+      format: "dc+sd-jwt",
+      meta: { vct_values: ["urn:eudi:pid:de:1"] },
+    });
+    expect(body.dcql_query.credential_sets[0].options).toEqual([
+      [PID_SD_JWT_QUERY],
+    ]);
+  });
+
+  it("falls back to mdoc rather than an empty request when no format is valid", async () => {
+    vi.stubEnv("EUDI_PID_FORMATS", "jwt_vc");
+    const fetchMock = vi.fn(async () =>
+      okJson({ transaction_id: "t", request_uri: "https://v/r" }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await startPresentation("n");
+    const body = JSON.parse(
+      (fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1]
+        .body as string,
+    );
+    expect(
+      body.dcql_query.credentials.map((c: { id: string }) => c.id),
+    ).toEqual([PID_MDOC_QUERY]);
+  });
+
   it("sends our own registration certificate instead of the test intended use", async () => {
     vi.stubEnv("EUDI_REGISTRATION_CERTIFICATE", "eyJ.rp.cert");
     const fetchMock = vi.fn(async () =>

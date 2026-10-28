@@ -116,17 +116,24 @@ jobs:
       # page under load was fixtures plus a failed round trip (#571).
       - name: Deploy UI
         run: |
+          # The wallet sign-in goes through our own verifier (ADR-066) with the
+          # SPRIND registration: German PID as SD-JWT VC only, intended use
+          # ehds-patient-sign-in (#708). Back to the EU's: BASE_URL
+          # https://verifier-backend.eudiw.dev, INTENDED_USE_ID TEST-01,
+          # PID_VCT urn:eudi:pid:1, PID_FORMATS dc+sd-jwt,mso_mdoc.
           az containerapp update \
             --name mvhd-ui \
             --resource-group ${{ env.RESOURCE_GROUP }} \
             --image ${{ env.ACR_LOGIN_SERVER }}/mvhd-ui:${{ github.sha }} \
             --set-env-vars \
               "DEPLOYMENT_TARGET=azure" \
-              "EUDI_VERIFIER_BASE_URL=https://verifier-backend.eudiw.dev" \
+              "EUDI_VERIFIER_BASE_URL=http://mvhd-eudi-verifier:8080" \
               "EUDI_VERIFIER_SCHEME=openid4vp://" \
               "EUDI_VERIFIER_PROFILE=haip" \
               "EUDI_PID_DOCTYPE=eu.europa.ec.eudi.pid.1" \
-              "EUDI_INTENDED_USE_ID=TEST-01" \
+              "EUDI_INTENDED_USE_ID=ehds-patient-sign-in" \
+              "EUDI_PID_VCT=urn:eudi:pid:de:1" \
+              "EUDI_PID_FORMATS=dc+sd-jwt" \
               "EUDI_REQUEST_URI_METHOD=get" \
               "EUDI_RESPONSE_MODE=direct_post.jwt" \
               "EUDI_DEMO_WALLET=true" \

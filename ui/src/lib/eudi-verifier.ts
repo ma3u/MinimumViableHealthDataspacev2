@@ -51,6 +51,16 @@ function settings() {
      * rulebook, EU reference wallet), `urn:eudi:pid:de:1` (German PID, d-you).
      * List only what the registration certificate declares.
      */
+    /**
+     * The PID formats to ask for, comma-separated: `dc+sd-jwt`, `mso_mdoc`.
+     * A registration certificate names the formats it covers, and a wallet
+     * refuses a request for one it does not: ours from the SPRIND registrar
+     * covers SD-JWT VC only (#708, 2026-10-28).
+     */
+    formats: (env.EUDI_PID_FORMATS || "dc+sd-jwt,mso_mdoc")
+      .split(",")
+      .map((f) => f.trim())
+      .filter((f) => f === "dc+sd-jwt" || f === "mso_mdoc"),
     vct: (env.EUDI_PID_VCT || "urn:eudi:pid:1")
       .split(",")
       .map((v) => v.trim())
@@ -99,28 +109,31 @@ async function safeText(res: Response): Promise<string> {
  * declares (over-asking, ETSI TS 119 472-2). Nothing of it is shown: a
  * patient session sees the record's pseudonym.
  */
-function pidQuery(doctype: string, vct: string[]) {
+function pidQuery(doctype: string, vct: string[], formats: string[]) {
+  const sdJwt = formats.includes("dc+sd-jwt");
+  const mdoc = formats.includes("mso_mdoc") || !sdJwt;
+  const credentials = [
+    {
+      id: PID_SD_JWT_QUERY,
+      format: "dc+sd-jwt",
+      meta: { vct_values: vct },
+      claims: [{ path: ["family_name"] }, { path: ["given_name"] }],
+    },
+    {
+      id: PID_MDOC_QUERY,
+      format: "mso_mdoc",
+      meta: { doctype_value: doctype },
+      claims: [
+        { path: [doctype, "family_name"] },
+        { path: [doctype, "given_name"] },
+      ],
+    },
+  ].filter((c) => (c.format === "dc+sd-jwt" ? sdJwt : mdoc));
   return {
-    credentials: [
-      {
-        id: PID_SD_JWT_QUERY,
-        format: "dc+sd-jwt",
-        meta: { vct_values: vct },
-        claims: [{ path: ["family_name"] }, { path: ["given_name"] }],
-      },
-      {
-        id: PID_MDOC_QUERY,
-        format: "mso_mdoc",
-        meta: { doctype_value: doctype },
-        claims: [
-          { path: [doctype, "family_name"] },
-          { path: [doctype, "given_name"] },
-        ],
-      },
-    ],
+    credentials,
     credential_sets: [
       {
-        options: [[PID_SD_JWT_QUERY], [PID_MDOC_QUERY]],
+        options: credentials.map((c) => [c.id]),
         purpose: "Sign in to the Health Dataspace patient portal",
       },
     ],
@@ -136,7 +149,7 @@ export async function startPresentation(
 ): Promise<StartedPresentation> {
   const s = settings();
   const body = {
-    dcql_query: pidQuery(s.doctype, s.vct),
+    dcql_query: pidQuery(s.doctype, s.vct, s.formats),
     nonce,
     response_mode: s.responseMode,
     jar_mode: "by_reference",

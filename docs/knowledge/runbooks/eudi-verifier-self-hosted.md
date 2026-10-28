@@ -107,7 +107,12 @@ deploy:
 EUDI_VERIFIER_BASE_URL=http://mvhd-eudi-verifier:8080
 EUDI_INTENDED_USE_ID=ehds-patient-sign-in
 EUDI_PID_VCT=urn:eudi:pid:de:1
+EUDI_PID_FORMATS=dc+sd-jwt
 ```
+
+`EUDI_PID_FORMATS` exists because the registration certificate covers SD-JWT
+VC only, and a wallet refuses a request for a format the certificate does not
+name. Switched on 2026-10-28 (#708).
 
 Then run the #708 test plan with d-you. Switching back is the first variable
 set to `https://verifier-backend.eudiw.dev` and the second to `TEST-01`.
