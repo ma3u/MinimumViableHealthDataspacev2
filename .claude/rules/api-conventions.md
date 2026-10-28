@@ -190,6 +190,10 @@ Klarbefund app's account creation:
   attestation verifies (ADR-054); the challenge route hands out nothing but a
   signed five-minute challenge. `DELETE /api/patient/app/account` takes the
   app's token and deletes it again.
+- `/api/auth/eudi/register`: creates a sandbox account from a verified PID
+  during the wallet sign-in, only for a `sid` the status route refused with
+  `canRegister`; the verified PID takes the place of App Attest as the guard,
+  with the same rate limit (ADR-067).
 
 The start page's TestFlight form (`/api/testflight-request`, ADR-048) is gone:
 Klarbefund's beta is joined by Apple's public link (ADR-050).

@@ -121,6 +121,9 @@ jobs:
           # ehds-patient-sign-in (#708). Back to the EU's: BASE_URL
           # https://verifier-backend.eudiw.dev, INTENDED_USE_ID TEST-01,
           # PID_VCT urn:eudi:pid:1, PID_FORMATS dc+sd-jwt,mso_mdoc.
+          # EUDI_PID_BIRTHDATE asks for the birth date for the secure hash of
+          # ADR-067; only with a registration certificate that names it
+          # (a5dfbef3..., eIDAS Art. 5b(3)).
           az containerapp update \
             --name mvhd-ui \
             --resource-group ${{ env.RESOURCE_GROUP }} \
@@ -134,6 +137,7 @@ jobs:
               "EUDI_INTENDED_USE_ID=ehds-patient-sign-in" \
               "EUDI_PID_VCT=urn:eudi:pid:de:1" \
               "EUDI_PID_FORMATS=dc+sd-jwt" \
+              "EUDI_PID_BIRTHDATE=true" \
               "EUDI_REQUEST_URI_METHOD=get" \
               "EUDI_RESPONSE_MODE=direct_post.jwt" \
               "EUDI_DEMO_WALLET=true" \

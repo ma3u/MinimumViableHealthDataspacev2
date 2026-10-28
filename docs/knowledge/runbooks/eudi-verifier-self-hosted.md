@@ -119,7 +119,7 @@ set to `https://verifier-backend.eudiw.dev` and the second to `TEST-01`.
 
 ## A PID on an account of its own (ADR-067)
 
-ADR-067 (`docs/ADRs/ADR-067-a-pid-links-to-an-account-by-a-keyed-fingerprint.md`):
+[ADR-067](../../ADRs/ADR-067-a-pid-links-to-an-account-by-a-keyed-fingerprint.md):
 a PID links to a sandbox account (`kb-…`, ADR-054) by a secure hash,
 `HMAC-SHA256(key, given name | family name | birth date)`, kept as the
 Keycloak user attribute `pid_fingerprint`. The hub stores neither the name
