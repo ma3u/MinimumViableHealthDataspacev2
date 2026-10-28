@@ -4,8 +4,10 @@ FROM alpine:3.24
 # additionalPortMappings, so the transactional HTTP API on 7474 that
 # run-ehds-tests.sh used to call is not routable from this job either
 # (issue #205). It is a JVM tool, hence the headless JRE.
+# python3, bc and openssl: the identity checks parse with python3, compute
+# the pass rate with bc and decode certificates with openssl.
 # hadolint ignore=DL3018
-RUN apk add --no-cache bash curl jq coreutils openjdk21-jre-headless unzip
+RUN apk add --no-cache bash curl jq coreutils openjdk21-jre-headless unzip python3 bc openssl
 ARG CYPHER_SHELL_VERSION=5.26.0
 RUN curl -fsSL -o /tmp/cypher-shell.zip \
       "https://dist.neo4j.org/cypher-shell/cypher-shell-${CYPHER_SHELL_VERSION}.zip" \
@@ -13,10 +15,13 @@ RUN curl -fsSL -o /tmp/cypher-shell.zip \
     && ln -sf "/opt/cypher-shell-${CYPHER_SHELL_VERSION}/bin/cypher-shell" /usr/local/bin/cypher-shell \
     && rm /tmp/cypher-shell.zip
 WORKDIR /work
-COPY scripts/lib/edc-mgmt-api.sh /work/scripts/lib/
-COPY scripts/run-compliance.sh /work/scripts/
-COPY scripts/run-dsp-tck.sh /work/scripts/
-COPY scripts/run-dcp-tests.sh /work/scripts/
+# The three suites under the names entrypoint.sh calls, and every library they
+# source. The image copied the names from before #342 (run-dsp-tck.sh,
+# run-dcp-tests.sh) and not scripts/lib/dsp-protocol.sh, so from then on the
+# suites were "No such file or directory" and the job still reported success.
+COPY scripts/lib/ /work/scripts/lib/
+COPY scripts/run-ehds-dataspace-checks.sh /work/scripts/
+COPY scripts/run-ehds-identity-checks.sh /work/scripts/
 COPY scripts/run-ehds-tests.sh /work/scripts/
 COPY scripts/azure/compliance-runner/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /work/scripts/*.sh /usr/local/bin/entrypoint.sh

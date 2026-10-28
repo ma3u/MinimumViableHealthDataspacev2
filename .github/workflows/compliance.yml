@@ -720,6 +720,7 @@ jobs:
     env:
       RG: rg-mvhd-dev
       COMPLIANCE_JOB: mvhd-compliance-runner
+      WORKSPACE_ID: 6c5814cc-e63f-4f4c-b996-83c6686b048e
     steps:
       - uses: actions/checkout@v7
       # OIDC, as every other Azure workflow here does. This was the last
@@ -737,6 +738,7 @@ jobs:
           chmod +x scripts/azure/08-compliance-runner.sh
           ./scripts/azure/08-compliance-runner.sh
       - name: Wait for job execution
+        id: wait
         run: |
           set -e
           for i in $(seq 1 60); do
@@ -746,6 +748,7 @@ jobs:
             status=$(echo "$latest" | jq -r '.properties.status // "Unknown"')
             name=$(echo "$latest" | jq -r '.name // "-"')
             echo "[$i] $name: $status"
+            echo "execution=$name" >> "$GITHUB_OUTPUT"
             case "$status" in
               Succeeded) echo "runner finished successfully"; exit 0 ;;
               Failed)    echo "runner failed — check logs in Azure portal"; exit 1 ;;
@@ -754,6 +757,23 @@ jobs:
           done
           echo "timeout waiting for runner"
           exit 1
+
+      # The runner's results live in the job's container, which is gone; its
+      # log is not. Print each suite's summary and the checks that did not
+      # pass, so a run says what it measured rather than only that it ran.
+      - name: Show the suite results
+        if: always() && steps.wait.outputs.execution != ''
+        run: |
+          sleep 60   # Log Analytics ingestion lag
+          az monitor log-analytics query -w "${{ env.WORKSPACE_ID }}" \
+            --analytics-query "ContainerAppConsoleLogs_CL
+              | where ContainerJobName_s == '${COMPLIANCE_JOB}'
+              | where ContainerGroupName_s startswith '${{ steps.wait.outputs.execution }}'
+              | where Log_s has 'SUITE ' or Log_s startswith '  failed' or Log_s startswith '  skipped' or Log_s has 'FAILED' or Log_s has 'client secret'
+              | project TimeGenerated, Log_s
+              | order by TimeGenerated asc
+              | take 200" \
+            --query "[].Log_s" -o tsv || echo "::warning::could not read the runner's log"
 
   # -----------------------------------------------------------------------
   # Aggregate Results
