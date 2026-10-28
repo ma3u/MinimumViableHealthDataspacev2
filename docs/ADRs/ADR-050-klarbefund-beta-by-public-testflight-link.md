@@ -1,6 +1,6 @@
 # ADR-050: The Klarbefund beta is joined by a public TestFlight link
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-10-03
 **Supersedes:** [ADR-048](ADR-048-testflight-request-mailed-without-a-session.md)
 **Relates to:** [ADR-044](ADR-044-every-api-route-needs-a-session.md), #186

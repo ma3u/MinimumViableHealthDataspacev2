@@ -1,6 +1,6 @@
 # ADR-052: The confidential secure processing environment, revisited against Azure and the vendors of October 2026
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-10-04
 **Relates to:** [ADR-037](ADR-037-secure-processing-environment-confidential-computing.md), [ADR-012](ADR-012-azure-container-apps.md), [ADR-042](ADR-042-off-hours-scaledown-current-state.md)
 **Revisits:** the implementation choice of ADR-037 (Contrast as the concrete product). The pattern ADR-037 decided, confidential containers with remote attestation, stands.

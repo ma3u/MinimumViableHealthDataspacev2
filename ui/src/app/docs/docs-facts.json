@@ -1032,13 +1032,13 @@
       "id": "ADR-050",
       "file": "ADR-050-klarbefund-beta-by-public-testflight-link.md",
       "title": "The Klarbefund beta is joined by a public TestFlight link",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-052",
       "file": "ADR-052-confidential-spe-on-azure-revisited.md",
       "title": "The confidential secure processing environment, revisited against Azure and the vendors of October 2026",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-053",
@@ -1050,7 +1050,7 @@
       "id": "ADR-054",
       "file": "ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md",
       "title": "Klarbefund creates a sandbox account on the hub, gated by App Attest",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-055",

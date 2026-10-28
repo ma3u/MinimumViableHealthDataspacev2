@@ -1,6 +1,6 @@
 # ADR-054: Klarbefund creates a sandbox account on the hub, gated by App Attest
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-10-04
 **Relates to:** [ADR-049](ADR-049-klarbefund-connects-by-device-grant.md), ADR-050 (#477), #473
 **Extends:** [ADR-044](ADR-044-every-api-route-needs-a-session.md), by adding two routes that answer without a session: one hands out a challenge, the other creates an account only for a request that proves, through Apple's App Attest, that it comes from the genuine Klarbefund app on a real device. [ADR-049](ADR-049-klarbefund-connects-by-device-grant.md) is unchanged: the QR code still connects an existing account, with Keycloak's consent screen.
