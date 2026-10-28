@@ -100,8 +100,11 @@ export interface TrendSeries {
   current: string;
   /** oldest → newest, evenly spaced from `from` to `to` */
   points: number[];
-  /** which direction is the healthy one (for the ▲/▼ chip) */
-  goodDirection: "up" | "down";
+  /**
+   * which direction is the healthy one (for the ▲/▼ chip); `neutral` shows
+   * the change without judging it, as for a person's own measured values
+   */
+  goodDirection: "up" | "down" | "neutral";
   /** optional ISO date of points[0] — when set, ePA event markers can be placed */
   from?: string;
   /** optional ISO date of the last point */

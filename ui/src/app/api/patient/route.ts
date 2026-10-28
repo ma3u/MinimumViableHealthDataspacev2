@@ -12,6 +12,7 @@ import { runQuery } from "@/lib/neo4j";
 import { forRoles } from "@/lib/opt-out";
 import { ownPatientIdForSession } from "@/lib/overview/patient";
 import { ehrSyncFromRow } from "@/lib/patient/ehr-sync";
+import { loadOwnHealth } from "@/lib/patient/load-own-health";
 
 export const dynamic = "force-dynamic";
 
@@ -196,6 +197,16 @@ export async function GET(req: Request) {
           timeline: myId ? await loadTimeline(myId) : [],
           // When the ePA was last transferred into the portal, if ever.
           lastEhrSync: ehrSyncFromRow({ ehrSyncedAt, ehrSyncSource }),
+          // A record the Klarbefund app created: the person's own device
+          // trends and lab values, for the cards that otherwise show an
+          // illustration. Null for a demo persona's synthetic record.
+          // A failure here costs the cards, never the record.
+          ownHealth: myId
+            ? await loadOwnHealth(myId).catch((err) => {
+                console.error("GET /api/patient own health:", err);
+                return null;
+              })
+            : null,
           restricted: true, // signal to the UI that patient selector should be hidden
         });
       }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { fetchApi } from "@/lib/api";
 import { formatEhrSync, type EhrSync } from "@/lib/patient/ehr-sync";
+import { ownHealthSources, type OwnHealth } from "@/lib/patient/own-health";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import {
   Activity,
@@ -222,7 +223,8 @@ function PersonalHealthCard({
             } as CSSProperties
           }
         >
-          View 3-month trends <ArrowRight size={13} />
+          {s.trends[0]?.from ? "View trends" : "View 3-month trends"}{" "}
+          <ArrowRight size={13} />
         </p>
       </div>
     </button>
@@ -234,6 +236,8 @@ export default function PatientPage() {
   const [ehrModal, setEhrModal] = useState(false);
   const [ehrReceived, setEhrReceived] = useState(false);
   const [lastEhrSync, setLastEhrSync] = useState<EhrSync | null>(null);
+  /** The person's own values, when the record is one Klarbefund created. */
+  const [ownHealth, setOwnHealth] = useState<OwnHealth | null>(null);
   const [detailSource, setDetailSource] = useState<PersonalHealthSource | null>(
     null,
   );
@@ -257,6 +261,7 @@ export default function PatientPage() {
         // The restricted (own-record) response embeds the patient's timeline.
         if (Array.isArray(d.timeline)) setTimeline(d.timeline);
         setLastEhrSync(d.lastEhrSync ?? null);
+        setOwnHealth(d.ownHealth ?? null);
         if (d.restricted && d.patients?.length === 1) {
           setSelected(d.patients[0].id);
         }
@@ -289,6 +294,10 @@ export default function PatientPage() {
   }, [selected, restricted]);
 
   const selectedPatient = patients.find((p) => p.id === selected);
+  const healthCards = useMemo(
+    () => (ownHealth ? ownHealthSources(ownHealth) : personalHealth),
+    [ownHealth],
+  );
 
   /* The "Request EHR data" flow just completed: stamp the sync on the own
      record. Without a record of our own (or in the static demo) the moment
@@ -434,8 +443,19 @@ export default function PatientPage() {
             </div>
           )}
 
-          <div className="grid sm:grid-cols-3 gap-4">
-            {personalHealth.map((s) => (
+          {/* A record Klarbefund created shows the person's own values; a demo
+              persona keeps the illustration of journey-config. */}
+          {ownHealth && healthCards.length === 0 && (
+            <p
+              className="mb-4 text-sm text-(--text-secondary)"
+              data-testid="own-health-empty"
+            >
+              No values from your devices or reports yet. In Klarbefund, switch
+              on sending your reports and your device trends to your record.
+            </p>
+          )}
+          <div className="grid sm:grid-cols-3 gap-4" data-testid="health-cards">
+            {healthCards.map((s) => (
               <PersonalHealthCard
                 key={s.id}
                 s={s}
@@ -487,7 +507,7 @@ export default function PatientPage() {
                   value={stats.patients}
                   isOrb
                   icon={<Heart size={20} className="text-white" />}
-                  sub="Synthea cohort"
+                  sub={restricted ? "Your record" : "Synthea cohort"}
                 />
                 <MetricCard
                   label="Encounters"
