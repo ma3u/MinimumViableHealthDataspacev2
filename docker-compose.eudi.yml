@@ -1,0 +1,195 @@
+# German national EUDI wallet backend (Apache-2.0), run as its own overlay so
+# the base stack stays unchanged:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.eudi.yml up -d wallet-backend
+#
+# depends_on pulls in Postgres, MinIO, the SoftHSM provisioning and the
+# certificate upload, in that order — naming wallet-backend is enough, and it
+# keeps the base stack's services out of it.
+#
+# Prerequisite: scripts/eudi/gen-dev-certs.sh (the backend will not start
+# without its four root certificates).
+#
+# See docs/knowledge/runbooks/eudi-wallet-backend-local.md and
+# docs/planning/current/issue-182-german-national-wallet-integration.md.
+
+services:
+  wallet-postgres:
+    image: postgres:16.6-alpine
+    container_name: eudi-wallet-postgres
+    environment:
+      POSTGRES_DB: wallet
+      POSTGRES_USER: wallet
+      POSTGRES_PASSWORD: wallet
+    ports:
+      - "5433:5432" # 5433 on the host: the JAD stack already uses 5432
+    volumes:
+      - eudi_wallet_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wallet -d wallet"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  # Stands in for the S3 bucket the signing lineages read their certificate
+  # chains from. Unused under the build-docs profile, but the S3 client bean is
+  # built unconditionally, so the endpoint has to resolve.
+  wallet-minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    container_name: eudi-wallet-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: wallet
+      MINIO_ROOT_PASSWORD: wallet-secret
+    ports:
+      - "9100:9000"
+      - "9101:9001"
+    volumes:
+      - eudi_wallet_minio:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  # One-shot: creates the two SoftHSM tokens, imports a signing key per
+  # asymmetric lineage with a leaf certificate issued under the matching dev
+  # root, generates the four secret keys, and writes the PEM chains for the S3
+  # upload below. Idempotent — re-running skips whatever already exists.
+  wallet-hsm-init:
+    build:
+      context: ./services/eudi-wallet-backend
+      dockerfile: Dockerfile
+    image: ehds/de-eudi-wallet-backend:local
+    container_name: eudi-wallet-hsm-init
+    entrypoint: ["/usr/local/bin/provision-hsm.sh"]
+    environment:
+      HSM_SLOT_LABEL: wallet
+      HSM_SLOT_PIN: "1234"
+      HSM_WI_SLOT_LABEL: wallet-wi
+      HSM_WI_SLOT_PIN: "1234"
+      # An iOS simulator has no App Attest hardware, so the wallet sends the
+      # skip-integrity-checks header and MdvmService refuses it with
+      # SKIP_INTEGRITY_CHECKS_NOT_ALLOWED unless this is on. Upstream's own
+      # dev/test knob (ios.integrity.allow-skip-key-attestation).
+      #
+      # It disables device attestation: the backend will register any client
+      # that asks, with no proof it is a genuine wallet on genuine hardware.
+      # Acceptable only because this whole stack is a demo signing with a
+      # software HSM. Never set it anywhere that matters.
+      # Overridable: a *physical* device has App Attest hardware and does not
+      # need the bypass, so a device test should run with this false. Only a
+      # simulator requires true.
+      ALLOW_SKIP_KEY_ATTESTATION: "${ALLOW_SKIP_KEY_ATTESTATION:-true}"
+      # A device build cannot use SPRIND's bundle id, so it carries the
+      # signer's own team and bundle id. Set these to match a device build;
+      # the defaults are the published simulator identity.
+      IOS_TEAM_ID: "${IOS_TEAM_ID:-RKHWDWUG28}"
+      IOS_BUNDLE_IDS: "${IOS_BUNDLE_IDS:-org.sprind.wallet,org.sprind.wallet.dev,org.sprind.wallet.sandbox}"
+      HSM_CERT_DIR: /home/wallet/certs
+      HSM_CHAIN_DIR: /home/wallet/chains
+    volumes:
+      - ./services/eudi-wallet-backend/certs:/home/wallet/certs:ro
+      - eudi_wallet_softhsm:/home/wallet/softhsm
+      - eudi_wallet_chains:/home/wallet/chains
+    restart: "no"
+
+  # The lineages fetch their certificate chains from S3, so the chains the HSM
+  # init just wrote have to be in the bucket before the backend starts.
+  wallet-certs-init:
+    image: minio/mc:RELEASE.2025-04-16T18-13-26Z
+    container_name: eudi-wallet-certs-init
+    depends_on:
+      wallet-minio:
+        condition: service_healthy
+      wallet-hsm-init:
+        condition: service_completed_successfully
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        mc alias set local http://wallet-minio:9000 wallet wallet-secret
+        mc mb --ignore-existing local/wallet-certs
+        mc cp --recursive /chains/ local/wallet-certs/
+        mc ls --recursive local/wallet-certs
+    volumes:
+      - eudi_wallet_chains:/chains:ro
+    restart: "no"
+
+  wallet-backend:
+    build:
+      context: ./services/eudi-wallet-backend
+      dockerfile: Dockerfile
+    image: ehds/de-eudi-wallet-backend:local
+    container_name: eudi-wallet-backend
+    depends_on:
+      wallet-postgres:
+        condition: service_healthy
+      wallet-minio:
+        condition: service_healthy
+      wallet-certs-init:
+        condition: service_completed_successfully
+    environment:
+      # No build-docs: the SoftHSM tokens provisioned above are real PKCS#11
+      # objects, so the key lineages resolve and the service can sign. Set
+      # SPRING_PROFILES_ACTIVE=build-docs to fall back to the stubbed profile,
+      # where every endpoint that touches a key returns 500.
+      SPRING_PROFILES_ACTIVE: ""
+      DEPLOYMENT_ENVIRONMENT: local
+      WALLET_PORT: "8080"
+      # Reachable from a physical device too: set WALLET_PUBLIC_URL to the
+      # Mac's LAN address (http://<ip>:8081) before starting, or the tokens the
+      # backend issues carry an issuer the device cannot resolve.
+      WALLET_PUBLIC_URL: "${WALLET_PUBLIC_URL:-http://localhost:8081}"
+      WALLET_R2DBC_URL: r2dbc:postgresql://wallet-postgres:5432/wallet
+      WALLET_JDBC_URL: jdbc:postgresql://wallet-postgres:5432/wallet
+      WALLET_DB_USER: wallet
+      WALLET_DB_PASSWORD: wallet
+      WALLET_CERT_DIR: file:/home/wallet/certs
+      S3_ENDPOINT: http://wallet-minio:9000
+      S3_BUCKET: wallet-certs
+      S3_ACCESS_KEY: wallet
+      S3_SECRET_KEY: wallet-secret
+      KAFKA_ENABLED: "false"
+      OTEL_SDK_DISABLED: "true"
+      WALLET_LOG_LEVEL: INFO
+      HSM_MODULE_LIBRARY: /usr/lib/softhsm/libsofthsm2.so
+      HSM_SLOT_LABEL: wallet
+      HSM_SLOT_PIN: "1234"
+      HSM_WI_SLOT_LABEL: wallet-wi
+      HSM_WI_SLOT_PIN: "1234"
+      # An iOS simulator has no App Attest hardware, so the wallet sends the
+      # skip-integrity-checks header and MdvmService refuses it with
+      # SKIP_INTEGRITY_CHECKS_NOT_ALLOWED unless this is on. Upstream's own
+      # dev/test knob (ios.integrity.allow-skip-key-attestation).
+      #
+      # It disables device attestation: the backend will register any client
+      # that asks, with no proof it is a genuine wallet on genuine hardware.
+      # Acceptable only because this whole stack is a demo signing with a
+      # software HSM. Never set it anywhere that matters.
+      # Overridable: a *physical* device has App Attest hardware and does not
+      # need the bypass, so a device test should run with this false. Only a
+      # simulator requires true.
+      ALLOW_SKIP_KEY_ATTESTATION: "${ALLOW_SKIP_KEY_ATTESTATION:-true}"
+      # A device build cannot use SPRIND's bundle id, so it carries the
+      # signer's own team and bundle id. Set these to match a device build;
+      # the defaults are the published simulator identity.
+      IOS_TEAM_ID: "${IOS_TEAM_ID:-RKHWDWUG28}"
+      IOS_BUNDLE_IDS: "${IOS_BUNDLE_IDS:-org.sprind.wallet,org.sprind.wallet.dev,org.sprind.wallet.sandbox}"
+    ports:
+      - "8081:8080" # 8081 on the host: 8080 is taken by the JAD stack
+    volumes:
+      - ./services/eudi-wallet-backend/certs:/home/wallet/certs:ro
+      - eudi_wallet_softhsm:/home/wallet/softhsm
+    restart: unless-stopped
+
+volumes:
+  eudi_wallet_pgdata:
+  eudi_wallet_minio:
+  # The SoftHSM token store. This holds private keys as ordinary files: it is a
+  # dev/test HSM, and provides the PKCS#11 interface rather than the protection.
+  eudi_wallet_softhsm:
+  eudi_wallet_chains:

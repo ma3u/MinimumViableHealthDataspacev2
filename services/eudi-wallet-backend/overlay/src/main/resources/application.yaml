@@ -1,0 +1,195 @@
+# Configuration for the German national wallet backend.
+#
+# The mirror's README says "Configuration file is coming" — until it does, the
+# shape below is read off the @ConfigurationProperties classes in
+# src/main/kotlin, which is where upstream says the contract currently lives.
+# Every key here is declared by one of:
+#   deployment  -> shared/DeploymentProperties.kt
+#   hsm         -> shared/hsm/HsmConfiguration.kt
+#   s3          -> shared/s3/S3Configuration.kt
+#   challenge   -> shared/challengetoken/ChallengeConfiguration.kt
+#   mdvm-token  -> shared/mdvmtoken/MdvmTokenConfiguration.kt
+#   telemetry   -> shared/telemetry/TelemetryConfig.kt
+#   wpb / rwsca / mdvm / pns / statuslist -> the module Configuration.kt files
+#   android.integrity / ios.integrity     -> mdvm/*IntegrityConfig.kt
+#
+# Values are local-development values for the EHDS integration demo. They are
+# NOT the German deployment's values, which the mirror does not publish.
+# Everything security-relevant is overridable by environment variable.
+
+spring:
+  application:
+    name: de-eudi-wallet-backend
+  r2dbc:
+    url: ${WALLET_R2DBC_URL:r2dbc:postgresql://localhost:5432/wallet}
+    username: ${WALLET_DB_USER:wallet}
+    password: ${WALLET_DB_PASSWORD:wallet}
+    pool:
+      initial-size: 2
+      max-size: 10
+  flyway:
+    enabled: true
+    # Flyway is JDBC-only; the application itself talks R2DBC.
+    url: ${WALLET_JDBC_URL:jdbc:postgresql://localhost:5432/wallet}
+    user: ${WALLET_DB_USER:wallet}
+    password: ${WALLET_DB_PASSWORD:wallet}
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+server:
+  port: ${WALLET_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      # Local development: seeing which indicator is down is the point.
+      show-details: ${HEALTH_SHOW_DETAILS:always}
+      show-components: ${HEALTH_SHOW_DETAILS:always}
+
+deployment:
+  environment: ${DEPLOYMENT_ENVIRONMENT:local}
+
+# All five modules in one process. The combined entry point
+# (WalletBackendApplication) is what this demo runs; each module also has its
+# own entry point if they need to be split later.
+wpb:
+  enabled: true
+  issuer: ${WALLET_PUBLIC_URL:http://localhost:8080}/wpb
+  wallet-name: EHDS Integration Demo Wallet
+  wallet-version: 0.0.0-local
+  wpb-wia-auth-key-prefix: wpb-wia-auth
+  wpb-wia-root-cert-path: ${WALLET_CERT_DIR:file:./certs}/wpb-wia-root.crt
+
+rwsca:
+  enabled: true
+  issuer: ${WALLET_PUBLIC_URL:http://localhost:8080}/rwsca
+  rwscd-master-key-prefix: rwsca-master
+  rwscd-wte-auth-key-prefix: rwsca-wte-auth
+  rwscd-pin-symk-prefix: rwsca-pin-symk
+  rwscd-aead-symk-prefix: rwsca-aead-symk
+  rwscd-wte-root-cert-path: ${WALLET_CERT_DIR:file:./certs}/rwsca-wte-root.crt
+  wi-slot:
+    label: ${HSM_WI_SLOT_LABEL:wallet-wi}
+    pin: ${HSM_WI_SLOT_PIN:1234}
+    pool-size: 4
+  pin-retry:
+    max-tries: 3
+
+mdvm:
+  enabled: true
+  issuer: ${WALLET_PUBLIC_URL:http://localhost:8080}/mdvm
+  mdvm-auth-prvk-prefix: mdvm-attestation
+  mdvm-root-cert-path: ${WALLET_CERT_DIR:file:./certs}/mdvm-root.crt
+  save-analytics: false
+  trace-debug-info: false
+
+# The verifying half of the MDVM token, used by WPB and RWSCA. Both values must
+# match the issuing half above, or WPB rejects every token the MDVM just issued
+# with MDVM_TOKEN_VERIFICATION_FAILURE: MdvmTokenBuilder stamps `iss` from
+# mdvm.issuer while MdvmTokenParser checks it against mdvm-token.issuer. The
+# reference keeps them from drifting.
+mdvm-token:
+  issuer: ${mdvm.issuer}
+  mdvm-root-cert-path: ${WALLET_CERT_DIR:file:./certs}/mdvm-root.crt
+
+pns:
+  enabled: true
+  issuer: ${WALLET_PUBLIC_URL:http://localhost:8080}/pns
+  fcm:
+    # No Firebase project for a local demo; the FCM client beans stay unbuilt.
+    enabled: false
+
+statuslist:
+  enabled: true
+  public-url: ${WALLET_PUBLIC_URL:http://localhost:8080}
+  path-segment: ${STATUSLIST_PATH_SEGMENT:v1}
+  pools:
+    # Pool id 'wpb-wia' is the one WPB allocates Wallet Instance Attestation
+    # status entries from; the id is a map key, so it is part of the contract.
+    wpb-wia:
+      # entries-per-list * bits-per-entry must be a whole number of bytes and
+      # entries-per-list must be >= FeistelPermutation.MIN_DOMAIN / 128.
+      entries-per-list: 131072
+      bits-per-entry: 1
+      issuer: ${WALLET_PUBLIC_URL:http://localhost:8080}
+      ttl: PT1H
+      # lifetime must be >= 2 * ttl.
+      lifetime: P30D
+      tsl-auth-key-prefix: statuslist-wpb-wia-auth
+      tsl-root-cert-path: ${WALLET_CERT_DIR:file:./certs}/statuslist-root.crt
+
+challenge:
+  rwscd-challenge-symk-prefix: challenge-symk
+
+# PKCS#11. Under the build-docs profile every key lineage is stubbed and the
+# HSM is never opened, but HsmConfiguration is still bound, so these must
+# resolve. SoftHSM2 stands in for the real HSM when running without that
+# profile.
+hsm:
+  module-library: ${HSM_MODULE_LIBRARY:/usr/lib/softhsm/libsofthsm2.so}
+  slot-label: ${HSM_SLOT_LABEL:wallet}
+  slot-pin: ${HSM_SLOT_PIN:1234}
+  pool-size: 4
+
+# Certificate chains for the signing lineages live in S3; MinIO stands in.
+s3:
+  endpoint: ${S3_ENDPOINT:http://localhost:9000}
+  region: ${S3_REGION:us-east-1}
+  bucket: ${S3_BUCKET:wallet-certs}
+  access-key: ${S3_ACCESS_KEY:wallet}
+  secret-key: ${S3_SECRET_KEY:wallet-secret}
+
+messaging:
+  kafka:
+    # Cross-module revocation fan-out. Off by default: in the combined
+    # application the publishers and listeners are in one process, and a broker
+    # is only needed once the modules are split.
+    enabled: ${KAFKA_ENABLED:false}
+
+android:
+  integrity:
+    # This demo drives the iOS app, so no real Android package is configured.
+    # The list cannot be empty: MakotoConfiguration maps it straight onto
+    # AndroidAttestationConfiguration.applications, which rejects an empty set
+    # with "No apps configured" and fails the context. One entry with an
+    # unroutable package name and an all-zero signer fingerprint keeps the
+    # config well-formed while matching no real Android build.
+    # Set ANDROID_PACKAGE_NAME / ANDROID_SIGNER_FINGERPRINT to accept one.
+    expected-package-names:
+      - ${ANDROID_PACKAGE_NAME:invalid.not.configured}
+    expected-signer-fingerprints:
+      - ${ANDROID_SIGNER_FINGERPRINT:0000000000000000000000000000000000000000000000000000000000000000}
+    allow-skip-key-attestation: ${ALLOW_SKIP_KEY_ATTESTATION:false}
+
+ios:
+  integrity:
+    # App Attest identity. Both must match the build that is running:
+    # `app-id` is the Apple Team ID that signed it and `acceptable-bundle-id-list`
+    # its bundle id. The defaults are what the mirror publishes in
+    # IDGo.xcodeproj — correct for a simulator build of the unmodified project.
+    #
+    # A build signed by anyone else has a different team and a different bundle
+    # id (nobody else can sign org.sprind.*), so a device build needs both
+    # overridden: IOS_TEAM_ID and IOS_BUNDLE_IDS (comma-separated).
+    app-id: ${IOS_TEAM_ID:RKHWDWUG28}
+    acceptable-bundle-id-list: ${IOS_BUNDLE_IDS:org.sprind.wallet,org.sprind.wallet.dev,org.sprind.wallet.sandbox}
+    allow-app-attest-dev-environment: ${ALLOW_APP_ATTEST_DEV:true}
+    allow-skip-key-attestation: ${ALLOW_SKIP_KEY_ATTESTATION:false}
+
+telemetry:
+  filter-client-url-attributes: true
+  filter-ip-attributes: true
+
+otel:
+  sdk:
+    disabled: ${OTEL_SDK_DISABLED:true}
+
+logging:
+  level:
+    de.eudiwallet.backend: ${WALLET_LOG_LEVEL:INFO}
