@@ -1125,7 +1125,7 @@
       "max_failed": 6
     },
     "dcp-compliance-results": {
-      "min_passed": 22,
+      "min_passed": 24,
       "max_failed": 0
     },
     "ehds-compliance-results": {
