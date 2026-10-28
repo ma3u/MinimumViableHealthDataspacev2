@@ -383,3 +383,42 @@ describe("walletFetchedRequest (#708)", () => {
     expect(await walletFetchedRequest("tx")).toBe(false);
   });
 });
+
+describe("pidFromSdJwt reads the birth date for the secure hash (ADR-067)", () => {
+  function withBirthDate(birthdate: unknown, signed = true): string {
+    const given = b64(["s1", "given_name", "ERIKA"]);
+    const family = b64(["s2", "family_name", "MUSTERMANN"]);
+    const birth = b64(["s3", "birthdate", birthdate]);
+    const payload = {
+      vct: "urn:eudi:pid:de:1",
+      _sd_alg: "sha-256",
+      _sd: [digest(given), digest(family), ...(signed ? [digest(birth)] : [])],
+    };
+    const jwt = `${b64({ alg: "ES256" })}.${b64(payload)}.sig`;
+    return [jwt, given, family, birth, "kb.jwt.sig"].join("~");
+  }
+
+  it("takes a disclosed birthdate", () => {
+    expect(pidFromSdJwt(withBirthDate("1964-08-12"))).toMatchObject({
+      givenName: "ERIKA",
+      familyName: "MUSTERMANN",
+      birthDate: "1964-08-12",
+    });
+  });
+
+  it("keeps the rulebook's 00 for an unknown day", () => {
+    expect(pidFromSdJwt(withBirthDate("1964-08-00"))?.birthDate).toBe(
+      "1964-08-00",
+    );
+  });
+
+  it("ignores a birthdate that is not a date", () => {
+    expect(
+      pidFromSdJwt(withBirthDate("12.08.1964"))?.birthDate,
+    ).toBeUndefined();
+  });
+
+  it("refuses a birthdate disclosure the issuer did not sign", () => {
+    expect(pidFromSdJwt(withBirthDate("1964-08-12", false))).toBeNull();
+  });
+});
