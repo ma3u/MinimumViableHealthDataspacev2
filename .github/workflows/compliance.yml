@@ -742,9 +742,11 @@ jobs:
         run: |
           set -e
           for i in $(seq 1 60); do
+            # The newest by start time: the list is not ordered, and "[0]"
+            # once picked the previous run's execution (2026-10-28).
             latest=$(az containerapp job execution list \
               --name "$COMPLIANCE_JOB" --resource-group "$RG" \
-              --query "[0]" -o json)
+              --query "sort_by([], &properties.startTime)[-1]" -o json)
             status=$(echo "$latest" | jq -r '.properties.status // "Unknown"')
             name=$(echo "$latest" | jq -r '.name // "-"')
             echo "[$i] $name: $status"
