@@ -45,6 +45,8 @@ final class EHDSConnection: ObservableObject {
   @Published private(set) var lastSend: String?
   /// True while reports are being sent.
   @Published private(set) var syncing = false
+  /// When the app last tried to catch up on its own (`catchUp`).
+  private var lastCatchUp: Date?
   /// The reports to send, handed over by the app so the Connect screen can
   /// offer "Sync all reports now" without owning the store.
   var reportsToSync: () -> [LabReport] = { [] }
@@ -197,13 +199,14 @@ final class EHDSConnection: ObservableObject {
     }
   }
 
-  /// Signs in with a username and password the person typed.
+  /// Signs in with a username and password the person typed. When they are
+  /// the ones of the account the app made ("Sign in again"), it stays that
+  /// account, sending switch included (`EHDSAccount.signedIn`).
   func signIn(username: String, password: String) async {
     let hub = Self.trusted[0]
-    let account = EHDSAccount(
-      ehds: hub.ehds, issuer: hub.issuer,
-      username: username.trimmingCharacters(in: .whitespacesAndNewlines),
-      password: password, createdByApp: false)
+    let account = EHDSAccount.signedIn(
+      ehds: hub.ehds, issuer: hub.issuer, username: username, password: password,
+      kept: self.account)
     state = .signingIn
     notice = nil
     do {
@@ -282,6 +285,24 @@ final class EHDSConnection: ObservableObject {
     } else {
       UserDefaults.standard.removeObject(forKey: Self.sendsTag)
     }
+  }
+
+  /// Brings the record up to date when the app comes up (`RecordCatchUp`):
+  /// signs in again with the kept password if the connection dropped, then
+  /// sends the reports the hub has not had. A sign-in the hub cannot answer,
+  /// as every evening (ADR-053), is quiet and the next time the app comes up
+  /// tries again; a send that fails says so under the switch, as any send does.
+  func catchUp(_ reports: [LabReport]) async {
+    guard
+      RecordCatchUp().due(
+        account: account, sending: sendsReportsSince != nil, busy: syncing,
+        lastAttempt: lastCatchUp)
+    else { return }
+    lastCatchUp = Date()
+    if !isConnected, let account {
+      do { try await signIn(account) } catch { return }
+    }
+    await sync(reports)
   }
 
   /// Sends every report whose values changed since it was last sent, while
