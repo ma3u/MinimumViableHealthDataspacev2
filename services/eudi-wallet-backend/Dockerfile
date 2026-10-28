@@ -54,7 +54,8 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends softhsm2 opensc \
  && rm -rf /var/lib/apt/lists/*
 
-RUN useradd --system --uid 10001 --create-home wallet
+RUN groupadd --system --gid 10001 wallet \
+ && useradd --system --uid 10001 --gid 10001 --create-home wallet
 
 # Create the mount points before the volumes are attached. Docker seeds an empty
 # named volume from the image directory, ownership included; without this they
@@ -62,12 +63,14 @@ RUN useradd --system --uid 10001 --create-home wallet
 RUN mkdir -p /home/wallet/softhsm/tokens /home/wallet/chains /home/wallet/certs \
  && chown -R wallet:wallet /home/wallet
 
-USER wallet
+USER 10001:10001
 WORKDIR /home/wallet
 
 COPY --from=build --chown=wallet:wallet /workspace/wallet-backend.jar /home/wallet/wallet-backend.jar
 COPY --chown=wallet:wallet provision-hsm.sh /usr/local/bin/provision-hsm.sh
 
+# WALLET_CERT_DIR is the directory the dev roots are mounted at, not a secret.
+# hadolint ignore=DL3064
 ENV WALLET_PORT=8080 \
     WALLET_CERT_DIR=file:/home/wallet/certs \
     HSM_MODULE_LIBRARY=/usr/lib/softhsm/libsofthsm2.so \
