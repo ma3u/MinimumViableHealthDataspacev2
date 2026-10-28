@@ -28,6 +28,11 @@ export interface VerifiedPid {
   givenName?: string;
   /** read when a wallet discloses it unasked; the hub requests only the name */
   ageOver18?: boolean;
+  /**
+   * `YYYY-MM-DD`; the German rulebook allows `00` for an unknown month or
+   * day. Read only to compute the secure hash of ADR-067, never stored.
+   */
+  birthDate?: string;
 }
 
 /** The persons a PID can belong to: the realm's patient personas and their records. */
@@ -46,7 +51,8 @@ export const PID_BINDINGS = [
   },
 ] as const;
 
-function normalise(s: string): string {
+/** Case, accents and extra spaces do not count (the German PID writes UPPERCASE). */
+export function normalise(s: string): string {
   return s
     .normalize("NFKD")
     .replace(/\p{M}/gu, "")

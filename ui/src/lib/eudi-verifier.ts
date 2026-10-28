@@ -324,6 +324,7 @@ export function pidFromSdJwt(presentation: string): VerifiedPid | null {
       claims.given_name,
       claims.family_name,
       age?.["18"] ?? claims.age_over_18,
+      claims.birthdate,
     );
   } catch {
     return null;
@@ -361,14 +362,29 @@ async function pidFromMdoc(
     ? docs.find((d) => d.docType === doctype)?.attributes?.[doctype]
     : undefined;
   return attrs
-    ? pidOf(attrs.given_name, attrs.family_name, attrs.age_over_18)
+    ? pidOf(
+        attrs.given_name,
+        attrs.family_name,
+        attrs.age_over_18,
+        attrs.birth_date,
+      )
     : null;
 }
 
-function pidOf(given: unknown, family: unknown, over18: unknown): VerifiedPid {
+const BIRTH_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+function pidOf(
+  given: unknown,
+  family: unknown,
+  over18: unknown,
+  birth?: unknown,
+): VerifiedPid {
   return {
     ...(typeof given === "string" ? { givenName: given } : {}),
     ...(typeof family === "string" ? { familyName: family } : {}),
     ...(typeof over18 === "boolean" ? { ageOver18: over18 } : {}),
+    ...(typeof birth === "string" && BIRTH_DATE.test(birth)
+      ? { birthDate: birth }
+      : {}),
   };
 }
