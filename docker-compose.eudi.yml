@@ -186,6 +186,53 @@ services:
       - eudi_wallet_softhsm:/home/wallet/softhsm
     restart: unless-stopped
 
+  # The self-hosted EUDI verifier (ADR-066, #182 W1), the same image the EU
+  # runs at verifier-backend.eudiw.dev, signing with our own access
+  # certificate. Prerequisite: scripts/eudi/make-verifier-keystore.sh --dev.
+  #
+  #   docker compose -f docker-compose.yml -f docker-compose.eudi.yml up -d eudi-verifier-gate
+  #   EUDI_VERIFIER_BASE_URL=http://localhost:8092 npm run dev   # in ui/
+  #
+  # Port 8092 is the hub's side (/ui/*) and binds to localhost only; 8093 is
+  # the gate, the only side a wallet may reach. A phone needs the gate on a
+  # public HTTPS URL: set EUDI_VERIFIER_PUBLIC_URL to it.
+  eudi-verifier:
+    image: ghcr.io/eu-digital-identity-wallet/eudi-srv-verifier-endpoint:v0.12.0
+    container_name: eudi-verifier
+    environment:
+      VERIFIER_PUBLICURL: "${EUDI_VERIFIER_PUBLIC_URL:-http://localhost:8093}"
+      VERIFIER_ACCESS_CERTIFICATE_SIGNING_ALGORITHM: ES256
+      VERIFIER_ACCESS_CERTIFICATE_KEYSTORE: file:///certs/keystore.p12
+      VERIFIER_ACCESS_CERTIFICATE_KEYSTORE_TYPE: pkcs12
+      VERIFIER_ACCESS_CERTIFICATE_KEYSTORE_PASSWORD: dev-keystore
+      VERIFIER_ACCESS_CERTIFICATE_ALIAS: verifier
+      VERIFIER_ACCESS_CERTIFICATE_PASSWORD: dev-keystore
+      VERIFIER_DEFAULTHTTPRESPONSEMODE: DirectPostJwt
+      VERIFIER_AUTHORIZATIONREQUESTURI: "${EUDI_VERIFIER_SCHEME:-openid4vp://}"
+      VERIFIER_ATTESTATIONCLASSIFICATIONS_PID_VCTS: "urn:eudi:pid:1,urn:eudi:pid:de:1"
+      VERIFIER_ATTESTATIONCLASSIFICATIONS_PID_DOCTYPES: eu.europa.ec.eudi.pid.1
+      # The client id (x509_hash of the dev leaf), the intended use
+      # ehds-patient-sign-in and its dev registration certificate; on Azure the
+      # certificate is the one SPRIND issues.
+      SPRING_CONFIG_ADDITIONAL_LOCATION: "optional:file:/certs/dev.properties"
+    ports:
+      - "127.0.0.1:8092:8080" # the hub's side, never public
+    volumes:
+      - ./services/eudi-verifier/certs:/certs:ro
+    restart: unless-stopped
+
+  eudi-verifier-gate:
+    build: services/eudi-verifier
+    image: mvhd/eudi-verifier-gate:local
+    container_name: eudi-verifier-gate
+    depends_on:
+      - eudi-verifier
+    environment:
+      VERIFIER_UPSTREAM: eudi-verifier:8080
+    ports:
+      - "8093:8081" # the wallet's side: /wallet/* only
+    restart: unless-stopped
+
 volumes:
   eudi_wallet_pgdata:
   eudi_wallet_minio:

@@ -1117,6 +1117,12 @@
       "file": "ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md",
       "title": "The EUDI Wallet sign-in identifies the person: HAIP, both PID formats, one record per PID",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-066",
+      "file": "ADR-066-the-hub-runs-its-own-eudi-verifier-behind-a-wallet-only-gate.md",
+      "title": "The hub runs its own EUDI verifier, behind a gate that passes the wallet API only",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
