@@ -20,6 +20,14 @@ describe("TrustedIssuers", () => {
     }
   });
 
+  it("shows the hub issuer's DID on Azure, which names its Container App", () => {
+    render(<TrustedIssuers />);
+    const item = screen.getByText("Health Dataspace issuer").closest("li")!;
+    expect(
+      within(item).getByText("did:web:mvhd-issuerservice%3A10016:issuer"),
+    ).toBeInTheDocument();
+  });
+
   it("names the Simpl Governance Authority as fictional, for membership only", () => {
     render(<TrustedIssuers />);
     const item = screen

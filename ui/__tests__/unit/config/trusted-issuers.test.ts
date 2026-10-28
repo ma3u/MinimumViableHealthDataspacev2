@@ -37,6 +37,31 @@ const onCompose = trusted.issuers.filter((i) =>
   i.environments.includes("compose"),
 );
 
+/**
+ * The same keys on Azure: -D lines of the controlplane block in
+ * scripts/azure/migrate-edc-to-v018.sh, which go into JAVA_TOOL_OPTIONS.
+ */
+const migrate = readFileSync(
+  join(ROOT, "scripts/azure/migrate-edc-to-v018.sh"),
+  "utf-8",
+);
+const envSh = readFileSync(join(ROOT, "scripts/azure/env.sh"), "utf-8");
+const cpBlock = migrate.slice(
+  migrate.indexOf("controlplane) cat <<EOF"),
+  migrate.indexOf("\nEOF", migrate.indexOf("controlplane) cat <<EOF")),
+);
+const onAzure: Record<string, { id?: string; raw?: string }> = {};
+for (const m of cpBlock.matchAll(
+  /^-Dedc\.iam\.trusted-issuer\.([^.]+)\.(id|supportedtypes)=(.+)$/gm,
+)) {
+  onAzure[m[1]] ??= {};
+  if (m[2] === "id") onAzure[m[1]].id = m[3];
+  else onAzure[m[1]].raw = m[3];
+}
+/** ISSUER_DID as the script builds it from env.sh's ISSUER_APP. */
+const issuerApp = envSh.match(/ISSUER_APP="([^"]+)"/)?.[1];
+const issuerDidTemplate = migrate.match(/^ISSUER_DID="([^"]+)"/m)?.[1];
+
 describe("trusted issuers (#710)", () => {
   it("compose trusts exactly the issuers the list names for compose", () => {
     expect(Object.keys(configured).sort()).toEqual(
@@ -53,6 +78,30 @@ describe("trusted issuers (#710)", () => {
         [...issuer.types].sort(),
       );
       expect(c.types).not.toContain("*");
+    }
+  });
+
+  it("Azure trusts the issuers listed for azure, under their Azure DID, for the listed types", () => {
+    const listed = trusted.issuers.filter((i) =>
+      i.environments.includes("azure"),
+    );
+    expect(Object.keys(onAzure).sort()).toEqual(
+      listed.map((i) => i.alias).sort(),
+    );
+    for (const issuer of listed) {
+      const a = onAzure[issuer.alias];
+      const did = (a.id ?? "").replace(
+        "${ISSUER_DID}",
+        (issuerDidTemplate ?? "").replace("${ISSUER_APP}", issuerApp ?? ""),
+      );
+      expect(did, issuer.alias).toBe(
+        "azureDid" in issuer ? issuer.azureDid : issuer.did,
+      );
+      // Single quotes: JAVA_TOOL_OPTIONS strips double quotes, and the
+      // control plane would get [MembershipCredential,...], which is not JSON.
+      expect(a.raw, issuer.alias).toMatch(/^'\[.*\]'$/);
+      const types = JSON.parse((a.raw ?? "").slice(1, -1)) as string[];
+      expect([...types].sort(), issuer.alias).toEqual([...issuer.types].sort());
     }
   });
 

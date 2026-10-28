@@ -1121,11 +1121,11 @@
   ],
   "complianceFloors": {
     "dsp-tck-results": {
-      "min_passed": 21,
-      "max_failed": 6
+      "min_passed": 25,
+      "max_failed": 1
     },
     "dcp-compliance-results": {
-      "min_passed": 24,
+      "min_passed": 27,
       "max_failed": 0
     },
     "ehds-compliance-results": {
@@ -1133,8 +1133,8 @@
       "max_failed": 0
     },
     "bruno-api-results": {
-      "min_passed": 178,
-      "max_failed": 1
+      "min_passed": 179,
+      "max_failed": 0
     },
     "bruno-api-azure-results": {
       "min_passed": 153,

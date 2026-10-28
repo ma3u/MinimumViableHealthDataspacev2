@@ -123,7 +123,9 @@ jobs:
   dsp-tck:
     name: DSP 2025-1 TCK
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 25, not 15: the identity layer seed (#710) adds the issuer restart and
+    # credential issuance, about five minutes on a standard runner.
+    timeout-minutes: 25
     if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
       - uses: actions/checkout@v7
@@ -168,6 +170,14 @@ jobs:
             sleep 5
           done
 
+      - name: Wait for the IdentityHub
+        run: |
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:11005/api/identity >/dev/null 2>&1 && { echo "IdentityHub ready (attempt $i)"; break; }
+            [ "$i" -eq 60 ] && echo "IdentityHub not ready after 5 min, proceeding anyway"
+            sleep 5
+          done
+
       # The ephemeral stack comes up empty: this workflow starts it with
       # `docker compose up -d` and never runs jad/seed-all.sh, so the control
       # plane has no participant contexts and every participant-scoped check
@@ -187,21 +197,19 @@ jobs:
       # silently does nothing is exactly what #316 is about. If it breaks, the
       # run should stop here rather than let the suites report a number that
       # measures the seeding instead of the platform.
-      - name: Seed participant contexts on the control plane (#316)
+      #
+      # #710. Participant contexts alone gave the catalogue checks no DSP path:
+      # a consumer needs its STS config to send the request, and a provider
+      # refuses one that presents no MembershipCredential. So CAT-1.1 failed
+      # for every participant. The whole identity layer, as the Bruno job seeds
+      # it, gives both.
+      - name: Seed the identity layer (#345, #710)
         run: |
-          TOKEN=$(curl -sS --max-time 20 -X POST \
-            "http://localhost:8080/realms/edcv/protocol/openid-connect/token" \
-            -H "Content-Type: application/x-www-form-urlencoded" \
-            -d "grant_type=client_credentials&client_id=provisioner&client_secret=provisioner-secret" \
-            2>/dev/null \
-            | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" \
-            2>/dev/null || true)
-          if [ -z "$TOKEN" ]; then
-            echo "::warning::No Keycloak token, so the participant contexts cannot be seeded. The suites will report an empty control plane (#316)."
-            exit 1
-          fi
-          CP=http://localhost:11003/api/mgmt TOKEN="$TOKEN" \
-            bash scripts/azure/05-cp-participants.sh
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
+          EDC_IDENTITY_URL=http://localhost:11005/api/identity \
+          EDC_ISSUER_URL=http://localhost:10013/api/admin \
+            bash scripts/seed-identity-layer.sh
 
       - name: Run DSP TCK
         run: |
@@ -230,7 +238,9 @@ jobs:
   dcp-compliance:
     name: DCP v1.0 Compliance
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 25, not 15: with a DSP path TRUST-6.4 starts a third IssuerService and
+    # waits for its credential (#710); the job used 11 minutes without it.
+    timeout-minutes: 25
     if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
       - uses: actions/checkout@v7
@@ -313,6 +323,15 @@ jobs:
           KEYCLOAK_URL=http://localhost:8080 \
           EDC_IDENTITY_URL=http://localhost:11005/api/identity \
             ./scripts/seed-identityhub-participants.sh
+
+      # #710. Without the config CFM writes locally, every DSP call a context
+      # sends answers 500 "No configuration found for participant context", so
+      # TRUST-6.3 to 6.5 skipped for want of a DSP path.
+      - name: Give each participant context its STS config (#710)
+        run: |
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
+            ./scripts/seed-cp-participant-config.sh
 
       # #345. CI's IssuerService has never had an identity: no participant
       # context, no signing key loaded, no DID. Locally bootstrap-jad.sh gives it

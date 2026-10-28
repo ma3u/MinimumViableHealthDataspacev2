@@ -26,6 +26,11 @@ export function TrustedIssuers() {
             <code className="block text-xs text-(--text-secondary) break-all mt-0.5">
               {issuer.did}
             </code>
+            {"azureDid" in issuer && (
+              <div className="text-xs text-(--text-secondary) mt-0.5">
+                On Azure: <code className="break-all">{issuer.azureDid}</code>
+              </div>
+            )}
             <p className="text-xs text-(--text-secondary) mt-1">
               {issuer.role}
             </p>

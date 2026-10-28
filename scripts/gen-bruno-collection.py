@@ -969,13 +969,14 @@ req(f, "16 DSP the consumer asks for the provider's catalogue", "post",
     "{{mgmtUrl}}/{{mgmtVersion}}/participants/{{consumerCtx}}/catalog/request",
     persona="anon", bearer="edcToken",
     body={"@context": ["https://w3id.org/edc/connector/management/v2"], "@type": "CatalogRequest",
-          "counterPartyAddress": "{{dspInternalUrl}}/{{providerCtx}}/2025-1",
-          "counterPartyId": "{{providerDid}}", "protocol": "dataspace-protocol-http:2025-1"},
+          "counterPartyAddress": "{{dspInternalUrl}}/{{providerCtx}}/http-dsp-profile-2025-1",
+          "counterPartyId": "{{providerDid}}", "protocol": "http-dsp-profile-2025-1"},
     asserts=["res.status: eq 200", "res.body['@type']: isDefined"],
-    docs="""Known red since 2026-09-26 in both environments: `No provider dispatcher registered for
-protocol: dataspace-protocol-http:2025-1` (#345). The consumer control plane never sends the
-message, so the provider's 404 was never the first problem. The request stays here so the
-message stays visible until it is fixed.""")
+    docs="""The consumer's control plane sends a DSP CatalogRequestMessage to the provider and returns
+the provider's catalogue. The protocol is the profile id, `http-dsp-profile-2025-1`, and the
+provider's address ends in it (#542). Red from 2026-09-26 to 2026-10-28: the request named
+`dataspace-protocol-http:2025-1`, for which no dispatcher is registered (#345), and in CI the
+consumer's context had no STS config, so the call could not have left anyway (#710).""")
 req(f, "20 IdentityHub participant contexts", "get", "{{identityUrl}}/v1alpha/participants",
     persona="anon", bearer="edcToken",
     asserts=["res.status: eq 200", "res.body: isArray", "res.body[0].did: isDefined"])

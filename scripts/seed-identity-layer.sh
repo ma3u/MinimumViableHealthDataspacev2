@@ -9,6 +9,7 @@
 #
 #   1. participant contexts on the control plane      scripts/azure/05-cp-participants.sh
 #   2. the same participants in IdentityHub            scripts/seed-identityhub-participants.sh
+#  2b. each context's STS config on the control plane scripts/seed-cp-participant-config.sh
 #   3. the IssuerService's own identity                scripts/seed-issuer-identity.sh
 #   4. the issuer accepts tokens                       scripts/lib/wait-for-issuer-auth.sh
 #   5. participants registered as holders              scripts/seed-issuer-holders.sh
@@ -46,6 +47,12 @@ CP="$EDC_MANAGEMENT_URL" TOKEN="$TOKEN" bash "${REPO_DIR}/scripts/azure/05-cp-pa
 
 step "2/7 the same participants in IdentityHub"
 "${SCRIPT_DIR}/seed-identityhub-participants.sh" || fail "step 2"
+
+# A context without its config answers 500 to every DSP call it would send
+# ("No configuration found for participant context"). CFM writes it locally;
+# where the contexts came from step 1 nothing did (#710).
+step "2b/7 each participant context's STS config on the control plane"
+"${SCRIPT_DIR}/seed-cp-participant-config.sh" || fail "step 2b"
 
 step "3/7 the IssuerService's own identity"
 "${SCRIPT_DIR}/seed-issuer-identity.sh" || fail "step 3"
