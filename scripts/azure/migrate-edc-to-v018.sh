@@ -70,6 +70,13 @@ app_name() {
 # to a 404; and the 0.18 IdentityHub accepts only the scope alias
 # org.eclipse.dspace.dcp.vc.type. Values from docker-compose.jad.yml, jad/identityhub.env
 # and jad/issuerservice.env, hosts rewritten to the Container App names.
+#
+# The trusted issuer's types are a JSON list, and JAVA_TOOL_OPTIONS strips
+# double quotes: written plain, the control plane would read
+# [MembershipCredential,...], which is not JSON. Inside single quotes the JVM
+# keeps them (measured with the controlplane image's own java, 2026-10-28).
+# The list is ui/src/content/trusted-issuers.json; trusted-issuers.test.ts
+# keeps the two equal (#710).
 settings() {
   case "$1" in
     controlplane) cat <<EOF
@@ -106,6 +113,7 @@ EDC_IAM_DCP_SCOPES_MANUFACTURER_VALUE=org.eclipse.dspace.dcp.vc.type:Manufacture
 -Dedc.iam.dcp.scopes.data-quality-label.value=org.eclipse.dspace.dcp.vc.type:DataQualityLabelCredential:read
 -Dedc.iam.dcp.scopes.data-quality-label.prefix-mapping=DataQualityLabelCredential
 -Dedc.iam.trusted-issuer.issuer.id=${ISSUER_DID}
+-Dedc.iam.trusted-issuer.issuer.supportedtypes='["MembershipCredential","ManufacturerCredential","EHDSParticipantCredential","DataProcessingPurposeCredential","DataQualityLabelCredential"]'
 EOF
       ;;
     identityhub) cat <<EOF
