@@ -101,7 +101,7 @@ jobs:
           LOCATION=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query location -o tsv)
           export ENV_ID LOCATION
           tar -czf /tmp/scripts.tgz scripts/azure/05-cp-participants.sh scripts/seed-identityhub-participants.sh \
-            scripts/repair-cp-sts-secrets.sh scripts/seed-issuer-holders.sh \
+            scripts/repair-cp-sts-secrets.sh scripts/seed-cp-participant-config.sh scripts/seed-issuer-holders.sh \
             scripts/request-participant-credentials.sh scripts/lib/cp-participant-pairs.py \
             scripts/lib/dsp-protocol.sh
           SCRIPTS_TGZ_B64=$(base64 -w0 < /tmp/scripts.tgz)

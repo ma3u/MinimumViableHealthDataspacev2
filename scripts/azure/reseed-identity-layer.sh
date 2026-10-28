@@ -18,6 +18,7 @@
 #                  IdentityHub and on the control plane
 #               2. control-plane contexts       scripts/azure/05-cp-participants.sh
 #               3. IdentityHub records          scripts/seed-identityhub-participants.sh
+#              3b. each context's STS config    scripts/seed-cp-participant-config.sh
 #               4. the control plane's copy of each STS secret
 #                                               scripts/repair-cp-sts-secrets.sh
 #               5. holders on the IssuerService scripts/seed-issuer-holders.sh
@@ -145,6 +146,15 @@ CP="$CP" TOKEN="$PROV_TOKEN" MGMT_V_CANDIDATES="$MGMT_V" bash scripts/azure/05-c
 
 log "3/6 IdentityHub records"
 bash scripts/seed-identityhub-participants.sh || fail "step 3"
+
+# A context made in step 2 has no config, so every DSP call it would send
+# answered 500 "No configuration found for participant context"; pharmaco's
+# did on 2026-10-28 (#710). CFM writes the config where it provisions; this
+# writes the same entries where it did not, and never overwrites one. The
+# token URL is the one 05-cfm-agents.sh gives the EDC-V agent.
+log "3b/6 each participant context's STS config on the control plane"
+STS_TOKEN_URL="${STS_TOKEN_URL:-http://mvhd-identityhub:7084/api/sts/token}" \
+  bash scripts/seed-cp-participant-config.sh || fail "step 3b"
 
 log "4/6 the control plane's copy of each STS client secret"
 bash scripts/repair-cp-sts-secrets.sh || fail "step 4"
