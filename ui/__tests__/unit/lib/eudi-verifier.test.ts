@@ -3,6 +3,7 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   startPresentation,
   getPresentationResult,
+  walletFetchedRequest,
   pidFromSdJwt,
   PID_SD_JWT_QUERY,
   PID_MDOC_QUERY,
@@ -305,5 +306,41 @@ describe("pidFromSdJwt", () => {
 
   it("returns null for something that is not an SD-JWT", () => {
     expect(pidFromSdJwt("not-a-jwt")).toBeNull();
+  });
+});
+
+describe("walletFetchedRequest (#708)", () => {
+  it("is true once the verifier logged the wallet fetching the request", async () => {
+    const fetchMock = vi.fn(async () =>
+      okJson({
+        events: [
+          { actor: "Verifier", event: "Transaction initialized" },
+          { actor: "Wallet", event: "Request object retrieved" },
+        ],
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    expect(await walletFetchedRequest("tx 1")).toBe(true);
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      "https://verifier-backend.eudiw.dev/ui/presentations/tx%201/events",
+    );
+  });
+
+  it("is false while only the verifier has acted", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        okJson([{ actor: "Verifier", event: "Transaction initialized" }]),
+      ),
+    );
+    expect(await walletFetchedRequest("tx")).toBe(false);
+  });
+
+  it("is false when the event log cannot be read", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => okJson({}, 404)),
+    );
+    expect(await walletFetchedRequest("tx")).toBe(false);
   });
 });

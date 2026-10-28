@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 vi.mock("@/lib/eudi-verifier", () => ({
   startPresentation: vi.fn(),
   getPresentationResult: vi.fn(),
+  walletFetchedRequest: vi.fn(async () => false),
 }));
 vi.mock("qrcode", () => ({
   default: { toDataURL: vi.fn(async () => "data:image/png;base64,QR") },
@@ -10,7 +11,11 @@ vi.mock("qrcode", () => ({
 
 import { POST } from "@/app/api/auth/eudi/start/route";
 import { GET } from "@/app/api/auth/eudi/status/route";
-import { startPresentation, getPresentationResult } from "@/lib/eudi-verifier";
+import {
+  startPresentation,
+  getPresentationResult,
+  walletFetchedRequest,
+} from "@/lib/eudi-verifier";
 import { getTransaction } from "@/lib/eudi-store";
 import { patientPseudonym } from "@/lib/patient-identity";
 
@@ -125,6 +130,40 @@ describe("GET /api/auth/eudi/status", () => {
       new Request(`http://x/api/auth/eudi/status?sid=${sid}`),
     );
     expect((await res.json()).status).toBe("pending");
+  });
+
+  it("says the wallet opened the request, and asks the verifier only once (#708)", async () => {
+    const sid = await startSid("tx-opened");
+    vi.mocked(getPresentationResult).mockResolvedValue({ status: "pending" });
+    vi.mocked(walletFetchedRequest).mockResolvedValueOnce(false);
+    const url = `http://x/api/auth/eudi/status?sid=${sid}`;
+    expect(await (await GET(new Request(url))).json()).toEqual({
+      status: "pending",
+      walletOpened: false,
+    });
+    vi.mocked(walletFetchedRequest).mockResolvedValueOnce(true);
+    expect(await (await GET(new Request(url))).json()).toEqual({
+      status: "pending",
+      walletOpened: true,
+    });
+    expect(await (await GET(new Request(url))).json()).toEqual({
+      status: "pending",
+      walletOpened: true,
+    });
+    expect(walletFetchedRequest).toHaveBeenCalledTimes(2);
+  });
+
+  it("stays pending when the event log throws", async () => {
+    const sid = await startSid("tx-events-down");
+    vi.mocked(getPresentationResult).mockResolvedValue({ status: "pending" });
+    vi.mocked(walletFetchedRequest).mockRejectedValueOnce(new Error("down"));
+    const res = await GET(
+      new Request(`http://x/api/auth/eudi/status?sid=${sid}`),
+    );
+    expect(await res.json()).toEqual({
+      status: "pending",
+      walletOpened: false,
+    });
   });
 
   it("pins the patient the PID belongs to, at level high (#708)", async () => {

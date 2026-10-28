@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  onTestFinished,
+} from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import EudiQrPage from "@/app/auth/eudi-qr/page";
 import { signIn } from "next-auth/react";
@@ -77,6 +85,46 @@ describe("EudiQrPage", () => {
     expect(
       screen.getByRole("group", { name: "Simulated d-you register" }),
     ).toBeInTheDocument();
+    // Since ADR-065 a PID opens the record in its name, not a demo patient.
+    expect(
+      screen.getByText(/your PID opens the one in your name/i),
+    ).toBeInTheDocument();
+  });
+
+  it("says when the wallet opened the request and then went quiet (#708)", async () => {
+    let now = 1_800_000_000_000;
+    const clock = vi.spyOn(Date, "now").mockImplementation(() => now);
+    onTestFinished(() => clock.mockRestore());
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) =>
+        String(url).includes("/start")
+          ? startOk
+          : {
+              status: 200,
+              ok: true,
+              json: async () => ({ status: "pending", walletOpened: true }),
+            },
+      ),
+    );
+    render(<EudiQrPage />);
+    expect(
+      await screen.findByText(
+        /Your wallet opened the request/i,
+        {},
+        { timeout: 6000 },
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    now += 30_000;
+    expect(
+      await screen.findByText(
+        /not registered with that wallet yet/i,
+        {},
+        { timeout: 6000 },
+      ),
+    ).toBeInTheDocument();
+    expect(signIn).not.toHaveBeenCalled();
   });
 
   it("shows an error with a retry button when start fails", async () => {

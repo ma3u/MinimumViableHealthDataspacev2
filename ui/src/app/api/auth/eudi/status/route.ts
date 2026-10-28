@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { getPresentationResult } from "@/lib/eudi-verifier";
+import {
+  getPresentationResult,
+  walletFetchedRequest,
+} from "@/lib/eudi-verifier";
 import { getTransaction, updateTransaction } from "@/lib/eudi-store";
 import { mapPidToPatient } from "@/lib/eudi-patient-map";
 
@@ -12,7 +15,8 @@ const DECLINED = "The wallet did not share a PID this hub can read.";
 /**
  * Poll the status of an in-flight EUDI Wallet login by `sid`.
  *
- * Returns only a coarse status — never the PID claims. On completion it pins
+ * Returns only a coarse status — never the PID claims — and, while pending,
+ * whether the wallet has fetched the request yet. On completion it pins
  * the patient the PID belongs to (#708) to the `sid`; the NextAuth
  * "eudi-wallet" Credentials provider then mints the session from that pinned
  * result. A PID that belongs to nobody, or a wallet that declined, is
@@ -35,7 +39,16 @@ export async function GET(req: Request): Promise<NextResponse> {
   try {
     const result = await getPresentationResult(tx.transactionId);
     if (result.status === "pending") {
-      return NextResponse.json({ status: "pending" });
+      // Whether the wallet has opened the request, so the page can tell a
+      // wallet that has not scanned yet from one that scanned and went quiet.
+      if (!tx.walletOpenedAt && (await walletOpened(tx.transactionId))) {
+        updateTransaction(sid, { walletOpenedAt: Date.now() });
+        return NextResponse.json({ status: "pending", walletOpened: true });
+      }
+      return NextResponse.json({
+        status: "pending",
+        walletOpened: Boolean(tx.walletOpenedAt),
+      });
     }
     if (result.status === "failed") {
       console.warn("EUDI presentation not usable:", result.reason);
@@ -53,6 +66,14 @@ export async function GET(req: Request): Promise<NextResponse> {
     // Transient verifier hiccup — keep the client polling rather than failing.
     console.error("GET /api/auth/eudi/status error:", err);
     return NextResponse.json({ status: "pending" });
+  }
+}
+
+async function walletOpened(transactionId: string): Promise<boolean> {
+  try {
+    return await walletFetchedRequest(transactionId);
+  } catch {
+    return false;
   }
 }
 
