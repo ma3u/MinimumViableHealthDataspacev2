@@ -293,6 +293,7 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md)                          | The hub meets Simpl-Open as a connector outside its agent, over DSP and DCP                                          | 2026-10-27 | Accepted          |
 | [065](ADRs/ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md)                          | The EUDI Wallet sign-in identifies the person: HAIP, both PID formats, one record per PID                            | 2026-10-27 | Accepted          |
 | [066](ADRs/ADR-066-the-hub-runs-its-own-eudi-verifier-behind-a-wallet-only-gate.md)           | The hub runs its own EUDI verifier, behind a gate that passes the wallet API only                                    | 2026-10-28 | Proposed          |
+| [067](ADRs/ADR-067-a-pid-links-to-an-account-by-a-keyed-fingerprint.md)                       | A PID links to an account by a keyed fingerprint; the hub stores neither name nor birth date                         | 2026-10-28 | Accepted          |
 
 Numbers taken by open work, so a new ADR starts at **066**: 051 (#475). 050
 (#477), 054 (#520) and 055 (#517) are merged.
