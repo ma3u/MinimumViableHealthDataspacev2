@@ -464,10 +464,15 @@ jobs:
       #
       # Hard-fails since #349: the seed has been seen to work, and its count
       # read-back is the assertion.
+      #
+      # register-healthdcat-ap-r8.cypher goes last, as in neo4j/seed.sh: it
+      # completes the Release 8 description of every dataset the seeds before
+      # it created. Without it HDCAT-2.6 (#700) found 4 incomplete datasets
+      # and the baseline reported a regression on every run since #702.
       - name: Seed Neo4j with the documented minimal data set (#345)
         run: |
           set -euo pipefail
-          for f in neo4j/insert-synthetic-schema-data.cypher neo4j/register-eehrxf-profiles.cypher neo4j/seed-compliance-matrix.cypher neo4j/seed-persona-overview.cypher; do
+          for f in neo4j/insert-synthetic-schema-data.cypher neo4j/register-eehrxf-profiles.cypher neo4j/seed-compliance-matrix.cypher neo4j/seed-persona-overview.cypher neo4j/register-healthdcat-ap-r8.cypher; do
             echo "== $f"
             docker exec -i health-dataspace-neo4j \
               cypher-shell -u neo4j -p healthdataspace < "$f"
