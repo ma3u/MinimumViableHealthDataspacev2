@@ -50,19 +50,11 @@ MGMT_URL="http://${CONTROLPLANE_APP}:8081/api/mgmt"
 IDENTITY_URL="http://${IDENTITYHUB_APP}:7082/api/identity"
 ISSUER_URL="https://${ISSUER_APP}.internal.${ACA_DOMAIN}/api/admin"
 KC_URL="https://${KEYCLOAK_APP}.${ACA_DOMAIN}"
-# Management API version segment. Measured, not assumed: against the image
-# deployed here (jad-controlplane:2026-04-14), with a Keycloak bearer token,
-#
-#   /api/mgmt/v5beta/participants   404
-#   /api/mgmt/v5alpha/participants  404
-#   /api/mgmt/v4alpha/participants  200  []
-#
-# so this environment is two version segments behind the 0.18 launchers in
-# docker-compose.jad.yml that the suites default to (v5beta). The suites fall
-# back across the candidates on a 404 (scripts/lib/edc-mgmt-api.sh), so this
-# is not load-bearing — but it saves two wasted requests and records which
-# version the deployed control plane is actually on.
-MGMT_API_VERSION="${EDC_MGMT_API_VERSION:-v4alpha}"
+# Management API version segment: v5beta since the EDC apps run the same 0.18
+# build as compose and CI (ADR-055). It was v4alpha, measured against the
+# April image, and stayed so after the migration; the suites fall back across
+# versions on a 404, but the domain suite does not, and asked v4alpha.
+MGMT_API_VERSION="${EDC_MGMT_API_VERSION:-v5beta}"
 # Bolt, not the transactional HTTP API: mvhd-neo4j has TCP ingress with
 # targetPort and exposedPort 7687 and no additionalPortMappings, so
 # http://mvhd-neo4j:7474 is not routable from inside the environment and every
@@ -110,6 +102,22 @@ else
     -o none
   ok "Job created"
 fi
+
+# The suites get a token as the Keycloak client `admin`. Its secret on Azure
+# is no longer the public default (rotate-edc-admin-client-secret.sh), so the
+# job reads it from Key Vault the way mvhd-ui and mvhd-neo4j-proxy do. Without
+# it every Management API call answered 401 "Missing Authorization header".
+SECRET_NAME="edc-admin-client-secret"
+IDENTITY_NAME="${ADMIN_SECRET_IDENTITY:-id-mvhd-claude-federation}"
+KV_URI="$(az keyvault show --name "$KEY_VAULT_NAME" --query properties.vaultUri -o tsv)"
+IDENTITY_ID="$(az identity show --name "$IDENTITY_NAME" --resource-group "$RG" --query id -o tsv)"
+az containerapp job identity assign --name "$COMPLIANCE_JOB" --resource-group "$RG" \
+  --user-assigned "$IDENTITY_ID" -o none
+az containerapp job secret set --name "$COMPLIANCE_JOB" --resource-group "$RG" \
+  --secrets "${SECRET_NAME}=keyvaultref:${KV_URI%/}/secrets/${SECRET_NAME},identityref:${IDENTITY_ID}" -o none
+az containerapp job update --name "$COMPLIANCE_JOB" --resource-group "$RG" \
+  --set-env-vars "EDC_CLIENT_SECRET=secretref:${SECRET_NAME}" -o none
+ok "EDC_CLIENT_SECRET from Key Vault (${SECRET_NAME})"
 
 if [[ -n "${NO_START:-}" ]]; then
   ok "NO_START=1 — skipping job start"
