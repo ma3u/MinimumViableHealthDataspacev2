@@ -153,6 +153,9 @@ az containerapp create \
     "EUDI_RESPONSE_MODE=${EUDI_RESPONSE_MODE:-direct_post.jwt}" \
     "EUDI_DEMO_WALLET=${EUDI_DEMO_WALLET:-true}" \
   -o none
+# An EUDI sign-in lives in one replica's memory; see size-ui.sh (#708).
+az containerapp ingress sticky-sessions set --name "$UI_APP" --resource-group "$RG" \
+  --affinity sticky -o none
 ok "UI container app"
 
 # ── Update NEXTAUTH_URL with actual FQDN ────────────────────────────────────
