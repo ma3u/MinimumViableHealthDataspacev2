@@ -23,7 +23,9 @@ set -euo pipefail
 #     container decodes it into an in-memory volume at every start, so no
 #     image and no disk carries the key;
 #   - one replica: the verifier keeps its transactions in memory;
-#   - public on verifier.ehds.mabu.red, the access certificate's SAN.
+#   - public on verifier.ehds.mabu.red. The client id is x509_hash: the
+#     SPRIND registrar sets its own subject and puts no DNS name in the
+#     access certificate (2026-10-28), so x509_san_dns is not an option.
 #
 # The hub keeps using the hosted EU verifier until EUDI_VERIFIER_BASE_URL is
 # switched (deploy-azure.yml re-asserts it on every deploy), see the runbook

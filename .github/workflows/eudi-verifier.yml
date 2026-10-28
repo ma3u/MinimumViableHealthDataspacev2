@@ -1,0 +1,58 @@
+name: EUDI verifier (ADR-066)
+
+# Creates or updates mvhd-eudi-verifier, the hub's own EUDI verifier behind
+# its wallet-only gate (#182 W1). Runs as the CI identity because importing
+# the verifier image into ACR and building the gate there needs more than the
+# maintainer's Container Apps Contributor role (2026-10-28: AuthorizationFailed
+# on importImage). The work is scripts/azure/19-eudi-verifier.sh; running it
+# again is an update.
+#
+# The keystore, its password, the client id and the registration certificate
+# must already be in Key Vault: the maintainer uploads them from the Mac that
+# holds the key (19-eudi-verifier.sh --upload-keystore). This workflow never
+# sees the key; the app reads it through its managed identity.
+#
+# Manual trigger only. Runbook: docs/knowledge/runbooks/eudi-verifier-self-hosted.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "apply creates or updates the app; check only reports"
+        type: choice
+        options: [apply, check]
+        default: apply
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-reset"
+  cancel-in-progress: false
+
+jobs:
+  verifier:
+    name: EUDI verifier (${{ inputs.mode }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Run 19-eudi-verifier.sh
+        env:
+          MODE: ${{ inputs.mode }}
+        run: |
+          if [ "$MODE" = "check" ]; then
+            ./scripts/azure/19-eudi-verifier.sh --check </dev/null | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            ./scripts/azure/19-eudi-verifier.sh </dev/null | tee -a "$GITHUB_STEP_SUMMARY"
+          fi

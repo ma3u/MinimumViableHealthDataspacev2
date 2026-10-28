@@ -51,6 +51,24 @@ Checked on 2026-10-28:
 
 ## On Azure, once SPRIND has issued the certificates
 
+Issued on 2026-10-28 for relying party `13e7eccf-…` ("Hackathon - Web"): access
+certificate `8B6F08D765A5552EE212477B26D03E98` (to 2027-10-28) and registration
+certificate `098c9530-86f7-471e-aac5-427d5b741be7`, both under
+`CN=German Registrar` (`https://sandbox.eudi-wallet.org/api/ca.der`). Three
+things the registrar decides, not the CSR:
+
+- It sets the subject (`CN=Hackathon - Web`, `organizationIdentifier=LEIXG-HEALTHDATASPACE`)
+  and puts only the support URL in the SAN. With no DNS name the client id is
+  `x509_hash`; `x509_san_dns` is not possible.
+- It refuses an access certificate (400) until the organisation has a privacy
+  policy URL and a support URL.
+- A registration certificate takes one format per attestation. Ours is
+  `dc+sd-jwt` `urn:eudi:pid:de:1` only, so the hub must not offer mdoc to d-you.
+
+Steps 4 and 5 need registry rights the maintainer does not have: run them as
+the CI identity with the **EUDI verifier** workflow
+(`.github/workflows/eudi-verifier.yml`, mode `apply` or `check`).
+
 1. Download the access certificate (and its chain, if the portal gives one
    separately), and the registration certificate.
 2. Build the keystore from the key that never left the Mac:
