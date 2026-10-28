@@ -103,6 +103,57 @@ MEDICATIONS = [
     ("209459", "Atorvastatin 20 mg oral tablet", "2024-09-12"),
 ]
 
+# ── 1b. The second demo patient (P2, the patient2 login), #708 ──────────────
+# Jan de Vries, treated at Limburg Medical Centre. The EUDI Wallet sign-in
+# binds a PID with his name to this record (ui/src/lib/eudi-patient-map.ts),
+# so the record has to exist. His picture is the one
+# patient_profile_patient2.json shows: atrial fibrillation on warfarin,
+# coronary artery disease, heart failure stage B, T2D since 2022, a smoker.
+# Codes checked against the NLM LOINC and RxNav APIs on 2026-10-28.
+P2_VISITS = ["2025-03-04", "2025-09-16", "2026-03-10", "2026-09-08"]
+
+P2_PARAMETERS = [
+    # Units as a Dutch laboratory prints them: LDL in mmol/L, eGFR by CKD-EPI.
+    ("4548-4", "Hemoglobin A1c/Hemoglobin.total in Blood", "%", 4.0, 6.0,
+     "laboratory", [6.9, 7.2, 6.8, 6.6]),
+    ("22748-8", "Cholesterol in LDL [Moles/volume] in Serum or Plasma",
+     "mmol/L", 0, 3.0, "laboratory", [3.4, 2.6, 2.1, 1.9]),
+    ("33762-6", "Natriuretic peptide.B prohormone N-Terminal [Mass/volume] in Serum or Plasma",
+     "pg/mL", 0, 125, "laboratory", [310, 355, 390, 420]),
+    ("6301-6", "INR in Platelet poor plasma by Coagulation assay", "{INR}",
+     0.8, 1.2, "laboratory", [2.6, 3.4, 2.4, 2.8]),
+    ("62238-1", "Glomerular filtration rate/1.73 sq M.predicted by CKD-EPI",
+     "mL/min/{1.73_m2}", 90, None, "laboratory", [74, 71, 69, 66]),
+    ("8480-6", "Systolic blood pressure", "mm[Hg]", 100, 130, "vital-signs",
+     [152, 144, 138, 136]),
+    ("39156-5", "Body mass index (BMI) [Ratio]", "kg/m2", 18.5, 25.0,
+     "vital-signs", [34.6, 34.1, 33.9, 33.8]),
+]
+
+P2_CONDITIONS = [
+    ("49436004", "Atrial fibrillation", "2019-08-03"),
+    ("38341003", "Hypertension", "2010-05-17"),
+    ("44054006", "Type 2 diabetes mellitus", "2022-01-11"),
+    ("414916001", "Obesity (BMI 33.8)", "2016-03-22"),
+    ("77176002", "Smoker", "1985-01-01"),
+    ("53741008", "Coronary artery disease", "2020-11-30"),
+    ("13644009", "Hypercholesterolaemia", "2014-07-09"),
+    ("84114007", "Heart failure (stage B)", "2023-02-14"),
+    ("13645005", "Chronic obstructive pulmonary disease", "2018-10-05"),
+    ("73430006", "Sleep apnea", "2021-06-18"),
+    ("73595000", "Work-related stress", "2017-04-01"),
+    ("90560007", "Gout", "2022-09-27"),
+]
+
+P2_MEDICATIONS = [
+    ("855332", "Warfarin 5 mg oral tablet", "2019-08-03"),
+    ("314077", "Lisinopril 20 mg oral tablet", "2010-05-17"),
+    ("854905", "Bisoprolol 5 mg oral tablet", "2019-08-03"),
+    ("617311", "Atorvastatin 40 mg oral tablet", "2020-11-30"),
+    ("861004", "Metformin 1000 mg oral tablet", "2022-01-11"),
+    ("313988", "Furosemide 40 mg oral tablet", "2023-02-14"),
+]
+
 # ── 2. Studies, enrolment and the patient's consents ────────────────────────
 STUDIES = [
     {
@@ -554,7 +605,120 @@ def cypher() -> str:
     w("WHERE vc.credentialId IN ['vc:data-quality-label:clinic-alphaklinik', 'vc:data-quality-label:clinic-lmc']")
     w("SET vc.expiresAt = datetime('2026-09-18T00:06:57Z'), vc.status = 'expired';")
     w("")
+    second_patient(w)
     return "\n".join(L)
+
+
+def second_patient(w) -> None:
+    """P2, Jan de Vries at Limburg Medical Centre (#708), shaped like P1."""
+    w("// ── 9. The second demo patient, treated at Limburg Medical Centre (#708) ──")
+    w("// Jan de Vries, the patient2 login. A verified EUDI Wallet PID with his name")
+    w("// signs in to this record, so it has to exist (ui/src/lib/eudi-patient-map.ts).")
+    w("MERGE (p:Patient {resourceId: 'P2'})")
+    w("SET p.id = 'P2',")
+    w("    p.name = 'Jan de Vries',")
+    w("    p.gender = 'male',")
+    w("    p.birthDate = date('1965-06-02'),")
+    w("    p.city = 'Maastricht',")
+    w("    p.country = 'NL',")
+    w("    p.demo = true,")
+    w("    p.fictional = true")
+    w("WITH p")
+    w(f"MATCH (holder:Participant {{participantId: {q(LMC)}}})")
+    w("MERGE (p)-[:TREATED_AT]->(holder);")
+    w("")
+    w("MATCH (p:Patient {resourceId: 'P2'})")
+    w("UNWIND [")
+    w(",\n".join(
+        f"  {{id: 'cond-p2-{code}', code: {q(code)}, display: {q(display)}, onset: {q(onset)}}}"
+        for code, display, onset in P2_CONDITIONS))
+    w("] AS c")
+    w("MERGE (cond:Condition {resourceId: c.id})")
+    w("SET cond.code = c.code,")
+    w("    cond.codeSystem = 'http://snomed.info/sct',")
+    w("    cond.display = c.display,")
+    w("    cond.name = c.display,")
+    w("    cond.clinicalStatus = 'active',")
+    w("    cond.onsetDate = c.onset,")
+    w("    cond.fictional = true")
+    w("MERGE (p)-[:HAS_CONDITION]->(cond);")
+    w("")
+    w("MATCH (p:Patient {resourceId: 'P2'})")
+    w("UNWIND [")
+    w(",\n".join(
+        f"  {{id: 'med-p2-{code}', code: {q(code)}, display: {q(display)}, since: {q(since)}}}"
+        for code, display, since in P2_MEDICATIONS))
+    w("] AS m")
+    w("MERGE (med:MedicationRequest {resourceId: m.id})")
+    w("SET med.medicationCode = m.code,")
+    w("    med.code = m.code,")
+    w("    med.codeSystem = 'http://www.nlm.nih.gov/research/umls/rxnorm',")
+    w("    med.display = m.display,")
+    w("    med.name = m.display,")
+    w("    med.status = 'active',")
+    w("    med.intent = 'order',")
+    w("    med.date = m.since,")
+    w("    med.fictional = true")
+    w("MERGE (p)-[:HAS_MEDICATION_REQUEST]->(med);")
+    w("")
+    w("MATCH (p:Patient {resourceId: 'P2'})")
+    w("UNWIND [")
+    w(",\n".join(
+        f"  {{id: 'enc-p2-{visit}', at: {q(visit)}, n: {i + 1}}}"
+        for i, visit in enumerate(P2_VISITS)))
+    w("] AS e")
+    w("MERGE (enc:Encounter {resourceId: e.id})")
+    w(f"SET enc.name = 'Laboratory visit ' + toString(e.n) + ' of {len(P2_VISITS)}',")
+    w("    enc.display = 'Laboratory visit, Limburg Medical Centre (fictional)',")
+    w("    enc.class = 'ambulatory',")
+    w("    enc.status = 'finished',")
+    w("    enc.date = e.at + 'T08:00:00Z',")
+    w("    enc.period = e.at,")
+    w("    enc.serviceProvider = 'Limburg Medical Centre',")
+    w("    enc.fictional = true")
+    w("MERGE (p)-[:HAS_ENCOUNTER]->(enc);")
+    w("")
+    w("// NT-proBNP rising, LDL falling under atorvastatin, INR in the warfarin")
+    w("// band (above the printed range by design), eGFR slipping.")
+    w("MATCH (p:Patient {resourceId: 'P2'})")
+    w("UNWIND [")
+    rows = []
+    for code, display, unit, low, high, cat, values in P2_PARAMETERS:
+        for visit, value in zip(P2_VISITS, values):
+            rows.append(
+                f"  {{id: 'obs-p2-{code}-{visit}', code: {q(code)}, display: {q(display)}, "
+                f"unit: {q(unit)}, value: {value}, low: {low}, high: {'null' if high is None else high}, "
+                f"category: {q(cat)}, at: {q(visit)}}}")
+    w(",\n".join(rows))
+    w("] AS o")
+    w("MERGE (obs:Observation {resourceId: o.id})")
+    w("SET obs.code = o.code,")
+    w("    obs.codeSystem = 'http://loinc.org',")
+    w("    obs.display = o.display,")
+    w("    obs.name = o.display + ' ' + toString(o.value) + ' ' + o.unit,")
+    w("    obs.status = 'final',")
+    w("    obs.category = o.category,")
+    w("    obs.valueQuantity = o.value,")
+    w("    obs.value = o.value,")
+    w("    obs.unit = o.unit,")
+    w("    obs.valueUnit = o.unit,")
+    w("    obs.referenceLow = o.low,")
+    w("    obs.referenceHigh = o.high,")
+    w("    obs.referenceText = CASE WHEN o.high IS NULL THEN '> ' + toString(o.low) ELSE toString(o.low) + ' - ' + toString(o.high) END + ' ' + o.unit + ' (as printed on the report)',")
+    w("    obs.effectiveDate = date(o.at),")
+    w("    obs.dateTime = o.at + 'T08:30:00Z',")
+    w("    obs.performer = 'Limburg Medical Centre, Klinisch Laboratorium (fictional)',")
+    w("    obs.fictional = true")
+    w("MERGE (p)-[:HAS_OBSERVATION]->(obs)")
+    w("WITH p, obs, o")
+    w("MATCH (enc:Encounter {resourceId: 'enc-p2-' + o.at})")
+    w("MERGE (obs)-[:PART_OF]->(enc)")
+    w("WITH obs, o")
+    w("MERGE (lc:LoincCode {loincNumber: o.code})")
+    w("  ON CREATE SET lc.name = o.display + ' (LOINC ' + o.code + ')',")
+    w("                lc.longCommonName = o.display")
+    w("MERGE (obs)-[:CODED_BY]->(lc);")
+    w("")
 
 
 def reference_range(low, high, unit: str) -> dict:
