@@ -44,3 +44,15 @@ paths = ['''jad/issuerservice\.env''']
 description = "The AWMF guideline register's public search key, embedded in its own public web page; it grants read access any browser already has. Found by scripts/security/scan-repo.sh on 2026-10-15."
 paths = ['''scripts/leitlinien/fetch_index\.py''']
 regexes = ['''AWMF_PUBLIC_API_KEY''']
+
+# The German wallet backend overlay (#182) supplies the OpenAPI example
+# constants the upstream mirror references but never declares. Each is a
+# placeholder: a JWT whose payload is `{}` and whose signature is the word
+# PLACEHOLDER, or the base64 of "PLACEHOLDER-...". Scoped to those files and to
+# exactly those two shapes, so a real token in an example is still found.
+[[allowlists]]
+description = "Placeholder OpenAPI examples in the wallet backend overlay"
+condition = "AND"
+paths = ['''services/eudi-wallet-backend/overlay/src/main/kotlin/.*/ApiDocsStubs\.kt''']
+regexTarget = "line"
+regexes = ['''_EXAMPLE = "(eyJ[A-Za-z0-9_-]+\.e30\.PLACEHOLDER|UExBQ0VIT0xERVI[A-Za-z0-9]*)"''']
