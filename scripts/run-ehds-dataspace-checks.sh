@@ -33,6 +33,11 @@ MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
 # ---------------------------------------------------------------------------
 MGMT_API="${EDC_MANAGEMENT_URL:-http://localhost:11003/api/mgmt}"
 DSP_API="${DSP_PROTOCOL_URL:-}"
+# Where the control plane reaches a provider's DSP endpoint: the compose and CI
+# host by default. On Azure the app is mvhd-controlplane, and with the compose
+# name every catalogue request answered "controlplane: Name does not resolve"
+# (2026-10-28); 08-compliance-runner.sh sets it.
+DSP_INTERNAL_URL="${DSP_INTERNAL_URL:-http://controlplane:8082/api/dsp}"
 KEYCLOAK_URL="${KEYCLOAK_URL:-http://keycloak:8080}"
 REALM="${KEYCLOAK_REALM:-edcv}"
 CLIENT_ID="${EDC_CLIENT_ID:-admin}"
@@ -197,7 +202,7 @@ run_catalog_tests() {
     local resp
     local catalog_body
     local provider_did="${PARTICIPANT_DIDS[$i]}"
-    catalog_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/'"$DSP_PROTOCOL"'","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'"}' "$ctx" "$provider_did")
+    catalog_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"'"$DSP_INTERNAL_URL"'/%s/'"$DSP_PROTOCOL"'","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'"}' "$ctx" "$provider_did")
     resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$catalog_body") || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e '.["@type"]' >/dev/null 2>&1; then
@@ -221,7 +226,7 @@ run_catalog_tests() {
   local test_id="CAT-1.2"
   local resp
   local cat12_body
-  cat12_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/'"$DSP_PROTOCOL"'","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'"}' "$PROVIDER_CTX" "$PROVIDER_DID")
+  cat12_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"'"$DSP_INTERNAL_URL"'/%s/'"$DSP_PROTOCOL"'","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'"}' "$PROVIDER_CTX" "$PROVIDER_DID")
   resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$cat12_body") || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e '.dataset' >/dev/null 2>&1; then
@@ -247,7 +252,7 @@ run_catalog_tests() {
   # has nothing to bind the object to, so the connector rejects the whole
   # request. This test had been sending it without one and passing anyway,
   # because the suite scored the error envelope as a response (#333).
-  cat13_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/'"$DSP_PROTOCOL"'","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'","querySpec":{"@type":"QuerySpec","filterExpression":[]}}' "$PROVIDER_CTX" "$PROVIDER_DID")  # nosemgrep: detected-username-and-password-in-uri -- host:port followed by @type in JSON, not credentials
+  cat13_body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"'"$DSP_INTERNAL_URL"'/%s/'"$DSP_PROTOCOL"'","counterPartyId":"%s","protocol":"'"$DSP_PROTOCOL"'","querySpec":{"@type":"QuerySpec","filterExpression":[]}}' "$PROVIDER_CTX" "$PROVIDER_DID")  # nosemgrep: detected-username-and-password-in-uri -- host:port followed by @type in JSON, not credentials
   resp=$(mgmt_post "/${MGMT_V}/participants/${CONSUMER_CTX}/catalog/request" "$cat13_body") || resp=""
 
   if [ -n "$resp" ]; then

@@ -687,8 +687,8 @@ trust_ctx() {
 # status and the response's @type.
 trust_catalog() {
   local consumer_ctx="$1" provider_ctx="$2" provider_did="$3" body tmp code
-  body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/%s","counterPartyId":"%s","protocol":"%s"}' \
-    "$provider_ctx" "${DSP_PROTOCOL:-http-dsp-profile-2025-1}" "$provider_did" "${DSP_PROTOCOL:-http-dsp-profile-2025-1}")
+  body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"%s/%s/%s","counterPartyId":"%s","protocol":"%s"}' \
+    "${DSP_INTERNAL_URL:-http://controlplane:8082/api/dsp}" "$provider_ctx" "${DSP_PROTOCOL:-http-dsp-profile-2025-1}" "$provider_did" "${DSP_PROTOCOL:-http-dsp-profile-2025-1}")
   tmp=$(mktemp)
   code=$(curl -s --max-time 60 -o "$tmp" -w '%{http_code}' -X POST \
     -H "$(auth_header)" -H "Content-Type: application/json" -d "$body" \
