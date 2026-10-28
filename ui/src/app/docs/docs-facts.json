@@ -1128,7 +1128,7 @@
   "complianceFloors": {
     "dsp-tck-results": {
       "min_passed": 25,
-      "max_failed": 1
+      "max_failed": 0
     },
     "dcp-compliance-results": {
       "min_passed": 27,
