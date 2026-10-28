@@ -14,16 +14,30 @@ NEO4J_USER="${NEO4J_USER:-neo4j}"
 NEO4J_PASSWORD="${NEO4J_PASSWORD:-healthdataspace}"
 NEO4J_URI="bolt://${NEO4J_HOST}:${NEO4J_PORT}"
 
+# A run that loads nothing, or loads a file only in part, must fail (ADR-031).
+# Until 2026-10-28 it exited 0 either way: two runs on 2026-10-27 found Neo4j
+# stopped for the night, every file failed, and the job reported Succeeded.
+ready=no
 echo "Waiting for Neo4j at ${NEO4J_URI}..."
 for i in $(seq 1 60); do
   if cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
        --non-interactive "RETURN 1;" > /dev/null 2>&1; then
     echo "Neo4j is ready (after ${i} attempts)"
+    ready=yes
     break
   fi
   echo "  attempt ${i}: not ready"
   sleep 3
 done
+if [ "$ready" != "yes" ]; then
+  echo "ERROR: Neo4j did not answer at ${NEO4J_URI} after 60 attempts; nothing was loaded."
+  echo "SEED_FAILED"
+  exit 2
+fi
+
+# The labels of the files that failed. The run goes on with the others, since
+# every file is idempotent, and exits 1 at the end.
+failed=()
 
 run_file() {
   local file="$1"
@@ -32,7 +46,8 @@ run_file() {
   echo "=== Loading ${label} (${file}) ==="
 
   if [ ! -f "$file" ]; then
-    echo "  ERROR: file not found, skipping"
+    echo "  FAIL ${label}: file not found"
+    failed+=("$label")
     return 0
   fi
 
@@ -44,8 +59,20 @@ run_file() {
     end_ts=$(date +%s)
     echo "  OK ${label} complete in $((end_ts - start_ts))s"
   else
-    echo "  WARN ${label} had errors (continuing — check output above)"
+    echo "  FAIL ${label} had errors (see the output above; the run goes on and exits 1)"
+    failed+=("$label")
   fi
+}
+
+finish() {
+  echo ""
+  if [ "${#failed[@]}" -gt 0 ]; then
+    echo "SEED_FAILED: ${#failed[@]} file(s) had errors:"
+    printf '  - %s\n' "${failed[@]}"
+    exit 1
+  fi
+  echo "SEED_COMPLETE"
+  exit 0
 }
 
 # Phase 26 fast-path: when re-seeding just the federated discovery bits
@@ -72,9 +99,7 @@ if [ "${SEED_PHASE:-}" = "phase26-only" ]; then
   cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
     --non-interactive --format plain \
     "MATCH (pp:ParticipantProfile) OPTIONAL MATCH (v:VPA)-[:OF_PROFILE]->(pp) RETURN count(DISTINCT pp) AS profiles, count(v) AS vpas;"
-  echo ""
-  echo "SEED_COMPLETE"
-  exit 0
+  finish
 fi
 
 # Demo fast-path: the governance and audit seeds only (applications, permits,
@@ -108,9 +133,7 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
     --non-interactive --format plain \
     "MATCH (p:Patient {resourceId: 'P1'})-[:HAS_OBSERVATION]->(o:Observation) WITH count(o) AS observations MATCH (te:TransferEvent {monthly: true}) RETURN observations, count(te) AS monthlyAccessEvents;"
-  echo ""
-  echo "SEED_COMPLETE"
-  exit 0
+  finish
 fi
 
 run_file /seed/init-schema.cypher "schema"
@@ -200,5 +223,4 @@ cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
   --non-interactive --format plain \
   "MATCH ()-[r]->() RETURN count(r) AS relCount;"
 
-echo ""
-echo "SEED_COMPLETE"
+finish

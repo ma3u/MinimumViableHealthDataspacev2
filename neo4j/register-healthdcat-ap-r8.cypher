@@ -216,8 +216,17 @@ UNWIND [
   {id: 'dataset:pharmacovigilance-ema', pop: 'Synthetic individual case safety reports, EU/EEA', minAge: 0, maxAge: 100, people: 240000, start: '2015-01-01', end: '2025-12-31', codes: ['ICD-10:T88.7', 'ICD-10:Y57']},
   {id: 'dataset:rare-disease-erdera-2026', pop: 'Synthetic people living with a rare disease, EU', minAge: 0, maxAge: 90, people: 2900, start: '2016-01-01', end: '2026-03-31', codes: ['ICD-10:E84', 'ICD-10:G71.0', 'ICD-10:Q87.4']},
   {id: 'dataset:stroke-rehab-fr-2025', pop: 'Synthetic adults in rehabilitation after a stroke, France', minAge: 18, maxAge: 100, people: 5600, start: '2020-01-01', end: '2025-06-30', codes: ['ICD-10:I63', 'ICD-10:I69']},
+  // The federated datasets the catalogue enricher writes from the participants'
+  // DSP catalogues (ui/src/app/api/mock-dsp); figures as their descriptions give them.
+  {id: 'dataset:alpha:t2dm-registry-2026', pop: 'Synthetic adults with type 2 diabetes in a Berlin registry, five years of follow-up', minAge: 18, maxAge: 95, people: 2400, start: '2021-01-01', end: '2026-06-30', codes: ['ICD-10:E11', 'ICD-10:E66']},
+  {id: 'dataset:alpha:cv-icu-2025', pop: 'Synthetic intensive care admissions with a primary cardiovascular diagnosis', minAge: 18, maxAge: 100, people: 3800, start: '2025-01-01', end: '2025-12-31', codes: ['ICD-10:I21', 'ICD-10:I48', 'ICD-10:I50']},
+  {id: 'dataset:lmc:t2dm-crossborder-2026', pop: 'Synthetic adults with type 2 diabetes in shared care across the Dutch, German and Belgian border region', minAge: 18, maxAge: 95, people: 1600, start: '2023-01-01', end: '2026-06-30', codes: ['ICD-10:E11']},
+  {id: 'dataset:pharmaco:oncology-phase2-2025', pop: 'Synthetic participants of a phase II immunotherapy trial', minAge: 18, maxAge: 85, people: 180, start: '2024-01-01', end: '2025-06-30', codes: ['ICD-10:C80']},
+  {id: 'dataset:irs:rare-diseases-fr-2026', pop: 'Synthetic people with a rare disease, France', minAge: 0, maxAge: 90, people: 4200, start: '2016-01-01', end: '2026-03-31', codes: ['ICD-10:E84', 'ICD-10:G71.0', 'ICD-10:Q87.4']},
+  // Copied from the Synthea dataset after 6c when the graph links no patients to it.
   {id: 'dataset:omop-cdm-v54-analytics', pop: 'Synthetic patients of the hub, transformed from FHIR R4 to OMOP CDM 5.4'},
-  {id: 'dataset:prostate-cancer-registry', pop: 'Synthetic men with prostate cancer, from several centres'},
+  // Stated for a graph that links none of its patients; 6c derives them where it does.
+  {id: 'dataset:prostate-cancer-registry', pop: 'Synthetic men with prostate cancer, from several centres', minAge: 40, maxAge: 95, people: 1200, start: '2015-01-01', end: '2025-12-31', codes: ['ICD-10:C61']},
   {id: 'dataset:synthea-fhir-r4-mvd', pop: 'Synthetic patients generated with Synthea for the hub', theme: 'HEALTH_SYSTEMS'},
   {id: 'urn:uuid:riverside:dataset:diab-001', pop: 'Synthetic adults with type 2 diabetes, one patient journey each', theme: 'NONCOMMUNICABLE_DISEASES'}
 ] AS row
@@ -284,6 +293,19 @@ SET d.hdcatapNumberOfUniqueIndividuals = size(people),
     d.hdcatapCodeValues = codes,
     // Its patients are in the hub's OMOP CDM, whose aggregates /analytics shows.
     d.hdcatapAnalyticsURL = coalesce(d.hdcatapAnalyticsURL, 'https://ehds.mabu.red/analytics');
+
+// 6c'. The OMOP dataset is the Synthea dataset transformed: where the graph
+// links no patients to it (Azure), it describes the same people.
+MATCH (o:HealthDataset {datasetId: 'dataset:omop-cdm-v54-analytics'})
+WHERE NOT EXISTS { MATCH (o)<-[:FROM_DATASET]-(:Patient) }
+MATCH (s:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-mvd'})
+WHERE s.hdcatapNumberOfUniqueIndividuals IS NOT NULL
+SET o.hdcatapNumberOfUniqueIndividuals = s.hdcatapNumberOfUniqueIndividuals,
+    o.hdcatapMinTypicalAge = s.hdcatapMinTypicalAge,
+    o.hdcatapMaxTypicalAge = s.hdcatapMaxTypicalAge,
+    o.dctTemporalStart = s.dctTemporalStart,
+    o.dctTemporalEnd = s.dctTemporalEnd,
+    o.hdcatapCodeValues = s.hdcatapCodeValues;
 
 // 6d. For every dataset: how often it grows (the synthetic sets are generated
 // again now and then), the finest time step of its records (a day), and how
