@@ -368,8 +368,18 @@ services:
       edc.iam.dcp.scopes.data-quality-label.type: "POLICY"
       edc.iam.dcp.scopes.data-quality-label.value: "org.eclipse.dspace.dcp.vc.type:DataQualityLabelCredential:read"
       edc.iam.dcp.scopes.data-quality-label.prefix-mapping: "DataQualityLabelCredential"
-      # Trusted issuers
+      # Trusted issuers, each for the credential types it may issue (#710,
+      # ADR-064). Without supportedtypes an issuer is trusted for every type
+      # ("*"), which is what the hub's own issuer was until 2026-10-28. A
+      # credential of a type its issuer is not listed for fails the whole
+      # presentation, so the request is refused. Change these together with
+      # ui/src/content/trusted-issuers.json, which /compliance shows:
+      # scripts/run-ehds-identity-checks.sh (TRUST-6.1) fails when they differ.
       edc.iam.trusted-issuer.issuer.id: "did:web:issuerservice%3A10016:issuer"
+      edc.iam.trusted-issuer.issuer.supportedtypes: '["MembershipCredential","ManufacturerCredential","EHDSParticipantCredential","DataProcessingPurposeCredential","DataQualityLabelCredential"]'
+      # The fictional Simpl Governance Authority: membership of its data space.
+      edc.iam.trusted-issuer.simpl-ga.id: "did:web:simpl-ga-issuer%3A10016:simpl-ga"
+      edc.iam.trusted-issuer.simpl-ga.supportedtypes: '["MembershipCredential"]'
     ports:
       - "11003:8081" # Management API (external port from planning doc)
     networks:
@@ -698,6 +708,93 @@ services:
       retries: 15
       start_period: 30s
     restart: unless-stopped
+
+  # ---------------------------------------------------------------------------
+  # A fictional Simpl Governance Authority ("Simpl test data space"), #710
+  # ---------------------------------------------------------------------------
+  # ADR-064: the hub meets Simpl-Open over DCP, with the data space's
+  # Governance Authority as a trusted issuer. A real authority runs its own
+  # issuer, so this one is a second IssuerService (same image): one
+  # IssuerService allows each credential type once, so the hub's could not
+  # issue a MembershipCredential under a second identity. Its DID is
+  # did:web:simpl-ga-issuer%3A10016:simpl-ga; the control plane trusts it for
+  # MembershipCredential only. scripts/seed-test-issuer.sh gives it its
+  # identity; Institut de Recherche Santé (irs) holds its membership from it.
+  simpl-ga-issuer:
+    image: ghcr.io/metaform/jad/issuerservice:4a7e5bd096c58814748e956cc9329586ad309698
+    container_name: health-dataspace-simpl-ga-issuer
+    env_file:
+      - ./jad/issuerservice.env
+    environment: &test-issuer-env
+      edc.hostname: "simpl-ga-issuer"
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/simplga"
+      edc.datasource.default.user: "simplga"
+      edc.datasource.default.password: "simplga"
+      edc.datasource.membership.url: "jdbc:postgresql://postgres:5432/simplga"
+      edc.datasource.membership.user: "simplga"
+      edc.datasource.membership.password: "simplga"
+    ports:
+      - "10023:10013" # Issuer Admin API
+    networks:
+      - edcv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:10010/api/check/health || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
+  # An issuer on no trust list, #710. Started only by the identity checks
+  # (profile trust-check) to show that a MembershipCredential it signs is
+  # refused, then stopped again.
+  rogue-issuer:
+    image: ghcr.io/metaform/jad/issuerservice:4a7e5bd096c58814748e956cc9329586ad309698
+    container_name: health-dataspace-rogue-issuer
+    profiles: ["trust-check"]
+    env_file:
+      - ./jad/issuerservice.env
+    environment:
+      <<: *test-issuer-env
+      edc.hostname: "rogue-issuer"
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/rogueissuer"
+      edc.datasource.default.user: "rogueissuer"
+      edc.datasource.default.password: "rogueissuer"
+      edc.datasource.membership.url: "jdbc:postgresql://postgres:5432/rogueissuer"
+      edc.datasource.membership.user: "rogueissuer"
+      edc.datasource.membership.password: "rogueissuer"
+    ports:
+      - "10033:10013" # Issuer Admin API
+    networks:
+      - edcv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      vault:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://127.0.0.1:10010/api/check/health || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
 
   # ---------------------------------------------------------------------------
   # CFM Tenant Manager — Multi-tenant participant lifecycle

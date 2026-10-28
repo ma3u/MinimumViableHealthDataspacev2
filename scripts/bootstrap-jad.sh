@@ -494,6 +494,17 @@ seed_dataspace() {
   ok "Dataspace seed pipeline complete"
 
   assert_participants_active
+
+  # #710, ADR-064: the fictional Simpl Governance Authority, trusted for
+  # MembershipCredential, and Institut de Recherche Santé's membership from it.
+  # The rest of the stack does not need it, so a failure is a warning; the
+  # identity checks (TRUST-6.2) then say what is missing.
+  log "=== Phase 9b: Simpl test Governance Authority (#710) ==="
+  if bash "$PROJECT_DIR/scripts/seed-simpl-ga.sh"; then
+    ok "irs holds its membership from the Simpl test Governance Authority"
+  else
+    warn "scripts/seed-simpl-ga.sh failed; the TRUST checks will report it"
+  fi
 }
 
 # ---------------------------------------------------------------------------

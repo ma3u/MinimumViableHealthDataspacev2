@@ -664,6 +664,195 @@ run_scope_tests() {
 }
 
 # ---------------------------------------------------------------------------
+# Category 6: Trusted issuers per credential type (#710, ADR-064)
+# ---------------------------------------------------------------------------
+# The control plane trusts each issuer for the credential types it may issue,
+# and a fictional Simpl Governance Authority for MembershipCredential. These
+# run only where the containers can be inspected (compose and CI); they need
+# scripts/seed-simpl-ga.sh to have run. A credential whose type its issuer is
+# not listed for fails the whole presentation, so the refusal shows as a DSP
+# request answered 401, with the reason in the control plane's log.
+TRUST_PROVIDER_SLUG="alpha-klinik"
+TRUST_HOLDER_SLUG="irs"
+TRUST_GA_DID="did:web:simpl-ga-issuer%3A10016:simpl-ga"
+TRUST_ROGUE_DID="did:web:rogue-issuer%3A10016:rogue"
+
+# The participant context id of a slug, from the control plane.
+trust_ctx() {
+  printf '%s' "$MGMT_PARTICIPANTS_JSON" | jq -r --arg s "$1" \
+    '[.[] | select((.identity // "") | endswith(":" + $s))] | .[0]["@id"] // empty'
+}
+
+# A DSP catalogue request from the holder to the provider. Prints the HTTP
+# status and the response's @type.
+trust_catalog() {
+  local consumer_ctx="$1" provider_ctx="$2" provider_did="$3" body tmp code
+  body=$(printf '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"CatalogRequest","counterPartyAddress":"http://controlplane:8082/api/dsp/%s/%s","counterPartyId":"%s","protocol":"%s"}' \
+    "$provider_ctx" "${DSP_PROTOCOL:-http-dsp-profile-2025-1}" "$provider_did" "${DSP_PROTOCOL:-http-dsp-profile-2025-1}")
+  tmp=$(mktemp)
+  code=$(curl -s --max-time 60 -o "$tmp" -w '%{http_code}' -X POST \
+    -H "$(auth_header)" -H "Content-Type: application/json" -d "$body" \
+    "${MGMT_API}/${MGMT_V}/participants/${consumer_ctx}/catalog/request" 2>/dev/null) || code="000"
+  printf '%s %s' "$code" "$(jq -r 'if type=="object" then (."@type" // "none") else "error" end' "$tmp" 2>/dev/null || echo unreadable)"
+  rm -f "$tmp"
+}
+
+# The issuers of the holder's ISSUED (500) MembershipCredentials, one per line.
+trust_membership_issuers() {
+  docker exec health-dataspace-postgres psql -U ih -d identityhub -At -c \
+    "select issuer_id from credential_resource where participant_context_id='$1' and vc_state=500 and verifiable_credential::text like '%MembershipCredential%'" 2>/dev/null
+}
+
+run_trust_tests() {
+  log "Category 6: Trusted issuers per credential type (#710, ADR-064)"
+  local cp_env repo_dir test_id
+  repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+  if ! cp_env=$(docker inspect health-dataspace-controlplane 2>/dev/null | jq -r '.[0].Config.Env[]' 2>/dev/null) || [ -z "$cp_env" ]; then
+    for test_id in TRUST-6.1 TRUST-6.2 TRUST-6.3 TRUST-6.4 TRUST-6.5; do
+      skip "$test_id: control plane container not inspectable (not a local stack)"
+      record_result "$test_id" "trust" "skipped" "container not inspectable"
+    done
+    return
+  fi
+
+  # 6.1 — The trust list is ui/src/content/trusted-issuers.json, each issuer with its types
+  test_id="TRUST-6.1"
+  local diff
+  diff=$(printf '%s\n' "$cp_env" | python3 -c '
+import json, re, sys
+want = {i["alias"]: i for i in json.load(open(sys.argv[1]))["issuers"] if "compose" in i["environments"]}
+have = {}
+for line in sys.stdin:
+    m = re.match(r"edc\.iam\.trusted-issuer\.([^.]+)\.(id|supportedtypes)=(.*)", line.strip())
+    if m:
+        have.setdefault(m.group(1), {})[m.group(2)] = m.group(3)
+problems = []
+for alias in sorted(set(want) | set(have)):
+    w, h = want.get(alias), have.get(alias)
+    if not w:
+        problems.append(alias + ": trusted but not in trusted-issuers.json")
+        continue
+    if not h:
+        problems.append(alias + ": in trusted-issuers.json, not trusted")
+        continue
+    if h.get("id") != w["did"]:
+        problems.append(alias + ": id " + str(h.get("id")) + " != " + w["did"])
+    types = json.loads(h["supportedtypes"]) if h.get("supportedtypes") else ["*"]
+    if sorted(types) != sorted(w["types"]):
+        problems.append(alias + ": types " + str(types) + " != " + str(w["types"]))
+print("; ".join(problems))
+' "${repo_dir}/ui/src/content/trusted-issuers.json" 2>&1)
+  if [ -z "$diff" ]; then
+    pass "$test_id: the control plane trusts exactly the issuers of ui/src/content/trusted-issuers.json, each for its listed types"
+    record_result "$test_id" "trust" "passed"
+  else
+    fail "$test_id: trust list differs from ui/src/content/trusted-issuers.json: ${diff}"
+    record_result "$test_id" "trust" "failed" "trust list differs"
+  fi
+
+  local provider_ctx provider_did holder_ctx
+  provider_ctx=$(trust_ctx "$TRUST_PROVIDER_SLUG")
+  provider_did="did:web:identityhub%3A7083:${TRUST_PROVIDER_SLUG}"
+  holder_ctx=$(trust_ctx "$TRUST_HOLDER_SLUG")
+  if [ -z "$provider_ctx" ] || [ -z "$holder_ctx" ]; then
+    for test_id in TRUST-6.2 TRUST-6.3 TRUST-6.4 TRUST-6.5; do
+      fail "$test_id: no participant context for ${TRUST_PROVIDER_SLUG} or ${TRUST_HOLDER_SLUG}"
+      record_result "$test_id" "trust" "failed" "participant missing"
+    done
+    return
+  fi
+
+  # 6.2 — The holder's membership comes from the Governance Authority alone
+  test_id="TRUST-6.2"
+  local issuers
+  issuers=$(trust_membership_issuers "$holder_ctx" | sort -u)
+  if [ "$issuers" = "$TRUST_GA_DID" ]; then
+    pass "$test_id: ${TRUST_HOLDER_SLUG} holds its MembershipCredential from ${TRUST_GA_DID} only"
+    record_result "$test_id" "trust" "passed"
+  else
+    fail "$test_id: ${TRUST_HOLDER_SLUG}'s MembershipCredential issuers are [$(printf '%s' "$issuers" | tr '\n' ' ')], want ${TRUST_GA_DID} alone (run scripts/seed-simpl-ga.sh)"
+    record_result "$test_id" "trust" "failed" "membership not from the authority alone"
+  fi
+
+  # Preflight: a member whose membership the hub issued must get the catalogue,
+  # or a refusal below would say nothing about trust. In CI no participant has
+  # a working DSP endpoint yet (dsp-tck floor, CAT-1.1), so there 6.3 to 6.5
+  # skip with that reason instead of passing or failing on the wrong cause.
+  local res control_ctx
+  control_ctx=$(trust_ctx pharmaco)
+  res=$(trust_catalog "${control_ctx:-none}" "$provider_ctx" "$provider_did")
+  if [ "${res#* }" != "Catalog" ]; then
+    for test_id in TRUST-6.3 TRUST-6.4 TRUST-6.5; do
+      skip "$test_id: a member with the hub's own membership (pharmaco) is refused too (${res}): the DSP path does not work here, so trust cannot be told apart"
+      record_result "$test_id" "trust" "skipped" "DSP path not working"
+    done
+    return
+  fi
+
+  # 6.3 — On that credential, a DSP request to a hub provider is accepted
+  test_id="TRUST-6.3"
+  res=$(trust_catalog "$holder_ctx" "$provider_ctx" "$provider_did")
+  if [ "${res#* }" = "Catalog" ]; then
+    pass "$test_id: ${TRUST_HOLDER_SLUG} gets ${TRUST_PROVIDER_SLUG}'s catalogue on the Governance Authority's credential"
+    record_result "$test_id" "trust" "passed"
+  else
+    fail "$test_id: catalogue request ${TRUST_HOLDER_SLUG} -> ${TRUST_PROVIDER_SLUG} answered ${res}"
+    record_result "$test_id" "trust" "failed" "catalogue refused"
+  fi
+
+  # 6.4 — A MembershipCredential from an issuer on no list is refused
+  test_id="TRUST-6.4"
+  local since rogue_ok=1
+  since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  PROFILE=trust-check SERVICE=rogue-issuer CTX=rogue DB=rogueissuer ADMIN_PORT=10033 \
+    HOLDERS="did:web:identityhub%3A7083:${TRUST_HOLDER_SLUG}" \
+    "${repo_dir}/scripts/seed-test-issuer.sh" >/dev/null 2>&1 || rogue_ok=0
+  if [ "$rogue_ok" -eq 1 ]; then
+    ISSUER_DID="$TRUST_ROGUE_DID" EDC_ISSUER_URL=http://localhost:10033/api/admin ISSUER_CTX=rogue \
+      ONLY="$TRUST_HOLDER_SLUG" WAIT_SECONDS=60 \
+      "${repo_dir}/scripts/request-participant-credentials.sh" >/dev/null 2>&1 || rogue_ok=0
+  fi
+  if [ "$rogue_ok" -ne 1 ]; then
+    fail "$test_id: could not have ${TRUST_ROGUE_DID} issue a MembershipCredential to ${TRUST_HOLDER_SLUG}"
+    record_result "$test_id" "trust" "failed" "rogue issuer setup"
+  else
+    res=$(trust_catalog "$holder_ctx" "$provider_ctx" "$provider_did")
+    # Capture, then match: `docker logs | grep -q` fails under pipefail, as
+    # grep closing the pipe on the first match gives docker logs a SIGPIPE.
+    local cp_log
+    cp_log=$(docker logs --since "$since" health-dataspace-controlplane 2>&1 || true)
+    if [ "${res#* }" != "Catalog" ] && [[ "$cp_log" == *"not supported for issuer '${TRUST_ROGUE_DID}'"* ]]; then
+      pass "$test_id: a MembershipCredential from ${TRUST_ROGUE_DID} is refused (answered ${res%% *}: issuer not trusted for the type)"
+      record_result "$test_id" "trust" "passed"
+    else
+      fail "$test_id: with a credential from ${TRUST_ROGUE_DID} the request answered ${res}, and the control plane did not name the issuer as untrusted"
+      record_result "$test_id" "trust" "failed" "untrusted issuer not refused"
+    fi
+  fi
+
+  # Clean up whatever happened above: the holder's rogue credentials and the
+  # rogue issuer itself.
+  local cred
+  for cred in $(docker exec health-dataspace-postgres psql -U ih -d identityhub -At -c \
+      "select id from credential_resource where participant_context_id='${holder_ctx}' and issuer_id='${TRUST_ROGUE_DID}'" 2>/dev/null); do
+    curl -s -o /dev/null --max-time 20 -X DELETE -H "$(auth_header)" \
+      "${IDENTITY_API}/v1alpha/participants/${holder_ctx}/credentials/${cred}" 2>/dev/null || true
+  done
+  docker rm -f health-dataspace-rogue-issuer >/dev/null 2>&1 || true
+
+  # 6.5 — Without it the holder is accepted again
+  test_id="TRUST-6.5"
+  res=$(trust_catalog "$holder_ctx" "$provider_ctx" "$provider_did")
+  if [ "${res#* }" = "Catalog" ]; then
+    pass "$test_id: after removing the untrusted credential, ${TRUST_HOLDER_SLUG} is accepted again"
+    record_result "$test_id" "trust" "passed"
+  else
+    fail "$test_id: after the clean-up the request still answered ${res}"
+    record_result "$test_id" "trust" "failed" "not accepted after clean-up"
+  fi
+}
+
+# ---------------------------------------------------------------------------
 # Generate JSON report
 # ---------------------------------------------------------------------------
 write_report() {
@@ -715,6 +904,8 @@ main() {
   run_issuer_tests
   echo ""
   run_scope_tests
+  echo ""
+  run_trust_tests
 
   echo ""
   echo "═══════════════════════════════════════════════════════════════"

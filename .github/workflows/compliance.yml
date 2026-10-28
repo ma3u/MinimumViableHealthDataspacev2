@@ -371,18 +371,35 @@ jobs:
       # land, and prints the hub's errorDetail if it gives up. First place CI
       # exercises DCP as a protocol between two services. continue-on-error on
       # Hard-fails since #349; it has been seen to work.
+      # Every participant but irs: Institut de Recherche Santé holds its
+      # membership from the fictional Simpl Governance Authority instead (next
+      # step), so TRUST-6.2 can assert that credential alone carries it (#710).
       - name: Request participant credentials over DCP (#345)
         run: |
           KEYCLOAK_URL=http://localhost:8080 \
           EDC_IDENTITY_URL=http://localhost:11005/api/identity \
           EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
           WAIT_SECONDS=120 \
+          ONLY="alpha-klinik pharmaco medreg lmc" \
             ./scripts/request-participant-credentials.sh
+
+      # #710, ADR-064: a Simpl data space's Governance Authority as a trusted
+      # issuer. A second IssuerService (docker-compose.jad.yml, simpl-ga-issuer)
+      # gets its identity, and irs requests its MembershipCredential from it.
+      - name: The Simpl test Governance Authority admits irs (#710)
+        run: |
+          COMPOSE_FILES=docker-compose.jad.yml \
+          KEYCLOAK_URL=http://localhost:8080 \
+          EDC_IDENTITY_URL=http://localhost:11005/api/identity \
+          EDC_MANAGEMENT_URL=http://localhost:11003/api/mgmt \
+          WAIT_SECONDS=120 \
+            ./scripts/seed-simpl-ga.sh
 
       - name: Run DCP compliance suite
         run: |
           chmod +x scripts/run-ehds-identity-checks.sh
           REPORT_DIR=${{ env.REPORT_DIR }}/dcp \
+          COMPOSE_FILES=docker-compose.jad.yml \
           KEYCLOAK_URL=http://localhost:8080 \
           EDC_IDENTITY_URL=http://localhost:11005/api/identity \
           EDC_ISSUER_URL=http://localhost:10013/api/admin \
