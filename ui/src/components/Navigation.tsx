@@ -36,6 +36,7 @@ import {
   X,
   Globe,
   Scale,
+  ChartGantt,
 } from "lucide-react";
 import UserMenu from "./UserMenu";
 import ThemeToggle from "./ThemeToggle";
@@ -447,6 +448,7 @@ const docsGroup: NavGroup = {
     },
     { href: "/docs/klarbefund", label: "Klarbefund", icon: Smartphone },
     { href: "/docs/ehds", label: "EHDS Regulation", icon: Scale },
+    { href: "/docs/roadmap", label: "Roadmap", icon: ChartGantt },
     { href: "/docs/operations", label: "Operations", icon: Activity },
   ],
 };

@@ -8,6 +8,7 @@ import {
   Activity,
   ArrowRight,
   Scale,
+  ChartGantt,
 } from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 
@@ -53,6 +54,13 @@ const sections = [
     label: "EHDS Regulation",
     desc: "What the hub implements of Regulation (EU) 2025/327, article by article, with the page, the code and the test for each, the gaps with their issues, and the proposal-to-adopted numbering.",
     color: "border-layer2 hover:bg-layer2/10",
+  },
+  {
+    href: "/docs/roadmap",
+    icon: ChartGantt,
+    label: "Roadmap",
+    desc: "The roadmap to 2031 as a clickable Gantt chart: the EHDS dates, the EUDI and Business Wallets, Simpl-Open, and the issues each one sets, with the drivers behind them.",
+    color: "border-layer3 hover:bg-layer3/10",
   },
   {
     href: "/docs/operations",

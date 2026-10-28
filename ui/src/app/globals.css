@@ -709,3 +709,102 @@
   color: var(--text-secondary);
   border-top: 1px solid var(--border);
 }
+
+/* ── Roadmap Gantt (/docs/roadmap) ─────────────────────────────────────────── */
+/* Mermaid draws the chart; RoadmapGantt.tsx wraps bars and markers in links
+   and numbers the bars (--i). Bars grow from their start date, one after the
+   other; milestones, which Mermaid rotates with a transform, fade in instead.
+   The reduced-motion rule above shortens both to nothing. */
+@keyframes roadmap-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes roadmap-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.roadmap-gantt rect.task:not(.milestone) {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: roadmap-grow 0.7s ease-out both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+.roadmap-gantt rect.milestone {
+  animation: roadmap-fade 0.6s ease-out both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+.roadmap-gantt a.roadmap-link {
+  cursor: pointer;
+}
+.roadmap-gantt a.roadmap-link:hover rect,
+.roadmap-gantt a.roadmap-link:focus-visible rect {
+  filter: brightness(1.2) drop-shadow(0 0 3px var(--accent));
+}
+.roadmap-gantt a.roadmap-link:hover text {
+  text-decoration: underline;
+}
+/* Lanes, axis and outside labels follow the page's theme: Mermaid's own
+   colours for them (set with id selectors, hence !important) were unreadable
+   in dark mode. */
+.roadmap-gantt .sectionTitle,
+.roadmap-gantt .taskTextOutsideRight,
+.roadmap-gantt .taskTextOutsideLeft,
+.roadmap-gantt .tick text {
+  fill: var(--text-primary) !important;
+}
+.roadmap-gantt rect.section0,
+.roadmap-gantt rect.section2 {
+  fill: var(--surface) !important;
+  opacity: 1 !important;
+}
+.roadmap-gantt rect.section1,
+.roadmap-gantt rect.section3 {
+  fill: var(--surface-2) !important;
+  opacity: 1 !important;
+}
+/* Bars by status, in the page's colours (the legend on /docs/roadmap names
+   them): planned light with an accent border, in progress solid accent,
+   blocked danger, done grey. Mermaid tags a bar task, active, crit or done. */
+.roadmap-gantt rect.task:not(.milestone) {
+  fill: var(--accent-surface) !important;
+  stroke: var(--accent) !important;
+}
+.roadmap-gantt rect.task[class*="active"] {
+  fill: var(--accent) !important;
+}
+.roadmap-gantt rect.task[class*="crit"] {
+  fill: var(--danger) !important;
+  stroke: var(--danger) !important;
+}
+.roadmap-gantt rect.task[class*="done"]:not(.milestone) {
+  fill: var(--surface-2) !important;
+  stroke: var(--border-ui) !important;
+}
+.roadmap-gantt rect.milestone {
+  fill: var(--accent) !important;
+  stroke: var(--accent) !important;
+}
+.roadmap-gantt text.taskText {
+  fill: var(--text-primary) !important;
+}
+.roadmap-gantt text.taskText[class*="active"],
+.roadmap-gantt text.taskText[class*="crit"] {
+  fill: var(--surface-card) !important;
+}
+/* On a phone the chart keeps a readable size and scrolls sideways; the
+   diagram box centres with flexbox, which would cut off an overflowing
+   chart's left side, so this one starts at the left. */
+.roadmap-gantt {
+  min-width: 56rem;
+}
+[data-testid="roadmap-gantt"] figure > div {
+  justify-content: flex-start;
+}

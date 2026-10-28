@@ -17,6 +17,9 @@ live tracking is in [GitHub Issues](https://github.com/ma3u/MinimumViableHealthD
 
 ## Roadmap to 2035: EHDS, wallets and Simpl
 
+As a clickable chart: [the roadmap on the documentation site](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/roadmap),
+drawn from `ui/src/lib/docs/roadmap.ts`; change that file with this section.
+
 The direction since 2026-10-27, from the
 [Simpl-Open and EHDS gap analysis](simpl-ehds-gap-analysis.md) (#707) and its
 plan [#725](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/725).

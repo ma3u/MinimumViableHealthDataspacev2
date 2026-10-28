@@ -5,11 +5,29 @@ import { useEffect, useRef, useState } from "react";
 interface MermaidDiagramProps {
   chart: string;
   caption?: string;
+  /** Changes the rendered SVG before it is shown, e.g. to make parts of it
+   *  links. Mermaid stays at its default strict security level, so its own
+   *  `click` lines do nothing; a caller adds interaction here instead. It runs
+   *  on the SVG before it is stored, so a re-render keeps the change. */
+  transform?: (svg: SVGSVGElement) => void;
+}
+
+/** The SVG markup after `transform` has changed its parsed form. */
+function transformed(
+  markup: string,
+  transform: (svg: SVGSVGElement) => void,
+): string {
+  const doc = new DOMParser().parseFromString(markup, "image/svg+xml");
+  const root = doc.documentElement;
+  if (!(root instanceof SVGSVGElement)) return markup;
+  transform(root);
+  return new XMLSerializer().serializeToString(root);
 }
 
 export default function MermaidDiagram({
   chart,
   caption,
+  transform,
 }: MermaidDiagramProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string>("");
@@ -52,7 +70,9 @@ export default function MermaidDiagram({
         });
         const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
         const { svg: rendered } = await mermaid.render(id, chart.trim());
-        if (!cancelled) setSvg(rendered);
+        if (!cancelled) {
+          setSvg(transform ? transformed(rendered, transform) : rendered);
+        }
       } catch (err: unknown) {
         if (!cancelled) setError(String(err));
       }
@@ -61,7 +81,7 @@ export default function MermaidDiagram({
     return () => {
       cancelled = true;
     };
-  }, [chart]);
+  }, [chart, transform]);
 
   if (error) {
     return (
