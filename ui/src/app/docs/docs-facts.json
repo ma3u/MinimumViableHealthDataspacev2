@@ -1145,6 +1145,18 @@
     "bruno-api-azure-results": {
       "min_passed": 153,
       "max_failed": 0
+    },
+    "dsp-azure-results": {
+      "min_passed": 26,
+      "max_failed": 0
+    },
+    "dcp-azure-results": {
+      "min_passed": 18,
+      "max_failed": 0
+    },
+    "ehds-azure-results": {
+      "min_passed": 28,
+      "max_failed": 0
     }
   },
   "openapi": {

@@ -19,8 +19,9 @@
 #   - the database <db>_v018, created beside the April one
 #     (create-edc-v018-databases.sh, run as the CI identity);
 #   - the settings docker-compose.jad.yml gives the service and Azure lacked.
-#     Keys with a hyphen in them (ehds-participant, prefix-mapping,
-#     trusted-issuer) cannot be spelled as environment variables, so they go
+#     Keys with a hyphen in them (ehds-participant, prefix-mapping) and the
+#     trusted issuers' (edc.iam.trustedissuer.<alias>.*, a JSON list among
+#     them) cannot be spelled as environment variables, so they go
 #     into JAVA_TOOL_OPTIONS as -D, the way the pool cap already does;
 #   - for IdentityHub and IssuerService, the ports of the web contexts 0.18
 #     serves and Azure never exposed (DID, STS, credentials, issuance, identity).
@@ -112,8 +113,8 @@ EDC_IAM_DCP_SCOPES_MANUFACTURER_VALUE=org.eclipse.dspace.dcp.vc.type:Manufacture
 -Dedc.iam.dcp.scopes.data-quality-label.type=POLICY
 -Dedc.iam.dcp.scopes.data-quality-label.value=org.eclipse.dspace.dcp.vc.type:DataQualityLabelCredential:read
 -Dedc.iam.dcp.scopes.data-quality-label.prefix-mapping=DataQualityLabelCredential
--Dedc.iam.trusted-issuer.issuer.id=${ISSUER_DID}
--Dedc.iam.trusted-issuer.issuer.supportedtypes='["MembershipCredential","ManufacturerCredential","EHDSParticipantCredential","DataProcessingPurposeCredential","DataQualityLabelCredential"]'
+-Dedc.iam.trustedissuer.issuer.id=${ISSUER_DID}
+-Dedc.iam.trustedissuer.issuer.supportedtypes='["MembershipCredential","ManufacturerCredential","EHDSParticipantCredential","DataProcessingPurposeCredential","DataQualityLabelCredential"]'
 EOF
       ;;
     identityhub) cat <<EOF

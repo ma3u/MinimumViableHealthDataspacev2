@@ -22,10 +22,10 @@ function service(name: string): string {
   return next < 0 ? rest : rest.slice(0, next + 1);
 }
 
-/** alias -> { id, types } from the control plane's edc.iam.trusted-issuer.* keys. */
+/** alias -> { id, types } from the control plane's edc.iam.trustedissuer.* keys. */
 const configured: Record<string, { id?: string; types?: string[] }> = {};
 for (const m of service("controlplane").matchAll(
-  /^\s+edc\.iam\.trusted-issuer\.([^.]+)\.(id|supportedtypes):\s*(.+)$/gm,
+  /^\s+edc\.iam\.trustedissuer\.([^.]+)\.(id|supportedtypes):\s*(.+)$/gm,
 )) {
   const value = m[3].trim().replace(/^(['"])(.*)\1$/, "$2");
   configured[m[1]] ??= {};
@@ -52,7 +52,7 @@ const cpBlock = migrate.slice(
 );
 const onAzure: Record<string, { id?: string; raw?: string }> = {};
 for (const m of cpBlock.matchAll(
-  /^-Dedc\.iam\.trusted-issuer\.([^.]+)\.(id|supportedtypes)=(.+)$/gm,
+  /^-Dedc\.iam\.trustedissuer\.([^.]+)\.(id|supportedtypes)=(.+)$/gm,
 )) {
   onAzure[m[1]] ??= {};
   if (m[2] === "id") onAzure[m[1]].id = m[3];

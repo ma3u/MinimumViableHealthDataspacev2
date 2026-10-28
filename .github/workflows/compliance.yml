@@ -775,7 +775,25 @@ jobs:
               | project TimeGenerated, Log_s
               | order by TimeGenerated asc
               | take 200" \
-            --query "[].Log_s" -o tsv || echo "::warning::could not read the runner's log"
+            --query "[].Log_s" -o tsv > runner-lines.txt || echo "::warning::could not read the runner's log"
+          cat runner-lines.txt
+
+      # The same ratchet as the CI suites (scripts/compliance-baseline.json),
+      # on what the runner measured inside Azure: one summary per suite, from
+      # its "SUITE <key>: {...}" line, then the checker. A suite whose line is
+      # missing reads as "no report produced", which does not fail; a floor it
+      # falls below does.
+      - name: Compliance baseline (Azure)
+        if: always() && steps.wait.outputs.execution != ''
+        run: |
+          for key in dsp dcp ehds; do
+            line=$(grep -o "SUITE ${key}: {.*}" runner-lines.txt 2>/dev/null | tail -1 || true)
+            [ -n "$line" ] || continue
+            mkdir -p "test-results-azure/${key}-azure-results"
+            printf '{"suite":"%s (Azure)","summary":%s}\n' "$key" "${line#*: }" \
+              > "test-results-azure/${key}-azure-results/summary.json"
+          done
+          python3 scripts/check-compliance-baseline.py --results test-results-azure
 
   # -----------------------------------------------------------------------
   # Aggregate Results

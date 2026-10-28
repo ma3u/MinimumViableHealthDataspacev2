@@ -1,5 +1,5 @@
 {
-  "description": "The issuers the hub's control plane trusts, each for the credential types it may issue (#710, ADR-064). docker-compose.jad.yml sets edc.iam.trusted-issuer.<alias>.id and .supportedtypes from this, and scripts/azure/migrate-edc-to-v018.sh does the same on Azure, where the issuer's DID names its Container App (azureDid); scripts/run-ehds-identity-checks.sh (TRUST-6.1) fails when the running control plane differs, and /compliance shows this list.",
+  "description": "The issuers the hub's control plane trusts, each for the credential types it may issue (#710, ADR-064). docker-compose.jad.yml sets edc.iam.trustedissuer.<alias>.id and .supportedtypes from this, and scripts/azure/migrate-edc-to-v018.sh does the same on Azure, where the issuer's DID names its Container App (azureDid); scripts/run-ehds-identity-checks.sh (TRUST-6.1) fails when the running control plane differs, and /compliance shows this list.",
   "issuers": [
     {
       "alias": "issuer",
