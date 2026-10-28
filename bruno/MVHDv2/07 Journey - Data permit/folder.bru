@@ -7,7 +7,8 @@ docs {
   The two-sided procedure the regulation defines, in the order it runs. The acting persona
   changes from request to request; each request says which one it is and the collection carries
   the ids between them. One run adds one application, one permit, one finding and one closed
-  supervision cycle to the graph.
+  supervision cycle to the graph. Against the live hub, Demo Smoke removes them afterwards
+  (neo4j/remove-api-collection-runs.cypher), found from the application's "Bruno:" name.
 
     data user   -> an application carrying the eleven Art. 67(2) items
     data user   -> declares it complete, the three-month clock starts (Art. 68(4))
