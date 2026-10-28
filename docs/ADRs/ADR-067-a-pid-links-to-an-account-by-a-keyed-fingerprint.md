@@ -1,6 +1,6 @@
 # ADR-067: A PID links to an account by a keyed fingerprint; the hub stores neither name nor birth date
 
-**Status:** Proposed (2026-10-28)
+**Status:** Accepted (2026-10-28)
 **Date:** 2026-10-28
 **Supersedes:** decision 4 of [ADR-065](ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md) ("a PID opens one record or none", by name, for the two demo personas only)
 **Relates to:** [ADR-054](ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md), [ADR-066](ADR-066-the-hub-runs-its-own-eudi-verifier-behind-a-wallet-only-gate.md), [ADR-036](ADR-036-operator-secrets-in-key-vault.md), #708, #182, #475

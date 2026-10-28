@@ -1128,7 +1128,7 @@
       "id": "ADR-067",
       "file": "ADR-067-a-pid-links-to-an-account-by-a-keyed-fingerprint.md",
       "title": "A PID links to an account by a keyed fingerprint; the hub stores neither name nor birth date",
-      "status": "Proposed"
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
