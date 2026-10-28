@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Health Dataspace demo hub, Privacy Notice</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        font:
+          16px/1.6 -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          system-ui,
+          sans-serif;
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 4rem;
+      }
+      h1 {
+        font-size: 1.6rem;
+      }
+      h2 {
+        font-size: 1.15rem;
+        margin-top: 2.2rem;
+      }
+      code {
+        font-size: 0.9em;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1rem 0;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.45rem 0.6rem;
+        border-bottom: 1px solid #8884;
+        vertical-align: top;
+      }
+      .updated {
+        opacity: 0.7;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Health Dataspace demo hub, Privacy Notice</h1>
+    <p class="updated">
+      Last updated 28 October 2026. Controller: Matthias Buchhorn. Contact:
+      <a href="mailto:matthias.buchhorn@web.de">matthias.buchhorn@web.de</a>
+      for anything personal, or the public issue tracker at
+      <a href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues"
+        >github.com/ma3u/MinimumViableHealthDataspacev2</a
+      >
+      for everything else.
+    </p>
+
+    <p>
+      The demo hub at <code>ehds.mabu.red</code> is an open-source reference
+      implementation of the European Health Data Space (Regulation (EU)
+      2025/327). It is a demonstration, not a health service. Every patient
+      record on it is synthetic: invented people with invented values. Do not
+      enter real health data.
+    </p>
+
+    <h2>Signing in with an EUDI Wallet</h2>
+    <p>
+      When you sign in with a European Digital Identity Wallet, the hub asks
+      your wallet for two attributes of your person identification data (PID)
+      and nothing else: your <strong>family name</strong> and your
+      <strong>given name</strong>. Your wallet shows you this request, and
+      nothing is shared unless you confirm it there.
+    </p>
+    <p>
+      The hub compares the name with its synthetic records. If one carries
+      that name, you are signed in to that record; if none does, the sign-in
+      is refused. Either way the name is not stored. Your session carries a
+      pseudonym and the record it opens, not your name. A sign-in in progress
+      is held in the server's memory for at most five minutes and then
+      discarded.
+    </p>
+    <p>
+      Your wallet does not send the attributes to the hub directly but to a
+      verifier, which checks the wallet's signatures and hands the hub the
+      result. Today that is the EU's EUDI Wallet reference verifier at
+      <code>verifier-backend.eudiw.dev</code>. Once the hub's own
+      registration is complete, it is the hub's own verifier at
+      <code>verifier.ehds.mabu.red</code>, run on the same Azure account as
+      the hub.
+    </p>
+    <p>
+      Legal basis: your consent, given in the wallet for each sign-in (Art.
+      6(1)(a) GDPR). You can withdraw it by not signing in again; there is
+      nothing stored to delete.
+    </p>
+
+    <h2>Demo accounts</h2>
+    <p>
+      The hub also offers fixed demo accounts (operator, clinic, researcher,
+      access body, patient), signed in through Keycloak. They belong to
+      fictional organisations and hold no personal data.
+    </p>
+
+    <h2>Cookies and local storage</h2>
+    <table>
+      <tr>
+        <th>What</th>
+        <th>Why</th>
+        <th>How long</th>
+      </tr>
+      <tr>
+        <td>The session cookie, and the sign-in's own short-lived cookies</td>
+        <td>To keep you signed in; strictly necessary</td>
+        <td>At most 8 hours, or until you sign out</td>
+      </tr>
+      <tr>
+        <td>The demo persona you chose, in the browser's local storage</td>
+        <td>To show the same demo view on your next visit</td>
+        <td>Until you clear it</td>
+      </tr>
+    </table>
+    <p>
+      There is no analytics, no tracking, no advertising and no third-party
+      script on the hub.
+    </p>
+
+    <h2>Hosting and logs</h2>
+    <p>
+      The hub runs on Microsoft Azure in the West Europe region (the
+      Netherlands). The documentation site runs on GitHub Pages. Both
+      providers may record technical access data, such as your IP address and
+      the time of a request, to operate and secure their service.
+    </p>
+    <p>
+      The hub's own logs hold technical events and errors. They never contain
+      the attributes from your wallet. They are kept for at most 90 days
+      (Art. 6(1)(f) GDPR: keeping the demo running and secure).
+    </p>
+
+    <h2>What the hub never does</h2>
+    <ul>
+      <li>store your name, or any other attribute from your wallet;</li>
+      <li>ask your wallet for more than your family and given name;</li>
+      <li>hold real health data;</li>
+      <li>share, sell or profile anything about you.</li>
+    </ul>
+
+    <h2>Your rights</h2>
+    <p>
+      You have the rights under Arts. 15 to 21 GDPR: access, rectification,
+      erasure, restriction, portability and objection. Since the hub keeps
+      nothing that names you, a request is usually answered by saying so;
+      write to the address above. You also have the right to complain to a
+      data protection supervisory authority, in particular in the member
+      state where you live or work.
+    </p>
+
+    <h2>Changes</h2>
+    <p>
+      This notice changes when the hub changes; the date at the top says when.
+      Its history is in the
+      <a
+        href="https://github.com/ma3u/MinimumViableHealthDataspacev2/commits/main/ui/public/hub/privacy.html"
+        >repository</a
+      >.
+    </p>
+  </body>
+</html>
