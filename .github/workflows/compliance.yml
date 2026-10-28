@@ -623,11 +623,16 @@ jobs:
           # her conditions and medications. Without it every request in the
           # collection's Patient folder answered 404 on CI while passing locally,
           # because only a fully seeded laptop had her (#349).
+          # seed-study-results.cypher gives her the rest of the Art. 14 record
+          # (ADR-059): reports, vaccinations, the medication plan. Without it
+          # `01 Patient/06` fails on CI, and since the count stayed at 2 failed
+          # it took the place of a request that had started passing.
           for f in neo4j/insert-synthetic-schema-data.cypher \
                    neo4j/register-eehrxf-profiles.cypher \
                    neo4j/seed-compliance-matrix.cypher \
                    neo4j/participant-source-init.cypher \
-                   neo4j/seed-persona-overview.cypher; do
+                   neo4j/seed-persona-overview.cypher \
+                   neo4j/seed-study-results.cypher; do
             echo "== $f"
             docker exec -i health-dataspace-neo4j \
               cypher-shell -u neo4j -p healthdataspace < "$f"
