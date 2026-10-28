@@ -1002,6 +1002,7 @@ struct ContentView: View {
   @StateObject private var model = AppModel()
   /// The phone's connection to the patient's record on the hub (#473).
   @StateObject private var connection = EHDSConnection()
+  @Environment(\.scenePhase) private var scenePhase
   @State private var scanning = false
   @State private var path: [UUID] = []
 
@@ -1263,6 +1264,13 @@ struct ContentView: View {
     .onChange(of: connection.sendsReportsSince) { _, since in
       guard since != nil else { return }
       Task { await connection.sync(model.reports) }
+    }
+    // And each time the app comes up: what waited while the hub slept, or
+    // while the session had ended, goes now (RecordCatchUp).
+    .task { await connection.catchUp(model.reports) }
+    .onChange(of: scenePhase) { _, phase in
+      guard phase == .active else { return }
+      Task { await connection.catchUp(model.reports) }
     }
     // My device trends into my record (ADR-057): when the person switches
     // sending on, and each time the app comes up while it is on. A series
