@@ -4,7 +4,9 @@
  * HealthDetailModal — the clickable detail view for a personal-health dashboard
  * card (fitness / labs / nutrition). Shows ~3-month weekly trends (TrendChart)
  * with an improving/declining chip, plus the weekly plan for nutrition.
- * Synthetic, illustrative data from journey-config.
+ * Synthetic, illustrative data from journey-config, or the person's own
+ * values for a record Klarbefund created (lib/patient/own-health.ts), whose
+ * series carry their own period and a neutral chip.
  */
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -33,6 +35,18 @@ const GOAL_ICON: Record<WeeklyGoal["icon"], typeof Leaf> = {
   protein: Drumstick,
 };
 
+/** A trend's own period when it has one ("12 Jul 2026 to 26 Oct 2026"). */
+function period(s: TrendSeries): string | null {
+  if (!s.from || !s.to) return null;
+  const day = (iso: string) =>
+    new Date(iso).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  return `${day(s.from)} to ${day(s.to)}`;
+}
+
 function deltaChip(s: TrendSeries) {
   const first = s.points[0];
   const last = s.points[s.points.length - 1];
@@ -41,7 +55,14 @@ function deltaChip(s: TrendSeries) {
   const pct =
     first === 0 ? 0 : Math.round(((last - first) / Math.abs(first)) * 100);
   const Icon = rising ? TrendingUp : TrendingDown;
-  const colour = improving ? "#1E8449" : "#CA6F1E";
+  // A person's own values move; whether that is good is not the portal's to
+  // say, so a neutral series gets no green or orange.
+  const colour =
+    s.goodDirection === "neutral"
+      ? "#6B7280"
+      : improving
+        ? "#1E8449"
+        : "#CA6F1E";
   return (
     <span
       className="inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full"
@@ -49,7 +70,7 @@ function deltaChip(s: TrendSeries) {
     >
       <Icon size={12} />
       {pct > 0 ? "+" : ""}
-      {pct}% · 3 mo
+      {pct}%{s.from ? "" : " · 3 mo"}
     </span>
   );
 }
@@ -218,7 +239,7 @@ export function HealthDetailModal({
               </div>
               <TrendChart points={s.points} color={s.color} />
               <p className="text-[10px] text-(--text-secondary) mt-1 text-right">
-                last 12 weeks
+                {period(s) ?? "last 12 weeks"}
               </p>
             </div>
           ))}

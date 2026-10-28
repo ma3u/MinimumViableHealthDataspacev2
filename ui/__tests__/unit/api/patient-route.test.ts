@@ -73,6 +73,8 @@ const TIMELINE = [
 describe("GET /api/patient as a PATIENT", () => {
   beforeEach(() => {
     mockRunQuery.mockReset();
+    // Any query a test does not answer finds nothing, as on an empty graph.
+    mockRunQuery.mockResolvedValue([]);
     vi.mocked(getServerSession).mockResolvedValue({
       user: { name: "Maria Schmidt", email: "patient1@health-dataspace.local" },
       roles: ["PATIENT"],
@@ -127,6 +129,84 @@ describe("GET /api/patient as a PATIENT", () => {
     expect(String(timelineQuery)).toMatch(
       /coalesce\(fhir\.valueUnit, fhir\.unit\)\s+AS unit/,
     );
+  });
+
+  it("hands a Klarbefund record its own values, grouped by source and code", async () => {
+    mockRunQuery
+      .mockResolvedValueOnce(PATIENTS)
+      .mockResolvedValueOnce(STATS)
+      .mockResolvedValueOnce(TIMELINE)
+      .mockResolvedValueOnce([
+        {
+          kind: "device",
+          code: "40443-4",
+          display: "Resting heart rate",
+          unit: "/min",
+          date: "2026-10-12",
+          value: 56,
+        },
+        {
+          kind: "device",
+          code: "40443-4",
+          display: "Resting heart rate",
+          unit: "/min",
+          date: "2026-10-19",
+          value: 55,
+        },
+        {
+          kind: "lab",
+          code: "2276-4",
+          display: "Ferritin",
+          unit: "ng/mL",
+          date: "2026-10-01",
+          value: 80,
+        },
+      ]);
+    const data = await (
+      await GET(new Request("http://localhost/api/patient"))
+    ).json();
+    expect(data.ownHealth.devices).toEqual([
+      {
+        code: "40443-4",
+        display: "Resting heart rate",
+        unit: "/min",
+        points: [
+          { date: "2026-10-12", value: 56 },
+          { date: "2026-10-19", value: 55 },
+        ],
+      },
+    ]);
+    expect(data.ownHealth.labs[0].code).toBe("2276-4");
+    // Only a record the app created, and only what the app put into it.
+    const [query] = mockRunQuery.mock.calls[3];
+    expect(String(query)).toMatch(/sandbox: true/);
+    expect(String(query)).toMatch(/contributedBy: 'klarbefund-app'/);
+  });
+
+  it("gives a demo persona's record no own values: it keeps the illustration", async () => {
+    mockRunQuery
+      .mockResolvedValueOnce(PATIENTS)
+      .mockResolvedValueOnce(STATS)
+      .mockResolvedValueOnce(TIMELINE)
+      .mockResolvedValueOnce([]); // not a sandbox: no row at all
+    const data = await (
+      await GET(new Request("http://localhost/api/patient"))
+    ).json();
+    expect(data.ownHealth).toBeNull();
+  });
+
+  it("keeps the record when the own values cannot be read", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    mockRunQuery
+      .mockResolvedValueOnce(PATIENTS)
+      .mockResolvedValueOnce(STATS)
+      .mockResolvedValueOnce(TIMELINE)
+      .mockRejectedValueOnce(new Error("Neo4j hiccup"));
+    const res = await GET(new Request("http://localhost/api/patient"));
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.ownHealth).toBeNull();
+    expect(data.timeline).toHaveLength(2);
   });
 
   it("says so when the record was never synced", async () => {

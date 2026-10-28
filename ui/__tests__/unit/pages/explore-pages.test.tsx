@@ -355,6 +355,71 @@ describe("PatientPage", () => {
     },
   };
 
+  it("shows the illustration cards for a demo record", async () => {
+    mockFetchApi.mockReturnValue(mockResponse(patientData));
+    render(<PatientPage />);
+    await waitFor(() => {
+      expect(screen.getByText(/John Doe/)).toBeInTheDocument();
+    });
+    expect(screen.getByText("62 %")).toBeInTheDocument();
+  });
+
+  it("shows a Klarbefund record its own values, not the illustration", async () => {
+    mockFetchApi.mockReturnValue(
+      mockResponse({
+        patients: [
+          { id: "kb-1", name: "kb-test0001", gender: "", birthDate: "" },
+        ],
+        stats: { ...patientData.stats, patients: 1 },
+        restricted: true,
+        timeline: [],
+        ownHealth: {
+          devices: [
+            {
+              code: "40443-4",
+              display: "Resting heart rate",
+              unit: "/min",
+              points: [
+                { date: "2026-10-12", value: 56 },
+                { date: "2026-10-19", value: 53 },
+              ],
+            },
+          ],
+          labs: [],
+        },
+      }),
+    );
+    render(<PatientPage />);
+    await waitFor(() => {
+      expect(
+        screen.getByText("Apple Health, weekly means"),
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByText("53 bpm")).toBeInTheDocument();
+    expect(screen.queryByText("62 %")).not.toBeInTheDocument();
+    expect(screen.queryByText("Mediterranean plan")).not.toBeInTheDocument();
+    expect(screen.getByText("Your record")).toBeInTheDocument();
+  });
+
+  it("says so when a Klarbefund record has no values yet", async () => {
+    mockFetchApi.mockReturnValue(
+      mockResponse({
+        patients: [
+          { id: "kb-1", name: "kb-test0001", gender: "", birthDate: "" },
+        ],
+        stats: { ...patientData.stats, patients: 1 },
+        restricted: true,
+        timeline: [],
+        ownHealth: { devices: [], labs: [] },
+      }),
+    );
+    render(<PatientPage />);
+    await waitFor(() => {
+      expect(screen.getByTestId("own-health-empty")).toBeInTheDocument();
+    });
+    expect(screen.queryByText("62 %")).not.toBeInTheDocument();
+  });
+
   it("renders stats after loading", async () => {
     mockFetchApi.mockReturnValue(mockResponse(patientData));
     render(<PatientPage />);
