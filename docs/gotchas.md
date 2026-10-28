@@ -54,6 +54,16 @@ after its restart, the diagnostic printed the last 40 log lines, and all 40
 were the OpenTelemetry agent failing to reach a collector CI does not run.
 `seed-issuer-identity.sh` now prints the log since the restart without them.
 
+Two more from the same evening. **The trusted-issuer key is
+`edc.iam.trustedissuer`**: the 0.18 control plane still reads
+`edc.iam.trusted-issuer`, but warns that it is deprecated and that "No
+configured trusted issuer" exists under the new prefix. Compose and Azure use
+the new one; TRUST-6.1 accepts both. **CAT-1.4 cannot pass on this build**: the
+connector has no Federated Catalog API (none in
+`jad/openapi/management-api.yaml`, 404 on every path), and the hub's federated
+discovery is `services/catalog-crawler` (#8). The check skips on a 404 with
+that reason.
+
 ## 2026-10-28: an IssuerService issues each credential type once, and IdentityHub's list hides new credentials
 
 Three things found while making a second issuer trusted for membership (#710).

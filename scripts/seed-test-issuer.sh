@@ -4,7 +4,7 @@
 # #710, ADR-064.
 # ---------------------------------------------------------------------------
 # The hub trusts each issuer for the credential types it may issue
-# (edc.iam.trusted-issuer.<alias>.supportedtypes on the control plane). Two
+# (edc.iam.trustedissuer.<alias>.supportedtypes on the control plane). Two
 # test issuers exercise that, each a second IssuerService from the same image
 # (docker-compose.jad.yml), because one IssuerService allows each credential
 # type only once:

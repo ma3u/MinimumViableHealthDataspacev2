@@ -652,12 +652,12 @@ run_scope_tests() {
     record_result "$test_id" "scope" "skipped" "container not inspectable"
   else
     local trusted_issuer
-    trusted_issuer=$(printf '%s\n' "$cp_env" | grep '^edc\.iam\.trusted-issuer' || true)
+    trusted_issuer=$(printf '%s\n' "$cp_env" | grep -E '^edc\.iam\.trusted-?issuer' || true)
     if [ -n "$trusted_issuer" ]; then
       pass "$test_id: Trusted issuer configured: $(printf '%s\n' "$trusted_issuer" | head -1)"
       record_result "$test_id" "scope" "passed"
     else
-      fail "$test_id: control plane defines no edc.iam.trusted-issuer"
+      fail "$test_id: control plane defines no edc.iam.trustedissuer"
       record_result "$test_id" "scope" "failed" "no trusted issuer"
     fi
   fi
@@ -723,7 +723,7 @@ import json, re, sys
 want = {i["alias"]: i for i in json.load(open(sys.argv[1]))["issuers"] if "compose" in i["environments"]}
 have = {}
 for line in sys.stdin:
-    m = re.match(r"edc\.iam\.trusted-issuer\.([^.]+)\.(id|supportedtypes)=(.*)", line.strip())
+    m = re.match(r"edc\.iam\.trusted-?issuer\.([^.]+)\.(id|supportedtypes)=(.*)", line.strip())
     if m:
         have.setdefault(m.group(1), {})[m.group(2)] = m.group(3)
 problems = []

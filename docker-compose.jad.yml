@@ -375,11 +375,11 @@ services:
       # presentation, so the request is refused. Change these together with
       # ui/src/content/trusted-issuers.json, which /compliance shows:
       # scripts/run-ehds-identity-checks.sh (TRUST-6.1) fails when they differ.
-      edc.iam.trusted-issuer.issuer.id: "did:web:issuerservice%3A10016:issuer"
-      edc.iam.trusted-issuer.issuer.supportedtypes: '["MembershipCredential","ManufacturerCredential","EHDSParticipantCredential","DataProcessingPurposeCredential","DataQualityLabelCredential"]'
+      edc.iam.trustedissuer.issuer.id: "did:web:issuerservice%3A10016:issuer"
+      edc.iam.trustedissuer.issuer.supportedtypes: '["MembershipCredential","ManufacturerCredential","EHDSParticipantCredential","DataProcessingPurposeCredential","DataQualityLabelCredential"]'
       # The fictional Simpl Governance Authority: membership of its data space.
-      edc.iam.trusted-issuer.simpl-ga.id: "did:web:simpl-ga-issuer%3A10016:simpl-ga"
-      edc.iam.trusted-issuer.simpl-ga.supportedtypes: '["MembershipCredential"]'
+      edc.iam.trustedissuer.simpl-ga.id: "did:web:simpl-ga-issuer%3A10016:simpl-ga"
+      edc.iam.trustedissuer.simpl-ga.supportedtypes: '["MembershipCredential"]'
     ports:
       - "11003:8081" # Management API (external port from planning doc)
     networks:

@@ -47,6 +47,14 @@ SUITES = {
     # CI stack's: the two environments hold different data and cannot score
     # the same, and until #349 the live site had no ratchet at all.
     "bruno-api-azure-results": "EHDS API collection (Bruno, Azure demo)",
+    # The three suites as the mvhd-compliance-runner job measures them inside
+    # the Azure environment (compliance.yml, target azure). The job's
+    # container is gone when it ends, so the workflow writes these from the
+    # runner's SUITE log lines. Their own floors: Azure holds different data
+    # and skips the checks that inspect containers.
+    "dsp-azure-results": "EHDS dataspace checks (Azure)",
+    "dcp-azure-results": "EHDS identity checks (Azure)",
+    "ehds-azure-results": "EHDS domain checks (Azure)",
 }
 
 
@@ -59,6 +67,9 @@ LOCAL_DIRS = {
     "ehds-compliance-results": "ehds",
     "bruno-api-results": "bruno",
     "bruno-api-azure-results": "bruno-api-azure-results",
+    "dsp-azure-results": "dsp-azure-results",
+    "dcp-azure-results": "dcp-azure-results",
+    "ehds-azure-results": "ehds-azure-results",
 }
 
 

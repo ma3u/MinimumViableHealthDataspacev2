@@ -16,9 +16,9 @@
   "suites": {
     "dsp-tck-results": {
       "min_passed": 25,
-      "max_failed": 1,
+      "max_failed": 0,
       "review_by": "2026-11-27",
-      "note": "RAISED 2026-10-28 from 21/6, runs 40708450227 and 40710803036 on fix/710-ci-dsp-path (2fc9539a, eb87d794): 25 passed, 1 failed, 7 skipped, twice. The six failures had one cause: CI created its participant contexts with no context config, so every DSP call answered 500 \"No configuration found for participant context\" before it left (#710, docs/gotchas.md 2026-10-28). A new seed step writes the STS config CFM writes locally, and the job now seeds the whole identity layer, so CAT-1.1 passes for alpha-klinik, pharmaco and medreg and CAT-1.3 passes. CAT-1.2 skips: the catalogue answers with no dataset, since the job seeds no assets. The 1 left is CAT-1.4, the federated catalogue request, not yet understood; hence the short review date. Earlier: LOWERED 2026-09-26 from 25/0 (run 36266621990), which was false: those checks passed on Jetty HTML error pages."
+      "note": "TIGHTENED 2026-10-28 to 25/0, run 40759615604 on chore/710-close-out (89f42662): 25 passed, 0 failed, 8 skipped. The one failure left, CAT-1.4, asked for a Federated Catalog API this connector build does not have (404, not in the management API spec); it now skips with that reason. RAISED 2026-10-28 from 21/6, runs 40708450227 and 40710803036 on fix/710-ci-dsp-path (2fc9539a, eb87d794): 25 passed, 1 failed, 7 skipped, twice. The six failures had one cause: CI created its participant contexts with no context config, so every DSP call answered 500 \"No configuration found for participant context\" before it left (#710, docs/gotchas.md 2026-10-28). A new seed step writes the STS config CFM writes locally, and the job now seeds the whole identity layer, so CAT-1.1 passes for alpha-klinik, pharmaco and medreg and CAT-1.3 passes. CAT-1.2 skips: the catalogue answers with no dataset, since the job seeds no assets. The 1 left is CAT-1.4, the federated catalogue request, not yet understood; hence the short review date. Earlier: LOWERED 2026-09-26 from 25/0 (run 36266621990), which was false: those checks passed on Jetty HTML error pages."
     },
     "dcp-compliance-results": {
       "min_passed": 27,
@@ -39,6 +39,21 @@
       "min_passed": 153,
       "max_failed": 0,
       "note": "Demo Smoke run 40645836471 on cb1eb44: 153 passed, 0 failed, 0 skipped over 153 against https://ehds.mabu.red. Raised from 123/0, which the collection had outgrown by 30 requests. Earlier history: run 36383527116 on ff2bba5: 123 passed, 0 failed, 0 skipped over 123 against https://ehds.mabu.red. The live demo answers every request in the collection. ARMED 2026-09-28 at 122/1 and raised to 123/0 in the same change, once the dispatched run showed #373 closed: the entry the workflow comment asked for on the first run had never been committed, so for 100 consecutive runs the Bruno step failed on its own exit code while this gate printed NO BASELINE and passed. A full house is an unusual floor and a deliberate one: nothing here is known-broken any more, so any red is a real regression. Lower it only with a reason."
+    },
+    "dsp-azure-results": {
+      "min_passed": 26,
+      "max_failed": 0,
+      "note": "Azure runner execution mvhd-compliance-runner-keoxu6x (compliance run 40729670137, 2026-10-28): 26 passed, 1 failed, 6 skipped. The 1 was CAT-1.4, whose federatedcatalog path answered 404 on Azure as in compose: this connector build has no Federated Catalog API, so CAT-1.4 now skips with that reason and the floor is 26/0. CAT-1.1 x3, 1.2 and 1.3 pass: the hub issuer's memberships are accepted under the per-type trust list (#710)."
+    },
+    "dcp-azure-results": {
+      "min_passed": 18,
+      "max_failed": 0,
+      "note": "Same execution: 18 passed, 0 failed, 9 skipped. The skips are the checks that inspect containers or the Vault container (KEY-2.4, SCOPE-5.x, TRUST-6.x), which the ACA job cannot reach; the trust checks run in CI."
+    },
+    "ehds-azure-results": {
+      "min_passed": 28,
+      "max_failed": 0,
+      "note": "Same execution: 28 passed, 0 failed, 2 skipped, against the live graph."
     }
   }
 }

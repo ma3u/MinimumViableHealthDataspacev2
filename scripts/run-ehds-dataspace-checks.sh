@@ -264,12 +264,27 @@ run_catalog_tests() {
   fi
 
   # 1.4 — Federated Catalog query
+  # The connector build in docker-compose.jad.yml and on Azure has no Federated
+  # Catalog API: jad/openapi/management-api.yaml defines none, and every path
+  # for it answers 404 (2026-10-28). The hub's federated discovery is its own
+  # crawler, services/catalog-crawler (#8). So a 404 says the subject does not
+  # exist on this stack and skips with that reason, rather than failing every
+  # run; a build that adds the API gets a verdict again.
   local test_id="CAT-1.4"
-  local resp
-  resp=$(mgmt_post "/${MGMT_V}/participants/${OPERATOR_CTX}/federatedcatalog/request" \
-    '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}') || resp=""
+  local resp fc_code
+  fc_code=$(curl -s --max-time 30 -o /dev/null -w '%{http_code}' -X POST -H "$(auth_header)" \
+    -H "Content-Type: application/json" -d '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}' \
+    "${MGMT_API}/${MGMT_V}/participants/${OPERATOR_CTX}/federatedcatalog/request" 2>/dev/null) || fc_code="000"
+  resp=""
+  if [ "$fc_code" != "404" ]; then
+    resp=$(mgmt_post "/${MGMT_V}/participants/${OPERATOR_CTX}/federatedcatalog/request" \
+      '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}') || resp=""
+  fi
 
-  if [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
+  if [ "$fc_code" = "404" ]; then
+    skip "$test_id: this connector build has no Federated Catalog API (404); federated discovery is services/catalog-crawler (#8)"
+    record_result "$test_id" "catalog" "skipped" "no Federated Catalog API in this build"
+  elif [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
     local count
     count=$(echo "$resp" | jq 'length')
     pass "$test_id: Federated Catalog returned ${count} entries"
