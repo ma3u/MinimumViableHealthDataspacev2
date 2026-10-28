@@ -53,6 +53,23 @@ describe("MermaidDiagram", () => {
     });
   });
 
+  it("applies transform to the SVG before showing it, so a re-render keeps the change", async () => {
+    mockRender.mockResolvedValue({
+      svg: '<svg xmlns="http://www.w3.org/2000/svg" id="d1"><rect id="d1-x"/></svg>',
+    });
+    const transform = vi.fn((svg: SVGSVGElement) => {
+      svg.classList.add("changed");
+    });
+    const { container } = render(
+      <MermaidDiagram chart="gantt" transform={transform} />,
+    );
+    await waitFor(() => {
+      expect(container.querySelector("svg.changed")).toBeInTheDocument();
+    });
+    expect(transform).toHaveBeenCalledTimes(1);
+    expect(container.querySelector("#d1-x")).toBeInTheDocument();
+  });
+
   it("shows error state on mermaid failure", async () => {
     mockRender.mockRejectedValue(new Error("Parse error"));
     render(<MermaidDiagram chart="invalid mermaid" />);

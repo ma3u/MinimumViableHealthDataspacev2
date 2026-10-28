@@ -55,6 +55,10 @@ describe("DocsPage (Hub)", () => {
       "href",
       "/docs/operations",
     );
+    expect(screen.getByText("Roadmap").closest("a")).toHaveAttribute(
+      "href",
+      "/docs/roadmap",
+    );
     expect(screen.getByText("EHDS Regulation").closest("a")).toHaveAttribute(
       "href",
       "/docs/ehds",

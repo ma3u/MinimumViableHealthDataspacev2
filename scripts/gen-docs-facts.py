@@ -103,6 +103,11 @@ PAGES = {
                     "ui/src/content/published-docs.json"],
         "facts": [],
     },
+    "/docs/roadmap": {
+        "sources": ["ui/src/app/docs/roadmap/page.tsx", "ui/src/components/docs/RoadmapGantt.tsx",
+                    "ui/src/lib/docs/roadmap.ts"],
+        "facts": [],
+    },
     "/docs/operations": {
         "sources": ["ui/src/app/docs/operations/page.tsx", "ui/src/content/published-docs.json"],
         "facts": [],
