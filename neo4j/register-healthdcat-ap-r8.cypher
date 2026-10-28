@@ -237,6 +237,10 @@ SET d.hdcatapPopulationCoverage = coalesce(d.hdcatapPopulationCoverage, row.pop)
 // ages, the period and the codes come from them. Patients who opted out of
 // secondary use (the OptedOut label, which a reversal removes) are not
 // counted. Run on every seed, so the description follows the data.
+// Encounters and conditions are read in separate subqueries: matched together
+// they multiply (encounters x conditions rows per patient), which on Azure's
+// Synthea cohort passed the 1 GiB transaction limit (ADR-056) and weighted
+// each code by its patient's number of encounters.
 MATCH (d:HealthDataset)<-[:FROM_DATASET]-(p:Patient)
 WHERE NOT p:OptedOut
 WITH d, collect(p) AS people
@@ -245,18 +249,32 @@ WITH d, people,
 CALL {
   WITH people
   UNWIND people AS p
-  OPTIONAL MATCH (p)-[:HAS_ENCOUNTER]->(e:Encounter)
-  OPTIONAL MATCH (p)-[:HAS_CONDITION]->(c:Condition)
-  WITH collect(date(substring(toString(e.date), 0, 10))) + collect(date(substring(toString(c.onsetDate), 0, 10))) AS dates,
-       collect(c) AS conditions
-  UNWIND conditions AS c
-  WITH dates, c.code AS code, count(*) AS n
-  ORDER BY n DESC
-  WITH dates, collect('SNOMED-CT:' + code)[..10] AS codes
-  RETURN codes,
-         reduce(lo = null, x IN dates | CASE WHEN lo IS NULL OR x < lo THEN x ELSE lo END) AS first,
-         reduce(hi = null, x IN dates | CASE WHEN hi IS NULL OR x > hi THEN x ELSE hi END) AS last
+  MATCH (p)-[:HAS_ENCOUNTER]->(e:Encounter)
+  WITH date(substring(toString(e.date), 0, 10)) AS at
+  RETURN min(at) AS encounterFirst, max(at) AS encounterLast
 }
+CALL {
+  WITH people
+  UNWIND people AS p
+  MATCH (p)-[:HAS_CONDITION]->(c:Condition)
+  WITH date(substring(toString(c.onsetDate), 0, 10)) AS at
+  RETURN min(at) AS onsetFirst, max(at) AS onsetLast
+}
+CALL {
+  WITH people
+  UNWIND people AS p
+  MATCH (p)-[:HAS_CONDITION]->(c:Condition)
+  // Only SNOMED codes go out as SNOMED-CT; an ICD-10 one (E11.9) would not.
+  WHERE c.code IS NOT NULL
+    AND coalesce(c.codeSystem, 'http://snomed.info/sct') = 'http://snomed.info/sct'
+  WITH c.code AS code, count(*) AS n
+  ORDER BY n DESC, code
+  LIMIT 10
+  RETURN collect('SNOMED-CT:' + code) AS codes
+}
+WITH d, people, ages, codes,
+     CASE WHEN onsetFirst IS NULL OR encounterFirst < onsetFirst THEN encounterFirst ELSE onsetFirst END AS first,
+     CASE WHEN onsetLast IS NULL OR encounterLast > onsetLast THEN encounterLast ELSE onsetLast END AS last
 SET d.hdcatapNumberOfUniqueIndividuals = size(people),
     d.hdcatapNumberOfRecords = coalesce(d.hdcatapNumberOfRecords, size(people)),
     d.hdcatapMinTypicalAge = reduce(lo = 200, a IN ages | CASE WHEN a < lo THEN a ELSE lo END),
