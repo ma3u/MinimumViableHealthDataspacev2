@@ -105,6 +105,23 @@ Names alone are not unique; names with the birth date practically are.
    no longer possible by accident.
 7. **Unlinking** is a button on the same page and removes the attribute.
 
+## What the hub stores, and what it does not
+
+| Data                                 | Stored?                                  | Where                                | Why                                                     |
+| ------------------------------------ | ---------------------------------------- | ------------------------------------ | ------------------------------------------------------- |
+| Given name, family name              | No, in memory while the hash is computed |                                      | Input of the hash only                                  |
+| Birth date                           | No, in memory while the hash is computed |                                      | Input of the hash only                                  |
+| The secure hash (`pid_fingerprint`)  | Yes, one value per linked account        | Keycloak user attribute              | Recognises the person at the next sign-in               |
+| The hash key (`pid-fingerprint-key`) | Yes                                      | Azure Key Vault, apart from Keycloak | Without it the hash can be neither computed nor checked |
+| The account (`kb-…`) and its record  | Yes, as before (ADR-054)                 | Keycloak, Neo4j                      | The account the person signs in to                      |
+
+The hash is a one-way HMAC-SHA256: it cannot be turned back into a name or a
+birth date, and without the key it cannot even be checked against a guess.
+It is still personal data in the GDPR's sense, pseudonymised (Art. 4(5),
+Recital 26), because it lets the hub recognise one person; so is the account
+itself. No service with a login can avoid that. What the design avoids is
+storing anything that identifies a person in clear.
+
 ## Consequences
 
 - A person with a real PID can sign in to an account of their own, and a
