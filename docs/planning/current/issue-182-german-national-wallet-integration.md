@@ -92,6 +92,8 @@ wallet and for durability anyway) but W3/W4's German path is parked with the rea
 
 The one step that turns ADR-028's config switch into a running thing.
 
+**Status 2026-10-28:** runs locally with a dev certificate (compose overlay, `make-verifier-keystore.sh --dev`); the Azure phase `scripts/azure/19-eudi-verifier.sh` is written but not yet run. Decided in [ADR-066](../../ADRs/ADR-066-the-hub-runs-its-own-eudi-verifier-behind-a-wallet-only-gate.md): only `/wallet/*` is public, behind a gate; the key is in Key Vault. Waiting on the SPRIND access and registration certificates (CSR generated 2026-10-28, #708). Runbook: [eudi-verifier-self-hosted](../../knowledge/runbooks/eudi-verifier-self-hosted.md).
+
 - Deploy `eudi-srv-web-verifier-endpoint-23220-4-kt` as a JAD compose service, configured
   with the RP access certificate (`.p12` → JKS). The public hostname must equal the leaf
   cert's SAN dNSName (`x509_san_dns` requires `response_uri` host == `client_id` host).

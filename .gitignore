@@ -84,3 +84,5 @@ sbom/*.cdx.json
 # German wallet backend (#182): dev roots from scripts/eudi/gen-dev-certs.sh, and Gradle's cache
 services/eudi-wallet-backend/certs/
 services/eudi-wallet-backend/overlay/.gradle/
+# Self-hosted verifier (ADR-066): the dev keystore from scripts/eudi/make-verifier-keystore.sh --dev
+services/eudi-verifier/certs/

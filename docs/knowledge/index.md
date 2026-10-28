@@ -48,6 +48,7 @@ frontmatter. Spec:
 [aca-postgres-ephemeral-recovery](runbooks/aca-postgres-ephemeral-recovery.md) ·
 [eudi-wallet-backend-local](runbooks/eudi-wallet-backend-local.md) ·
 [eudi-wallet-ios-local](runbooks/eudi-wallet-ios-local.md) ·
+[eudi-verifier-self-hosted](runbooks/eudi-verifier-self-hosted.md) ·
 [cost-efficient-logging](runbooks/cost-efficient-logging.md) ·
 [klarbefund-connect](runbooks/klarbefund-connect.md) ·
 [live-demo-off-hours](runbooks/live-demo-off-hours.md) ·
