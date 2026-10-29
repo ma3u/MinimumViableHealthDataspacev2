@@ -300,6 +300,50 @@ screen itself, **Open in Klarbefund** does the same as the QR code, and the
 iPhone's camera app opens Klarbefund from the code too. The code works once,
 for two minutes.
 
+### Your EUDI wallet, if you want one
+
+An EUDI wallet is optional. Klarbefund and the hub work with a username and
+password alone. A wallet adds a second way to sign in on the website: d-you,
+the German EUDI Wallet, or any other certified one, proves who you are with
+your PID (your digital identity card) instead of a password.
+
+The hub never keeps your name or birth date. It keeps one secure hash of
+them on the account, which only says "this PID belongs to this account"
+([ADR-067](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-067-a-pid-links-to-an-account-by-a-keyed-fingerprint.md)).
+One PID belongs to one account, so decide where you start.
+
+**You have Klarbefund first, and add the wallet later**
+
+1. In the app, **Connect to EHDS › Create an EHDS account** gives you a
+   username `kb-…` and a password. **Show password** or **Copy password**
+   shows it again.
+2. On a computer, open the website and choose **Sign in with Keycloak**, with
+   that username and password. Not **Sign in with d-you**: the wallet can only
+   open an account it is already connected to, and this one is not yet.
+3. Open **Health Profile › Connect your EUDI wallet**, choose **Connect your
+   EUDI wallet**, and scan the QR code with d-you.
+4. d-you names the service and asks for three things: given names, family
+   name and date of birth. Approve them with your Digital ID code.
+5. The page says **d-you is connected**. From now on **Sign in with d-you**
+   opens this account, and the app stays connected as before.
+
+**You have the wallet first, and add Klarbefund later**
+
+1. On the website, choose **Sign in with d-you (QR)** and scan the code.
+   Approve the same three things.
+2. No account belongs to your PID yet, so the page offers **Create an account
+   with this PID**. Only choose it if you have no Klarbefund account: if you
+   have one, connect the wallet to it as above instead, because your PID
+   cannot belong to two accounts.
+3. The page shows a username `kb-…` and a password, once. Save both, then
+   **I have saved them, sign me in**.
+4. In the app, **Connect to EHDS › Sign in with an EHDS account** with that
+   username and password. The app and the wallet now open the same record.
+
+**Disconnect wallet**, on the same page, removes the hash; the account, its
+record and the app's connection stay. Deleting the account removes the hash
+with it.
+
 ## Exports and your data rights
 
 Everything the app holds can leave it, in the form the recipient needs, and

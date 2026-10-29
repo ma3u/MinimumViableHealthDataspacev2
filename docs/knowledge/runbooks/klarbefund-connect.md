@@ -106,6 +106,42 @@ issuer `http://localhost:8080/realms/edcv`; a release build trusts only
 - **`XCUIApplication.open(_:)` relaunches the app**; `XCUIDevice.shared.system.open(_:)`
   hands the link to the running one.
 
+## A wallet on the same account (ADR-067)
+
+An EUDI wallet is optional and links to a sandbox account (`kb-…`) only, by
+the Keycloak attribute `pid_fingerprint`:
+`HMAC-SHA256(pid-fingerprint-key, given|family|birth_date)`, stored as
+`k1:<64 hex>`, never the name or the date. Two orders, both on the live hub
+since #764:
+
+| Order                | Where the account comes from                                         | How the second part joins                                                                                                                        |
+| -------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Klarbefund, then PID | the app, `POST /api/app-accounts` (App Attest)                       | password sign-in on the website, then `/patient/wallet` starts `POST /api/auth/eudi/start {purpose:"link"}` and the status route writes the hash |
+| PID, then Klarbefund | `/auth/eudi-qr`, a PID on no account, `POST /api/auth/eudi/register` | the page answers the generated password once; the app signs in with it (**Sign in with an EHDS account**)                                        |
+
+Check a link without reading the hash:
+
+```bash
+# declares the attribute when the realm lacks it; says so and changes nothing otherwise
+scripts/declare-pid-fingerprint-attribute.sh --azure
+# the verifier saw the exchange
+az containerapp logs show -n mvhd-eudi-verifier -g rg-mvhd-dev --tail 100 --format text | grep EVENTS
+```
+
+Then read the user in the Keycloak admin API and check that `attributes`
+holds `pid_fingerprint` and nothing from the PID.
+
+Tested live on 2026-10-29 with d-you: `kb-hh2mygdj` linked and holds only
+`pid_fingerprint`; d-you showed "Hackathon - Web" asking for 3 of 16 PID
+claims.
+
+The trap found that day: **a wallet sign-in never links.** Opening
+`/patient/wallet` signed out leads to `/auth/signin`, whose **Sign in with
+d-you** looks like the way to connect a wallet. It signs in, finds no account
+for the PID and offers to create one, which would take the PID away from the
+existing account. Link only from a password session. The pages do not yet say
+so (#708).
+
 ## Not done yet
 
 DPoP-bound tokens, writing a scanned report into the record (phase 3), and
