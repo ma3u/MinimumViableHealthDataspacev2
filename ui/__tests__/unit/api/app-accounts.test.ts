@@ -234,6 +234,20 @@ describe("DELETE /api/patient/app/account", () => {
     });
   });
 
+  it("takes the person's research consents along, and leaves the programmes", async () => {
+    requireAppToken.mockResolvedValue({
+      app: { username: "kb-ab3dk7mn", roles: ["PATIENT"], deviceId: DEVICE },
+    });
+    fakeKeycloak();
+    mockRunQuery.mockResolvedValue([]);
+    expect((await remove()).status).toBe(200);
+    const query = String(mockRunQuery.mock.calls[0][0]);
+    expect(query).toMatch(/PatientConsent \{patientId: \$patientId\}/);
+    expect(query).toMatch(/FOREACH \(n IN consents \| DETACH DELETE n\)/);
+    // The study a consent was given to is shared: never deleted here.
+    expect(query).not.toMatch(/DataProduct/);
+  });
+
   it("takes the wallet link with the login: the PID opens nothing afterwards (ADR-067)", async () => {
     const fp = `k1:${"c".repeat(64)}`;
     const kc = keycloakWithUsers([
