@@ -1257,7 +1257,7 @@ struct ContentView: View {
       )
       .ignoresSafeArea()
     }
-    .modifier(AppSheets(model: model))
+    .modifier(AppSheets(model: model, connection: connection))
     .modifier(ReportActions(model: model, path: $path, scanning: $scanning))
     .modifier(ConnectSheet(model: model, connection: connection))
     // My values into my record (#473 phase 3): whenever the reports change,
@@ -1545,6 +1545,7 @@ private struct ConnectSheet: ViewModifier {
 
 private struct AppSheets: ViewModifier {
   @ObservedObject var model: AppModel
+  @ObservedObject var connection: EHDSConnection
 
   func body(content: Content) -> some View {
     content
@@ -1605,7 +1606,7 @@ private struct AppSheets: ViewModifier {
         model.sharingDiagnostics = nil
       }
     }
-      .modifier(AppDialogs(model: model))
+      .modifier(AppDialogs(model: model, connection: connection))
   }
 }
 
@@ -1616,6 +1617,43 @@ private struct AppSheets: ViewModifier {
 /// inline `Binding`, is past what the type checker will infer.
 private struct AppDialogs: ViewModifier {
   @ObservedObject var model: AppModel
+  /// For "Delete all my data": the account the app created goes with it.
+  @ObservedObject var connection: EHDSConnection
+
+  /// Article 17 everywhere the app put your data (2026-10-29): the account
+  /// the app created on the hub first, with its record, every value sent to
+  /// it and its consents, then everything on this phone. When the hub cannot
+  /// be reached the phone is still cleared, and the account's password is
+  /// kept so its deletion can be tried again; it says which happened.
+  /// The deletion says where it reaches: the hub too, when the app made an
+  /// account there.
+  private var eraseMessage: Text {
+    if let account = connection.account, account.createdByApp {
+      return Text(
+        "Every report, every scanned page and your profile will be removed from this phone, along with the key that opens them. Your EHDS account \(account.username) is deleted on the hub as well: your record, every value sent to it and your research consents. This cannot be undone. Export your data first if you want to keep a copy."
+      )
+    }
+    return Text(
+      "Every report, every scanned page and your profile will be removed from this phone, along with the key that opens them. They are stored nowhere else, so this cannot be undone. Export your data first if you want to keep a copy."
+    )
+  }
+
+  private func eraseEverywhere() async {
+    let hub = await connection.deleteAccount()
+    await model.eraseEverything()
+    switch hub {
+    case .none:
+      break
+    case .deleted(let username):
+      model.notice = String(
+        localized:
+          "Deleted on this phone and on the hub: the account \(username), its record and every value sent to it.")
+    case .failed(let username, let reason):
+      model.notice = String(
+        localized:
+          "Deleted on this phone. The account \(username) on the hub could not be deleted; its password stays on this phone, so you can delete it under My EHDS record once the hub can be reached. Reason: \(reason)")
+    }
+  }
 
   func body(content: Content) -> some View {
     content
@@ -1728,13 +1766,11 @@ private struct AppDialogs: ViewModifier {
         "Delete all your data?", isPresented: $model.erasing
       ) {
         Button("Delete everything", role: .destructive) {
-          Task { await model.eraseEverything() }
+          Task { await eraseEverywhere() }
         }
         Button("Cancel", role: .cancel) {}
       } message: {
-        Text(
-          "Every report, every scanned page and your profile will be removed from this phone, along with the key that opens them. They are stored nowhere else, so this cannot be undone. Export your data first if you want to keep a copy."
-        )
+        eraseMessage
       }
       // Alerts rather than confirmation dialogs, for the reason given above:
       // raised from a menu, a dialog drops its Cancel button.

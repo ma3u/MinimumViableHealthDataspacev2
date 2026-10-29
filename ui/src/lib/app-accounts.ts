@@ -215,9 +215,11 @@ export async function createPidSandboxRecord(username: string): Promise<void> {
 
 /**
  * Deletes what a sandbox login owns on the hub: its record with its own
- * Observations, and its phones. Only Observations go with the record: a
- * relationship to anything shared, a research programme it consented to, is
- * detached, never followed into a delete.
+ * Observations, its research consents, and its phones. A consent is the
+ * person's own node (PatientConsent, keyed by the record's id) and goes with
+ * them; the programme it was given to is shared and is only detached, never
+ * followed into a delete. Before 2026-10-29 the consents were left behind,
+ * orphaned, still naming the record.
  *
  * The attested key's record stays, without the login, so the key can never
  * create a second account.
@@ -231,6 +233,10 @@ export async function deleteSandboxRecord(username: string): Promise<void> {
      WITH collect(DISTINCT p) AS records, collect(DISTINCT o) AS observations
      FOREACH (n IN observations | DETACH DELETE n)
      FOREACH (n IN records | DETACH DELETE n)
+     WITH 1 AS done
+     OPTIONAL MATCH (c:PatientConsent {patientId: $patientId})
+     WITH collect(c) AS consents
+     FOREACH (n IN consents | DETACH DELETE n)
      WITH 1 AS done
      OPTIONAL MATCH (a:AppConnection {username: $username})
      WITH collect(a) AS phones

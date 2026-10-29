@@ -556,3 +556,8 @@
 "Research and support" = "Forschung und Support";
 "Correct" = "Korrigieren";
 "Help improve Klarbefund" = "Klarbefund verbessern";
+
+/* Delete all my data, on the phone and on the hub (2026-10-29). */
+"Every report, every scanned page and your profile will be removed from this phone, along with the key that opens them. Your EHDS account %@ is deleted on the hub as well: your record, every value sent to it and your research consents. This cannot be undone. Export your data first if you want to keep a copy." = "Jeder Befund, jede eingelesene Seite und Ihr Profil werden von diesem Telefon entfernt, zusammen mit dem Schlüssel, der sie öffnet. Ihr EHDS-Konto %@ wird auch auf dem Hub gelöscht: Ihre Akte, jeder dorthin gesendete Wert und Ihre Forschungseinwilligungen. Das lässt sich nicht rückgängig machen. Exportieren Sie Ihre Daten vorher, wenn Sie eine Kopie behalten möchten.";
+"Deleted on this phone and on the hub: the account %@, its record and every value sent to it." = "Auf diesem Telefon und auf dem Hub gelöscht: das Konto %@, seine Akte und jeder dorthin gesendete Wert.";
+"Deleted on this phone. The account %@ on the hub could not be deleted; its password stays on this phone, so you can delete it under My EHDS record once the hub can be reached. Reason: %@" = "Auf diesem Telefon gelöscht. Das Konto %1$@ auf dem Hub konnte nicht gelöscht werden; sein Passwort bleibt auf diesem Telefon, damit Sie es unter Meine EHDS-Akte löschen können, sobald der Hub erreichbar ist. Grund: %2$@";
