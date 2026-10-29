@@ -470,7 +470,6 @@
 "Don't save" = "Nicht speichern";
 "Save and delete the older copy" = "Speichern und ältere Kopie löschen";
 "Save anyway" = "Trotzdem speichern";
-"Find duplicate reports" = "Doppelte Befunde finden";
 "No duplicate reports found." = "Keine doppelten Befunde gefunden.";
 "Duplicate report" = "Doppelter Befund";
 "Keep both" = "Beide behalten";
@@ -541,3 +540,19 @@
 "Unlock" = "Entsperren";
 "Unlock your results" = "Ergebnisse entsperren";
 "Not now" = "Jetzt nicht";
+
+/* The list's shortcuts and the grouped menus (2026-10-29). */
+"Reports" = "Befunde";
+"How your values moved over time" = "Wie sich Ihre Werte entwickelt haben";
+"Not connected" = "Nicht verbunden";
+"Signed out. Open to sign in again." = "Abgemeldet. Öffnen, um sich erneut anzumelden.";
+"Connected as %@, sending on" = "Verbunden als %@, Senden ist an";
+"Connected as %@" = "Verbunden als %@";
+"Possible duplicates" = "Mögliche Doppelungen";
+"Some reports look like the same one. Review them." = "Einige Befunde sehen gleich aus. Bitte prüfen.";
+"About you" = "Über Sie";
+"Privacy and sharing" = "Datenschutz und Weitergabe";
+"Your data" = "Ihre Daten";
+"Research and support" = "Forschung und Support";
+"Correct" = "Korrigieren";
+"Help improve Klarbefund" = "Klarbefund verbessern";

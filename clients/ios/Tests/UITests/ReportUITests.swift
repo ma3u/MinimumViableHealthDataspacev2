@@ -155,8 +155,8 @@ final class DevDatasetUITests: XCTestCase {
   func testFindDuplicateReportsOffersTheRedundantOneAndDeletesIt() {
     let app = launch()
     AppDriver.require(app.staticTexts["Lipidprofil, Seite 1"], "the rescanned first page")
-    app.buttons["More"].firstMatch.tap()
-    AppDriver.require(app.buttons["Find duplicate reports"], "the menu entry").tap()
+    // The list offers the review itself once two reports look the same.
+    AppDriver.require(app.buttons["home-duplicates"], "the duplicates row").tap()
     let alert = app.alerts["Duplicate report"]
     AppDriver.require(alert, "the duplicate is reported")
     XCTAssertTrue(
