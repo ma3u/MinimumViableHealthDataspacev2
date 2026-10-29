@@ -75,6 +75,12 @@ function settings() {
     registrationCertificate: env.EUDI_REGISTRATION_CERTIFICATE || undefined,
     /** An intended use configured at the verifier; TEST-01 is the hosted verifier's public one. */
     intendedUseId: env.EUDI_INTENDED_USE_ID || "TEST-01",
+    /**
+     * Ask for the birth date as well, for the secure hash of ADR-067. Only a
+     * deployment whose registration certificate names it sets this: a relying
+     * party may not ask beyond its registration (eIDAS Art. 5b(3)).
+     */
+    birthDate: env.EUDI_PID_BIRTHDATE === "true",
   };
 }
 
@@ -101,15 +107,22 @@ async function safeText(res: Response): Promise<string> {
 }
 
 /**
- * The DCQL query: the PID as SD-JWT VC or as mdoc, and of it only the name,
- * which binds the wallet to a record. Nothing else: no birth date (#475,
- * 2026-10-07), and no age, which the hub does not use and which neither the
- * reference verifier's registration (`TEST-01`) nor ours declares; a wallet
- * refuses a request that asks for more than the registration certificate
- * declares (over-asking, ETSI TS 119 472-2). Nothing of it is shown: a
+ * The DCQL query: the PID as SD-JWT VC or as mdoc, and of it the name, which
+ * binds the wallet to a record, and, where the deployment's registration
+ * certificate names it (`EUDI_PID_BIRTHDATE=true`), the birth date, which
+ * goes into the secure hash of ADR-067 and nowhere else. Nothing more: no
+ * age, which the hub does not use and which neither the reference verifier's
+ * registration (`TEST-01`) nor ours declares; a wallet refuses a request that
+ * asks for more than the registration certificate declares (over-asking,
+ * ETSI TS 119 472-2; eIDAS Art. 5b(3)). Nothing of it is shown or stored: a
  * patient session sees the record's pseudonym.
  */
-function pidQuery(doctype: string, vct: string[], formats: string[]) {
+function pidQuery(
+  doctype: string,
+  vct: string[],
+  formats: string[],
+  birthDate: boolean,
+) {
   const sdJwt = formats.includes("dc+sd-jwt");
   const mdoc = formats.includes("mso_mdoc") || !sdJwt;
   const credentials = [
@@ -117,7 +130,11 @@ function pidQuery(doctype: string, vct: string[], formats: string[]) {
       id: PID_SD_JWT_QUERY,
       format: "dc+sd-jwt",
       meta: { vct_values: vct },
-      claims: [{ path: ["family_name"] }, { path: ["given_name"] }],
+      claims: [
+        { path: ["family_name"] },
+        { path: ["given_name"] },
+        ...(birthDate ? [{ path: ["birthdate"] }] : []),
+      ],
     },
     {
       id: PID_MDOC_QUERY,
@@ -126,6 +143,7 @@ function pidQuery(doctype: string, vct: string[], formats: string[]) {
       claims: [
         { path: [doctype, "family_name"] },
         { path: [doctype, "given_name"] },
+        ...(birthDate ? [{ path: [doctype, "birth_date"] }] : []),
       ],
     },
   ].filter((c) => (c.format === "dc+sd-jwt" ? sdJwt : mdoc));
@@ -149,7 +167,7 @@ export async function startPresentation(
 ): Promise<StartedPresentation> {
   const s = settings();
   const body = {
-    dcql_query: pidQuery(s.doctype, s.vct, s.formats),
+    dcql_query: pidQuery(s.doctype, s.vct, s.formats, s.birthDate),
     nonce,
     response_mode: s.responseMode,
     jar_mode: "by_reference",

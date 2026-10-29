@@ -9,8 +9,11 @@ import {
   Activity,
   Shield,
   User,
+  Wallet,
 } from "lucide-react";
+import Link from "next/link";
 import PageIntro from "@/components/PageIntro";
+import { isSandboxUsername } from "@/lib/sandbox-account";
 import ConnectAppCard from "@/components/ConnectAppCard";
 import HealthInterests from "@/components/HealthInterests";
 import { useSession } from "next-auth/react";
@@ -71,6 +74,9 @@ export default function PatientProfilePage() {
   const { data: session } = useSession();
   const roles = (session as { roles?: string[] } | null)?.roles ?? [];
   const canEditInterests = roles.includes("PATIENT");
+  const username =
+    (session?.user as { preferredUsername?: string } | undefined)
+      ?.preferredUsername ?? "";
 
   useEffect(() => {
     fetchApi("/api/patient/profile")
@@ -109,6 +115,23 @@ export default function PatientProfilePage() {
 
         {/* The Klarbefund app reads this record once connected (#473). */}
         <ConnectAppCard />
+
+        {/* A sandbox account can sign in with the EUDI wallet (ADR-067). */}
+        {isSandboxUsername(username) && (
+          <Link
+            href="/patient/wallet"
+            data-testid="connect-wallet-link"
+            className="mb-6 flex items-center gap-2 rounded-lg border border-(--border) bg-(--surface) p-4 text-sm hover:bg-(--surface-2)"
+          >
+            <Wallet size={18} className="text-(--accent)" aria-hidden />
+            <span>
+              <strong>Connect your EUDI wallet</strong>
+              <span className="block text-xs text-(--text-secondary)">
+                Sign in to this account with your PID, at assurance level high.
+              </span>
+            </span>
+          </Link>
+        )}
 
         {/* GDPR rights banner */}
         <div className="mb-6 rounded-lg border border-(--border) bg-(--surface-2) p-3 flex items-start gap-2">

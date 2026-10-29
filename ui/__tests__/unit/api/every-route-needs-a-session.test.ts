@@ -29,6 +29,8 @@ const ANONYMOUS: Record<string, string> = {
   "auth/[...nextauth]": "the NextAuth handler: signing in itself",
   "auth/eudi/start": "starts an EUDI wallet sign-in, before any session",
   "auth/eudi/status": "polled by the QR page until the wallet sign-in lands",
+  "auth/eudi/register":
+    "creates an account from a verified PID during the wallet sign-in, only for a sid refused with canRegister (ADR-067)",
   "keycloak-config": "tells the sign-in banner where Keycloak is",
   health: "the liveness and readiness probe (k8s/probes.yaml)",
   "app-accounts/challenge":

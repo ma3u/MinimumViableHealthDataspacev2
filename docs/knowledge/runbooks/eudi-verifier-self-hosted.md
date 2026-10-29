@@ -117,6 +117,54 @@ name. Switched on 2026-10-28 (#708).
 Then run the #708 test plan with d-you. Switching back is the first variable
 set to `https://verifier-backend.eudiw.dev` and the second to `TEST-01`.
 
+## A PID on an account of its own (ADR-067)
+
+[ADR-067](../../ADRs/ADR-067-a-pid-links-to-an-account-by-a-keyed-fingerprint.md):
+a PID links to a sandbox account (`kb-…`, ADR-054) by a secure hash,
+`HMAC-SHA256(key, given name | family name | birth date)`, kept as the
+Keycloak user attribute `pid_fingerprint`. The hub stores neither the name
+nor the birth date; they live in memory while the status route computes the
+hash. The two demo personas keep their name match (ADR-065).
+
+Three flows:
+
+| Flow     | Where                                                                    | What happens                                                                                                                                                                                                                                                               |
+| -------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Link     | `/patient/wallet`, signed in to a `kb-` account                          | `POST /api/auth/eudi/start` with `{ "purpose": "link" }`; on the PID the status route writes the hash to the account and answers `{ status: "linked" }`, or 409 when another account holds it. "Disconnect wallet" is `DELETE /api/patient/wallet-link`.                   |
+| Sign in  | `/auth/eudi-qr`                                                          | The status route looks the hash up in Keycloak and signs in to the account that holds it, at assurance high.                                                                                                                                                               |
+| Register | `/auth/eudi-qr`, after "No record ... belongs to the PID" with the offer | `POST /api/auth/eudi/register` with `{ sid }` (no session, part of signing in) creates a `kb-` account with the hash on it and an empty record, answers the password once, and the `sid` signs in to it. One account per hash; the same rate limit as `/api/app-accounts`. |
+
+Deleting an account (`DELETE /api/patient/app/account`) deletes the Keycloak
+user, and the hash with it.
+
+Configuration on `mvhd-ui`:
+
+| Variable                          | Value                                                   | Without it                                                                             |
+| --------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `PID_FINGERPRINT_KEY`             | Key Vault reference to `pid-fingerprint-key`, 256 bit   | No link: a PID signs in only a demo persona, as before                                 |
+| `PID_FINGERPRINT_KEY_ID`          | `k1`; a new key gets a new id                           | `k1`                                                                                   |
+| `EUDI_PID_BIRTHDATE`              | `true` once the registration certificate names the date | The DCQL query asks for the name only; with no birth date there is no hash and no link |
+| `KEYCLOAK_ACCOUNT_SERVICE_SECRET` | the `ehds-account-service` client secret (already set)  | No link and no account creation                                                        |
+
+Set `EUDI_PID_BIRTHDATE=true` only together with a registration certificate
+that names `birthdate`: a relying party may not ask for more than its
+registration (eIDAS Art. 5b(3)), and d-you refuses such a request.
+
+Once per environment:
+
+```bash
+# the key, in Key Vault only, and the reference on mvhd-ui (ADR-036)
+scripts/azure/wire-pid-fingerprint-key.sh --create   # operator, once; prints no secret
+scripts/azure/wire-pid-fingerprint-key.sh            # wire the reference
+# the attribute in the realm's user profile (admin-only, k<n>:<64 hex>)
+scripts/declare-pid-fingerprint-attribute.sh --azure
+KC_HOST=http://localhost:8080 KC_ADMIN_PASSWORD=… scripts/declare-pid-fingerprint-attribute.sh
+```
+
+The service account `ehds-account-service` needs `view-users` and
+`query-groups` on top of `manage-users`, to find a hash. Rotating the key
+breaks every link until the person links again.
+
 ## Still open
 
 - The deep-link scheme d-you answers (`openid4vp://`, `haip-vp://`):

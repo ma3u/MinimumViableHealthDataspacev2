@@ -1,0 +1,30 @@
+meta {
+  name: 20 My wallet link
+  type: http
+  seq: 20
+}
+
+get {
+  url: {{baseUrl}}/api/patient/wallet-link
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+tests {
+  // ADR-067: a PID links only to a sandbox account (kb-), which this stack
+  // has none of; the collection's patient is the demo persona patient1, who
+  // signs in with a wallet by name. So the answer is "not eligible", and the
+  // secure hash is never in it.
+  test("the demo patient is told it cannot link a wallet", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().eligible).to.equal(false);
+    expect(res.getBody().linked).to.equal(false);
+  });
+  test("the answer carries no hash", function () {
+    expect(JSON.stringify(res.getBody())).to.not.match(/k[0-9]+:[0-9a-f]{64}/);
+  });
+}

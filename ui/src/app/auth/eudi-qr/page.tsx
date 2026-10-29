@@ -2,33 +2,30 @@
 
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import {
   ShieldCheck,
   RefreshCw,
   CheckCircle2,
   AlertTriangle,
+  UserPlus,
+  KeyRound,
 } from "lucide-react";
 import { WalletFlow } from "@/components/wallet/PhoneFrame";
 import { REGISTER_STEPS, LOGIN_STEPS } from "@/components/wallet/flows";
 import { EudiApprovalFlow } from "@/components/wallet/EudiApprovalFlow";
+import { EudiQrPanel } from "@/components/wallet/EudiQrPanel";
 import { setDemoPersona } from "@/lib/use-demo-persona";
+import { useEudiPresentation } from "@/lib/use-eudi-presentation";
 import { CITIZEN_WALLET } from "@/lib/wallet-config";
 
-const POLL_MS = 2000;
-const TIMEOUT_MS = 5 * 60 * 1000;
-/** How long a wallet that opened the request may stay silent before we say so. */
-const SILENT_MS = 20 * 1000;
 const WALLET = CITIZEN_WALLET;
 
-type Phase =
-  | "loading"
-  | "scanning"
-  | "completed"
-  | "error"
-  | "refused"
-  | "expired"
-  | "unavailable";
+/** The account a PID created (ADR-067), shown once and then never again. */
+interface NewAccount {
+  username: string;
+  password: string;
+}
 
 function EudiQrContent() {
   // Read at render-time (not module load) so it is deterministic in tests and
@@ -39,103 +36,65 @@ function EudiQrContent() {
   const callbackUrl = searchParams.get("callbackUrl") || "/overview";
   const mode = searchParams.get("mode") === "login" ? "login" : "register";
 
-  const [phase, setPhase] = useState<Phase>(
-    IS_STATIC ? "unavailable" : "loading",
-  );
-  const [qr, setQr] = useState<string | null>(null);
-  const [walletLink, setWalletLink] = useState<string | null>(null);
   const [demoHint, setDemoHint] = useState<string | null>(null);
-  const [refusal, setRefusal] = useState<string | null>(null);
-  const [walletOpened, setWalletOpened] = useState(false);
-  const [walletSilent, setWalletSilent] = useState(false);
-  const openedAtRef = useRef<number>(0);
-  const sidRef = useRef<string | null>(null);
-  const startedAtRef = useRef<number>(0);
+  const [account, setAccount] = useState<NewAccount | null>(null);
+  const [registering, setRegistering] = useState(false);
+  const [registerError, setRegisterError] = useState<string | null>(null);
 
-  const start = useCallback(async () => {
-    if (IS_STATIC) {
-      setPhase("unavailable");
-      return;
-    }
-    setPhase("loading");
-    setQr(null);
-    setWalletLink(null);
-    setWalletOpened(false);
-    setWalletSilent(false);
-    openedAtRef.current = 0;
-    sidRef.current = null;
-    try {
-      const res = await fetch("/api/auth/eudi/start", { method: "POST" });
-      if (!res.ok) throw new Error("start failed");
-      const data = (await res.json()) as {
-        sid: string;
-        qrDataUri: string;
-        walletLink: string;
-      };
-      sidRef.current = data.sid;
-      setQr(data.qrDataUri);
-      setWalletLink(data.walletLink);
-      startedAtRef.current = Date.now();
-      setPhase("scanning");
-    } catch {
-      setPhase("error");
-    }
-  }, [IS_STATIC]);
+  const presentation = useEudiPresentation({
+    onDone: async (_answer, sid) => {
+      await signIn("eudi-wallet", { sid, callbackUrl });
+    },
+  });
+  const { phase, setPhase, start, refusal, sid } = presentation;
 
-  useEffect(() => {
-    start();
+  const restart = useCallback(() => {
+    setRegisterError(null);
+    void start();
   }, [start]);
 
-  // Poll the verifier (via our server) until the wallet completes the presentation.
   useEffect(() => {
-    if (phase !== "scanning") return;
-    let active = true;
-    const id = setInterval(async () => {
-      const sid = sidRef.current;
-      if (!sid) return;
-      if (Date.now() - startedAtRef.current > TIMEOUT_MS) {
-        if (active) setPhase("expired");
+    if (!IS_STATIC) void start();
+  }, [IS_STATIC, start]);
+
+  // ADR-067: a PID on no account may create one. The password is answered
+  // once; the page shows it until the person goes on, then signs in.
+  const register = useCallback(async () => {
+    if (!sid) return;
+    setRegistering(true);
+    setRegisterError(null);
+    try {
+      const res = await fetch("/api/auth/eudi/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sid }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        username?: string;
+        password?: string;
+        error?: string;
+        reason?: string;
+      };
+      if (!res.ok || !data.username || !data.password) {
+        setRegisterError(
+          data.reason ?? data.error ?? "The hub could not create the account.",
+        );
         return;
       }
-      try {
-        const res = await fetch(
-          `/api/auth/eudi/status?sid=${encodeURIComponent(sid)}`,
-        );
-        if (res.status === 404) {
-          if (active) setPhase("expired");
-          return;
-        }
-        const data = (await res.json()) as {
-          status: string;
-          error?: string;
-          walletOpened?: boolean;
-        };
-        // A PID that belongs to no record here, or a declined wallet (#708).
-        if (res.status === 403 && active) {
-          setRefusal(data.error ?? "The wallet could not sign you in.");
-          setPhase("refused");
-          return;
-        }
-        if (data.status === "completed" && active) {
-          setPhase("completed");
-          await signIn("eudi-wallet", { sid, callbackUrl });
-          return;
-        }
-        // The wallet fetched the request but has not answered (#708).
-        if (data.walletOpened && active) {
-          if (!openedAtRef.current) openedAtRef.current = Date.now();
-          setWalletOpened(true);
-          setWalletSilent(Date.now() - openedAtRef.current > SILENT_MS);
-        }
-      } catch {
-        /* transient — keep polling */
-      }
-    }, POLL_MS);
-    return () => {
-      active = false;
-      clearInterval(id);
-    };
-  }, [phase, callbackUrl]);
+      setAccount({ username: data.username, password: data.password });
+    } catch {
+      setRegisterError("The hub could not create the account.");
+    } finally {
+      setRegistering(false);
+    }
+  }, [sid]);
+
+  const continueSignedIn = useCallback(async () => {
+    if (!sid) return;
+    setAccount(null);
+    setPhase("done");
+    await signIn("eudi-wallet", { sid, callbackUrl });
+  }, [sid, callbackUrl, setPhase]);
 
   // The simulated phone next to the real QR. Approving it asks the server for a
   // demo transaction (allowed only where EUDI_DEMO_WALLET=true) and signs in as
@@ -154,12 +113,12 @@ function EudiQrContent() {
         return;
       }
       const data = (await res.json()) as { sid: string };
-      setPhase("completed");
+      setPhase("done");
       await signIn("eudi-wallet", { sid: data.sid, callbackUrl });
     } catch {
       setDemoHint(simulationOnly);
     }
-  }, [callbackUrl]);
+  }, [callbackUrl, setPhase]);
 
   const title = `${mode === "login" ? "Sign in" : "Register"} with ${
     WALLET.name
@@ -232,92 +191,126 @@ function EudiQrContent() {
             </span>
           </p>
 
-          {phase === "loading" && (
+          {(phase === "idle" || phase === "loading") && (
             <div className="py-10 text-(--text-secondary)">
               Preparing a secure request…
             </div>
           )}
 
-          {phase === "scanning" && qr && (
-            <>
-              <div className="bg-white rounded-lg p-4 inline-block mb-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={qr}
-                  alt={`${WALLET.name} OpenID4VP QR code`}
-                  width={256}
-                  height={256}
-                  className="block"
-                />
-              </div>
-              <div className="flex items-center justify-center gap-2 text-sm text-(--text-secondary) mb-3">
-                <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                {walletOpened
-                  ? "Your wallet opened the request…"
-                  : "Waiting for your wallet…"}
-              </div>
-              {walletSilent && (
-                <p
-                  role="status"
-                  className="text-xs text-amber-600 dark:text-amber-400 mb-3"
-                >
-                  Your wallet opened the request but has not answered. If it
-                  says this service may not verify your data, this hub is not
-                  registered with that wallet yet.
-                </p>
-              )}
-              {walletLink && (
-                <a
-                  href={walletLink}
-                  className="text-xs text-(--accent) underline break-all"
-                >
-                  On this phone? Tap to open {WALLET.name}
-                </a>
-              )}
-            </>
+          {phase === "scanning" && presentation.qr && (
+            <EudiQrPanel
+              qr={presentation.qr}
+              walletLink={presentation.walletLink}
+              walletOpened={presentation.walletOpened}
+              walletSilent={presentation.walletSilent}
+            />
           )}
 
-          {phase === "completed" && (
+          {phase === "done" && (
             <div className="py-8 flex flex-col items-center gap-2 text-green-600 dark:text-green-400">
               <CheckCircle2 size={40} />
               <p className="font-medium">Verified — signing you in…</p>
             </div>
           )}
 
-          {(phase === "error" ||
-            phase === "expired" ||
-            phase === "refused") && (
-            <div className="py-6">
-              <AlertTriangle
-                size={36}
-                className="mx-auto mb-2 text-amber-500"
-              />
-              <p className="text-sm text-(--text-secondary) mb-4">
-                {phase === "expired"
-                  ? "This sign-in request expired."
-                  : phase === "refused"
-                    ? refusal
-                    : "Could not reach the EUDI verifier."}
+          {account && (
+            <div
+              className="py-4 text-left"
+              role="region"
+              aria-label="Your new account"
+            >
+              <div className="flex items-center gap-2 mb-2 text-green-600 dark:text-green-400">
+                <KeyRound size={20} />
+                <p className="font-medium">Your account is ready</p>
+              </div>
+              <p className="text-sm text-(--text-secondary) mb-3">
+                Keep this username and password somewhere safe. The hub shows
+                the password only now and cannot show it again. Next time you
+                can sign in with {WALLET.name} or with these.
               </p>
+              <dl className="text-sm mb-4 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+                <dt className="text-(--text-secondary)">Username</dt>
+                <dd
+                  className="font-mono text-(--text-primary) break-all"
+                  data-testid="new-account-username"
+                >
+                  {account.username}
+                </dd>
+                <dt className="text-(--text-secondary)">Password</dt>
+                <dd
+                  className="font-mono text-(--text-primary) break-all"
+                  data-testid="new-account-password"
+                >
+                  {account.password}
+                </dd>
+              </dl>
               <button
-                onClick={start}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-(--accent) hover:bg-(--accent-hover) text-white dark:text-gray-900 rounded-lg font-medium transition-colors"
+                onClick={continueSignedIn}
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-(--accent) hover:bg-(--accent-hover) text-white dark:text-gray-900 rounded-lg font-medium transition-colors"
               >
-                <RefreshCw size={16} /> Try again
+                I have saved them, sign me in
               </button>
             </div>
           )}
 
-          {phase === "unavailable" && (
-            <div className="py-8 text-sm text-(--text-secondary)">
-              Wallet sign-in is only available on the live deployment, not in
-              the static demo. Use the demo personas on the{" "}
-              <a href="/auth/signin" className="text-(--accent) underline">
-                sign-in page
-              </a>{" "}
-              instead.
-            </div>
-          )}
+          {!account &&
+            (phase === "error" ||
+              phase === "expired" ||
+              phase === "refused") && (
+              <div className="py-6">
+                <AlertTriangle
+                  size={36}
+                  className="mx-auto mb-2 text-amber-500"
+                />
+                <p className="text-sm text-(--text-secondary) mb-4">
+                  {phase === "expired"
+                    ? "This sign-in request expired."
+                    : phase === "refused"
+                      ? refusal?.error
+                      : "Could not reach the EUDI verifier."}
+                </p>
+                {phase === "refused" && refusal?.canRegister && (
+                  <div className="mb-4">
+                    <p className="text-xs text-(--text-secondary) mb-3">
+                      You can create a sandbox account with this PID. The hub
+                      keeps only a secure hash of your name and birth date on
+                      it, never the name or the date (
+                      <a
+                        href="/hub/privacy.html"
+                        className="text-(--accent) underline"
+                      >
+                        privacy notice
+                      </a>
+                      ).
+                    </p>
+                    <button
+                      onClick={register}
+                      disabled={registering}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-(--accent) hover:bg-(--accent-hover) text-white dark:text-gray-900 rounded-lg font-medium transition-colors disabled:opacity-60"
+                    >
+                      <UserPlus size={16} />
+                      {registering
+                        ? "Creating your account…"
+                        : "Create an account with this PID"}
+                    </button>
+                    {registerError && (
+                      <p
+                        role="alert"
+                        className="text-xs text-amber-600 dark:text-amber-400 mt-2"
+                      >
+                        {registerError}
+                      </p>
+                    )}
+                  </div>
+                )}
+                <button
+                  onClick={restart}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-(--accent) hover:bg-(--accent-hover) text-white dark:text-gray-900 rounded-lg font-medium transition-colors"
+                >
+                  <RefreshCw size={16} /> Try again
+                </button>
+              </div>
+            )}
         </div>
 
         <div className="flex flex-col items-center gap-2 shrink-0">

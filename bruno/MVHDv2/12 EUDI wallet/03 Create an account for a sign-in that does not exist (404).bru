@@ -1,0 +1,32 @@
+meta {
+  name: 03 Create an account for a sign-in that does not exist (404)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/auth/eudi/register
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}=not-a-session
+}
+
+body:json {
+  {"sid": "does-not-exist"}
+}
+
+tests {
+  // ADR-067: a PID creates an account only through a sign-in the status route
+  // refused with canRegister. A sid the hub never issued creates nothing. A
+  // real registration needs a wallet presenting a PID, which no stack here has.
+  test("an unknown sign-in creates no account", function () {
+    expect(res.getStatus()).to.equal(404);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody().error).to.match(/unknown or expired/);
+  });
+}

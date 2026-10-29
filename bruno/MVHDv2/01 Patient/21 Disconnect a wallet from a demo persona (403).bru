@@ -1,0 +1,28 @@
+meta {
+  name: 21 Disconnect a wallet from a demo persona (403)
+  type: http
+  seq: 21
+}
+
+delete {
+  url: {{baseUrl}}/api/patient/wallet-link
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+tests {
+  // ADR-067 decision 7: disconnecting removes the link from the patient's own
+  // sandbox account. patient1 is a demo persona and carries no link, so the
+  // hub refuses rather than asking Keycloak. Disconnecting a real link needs a
+  // kb- account linked to a wallet's PID, which no stack here has.
+  test("a demo persona has nothing to disconnect", function () {
+    expect(res.getStatus()).to.equal(403);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody().error).to.equal("Forbidden");
+  });
+}

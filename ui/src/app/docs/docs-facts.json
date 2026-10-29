@@ -62,6 +62,10 @@
       "methods": ["GET", "POST"]
     },
     {
+      "path": "/api/auth/eudi/register",
+      "methods": ["POST"]
+    },
+    {
       "path": "/api/auth/eudi/start",
       "methods": ["POST"]
     },
@@ -298,6 +302,10 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/patient/wallet-link",
+      "methods": ["GET", "DELETE"]
+    },
+    {
       "path": "/api/permits",
       "methods": ["GET"]
     },
@@ -372,6 +380,7 @@
     "/patient/profile",
     "/patient/query",
     "/patient/research",
+    "/patient/wallet",
     "/permits",
     "/query",
     "/requests",
@@ -1167,8 +1176,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 50,
-    "operations": 66
+    "paths": 52,
+    "operations": 69
   },
   "workflowJobs": {
     "test.yml": [
@@ -1223,8 +1232,8 @@
     "/docs/user-guide": "2026-10-28",
     "/docs/developer": "2026-10-28",
     "/docs/developer/quality-gates": "2026-10-28",
-    "/docs/developer/api": "2026-10-27",
-    "/docs/developer/reference": "2026-10-27",
+    "/docs/developer/api": "2026-10-28",
+    "/docs/developer/reference": "2026-10-28",
     "/docs/architecture": "2026-10-28",
     "/docs/security": "2026-10-27",
     "/docs/security/[slug]": "2026-10-27",

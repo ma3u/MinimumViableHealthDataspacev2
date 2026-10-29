@@ -70,9 +70,11 @@ const eudiWalletProvider = CredentialsProvider({
     const sid = credentials?.sid;
     if (!sid) return null;
     const tx = getTransaction(sid);
+    // A link presentation (ADR-067) changes an account; it never signs in.
     if (
       !tx ||
       tx.status !== "completed" ||
+      tx.purpose === "link" ||
       tx.consumed ||
       !tx.verifiedPatient
     ) {

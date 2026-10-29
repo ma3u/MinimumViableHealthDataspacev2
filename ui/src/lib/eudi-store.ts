@@ -31,8 +31,26 @@ export interface EudiVerifiedPatient {
   assurance: AssuranceLevel;
 }
 
+/**
+ * What a presentation is for (ADR-067): to sign in, or to link the PID to the
+ * signed-in sandbox account.
+ */
+export type EudiPurpose = "signin" | "link";
+
 export interface EudiTransaction {
   sid: string;
+  /** "signin" unless the start route was asked to link */
+  purpose: EudiPurpose;
+  /** the signed-in account a link is for; set only when purpose is "link" */
+  linkUsername?: string;
+  /**
+   * The PID's secure hash (ADR-067), kept only for the register step after a
+   * sign-in found no account, and dropped with the transaction. Never a name
+   * or a birth date: those are not stored anywhere.
+   */
+  fingerprint?: string;
+  /** true when a sign-in found no account and the PID may create one */
+  canRegister?: boolean;
   /** verifier-side transaction / presentation id */
   transactionId: string;
   /** anti-replay nonce echoed by the wallet's presentation */
@@ -78,13 +96,14 @@ export function newNonce(): string {
 }
 
 export function putTransaction(
-  tx: Omit<EudiTransaction, "status" | "createdAt"> &
-    Partial<Pick<EudiTransaction, "status" | "createdAt">>,
+  tx: Omit<EudiTransaction, "status" | "createdAt" | "purpose"> &
+    Partial<Pick<EudiTransaction, "status" | "createdAt" | "purpose">>,
 ): EudiTransaction {
   sweep();
   const full: EudiTransaction = {
     status: "pending",
     createdAt: Date.now(),
+    purpose: "signin",
     ...tx,
   };
   store.set(full.sid, full);

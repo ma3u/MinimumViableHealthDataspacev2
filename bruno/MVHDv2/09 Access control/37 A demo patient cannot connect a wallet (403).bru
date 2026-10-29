@@ -1,0 +1,33 @@
+meta {
+  name: 37 A demo patient cannot connect a wallet (403)
+  type: http
+  seq: 37
+}
+
+post {
+  url: {{baseUrl}}/api/auth/eudi/start
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenPatient}}
+}
+
+body:json {
+  {"purpose": "link"}
+}
+
+tests {
+  // ADR-067: a PID links only to a sandbox account (kb-). patient1 is a demo
+  // persona, opened by the name on a test PID, so a link is refused before
+  // the verifier is asked. (On a deployment with PATIENT_MIN_ASSURANCE the
+  // password session is refused for its level instead: a 403 either way.)
+  test("a demo persona is refused", function () {
+    expect(res.getStatus()).to.equal(403);
+  });
+  test("the refusal says so in the body", function () {
+    expect(res.getBody().error).to.be.a("string").and.not.be.empty;
+  });
+}

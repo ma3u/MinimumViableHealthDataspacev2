@@ -20,16 +20,9 @@ import {
   registerConnection,
 } from "@/lib/app-connections";
 import { ehdsOrigin } from "@/lib/app-pairing";
-import { createRateLimiter } from "@/lib/rate-limit";
+import { accountLimiter, clientAddress } from "@/lib/account-rate-limit";
 
 export const dynamic = "force-dynamic";
-
-/** Behind the attestation, a second line: per address and in all, per hour. */
-const limiter = createRateLimiter({
-  windowMs: 60 * 60_000,
-  perKey: 5,
-  inTotal: 100,
-});
 
 const keycloakPublicUrl =
   process.env.KEYCLOAK_PUBLIC_URL ?? "http://localhost:8080/realms/edcv";
@@ -94,8 +87,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const address = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  if (!limiter.allow(address || "unknown")) {
+  // Behind the attestation, a second line: per address and in all, per hour.
+  if (!accountLimiter.allow(clientAddress(request))) {
     return NextResponse.json(
       { error: "Too many accounts, try again later" },
       { status: 429 },

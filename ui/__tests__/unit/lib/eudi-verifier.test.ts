@@ -140,6 +140,58 @@ describe("startPresentation", () => {
     ]);
   });
 
+  describe("the birth date, only where the registration names it (ADR-067, eIDAS Art. 5b(3))", () => {
+    async function claimsAsked(): Promise<string[][]> {
+      const fetchMock = vi.fn(async () =>
+        okJson({ transaction_id: "t", request_uri: "https://v/r" }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+      await startPresentation("n");
+      const body = JSON.parse(
+        (fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1]
+          .body as string,
+      );
+      return body.dcql_query.credentials.map(
+        (c: { claims: { path: string[] }[] }) =>
+          c.claims.map((cl) => cl.path.join("/")),
+      );
+    }
+
+    it("asks for the name only without EUDI_PID_BIRTHDATE", async () => {
+      vi.stubEnv("EUDI_PID_BIRTHDATE", "");
+      expect(await claimsAsked()).toEqual([
+        ["family_name", "given_name"],
+        [
+          "eu.europa.ec.eudi.pid.1/family_name",
+          "eu.europa.ec.eudi.pid.1/given_name",
+        ],
+      ]);
+      vi.stubEnv("EUDI_PID_BIRTHDATE", "yes");
+      expect(JSON.stringify(await claimsAsked())).not.toMatch(/birth/);
+    });
+
+    it("asks for birthdate (SD-JWT) and birth_date (mdoc) with EUDI_PID_BIRTHDATE=true", async () => {
+      vi.stubEnv("EUDI_PID_BIRTHDATE", "true");
+      expect(await claimsAsked()).toEqual([
+        ["family_name", "given_name", "birthdate"],
+        [
+          "eu.europa.ec.eudi.pid.1/family_name",
+          "eu.europa.ec.eudi.pid.1/given_name",
+          "eu.europa.ec.eudi.pid.1/birth_date",
+        ],
+      ]);
+    });
+
+    it("asks for the German PID's birthdate as SD-JWT VC only, as d-you's certificate covers", async () => {
+      vi.stubEnv("EUDI_PID_BIRTHDATE", "true");
+      vi.stubEnv("EUDI_PID_FORMATS", "dc+sd-jwt");
+      vi.stubEnv("EUDI_PID_VCT", "urn:eudi:pid:de:1");
+      expect(await claimsAsked()).toEqual([
+        ["family_name", "given_name", "birthdate"],
+      ]);
+    });
+  });
+
   it("falls back to mdoc rather than an empty request when no format is valid", async () => {
     vi.stubEnv("EUDI_PID_FORMATS", "jwt_vc");
     const fetchMock = vi.fn(async () =>
