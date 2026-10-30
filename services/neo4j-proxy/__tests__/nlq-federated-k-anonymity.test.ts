@@ -115,6 +115,39 @@ describe("POST /nlq with federated: true", () => {
   });
 });
 
+describe("a question about the SPEs themselves", () => {
+  it("asks every SPE, without the Federated button", async () => {
+    mockRun.mockResolvedValue(fakeResult([{ patients: 216 }]));
+
+    const res = await request
+      .post("/nlq")
+      .send({ question: "How many SPE you have access?" });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      method: "template",
+      templateName: "spe_access",
+      federated: true,
+    });
+    expect(res.body.results.map((r: { _source: string }) => r._source)).toEqual(
+      ["SPE-1", "SPE-2"],
+    );
+  });
+
+  it("does not search the conditions for a pronoun", async () => {
+    // "you~" matched "Gout": the SPE question was answered with gout and
+    // diabetes patients (2026-10-30).
+    const { fulltextSearch } = await import("../src/nlq/engine.js");
+    mockRun.mockResolvedValue(fakeResult([]));
+
+    await fulltextSearch("Did you see abscess?");
+
+    const term = mockRun.mock.calls[0][1].term as string;
+    expect(term).not.toMatch(/you/);
+    expect(term).toBe("see* abscess* abscess~1");
+  });
+});
+
 describe("the k-anonymity rules", () => {
   it("takes the share computed from a masked count with it", () => {
     const { rows, filtered } = suppressSmallCells(

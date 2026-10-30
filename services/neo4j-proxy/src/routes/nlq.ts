@@ -83,7 +83,8 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
   let method: "template" | "fulltext" | "graphrag" | "llm" | "none" = "none";
 
   try {
-    const { question, federated = false, odrlScope } = req.body;
+    const { question, odrlScope } = req.body;
+    let federated: boolean = req.body.federated === true;
 
     if (!question || typeof question !== "string") {
       res.status(400).json({ error: "Missing 'question' in request body" });
@@ -116,6 +117,7 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       templateName = templateMatch.template.name;
       graphLayers = templateMatch.template.graphLayers;
       cypherSections = templateMatch.template.cypherSections;
+      if (templateMatch.template.everySpe) federated = true;
     }
 
     // Step 1b: Pharmacovigilance template needs glossary-resolved params
@@ -325,6 +327,8 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
           }
         }),
       );
+      // In SPE order, not in the order they answered.
+      contributions.sort((a, b) => a.source.localeCompare(b.source));
       // What leaves the SPEs is k-anonymous, as on /federated/query.
       kOutcome = anonymiseFederatedAnswer(
         cypher,
