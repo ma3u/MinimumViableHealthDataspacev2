@@ -278,7 +278,7 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [048](ADRs/ADR-048-testflight-request-mailed-without-a-session.md)                            | The TestFlight request is mailed by the hub, without a session                                                       | 2026-10-03 | Superseded by 050 |
 | [049](ADRs/ADR-049-klarbefund-connects-by-device-grant.md)                                    | Klarbefund connects to a patient's record by a device grant the website starts                                       | 2026-10-03 | Accepted          |
 | [050](ADRs/ADR-050-klarbefund-beta-by-public-testflight-link.md)                              | The Klarbefund beta is joined by a public TestFlight link                                                            | 2026-10-03 | Accepted          |
-| [052](ADRs/ADR-052-confidential-spe-on-azure-revisited.md)                                    | The confidential secure processing environment, revisited against Azure and the vendors of 2026                      | 2026-10-04 | Accepted          |
+| [052](ADRs/ADR-052-confidential-spe-on-azure-revisited.md)                                    | The confidential secure processing environment, revisited against Azure and the vendors of 2026                      | 2026-10-04 | Superseded by 068 |
 | [053](ADRs/ADR-053-everything-stops-off-hours.md)                                             | Everything stops off hours, and the UI says so                                                                       | 2026-10-04 | Accepted          |
 | [054](ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md)                   | Klarbefund creates a sandbox account on the hub, gated by App Attest                                                 | 2026-10-04 | Accepted          |
 | [055](ADRs/ADR-055-azure-runs-the-compose-jad-build.md)                                       | Azure runs the same JAD build as compose and CI                                                                      | 2026-10-04 | Accepted          |
@@ -294,8 +294,9 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [065](ADRs/ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md)                          | The EUDI Wallet sign-in identifies the person: HAIP, both PID formats, one record per PID                            | 2026-10-27 | Accepted          |
 | [066](ADRs/ADR-066-the-hub-runs-its-own-eudi-verifier-behind-a-wallet-only-gate.md)           | The hub runs its own EUDI verifier, behind a gate that passes the wallet API only                                    | 2026-10-28 | Proposed          |
 | [067](ADRs/ADR-067-a-pid-links-to-an-account-by-a-keyed-fingerprint.md)                       | A PID links to an account by a keyed fingerprint; the hub stores neither name nor birth date                         | 2026-10-28 | Accepted          |
+| [068](ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md)    | A sovereign confidential SPE: Confidential Containers and a Trustee the access body runs, Neo4j loaded per permit    | 2026-10-30 | Accepted          |
 
-Numbers taken by open work, so a new ADR starts at **066**: 051 (#475). 050
+Numbers taken by open work, so a new ADR starts at **069**: 051 (#475). 050
 (#477), 054 (#520) and 055 (#517) are merged.
 
 ADR-045 to ADR-049 accepted on 2026-10-04.
