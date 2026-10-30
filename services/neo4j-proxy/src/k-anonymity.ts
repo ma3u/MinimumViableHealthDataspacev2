@@ -12,8 +12,9 @@
  *   percentage in the same row goes too, or it would give the count back.
  *
  * `/federated/query` applies the first rule to the Cypher a caller sends;
- * `/nlq` with `federated: true` applies whichever fits the answer. Only an
- * answer about persons is filtered: a count of datasets identifies nobody.
+ * `/nlq` applies whichever fits the answer, from one SPE as from several.
+ * Only an answer about persons is filtered: a count of datasets identifies
+ * nobody.
  */
 
 type Row = Record<string, any>;
@@ -127,8 +128,8 @@ export function suppressSmallCells(rows: Row[], k: number): KOutcome {
   };
 }
 
-/** The rule that fits a federated NLQ answer, or none if it is not about persons. */
-export function anonymiseFederatedAnswer(
+/** The rule that fits an NLQ answer, or none if it is not about persons. */
+export function anonymiseAnswer(
   cypher: string,
   contributions: Contribution[],
   k: number,

@@ -109,7 +109,7 @@ interface NlqResult {
   dataQuality?: NlqDataQuality;
   graphLayers?: GraphLayerInfo[];
   cypherSections?: NlqCypherSection[];
-  /** Federated answers: k-anonymity as the proxy applied it. */
+  /** k-anonymity as the proxy applied it (0: the answer is not about persons). */
   minKApplied?: number;
   filtered?: number;
   aggregateSuppressed?: boolean;
@@ -568,7 +568,7 @@ export default function NlqPage() {
                   Federated
                 </span>
               )}
-              {result.federated && (result.minKApplied ?? 0) > 0 && (
+              {(result.minKApplied ?? 0) > 0 && (
                 <span
                   className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-(--success-text)"
                   data-testid="k-anonymity-badge"
@@ -607,14 +607,14 @@ export default function NlqPage() {
               </button>
             </div>
 
-            {result.federated && (result.filtered ?? 0) > 0 && (
+            {(result.filtered ?? 0) > 0 && (
               <p
                 className="text-xs text-(--text-secondary)"
                 data-testid="k-anonymity-note"
               >
                 {result.aggregateSuppressed
                   ? `One secure processing environment returned fewer than ${result.minKApplied} records, so the whole answer is withheld: a missing contributor would identify people.`
-                  : `Counts below ${result.minKApplied} are shown as <${result.minKApplied}, and a share computed from one goes with it, so no one can be singled out (k-anonymity across the secure processing environments).`}
+                  : `Counts below ${result.minKApplied} are shown as <${result.minKApplied}, and a share computed from one goes with it, so no one can be singled out (k-anonymity).`}
               </p>
             )}
 

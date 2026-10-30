@@ -3,7 +3,8 @@
  * That path merged what every SPE returned and applied no k-anonymity, so
  * an age group of one person left the environment as `count: 1` (found
  * 2026-10-30 against two local SPEs). It now applies the rules of
- * src/k-anonymity.ts, the same /federated/query uses.
+ * src/k-anonymity.ts, the same /federated/query uses, and so does a question
+ * asked of one SPE.
  */
 import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
 
@@ -32,7 +33,7 @@ vi.mock("neo4j-driver", () => ({
 
 const { app, main } = await import("../src/index.js");
 const { setSpe2Driver } = await import("../src/db.js");
-const { anonymiseFederatedAnswer, suppressSmallCells, suppressSmallGroups } =
+const { anonymiseAnswer, suppressSmallCells, suppressSmallGroups } =
   await import("../src/k-anonymity.js");
 import supertest from "supertest";
 
@@ -115,6 +116,56 @@ describe("POST /nlq with federated: true", () => {
   });
 });
 
+describe("POST /nlq without federated", () => {
+  it("masks small counts from one SPE as from several", async () => {
+    // Asked of SPE-1 alone, "Patients with diabetes" listed groups of 4 and
+    // 1 patients (2026-10-30).
+    setSpe2Driver(null);
+    try {
+      mockRun.mockResolvedValue(
+        fakeResult([
+          {
+            condition: "Type 2 Diabetes",
+            occurrences: 16,
+            prevalencePercent: 7.41,
+          },
+          {
+            condition: "Type 2 diabetes mellitus",
+            occurrences: 4,
+            prevalencePercent: 1.85,
+          },
+        ]),
+      );
+
+      const res = await request
+        .post("/nlq")
+        .send({ question: "Patients with diabetes" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.federated).toBe(false);
+      expect(res.body.results).toEqual([
+        {
+          condition: "Type 2 Diabetes",
+          occurrences: 16,
+          prevalencePercent: 7.41,
+        },
+        {
+          condition: "Type 2 diabetes mellitus",
+          occurrences: "<5",
+          prevalencePercent: "<5",
+        },
+      ]);
+      expect(res.body).toMatchObject({
+        minKApplied: 5,
+        filtered: 1,
+        suppressionReason: "small_cells",
+      });
+    } finally {
+      setSpe2Driver(mockDriver as never);
+    }
+  });
+});
+
 describe("a question about the SPEs themselves", () => {
   it("asks every SPE, without the Federated button", async () => {
     mockRun.mockResolvedValue(fakeResult([{ patients: 216 }]));
@@ -188,7 +239,7 @@ describe("the k-anonymity rules", () => {
   });
 
   it("recognises a person label inside the Art. 71 label expression", () => {
-    const outcome = anonymiseFederatedAnswer(
+    const outcome = anonymiseAnswer(
       "MATCH (p:(Patient)&!OptedOut) RETURN p.gender AS gender, count(*) AS count",
       [{ source: "SPE-1", records: [{ gender: "female", count: 3 }] }],
       5,
@@ -200,7 +251,7 @@ describe("the k-anonymity rules", () => {
     const datasets = [
       { source: "SPE-1", records: [{ publisher: "AlphaKlinik", count: 2 }] },
     ];
-    const outcome = anonymiseFederatedAnswer(
+    const outcome = anonymiseAnswer(
       "MATCH (d:HealthDataset) RETURN d.publisher AS publisher, count(d) AS count",
       datasets,
       5,

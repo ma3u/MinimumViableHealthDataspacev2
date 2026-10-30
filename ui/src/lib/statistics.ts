@@ -104,11 +104,13 @@ export function toStatisticalAnswer(answer: NlqAnswer): StatisticalAnswer {
   const rows = results.map((r) => {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(r ?? {})) {
+      // The proxy suppresses too, so a cell can arrive as "<5" already.
       if (
-        typeof v === "number" &&
-        Number.isInteger(v) &&
-        v > 0 &&
-        v < K_ANONYMITY
+        (typeof v === "number" &&
+          Number.isInteger(v) &&
+          v > 0 &&
+          v < K_ANONYMITY) ||
+        v === `<${K_ANONYMITY}`
       ) {
         out[k] = `<${K_ANONYMITY}`;
         suppressed += 1;
