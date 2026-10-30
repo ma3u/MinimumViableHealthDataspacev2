@@ -37,6 +37,20 @@ describe("toStatisticalAnswer", () => {
     expect(r.reason).toContain("suppressed");
   });
 
+  it("counts a cell the proxy already suppressed", () => {
+    const r = toStatisticalAnswer({
+      method: "template",
+      templateName: "top_conditions",
+      results: [
+        { condition: "Hypertension", count: 40 },
+        { condition: "Rare disease", count: `<${K_ANONYMITY}` },
+      ],
+    });
+    expect(r.rows[1].count).toBe(`<${K_ANONYMITY}`);
+    expect(r.suppressedCells).toBe(1);
+    expect(r.reason).toContain("suppressed");
+  });
+
   it("refuses a record-level template", () => {
     const r = toStatisticalAnswer({
       method: "template",

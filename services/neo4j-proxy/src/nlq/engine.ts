@@ -58,9 +58,26 @@ interface QueryTemplate {
    * raw `cypher` string is shown unannotated.
    */
   cypherSections?: CypherSection[];
+  /** Asks every SPE, whether or not the caller chose Federated. */
+  everySpe?: boolean;
 }
 
 export const QUERY_TEMPLATES: QueryTemplate[] = [
+  // Which SPEs the caller reaches. Answered by every SPE itself, through the
+  // federated path (everySpe), so the answer counts what each one holds.
+  {
+    name: "spe_access",
+    patterns: [
+      /\b(?:how many|which|what) (?:SPEs?|secure processing environments?)\b/i,
+      /\b(?:SPEs?|secure processing environments?)\b.*\baccess\b/i,
+      /\baccess\b.*\b(?:SPEs?|secure processing environments?)\b/i,
+    ],
+    cypher: "MATCH (p:Patient) RETURN count(p) AS patients",
+    extractParams: () => ({}),
+    description:
+      "The secure processing environments you reach, with the patients each holds",
+    everySpe: true,
+  },
   {
     name: "patient_count",
     patterns: [
@@ -986,6 +1003,14 @@ export async function fulltextSearch(
       "classes",
       "common",
       "prescribed",
+      // Pronouns: "you~" matched "Gout" (two edits), so "How many SPE you
+      // have access?" was answered with gout and diabetes patients.
+      "you",
+      "your",
+      "our",
+      "they",
+      "them",
+      "their",
     ]);
     const words = question
       .trim()
@@ -996,7 +1021,10 @@ export async function fulltextSearch(
     if (words.length === 0) return null;
     const escaped = words
       .map((w) => w.replace(/[+\-&|!(){}[\]^"~*?:\\/]/g, "\\$&"))
-      .map((w) => `${w}* ${w}~`) // wildcard + fuzzy for each word
+      // Prefix for every word; a typo is forgiven in a word of five letters
+      // or more, and only one: Lucene's default of two edits makes a short
+      // word match almost anything ("access~" is "abscess").
+      .map((w) => (w.length >= 5 ? `${w}* ${w}~1` : `${w}*`))
       .join(" ");
     // Try each fulltext index in priority order
     const indexes = [

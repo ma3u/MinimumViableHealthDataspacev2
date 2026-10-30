@@ -12,6 +12,7 @@ import {
 import { appendQueryAudit, auditUnavailable } from "../audit-chain.js";
 import { logger } from "../logger.js";
 import { secondaryUseSession } from "../opt-out.js";
+import { suppressSmallGroups } from "../k-anonymity.js";
 
 /** A refused federated query is recorded before the refusal goes out. */
 async function auditFederatedRefusal(
@@ -143,63 +144,22 @@ app.post(
         }),
       );
 
-      // Merge results from all SPEs
-      let merged = allResults.flatMap((r) => r.records);
-      const totalRows = merged.length;
-      let filtered = 0;
-
-      // Apply k-anonymity filtering if requested
-      if (minK > 0) {
-        // Group by all non-_source, non-_error keys and filter groups with < minK members
-        const keySet = new Set<string>();
-        merged.forEach((row) =>
-          Object.keys(row).forEach((k) => {
-            if (k !== "_source" && k !== "_error") keySet.add(k);
-          }),
-        );
-        const groupKey = (row: Record<string, any>) =>
-          Array.from(keySet)
-            .map((k) => `${k}=${row[k]}`)
-            .join("|");
-
-        const groups = new Map<string, Record<string, any>[]>();
-        merged.forEach((row) => {
-          const key = groupKey(row);
-          if (!groups.has(key)) groups.set(key, []);
-          groups.get(key)!.push(row);
-        });
-
-        merged = [];
-        for (const [, group] of groups) {
-          if (group.length >= minK) {
-            merged.push(...group);
-          } else {
-            filtered += group.length;
-          }
-        }
-      }
-
-      // Phase 26e (issue #8): contributor-side k-anonymity. A contributor
-      // whose row count is non-zero but below minK is suppressed entirely,
-      // and — because a missing contributor is itself identifying — the
-      // global aggregate is suppressed with it.
-      const suppressedContributors: string[] = [];
-      if (minK > 0) {
-        for (const r of allResults) {
-          const rows = r.records.filter((rec) => !rec._error);
-          if (rows.length > 0 && rows.length < minK) {
-            suppressedContributors.push(r.source);
-          }
-        }
-      }
-      const aggregateSuppressed = suppressedContributors.length > 0;
-      const suppressionReason = aggregateSuppressed
-        ? "contributor_k_violation"
-        : null;
-      if (aggregateSuppressed) {
-        filtered += merged.length;
-        merged = [];
-      }
+      // k-anonymity on both sides (issue #8): small groups and a
+      // contributor below minK are suppressed (src/k-anonymity.ts).
+      const totalRows = allResults.reduce((n, r) => n + r.records.length, 0);
+      const {
+        rows: merged,
+        filtered,
+        aggregateSuppressed,
+        suppressionReason,
+      } = minK > 0
+        ? suppressSmallGroups(allResults, minK)
+        : {
+            rows: allResults.flatMap((r) => r.records),
+            filtered: 0,
+            aggregateSuppressed: false,
+            suppressionReason: null,
+          };
 
       const sources = allResults.map((r) => r.source);
 
