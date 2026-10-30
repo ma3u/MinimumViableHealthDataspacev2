@@ -221,6 +221,15 @@ describe("the k-anonymity rules", () => {
     expect(filtered).toBe(1);
   });
 
+  it("leaves a relevance score alone", () => {
+    // The fulltext answer's score of 2 was shown as "<5" (2026-10-30).
+    const { rows } = suppressSmallCells(
+      [{ condition: "Gout", patients: 1, score: 2 }],
+      5,
+    );
+    expect(rows[0]).toEqual({ condition: "Gout", patients: "<5", score: 2 });
+  });
+
   it("drops small groups of records and suppresses a small contributor", () => {
     const many = Array.from({ length: 6 }, () => ({ code: "E11" }));
     expect(

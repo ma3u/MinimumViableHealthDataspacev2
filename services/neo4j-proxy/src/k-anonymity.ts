@@ -44,6 +44,9 @@ const PERSON_DATA =
 /** Cypher whose answer is a count, not a list of records. */
 const AGGREGATE = /\b(count|sum)\s*\(/i;
 
+/** A relevance score, which counts nobody, even when it comes out whole. */
+const SCORE_KEY = /(score|similarity)$/i;
+
 /** A share computed from a count in the same row. */
 const SHARE_KEY = /(pct|percent|share|ratio|rate)$/i;
 
@@ -105,6 +108,7 @@ export function suppressSmallCells(rows: Row[], k: number): KOutcome {
     const small = Object.entries(row).filter(
       ([key, v]) =>
         key !== "_source" &&
+        !SCORE_KEY.test(key) &&
         typeof v === "number" &&
         Number.isInteger(v) &&
         v > 0 &&
