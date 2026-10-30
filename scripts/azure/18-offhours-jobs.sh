@@ -25,6 +25,7 @@ set -euo pipefail
 #   Reader                      rg-mvhd-dev                the hold tag, the environment
 #   Contributor                 the Flexible Server only   stop and start Postgres
 #   Key Vault Secrets User      kv-mvhd-b53a0449           the realm restore's Keycloak password
+#   Contributor                 mvhd-spe-1, mvhd-spe-2     stop and start the SPE workspaces (ACI, ADR-069)
 #
 # Each execution downloads the seven files it runs from this public repository
 # at REPO_REF, the commit deploy-azure.yml last deployed, so the jobs run the
@@ -122,6 +123,17 @@ grant "Container Apps Contributor" "$RG_ID"
 grant "Reader" "$RG_ID"
 grant "Contributor" "$PG_ID"
 grant "Key Vault Secrets User" "$KV_ID"
+# The SPE workspaces, ACI confidential container groups (ADR-069): stop and
+# start each one, nothing else in Microsoft.ContainerInstance. Contributor on
+# the group itself, once 21-aci-confidential-spe.sh --workspaces made it; run
+# this script again after that phase.
+for group in "${SPE_ACI_GROUPS[@]}"; do
+  if GROUP_ID=$(az container show -n "$group" -g "$RG" --query id -o tsv 2>/dev/null) && [ -n "$GROUP_ID" ]; then
+    grant "Contributor" "$GROUP_ID"
+  else
+    ok "  ${group}: does not exist yet, no role (run again after 21-aci-confidential-spe.sh --workspaces)"
+  fi
+done
 
 # ── the jobs ────────────────────────────────────────────────────────────────
 ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RG" --query id -o tsv)

@@ -1384,8 +1384,8 @@
     },
     {
       "id": "ADR-069",
-      "file": "ADR-069-azure-runs-a-second-spe.md",
-      "title": "Azure runs a second secure processing environment, SPE-2, as a Neo4j app of its own",
+      "file": "ADR-069-two-spe-workspaces-as-aci-confidential-containers.md",
+      "title": "Two SPE workspaces as ACI confidential containers",
       "status": "Proposed"
     }
   ],

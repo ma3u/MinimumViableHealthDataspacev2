@@ -1,0 +1,213 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "description": "One SPE workspace as an ACI confidential container group (ADR-068, ADR-069, #774). Init container spe-unlock attests to the access body's Trustee with the SEV-SNP report and decrypts the extract; neo4j holds it in an emptyDir; spe-ingest loads it and records the attestation. 21-aci-confidential-spe.sh --policy fills ccePolicy with `az confcom acipolicygen`; its SHA-256 is the report's HOST_DATA and the permit's policy hash. Secrets (TLS key, Neo4j password) come through the secret volume, outside the policy, so rotating them does not change the hash."
+  },
+  "parameters": {
+    "name": { "type": "string" },
+    "location": { "type": "string", "defaultValue": "westeurope" },
+    "speNumber": { "type": "string", "allowedValues": ["1", "2"] },
+    "loaderImage": {
+      "type": "string",
+      "metadata": {
+        "description": "mvhd-spe-loader-spe<n>@sha256:..., the loader with this SPE's sealed extract at /extracts/spe.enc"
+      }
+    },
+    "neo4jImage": { "type": "string" },
+    "dnsLabel": { "type": "string" },
+    "trusteeUrl": { "type": "string" },
+    "registryServer": { "type": "string" },
+    "pullIdentity": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource id of the user-assigned identity with AcrPull"
+      }
+    },
+    "boltTlsKey": {
+      "type": "securestring",
+      "metadata": { "description": "base64 of private.key (PKCS#8)" }
+    },
+    "boltTlsCert": {
+      "type": "string",
+      "metadata": { "description": "base64 of public.crt" }
+    },
+    "neo4jAuth": {
+      "type": "securestring",
+      "metadata": { "description": "base64 of neo4j/<password>" }
+    },
+    "neo4jPassword": {
+      "type": "securestring",
+      "metadata": { "description": "base64 of <password>" }
+    }
+  },
+  "variables": {
+    "runsOn": "[concat('ACI confidential container group ', parameters('name'), ' (', parameters('location'), ')')]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ContainerInstance/containerGroups",
+      "apiVersion": "2023-05-01",
+      "name": "[parameters('name')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "project": "mvhd",
+        "adr": "ADR-069",
+        "issue": "774",
+        "spe": "[concat('SPE-', parameters('speNumber'))]"
+      },
+      "identity": {
+        "type": "UserAssigned",
+        "userAssignedIdentities": { "[parameters('pullIdentity')]": {} }
+      },
+      "properties": {
+        "sku": "Confidential",
+        "confidentialComputeProperties": { "ccePolicy": "" },
+        "osType": "Linux",
+        "restartPolicy": "Always",
+        "imageRegistryCredentials": [
+          {
+            "server": "[parameters('registryServer')]",
+            "identity": "[parameters('pullIdentity')]"
+          }
+        ],
+        "ipAddress": {
+          "type": "Public",
+          "dnsNameLabel": "[parameters('dnsLabel')]",
+          "ports": [{ "protocol": "TCP", "port": 7687 }]
+        },
+        "volumes": [
+          { "name": "work", "emptyDir": {} },
+          { "name": "neo4j-data", "emptyDir": {} },
+          {
+            "name": "secrets",
+            "secret": {
+              "private.key": "[parameters('boltTlsKey')]",
+              "public.crt": "[parameters('boltTlsCert')]",
+              "neo4j-auth": "[parameters('neo4jAuth')]",
+              "neo4j-password": "[parameters('neo4jPassword')]"
+            }
+          }
+        ],
+        "initContainers": [
+          {
+            "name": "spe-unlock",
+            "properties": {
+              "image": "[parameters('loaderImage')]",
+              "command": [
+                "spe-loader",
+                "unlock",
+                "--spe",
+                "[parameters('speNumber')]",
+                "--in",
+                "/extracts/spe.enc",
+                "--work",
+                "/work"
+              ],
+              "environmentVariables": [
+                {
+                  "name": "TRUSTEE_URL",
+                  "value": "[parameters('trusteeUrl')]"
+                },
+                { "name": "SPE_SNP_DEVICE", "value": "/dev/sev-guest" },
+                { "name": "TRUSTEE_ATTEMPTS", "value": "40" },
+                { "name": "TRUSTEE_INTERVAL_MS", "value": "15000" }
+              ],
+              "volumeMounts": [{ "name": "work", "mountPath": "/work" }]
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "neo4j",
+            "properties": {
+              "image": "[parameters('neo4jImage')]",
+              "ports": [{ "protocol": "TCP", "port": 7687 }],
+              "resources": { "requests": { "cpu": 1.5, "memoryInGB": 4 } },
+              "environmentVariables": [
+                { "name": "NEO4J_AUTH_PATH", "value": "/ssl/bolt/neo4j-auth" },
+                {
+                  "name": "NEO4J_server_memory_heap_initial__size",
+                  "value": "1g"
+                },
+                {
+                  "name": "NEO4J_server_memory_heap_max__size",
+                  "value": "1536m"
+                },
+                { "name": "NEO4J_server_memory_pagecache_size", "value": "1g" },
+                { "name": "NEO4J_server_bolt_tls__level", "value": "REQUIRED" },
+                {
+                  "name": "NEO4J_dbms_ssl_policy_bolt_enabled",
+                  "value": "true"
+                },
+                {
+                  "name": "NEO4J_dbms_ssl_policy_bolt_base__directory",
+                  "value": "/ssl/bolt"
+                },
+                {
+                  "name": "NEO4J_dbms_ssl_policy_bolt_private__key",
+                  "value": "private.key"
+                },
+                {
+                  "name": "NEO4J_dbms_ssl_policy_bolt_public__certificate",
+                  "value": "public.crt"
+                },
+                {
+                  "name": "NEO4J_dbms_ssl_policy_bolt_client__auth",
+                  "value": "NONE"
+                },
+                { "name": "NEO4J_server_http_enabled", "value": "false" }
+              ],
+              "volumeMounts": [
+                { "name": "neo4j-data", "mountPath": "/data" },
+                {
+                  "name": "secrets",
+                  "mountPath": "/ssl/bolt",
+                  "readOnly": true
+                }
+              ]
+            }
+          },
+          {
+            "name": "spe-ingest",
+            "properties": {
+              "image": "[parameters('loaderImage')]",
+              "command": [
+                "spe-loader",
+                "ingest",
+                "--spe",
+                "[parameters('speNumber')]",
+                "--work",
+                "/work",
+                "--stay"
+              ],
+              "resources": { "requests": { "cpu": 0.5, "memoryInGB": 1 } },
+              "environmentVariables": [
+                {
+                  "name": "WORKSPACE_NEO4J_URI",
+                  "value": "bolt+ssc://localhost:7687"
+                },
+                { "name": "WORKSPACE_NEO4J_USER", "value": "neo4j" },
+                {
+                  "name": "WORKSPACE_NEO4J_PASSWORD_FILE",
+                  "value": "/secrets/neo4j-password"
+                },
+                { "name": "SPE_RUNS_ON", "value": "[variables('runsOn')]" }
+              ],
+              "volumeMounts": [
+                { "name": "work", "mountPath": "/work" },
+                { "name": "secrets", "mountPath": "/secrets", "readOnly": true }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "fqdn": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.ContainerInstance/containerGroups', parameters('name'))).ipAddress.fqdn]"
+    }
+  }
+}

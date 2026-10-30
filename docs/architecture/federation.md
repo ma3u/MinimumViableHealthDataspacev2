@@ -92,24 +92,36 @@ A question about the SPEs themselves ("How many SPEs can I access?") is the
 
 ### Where the two SPEs run
 
-| Stack        | SPE-1                                   | SPE-2                                                                    |
-| ------------ | --------------------------------------- | ------------------------------------------------------------------------ |
-| Compose      | `neo4j` (Bolt 7687)                     | `neo4j-spe2`, profile `federated` (Bolt 7688)                            |
-| Azure        | `mvhd-neo4j` (`bolt://mvhd-neo4j:7687`) | `mvhd-neo4j-spe2` (`bolt://mvhd-neo4j-spe2:7688`), once phase 20 has run |
-| GitHub Pages | fixtures                                | none                                                                     |
+| Stack                       | SPE-1 (AlphaKlinik Berlin)                            | SPE-2 (Limburg Medical Centre)                     |
+| --------------------------- | ----------------------------------------------------- | -------------------------------------------------- |
+| Compose                     | the hub graph `neo4j` (Bolt 7687)                     | `neo4j-spe2`, profile `federated` (Bolt 7688)      |
+| Compose + `trustee` overlay | workspace `neo4j-spe1` (Bolt 7689), loaded per permit | `neo4j-spe2`, loaded per permit, store in memory   |
+| Azure (ADR-069, phase 21)   | ACI confidential group `mvhd-spe-1`, Bolt with TLS    | ACI confidential group `mvhd-spe-2`, Bolt with TLS |
+| GitHub Pages                | fixtures                                              | none                                               |
 
-SPE-2 holds a different set of patients: `scripts/seed-spe2.py` copies the
-second half of SPE-1's synthetic patients, with their FHIR records, OMOP rows
-and codes, then applies the schema and SPE-2's HealthDCAT-AP registration
-(publisher Limburg Medical Centre). It never copies a record the Klarbefund
-app or a PID created or connected to. Locally: `python3 scripts/seed-spe2.py`
-with the `federated` profile up. On Azure (ADR-069, proposed):
-`scripts/azure/20-neo4j-spe2.sh --create-secret`, then without arguments,
-`--seed` and `--wire-proxy`; the proxy reads SPE-2's password from Key Vault
-and keeps retrying SPE-2 for ten minutes when it is not up at startup, and
-`offhours.sh` stops and starts it with SPE-1. SPE-1 still holds every patient,
-so until it drops the ones SPE-2 holds (ADR-069, "Open") a federated total
-counts those twice.
+Each workspace holds its own half of the hub's synthetic patients (SPE-1 the
+first half, SPE-2 the second, ordered by their ids), with their FHIR
+records, OMOP rows and codes, the schema and its HealthDCAT-AP registration.
+It never holds a record the Klarbefund app or a PID created or connected to.
+`services/spe-loader` makes the extract from the hub graph, seals it with
+AES-256-GCM under a key per permit and puts the key into the access body's
+Trustee; the workspace gets the key only after attesting (ADR-068), decrypts
+and loads, and records the attestation (`SpeAttestation`, `SpeEvent`). The
+proxy shows them on `GET /spe/status` and appends the events to the audit
+chain `spe` (ADR-045).
+
+Locally: `docker compose -f docker-compose.yml -f docker-compose.jad.yml -f
+docker-compose.trustee.yml --profile federated up -d --build`, with Trustee's
+sample attester and the label "Simulated attestation". On Azure:
+`scripts/azure/21-aci-confidential-spe.sh` (`--trustee`, `--extracts`,
+`--policy`, `--workspaces`, `--wire-proxy`, `--check`): the SEV-SNP report's
+HOST_DATA is the hash of the group's ccePolicy, which is the permit's policy
+hash, so the label is "Attested: confidential workload". The proxy pins the
+workspaces' CA, keeps retrying a workspace for ten minutes when it is not up,
+and never asks the hub graph in its place; `offhours.sh` stops and starts
+both groups with the stack (ADR-053, as extended by ADR-069). Without the
+overlay or phase 21, SPE-1 is the hub graph and holds every patient, so a
+federated total counts SPE-2's patients twice.
 
 Publisher-side ODRL policies arrive verbatim as `:OdrlPolicy` nodes via the
 enricher and are enforced at negotiation time (`/negotiate`); VC-gated
