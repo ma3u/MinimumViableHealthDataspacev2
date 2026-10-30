@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRef } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -26,6 +27,13 @@ import {
   UserPlus,
   Users,
   BookOpen,
+  PencilLine,
+  ScrollText,
+  Server,
+  Smartphone,
+  Wallet,
+  Image as ImageIcon,
+  X,
 } from "lucide-react";
 
 const LIVE_URL = "https://ma3u.github.io/MinimumViableHealthDataspacev2";
@@ -36,6 +44,7 @@ const FULL_JOURNEY_URL =
 import MermaidDiagram from "@/components/MermaidDiagram";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 import { visibleNavGroups } from "@/components/Navigation";
+import { guideScreenshotSrc } from "@/lib/guide-screenshots";
 
 /** The demo personas' realm roles (jad/keycloak-realm.json). */
 const MATRIX_PERSONAS = [
@@ -97,12 +106,10 @@ const userWorkflowDiagram = `graph LR
   B --> E[Review<br/>Patient Journey]
   B --> F[Run<br/>Analytics]
   B --> G[Govern<br/>permits and supervision]
-  B --> C[Explore<br/>Knowledge Graph]
   D --> I[Search HealthDCAT-AP<br/>metadata]
   E --> J[View FHIR→OMOP<br/>timeline]
   F --> K[Cohort analytics<br/>dashboards]
-  G --> L[EHDS Art. 57-69<br/>application to permit]
-  C --> H[Visualise the 5-layer<br/>graph]`;
+  G --> L[EHDS Art. 57-69<br/>application to permit]`;
 
 const complianceDiagram = `sequenceDiagram
   participant USER as Research User
@@ -112,7 +119,7 @@ const complianceDiagram = `sequenceDiagram
 
   USER->>UI: Start data access application
   UI->>UI: Select dataset from catalog
-  UI->>HDAB: Submit permit request<br/>(EHDS Articles 45-49)
+  UI->>HDAB: Submit permit request<br/>(EHDS Art. 67-68)
   HDAB->>HDAB: Review & approve
   HDAB-->>UI: Data permit issued (VC)
   UI->>DH: Initiate contract negotiation
@@ -120,6 +127,76 @@ const complianceDiagram = `sequenceDiagram
   UI->>USER: Access granted<br/>with audit trail`;
 
 /** Reusable card linking to a feature page */
+/**
+ * The page as its persona sees it on the static site
+ * (src/lib/guide-screenshots.ts): small on mouse-over, full size in a native
+ * modal <dialog> on a click or tap anywhere on the card's text, or on the
+ * Screenshot button from the keyboard. Escape, the close button or a click
+ * beside the image closes it.
+ */
+function ScreenshotDialog({
+  src,
+  title,
+  href,
+  dialogRef,
+}: {
+  src: string;
+  title: string;
+  href: string;
+  dialogRef: React.RefObject<HTMLDialogElement>;
+}) {
+  const close = () => dialogRef.current?.close();
+  return (
+    <dialog
+      ref={dialogRef}
+      aria-label={`Screenshot: ${title}`}
+      onClick={(e) => {
+        // The dialog itself is the backdrop area; its content stops here.
+        if (e.target === e.currentTarget) close();
+      }}
+      onClose={() =>
+        document.documentElement.classList.remove("overflow-hidden")
+      }
+      className="m-auto max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-6xl overflow-visible bg-transparent p-0 opacity-0 scale-95 transition-[opacity,scale,display,overlay] duration-200 ease-out transition-discrete open:opacity-100 open:scale-100 starting:open:opacity-0 starting:open:scale-95 motion-reduce:transition-none backdrop:bg-black/0 backdrop:transition-[background-color,display,overlay] backdrop:duration-200 backdrop:transition-discrete open:backdrop:bg-black/75 starting:open:backdrop:bg-black/0"
+    >
+      <figure className="overflow-hidden rounded-xl border border-(--border) bg-(--surface) shadow-2xl">
+        <div className="flex items-center justify-between gap-3 border-b border-(--border) px-4 py-2">
+          <figcaption className="truncate text-sm font-semibold text-(--text-primary)">
+            {title}
+          </figcaption>
+          <div className="flex shrink-0 items-center gap-1">
+            <Link
+              href={href}
+              onClick={close}
+              className="inline-flex min-h-11 items-center gap-1 rounded-lg px-3 text-sm text-indigo-700 hover:bg-indigo-500/10 dark:text-indigo-400"
+            >
+              Try it <ArrowRight size={14} />
+            </Link>
+            <button
+              type="button"
+              onClick={close}
+              data-close
+              aria-label="Close screenshot"
+              className="inline-flex size-11 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-2)"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt={`Screenshot: ${title}`}
+          loading="lazy"
+          width={1200}
+          height={750}
+          className="block h-auto max-h-[calc(100dvh-5rem)] w-full object-contain"
+        />
+      </figure>
+    </dialog>
+  );
+}
+
 function FeatureCard({
   href,
   title,
@@ -134,9 +211,58 @@ function FeatureCard({
   children: React.ReactNode;
 }) {
   const isExternal = href.startsWith("http");
+  const screenshot = guideScreenshotSrc(href);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const openScreenshot = () => {
+    const dialog = dialogRef.current;
+    if (!dialog || dialog.open) return;
+    document.documentElement.classList.add("overflow-hidden");
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else dialog.setAttribute("open", "");
+    // The dialog would focus Try it, the first control; Escape or Close is
+    // the likelier next step.
+    dialog.querySelector<HTMLButtonElement>("button[data-close]")?.focus();
+  };
   return (
-    <div className="border border-(--border) rounded-xl overflow-hidden hover:border-indigo-500/50 transition-colors">
-      <div className="p-5">
+    <div className="group relative border border-(--border) rounded-xl hover:border-indigo-500/50 focus-within:border-indigo-500/50 transition-colors">
+      {screenshot && (
+        <>
+          {/* Small preview on mouse-over; Tailwind 4 applies group-hover
+              only where a pointer can hover, so a tap never shows it. */}
+          <figure
+            aria-hidden="true"
+            className="pointer-events-none invisible absolute right-4 top-full z-30 -mt-3 w-[min(22rem,calc(100%-2rem))] translate-y-1 overflow-hidden rounded-lg border border-(--border) bg-(--surface) opacity-0 shadow-2xl transition duration-150 ease-out group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-hover:delay-200 motion-reduce:transition-none group-has-[dialog[open]]:hidden"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={screenshot}
+              alt=""
+              loading="lazy"
+              width={1200}
+              height={750}
+              className="block h-auto w-full"
+            />
+            <figcaption className="px-3 py-1.5 text-[11px] text-(--text-secondary)">
+              Click to enlarge
+            </figcaption>
+          </figure>
+          <ScreenshotDialog
+            src={screenshot}
+            title={title}
+            href={href}
+            dialogRef={dialogRef}
+          />
+        </>
+      )}
+      <div
+        className={`p-5 ${screenshot ? "cursor-zoom-in" : ""}`}
+        onClick={(e) => {
+          if (!screenshot) return;
+          // A link or button in the card does its own thing.
+          if ((e.target as HTMLElement).closest("a, button")) return;
+          openScreenshot();
+        }}
+      >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-indigo-500/10 flex items-center justify-center">
@@ -154,6 +280,18 @@ function FeatureCard({
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/30 font-medium">
                 JAD Stack
               </span>
+            )}
+            {screenshot && (
+              <button
+                type="button"
+                onClick={openScreenshot}
+                aria-haspopup="dialog"
+                aria-label={`Show screenshot: ${title}`}
+                className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs text-(--text-secondary) hover:text-indigo-700 dark:hover:text-indigo-400 transition-colors"
+              >
+                <ImageIcon size={14} />
+                <span className="hidden sm:inline">Screenshot</span>
+              </button>
             )}
             {isExternal ? (
               <a
@@ -291,8 +429,8 @@ export default function UserGuidePage() {
                 persona switcher instead
               </li>
               <li>
-                <strong>Live Neo4j graph queries</strong> — graph explorer uses
-                pre-loaded mock data
+                <strong>Live Neo4j graph queries</strong> — the persona overview
+                and the other views read pre-loaded mock data
               </li>
               <li>
                 <strong>Contract negotiation &amp; transfers</strong> — require
@@ -409,8 +547,9 @@ export default function UserGuidePage() {
         <p className="text-(--text-secondary) text-sm mb-4">
           The EHDS regulation defines distinct participant roles to ensure
           accountability, data sovereignty, and patient rights across the health
-          data ecosystem. This platform adapts its navigation, graph view, and
-          available actions to the signed-in user&apos;s EHDS role. Sign in at{" "}
+          data ecosystem. This platform adapts its navigation, persona overview,
+          and available actions to the signed-in user&apos;s EHDS role. Sign in
+          at{" "}
           <code className="text-xs bg-(--surface-2) px-1 py-0.5 rounded-sm">
             /auth/signin
           </code>{" "}
@@ -423,10 +562,9 @@ export default function UserGuidePage() {
           icon={Users}
         >
           <p className="text-(--text-secondary) text-sm mb-3">
-            The sign-in page lists every demo account with its role badge,
-            organisation, and the graph persona view it will open after login.
-            Clicking a card calls Keycloak SSO and redirects directly to the
-            user&apos;s personalised graph.
+            The sign-in page lists every demo account with its role badge and
+            organisation. Clicking a card signs in through Keycloak SSO and
+            opens the persona overview with the tab for that role.
           </p>
 
           {/* Demo users table with EHDS regulatory context */}
@@ -437,7 +575,7 @@ export default function UserGuidePage() {
                   <th className="text-left py-1.5 pr-3">Username</th>
                   <th className="text-left py-1.5 pr-3">Organisation</th>
                   <th className="text-left py-1.5 pr-3">Role</th>
-                  <th className="text-left py-1.5 pr-3">Graph view</th>
+                  <th className="text-left py-1.5 pr-3">Overview tab</th>
                   <th className="text-left py-1.5 pr-3">Primary question</th>
                   <th className="text-left py-1.5">EHDS basis</th>
                 </tr>
@@ -449,45 +587,45 @@ export default function UserGuidePage() {
                     org: "Dataspace Operator",
                     role: "EDC Admin",
                     color: "text-(--danger-text)",
-                    graph: "edc-admin",
+                    graph: "Access body",
                     q: "Who are my participants? What contracts are active?",
-                    ehds: "EHDS Art. 52 — operates the dataspace infrastructure and ensures interoperability between participants",
+                    ehds: "EHDS Art. 75 — operates the dataspace infrastructure and ensures interoperability between participants",
                   },
                   {
                     user: "clinicuser",
                     org: "AlphaKlinik Berlin",
                     role: "Data Holder",
                     color: "text-(--accent)",
-                    graph: "hospital",
+                    graph: "Data holder",
                     q: "Who has approved access to my datasets?",
-                    ehds: "EHDS Art. 33-34 — health data holders must make electronic health data available for secondary use when authorized",
+                    ehds: "EHDS Art. 60 — health data holders must make electronic health data available for secondary use when authorized",
                   },
                   {
                     user: "lmcuser",
                     org: "Limburg Medical Centre",
                     role: "Data Holder",
                     color: "text-(--accent)",
-                    graph: "hospital",
+                    graph: "Data holder",
                     q: "What contracts are active for my NL datasets?",
-                    ehds: "EHDS Art. 33-34 — cross-border data holder demonstrating multi-country interoperability",
+                    ehds: "EHDS Art. 60 — cross-border data holder demonstrating multi-country interoperability",
                   },
                   {
                     user: "researcher",
                     org: "PharmaCo Research AG",
                     role: "Researcher",
                     color: "text-(--success-text)",
-                    graph: "researcher",
+                    graph: "Researcher",
                     q: "What datasets match my study protocol?",
-                    ehds: "EHDS Art. 34(1) — data users access health data for permitted secondary use purposes (research, innovation, public health)",
+                    ehds: "EHDS Art. 53(1) — data users access health data for permitted secondary use purposes (research, innovation, public health)",
                   },
                   {
                     user: "regulator",
                     org: "MedReg DE",
                     role: "HDAB Authority",
                     color: "text-amber-700 dark:text-amber-400",
-                    graph: "hdab",
+                    graph: "Access body",
                     q: "What approvals are pending? Is the chain complete?",
-                    ehds: "EHDS Art. 36-37 — Health Data Access Bodies are designated by each Member State to authorize secondary use of health data",
+                    ehds: "EHDS Art. 55 and 57 — Health Data Access Bodies are designated by each Member State to authorize secondary use of health data",
                   },
                 ].map((p) => (
                   <tr key={p.user} className="border-b border-(--border)">
@@ -505,7 +643,7 @@ export default function UserGuidePage() {
                         {p.role}
                       </span>
                     </td>
-                    <td className="py-1.5 pr-3 font-mono text-(--text-secondary)">
+                    <td className="py-1.5 pr-3 text-(--text-secondary)">
                       {p.graph}
                     </td>
                     <td className="py-1.5 pr-3 text-(--text-secondary) italic">
@@ -535,31 +673,31 @@ export default function UserGuidePage() {
               {
                 role: "Data Holder",
                 color: "text-(--accent)",
-                article: "Art. 33-34",
+                article: "Art. 60",
                 why: "Healthcare providers, insurers, and registries that hold electronic health data are legally required to make it available for authorized secondary use. They retain sovereignty over their data and control access through ODRL policies and contract negotiation.",
               },
               {
                 role: "Data User (Researcher)",
                 color: "text-(--success-text)",
-                article: "Art. 34(1), Art. 45-46",
+                article: "Art. 53(1), Art. 67-68",
                 why: "Researchers, public health agencies, and innovators who need health data for permitted purposes must apply through an HDAB, receive a data permit, and access data only in a secure processing environment. They never receive raw patient data directly.",
               },
               {
                 role: "HDAB Authority",
                 color: "text-amber-700 dark:text-amber-400",
-                article: "Art. 36-37",
+                article: "Art. 55, 57",
                 why: "Each EU Member State must designate one or more Health Data Access Bodies (HDABs) as the national authority that reviews data access applications, issues data permits, and ensures compliance. MedReg DE represents the German HDAB in this implementation.",
               },
               {
                 role: "EDC Admin / Dataspace Operator",
                 color: "text-(--danger-text)",
-                article: "Art. 52",
+                article: "Art. 75",
                 why: "The dataspace operator runs the technical infrastructure: participant onboarding, connector management, federated catalog, and transfer monitoring. They ensure interoperability across all participants but do not access health data directly.",
               },
               {
                 role: "Trust Center Operator",
                 color: "text-violet-700 dark:text-violet-400",
-                article: "Art. 50(1)(e)",
+                article: "Art. 73(1)(e)",
                 why: "The EHDS mandates pseudonymisation and re-identification controls. The Trust Center manages pseudonym resolution, secure processing environment (SPE) sessions, and ensures that data users only access de-identified data. This role enforces the technical privacy safeguards the regulation requires.",
               },
             ].map((r) => (
@@ -633,63 +771,55 @@ export default function UserGuidePage() {
           </p>
         </div>
 
-        {/* Persona graph views */}
+        {/* Persona overview views (the graph explorer is retired) */}
         <div className="mt-6 border border-(--border) rounded-xl p-5">
           <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-400 mb-3">
-            Graph Explorer — Persona Views
+            Persona Overview — one view per role
           </h3>
           <p className="text-(--text-secondary) text-sm mb-4">
-            The <strong>&ldquo;View as&rdquo;</strong> panel in the graph
-            sidebar and the <strong>&ldquo;My graph view&rdquo;</strong> link in
-            the UserMenu dropdown load a role-specific subgraph that answers
-            each persona&apos;s primary question. Each view surfaces only the
-            graph layers and node types relevant to that regulatory function.
+            The persona overview answers each role&apos;s primary question in a
+            single layered view: what is wrong right now, with the article it
+            breaks, and the nodes behind it. It replaces the graph explorer,
+            which is retired. Pick a role with the tabs at the top of the page
+            or straight from here.
           </p>
           <div className="space-y-3">
             {[
               {
-                param: "?persona=hospital",
-                label: "Hospital / Data Holder",
-                color: "text-(--accent)",
-                q: "Who has approved access to my datasets?",
-                nodes:
-                  "Participant \u00b7 HealthDataset \u00b7 Contract \u00b7 HDABApproval \u00b7 EEHRxFProfile",
+                id: "patient",
+                label: "Patient",
+                title: "My health, in one view",
+                color: "text-teal-700 dark:text-teal-400",
+                q: "Which parameters put me at risk, what should I do about them, and who is using my data?",
+                articles: "Art. 3, 8, 14, 71, 73",
               },
               {
-                param: "?persona=researcher",
+                id: "researcher",
                 label: "Researcher / Data User",
+                title: "My research, in one view",
                 color: "text-(--success-text)",
-                q: "What datasets match my study? What OMOP analytics can I run?",
-                nodes:
-                  "HealthDataset \u00b7 OMOPPerson \u00b7 SnomedConcept \u00b7 SPESession",
+                q: "What am I allowed to use today, what is pending or blocked, and what am I missing?",
+                articles: "Art. 53, 61, 67, 68, 69, 73",
               },
               {
-                param: "?persona=hdab",
-                label: "HDAB Authority",
+                id: "hdab",
+                label: "Health Data Access Body",
+                title: "Compliance, in one view",
                 color: "text-amber-700 dark:text-amber-400",
-                q: "What approvals are pending? Is the governance chain complete?",
-                nodes:
-                  "HDABApproval \u00b7 VerifiableCredential \u00b7 TrustCenter \u00b7 AccessApplication",
+                q: "Which operations are non-compliant right now, and are my own decisions on time?",
+                articles: "Art. 57, 61, 63, 68, 73, 78",
               },
               {
-                param: "?persona=trust-center",
-                label: "Trust Center Operator",
-                color: "text-violet-700 dark:text-violet-400",
-                q: "Which pseudonym resolution flows am I managing?",
-                nodes:
-                  "TrustCenter \u00b7 SPESession \u00b7 ResearchPseudonym \u00b7 ProviderPseudonym",
-              },
-              {
-                param: "?persona=edc-admin",
-                label: "EDC Admin",
-                color: "text-(--danger-text)",
-                q: "Who are my participants? What contracts and transfers are live?",
-                nodes:
-                  "Participant \u00b7 DataProduct \u00b7 Contract \u00b7 TransferEvent",
+                id: "hospital",
+                label: "Hospital / Data Holder",
+                title: "My data, in one view",
+                color: "text-(--accent)",
+                q: "Which consumers are trusted, what is flowing without cover, and are my own duties in order?",
+                articles: "Art. 60, 61, 73, 77, 78",
               },
             ].map((p) => (
               <div
-                key={p.param}
+                key={p.id}
                 className="border border-(--border) rounded-lg p-3 hover:border-indigo-500/50 transition-colors"
               >
                 <div className="flex items-center justify-between mb-1">
@@ -697,24 +827,22 @@ export default function UserGuidePage() {
                     <span className={`font-semibold text-sm ${p.color}`}>
                       {p.label}
                     </span>
-                    <code className="text-xs text-(--text-secondary) font-mono">
-                      /graph{p.param}
-                    </code>
+                    <span className="text-xs text-(--text-secondary)">
+                      {p.title}
+                    </span>
                   </div>
-                  <a
-                    href={`/graph${p.param}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href={`/overview?persona=${p.id}`}
                     className="inline-flex items-center gap-1 text-xs text-(--text-secondary) hover:text-indigo-700 dark:hover:text-indigo-400 transition-colors"
                   >
-                    Try it <ExternalLink size={12} />
-                  </a>
+                    Try it <ArrowRight size={12} />
+                  </Link>
                 </div>
                 <p className="text-(--text-secondary) text-xs italic mb-1">
                   &ldquo;{p.q}&rdquo;
                 </p>
                 <p className="text-(--text-secondary) text-xs">
-                  Focus nodes: {p.nodes}
+                  Regulation (EU) 2025/327 {p.articles}
                 </p>
               </div>
             ))}
@@ -730,11 +858,11 @@ export default function UserGuidePage() {
           caption="User workflow overview"
         />
         <p className="text-(--text-secondary) text-sm mt-3 mb-6">
-          After authenticating through Keycloak SSO, you land on the graph view
-          personalised for your role. You can also browse datasets, review
-          patient timelines, run analytics, or check EHDS compliance. The{" "}
-          <strong>UserMenu</strong> (top-right) shows your role badge and a
-          &ldquo;My graph view&rdquo; shortcut to your persona graph.
+          After authenticating through Keycloak SSO, you land on the persona
+          overview, opened at the tab for your role. From there you browse
+          datasets, review patient timelines, run analytics, or check EHDS
+          compliance. The <strong>UserMenu</strong> (top-right) shows your role
+          badge.
         </p>
 
         <div className="space-y-6">
@@ -762,7 +890,7 @@ export default function UserGuidePage() {
               registration: creating a DID identity, registering with the
               Credential Federated Manager, and enrolling in the federated
               catalog. This process implements the EHDS requirement for
-              authorised participation (Art. 52) with verifiable credentials.
+              authorised participation (Art. 75) with verifiable credentials.
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               Example: Limburg Medical Centre joins the EHDS dataspace by
@@ -787,6 +915,29 @@ export default function UserGuidePage() {
               Example: AlphaKlinik Berlin checks that both its
               MembershipCredential and EHDSParticipantCredential are active and
               not expired before publishing a new dataset.
+            </p>
+          </FeatureCard>
+
+          <FeatureCard
+            href="/auth/eudi-qr"
+            title="Sign in with the EUDI Wallet"
+            icon={Wallet}
+            requiresJAD
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              A patient signs in with the person identification data (PID) in an
+              EUDI Wallet, such as the German d-you wallet, instead of a
+              password: the sign-in page shows a QR code, the wallet presents
+              the PID over OpenID4VP, and the hub checks it with its own
+              verifier (EHDS Art. 16, eIDAS). An account the Klarbefund app
+              created can be linked to a PID once under My Health, Connect your
+              EUDI wallet; the hub keeps a keyed fingerprint of the PID, never
+              the name or birth date.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: A patient scans the QR code with d-you, approves the
+              presentation and lands in their own record at assurance level
+              high. The static demo shows the flow with a simulated phone.
             </p>
           </FeatureCard>
         </div>
@@ -870,34 +1021,29 @@ export default function UserGuidePage() {
         <div className="space-y-6">
           <FeatureCard href="/overview" title="Persona Overview" icon={Globe}>
             <p className="text-(--text-secondary) text-sm mb-2">
-              The force-directed graph visualisation displays all five
-              architecture layers of the knowledge graph. Nodes are colour-coded
-              by layer: <span className="text-(--accent)">Marketplace</span>,{" "}
-              <span className="text-emerald-700 dark:text-teal-300">
-                HealthDCAT-AP
-              </span>
-              ,{" "}
-              <span className="text-green-700 dark:text-green-300">
-                FHIR R4
-              </span>
-              ,{" "}
-              <span className="text-orange-700 dark:text-orange-400">
-                OMOP CDM
-              </span>
-              , and <span className="text-(--accent)">Ontology</span>. This
-              unified view shows how the EHDS connects clinical data (FHIR),
-              analytics (OMOP), and governance (DSP) into a coherent ecosystem.
+              One view per role that answers the role&apos;s primary question.
+              On the left, what needs attention right now, most urgent first,
+              each with the article of Regulation (EU) 2025/327 it concerns. On
+              the right, a layered 3D scene of the knowledge graph behind it:
+              the role&apos;s own decisions and their clocks, credentials,
+              permits and contracts, data users and holders, datasets, and the
+              months unfolded over time.
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
-              <li>Click nodes to see properties and related entities</li>
-              <li>Use the layer toggle to filter visible layers</li>
-              <li>Zoom and pan with mouse controls</li>
-              <li>Search bar finds specific nodes across all layers</li>
+              <li>Tabs for Patient, Researcher, Access body and Data holder</li>
+              <li>
+                Click a finding to select its node in the scene and unfold what
+                lies behind it
+              </li>
+              <li>
+                Turn the scene off (or ask your system for reduced motion) and
+                the list on the left is the full view
+              </li>
             </ul>
             <p className="text-(--text-secondary) text-xs italic mt-2">
-              Example: A researcher explores how a FHIR Patient resource
-              connects to OMOP Person and condition_occurrence records via the
-              SNOMED ontology layer.
+              Example: MedReg DE sees that three applications passed the
+              three-month decision deadline of Art. 68(4) and opens the queue by
+              month.
             </p>
           </FeatureCard>
 
@@ -906,7 +1052,7 @@ export default function UserGuidePage() {
               Browse and search HealthDCAT-AP metadata records for all published
               datasets. Each entry shows title, description, publisher,
               temporal/spatial coverage, and distribution formats. The catalog
-              implements the EHDS metadata requirements (Art. 55) for
+              implements the EHDS metadata requirements (Art. 77) for
               discoverable, machine-readable dataset descriptions.
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
@@ -922,14 +1068,34 @@ export default function UserGuidePage() {
             </p>
           </FeatureCard>
 
+          <FeatureCard
+            href="/catalog/editor"
+            title="HealthDCAT-AP Editor"
+            icon={PencilLine}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              Data holders create and edit their dataset descriptions here. The
+              hub serves them as HealthDCAT-AP Release 8, the form Implementing
+              Regulation (EU) 2026/2098 sets for every dataset description.
+              Mandatory fields are marked, and a saved entry carries what
+              Release 8 requires (access body, distribution, variables, contact
+              point), so it passes the official validation at once.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic mt-2">
+              Example: AlphaKlinik Berlin adds its Type 2 Diabetes Cohort with
+              an Art. 68 data permit as the legal basis, then exports the
+              catalogue as Turtle.
+            </p>
+          </FeatureCard>
+
           <FeatureCard href="/patient" title="Patient Journey" icon={Search}>
             <p className="text-(--text-secondary) text-sm mb-2">
               View the clinical timeline for synthetic patients, showing FHIR R4
               resources (Encounters, Conditions, Observations, Medications,
               Procedures) mapped to their OMOP CDM equivalents. This dual-view
-              demonstrates how primary-use clinical data (EHDS Art. 3-12) can be
-              transformed for secondary-use analytics while preserving semantic
-              integrity.
+              demonstrates how primary-use clinical data (EHDS Chapter II) can
+              be transformed for secondary-use analytics while preserving
+              semantic integrity.
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
               <li>Select patients from the patient list</li>
@@ -954,7 +1120,7 @@ export default function UserGuidePage() {
               Cohort-level research analytics powered by the OMOP CDM layer. Run
               aggregate queries across conditions, measurements, drug exposures,
               and procedures. This implements the EHDS secondary-use analytics
-              capability (Art. 34) where researchers work with de-identified,
+              capability (Art. 53) where researchers work with de-identified,
               standardised data.
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
@@ -977,19 +1143,60 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Execute cross-participant queries using natural language or
-              structured query syntax. The query engine translates requests into
-              federated SPARQL/Cypher queries across connected dataspace nodes.
-              This demonstrates how the EHDS enables cross-border data access
-              without centralising raw health data.
+              A researcher with a data permit asks a question in plain language.
+              A prepared question, a fulltext search or, where one is
+              configured, a language model turns it into Cypher, which runs
+              inside the secure processing environment; the page shows the
+              Cypher, the permit it ran under and the rows that came back. The
+              Federated button asks every SPE and merges the answers. Every
+              answer about persons is k-anonymous: a count below 5 is shown as
+              &lt;5, and a share computed from it with it.
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A researcher types &quot;How many patients with
-              hypertension are older than 65?&quot; and the system queries both
-              AlphaKlinik Berlin and Limburg Medical Centre, returning
-              aggregated results without moving raw data.
+              Example: A researcher asks &quot;What is the age
+              distribution?&quot;; the 0-17 group holds one person and comes
+              back as &lt;5, with a k = 5 badge saying how many values were
+              suppressed.
             </p>
           </FeatureCard>
+
+          <div
+            id="spes"
+            className="rounded-xl border border-(--border) bg-(--surface-2) p-5"
+          >
+            <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold text-indigo-700 dark:text-indigo-400">
+              <Server size={18} aria-hidden /> Two secure processing
+              environments
+            </h3>
+            <p className="text-(--text-secondary) text-sm mb-2">
+              Row-level data is processed only inside a secure processing
+              environment (EHDS Art. 73); only answers leave it. SPE-1 is the
+              main graph. SPE-2 is a second Neo4j holding a different set of
+              patients, so a federated question has two contributors. Both apply
+              the same rules before anything leaves: the data permit, the ODRL
+              policy, the Art. 71 opt-out (persons who opted out are never
+              counted) and k = 5, including the rule that a contributor with
+              fewer than 5 records withholds the whole answer, since a missing
+              contributor would identify people. Every question is recorded on
+              the audit chain.
+            </p>
+            <ul className="text-(--text-secondary) text-sm mb-2 list-disc pl-5 space-y-1">
+              <li>
+                Ask &quot;How many SPEs can I access?&quot; on the query page to
+                see the environments and how many patients each holds.
+              </li>
+              <li>
+                SPE-2 runs on the local stack with the <code>federated</code>{" "}
+                compose profile. The live demo and the static demo have one SPE.
+              </li>
+              <li>
+                The attestation fields on an SPE session are labelled
+                &quot;Simulated attestation&quot;. The plan for a real one on
+                confidential hardware, with the access body checking it, is
+                ADR-068.
+              </li>
+            </ul>
+          </div>
 
           <FeatureCard href="/eehrxf" title="EEHRxF Profiles" icon={FileCheck}>
             <p className="text-(--text-secondary) text-sm mb-2">
@@ -997,7 +1204,7 @@ export default function UserGuidePage() {
               FHIR profiles satisfy EHDS priority categories (Patient Summary,
               ePrescription, Laboratory Results, Medical Imaging, Hospital
               Discharge) and identify coverage gaps. The EEHRxF is mandated by
-              EHDS Art. 6 to ensure interoperability of primary-use health data
+              EHDS Art. 15 to ensure interoperability of primary-use health data
               across Member States.
             </p>
             <p className="text-(--text-secondary) text-xs italic">
@@ -1080,6 +1287,28 @@ export default function UserGuidePage() {
               contributed to.
             </p>
           </FeatureCard>
+          <FeatureCard
+            href="/docs/klarbefund"
+            title="Klarbefund: the iPhone app"
+            icon={Smartphone}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              Klarbefund turns a paper lab report into checkable values on the
+              phone. Connected to the hub, it either creates its own sandbox
+              account with an empty record (gated by Apple App Attest) or
+              connects to an existing one: Health Profile shows a QR code, the
+              app scans it and is connected. It sends the reports, vaccinations
+              and medication plan the person chooses, and weekly device means
+              behind a switch of their own. Delete all my data in the app also
+              deletes the account it created on the hub. The beta is open
+              through TestFlight.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: A patient photographs a lab report, checks the values
+              Klarbefund read, and sends the report to their record, where it
+              appears under Patient Journey.
+            </p>
+          </FeatureCard>
         </div>
       </section>
 
@@ -1089,10 +1318,10 @@ export default function UserGuidePage() {
         <p className="text-(--text-secondary) text-sm mb-4">
           The governance modules manage EHDS compliance, protocol testing, and
           verifiable credential issuance as required by the European Health Data
-          Space regulation (Articles 36-52). These modules ensure that every
-          data access follows the legally mandated approval chain: application,
-          HDAB review, data permit issuance, contract negotiation, and audited
-          transfer.
+          Space regulation (Chapter IV, Art. 50 to 81). These modules ensure
+          that every data access follows the legally mandated approval chain:
+          application, HDAB review, data permit issuance, contract negotiation,
+          and audited transfer.
         </p>
         <MermaidDiagram
           chart={complianceDiagram}
@@ -1107,16 +1336,16 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Manage data access permits as required by EHDS Articles 45-49.
+              Manage data access permits as required by EHDS Art. 67 and 68.
               Data users submit applications specifying the purpose, scope, and
               duration of data access. HDABs review applications against the
-              permitted purposes in Art. 34(1) and issue verifiable credentials
+              permitted purposes in Art. 53(1) and issue verifiable credentials
               as proof of authorization.
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               Example: PharmaCo Research AG submits a data access application
               for the diabetes cohort. MedReg DE (HDAB) reviews the request,
-              approves it under Art. 46, and a DataPermitCredential is issued.
+              approves it under Art. 68, and a DataPermitCredential is issued.
             </p>
           </FeatureCard>
 
@@ -1261,8 +1490,9 @@ export default function UserGuidePage() {
           The sovereign data exchange pipeline follows the Dataspace Protocol
           (DSP 2025-1): share assets, discover via federated catalog, negotiate
           contracts, manage tasks, and transfer data. This pipeline implements
-          EHDS Art. 33-34 requirements for making health data available while
-          preserving data holder sovereignty through policy-controlled access.
+          EHDS Art. 51 and 60 requirements for making health data available
+          while preserving data holder sovereignty through policy-controlled
+          access.
         </p>
 
         <div className="space-y-6">
@@ -1276,7 +1506,7 @@ export default function UserGuidePage() {
               Publish datasets with HealthDCAT-AP metadata and ODRL access
               policies for the federated catalog. Define distribution endpoints,
               data quality attributes, and usage constraints. Data holders use
-              this page to fulfil their obligation under EHDS Art. 33 to make
+              this page to fulfil their obligation under EHDS Art. 60 to make
               data available for secondary use.
             </p>
             <p className="text-(--text-secondary) text-xs italic">
@@ -1445,6 +1675,26 @@ export default function UserGuidePage() {
               DID resolves.
             </p>
           </FeatureCard>
+          <FeatureCard
+            href="/admin/policies"
+            title="Policy Definitions"
+            icon={ScrollText}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              The ODRL policies each participant offers its data under, grouped
+              by participant. New policies start from a template for a permitted
+              purpose of Art. 53 (scientific research, public health, official
+              statistics, AI training and more), with the permitted purposes,
+              the duration of use and the duties attached; the JSON can be
+              edited directly.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: the operator gives Limburg Medical Centre a policy for
+              scientific research only, valid one year, that forbids
+              re-identification.
+            </p>
+          </FeatureCard>
+
           <FeatureCard
             href="/admin/audit"
             title="Audit &amp; Provenance"
