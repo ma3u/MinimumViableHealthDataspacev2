@@ -1138,6 +1138,12 @@
       "file": "ADR-067-a-pid-links-to-an-account-by-a-keyed-fingerprint.md",
       "title": "A PID links to an account by a keyed fingerprint; the hub stores neither name nor birth date",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-068",
+      "file": "ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md",
+      "title": "A sovereign confidential SPE: Confidential Containers and a Trustee the access body runs, Neo4j loaded per permit",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1234,7 +1240,7 @@
     "/docs/developer/quality-gates": "2026-10-28",
     "/docs/developer/api": "2026-10-28",
     "/docs/developer/reference": "2026-10-28",
-    "/docs/architecture": "2026-10-28",
+    "/docs/architecture": "2026-10-30",
     "/docs/security": "2026-10-29",
     "/docs/security/[slug]": "2026-10-29",
     "/docs/klarbefund": "2026-10-29",
