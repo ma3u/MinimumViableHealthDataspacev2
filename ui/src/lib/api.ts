@@ -36,6 +36,7 @@ const STATIC_MOCK_MAP: Record<string, string> = {
   "/api/admin/policies": "/mock/admin_policies.json",
   "/api/admin/components": "/mock/admin_components.json",
   "/api/admin/components/topology": "/mock/admin_components_topology.json",
+  "/api/admin/spe": "/mock/admin_spe.json",
   "/api/odrl/scope": "/mock/odrl_scope.json",
 };
 

@@ -1,0 +1,25 @@
+meta {
+  name: 31 admin/spe
+  type: http
+  seq: 31
+}
+
+get {
+  url: {{baseUrl}}/mock/admin_spe.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.environment: eq static
+  res.body.spes: isArray
+}
+
+docs {
+  ui/public/mock/admin_spe.json stands in for /api/admin/spe in the static build.
+}

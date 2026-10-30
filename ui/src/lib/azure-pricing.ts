@@ -45,6 +45,23 @@ const AZURE_FILES_TRANSACTIONS_EUR = 9.2;
 const ACR_BASIC_EUR_PER_DAY = 0.1466;
 const LOG_ANALYTICS_EUR_PER_GB = 2.38;
 
+// AKS confidential VM node pool for the two SPE workspaces (ADR-068, #774).
+// Azure Retail Prices API, West Europe, Linux pay as you go, read 2026-10-30:
+// Standard_DC4as_v5 EUR 0.183 an hour (USD 0.208), a Standard Load Balancer's
+// included rules EUR 0.022 an hour, a Standard static public IP EUR 0.0044 an
+// hour. The OS disk is #774's estimate of about USD 6 a month, at the rate the
+// node's two prices imply (0.183 / 0.208). The AKS Free tier control plane
+// costs nothing.
+const AKS_VM_EUR_PER_HOUR: Record<string, number> = {
+  Standard_DC4as_v5: 0.183,
+};
+export const AKS_VM_USD_PER_HOUR: Record<string, number> = {
+  Standard_DC4as_v5: 0.208,
+};
+const AKS_LB_EUR_PER_HOUR = 0.022;
+const AKS_PUBLIC_IP_EUR_PER_HOUR = 0.0044;
+const AKS_OS_DISK_EUR_PER_MONTH = 6 * (0.183 / 0.208);
+
 export const AZURE_EGRESS_FREE_GIB = 100;
 const AZURE_EGRESS_EUR_PER_GIB = 0.0704;
 
@@ -79,8 +96,21 @@ export interface PgFlexSpec {
   schedule: AcaSchedule;
 }
 
+export interface AksNodePoolSpec {
+  cluster: string;
+  name: string; // node pool
+  vmSize: string; // key of AKS_VM_EUR_PER_HOUR
+  nodes: number;
+  publicIps: number; // one per LoadBalancer Service
+  // "office": `az aks stop` in the evening and `az aks start` in the morning
+  // (ADR-053), so the node bills office hours. The load balancer, its public
+  // IPs and the OS disk stay and bill around the clock.
+  schedule: AcaSchedule;
+}
+
 export interface AzureEnvironmentInputs {
   pgFlex: PgFlexSpec;
+  aks?: AksNodePoolSpec;
   fileSharesGib: number; // sum of share quotas, an upper bound on data stored
   logAnalyticsGb: number;
   egressGiB: number;
@@ -104,6 +134,10 @@ export interface AzureEnvironmentCost {
   pgFlexEur: number;
   pgFlexComputeEur: number;
   pgFlexStorageEur: number;
+  aksEur: number;
+  aksNodeEur: number;
+  aksNetworkEur: number;
+  aksDiskEur: number;
   filesEur: number;
   registryEur: number;
   logsEur: number;
@@ -148,10 +182,28 @@ export function pgFlexMonthlyEur(pg: PgFlexSpec) {
   return { computeEur, storageEur, totalEur: computeEur + storageEur };
 }
 
+export function aksMonthlyEur(aks: AksNodePoolSpec) {
+  const hourly = AKS_VM_EUR_PER_HOUR[aks.vmSize] ?? 0;
+  const nodeHours =
+    aks.schedule === "office" ? OFFICE_HOURS_PER_MONTH : HOURS_PER_MONTH;
+  const nodeEur = hourly * aks.nodes * nodeHours;
+  const networkEur =
+    (AKS_LB_EUR_PER_HOUR + aks.publicIps * AKS_PUBLIC_IP_EUR_PER_HOUR) *
+    HOURS_PER_MONTH;
+  const diskEur = AKS_OS_DISK_EUR_PER_MONTH * aks.nodes;
+  return {
+    nodeEur,
+    networkEur,
+    diskEur,
+    totalEur: nodeEur + networkEur + diskEur,
+  };
+}
+
 /**
  * Monthly cost of the environment: Container Apps on the off-hours schedule
- * with the subscription's free grant taken off, plus the managed Postgres and
- * the services every deployment pays for.
+ * with the subscription's free grant taken off, plus the managed Postgres, the
+ * AKS confidential node when there is one, and the services every deployment
+ * pays for.
  */
 export function costForEnvironment(
   specs: AcaAppSpec[],
@@ -169,6 +221,9 @@ export function costForEnvironment(
   const computeEur = Math.max(0, grossComputeEur - freeCreditEur);
 
   const pg = pgFlexMonthlyEur(inputs.pgFlex);
+  const aks = inputs.aks
+    ? aksMonthlyEur(inputs.aks)
+    : { nodeEur: 0, networkEur: 0, diskEur: 0, totalEur: 0 };
   const filesEur =
     inputs.fileSharesGib * AZURE_FILES_EUR_PER_GB +
     AZURE_FILES_TRANSACTIONS_EUR;
@@ -186,12 +241,22 @@ export function costForEnvironment(
     pgFlexEur: pg.totalEur,
     pgFlexComputeEur: pg.computeEur,
     pgFlexStorageEur: pg.storageEur,
+    aksEur: aks.totalEur,
+    aksNodeEur: aks.nodeEur,
+    aksNetworkEur: aks.networkEur,
+    aksDiskEur: aks.diskEur,
     filesEur,
     registryEur,
     logsEur,
     egressEur,
     totalEur:
-      computeEur + pg.totalEur + filesEur + registryEur + logsEur + egressEur,
+      computeEur +
+      pg.totalEur +
+      aks.totalEur +
+      filesEur +
+      registryEur +
+      logsEur +
+      egressEur,
   };
 }
 

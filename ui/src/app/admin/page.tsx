@@ -20,6 +20,7 @@ import {
   Gauge,
 } from "lucide-react";
 import Link from "next/link";
+import { SpeStatusCard } from "@/components/spe/SpeStatusCard";
 
 interface Summary {
   totalTenants: number;
@@ -407,6 +408,9 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </div>
+
+            {/* ── Secure processing environments (ADR-068, #774) ── */}
+            <SpeStatusCard />
 
             {/* ── Sub-page quick links ── */}
             <div className="grid md:grid-cols-2 gap-6">

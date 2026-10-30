@@ -1,0 +1,44 @@
+{
+  "environment": "static",
+  "trustee": {
+    "url": "http://trustee:8080",
+    "operator": "MedReg DE (access body)",
+    "verifier": "sample",
+    "reachable": true
+  },
+  "spes": [
+    {
+      "id": "SPE-1",
+      "holder": "AlphaKlinik Berlin",
+      "runsOn": "Docker Compose, neo4j workspace (M1, no TEE)",
+      "teeType": "none",
+      "attestationScope": "none",
+      "simulated": true,
+      "label": "Simulated attestation",
+      "attestedAt": "2026-10-30T07:02:11Z",
+      "keyReleasedAt": "2026-10-30T07:02:12Z",
+      "permitId": "hdab-medreg-pharmaco-2026-001",
+      "policyHash": "sha256:4f1c9a27d83e5b60c2a7e914f0d3b8c51e6a2f97d4c08b13a5e7f2c690d1b4e8",
+      "policyCheckedByHardware": false,
+      "patients": 167,
+      "status": "ready"
+    },
+    {
+      "id": "SPE-2",
+      "holder": "Limburg Medical Centre",
+      "runsOn": "Docker Compose, neo4j-spe2 workspace (M1, no TEE)",
+      "teeType": "none",
+      "attestationScope": "none",
+      "simulated": true,
+      "label": "Simulated attestation",
+      "attestedAt": "2026-10-30T07:02:40Z",
+      "keyReleasedAt": "2026-10-30T07:02:41Z",
+      "permitId": "hdab-irs-lmc-2026-001",
+      "policyHash": "sha256:b7e2046d1f9c38a5e0d4c7b19a62f3e8d05c1b7a9e4f2d68c3a0b5e91f7d2c46",
+      "policyCheckedByHardware": false,
+      "patients": 34,
+      "status": "ready"
+    }
+  ],
+  "residualTrust": []
+}

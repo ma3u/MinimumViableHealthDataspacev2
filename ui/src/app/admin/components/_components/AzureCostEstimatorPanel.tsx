@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AKS_VM_USD_PER_HOUR,
   AZURE_BILLED,
   AZURE_EGRESS_FREE_GIB,
   costForEnvironment,
@@ -9,9 +10,19 @@ import {
   type AcaAppSpec,
 } from "@/lib/azure-pricing";
 import { useMemo } from "react";
-import { BarChart2, Clock, Database, HardDrive, Network } from "lucide-react";
+import {
+  BarChart2,
+  Clock,
+  Cpu,
+  Database,
+  HardDrive,
+  Network,
+} from "lucide-react";
+import { ADR_068_URL } from "@/lib/spe";
 import {
   ACA_APP_SPECS,
+  AKS_SPE_DETAILS,
+  AKS_SPE_NODE_POOL,
   AZURE_PG_FLEX,
   COMPUTED_STORAGE_GIB,
   EGRESS_INFRA_BASELINE_GB,
@@ -69,6 +80,7 @@ export function AzureCostEstimatorPanel({
     () =>
       costForEnvironment(specs, {
         pgFlex: AZURE_PG_FLEX,
+        aks: AKS_SPE_NODE_POOL,
         fileSharesGib: storageGiB,
         logAnalyticsGb: LOG_ANALYTICS_GB_PER_MONTH,
         egressGiB,
@@ -219,9 +231,52 @@ export function AzureCostEstimatorPanel({
         </div>
       </div>
 
+      {/* The AKS confidential node for the SPE workspaces (ADR-068, #774) */}
+      <div>
+        <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
+          Secure processing environments (AKS)
+        </p>
+        <section
+          aria-label="AKS confidential node cost"
+          className="border border-(--border) rounded-lg p-3 bg-(--surface)/40 text-xs"
+        >
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <span className="flex items-center gap-1 text-(--text-primary) font-mono">
+              <Cpu size={11} aria-hidden="true" />
+              {AKS_SPE_NODE_POOL.cluster} · node pool {AKS_SPE_NODE_POOL.name}
+            </span>
+            <span className="font-mono text-(--success-text)">
+              {formatEur(cost.aksEur)}/mo
+            </span>
+          </div>
+          <p className="text-[10px] text-(--text-secondary) mt-1">
+            {AKS_SPE_NODE_POOL.nodes} × {AKS_SPE_NODE_POOL.vmSize} (
+            {AKS_SPE_DETAILS.tee}, {AKS_SPE_DETAILS.os},{" "}
+            {AKS_SPE_DETAILS.region}) at $
+            {AKS_VM_USD_PER_HOUR[AKS_SPE_NODE_POOL.vmSize]} an hour ·{" "}
+            {AKS_SPE_NODE_POOL.schedule === "always"
+              ? "24×7"
+              : "stopped off hours (ADR-053)"}{" "}
+            {formatEur(cost.aksNodeEur)} · load balancer and{" "}
+            {AKS_SPE_NODE_POOL.publicIps} public IPs{" "}
+            {formatEur(cost.aksNetworkEur)} · OS disk{" "}
+            {formatEur(cost.aksDiskEur)} · {AKS_SPE_DETAILS.tier} tier control
+            plane €0 ·{" "}
+            <a
+              href={ADR_068_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-(--accent) hover:underline"
+            >
+              ADR-068
+            </a>
+          </p>
+        </section>
+      </div>
+
       {/* Totals */}
       <div className="border border-(--border) rounded-xl p-4 bg-(--surface)/60">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-center">
           <div>
             <div className="text-[10px] text-(--text-secondary) mb-1">
               Compute (net)
@@ -236,6 +291,14 @@ export function AzureCostEstimatorPanel({
             </div>
             <div className="font-mono text-lg font-semibold text-(--text-primary)">
               {formatEur(cost.pgFlexEur)}
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] text-(--text-secondary) mb-1">
+              AKS SPE node
+            </div>
+            <div className="font-mono text-lg font-semibold text-(--text-primary)">
+              {formatEur(cost.aksEur)}
             </div>
           </div>
           <div>
@@ -264,9 +327,10 @@ export function AzureCostEstimatorPanel({
         </div>
         <p className="text-[9px] text-(--text-secondary) mt-3 text-center">
           EUR, as billed · Container Apps rates from the subscription&apos;s
-          bill, the rest from the Azure retail price list (2026-10-03) ·
-          everything stops outside Mon-Fri 07-20 (ADR-053) · Azure OpenAI, Key
-          Vault and Communication Services are usage based and near €0
+          bill, the rest from the Azure retail price list (2026-10-03, the AKS
+          node 2026-10-30) · everything stops outside Mon-Fri 07-20 (ADR-053) ·
+          Azure OpenAI, Key Vault and Communication Services are usage based and
+          near €0
         </p>
       </div>
     </div>

@@ -41,6 +41,12 @@ vi.mock("@/components/OdrlJsonHighlighter", () => ({
   ),
 }));
 
+// The SPE permit section fetches /api/admin/spe on its own; these tests count
+// and sequence the page's policy calls. It has its own tests (#774).
+vi.mock("@/components/spe/SpePermitBindings", () => ({
+  SpePermitBindings: () => null,
+}));
+
 import AdminPoliciesPage from "@/app/admin/policies/page";
 
 function mockResponse(data: unknown, ok = true) {

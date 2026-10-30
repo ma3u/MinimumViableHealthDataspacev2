@@ -622,5 +622,115 @@
       "errorMessage": "No data permit covers this access (Art. 61(1))",
       "demo": true
     }
+  ],
+  "speEvents": [
+    {
+      "id": "spe-evt-0009",
+      "eventType": "spe.workspace_loaded",
+      "recorded": "2026-10-30T07:02:44Z",
+      "speId": "SPE-2",
+      "permitId": "hdab-irs-lmc-2026-001",
+      "policyHash": "sha256:b7e2046d1f9c38a5e0d4c7b19a62f3e8d05c1b7a9e4f2d68c3a0b5e91f7d2c46",
+      "teeType": "none",
+      "attestationScope": "none",
+      "simulated": true,
+      "outcome": "success"
+    },
+    {
+      "id": "spe-evt-0008",
+      "eventType": "spe.key_release",
+      "recorded": "2026-10-30T07:02:41Z",
+      "speId": "SPE-2",
+      "permitId": "hdab-irs-lmc-2026-001",
+      "policyHash": "sha256:b7e2046d1f9c38a5e0d4c7b19a62f3e8d05c1b7a9e4f2d68c3a0b5e91f7d2c46",
+      "teeType": "none",
+      "attestationScope": "none",
+      "simulated": true,
+      "outcome": "success"
+    },
+    {
+      "id": "spe-evt-0007",
+      "eventType": "spe.attestation",
+      "recorded": "2026-10-30T07:02:40Z",
+      "speId": "SPE-2",
+      "permitId": "hdab-irs-lmc-2026-001",
+      "policyHash": "sha256:b7e2046d1f9c38a5e0d4c7b19a62f3e8d05c1b7a9e4f2d68c3a0b5e91f7d2c46",
+      "teeType": "none",
+      "attestationScope": "none",
+      "simulated": true,
+      "outcome": "success"
+    },
+    {
+      "id": "spe-evt-0006",
+      "eventType": "spe.workspace_loaded",
+      "recorded": "2026-10-30T07:02:15Z",
+      "speId": "SPE-1",
+      "permitId": "hdab-medreg-pharmaco-2026-001",
+      "policyHash": "sha256:4f1c9a27d83e5b60c2a7e914f0d3b8c51e6a2f97d4c08b13a5e7f2c690d1b4e8",
+      "teeType": "none",
+      "attestationScope": "none",
+      "simulated": true,
+      "outcome": "success"
+    },
+    {
+      "id": "spe-evt-0005",
+      "eventType": "spe.key_release",
+      "recorded": "2026-10-30T07:02:12Z",
+      "speId": "SPE-1",
+      "permitId": "hdab-medreg-pharmaco-2026-001",
+      "policyHash": "sha256:4f1c9a27d83e5b60c2a7e914f0d3b8c51e6a2f97d4c08b13a5e7f2c690d1b4e8",
+      "teeType": "none",
+      "attestationScope": "none",
+      "simulated": true,
+      "outcome": "success"
+    },
+    {
+      "id": "spe-evt-0004",
+      "eventType": "spe.attestation",
+      "recorded": "2026-10-30T07:02:11Z",
+      "speId": "SPE-1",
+      "permitId": "hdab-medreg-pharmaco-2026-001",
+      "policyHash": "sha256:4f1c9a27d83e5b60c2a7e914f0d3b8c51e6a2f97d4c08b13a5e7f2c690d1b4e8",
+      "teeType": "none",
+      "attestationScope": "none",
+      "simulated": true,
+      "outcome": "success"
+    },
+    {
+      "id": "spe-evt-0003",
+      "eventType": "spe.workspace_destroyed",
+      "recorded": "2026-10-29T19:59:30Z",
+      "speId": "SPE-1",
+      "permitId": "hdab-medreg-pharmaco-2026-001",
+      "policyHash": "sha256:4f1c9a27d83e5b60c2a7e914f0d3b8c51e6a2f97d4c08b13a5e7f2c690d1b4e8",
+      "teeType": "none",
+      "attestationScope": "none",
+      "simulated": true,
+      "outcome": "success"
+    },
+    {
+      "id": "spe-evt-0002",
+      "eventType": "spe.key_refused",
+      "recorded": "2026-10-29T16:41:05Z",
+      "speId": "SPE-2",
+      "permitId": "hdab-irs-lmc-2026-001",
+      "policyHash": "sha256:b7e2046d1f9c38a5e0d4c7b19a62f3e8d05c1b7a9e4f2d68c3a0b5e91f7d2c46",
+      "teeType": "none",
+      "attestationScope": "none",
+      "simulated": true,
+      "outcome": "refused"
+    },
+    {
+      "id": "spe-evt-0001",
+      "eventType": "spe.attestation",
+      "recorded": "2026-10-29T16:41:04Z",
+      "speId": "SPE-2",
+      "permitId": "hdab-irs-lmc-2026-001",
+      "policyHash": "sha256:b7e2046d1f9c38a5e0d4c7b19a62f3e8d05c1b7a9e4f2d68c3a0b5e91f7d2c46",
+      "teeType": "none",
+      "attestationScope": "none",
+      "simulated": true,
+      "outcome": "refused"
+    }
   ]
 }

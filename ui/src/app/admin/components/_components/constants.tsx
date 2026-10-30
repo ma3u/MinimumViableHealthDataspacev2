@@ -1,7 +1,11 @@
 "use client";
 
 import { HardDrive, Server, Shield, Workflow } from "lucide-react";
-import type { AcaAppSpec, PgFlexSpec } from "@/lib/azure-pricing";
+import type {
+  AcaAppSpec,
+  AksNodePoolSpec,
+  PgFlexSpec,
+} from "@/lib/azure-pricing";
 import type { Severity } from "./types";
 
 export const REFRESH_INTERVAL = 30_000;
@@ -117,9 +121,35 @@ export const ACA_APP_SPECS: AcaAppSpec[] = [
   { name: "mvhd-keycloak", cpu: 1.0, memGiB: 2.0, schedule: "office" },
   { name: "mvhd-vault", cpu: 0.75, memGiB: 1.5, schedule: "office" },
   { name: "mvhd-claude-federation", cpu: 0.5, memGiB: 1.0, schedule: "office" },
+  // The access body's Trustee (KBS, Attestation Service, RVPS) for the SPEs of
+  // ADR-068, operated as if by MedReg DE (#774). It holds no row-level data,
+  // so it stays on ACA (ADR-012).
+  { name: "mvhd-trustee", cpu: 0.25, memGiB: 0.5, schedule: "office" },
   // mvhd-postgres is retired (ADR-041 phase 4); nothing used it after the
   // move to the Flexible Server below.
 ];
+
+// ADR-068, #774: the two SPE workspaces (namespaces spe-1 and spe-2) run on
+// one AMD SEV-SNP confidential VM node beside ACA, node-level evidence (A1).
+// The cluster stops off hours with everything else (ADR-053); the workspaces
+// reload from the encrypted extract on every start. One LoadBalancer Service
+// with a public IP per workspace (Bolt with TLS).
+export const AKS_SPE_NODE_POOL: AksNodePoolSpec = {
+  cluster: "aks-mvhd-spe",
+  name: "cvm",
+  vmSize: "Standard_DC4as_v5",
+  nodes: 1,
+  publicIps: 2,
+  schedule: "office",
+};
+
+export const AKS_SPE_DETAILS = {
+  region: "West Europe",
+  os: "Azure Linux 3",
+  tee: "AMD SEV-SNP",
+  tier: "Free",
+  namespaces: ["spe-1", "spe-2"],
+} as const;
 
 // ADR-041: every database lives on this Flexible Server since 2026-10-02.
 // The evening stop stops it last and the morning start starts it first

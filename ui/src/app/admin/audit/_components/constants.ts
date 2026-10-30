@@ -5,6 +5,7 @@ import {
   ShieldCheck,
   Eye,
   AlertTriangle,
+  Lock,
 } from "lucide-react";
 import type { AuditFilters, AuditType } from "./types";
 
@@ -19,6 +20,7 @@ export const TABS: {
   { key: "credentials", label: "Credentials", icon: ShieldCheck },
   { key: "accesslogs", label: "Access Logs", icon: Eye },
   { key: "supervision", label: "Supervision", icon: AlertTriangle },
+  { key: "spe", label: "Secure processing", icon: Lock },
 ];
 
 export const TRANSFER_STATUSES = ["COMPLETED", "IN_PROGRESS", "ERROR"];

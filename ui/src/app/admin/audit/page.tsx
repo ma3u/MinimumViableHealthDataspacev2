@@ -19,6 +19,7 @@ import {
 import { ComplianceButton } from "./_components/ComplianceButton";
 import { FilterBar } from "./_components/FilterBar";
 import { RetentionLine } from "./_components/RetentionLine";
+import { SpeAuditSection } from "./_components/SpeAuditSection";
 import { EMPTY_FILTERS, TABS } from "./_components/constants";
 import {
   accessTypeBadge,
@@ -144,8 +145,8 @@ export default function AdminAuditPage() {
           ))}
         </div>
 
-        {/* Filter bar (not on overview) */}
-        {activeTab !== "all" && (
+        {/* Filter bar (not on overview; secure processing has its own) */}
+        {activeTab !== "all" && activeTab !== "spe" && (
           <FilterBar
             filters={filters}
             onChange={updateFilter}
@@ -717,6 +718,10 @@ export default function AdminAuditPage() {
                   )}
                 </section>
               )}
+            {/* ── Secure processing (ADR-068, #774) ──────────────────────── */}
+            {activeTab === "spe" && (
+              <SpeAuditSection events={data.speEvents ?? []} />
+            )}
             {/* ── Access Logs ────────────────────────────────────────────── */}
             {activeTab === "supervision" && (
               <section className="mb-8" data-testid="supervision-section">
