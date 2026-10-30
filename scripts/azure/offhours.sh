@@ -66,6 +66,10 @@ CORE_APPS=(mvhd-vault mvhd-keycloak mvhd-claude-federation mvhd-neo4j mvhd-nats
 EDC_APPS=(mvhd-controlplane mvhd-siglet mvhd-dp-fhir mvhd-dp-omop
           mvhd-identityhub mvhd-issuerservice mvhd-tenant-mgr mvhd-provision-mgr)
 CFM_APPS=(mvhd-cfm-cp-shim mvhd-cfm-kcagent mvhd-cfm-edcvagent mvhd-cfm-regagent mvhd-cfm-obagent)
+# SPE-2, the second secure processing environment (ADR-069), from the moment
+# scripts/azure/20-neo4j-spe2.sh has created it. Until then it is left out:
+# set-app-power.sh fails on an app that does not exist, and the stop with it.
+SPE2_APP="${SPE2_APP:-mvhd-neo4j-spe2}"
 
 # GitHub annotations when run there, plain lines anywhere else.
 gh_mark() { if [ -n "${GITHUB_ACTIONS:-}" ]; then echo "::$1::$2"; else echo "$(tr '[:lower:]' '[:upper:]' <<<"$1"): $2"; fi; }
@@ -81,6 +85,8 @@ vault_state() { az containerapp show --name mvhd-vault --resource-group "$RESOUR
                   --query properties.runningStatus -o tsv; }
 pg_state()    { az postgres flexible-server show --name "$PG_FLEX_NAME" --resource-group "$RESOURCE_GROUP" \
                   --query state -o tsv 2>/dev/null || echo unknown; }
+spe2_present() { az containerapp show --name "$SPE2_APP" --resource-group "$RESOURCE_GROUP" \
+                   --query name -o tsv >/dev/null 2>&1; }
 scale() {  # scale <min> <max> <app>...
   local min="$1" max="$2" app; shift 2
   for app in "$@"; do
@@ -151,9 +157,17 @@ do_stop() {
   fi
 
   # A stop, not min=0: scale-to-zero only reaches zero for an app nobody calls
-  # (PR #482). A stopped app keeps its revision and scale.
-  log "stopping ${#BACKEND_APPS[@]} apps"
-  "${SCRIPT_DIR}/set-app-power.sh" stop "${BACKEND_APPS[@]}"
+  # (PR #482). A stopped app keeps its revision and scale. SPE-2 goes right
+  # after SPE-1, once the proxy that reads both has stopped.
+  local -a apps=()
+  local app spe2=""
+  if spe2_present; then spe2=1; fi
+  for app in "${BACKEND_APPS[@]}"; do
+    apps+=("$app")
+    if [ "$app" = mvhd-neo4j ] && [ -n "$spe2" ]; then apps+=("$SPE2_APP"); fi
+  done
+  log "stopping ${#apps[@]} apps"
+  "${SCRIPT_DIR}/set-app-power.sh" stop "${apps[@]}"
 
   # Last, because Keycloak, Vault and the EDC services hold connections to it.
   local state
@@ -163,7 +177,7 @@ do_stop() {
   fi
   state=$(pg_state)
   [ "$state" = Stopped ] || { error "$PG_FLEX_NAME is '$state' after the stop (expected Stopped)"; exit 1; }
-  log "stopped: UI offline at min=0, ${#BACKEND_APPS[@]} apps and $PG_FLEX_NAME"
+  log "stopped: UI offline at min=0, ${#apps[@]} apps and $PG_FLEX_NAME"
 }
 
 # ── start ───────────────────────────────────────────────────────────────────
@@ -182,11 +196,18 @@ do_start() {
   # still runs replicas (an old Neo4j revision held the store lock, 2026-10-04).
   "${SCRIPT_DIR}/retire-stale-revisions.sh" || warn "A stale revision could not be deactivated, see above"
 
+  # SPE-2 first, so it has the longest time to come up before the proxy
+  # connects; the proxy keeps trying for ten minutes in any case (ADR-069).
+  local -a core=("${CORE_APPS[@]}") graphs=(mvhd-neo4j)
+  if spe2_present; then
+    core=("$SPE2_APP" "${core[@]}")
+    graphs+=("$SPE2_APP")
+  fi
   log "core apps"
-  "${SCRIPT_DIR}/set-app-power.sh" start "${CORE_APPS[@]}" || warn "Not every core app reported running, see above"
-  scale 1 1 mvhd-neo4j mvhd-keycloak mvhd-vault mvhd-catalog-enricher mvhd-claude-federation
+  "${SCRIPT_DIR}/set-app-power.sh" start "${core[@]}" || warn "Not every core app reported running, see above"
+  scale 1 1 "${graphs[@]}" mvhd-keycloak mvhd-vault mvhd-catalog-enricher mvhd-claude-federation
   # A scale change can make a new Neo4j revision; the old one keeps the lock.
-  "${SCRIPT_DIR}/retire-stale-revisions.sh" mvhd-neo4j || warn "A stale mvhd-neo4j revision could not be deactivated, see above"
+  "${SCRIPT_DIR}/retire-stale-revisions.sh" "${graphs[@]}" || warn "A stale Neo4j revision could not be deactivated, see above"
   scale 1 2 mvhd-neo4j-proxy
   scale 1 1 mvhd-nats
   log "waiting 75 s for Neo4j and Vault"; sleep 75
@@ -234,7 +255,7 @@ do_start() {
   # The one check allowed to fail the start: a stack that cannot serve a
   # login is not started, whatever the steps above said (2026-09-30).
   "${SCRIPT_DIR}/check-keycloak-health.sh" "https://${KEYCLOAK_PUBLIC_HOSTNAME}" edcv
-  log "started: Postgres, $(( ${#CORE_APPS[@]} + ${#EDC_APPS[@]} + ${#CFM_APPS[@]} )) apps, UI online"
+  log "started: Postgres, $(( ${#core[@]} + ${#EDC_APPS[@]} + ${#CFM_APPS[@]} )) apps, UI online"
 }
 
 case "${1:-}" in

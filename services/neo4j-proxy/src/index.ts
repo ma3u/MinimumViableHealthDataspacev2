@@ -23,8 +23,10 @@ import {
   OLLAMA_URL,
   OPENAI_API_KEY,
   PORT,
+  SPE2_CONNECT_ATTEMPTS,
+  SPE2_CONNECT_INTERVAL_MS,
 } from "./config.js";
-import { driver, setDriver, setSpe2Driver, spe2Driver } from "./db.js";
+import { connectSpe2, driver, setDriver, spe2Driver } from "./db.js";
 import { app } from "./app.js";
 import { dcpDiscoveryTick, startDcpDiscoveryLoop } from "./dcp-discovery.js";
 
@@ -57,19 +59,39 @@ async function main() {
     process.exit(1);
   }
 
-  // Phase 5: Connect to optional second SPE
+  // Phase 5: Connect to optional second SPE. One try before listening, so
+  // the startup line says whether it is there; when it is not up yet, the
+  // proxy answers from SPE-1 and keeps trying in the background (ADR-069).
   if (NEO4J_SPE2_URI) {
-    try {
-      const spe2 = neo4j.driver(
-        NEO4J_SPE2_URI,
+    const spe2Uri = NEO4J_SPE2_URI;
+    const create = () =>
+      neo4j.driver(
+        spe2Uri,
         neo4j.auth.basic(NEO4J_SPE2_USER, NEO4J_SPE2_PASSWORD),
       );
-      setSpe2Driver(spe2);
-      const info2 = await spe2.getServerInfo();
-      logger.info({ server: info2.address }, "connected to Neo4j SPE-2");
-    } catch (err) {
-      logger.warn({ err }, "SPE-2 not available (federated queries disabled)");
-      setSpe2Driver(null);
+    const onConnected = (server: string | undefined, attempt: number) =>
+      logger.info({ server, attempt }, "connected to Neo4j SPE-2");
+    const now = await connectSpe2({
+      create,
+      attempts: 1,
+      intervalMs: 0,
+      onConnected,
+    });
+    if (!now) {
+      logger.warn(
+        "SPE-2 not answering yet; federated queries use SPE-1 alone until it does",
+      );
+      void connectSpe2({
+        create,
+        attempts: SPE2_CONNECT_ATTEMPTS,
+        intervalMs: SPE2_CONNECT_INTERVAL_MS,
+        onConnected,
+        onGiveUp: (err) =>
+          logger.warn(
+            { err },
+            "SPE-2 not available (federated queries disabled)",
+          ),
+      });
     }
   } else {
     logger.info("SPE-2 not configured (set NEO4J_SPE2_URI to enable)");

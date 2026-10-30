@@ -12,6 +12,16 @@ export const NEO4J_SPE2_URI = process.env.NEO4J_SPE2_URI;
 export const NEO4J_SPE2_USER = process.env.NEO4J_SPE2_USER ?? NEO4J_USER;
 export const NEO4J_SPE2_PASSWORD =
   process.env.NEO4J_SPE2_PASSWORD ?? NEO4J_PASSWORD;
+// When SPE-2 does not answer at startup the proxy keeps trying in the
+// background (ADR-069): 40 attempts 15 s apart, ten minutes in all.
+export const SPE2_CONNECT_ATTEMPTS = parseInt(
+  process.env.SPE2_CONNECT_ATTEMPTS ?? "40",
+  10,
+);
+export const SPE2_CONNECT_INTERVAL_MS = parseInt(
+  process.env.SPE2_CONNECT_INTERVAL_MS ?? "15000",
+  10,
+);
 
 // GDPR / EHDS: k-anonymity minimum cohort size for federated queries.
 // Callers may request a HIGHER threshold via the request body, but never lower.

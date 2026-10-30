@@ -5,22 +5,32 @@
 // Processing Environment (SPE-2). Different organization, dataset ID, and
 // distribution endpoints.
 //
-// Idempotent (MERGE everywhere). Run after FHIR load + OMOP transform:
+// Idempotent (MERGE everywhere). scripts/seed-spe2.py applies it to SPE-2
+// after copying SPE-2's patients (ADR-069), locally and on Azure; by hand:
 //
 //   cat neo4j/register-fhir-dataset-hdcatap-spe2.cypher | \
 //     docker exec -i health-dataspace-neo4j-spe2 \
 //     cypher-shell -u neo4j -p healthdataspace
+//
+// The publisher is Limburg Medical Centre, a fictional data holder. Every
+// relationship below matches both ends first: cypher-shell runs each
+// statement on its own, so `MERGE (pub)-[:PUBLISHES]->(cat);` with nothing
+// bound created two empty nodes instead of linking the two (until 2026-10-30).
 // =============================================================================
 
 // ---------------------------------------------------------------------------
 // 1. Publisher (Organization — foaf:Organization)
 // ---------------------------------------------------------------------------
 MERGE (pub:Organization {organizationId: 'org:health-mvd-operator-spe2'})
-  ON CREATE SET pub.name         = 'Health MVD SPE-2 Operator',
-               pub.jurisdiction  = 'EU',
-               pub.ehdsRole      = 'DataHolder',
-               pub.createdAt     = datetime()
-  ON MATCH  SET pub.modifiedAt   = datetime();
+  ON CREATE SET pub.name           = 'Limburg Medical Centre',
+               pub.jurisdiction    = 'NL',
+               pub.ehdsRole        = 'DataHolder',
+               pub.participantDid  = 'did:web:lmc.nl:clinic',
+               pub.createdAt       = datetime()
+  ON MATCH  SET pub.name           = 'Limburg Medical Centre',
+               pub.jurisdiction    = 'NL',
+               pub.participantDid  = 'did:web:lmc.nl:clinic',
+               pub.modifiedAt      = datetime();
 
 // ---------------------------------------------------------------------------
 // 2. Catalog node (dcat:Catalog — Layer 2 root)
@@ -33,16 +43,19 @@ MERGE (cat:Catalog {catalogId: 'catalog:health-mvd-spe2'})
                cat.createdAt     = datetime()
   ON MATCH  SET cat.modifiedAt   = datetime();
 
+MATCH (pub:Organization {organizationId: 'org:health-mvd-operator-spe2'})
+MATCH (cat:Catalog {catalogId: 'catalog:health-mvd-spe2'})
 MERGE (pub)-[:PUBLISHES]->(cat);
 
 // ---------------------------------------------------------------------------
 // 3. ContactPoint (vcard:ContactPoint)
 // ---------------------------------------------------------------------------
 MERGE (cp:ContactPoint {contactId: 'contact:health-mvd-steward-spe2'})
-  ON CREATE SET cp.name    = 'Health MVD SPE-2 Data Steward',
+  ON CREATE SET cp.name    = 'Limburg Medical Centre Data Steward',
                cp.email    = 'datasteward-spe2@health-mvd.example.org',
                cp.url      = 'https://github.com/ma3u/MinimumViableHealthDataspacev2',
-               cp.role     = 'DataSteward';
+               cp.role     = 'DataSteward'
+  ON MATCH  SET cp.name    = 'Limburg Medical Centre Data Steward';
 
 // ---------------------------------------------------------------------------
 // 4. Register the SPE-2 Synthea FHIR Dataset (HealthDCAT-AP vocabulary)
@@ -90,8 +103,12 @@ MERGE (ds:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-spe2'})
     ds.hdcatapSensitiveData            = false;
 
 // Link dataset into catalog
-MERGE (cat)-[:HAS_DATASET]->(ds);
-MERGE (pub)-[:OWNS_DATASET]->(ds);
+MATCH (ds:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-spe2'})
+MATCH (cat:Catalog {catalogId: 'catalog:health-mvd-spe2'})
+MATCH (pub:Organization {organizationId: 'org:health-mvd-operator-spe2'})
+MATCH (cp:ContactPoint {contactId: 'contact:health-mvd-steward-spe2'})
+MERGE (cat)-[:HAS_DATASET]->(ds)
+MERGE (pub)-[:OWNS_DATASET]->(ds)
 MERGE (ds)-[:HAS_CONTACT_POINT]->(cp);
 
 // Link to EEHRxF categories
@@ -193,6 +210,7 @@ MERGE (purpose:EhdsPurpose {id: 'purpose:ehds-art53'})
     purpose.createdAt     = datetime();
 
 MATCH (ds:HealthDataset {datasetId: 'dataset:synthea-fhir-r4-spe2'})
+MATCH (purpose:EhdsPurpose {id: 'purpose:ehds-art53'})
 MERGE (ds)-[:SUBJECT_TO_PURPOSE]->(purpose);
 
 // ---------------------------------------------------------------------------

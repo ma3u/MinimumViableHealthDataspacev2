@@ -212,6 +212,24 @@ export NEO4J_PASSWORD="healthdataspace"
 # cost. Reachable from inside the ACA environment only, not from a workstation.
 export NEO4J_BOLT_URI="bolt://${NEO4J_APP}:7687"
 
+# ── SPE-2, the second secure processing environment (ADR-069) ──────────────
+# Its own Neo4j app, share and password; 20-neo4j-spe2.sh creates all three,
+# seeds it from SPE-1 and points the proxy at it. Bolt on 7688 as on the
+# compose stack: ACA reaches environment-local TCP by short app name and the
+# exposed port, and a second app on 7687 would rely on the environment
+# keeping the two apart by name alone. Same size as SPE-1 (ADR-056).
+export NEO4J_SPE2_APP="mvhd-neo4j-spe2"
+export NEO4J_SPE2_SEED_JOB="mvhd-neo4j-spe2-seed"
+export SHARE_NEO4J_SPE2_DATA="neo4j-spe2-data"
+export QUOTA_NEO4J_SPE2_DATA=5
+export NEO4J_SPE2_PORT=7688
+export NEO4J_SPE2_BOLT_URI="bolt://${NEO4J_SPE2_APP}:${NEO4J_SPE2_PORT}"
+export NEO4J_SPE2_USER="neo4j"
+# Key Vault secrets (ADR-036): the password, and the same as `neo4j/<password>`
+# for the image's NEO4J_AUTH. Never in this file.
+export KV_NEO4J_SPE2_PASSWORD="neo4j-spe2-password"
+export KV_NEO4J_SPE2_AUTH="neo4j-spe2-auth"
+
 # ── Azure Key Vault (ADR-036) ────────────────────────────────────────────────
 # Operator secrets live here and are referenced, never copied into this file.
 export KEY_VAULT_NAME="${KEY_VAULT_NAME:-kv-mvhd-b53a0449}"

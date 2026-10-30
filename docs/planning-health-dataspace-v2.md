@@ -295,8 +295,9 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [066](ADRs/ADR-066-the-hub-runs-its-own-eudi-verifier-behind-a-wallet-only-gate.md)           | The hub runs its own EUDI verifier, behind a gate that passes the wallet API only                                    | 2026-10-28 | Proposed          |
 | [067](ADRs/ADR-067-a-pid-links-to-an-account-by-a-keyed-fingerprint.md)                       | A PID links to an account by a keyed fingerprint; the hub stores neither name nor birth date                         | 2026-10-28 | Accepted          |
 | [068](ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md)    | A sovereign confidential SPE: Confidential Containers and a Trustee the access body runs, Neo4j loaded per permit    | 2026-10-30 | Accepted          |
+| [069](ADRs/ADR-069-azure-runs-a-second-spe.md)                                                | Azure runs a second SPE as a Neo4j app of its own, seeded from SPE-1 with a different set of patients                | 2026-10-30 | Proposed          |
 
-Numbers taken by open work, so a new ADR starts at **069**: 051 (#475). 050
+Numbers taken by open work, so a new ADR starts at **070**: 051 (#475). 050
 (#477), 054 (#520) and 055 (#517) are merged.
 
 ADR-045 to ADR-049 accepted on 2026-10-04.

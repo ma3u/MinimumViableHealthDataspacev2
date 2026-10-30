@@ -1187,7 +1187,9 @@ export default function UserGuidePage() {
               </li>
               <li>
                 SPE-2 runs on the local stack with the <code>federated</code>{" "}
-                compose profile. The live demo and the static demo have one SPE.
+                compose profile, and on Azure once deployment phase 20 has run
+                (ADR-069, proposed). Until then the live demo has one SPE; the
+                static demo has one.
               </li>
               <li>
                 The attestation fields on an SPE session are labelled

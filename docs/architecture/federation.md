@@ -90,6 +90,27 @@ cell that arrives as `"<5"` among its suppressed cells.
 A question about the SPEs themselves ("How many SPEs can I access?") is the
 `spe_access` template: it asks every SPE, Federated button or not.
 
+### Where the two SPEs run
+
+| Stack        | SPE-1                                   | SPE-2                                                                    |
+| ------------ | --------------------------------------- | ------------------------------------------------------------------------ |
+| Compose      | `neo4j` (Bolt 7687)                     | `neo4j-spe2`, profile `federated` (Bolt 7688)                            |
+| Azure        | `mvhd-neo4j` (`bolt://mvhd-neo4j:7687`) | `mvhd-neo4j-spe2` (`bolt://mvhd-neo4j-spe2:7688`), once phase 20 has run |
+| GitHub Pages | fixtures                                | none                                                                     |
+
+SPE-2 holds a different set of patients: `scripts/seed-spe2.py` copies the
+second half of SPE-1's synthetic patients, with their FHIR records, OMOP rows
+and codes, then applies the schema and SPE-2's HealthDCAT-AP registration
+(publisher Limburg Medical Centre). It never copies a record the Klarbefund
+app or a PID created or connected to. Locally: `python3 scripts/seed-spe2.py`
+with the `federated` profile up. On Azure (ADR-069, proposed):
+`scripts/azure/20-neo4j-spe2.sh --create-secret`, then without arguments,
+`--seed` and `--wire-proxy`; the proxy reads SPE-2's password from Key Vault
+and keeps retrying SPE-2 for ten minutes when it is not up at startup, and
+`offhours.sh` stops and starts it with SPE-1. SPE-1 still holds every patient,
+so until it drops the ones SPE-2 holds (ADR-069, "Open") a federated total
+counts those twice.
+
 Publisher-side ODRL policies arrive verbatim as `:OdrlPolicy` nodes via the
 enricher and are enforced at negotiation time (`/negotiate`); VC-gated
 dataset visibility (e.g. requiring a DataQualityLabelCredential before a
