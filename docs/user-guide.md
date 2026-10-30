@@ -64,40 +64,61 @@ Joining a single study below that panel is a separate choice, a consent under
 GDPR Art. 9(2)(a) that can be withdrawn at any time. How it works:
 [ADR-062](ADRs/ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md).
 
-### Graph Explorer — Persona Views
+### Persona Overview: one view per role
 
-| Persona      | Route                       | Primary Question                        | Focus Nodes                                        |
-| ------------ | --------------------------- | --------------------------------------- | -------------------------------------------------- |
-| Hospital     | /graph?persona=hospital     | Who has approved access to my datasets? | Participant, HealthDataset, Contract, HDABApproval |
-| Researcher   | /graph?persona=researcher   | What datasets match my study?           | HealthDataset, OMOPPerson, SnomedConcept           |
-| HDAB         | /graph?persona=hdab         | What approvals are pending?             | HDABApproval, VerifiableCredential, TrustCenter    |
-| Trust Center | /graph?persona=trust-center | Which pseudonym flows am I managing?    | TrustCenter, SPESession, ResearchPseudonym         |
-| EDC Admin    | /graph?persona=edc-admin    | What contracts and transfers are live?  | Participant, DataProduct, Contract, TransferEvent  |
+After sign-in every persona lands on `/overview`, opened at the tab for its role. The graph
+explorer at `/graph` is retired.
+
+| Tab         | Route                        | Primary question                                                                            | Regulation (EU) 2025/327    |
+| ----------- | ---------------------------- | ------------------------------------------------------------------------------------------- | --------------------------- |
+| Patient     | /overview?persona=patient    | Which parameters put me at risk, what should I do about them, and who is using my data?     | Art. 3, 8, 14, 71, 73       |
+| Researcher  | /overview?persona=researcher | What am I allowed to use today, what is pending or blocked, and what am I missing?          | Art. 53, 61, 67–69, 73      |
+| Access body | /overview?persona=hdab       | Which operations are non-compliant right now, and are my own decisions on time?             | Art. 57, 61, 63, 68, 73, 78 |
+| Data holder | /overview?persona=hospital   | Which consumers are trusted, what is flowing without cover, and are my own duties in order? | Art. 60, 61, 73, 77, 78     |
+
+The operator and the trust centre open on the access body's tab.
 
 ## Getting Started
 
-After authenticating through Keycloak SSO, you land on a graph view personalised for your role.
+After authenticating through Keycloak SSO, you land on the persona overview for your role.
+The [user guide on the demo site](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/user-guide)
+describes every page below and shows a screenshot of each on mouse-over.
 
 ### Features
 
-| Feature                | Route             | Description                                       | JAD Required? |
-| ---------------------- | ----------------- | ------------------------------------------------- | ------------- |
-| Home Dashboard         | /                 | Participant overview, statistics, quick actions   | No            |
-| Graph Explorer         | /graph            | 5-layer force-directed knowledge graph            | No            |
-| Dataset Catalog        | /catalog          | HealthDCAT-AP metadata browser (EHDS Art. 77)     | No            |
-| Patient Journey        | /patient          | FHIR R4 clinical timeline with OMOP mapping       | No            |
-| OMOP Analytics         | /analytics        | Cohort analytics dashboards                       | No            |
-| EEHRxF Profiles        | /eehrxf           | European EHR Exchange Format alignment            | No            |
-| NL / Federated Query   | /query            | Natural language graph queries                    | Yes           |
-| EHDS Approval          | /compliance       | HDAB permit workflow (Art. 67-69)                 | Yes           |
-| Protocol TCK           | /compliance/tck   | DSP 2025-1 validation suite                       | Yes           |
-| Verifiable Credentials | /credentials      | DCP v1.0 credential management                    | No            |
-| Share Data             | /data/share       | Publish datasets with ODRL policies (Art. 51, 60) | Yes           |
-| Discover               | /data/discover    | Federated catalog search                          | Yes           |
-| Negotiate              | /negotiate        | DSP contract negotiation lifecycle                | Yes           |
-| Tasks                  | /tasks            | Transfer task queue                               | Yes           |
-| Transfer               | /data/transfer    | Transfer history with audit trail                 | Yes           |
-| Admin Dashboard        | /admin            | Operator overview                                 | Yes           |
-| EDC Components         | /admin/components | EDC-V runtime component status                    | Yes           |
-| Participant Onboarding | /onboarding       | DID registration wizard                           | Yes           |
-| Participant Settings   | /settings         | Profile and credential management                 | Yes           |
+| Feature                   | Route               | Description                                                     | JAD Required? |
+| ------------------------- | ------------------- | --------------------------------------------------------------- | ------------- |
+| Home Dashboard            | /                   | Participant overview, statistics, quick actions                 | No            |
+| Persona Overview          | /overview           | One view per role: what needs attention, with its article       | No            |
+| Dataset Catalog           | /catalog            | HealthDCAT-AP metadata browser (EHDS Art. 77)                   | No            |
+| HealthDCAT-AP Editor      | /catalog/editor     | Data holders write their dataset descriptions (Release 8)       | No            |
+| Patient Journey           | /patient            | FHIR R4 clinical timeline with OMOP mapping                     | No            |
+| OMOP Analytics            | /analytics          | Cohort analytics dashboards                                     | No            |
+| EEHRxF Profiles           | /eehrxf             | European EHR Exchange Format alignment                          | No            |
+| NL / Federated Query      | /query              | Natural language graph queries                                  | Yes           |
+| Personal Research         | /patient/query      | A patient asks questions about their own record (Art. 3)        | No            |
+| Health Profile & Risks    | /patient/profile    | Own health profile, risk scores, connected phones               | No            |
+| Research Programs         | /patient/research   | Art. 71 opt-out and consent to single studies                   | No            |
+| Research Insights         | /patient/insights   | Aggregate findings from studies the patient's data joined       | No            |
+| EHDS Approval             | /compliance         | HDAB permit workflow (Art. 67-69)                               | Yes           |
+| Protocol TCK              | /compliance/tck     | DSP 2025-1 validation suite                                     | Yes           |
+| Verifiable Credentials    | /credentials        | DCP v1.0 credential management                                  | No            |
+| Apply for a Permit        | /applications       | The eleven items of Art. 67(2), then the decision and its clock | No            |
+| Statistical Requests      | /requests           | Art. 69 health data requests answered with a statistic          | No            |
+| Supervision               | /supervision        | Findings, measures and requests for information (Art. 63)       | No            |
+| Permits Register          | /permits            | The access body's public register of decisions (Art. 57, 58)    | No            |
+| Activity Report           | /activity-report    | The access body's biennial report (Art. 59)                     | No            |
+| Secondary Use Information | /information        | What a person should know about secondary use (Art. 58)         | No            |
+| Share Data                | /data/share         | Publish datasets with ODRL policies (Art. 51, 60)               | Yes           |
+| Discover                  | /data/discover      | Federated catalog search                                        | Yes           |
+| Negotiate                 | /negotiate          | DSP contract negotiation lifecycle                              | Yes           |
+| Tasks                     | /tasks              | Transfer task queue                                             | Yes           |
+| Transfer                  | /data/transfer      | Transfer history with audit trail                               | Yes           |
+| Admin Dashboard           | /admin              | Operator overview                                               | Yes           |
+| EDC Components            | /admin/components   | EDC-V runtime component status                                  | Yes           |
+| Tenant Management         | /admin/tenants      | Organisations, their roles and access levels                    | No            |
+| Participant Directory     | /admin/participants | Wallets and catalogs the crawler discovers datasets from        | No            |
+| Policy Definitions        | /admin/policies     | ODRL policies per participant, from Art. 53 purpose templates   | No            |
+| Audit & Provenance        | /admin/audit        | Audit log and provenance trail, shared with the access body     | No            |
+| Participant Onboarding    | /onboarding         | DID registration wizard                                         | Yes           |
+| Participant Settings      | /settings           | Profile and credential management                               | Yes           |

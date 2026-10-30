@@ -157,6 +157,16 @@ describe("UserGuidePage", () => {
 
   it("renders feature sections", () => {
     render(<UserGuidePage />);
-    expect(screen.getAllByText(/Graph Explorer/)[0]).toBeInTheDocument();
+    expect(
+      screen.getByText(/Persona Overview — one view per role/),
+    ).toBeInTheDocument();
+  });
+
+  it("shows each feature's page on mouse-over", () => {
+    render(<UserGuidePage />);
+    expect(screen.getByAltText("Screenshot: Protocol TCK")).toHaveAttribute(
+      "src",
+      "/images/guide/compliance-tck.webp",
+    );
   });
 });
