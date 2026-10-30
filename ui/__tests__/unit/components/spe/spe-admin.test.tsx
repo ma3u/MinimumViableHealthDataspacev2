@@ -72,6 +72,10 @@ describe("the static fixtures", () => {
       expect(spe.simulated).toBe(true);
       expect(spe.policyCheckedByHardware).toBe(false);
       expect(spe.policyHash).toMatch(/^sha256:[0-9a-f]{64}$/);
+      // The sample attester: simulated evidence, no vTPM, no PCRs.
+      expect(spe.attestation?.verifier).toBe("sample");
+      expect(spe.attestation?.claims?.tee).toBe("sample");
+      expect(spe.attestation?.claims?.pcrs).toBeNull();
     }
   });
 
@@ -108,6 +112,16 @@ describe("SpeStatusView (dashboard)", () => {
     expect(
       screen.getByRole("region", { name: "SPE-2, Limburg Medical Centre" }),
     ).toBeInTheDocument();
+  });
+
+  it("links each SPE to its section on /admin/attestation", () => {
+    render(<SpeStatusView data={STATIC_SPE} />);
+    expect(
+      screen.getByRole("link", { name: "Attestation evidence for SPE-1" }),
+    ).toHaveAttribute("href", "/admin/attestation#attestation-spe-1");
+    expect(
+      screen.getByRole("link", { name: "Attestation evidence for SPE-2" }),
+    ).toHaveAttribute("href", "/admin/attestation#attestation-spe-2");
   });
 
   it("shows the Trustee line and no residual trust line when there is none", () => {

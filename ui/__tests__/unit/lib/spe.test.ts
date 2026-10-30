@@ -5,6 +5,8 @@
  */
 import { describe, it, expect } from "vitest";
 import {
+  attestationAnchor,
+  attestationVerdict,
   policyCheckDepth,
   shortPolicyHash,
   speEventLabel,
@@ -106,6 +108,62 @@ describe("policyCheckDepth", () => {
         policyCheckedByHardware: true,
       }).checked,
     ).toBe(false);
+  });
+});
+
+describe("attestationVerdict", () => {
+  const evidence = {
+    verifier: "sample",
+    result: "pass" as const,
+    evidenceDigest: null,
+    tokenIssuedAt: null,
+    tokenExpiresAt: null,
+    policyId: null,
+    claims: null,
+    refusalReason: null,
+  };
+
+  it("is none without an attestation or a result", () => {
+    expect(attestationVerdict({ attestation: null }).text).toBe(
+      "No attestation recorded",
+    );
+    expect(attestationVerdict({}).verdict).toBe("none");
+    expect(
+      attestationVerdict({ attestation: { ...evidence, result: null } })
+        .verdict,
+    ).toBe("none");
+  });
+
+  it("tells a failed verification from a refused key", () => {
+    expect(
+      attestationVerdict({ attestation: { ...evidence, result: "fail" } })
+        .verdict,
+    ).toBe("fail");
+    expect(
+      attestationVerdict({
+        attestation: { ...evidence, refusalReason: "policy" },
+      }).verdict,
+    ).toBe("refused");
+    expect(
+      attestationVerdict({ status: "refused", attestation: evidence }).text,
+    ).toBe("Verified, key refused");
+  });
+
+  it("says whether the key was released after a pass", () => {
+    expect(attestationVerdict({ attestation: evidence }).text).toBe("Verified");
+    expect(
+      attestationVerdict({
+        attestation: evidence,
+        keyReleasedAt: "2026-10-30T07:00:00Z",
+      }).text,
+    ).toBe("Verified, key released");
+  });
+});
+
+describe("attestationAnchor", () => {
+  it("is a stable fragment per SPE", () => {
+    expect(attestationAnchor("SPE-1")).toBe("attestation-spe-1");
+    expect(attestationAnchor("SPE 2")).toBe("attestation-spe-2");
   });
 });
 

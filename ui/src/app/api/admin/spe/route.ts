@@ -31,15 +31,12 @@ function isSpeStatusResponse(v: unknown): v is SpeStatusResponse {
 }
 
 /**
- * An SPE as far as the proxy's existing information goes: no attestation, no
- * key release, no permit, labelled "Simulated attestation". Nothing here may
+ * An SPE as far as the UI knows without the proxy's `/spe/status`: no
+ * attestation, no key release, no permit, no patient count, labelled
+ * "Simulated attestation", status "unreachable" (unknown). Nothing here may
  * claim more than the proxy said.
  */
-function unattested(
-  id: string,
-  patients: number | null,
-  answered: boolean,
-): SpeEntry {
+function unattested(id: string): SpeEntry {
   return {
     id,
     holder: SPE_HOLDERS[id] ?? "Unknown holder",
@@ -53,56 +50,36 @@ function unattested(
     permitId: null,
     policyHash: null,
     policyCheckedByHardware: false,
-    patients,
-    status: answered ? "ready" : "unreachable",
+    patients: null,
+    status: "unreachable",
+    attestation: null,
   };
 }
 
 /**
- * Before the proxy has `/spe/status` (#774 WP1), the only thing that says
- * which SPEs exist is `/federated/stats`: SPE-1 always, SPE-2 only when the
- * proxy has a driver for it. When that fails too, SPE-1 is listed as
- * unreachable and SPE-2 not at all, since nothing says it exists.
+ * True when the deployment says a second SPE exists. `NEO4J_SPE2_CONFIGURED`
+ * ("true" or "1") is set on the UI where the proxy has `NEO4J_SPE2_URI`; the
+ * UI never sees the proxy's environment, and asking the proxy would cost a
+ * query.
  */
-async function fallbackStatus(
-  reason: string,
-  headers: Record<string, string>,
-): Promise<SpeStatusResponse> {
-  const environment = isAzureDeployment() ? "azure" : "local";
-  let spes: SpeEntry[] = [unattested("SPE-1", null, false)];
-  try {
-    const resp = await fetch(`${NEO4J_PROXY_URL}/federated/stats`, {
-      headers,
-      cache: "no-store",
-      signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
-    });
-    if (resp.ok) {
-      const data = (await resp.json()) as {
-        perSpe?: { source?: string; patients?: number }[];
-      };
-      const perSpe = Array.isArray(data.perSpe) ? data.perSpe : [];
-      const byId = new Map(
-        perSpe
-          .filter((s) => typeof s.source === "string")
-          .map((s) => [s.source as string, s]),
-      );
-      const ids = ["SPE-1", ...[...byId.keys()].filter((k) => k !== "SPE-1")];
-      spes = ids.sort().map((id) => {
-        const s = byId.get(id);
-        return unattested(
-          id,
-          typeof s?.patients === "number" ? s.patients : null,
-          Boolean(s),
-        );
-      });
-    }
-  } catch {
-    /* SPE-1 stays listed as unreachable */
-  }
+function spe2Configured(): boolean {
+  const v = (process.env.NEO4J_SPE2_CONFIGURED ?? "").trim().toLowerCase();
+  return v === "true" || v === "1";
+}
+
+/**
+ * Without the proxy's `/spe/status` (#774 WP1 not deployed, or the proxy
+ * down): SPE-1 always, SPE-2 only when `NEO4J_SPE2_CONFIGURED` says it
+ * exists. It asks the proxy nothing else: `/federated/stats` would run the
+ * statistics on every SPE and record a TransferEvent, so every visit to an
+ * admin page would write access-log rows.
+ */
+function fallbackStatus(reason: string): SpeStatusResponse {
+  const ids = spe2Configured() ? ["SPE-1", "SPE-2"] : ["SPE-1"];
   return {
-    environment,
+    environment: isAzureDeployment() ? "azure" : "local",
     trustee: null,
-    spes,
+    spes: ids.map(unattested),
     residualTrust: [],
     fallback: { reason },
   };
@@ -111,16 +88,15 @@ async function fallbackStatus(
 /**
  * GET /api/admin/spe: the confidential SPEs of ADR-068 (#774), for the
  * operator and the access body. Passes the proxy's `/spe/status` through;
- * when the proxy does not have it yet or cannot be reached, answers with what
- * the proxy's federated statistics say, labelled "Simulated attestation".
+ * when the proxy does not have it yet or cannot be reached, answers with the
+ * fallback above, labelled "Simulated attestation", and the reason.
  */
 export async function GET(): Promise<NextResponse> {
   const auth = await requireAuth(["EDC_ADMIN", "HDAB_AUTHORITY"]);
   if (isAuthError(auth)) return auth;
   const { session } = auth;
 
-  // The proxy records the federated statistics call as a TransferEvent; this
-  // header makes the entry name who asked (issue #205).
+  // Names who asked, should the proxy record the status call (issue #205).
   const headers: Record<string, string> = {
     "X-Participant": userToParticipantId(
       session.user.email ?? session.user.name ?? session.user.id,
@@ -149,5 +125,5 @@ export async function GET(): Promise<NextResponse> {
     reason = "The query proxy is unreachable";
   }
 
-  return NextResponse.json(await fallbackStatus(reason, headers));
+  return NextResponse.json(fallbackStatus(reason));
 }

@@ -1,7 +1,19 @@
 "use client";
 
-import { Cpu, KeyRound, Loader2, ShieldQuestion } from "lucide-react";
-import { ADR_068_URL, formatSpeTime, type SpeStatusResponse } from "@/lib/spe";
+import Link from "next/link";
+import {
+  Cpu,
+  Fingerprint,
+  KeyRound,
+  Loader2,
+  ShieldQuestion,
+} from "lucide-react";
+import {
+  ADR_068_URL,
+  attestationAnchor,
+  formatSpeTime,
+  type SpeStatusResponse,
+} from "@/lib/spe";
 import { SpeLabelBadge, SpeStatusText } from "./SpeBadges";
 import { useSpeStatus } from "./use-spe-status";
 
@@ -31,8 +43,8 @@ export function SpeStatusView({ data }: { data: SpeStatusResponse }) {
           role="note"
           className="text-xs text-(--warning-text) bg-(--warning)/10 border border-(--warning)/30 rounded-lg px-3 py-2"
         >
-          {data.fallback.reason}. Shown from the proxy&apos;s federated
-          statistics: no attestation and no key release are known.
+          {data.fallback.reason}. No attestation, key release or patient count
+          is known.
         </p>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -70,6 +82,14 @@ export function SpeStatusView({ data }: { data: SpeStatusResponse }) {
                 value={spe.patients === null ? "unknown" : spe.patients}
               />
             </dl>
+            <Link
+              href={`/admin/attestation#${attestationAnchor(spe.id)}`}
+              aria-label={`Attestation evidence for ${spe.id}`}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-(--accent) hover:underline"
+            >
+              <Fingerprint size={12} aria-hidden="true" />
+              Attestation evidence
+            </Link>
           </section>
         ))}
       </div>

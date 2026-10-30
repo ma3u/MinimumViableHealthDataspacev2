@@ -21,7 +21,25 @@
       "policyHash": "sha256:4f1c9a27d83e5b60c2a7e914f0d3b8c51e6a2f97d4c08b13a5e7f2c690d1b4e8",
       "policyCheckedByHardware": false,
       "patients": 167,
-      "status": "ready"
+      "status": "ready",
+      "attestation": {
+        "verifier": "sample",
+        "result": "pass",
+        "evidenceDigest": "sha256:9cdc8f16c2e033ae5907fc9a4421955c25289eb0a2795b6fcd333c5222837ada",
+        "tokenIssuedAt": "2026-10-30T07:02:11Z",
+        "tokenExpiresAt": "2026-10-30T07:07:11Z",
+        "policyId": "default",
+        "claims": {
+          "tee": "sample",
+          "measurement": "73616d706c652d6d6561737572656d656e742d7370652d31000000000000000000000000000000000000000000000000",
+          "reportedTcb": "sample svn 1",
+          "hostData": "4f1c9a27d83e5b60c2a7e914f0d3b8c51e6a2f97d4c08b13a5e7f2c690d1b4e8",
+          "reportData": "73616d706c652d7265706f72742d646174612d7370652d3100000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "pcrs": null,
+          "vmId": null
+        },
+        "refusalReason": null
+      }
     },
     {
       "id": "SPE-2",
@@ -37,7 +55,25 @@
       "policyHash": "sha256:b7e2046d1f9c38a5e0d4c7b19a62f3e8d05c1b7a9e4f2d68c3a0b5e91f7d2c46",
       "policyCheckedByHardware": false,
       "patients": 34,
-      "status": "ready"
+      "status": "ready",
+      "attestation": {
+        "verifier": "sample",
+        "result": "pass",
+        "evidenceDigest": "sha256:28d0371756a8bb4730858d88f496fea3776b4cde400808145605f6d0b2d0203f",
+        "tokenIssuedAt": "2026-10-30T07:02:40Z",
+        "tokenExpiresAt": "2026-10-30T07:07:40Z",
+        "policyId": "default",
+        "claims": {
+          "tee": "sample",
+          "measurement": "73616d706c652d6d6561737572656d656e742d7370652d32000000000000000000000000000000000000000000000000",
+          "reportedTcb": "sample svn 1",
+          "hostData": "b7e2046d1f9c38a5e0d4c7b19a62f3e8d05c1b7a9e4f2d68c3a0b5e91f7d2c46",
+          "reportData": "73616d706c652d7265706f72742d646174612d7370652d3200000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "pcrs": null,
+          "vmId": null
+        },
+        "refusalReason": null
+      }
     }
   ],
   "residualTrust": []

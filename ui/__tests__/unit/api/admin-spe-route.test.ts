@@ -3,9 +3,10 @@
  * and the access body.
  *
  * Passes the proxy's /spe/status through; when the proxy has none yet (404)
- * or cannot be reached, it answers from the proxy's federated statistics and
- * never claims an attestation it was not told about. The real requireAuth()
- * runs here, against the mocked getServerSession, so the role gate is pinned.
+ * or cannot be reached, it answers from what the UI knows, asks the proxy
+ * nothing else, and never claims an attestation it was not told about. The
+ * real requireAuth() runs here, against the mocked getServerSession, so the
+ * role gate is pinned.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getServerSession } from "next-auth/next";
@@ -58,10 +59,6 @@ function json(body: unknown, status = 200) {
   });
 }
 
-function federatedStats(perSpe: { source: string; patients: number }[]) {
-  return json({ speCount: perSpe.length, perSpe });
-}
-
 function proxyAnswers(routes: Record<string, () => Response | never>) {
   mockFetch.mockImplementation(async (url: string) => {
     for (const [path, answer] of Object.entries(routes)) {
@@ -101,15 +98,8 @@ describe("GET /api/admin/spe", () => {
     expect(init.headers["X-Caller"]).toMatch(/^[0-9a-f]{32}$/);
   });
 
-  it("falls back to the federated statistics when the proxy has no /spe/status (404)", async () => {
-    proxyAnswers({
-      "/spe/status": () => json({ error: "Not found" }, 404),
-      "/federated/stats": () =>
-        federatedStats([
-          { source: "SPE-1", patients: 167 },
-          { source: "SPE-2", patients: 34 },
-        ]),
-    });
+  it("falls back without asking the proxy anything else when it has no /spe/status (404)", async () => {
+    proxyAnswers({ "/spe/status": () => json({ error: "Not found" }, 404) });
     const body = (await (await GET()).json()) as SpeStatusResponse;
     expect(body.fallback?.reason).toBe(
       "The query proxy has no /spe/status yet",
@@ -117,24 +107,39 @@ describe("GET /api/admin/spe", () => {
     expect(body.environment).toBe("local");
     expect(body.trustee).toBeNull();
     expect(body.residualTrust).toEqual([]);
-    expect(
-      body.spes.map((s) => [s.id, s.holder, s.patients, s.status]),
-    ).toEqual([
-      ["SPE-1", "AlphaKlinik Berlin", 167, "ready"],
-      ["SPE-2", "Limburg Medical Centre", 34, "ready"],
+    expect(body.spes.map((s) => [s.id, s.holder, s.status])).toEqual([
+      ["SPE-1", "AlphaKlinik Berlin", "unreachable"],
     ]);
+    // No /federated/stats: it would write a TransferEvent per page visit.
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(String(mockFetch.mock.calls[0][0])).toMatch(/\/spe\/status$/);
+  });
+
+  it("lists SPE-2 in the fallback only when NEO4J_SPE2_CONFIGURED says so", async () => {
+    proxyAnswers({ "/spe/status": () => json({}, 404) });
+    for (const [value, ids] of [
+      ["true", ["SPE-1", "SPE-2"]],
+      ["1", ["SPE-1", "SPE-2"]],
+      ["false", ["SPE-1"]],
+      ["", ["SPE-1"]],
+    ] as const) {
+      vi.stubEnv("NEO4J_SPE2_CONFIGURED", value);
+      const body = (await (await GET()).json()) as SpeStatusResponse;
+      expect(
+        body.spes.map((s) => s.id),
+        `"${value}"`,
+      ).toEqual(ids);
+    }
+    vi.stubEnv("NEO4J_SPE2_CONFIGURED", "true");
+    const body = (await (await GET()).json()) as SpeStatusResponse;
+    expect(body.spes[1].holder).toBe("Limburg Medical Centre");
   });
 
   it("never invents attested state in the fallback", async () => {
-    proxyAnswers({
-      "/spe/status": () => json({}, 404),
-      "/federated/stats": () =>
-        federatedStats([
-          { source: "SPE-1", patients: 167 },
-          { source: "SPE-2", patients: 34 },
-        ]),
-    });
+    vi.stubEnv("NEO4J_SPE2_CONFIGURED", "true");
+    proxyAnswers({ "/spe/status": () => json({}, 404) });
     const body = (await (await GET()).json()) as SpeStatusResponse;
+    expect(body.spes).toHaveLength(2);
     for (const spe of body.spes) {
       expect(spe.label).toBe("Simulated attestation");
       expect(spe.simulated).toBe(true);
@@ -145,20 +150,12 @@ describe("GET /api/admin/spe", () => {
       expect(spe.permitId).toBeNull();
       expect(spe.policyHash).toBeNull();
       expect(spe.policyCheckedByHardware).toBe(false);
+      expect(spe.patients).toBeNull();
+      expect(spe.attestation).toBeNull();
     }
   });
 
-  it("lists SPE-2 only when the proxy's statistics include it", async () => {
-    proxyAnswers({
-      "/spe/status": () => json({}, 404),
-      "/federated/stats": () =>
-        federatedStats([{ source: "SPE-1", patients: 127 }]),
-    });
-    const body = (await (await GET()).json()) as SpeStatusResponse;
-    expect(body.spes.map((s) => s.id)).toEqual(["SPE-1"]);
-  });
-
-  it("lists SPE-1 as unreachable, and no SPE-2, when the proxy cannot be reached", async () => {
+  it("lists SPE-1 as unreachable when the proxy cannot be reached", async () => {
     mockFetch.mockRejectedValue(new TypeError("fetch failed"));
     const res = await GET();
     expect(res.status).toBe(200);
@@ -168,34 +165,25 @@ describe("GET /api/admin/spe", () => {
     expect(body.spes[0]).toMatchObject({
       id: "SPE-1",
       status: "unreachable",
-      patients: null,
       label: "Simulated attestation",
     });
   });
 
   it("falls back when /spe/status answers in a shape it does not know", async () => {
-    proxyAnswers({
-      "/spe/status": () => json({ hello: "world" }),
-      "/federated/stats": () =>
-        federatedStats([{ source: "SPE-1", patients: 127 }]),
-    });
+    proxyAnswers({ "/spe/status": () => json({ hello: "world" }) });
     const body = (await (await GET()).json()) as SpeStatusResponse;
     expect(body.fallback?.reason).toMatch(/unknown shape/);
-    expect(body.spes[0].status).toBe("ready");
+    expect(body.spes[0].status).toBe("unreachable");
   });
 
   it("says azure in the fallback on the Azure deployment", async () => {
     vi.stubEnv("DEPLOYMENT_TARGET", "azure");
-    proxyAnswers({
-      "/spe/status": () => json({}, 503),
-      "/federated/stats": () => json({}, 503),
-    });
+    proxyAnswers({ "/spe/status": () => json({}, 503) });
     const body = (await (await GET()).json()) as SpeStatusResponse;
     expect(body.environment).toBe("azure");
     expect(body.fallback?.reason).toBe(
       "The query proxy's /spe/status answered 503",
     );
-    expect(body.spes[0].status).toBe("unreachable");
   });
 
   describe("the role gate", () => {

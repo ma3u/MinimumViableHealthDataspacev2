@@ -47,6 +47,35 @@ export interface SpeEntry {
   policyCheckedByHardware: boolean;
   patients: number | null;
   status: SpeStatusValue;
+  /**
+   * The evidence the Trustee verified for this workspace (#774 contract
+   * extension). null in the fallback and before the first attestation; an
+   * older proxy may leave it out.
+   */
+  attestation?: SpeAttestation | null;
+}
+
+/** What the attestation measured, as the verifier reports it; any may be null. */
+export interface SpeAttestationClaims {
+  tee: string | null;
+  measurement: string | null;
+  reportedTcb: string | null;
+  hostData: string | null;
+  reportData: string | null;
+  pcrs: Record<string, string> | null;
+  vmId: string | null;
+}
+
+export interface SpeAttestation {
+  /** "az-snp-vtpm" on Azure, "sample" locally. */
+  verifier: string | null;
+  result: "pass" | "fail" | null;
+  evidenceDigest: string | null;
+  tokenIssuedAt: string | null;
+  tokenExpiresAt: string | null;
+  policyId: string | null;
+  claims: SpeAttestationClaims | null;
+  refusalReason: string | null;
 }
 
 export interface SpeStatusResponse {
@@ -57,8 +86,8 @@ export interface SpeStatusResponse {
   residualTrust: string[];
   /**
    * Set by the UI only when the proxy's `/spe/status` did not answer and the
-   * route fell back to what the proxy's federated statistics say. Not part
-   * of the proxy's contract.
+   * route fell back to what it knows without it. Not part of the proxy's
+   * contract.
    */
   fallback?: { reason: string };
 }
@@ -182,4 +211,38 @@ export function formatSpeTime(iso: string | null | undefined): string {
     dateStyle: "medium",
     timeStyle: "short",
   });
+}
+
+export type AttestationVerdict = "pass" | "fail" | "refused" | "none";
+
+/**
+ * The verdict of an SPE's last attestation. "refused" is evidence that
+ * verified but whose key the Trustee did not release (the permit's policy did
+ * not match), or a workspace the proxy reports refused; "fail" is evidence
+ * that did not verify; "none" is no attestation recorded.
+ */
+export function attestationVerdict(spe: {
+  status?: string | null;
+  keyReleasedAt?: string | null;
+  attestation?: SpeAttestation | null;
+}): { verdict: AttestationVerdict; text: string } {
+  const a = spe.attestation;
+  if (!a || !a.result) {
+    return { verdict: "none", text: "No attestation recorded" };
+  }
+  if (a.result === "fail") {
+    return { verdict: "fail", text: "Evidence did not verify" };
+  }
+  if (a.refusalReason || spe.status === "refused") {
+    return { verdict: "refused", text: "Verified, key refused" };
+  }
+  return {
+    verdict: "pass",
+    text: spe.keyReleasedAt ? "Verified, key released" : "Verified",
+  };
+}
+
+/** The anchor of an SPE's section on /admin/attestation. */
+export function attestationAnchor(speId: string): string {
+  return `attestation-${speId.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 }

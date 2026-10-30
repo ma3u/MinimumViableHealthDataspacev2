@@ -330,6 +330,7 @@
     "/",
     "/activity-report",
     "/admin",
+    "/admin/attestation",
     "/admin/audit",
     "/admin/components",
     "/admin/participants",
