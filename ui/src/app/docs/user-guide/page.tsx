@@ -29,6 +29,9 @@ import {
   BookOpen,
   PencilLine,
   ScrollText,
+  Server,
+  Smartphone,
+  Wallet,
   Image as ImageIcon,
   X,
 } from "lucide-react";
@@ -116,7 +119,7 @@ const complianceDiagram = `sequenceDiagram
 
   USER->>UI: Start data access application
   UI->>UI: Select dataset from catalog
-  UI->>HDAB: Submit permit request<br/>(EHDS Articles 45-49)
+  UI->>HDAB: Submit permit request<br/>(EHDS Art. 67-68)
   HDAB->>HDAB: Review & approve
   HDAB-->>UI: Data permit issued (VC)
   UI->>DH: Initiate contract negotiation
@@ -586,7 +589,7 @@ export default function UserGuidePage() {
                     color: "text-(--danger-text)",
                     graph: "Access body",
                     q: "Who are my participants? What contracts are active?",
-                    ehds: "EHDS Art. 52 — operates the dataspace infrastructure and ensures interoperability between participants",
+                    ehds: "EHDS Art. 75 — operates the dataspace infrastructure and ensures interoperability between participants",
                   },
                   {
                     user: "clinicuser",
@@ -595,7 +598,7 @@ export default function UserGuidePage() {
                     color: "text-(--accent)",
                     graph: "Data holder",
                     q: "Who has approved access to my datasets?",
-                    ehds: "EHDS Art. 33-34 — health data holders must make electronic health data available for secondary use when authorized",
+                    ehds: "EHDS Art. 60 — health data holders must make electronic health data available for secondary use when authorized",
                   },
                   {
                     user: "lmcuser",
@@ -604,7 +607,7 @@ export default function UserGuidePage() {
                     color: "text-(--accent)",
                     graph: "Data holder",
                     q: "What contracts are active for my NL datasets?",
-                    ehds: "EHDS Art. 33-34 — cross-border data holder demonstrating multi-country interoperability",
+                    ehds: "EHDS Art. 60 — cross-border data holder demonstrating multi-country interoperability",
                   },
                   {
                     user: "researcher",
@@ -613,7 +616,7 @@ export default function UserGuidePage() {
                     color: "text-(--success-text)",
                     graph: "Researcher",
                     q: "What datasets match my study protocol?",
-                    ehds: "EHDS Art. 34(1) — data users access health data for permitted secondary use purposes (research, innovation, public health)",
+                    ehds: "EHDS Art. 53(1) — data users access health data for permitted secondary use purposes (research, innovation, public health)",
                   },
                   {
                     user: "regulator",
@@ -622,7 +625,7 @@ export default function UserGuidePage() {
                     color: "text-amber-700 dark:text-amber-400",
                     graph: "Access body",
                     q: "What approvals are pending? Is the chain complete?",
-                    ehds: "EHDS Art. 36-37 — Health Data Access Bodies are designated by each Member State to authorize secondary use of health data",
+                    ehds: "EHDS Art. 55 and 57 — Health Data Access Bodies are designated by each Member State to authorize secondary use of health data",
                   },
                 ].map((p) => (
                   <tr key={p.user} className="border-b border-(--border)">
@@ -670,31 +673,31 @@ export default function UserGuidePage() {
               {
                 role: "Data Holder",
                 color: "text-(--accent)",
-                article: "Art. 33-34",
+                article: "Art. 60",
                 why: "Healthcare providers, insurers, and registries that hold electronic health data are legally required to make it available for authorized secondary use. They retain sovereignty over their data and control access through ODRL policies and contract negotiation.",
               },
               {
                 role: "Data User (Researcher)",
                 color: "text-(--success-text)",
-                article: "Art. 34(1), Art. 45-46",
+                article: "Art. 53(1), Art. 67-68",
                 why: "Researchers, public health agencies, and innovators who need health data for permitted purposes must apply through an HDAB, receive a data permit, and access data only in a secure processing environment. They never receive raw patient data directly.",
               },
               {
                 role: "HDAB Authority",
                 color: "text-amber-700 dark:text-amber-400",
-                article: "Art. 36-37",
+                article: "Art. 55, 57",
                 why: "Each EU Member State must designate one or more Health Data Access Bodies (HDABs) as the national authority that reviews data access applications, issues data permits, and ensures compliance. MedReg DE represents the German HDAB in this implementation.",
               },
               {
                 role: "EDC Admin / Dataspace Operator",
                 color: "text-(--danger-text)",
-                article: "Art. 52",
+                article: "Art. 75",
                 why: "The dataspace operator runs the technical infrastructure: participant onboarding, connector management, federated catalog, and transfer monitoring. They ensure interoperability across all participants but do not access health data directly.",
               },
               {
                 role: "Trust Center Operator",
                 color: "text-violet-700 dark:text-violet-400",
-                article: "Art. 50(1)(e)",
+                article: "Art. 73(1)(e)",
                 why: "The EHDS mandates pseudonymisation and re-identification controls. The Trust Center manages pseudonym resolution, secure processing environment (SPE) sessions, and ensures that data users only access de-identified data. This role enforces the technical privacy safeguards the regulation requires.",
               },
             ].map((r) => (
@@ -887,7 +890,7 @@ export default function UserGuidePage() {
               registration: creating a DID identity, registering with the
               Credential Federated Manager, and enrolling in the federated
               catalog. This process implements the EHDS requirement for
-              authorised participation (Art. 52) with verifiable credentials.
+              authorised participation (Art. 75) with verifiable credentials.
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               Example: Limburg Medical Centre joins the EHDS dataspace by
@@ -912,6 +915,29 @@ export default function UserGuidePage() {
               Example: AlphaKlinik Berlin checks that both its
               MembershipCredential and EHDSParticipantCredential are active and
               not expired before publishing a new dataset.
+            </p>
+          </FeatureCard>
+
+          <FeatureCard
+            href="/auth/eudi-qr"
+            title="Sign in with the EUDI Wallet"
+            icon={Wallet}
+            requiresJAD
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              A patient signs in with the person identification data (PID) in an
+              EUDI Wallet, such as the German d-you wallet, instead of a
+              password: the sign-in page shows a QR code, the wallet presents
+              the PID over OpenID4VP, and the hub checks it with its own
+              verifier (EHDS Art. 16, eIDAS). An account the Klarbefund app
+              created can be linked to a PID once under My Health, Connect your
+              EUDI wallet; the hub keeps a keyed fingerprint of the PID, never
+              the name or birth date.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: A patient scans the QR code with d-you, approves the
+              presentation and lands in their own record at assurance level
+              high. The static demo shows the flow with a simulated phone.
             </p>
           </FeatureCard>
         </div>
@@ -1026,7 +1052,7 @@ export default function UserGuidePage() {
               Browse and search HealthDCAT-AP metadata records for all published
               datasets. Each entry shows title, description, publisher,
               temporal/spatial coverage, and distribution formats. The catalog
-              implements the EHDS metadata requirements (Art. 55) for
+              implements the EHDS metadata requirements (Art. 77) for
               discoverable, machine-readable dataset descriptions.
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
@@ -1067,9 +1093,9 @@ export default function UserGuidePage() {
               View the clinical timeline for synthetic patients, showing FHIR R4
               resources (Encounters, Conditions, Observations, Medications,
               Procedures) mapped to their OMOP CDM equivalents. This dual-view
-              demonstrates how primary-use clinical data (EHDS Art. 3-12) can be
-              transformed for secondary-use analytics while preserving semantic
-              integrity.
+              demonstrates how primary-use clinical data (EHDS Chapter II) can
+              be transformed for secondary-use analytics while preserving
+              semantic integrity.
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
               <li>Select patients from the patient list</li>
@@ -1094,7 +1120,7 @@ export default function UserGuidePage() {
               Cohort-level research analytics powered by the OMOP CDM layer. Run
               aggregate queries across conditions, measurements, drug exposures,
               and procedures. This implements the EHDS secondary-use analytics
-              capability (Art. 34) where researchers work with de-identified,
+              capability (Art. 53) where researchers work with de-identified,
               standardised data.
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
@@ -1117,19 +1143,60 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Execute cross-participant queries using natural language or
-              structured query syntax. The query engine translates requests into
-              federated SPARQL/Cypher queries across connected dataspace nodes.
-              This demonstrates how the EHDS enables cross-border data access
-              without centralising raw health data.
+              A researcher with a data permit asks a question in plain language.
+              A prepared question, a fulltext search or, where one is
+              configured, a language model turns it into Cypher, which runs
+              inside the secure processing environment; the page shows the
+              Cypher, the permit it ran under and the rows that came back. The
+              Federated button asks every SPE and merges the answers. Every
+              answer about persons is k-anonymous: a count below 5 is shown as
+              &lt;5, and a share computed from it with it.
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A researcher types &quot;How many patients with
-              hypertension are older than 65?&quot; and the system queries both
-              AlphaKlinik Berlin and Limburg Medical Centre, returning
-              aggregated results without moving raw data.
+              Example: A researcher asks &quot;What is the age
+              distribution?&quot;; the 0-17 group holds one person and comes
+              back as &lt;5, with a k = 5 badge saying how many values were
+              suppressed.
             </p>
           </FeatureCard>
+
+          <div
+            id="spes"
+            className="rounded-xl border border-(--border) bg-(--surface-2) p-5"
+          >
+            <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold text-indigo-700 dark:text-indigo-400">
+              <Server size={18} aria-hidden /> Two secure processing
+              environments
+            </h3>
+            <p className="text-(--text-secondary) text-sm mb-2">
+              Row-level data is processed only inside a secure processing
+              environment (EHDS Art. 73); only answers leave it. SPE-1 is the
+              main graph. SPE-2 is a second Neo4j holding a different set of
+              patients, so a federated question has two contributors. Both apply
+              the same rules before anything leaves: the data permit, the ODRL
+              policy, the Art. 71 opt-out (persons who opted out are never
+              counted) and k = 5, including the rule that a contributor with
+              fewer than 5 records withholds the whole answer, since a missing
+              contributor would identify people. Every question is recorded on
+              the audit chain.
+            </p>
+            <ul className="text-(--text-secondary) text-sm mb-2 list-disc pl-5 space-y-1">
+              <li>
+                Ask &quot;How many SPEs can I access?&quot; on the query page to
+                see the environments and how many patients each holds.
+              </li>
+              <li>
+                SPE-2 runs on the local stack with the <code>federated</code>{" "}
+                compose profile. The live demo and the static demo have one SPE.
+              </li>
+              <li>
+                The attestation fields on an SPE session are labelled
+                &quot;Simulated attestation&quot;. The plan for a real one on
+                confidential hardware, with the access body checking it, is
+                ADR-068.
+              </li>
+            </ul>
+          </div>
 
           <FeatureCard href="/eehrxf" title="EEHRxF Profiles" icon={FileCheck}>
             <p className="text-(--text-secondary) text-sm mb-2">
@@ -1137,7 +1204,7 @@ export default function UserGuidePage() {
               FHIR profiles satisfy EHDS priority categories (Patient Summary,
               ePrescription, Laboratory Results, Medical Imaging, Hospital
               Discharge) and identify coverage gaps. The EEHRxF is mandated by
-              EHDS Art. 6 to ensure interoperability of primary-use health data
+              EHDS Art. 15 to ensure interoperability of primary-use health data
               across Member States.
             </p>
             <p className="text-(--text-secondary) text-xs italic">
@@ -1220,6 +1287,28 @@ export default function UserGuidePage() {
               contributed to.
             </p>
           </FeatureCard>
+          <FeatureCard
+            href="/docs/klarbefund"
+            title="Klarbefund: the iPhone app"
+            icon={Smartphone}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              Klarbefund turns a paper lab report into checkable values on the
+              phone. Connected to the hub, it either creates its own sandbox
+              account with an empty record (gated by Apple App Attest) or
+              connects to an existing one: Health Profile shows a QR code, the
+              app scans it and is connected. It sends the reports, vaccinations
+              and medication plan the person chooses, and weekly device means
+              behind a switch of their own. Delete all my data in the app also
+              deletes the account it created on the hub. The beta is open
+              through TestFlight.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: A patient photographs a lab report, checks the values
+              Klarbefund read, and sends the report to their record, where it
+              appears under Patient Journey.
+            </p>
+          </FeatureCard>
         </div>
       </section>
 
@@ -1229,10 +1318,10 @@ export default function UserGuidePage() {
         <p className="text-(--text-secondary) text-sm mb-4">
           The governance modules manage EHDS compliance, protocol testing, and
           verifiable credential issuance as required by the European Health Data
-          Space regulation (Articles 36-52). These modules ensure that every
-          data access follows the legally mandated approval chain: application,
-          HDAB review, data permit issuance, contract negotiation, and audited
-          transfer.
+          Space regulation (Chapter IV, Art. 50 to 81). These modules ensure
+          that every data access follows the legally mandated approval chain:
+          application, HDAB review, data permit issuance, contract negotiation,
+          and audited transfer.
         </p>
         <MermaidDiagram
           chart={complianceDiagram}
@@ -1247,16 +1336,16 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Manage data access permits as required by EHDS Articles 45-49.
+              Manage data access permits as required by EHDS Art. 67 and 68.
               Data users submit applications specifying the purpose, scope, and
               duration of data access. HDABs review applications against the
-              permitted purposes in Art. 34(1) and issue verifiable credentials
+              permitted purposes in Art. 53(1) and issue verifiable credentials
               as proof of authorization.
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               Example: PharmaCo Research AG submits a data access application
               for the diabetes cohort. MedReg DE (HDAB) reviews the request,
-              approves it under Art. 46, and a DataPermitCredential is issued.
+              approves it under Art. 68, and a DataPermitCredential is issued.
             </p>
           </FeatureCard>
 
@@ -1401,8 +1490,9 @@ export default function UserGuidePage() {
           The sovereign data exchange pipeline follows the Dataspace Protocol
           (DSP 2025-1): share assets, discover via federated catalog, negotiate
           contracts, manage tasks, and transfer data. This pipeline implements
-          EHDS Art. 33-34 requirements for making health data available while
-          preserving data holder sovereignty through policy-controlled access.
+          EHDS Art. 51 and 60 requirements for making health data available
+          while preserving data holder sovereignty through policy-controlled
+          access.
         </p>
 
         <div className="space-y-6">
@@ -1416,7 +1506,7 @@ export default function UserGuidePage() {
               Publish datasets with HealthDCAT-AP metadata and ODRL access
               policies for the federated catalog. Define distribution endpoints,
               data quality attributes, and usage constraints. Data holders use
-              this page to fulfil their obligation under EHDS Art. 33 to make
+              this page to fulfil their obligation under EHDS Art. 60 to make
               data available for secondary use.
             </p>
             <p className="text-(--text-secondary) text-xs italic">

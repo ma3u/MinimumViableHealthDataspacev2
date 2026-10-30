@@ -95,11 +95,12 @@ describes every page below and shows a screenshot of each on mouse-over.
 | Patient Journey           | /patient            | FHIR R4 clinical timeline with OMOP mapping                     | No            |
 | OMOP Analytics            | /analytics          | Cohort analytics dashboards                                     | No            |
 | EEHRxF Profiles           | /eehrxf             | European EHR Exchange Format alignment                          | No            |
-| NL / Federated Query      | /query              | Natural language graph queries                                  | Yes           |
+| NL / Federated Query      | /query              | Plain-language questions inside the SPEs; k = 5 on every answer | Yes           |
 | Personal Research         | /patient/query      | A patient asks questions about their own record (Art. 3)        | No            |
 | Health Profile & Risks    | /patient/profile    | Own health profile, risk scores, connected phones               | No            |
 | Research Programs         | /patient/research   | Art. 71 opt-out and consent to single studies                   | No            |
 | Research Insights         | /patient/insights   | Aggregate findings from studies the patient's data joined       | No            |
+| Klarbefund (iPhone app)   | /docs/klarbefund    | Lab reports to checkable values; connects to the own record     | Yes           |
 | EHDS Approval             | /compliance         | HDAB permit workflow (Art. 67-69)                               | Yes           |
 | Protocol TCK              | /compliance/tck     | DSP 2025-1 validation suite                                     | Yes           |
 | Verifiable Credentials    | /credentials        | DCP v1.0 credential management                                  | No            |
@@ -122,3 +123,34 @@ describes every page below and shows a screenshot of each on mouse-over.
 | Audit & Provenance        | /admin/audit        | Audit log and provenance trail, shared with the access body     | No            |
 | Participant Onboarding    | /onboarding         | DID registration wizard                                         | Yes           |
 | Participant Settings      | /settings           | Profile and credential management                               | Yes           |
+| EUDI Wallet sign-in       | /auth/eudi-qr       | Patient sign-in with the PID over OpenID4VP (Art. 16, eIDAS)    | Yes           |
+
+### Two secure processing environments
+
+Row-level data is processed only inside a secure processing environment
+(Art. 73); only answers leave it. SPE-1 is the main graph; SPE-2 is a second
+Neo4j with a different set of patients, so a federated question on `/query`
+has two contributors. Both apply the data permit, the ODRL policy, the Art. 71
+opt-out and k = 5 before anything leaves: a count below 5 is shown as `<5`,
+and a contributor with fewer than 5 records withholds the whole answer. Ask
+"How many SPEs can I access?" to see them. SPE-2 runs on the local stack with
+the `federated` compose profile; the static demo has one. Attestation is
+labelled "Simulated attestation"; the plan for a real one is
+ADR-068 (in review, #773).
+
+### EUDI Wallet and Klarbefund
+
+A patient can sign in with the PID in an EUDI Wallet such as d-you: the sign-in
+page shows a QR code, the wallet presents the PID over OpenID4VP, and the hub's
+own verifier checks it (ADR-065, ADR-066). An account the Klarbefund app
+created can be linked to a PID once, under Health Profile, Connect your EUDI
+wallet; the hub keeps a keyed fingerprint, never the name or birth date
+(ADR-067).
+
+The Klarbefund iPhone app reads lab reports into checkable values. It creates
+its own sandbox account on the hub, gated by App Attest (ADR-054), or connects
+to an existing record by the QR code on Health Profile (ADR-049), and sends the
+reports, vaccinations and medication plan the person chooses, plus weekly
+device means behind their own switch (ADR-057, ADR-059). Delete all my data in
+the app also deletes the account it created on the hub. Guides:
+[Klarbefund](klarbefund/README.md).
