@@ -349,13 +349,13 @@ with it.
 Everything the app holds can leave it, in the form the recipient needs, and
 only when you say so.
 
-| Action                     | For                 | What you get                                                            |
-| -------------------------- | ------------------- | ----------------------------------------------------------------------- |
-| Share for my doctor        | a practice, the ePA | a PDF summary with the original pages appended, plus a FHIR R4 bundle   |
-| Export for research (OMOP) | an analytics team   | OMOP CDM v5.4 `measurement.csv`, `person.csv`, `observation_period.csv` |
-| Export all my data         | you, under GDPR     | every report, page, value, profile field and consent, in one archive    |
-| Delete all my data         | you                 | the store is wiped for good, and the app says so before it does it      |
-| Export diagnostics         | the developers      | the recognised text and both recogniser passes, to fix a misread line   |
+| Action                     | For                 | What you get                                                                                                                                        |
+| -------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Share for my doctor        | a practice, the ePA | a PDF summary with the original pages appended, plus a FHIR R4 bundle                                                                               |
+| Export for research (OMOP) | an analytics team   | OMOP CDM v5.4 `measurement.csv`, `person.csv`, `observation_period.csv`                                                                             |
+| Export all my data         | you, under GDPR     | every report, page, value, profile field and consent, in one archive                                                                                |
+| Delete all my data         | you                 | the store is wiped for good; the account the app made on the hub, with its record, values and consents, goes too; the app says so before it does it |
+| Export diagnostics         | the developers      | the recognised text and both recogniser passes, to fix a misread line                                                                               |
 
 The FHIR bundle carries every value with its LOINC code, its UCUM unit, the
 range the laboratory printed (as numbers where they can be read, and always as

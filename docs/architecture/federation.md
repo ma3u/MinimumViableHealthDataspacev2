@@ -65,6 +65,31 @@ Enforced in `services/neo4j-proxy/src/routes/federated.ts` (`POST /federated/que
    `suppressionReason`, so EHDS Art. 53 transparency reports show _who we
    asked_ alongside _what we answered_.
 
+### The same rules on every question
+
+The Federated button on `/query` asks `POST /nlq` with `federated: true`, which
+runs the template's Cypher on every SPE. Until 2026-10-30 that path merged the
+answers without k-anonymity, so an age group of one person left as `count: 1`,
+and a question asked of one SPE listed groups of one patient too. Every `/nlq`
+answer, from one SPE or from several, and `/federated/query` now share
+`services/neo4j-proxy/src/k-anonymity.ts`:
+
+- An answer that does not read persons (no `Patient`, `OMOPPerson` or clinical
+  label, including inside the Art. 71 label expression `(Patient)&!OptedOut`)
+  is not filtered: a count of datasets identifies nobody.
+- An aggregate answer (the Cypher counts) has every count below k shown as
+  `"<5"`, and a percentage in the same row with it, as the Art. 69 statistics
+  do (`ui/src/lib/statistics.ts`). `suppressionReason` is `"small_cells"`.
+- A row-level answer gets rules 3 and 4 above.
+
+The response carries `minKApplied`, `filtered`, `aggregateSuppressed` and
+`suppressionReason`, the audit record the suppression, and `/query` shows it
+as a `k = 5` badge. An Art. 69 statistic (`ui/src/lib/statistics.ts`) counts a
+cell that arrives as `"<5"` among its suppressed cells.
+
+A question about the SPEs themselves ("How many SPEs can I access?") is the
+`spe_access` template: it asks every SPE, Federated button or not.
+
 Publisher-side ODRL policies arrive verbatim as `:OdrlPolicy` nodes via the
 enricher and are enforced at negotiation time (`/negotiate`); VC-gated
 dataset visibility (e.g. requiring a DataQualityLabelCredential before a

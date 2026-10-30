@@ -252,7 +252,7 @@ MinimumViableHealthDataspacev2/
 │       ├── container-dependencies.svg    # Compose services by startup tier
 │       ├── graph-schema.png              # Neo4j schema of the five layers
 │       ├── persona-overview.png          # The animated persona overview
-│       └── synthetic-patient-journey.png # Full patient journey screenshot
+│       └── synthetic-patient-journey.png # Patient Journey view: FHIR events and their OMOP records
 ├── jad/                          # JAD stack configuration
 │   ├── edcv-assets/              # Phase 4a: EDC-V asset + policy + contract JSON
 │   ├── openapi/                  # OpenAPI specs for all JAD services
@@ -353,9 +353,10 @@ cat neo4j/insert-synthetic-schema-data.cypher | \
   cypher-shell -u neo4j -p healthdataspace
 ```
 
-After loading, the cross-layer patient journey is visible in Neo4j Browser:
+After loading, the cross-layer patient journey is visible in Neo4j Browser and in the UI's
+Patient Journey view (`/patient`), where every FHIR event shows the OMOP record it became:
 
-![Full Synthetic Patient Journey](docs/images/synthetic-patient-journey.png)
+![Patient Journey: a patient's FHIR events by month, each with its OMOP CDM record](docs/images/synthetic-patient-journey.png)
 
 ### Step 6 — Register DSP Marketplace Chain
 

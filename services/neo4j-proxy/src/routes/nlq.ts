@@ -5,6 +5,7 @@ import {
   ANTHROPIC_API_KEY,
   AZURE_OPENAI_API_KEY,
   AZURE_OPENAI_GPT4O_URL,
+  MIN_COHORT_SIZE,
   OLLAMA_URL,
   OPENAI_API_KEY,
 } from "../config.js";
@@ -32,6 +33,11 @@ import {
 } from "../nlq/engine.js";
 import { logger } from "../logger.js";
 import { forSecondaryUse, secondaryUseSession } from "../opt-out.js";
+import {
+  anonymiseAnswer,
+  type Contribution,
+  type KOutcome,
+} from "../k-anonymity.js";
 
 /**
  * A refused query is recorded too, before the refusal goes out. The refusal
@@ -77,7 +83,8 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
   let method: "template" | "fulltext" | "graphrag" | "llm" | "none" = "none";
 
   try {
-    const { question, federated = false, odrlScope } = req.body;
+    const { question, odrlScope } = req.body;
+    let federated: boolean = req.body.federated === true;
 
     if (!question || typeof question !== "string") {
       res.status(400).json({ error: "Missing 'question' in request body" });
@@ -110,6 +117,7 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       templateName = templateMatch.template.name;
       graphLayers = templateMatch.template.graphLayers;
       cypherSections = templateMatch.template.cypherSections;
+      if (templateMatch.template.everySpe) federated = true;
     }
 
     // Step 1b: Pharmacovigilance template needs glossary-resolved params
@@ -289,51 +297,57 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
     cypher = forSecondaryUse(cypher, scope);
 
     // Execute query
-    let results: any[];
+    const toRow = (r: neo4j.Record, source?: string) => {
+      const obj: Record<string, any> = source ? { _source: source } : {};
+      r.keys.forEach((key) => {
+        const val = r.get(key);
+        obj[String(key)] = neo4j.isInt(val) ? val.toNumber() : val;
+      });
+      return obj;
+    };
+    const contributions: Contribution[] = [];
 
     if (federated && spe2Driver) {
       // Federated execution across all SPEs
-      const spes = getSpeDrivers();
-      const allResults: any[] = [];
-
       await Promise.all(
-        spes.map(async ({ label, driver: d }) => {
+        getSpeDrivers().map(async ({ label, driver: d }) => {
           const session = d.session({ database: "neo4j" });
           try {
             // nosemgrep: cypher-built-from-request-input -- generated Cypher; WRITE_PATTERN and checkReIdentification above
             const result = await session.run(cypher!, params);
-            result.records.forEach((r) => {
-              const obj: Record<string, any> = { _source: label };
-              r.keys.forEach((key) => {
-                const val = r.get(key);
-                obj[String(key)] = neo4j.isInt(val) ? val.toNumber() : val;
-              });
-              allResults.push(obj);
+            contributions.push({
+              source: label,
+              records: result.records.map((r) => toRow(r, label)),
             });
           } finally {
             await session.close();
           }
         }),
       );
-      results = allResults;
+      // In SPE order, not in the order they answered.
+      contributions.sort((a, b) => a.source.localeCompare(b.source));
     } else {
       // Single SPE execution
       const session = getSession();
       try {
         // nosemgrep: cypher-built-from-request-input -- generated Cypher; WRITE_PATTERN and checkReIdentification above
         const result = await session.run(cypher, params);
-        results = result.records.map((r) => {
-          const obj: Record<string, any> = {};
-          r.keys.forEach((key) => {
-            const val = r.get(key);
-            obj[String(key)] = neo4j.isInt(val) ? val.toNumber() : val;
-          });
-          return obj;
+        contributions.push({
+          source: "SPE-1",
+          records: result.records.map((r) => toRow(r)),
         });
       } finally {
         await session.close();
       }
     }
+    // What leaves an SPE is k-anonymous, from one SPE as from several, as on
+    // /federated/query.
+    const kOutcome: KOutcome = anonymiseAnswer(
+      cypher,
+      contributions,
+      MIN_COHORT_SIZE,
+    );
+    const results = kOutcome.rows;
 
     const participantId =
       (req.headers["x-participant"] as string) ?? scope?.participantId;
@@ -373,6 +387,15 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
         resultCount: results.length,
         odrlEnforced,
         outcome: "success",
+        ...(kOutcome.minKApplied > 0
+          ? {
+              federated: {
+                contributors: contributions.map((c) => c.source),
+                aggregateSuppressed: kOutcome.aggregateSuppressed,
+                suppressionReason: kOutcome.suppressionReason,
+              },
+            }
+          : {}),
       });
     } catch (err) {
       auditUnavailable(res, err);
@@ -388,6 +411,10 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       results,
       totalRows: results.length,
       odrlEnforced,
+      minKApplied: kOutcome.minKApplied,
+      filtered: kOutcome.filtered,
+      aggregateSuppressed: kOutcome.aggregateSuppressed,
+      suppressionReason: kOutcome.suppressionReason,
       ...(graphragTrace ? { trace: graphragTrace } : {}),
       ...(graphLayers
         ? {

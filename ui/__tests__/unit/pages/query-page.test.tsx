@@ -243,6 +243,56 @@ describe("NlqPage", () => {
     });
   });
 
+  it("says how many values k-anonymity withheld from a federated answer", async () => {
+    mockFetchApiResponses();
+    mockFetchApi.mockImplementation(
+      (url: string, opts?: { method?: string }) => {
+        if (url === "/api/nlq" && opts?.method === "POST") {
+          return Promise.resolve({
+            ok: true,
+            json: () =>
+              Promise.resolve({
+                question: "What is the age distribution?",
+                cypher: "MATCH (p:Patient) RETURN count(*) AS count",
+                method: "template",
+                templateName: "age_distribution",
+                federated: true,
+                results: [
+                  { _source: "SPE-1", ageGroup: "0-17", count: "<5" },
+                  { _source: "SPE-2", ageGroup: "0-17", count: "<5" },
+                ],
+                totalRows: 2,
+                minKApplied: 5,
+                filtered: 2,
+                aggregateSuppressed: false,
+                suppressionReason: "small_cells",
+              }),
+          });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ templates: [] }),
+        });
+      },
+    );
+
+    render(<NlqPage />);
+    await userEvent.type(
+      screen.getByPlaceholderText(/ask a question about the health data/i),
+      "What is the age distribution?",
+    );
+    await userEvent.click(screen.getByText("Ask"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("k-anonymity-badge")).toHaveTextContent(
+        "k = 5: 2 values suppressed",
+      );
+    });
+    expect(screen.getByTestId("k-anonymity-note")).toHaveTextContent(
+      "Counts below 5 are shown as <5",
+    );
+  });
+
   it("should show GraphRAG badge for graphrag method results", async () => {
     mockFetchApiResponses();
 

@@ -240,14 +240,29 @@ final class EHDSConnection: ObservableObject {
     state = .connected(hub: account.hub, username: account.username)
   }
 
-  /// Deletes the account the app created: its login, its record and its
-  /// phones on the hub, then everything on this phone (App Store 5.1.1(v)).
-  func deleteAccount() async {
-    guard let account, account.createdByApp, let hub else { return }
+  /// What deleting the account on the hub came to.
+  enum AccountDeletion: Equatable {
+    /// No account the app created: nothing on the hub is this phone's to delete.
+    case none
+    case deleted(username: String)
+    /// The hub could not be reached or refused. The password stays on this
+    /// phone, so the deletion can be tried again; forgetting it would leave
+    /// an account nobody can delete any more.
+    case failed(username: String, reason: String)
+  }
+
+  /// Deletes the account the app created: its login, its record with every
+  /// value and consent, and its phones on the hub (App Store 5.1.1(v)), then
+  /// the password and the session on this phone. The hub's address comes from
+  /// the account itself, so this works before the app has signed in again
+  /// since it started; it used to return without a word in that state.
+  @discardableResult
+  func deleteAccount() async -> AccountDeletion {
+    guard let account, account.createdByApp else { return .none }
     do {
       let token = try await freshToken()
       let (status, body) = try await transport.send(
-        method: "DELETE", url: URL(string: "\(hub.ehds)/api/patient/app/account")!,
+        method: "DELETE", url: URL(string: "\(account.ehds)/api/patient/app/account")!,
         bearer: token, device: Self.deviceId(), json: nil)
       guard status == 200 else { throw HubError(status: status, body: body) }
       forget()
@@ -255,8 +270,11 @@ final class EHDSConnection: ObservableObject {
       lastSend = nil
       state = .disconnected
       notice = String(localized: "The account \(account.username) and its record were deleted.")
+      return .deleted(username: account.username)
     } catch {
-      notice = Self.explain(error)
+      let reason = Self.explain(error)
+      notice = reason
+      return .failed(username: account.username, reason: reason)
     }
   }
 
