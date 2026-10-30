@@ -1143,7 +1143,7 @@
       "id": "ADR-068",
       "file": "ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md",
       "title": "A sovereign confidential SPE: Confidential Containers and a Trustee the access body runs, Neo4j loaded per permit",
-      "status": "Proposed"
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {

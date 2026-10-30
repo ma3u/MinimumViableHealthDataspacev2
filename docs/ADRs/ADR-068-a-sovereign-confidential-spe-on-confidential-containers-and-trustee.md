@@ -1,6 +1,6 @@
 # ADR-068: A sovereign confidential SPE: Confidential Containers and a Trustee the access body runs, Neo4j loaded per permit
 
-**Status:** Proposed
+**Status:** Accepted (2026-10-30)
 **Date:** 2026-10-30
 **Supersedes:** [ADR-052](ADR-052-confidential-spe-on-azure-revisited.md) in full. This ADR carries over what still holds from it (the regulation, Azure Container Apps, Contrast, the triggers) and replaces what no longer does (AKS `KataCcIsolation` with Azure Attestation).
 **Keeps:** the pattern of [ADR-037](ADR-037-secure-processing-environment-confidential-computing.md): confidential containers with remote attestation.
