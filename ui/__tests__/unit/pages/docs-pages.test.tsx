@@ -2,7 +2,7 @@
  * Tests for Docs pages: Hub, Developer Guide, Architecture, User Guide
  */
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -168,5 +168,34 @@ describe("UserGuidePage", () => {
       "src",
       "/images/guide/compliance-tck.webp",
     );
+  });
+
+  it("opens the screenshot full size on a click on the card's text", () => {
+    render(<UserGuidePage />);
+    const dialog = screen.getByLabelText("Screenshot: Protocol TCK", {
+      selector: "dialog",
+    });
+    expect(dialog).not.toHaveAttribute("open");
+
+    fireEvent.click(screen.getByRole("heading", { name: "Protocol TCK" }));
+    expect(dialog).toHaveAttribute("open");
+  });
+
+  it("opens it from the Screenshot button, and not from Try it", () => {
+    render(<UserGuidePage />);
+    const dialog = screen.getByLabelText("Screenshot: Protocol TCK", {
+      selector: "dialog",
+    });
+    const card = screen
+      .getByRole("heading", { name: "Protocol TCK" })
+      .closest("div.group") as HTMLElement;
+
+    fireEvent.click(within(card).getByRole("link", { name: /Try it/ }));
+    expect(dialog).not.toHaveAttribute("open");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Show screenshot: Protocol TCK" }),
+    );
+    expect(dialog).toHaveAttribute("open");
   });
 });

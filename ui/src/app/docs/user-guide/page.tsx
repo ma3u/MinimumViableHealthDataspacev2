@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRef } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -28,6 +29,8 @@ import {
   BookOpen,
   PencilLine,
   ScrollText,
+  Image as ImageIcon,
+  X,
 } from "lucide-react";
 
 const LIVE_URL = "https://ma3u.github.io/MinimumViableHealthDataspacev2";
@@ -121,6 +124,76 @@ const complianceDiagram = `sequenceDiagram
   UI->>USER: Access granted<br/>with audit trail`;
 
 /** Reusable card linking to a feature page */
+/**
+ * The page as its persona sees it on the static site
+ * (src/lib/guide-screenshots.ts): small on mouse-over, full size in a native
+ * modal <dialog> on a click or tap anywhere on the card's text, or on the
+ * Screenshot button from the keyboard. Escape, the close button or a click
+ * beside the image closes it.
+ */
+function ScreenshotDialog({
+  src,
+  title,
+  href,
+  dialogRef,
+}: {
+  src: string;
+  title: string;
+  href: string;
+  dialogRef: React.RefObject<HTMLDialogElement>;
+}) {
+  const close = () => dialogRef.current?.close();
+  return (
+    <dialog
+      ref={dialogRef}
+      aria-label={`Screenshot: ${title}`}
+      onClick={(e) => {
+        // The dialog itself is the backdrop area; its content stops here.
+        if (e.target === e.currentTarget) close();
+      }}
+      onClose={() =>
+        document.documentElement.classList.remove("overflow-hidden")
+      }
+      className="m-auto max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-6xl overflow-visible bg-transparent p-0 opacity-0 scale-95 transition-[opacity,scale,display,overlay] duration-200 ease-out transition-discrete open:opacity-100 open:scale-100 starting:open:opacity-0 starting:open:scale-95 motion-reduce:transition-none backdrop:bg-black/0 backdrop:transition-[background-color,display,overlay] backdrop:duration-200 backdrop:transition-discrete open:backdrop:bg-black/75 starting:open:backdrop:bg-black/0"
+    >
+      <figure className="overflow-hidden rounded-xl border border-(--border) bg-(--surface) shadow-2xl">
+        <div className="flex items-center justify-between gap-3 border-b border-(--border) px-4 py-2">
+          <figcaption className="truncate text-sm font-semibold text-(--text-primary)">
+            {title}
+          </figcaption>
+          <div className="flex shrink-0 items-center gap-1">
+            <Link
+              href={href}
+              onClick={close}
+              className="inline-flex min-h-11 items-center gap-1 rounded-lg px-3 text-sm text-indigo-700 hover:bg-indigo-500/10 dark:text-indigo-400"
+            >
+              Try it <ArrowRight size={14} />
+            </Link>
+            <button
+              type="button"
+              onClick={close}
+              data-close
+              aria-label="Close screenshot"
+              className="inline-flex size-11 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-2)"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={src}
+          alt={`Screenshot: ${title}`}
+          loading="lazy"
+          width={1200}
+          height={750}
+          className="block h-auto max-h-[calc(100dvh-5rem)] w-full object-contain"
+        />
+      </figure>
+    </dialog>
+  );
+}
+
 function FeatureCard({
   href,
   title,
@@ -136,24 +209,57 @@ function FeatureCard({
 }) {
   const isExternal = href.startsWith("http");
   const screenshot = guideScreenshotSrc(href);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const openScreenshot = () => {
+    const dialog = dialogRef.current;
+    if (!dialog || dialog.open) return;
+    document.documentElement.classList.add("overflow-hidden");
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else dialog.setAttribute("open", "");
+    // The dialog would focus Try it, the first control; Escape or Close is
+    // the likelier next step.
+    dialog.querySelector<HTMLButtonElement>("button[data-close]")?.focus();
+  };
   return (
     <div className="group relative border border-(--border) rounded-xl hover:border-indigo-500/50 focus-within:border-indigo-500/50 transition-colors">
       {screenshot && (
-        // On mouse-over or keyboard focus: the page as its persona sees it on
-        // the static site (src/lib/guide-screenshots.ts).
-        <figure className="pointer-events-none absolute right-4 top-full z-30 -mt-3 hidden w-[min(36rem,calc(100%-2rem))] overflow-hidden rounded-lg border border-(--border) bg-(--surface) shadow-2xl group-hover:block group-focus-within:block">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+        <>
+          {/* Small preview on mouse-over; Tailwind 4 applies group-hover
+              only where a pointer can hover, so a tap never shows it. */}
+          <figure
+            aria-hidden="true"
+            className="pointer-events-none invisible absolute right-4 top-full z-30 -mt-3 w-[min(22rem,calc(100%-2rem))] translate-y-1 overflow-hidden rounded-lg border border-(--border) bg-(--surface) opacity-0 shadow-2xl transition duration-150 ease-out group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-hover:delay-200 motion-reduce:transition-none group-has-[dialog[open]]:hidden"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={screenshot}
+              alt=""
+              loading="lazy"
+              width={1200}
+              height={750}
+              className="block h-auto w-full"
+            />
+            <figcaption className="px-3 py-1.5 text-[11px] text-(--text-secondary)">
+              Click to enlarge
+            </figcaption>
+          </figure>
+          <ScreenshotDialog
             src={screenshot}
-            alt={`Screenshot: ${title}`}
-            loading="lazy"
-            width={1200}
-            height={750}
-            className="block h-auto w-full"
+            title={title}
+            href={href}
+            dialogRef={dialogRef}
           />
-        </figure>
+        </>
       )}
-      <div className="p-5">
+      <div
+        className={`p-5 ${screenshot ? "cursor-zoom-in" : ""}`}
+        onClick={(e) => {
+          if (!screenshot) return;
+          // A link or button in the card does its own thing.
+          if ((e.target as HTMLElement).closest("a, button")) return;
+          openScreenshot();
+        }}
+      >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-indigo-500/10 flex items-center justify-center">
@@ -171,6 +277,18 @@ function FeatureCard({
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/30 font-medium">
                 JAD Stack
               </span>
+            )}
+            {screenshot && (
+              <button
+                type="button"
+                onClick={openScreenshot}
+                aria-haspopup="dialog"
+                aria-label={`Show screenshot: ${title}`}
+                className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs text-(--text-secondary) hover:text-indigo-700 dark:hover:text-indigo-400 transition-colors"
+              >
+                <ImageIcon size={14} />
+                <span className="hidden sm:inline">Screenshot</span>
+              </button>
             )}
             {isExternal ? (
               <a
