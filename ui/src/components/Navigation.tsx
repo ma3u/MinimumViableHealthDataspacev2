@@ -37,7 +37,6 @@ import {
   Globe,
   Scale,
   ChartGantt,
-  Fingerprint,
 } from "lucide-react";
 import UserMenu from "./UserMenu";
 import ThemeToggle from "./ThemeToggle";
@@ -404,12 +403,6 @@ const manageGroup: NavGroup = {
       href: "/admin/components",
       label: "EDC Components",
       icon: Activity,
-      roles: ["EDC_ADMIN"],
-    },
-    {
-      href: "/admin/attestation",
-      label: "SPE attestation",
-      icon: Fingerprint,
       roles: ["EDC_ADMIN"],
     },
     {
