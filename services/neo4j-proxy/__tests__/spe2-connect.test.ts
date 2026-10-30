@@ -1,6 +1,7 @@
 /**
- * ADR-069: SPE-2 runs on Azure as its own container app, and the morning
- * start brings it and the proxy up within a minute of each other. The proxy
+ * ADR-069: the SPE workspaces run on Azure as ACI confidential container
+ * groups, and the morning start brings them up while the proxy is already
+ * running; a workspace answers only once it has attested and loaded. The proxy
  * used to try SPE-2 once and then run without it all day; connectSpe2() keeps
  * trying until SPE-2 answers, and leaves no driver behind when it never does.
  */
@@ -8,7 +9,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Driver } from "neo4j-driver";
 import { connectSpe2, getSpeDrivers, setSpe2Driver } from "../src/db.js";
 
-function fakeDriver(answers: boolean, address = "mvhd-neo4j-spe2:7688") {
+function fakeDriver(
+  answers: boolean,
+  address = "mvhd-spe-2-b53a0449.westeurope.azurecontainer.io:7687",
+) {
   return {
     getServerInfo: answers
       ? vi.fn().mockResolvedValue({ address })
@@ -44,7 +48,10 @@ describe("connectSpe2", () => {
     expect(drivers[0].close).toHaveBeenCalled();
     expect(drivers[1].close).toHaveBeenCalled();
     expect(drivers[2].close).not.toHaveBeenCalled();
-    expect(onConnected).toHaveBeenCalledWith("mvhd-neo4j-spe2:7688", 3);
+    expect(onConnected).toHaveBeenCalledWith(
+      "mvhd-spe-2-b53a0449.westeurope.azurecontainer.io:7687",
+      3,
+    );
     expect(getSpeDrivers().map((s) => s.label)).toEqual(["SPE-1", "SPE-2"]);
   });
 
