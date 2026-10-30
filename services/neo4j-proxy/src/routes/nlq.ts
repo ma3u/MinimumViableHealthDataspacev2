@@ -5,6 +5,7 @@ import {
   ANTHROPIC_API_KEY,
   AZURE_OPENAI_API_KEY,
   AZURE_OPENAI_GPT4O_URL,
+  MIN_COHORT_SIZE,
   OLLAMA_URL,
   OPENAI_API_KEY,
 } from "../config.js";
@@ -32,6 +33,11 @@ import {
 } from "../nlq/engine.js";
 import { logger } from "../logger.js";
 import { forSecondaryUse, secondaryUseSession } from "../opt-out.js";
+import {
+  anonymiseFederatedAnswer,
+  type Contribution,
+  type KOutcome,
+} from "../k-anonymity.js";
 
 /**
  * A refused query is recorded too, before the refusal goes out. The refusal
@@ -290,11 +296,12 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
 
     // Execute query
     let results: any[];
+    let kOutcome: KOutcome | null = null;
 
     if (federated && spe2Driver) {
       // Federated execution across all SPEs
       const spes = getSpeDrivers();
-      const allResults: any[] = [];
+      const contributions: Contribution[] = [];
 
       await Promise.all(
         spes.map(async ({ label, driver: d }) => {
@@ -302,20 +309,29 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
           try {
             // nosemgrep: cypher-built-from-request-input -- generated Cypher; WRITE_PATTERN and checkReIdentification above
             const result = await session.run(cypher!, params);
-            result.records.forEach((r) => {
-              const obj: Record<string, any> = { _source: label };
-              r.keys.forEach((key) => {
-                const val = r.get(key);
-                obj[String(key)] = neo4j.isInt(val) ? val.toNumber() : val;
-              });
-              allResults.push(obj);
+            contributions.push({
+              source: label,
+              records: result.records.map((r) => {
+                const obj: Record<string, any> = { _source: label };
+                r.keys.forEach((key) => {
+                  const val = r.get(key);
+                  obj[String(key)] = neo4j.isInt(val) ? val.toNumber() : val;
+                });
+                return obj;
+              }),
             });
           } finally {
             await session.close();
           }
         }),
       );
-      results = allResults;
+      // What leaves the SPEs is k-anonymous, as on /federated/query.
+      kOutcome = anonymiseFederatedAnswer(
+        cypher,
+        contributions,
+        MIN_COHORT_SIZE,
+      );
+      results = kOutcome.rows;
     } else {
       // Single SPE execution
       const session = getSession();
@@ -373,6 +389,15 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
         resultCount: results.length,
         odrlEnforced,
         outcome: "success",
+        ...(kOutcome
+          ? {
+              federated: {
+                contributors: getSpeDrivers().map((s) => s.label),
+                aggregateSuppressed: kOutcome.aggregateSuppressed,
+                suppressionReason: kOutcome.suppressionReason,
+              },
+            }
+          : {}),
       });
     } catch (err) {
       auditUnavailable(res, err);
@@ -388,6 +413,14 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       results,
       totalRows: results.length,
       odrlEnforced,
+      ...(kOutcome
+        ? {
+            minKApplied: kOutcome.minKApplied,
+            filtered: kOutcome.filtered,
+            aggregateSuppressed: kOutcome.aggregateSuppressed,
+            suppressionReason: kOutcome.suppressionReason,
+          }
+        : {}),
       ...(graphragTrace ? { trace: graphragTrace } : {}),
       ...(graphLayers
         ? {

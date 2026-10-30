@@ -17,5 +17,7 @@ Core (from `.claude/rules/api-conventions.md` + startup log):
 
 `/federated/query` response contract (Phase 26e): `{results, sources, totalRows,
 filtered, speCount, minKApplied, aggregateSuppressed, suppressionReason}` —
-suppression rules in `docs/architecture/federation.md`. Rate limits: 100 req/min
+suppression rules in `docs/architecture/federation.md`. `/nlq` with
+`federated: true` adds `minKApplied, filtered, aggregateSuppressed,
+suppressionReason` to its answer and applies the same rules. Rate limits: 100 req/min
 per IP; heavier limiter on federated/NLQ (source: ADR-020 safety-rails list).

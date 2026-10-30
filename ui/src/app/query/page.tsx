@@ -109,6 +109,11 @@ interface NlqResult {
   dataQuality?: NlqDataQuality;
   graphLayers?: GraphLayerInfo[];
   cypherSections?: NlqCypherSection[];
+  /** Federated answers: k-anonymity as the proxy applied it. */
+  minKApplied?: number;
+  filtered?: number;
+  aggregateSuppressed?: boolean;
+  suppressionReason?: "contributor_k_violation" | "small_cells" | null;
 }
 
 const LAYER_ACCENT: Record<GraphLayerId, string> = {
@@ -563,6 +568,21 @@ export default function NlqPage() {
                   Federated
                 </span>
               )}
+              {result.federated && (result.minKApplied ?? 0) > 0 && (
+                <span
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-(--success-text)"
+                  data-testid="k-anonymity-badge"
+                >
+                  <Shield size={12} />k = {result.minKApplied}
+                  {result.aggregateSuppressed
+                    ? ": answer suppressed"
+                    : (result.filtered ?? 0) > 0
+                      ? `: ${result.filtered} value${
+                          result.filtered === 1 ? "" : "s"
+                        } suppressed`
+                      : ""}
+                </span>
+              )}
               {result.odrlEnforced && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300">
                   <Shield size={12} />
@@ -586,6 +606,17 @@ export default function NlqPage() {
                 Cypher
               </button>
             </div>
+
+            {result.federated && (result.filtered ?? 0) > 0 && (
+              <p
+                className="text-xs text-(--text-secondary)"
+                data-testid="k-anonymity-note"
+              >
+                {result.aggregateSuppressed
+                  ? `One secure processing environment returned fewer than ${result.minKApplied} records, so the whole answer is withheld: a missing contributor would identify people.`
+                  : `Counts below ${result.minKApplied} are shown as <${result.minKApplied}, and a share computed from one goes with it, so no one can be singled out (k-anonymity across the secure processing environments).`}
+              </p>
+            )}
 
             {/* 5-layer graph breadcrumb — which layers answer this question */}
             {result.graphLayers && result.graphLayers.length > 0 && (
