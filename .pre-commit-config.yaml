@@ -36,6 +36,9 @@ repos:
     rev: v2.14.0
     hooks:
       - id: hadolint-docker
+        # A <Dockerfile>.dockerignore (BuildKit's per-Dockerfile ignore list)
+        # matches the hook's file pattern but is not a Dockerfile.
+        exclude: \.dockerignore$
 
   # Flexible linter/formatter suitable for Markdown, JS, TS, YAML, and JSON.
   - repo: https://github.com/pre-commit/mirrors-prettier

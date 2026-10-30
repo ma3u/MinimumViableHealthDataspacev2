@@ -1,0 +1,28 @@
+{
+  "name": "@health-dataspace/spe-loader",
+  "version": "0.1.0",
+  "description": "SPE workspace loader: hub graph to encrypted extract, Trustee key release, Neo4j workspace (ADR-068, ADR-069)",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "spe-loader": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "neo4j-driver": "^5.28.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^5.8.3",
+    "vitest": "^5.0.2"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

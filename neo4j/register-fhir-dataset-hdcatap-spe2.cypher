@@ -5,8 +5,9 @@
 // Processing Environment (SPE-2). Different organization, dataset ID, and
 // distribution endpoints.
 //
-// Idempotent (MERGE everywhere). scripts/seed-spe2.py applies it to SPE-2
-// after copying SPE-2's patients (ADR-069), locally and on Azure; by hand:
+// Idempotent (MERGE everywhere). services/spe-loader applies it to the SPE-2
+// workspace after loading SPE-2's extract (ADR-069), on compose and on AKS;
+// by hand:
 //
 //   cat neo4j/register-fhir-dataset-hdcatap-spe2.cypher | \
 //     docker exec -i health-dataspace-neo4j-spe2 \

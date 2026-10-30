@@ -1,0 +1,75 @@
+# Trustee KBS with the built-in Attestation Service and RVPS (ADR-068, #774)
+#
+# Run by the access body (MedReg DE), not by the hub. The same file serves the
+# compose overlay (docker-compose.trustee.yml) and mvhd-trustee on Azure
+# (scripts/azure/21-aks-confidential-spe.sh --trustee); what differs between
+# them is the resource policy (trustee/policies/resource-*.rego) and the
+# reference values, both set through the admin API after start.
+#
+# Format: Trustee v0.22.0, kbs/docs/config.md.
+
+[http_server]
+sockets = ["0.0.0.0:8080"]
+# TLS ends in front of KBS: on Azure at the Container Apps ingress, locally
+# nowhere (the compose network only). The admin API is still gated by the
+# admin token below.
+insecure_http = true
+
+# Attestation tokens are signed by the built-in AS with the RSA key that
+# trustee-setup.sh generates on first start, and KBS accepts only tokens whose
+# header key chains to that CA. No `insecure_header_jwk`.
+[attestation_token]
+trusted_certs_paths = ["/opt/confidential-containers/kbs/user-keys/ca-cert.pem"]
+insecure_header_jwk = false
+
+[attestation_service]
+type = "coco_as_builtin"
+
+[attestation_service.attestation_token_broker]
+duration_min = 5
+issuer_name = "mvhd-trustee (MedReg DE, access body)"
+
+[attestation_service.attestation_token_broker.signer]
+key_path = "/opt/confidential-containers/kbs/user-keys/token.key"
+cert_path = "/opt/confidential-containers/kbs/user-keys/token-cert-chain.pem"
+
+[attestation_service.rvps_config]
+type = "BuiltIn"
+
+# SEV-SNP evidence from an ACI confidential container (ADR-069): the VCEK
+# that signed the report is looked up in the offline store first (the chain
+# the ACI host provides, copied there by the access body), then fetched from
+# AMD's KDS. The ACI hosts are Genoa (EPYC 9V74, probed 2026-10-31).
+[attestation_service.verifier_config.snp_verifier]
+vcek_sources = [
+  { type = "OfflineStore", path = "/opt/confidential-containers/storage/kds-store" },
+  { type = "KDS" },
+]
+
+# Admin API: a JWT signed with the ed25519 key trustee-setup.sh generates, so
+# only whoever holds user-keys/private.key (the access body) can set keys,
+# policies and reference values.
+[admin]
+authorization_mode = "AuthenticatedAuthorization"
+
+[admin.authentication.bearer_jwt]
+identity_providers = [
+  { issuer = "mvhd-trustee-admin", public_key_uri = "/opt/confidential-containers/kbs/user-keys/public.pub" },
+]
+
+[admin.authorization.regex_acl]
+acls = [{ role = "admin", allowed_endpoints = "^/kbs/.+$" }]
+
+[[plugins]]
+name = "resource"
+storage_backend_type = "kvstorage"
+
+# One store for everything that must survive a restart: the extract keys
+# (namespace `repository`), the resource policy (`kbs`), the attestation
+# policies and the reference values. A named volume locally, an Azure Files
+# share mounted into mvhd-trustee only on Azure.
+[storage_backend]
+storage_type = "LocalFs"
+
+[storage_backend.backends.local_fs]
+dir_path = "/opt/confidential-containers/storage"

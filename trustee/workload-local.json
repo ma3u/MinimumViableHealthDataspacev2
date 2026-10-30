@@ -1,0 +1,28 @@
+{
+  "_comment": "The compose SPE workspace as the permit's policy hash sees it (services/spe-loader/src/policy-hash.ts): docker-compose.trustee.yml's spe-loader-spe<n> and neo4j-spe<n>. Images by tag, as compose builds the loader locally; on Azure the hash is taken from the rendered k8s/spe/workspace.yaml with images by digest.",
+  "initContainers": [],
+  "containers": [
+    {
+      "name": "spe-loader",
+      "image": "mvhd/spe-loader:local",
+      "command": ["spe-loader", "load"],
+      "env": [
+        { "name": "WORKSPACE_NEO4J_URI" },
+        { "name": "WORKSPACE_NEO4J_USER" },
+        { "name": "WORKSPACE_NEO4J_PASSWORD" },
+        { "name": "TRUSTEE_URL" },
+        { "name": "SPE_RUNS_ON" }
+      ]
+    },
+    {
+      "name": "neo4j",
+      "image": "neo4j:5.26.28-community@sha256:ff32db30b2baff97971e441b46bfd9c832c1b62c970398ef579244c06b21d357",
+      "env": [
+        { "name": "NEO4J_AUTH" },
+        { "name": "NEO4J_server_memory_heap_initial__size" },
+        { "name": "NEO4J_server_memory_heap_max__size" },
+        { "name": "NEO4J_server_memory_pagecache_size" }
+      ]
+    }
+  ]
+}

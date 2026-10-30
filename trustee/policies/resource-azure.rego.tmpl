@@ -1,0 +1,65 @@
+# KBS resource policy, mvhd-trustee on Azure ("Attested: confidential workload")
+#
+# Releases an SPE's extract key, default/spe-<n>/extract-key, only to
+#   - SEV-SNP evidence (Trustee's `snp` verifier checked the report against
+#     AMD's VCEK chain) from an ACI confidential container group,
+#   - whose attestation token is affirming (the measurement and TCB matched
+#     the reference values the access body set),
+#   - and whose HOST_DATA is the permit's policy hash for that SPE: on ACI,
+#     HOST_DATA is the SHA-256 of the group's ccePolicy, so a workload with
+#     another image, command or environment gets nothing (ADR-068 decision 2).
+# Sample evidence, which any container can produce, gets nothing here.
+#
+# A template: `spe-loader trustee-configure --resource-policy-template` fills
+# in the line below with the hashes 21-aci-confidential-spe.sh --policy
+# recorded, one per SPE, without the `sha256:` prefix (as the claim has it).
+package policy
+
+import rego.v1
+
+default allow := false
+
+permit_policy_hash := {}
+
+spe := data["resource-path"][1]
+
+spe_extract_key if {
+	data.plugin == "resource"
+	count(data["resource-path"]) == 3
+	data["resource-path"][0] == "default"
+	regex.match(`^spe-[0-9]+$`, spe)
+	data["resource-path"][2] == "extract-key"
+}
+
+snp_claims contains claims if {
+	some _, submod in input.submods
+	claims := submod["ear.veraison.annotated-evidence"].snp
+}
+
+sample_evidence if {
+	some _, submod in input.submods
+	submod["ear.veraison.annotated-evidence"].sample
+}
+
+affirming if {
+	count(input.submods) > 0
+	not any_not_affirming
+}
+
+any_not_affirming if {
+	some _, submod in input.submods
+	submod["ear.status"] != "affirming"
+}
+
+host_data_is_the_permits if {
+	some claims in snp_claims
+	lower(claims.init_data) == permit_policy_hash[spe]
+}
+
+allow if {
+	spe_extract_key
+	count(snp_claims) > 0
+	not sample_evidence
+	affirming
+	host_data_is_the_permits
+}
