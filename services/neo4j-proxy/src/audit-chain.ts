@@ -271,6 +271,13 @@ export interface AuditIndex {
    * callback leaves one record, and the existing one is returned.
    */
   dedupeKey?: string;
+  /**
+   * Further properties of the (:AuditEvent) node, for the readers that filter
+   * on them (the SPE events: speId, permitId, policyHash, teeType,
+   * attestationScope, simulated; #774). Indexing only, outside the hash: the
+   * resource is the record and holds the same values.
+   */
+  properties?: Record<string, string | boolean | null>;
 }
 
 /**
@@ -417,6 +424,8 @@ async function writeBatch(batch: PendingRecord[]): Promise<ChainedEvent[]> {
           outcome: p.index.outcome,
           resource: canonicalJson(p.resource),
           dedupeKey: p.index.dedupeKey ?? null,
+          eventType: auditType(p.resource),
+          extra: p.index.properties ?? {},
         });
       }
       if (rows.length > 0) {
@@ -425,8 +434,10 @@ async function writeBatch(batch: PendingRecord[]): Promise<ChainedEvent[]> {
            CREATE (e:AuditEvent {
              id: ev.id, chain: ev.chain, seq: ev.seq, prevHash: ev.prevHash, hash: ev.hash,
              recorded: datetime(ev.recorded), participantId: ev.participantId,
-             outcome: ev.outcome, resource: ev.resource, dedupeKey: ev.dedupeKey
-           })`,
+             outcome: ev.outcome, resource: ev.resource, dedupeKey: ev.dedupeKey,
+             eventType: ev.eventType
+           })
+           SET e += ev.extra`,
           { events: rows },
         );
         await tx.run(

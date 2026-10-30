@@ -16,6 +16,7 @@ import {
   verifyChain,
 } from "../audit-chain.js";
 import { DSP_CHAIN } from "../dsp-audit.js";
+import { SPE_CHAIN } from "../spe-status.js";
 
 // ---- Contract and transfer audit (ADR-045 plane 2, #418) --------------------
 
@@ -122,7 +123,7 @@ app.post("/audit/dsp", auditLimiter, async (req: Request, res: Response) => {
 
 // ---- Reading the trail (operators, Grafana) ---------------------------------
 
-const CHAINS = new Set([QUERY_CHAIN, DSP_CHAIN]);
+const CHAINS = new Set([QUERY_CHAIN, DSP_CHAIN, SPE_CHAIN]);
 
 /**
  * GET /audit/chains/:chain/verify

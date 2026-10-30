@@ -12,12 +12,17 @@
  * plane's contract enforcement layer.
  */
 
-import neo4j from "neo4j-driver";
+import neo4j, { type Driver } from "neo4j-driver";
 import {
   NEO4J_PASSWORD,
+  NEO4J_SPE1_PASSWORD,
+  NEO4J_SPE1_URI,
+  NEO4J_SPE1_USER,
   NEO4J_SPE2_PASSWORD,
   NEO4J_SPE2_URI,
   NEO4J_SPE2_USER,
+  NEO4J_SPE_CA_CERT,
+  NEO4J_SPE_CA_FILE,
   NEO4J_URI,
   NEO4J_USER,
   OLLAMA_URL,
@@ -26,7 +31,17 @@ import {
   SPE2_CONNECT_ATTEMPTS,
   SPE2_CONNECT_INTERVAL_MS,
 } from "./config.js";
-import { connectSpe2, driver, setDriver, spe2Driver } from "./db.js";
+import {
+  connectSpe,
+  driver,
+  setDriver,
+  setSpe1Driver,
+  setSpe1Workspace,
+  setSpe2Driver,
+  spe1Driver,
+  spe2Driver,
+  workspaceDriverOptions,
+} from "./db.js";
 import { app } from "./app.js";
 import { dcpDiscoveryTick, startDcpDiscoveryLoop } from "./dcp-discovery.js";
 
@@ -42,8 +57,10 @@ import "./routes/tasks.js";
 import "./routes/tck.js";
 import "./routes/trust-center.js";
 import "./routes/dsp-audit.js";
+import "./routes/spe.js";
 import "./error-handler.js";
 import { logger } from "./logger.js";
+import { startSpeAuditSync } from "./spe-status.js";
 
 async function main() {
   setDriver(
@@ -59,43 +76,26 @@ async function main() {
     process.exit(1);
   }
 
-  // Phase 5: Connect to optional second SPE. One try before listening, so
-  // the startup line says whether it is there; when it is not up yet, the
-  // proxy answers from SPE-1 and keeps trying in the background (ADR-069).
-  if (NEO4J_SPE2_URI) {
-    const spe2Uri = NEO4J_SPE2_URI;
-    const create = () =>
-      neo4j.driver(
-        spe2Uri,
-        neo4j.auth.basic(NEO4J_SPE2_USER, NEO4J_SPE2_PASSWORD),
-      );
-    const onConnected = (server: string | undefined, attempt: number) =>
-      logger.info({ server, attempt }, "connected to Neo4j SPE-2");
-    const now = await connectSpe2({
-      create,
-      attempts: 1,
-      intervalMs: 0,
-      onConnected,
-    });
-    if (!now) {
-      logger.warn(
-        "SPE-2 not answering yet; federated queries use SPE-1 alone until it does",
-      );
-      void connectSpe2({
-        create,
-        attempts: SPE2_CONNECT_ATTEMPTS,
-        intervalMs: SPE2_CONNECT_INTERVAL_MS,
-        onConnected,
-        onGiveUp: (err) =>
-          logger.warn(
-            { err },
-            "SPE-2 not available (federated queries disabled)",
-          ),
-      });
-    }
-  } else {
-    logger.info("SPE-2 not configured (set NEO4J_SPE2_URI to enable)");
-  }
+  // The SPE workspaces (ADR-069): SPE-1 only when NEO4J_SPE1_URI makes it one,
+  // SPE-2 when NEO4J_SPE2_URI is set. One try before listening, so the
+  // startup line says whether each is there; one that is not up yet is kept
+  // trying in the background while the proxy answers without it.
+  setSpe1Workspace(Boolean(NEO4J_SPE1_URI));
+  await startWorkspace(
+    "SPE-1",
+    NEO4J_SPE1_URI,
+    NEO4J_SPE1_USER,
+    NEO4J_SPE1_PASSWORD,
+    setSpe1Driver,
+  );
+  await startWorkspace(
+    "SPE-2",
+    NEO4J_SPE2_URI,
+    NEO4J_SPE2_USER,
+    NEO4J_SPE2_PASSWORD,
+    setSpe2Driver,
+  );
+  startSpeAuditSync();
 
   startDcpDiscoveryLoop();
 
@@ -106,6 +106,7 @@ async function main() {
       {
         port: PORT,
         federated: Boolean(spe2Driver),
+        spe1Workspace: Boolean(NEO4J_SPE1_URI),
         llm: OPENAI_API_KEY ? "openai" : OLLAMA_URL ? "ollama" : "none",
       },
       "listening",
@@ -116,9 +117,61 @@ async function main() {
   process.on("SIGTERM", async () => {
     logger.info("SIGTERM received, shutting down");
     await driver.close();
+    if (spe1Driver) await spe1Driver.close();
     if (spe2Driver) await spe2Driver.close();
     process.exit(0);
   });
+}
+
+async function startWorkspace(
+  label: "SPE-1" | "SPE-2",
+  uri: string | undefined,
+  user: string,
+  password: string,
+  set: (d: Driver) => void,
+): Promise<void> {
+  if (!uri) {
+    logger.info(
+      label === "SPE-1"
+        ? "SPE-1 is the hub graph (set NEO4J_SPE1_URI for a workspace)"
+        : "SPE-2 not configured (set NEO4J_SPE2_URI to enable)",
+    );
+    return;
+  }
+  const opts = workspaceDriverOptions(uri, {
+    pem: NEO4J_SPE_CA_CERT,
+    file: NEO4J_SPE_CA_FILE,
+  });
+  const create = () =>
+    neo4j.driver(opts.uri, neo4j.auth.basic(user, password), opts.config);
+  const onConnected = (server: string | undefined, attempt: number) =>
+    logger.info(
+      { server, attempt, tls: Boolean(opts.config.encrypted) },
+      `connected to Neo4j ${label}`,
+    );
+  const now = await connectSpe(
+    { create, attempts: 1, intervalMs: 0, onConnected },
+    set,
+  );
+  if (!now) {
+    logger.warn(
+      `${label} not answering yet; federated queries go without it until it does`,
+    );
+    void connectSpe(
+      {
+        create,
+        attempts: SPE2_CONNECT_ATTEMPTS,
+        intervalMs: SPE2_CONNECT_INTERVAL_MS,
+        onConnected,
+        onGiveUp: (err) =>
+          logger.warn(
+            { err },
+            `${label} not available (left out of federated queries)`,
+          ),
+      },
+      set,
+    );
+  }
 }
 
 // Only auto-start when run directly (not imported for testing)
