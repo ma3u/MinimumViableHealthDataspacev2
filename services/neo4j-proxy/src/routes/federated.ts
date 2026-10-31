@@ -1,7 +1,7 @@
 import { type Request, type Response, type NextFunction } from "express";
 import neo4j from "neo4j-driver";
 import { MIN_COHORT_SIZE } from "../config.js";
-import { driver, getSpeDrivers } from "../db.js";
+import { driver, getSpeDrivers, readSession } from "../db.js";
 import { app, heavyLimiter } from "../app.js";
 import { auditContext, logTransferEvent } from "../audit.js";
 import {
@@ -117,12 +117,10 @@ app.post(
       await Promise.all(
         spes.map(async ({ label, driver: d }) => {
           // Art. 71 (ADR-062): each SPE answers without the persons who opted out.
-          const session = secondaryUseSession(
-            d.session({ database: "neo4j" }),
-            scope,
-          );
+          // Read-only: the database refuses a write the regex above misses.
+          const session = secondaryUseSession(readSession(d), scope);
           try {
-            // nosemgrep: cypher-built-from-request-input -- caller-supplied Cypher by design; WRITE_PATTERN and checkReIdentification above
+            // nosemgrep: cypher-built-from-request-input -- caller-supplied Cypher by design, in a read-only session; WRITE_PATTERN and checkReIdentification above
             const result = await session.run(cypher, params);
             const records = result.records.map((r) => {
               const obj: Record<string, any> = { _source: label };
