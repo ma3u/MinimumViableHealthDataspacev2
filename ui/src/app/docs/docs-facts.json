@@ -38,6 +38,10 @@
       "methods": ["GET", "POST", "PUT", "DELETE"]
     },
     {
+      "path": "/api/admin/spe",
+      "methods": ["GET"]
+    },
+    {
       "path": "/api/admin/tenants",
       "methods": ["GET"]
     },
@@ -1189,8 +1193,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 52,
-    "operations": 69
+    "paths": 53,
+    "operations": 70
   },
   "workflowJobs": {
     "test.yml": [
@@ -1245,11 +1249,11 @@
   "lastUpdated": {
     "/docs": "2026-10-28",
     "/docs/user-guide": "2026-10-30",
-    "/docs/developer": "2026-10-27",
-    "/docs/developer/quality-gates": "2026-10-04",
-    "/docs/developer/api": "2026-10-29",
+    "/docs/developer": "2026-10-31",
+    "/docs/developer/quality-gates": "2026-10-31",
+    "/docs/developer/api": "2026-10-31",
     "/docs/developer/reference": "2026-10-29",
-    "/docs/architecture": "2026-10-27",
+    "/docs/architecture": "2026-10-31",
     "/docs/security": "2026-10-31",
     "/docs/security/[slug]": "2026-10-31",
     "/docs/klarbefund": "2026-10-31",
