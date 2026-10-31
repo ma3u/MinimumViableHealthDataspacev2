@@ -28,8 +28,9 @@ import {
   OLLAMA_URL,
   OPENAI_API_KEY,
   PORT,
-  SPE2_CONNECT_ATTEMPTS,
-  SPE2_CONNECT_INTERVAL_MS,
+  SPE_CONNECT_INTERVAL_MS,
+  SPE_CONNECT_MAX_INTERVAL_MS,
+  SPE_CONNECT_TIMEOUT_MS,
 } from "./config.js";
 import {
   connectSpe,
@@ -60,7 +61,7 @@ import "./routes/dsp-audit.js";
 import "./routes/spe.js";
 import "./error-handler.js";
 import { logger } from "./logger.js";
-import { startSpeAuditSync } from "./spe-status.js";
+import { startSpeSync } from "./spe-status.js";
 
 async function main() {
   setDriver(
@@ -77,25 +78,25 @@ async function main() {
   }
 
   // The SPE workspaces (ADR-069): SPE-1 only when NEO4J_SPE1_URI makes it one,
-  // SPE-2 when NEO4J_SPE2_URI is set. One try before listening, so the
-  // startup line says whether each is there; one that is not up yet is kept
-  // trying in the background while the proxy answers without it.
+  // SPE-2 when NEO4J_SPE2_URI is set. Connected in the background, never
+  // awaited: the proxy listens and answers from the hub whatever they do,
+  // and federates over each one as soon as it answers.
   setSpe1Workspace(Boolean(NEO4J_SPE1_URI));
-  await startWorkspace(
+  startWorkspace(
     "SPE-1",
     NEO4J_SPE1_URI,
     NEO4J_SPE1_USER,
     NEO4J_SPE1_PASSWORD,
     setSpe1Driver,
   );
-  await startWorkspace(
+  startWorkspace(
     "SPE-2",
     NEO4J_SPE2_URI,
     NEO4J_SPE2_USER,
     NEO4J_SPE2_PASSWORD,
     setSpe2Driver,
   );
-  startSpeAuditSync();
+  startSpeSync();
 
   startDcpDiscoveryLoop();
 
@@ -123,13 +124,19 @@ async function main() {
   });
 }
 
-async function startWorkspace(
+/**
+ * Starts connecting one workspace and returns at once. Each try gives up
+ * after SPE_CONNECT_TIMEOUT_MS; the tries go on for as long as the proxy
+ * runs, 15 s apart at first, up to 60 s. Logged when it fails the first time
+ * and when it connects, not per try.
+ */
+export function startWorkspace(
   label: "SPE-1" | "SPE-2",
   uri: string | undefined,
   user: string,
   password: string,
   set: (d: Driver) => void,
-): Promise<void> {
+): void {
   if (!uri) {
     logger.info(
       label === "SPE-1"
@@ -142,36 +149,29 @@ async function startWorkspace(
     pem: NEO4J_SPE_CA_CERT,
     file: NEO4J_SPE_CA_FILE,
   });
+  const config = { ...opts.config, connectionTimeout: SPE_CONNECT_TIMEOUT_MS };
   const create = () =>
-    neo4j.driver(opts.uri, neo4j.auth.basic(user, password), opts.config);
-  const onConnected = (server: string | undefined, attempt: number) =>
-    logger.info(
-      { server, attempt, tls: Boolean(opts.config.encrypted) },
-      `connected to Neo4j ${label}`,
-    );
-  const now = await connectSpe(
-    { create, attempts: 1, intervalMs: 0, onConnected },
+    neo4j.driver(opts.uri, neo4j.auth.basic(user, password), config);
+  void connectSpe(
+    {
+      create,
+      attempts: Number.POSITIVE_INFINITY,
+      intervalMs: SPE_CONNECT_INTERVAL_MS,
+      maxIntervalMs: SPE_CONNECT_MAX_INTERVAL_MS,
+      timeoutMs: SPE_CONNECT_TIMEOUT_MS,
+      onConnected: (server, attempt) =>
+        logger.info(
+          { server, attempt, tls: Boolean(opts.config.encrypted) },
+          `connected to Neo4j ${label}`,
+        ),
+      onFirstFailure: (err) =>
+        logger.warn(
+          { err },
+          `${label} not answering yet; federated queries go without it, retrying in the background`,
+        ),
+    },
     set,
   );
-  if (!now) {
-    logger.warn(
-      `${label} not answering yet; federated queries go without it until it does`,
-    );
-    void connectSpe(
-      {
-        create,
-        attempts: SPE2_CONNECT_ATTEMPTS,
-        intervalMs: SPE2_CONNECT_INTERVAL_MS,
-        onConnected,
-        onGiveUp: (err) =>
-          logger.warn(
-            { err },
-            `${label} not available (left out of federated queries)`,
-          ),
-      },
-      set,
-    );
-  }
 }
 
 // Only auto-start when run directly (not imported for testing)

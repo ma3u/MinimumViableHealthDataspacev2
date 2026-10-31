@@ -1,7 +1,6 @@
 import { type NextFunction, type Request, type Response } from "express";
 import { app } from "../app.js";
-import { logger } from "../logger.js";
-import { speStatus, syncSpeAudit } from "../spe-status.js";
+import { speStatus } from "../spe-status.js";
 
 // ---- The SPE workspaces for the administration (ADR-068, ADR-069, #774) -----
 
@@ -14,22 +13,16 @@ import { speStatus, syncSpeAudit } from "../spe-status.js";
  * configuration plus a reachability probe. The UI's GET /api/admin/spe
  * forwards this.
  *
- * Before answering, every SPE event the workspaces hold and the hub's audit
- * chain does not is appended to the chain `spe` (idempotent by event id).
- * The answer does not wait on that succeeding.
+ * Read only. The writes that follow from what the workspaces hold (their
+ * events onto the audit chain `spe`, the hub's Art. 71 opt-outs into them)
+ * are the SPE sync's, on its timer (spe-status.ts, runSpeSync), so a caller
+ * of this route never waits on a write and never causes one.
  */
 app.get(
   "/spe/status",
   async (_req: Request, res: Response, next: NextFunction) => {
     try {
-      const { status, reads } = await speStatus();
-      const appended = await syncSpeAudit(reads);
-      if (appended.length > 0) {
-        logger.info(
-          { audit: { chain: "spe", appended: appended.length } },
-          "SPE events appended to the audit chain",
-        );
-      }
+      const { status } = await speStatus();
       res.json(status);
     } catch (err) {
       next(err);

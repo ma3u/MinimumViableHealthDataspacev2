@@ -301,6 +301,31 @@ export async function appendAuditEvent(
   });
 }
 
+/**
+ * Appends one record in a transaction of its own, outside the shared queue.
+ * For background writers (the SPE sync, #774): a failure of theirs must never
+ * share a batch with a query's record, whose caller would then answer 503.
+ * The chain head is still locked, so the chain stays one chain.
+ */
+export async function appendAuditEventAlone(
+  chain: string,
+  resource: Record<string, unknown>,
+  index: AuditIndex,
+): Promise<ChainedEvent> {
+  if (!driver) throw new Error("audit: no Neo4j driver");
+  canonicalJson(resource);
+  const [event] = await writeBatch([
+    {
+      chain,
+      resource,
+      index,
+      resolve: () => undefined,
+      reject: () => undefined,
+    },
+  ]);
+  return event;
+}
+
 interface PendingRecord {
   chain: string;
   resource: Record<string, unknown>;

@@ -1,11 +1,13 @@
+import { randomUUID } from "node:crypto";
 import neo4j, { type Driver } from "neo4j-driver";
-import { appendAuditEvent, type ChainedEvent } from "./audit-chain.js";
+import { appendAuditEventAlone, type ChainedEvent } from "./audit-chain.js";
 import {
   NEO4J_SPE2_URI,
   SPE1_RUNS_ON,
   SPE2_RUNS_ON,
   SPE_AUDIT_SYNC_MS,
   SPE_ENVIRONMENT,
+  SPE_READ_TIMEOUT_MS,
   TRUSTEE_OPERATOR,
   TRUSTEE_PROBE_URL,
   TRUSTEE_URL,
@@ -13,24 +15,30 @@ import {
 } from "./config.js";
 import { driver, spe1Driver, spe1IsWorkspace, spe2Driver } from "./db.js";
 import { logger } from "./logger.js";
+import { OPTED_OUT_LABEL, PERSON_LABELS } from "./opt-out.js";
 
 // ---------------------------------------------------------------------------
-// The SPEs' state for the administration, and their events for the audit
-// chain (ADR-068, ADR-069, #774)
+// The SPEs' state for the administration, their events for the audit chain,
+// and the hub's Art. 71 opt-outs for the workspaces (ADR-068, ADR-069, #774)
 // ---------------------------------------------------------------------------
 //
-// The loader cannot reach the hub graph from an AKS workspace (no network
-// path from the confidential node into the ACA environment, by design). So it
-// records what happened in the workspace itself: one (:SpeAttestation) per
-// workspace and one (:SpeEvent) per attestation, key release, refusal and
-// load. The proxy, which reaches both, reads them here and appends each
-// event to the hub's audit chain `spe` once: the event id is the dedupe key,
-// so a second read leaves the chain as it was (ADR-045).
+// The loader cannot reach the hub graph from an ACI workspace (ACA exposes
+// the hub's Neo4j inside its environment only, by design). So it records what
+// happened in the workspace itself: one (:SpeAttestation) per workspace and
+// one (:SpeEvent) per attestation, key release, refusal and load.
 //
-// spe.workspace_destroyed is the proxy's own observation: a workspace that
-// answers with a different load than the one the hub saw last was destroyed
-// and loaded afresh (an off-hours stop, a pod restart, a new permit). The
-// hub keeps the last load per SPE on a (:SpeWorkspace {speId}) node.
+// GET /spe/status only reads (speStatus). Every write is the sync's
+// (runSpeSync), on a timer, one run at a time:
+//   - each workspace event goes to the hub's audit chain `spe` once, the event
+//     id as dedupe key, in a transaction of its own (ADR-045);
+//   - spe.workspace_destroyed is the proxy's own observation: a workspace
+//     that answers with a different load than the one the hub saw last was
+//     destroyed and loaded afresh; the hub keeps the last load per SPE on a
+//     (:SpeWorkspace {speId}) node;
+//   - the hub's Art. 71 opt-outs (the OptedOut label, ADR-062) are put on, and
+//     taken off, the workspaces' copies of the same persons, so an opt-out
+//     made after the extract was sealed reaches every SPE within one sync
+//     interval; each change is recorded as spe.optout_synced, counts only.
 
 export const SPE_CHAIN = "spe";
 const PROXY = "mvhd-neo4j-proxy";
@@ -41,7 +49,8 @@ export type SpeEventType =
   | "spe.key_release"
   | "spe.key_refused"
   | "spe.workspace_loaded"
-  | "spe.workspace_destroyed";
+  | "spe.workspace_destroyed"
+  | "spe.optout_synced";
 
 export interface SpeEvent {
   eventId: string;
@@ -141,19 +150,42 @@ export interface WorkspaceRead {
 const str = (v: unknown): string | null =>
   v === null || v === undefined ? null : String(v);
 
+/** Rejects when `p` takes longer than `ms`: a hung workspace must not hang a caller. */
+export function withTimeout<T>(
+  p: Promise<T>,
+  ms: number,
+  what: string,
+): Promise<T> {
+  let timer: NodeJS.Timeout | undefined;
+  const late = new Promise<never>((_, reject) => {
+    timer = setTimeout(
+      () => reject(new Error(`${what}: no answer within ${ms} ms`)),
+      ms,
+    );
+    timer.unref();
+  });
+  return Promise.race([p, late]).finally(() => clearTimeout(timer));
+}
+
 export async function readWorkspace(d: Driver): Promise<WorkspaceRead> {
   const session = d.session({
     database: "neo4j",
     defaultAccessMode: neo4j.session.READ,
   });
   try {
-    const res = await session.run(
-      `OPTIONAL MATCH (s:SpeAttestation)
-       WITH s ORDER BY s.updatedAt DESC LIMIT 1
-       CALL { MATCH (p:Patient) RETURN count(p) AS patients }
-       CALL { OPTIONAL MATCH (e:SpeEvent) WITH e ORDER BY e.at
-              RETURN collect(e {.*}) AS events }
-       RETURN s {.*} AS attestation, patients, events`,
+    const res = await withTimeout(
+      session.run(
+        `OPTIONAL MATCH (s:SpeAttestation)
+         WITH s ORDER BY s.updatedAt DESC LIMIT 1
+         CALL { MATCH (p:Patient) RETURN count(p) AS patients }
+         CALL { OPTIONAL MATCH (e:SpeEvent) WITH e ORDER BY e.at
+                RETURN collect(e {.*}) AS events }
+         RETURN s {.*} AS attestation, patients, events`,
+        {},
+        { timeout: SPE_READ_TIMEOUT_MS },
+      ),
+      SPE_READ_TIMEOUT_MS,
+      "SPE workspace read",
     );
     const r = res.records[0];
     const events = ((r?.get("events") as Array<Record<string, unknown>>) ?? [])
@@ -181,7 +213,10 @@ export async function readWorkspace(d: Driver): Promise<WorkspaceRead> {
       events,
     };
   } finally {
-    await session.close();
+    // A session on a hung connection may not close either.
+    await withTimeout(session.close(), 2000, "SPE session close").catch(
+      () => undefined,
+    );
   }
 }
 
@@ -467,7 +502,7 @@ export function buildSpeAuditEvent(
   };
 }
 
-/** Event ids already on the chain, so a status call does not lock it each time. */
+/** Event ids already on the chain, so a sync does not lock it for each again. */
 const synced = new Set<string>();
 
 export function resetSpeAuditCache(): void {
@@ -475,10 +510,40 @@ export function resetSpeAuditCache(): void {
 }
 
 /**
+ * One SPE event on the chain `spe`, in a transaction of its own (never in a
+ * batch with a query's record), with the auditor's fields as node properties.
+ */
+async function appendSpeEvent(
+  e: SpeEvent,
+  now: () => Date,
+): Promise<ChainedEvent> {
+  const key = `spe:${e.eventId}`;
+  const ev = await appendAuditEventAlone(
+    SPE_CHAIN,
+    buildSpeAuditEvent(e, { recorded: now().toISOString() }),
+    {
+      participantId: e.speId,
+      outcome: e.outcome,
+      dedupeKey: key,
+      // What the auditor filters on, as node properties (#774).
+      properties: {
+        speId: e.speId,
+        permitId: e.permitId,
+        policyHash: e.policyHash,
+        teeType: e.teeType,
+        attestationScope: e.attestationScope,
+        simulated: e.simulated,
+      },
+    },
+  );
+  synced.add(key);
+  return ev;
+}
+
+/**
  * Appends every event a workspace recorded and the hub has not, and a
  * spe.workspace_destroyed for a load that has been replaced. Returns what it
- * appended. Never throws: the status answer does not depend on it, and the
- * next call tries again.
+ * appended. Never throws: the next run tries again.
  */
 export async function syncSpeAudit(
   reads: Array<{ id: string; read: WorkspaceRead | null }>,
@@ -490,27 +555,8 @@ export async function syncSpeAudit(
     try {
       const destroyed = await noteLoad(id, read, now);
       for (const e of [...destroyed, ...read.events]) {
-        const key = `spe:${e.eventId}`;
-        if (synced.has(key)) continue;
-        const ev = await appendAuditEvent(
-          SPE_CHAIN,
-          buildSpeAuditEvent(e, { recorded: now().toISOString() }),
-          {
-            participantId: e.speId,
-            outcome: e.outcome,
-            dedupeKey: key,
-            // What the auditor filters on, as node properties (#774).
-            properties: {
-              speId: e.speId,
-              permitId: e.permitId,
-              policyHash: e.policyHash,
-              teeType: e.teeType,
-              attestationScope: e.attestationScope,
-              simulated: e.simulated,
-            },
-          },
-        );
-        synced.add(key);
+        if (synced.has(`spe:${e.eventId}`)) continue;
+        const ev = await appendSpeEvent(e, now);
         if (!ev.duplicate) appended.push(ev);
       }
     } catch (err) {
@@ -587,20 +633,248 @@ async function noteLoad(
   }
 }
 
-let timer: NodeJS.Timeout | null = null;
+// ---- Art. 71 opt-outs into the workspaces (ADR-062) -------------------------
 
-/** Carries SPE events to the chain even when nobody opens the administration. */
-export function startSpeAuditSync(): void {
+/**
+ * The key the extract gave each node (services/spe-loader, nodeKey()): its
+ * `id`, `resourceId` or `code`, the elementId only when it has none. The
+ * workspace's copy carries it as `_speKey`.
+ */
+const HUB_OPTED_OUT = `
+MATCH (n:${OPTED_OUT_LABEL})
+WHERE any(l IN labels(n) WHERE l IN $labels)
+WITH n, head([l IN $labels WHERE l IN labels(n)]) AS label
+RETURN label,
+       CASE
+         WHEN n.id IS NOT NULL AND toString(n.id) <> '' THEN toString(n.id)
+         WHEN n.resourceId IS NOT NULL AND toString(n.resourceId) <> '' THEN toString(n.resourceId)
+         WHEN n.code IS NOT NULL AND toString(n.code) <> '' THEN toString(n.code)
+         ELSE elementId(n)
+       END AS key`;
+
+const IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+/** The hub's opted-out persons, as {label: keys} for the person-level labels. */
+export async function hubOptOuts(hub: Driver): Promise<Map<string, string[]>> {
+  const session = hub.session({
+    database: "neo4j",
+    defaultAccessMode: neo4j.session.READ,
+  });
+  try {
+    const res = await withTimeout(
+      session.run(
+        HUB_OPTED_OUT,
+        { labels: [...PERSON_LABELS] },
+        { timeout: SPE_READ_TIMEOUT_MS },
+      ),
+      SPE_READ_TIMEOUT_MS,
+      "hub opt-out read",
+    );
+    const byLabel = new Map<string, string[]>();
+    for (const r of res.records) {
+      const label = String(r.get("label"));
+      const list = byLabel.get(label) ?? [];
+      list.push(String(r.get("key")));
+      byLabel.set(label, list);
+    }
+    return byLabel;
+  } finally {
+    await withTimeout(session.close(), 2000, "hub session close").catch(
+      () => undefined,
+    );
+  }
+}
+
+export interface OptOutChange {
+  added: number;
+  removed: number;
+}
+
+/**
+ * Puts OptedOut on the workspace's copies of the hub's opted-out persons and
+ * takes it off every copy the hub no longer marks. Only nodes the loader
+ * wrote (`_speKey`) are touched; idempotent; one write transaction.
+ */
+export async function applyOptOuts(
+  workspace: Driver,
+  byLabel: Map<string, string[]>,
+): Promise<OptOutChange> {
+  const session = workspace.session({ database: "neo4j" });
+  try {
+    return await withTimeout(
+      session.executeWrite(async (tx) => {
+        let added = 0;
+        let removed = 0;
+        for (const label of PERSON_LABELS) {
+          if (!IDENTIFIER.test(label)) continue;
+          const keys = byLabel.get(label) ?? [];
+          if (keys.length > 0) {
+            const a = await tx.run(
+              `UNWIND $keys AS k
+               MATCH (n:\`${label}\` {_speKey: k})
+               WHERE NOT n:${OPTED_OUT_LABEL}
+               SET n:${OPTED_OUT_LABEL}
+               RETURN count(n) AS c`,
+              { keys },
+            );
+            added += neo4j.integer.toNumber(a.records[0]?.get("c") ?? 0);
+          }
+          const r = await tx.run(
+            `MATCH (n:\`${label}\`:${OPTED_OUT_LABEL})
+             WHERE n._speKey IS NOT NULL AND NOT n._speKey IN $keys
+             REMOVE n:${OPTED_OUT_LABEL}
+             RETURN count(n) AS c`,
+            { keys },
+          );
+          removed += neo4j.integer.toNumber(r.records[0]?.get("c") ?? 0);
+        }
+        return { added, removed };
+      }),
+      SPE_READ_TIMEOUT_MS * 3,
+      "SPE opt-out write",
+    );
+  } finally {
+    await withTimeout(session.close(), 2000, "SPE session close").catch(
+      () => undefined,
+    );
+  }
+}
+
+/** The audit record of an opt-out sync: counts only, never who. */
+export function optOutEvent(
+  id: string,
+  read: WorkspaceRead | null,
+  change: OptOutChange,
+  optedOutInHub: number,
+  now: () => Date,
+): SpeEvent {
+  const a = read?.attestation ?? null;
+  return {
+    eventId: randomUUID(),
+    type: "spe.optout_synced",
+    at: now().toISOString(),
+    outcome: "success",
+    speId: id,
+    permitId: str(a?.permitId),
+    policyHash: str(a?.policyHash),
+    teeType: str(a?.teeType) ?? "none",
+    attestationScope: str(a?.attestationScope) ?? "none",
+    simulated: a ? a.simulated !== false : true,
+    loadId: str(a?.loadId),
+    detail: {
+      optedOutAdded: change.added,
+      optedOutRemoved: change.removed,
+      optedOutInHub,
+    },
+  };
+}
+
+/**
+ * Carries the hub's opt-outs into every connected workspace and records each
+ * change. The hub graph itself, while it is SPE-1, needs nothing: it is where
+ * the label is set.
+ */
+export async function syncOptOuts(
+  hub: Driver,
+  workspaces: Array<{ id: string; driver: Driver; read: WorkspaceRead | null }>,
+  now: () => Date = () => new Date(),
+): Promise<Array<{ id: string } & OptOutChange>> {
+  if (workspaces.length === 0) return [];
+  const byLabel = await hubOptOuts(hub);
+  const optedOutInHub = [...byLabel.values()].reduce((n, k) => n + k.length, 0);
+  const out: Array<{ id: string } & OptOutChange> = [];
+  for (const w of workspaces) {
+    try {
+      const change = await applyOptOuts(w.driver, byLabel);
+      out.push({ id: w.id, ...change });
+      if (change.added + change.removed > 0) {
+        logger.info(
+          { spe: w.id, added: change.added, removed: change.removed },
+          "Art. 71 opt-outs synced into the SPE workspace",
+        );
+        await appendSpeEvent(
+          optOutEvent(w.id, w.read, change, optedOutInHub, now),
+          now,
+        );
+      }
+    } catch (err) {
+      logger.warn(
+        { err, spe: w.id },
+        "Art. 71 opt-outs not yet synced into the SPE workspace",
+      );
+    }
+  }
+  return out;
+}
+
+// ---- the sync ----------------------------------------------------------------
+
+let running = false;
+let timer: NodeJS.Timeout | null = null;
+let first: NodeJS.Timeout | null = null;
+
+/** The workspaces the proxy has a driver for (not the hub graph as SPE-1). */
+function workspaceTargets(): Array<{ id: "SPE-1" | "SPE-2"; driver: Driver }> {
+  const out: Array<{ id: "SPE-1" | "SPE-2"; driver: Driver }> = [];
+  if (spe1IsWorkspace() && spe1Driver)
+    out.push({ id: "SPE-1", driver: spe1Driver });
+  if (spe2Driver) out.push({ id: "SPE-2", driver: spe2Driver });
+  return out;
+}
+
+/**
+ * One run of the sync: read every workspace, carry the opt-outs in, append
+ * the events. A run that finds the previous one still going is skipped
+ * (false), so a slow workspace cannot pile runs up. Never throws.
+ */
+export async function runSpeSync(
+  now: () => Date = () => new Date(),
+): Promise<boolean> {
+  if (running) {
+    logger.info("SPE sync still running; this tick is skipped");
+    return false;
+  }
+  running = true;
+  try {
+    const reads = await readAll();
+    const readOf = new Map(reads.map(({ target, read }) => [target.id, read]));
+    await syncOptOuts(
+      driver,
+      workspaceTargets().map((w) => ({ ...w, read: readOf.get(w.id) ?? null })),
+      now,
+    ).catch((err) => logger.warn({ err }, "SPE opt-out sync failed"));
+    await syncSpeAudit(
+      reads.map(({ target, read }) => ({ id: target.id, read })),
+      now,
+    );
+    return true;
+  } catch (err) {
+    logger.warn({ err }, "SPE sync failed");
+    return true;
+  } finally {
+    running = false;
+  }
+}
+
+/**
+ * The sync on a timer: once a few seconds after startup, then every
+ * SPE_AUDIT_SYNC_MS. Only when a workspace is configured.
+ */
+export function startSpeSync(): void {
   if (timer || !(spe1IsWorkspace() || NEO4J_SPE2_URI) || SPE_AUDIT_SYNC_MS <= 0)
     return;
-  timer = setInterval(() => {
-    void readAll()
-      .then((reads) =>
-        syncSpeAudit(
-          reads.map(({ target, read }) => ({ id: target.id, read })),
-        ),
-      )
-      .catch((err) => logger.warn({ err }, "SPE audit sync failed"));
-  }, SPE_AUDIT_SYNC_MS);
+  first = setTimeout(
+    () => void runSpeSync(),
+    Math.min(5000, SPE_AUDIT_SYNC_MS),
+  );
+  first.unref();
+  timer = setInterval(() => void runSpeSync(), SPE_AUDIT_SYNC_MS);
   timer.unref();
+}
+
+export function stopSpeSync(): void {
+  if (first) clearTimeout(first);
+  if (timer) clearInterval(timer);
+  first = null;
+  timer = null;
 }

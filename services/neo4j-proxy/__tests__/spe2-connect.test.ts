@@ -92,4 +92,37 @@ describe("connectSpe2", () => {
     expect(ok).toBe(true);
     expect(sleep).not.toHaveBeenCalled();
   });
+
+  it("backs off 15 s, 30 s, then 60 s at most, and logs the first failure once", async () => {
+    const sleep = vi.fn().mockResolvedValue(undefined);
+    const onFirstFailure = vi.fn();
+    const ok = await connectSpe2({
+      create: () => fakeDriver(false) as unknown as Driver,
+      attempts: 5,
+      intervalMs: 15000,
+      maxIntervalMs: 60000,
+      sleep,
+      onFirstFailure,
+    });
+    expect(ok).toBe(false);
+    expect(sleep.mock.calls.map((c) => c[0])).toEqual([
+      15000, 30000, 60000, 60000,
+    ]);
+    expect(onFirstFailure).toHaveBeenCalledOnce();
+  });
+
+  it("counts a try that never answers as failed after timeoutMs", async () => {
+    const hung = {
+      getServerInfo: vi.fn(() => new Promise(() => undefined)),
+      close: vi.fn().mockResolvedValue(undefined),
+    };
+    const ok = await connectSpe2({
+      create: () => hung as unknown as Driver,
+      attempts: 1,
+      intervalMs: 0,
+      timeoutMs: 20,
+    });
+    expect(ok).toBe(false);
+    expect(hung.close).toHaveBeenCalled();
+  });
 });

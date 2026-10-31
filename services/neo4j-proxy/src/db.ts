@@ -7,12 +7,16 @@ import { type Config, type Driver, type Session } from "neo4j-driver";
 // Neo4j drivers: the hub graph, and the SPE workspaces
 // ---------------------------------------------------------------------------
 //
-// `driver` is the hub graph: catalog, permits, audit chain, and SPE-1 for as
-// long as SPE-1 is not a workspace of its own. NEO4J_SPE1_URI makes it one
-// (ADR-068 decision 3, ADR-069): the federated path and the spe_access
-// template then ask `spe1Driver` for SPE-1, never the hub, which holds every
-// patient of both halves. While a configured SPE-1 workspace does not answer
-// it is left out of the federation rather than replaced by the hub.
+// `driver` is the hub graph: catalog, permits, audit chain, the single-SPE
+// NLQ path (POST /nlq without `federated`, getSession()), and SPE-1 in the
+// federation for as long as SPE-1 is not a workspace of its own.
+// NEO4J_SPE1_URI makes it one (ADR-068 decision 3, ADR-069): getSpeDrivers(),
+// which the federated path and the spe_access template use, then returns
+// `spe1Driver` for SPE-1, never the hub, which holds every patient of both
+// halves. While a configured SPE-1 workspace does not answer it is left out
+// of the federation rather than replaced by the hub. getSession() stays the
+// hub's either way: the single-SPE path answers from the hub on purpose
+// (catalog questions need it), and ADR-069 says so.
 
 export let driver: Driver;
 export let spe1Driver: Driver | null = null;
@@ -92,11 +96,19 @@ export function workspaceDriverOptions(
 export interface SpeConnection {
   /** Makes a fresh driver; called once per attempt. */
   create: () => Driver;
+  /** How many tries; Infinity keeps trying for as long as the proxy runs. */
   attempts: number;
+  /** The wait after the first failed try. */
   intervalMs: number;
+  /** The wait doubles after each failure up to this; unset, it stays intervalMs. */
+  maxIntervalMs?: number;
+  /** A try that has not answered after this long counts as failed. */
+  timeoutMs?: number;
   /** Injected by tests; a real wait otherwise. */
   sleep?: (ms: number) => Promise<void>;
   onConnected?: (address: string | undefined, attempt: number) => void;
+  /** Called once, on the first failure: logs follow state changes, not tries. */
+  onFirstFailure?: (err: unknown) => void;
   onGiveUp?: (err: unknown) => void;
 }
 /** The SPE-2 name of SpeConnection, kept for its callers. */
@@ -112,11 +124,12 @@ const wait = (ms: number) =>
  *
  * The proxy used to try SPE-2 once at startup and, if it was not up, run
  * without it until the next restart. On Azure the morning start (ADR-053)
- * brings the AKS node, its workspaces and the proxy up within minutes of each
- * other, and a workspace answers Bolt only once its loader has run, so one
- * try could lose an SPE for the whole day (ADR-069). True once the workspace
- * answered and its driver is set; false after the last attempt, with no
- * driver set.
+ * brings Trustee, the ACI workspaces and the proxy up within minutes of each
+ * other, and a workspace answers Bolt only once it has attested and loaded,
+ * so one try could lose an SPE for the whole day (ADR-069). The proxy calls
+ * this without waiting for it (index.ts), so it listens whatever the
+ * workspaces do. True once the workspace answered and its driver is set;
+ * false after the last attempt, with no driver set.
  */
 export async function connectSpe(
   c: SpeConnection,
@@ -124,25 +137,47 @@ export async function connectSpe(
 ): Promise<boolean> {
   const sleep = c.sleep ?? wait;
   let lastErr: unknown;
+  let interval = c.intervalMs;
   for (let attempt = 1; attempt <= c.attempts; attempt++) {
     const d = c.create();
     try {
-      const info = await d.getServerInfo();
+      const info = await answersWithin(d, c.timeoutMs);
       set(d);
       c.onConnected?.(info?.address, attempt);
       return true;
     } catch (err) {
       lastErr = err;
-      try {
-        await d.close();
-      } catch {
-        // a driver that never connected has nothing to close
+      if (attempt === 1) c.onFirstFailure?.(err);
+      // Not awaited: closing a driver whose connection hangs can hang too.
+      void Promise.resolve()
+        .then(() => d.close())
+        .catch(() => undefined);
+      if (attempt < c.attempts) {
+        await sleep(interval);
+        if (c.maxIntervalMs) interval = Math.min(interval * 2, c.maxIntervalMs);
       }
-      if (attempt < c.attempts) await sleep(c.intervalMs);
     }
   }
   c.onGiveUp?.(lastErr);
   return false;
+}
+
+/** getServerInfo(), given up after `timeoutMs` (a hung connection never answers). */
+function answersWithin(
+  d: Driver,
+  timeoutMs?: number,
+): Promise<{ address?: string } | undefined> {
+  const info = d.getServerInfo();
+  if (!timeoutMs) return info;
+  let timer: NodeJS.Timeout | undefined;
+  const late = new Promise<never>((_, reject) => {
+    timer = setTimeout(
+      () => reject(new Error(`no answer within ${timeoutMs} ms`)),
+      timeoutMs,
+    );
+    timer.unref();
+  });
+  return Promise.race([info, late]).finally(() => clearTimeout(timer));
 }
 
 export function connectSpe2(c: SpeConnection): Promise<boolean> {

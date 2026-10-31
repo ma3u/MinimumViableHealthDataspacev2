@@ -36,10 +36,18 @@ const record = (row: Row) => ({
 
 function workspaceDriver(name: string) {
   const run = vi.fn();
+  // The opt-out sync writes through executeWrite; its tx.run is `write`.
+  const write = vi.fn();
   return {
     name,
     run,
-    session: vi.fn(() => ({ run, close: vi.fn(), executeWrite: vi.fn() })),
+    write,
+    session: vi.fn(() => ({
+      run,
+      close: vi.fn(),
+      executeWrite: (work: (tx: { run: typeof write }) => unknown) =>
+        work({ run: write }),
+    })),
     getServerInfo: vi.fn().mockResolvedValue({ address: `${name}:7687` }),
     close: vi.fn(),
   };
@@ -69,11 +77,15 @@ vi.mock("neo4j-driver", () => ({
   },
 }));
 
+// The SPE sync appends alone (its own transaction); the queue that /nlq's
+// records share is appendAuditEvent, which the sync must never use.
 const appendAuditEvent = vi.fn();
+const appendQueue = vi.fn();
 const appendQueryAudit = vi.fn().mockResolvedValue({});
 vi.mock("../src/audit-chain.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../src/audit-chain.js")>()),
-  appendAuditEvent: (...a: unknown[]) => appendAuditEvent(...a),
+  appendAuditEventAlone: (...a: unknown[]) => appendAuditEvent(...a),
+  appendAuditEvent: (...a: unknown[]) => appendQueue(...a),
   appendQueryAudit: (...a: unknown[]) => appendQueryAudit(...a),
 }));
 
@@ -81,7 +93,7 @@ const { app, main } = await import("../src/index.js");
 const { setSpe2Driver, getSpeDrivers, workspaceDriverOptions } = await import(
   "../src/db.js"
 );
-const { resetSpeAuditCache } = await import("../src/spe-status.js");
+const { resetSpeAuditCache, runSpeSync } = await import("../src/spe-status.js");
 import supertest from "supertest";
 
 const request = supertest(app);
@@ -184,6 +196,13 @@ beforeEach(() => {
   spe1.run.mockReset();
   spe2.run.mockReset();
   hub.run.mockReset();
+  // No opt-outs in the hub, nothing to change in a workspace, by default.
+  hub.run.mockResolvedValue({ records: [] });
+  for (const w of [spe1, spe2]) {
+    w.write.mockReset();
+    w.write.mockResolvedValue({ records: [record({ c: 0 })] });
+  }
+  appendQueue.mockReset();
   fetchSpy = vi
     .spyOn(globalThis, "fetch")
     .mockResolvedValue(new Response("", { status: 401 }));
@@ -338,10 +357,11 @@ describe("SPE events on the audit chain", () => {
       ]),
     );
 
-    await request.get("/spe/status");
-    await request.get("/spe/status");
+    await runSpeSync();
+    await runSpeSync();
 
     expect(appendAuditEvent).toHaveBeenCalledTimes(3);
+    expect(appendQueue).not.toHaveBeenCalled();
     const [chain, resource, index] = appendAuditEvent.mock.calls[0];
     expect(chain).toBe("spe");
     expect(resource).toMatchObject({
@@ -389,7 +409,7 @@ describe("SPE events on the audit chain", () => {
       statusResult(speAttestation("SPE-2", "load-new"), 108, []),
     );
 
-    await request.get("/spe/status");
+    await runSpeSync();
 
     const destroyed = appendAuditEvent.mock.calls.find(
       (c) => c[1].subtype[0].code === "spe.workspace_destroyed",
@@ -399,6 +419,40 @@ describe("SPE events on the audit chain", () => {
       dedupeKey: "spe:destroyed-load-old",
       properties: { speId: "SPE-2" },
     });
+  });
+
+  it("GET /spe/status writes nothing: no audit append, no hub write", async () => {
+    spe1.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-1", "load-1"), 108, [
+        speEvent("SPE-1", "ev-7", "spe.attestation", "load-1"),
+      ]),
+    );
+    spe2.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-2", "load-2"), 108, []),
+    );
+    const res = await request.get("/spe/status");
+    expect(res.status).toBe(200);
+    expect(appendAuditEvent).not.toHaveBeenCalled();
+    expect(hubWrite).not.toHaveBeenCalled();
+    expect(spe1.write).not.toHaveBeenCalled();
+  });
+
+  it("skips a tick while the previous sync still runs", async () => {
+    let release: (v: unknown) => void = () => undefined;
+    spe1.run.mockReturnValue(new Promise((r) => (release = r)));
+    spe2.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-2", "load-2"), 108, []),
+    );
+    const firstRun = runSpeSync();
+    const second = await runSpeSync();
+    expect(second).toBe(false);
+    release(statusResult(speAttestation("SPE-1", "load-1"), 108, []));
+    expect(await firstRun).toBe(true);
+    // And the next tick runs again.
+    spe1.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-1", "load-1"), 108, []),
+    );
+    expect(await runSpeSync()).toBe(true);
   });
 
   it("still answers when the chain cannot be written", async () => {
@@ -411,8 +465,94 @@ describe("SPE events on the audit chain", () => {
     spe2.run.mockResolvedValue(
       statusResult(speAttestation("SPE-2", "load-2"), 108, []),
     );
+    await expect(runSpeSync()).resolves.toBe(true);
     const res = await request.get("/spe/status");
     expect(res.status).toBe(200);
+  });
+});
+
+describe("Art. 71 opt-outs reach the workspaces (ADR-062)", () => {
+  it("marks the hub's opted-out persons in each workspace and unmarks the rest, counts only on the chain", async () => {
+    hub.run.mockResolvedValue({
+      records: [
+        record({ label: "Patient", key: "p-17" }),
+        record({ label: "Condition", key: "c-4" }),
+      ],
+    });
+    // One person newly marked in each workspace, one taken off in SPE-2.
+    spe1.write.mockImplementation(async (q: string) =>
+      /SET n:OptedOut/.test(q) && /Patient/.test(q)
+        ? { records: [record({ c: 1 })] }
+        : { records: [record({ c: 0 })] },
+    );
+    spe2.write.mockImplementation(async (q: string) =>
+      /REMOVE n:OptedOut/.test(q) && /`Patient`/.test(q)
+        ? { records: [record({ c: 1 })] }
+        : { records: [record({ c: 0 })] },
+    );
+    spe1.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-1", "load-1"), 107, []),
+    );
+    spe2.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-2", "load-2"), 108, []),
+    );
+
+    await runSpeSync();
+
+    // The hub is read for every person-level label, by parameter.
+    const [hubQuery, hubParams] = hub.run.mock.calls[0];
+    expect(String(hubQuery)).toContain(":OptedOut");
+    expect(hubParams.labels).toContain("Patient");
+    // The workspace gets the keys as parameters, per label, and only nodes the
+    // loader wrote are unmarked.
+    const add = spe1.write.mock.calls.find(
+      (c) => /SET n:OptedOut/.test(c[0]) && /`Patient`/.test(c[0]),
+    );
+    expect(add?.[1]).toEqual({ keys: ["p-17"] });
+    const remove = spe1.write.mock.calls.find(
+      (c) => /REMOVE n:OptedOut/.test(c[0]) && /`Condition`/.test(c[0]),
+    );
+    expect(remove?.[0]).toContain("n._speKey IS NOT NULL");
+    expect(remove?.[1]).toEqual({ keys: ["c-4"] });
+
+    const synced = appendAuditEvent.mock.calls.filter(
+      (c) => c[1].subtype[0].code === "spe.optout_synced",
+    );
+    expect(synced.map((c) => c[2].participantId)).toEqual(["SPE-1", "SPE-2"]);
+    const evidence = (resource: {
+      entity: Array<{ detail?: Array<{ type: string; valueString: string }> }>;
+    }) =>
+      JSON.parse(
+        resource.entity
+          .flatMap((e) => e.detail ?? [])
+          .find((d) => d.type === "evidence")!.valueString,
+      );
+    expect(evidence(synced[0][1])).toEqual({
+      optedOutAdded: 1,
+      optedOutRemoved: 0,
+      optedOutInHub: 2,
+    });
+    expect(evidence(synced[1][1])).toEqual({
+      optedOutAdded: 0,
+      optedOutRemoved: 1,
+      optedOutInHub: 2,
+    });
+    expect(JSON.stringify(synced)).not.toContain("p-17");
+  });
+
+  it("records nothing when nothing changed", async () => {
+    spe1.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-1", "load-1"), 107, []),
+    );
+    spe2.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-2", "load-2"), 108, []),
+    );
+    await runSpeSync();
+    expect(
+      appendAuditEvent.mock.calls.filter(
+        (c) => c[1].subtype[0].code === "spe.optout_synced",
+      ),
+    ).toEqual([]);
   });
 });
 
@@ -449,6 +589,20 @@ describe("SPE-1 as a workspace", () => {
       (r: { _source: string }) => r._source === "SPE-2",
     );
     expect(two?.patients).not.toBe(3);
+  });
+
+  it("answers a question without `federated` from the hub graph, not the workspace", async () => {
+    hub.run.mockResolvedValue({ records: [record({ patientCount: 215 })] });
+    const res = await request
+      .post("/nlq")
+      .send({ question: "How many patients are there?" });
+    expect(res.status).toBe(200);
+    expect(res.body.federated).toBe(false);
+    expect(
+      hub.run.mock.calls.some((c) => String(c[0]).includes(":(Patient)")),
+    ).toBe(true);
+    expect(spe1.run).not.toHaveBeenCalled();
+    expect(spe2.run).not.toHaveBeenCalled();
   });
 
   it("leaves a workspace that is down out, rather than asking the hub", async () => {
