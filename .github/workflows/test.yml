@@ -22,6 +22,10 @@ on:
       - "services/neo4j-proxy/**"
       - "services/epa-ingest/**"
       - "clients/ios/**"
+      # ui/__tests__/unit/docs/klarbefund-wallet-guide.test.ts reads these
+      # two documents: a change to them alone must re-run it (#708).
+      - "docs/klarbefund/**"
+      - "docs/knowledge/runbooks/klarbefund-connect.md"
       - ".github/workflows/test.yml"
   pull_request:
     branches: [main]
@@ -30,6 +34,8 @@ on:
       - "services/neo4j-proxy/**"
       - "services/epa-ingest/**"
       - "clients/ios/**"
+      - "docs/klarbefund/**"
+      - "docs/knowledge/runbooks/klarbefund-connect.md"
   workflow_dispatch:
 
 env:
