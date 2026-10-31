@@ -27,6 +27,17 @@ export function getSession(): Session {
   return driver.session({ database: "neo4j" });
 }
 
+/**
+ * A session the database keeps from writing: Neo4j refuses any write in it
+ * with Neo.ClientError.Statement.AccessMode, procedures included. For Cypher
+ * that an LLM or a caller wrote. The write-keyword regex in front of it is a
+ * quick refusal with a clear message, not the barrier: it lets through
+ * `apoc.refactor.rename.label`, which contains none of its keywords.
+ */
+export function readSession(d: Driver = driver): Session {
+  return d.session({ database: "neo4j", defaultAccessMode: "READ" });
+}
+
 /** True once NEO4J_SPE1_URI is set: SPE-1 is a workspace, not the hub. */
 export function spe1IsWorkspace(): boolean {
   return spe1Workspace;

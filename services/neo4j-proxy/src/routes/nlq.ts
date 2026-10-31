@@ -12,8 +12,8 @@ import {
 import {
   driver,
   federationAvailable,
-  getSession,
   getSpeDrivers,
+  readSession,
 } from "../db.js";
 import { app } from "../app.js";
 import { auditContext, logTransferEvent } from "../audit.js";
@@ -316,9 +316,9 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       // Federated execution across all SPEs
       await Promise.all(
         getSpeDrivers().map(async ({ label, driver: d }) => {
-          const session = d.session({ database: "neo4j" });
+          const session = readSession(d);
           try {
-            // nosemgrep: cypher-built-from-request-input -- generated Cypher; WRITE_PATTERN and checkReIdentification above
+            // nosemgrep: cypher-built-from-request-input -- generated Cypher in a read-only session; WRITE_PATTERN and checkReIdentification above
             const result = await session.run(cypher!, params);
             contributions.push({
               source: label,
@@ -333,9 +333,9 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       contributions.sort((a, b) => a.source.localeCompare(b.source));
     } else {
       // Single SPE execution
-      const session = getSession();
+      const session = readSession();
       try {
-        // nosemgrep: cypher-built-from-request-input -- generated Cypher; WRITE_PATTERN and checkReIdentification above
+        // nosemgrep: cypher-built-from-request-input -- generated Cypher in a read-only session; WRITE_PATTERN and checkReIdentification above
         const result = await session.run(cypher, params);
         contributions.push({
           source: "SPE-1",
