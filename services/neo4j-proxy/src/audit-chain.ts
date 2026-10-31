@@ -271,6 +271,13 @@ export interface AuditIndex {
    * callback leaves one record, and the existing one is returned.
    */
   dedupeKey?: string;
+  /**
+   * Further properties of the (:AuditEvent) node, for the readers that filter
+   * on them (the SPE events: speId, permitId, policyHash, teeType,
+   * attestationScope, simulated; #774). Indexing only, outside the hash: the
+   * resource is the record and holds the same values.
+   */
+  properties?: Record<string, string | boolean | null>;
 }
 
 /**
@@ -292,6 +299,31 @@ export async function appendAuditEvent(
     // One microtask later, so records enqueued in the same tick share a batch.
     queueMicrotask(() => void flush());
   });
+}
+
+/**
+ * Appends one record in a transaction of its own, outside the shared queue.
+ * For background writers (the SPE sync, #774): a failure of theirs must never
+ * share a batch with a query's record, whose caller would then answer 503.
+ * The chain head is still locked, so the chain stays one chain.
+ */
+export async function appendAuditEventAlone(
+  chain: string,
+  resource: Record<string, unknown>,
+  index: AuditIndex,
+): Promise<ChainedEvent> {
+  if (!driver) throw new Error("audit: no Neo4j driver");
+  canonicalJson(resource);
+  const [event] = await writeBatch([
+    {
+      chain,
+      resource,
+      index,
+      resolve: () => undefined,
+      reject: () => undefined,
+    },
+  ]);
+  return event;
 }
 
 interface PendingRecord {
@@ -417,6 +449,8 @@ async function writeBatch(batch: PendingRecord[]): Promise<ChainedEvent[]> {
           outcome: p.index.outcome,
           resource: canonicalJson(p.resource),
           dedupeKey: p.index.dedupeKey ?? null,
+          eventType: auditType(p.resource),
+          extra: p.index.properties ?? {},
         });
       }
       if (rows.length > 0) {
@@ -425,8 +459,10 @@ async function writeBatch(batch: PendingRecord[]): Promise<ChainedEvent[]> {
            CREATE (e:AuditEvent {
              id: ev.id, chain: ev.chain, seq: ev.seq, prevHash: ev.prevHash, hash: ev.hash,
              recorded: datetime(ev.recorded), participantId: ev.participantId,
-             outcome: ev.outcome, resource: ev.resource, dedupeKey: ev.dedupeKey
-           })`,
+             outcome: ev.outcome, resource: ev.resource, dedupeKey: ev.dedupeKey,
+             eventType: ev.eventType
+           })
+           SET e += ev.extra`,
           { events: rows },
         );
         await tx.run(

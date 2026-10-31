@@ -1,0 +1,14 @@
+{
+  "_comment": "RVPS reference values for mvhd-trustee on Azure (ADR-069): what Trustee's default attestation policy (default_cpu, SNP section) compares SEV-SNP evidence from the ACI groups with. Take each value from the first attestation (21-aci-confidential-spe.sh --check prints the loader's 'pinnable claims'), check snp_launch_measurement against Microsoft's endorsement of the UVM (reference-info-base64 in the group), save a copy outside the repository with the placeholders replaced, and run 21-aci-confidential-spe.sh --trustee --reference-values <file>. A list is 'one of', a scalar an exact value. The resource policy (resource-azure.rego.tmpl) additionally requires HOST_DATA to be the permit's policy hash.",
+  "snp_launch_measurement": ["REPLACE: claims.measurement (hex)"],
+  "snp_bootloader": ["REPLACE: reported_tcb_bootloader (integer)"],
+  "snp_microcode": ["REPLACE: reported_tcb_microcode (integer)"],
+  "snp_snp_svn": ["REPLACE: reported_tcb_snp (integer)"],
+  "snp_tee_svn": ["REPLACE: reported_tcb_tee (integer)"],
+  "snp_smt_enabled": "REPLACE: platform_smt_enabled (true or false)",
+  "snp_tsme_enabled": "REPLACE: platform_tsme_enabled (true or false)",
+  "snp_guest_abi_major": "REPLACE: policy_abi_major (integer)",
+  "snp_guest_abi_minor": "REPLACE: policy_abi_minor (integer)",
+  "snp_single_socket": "REPLACE: policy_single_socket (true or false)",
+  "snp_smt_allowed": "REPLACE: policy_smt_allowed (true or false)"
+}

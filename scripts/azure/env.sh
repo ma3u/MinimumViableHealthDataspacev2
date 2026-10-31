@@ -212,6 +212,40 @@ export NEO4J_PASSWORD="healthdataspace"
 # cost. Reachable from inside the ACA environment only, not from a workstation.
 export NEO4J_BOLT_URI="bolt://${NEO4J_APP}:7687"
 
+# ── The two SPE workspaces and the access body's Trustee (ADR-068, ADR-069) ─
+# 21-aci-confidential-spe.sh creates all of this. SPE-1 (AlphaKlinik Berlin)
+# and SPE-2 (Limburg Medical Centre) are ACI confidential container groups
+# (sku Confidential, AMD SEV-SNP), each Neo4j loaded per permit from a sealed
+# extract whose key only Trustee releases. AKS is not possible in this tenant
+# (pol-ssg-prd-restriction_sku_kubernetes, ADR-069). Bolt with TLS on each
+# group's public DNS name; the CA is ours and the proxy pins it.
+export SPE_ACI_GROUPS=(mvhd-spe-1 mvhd-spe-2)
+export SPE_DNS_SUFFIX="b53a0449"   # ACI DNS labels are unique per region
+export SPE_PERMIT_ID="hdab-medreg-spe-2026-001"
+export SPE_PULL_IDENTITY="id-mvhd-spe-pull"           # AcrPull for the groups
+export SPE_LOADER_REPO="mvhd-spe-loader"               # in ACR_NAME
+export KBS_CLIENT_ACI_REPO="kbs-client-aci"
+export TRUSTEE_VERSION="v0.22.0"
+export TRUSTEE_COMMIT="512fed65642015b849f38fb13bfdec7806639987"
+# Trustee, operated as if by MedReg DE (the access body; ADR-068 "Not decided
+# here"): its own app, identity, shares and admin job, none of them shared
+# with the hub. Its admin token, token signing key and the extract keys live on
+# its own shares, never in the hub's Key Vault.
+export TRUSTEE_APP="mvhd-trustee"
+export TRUSTEE_IDENTITY="id-mvhd-trustee"
+export TRUSTEE_ADMIN_JOB="mvhd-trustee-admin"
+export SHARE_TRUSTEE_KEYS="trustee-keys"
+export SHARE_TRUSTEE_DATA="trustee-data"
+export SHARE_SPE_EXTRACTS="spe-extracts"
+export TRUSTEE_KBS_SOURCE="ghcr.io/confidential-containers/key-broker-service:built-in-as-v0.22.0@sha256:c1960cb4df0b1bdc0e4309f97dc65b0a1a777a92dabb2211acb45542f906c625"
+export TRUSTEE_KBS_IMAGE="${ACR_LOGIN_SERVER}/key-broker-service:built-in-as-${TRUSTEE_VERSION}"
+# Outside the repository: the CA that signs the workspaces' Bolt certificates.
+export SPE_CA_DIR="${SPE_CA_DIR:-${HOME}/.mvhd/spe-ca}"
+# Hub Key Vault (ADR-036): the workspaces' Neo4j passwords, which the proxy
+# reads by keyvaultref. Not in the key path: the extract keys are Trustee's.
+export KV_SPE1_NEO4J_PASSWORD="spe-1-neo4j-password"
+export KV_SPE2_NEO4J_PASSWORD="spe-2-neo4j-password"
+
 # ── Azure Key Vault (ADR-036) ────────────────────────────────────────────────
 # Operator secrets live here and are referenced, never copied into this file.
 export KEY_VAULT_NAME="${KEY_VAULT_NAME:-kv-mvhd-b53a0449}"

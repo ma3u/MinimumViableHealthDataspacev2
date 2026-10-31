@@ -25,6 +25,7 @@ set -euo pipefail
 #   Reader                      rg-mvhd-dev                the hold tag, the environment
 #   Contributor                 the Flexible Server only   stop and start Postgres
 #   Key Vault Secrets User      kv-mvhd-b53a0449           the realm restore's Keycloak password
+#   mvhd-aci-power (custom)     rg-mvhd-dev                read, start, stop, restart container groups (the SPE workspaces, ADR-069)
 #
 # Each execution downloads the seven files it runs from this public repository
 # at REPO_REF, the commit deploy-azure.yml last deployed, so the jobs run the
@@ -122,6 +123,35 @@ grant "Container Apps Contributor" "$RG_ID"
 grant "Reader" "$RG_ID"
 grant "Contributor" "$PG_ID"
 grant "Key Vault Secrets User" "$KV_ID"
+# The SPE workspaces, ACI confidential container groups (ADR-069): read, start,
+# stop and restart them, nothing else. A custom role with exactly those
+# actions, defined and assigned at the resource group, so it covers the groups
+# whether or not 21-aci-confidential-spe.sh --workspaces has made them yet.
+ACI_ROLE="mvhd-aci-power"
+if [ -z "$(az role definition list --name "$ACI_ROLE" --scope "$RG_ID" --query '[0].id' -o tsv 2>/dev/null)" ]; then
+  ROLE_DEF=$(mktemp)
+  jq -n --arg name "$ACI_ROLE" --arg scope "$RG_ID" '{
+    Name: $name, IsCustom: true,
+    Description: "Read, start, stop and restart container groups (the SPE workspaces, ADR-069). Nothing else.",
+    Actions: ["Microsoft.ContainerInstance/containerGroups/read",
+              "Microsoft.ContainerInstance/containerGroups/start/action",
+              "Microsoft.ContainerInstance/containerGroups/stop/action",
+              "Microsoft.ContainerInstance/containerGroups/restart/action"],
+    NotActions: [], AssignableScopes: [$scope]}' >"$ROLE_DEF"
+  if az role definition create --role-definition "@${ROLE_DEF}" -o none 2>/dev/null; then
+    ok "  role ${ACI_ROLE}: created at ${RG}"
+    sleep 30   # a new role definition takes a moment to be assignable
+  else
+    warn "could not create the custom role ${ACI_ROLE} (this account may not define roles)."
+    warn "Until someone who may runs this script, the off-hours jobs cannot stop or start"
+    warn "mvhd-spe-1/2: offhours.sh warns and carries on, and the groups keep running (and billing)."
+    ACI_ROLE=""
+  fi
+  rm -f "$ROLE_DEF"
+fi
+if [ -n "$ACI_ROLE" ]; then
+  grant "$ACI_ROLE" "$RG_ID"
+fi
 
 # ── the jobs ────────────────────────────────────────────────────────────────
 ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RG" --query id -o tsv)

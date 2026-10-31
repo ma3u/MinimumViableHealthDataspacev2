@@ -1144,6 +1144,12 @@
       "file": "ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md",
       "title": "A sovereign confidential SPE: Confidential Containers and a Trustee the access body runs, Neo4j loaded per permit",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-069",
+      "file": "ADR-069-two-spe-workspaces-as-aci-confidential-containers.md",
+      "title": "Two SPE workspaces as ACI confidential containers",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1189,6 +1195,8 @@
     "test.yml": [
       "UI Tests (Vitest)",
       "Neo4j Proxy Tests (Vitest)",
+      "SPE Loader Tests (Vitest)",
+      "Trustee Policy Tests (opa test)",
       "ePA Ingest Tests (Vitest)",
       "iOS Analyte Parity (Swift)",
       "Secret Scan (gitleaks)",
@@ -1235,12 +1243,12 @@
   },
   "lastUpdated": {
     "/docs": "2026-10-28",
-    "/docs/user-guide": "2026-10-31",
-    "/docs/developer": "2026-10-28",
-    "/docs/developer/quality-gates": "2026-10-28",
-    "/docs/developer/api": "2026-10-28",
-    "/docs/developer/reference": "2026-10-28",
-    "/docs/architecture": "2026-10-30",
+    "/docs/user-guide": "2026-10-30",
+    "/docs/developer": "2026-10-27",
+    "/docs/developer/quality-gates": "2026-10-04",
+    "/docs/developer/api": "2026-10-29",
+    "/docs/developer/reference": "2026-10-29",
+    "/docs/architecture": "2026-10-27",
     "/docs/security": "2026-10-31",
     "/docs/security/[slug]": "2026-10-31",
     "/docs/klarbefund": "2026-10-31",

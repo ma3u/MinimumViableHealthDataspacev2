@@ -1,0 +1,15 @@
+# Build context is the repository root (services/spe-loader/Dockerfile);
+# only the loader and the cypher files it ships go in.
+*
+!services/spe-loader/package.json
+!services/spe-loader/package-lock.json
+!services/spe-loader/tsconfig.json
+!services/spe-loader/tsconfig.build.json
+!services/spe-loader/src
+!services/spe-loader/scripts
+!neo4j/init-schema.cypher
+!neo4j/register-fhir-dataset-hdcatap-spe1.cypher
+!neo4j/register-fhir-dataset-hdcatap-spe2.cypher
+!trustee/policies
+!trustee/reference-values-local.json
+!trustee/workload-local.json

@@ -1,0 +1,218 @@
+# =============================================================================
+# Trustee and SPE workspaces loaded per permit, locally (ADR-068 M1, #774)
+# =============================================================================
+# On top of the JAD stack:
+#   docker compose -f docker-compose.yml -f docker-compose.jad.yml \
+#     -f docker-compose.trustee.yml --profile federated up -d --build
+#
+# What this overlay switches on:
+#   - trustee: the access body's (MedReg DE) Trustee, KBS with the built-in
+#     Attestation Service and RVPS, Trustee v0.22.0. Its admin key and token
+#     signing key are generated at first start into the volume trustee_keys
+#     (trustee-setup) and never leave it; its policies, reference values and
+#     extract keys live in trustee_data. http://localhost:8099.
+#   - trustee-policy: sets trustee/policies/resource-local.rego and
+#     trustee/reference-values-local.json, every `up` (idempotent).
+#   - spe-extract: exports each SPE's half of the hub's synthetic patients,
+#     seals it under a new key per permit (AES-256-GCM), puts the key into
+#     Trustee and writes only ciphertext to the volume spe_extracts; records
+#     the permit's policy hash on the hub (HDABApproval).
+#   - neo4j-spe1: SPE-1 (AlphaKlinik Berlin) becomes a workspace of its own,
+#     store in memory (tmpfs), and the proxy federates over it instead of the
+#     hub graph (NEO4J_SPE1_URI). Without this overlay SPE-1 is the hub graph.
+#   - neo4j-spe2 (profile federated): its store moves to tmpfs too. The named
+#     volume neo4j_spe2_data stays as it was and is mounted again once the
+#     overlay is left out.
+#   - spe-loader-spe1/-spe2: attest to Trustee with the sample attester, get
+#     the key, decrypt, load, record the SpeAttestation and SpeEvent nodes.
+#     Labelled "Simulated attestation": no TEE on a laptop.
+#   - neo4j-proxy: GET /spe/status reads both workspaces and Trustee, and
+#     appends the SPE events to the hub's audit chain `spe` (ADR-045).
+#
+# A refusal to try (the policy decides, not the loader):
+#   docker compose -f docker-compose.yml -f docker-compose.jad.yml -f docker-compose.trustee.yml \
+#     run --rm --entrypoint kbs-client trustee-policy --url http://trustee:8080 \
+#     config --admin-token-file /keys/admin-token set-sample-reference-value launch_digest wrong
+#   then restart neo4j-spe2 and run spe-loader-spe2 again: no key, nothing loaded,
+#   spe.key_refused on the audit chain. trustee-policy puts the value back on the next `up`.
+#
+# The KBS image is x86_64 and s390x only; on Apple silicon it runs under
+# Rosetta. Pinned by tag and digest (ADR-029).
+# =============================================================================
+
+x-spe-loader: &spe-loader
+  build:
+    context: .
+    dockerfile: services/spe-loader/Dockerfile
+  image: mvhd/spe-loader:local
+  restart: "no"
+
+services:
+  trustee-setup:
+    <<: *spe-loader
+    container_name: health-dataspace-trustee-setup
+    user: "0:0"
+    entrypoint: ["bash", "/app/scripts/trustee-setup.sh", "/keys"]
+    volumes:
+      - trustee_keys:/keys
+
+  trustee:
+    # Trustee v0.22.0 (CoCo v0.23.0), KBS with the built-in AS
+    image: ghcr.io/confidential-containers/key-broker-service:built-in-as-v0.22.0@sha256:c1960cb4df0b1bdc0e4309f97dc65b0a1a777a92dabb2211acb45542f906c625
+    platform: linux/amd64
+    container_name: health-dataspace-trustee
+    command: ["/usr/local/bin/kbs", "--config-file", "/etc/kbs/kbs-config.toml"]
+    environment:
+      RUST_LOG: info
+    ports:
+      - "8099:8080"
+    volumes:
+      - trustee_keys:/opt/confidential-containers/kbs/user-keys:ro
+      - trustee_data:/opt/confidential-containers/storage
+      - ./trustee/kbs-config.toml:/etc/kbs/kbs-config.toml:ro
+    depends_on:
+      trustee-setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+
+  trustee-policy:
+    <<: *spe-loader
+    container_name: health-dataspace-trustee-policy
+    user: "0:0"
+    command:
+      - trustee-configure
+      - --resource-policy
+      - /trustee/policies/resource-local.rego
+      - --reference-values
+      - /trustee/reference-values-local.json
+    environment:
+      TRUSTEE_URL: http://trustee:8080
+      TRUSTEE_ADMIN_TOKEN_FILE: /keys/admin-token
+    volumes:
+      - trustee_keys:/keys:ro
+      - ./trustee:/trustee:ro
+    depends_on:
+      trustee:
+        condition: service_healthy
+
+  spe-extract:
+    <<: *spe-loader
+    container_name: health-dataspace-spe-extract
+    user: "0:0"
+    entrypoint: ["bash", "/app/scripts/extract-all.sh", "/extracts"]
+    environment:
+      HUB_NEO4J_URI: ${SPE_HUB_NEO4J_URI:-bolt://neo4j:7687}
+      HUB_NEO4J_USER: neo4j
+      HUB_NEO4J_PASSWORD: healthdataspace
+      TRUSTEE_URL: http://trustee:8080
+      TRUSTEE_ADMIN_TOKEN_FILE: /keys/admin-token
+      SPE_PERMIT_ID: ${SPE_PERMIT_ID:-hdab-medreg-spe-2026-001}
+      SPE_WORKLOAD_FILE: /trustee/workload-local.json
+    volumes:
+      - trustee_keys:/keys:ro
+      - spe_extracts:/extracts
+      - ./trustee:/trustee:ro
+    depends_on:
+      trustee-policy:
+        condition: service_completed_successfully
+
+  neo4j-spe1:
+    image: neo4j:5.26.28-community
+    container_name: health-dataspace-neo4j-spe1
+    ports:
+      - "7476:7474"
+      - "7689:7687"
+    # As neo4j-spe2 (docker-compose.yml), so both SPEs answer the same Cypher.
+    environment:
+      NEO4J_AUTH: neo4j/healthdataspace
+      NEO4J_PLUGINS: '["apoc", "apoc-extended", "graph-data-science", "n10s"]'
+      NEO4J_dbms_security_procedures_unrestricted: "apoc.*,gds.*,n10s.*"
+      NEO4J_dbms_security_procedures_allowlist: "apoc.*,gds.*,n10s.*"
+      NEO4J_server_memory_heap_initial__size: 512m
+      NEO4J_server_memory_heap_max__size: 1G
+    # The workspace's store is memory: gone when the container goes (Art. 73).
+    volumes:
+      - type: tmpfs
+        target: /data
+        tmpfs:
+          size: 2147483648
+      - ./neo4j/plugins:/plugins
+    healthcheck: &workspace-health
+      test:
+        [
+          "CMD-SHELL",
+          "cypher-shell -u neo4j -p healthdataspace 'RETURN 1' >/dev/null 2>&1",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 60
+      start_period: 10s
+    restart: unless-stopped
+
+  neo4j-spe2:
+    volumes:
+      - type: tmpfs
+        target: /data
+        tmpfs:
+          size: 2147483648
+    healthcheck: *workspace-health
+
+  spe-loader-spe1:
+    <<: *spe-loader
+    container_name: health-dataspace-spe-loader-spe1
+    command: ["load", "--spe", "1", "--in", "/extracts/spe-1.enc"]
+    environment:
+      WORKSPACE_NEO4J_URI: bolt://neo4j-spe1:7687
+      WORKSPACE_NEO4J_USER: neo4j
+      WORKSPACE_NEO4J_PASSWORD: healthdataspace
+      TRUSTEE_URL: http://trustee:8080
+      SPE_RUNS_ON: "Docker Compose (local), neo4j-spe1, store in memory"
+    # Ciphertext only, and no Trustee admin key: the workspace side asks.
+    volumes:
+      - spe_extracts:/extracts:ro
+    depends_on:
+      spe-extract:
+        condition: service_completed_successfully
+      neo4j-spe1:
+        condition: service_healthy
+
+  spe-loader-spe2:
+    <<: *spe-loader
+    container_name: health-dataspace-spe-loader-spe2
+    command: ["load", "--spe", "2", "--in", "/extracts/spe-2.enc"]
+    environment:
+      WORKSPACE_NEO4J_URI: bolt://neo4j-spe2:7687
+      WORKSPACE_NEO4J_USER: neo4j
+      WORKSPACE_NEO4J_PASSWORD: healthdataspace
+      TRUSTEE_URL: http://trustee:8080
+      SPE_RUNS_ON: "Docker Compose (local), neo4j-spe2, store in memory"
+    volumes:
+      - spe_extracts:/extracts:ro
+    depends_on:
+      spe-extract:
+        condition: service_completed_successfully
+      neo4j-spe2:
+        condition: service_healthy
+    profiles:
+      - federated
+
+  neo4j-proxy:
+    environment:
+      # SPE-1 is the workspace, not the hub graph, for the federated path and
+      # the spe_access template; everything else stays on the hub (ADR-069).
+      NEO4J_SPE1_URI: "bolt://health-dataspace-neo4j-spe1:7687"
+      NEO4J_SPE1_USER: "neo4j"
+      NEO4J_SPE1_PASSWORD: "healthdataspace"
+      SPE_ENVIRONMENT: "local"
+      TRUSTEE_URL: "http://health-dataspace-trustee:8080"
+      TRUSTEE_VERIFIER: "sample"
+
+volumes:
+  trustee_keys:
+  trustee_data:
+  spe_extracts:

@@ -9,7 +9,12 @@ import {
   OLLAMA_URL,
   OPENAI_API_KEY,
 } from "../config.js";
-import { driver, getSession, getSpeDrivers, spe2Driver } from "../db.js";
+import {
+  driver,
+  federationAvailable,
+  getSession,
+  getSpeDrivers,
+} from "../db.js";
 import { app } from "../app.js";
 import { auditContext, logTransferEvent } from "../audit.js";
 import { appendQueryAudit, auditUnavailable } from "../audit-chain.js";
@@ -307,7 +312,7 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
     };
     const contributions: Contribution[] = [];
 
-    if (federated && spe2Driver) {
+    if (federated && federationAvailable()) {
       // Federated execution across all SPEs
       await Promise.all(
         getSpeDrivers().map(async ({ label, driver: d }) => {
@@ -407,7 +412,7 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
       cypher,
       method,
       templateName,
-      federated: federated && spe2Driver != null,
+      federated: federated && federationAvailable(),
       results,
       totalRows: results.length,
       odrlEnforced,

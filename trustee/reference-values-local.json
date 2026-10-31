@@ -1,0 +1,7 @@
+{
+  "_comment": "RVPS reference values for the compose overlay (M1). Trustee's default attestation policy (default_cpu) compares the sample attester's claims with these; all match, so the token is affirming. Set launch_digest to anything else and the token turns to warning: resource-local.rego then refuses the key. A list is 'one of', a scalar an exact value.",
+  "launch_digest": ["abcde"],
+  "svn": ["1"],
+  "major_version": 1,
+  "minimum_minor_version": 4
+}

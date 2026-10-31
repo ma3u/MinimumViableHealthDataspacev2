@@ -66,6 +66,13 @@ CORE_APPS=(mvhd-vault mvhd-keycloak mvhd-claude-federation mvhd-neo4j mvhd-nats
 EDC_APPS=(mvhd-controlplane mvhd-siglet mvhd-dp-fhir mvhd-dp-omop
           mvhd-identityhub mvhd-issuerservice mvhd-tenant-mgr mvhd-provision-mgr)
 CFM_APPS=(mvhd-cfm-cp-shim mvhd-cfm-kcagent mvhd-cfm-edcvagent mvhd-cfm-regagent mvhd-cfm-obagent)
+# The two SPE workspaces, ACI confidential container groups, and the access
+# body's Trustee on ACA (ADR-069), from the moment 21-aci-confidential-spe.sh
+# has created them; each is left out while it does not exist. A stopped ACI
+# group bills nothing, and each start re-attests and reloads its workspace
+# from the sealed extract: nothing row-level survives a stop, by design.
+SPE_GROUPS=(mvhd-spe-1 mvhd-spe-2)
+TRUSTEE_APP="${TRUSTEE_APP:-mvhd-trustee}"
 
 # GitHub annotations when run there, plain lines anywhere else.
 gh_mark() { if [ -n "${GITHUB_ACTIONS:-}" ]; then echo "::$1::$2"; else echo "$(tr '[:lower:]' '[:upper:]' <<<"$1"): $2"; fi; }
@@ -81,6 +88,24 @@ vault_state() { az containerapp show --name mvhd-vault --resource-group "$RESOUR
                   --query properties.runningStatus -o tsv; }
 pg_state()    { az postgres flexible-server show --name "$PG_FLEX_NAME" --resource-group "$RESOURCE_GROUP" \
                   --query state -o tsv 2>/dev/null || echo unknown; }
+trustee_present() { az containerapp show --name "$TRUSTEE_APP" --resource-group "$RESOURCE_GROUP" \
+                      --query name -o tsv >/dev/null 2>&1; }
+spe_groups() {  # the SPE container groups that exist, one per line
+  local g
+  for g in "${SPE_GROUPS[@]}"; do
+    az container show --name "$g" --resource-group "$RESOURCE_GROUP" --query name -o tsv >/dev/null 2>&1 && echo "$g"
+  done
+  return 0
+}
+spe_power() {  # spe_power stop|start: both SPE groups, in order, those that exist
+  local verb="$1" g
+  while read -r g; do
+    [ -n "$g" ] || continue
+    log "  $g: az container $verb"
+    az container "$verb" --name "$g" --resource-group "$RESOURCE_GROUP" -o none ||
+      warn "az container $verb $g failed"
+  done < <(spe_groups)
+}
 scale() {  # scale <min> <max> <app>...
   local min="$1" max="$2" app; shift 2
   for app in "$@"; do
@@ -150,10 +175,18 @@ do_stop() {
     error "mvhd-ui LIVE_DEMO_OFFLINE=$(ui_flag) minReplicas=$min (expected true, 0)"; exit 1
   fi
 
+  # The SPE workspaces first: their memory-backed stores go with them, which
+  # is the design (ADR-069); the morning start loads them afresh.
+  log "SPE workspaces (ACI)"
+  spe_power stop
+
   # A stop, not min=0: scale-to-zero only reaches zero for an app nobody calls
-  # (PR #482). A stopped app keeps its revision and scale.
-  log "stopping ${#BACKEND_APPS[@]} apps"
-  "${SCRIPT_DIR}/set-app-power.sh" stop "${BACKEND_APPS[@]}"
+  # (PR #482). A stopped app keeps its revision and scale. Trustee goes with
+  # the backend once the workspaces that ask it are down.
+  local -a apps=("${BACKEND_APPS[@]}")
+  if trustee_present; then apps+=("$TRUSTEE_APP"); fi
+  log "stopping ${#apps[@]} apps"
+  "${SCRIPT_DIR}/set-app-power.sh" stop "${apps[@]}"
 
   # Last, because Keycloak, Vault and the EDC services hold connections to it.
   local state
@@ -163,7 +196,7 @@ do_stop() {
   fi
   state=$(pg_state)
   [ "$state" = Stopped ] || { error "$PG_FLEX_NAME is '$state' after the stop (expected Stopped)"; exit 1; }
-  log "stopped: UI offline at min=0, ${#BACKEND_APPS[@]} apps and $PG_FLEX_NAME"
+  log "stopped: UI offline at min=0, ${#apps[@]} apps and $PG_FLEX_NAME"
 }
 
 # ── start ───────────────────────────────────────────────────────────────────
@@ -182,8 +215,15 @@ do_start() {
   # still runs replicas (an old Neo4j revision held the store lock, 2026-10-04).
   "${SCRIPT_DIR}/retire-stale-revisions.sh" || warn "A stale revision could not be deactivated, see above"
 
+  # Trustee first, then the SPE workspaces, which attest to it as they start
+  # (and keep trying while it comes up); the proxy, among the core apps,
+  # reconnects to them as they finish loading (ADR-069).
+  local -a core=("${CORE_APPS[@]}")
+  if trustee_present; then core=("$TRUSTEE_APP" "${core[@]}"); fi
   log "core apps"
-  "${SCRIPT_DIR}/set-app-power.sh" start "${CORE_APPS[@]}" || warn "Not every core app reported running, see above"
+  "${SCRIPT_DIR}/set-app-power.sh" start "${core[@]}" || warn "Not every core app reported running, see above"
+  log "SPE workspaces (ACI)"
+  spe_power start
   scale 1 1 mvhd-neo4j mvhd-keycloak mvhd-vault mvhd-catalog-enricher mvhd-claude-federation
   # A scale change can make a new Neo4j revision; the old one keeps the lock.
   "${SCRIPT_DIR}/retire-stale-revisions.sh" mvhd-neo4j || warn "A stale mvhd-neo4j revision could not be deactivated, see above"
@@ -234,7 +274,7 @@ do_start() {
   # The one check allowed to fail the start: a stack that cannot serve a
   # login is not started, whatever the steps above said (2026-09-30).
   "${SCRIPT_DIR}/check-keycloak-health.sh" "https://${KEYCLOAK_PUBLIC_HOSTNAME}" edcv
-  log "started: Postgres, $(( ${#CORE_APPS[@]} + ${#EDC_APPS[@]} + ${#CFM_APPS[@]} )) apps, UI online"
+  log "started: Postgres, $(( ${#core[@]} + ${#EDC_APPS[@]} + ${#CFM_APPS[@]} )) apps, UI online"
 }
 
 case "${1:-}" in

@@ -134,7 +134,9 @@ has two contributors. Both apply the data permit, the ODRL policy, the Art. 71
 opt-out and k = 5 before anything leaves: a count below 5 is shown as `<5`,
 and a contributor with fewer than 5 records withholds the whole answer. Ask
 "How many SPEs can I access?" to see them. SPE-2 runs on the local stack with
-the `federated` compose profile; the static demo has one. Attestation is
+the `federated` compose profile, and on Azure once deployment phase 20 has run
+(ADR-069, proposed); until then the live demo has one, and the static demo has
+one. Attestation is
 labelled "Simulated attestation"; the plan for a real one is
 ADR-068 (in review, #773).
 
