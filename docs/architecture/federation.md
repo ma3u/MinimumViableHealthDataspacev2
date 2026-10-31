@@ -107,8 +107,11 @@ It never holds a record the Klarbefund app or a PID created or connected to.
 AES-256-GCM under a key per permit and puts the key into the access body's
 Trustee; the workspace gets the key only after attesting (ADR-068), decrypts
 and loads, and records the attestation (`SpeAttestation`, `SpeEvent`). The
-proxy shows them on `GET /spe/status` and appends the events to the audit
-chain `spe` (ADR-045).
+proxy shows them on `GET /spe/status` (read only) and its sync, every
+minute, appends the events to the audit chain `spe` (ADR-045) and carries
+the hub's Art. 71 opt-outs into the workspaces: a person who opts out after
+the extract was sealed stops counting there within one sync interval
+(ADR-062, ADR-069).
 
 Locally: `docker compose -f docker-compose.yml -f docker-compose.jad.yml -f
 docker-compose.trustee.yml --profile federated up -d --build`, with Trustee's

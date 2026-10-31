@@ -4,24 +4,32 @@ set -euo pipefail
 # Phase 21: two SPE workspaces as ACI confidential container groups, and the
 # access body's Trustee (ADR-068, ADR-069, #774)
 # =============================================================================
-#   21-aci-confidential-spe.sh --trustee [--reference-values <file.json>]
+#   21-aci-confidential-spe.sh <phase>... [options]   phases run in this order:
+#   --trustee [--reference-values <file.json>]
 #        identity, shares, images, mvhd-trustee (KBS + built-in AS) and its
-#        admin job; resource policy deny-all until --policy binds the permits.
-#        With --reference-values: set the SNP reference values (after the
-#        first attestation; see --check).
-#   21-aci-confidential-spe.sh --extracts
+#        admin job. The resource policy Trustee holds is read back from its
+#        share: a bound one is kept (re-applied with the same hashes), none is
+#        answered with deny-all. With --reference-values: set the SNP
+#        reference values (the first attestation is refused until they are,
+#        see --check).
+#   --extracts [--rekey]
 #        build kbs-client (snp attester) and spe-loader in ACR; the admin job
 #        exports each SPE's half of the hub's patients, seals it, puts the key
 #        into Trustee; the ciphertext is baked into mvhd-spe-loader-spe<n>.
-#   21-aci-confidential-spe.sh --policy
+#        Refuses while Trustee already holds extract keys, unless --rekey.
+#   --policy
 #        TLS certificates, passwords, `az confcom acipolicygen` per group;
 #        prints each policy hash (SHA-256 of the ccePolicy = SEV-SNP HOST_DATA),
 #        records it on the permit and binds it in Trustee's resource policy.
-#   21-aci-confidential-spe.sh --workspaces
+#   --workspaces
 #        deploy mvhd-spe-1 and mvhd-spe-2 (sku Confidential).
-#   21-aci-confidential-spe.sh --wire-proxy
-#        point mvhd-neo4j-proxy at both workspaces (Bolt with TLS, CA pinned).
-#   21-aci-confidential-spe.sh --check
+#   --wire-proxy
+#        point mvhd-neo4j-proxy at both workspaces (Bolt with TLS, CA pinned);
+#        records what it replaces, for --unwire-proxy.
+#   --unwire-proxy
+#        take the SPE settings off mvhd-neo4j-proxy again and restore what was
+#        there before: SPE-1 is the hub graph again.
+#   --check
 #        report, change nothing; prints each workspace's attestation and the
 #        claims to pin as reference values.
 #
@@ -41,6 +49,12 @@ set -euo pipefail
 #     server keys and Neo4j passwords reach each group through its secret
 #     volume, outside the ccePolicy; the passwords are in the hub's Key Vault
 #     because the proxy needs them (not in the key path).
+#   - No secret on a command line where the CLI offers another way: the
+#     storage key reaches `az storage file` as AZURE_STORAGE_KEY in its
+#     environment; a new password reaches Key Vault with --file from a mode-700
+#     directory. One exception: `az containerapp env storage set` takes the
+#     account key only as --azure-file-account-key (no env or file form), so
+#     it is passed there and nowhere else.
 #   - Nothing secret is printed. State that is not secret (image digests,
 #     policy hashes, FQDNs) is kept in ${SPE_STATE_DIR}/state.env.
 # =============================================================================
@@ -49,11 +63,16 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 # shellcheck source=scripts/azure/env.sh
 source "$SCRIPT_DIR/env.sh"
 
-MODE="${1:-}"
 SPE_STATE_DIR="${SPE_STATE_DIR:-${HOME}/.mvhd/spe-state}"
 STATE="${SPE_STATE_DIR}/state.env"
+PROXY_BEFORE="${SPE_STATE_DIR}/proxy-before.json"
 TEMPLATE="${SCRIPT_DIR}/aci/spe-workspace.template.json"
 JOB_TIMEOUT_SECONDS="${JOB_TIMEOUT_SECONDS:-1800}"
+# What --wire-proxy sets on the proxy, and so what --unwire-proxy takes off.
+PROXY_ENV_NAMES=(NEO4J_SPE1_URI NEO4J_SPE1_USER NEO4J_SPE1_PASSWORD NEO4J_SPE2_URI NEO4J_SPE2_USER
+  NEO4J_SPE2_PASSWORD NEO4J_SPE_CA_CERT SPE_ENVIRONMENT TRUSTEE_URL TRUSTEE_PROBE_URL TRUSTEE_VERIFIER
+  SPE1_RUNS_ON SPE2_RUNS_ON)
+PROXY_SECRET_NAMES=(spe-1-neo4j-password spe-2-neo4j-password spe-ca-cert)
 WORK=""
 trap 'if [ -n "$WORK" ]; then rm -rf "$WORK"; fi' EXIT
 
@@ -74,13 +93,30 @@ state_set() {  # state_set KEY VALUE (not a secret)
 workdir() { WORK="$(mktemp -d)"; chmod 700 "$WORK"; }
 fqdn_of() { printf '%s-%s.%s.azurecontainer.io' "mvhd-spe-${1}" "$SPE_DNS_SUFFIX" "$LOCATION"; }
 group_of() { printf 'mvhd-spe-%s' "$1"; }
+need() {  # need <value> <what>: a value an az call should have returned
+  [ -n "$1" ] || { err "${2} is empty; the step before did not do what it should"; exit 1; }
+}
 kv_uri() {
   local uri
   uri="$(az keyvault show --name "$KEY_VAULT_NAME" --query properties.vaultUri -o tsv 2>/dev/null || true)"
   uri="${uri:-https://${KEY_VAULT_NAME}.vault.azure.net/}"
   printf '%s' "${uri%/}"
 }
-kv_has() { az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$1" --query id -o none 2>/dev/null; }
+# present | missing; anything else (no right, no network, a throttled call)
+# stops the script: it must never take an error for "missing" and write a
+# new version of a password the workspaces already use.
+kv_state() {
+  local out
+  if out="$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$1" --query id -o tsv 2>&1)"; then
+    echo present
+  elif grep -q "SecretNotFound" <<<"$out"; then
+    echo missing
+  else
+    err "Key Vault ${KEY_VAULT_NAME}: could not tell whether ${1} exists:"
+    grep -v -i "value" <<<"$out" | head -3 >&2
+    exit 1
+  fi
+}
 identity_ensure() {  # identity_ensure NAME -> prints resource id
   az identity show -n "$1" -g "$RG" -o none 2>/dev/null || az identity create -n "$1" -g "$RG" --tags project=mvhd adr=ADR-069 -o none
   az identity show -n "$1" -g "$RG" --query id -o tsv
@@ -99,16 +135,47 @@ grant() {  # grant <principal-id> <role> <scope>
 storage_key() {
   az storage account keys list -g "$RG" -n "$STORAGE_ACCOUNT" --query '[0].value' -o tsv
 }
+# `az storage file ...` with the key in its environment, not on its command line.
+files() {
+  local key
+  key="$(storage_key)"
+  need "$key" "the storage account key"
+  AZURE_STORAGE_ACCOUNT="$STORAGE_ACCOUNT" AZURE_STORAGE_KEY="$key" az storage file "$@"
+}
 digest_of() {  # digest_of <repo> <tag> -> sha256:...
   az acr repository show -n "$ACR_NAME" --image "${1}:${2}" --query digest -o tsv 2>/dev/null || true
+}
+
+# ── what Trustee holds (read back from its own share) ──────────────────────
+# KBS keeps its resource policy as kbs/resource-policy.rego and each resource
+# under repository/ (LocalFs layout of Trustee v0.22.0, checked 2026-10-31).
+trustee_bound_hashes() {  # prints {"spe-1":"sha256:..",..} from the policy Trustee enforces, {} if none
+  local f
+  f="$(mktemp)"
+  if files download --share-name "$SHARE_TRUSTEE_DATA" --path kbs/resource-policy.rego --dest "$f" -o none 2>/dev/null; then
+    # No match is an answer ({}), not an error, under pipefail.
+    { grep -oE '"spe-[0-9]+": "[0-9a-f]{64}"' "$f" || true; } |
+      jq -R -s -c 'split("\n") | map(select(length > 0) | capture("\"(?<k>spe-[0-9]+)\": \"(?<v>[0-9a-f]{64})\"")) |
+        map({(.k): ("sha256:" + .v)}) | add // {}'
+  else
+    echo '{}'
+  fi
+  rm -f "$f"
+}
+trustee_holds_key() {  # trustee_holds_key <n>: true when an extract key for SPE-<n> was put into Trustee
+  local n="$1"
+  files exists --share-name "$SHARE_SPE_EXTRACTS" --path "spe-${n}.enc" --query exists -o tsv 2>/dev/null | grep -q true && return 0
+  files list --share-name "$SHARE_TRUSTEE_DATA" --path repository --query "[].name" -o tsv 2>/dev/null |
+    grep -E "spe-${n}.*extract-key" >/dev/null
 }
 
 # ── images ──────────────────────────────────────────────────────────────────
 # Tagged with the commit of what they carry, never :latest (gotcha #6).
 build_images() {
-  local tag kdig ldig ctx
+  local tag kdig ldig tdig ctx
   tag="$(git -C "$REPO_ROOT" log -1 --format=%h -- services/spe-loader trustee neo4j/init-schema.cypher \
     neo4j/register-fhir-dataset-hdcatap-spe1.cypher neo4j/register-fhir-dataset-hdcatap-spe2.cypher)"
+  need "$tag" "the loader's source commit"
 
   kdig="$(digest_of "$KBS_CLIENT_ACI_REPO" "$TRUSTEE_VERSION")"
   if [ -z "$kdig" ]; then
@@ -117,6 +184,7 @@ build_images() {
       -f "${REPO_ROOT}/services/spe-loader/kbs-client.aci.Dockerfile" "${REPO_ROOT}/services/spe-loader" -o none
     kdig="$(digest_of "$KBS_CLIENT_ACI_REPO" "$TRUSTEE_VERSION")"
   fi
+  need "$kdig" "the digest of ${KBS_CLIENT_ACI_REPO}:${TRUSTEE_VERSION}"
   state_set KBS_CLIENT_ACI_DIGEST "$kdig"
   ok "kbs-client (snp attester): ${ACR_LOGIN_SERVER}/${KBS_CLIENT_ACI_REPO}@${kdig}"
 
@@ -134,6 +202,7 @@ build_images() {
     rm -rf "$WORK"; WORK=""
     ldig="$(digest_of "$SPE_LOADER_REPO" "$tag")"
   fi
+  need "$ldig" "the digest of ${SPE_LOADER_REPO}:${tag}"
   state_set SPE_LOADER_IMAGE "${ACR_LOGIN_SERVER}/${SPE_LOADER_REPO}@${ldig}"
   ok "spe-loader: ${SPE_LOADER_IMAGE}"
 
@@ -141,7 +210,9 @@ build_images() {
     log "importing Trustee KBS ${TRUSTEE_VERSION} into ACR (pinned by digest)"
     az acr import -n "$ACR_NAME" --source "$TRUSTEE_KBS_SOURCE" --image "key-broker-service:built-in-as-${TRUSTEE_VERSION}" -o none
   fi
-  state_set TRUSTEE_KBS_DIGEST "$(digest_of key-broker-service "built-in-as-${TRUSTEE_VERSION}")"
+  tdig="$(digest_of key-broker-service "built-in-as-${TRUSTEE_VERSION}")"
+  need "$tdig" "the digest of key-broker-service:built-in-as-${TRUSTEE_VERSION}"
+  state_set TRUSTEE_KBS_DIGEST "$tdig"
   ok "KBS: ${TRUSTEE_KBS_IMAGE}@${TRUSTEE_KBS_DIGEST}"
 }
 
@@ -152,6 +223,7 @@ run_admin() {  # run_admin <command> <args...>: one execution of mvhd-trustee-ad
   execution="$(az containerapp job start -n "$TRUSTEE_ADMIN_JOB" -g "$RG" \
     --image "$SPE_LOADER_IMAGE" --container-name trustee-admin \
     --command "$cmd" --args "$@" --query name -o tsv)"
+  need "$execution" "the ${TRUSTEE_ADMIN_JOB} execution"
   log "${TRUSTEE_ADMIN_JOB}: ${execution} (${cmd} $1)"
   deadline=$((SECONDS + JOB_TIMEOUT_SECONDS))
   while [ "$SECONDS" -lt "$deadline" ]; do
@@ -167,30 +239,35 @@ run_admin() {  # run_admin <command> <args...>: one execution of mvhd-trustee-ad
 
 # ── --trustee ───────────────────────────────────────────────────────────────
 trustee() {
-  local rv="${1:-}" tid tprincipal acr_id key env_id spec share
+  local rv="${1:-}" tid tprincipal acr_id key env_id spec share bound
   log "Phase 21 --trustee: mvhd-trustee, operated as MedReg DE (ADR-068)"
   tid="$(identity_ensure "$TRUSTEE_IDENTITY")"
+  need "$tid" "the identity ${TRUSTEE_IDENTITY}"
   tprincipal="$(az identity show -n "$TRUSTEE_IDENTITY" -g "$RG" --query principalId -o tsv)"
   acr_id="$(az acr show -n "$ACR_NAME" --query id -o tsv)"
   grant "$tprincipal" AcrPull "$acr_id"
 
-  key="$(storage_key)"
   for share in "$SHARE_TRUSTEE_KEYS" "$SHARE_TRUSTEE_DATA" "$SHARE_SPE_EXTRACTS"; do
     az storage share-rm show -g "$RG" --storage-account "$STORAGE_ACCOUNT" -n "$share" -o none 2>/dev/null ||
       az storage share-rm create -g "$RG" --storage-account "$STORAGE_ACCOUNT" -n "$share" --quota 1 -o none
-    az containerapp env storage set -n "$ACA_ENV" -g "$RG" --storage-name "$share" \
-      --azure-file-account-name "$STORAGE_ACCOUNT" --azure-file-account-key "$key" \
-      --azure-file-share-name "$share" --access-mode ReadWrite -o none
+    if ! az containerapp env storage show -n "$ACA_ENV" -g "$RG" --storage-name "$share" -o none 2>/dev/null; then
+      # The one place the key is an argument: this command has no other form.
+      key="$(storage_key)"
+      az containerapp env storage set -n "$ACA_ENV" -g "$RG" --storage-name "$share" \
+        --azure-file-account-name "$STORAGE_ACCOUNT" --azure-file-account-key "$key" \
+        --azure-file-share-name "$share" --access-mode ReadWrite -o none
+      key=""
+    fi
     ok "share ${share}"
   done
   # The KBS configuration sits beside its keys; uploaded every run, so a change
   # in trustee/kbs-config.toml reaches Trustee on its next restart.
-  az storage file upload --account-name "$STORAGE_ACCOUNT" --account-key "$key" --share-name "$SHARE_TRUSTEE_KEYS" \
-    --source "${REPO_ROOT}/trustee/kbs-config.toml" --path kbs-config.toml -o none
-  key=""
+  files upload --share-name "$SHARE_TRUSTEE_KEYS" --source "${REPO_ROOT}/trustee/kbs-config.toml" \
+    --path kbs-config.toml -o none
 
   build_images
   env_id="$(az containerapp env show -n "$ACA_ENV" -g "$RG" --query id -o tsv)"
+  need "$env_id" "the environment ${ACA_ENV}"
   workdir; spec="$WORK/trustee.yaml"
   cat >"$spec" <<YAML
 location: ${LOCATION}
@@ -238,6 +315,7 @@ YAML
     az containerapp create -n "$TRUSTEE_APP" -g "$RG" --yaml "$spec" -o none
   fi
   state_set TRUSTEE_FQDN "$(az containerapp show -n "$TRUSTEE_APP" -g "$RG" --query properties.configuration.ingress.fqdn -o tsv)"
+  need "$TRUSTEE_FQDN" "the FQDN of ${TRUSTEE_APP}"
   ok "${TRUSTEE_APP}: https://${TRUSTEE_FQDN}"
 
   spec="$WORK/admin.yaml"
@@ -288,53 +366,77 @@ YAML
   rm -rf "$WORK"; WORK=""
   ok "${TRUSTEE_ADMIN_JOB} (identity ${TRUSTEE_IDENTITY})"
 
-  # Until --policy binds the permits, nothing is released: KBS's built-in
-  # default would release to any non-sample TEE.
-  if [ -z "${SPE_POLICY_HASHES:-}" ]; then
-    run_admin kbs-client --url "http://${TRUSTEE_APP}" config --admin-token-file /keys/admin-token set-resource-policy --deny-all
-  else
+  # What Trustee enforces now, read back from its share, not from state.env
+  # (which may be gone): a policy bound to permits stays bound; only a Trustee
+  # with none gets deny-all (KBS's built-in default would release to any
+  # non-sample TEE).
+  bound="$(trustee_bound_hashes)"
+  if [ "$(jq 'length' <<<"$bound")" -gt 0 ]; then
+    state_set SPE_POLICY_HASHES "$bound"
+    ok "Trustee's resource policy is bound to $(jq -r 'keys | join(", ")' <<<"$bound"); kept"
     run_admin spe-loader trustee-configure --resource-policy-template /app/trustee/policies/resource-azure.rego.tmpl \
-      --policy-hashes "$SPE_POLICY_HASHES"
+      --policy-hashes "$bound"
+  else
+    run_admin kbs-client --url "http://${TRUSTEE_APP}" config --admin-token-file /keys/admin-token set-resource-policy --deny-all
+    ok "no permit bound yet: deny-all until --policy"
   fi
   if [ -n "$rv" ]; then
     [ -s "$rv" ] || { err "no reference values file ${rv}"; exit 1; }
     run_admin spe-loader trustee-configure --reference-values "$(jq -c . "$rv")"
     ok "reference values set from ${rv}; restart the workspaces: az container restart -n mvhd-spe-<n> -g ${RG}"
   fi
-  echo "  Next: $0 --extracts"
 }
 
 # ── --extracts ──────────────────────────────────────────────────────────────
 extracts() {
-  local key n tag dig
+  local rekey="$1" n tag dig held=""
   log "Phase 21 --extracts: sealed extracts, keys into Trustee (Art. 73(2))"
+  for n in 1 2; do
+    if trustee_holds_key "$n"; then held="${held} SPE-${n}"; fi
+  done
+  if [ -n "$held" ] && [ "$rekey" != 1 ]; then
+    err "Trustee already holds extract keys for${held}. A new extract replaces them, and the"
+    err "running workspaces could then not unlock on their next start. Run again with --rekey"
+    err "to do it anyway, followed by: $0 --policy --workspaces"
+    exit 1
+  fi
   [ -n "${SPE_LOADER_IMAGE:-}" ] || build_images
   run_admin bash /app/scripts/extract-all.sh /extracts
   workdir
-  key="$(storage_key)"
   tag="$(date -u +%Y%m%d%H%M)"
   for n in 1 2; do
-    az storage file download --account-name "$STORAGE_ACCOUNT" --account-key "$key" --share-name "$SHARE_SPE_EXTRACTS" \
-      --path "spe-${n}.enc" --dest "$WORK/spe.enc" -o none
+    files download --share-name "$SHARE_SPE_EXTRACTS" --path "spe-${n}.enc" --dest "$WORK/spe.enc" -o none
+    [ -s "$WORK/spe.enc" ] || { err "spe-${n}.enc is missing or empty on ${SHARE_SPE_EXTRACTS}"; exit 1; }
     # Ciphertext only: the key went from the job straight into Trustee.
     printf 'FROM %s\nCOPY spe.enc /extracts/spe.enc\n' "$SPE_LOADER_IMAGE" >"$WORK/Dockerfile"
     az acr build -r "$ACR_NAME" -t "${SPE_LOADER_REPO}-spe${n}:${tag}" --platform linux/amd64 -f "$WORK/Dockerfile" "$WORK" -o none
     dig="$(digest_of "${SPE_LOADER_REPO}-spe${n}" "$tag")"
+    need "$dig" "the digest of ${SPE_LOADER_REPO}-spe${n}:${tag}"
     state_set "SPE${n}_LOADER_IMAGE" "${ACR_LOGIN_SERVER}/${SPE_LOADER_REPO}-spe${n}@${dig}"
-    ok "SPE-${n}: $(eval "printf '%s' \"\$SPE${n}_LOADER_IMAGE\"")"
+    ok "SPE-${n}: ${ACR_LOGIN_SERVER}/${SPE_LOADER_REPO}-spe${n}@${dig}"
     rm -f "$WORK/spe.enc"
   done
-  key=""
   rm -rf "$WORK"; WORK=""
-  echo "  Next: $0 --policy (the images changed, so the policy hashes do)"
+  if [ -n "$held" ]; then
+    warn "Re-keyed${held}: the running workspaces cannot unlock their old extracts any more,"
+    warn "and fail to unlock on their next start until the new ones are deployed:"
+    warn "  $0 --policy --workspaces"
+  else
+    echo "  Next: $0 --policy (the images changed, so the policy hashes do)"
+  fi
 }
 
 # ── --policy ────────────────────────────────────────────────────────────────
 params_file() {  # params_file <n> <file> <with-secrets:0|1>
-  local n="$1" out="$2" secrets="$3" tls="${SPE_STATE_DIR}/tls-${1}" pid pw auth="" pwb="" keyb=""
+  local n="$1" out="$2" secrets="$3" tls="${SPE_STATE_DIR}/tls-${1}" pid pw auth="" pwb="" keyb="" loader
   pid="$(az identity show -n "$SPE_PULL_IDENTITY" -g "$RG" --query id -o tsv)"
+  need "$pid" "the identity ${SPE_PULL_IDENTITY}"
+  loader="$(eval "printf '%s' \"\${SPE${n}_LOADER_IMAGE:-}\"")"
+  need "$loader" "SPE${n}_LOADER_IMAGE (run --extracts)"
+  [ -s "${tls}/public.crt" ] || { err "no Bolt certificate for SPE-${n} in ${tls}"; exit 1; }
   if [ "$secrets" = 1 ]; then
     pw="$(az keyvault secret show --vault-name "$KEY_VAULT_NAME" --name "$(eval "printf '%s' \"\$KV_SPE${n}_NEO4J_PASSWORD\"")" --query value -o tsv)"
+    need "$pw" "the Neo4j password of SPE-${n}"
     auth="$(printf 'neo4j/%s' "$pw" | base64 | tr -d '\n')"
     pwb="$(printf '%s' "$pw" | base64 | tr -d '\n')"
     keyb="$(base64 <"${tls}/private.key" | tr -d '\n')"
@@ -342,7 +444,7 @@ params_file() {  # params_file <n> <file> <with-secrets:0|1>
   fi
   jq -n \
     --arg name "$(group_of "$n")" --arg location "$LOCATION" --arg n "$n" \
-    --arg loader "$(eval "printf '%s' \"\$SPE${n}_LOADER_IMAGE\"")" \
+    --arg loader "$loader" \
     --arg neo4j "${NEO4J_IMAGE}" --arg dns "mvhd-spe-${n}-${SPE_DNS_SUFFIX}" \
     --arg trustee "https://${TRUSTEE_FQDN}" --arg registry "$ACR_LOGIN_SERVER" --arg pull "$pid" \
     --arg key "${keyb:-cGxhY2Vob2xkZXI=}" --arg cert "$(base64 <"${tls}/public.crt" | tr -d '\n')" \
@@ -357,24 +459,25 @@ params_file() {  # params_file <n> <file> <with-secrets:0|1>
 }
 
 policy() {
-  local pid pprincipal acr_id n s hash hashes="{}" tmpl
+  local pprincipal acr_id n s hash hashes="{}" tmpl
   log "Phase 21 --policy: TLS, passwords, ccePolicy per group, the permit's hash"
   for s in SPE1_LOADER_IMAGE SPE2_LOADER_IMAGE TRUSTEE_FQDN; do
     [ -n "${!s:-}" ] || { err "${s} unknown: run --trustee and --extracts first"; exit 1; }
   done
   az confcom --help >/dev/null 2>&1 || { err "az confcom missing: az extension add --name confcom"; exit 1; }
-  pid="$(identity_ensure "$SPE_PULL_IDENTITY")"
+  need "$(identity_ensure "$SPE_PULL_IDENTITY")" "the identity ${SPE_PULL_IDENTITY}"
   pprincipal="$(az identity show -n "$SPE_PULL_IDENTITY" -g "$RG" --query principalId -o tsv)"
   acr_id="$(az acr show -n "$ACR_NAME" --query id -o tsv)"
   grant "$pprincipal" AcrPull "$acr_id"
-  : "$pid"
   az acr login -n "$ACR_NAME" >/dev/null
 
   for n in 1 2; do
     s="$(eval "printf '%s' \"\$KV_SPE${n}_NEO4J_PASSWORD\"")"
-    if ! kv_has "$s"; then
-      az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$s" \
-        --value "$(openssl rand -base64 24 | tr -d '/+=' | cut -c1-28)" -o none
+    if [ "$(kv_state "$s")" = missing ]; then
+      workdir
+      openssl rand -base64 24 | tr -d '/+=\n' | cut -c1-28 >"$WORK/pw"
+      az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$s" --file "$WORK/pw" --encoding utf-8 -o none
+      rm -rf "$WORK"; WORK=""
       ok "created ${s} in ${KEY_VAULT_NAME} (not displayed)"
     fi
     [ -s "${SPE_STATE_DIR}/tls-${n}/public.crt" ] ||
@@ -393,6 +496,7 @@ policy() {
     cp "$tmpl" "${SPE_STATE_DIR}/template-spe${n}.json"
     hash="sha256:$(jq -r '.resources[0].properties.confidentialComputeProperties.ccePolicy' "$tmpl" | base64 -d | shasum -a 256 | cut -c1-64)"
     rm -rf "$WORK"; WORK=""
+    [[ "$hash" =~ ^sha256:[0-9a-f]{64}$ ]] || { err "no policy hash for SPE-${n}"; exit 1; }
     state_set "SPE${n}_POLICY_HASH" "$hash"
     ok "SPE-${n} policy hash (= SEV-SNP HOST_DATA): ${hash}"
     run_admin spe-loader record-permit --spe "$n" --policy-hash "$hash"
@@ -402,7 +506,6 @@ policy() {
   run_admin spe-loader trustee-configure --resource-policy-template /app/trustee/policies/resource-azure.rego.tmpl \
     --policy-hashes "$hashes"
   ok "Trustee releases default/spe-<n>/extract-key only to HOST_DATA = the permit's hash"
-  echo "  Next: $0 --workspaces"
 }
 
 # ── --workspaces ────────────────────────────────────────────────────────────
@@ -419,23 +522,40 @@ workspaces() {
     ok "$(group_of "$n"): bolt+s://$(fqdn_of "$n"):7687"
   done
   echo "  Off hours (ADR-053): run scripts/azure/18-offhours-jobs.sh once more, so id-mvhd-offhours"
-  echo "  may stop and start the groups (Contributor on each group, nothing else)."
-  echo "  Next: $0 --wire-proxy, then $0 --check"
+  echo "  may stop and start the groups (custom role mvhd-aci-power, nothing else)."
 }
 
-# ── --wire-proxy ────────────────────────────────────────────────────────────
+# ── --wire-proxy / --unwire-proxy ───────────────────────────────────────────
+proxy_env_names_json() { printf '%s\n' "${PROXY_ENV_NAMES[@]}" | jq -R . | jq -s -c .; }
+
 wire_proxy() {
-  local identity kv n
+  local identity kv n ca="${SPE_CA_DIR}/ca.crt" names
   log "Phase 21 --wire-proxy: ${NEO4J_PROXY_APP} federates over the workspaces"
+  [ -s "$ca" ] || { err "no CA certificate at ${ca}: run --policy first (or restore ${SPE_CA_DIR})"; exit 1; }
+  need "${TRUSTEE_FQDN:-}" "TRUSTEE_FQDN (run --trustee)"
+  # What this replaces, once: the proxy's settings before the first wiring.
+  if [ ! -s "$PROXY_BEFORE" ]; then
+    names="$(proxy_env_names_json)"
+    az containerapp show -n "$NEO4J_PROXY_APP" -g "$RG" -o json |
+      jq --argjson names "$names" '{env: [.properties.template.containers[0].env[]? | select(.name as $n | $names | index($n))],
+        identities: (.identity.userAssignedIdentities // {} | keys)}' >"${PROXY_BEFORE}.tmp"
+    az containerapp secret list -n "$NEO4J_PROXY_APP" -g "$RG" --query "[].name" -o json |
+      jq -s '.[0]' >"${PROXY_BEFORE}.secrets"
+    jq --slurpfile s "${PROXY_BEFORE}.secrets" '. + {secrets: $s[0]}' "${PROXY_BEFORE}.tmp" >"$PROXY_BEFORE"
+    rm -f "${PROXY_BEFORE}.tmp" "${PROXY_BEFORE}.secrets"
+    chmod 600 "$PROXY_BEFORE"
+    ok "recorded the proxy's settings before wiring in ${PROXY_BEFORE} (names and plain values, no secret)"
+  fi
   identity="$(az containerapp show -n "$NEO4J_PROXY_APP" -g "$RG" --query "keys(identity.userAssignedIdentities)[0]" -o tsv 2>/dev/null || true)"
   [ -n "$identity" ] || identity="$(az identity show -n id-mvhd-claude-federation -g "$RG" --query id -o tsv)"
+  need "$identity" "an identity for ${NEO4J_PROXY_APP}"
   az containerapp identity assign -n "$NEO4J_PROXY_APP" -g "$RG" --user-assigned "$identity" -o none
   kv="$(kv_uri)"
   # The CA certificate is public, but multi-line: a secret is how ACA carries it.
   az containerapp secret set -n "$NEO4J_PROXY_APP" -g "$RG" --secrets \
     "spe-1-neo4j-password=keyvaultref:${kv}/secrets/${KV_SPE1_NEO4J_PASSWORD},identityref:${identity}" \
     "spe-2-neo4j-password=keyvaultref:${kv}/secrets/${KV_SPE2_NEO4J_PASSWORD},identityref:${identity}" \
-    "spe-ca-cert=$(cat "${SPE_CA_DIR}/ca.crt")" -o none
+    "spe-ca-cert=$(cat "$ca")" -o none
   az containerapp update -n "$NEO4J_PROXY_APP" -g "$RG" --set-env-vars \
     "NEO4J_SPE1_URI=bolt+s://$(fqdn_of 1):7687" "NEO4J_SPE1_USER=neo4j" "NEO4J_SPE1_PASSWORD=secretref:spe-1-neo4j-password" \
     "NEO4J_SPE2_URI=bolt+s://$(fqdn_of 2):7687" "NEO4J_SPE2_USER=neo4j" "NEO4J_SPE2_PASSWORD=secretref:spe-2-neo4j-password" \
@@ -446,10 +566,41 @@ wire_proxy() {
     "SPE2_RUNS_ON=ACI confidential container group mvhd-spe-2 (${LOCATION})" -o none
   RESOURCE_GROUP="$RG" "${SCRIPT_DIR}/retire-stale-revisions.sh" --when-healthy "$NEO4J_PROXY_APP" ||
     warn "the previous ${NEO4J_PROXY_APP} revision is still active"
-  ok "${NEO4J_PROXY_APP}: SPE-1 and SPE-2 are the ACI workspaces, CA pinned"
+  ok "${NEO4J_PROXY_APP}: SPE-1 and SPE-2 are the ACI workspaces, CA pinned (undo: $0 --unwire-proxy)"
   for n in 1 2; do
     echo "  SPE-${n}: bolt+s://$(fqdn_of "$n"):7687"
   done
+}
+
+unwire_proxy() {
+  local -a restore=() remove_secrets=()
+  local s
+  log "Phase 21 --unwire-proxy: ${NEO4J_PROXY_APP} back to SPE-1 = the hub graph"
+  az containerapp update -n "$NEO4J_PROXY_APP" -g "$RG" --remove-env-vars "${PROXY_ENV_NAMES[@]}" -o none
+  if [ -s "$PROXY_BEFORE" ]; then
+    # What the proxy had before the first wiring, as it had it.
+    # A while-read loop, not mapfile: macOS ships bash 3.2.
+    while IFS= read -r s; do
+      restore+=("$s")
+    done < <(jq -r '.env[] | if .secretRef then "\(.name)=secretref:\(.secretRef)" else "\(.name)=\(.value // "")" end' "$PROXY_BEFORE")
+    if [ "${#restore[@]}" -gt 0 ]; then
+      az containerapp update -n "$NEO4J_PROXY_APP" -g "$RG" --set-env-vars "${restore[@]}" -o none
+      ok "restored ${#restore[@]} setting(s) the proxy had before"
+    fi
+  else
+    warn "no ${PROXY_BEFORE}: the SPE settings are removed, nothing earlier to restore"
+  fi
+  for s in "${PROXY_SECRET_NAMES[@]}"; do
+    if [ -s "$PROXY_BEFORE" ] && jq -e --arg s "$s" '.secrets | index($s)' "$PROXY_BEFORE" >/dev/null; then continue; fi
+    if az containerapp secret show -n "$NEO4J_PROXY_APP" -g "$RG" --secret-name "$s" -o none 2>/dev/null; then remove_secrets+=("$s"); fi
+  done
+  if [ "${#remove_secrets[@]}" -gt 0 ]; then
+    az containerapp secret remove -n "$NEO4J_PROXY_APP" -g "$RG" --secret-names "${remove_secrets[@]}" -o none
+  fi
+  RESOURCE_GROUP="$RG" "${SCRIPT_DIR}/retire-stale-revisions.sh" --when-healthy "$NEO4J_PROXY_APP" ||
+    warn "the previous ${NEO4J_PROXY_APP} revision is still active"
+  rm -f "$PROXY_BEFORE"
+  ok "${NEO4J_PROXY_APP}: no SPE workspace configured; SPE-1 is the hub graph again"
 }
 
 # ── --check ─────────────────────────────────────────────────────────────────
@@ -458,9 +609,12 @@ check() {
   log "Phase 21 --check"
   echo "  state: ${STATE}"
   grep -E '^(TRUSTEE_FQDN|SPE[12]_POLICY_HASH|SPE[12]_LOADER_IMAGE|KBS_CLIENT_ACI_DIGEST)=' "$STATE" | sed 's/^/    /' || true
+  echo "  ${NEO4J_PROXY_APP} ingress external: $(az containerapp show -n "$NEO4J_PROXY_APP" -g "$RG" \
+    --query properties.configuration.ingress.external -o tsv 2>/dev/null || echo unknown) (expected false: 04-edc-services.sh creates it internal)"
   if az containerapp show -n "$TRUSTEE_APP" -g "$RG" -o none 2>/dev/null; then
     echo "  ${TRUSTEE_APP}: $(az containerapp show -n "$TRUSTEE_APP" -g "$RG" --query properties.runningStatus -o tsv)," \
-      "answers HTTP $(curl -s -o /dev/null -w '%{http_code}' "https://${TRUSTEE_FQDN:-none}/kbs/v0/auth" || echo 000)"
+      "answers HTTP $(curl -s -o /dev/null -w '%{http_code}' "https://${TRUSTEE_FQDN:-none}/kbs/v0/auth" || echo 000)," \
+      "resource policy bound to: $(trustee_bound_hashes | jq -r 'keys | join(", ") | if . == "" then "nothing (deny-all)" else . end')"
   else
     echo "  MISSING  ${TRUSTEE_APP}"
   fi
@@ -474,17 +628,35 @@ check() {
     echo "  ${g} spe-ingest:"
     az container logs -n "$g" -g "$RG" --container-name spe-ingest 2>/dev/null | tail -3 | sed 's/^/    /' || true
   done
-  echo "  First run: copy the pinnable claims into a file shaped like trustee/reference-values-aci.example.json,"
-  echo "  then: $0 --trustee --reference-values <file> and restart both groups."
+  echo "  First run: Trustee refuses every key until the reference values are pinned (no unlock on"
+  echo "  first use). Copy the pinnable claims into a file shaped like"
+  echo "  trustee/reference-values-aci.example.json, check snp_launch_measurement against Microsoft's"
+  echo "  endorsement, then: $0 --trustee --reference-values <file> and restart both groups."
 }
 
-case "$MODE" in
-  --trustee)
-    if [ "${2:-}" = --reference-values ]; then trustee "${3:-}"; else trustee; fi ;;
-  --extracts) extracts ;;
-  --policy) policy ;;
-  --workspaces) workspaces ;;
-  --wire-proxy) wire_proxy ;;
-  --check) check ;;
-  *) sed -n '3,47p' "${BASH_SOURCE[0]}"; exit 2 ;;
-esac
+# ── arguments ───────────────────────────────────────────────────────────────
+DO_TRUSTEE=0 DO_EXTRACTS=0 DO_POLICY=0 DO_WORKSPACES=0 DO_WIRE=0 DO_UNWIRE=0 DO_CHECK=0 REKEY=0 RV=""
+[ $# -gt 0 ] || { sed -n '3,33p' "${BASH_SOURCE[0]}"; exit 2; }
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --trustee) DO_TRUSTEE=1 ;;
+    --reference-values) RV="${2:?--reference-values needs a file}"; DO_TRUSTEE=1; shift ;;
+    --extracts) DO_EXTRACTS=1 ;;
+    --rekey) REKEY=1 ;;
+    --policy) DO_POLICY=1 ;;
+    --workspaces) DO_WORKSPACES=1 ;;
+    --wire-proxy) DO_WIRE=1 ;;
+    --unwire-proxy) DO_UNWIRE=1 ;;
+    --check) DO_CHECK=1 ;;
+    *) sed -n '3,33p' "${BASH_SOURCE[0]}"; exit 2 ;;
+  esac
+  shift
+done
+[ "$DO_WIRE$DO_UNWIRE" != 11 ] || { err "--wire-proxy and --unwire-proxy together make no sense"; exit 2; }
+if [ "$DO_TRUSTEE" = 1 ]; then trustee "$RV"; fi
+if [ "$DO_EXTRACTS" = 1 ]; then extracts "$REKEY"; fi
+if [ "$DO_POLICY" = 1 ]; then policy; fi
+if [ "$DO_WORKSPACES" = 1 ]; then workspaces; fi
+if [ "$DO_UNWIRE" = 1 ]; then unwire_proxy; fi
+if [ "$DO_WIRE" = 1 ]; then wire_proxy; fi
+if [ "$DO_CHECK" = 1 ]; then check; fi

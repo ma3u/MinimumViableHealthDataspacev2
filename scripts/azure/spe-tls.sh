@@ -20,6 +20,22 @@ ca="${1:?usage: spe-tls.sh <ca-dir> <out-dir> <dns-name>}"
 out="${2:?usage: spe-tls.sh <ca-dir> <out-dir> <dns-name>}"
 name="${3:?usage: spe-tls.sh <ca-dir> <out-dir> <dns-name>}"
 umask 077
+
+# A CA that is gone while certificates it signed are still around: a new CA
+# would not match the one the proxy pins (NEO4J_SPE_CA_CERT) nor the
+# certificates already deployed. Refuse, and say how to recover.
+if [ ! -s "$ca/ca.key" ]; then
+  parent="$(dirname "$out")"
+  for existing in "$parent"/tls-*/public.crt "$out/public.crt"; do
+    if [ -s "$existing" ]; then
+      echo "spe-tls: ${existing} exists but the CA in ${ca} does not." >&2
+      echo "spe-tls: Either restore ${ca} (ca.key, ca.crt) from its backup, or start over:" >&2
+      echo "spe-tls:   remove every ${parent}/tls-*, then run 21-aci-confidential-spe.sh --policy" >&2
+      echo "spe-tls:   --workspaces --wire-proxy, so the groups and the proxy get the new CA." >&2
+      exit 1
+    fi
+  done
+fi
 mkdir -p "$ca" "$out"
 
 if [ ! -s "$ca/ca.key" ]; then
@@ -43,5 +59,8 @@ openssl x509 -req -in "$out/server.csr" -CA "$ca/ca.crt" -CAkey "$ca/ca.key" -CA
   -days 365 -sha256 -extfile "$ext" -out "$out/public.crt" 2>/dev/null
 rm -f "$out/server.csr" "$ext"
 chmod 0644 "$out/public.crt" "$ca/ca.crt"
-chmod 0644 "$out/private.key"   # read by the Neo4j user inside the container; the directory stays 0700
+# Keys are the owner's only. The group gets the server key through its
+# secret volume, which sets its own modes inside the container.
+chmod 0600 "$out/private.key" "$ca/ca.key"
+rm -f "$ca/ca.srl"
 echo "spe-tls: certificate for ${name} in ${out}"

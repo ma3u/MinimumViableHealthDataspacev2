@@ -97,7 +97,11 @@ waits for it.
    `HDABApproval` and written into Trustee's resource policy
    (`trustee/policies/resource-azure.rego.tmpl`). Trustee releases the key
    only to SEV-SNP evidence (its `snp` verifier, AMD's chain), with an
-   affirming token, whose HOST_DATA equals that permit's hash. The loader
+   affirming token and a pinned launch measurement, whose HOST_DATA equals
+   that permit's hash. In Trustee v0.22.0's token HOST_DATA is `init_data`
+   beside the `snp` claims, not inside them (its `transform_claims` moves it
+   there); the policy reads it there, and `opa test` pins every case
+   (`trustee/policies/resource_azure_test.rego`, in CI). The loader
    takes the hash of record from the token's HOST_DATA and sets
    `policyCheckedByHardware: true` once the key came. It also checks HOST_DATA
    against `security-policy-base64` and records the digests of the three
@@ -115,9 +119,15 @@ waits for it.
    shares are in the hub's storage account and subscription, so the
    subscription owner could read them; for the claim to hold, the access body
    runs Trustee in a subscription of its own. Reference values (UVM
-   measurement, TCB) are pinned from the first attestation, which is refused
-   until they are set, and checked against Microsoft's endorsement in
-   `reference-info-base64` by the operator.
+   measurement, TCB) are taken from the first attestation and checked against
+   Microsoft's endorsement in `reference-info-base64` by the operator before
+   they are set. There is no unlock on first use: with no
+   `snp_launch_measurement` pinned, the token's `executables` claim is 33 and
+   the resource policy refuses. `--trustee` reads the resource policy back
+   from Trustee's own share and keeps a bound one; deny-all is set only when
+   Trustee holds none. `--extracts` refuses to re-key while Trustee holds
+   extract keys, unless `--rekey`, and then says that `--policy --workspaces`
+   must follow before the workspaces can unlock again.
 
 4. **Extracts are sealed where the hub graph is, and only ciphertext moves.**
    The admin job exports each SPE's half of the hub's synthetic patients
@@ -135,12 +145,26 @@ waits for it.
    an audit write. So each workspace keeps an `(:SpeAttestation {speId})`
    with the contract's fields and the `attestation` object, and one
    `(:SpeEvent)` per attestation, key release, refusal and load. The proxy,
-   which reaches both, reads them through `GET /spe/status` (and every
-   minute without a caller) and appends each to the chain `spe` once, the
-   event id as dedupe key; `speId`, `permitId`, `policyHash`, `teeType`,
-   `attestationScope`, `simulated` and `eventType` are node properties of
-   the `(:AuditEvent)`. `spe.workspace_destroyed` is the proxy's own
-   observation: a workspace that answers with a new load replaced the old one.
+   which reaches both, runs a sync a few seconds after it starts and every
+   minute after that (one run at a time, each workspace read bounded by a
+   timeout), and appends each event to the chain `spe` once, the event id as
+   dedupe key, each in a transaction of its own: never in a batch with a
+   query's record, so an SPE failure cannot turn an answer into a 503.
+   `speId`, `permitId`, `policyHash`, `teeType`, `attestationScope`,
+   `simulated` and `eventType` are node properties of the `(:AuditEvent)`.
+   `spe.workspace_destroyed` is the proxy's own observation: a workspace that
+   answers with a new load replaced the old one. `GET /spe/status` only reads;
+   every write is the sync's.
+
+   **Art. 71 opt-outs reach the workspaces within one sync interval.** An
+   extract carries the `OptedOut` label as it was when it was sealed, but a
+   person may opt out (or reverse it) any time after (Art. 71, ADR-062), and
+   the workspace must then stop counting them as the hub does. Each sync
+   reads the hub's opted-out person-level nodes by the key the extract gave
+   them, puts `OptedOut` on the workspace's copies and takes it off copies the
+   hub no longer marks (only nodes the loader wrote; idempotent; by
+   parameter). Each change is recorded as `spe.optout_synced`, with counts
+   only, never who.
 
 6. **Bolt with TLS on a public DNS name; TLS and the password are the gate.**
    `mvhd-spe-<n>-b53a0449.westeurope.azurecontainer.io:7687`. The server
@@ -150,24 +174,36 @@ waits for it.
    hub's Key Vault for the proxy's `keyvaultref`, and reach the group through
    its secret volume (`NEO4J_AUTH_PATH`). There is no source-range filter: ACI
    without a VNet has none, and the proxy's 321 shared outbound addresses
-   would make one weak anyway.
+   would make one weak anyway. The proxy itself has internal ingress only
+   (`scripts/azure/04-edc-services.sh`, `--ingress internal`; `--check`
+   prints the live setting), so `/spe/status` is not on the internet.
 
 7. **The proxy asks the workspaces only for the SPE questions.**
    `NEO4J_SPE1_URI` (new) and `NEO4J_SPE2_URI` point at the groups; the
    federated path and the `spe_access` template ask them, everything else
-   stays on the hub graph. A configured workspace that does not answer is
+   stays on the hub graph. That includes a question to `POST /nlq` without
+   `federated`: the single-SPE path answers from the hub (all patients, the
+   catalog, the permits) on purpose, because catalog and permit questions
+   need it; a test pins it. A configured workspace that does not answer is
    left out, never replaced by the hub, which holds both halves. k = 5 and
    the Art. 71 rewrite apply to every answer, as since #772. Unset, SPE-1 is
-   the hub graph as before.
+   the hub graph as before. The proxy never waits for a workspace to start:
+   it connects them in the background (5 s per try, retried for as long as
+   it runs, 15 s apart at first, up to 60 s), and listens at once.
+   `--unwire-proxy` takes the SPE settings off again and restores what was
+   there before.
 
 8. **Off hours (extends ADR-053).** The evening run stops both groups with
    `az container stop` first, then the apps, `mvhd-trustee` among them; the
    morning run starts `mvhd-trustee` first among the core apps, then both
    groups with `az container start`, while the proxy keeps retrying until
    they have loaded. A stopped group bills nothing; each start re-attests and
-   reloads from the sealed extract, by design. `id-mvhd-offhours` gets
-   Contributor on each group and nothing else (`18-offhours-jobs.sh`, run
-   once more after `--workspaces`). Missing groups or Trustee are skipped.
+   reloads from the sealed extract, by design. `id-mvhd-offhours` gets the
+   custom role `mvhd-aci-power` (container groups: read, start, stop,
+   restart; nothing else), defined and assigned at the resource group by
+   `18-offhours-jobs.sh`; where the account may not define roles, the script
+   says so and the groups keep running until someone who may runs it.
+   Missing groups or Trustee are skipped.
 
 9. **Locally (M1)** `docker-compose.trustee.yml` runs the same loader and
    Trustee with the sample attester: SPE-1 becomes a workspace of its own
@@ -195,7 +231,10 @@ waits for it.
   lacks the sysfs node, kbs-client falls back to the sample attester and every
   release is refused. Also unproven: init containers and secret volumes in a
   confidential group with a generated ccePolicy, `NEO4J_AUTH_PATH` under the
-  policy, Trustee's LocalFs store on an SMB share, and `az containerapp job
+  policy, Trustee's LocalFs store on an SMB share (KBS names a resource file
+  `repository/default\x2Fspe-1\x2Fextract-key`, and Azure Files does not
+  allow `\` in a name: if the write fails there, Trustee's resource store
+  moves to a backend of its own before A2 is used), and `az containerapp job
 start` argument overrides as `--policy` uses them.
 
 ## Alternatives considered
