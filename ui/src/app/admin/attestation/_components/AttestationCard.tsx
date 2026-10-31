@@ -22,6 +22,9 @@ const VERDICT_STYLES: Record<AttestationVerdict, string> = {
   none: "text-(--text-secondary) border-(--border) bg-(--surface-2)",
 };
 
+const SIMULATED_PASS_STYLE =
+  "text-(--warning-text) border-(--warning)/40 bg-(--warning)/10";
+
 const VERDICT_ICONS = {
   pass: CheckCircle2,
   fail: XCircle,
@@ -123,7 +126,11 @@ export function AttestationCard({
           <span
             aria-label={`Verdict: ${verdict.text}`}
             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
-              VERDICT_STYLES[verdict.verdict]
+              // A pass on sample evidence proves the flow, not the hardware:
+              // amber, like the "Simulated attestation" label.
+              verdict.verdict === "pass" && simulated
+                ? SIMULATED_PASS_STYLE
+                : VERDICT_STYLES[verdict.verdict]
             }`}
           >
             <VerdictIcon size={12} aria-hidden="true" />

@@ -117,6 +117,7 @@ describes every page below and shows a screenshot of each on mouse-over.
 | Transfer                  | /data/transfer      | Transfer history with audit trail                               | Yes           |
 | Admin Dashboard           | /admin              | Operator overview                                               | Yes           |
 | EDC Components            | /admin/components   | EDC-V runtime component status                                  | Yes           |
+| SPE attestation           | /admin/attestation  | The evidence behind each SPE's label, for the operator          | No            |
 | Tenant Management         | /admin/tenants      | Organisations, their roles and access levels                    | No            |
 | Participant Directory     | /admin/participants | Wallets and catalogs the crawler discovers datasets from        | No            |
 | Policy Definitions        | /admin/policies     | ODRL policies per participant, from Art. 53 purpose templates   | No            |
@@ -128,17 +129,27 @@ describes every page below and shows a screenshot of each on mouse-over.
 ### Two secure processing environments
 
 Row-level data is processed only inside a secure processing environment
-(Art. 73); only answers leave it. SPE-1 is the main graph; SPE-2 is a second
-Neo4j with a different set of patients, so a federated question on `/query`
-has two contributors. Both apply the data permit, the ODRL policy, the Art. 71
-opt-out and k = 5 before anything leaves: a count below 5 is shown as `<5`,
-and a contributor with fewer than 5 records withholds the whole answer. Ask
-"How many SPEs can I access?" to see them. SPE-2 runs on the local stack with
-the `federated` compose profile, and on Azure once deployment phase 20 has run
-(ADR-069, proposed); until then the live demo has one, and the static demo has
-one. Attestation is
-labelled "Simulated attestation"; the plan for a real one is
-ADR-068 (in review, #773).
+(Art. 73); only answers leave it. SPE-1 holds AlphaKlinik Berlin's patients,
+SPE-2 Limburg Medical Centre's, each a Neo4j workspace loaded for the permit
+from an encrypted extract, so a federated question on `/query` has two
+contributors. Both apply the data permit, the ODRL policy, the Art. 71 opt-out
+and k = 5 before anything leaves: a count below 5 is shown as `<5`, and a
+contributor with fewer than 5 records withholds the whole answer. Ask "How many
+SPEs can I access?" to see them.
+
+- **Locally** both run with the access body's Trustee and its sample attester
+  (`docker-compose.trustee.yml` with the `federated` profile), labelled
+  "Simulated attestation". The static demo shows the same.
+- **On Azure** both run as ACI confidential container groups, `mvhd-spe-1` and
+  `mvhd-spe-2`, once `scripts/azure/21-aci-confidential-spe.sh` has run. Each
+  proves its own container group on AMD SEV-SNP hardware, labelled "Attested:
+  confidential workload", and the permit's policy hash is checked by hardware.
+- The operator sees the evidence behind each label on `/admin/attestation`
+  (SPE attestation).
+
+The design is
+[ADR-068](ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md);
+where it runs on Azure is ADR-069 (proposed, #774).
 
 ### EUDI Wallet and Klarbefund
 
