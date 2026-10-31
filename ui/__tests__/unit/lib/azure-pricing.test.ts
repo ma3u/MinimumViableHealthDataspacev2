@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
-  aksMonthlyEur,
+  aciGroupMonthlyEur,
   costForApp,
   costForEnvironment,
   formatEur,
@@ -9,7 +9,7 @@ import {
 } from "@/lib/azure-pricing";
 import {
   ACA_APP_SPECS,
-  AKS_SPE_NODE_POOL,
+  ACI_SPE_GROUPS,
   AZURE_PG_FLEX,
 } from "@/app/admin/components/_components/constants";
 
@@ -98,8 +98,9 @@ describe("costForEnvironment", () => {
     expect(cost.totalEur).toBeLessThan(400);
   });
 
-  it("adds nothing for AKS when there is no SPE node", () => {
-    expect(cost.aksEur).toBe(0);
+  it("adds nothing for SPE workspaces when there are none", () => {
+    expect(cost.aciEur).toBe(0);
+    expect(cost.aciGroups).toEqual([]);
   });
 
   it("charges no egress inside the free 100 GiB", () => {
@@ -110,39 +111,42 @@ describe("costForEnvironment", () => {
   });
 });
 
-describe("aksMonthlyEur (the SPE node of ADR-068, #774)", () => {
-  it("bills the confidential node office hours, the network and disk always", () => {
-    const aks = aksMonthlyEur(AKS_SPE_NODE_POOL);
-    // Standard_DC4as_v5 at EUR 0.183 an hour for 281.67 office hours
-    expect(aks.nodeEur).toBeCloseTo(51.55, 1);
-    // Load balancer EUR 0.022 plus two public IPs at EUR 0.0044, 730 hours
-    expect(aks.networkEur).toBeCloseTo(22.48, 1);
-    expect(aks.diskEur).toBeCloseTo(5.28, 1);
-    expect(aks.totalEur).toBeCloseTo(79.3, 0);
+describe("aciGroupMonthlyEur (the SPE workspaces of ADR-069, #774)", () => {
+  it("sizes each group from its containers: neo4j 1.5/4 and spe-ingest 0.5/1", () => {
+    expect(ACI_SPE_GROUPS.map((g) => g.name)).toEqual([
+      "mvhd-spe-1",
+      "mvhd-spe-2",
+    ]);
+    const g = aciGroupMonthlyEur(ACI_SPE_GROUPS[0]);
+    expect(g.cpu).toBe(2);
+    expect(g.memGiB).toBe(5);
   });
 
-  it("bills the node around the clock when it is never stopped", () => {
-    const aks = aksMonthlyEur({ ...AKS_SPE_NODE_POOL, schedule: "always" });
-    expect(aks.nodeEur).toBeCloseTo(133.59, 1);
+  it("bills a group office hours at the confidential ACI rates", () => {
+    const g = aciGroupMonthlyEur(ACI_SPE_GROUPS[0]);
+    // 2 vCPU x EUR 0.051 + 5 GB x EUR 0.0056 = EUR 0.130 an hour
+    expect(g.hourlyEur).toBeCloseTo(0.13, 4);
+    // for 281.67 office hours
+    expect(g.totalEur).toBeCloseTo(36.62, 1);
   });
 
-  it("adds the node to the environment total", () => {
+  it("bills around the clock only when a group is never stopped", () => {
+    const g = aciGroupMonthlyEur({ ...ACI_SPE_GROUPS[0], schedule: "always" });
+    expect(g.totalEur).toBeCloseTo(94.9, 1);
+  });
+
+  it("adds both groups to the environment total", () => {
     const without = costForEnvironment(ACA_APP_SPECS, inputs);
-    const withAks = costForEnvironment(ACA_APP_SPECS, {
+    const withSpes = costForEnvironment(ACA_APP_SPECS, {
       ...inputs,
-      aks: AKS_SPE_NODE_POOL,
+      aciGroups: ACI_SPE_GROUPS,
     });
-    expect(withAks.aksEur).toBeCloseTo(
-      aksMonthlyEur(AKS_SPE_NODE_POOL).totalEur,
+    expect(withSpes.aciGroups).toHaveLength(2);
+    expect(withSpes.aciEur).toBeCloseTo(73.23, 1);
+    expect(withSpes.totalEur - without.totalEur).toBeCloseTo(
+      withSpes.aciEur,
       6,
     );
-    expect(withAks.totalEur - without.totalEur).toBeCloseTo(withAks.aksEur, 6);
-  });
-
-  it("prices an unknown VM size at zero rather than guessing", () => {
-    expect(
-      aksMonthlyEur({ ...AKS_SPE_NODE_POOL, vmSize: "Nope" }).nodeEur,
-    ).toBe(0);
   });
 });
 

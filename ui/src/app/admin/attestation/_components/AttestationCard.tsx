@@ -32,7 +32,7 @@ const VERDICT_ICONS = {
 const SCOPE_TEXT: Record<string, string> = {
   node: "Node level: the confidential VM's encrypted memory and measured boot, not which container ran",
   workload:
-    "Workload level: the workspace's own evidence, which carries the permit's policy hash",
+    "Workload level: this container group's own evidence, whose HOST_DATA is the hash of its policy, the permit's policy hash",
   none: "Nothing in hardware: the evidence comes from the sample attester",
 };
 

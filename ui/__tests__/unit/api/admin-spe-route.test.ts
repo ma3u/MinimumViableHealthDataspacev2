@@ -28,28 +28,31 @@ const PROXY_STATUS: SpeStatusResponse = {
   trustee: {
     url: "https://trustee.example",
     operator: "MedReg DE (access body)",
-    verifier: "az-snp-vtpm",
+    verifier: "snp",
     reachable: true,
   },
   spes: [
     {
       id: "SPE-1",
       holder: "AlphaKlinik Berlin",
-      runsOn: "AKS aks-mvhd-spe, node pool cvm (Standard_DC4as_v5)",
+      runsOn: "ACI confidential container group mvhd-spe-1 (westeurope)",
       teeType: "AMD SEV-SNP",
-      attestationScope: "node",
+      attestationScope: "workload",
       simulated: false,
-      label: "Attested: SEV-SNP node",
+      label: "Attested: confidential workload",
       attestedAt: "2026-10-30T07:00:00Z",
       keyReleasedAt: "2026-10-30T07:00:01Z",
       permitId: "hdab-medreg-pharmaco-2026-001",
       policyHash: "sha256:" + "a".repeat(64),
-      policyCheckedByHardware: false,
+      policyCheckedByHardware: true,
       patients: 108,
       status: "ready",
     },
   ],
-  residualTrust: ["AMD root of trust", "Microsoft paravisor"],
+  residualTrust: [
+    "AMD root of trust",
+    "Microsoft utility VM image (measurement endorsed by Microsoft)",
+  ],
 };
 
 function json(body: unknown, status = 200) {

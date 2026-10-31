@@ -505,7 +505,7 @@ export default function AdminComponentsPage() {
           </>
         )}
 
-        {/* Where the SPEs run: the AKS confidential node and the Trustee
+        {/* Where the SPEs run: the ACI confidential groups and the Trustee
             (ADR-068, #774). Outside the view toggle, so it is fetched once. */}
         <SpeTopologySection />
 

@@ -1,11 +1,7 @@
 "use client";
 
 import { HardDrive, Server, Shield, Workflow } from "lucide-react";
-import type {
-  AcaAppSpec,
-  AksNodePoolSpec,
-  PgFlexSpec,
-} from "@/lib/azure-pricing";
+import type { AcaAppSpec, AciGroupSpec, PgFlexSpec } from "@/lib/azure-pricing";
 import type { Severity } from "./types";
 
 export const REFRESH_INTERVAL = 30_000;
@@ -129,26 +125,35 @@ export const ACA_APP_SPECS: AcaAppSpec[] = [
   // move to the Flexible Server below.
 ];
 
-// ADR-068, #774: the two SPE workspaces (namespaces spe-1 and spe-2) run on
-// one AMD SEV-SNP confidential VM node beside ACA, node-level evidence (A1).
-// The cluster stops off hours with everything else (ADR-053); the workspaces
-// reload from the encrypted extract on every start. One LoadBalancer Service
-// with a public IP per workspace (Bolt with TLS).
-export const AKS_SPE_NODE_POOL: AksNodePoolSpec = {
-  cluster: "aks-mvhd-spe",
-  name: "cvm",
-  vmSize: "Standard_DC4as_v5",
-  nodes: 1,
-  publicIps: 2,
-  schedule: "office",
-};
+// ADR-069, #774: the two SPE workspaces are ACI confidential container
+// groups (sku Confidential, AMD SEV-SNP, per-workload evidence), sizes from
+// scripts/azure/aci/spe-workspace.template.json: neo4j 1.5 vCPU and 4 GB
+// (ADR-056's proportions), the spe-ingest sidecar 0.5 vCPU and 1 GB; the init
+// container spe-unlock runs before them. Both stop off hours (ADR-053,
+// extended by ADR-069) and reload from the sealed extract on every start.
+const SPE_WORKSPACE_CONTAINERS = [
+  { name: "neo4j", cpu: 1.5, memGiB: 4 },
+  { name: "spe-ingest", cpu: 0.5, memGiB: 1 },
+];
 
-export const AKS_SPE_DETAILS = {
-  region: "West Europe",
-  os: "Azure Linux 3",
+export const ACI_SPE_GROUPS: AciGroupSpec[] = [
+  {
+    name: "mvhd-spe-1",
+    containers: SPE_WORKSPACE_CONTAINERS,
+    schedule: "office",
+  },
+  {
+    name: "mvhd-spe-2",
+    containers: SPE_WORKSPACE_CONTAINERS,
+    schedule: "office",
+  },
+];
+
+export const ACI_SPE_DETAILS = {
+  region: "westeurope",
+  sku: "Confidential",
   tee: "AMD SEV-SNP",
-  tier: "Free",
-  namespaces: ["spe-1", "spe-2"],
+  initContainer: "spe-unlock",
 } as const;
 
 // ADR-041: every database lives on this Flexible Server since 2026-10-02.

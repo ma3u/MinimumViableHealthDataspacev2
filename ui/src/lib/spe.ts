@@ -25,7 +25,7 @@ export const SPE_LABEL_WORKLOAD = "Attested: confidential workload";
 export interface SpeTrustee {
   url: string | null;
   operator: string;
-  /** "az-snp-vtpm" on Azure, "sample" locally. */
+  /** "snp" on Azure (ADR-069), "sample" locally. */
   verifier: string;
   reachable: boolean;
 }
@@ -67,7 +67,7 @@ export interface SpeAttestationClaims {
 }
 
 export interface SpeAttestation {
-  /** "az-snp-vtpm" on Azure, "sample" locally. */
+  /** "snp" on Azure (ADR-069), "sample" locally. */
   verifier: string | null;
   result: "pass" | "fail" | null;
   evidenceDigest: string | null;

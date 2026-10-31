@@ -38,29 +38,37 @@ const AZURE: SpeStatusResponse = {
   trustee: {
     url: "https://trustee.example",
     operator: "MedReg DE (access body)",
-    verifier: "az-snp-vtpm",
+    verifier: "snp",
     reachable: true,
   },
+  spes: [0, 1].map((i) => ({
+    ...STATIC_SPE.spes[i],
+    runsOn: `ACI confidential container group mvhd-spe-${i + 1} (westeurope)`,
+    teeType: "AMD SEV-SNP",
+    attestationScope: "workload" as const,
+    simulated: false,
+    label: "Attested: confidential workload",
+    policyCheckedByHardware: true,
+  })),
+  residualTrust: [
+    "AMD root of trust",
+    "Microsoft utility VM image (measurement endorsed by Microsoft)",
+  ],
+};
+
+/** Node-level evidence (ADR-068 A1), still a label the UI must render. */
+const NODE_LEVEL: SpeStatusResponse = {
+  ...AZURE,
   spes: [
     {
-      ...STATIC_SPE.spes[0],
-      runsOn: "AKS aks-mvhd-spe, node pool cvm (Standard_DC4as_v5)",
-      teeType: "AMD SEV-SNP",
+      ...AZURE.spes[0],
+      runsOn: "a confidential VM node",
       attestationScope: "node",
-      simulated: false,
       label: "Attested: SEV-SNP node",
+      policyCheckedByHardware: false,
     },
-    {
-      ...STATIC_SPE.spes[1],
-      runsOn: "AKS aks-mvhd-spe, node pool cvm (Standard_DC4as_v5)",
-      teeType: "AMD SEV-SNP",
-      attestationScope: "workload",
-      simulated: false,
-      label: "Attested: confidential workload",
-      policyCheckedByHardware: true,
-    },
+    AZURE.spes[1],
   ],
-  residualTrust: ["AMD root of trust", "Microsoft paravisor"],
 };
 
 describe("the static fixtures", () => {
@@ -124,17 +132,24 @@ describe("SpeStatusView (dashboard)", () => {
     ).toHaveAttribute("href", "/admin/attestation#attestation-spe-2");
   });
 
-  it("shows the Trustee line and no residual trust line when there is none", () => {
+  it("shows the Trustee line and that nothing is proven locally", () => {
     render(<SpeStatusView data={STATIC_SPE} />);
     const trustee = screen.getByTestId("spe-trustee");
     expect(trustee).toHaveTextContent("MedReg DE (access body)");
     expect(trustee).toHaveTextContent("sample");
     expect(trustee).toHaveTextContent("reachable");
+    expect(screen.getByTestId("spe-residual-trust")).toHaveTextContent(
+      "None proven: no TEE on this machine",
+    );
+  });
+
+  it("shows no residual trust line when there is none", () => {
+    render(<SpeStatusView data={{ ...STATIC_SPE, residualTrust: [] }} />);
     expect(screen.queryByTestId("spe-residual-trust")).toBeNull();
   });
 
   it("shows the attested labels and the residual trust on Azure", () => {
-    render(<SpeStatusView data={AZURE} />);
+    render(<SpeStatusView data={NODE_LEVEL} />);
     expect(
       screen.getByRole("link", { name: "Attested: SEV-SNP node, see ADR-068" }),
     ).toBeInTheDocument();
@@ -144,7 +159,7 @@ describe("SpeStatusView (dashboard)", () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getByTestId("spe-residual-trust")).toHaveTextContent(
-      "AMD root of trust, Microsoft paravisor",
+      "AMD root of trust, Microsoft utility VM image (measurement endorsed by Microsoft)",
     );
   });
 
@@ -214,31 +229,43 @@ describe("SpeStatusCard", () => {
 });
 
 describe("SpeTopologyView (/admin/components)", () => {
-  it("shows the AKS confidential node and marks it in use on Azure", () => {
+  it("shows both ACI confidential container groups, in use on Azure", () => {
     render(<SpeTopologyView data={AZURE} />);
-    const node = screen.getByLabelText("AKS cluster aks-mvhd-spe");
-    expect(node).toHaveTextContent("node pool cvm");
-    expect(node).toHaveTextContent("Standard_DC4as_v5");
-    expect(node).toHaveTextContent("AMD SEV-SNP");
-    expect(node).toHaveTextContent("West Europe");
-    expect(node).toHaveTextContent("$0.208 an hour");
-    expect(node).toHaveTextContent("ADR-053");
-    expect(within(node).getByText("in use")).toBeInTheDocument();
-    expect(screen.getByLabelText("SPE-1 workspace")).toBeInTheDocument();
-    expect(screen.getByLabelText("SPE-2 workspace")).toBeInTheDocument();
+    const groups = screen.getByRole("list", {
+      name: "ACI confidential container groups",
+    });
+    for (const n of [1, 2]) {
+      const group = within(groups).getByLabelText(
+        `ACI container group mvhd-spe-${n}`,
+      );
+      expect(group).toHaveTextContent("sku Confidential");
+      expect(group).toHaveTextContent("AMD SEV-SNP");
+      expect(group).toHaveTextContent("westeurope");
+      expect(group).toHaveTextContent("neo4j 1.5 vCPU 4 GB");
+      expect(group).toHaveTextContent("spe-ingest 0.5 vCPU 1 GB");
+      expect(group).toHaveTextContent("init spe-unlock");
+      expect(group).toHaveTextContent("€0.13 an hour while running");
+      expect(group).toHaveTextContent("ADR-053");
+      expect(within(group).getByText("in use")).toBeInTheDocument();
+      expect(
+        within(group).getByLabelText(`SPE-${n} workspace`),
+      ).toHaveTextContent(`mvhd-spe-${n} (westeurope)`);
+    }
     const trustee = screen.getByLabelText("Trustee mvhd-trustee");
-    expect(trustee).toHaveTextContent("az-snp-vtpm");
+    expect(trustee).toHaveTextContent("snp");
     expect(trustee).toHaveTextContent("reachable");
   });
 
-  it("does not mark the node in use on a stack that does not run there", () => {
+  it("does not mark a group in use on a stack that does not run there", () => {
     render(<SpeTopologyView data={STATIC_SPE} />);
-    expect(screen.getByText("not used by this stack")).toBeInTheDocument();
+    expect(screen.getAllByText("not used by this stack")).toHaveLength(2);
+    expect(screen.getByLabelText("SPE-1 workspace")).toBeInTheDocument();
   });
 
   it("says the Trustee was not reported in the fallback", () => {
     render(<SpeTopologyView data={null} />);
-    expect(screen.getByText("No SPE reported")).toBeInTheDocument();
+    expect(screen.getByText("SPE-1 not reported")).toBeInTheDocument();
+    expect(screen.getByText("SPE-2 not reported")).toBeInTheDocument();
     expect(screen.getByLabelText("Trustee mvhd-trustee")).toHaveTextContent(
       "Not reported by the proxy",
     );
@@ -263,7 +290,7 @@ describe("SpePermitBindingsView (/admin/policies)", () => {
   });
 
   it("marks the hash checked by hardware only for workload evidence (A2)", () => {
-    render(<SpePermitBindingsView data={AZURE} />);
+    render(<SpePermitBindingsView data={NODE_LEVEL} />);
     expect(
       within(
         screen.getByRole("row", { name: "Permit binding for SPE-1" }),

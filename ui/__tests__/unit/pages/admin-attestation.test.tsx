@@ -57,26 +57,27 @@ const AZURE: SpeStatusResponse = {
   trustee: {
     url: "https://trustee.example",
     operator: "MedReg DE (access body)",
-    verifier: "az-snp-vtpm",
+    verifier: "snp",
     reachable: true,
   },
   spes: [
     {
       ...STATIC_SPE.spes[0],
-      runsOn: "AKS aks-mvhd-spe, node pool cvm (Standard_DC4as_v5)",
+      runsOn: "ACI confidential container group mvhd-spe-1 (westeurope)",
       teeType: "AMD SEV-SNP",
-      attestationScope: "node",
+      attestationScope: "workload",
       simulated: false,
-      label: "Attested: SEV-SNP node",
+      label: "Attested: confidential workload",
+      policyCheckedByHardware: true,
       attestation: {
-        verifier: "az-snp-vtpm",
+        verifier: "snp",
         result: "pass",
         evidenceDigest: "sha256:" + "d".repeat(64),
         tokenIssuedAt: "2026-10-30T07:00:00Z",
         tokenExpiresAt: "2026-10-30T07:05:00Z",
         policyId: "spe-node",
         claims: {
-          tee: "az-snp-vtpm",
+          tee: "snp",
           measurement: "e".repeat(96),
           reportedTcb: "bootloader 4, tee 0, snp 22, microcode 213",
           hostData: null,
@@ -89,15 +90,16 @@ const AZURE: SpeStatusResponse = {
     },
     {
       ...STATIC_SPE.spes[1],
-      runsOn: "AKS aks-mvhd-spe, node pool cvm (Standard_DC4as_v5)",
+      runsOn: "ACI confidential container group mvhd-spe-2 (westeurope)",
       teeType: "AMD SEV-SNP",
-      attestationScope: "node",
+      attestationScope: "workload",
       simulated: false,
-      label: "Attested: SEV-SNP node",
+      label: "Attested: confidential workload",
+      policyCheckedByHardware: false,
       keyReleasedAt: null,
       status: "refused",
       attestation: {
-        verifier: "az-snp-vtpm",
+        verifier: "snp",
         result: "pass",
         evidenceDigest: "sha256:" + "1".repeat(64),
         tokenIssuedAt: null,
@@ -109,7 +111,10 @@ const AZURE: SpeStatusResponse = {
       },
     },
   ],
-  residualTrust: ["AMD root of trust", "Microsoft paravisor"],
+  residualTrust: [
+    "AMD root of trust",
+    "Microsoft utility VM image (measurement endorsed by Microsoft)",
+  ],
 };
 
 function answer(spe: unknown, events: SpeAuditEvent[] = STATIC_EVENTS) {
@@ -139,8 +144,14 @@ describe("/admin/attestation", () => {
     const box = screen.getByRole("complementary", {
       name: "What attestation is",
     });
-    expect(box).toHaveTextContent("does not prove which container runs");
+    expect(box).toHaveTextContent("but not which container runs on it");
+    expect(box).toHaveTextContent("On Azure: per workload (A2)");
+    expect(box).toHaveTextContent("ACI confidential container groups");
+    expect(box).toHaveTextContent("inside Microsoft's utility VM");
+    expect(box).toHaveTextContent("Microsoft endorses its measurement");
+    expect(box).toHaveTextContent("operated as if by MedReg DE");
     expect(box).toHaveTextContent("sample attester");
+    expect(box).toHaveTextContent("ADR-069");
     expect(within(box).getByRole("link", { name: /ADR-068/ })).toHaveAttribute(
       "href",
       ADR_068_URL,
@@ -175,7 +186,9 @@ describe("/admin/attestation", () => {
     expect(spe1).toHaveTextContent(
       "No PCRs reported (the sample attester has no vTPM)",
     );
-    expect(spe1).toHaveTextContent("everything: no hardware proof");
+    expect(spe1).toHaveTextContent(
+      "None proven: no TEE on this machine, the evidence comes from Trustee's sample attester",
+    );
   });
 
   it("shows the chain from permit to loaded workspace", async () => {
@@ -219,8 +232,15 @@ describe("/admin/attestation", () => {
       name: "SPE-1 · AlphaKlinik Berlin",
     });
     expect(within(spe1).getByText("Hardware")).toBeInTheDocument();
-    expect(spe1).toHaveTextContent("AMD root of trust, Microsoft paravisor");
-    expect(spe1).toHaveTextContent("not which container ran");
+    expect(spe1).toHaveTextContent(
+      "AMD root of trust, Microsoft utility VM image (measurement endorsed by Microsoft)",
+    );
+    expect(spe1).toHaveTextContent("whose HOST_DATA is the hash of its policy");
+    expect(
+      within(spe1).getByRole("link", {
+        name: "Attested: confidential workload, see ADR-068",
+      }),
+    ).toBeInTheDocument();
     expect(spe1).toHaveTextContent("bootloader 4, tee 0, snp 22");
     expect(spe1).toHaveTextContent("vm-sample-0001");
     const summary = within(spe1).getByText("PCRs (3)");

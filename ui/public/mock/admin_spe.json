@@ -76,5 +76,7 @@
       }
     }
   ],
-  "residualTrust": []
+  "residualTrust": [
+    "None proven: no TEE on this machine, the evidence comes from Trustee's sample attester"
+  ]
 }

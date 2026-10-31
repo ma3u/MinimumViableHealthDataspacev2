@@ -3,7 +3,8 @@ import { ADR_068_URL } from "@/lib/spe";
 
 /**
  * What attestation is and what each label proves, in plain words (#774).
- * The source is ADR-068 decisions 4, 5 and 7.
+ * The sources are ADR-068 (decisions 4, 5 and 7) and ADR-069, which puts both
+ * SPE workspaces on ACI confidential containers.
  */
 export function AttestationExplainer() {
   return (
@@ -28,16 +29,31 @@ export function AttestationExplainer() {
       </p>
       <div>
         <h3 className="font-semibold text-(--text-primary)">
-          Node level (A1, &quot;Attested: SEV-SNP node&quot;)
+          Two scopes of evidence
         </h3>
         <p>
-          Proves that the workspace runs on an AMD SEV-SNP confidential VM on
-          genuine hardware, with encrypted memory and a measured boot. It does
-          not prove which container runs on that node: the permit&apos;s policy
-          hash is recorded, but hardware does not check it. That takes
-          per-workload evidence (A2, &quot;Attested: confidential
-          workload&quot;). On Azure the remaining trust is AMD&apos;s root of
-          trust and Microsoft&apos;s paravisor.
+          Node level (A1, &quot;Attested: SEV-SNP node&quot;) proves a
+          confidential VM with encrypted memory and a measured boot, but not
+          which container runs on it. Workload level (A2, &quot;Attested:
+          confidential workload&quot;) proves the workload itself: its own
+          evidence carries the hash of its policy, so hardware checks the
+          permit&apos;s policy hash.
+        </p>
+      </div>
+      <div>
+        <h3 className="font-semibold text-(--text-primary)">
+          On Azure: per workload (A2)
+        </h3>
+        <p>
+          Both SPE workspaces run as ACI confidential container groups. The
+          evidence proves that this exact container group, with the policy whose
+          SHA-256 is the permit&apos;s policy hash (the report&apos;s
+          HOST_DATA), runs on genuine AMD SEV-SNP hardware, inside
+          Microsoft&apos;s utility VM. It does not prove what that utility VM
+          image does: it is trusted because Microsoft endorses its measurement.
+          And the Trustee runs in the hub&apos;s own subscription, operated as
+          if by MedReg DE; for the claim to hold fully, the access body runs it
+          in a subscription of its own.
         </p>
       </div>
       <div>
@@ -58,7 +74,9 @@ export function AttestationExplainer() {
           className="text-(--accent) hover:underline"
         >
           ADR-068: a sovereign confidential SPE
-        </a>
+        </a>{" "}
+        · ADR-069: two SPE workspaces as ACI confidential containers (proposed,
+        #774)
       </p>
     </aside>
   );
