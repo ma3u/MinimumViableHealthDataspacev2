@@ -147,26 +147,37 @@ digest_of() {  # digest_of <repo> <tag> -> sha256:...
 }
 
 # ── what Trustee holds (read back from its own share) ──────────────────────
-# KBS keeps its resource policy as kbs/resource-policy.rego and each resource
-# under repository/ (LocalFs layout of Trustee v0.22.0, checked 2026-10-31).
+# trustee/kbs-config.toml stores everything with LocalJson: one JSON file per
+# namespace at the top of trustee-data, named after it, {key: base64url}
+# (Trustee v0.22.0, deps/key-value-storage/src/local_json; checked
+# 2026-10-31). The resource policy is key "resource-policy.rego" in `kbs`;
+# an extract key is "default/spe-<n>/extract-key" in `repository`.
+trustee_namespace() {  # trustee_namespace <name> <dest>: false when Trustee has not written it
+  files download --share-name "$SHARE_TRUSTEE_DATA" --path "$1" --dest "$2" -o none 2>/dev/null && [ -s "$2" ]
+}
 trustee_bound_hashes() {  # prints {"spe-1":"sha256:..",..} from the policy Trustee enforces, {} if none
   local f
   f="$(mktemp)"
-  if files download --share-name "$SHARE_TRUSTEE_DATA" --path kbs/resource-policy.rego --dest "$f" -o none 2>/dev/null; then
+  if trustee_namespace kbs "$f"; then
+    jq -r '.["resource-policy.rego"] // empty | gsub("-";"+") | gsub("_";"/") | @base64d' "$f" >"${f}.rego"
     # No match is an answer ({}), not an error, under pipefail.
-    { grep -oE '"spe-[0-9]+": "[0-9a-f]{64}"' "$f" || true; } |
+    { grep -oE '"spe-[0-9]+": "[0-9a-f]{64}"' "${f}.rego" || true; } |
       jq -R -s -c 'split("\n") | map(select(length > 0) | capture("\"(?<k>spe-[0-9]+)\": \"(?<v>[0-9a-f]{64})\"")) |
         map({(.k): ("sha256:" + .v)}) | add // {}'
   else
     echo '{}'
   fi
-  rm -f "$f"
+  rm -f "$f" "${f}.rego"
 }
 trustee_holds_key() {  # trustee_holds_key <n>: true when an extract key for SPE-<n> was put into Trustee
-  local n="$1"
+  local n="$1" f held=1
   files exists --share-name "$SHARE_SPE_EXTRACTS" --path "spe-${n}.enc" --query exists -o tsv 2>/dev/null | grep -q true && return 0
-  files list --share-name "$SHARE_TRUSTEE_DATA" --path repository --query "[].name" -o tsv 2>/dev/null |
-    grep -E "spe-${n}.*extract-key" >/dev/null
+  f="$(mktemp)"
+  if trustee_namespace repository "$f" && jq -e --arg k "default/spe-${n}/extract-key" 'has($k)' "$f" >/dev/null; then
+    held=0
+  fi
+  rm -f "$f"
+  return "$held"
 }
 
 # ── images ──────────────────────────────────────────────────────────────────

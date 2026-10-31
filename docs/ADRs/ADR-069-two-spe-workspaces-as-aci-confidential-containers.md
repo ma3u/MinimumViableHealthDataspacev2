@@ -36,6 +36,10 @@ deployed without a policy refusal and found:
 
 - the SEV-SNP guest device `/dev/sev-guest` (crw-rw-rw-, 10,125) in the
   container; no `/dev/sev`, no TPM;
+- `/sys/devices/platform/sev-guest` (a directory, `driver ->
+../../../bus/platform/drivers/sev-guest`) and `sev-guest` in
+  `/sys/class/misc`: CoCo's `snp-attester` detects its platform by that sysfs
+  node, so it finds the TEE in an ACI group (second probe, same day);
 - `UVM_SECURITY_CONTEXT_DIR=/security-context-<n>` with
   `host-amd-cert-base64` (8900 bytes, the VCEK, ASK and ARK chain from the
   host), `reference-info-base64` (14532 bytes, Microsoft's COSE endorsement
@@ -226,15 +230,18 @@ waits for it.
 - `scripts/azure/20-neo4j-spe2.sh`, `scripts/seed-spe2.py` and the ACA
   SPE-2 app of the draft are gone; their split logic lives in
   `services/spe-loader/src/hub.ts`.
-- Not verified on Azure yet: CoCo's `snp-attester` checks
-  `/sys/devices/platform/sev-guest` before it uses `/dev/sev-guest`; if ACI
-  lacks the sysfs node, kbs-client falls back to the sample attester and every
-  release is refused. Also unproven: init containers and secret volumes in a
+- Trustee stores its state with KBS's `LocalJson` backend, not `LocalFs`:
+  LocalFs writes a key's `/` as `\x2F` in the file name
+  (`repository/default\x2Fspe-1\x2Fextract-key`), which Azure Files over SMB
+  refuses. LocalJson keeps one JSON file per namespace (`repository`, `kbs`,
+  `reference_value`, `attestation_service_policy`, `kbs_protocol_session`),
+  named after it. On a FAT filesystem, which refuses a backslash as SMB does,
+  LocalFs failed to store an extract key and LocalJson stored it, kept it
+  across a restart and released it again (2026-10-31). Every write rewrites
+  its namespace's file; at a handful of keys that is no cost.
+- Not verified on Azure yet: init containers and secret volumes in a
   confidential group with a generated ccePolicy, `NEO4J_AUTH_PATH` under the
-  policy, Trustee's LocalFs store on an SMB share (KBS names a resource file
-  `repository/default\x2Fspe-1\x2Fextract-key`, and Azure Files does not
-  allow `\` in a name: if the write fails there, Trustee's resource store
-  moves to a backend of its own before A2 is used), and `az containerapp job
+  policy, LocalJson on the Azure Files share itself, and `az containerapp job
 start` argument overrides as `--policy` uses them.
 
 ## Alternatives considered
