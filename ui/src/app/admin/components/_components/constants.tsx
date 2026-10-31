@@ -1,7 +1,7 @@
 "use client";
 
 import { HardDrive, Server, Shield, Workflow } from "lucide-react";
-import type { AcaAppSpec, PgFlexSpec } from "@/lib/azure-pricing";
+import type { AcaAppSpec, AciGroupSpec, PgFlexSpec } from "@/lib/azure-pricing";
 import type { Severity } from "./types";
 
 export const REFRESH_INTERVAL = 30_000;
@@ -117,9 +117,44 @@ export const ACA_APP_SPECS: AcaAppSpec[] = [
   { name: "mvhd-keycloak", cpu: 1.0, memGiB: 2.0, schedule: "office" },
   { name: "mvhd-vault", cpu: 0.75, memGiB: 1.5, schedule: "office" },
   { name: "mvhd-claude-federation", cpu: 0.5, memGiB: 1.0, schedule: "office" },
+  // The access body's Trustee (KBS, Attestation Service, RVPS) for the SPEs of
+  // ADR-068, operated as if by MedReg DE (#774). It holds no row-level data,
+  // so it stays on ACA (ADR-012).
+  { name: "mvhd-trustee", cpu: 0.25, memGiB: 0.5, schedule: "office" },
   // mvhd-postgres is retired (ADR-041 phase 4); nothing used it after the
   // move to the Flexible Server below.
 ];
+
+// ADR-069, #774: the two SPE workspaces are ACI confidential container
+// groups (sku Confidential, AMD SEV-SNP, per-workload evidence), sizes from
+// scripts/azure/aci/spe-workspace.template.json: neo4j 1.5 vCPU and 4 GB
+// (ADR-056's proportions), the spe-ingest sidecar 0.5 vCPU and 1 GB; the init
+// container spe-unlock runs before them. Both stop off hours (ADR-053,
+// extended by ADR-069) and reload from the sealed extract on every start.
+const SPE_WORKSPACE_CONTAINERS = [
+  { name: "neo4j", cpu: 1.5, memGiB: 4 },
+  { name: "spe-ingest", cpu: 0.5, memGiB: 1 },
+];
+
+export const ACI_SPE_GROUPS: AciGroupSpec[] = [
+  {
+    name: "mvhd-spe-1",
+    containers: SPE_WORKSPACE_CONTAINERS,
+    schedule: "office",
+  },
+  {
+    name: "mvhd-spe-2",
+    containers: SPE_WORKSPACE_CONTAINERS,
+    schedule: "office",
+  },
+];
+
+export const ACI_SPE_DETAILS = {
+  region: "westeurope",
+  sku: "Confidential",
+  tee: "AMD SEV-SNP",
+  initContainer: "spe-unlock",
+} as const;
 
 // ADR-041: every database lives on this Flexible Server since 2026-10-02.
 // The evening stop stops it last and the morning start starts it first

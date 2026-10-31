@@ -126,7 +126,8 @@ describe("PoliciesPage", () => {
   it("shows loading state", () => {
     mockFetchApi.mockReturnValue(new Promise(() => {}));
     render(<PoliciesPage />);
-    expect(screen.getByText(/Loading/i)).toBeInTheDocument();
+    // The page's own list; the SPE permit section loads beside it (#774).
+    expect(screen.getByText(/Loading policies/i)).toBeInTheDocument();
   });
 
   it("renders policies after loading", async () => {

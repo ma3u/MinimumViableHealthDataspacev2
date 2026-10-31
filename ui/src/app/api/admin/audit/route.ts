@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { runQuery } from "@/lib/neo4j";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
+import { normaliseSpeEvent } from "@/lib/spe-audit";
+import type { SpeAuditEvent } from "@/lib/spe";
 
 export const dynamic = "force-dynamic";
 
@@ -87,7 +89,7 @@ function buildWhere(
  * GET /api/admin/audit — Query the provenance & audit graph from Neo4j.
  *
  * Query params:
- *   type         – "all" | "transfers" | "negotiations" | "credentials" | "accesslogs" | "participants"
+ *   type         – "all" | "transfers" | "negotiations" | "credentials" | "accesslogs" | "participants" | "supervision" | "spe"
  *   limit        – max rows (default 50, max 200)
  *   status       – filter by status string
  *   dateFrom     – ISO date lower bound on timestamp  (YYYY-MM-DD)
@@ -342,6 +344,43 @@ export async function GET(request: NextRequest) {
       ]);
       results.findings = findings.map((r) => r.finding);
       results.informationRequests = informationRequests.map((r) => r.request);
+      return NextResponse.json({ type, limit, filters, ...results });
+    }
+
+    // ── Secure processing (ADR-068, #774) ─────────────────────────────────
+    // Attestations, key releases and refusals, workspaces loaded and
+    // destroyed, Art. 71 opt-outs synced: the proxy appends them to the
+    // ADR-045 chain `spe` as (:AuditEvent) nodes. dateFrom and dateTo apply;
+    // the event type and SPE are filtered on the page.
+    if (type === "spe") {
+      const speParams: Record<string, unknown> = { limit: limitParam };
+      const speConditions = [
+        "(e.eventType STARTS WITH 'spe.' OR e.chain = 'spe')",
+      ];
+      if (filters.dateFrom) {
+        speConditions.push("toString(e.recorded) >= $filterDateFrom");
+        speParams.filterDateFrom = filters.dateFrom;
+      }
+      if (filters.dateTo) {
+        speConditions.push("toString(e.recorded) <= $filterDateTo");
+        speParams.filterDateTo = filters.dateTo + "T23:59:59Z";
+      }
+      const rows = await runQuery<{ event: Row }>(
+        `MATCH (e:AuditEvent)
+         WHERE ${speConditions.join(" AND ")}
+         RETURN e {
+           .id, .eventType, .speId, .permitId, .policyHash, .teeType,
+           .attestationScope, .simulated, .outcome, .resource,
+           .optedOutAdded, .optedOutRemoved, .optedOutInHub,
+           recorded: toString(e.recorded)
+         } AS event
+         ORDER BY e.recorded DESC
+         LIMIT $limit`,
+        speParams,
+      );
+      results.speEvents = rows
+        .map((r) => normaliseSpeEvent(r.event))
+        .filter((e): e is SpeAuditEvent => e !== null);
       return NextResponse.json({ type, limit, filters, ...results });
     }
 

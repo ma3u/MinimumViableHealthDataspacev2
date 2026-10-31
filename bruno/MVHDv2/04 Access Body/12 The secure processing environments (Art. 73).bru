@@ -1,0 +1,30 @@
+meta {
+  name: 12 The secure processing environments (Art. 73)
+  type: http
+  seq: 12
+}
+
+get {
+  url: {{baseUrl}}/api/admin/spe
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.spes: isArray
+}
+
+tests {
+  // The access body runs the Trustee (ADR-068 decision 1); it sees each SPE's
+  // permit and policy hash to check what its Trustee released against.
+  test("each SPE says whether hardware checks its policy hash", function () {
+    for (const spe of res.getBody().spes) {
+      expect(spe.policyCheckedByHardware, spe.id).to.be.a("boolean");
+    }
+  });
+}

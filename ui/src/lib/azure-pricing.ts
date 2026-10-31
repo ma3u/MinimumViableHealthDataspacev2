@@ -45,6 +45,18 @@ const AZURE_FILES_TRANSACTIONS_EUR = 9.2;
 const ACR_BASIC_EUR_PER_DAY = 0.1466;
 const LOG_ANALYTICS_EUR_PER_GB = 2.38;
 
+// ACI confidential container groups for the two SPE workspaces (ADR-069,
+// #774). Azure Retail Prices API, westeurope, Linux, pay as you go, read
+// 2026-10-31: meter "Confidential containers ACI vCPU Duration" EUR 0.051 per
+// vCPU-hour and "Confidential containers ACI Memory Duration" EUR 0.0056 per
+// GB-hour, billed per second while the group runs. A stopped group bills
+// nothing; ACI's public IP and DNS name cost nothing extra.
+export const ACI_CONFIDENTIAL_RATES = {
+  vcpuEurPerHour: 0.051,
+  memEurPerGbHour: 0.0056,
+  readOn: "2026-10-31",
+} as const;
+
 export const AZURE_EGRESS_FREE_GIB = 100;
 const AZURE_EGRESS_EUR_PER_GIB = 0.0704;
 
@@ -79,8 +91,25 @@ export interface PgFlexSpec {
   schedule: AcaSchedule;
 }
 
+export interface AciContainerSpec {
+  name: string;
+  cpu: number; // vCPU request
+  memGiB: number; // memory request, GB as ACI bills it
+}
+
+export interface AciGroupSpec {
+  name: string;
+  // Billed: the requests of the containers that run. The init container runs
+  // before them, within the group's resources, and adds no request.
+  containers: AciContainerSpec[];
+  // "office": `az container stop` in the evening and `start` in the morning
+  // (ADR-053, extended by ADR-069); "always": never stopped.
+  schedule: AcaSchedule;
+}
+
 export interface AzureEnvironmentInputs {
   pgFlex: PgFlexSpec;
+  aciGroups?: AciGroupSpec[];
   fileSharesGib: number; // sum of share quotas, an upper bound on data stored
   logAnalyticsGb: number;
   egressGiB: number;
@@ -96,6 +125,15 @@ export interface AcaAppCost {
   totalEur: number;
 }
 
+export interface AciGroupCost {
+  name: string;
+  schedule: AcaSchedule;
+  cpu: number;
+  memGiB: number;
+  hourlyEur: number;
+  totalEur: number;
+}
+
 export interface AzureEnvironmentCost {
   apps: AcaAppCost[];
   grossComputeEur: number;
@@ -104,6 +142,8 @@ export interface AzureEnvironmentCost {
   pgFlexEur: number;
   pgFlexComputeEur: number;
   pgFlexStorageEur: number;
+  aciEur: number;
+  aciGroups: AciGroupCost[];
   filesEur: number;
   registryEur: number;
   logsEur: number;
@@ -148,10 +188,29 @@ export function pgFlexMonthlyEur(pg: PgFlexSpec) {
   return { computeEur, storageEur, totalEur: computeEur + storageEur };
 }
 
+export function aciGroupMonthlyEur(group: AciGroupSpec): AciGroupCost {
+  const cpu = group.containers.reduce((sum, c) => sum + c.cpu, 0);
+  const memGiB = group.containers.reduce((sum, c) => sum + c.memGiB, 0);
+  const hourlyEur =
+    cpu * ACI_CONFIDENTIAL_RATES.vcpuEurPerHour +
+    memGiB * ACI_CONFIDENTIAL_RATES.memEurPerGbHour;
+  const hours =
+    group.schedule === "office" ? OFFICE_HOURS_PER_MONTH : HOURS_PER_MONTH;
+  return {
+    name: group.name,
+    schedule: group.schedule,
+    cpu,
+    memGiB,
+    hourlyEur,
+    totalEur: hourlyEur * hours,
+  };
+}
+
 /**
  * Monthly cost of the environment: Container Apps on the off-hours schedule
- * with the subscription's free grant taken off, plus the managed Postgres and
- * the services every deployment pays for.
+ * with the subscription's free grant taken off, plus the managed Postgres, the
+ * ACI confidential SPE workspaces when there are any, and the services every
+ * deployment pays for.
  */
 export function costForEnvironment(
   specs: AcaAppSpec[],
@@ -169,6 +228,8 @@ export function costForEnvironment(
   const computeEur = Math.max(0, grossComputeEur - freeCreditEur);
 
   const pg = pgFlexMonthlyEur(inputs.pgFlex);
+  const aciGroups = (inputs.aciGroups ?? []).map(aciGroupMonthlyEur);
+  const aciEur = aciGroups.reduce((sum, g) => sum + g.totalEur, 0);
   const filesEur =
     inputs.fileSharesGib * AZURE_FILES_EUR_PER_GB +
     AZURE_FILES_TRANSACTIONS_EUR;
@@ -186,12 +247,20 @@ export function costForEnvironment(
     pgFlexEur: pg.totalEur,
     pgFlexComputeEur: pg.computeEur,
     pgFlexStorageEur: pg.storageEur,
+    aciEur,
+    aciGroups,
     filesEur,
     registryEur,
     logsEur,
     egressEur,
     totalEur:
-      computeEur + pg.totalEur + filesEur + registryEur + logsEur + egressEur,
+      computeEur +
+      pg.totalEur +
+      aciEur +
+      filesEur +
+      registryEur +
+      logsEur +
+      egressEur,
   };
 }
 

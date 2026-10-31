@@ -33,6 +33,12 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+// The SPE topology fetches /api/admin/spe on its own; these tests count the
+// page's component calls. It has its own tests (#774).
+vi.mock("@/app/admin/components/_components/SpeTopologySection", () => ({
+  SpeTopologySection: () => null,
+}));
+
 import AdminComponentsPage from "@/app/admin/components/page";
 
 function mockResponse(data: unknown, ok = true) {

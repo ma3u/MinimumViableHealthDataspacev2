@@ -280,6 +280,97 @@ describe("/api/admin/audit GET", () => {
     });
   });
 
+  it("returns the secure processing events for type=spe (#774)", async () => {
+    mockRunQuery.mockResolvedValueOnce([
+      {
+        event: {
+          id: "e-2",
+          eventType: "spe.key_release",
+          speId: "SPE-1",
+          permitId: "hdab-medreg-pharmaco-2026-001",
+          policyHash: "sha256:abc",
+          teeType: "none",
+          attestationScope: "none",
+          simulated: true,
+          outcome: "success",
+          resource: null,
+          recorded: "2026-10-30T07:02:12Z",
+        },
+      },
+      // The same fields as FHIR AuditEvent details, the other way the proxy
+      // may record them on the chain.
+      {
+        event: {
+          id: "e-1",
+          outcome: "refused",
+          recorded: "2026-10-30T07:01:00Z",
+          resource: JSON.stringify({
+            resourceType: "AuditEvent",
+            subtype: [{ code: "spe.key_refused" }],
+            entity: [
+              {
+                detail: [
+                  { type: "speId", valueString: "SPE-2" },
+                  { type: "permitId", valueString: "hdab-irs-lmc-2026-001" },
+                  { type: "policyHash", valueString: "sha256:def" },
+                  { type: "teeType", valueString: "AMD SEV-SNP" },
+                  { type: "attestationScope", valueString: "node" },
+                  { type: "simulated", valueString: "false" },
+                ],
+              },
+            ],
+          }),
+        },
+      },
+      // A query audit record on the same label is not an SPE event.
+      { event: { id: "q-1", resource: "{}", recorded: "2026-10-30T07:00Z" } },
+    ]);
+
+    const res = await AuditGET(
+      new NextRequest(
+        "http://localhost/api/admin/audit?type=spe&dateFrom=2026-10-01",
+      ),
+    );
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.speEvents).toEqual([
+      {
+        id: "e-2",
+        eventType: "spe.key_release",
+        recorded: "2026-10-30T07:02:12Z",
+        speId: "SPE-1",
+        permitId: "hdab-medreg-pharmaco-2026-001",
+        policyHash: "sha256:abc",
+        teeType: "none",
+        attestationScope: "none",
+        simulated: true,
+        outcome: "success",
+        optOut: null,
+      },
+      {
+        id: "e-1",
+        eventType: "spe.key_refused",
+        recorded: "2026-10-30T07:01:00Z",
+        speId: "SPE-2",
+        permitId: "hdab-irs-lmc-2026-001",
+        policyHash: "sha256:def",
+        teeType: "AMD SEV-SNP",
+        attestationScope: "node",
+        simulated: false,
+        outcome: "refused",
+        optOut: null,
+      },
+    ]);
+    const [cypher, params] = mockRunQuery.mock.calls[0];
+    expect(cypher).toContain("MATCH (e:AuditEvent)");
+    expect(cypher).toContain("e.eventType STARTS WITH 'spe.'");
+    expect(cypher).toContain(
+      ".optedOutAdded, .optedOutRemoved, .optedOutInHub",
+    );
+    expect(params).toMatchObject({ filterDateFrom: "2026-10-01" });
+    expect(mockRunQuery).toHaveBeenCalledTimes(1);
+  });
+
   it("never touches Neo4j's HTTP port", async () => {
     mockRunQuery.mockResolvedValue([]);
 

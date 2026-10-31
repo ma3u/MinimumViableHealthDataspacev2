@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  aciGroupMonthlyEur,
   costForApp,
   costForEnvironment,
   formatEur,
@@ -8,6 +9,7 @@ import {
 } from "@/lib/azure-pricing";
 import {
   ACA_APP_SPECS,
+  ACI_SPE_GROUPS,
   AZURE_PG_FLEX,
 } from "@/app/admin/components/_components/constants";
 
@@ -86,9 +88,9 @@ describe("costForEnvironment", () => {
   });
 
   it("keeps the live stack in the range the schedule predicts", () => {
-    // 20 apps, all stopped off hours (ADR-053): about €294 compute and
-    // €362 in all
-    expect(cost.apps).toHaveLength(20);
+    // 21 apps with the SPE Trustee (#774), all stopped off hours (ADR-053):
+    // about €302 compute and €370 in all
+    expect(cost.apps).toHaveLength(21);
     expect(cost.apps.every((a) => a.idleEur === 0)).toBe(true);
     expect(cost.computeEur).toBeGreaterThan(260);
     expect(cost.computeEur).toBeLessThan(330);
@@ -96,11 +98,55 @@ describe("costForEnvironment", () => {
     expect(cost.totalEur).toBeLessThan(400);
   });
 
+  it("adds nothing for SPE workspaces when there are none", () => {
+    expect(cost.aciEur).toBe(0);
+    expect(cost.aciGroups).toEqual([]);
+  });
+
   it("charges no egress inside the free 100 GiB", () => {
     expect(cost.egressEur).toBe(0);
     expect(
       costForEnvironment([], { ...inputs, egressGiB: 110 }).egressEur,
     ).toBeCloseTo(0.704, 3);
+  });
+});
+
+describe("aciGroupMonthlyEur (the SPE workspaces of ADR-069, #774)", () => {
+  it("sizes each group from its containers: neo4j 1.5/4 and spe-ingest 0.5/1", () => {
+    expect(ACI_SPE_GROUPS.map((g) => g.name)).toEqual([
+      "mvhd-spe-1",
+      "mvhd-spe-2",
+    ]);
+    const g = aciGroupMonthlyEur(ACI_SPE_GROUPS[0]);
+    expect(g.cpu).toBe(2);
+    expect(g.memGiB).toBe(5);
+  });
+
+  it("bills a group office hours at the confidential ACI rates", () => {
+    const g = aciGroupMonthlyEur(ACI_SPE_GROUPS[0]);
+    // 2 vCPU x EUR 0.051 + 5 GB x EUR 0.0056 = EUR 0.130 an hour
+    expect(g.hourlyEur).toBeCloseTo(0.13, 4);
+    // for 281.67 office hours
+    expect(g.totalEur).toBeCloseTo(36.62, 1);
+  });
+
+  it("bills around the clock only when a group is never stopped", () => {
+    const g = aciGroupMonthlyEur({ ...ACI_SPE_GROUPS[0], schedule: "always" });
+    expect(g.totalEur).toBeCloseTo(94.9, 1);
+  });
+
+  it("adds both groups to the environment total", () => {
+    const without = costForEnvironment(ACA_APP_SPECS, inputs);
+    const withSpes = costForEnvironment(ACA_APP_SPECS, {
+      ...inputs,
+      aciGroups: ACI_SPE_GROUPS,
+    });
+    expect(withSpes.aciGroups).toHaveLength(2);
+    expect(withSpes.aciEur).toBeCloseTo(73.23, 1);
+    expect(withSpes.totalEur - without.totalEur).toBeCloseTo(
+      withSpes.aciEur,
+      6,
+    );
   });
 });
 

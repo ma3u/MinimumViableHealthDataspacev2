@@ -20,6 +20,7 @@ import {
   X,
 } from "lucide-react";
 import OdrlJsonHighlighter from "@/components/OdrlJsonHighlighter";
+import { SpePermitBindings } from "@/components/spe/SpePermitBindings";
 
 /* ── Types ────────────────────────────────────────────────────── */
 
@@ -1266,6 +1267,9 @@ export default function AdminPoliciesPage() {
             })}
           </div>
         )}
+
+        {/* ── Data permits in secure processing (ADR-068, #774) ────── */}
+        <SpePermitBindings />
 
         {/* ── Edit Modal ──────────────────────────────────────────── */}
         {editingPolicy && (

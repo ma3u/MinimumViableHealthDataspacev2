@@ -116,6 +116,17 @@ describe("middleware — role-based authorization", () => {
       const res = await invoke("/admin/policies", { roles: [] });
       expect(res.headers.get("location")).toContain("/auth/unauthorized");
     });
+
+    it("gates /admin/attestation like /admin (#774)", async () => {
+      const hdab = await invoke("/admin/attestation", {
+        roles: ["HDAB_AUTHORITY"],
+      });
+      expect(hdab.headers.get("location")).toContain("/auth/unauthorized");
+      const admin = await invoke("/admin/attestation", {
+        roles: ["EDC_ADMIN"],
+      });
+      expect(admin.headers.get("location")).toBeNull();
+    });
   });
 
   describe("/compliance requires HDAB_AUTHORITY or EDC_ADMIN", () => {

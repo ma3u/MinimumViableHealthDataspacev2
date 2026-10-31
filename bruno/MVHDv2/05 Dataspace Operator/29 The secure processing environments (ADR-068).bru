@@ -1,0 +1,37 @@
+meta {
+  name: 29 The secure processing environments (ADR-068)
+  type: http
+  seq: 29
+}
+
+get {
+  url: {{baseUrl}}/api/admin/spe
+  body: none
+  auth: inherit
+}
+
+assert {
+  res.status: eq 200
+  res.body.environment: isDefined
+  res.body.spes: isArray
+}
+
+tests {
+  // #774: SPE-1 is always there; the label never claims more than the proxy
+  // reported, and a simulated SPE is never labelled attested.
+  test("SPE-1 is listed", function () {
+    const ids = res.getBody().spes.map((s) => s.id);
+    expect(ids).to.include("SPE-1");
+  });
+  test("every SPE carries one of the three ADR-068 labels", function () {
+    const labels = [
+      "Simulated attestation",
+      "Attested: SEV-SNP node",
+      "Attested: confidential workload",
+    ];
+    for (const spe of res.getBody().spes) {
+      expect(labels, spe.id).to.include(spe.label);
+      if (spe.simulated) expect(spe.label, spe.id).to.equal("Simulated attestation");
+    }
+  });
+}

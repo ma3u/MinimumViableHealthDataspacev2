@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ACI_CONFIDENTIAL_RATES,
   AZURE_BILLED,
   AZURE_EGRESS_FREE_GIB,
   costForEnvironment,
@@ -9,9 +10,19 @@ import {
   type AcaAppSpec,
 } from "@/lib/azure-pricing";
 import { useMemo } from "react";
-import { BarChart2, Clock, Database, HardDrive, Network } from "lucide-react";
+import {
+  BarChart2,
+  Clock,
+  Cpu,
+  Database,
+  HardDrive,
+  Network,
+} from "lucide-react";
+import { ADR_068_URL } from "@/lib/spe";
 import {
   ACA_APP_SPECS,
+  ACI_SPE_DETAILS,
+  ACI_SPE_GROUPS,
   AZURE_PG_FLEX,
   COMPUTED_STORAGE_GIB,
   EGRESS_INFRA_BASELINE_GB,
@@ -69,6 +80,7 @@ export function AzureCostEstimatorPanel({
     () =>
       costForEnvironment(specs, {
         pgFlex: AZURE_PG_FLEX,
+        aciGroups: ACI_SPE_GROUPS,
         fileSharesGib: storageGiB,
         logAnalyticsGb: LOG_ANALYTICS_GB_PER_MONTH,
         egressGiB,
@@ -219,9 +231,68 @@ export function AzureCostEstimatorPanel({
         </div>
       </div>
 
+      {/* The SPE workspaces as ACI confidential container groups (ADR-069) */}
+      <div>
+        <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
+          Secure processing environments (ACI confidential containers)
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          {cost.aciGroups.map((g) => {
+            const spec = ACI_SPE_GROUPS.find((x) => x.name === g.name);
+            return (
+              <section
+                key={g.name}
+                aria-label={`${g.name} cost`}
+                className="border border-(--border) rounded-lg p-3 bg-(--surface)/40"
+              >
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="flex items-center gap-1 text-(--text-primary) font-mono">
+                    <Cpu size={11} aria-hidden="true" />
+                    {g.name}
+                  </span>
+                  <span className="font-mono text-(--success-text)">
+                    {formatEur(g.totalEur)}/mo
+                  </span>
+                </div>
+                <p className="text-[10px] text-(--text-secondary) mt-1 font-mono">
+                  {spec?.containers
+                    .map((c) => `${c.name} ${c.cpu} vCPU ${c.memGiB} GB`)
+                    .join(" + ")}{" "}
+                  = {g.cpu} vCPU, {g.memGiB} GB
+                </p>
+                <p className="text-[10px] text-(--text-secondary) mt-1">
+                  {ACI_SPE_DETAILS.tee}, sku {ACI_SPE_DETAILS.sku},{" "}
+                  {ACI_SPE_DETAILS.region} · {formatEur(g.hourlyEur)} an hour,
+                  billed only while running ·{" "}
+                  {g.schedule === "always"
+                    ? "24×7"
+                    : "stopped off hours (ADR-053)"}
+                </p>
+              </section>
+            );
+          })}
+        </div>
+        <p className="text-[10px] text-(--text-secondary) mt-2">
+          Meters &quot;Confidential containers ACI vCPU Duration&quot; €
+          {ACI_CONFIDENTIAL_RATES.vcpuEurPerHour} per vCPU-hour and
+          &quot;Confidential containers ACI Memory Duration&quot; €
+          {ACI_CONFIDENTIAL_RATES.memEurPerGbHour} per GB-hour, westeurope,
+          Azure retail price list read {ACI_CONFIDENTIAL_RATES.readOn} · ADR-069
+          (proposed, #774) ·{" "}
+          <a
+            href={ADR_068_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-(--accent) hover:underline"
+          >
+            ADR-068
+          </a>
+        </p>
+      </div>
+
       {/* Totals */}
       <div className="border border-(--border) rounded-xl p-4 bg-(--surface)/60">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-center">
           <div>
             <div className="text-[10px] text-(--text-secondary) mb-1">
               Compute (net)
@@ -236,6 +307,14 @@ export function AzureCostEstimatorPanel({
             </div>
             <div className="font-mono text-lg font-semibold text-(--text-primary)">
               {formatEur(cost.pgFlexEur)}
+            </div>
+          </div>
+          <div>
+            <div className="text-[10px] text-(--text-secondary) mb-1">
+              SPE workspaces
+            </div>
+            <div className="font-mono text-lg font-semibold text-(--text-primary)">
+              {formatEur(cost.aciEur)}
             </div>
           </div>
           <div>
@@ -264,9 +343,10 @@ export function AzureCostEstimatorPanel({
         </div>
         <p className="text-[9px] text-(--text-secondary) mt-3 text-center">
           EUR, as billed · Container Apps rates from the subscription&apos;s
-          bill, the rest from the Azure retail price list (2026-10-03) ·
-          everything stops outside Mon-Fri 07-20 (ADR-053) · Azure OpenAI, Key
-          Vault and Communication Services are usage based and near €0
+          bill, the rest from the Azure retail price list (2026-10-03, the ACI
+          confidential groups 2026-10-31) · everything stops outside Mon-Fri
+          07-20 (ADR-053) · Azure OpenAI, Key Vault and Communication Services
+          are usage based and near €0
         </p>
       </div>
     </div>

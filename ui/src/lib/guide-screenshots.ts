@@ -43,6 +43,7 @@ export const GUIDE_SCREENS: { href: string; persona: string | null }[] = [
   { href: "/data/transfer", persona: "researcher" },
   { href: "/admin", persona: "edcadmin" },
   { href: "/admin/components", persona: "edcadmin" },
+  { href: "/admin/attestation", persona: "edcadmin" },
   { href: "/admin/tenants", persona: "edcadmin" },
   { href: "/admin/participants", persona: "edcadmin" },
   { href: "/admin/policies", persona: "edcadmin" },

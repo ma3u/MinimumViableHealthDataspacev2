@@ -10,6 +10,7 @@ import { CostEstimatorPanel } from "./_components/CostEstimatorPanel";
 import { CriticalBanner } from "./_components/CriticalBanner";
 import { ParticipantTopologySection } from "./_components/ParticipantTopologySection";
 import { ResourceSummary } from "./_components/ResourceSummary";
+import { SpeTopologySection } from "./_components/SpeTopologySection";
 import { TopoComponentCard } from "./_components/TopoComponentCard";
 import {
   LAYER_META,
@@ -503,6 +504,10 @@ export default function AdminComponentsPage() {
               )}
           </>
         )}
+
+        {/* Where the SPEs run: the ACI confidential groups and the Trustee
+            (ADR-068, #774). Outside the view toggle, so it is fetched once. */}
+        <SpeTopologySection />
 
         {/* Cost estimates. On Azure, the running deployment first and the
             static STACKIT alternative under it, for comparison; elsewhere

@@ -34,6 +34,7 @@ import {
   Wallet,
   Image as ImageIcon,
   X,
+  Fingerprint,
 } from "lucide-react";
 
 const LIVE_URL = "https://ma3u.github.io/MinimumViableHealthDataspacev2";
@@ -1170,15 +1171,15 @@ export default function UserGuidePage() {
             </h3>
             <p className="text-(--text-secondary) text-sm mb-2">
               Row-level data is processed only inside a secure processing
-              environment (EHDS Art. 73); only answers leave it. SPE-1 is the
-              main graph. SPE-2 is a second Neo4j holding a different set of
-              patients, so a federated question has two contributors. Both apply
-              the same rules before anything leaves: the data permit, the ODRL
-              policy, the Art. 71 opt-out (persons who opted out are never
-              counted) and k = 5, including the rule that a contributor with
-              fewer than 5 records withholds the whole answer, since a missing
-              contributor would identify people. Every question is recorded on
-              the audit chain.
+              environment (EHDS Art. 73); only answers leave it. SPE-1 holds
+              AlphaKlinik Berlin&apos;s patients, SPE-2 Limburg Medical
+              Centre&apos;s, each a Neo4j workspace loaded for the permit, so a
+              federated question has two contributors. Both apply the same rules
+              before anything leaves: the data permit, the ODRL policy, the Art.
+              71 opt-out (persons who opted out are never counted) and k = 5,
+              including the rule that a contributor with fewer than 5 records
+              withholds the whole answer, since a missing contributor would
+              identify people. Every question is recorded on the audit chain.
             </p>
             <ul className="text-(--text-secondary) text-sm mb-2 list-disc pl-5 space-y-1">
               <li>
@@ -1186,16 +1187,38 @@ export default function UserGuidePage() {
                 see the environments and how many patients each holds.
               </li>
               <li>
-                SPE-2 runs on the local stack with the <code>federated</code>{" "}
-                compose profile, and on Azure once deployment phase 20 has run
-                (ADR-069, proposed). Until then the live demo has one SPE; the
-                static demo has one.
+                Locally both run as workspaces loaded per permit from an
+                encrypted extract (<code>docker-compose.trustee.yml</code> with
+                the <code>federated</code> profile), with the access body&apos;s
+                Trustee and its sample attester: labelled &quot;Simulated
+                attestation&quot;. The static demo shows the same.
               </li>
               <li>
-                The attestation fields on an SPE session are labelled
-                &quot;Simulated attestation&quot;. The plan for a real one on
-                confidential hardware, with the access body checking it, is
-                ADR-068.
+                On Azure both run as ACI confidential container groups,{" "}
+                <code>mvhd-spe-1</code> and <code>mvhd-spe-2</code>, once{" "}
+                <code>scripts/azure/21-aci-confidential-spe.sh</code> has run.
+                Each proves its own container group on AMD SEV-SNP hardware:
+                labelled &quot;Attested: confidential workload&quot;, and the
+                permit&apos;s policy hash is checked by hardware.
+              </li>
+              <li>
+                The operator sees the evidence behind each label on{" "}
+                <Link
+                  href="/admin/attestation"
+                  className="text-indigo-700 dark:text-indigo-400 hover:underline"
+                >
+                  SPE attestation
+                </Link>
+                . The design is{" "}
+                <a
+                  href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-indigo-700 dark:text-indigo-400 hover:underline"
+                >
+                  ADR-068
+                </a>
+                ; where it runs on Azure is ADR-069 (proposed, #774).
               </li>
             </ul>
           </div>
@@ -1647,6 +1670,26 @@ export default function UserGuidePage() {
               Example: The operator checks that the Control Plane (port 11003),
               the FHIR Data Plane (port 11002) and the Identity Hub (port 11005)
               all report healthy on the local stack.
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/admin/attestation"
+            title="SPE attestation"
+            icon={Fingerprint}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              The evidence behind each secure processing environment&apos;s
+              label, for the operator (EDC_ADMIN): the verdict, who verified it
+              (the access body&apos;s Trustee), what was proven and what was
+              not, the measurements, and the chain from the data permit to its
+              policy hash, the Trustee&apos;s key release and the loaded
+              workspace, with the SPE&apos;s last audit events. Each SPE on the
+              operator dashboard links to it.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: the operator checks that SPE-2 of Limburg Medical Centre
+              got its key for MedReg DE&apos;s permit, and reads why an earlier
+              attempt was refused.
             </p>
           </FeatureCard>
           <FeatureCard

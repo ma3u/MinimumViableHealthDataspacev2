@@ -1791,6 +1791,8 @@ paths:
                         credentials,
                         accesslogs,
                         participants,
+                        supervision,
+                        spe,
                       ]
                   limit: { type: integer }
                   filters: { type: object }
@@ -1811,6 +1813,157 @@ paths:
                       items: { $ref: "#/components/schemas/AuditEntry" },
                     }
                   accesslogs: { type: array, items: { type: object } }
+                  speEvents:
+                    description: >
+                      With `type=spe`: attestations, key releases and
+                      refusals, workspaces loaded and destroyed, from the
+                      ADR-045 chain (ADR-068, #774).
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        eventType:
+                          type: string
+                          enum:
+                            [
+                              spe.attestation,
+                              spe.key_release,
+                              spe.key_refused,
+                              spe.workspace_loaded,
+                              spe.workspace_destroyed,
+                              spe.optout_synced,
+                            ]
+                        recorded: { type: string, nullable: true }
+                        speId: { type: string, nullable: true }
+                        permitId: { type: string, nullable: true }
+                        policyHash: { type: string, nullable: true }
+                        teeType: { type: string, nullable: true }
+                        attestationScope: { type: string, nullable: true }
+                        simulated: { type: boolean, nullable: true }
+                        outcome: { type: string, nullable: true }
+                        optOut:
+                          description: >
+                            spe.optout_synced only: the hub's Art. 71
+                            opt-out labels pushed into the workspace, counts
+                            only, never patient ids.
+                          type: object
+                          nullable: true
+                          properties:
+                            added: { type: integer, nullable: true }
+                            removed: { type: integer, nullable: true }
+                            inHub: { type: integer, nullable: true }
+        "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/admin/spe:
+    get:
+      tags: [Admin]
+      summary: The confidential SPEs of ADR-068 (operator and access body)
+      description: >
+        Passes the query proxy's `/spe/status` through (#774). When the proxy
+        has none yet or cannot be reached, answers without asking the proxy
+        anything else, with `fallback.reason`: SPE-1, and SPE-2 only when the
+        UI's `NEO4J_SPE2_CONFIGURED` is "true" or "1", every SPE labelled
+        "Simulated attestation", status "unreachable", nothing attested and
+        `attestation: null`.
+      responses:
+        "200":
+          description: Where each SPE runs, what proves it, and its permit
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [environment, trustee, spes, residualTrust]
+                properties:
+                  environment: { type: string, enum: [azure, local, static] }
+                  trustee:
+                    type: object
+                    nullable: true
+                    properties:
+                      url: { type: string, nullable: true }
+                      operator: { type: string }
+                      verifier: { type: string }
+                      reachable: { type: boolean }
+                  spes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        holder: { type: string }
+                        runsOn: { type: string }
+                        teeType: { type: string }
+                        attestationScope:
+                          { type: string, enum: [node, workload, none] }
+                        simulated: { type: boolean }
+                        label:
+                          type: string
+                          enum:
+                            [
+                              "Simulated attestation",
+                              "Attested: SEV-SNP node",
+                              "Attested: confidential workload",
+                            ]
+                        attestedAt:
+                          { type: string, format: date-time, nullable: true }
+                        keyReleasedAt:
+                          { type: string, format: date-time, nullable: true }
+                        permitId: { type: string, nullable: true }
+                        policyHash: { type: string, nullable: true }
+                        policyCheckedByHardware: { type: boolean }
+                        patients: { type: integer, nullable: true }
+                        status:
+                          type: string
+                          enum: [ready, loading, refused, unreachable]
+                        attestation:
+                          description: >
+                            The evidence the Trustee verified; null in the
+                            fallback and before the first attestation.
+                          type: object
+                          nullable: true
+                          properties:
+                            verifier: { type: string, nullable: true }
+                            result:
+                              {
+                                type: string,
+                                enum: [pass, fail],
+                                nullable: true,
+                              }
+                            evidenceDigest: { type: string, nullable: true }
+                            tokenIssuedAt:
+                              {
+                                type: string,
+                                format: date-time,
+                                nullable: true,
+                              }
+                            tokenExpiresAt:
+                              {
+                                type: string,
+                                format: date-time,
+                                nullable: true,
+                              }
+                            policyId: { type: string, nullable: true }
+                            claims:
+                              type: object
+                              nullable: true
+                              properties:
+                                tee: { type: string, nullable: true }
+                                measurement: { type: string, nullable: true }
+                                reportedTcb: { type: string, nullable: true }
+                                hostData: { type: string, nullable: true }
+                                reportData: { type: string, nullable: true }
+                                pcrs:
+                                  type: object
+                                  nullable: true
+                                  additionalProperties: { type: string }
+                                vmId: { type: string, nullable: true }
+                            refusalReason: { type: string, nullable: true }
+                  residualTrust: { type: array, items: { type: string } }
+                  fallback:
+                    type: object
+                    properties:
+                      reason: { type: string }
+        "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
 
   /api/admin/components:

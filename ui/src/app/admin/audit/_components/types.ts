@@ -1,3 +1,5 @@
+import type { SpeAuditEvent } from "@/lib/spe";
+
 // ── Types ──────────────────────────────────────────────────────────────────────
 
 export type AuditType =
@@ -6,7 +8,8 @@ export type AuditType =
   | "negotiations"
   | "credentials"
   | "accesslogs"
-  | "supervision";
+  | "supervision"
+  | "spe";
 
 /** A finding of non-compliance (Art. 63) as the audit view lists it. */
 interface FindingRow {
@@ -198,6 +201,8 @@ export interface AuditData {
   accesslogs?: AccessLogRow[];
   findings?: FindingRow[];
   informationRequests?: InformationRequestRow[];
+  /** Attestations, key releases and workspaces (ADR-068, #774). */
+  speEvents?: SpeAuditEvent[];
   summary?: {
     nodeCounts: Record<string, number>;
     accessByConsumer?: {
