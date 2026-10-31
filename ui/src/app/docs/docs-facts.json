@@ -1235,20 +1235,20 @@
   },
   "lastUpdated": {
     "/docs": "2026-10-28",
-    "/docs/user-guide": "2026-10-30",
+    "/docs/user-guide": "2026-10-31",
     "/docs/developer": "2026-10-28",
     "/docs/developer/quality-gates": "2026-10-28",
     "/docs/developer/api": "2026-10-28",
     "/docs/developer/reference": "2026-10-28",
     "/docs/architecture": "2026-10-30",
-    "/docs/security": "2026-10-29",
-    "/docs/security/[slug]": "2026-10-29",
-    "/docs/klarbefund": "2026-10-29",
-    "/docs/ehds": "2026-10-29",
-    "/docs/ehds/[slug]": "2026-10-29",
+    "/docs/security": "2026-10-31",
+    "/docs/security/[slug]": "2026-10-31",
+    "/docs/klarbefund": "2026-10-31",
+    "/docs/ehds": "2026-10-31",
+    "/docs/ehds/[slug]": "2026-10-31",
     "/docs/roadmap": "2026-10-28",
-    "/docs/operations": "2026-10-29",
-    "/docs/operations/[slug]": "2026-10-29",
-    "/docs/klarbefund/[slug]": "2026-10-29"
+    "/docs/operations": "2026-10-31",
+    "/docs/operations/[slug]": "2026-10-31",
+    "/docs/klarbefund/[slug]": "2026-10-31"
   }
 }
