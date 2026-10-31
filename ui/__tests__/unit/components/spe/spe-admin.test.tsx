@@ -87,14 +87,24 @@ describe("the static fixtures", () => {
     }
   });
 
-  it("admin_audit.json carries all five SPE event types, all simulated", () => {
+  it("admin_audit.json carries all six SPE event types, all simulated", () => {
     const types = new Set(STATIC_AUDIT.speEvents.map((e) => e.eventType));
     expect([...types].sort()).toEqual([
       "spe.attestation",
       "spe.key_refused",
       "spe.key_release",
+      "spe.optout_synced",
       "spe.workspace_destroyed",
       "spe.workspace_loaded",
+    ]);
+    // The opt-out sync carries counts only, never a patient id.
+    const sync = STATIC_AUDIT.speEvents.find(
+      (e) => e.eventType === "spe.optout_synced",
+    );
+    expect(Object.keys(sync?.optOut ?? {}).sort()).toEqual([
+      "added",
+      "inHub",
+      "removed",
     ]);
     expect(STATIC_AUDIT.speEvents.every((e) => e.simulated === true)).toBe(
       true,
@@ -324,12 +334,18 @@ describe("SpePermitBindingsView (/admin/policies)", () => {
 describe("SpeAuditSection (/admin/audit)", () => {
   it("lists the events with readable labels and the evidence summary", () => {
     render(<SpeAuditSection events={STATIC_AUDIT.speEvents} />);
-    expect(screen.getByText("(9 of 9)")).toBeInTheDocument();
+    expect(screen.getByText("(10 of 10)")).toBeInTheDocument();
     const table = screen.getByRole("table");
     expect(within(table).getAllByText("Key released")).toHaveLength(2);
     expect(within(table).getByText("Key refused")).toBeInTheDocument();
     expect(within(table).getByText("Workspace destroyed")).toBeInTheDocument();
-    expect(within(table).getAllByText("Simulated")).toHaveLength(9);
+    expect(within(table).getAllByText("Simulated")).toHaveLength(10);
+    expect(
+      within(table).getByText("Opt-outs synced (Art. 71)"),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByText("1 added, 0 removed, 6 opted out in the hub"),
+    ).toBeInTheDocument();
     expect(within(table).getAllByTestId("policy-hash")[0]).toHaveAttribute(
       "title",
       expect.stringMatching(/^sha256:[0-9a-f]{64}$/),
@@ -342,16 +358,32 @@ describe("SpeAuditSection (/admin/audit)", () => {
       name: "Secure processing event types",
     });
     await userEvent.click(within(group).getByLabelText("Key released"));
-    expect(screen.getByText("(7 of 9)")).toBeInTheDocument();
+    expect(screen.getByText("(8 of 10)")).toBeInTheDocument();
     expect(
       within(screen.getByRole("table")).queryByText("Key released"),
+    ).toBeNull();
+  });
+
+  it("offers the Art. 71 opt-out sync in the filter group", async () => {
+    render(<SpeAuditSection events={STATIC_AUDIT.speEvents} />);
+    const group = screen.getByRole("group", {
+      name: "Secure processing event types",
+    });
+    await userEvent.click(
+      within(group).getByLabelText("Opt-outs synced (Art. 71)"),
+    );
+    expect(screen.getByText("(9 of 10)")).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("table")).queryByText(
+        "Opt-outs synced (Art. 71)",
+      ),
     ).toBeNull();
   });
 
   it("filters by SPE", async () => {
     render(<SpeAuditSection events={STATIC_AUDIT.speEvents} />);
     await userEvent.selectOptions(screen.getByLabelText("SPE"), "SPE-1");
-    expect(screen.getByText("(4 of 9)")).toBeInTheDocument();
+    expect(screen.getByText("(4 of 10)")).toBeInTheDocument();
   });
 
   it("says when there is nothing recorded", () => {

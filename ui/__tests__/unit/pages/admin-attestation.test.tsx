@@ -216,7 +216,10 @@ describe("/admin/attestation", () => {
     });
     const items = within(list).getAllByRole("listitem");
     expect(items).toHaveLength(5);
-    expect(items[0]).toHaveTextContent("Workspace loaded");
+    expect(items[0]).toHaveTextContent(
+      "Opt-outs synced (Art. 71) · 1 added, 0 removed, 6 opted out in the hub",
+    );
+    expect(items[1]).toHaveTextContent("Workspace loaded");
     expect(within(list).getByText("Key refused")).toBeInTheDocument();
     expect(
       screen.getAllByRole("link", {

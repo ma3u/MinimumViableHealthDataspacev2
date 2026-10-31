@@ -8,6 +8,7 @@ import {
   SPE_EVENT_LABELS,
   SPE_EVENT_TYPES,
   formatSpeTime,
+  optOutCountsText,
   speEventLabel,
   type SpeAuditEvent,
   type SpeEventType,
@@ -24,6 +25,8 @@ const EVENT_CLASSES: Record<string, string> = {
     "bg-(--role-trust-bg) text-(--role-trust-text) border border-(--role-trust-border)",
   "spe.workspace_destroyed":
     "bg-(--surface-2) text-(--text-secondary) border border-(--border)",
+  "spe.optout_synced":
+    "bg-(--role-patient-bg) text-(--role-patient-text) border border-(--role-patient-border)",
 };
 
 function SimulatedMarker({ simulated }: { simulated: boolean | null }) {
@@ -81,8 +84,9 @@ export function SpeAuditSection({ events }: { events: SpeAuditEvent[] }) {
         </span>
       </h2>
       <p className="text-xs text-(--text-secondary) mb-3">
-        Attestation and key release for each SPE workspace, appended to the
-        audit chain (ADR-045). What each label proves:{" "}
+        Attestation and key release for each SPE workspace, and the Art. 71
+        opt-outs pushed into it (counts only), appended to the audit chain
+        (ADR-045). What each label proves:{" "}
         <a
           href={ADR_068_URL}
           target="_blank"
@@ -177,6 +181,11 @@ export function SpeAuditSection({ events }: { events: SpeAuditEvent[] }) {
                     >
                       {speEventLabel(e.eventType)}
                     </span>
+                    {e.optOut && (
+                      <span className="block mt-0.5 text-[10px] text-(--text-secondary)">
+                        {optOutCountsText(e.optOut)}
+                      </span>
+                    )}
                   </td>
                   <td className="py-2 px-3 font-semibold text-(--text-primary)">
                     {e.speId ?? "unknown"}

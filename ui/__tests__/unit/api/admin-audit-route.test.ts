@@ -345,6 +345,7 @@ describe("/api/admin/audit GET", () => {
         attestationScope: "none",
         simulated: true,
         outcome: "success",
+        optOut: null,
       },
       {
         id: "e-1",
@@ -357,11 +358,15 @@ describe("/api/admin/audit GET", () => {
         attestationScope: "node",
         simulated: false,
         outcome: "refused",
+        optOut: null,
       },
     ]);
     const [cypher, params] = mockRunQuery.mock.calls[0];
     expect(cypher).toContain("MATCH (e:AuditEvent)");
     expect(cypher).toContain("e.eventType STARTS WITH 'spe.'");
+    expect(cypher).toContain(
+      ".optedOutAdded, .optedOutRemoved, .optedOutInHub",
+    );
     expect(params).toMatchObject({ filterDateFrom: "2026-10-01" });
     expect(mockRunQuery).toHaveBeenCalledTimes(1);
   });

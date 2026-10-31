@@ -92,13 +92,14 @@ export interface SpeStatusResponse {
   fallback?: { reason: string };
 }
 
-/** The five audit event types of #774 on the ADR-045 chain. */
+/** The six audit event types of #774 on the ADR-045 chain `spe`. */
 export const SPE_EVENT_TYPES = [
   "spe.attestation",
   "spe.key_release",
   "spe.key_refused",
   "spe.workspace_loaded",
   "spe.workspace_destroyed",
+  "spe.optout_synced",
 ] as const;
 
 export type SpeEventType = (typeof SPE_EVENT_TYPES)[number];
@@ -109,6 +110,7 @@ export const SPE_EVENT_LABELS: Record<SpeEventType, string> = {
   "spe.key_refused": "Key refused",
   "spe.workspace_loaded": "Workspace loaded",
   "spe.workspace_destroyed": "Workspace destroyed",
+  "spe.optout_synced": "Opt-outs synced (Art. 71)",
 };
 
 export interface SpeAuditEvent {
@@ -122,6 +124,25 @@ export interface SpeAuditEvent {
   attestationScope: string | null;
   simulated: boolean | null;
   outcome: string | null;
+  /**
+   * spe.optout_synced only: the hub's Art. 71 opt-out labels pushed into the
+   * workspace (ADR-062, ADR-069). Counts, never patient ids.
+   */
+  optOut?: SpeOptOutCounts | null;
+}
+
+export interface SpeOptOutCounts {
+  added: number | null;
+  removed: number | null;
+  inHub: number | null;
+}
+
+/** "1 added, 0 removed, 6 opted out in the hub" for spe.optout_synced. */
+export function optOutCountsText(c: SpeOptOutCounts): string {
+  const n = (v: number | null) => (v === null ? "?" : String(v));
+  return `${n(c.added)} added, ${n(c.removed)} removed, ${n(
+    c.inHub,
+  )} opted out in the hub`;
 }
 
 export function isSpeEventType(t: string): t is SpeEventType {

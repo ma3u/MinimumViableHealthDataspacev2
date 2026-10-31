@@ -1832,6 +1832,7 @@ paths:
                               spe.key_refused,
                               spe.workspace_loaded,
                               spe.workspace_destroyed,
+                              spe.optout_synced,
                             ]
                         recorded: { type: string, nullable: true }
                         speId: { type: string, nullable: true }
@@ -1841,6 +1842,17 @@ paths:
                         attestationScope: { type: string, nullable: true }
                         simulated: { type: boolean, nullable: true }
                         outcome: { type: string, nullable: true }
+                        optOut:
+                          description: >
+                            spe.optout_synced only: the hub's Art. 71
+                            opt-out labels pushed into the workspace, counts
+                            only, never patient ids.
+                          type: object
+                          nullable: true
+                          properties:
+                            added: { type: integer, nullable: true }
+                            removed: { type: integer, nullable: true }
+                            inHub: { type: integer, nullable: true }
         "403": { $ref: "#/components/responses/Forbidden" }
 
   /api/admin/spe:

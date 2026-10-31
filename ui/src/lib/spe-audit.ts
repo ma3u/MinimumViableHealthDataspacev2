@@ -60,6 +60,19 @@ function str(v: unknown): string | null {
   return null;
 }
 
+function num(v: unknown): number | null {
+  if (typeof v === "number" && Number.isFinite(v)) return v;
+  if (typeof v === "string" && v.trim() !== "" && Number.isFinite(Number(v))) {
+    return Number(v);
+  }
+  // A Neo4j integer that reached JSON as { low, high }.
+  if (v && typeof v === "object" && "low" in v) {
+    const low = (v as { low: unknown }).low;
+    return typeof low === "number" ? low : null;
+  }
+  return null;
+}
+
 function bool(v: unknown): boolean | null {
   if (typeof v === "boolean") return v;
   if (v === "true") return true;
@@ -93,5 +106,13 @@ export function normaliseSpeEvent(row: Row): SpeAuditEvent | null {
     attestationScope: str(field("attestationScope")),
     simulated: bool(field("simulated")),
     outcome: str(row.outcome) ?? str(detail("outcome")),
+    optOut:
+      eventType === "spe.optout_synced"
+        ? {
+            added: num(field("optedOutAdded")),
+            removed: num(field("optedOutRemoved")),
+            inHub: num(field("optedOutInHub")),
+          }
+        : null,
   };
 }

@@ -168,13 +168,16 @@ describe("attestationAnchor", () => {
 });
 
 describe("speEventLabel", () => {
-  it("reads each of the five event types", () => {
+  it("reads each of the six event types", () => {
     expect(speEventLabel("spe.attestation")).toBe("Attestation");
     expect(speEventLabel("spe.key_release")).toBe("Key released");
     expect(speEventLabel("spe.key_refused")).toBe("Key refused");
     expect(speEventLabel("spe.workspace_loaded")).toBe("Workspace loaded");
     expect(speEventLabel("spe.workspace_destroyed")).toBe(
       "Workspace destroyed",
+    );
+    expect(speEventLabel("spe.optout_synced")).toBe(
+      "Opt-outs synced (Art. 71)",
     );
     expect(speEventLabel("spe.unknown")).toBe("spe.unknown");
   });
@@ -222,6 +225,21 @@ describe("normaliseSpeEvent", () => {
       simulated: false,
       recorded: "2026-10-30T07:00:00Z",
     });
+  });
+
+  it("reads the opt-out counts of spe.optout_synced, and only those", () => {
+    expect(
+      normaliseSpeEvent({
+        id: "o1",
+        eventType: "spe.optout_synced",
+        optedOutAdded: 2,
+        optedOutRemoved: { low: 1, high: 0 },
+        optedOutInHub: "7",
+      })?.optOut,
+    ).toEqual({ added: 2, removed: 1, inHub: 7 });
+    expect(
+      normaliseSpeEvent({ id: "a1", eventType: "spe.attestation" })?.optOut,
+    ).toBeNull();
   });
 
   it("drops anything that is not an SPE event", () => {

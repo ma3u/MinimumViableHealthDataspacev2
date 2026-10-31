@@ -349,9 +349,9 @@ export async function GET(request: NextRequest) {
 
     // ── Secure processing (ADR-068, #774) ─────────────────────────────────
     // Attestations, key releases and refusals, workspaces loaded and
-    // destroyed: the proxy appends them to the ADR-045 chain as
-    // (:AuditEvent) nodes. dateFrom and dateTo apply; the event type and SPE
-    // are filtered on the page.
+    // destroyed, Art. 71 opt-outs synced: the proxy appends them to the
+    // ADR-045 chain `spe` as (:AuditEvent) nodes. dateFrom and dateTo apply;
+    // the event type and SPE are filtered on the page.
     if (type === "spe") {
       const speParams: Record<string, unknown> = { limit: limitParam };
       const speConditions = [
@@ -371,6 +371,7 @@ export async function GET(request: NextRequest) {
          RETURN e {
            .id, .eventType, .speId, .permitId, .policyHash, .teeType,
            .attestationScope, .simulated, .outcome, .resource,
+           .optedOutAdded, .optedOutRemoved, .optedOutInHub,
            recorded: toString(e.recorded)
          } AS event
          ORDER BY e.recorded DESC

@@ -7,6 +7,7 @@ import {
   attestationAnchor,
   attestationVerdict,
   formatSpeTime,
+  optOutCountsText,
   speEventLabel,
   trusteeResource,
   type AttestationVerdict,
@@ -326,6 +327,12 @@ export function AttestationCard({
                 </span>
                 <span className="text-(--text-primary)">
                   {speEventLabel(e.eventType)}
+                  {e.optOut && (
+                    <span className="text-(--text-secondary)">
+                      {" "}
+                      · {optOutCountsText(e.optOut)}
+                    </span>
+                  )}
                 </span>
                 {e.outcome && e.outcome !== "success" && (
                   <span className="text-(--danger-text)">{e.outcome}</span>
