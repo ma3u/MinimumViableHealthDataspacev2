@@ -8,6 +8,7 @@ export function earToken(
 ): string {
   const b64 = (o: unknown) =>
     Buffer.from(JSON.stringify(o)).toString("base64url");
+  const { init_data, report_data, ...teeClaims } = claims;
   const payload = {
     iss: "mvhd-trustee (MedReg DE, access body)",
     iat: 1793404800,
@@ -27,12 +28,16 @@ export function earToken(
           executables: status === "affirming" ? 3 : 33,
           hardware: 2,
         },
+        // As Trustee v0.22.0 builds it (ear_token/broker.rs, transform_claims):
+        // the verifier's init_data and report_data sit beside the TEE's
+        // claims, not inside them.
         "ear.veraison.annotated-evidence": {
-          report_data: "x",
+          report_data: report_data ?? "x",
+          ...(init_data !== undefined ? { init_data } : {}),
           runtime_data_claims: {
             "tee-pubkey": { kty: "RSA", n: "secret-looking" },
           },
-          [tee]: { svn: "1", launch_digest: "abcde", ...claims },
+          [tee]: { svn: "1", launch_digest: "abcde", ...teeClaims },
         },
       },
     },

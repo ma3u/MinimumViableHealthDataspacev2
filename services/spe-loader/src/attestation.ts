@@ -8,8 +8,13 @@ import { createHash } from "node:crypto";
 //   submods.cpu0["ear.status"]                         affirming | warning | contraindicated | none
 //   submods.cpu0["ear.trustworthiness-vector"]         the AR4SI claims
 //   submods.cpu0["ear.appraisal-policy-id"]            the attestation policy applied
-//   submods.cpu0["ear.veraison.annotated-evidence"]    { <tee>: claims, report_data, runtime_data_claims }
-// The <tee> key says what produced the evidence. This module turns it into
+//   submods.cpu0["ear.veraison.annotated-evidence"]    { <tee>: claims, init_data, init_data_claims,
+//                                                        report_data, runtime_data_claims }
+// The <tee> key says what produced the evidence. Trustee v0.22.0 moves the
+// verifier's `init_data` and `report_data` claims out of <tee> to the top of
+// the annotated evidence (attestation-service/src/ear_token/broker.rs,
+// transform_claims); for SEV-SNP `init_data` is HOST_DATA in hex
+// (deps/verifier/src/snp/mod.rs). This module turns it into
 // the fields the SPE status carries (ADR-068 decision 5): which TEE, at which
 // scope, whether it was simulated, the label the UI shows, and the
 // `attestation` object of the administration. The token itself is never
@@ -35,12 +40,13 @@ export const LABELS = {
 } as const;
 
 /**
- * Azure's vTPM evidence comes from the paravisor of a confidential VM: it
- * proves the node, not the container (A1). Bare SEV-SNP or TDX evidence comes
- * from a CoCo guest whose agent policy is measured: the workload (A2). The
- * sample attester, which any process can run, proves nothing. Azure TDX
- * nodes are not mapped: AKS has none (ADR-068), and resource-azure.rego
- * releases keys to `az-snp-vtpm` evidence only.
+ * Bare SEV-SNP (`snp`) evidence comes from a guest whose execution policy is
+ * measured into HOST_DATA, an ACI confidential container group (ADR-069) or a
+ * CoCo guest: the workload. Azure's vTPM evidence (`az-snp-vtpm`) comes from
+ * the paravisor of a confidential VM: it proves the node, not the container;
+ * kept for an AKS confidential node pool, should the exemption ADR-069 asks
+ * for be granted. The sample attester, which any process can run, proves
+ * nothing. resource-azure.rego.tmpl releases keys to `snp` evidence only.
  */
 export function describeEvidence(tee: string): EvidenceDescription {
   switch (tee) {
@@ -232,7 +238,10 @@ function attestationRecord(
       tee,
       measurement: hexOf(claims.measurement),
       reportedTcb: tcb.length > 0 ? tcb.join(" ") : null,
-      hostData: hexOf(claims.init_data ?? claims.host_data),
+      // Trustee moves init_data (SNP: HOST_DATA) out of the TEE's claims.
+      hostData: hexOf(
+        annotated.init_data ?? claims.init_data ?? claims.host_data,
+      ),
       reportData: hexOf(claims.report_data ?? annotated.report_data),
       pcrs: pcrEntries.length > 0 ? Object.fromEntries(pcrEntries) : null,
       vmId: typeof vmId === "string" ? vmId : null,

@@ -1433,6 +1433,7 @@
       "UI Tests (Vitest)",
       "Neo4j Proxy Tests (Vitest)",
       "SPE Loader Tests (Vitest)",
+      "Trustee Policy Tests (opa test)",
       "ePA Ingest Tests (Vitest)",
       "iOS Analyte Parity (Swift)",
       "Secret Scan (gitleaks)",

@@ -21,6 +21,8 @@ on:
       - "ui/**"
       - "services/neo4j-proxy/**"
       - "services/spe-loader/**"
+      - "trustee/**"
+      - "scripts/test-trustee-policies.sh"
       - "services/epa-ingest/**"
       - "clients/ios/**"
       # ui/__tests__/unit/docs/klarbefund-wallet-guide.test.ts reads these
@@ -34,6 +36,8 @@ on:
       - "ui/**"
       - "services/neo4j-proxy/**"
       - "services/spe-loader/**"
+      - "trustee/**"
+      - "scripts/test-trustee-policies.sh"
       - "services/epa-ingest/**"
       - "clients/ios/**"
       - "docs/klarbefund/**"
@@ -163,6 +167,20 @@ jobs:
 
       - name: Run tests
         run: npx vitest run --reporter=verbose
+
+  # -----------------------------------------------------------------------
+  # Trustee resource policies (opa test)
+  # Who gets an SPE's extract key: the permit's workload on SEV-SNP with a
+  # pinned measurement, nothing else (ADR-069). Pinned OPA image.
+  # -----------------------------------------------------------------------
+  trustee-policy-tests:
+    name: Trustee Policy Tests (opa test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: opa test
+        run: ./scripts/test-trustee-policies.sh
 
   # -----------------------------------------------------------------------
   # ePA Ingest Tests (Vitest)
