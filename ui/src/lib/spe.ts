@@ -19,8 +19,8 @@ export type SpeStatusValue = "ready" | "loading" | "refused" | "unreachable";
 
 /** The three labels of ADR-068 decision 5, one per depth. */
 export const SPE_LABEL_SIMULATED = "Simulated attestation";
-export const SPE_LABEL_NODE = "Attested: SEV-SNP node";
-export const SPE_LABEL_WORKLOAD = "Attested: confidential workload";
+const SPE_LABEL_NODE = "Attested: SEV-SNP node";
+const SPE_LABEL_WORKLOAD = "Attested: confidential workload";
 
 export interface SpeTrustee {
   url: string | null;
@@ -145,7 +145,7 @@ export function optOutCountsText(c: SpeOptOutCounts): string {
   )} opted out in the hub`;
 }
 
-export function isSpeEventType(t: string): t is SpeEventType {
+function isSpeEventType(t: string): t is SpeEventType {
   return (SPE_EVENT_TYPES as readonly string[]).includes(t);
 }
 
