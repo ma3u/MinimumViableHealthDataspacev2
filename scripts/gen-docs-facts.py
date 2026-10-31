@@ -322,7 +322,9 @@ def main():
             # newest commit that changed it. Not "the date must move": a page
             # already dated today has nowhere to move to.
             for page, spec in PAGES.items():
-                newest = git("log", "-1", "--format=%cd", "--date=short",
+                # Author date, as date_from_git() writes it: a rebase moves the
+                # committer date and would fail a branch that changed nothing.
+                newest = git("log", "-1", "--format=%ad", "--date=short",
                              f"{args.base}..HEAD", "--", *spec["sources"])
                 if newest and old_dates.get(page, "") < newest:
                     problems.append(

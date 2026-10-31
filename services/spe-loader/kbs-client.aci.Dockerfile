@@ -58,4 +58,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends ca-certificates libssl3 && \
     rm -rf /var/lib/apt/lists/*
 COPY --from=build /out/kbs-client /usr/local/bin/kbs-client
+# Only a source for the binary (services/spe-loader/Dockerfile copies it and
+# runs as 1000); /dev/sev-guest is world-readable in ACI, so no root needed.
+USER 65532:65532
 ENTRYPOINT ["/usr/local/bin/kbs-client"]
