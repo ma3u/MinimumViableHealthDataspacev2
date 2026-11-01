@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FileBarChart, Download } from "lucide-react";
+import { T, useT } from "@/lib/i18n/translate";
 
 /**
  * The activity report of the health data access body, Regulation (EU)
@@ -24,9 +25,10 @@ function day(value: string | null | undefined): string {
 }
 
 function Pairs({ map }: { map: Record<string, number> }) {
+  const t = useT("access");
   const rows = Object.entries(map);
   if (rows.length === 0) {
-    return <span className="text-(--text-secondary)">none</span>;
+    return <span className="text-(--text-secondary)">{t("none")}</span>;
   }
   return (
     <span className="flex flex-wrap gap-1">
@@ -42,10 +44,12 @@ function Pairs({ map }: { map: Record<string, number> }) {
   );
 }
 
+/** `label` is an English text of the access area; it is shown translated. */
 function Stat({ label, value }: { label: string; value: number | string }) {
+  const t = useT("access");
   return (
     <div className="rounded-sm border border-(--border) bg-(--surface-2) px-3 py-2">
-      <div className="text-xs text-(--text-secondary)">{label}</div>
+      <div className="text-xs text-(--text-secondary)">{t(label)}</div>
       <div className="text-lg font-semibold text-(--text-primary) tabular-nums">
         {value}
       </div>
@@ -64,6 +68,7 @@ function ItemBody({
   itemKey: ItemKey;
   report: ActivityReport;
 }) {
+  const t = useT("access");
   const { items } = report;
   switch (itemKey) {
     case "a":
@@ -79,7 +84,7 @@ function ItemBody({
           <dl className="mt-3 text-sm space-y-2">
             <div className="flex gap-2 flex-wrap">
               <dt className="text-(--text-secondary) w-44 shrink-0">
-                Types of applicants
+                {t("Types of applicants")}
               </dt>
               <dd>
                 <Pairs map={items.a.byApplicantType} />
@@ -87,7 +92,7 @@ function ItemBody({
             </div>
             <div className="flex gap-2 flex-wrap">
               <dt className="text-(--text-secondary) w-44 shrink-0">
-                Purposes requested
+                {t("Purposes requested")}
               </dt>
               <dd>
                 <Pairs map={items.a.byPurpose} />
@@ -95,11 +100,11 @@ function ItemBody({
             </div>
             <div className="flex gap-2 flex-wrap">
               <dt className="text-(--text-secondary) w-44 shrink-0">
-                Data categories accessed
+                {t("Data categories accessed")}
               </dt>
               <dd className="text-(--text-primary)">
                 {items.a.dataCategoriesAccessed.length === 0
-                  ? "none"
+                  ? t("none")
                   : items.a.dataCategoriesAccessed
                       .map((d) => `${d.title ?? d.datasetId} (${d.permits})`)
                       .join(", ")}
@@ -107,16 +112,18 @@ function ItemBody({
             </div>
             <div className="flex gap-2 flex-wrap">
               <dt className="text-(--text-secondary) w-44 shrink-0">
-                Health data requests
+                {t("Health data requests")}
               </dt>
               <dd className="text-(--text-primary)">
-                {items.a.healthDataRequests} received,{" "}
-                {items.a.healthDataRequestsAnswered} answered (Art. 69)
+                {t("{received} received, {answered} answered (Art. 69)", {
+                  received: items.a.healthDataRequests,
+                  answered: items.a.healthDataRequestsAnswered,
+                })}
               </dd>
             </div>
             <div className="flex gap-2 flex-wrap">
               <dt className="text-(--text-secondary) w-44 shrink-0">
-                Results communicated
+                {t("Results communicated")}
               </dt>
               <dd className="text-(--text-primary)">
                 {items.a.resultsCommunicated}
@@ -131,14 +138,23 @@ function ItemBody({
         <>
           {items.b.measures.length === 0 ? (
             <p className="text-sm text-(--text-secondary)">
-              No measure taken in the period.
+              {t("No measure taken in the period.")}
             </p>
           ) : (
             <ul className="text-sm space-y-1">
               {items.b.measures.map((m) => (
                 <li key={m.permitId} className="text-(--text-primary)">
-                  <span className="font-mono">{m.permitId}</span> of{" "}
-                  {m.applicant ?? "?"} revoked on {day(m.revokedAt)}
+                  <T
+                    area="access"
+                    vars={{
+                      permit: m.permitId,
+                      applicant: m.applicant ?? "?",
+                      date: day(m.revokedAt),
+                    }}
+                    tags={{ p: <span className="font-mono" /> }}
+                  >
+                    {"<p>{permit}</p> of {applicant} revoked on {date}"}
+                  </T>
                   {m.reason && (
                     <span className="text-(--text-secondary)">
                       : {m.reason}
@@ -174,10 +190,10 @@ function ItemBody({
               <table className="w-full text-sm">
                 <thead className="text-xs text-(--text-secondary) text-left">
                   <tr>
-                    <th className="py-1 pr-3">Data user</th>
-                    <th className="py-1 pr-3">Events</th>
-                    <th className="py-1 pr-3">Permits</th>
-                    <th className="py-1 pr-3">Refused</th>
+                    <th className="py-1 pr-3">{t("Data user")}</th>
+                    <th className="py-1 pr-3">{t("Events")}</th>
+                    <th className="py-1 pr-3">{t("Permits")}</th>
+                    <th className="py-1 pr-3">{t("Refused")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -187,7 +203,7 @@ function ItemBody({
                       className="border-t border-(--border)"
                     >
                       <td className="py-1 pr-3 text-(--text-primary)">
-                        {u.consumerName ?? u.consumer ?? "unknown"}
+                        {u.consumerName ?? u.consumer ?? t("unknown")}
                       </td>
                       <td className="py-1 pr-3 tabular-nums">{u.events}</td>
                       <td className="py-1 pr-3 tabular-nums">{u.permits}</td>
@@ -207,7 +223,9 @@ function ItemBody({
           <div className="grid grid-cols-2 gap-2">
             <Stat
               label="Average days"
-              value={items.h.averageDays === null ? "n/a" : items.h.averageDays}
+              value={
+                items.h.averageDays === null ? t("n/a") : items.h.averageDays
+              }
             />
             <Stat label="Permits counted" value={items.h.basis} />
           </div>
@@ -215,9 +233,21 @@ function ItemBody({
             <ul className="text-sm mt-3 space-y-1">
               {items.h.detail.map((d) => (
                 <li key={d.applicationId} className="text-(--text-primary)">
-                  <span className="font-mono">{d.applicationId}</span> (
-                  {d.applicant ?? "?"}): applied {day(d.submittedAt)}, first
-                  access {day(d.accessAt)}, {d.days} days
+                  <T
+                    area="access"
+                    vars={{
+                      id: d.applicationId,
+                      applicant: d.applicant ?? "?",
+                      applied: day(d.submittedAt),
+                      access: day(d.accessAt),
+                      days: d.days,
+                    }}
+                    tags={{ p: <span className="font-mono" /> }}
+                  >
+                    {
+                      "<p>{id}</p> ({applicant}): applied {applied}, first access {access}, {days} days"
+                    }
+                  </T>
                 </li>
               ))}
             </ul>
@@ -232,7 +262,7 @@ function ItemBody({
             <Stat label="Labels" value={items.i.total} />
             <div className="text-sm">
               <div className="text-xs text-(--text-secondary) mb-1">
-                By EEHRxF coverage
+                {t("By EEHRxF coverage")}
               </div>
               <Pairs map={items.i.byCoverage} />
             </div>
@@ -242,13 +272,13 @@ function ItemBody({
               <table className="w-full text-sm">
                 <thead className="text-xs text-(--text-secondary) text-left">
                   <tr>
-                    <th className="py-1 pr-3">Dataset</th>
-                    <th className="py-1 pr-3">Holder</th>
-                    <th className="py-1 pr-3">Completeness</th>
-                    <th className="py-1 pr-3">Conformance</th>
-                    <th className="py-1 pr-3">Timeliness</th>
-                    <th className="py-1 pr-3">Coverage</th>
-                    <th className="py-1 pr-3">Assessed</th>
+                    <th className="py-1 pr-3">{t("Dataset")}</th>
+                    <th className="py-1 pr-3">{t("Holder")}</th>
+                    <th className="py-1 pr-3">{t("Completeness")}</th>
+                    <th className="py-1 pr-3">{t("Conformance")}</th>
+                    <th className="py-1 pr-3">{t("Timeliness")}</th>
+                    <th className="py-1 pr-3">{t("Coverage")}</th>
+                    <th className="py-1 pr-3">{t("Assessed")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -329,6 +359,7 @@ function save(name: string, type: string, content: string) {
 }
 
 export default function ActivityReportPage() {
+  const t = useT("access");
   const [report, setReport] = useState<ActivityReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -360,51 +391,52 @@ export default function ActivityReportPage() {
         <div className="mb-8">
           <h1 className="page-header flex items-center gap-2">
             <FileBarChart size={28} />
-            Activity report of the health data access body
+            {t("Activity report of the health data access body")}
           </h1>
           <p className="text-(--text-secondary) text-lg mt-1">
-            Regulation (EU) 2025/327, Art. 59 · public, no sign-in
+            {t("Regulation (EU) 2025/327, Art. 59 · public, no sign-in")}
           </p>
         </div>
 
         <div className="rounded-lg border border-(--border) bg-(--surface) p-4 mb-8 text-sm text-(--text-secondary) space-y-2">
           <p>
-            Every two years the health data access body publishes a report on
-            its activity with the items of Art. 59(1)(a) to (k): the
-            applications and permits, the data accessed, how data users and
-            holders kept their obligations, the audits, the requests from
-            natural persons, revenues, the time from application to access, the
-            quality labels, and what came out of the data. This report is
-            generated from the graph for the period shown; where nothing is
-            recorded for an item, it says so.
+            {t(
+              "Every two years the health data access body publishes a report on its activity with the items of Art. 59(1)(a) to (k): the applications and permits, the data accessed, how data users and holders kept their obligations, the audits, the requests from natural persons, revenues, the time from application to access, the quality labels, and what came out of the data. This report is generated from the graph for the period shown; where nothing is recorded for an item, it says so.",
+            )}
           </p>
           <p>
-            Participants are fictional. Decisions are taken on{" "}
-            <Link
-              href="/compliance"
-              className="font-bold text-(--accent) hover:underline"
+            <T
+              area="access"
+              tags={{
+                a: (
+                  <Link
+                    href="/compliance"
+                    className="font-bold text-(--accent) hover:underline"
+                  />
+                ),
+                r: (
+                  <Link
+                    href="/permits"
+                    className="font-bold text-(--accent) hover:underline"
+                  />
+                ),
+              }}
             >
-              EHDS Approval
-            </Link>{" "}
-            and published in the{" "}
-            <Link
-              href="/permits"
-              className="font-bold text-(--accent) hover:underline"
-            >
-              permits register
-            </Link>
-            .
+              {
+                "Participants are fictional. Decisions are taken on <a>EHDS Approval</a> and published in the <r>permits register</r>."
+              }
+            </T>
           </p>
         </div>
 
         {loading ? (
           <p className="text-(--text-secondary) text-sm">
-            Generating the report…
+            {t("Generating the report…")}
           </p>
         ) : error ? (
           <div className="text-sm" data-testid="report-error">
             <p className="text-(--text-secondary)">
-              The report could not be generated.
+              {t("The report could not be generated.")}
             </p>
             <p className="text-red-300 mt-1">{error}</p>
           </div>
@@ -415,15 +447,19 @@ export default function ActivityReportPage() {
               data-testid="report-period"
             >
               <span className="text-(--text-secondary)">
-                Period{" "}
-                <span className="text-(--text-primary)">
-                  {day(report.period.from)}
-                </span>{" "}
-                to{" "}
-                <span className="text-(--text-primary)">
-                  {day(report.period.to)}
-                </span>
-                {" · "}generated {day(report.generatedAt)}
+                <T
+                  area="access"
+                  vars={{
+                    from: day(report.period.from),
+                    to: day(report.period.to),
+                    generated: day(report.generatedAt),
+                  }}
+                  tags={{ b: <span className="text-(--text-primary)" /> }}
+                >
+                  {
+                    "Period <b>{from}</b> to <b>{to}</b> · generated {generated}"
+                  }
+                </T>
                 {report.accessBodies.length > 0 && (
                   <>
                     {" · "}
@@ -473,7 +509,7 @@ export default function ActivityReportPage() {
                     <span className="font-mono text-xs px-1.5 py-0.5 rounded-sm bg-(--role-hdab-bg) text-(--role-hdab-text) border border-(--role-hdab-border)">
                       ({k})
                     </span>
-                    {report.items[k].title}
+                    {t(report.items[k].title)}
                   </h2>
                   <ItemBody itemKey={k} report={report} />
                 </section>

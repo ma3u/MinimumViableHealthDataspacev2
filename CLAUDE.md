@@ -51,6 +51,7 @@ docs/                   — see "Knowledge & planning" below
 @.claude/rules/code-style.md
 @.claude/rules/testing.md
 @.claude/rules/api-conventions.md
+@.claude/rules/i18n.md
 
 ## Top gotchas
 

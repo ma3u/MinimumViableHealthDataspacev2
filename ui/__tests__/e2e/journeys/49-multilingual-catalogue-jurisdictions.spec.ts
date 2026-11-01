@@ -1,6 +1,6 @@
 /**
  * Issue #782, phase 1: dataset descriptions in more than one language and
- * the national implementation profiles (J1006 to J1018).
+ * the national implementation profiles (J1006 to J1022).
  *
  * The catalogue shows a dataset's title and description in the language a
  * visitor picks in the menu bar and falls back to English, marked as such; the HealthDCAT-AP
@@ -365,6 +365,96 @@ test.describe("Issue #782 · the compliance page follows the picker", () => {
       ).toBeVisible({ timeout: 15_000 });
       await expect(page.getByText(matrix).first()).toBeVisible();
     }
+  });
+});
+
+test.describe("Issue #782 · the access body's procedures follow the picker", () => {
+  /** [lang, heading, one label inside the page] per page. */
+  type Case = [string, string, string];
+  async function check(page: Page, path: string, cases: Case[]) {
+    for (const [lang, title, label] of cases) {
+      await page.goto(`${path}?lang=${lang}`);
+      await expect(
+        page.getByRole("heading", { level: 1, name: title }),
+      ).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText(label).first()).toBeVisible({
+        timeout: 15_000,
+      });
+    }
+  }
+
+  test("J1021 a data user's applications and statistical requests in every language", async ({
+    page,
+  }) => {
+    await skipIfKeycloakDown();
+    await loginAs(page, "researcher", "researcher");
+    await check(page, "/applications", [
+      ["de", "Anträge auf Datengenehmigung", "Datengenehmigung beantragen"],
+      [
+        "fr",
+        "Demandes d’autorisation de traitement de données",
+        "Demander une autorisation de traitement de données",
+      ],
+      [
+        "nl",
+        "Aanvragen voor een gegevensvergunning",
+        "Een gegevensvergunning aanvragen",
+      ],
+      [
+        "es",
+        "Solicitudes de permiso de datos",
+        "Solicitar un permiso de datos",
+      ],
+      ["en", "Data permit applications", "Apply for a data permit"],
+    ]);
+    await check(page, "/requests", [
+      ["de", "Gesundheitsdatenanfragen", "Statistik anfragen"],
+      ["fr", "Demandes de données de santé", "Demander une statistique"],
+      ["nl", "Verzoeken om gezondheidsgegevens", "Een statistiek vragen"],
+      ["es", "Peticiones de datos de salud", "Pedir una estadística"],
+      ["en", "Statistical requests", "Ask for a statistic"],
+    ]);
+  });
+
+  test("J1022 supervision and the activity report in every language", async ({
+    page,
+  }) => {
+    await skipIfKeycloakDown();
+    await loginAs(page, "regulator", "regulator");
+    await check(page, "/supervision", [
+      ["de", "Aufsicht", "Feststellung eines Verstoßes erfassen"],
+      ["fr", "Supervision", "Enregistrer une constatation de non-conformité"],
+      ["nl", "Toezicht", "Een bevinding van niet-naleving vastleggen"],
+      ["es", "Supervisión", "Registrar una constatación de incumplimiento"],
+      ["en", "Supervision", "Record a finding of non-compliance"],
+    ]);
+    await check(page, "/activity-report", [
+      [
+        "de",
+        "Tätigkeitsbericht der Zugangsstelle für Gesundheitsdaten",
+        "Anträge auf Zugang, Genehmigungen und abgerufene Daten",
+      ],
+      [
+        "fr",
+        "Rapport d’activité de l’organisme responsable de l’accès aux données de santé",
+        "Demandes d’accès, autorisations et données consultées",
+      ],
+      [
+        "nl",
+        "Activiteitenverslag van de instantie voor toegang tot gezondheidsgegevens",
+        "Aanvragen voor toegang, vergunningen en geraadpleegde gegevens",
+      ],
+      [
+        "es",
+        "Informe de actividad del organismo de acceso a datos de salud",
+        "Solicitudes de acceso, permisos y datos consultados",
+      ],
+      [
+        "en",
+        "Activity report of the health data access body",
+        "Applications for access, permits and the data accessed",
+      ],
+    ]);
   });
 });
 
