@@ -29,8 +29,10 @@ import type {
   SpeSession,
   TrustCenter,
 } from "./_components/types";
+import { T, useT } from "@/lib/i18n/translate";
 
 export default function CompliancePage() {
+  const t = useT("compliance");
   const [_consumers, setConsumers] = useState<Consumer[]>([]);
   const [_datasets, setDatasets] = useState<DatasetOption[]>([]);
   const [matrix, setMatrix] = useState<MatrixRow[]>([]);
@@ -130,28 +132,28 @@ export default function CompliancePage() {
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* ── Page header ── */}
         <div className="mb-8">
-          <h1 className="page-header">EHDS Compliance Overview</h1>
+          <h1 className="page-header">{t("EHDS Compliance Overview")}</h1>
           <p className="text-(--text-secondary) text-lg mt-1">
-            HDAB approval chain · Regulation (EU) 2025/327, Art. 67 to 73
+            {t("HDAB approval chain · Regulation (EU) 2025/327, Art. 67 to 73")}
           </p>
           <div className="flex gap-4 mt-4 text-sm">
             <Link
               href="/eehrxf"
               className="font-bold text-(--accent) hover:underline"
             >
-              ← EEHRxF Profiles
+              {t("← EEHRxF Profiles")}
             </Link>
             <Link
               href="/compliance/tck"
               className="font-bold text-(--accent) hover:underline"
             >
-              Protocol TCK →
+              {t("Protocol TCK →")}
             </Link>
             <Link
               href="/permits"
               className="font-bold text-(--accent) hover:underline"
             >
-              Public register →
+              {t("Public register →")}
             </Link>
           </div>
         </div>
@@ -159,65 +161,83 @@ export default function CompliancePage() {
         {/* ── Intro description ── */}
         <div className="rounded-lg border border-(--border) bg-(--surface) p-4 mb-8 text-sm text-(--text-secondary) space-y-2">
           <p>
-            The{" "}
-            <strong className="text-(--text-primary)">
-              EHDS Compliance Matrix
-            </strong>{" "}
-            shows the approval chain status for every dataspace participant.
-            Under Regulation (EU) 2025/327, secondary use of health data
-            requires a complete chain:
+            <T
+              area="compliance"
+              tags={{ b: <strong className="text-(--text-primary)" /> }}
+            >
+              {
+                "The <b>EHDS Compliance Matrix</b> shows the approval chain status for every dataspace participant. Under Regulation (EU) 2025/327, secondary use of health data requires a complete chain:"
+              }
+            </T>
           </p>
           <ol className="list-decimal list-inside space-y-1 ml-2">
             <li>
-              <strong className="text-(--text-primary)">
-                Access Application
-              </strong>{" "}
-              · the data user applies with purpose, justification and ethics
-              assessment (Art. 67)
+              <T
+                area="compliance"
+                tags={{ b: <strong className="text-(--text-primary)" /> }}
+              >
+                {
+                  "<b>Access Application</b> · the data user applies with purpose, justification and ethics assessment (Art. 67)"
+                }
+              </T>
             </li>
             <li>
-              <strong className="text-(--text-primary)">HDAB decision</strong> ·
-              the health data access body assesses the Art. 68(1) criteria and
-              issues or refuses a data permit within three months (Art. 68)
+              <T
+                area="compliance"
+                tags={{ b: <strong className="text-(--text-primary)" /> }}
+              >
+                {
+                  "<b>HDAB decision</b> · the health data access body assesses the Art. 68(1) criteria and issues or refuses a data permit within three months (Art. 68)"
+                }
+              </T>
             </li>
             <li>
-              <strong className="text-(--text-primary)">Dataset Grant</strong> ·
-              the permit names the dataset it grants access to (Art. 68(3))
+              <T
+                area="compliance"
+                tags={{ b: <strong className="text-(--text-primary)" /> }}
+              >
+                {
+                  "<b>Dataset Grant</b> · the permit names the dataset it grants access to (Art. 68(3))"
+                }
+              </T>
             </li>
             <li>
-              <strong className="text-(--text-primary)">Contract</strong> · the
-              data user accesses the data only under that permit, in a secure
-              processing environment (Art. 61(1), Art. 73)
+              <T
+                area="compliance"
+                tags={{ b: <strong className="text-(--text-primary)" /> }}
+              >
+                {
+                  "<b>Contract</b> · the data user accesses the data only under that permit, in a secure processing environment (Art. 61(1), Art. 73)"
+                }
+              </T>
             </li>
           </ol>
           <p>
-            <strong>Decision due:</strong> the date by which the access body
-            must issue or refuse the data permit: three months after it received
-            the application (Art. 68(4)). <strong>Late</strong> means the body
-            has done neither by that date. The applicant may not access any data
-            until it decides (Art. 61(1)), and the application and the decision
-            must be published (Art. 57(1)(j)). The delay is the access
-            body&apos;s compliance issue, not the applicant&apos;s.
+            <T area="compliance" tags={{ b: <strong /> }}>
+              {
+                "<b>Decision due:</b> the date by which the access body must issue or refuse the data permit: three months after it received the application (Art. 68(4)). <b>Late</b> means the body has done neither by that date. The applicant may not access any data until it decides (Art. 61(1)), and the application and the decision must be published (Art. 57(1)(j)). The delay is the access body's compliance issue, not the applicant's."
+              }
+            </T>
           </p>
           <p>
-            Click a row for the application and the chain. Signed in as the
-            access body, the row also carries the decision: a refused or missing
-            permit blocks the transfer in step 5.
+            {t(
+              "Click a row for the application and the chain. Signed in as the access body, the row also carries the decision: a refused or missing permit blocks the transfer in step 5.",
+            )}
           </p>
         </div>
 
         {/* ── Compliance Matrix ── */}
         <div className="mb-8">
           <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
-            Participant Compliance Matrix
+            {t("Participant Compliance Matrix")}
           </h2>
           {optionsLoading ? (
             <div className="text-(--text-secondary) text-sm">
-              Loading compliance data from graph…
+              {t("Loading compliance data from graph…")}
             </div>
           ) : matrix.length === 0 ? (
             <div className="text-(--text-secondary) text-sm">
-              No participants found in the knowledge graph.
+              {t("No participants found in the knowledge graph.")}
             </div>
           ) : (
             <div className="overflow-x-auto rounded-lg border border-(--border)">
@@ -225,27 +245,27 @@ export default function CompliancePage() {
                 <thead>
                   <tr className="bg-(--surface) text-(--text-secondary)">
                     <th className="text-left px-3 py-2 font-medium">
-                      Participant
+                      {t("Participant")}
                     </th>
                     <th className="text-left px-3 py-2 font-medium">Role</th>
                     <th className="text-center px-3 py-2 font-medium">
-                      Application
+                      {t("Application")}
                     </th>
                     <th className="text-center px-3 py-2 font-medium">
-                      HDAB Approval
+                      {t("HDAB Approval")}
                     </th>
                     <th className="text-left px-3 py-2 font-medium">
-                      Decision due
+                      {t("Decision due")}
                     </th>
                     <th className="text-left px-3 py-2 font-medium">Dataset</th>
                     <th className="text-center px-3 py-2 font-medium">
-                      Contract
+                      {t("Contract")}
                     </th>
                     <th className="text-center px-3 py-2 font-medium">
-                      EHDS Art.
+                      {t("EHDS Art.")}
                     </th>
                     <th className="text-center px-3 py-2 font-medium">
-                      Status
+                      {t("Status")}
                     </th>
                   </tr>
                 </thead>
@@ -441,7 +461,7 @@ export default function CompliancePage() {
                   }}
                   className="text-xs text-(--text-secondary) hover:text-(--text-primary)"
                 >
-                  Close
+                  {t("Close")}
                 </button>
               </div>
 
@@ -454,14 +474,14 @@ export default function CompliancePage() {
 
               {detailLoading ? (
                 <div className="text-(--text-secondary) text-xs">
-                  Checking approval chain…
+                  {t("Checking approval chain…")}
                 </div>
               ) : !detailResult ? null : detailResult.compliant ? (
                 <div>
                   <div className="flex items-center gap-2 mb-3 text-sm">
                     <ShieldCheck size={16} className="text-(--success-text)" />
                     <span className="text-(--success-text) font-medium">
-                      Full HDAB approval chain found
+                      {t("Full HDAB approval chain found")}
                     </span>
                   </div>
                   {detailResult.chain.length > 0 && (
@@ -502,30 +522,30 @@ export default function CompliancePage() {
                   <div className="flex items-center gap-2 mb-2 text-sm">
                     <AlertCircle size={16} className="text-(--warning-text)" />
                     <span className="text-(--warning-text) font-medium">
-                      Incomplete approval chain
+                      {t("Incomplete approval chain")}
                     </span>
                   </div>
                   <div className="text-xs text-(--text-secondary) space-y-1">
                     <p>
-                      <strong>Application:</strong>{" "}
+                      <strong>{t("Application:")}</strong>{" "}
                       {detailRow.hasApplication
                         ? `✓ ${detailRow.applicationStatus ?? "submitted"}`
                         : "✗ No AccessApplication submitted"}
                     </p>
                     <p>
-                      <strong>HDAB Approval:</strong>{" "}
+                      <strong>{t("HDAB Approval:")}</strong>{" "}
                       {detailRow.hasApproval
                         ? `✓ ${detailRow.approvalStatus ?? "exists"}`
                         : "✗ No HDABApproval linked"}
                     </p>
                     <p>
-                      <strong>Dataset grant:</strong>{" "}
+                      <strong>{t("Dataset grant:")}</strong>{" "}
                       {detailRow.datasetId
                         ? `✓ ${detailRow.datasetTitle}`
                         : "✗ No GRANTS_ACCESS_TO relationship to a dataset"}
                     </p>
                     <p>
-                      <strong>Contract:</strong>{" "}
+                      <strong>{t("Contract:")}</strong>{" "}
                       {detailRow.hasContract
                         ? "✓ Contract governs DataProduct"
                         : "✗ No Contract → DataProduct → Dataset chain"}
@@ -541,11 +561,14 @@ export default function CompliancePage() {
         <div className="mt-12 border-t border-(--border) pt-8">
           <div className="flex items-center gap-2 mb-1">
             <Key size={18} className="text-blue-800 dark:text-blue-300" />
-            <h2 className="text-xl font-bold">EHDS Verifiable Credentials</h2>
+            <h2 className="text-xl font-bold">
+              {t("EHDS Verifiable Credentials")}
+            </h2>
           </div>
           <p className="text-(--text-secondary) text-sm mb-6">
-            DCP credential definitions registered on IssuerService — presented
-            during DSP negotiation
+            {t(
+              "DCP credential definitions registered on IssuerService, presented during DSP negotiation",
+            )}
           </p>
 
           {credentials.length === 0 ? (
@@ -703,19 +726,18 @@ export default function CompliancePage() {
           <div className="flex items-center gap-2 mb-1">
             <Lock size={18} className="text-blue-800 dark:text-blue-300" />
             <h2 className="text-xl font-bold">
-              Trust Center — Pseudonym Resolution
+              {t("Trust Center: Pseudonym Resolution")}
             </h2>
           </div>
           <p className="text-(--text-secondary) text-sm mb-6">
-            EHDS Art. 66 and 73: HDAB-designated trust centers enabling
-            cross-provider longitudinal patient linkage without exposing real
-            identities to researchers. Provider pseudonyms are resolved to
-            research pseudonyms inside the Secure Processing Environment only.
+            {t(
+              "EHDS Art. 66 and 73: HDAB-designated trust centers enabling cross-provider longitudinal patient linkage without exposing real identities to researchers. Provider pseudonyms are resolved to research pseudonyms inside the Secure Processing Environment only.",
+            )}
           </p>
 
           {optionsLoading ? (
             <div className="text-(--text-secondary) text-sm">
-              Loading trust centers…
+              {t("Loading trust centers…")}
             </div>
           ) : trustCenterRefused ? (
             <div
@@ -723,9 +745,9 @@ export default function CompliancePage() {
               data-testid="trust-center-refused"
               className="text-(--text-secondary) text-sm"
             >
-              Your role cannot read the trust centre register. It is open to
-              trust centre operators and the dataspace administrator; whether a
-              health data access body may read it is still to be decided.
+              {t(
+                "Your role cannot read the trust centre register. It is open to trust centre operators and the dataspace administrator; whether a health data access body may read it is still to be decided.",
+              )}
             </div>
           ) : trustCenters.length === 0 ? (
             <div className="text-(--text-secondary) text-sm">
@@ -848,7 +870,7 @@ export default function CompliancePage() {
           {speSessions.length > 0 && (
             <div className="mt-6">
               <h3 className="text-sm font-semibold mb-3 text-(--text-primary)">
-                Active SPE Sessions (TEE-Attested)
+                {t("Active SPE Sessions (TEE-Attested)")}
               </h3>
               <table className="text-xs w-full border-collapse">
                 <thead>
@@ -898,7 +920,7 @@ export default function CompliancePage() {
           {/* Security model summary */}
           <div className="mt-6 rounded-lg border border-(--border) bg-(--surface)/50 p-4">
             <h3 className="text-sm font-semibold mb-3 text-(--text-primary)">
-              Security Model — Threat Mitigations
+              {t("Security Model: Threat Mitigations")}
             </h3>
             <div className="space-y-1 text-xs text-(--text-secondary)">
               {[

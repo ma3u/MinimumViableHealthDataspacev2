@@ -1,6 +1,6 @@
 /**
  * Issue #782, phase 1: dataset descriptions in more than one language and
- * the national implementation profiles (J1006 to J1017).
+ * the national implementation profiles (J1006 to J1018).
  *
  * The catalogue shows a dataset's title and description in the language a
  * visitor picks in the menu bar and falls back to English, marked as such; the HealthDCAT-AP
@@ -334,6 +334,36 @@ test.describe("Issue #782 · the access body's public pages follow the picker", 
       await expect(
         page.getByRole("heading", { level: 1, name: register }),
       ).toBeVisible({ timeout: 15_000 });
+    }
+  });
+});
+
+test.describe("Issue #782 · the compliance page follows the picker", () => {
+  test("J1018 the compliance overview in German, French, Dutch and Spanish", async ({
+    page,
+  }) => {
+    await skipIfKeycloakDown();
+    await loginAs(page, "regulator", "regulator");
+    const cases: [string, string, string][] = [
+      ["de", "EHDS-Compliance-Übersicht", "Compliance-Matrix der Teilnehmer"],
+      [
+        "fr",
+        "Vue d’ensemble de la conformité à l’EEDS",
+        "Matrice de conformité des participants",
+      ],
+      ["nl", "Overzicht EHDS-naleving", "Nalevingsmatrix per deelnemer"],
+      [
+        "es",
+        "Resumen del cumplimiento del EEDS",
+        "Matriz de cumplimiento de los participantes",
+      ],
+    ];
+    for (const [lang, title, matrix] of cases) {
+      await page.goto(`/compliance?lang=${lang}`);
+      await expect(
+        page.getByRole("heading", { level: 1, name: title }),
+      ).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText(matrix).first()).toBeVisible();
     }
   });
 });

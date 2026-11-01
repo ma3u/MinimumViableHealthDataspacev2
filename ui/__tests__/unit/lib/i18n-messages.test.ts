@@ -112,6 +112,7 @@ describe("the code and the dictionaries", () => {
     "src/components/KlarbefundShowcase.tsx",
     "src/app/information/page.tsx",
     "src/app/permits/page.tsx",
+    "src/app/compliance/page.tsx",
   ];
   const known = new Set(AREAS.flatMap((a) => Object.keys(MESSAGES.en[a])));
 
