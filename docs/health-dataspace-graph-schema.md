@@ -287,6 +287,26 @@ CREATE INDEX transfer_event_retain_until IF NOT EXISTS FOR (te:TransferEvent) ON
 
 Two properties elsewhere belong to the same work: `TransferEvent.retainUntil` and `DataTransfer.retainUntil` (Art. 73(1)(e), one year after the record; nothing is deleted before it, nothing without it, `POST /api/admin/audit/retention`), and `Participant.trustedHolder: Boolean` with `trustedHolderSince` (Art. 72: the holder answers health data requests on the datasets it offers, `decidedUnder = 'Art. 72'` on the `HealthDataRequest`).
 
+#### `Jurisdiction`, `NationalLaw`, `JurisdictionMilestone`
+
+How a member state implements the secondary use of Regulation (EU) 2025/327 (issue #782): the legal role of its health data access body, the national law it acts under, how a person objects (Art. 71), whether access is charged for (Art. 62) and the dates. A jurisdiction, not a translation. The laws and roles are real; the participants under them stay fictional. Seeded for DE, AT, BE, FR, NL and ES by `neo4j/seed-jurisdictions.cypher`; served by `GET /api/jurisdictions` and shown on `/jurisdictions`.
+
+**`Jurisdiction` properties:** `code: String!` (ISO 3166-1 alpha-2), `name`, `nameNative`, `languages: String[]` (ISO 639-1), `accessBodyRole` (national language), `accessBodyRoleEn`, `designationStatus`, `optOutModel`, `fees`, `summary`, `sources: String[]`, `reviewedOn` (ISO date the profile was last checked against its sources), `sortOrder`.
+
+**`NationalLaw` properties:** `lawId: String!`, `title` (official, national language), `titleEn`, `citation`, `year`, `url`, `status` (`IN_FORCE`, `BILL`, `DRAFT`).
+
+**`JurisdictionMilestone` properties:** `milestoneId: String!`, `date` (ISO date, or year or year-month), `label`, `scope` (`EU` for a date of the Regulation, shared by every jurisdiction; `NATIONAL`), `status` (`DONE`, `PLANNED`).
+
+**Relationships:** `(j)-[:HAS_LEGAL_BASIS]->(law:NationalLaw)`, `(j)-[:HAS_MILESTONE]->(m:JurisdictionMilestone)`, `(p:Participant)-[:UNDER_JURISDICTION]->(j)` for every participant whose `country` is the code.
+
+**Indexes:**
+
+```cypher
+CREATE CONSTRAINT jurisdiction_code IF NOT EXISTS FOR (j:Jurisdiction) REQUIRE j.code IS UNIQUE;
+CREATE CONSTRAINT national_law_id IF NOT EXISTS FOR (l:NationalLaw) REQUIRE l.lawId IS UNIQUE;
+CREATE CONSTRAINT jurisdiction_milestone_id IF NOT EXISTS FOR (m:JurisdictionMilestone) REQUIRE m.milestoneId IS UNIQUE;
+```
+
 ### 2.2 Relationships
 
 ```cypher
@@ -316,6 +336,11 @@ Two properties elsewhere belong to the same work: `TransferEvent.retainUntil` an
 (:TransferEvent)-[:REQUESTED_BY]->(:Participant)
 (:TransferEvent)-[:PROVIDED_BY]->(:Participant)
 (:TransferEvent)-[:ACCESSED]->(:HealthDataset)
+
+// National implementation (#782)
+(:Jurisdiction)-[:HAS_LEGAL_BASIS]->(:NationalLaw)
+(:Jurisdiction)-[:HAS_MILESTONE]->(:JurisdictionMilestone)
+(:Participant)-[:UNDER_JURISDICTION]->(:Jurisdiction)
 ```
 
 ---
@@ -361,6 +386,8 @@ A dataset described using HealthDCAT-AP (`healthdcatap:Dataset` extending `dcat:
 - `modified: Date` — Last modification (`dct:modified`)
 - `language: String[]` — ISO 639-1 language codes (`dct:language`)
 - `themes: String[]` — EuroVoc theme URIs (`dcat:theme`)
+
+**Properties (translations, #782):** English is the source language of `title`, `description` and `hdcatapKeywords`. A translation is the same property with the language as suffix: `titleDe`, `descriptionDe`, `hdcatapKeywordsDe`, and likewise `Fr`, `Nl`, `Es`. The serialiser writes each value tagged with its language (`{"@value": ..., "@language": "de"}`); `GET /api/catalog` hands them over as `translations: {de: {title, description, keywords}}`. Set by `neo4j/seed-catalog-translations.cypher`.
 
 **Properties (DCAT-AP recommended):**
 

@@ -4,6 +4,11 @@ import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { Roles } from "@/lib/auth";
 import { promises as fs } from "fs";
 import path from "path";
+import {
+  type MetadataLanguage,
+  type Translation,
+  translationsOf,
+} from "@/lib/metadata-language";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +28,12 @@ interface CatalogRow {
   numberOfUniqueIndividuals?: number | null;
   minTypicalAge?: number | null;
   maxTypicalAge?: number | null;
+  /** Title, description and keywords in the languages the dataset has
+   * besides English (#782); English is title and description above. */
+  translations?: Partial<Record<MetadataLanguage, Translation>>;
+  /** The access body that governs the dataset, and its country. */
+  accessBody?: string | null;
+  accessBodyCountry?: string | null;
   providers: string[];
   consumers: string[];
   fhirResources: string[];
@@ -46,7 +57,9 @@ export async function GET() {
 
   let realRows: CatalogRow[] = [];
   try {
-    realRows = await runQuery<CatalogRow>(
+    const rows = await runQuery<
+      CatalogRow & { props: Record<string, unknown> }
+    >(
       `MATCH (d:HealthDataset)
        OPTIONAL MATCH (d)-[:PUBLISHED_BY]->(pub:Participant)
        OPTIONAL MATCH (dp)-[:DESCRIBED_BY]->(d)
@@ -56,6 +69,7 @@ export async function GET() {
        OPTIONAL MATCH (product)<-[:CONSUMES]-(cons:Participant)
        OPTIONAL MATCH (fhir:Patient)-[:FROM_DATASET]->(d)
        OPTIONAL MATCH (dt:DataTransfer)-[:TRANSFERS]->(d)
+       OPTIONAL MATCH (hdab:Participant)-[:GOVERNS]->(d)
        RETURN coalesce(d.id, d.datasetId)  AS id,
               d.title                   AS title,
               d.description             AS description,
@@ -71,11 +85,23 @@ export async function GET() {
               d.hdcatapNumberOfUniqueIndividuals AS numberOfUniqueIndividuals,
               d.hdcatapMinTypicalAge    AS minTypicalAge,
               d.hdcatapMaxTypicalAge    AS maxTypicalAge,
+              d {.titleDe, .descriptionDe, .hdcatapKeywordsDe,
+                 .titleFr, .descriptionFr, .hdcatapKeywordsFr,
+                 .titleNl, .descriptionNl, .hdcatapKeywordsNl,
+                 .titleEs, .descriptionEs, .hdcatapKeywordsEs} AS props,
+              head(collect(DISTINCT hdab.name))    AS accessBody,
+              head(collect(DISTINCT hdab.country)) AS accessBodyCountry,
               collect(DISTINCT prov.name) AS providers,
               collect(DISTINCT cons.name) AS consumers,
               collect(DISTINCT fhir.name) AS fhirResources,
               collect(DISTINCT dt.name)   AS transfers`,
     );
+    // The translations are properties named with the language as suffix
+    // (neo4j/seed-catalog-translations.cypher); the page gets them as a map.
+    realRows = rows.map(({ props, ...row }) => {
+      const translations = translationsOf(props);
+      return Object.keys(translations).length ? { ...row, translations } : row;
+    });
   } catch (err) {
     console.warn("Neo4j catalog query unavailable, using demo data:", err);
   }

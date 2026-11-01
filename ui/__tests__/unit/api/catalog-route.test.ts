@@ -212,6 +212,41 @@ describe("GET /api/catalog", () => {
     });
   });
 
+  it("hands over the translations as a map by language (#782)", async () => {
+    mockRunQuery.mockResolvedValue([
+      {
+        ...MOCK_ENTRY_A,
+        accessBody: "MedReg DE",
+        accessBodyCountry: "DE",
+        props: {
+          titleDe: "Synthetische FHIR-Kohorte",
+          descriptionDe: null,
+          hdcatapKeywordsDe: ["synthetische Daten"],
+          titleFr: null,
+        },
+      },
+      { ...MOCK_ENTRY_B, props: { titleDe: null } },
+    ]);
+    mockReadFile.mockRejectedValue(new Error("ENOENT"));
+
+    const data = await (await GET()).json();
+
+    expect(data[0].translations).toEqual({
+      de: {
+        title: "Synthetische FHIR-Kohorte",
+        keywords: ["synthetische Daten"],
+      },
+    });
+    expect(data[0]).toMatchObject({
+      accessBody: "MedReg DE",
+      accessBodyCountry: "DE",
+    });
+    // Only the map goes out, never the raw properties; English only, no map.
+    expect(data[0]).not.toHaveProperty("props");
+    expect(data[1]).not.toHaveProperty("translations");
+    expect(mockRunQuery.mock.calls[0][0]).toContain(".titleDe");
+  });
+
   it("merges multiple Neo4j rows with multiple mock rows", async () => {
     const neo4jRows = [
       MOCK_ENTRY_A,

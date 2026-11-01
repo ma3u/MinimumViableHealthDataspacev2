@@ -126,6 +126,8 @@ const exploreGroup: NavGroup = {
     { href: "/activity-report", label: "Activity Report", icon: FileBarChart },
     // Art. 58(1): what the public is told about secondary use.
     { href: "/information", label: "Secondary Use Info", icon: Info },
+    // #782: how each member state implements secondary use.
+    { href: "/jurisdictions", label: "National EHDS Rules", icon: Scale },
   ],
 };
 

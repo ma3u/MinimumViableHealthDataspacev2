@@ -1,0 +1,159 @@
+{
+  "source": {
+    "title": "Regulation (EU) 2025/327 on the European Health Data Space",
+    "celex": "32025R0327",
+    "eli": "http://data.europa.eu/eli/reg/2025/327/oj",
+    "languageVersions": {
+      "en": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32025R0327",
+      "de": "https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32025R0327",
+      "fr": "https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32025R0327",
+      "nl": "https://eur-lex.europa.eu/legal-content/NL/TXT/?uri=CELEX:32025R0327",
+      "es": "https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX:32025R0327"
+    },
+    "checkedOn": "2026-11-01",
+    "checkedBy": "scripts/i18n/check-ehds-terminology.py, which reads the Official Journal text from the Publications Office (Cellar) and counts every term in its language version"
+  },
+  "terms": [
+    {
+      "id": "health-data-access-body",
+      "article": "Art. 55",
+      "en": "health data access body",
+      "de": "Zugangsstelle für Gesundheitsdaten",
+      "fr": "organisme responsable de l’accès aux données de santé",
+      "nl": "instantie voor toegang tot gezondheidsgegevens",
+      "es": "organismo de acceso a datos de salud",
+      "avoid": {
+        "de": ["Datenzugangsstelle", "Gesundheitsdatenzugangsstelle"],
+        "nl": ["toegangsinstantie"]
+      }
+    },
+    {
+      "id": "data-permit",
+      "article": "Art. 68",
+      "en": "data permit",
+      "de": "Datengenehmigung",
+      "fr": "autorisation de traitement de données",
+      "nl": "gegevensvergunning",
+      "es": "permiso de datos",
+      "avoid": {
+        "de": ["Datenzugangsgenehmigung", "Datennutzungsgenehmigung"],
+        "fr": ["permis de données"],
+        "nl": ["datavergunning"],
+        "es": ["autorización de datos"]
+      }
+    },
+    {
+      "id": "secondary-use",
+      "article": "Art. 2(2)(e)",
+      "en": "secondary use",
+      "de": "Sekundärnutzung",
+      "fr": "utilisation secondaire",
+      "nl": "secundair gebruik",
+      "es": "uso secundario",
+      "avoid": {
+        "de": ["Zweitnutzung", "Sekundärverwendung"],
+        "es": ["utilización secundaria"]
+      }
+    },
+    {
+      "id": "health-data-holder",
+      "article": "Art. 2(2)(t)",
+      "en": "health data holder",
+      "de": "Gesundheitsdateninhaber",
+      "fr": "détenteur de données de santé",
+      "nl": "houder van gezondheidsgegevens",
+      "es": "tenedor de datos de salud",
+      "avoid": {
+        "de": ["Dateninhaber", "Datenhalter"],
+        "es": ["titular de datos de salud"]
+      },
+      "note": "The German text uses \"Dateninhaber\" twice in passing; the defined term, and the hub's, is \"Gesundheitsdateninhaber\"."
+    },
+    {
+      "id": "health-data-user",
+      "article": "Art. 2(2)(u)",
+      "en": "health data user",
+      "de": "Gesundheitsdatennutzer",
+      "fr": "utilisateur de données de santé",
+      "nl": "gebruiker van gezondheidsgegevens",
+      "es": "usuario de datos de salud",
+      "avoid": {
+        "de": ["Datennutzer"]
+      },
+      "note": "The German text uses \"Datennutzer\" once in passing; the defined term, and the hub's, is \"Gesundheitsdatennutzer\"."
+    },
+    {
+      "id": "health-data-access-application",
+      "article": "Art. 67",
+      "en": "health data access application",
+      "de": "Antrag auf Zugang zu Gesundheitsdaten",
+      "fr": "demande d’accès aux données de santé",
+      "nl": "aanvraag voor toegang tot gezondheidsgegevens",
+      "es": "solicitud de acceso a datos de salud"
+    },
+    {
+      "id": "health-data-request",
+      "article": "Art. 69",
+      "en": "health data request",
+      "de": "Gesundheitsdatenanfrage",
+      "fr": "demande de données de santé",
+      "nl": "verzoek om gezondheidsgegevens",
+      "es": "petición de datos de salud"
+    },
+    {
+      "id": "opt-out",
+      "article": "Art. 71",
+      "en": "right to opt out",
+      "de": "Recht zum Widerspruch",
+      "fr": "droit de refuser",
+      "nl": "opt-out-recht",
+      "es": "derecho de autoexclusión",
+      "note": "German says Widerspruch, not Opt-out; French refuser, not opposition, which is the GDPR right (Art. 21) and a different thing."
+    },
+    {
+      "id": "trusted-health-data-holder",
+      "article": "Art. 72",
+      "en": "trusted health data holder",
+      "de": "vertrauenswürdiger Gesundheitsdateninhaber",
+      "fr": "détenteur de données de santé de confiance",
+      "nl": "betrouwbare houder van gezondheidsgegevens",
+      "es": "tenedor fiable de datos de salud"
+    },
+    {
+      "id": "secure-processing-environment",
+      "article": "Art. 73",
+      "en": "secure processing environment",
+      "de": "sichere Verarbeitungsumgebung",
+      "fr": "environnement de traitement sécurisé",
+      "nl": "beveiligde verwerkingsomgeving",
+      "es": "entorno de tratamiento seguro"
+    },
+    {
+      "id": "fees",
+      "article": "Art. 62",
+      "en": "fees",
+      "de": "Gebühren",
+      "fr": "redevances",
+      "nl": "vergoedingen",
+      "es": "tasas"
+    },
+    {
+      "id": "dataset-catalogue",
+      "article": "Art. 77",
+      "en": "dataset catalogue",
+      "de": "Datensatzkatalog",
+      "fr": "catalogue des ensembles de données",
+      "nl": "catalogus van datasets",
+      "es": "catálogo de conjuntos de datos"
+    },
+    {
+      "id": "electronic-health-data",
+      "article": "Art. 2(2)(c)",
+      "en": "electronic health data",
+      "de": "elektronische Gesundheitsdaten",
+      "fr": "données de santé électroniques",
+      "nl": "elektronische gezondheidsgegevens",
+      "es": "datos de salud electrónicos"
+    }
+  ]
+}

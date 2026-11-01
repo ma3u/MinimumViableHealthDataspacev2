@@ -23,6 +23,8 @@ export const API_GROUP_DESCRIPTIONS: Record<string, string> = {
   health: "Liveness and readiness probe. No session needed",
   information:
     "What the access body tells the public about secondary use, Art. 58(1)",
+  jurisdictions:
+    "How six member states implement the EHDS: access body, national law, opt-out, fees, dates (#782)",
   "keycloak-config":
     "Where Keycloak is, for the sign-in banner. No session needed",
   "mock-dsp":

@@ -1,0 +1,36 @@
+meta {
+  name: 13 A dataset described in German
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/api/catalog/jsonld?id=dataset:omop-cdm-v54-analytics
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body['@type']: eq dcat:Dataset
+}
+
+tests {
+  // #782: a title is tagged with its language, English and German at least,
+  // which is what the central catalogue reads (DCAT-AP, one value per language).
+  const asList = (v) => (Array.isArray(v) ? v : v ? [v] : []);
+  const titles = asList(res.getBody()["dct:title"]);
+  test("every title carries its language", function () {
+    expect(titles.length, "at least one title").to.be.above(0);
+    for (const t of titles) expect(t["@language"], JSON.stringify(t)).to.be.a("string");
+  });
+  test("the title is there in English and in German", function () {
+    const langs = titles.map((t) => t["@language"]);
+    expect(langs).to.include("en");
+    expect(langs).to.include("de");
+  });
+}

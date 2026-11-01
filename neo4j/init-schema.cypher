@@ -224,6 +224,11 @@ CREATE CONSTRAINT app_pairing_id IF NOT EXISTS FOR (p:AppPairing) REQUIRE p.id I
 // (:AppAttestKey {keyId, username, createdBy, environment, createdAt}). One key,
 // one account, ever; the record outlives the account's deletion.
 CREATE CONSTRAINT app_attest_key_id IF NOT EXISTS FOR (k:AppAttestKey) REQUIRE k.keyId IS UNIQUE;
+// #782: the national implementation of the EHDS, one profile per member
+// state, with its national laws and its dates (neo4j/seed-jurisdictions.cypher).
+CREATE CONSTRAINT jurisdiction_code IF NOT EXISTS FOR (j:Jurisdiction) REQUIRE j.code IS UNIQUE;
+CREATE CONSTRAINT national_law_id IF NOT EXISTS FOR (l:NationalLaw) REQUIRE l.lawId IS UNIQUE;
+CREATE CONSTRAINT jurisdiction_milestone_id IF NOT EXISTS FOR (m:JurisdictionMilestone) REQUIRE m.milestoneId IS UNIQUE;
 CREATE INDEX query_audit_timestamp IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.timestamp);
 CREATE INDEX query_audit_participant IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.participantId);
 

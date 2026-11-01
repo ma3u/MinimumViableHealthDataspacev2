@@ -198,6 +198,10 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/jurisdictions",
+      "methods": ["GET"]
+    },
+    {
       "path": "/api/keycloak-config",
       "methods": ["GET"]
     },
@@ -375,6 +379,7 @@
     "/graph",
     "/information",
     "/journey",
+    "/jurisdictions",
     "/negotiate",
     "/offline",
     "/onboarding",
@@ -1193,8 +1198,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 53,
-    "operations": 70
+    "paths": 54,
+    "operations": 71
   },
   "workflowJobs": {
     "test.yml": [
@@ -1248,12 +1253,12 @@
   },
   "lastUpdated": {
     "/docs": "2026-10-28",
-    "/docs/user-guide": "2026-10-31",
-    "/docs/developer": "2026-10-31",
-    "/docs/developer/quality-gates": "2026-10-31",
-    "/docs/developer/api": "2026-10-31",
-    "/docs/developer/reference": "2026-10-31",
-    "/docs/architecture": "2026-10-31",
+    "/docs/user-guide": "2026-11-01",
+    "/docs/developer": "2026-11-01",
+    "/docs/developer/quality-gates": "2026-11-01",
+    "/docs/developer/api": "2026-11-01",
+    "/docs/developer/reference": "2026-11-01",
+    "/docs/architecture": "2026-11-01",
     "/docs/security": "2026-10-31",
     "/docs/security/[slug]": "2026-10-31",
     "/docs/klarbefund": "2026-10-31",

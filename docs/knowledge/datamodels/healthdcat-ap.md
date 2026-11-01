@@ -66,3 +66,14 @@ requires of every dataset, so a saved entry validates at once. Its Turtle
 export is the proxy's JSON-LD written as Turtle (`ui/src/lib/healthdcat-ap.ts`);
 CI validates the Turtle and checks it is the same graph
 (`validate.py --same-as`).
+
+Languages (#782): English is the source language. A translation is the same
+property with the language as suffix (`titleDe`, `descriptionDe`,
+`hdcatapKeywordsDe`, and `Fr`, `Nl`, `Es`), set by
+`neo4j/seed-catalog-translations.cypher`: German for every dataset, French
+and Dutch where the dataset comes from a country that speaks them. The
+serialiser writes `dct:title`, `dct:description` and `dcat:keyword` as values
+tagged with their language (one value per language, as DCAT-AP asks), and the
+catalogue page shows the language a visitor picks, falling back to English
+per text and marking the fallback. The editor does not take translations yet,
+and the `catalog_search` fulltext index reads the English texts only.

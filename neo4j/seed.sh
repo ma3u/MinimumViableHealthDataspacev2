@@ -137,6 +137,8 @@ if [ "${SEED_PHASE:-}" = "demo-only" ]; then
   run_file /seed/seed-study-results.cypher "study results: ECG, imaging, vaccinations, medication plan (ADR-059)"
   run_file /seed/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
   run_file /seed/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
+  run_file /seed/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
+  run_file /seed/seed-jurisdictions.cypher "national EHDS implementation profiles (#782)"
   echo ""
   echo "=== Verifying ==="
   cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" \
@@ -182,6 +184,7 @@ run_file /seed/seed-study-results.cypher "study results: ECG, imaging, vaccinati
 # migration corrects them. Idempotent: it matches only the old values.
 run_file /seed/migrate-ehds-article-labels.cypher "EHDS article labels to adopted numbers (#694)"
 run_file /seed/register-healthdcat-ap-r8.cypher "HealthDCAT-AP Release 8 dataset descriptions (#700)"
+run_file /seed/seed-catalog-translations.cypher "dataset descriptions in German, French and Dutch (#782)"
 
 # Phase 26a: bootstrap :Participant source labels + dspCatalogUrl so the
 # catalog-crawler has targets and the enricher can link federated datasets
@@ -192,6 +195,11 @@ run_file /seed/participant-source-init.cypher "participant source labels (Phase 
 # there is no live CFM TenantManager) so the dashboard shows non-zero
 # Participant Profiles + Disposed VPAs counts. Idempotent MERGE.
 run_file /seed/seed-tenant-profiles.cypher "CFM tenant profiles + VPAs (Phase 26e)"
+
+# Issue #782: the national implementation of the EHDS in DE, AT, BE, FR, NL
+# and ES, and which participant is under which. After Phase 26a, which gives
+# every participant its country. Idempotent MERGE.
+run_file /seed/seed-jurisdictions.cypher "national EHDS implementation profiles (#782)"
 
 # Phase 26d: NLQ glossary — NL->code mappings for federated templates.
 # Stored in Neo4j (not hardcoded) so operators can extend without a

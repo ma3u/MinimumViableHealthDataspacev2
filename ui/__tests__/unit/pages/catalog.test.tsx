@@ -382,3 +382,90 @@ describe("CatalogPage", () => {
     ).toBeInTheDocument();
   });
 });
+
+// ── Descriptions in more than one language (#782) ────────────────────
+describe("CatalogPage in another language", () => {
+  const translated = {
+    ...sampleDataset,
+    translations: {
+      de: {
+        title: "Synthetische FHIR-Patientenkohorte",
+        description: "Ein synthetischer Datensatz von rund 100 Personen",
+      },
+    },
+  };
+
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it("offers only the languages the datasets are described in", async () => {
+    mockFetchApi.mockReturnValue(mockResponse([translated, secondDataset]));
+    render(<CatalogPage />);
+    const group = await screen.findByRole("group", {
+      name: "Language of the dataset descriptions",
+    });
+    const buttons = Array.from(group.querySelectorAll("button")).map(
+      (b) => b.textContent,
+    );
+    expect(buttons).toEqual(["English", "Deutsch"]);
+  });
+
+  it("shows the chosen language, and English with a mark where there is none", async () => {
+    const user = userEvent.setup();
+    mockFetchApi.mockReturnValue(mockResponse([translated, secondDataset]));
+    render(<CatalogPage />);
+    await screen.findByText("Synthetic FHIR Patient Cohort");
+
+    await user.click(screen.getByRole("button", { name: "Deutsch" }));
+
+    const title = screen.getByText("Synthetische FHIR-Patientenkohorte");
+    expect(title).toHaveAttribute("lang", "de");
+    expect(
+      screen.queryByText("Synthetic FHIR Patient Cohort"),
+    ).not.toBeInTheDocument();
+    // The second dataset has no German: its English title is marked as such.
+    expect(screen.getByText("OMOP CDM Condition Data")).toHaveAttribute(
+      "lang",
+      "en",
+    );
+    expect(
+      screen.getAllByLabelText("shown in English, no Deutsch text yet").length,
+    ).toBeGreaterThan(0);
+    expect(localStorage.getItem("catalog-metadata-language")).toBe("de");
+  });
+
+  it("starts in the language chosen before", async () => {
+    localStorage.setItem("catalog-metadata-language", "de");
+    mockFetchApi.mockReturnValue(mockResponse([translated]));
+    render(<CatalogPage />);
+    expect(
+      await screen.findByText("Synthetische FHIR-Patientenkohorte"),
+    ).toBeInTheDocument();
+  });
+
+  it("finds a dataset by its German title while English is shown", async () => {
+    const user = userEvent.setup();
+    mockFetchApi.mockReturnValue(mockResponse([translated, secondDataset]));
+    render(<CatalogPage />);
+    await screen.findByText("Synthetic FHIR Patient Cohort");
+    await user.type(
+      screen.getByLabelText("Search datasets"),
+      "Patientenkohorte",
+    );
+    expect(
+      screen.getByText("Synthetic FHIR Patient Cohort"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("OMOP CDM Condition Data"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("links to the national EHDS rules", async () => {
+    mockFetchApi.mockReturnValue(mockResponse([sampleDataset]));
+    render(<CatalogPage />);
+    expect(
+      await screen.findByRole("link", { name: /National EHDS rules/ }),
+    ).toHaveAttribute("href", "/jurisdictions");
+  });
+});

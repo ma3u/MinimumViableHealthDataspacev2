@@ -259,6 +259,17 @@ export default function InformationPage() {
                       {b.name}
                     </span>
                     {b.country ? ` (${b.country})` : ""}
+                    {b.country && (
+                      <>
+                        {" · "}
+                        <Link
+                          href={`/jurisdictions#${b.country.toLowerCase()}`}
+                          className="text-(--accent) underline"
+                        >
+                          national rules
+                        </Link>
+                      </>
+                    )}
                     {b.contactName || b.contactEmail
                       ? ` · ${[b.contactName, b.contactEmail]
                           .filter(Boolean)

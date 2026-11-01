@@ -18,8 +18,26 @@
   },
   "@id": "https://ehds.mabu.red/catalog",
   "@type": "dcat:Catalog",
-  "dct:title": "EHDS integration hub, HealthDCAT-AP catalogue",
-  "dct:description": "Health datasets of the hub, described in HealthDCAT-AP Release 8. All are synthetic.",
+  "dct:title": [
+    {
+      "@value": "EHDS integration hub, HealthDCAT-AP catalogue",
+      "@language": "en"
+    },
+    {
+      "@value": "EHDS-Integrationshub, HealthDCAT-AP-Katalog",
+      "@language": "de"
+    }
+  ],
+  "dct:description": [
+    {
+      "@value": "Health datasets of the hub, described in HealthDCAT-AP Release 8. All are synthetic.",
+      "@language": "en"
+    },
+    {
+      "@value": "Gesundheitsdatensätze des Hubs, beschrieben in HealthDCAT-AP Release 8. Alle sind synthetisch.",
+      "@language": "de"
+    }
+  ],
   "dcatap:applicableLegislation": {
     "@id": "http://data.europa.eu/eli/reg/2025/327/oj",
     "@type": "eli:LegalResource"
@@ -40,8 +58,26 @@
       "@id": "https://ehds.mabu.red/catalog/datasets/dataset%3Aalpha-klinik-cardio-registry",
       "@type": "dcat:Dataset",
       "dct:identifier": "dataset:alpha-klinik-cardio-registry",
-      "dct:title": "AlphaKlinik Berlin Cardiac Registry",
-      "dct:description": "Synthetic registry of cardiac outcomes at AlphaKlinik Berlin, FHIR R4.",
+      "dct:title": [
+        {
+          "@value": "AlphaKlinik Berlin Cardiac Registry",
+          "@language": "en"
+        },
+        {
+          "@value": "Kardiologisches Register der AlphaKlinik Berlin",
+          "@language": "de"
+        }
+      ],
+      "dct:description": [
+        {
+          "@value": "Synthetic registry of cardiac outcomes at AlphaKlinik Berlin, FHIR R4.",
+          "@language": "en"
+        },
+        {
+          "@value": "Synthetisches Register kardialer Behandlungsergebnisse der AlphaKlinik Berlin, FHIR R4.",
+          "@language": "de"
+        }
+      ],
       "dct:accessRights": {
         "@id": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC",
         "@type": "dct:RightsStatement"
@@ -69,10 +105,38 @@
         }
       },
       "dcat:keyword": [
-        "Cardiology",
-        "RegistryData",
-        "synthetic data",
-        "EHDS secondary use"
+        {
+          "@value": "Cardiology",
+          "@language": "en"
+        },
+        {
+          "@value": "RegistryData",
+          "@language": "en"
+        },
+        {
+          "@value": "synthetic data",
+          "@language": "en"
+        },
+        {
+          "@value": "EHDS secondary use",
+          "@language": "en"
+        },
+        {
+          "@value": "Kardiologie",
+          "@language": "de"
+        },
+        {
+          "@value": "Registerdaten",
+          "@language": "de"
+        },
+        {
+          "@value": "synthetische Daten",
+          "@language": "de"
+        },
+        {
+          "@value": "EHDS-Sekundärnutzung",
+          "@language": "de"
+        }
       ],
       "dct:provenance": {
         "@type": "dct:ProvenanceStatement",
@@ -338,8 +402,14 @@
       "@id": "https://ehds.mabu.red/catalog/datasets/dataset%3Almc-omop-analytics",
       "@type": "dcat:Dataset",
       "dct:identifier": "dataset:lmc-omop-analytics",
-      "dct:title": "Limburg Medical Centre OMOP Analytics",
-      "dct:description": "Synthetic OMOP CDM 5.4 warehouse at Limburg Medical Centre.",
+      "dct:title": {
+        "@value": "Limburg Medical Centre OMOP Analytics",
+        "@language": "en"
+      },
+      "dct:description": {
+        "@value": "Synthetic OMOP CDM 5.4 warehouse at Limburg Medical Centre.",
+        "@language": "en"
+      },
       "dct:accessRights": {
         "@id": "http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC",
         "@type": "dct:RightsStatement"
@@ -367,9 +437,18 @@
         }
       },
       "dcat:keyword": [
-        "Clinical Research",
-        "AnalyticsData",
-        "synthetic data"
+        {
+          "@value": "Clinical Research",
+          "@language": "en"
+        },
+        {
+          "@value": "AnalyticsData",
+          "@language": "en"
+        },
+        {
+          "@value": "synthetic data",
+          "@language": "en"
+        }
       ],
       "dct:provenance": {
         "@type": "dct:ProvenanceStatement",

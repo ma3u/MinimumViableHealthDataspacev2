@@ -33,3 +33,5 @@
 13 Static export/29 patient.bru
 13 Static export/30 graph.bru
 13 Static export/31 admin-spe.bru
+# 13 Static export/32 jurisdictions.bru: runs against the published Pages site, which has no
+# mock/jurisdictions.json until #783 is merged and deployed; enabled again after that (#782).

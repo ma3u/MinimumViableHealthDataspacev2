@@ -22,7 +22,15 @@
       "Patient fhir-pat-1007",
       "Patient fhir-pat-1008"
     ],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "Synthetischer Patientenverlauf Typ-2-Diabetes",
+        "description": "Vollständiger Patientenverlauf bei Typ-2-Diabetes: Diagnose, HbA1c-Kontrollen, Anpassung der Medikation und Erfassung von Folgeerkrankungen."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "Synthea Synthetic FHIR R4 Patient Cohort",
@@ -46,7 +54,15 @@
       "FHIR Push → PharmaCo ✓",
       "FHIR Pull → LMC (Active)",
       "FHIR Push → IRS (Error)"
-    ]
+    ],
+    "translations": {
+      "de": {
+        "title": "Synthetische FHIR-R4-Patientenkohorte (Synthea)",
+        "description": "Synthetische Längsschnittdaten von Patientinnen und Patienten, mit Synthea 3.3.0 für Massachusetts erzeugt. Enthält Demografie, Kontakte, Diagnosen, Messwerte und Verordnungen in FHIR R4, in Schicht 4 auf OMOP CDM abgebildet."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:omop-cdm-v54-analytics",
@@ -62,7 +78,15 @@
     "providers": ["AlphaKlinik Berlin"],
     "consumers": ["PharmaCo Research AG"],
     "fhirResources": [],
-    "transfers": ["OMOP Pull → PharmaCo ✓"]
+    "transfers": ["OMOP Pull → PharmaCo ✓"],
+    "translations": {
+      "de": {
+        "title": "Analysedatenbank OMOP CDM v5.4",
+        "description": "Analysedatenbank nach dem OMOP Common Data Model v5.4 mit standardisierten klinischen Daten aus FHIR-R4-Quellen."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:prostate-cancer-registry",
@@ -78,7 +102,19 @@
     "providers": ["Limburg Medical Centre"],
     "consumers": ["MedReg DE"],
     "fhirResources": [],
-    "transfers": ["PCA Push → MedReg ✓"]
+    "transfers": ["PCA Push → MedReg ✓"],
+    "translations": {
+      "de": {
+        "title": "Multizentrisches Prostatakrebsregister",
+        "description": "Föderiertes Register zu Behandlungsergebnissen bei Prostatakrebs mit TNM-Stadien, Gleason-Scores und Behandlungsprotokollen in FHIR R4."
+      },
+      "nl": {
+        "title": "Multicentrisch register prostaatkanker",
+        "description": "Gefedereerd register van uitkomsten bij prostaatkanker met TNM-stadia, Gleason-scores en behandelprotocollen in FHIR R4."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:synthea-fhir-r4-mvd",
@@ -102,7 +138,15 @@
       "FHIR Push → PharmaCo ✓",
       "FHIR Pull → LMC (Active)",
       "FHIR Push → IRS (Error)"
-    ]
+    ],
+    "translations": {
+      "de": {
+        "title": "Synthetische FHIR-R4-Patientenkohorte (Synthea)",
+        "description": "Synthetische Längsschnittdaten von Patientinnen und Patienten, mit Synthea 3.3.0 für Massachusetts erzeugt. Enthält Demografie, Kontakte, Diagnosen, Messwerte und Verordnungen in FHIR R4, in Schicht 4 auf OMOP CDM abgebildet."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:omop-cdm-v54-analytics-detail",
@@ -118,7 +162,15 @@
     "providers": ["AlphaKlinik Berlin"],
     "consumers": ["PharmaCo Research AG"],
     "fhirResources": [],
-    "transfers": ["OMOP Pull → PharmaCo ✓"]
+    "transfers": ["OMOP Pull → PharmaCo ✓"],
+    "translations": {
+      "de": {
+        "title": "Analysedatenbank OMOP CDM v5.4",
+        "description": "Analysedatenbank nach dem OMOP Common Data Model v5.4. Enthält standardisierte klinische Daten aus FHIR-R4-Quellen für epidemiologische Forschung und Arzneimittelsicherheit."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:prostate-cancer-registry-detail",
@@ -134,7 +186,15 @@
     "providers": ["Limburg Medical Centre"],
     "consumers": ["MedReg DE"],
     "fhirResources": [],
-    "transfers": ["PCA Push → MedReg ✓"]
+    "transfers": ["PCA Push → MedReg ✓"],
+    "translations": {
+      "de": {
+        "title": "Multizentrisches Prostatakrebsregister",
+        "description": "Föderiertes Register zu Behandlungsergebnissen bei Prostatakrebs von teilnehmenden Gesundheitsdateninhabern. Enthält TNM-Stadien, Gleason-Scores, Behandlungsprotokolle und 5-Jahres-Überlebensdaten in HL7 FHIR R4."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:t2dm-patient-journey",
@@ -150,7 +210,15 @@
     "providers": ["AlphaKlinik Berlin"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "Synthetischer Patientenverlauf Typ-2-Diabetes",
+        "description": "Vollständiger Patientenverlauf bei Typ-2-Diabetes: Diagnose, HbA1c-Kontrollen, Anpassung der Medikation und Erfassung von Folgeerkrankungen."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:fhir-encounter-history",
@@ -166,7 +234,15 @@
     "providers": ["AlphaKlinik Berlin"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "FHIR-Sammlung von Behandlungskontakten",
+        "description": "Längsschnittdaten zu Notfall-, stationären und ambulanten Kontakten, verknüpft mit Practitioner- und Location-Ressourcen zur Analyse von Versorgungspfaden."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:fhir-diagnostic-report",
@@ -182,7 +258,19 @@
     "providers": ["Limburg Medical Centre"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "FHIR-Befundberichte",
+        "description": "DiagnosticReport-Ressourcen aus Radiologie, Pathologie und Labor mit verknüpften Observation-Ergebnissen und Probenreferenzen."
+      },
+      "nl": {
+        "title": "FHIR-diagnostische verslagen",
+        "description": "DiagnosticReport-resources uit radiologie, pathologie en laboratorium met gekoppelde Observation-resultaten en verwijzingen naar monsters."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:fhir-care-plan",
@@ -198,7 +286,15 @@
     "providers": ["AlphaKlinik Berlin"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "FHIR-Register für Behandlungspläne",
+        "description": "Strukturierte CarePlan-Ressourcen für die Versorgung chronischer Erkrankungen, mit Behandlungszielen, geplanten Maßnahmen, Zuständigkeiten im Behandlungsteam und Ergebnismaßen."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:fhir-condition-list",
@@ -214,7 +310,15 @@
     "providers": ["Limburg Medical Centre"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "FHIR-Problemliste der Diagnosen",
+        "description": "Aktive und abgeschlossene Condition-Ressourcen, auf SNOMED CT und ICD-10 abgebildet, mit Beginn, Schweregrad, Verifikationsstatus und klinischem Stadium."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:fhir-medication-request",
@@ -230,7 +334,19 @@
     "providers": ["Institut de Recherche Santé"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "FHIR-Datensatz Arzneimittelverordnungen",
+        "description": "MedicationRequest-Ressourcen mit Verordnungen, Dosierungsanweisungen, Folgeverordnungen und Hinweisen auf Wechselwirkungen, kodiert mit RxNorm und ATC."
+      },
+      "fr": {
+        "title": "Jeu de données FHIR des prescriptions",
+        "description": "Ressources MedicationRequest couvrant les prescriptions, les posologies, les renouvellements et les alertes d'interaction, codées en RxNorm et ATC."
+      }
+    },
+    "accessBody": "Institut de Recherche Santé",
+    "accessBodyCountry": "FR"
   },
   {
     "id": "dataset:fhir-immunization-record",
@@ -246,7 +362,15 @@
     "providers": ["Limburg Medical Centre"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "FHIR-Impfdaten",
+        "description": "Immunization-Ressourcen zu COVID-19-, Influenza- und Kinderimpfungen mit Chargennummern, abgestimmt auf das digitale COVID-Zertifikat der EU."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:fhir-allergy-intolerance",
@@ -262,7 +386,15 @@
     "providers": ["AlphaKlinik Berlin"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "FHIR-Register Allergien und Unverträglichkeiten",
+        "description": "AllergyIntolerance-Ressourcen zu Arzneimittelallergien, Nahrungsmittelunverträglichkeiten und Umweltempfindlichkeiten mit SNOMED-CT-Substanzcodes."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:fhir-procedure-bundle",
@@ -278,7 +410,15 @@
     "providers": ["AlphaKlinik Berlin"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "FHIR-Bündel Prozeduren",
+        "description": "Procedure-Ressourcen zu chirurgischen Eingriffen, diagnostischen Verfahren und Therapien mit SNOMED-CT-Codes und Körperstellen."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:fhir-observation-vitals",
@@ -294,7 +434,15 @@
     "providers": ["Limburg Medical Centre"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "FHIR-Vitalwerte und Laborergebnisse",
+        "description": "Observation-Ressourcen mit Vitalzeichen und Laborergebnissen, kodiert mit LOINC und verknüpft mit Encounter- und Patient-Ressourcen."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:fhir-cohort-bundle",
@@ -310,7 +458,15 @@
     "providers": ["PharmaCo Research AG"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "FHIR-Bündel für Kohortensuchen",
+        "description": "Vorbereitete FHIR-Bundle-Ressourcen für epidemiologische Kohortenabfragen, für Auswertungen auf Bevölkerungsebene wie Prävalenz und Stratifizierung nach Ergebnissen."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:healthdcatap-federated-catalog",
@@ -326,7 +482,15 @@
     "providers": ["MedReg DE"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "Föderierter HealthDCAT-AP-Katalog",
+        "description": "Zusammengeführter HealthDCAT-AP-Metadatenkatalog mit den Datensatzbeschreibungen aller teilnehmenden Gesundheitsdateninhaber für den grenzüberschreitenden Zugang zu Gesundheitsdaten."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:meddra-v27-adverse-events",
@@ -342,7 +506,15 @@
     "providers": ["PharmaCo Research AG"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "MedDRA v27.0, Klassifikation unerwünschter Ereignisse",
+        "description": "Terminologie unerwünschter Ereignisse des Medical Dictionary for Regulatory Activities (MedDRA) v27.0, abgebildet auf FHIR-R4-AdverseEvent-Ressourcen. Umfasst Systemorganklassen (SOC), HLGT, HLT, bevorzugte Begriffe (PT) und LLT für die Signalerkennung in der Pharmakovigilanz und ICSR-Meldungen."
+      }
+    },
+    "accessBody": "MedReg DE",
+    "accessBodyCountry": "DE"
   },
   {
     "id": "dataset:clinical-trial-phases",
@@ -358,6 +530,18 @@
     "providers": ["Institut de Recherche Santé"],
     "consumers": [],
     "fhirResources": [],
-    "transfers": []
+    "transfers": [],
+    "translations": {
+      "de": {
+        "title": "Metadatenregister klinischer Studien der Phasen I bis IV",
+        "description": "Strukturierte Metadaten mehrphasiger klinischer Studien (Phase I Sicherheit, Phase II Wirksamkeit, Phase III Vergleich, Phase IV Überwachung nach Zulassung). Enthält EudraCT-Nummern, Endpunkte, Prüfzentren, Rekrutierungsziele und Abbildungen auf FHIR-R4-ResearchStudy und -ResearchSubject nach ICH E6(R3) GCP."
+      },
+      "fr": {
+        "title": "Registre de métadonnées des essais cliniques de phase I à IV",
+        "description": "Métadonnées structurées d'essais cliniques multiphases (phase I sécurité, phase II efficacité, phase III comparaison, phase IV surveillance après mise sur le marché), avec numéros EudraCT, critères d'évaluation, centres investigateurs, objectifs de recrutement et correspondances FHIR R4 ResearchStudy et ResearchSubject selon les BPC ICH E6(R3)."
+      }
+    },
+    "accessBody": "Institut de Recherche Santé",
+    "accessBodyCountry": "FR"
   }
 ]

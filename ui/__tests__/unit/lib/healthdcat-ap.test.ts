@@ -81,6 +81,24 @@ describe("the editor's vocabulary", () => {
   it("builds the static export's minimal description", () => {
     const d = minimalDescription({ id: "dataset:x", title: "X" });
     expect(d["@type"]).toBe("dcat:Dataset");
-    expect(d["dct:title"]).toBe("X");
+    expect(d["dct:title"]).toEqual({ "@value": "X", "@language": "en" });
+  });
+
+  it("tags the static description's translations with their language (#782)", () => {
+    const d = minimalDescription({
+      id: "dataset:x",
+      title: "Registry",
+      description: "A registry.",
+      translations: { de: { title: "Register" } },
+    });
+    expect(d["dct:title"]).toEqual([
+      { "@value": "Registry", "@language": "en" },
+      { "@value": "Register", "@language": "de" },
+    ]);
+    // German has no description, so only the English one is stated.
+    expect(d["dct:description"]).toEqual({
+      "@value": "A registry.",
+      "@language": "en",
+    });
   });
 });

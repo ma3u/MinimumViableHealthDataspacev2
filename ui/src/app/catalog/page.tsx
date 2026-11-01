@@ -21,6 +21,17 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import MermaidDiagram from "@/components/MermaidDiagram";
+import {
+  type CatalogLanguage,
+  type MetadataLanguage,
+  type Translation,
+  LANGUAGE_NAMES,
+  languagesOf,
+  localise,
+  searchableText,
+  storedLanguage,
+  storeLanguage,
+} from "@/lib/metadata-language";
 
 interface Dataset {
   id: string;
@@ -37,6 +48,36 @@ interface Dataset {
   consumers?: string[];
   fhirResources?: string[];
   transfers?: string[];
+  translations?: Partial<Record<MetadataLanguage, Translation>>;
+  accessBody?: string | null;
+  accessBodyCountry?: string | null;
+}
+
+/** The text a card shows in a language other than the page's, so a screen
+ * reader reads it in that language (WCAG 2.2, 3.1.2 Language of Parts). */
+function InLanguage({
+  lang,
+  shown,
+  children,
+}: {
+  lang: CatalogLanguage;
+  shown: CatalogLanguage;
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      <span lang={lang}>{children}</span>
+      {lang !== shown && (
+        <span
+          className="ml-1.5 align-middle text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm bg-white/20 border border-current opacity-80"
+          title={`No ${LANGUAGE_NAMES[shown]} text yet, shown in English`}
+          aria-label={`shown in English, no ${LANGUAGE_NAMES[shown]} text yet`}
+        >
+          EN
+        </span>
+      )}
+    </>
+  );
 }
 
 const LEGAL_BASIS_LABELS: Record<string, string> = {
@@ -203,6 +244,14 @@ function CatalogContent() {
   const [minSamples, setMinSamples] = useState(0);
   const [detailDataset, setDetailDataset] = useState<Dataset | null>(null);
   const [diagramDataset, setDiagramDataset] = useState<Dataset | null>(null);
+  // The language of the dataset descriptions (#782); the rest of the page
+  // stays English until the interface itself is translated (phase 2).
+  const [lang, setLang] = useState<CatalogLanguage>("en");
+  useEffect(() => setLang(storedLanguage()), []);
+  const chooseLanguage = (l: CatalogLanguage) => {
+    setLang(l);
+    storeLanguage(l);
+  };
 
   // The live hub hands over the proxy's HealthDCAT-AP Release 8 document, the
   // one CI validates with the official SHACL (#700); the static export has no
@@ -260,11 +309,13 @@ function CatalogContent() {
     ...new Set(datasets.map((d) => d.datasetType).filter(Boolean)),
   ].sort();
 
+  const languages = languagesOf(datasets);
+
   const visible = datasets.filter((d) => {
+    // A search finds a dataset in any language it is described in.
     if (
       searchText &&
-      !d.title?.toLowerCase().includes(searchText.toLowerCase()) &&
-      !d.description?.toLowerCase().includes(searchText.toLowerCase()) &&
+      !searchableText(d).includes(searchText.toLowerCase()) &&
       !d.theme?.toLowerCase().includes(searchText.toLowerCase())
     ) {
       return false;
@@ -328,6 +379,41 @@ function CatalogContent() {
               className="px-3 py-2 bg-(--surface-card) border border-(--border-ui) rounded-xl text-sm outline-hidden focus:border-(--accent) text-(--text-primary) placeholder:text-(--text-secondary) w-52"
             />
           </div>
+        </div>
+        <div className="-mt-4 mb-8 flex flex-wrap items-center gap-2">
+          {languages.length > 1 && (
+            <div
+              role="group"
+              aria-label="Language of the dataset descriptions"
+              className="flex flex-wrap items-center gap-2"
+            >
+              <span className="text-xs font-bold text-(--text-secondary) uppercase tracking-widest mr-1">
+                Descriptions in
+              </span>
+              {languages.map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  lang={l}
+                  aria-pressed={lang === l}
+                  onClick={() => chooseLanguage(l)}
+                  className={`px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
+                    lang === l
+                      ? "bg-(--accent) text-white border-(--accent)"
+                      : "bg-(--surface-card) text-(--text-secondary) border-(--border-ui) hover:border-(--accent)"
+                  }`}
+                >
+                  {LANGUAGE_NAMES[l]}
+                </button>
+              ))}
+            </div>
+          )}
+          <Link
+            href="/jurisdictions"
+            className="ml-auto text-xs font-bold text-(--accent) hover:underline"
+          >
+            National EHDS rules →
+          </Link>
         </div>
 
         {loading ? (
@@ -464,6 +550,7 @@ function CatalogContent() {
                   {visible.map((d, idx) => {
                     const grad = themeGradient(d.theme);
                     const status = providerStatus(d.publisher);
+                    const text = localise(d, lang);
                     return (
                       <div
                         key={d.id ?? `dataset-${idx}`}
@@ -489,7 +576,9 @@ function CatalogContent() {
                               </span>
                             )}
                             <h3 className="text-white text-lg font-bold mt-2 leading-tight line-clamp-2">
-                              {d.title ?? d.id}
+                              <InLanguage lang={text.titleLang} shown={lang}>
+                                {text.title || d.id}
+                              </InLanguage>
                             </h3>
                           </div>
                         </div>
@@ -545,7 +634,14 @@ function CatalogContent() {
 
                           {/* Description */}
                           <p className="text-sm text-(--text-secondary) leading-relaxed mb-5 line-clamp-2">
-                            {d.description}
+                            {text.description && (
+                              <InLanguage
+                                lang={text.descriptionLang}
+                                shown={lang}
+                              >
+                                {text.description}
+                              </InLanguage>
+                            )}
                           </p>
 
                           {/* Legal basis tag */}
@@ -604,7 +700,12 @@ function CatalogContent() {
                 <Database size={18} className="text-(--accent)" />
                 <div>
                   <p className="font-bold text-sm text-(--text-primary) line-clamp-1">
-                    {detailDataset.title}
+                    <InLanguage
+                      lang={localise(detailDataset, lang).titleLang}
+                      shown={lang}
+                    >
+                      {localise(detailDataset, lang).title}
+                    </InLanguage>
                   </p>
                   <p className="text-xs text-(--text-secondary)">
                     HealthDCAT-AP Metadata
@@ -626,6 +727,16 @@ function CatalogContent() {
                 {[
                   { label: "Dataset ID", value: detailDataset.id },
                   { label: "Publisher", value: detailDataset.publisher },
+                  {
+                    label: "Access Body",
+                    value: detailDataset.accessBody
+                      ? `${detailDataset.accessBody}${
+                          detailDataset.accessBodyCountry
+                            ? ` (${detailDataset.accessBodyCountry})`
+                            : ""
+                        }`
+                      : undefined,
+                  },
                   {
                     label: "Data Providers",
                     value: detailDataset.providers?.join(", "),

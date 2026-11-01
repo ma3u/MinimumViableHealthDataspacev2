@@ -10,6 +10,8 @@
 
 /** The categories of Art. 51(1) of Regulation (EU) 2025/327, as the
  * HealthDCAT-AP health-category vocabulary codes them. */
+import type { MetadataLanguage, Translation } from "@/lib/metadata-language";
+
 export const HEALTH_CATEGORIES: { code: string; label: string }[] = [
   { code: "EHRS", label: "Electronic health data from EHRs" },
   {
@@ -70,6 +72,23 @@ export interface CatalogEntry {
   datasetType?: string;
   legalBasis?: string;
   recordCount?: number | null;
+  translations?: Partial<Record<MetadataLanguage, Translation>>;
+}
+
+/** A text in English and its translations, each tagged with its language,
+ * as the proxy's serialiser writes them (#782). */
+function tagged(
+  en: string | undefined,
+  translations: CatalogEntry["translations"],
+  field: "title" | "description",
+) {
+  const values = [
+    ...(en ? [{ "@value": en, "@language": "en" }] : []),
+    ...Object.entries(translations ?? {}).flatMap(([lang, t]) =>
+      t?.[field] ? [{ "@value": t[field], "@language": lang }] : [],
+    ),
+  ];
+  return values.length > 1 ? values : values[0];
 }
 
 /**
@@ -87,8 +106,8 @@ export function minimalDescription(d: CatalogEntry): Record<string, unknown> {
     },
     "@type": "dcat:Dataset",
     "@id": d.id,
-    "dct:title": d.title,
-    "dct:description": d.description,
+    "dct:title": tagged(d.title, d.translations, "title"),
+    "dct:description": tagged(d.description, d.translations, "description"),
     "dct:license": d.license,
     "dct:conformsTo": d.conformsTo,
     "dct:publisher": d.publisher
