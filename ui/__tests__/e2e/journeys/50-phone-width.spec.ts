@@ -42,3 +42,24 @@ for (const width of [375, 390]) {
     ).toBeVisible();
   });
 }
+
+test("J1019 the menu panel scrolls to its last entry on a phone", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await skipIfKeycloakDown();
+  // edcadmin sees every menu group, the longest panel there is.
+  await loginAs(page, "edcadmin", "edcadmin");
+  await page.goto("/");
+  await page.locator(`[aria-controls="mobile-nav"]`).click();
+  const panel = page.locator("#mobile-nav");
+  await expect(panel).toBeVisible();
+  // After the panel's fade-in, which moves it while it runs.
+  await page.waitForTimeout(800);
+  const box = await panel.boundingBox();
+  // The panel ends inside the screen and scrolls itself.
+  expect(box!.y + box!.height).toBeLessThanOrEqual(844 + 1);
+  const last = panel.getByRole("link").last();
+  await last.scrollIntoViewIfNeeded();
+  await expect(last).toBeInViewport();
+});

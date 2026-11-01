@@ -644,7 +644,7 @@ export default function Navigation() {
 
   return (
     <nav
-      className="glass border-b border-(--border) sticky top-0 z-50"
+      className="glass border-b border-(--border) sticky top-0 z-50 flex flex-col max-h-dvh"
       role="navigation"
       aria-label="Main navigation"
     >
@@ -690,7 +690,11 @@ export default function Navigation() {
       {mobileOpen && (
         <div
           id="mobile-nav"
-          className="md:hidden border-t border-(--border) bg-(--surface) px-4 py-3 space-y-1 animate-fade-in-up"
+          // The bar is sticky, so a panel taller than the screen could not be
+          // scrolled to its end on a phone. The nav is at most the screen's
+          // height (flex column); the bar keeps its height, the panel takes
+          // the rest and scrolls on its own.
+          className="md:hidden border-t border-(--border) bg-(--surface) px-4 py-3 space-y-1 animate-fade-in-up min-h-0 overflow-y-auto overscroll-contain"
         >
           <div className="mb-2 px-1">
             <LanguagePicker />
