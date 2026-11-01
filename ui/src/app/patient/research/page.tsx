@@ -10,6 +10,7 @@ import {
   ShieldOff,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import { useT } from "@/lib/i18n/translate";
 
 interface Program {
   studyId: string;
@@ -47,6 +48,8 @@ const DEMO_PATIENT_ID = "demo-patient-1";
 const day = (iso: string | null) => (iso ? iso.slice(0, 10) : "");
 
 export default function ResearchProgramsPage() {
+  const t = useT("patient");
+  const tn = useT("nav");
   const [programs, setPrograms] = useState<Program[]>([]);
   const [consents, setConsents] = useState<Consent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -107,8 +110,8 @@ export default function ResearchProgramsPage() {
       setMessage(
         d.message ??
           (optOut.optedOut
-            ? "Your opt-out is reversed."
-            : "You have opted out of secondary use."),
+            ? t("Your opt-out is reversed.")
+            : t("You have opted out of secondary use.")),
       );
       loadOptOut();
     } finally {
@@ -126,7 +129,7 @@ export default function ResearchProgramsPage() {
         body: JSON.stringify({ patientId, studyId }),
       });
       const d = await r.json();
-      setMessage(d.message ?? "EHR donation registered.");
+      setMessage(d.message ?? t("EHR donation registered."));
       reload();
     } finally {
       setDonating(null);
@@ -141,7 +144,9 @@ export default function ResearchProgramsPage() {
         `/api/patient/research?consentId=${consent.consentId}&patientId=${patientId}`,
         { method: "DELETE" },
       );
-      setMessage("Consent withdrawn. Nothing new of yours reaches this study.");
+      setMessage(
+        t("Consent withdrawn. Nothing new of yours reaches this study."),
+      );
       reload();
     } finally {
       setRevoking(null);
@@ -156,13 +161,23 @@ export default function ResearchProgramsPage() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-3xl mx-auto px-6 py-10">
         <PageIntro
-          title="Research Programs"
+          title={tn("Research Programs")}
           icon={FlaskConical}
-          description="Decide about the secondary use of your health data (EHDS Art. 71) and, separately, which studies you join. Joining a study is your consent (GDPR Art. 9(2)(a)); you can withdraw it at any time (GDPR Art. 7(3))."
-          prevStep={{ href: "/patient/profile", label: "Health Profile" }}
-          nextStep={{ href: "/patient/insights", label: "Research Insights" }}
-          infoText="Your data is pseudonymised by the Trust Center before reaching researchers. Individual-level data never leaves the Secure Processing Environment (EHDS Art. 73)."
-          docLink={{ href: "/docs/user-guide", label: "Patient Rights Guide" }}
+          description={t(
+            "Decide about the secondary use of your health data (EHDS Art. 71) and, separately, which studies you join. Joining a study is your consent (GDPR Art. 9(2)(a)); you can withdraw it at any time (GDPR Art. 7(3)).",
+          )}
+          prevStep={{ href: "/patient/profile", label: t("Health Profile") }}
+          nextStep={{
+            href: "/patient/insights",
+            label: tn("Research Insights"),
+          }}
+          infoText={t(
+            "Your data is pseudonymised by the Trust Center before reaching researchers. Individual-level data never leaves the Secure Processing Environment (EHDS Art. 73).",
+          )}
+          docLink={{
+            href: "/docs/user-guide",
+            label: t("Patient Rights Guide"),
+          }}
         />
 
         {/* The Art. 71 opt-out from all secondary use (ADR-062) */}
@@ -185,22 +200,23 @@ export default function ResearchProgramsPage() {
             )}
             <div className="text-xs text-teal-900 dark:text-teal-200 space-y-2">
               <h2 id="opt-out-heading" className="text-sm font-semibold">
-                Secondary use of your health data (EHDS Art. 71)
+                {t("Secondary use of your health data (EHDS Art. 71)")}
               </h2>
               <p>
-                Your data may be used for research, innovation, policy and
-                statistics, but only under a permit from a health data access
-                body, pseudonymised, inside a secure processing environment. You
-                can opt out at any time, without giving a reason, and opt back
-                in. The opt-out applies to every new extraction; what a permit
-                received before it is not recalled.
+                {t(
+                  "Your data may be used for research, innovation, policy and statistics, but only under a permit from a health data access body, pseudonymised, inside a secure processing environment. You can opt out at any time, without giving a reason, and opt back in. The opt-out applies to every new extraction; what a permit received before it is not recalled.",
+                )}
               </p>
               {optOut ? (
                 <>
                   <p data-testid="opt-out-state" className="font-medium">
                     {optOut.optedOut
-                      ? `You opted out on ${day(optOut.since)}.`
-                      : "You have not opted out: secondary use under a permit applies."}
+                      ? t("You opted out on {date}.", {
+                          date: day(optOut.since),
+                        })
+                      : t(
+                          "You have not opted out: secondary use under a permit applies.",
+                        )}
                   </p>
                   <button
                     type="button"
@@ -214,19 +230,23 @@ export default function ResearchProgramsPage() {
                     }`}
                   >
                     {switching
-                      ? "Saving…"
+                      ? t("Saving…")
                       : optOut.optedOut
-                        ? "Opt back in"
-                        : "Opt out of secondary use"}
+                        ? t("Opt back in")
+                        : t("Opt out of secondary use")}
                   </button>
                   {optOut.history.length > 0 && (
                     <ul className="list-disc list-inside text-(--text-secondary)">
                       {optOut.history.map((h) => (
                         <li key={h.optOutId}>
-                          Opted out {day(h.optedOutAt)}
                           {h.reversedAt
-                            ? `, back in ${day(h.reversedAt)}`
-                            : ", still in effect"}
+                            ? t("Opted out {date}, back in {back}", {
+                                date: day(h.optedOutAt),
+                                back: day(h.reversedAt),
+                              })
+                            : t("Opted out {date}, still in effect", {
+                                date: day(h.optedOutAt),
+                              })}
                         </li>
                       ))}
                     </ul>
@@ -235,14 +255,17 @@ export default function ResearchProgramsPage() {
               ) : (
                 <p className="text-(--text-secondary)">
                   {optOutError
-                    ? `The opt-out is available to a signed-in patient (${optOutError}).`
-                    : "Loading your opt-out…"}
+                    ? t(
+                        "The opt-out is available to a signed-in patient ({error}).",
+                        { error: optOutError },
+                      )
+                    : t("Loading your opt-out…")}
                 </p>
               )}
               <p className="text-(--text-secondary)">
-                Joining a study below is a separate choice: your consent to that
-                study (GDPR Art. 9(2)(a)), which you can withdraw at any time
-                (GDPR Art. 7(3)).
+                {t(
+                  "Joining a study below is a separate choice: your consent to that study (GDPR Art. 9(2)(a)), which you can withdraw at any time (GDPR Art. 7(3)).",
+                )}
               </p>
             </div>
           </div>
@@ -256,17 +279,19 @@ export default function ResearchProgramsPage() {
 
         {loading ? (
           <div className="text-(--text-secondary) text-sm">
-            Loading research programs…
+            {t("Loading research programs…")}
           </div>
         ) : (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold">
-              Available Research Programs ({programs.length})
+              {t("Available Research Programs ({n})", { n: programs.length })}
             </h2>
 
             {programs.length === 0 && (
               <div className="text-(--text-secondary) text-sm">
-                No research programs found. Seed the JAD stack to populate.
+                {t(
+                  "No research programs found. Seed the JAD stack to populate.",
+                )}
               </div>
             )}
 
@@ -293,7 +318,7 @@ export default function ResearchProgramsPage() {
                     </div>
                     {isConsented ? (
                       <span className="flex items-center gap-1 text-xs text-teal-800 dark:text-teal-400 font-medium">
-                        <CheckCircle2 size={12} /> Donated
+                        <CheckCircle2 size={12} /> {t("Donated")}
                       </span>
                     ) : (
                       <span className="text-xs text-(--text-secondary) border border-gray-600 rounded-sm px-2 py-0.5">
@@ -306,7 +331,7 @@ export default function ResearchProgramsPage() {
                   </p>
                   <div className="text-xs text-(--text-secondary) mb-3">
                     <span className="text-gray-700 dark:text-gray-400">
-                      Data needed:{" "}
+                      {t("Data needed:")}{" "}
                     </span>
                     {prog.dataNeeded}
                   </div>
@@ -324,8 +349,8 @@ export default function ResearchProgramsPage() {
                     >
                       <XCircle size={12} />
                       {revoking
-                        ? "Withdrawing…"
-                        : "Withdraw consent (GDPR Art. 7(3))"}
+                        ? t("Withdrawing…")
+                        : t("Withdraw consent (GDPR Art. 7(3))")}
                     </button>
                   ) : (
                     <button
@@ -334,8 +359,8 @@ export default function ResearchProgramsPage() {
                       className="px-3 py-1.5 rounded-sm bg-teal-700 hover:bg-teal-600 text-white text-xs font-medium transition-colors disabled:opacity-50"
                     >
                       {donating === prog.studyId
-                        ? "Registering…"
-                        : "Donate my EHR to this study"}
+                        ? t("Registering…")
+                        : t("Donate my EHR to this study")}
                     </button>
                   )}
                 </div>
@@ -345,13 +370,15 @@ export default function ResearchProgramsPage() {
             {/* Consent history */}
             {consents.length > 0 && (
               <div className="mt-8">
-                <h2 className="text-lg font-semibold mb-3">Consent History</h2>
+                <h2 className="text-lg font-semibold mb-3">
+                  {t("Consent History")}
+                </h2>
                 <table className="text-xs w-full border-collapse">
                   <thead>
                     <tr className="border-b border-(--border) text-(--text-secondary)">
-                      <th className="text-left pb-1">Study</th>
-                      <th className="text-left pb-1">Granted</th>
-                      <th className="text-left pb-1">Status</th>
+                      <th className="text-left pb-1">{t("Study")}</th>
+                      <th className="text-left pb-1">{t("Granted")}</th>
+                      <th className="text-left pb-1">{t("Status")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -367,11 +394,11 @@ export default function ResearchProgramsPage() {
                         <td className="py-1.5">
                           {c.revoked ? (
                             <span className="text-red-800 dark:text-red-400">
-                              Revoked
+                              {t("Revoked")}
                             </span>
                           ) : (
                             <span className="text-teal-800 dark:text-teal-400">
-                              Active
+                              {t("Active")}
                             </span>
                           )}
                         </td>

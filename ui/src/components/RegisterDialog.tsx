@@ -10,17 +10,11 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, ShieldCheck, ScanLine } from "lucide-react";
+import { useT } from "@/lib/i18n/translate";
 import {
   EudiApprovalFlow,
   type ApprovalMode,
 } from "@/components/wallet/EudiApprovalFlow";
-
-/** Eyebrow label per approval mode, so the dialog's intent is unmistakable. */
-const EYEBROW: Record<ApprovalMode, string> = {
-  register: "European Health Dataspace · Registration",
-  login: "European Health Dataspace · Sign in",
-  ehr: "Electronic Patient Record · ePA transfer",
-};
 
 export function RegisterDialog({
   mode = "register",
@@ -35,6 +29,15 @@ export function RegisterDialog({
   onClose: () => void;
   onComplete: () => void;
 }) {
+  const t = useT("patient");
+  const tc = useT("common");
+  // Eyebrow label per approval mode, so the dialog's intent is unmistakable.
+  const eyebrow =
+    mode === "register"
+      ? t("European Health Dataspace · Registration")
+      : mode === "login"
+        ? t("European Health Dataspace · Sign in")
+        : t("Electronic Patient Record · ePA transfer");
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   useEffect(() => {
@@ -70,7 +73,7 @@ export function RegisterDialog({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={tc("Close")}
           className="absolute top-3 right-3 grid place-items-center w-9 h-9 rounded-full text-(--text-secondary) hover:bg-(--surface-2) transition-colors z-10"
         >
           <X size={18} />
@@ -85,7 +88,7 @@ export function RegisterDialog({
               color: "var(--accent)",
             }}
           >
-            <ShieldCheck size={13} /> {EYEBROW[mode]}
+            <ShieldCheck size={13} /> {eyebrow}
           </span>
           <h2 className="text-2xl font-extrabold text-(--text-primary) leading-tight">
             {title}
@@ -96,8 +99,8 @@ export function RegisterDialog({
             </p>
           )}
           <span className="inline-flex items-center gap-1.5 mt-3 text-xs font-semibold text-(--text-secondary)">
-            <ScanLine size={13} /> Scan the QR or approve on your phone — no
-            password
+            <ScanLine size={13} />{" "}
+            {t("Scan the QR or approve on your phone, no password")}
           </span>
         </div>
 

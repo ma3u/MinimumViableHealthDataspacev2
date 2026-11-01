@@ -8,6 +8,7 @@
 import { TrendingUp, TrendingDown } from "lucide-react";
 import { TrendChart, type TrendMarker } from "@/components/charts/TrendChart";
 import type { TrendSeries } from "@/lib/journey-config";
+import { useT } from "@/lib/i18n/translate";
 
 export function MetricTrendRow({
   s,
@@ -16,6 +17,7 @@ export function MetricTrendRow({
   s: TrendSeries;
   markers?: TrendMarker[];
 }) {
+  const t = useT("patient");
   const first = s.points[0];
   const last = s.points[s.points.length - 1];
   const rising = last >= first;
@@ -29,7 +31,7 @@ export function MetricTrendRow({
   const fromYear = s.from?.slice(0, 4);
   const toYear = s.to?.slice(0, 4);
   const years = fromYear && toYear ? Number(toYear) - Number(fromYear) : 0;
-  const span = years >= 1 ? `${years}y` : "3 mo";
+  const span = years >= 1 ? t("{n}y", { n: years }) : t("3 mo");
 
   return (
     <div className="rounded-xl border border-(--border) bg-(--surface-2) p-3">

@@ -9,6 +9,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useState } from "react";
+import { useT } from "@/lib/i18n/translate";
 
 export interface StepLink {
   href: string;
@@ -51,6 +52,7 @@ export default function PageIntro({
   nextStep,
 }: PageIntroProps) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const tc = useT("common");
 
   return (
     <div className="mb-8">
@@ -99,7 +101,7 @@ export default function PageIntro({
             className="flex items-center gap-1.5 text-xs font-bold text-(--accent) hover:opacity-75 transition-opacity"
           >
             <Info size={13} />
-            {infoOpen ? "Hide details" : "How does this work?"}
+            {infoOpen ? tc("Hide details") : tc("How does this work?")}
           </button>
 
           {infoOpen && (

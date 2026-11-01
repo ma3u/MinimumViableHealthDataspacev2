@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, Pencil } from "lucide-react";
 import { IS_STATIC } from "@/lib/static-export";
 import { interestLabel } from "@/lib/patient/interests";
+import { useT } from "@/lib/i18n/translate";
 
 interface Suggested {
   id: string;
@@ -29,6 +30,7 @@ export default function HealthInterests({
   suggested: Suggested[];
   canEdit: boolean;
 }) {
+  const t = useT("patient");
   const [current, setCurrent] = useState<string[]>(interests);
   const [isChosen, setIsChosen] = useState(chosen);
   const [editing, setEditing] = useState(false);
@@ -62,7 +64,7 @@ export default function HealthInterests({
       setIsChosen(true);
       setEditing(false);
     } catch {
-      setError("The hub could not be reached");
+      setError(t("The hub could not be reached"));
     } finally {
       setSaving(false);
     }
@@ -71,7 +73,9 @@ export default function HealthInterests({
   return (
     <div data-testid="health-interests">
       <div className="flex items-center gap-3 mb-2">
-        <h2 className="text-lg font-semibold">Health Interests & Goals</h2>
+        <h2 className="text-lg font-semibold">
+          {t("Health Interests & Goals")}
+        </h2>
         {canEdit && !IS_STATIC && !editing && (
           <button
             type="button"
@@ -82,7 +86,7 @@ export default function HealthInterests({
             className="inline-flex items-center gap-1 rounded border border-(--border) px-2 py-1 text-xs hover:bg-(--surface-2)"
             data-testid="health-interests-edit"
           >
-            <Pencil size={12} aria-hidden /> Edit
+            <Pencil size={12} aria-hidden /> {t("Edit")}
           </button>
         )}
       </div>
@@ -92,7 +96,7 @@ export default function HealthInterests({
           <div className="flex flex-wrap gap-2">
             {current.length === 0 && (
               <span className="text-sm text-(--text-secondary)">
-                None chosen.
+                {t("None chosen.")}
               </span>
             )}
             {current.map((i) => (
@@ -100,26 +104,27 @@ export default function HealthInterests({
                 key={i}
                 className="text-xs px-3 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300 border border-teal-300 dark:border-teal-700"
               >
-                {interestLabel(i)}
+                {t(interestLabel(i))}
               </span>
             ))}
           </div>
           <p className="text-xs text-(--text-secondary) mt-2">
             {isChosen
-              ? "Chosen by you."
-              : "Suggested from your record; edit them to choose your own."}
+              ? t("Chosen by you.")
+              : t("Suggested from your record; edit them to choose your own.")}
           </p>
         </>
       ) : (
         <div>
           <p className="text-sm text-(--text-secondary) mb-2">
-            Choose what interests you. Your choice replaces the suggestions from
-            your record.
+            {t(
+              "Choose what interests you. Your choice replaces the suggestions from your record.",
+            )}
           </p>
           <div
             className="flex flex-wrap gap-2"
             role="group"
-            aria-label="Suggested health interests"
+            aria-label={t("Suggested health interests")}
           >
             {suggested.map((s) => {
               const on = draft.includes(s.id);
@@ -136,7 +141,7 @@ export default function HealthInterests({
                   }`}
                 >
                   {on && <Check size={12} aria-hidden />}
-                  {s.label}
+                  {t(s.label)}
                 </button>
               );
             })}
@@ -154,7 +159,7 @@ export default function HealthInterests({
               className="rounded bg-(--accent) px-3 py-1.5 text-sm font-medium text-white disabled:opacity-60"
               data-testid="health-interests-save"
             >
-              {saving ? "Saving..." : "Save"}
+              {saving ? t("Saving...") : t("Save")}
             </button>
             <button
               type="button"
@@ -164,7 +169,7 @@ export default function HealthInterests({
               }}
               className="rounded border border-(--border) px-3 py-1.5 text-sm"
             >
-              Cancel
+              {t("Cancel")}
             </button>
           </div>
         </div>

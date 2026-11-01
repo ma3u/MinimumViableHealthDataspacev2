@@ -22,6 +22,9 @@ import {
   Drumstick,
 } from "lucide-react";
 import { TrendChart } from "@/components/charts/TrendChart";
+import { useT } from "@/lib/i18n/translate";
+import { useLanguage } from "@/lib/use-language";
+import type { CatalogLanguage } from "@/lib/metadata-language";
 import type {
   PersonalHealthSource,
   TrendSeries,
@@ -35,19 +38,22 @@ const GOAL_ICON: Record<WeeklyGoal["icon"], typeof Leaf> = {
   protein: Drumstick,
 };
 
-/** A trend's own period when it has one ("12 Jul 2026 to 26 Oct 2026"). */
-function period(s: TrendSeries): string | null {
+/** A trend's own period when it has one, as its two days ("12 Jul 2026"). */
+function period(
+  s: TrendSeries,
+  lang: CatalogLanguage,
+): { from: string; to: string } | null {
   if (!s.from || !s.to) return null;
   const day = (iso: string) =>
-    new Date(iso).toLocaleDateString("en-GB", {
+    new Date(iso).toLocaleDateString(lang === "en" ? "en-GB" : lang, {
       day: "numeric",
       month: "short",
       year: "numeric",
     });
-  return `${day(s.from)} to ${day(s.to)}`;
+  return { from: day(s.from), to: day(s.to) };
 }
 
-function deltaChip(s: TrendSeries) {
+function deltaChip(s: TrendSeries, threeMonths: string) {
   const first = s.points[0];
   const last = s.points[s.points.length - 1];
   const rising = last >= first;
@@ -70,7 +76,7 @@ function deltaChip(s: TrendSeries) {
     >
       <Icon size={12} />
       {pct > 0 ? "+" : ""}
-      {pct}%{s.from ? "" : " · 3 mo"}
+      {pct}%{s.from ? "" : ` · ${threeMonths}`}
     </span>
   );
 }
@@ -82,6 +88,9 @@ export function HealthDetailModal({
   source: PersonalHealthSource;
   onClose: () => void;
 }) {
+  const t = useT("patient");
+  const tc = useT("common");
+  const lang = useLanguage();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   useEffect(() => {
@@ -103,7 +112,7 @@ export function HealthDetailModal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`${source.title} detail`}
+      aria-label={t("{title} detail", { title: source.title })}
       className="fixed inset-0 z-100 flex items-center justify-center p-4"
       onClick={onClose}
     >
@@ -115,7 +124,7 @@ export function HealthDetailModal({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close"
+          aria-label={tc("Close")}
           className="absolute top-3 right-3 grid place-items-center w-9 h-9 rounded-full text-(--text-secondary) hover:bg-(--surface-2) transition-colors"
         >
           <X size={18} />
@@ -144,7 +153,7 @@ export function HealthDetailModal({
                 aria-hidden="true"
                 style={{ color: source.brand }}
               />
-              Weekly goals
+              {t("Weekly goals")}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {source.weeklyGoals.map((g) => {
@@ -173,10 +182,10 @@ export function HealthDetailModal({
                       >
                         {met ? (
                           <>
-                            <Check size={10} aria-hidden="true" /> met
+                            <Check size={10} aria-hidden="true" /> {t("met")}
                           </>
                         ) : (
-                          `${g.target - g.current} to go`
+                          t("{n} to go", { n: g.target - g.current })
                         )}
                       </span>
                     </div>
@@ -193,11 +202,18 @@ export function HealthDetailModal({
                       aria-valuenow={Math.min(g.current, g.target)}
                       aria-valuemin={0}
                       aria-valuemax={g.target}
-                      aria-valuetext={`${g.current} of ${g.target} ${g.unit}`}
-                      aria-label={`${g.label}: ${g.current} of ${g.target} ${
-                        g.unit
-                      } — ${
-                        met ? "goal met" : `${g.target - g.current} to go`
+                      aria-valuetext={t("{current} of {target} {unit}", {
+                        current: g.current,
+                        target: g.target,
+                        unit: g.unit,
+                      })}
+                      aria-label={`${g.label}: ${t(
+                        "{current} of {target} {unit}",
+                        { current: g.current, target: g.target, unit: g.unit },
+                      )}, ${
+                        met
+                          ? t("goal met")
+                          : t("{n} to go", { n: g.target - g.current })
                       }`}
                       className="h-1.5 rounded-full bg-(--border) mt-2 overflow-hidden"
                     >
@@ -235,11 +251,14 @@ export function HealthDetailModal({
                     {s.unit}
                   </span>
                 </div>
-                {deltaChip(s)}
+                {deltaChip(s, t("3 mo"))}
               </div>
               <TrendChart points={s.points} color={s.color} />
               <p className="text-[10px] text-(--text-secondary) mt-1 text-right">
-                {period(s) ?? "last 12 weeks"}
+                {(() => {
+                  const p = period(s, lang);
+                  return p ? t("{from} to {to}", p) : t("last 12 weeks");
+                })()}
               </p>
             </div>
           ))}
@@ -250,7 +269,7 @@ export function HealthDetailModal({
           <div className="mt-5">
             <p className="flex items-center gap-1.5 text-sm font-bold text-(--text-primary) mb-2">
               <CalendarDays size={15} style={{ color: source.brand }} />
-              This week&rsquo;s plan
+              {t("This week’s plan")}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {source.weeklyPlan.map((d) => (
@@ -274,7 +293,7 @@ export function HealthDetailModal({
         )}
 
         <p className="text-[11px] text-(--text-secondary) mt-5 text-center">
-          Synthetic · illustrative — not medical advice.
+          {t("Synthetic · illustrative · not medical advice.")}
         </p>
       </div>
     </div>,

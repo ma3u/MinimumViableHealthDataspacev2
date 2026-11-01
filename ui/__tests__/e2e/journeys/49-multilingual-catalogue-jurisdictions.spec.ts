@@ -1,6 +1,6 @@
 /**
  * Issue #782, phase 1: dataset descriptions in more than one language and
- * the national implementation profiles (J1006 to J1022).
+ * the national implementation profiles (J1006 to J1024).
  *
  * The catalogue shows a dataset's title and description in the language a
  * visitor picks in the menu bar and falls back to English, marked as such; the HealthDCAT-AP
@@ -442,6 +442,142 @@ test.describe("Issue #782 · the access body's procedures follow the picker", ()
         "Activity report of the health data access body",
         "Applications for access, permits and the data accessed",
       ],
+    ]);
+  });
+});
+
+test.describe("Issue #782 · the patient's pages follow the picker", () => {
+  /** [lang, heading, one text inside the page] per page. */
+  type Case = [string, string, string];
+  async function check(page: Page, path: string, cases: Case[]) {
+    for (const [lang, title, text] of cases) {
+      await page.goto(`${path}?lang=${lang}`);
+      await expect(
+        page.getByRole("heading", { level: 1, name: title }),
+      ).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByText(text).first()).toBeVisible({
+        timeout: 15_000,
+      });
+    }
+  }
+
+  test("J1023 the patient's record, profile and personal research in every language", async ({
+    page,
+  }) => {
+    await skipIfKeycloakDown();
+    await loginAs(page, "patient1", "patient1");
+    await check(page, "/patient", [
+      ["de", "Patientenreise", "ePA-Daten anfordern"],
+      ["fr", "Parcours patient", "Demander les données du dossier"],
+      ["nl", "Patiëntreis", "EPD-gegevens opvragen"],
+      ["es", "Recorrido del paciente", "Solicitar datos de la HCE"],
+      ["en", "Patient Journey", "Request EHR data"],
+    ]);
+    await check(page, "/patient/profile", [
+      ["de", "Gesundheitsprofil und Risikobewertung", "Ihre Datenrechte:"],
+      [
+        "fr",
+        "Profil de santé et évaluation des risques",
+        "Vos droits sur vos données :",
+      ],
+      ["nl", "Gezondheidsprofiel en risicobeoordeling", "Uw gegevensrechten:"],
+      [
+        "es",
+        "Perfil de salud y evaluación de riesgos",
+        "Sus derechos sobre los datos:",
+      ],
+      ["en", "Health Profile & Risk Assessment", "Your data rights:"],
+    ]);
+    await check(page, "/patient/query", [
+      [
+        "de",
+        "Persönliche Forschung",
+        "Nur Ihre eigenen Daten · synthetisch · keine medizinische Beratung",
+      ],
+      [
+        "fr",
+        "Recherche personnelle",
+        "Uniquement vos propres données · synthétique · pas un avis médical",
+      ],
+      [
+        "nl",
+        "Persoonlijk onderzoek",
+        "Alleen uw eigen gegevens · synthetisch · geen medisch advies",
+      ],
+      [
+        "es",
+        "Investigación personal",
+        "Solo sus propios datos · sintético · no es consejo médico",
+      ],
+      [
+        "en",
+        "Personal Research",
+        "Your own records only · synthetic · not medical advice",
+      ],
+    ]);
+  });
+
+  test("J1024 research programmes, the Art. 71 opt-out, insights and the wallet in every language", async ({
+    page,
+  }) => {
+    await skipIfKeycloakDown();
+    await loginAs(page, "patient1", "patient1");
+    await check(page, "/patient/research", [
+      [
+        "de",
+        "Forschungsprogramme",
+        "Sekundärnutzung Ihrer Gesundheitsdaten (EHDS Art. 71)",
+      ],
+      [
+        "fr",
+        "Programmes de recherche",
+        "Utilisation secondaire de vos données de santé (EEDS, art. 71)",
+      ],
+      [
+        "nl",
+        "Onderzoeksprogramma’s",
+        "Secundair gebruik van uw gezondheidsgegevens (EHDS art. 71)",
+      ],
+      [
+        "es",
+        "Programas de investigación",
+        "Uso secundario de sus datos de salud (EEDS, art. 71)",
+      ],
+      [
+        "en",
+        "Research Programs",
+        "Secondary use of your health data (EHDS Art. 71)",
+      ],
+    ]);
+    await check(page, "/patient/insights", [
+      [
+        "de",
+        "Forschungserkenntnisse und medizinische Empfehlungen",
+        "Wie funktioniert das?",
+      ],
+      [
+        "fr",
+        "Résultats de recherche et recommandations médicales",
+        "Comment cela fonctionne-t-il ?",
+      ],
+      ["nl", "Onderzoeksinzichten en medische aanbevelingen", "Hoe werkt dit?"],
+      [
+        "es",
+        "Resultados de investigación y recomendaciones médicas",
+        "¿Cómo funciona?",
+      ],
+      [
+        "en",
+        "Research Insights & Medical Recommendations",
+        "How does this work?",
+      ],
+    ]);
+    await check(page, "/patient/wallet", [
+      ["de", "EUDI-Wallet verbinden", "d-you verbinden"],
+      ["fr", "Connecter votre portefeuille EUDI", "Connecter d-you"],
+      ["nl", "Uw EUDI-wallet koppelen", "d-you koppelen"],
+      ["es", "Conectar su cartera EUDI", "Conectar d-you"],
+      ["en", "Connect your EUDI wallet", "Connect d-you"],
     ]);
   });
 });
