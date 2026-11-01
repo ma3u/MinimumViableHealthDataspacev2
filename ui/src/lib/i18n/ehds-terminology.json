@@ -15,6 +15,20 @@
   },
   "terms": [
     {
+      "id": "ehds-abbreviation",
+      "article": "Title",
+      "en": "EHDS",
+      "de": "EHDS",
+      "fr": "EEDS",
+      "nl": "EHDS",
+      "es": "EEDS",
+      "avoid": {
+        "fr": ["EHDS"],
+        "es": ["EHDS"]
+      },
+      "note": "French and Spanish abbreviate the Regulation EEDS (espace européen des données de santé, Espacio Europeo de Datos de Salud); German and Dutch keep EHDS."
+    },
+    {
       "id": "health-data-access-body",
       "article": "Art. 55",
       "en": "health data access body",

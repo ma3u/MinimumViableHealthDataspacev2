@@ -70,10 +70,12 @@ CI validates the Turtle and checks it is the same graph
 Languages (#782): English is the source language. A translation is the same
 property with the language as suffix (`titleDe`, `descriptionDe`,
 `hdcatapKeywordsDe`, and `Fr`, `Nl`, `Es`), set by
-`neo4j/seed-catalog-translations.cypher`: German for every dataset, French
-and Dutch where the dataset comes from a country that speaks them. The
+`neo4j/seed-catalog-translations.cypher`: German and Spanish for every
+dataset, French and Dutch where the dataset comes from a country that speaks
+them, with the terms of `ui/src/lib/i18n/ehds-terminology.json` (French and
+Spanish abbreviate the Regulation EEDS). The
 serialiser writes `dct:title`, `dct:description` and `dcat:keyword` as values
 tagged with their language (one value per language, as DCAT-AP asks), and the
-catalogue page shows the language a visitor picks, falling back to English
+catalogue shows the language a visitor picks in the menu bar, falling back to English
 per text and marking the fallback. The editor does not take translations yet,
 and the `catalog_search` fulltext index reads the English texts only.

@@ -18,7 +18,7 @@ afterEach(() => {
 });
 
 describe("LanguagePicker", () => {
-  it("offers English, German, French and Dutch, each in its own name", () => {
+  it("offers English, German, French, Dutch and Spanish, each in its own name", () => {
     render(<LanguagePicker />);
     const select = screen.getByRole("combobox", { name: "Language" });
     const options = Array.from(select.querySelectorAll("option")).map((o) => [
@@ -31,6 +31,7 @@ describe("LanguagePicker", () => {
       ["de", "Deutsch", "de"],
       ["fr", "Français", "fr"],
       ["nl", "Nederlands", "nl"],
+      ["es", "Español", "es"],
     ]);
   });
 
