@@ -201,7 +201,7 @@ describe("NegotiatePage", () => {
     render(<NegotiatePage />);
     await waitFor(() => {
       expect(
-        screen.getByText(/Step 2 — Initiate Negotiation/),
+        screen.getByText(/Step 2: Initiate Negotiation/),
       ).toBeInTheDocument();
     });
     expect(
@@ -266,7 +266,7 @@ describe("NegotiatePage", () => {
     render(<NegotiatePage />);
     await waitFor(() => {
       expect(
-        screen.getByText(/Step 2 — Initiate Negotiation/),
+        screen.getByText(/Step 2: Initiate Negotiation/),
       ).toBeInTheDocument();
     });
     // The Start Negotiation button exists but is disabled until an offer is selected

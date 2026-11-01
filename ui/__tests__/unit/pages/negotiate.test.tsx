@@ -152,8 +152,8 @@ describe("NegotiatePage", () => {
     setupDefaultMocks();
     render(<NegotiatePage />);
     await waitFor(() => {
-      expect(screen.getByText("Step 1 — Choose Data Provider")).toBeTruthy();
-      expect(screen.getByText("Step 2 — Initiate Negotiation")).toBeTruthy();
+      expect(screen.getByText("Step 1: Choose Data Provider")).toBeTruthy();
+      expect(screen.getByText("Step 2: Initiate Negotiation")).toBeTruthy();
     });
   });
 
@@ -228,7 +228,7 @@ describe("NegotiatePage", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText("2 offer(s) found — select one to negotiate:"),
+        screen.getByText("2 offer(s) found. Select one to negotiate:"),
       ).toBeTruthy();
     });
 
@@ -285,7 +285,7 @@ describe("NegotiatePage", () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          "Complete Step 1 first — select a dataset offer above to negotiate.",
+          "Complete Step 1 first: select a dataset offer above to negotiate.",
         ),
       ).toBeTruthy();
     });
@@ -713,7 +713,7 @@ describe("NegotiatePage", () => {
     await waitFor(() => {
       expect(screen.getByText("LD Prefixed Dataset")).toBeTruthy();
       expect(
-        screen.getByText("1 offer(s) found — select one to negotiate:"),
+        screen.getByText("1 offer(s) found. Select one to negotiate:"),
       ).toBeTruthy();
     });
   });

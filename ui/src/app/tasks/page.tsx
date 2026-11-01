@@ -22,6 +22,7 @@ import {
 import PageIntro from "@/components/PageIntro";
 import Link from "next/link";
 import { IS_STATIC } from "@/lib/static-export";
+import { useT } from "@/lib/i18n/translate";
 
 /* ── Types ── */
 
@@ -127,6 +128,9 @@ function stateIndex(state: string, states: readonly string[]): number {
  * See IDS Dataspace Protocol 2025-1:
  *   Negotiations: Consumer/Provider interaction protocol
  *   Transfers:    Data Plane Signaling (DPS) lifecycle
+ *
+ * The labels are translated where they are shown (t(action.label)); the
+ * research dictionary must know each one (i18n-research.test.ts).
  */
 const NEGOTIATION_ACTIONS: Record<string, { label: string; color: string }[]> =
   {
@@ -239,12 +243,13 @@ type FilterType = "all" | "negotiation" | "transfer" | "active";
 /* ── Main Page ── */
 
 export default function TasksPage() {
+  const tc = useT("common");
   return (
     <Suspense
       fallback={
         <div className="flex items-center gap-2 text-(--text-secondary) p-10">
           <Loader2 size={16} className="animate-spin" />
-          Loading…
+          {tc("Loading…")}
         </div>
       }
     >
@@ -254,6 +259,8 @@ export default function TasksPage() {
 }
 
 function TasksContent() {
+  const t = useT("research");
+  const tn = useT("nav");
   /* ── Current user context ── */
   const demoPersona = useDemoPersona();
   const { session: tabSession } = useTabSession();
@@ -385,33 +392,38 @@ function TasksContent() {
   }, [tasks, isAdmin, selectedParticipant]);
 
   const filters: { key: FilterType; label: string; count: number }[] = [
-    { key: "all", label: "All", count: filteredCounts.total },
-    { key: "active", label: "Active", count: filteredCounts.active },
+    { key: "all", label: t("All"), count: filteredCounts.total },
+    { key: "active", label: t("Active"), count: filteredCounts.active },
     {
       key: "negotiation",
-      label: "Negotiations",
+      label: t("Negotiations"),
       count: filteredCounts.negotiations,
     },
-    { key: "transfer", label: "Transfers", count: filteredCounts.transfers },
+    { key: "transfer", label: t("Transfers"), count: filteredCounts.transfers },
   ];
 
   return (
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
-          title={isAdmin ? "All Tasks" : "My Tasks"}
+          title={isAdmin ? t("All Tasks") : t("My Tasks")}
           icon={ClipboardList}
           description={
             isAdmin
-              ? "Track all DSP protocol tasks across your dataspace participants. Negotiations and transfers are shown as live state pipelines following the Dataspace Protocol and Data Plane Signaling (DPS) specification."
-              : `Negotiations and transfers for ${
-                  currentOrg || "your organisation"
-                }. Use action buttons to advance the DSP state machine.`
+              ? t(
+                  "Track all DSP protocol tasks across your dataspace participants. Negotiations and transfers are shown as live state pipelines following the Dataspace Protocol and Data Plane Signaling (DPS) specification.",
+                )
+              : t(
+                  "Negotiations and transfers for {org}. Use action buttons to advance the DSP state machine.",
+                  { org: currentOrg || t("your organisation") },
+                )
           }
-          infoText="Tasks are aggregated from all registered participant contexts. Negotiations follow: REQUESTED → OFFERED → ACCEPTED → AGREED → VERIFIED → FINALIZED. Transfers follow: REQUESTED → STARTED → SUSPENDED → COMPLETED. The EDR badge indicates the Data Plane has been signalled via DPS and generated an Endpoint Data Reference with JWT bearer token."
+          infoText={t(
+            "Tasks are aggregated from all registered participant contexts. Negotiations follow: REQUESTED → OFFERED → ACCEPTED → AGREED → VERIFIED → FINALIZED. Transfers follow: REQUESTED → STARTED → SUSPENDED → COMPLETED. The EDR badge indicates the Data Plane has been signalled via DPS and generated an Endpoint Data Reference with JWT bearer token.",
+          )}
           docLink={{
             href: "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
-            label: "DSP Specification",
+            label: t("DSP Specification"),
             external: true,
           }}
         />
@@ -424,7 +436,9 @@ function TasksContent() {
             className="mb-6 flex items-start gap-2 rounded-lg border border-(--danger-border) bg-(--danger-bg) p-3 text-sm text-(--danger-text)"
           >
             <XCircle size={16} className="mt-0.5 shrink-0" />
-            <span>Tasks could not be loaded: {loadError}</span>
+            <span>
+              {t("Tasks could not be loaded: {error}", { error: loadError })}
+            </span>
           </div>
         )}
         {!loadError && data?.source === "store" && (
@@ -435,9 +449,10 @@ function TasksContent() {
           >
             <Circle size={16} className="mt-0.5 shrink-0" />
             <span>
-              The connector&apos;s management API is not answering
-              {data.backend?.edc ? ` (${data.backend.edc})` : ""}. These are the
-              tasks the hub last synced to its store; they may be stale.
+              {t(
+                "The connector's management API is not answering{detail}. These are the tasks the hub last synced to its store; they may be stale.",
+                { detail: data.backend?.edc ? ` (${data.backend.edc})` : "" },
+              )}
             </span>
           </div>
         )}
@@ -446,22 +461,22 @@ function TasksContent() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           {[
             {
-              label: "Total Tasks",
+              label: t("Total Tasks"),
               value: filteredCounts.total,
               color: "text-(--text-primary)",
             },
             {
-              label: "Active",
+              label: t("Active"),
               value: filteredCounts.active,
               color: "text-(--warning-text)",
             },
             {
-              label: "Negotiations",
+              label: t("Negotiations"),
               value: filteredCounts.negotiations,
               color: "text-(--accent)",
             },
             {
-              label: "Transfers",
+              label: t("Transfers"),
               value: filteredCounts.transfers,
               color: "text-(--accent)",
             },
@@ -494,10 +509,10 @@ function TasksContent() {
                 >
                   <Users size={12} />
                   {selectedParticipant === "all"
-                    ? "All Participants"
+                    ? t("All Participants")
                     : uniqueParticipants.find(
                         ([id]) => id === selectedParticipant,
-                      )?.[1] || "Unknown"}
+                      )?.[1] || t("Unknown")}
                   <ChevronDown size={10} />
                 </button>
                 {participantDropdownOpen && (
@@ -513,7 +528,7 @@ function TasksContent() {
                           : "text-(--text-primary)"
                       }`}
                     >
-                      All Participants ({counts.total})
+                      {t("All Participants ({n})", { n: counts.total })}
                     </button>
                     {uniqueParticipants.map(([id, name]) => {
                       const pCount = tasks.filter(
@@ -571,7 +586,7 @@ function TasksContent() {
             className="flex items-center gap-1 text-xs text-(--text-secondary) hover:text-(--text-primary) disabled:opacity-50"
           >
             <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
-            Refresh
+            {t("Refresh")}
           </button>
         </div>
 
@@ -579,28 +594,34 @@ function TasksContent() {
         {loading ? (
           <div className="flex items-center gap-2 text-(--text-secondary) py-8">
             <Loader2 size={16} className="animate-spin" />
-            Loading tasks…
+            {t("Loading tasks…")}
           </div>
         ) : filteredTasks.length === 0 ? (
           <div className="text-center py-12 text-(--text-secondary)">
             <ClipboardList size={32} className="mx-auto mb-3 opacity-40" />
             <p className="text-sm">
               {filter === "all"
-                ? "No tasks yet. Start by sharing data or negotiating a contract."
-                : `No ${filter} tasks found.`}
+                ? t(
+                    "No tasks yet. Start by sharing data or negotiating a contract.",
+                  )
+                : filter === "active"
+                  ? t("No active tasks found.")
+                  : filter === "negotiation"
+                    ? t("No negotiation tasks found.")
+                    : t("No transfer tasks found.")}
             </p>
             <div className="flex items-center justify-center gap-3 mt-4">
               <Link
                 href="/data/share"
                 className="text-xs text-teal-800 dark:text-teal-300 hover:underline"
               >
-                Share Data →
+                {tn("Share Data")} →
               </Link>
               <Link
                 href="/negotiate"
                 className="text-xs text-teal-800 dark:text-teal-300 hover:underline"
               >
-                Negotiate →
+                {tn("Negotiate")} →
               </Link>
             </div>
           </div>
@@ -610,7 +631,7 @@ function TasksContent() {
               const isNeg = task.type === "negotiation";
               const states = isNeg ? NEGOTIATION_STATES : TRANSFER_STATES;
               const TypeIcon = isNeg ? FileSignature : ArrowRightLeft;
-              const typeBadge = isNeg ? "Negotiation" : "Transfer";
+              const typeBadge = isNeg ? t("Negotiation") : tn("Transfer");
               const typeBadgeColor = isNeg
                 ? "bg-(--accent)/10 text-(--accent)"
                 : "bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300";
@@ -673,14 +694,14 @@ function TasksContent() {
                     return (
                       <div className="flex items-center gap-1.5">
                         <span className="text-[10px] text-(--text-secondary)">
-                          Actions:
+                          {t("Actions:")}
                         </span>
                         {actions.map((action) => (
                           <span
                             key={action.label}
                             className={`text-[10px] px-2 py-0.5 rounded-full bg-layer2/10 border border-layer2/30 ${action.color}`}
                           >
-                            {action.label}
+                            {t(action.label)}
                           </span>
                         ))}
                       </div>
@@ -696,7 +717,7 @@ function TasksContent() {
                     {task.contractId && (
                       <span
                         className="text-(--text-secondary)"
-                        title="Contract Agreement ID"
+                        title={t("Contract Agreement ID")}
                       >
                         📄 {task.contractId.slice(0, 12)}…
                       </span>
