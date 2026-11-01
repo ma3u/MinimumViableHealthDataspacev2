@@ -4,6 +4,7 @@ import { fetchApi } from "@/lib/api";
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import PageIntro from "@/components/PageIntro";
+import { useT } from "@/lib/i18n/translate";
 import {
   Loader2,
   Search,
@@ -80,12 +81,13 @@ function keywordMatch(text: string, query: string): boolean {
 }
 
 export default function DataDiscoverPage() {
+  const tc = useT("common");
   return (
     <Suspense
       fallback={
         <div className="flex items-center gap-2 text-(--text-secondary) p-10">
           <Loader2 size={16} className="animate-spin" />
-          Loading…
+          {tc("Loading…")}
         </div>
       }
     >
@@ -95,6 +97,8 @@ export default function DataDiscoverPage() {
 }
 
 function DataDiscoverContent() {
+  const t = useT("research");
+  const tn = useT("nav");
   const [groups, setGroups] = useState<ParticipantAssets[]>([]);
   const [catalog, setCatalog] = useState<CatalogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -158,13 +162,17 @@ function DataDiscoverContent() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
-          title="Discover Data"
+          title={t("Discover Data")}
           icon={Search}
-          description="Browse available data assets and HealthDCAT-AP datasets across all dataspace participants. Search by name, description, theme, or FHIR resource type to find datasets, then negotiate access."
-          prevStep={{ href: "/data/share", label: "Share Data" }}
-          nextStep={{ href: "/negotiate", label: "Negotiate Contract" }}
-          infoText="EDC assets come from the federated catalog; HealthDCAT-AP entries describe datasets using the European health metadata standard. Search uses keyword matching — each word is matched independently."
-          docLink={{ href: "/docs/user-guide", label: "User Guide" }}
+          description={t(
+            "Browse available data assets and HealthDCAT-AP datasets across all dataspace participants. Search by name, description, theme, or FHIR resource type to find datasets, then negotiate access.",
+          )}
+          prevStep={{ href: "/data/share", label: tn("Share Data") }}
+          nextStep={{ href: "/negotiate", label: t("Negotiate Contract") }}
+          infoText={t(
+            "EDC assets come from the federated catalog; HealthDCAT-AP entries describe datasets using the European health metadata standard. Search uses keyword matching: each word is matched independently.",
+          )}
+          docLink={{ href: "/docs/user-guide", label: tn("User Guide") }}
         />
 
         {/* Search bar */}
@@ -175,7 +183,7 @@ function DataDiscoverContent() {
           />
           <input
             type="search"
-            placeholder="Search by name, theme, FHIR type, publisher…"
+            placeholder={t("Search by name, theme, FHIR type, publisher…")}
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             className="w-full pl-10 pr-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm outline-hidden focus:border-layer2"
@@ -186,27 +194,27 @@ function DataDiscoverContent() {
         <div className="flex gap-1 mb-4 border-b border-(--border)">
           {(
             [
-              { key: "all", label: "All" },
-              { key: "assets", label: "EDC Assets" },
+              { key: "all", label: t("All") },
+              { key: "assets", label: t("EDC Assets") },
               { key: "catalog", label: "HealthDCAT-AP" },
             ] as { key: Tab; label: string }[]
-          ).map((t) => (
+          ).map((item) => (
             <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
+              key={item.key}
+              onClick={() => setTab(item.key)}
               className={`px-4 py-2 text-xs font-medium border-b-2 -mb-px transition-colors ${
-                tab === t.key
+                tab === item.key
                   ? "border-layer2 text-teal-800 dark:text-teal-300"
                   : "border-transparent text-(--text-secondary) hover:text-(--text-primary)"
               }`}
             >
-              {t.label}
+              {item.label}
               {!loading && (
                 <span className="ml-1 text-(--text-secondary)">
                   (
-                  {t.key === "all"
+                  {item.key === "all"
                     ? totalMatching
-                    : t.key === "assets"
+                    : item.key === "assets"
                       ? visibleAssets.length
                       : visibleCatalog.length}
                   )
@@ -220,16 +228,20 @@ function DataDiscoverContent() {
         {!loading && (
           <div className="flex gap-4 mb-6 text-xs text-(--text-secondary)">
             <span>
-              {groups.length} participant{groups.length !== 1 ? "s" : ""}
+              {groups.length === 1
+                ? t("{n} participant", { n: groups.length })
+                : t("{n} participants", { n: groups.length })}
             </span>
             <span>·</span>
-            <span>{allAssets.length} EDC assets</span>
+            <span>{t("{n} EDC assets", { n: allAssets.length })}</span>
             <span>·</span>
-            <span>{catalog.length} HealthDCAT-AP datasets</span>
+            <span>
+              {t("{n} HealthDCAT-AP datasets", { n: catalog.length })}
+            </span>
             {filter && (
               <>
                 <span>·</span>
-                <span>{totalMatching} matching</span>
+                <span>{t("{n} matching", { n: totalMatching })}</span>
               </>
             )}
           </div>
@@ -238,7 +250,7 @@ function DataDiscoverContent() {
         {loading ? (
           <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
-            Querying federated catalog…
+            {t("Querying federated catalog…")}
           </div>
         ) : totalMatching === 0 ? (
           <div className="text-center py-12">
@@ -248,8 +260,8 @@ function DataDiscoverContent() {
             />
             <p className="text-(--text-secondary)">
               {filter
-                ? "No datasets match your search"
-                : "No datasets available"}
+                ? t("No datasets match your search")
+                : t("No datasets available")}
             </p>
           </div>
         ) : (
@@ -260,7 +272,9 @@ function DataDiscoverContent() {
                 {tab === "all" && (
                   <h2 className="text-xs font-semibold uppercase text-(--text-secondary) mb-3 flex items-center gap-1.5">
                     <BookOpen size={12} />
-                    HealthDCAT-AP Datasets ({visibleCatalog.length})
+                    {t("HealthDCAT-AP Datasets ({n})", {
+                      n: visibleCatalog.length,
+                    })}
                   </h2>
                 )}
                 <div className="grid gap-3">
@@ -277,9 +291,11 @@ function DataDiscoverContent() {
                       >
                         <button
                           className="w-full text-left p-4"
-                          aria-label={`${isOpen ? "Collapse" : "Expand"} ${
-                            c.title
-                          }`}
+                          aria-label={
+                            isOpen
+                              ? t("Collapse {name}", { name: c.title })
+                              : t("Expand {name}", { name: c.title })
+                          }
                           onClick={() => setExpanded(isOpen ? null : c.id)}
                         >
                           <div className="flex items-start justify-between gap-4">
@@ -338,7 +354,7 @@ function DataDiscoverContent() {
                               {c.license && (
                                 <div className="text-xs">
                                   <span className="text-(--text-secondary)">
-                                    License:
+                                    {t("License:")}
                                   </span>{" "}
                                   <span className="text-(--text-primary)">
                                     {c.license}
@@ -348,7 +364,7 @@ function DataDiscoverContent() {
                               {c.legalBasis && (
                                 <div className="text-xs">
                                   <span className="text-(--text-secondary)">
-                                    Legal Basis:
+                                    {t("Legal Basis:")}
                                   </span>{" "}
                                   <span className="text-(--text-primary)">
                                     {c.legalBasis}
@@ -358,7 +374,7 @@ function DataDiscoverContent() {
                               {c.conformsTo && (
                                 <div className="text-xs">
                                   <span className="text-(--text-secondary)">
-                                    Conforms To:
+                                    {t("Conforms To:")}
                                   </span>{" "}
                                   <a
                                     href={c.conformsTo}
@@ -376,7 +392,7 @@ function DataDiscoverContent() {
                               {c.recordCount != null && (
                                 <div className="text-xs">
                                   <span className="text-(--text-secondary)">
-                                    Records:
+                                    {t("Records:")}
                                   </span>{" "}
                                   <span className="text-(--text-primary)">
                                     {c.recordCount.toLocaleString()}
@@ -392,7 +408,7 @@ function DataDiscoverContent() {
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white rounded-sm text-xs font-medium hover:bg-purple-500"
                               >
                                 <BookOpen size={14} />
-                                View in Catalog
+                                {t("View in Catalog")}
                               </a>
                               <a
                                 href={`/graph?highlight=${encodeURIComponent(
@@ -401,7 +417,7 @@ function DataDiscoverContent() {
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-(--border-ui) text-(--text-primary) rounded-sm text-xs font-medium hover:border-purple-500 hover:text-(--accent) transition-colors"
                               >
                                 <Network size={14} />
-                                View in Graph
+                                {t("View in Graph")}
                               </a>
                             </div>
                           </div>
@@ -419,7 +435,7 @@ function DataDiscoverContent() {
                 {tab === "all" && (
                   <h2 className="text-xs font-semibold uppercase text-(--text-secondary) mb-3 flex items-center gap-1.5">
                     <Database size={12} />
-                    EDC Data Assets ({visibleAssets.length})
+                    {t("EDC Data Assets ({n})", { n: visibleAssets.length })}
                   </h2>
                 )}
                 <div className="grid gap-3">
@@ -438,9 +454,15 @@ function DataDiscoverContent() {
                       >
                         <button
                           className="w-full text-left p-4"
-                          aria-label={`${isOpen ? "Collapse" : "Expand"} ${
-                            assetField(a, "name") || id
-                          }`}
+                          aria-label={
+                            isOpen
+                              ? t("Collapse {name}", {
+                                  name: assetField(a, "name") || id,
+                                })
+                              : t("Expand {name}", {
+                                  name: assetField(a, "name") || id,
+                                })
+                          }
                           onClick={() => setExpanded(isOpen ? null : id)}
                         >
                           <div className="flex items-start justify-between gap-4">
@@ -454,7 +476,7 @@ function DataDiscoverContent() {
                                 </p>
                               )}
                               <p className="text-xs text-(--text-secondary) mt-1">
-                                Provider:{" "}
+                                {t("Provider:")}{" "}
                                 {a._identity
                                   ?.replace("did:web:", "")
                                   .replace(/%3A/g, ":") ||
@@ -493,7 +515,7 @@ function DataDiscoverContent() {
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-(--accent) text-white dark:text-gray-900 rounded-sm text-xs font-medium hover:bg-(--accent-hover)"
                               >
                                 <FileSignature size={14} />
-                                Negotiate Access
+                                {t("Negotiate Access")}
                               </a>
                               <a
                                 href={`/graph?highlight=${encodeURIComponent(
@@ -502,7 +524,7 @@ function DataDiscoverContent() {
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 border border-(--border-ui) text-(--text-primary) rounded-sm text-xs font-medium hover:border-layer2 hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
                               >
                                 <Network size={14} />
-                                View in Graph
+                                {t("View in Graph")}
                               </a>
                             </div>
                           </div>

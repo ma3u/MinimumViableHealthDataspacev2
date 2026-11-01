@@ -18,6 +18,7 @@ import {
   Stethoscope,
   AlertTriangle,
 } from "lucide-react";
+import { useT } from "@/lib/i18n/translate";
 
 interface ScopePermit {
   permitId: string;
@@ -151,6 +152,8 @@ interface FederatedStats {
   }[];
 }
 
+// The example questions stay English in every language: the query engine
+// matches English patterns (#782, ADR-070).
 const EXAMPLE_QUESTIONS = [
   "How many patients are there?",
   "Show me patients by gender",
@@ -202,6 +205,8 @@ function codeBadge(system: string | undefined): {
 }
 
 export default function NlqPage() {
+  const t = useT("research");
+  const tn = useT("nav");
   const [question, setQuestion] = useState("");
   const [federated, setFederated] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -255,7 +260,7 @@ export default function NlqPage() {
       setResult(normalized);
       setHistory((prev) => [normalized, ...prev.slice(0, 9)]);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Query failed";
+      const message = err instanceof Error ? err.message : t("Query failed");
       setResult({
         question: query,
         cypher: "",
@@ -290,28 +295,27 @@ export default function NlqPage() {
               <div className="flex items-center gap-2 mb-1">
                 <Search size={20} className="text-(--accent-l1)" />
                 <h1 className="text-xl font-semibold">
-                  Natural Language Query
+                  {t("Natural Language Query")}
                 </h1>
               </div>
               <p className="text-sm text-(--text-secondary) mt-1">
-                Ask questions about the Health Dataspace knowledge graph in
-                plain language. The query engine translates your question into
-                Cypher and returns structured results from all five graph
-                layers.
+                {t(
+                  "Ask questions about the Health Dataspace knowledge graph in plain language. The query engine translates your question into Cypher and returns structured results from all five graph layers.",
+                )}
               </p>
               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mt-2">
                 <a
                   href="/analytics"
                   className="hover:text-(--text-secondary) transition-colors"
                 >
-                  ← OMOP Analytics
+                  ← {tn("OMOP Analytics")}
                 </a>
                 <span>|</span>
                 <a
                   href="/eehrxf"
                   className="hover:text-(--text-secondary) transition-colors"
                 >
-                  EEHRxF Profiles →
+                  {tn("EEHRxF Profiles")} →
                 </a>
               </div>
             </div>
@@ -321,14 +325,16 @@ export default function NlqPage() {
                   <div className="text-lg font-semibold text-(--accent-l1)">
                     {stats.speCount}
                   </div>
-                  <div className="text-(--text-secondary) text-xs">SPEs</div>
+                  <div className="text-(--text-secondary) text-xs">
+                    {t("SPEs")}
+                  </div>
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-semibold text-(--accent-l3)">
                     {stats.totals.patients.toLocaleString()}
                   </div>
                   <div className="text-(--text-secondary) text-xs">
-                    Patients
+                    {t("Patients")}
                   </div>
                 </div>
                 <div className="text-center">
@@ -336,7 +342,7 @@ export default function NlqPage() {
                     {stats.totals.encounters.toLocaleString()}
                   </div>
                   <div className="text-(--text-secondary) text-xs">
-                    Encounters
+                    {t("Encounters")}
                   </div>
                 </div>
                 <div className="text-center">
@@ -344,7 +350,7 @@ export default function NlqPage() {
                     {stats.totals.conditions.toLocaleString()}
                   </div>
                   <div className="text-(--text-secondary) text-xs">
-                    Conditions
+                    {t("Conditions")}
                   </div>
                 </div>
               </div>
@@ -366,11 +372,11 @@ export default function NlqPage() {
             <div className="flex-1 relative">
               <input
                 ref={inputRef}
-                aria-label="Ask a question about the health data"
+                aria-label={t("Ask a question about the health data")}
                 type="text"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Ask a question about the health data..."
+                placeholder={t("Ask a question about the health data...")}
                 className="w-full bg-(--surface-2) border border-(--border) rounded-lg px-4 py-2.5 text-sm text-(--text-primary) placeholder-gray-500 focus:outline-hidden focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500"
                 disabled={loading}
               />
@@ -383,10 +389,10 @@ export default function NlqPage() {
                   ? "bg-blue-500/20 border-blue-500/50 text-(--accent)"
                   : "bg-(--surface-2) border-(--border) text-(--text-secondary) hover:text-(--text-primary)"
               }`}
-              title="Query across all Secure Processing Environments"
+              title={t("Query across all Secure Processing Environments")}
             >
               <Globe size={14} />
-              Federated
+              {t("Federated")}
             </button>
             <button
               type="submit"
@@ -398,7 +404,7 @@ export default function NlqPage() {
               ) : (
                 <Send size={14} />
               )}
-              Ask
+              {t("Ask")}
             </button>
           </form>
 
@@ -423,22 +429,24 @@ export default function NlqPage() {
             <div className="flex items-center gap-2 mb-3">
               <Shield size={14} className="text-(--accent-l1)" />
               <h3 className="text-sm font-medium text-(--text-primary)">
-                Policy Scope
+                {t("Policy Scope")}
               </h3>
               {odrlScope.hasActiveContract && (
                 <span className="px-2 py-0.5 rounded-full text-xs bg-emerald-500/20 text-(--success-text)">
-                  Active Contract
+                  {t("Active Contract")}
                 </span>
               )}
               {odrlScope.hdabApproved && (
                 <span className="px-2 py-0.5 rounded-full text-xs bg-blue-500/20 text-(--accent)">
-                  HDAB Approved
+                  {t("HDAB Approved")}
                 </span>
               )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
               <div>
-                <div className="text-(--text-secondary) mb-1">Permissions</div>
+                <div className="text-(--text-secondary) mb-1">
+                  {t("Permissions")}
+                </div>
                 <div className="flex flex-wrap gap-1">
                   {odrlScope.permissions.length > 0 ? (
                     odrlScope.permissions.map((p) => (
@@ -450,12 +458,14 @@ export default function NlqPage() {
                       </span>
                     ))
                   ) : (
-                    <span className="text-(--text-secondary)">None</span>
+                    <span className="text-(--text-secondary)">{t("None")}</span>
                   )}
                 </div>
               </div>
               <div>
-                <div className="text-(--text-secondary) mb-1">Prohibitions</div>
+                <div className="text-(--text-secondary) mb-1">
+                  {t("Prohibitions")}
+                </div>
                 <div className="flex flex-wrap gap-1">
                   {odrlScope.prohibitions.length > 0 ? (
                     odrlScope.prohibitions.map((p) => (
@@ -467,13 +477,13 @@ export default function NlqPage() {
                       </span>
                     ))
                   ) : (
-                    <span className="text-(--text-secondary)">None</span>
+                    <span className="text-(--text-secondary)">{t("None")}</span>
                   )}
                 </div>
               </div>
               <div>
                 <div className="text-(--text-secondary) mb-1">
-                  Accessible Datasets
+                  {t("Accessible Datasets")}
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {odrlScope.accessibleDatasets.length > 0 ? (
@@ -486,12 +496,12 @@ export default function NlqPage() {
                       </span>
                     ))
                   ) : (
-                    <span className="text-(--text-secondary)">All</span>
+                    <span className="text-(--text-secondary)">{t("All")}</span>
                   )}
                 </div>
                 {odrlScope.temporalLimit && (
                   <div className="mt-1 text-(--text-secondary)">
-                    Valid until:{" "}
+                    {t("Valid until:")}{" "}
                     <span className="text-(--text-primary)">
                       {odrlScope.temporalLimit}
                     </span>
@@ -507,19 +517,27 @@ export default function NlqPage() {
                 data-testid="scope-permits"
               >
                 <div className="text-(--text-secondary) mb-1">
-                  Data permits (Art. 68)
+                  {t("Data permits (Art. 68)")}
                 </div>
                 <ul className="space-y-0.5">
                   {odrlScope.permits.map((p) => (
                     <li key={p.permitId} className="text-(--text-primary)">
                       <span className="font-mono">{p.permitId}</span>
                       {p.datasetId && (
-                        <span> for {p.datasetTitle ?? p.datasetId}</span>
+                        <span>
+                          {" "}
+                          {t("for {dataset}", {
+                            dataset: p.datasetTitle ?? p.datasetId,
+                          })}
+                        </span>
                       )}
                       {p.validUntil && (
                         <span className="text-(--text-secondary)">
                           {" "}
-                          · valid until {p.validUntil.slice(0, 10)}
+                          ·{" "}
+                          {t("valid until {date}", {
+                            date: p.validUntil.slice(0, 10),
+                          })}
                         </span>
                       )}
                     </li>
@@ -553,19 +571,19 @@ export default function NlqPage() {
                 {result.method === "graphrag" && <Zap size={12} />}
                 {result.method === "llm" && <Sparkles size={12} />}
                 {result.method === "template"
-                  ? `Template: ${result.templateName}`
+                  ? t("Template: {name}", { name: result.templateName ?? "" })
                   : result.method === "fulltext"
-                    ? "Fulltext Search"
+                    ? t("Fulltext Search")
                     : result.method === "graphrag"
                       ? "GraphRAG"
                       : result.method === "llm"
-                        ? "LLM Generated"
-                        : "No Match"}
+                        ? t("LLM Generated")
+                        : t("No Match")}
               </span>
               {result.federated && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-(--accent)">
                   <Globe size={12} />
-                  Federated
+                  {t("Federated")}
                 </span>
               )}
               {(result.minKApplied ?? 0) > 0 && (
@@ -575,22 +593,28 @@ export default function NlqPage() {
                 >
                   <Shield size={12} />k = {result.minKApplied}
                   {result.aggregateSuppressed
-                    ? ": answer suppressed"
+                    ? `: ${t("answer suppressed")}`
                     : (result.filtered ?? 0) > 0
-                      ? `: ${result.filtered} value${
-                          result.filtered === 1 ? "" : "s"
-                        } suppressed`
+                      ? `: ${
+                          result.filtered === 1
+                            ? t("1 value suppressed")
+                            : t("{n} values suppressed", {
+                                n: result.filtered ?? 0,
+                              })
+                        }`
                       : ""}
                 </span>
               )}
               {result.odrlEnforced && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300">
                   <Shield size={12} />
-                  ODRL Enforced
+                  {t("ODRL Enforced")}
                 </span>
               )}
               <span className="text-xs text-(--text-secondary)">
-                {result.totalRows} row{result.totalRows !== 1 ? "s" : ""}
+                {result.totalRows === 1
+                  ? t("1 row")
+                  : t("{n} rows", { n: result.totalRows })}
               </span>
 
               {/* Cypher toggle */}
@@ -613,8 +637,14 @@ export default function NlqPage() {
                 data-testid="k-anonymity-note"
               >
                 {result.aggregateSuppressed
-                  ? `One secure processing environment returned fewer than ${result.minKApplied} records, so the whole answer is withheld: a missing contributor would identify people.`
-                  : `Counts below ${result.minKApplied} are shown as <${result.minKApplied}, and a share computed from one goes with it, so no one can be singled out (k-anonymity).`}
+                  ? t(
+                      "One secure processing environment returned fewer than {k} records, so the whole answer is withheld: a missing contributor would identify people.",
+                      { k: result.minKApplied ?? 0 },
+                    )
+                  : t(
+                      "Counts below {k} are shown as <{k}, and a share computed from one goes with it, so no one can be singled out (k-anonymity).",
+                      { k: result.minKApplied ?? 0 },
+                    )}
               </p>
             )}
 
@@ -624,13 +654,15 @@ export default function NlqPage() {
                 <div className="flex items-center gap-2 mb-3">
                   <Zap size={14} className="text-(--accent-l1)" />
                   <h3 className="text-sm font-medium text-(--text-primary)">
-                    Graph layers traversed
+                    {t("Graph layers traversed")}
                   </h3>
                   <span
                     className="text-xs text-(--text-secondary) cursor-help"
-                    title="The EHDS dataspace knowledge graph is built from five stacked layers. This breadcrumb shows which layers the generated Cypher reads from to answer your question."
+                    title={t(
+                      "The EHDS dataspace knowledge graph is built from five stacked layers. This breadcrumb shows which layers the generated Cypher reads from to answer your question.",
+                    )}
                   >
-                    (5-layer model)
+                    {t("(5-layer model)")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -646,8 +678,10 @@ export default function NlqPage() {
                           }`}
                           title={
                             active
-                              ? `${active.label} — touched by this query`
-                              : `${id} — not touched`
+                              ? t("{layer}: touched by this query", {
+                                  layer: active.label,
+                                })
+                              : t("{layer}: not touched", { layer: id })
                           }
                         >
                           <span className="font-mono mr-1">{id}</span>
@@ -669,7 +703,7 @@ export default function NlqPage() {
                 <div className="flex items-center gap-2 mb-3">
                   <Info size={14} className="text-(--accent-l1)" />
                   <h3 className="text-sm font-medium text-(--text-primary)">
-                    How we interpreted your question
+                    {t("How we interpreted your question")}
                   </h3>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -677,7 +711,7 @@ export default function NlqPage() {
                   <div className="bg-(--surface-2)/50 border border-(--border)/50 rounded-lg p-3">
                     <div className="flex items-center gap-1.5 text-xs text-(--text-secondary) mb-1">
                       <Pill size={12} className="text-amber-400" />
-                      Drug / product
+                      {t("Drug / product")}
                     </div>
                     {result.interpretation.drug ? (
                       <div className="space-y-1">
@@ -699,7 +733,7 @@ export default function NlqPage() {
                         </div>
                         {result.interpretation.drug.generic && (
                           <div className="text-xs text-(--text-secondary)">
-                            generic:{" "}
+                            {t("generic:")}{" "}
                             <span className="text-(--text-primary)">
                               {result.interpretation.drug.generic}
                             </span>
@@ -710,8 +744,10 @@ export default function NlqPage() {
                       <div className="text-xs text-red-300/80 flex items-center gap-1.5">
                         <AlertTriangle size={12} />
                         {result.interpretation.raw?.drugText
-                          ? `"${result.interpretation.raw.drugText}" — not in glossary`
-                          : "No drug detected"}
+                          ? t('"{text}": not in glossary', {
+                              text: result.interpretation.raw.drugText,
+                            })
+                          : t("No drug detected")}
                       </div>
                     )}
                   </div>
@@ -719,7 +755,7 @@ export default function NlqPage() {
                   <div className="bg-(--surface-2)/50 border border-(--border)/50 rounded-lg p-3">
                     <div className="flex items-center gap-1.5 text-xs text-(--text-secondary) mb-1">
                       <Stethoscope size={12} className="text-emerald-400" />
-                      Indication (diagnosis)
+                      {t("Indication (diagnosis)")}
                     </div>
                     {result.interpretation.indication ? (
                       <div className="space-y-1">
@@ -761,8 +797,10 @@ export default function NlqPage() {
                       <div className="text-xs text-red-300/80 flex items-center gap-1.5">
                         <AlertTriangle size={12} />
                         {result.interpretation.raw?.indicationText
-                          ? `"${result.interpretation.raw.indicationText}" — not in glossary`
-                          : "No indication detected"}
+                          ? t('"{text}": not in glossary', {
+                              text: result.interpretation.raw.indicationText,
+                            })
+                          : t("No indication detected")}
                       </div>
                     )}
                   </div>
@@ -770,7 +808,7 @@ export default function NlqPage() {
                   <div className="bg-(--surface-2)/50 border border-(--border)/50 rounded-lg p-3">
                     <div className="flex items-center gap-1.5 text-xs text-(--text-secondary) mb-1">
                       <AlertTriangle size={12} className="text-red-400" />
-                      Side-effect (measured)
+                      {t("Side-effect (measured)")}
                     </div>
                     {result.interpretation.sideEffect ? (
                       <div className="space-y-1">
@@ -812,8 +850,10 @@ export default function NlqPage() {
                       <div className="text-xs text-red-300/80 flex items-center gap-1.5">
                         <AlertTriangle size={12} />
                         {result.interpretation.raw?.sideEffectText
-                          ? `"${result.interpretation.raw.sideEffectText}" — not in glossary`
-                          : "No side-effect detected"}
+                          ? t('"{text}": not in glossary', {
+                              text: result.interpretation.raw.sideEffectText,
+                            })
+                          : t("No side-effect detected")}
                       </div>
                     )}
                   </div>
@@ -827,13 +867,15 @@ export default function NlqPage() {
                 <div className="flex items-center gap-2 mb-3">
                   <Database size={14} className="text-(--accent-l5)" />
                   <h3 className="text-sm font-medium text-(--text-primary)">
-                    Data quality for this question
+                    {t("Data quality for this question")}
                   </h3>
                   <span
                     className="text-xs text-(--text-secondary) cursor-help"
-                    title="Share of Condition nodes with a CODED_BY SnomedConcept link, and MedicationRequest nodes with a CODED_BY RxNormConcept link. High coverage means the cohort filter is reliable."
+                    title={t(
+                      "Share of Condition nodes with a CODED_BY SnomedConcept link, and MedicationRequest nodes with a CODED_BY RxNormConcept link. High coverage means the cohort filter is reliable.",
+                    )}
                   >
-                    (hover for details)
+                    {t("(hover for details)")}
                   </span>
                 </div>
 
@@ -842,12 +884,12 @@ export default function NlqPage() {
                   <div className="mb-4">
                     <div className="text-xs text-(--text-secondary) mb-2 flex items-center gap-1.5">
                       <span className="inline-block w-1.5 h-1.5 rounded-full bg-(--accent-l3)"></span>
-                      In this cohort
+                      {t("In this cohort")}
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-xs">
                       <div>
                         <div className="text-(--text-secondary)">
-                          Cohort size
+                          {t("Cohort size")}
                         </div>
                         <div className="text-lg font-semibold text-(--accent-l3)">
                           {result.dataQuality.cohortSize.toLocaleString()}
@@ -855,7 +897,7 @@ export default function NlqPage() {
                       </div>
                       <div>
                         <div className="text-(--text-secondary)">
-                          Conditions
+                          {t("Conditions")}
                         </div>
                         <div className="text-lg font-semibold text-(--text-primary)">
                           {(
@@ -865,7 +907,7 @@ export default function NlqPage() {
                       </div>
                       <div>
                         <div className="text-(--text-secondary)">
-                          Med requests
+                          {t("Med requests")}
                         </div>
                         <div className="text-lg font-semibold text-(--text-primary)">
                           {(
@@ -875,7 +917,7 @@ export default function NlqPage() {
                       </div>
                       <div>
                         <div className="text-(--text-secondary)">
-                          SNOMED coverage
+                          {t("SNOMED coverage")}
                         </div>
                         <div className="text-lg font-semibold text-(--accent-l5)">
                           {(
@@ -886,7 +928,7 @@ export default function NlqPage() {
                       </div>
                       <div>
                         <div className="text-(--text-secondary)">
-                          RxNorm coverage
+                          {t("RxNorm coverage")}
                         </div>
                         <div className="text-lg font-semibold text-amber-300">
                           {(
@@ -903,12 +945,12 @@ export default function NlqPage() {
                 <div>
                   <div className="text-xs text-(--text-secondary) mb-2 flex items-center gap-1.5">
                     <span className="inline-block w-1.5 h-1.5 rounded-full bg-(--accent-l5)"></span>
-                    Across the whole graph
+                    {t("Across the whole graph")}
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
                     <div>
                       <div className="text-(--text-secondary)">
-                        SNOMED coverage
+                        {t("SNOMED coverage")}
                       </div>
                       <div className="text-lg font-semibold text-(--accent-l5)">
                         {result.dataQuality.snomedCoveragePct.toFixed(1)}%
@@ -916,21 +958,23 @@ export default function NlqPage() {
                     </div>
                     <div>
                       <div className="text-(--text-secondary)">
-                        RxNorm coverage
+                        {t("RxNorm coverage")}
                       </div>
                       <div className="text-lg font-semibold text-amber-300">
                         {result.dataQuality.rxnormCoveragePct.toFixed(1)}%
                       </div>
                     </div>
                     <div>
-                      <div className="text-(--text-secondary)">Conditions</div>
+                      <div className="text-(--text-secondary)">
+                        {t("Conditions")}
+                      </div>
                       <div className="text-lg font-semibold text-(--text-primary)">
                         {result.dataQuality.totalConditions.toLocaleString()}
                       </div>
                     </div>
                     <div>
                       <div className="text-(--text-secondary)">
-                        Medication requests
+                        {t("Medication requests")}
                       </div>
                       <div className="text-lg font-semibold text-(--text-primary)">
                         {result.dataQuality.totalMedicationRequests.toLocaleString()}
@@ -1023,9 +1067,13 @@ export default function NlqPage() {
                             key={col}
                             title={
                               col === "score"
-                                ? "Lucene relevance score — higher means the node's indexed text matched the query terms more strongly. Not a statistical frequency."
+                                ? t(
+                                    "Lucene relevance score: higher means the node's indexed text matched the query terms more strongly. Not a statistical frequency.",
+                                  )
                                 : col === "frequencyPct"
-                                  ? "Percentage of the cohort that has the side-effect recorded (0–100)."
+                                  ? t(
+                                      "Percentage of the cohort that has the side-effect recorded (0 to 100).",
+                                    )
                                   : undefined
                             }
                             className="px-4 py-2.5 text-left text-xs font-medium text-(--text-secondary) uppercase tracking-wider"
@@ -1069,19 +1117,19 @@ export default function NlqPage() {
           <div className="bg-(--surface)/50 border border-(--border) rounded-lg p-4">
             <h3 className="text-sm font-medium text-(--text-primary) mb-3 flex items-center gap-1.5">
               <Database size={14} className="text-(--accent-l3)" />
-              Available Query Templates
+              {t("Available Query Templates")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {templates.map((t) => (
+              {templates.map((tpl) => (
                 <div
-                  key={t.name}
+                  key={tpl.name}
                   className="bg-(--surface-2)/50 border border-(--border)/50 rounded-lg p-3"
                 >
                   <div className="text-sm font-medium text-(--text-primary)">
-                    {t.name.replace(/_/g, " ")}
+                    {tpl.name.replace(/_/g, " ")}
                   </div>
                   <div className="text-xs text-(--text-secondary) mt-1">
-                    {t.description}
+                    {tpl.description}
                   </div>
                 </div>
               ))}
@@ -1094,7 +1142,7 @@ export default function NlqPage() {
           <div className="bg-(--surface)/50 border border-(--border) rounded-lg p-4">
             <h3 className="text-sm font-medium text-(--text-primary) mb-3 flex items-center gap-1.5">
               <Globe size={14} className="text-(--accent-l1)" />
-              Secure Processing Environments
+              {t("Secure Processing Environments")}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {stats.spes.map((spe) => (
@@ -1108,7 +1156,7 @@ export default function NlqPage() {
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
                       <span className="text-(--text-secondary)">
-                        Patients:{" "}
+                        {t("Patients:")}{" "}
                       </span>
                       <span className="text-(--accent-l3)">
                         {spe.patients.toLocaleString()}
@@ -1116,7 +1164,7 @@ export default function NlqPage() {
                     </div>
                     <div>
                       <span className="text-(--text-secondary)">
-                        Encounters:{" "}
+                        {t("Encounters:")}{" "}
                       </span>
                       <span className="text-(--accent-l4)">
                         {spe.encounters.toLocaleString()}
@@ -1124,7 +1172,7 @@ export default function NlqPage() {
                     </div>
                     <div>
                       <span className="text-(--text-secondary)">
-                        Conditions:{" "}
+                        {t("Conditions:")}{" "}
                       </span>
                       <span className="text-(--accent-l5)">
                         {spe.conditions.toLocaleString()}
@@ -1132,7 +1180,7 @@ export default function NlqPage() {
                     </div>
                     <div>
                       <span className="text-(--text-secondary)">
-                        Observations:{" "}
+                        {t("Observations:")}{" "}
                       </span>
                       <span className="text-(--accent-l1)">
                         {spe.observations.toLocaleString()}
@@ -1149,7 +1197,7 @@ export default function NlqPage() {
         {history.length > 1 && (
           <div className="bg-(--surface)/50 border border-(--border) rounded-lg p-4">
             <h3 className="text-sm font-medium text-(--text-primary) mb-3">
-              Recent Queries
+              {t("Recent Queries")}
             </h3>
             <div className="space-y-2">
               {history.slice(1).map((h, i) => (
@@ -1160,7 +1208,9 @@ export default function NlqPage() {
                 >
                   <span className="truncate">{h.question}</span>
                   <span className="text-gray-600 shrink-0 ml-2">
-                    {h.totalRows} rows
+                    {h.totalRows === 1
+                      ? t("1 row")
+                      : t("{n} rows", { n: h.totalRows })}
                   </span>
                 </button>
               ))}

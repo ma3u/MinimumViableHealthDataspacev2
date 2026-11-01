@@ -18,6 +18,7 @@ import {
 import PageIntro from "@/components/PageIntro";
 import RowSourceBadge from "@/components/RowSourceBadge";
 import type { RowSource } from "@/lib/row-provenance";
+import { T, useT } from "@/lib/i18n/translate";
 
 interface ParticipantCtx {
   "@id": string;
@@ -113,12 +114,13 @@ function parseOffers(catalog: Record<string, unknown>): CatalogOffer[] {
 }
 
 export default function NegotiatePage() {
+  const tc = useT("common");
   return (
     <Suspense
       fallback={
         <div className="flex items-center gap-2 text-(--text-secondary) p-10">
           <Loader2 size={16} className="animate-spin" />
-          Loading…
+          {tc("Loading…")}
         </div>
       }
     >
@@ -128,6 +130,8 @@ export default function NegotiatePage() {
 }
 
 function NegotiateContent() {
+  const t = useT("research");
+  const tn = useT("nav");
   const searchParams = useSearchParams();
   const preAssetId = searchParams.get("assetId") || "";
   const preProviderId = searchParams.get("providerId") || "";
@@ -156,6 +160,7 @@ function NegotiateContent() {
   const [offerId, setOfferId] = useState("");
   const [initiating, setInitiating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [resultIsError, setResultIsError] = useState(false);
 
   useEffect(() => {
     fetchApi("/api/participants")
@@ -228,7 +233,7 @@ function NegotiateContent() {
         setCatalogError(
           (errData.detail as string) ||
             (errData.error as string) ||
-            "Failed to fetch catalog",
+            t("Failed to fetch catalog"),
         );
         return;
       }
@@ -237,7 +242,9 @@ function NegotiateContent() {
       if (payload.demo === true) {
         setCatalogNote(
           (payload.demoReason as string) ||
-            "These offers come from the demonstrator's own catalogue, not from a live DSP request.",
+            t(
+              "These offers come from the demonstrator's own catalogue, not from a live DSP request.",
+            ),
         );
       }
 
@@ -245,11 +252,13 @@ function NegotiateContent() {
       setOffers(parsed);
       if (parsed.length === 0) {
         setCatalogError(
-          "No datasets with offers found. Ensure the provider has contract definitions and active participant contexts (VPAs in ACTIVE state).",
+          t(
+            "No datasets with offers found. Ensure the provider has contract definitions and active participant contexts (VPAs in ACTIVE state).",
+          ),
         );
       }
     } catch {
-      setCatalogError("Network error fetching catalog");
+      setCatalogError(t("Network error fetching catalog"));
     } finally {
       setCatalogLoading(false);
     }
@@ -266,6 +275,7 @@ function NegotiateContent() {
     e.preventDefault();
     setInitiating(true);
     setResult(null);
+    setResultIsError(false);
 
     try {
       const res = await fetchApi("/api/negotiations", {
@@ -285,10 +295,13 @@ function NegotiateContent() {
         const data = (await res.json()) as Record<string, unknown>;
         setResult(
           data.demo === true
-            ? `Demo negotiation recorded: ${data["@id"]}. ${
-                data.demoReason ?? ""
-              }`
-            : `Negotiation initiated: ${data["@id"] || JSON.stringify(data)}`,
+            ? t("Demo negotiation recorded: {id}. {reason}", {
+                id: String(data["@id"]),
+                reason: String(data.demoReason ?? ""),
+              })
+            : t("Negotiation initiated: {id}", {
+                id: String(data["@id"] || JSON.stringify(data)),
+              }),
         );
         const updated = await fetchApi(
           `/api/negotiations?participantId=${selectedCtx}`,
@@ -308,16 +321,23 @@ function NegotiateContent() {
         );
       } else {
         const err = (await res.json()) as Record<string, unknown>;
+        setResultIsError(true);
         setResult(
-          `Error: ${
-            (err.detail as string) ||
-            (err.error as string) ||
-            "Negotiation failed"
-          }`,
+          t("Error: {detail}", {
+            detail:
+              (err.detail as string) ||
+              (err.error as string) ||
+              t("Negotiation failed"),
+          }),
         );
       }
     } catch {
-      setResult("Error: Failed to initiate negotiation");
+      setResultIsError(true);
+      setResult(
+        t("Error: {detail}", {
+          detail: t("Failed to initiate negotiation"),
+        }),
+      );
     } finally {
       setInitiating(false);
     }
@@ -345,15 +365,19 @@ function NegotiateContent() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
-          title="Contract Negotiation"
+          title={t("Contract Negotiation")}
           icon={FileSignature}
-          description="Negotiate data access contracts via the Dataspace Protocol using ODRL policies. Select a consumer participant, choose a dataset, and initiate a contract negotiation request that the data holder can accept or reject."
-          prevStep={{ href: "/data/discover", label: "Discover Data" }}
-          nextStep={{ href: "/data/transfer", label: "Data Transfer" }}
-          infoText="Two steps: (1) choose a data provider and click Discover Offers to see what datasets are available; (2) select a dataset and click Start Negotiation to request access."
+          description={t(
+            "Negotiate data access contracts via the Dataspace Protocol using ODRL policies. Select a consumer participant, choose a dataset, and initiate a contract negotiation request that the data holder can accept or reject.",
+          )}
+          prevStep={{ href: "/data/discover", label: t("Discover Data") }}
+          nextStep={{ href: "/data/transfer", label: t("Data Transfer") }}
+          infoText={t(
+            "Two steps: (1) choose a data provider and click Discover Offers to see what datasets are available; (2) select a dataset and click Start Negotiation to request access.",
+          )}
           docLink={{
             href: "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
-            label: "DSP Specification",
+            label: t("DSP Specification"),
             external: true,
           }}
         />
@@ -361,10 +385,10 @@ function NegotiateContent() {
         {/* Consumer context selector */}
         <div className="mb-6">
           <label className="text-xs text-(--text-secondary) mb-1 block">
-            Requesting as (your participant)
+            {t("Requesting as (your participant)")}
           </label>
           <select
-            aria-label="Requesting as (your participant)"
+            aria-label={t("Requesting as (your participant)")}
             value={selectedCtx}
             onChange={(e) => setSelectedCtx(e.target.value)}
             className="w-full max-w-md px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm"
@@ -383,20 +407,21 @@ function NegotiateContent() {
           <div className="flex items-center gap-2 mb-1">
             <Search size={16} className="text-teal-800 dark:text-teal-300" />
             <h2 className="font-semibold text-sm">
-              Step 1 — Choose Data Provider
+              {t("Step 1: Choose Data Provider")}
             </h2>
           </div>
           <p className="text-xs text-(--text-secondary) mb-4">
-            Choose a data provider below — the catalog will be fetched
-            automatically.
+            {t(
+              "Choose a data provider below; the catalog will be fetched automatically.",
+            )}
           </p>
 
           <div className="mb-4">
             <label className="text-xs text-(--text-secondary) mb-1 block">
-              Data Provider
+              {t("Data Provider")}
             </label>
             <select
-              aria-label="Data Provider"
+              aria-label={t("Data Provider")}
               value={selectedProviderCtx}
               onChange={(e) => {
                 const chosen = participants.find(
@@ -417,7 +442,7 @@ function NegotiateContent() {
               disabled={participants.length === 0}
             >
               {participants.length === 0 && (
-                <option value="">Loading participants…</option>
+                <option value="">{t("Loading participants…")}</option>
               )}
               {participants
                 .filter((p) => p["@id"] !== selectedCtx)
@@ -441,7 +466,7 @@ function NegotiateContent() {
             ) : (
               <BookOpen size={14} />
             )}
-            Discover Offers
+            {t("Discover Offers")}
           </button>
 
           {catalogError && (
@@ -461,7 +486,9 @@ function NegotiateContent() {
           {offers.length > 0 && (
             <div className="mt-4 space-y-2">
               <p className="text-xs text-(--text-secondary) mb-2">
-                {offers.length} offer(s) found — select one to negotiate:
+                {t("{n} offer(s) found. Select one to negotiate:", {
+                  n: offers.length,
+                })}
               </p>
               {offers.map((o) => (
                 <button
@@ -511,20 +538,25 @@ function NegotiateContent() {
               className="text-teal-800 dark:text-teal-300"
             />
             <h2 className="font-semibold text-sm">
-              Step 2 — Initiate Negotiation
+              {t("Step 2: Initiate Negotiation")}
             </h2>
           </div>
           <p className="text-xs text-(--text-secondary) mb-4">
-            Submit a DSP{" "}
-            <code className="text-(--text-secondary)">ContractRequest</code>{" "}
-            with the selected ODRL offer. Protocol:{" "}
+            <T
+              area="research"
+              tags={{ c: <code className="text-(--text-secondary)" /> }}
+            >
+              {
+                "Submit a DSP <c>ContractRequest</c> with the selected ODRL offer. Protocol:"
+              }
+            </T>{" "}
             <code className="text-(--text-secondary)">{DSP_PROTOCOL}</code>
           </p>
 
           {result && (
             <div
               className={`mb-4 p-3 rounded text-sm ${
-                result.startsWith("Error")
+                resultIsError
                   ? "bg-(--badge-inactive-bg) border border-(--badge-inactive-border) text-(--badge-inactive-text)"
                   : "bg-(--badge-active-bg) border border-(--badge-active-border) text-(--badge-active-text)"
               }`}
@@ -537,15 +569,16 @@ function NegotiateContent() {
             <div className="mb-4 p-3 rounded-sm bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700/40 text-yellow-800 dark:text-yellow-400 text-xs flex gap-2">
               <AlertCircle size={14} className="shrink-0 mt-0.5" />
               <span>
-                Complete Step 1 first — select a dataset offer above to
-                negotiate.
+                {t(
+                  "Complete Step 1 first: select a dataset offer above to negotiate.",
+                )}
               </span>
             </div>
           )}
 
           {selectedOffer && (
             <div className="mb-4 p-3 rounded-sm bg-(--surface-2)/60 border border-(--border) text-sm">
-              <span className="text-(--text-secondary)">Selected:</span>{" "}
+              <span className="text-(--text-secondary)">{t("Selected:")}</span>{" "}
               <span className="text-(--text-primary) font-medium">
                 {selectedOffer.name || assetLabel(selectedOffer.assetId)}
               </span>
@@ -571,21 +604,23 @@ function NegotiateContent() {
               ) : (
                 <FileSignature size={14} />
               )}
-              Start Negotiation
+              {t("Start Negotiation")}
             </button>
           </form>
         </div>
 
         {/* Negotiation history */}
-        <h2 className="font-semibold text-sm mb-3">Negotiation History</h2>
+        <h2 className="font-semibold text-sm mb-3">
+          {t("Negotiation History")}
+        </h2>
         {loading ? (
           <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
-            Loading negotiations…
+            {t("Loading negotiations…")}
           </div>
         ) : negotiations.length === 0 ? (
           <p className="text-(--text-secondary) text-sm">
-            No negotiations found
+            {t("No negotiations found")}
           </p>
         ) : (
           <div className="grid gap-2">
@@ -606,8 +641,9 @@ function NegotiateContent() {
                         : n["@id"].slice(0, 12)}
                     </p>
                     <p className="text-xs text-(--text-secondary)">
-                      Provider: {counterParty ? didToName(counterParty) : "—"}
-                      {state === "FINALIZED" && " · Agreement ready"}
+                      {t("Provider:")}{" "}
+                      {counterParty ? didToName(counterParty) : "—"}
+                      {state === "FINALIZED" && ` · ${t("Agreement ready")}`}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
@@ -640,7 +676,7 @@ function NegotiateContent() {
                         )}&contractId=${encodeURIComponent(agreementId)}`}
                         className="flex items-center gap-1 text-xs text-teal-800 dark:text-teal-300 hover:underline"
                       >
-                        Transfer <ArrowRight size={12} />
+                        {tn("Transfer")} <ArrowRight size={12} />
                       </a>
                     )}
                   </div>

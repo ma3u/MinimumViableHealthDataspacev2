@@ -21,6 +21,7 @@ import {
 import PageIntro from "@/components/PageIntro";
 import RowSourceBadge from "@/components/RowSourceBadge";
 import type { RowSource } from "@/lib/row-provenance";
+import { T, useT } from "@/lib/i18n/translate";
 
 /* ── Types ── */
 
@@ -432,6 +433,8 @@ function FhirViewerPanel({
   bundle: FhirBundle | null;
   onClose: () => void;
 }) {
+  const t = useT("research");
+  const tc = useT("common");
   const [viewMode, setViewMode] = useState<"resources" | "json">("resources");
   const [copied, setCopied] = useState(false);
   const payload = transfer.dataPayload as DataPayload | undefined;
@@ -464,11 +467,13 @@ function FhirViewerPanel({
         <div className="flex items-center gap-2">
           <FileJson2 size={16} className="text-teal-800 dark:text-teal-300" />
           <span className="text-sm font-medium text-(--text-primary)">
-            FHIR Data — {aId ? assetLabel(aId as string) : "Bundle"}
+            {t("FHIR Data: {name}", {
+              name: aId ? assetLabel(aId as string) : "Bundle",
+            })}
           </span>
           {payload?.provider && (
             <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-              from {payload.provider}
+              {t("from {provider}", { provider: payload.provider })}
             </span>
           )}
         </div>
@@ -479,10 +484,11 @@ function FhirViewerPanel({
             )}`}
             className="flex items-center gap-1 text-[11px] text-(--accent) hover:underline transition-colors"
           >
-            View in Graph <Network size={10} />
+            {t("View in Graph")} <Network size={10} />
           </a>
           <button
             onClick={onClose}
+            aria-label={tc("Close")}
             className="text-(--text-secondary) hover:text-(--text-primary)"
           >
             <X size={16} />
@@ -494,7 +500,7 @@ function FhirViewerPanel({
       <div className="px-4 py-3 border-b border-(--border) grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
           <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
-            Total Resources
+            {t("Total Resources")}
           </div>
           <div className="text-lg font-semibold text-(--text-primary)">
             {bundle?.entry?.length ?? payload?.total ?? "—"}
@@ -502,7 +508,7 @@ function FhirViewerPanel({
         </div>
         <div>
           <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
-            Resource Types
+            {t("Resource Types")}
           </div>
           <div className="text-lg font-semibold text-(--text-primary)">
             {Object.keys(resourceCounts).length ||
@@ -512,7 +518,7 @@ function FhirViewerPanel({
         </div>
         <div>
           <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
-            Transferred
+            {t("Transferred")}
           </div>
           <div className="text-sm text-(--text-primary)">
             {payload?.transferredAt
@@ -525,7 +531,7 @@ function FhirViewerPanel({
         </div>
         <div>
           <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
-            Size
+            {t("Size")}
           </div>
           <div className="text-sm text-(--text-primary)">
             {payload?.sizeBytes
@@ -574,7 +580,7 @@ function FhirViewerPanel({
                 : "text-(--text-secondary) hover:text-(--text-primary)"
             }`}
           >
-            Resources
+            {t("Resources")}
           </button>
           <button
             onClick={() => setViewMode("json")}
@@ -584,7 +590,7 @@ function FhirViewerPanel({
                 : "text-(--text-secondary) hover:text-(--text-primary)"
             }`}
           >
-            Raw JSON
+            {t("Raw JSON")}
           </button>
         </div>
         <button
@@ -592,7 +598,7 @@ function FhirViewerPanel({
           className="flex items-center gap-1 text-[11px] text-(--text-secondary) hover:text-(--text-primary)"
         >
           <Copy size={10} />
-          {copied ? "Copied!" : "Copy"}
+          {copied ? t("Copied!") : t("Copy")}
         </button>
       </div>
 
@@ -607,10 +613,13 @@ function FhirViewerPanel({
         ) : viewMode === "resources" && !bundle?.entry ? (
           <div className="p-6 text-center text-sm text-(--text-secondary)">
             <FileJson2 size={24} className="mx-auto mb-2 text-gray-600" />
-            <p>Full FHIR Bundle data not available for this transfer.</p>
+            <p>{t("Full FHIR Bundle data not available for this transfer.")}</p>
             <p className="text-xs mt-1">
-              Transfer metadata: {payload?.total ?? 0} resources (
-              {payload?.containedResourceTypes?.join(", ") || "unknown"})
+              {t("Transfer metadata: {n} resources ({types})", {
+                n: payload?.total ?? 0,
+                types:
+                  payload?.containedResourceTypes?.join(", ") || t("unknown"),
+              })}
             </p>
           </div>
         ) : (
@@ -626,12 +635,13 @@ function FhirViewerPanel({
 /* ── Main Page ── */
 
 export default function DataTransferPage() {
+  const tc = useT("common");
   return (
     <Suspense
       fallback={
         <div className="flex items-center gap-2 text-(--text-secondary) p-10">
           <Loader2 size={16} className="animate-spin" />
-          Loading…
+          {tc("Loading…")}
         </div>
       }
     >
@@ -641,6 +651,8 @@ export default function DataTransferPage() {
 }
 
 function DataTransferContent() {
+  const t = useT("research");
+  const tn = useT("nav");
   const searchParams = useSearchParams();
   const preselectedCtx = searchParams.get("participantId") || "";
   const preContractId = searchParams.get("contractId") || "";
@@ -657,6 +669,7 @@ function DataTransferContent() {
     preContractId ? new Set([preContractId]) : new Set(),
   );
   const [result, setResult] = useState<string | null>(null);
+  const [resultIsError, setResultIsError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
   // Agreement list pagination
@@ -748,8 +761,10 @@ function DataTransferContent() {
     if (selectedAgreements.size === 0) return;
     setInitiating(true);
     setResult(null);
+    setResultIsError(false);
 
-    const results: string[] = [];
+    const started: string[] = [];
+    const errors: string[] = [];
     // A transfer the API recorded rather than sent, because the contract exists
     // only in this demonstrator. Reported separately: "started" would claim a
     // DSP transfer that never happened.
@@ -782,7 +797,7 @@ function DataTransferContent() {
           if (data.demo === true) {
             demoResults.push(label);
           } else {
-            results.push(label);
+            started.push(label);
           }
         } else {
           const err = await res.json().catch(() => ({}));
@@ -790,37 +805,43 @@ function DataTransferContent() {
             (err as Record<string, string>).detail ||
             (err as Record<string, string>).error ||
             `HTTP ${res.status}`;
-          results.push(
-            `Error: ${assetLabel(assetId || agrId.slice(0, 12))} — ${detail}`,
+          errors.push(
+            t("Error: {name}: {detail}", {
+              name: assetLabel(assetId || agrId.slice(0, 12)),
+              detail,
+            }),
           );
         }
       } catch {
-        results.push(
-          `Error: ${assetLabel(assetId || agrId.slice(0, 12))} — Network error`,
+        errors.push(
+          t("Error: {name}: {detail}", {
+            name: assetLabel(assetId || agrId.slice(0, 12)),
+            detail: t("Network error"),
+          }),
         );
       }
     }
 
-    const errors = results.filter((r) => r.startsWith("Error"));
-    const started = results.filter((r) => !r.startsWith("Error"));
     if (errors.length === 0) {
       const lines: string[] = [];
       if (started.length === 1) {
-        lines.push(`Transfer started for ${started[0]}`);
+        lines.push(t("Transfer started for {name}", { name: started[0] }));
       } else if (started.length > 1) {
-        lines.push(`${started.length} transfers started successfully`);
+        lines.push(
+          t("{n} transfers started successfully", { n: started.length }),
+        );
       }
       if (demoResults.length > 0) {
         lines.push(
-          `Demo transfer recorded for ${demoResults.join(
-            ", ",
-          )}: the contract ` +
-            "exists only in this demonstrator, so nothing was sent to the " +
-            "connector and the FHIR payload below is the demonstrator's own.",
+          t(
+            "Demo transfer recorded for {names}: the contract exists only in this demonstrator, so nothing was sent to the connector and the FHIR payload below is the demonstrator's own.",
+            { names: demoResults.join(", ") },
+          ),
         );
       }
       setResult(lines.join("\n"));
     } else {
+      setResultIsError(true);
       setResult(errors.join("\n"));
     }
     await refreshTransfers();
@@ -907,15 +928,19 @@ function DataTransferContent() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
-          title="Data Transfers"
+          title={t("Data Transfers")}
           icon={ArrowRightLeft}
-          description="Monitor and initiate EDC-V data transfers via the DSP Transfer Process (Signalling Protocol). Once a contract is agreed, start a transfer to pull FHIR or OMOP data from the provider's data plane."
-          prevStep={{ href: "/negotiate", label: "Contract Negotiation" }}
-          nextStep={{ href: "/admin", label: "Operator Dashboard" }}
-          infoText="The DSP Signalling Protocol defines the transfer state machine: REQUESTED → STARTED → COMPLETED (or TERMINATED on failure). Each transfer is secured by EDC-V access tokens issued during the STARTED phase."
+          description={t(
+            "Monitor and initiate EDC-V data transfers via the DSP Transfer Process (Signalling Protocol). Once a contract is agreed, start a transfer to pull FHIR or OMOP data from the provider's data plane.",
+          )}
+          prevStep={{ href: "/negotiate", label: t("Contract Negotiation") }}
+          nextStep={{ href: "/admin", label: tn("Operator Dashboard") }}
+          infoText={t(
+            "The DSP Signalling Protocol defines the transfer state machine: REQUESTED → STARTED → COMPLETED (or TERMINATED on failure). Each transfer is secured by EDC-V access tokens issued during the STARTED phase.",
+          )}
           docLink={{
             href: "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/#transfer-protocol",
-            label: "DSP Transfer Process Spec",
+            label: t("DSP Transfer Process Spec"),
             external: true,
           }}
         />
@@ -923,10 +948,10 @@ function DataTransferContent() {
         {/* Participant selector */}
         <div className="mb-6">
           <label className="text-xs text-(--text-secondary) mb-1 block">
-            Requesting as (your participant)
+            {t("Requesting as (your participant)")}
           </label>
           <select
-            aria-label="Requesting as (your participant)"
+            aria-label={t("Requesting as (your participant)")}
             value={selectedCtx}
             onChange={(e) => setSelectedCtx(e.target.value)}
             className="w-full max-w-md px-3 py-2 bg-(--surface-2) border border-gray-600 rounded-sm text-sm"
@@ -945,18 +970,24 @@ function DataTransferContent() {
           <div className="flex items-center gap-2 mb-1">
             <Play size={16} className="text-teal-800 dark:text-teal-300" />
             <h2 className="font-semibold text-sm">
-              Start Transfer from Agreement
+              {t("Start Transfer from Agreement")}
             </h2>
           </div>
           <p className="text-xs text-(--text-secondary) mb-4">
-            Select a finalized contract agreement to pull data via{" "}
-            <code className="text-(--text-secondary)">HttpData-PULL</code>.
+            <T
+              area="research"
+              tags={{ c: <code className="text-(--text-secondary)" /> }}
+            >
+              {
+                "Select a finalized contract agreement to pull data via <c>HttpData-PULL</c>."
+              }
+            </T>
           </p>
 
           {result && (
             <div
               className={`mb-4 p-3 rounded text-sm whitespace-pre-line ${
-                result.startsWith("Error")
+                resultIsError
                   ? "bg-(--role-admin-bg) border border-(--role-admin-border) text-(--role-admin-text)"
                   : "bg-(--role-user-bg) border border-(--role-user-border) text-(--role-user-text)"
               }`}
@@ -967,14 +998,21 @@ function DataTransferContent() {
 
           {agreements.length === 0 && !loading && (
             <p className="text-xs text-(--text-secondary)">
-              No finalized agreements found. Complete a{" "}
-              <a
-                href="/negotiate"
-                className="text-teal-800 dark:text-teal-300 hover:underline"
+              <T
+                area="research"
+                tags={{
+                  a: (
+                    <a
+                      href="/negotiate"
+                      className="text-teal-800 dark:text-teal-300 hover:underline"
+                    />
+                  ),
+                }}
               >
-                contract negotiation
-              </a>{" "}
-              first.
+                {
+                  "No finalized agreements found. Complete a <a>contract negotiation</a> first."
+                }
+              </T>
             </p>
           )}
 
@@ -988,7 +1026,7 @@ function DataTransferContent() {
                   onChange={toggleAll}
                   className="accent-layer2"
                 />
-                Select All ({agreements.length})
+                {t("Select All ({n})", { n: agreements.length })}
               </label>
 
               <div className="space-y-2">
@@ -1021,10 +1059,10 @@ function DataTransferContent() {
                           {aId ? assetLabel(aId as string) : agrId.slice(0, 12)}
                         </p>
                         <p className="text-xs text-(--text-secondary)">
-                          Provider: {cp ? didToName(cp as string) : "—"}
+                          {t("Provider:")} {cp ? didToName(cp as string) : "—"}
                           {hasTransfer && (
                             <span className="ml-2 text-yellow-800 dark:text-yellow-400">
-                              (transfer in progress)
+                              {t("(transfer in progress)")}
                             </span>
                           )}
                         </p>
@@ -1046,12 +1084,14 @@ function DataTransferContent() {
                 >
                   {showAllAgreements ? (
                     <>
-                      <ChevronDown size={12} /> Show less
+                      <ChevronDown size={12} /> {t("Show less")}
                     </>
                   ) : (
                     <>
-                      <ChevronRight size={12} /> Show{" "}
-                      {agreements.length - AGREEMENTS_PAGE_SIZE} more
+                      <ChevronRight size={12} />{" "}
+                      {t("Show {n} more", {
+                        n: agreements.length - AGREEMENTS_PAGE_SIZE,
+                      })}
                     </>
                   )}
                 </button>
@@ -1068,8 +1108,8 @@ function DataTransferContent() {
                   <ArrowRightLeft size={14} />
                 )}
                 {selectedAgreements.size > 1
-                  ? `Start ${selectedAgreements.size} Transfers`
-                  : "Start Transfer"}
+                  ? t("Start {n} Transfers", { n: selectedAgreements.size })
+                  : t("Start Transfer")}
               </button>
             </form>
           )}
@@ -1078,9 +1118,9 @@ function DataTransferContent() {
         {/* ── Transfer Processes (DSP State Machine) ── */}
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-semibold text-sm">
-            Transfer Processes{" "}
+            {t("Transfer Processes")}{" "}
             <span className="font-normal text-(--text-secondary)">
-              (DSP Signalling Protocol)
+              {t("(DSP Signalling Protocol)")}
             </span>
           </h2>
           <button
@@ -1089,7 +1129,7 @@ function DataTransferContent() {
             className="flex items-center gap-1 text-xs text-(--text-secondary) hover:text-(--text-primary) disabled:opacity-50"
           >
             <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
-            Refresh
+            {t("Refresh")}
           </button>
         </div>
 
@@ -1117,7 +1157,7 @@ function DataTransferContent() {
                       : "bg-(--surface-2) text-(--text-secondary) border border-(--border) hover:border-gray-500"
                   }`}
                 >
-                  {s} ({count})
+                  {s === "ALL" ? t("ALL") : s} ({count})
                 </button>
               );
             })}
@@ -1127,34 +1167,38 @@ function DataTransferContent() {
         {loading ? (
           <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
-            Loading transfers…
+            {t("Loading transfers…")}
           </div>
         ) : filteredTransfers.length === 0 ? (
           <p className="text-(--text-secondary) text-sm">
             {transfers.length === 0
-              ? "No transfer processes yet. Start one from an agreed contract above."
-              : `No transfers matching "${statusFilter}".`}
+              ? t(
+                  "No transfer processes yet. Start one from an agreed contract above.",
+                )
+              : t('No transfers matching "{status}".', {
+                  status: statusFilter,
+                })}
           </p>
         ) : (
           <div className="grid gap-3">
-            {filteredTransfers.map((t) => {
-              const state = f(t as Record<string, unknown>, "state");
+            {filteredTransfers.map((tr) => {
+              const state = f(tr as Record<string, unknown>, "state");
               const aId =
-                t.assetId || f(t as Record<string, unknown>, "assetId");
+                tr.assetId || f(tr as Record<string, unknown>, "assetId");
               const transferType =
-                f(t as Record<string, unknown>, "transferType") ||
+                f(tr as Record<string, unknown>, "transferType") ||
                 "HttpData-PULL";
               const timestamp =
-                (t.stateTimestamp as number) ||
-                (t["edc:stateTimestamp"] as number) ||
+                (tr.stateTimestamp as number) ||
+                (tr["edc:stateTimestamp"] as number) ||
                 0;
               const isCompleted = state?.toUpperCase().includes("COMPLETED");
-              const isViewing = viewingTransferId === t["@id"];
+              const isViewing = viewingTransferId === tr["@id"];
               const bundle = fhirBundles?.[aId as string] ?? null;
 
               return (
                 <div
-                  key={t["@id"]}
+                  key={tr["@id"]}
                   className={`p-4 border rounded-xl space-y-3 transition-colors ${
                     isViewing
                       ? "border-layer2/50 bg-(--surface-2)/30"
@@ -1168,7 +1212,7 @@ function DataTransferContent() {
                       <span className="text-sm font-medium text-(--text-primary)">
                         {aId
                           ? assetLabel(aId as string)
-                          : t["@id"].slice(0, 12)}
+                          : tr["@id"].slice(0, 12)}
                       </span>
                       <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                         {transferType}
@@ -1178,15 +1222,15 @@ function DataTransferContent() {
                           badge on it claims a transfer that never ran. #358 */}
                       <RowSourceBadge
                         source={
-                          (t.source as RowSource | undefined) ??
-                          (t.demo === true ? "demo" : undefined)
+                          (tr.source as RowSource | undefined) ??
+                          (tr.demo === true ? "demo" : undefined)
                         }
-                        reason={t.demoReason as string | undefined}
+                        reason={tr.demoReason as string | undefined}
                       />
                     </div>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => openFhirViewer(t["@id"])}
+                        onClick={() => openFhirViewer(tr["@id"])}
                         className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
                           isViewing
                             ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
@@ -1194,7 +1238,7 @@ function DataTransferContent() {
                         }`}
                       >
                         <FileJson2 size={12} />
-                        {isViewing ? "Hide FHIR" : "View FHIR"}
+                        {isViewing ? t("Hide FHIR") : t("View FHIR")}
                       </button>
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full ${stateBg(
@@ -1213,18 +1257,21 @@ function DataTransferContent() {
                   <div className="flex items-center gap-4 text-[11px] text-(--text-secondary)">
                     {timestamp > 0 && (
                       <span>
-                        Updated:{" "}
+                        {t("Updated:")}{" "}
                         {new Date(timestamp).toLocaleString(undefined, {
                           dateStyle: "short",
                           timeStyle: "short",
                         })}
                       </span>
                     )}
-                    <span>Process: {t["@id"].slice(0, 8)}…</span>
-                    {isCompleted && (t.dataPayload as DataPayload)?.total && (
+                    <span>
+                      {t("Process: {id}…", { id: tr["@id"].slice(0, 8) })}
+                    </span>
+                    {isCompleted && (tr.dataPayload as DataPayload)?.total && (
                       <span className="text-green-800 dark:text-green-400">
-                        {(t.dataPayload as DataPayload).total} resources
-                        transferred
+                        {t("{n} resources transferred", {
+                          n: (tr.dataPayload as DataPayload).total,
+                        })}
                       </span>
                     )}
                   </div>
@@ -1234,11 +1281,11 @@ function DataTransferContent() {
                     (loadingFhir ? (
                       <div className="flex items-center gap-2 text-(--text-secondary) py-4 justify-center">
                         <Loader2 size={14} className="animate-spin" />
-                        Loading FHIR data…
+                        {t("Loading FHIR data…")}
                       </div>
                     ) : (
                       <FhirViewerPanel
-                        transfer={t}
+                        transfer={tr}
                         bundle={bundle}
                         onClose={() => setViewingTransferId(null)}
                       />

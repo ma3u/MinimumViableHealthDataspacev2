@@ -12,6 +12,7 @@ import {
   Scissors,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import { useT } from "@/lib/i18n/translate";
 
 interface AnalyticsData {
   summary: {
@@ -108,6 +109,8 @@ function BarSection({
   colorClass: string;
   loading: boolean;
 }) {
+  const t = useT("research");
+  const tc = useT("common");
   const maxCount = data[0]?.count ?? 1;
   return (
     <section className="bg-(--surface) border border-(--border) rounded-xl p-5">
@@ -116,9 +119,9 @@ function BarSection({
         <h2 className="font-semibold text-sm text-(--text-primary)">{title}</h2>
       </div>
       {loading ? (
-        <div className="text-(--text-secondary) text-xs">Loading…</div>
+        <div className="text-(--text-secondary) text-xs">{tc("Loading…")}</div>
       ) : data.length === 0 ? (
-        <div className="text-(--text-secondary) text-xs">No data</div>
+        <div className="text-(--text-secondary) text-xs">{t("No data")}</div>
       ) : (
         <div className="flex flex-col gap-1">
           {data.map((d, i) => (
@@ -137,6 +140,8 @@ function BarSection({
 }
 
 export default function AnalyticsPage() {
+  const t = useT("research");
+  const tn = useT("nav");
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -161,37 +166,37 @@ export default function AnalyticsPage() {
 
   const statCards = [
     {
-      label: "Patients",
+      label: t("Patients"),
       value: summary?.persons,
       icon: Users,
       color: "text-blue-800 dark:text-blue-300",
     },
     {
-      label: "Conditions",
+      label: t("Conditions"),
       value: summary?.conditions,
       icon: Activity,
       color: "text-green-800 dark:text-green-300",
     },
     {
-      label: "Drug Exposures",
+      label: t("Drug Exposures"),
       value: summary?.drugs,
       icon: Pill,
       color: "text-amber-800 dark:text-amber-300",
     },
     {
-      label: "Procedures",
+      label: t("Procedures"),
       value: summary?.procedures,
       icon: Scissors,
       color: "text-blue-800 dark:text-blue-300",
     },
     {
-      label: "Measurements",
+      label: t("Measurements"),
       value: summary?.measurements,
       icon: FlaskConical,
       color: "text-purple-800 dark:text-purple-300",
     },
     {
-      label: "Visits",
+      label: t("Visits"),
       value: summary?.visits,
       icon: Calendar,
       color: "text-teal-800 dark:text-teal-300",
@@ -202,15 +207,19 @@ export default function AnalyticsPage() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
-          title="OMOP Research Analytics"
+          title={t("OMOP Research Analytics")}
           icon={BarChart2}
-          description="Layer 4 — OMOP CDM cohort statistics from the Synthea-generated dataset, supporting EHDS Art. 53 secondary-use research. View aggregate counts for persons, conditions, drugs, measurements, and procedures."
-          prevStep={{ href: "/patient", label: "Patient Journey" }}
-          nextStep={{ href: "/query", label: "Natural Language Query" }}
-          infoText="Analytics are computed from OMOP CDM nodes in Neo4j. The OMOP Common Data Model standardises clinical data across institutions, enabling federated cohort analysis without moving patient-level data."
+          description={t(
+            "Layer 4: OMOP CDM cohort statistics from the Synthea-generated dataset, supporting EHDS Art. 53 secondary-use research. View aggregate counts for persons, conditions, drugs, measurements, and procedures.",
+          )}
+          prevStep={{ href: "/patient", label: tn("Patient Journey") }}
+          nextStep={{ href: "/query", label: t("Natural Language Query") }}
+          infoText={t(
+            "Analytics are computed from OMOP CDM nodes in Neo4j. The OMOP Common Data Model standardises clinical data across institutions, enabling federated cohort analysis without moving patient-level data.",
+          )}
           docLink={{
             href: "https://ohdsi.github.io/CommonDataModel/",
-            label: "OMOP CDM Documentation",
+            label: t("OMOP CDM Documentation"),
             external: true,
           }}
         />
@@ -229,13 +238,20 @@ export default function AnalyticsPage() {
             className="mb-6 p-3 rounded-sm bg-(--surface) border border-(--border) text-xs text-(--text-secondary)"
             data-testid="analytics-permit"
           >
-            Under data permit{" "}
+            {t("Under data permit")}{" "}
             <span className="font-mono text-(--text-primary)">
               {data.permit.permitId}
             </span>
-            {data.permit.datasetId && <> for {data.permit.datasetId}</>}
+            {data.permit.datasetId && (
+              <> {t("for {dataset}", { dataset: data.permit.datasetId })}</>
+            )}
             {data.permit.validUntil && (
-              <>, valid until {data.permit.validUntil.slice(0, 10)}</>
+              <>
+                ,{" "}
+                {t("valid until {date}", {
+                  date: data.permit.validUntil.slice(0, 10),
+                })}
+              </>
             )}{" "}
             ({data.permit.article})
           </div>
@@ -263,7 +279,7 @@ export default function AnalyticsPage() {
             <div className="flex items-center gap-2 mb-3">
               <Users size={16} className="text-(--text-secondary)" />
               <h2 className="font-semibold text-sm text-(--text-primary)">
-                Gender Distribution
+                {t("Gender Distribution")}
               </h2>
             </div>
             <div className="flex gap-6">
@@ -283,7 +299,7 @@ export default function AnalyticsPage() {
                         g.gender === "Female" ? "bg-layer3" : "bg-layer4"
                       }`}
                     />
-                    <span className="text-(--text-primary)">{g.gender}</span>
+                    <span className="text-(--text-primary)">{t(g.gender)}</span>
                     <span className="text-(--text-secondary)">
                       {g.count.toLocaleString()} ({pct}%)
                     </span>
@@ -297,28 +313,28 @@ export default function AnalyticsPage() {
         {/* Bar chart sections */}
         <div className="flex flex-col gap-6">
           <BarSection
-            title="Top Conditions (OMOPConditionOccurrence)"
+            title={t("Top Conditions (OMOPConditionOccurrence)")}
             icon={Activity}
             data={data?.topConditions ?? []}
             colorClass={LAYER_COLORS.condition}
             loading={loading}
           />
           <BarSection
-            title="Top Drug Exposures (OMOPDrugExposure)"
+            title={t("Top Drug Exposures (OMOPDrugExposure)")}
             icon={Pill}
             data={data?.topDrugs ?? []}
             colorClass={LAYER_COLORS.drug}
             loading={loading}
           />
           <BarSection
-            title="Top Measurements (OMOPMeasurement)"
+            title={t("Top Measurements (OMOPMeasurement)")}
             icon={FlaskConical}
             data={data?.topMeasurements ?? []}
             colorClass={LAYER_COLORS.measurement}
             loading={loading}
           />
           <BarSection
-            title="Top Procedures (OMOPProcedureOccurrence)"
+            title={t("Top Procedures (OMOPProcedureOccurrence)")}
             icon={Scissors}
             data={data?.topProcedures ?? []}
             colorClass={LAYER_COLORS.procedure}
