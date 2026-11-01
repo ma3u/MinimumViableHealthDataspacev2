@@ -6,6 +6,7 @@ import { SpeLabelBadge, SpeStatusText } from "@/components/spe/SpeBadges";
 import { aciGroupMonthlyEur, formatEur } from "@/lib/azure-pricing";
 import { ADR_068_URL, type SpeStatusResponse } from "@/lib/spe";
 import { ACI_SPE_DETAILS, ACI_SPE_GROUPS } from "./constants";
+import { T, useT } from "@/lib/i18n/translate";
 
 /** "mvhd-spe-2" holds SPE-2. */
 function speIdOf(group: string): string {
@@ -18,6 +19,7 @@ function speIdOf(group: string): string {
  * group is marked "in use" only when its SPE says it runs there.
  */
 export function SpeTopologyView({ data }: { data: SpeStatusResponse | null }) {
+  const t = useT("admin");
   const spes = data?.spes ?? [];
   const trustee = data?.trustee ?? null;
   return (
@@ -27,23 +29,28 @@ export function SpeTopologyView({ data }: { data: SpeStatusResponse | null }) {
         className="font-semibold text-sm flex items-center gap-2 text-(--text-primary) mb-3"
       >
         <Lock size={16} className="text-(--layer5-text)" aria-hidden="true" />
-        Secure processing environments
+        {t("Secure processing environments")}
         <span className="text-xs font-normal text-(--text-secondary)">
-          (
-          <a
-            href={ADR_068_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-(--accent) hover:underline"
+          <T
+            area="admin"
+            tags={{
+              a: (
+                <a
+                  href={ADR_068_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-(--accent) hover:underline"
+                />
+              ),
+            }}
           >
-            ADR-068
-          </a>
-          , ADR-069 proposed)
+            {"(<a>ADR-068</a>, ADR-069 proposed)"}
+          </T>
         </span>
       </h2>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
         <ul
-          aria-label="ACI confidential container groups"
+          aria-label={t("ACI confidential container groups")}
           className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-2"
         >
           {ACI_SPE_GROUPS.map((group) => {
@@ -53,7 +60,9 @@ export function SpeTopologyView({ data }: { data: SpeStatusResponse | null }) {
             return (
               <li
                 key={group.name}
-                aria-label={`ACI container group ${group.name}`}
+                aria-label={t("ACI container group {name}", {
+                  name: group.name,
+                })}
                 className="border border-(--border) rounded-xl p-4 bg-(--surface)/40 text-xs space-y-1.5"
               >
                 <div className="flex items-start justify-between gap-2 flex-wrap">
@@ -68,7 +77,7 @@ export function SpeTopologyView({ data }: { data: SpeStatusResponse | null }) {
                         : "text-(--text-secondary) border-(--border)"
                     }`}
                   >
-                    {inUse ? "in use" : "not used by this stack"}
+                    {inUse ? t("in use") : t("not used by this stack")}
                   </span>
                 </div>
                 <p className="text-[11px] text-(--text-secondary) font-mono">
@@ -82,13 +91,14 @@ export function SpeTopologyView({ data }: { data: SpeStatusResponse | null }) {
                     .join(" · ")}
                 </p>
                 <p className="text-[11px] text-(--text-secondary)">
-                  {formatEur(cost.hourlyEur)} an hour while running · stopped
-                  off hours (ADR-053) · reloads from the sealed extract on every
-                  start
+                  {t(
+                    "{eur} an hour while running · stopped off hours (ADR-053) · reloads from the sealed extract on every start",
+                    { eur: formatEur(cost.hourlyEur) },
+                  )}
                 </p>
                 {spe ? (
                   <div
-                    aria-label={`${spe.id} workspace`}
+                    aria-label={t("{id} workspace", { id: spe.id })}
                     className="border-t border-(--border) pt-2 space-y-1"
                   >
                     <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -104,7 +114,7 @@ export function SpeTopologyView({ data }: { data: SpeStatusResponse | null }) {
                   </div>
                 ) : (
                   <p className="text-(--text-secondary)">
-                    {speIdOf(group.name)} not reported
+                    {t("{id} not reported", { id: speIdOf(group.name) })}
                   </p>
                 )}
               </li>
@@ -124,33 +134,40 @@ export function SpeTopologyView({ data }: { data: SpeStatusResponse | null }) {
             Trustee <span className="font-mono">mvhd-trustee</span>
           </p>
           <p className="text-[11px] text-(--text-secondary)">
-            KBS, Attestation Service and RVPS on ACA; releases each
-            workspace&apos;s extract key after attestation
+            {t(
+              "KBS, Attestation Service and RVPS on ACA; releases each workspace's extract key after attestation",
+            )}
           </p>
           {trustee ? (
             <>
               <p>
-                Operator:{" "}
+                {t("Operator:")}{" "}
                 <span className="text-(--text-primary)">
                   {trustee.operator}
                 </span>
               </p>
               <p>
-                Verifier:{" "}
+                {t("Verifier:")}{" "}
                 <span className="font-mono text-(--text-primary)">
                   {trustee.verifier}
                 </span>
               </p>
               <p>
                 {trustee.reachable ? (
-                  <span className="text-(--success-text)">reachable</span>
+                  <span className="text-(--success-text)">
+                    {t("reachable")}
+                  </span>
                 ) : (
-                  <span className="text-(--danger-text)">not reachable</span>
+                  <span className="text-(--danger-text)">
+                    {t("not reachable")}
+                  </span>
                 )}
               </p>
             </>
           ) : (
-            <p className="text-(--text-secondary)">Not reported by the proxy</p>
+            <p className="text-(--text-secondary)">
+              {t("Not reported by the proxy")}
+            </p>
           )}
         </div>
       </div>

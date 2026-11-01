@@ -3,8 +3,10 @@
 import { COMPONENT_INFO, type ComponentMeta } from "@/lib/edc/component-info";
 import { useState } from "react";
 import { Info, X } from "lucide-react";
+import { useT } from "@/lib/i18n/translate";
 
 export function InfoPopover({ name }: { name: string }) {
+  const t = useT("admin");
   const [open, setOpen] = useState(false);
   const meta: ComponentMeta | undefined = COMPONENT_INFO[name];
   if (!meta) return null;
@@ -17,7 +19,7 @@ export function InfoPopover({ name }: { name: string }) {
           setOpen(!open);
         }}
         className="text-(--text-secondary) hover:text-teal-800 dark:hover:text-teal-300 transition-colors p-0.5"
-        title={`Info: ${name}`}
+        title={t("Info: {name}", { name })}
       >
         <Info size={13} />
       </button>
@@ -42,17 +44,19 @@ export function InfoPopover({ name }: { name: string }) {
               {meta.description}
             </p>
             <div className="grid grid-cols-[80px_1fr] gap-y-1.5 gap-x-2 pt-1 border-t border-(--border)">
-              <span className="text-(--text-secondary)">Protocol</span>
+              <span className="text-(--text-secondary)">{t("Protocol")}</span>
               <span className="text-(--text-primary)">{meta.protocol}</span>
-              <span className="text-(--text-secondary)">Ports</span>
+              <span className="text-(--text-secondary)">{t("Ports")}</span>
               <span className="text-(--text-primary) font-mono text-[11px]">
                 {meta.ports}
               </span>
-              <span className="text-(--text-secondary)">Depends on</span>
+              <span className="text-(--text-secondary)">{t("Depends on")}</span>
               <span className="text-(--text-primary)">
-                {meta.dependsOn.length > 0 ? meta.dependsOn.join(", ") : "None"}
+                {meta.dependsOn.length > 0
+                  ? meta.dependsOn.join(", ")
+                  : t("None")}
               </span>
-              <span className="text-(--text-secondary)">Health</span>
+              <span className="text-(--text-secondary)">{t("Health")}</span>
               <span className="text-(--text-primary)">{meta.healthSource}</span>
             </div>
           </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n/translate";
+
 export function Sparkline({
   data,
   max,
@@ -13,9 +15,12 @@ export function Sparkline({
   width?: number;
   height?: number;
 }) {
+  const t = useT("admin");
   if (data.length < 2)
     return (
-      <span className="text-[10px] text-(--text-secondary)">collecting…</span>
+      <span className="text-[10px] text-(--text-secondary)">
+        {t("collecting…")}
+      </span>
     );
 
   const effectiveMax = max > 0 ? max : 1;

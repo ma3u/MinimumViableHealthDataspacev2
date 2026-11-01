@@ -7,7 +7,6 @@ import {
   attestationAnchor,
   attestationVerdict,
   formatSpeTime,
-  optOutCountsText,
   speEventLabel,
   trusteeResource,
   type AttestationVerdict,
@@ -15,6 +14,8 @@ import {
   type SpeEntry,
   type SpeTrustee,
 } from "@/lib/spe";
+import { useT } from "@/lib/i18n/translate";
+import { useOptOutText } from "@/app/admin/audit/_components/SpeAuditSection";
 
 const VERDICT_STYLES: Record<AttestationVerdict, string> = {
   pass: "text-(--success-text) border-(--success)/40 bg-(--success)/10",
@@ -59,8 +60,9 @@ function Field({
 
 /** A hex value in full, wrapped, or "not reported". */
 function Hex({ value }: { value: string | null | undefined }) {
+  const t = useT("admin");
   if (!value) {
-    return <span className="text-(--text-secondary)">not reported</span>;
+    return <span className="text-(--text-secondary)">{t("not reported")}</span>;
   }
   return <code className="font-mono text-[11px] break-all">{value}</code>;
 }
@@ -82,6 +84,11 @@ export function AttestationCard({
   /** This SPE's spe.* events, newest first. */
   events: SpeAuditEvent[];
 }) {
+  const t = useT("admin");
+  const optOutText = useOptOutText();
+  const when = (iso: string | null | undefined) =>
+    iso ? formatSpeTime(iso) : t("not yet");
+  const notReported = t("not reported");
   const a = spe.attestation ?? null;
   const claims = a?.claims ?? null;
   const verdict = attestationVerdict(spe);
@@ -93,20 +100,22 @@ export function AttestationCard({
 
   const chain: { label: string; value: React.ReactNode }[] = [
     {
-      label: "Data permit",
+      label: t("Data permit"),
       value: (
-        <span className="font-mono">{spe.permitId ?? "no permit loaded"}</span>
+        <span className="font-mono">
+          {spe.permitId ?? t("no permit loaded")}
+        </span>
       ),
     },
-    { label: "Policy hash", value: <PolicyHash hash={spe.policyHash} /> },
+    { label: t("Policy hash"), value: <PolicyHash hash={spe.policyHash} /> },
     {
-      label: "Trustee resource",
+      label: t("Trustee resource"),
       value: <span className="font-mono">{trusteeResource(spe.id)}</span>,
     },
-    { label: "Key released", value: formatSpeTime(spe.keyReleasedAt) },
+    { label: t("Key released"), value: when(spe.keyReleasedAt) },
     {
-      label: "Workspace loaded",
-      value: formatSpeTime(loaded?.recorded ?? null),
+      label: t("Workspace loaded"),
+      value: when(loaded?.recorded ?? null),
     },
   ];
 
@@ -125,7 +134,7 @@ export function AttestationCard({
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <span
-            aria-label={`Verdict: ${verdict.text}`}
+            aria-label={t("Verdict: {text}", { text: t(verdict.text) })}
             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border ${
               // A pass on sample evidence proves the flow, not the hardware:
               // amber, like the "Simulated attestation" label.
@@ -135,14 +144,14 @@ export function AttestationCard({
             }`}
           >
             <VerdictIcon size={12} aria-hidden="true" />
-            {verdict.text}
+            {t(verdict.text)}
           </span>
           <span
             className={`text-[11px] font-semibold ${
               simulated ? "text-(--warning-text)" : "text-(--success-text)"
             }`}
           >
-            {simulated ? "Simulated" : "Hardware"}
+            {simulated ? t("Simulated") : t("Hardware")}
           </span>
           <SpeLabelBadge spe={spe} />
         </div>
@@ -153,99 +162,100 @@ export function AttestationCard({
           role="alert"
           className="text-xs text-(--danger-text) bg-(--danger)/10 border border-(--danger)/30 rounded-lg px-3 py-2"
         >
-          Refused: {a.refusalReason}
+          {t("Refused: {reason}", { reason: a.refusalReason })}
         </p>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div>
           <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
-            Who verified
+            {t("Who verified")}
           </h3>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <Field label="Trustee operator">
-              {trustee?.operator ?? "not reported"}
+            <Field label={t("Trustee operator")}>
+              {trustee?.operator ?? notReported}
             </Field>
-            <Field label="Verifier">
+            <Field label={t("Verifier")}>
               <span className="font-mono">
-                {a?.verifier ?? trustee?.verifier ?? "not reported"}
+                {a?.verifier ?? trustee?.verifier ?? notReported}
               </span>
             </Field>
-            <Field label="Attestation policy">
-              <span className="font-mono">{a?.policyId ?? "not reported"}</span>
+            <Field label={t("Attestation policy")}>
+              <span className="font-mono">{a?.policyId ?? notReported}</span>
             </Field>
-            <Field label="Token valid">
+            <Field label={t("Token valid")}>
               {a?.tokenIssuedAt || a?.tokenExpiresAt
-                ? `${formatSpeTime(a?.tokenIssuedAt)} to ${formatSpeTime(
-                    a?.tokenExpiresAt,
-                  )}`
-                : "not reported"}
+                ? t("{from} to {to}", {
+                    from: when(a?.tokenIssuedAt),
+                    to: when(a?.tokenExpiresAt),
+                  })
+                : notReported}
             </Field>
           </dl>
         </div>
         <div>
           <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
-            What was proven
+            {t("What was proven")}
           </h3>
           <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <Field label="Scope">
+            <Field label={t("Scope")}>
               {spe.attestationScope}
               <span className="block text-[11px] text-(--text-secondary)">
-                {SCOPE_TEXT[spe.attestationScope] ?? ""}
+                {SCOPE_TEXT[spe.attestationScope]
+                  ? t(SCOPE_TEXT[spe.attestationScope])
+                  : ""}
               </span>
             </Field>
-            <Field label="TEE">{claims?.tee ?? spe.teeType}</Field>
-            <Field label="Residual trust">
+            <Field label={t("TEE")}>{claims?.tee ?? spe.teeType}</Field>
+            <Field label={t("Residual trust")}>
               {residualTrust.length > 0
                 ? residualTrust.join(", ")
                 : simulated
-                  ? "everything: no hardware proof"
-                  : "not reported"}
+                  ? t("everything: no hardware proof")
+                  : notReported}
             </Field>
-            <Field label="Last attestation">
-              {formatSpeTime(spe.attestedAt)}
-            </Field>
+            <Field label={t("Last attestation")}>{when(spe.attestedAt)}</Field>
           </dl>
         </div>
       </div>
 
       <div>
         <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
-          Evidence
+          {t("Evidence")}
         </h3>
         {a ? (
           <>
             <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
-              <Field label="Measurement">
+              <Field label={t("Measurement")}>
                 <Hex value={claims?.measurement} />
               </Field>
-              <Field label="Reported TCB">
+              <Field label={t("Reported TCB")}>
                 {claims?.reportedTcb ?? (
-                  <span className="text-(--text-secondary)">not reported</span>
+                  <span className="text-(--text-secondary)">{notReported}</span>
                 )}
               </Field>
-              <Field label="Host data">
+              <Field label={t("Host data")}>
                 <Hex value={claims?.hostData} />
               </Field>
-              <Field label="Report data">
+              <Field label={t("Report data")}>
                 <Hex value={claims?.reportData} />
               </Field>
-              <Field label="VM id">
+              <Field label={t("VM id")}>
                 {claims?.vmId ?? (
-                  <span className="text-(--text-secondary)">not reported</span>
+                  <span className="text-(--text-secondary)">{notReported}</span>
                 )}
               </Field>
-              <Field label="Evidence digest">
+              <Field label={t("Evidence digest")}>
                 <PolicyHash hash={a.evidenceDigest} />
               </Field>
             </dl>
             {pcrs.length > 0 ? (
               <details className="mt-3">
                 <summary className="cursor-pointer text-xs font-semibold text-(--accent)">
-                  PCRs ({pcrs.length})
+                  {t("PCRs ({n})", { n: pcrs.length })}
                 </summary>
                 <table
-                  aria-label={`${spe.id} PCRs`}
+                  aria-label={t("{id} PCRs", { id: spe.id })}
                   className="mt-2 w-full text-left text-[11px]"
                 >
                   <thead>
@@ -254,7 +264,7 @@ export function AttestationCard({
                         PCR
                       </th>
                       <th className="py-1 font-medium text-(--text-secondary)">
-                        Value
+                        {t("Value")}
                       </th>
                     </tr>
                   </thead>
@@ -270,23 +280,27 @@ export function AttestationCard({
               </details>
             ) : (
               <p className="mt-3 text-xs text-(--text-secondary)">
-                No PCRs reported
-                {simulated ? " (the sample attester has no vTPM)" : ""}
+                {simulated
+                  ? t("No PCRs reported (the sample attester has no vTPM)")
+                  : t("No PCRs reported")}
               </p>
             )}
           </>
         ) : (
           <p className="text-sm text-(--text-secondary)">
-            No attestation recorded
+            {t("No attestation recorded")}
           </p>
         )}
       </div>
 
       <div>
         <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
-          From permit to workspace
+          {t("From permit to workspace")}
         </h3>
-        <ol aria-label={`${spe.id} chain`} className="space-y-1 text-xs">
+        <ol
+          aria-label={t("{id} chain", { id: spe.id })}
+          className="space-y-1 text-xs"
+        >
           {chain.map((step, i) => (
             <li key={step.label}>
               <div className="flex items-center gap-2 flex-wrap">
@@ -309,28 +323,30 @@ export function AttestationCard({
 
       <div>
         <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
-          Last audit events
+          {t("Last audit events")}
         </h3>
         {events.length === 0 ? (
           <p className="text-xs text-(--text-secondary)">
-            No secure processing events recorded for {spe.id}
+            {t("No secure processing events recorded for {id}", {
+              id: spe.id,
+            })}
           </p>
         ) : (
           <ul
-            aria-label={`${spe.id} audit events`}
+            aria-label={t("{id} audit events", { id: spe.id })}
             className="text-xs space-y-1"
           >
             {events.slice(0, 5).map((e) => (
               <li key={e.id} className="flex gap-3">
                 <span className="w-40 shrink-0 text-(--text-secondary)">
-                  {formatSpeTime(e.recorded)}
+                  {when(e.recorded)}
                 </span>
                 <span className="text-(--text-primary)">
-                  {speEventLabel(e.eventType)}
+                  {t(speEventLabel(e.eventType))}
                   {e.optOut && (
                     <span className="text-(--text-secondary)">
                       {" "}
-                      · {optOutCountsText(e.optOut)}
+                      · {optOutText(e.optOut)}
                     </span>
                   )}
                 </span>
@@ -345,7 +361,7 @@ export function AttestationCard({
           href="/admin/audit"
           className="inline-block mt-2 text-xs text-(--accent) hover:underline"
         >
-          All events in Audit &amp; Provenance, tab Secure processing
+          {t("All events in Audit & Provenance, tab Secure processing")}
         </Link>
       </div>
     </section>

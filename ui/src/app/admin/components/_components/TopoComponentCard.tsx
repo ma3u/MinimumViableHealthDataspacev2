@@ -6,6 +6,7 @@ import { InfoPopover } from "./InfoPopover";
 import { SeverityDot } from "./SeverityDot";
 import { KNOWN_BROKEN_ACA_APPS, SEVERITY_STYLES } from "./constants";
 import type { TopoComponent } from "./types";
+import { useT } from "@/lib/i18n/translate";
 
 export function TopoComponentCard({
   comp,
@@ -18,9 +19,12 @@ export function TopoComponentCard({
   // why eight rows show the same value.
   metricsShared?: boolean;
 }) {
+  const t = useT("admin");
   const sev = SEVERITY_STYLES[comp.severity];
   const sharedTitle = metricsShared
-    ? "Shared ACA container — same value applies to every participant. See Layer View for the cluster total."
+    ? t(
+        "Shared ACA container: the same value applies to every participant. See Layer View for the cluster total.",
+      )
     : undefined;
   const isBroken =
     KNOWN_BROKEN_ACA_APPS.has(comp.container) ||
@@ -37,13 +41,13 @@ export function TopoComponentCard({
           <InfoPopover name={comp.name} />
         </span>
         <span className="text-[10px] text-(--text-secondary) capitalize">
-          {comp.status}
+          {t(comp.status)}
           {metricsShared && (
             <span
               className="ml-1 italic text-[9px] text-(--text-secondary)"
               title={sharedTitle}
             >
-              · shared
+              · {t("shared")}
             </span>
           )}
         </span>

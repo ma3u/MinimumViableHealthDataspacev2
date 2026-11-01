@@ -8,11 +8,12 @@ import {
   SPE_EVENT_LABELS,
   SPE_EVENT_TYPES,
   formatSpeTime,
-  optOutCountsText,
   speEventLabel,
   type SpeAuditEvent,
   type SpeEventType,
+  type SpeOptOutCounts,
 } from "@/lib/spe";
+import { useT } from "@/lib/i18n/translate";
 
 const EVENT_CLASSES: Record<string, string> = {
   "spe.attestation":
@@ -30,14 +31,30 @@ const EVENT_CLASSES: Record<string, string> = {
 };
 
 function SimulatedMarker({ simulated }: { simulated: boolean | null }) {
+  const t = useT("admin");
   if (simulated === null) {
-    return <span className="text-(--text-secondary)">unknown</span>;
+    return <span className="text-(--text-secondary)">{t("unknown")}</span>;
   }
   return simulated ? (
-    <span className="text-(--warning-text) font-semibold">Simulated</span>
+    <span className="text-(--warning-text) font-semibold">
+      {t("Simulated")}
+    </span>
   ) : (
-    <span className="text-(--success-text) font-semibold">Hardware</span>
+    <span className="text-(--success-text) font-semibold">{t("Hardware")}</span>
   );
+}
+
+/** "1 added, 0 removed, 6 opted out in the hub", in the picker's language. */
+export function useOptOutText() {
+  const t = useT("admin");
+  return (c: SpeOptOutCounts) => {
+    const n = (v: number | null) => (v === null ? "?" : String(v));
+    return t("{added} added, {removed} removed, {inHub} opted out in the hub", {
+      added: n(c.added),
+      removed: n(c.removed),
+      inHub: n(c.inHub),
+    });
+  };
 }
 
 /**
@@ -46,6 +63,8 @@ function SimulatedMarker({ simulated }: { simulated: boolean | null }) {
  * evidence summary the proxy recorded on the ADR-045 chain.
  */
 export function SpeAuditSection({ events }: { events: SpeAuditEvent[] }) {
+  const t = useT("admin");
+  const optOutText = useOptOutText();
   const [shown, setShown] = useState<Set<SpeEventType>>(
     () => new Set(SPE_EVENT_TYPES),
   );
@@ -66,11 +85,11 @@ export function SpeAuditSection({ events }: { events: SpeAuditEvent[] }) {
       (!speId || e.speId === speId),
   );
 
-  const toggle = (t: SpeEventType) =>
+  const toggle = (type: SpeEventType) =>
     setShown((prev) => {
       const next = new Set(prev);
-      if (next.has(t)) next.delete(t);
-      else next.add(t);
+      if (next.has(type)) next.delete(type);
+      else next.add(type);
       return next;
     });
 
@@ -78,15 +97,15 @@ export function SpeAuditSection({ events }: { events: SpeAuditEvent[] }) {
     <section className="mb-8" data-testid="spe-audit-section">
       <h2 className="font-semibold text-sm mb-1 flex items-center gap-2">
         <Lock size={14} className="text-(--layer5-text)" aria-hidden="true" />
-        Secure processing
+        {t("Secure processing")}
         <span className="text-xs font-normal text-(--text-secondary)">
-          ({visible.length} of {events.length})
+          ({t("{n} of {total}", { n: visible.length, total: events.length })})
         </span>
       </h2>
       <p className="text-xs text-(--text-secondary) mb-3">
-        Attestation and key release for each SPE workspace, and the Art. 71
-        opt-outs pushed into it (counts only), appended to the audit chain
-        (ADR-045). What each label proves:{" "}
+        {t(
+          "Attestation and key release for each SPE workspace, and the Art. 71 opt-outs pushed into it (counts only), appended to the audit chain (ADR-045). What each label proves:",
+        )}{" "}
         <a
           href={ADR_068_URL}
           target="_blank"
@@ -99,32 +118,34 @@ export function SpeAuditSection({ events }: { events: SpeAuditEvent[] }) {
       </p>
 
       <fieldset
-        aria-label="Secure processing event types"
+        aria-label={t("Secure processing event types")}
         className="flex flex-wrap items-center gap-2 p-3 mb-4 bg-(--surface) border border-(--border) rounded-lg text-xs"
       >
-        <legend className="sr-only">Secure processing event types</legend>
-        {SPE_EVENT_TYPES.map((t) => (
+        <legend className="sr-only">
+          {t("Secure processing event types")}
+        </legend>
+        {SPE_EVENT_TYPES.map((type) => (
           <label
-            key={t}
+            key={type}
             className="flex items-center gap-1.5 px-2 py-1 rounded-sm border border-(--border) cursor-pointer"
           >
             <input
               type="checkbox"
-              checked={shown.has(t)}
-              onChange={() => toggle(t)}
+              checked={shown.has(type)}
+              onChange={() => toggle(type)}
               className="w-3.5 h-3.5"
             />
-            {SPE_EVENT_LABELS[t]}
+            {t(SPE_EVENT_LABELS[type])}
           </label>
         ))}
         {speIds.length > 1 && (
           <select
-            aria-label="SPE"
+            aria-label={t("SPE")}
             value={speId}
             onChange={(e) => setSpeId(e.target.value)}
             className="bg-(--surface-2) border border-(--border) rounded-sm px-2 py-1 text-(--text-primary)"
           >
-            <option value="">All SPEs</option>
+            <option value="">{t("All SPEs")}</option>
             {speIds.map((id) => (
               <option key={id} value={id}>
                 {id}
@@ -136,7 +157,7 @@ export function SpeAuditSection({ events }: { events: SpeAuditEvent[] }) {
 
       {visible.length === 0 ? (
         <p className="text-sm text-(--text-secondary)">
-          No secure processing events recorded
+          {t("No secure processing events recorded")}
         </p>
       ) : (
         <div className="overflow-x-auto border border-(--border) rounded-xl">
@@ -144,14 +165,14 @@ export function SpeAuditSection({ events }: { events: SpeAuditEvent[] }) {
             <thead>
               <tr className="border-b border-(--border) bg-(--surface)/60">
                 {[
-                  "Recorded",
-                  "Event",
-                  "SPE",
-                  "Permit",
-                  "Policy hash",
-                  "TEE",
-                  "Scope",
-                  "Evidence",
+                  t("Recorded"),
+                  t("Event"),
+                  t("SPE"),
+                  t("Permit"),
+                  t("Policy hash"),
+                  t("TEE"),
+                  t("Scope"),
+                  t("Evidence"),
                 ].map((h) => (
                   <th
                     key={h}
@@ -169,7 +190,7 @@ export function SpeAuditSection({ events }: { events: SpeAuditEvent[] }) {
                   className="border-b border-(--border) hover:bg-(--surface-2)/40"
                 >
                   <td className="py-2 px-3 whitespace-nowrap text-(--text-secondary)">
-                    {formatSpeTime(e.recorded)}
+                    {e.recorded ? formatSpeTime(e.recorded) : t("not yet")}
                   </td>
                   <td className="py-2 px-3">
                     <span
@@ -179,26 +200,26 @@ export function SpeAuditSection({ events }: { events: SpeAuditEvent[] }) {
                         "bg-(--surface-2) text-(--text-secondary)"
                       }`}
                     >
-                      {speEventLabel(e.eventType)}
+                      {t(speEventLabel(e.eventType))}
                     </span>
                     {e.optOut && (
                       <span className="block mt-0.5 text-[10px] text-(--text-secondary)">
-                        {optOutCountsText(e.optOut)}
+                        {optOutText(e.optOut)}
                       </span>
                     )}
                   </td>
                   <td className="py-2 px-3 font-semibold text-(--text-primary)">
-                    {e.speId ?? "unknown"}
+                    {e.speId ?? t("unknown")}
                   </td>
                   <td className="py-2 px-3 font-mono text-[11px]">
-                    {e.permitId ?? "none"}
+                    {e.permitId ?? t("none")}
                   </td>
                   <td className="py-2 px-3">
                     <PolicyHash hash={e.policyHash} />
                   </td>
-                  <td className="py-2 px-3">{e.teeType ?? "unknown"}</td>
+                  <td className="py-2 px-3">{e.teeType ?? t("unknown")}</td>
                   <td className="py-2 px-3">
-                    {e.attestationScope ?? "unknown"}
+                    {e.attestationScope ?? t("unknown")}
                   </td>
                   <td className="py-2 px-3">
                     <SimulatedMarker simulated={e.simulated} />

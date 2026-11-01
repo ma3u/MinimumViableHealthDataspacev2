@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import OdrlJsonHighlighter from "@/components/OdrlJsonHighlighter";
 import { SpePermitBindings } from "@/components/spe/SpePermitBindings";
+import { T, useT } from "@/lib/i18n/translate";
 
 /* ── Types ────────────────────────────────────────────────────── */
 
@@ -43,12 +44,26 @@ interface EhdsPolicyTemplate {
 /* ── EHDS Art. 53 / Art. 7 Policy Templates ───────────────────── */
 
 const DURATION_OPTIONS = [
-  { value: "contractAgreement+90d", label: "90 days" },
-  { value: "contractAgreement+180d", label: "180 days" },
-  { value: "contractAgreement+365d", label: "1 year" },
-  { value: "contractAgreement+730d", label: "2 years" },
-  { value: "contractAgreement+1095d", label: "3 years" },
+  "contractAgreement+90d",
+  "contractAgreement+180d",
+  "contractAgreement+365d",
+  "contractAgreement+730d",
+  "contractAgreement+1095d",
 ];
+
+type Translate = (
+  text: string,
+  vars?: Record<string, string | number>,
+) => string;
+
+/** "contractAgreement+730d" reads "2 years", in the picker's language. */
+function durationText(value: string, t: Translate): string {
+  const days = Number(/(\d+)d$/.exec(value)?.[1]);
+  if (!days) return value.replace("contractAgreement+", "");
+  if (days === 365) return t("1 year");
+  if (days % 365 === 0) return t("{n} years", { n: days / 365 });
+  return t("{n} days", { n: days });
+}
 
 function odrlPermission(
   purposes: string[],
@@ -487,9 +502,9 @@ function actionId(v: unknown): string {
 }
 
 /** Friendly display for ODRL/EDC action IDs */
-function friendlyAction(v: unknown): string {
+function friendlyAction(v: unknown, t: Translate): string {
   const id = actionId(v);
-  return friendlyId(id);
+  return t(friendlyId(id));
 }
 
 const FRIENDLY_NAMES: Record<string, string> = {
@@ -534,6 +549,8 @@ function friendlyOp(op: string): string {
 /* ── Component ────────────────────────────────────────────────── */
 
 export default function AdminPoliciesPage() {
+  const t = useT("admin");
+  const tc = useT("common");
   const [groups, setGroups] = useState<PolicyGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -544,9 +561,7 @@ export default function AdminPoliciesPage() {
     POLICY_TEMPLATES[0].id,
   );
   const [selectedParticipant, setSelectedParticipant] = useState("");
-  const [selectedDuration, setSelectedDuration] = useState(
-    DURATION_OPTIONS[2].value,
-  );
+  const [selectedDuration, setSelectedDuration] = useState(DURATION_OPTIONS[2]);
   const [creating, setCreating] = useState(false);
   const [formMsg, setFormMsg] = useState<{
     type: "ok" | "err";
@@ -597,11 +612,11 @@ export default function AdminPoliciesPage() {
     0,
   );
 
-  const tpl = POLICY_TEMPLATES.find((t) => t.id === selectedTemplate)!;
+  const tpl = POLICY_TEMPLATES.find((tp) => tp.id === selectedTemplate)!;
 
   const handleCreate = async () => {
     if (!selectedParticipant) {
-      setFormMsg({ type: "err", text: "Select a participant first." });
+      setFormMsg({ type: "err", text: t("Select a participant first.") });
       return;
     }
     setCreating(true);
@@ -624,14 +639,18 @@ export default function AdminPoliciesPage() {
       setFormMsg({
         type: "ok",
         text: isOffline
-          ? "Policy saved to local Neo4j registry (EDC-V management API is offline)"
-          : "Policy created successfully.",
+          ? t(
+              "Policy saved to local Neo4j registry (EDC-V management API is offline)",
+            )
+          : t("Policy created successfully."),
       });
       loadPolicies();
     } catch (e) {
       setFormMsg({
         type: "err",
-        text: `Failed: ${e instanceof Error ? e.message : e}`,
+        text: t("Failed: {error}", {
+          error: e instanceof Error ? e.message : String(e),
+        }),
       });
     } finally {
       setCreating(false);
@@ -645,7 +664,7 @@ export default function AdminPoliciesPage() {
     try {
       JSON.parse(editingPolicy.json); // validate JSON
     } catch {
-      setEditMsg({ type: "err", text: "Invalid JSON" });
+      setEditMsg({ type: "err", text: t("Invalid JSON") });
       setEditSaving(false);
       return;
     }
@@ -665,13 +684,15 @@ export default function AdminPoliciesPage() {
           (err as { error?: string }).error || `HTTP ${res.status}`,
         );
       }
-      setEditMsg({ type: "ok", text: "Policy updated." });
+      setEditMsg({ type: "ok", text: t("Policy updated.") });
       setEditingPolicy(null);
       loadPolicies();
     } catch (e) {
       setEditMsg({
         type: "err",
-        text: `Failed: ${e instanceof Error ? e.message : e}`,
+        text: t("Failed: {error}", {
+          error: e instanceof Error ? e.message : String(e),
+        }),
       });
     } finally {
       setEditSaving(false);
@@ -728,9 +749,9 @@ export default function AdminPoliciesPage() {
         {/* ── Page header ── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <h1 className="page-header">Policy Definitions</h1>
+            <h1 className="page-header">{t("Policy Definitions")}</h1>
             <p className="text-(--text-secondary) text-lg mt-1">
-              ODRL policies · EHDS Regulation (EU) 2025/327
+              {t("ODRL policies · EHDS Regulation (EU) 2025/327")}
             </p>
           </div>
           <button
@@ -742,11 +763,11 @@ export default function AdminPoliciesPage() {
           >
             {showForm ? (
               <>
-                <X size={14} /> Close
+                <X size={14} /> {tc("Close")}
               </>
             ) : (
               <>
-                <Plus size={14} /> Create Policy
+                <Plus size={14} /> {t("Create Policy")}
               </>
             )}
           </button>
@@ -756,29 +777,29 @@ export default function AdminPoliciesPage() {
         {showForm && (
           <div className="mb-8 border border-layer2 rounded-xl p-5 bg-(--surface)/40">
             <h2 className="text-lg font-semibold mb-4">
-              Create EHDS Policy Definition
+              {t("Create EHDS Policy Definition")}
             </h2>
 
             {/* Template selector */}
             <label className="block text-xs text-(--text-secondary) mb-1">
-              Policy Template
+              {t("Policy Template")}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-4">
-              {POLICY_TEMPLATES.map((t) => (
+              {POLICY_TEMPLATES.map((tp) => (
                 <button
-                  key={t.id}
-                  onClick={() => setSelectedTemplate(t.id)}
+                  key={tp.id}
+                  onClick={() => setSelectedTemplate(tp.id)}
                   className={`text-left p-3 rounded-lg border transition-colors ${
-                    selectedTemplate === t.id
+                    selectedTemplate === tp.id
                       ? "border-layer2 bg-layer2/10"
                       : "border-(--border) hover:border-gray-500"
                   }`}
                 >
                   <span className="text-xs font-mono text-teal-800 dark:text-teal-300">
-                    {t.article}
+                    {tp.article}
                   </span>
                   <p className="text-sm font-medium text-(--text-primary)">
-                    {t.label}
+                    {t(tp.label)}
                   </p>
                 </button>
               ))}
@@ -787,7 +808,7 @@ export default function AdminPoliciesPage() {
             {/* Selected template description */}
             <div className="mb-4 p-3 rounded-lg bg-(--surface-2)/50 border border-(--border)">
               <p className="text-xs text-(--text-secondary)">
-                {tpl.description}
+                {t(tpl.description)}
               </p>
             </div>
 
@@ -795,15 +816,15 @@ export default function AdminPoliciesPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-xs text-(--text-secondary) mb-1">
-                  Participant Context
+                  {t("Participant Context")}
                 </label>
                 <select
-                  aria-label="Participant Context"
+                  aria-label={t("Participant Context")}
                   value={selectedParticipant}
                   onChange={(e) => setSelectedParticipant(e.target.value)}
                   className="w-full rounded-lg bg-(--surface-2) border border-(--border-ui) text-sm px-3 py-2 text-(--text-primary)"
                 >
-                  <option value="">— select —</option>
+                  <option value="">{t("Select…")}</option>
                   {groups.map((g) => (
                     <option key={g.participantId} value={g.participantId}>
                       {g.identity
@@ -815,17 +836,17 @@ export default function AdminPoliciesPage() {
               </div>
               <div>
                 <label className="block text-xs text-(--text-secondary) mb-1">
-                  Access Duration
+                  {t("Access Duration")}
                 </label>
                 <select
-                  aria-label="Access Duration"
+                  aria-label={t("Access Duration")}
                   value={selectedDuration}
                   onChange={(e) => setSelectedDuration(e.target.value)}
                   className="w-full rounded-lg bg-(--surface-2) border border-(--border-ui) text-sm px-3 py-2 text-(--text-primary)"
                 >
                   {DURATION_OPTIONS.map((d) => (
-                    <option key={d.value} value={d.value}>
-                      {d.label}
+                    <option key={d} value={d}>
+                      {durationText(d, t)}
                     </option>
                   ))}
                 </select>
@@ -835,7 +856,7 @@ export default function AdminPoliciesPage() {
             {/* Preview */}
             <details className="mb-4">
               <summary className="cursor-pointer text-xs text-(--text-secondary) hover:text-(--text-primary)">
-                Preview ODRL policy JSON
+                {t("Preview ODRL policy JSON")}
               </summary>
               <OdrlJsonHighlighter
                 data={tpl.build({ duration: selectedDuration })}
@@ -851,7 +872,7 @@ export default function AdminPoliciesPage() {
                 className="px-4 py-2 rounded-lg bg-(--accent) text-white dark:text-gray-900 text-sm font-medium hover:bg-(--accent-hover) disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
               >
                 {creating && <Loader2 size={14} className="animate-spin" />}
-                Create Policy
+                {t("Create Policy")}
               </button>
               {formMsg && (
                 <span
@@ -871,9 +892,9 @@ export default function AdminPoliciesPage() {
         {/* ── Stats ────────────────────────────────────────────────── */}
         {!loading && (
           <div className="flex gap-4 mb-6 text-xs text-(--text-secondary)">
-            <span>{groups.length} participants</span>
+            <span>{t("{n} participants", { n: groups.length })}</span>
             <span>&middot;</span>
-            <span>{totalPolicies} total policies</span>
+            <span>{t("{n} total policies", { n: totalPolicies })}</span>
           </div>
         )}
 
@@ -881,7 +902,7 @@ export default function AdminPoliciesPage() {
         {loading ? (
           <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
-            Loading policies&hellip;
+            {t("Loading policies…")}
           </div>
         ) : groups.length === 0 ? (
           <div className="text-center py-12">
@@ -889,7 +910,7 @@ export default function AdminPoliciesPage() {
               size={40}
               className="text-(--text-secondary) mx-auto mb-4"
             />
-            <p className="text-(--text-secondary)">No policies found</p>
+            <p className="text-(--text-secondary)">{t("No policies found")}</p>
           </div>
         ) : (
           <div className="grid gap-4">
@@ -907,11 +928,16 @@ export default function AdminPoliciesPage() {
                 >
                   <button
                     className="w-full text-left p-4"
-                    aria-label={`${isOpen ? "Collapse" : "Expand"} ${
-                      g.identity
-                        ?.replace("did:web:", "")
-                        .replace(/%3A/g, ":") || g.participantId.slice(0, 16)
-                    }`}
+                    aria-label={t(
+                      isOpen ? "Collapse {name}" : "Expand {name}",
+                      {
+                        name:
+                          g.identity
+                            ?.replace("did:web:", "")
+                            .replace(/%3A/g, ":") ||
+                          g.participantId.slice(0, 16),
+                      },
+                    )}
                     onClick={() => setExpanded(isOpen ? null : g.participantId)}
                   >
                     <div className="flex items-center justify-between">
@@ -923,8 +949,12 @@ export default function AdminPoliciesPage() {
                             g.participantId.slice(0, 16)}
                         </p>
                         <p className="text-xs text-(--text-secondary)">
-                          {policies.length} polic
-                          {policies.length === 1 ? "y" : "ies"}
+                          {t(
+                            policies.length === 1
+                              ? "{n} policy"
+                              : "{n} policies",
+                            { n: policies.length },
+                          )}
                           {g.error && (
                             <span className="text-red-800 dark:text-red-400 ml-2">
                               ({g.error})
@@ -950,7 +980,7 @@ export default function AdminPoliciesPage() {
                     <div className="px-4 pb-4 border-t border-(--border) pt-3">
                       {policies.length === 0 ? (
                         <p className="text-(--text-secondary) text-sm">
-                          No policies defined
+                          {t("No policies defined")}
                         </p>
                       ) : (
                         <div className="space-y-3">
@@ -1015,12 +1045,7 @@ export default function AdminPoliciesPage() {
                                 ? durationVal
                                 : durationVal?.["@value"] ?? null;
                             const durationLabel = durationStr
-                              ? durationStr
-                                  .replace("contractAgreement+", "")
-                                  .replace("d", " days")
-                                  .replace("365 days", "1 year")
-                                  .replace("730 days", "2 years")
-                                  .replace("1095 days", "3 years")
+                              ? durationText(durationStr, t)
                               : null;
 
                             return (
@@ -1034,7 +1059,7 @@ export default function AdminPoliciesPage() {
                                     <div className="min-w-0">
                                       <p className="text-sm font-semibold text-(--text-primary) truncate">
                                         {(pObj["@id"] as string) ||
-                                          `Policy #${i + 1}`}
+                                          t("Policy #{n}", { n: i + 1 })}
                                       </p>
                                       <p className="text-xs text-(--text-secondary) mt-0.5 line-clamp-2">
                                         {purposeLabel}
@@ -1048,7 +1073,7 @@ export default function AdminPoliciesPage() {
                                         </span>
                                       )}
                                       <button
-                                        title="Edit policy JSON"
+                                        title={t("Edit policy JSON")}
                                         onClick={() => {
                                           setEditingPolicy({
                                             participantId: g.participantId,
@@ -1063,7 +1088,7 @@ export default function AdminPoliciesPage() {
                                         <Pencil size={13} />
                                       </button>
                                       <button
-                                        title="Duplicate policy"
+                                        title={t("Duplicate policy")}
                                         onClick={() =>
                                           handleDuplicate(g.participantId, p)
                                         }
@@ -1072,7 +1097,7 @@ export default function AdminPoliciesPage() {
                                         <Copy size={13} />
                                       </button>
                                       <button
-                                        title="Delete policy"
+                                        title={t("Delete policy")}
                                         onClick={() =>
                                           setDeletingPolicy({
                                             participantId: g.participantId,
@@ -1099,7 +1124,7 @@ export default function AdminPoliciesPage() {
                                       />
                                       <div className="text-xs">
                                         <span className="font-semibold text-green-700 dark:text-green-400">
-                                          Permissions
+                                          {t("Permissions")}
                                         </span>
                                         <span className="text-(--text-secondary) ml-1">
                                           {perms
@@ -1107,6 +1132,7 @@ export default function AdminPoliciesPage() {
                                               friendlyAction(
                                                 pm["odrl:action"] ??
                                                   pm["action"],
+                                                t,
                                               ),
                                             )
                                             .join(", ")}
@@ -1124,13 +1150,14 @@ export default function AdminPoliciesPage() {
                                       />
                                       <div className="text-xs">
                                         <span className="font-semibold text-blue-700 dark:text-blue-400">
-                                          Duties
+                                          {t("Duties")}
                                         </span>
                                         <span className="text-(--text-secondary) ml-1">
                                           {duties
                                             .map((d) => {
                                               const act = friendlyAction(
                                                 d["odrl:action"] ?? d["action"],
+                                                t,
                                               );
                                               const dc = asArray(
                                                 d["odrl:constraint"] ??
@@ -1149,9 +1176,9 @@ export default function AdminPoliciesPage() {
                                                 const rv =
                                                   cv["odrl:rightOperand"] ??
                                                   cv["rightOperand"];
-                                                return `${act} (${friendlyId(
-                                                  lo,
-                                                )} ${friendlyOp(op)} ${rv})`;
+                                                return `${act} (${t(
+                                                  friendlyId(lo),
+                                                )} ${t(friendlyOp(op))} ${rv})`;
                                               }
                                               return act;
                                             })
@@ -1170,7 +1197,7 @@ export default function AdminPoliciesPage() {
                                       />
                                       <div className="text-xs">
                                         <span className="font-semibold text-red-700 dark:text-red-400">
-                                          Prohibitions
+                                          {t("Prohibitions")}
                                         </span>
                                         <span className="text-(--text-secondary) ml-1">
                                           {prohibs
@@ -1178,6 +1205,7 @@ export default function AdminPoliciesPage() {
                                               friendlyAction(
                                                 pr["odrl:action"] ??
                                                   pr["action"],
+                                                t,
                                               ),
                                             )
                                             .join(", ")}
@@ -1205,7 +1233,7 @@ export default function AdminPoliciesPage() {
                                       />
                                       <div className="text-xs">
                                         <span className="font-semibold text-amber-700 dark:text-amber-400">
-                                          Constraints
+                                          {t("Constraints")}
                                         </span>
                                         <span className="text-(--text-secondary) ml-1">
                                           {constraints
@@ -1232,9 +1260,9 @@ export default function AdminPoliciesPage() {
                                               const rv =
                                                 c["odrl:rightOperand"] ??
                                                 c["rightOperand"];
-                                              return `${friendlyId(
-                                                lo,
-                                              )} ${friendlyOp(op)} ${rv}`;
+                                              return `${t(friendlyId(lo))} ${t(
+                                                friendlyOp(op),
+                                              )} ${rv}`;
                                             })
                                             .join(", ")}
                                         </span>
@@ -1247,7 +1275,7 @@ export default function AdminPoliciesPage() {
                                 <div className="px-4 pb-3">
                                   <details>
                                     <summary className="cursor-pointer text-[10px] text-(--text-secondary) hover:text-(--text-primary)">
-                                      View full ODRL JSON
+                                      {t("View full ODRL JSON")}
                                     </summary>
                                     <OdrlJsonHighlighter
                                       data={p}
@@ -1278,8 +1306,8 @@ export default function AdminPoliciesPage() {
               <div className="flex items-center justify-between px-5 py-3 border-b border-(--border)">
                 <h3 className="text-sm font-semibold text-(--text-primary)">
                   {editingPolicy.policyId
-                    ? `Edit: ${editingPolicy.policyId}`
-                    : "New Policy (duplicated)"}
+                    ? t("Edit: {id}", { id: editingPolicy.policyId })
+                    : t("New Policy (duplicated)")}
                 </h3>
                 <button
                   onClick={() => setEditingPolicy(null)}
@@ -1320,7 +1348,7 @@ export default function AdminPoliciesPage() {
                     onClick={() => setEditingPolicy(null)}
                     className="px-3 py-1.5 rounded-lg text-xs border border-(--border) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
                   >
-                    Cancel
+                    {t("Cancel")}
                   </button>
                   <button
                     onClick={handleEditSave}
@@ -1330,7 +1358,9 @@ export default function AdminPoliciesPage() {
                     {editSaving && (
                       <Loader2 size={12} className="animate-spin" />
                     )}
-                    {editingPolicy.policyId ? "Save Changes" : "Create Policy"}
+                    {editingPolicy.policyId
+                      ? t("Save Changes")
+                      : t("Create Policy")}
                   </button>
                 </div>
               </div>
@@ -1343,21 +1373,29 @@ export default function AdminPoliciesPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
             <div className="bg-(--surface) border border-(--border) rounded-xl shadow-2xl w-full max-w-md p-6">
               <h3 className="text-sm font-semibold text-(--text-primary) mb-2">
-                Delete Policy
+                {t("Delete Policy")}
               </h3>
               <p className="text-xs text-(--text-secondary) mb-4">
-                Are you sure you want to delete{" "}
-                <span className="font-mono font-medium text-(--text-primary)">
-                  {deletingPolicy.policyId || "this policy"}
-                </span>
-                ? This action cannot be undone.
+                <T
+                  area="admin"
+                  vars={{ id: deletingPolicy.policyId || t("this policy") }}
+                  tags={{
+                    b: (
+                      <span className="font-mono font-medium text-(--text-primary)" />
+                    ),
+                  }}
+                >
+                  {
+                    "Are you sure you want to delete <b>{id}</b>? This action cannot be undone."
+                  }
+                </T>
               </p>
               <div className="flex items-center justify-end gap-2">
                 <button
                   onClick={() => setDeletingPolicy(null)}
                   className="px-3 py-1.5 rounded-lg text-xs border border-(--border) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
                 >
-                  Cancel
+                  {t("Cancel")}
                 </button>
                 <button
                   onClick={handleDelete}
@@ -1365,7 +1403,7 @@ export default function AdminPoliciesPage() {
                   className="px-3 py-1.5 rounded-lg text-xs bg-red-600 text-white font-medium hover:bg-red-700 disabled:opacity-50 flex items-center gap-1.5 transition-colors"
                 >
                   {deleting && <Loader2 size={12} className="animate-spin" />}
-                  Delete
+                  {t("Delete")}
                 </button>
               </div>
             </div>

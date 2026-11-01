@@ -7,6 +7,7 @@ import { useSpeStatus } from "@/components/spe/use-spe-status";
 import { type SpeAuditEvent } from "@/lib/spe";
 import { AttestationCard } from "./_components/AttestationCard";
 import { AttestationExplainer } from "./_components/AttestationExplainer";
+import { useT } from "@/lib/i18n/translate";
 
 const ENVIRONMENT_LABELS: Record<string, string> = {
   azure: "Azure",
@@ -20,6 +21,7 @@ const ENVIRONMENT_LABELS: Record<string, string> = {
  * chain (/api/admin/audit?type=spe).
  */
 export default function AdminAttestationPage() {
+  const t = useT("admin");
   const { data, loading, error } = useSpeStatus();
   const [events, setEvents] = useState<SpeAuditEvent[]>([]);
 
@@ -47,15 +49,17 @@ export default function AdminAttestationPage() {
                 className="text-(--layer5-text)"
                 aria-hidden="true"
               />
-              SPE attestation
+              {t("SPE attestation")}
             </h1>
             <p className="text-(--text-secondary) text-lg mt-1">
-              What proves each secure processing environment · EHDS Art. 73
+              {t(
+                "What proves each secure processing environment · EHDS Art. 73",
+              )}
             </p>
           </div>
           {data && (
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-(--surface-2) text-(--text-secondary) self-start md:self-auto">
-              {ENVIRONMENT_LABELS[data.environment] ?? data.environment}
+              {t(ENVIRONMENT_LABELS[data.environment] ?? data.environment)}
             </span>
           )}
         </div>
@@ -65,11 +69,11 @@ export default function AdminAttestationPage() {
         {loading ? (
           <p className="flex items-center gap-2 text-sm text-(--text-secondary)">
             <Loader2 size={14} className="animate-spin" aria-hidden="true" />
-            Loading attestation evidence…
+            {t("Loading attestation evidence…")}
           </p>
         ) : !data ? (
           <p className="text-sm text-(--text-secondary)">
-            Secure processing environments unavailable
+            {t("Secure processing environments unavailable")}
             {error ? `: ${error}` : ""}
           </p>
         ) : (
@@ -79,11 +83,14 @@ export default function AdminAttestationPage() {
                 role="note"
                 className="text-xs text-(--warning-text) bg-(--warning)/10 border border-(--warning)/30 rounded-lg px-3 py-2"
               >
-                {data.fallback.reason}. No attestation is known for any SPE.
+                {data.fallback.reason}.{" "}
+                {t("No attestation is known for any SPE.")}
               </p>
             )}
             {data.spes.length === 0 ? (
-              <p className="text-sm text-(--text-secondary)">No SPE reported</p>
+              <p className="text-sm text-(--text-secondary)">
+                {t("No SPE reported")}
+              </p>
             ) : (
               data.spes.map((spe) => (
                 <AttestationCard

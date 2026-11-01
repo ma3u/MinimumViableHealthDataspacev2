@@ -13,6 +13,7 @@ import {
   STACKIT_SERVERS,
   stackitCost,
 } from "@/lib/stackit-pricing";
+import { useT } from "@/lib/i18n/translate";
 
 /** What the same stack would cost on fixed STACKIT servers (not deployed). */
 export function CostEstimatorPanel({
@@ -20,6 +21,7 @@ export function CostEstimatorPanel({
 }: {
   participantCount: number;
 }) {
+  const t = useT("admin");
   const [count, setCount] = useState(participantCount);
   const cost = stackitCost(count);
   const perParticipant = count > 0 ? cost.participantsEur / count : 0;
@@ -30,12 +32,14 @@ export function CostEstimatorPanel({
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="font-semibold text-sm flex items-center gap-2 text-(--text-primary)">
           <BarChart2 size={16} className="text-(--success-text)" />
-          Monthly Cost Estimate: STACKIT (static, EU01 Germany, not deployed)
+          {t(
+            "Monthly Cost Estimate: STACKIT (static, EU01 Germany, not deployed)",
+          )}
         </h2>
         <div className="flex items-center gap-3 text-xs text-(--text-secondary)">
           <label className="flex items-center gap-2">
             <Users size={13} />
-            Participants:
+            {t("Participants:")}
             <input
               type="range"
               min={1}
@@ -54,7 +58,7 @@ export function CostEstimatorPanel({
       {/* Servers */}
       <div>
         <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
-          Servers (24×7, Docker Compose)
+          {t("Servers (24×7, Docker Compose)")}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
           {STACKIT_SERVERS.map((n) => (
@@ -67,7 +71,9 @@ export function CostEstimatorPanel({
                   {n.label}
                 </span>
                 <span className="text-xs font-mono text-(--success-text)">
-                  {formatEur(n.eurPerHour * HOURS_PER_MONTH)}/mo
+                  {t("{eur}/mo", {
+                    eur: formatEur(n.eurPerHour * HOURS_PER_MONTH),
+                  })}
                 </span>
               </div>
               <p className="text-[10px] text-(--text-secondary) font-mono mb-1.5">
@@ -95,16 +101,17 @@ export function CostEstimatorPanel({
                 PostgreSQL Flex
               </span>
               <span className="text-xs font-mono text-(--success-text)">
-                {formatEur(cost.pgFlexEur)}/mo
+                {t("{eur}/mo", { eur: formatEur(cost.pgFlexEur) })}
               </span>
             </div>
             <p className="text-[10px] text-(--text-secondary) font-mono mb-1.5">
               {STACKIT_PG_FLEX.flavor} · {STACKIT_PG_FLEX.storageGb} GB
             </p>
             <p className="text-[9px] text-(--text-secondary) leading-relaxed">
-              Managed, like the Azure Flexible Server. The smallest flavor is 2
-              vCPU / 4 GB, twice the Azure B1ms; storage pays the{" "}
-              {STACKIT_PG_FLEX.performanceClass} class plus capacity and backup.
+              {t(
+                "Managed, like the Azure Flexible Server. The smallest flavor is 2 vCPU / 4 GB, twice the Azure B1ms; storage pays the {cls} class plus capacity and backup.",
+                { cls: STACKIT_PG_FLEX.performanceClass },
+              )}
             </p>
           </div>
         </div>
@@ -113,51 +120,65 @@ export function CostEstimatorPanel({
       {/* Shared extras and participants */}
       <div>
         <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
-          Storage, network, logs and participants
+          {t("Storage, network, logs and participants")}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs">
           <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
-            <div className="text-(--text-secondary) mb-0.5">Block storage</div>
+            <div className="text-(--text-secondary) mb-0.5">
+              {t("Block storage")}
+            </div>
             <div className="font-mono text-(--text-primary)">
-              {formatEur(cost.disksEur)}/mo
+              {t("{eur}/mo", { eur: formatEur(cost.disksEur) })}
             </div>
             <div className="text-[10px] text-(--text-secondary) mt-1">
-              {STACKIT_SERVERS.length} boot disks × {STACKIT_BOOT_DISK_GB} GB +{" "}
-              {STACKIT_DATA_DISK_GB} GB data · perf1 class per disk + capacity
+              {t(
+                "{n} boot disks × {boot} GB + {data} GB data · perf1 class per disk + capacity",
+                {
+                  n: STACKIT_SERVERS.length,
+                  boot: STACKIT_BOOT_DISK_GB,
+                  data: STACKIT_DATA_DISK_GB,
+                },
+              )}
             </div>
           </div>
           <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
             <div className="text-(--text-secondary) mb-0.5">
-              Load balancer + public IP
+              {t("Load balancer + public IP")}
             </div>
             <div className="font-mono text-(--text-primary)">
-              {formatEur(cost.networkEur)}/mo
+              {t("{eur}/mo", { eur: formatEur(cost.networkEur) })}
             </div>
             <div className="text-[10px] text-(--text-secondary) mt-1">
-              Essential NLB · one IPv4 · no egress fee in the price list
+              {t("Essential NLB · one IPv4 · no egress fee in the price list")}
             </div>
           </div>
           <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
-            <div className="text-(--text-secondary) mb-0.5">Logs</div>
+            <div className="text-(--text-secondary) mb-0.5">{t("Logs")}</div>
             <div className="font-mono text-(--text-primary)">
-              {formatEur(cost.logsEur)}/mo
+              {t("{eur}/mo", { eur: formatEur(cost.logsEur) })}
             </div>
             <div className="text-[10px] text-(--text-secondary) mt-1">
-              The Azure stack&apos;s 18.3 GB/mo · €{STACKIT_LOGS_EUR_PER_GB}
-              /GB ingest + 30 days retention
+              {t(
+                "The Azure stack's 18.3 GB/mo · €{eur}/GB ingest + 30 days retention",
+                { eur: STACKIT_LOGS_EUR_PER_GB },
+              )}
             </div>
           </div>
           <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
             <div className="text-(--text-secondary) mb-0.5">
-              {count} participants
+              {t("{n} participants", { n: count })}
             </div>
             <div className="font-mono text-(--text-primary)">
-              {formatEur(cost.participantsEur)}/mo
+              {t("{eur}/mo", { eur: formatEur(cost.participantsEur) })}
             </div>
             <div className="text-[10px] text-(--text-secondary) mt-1">
-              Contexts in one EDC-V, no servers of their own ·{" "}
-              {PARTICIPANT_STORAGE_GB} GB each, +{DATA_HOLDER_EXTRA_STORAGE_GB}{" "}
-              GB per data holder · audit log
+              {t(
+                "Contexts in one EDC-V, no servers of their own · {each} GB each, +{extra} GB per data holder · audit log",
+                {
+                  each: PARTICIPANT_STORAGE_GB,
+                  extra: DATA_HOLDER_EXTRA_STORAGE_GB,
+                },
+              )}
             </div>
           </div>
         </div>
@@ -168,7 +189,7 @@ export function CostEstimatorPanel({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
           <div>
             <div className="text-[10px] text-(--text-secondary) mb-1">
-              Servers
+              {t("Servers")}
             </div>
             <div className="font-mono text-lg font-semibold text-(--text-primary)">
               {formatEur(cost.serversEur)}
@@ -184,7 +205,7 @@ export function CostEstimatorPanel({
           </div>
           <div>
             <div className="text-[10px] text-(--text-secondary) mb-1">
-              Storage, network, logs, participants
+              {t("Storage, network, logs, participants")}
             </div>
             <div className="font-mono text-lg font-semibold text-(--text-primary)">
               {formatEur(
@@ -197,20 +218,23 @@ export function CostEstimatorPanel({
           </div>
           <div className="border-l border-(--border)">
             <div className="text-[10px] text-(--text-secondary) mb-1">
-              Total / month
+              {t("Total / month")}
             </div>
             <div className="font-mono text-xl font-bold text-(--success-text)">
               {formatEur(cost.totalEur)}
             </div>
             <div className="text-[10px] text-(--text-secondary) mt-0.5">
-              {formatEur(perParticipant)} more per participant
+              {t("{eur} more per participant", {
+                eur: formatEur(perParticipant),
+              })}
             </div>
           </div>
         </div>
         <p className="text-[9px] text-(--text-secondary) mt-3 text-center">
-          STACKIT public price list (pim.api.stackit.cloud, 2026-10-03) · EUR
-          excl. VAT · {HOURS_PER_MONTH} h/month · 60 % data holders · no
-          container registry or support plan
+          {t(
+            "STACKIT public price list (pim.api.stackit.cloud, 2026-10-03) · EUR excl. VAT · {h} h/month · 60 % data holders · no container registry or support plan",
+            { h: HOURS_PER_MONTH },
+          )}
         </p>
       </div>
     </div>

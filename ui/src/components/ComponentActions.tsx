@@ -8,6 +8,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import { useT } from "@/lib/i18n/translate";
 
 interface Diagnosis {
   name: string;
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export function ComponentActions({ name, isBroken }: Props) {
+  const t = useT("admin");
   const [expanded, setExpanded] = useState(false);
   const [diagnosis, setDiagnosis] = useState<Diagnosis | null>(null);
   const [loading, setLoading] = useState(false);
@@ -80,7 +82,7 @@ export function ComponentActions({ name, isBroken }: Props) {
         throw new Error(data.detail || data.error || `HTTP ${res.status}`);
       }
       setRestartState("ok");
-      setRestartMessage(data.message || "Restart triggered.");
+      setRestartMessage(data.message || t("Restart triggered."));
     } catch (err) {
       setRestartState("failed");
       setRestartMessage(err instanceof Error ? err.message : String(err));
@@ -92,20 +94,20 @@ export function ComponentActions({ name, isBroken }: Props) {
       <div className="flex items-center gap-2 text-[10px]">
         <span className="flex items-center gap-1 text-(--danger-text) font-medium">
           <AlertTriangle size={11} />
-          Broken
+          {t("Broken")}
         </span>
         <button
           type="button"
           onClick={onRestart}
           disabled={restartState === "running"}
           className="flex items-center gap-1 px-1.5 py-0.5 rounded-sm border border-(--border) hover:bg-(--surface-2) text-(--text-primary) disabled:opacity-50"
-          title="Restart this Container App"
+          title={t("Restart this Container App")}
         >
           <RefreshCw
             size={10}
             className={restartState === "running" ? "animate-spin" : ""}
           />
-          {restartState === "running" ? "Restarting…" : "Restart"}
+          {restartState === "running" ? t("Restarting…") : t("Restart")}
         </button>
         <button
           type="button"
@@ -113,7 +115,7 @@ export function ComponentActions({ name, isBroken }: Props) {
           className="flex items-center gap-1 px-1.5 py-0.5 rounded-sm border border-(--border) hover:bg-(--surface-2) text-(--text-primary)"
         >
           {expanded ? <ChevronUp size={10} /> : <ChevronDown size={10} />}
-          Why broken?
+          {t("Why broken?")}
         </button>
       </div>
 
@@ -132,11 +134,11 @@ export function ComponentActions({ name, isBroken }: Props) {
       {expanded && (
         <div className="mt-2 p-2 rounded-sm bg-(--surface-2)/60 border border-(--border) text-[10px] space-y-1.5 leading-relaxed">
           {loading && (
-            <p className="text-(--text-secondary)">Loading diagnosis…</p>
+            <p className="text-(--text-secondary)">{t("Loading diagnosis…")}</p>
           )}
           {error && (
             <p className="text-(--danger-text)">
-              Failed to load diagnosis: {error}
+              {t("Failed to load diagnosis: {error}", { error })}
             </p>
           )}
           {diagnosis && (
@@ -153,7 +155,7 @@ export function ComponentActions({ name, isBroken }: Props) {
               {diagnosis.remediation && (
                 <p className="text-(--text-secondary)">
                   <span className="font-medium text-(--text-primary)">
-                    Remediation:
+                    {t("Remediation:")}
                   </span>{" "}
                   {diagnosis.remediation}
                 </p>
@@ -166,7 +168,7 @@ export function ComponentActions({ name, isBroken }: Props) {
                   className="inline-flex items-center gap-1 text-(--success-text) hover:underline"
                 >
                   <ExternalLink size={10} />
-                  Tracking issue
+                  {t("Tracking issue")}
                 </a>
               )}
             </>

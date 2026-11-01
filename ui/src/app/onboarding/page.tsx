@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import type { VpaSummary } from "@/lib/provisioning";
+import { useT } from "@/lib/i18n/translate";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -127,10 +128,10 @@ const CONTACT_DB: Record<
 // ---------------------------------------------------------------------------
 const REQUIREMENTS = [
   {
-    category: "EHDS Regulation (EU 2025/327) — Secondary Use",
+    category: "EHDS Regulation (EU 2025/327): secondary use",
     items: [
       "Art. 60(1): Data holders make health data available for approved secondary-use purposes on request of the HDAB.",
-      "Purpose limitation: only approved uses — research, policy analysis, education, statistics.",
+      "Purpose limitation: only approved uses (research, policy analysis, education, statistics).",
       "Pseudonymisation required before transfer (Art. 66); re-identification is prohibited (Art. 61(3)).",
       "Data must be provided via an accredited Secure Processing Environment (SPE) listed in the HealthDCAT-AP catalogue.",
       "Interoperability: FHIR R4 and OMOP CDM formats required for clinical data exchange.",
@@ -141,7 +142,7 @@ const REQUIREMENTS = [
     category: "Contractual / NDA Requirements",
     items: [
       "Data Access Agreement (DAA) signed between data user and HDAB before any transfer.",
-      "Data Processing Agreement (DPA) — GDPR Art. 28 compliant, listing all sub-processors.",
+      "Data Processing Agreement (DPA): GDPR Art. 28 compliant, listing all sub-processors.",
       "Mutual Non-Disclosure Agreement (NDA) covering proprietary algorithms, intermediate results, and derived datasets.",
       "Sub-processor disclosure if third-party cloud infrastructure is involved in processing.",
       "Breach notification procedure within 72 hours per GDPR Art. 33.",
@@ -237,13 +238,14 @@ function StatusBadge({
   status: TenantStatus;
   title?: string;
 }) {
+  const t = useT("admin");
   if (status === "not-provisioned") {
     return (
       <span
         title={title}
         className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-(--surface-2) text-(--text-secondary) border border-(--border)"
       >
-        <Circle size={10} /> Not provisioned
+        <Circle size={10} /> {t("Not provisioned")}
       </span>
     );
   }
@@ -253,7 +255,7 @@ function StatusBadge({
         title={title}
         className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-(--role-admin-bg) text-(--role-admin-text) border border-(--role-admin-border)"
       >
-        <AlertTriangle size={10} /> Provisioning failed
+        <AlertTriangle size={10} /> {t("Provisioning failed")}
       </span>
     );
   }
@@ -263,25 +265,25 @@ function StatusBadge({
         title={title}
         className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-(--surface-2) text-(--text-secondary) border border-(--border)"
       >
-        <AlertTriangle size={10} /> Provisioning stalled
+        <AlertTriangle size={10} /> {t("Provisioning stalled")}
       </span>
     );
   }
   if (status === "active")
     return (
       <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)">
-        <CheckCircle2 size={10} /> Active
+        <CheckCircle2 size={10} /> {t("Active")}
       </span>
     );
   if (status === "provisioning")
     return (
       <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-(--role-hdab-bg) text-(--role-hdab-text) border border-(--role-hdab-border)">
-        <Clock size={10} className="animate-pulse" /> Provisioning
+        <Clock size={10} className="animate-pulse" /> {t("Provisioning")}
       </span>
     );
   return (
     <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-(--surface-2) text-(--text-secondary) border border-(--border)">
-      <Circle size={10} /> Pending
+      <Circle size={10} /> {t("Pending")}
     </span>
   );
 }
@@ -290,6 +292,7 @@ function StatusBadge({
 // Inline onboarding steps — derived from tenant data (no EDC-V API call needed)
 // ---------------------------------------------------------------------------
 function OnboardingSteps({ tenant }: { tenant: Tenant }) {
+  const t = useT("admin");
   const profiles = tenant.participantProfiles || [];
   const hasProfile = profiles.length > 0;
   const status = deriveStatus(tenant);
@@ -309,34 +312,34 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
 
   const steps = [
     {
-      label: "Tenant Created",
+      label: t("Tenant Created"),
       done: true,
       inProgress: false,
-      desc: "Organisation registered in CFM TenantManager",
+      desc: t("Organisation registered in CFM TenantManager"),
     },
     {
-      label: "Participant Context",
+      label: t("Participant Context"),
       done: hasProfile && (!live || status !== "failed"),
       inProgress: !hasProfile && moving,
-      desc: "EDC-V participant context provisioned",
+      desc: t("EDC-V participant context provisioned"),
     },
     {
-      label: "DID Provisioned",
+      label: t("DID Provisioned"),
       done: hasDid,
       inProgress: hasProfile && !hasDid && moving,
-      desc: "Decentralised Identifier (did:web) created via IdentityHub",
+      desc: t("Decentralised Identifier (did:web) created via IdentityHub"),
     },
     {
-      label: "Credentials Issued",
+      label: t("Credentials Issued"),
       done: hasDid,
       inProgress: hasDid && status !== "active" && moving,
-      desc: "EHDS Verifiable Credentials available",
+      desc: t("EHDS Verifiable Credentials available"),
     },
     {
-      label: "Active in Dataspace",
+      label: t("Active in Dataspace"),
       done: status === "active",
       inProgress: hasDid && status !== "active" && moving,
-      desc: "Ready to negotiate contracts and transfer data",
+      desc: t("Ready to negotiate contracts and transfer data"),
     },
   ];
 
@@ -394,7 +397,9 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
             >
               {p.identifier || p.did
                 ? `DID: ${p.identifier || p.did}`
-                : `Profile: ${p.participantContextId || p.dataspaceProfileId}`}
+                : t("Profile: {id}", {
+                    id: p.participantContextId || p.dataspaceProfileId || "",
+                  })}
             </div>
           ))}
         </div>
@@ -413,6 +418,7 @@ function ParticipantCard({
   tenant: Tenant;
   defaultExpanded?: boolean;
 }) {
+  const t = useT("admin");
   const [expanded, setExpanded] = useState(defaultExpanded);
 
   const name = tenant.properties.displayName || tenant.id;
@@ -452,8 +458,10 @@ function ParticipantCard({
             />
           </div>
           <p className="text-xs text-(--text-secondary) mt-0.5">
-            {org} · {role} · {tenant.participantProfiles?.length || 0}{" "}
-            profile(s)
+            {org} · {role} ·{" "}
+            {t("{n} profile(s)", {
+              n: tenant.participantProfiles?.length || 0,
+            })}
           </p>
         </div>
         {expanded ? (
@@ -473,7 +481,7 @@ function ParticipantCard({
           <div className="grid sm:grid-cols-2 gap-5">
             <div className="space-y-2">
               <h4 className="text-xs font-semibold text-(--text-secondary) uppercase tracking-wide">
-                Organisation
+                {t("Organisation")}
               </h4>
               <p className="text-sm font-medium text-(--text-primary)">{org}</p>
               <div className="flex items-start gap-2 text-xs text-(--text-secondary)">
@@ -510,10 +518,10 @@ function ParticipantCard({
 
             <div className="space-y-2">
               <h4 className="text-xs font-semibold text-(--text-secondary) uppercase tracking-wide">
-                Data Compliance Officer
+                {t("Data Compliance Officer")}
               </h4>
               <p className="text-sm font-medium text-(--text-primary)">
-                {contact.dpoName}
+                {t(contact.dpoName)}
               </p>
               <div className="flex items-center gap-2 text-xs">
                 <Mail size={12} className="text-(--text-secondary) shrink-0" />
@@ -525,14 +533,14 @@ function ParticipantCard({
                 </a>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 italic">
-                GDPR Art. 37 / EHDS Art. 34 appointed contact
+                {t("GDPR Art. 37 / EHDS Art. 34 appointed contact")}
               </p>
             </div>
           </div>
 
           {/* Tenant ID */}
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Tenant ID:{" "}
+            {t("Tenant ID:")}{" "}
             <span className="font-mono text-(--text-secondary)">
               {tenant.id}
             </span>
@@ -541,7 +549,7 @@ function ParticipantCard({
           {/* Onboarding progress */}
           <div>
             <h4 className="text-xs font-semibold text-(--text-secondary) uppercase tracking-wide mb-3">
-              Onboarding Progress
+              {t("Onboarding Progress")}
             </h4>
             {(tenant.failedReason ?? tenant.stalledReason) && (
               <p className="mb-3 text-xs text-(--text-secondary)">
@@ -560,6 +568,7 @@ function ParticipantCard({
 // EHDS requirements accordion (bottom of page)
 // ---------------------------------------------------------------------------
 function EhdsRequirements() {
+  const t = useT("admin");
   const [open, setOpen] = useState(false);
 
   return (
@@ -574,10 +583,12 @@ function EhdsRequirements() {
         />
         <div className="flex-1">
           <p className="font-semibold text-sm">
-            EHDS &amp; Contractual Requirements for Data Sharing
+            {t("EHDS & Contractual Requirements for Data Sharing")}
           </p>
           <p className="text-xs text-(--text-secondary)">
-            Regulatory, NDA, and technical prerequisites before data exchange
+            {t(
+              "Regulatory, NDA, and technical prerequisites before data exchange",
+            )}
           </p>
         </div>
         {open ? (
@@ -592,7 +603,7 @@ function EhdsRequirements() {
           {REQUIREMENTS.map((section) => (
             <div key={section.category}>
               <h3 className="text-xs font-semibold text-(--text-secondary) uppercase tracking-wide mb-2">
-                {section.category}
+                {t(section.category)}
               </h3>
               <ul className="space-y-1.5">
                 {section.items.map((item, i) => (
@@ -603,17 +614,16 @@ function EhdsRequirements() {
                     <span className="text-teal-800 dark:text-teal-300 mt-0.5 shrink-0">
                       •
                     </span>
-                    <span>{item}</span>
+                    <span>{t(item)}</span>
                   </li>
                 ))}
               </ul>
             </div>
           ))}
           <p className="text-xs text-gray-500 dark:text-gray-400 italic pt-2 border-t border-(--border)">
-            Note: In this demo environment all participants are pre-seeded. In
-            production, onboarding triggers automated DID provisioning,
-            credential issuance, and policy activation via the CFM orchestration
-            agents.
+            {t(
+              "Note: In this demo environment all participants are pre-seeded. In production, onboarding triggers automated DID provisioning, credential issuance, and policy activation via the CFM orchestration agents.",
+            )}
           </p>
         </div>
       )}
@@ -625,6 +635,7 @@ function EhdsRequirements() {
 // Main page (inner — uses useSearchParams, must be wrapped in Suspense)
 // ---------------------------------------------------------------------------
 function OnboardingContent() {
+  const t = useT("admin");
   const searchParams = useSearchParams();
   const highlightTenantId = searchParams.get("tenantId");
   const [tenants, setTenants] = useState<Tenant[]>([]);
@@ -695,14 +706,16 @@ function OnboardingContent() {
         const err = await res.json();
         // detail first: "Failed to create participant" on its own told the user
         // nothing and read as though their input were at fault (issue #203).
-        throw new Error(err.detail || err.error || "Registration failed");
+        throw new Error(err.detail || err.error || t("Registration failed"));
       }
 
       const data = (await res.json()) as Record<string, unknown>;
       if (data.provisioned === false) {
         setNotProvisioned(
           (data.demoReason as string) ||
-            "This deployment cannot provision a participant, so the registration was recorded for the demonstration only.",
+            t(
+              "This deployment cannot provision a participant, so the registration was recorded for the demonstration only.",
+            ),
         );
       } else if (Array.isArray(data.activityTypes)) {
         setActivityTypes(data.activityTypes as string[]);
@@ -711,7 +724,7 @@ function OnboardingContent() {
       setStep("done");
       loadTenants();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Registration failed");
+      setError(err instanceof Error ? err.message : t("Registration failed"));
       setStep("form");
     }
   };
@@ -720,24 +733,31 @@ function OnboardingContent() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-4xl mx-auto px-6 py-10">
         <PageIntro
-          title="Participant Onboarding"
+          title={t("Participant Onboarding")}
           icon={UserPlus}
-          description="Register your organisation as a participant in the European Health Data Space. Each participant receives a DID identity, Verifiable Credentials, and a dataspace profile to enable trusted data sharing."
-          nextStep={{ href: "/catalog", label: "Explore Datasets" }}
-          infoText="After onboarding, your organisation can share or consume health data under EHDS Regulation (EU) 2025/327. The registration creates a tenant, participant context, and DID:web identity."
-          docLink={{ href: "/docs/user-guide", label: "Read the User Guide" }}
+          description={t(
+            "Register your organisation as a participant in the European Health Data Space. Each participant receives a DID identity, Verifiable Credentials, and a dataspace profile to enable trusted data sharing.",
+          )}
+          nextStep={{ href: "/catalog", label: t("Explore Datasets") }}
+          infoText={t(
+            "After onboarding, your organisation can share or consume health data under EHDS Regulation (EU) 2025/327. The registration creates a tenant, participant context, and DID:web identity.",
+          )}
+          docLink={{
+            href: "/docs/user-guide",
+            label: t("Read the User Guide"),
+          }}
         />
 
         {/* Registered participants */}
         {loading ? (
           <div className="flex items-center gap-2 text-(--text-secondary) mb-8">
             <Loader2 size={16} className="animate-spin" />
-            Loading registered participants…
+            {t("Loading registered participants…")}
           </div>
         ) : tenants.length > 0 ? (
           <div className="mb-8">
             <h2 className="text-sm font-semibold text-(--text-secondary) uppercase tracking-wide mb-3">
-              Registered Participants
+              {t("Registered Participants")}
             </h2>
             <div className="grid gap-3">
               {tenants.map((t) => (
@@ -749,8 +769,9 @@ function OnboardingContent() {
               ))}
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-              Click a participant card to expand contact details and onboarding
-              status.
+              {t(
+                "Click a participant card to expand contact details and onboarding status.",
+              )}
             </p>
           </div>
         ) : null}
@@ -765,8 +786,8 @@ function OnboardingContent() {
             )}
             <h2 className="text-xl font-semibold">
               {notProvisioned
-                ? "Registration Recorded"
-                : "Registration Submitted"}
+                ? t("Registration Recorded")
+                : t("Registration Submitted")}
             </h2>
             <p className="text-(--text-secondary) text-sm max-w-md">
               {notProvisioned ??
@@ -774,15 +795,17 @@ function OnboardingContent() {
                 // are real, the activities are pending, and whether an agent
                 // completes them is not something this page can promise.
                 // Issue #203.
-                `The tenant and the participant profile were created, and ${
-                  activityTypes.length
-                    ? `${
-                        activityTypes.length
-                      } provisioning activities (${activityTypes.join(
-                        ", ",
-                      )}) are`
-                    : "the provisioning activities are"
-                } pending. A DID and a credential appear on the participant card only once an agent completes them; if they stay pending, the card says so.`}
+                (activityTypes.length
+                  ? t(
+                      "The tenant and the participant profile were created, and {n} provisioning activities ({list}) are pending. A DID and a credential appear on the participant card only once an agent completes them; if they stay pending, the card says so.",
+                      {
+                        n: activityTypes.length,
+                        list: activityTypes.join(", "),
+                      },
+                    )
+                  : t(
+                      "The tenant and the participant profile were created, and the provisioning activities are pending. A DID and a credential appear on the participant card only once an agent completes them; if they stay pending, the card says so.",
+                    ))}
             </p>
             <button
               onClick={() => {
@@ -795,7 +818,7 @@ function OnboardingContent() {
               }}
               className="mt-2 px-4 py-2 border border-gray-600 text-(--text-primary) rounded-lg text-sm hover:border-gray-400"
             >
-              Register another participant
+              {t("Register another participant")}
             </button>
           </div>
         ) : (
@@ -805,7 +828,9 @@ function OnboardingContent() {
                 size={20}
                 className="text-teal-800 dark:text-teal-300"
               />
-              <h2 className="font-semibold">New Participant Registration</h2>
+              <h2 className="font-semibold">
+                {t("New Participant Registration")}
+              </h2>
             </div>
 
             {error && (
@@ -817,10 +842,10 @@ function OnboardingContent() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm text-(--text-secondary) mb-1">
-                  Display Name
+                  {t("Display Name")}
                 </label>
                 <input
-                  aria-label="Display Name"
+                  aria-label={t("Display Name")}
                   type="text"
                   required
                   value={displayName}
@@ -832,10 +857,10 @@ function OnboardingContent() {
 
               <div>
                 <label className="block text-sm text-(--text-secondary) mb-1">
-                  Organisation
+                  {t("Organisation")}
                 </label>
                 <input
-                  aria-label="Organisation"
+                  aria-label={t("Organisation")}
                   type="text"
                   required
                   value={organization}
@@ -847,7 +872,7 @@ function OnboardingContent() {
 
               <div>
                 <label className="block text-sm text-(--text-secondary) mb-2">
-                  EHDS Role
+                  {t("EHDS Role")}
                 </label>
                 <div className="grid gap-2">
                   {EHDS_ROLES.map((r) => (
@@ -868,9 +893,11 @@ function OnboardingContent() {
                         className="mt-1"
                       />
                       <div>
-                        <span className="font-medium text-sm">{r.label}</span>
+                        <span className="font-medium text-sm">
+                          {t(r.label)}
+                        </span>
                         <p className="text-xs text-(--text-secondary) mt-0.5">
-                          {r.desc}
+                          {t(r.desc)}
                         </p>
                       </div>
                     </label>
@@ -886,12 +913,12 @@ function OnboardingContent() {
                 {step === "submitting" ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
-                    Registering…
+                    {t("Registering…")}
                   </>
                 ) : (
                   <>
                     <ShieldCheck size={16} />
-                    Register Participant
+                    {t("Register Participant")}
                   </>
                 )}
               </button>
