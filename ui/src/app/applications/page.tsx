@@ -28,6 +28,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { FileText, ShieldCheck, AlertCircle, Clock } from "lucide-react";
 import { IS_STATIC } from "@/lib/static-export";
+import { T, useT } from "@/lib/i18n/translate";
 
 /**
  * The data user's application for a data permit, Regulation (EU) 2025/327
@@ -125,6 +126,7 @@ function purposeLabel(p: string | null): string {
 }
 
 function StatusBadge({ app }: { app: Application }) {
+  const t = useT("access");
   const d = (app.decision ?? "").toUpperCase();
   const label =
     d === "APPROVED"
@@ -150,7 +152,7 @@ function StatusBadge({ app }: { app: Application }) {
       data-testid="application-status"
     >
       {d === "APPROVED" ? <ShieldCheck size={12} /> : <Clock size={12} />}
-      {label}
+      {t(label)}
     </span>
   );
 }
@@ -185,13 +187,17 @@ function ItemFields({
   setDraft: (d: Draft) => void;
   idPrefix: string;
 }) {
+  const t = useT("access");
+  const tp = useT("public");
   const set = (k: keyof Draft, v: string | number | boolean) =>
     setDraft({ ...draft, [k]: v });
   return (
     <>
       <Field
         id={`${idPrefix}-namedPersons`}
-        label="(a) Applicant and the natural persons who will access the data"
+        label={t(
+          "(a) Applicant and the natural persons who will access the data",
+        )}
       >
         <textarea
           id={`${idPrefix}-namedPersons`}
@@ -202,7 +208,7 @@ function ItemFields({
         />
       </Field>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <Field id={`${idPrefix}-purpose`} label="(b) Purpose, Art. 53(1)">
+        <Field id={`${idPrefix}-purpose`} label={t("(b) Purpose, Art. 53(1)")}>
           <select
             id={`${idPrefix}-purpose`}
             value={draft.purpose}
@@ -211,14 +217,14 @@ function ItemFields({
           >
             {PURPOSES.map((p) => (
               <option key={p} value={p}>
-                {PURPOSE_LABELS[p]}
+                {tp(PURPOSE_LABELS[p])}
               </option>
             ))}
           </select>
         </Field>
         <Field
           id={`${idPrefix}-category`}
-          label="Applicant category, for the fee (Art. 62)"
+          label={t("Applicant category, for the fee (Art. 62)")}
         >
           <select
             id={`${idPrefix}-category`}
@@ -230,7 +236,7 @@ function ItemFields({
           >
             {APPLICANT_CATEGORIES.map((c) => (
               <option key={c} value={c}>
-                {APPLICANT_CATEGORY_LABELS[c]}
+                {t(APPLICANT_CATEGORY_LABELS[c])}
               </option>
             ))}
           </select>
@@ -238,7 +244,7 @@ function ItemFields({
       </div>
       <Field
         id={`${idPrefix}-intendedUse`}
-        label="(c) Intended use and the expected benefit"
+        label={t("(c) Intended use and the expected benefit")}
       >
         <textarea
           id={`${idPrefix}-intendedUse`}
@@ -250,7 +256,7 @@ function ItemFields({
       </Field>
       <Field
         id={`${idPrefix}-requestedData`}
-        label="(d) Requested data: scope, sources and coverage"
+        label={t("(d) Requested data: scope, sources and coverage")}
       >
         <textarea
           id={`${idPrefix}-requestedData`}
@@ -261,7 +267,7 @@ function ItemFields({
         />
       </Field>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <Field id={`${idPrefix}-datasetId`} label="(d) Dataset">
+        <Field id={`${idPrefix}-datasetId`} label={t("(d) Dataset")}>
           <input
             id={`${idPrefix}-datasetId`}
             value={draft.datasetId}
@@ -269,7 +275,7 @@ function ItemFields({
             className={`${inputCls} font-mono`}
           />
         </Field>
-        <Field id={`${idPrefix}-dataTimeRange`} label="(d) Time range">
+        <Field id={`${idPrefix}-dataTimeRange`} label={t("(d) Time range")}>
           <input
             id={`${idPrefix}-dataTimeRange`}
             value={draft.dataTimeRange}
@@ -277,7 +283,7 @@ function ItemFields({
             className={inputCls}
           />
         </Field>
-        <Field id={`${idPrefix}-dataFormats`} label="(d) Formats">
+        <Field id={`${idPrefix}-dataFormats`} label={t("(d) Formats")}>
           <input
             id={`${idPrefix}-dataFormats`}
             value={draft.dataFormats}
@@ -289,7 +295,7 @@ function ItemFields({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Field
           id={`${idPrefix}-identifiability`}
-          label="(e) Pseudonymised or anonymised"
+          label={t("(e) Pseudonymised or anonymised")}
         >
           <select
             id={`${idPrefix}-identifiability`}
@@ -299,14 +305,14 @@ function ItemFields({
           >
             {IDENTIFIABILITY.map((v) => (
               <option key={v} value={v}>
-                {v.toLowerCase()}
+                {t(v.toLowerCase())}
               </option>
             ))}
           </select>
         </Field>
         <Field
           id={`${idPrefix}-pseudonymisationJustification`}
-          label="(e) Why pseudonymised data are needed"
+          label={t("(e) Why pseudonymised data are needed")}
         >
           <input
             id={`${idPrefix}-pseudonymisationJustification`}
@@ -321,7 +327,7 @@ function ItemFields({
       </div>
       <Field
         id={`${idPrefix}-datasetsBroughtIn`}
-        label="(f) Datasets you bring in ('None' if none)"
+        label={t("(f) Datasets you bring in ('None' if none)")}
       >
         <input
           id={`${idPrefix}-datasetsBroughtIn`}
@@ -332,7 +338,7 @@ function ItemFields({
       </Field>
       <Field
         id={`${idPrefix}-safeguards`}
-        label="(g) Safeguards against misuse and re-identification"
+        label={t("(g) Safeguards against misuse and re-identification")}
       >
         <textarea
           id={`${idPrefix}-safeguards`}
@@ -345,7 +351,7 @@ function ItemFields({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <Field
           id={`${idPrefix}-processingPeriodMonths`}
-          label="(h) Processing period, months"
+          label={t("(h) Processing period, months")}
         >
           <input
             id={`${idPrefix}-processingPeriodMonths`}
@@ -361,7 +367,7 @@ function ItemFields({
         </Field>
         <Field
           id={`${idPrefix}-speTools`}
-          label="(i) Tools and computing resources in the SPE"
+          label={t("(i) Tools and computing resources in the SPE")}
         >
           <input
             id={`${idPrefix}-speTools`}
@@ -372,7 +378,7 @@ function ItemFields({
         </Field>
         <Field
           id={`${idPrefix}-ethicsCommitteeRef`}
-          label="(j) Ethics assessment reference"
+          label={t("(j) Ethics assessment reference")}
         >
           <input
             id={`${idPrefix}-ethicsCommitteeRef`}
@@ -391,13 +397,14 @@ function ItemFields({
             onChange={(e) => set("art71Exception", e.target.checked)}
           />
           <span>
-            (k) I invoke the Art. 71(4) exception (data of persons who opted
-            out, for a substantial public interest)
+            {t(
+              "(k) I invoke the Art. 71(4) exception (data of persons who opted out, for a substantial public interest)",
+            )}
           </span>
         </label>
         <Field
           id={`${idPrefix}-art71ExceptionJustification`}
-          label="(k) Why the exception applies"
+          label={t("(k) Why the exception applies")}
         >
           <input
             id={`${idPrefix}-art71ExceptionJustification`}
@@ -475,6 +482,7 @@ function CompleteForm({
   app: Application;
   onDone: () => Promise<void>;
 }) {
+  const t = useT("access");
   const [draft, setDraft] = useState<Draft>(() => draftFrom(app));
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -501,12 +509,13 @@ function CompleteForm({
       const c = body.completeness as Completeness | undefined;
       setMsg(
         c?.complete
-          ? `Complete application received; the access body decides by ${shortDate(
-              String(body.decisionDue ?? ""),
-            )} (Art. 68(4)).`
-          : `Still missing: ${(c?.missing ?? [])
-              .map((m) => `(${m.item})`)
-              .join(" ")}`,
+          ? t(
+              "Complete application received; the access body decides by {date} (Art. 68(4)).",
+              { date: shortDate(String(body.decisionDue ?? "")) },
+            )
+          : t("Still missing: {items}", {
+              items: (c?.missing ?? []).map((m) => `(${m.item})`).join(" "),
+            }),
       );
       await onDone();
     } catch (e) {
@@ -522,14 +531,18 @@ function CompleteForm({
         e.preventDefault();
         void submit();
       }}
-      aria-label="Complete the application"
+      aria-label={t("Complete the application")}
       data-testid="complete-form"
     >
       <div className="font-semibold text-(--text-primary)">
-        Complete the application by {shortDate(app.completeBy)}
+        {t("Complete the application by {date}", {
+          date: shortDate(app.completeBy),
+        })}
         <span className="font-normal text-(--text-secondary)">
-          {" "}
-          · the access body wrote: {app.incompleteReason ?? "items missing"}
+          {" · "}
+          {t("the access body wrote: {reason}", {
+            reason: app.incompleteReason ?? t("items missing"),
+          })}
         </span>
       </div>
       <ItemFields
@@ -542,7 +555,7 @@ function CompleteForm({
         disabled={busy}
         className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
       >
-        {busy ? "Sending…" : "Send the missing items"}
+        {busy ? t("Sending…") : t("Send the missing items")}
       </button>
       {msg && (
         <p className="text-(--text-primary)" role="status">
@@ -561,6 +574,7 @@ function ResultsForm({
   app: Application;
   onDone: () => Promise<void>;
 }) {
+  const t = useT("access");
   const [kind, setKind] = useState<ResultKind>("PUBLICATION");
   const [title, setTitle] = useState(
     "Second-line therapies and HbA1c trajectories in a synthetic type 2 diabetes cohort",
@@ -598,9 +612,15 @@ function ResultsForm({
         return;
       }
       setMsg(
-        `Result ${body.resultId} communicated${
-          body.onTime === false ? " after" : " within"
-        } the 18 months (Art. 61(4)); it is published on the register.`,
+        body.onTime === false
+          ? t(
+              "Result {id} communicated after the 18 months (Art. 61(4)); it is published on the register.",
+              { id: String(body.resultId) },
+            )
+          : t(
+              "Result {id} communicated within the 18 months (Art. 61(4)); it is published on the register.",
+              { id: String(body.resultId) },
+            ),
       );
       await onDone();
     } catch (e) {
@@ -616,19 +636,20 @@ function ResultsForm({
         e.preventDefault();
         void submit();
       }}
-      aria-label="Communicate results"
+      aria-label={t("Communicate results")}
       data-testid="results-form"
     >
       <div className="font-semibold text-(--text-primary)">
-        Communicate the results of the use, Art. 61(4)
+        {t("Communicate the results of the use, Art. 61(4)")}
         <span className="font-normal text-(--text-secondary)">
-          {" "}
-          · due by {shortDate(deadline)}, 18 months after the end of the
-          processing
+          {" · "}
+          {t("due by {date}, 18 months after the end of the processing", {
+            date: shortDate(deadline),
+          })}
         </span>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <Field id={`result-kind-${app.applicationId}`} label="Kind">
+        <Field id={`result-kind-${app.applicationId}`} label={t("Kind")}>
           <select
             id={`result-kind-${app.applicationId}`}
             value={kind}
@@ -637,14 +658,14 @@ function ResultsForm({
           >
             {RESULT_KINDS.map((k) => (
               <option key={k} value={k}>
-                {RESULT_KIND_LABELS[k]}
+                {t(RESULT_KIND_LABELS[k])}
               </option>
             ))}
           </select>
         </Field>
         <Field
           id={`result-url-${app.applicationId}`}
-          label="Link, if published"
+          label={t("Link, if published")}
         >
           <input
             id={`result-url-${app.applicationId}`}
@@ -654,7 +675,7 @@ function ResultsForm({
           />
         </Field>
       </div>
-      <Field id={`result-title-${app.applicationId}`} label="Title">
+      <Field id={`result-title-${app.applicationId}`} label={t("Title")}>
         <input
           id={`result-title-${app.applicationId}`}
           value={title}
@@ -662,7 +683,7 @@ function ResultsForm({
           className={inputCls}
         />
       </Field>
-      <Field id={`result-summary-${app.applicationId}`} label="Summary">
+      <Field id={`result-summary-${app.applicationId}`} label={t("Summary")}>
         <textarea
           id={`result-summary-${app.applicationId}`}
           rows={2}
@@ -676,7 +697,7 @@ function ResultsForm({
         disabled={busy || !title.trim()}
         className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
       >
-        {busy ? "Sending…" : "Communicate results"}
+        {busy ? t("Sending…") : t("Communicate results")}
       </button>
       {msg && (
         <p className="text-(--text-primary)" role="status">
@@ -694,7 +715,11 @@ function ApplicationCard({
   app: Application;
   onChanged: () => Promise<void>;
 }) {
+  const t = useT("access");
+  const tp = useT("public");
   const c = app.completeness;
+  const days = (n: number | null | undefined) =>
+    typeof n === "number" ? ` (${t("{days} days", { days: n })})` : "";
   return (
     <article
       className="rounded-lg border border-(--border) bg-(--surface) p-4 text-sm"
@@ -714,68 +739,76 @@ function ApplicationCard({
       </div>
       <dl className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-xs">
         <div>
-          <dt className="inline text-(--text-secondary)">Dataset </dt>
+          <dt className="inline text-(--text-secondary)">{t("Dataset")} </dt>
           <dd className="inline">{app.datasetTitle ?? app.datasetId}</dd>
         </div>
         <div>
-          <dt className="inline text-(--text-secondary)">Purpose </dt>
-          <dd className="inline">{purposeLabel(app.purpose)}</dd>
+          <dt className="inline text-(--text-secondary)">{t("Purpose")} </dt>
+          <dd className="inline">{tp(purposeLabel(app.purpose))}</dd>
         </div>
         <div>
-          <dt className="inline text-(--text-secondary)">Submitted </dt>
+          <dt className="inline text-(--text-secondary)">{t("Submitted")} </dt>
           <dd className="inline">{shortDate(app.submittedAt)}</dd>
         </div>
         <div data-testid="application-clock">
-          <dt className="inline text-(--text-secondary)">Clock </dt>
+          <dt className="inline text-(--text-secondary)">{t("Clock")} </dt>
           <dd className="inline">
             {app.clockState === "paused"
-              ? `stopped; complete by ${shortDate(app.completeBy)}${
-                  typeof app.daysToComplete === "number"
-                    ? ` (${app.daysToComplete} days)`
-                    : ""
-                }`
+              ? t("stopped; complete by {date}", {
+                  date: shortDate(app.completeBy),
+                }) + days(app.daysToComplete)
               : app.clockState === "decided"
-                ? `decided ${shortDate(app.decidedAt)}`
+                ? t("decided {date}", { date: shortDate(app.decidedAt) })
                 : app.decisionDue
-                  ? `decision due ${shortDate(app.decisionDue)}${
-                      app.extended ? ", extended once" : ""
-                    }${
-                      typeof app.daysToDecision === "number"
-                        ? ` (${app.daysToDecision} days)`
-                        : ""
-                    }`
+                  ? t("decision due {date}", {
+                      date: shortDate(app.decisionDue),
+                    }) +
+                    (app.extended ? `, ${t("extended once")}` : "") +
+                    days(app.daysToDecision)
                   : "—"}
           </dd>
         </div>
         <div className="md:col-span-2" data-testid="application-completeness">
-          <dt className="inline text-(--text-secondary)">Art. 67(2) items </dt>
+          <dt className="inline text-(--text-secondary)">
+            {t("Art. 67(2) items")}{" "}
+          </dt>
           <dd className="inline">
             {c.complete
-              ? `complete, ${c.present} of ${c.total}`
-              : `${c.present} of ${c.total}; missing ${c.missing
-                  .map((m) => `(${m.item})`)
-                  .join(" ")}`}
+              ? t("complete, {present} of {total}", {
+                  present: c.present,
+                  total: c.total,
+                })
+              : t("{present} of {total}; missing {items}", {
+                  present: c.present,
+                  total: c.total,
+                  items: c.missing.map((m) => `(${m.item})`).join(" "),
+                })}
           </dd>
         </div>
         {app.undecided && (
           <div className="md:col-span-2" data-testid="application-fee">
             <dt className="inline text-(--text-secondary)">
-              Fee estimate, Art. 62{" "}
+              {t("Fee estimate, Art. 62")}{" "}
             </dt>
             <dd className="inline">
               {(() => {
                 const f = estimateFee(app);
-                return `${f.totalEur.toLocaleString(
-                  "en-GB",
-                )} EUR (access body ${f.bodyEur.toLocaleString(
-                  "en-GB",
-                )}, data holder ${f.holderEur.toLocaleString("en-GB")}${
-                  f.reduction > 0
-                    ? `; reduced by ${Math.round(f.reduction * 100)}% as ${
-                        f.categoryLabel
-                      }`
-                    : ""
-                })`;
+                const vars = {
+                  total: f.totalEur.toLocaleString("en-GB"),
+                  body: f.bodyEur.toLocaleString("en-GB"),
+                  holder: f.holderEur.toLocaleString("en-GB"),
+                  percent: Math.round(f.reduction * 100),
+                  category: t(f.categoryLabel),
+                };
+                return f.reduction > 0
+                  ? t(
+                      "{total} EUR (access body {body}, data holder {holder}; reduced by {percent}% as {category})",
+                      vars,
+                    )
+                  : t(
+                      "{total} EUR (access body {body}, data holder {holder})",
+                      vars,
+                    );
               })()}
             </dd>
           </div>
@@ -783,35 +816,39 @@ function ApplicationCard({
         {app.extensionReason && (
           <div className="md:col-span-2">
             <dt className="inline text-(--text-secondary)">
-              Extended once because{" "}
+              {t("Extended once because")}{" "}
             </dt>
             <dd className="inline">{app.extensionReason}</dd>
           </div>
         )}
         {app.decision && (
           <div className="md:col-span-2">
-            <dt className="inline text-(--text-secondary)">Decision </dt>
+            <dt className="inline text-(--text-secondary)">{t("Decision")} </dt>
             <dd className="inline">
               {app.decision === "APPROVED"
-                ? `data permit ${app.permitId} issued ${shortDate(
-                    app.decidedAt,
-                  )}, valid until ${shortDate(app.validUntil)}`
+                ? t("data permit {permit} issued {date}, valid until {until}", {
+                    permit: app.permitId ?? "",
+                    date: shortDate(app.decidedAt),
+                    until: shortDate(app.validUntil),
+                  })
                 : app.decision === "REJECTED"
-                  ? `refused ${shortDate(app.decidedAt)}: ${
-                      app.decisionJustification ?? ""
-                    }${
-                      app.statisticalAlternativeOffered
-                        ? " · the access body offers an anonymised statistical answer instead (Art. 68(3)); file it under Statistical requests"
-                        : ""
-                    }`
-                  : `permit revoked`}
+                  ? t("refused {date}: {justification}", {
+                      date: shortDate(app.decidedAt),
+                      justification: app.decisionJustification ?? "",
+                    }) +
+                    (app.statisticalAlternativeOffered
+                      ? ` · ${t(
+                          "the access body offers an anonymised statistical answer instead (Art. 68(3)); file it under Statistical requests",
+                        )}`
+                      : "")
+                  : t("permit revoked")}
             </dd>
           </div>
         )}
       </dl>
       <details className="mt-2 text-xs">
         <summary className="cursor-pointer text-(--text-secondary)">
-          The eleven items as filed
+          {t("The eleven items as filed")}
         </summary>
         <ol className="mt-1 space-y-0.5">
           {APPLICATION_ITEMS.map((i) => (
@@ -825,7 +862,7 @@ function ApplicationCard({
               >
                 {hasApplicationItem(app, i.item) ? "✓" : "✗"}
               </span>{" "}
-              ({i.item}) {i.label}
+              ({i.item}) {t(i.label)}
             </li>
           ))}
         </ol>
@@ -851,6 +888,7 @@ export default function ApplicationsPage() {
     roles.includes("EDC_USER_PARTICIPANT") ||
     roles.includes("EDC_ADMIN");
 
+  const t = useT("access");
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -896,14 +934,24 @@ export default function ApplicationsPage() {
         return;
       }
       const c = body.completeness as Completeness | undefined;
+      const due = shortDate(String(body.decisionDue ?? ""));
       setSubmitMsg(
-        body.applicationId
-          ? `Application ${body.applicationId} filed${
-              c ? `, ${c.present} of ${c.total} items` : ""
-            }; the access body decides by ${shortDate(
-              String(body.decisionDue ?? ""),
-            )} (Art. 68(4)).`
-          : "Application filed.",
+        !body.applicationId
+          ? t("Application filed.")
+          : c
+            ? t(
+                "Application {id} filed, {present} of {total} items; the access body decides by {date} (Art. 68(4)).",
+                {
+                  id: String(body.applicationId),
+                  present: c.present,
+                  total: c.total,
+                  date: due,
+                },
+              )
+            : t(
+                "Application {id} filed; the access body decides by {date} (Art. 68(4)).",
+                { id: String(body.applicationId), date: due },
+              ),
       );
       await load();
     } catch (e) {
@@ -919,36 +967,39 @@ export default function ApplicationsPage() {
         <div className="mb-8">
           <h1 className="page-header flex items-center gap-2">
             <FileText size={28} />
-            Data permit applications
+            {t("Data permit applications")}
           </h1>
           <p className="text-(--text-secondary) text-lg mt-1">
-            Regulation (EU) 2025/327, Art. 67 · the eleven items of Art. 67(2) ·
-            decided within three months (Art. 68(4))
+            {t(
+              "Regulation (EU) 2025/327, Art. 67 · the eleven items of Art. 67(2) · decided within three months (Art. 68(4))",
+            )}
           </p>
         </div>
 
         <div className="rounded-lg border border-(--border) bg-(--surface) p-4 mb-8 text-sm text-(--text-secondary) space-y-2">
           <p>
-            A data permit is what unlocks the data (Art. 61(1)); a contract with
-            the holder is not enough. The application names who will access the
-            data, why, which data, pseudonymised or anonymised, the safeguards,
-            the period, the tools and the ethics assessment. The access body has
-            three months from a complete application; if items are missing it
-            says so and you have four weeks. Decisions are published on the{" "}
-            <Link
-              href="/permits"
-              className="font-bold text-(--accent) hover:underline"
+            <T
+              area="access"
+              tags={{
+                a: (
+                  <Link
+                    href="/permits"
+                    className="font-bold text-(--accent) hover:underline"
+                  />
+                ),
+              }}
             >
-              public register
-            </Link>
-            .
+              {
+                "A data permit is what unlocks the data (Art. 61(1)); a contract with the holder is not enough. The application names who will access the data, why, which data, pseudonymised or anonymised, the safeguards, the period, the tools and the ethics assessment. The access body has three months from a complete application; if items are missing it says so and you have four weeks. Decisions are published on the <a>public register</a>."
+              }
+            </T>
           </p>
         </div>
 
         {canApply && (
           <section className="mb-10 rounded-lg border border-(--border) bg-(--surface) p-4">
             <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
-              Apply for a data permit
+              {t("Apply for a data permit")}
             </h2>
             <form
               className="space-y-3 text-xs"
@@ -956,10 +1007,10 @@ export default function ApplicationsPage() {
                 e.preventDefault();
                 void submit();
               }}
-              aria-label="Data permit application"
+              aria-label={t("Data permit application")}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <Field id="apply-name" label="Title of the project">
+                <Field id="apply-name" label={t("Title of the project")}>
                   <input
                     id="apply-name"
                     value={draft.name}
@@ -971,7 +1022,7 @@ export default function ApplicationsPage() {
                 </Field>
                 <Field
                   id="apply-justification"
-                  label="Why these data are necessary (Art. 66)"
+                  label={t("Why these data are necessary (Art. 66)")}
                 >
                   <input
                     id="apply-justification"
@@ -989,10 +1040,10 @@ export default function ApplicationsPage() {
                 disabled={submitting || IS_STATIC}
                 className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
                 title={
-                  IS_STATIC ? "Not available in the static simulation" : ""
+                  IS_STATIC ? t("Not available in the static simulation") : ""
                 }
               >
-                {submitting ? "Filing…" : "File the application"}
+                {submitting ? t("Filing…") : t("File the application")}
               </button>
               {submitMsg && (
                 <p className="text-(--text-primary)" role="status">
@@ -1005,10 +1056,10 @@ export default function ApplicationsPage() {
 
         <section>
           <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
-            My applications ({applications.length})
+            {t("My applications ({count})", { count: applications.length })}
           </h2>
           {loading ? (
-            <p className="text-(--text-secondary) text-sm">Loading…</p>
+            <p className="text-(--text-secondary) text-sm">{t("Loading…")}</p>
           ) : error ? (
             <div className="rounded-lg border border-(--border) bg-(--surface) p-4 text-sm flex items-start gap-2">
               <AlertCircle size={16} className="mt-0.5" />
@@ -1016,7 +1067,7 @@ export default function ApplicationsPage() {
             </div>
           ) : applications.length === 0 ? (
             <p className="text-(--text-secondary) text-sm">
-              No application yet
+              {t("No application yet")}
             </p>
           ) : (
             <div className="space-y-3">

@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { BarChart2, ShieldCheck, AlertCircle, Clock } from "lucide-react";
 import { IS_STATIC } from "@/lib/static-export";
+import { T, useT } from "@/lib/i18n/translate";
 
 /**
  * Health data requests, Regulation (EU) 2025/327 Art. 69. A data user asks a
@@ -62,6 +63,7 @@ function purposeLabel(p: string | null): string {
 }
 
 function DecidedUnder({ r }: { r: HealthDataRequest }) {
+  const t = useT("access");
   if (!r.decidedUnder || !r.decidedAt) return null;
   return (
     <span
@@ -69,14 +71,17 @@ function DecidedUnder({ r }: { r: HealthDataRequest }) {
       data-testid="decided-under"
     >
       {r.decidedUnder === "Art. 72"
-        ? "decided by the trusted data holder, Art. 72"
-        : "decided by the access body, Art. 69(3)"}
-      {r.feeEur ? ` · fee ${r.feeEur} EUR (Art. 62)` : ""}
+        ? t("decided by the trusted data holder, Art. 72")
+        : t("decided by the access body, Art. 69(3)")}
+      {r.feeEur
+        ? ` · ${t("fee {amount} EUR (Art. 62)", { amount: r.feeEur })}`
+        : ""}
     </span>
   );
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useT("access");
   const cls =
     status === "ANSWERED"
       ? "bg-(--badge-active-bg) text-(--badge-active-text) border-(--badge-active-border)"
@@ -106,15 +111,18 @@ function StatusBadge({ status }: { status: string }) {
       ) : (
         <AlertCircle size={12} />
       )}
-      {label}
+      {t(label)}
     </span>
   );
 }
 
 function AnswerTable({ rows }: { rows: Record<string, unknown>[] }) {
+  const t = useT("access");
   if (rows.length === 0) {
     return (
-      <p className="text-xs text-(--text-secondary)">The statistic is empty.</p>
+      <p className="text-xs text-(--text-secondary)">
+        {t("The statistic is empty.")}
+      </p>
     );
   }
   const columns = Array.from(new Set(rows.flatMap((r) => Object.keys(r))));
@@ -152,6 +160,8 @@ export default function RequestsPage() {
   const roles: readonly string[] = IS_STATIC
     ? demoPersona?.roles ?? []
     : (session as { roles?: string[] } | null)?.roles ?? [];
+  const t = useT("access");
+  const tp = useT("public");
   const isBody = roles.includes("HDAB_AUTHORITY");
   const [trustedHolder, setTrustedHolder] = useState(false);
   const canSubmit =
@@ -227,8 +237,11 @@ export default function RequestsPage() {
       }
       setSubmitMsg(
         body.requestId
-          ? `Request ${body.requestId} filed; the access body decides within three months (Art. 69(4)).`
-          : "Request filed.",
+          ? t(
+              "Request {id} filed; the access body decides within three months (Art. 69(4)).",
+              { id: String(body.requestId) },
+            )
+          : t("Request filed."),
       );
       setQuestion("");
       setStatisticalContent("");
@@ -270,16 +283,17 @@ export default function RequestsPage() {
         ...m,
         [requestId]:
           decision === "REJECTED"
-            ? "Refused; the justification is published with the decision."
+            ? t("Refused; the justification is published with the decision.")
             : body.answered
-              ? `Answered in anonymised statistical format${
-                  Number(body.suppressedCells) > 0
-                    ? `, ${body.suppressedCells} small count(s) suppressed`
-                    : ""
-                }.`
-              : `Approved, but no statistic could be produced: ${
-                  body.answerError ?? "unknown reason"
-                }`,
+              ? Number(body.suppressedCells) > 0
+                ? t(
+                    "Answered in anonymised statistical format, {count} small count(s) suppressed.",
+                    { count: Number(body.suppressedCells) },
+                  )
+                : t("Answered in anonymised statistical format.")
+              : t("Approved, but no statistic could be produced: {reason}", {
+                  reason: String(body.answerError ?? t("unknown reason")),
+                }),
       }));
       await load();
     } catch (e) {
@@ -298,29 +312,32 @@ export default function RequestsPage() {
         <div className="mb-8">
           <h1 className="page-header flex items-center gap-2">
             <BarChart2 size={28} />
-            Statistical requests
+            {t("Statistical requests")}
           </h1>
           <p className="text-(--text-secondary) text-lg mt-1">
-            Regulation (EU) 2025/327, Art. 69 · answers in anonymised
-            statistical format only
+            {t(
+              "Regulation (EU) 2025/327, Art. 69 · answers in anonymised statistical format only",
+            )}
           </p>
         </div>
 
         <div className="rounded-lg border border-(--border) bg-(--surface) p-4 mb-8 text-sm text-(--text-secondary) space-y-2">
           <p>
-            A health data request asks the access body for a statistic, not for
-            data. If the body approves, the question is run once in the
-            applicant&apos;s name and only the anonymised result is kept: no
-            records, no identifiers, counts below five suppressed. The applicant
-            never sees the data behind it (Art. 69(1)). The body decides within
-            three months (Art. 69(4)), and the decision is published on the{" "}
-            <Link
-              href="/permits"
-              className="font-bold text-(--accent) hover:underline"
+            <T
+              area="access"
+              tags={{
+                a: (
+                  <Link
+                    href="/permits"
+                    className="font-bold text-(--accent) hover:underline"
+                  />
+                ),
+              }}
             >
-              public register
-            </Link>
-            .
+              {
+                "A health data request asks the access body for a statistic, not for data. If the body approves, the question is run once in the applicant's name and only the anonymised result is kept: no records, no identifiers, counts below five suppressed. The applicant never sees the data behind it (Art. 69(1)). The body decides within three months (Art. 69(4)), and the decision is published on the <a>public register</a>."
+              }
+            </T>
           </p>
         </div>
 
@@ -329,16 +346,16 @@ export default function RequestsPage() {
             className="mb-6 text-sm text-(--text-secondary)"
             data-testid="trusted-holder-note"
           >
-            You are a trusted data holder (Art. 72): requests for the datasets
-            you offer are answered here, under the supervision of the access
-            body; the decision is published like any other.
+            {t(
+              "You are a trusted data holder (Art. 72): requests for the datasets you offer are answered here, under the supervision of the access body; the decision is published like any other.",
+            )}
           </p>
         )}
 
         {canSubmit && (
           <section className="mb-10 rounded-lg border border-(--border) bg-(--surface) p-4">
             <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
-              Ask for a statistic
+              {t("Ask for a statistic")}
             </h2>
             <form
               className="space-y-3 text-sm"
@@ -346,7 +363,7 @@ export default function RequestsPage() {
                 e.preventDefault();
                 void submit();
               }}
-              aria-label="Health data request"
+              aria-label={t("Health data request")}
             >
               <div className="flex flex-wrap gap-2">
                 {EXAMPLES.map((q) => (
@@ -361,7 +378,7 @@ export default function RequestsPage() {
                 ))}
               </div>
               <label className="flex flex-col gap-1">
-                <span className="text-(--text-secondary)">Question</span>
+                <span className="text-(--text-secondary)">{t("Question")}</span>
                 <textarea
                   id="request-question"
                   rows={2}
@@ -374,7 +391,7 @@ export default function RequestsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <label className="flex flex-col gap-1">
                   <span className="text-(--text-secondary)">
-                    Purpose, Art. 53(1)
+                    {t("Purpose, Art. 53(1)")}
                   </span>
                   <select
                     id="request-purpose"
@@ -384,13 +401,15 @@ export default function RequestsPage() {
                   >
                     {PURPOSES.map((p) => (
                       <option key={p} value={p}>
-                        {PURPOSE_LABELS[p]}
+                        {tp(PURPOSE_LABELS[p])}
                       </option>
                     ))}
                   </select>
                 </label>
                 <label className="flex flex-col gap-1">
-                  <span className="text-(--text-secondary)">Dataset</span>
+                  <span className="text-(--text-secondary)">
+                    {t("Dataset")}
+                  </span>
                   <input
                     id="request-dataset"
                     value={datasetId}
@@ -401,20 +420,20 @@ export default function RequestsPage() {
               </div>
               <label className="flex flex-col gap-1">
                 <span className="text-(--text-secondary)">
-                  Statistical content, Art. 69(2)(d)
+                  {t("Statistical content, Art. 69(2)(d)")}
                 </span>
                 <input
                   id="request-content"
                   required
                   value={statisticalContent}
                   onChange={(e) => setStatisticalContent(e.target.value)}
-                  placeholder="One count of the cohort, no breakdown"
+                  placeholder={t("One count of the cohort, no breakdown")}
                   className="rounded-sm border border-(--border) bg-(--bg) px-2 py-1"
                 />
               </label>
               <label className="flex flex-col gap-1">
                 <span className="text-(--text-secondary)">
-                  Safeguards, Art. 69(2)(e)
+                  {t("Safeguards, Art. 69(2)(e)")}
                 </span>
                 <input
                   id="request-safeguards"
@@ -431,7 +450,7 @@ export default function RequestsPage() {
                   }
                   className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
                 >
-                  {submitting ? "Filing…" : "File the request"}
+                  {submitting ? t("Filing…") : t("File the request")}
                 </button>
                 {submitMsg && (
                   <span
@@ -449,25 +468,29 @@ export default function RequestsPage() {
         <section>
           <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
             {scope === "all"
-              ? "All requests"
+              ? t("All requests")
               : scope === "holder"
-                ? "Requests on my datasets, as a trusted holder (Art. 72)"
-                : "My requests"}{" "}
+                ? t("Requests on my datasets, as a trusted holder (Art. 72)")
+                : t("My requests")}{" "}
             ({requests.length})
           </h2>
           {loading ? (
-            <p className="text-(--text-secondary) text-sm">Reading requests…</p>
+            <p className="text-(--text-secondary) text-sm">
+              {t("Reading requests…")}
+            </p>
           ) : error ? (
             <div className="text-sm">
               <p className="text-(--text-secondary)">
-                Requests could not be read
+                {t("Requests could not be read")}
               </p>
               <p className="text-xs font-mono text-(--text-secondary)">
                 {error}
               </p>
             </div>
           ) : requests.length === 0 ? (
-            <p className="text-(--text-secondary) text-sm">No request yet</p>
+            <p className="text-(--text-secondary) text-sm">
+              {t("No request yet")}
+            </p>
           ) : (
             <div className="space-y-3">
               {requests.map((r) => (
@@ -484,15 +507,21 @@ export default function RequestsPage() {
                       </div>
                       <div className="text-xs text-(--text-secondary)">
                         {r.applicantName ?? r.applicant ?? "—"} ·{" "}
-                        {purposeLabel(r.purpose)} ·{" "}
-                        {r.datasetTitle ?? r.datasetId ?? "any dataset"} · filed{" "}
-                        {shortDate(r.submittedAt)}
+                        {tp(purposeLabel(r.purpose))} ·{" "}
+                        {r.datasetTitle ?? r.datasetId ?? t("any dataset")} ·{" "}
+                        {t("filed {date}", { date: shortDate(r.submittedAt) })}
                         {r.undecided && r.decisionDue
-                          ? ` · decision due ${shortDate(r.decisionDue)}${
+                          ? ` · ${t("decision due {date}", {
+                              date: shortDate(r.decisionDue),
+                            })}${
                               typeof r.daysToDecision === "number"
                                 ? r.daysToDecision < 0
-                                  ? ` (${-r.daysToDecision} days overdue)`
-                                  : ` (${r.daysToDecision} days left)`
+                                  ? ` (${t("{days} days overdue", {
+                                      days: -r.daysToDecision,
+                                    })})`
+                                  : ` (${t("{days} days left", {
+                                      days: r.daysToDecision,
+                                    })})`
                                 : ""
                             }`
                           : ""}
@@ -505,15 +534,17 @@ export default function RequestsPage() {
                   </div>
                   <div className="text-xs text-(--text-secondary) grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 mb-2">
                     <div>
-                      <span className="font-medium">Statistical content </span>
+                      <span className="font-medium">
+                        {t("Statistical content")}{" "}
+                      </span>
                       {r.statisticalContent ?? "—"}
                     </div>
                     <div>
-                      <span className="font-medium">Safeguards </span>
+                      <span className="font-medium">{t("Safeguards")} </span>
                       {r.safeguards ?? "—"}
                     </div>
                     <div className="md:col-span-2">
-                      <span className="font-medium">Legal basis </span>
+                      <span className="font-medium">{t("Legal basis")} </span>
                       {r.legalBasis ?? "—"}
                     </div>
                   </div>
@@ -521,12 +552,14 @@ export default function RequestsPage() {
                   {r.status === "ANSWERED" && r.answer && (
                     <div className="space-y-1 mb-2">
                       <div className="text-xs text-(--text-secondary)">
-                        Anonymised statistical answer
+                        {t("Anonymised statistical answer")}
                         {r.answerTemplate ? ` (${r.answerTemplate})` : ""}
                         {r.answeredAt ? `, ${shortDate(r.answeredAt)}` : ""}
                         {typeof r.suppressedCells === "number" &&
                         r.suppressedCells > 0
-                          ? `; ${r.suppressedCells} small count(s) suppressed`
+                          ? `; ${t("{count} small count(s) suppressed", {
+                              count: r.suppressedCells,
+                            })}`
                           : ""}
                       </div>
                       <AnswerTable rows={r.answer} />
@@ -534,13 +567,18 @@ export default function RequestsPage() {
                   )}
                   {r.status === "APPROVED" && r.answerError && (
                     <p className="text-xs text-(--warning-text) mb-2">
-                      Approved on {shortDate(r.decidedAt)}, but no statistic
-                      could be produced: {r.answerError}
+                      {t(
+                        "Approved on {date}, but no statistic could be produced: {reason}",
+                        {
+                          date: shortDate(r.decidedAt),
+                          reason: r.answerError,
+                        },
+                      )}
                     </p>
                   )}
                   {r.status === "REJECTED" && (
                     <p className="text-xs text-(--danger-text) mb-2">
-                      Refused on {shortDate(r.decidedAt)}
+                      {t("Refused on {date}", { date: shortDate(r.decidedAt) })}
                       {r.justification ? `: ${r.justification}` : ""}
                     </p>
                   )}
@@ -550,12 +588,12 @@ export default function RequestsPage() {
                       <div className="mt-2 rounded-sm border border-(--border) bg-(--bg) p-3 space-y-2 text-xs">
                         <div className="font-semibold text-(--text-primary)">
                           {isBody
-                            ? "Decide · Art. 69(3)"
-                            : "Decide as the trusted data holder · Art. 72"}
+                            ? t("Decide · Art. 69(3)")
+                            : t("Decide as the trusted data holder · Art. 72")}
                         </div>
                         <label className="flex flex-col gap-1">
                           <span className="text-(--text-secondary)">
-                            Justification (required for a refusal)
+                            {t("Justification (required for a refusal)")}
                           </span>
                           <textarea
                             id={`justification-${r.requestId}`}
@@ -578,8 +616,8 @@ export default function RequestsPage() {
                             className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
                           >
                             {busy === r.requestId
-                              ? "Working…"
-                              : "Approve and answer"}
+                              ? t("Working…")
+                              : t("Approve and answer")}
                           </button>
                           <button
                             type="button"
@@ -590,7 +628,7 @@ export default function RequestsPage() {
                             onClick={() => void decide(r.requestId, "REJECTED")}
                             className="px-3 py-1.5 rounded-sm font-semibold border border-(--danger-text) text-(--danger-text) disabled:opacity-50"
                           >
-                            Refuse
+                            {t("Refuse")}
                           </button>
                         </div>
                       </div>

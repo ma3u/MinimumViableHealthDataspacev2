@@ -112,6 +112,10 @@ describe("the code and the dictionaries", () => {
     "src/components/KlarbefundShowcase.tsx",
     "src/app/information/page.tsx",
     "src/app/permits/page.tsx",
+    "src/app/applications/page.tsx",
+    "src/app/requests/page.tsx",
+    "src/app/supervision/page.tsx",
+    "src/app/activity-report/page.tsx",
     "src/app/compliance/page.tsx",
   ];
   const known = new Set(AREAS.flatMap((a) => Object.keys(MESSAGES.en[a])));
@@ -165,6 +169,29 @@ describe("the code and the dictionaries", () => {
     expect(
       Object.values(PURPOSE_LABELS).filter((p) => !(p in MESSAGES.en.public)),
     ).toEqual([]);
+  });
+
+  it("knows every label the access body's pages take from a library", async () => {
+    const permits = await import("@/lib/permits");
+    const { RESULT_KIND_LABELS } = await import("@/lib/results");
+    const { MEASURE_LABELS } = await import("@/lib/supervision");
+    const { ITEM_TITLES } = await import("@/lib/activity-report");
+    const texts = [
+      ...Object.values(permits.APPLICANT_CATEGORY_LABELS),
+      ...permits.APPLICATION_ITEMS.map((i) => i.label),
+      ...permits.IDENTIFIABILITY.map((v) => v.toLowerCase()),
+      ...Object.values(RESULT_KIND_LABELS),
+      ...Object.values(MEASURE_LABELS),
+      ...Object.values(ITEM_TITLES),
+    ];
+    // The activity report's figures: <Stat label="..."> translates its label.
+    const report = readFileSync(
+      path.resolve("src/app/activity-report/page.tsx"),
+      "utf8",
+    );
+    texts.push(...[...report.matchAll(/\blabel="([^"]+)"/g)].map((m) => m[1]));
+    expect(texts.length).toBeGreaterThan(40);
+    expect(texts.filter((x) => !(x in MESSAGES.en.access))).toEqual([]);
   });
 
   it("knows every persona description of the sign-in page", async () => {

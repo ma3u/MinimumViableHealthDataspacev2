@@ -14,6 +14,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Gavel, AlertCircle, ShieldCheck, Clock } from "lucide-react";
 import { IS_STATIC } from "@/lib/static-export";
+import { T, useT } from "@/lib/i18n/translate";
 
 /**
  * Supervision, Regulation (EU) 2025/327 Art. 63: the access body records a
@@ -44,6 +45,7 @@ function shortDate(iso: string | null | undefined): string {
 }
 
 function StatusBadge({ status }: { status: string }) {
+  const t = useT("access");
   const cls =
     status === "CLOSED" || status === "ANSWERED"
       ? "bg-(--badge-inactive-bg) text-(--badge-inactive-text) border-(--badge-inactive-border)"
@@ -62,7 +64,7 @@ function StatusBadge({ status }: { status: string }) {
       data-testid="supervision-status"
     >
       {status === "OPEN" ? <Clock size={12} /> : <ShieldCheck size={12} />}
-      {words[status] ?? status.toLowerCase()}
+      {words[status] ? t(words[status]) : status.toLowerCase()}
     </span>
   );
 }
@@ -90,6 +92,7 @@ function FindingCard({
   isBody: boolean;
   onChanged: () => Promise<void>;
 }) {
+  const t = useT("access");
   const [views, setViews] = useState("");
   const [measure, setMeasure] = useState<Measure>("WARNING");
   const [note, setNote] = useState("");
@@ -137,30 +140,33 @@ function FindingCard({
       <p className="mt-2">{f.description}</p>
       <dl className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-xs">
         <div>
-          <dt className="inline text-(--text-secondary)">Notified </dt>
+          <dt className="inline text-(--text-secondary)">{t("Notified")} </dt>
           <dd className="inline">{shortDate(f.notifiedAt)}</dd>
         </div>
         <div data-testid="finding-respond-by">
           <dt className="inline text-(--text-secondary)">
-            Views by (Art. 63(2)){" "}
+            {t("Views by (Art. 63(2))")}{" "}
           </dt>
           <dd className="inline">
             {shortDate(f.respondBy)}
             {typeof f.daysToRespond === "number"
-              ? ` (${f.daysToRespond} days)`
+              ? ` (${t("{days} days", { days: f.daysToRespond })})`
               : ""}
           </dd>
         </div>
         {f.gdprBreach && (
           <div className="md:col-span-2 text-(--danger-text)">
-            Suspected GDPR breach; the supervisory authority has been informed
-            (Art. 63).
+            {t(
+              "Suspected GDPR breach; the supervisory authority has been informed (Art. 63).",
+            )}
           </div>
         )}
         {f.views && (
           <div className="md:col-span-2">
             <dt className="inline text-(--text-secondary)">
-              Views of the party ({shortDate(f.respondedAt)}){" "}
+              {t("Views of the party ({date})", {
+                date: shortDate(f.respondedAt),
+              })}{" "}
             </dt>
             <dd className="inline">{f.views}</dd>
           </div>
@@ -168,12 +174,14 @@ function FindingCard({
         {f.status === "CLOSED" && (
           <div className="md:col-span-2" data-testid="finding-measure">
             <dt className="inline text-(--text-secondary)">
-              Measure ({shortDate(f.closedAt)}){" "}
+              {t("Measure ({date})", { date: shortDate(f.closedAt) })}{" "}
             </dt>
             <dd className="inline">
-              {MEASURE_LABELS[(f.measure ?? "NONE") as Measure] ?? f.measure}
+              {MEASURE_LABELS[(f.measure ?? "NONE") as Measure]
+                ? t(MEASURE_LABELS[(f.measure ?? "NONE") as Measure])
+                : f.measure}
               {f.measure === "EXCLUSION" && f.exclusionMonths
-                ? `, ${f.exclusionMonths} months`
+                ? `, ${t("{months} months", { months: f.exclusionMonths })}`
                 : ""}
               {f.measure === "FINE" && f.fineEur
                 ? `, ${f.fineEur.toLocaleString("en-GB")} EUR`
@@ -194,14 +202,14 @@ function FindingCard({
                 findingId: f.findingId,
                 views,
               });
-              return "Your views are on record (Art. 63(2)).";
+              return t("Your views are on record (Art. 63(2)).");
             });
           }}
-          aria-label="State your views"
+          aria-label={t("State your views")}
         >
           <label className="flex flex-col gap-1">
             <span className="text-(--text-secondary)">
-              State your views within four weeks
+              {t("State your views within four weeks")}
             </span>
             <textarea
               id={`views-${f.findingId}`}
@@ -216,7 +224,7 @@ function FindingCard({
             disabled={busy || !views.trim()}
             className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
           >
-            {busy ? "Sending…" : "Send views"}
+            {busy ? t("Sending…") : t("Send views")}
           </button>
         </form>
       )}
@@ -235,18 +243,23 @@ function FindingCard({
                 fineEur,
               });
               return r.permitRevoked
-                ? `Closed; data permit ${r.permitId} revoked (Art. 63(3)); published under Art. 57(1)(j)(iv).`
+                ? t(
+                    "Closed; data permit {permit} revoked (Art. 63(3)); published under Art. 57(1)(j)(iv).",
+                    { permit: String(r.permitId) },
+                  )
                 : measure === "NONE"
-                  ? "Closed without a measure."
-                  : "Closed; the measure is published under Art. 57(1)(j)(iv).";
+                  ? t("Closed without a measure.")
+                  : t(
+                      "Closed; the measure is published under Art. 57(1)(j)(iv).",
+                    );
             });
           }}
-          aria-label="Close the finding"
+          aria-label={t("Close the finding")}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <label className="flex flex-col gap-1">
               <span className="text-(--text-secondary)">
-                Measure, Art. 63(3)
+                {t("Measure, Art. 63(3)")}
               </span>
               <select
                 id={`measure-${f.findingId}`}
@@ -256,7 +269,7 @@ function FindingCard({
               >
                 {MEASURES.map((m) => (
                   <option key={m} value={m}>
-                    {MEASURE_LABELS[m]}
+                    {t(MEASURE_LABELS[m])}
                   </option>
                 ))}
               </select>
@@ -264,7 +277,7 @@ function FindingCard({
             {measure === "EXCLUSION" && (
               <label className="flex flex-col gap-1">
                 <span className="text-(--text-secondary)">
-                  Exclusion, months (up to 60)
+                  {t("Exclusion, months (up to 60)")}
                 </span>
                 <input
                   type="number"
@@ -278,7 +291,9 @@ function FindingCard({
             )}
             {measure === "FINE" && (
               <label className="flex flex-col gap-1">
-                <span className="text-(--text-secondary)">Fine, EUR</span>
+                <span className="text-(--text-secondary)">
+                  {t("Fine, EUR")}
+                </span>
                 <input
                   type="number"
                   min={0}
@@ -291,7 +306,7 @@ function FindingCard({
           </div>
           <label className="flex flex-col gap-1">
             <span className="text-(--text-secondary)">
-              Reason (published with the measure, Art. 57(1)(j)(iv))
+              {t("Reason (published with the measure, Art. 57(1)(j)(iv))")}
             </span>
             <textarea
               id={`measure-note-${f.findingId}`}
@@ -306,7 +321,7 @@ function FindingCard({
             disabled={busy || (measure !== "NONE" && !note.trim())}
             className="px-3 py-1.5 rounded-sm font-semibold border border-(--danger-text) text-(--danger-text) disabled:opacity-50"
           >
-            {busy ? "Closing…" : "Close with this measure"}
+            {busy ? t("Closing…") : t("Close with this measure")}
           </button>
         </form>
       )}
@@ -328,6 +343,7 @@ function InformationRequestCard({
   isBody: boolean;
   onChanged: () => Promise<void>;
 }) {
+  const t = useT("access");
   const [answer, setAnswer] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -356,13 +372,18 @@ function InformationRequestCard({
       </div>
       <p className="mt-2">{r.question}</p>
       <p className="mt-1 text-xs text-(--text-secondary)">
-        Asked {shortDate(r.requestedAt)} · answer by {shortDate(r.answerBy)}
-        {typeof r.daysToAnswer === "number" ? ` (${r.daysToAnswer} days)` : ""}
+        {t("Asked {asked} · answer by {by}", {
+          asked: shortDate(r.requestedAt),
+          by: shortDate(r.answerBy),
+        })}
+        {typeof r.daysToAnswer === "number"
+          ? ` (${t("{days} days", { days: r.daysToAnswer })})`
+          : ""}
       </p>
       {r.answer && (
         <p className="mt-2 text-xs" data-testid="information-answer">
           <span className="text-(--text-secondary)">
-            Answer ({shortDate(r.answeredAt)}):{" "}
+            {t("Answer ({date}):", { date: shortDate(r.answeredAt) })}{" "}
           </span>
           {r.answer}
         </p>
@@ -379,7 +400,7 @@ function InformationRequestCard({
               answer,
             })
               .then(async () => {
-                setMsg("Answer on record.");
+                setMsg(t("Answer on record."));
                 await onChanged();
               })
               .catch((err: unknown) =>
@@ -387,10 +408,10 @@ function InformationRequestCard({
               )
               .finally(() => setBusy(false));
           }}
-          aria-label="Answer the request"
+          aria-label={t("Answer the request")}
         >
           <label className="flex flex-col gap-1">
-            <span className="text-(--text-secondary)">Your answer</span>
+            <span className="text-(--text-secondary)">{t("Your answer")}</span>
             <textarea
               id={`answer-${r.requestId}`}
               rows={2}
@@ -404,7 +425,7 @@ function InformationRequestCard({
             disabled={busy || !answer.trim()}
             className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
           >
-            {busy ? "Sending…" : "Send answer"}
+            {busy ? t("Sending…") : t("Send answer")}
           </button>
           {msg && (
             <p className="text-(--text-primary)" role="status">
@@ -423,6 +444,7 @@ export default function SupervisionPage() {
   const roles: readonly string[] = IS_STATIC
     ? demoPersona?.roles ?? []
     : (session as { roles?: string[] } | null)?.roles ?? [];
+  const t = useT("access");
   const isBody =
     roles.includes("HDAB_AUTHORITY") || roles.includes("EDC_ADMIN");
 
@@ -502,12 +524,21 @@ export default function SupervisionPage() {
           description,
           gdprBreach,
         });
+        const vars = {
+          id: String(r.findingId),
+          party: String(r.partyName ?? partyDid),
+          date: shortDate(String(r.respondBy)),
+        };
         setMsg(
-          `Finding ${r.findingId} recorded; ${
-            r.partyName ?? partyDid
-          } states its views by ${shortDate(String(r.respondBy))} (Art. 63(2))${
-            gdprBreach ? "; the supervisory authority is informed" : ""
-          }.`,
+          gdprBreach
+            ? t(
+                "Finding {id} recorded; {party} states its views by {date} (Art. 63(2)); the supervisory authority is informed.",
+                vars,
+              )
+            : t(
+                "Finding {id} recorded; {party} states its views by {date} (Art. 63(2)).",
+                vars,
+              ),
         );
       } else {
         const r = await postJson("/api/compliance/information-requests", {
@@ -516,9 +547,10 @@ export default function SupervisionPage() {
           question,
         });
         setMsg(
-          `Information request ${r.requestId} sent; answer by ${shortDate(
-            String(r.answerBy),
-          )}.`,
+          t("Information request {id} sent; answer by {date}.", {
+            id: String(r.requestId),
+            date: shortDate(String(r.answerBy)),
+          }),
         );
       }
       await load();
@@ -535,30 +567,32 @@ export default function SupervisionPage() {
         <div className="mb-8">
           <h1 className="page-header flex items-center gap-2">
             <Gavel size={28} />
-            Supervision
+            {t("Supervision")}
           </h1>
           <p className="text-(--text-secondary) text-lg mt-1">
-            Regulation (EU) 2025/327, Art. 63 · findings, views within four
-            weeks, measures; requests for information
+            {t(
+              "Regulation (EU) 2025/327, Art. 63 · findings, views within four weeks, measures; requests for information",
+            )}
           </p>
         </div>
 
         <div className="rounded-lg border border-(--border) bg-(--surface) p-4 mb-8 text-sm text-(--text-secondary) space-y-2">
           <p>
-            When a data user or holder fails to comply, the access body records
-            a finding and the party has four weeks to state its views (Art.
-            63(2)). The body may then warn, revoke the permit, exclude the party
-            from access for up to five years (Art. 63(3)) or fine it (Art. 64);
-            the measure is published on the{" "}
-            <Link
-              href="/permits"
-              className="font-bold text-(--accent) hover:underline"
+            <T
+              area="access"
+              tags={{
+                a: (
+                  <Link
+                    href="/permits"
+                    className="font-bold text-(--accent) hover:underline"
+                  />
+                ),
+              }}
             >
-              public register
-            </Link>{" "}
-            (Art. 57(1)(j)(iv)). Where a breach of the GDPR is suspected, the
-            supervisory authority is informed. The body may also ask a party for
-            information; the request and the answer are on record.
+              {
+                "When a data user or holder fails to comply, the access body records a finding and the party has four weeks to state its views (Art. 63(2)). The body may then warn, revoke the permit, exclude the party from access for up to five years (Art. 63(3)) or fine it (Art. 64); the measure is published on the <a>public register</a> (Art. 57(1)(j)(iv)). Where a breach of the GDPR is suspected, the supervisory authority is informed. The body may also ask a party for information; the request and the answer are on record."
+              }
+            </T>
           </p>
         </div>
 
@@ -570,13 +604,13 @@ export default function SupervisionPage() {
                 e.preventDefault();
                 void submit("finding");
               }}
-              aria-label="Record a finding"
+              aria-label={t("Record a finding")}
             >
               <h2 className="text-sm font-semibold text-(--text-primary)">
-                Record a finding of non-compliance
+                {t("Record a finding of non-compliance")}
               </h2>
               <label className="flex flex-col gap-1">
-                <span className="text-(--text-secondary)">Party</span>
+                <span className="text-(--text-secondary)">{t("Party")}</span>
                 <select
                   id="finding-party"
                   value={partyDid}
@@ -595,7 +629,7 @@ export default function SupervisionPage() {
               </label>
               <label className="flex flex-col gap-1">
                 <span className="text-(--text-secondary)">
-                  Permit concerned, if any
+                  {t("Permit concerned, if any")}
                 </span>
                 <select
                   id="finding-permit"
@@ -603,7 +637,7 @@ export default function SupervisionPage() {
                   onChange={(e) => setPermitId(e.target.value)}
                   className={inputCls}
                 >
-                  <option value="">none</option>
+                  <option value="">{t("none")}</option>
                   {permits
                     .filter((p) => !partyDid || p.applicantDid === partyDid)
                     .map((p) => (
@@ -615,7 +649,7 @@ export default function SupervisionPage() {
               </label>
               <label className="flex flex-col gap-1">
                 <span className="text-(--text-secondary)">
-                  What was not complied with
+                  {t("What was not complied with")}
                 </span>
                 <textarea
                   id="finding-description"
@@ -633,8 +667,9 @@ export default function SupervisionPage() {
                   onChange={(e) => setGdprBreach(e.target.checked)}
                 />
                 <span>
-                  A breach of the GDPR is suspected; inform the supervisory
-                  authority
+                  {t(
+                    "A breach of the GDPR is suspected; inform the supervisory authority",
+                  )}
                 </span>
               </label>
               <button
@@ -642,7 +677,7 @@ export default function SupervisionPage() {
                 disabled={busy !== null || IS_STATIC || !description.trim()}
                 className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
               >
-                {busy === "finding" ? "Recording…" : "Record and notify"}
+                {busy === "finding" ? t("Recording…") : t("Record and notify")}
               </button>
             </form>
 
@@ -652,17 +687,23 @@ export default function SupervisionPage() {
                 e.preventDefault();
                 void submit("information");
               }}
-              aria-label="Request information"
+              aria-label={t("Request information")}
             >
               <h2 className="text-sm font-semibold text-(--text-primary)">
-                Request information from a party
+                {t("Request information from a party")}
               </h2>
               <p className="text-(--text-secondary)">
-                Sent to the party selected on the left
-                {permitId ? `, about ${permitId}` : ""}.
+                {permitId
+                  ? t(
+                      "Sent to the party selected on the left, about {permit}.",
+                      {
+                        permit: permitId,
+                      },
+                    )
+                  : t("Sent to the party selected on the left.")}
               </p>
               <label className="flex flex-col gap-1">
-                <span className="text-(--text-secondary)">Question</span>
+                <span className="text-(--text-secondary)">{t("Question")}</span>
                 <textarea
                   id="information-question"
                   rows={3}
@@ -676,7 +717,7 @@ export default function SupervisionPage() {
                 disabled={busy !== null || IS_STATIC || !question.trim()}
                 className="px-3 py-1.5 rounded-sm font-semibold border border-(--border) disabled:opacity-50"
               >
-                {busy === "information" ? "Sending…" : "Send the request"}
+                {busy === "information" ? t("Sending…") : t("Send the request")}
               </button>
             </form>
             {msg && (
@@ -691,7 +732,7 @@ export default function SupervisionPage() {
         )}
 
         {loading ? (
-          <p className="text-(--text-secondary) text-sm">Loading…</p>
+          <p className="text-(--text-secondary) text-sm">{t("Loading…")}</p>
         ) : error ? (
           <div className="rounded-lg border border-(--border) bg-(--surface) p-4 text-sm flex items-start gap-2">
             <AlertCircle size={16} className="mt-0.5" />
@@ -701,11 +742,13 @@ export default function SupervisionPage() {
           <>
             <section className="mb-10">
               <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
-                {isBody ? "Findings" : "Findings against you"} (
+                {isBody ? t("Findings") : t("Findings against you")} (
                 {findings.length})
               </h2>
               {findings.length === 0 ? (
-                <p className="text-(--text-secondary) text-sm">No finding</p>
+                <p className="text-(--text-secondary) text-sm">
+                  {t("No finding")}
+                </p>
               ) : (
                 <div className="space-y-3">
                   {findings.map((f) => (
@@ -721,11 +764,15 @@ export default function SupervisionPage() {
             </section>
             <section>
               <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
-                {isBody ? "Requests for information" : "Requests asked of you"}{" "}
+                {isBody
+                  ? t("Requests for information")
+                  : t("Requests asked of you")}{" "}
                 ({requests.length})
               </h2>
               {requests.length === 0 ? (
-                <p className="text-(--text-secondary) text-sm">No request</p>
+                <p className="text-(--text-secondary) text-sm">
+                  {t("No request")}
+                </p>
               ) : (
                 <div className="space-y-3">
                   {requests.map((r) => (
