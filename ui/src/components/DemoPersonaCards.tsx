@@ -4,6 +4,7 @@ import { signIn, useSession } from "next-auth/react";
 import { Shield, LogIn } from "lucide-react";
 import { DEMO_PERSONAS, ROLE_LABELS, landingFor } from "@/lib/auth";
 import { IS_STATIC } from "@/lib/static-export";
+import { useT } from "@/lib/i18n/translate";
 
 /**
  * Demo persona cards showing available users and their roles.
@@ -12,6 +13,9 @@ import { IS_STATIC } from "@/lib/static-export";
  */
 export function DemoPersonaCards() {
   const { data: session } = useSession();
+  const t = useT("home");
+  const tc = useT("common");
+  const ts = useT("signin");
 
   // Hide persona cards if already signed in (unless static mode)
   if (session && !IS_STATIC) return null;
@@ -22,10 +26,10 @@ export function DemoPersonaCards() {
         id="personas-title"
         className="text-sm font-semibold text-(--text-secondary) uppercase tracking-wider mb-3"
       >
-        Demo Users &amp; Roles
+        {t("Demo Users & Roles")}
       </h2>
       <p className="text-xs text-(--text-secondary) mb-3">
-        Sign in as any persona to explore role-specific views.
+        {t("Sign in as any persona to explore role-specific views.")}
         <span className="text-gray-500 dark:text-gray-400">
           {" "}
           Password = username · Keycloak realm: EDCV
@@ -83,12 +87,12 @@ export function DemoPersonaCards() {
                     className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-sm font-medium ${persona.badge}`}
                   >
                     <Shield size={8} aria-hidden="true" />
-                    {ROLE_LABELS[role] ?? role}
+                    {ROLE_LABELS[role] ? tc(ROLE_LABELS[role]) : role}
                   </span>
                 ))}
             </div>
             <p className="text-xs text-(--text-secondary) leading-tight">
-              {persona.description}
+              {ts(persona.description)}
             </p>
           </button>
         ))}

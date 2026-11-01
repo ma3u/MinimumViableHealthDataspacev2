@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { IS_STATIC } from "@/lib/static-export";
+import { useT } from "@/lib/i18n/translate";
 
 interface PersonaJourney {
   role: string;
@@ -112,7 +113,7 @@ const personaJourneys: PersonaJourney[] = [
     steps: [
       {
         page: "/compliance",
-        action: "Review data access permit applications (Art. 46)",
+        action: "Review health data access applications (Art. 67)",
       },
       {
         page: "/admin/policies",
@@ -158,11 +159,12 @@ const personaJourneys: PersonaJourney[] = [
 ];
 
 export function PersonaJourneyCards() {
+  const t = useT("home");
   return (
     <div
       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
       role="list"
-      aria-label="Persona user journeys"
+      aria-label={t("Persona user journeys")}
     >
       {personaJourneys.map((persona, pi) => {
         const PersonaIcon = persona.icon;
@@ -180,11 +182,11 @@ export function PersonaJourneyCards() {
                 aria-hidden="true"
               />
               <h3 className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100">
-                {persona.role}
+                {t(persona.role)}
               </h3>
             </div>
             <p className="text-[11px] text-gray-700 dark:text-gray-300 mb-3">
-              {persona.org} · login as{" "}
+              {persona.org} · {t("login as")}{" "}
               <code className="font-mono text-gray-700 dark:text-gray-300">
                 {persona.loginAs}
               </code>
@@ -192,7 +194,7 @@ export function PersonaJourneyCards() {
 
             <ol
               className="space-y-2 flex-1"
-              aria-label={`${persona.role} journey steps`}
+              aria-label={t("{role} journey steps", { role: t(persona.role) })}
             >
               {persona.steps.map((step, si) => (
                 <li key={si} className="flex gap-2 items-start">
@@ -204,7 +206,7 @@ export function PersonaJourneyCards() {
                   </span>
                   <div className="min-w-0">
                     <p className="text-xs text-gray-800 dark:text-gray-200 leading-relaxed">
-                      {step.action}
+                      {t(step.action)}
                     </p>
                     <p className="text-[10px] text-gray-600 dark:text-gray-400 font-mono">
                       {step.page}
@@ -219,7 +221,7 @@ export function PersonaJourneyCards() {
                 href={persona.steps[0].page}
                 className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white transition-colors touch-target-sm"
               >
-                <span>Start journey</span>
+                <span>{t("Start journey")}</span>
                 <ArrowRight size={12} aria-hidden="true" />
               </Link>
             ) : (
@@ -235,7 +237,7 @@ export function PersonaJourneyCards() {
                 className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-gray-800 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white transition-colors touch-target-sm cursor-pointer text-left"
               >
                 <Lock size={10} aria-hidden="true" />
-                <span>Sign in & start</span>
+                <span>{t("Sign in & start")}</span>
                 <ArrowRight size={12} aria-hidden="true" />
               </button>
             )}
