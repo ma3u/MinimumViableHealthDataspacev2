@@ -17,6 +17,7 @@ import {
   Edit,
 } from "lucide-react";
 import Link from "next/link";
+import { T, useT } from "@/lib/i18n/translate";
 
 interface VPA {
   id: string;
@@ -86,63 +87,68 @@ function normalizeRole(t: Tenant): string {
 
 const ROLE_CONFIG: Record<
   string,
-  { label: string; color: string; bg: string; level: string }
+  { label: string; color: string; bg: string; level: number }
 > = {
   EDC_ADMIN: {
     label: "Admin",
     color: "text-(--role-admin-text)",
     bg: "bg-(--role-admin-bg)",
-    level: "Level 4",
+    level: 4,
   },
   DATA_HOLDER: {
     label: "Data Holder",
     color: "text-(--role-holder-text)",
     bg: "bg-(--role-holder-bg)",
-    level: "Level 3",
+    level: 3,
   },
   DATA_USER: {
     label: "Researcher",
     color: "text-(--role-user-text)",
     bg: "bg-(--role-user-bg)",
-    level: "Level 2",
+    level: 2,
   },
   HDAB_AUTHORITY: {
     label: "HDAB",
     color: "text-(--role-hdab-text)",
     bg: "bg-(--role-hdab-bg)",
-    level: "Level 3",
+    level: 3,
   },
   TRUST_CENTER_OPERATOR: {
     label: "Trust Center",
     color: "text-(--role-trust-text)",
     bg: "bg-(--role-trust-bg)",
-    level: "Level 3",
+    level: 3,
   },
   PATIENT: {
     label: "Patient",
     color: "text-(--role-patient-text)",
     bg: "bg-(--role-patient-bg)",
-    level: "Level 1",
+    level: 1,
   },
 };
 
 function RoleBadge({ role }: { role: string }) {
-  const cfg = ROLE_CONFIG[role] ?? {
-    label: role,
-    color: "text-(--text-secondary)",
-    bg: "bg-(--surface-2)",
-    level: "—",
-  };
+  const t = useT("admin");
+  const cfg = ROLE_CONFIG[role];
   return (
     <span
-      className={`px-3 py-1 rounded-full text-xs font-bold ${cfg.color} ${cfg.bg}`}
+      className={`px-3 py-1 rounded-full text-xs font-bold ${
+        cfg?.color ?? "text-(--text-secondary)"
+      } ${cfg?.bg ?? "bg-(--surface-2)"}`}
     >
-      {cfg.level}
+      {cfg ? t("Level {n}", { n: cfg.level }) : "—"}
     </span>
   );
 }
 
 export default function AdminTenantsPage() {
+  const t = useT("admin");
+  const tc = useT("common");
+  // A role name the common area already has comes from there (#782).
+  const roleLabel = (label: string) => {
+    const shared = tc(label);
+    return shared !== label ? shared : t(label);
+  };
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -160,16 +166,16 @@ export default function AdminTenantsPage() {
   }, []);
 
   const totalProfiles = tenants.reduce(
-    (s, t) => s + (t.participantProfiles?.length || 0),
+    (s, tn) => s + (tn.participantProfiles?.length || 0),
     0,
   );
   const activeParticipants = participants.filter(
     (p) => p.state === "ACTIVE",
   ).length;
-  const disposedCount = tenants.reduce((s, t) => {
+  const disposedCount = tenants.reduce((s, tn) => {
     return (
       s +
-      (t.participantProfiles || []).reduce((ps, pp) => {
+      (tn.participantProfiles || []).reduce((ps, pp) => {
         const allDisposed =
           pp.vpas?.length > 0 && pp.vpas.every((v) => v.state === "disposed");
         return ps + (allDisposed ? 1 : 0);
@@ -178,8 +184,8 @@ export default function AdminTenantsPage() {
   }, 0);
 
   const roleCounts: Record<string, number> = {};
-  tenants.forEach((t) => {
-    const role = normalizeRole(t);
+  tenants.forEach((tn) => {
+    const role = normalizeRole(tn);
     roleCounts[role] = (roleCounts[role] || 0) + 1;
   });
 
@@ -189,23 +195,26 @@ export default function AdminTenantsPage() {
         {/* ── Page header ── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h1 className="page-header">Tenant Management</h1>
+            <h1 className="page-header">{t("Tenant Management")}</h1>
             <p className="text-(--text-secondary) text-lg mt-1">
-              Manage EHDS participant organisations, roles, and dataspace access
+              {t(
+                "Manage EHDS participant organisations, roles, and dataspace access",
+              )}
             </p>
             <p className="text-xs text-(--text-secondary) mt-2 max-w-2xl flex items-start gap-1.5">
               <Info size={14} className="mt-0.5 shrink-0 text-(--accent)" />
               <span>
-                <strong className="text-(--text-primary)">
-                  VPA (Virtual Participant Agent)
-                </strong>{" "}
-                — a runtime instance provisioned by the CFM Tenant Manager for a
-                participant. Each tenant typically runs three VPAs:
-                <code>cfm.connector</code> (EDC-V control plane),{" "}
-                <code>cfm.credentialservice</code> (IdentityHub), and{" "}
-                <code>cfm.dataplane</code> (DCore data plane). State{" "}
-                <code>disposed</code> means the agent was terminated by a demo
-                reset — re-seed the tenants to recreate.
+                <T
+                  area="admin"
+                  tags={{
+                    b: <strong className="text-(--text-primary)" />,
+                    c: <code />,
+                  }}
+                >
+                  {
+                    "<b>VPA (Virtual Participant Agent)</b>: a runtime instance provisioned by the CFM Tenant Manager for a participant. Each tenant typically runs three VPAs: <c>cfm.connector</c> (EDC-V control plane), <c>cfm.credentialservice</c> (IdentityHub), and <c>cfm.dataplane</c> (DCore data plane). State <c>disposed</c> means the agent was terminated by a demo reset; re-seed the tenants to recreate."
+                  }
+                </T>
               </span>
             </p>
           </div>
@@ -213,14 +222,14 @@ export default function AdminTenantsPage() {
             href="/admin"
             className="text-sm font-bold text-(--accent) hover:underline uppercase tracking-wider"
           >
-            ← Operator Dashboard
+            ← {t("Operator Dashboard")}
           </Link>
         </div>
 
         {loading ? (
           <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
-            Loading tenants…
+            {t("Loading tenants…")}
           </div>
         ) : (
           <>
@@ -236,7 +245,7 @@ export default function AdminTenantsPage() {
                       </div>
                     </div>
                     <p className="text-sm font-medium text-(--text-secondary)">
-                      Total Tenants
+                      {t("Total Tenants")}
                     </p>
                     <p className="text-3xl font-black text-(--text-primary) mt-1 tabular-nums">
                       {tenants.length}
@@ -249,12 +258,12 @@ export default function AdminTenantsPage() {
                       </div>
                       {activeParticipants > 0 && (
                         <span className="text-xs font-bold text-(--success-text) bg-(--success)/10 px-2 py-0.5 rounded-full">
-                          {activeParticipants} active
+                          {t("{n} active", { n: activeParticipants })}
                         </span>
                       )}
                     </div>
                     <p className="text-sm font-medium text-(--text-secondary)">
-                      Participant Profiles
+                      {t("Participant Profiles")}
                     </p>
                     <p className="text-3xl font-black text-(--text-primary) mt-1 tabular-nums">
                       {totalProfiles}
@@ -271,9 +280,11 @@ export default function AdminTenantsPage() {
                     </div>
                     <p
                       className="text-sm font-medium text-(--text-secondary) flex items-center gap-1.5"
-                      title="Virtual Participant Agents (one per dataspace profile per tenant). Disposed = terminated by demo reset; re-seed to recreate."
+                      title={t(
+                        "Virtual Participant Agents (one per dataspace profile per tenant). Disposed = terminated by demo reset; re-seed to recreate.",
+                      )}
                     >
-                      Disposed VPAs
+                      {t("Disposed VPAs")}
                       <Info
                         size={12}
                         className="text-(--text-secondary) opacity-60"
@@ -289,39 +300,41 @@ export default function AdminTenantsPage() {
                 <div className="bg-(--surface-card) rounded-xl shadow-xs overflow-hidden border border-(--border)">
                   <div className="p-6 border-b border-(--border) flex items-center justify-between gap-4">
                     <h3 className="text-lg font-bold text-(--text-primary)">
-                      Registered Organisations
+                      {t("Registered Organisations")}
                     </h3>
                     <Link
                       href="/admin/policies"
                       className="px-4 py-2 text-sm font-bold text-white bg-(--accent) rounded-xl hover:opacity-90 transition-opacity"
                     >
-                      Policy Definitions →
+                      {t("Policy Definitions")} →
                     </Link>
                   </div>
 
                   {tenants.length === 0 ? (
                     <p className="p-6 text-(--text-secondary) text-sm">
-                      No tenants registered — connect to live stack
+                      {t("No tenants registered; connect to the live stack")}
                     </p>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-left">
                         <thead className="bg-(--surface) text-xs font-bold text-(--text-secondary) uppercase tracking-wider">
                           <tr>
-                            <th className="px-6 py-4">Organisation</th>
-                            <th className="px-6 py-4">Role</th>
-                            <th className="px-6 py-4">Access Level</th>
-                            <th className="px-6 py-4">Status</th>
-                            <th className="px-6 py-4 text-right">Details</th>
+                            <th className="px-6 py-4">{t("Organisation")}</th>
+                            <th className="px-6 py-4">{t("Role")}</th>
+                            <th className="px-6 py-4">{t("Access Level")}</th>
+                            <th className="px-6 py-4">{t("Status")}</th>
+                            <th className="px-6 py-4 text-right">
+                              {t("Details")}
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-(--border)">
-                          {tenants.map((t) => {
-                            const isOpen = expanded === t.id;
-                            const role = normalizeRole(t);
+                          {tenants.map((tn) => {
+                            const isOpen = expanded === tn.id;
+                            const role = normalizeRole(tn);
                             const roleCfg = ROLE_CONFIG[role] ?? null;
                             const allVpasDisposed = (
-                              t.participantProfiles || []
+                              tn.participantProfiles || []
                             ).some(
                               (pp) =>
                                 pp.vpas?.length > 0 &&
@@ -331,7 +344,7 @@ export default function AdminTenantsPage() {
                             return (
                               <>
                                 <tr
-                                  key={t.id}
+                                  key={tn.id}
                                   className="hover:bg-(--surface) transition-colors"
                                 >
                                   <td className="px-6 py-4">
@@ -344,16 +357,16 @@ export default function AdminTenantsPage() {
                                       </div>
                                       <div>
                                         <p className="text-sm font-bold text-(--text-primary)">
-                                          {t.properties.displayName || t.id}
+                                          {tn.properties.displayName || tn.id}
                                         </p>
                                         <p className="text-[10px] text-(--text-secondary)">
-                                          {t.properties.organization || t.id}
+                                          {tn.properties.organization || tn.id}
                                         </p>
                                       </div>
                                     </div>
                                   </td>
                                   <td className="px-6 py-4 text-sm text-(--text-primary)">
-                                    {roleCfg?.label ?? role}
+                                    {roleCfg ? roleLabel(roleCfg.label) : role}
                                   </td>
                                   <td className="px-6 py-4">
                                     <RoleBadge role={role} />
@@ -362,25 +375,25 @@ export default function AdminTenantsPage() {
                                     {allVpasDisposed ? (
                                       <div className="flex items-center gap-2 text-xs font-medium text-(--warning-text)">
                                         <span className="w-1.5 h-1.5 rounded-full bg-(--warning)" />
-                                        Disposed
+                                        {t("Disposed")}
                                       </div>
                                     ) : (
                                       <div className="flex items-center gap-2 text-xs font-medium text-(--success-text)">
                                         <span className="w-1.5 h-1.5 rounded-full bg-(--success)" />
-                                        Active
+                                        {t("Active")}
                                       </div>
                                     )}
                                   </td>
                                   <td className="px-6 py-4 text-right">
                                     <button
                                       onClick={() =>
-                                        setExpanded(isOpen ? null : t.id)
+                                        setExpanded(isOpen ? null : tn.id)
                                       }
                                       className="p-2 text-(--text-secondary) hover:text-(--accent) transition-colors"
                                       aria-label={
                                         isOpen
-                                          ? "Collapse details"
-                                          : "Expand details"
+                                          ? t("Collapse details")
+                                          : t("Expand details")
                                       }
                                     >
                                       {isOpen ? (
@@ -394,7 +407,7 @@ export default function AdminTenantsPage() {
 
                                 {/* Expanded detail row */}
                                 {isOpen && (
-                                  <tr key={`${t.id}-detail`}>
+                                  <tr key={`${tn.id}-detail`}>
                                     <td
                                       colSpan={5}
                                       className="px-6 py-4 bg-(--surface) border-b border-(--border)"
@@ -402,7 +415,7 @@ export default function AdminTenantsPage() {
                                       <div className="space-y-4">
                                         {/* Properties */}
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                          {Object.entries(t.properties)
+                                          {Object.entries(tn.properties)
                                             .filter(
                                               ([k]) => k !== "displayName",
                                             )
@@ -421,22 +434,22 @@ export default function AdminTenantsPage() {
                                             ))}
                                           <div className="bg-(--surface-card) rounded-xl px-3 py-2.5">
                                             <p className="text-[10px] text-(--text-secondary) uppercase tracking-wider font-bold">
-                                              Tenant ID
+                                              {t("Tenant ID")}
                                             </p>
                                             <p className="text-xs text-(--text-primary) font-mono mt-0.5 break-all">
-                                              {t.id}
+                                              {tn.id}
                                             </p>
                                           </div>
                                         </div>
 
                                         {/* Participant profiles */}
-                                        {t.participantProfiles?.length > 0 && (
+                                        {tn.participantProfiles?.length > 0 && (
                                           <div>
                                             <p className="section-label">
-                                              Dataspace Profiles
+                                              {t("Dataspace Profiles")}
                                             </p>
                                             <div className="grid md:grid-cols-2 gap-3">
-                                              {t.participantProfiles.map(
+                                              {tn.participantProfiles.map(
                                                 (pp, i) => {
                                                   const ctxId =
                                                     pp.properties?.[
@@ -472,16 +485,24 @@ export default function AdminTenantsPage() {
                                                           <AlertTriangle
                                                             size={12}
                                                           />
-                                                          VPAs disposed — re-run{" "}
-                                                          <code className="bg-(--warning)/10 px-1 rounded-sm font-mono">
-                                                            seed-health-tenants.sh
-                                                          </code>
+                                                          <T
+                                                            area="admin"
+                                                            tags={{
+                                                              c: (
+                                                                <code className="bg-(--warning)/10 px-1 rounded-sm font-mono" />
+                                                              ),
+                                                            }}
+                                                          >
+                                                            {
+                                                              "VPAs disposed; re-run <c>seed-health-tenants.sh</c>"
+                                                            }
+                                                          </T>
                                                         </div>
                                                       )}
                                                       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                                                         <div>
                                                           <span className="text-(--text-secondary)">
-                                                            Profile ID{" "}
+                                                            {t("Profile ID")}{" "}
                                                           </span>
                                                           <span className="text-(--text-primary) font-mono">
                                                             {pp.id}
@@ -501,7 +522,7 @@ export default function AdminTenantsPage() {
                                                         </div>
                                                         <div>
                                                           <span className="text-(--text-secondary)">
-                                                            Roles{" "}
+                                                            {t("Roles")}{" "}
                                                           </span>
                                                           <span className="text-(--text-primary)">
                                                             {roles.length > 0
@@ -512,7 +533,7 @@ export default function AdminTenantsPage() {
                                                         {ctx && (
                                                           <div>
                                                             <span className="text-(--text-secondary)">
-                                                              State{" "}
+                                                              {t("State")}{" "}
                                                             </span>
                                                             <span
                                                               className={`font-bold ${
@@ -588,39 +609,39 @@ export default function AdminTenantsPage() {
               <div className="lg:col-span-4">
                 <div className="bg-(--surface) rounded-xl p-8 h-full">
                   <h3 className="text-lg font-bold text-(--text-primary) mb-6">
-                    RBAC Summary
+                    {t("RBAC Summary")}
                   </h3>
                   <div className="space-y-4">
                     {[
                       {
                         role: "EDC_ADMIN",
                         icon: ShieldCheck,
-                        label: "Administrators",
-                        sub: "Full Access (L4)",
+                        label: t("Administrators"),
+                        sub: t("Full Access (L4)"),
                         color: "text-(--role-admin-text)",
                         bg: "bg-(--role-admin-bg)",
                       },
                       {
                         role: "DATA_HOLDER",
                         icon: Building2,
-                        label: "Data Holders",
-                        sub: "Write Access (L3)",
+                        label: t("Data Holders"),
+                        sub: t("Write Access (L3)"),
                         color: "text-(--role-holder-text)",
                         bg: "bg-(--role-holder-bg)",
                       },
                       {
                         role: "DATA_USER",
                         icon: Users,
-                        label: "Researchers",
-                        sub: "Read-only (L1–2)",
+                        label: t("Researchers"),
+                        sub: t("Read-only (L1–2)"),
                         color: "text-(--role-user-text)",
                         bg: "bg-(--role-user-bg)",
                       },
                       {
                         role: "HDAB_AUTHORITY",
                         icon: ShieldCheck,
-                        label: "HDAB",
-                        sub: "Governance (L3)",
+                        label: t("HDAB"),
+                        sub: t("Governance (L3)"),
                         color: "text-(--role-hdab-text)",
                         bg: "bg-(--role-hdab-bg)",
                       },
@@ -654,17 +675,18 @@ export default function AdminTenantsPage() {
                   {/* Security notice */}
                   <div className="mt-8 p-6 bg-(--accent) text-white dark:text-gray-900 rounded-xl">
                     <p className="text-xs font-bold uppercase tracking-widest mb-2 opacity-80">
-                      Security Notice
+                      {t("Security Notice")}
                     </p>
                     <p className="text-sm mb-4 opacity-90">
-                      All Level 4 changes require secondary hardware key
-                      validation per EHDS Art. 50.
+                      {t(
+                        "All Level 4 changes require secondary hardware key validation per EHDS Art. 50.",
+                      )}
                     </p>
                     <Link
                       href="/admin/audit"
                       className="text-xs font-bold border border-white/30 px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors inline-block"
                     >
-                      Audit Logs
+                      {t("Audit Logs")}
                     </Link>
                   </div>
                 </div>

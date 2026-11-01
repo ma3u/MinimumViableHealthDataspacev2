@@ -437,11 +437,11 @@ describe("AdminPoliciesPage", () => {
     expect(select).toBeInTheDocument();
 
     const options = within(select as HTMLElement).getAllByRole("option");
-    // "— select —" + 2 participants
+    // "Select…" + 2 participants
     expect(options).toHaveLength(3);
   });
 
-  it("shows '— select —' as the first option", async () => {
+  it("shows 'Select…' as the first option", async () => {
     const user = userEvent.setup();
     await renderLoaded();
     await user.click(screen.getByRole("button", { name: /Create Policy/ }));
@@ -449,7 +449,7 @@ describe("AdminPoliciesPage", () => {
     // Label is not associated via htmlFor, so find by display value
     const selectEl = screen.getByDisplayValue("alpha-klinik.de:participant");
     const opts = within(selectEl as HTMLElement).getAllByRole("option");
-    expect((opts[0] as HTMLOptionElement).textContent).toBe("— select —");
+    expect((opts[0] as HTMLOptionElement).textContent).toBe("Select…");
   });
 
   /* ─── Duration dropdown (5 options) ─── */

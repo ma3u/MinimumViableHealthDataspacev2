@@ -9,6 +9,7 @@ import {
   speLabelTone,
   type SpeStatusValue,
 } from "@/lib/spe";
+import { useT } from "@/lib/i18n/translate";
 
 const TONE_CLASSES = {
   simulated:
@@ -31,16 +32,17 @@ export function SpeLabelBadge({
     attestationScope?: string | null;
   };
 }) {
+  const t = useT("admin");
   const tone = speLabelTone(spe);
-  const text = speLabelText(spe);
+  const text = t(speLabelText(spe));
   const Icon = tone === "simulated" ? ShieldAlert : ShieldCheck;
   return (
     <a
       href={ADR_068_URL}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`${text}, see ADR-068`}
-      title="What each label proves: ADR-068, decision 5"
+      aria-label={t("{label}, see ADR-068", { label: text })}
+      title={t("What each label proves: ADR-068, decision 5")}
       className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold hover:underline ${TONE_CLASSES[tone]}`}
     >
       <Icon size={11} aria-hidden="true" />
@@ -57,13 +59,14 @@ const STATUS_CLASSES: Record<string, string> = {
 };
 
 export function SpeStatusText({ status }: { status: SpeStatusValue | string }) {
+  const t = useT("admin");
   return (
     <span
       className={`font-semibold ${
         STATUS_CLASSES[status] ?? "text-(--text-secondary)"
       }`}
     >
-      {status}
+      {t(status)}
     </span>
   );
 }
@@ -73,9 +76,12 @@ export function SpeStatusText({ status }: { status: SpeStatusValue | string }) {
  * clipboard with the copy button.
  */
 export function PolicyHash({ hash }: { hash: string | null | undefined }) {
+  const t = useT("admin");
   const [copied, setCopied] = useState(false);
   if (!hash) {
-    return <span className="text-(--text-secondary)">none recorded</span>;
+    return (
+      <span className="text-(--text-secondary)">{t("none recorded")}</span>
+    );
   }
   const copy = () => {
     void navigator.clipboard
@@ -98,8 +104,8 @@ export function PolicyHash({ hash }: { hash: string | null | undefined }) {
       <button
         type="button"
         onClick={copy}
-        aria-label={`Copy policy hash ${hash}`}
-        title="Copy the full hash"
+        aria-label={t("Copy policy hash {hash}", { hash })}
+        title={t("Copy the full hash")}
         className="p-0.5 rounded-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2)"
       >
         {copied ? (

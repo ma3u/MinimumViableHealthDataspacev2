@@ -2,6 +2,7 @@
 
 import { AlertTriangle } from "lucide-react";
 import type { TopoParticipant } from "./types";
+import { useT } from "@/lib/i18n/translate";
 
 export function CriticalBanner({
   degraded,
@@ -12,6 +13,7 @@ export function CriticalBanner({
   total: number;
   participants: TopoParticipant[];
 }) {
+  const t = useT("admin");
   if (degraded === 0) return null;
   const names = participants
     .filter((p) => p.health === "critical" || p.health === "warning")
@@ -22,10 +24,13 @@ export function CriticalBanner({
       <AlertTriangle size={18} className="text-(--danger-text) shrink-0" />
       <div className="text-sm">
         <span className="font-semibold text-(--danger-text)">
-          {degraded} of {total} participants degraded
+          {t("{degraded} of {total} participants degraded", {
+            degraded,
+            total,
+          })}
         </span>
         <span className="text-(--text-secondary) ml-2">
-          — {names.join(", ")}
+          ({names.join(", ")})
         </span>
       </div>
     </div>

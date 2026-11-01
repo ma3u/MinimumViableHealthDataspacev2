@@ -16,6 +16,7 @@ import {
 } from "@/lib/spe";
 import { SpeLabelBadge, SpeStatusText } from "./SpeBadges";
 import { useSpeStatus } from "./use-spe-status";
+import { T, useT } from "@/lib/i18n/translate";
 
 const ENVIRONMENT_LABELS: Record<string, string> = {
   azure: "Azure",
@@ -36,6 +37,9 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 
 /** The SPE list, presentational, so it can be tested with a fixed answer. */
 export function SpeStatusView({ data }: { data: SpeStatusResponse }) {
+  const t = useT("admin");
+  const when = (iso: string | null) =>
+    iso ? formatSpeTime(iso) : t("not yet");
   return (
     <div className="space-y-4">
       {data.fallback && (
@@ -43,8 +47,8 @@ export function SpeStatusView({ data }: { data: SpeStatusResponse }) {
           role="note"
           className="text-xs text-(--warning-text) bg-(--warning)/10 border border-(--warning)/30 rounded-lg px-3 py-2"
         >
-          {data.fallback.reason}. No attestation, key release or patient count
-          is known.
+          {data.fallback.reason}.{" "}
+          {t("No attestation, key release or patient count is known.")}
         </p>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -62,33 +66,36 @@ export function SpeStatusView({ data }: { data: SpeStatusResponse }) {
               <SpeLabelBadge spe={spe} />
             </div>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-2">
-              <Field label="Runs on" value={spe.runsOn} />
-              <Field label="TEE" value={spe.teeType} />
-              <Field label="Attestation scope" value={spe.attestationScope} />
+              <Field label={t("Runs on")} value={spe.runsOn} />
+              <Field label={t("TEE")} value={spe.teeType} />
               <Field
-                label="Status"
+                label={t("Attestation scope")}
+                value={spe.attestationScope}
+              />
+              <Field
+                label={t("Status")}
                 value={<SpeStatusText status={spe.status} />}
               />
               <Field
-                label="Last attestation"
-                value={formatSpeTime(spe.attestedAt)}
+                label={t("Last attestation")}
+                value={when(spe.attestedAt)}
               />
               <Field
-                label="Last key release"
-                value={formatSpeTime(spe.keyReleasedAt)}
+                label={t("Last key release")}
+                value={when(spe.keyReleasedAt)}
               />
               <Field
-                label="Patients"
-                value={spe.patients === null ? "unknown" : spe.patients}
+                label={t("Patients")}
+                value={spe.patients === null ? t("unknown") : spe.patients}
               />
             </dl>
             <Link
               href={`/admin/attestation#${attestationAnchor(spe.id)}`}
-              aria-label={`Attestation evidence for ${spe.id}`}
+              aria-label={t("Attestation evidence for {id}", { id: spe.id })}
               className="inline-flex items-center gap-1 text-xs font-semibold text-(--accent) hover:underline"
             >
               <Fingerprint size={12} aria-hidden="true" />
-              Attestation evidence
+              {t("Attestation evidence")}
             </Link>
           </section>
         ))}
@@ -97,19 +104,25 @@ export function SpeStatusView({ data }: { data: SpeStatusResponse }) {
         {data.trustee ? (
           <p data-testid="spe-trustee">
             <KeyRound size={12} className="inline mr-1" aria-hidden="true" />
-            Trustee: operated by{" "}
-            <span className="text-(--text-primary)">
-              {data.trustee.operator}
-            </span>
-            , verifier{" "}
-            <span className="font-mono text-(--text-primary)">
-              {data.trustee.verifier}
-            </span>
-            ,{" "}
+            <T
+              area="admin"
+              vars={{
+                operator: data.trustee.operator,
+                verifier: data.trustee.verifier,
+              }}
+              tags={{
+                b: <span className="text-(--text-primary)" />,
+                c: <span className="font-mono text-(--text-primary)" />,
+              }}
+            >
+              {
+                "Trustee: operated by <b>{operator}</b>, verifier <c>{verifier}</c>,"
+              }
+            </T>{" "}
             {data.trustee.reachable ? (
-              <span className="text-(--success-text)">reachable</span>
+              <span className="text-(--success-text)">{t("reachable")}</span>
             ) : (
-              <span className="text-(--danger-text)">not reachable</span>
+              <span className="text-(--danger-text)">{t("not reachable")}</span>
             )}
           </p>
         ) : (
@@ -119,13 +132,15 @@ export function SpeStatusView({ data }: { data: SpeStatusResponse }) {
               className="inline mr-1"
               aria-hidden="true"
             />
-            Trustee: not reported by the proxy
+            {t("Trustee: not reported by the proxy")}
           </p>
         )}
         {data.residualTrust.length > 0 && (
           <p data-testid="spe-residual-trust">
             <Cpu size={12} className="inline mr-1" aria-hidden="true" />
-            Residual trust: {data.residualTrust.join(", ")} (ADR-068 decision 7)
+            {t("Residual trust: {list} (ADR-068 decision 7)", {
+              list: data.residualTrust.join(", "),
+            })}
           </p>
         )}
       </div>
@@ -138,6 +153,7 @@ export function SpeStatusView({ data }: { data: SpeStatusResponse }) {
  * where it runs, what proves it and when the key was last released.
  */
 export function SpeStatusCard() {
+  const t = useT("admin");
   const { data, loading, error } = useSpeStatus();
   return (
     <section
@@ -150,38 +166,44 @@ export function SpeStatusCard() {
             id="spe-card-title"
             className="text-xl font-bold tracking-tight text-(--text-primary)"
           >
-            Secure processing environments
+            {t("Secure processing environments")}
           </h2>
           <p className="text-sm text-(--text-secondary) mt-0.5">
-            EHDS Art. 73 · confidential SPEs with a Trustee run by the access
-            body (
-            <a
-              href={ADR_068_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-(--accent) hover:underline"
+            <T
+              area="admin"
+              tags={{
+                a: (
+                  <a
+                    href={ADR_068_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-(--accent) hover:underline"
+                  />
+                ),
+              }}
             >
-              ADR-068
-            </a>
-            )
+              {
+                "EHDS Art. 73 · confidential SPEs with a Trustee run by the access body (<a>ADR-068</a>)"
+              }
+            </T>
           </p>
         </div>
         {data && (
           <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-(--surface-2) text-(--text-secondary)">
-            {ENVIRONMENT_LABELS[data.environment] ?? data.environment}
+            {t(ENVIRONMENT_LABELS[data.environment] ?? data.environment)}
           </span>
         )}
       </div>
       {loading ? (
         <p className="flex items-center gap-2 text-sm text-(--text-secondary)">
           <Loader2 size={14} className="animate-spin" aria-hidden="true" />
-          Loading secure processing environments…
+          {t("Loading secure processing environments…")}
         </p>
       ) : data ? (
         <SpeStatusView data={data} />
       ) : (
         <p className="text-sm text-(--text-secondary)">
-          Secure processing environments unavailable
+          {t("Secure processing environments unavailable")}
           {error ? `: ${error}` : ""}
         </p>
       )}

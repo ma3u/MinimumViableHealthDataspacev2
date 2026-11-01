@@ -35,6 +35,7 @@ import {
 } from "./constants";
 import { computeEgressGiB } from "./helpers";
 import type { ComponentInfo } from "./types";
+import { useT } from "@/lib/i18n/translate";
 
 function Card({
   title,
@@ -45,10 +46,13 @@ function Card({
   eur: number;
   detail: string;
 }) {
+  const t = useT("admin");
   return (
     <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40">
       <div className="text-(--text-secondary) mb-0.5">{title}</div>
-      <div className="font-mono text-(--text-primary)">{formatEur(eur)}/mo</div>
+      <div className="font-mono text-(--text-primary)">
+        {t("{eur}/mo", { eur: formatEur(eur) })}
+      </div>
       <div className="text-[10px] text-(--text-secondary) mt-1">{detail}</div>
     </div>
   );
@@ -61,6 +65,7 @@ export function AzureCostEstimatorPanel({
   liveComponents: ComponentInfo[];
   participantCount: number;
 }) {
+  const t = useT("admin");
   const storageGiB = COMPUTED_STORAGE_GIB;
   const egressGiB = computeEgressGiB(participantCount);
 
@@ -99,35 +104,52 @@ export function AzureCostEstimatorPanel({
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="font-semibold text-sm flex items-center gap-2 text-(--text-primary)">
           <BarChart2 size={16} className="text-(--success-text)" />
-          Monthly Cost Estimate: Azure (running, West Europe)
+          {t("Monthly Cost Estimate: Azure (running, West Europe)")}
         </h2>
         <div className="flex items-center gap-4 text-xs text-(--text-secondary)">
           <span
             className="flex items-center gap-1.5"
-            title="Mon-Fri 07:00-20:00 Europe/Berlin, .github/workflows/aca-schedule.yml (ADR-053). Every app and the Flexible Server stop outside it; the UI answers with the offline notice at min=0."
+            title={t(
+              "Mon-Fri 07:00-20:00 Europe/Berlin, .github/workflows/aca-schedule.yml (ADR-053). Every app and the Flexible Server stop outside it; the UI answers with the offline notice at min=0.",
+            )}
           >
             <Clock size={13} />
-            Schedule:{" "}
+            {t("Schedule:")}{" "}
             <span className="font-mono font-semibold text-(--text-primary)">
-              {Math.round(OFFICE_HOURS_PER_MONTH)} h/mo
+              {t("{n} h/mo", { n: Math.round(OFFICE_HOURS_PER_MONTH) })}
             </span>
           </span>
           <span
             className="flex items-center gap-1.5"
-            title={`Azure Files share quotas: neo4j-data ${SHARE_NEO4J_DATA_GIB} + neo4j-logs ${SHARE_NEO4J_LOGS_GIB} + pg-data ${SHARE_PG_DATA_GIB} + vault-data ${SHARE_VAULT_DATA_GIB} GiB (scripts/azure/env.sh).`}
+            title={t(
+              "Azure Files share quotas: neo4j-data {a} + neo4j-logs {b} + pg-data {c} + vault-data {d} GiB (scripts/azure/env.sh).",
+              {
+                a: SHARE_NEO4J_DATA_GIB,
+                b: SHARE_NEO4J_LOGS_GIB,
+                c: SHARE_PG_DATA_GIB,
+                d: SHARE_VAULT_DATA_GIB,
+              },
+            )}
           >
             <HardDrive size={13} />
-            Files:{" "}
+            {t("Files:")}{" "}
             <span className="font-mono font-semibold text-(--text-primary)">
               {storageGiB} GiB
             </span>
           </span>
           <span
             className="flex items-center gap-1.5"
-            title={`Estimated: ${EGRESS_PER_PARTICIPANT_MB} MB per participant × ${participantCount} + ${EGRESS_INFRA_BASELINE_GB} GB baseline.`}
+            title={t(
+              "Estimated: {mb} MB per participant × {n} + {gb} GB baseline.",
+              {
+                mb: EGRESS_PER_PARTICIPANT_MB,
+                n: participantCount,
+                gb: EGRESS_INFRA_BASELINE_GB,
+              },
+            )}
           >
             <Network size={13} />
-            Egress (est.):{" "}
+            {t("Egress (est.):")}{" "}
             <span className="font-mono font-semibold text-(--text-primary)">
               {egressGiB} GiB
             </span>
@@ -138,7 +160,7 @@ export function AzureCostEstimatorPanel({
       {/* App grid, most expensive first */}
       <div>
         <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
-          Container Apps: compute (vCPU + memory reservation)
+          {t("Container Apps: compute (vCPU + memory reservation)")}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
           {[...cost.apps]
@@ -155,17 +177,21 @@ export function AzureCostEstimatorPanel({
                       {app.name}
                     </span>
                     <span className="text-xs font-mono text-(--success-text)">
-                      {formatEur(app.totalEur)}/mo
+                      {t("{eur}/mo", { eur: formatEur(app.totalEur) })}
                     </span>
                   </div>
                   <p className="text-[10px] text-(--text-secondary) font-mono mb-1">
                     {spec.cpu} vCPU · {spec.memGiB} GiB RAM ·{" "}
-                    {app.schedule === "always" ? "24×7" : "office hours"}
+                    {app.schedule === "always" ? "24×7" : t("office hours")}
                   </p>
                   {app.schedule === "always" && (
                     <div className="flex gap-3 text-[9px] text-(--text-secondary)">
-                      <span>active {formatEur(app.activeEur)}</span>
-                      <span>idle {formatEur(app.idleEur)}</span>
+                      <span>
+                        {t("active {eur}", { eur: formatEur(app.activeEur) })}
+                      </span>
+                      <span>
+                        {t("idle {eur}", { eur: formatEur(app.idleEur) })}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -173,15 +199,15 @@ export function AzureCostEstimatorPanel({
             })}
         </div>
         <p className="text-xs text-(--text-secondary) mt-2 text-right">
-          Gross compute:{" "}
+          {t("Gross compute:")}{" "}
           <span className="font-mono text-(--text-primary)">
-            {formatEur(cost.grossComputeEur)}/mo
+            {t("{eur}/mo", { eur: formatEur(cost.grossComputeEur) })}
           </span>{" "}
-          · Free grant:{" "}
+          · {t("Free grant:")}{" "}
           <span className="font-mono text-(--success-text)">
             −{formatEur(cost.freeCreditEur)}
           </span>{" "}
-          · {specs.length} apps · {totalVcpu.toFixed(2)} vCPU ·{" "}
+          · {t("{n} apps", { n: specs.length })} · {totalVcpu.toFixed(2)} vCPU ·{" "}
           {totalMemGiB.toFixed(1)} GiB
         </p>
       </div>
@@ -189,7 +215,7 @@ export function AzureCostEstimatorPanel({
       {/* Database and platform services */}
       <div>
         <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
-          Database and platform
+          {t("Database and platform")}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 text-xs">
           <div className="border border-(--border) rounded-lg p-3 bg-(--surface)/40 lg:col-span-1">
@@ -198,11 +224,11 @@ export function AzureCostEstimatorPanel({
               PostgreSQL Flexible Server
             </div>
             <div className="font-mono text-(--text-primary)">
-              {formatEur(cost.pgFlexEur)}/mo
+              {t("{eur}/mo", { eur: formatEur(cost.pgFlexEur) })}
             </div>
             <div className="text-[10px] text-(--text-secondary) mt-1">
               {AZURE_PG_FLEX.sku} ·{" "}
-              {AZURE_PG_FLEX.schedule === "always" ? "24×7" : "office hours"}{" "}
+              {AZURE_PG_FLEX.schedule === "always" ? "24×7" : t("office hours")}{" "}
               {formatEur(cost.pgFlexComputeEur)} · {AZURE_PG_FLEX.storageGb} GB{" "}
               {formatEur(cost.pgFlexStorageEur)} · Keycloak, EDC, CFM, Vault
               (ADR-041, ADR-046)
@@ -211,22 +237,29 @@ export function AzureCostEstimatorPanel({
           <Card
             title="Azure Files (Standard LRS)"
             eur={cost.filesEur}
-            detail={`≤ ${storageGiB} GiB stored + transactions, which are most of it`}
+            detail={t("≤ {n} GiB stored + transactions, which are most of it", {
+              n: storageGiB,
+            })}
           />
           <Card
             title="Log Analytics"
             eur={cost.logsEur}
-            detail={`${LOG_ANALYTICS_GB_PER_MONTH} GB/mo ingested (measured)`}
+            detail={t("{n} GB/mo ingested (measured)", {
+              n: LOG_ANALYTICS_GB_PER_MONTH,
+            })}
           />
           <Card
             title="Container Registry"
             eur={cost.registryEur}
-            detail="Basic tier, per day"
+            detail={t("Basic tier, per day")}
           />
           <Card
-            title="Egress"
+            title={t("Egress")}
             eur={cost.egressEur}
-            detail={`${egressGiB} GiB · first ${AZURE_EGRESS_FREE_GIB} GiB free`}
+            detail={t("{n} GiB · first {free} GiB free", {
+              n: egressGiB,
+              free: AZURE_EGRESS_FREE_GIB,
+            })}
           />
         </div>
       </div>
@@ -234,7 +267,7 @@ export function AzureCostEstimatorPanel({
       {/* The SPE workspaces as ACI confidential container groups (ADR-069) */}
       <div>
         <p className="text-[11px] text-(--text-secondary) mb-2 uppercase tracking-wide">
-          Secure processing environments (ACI confidential containers)
+          {t("Secure processing environments (ACI confidential containers)")}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
           {cost.aciGroups.map((g) => {
@@ -242,7 +275,7 @@ export function AzureCostEstimatorPanel({
             return (
               <section
                 key={g.name}
-                aria-label={`${g.name} cost`}
+                aria-label={t("{name} cost", { name: g.name })}
                 className="border border-(--border) rounded-lg p-3 bg-(--surface)/40"
               >
                 <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -251,7 +284,7 @@ export function AzureCostEstimatorPanel({
                     {g.name}
                   </span>
                   <span className="font-mono text-(--success-text)">
-                    {formatEur(g.totalEur)}/mo
+                    {t("{eur}/mo", { eur: formatEur(g.totalEur) })}
                   </span>
                 </div>
                 <p className="text-[10px] text-(--text-secondary) mt-1 font-mono">
@@ -262,23 +295,28 @@ export function AzureCostEstimatorPanel({
                 </p>
                 <p className="text-[10px] text-(--text-secondary) mt-1">
                   {ACI_SPE_DETAILS.tee}, sku {ACI_SPE_DETAILS.sku},{" "}
-                  {ACI_SPE_DETAILS.region} · {formatEur(g.hourlyEur)} an hour,
-                  billed only while running ·{" "}
+                  {ACI_SPE_DETAILS.region} ·{" "}
+                  {t("{eur} an hour, billed only while running", {
+                    eur: formatEur(g.hourlyEur),
+                  })}{" "}
+                  ·{" "}
                   {g.schedule === "always"
                     ? "24×7"
-                    : "stopped off hours (ADR-053)"}
+                    : t("stopped off hours (ADR-053)")}
                 </p>
               </section>
             );
           })}
         </div>
         <p className="text-[10px] text-(--text-secondary) mt-2">
-          Meters &quot;Confidential containers ACI vCPU Duration&quot; €
-          {ACI_CONFIDENTIAL_RATES.vcpuEurPerHour} per vCPU-hour and
-          &quot;Confidential containers ACI Memory Duration&quot; €
-          {ACI_CONFIDENTIAL_RATES.memEurPerGbHour} per GB-hour, westeurope,
-          Azure retail price list read {ACI_CONFIDENTIAL_RATES.readOn} · ADR-069
-          (proposed, #774) ·{" "}
+          {t(
+            'Meters "Confidential containers ACI vCPU Duration" €{vcpu} per vCPU-hour and "Confidential containers ACI Memory Duration" €{mem} per GB-hour, westeurope, Azure retail price list read {date} · ADR-069 (proposed, #774) ·',
+            {
+              vcpu: ACI_CONFIDENTIAL_RATES.vcpuEurPerHour,
+              mem: ACI_CONFIDENTIAL_RATES.memEurPerGbHour,
+              date: ACI_CONFIDENTIAL_RATES.readOn,
+            },
+          )}{" "}
           <a
             href={ADR_068_URL}
             target="_blank"
@@ -295,7 +333,7 @@ export function AzureCostEstimatorPanel({
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-center">
           <div>
             <div className="text-[10px] text-(--text-secondary) mb-1">
-              Compute (net)
+              {t("Compute (net)")}
             </div>
             <div className="font-mono text-lg font-semibold text-(--text-primary)">
               {formatEur(cost.computeEur)}
@@ -311,7 +349,7 @@ export function AzureCostEstimatorPanel({
           </div>
           <div>
             <div className="text-[10px] text-(--text-secondary) mb-1">
-              SPE workspaces
+              {t("SPE workspaces")}
             </div>
             <div className="font-mono text-lg font-semibold text-(--text-primary)">
               {formatEur(cost.aciEur)}
@@ -319,7 +357,7 @@ export function AzureCostEstimatorPanel({
           </div>
           <div>
             <div className="text-[10px] text-(--text-secondary) mb-1">
-              Platform
+              {t("Platform")}
             </div>
             <div className="font-mono text-lg font-semibold text-(--text-primary)">
               {formatEur(platformEur)}
@@ -327,26 +365,29 @@ export function AzureCostEstimatorPanel({
           </div>
           <div className="border-l border-(--border)">
             <div className="text-[10px] text-(--text-secondary) mb-1">
-              Total / month
+              {t("Total / month")}
             </div>
             <div className="font-mono text-xl font-bold text-(--success-text)">
               {formatEur(cost.totalEur)}
             </div>
             <div
               className="text-[10px] text-(--text-secondary) mt-0.5"
-              title="Cost Management, actual cost of rg-mvhd-dev. Higher than the estimate while crashed revisions keep replicas that the evening stop does not reach."
+              title={t(
+                "Cost Management, actual cost of rg-mvhd-dev. Higher than the estimate while crashed revisions keep replicas that the evening stop does not reach.",
+              )}
             >
-              billed {AZURE_BILLED.from} to {AZURE_BILLED.to}:{" "}
-              {formatEur(AZURE_BILLED.eur)}
+              {t("billed {from} to {to}: {eur}", {
+                from: AZURE_BILLED.from,
+                to: AZURE_BILLED.to,
+                eur: formatEur(AZURE_BILLED.eur),
+              })}
             </div>
           </div>
         </div>
         <p className="text-[9px] text-(--text-secondary) mt-3 text-center">
-          EUR, as billed · Container Apps rates from the subscription&apos;s
-          bill, the rest from the Azure retail price list (2026-10-03, the ACI
-          confidential groups 2026-10-31) · everything stops outside Mon-Fri
-          07-20 (ADR-053) · Azure OpenAI, Key Vault and Communication Services
-          are usage based and near €0
+          {t(
+            "EUR, as billed · Container Apps rates from the subscription's bill, the rest from the Azure retail price list (2026-10-03, the ACI confidential groups 2026-10-31) · everything stops outside Mon-Fri 07-20 (ADR-053) · Azure OpenAI, Key Vault and Communication Services are usage based and near €0",
+          )}
         </p>
       </div>
     </div>

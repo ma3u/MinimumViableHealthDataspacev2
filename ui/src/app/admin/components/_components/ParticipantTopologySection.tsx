@@ -7,6 +7,7 @@ import { SeverityDot } from "./SeverityDot";
 import { TopoComponentCard } from "./TopoComponentCard";
 import { ROLE_COLORS, SEVERITY_STYLES } from "./constants";
 import type { PeakEntry, TopoParticipant } from "./types";
+import { useT } from "@/lib/i18n/translate";
 
 export function ParticipantTopologySection({
   participant,
@@ -17,6 +18,7 @@ export function ParticipantTopologySection({
   peaks: Map<string, PeakEntry>;
   metricsShared?: boolean;
 }) {
+  const t = useT("admin");
   const [expanded, setExpanded] = useState(
     participant.health === "critical" || participant.health === "warning",
   );
@@ -63,7 +65,7 @@ export function ParticipantTopologySection({
           {participant.role}
         </span>
         <span className="text-[10px] text-(--text-secondary) shrink-0">
-          {participant.components.length} services
+          {t("{n} services", { n: participant.components.length })}
         </span>
       </button>
 
@@ -72,7 +74,7 @@ export function ParticipantTopologySection({
         <div className="px-4 pb-4 pt-1 border-t border-(--border)/60">
           <div className="flex items-center gap-4 text-[11px] text-(--text-secondary) mb-3">
             <span>
-              DID:{" "}
+              {t("DID:")}{" "}
               <span className="font-mono text-(--text-secondary)">
                 {participant.did.length > 40
                   ? participant.did.slice(0, 40) + "…"
@@ -80,7 +82,7 @@ export function ParticipantTopologySection({
               </span>
             </span>
             <span>
-              State:{" "}
+              {t("State:")}{" "}
               <span
                 className={
                   participant.state === "CREATED"

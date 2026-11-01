@@ -9,12 +9,16 @@ import {
 } from "@/lib/spe";
 import { PolicyHash, SpeLabelBadge } from "./SpeBadges";
 import { useSpeStatus } from "./use-spe-status";
+import { T, useT } from "@/lib/i18n/translate";
 
 /** The permit to policy hash to Trustee resource bindings, presentational. */
 export function SpePermitBindingsView({ data }: { data: SpeStatusResponse }) {
+  const t = useT("admin");
   const rows = data.spes;
   if (rows.length === 0) {
-    return <p className="text-sm text-(--text-secondary)">No SPE reported</p>;
+    return (
+      <p className="text-sm text-(--text-secondary)">{t("No SPE reported")}</p>
+    );
   }
   return (
     <div className="overflow-x-auto border border-(--border) rounded-xl">
@@ -22,12 +26,12 @@ export function SpePermitBindingsView({ data }: { data: SpeStatusResponse }) {
         <thead>
           <tr className="border-b border-(--border) bg-(--surface)/60">
             {[
-              "Data permit",
-              "SPE",
-              "Policy hash",
-              "Trustee resource",
-              "Policy check",
-              "Label",
+              t("Data permit"),
+              t("SPE"),
+              t("Policy hash"),
+              t("Trustee resource"),
+              t("Policy check"),
+              t("Label"),
             ].map((h) => (
               <th
                 key={h}
@@ -41,14 +45,17 @@ export function SpePermitBindingsView({ data }: { data: SpeStatusResponse }) {
         <tbody>
           {rows.map((spe) => {
             const check = policyCheckDepth(spe);
+            const checkText = check.checked
+              ? t(check.text)
+              : t("Recorded only ({depth})", { depth: check.depth });
             return (
               <tr
                 key={spe.id}
-                aria-label={`Permit binding for ${spe.id}`}
+                aria-label={t("Permit binding for {id}", { id: spe.id })}
                 className="border-b border-(--border)"
               >
                 <td className="py-2 px-3 font-mono text-[11px] text-(--text-primary)">
-                  {spe.permitId ?? "no permit loaded"}
+                  {spe.permitId ?? t("no permit loaded")}
                 </td>
                 <td className="py-2 px-3">
                   <span className="font-semibold text-(--text-primary)">
@@ -66,7 +73,7 @@ export function SpePermitBindingsView({ data }: { data: SpeStatusResponse }) {
                 </td>
                 <td className="py-2 px-3">
                   <span
-                    aria-label={`Policy check: ${check.text}`}
+                    aria-label={t("Policy check: {text}", { text: checkText })}
                     className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm text-[10px] font-semibold border ${
                       check.checked
                         ? "text-(--success-text) border-(--success)/40 bg-(--success)/10"
@@ -78,7 +85,7 @@ export function SpePermitBindingsView({ data }: { data: SpeStatusResponse }) {
                     ) : (
                       <FileLock2 size={10} aria-hidden="true" />
                     )}
-                    {check.text}
+                    {checkText}
                   </span>
                 </td>
                 <td className="py-2 px-3">
@@ -100,6 +107,7 @@ export function SpePermitBindingsView({ data }: { data: SpeStatusResponse }) {
  * `/api/admin/spe`, the one source for the SPEs.
  */
 export function SpePermitBindings() {
+  const t = useT("admin");
   const { data, loading, error } = useSpeStatus();
   return (
     <section aria-labelledby="spe-permits-title" className="mt-10 space-y-3">
@@ -108,34 +116,38 @@ export function SpePermitBindings() {
           id="spe-permits-title"
           className="text-lg font-semibold text-(--text-primary)"
         >
-          Data permits in secure processing
+          {t("Data permits in secure processing")}
         </h2>
         <p className="text-xs text-(--text-secondary) mt-0.5">
-          The permit records the SHA-256 of the workspace&apos;s pod spec; the
-          access body&apos;s Trustee releases the extract key against it. Only
-          per-workload evidence (A2) makes hardware check the hash; until then
-          it is recorded and labelled so (
-          <a
-            href={ADR_068_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-(--accent) hover:underline"
+          <T
+            area="admin"
+            tags={{
+              a: (
+                <a
+                  href={ADR_068_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-(--accent) hover:underline"
+                />
+              ),
+            }}
           >
-            ADR-068
-          </a>
-          , decision 2).
+            {
+              "The permit records the SHA-256 of the workspace's pod spec; the access body's Trustee releases the extract key against it. Only per-workload evidence (A2) makes hardware check the hash; until then it is recorded and labelled so (<a>ADR-068</a>, decision 2)."
+            }
+          </T>
         </p>
       </div>
       {loading ? (
         <p className="flex items-center gap-2 text-sm text-(--text-secondary)">
           <Loader2 size={14} className="animate-spin" aria-hidden="true" />
-          Loading data permits…
+          {t("Loading data permits…")}
         </p>
       ) : data ? (
         <SpePermitBindingsView data={data} />
       ) : (
         <p className="text-sm text-(--text-secondary)">
-          Secure processing environments unavailable
+          {t("Secure processing environments unavailable")}
           {error ? `: ${error}` : ""}
         </p>
       )}

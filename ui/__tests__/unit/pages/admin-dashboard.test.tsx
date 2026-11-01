@@ -398,7 +398,7 @@ describe("AdminDashboard", () => {
     });
     // Subtitle below the heading
     expect(
-      screen.getByText(/EHDS Health Dataspace — Operator Control/),
+      screen.getByText(/EHDS Health Dataspace: operator control/),
     ).toBeInTheDocument();
   });
 

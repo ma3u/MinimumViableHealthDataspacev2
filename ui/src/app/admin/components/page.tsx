@@ -12,6 +12,7 @@ import { ParticipantTopologySection } from "./_components/ParticipantTopologySec
 import { ResourceSummary } from "./_components/ResourceSummary";
 import { SpeTopologySection } from "./_components/SpeTopologySection";
 import { TopoComponentCard } from "./_components/TopoComponentCard";
+import { T, useT } from "@/lib/i18n/translate";
 import {
   LAYER_META,
   MAX_HISTORY,
@@ -28,6 +29,7 @@ import type {
 } from "./_components/types";
 
 export default function AdminComponentsPage() {
+  const t = useT("admin");
   // Layer view state
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const historyRef = useRef<Map<string, HistoryEntry[]>>(new Map());
@@ -151,14 +153,14 @@ export default function AdminComponentsPage() {
         {/* ── Page header ── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
           <div>
-            <h1 className="page-header">EDC Components</h1>
+            <h1 className="page-header">{t("EDC Components")}</h1>
             <p className="text-(--text-secondary) text-lg mt-1">
-              Infrastructure health · CPU &amp; memory per service
+              {t("Infrastructure health · CPU & memory per service")}
             </p>
           </div>
           <div className="flex items-center gap-2 px-4 py-2 bg-(--success)/10 text-(--success-text) rounded-full border border-(--success)/20 text-sm font-bold tracking-tight">
             <span className="w-2 h-2 rounded-full bg-(--success) animate-pulse" />
-            LIVE MONITORING
+            {t("LIVE MONITORING")}
           </div>
         </div>
 
@@ -175,7 +177,7 @@ export default function AdminComponentsPage() {
                     : "text-(--text-secondary) hover:text-(--text-primary)"
                 }`}
               >
-                Layer View
+                {t("Layer View")}
               </button>
               <button
                 onClick={() => setViewMode("participant")}
@@ -185,31 +187,35 @@ export default function AdminComponentsPage() {
                     : "text-(--text-secondary) hover:text-(--text-primary)"
                 }`}
               >
-                Participant View
+                {t("Participant View")}
               </button>
             </div>
 
             {/* Stats summary for layer view */}
             {viewMode === "layer" && snapshot && (
               <>
-                <span>{totalServices} services</span>
+                <span>{t("{n} services", { n: totalServices })}</span>
                 <span>·</span>
                 <span className="text-(--success-text)">
-                  {healthyCount} healthy
+                  {t("{n} healthy", { n: healthyCount })}
                 </span>
-                <span className="text-(--accent)">{runningCount} running</span>
+                <span className="text-(--accent)">
+                  {t("{n} running", { n: runningCount })}
+                </span>
                 <span>·</span>
                 <span>
                   <Cpu size={11} className="inline mr-0.5" />
-                  {totalCpu.toFixed(1)}% total
+                  {t("{value} total", { value: `${totalCpu.toFixed(1)}%` })}
                 </span>
                 <span>·</span>
                 <span>
                   <HardDrive size={11} className="inline mr-0.5" />
-                  {totalMem > 1024
-                    ? `${(totalMem / 1024).toFixed(1)} GB`
-                    : `${Math.round(totalMem)} MB`}{" "}
-                  total
+                  {t("{value} total", {
+                    value:
+                      totalMem > 1024
+                        ? `${(totalMem / 1024).toFixed(1)} GB`
+                        : `${Math.round(totalMem)} MB`,
+                  })}
                 </span>
               </>
             )}
@@ -217,14 +223,22 @@ export default function AdminComponentsPage() {
             {/* Stats summary for participant view */}
             {viewMode === "participant" && topology && (
               <>
-                <span>{topology.summary.totalParticipants} participants</span>
+                <span>
+                  {t("{n} participants", {
+                    n: topology.summary.totalParticipants,
+                  })}
+                </span>
                 <span>·</span>
-                <span>{topology.summary.totalInfra} infra services</span>
+                <span>
+                  {t("{n} infra services", { n: topology.summary.totalInfra })}
+                </span>
                 {topology.summary.degradedParticipants > 0 && (
                   <>
                     <span>·</span>
                     <span className="text-(--danger-text)">
-                      {topology.summary.degradedParticipants} degraded
+                      {t("{n} degraded", {
+                        n: topology.summary.degradedParticipants,
+                      })}
                     </span>
                   </>
                 )}
@@ -233,9 +247,11 @@ export default function AdminComponentsPage() {
                     <span>·</span>
                     <span
                       className="italic text-(--text-secondary)"
-                      title="Participants are logical DIDs on this deployment — they share the same ACA containers. Switch to Layer View for real per-container CPU/MEM from Azure Monitor."
+                      title={t(
+                        "Participants are logical DIDs on this deployment; they share the same ACA containers. Switch to Layer View for real per-container CPU/MEM from Azure Monitor.",
+                      )}
                     >
-                      shared infrastructure (see Layer View for metrics)
+                      {t("shared infrastructure (see Layer View for metrics)")}
                     </span>
                   </>
                 )}
@@ -251,7 +267,7 @@ export default function AdminComponentsPage() {
                 onChange={(e) => setAutoRefresh(e.target.checked)}
                 className="rounded-sm border-(--border-ui) bg-(--surface-2) text-teal-800 dark:text-teal-300 focus:ring-layer2 w-3.5 h-3.5"
               />
-              Auto-refresh (30s)
+              {t("Auto-refresh (30s)")}
             </label>
             <button
               onClick={() => fetchData(true)}
@@ -262,7 +278,7 @@ export default function AdminComponentsPage() {
                 size={12}
                 className={refreshing ? "animate-spin" : ""}
               />
-              Refresh
+              {t("Refresh")}
             </button>
           </div>
         </div>
@@ -270,7 +286,7 @@ export default function AdminComponentsPage() {
         {loading ? (
           <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
-            Loading EDC components…
+            {t("Loading EDC components…")}
           </div>
         ) : viewMode === "participant" ? (
           /* ═══════════════════════════════════════════════════════════════
@@ -297,7 +313,7 @@ export default function AdminComponentsPage() {
                     size={16}
                     className="text-teal-800 dark:text-teal-300"
                   />
-                  Dataspace Participants
+                  {t("Dataspace Participants")}
                   <span className="text-xs font-normal text-(--text-secondary)">
                     ({topology.participants.length})
                   </span>
@@ -318,7 +334,7 @@ export default function AdminComponentsPage() {
                   <div className="flex items-start justify-between mb-3 flex-wrap gap-2">
                     <h2 className="font-semibold text-sm flex items-center gap-2 text-(--text-primary)">
                       <HardDrive size={16} className="text-(--warning-text)" />
-                      Shared Infrastructure &amp; CFM
+                      {t("Shared Infrastructure & CFM")}
                       <span className="text-xs font-normal text-(--text-secondary)">
                         ({topology.infrastructure.length})
                       </span>
@@ -339,8 +355,11 @@ export default function AdminComponentsPage() {
               {/* Docker unavailable */}
               {!topology.dockerAvailable && (
                 <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-(--warning-text)">
-                  <strong>Docker socket not available.</strong> CPU and memory
-                  metrics require the Docker socket to be mounted.
+                  <T area="admin" tags={{ b: <strong /> }}>
+                    {
+                      "<b>Docker socket not available.</b> CPU and memory metrics require the Docker socket to be mounted."
+                    }
+                  </T>
                 </div>
               )}
             </>
@@ -358,7 +377,7 @@ export default function AdminComponentsPage() {
                     size={16}
                     className="text-teal-800 dark:text-teal-300"
                   />
-                  Dataspace Participants
+                  {t("Dataspace Participants")}
                   <span className="text-xs font-normal text-(--text-secondary)">
                     ({snapshot.participants.length})
                   </span>
@@ -368,19 +387,19 @@ export default function AdminComponentsPage() {
                     <thead>
                       <tr className="border-b border-(--border) bg-(--surface)/60">
                         <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-48">
-                          Participant
+                          {t("Participant")}
                         </th>
                         <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-32">
-                          Role
+                          {t("Role")}
                         </th>
                         <th className="py-2 px-3 text-xs font-medium text-(--text-secondary)">
                           DID
                         </th>
                         <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-28">
-                          State
+                          {t("State")}
                         </th>
                         <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-20 text-center">
-                          Profiles
+                          {t("Profiles")}
                         </th>
                       </tr>
                     </thead>
@@ -444,7 +463,7 @@ export default function AdminComponentsPage() {
                 <div key={layer} className="mb-8">
                   <h2 className="font-semibold text-sm mb-3 flex items-center gap-2 text-(--text-primary)">
                     <LayerIcon size={16} className={meta.color} />
-                    {meta.label}
+                    {t(meta.label)}
                     <span className="text-xs font-normal text-(--text-secondary)">
                       ({items.length})
                     </span>
@@ -454,22 +473,22 @@ export default function AdminComponentsPage() {
                       <thead>
                         <tr className="border-b border-(--border) bg-(--surface)/60">
                           <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-48">
-                            Component
+                            {t("Component")}
                           </th>
                           <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-28">
-                            Health
+                            {t("Health")}
                           </th>
                           <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-24">
-                            Uptime
+                            {t("Uptime")}
                           </th>
                           <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-40">
-                            CPU (Last 24h)
+                            {t("CPU (Last 24h)")}
                           </th>
                           <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-44">
-                            Memory (Last 24h)
+                            {t("Memory (Last 24h)")}
                           </th>
                           <th className="py-2 px-3 text-xs font-medium text-(--text-secondary) w-16">
-                            Mem %
+                            {t("Mem %")}
                           </th>
                         </tr>
                       </thead>
@@ -498,8 +517,11 @@ export default function AdminComponentsPage() {
               snapshot.metricsSource !== "azure-monitor" &&
               snapshot.deploymentTarget !== "azure" && (
                 <div className="border border-yellow-600/40 bg-yellow-900/20 rounded-xl p-4 text-sm text-(--warning-text)">
-                  <strong>Docker socket not available.</strong> CPU and memory
-                  metrics require the Docker socket to be mounted.
+                  <T area="admin" tags={{ b: <strong /> }}>
+                    {
+                      "<b>Docker socket not available.</b> CPU and memory metrics require the Docker socket to be mounted."
+                    }
+                  </T>
                 </div>
               )}
           </>
@@ -529,7 +551,9 @@ export default function AdminComponentsPage() {
         {/* Timestamp */}
         {timestamp && (
           <p className="text-[10px] text-(--text-secondary) mt-4">
-            Last updated: {new Date(timestamp).toLocaleString()}
+            {t("Last updated: {time}", {
+              time: new Date(timestamp).toLocaleString(),
+            })}
           </p>
         )}
       </div>

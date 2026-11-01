@@ -137,14 +137,6 @@ export interface SpeOptOutCounts {
   inHub: number | null;
 }
 
-/** "1 added, 0 removed, 6 opted out in the hub" for spe.optout_synced. */
-export function optOutCountsText(c: SpeOptOutCounts): string {
-  const n = (v: number | null) => (v === null ? "?" : String(v));
-  return `${n(c.added)} added, ${n(c.removed)} removed, ${n(
-    c.inHub,
-  )} opted out in the hub`;
-}
-
 function isSpeEventType(t: string): t is SpeEventType {
   return (SPE_EVENT_TYPES as readonly string[]).includes(t);
 }

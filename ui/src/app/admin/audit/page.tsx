@@ -36,8 +36,10 @@ import type {
   AuditType,
   Participant,
 } from "./_components/types";
+import { useT } from "@/lib/i18n/translate";
 
 export default function AdminAuditPage() {
+  const t = useT("admin");
   const [activeTab, setActiveTab] = useState<AuditType>("all");
   const [filters, setFilters] = useState<AuditFilters>(EMPTY_FILTERS);
   const [data, setData] = useState<AuditData | null>(null);
@@ -101,7 +103,7 @@ export default function AdminAuditPage() {
         {/* ── Page header ── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h1 className="page-header">Audit &amp; Provenance</h1>
+            <h1 className="page-header">{t("Audit & Provenance")}</h1>
             {/*
               The subtitle read "Tamper-evident audit trail" and the badge next
               to it read "HIPAA COMPLIANT". Neither was backed by anything in
@@ -110,37 +112,40 @@ export default function AdminAuditPage() {
               checks (issue #205). Sealed evidence is issue #204.
             */}
             <p className="text-(--text-secondary) text-lg mt-1">
-              Access and provenance records · EHDS Art. 73 · Art. 59 · GDPR Art.
-              30
+              {t(
+                "Access and provenance records · EHDS Art. 73 · Art. 59 · GDPR Art. 30",
+              )}
             </p>
           </div>
           <div
             data-testid="integrity-notice"
-            title="Transfers, negotiations, credentials and access events are stored as ordinary Neo4j properties. Detached eIDAS seals over contract agreements are issue #204."
+            title={t(
+              "Transfers, negotiations, credentials and access events are stored as ordinary Neo4j properties. Detached eIDAS seals over contract agreements are issue #204.",
+            )}
             className="flex items-center gap-2 px-4 py-2 bg-(--warning)/10 text-(--warning-text) rounded-full border border-(--warning)/20 text-sm font-bold tracking-tight"
           >
             <AlertTriangle size={14} />
-            Records are not sealed
+            {t("Records are not sealed")}
           </div>
         </div>
 
         {/* Tabs */}
         <div className="flex gap-1 border-b border-(--border)">
-          {TABS.map((t) => (
+          {TABS.map((tab) => (
             <button
-              key={t.key}
+              key={tab.key}
               onClick={() => {
-                setActiveTab(t.key);
+                setActiveTab(tab.key);
                 setFilters(EMPTY_FILTERS);
               }}
               className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold border-b-2 -mb-px transition-colors ${
-                activeTab === t.key
+                activeTab === tab.key
                   ? "border-(--accent) text-(--accent)"
                   : "border-transparent text-(--text-secondary) hover:text-(--text-primary)"
               }`}
             >
-              <t.icon size={14} />
-              {t.label}
+              <tab.icon size={14} />
+              {t(tab.label)}
             </button>
           ))}
         </div>
@@ -159,11 +164,13 @@ export default function AdminAuditPage() {
         {loading ? (
           <div className="flex items-center gap-2 text-(--text-secondary) mt-6">
             <Loader2 size={16} className="animate-spin" />
-            Querying Neo4j…
+            {t("Querying Neo4j…")}
           </div>
         ) : !data ? (
           <div className="mt-6 space-y-1">
-            <p className="text-(--text-secondary)">Failed to load audit data</p>
+            <p className="text-(--text-secondary)">
+              {t("Failed to load audit data")}
+            </p>
             {error && (
               <p className="text-xs font-mono text-(--text-secondary)">
                 {error}
@@ -201,20 +208,24 @@ export default function AdminAuditPage() {
                         size={14}
                         className="text-teal-800 dark:text-teal-300"
                       />
-                      Access Activity by Consumer
+                      {t("Access Activity by Consumer")}
                     </h2>
                     <div className="overflow-auto">
                       <table className="w-full text-xs">
                         <thead>
                           <tr className="text-(--text-secondary) border-b border-(--border)">
-                            <th className="text-left py-2 px-2">Consumer</th>
                             <th className="text-left py-2 px-2">
-                              Total Accesses
+                              {t("Consumer")}
                             </th>
                             <th className="text-left py-2 px-2">
-                              Data Transferred
+                              {t("Total Accesses")}
                             </th>
-                            <th className="text-left py-2 px-2">Last Access</th>
+                            <th className="text-left py-2 px-2">
+                              {t("Data Transferred")}
+                            </th>
+                            <th className="text-left py-2 px-2">
+                              {t("Last Access")}
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -259,7 +270,7 @@ export default function AdminAuditPage() {
                         size={14}
                         className="text-teal-800 dark:text-teal-300"
                       />
-                      Data Transfers ({data.transfers.length})
+                      {t("Data Transfers ({n})", { n: data.transfers.length })}
                     </h2>
                     {data.transfers.length > 0 && (
                       <button
@@ -274,85 +285,99 @@ export default function AdminAuditPage() {
                         }
                         className="flex items-center gap-1 text-xs text-(--text-secondary) hover:text-(--text-primary) transition-colors"
                       >
-                        <Download size={12} /> Export CSV
+                        <Download size={12} /> {t("Export CSV")}
                       </button>
                     )}
                   </div>
                   {data.transfers.length === 0 ? (
                     <p className="text-(--text-secondary) text-sm">
-                      No transfers recorded
+                      {t("No transfers recorded")}
                     </p>
                   ) : (
                     <div className="overflow-auto">
                       <table className="w-full text-xs">
                         <thead>
                           <tr className="text-(--text-secondary) border-b border-(--border)">
-                            <th className="text-left py-2 px-2">Dir</th>
-                            <th className="text-left py-2 px-2">Consumer</th>
-                            <th className="text-left py-2 px-2">Provider</th>
-                            <th className="text-left py-2 px-2">Asset</th>
-                            <th className="text-left py-2 px-2">Purpose</th>
-                            <th className="text-left py-2 px-2">Status</th>
-                            <th className="text-left py-2 px-2">Date</th>
-                            <th className="text-left py-2 px-2">Size</th>
-                            <th className="text-left py-2 px-2">Accesses</th>
-                            <th className="text-left py-2 px-2">EDC Source</th>
-                            <th className="text-left py-2 px-2">EHDS</th>
+                            <th className="text-left py-2 px-2">{t("Dir")}</th>
+                            <th className="text-left py-2 px-2">
+                              {t("Consumer")}
+                            </th>
+                            <th className="text-left py-2 px-2">
+                              {t("Provider")}
+                            </th>
+                            <th className="text-left py-2 px-2">
+                              {t("Asset")}
+                            </th>
+                            <th className="text-left py-2 px-2">
+                              {t("Purpose")}
+                            </th>
+                            <th className="text-left py-2 px-2">
+                              {t("Status")}
+                            </th>
+                            <th className="text-left py-2 px-2">{t("Date")}</th>
+                            <th className="text-left py-2 px-2">{t("Size")}</th>
+                            <th className="text-left py-2 px-2">
+                              {t("Accesses")}
+                            </th>
+                            <th className="text-left py-2 px-2">
+                              {t("EDC Source")}
+                            </th>
+                            <th className="text-left py-2 px-2">{t("EHDS")}</th>
                           </tr>
                         </thead>
                         <tbody>
-                          {data.transfers.map((t, i) => (
+                          {data.transfers.map((tr, i) => (
                             <tr
                               key={i}
                               className="border-b border-(--border) hover:bg-(--surface-2)/50"
                             >
                               <td className="py-2 px-2">
-                                {directionBadge(t.direction)}
+                                {directionBadge(tr.direction)}
                               </td>
                               <td className="py-2 px-2">
                                 <div className="text-(--text-primary)">
                                   {displayName(
-                                    t.consumerName,
-                                    t.consumerDid,
-                                    t.consumerCountryCode,
+                                    tr.consumerName,
+                                    tr.consumerDid,
+                                    tr.consumerCountryCode,
                                   )}
                                 </div>
                                 <div className="mt-0.5">
                                   <ComplianceButton
-                                    name={t.consumerComplianceName}
-                                    email={t.consumerComplianceEmail}
+                                    name={tr.consumerComplianceName}
+                                    email={tr.consumerComplianceEmail}
                                   />
                                 </div>
                               </td>
                               <td className="py-2 px-2">
                                 <div className="text-(--text-primary)">
                                   {displayName(
-                                    t.providerName,
-                                    t.providerDid,
-                                    t.providerCountryCode,
+                                    tr.providerName,
+                                    tr.providerDid,
+                                    tr.providerCountryCode,
                                   )}
                                 </div>
                                 <div className="mt-0.5">
                                   <ComplianceButton
-                                    name={t.providerComplianceName}
-                                    email={t.providerComplianceEmail}
+                                    name={tr.providerComplianceName}
+                                    email={tr.providerComplianceEmail}
                                   />
                                 </div>
                               </td>
                               <td className="py-2 px-2 text-(--text-secondary)">
-                                {t.asset || t.assetId || "—"}
+                                {tr.asset || tr.assetId || "—"}
                               </td>
                               <td
                                 className="py-2 px-2 text-(--text-secondary) max-w-[140px] truncate"
-                                title={t.purposeOfSharing}
+                                title={tr.purposeOfSharing}
                               >
-                                {t.purposeOfSharing || "—"}
+                                {tr.purposeOfSharing || "—"}
                               </td>
                               <td className="py-2 px-2">
-                                {statusBadge(t.status)}
-                                {t.errorMessage && (
+                                {statusBadge(tr.status)}
+                                {tr.errorMessage && (
                                   <span
-                                    title={String(t.errorMessage)}
+                                    title={String(tr.errorMessage)}
                                     className="ml-1 text-red-400 cursor-help"
                                   >
                                     ⚠
@@ -360,19 +385,19 @@ export default function AdminAuditPage() {
                                 )}
                               </td>
                               <td className="py-2 px-2 text-(--text-secondary)">
-                                {(t.timestamp || t.transferDate || "—").slice(
+                                {(tr.timestamp || tr.transferDate || "—").slice(
                                   0,
                                   10,
                                 )}
                               </td>
                               <td className="py-2 px-2 text-(--text-secondary)">
-                                {formatBytes(t.byteSize)}
+                                {formatBytes(tr.byteSize)}
                               </td>
                               <td className="py-2 px-2">
-                                {t.accessLogCount != null &&
-                                t.accessLogCount > 0 ? (
+                                {tr.accessLogCount != null &&
+                                tr.accessLogCount > 0 ? (
                                   <span className="inline-block px-1.5 py-0.5 rounded-sm bg-(--role-patient-bg) text-(--role-patient-text) border border-(--role-patient-border) text-[10px] font-semibold">
-                                    {t.accessLogCount}×
+                                    {tr.accessLogCount}×
                                   </span>
                                 ) : (
                                   <span className="text-(--text-secondary)">
@@ -381,12 +406,12 @@ export default function AdminAuditPage() {
                                 )}
                               </td>
                               <td className="py-2 px-2">
-                                {t.edcProviderEndpoint ? (
+                                {tr.edcProviderEndpoint ? (
                                   <span
-                                    title={t.edcProviderEndpoint}
+                                    title={tr.edcProviderEndpoint}
                                     className="font-mono text-(--text-secondary) text-[10px] truncate max-w-[100px] block cursor-help"
                                   >
-                                    {t.edcProviderEndpoint.replace(
+                                    {tr.edcProviderEndpoint.replace(
                                       /^https?:\/\//,
                                       "",
                                     )}
@@ -396,13 +421,13 @@ export default function AdminAuditPage() {
                                 )}
                               </td>
                               <td className="py-2 px-2">
-                                {t.crossBorder ? (
+                                {tr.crossBorder ? (
                                   <span className="flex items-center gap-0.5 text-orange-800 dark:text-orange-400">
                                     <Globe size={10} />
-                                    {ehdsArticle(t.policyId)}
+                                    {ehdsArticle(tr.policyId)}
                                   </span>
                                 ) : (
-                                  ehdsArticle(t.policyId)
+                                  ehdsArticle(tr.policyId)
                                 )}
                               </td>
                             </tr>
@@ -424,7 +449,9 @@ export default function AdminAuditPage() {
                         size={14}
                         className="text-teal-800 dark:text-teal-300"
                       />
-                      Contract Negotiations ({data.negotiations.length})
+                      {t("Contract Negotiations ({n})", {
+                        n: data.negotiations.length,
+                      })}
                     </h2>
                     {data.negotiations.length > 0 && (
                       <button
@@ -439,13 +466,13 @@ export default function AdminAuditPage() {
                         }
                         className="flex items-center gap-1 text-xs text-(--text-secondary) hover:text-(--text-primary) transition-colors"
                       >
-                        <Download size={12} /> Export CSV
+                        <Download size={12} /> {t("Export CSV")}
                       </button>
                     )}
                   </div>
                   {data.negotiations.length === 0 ? (
                     <p className="text-(--text-secondary) text-sm">
-                      No negotiations recorded
+                      {t("No negotiations recorded")}
                     </p>
                   ) : (
                     <div className="overflow-auto">
@@ -453,13 +480,23 @@ export default function AdminAuditPage() {
                         <thead>
                           <tr className="text-(--text-secondary) border-b border-(--border)">
                             <th className="text-left py-2 px-2 w-5"></th>
-                            <th className="text-left py-2 px-2">Consumer</th>
-                            <th className="text-left py-2 px-2">Provider</th>
-                            <th className="text-left py-2 px-2">Asset</th>
-                            <th className="text-left py-2 px-2">Status</th>
-                            <th className="text-left py-2 px-2">Date</th>
-                            <th className="text-left py-2 px-2">Accesses</th>
-                            <th className="text-left py-2 px-2">EHDS</th>
+                            <th className="text-left py-2 px-2">
+                              {t("Consumer")}
+                            </th>
+                            <th className="text-left py-2 px-2">
+                              {t("Provider")}
+                            </th>
+                            <th className="text-left py-2 px-2">
+                              {t("Asset")}
+                            </th>
+                            <th className="text-left py-2 px-2">
+                              {t("Status")}
+                            </th>
+                            <th className="text-left py-2 px-2">{t("Date")}</th>
+                            <th className="text-left py-2 px-2">
+                              {t("Accesses")}
+                            </th>
+                            <th className="text-left py-2 px-2">{t("EHDS")}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -565,55 +602,57 @@ export default function AdminAuditPage() {
                                         {/* Policy details */}
                                         <div className="border border-(--border) rounded-lg p-3">
                                           <p className="text-[10px] font-semibold text-(--text-secondary) uppercase mb-2">
-                                            Policy Details
+                                            {t("Policy Details")}
                                           </p>
                                           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                                             <span className="text-(--text-secondary)">
-                                              Purpose
+                                              {t("Purpose")}
                                             </span>
                                             <span className="text-(--text-primary)">
                                               {n.policyPurpose ?? "—"}
                                             </span>
                                             <span className="text-(--text-secondary)">
-                                              Legal Basis
+                                              {t("Legal Basis")}
                                             </span>
                                             <span className="text-(--text-primary)">
                                               {n.policyLegalBasis ?? "—"}
                                             </span>
                                             <span className="text-(--text-secondary)">
-                                              Permitted
+                                              {t("Permitted")}
                                             </span>
                                             <span className="text-(--text-primary)">
                                               {n.policyPermittedUses ?? "—"}
                                             </span>
                                             <span className="text-(--text-secondary)">
-                                              Prohibited
+                                              {t("Prohibited")}
                                             </span>
                                             <span className="text-red-800 dark:text-red-400">
                                               {n.policyProhibitedUses ?? "—"}
                                             </span>
                                             <span className="text-(--text-secondary)">
-                                              Data Minimisation
+                                              {t("Data Minimisation")}
                                             </span>
                                             <span className="text-(--text-primary)">
                                               {n.policyDataMinimisation ?? "—"}
                                             </span>
                                             <span className="text-(--text-secondary)">
-                                              Retention
+                                              {t("Retention")}
                                             </span>
                                             <span className="text-(--text-primary)">
                                               {n.policyRetentionDays
-                                                ? `${n.policyRetentionDays} days`
+                                                ? t("{n} days", {
+                                                    n: n.policyRetentionDays,
+                                                  })
                                                 : "—"}
                                             </span>
                                             <span className="text-(--text-secondary)">
-                                              Total Accesses
+                                              {t("Total Accesses")}
                                             </span>
                                             <span className="text-teal-300 font-semibold">
                                               {n.accessCount ?? 0}×
                                             </span>
                                             <span className="text-(--text-secondary)">
-                                              Last Access
+                                              {t("Last Access")}
                                             </span>
                                             <span className="text-(--text-primary)">
                                               {n.lastAccessAt
@@ -626,23 +665,23 @@ export default function AdminAuditPage() {
                                         {/* EDC endpoints + contract ID */}
                                         <div className="border border-(--border) rounded-lg p-3">
                                           <p className="text-[10px] font-semibold text-(--text-secondary) uppercase mb-2">
-                                            EDC Endpoints &amp; Contract
+                                            {t("EDC Endpoints & Contract")}
                                           </p>
                                           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
                                             <span className="text-(--text-secondary)">
-                                              Consumer EDC
+                                              {t("Consumer EDC")}
                                             </span>
                                             <span className="font-mono text-(--text-secondary) break-all">
                                               {n.consumerEdcEndpoint ?? "—"}
                                             </span>
                                             <span className="text-(--text-secondary)">
-                                              Provider EDC
+                                              {t("Provider EDC")}
                                             </span>
                                             <span className="font-mono text-(--text-secondary) break-all">
                                               {n.providerEdcEndpoint ?? "—"}
                                             </span>
                                             <span className="text-(--text-secondary)">
-                                              Contract ID
+                                              {t("Contract ID")}
                                             </span>
                                             <span className="font-mono text-(--text-secondary)">
                                               {n.contractId ?? "—"}
@@ -672,20 +711,26 @@ export default function AdminAuditPage() {
                       size={14}
                       className="text-teal-800 dark:text-teal-300"
                     />
-                    Verifiable Credentials ({data.credentials.length})
+                    {t("Verifiable Credentials ({n})", {
+                      n: data.credentials.length,
+                    })}
                   </h2>
                   {data.credentials.length === 0 ? (
                     <p className="text-(--text-secondary) text-sm">
-                      No credentials recorded
+                      {t("No credentials recorded")}
                     </p>
                   ) : (
                     <div className="overflow-auto">
                       <table className="w-full text-xs">
                         <thead>
                           <tr className="text-(--text-secondary) border-b border-(--border)">
-                            <th className="text-left py-2 px-2">Participant</th>
-                            <th className="text-left py-2 px-2">Type</th>
-                            <th className="text-left py-2 px-2">Issued</th>
+                            <th className="text-left py-2 px-2">
+                              {t("Participant")}
+                            </th>
+                            <th className="text-left py-2 px-2">{t("Type")}</th>
+                            <th className="text-left py-2 px-2">
+                              {t("Issued")}
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -730,25 +775,34 @@ export default function AdminAuditPage() {
                     size={14}
                     className="text-amber-700 dark:text-amber-300"
                   />
-                  Findings of non-compliance, Art. 63 (
-                  {data.findings?.length ?? 0})
+                  {t("Findings of non-compliance, Art. 63 ({n})", {
+                    n: data.findings?.length ?? 0,
+                  })}
                 </h2>
                 {!data.findings || data.findings.length === 0 ? (
                   <p className="text-(--text-secondary) text-sm mb-6">
-                    No finding recorded
+                    {t("No finding recorded")}
                   </p>
                 ) : (
                   <div className="overflow-auto mb-6">
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="text-(--text-secondary) border-b border-(--border)">
-                          <th className="text-left py-2 px-2">Party</th>
-                          <th className="text-left py-2 px-2">Finding</th>
-                          <th className="text-left py-2 px-2">Status</th>
-                          <th className="text-left py-2 px-2">Notified</th>
-                          <th className="text-left py-2 px-2">Views by</th>
-                          <th className="text-left py-2 px-2">Measure</th>
-                          <th className="text-left py-2 px-2">GDPR</th>
+                          <th className="text-left py-2 px-2">{t("Party")}</th>
+                          <th className="text-left py-2 px-2">
+                            {t("Finding")}
+                          </th>
+                          <th className="text-left py-2 px-2">{t("Status")}</th>
+                          <th className="text-left py-2 px-2">
+                            {t("Notified")}
+                          </th>
+                          <th className="text-left py-2 px-2">
+                            {t("Views by")}
+                          </th>
+                          <th className="text-left py-2 px-2">
+                            {t("Measure")}
+                          </th>
+                          <th className="text-left py-2 px-2">{t("GDPR")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -773,7 +827,7 @@ export default function AdminAuditPage() {
                               </div>
                               {f.views && (
                                 <div className="text-(--text-secondary)">
-                                  Views: {f.views}
+                                  {t("Views: {views}", { views: f.views })}
                                 </div>
                               )}
                             </td>
@@ -790,7 +844,7 @@ export default function AdminAuditPage() {
                               {f.measureNote ? `: ${f.measureNote}` : ""}
                             </td>
                             <td className="py-2 px-2">
-                              {f.gdprBreach ? "authority informed" : "—"}
+                              {f.gdprBreach ? t("authority informed") : "—"}
                             </td>
                           </tr>
                         ))}
@@ -803,25 +857,30 @@ export default function AdminAuditPage() {
                     size={14}
                     className="text-teal-800 dark:text-teal-300"
                   />
-                  Requests for information, Art. 63(1) (
-                  {data.informationRequests?.length ?? 0})
+                  {t("Requests for information, Art. 63(1) ({n})", {
+                    n: data.informationRequests?.length ?? 0,
+                  })}
                 </h2>
                 {!data.informationRequests ||
                 data.informationRequests.length === 0 ? (
                   <p className="text-(--text-secondary) text-sm">
-                    No request recorded
+                    {t("No request recorded")}
                   </p>
                 ) : (
                   <div className="overflow-auto">
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="text-(--text-secondary) border-b border-(--border)">
-                          <th className="text-left py-2 px-2">Party</th>
-                          <th className="text-left py-2 px-2">Question</th>
-                          <th className="text-left py-2 px-2">Status</th>
-                          <th className="text-left py-2 px-2">Asked</th>
-                          <th className="text-left py-2 px-2">Answer by</th>
-                          <th className="text-left py-2 px-2">Answer</th>
+                          <th className="text-left py-2 px-2">{t("Party")}</th>
+                          <th className="text-left py-2 px-2">
+                            {t("Question")}
+                          </th>
+                          <th className="text-left py-2 px-2">{t("Status")}</th>
+                          <th className="text-left py-2 px-2">{t("Asked")}</th>
+                          <th className="text-left py-2 px-2">
+                            {t("Answer by")}
+                          </th>
+                          <th className="text-left py-2 px-2">{t("Answer")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -856,26 +915,38 @@ export default function AdminAuditPage() {
               <section className="mb-8">
                 <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
                   <Eye size={14} className="text-teal-800 dark:text-teal-300" />
-                  Data Access Logs ({data.accesslogs?.length ?? 0})
+                  {t("Data Access Logs ({n})", {
+                    n: data.accesslogs?.length ?? 0,
+                  })}
                 </h2>
                 <RetentionLine />
                 {!data.accesslogs || data.accesslogs.length === 0 ? (
                   <p className="text-(--text-secondary) text-sm">
-                    No access logs recorded
+                    {t("No access logs recorded")}
                   </p>
                 ) : (
                   <div className="overflow-auto">
                     <table className="w-full text-xs">
                       <thead>
                         <tr className="text-(--text-secondary) border-b border-(--border)">
-                          <th className="text-left py-2 px-2">Consumer</th>
-                          <th className="text-left py-2 px-2">Provider</th>
-                          <th className="text-left py-2 px-2">Asset</th>
-                          <th className="text-left py-2 px-2">Type</th>
-                          <th className="text-left py-2 px-2">Purpose</th>
-                          <th className="text-left py-2 px-2">Accessed At</th>
-                          <th className="text-left py-2 px-2">Bytes</th>
-                          <th className="text-left py-2 px-2">Contract</th>
+                          <th className="text-left py-2 px-2">
+                            {t("Consumer")}
+                          </th>
+                          <th className="text-left py-2 px-2">
+                            {t("Provider")}
+                          </th>
+                          <th className="text-left py-2 px-2">{t("Asset")}</th>
+                          <th className="text-left py-2 px-2">{t("Type")}</th>
+                          <th className="text-left py-2 px-2">
+                            {t("Purpose")}
+                          </th>
+                          <th className="text-left py-2 px-2">
+                            {t("Accessed At")}
+                          </th>
+                          <th className="text-left py-2 px-2">{t("Bytes")}</th>
+                          <th className="text-left py-2 px-2">
+                            {t("Contract")}
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -886,59 +957,61 @@ export default function AdminAuditPage() {
                             string,
                             string | number | null | undefined,
                           ][] = [
-                            ["Event", a.id],
-                            ["Recorded", a.accessedAt],
-                            ["Consumer", a.consumerDid],
-                            ["Provider", a.providerDid],
+                            [t("Event"), a.id],
+                            [t("Recorded"), a.accessedAt],
+                            [t("Consumer"), a.consumerDid],
+                            [t("Provider"), a.providerDid],
                             [
-                              "Dataset",
+                              t("Dataset"),
                               a.assetTitle
                                 ? `${a.assetTitle} (${a.assetId})`
                                 : a.assetId,
                             ],
                             [
-                              "Request",
+                              t("Request"),
                               a.endpoint
                                 ? `${a.method ?? ""} ${a.endpoint}`.trim()
                                 : null,
                             ],
-                            ["Status", a.statusCode],
-                            ["Results", a.resultCount],
-                            ["Bytes", a.bytesAccessed],
+                            [t("Status"), a.statusCode],
+                            [t("Results"), a.resultCount],
+                            [t("Bytes"), a.bytesAccessed],
                             [
-                              "Duration",
+                              t("Duration"),
                               a.durationMs != null
                                 ? `${a.durationMs} ms`
                                 : null,
                             ],
-                            ["Content type", a.contentType],
-                            ["Protocol", a.protocol],
-                            ["Purpose, Art. 53(1)", a.purpose],
+                            [t("Content type"), a.contentType],
+                            [t("Protocol"), a.protocol],
+                            [t("Purpose, Art. 53(1)"), a.purpose],
                             [
-                              "Data permit, Art. 68",
+                              t("Data permit, Art. 68"),
                               a.permitId
                                 ? `${a.permitId}${
                                     a.permitStatus
                                       ? ` (${a.permitStatus}${
                                           a.permitValidUntil
-                                            ? `, valid until ${a.permitValidUntil.slice(
-                                                0,
-                                                10,
-                                              )}`
+                                            ? `, ${t("valid until {date}", {
+                                                date: a.permitValidUntil.slice(
+                                                  0,
+                                                  10,
+                                                ),
+                                              })}`
                                             : ""
                                         })`
                                       : ""
                                   }`
                                 : null,
                             ],
-                            ["Contract", a.contractId],
-                            ["Transfer", a.transferId],
-                            ["Error", a.errorMessage],
+                            [t("Contract"), a.contractId],
+                            [t("Transfer"), a.transferId],
+                            [t("Error"), a.errorMessage],
                             [
-                              "Origin",
+                              t("Origin"),
                               a.demo
-                                ? "seeded demo event"
-                                : "recorded by the neo4j-proxy",
+                                ? t("seeded demo event")
+                                : t("recorded by the neo4j-proxy"),
                             ],
                           ];
                           return (
@@ -988,7 +1061,7 @@ export default function AdminAuditPage() {
                                   {a.assetTitle ?? a.assetId ?? "—"}
                                 </td>
                                 <td className="py-2 px-2">
-                                  {accessTypeBadge(a.accessType)}
+                                  {accessTypeBadge(a.accessType, t)}
                                 </td>
                                 <td
                                   className="py-2 px-2 text-(--text-secondary) max-w-[140px] truncate"

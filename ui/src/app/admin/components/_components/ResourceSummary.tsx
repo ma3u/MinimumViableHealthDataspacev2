@@ -2,6 +2,7 @@
 
 import { Cpu, HardDrive } from "lucide-react";
 import type { PeakEntry, TopoComponent } from "./types";
+import { useT } from "@/lib/i18n/translate";
 
 export function ResourceSummary({
   components,
@@ -16,6 +17,7 @@ export function ResourceSummary({
   // "shared — see Layer View" marker instead of a meaningless 0.0%.
   metricsShared?: boolean;
 }) {
+  const t = useT("admin");
   const totalCpu = components.reduce((s, c) => s + c.cpu, 0);
   const totalMem = components.reduce((s, c) => s + c.memMB, 0);
   const fmtMem = (mb: number) =>
@@ -25,8 +27,12 @@ export function ResourceSummary({
     return (
       <div className="flex items-center gap-2 text-xs text-(--text-secondary) italic">
         {label && <span className="mr-1">{label}</span>}
-        <span title="Containers are shared across all participants on this deployment — per-container CPU/MEM is shown in Layer View.">
-          shared infrastructure — see Layer View
+        <span
+          title={t(
+            "Containers are shared across all participants on this deployment; per-container CPU/MEM is shown in Layer View.",
+          )}
+        >
+          {t("shared infrastructure; see Layer View")}
         </span>
       </div>
     );

@@ -333,7 +333,7 @@ describe("critical banner", () => {
   it("lists degraded participant names in banner", async () => {
     render(<AdminComponentsPage />);
     await waitFor(() => {
-      expect(screen.getByText(/— PharmaCo Research AG/)).toBeInTheDocument();
+      expect(screen.getByText(/\(PharmaCo Research AG\)/)).toBeInTheDocument();
     });
   });
 

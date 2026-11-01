@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
+import { useT } from "@/lib/i18n/translate";
 
 /**
  * /auth/switch — intermediate page after Keycloak logout.
@@ -10,6 +11,7 @@ import { Loader2 } from "lucide-react";
  * sign-in with login_hint so Keycloak pre-fills the username field.
  */
 export default function SwitchPage() {
+  const t = useT("admin");
   useEffect(() => {
     const targetUser = sessionStorage.getItem("switch_to_user");
     sessionStorage.removeItem("switch_to_user");
@@ -20,7 +22,7 @@ export default function SwitchPage() {
   return (
     <div className="flex h-screen items-center justify-center bg-(--bg) text-(--text-secondary)">
       <Loader2 size={16} className="mr-2 animate-spin" />
-      Switching user…
+      {t("Switching user…")}
     </div>
   );
 }

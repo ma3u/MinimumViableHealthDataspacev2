@@ -18,8 +18,14 @@ import { EudiQrPanel } from "@/components/wallet/EudiQrPanel";
 import { setDemoPersona } from "@/lib/use-demo-persona";
 import { useEudiPresentation } from "@/lib/use-eudi-presentation";
 import { CITIZEN_WALLET } from "@/lib/wallet-config";
+import { T, useT } from "@/lib/i18n/translate";
 
 const WALLET = CITIZEN_WALLET;
+
+/** Messages kept in state as their English key and translated when shown. */
+const HUB_COULD_NOT_CREATE = "The hub could not create the account.";
+const SIMULATION_ONLY =
+  "Simulation only on this deployment. Scan the QR code with {wallet} to sign in.";
 
 /** The account a PID created (ADR-067), shown once and then never again. */
 interface NewAccount {
@@ -28,6 +34,7 @@ interface NewAccount {
 }
 
 function EudiQrContent() {
+  const t = useT("admin");
   // Read at render-time (not module load) so it is deterministic in tests and
   // immune to test-ordering env pollution; NEXT_PUBLIC_* is build-inlined anyway.
   const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
@@ -76,14 +83,12 @@ function EudiQrContent() {
         reason?: string;
       };
       if (!res.ok || !data.username || !data.password) {
-        setRegisterError(
-          data.reason ?? data.error ?? "The hub could not create the account.",
-        );
+        setRegisterError(data.reason ?? data.error ?? HUB_COULD_NOT_CREATE);
         return;
       }
       setAccount({ username: data.username, password: data.password });
     } catch {
-      setRegisterError("The hub could not create the account.");
+      setRegisterError(HUB_COULD_NOT_CREATE);
     } finally {
       setRegistering(false);
     }
@@ -101,7 +106,7 @@ function EudiQrContent() {
   // the demo patient through the same Credentials provider a real presentation
   // uses. Where the deployment refuses, the phone stays a picture and says so.
   const approveSimulated = useCallback(async () => {
-    const simulationOnly = `Simulation only on this deployment. Scan the QR code with ${WALLET.name} to sign in.`;
+    const simulationOnly = SIMULATION_ONLY;
     try {
       const res = await fetch("/api/auth/eudi/start", {
         method: "POST",
@@ -120,9 +125,16 @@ function EudiQrContent() {
     }
   }, [callbackUrl, setPhase]);
 
-  const title = `${mode === "login" ? "Sign in" : "Register"} with ${
-    WALLET.name
-  }`;
+  const title =
+    mode === "login"
+      ? t("Sign in with {wallet}", { wallet: WALLET.name })
+      : t("Register with {wallet}", { wallet: WALLET.name });
+  // The wallet's one-line description and the footnote, translated.
+  const walletVars = {
+    description: t(WALLET.description),
+    alternatives: t(WALLET.alternatives),
+    wallet: WALLET.name,
+  };
 
   // Static export / demo: no live verifier backend, so drive an interactive
   // QR + wallet-approval simulation; on approval, sign in as the demo patient
@@ -148,11 +160,13 @@ function EudiQrContent() {
             {title}
           </h1>
           <p className="text-(--text-secondary) text-sm">
-            Scan the QR with {WALLET.description}, {WALLET.alternatives}, or
-            approve on the simulated phone (OpenID4VP).
+            {t(
+              "Scan the QR with {description}, {alternatives}, or approve on the simulated phone (OpenID4VP).",
+              walletVars,
+            )}
             <br />
             <span className="text-xs">
-              Synthetic demo · signs you in as the demo patient
+              {t("Synthetic demo · signs you in as the demo patient")}
             </span>
           </p>
         </div>
@@ -165,7 +179,7 @@ function EudiQrContent() {
           href="/auth/signin"
           className="text-xs text-(--text-secondary) hover:text-(--accent) underline"
         >
-          ← Back to other sign-in options
+          ← {t("Back to other sign-in options")}
         </a>
       </div>
     );
@@ -183,17 +197,19 @@ function EudiQrContent() {
             {title}
           </h1>
           <p className="text-(--text-secondary) text-sm mb-6">
-            Scan the QR code with {WALLET.description}, {WALLET.alternatives},
-            to prove who you are (OpenID4VP).
+            {t(
+              "Scan the QR code with {description}, {alternatives}, to prove who you are (OpenID4VP).",
+              walletVars,
+            )}
             <br />
             <span className="text-xs">
-              Synthetic records · your PID opens the one in your name
+              {t("Synthetic records · your PID opens the one in your name")}
             </span>
           </p>
 
           {(phase === "idle" || phase === "loading") && (
             <div className="py-10 text-(--text-secondary)">
-              Preparing a secure request…
+              {t("Preparing a secure request…")}
             </div>
           )}
 
@@ -209,7 +225,7 @@ function EudiQrContent() {
           {phase === "done" && (
             <div className="py-8 flex flex-col items-center gap-2 text-green-600 dark:text-green-400">
               <CheckCircle2 size={40} />
-              <p className="font-medium">Verified — signing you in…</p>
+              <p className="font-medium">{t("Verified, signing you in…")}</p>
             </div>
           )}
 
@@ -217,26 +233,27 @@ function EudiQrContent() {
             <div
               className="py-4 text-left"
               role="region"
-              aria-label="Your new account"
+              aria-label={t("Your new account")}
             >
               <div className="flex items-center gap-2 mb-2 text-green-600 dark:text-green-400">
                 <KeyRound size={20} />
-                <p className="font-medium">Your account is ready</p>
+                <p className="font-medium">{t("Your account is ready")}</p>
               </div>
               <p className="text-sm text-(--text-secondary) mb-3">
-                Keep this username and password somewhere safe. The hub shows
-                the password only now and cannot show it again. Next time you
-                can sign in with {WALLET.name} or with these.
+                {t(
+                  "Keep this username and password somewhere safe. The hub shows the password only now and cannot show it again. Next time you can sign in with {wallet} or with these.",
+                  walletVars,
+                )}
               </p>
               <dl className="text-sm mb-4 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
-                <dt className="text-(--text-secondary)">Username</dt>
+                <dt className="text-(--text-secondary)">{t("Username")}</dt>
                 <dd
                   className="font-mono text-(--text-primary) break-all"
                   data-testid="new-account-username"
                 >
                   {account.username}
                 </dd>
-                <dt className="text-(--text-secondary)">Password</dt>
+                <dt className="text-(--text-secondary)">{t("Password")}</dt>
                 <dd
                   className="font-mono text-(--text-primary) break-all"
                   data-testid="new-account-password"
@@ -248,7 +265,7 @@ function EudiQrContent() {
                 onClick={continueSignedIn}
                 className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-(--accent) hover:bg-(--accent-hover) text-white dark:text-gray-900 rounded-lg font-medium transition-colors"
               >
-                I have saved them, sign me in
+                {t("I have saved them, sign me in")}
               </button>
             </div>
           )}
@@ -264,24 +281,29 @@ function EudiQrContent() {
                 />
                 <p className="text-sm text-(--text-secondary) mb-4">
                   {phase === "expired"
-                    ? "This sign-in request expired."
+                    ? t("This sign-in request expired.")
                     : phase === "refused"
                       ? refusal?.error
-                      : "Could not reach the EUDI verifier."}
+                      : t("Could not reach the EUDI verifier.")}
                 </p>
                 {phase === "refused" && refusal?.canRegister && (
                   <div className="mb-4">
                     <p className="text-xs text-(--text-secondary) mb-3">
-                      You can create a sandbox account with this PID. The hub
-                      keeps only a secure hash of your name and birth date on
-                      it, never the name or the date (
-                      <a
-                        href="/hub/privacy.html"
-                        className="text-(--accent) underline"
+                      <T
+                        area="admin"
+                        tags={{
+                          a: (
+                            <a
+                              href="/hub/privacy.html"
+                              className="text-(--accent) underline"
+                            />
+                          ),
+                        }}
                       >
-                        privacy notice
-                      </a>
-                      ).
+                        {
+                          "You can create a sandbox account with this PID. The hub keeps only a secure hash of your name and birth date on it, never the name or the date (<a>privacy notice</a>)."
+                        }
+                      </T>
                     </p>
                     <button
                       onClick={register}
@@ -290,15 +312,15 @@ function EudiQrContent() {
                     >
                       <UserPlus size={16} />
                       {registering
-                        ? "Creating your account…"
-                        : "Create an account with this PID"}
+                        ? t("Creating your account…")
+                        : t("Create an account with this PID")}
                     </button>
                     {registerError && (
                       <p
                         role="alert"
                         className="text-xs text-amber-600 dark:text-amber-400 mt-2"
                       >
-                        {registerError}
+                        {t(registerError)}
                       </p>
                     )}
                   </div>
@@ -307,7 +329,7 @@ function EudiQrContent() {
                   onClick={restart}
                   className="inline-flex items-center gap-2 px-4 py-2 bg-(--accent) hover:bg-(--accent-hover) text-white dark:text-gray-900 rounded-lg font-medium transition-colors"
                 >
-                  <RefreshCw size={16} /> Try again
+                  <RefreshCw size={16} /> {t("Try again")}
                 </button>
               </div>
             )}
@@ -318,21 +340,27 @@ function EudiQrContent() {
             interactive
             loop={false}
             theme="dyou"
-            ariaLabel={`Simulated ${WALLET.name} ${mode}`}
+            ariaLabel={
+              mode === "login"
+                ? t("Simulated {wallet} login", walletVars)
+                : t("Simulated {wallet} register", walletVars)
+            }
             steps={mode === "login" ? LOGIN_STEPS : REGISTER_STEPS}
             onComplete={approveSimulated}
             onCancel={() => router.push("/auth/signin")}
           />
           <p className="text-xs text-(--text-secondary) max-w-[280px] text-center">
-            What happens on your phone. No {WALLET.name} yet? Approve here to
-            sign in as the demo patient.
+            {t(
+              "What happens on your phone. No {wallet} yet? Approve here to sign in as the demo patient.",
+              walletVars,
+            )}
           </p>
           {demoHint && (
             <p
               role="status"
               className="text-xs text-amber-600 dark:text-amber-400 max-w-[280px] text-center"
             >
-              {demoHint}
+              {t(demoHint, walletVars)}
             </p>
           )}
         </div>
@@ -342,18 +370,19 @@ function EudiQrContent() {
         href="/auth/signin"
         className="text-xs text-(--text-secondary) hover:text-(--accent) underline"
       >
-        ← Back to other sign-in options
+        ← {t("Back to other sign-in options")}
       </a>
     </div>
   );
 }
 
 export default function EudiQrPage() {
+  const tc = useT("common");
   return (
     <Suspense
       fallback={
         <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="text-(--text-secondary)">Loading…</div>
+          <div className="text-(--text-secondary)">{tc("Loading…")}</div>
         </div>
       }
     >

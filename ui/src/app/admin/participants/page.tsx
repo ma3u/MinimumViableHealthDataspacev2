@@ -4,6 +4,7 @@ import { fetchApi } from "@/lib/api";
 import { useCallback, useEffect, useState } from "react";
 import PageIntro from "@/components/PageIntro";
 import { Globe, Loader2, Plus, RefreshCw, Trash2, Wallet } from "lucide-react";
+import { useT } from "@/lib/i18n/translate";
 
 interface Participant {
   participantId: string;
@@ -49,6 +50,7 @@ const EMPTY_FORM = {
 };
 
 export default function ParticipantsAdminPage() {
+  const t = useT("admin");
   const [data, setData] = useState<DirectoryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +94,7 @@ export default function ParticipantsAdminPage() {
       if (!res.ok) {
         setNotice(body.error ?? `HTTP ${res.status}`);
       } else {
-        setNotice(`Added ${form.participantId}`);
+        setNotice(t("Added {id}", { id: form.participantId }));
         setForm(EMPTY_FORM);
         await load();
       }
@@ -114,8 +116,10 @@ export default function ParticipantsAdminPage() {
     } else {
       setNotice(
         body.returnsOnDeploy
-          ? `Removed ${participantId}. It is seeded, so the next deploy adds it back.`
-          : `Removed ${participantId}`,
+          ? t("Removed {id}. It is seeded, so the next deploy adds it back.", {
+              id: participantId,
+            })
+          : t("Removed {id}", { id: participantId }),
       );
       await load();
     }
@@ -125,10 +129,14 @@ export default function ParticipantsAdminPage() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-6xl mx-auto px-6 py-10">
         <PageIntro
-          title="Participant Directory"
+          title={t("Participant Directory")}
           icon={Globe}
-          description="Wallets and participants the catalog crawler discovers datasets from. Adding a participant here makes their DSP catalog a crawl target on the next 5-minute tick — no restart required."
-          infoText="source shows how the participant entered the directory: seed (demo bootstrap), dcp (trust-anchor discovery), business-wallet / private-wallet (manual onboarding). Only entries with a DSP catalog URL and crawling enabled are fetched."
+          description={t(
+            "Wallets and participants the catalog crawler discovers datasets from. Adding a participant here makes their DSP catalog a crawl target on the next 5-minute tick; no restart required.",
+          )}
+          infoText={t(
+            "source shows how the participant entered the directory: seed (demo bootstrap), dcp (trust-anchor discovery), business-wallet / private-wallet (manual onboarding). Only entries with a DSP catalog URL and crawling enabled are fetched.",
+          )}
         />
 
         {notice && (
@@ -146,9 +154,9 @@ export default function ParticipantsAdminPage() {
             className="mb-6 flex flex-wrap gap-4 text-sm text-(--text-secondary)"
             data-testid="participants-summary"
           >
-            <span>{data.summary.total} participants</span>
+            <span>{t("{n} participants", { n: data.summary.total })}</span>
             <span>·</span>
-            <span>{data.summary.crawlable} crawlable</span>
+            <span>{t("{n} crawlable", { n: data.summary.crawlable })}</span>
             {Object.entries(data.summary.bySource).map(([s, n]) => (
               <span key={s} className="flex items-center gap-1">
                 · {s}: {n}
@@ -156,23 +164,23 @@ export default function ParticipantsAdminPage() {
             ))}
             <button
               onClick={load}
-              aria-label="Refresh participants"
+              aria-label={t("Refresh participants")}
               className="ml-auto flex items-center gap-1 text-(--accent) hover:underline"
             >
-              <RefreshCw size={14} /> Refresh
+              <RefreshCw size={14} /> {t("Refresh")}
             </button>
           </div>
         )}
 
         {loading && (
           <div className="flex items-center gap-2 py-8 text-(--text-secondary)">
-            <Loader2 size={16} className="animate-spin" /> Loading participant
-            directory…
+            <Loader2 size={16} className="animate-spin" />{" "}
+            {t("Loading participant directory…")}
           </div>
         )}
         {error && !loading && (
           <div className="rounded-sm border border-red-700 bg-red-900/30 px-4 py-3 text-sm text-red-300">
-            {error}
+            {t(error)}
           </div>
         )}
 
@@ -182,13 +190,15 @@ export default function ParticipantsAdminPage() {
             <table className="w-full text-sm" data-testid="participants-table">
               <thead>
                 <tr className="border-b border-(--border) bg-(--surface-2) text-left text-(--text-secondary)">
-                  <th className="px-4 py-3 font-medium">Participant</th>
-                  <th className="px-4 py-3 font-medium">Source</th>
-                  <th className="px-4 py-3 font-medium">Wallet</th>
-                  <th className="px-4 py-3 font-medium">Country</th>
-                  <th className="px-4 py-3 font-medium">Datasets</th>
-                  <th className="px-4 py-3 font-medium">DSP Catalog</th>
-                  <th className="px-4 py-3 font-medium sr-only">Actions</th>
+                  <th className="px-4 py-3 font-medium">{t("Participant")}</th>
+                  <th className="px-4 py-3 font-medium">{t("Source")}</th>
+                  <th className="px-4 py-3 font-medium">{t("Wallet")}</th>
+                  <th className="px-4 py-3 font-medium">{t("Country")}</th>
+                  <th className="px-4 py-3 font-medium">{t("Datasets")}</th>
+                  <th className="px-4 py-3 font-medium">{t("DSP Catalog")}</th>
+                  <th className="px-4 py-3 font-medium sr-only">
+                    {t("Actions")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -212,7 +222,7 @@ export default function ParticipantsAdminPage() {
                           "bg-gray-800 text-gray-300 border-gray-600"
                         }`}
                       >
-                        {p.source ?? "unknown"}
+                        {p.source ?? t("unknown")}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-(--text-secondary)">
@@ -236,15 +246,15 @@ export default function ParticipantsAdminPage() {
                           }`}
                           title={
                             p.crawlerEnabled
-                              ? "Crawled every 5 minutes"
-                              : "Crawling disabled"
+                              ? t("Crawled every 5 minutes")
+                              : t("Crawling disabled")
                           }
                         >
                           {p.dspCatalogUrl}
                         </span>
                       ) : (
                         <span className="text-xs text-(--text-secondary)">
-                          not crawlable
+                          {t("not crawlable")}
                         </span>
                       )}
                     </td>
@@ -253,32 +263,36 @@ export default function ParticipantsAdminPage() {
                         <span className="flex flex-col items-end gap-1 text-xs">
                           <span className="whitespace-nowrap text-(--text-secondary)">
                             {p.source === "seed"
-                              ? "Remove? Back on next deploy"
-                              : "Remove?"}
+                              ? t("Remove? Back on next deploy")
+                              : t("Remove?")}
                           </span>
                           <span className="flex gap-2">
                             <button
                               onClick={() => removeParticipant(p.participantId)}
                               className="rounded border border-red-400 px-2 py-0.5 text-red-500 hover:bg-red-500/10"
                             >
-                              Remove
+                              {t("Remove")}
                             </button>
                             <button
                               onClick={() => setConfirming(null)}
                               className="rounded border border-(--border) px-2 py-0.5 text-(--text-secondary)"
                             >
-                              Cancel
+                              {t("Cancel")}
                             </button>
                           </span>
                         </span>
                       ) : (
                         <button
                           onClick={() => setConfirming(p.participantId)}
-                          aria-label={`Remove ${p.name ?? p.participantId}`}
+                          aria-label={t("Remove {name}", {
+                            name: p.name ?? p.participantId,
+                          })}
                           title={
                             p.source === "seed"
-                              ? "Seeded: removed until the next deploy adds it back"
-                              : "Remove from the directory"
+                              ? t(
+                                  "Seeded: removed until the next deploy adds it back",
+                                )
+                              : t("Remove from the directory")
                           }
                           className="text-red-400 hover:text-red-300"
                         >
@@ -300,11 +314,11 @@ export default function ParticipantsAdminPage() {
           data-testid="participant-form"
         >
           <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-(--text-primary)">
-            <Plus size={18} /> Onboard participant wallet
+            <Plus size={18} /> {t("Onboard participant wallet")}
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <label className="text-sm text-(--text-secondary)">
-              Participant DID *
+              {t("Participant DID *")}
               <input
                 required
                 value={form.participantId}
@@ -316,7 +330,7 @@ export default function ParticipantsAdminPage() {
               />
             </label>
             <label className="text-sm text-(--text-secondary)">
-              Display name *
+              {t("Display name *")}
               <input
                 required
                 value={form.name}
@@ -326,7 +340,7 @@ export default function ParticipantsAdminPage() {
               />
             </label>
             <label className="text-sm text-(--text-secondary)">
-              Participant type
+              {t("Participant type")}
               <select
                 value={form.participantType}
                 onChange={(e) =>
@@ -340,7 +354,7 @@ export default function ParticipantsAdminPage() {
               </select>
             </label>
             <label className="text-sm text-(--text-secondary)">
-              Wallet type
+              {t("Wallet type")}
               <select
                 value={form.walletType}
                 onChange={(e) =>
@@ -348,12 +362,12 @@ export default function ParticipantsAdminPage() {
                 }
                 className="mt-1 w-full rounded-sm border border-(--border) bg-(--bg) px-3 py-2 text-(--text-primary)"
               >
-                <option value="business">business</option>
-                <option value="private">private</option>
+                <option value="business">{t("business")}</option>
+                <option value="private">{t("private")}</option>
               </select>
             </label>
             <label className="text-sm text-(--text-secondary)">
-              Country (ISO-2)
+              {t("Country (ISO-2)")}
               <input
                 value={form.country}
                 onChange={(e) => setForm({ ...form, country: e.target.value })}
@@ -363,7 +377,7 @@ export default function ParticipantsAdminPage() {
               />
             </label>
             <label className="text-sm text-(--text-secondary)">
-              DSP catalog URL
+              {t("DSP catalog URL")}
               <input
                 value={form.dspCatalogUrl}
                 onChange={(e) =>
@@ -384,7 +398,7 @@ export default function ParticipantsAdminPage() {
             ) : (
               <Plus size={15} />
             )}
-            Add to directory
+            {t("Add to directory")}
           </button>
         </form>
       </div>

@@ -3,12 +3,14 @@
 import { Activity, Cpu, HardDrive } from "lucide-react";
 import { TrendArrow } from "./TrendArrow";
 import type { TopologyData } from "./types";
+import { useT } from "@/lib/i18n/translate";
 
 export function ClusterResourceBanner({
   metrics,
 }: {
   metrics: NonNullable<TopologyData["clusterMetrics"]>;
 }) {
+  const t = useT("admin");
   const fmtMem = (mb: number) =>
     mb > 1024 ? `${(mb / 1024).toFixed(1)} GB` : `${Math.round(mb)} MB`;
   const hasPrev = metrics.prev24h.samples > 0;
@@ -20,7 +22,9 @@ export function ClusterResourceBanner({
           size={14}
           className="text-teal-800 dark:text-teal-300 shrink-0"
         />
-        <span className="font-medium text-(--text-primary)">Cluster</span>
+        <span className="font-medium text-(--text-primary)">
+          {t("Cluster")}
+        </span>
       </div>
 
       {/* Current */}
@@ -29,14 +33,14 @@ export function ClusterResourceBanner({
         <span className="text-(--text-primary) tabular-nums">
           {metrics.currentCpu.toFixed(1)}%
         </span>
-        <span className="text-(--text-secondary)">now</span>
+        <span className="text-(--text-secondary)">{t("now")}</span>
       </div>
       <div className="flex items-center gap-1.5 text-xs">
         <HardDrive size={11} className="text-(--accent)" />
         <span className="text-(--text-primary) tabular-nums">
           {fmtMem(metrics.currentMemMB)}
         </span>
-        <span className="text-(--text-secondary)">now</span>
+        <span className="text-(--text-secondary)">{t("now")}</span>
       </div>
 
       <span className="text-(--text-secondary)">│</span>
@@ -51,7 +55,7 @@ export function ClusterResourceBanner({
         <span className="text-(--accent) tabular-nums font-medium">
           CPU {metrics.last24h.peakCpu.toFixed(1)}%
         </span>
-        <span className="text-(--text-secondary)">peak 24h</span>
+        <span className="text-(--text-secondary)">{t("peak 24h")}</span>
       </div>
       <div className="flex items-center gap-1 text-xs">
         <TrendArrow
@@ -62,15 +66,15 @@ export function ClusterResourceBanner({
         <span className="text-(--accent) tabular-nums font-medium">
           MEM {fmtMem(metrics.last24h.peakMemMB)}
         </span>
-        <span className="text-(--text-secondary)">peak 24h</span>
+        <span className="text-(--text-secondary)">{t("peak 24h")}</span>
       </div>
 
       {metrics.last24h.samples > 0 && (
         <span
           className="text-[10px] text-(--text-secondary)"
-          title="Number of data points collected in the last 24h"
+          title={t("Number of data points collected in the last 24h")}
         >
-          ({metrics.last24h.samples} samples)
+          ({t("{n} samples", { n: metrics.last24h.samples })})
         </span>
       )}
     </div>

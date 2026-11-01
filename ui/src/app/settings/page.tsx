@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { IS_STATIC } from "@/lib/static-export";
+import { T, useT } from "@/lib/i18n/translate";
 
 /**
  * Maps a demo persona username to the tenant IDs they should see.
@@ -84,6 +85,7 @@ interface CredentialContext {
 }
 
 export default function SettingsPage() {
+  const t = useT("admin");
   /* ── Current user context ── */
   const demoPersona = useDemoPersona();
   const { session: tabSession } = useTabSession();
@@ -303,7 +305,7 @@ export default function SettingsPage() {
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
     } catch (e: unknown) {
-      setSaveError(e instanceof Error ? e.message : "Save failed");
+      setSaveError(e instanceof Error ? e.message : t("Save failed"));
     } finally {
       setSaving(false);
     }
@@ -319,14 +321,15 @@ export default function SettingsPage() {
             className="text-(--text-secondary) mx-auto mb-4"
           />
           <p className="text-(--text-secondary) mb-2">
-            Patient accounts use personal health credentials (eIDAS 2.0 /
-            OIDC4VP), not DCP business profiles.
+            {t(
+              "Patient accounts use personal health credentials (eIDAS 2.0 / OIDC4VP), not DCP business profiles.",
+            )}
           </p>
           <a
             href="/patient"
             className="text-sm text-teal-800 dark:text-teal-300 hover:underline"
           >
-            Go to My Health →
+            {t("Go to My Health")} →
           </a>
         </div>
       </div>
@@ -339,7 +342,7 @@ export default function SettingsPage() {
         <div className="max-w-3xl mx-auto px-6 py-10">
           <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
-            Loading settings…
+            {t("Loading settings…")}
           </div>
         </div>
       </div>
@@ -350,18 +353,23 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-3xl mx-auto px-6 py-10">
         <PageIntro
-          title={isAdmin ? "Dataspace Settings" : "Participant Settings"}
+          title={isAdmin ? t("Dataspace Settings") : t("Participant Settings")}
           icon={Settings2}
           description={
             isAdmin
-              ? "Manage all participant profiles across the dataspace. Update display names, contact details, and notification settings."
-              : `Manage your profile and preferences for ${
-                  currentOrg || "your organisation"
-                }. Update display name, contact details, and notification settings.`
+              ? t(
+                  "Manage all participant profiles across the dataspace. Update display names, contact details, and notification settings.",
+                )
+              : t(
+                  "Manage your profile and preferences for {org}. Update display name, contact details, and notification settings.",
+                  { org: currentOrg || t("your organisation") },
+                )
           }
-          prevStep={{ href: "/admin/audit", label: "Audit & Provenance" }}
-          infoText="Changes are saved to the tenant-manager API and reflected across all dataspace interactions. Your DID:web identity and credentials remain unchanged."
-          docLink={{ href: "/docs/user-guide", label: "User Guide" }}
+          prevStep={{ href: "/admin/audit", label: t("Audit & Provenance") }}
+          infoText={t(
+            "Changes are saved to the tenant-manager API and reflected across all dataspace interactions. Your DID:web identity and credentials remain unchanged.",
+          )}
+          docLink={{ href: "/docs/user-guide", label: t("User Guide") }}
         />
 
         {tenants.length === 0 ? (
@@ -371,13 +379,13 @@ export default function SettingsPage() {
               className="text-(--text-secondary) mx-auto mb-4"
             />
             <p className="text-(--text-secondary) mb-2">
-              No participant profile found
+              {t("No participant profile found")}
             </p>
             <a
               href="/onboarding"
               className="text-sm text-teal-800 dark:text-teal-300 hover:underline"
             >
-              Register first →
+              {t("Register first")} →
             </a>
           </div>
         ) : (
@@ -385,10 +393,10 @@ export default function SettingsPage() {
             {/* Tenant selector */}
             <div className="mb-6">
               <label className="block text-sm text-(--text-secondary) mb-1">
-                Active Profile
+                {t("Active Profile")}
               </label>
               <select
-                aria-label="Active Profile"
+                aria-label={t("Active Profile")}
                 value={selected?.id || ""}
                 onChange={(e) => handleSelect(e.target.value)}
                 className="w-full px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm"
@@ -410,12 +418,12 @@ export default function SettingsPage() {
                       size={16}
                       className="text-teal-800 dark:text-teal-300"
                     />
-                    Identity
+                    {t("Identity")}
                   </h2>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label className="text-xs text-(--text-secondary)">
-                        EHDS Role
+                        {t("EHDS Role")}
                       </label>
                       <p className="text-sm font-medium text-(--text-primary) mt-0.5">
                         {selected.properties.ehdsParticipantType ||
@@ -425,7 +433,7 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <label className="text-xs text-(--text-secondary)">
-                        Tenant ID
+                        {t("Tenant ID")}
                       </label>
                       <p className="font-mono text-xs text-(--text-secondary) break-all mt-0.5">
                         {selected.id}
@@ -441,71 +449,71 @@ export default function SettingsPage() {
                       size={16}
                       className="text-teal-800 dark:text-teal-300"
                     />
-                    Profile &amp; Contact Details
+                    {t("Profile & Contact Details")}
                   </h2>
                   <div className="grid gap-4 sm:grid-cols-2">
                     {(
                       [
                         {
                           key: "displayName",
-                          label: "Display Name",
+                          label: t("Display Name"),
                           icon: User,
                           placeholder: "e.g. AlphaKlinik Berlin",
                         },
                         {
                           key: "organization",
-                          label: "Organisation",
+                          label: t("Organisation"),
                           icon: Settings2,
-                          placeholder: "Legal entity name",
+                          placeholder: t("Legal entity name"),
                         },
                         {
                           key: "contactPerson",
-                          label: "Contact Person",
+                          label: t("Contact Person"),
                           icon: User,
-                          placeholder: "Full name",
+                          placeholder: t("Full name"),
                         },
                         {
                           key: "email",
-                          label: "Email",
+                          label: t("Email"),
                           icon: Mail,
                           placeholder: "contact@example.de",
                           type: "email",
                         },
                         {
                           key: "phone",
-                          label: "Phone",
+                          label: t("Phone"),
                           icon: Phone,
                           placeholder: "+49 30 …",
                           type: "tel",
                         },
                         {
                           key: "website",
-                          label: "Website",
+                          label: t("Website"),
                           icon: Globe,
                           placeholder: "https://",
                           type: "url",
                         },
                         {
                           key: "address",
-                          label: "Street Address",
+                          label: t("Street Address"),
                           icon: MapPin,
-                          placeholder: "Street & number",
+                          placeholder: t("Street & number"),
                         },
                         {
                           key: "city",
-                          label: "City",
+                          label: t("City"),
                           icon: MapPin,
                           placeholder: "Berlin",
                         },
                         {
                           key: "postalCode",
-                          label: "Postal Code",
+                          label: t("Postal Code"),
                           icon: MapPin,
                           placeholder: "10117",
                         },
                         {
                           key: "country",
-                          label: "Country",
+                          label: t("Country"),
                           icon: Globe,
                           placeholder: "DE",
                         },
@@ -539,7 +547,9 @@ export default function SettingsPage() {
 
                 {/* Dataspace Profiles */}
                 <div className="p-6">
-                  <h2 className="font-semibold mb-3">Dataspace Profiles</h2>
+                  <h2 className="font-semibold mb-3">
+                    {t("Dataspace Profiles")}
+                  </h2>
                   {selected.participantProfiles?.length > 0 ? (
                     <div className="space-y-3">
                       {selected.participantProfiles.map((pp, i) => {
@@ -569,24 +579,31 @@ export default function SettingsPage() {
                             {hasError && (
                               <div className="flex items-center gap-1.5 text-red-800 dark:text-red-400 mb-1">
                                 <AlertCircle size={12} />
-                                <span>Provisioning failed</span>
+                                <span>{t("Provisioning failed")}</span>
                               </div>
                             )}
                             {allDisposed && (
                               <div className="flex items-center gap-1.5 text-yellow-800 dark:text-yellow-400 mb-1">
                                 <AlertCircle size={12} />
                                 <span>
-                                  VPAs disposed — re-run{" "}
-                                  <code className="font-mono bg-yellow-900/30 px-1 rounded-sm">
-                                    seed-health-tenants.sh
-                                  </code>{" "}
-                                  to re-provision
+                                  <T
+                                    area="admin"
+                                    tags={{
+                                      c: (
+                                        <code className="font-mono bg-yellow-900/30 px-1 rounded-sm" />
+                                      ),
+                                    }}
+                                  >
+                                    {
+                                      "VPAs disposed; re-run <c>seed-health-tenants.sh</c> to re-provision"
+                                    }
+                                  </T>
                                 </span>
                               </div>
                             )}
                             <div className="flex gap-2">
                               <span className="text-(--text-secondary) w-32 shrink-0">
-                                Profile ID
+                                {t("Profile ID")}
                               </span>
                               <span className="text-(--text-primary) font-mono break-all">
                                 {pp.id}
@@ -602,14 +619,14 @@ export default function SettingsPage() {
                             </div>
                             <div className="flex gap-2">
                               <span className="text-(--text-secondary) w-32 shrink-0">
-                                Participant Ctx
+                                {t("Participant Ctx")}
                               </span>
                               <span className="text-(--text-primary) font-mono">
                                 {ctxId !== "—" ? (
                                   ctxId
                                 ) : (
                                   <span className="text-(--text-secondary)">
-                                    none
+                                    {t("none")}
                                   </span>
                                 )}
                               </span>
@@ -617,7 +634,7 @@ export default function SettingsPage() {
                             {activeVpas.length > 0 && (
                               <div className="flex gap-2">
                                 <span className="text-(--text-secondary) w-32 shrink-0">
-                                  Active VPAs
+                                  {t("Active VPAs")}
                                 </span>
                                 <span className="text-green-800 dark:text-green-400">
                                   {activeVpas
@@ -632,7 +649,7 @@ export default function SettingsPage() {
                     </div>
                   ) : (
                     <p className="text-(--text-secondary) text-sm">
-                      No dataspace profiles linked yet.
+                      {t("No dataspace profiles linked yet.")}
                     </p>
                   )}
                 </div>
@@ -645,7 +662,7 @@ export default function SettingsPage() {
                         size={16}
                         className="text-teal-800 dark:text-teal-300"
                       />
-                      Digital Credentials
+                      {t("Digital Credentials")}
                     </h2>
                     <button
                       onClick={() => selected && loadCredentials(selected.id)}
@@ -656,14 +673,14 @@ export default function SettingsPage() {
                         size={11}
                         className={credsLoading ? "animate-spin" : ""}
                       />
-                      Refresh
+                      {t("Refresh")}
                     </button>
                   </div>
 
                   {credsLoading ? (
                     <div className="flex items-center gap-2 text-(--text-secondary) text-sm">
                       <Loader2 size={13} className="animate-spin" />
-                      Fetching credentials…
+                      {t("Fetching credentials…")}
                     </div>
                   ) : credentials.length === 0 ||
                     credentials.every((c) => c.credentials.length === 0) ? (
@@ -671,13 +688,13 @@ export default function SettingsPage() {
                       <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-400 mb-2">
                         <ShieldOff size={14} />
                         <span className="font-medium">
-                          No credentials issued yet
+                          {t("No credentials issued yet")}
                         </span>
                       </div>
                       <p className="text-(--text-secondary) text-xs leading-relaxed">
-                        Verifiable Credentials (EHDS-compliant VCs) are issued
-                        by the HDAB after participant onboarding via the
-                        IdentityHub. To issue credentials, run:
+                        {t(
+                          "Verifiable Credentials (EHDS-compliant VCs) are issued by the HDAB after participant onboarding via the IdentityHub. To issue credentials, run:",
+                        )}
                       </p>
                       <code className="mt-2 block text-xs text-(--success-text) bg-(--surface) rounded-sm px-3 py-2">
                         bash jad/issue-ehds-credentials.sh
@@ -725,13 +742,13 @@ export default function SettingsPage() {
                                 </span>
                                 {expired && (
                                   <span className="text-red-800 dark:text-red-400 ml-auto">
-                                    EXPIRED
+                                    {t("EXPIRED")}
                                   </span>
                                 )}
                               </div>
                               <div className="flex gap-2">
                                 <span className="text-(--text-secondary) w-28 shrink-0">
-                                  Issuer
+                                  {t("Issuer")}
                                 </span>
                                 <span className="text-(--text-primary) font-mono break-all">
                                   {vc.issuer || "—"}
@@ -739,7 +756,7 @@ export default function SettingsPage() {
                               </div>
                               <div className="flex gap-2">
                                 <span className="text-(--text-secondary) w-28 shrink-0">
-                                  Issued
+                                  {t("Issued")}
                                 </span>
                                 <span className="text-(--text-primary)">
                                   {vc.issuanceDate
@@ -752,7 +769,7 @@ export default function SettingsPage() {
                               {vc.expirationDate && (
                                 <div className="flex gap-2">
                                   <span className="text-(--text-secondary) w-28 shrink-0">
-                                    Expires
+                                    {t("Expires")}
                                   </span>
                                   <span
                                     className={
@@ -770,7 +787,7 @@ export default function SettingsPage() {
                               {vc.id && (
                                 <div className="flex gap-2">
                                   <span className="text-(--text-secondary) w-28 shrink-0">
-                                    Credential ID
+                                    {t("Credential ID")}
                                   </span>
                                   <span className="text-(--text-secondary) font-mono text-[10px] break-all">
                                     {vc.id}
@@ -795,17 +812,17 @@ export default function SettingsPage() {
                     {saving ? (
                       <>
                         <Loader2 size={16} className="animate-spin" />
-                        Saving…
+                        {t("Saving…")}
                       </>
                     ) : saved ? (
                       <>
                         <CheckCircle2 size={16} />
-                        Saved
+                        {t("Saved")}
                       </>
                     ) : (
                       <>
                         <Save size={16} />
-                        Save Changes
+                        {t("Save Changes")}
                       </>
                     )}
                   </button>
@@ -817,7 +834,7 @@ export default function SettingsPage() {
                   )}
                   {saved && !saveError && (
                     <span className="text-xs text-green-500">
-                      Profile saved successfully.
+                      {t("Profile saved successfully.")}
                     </span>
                   )}
                 </div>

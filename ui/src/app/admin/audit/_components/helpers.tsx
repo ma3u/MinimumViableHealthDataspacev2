@@ -68,17 +68,21 @@ export function directionBadge(direction?: string) {
   );
 }
 
-export function accessTypeBadge(t?: string) {
-  if (!t) return <span className="text-(--text-secondary)">—</span>;
+/** "Transfer" or "Query", in the picker's language when given a translator. */
+export function accessTypeBadge(
+  kind?: string,
+  tr: (text: string) => string = (s) => s,
+) {
+  if (!kind) return <span className="text-(--text-secondary)">—</span>;
   const cls =
-    t === "INITIAL_TRANSFER"
+    kind === "INITIAL_TRANSFER"
       ? "bg-(--role-holder-bg) text-(--role-holder-text) border border-(--role-holder-border)"
       : "bg-(--role-trust-bg) text-(--role-trust-text) border border-(--role-trust-border)";
   return (
     <span
       className={`inline-block px-1.5 py-0.5 rounded-sm text-[10px] font-semibold uppercase ${cls}`}
     >
-      {t === "INITIAL_TRANSFER" ? "Transfer" : "Query"}
+      {kind === "INITIAL_TRANSFER" ? tr("Transfer") : tr("Query")}
     </span>
   );
 }

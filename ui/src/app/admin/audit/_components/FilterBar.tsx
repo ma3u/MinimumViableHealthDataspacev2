@@ -3,6 +3,7 @@
 import { Filter, X } from "lucide-react";
 import { NEGOTIATION_STATUSES, TRANSFER_STATUSES } from "./constants";
 import type { AuditFilters, AuditType, Participant } from "./types";
+import { useT } from "@/lib/i18n/translate";
 
 export function FilterBar({
   filters,
@@ -17,6 +18,7 @@ export function FilterBar({
   participants: Participant[];
   tab: AuditType;
 }) {
+  const t = useT("admin");
   const statuses =
     tab === "transfers" ? TRANSFER_STATUSES : NEGOTIATION_STATUSES;
   const hasFilters = Object.values(filters).some(Boolean);
@@ -27,9 +29,9 @@ export function FilterBar({
 
       {/* Date range */}
       <div className="flex flex-col gap-1">
-        <label className="text-(--text-secondary)">From</label>
+        <label className="text-(--text-secondary)">{t("From")}</label>
         <input
-          aria-label="From date"
+          aria-label={t("From date")}
           type="date"
           value={filters.dateFrom}
           onChange={(e) => onChange({ dateFrom: e.target.value })}
@@ -37,9 +39,9 @@ export function FilterBar({
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label className="text-(--text-secondary)">To</label>
+        <label className="text-(--text-secondary)">{t("To")}</label>
         <input
-          aria-label="To date"
+          aria-label={t("To date")}
           type="date"
           value={filters.dateTo}
           onChange={(e) => onChange({ dateTo: e.target.value })}
@@ -50,14 +52,14 @@ export function FilterBar({
       {/* Status */}
       {tab !== "all" && tab !== "credentials" && (
         <div className="flex flex-col gap-1">
-          <label className="text-(--text-secondary)">Status</label>
+          <label className="text-(--text-secondary)">{t("Status")}</label>
           <select
-            aria-label="Status"
+            aria-label={t("Status")}
             value={filters.status}
             onChange={(e) => onChange({ status: e.target.value })}
             className="bg-(--surface-2) border border-(--border) rounded-sm px-2 py-1 text-(--text-primary) w-36"
           >
-            <option value="">All statuses</option>
+            <option value="">{t("All statuses")}</option>
             {statuses.map((s) => (
               <option key={s} value={s}>
                 {s}
@@ -70,14 +72,14 @@ export function FilterBar({
       {/* Consumer */}
       {tab !== "credentials" && (
         <div className="flex flex-col gap-1">
-          <label className="text-(--text-secondary)">Consumer</label>
+          <label className="text-(--text-secondary)">{t("Consumer")}</label>
           <select
-            aria-label="Consumer"
+            aria-label={t("Consumer")}
             value={filters.consumerDid}
             onChange={(e) => onChange({ consumerDid: e.target.value })}
             className="bg-(--surface-2) border border-(--border) rounded-sm px-2 py-1 text-(--text-primary) w-44"
           >
-            <option value="">All consumers</option>
+            <option value="">{t("All consumers")}</option>
             {participants.map((p) => (
               <option key={p.did} value={p.did}>
                 {p.name} ({p.country ?? "?"})
@@ -90,14 +92,14 @@ export function FilterBar({
       {/* Provider */}
       {tab !== "credentials" && (
         <div className="flex flex-col gap-1">
-          <label className="text-(--text-secondary)">Provider</label>
+          <label className="text-(--text-secondary)">{t("Provider")}</label>
           <select
-            aria-label="Provider"
+            aria-label={t("Provider")}
             value={filters.providerDid}
             onChange={(e) => onChange({ providerDid: e.target.value })}
             className="bg-(--surface-2) border border-(--border) rounded-sm px-2 py-1 text-(--text-primary) w-44"
           >
-            <option value="">All providers</option>
+            <option value="">{t("All providers")}</option>
             {participants.map((p) => (
               <option key={p.did} value={p.did}>
                 {p.name} ({p.country ?? "?"})
@@ -110,16 +112,16 @@ export function FilterBar({
       {/* Cross-border */}
       {tab !== "credentials" && (
         <div className="flex flex-col gap-1">
-          <label className="text-(--text-secondary)">Cross-border</label>
+          <label className="text-(--text-secondary)">{t("Cross-border")}</label>
           <select
-            aria-label="Cross-border"
+            aria-label={t("Cross-border")}
             value={filters.crossBorder}
             onChange={(e) => onChange({ crossBorder: e.target.value })}
             className="bg-(--surface-2) border border-(--border) rounded-sm px-2 py-1 text-(--text-primary) w-32"
           >
-            <option value="">All</option>
-            <option value="true">Yes</option>
-            <option value="false">No</option>
+            <option value="">{t("All")}</option>
+            <option value="true">{t("Yes")}</option>
+            <option value="false">{t("No")}</option>
           </select>
         </div>
       )}
@@ -129,7 +131,7 @@ export function FilterBar({
           onClick={onClear}
           className="flex items-center gap-1 mt-4 px-2 py-1 rounded-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) transition-colors"
         >
-          <X size={11} /> Clear
+          <X size={11} /> {t("Clear")}
         </button>
       )}
     </div>

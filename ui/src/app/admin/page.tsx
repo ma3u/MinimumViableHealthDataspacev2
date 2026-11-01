@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { SpeStatusCard } from "@/components/spe/SpeStatusCard";
+import { useT } from "@/lib/i18n/translate";
 
 interface Summary {
   totalTenants: number;
@@ -33,25 +34,33 @@ const ACTIVITY_LOG = [
     icon: Key,
     color: "text-(--accent)",
     title: "Security keys rotated",
-    sub: "Admin • 12m ago",
+    who: "Admin",
+    ago: "{n}m ago",
+    n: 12,
   },
   {
     icon: Shield,
     color: "text-(--success-text)",
     title: "New node authorized",
-    sub: "Frankfurt-Cluster-04 • 45m ago",
+    who: "Frankfurt-Cluster-04",
+    ago: "{n}m ago",
+    n: 45,
   },
   {
     icon: ShieldCheck,
     color: "text-(--danger-text)",
     title: "DDoS attempt mitigated",
-    sub: "Auto-Defense System • 1h ago",
+    who: "Auto-Defense System",
+    ago: "{n}h ago",
+    n: 1,
   },
   {
     icon: RefreshCw,
     color: "text-(--text-secondary)",
     title: "Scheduled Backup Complete",
-    sub: "System • 3h ago",
+    who: "System",
+    ago: "{n}h ago",
+    n: 3,
     dim: true,
   },
 ];
@@ -126,6 +135,7 @@ function generateReport(summary: Summary | null, policyCount: number | null) {
 }
 
 export default function AdminDashboard() {
+  const t = useT("admin");
   const [summary, setSummary] = useState<Summary | null>(null);
   const [policyCount, setPolicyCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -163,22 +173,22 @@ export default function AdminDashboard() {
         {/* ── Page header ── */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h1 className="page-header">System Overview</h1>
+            <h1 className="page-header">{t("System Overview")}</h1>
             <p className="text-(--text-secondary) text-lg mt-1">
-              EHDS Health Dataspace — Operator Control
+              {t("EHDS Health Dataspace: operator control")}
             </p>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 px-4 py-2 bg-(--success)/10 text-(--success-text) rounded-full border border-(--success)/20 text-sm font-bold tracking-tight">
               <span className="w-2 h-2 rounded-full bg-(--success) animate-pulse" />
-              SYSTEMS NOMINAL
+              {t("SYSTEMS NOMINAL")}
             </div>
             <button
               onClick={() => generateReport(summary, policyCount)}
               className="btn-gradient flex items-center gap-2 text-sm"
             >
               <Download size={16} />
-              Generate Report
+              {t("Generate Report")}
             </button>
           </div>
         </div>
@@ -186,7 +196,7 @@ export default function AdminDashboard() {
         {loading ? (
           <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
-            Loading dashboard…
+            {t("Loading dashboard…")}
           </div>
         ) : (
           <>
@@ -198,7 +208,7 @@ export default function AdminDashboard() {
                   icon: Building2,
                   iconColor: "text-(--accent)",
                   iconBg: "bg-(--accent)/5",
-                  label: "Tenants",
+                  label: t("Tenants"),
                   value: summary?.totalTenants ?? "—",
                   border: "border-l-(--accent)",
                 },
@@ -207,7 +217,7 @@ export default function AdminDashboard() {
                   icon: Users,
                   iconColor: "text-(--success-text)",
                   iconBg: "bg-(--success)/5",
-                  label: "Participants",
+                  label: t("Participants"),
                   value: summary?.totalParticipants ?? "—",
                   border: "border-l-(--success-text)",
                 },
@@ -216,7 +226,7 @@ export default function AdminDashboard() {
                   icon: ShieldCheck,
                   iconColor: "text-(--layer5-text)",
                   iconBg: "bg-(--layer5)/5",
-                  label: "Policies",
+                  label: t("Policies"),
                   value: policyCount ?? "—",
                   border: "border-l-(--layer5-text)",
                 },
@@ -225,7 +235,7 @@ export default function AdminDashboard() {
                   icon: ScrollText,
                   iconColor: "text-(--warning-text)",
                   iconBg: "bg-(--warning)/5",
-                  label: "Audit Logs",
+                  label: t("Audit Logs"),
                   value: "→",
                   border: "border-l-(--warning-text)",
                 },
@@ -257,10 +267,10 @@ export default function AdminDashboard() {
                 <div className="flex justify-between items-start mb-6">
                   <div>
                     <h2 className="text-xl font-bold tracking-tight text-(--text-primary)">
-                      Participants by EHDS Role
+                      {t("Participants by EHDS Role")}
                     </h2>
                     <p className="text-sm text-(--text-secondary) mt-0.5">
-                      Access control breakdown across the dataspace
+                      {t("Access control breakdown across the dataspace")}
                     </p>
                   </div>
                   <LayoutDashboard
@@ -288,13 +298,15 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-3 text-(--text-secondary)">
                     <FileKey2 size={18} />
                     <span className="text-sm">
-                      No role data available — connect to live stack
+                      {t("No role data available; connect to the live stack")}
                     </span>
                   </div>
                 )}
                 {/* EU data flow indicator strip */}
                 <div className="mt-6 pt-4 border-t border-(--border)">
-                  <p className="section-label mb-3">European data flow</p>
+                  <p className="section-label mb-3">
+                    {t("European data flow")}
+                  </p>
                   <div className="flex items-center gap-2 flex-wrap">
                     {[
                       {
@@ -352,7 +364,7 @@ export default function AdminDashboard() {
               <div className="flex flex-col gap-6">
                 {/* Quick ops */}
                 <div className="bg-(--surface-2) rounded-xl p-6">
-                  <p className="section-label">Quick Operations</p>
+                  <p className="section-label">{t("Quick Operations")}</p>
                   <div className="grid grid-cols-2 gap-3">
                     {QUICK_OPS.map(({ icon: Icon, label, href }) => (
                       <Link
@@ -365,7 +377,7 @@ export default function AdminDashboard() {
                           className="text-(--accent) group-hover:text-white mb-2"
                         />
                         <span className="text-xs font-bold text-center leading-tight">
-                          {label}
+                          {t(label)}
                         </span>
                       </Link>
                     ))}
@@ -374,7 +386,9 @@ export default function AdminDashboard() {
 
                 {/* Activity feed — Stitch activity-timeline pattern */}
                 <div className="flex-1 surface-card p-6 border border-(--border)">
-                  <p className="section-label">Administrative Activity</p>
+                  <p className="section-label">
+                    {t("Administrative Activity")}
+                  </p>
                   <div className="activity-timeline space-y-5 pl-7">
                     {ACTIVITY_LOG.map((item, i) => (
                       <div key={i} className="flex gap-3 items-start relative">
@@ -390,7 +404,7 @@ export default function AdminDashboard() {
                                 : "text-(--text-primary)"
                             }`}
                           >
-                            {item.title}
+                            {t(item.title)}
                           </p>
                           <p
                             className={`text-xs ${
@@ -399,7 +413,7 @@ export default function AdminDashboard() {
                                 : "text-(--text-secondary)"
                             }`}
                           >
-                            {item.sub}
+                            {item.who} • {t(item.ago, { n: item.n })}
                           </p>
                         </div>
                       </div>
@@ -420,16 +434,16 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg text-(--text-primary)">
-                    GDPR Compliance Check
+                    {t("GDPR Compliance Check")}
                   </h3>
                   <p className="text-sm text-(--text-secondary) mb-3">
-                    Next automated audit scheduled for next month.
+                    {t("Next automated audit scheduled for next month.")}
                   </p>
                   <Link
                     href="/compliance"
                     className="text-sm font-black text-(--success-text) hover:underline uppercase tracking-wider"
                   >
-                    RUN PRE-AUDIT NOW
+                    {t("RUN PRE-AUDIT NOW")}
                   </Link>
                 </div>
               </div>
@@ -439,16 +453,16 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg text-(--text-primary)">
-                    EDC Components
+                    {t("EDC Components")}
                   </h3>
                   <p className="text-sm text-(--text-secondary) mb-3">
-                    Monitor health, CPU &amp; memory per service.
+                    {t("Monitor health, CPU & memory per service.")}
                   </p>
                   <Link
                     href="/admin/components"
                     className="text-sm font-black text-(--accent) hover:underline uppercase tracking-wider"
                   >
-                    VIEW COMPONENTS
+                    {t("VIEW COMPONENTS")}
                   </Link>
                 </div>
               </div>
