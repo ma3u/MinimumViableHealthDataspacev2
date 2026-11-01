@@ -5,8 +5,9 @@ import {
   DocsLastUpdated,
   type DocsPage,
 } from "@/components/docs/DocsLastUpdated";
+import { LocalizedDocBody } from "@/components/docs/LocalizedDocBody";
 import MermaidDiagram from "@/components/MermaidDiagram";
-import { splitMermaid } from "@/lib/docs/markdown";
+import { docSegments } from "@/lib/docs/markdown";
 import { REPO_URL, type PublishedDoc } from "@/lib/docs/published-docs";
 
 /** One document published from docs/, rendered from its Markdown at build
@@ -22,18 +23,9 @@ export function PublishedDocPage({
   backLabel: string;
   lastUpdatedPage: DocsPage;
 }) {
-  // Images the documents embed are copied to public/published-docs by
-  // scripts/gen-docs-content.py and referenced through a placeholder, so the
-  // GitHub Pages build (basePath) and the hub (none) both find them.
-  const basePath =
-    process.env.NEXT_PUBLIC_STATIC_EXPORT === "true"
-      ? "/MinimumViableHealthDataspacev2"
-      : "";
-  const segments = splitMermaid(doc.markdown).map((seg) =>
-    seg.kind === "html"
-      ? { ...seg, html: seg.html.replaceAll("__BASE_PATH__/", `${basePath}/`) }
-      : seg,
-  );
+  // Images go through the base-path placeholder (docSegments). In another
+  // language LocalizedDocBody swaps in the translation (ADR-071).
+  const segments = docSegments(doc.markdown);
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
       <Link
@@ -56,17 +48,19 @@ export function PublishedDocPage({
       {/* A click on a diagram or screenshot opens it full screen with zoom. */}
       <article className="doc-prose" data-testid="published-doc">
         <DocFigureViewer>
-          {segments.map((seg, i) =>
-            seg.kind === "mermaid" ? (
-              <MermaidDiagram key={i} chart={seg.chart} />
-            ) : (
-              <div
-                key={i}
-                // The HTML comes from the repository's own Markdown, rendered at build time.
-                dangerouslySetInnerHTML={{ __html: seg.html }}
-              />
-            ),
-          )}
+          <LocalizedDocBody section={doc.section} slug={doc.slug}>
+            {segments.map((seg, i) =>
+              seg.kind === "mermaid" ? (
+                <MermaidDiagram key={i} chart={seg.chart} />
+              ) : (
+                <div
+                  key={i}
+                  // The HTML comes from the repository's own Markdown, rendered at build time.
+                  dangerouslySetInnerHTML={{ __html: seg.html }}
+                />
+              ),
+            )}
+          </LocalizedDocBody>
         </DocFigureViewer>
       </article>
     </div>

@@ -1,4 +1,5 @@
 import { Marked, type Tokens } from "marked";
+import { BASE_PATH } from "@/lib/static-export";
 
 /** GitHub's heading anchor: lower case, punctuation dropped, spaces to hyphens,
  *  so a link written against the file on GitHub lands on the same heading here. */
@@ -99,4 +100,17 @@ export function splitMermaid(markdown: string): DocSegment[] {
   if (rest.trim()) out.push({ kind: "html", html: renderMarkdown(rest) });
   numbering.on = false;
   return out;
+}
+
+/** A published document's segments, ready to show. Its images are copied to
+ *  public/published-docs by scripts/gen-docs-content.py and referenced
+ *  through the __BASE_PATH__ placeholder, so the static export (basePath)
+ *  and the hub (none) both find them. Used for the English body on the
+ *  server and for a translation fetched on the client (ADR-071). */
+export function docSegments(markdown: string): DocSegment[] {
+  return splitMermaid(markdown).map((seg) =>
+    seg.kind === "html"
+      ? { ...seg, html: seg.html.replaceAll("__BASE_PATH__/", `${BASE_PATH}/`) }
+      : seg,
+  );
 }

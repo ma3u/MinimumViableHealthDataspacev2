@@ -563,6 +563,12 @@
       "stage": "pre-commit"
     },
     {
+      "id": "localized-images",
+      "name": "Localized image manifest matches ui/public",
+      "source": "local",
+      "stage": "pre-commit"
+    },
+    {
       "id": "bruno-coverage",
       "name": "API collection covers every route, and can fail",
       "source": "local",
@@ -1167,6 +1173,12 @@
       "file": "ADR-070-the-interface-follows-the-language-picker-without-locale-urls.md",
       "title": "ADR-070-the-interface-follows-the-language-picker-without-locale-urls.md",
       "status": ""
+    },
+    {
+      "id": "ADR-071",
+      "file": "ADR-071-the-documentation-follows-the-language-picker.md",
+      "title": "ADR-071-the-documentation-follows-the-language-picker.md",
+      "status": ""
     }
   ],
   "complianceFloors": {
@@ -1267,14 +1279,14 @@
     "/docs/developer/reference": "2026-11-01",
     "/docs/architecture": "2026-11-01",
     "/docs/security": "2026-10-31",
-    "/docs/security/[slug]": "2026-10-31",
+    "/docs/security/[slug]": "2026-11-01",
     "/docs/klarbefund": "2026-10-31",
     "/docs/ehds": "2026-11-01",
     "/docs/ehds/glossary": "2026-11-01",
-    "/docs/ehds/[slug]": "2026-10-31",
+    "/docs/ehds/[slug]": "2026-11-01",
     "/docs/roadmap": "2026-10-28",
     "/docs/operations": "2026-10-31",
-    "/docs/operations/[slug]": "2026-10-31",
-    "/docs/klarbefund/[slug]": "2026-10-31"
+    "/docs/operations/[slug]": "2026-11-01",
+    "/docs/klarbefund/[slug]": "2026-11-01"
   }
 }
