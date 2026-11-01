@@ -1,9 +1,9 @@
 /**
  * Issue #782, phase 1: dataset descriptions in more than one language and
- * the national implementation profiles (J1006 to J1012).
+ * the national implementation profiles (J1006 to J1013).
  *
  * The catalogue shows a dataset's title and description in the language a
- * visitor chooses and falls back to English, marked as such; the HealthDCAT-AP
+ * visitor picks in the menu bar and falls back to English, marked as such; the HealthDCAT-AP
  * description tags each value with its language. /jurisdictions shows how DE,
  * AT, BE, FR, NL and ES implement secondary use, and which of the hub's
  * fictional access bodies acts under which.
@@ -25,36 +25,25 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("Issue #782 · multilingual catalogue, national profiles", () => {
-  test("J1006 the catalogue switches its descriptions to German and back", async ({
+  test("J1006 the language picker in the menu switches the catalogue to German and back", async ({
     page,
   }) => {
     await skipIfKeycloakDown();
     await loginAs(page, "researcher", "researcher");
     await page.goto("/catalog");
-    const group = page.getByRole("group", {
-      name: "Language of the dataset descriptions",
+    await expect(page.locator("h3 [lang]").first()).toBeVisible({
+      timeout: 20_000,
     });
-    await expect(group).toBeVisible({ timeout: 20_000 });
 
-    await group.getByRole("button", { name: "Deutsch" }).click();
-    await expect(
-      group.getByRole("button", { name: "Deutsch" }),
-    ).toHaveAttribute("aria-pressed", "true");
+    await languagePicker(page).selectOption("de");
     // At least one card title is now in German, and says so to a reader.
     await expect(page.locator('h3 [lang="de"]').first()).toBeVisible();
 
     // The choice is kept for the next visit.
     await page.reload();
-    await expect(
-      page
-        .getByRole("group", { name: "Language of the dataset descriptions" })
-        .getByRole("button", { name: "Deutsch" }),
-    ).toHaveAttribute("aria-pressed", "true", { timeout: 20_000 });
+    await expect(languagePicker(page)).toHaveValue("de", { timeout: 20_000 });
 
-    await page
-      .getByRole("group", { name: "Language of the dataset descriptions" })
-      .getByRole("button", { name: "English" })
-      .click();
+    await languagePicker(page).selectOption("en");
     await expect(page.locator('h3 [lang="de"]')).toHaveCount(0);
   });
 
@@ -138,11 +127,13 @@ test.describe("Issue #782 · multilingual catalogue, national profiles", () => {
     await skipIfKeycloakDown();
     await loginAs(page, "researcher", "researcher");
     await page.goto("/catalog");
-    const group = page.getByRole("group", {
-      name: "Language of the dataset descriptions",
+    const picker = languagePicker(page);
+    await expect(page.locator("h3 [lang]").first()).toBeVisible({
+      timeout: 20_000,
     });
-    await expect(group).toBeVisible({ timeout: 20_000 });
-    const names = await group.getByRole("button").allTextContents();
+    const names = (await picker.locator("option").allTextContents()).map((n) =>
+      n.trim(),
+    );
     // English plus at least German; French and Dutch where datasets have them.
     expect(names[0]).toBe("English");
     expect(names).toContain("Deutsch");
@@ -156,11 +147,8 @@ test.describe("Issue #782 · multilingual catalogue, national profiles", () => {
     };
     for (const name of names) {
       const lang = CODES[name];
-      await group.getByRole("button", { name }).click();
-      await expect(group.getByRole("button", { name })).toHaveAttribute(
-        "aria-pressed",
-        "true",
-      );
+      await picker.selectOption(lang);
+      await expect(picker).toHaveValue(lang);
       const titles = page.locator("h3 [lang]");
       await expect(titles.first()).toBeVisible();
       const langs = await titles.evaluateAll((els) =>
@@ -217,6 +205,36 @@ test.describe("Issue #782 · multilingual catalogue, national profiles", () => {
     }
   });
 });
+
+test.describe("Issue #782 · the browser's language", () => {
+  test.use({ locale: "de-DE" });
+
+  test("J1013 a German browser sees German descriptions; ?lang=en and a stored choice win", async ({
+    page,
+  }) => {
+    await skipIfKeycloakDown();
+    await loginAs(page, "researcher", "researcher");
+
+    await page.goto("/catalog");
+    await expect(languagePicker(page)).toHaveValue("de", { timeout: 20_000 });
+    await expect(page.locator('h3 [lang="de"]').first()).toBeVisible();
+
+    // A shared English link stays English.
+    await page.goto("/catalog?lang=en");
+    await expect(languagePicker(page)).toHaveValue("en", { timeout: 20_000 });
+    await expect(page.locator('h3 [lang="de"]')).toHaveCount(0);
+
+    // So does a visitor who chose English once.
+    await languagePicker(page).selectOption("en");
+    await page.goto("/catalog");
+    await expect(languagePicker(page)).toHaveValue("en", { timeout: 20_000 });
+  });
+});
+
+/** The language picker in the menu bar (components/LanguagePicker.tsx). */
+function languagePicker(page: Page) {
+  return page.getByRole("combobox", { name: "Language" });
+}
 
 /** The marks shown for English fallbacks: one per title, plus one per
  * description that falls back too, so at least the titles' count. */

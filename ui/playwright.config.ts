@@ -25,6 +25,9 @@ export default defineConfig({
 
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3000",
+    // The catalogue picks its description language from the browser's
+    // (#782); every journey runs as an English browser unless it says not.
+    locale: "en-US",
     trace: "on-first-retry",
     screenshot: "on",
     video: "on-first-retry",

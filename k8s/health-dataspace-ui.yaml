@@ -4,13 +4,18 @@
 # to the local OrbStack k8s cluster.
 #
 # Deploy:
-#   docker build --platform linux/amd64 -t health-dataspace-ui:latest ./ui
+#   docker build -t health-dataspace-ui:2.0.0 ./ui
 #   kubectl apply -f k8s/health-dataspace-ui.yaml
 #
-# Access:
-#   http://health-dataspace.orbstack.local  (via OrbStack ingress)
-#   or: kubectl -n health-dataspace port-forward svc/health-dataspace-ui 3002:3000
-#       → http://localhost:3002
+# Access (checked 2026-11-01, #782): OrbStack's Kubernetes has no ingress
+# controller, so the Ingress below routes nothing until one is installed.
+# Keycloak accepts sign-in redirects to localhost:3000 and :3003 only
+# (jad/keycloak-realm.json), so stop the Compose UI and forward :3003:
+#   docker stop health-dataspace-ui
+#   kubectl -n health-dataspace port-forward svc/health-dataspace-ui 3003:3000
+#       → http://localhost:3003, and the journeys and Bruno run against it
+#         (NEXTAUTH_SECRET=<the value below> ./scripts/run-api-tests.sh Local)
+#   docker start health-dataspace-ui   # afterwards
 #
 # Neo4j must be reachable from the cluster. The Docker Compose neo4j container
 # is accessible from OrbStack k8s pods via host.docker.internal (or the bridge IP).
@@ -34,11 +39,13 @@ data:
   NEO4J_URI: "bolt://host.docker.internal:7687"
   NEO4J_USER: "neo4j"
   # Keycloak — connect to Docker Compose Keycloak if running, else skip auth
-  KEYCLOAK_ISSUER: "http://host.docker.internal:8080/realms/EDCV"
-  KEYCLOAK_PUBLIC_URL: "http://keycloak.localhost/realms/EDCV"
-  KEYCLOAK_CLIENT_ID: "ui"
-  NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL: "http://keycloak.localhost/realms/EDCV"
-  NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: "ui"
+  # The realm and client of jad/keycloak-realm.json, as docker-compose.yml.
+  KEYCLOAK_ISSUER: "http://host.docker.internal:8080/realms/edcv"
+  KEYCLOAK_INTERNAL_URL: "http://host.docker.internal:8080"
+  KEYCLOAK_PUBLIC_URL: "http://localhost:8080/realms/edcv"
+  KEYCLOAK_CLIENT_ID: "health-dataspace-ui"
+  NEXT_PUBLIC_KEYCLOAK_PUBLIC_URL: "http://localhost:8080/realms/edcv"
+  NEXT_PUBLIC_KEYCLOAK_CLIENT_ID: "health-dataspace-ui"
   # EDC-V APIs (via host.docker.internal — Docker Compose JAD stack ports)
   EDC_MANAGEMENT_URL: "http://host.docker.internal:11003"
   IDENTITYHUB_URL: "http://host.docker.internal:11005"
@@ -46,7 +53,7 @@ data:
   TENANT_MANAGER_URL: "http://host.docker.internal:11006"
   PROVISION_MANAGER_URL: "http://host.docker.internal:11007"
   NEO4J_PROXY_URL: "http://host.docker.internal:9090"
-  NEXTAUTH_URL: "http://health-dataspace.orbstack.local"
+  NEXTAUTH_URL: "http://localhost:3003"
   NEXT_PUBLIC_STATIC_EXPORT: "false"
   NODE_ENV: "production"
   # Force Next.js standalone to listen on all interfaces.
@@ -62,10 +69,11 @@ metadata:
   namespace: health-dataspace
 type: Opaque
 stringData:
-  # Default dev credentials — override in production
+  # The local dev defaults of docker-compose.yml; never for a real deployment.
   NEO4J_PASSWORD: "healthdataspace"
-  KEYCLOAK_CLIENT_SECRET: "ui-secret"
-  NEXTAUTH_SECRET: "health-dataspace-local-dev-secret-change-in-production"
+  KEYCLOAK_CLIENT_SECRET: "health-dataspace-ui-secret"
+  KEYCLOAK_ACCOUNT_SERVICE_SECRET: "dev-account-service-secret"
+  NEXTAUTH_SECRET: "health-dataspace-dev-secret-change-in-prod"
 
 ---
 apiVersion: apps/v1

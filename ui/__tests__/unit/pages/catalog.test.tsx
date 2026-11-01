@@ -6,7 +6,7 @@
  * API error fallback, and multiple datasets.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 // ── Mocks ────────────────────────────────────────────────────────────
@@ -37,6 +37,7 @@ vi.mock("@/components/MermaidDiagram", () => ({
 }));
 
 import CatalogPage from "@/app/catalog/page";
+import { setLanguage } from "@/lib/use-language";
 
 // ── Helpers ──────────────────────────────────────────────────────────
 function mockResponse(data: unknown) {
@@ -399,27 +400,15 @@ describe("CatalogPage in another language", () => {
     localStorage.clear();
   });
 
-  it("offers only the languages the datasets are described in", async () => {
-    mockFetchApi.mockReturnValue(mockResponse([translated, secondDataset]));
-    render(<CatalogPage />);
-    const group = await screen.findByRole("group", {
-      name: "Language of the dataset descriptions",
-    });
-    const buttons = Array.from(group.querySelectorAll("button")).map(
-      (b) => b.textContent,
-    );
-    expect(buttons).toEqual(["English", "Deutsch"]);
-  });
-
   it("shows the chosen language, and English with a mark where there is none", async () => {
-    const user = userEvent.setup();
     mockFetchApi.mockReturnValue(mockResponse([translated, secondDataset]));
     render(<CatalogPage />);
     await screen.findByText("Synthetic FHIR Patient Cohort");
 
-    await user.click(screen.getByRole("button", { name: "Deutsch" }));
+    // The picker in the menu bar sets it (components/LanguagePicker.tsx).
+    act(() => setLanguage("de"));
 
-    const title = screen.getByText("Synthetische FHIR-Patientenkohorte");
+    const title = await screen.findByText("Synthetische FHIR-Patientenkohorte");
     expect(title).toHaveAttribute("lang", "de");
     expect(
       screen.queryByText("Synthetic FHIR Patient Cohort"),
@@ -433,6 +422,33 @@ describe("CatalogPage in another language", () => {
       screen.getAllByLabelText("shown in English, no Deutsch text yet").length,
     ).toBeGreaterThan(0);
     expect(localStorage.getItem("catalog-metadata-language")).toBe("de");
+  });
+
+  it("starts in the browser's language when the visitor never chose", async () => {
+    const languages = vi
+      .spyOn(navigator, "languages", "get")
+      .mockReturnValue(["de-AT", "en"]);
+    mockFetchApi.mockReturnValue(mockResponse([translated]));
+    render(<CatalogPage />);
+    expect(
+      await screen.findByText("Synthetische FHIR-Patientenkohorte"),
+    ).toBeInTheDocument();
+    // Detected, not chosen: nothing is stored until the visitor picks.
+    expect(localStorage.getItem("catalog-metadata-language")).toBeNull();
+    languages.mockRestore();
+  });
+
+  it("keeps a stored English over a German browser", async () => {
+    localStorage.setItem("catalog-metadata-language", "en");
+    const languages = vi
+      .spyOn(navigator, "languages", "get")
+      .mockReturnValue(["de-DE"]);
+    mockFetchApi.mockReturnValue(mockResponse([translated]));
+    render(<CatalogPage />);
+    expect(
+      await screen.findByText("Synthetic FHIR Patient Cohort"),
+    ).toBeInTheDocument();
+    languages.mockRestore();
   });
 
   it("starts in the language chosen before", async () => {

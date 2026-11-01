@@ -85,19 +85,6 @@ export function localise(
   };
 }
 
-/** The languages, English first, that at least one dataset is described in. */
-export function languagesOf(
-  datasets: { translations?: Partial<Record<MetadataLanguage, Translation>> }[],
-): CatalogLanguage[] {
-  const found = new Set<MetadataLanguage>();
-  for (const d of datasets) {
-    for (const lang of METADATA_LANGUAGES) {
-      if (d.translations?.[lang]) found.add(lang);
-    }
-  }
-  return ["en", ...METADATA_LANGUAGES.filter((l) => found.has(l))];
-}
-
 /** Every text of a dataset in every language, for a search in any of them. */
 export function searchableText(d: {
   title?: string;
@@ -120,17 +107,56 @@ export function searchableText(d: {
 
 const STORAGE_KEY = "catalog-metadata-language";
 
-/** The language the visitor chose before, else English. */
-export function storedLanguage(): CatalogLanguage {
+/** The language the visitor chose before, or null when they never chose. */
+export function storedLanguage(): CatalogLanguage | null {
   try {
     const v = localStorage.getItem(STORAGE_KEY);
     if (v === "en" || METADATA_LANGUAGES.includes(v as MetadataLanguage)) {
       return v as CatalogLanguage;
     }
   } catch {
-    // no storage (private window): English
+    // no storage (private window): no choice on record
+  }
+  return null;
+}
+
+/**
+ * The first of the browser's languages the catalogue has descriptions in,
+ * by its primary subtag (de-AT is German), else English. Only a default:
+ * a choice the visitor made, or ?lang= in the address, wins over it.
+ */
+export function browserLanguage(
+  available: CatalogLanguage[],
+  preferred: readonly string[] = typeof navigator === "undefined"
+    ? []
+    : navigator.languages?.length
+      ? navigator.languages
+      : [navigator.language],
+): CatalogLanguage {
+  for (const tag of preferred) {
+    const primary = (tag ?? "").toLowerCase().split("-")[0];
+    if (available.includes(primary as CatalogLanguage)) {
+      return primary as CatalogLanguage;
+    }
   }
   return "en";
+}
+
+/**
+ * The language to show: ?lang= in the address (a shared link), else the
+ * visitor's stored choice, else the browser's language, else English. A
+ * language the catalogue has no descriptions in falls through to the next.
+ */
+export function initialLanguage(
+  available: CatalogLanguage[],
+  fromUrl: string | null,
+  stored: CatalogLanguage | null,
+  preferred?: readonly string[],
+): CatalogLanguage {
+  const url = (fromUrl ?? "").toLowerCase() as CatalogLanguage;
+  if (available.includes(url)) return url;
+  if (stored && available.includes(stored)) return stored;
+  return browserLanguage(available, preferred);
 }
 
 export function storeLanguage(lang: CatalogLanguage): void {
