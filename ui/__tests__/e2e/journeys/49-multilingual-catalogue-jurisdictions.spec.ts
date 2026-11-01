@@ -1,6 +1,6 @@
 /**
  * Issue #782, phase 1: dataset descriptions in more than one language and
- * the national implementation profiles (J1006 to J1010).
+ * the national implementation profiles (J1006 to J1012).
  *
  * The catalogue shows a dataset's title and description in the language a
  * visitor chooses and falls back to English, marked as such; the HealthDCAT-AP
@@ -11,7 +11,7 @@
  *   PLAYWRIGHT_BASE_URL=http://localhost:3003 \
  *     npx playwright test __tests__/e2e/journeys/49-multilingual-catalogue-jurisdictions.spec.ts
  */
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { apiGet, loginAs, skipIfKeycloakDown } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
@@ -131,4 +131,99 @@ test.describe("Issue #782 · multilingual catalogue, national profiles", () => {
     await link.click();
     await expect(page).toHaveURL(/\/jurisdictions#[a-z]{2}$/);
   });
+
+  test("J1011 the catalogue journey in every language it offers", async ({
+    page,
+  }, testInfo) => {
+    await skipIfKeycloakDown();
+    await loginAs(page, "researcher", "researcher");
+    await page.goto("/catalog");
+    const group = page.getByRole("group", {
+      name: "Language of the dataset descriptions",
+    });
+    await expect(group).toBeVisible({ timeout: 20_000 });
+    const names = await group.getByRole("button").allTextContents();
+    // English plus at least German; French and Dutch where datasets have them.
+    expect(names[0]).toBe("English");
+    expect(names).toContain("Deutsch");
+
+    const CODES: Record<string, string> = {
+      English: "en",
+      Deutsch: "de",
+      Français: "fr",
+      Nederlands: "nl",
+      Español: "es",
+    };
+    for (const name of names) {
+      const lang = CODES[name];
+      await group.getByRole("button", { name }).click();
+      await expect(group.getByRole("button", { name })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      const titles = page.locator("h3 [lang]");
+      await expect(titles.first()).toBeVisible();
+      const langs = await titles.evaluateAll((els) =>
+        els.map((e) => e.getAttribute("lang")),
+      );
+      // Every title is in the chosen language or, marked, in English.
+      expect(
+        langs.every((l) => l === lang || l === "en"),
+        name,
+      ).toBe(true);
+      if (lang === "en") {
+        await expect(page.getByLabel(/shown in English/)).toHaveCount(0);
+      } else {
+        expect(langs, `${name}: a title in ${lang}`).toContain(lang);
+        const fallbacks = langs.filter((l) => l === "en").length;
+        await expect(
+          page.getByLabel(`shown in English, no ${name} text yet`),
+        ).toHaveCount(await countMarks(page, name, fallbacks));
+      }
+      // The detail of the first dataset carries the same language.
+      await page.getByTitle("View HealthDCAT-AP metadata").first().click();
+      await expect(page.locator(".fixed [lang]").first()).toHaveAttribute(
+        "lang",
+        new RegExp(`^(${lang}|en)$`),
+      );
+      await page.getByRole("button", { name: "Close" }).click();
+      await page.screenshot({
+        path: testInfo.outputPath(`catalog-${lang}.png`),
+        fullPage: false,
+      });
+    }
+  });
+
+  test("J1012 the national profiles of every country, from the catalogue", async ({
+    page,
+  }) => {
+    await skipIfKeycloakDown();
+    await loginAs(page, "researcher", "researcher");
+    await page.goto("/catalog");
+    await page.getByRole("link", { name: /National EHDS rules/ }).click();
+    await expect(page).toHaveURL(/\/jurisdictions$/);
+    for (const code of ["DE", "AT", "BE", "FR", "NL", "ES"]) {
+      await page
+        .getByRole("navigation", { name: "Countries" })
+        .getByRole("link", { name: new RegExp(`^${code} ·`) })
+        .click();
+      await expect(page).toHaveURL(new RegExp(`#${code.toLowerCase()}$`));
+      const profile = page.getByTestId(`jurisdiction-${code}`);
+      await expect(profile).toBeInViewport();
+      // The national law is linked to its official source.
+      await expect(
+        profile.getByRole("link").filter({ hasText: /\S/ }).first(),
+      ).toHaveAttribute("href", /^https:\/\//);
+    }
+  });
 });
+
+/** The marks shown for English fallbacks: one per title, plus one per
+ * description that falls back too, so at least the titles' count. */
+async function countMarks(page: Page, name: string, titles: number) {
+  const marks = await page
+    .getByLabel(`shown in English, no ${name} text yet`)
+    .count();
+  expect(marks).toBeGreaterThanOrEqual(titles);
+  return marks;
+}

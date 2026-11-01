@@ -10,7 +10,7 @@
  */
 
 /** The languages a description can carry besides English, as in the proxy. */
-export const METADATA_LANGUAGES = ["de", "fr", "nl", "es"] as const;
+const METADATA_LANGUAGES = ["de", "fr", "nl", "es"] as const;
 export type MetadataLanguage = (typeof METADATA_LANGUAGES)[number];
 export type CatalogLanguage = "en" | MetadataLanguage;
 

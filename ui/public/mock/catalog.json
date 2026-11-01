@@ -190,7 +190,7 @@
     "translations": {
       "de": {
         "title": "Multizentrisches Prostatakrebsregister",
-        "description": "Föderiertes Register zu Behandlungsergebnissen bei Prostatakrebs von teilnehmenden EHDS-Dateninhabern. Enthält TNM-Stadien, Gleason-Scores, Behandlungsprotokolle und 5-Jahres-Überlebensdaten in HL7 FHIR R4."
+        "description": "Föderiertes Register zu Behandlungsergebnissen bei Prostatakrebs von teilnehmenden Gesundheitsdateninhabern. Enthält TNM-Stadien, Gleason-Scores, Behandlungsprotokolle und 5-Jahres-Überlebensdaten in HL7 FHIR R4."
       }
     },
     "accessBody": "MedReg DE",
@@ -486,7 +486,7 @@
     "translations": {
       "de": {
         "title": "Föderierter HealthDCAT-AP-Katalog",
-        "description": "Zusammengeführter HealthDCAT-AP-Metadatenkatalog mit den Datensatzbeschreibungen aller teilnehmenden EHDS-Dateninhaber für den grenzüberschreitenden Zugang zu Gesundheitsdaten."
+        "description": "Zusammengeführter HealthDCAT-AP-Metadatenkatalog mit den Datensatzbeschreibungen aller teilnehmenden Gesundheitsdateninhaber für den grenzüberschreitenden Zugang zu Gesundheitsdaten."
       }
     },
     "accessBody": "MedReg DE",
