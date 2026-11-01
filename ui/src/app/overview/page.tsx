@@ -25,16 +25,24 @@ import type {
   Severity,
 } from "@/lib/overview/types";
 import { IS_STATIC } from "@/lib/static-export";
+import { T, translate, useT } from "@/lib/i18n/translate";
+import { useLanguage } from "@/lib/use-language";
+
+function SceneLoading() {
+  const t = useT("explore");
+  return (
+    <div className="flex h-full items-center justify-center text-sm text-(--text-secondary)">
+      <Loader2 className="animate-spin mr-2" size={16} />{" "}
+      {t("Loading the scene")}
+    </div>
+  );
+}
 
 const OverviewScene = dynamic(
   () => import("@/components/overview/OverviewScene"),
   {
     ssr: false,
-    loading: () => (
-      <div className="flex h-full items-center justify-center text-sm text-(--text-secondary)">
-        <Loader2 className="animate-spin mr-2" size={16} /> Loading the scene
-      </div>
-    ),
+    loading: () => <SceneLoading />,
   },
 );
 
@@ -46,6 +54,14 @@ const PERSONAS = [
 ] as const;
 type Persona = (typeof PERSONAS)[number]["id"];
 
+/** What a signal's dot means, for a screen reader. */
+const SEVERITY_LABEL: Record<Severity, string> = {
+  bad: "Not in order",
+  warn: "At risk or due",
+  info: "Information",
+  ok: "In order",
+};
+
 const BADGE: Record<Severity, string> = {
   bad: "bg-red-500",
   warn: "bg-amber-500",
@@ -54,6 +70,8 @@ const BADGE: Record<Severity, string> = {
 };
 
 function OverviewContent() {
+  const t = useT("explore");
+  const lang = useLanguage();
   const searchParams = useSearchParams();
   const { data: session, status: sessionStatus } = useSession();
   const demoPersona = useDemoPersona();
@@ -166,26 +184,46 @@ function OverviewContent() {
 
   const selected = selectedId ? nodeById.get(selectedId) ?? null : null;
 
+  // The view's fixed texts (title, question, layers, legend) are the
+  // builders' (lib/overview) and are translated here; signals and node
+  // details carry values and stay as the API words them.
+  const shown = useMemo(
+    () =>
+      view && {
+        ...view,
+        layers: view.layers.map((l) => ({
+          ...l,
+          name: translate(lang, "explore", l.name),
+        })),
+      },
+    [view, lang],
+  );
+
   return (
     <div className="min-h-screen bg-(--bg)">
       <div className="w-full px-4 py-3">
         <header
           className="mb-3 flex flex-wrap items-baseline gap-x-4 gap-y-1"
-          title="The list on the left is the complete view; the scene is the same information in three dimensions and can be switched off. Article numbers follow Regulation (EU) 2025/327 as adopted."
+          title={t(
+            "The list on the left is the complete view; the scene is the same information in three dimensions and can be switched off. Article numbers follow Regulation (EU) 2025/327 as adopted.",
+          )}
         >
           <h1 className="text-lg font-semibold leading-tight">
-            {view?.title ?? "In one view"}
+            {t(view?.title ?? "In one view")}
           </h1>
           <p className="text-sm text-(--text-secondary)">
-            {view?.question ??
-              "Each persona sees the state that matters to them: what is out of range, what is due, what is broken, and what to do next."}
+            {view?.question
+              ? t(view.question)
+              : t(
+                  "Each persona sees the state that matters to them: what is out of range, what is due, what is broken, and what to do next.",
+                )}
           </p>
         </header>
 
         {isAdmin && (
           <nav
             className="mb-4 flex flex-wrap gap-2 text-sm"
-            aria-label="Persona"
+            aria-label={t("Persona")}
           >
             {PERSONAS.map((p) => (
               <Link
@@ -198,7 +236,7 @@ function OverviewContent() {
                 }`}
                 aria-current={p.id === persona ? "page" : undefined}
               >
-                {p.label}
+                {t(p.label)}
               </Link>
             ))}
           </nav>
@@ -209,7 +247,8 @@ function OverviewContent() {
             className="flex items-center gap-2 text-sm text-(--text-secondary)"
             data-testid="overview-loading"
           >
-            <Loader2 className="animate-spin" size={16} /> Computing the view
+            <Loader2 className="animate-spin" size={16} />{" "}
+            {t("Computing the view")}
           </div>
         )}
 
@@ -221,22 +260,27 @@ function OverviewContent() {
             <p>{error.message}</p>
             {error.issue && (
               <p className="mt-1">
-                Tracked in{" "}
-                <a
-                  href={error.issue}
-                  className="underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <T
+                  area="explore"
+                  tags={{
+                    a: (
+                      <a
+                        href={error.issue}
+                        className="underline"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      />
+                    ),
+                  }}
                 >
-                  issue #271
-                </a>
-                .
+                  {"Tracked in <a>issue #271</a>."}
+                </T>
               </p>
             )}
           </div>
         )}
 
-        {view && !loading && (
+        {view && shown && !loading && (
           <div
             className={`grid gap-4 ${
               selected
@@ -247,13 +291,13 @@ function OverviewContent() {
             {/* ── left: the view as a list ───────────────────────────────── */}
             <aside className="rounded-lg border border-(--border) bg-(--surface-2) p-4 text-sm lg:max-h-[calc(100vh-120px)] lg:overflow-auto">
               <p className="font-medium" data-testid="overview-question">
-                {view.question}
+                {t(view.question)}
               </p>
               <p className="mt-1 text-xs text-(--text-secondary)">
                 {view.article}
               </p>
               <h2 className="mt-4 mb-2 text-xs uppercase tracking-wide text-(--text-secondary)">
-                In one view
+                {t("In one view")}
               </h2>
               <ul className="space-y-1" data-testid="overview-signals">
                 {view.signals.map((s, i) => (
@@ -275,7 +319,7 @@ function OverviewContent() {
                         className={`mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full ${
                           BADGE[s.severity]
                         }`}
-                        aria-label={s.severity}
+                        aria-label={t(SEVERITY_LABEL[s.severity])}
                       />
                       <span>
                         <span className="block">{s.text}</span>
@@ -290,7 +334,7 @@ function OverviewContent() {
                 ))}
               </ul>
               <h2 className="mt-4 mb-2 text-xs uppercase tracking-wide text-(--text-secondary)">
-                Legend
+                {t("Legend")}
               </h2>
               <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-(--text-secondary)">
                 {view.legend.map((l) => (
@@ -299,19 +343,20 @@ function OverviewContent() {
                       className="inline-block h-2.5 w-2.5 rounded-full"
                       style={{ background: l.color }}
                     />
-                    {l.text}
+                    {t(l.text)}
                   </span>
                 ))}
               </div>
               <p className="mt-4 text-xs text-(--text-secondary)">
-                As of {view.asOf}. {view.dataNote}
+                {t("As of {date}.", { date: view.asOf })}{" "}
+                {view.dataNote ? t(view.dataNote) : ""}
               </p>
             </aside>
 
             {/* ── centre: the scene ──────────────────────────────────────── */}
             <section className="relative min-h-[520px] lg:h-[calc(100vh-120px)] rounded-lg border border-(--border) overflow-hidden bg-[#0b1220]">
               <div className="absolute left-3 top-3 z-10 flex flex-col gap-1 pointer-events-none">
-                {[...view.layers]
+                {[...shown.layers]
                   .sort((a, b) => b.z - a.z)
                   .map((l) => (
                     <span
@@ -330,11 +375,11 @@ function OverviewContent() {
                 data-testid="overview-scene-toggle"
                 aria-pressed={showScene}
               >
-                {showScene ? "Scene off" : "Scene on"}
+                {showScene ? t("Scene off") : t("Scene on")}
               </button>
               {showScene ? (
                 <OverviewScene
-                  view={view}
+                  view={shown}
                   selectedId={selectedId}
                   expandedIds={expandedIds}
                   onSelect={select}
@@ -346,14 +391,18 @@ function OverviewContent() {
                   data-testid="overview-scene-off"
                 >
                   {reducedMotion
-                    ? "The animated scene is off because your system asks for reduced motion. The list on the left is the full view."
-                    : "The scene is off. The list on the left is the full view."}
+                    ? t(
+                        "The animated scene is off because your system asks for reduced motion. The list on the left is the full view.",
+                      )
+                    : t(
+                        "The scene is off. The list on the left is the full view.",
+                      )}
                 </div>
               )}
               <div className="absolute bottom-2 right-3 z-10 text-[11px] text-slate-400 pointer-events-none">
-                drag to orbit · wheel to zoom · click a node · arrows move ·
-                shift + arrows rotate · + and - zoom · space pauses · orbits on
-                its own after 30 s
+                {t(
+                  "drag to orbit · wheel to zoom · click a node · arrows move · shift + arrows rotate · + and - zoom · space pauses · orbits on its own after 30 s",
+                )}
               </div>
             </section>
 
@@ -374,11 +423,12 @@ function OverviewContent() {
 }
 
 export default function OverviewPage() {
+  const tc = useT("common");
   return (
     <Suspense
       fallback={
         <div className="min-h-screen bg-(--bg) p-6 text-sm text-(--text-secondary)">
-          Loading
+          {tc("Loading…")}
         </div>
       }
     >

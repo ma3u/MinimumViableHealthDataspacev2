@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import PageIntro from "@/components/PageIntro";
+import { T, useT } from "@/lib/i18n/translate";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 
@@ -65,13 +66,14 @@ function ScoreBadge({
   total: number;
   skipped?: number;
 }) {
+  const t = useT("explore");
   // When all tests are skipped, render a neutral "Skipped" badge instead of
   // a red "0/N (0%)" that visually screams failure even though nothing
   // actually failed.
   if (skipped > 0 && skipped === total) {
     return (
       <span className="text-xs font-mono px-2 py-0.5 rounded-sm border bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-700">
-        {skipped} skipped
+        {t("{n} skipped", { n: skipped })}
       </span>
     );
   }
@@ -97,17 +99,17 @@ const suiteLabels: Record<string, { title: string; description: string }> = {
   DSP: {
     title: "DSP 2025-1 Protocol",
     description:
-      "Dataspace Protocol — catalog, negotiation, transfer process, schema compliance",
+      "Dataspace Protocol: catalog, negotiation, transfer process, schema compliance",
   },
   DCP: {
     title: "DCP v1.0 Identity",
     description:
-      "Decentralized Claims Protocol — DIDs, key pairs, verifiable credentials, issuer service",
+      "Decentralized Claims Protocol: DIDs, key pairs, verifiable credentials, issuer service",
   },
   EHDS: {
     title: "EHDS Health Domain",
     description:
-      "European Health Data Space — HealthDCAT-AP, EEHRxF, OMOP CDM, Article 53 enforcement",
+      "European Health Data Space: HealthDCAT-AP, EEHRxF, OMOP CDM, Article 53 enforcement",
   },
 };
 
@@ -118,6 +120,7 @@ function SuiteCard({
   suiteKey: "DSP" | "DCP" | "EHDS";
   data: SuiteResult;
 }) {
+  const t = useT("explore");
   const [expanded, setExpanded] = useState(true);
   const meta = suiteLabels[suiteKey];
   const skipped = data.results.filter((r) => r.status === "skip").length;
@@ -144,10 +147,10 @@ function SuiteCard({
           />
           <div className="text-left">
             <span className="font-semibold text-(--text-primary)">
-              {meta.title}
+              {t(meta.title)}
             </span>
             <span className="block text-xs text-(--text-secondary)">
-              {meta.description}
+              {t(meta.description)}
             </span>
           </div>
         </div>
@@ -162,18 +165,18 @@ function SuiteCard({
                 {cat}
               </h4>
               <ul className="space-y-1.5">
-                {tests.map((t) => (
-                  <li key={t.id} className="flex items-start gap-2 text-sm">
-                    <StatusIcon status={t.status} />
+                {tests.map((test) => (
+                  <li key={test.id} className="flex items-start gap-2 text-sm">
+                    <StatusIcon status={test.status} />
                     <div>
                       <span className="text-(--text-primary)">
                         <span className="font-mono text-xs text-(--text-secondary) mr-1.5">
-                          {t.id}
+                          {test.id}
                         </span>
-                        {t.name}
+                        {test.name}
                       </span>
                       <span className="block text-xs text-(--text-secondary) mt-0.5">
-                        {t.detail}
+                        {test.detail}
                       </span>
                     </div>
                   </li>
@@ -190,6 +193,7 @@ function SuiteCard({
 /* ── Page ──────────────────────────────────────────────────────── */
 
 export default function ComplianceTckPage() {
+  const t = useT("explore");
   const [data, setData] = useState<TckData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -214,15 +218,22 @@ export default function ComplianceTckPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-1">
           <PageIntro
-            title="Protocol Compliance Dashboard"
+            title={t("Protocol Compliance Dashboard")}
             icon={ShieldCheck}
-            description="Run the DSP 2025-1 and DCP v1.0 Technology Compatibility Kit against your connectors. This dashboard validates that your EDC-V deployment correctly implements the Dataspace Protocol and Decentralized Claims Protocol."
-            prevStep={{ href: "/compliance", label: "EHDS Compliance" }}
-            nextStep={{ href: "/credentials", label: "Verifiable Credentials" }}
-            infoText="The TCK executes protocol-level tests covering catalog, negotiation, transfer, and identity resolution. Results indicate whether your connectors are interoperable with other EHDS participants."
+            description={t(
+              "Run the DSP 2025-1 and DCP v1.0 Technology Compatibility Kit against your connectors. This dashboard validates that your EDC-V deployment correctly implements the Dataspace Protocol and Decentralized Claims Protocol.",
+            )}
+            prevStep={{ href: "/compliance", label: t("EHDS Compliance") }}
+            nextStep={{
+              href: "/credentials",
+              label: t("Verifiable Credentials"),
+            }}
+            infoText={t(
+              "The TCK executes protocol-level tests covering catalog, negotiation, transfer, and identity resolution. Results indicate whether your connectors are interoperable with other EHDS participants.",
+            )}
             docLink={{
               href: "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
-              label: "Dataspace Protocol Spec",
+              label: t("Dataspace Protocol Spec"),
               external: true,
             }}
           />
@@ -232,7 +243,7 @@ export default function ComplianceTckPage() {
             className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-sm bg-(--surface-2) border border-(--border) text-(--text-primary) hover:bg-(--surface-2) disabled:opacity-50 transition-colors"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-            {loading ? "Running…" : "Re-run"}
+            {loading ? t("Running…") : t("Re-run")}
           </button>
         </div>
         <div className="flex items-center gap-3 mb-8 text-xs text-(--text-secondary)">
@@ -241,10 +252,14 @@ export default function ComplianceTckPage() {
             className="flex items-center gap-1 hover:text-(--text-primary) transition-colors"
           >
             <ExternalLink size={12} />
-            EHDS Approval Checker
+            {t("EHDS Approval Checker")}
           </Link>
           {data && (
-            <span>Last run: {new Date(data.timestamp).toLocaleString()}</span>
+            <span>
+              {t("Last run: {when}", {
+                when: new Date(data.timestamp).toLocaleString(),
+              })}
+            </span>
           )}
         </div>
 
@@ -261,8 +276,9 @@ export default function ComplianceTckPage() {
             <div className="flex items-center gap-3 mb-6 text-sm text-(--text-secondary)">
               <RefreshCw size={16} className="animate-spin" />
               <span>
-                Running 20 protocol probes against the live deployment — this
-                takes up to a minute on first load…
+                {t(
+                  "Running 20 protocol probes against the live deployment; this takes up to a minute on first load…",
+                )}
               </span>
             </div>
             <div className="space-y-4">
@@ -284,8 +300,9 @@ export default function ComplianceTckPage() {
               className="animate-spin text-(--text-primary)"
             />
             <span>
-              Re-running probes — current results may be stale until this
-              completes (typically 30-60 s).
+              {t(
+                "Re-running probes; current results may be stale until this completes (typically 30-60 s).",
+              )}
             </span>
           </div>
         )}
@@ -296,22 +313,22 @@ export default function ComplianceTckPage() {
             <div className="grid grid-cols-4 gap-4 mb-8">
               {[
                 {
-                  label: "Total",
+                  label: t("Total"),
                   value: data.summary.total,
                   color: "text-(--text-primary)",
                 },
                 {
-                  label: "Passed",
+                  label: t("Passed"),
                   value: data.summary.passed,
                   color: "text-(--success-text)",
                 },
                 {
-                  label: "Failed",
+                  label: t("Failed"),
                   value: data.summary.failed,
                   color: "text-(--danger-text)",
                 },
                 {
-                  label: "Skipped",
+                  label: t("Skipped"),
                   value: data.summary.skipped,
                   color: "text-(--warning-text)",
                 },
@@ -337,28 +354,35 @@ export default function ComplianceTckPage() {
             {data.summary.skipped > 0 && (
               <div className="mb-6 px-4 py-3 rounded-lg border border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/20 text-sm text-(--text-primary)">
                 <p className="font-medium mb-1">
-                  {data.summary.skipped} test
-                  {data.summary.skipped === 1 ? "" : "s"} skipped — EDC services
-                  not provisioned in this environment
+                  {data.summary.skipped === 1
+                    ? t(
+                        "1 test skipped: EDC services not provisioned in this environment",
+                      )
+                    : t(
+                        "{n} tests skipped: EDC services not provisioned in this environment",
+                        { n: data.summary.skipped },
+                      )}
                 </p>
                 <p className="text-xs text-(--text-secondary) leading-relaxed">
-                  The Azure Container Apps deployment doesn&apos;t currently
-                  host the EDC controlplane / IdentityHub / IssuerService
-                  (single-port ingress vs EDC&apos;s 4-port architecture — see
-                  ADR-012 follow-up). For full DSP/DCP validation, run the local
-                  Docker stack:{" "}
-                  <code className="font-mono text-[11px] bg-(--surface-2) px-1 py-0.5 rounded-sm">
-                    docker compose -f docker-compose.yml -f
-                    docker-compose.jad.yml up -d
-                  </code>
-                  .{" "}
+                  <T
+                    area="explore"
+                    tags={{
+                      code: (
+                        <code className="font-mono text-[11px] bg-(--surface-2) px-1 py-0.5 rounded-sm" />
+                      ),
+                    }}
+                  >
+                    {
+                      "The Azure Container Apps deployment doesn't currently host the EDC controlplane / IdentityHub / IssuerService (single-port ingress vs EDC's 4-port architecture, see ADR-012 follow-up). For full DSP/DCP validation, run the local Docker stack: <code>docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d</code>."
+                    }
+                  </T>{" "}
                   <a
                     href="https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/25"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-700 dark:text-blue-300 underline hover:no-underline"
                   >
-                    Tracking issue #25 ↗
+                    {t("Tracking issue #25 ↗")}
                   </a>
                 </p>
               </div>

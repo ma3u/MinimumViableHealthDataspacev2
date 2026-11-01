@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { DEMO_PERSONAS, ROLE_LABELS } from "@/lib/auth";
 import { setDemoPersona } from "@/lib/use-demo-persona";
+import { T, useT } from "@/lib/i18n/translate";
 
 /** Where each persona lands after selection */
 const PERSONA_HOME: Record<string, string> = {
@@ -48,6 +49,9 @@ const PERSONA_ICON: Record<string, React.ReactNode> = {
 };
 
 export default function DemoHubPage() {
+  const t = useT("explore");
+  const tc = useT("common");
+  const ts = useT("signin");
   const router = useRouter();
 
   function handleSelect(username: string, personaId: string) {
@@ -69,17 +73,19 @@ export default function DemoHubPage() {
       {/* Header */}
       <div className="flex items-center gap-3 mb-2">
         <Users size={28} className="text-blue-800 dark:text-blue-300" />
-        <h1 className="text-3xl font-bold">Demo Persona Selector</h1>
+        <h1 className="text-3xl font-bold">{t("Demo Persona Selector")}</h1>
       </div>
       <p className="text-(--text-secondary) mb-2">
-        Explore the Health Dataspace as any of the 7 demo participants — no
-        login required.
+        {t(
+          "Explore the Health Dataspace as any of the 7 demo participants, no login required.",
+        )}
       </p>
       <p className="text-sm text-(--text-secondary) mb-10">
-        Select a persona below. Navigation, data, and views will update to match
-        that participant&apos;s role. Switch anytime via the user menu{" "}
-        <span className="text-(--text-secondary)">→</span>{" "}
-        <em>Switch demo persona</em>.
+        <T area="explore" tags={{ em: <em /> }}>
+          {
+            "Select a persona below. Navigation, data, and views will update to match that participant's role. Switch anytime via the user menu → <em>Switch demo persona</em>."
+          }
+        </T>
       </p>
 
       {/* Featured journey CTA */}
@@ -97,11 +103,13 @@ export default function DemoHubPage() {
           </span>
           <div>
             <p className="font-bold text-lg text-(--text-primary)">
-              ▶ Maria&apos;s journey — the EHDS Patient Wallet
+              ▶ {t("Maria's journey: the EHDS Patient Wallet")}
             </p>
             <p className="text-sm text-(--text-secondary)">
-              Register with {CITIZEN_WALLET.name} → get your EHR → donate to
-              research → see your results
+              {t(
+                "Register with {wallet} → get your EHR → donate to research → see your results",
+                { wallet: CITIZEN_WALLET.name },
+              )}
             </p>
           </div>
         </div>
@@ -145,7 +153,7 @@ export default function DemoHubPage() {
 
               {/* Description */}
               <p className="text-xs text-(--text-secondary) mb-4 leading-relaxed">
-                {persona.description}
+                {ts(persona.description)}
               </p>
 
               {/* Role badges */}
@@ -158,7 +166,7 @@ export default function DemoHubPage() {
                       className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium border ${persona.badge}`}
                     >
                       <Shield size={8} />
-                      {ROLE_LABELS[r] ?? r}
+                      {ROLE_LABELS[r] ? tc(ROLE_LABELS[r]) : r}
                     </span>
                   ))}
                 {primaryRole === undefined &&
@@ -169,7 +177,7 @@ export default function DemoHubPage() {
                       className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-medium border ${persona.badge}`}
                     >
                       <Shield size={8} />
-                      Participant
+                      {tc("Participant")}
                     </span>
                   )}
               </div>
@@ -178,7 +186,7 @@ export default function DemoHubPage() {
               <div
                 className={`flex items-center gap-1 text-xs font-semibold ${persona.color} group-hover:gap-2 transition-all`}
               >
-                Start demo
+                {t("Start demo")}
                 <ArrowRight size={13} />
               </div>
             </button>
@@ -188,7 +196,9 @@ export default function DemoHubPage() {
 
       {/* Footer note */}
       <p className="mt-12 text-xs text-(--text-secondary) text-center">
-        Static demo — all data is synthetic. No login, no real patient records.
+        {t(
+          "Static demo: all data is synthetic. No login, no real patient records.",
+        )}
         <br />
         EHDS Art. 3 · GDPR Art. 15-22 · DSP 2025-1 · FHIR R4 · OMOP CDM
       </p>

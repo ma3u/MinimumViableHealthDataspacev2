@@ -10,6 +10,14 @@ import Link from "next/link";
 import { X } from "lucide-react";
 import { isOutOfRange, trendOf } from "@/lib/overview/derive";
 import type { OverviewNode } from "@/lib/overview/types";
+import { useT } from "@/lib/i18n/translate";
+
+/** A trend's direction in words, before "from {first} over {months} months". */
+const TREND_WORDS: Record<string, string> = {
+  rising: "rising",
+  falling: "falling",
+  stable: "stable",
+};
 
 const DIR_CLASS: Record<string, string> = {
   bad: "border-red-500 text-red-600 dark:text-red-400",
@@ -19,6 +27,7 @@ const DIR_CLASS: Record<string, string> = {
 };
 
 function SeriesChart({ node }: { node: OverviewNode }) {
+  const t = useT("explore");
   const pts = node.series ?? [];
   if (pts.length < 2) return null;
   const W = 340;
@@ -52,7 +61,9 @@ function SeriesChart({ node }: { node: OverviewNode }) {
       className="w-full h-[170px] block my-1"
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label={`${node.measure ?? node.label} over time`}
+      aria-label={t("{measure} over time", {
+        measure: node.measure ?? node.label,
+      })}
       data-testid="overview-chart"
     >
       <rect
@@ -125,6 +136,7 @@ export default function OverviewDetail({
   onClose,
   onToggleExpand,
 }: OverviewDetailProps) {
+  const t = useT("explore");
   const trend =
     node.series && node.series.length > 1
       ? trendOf(node.series, {
@@ -136,7 +148,7 @@ export default function OverviewDetail({
     <aside
       className="rounded-lg border border-(--border) bg-(--surface-2) p-4 text-sm overflow-auto lg:max-h-[calc(100vh-120px)]"
       data-testid="overview-detail"
-      aria-label={`Details: ${node.title ?? node.label}`}
+      aria-label={t("Details: {name}", { name: node.title ?? node.label })}
     >
       <div className="flex items-start justify-between gap-2">
         <div>
@@ -154,7 +166,7 @@ export default function OverviewDetail({
           type="button"
           onClick={onClose}
           className="p-1 rounded-sm hover:bg-(--bg)"
-          aria-label="Close details"
+          aria-label={t("Close details")}
         >
           <X size={16} />
         </button>
@@ -181,16 +193,20 @@ export default function OverviewDetail({
               }`}
               data-severity={trend.severity}
             >
-              {trend.dir}
               {trend.dir === "stable"
-                ? ""
-                : ` from ${trend.first} over ${trend.months} months`}
+                ? t(TREND_WORDS.stable)
+                : t("{dir} from {first} over {months} months", {
+                    dir: t(TREND_WORDS[trend.dir] ?? trend.dir),
+                    first: trend.first,
+                    months: trend.months,
+                  })}
             </span>
           </div>
           <SeriesChart node={node} />
           <div className="text-xs text-(--text-secondary)">
-            Reference {node.range?.text ?? "n/a"}. Green band: the expected
-            range.{" "}
+            {t("Reference {range}. Green band: the expected range.", {
+              range: node.range?.text ?? t("n/a"),
+            })}{" "}
             {node.expand && (
               <button
                 type="button"
@@ -199,16 +215,16 @@ export default function OverviewDetail({
                 data-testid="overview-toggle-expand"
               >
                 {expanded
-                  ? "Fold the single values back into the node."
-                  : "Unfold the single values as nodes."}
+                  ? t("Fold the single values back into the node.")
+                  : t("Unfold the single values as nodes.")}
               </button>
             )}
           </div>
           <table className="mt-2 w-full text-xs" data-testid="overview-series">
             <thead>
               <tr className="text-left text-(--text-secondary)">
-                <th className="pr-3 font-medium">Date</th>
-                <th className="font-medium">Value</th>
+                <th className="pr-3 font-medium">{t("Date")}</th>
+                <th className="font-medium">{t("Value")}</th>
               </tr>
             </thead>
             <tbody>
@@ -257,7 +273,7 @@ export default function OverviewDetail({
               href={l.href}
               className="underline text-(--accent)"
             >
-              {l.text}
+              {t(l.text)}
             </Link>
           ))}
         </div>

@@ -35,6 +35,7 @@ import type {
   OverviewNode,
   OverviewView,
 } from "@/lib/overview/types";
+import { useT } from "@/lib/i18n/translate";
 
 const STATUS_COLOR: Record<string, string> = {
   ok: "#22c55e",
@@ -219,6 +220,7 @@ export default function OverviewScene({
   onSelect,
   className,
 }: OverviewSceneProps) {
+  const t = useT("explore");
   const ref = useRef<HTMLDivElement>(null);
   const state = useRef<SceneState | null>(null);
   const onSelectRef = useRef(onSelect);
@@ -565,7 +567,9 @@ export default function OverviewScene({
       className={className}
       data-testid="overview-canvas"
       role="img"
-      aria-label="Layered 3D scene of the overview; every node is also in the list"
+      aria-label={t(
+        "Layered 3D scene of the overview; every node is also in the list",
+      )}
     />
   );
 }
