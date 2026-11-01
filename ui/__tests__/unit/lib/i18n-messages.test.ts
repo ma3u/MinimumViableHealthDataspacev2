@@ -104,6 +104,12 @@ describe("the code and the dictionaries", () => {
     "src/app/auth/signin/page.tsx",
     "src/app/catalog/page.tsx",
     "src/app/jurisdictions/page.tsx",
+    "src/app/page.tsx",
+    "src/components/FeatureCardGrid.tsx",
+    "src/components/PersonaJourneyCards.tsx",
+    "src/components/HomeRegisterCta.tsx",
+    "src/components/DemoPersonaCards.tsx",
+    "src/components/KlarbefundShowcase.tsx",
   ];
   const known = new Set(AREAS.flatMap((a) => Object.keys(MESSAGES.en[a])));
 
@@ -111,7 +117,13 @@ describe("the code and the dictionaries", () => {
     const unknown: string[] = [];
     for (const f of files) {
       const src = readFileSync(path.resolve(f), "utf8");
-      for (const m of src.matchAll(/\bt[c]?\(\s*"((?:[^"\\]|\\.)*)"/g)) {
+      for (const m of src.matchAll(/\bt[cs]?\(\s*"((?:[^"\\]|\\.)*)"/g)) {
+        if (!known.has(m[1])) unknown.push(`${f}: ${m[1]}`);
+      }
+      // <T area="...">{"..."}</T>, the server components' form.
+      for (const m of src.matchAll(
+        /<T\b[^>]*>\s*\{\s*"((?:[^"\\]|\\.)*)"\s*\}/g,
+      )) {
         if (!known.has(m[1])) unknown.push(`${f}: ${m[1]}`);
       }
     }
@@ -126,6 +138,23 @@ describe("the code and the dictionaries", () => {
     const labels = [...nav.matchAll(/label: "([^"]+)"/g)].map((m) => m[1]);
     expect(labels.length).toBeGreaterThan(50);
     expect(labels.filter((l) => !(l in MESSAGES.en.nav))).toEqual([]);
+  });
+
+  it("knows every feature card and persona journey step of the start page", () => {
+    for (const f of [
+      "src/components/FeatureCardGrid.tsx",
+      "src/components/PersonaJourneyCards.tsx",
+    ]) {
+      const src = readFileSync(path.resolve(f), "utf8");
+      const texts = [
+        ...src.matchAll(/\b(?:label|desc|action|role): "([^"]+)"/g),
+      ].map((m) => m[1]);
+      expect(texts.length, f).toBeGreaterThan(10);
+      expect(
+        texts.filter((x) => !(x in MESSAGES.en.home)),
+        f,
+      ).toEqual([]);
+    }
   });
 
   it("knows every persona description of the sign-in page", async () => {

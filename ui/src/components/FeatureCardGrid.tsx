@@ -25,6 +25,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { IS_STATIC } from "@/lib/static-export";
+import { useT } from "@/lib/i18n/translate";
 
 /** Routes that are most relevant for each role. */
 const ROLE_PATHS: Record<string, string[]> = {
@@ -250,6 +251,7 @@ export function FeatureCardGrid({
   section: "explore" | "exchange" | "govern";
   delay: number;
 }) {
+  const t = useT("home");
   const { data: session } = useSession();
   const demoPersona = useDemoPersona();
 
@@ -296,7 +298,7 @@ export function FeatureCardGrid({
                 <Icon size={22} strokeWidth={1.8} aria-hidden="true" />
               </span>
               <span className="font-semibold text-base leading-snug text-gray-900 dark:text-gray-100">
-                {label}
+                {t(label)}
               </span>
               {isRelevant && (
                 <span
@@ -312,7 +314,7 @@ export function FeatureCardGrid({
               )}
             </div>
             <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-              {desc}
+              {t(desc)}
             </p>
           </Link>
         );

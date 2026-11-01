@@ -2,7 +2,7 @@
  * Tests for the Home page (ui/src/app/page.tsx)
  * Server component — static card grid with EHDS demo guide
  */
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 vi.mock("next/link", () => ({
@@ -209,7 +209,8 @@ describe("Home Page", () => {
   it("renders footer with linked regulation references", () => {
     render(<Home />);
     const footer = screen.getByRole("contentinfo");
-    expect(footer).toHaveTextContent(/EHDS Art/i);
+    // The chapters of Regulation (EU) 2025/327 the hub implements (#782).
+    expect(footer).toHaveTextContent(/EHDS Chapters II and IV/i);
     expect(footer).toHaveTextContent(/FHIR R4/i);
     // Footer references should be links
     const fhirLink = footer.querySelector('a[href*="hl7.org/fhir"]');

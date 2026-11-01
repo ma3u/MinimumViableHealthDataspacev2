@@ -13,9 +13,11 @@ import { ScanLine, ArrowRight, Info } from "lucide-react";
 import { RegisterDialog } from "@/components/RegisterDialog";
 import { setDemoPersona } from "@/lib/use-demo-persona";
 import { CITIZEN_WALLET } from "@/lib/wallet-config";
+import { useT } from "@/lib/i18n/translate";
 
 export function HomeRegisterCta() {
   const [open, setOpen] = useState(false);
+  const t = useT("home");
   const router = useRouter();
 
   const onComplete = () => {
@@ -41,7 +43,7 @@ export function HomeRegisterCta() {
         style={{ background: "linear-gradient(135deg,#7D3C98,#2471A3)" }}
       >
         <ScanLine size={20} aria-hidden="true" />
-        Register with {CITIZEN_WALLET.name}
+        {t("Register with {wallet}", { wallet: CITIZEN_WALLET.name })}
         <ArrowRight
           size={18}
           aria-hidden="true"
@@ -54,13 +56,14 @@ export function HomeRegisterCta() {
         className="inline-flex items-center gap-1.5 text-sm font-medium text-(--accent) hover:underline"
       >
         <Info size={15} aria-hidden="true" />
-        Why the patient journey needs an EUDI wallet
+        {t("Why the patient journey needs an EUDI wallet")}
       </Link>
       <Link
         href="/auth/eudi-qr?mode=login"
         className="inline-flex items-center gap-1.5 text-sm font-medium text-(--text-secondary) hover:text-(--accent) transition-colors"
       >
-        Already have it? Sign in <ArrowRight size={14} aria-hidden="true" />
+        {t("Already have it? Sign in")}{" "}
+        <ArrowRight size={14} aria-hidden="true" />
       </Link>
 
       {open && (
