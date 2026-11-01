@@ -12,6 +12,7 @@ import enCatalog from "./en/catalog.json";
 import enJurisdictions from "./en/jurisdictions.json";
 import enHome from "./en/home.json";
 import enPublic from "./en/public.json";
+import enCompliance from "./en/compliance.json";
 import deNav from "./de/nav.json";
 import deCommon from "./de/common.json";
 import deSignin from "./de/signin.json";
@@ -19,6 +20,7 @@ import deCatalog from "./de/catalog.json";
 import deJurisdictions from "./de/jurisdictions.json";
 import deHome from "./de/home.json";
 import dePublic from "./de/public.json";
+import deCompliance from "./de/compliance.json";
 import frNav from "./fr/nav.json";
 import frCommon from "./fr/common.json";
 import frSignin from "./fr/signin.json";
@@ -26,6 +28,7 @@ import frCatalog from "./fr/catalog.json";
 import frJurisdictions from "./fr/jurisdictions.json";
 import frHome from "./fr/home.json";
 import frPublic from "./fr/public.json";
+import frCompliance from "./fr/compliance.json";
 import nlNav from "./nl/nav.json";
 import nlCommon from "./nl/common.json";
 import nlSignin from "./nl/signin.json";
@@ -33,6 +36,7 @@ import nlCatalog from "./nl/catalog.json";
 import nlJurisdictions from "./nl/jurisdictions.json";
 import nlHome from "./nl/home.json";
 import nlPublic from "./nl/public.json";
+import nlCompliance from "./nl/compliance.json";
 import esNav from "./es/nav.json";
 import esCommon from "./es/common.json";
 import esSignin from "./es/signin.json";
@@ -40,6 +44,7 @@ import esCatalog from "./es/catalog.json";
 import esJurisdictions from "./es/jurisdictions.json";
 import esHome from "./es/home.json";
 import esPublic from "./es/public.json";
+import esCompliance from "./es/compliance.json";
 
 export type Area =
   | "nav"
@@ -48,7 +53,8 @@ export type Area =
   | "catalog"
   | "jurisdictions"
   | "home"
-  | "public";
+  | "public"
+  | "compliance";
 type Dictionary = Record<Area, Record<string, string>>;
 
 export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
@@ -60,6 +66,7 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     jurisdictions: enJurisdictions,
     home: enHome,
     public: enPublic,
+    compliance: enCompliance,
   },
   de: {
     nav: deNav,
@@ -69,6 +76,7 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     jurisdictions: deJurisdictions,
     home: deHome,
     public: dePublic,
+    compliance: deCompliance,
   },
   fr: {
     nav: frNav,
@@ -78,6 +86,7 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     jurisdictions: frJurisdictions,
     home: frHome,
     public: frPublic,
+    compliance: frCompliance,
   },
   nl: {
     nav: nlNav,
@@ -87,6 +96,7 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     jurisdictions: nlJurisdictions,
     home: nlHome,
     public: nlPublic,
+    compliance: nlCompliance,
   },
   es: {
     nav: esNav,
@@ -96,5 +106,6 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     jurisdictions: esJurisdictions,
     home: esHome,
     public: esPublic,
+    compliance: esCompliance,
   },
 };
