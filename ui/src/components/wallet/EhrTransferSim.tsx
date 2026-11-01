@@ -16,8 +16,10 @@ import { useState } from "react";
 import { WalletFlow } from "@/components/wallet/PhoneFrame";
 import { EHR_TRANSFER_STEPS } from "@/components/wallet/flows";
 import { insurer } from "@/lib/journey-config";
+import { useT } from "@/lib/i18n/translate";
 
 export function EhrTransferSim() {
+  const t = useT("explore");
   const [imgOk, setImgOk] = useState(true);
 
   if (insurer.screenshot && imgOk) {
@@ -43,7 +45,9 @@ export function EhrTransferSim() {
   return (
     <WalletFlow
       loop
-      ariaLabel={`Simulated ${insurer.short} ePA data transfer`}
+      ariaLabel={t("Simulated {insurer} ePA data transfer", {
+        insurer: insurer.short,
+      })}
       steps={EHR_TRANSFER_STEPS}
       brand={{ name: insurer.name, color: insurer.brand }}
     />

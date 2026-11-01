@@ -63,6 +63,8 @@ import {
   type PersonaId,
 } from "@/lib/graph-constants";
 import { IS_STATIC } from "@/lib/static-export";
+import { T, useT } from "@/lib/i18n/translate";
+import { graphKey } from "./_lib/graph-text";
 
 const ForceGraph2D = dynamic(() => import("react-force-graph-2d"), {
   ssr: false,
@@ -275,12 +277,13 @@ function mergeInto(
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function GraphPage() {
+  const tc = useT("common");
   return (
     <Suspense
       fallback={
         <div className="flex h-[calc(100vh-44px)] items-center justify-center text-(--text-secondary)">
           <Loader2 size={16} className="mr-2 animate-spin" />
-          Loading…
+          {tc("Loading…")}
         </div>
       }
     >
@@ -346,6 +349,26 @@ function GraphContent() {
   // where the graph loads with "default" before the session resolves.
   const derivedPersona = (sessionPersonaId || "default") as PersonaId;
   const activePersona: PersonaId = urlPersona ?? derivedPersona;
+
+  // ── The explorer's texts in the picked language (#782) ───────────────────
+  const t = useT("explore");
+  const tn = useT("nav");
+  /** A label from graph-constants, in the picked language. */
+  const tg = (text: string) => t(graphKey(text));
+  /** A node's name: the value centre's is ours to translate, the rest are data. */
+  const nodeName = (n: GraphNode) => (n.isValueCenter ? tg(n.name) : n.name);
+  /** A node type in plain words; an unknown Neo4j label stays as it is. */
+  const typeName = (label: string) =>
+    NODE_DISPLAY_NAMES[label] ? tg(NODE_DISPLAY_NAMES[label]) : label;
+  /** A relationship in plain words; an unknown type stays as it is. */
+  const relName = (type: string) =>
+    FRIENDLY_REL_NAMES[type] ? t(FRIENDLY_REL_NAMES[type]) : type;
+  /** A layer's name, as this persona calls it. */
+  const layerName = (layer: number) => {
+    const text =
+      PERSONA_LAYER_LABELS[activePersona]?.[layer] ?? LAYER_LABELS[layer];
+    return text ? tg(text) : "";
+  };
 
   const containerRef = useRef<HTMLDivElement>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -452,7 +475,7 @@ function GraphContent() {
         if (e.message === "UNAUTHENTICATED") {
           setError("UNAUTHENTICATED");
         } else {
-          setError("Neo4j unavailable — graph could not be loaded.");
+          setError("UNAVAILABLE");
         }
         setLoading(false);
       });
@@ -599,10 +622,13 @@ function GraphContent() {
     canvas.setAttribute("role", "img");
     canvas.setAttribute(
       "aria-label",
-      `Interactive force-directed knowledge graph showing ${data.nodes.length} nodes and ${data.links.length} links across 5 data layers`,
+      t(
+        "Interactive force-directed knowledge graph showing {nodes} nodes and {links} links across 5 data layers",
+        { nodes: data.nodes.length, links: data.links.length },
+      ),
     );
     canvas.setAttribute("tabIndex", "0");
-  }, [data.nodes.length, data.links.length]);
+  }, [data.nodes.length, data.links.length, t]);
 
   // ── Recalculate canvas dims when panels open/close ─────────────────────
   useEffect(() => {
@@ -790,14 +816,14 @@ function GraphContent() {
         ctx.font = `bold ${fs}px sans-serif`;
         ctx.fillStyle = isDark ? "#fff" : "#0f172a";
         ctx.textAlign = "center";
-        ctx.fillText(node.name, x, y + vcR + fs * 1.3);
+        ctx.fillText(nodeName(node), x, y + vcR + fs * 1.3);
 
         // Subtitle
         const sfs = Math.max(3, 9 / gs);
         ctx.font = `${sfs}px sans-serif`;
         ctx.fillStyle = isDark ? "#fbbf24" : "#b45309";
         ctx.fillText(
-          NODE_DISPLAY_NAMES[node.label] ?? "",
+          NODE_DISPLAY_NAMES[node.label] ? typeName(node.label) : "",
           x,
           y + vcR + fs * 1.3 + sfs * 1.4,
         );
@@ -903,11 +929,7 @@ function GraphContent() {
           const tfs = Math.max(2.5, 7 / gs);
           ctx.font = `${tfs}px sans-serif`;
           ctx.fillStyle = node.color;
-          ctx.fillText(
-            NODE_DISPLAY_NAMES[node.label] ?? node.label,
-            x,
-            y + r + fs * 1.3 + tfs * 1.4,
-          );
+          ctx.fillText(typeName(node.label), x, y + r + fs * 1.3 + tfs * 1.4);
         }
       }
       ctx.globalAlpha = 1;
@@ -945,8 +967,7 @@ function GraphContent() {
         // Label on golden line — hidden when filter active or node selected
         if (!selected && !filterLabelSet && gs >= 0.3) {
           const targetNode = t.isValueCenter ? s : t;
-          const typeLabel =
-            NODE_DISPLAY_NAMES[targetNode.label] ?? targetNode.label;
+          const typeLabel = typeName(targetNode.label);
           const mx = (s.x + t.x) / 2,
             my = ((s.y ?? 0) + (t.y ?? 0)) / 2;
           const fs = Math.max(3, 7 / gs);
@@ -1045,7 +1066,7 @@ function GraphContent() {
       if (showLabel) {
         // User-friendly relationship label
         const rawType = link.type;
-        const friendlyType = FRIENDLY_REL_NAMES[rawType] ?? rawType;
+        const friendlyType = relName(rawType);
         const mx = (s.x + t.x) / 2,
           my = ((s.y ?? 0) + (t.y ?? 0)) / 2;
         const fs = Math.max(3, 7 / gs);
@@ -1080,11 +1101,14 @@ function GraphContent() {
         className="absolute left-1/2 top-2 z-20 -translate-x-1/2 rounded-md border border-amber-400 bg-amber-50 px-3 py-1 text-xs text-amber-900 dark:bg-amber-900/30 dark:text-amber-200"
         role="note"
       >
-        This explorer is retired. The persona views live at{" "}
-        <a href="/overview" className="underline font-medium">
-          /overview
-        </a>
-        .
+        <T
+          area="explore"
+          tags={{ a: <a href="/overview" className="underline font-medium" /> }}
+        >
+          {
+            "This explorer is retired. The persona views live at <a>/overview</a>."
+          }
+        </T>
       </div>
       {/* Left sidebar — collapsible */}
       <aside
@@ -1096,7 +1120,9 @@ function GraphContent() {
         <button
           onClick={() => setLeftCollapsed((v) => !v)}
           className="flex items-center justify-center rounded-sm p-1 text-(--text-secondary) hover:text-(--text-primary) transition-colors"
-          aria-label={leftCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={
+            leftCollapsed ? t("Expand sidebar") : t("Collapse sidebar")
+          }
           aria-expanded={!leftCollapsed}
           aria-controls="graph-sidebar-panel"
         >
@@ -1112,10 +1138,13 @@ function GraphContent() {
             <div className="pb-2 border-b border-(--border)">
               <div className="flex items-baseline justify-between">
                 <h1 className="text-sm font-bold text-(--accent) leading-tight">
-                  Knowledge Graph
+                  {t("Knowledge Graph")}
                 </h1>
                 <span className="text-[10px] text-(--text-secondary) tabular-nums">
-                  {data.nodes.length} nodes · {data.links.length} links
+                  {t("{nodes} nodes · {links} links", {
+                    nodes: data.nodes.length,
+                    links: data.links.length,
+                  })}
                 </span>
               </div>
 
@@ -1128,7 +1157,7 @@ function GraphContent() {
                     <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-(--accent)">
                       <Icon size={10} />
                       <span className="font-semibold">
-                        {pv?.label ?? activePersona}
+                        {pv ? tg(pv.label) : activePersona}
                       </span>
                       {pv?.ehdsArticle && (
                         <span className="text-(--text-secondary)">
@@ -1147,8 +1176,8 @@ function GraphContent() {
                 type="search"
                 value={nodeSearch}
                 onChange={(e) => setNodeSearch(e.target.value)}
-                placeholder="e.g. Organization, Contract, Pseudonym…"
-                aria-label="Search graph nodes by name, type, or keyword"
+                placeholder={t("e.g. Organization, Contract, Pseudonym…")}
+                aria-label={t("Search graph nodes by name, type, or keyword")}
                 className="w-full px-3 py-1.5 text-xs bg-(--surface-card) border border-(--border-ui) rounded-lg text-(--text-primary) placeholder-(--text-secondary) outline-hidden focus:border-(--accent) transition-colors"
               />
               {nodeSearch.trim() &&
@@ -1161,6 +1190,8 @@ function GraphContent() {
                       (NODE_DISPLAY_NAMES[n.label] ?? "")
                         .toLowerCase()
                         .includes(q) ||
+                      typeName(n.label).toLowerCase().includes(q) ||
+                      nodeName(n).toLowerCase().includes(q) ||
                       (n.group ?? "").toLowerCase().includes(q),
                   );
                   return (
@@ -1168,8 +1199,9 @@ function GraphContent() {
                       {matches.length > 0 ? (
                         <>
                           <p className="text-[10px] text-(--text-secondary) px-2 py-0.5">
-                            {matches.length} result
-                            {matches.length !== 1 ? "s" : ""}
+                            {matches.length === 1
+                              ? t("1 result")
+                              : t("{n} results", { n: matches.length })}
                           </p>
                           {matches.slice(0, 15).map((n) => (
                             <button
@@ -1191,17 +1223,17 @@ function GraphContent() {
                                 }}
                               />
                               <span className="truncate text-(--text-primary) font-medium">
-                                {n.name}
+                                {nodeName(n)}
                               </span>
                               <span className="text-(--text-secondary) shrink-0 text-[10px]">
-                                {NODE_DISPLAY_NAMES[n.label] ?? n.label}
+                                {typeName(n.label)}
                               </span>
                             </button>
                           ))}
                         </>
                       ) : (
                         <p className="text-xs text-(--text-secondary) px-2 py-1">
-                          No nodes match &ldquo;{nodeSearch}&rdquo;
+                          {t("No nodes match “{q}”", { q: nodeSearch })}
                         </p>
                       )}
                     </div>
@@ -1211,7 +1243,7 @@ function GraphContent() {
 
             {/* ── Filter by question — most prominent section ── */}
             <div>
-              <p className="section-label">Ask the graph</p>
+              <p className="section-label">{t("Ask the graph")}</p>
               <div className="flex flex-col gap-0.5">
                 {(activePersona === "patient"
                   ? PATIENT_FILTER_PRESETS
@@ -1239,7 +1271,7 @@ function GraphContent() {
                                 ResearcherFilterPresetId),
                         )
                       }
-                      title={preset.description}
+                      title={tg(preset.description)}
                       className={`flex items-center gap-2 py-1.5 text-left text-xs transition-colors ${
                         isActive
                           ? "nav-item-active rounded-r"
@@ -1247,38 +1279,38 @@ function GraphContent() {
                       }`}
                     >
                       <Icon size={11} />
-                      <span className="leading-tight">{preset.label}</span>
+                      <span className="leading-tight">{tg(preset.label)}</span>
                     </button>
                   );
                 })}
               </div>
               {activeFilter && (
                 <p className="mt-1.5 px-2 py-1.5 text-[10px] text-(--text-secondary) bg-(--accent-surface) rounded-sm leading-snug">
-                  {
+                  {tg(
                     [
                       ...FILTER_PRESETS,
                       ...PATIENT_FILTER_PRESETS,
                       ...HOSPITAL_FILTER_PRESETS,
                       ...HDAB_FILTER_PRESETS,
                       ...RESEARCHER_FILTER_PRESETS,
-                    ].find((p) => p.id === activeFilter)?.description
-                  }
+                    ].find((p) => p.id === activeFilter)?.description ?? "",
+                  )}
                 </p>
               )}
             </div>
 
             {/* ── Quick links — compact icon row ── */}
             <div className="border-t border-(--border) pt-2">
-              <p className="section-label">Explore</p>
+              <p className="section-label">{tn("Explore")}</p>
               <div className="grid grid-cols-2 gap-1">
                 {[
-                  { href: "/catalog", icon: BookOpen, label: "Catalog" },
-                  { href: "/patient", icon: Activity, label: "Patients" },
+                  { href: "/catalog", icon: BookOpen, label: t("Catalog") },
+                  { href: "/patient", icon: Activity, label: t("Patients") },
                   { href: "/analytics", icon: Database, label: "OMOP" },
                   {
                     href: "/api/graph/validate",
                     icon: ShieldCheck,
-                    label: "Validate",
+                    label: t("Validate"),
                     external: true,
                   },
                 ].map(({ href, icon: Icon, label, external }) => (
@@ -1301,24 +1333,23 @@ function GraphContent() {
               open={!activeFilter}
             >
               <summary className="section-label cursor-pointer select-none hover:text-(--accent) transition-colors mb-1">
-                Legend
+                {t("Legend")}
               </summary>
               <div className="mt-2 space-y-3">
                 {/* Layer colors */}
                 <div>
                   <p className="text-[10px] text-(--text-secondary) uppercase tracking-wider font-semibold mb-1">
-                    Layers
+                    {t("Layers")}
                   </p>
-                  {Object.entries(LAYER_LABELS)
-                    .filter(([k]) => +k >= 1)
-                    .map(([k, v]) => {
-                      const personaLabel =
-                        PERSONA_LAYER_LABELS[activePersona]?.[+k] ?? v;
+                  {Object.keys(LAYER_LABELS)
+                    .filter((k) => +k >= 1)
+                    .map((k) => {
+                      const personaLabel = layerName(+k);
                       return (
                         <div
                           key={k}
                           className="mb-0.5 flex items-center gap-2 text-[11px] cursor-help"
-                          title={LAYER_TOOLTIPS[+k]}
+                          title={tg(LAYER_TOOLTIPS[+k] ?? "")}
                         >
                           <span
                             className="h-2 w-2 shrink-0 rounded-full"
@@ -1335,13 +1366,13 @@ function GraphContent() {
                 {/* Key actors */}
                 <div>
                   <p className="text-[10px] text-(--text-secondary) uppercase tracking-wider font-semibold mb-1">
-                    Key actors
+                    {t("Key actors")}
                   </p>
                   {ROLE_LEGEND.map(({ label, color, description, tooltip }) => (
                     <div
                       key={label}
                       className="mb-1 flex items-start gap-2 text-[11px] cursor-help"
-                      title={tooltip}
+                      title={tg(tooltip)}
                     >
                       <span
                         className="mt-0.5 h-2 w-2 shrink-0 rounded-full"
@@ -1350,11 +1381,11 @@ function GraphContent() {
                       />
                       <div>
                         <span className="font-medium text-(--text-primary)">
-                          {label}
+                          {tg(label)}
                         </span>
                         <span className="text-(--text-secondary)">
-                          {" "}
-                          — {description}
+                          {": "}
+                          {t(description)}
                         </span>
                       </div>
                     </div>
@@ -1371,7 +1402,7 @@ function GraphContent() {
                   className="mt-0.5 shrink-0 text-(--accent)"
                   aria-hidden="true"
                 />
-                Click a node to inspect, or pick a question above.
+                {t("Click a node to inspect, or pick a question above.")}
               </div>
             )}
           </div>
@@ -1383,26 +1414,33 @@ function GraphContent() {
         {loading ? (
           <div className="flex h-full items-center justify-center text-(--text-secondary)">
             <Loader2 size={14} className="mr-2 animate-spin" />
-            Loading {PERSONA_VALUE_NODES[activePersona]?.name ?? "graph"}…
+            {PERSONA_VALUE_NODES[activePersona]
+              ? t("Loading {name}…", {
+                  name: tg(PERSONA_VALUE_NODES[activePersona].name),
+                })
+              : t("Loading the graph…")}
           </div>
         ) : error === "UNAUTHENTICATED" ? (
           <div className="flex h-full flex-col items-center justify-center gap-4 text-(--text-secondary)">
-            <p className="text-lg">Sign in to explore the knowledge graph.</p>
+            <p className="text-lg">
+              {t("Sign in to explore the knowledge graph.")}
+            </p>
             <p className="text-sm text-(--text-secondary)">
-              The graph shows participants, data products, policies and clinical
-              entities scoped to your persona.
+              {t(
+                "The graph shows participants, data products, policies and clinical entities scoped to your persona.",
+              )}
             </p>
             <button
               type="button"
               onClick={() => signIn("keycloak")}
               className="rounded-sm bg-(--accent) px-4 py-2 text-sm font-medium text-white dark:text-(--bg) hover:opacity-90"
             >
-              Sign in
+              {tn("Sign in")}
             </button>
           </div>
         ) : error ? (
           <div className="flex h-full items-center justify-center text-(--text-secondary)">
-            {error}
+            {t("Neo4j unavailable: the graph could not be loaded.")}
           </div>
         ) : (
           <ForceGraph2D
@@ -1448,19 +1486,17 @@ function GraphContent() {
                 style={{ background: hoveredNode.color }}
               />
               <span className="truncate text-sm font-semibold text-(--text-primary)">
-                {hoveredNode.name}
+                {nodeName(hoveredNode)}
               </span>
             </div>
             <div className="mb-1 text-xs text-(--text-secondary)">
-              {NODE_DISPLAY_NAMES[hoveredNode.label] ?? hoveredNode.label}
+              {typeName(hoveredNode.label)}
               {" · "}
-              {(PERSONA_LAYER_LABELS[activePersona] ?? LAYER_LABELS)[
-                hoveredNode.layer
-              ] ?? LAYER_LABELS[hoveredNode.layer]}
+              {layerName(hoveredNode.layer)}
             </div>
             {NODE_TOOLTIPS[hoveredNode.label] && (
               <p className="text-xs leading-relaxed text-(--text-secondary)">
-                {NODE_TOOLTIPS[hoveredNode.label]}
+                {tg(NODE_TOOLTIPS[hoveredNode.label])}
               </p>
             )}
           </div>
@@ -1470,7 +1506,7 @@ function GraphContent() {
         {expanding && (
           <div className="pointer-events-none absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-(--surface)/90 px-3 py-1.5 text-xs text-(--text-secondary)">
             <Loader2 size={12} className="animate-spin" />
-            Loading neighbours…
+            {t("Loading neighbours…")}
           </div>
         )}
       </div>
@@ -1487,7 +1523,7 @@ function GraphContent() {
             onClick={() => setRightCollapsed((v) => !v)}
             className="flex w-full items-center justify-center border-b border-(--border) p-2 text-(--text-secondary) hover:text-(--text-primary) transition-colors"
             aria-label={
-              rightCollapsed ? "Expand inspector" : "Collapse inspector"
+              rightCollapsed ? t("Expand inspector") : t("Collapse inspector")
             }
             aria-expanded={!rightCollapsed}
             aria-controls="graph-inspector-panel"
@@ -1505,12 +1541,12 @@ function GraphContent() {
               <div className="border-b border-(--border) px-5 pt-5 pb-4">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-[10px] font-black text-(--text-secondary) uppercase tracking-widest">
-                    Entity Details
+                    {t("Entity Details")}
                   </p>
                   <button
                     onClick={() => setSelected(null)}
                     className="text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) rounded-lg p-1 transition-colors"
-                    aria-label="Close detail panel"
+                    aria-label={t("Close detail panel")}
                   >
                     <X size={14} aria-hidden="true" />
                   </button>
@@ -1525,9 +1561,13 @@ function GraphContent() {
                   <h2
                     className="text-xl font-black leading-tight tracking-tight wrap-break-word"
                     style={{ color: selected.color }}
-                    title={NODE_TOOLTIPS[selected.label]}
+                    title={
+                      NODE_TOOLTIPS[selected.label]
+                        ? tg(NODE_TOOLTIPS[selected.label])
+                        : undefined
+                    }
                   >
-                    {selected.name}
+                    {nodeName(selected)}
                   </h2>
                 </div>
 
@@ -1540,11 +1580,10 @@ function GraphContent() {
                       color: selected.color,
                     }}
                   >
-                    {NODE_DISPLAY_NAMES[selected.label] ?? selected.label}
+                    {typeName(selected.label)}
                   </span>
                   <span className="text-[10px] font-semibold text-(--text-secondary)">
-                    {PERSONA_LAYER_LABELS[activePersona]?.[selected.layer] ??
-                      LAYER_LABELS[selected.layer]}
+                    {layerName(selected.layer)}
                   </span>
                 </div>
               </div>
@@ -1561,8 +1600,8 @@ function GraphContent() {
                     setTimeout(() => setCopiedKey(null), 1500);
                   }}
                   className="shrink-0 text-(--text-secondary) hover:text-(--accent) transition-colors"
-                  title="Copy node ID"
-                  aria-label="Copy node ID"
+                  title={t("Copy node ID")}
+                  aria-label={t("Copy node ID")}
                 >
                   {copiedKey === "__id__" ? (
                     <Check size={12} className="text-(--success-text)" />
@@ -1587,7 +1626,7 @@ function GraphContent() {
                       )}`}
                       className="inline-flex items-center gap-1.5 text-[10px] font-bold text-(--layer2-text) bg-(--surface-2) px-2.5 py-1.5 rounded-full hover:bg-(--accent-surface) transition-colors"
                     >
-                      <BookOpen size={10} /> Dataset Catalog
+                      <BookOpen size={10} /> {tn("Dataset Catalog")}
                     </a>
                   )}
                   {(selected.layer === 3 || selected.layer === 4) && (
@@ -1595,7 +1634,7 @@ function GraphContent() {
                       href="/patient"
                       className="inline-flex items-center gap-1.5 text-[10px] font-bold text-(--layer3-text) bg-(--surface-2) px-2.5 py-1.5 rounded-full hover:bg-(--accent-surface) transition-colors"
                     >
-                      <Activity size={10} /> Patient Journey
+                      <Activity size={10} /> {tn("Patient Journey")}
                     </a>
                   )}
                   {selected.layer === 4 && (
@@ -1603,7 +1642,7 @@ function GraphContent() {
                       href="/analytics"
                       className="inline-flex items-center gap-1.5 text-[10px] font-bold text-(--layer4-text) bg-(--surface-2) px-2.5 py-1.5 rounded-full hover:bg-(--accent-surface) transition-colors"
                     >
-                      <Database size={10} /> OMOP Analytics
+                      <Database size={10} /> {tn("OMOP Analytics")}
                     </a>
                   )}
                   {(selected.label === "TrustCenter" ||
@@ -1613,7 +1652,7 @@ function GraphContent() {
                       href="/compliance#trust-center"
                       className="inline-flex items-center gap-1.5 text-[10px] font-bold text-(--layer1-text) bg-(--surface-2) px-2.5 py-1.5 rounded-full hover:bg-(--accent-surface) transition-colors"
                     >
-                      <Lock size={10} /> Trust Center
+                      <Lock size={10} /> {tn("Trust Center")}
                     </a>
                   )}
                 </div>
@@ -1625,11 +1664,13 @@ function GraphContent() {
                   {propsLoading ? (
                     <div className="flex items-center gap-2 text-xs text-(--text-secondary)">
                       <Loader2 size={12} className="animate-spin" />
-                      Loading properties…
+                      {t("Loading properties…")}
                     </div>
                   ) : nodeProps.length > 0 ? (
                     <>
-                      <p className="section-label mb-3">Graph Properties</p>
+                      <p className="section-label mb-3">
+                        {t("Graph Properties")}
+                      </p>
                       <div className="space-y-1.5">
                         {nodeProps.map((p) => {
                           const isUrl = p.value.startsWith("http");
@@ -1690,8 +1731,10 @@ function GraphContent() {
                                     setTimeout(() => setCopiedKey(null), 1500);
                                   }}
                                   className="shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity text-(--text-secondary) hover:text-(--accent)"
-                                  title={`Copy ${p.label}`}
-                                  aria-label={`Copy ${p.label}`}
+                                  title={t("Copy {name}", { name: p.label })}
+                                  aria-label={t("Copy {name}", {
+                                    name: p.label,
+                                  })}
                                 >
                                   {isCopied ? (
                                     <Check
@@ -1710,7 +1753,7 @@ function GraphContent() {
                     </>
                   ) : (
                     <p className="text-xs text-(--text-secondary) italic">
-                      No additional properties
+                      {t("No additional properties")}
                     </p>
                   )}
                 </div>
@@ -1720,8 +1763,9 @@ function GraphContent() {
               <div className="px-5 py-4 border-b border-(--border)">
                 {selected.isValueCenter ? (
                   <p className="text-xs text-(--warning-text) italic">
-                    {PERSONA_VALUE_NODES[activePersona]?.tooltip ??
-                      "Your starting point in the dataspace"}
+                    {PERSONA_VALUE_NODES[activePersona]
+                      ? tg(PERSONA_VALUE_NODES[activePersona].tooltip)
+                      : t("Your starting point in the dataspace")}
                   </p>
                 ) : !expandedIds.has(selected.id) ? (
                   <button
@@ -1732,19 +1776,19 @@ function GraphContent() {
                     {expanding === selected.id ? (
                       <>
                         <Loader2 size={12} className="animate-spin" />
-                        Expanding…
+                        {t("Expanding…")}
                       </>
                     ) : (
                       <>
                         <MousePointerClick size={12} />
-                        Expand Neighbours
+                        {t("Expand Neighbours")}
                       </>
                     )}
                   </button>
                 ) : (
                   <div className="flex items-center gap-2 text-xs text-(--text-secondary)">
                     <span className="w-2 h-2 rounded-full bg-(--success) animate-pulse shrink-0" />
-                    {neighbours.length} connections loaded
+                    {t("{n} connections loaded", { n: neighbours.length })}
                   </div>
                 )}
               </div>
@@ -1756,7 +1800,7 @@ function GraphContent() {
                   {neighbours.filter((nb) => nb.dir === "out").length > 0 && (
                     <div className="mb-5">
                       <div className="flex items-center gap-2 mb-2">
-                        <p className="section-label">Outgoing</p>
+                        <p className="section-label">{t("Outgoing")}</p>
                         <span className="text-[10px] font-bold text-(--text-secondary) bg-(--surface) px-1.5 py-0.5 rounded-full border border-(--border)">
                           {neighbours.filter((nb) => nb.dir === "out").length}
                         </span>
@@ -1775,14 +1819,14 @@ function GraphContent() {
                                 className="shrink-0 text-(--accent) opacity-60 group-hover:opacity-100"
                               />
                               <span className="shrink-0 font-mono text-[9px] font-black text-(--accent) bg-(--accent-surface) group-hover:bg-white/50 px-1.5 py-0.5 rounded-sm max-w-[90px] truncate">
-                                {FRIENDLY_REL_NAMES[nb.type] ?? nb.type}
+                                {relName(nb.type)}
                               </span>
                               <span
                                 className="h-2 w-2 shrink-0 rounded-full"
                                 style={{ background: nb.node.color }}
                               />
                               <span className="truncate text-xs text-(--text-primary) group-hover:text-(--accent) flex-1 text-left">
-                                {nb.node.name}
+                                {nodeName(nb.node)}
                               </span>
                               <ChevronRight
                                 size={10}
@@ -1798,7 +1842,7 @@ function GraphContent() {
                   {neighbours.filter((nb) => nb.dir === "in").length > 0 && (
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <p className="section-label">Incoming</p>
+                        <p className="section-label">{t("Incoming")}</p>
                         <span className="text-[10px] font-bold text-(--text-secondary) bg-(--surface) px-1.5 py-0.5 rounded-full border border-(--border)">
                           {neighbours.filter((nb) => nb.dir === "in").length}
                         </span>
@@ -1817,14 +1861,14 @@ function GraphContent() {
                                 className="shrink-0 text-(--layer3-text) opacity-60 group-hover:opacity-100"
                               />
                               <span className="shrink-0 font-mono text-[9px] font-black text-(--layer3-text) bg-(--surface-2) px-1.5 py-0.5 rounded-sm max-w-[90px] truncate">
-                                {FRIENDLY_REL_NAMES[nb.type] ?? nb.type}
+                                {relName(nb.type)}
                               </span>
                               <span
                                 className="h-2 w-2 shrink-0 rounded-full"
                                 style={{ background: nb.node.color }}
                               />
                               <span className="truncate text-xs text-(--text-primary) group-hover:text-(--accent) flex-1 text-left">
-                                {nb.node.name}
+                                {nodeName(nb.node)}
                               </span>
                               <ChevronRight
                                 size={10}

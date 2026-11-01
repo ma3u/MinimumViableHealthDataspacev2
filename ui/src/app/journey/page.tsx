@@ -35,6 +35,7 @@ import {
   Salad,
   Database,
 } from "lucide-react";
+import { useT } from "@/lib/i18n/translate";
 
 /** Per-step accent (matches the 5-layer graph palette). */
 const ACCENTS = ["#2471A3", "#148F77", "#1E8449", "#7D3C98"];
@@ -78,29 +79,32 @@ function Quote({ children }: { children: React.ReactNode }) {
 
 /** ── Slide 0 — title ─────────────────────────────────────────────────────── */
 function SlideIntro() {
+  const t = useT("explore");
   const steps = [
-    { n: 1, t: "Register", c: ACCENTS[0] },
-    { n: 2, t: "Get my EHR", c: ACCENTS[1] },
-    { n: 3, t: "Donate to research", c: ACCENTS[2] },
-    { n: 4, t: "See my results", c: ACCENTS[3] },
+    { n: 1, t: t("Register"), c: ACCENTS[0] },
+    { n: 2, t: t("Get my EHR"), c: ACCENTS[1] },
+    { n: 3, t: t("Donate to research"), c: ACCENTS[2] },
+    { n: 4, t: t("See my results"), c: ACCENTS[3] },
   ];
   return (
     <div className="text-center max-w-3xl mx-auto">
       <Reveal>
         <p className="uppercase tracking-[0.18em] text-sm font-semibold text-(--accent) mb-3">
-          EHDS Patient Wallet
+          {t("EHDS Patient Wallet")}
         </p>
       </Reveal>
       <Reveal delay={120}>
         <h1 className="font-extrabold text-[clamp(1.9rem,5.5vw,3.4rem)] leading-[1.05] text-(--text-primary) mb-4">
-          Maria takes control of
+          {t("Maria takes control of")}
           <br />
-          her health data
+          {t("her health data")}
         </h1>
       </Reveal>
       <Reveal delay={260}>
         <p className="text-[clamp(1rem,2.3vw,1.4rem)] text-(--text-secondary) mb-9">
-          From digital identity to personal research insights — in four steps.
+          {t(
+            "From digital identity to personal research insights, in four steps.",
+          )}
         </p>
       </Reveal>
       <Reveal delay={400}>
@@ -128,28 +132,33 @@ function SlideIntro() {
 
 /** ── Slide 1 — register via QR + the citizen wallet (d-you) ─────────────────────────────── */
 function SlideRegister() {
+  const t = useT("explore");
   const [mode, setMode] = useState<"register" | "login">("register");
   const isReg = mode === "register";
+  const wallet = CITIZEN_WALLET.name;
   return (
     <div className="max-w-5xl mx-auto w-full">
       <Reveal>
         <h2 className="font-extrabold text-[clamp(1.4rem,3.2vw,2.1rem)] leading-tight text-(--text-primary) mb-1 text-center">
-          {isReg ? "Register" : "Sign in"} with {CITIZEN_WALLET.name}, no
-          password
+          {isReg
+            ? t("Register with {wallet}, no password", { wallet })
+            : t("Sign in with {wallet}, no password", { wallet })}
         </h2>
       </Reveal>
       <Reveal delay={120} className="flex flex-col items-center gap-3 mb-4">
         <p className="text-center text-sm text-(--text-secondary)">
           {isReg
-            ? "First time: scan → approve → registered."
-            : "Returning: scan → approve → back in. The wallet skips the trust step."}{" "}
+            ? t("First time: scan → approve → registered.")
+            : t(
+                "Returning: scan → approve → back in. The wallet skips the trust step.",
+              )}{" "}
           · OpenID4VP · eIDAS 2.0
         </p>
         <div className="inline-flex rounded-full border border-(--border) p-1 bg-(--surface-2)">
           {(
             [
-              ["register", "First time · Register"],
-              ["login", "Returning · Login"],
+              ["register", t("First time · Register")],
+              ["login", t("Returning · Login")],
             ] as const
           ).map(([m, label]) => (
             <button
@@ -171,7 +180,7 @@ function SlideRegister() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`${BASE_PATH}/journey/qr-register.png`}
-              alt={`QR code to register with ${CITIZEN_WALLET.name}`}
+              alt={t("QR code to register with {wallet}", { wallet })}
               width={230}
               height={230}
               className="block w-[clamp(150px,24vw,230px)] h-auto"
@@ -179,10 +188,10 @@ function SlideRegister() {
           </div>
           <p className="mt-3 flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
             <ScanLine size={18} style={{ color: ACCENTS[0] }} />
-            Scan with {CITIZEN_WALLET.name}
+            {t("Scan with {wallet}", { wallet })}
           </p>
           <p className="text-xs text-(--text-secondary) mt-1">
-            Live flow → ehds.mabu.red/auth/eudi-qr
+            {t("Live flow")} → ehds.mabu.red/auth/eudi-qr
             {isReg ? "" : "?mode=login"}
           </p>
         </Reveal>
@@ -190,7 +199,11 @@ function SlideRegister() {
           <WalletFlow
             loop
             theme="dyou"
-            ariaLabel={`Simulated ${CITIZEN_WALLET.name} ${mode}`}
+            ariaLabel={
+              isReg
+                ? t("Simulated {wallet} registration", { wallet })
+                : t("Simulated {wallet} sign-in", { wallet })
+            }
             steps={isReg ? REGISTER_STEPS : LOGIN_STEPS}
           />
         </Reveal>
@@ -201,6 +214,7 @@ function SlideRegister() {
 
 /** ── Slide 2 — fetch EHR from health insurance ───────────────────────────── */
 function SlideEhr() {
+  const t = useT("explore");
   const [transferred, setTransferred] = useState(false);
   return (
     <div className="grid md:grid-cols-2 gap-8 items-center max-w-6xl mx-auto w-full">
@@ -215,14 +229,16 @@ function SlideEhr() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={`${BASE_PATH}/journey/app-profile.png`}
-                alt="Maria's electronic health record now in the portal, with cardiovascular and diabetes risk scores"
+                alt={t(
+                  "Maria's electronic health record now in the portal, with cardiovascular and diabetes risk scores",
+                )}
                 width={1280}
                 height={860}
                 className="block w-full h-auto"
               />
             </div>
             <p className="text-xs text-(--text-secondary) mt-2 text-center">
-              Now in the portal as FHIR R4 — synthetic data
+              {t("Now in the portal as FHIR R4, synthetic data")}
             </p>
           </div>
         ) : (
@@ -233,18 +249,20 @@ function SlideEhr() {
       <div className="order-1 md:order-2">
         <Reveal>
           <h2 className="font-extrabold text-[clamp(1.5rem,3.4vw,2.3rem)] leading-tight text-(--text-primary) mb-3">
-            Pull my record from my insurance
+            {t("Pull my record from my insurance")}
           </h2>
         </Reveal>
         <Reveal delay={180}>
-          <Quote>I need my data from my Electronic Health Record (ePA)!</Quote>
+          <Quote>
+            {t("I need my data from my Electronic Health Record (ePA)!")}
+          </Quote>
         </Reveal>
         <Reveal delay={320}>
           <div className="mt-5 flex items-center gap-2 text-sm text-(--text-secondary)">
             <Database size={16} style={{ color: ACCENTS[1] }} />
             <span>
               <strong className="text-(--text-primary)">{insurer.name}</strong>{" "}
-              (health insurance) · ePA / EHR via{" "}
+              {t("(health insurance) · ePA / EHR via")}{" "}
               <strong className="text-(--text-primary)">GesundheitsID</strong>
             </span>
           </div>
@@ -253,17 +271,17 @@ function SlideEhr() {
           <div className="mt-4 flex flex-wrap gap-2.5">
             {(
               [
-                { t: "Lab data", Icon: FlaskConical },
-                { t: "Fitness data", Icon: Activity },
-                { t: "Nutrition plan", Icon: Salad },
-              ] as { t: string; Icon: LucideIcon }[]
-            ).map(({ t, Icon }, i) => (
+                { text: t("Lab data"), Icon: FlaskConical },
+                { text: t("Fitness data"), Icon: Activity },
+                { text: t("Nutrition plan"), Icon: Salad },
+              ] as { text: string; Icon: LucideIcon }[]
+            ).map(({ text, Icon }, i) => (
               <span
                 key={i}
                 className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium border bg-(--surface-2)"
                 style={{ borderColor: ACCENTS[1], color: ACCENTS[1] }}
               >
-                <Icon size={15} /> {t}
+                <Icon size={15} /> {text}
               </span>
             ))}
           </div>
@@ -277,17 +295,19 @@ function SlideEhr() {
           >
             {transferred ? (
               <>
-                <ShieldCheck size={16} /> Transferred to the portal
+                <ShieldCheck size={16} /> {t("Transferred to the portal")}
               </>
             ) : (
               <>
-                Authorize the transfer <ArrowRight size={16} />
+                {t("Authorize the transfer")} <ArrowRight size={16} />
               </>
             )}
           </button>
           <p className="mt-2 text-xs text-(--text-secondary)">
-            GesundheitsID-authenticated · end-to-end encrypted · {insurer.short}{" "}
-            cannot read it · withdraw any time
+            {t(
+              "GesundheitsID-authenticated · end-to-end encrypted · {insurer} cannot read it · withdraw any time",
+              { insurer: insurer.short },
+            )}
           </p>
         </Reveal>
       </div>
@@ -308,6 +328,7 @@ const SOURCE_ICON: Record<DataSource["id"], LucideIcon> = {
  * the public default shows a brand-tinted icon tile with a generic label.
  */
 function SourceCard({ s }: { s: DataSource }) {
+  const t = useT("explore");
   const [imgOk, setImgOk] = useState(true);
   const Icon = SOURCE_ICON[s.id];
   return (
@@ -320,7 +341,10 @@ function SourceCard({ s }: { s: DataSource }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={s.screenshot}
-            alt={`${s.label} — ${s.sublabel} (real screenshot)`}
+            alt={t("{label}: {sublabel} (real screenshot)", {
+              label: t(s.label),
+              sublabel: t(s.sublabel),
+            })}
             onError={() => setImgOk(false)}
             className="w-full h-full object-cover object-top"
           />
@@ -341,10 +365,10 @@ function SourceCard({ s }: { s: DataSource }) {
         />
         <div className="min-w-0">
           <p className="text-xs font-semibold text-(--text-primary) truncate">
-            {s.label}
+            {t(s.label)}
           </p>
           <p className="text-[11px] text-(--text-secondary) truncate">
-            {s.sublabel}
+            {t(s.sublabel)}
           </p>
         </div>
       </div>
@@ -354,6 +378,7 @@ function SourceCard({ s }: { s: DataSource }) {
 
 /** ── Slide 3 — donate to research ────────────────────────────────────────── */
 function SlideDonate() {
+  const t = useT("explore");
   const programs = [
     {
       name: "European Cardiovascular Risk Study",
@@ -370,17 +395,19 @@ function SlideDonate() {
     <div className="max-w-5xl mx-auto w-full">
       <Reveal>
         <h2 className="font-extrabold text-[clamp(1.4rem,3.2vw,2.1rem)] leading-tight text-(--text-primary) mb-2 text-center">
-          Donate my data to research I care about
+          {t("Donate my data to research I care about")}
         </h2>
       </Reveal>
       <Reveal delay={140} className="text-center">
-        <Quote>I want to donate my data for specific research programs.</Quote>
+        <Quote>
+          {t("I want to donate my data for specific research programs.")}
+        </Quote>
       </Reveal>
 
       {/* the three real sources Maria contributes */}
       <Reveal delay={260} className="mt-5">
         <p className="text-center text-xs font-semibold uppercase tracking-[0.14em] text-(--text-secondary) mb-2.5">
-          Contributing my real data
+          {t("Contributing my real data")}
         </p>
         <div className="grid grid-cols-3 gap-3 max-w-3xl mx-auto">
           {donationSources.map((s) => (
@@ -392,7 +419,7 @@ function SlideDonate() {
       {/* into the programs she trusts */}
       <Reveal delay={420}>
         <p className="text-center text-xs font-semibold uppercase tracking-[0.14em] text-(--text-secondary) mt-5 mb-2.5">
-          into programs I trust
+          {t("into programs I trust")}
         </p>
       </Reveal>
       <div className="grid sm:grid-cols-2 gap-3">
@@ -408,7 +435,7 @@ function SlideDonate() {
                   className="text-[11px] font-bold px-2.5 py-1 rounded-full text-white"
                   style={{ background: ACCENTS[2] }}
                 >
-                  CONSENT GRANTED
+                  {t("CONSENT GRANTED")}
                 </span>
               </div>
               <h3 className="font-bold text-(--text-primary) mt-2 text-[clamp(0.95rem,1.9vw,1.15rem)]">
@@ -416,7 +443,7 @@ function SlideDonate() {
               </h3>
               <p className="text-sm text-(--text-secondary) mt-1">{p.org}</p>
               <p className="text-xs text-(--text-secondary) mt-1.5">
-                Federated across {p.countries}
+                {t("Federated across {countries}", { countries: p.countries })}
               </p>
             </div>
           </Reveal>
@@ -425,8 +452,9 @@ function SlideDonate() {
       <Reveal delay={760}>
         <p className="mt-4 text-center text-sm text-(--text-secondary) flex items-center justify-center gap-2">
           <ShieldCheck size={16} style={{ color: ACCENTS[2] }} />
-          Federated queries reach many databases — my data never leaves the
-          secure environment. Withdraw any time.
+          {t(
+            "Federated queries reach many databases; my data never leaves the secure environment. Withdraw any time.",
+          )}
         </p>
       </Reveal>
     </div>
@@ -435,33 +463,46 @@ function SlideDonate() {
 
 /** ── Slide 4 — research results ──────────────────────────────────────────── */
 function SlideResults() {
+  const t = useT("explore");
   const results = [
     {
       icon: Salad,
-      q: "I changed my nutrition over 3 months — how are my cardiovascular risk & pre-diabetes?",
-      r: "Cardiovascular risk ↓ 42% → 36%. HbA1c trending toward normal — pre-diabetes risk reduced.",
+      q: t(
+        "I changed my nutrition over 3 months: how are my cardiovascular risk & pre-diabetes?",
+      ),
+      r: t(
+        "Cardiovascular risk ↓ 42% → 36%. HbA1c trending toward normal, pre-diabetes risk reduced.",
+      ),
     },
     {
       icon: Wind,
-      q: "Daily breathing exercises — any effect on stress, inflammation & oxygen?",
-      r: "Resting stress markers ↓ ~18%. CRP (inflammation) ↓. Blood-oxygen (SpO₂) stable to improved.",
+      q: t(
+        "Daily breathing exercises: any effect on stress, inflammation & oxygen?",
+      ),
+      r: t(
+        "Resting stress markers ↓ ~18%. CRP (inflammation) ↓. Blood-oxygen (SpO₂) stable to improved.",
+      ),
     },
     {
       icon: Activity,
-      q: "I increased my daily sport routine — do you see any effect?",
-      r: "Resting heart rate ↓ ~6 bpm. Fitness (VO₂ proxy) ↑. Body-weight trend ↓.",
+      q: t("I increased my daily sport routine: do you see any effect?"),
+      r: t(
+        "Resting heart rate ↓ ~6 bpm. Fitness (VO₂ proxy) ↑. Body-weight trend ↓.",
+      ),
     },
   ];
   return (
     <div className="max-w-5xl mx-auto w-full">
       <Reveal>
         <h2 className="font-extrabold text-[clamp(1.5rem,3.4vw,2.3rem)] leading-tight text-(--text-primary) mb-1 text-center">
-          My personal research results
+          {t("My personal research results")}
         </h2>
       </Reveal>
       <Reveal delay={120}>
         <p className="text-center text-sm text-(--text-secondary) mb-6">
-          Insights computed from my donated data — synthetic, illustrative.
+          {t(
+            "Insights computed from my donated data: synthetic, illustrative.",
+          )}
         </p>
       </Reveal>
       <div className="space-y-3">
@@ -491,8 +532,10 @@ function SlideResults() {
       </div>
       <Reveal delay={760}>
         <p className="mt-6 text-center font-bold text-[clamp(1.1rem,2.6vw,1.6rem)] text-(--text-primary)">
-          My data. My identity. My insights.{" "}
-          <span style={{ color: ACCENTS[3] }}>Sovereign, by design.</span>
+          {t("My data. My identity. My insights.")}{" "}
+          <span style={{ color: ACCENTS[3] }}>
+            {t("Sovereign, by design.")}
+          </span>
         </p>
       </Reveal>
     </div>
@@ -508,6 +551,7 @@ const SLIDES = [
 ];
 
 export default function JourneyPage() {
+  const t = useT("explore");
   const [step, setStep] = useState(0);
   const last = SLIDES.length - 1;
 
@@ -559,7 +603,7 @@ export default function JourneyPage() {
 
         {/* prev / next — always visible */}
         <button
-          aria-label="Previous step"
+          aria-label={t("Previous step")}
           onClick={() => go(-1)}
           disabled={step === 0}
           className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 grid place-items-center w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-(--surface-2) border border-(--border) shadow-md text-(--text-primary) hover:bg-(--accent) hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-colors"
@@ -567,7 +611,7 @@ export default function JourneyPage() {
           <ArrowLeft size={22} />
         </button>
         <button
-          aria-label="Next step"
+          aria-label={t("Next step")}
           onClick={() => go(1)}
           disabled={step === last}
           className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 grid place-items-center w-11 h-11 sm:w-12 sm:h-12 rounded-full shadow-md text-white hover:opacity-90 disabled:opacity-30 disabled:pointer-events-none transition-opacity"
@@ -583,7 +627,7 @@ export default function JourneyPage() {
           {SLIDES.map((s, i) => (
             <button
               key={i}
-              aria-label={`Go to ${s.label}`}
+              aria-label={t("Go to {step}", { step: t(s.label) })}
               onClick={() => setStep(i)}
               className="rounded-full transition-all"
               style={{
