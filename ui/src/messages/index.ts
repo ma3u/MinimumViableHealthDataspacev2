@@ -50,6 +50,31 @@ import esHome from "./es/home.json";
 import esPublic from "./es/public.json";
 import esCompliance from "./es/compliance.json";
 import esAccess from "./es/access.json";
+import enPatient from "./en/patient.json";
+import enResearch from "./en/research.json";
+import enHolder from "./en/holder.json";
+import enExplore from "./en/explore.json";
+import enAdmin from "./en/admin.json";
+import dePatient from "./de/patient.json";
+import deResearch from "./de/research.json";
+import deHolder from "./de/holder.json";
+import deExplore from "./de/explore.json";
+import deAdmin from "./de/admin.json";
+import frPatient from "./fr/patient.json";
+import frResearch from "./fr/research.json";
+import frHolder from "./fr/holder.json";
+import frExplore from "./fr/explore.json";
+import frAdmin from "./fr/admin.json";
+import nlPatient from "./nl/patient.json";
+import nlResearch from "./nl/research.json";
+import nlHolder from "./nl/holder.json";
+import nlExplore from "./nl/explore.json";
+import nlAdmin from "./nl/admin.json";
+import esPatient from "./es/patient.json";
+import esResearch from "./es/research.json";
+import esHolder from "./es/holder.json";
+import esExplore from "./es/explore.json";
+import esAdmin from "./es/admin.json";
 
 export type Area =
   | "nav"
@@ -60,7 +85,13 @@ export type Area =
   | "home"
   | "public"
   | "compliance"
-  | "access";
+  | "access"
+  | "patient"
+  | "research"
+  | "holder"
+  | "explore"
+  | "admin";
+
 type Dictionary = Record<Area, Record<string, string>>;
 
 export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
@@ -74,6 +105,11 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     public: enPublic,
     compliance: enCompliance,
     access: enAccess,
+    patient: enPatient,
+    research: enResearch,
+    holder: enHolder,
+    explore: enExplore,
+    admin: enAdmin,
   },
   de: {
     nav: deNav,
@@ -85,6 +121,11 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     public: dePublic,
     compliance: deCompliance,
     access: deAccess,
+    patient: dePatient,
+    research: deResearch,
+    holder: deHolder,
+    explore: deExplore,
+    admin: deAdmin,
   },
   fr: {
     nav: frNav,
@@ -96,6 +137,11 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     public: frPublic,
     compliance: frCompliance,
     access: frAccess,
+    patient: frPatient,
+    research: frResearch,
+    holder: frHolder,
+    explore: frExplore,
+    admin: frAdmin,
   },
   nl: {
     nav: nlNav,
@@ -107,6 +153,11 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     public: nlPublic,
     compliance: nlCompliance,
     access: nlAccess,
+    patient: nlPatient,
+    research: nlResearch,
+    holder: nlHolder,
+    explore: nlExplore,
+    admin: nlAdmin,
   },
   es: {
     nav: esNav,
@@ -118,5 +169,10 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     public: esPublic,
     compliance: esCompliance,
     access: esAccess,
+    patient: esPatient,
+    research: esResearch,
+    holder: esHolder,
+    explore: esExplore,
+    admin: esAdmin,
   },
 };
