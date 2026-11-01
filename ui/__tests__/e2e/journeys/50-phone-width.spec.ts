@@ -36,7 +36,7 @@ for (const width of [375, 390]) {
     }
     // The picker is in the menu panel on a phone.
     await page.goto("/");
-    await page.getByRole("button", { name: "Open menu" }).click();
+    await page.locator(`[aria-controls="mobile-nav"]`).click();
     await expect(
       page.locator("#mobile-nav").getByRole("combobox"),
     ).toBeVisible();
