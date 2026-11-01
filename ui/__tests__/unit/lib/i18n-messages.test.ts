@@ -110,6 +110,8 @@ describe("the code and the dictionaries", () => {
     "src/components/HomeRegisterCta.tsx",
     "src/components/DemoPersonaCards.tsx",
     "src/components/KlarbefundShowcase.tsx",
+    "src/app/information/page.tsx",
+    "src/app/permits/page.tsx",
   ];
   const known = new Set(AREAS.flatMap((a) => Object.keys(MESSAGES.en[a])));
 
@@ -155,6 +157,13 @@ describe("the code and the dictionaries", () => {
         f,
       ).toEqual([]);
     }
+  });
+
+  it("knows every purpose of Art. 53(1)", async () => {
+    const { PURPOSE_LABELS } = await import("@/lib/permits");
+    expect(
+      Object.values(PURPOSE_LABELS).filter((p) => !(p in MESSAGES.en.public)),
+    ).toEqual([]);
   });
 
   it("knows every persona description of the sign-in page", async () => {
