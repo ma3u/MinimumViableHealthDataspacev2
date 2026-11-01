@@ -217,23 +217,53 @@ build_images() {
   state_set SPE_LOADER_IMAGE "${ACR_LOGIN_SERVER}/${SPE_LOADER_REPO}@${ldig}"
   ok "spe-loader: ${SPE_LOADER_IMAGE}"
 
+  # TRUSTEE_KBS_SOURCE is repo:tag@digest, for the reader; az acr import takes
+  # a tag or a digest, not both (InvalidImportImageParameter), so it imports
+  # by the digest, and the copy in ACR must carry exactly that digest.
+  local pinned src_repo
+  pinned="${TRUSTEE_KBS_SOURCE##*@}"
+  src_repo="${TRUSTEE_KBS_SOURCE%@*}"
+  src_repo="${src_repo%:*}"
   if [ -z "$(digest_of key-broker-service "built-in-as-${TRUSTEE_VERSION}")" ]; then
     log "importing Trustee KBS ${TRUSTEE_VERSION} into ACR (pinned by digest)"
-    az acr import -n "$ACR_NAME" --source "$TRUSTEE_KBS_SOURCE" --image "key-broker-service:built-in-as-${TRUSTEE_VERSION}" -o none
+    az acr import -n "$ACR_NAME" --source "${src_repo}@${pinned}" \
+      --image "key-broker-service:built-in-as-${TRUSTEE_VERSION}" -o none
   fi
   tdig="$(digest_of key-broker-service "built-in-as-${TRUSTEE_VERSION}")"
   need "$tdig" "the digest of key-broker-service:built-in-as-${TRUSTEE_VERSION}"
+  if [ "$tdig" != "$pinned" ]; then
+    err "key-broker-service:built-in-as-${TRUSTEE_VERSION} in ACR is ${tdig}, not the pinned ${pinned}"
+    exit 1
+  fi
   state_set TRUSTEE_KBS_DIGEST "$tdig"
   ok "KBS: ${TRUSTEE_KBS_IMAGE}@${TRUSTEE_KBS_DIGEST}"
 }
 
 # ── the admin job (as MedReg DE) ────────────────────────────────────────────
 run_admin() {  # run_admin <command> <args...>: one execution of mvhd-trustee-admin, waited for
-  local cmd="$1" execution status="" deadline
+  local cmd="$1" execution status="" deadline spec
   shift
+  # The execution goes in as a template file, not as flags: `--args` is
+  # argparse nargs='+' and refuses any value that starts with a dash
+  # ("unrecognized arguments: --url ..."), and kbs-client takes nothing else.
+  # The job's own containers are kept (volumes, environment, resources); the
+  # admin container gets the image, command and arguments of this run.
+  # jq reads "--url" as one of its own options too, even after --args, so
+  # the arguments reach it as a JSON array (one per line; none has a newline).
+  local args_json
+  args_json="$(printf '%s\n' "$@" | jq -R . | jq -sc .)"
+  spec="$(mktemp)"
+  az containerapp job show -n "$TRUSTEE_ADMIN_JOB" -g "$RG" -o json |
+    jq --arg image "$SPE_LOADER_IMAGE" --arg cmd "$cmd" --argjson args "$args_json" '
+      .properties.template
+      | {containers: [.containers[]
+           | if .name == "trustee-admin"
+             then .image = $image | .command = [$cmd] | .args = $args
+             else . end],
+         initContainers: (.initContainers // [])}' >"$spec"
   execution="$(az containerapp job start -n "$TRUSTEE_ADMIN_JOB" -g "$RG" \
-    --image "$SPE_LOADER_IMAGE" --container-name trustee-admin \
-    --command "$cmd" --args "$@" --query name -o tsv)"
+    --yaml "$spec" --query name -o tsv)"
+  rm -f "$spec"
   need "$execution" "the ${TRUSTEE_ADMIN_JOB} execution"
   log "${TRUSTEE_ADMIN_JOB}: ${execution} (${cmd} $1)"
   deadline=$((SECONDS + JOB_TIMEOUT_SECONDS))
