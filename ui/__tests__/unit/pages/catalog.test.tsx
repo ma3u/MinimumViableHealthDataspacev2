@@ -419,7 +419,9 @@ describe("CatalogPage in another language", () => {
       "en",
     );
     expect(
-      screen.getAllByLabelText("shown in English, no Deutsch text yet").length,
+      screen.getAllByLabelText(
+        "auf Englisch angezeigt, noch kein deutscher Text",
+      ).length,
     ).toBeGreaterThan(0);
     expect(localStorage.getItem("catalog-metadata-language")).toBe("de");
   });

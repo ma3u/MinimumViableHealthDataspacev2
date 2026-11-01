@@ -92,7 +92,9 @@ export async function loginAs(page: Page, username: string, password: string) {
   // initializing (fetched /api/auth/session + /api/keycloak-config). Clicking
   // "Sign in with Keycloak" before this is established causes signIn() to
   // fail silently and reload the page instead of redirecting to Keycloak.
-  await page.goto("/auth/signin", { waitUntil: "networkidle" });
+  // ?lang=en: the button is found by its English name whatever language the
+  // browser or an earlier test picked (#782); it does not store a choice.
+  await page.goto("/auth/signin?lang=en", { waitUntil: "networkidle" });
   const keycloakBtn = page.getByRole("button", {
     name: /sign in with keycloak/i,
   });
