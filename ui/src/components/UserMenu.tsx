@@ -204,6 +204,13 @@ export default function UserMenu() {
   const [open, setOpen] = useState(false);
   const t = useT("nav");
   const tc = useT("common");
+  // A chip has room for the short form (nav, #782: the French term for an
+  // access body wrapped the menu bar); the full term, the Regulation's in
+  // each language, is the chip's title and stands in the identity block.
+  const roleChip = (role?: string) =>
+    role && ROLE_LABELS[role] ? t(ROLE_LABELS[role]) : role;
+  const roleTitle = (role?: string) =>
+    role && ROLE_LABELS[role] ? tc(ROLE_LABELS[role]) : undefined;
   const ref = useRef<HTMLDivElement>(null);
   // Runtime Keycloak config — fetched once on mount from /api/auth/keycloak-config.
   // We can't use NEXT_PUBLIC_* env vars because they're baked in at `npm run build`
@@ -293,11 +300,10 @@ export default function UserMenu() {
                           ROLE_BADGE[pRole ?? ""] ??
                           "bg-gray-600 text-(--text-primary)"
                         }`}
+                        title={roleTitle(pRole)}
                       >
                         <Shield size={8} />
-                        {ROLE_LABELS[pRole ?? ""]
-                          ? tc(ROLE_LABELS[pRole ?? ""])
-                          : pRole}
+                        {roleChip(pRole)}
                       </span>
                       <span className="font-mono text-xs truncate text-(--text-primary)">
                         {persona.username}
@@ -359,11 +365,10 @@ export default function UserMenu() {
                         ROLE_BADGE[pRole ?? ""] ??
                         "bg-gray-600 text-(--text-primary)"
                       }`}
+                      title={roleTitle(pRole)}
                     >
                       <Shield size={8} />
-                      {ROLE_LABELS[pRole ?? ""]
-                        ? tc(ROLE_LABELS[pRole ?? ""])
-                        : pRole}
+                      {roleChip(pRole)}
                     </span>
                     <span className="font-mono text-xs truncate text-(--text-primary)">
                       {persona.username}
@@ -397,9 +402,7 @@ export default function UserMenu() {
   const _participantType = deriveParticipantType(roles, username);
 
   // Short role label for the nav bar chip
-  const navLabel = ROLE_LABELS[primaryRole]
-    ? tc(ROLE_LABELS[primaryRole])
-    : username;
+  const navLabel = ROLE_LABELS[primaryRole] ? roleChip(primaryRole) : username;
   const accentClass = ROLE_ACCENT[primaryRole] ?? "border-gray-600";
   const shieldClass = ROLE_SHIELD[primaryRole] ?? "text-(--text-secondary)";
 
@@ -420,9 +423,10 @@ export default function UserMenu() {
         </span>
         {/* Role chip — hidden on very small screens */}
         <span
-          className={`hidden sm:inline-block text-[10px] px-1.5 py-0.5 rounded font-medium ${
+          className={`hidden sm:inline-block whitespace-nowrap text-[10px] px-1.5 py-0.5 rounded font-medium ${
             ROLE_BADGE[primaryRole] ?? "bg-gray-600 text-(--text-primary)"
           }`}
+          title={roleTitle(primaryRole)}
         >
           {navLabel}
         </span>
@@ -525,11 +529,10 @@ export default function UserMenu() {
                         ROLE_BADGE[primaryRole ?? ""] ??
                         "bg-gray-600 text-(--text-primary)"
                       }`}
+                      title={roleTitle(primaryRole)}
                     >
                       <Shield size={8} />
-                      {ROLE_LABELS[primaryRole ?? ""]
-                        ? tc(ROLE_LABELS[primaryRole ?? ""])
-                        : primaryRole}
+                      {roleChip(primaryRole)}
                     </span>
                     <span
                       className={`font-mono text-xs truncate ${

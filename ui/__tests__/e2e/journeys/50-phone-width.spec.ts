@@ -63,3 +63,32 @@ test("J1019 the menu panel scrolls to its last entry on a phone", async ({
   await last.scrollIntoViewIfNeeded();
   await expect(last).toBeInViewport();
 });
+
+// On 2026-11-01 the French menu bar wrapped: the role chip carried the
+// Regulation's full term for an access body, and below about 1220 px the
+// groups, the picker and the user menu overflowed in every language.
+for (const width of [1024, 1280]) {
+  test(`J1020 the menu bar is one line at ${width} px, in any language`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await skipIfKeycloakDown();
+    await loginAs(page, "edcadmin", "edcadmin");
+    for (const lang of LANGS) {
+      await page.goto(`/compliance?lang=${lang}`);
+      await page.waitForLoadState("networkidle");
+      const bar = page.getByRole("navigation", { name: "Main navigation" });
+      const box = await bar.boundingBox();
+      expect(box!.height, `bar height in ${lang}`).toBeLessThanOrEqual(64);
+      expect(await overflow(page), `page width in ${lang}`).toBeLessThanOrEqual(
+        0,
+      );
+      // The chip has room for the short form; the full term is its title.
+      if (width >= 1280 && lang === "fr") {
+        await expect(
+          page.locator(`[title="Administrateur de l’espace de données"]`),
+        ).toHaveText("Admin");
+      }
+    }
+  });
+}

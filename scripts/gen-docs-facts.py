@@ -98,6 +98,10 @@ PAGES = {
         "sources": ["ui/src/app/docs/ehds/page.tsx", "ui/src/content/published-docs.json"],
         "facts": [],
     },
+    "/docs/ehds/glossary": {
+        "sources": ["ui/src/app/docs/ehds/glossary/page.tsx", "ui/src/lib/i18n/ehds-terminology.json"],
+        "facts": [],
+    },
     "/docs/ehds/[slug]": {
         "sources": ["ui/src/app/docs/ehds/[slug]/page.tsx", "ui/src/components/docs/PublishedDoc.tsx",
                     "ui/src/content/published-docs.json"],

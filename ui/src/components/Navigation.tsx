@@ -35,6 +35,7 @@ import {
   Menu,
   X,
   Globe,
+  Languages,
   Scale,
   ChartGantt,
   Fingerprint,
@@ -459,6 +460,7 @@ const docsGroup: NavGroup = {
     },
     { href: "/docs/klarbefund", label: "Klarbefund", icon: Smartphone },
     { href: "/docs/ehds", label: "EHDS Regulation", icon: Scale },
+    { href: "/docs/ehds/glossary", label: "Glossary", icon: Languages },
     { href: "/docs/roadmap", label: "Roadmap", icon: ChartGantt },
     { href: "/docs/operations", label: "Operations", icon: Activity },
   ],
@@ -651,28 +653,32 @@ export default function Navigation() {
       <div className="flex items-center gap-1 px-4 py-2">
         <Link
           href="/"
-          className="mr-4 font-bold text-(--accent) tracking-wide text-sm hover:text-(--accent-hover) transition-colors"
+          className="mr-4 shrink-0 whitespace-nowrap font-bold text-(--accent) tracking-wide text-sm hover:text-(--accent-hover) transition-colors"
         >
           Health Dataspace
         </Link>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-1">
+        {/* Desktop nav, from xl: the groups, the picker and the user menu
+            need 1100 to 1220 px depending on the language (#782), so below
+            1280 px the bar overflowed in every language; there the menu
+            button opens the panel instead. */}
+        <div className="hidden xl:flex items-center gap-1">
           {visibleGroups.map((g) => (
             <NavDropdown key={g.label} group={g} />
           ))}
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          {/* In the bar from md up; on a phone the full language name made the
-              bar wider than the screen, so there it sits in the menu panel. */}
-          <LanguagePicker className="hidden md:flex" />
+          {/* In the bar with the desktop nav; on a narrower screen the full
+              language name made the bar too wide, so there it sits in the
+              menu panel. */}
+          <LanguagePicker className="hidden xl:flex" />
           <ThemeToggle />
           <UserMenu />
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 rounded-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) touch-target"
+            className="xl:hidden p-2 rounded-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) touch-target"
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
             aria-label={mobileOpen ? t("Close menu") : t("Open menu")}
@@ -694,7 +700,7 @@ export default function Navigation() {
           // scrolled to its end on a phone. The nav is at most the screen's
           // height (flex column); the bar keeps its height, the panel takes
           // the rest and scrolls on its own.
-          className="md:hidden border-t border-(--border) bg-(--surface) px-4 py-3 space-y-1 animate-fade-in-up min-h-0 overflow-y-auto overscroll-contain"
+          className="xl:hidden border-t border-(--border) bg-(--surface) px-4 py-3 space-y-1 animate-fade-in-up min-h-0 overflow-y-auto overscroll-contain"
         >
           <div className="mb-2 px-1">
             <LanguagePicker />

@@ -69,5 +69,13 @@
   "Close menu": "Menu sluiten",
   "Switch to light mode": "Naar de lichte modus",
   "Switch to dark mode": "Naar de donkere modus",
-  "Language": "Taal"
+  "Language": "Taal",
+  "Dataspace Admin": "Beheerder",
+  "Participant": "Deelnemer",
+  "HDAB Authority": "Instantie voor toegang",
+  "Data Holder": "Gegevenshouder",
+  "Researcher": "Onderzoeker",
+  "Trust Center": "Vertrouwenscentrum",
+  "Patient / Citizen": "Patiënt",
+  "Glossary": "Woordenlijst"
 }
