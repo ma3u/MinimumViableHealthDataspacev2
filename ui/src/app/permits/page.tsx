@@ -2,6 +2,7 @@
 
 import { fetchApi } from "@/lib/api";
 import { PURPOSE_LABELS, type Purpose } from "@/lib/permits";
+import { T, useT } from "@/lib/i18n/translate";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ScrollText, ShieldCheck, AlertCircle } from "lucide-react";
@@ -105,9 +106,10 @@ function shortDate(iso: string | null | undefined): string {
   return iso ? iso.slice(0, 10) : "—";
 }
 
-function purposeLabel(p: string | null): string {
+function purposeLabel(p: string | null, t?: (s: string) => string): string {
   if (!p) return "—";
-  return (PURPOSE_LABELS as Record<string, string>)[p as Purpose] ?? p;
+  const label = (PURPOSE_LABELS as Record<string, string>)[p as Purpose];
+  return label ? (t ? t(label) : label) : p;
 }
 
 function OutcomeBadge({ outcome }: { outcome: Entry["outcome"] }) {
@@ -134,6 +136,7 @@ function OutcomeBadge({ outcome }: { outcome: Entry["outcome"] }) {
 export default function PermitsRegisterPage() {
   const [register, setRegister] = useState<Register | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const t = useT("public");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -165,44 +168,48 @@ export default function PermitsRegisterPage() {
         <div className="mb-8">
           <h1 className="page-header flex items-center gap-2">
             <ScrollText size={28} />
-            Data permits register
+            {t("Data permits register")}
           </h1>
           <p className="text-(--text-secondary) text-lg mt-1">
-            Regulation (EU) 2025/327, Art. 57(1)(j) and Art. 58(1)(f) · public,
-            no sign-in
+            {t(
+              "Regulation (EU) 2025/327, Art. 57(1)(j) and Art. 58(1)(f) · public register",
+            )}
           </p>
         </div>
 
         <div className="rounded-lg border border-(--border) bg-(--surface) p-4 mb-8 text-sm text-(--text-secondary) space-y-2">
           <p>
-            The health data access body publishes every health data access
-            application it receives (Art. 57(1)(j)(ii)), every data permit
-            issued and every refusal with its justification within 30 working
-            days of the decision (Art. 57(1)(j)(iii)), and the measures it takes
-            against non-compliance, such as a revoked permit (Art. 57(1)(j)(iv),
-            Art. 63(3)). Natural persons can see here who has been granted
-            access to which datasets and for what purpose (Art. 58(1)(f)).
+            {t(
+              "The health data access body publishes every health data access application it receives (Art. 57(1)(j)(ii)), every data permit issued and every refusal with its justification within 30 working days of the decision (Art. 57(1)(j)(iii)), and the measures it takes against non-compliance, such as a revoked permit (Art. 57(1)(j)(iv), Art. 63(3)). Natural persons can see here who has been granted access to which datasets and for what purpose (Art. 58(1)(f)).",
+            )}
           </p>
           <p>
-            Participants are fictional. The access body decides on{" "}
-            <Link
-              href="/compliance"
-              className="font-bold text-(--accent) hover:underline"
+            <T
+              area="public"
+              tags={{
+                a: (
+                  <Link
+                    href="/compliance"
+                    className="font-bold text-(--accent) hover:underline"
+                  />
+                ),
+              }}
             >
-              EHDS Approval
-            </Link>
-            ; this register is the public face of those decisions.
+              {
+                "Participants are fictional. The access body decides on <a>EHDS Approval</a>; this register is the public face of those decisions."
+              }
+            </T>
           </p>
         </div>
 
         {loading ? (
           <p className="text-(--text-secondary) text-sm">
-            Reading the register…
+            {t("Reading the register…")}
           </p>
         ) : error ? (
           <div className="text-sm">
             <p className="text-(--text-secondary)">
-              The register could not be read
+              {t("The register could not be read")}
             </p>
             <p className="text-xs font-mono text-(--text-secondary)">{error}</p>
           </div>
@@ -210,11 +217,11 @@ export default function PermitsRegisterPage() {
           <>
             <section className="mb-10">
               <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
-                Decisions ({decided.length})
+                {t("Decisions ({count})", { count: decided.length })}
               </h2>
               {decided.length === 0 ? (
                 <p className="text-(--text-secondary) text-sm">
-                  No decision published yet
+                  {t("No decision published yet")}
                 </p>
               ) : (
                 <div className="overflow-x-auto rounded-lg border border-(--border)">
@@ -222,25 +229,25 @@ export default function PermitsRegisterPage() {
                     <thead>
                       <tr className="bg-(--surface) text-(--text-secondary)">
                         <th className="text-left px-3 py-2 font-medium">
-                          Applicant
+                          {t("Applicant")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Dataset
+                          {t("Dataset")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Purpose, Art. 53(1)
+                          {t("Purpose, Art. 53(1)")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Decision
+                          {t("Decision")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Decided
+                          {t("Decided")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Valid until
+                          {t("Valid until")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Publish by
+                          {t("Publish by")}
                         </th>
                       </tr>
                     </thead>
@@ -269,7 +276,7 @@ export default function PermitsRegisterPage() {
                             </span>
                           </td>
                           <td className="px-3 py-2">
-                            {purposeLabel(e.purpose)}
+                            {purposeLabel(e.purpose, t)}
                           </td>
                           <td className="px-3 py-2">
                             <OutcomeBadge outcome={e.outcome} />
@@ -347,11 +354,13 @@ export default function PermitsRegisterPage() {
 
             <section>
               <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
-                Applications received, awaiting a decision ({pending.length})
+                {t("Applications received, awaiting a decision ({count})", {
+                  count: pending.length,
+                })}
               </h2>
               {pending.length === 0 ? (
                 <p className="text-(--text-secondary) text-sm">
-                  No application awaiting a decision
+                  {t("No application awaiting a decision")}
                 </p>
               ) : (
                 <div className="overflow-x-auto rounded-lg border border-(--border)">
@@ -359,19 +368,19 @@ export default function PermitsRegisterPage() {
                     <thead>
                       <tr className="bg-(--surface) text-(--text-secondary)">
                         <th className="text-left px-3 py-2 font-medium">
-                          Applicant
+                          {t("Applicant")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Dataset
+                          {t("Dataset")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Purpose, Art. 53(1)
+                          {t("Purpose, Art. 53(1)")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Received
+                          {t("Received")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Decision due, Art. 68(4)
+                          {t("Decision due, Art. 68(4)")}
                         </th>
                       </tr>
                     </thead>
@@ -388,7 +397,7 @@ export default function PermitsRegisterPage() {
                             {e.datasetTitle ?? e.datasetId ?? "—"}
                           </td>
                           <td className="px-3 py-2">
-                            {purposeLabel(e.purpose)}
+                            {purposeLabel(e.purpose, t)}
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap">
                             {shortDate(e.submittedAt)}
@@ -419,12 +428,13 @@ export default function PermitsRegisterPage() {
 
             <section className="mt-10" data-testid="results-section">
               <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
-                Results communicated by data users, Art. 61(4) (
-                {register?.results?.length ?? 0})
+                {t("Results communicated by data users, Art. 61(4) ({count})", {
+                  count: register?.results?.length ?? 0,
+                })}
               </h2>
               {!register?.results || register.results.length === 0 ? (
                 <p className="text-(--text-secondary) text-sm">
-                  No result communicated yet
+                  {t("No result communicated yet")}
                 </p>
               ) : (
                 <div className="overflow-x-auto rounded-lg border border-(--border)">
@@ -432,19 +442,19 @@ export default function PermitsRegisterPage() {
                     <thead>
                       <tr className="bg-(--surface) text-(--text-secondary)">
                         <th className="text-left px-3 py-2 font-medium">
-                          Data user
+                          {t("Data user")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Result
+                          {t("Result")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Dataset
+                          {t("Dataset")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Communicated
+                          {t("Communicated")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Deadline
+                          {t("Deadline")}
                         </th>
                       </tr>
                     </thead>
@@ -510,12 +520,13 @@ export default function PermitsRegisterPage() {
 
             <section className="mt-10" data-testid="measures-section">
               <h2 className="text-sm font-semibold mb-3 text-(--text-primary)">
-                Measures taken on non-compliance, Art. 63 (
-                {register?.measures?.length ?? 0})
+                {t("Measures taken on non-compliance, Art. 63 ({count})", {
+                  count: register?.measures?.length ?? 0,
+                })}
               </h2>
               {!register?.measures || register.measures.length === 0 ? (
                 <p className="text-(--text-secondary) text-sm">
-                  No measure taken
+                  {t("No measure taken")}
                 </p>
               ) : (
                 <div className="overflow-x-auto rounded-lg border border-(--border)">
@@ -523,19 +534,19 @@ export default function PermitsRegisterPage() {
                     <thead>
                       <tr className="bg-(--surface) text-(--text-secondary)">
                         <th className="text-left px-3 py-2 font-medium">
-                          Party
+                          {t("Party")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Measure
+                          {t("Measure")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Reason
+                          {t("Reason")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Notified
+                          {t("Notified")}
                         </th>
                         <th className="text-left px-3 py-2 font-medium">
-                          Decided
+                          {t("Decided")}
                         </th>
                       </tr>
                     </thead>

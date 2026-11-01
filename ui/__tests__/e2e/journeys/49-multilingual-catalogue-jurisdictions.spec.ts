@@ -1,6 +1,6 @@
 /**
  * Issue #782, phase 1: dataset descriptions in more than one language and
- * the national implementation profiles (J1006 to J1015).
+ * the national implementation profiles (J1006 to J1017).
  *
  * The catalogue shows a dataset's title and description in the language a
  * visitor picks in the menu bar and falls back to English, marked as such; the HealthDCAT-AP
@@ -293,6 +293,47 @@ test.describe("Issue #782 · the start page follows the picker", () => {
       ).toBeVisible();
       await expect(page.getByRole("heading", { name: card })).toBeVisible();
       await expect(page.locator("html")).toHaveAttribute("lang", lang);
+    }
+  });
+});
+
+test.describe("Issue #782 · the access body's public pages follow the picker", () => {
+  test("J1017 the information page and the register in German, French, Dutch and Spanish", async ({
+    page,
+  }) => {
+    await skipIfKeycloakDown();
+    await loginAs(page, "regulator", "regulator");
+    const cases: [string, string, string][] = [
+      [
+        "de",
+        "Sekundärnutzung von Gesundheitsdaten: was Sie wissen sollten",
+        "Register der Datengenehmigungen",
+      ],
+      [
+        "fr",
+        "Utilisation secondaire des données de santé : ce que vous devez savoir",
+        "Registre des autorisations de traitement de données",
+      ],
+      [
+        "nl",
+        "Secundair gebruik van gezondheidsgegevens: wat u moet weten",
+        "Register van gegevensvergunningen",
+      ],
+      [
+        "es",
+        "Uso secundario de los datos de salud: lo que debe saber",
+        "Registro de permisos de datos",
+      ],
+    ];
+    for (const [lang, info, register] of cases) {
+      await page.goto(`/information?lang=${lang}`);
+      await expect(
+        page.getByRole("heading", { level: 1, name: info }),
+      ).toBeVisible({ timeout: 15_000 });
+      await page.goto(`/permits?lang=${lang}`);
+      await expect(
+        page.getByRole("heading", { level: 1, name: register }),
+      ).toBeVisible({ timeout: 15_000 });
     }
   });
 });
