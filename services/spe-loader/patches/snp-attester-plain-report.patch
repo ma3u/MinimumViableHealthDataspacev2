@@ -1,27 +1,21 @@
 --- a/attestation-agent/attester/src/snp/mod.rs	2026-11-01 17:35:04
-+++ b/attestation-agent/attester/src/snp/mod.rs	2026-11-01 18:17:58
-@@ -41,9 +41,21 @@
++++ b/attestation-agent/attester/src/snp/mod.rs	2026-11-01 19:30:00
+@@ -41,9 +41,15 @@
          let mut firmware = Firmware::open()?;
          let data = report_data.as_slice().try_into()?;
  
 -        let (report, certs) = firmware
 -            .get_ext_report(None, Some(data), Some(0))
 -            .context("Failed to get attestation report")?;
-+        // Azure Container Instances serve no extended report (the host holds
-+        // no certificate table), so the plain one is asked for when the
-+        // extended one fails, as Microsoft's get-snp-report does there. The
-+        // verifier then fetches the VCEK from AMD KDS itself.
-+        // The arms name std's Result: `use anyhow::*` brings a function `Ok`
-+        // that a pattern cannot match.
-+        let (report, certs) = match firmware.get_ext_report(None, Some(data), Some(0)) {
-+            std::result::Result::Ok(extended) => extended,
-+            std::result::Result::Err(ext_err) => (
-+                firmware.get_report(None, Some(data), Some(0)).with_context(|| {
-+                    format!("Failed to get attestation report (extended: {ext_err:?})")
-+                })?,
-+                None,
-+            ),
-+        };
++        // Azure Container Instances serve no extended report, and a failed
++        // extended request makes the guest driver drop its VMPCK, so every
++        // request after it fails too (ENOTTY; probed on ACI, kernel 6.1.10,
++        // #774). Ask for the plain report only; the verifier fetches the
++        // VCEK from AMD KDS itself.
++        let report = firmware
++            .get_report(None, Some(data), Some(0))
++            .context("Failed to get attestation report")?;
++        let certs = None;
  
          let evidence = SnpEvidence {
              attestation_report: AttestationReport::from_bytes(&report)
