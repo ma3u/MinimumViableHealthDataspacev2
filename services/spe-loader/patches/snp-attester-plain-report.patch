@@ -1,0 +1,25 @@
+--- a/attestation-agent/attester/src/snp/mod.rs	2026-11-01 17:35:04
++++ b/attestation-agent/attester/src/snp/mod.rs	2026-11-01 17:35:04
+@@ -41,9 +41,19 @@
+         let mut firmware = Firmware::open()?;
+         let data = report_data.as_slice().try_into()?;
+ 
+-        let (report, certs) = firmware
+-            .get_ext_report(None, Some(data), Some(0))
+-            .context("Failed to get attestation report")?;
++        // Azure Container Instances serve no extended report (the host holds
++        // no certificate table), so the plain one is asked for when the
++        // extended one fails, as Microsoft's get-snp-report does there. The
++        // verifier then fetches the VCEK from AMD KDS itself.
++        let (report, certs) = match firmware.get_ext_report(None, Some(data), Some(0)) {
++            Ok(extended) => extended,
++            Err(ext_err) => (
++                firmware.get_report(None, Some(data), Some(0)).with_context(|| {
++                    format!("Failed to get attestation report (extended: {ext_err:?})")
++                })?,
++                None,
++            ),
++        };
+ 
+         let evidence = SnpEvidence {
+             attestation_report: AttestationReport::from_bytes(&report)
