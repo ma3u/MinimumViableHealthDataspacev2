@@ -1,7 +1,8 @@
 import { execFile } from "node:child_process";
 import { generateKeyPairSync } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { request } from "node:https";
+import { request as httpRequest } from "node:http";
+import { request as httpsRequest } from "node:https";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -89,6 +90,9 @@ function postReferenceValue(
   timeoutMs: number,
 ): Promise<void> {
   const token = readFileSync(tokenFile, "utf8").trim();
+  // Inside the environment the admin job reaches Trustee over plain HTTP,
+  // as kbs-client does; from outside it is HTTPS.
+  const request = url.startsWith("http://") ? httpRequest : httpsRequest;
   return new Promise((resolve, reject) => {
     const req = request(
       `${url.replace(/\/$/, "")}/kbs/v0/reference-value`,
