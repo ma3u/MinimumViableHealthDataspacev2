@@ -105,7 +105,14 @@ export async function unlock(
           plaintext: null,
         };
       }
-      log(`Trustee did not answer (attempt ${i} of ${attempts}); retrying`);
+      // The attester's own error, not "Trustee did not answer": on
+      // 2026-11-01 every attempt failed inside the attester (no SEV-SNP
+      // report) while Trustee answered each one (#774).
+      log(
+        `attestation attempt ${i} of ${attempts} failed: ${
+          (err as Error).message
+        }; retrying`,
+      );
       await sleep(deps.intervalMs ?? 15_000);
     }
   }

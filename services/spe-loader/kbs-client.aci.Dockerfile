@@ -16,7 +16,8 @@
 # scripts/azure/21-aci-confidential-spe.sh --extracts does this and pins the
 # digest; the spe-loader image then copies the binary (KBS_CLIENT_IMAGE).
 # Built and run on 2026-10-31 under amd64 emulation (both attesters below):
-# it compiles, links, and every library resolves. Not yet run inside ACI.
+# it compiles, links, and every library resolves. Run inside ACI on
+# 2026-11-01: the unpatched attester could not get the report (see below).
 #
 # ATTESTER is kbs/Makefile's: `snp-attester` for ACI; `az-snp-vtpm-attester`
 # (an Azure confidential VM's vTPM) also builds, and needs the libtss2
@@ -30,6 +31,8 @@ FROM rust:1.95.0-bookworm@sha256:6258907abe69656e41cd992e0b705cdcfabcbbe3db374f9
 
 ARG TRUSTEE_REF=v0.22.0
 ARG TRUSTEE_COMMIT=512fed65642015b849f38fb13bfdec7806639987
+# The guest-components commit Trustee v0.22.0 pins (Cargo.toml, Cargo.lock).
+ARG GUEST_COMPONENTS_COMMIT=da8d93f2797088a5f0636c8c1eeb31da73784fe8
 ARG ATTESTER=snp-attester
 
 # From the pinned base image's Debian release; patch pins break at every security update.
@@ -43,11 +46,37 @@ WORKDIR /src
 RUN git clone --depth 1 --branch "${TRUSTEE_REF}" https://github.com/confidential-containers/trustee.git . && \
     test "$(git rev-parse HEAD)" = "${TRUSTEE_COMMIT}"
 
+# The SNP attester asks /dev/sev-guest for the extended report only, which
+# carries the host's certificate table. Azure Container Instances serve none,
+# so inside ACI it failed with "Failed to get attestation report" and Trustee
+# never saw evidence (#774, 2026-11-01). patches/snp-attester-plain-report.patch
+# falls back to the plain report, as Microsoft's get-snp-report does there;
+# Trustee's SNP verifier then fetches the VCEK from AMD KDS. Every
+# guest-components crate Trustee uses is taken from the patched checkout of
+# the same commit, so none comes twice.
+COPY patches/snp-attester-plain-report.patch /patches/
+RUN git clone https://github.com/confidential-containers/guest-components.git /guest-components && \
+    git -C /guest-components checkout --quiet "${GUEST_COMPONENTS_COMMIT}" && \
+    git -C /guest-components apply /patches/snp-attester-plain-report.patch && \
+    printf '%s\n' \
+      '' \
+      '[patch."https://github.com/confidential-containers/guest-components.git"]' \
+      'attestation-agent = { path = "/guest-components/attestation-agent/attestation-agent" }' \
+      'attester = { path = "/guest-components/attestation-agent/attester" }' \
+      'crypto = { path = "/guest-components/attestation-agent/deps/crypto" }' \
+      'kbs_protocol = { path = "/guest-components/attestation-agent/kbs_protocol" }' \
+      'kms = { path = "/guest-components/confidential-data-hub/kms" }' \
+      'protos = { path = "/guest-components/protos" }' \
+      'resource_uri = { path = "/guest-components/attestation-agent/deps/resource_uri" }' \
+      >> Cargo.toml
+
 # As kbs/Makefile's `cli` target with ATTESTER=<attester>: the sample attester
 # stays compiled in (kbs_protocol's fallback when no TEE device is found), and
 # the resource policy on Azure refuses sample evidence
-# (trustee/policies/resource-azure.rego.tmpl).
-RUN cargo build -p kbs-client --locked --release --features "${ATTESTER}" && \
+# (trustee/policies/resource-azure.rego.tmpl). Not --locked: the patch moves
+# the guest-components crates from git to a path, which rewrites their lock
+# entries; every other crate keeps the version Cargo.lock pins.
+RUN cargo build -p kbs-client --release --features "${ATTESTER}" && \
     install -D -m0755 target/release/kbs-client /out/kbs-client
 
 # debian:bookworm-slim

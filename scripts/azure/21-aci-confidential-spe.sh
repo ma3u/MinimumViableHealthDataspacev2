@@ -188,14 +188,20 @@ build_images() {
     neo4j/register-fhir-dataset-hdcatap-spe1.cypher neo4j/register-fhir-dataset-hdcatap-spe2.cypher)"
   need "$tag" "the loader's source commit"
 
-  kdig="$(digest_of "$KBS_CLIENT_ACI_REPO" "$TRUSTEE_VERSION")"
+  # The tag names the Trustee release and the commit of what this repo adds
+  # to it (the Dockerfile and its patches), so a changed patch is built, not
+  # skipped because the release tag already exists.
+  local ktag
+  ktag="${TRUSTEE_VERSION}-$(git -C "$REPO_ROOT" log -1 --format=%h -- \
+    services/spe-loader/kbs-client.aci.Dockerfile services/spe-loader/patches)"
+  kdig="$(digest_of "$KBS_CLIENT_ACI_REPO" "$ktag")"
   if [ -z "$kdig" ]; then
-    log "building ${KBS_CLIENT_ACI_REPO}:${TRUSTEE_VERSION} in ACR (Rust, about 20 minutes)"
-    az acr build -r "$ACR_NAME" -t "${KBS_CLIENT_ACI_REPO}:${TRUSTEE_VERSION}" --platform linux/amd64 \
+    log "building ${KBS_CLIENT_ACI_REPO}:${ktag} in ACR (Rust, about 20 minutes)"
+    az acr build -r "$ACR_NAME" -t "${KBS_CLIENT_ACI_REPO}:${ktag}" --platform linux/amd64 \
       -f "${REPO_ROOT}/services/spe-loader/kbs-client.aci.Dockerfile" "${REPO_ROOT}/services/spe-loader" -o none
-    kdig="$(digest_of "$KBS_CLIENT_ACI_REPO" "$TRUSTEE_VERSION")"
+    kdig="$(digest_of "$KBS_CLIENT_ACI_REPO" "$ktag")"
   fi
-  need "$kdig" "the digest of ${KBS_CLIENT_ACI_REPO}:${TRUSTEE_VERSION}"
+  need "$kdig" "the digest of ${KBS_CLIENT_ACI_REPO}:${ktag}"
   state_set KBS_CLIENT_ACI_DIGEST "$kdig"
   ok "kbs-client (snp attester): ${ACR_LOGIN_SERVER}/${KBS_CLIENT_ACI_REPO}@${kdig}"
 
