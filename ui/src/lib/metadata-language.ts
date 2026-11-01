@@ -85,19 +85,6 @@ export function localise(
   };
 }
 
-/** The languages, English first, that at least one dataset is described in. */
-export function languagesOf(
-  datasets: { translations?: Partial<Record<MetadataLanguage, Translation>> }[],
-): CatalogLanguage[] {
-  const found = new Set<MetadataLanguage>();
-  for (const d of datasets) {
-    for (const lang of METADATA_LANGUAGES) {
-      if (d.translations?.[lang]) found.add(lang);
-    }
-  }
-  return ["en", ...METADATA_LANGUAGES.filter((l) => found.has(l))];
-}
-
 /** Every text of a dataset in every language, for a search in any of them. */
 export function searchableText(d: {
   title?: string;

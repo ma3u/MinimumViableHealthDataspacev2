@@ -26,13 +26,10 @@ import {
   type MetadataLanguage,
   type Translation,
   LANGUAGE_NAMES,
-  initialLanguage,
-  languagesOf,
   localise,
   searchableText,
-  storedLanguage,
-  storeLanguage,
 } from "@/lib/metadata-language";
+import { useLanguage } from "@/lib/use-language";
 
 interface Dataset {
   id: string;
@@ -245,17 +242,9 @@ function CatalogContent() {
   const [minSamples, setMinSamples] = useState(0);
   const [detailDataset, setDetailDataset] = useState<Dataset | null>(null);
   const [diagramDataset, setDiagramDataset] = useState<Dataset | null>(null);
-  // The language of the dataset descriptions (#782); the rest of the page
-  // stays English until the interface itself is translated (phase 2). Set
-  // once the datasets are there, since only then is it known which
-  // languages they come in: ?lang=, the stored choice, the browser's.
-  const [lang, setLang] = useState<CatalogLanguage>("en");
-  const [langSettled, setLangSettled] = useState(false);
-  const chooseLanguage = (l: CatalogLanguage) => {
-    setLang(l);
-    setLangSettled(true);
-    storeLanguage(l);
-  };
+  // The language of the dataset descriptions, picked in the menu (#782);
+  // the rest of the page stays English until the interface is translated.
+  const lang = useLanguage();
 
   // The live hub hands over the proxy's HealthDCAT-AP Release 8 document, the
   // one CI validates with the official SHACL (#700); the static export has no
@@ -312,18 +301,6 @@ function CatalogContent() {
   const allTypes = [
     ...new Set(datasets.map((d) => d.datasetType).filter(Boolean)),
   ].sort();
-
-  const languages = languagesOf(datasets);
-  const languageKey = languages.join(",");
-  useEffect(() => {
-    if (langSettled || datasets.length === 0) return;
-    setLang(
-      initialLanguage(languages, searchParams.get("lang"), storedLanguage()),
-    );
-    setLangSettled(true);
-    // languageKey stands for languages, which is a new array every render.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [languageKey, datasets.length, langSettled, searchParams]);
 
   const visible = datasets.filter((d) => {
     // A search finds a dataset in any language it is described in.
@@ -395,33 +372,6 @@ function CatalogContent() {
           </div>
         </div>
         <div className="-mt-4 mb-8 flex flex-wrap items-center gap-2">
-          {languages.length > 1 && (
-            <div
-              role="group"
-              aria-label="Language of the dataset descriptions"
-              className="flex flex-wrap items-center gap-2"
-            >
-              <span className="text-xs font-bold text-(--text-secondary) uppercase tracking-widest mr-1">
-                Descriptions in
-              </span>
-              {languages.map((l) => (
-                <button
-                  key={l}
-                  type="button"
-                  lang={l}
-                  aria-pressed={lang === l}
-                  onClick={() => chooseLanguage(l)}
-                  className={`px-3 py-1 rounded-full text-xs font-bold border transition-colors ${
-                    lang === l
-                      ? "bg-(--accent) text-white border-(--accent)"
-                      : "bg-(--surface-card) text-(--text-secondary) border-(--border-ui) hover:border-(--accent)"
-                  }`}
-                >
-                  {LANGUAGE_NAMES[l]}
-                </button>
-              ))}
-            </div>
-          )}
           <Link
             href="/jurisdictions"
             className="ml-auto text-xs font-bold text-(--accent) hover:underline"

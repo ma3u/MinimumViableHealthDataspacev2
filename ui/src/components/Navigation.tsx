@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import UserMenu from "./UserMenu";
 import ThemeToggle from "./ThemeToggle";
+import LanguagePicker from "./LanguagePicker";
 import { useState, useRef, useEffect } from "react";
 import { deriveParticipantType, derivePersonaId } from "@/lib/auth";
 import { useDemoPersona } from "@/lib/use-demo-persona";
@@ -660,6 +661,7 @@ export default function Navigation() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          <LanguagePicker />
           <ThemeToggle />
           <UserMenu />
           {/* Mobile hamburger */}

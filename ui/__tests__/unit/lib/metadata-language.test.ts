@@ -6,7 +6,6 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   browserLanguage,
   initialLanguage,
-  languagesOf,
   localise,
   searchableText,
   storedLanguage,
@@ -68,13 +67,6 @@ describe("localise", () => {
       title: "Belgian Long COVID Registry",
       titleLang: "en",
     });
-  });
-});
-
-describe("languagesOf", () => {
-  it("lists English first, then the languages some dataset is in", () => {
-    expect(languagesOf([registry, { title: "Y" }])).toEqual(["en", "de", "fr"]);
-    expect(languagesOf([{ title: "Y" }])).toEqual(["en"]);
   });
 });
 
