@@ -299,7 +299,7 @@ describe("DataSharePage", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(/Asset Details — FHIR Patient Bundle/),
+        screen.getByText(/Asset Details: FHIR Patient Bundle/),
       ).toBeInTheDocument();
     });
     // Should show asset ID
@@ -423,7 +423,7 @@ describe("DataSharePage", () => {
     await user.click(screen.getByText("FHIR Patient Bundle"));
     await waitFor(() => {
       expect(
-        screen.getByText(/Asset Details — FHIR Patient Bundle/),
+        screen.getByText(/Asset Details: FHIR Patient Bundle/),
       ).toBeInTheDocument();
     });
 
@@ -431,7 +431,7 @@ describe("DataSharePage", () => {
     await user.click(screen.getByText("FHIR Patient Bundle"));
     await waitFor(() => {
       expect(
-        screen.queryByText(/Asset Details — FHIR Patient Bundle/),
+        screen.queryByText(/Asset Details: FHIR Patient Bundle/),
       ).not.toBeInTheDocument();
     });
   });
