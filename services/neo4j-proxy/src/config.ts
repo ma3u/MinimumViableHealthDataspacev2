@@ -16,15 +16,34 @@ export const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD ?? "healthdataspace";
 // from the hub (all patients, the catalog, permits) whether or not this is set.
 // The audit chain and the access log are always the hub's.
 export const NEO4J_SPE1_URI = process.env.NEO4J_SPE1_URI || undefined;
+
+/**
+ * A workspace password as the workspace has it. The Key Vault secrets were
+ * stored with a trailing newline, which the shell drops when the workspace
+ * gets the password and a Key Vault reference keeps, so the proxy was
+ * refused (Neo.ClientError.Security.Unauthorized, #774). A password never
+ * ends in a line break.
+ */
+export function workspacePassword(
+  value: string | undefined,
+  fallback: string,
+): string {
+  return value === undefined ? fallback : value.replace(/[\r\n]+$/, "");
+}
+
 export const NEO4J_SPE1_USER = process.env.NEO4J_SPE1_USER ?? NEO4J_USER;
-export const NEO4J_SPE1_PASSWORD =
-  process.env.NEO4J_SPE1_PASSWORD ?? NEO4J_PASSWORD;
+export const NEO4J_SPE1_PASSWORD = workspacePassword(
+  process.env.NEO4J_SPE1_PASSWORD,
+  NEO4J_PASSWORD,
+);
 
 // Phase 5: Second SPE for federated queries (optional)
 export const NEO4J_SPE2_URI = process.env.NEO4J_SPE2_URI;
 export const NEO4J_SPE2_USER = process.env.NEO4J_SPE2_USER ?? NEO4J_USER;
-export const NEO4J_SPE2_PASSWORD =
-  process.env.NEO4J_SPE2_PASSWORD ?? NEO4J_PASSWORD;
+export const NEO4J_SPE2_PASSWORD = workspacePassword(
+  process.env.NEO4J_SPE2_PASSWORD,
+  NEO4J_PASSWORD,
+);
 // Bolt over TLS to the ACI workspaces (ADR-069): the CA that signed their
 // server certificates, as PEM text (an ACA secret) or a file. Set, the proxy
 // trusts that CA and no other for SPE-1 and SPE-2; unset, the URIs decide.
