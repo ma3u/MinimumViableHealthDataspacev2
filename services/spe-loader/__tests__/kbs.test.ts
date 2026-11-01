@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   kbsErrorSummary,
   referenceValueArgs,
+  referenceValueBody,
   type ReferenceValue,
 } from "../src/kbs.js";
 
@@ -45,6 +46,15 @@ describe("referenceValueArgs", () => {
 
   it("passes a boolean as a bool", () => {
     expect(referenceValueArgs("smt_enabled", [true])).toContain("--as-bool");
+  });
+
+  it("leaves a list of several values to the admin API", () => {
+    const body = JSON.parse(referenceValueBody("snp_bootloader", [10, 12]));
+    expect(body).toMatchObject({ version: "0.1.0", type: "sample" });
+    expect(JSON.parse(Buffer.from(body.payload, "base64").toString())).toEqual({
+      snp_bootloader: [10, 12],
+    });
+    expect(() => referenceValueBody("a b", [1, 2])).toThrow(/refusing/);
   });
 
   it("refuses more than one value and a name that is not an identifier", () => {

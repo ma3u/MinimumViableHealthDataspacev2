@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
 import { generateKeyPairSync } from "node:crypto";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { request } from "node:https";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -27,12 +28,14 @@ export interface KbsAdmin {
   setReferenceValue(name: string, value: ReferenceValue): Promise<void>;
 }
 
-/** A scalar, or a list of one scalar (kbs-client sets one value at a time). */
-export type ReferenceValue =
-  | string
-  | number
-  | boolean
-  | [string | number | boolean];
+/**
+ * A scalar, or a list of scalars any one of which matches. kbs-client sets a
+ * list of one; a longer list goes to the admin API directly
+ * (referenceValueBody), as the TCB of the hosts an ACI group lands on
+ * differs (#774).
+ */
+type Scalar = string | number | boolean;
+export type ReferenceValue = Scalar | Scalar[];
 
 /** kbs-client arguments for one reference value. */
 export function referenceValueArgs(
@@ -62,6 +65,63 @@ export function referenceValueArgs(
     ...type,
     ...(single ? ["--as-single-value"] : []),
   ];
+}
+
+/**
+ * The admin API's body for one reference value, the sample provenance
+ * kbs-client's set_sample_rv sends (Trustee v0.22.0, tools/kbs-client/src/
+ * lib.rs), with the whole list in it.
+ */
+export function referenceValueBody(name: string, values: Scalar[]): string {
+  if (!/^[A-Za-z0-9_.-]+$/.test(name))
+    throw new Error(`refusing reference value name '${name}'`);
+  const payload = Buffer.from(JSON.stringify({ [name]: values })).toString(
+    "base64",
+  );
+  return JSON.stringify({ version: "0.1.0", type: "sample", payload });
+}
+
+function postReferenceValue(
+  url: string,
+  tokenFile: string,
+  certFile: string | undefined,
+  body: string,
+  timeoutMs: number,
+): Promise<void> {
+  const token = readFileSync(tokenFile, "utf8").trim();
+  return new Promise((resolve, reject) => {
+    const req = request(
+      `${url.replace(/\/$/, "")}/kbs/v0/reference-value`,
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${token}`,
+        },
+        ...(certFile ? { ca: readFileSync(certFile) } : {}),
+        timeout: timeoutMs,
+      },
+      (res) => {
+        let text = "";
+        res.on("data", (c) => (text += c));
+        res.on("end", () =>
+          res.statusCode === 200
+            ? resolve()
+            : reject(
+                new KbsError(
+                  `reference value: Trustee answered ${
+                    res.statusCode
+                  }: ${text.slice(0, 300)}`,
+                  false,
+                ),
+              ),
+        );
+      },
+    );
+    req.on("timeout", () => req.destroy(new Error("reference value: timeout")));
+    req.on("error", reject);
+    req.end(body);
+  });
 }
 
 export class KbsError extends Error {
@@ -202,6 +262,16 @@ export function kbsAdmin(opts: {
       await exec([...config, "set-resource-policy", "--policy-file", regoFile]);
     },
     async setReferenceValue(name, value) {
+      if (Array.isArray(value) && value.length > 1) {
+        await postReferenceValue(
+          opts.url,
+          opts.adminTokenFile,
+          opts.certFile,
+          referenceValueBody(name, value),
+          opts.timeoutMs ?? 60_000,
+        );
+        return;
+      }
       await exec([...config, ...referenceValueArgs(name, value)]);
     },
     async setResource(path, value) {
