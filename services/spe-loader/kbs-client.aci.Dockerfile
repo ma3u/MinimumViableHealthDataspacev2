@@ -49,8 +49,10 @@ RUN git clone --depth 1 --branch "${TRUSTEE_REF}" https://github.com/confidentia
 # The SNP attester asks /dev/sev-guest for the extended report only, which
 # carries the host's certificate table. Azure Container Instances serve none,
 # so inside ACI it failed with "Failed to get attestation report" and Trustee
-# never saw evidence (#774, 2026-11-01). patches/snp-attester-plain-report.patch
-# falls back to the plain report, as Microsoft's get-snp-report does there;
+# never saw evidence (#774, 2026-11-01). A fallback after the failure did not
+# help: the failed extended request makes the guest driver drop its VMPCK, so
+# every later request fails too (ENOTTY, probed on ACI). So
+# patches/snp-attester-plain-report.patch asks for the plain report only;
 # Trustee's SNP verifier then fetches the VCEK from AMD KDS. Every
 # guest-components crate Trustee uses is taken from the patched checkout of
 # the same commit, so none comes twice.
