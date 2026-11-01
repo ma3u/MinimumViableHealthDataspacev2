@@ -4,6 +4,7 @@ import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
 import { Lightbulb, Shield, TrendingUp, Activity } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import { useT } from "@/lib/i18n/translate";
 
 interface Finding {
   insightId: string;
@@ -55,12 +56,30 @@ const EVIDENCE_BADGE: Record<string, string> = {
 const DEMO_PATIENT_ID = "demo-patient-1";
 
 export default function ResearchInsightsPage() {
+  const t = useT("patient");
+  const tn = useT("nav");
+  const evidenceLabel = (level: string) =>
+    level === "high"
+      ? t("high evidence")
+      : level === "moderate"
+        ? t("moderate evidence")
+        : level === "low"
+          ? t("low evidence")
+          : `${level} evidence`;
+  const priorityLabel = (p: Recommendation["priority"]) =>
+    p === "high"
+      ? t("high priority")
+      : p === "medium"
+        ? t("medium priority")
+        : t("low priority");
   const [insights, setInsights] = useState<Insights | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // A refusal (a patient asking for another record answers 403) is no
+    // insights, not an object without findings that the page would crash on.
     fetchApi(`/api/patient/insights?patientId=${DEMO_PATIENT_ID}`)
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : null))
       .then((d) => setInsights(d))
       .finally(() => setLoading(false));
   }, []);
@@ -69,13 +88,23 @@ export default function ResearchInsightsPage() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-3xl mx-auto px-6 py-10">
         <PageIntro
-          title="Research Insights & Medical Recommendations"
+          title={t("Research Insights & Medical Recommendations")}
           icon={Lightbulb}
-          description="Anonymised findings from research studies that used your donated EHR data. Personalised medical recommendations derived from aggregate results — never individual-level data."
-          prevStep={{ href: "/patient/research", label: "Research Programs" }}
-          nextStep={{ href: "/patient", label: "Health Records" }}
-          infoText="All findings are from aggregate analyses (k ≥ 5 participants). Your data contributes to research that benefits everyone — including you."
-          docLink={{ href: "/docs/user-guide", label: "Patient Rights Guide" }}
+          description={t(
+            "Anonymised findings from research studies that used your donated EHR data. Personalised medical recommendations derived from aggregate results, never individual-level data.",
+          )}
+          prevStep={{
+            href: "/patient/research",
+            label: tn("Research Programs"),
+          }}
+          nextStep={{ href: "/patient", label: t("Health Records") }}
+          infoText={t(
+            "All findings are from aggregate analyses (k ≥ 5 participants). Your data contributes to research that benefits everyone, including you.",
+          )}
+          docLink={{
+            href: "/docs/user-guide",
+            label: t("Patient Rights Guide"),
+          }}
         />
 
         {/* Privacy guarantee */}
@@ -86,17 +115,19 @@ export default function ResearchInsightsPage() {
           />
           <div className="text-xs text-violet-800 dark:text-violet-300">
             {insights?.privacyNote ??
-              "All findings are aggregate results (k ≥ 5). Your individual data is never shared with researchers — only pseudonymised summaries reach the Secure Processing Environment (EHDS Art. 73)."}
+              t(
+                "All findings are aggregate results (k ≥ 5). Your individual data is never shared with researchers: only pseudonymised summaries reach the Secure Processing Environment (EHDS Art. 73).",
+              )}
           </div>
         </div>
 
         {loading ? (
           <div className="text-(--text-secondary) text-sm">
-            Loading insights…
+            {t("Loading insights…")}
           </div>
         ) : !insights ? (
           <div className="text-(--text-secondary) text-sm">
-            No insights available.
+            {t("No insights available.")}
           </div>
         ) : (
           <div className="space-y-8">
@@ -104,19 +135,19 @@ export default function ResearchInsightsPage() {
             <div className="grid grid-cols-3 gap-4">
               {[
                 {
-                  label: "Active donations",
+                  label: t("Active donations"),
                   value: insights.activeDonations,
                   icon: Activity,
                   color: "text-teal-800 dark:text-teal-400",
                 },
                 {
-                  label: "Active SPE studies",
+                  label: t("Active SPE studies"),
                   value: insights.activeStudies,
                   icon: TrendingUp,
                   color: "text-(--accent)",
                 },
                 {
-                  label: "Research findings",
+                  label: t("Research findings"),
                   value: insights.findings.length,
                   icon: Lightbulb,
                   color: "text-(--warning-text)",
@@ -138,7 +169,7 @@ export default function ResearchInsightsPage() {
               <div>
                 <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
                   <TrendingUp size={18} className="text-(--accent)" />
-                  Aggregate Research Findings
+                  {t("Aggregate Research Findings")}
                 </h2>
                 <div className="space-y-3">
                   {insights.findings.map((f) => (
@@ -157,7 +188,7 @@ export default function ResearchInsightsPage() {
                             EVIDENCE_BADGE.low
                           }`}
                         >
-                          {f.evidenceLevel} evidence
+                          {evidenceLabel(f.evidenceLevel)}
                         </span>
                       </div>
                       <p className="text-sm text-(--text-primary) mb-2">
@@ -165,7 +196,7 @@ export default function ResearchInsightsPage() {
                       </p>
                       {f.recommendation && (
                         <div className="rounded-sm bg-teal-100 dark:bg-teal-900/20 border border-teal-300 dark:border-teal-800 p-2 text-xs text-teal-800 dark:text-teal-300">
-                          <strong>For you:</strong> {f.recommendation}
+                          <strong>{t("For you:")}</strong> {f.recommendation}
                         </div>
                       )}
                     </div>
@@ -182,7 +213,7 @@ export default function ResearchInsightsPage() {
                     size={18}
                     className="text-yellow-600 dark:text-yellow-400"
                   />
-                  Personalised Recommendations
+                  {t("Personalised Recommendations")}
                 </h2>
                 <div className="space-y-3">
                   {insights.recommendations.map((rec, i) => (
@@ -206,14 +237,14 @@ export default function ResearchInsightsPage() {
                                 : "bg-(--surface-2) text-(--text-secondary)"
                           }`}
                         >
-                          {rec.priority} priority
+                          {priorityLabel(rec.priority)}
                         </span>
                       </div>
                       <p className="text-sm text-(--text-primary) mb-1.5">
                         {rec.action}
                       </p>
                       <div className="text-xs text-(--text-secondary)">
-                        Based on: {rec.basedOn} ·{" "}
+                        {t("Based on:")} {rec.basedOn} ·{" "}
                         <span className="text-(--text-secondary)">
                           {rec.ehdsArticle}
                         </span>
@@ -228,14 +259,14 @@ export default function ResearchInsightsPage() {
             {insights.donatedStudies.length > 0 && (
               <div>
                 <h2 className="text-lg font-semibold mb-3">
-                  Studies Using My Data
+                  {t("Studies Using My Data")}
                 </h2>
                 <table className="text-xs w-full border-collapse">
                   <thead>
                     <tr className="border-b border-(--border) text-(--text-secondary)">
-                      <th className="text-left pb-1">Study</th>
-                      <th className="text-left pb-1">Consented</th>
-                      <th className="text-left pb-1">Status</th>
+                      <th className="text-left pb-1">{t("Study")}</th>
+                      <th className="text-left pb-1">{t("Consented")}</th>
+                      <th className="text-left pb-1">{t("Status")}</th>
                     </tr>
                   </thead>
                   <tbody>

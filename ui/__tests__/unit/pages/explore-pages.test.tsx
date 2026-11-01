@@ -453,7 +453,9 @@ describe("PatientPage", () => {
     mockFetchApi.mockReturnValue(mockResponse(patientData));
     render(<PatientPage />);
     await waitFor(() =>
-      expect(screen.getByText(/select patient/)).toBeInTheDocument(),
+      expect(
+        screen.getByText(/Select patient \(\d+ loaded\)/),
+      ).toBeInTheDocument(),
     );
     // Now set up mock for patient timeline call
     mockFetchApi.mockReturnValue(

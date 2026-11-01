@@ -4,6 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Smartphone, QrCode, ShieldCheck, Unplug } from "lucide-react";
 import { fetchApi } from "@/lib/api";
 import { IS_STATIC } from "@/lib/static-export";
+import { T, useT } from "@/lib/i18n/translate";
+import { useLanguage } from "@/lib/use-language";
+import type { CatalogLanguage } from "@/lib/metadata-language";
 
 /**
  * "Connect the Klarbefund app": the patient screen's half of #473 (ADR-049).
@@ -42,15 +45,23 @@ type Phase =
   | { kind: "expired" }
   | { kind: "error"; message: string };
 
-function formatDate(iso: string | null): string {
+function formatDate(iso: string | null, lang: CatalogLanguage): string {
   if (!iso) return "";
   const d = new Date(iso);
   return Number.isNaN(d.getTime())
     ? iso
-    : d.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" });
+    : d.toLocaleString(lang === "en" ? "en-GB" : lang, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      });
 }
 
+/** The app's own menu path, as Klarbefund labels it. */
+const APP_MENU = "More, Connect to EHDS";
+
 export default function ConnectAppCard() {
+  const t = useT("patient");
+  const lang = useLanguage();
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [devices, setDevices] = useState<Device[]>([]);
   const [secondsLeft, setSecondsLeft] = useState(0);
@@ -108,7 +119,7 @@ export default function ConnectAppCard() {
       );
       setPhase({ kind: "showing", pairing });
     } catch {
-      setPhase({ kind: "error", message: "The hub could not be reached" });
+      setPhase({ kind: "error", message: t("The hub could not be reached") });
     }
   }
 
@@ -134,25 +145,31 @@ export default function ConnectAppCard() {
         className="text-lg font-semibold flex items-center gap-2 mb-1"
       >
         <Smartphone size={18} className="text-(--accent)" aria-hidden />
-        {connected ? "Klarbefund is connected" : "Connect the Klarbefund app"}
+        {connected
+          ? t("Klarbefund is connected")
+          : t("Connect the Klarbefund app")}
       </h2>
       {connected ? (
         <p className="text-sm text-(--text-secondary) mb-3">
-          Your iPhone reads your record here and sends the values you allowed in
-          the app. Nothing to scan: a QR code is needed only to connect another
-          phone.
+          {t(
+            "Your iPhone reads your record here and sends the values you allowed in the app. Nothing to scan: a QR code is needed only to connect another phone.",
+          )}
         </p>
       ) : (
         <p className="text-sm text-(--text-secondary) mb-3">
-          Klarbefund turns your paper lab reports into structured values on your
-          iPhone. Connected, it can read your record here. In the app, choose{" "}
-          <strong>More, Connect to EHDS</strong> and scan the code.
+          <T area="patient" vars={{ menu: APP_MENU }} tags={{ b: <strong /> }}>
+            {
+              "Klarbefund turns your paper lab reports into structured values on your iPhone. Connected, it can read your record here. In the app, choose <b>{menu}</b> and scan the code."
+            }
+          </T>
         </p>
       )}
 
       {devices.length > 0 && (
         <div className="mb-3" data-testid="connected-devices">
-          <h3 className="text-sm font-semibold mb-2">Connected phones</h3>
+          <h3 className="text-sm font-semibold mb-2">
+            {t("Connected phones")}
+          </h3>
           <ul className="space-y-2">
             {devices.map((d) => (
               <li
@@ -162,10 +179,14 @@ export default function ConnectAppCard() {
                 <span>
                   <strong>{d.deviceName}</strong>
                   <span className="block text-xs text-(--text-secondary)">
-                    Connected {formatDate(d.connectedAt)}
                     {d.lastSeenAt
-                      ? `, last seen ${formatDate(d.lastSeenAt)}`
-                      : ""}
+                      ? t("Connected {date}, last seen {seen}", {
+                          date: formatDate(d.connectedAt, lang),
+                          seen: formatDate(d.lastSeenAt, lang),
+                        })
+                      : t("Connected {date}", {
+                          date: formatDate(d.connectedAt, lang),
+                        })}
                   </span>
                 </span>
                 {!IS_STATIC && (
@@ -173,9 +194,11 @@ export default function ConnectAppCard() {
                     type="button"
                     onClick={() => disconnect(d.deviceId)}
                     className="inline-flex items-center gap-1 rounded border border-(--border) px-2 py-1 text-xs hover:bg-(--surface-2)"
-                    aria-label={`Disconnect ${d.deviceName}`}
+                    aria-label={t("Disconnect {device}", {
+                      device: d.deviceName,
+                    })}
                   >
-                    <Unplug size={14} aria-hidden /> Disconnect
+                    <Unplug size={14} aria-hidden /> {t("Disconnect")}
                   </button>
                 )}
               </li>
@@ -185,7 +208,7 @@ export default function ConnectAppCard() {
       )}
       {IS_STATIC ? (
         <p className="text-sm" data-testid="connect-app-static">
-          Connecting needs the live demo, where you sign in as a patient:{" "}
+          {t("Connecting needs the live demo, where you sign in as a patient:")}{" "}
           <a
             className="underline text-(--accent)"
             href="https://ehds.mabu.red/patient/profile"
@@ -221,6 +244,7 @@ function PairingPanel({
   /** A phone is connected already: offer the code for another one, quietly. */
   another?: boolean;
 }) {
+  const t = useT("patient");
   switch (phase.kind) {
     case "idle":
     case "starting":
@@ -238,10 +262,10 @@ function PairingPanel({
         >
           <QrCode size={16} aria-hidden />
           {phase.kind === "starting"
-            ? "Preparing..."
+            ? t("Preparing...")
             : another
-              ? "Connect another phone"
-              : "Show QR code"}
+              ? t("Connect another phone")
+              : t("Show QR code")}
         </button>
       );
     case "showing": {
@@ -251,7 +275,7 @@ function PairingPanel({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={pairing.qrDataUri}
-            alt="QR code that connects the Klarbefund app to your record"
+            alt={t("QR code that connects the Klarbefund app to your record")}
             width={220}
             height={220}
             className="rounded bg-white p-2"
@@ -259,34 +283,45 @@ function PairingPanel({
           />
           <div className="text-sm space-y-2">
             <ol className="list-decimal pl-5 space-y-1">
-              <li>Scan the code with Klarbefund.</li>
+              <li>{t("Scan the code with Klarbefund.")}</li>
               <li>
-                <a
-                  href={pairing.verificationUri}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline text-(--accent)"
-                  data-testid="connect-app-approve"
+                <T
+                  area="patient"
+                  vars={{ code: pairing.userCode }}
+                  tags={{
+                    a: (
+                      <a
+                        href={pairing.verificationUri}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline text-(--accent)"
+                        data-testid="connect-app-approve"
+                      />
+                    ),
+                    b: <strong />,
+                  }}
                 >
-                  Approve on this computer
-                </a>
-                , and check the code reads <strong>{pairing.userCode}</strong>.
+                  {
+                    "<a>Approve on this computer</a>, and check the code reads <b>{code}</b>."
+                  }
+                </T>
               </li>
             </ol>
             <p>
-              On this phone instead?{" "}
+              {t("On this phone instead?")}{" "}
               <a
                 href={pairing.appLink}
                 className="underline text-(--accent)"
                 data-testid="connect-app-open"
               >
-                Open in Klarbefund
+                {t("Open in Klarbefund")}
               </a>
             </p>
             <p className="text-xs text-(--text-secondary)" aria-live="polite">
-              The code works for {secondsLeft} more seconds, once. Scan it only
-              with your own phone: whoever holds it when you approve gets read
-              access to your record.
+              {t(
+                "The code works for {n} more seconds, once. Scan it only with your own phone: whoever holds it when you approve gets read access to your record.",
+                { n: secondsLeft },
+              )}
             </p>
           </div>
         </div>
@@ -299,24 +334,24 @@ function PairingPanel({
           data-testid="connect-app-connected"
         >
           <ShieldCheck size={16} className="text-(--accent)" aria-hidden />
-          {phase.deviceName} is connected.
+          {t("{device} is connected.", { device: phase.deviceName })}
         </p>
       );
     case "expired":
       return (
         <p className="text-sm">
-          The code expired before a phone connected.{" "}
+          {t("The code expired before a phone connected.")}{" "}
           <button type="button" className="underline" onClick={onReset}>
-            Show a new one
+            {t("Show a new one")}
           </button>
         </p>
       );
     case "error":
       return (
         <p className="text-sm" role="alert">
-          Connecting failed: {phase.message}.{" "}
+          {t("Connecting failed: {message}.", { message: phase.message })}{" "}
           <button type="button" className="underline" onClick={onReset}>
-            Try again
+            {t("Try again")}
           </button>
         </p>
       );

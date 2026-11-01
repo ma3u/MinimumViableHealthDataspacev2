@@ -26,6 +26,7 @@ import {
 } from "@/components/wallet/flows";
 import { insurer } from "@/lib/journey-config";
 import { CITIZEN_WALLET } from "@/lib/wallet-config";
+import { useT } from "@/lib/i18n/translate";
 
 export type ApprovalMode = "register" | "login" | "ehr";
 
@@ -33,21 +34,18 @@ const FLOWS = {
   register: {
     steps: REGISTER_STEPS,
     qrUrl: "https://ehds.mabu.red/auth/eudi-qr?mode=register",
-    scanLabel: `Scan with ${CITIZEN_WALLET.name}`,
     brand: undefined as { name: string; color: string } | undefined,
     theme: "dyou" as const,
   },
   login: {
     steps: LOGIN_STEPS,
     qrUrl: "https://ehds.mabu.red/auth/eudi-qr?mode=login",
-    scanLabel: `Scan with ${CITIZEN_WALLET.name}`,
     brand: undefined as { name: string; color: string } | undefined,
     theme: "dyou" as const,
   },
   ehr: {
     steps: EHR_TRANSFER_STEPS,
     qrUrl: "https://ehds.mabu.red/patient/ehr-transfer",
-    scanLabel: "Scan with your insurer app",
     brand: { name: insurer.name, color: insurer.brand },
     theme: "classic" as const,
   },
@@ -63,6 +61,11 @@ export function EudiApprovalFlow({
   onCancel?: () => void;
 }) {
   const cfg = FLOWS[mode];
+  const t = useT("patient");
+  const scanLabel =
+    mode === "ehr"
+      ? t("Scan with your insurer app")
+      : t("Scan with {wallet}", { wallet: CITIZEN_WALLET.name });
   const accent = cfg.brand?.color ?? CITIZEN_WALLET.color;
   const [qr, setQr] = useState<string | null>(null);
 
@@ -96,21 +99,21 @@ export function EudiApprovalFlow({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={qr}
-              alt={`${cfg.scanLabel} — OpenID4VP QR code`}
+              alt={t("{label}: OpenID4VP QR code", { label: scanLabel })}
               className="block w-full h-full"
             />
           ) : (
             <span className="animate-pulse text-gray-300 text-xs">
-              Generating QR…
+              {t("Generating QR…")}
             </span>
           )}
         </div>
         <p className="flex items-center gap-1.5 text-sm font-semibold text-(--text-primary)">
           <ScanLine size={16} style={{ color: accent }} aria-hidden="true" />
-          {cfg.scanLabel}
+          {scanLabel}
         </p>
         <p className="text-xs text-(--text-secondary) text-center max-w-[210px]">
-          …or approve on the simulated phone →
+          {t("…or approve on the simulated phone →")}
         </p>
       </div>
 

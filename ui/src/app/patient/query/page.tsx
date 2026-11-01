@@ -20,6 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
+import { useT } from "@/lib/i18n/translate";
 import { MetricTrendRow } from "@/components/charts/MetricTrendRow";
 import {
   personalResearchQA,
@@ -48,6 +49,19 @@ interface Exchange {
 }
 
 export default function PersonalQueryPage() {
+  const t = useT("patient");
+  const tn = useT("nav");
+  // The ePA event types of lib/personal-research, by name.
+  const eventType = (type: string) =>
+    type === "Infection"
+      ? t("Infection")
+      : type === "Surgery"
+        ? t("Surgery")
+        : type === "Vaccination"
+          ? t("Vaccination")
+          : type === "Diagnosis"
+            ? t("Diagnosis")
+            : type;
   const [input, setInput] = useState("");
   const [exchanges, setExchanges] = useState<Exchange[]>([]);
 
@@ -66,12 +80,19 @@ export default function PersonalQueryPage() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-3xl mx-auto px-6 py-10">
         <PageIntro
-          title="Personal Research"
+          title={tn("Personal Research")}
           icon={Sparkles}
-          description="Ask a question about your own health data — fitness, lab and nutrition trends together with your ePA record (infections, surgeries, vaccinations and diagnoses). Answers are computed only from your own records (EHDS Art. 3 / GDPR Art. 15 — primary use). Synthetic · illustrative — not medical advice."
-          prevStep={{ href: "/patient", label: "My Health Records" }}
-          nextStep={{ href: "/patient/insights", label: "Research Insights" }}
-          infoText="This is primary use: you query your own data. It never leaves your record and is not compared against other patients. The static demo matches your free-text question to a predefined answer by keyword (no AI model)."
+          description={t(
+            "Ask a question about your own health data: fitness, lab and nutrition trends together with your ePA record (infections, surgeries, vaccinations and diagnoses). Answers are computed only from your own records (EHDS Art. 3 / GDPR Art. 15, primary use). Synthetic · illustrative · not medical advice.",
+          )}
+          prevStep={{ href: "/patient", label: tn("My Health Records") }}
+          nextStep={{
+            href: "/patient/insights",
+            label: tn("Research Insights"),
+          }}
+          infoText={t(
+            "This is primary use: you query your own data. It never leaves your record and is not compared against other patients. The static demo matches your free-text question to a predefined answer by keyword (no AI model).",
+          )}
         />
 
         {/* Query box — at the top */}
@@ -86,14 +107,14 @@ export default function PersonalQueryPage() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            aria-label="Ask a question about your own health data"
-            placeholder="Ask about your own health data…"
+            aria-label={t("Ask a question about your own health data")}
+            placeholder={t("Ask about your own health data…")}
             className="flex-1 rounded-xl border border-(--border-ui) bg-(--surface-card) px-4 py-3 text-sm text-(--text-primary) outline-hidden focus:border-(--accent)"
           />
           <button
             type="submit"
             disabled={!input.trim()}
-            aria-label="Send question"
+            aria-label={t("Send question")}
             className="grid place-items-center w-12 h-12 rounded-xl text-white shrink-0 transition-all hover:scale-[1.03] disabled:opacity-40 disabled:hover:scale-100"
             style={{ background: "var(--accent)" }}
           >
@@ -123,15 +144,16 @@ export default function PersonalQueryPage() {
           })}
         </div>
         <p className="text-[11px] text-(--text-secondary) mt-2">
-          Your own records only · synthetic · not medical advice
+          {t("Your own records only · synthetic · not medical advice")}
         </p>
 
         {/* Answers — below the field, newest first */}
         <div className="space-y-4 mt-6">
           {exchanges.length === 0 && (
             <div className="text-center text-sm text-(--text-secondary) py-8 rounded-xl border border-dashed border-(--border)">
-              Ask a question above — or tap a suggestion — to see an answer from
-              your own data.
+              {t(
+                "Ask a question above, or tap a suggestion, to see an answer from your own data.",
+              )}
             </div>
           )}
           {exchanges.map((x, i) => {
@@ -154,7 +176,7 @@ export default function PersonalQueryPage() {
                       <Icon size={16} />
                     </span>
                     <span className="text-xs font-bold uppercase tracking-wide text-(--text-secondary)">
-                      Your data assistant
+                      {t("Your data assistant")}
                     </span>
                   </div>
                   {x.qa ? (
@@ -163,12 +185,12 @@ export default function PersonalQueryPage() {
                         {x.qa.answer}
                       </p>
                       <div className="grid sm:grid-cols-2 gap-2.5">
-                        {x.qa.trends.map((t) => (
+                        {x.qa.trends.map((tr) => (
                           <MetricTrendRow
-                            key={t.label}
-                            s={t}
+                            key={tr.label}
+                            s={tr}
                             markers={eventMarkers(
-                              t,
+                              tr,
                               x.qa!.events,
                               (type) => EPA_TYPE_COLOR[type] ?? "#7D3C98",
                             )}
@@ -178,7 +200,7 @@ export default function PersonalQueryPage() {
                       {x.qa.events.length > 0 && (
                         <ul className="space-y-1.5 mt-2.5">
                           <li className="text-[10px] font-bold uppercase tracking-wide text-(--text-secondary)">
-                            Related ePA events · marked on the trends
+                            {t("Related ePA events · marked on the trends")}
                           </li>
                           {x.qa.events.map((e) => (
                             <li
@@ -192,7 +214,7 @@ export default function PersonalQueryPage() {
                                     EPA_TYPE_COLOR[e.type] ?? "#7D3C98",
                                 }}
                               >
-                                {e.type}
+                                {eventType(e.type)}
                               </span>
                               <span className="text-xs font-mono text-(--text-secondary) shrink-0">
                                 {e.date}
@@ -210,9 +232,9 @@ export default function PersonalQueryPage() {
                     </>
                   ) : (
                     <p className="text-sm text-(--text-primary) leading-relaxed">
-                      I can only answer from your own fitness, lab, nutrition
-                      and ePA records. Try asking about your sport routine, your
-                      nutrition, or your breathing &amp; respiratory history.
+                      {t(
+                        "I can only answer from your own fitness, lab, nutrition and ePA records. Try asking about your sport routine, your nutrition, or your breathing & respiratory history.",
+                      )}
                     </p>
                   )}
                 </div>

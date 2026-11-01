@@ -17,6 +17,7 @@ import { isSandboxUsername } from "@/lib/sandbox-account";
 import ConnectAppCard from "@/components/ConnectAppCard";
 import HealthInterests from "@/components/HealthInterests";
 import { useSession } from "next-auth/react";
+import { T, useT } from "@/lib/i18n/translate";
 
 interface RiskScore {
   score: number;
@@ -65,6 +66,31 @@ const RISK_ICONS = {
 };
 
 export default function PatientProfilePage() {
+  const t = useT("patient");
+  const tn = useT("nav");
+  // FHIR's administrative gender codes, in the picked language.
+  const gender = (g: string | null | undefined) =>
+    g === "female"
+      ? t("female")
+      : g === "male"
+        ? t("male")
+        : g === "other"
+          ? t("other")
+          : g === "unknown"
+            ? t("unknown")
+            : g;
+  const riskTitle = (key: string) =>
+    key === "cardiovascular"
+      ? t("Cardiovascular Risk")
+      : key === "diabetes"
+        ? t("Diabetes Risk")
+        : `${key.replace(/([A-Z])/g, " $1")} Risk`;
+  const riskLevel = (level: RiskScore["level"]) =>
+    level === "high"
+      ? t("high risk")
+      : level === "moderate"
+        ? t("moderate risk")
+        : t("low risk");
   const [patients, setPatients] = useState<PatientItem[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -101,15 +127,22 @@ export default function PatientProfilePage() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-3xl mx-auto px-6 py-10">
         <PageIntro
-          title="Health Profile & Risk Assessment"
+          title={t("Health Profile & Risk Assessment")}
           icon={Heart}
-          description="GDPR Art. 15 / EHDS Art. 3 — Your personal health profile, computed risk scores, and health interests. All data derived from your own FHIR electronic health record."
-          prevStep={{ href: "/patient", label: "Health Records" }}
-          nextStep={{ href: "/patient/research", label: "Research Programs" }}
-          infoText="Risk scores are computed from your clinical conditions and are for informational purposes only. Always consult your physician before making medical decisions."
+          description={t(
+            "GDPR Art. 15 / EHDS Art. 3: your personal health profile, computed risk scores, and health interests. All data derived from your own FHIR electronic health record.",
+          )}
+          prevStep={{ href: "/patient", label: t("Health Records") }}
+          nextStep={{
+            href: "/patient/research",
+            label: tn("Research Programs"),
+          }}
+          infoText={t(
+            "Risk scores are computed from your clinical conditions and are for informational purposes only. Always consult your physician before making medical decisions.",
+          )}
           docLink={{
             href: "/docs/user-guide",
-            label: "Patient Rights Guide",
+            label: t("Patient Rights Guide"),
           }}
         />
 
@@ -125,9 +158,11 @@ export default function PatientProfilePage() {
           >
             <Wallet size={18} className="text-(--accent)" aria-hidden />
             <span>
-              <strong>Connect your EUDI wallet</strong>
+              <strong>{t("Connect your EUDI wallet")}</strong>
               <span className="block text-xs text-(--text-secondary)">
-                Sign in to this account with your PID, at assurance level high.
+                {t(
+                  "Sign in to this account with your PID, at assurance level high.",
+                )}
               </span>
             </span>
           </Link>
@@ -137,10 +172,11 @@ export default function PatientProfilePage() {
         <div className="mb-6 rounded-lg border border-(--border) bg-(--surface-2) p-3 flex items-start gap-2">
           <Shield size={16} className="mt-0.5 shrink-0 text-(--accent)" />
           <div className="text-xs text-(--text-secondary)">
-            <strong>Your data rights:</strong> You have the right to access
-            (GDPR Art. 15), portability (Art. 20), rectification (Art. 16), and
-            erasure (Art. 17) of your health data. Under EHDS Art. 3, you can
-            access your EHR through any EU national contact point.
+            <T area="patient" tags={{ b: <strong /> }}>
+              {
+                "<b>Your data rights:</b> You have the right to access (GDPR Art. 15), portability (Art. 20), rectification (Art. 16), and erasure (Art. 17) of your health data. Under EHDS Art. 3, you can access your EHR through any EU national contact point."
+              }
+            </T>
           </div>
         </div>
 
@@ -148,7 +184,7 @@ export default function PatientProfilePage() {
         {!loading && patients.length > 0 && (
           <div className="mb-6">
             <label className="text-sm text-(--text-secondary)">
-              Select patient record
+              {t("Select patient record")}
               <select
                 value={selectedId}
                 onChange={(e) => setSelectedId(e.target.value)}
@@ -158,16 +194,18 @@ export default function PatientProfilePage() {
                   <option key={p.id} value={p.id}>
                     {[
                       p.name,
-                      p.gender && p.gender !== "unknown" ? p.gender : null,
+                      p.gender && p.gender !== "unknown"
+                        ? gender(p.gender)
+                        : null,
                       p.age != null
-                        ? `age ${p.age}`
+                        ? t("age {age}", { age: p.age })
                         : p.birthDate
-                          ? `born ${p.birthDate}`
+                          ? t("born {date}", { date: p.birthDate })
                           : null,
                     ]
                       .filter(Boolean)
                       .join(", ")}{" "}
-                    ({p.conditionCount} conditions)
+                    {t("({n} conditions)", { n: p.conditionCount })}
                   </option>
                 ))}
               </select>
@@ -177,7 +215,7 @@ export default function PatientProfilePage() {
 
         {profileLoading && (
           <div className="text-(--text-secondary) text-sm">
-            Loading health profile…
+            {t("Loading health profile…")}
           </div>
         )}
 
@@ -188,17 +226,21 @@ export default function PatientProfilePage() {
               <div className="flex items-center gap-2 mb-3">
                 <User size={16} className="text-teal-800 dark:text-teal-400" />
                 <h2 className="font-semibold">
-                  {profile.patient.name || "Anonymous Patient"}
+                  {profile.patient.name || t("Anonymous Patient")}
                 </h2>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs text-(--text-secondary)">
                 <div>
-                  <span className="text-(--text-secondary)">Gender:</span>{" "}
-                  {profile.patient.gender}
+                  <span className="text-(--text-secondary)">
+                    {t("Gender:")}
+                  </span>{" "}
+                  {gender(profile.patient.gender)}
                 </div>
                 <div>
                   <span className="text-(--text-secondary)">
-                    {profile.patient.age != null ? "Age:" : "Date of birth:"}
+                    {profile.patient.age != null
+                      ? t("Age:")
+                      : t("Date of birth:")}
                   </span>{" "}
                   {profile.patient.age != null
                     ? profile.patient.age
@@ -206,12 +248,14 @@ export default function PatientProfilePage() {
                 </div>
                 <div>
                   <span className="text-(--text-secondary)">
-                    Active Conditions:
+                    {t("Active Conditions:")}
                   </span>{" "}
                   {profile.totalConditionCount ?? profile.conditions.length}
                 </div>
                 <div>
-                  <span className="text-(--text-secondary)">Medications:</span>{" "}
+                  <span className="text-(--text-secondary)">
+                    {t("Medications:")}
+                  </span>{" "}
                   {profile.medications.length}
                 </div>
               </div>
@@ -224,7 +268,7 @@ export default function PatientProfilePage() {
                   size={18}
                   className="text-teal-800 dark:text-teal-400"
                 />
-                Health Risk Assessment
+                {t("Health Risk Assessment")}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {Object.entries(profile.riskScores).map(([key, risk]) => {
@@ -238,16 +282,16 @@ export default function PatientProfilePage() {
                       data-testid={`risk-card-${key}`}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold capitalize">
-                          {key.replace(/([A-Z])/g, " $1")} Risk
+                        <span className="font-semibold first-letter:uppercase">
+                          {riskTitle(key)}
                         </span>
                         <Icon size={16} />
                       </div>
                       <div className="text-2xl font-bold mb-1">
                         {Math.round(risk.score * 100)}%
                       </div>
-                      <div className="text-xs capitalize font-medium mb-2">
-                        {risk.level} risk
+                      <div className="text-xs first-letter:uppercase font-medium mb-2">
+                        {riskLevel(risk.level)}
                       </div>
                       {risk.factors.length > 0 && (
                         <ul className="text-xs space-y-0.5 opacity-80">
@@ -276,15 +320,15 @@ export default function PatientProfilePage() {
             {profile.conditions.length > 0 && (
               <div>
                 <h2 className="text-lg font-semibold mb-2">
-                  Active Conditions
+                  {t("Active Conditions")}
                 </h2>
                 <div className="rounded-xl border border-(--border) overflow-hidden">
                   <table className="text-xs w-full border-collapse">
                     <thead>
                       <tr className="border-b border-(--border) text-(--text-secondary)">
-                        <th className="text-left p-2">Condition</th>
+                        <th className="text-left p-2">{t("Condition")}</th>
                         <th className="text-left p-2">ICD-10 / SNOMED</th>
-                        <th className="text-left p-2">Onset</th>
+                        <th className="text-left p-2">{t("Onset")}</th>
                       </tr>
                     </thead>
                     <tbody>

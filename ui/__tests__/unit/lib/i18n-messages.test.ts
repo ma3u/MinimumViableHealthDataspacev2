@@ -187,6 +187,15 @@ describe("the code and the dictionaries", () => {
     expect(texts.filter((x) => !(x in MESSAGES.en.access))).toEqual([]);
   });
 
+  it("knows every health interest a patient can choose", async () => {
+    const { HEALTH_INTERESTS } = await import("@/lib/patient/interests");
+    expect(
+      HEALTH_INTERESTS.map((i) => i.label).filter(
+        (l) => !(l in MESSAGES.en.patient),
+      ),
+    ).toEqual([]);
+  });
+
   it("knows every persona description of the sign-in page", async () => {
     const { DEMO_PERSONAS } = await import("@/lib/auth");
     expect(
