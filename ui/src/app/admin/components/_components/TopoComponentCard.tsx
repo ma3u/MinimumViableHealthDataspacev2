@@ -26,10 +26,13 @@ export function TopoComponentCard({
         "Shared ACA container: the same value applies to every participant. See Layer View for the cluster total.",
       )
     : undefined;
+  // The live status decides. The list of apps known to be broken on Azure
+  // only marks one whose status is not healthy: the CFM managers were on it
+  // while scaled to zero and kept showing "Broken" once they ran (#774).
   const isBroken =
-    KNOWN_BROKEN_ACA_APPS.has(comp.container) ||
     comp.severity === "critical" ||
-    comp.severity === "warning";
+    comp.severity === "warning" ||
+    (KNOWN_BROKEN_ACA_APPS.has(comp.container) && comp.severity !== "healthy");
   return (
     <div
       className={`border rounded-lg p-3 ${sev.border} ${sev.bg} transition-colors`}
