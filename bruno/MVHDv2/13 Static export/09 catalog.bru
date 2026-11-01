@@ -21,7 +21,14 @@ assert {
   res.body[0].title: isDefined
 }
 
+tests {
+  // #782: the static catalogue carries the German descriptions too.
+  test("datasets carry a German title", function () {
+    const german = res.getBody().filter((d) => d.translations && d.translations.de);
+    expect(german.length).to.be.above(0);
+  });
+}
+
 docs {
   ui/public/mock/catalog.json stands in for /api/catalog in the static build.
-  Its German titles (#782) are asserted again once #783 is on the Pages site.
 }

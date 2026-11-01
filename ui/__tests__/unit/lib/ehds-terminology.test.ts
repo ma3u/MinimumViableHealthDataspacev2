@@ -51,7 +51,7 @@ describe("the EHDS terminology file", () => {
     expect(TERMS.length).toBeGreaterThanOrEqual(13);
     for (const t of TERMS) {
       for (const l of LANGS) expect(t[l], `${t.id} ${l}`).toBeTruthy();
-      expect(t.article, t.id).toMatch(/^Art\. \d+/);
+      expect(t.article, t.id).toMatch(/^(Art\. \d+|Title)/);
     }
   });
 
@@ -74,14 +74,82 @@ describe("the EHDS terminology file", () => {
   });
 });
 
+/**
+ * The texts of each language on the hub, so a term is checked only where it
+ * is wrong: "EHDS" is right in German and wrong in Spanish.
+ */
+function textsByLanguage(): Record<Lang, { where: string; text: string }[]> {
+  const out: Record<Lang, { where: string; text: string }[]> = {
+    en: [],
+    de: [],
+    fr: [],
+    nl: [],
+    es: [],
+  };
+  // The seed: rows like  de: ['title', 'description'],  and the keyword
+  // maps, which end in  } AS de .
+  const seed = SOURCES["neo4j/seed-catalog-translations.cypher"];
+  for (const m of seed.matchAll(
+    /\b(de|fr|nl|es): \[((?:'(?:[^'\\]|\\.)*'|null)(?:, (?:'(?:[^'\\]|\\.)*'|null))*)\]/g,
+  )) {
+    out[m[1] as Lang].push({ where: "seed row", text: m[2] });
+  }
+  for (const m of seed.matchAll(/\{([^{}]*)\}\s+AS (de|fr|nl|es)\b/g)) {
+    const values = [...m[1].matchAll(/: '([^']*)'/g)].map((v) => v[1]);
+    out[m[2] as Lang].push({
+      where: "seed keywords",
+      text: values.join(" | "),
+    });
+  }
+  // The catalogue mock: translations by language.
+  const catalog = JSON.parse(SOURCES["public/mock/catalog.json"]) as {
+    id: string;
+    translations?: Partial<
+      Record<Lang, { title?: string; description?: string }>
+    >;
+  }[];
+  for (const d of catalog) {
+    for (const [l, t] of Object.entries(d.translations ?? {})) {
+      out[l as Lang].push({
+        where: `catalog.json ${d.id}`,
+        text: `${t?.title ?? ""} ${t?.description ?? ""}`,
+      });
+    }
+  }
+  // The national profiles: the role and the laws, in the country's language.
+  const profiles = JSON.parse(SOURCES["public/mock/jurisdictions.json"]) as {
+    jurisdictions: {
+      code: string;
+      languages: string[];
+      accessBodyRole: string;
+      laws: { title: string }[];
+    }[];
+  };
+  for (const j of profiles.jurisdictions) {
+    const text = [j.accessBodyRole, ...j.laws.map((l) => l.title)].join(" | ");
+    for (const l of j.languages) {
+      if (l in out) out[l as Lang].push({ where: `profile ${j.code}`, text });
+    }
+  }
+  return out;
+}
+
 describe("the translations on the hub", () => {
-  for (const [file, text] of Object.entries(SOURCES)) {
-    it(`${file} uses no term the Regulation does not`, () => {
-      const used = TERMS.flatMap((t) =>
-        Object.entries(t.avoid ?? {}).flatMap(([l, words]) =>
-          (words ?? [])
+  const texts = textsByLanguage();
+
+  it("are found in every language they come in", () => {
+    for (const l of ["de", "fr", "nl", "es"] as Lang[]) {
+      expect(texts[l].length, l).toBeGreaterThan(0);
+    }
+  });
+
+  for (const l of ["de", "fr", "nl", "es"] as Lang[]) {
+    it(`in ${l} use no term the Regulation does not`, () => {
+      const used = texts[l].flatMap(({ where, text }) =>
+        TERMS.flatMap((t) =>
+          (t.avoid?.[l] ?? [])
             .filter((w) => usesWord(text, w))
-            .map((w) => `${w} (${l}; the Regulation says "${t[l as Lang]}")`),
+            .map((w) => `${where}: ${w} (the Regulation says "${t[l]}")`),
         ),
       );
       expect(used).toEqual([]);
@@ -95,9 +163,11 @@ describe("the translations on the hub", () => {
       new RegExp(
         "`EHDS secondary use`: '([^']+)'[^}]*}\\s+AS " + map + "\\b",
       ).exec(seed)?.[1];
-    expect(keyword("de")).toContain(secondary.de);
-    expect(keyword("fr")).toContain(secondary.fr);
-    expect(keyword("nl")).toContain(secondary.nl);
+    const abbreviation = TERMS.find((t) => t.id === "ehds-abbreviation")!;
+    for (const l of ["de", "fr", "nl", "es"] as Lang[]) {
+      expect(keyword(l), l).toContain(secondary[l]);
+      expect(keyword(l), l).toContain(abbreviation[l]);
+    }
   });
 
   it("call a health data access body by its name in the national profiles", () => {

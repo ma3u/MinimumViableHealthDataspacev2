@@ -19,7 +19,13 @@ import {
 } from "@/lib/metadata-language";
 
 /** The languages the menu offers: those the hub has descriptions in. */
-export const OFFERED_LANGUAGES: CatalogLanguage[] = ["en", "de", "fr", "nl"];
+export const OFFERED_LANGUAGES: CatalogLanguage[] = [
+  "en",
+  "de",
+  "fr",
+  "nl",
+  "es",
+];
 
 const emitter: EventTarget | null =
   typeof window !== "undefined" ? new EventTarget() : null;

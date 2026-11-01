@@ -27,6 +27,10 @@
       "de": {
         "title": "Synthetischer Patientenverlauf Typ-2-Diabetes",
         "description": "Vollständiger Patientenverlauf bei Typ-2-Diabetes: Diagnose, HbA1c-Kontrollen, Anpassung der Medikation und Erfassung von Folgeerkrankungen."
+      },
+      "es": {
+        "title": "Trayectoria sintética de pacientes con diabetes tipo 2",
+        "description": "Conjunto de datos de la trayectoria completa del paciente con diabetes tipo 2: diagnóstico, control de HbA1c, ajuste de la medicación y seguimiento de complicaciones."
       }
     },
     "accessBody": "MedReg DE",
@@ -59,6 +63,10 @@
       "de": {
         "title": "Synthetische FHIR-R4-Patientenkohorte (Synthea)",
         "description": "Synthetische Längsschnittdaten von Patientinnen und Patienten, mit Synthea 3.3.0 für Massachusetts erzeugt. Enthält Demografie, Kontakte, Diagnosen, Messwerte und Verordnungen in FHIR R4, in Schicht 4 auf OMOP CDM abgebildet."
+      },
+      "es": {
+        "title": "Cohorte sintética de pacientes FHIR R4 (Synthea)",
+        "description": "Historias clínicas longitudinales sintéticas generadas con Synthea 3.3.0 para Massachusetts. Incluye datos demográficos, contactos, diagnósticos, observaciones y prescripciones en FHIR R4, transformados a OMOP CDM en la capa 4."
       }
     },
     "accessBody": "MedReg DE",
@@ -83,6 +91,10 @@
       "de": {
         "title": "Analysedatenbank OMOP CDM v5.4",
         "description": "Analysedatenbank nach dem OMOP Common Data Model v5.4 mit standardisierten klinischen Daten aus FHIR-R4-Quellen."
+      },
+      "es": {
+        "title": "Almacén analítico OMOP CDM v5.4",
+        "description": "Almacén analítico según el OMOP Common Data Model v5.4 con datos clínicos normalizados de fuentes FHIR R4."
       }
     },
     "accessBody": "MedReg DE",
@@ -111,6 +123,10 @@
       "nl": {
         "title": "Multicentrisch register prostaatkanker",
         "description": "Gefedereerd register van uitkomsten bij prostaatkanker met TNM-stadia, Gleason-scores en behandelprotocollen in FHIR R4."
+      },
+      "es": {
+        "title": "Registro multicéntrico de cáncer de próstata",
+        "description": "Registro federado de resultados del cáncer de próstata con estadificación TNM, puntuaciones de Gleason y protocolos de tratamiento en FHIR R4."
       }
     },
     "accessBody": "MedReg DE",
@@ -143,6 +159,10 @@
       "de": {
         "title": "Synthetische FHIR-R4-Patientenkohorte (Synthea)",
         "description": "Synthetische Längsschnittdaten von Patientinnen und Patienten, mit Synthea 3.3.0 für Massachusetts erzeugt. Enthält Demografie, Kontakte, Diagnosen, Messwerte und Verordnungen in FHIR R4, in Schicht 4 auf OMOP CDM abgebildet."
+      },
+      "es": {
+        "title": "Cohorte sintética de pacientes FHIR R4 (Synthea)",
+        "description": "Historias clínicas longitudinales sintéticas generadas con Synthea 3.3.0 para Massachusetts. Incluye datos demográficos, contactos, diagnósticos, observaciones y prescripciones en FHIR R4, transformados a OMOP CDM en la capa 4."
       }
     },
     "accessBody": "MedReg DE",
@@ -167,6 +187,10 @@
       "de": {
         "title": "Analysedatenbank OMOP CDM v5.4",
         "description": "Analysedatenbank nach dem OMOP Common Data Model v5.4. Enthält standardisierte klinische Daten aus FHIR-R4-Quellen für epidemiologische Forschung und Arzneimittelsicherheit."
+      },
+      "es": {
+        "title": "Almacén analítico OMOP CDM v5.4",
+        "description": "Almacén analítico según el OMOP Common Data Model v5.4. Contiene datos clínicos normalizados de fuentes FHIR R4 para la investigación epidemiológica y la vigilancia de la seguridad de los medicamentos."
       }
     },
     "accessBody": "MedReg DE",
@@ -191,6 +215,10 @@
       "de": {
         "title": "Multizentrisches Prostatakrebsregister",
         "description": "Föderiertes Register zu Behandlungsergebnissen bei Prostatakrebs von teilnehmenden Gesundheitsdateninhabern. Enthält TNM-Stadien, Gleason-Scores, Behandlungsprotokolle und 5-Jahres-Überlebensdaten in HL7 FHIR R4."
+      },
+      "es": {
+        "title": "Registro multicéntrico de cáncer de próstata",
+        "description": "Registro federado de resultados del cáncer de próstata de tenedores de datos de salud participantes en el EEDS. Incluye estadificación TNM, puntuaciones de Gleason, protocolos de tratamiento y supervivencia a 5 años en HL7 FHIR R4."
       }
     },
     "accessBody": "MedReg DE",
@@ -215,6 +243,10 @@
       "de": {
         "title": "Synthetischer Patientenverlauf Typ-2-Diabetes",
         "description": "Vollständiger Patientenverlauf bei Typ-2-Diabetes: Diagnose, HbA1c-Kontrollen, Anpassung der Medikation und Erfassung von Folgeerkrankungen."
+      },
+      "es": {
+        "title": "Trayectoria sintética de pacientes con diabetes tipo 2",
+        "description": "Conjunto de datos de la trayectoria completa del paciente con diabetes tipo 2: diagnóstico, control de HbA1c, ajuste de la medicación y seguimiento de complicaciones."
       }
     },
     "accessBody": "MedReg DE",
@@ -239,6 +271,10 @@
       "de": {
         "title": "FHIR-Sammlung von Behandlungskontakten",
         "description": "Längsschnittdaten zu Notfall-, stationären und ambulanten Kontakten, verknüpft mit Practitioner- und Location-Ressourcen zur Analyse von Versorgungspfaden."
+      },
+      "es": {
+        "title": "Colección FHIR del historial de contactos asistenciales",
+        "description": "Registros longitudinales de contactos de urgencias, hospitalización y consultas ambulatorias, vinculados a recursos Practitioner y Location para analizar los itinerarios asistenciales."
       }
     },
     "accessBody": "MedReg DE",
@@ -267,6 +303,10 @@
       "nl": {
         "title": "FHIR-diagnostische verslagen",
         "description": "DiagnosticReport-resources uit radiologie, pathologie en laboratorium met gekoppelde Observation-resultaten en verwijzingen naar monsters."
+      },
+      "es": {
+        "title": "Informes diagnósticos FHIR",
+        "description": "Recursos DiagnosticReport de radiología, anatomía patológica y laboratorio, con resultados Observation vinculados y referencias a muestras."
       }
     },
     "accessBody": "MedReg DE",
@@ -291,6 +331,10 @@
       "de": {
         "title": "FHIR-Register für Behandlungspläne",
         "description": "Strukturierte CarePlan-Ressourcen für die Versorgung chronischer Erkrankungen, mit Behandlungszielen, geplanten Maßnahmen, Zuständigkeiten im Behandlungsteam und Ergebnismaßen."
+      },
+      "es": {
+        "title": "Registro FHIR de planes de cuidados",
+        "description": "Recursos CarePlan estructurados para el manejo de enfermedades crónicas, con objetivos terapéuticos, actividades programadas, asignación del equipo asistencial y medidas de resultado."
       }
     },
     "accessBody": "MedReg DE",
@@ -315,6 +359,10 @@
       "de": {
         "title": "FHIR-Problemliste der Diagnosen",
         "description": "Aktive und abgeschlossene Condition-Ressourcen, auf SNOMED CT und ICD-10 abgebildet, mit Beginn, Schweregrad, Verifikationsstatus und klinischem Stadium."
+      },
+      "es": {
+        "title": "Lista FHIR de problemas de salud",
+        "description": "Recursos Condition activos y resueltos, mapeados a SNOMED CT y CIE-10, con fecha de inicio, gravedad, estado de verificación y estadio clínico."
       }
     },
     "accessBody": "MedReg DE",
@@ -343,6 +391,10 @@
       "fr": {
         "title": "Jeu de données FHIR des prescriptions",
         "description": "Ressources MedicationRequest couvrant les prescriptions, les posologies, les renouvellements et les alertes d'interaction, codées en RxNorm et ATC."
+      },
+      "es": {
+        "title": "Conjunto de datos FHIR de prescripciones",
+        "description": "Recursos MedicationRequest con prescripciones, pautas posológicas, renovaciones y alertas de interacciones, codificados con RxNorm y ATC."
       }
     },
     "accessBody": "Institut de Recherche Santé",
@@ -367,6 +419,10 @@
       "de": {
         "title": "FHIR-Impfdaten",
         "description": "Immunization-Ressourcen zu COVID-19-, Influenza- und Kinderimpfungen mit Chargennummern, abgestimmt auf das digitale COVID-Zertifikat der EU."
+      },
+      "es": {
+        "title": "Registros FHIR de vacunación",
+        "description": "Recursos Immunization de vacunación frente a la COVID-19, la gripe y vacunas infantiles, con números de lote y alineados con el certificado COVID digital de la UE."
       }
     },
     "accessBody": "MedReg DE",
@@ -391,6 +447,10 @@
       "de": {
         "title": "FHIR-Register Allergien und Unverträglichkeiten",
         "description": "AllergyIntolerance-Ressourcen zu Arzneimittelallergien, Nahrungsmittelunverträglichkeiten und Umweltempfindlichkeiten mit SNOMED-CT-Substanzcodes."
+      },
+      "es": {
+        "title": "Registro FHIR de alergias e intolerancias",
+        "description": "Recursos AllergyIntolerance sobre alergias a medicamentos, intolerancias alimentarias y sensibilidades ambientales, con códigos de sustancia SNOMED CT."
       }
     },
     "accessBody": "MedReg DE",
@@ -415,6 +475,10 @@
       "de": {
         "title": "FHIR-Bündel Prozeduren",
         "description": "Procedure-Ressourcen zu chirurgischen Eingriffen, diagnostischen Verfahren und Therapien mit SNOMED-CT-Codes und Körperstellen."
+      },
+      "es": {
+        "title": "Conjunto FHIR de procedimientos",
+        "description": "Recursos Procedure sobre intervenciones quirúrgicas, procedimientos diagnósticos y tratamientos, con códigos SNOMED CT y localización anatómica."
       }
     },
     "accessBody": "MedReg DE",
@@ -439,6 +503,10 @@
       "de": {
         "title": "FHIR-Vitalwerte und Laborergebnisse",
         "description": "Observation-Ressourcen mit Vitalzeichen und Laborergebnissen, kodiert mit LOINC und verknüpft mit Encounter- und Patient-Ressourcen."
+      },
+      "es": {
+        "title": "Constantes vitales y resultados de laboratorio FHIR",
+        "description": "Recursos Observation de constantes vitales y resultados de laboratorio, codificados con LOINC y vinculados a recursos Encounter y Patient."
       }
     },
     "accessBody": "MedReg DE",
@@ -463,6 +531,10 @@
       "de": {
         "title": "FHIR-Bündel für Kohortensuchen",
         "description": "Vorbereitete FHIR-Bundle-Ressourcen für epidemiologische Kohortenabfragen, für Auswertungen auf Bevölkerungsebene wie Prävalenz und Stratifizierung nach Ergebnissen."
+      },
+      "es": {
+        "title": "Paquetes FHIR para búsquedas de cohortes",
+        "description": "Recursos Bundle de FHIR preparados para consultas epidemiológicas de cohortes, para análisis poblacionales como la prevalencia y la estratificación por resultados."
       }
     },
     "accessBody": "MedReg DE",
@@ -487,6 +559,10 @@
       "de": {
         "title": "Föderierter HealthDCAT-AP-Katalog",
         "description": "Zusammengeführter HealthDCAT-AP-Metadatenkatalog mit den Datensatzbeschreibungen aller teilnehmenden Gesundheitsdateninhaber für den grenzüberschreitenden Zugang zu Gesundheitsdaten."
+      },
+      "es": {
+        "title": "Catálogo federado HealthDCAT-AP",
+        "description": "Catálogo de metadatos HealthDCAT-AP que reúne las descripciones de conjuntos de datos de todos los tenedores de datos de salud participantes en el EEDS para el acceso transfronterizo a datos de salud."
       }
     },
     "accessBody": "MedReg DE",
@@ -511,6 +587,10 @@
       "de": {
         "title": "MedDRA v27.0, Klassifikation unerwünschter Ereignisse",
         "description": "Terminologie unerwünschter Ereignisse des Medical Dictionary for Regulatory Activities (MedDRA) v27.0, abgebildet auf FHIR-R4-AdverseEvent-Ressourcen. Umfasst Systemorganklassen (SOC), HLGT, HLT, bevorzugte Begriffe (PT) und LLT für die Signalerkennung in der Pharmakovigilanz und ICSR-Meldungen."
+      },
+      "es": {
+        "title": "MedDRA v27.0, clasificación de acontecimientos adversos",
+        "description": "Terminología de acontecimientos adversos del Medical Dictionary for Regulatory Activities (MedDRA) v27.0, mapeada a recursos AdverseEvent de FHIR R4. Abarca las clases de órganos y sistemas (SOC), HLGT, HLT, términos preferentes (PT) y LLT para la detección de señales de farmacovigilancia y la notificación de ICSR."
       }
     },
     "accessBody": "MedReg DE",
@@ -539,6 +619,10 @@
       "fr": {
         "title": "Registre de métadonnées des essais cliniques de phase I à IV",
         "description": "Métadonnées structurées d'essais cliniques multiphases (phase I sécurité, phase II efficacité, phase III comparaison, phase IV surveillance après mise sur le marché), avec numéros EudraCT, critères d'évaluation, centres investigateurs, objectifs de recrutement et correspondances FHIR R4 ResearchStudy et ResearchSubject selon les BPC ICH E6(R3)."
+      },
+      "es": {
+        "title": "Registro de metadatos de ensayos clínicos de fases I a IV",
+        "description": "Metadatos estructurados de ensayos clínicos multifase (fase I seguridad, fase II eficacia, fase III comparación, fase IV vigilancia poscomercialización). Incluye números EudraCT, criterios de valoración, centros investigadores, objetivos de reclutamiento y correspondencias con ResearchStudy y ResearchSubject de FHIR R4 conforme a las BPC ICH E6(R3)."
       }
     },
     "accessBody": "Institut de Recherche Santé",

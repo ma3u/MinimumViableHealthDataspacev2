@@ -245,7 +245,8 @@ export default function JurisdictionsPage() {
             <Link href="/catalog" className="text-(--accent) underline">
               catalogue
             </Link>{" "}
-            are available in German, and some in French and Dutch.
+            are available in German and Spanish, and some in French and Dutch;
+            pick the language in the menu bar.
           </p>
         </div>
 
