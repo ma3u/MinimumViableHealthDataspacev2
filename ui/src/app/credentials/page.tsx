@@ -3,6 +3,7 @@
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState } from "react";
 import PageIntro from "@/components/PageIntro";
+import { useT } from "@/lib/i18n/translate";
 import {
   ChevronDown,
   ChevronUp,
@@ -38,14 +39,29 @@ interface CredentialDef {
   validity: number;
 }
 
+type RequestResult = { ok: true } | { ok: false; detail: string };
+
 export default function CredentialsPage() {
+  const t = useT("holder");
+  const tn = useT("nav");
+  // The status is the graph's; the ones it holds are shown translated.
+  const statusText = (s: string) =>
+    s === "Active"
+      ? t("Active")
+      : s === "Expired"
+        ? t("Expired")
+        : s === "Revoked"
+          ? t("Revoked")
+          : s;
   const [credentials, setCredentials] = useState<VC[]>([]);
   const [participants, setParticipants] = useState<ParticipantCtx[]>([]);
   const [credentialDefs, setCredentialDefs] = useState<CredentialDef[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [requesting, setRequesting] = useState(false);
-  const [requestResult, setRequestResult] = useState<string | null>(null);
+  const [requestResult, setRequestResult] = useState<RequestResult | null>(
+    null,
+  );
   const [removingId, setRemovingId] = useState<string | null>(null);
 
   // Request form
@@ -133,7 +149,7 @@ export default function CredentialsPage() {
       });
 
       if (res.ok) {
-        setRequestResult("Credential request submitted successfully");
+        setRequestResult({ ok: true });
         // Refresh credentials list
         const updated = await fetchApi("/api/credentials");
         const data = await updated.json();
@@ -173,17 +189,21 @@ export default function CredentialsPage() {
         );
       } else {
         const err = await res.json();
-        setRequestResult(`Error: ${err.error || "Request failed"}`);
+        // The API's error stays as it is; only the fallback is ours.
+        setRequestResult({
+          ok: false,
+          detail: err.error || t("Request failed"),
+        });
       }
     } catch {
-      setRequestResult("Error: Failed to submit request");
+      setRequestResult({ ok: false, detail: t("Failed to submit request") });
     } finally {
       setRequesting(false);
     }
   };
 
   const handleRemove = async (credentialId: string) => {
-    if (!confirm("Remove this credential? This cannot be undone.")) return;
+    if (!confirm(t("Remove this credential? This cannot be undone."))) return;
     setRemovingId(credentialId);
     try {
       const res = await fetchApi(
@@ -195,10 +215,10 @@ export default function CredentialsPage() {
         if (expanded === credentialId) setExpanded(null);
       } else {
         const err = await res.json();
-        alert(err.error || "Failed to remove credential");
+        alert(err.error || t("Failed to remove credential"));
       }
     } catch {
-      alert("Failed to remove credential");
+      alert(t("Failed to remove credential"));
     } finally {
       setRemovingId(null);
     }
@@ -208,35 +228,40 @@ export default function CredentialsPage() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
-          title="Verifiable Credentials"
+          title={t("Verifiable Credentials")}
           icon={FileKey2}
-          description="Request and manage EHDS participant credentials issued via the IssuerService and stored in the IdentityHub. Verifiable Credentials prove identity, compliance status, and data-access authorisation within the dataspace."
-          prevStep={{ href: "/compliance/tck", label: "Protocol TCK" }}
-          nextStep={{ href: "/data/share", label: "Share Data" }}
-          infoText="VCs follow the W3C Verifiable Credentials standard. They are cryptographically signed by the IssuerService and can be verified by any participant using the holder's DID:web identity."
-          docLink={{ href: "/docs/architecture", label: "Architecture Docs" }}
+          description={t(
+            "Request and manage EHDS participant credentials issued via the IssuerService and stored in the IdentityHub. Verifiable Credentials prove identity, compliance status, and data-access authorisation within the dataspace.",
+          )}
+          prevStep={{ href: "/compliance/tck", label: tn("Protocol TCK") }}
+          nextStep={{ href: "/data/share", label: tn("Share Data") }}
+          infoText={t(
+            "VCs follow the W3C Verifiable Credentials standard. They are cryptographically signed by the IssuerService and can be verified by any participant using the holder's DID:web identity.",
+          )}
+          docLink={{
+            href: "/docs/architecture",
+            label: t("Architecture Docs"),
+          }}
         />
 
         {/* Request new credential */}
         <div className="border border-(--border) rounded-xl p-5 mb-8">
           <div className="flex items-center gap-2 mb-2">
             <Send size={18} className="text-teal-800 dark:text-teal-300" />
-            <h2 className="font-semibold text-sm">Request Credential</h2>
+            <h2 className="font-semibold text-sm">{t("Request Credential")}</h2>
           </div>
           <p className="text-xs text-(--text-secondary) mb-4">
-            Request a Verifiable Credential (VC) from the IssuerService for a
-            participant. VCs prove identity, compliance, and data-access
-            authorization in the EHDS dataspace. They are stored in the
-            participant&apos;s IdentityHub and presented during
-            connector-to-connector negotiations.
+            {t(
+              "Request a Verifiable Credential (VC) from the IssuerService for a participant. VCs prove identity, compliance, and data-access authorization in the EHDS dataspace. They are stored in the participant's IdentityHub and presented during connector-to-connector negotiations.",
+            )}
           </p>
           <div className="grid sm:grid-cols-3 gap-3 items-end">
             <div>
               <label className="text-xs text-(--text-secondary) mb-1 block">
-                Participant Context
+                {t("Participant Context")}
               </label>
               <select
-                aria-label="Participant Context"
+                aria-label={t("Participant Context")}
                 value={reqParticipant}
                 onChange={(e) => setReqParticipant(e.target.value)}
                 className="w-full px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm"
@@ -252,10 +277,10 @@ export default function CredentialsPage() {
 
             <div>
               <label className="text-xs text-(--text-secondary) mb-1 block">
-                Credential Type
+                {t("Credential Type")}
               </label>
               <select
-                aria-label="Credential Type"
+                aria-label={t("Credential Type")}
                 value={reqType}
                 onChange={(e) => setReqType(e.target.value)}
                 className="w-full px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm"
@@ -292,19 +317,21 @@ export default function CredentialsPage() {
               ) : (
                 <FileKey2 size={14} />
               )}
-              Request
+              {t("Request")}
             </button>
           </div>
 
           {requestResult && (
             <p
               className={`mt-3 text-xs ${
-                requestResult.startsWith("Error")
-                  ? "text-(--role-admin-text)"
-                  : "text-(--role-user-text)"
+                requestResult.ok
+                  ? "text-(--role-user-text)"
+                  : "text-(--role-admin-text)"
               }`}
             >
-              {requestResult}
+              {requestResult.ok
+                ? t("Credential request submitted successfully")
+                : t("Error: {detail}", { detail: requestResult.detail })}
             </p>
           )}
         </div>
@@ -313,7 +340,7 @@ export default function CredentialsPage() {
         {loading ? (
           <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
-            Loading credentials…
+            {t("Loading credentials…")}
           </div>
         ) : credentials.length === 0 ? (
           <div className="text-center py-12">
@@ -322,10 +349,10 @@ export default function CredentialsPage() {
               className="text-(--text-secondary) mx-auto mb-4"
             />
             <p className="text-(--text-secondary)">
-              No credentials found in Neo4j
+              {t("No credentials found in Neo4j")}
             </p>
             <p className="text-(--text-secondary) text-xs mt-1">
-              Register a participant and request credentials above
+              {t("Register a participant and request credentials above")}
             </p>
           </div>
         ) : (
@@ -343,7 +370,11 @@ export default function CredentialsPage() {
                 >
                   <button
                     className="w-full text-left p-4"
-                    aria-label={`${isOpen ? "Collapse" : "Expand"} ${vc.type}`}
+                    aria-label={
+                      isOpen
+                        ? t("Collapse {name}", { name: vc.type })
+                        : t("Expand {name}", { name: vc.type })
+                    }
                     onClick={() => setExpanded(isOpen ? null : vc.id)}
                   >
                     <div className="flex items-center justify-between">
@@ -361,7 +392,7 @@ export default function CredentialsPage() {
                             {vc.type}
                           </p>
                           <p className="text-xs text-(--text-secondary)">
-                            {vc.subject?.slice(0, 40)}… · Issued:{" "}
+                            {vc.subject?.slice(0, 40)}… · {t("Issued:")}{" "}
                             {vc.issuanceDate?.split("T")[0]}
                           </p>
                         </div>
@@ -374,7 +405,7 @@ export default function CredentialsPage() {
                               : "bg-(--surface-2) text-(--text-secondary)"
                           }`}
                         >
-                          {vc.status}
+                          {statusText(vc.status)}
                         </span>
                         {isOpen ? (
                           <ChevronUp
@@ -401,7 +432,7 @@ export default function CredentialsPage() {
                       </div>
                       <div className="flex gap-3 text-xs">
                         <span className="text-(--text-secondary) w-28">
-                          Issuer
+                          {t("Issuer")}
                         </span>
                         <span className="text-(--text-primary) font-mono break-all">
                           {vc.issuer}
@@ -409,7 +440,7 @@ export default function CredentialsPage() {
                       </div>
                       <div className="flex gap-3 text-xs">
                         <span className="text-(--text-secondary) w-28">
-                          Subject
+                          {t("Subject")}
                         </span>
                         <span className="text-(--text-primary) font-mono break-all">
                           {vc.subject}
@@ -418,7 +449,7 @@ export default function CredentialsPage() {
                       {vc.expirationDate && (
                         <div className="flex gap-3 text-xs">
                           <span className="text-(--text-secondary) w-28">
-                            Expires
+                            {t("Expires")}
                           </span>
                           <span className="text-(--text-primary)">
                             {vc.expirationDate}
@@ -450,7 +481,7 @@ export default function CredentialsPage() {
                           ) : (
                             <Trash2 size={12} />
                           )}
-                          Remove
+                          {t("Remove")}
                         </button>
                       </div>
                     </div>

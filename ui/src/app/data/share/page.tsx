@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import FhirResourceViewer from "@/components/FhirResourceViewer";
+import { useT } from "@/lib/i18n/translate";
 
 interface ParticipantCtx {
   "@id": string;
@@ -128,6 +129,8 @@ function JsonNode({ data, depth = 0 }: { data: unknown; depth?: number }) {
 /* ── Asset Detail Panel ── */
 
 function AssetDetailPanel({ asset }: { asset: Asset }) {
+  const t = useT("holder");
+  const tc = useT("catalog");
   const [viewMode, setViewMode] = useState<"details" | "json" | "fhir">(
     "details",
   );
@@ -210,7 +213,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
         <div className="flex items-center gap-2">
           <FileJson2 size={14} className="text-teal-800 dark:text-teal-300" />
           <span className="text-xs font-medium text-(--text-primary)">
-            Asset Details — {name}
+            {t("Asset Details: {name}", { name: String(name) })}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -218,7 +221,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             href={`/graph?highlight=${encodeURIComponent(String(name))}`}
             className="flex items-center gap-1 text-[11px] text-(--accent) hover:underline transition-colors"
           >
-            View in Graph <Network size={10} />
+            {tc("View in Graph")} <Network size={10} />
           </a>
         </div>
       </div>
@@ -227,7 +230,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
       <div className="px-4 py-3 border-b border-(--border) grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
           <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
-            Asset ID
+            {t("Asset ID")}
           </div>
           <div className="text-sm text-(--text-primary) font-mono truncate">
             {asset["@id"]}
@@ -235,7 +238,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
         </div>
         <div>
           <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
-            Type
+            {t("Type")}
           </div>
           <div className="text-sm text-(--text-primary)">
             {String(asset["@type"] || "Asset")}
@@ -243,16 +246,18 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
         </div>
         <div>
           <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
-            Content Type
+            {t("Content Type")}
           </div>
           <div className="text-sm text-(--text-primary)">{ct || "—"}</div>
         </div>
         <div>
           <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
-            Properties
+            {t("Properties")}
           </div>
           <div className="text-sm text-(--text-primary)">
-            {Object.keys(asset.properties || {}).length} fields
+            {t("{n} fields", {
+              n: Object.keys(asset.properties || {}).length,
+            })}
           </div>
         </div>
       </div>
@@ -261,7 +266,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
       {desc && (
         <div className="px-4 py-2 border-b border-(--border)">
           <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide mb-1">
-            Description
+            {t("Description")}
           </div>
           <p className="text-xs text-(--text-primary)">{desc as string}</p>
         </div>
@@ -278,7 +283,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
                 : "text-(--text-secondary) hover:text-(--text-primary)"
             }`}
           >
-            Details
+            {t("Details")}
           </button>
           <button
             onClick={() => setViewMode("json")}
@@ -288,7 +293,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
                 : "text-(--text-secondary) hover:text-(--text-primary)"
             }`}
           >
-            Raw JSON
+            {t("Raw JSON")}
           </button>
           {isFhir && (
             <button
@@ -303,7 +308,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
               }`}
             >
               <Activity size={10} />
-              FHIR Viewer
+              {t("FHIR Viewer")}
             </button>
           )}
         </div>
@@ -312,7 +317,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
           className="flex items-center gap-1 text-[11px] text-(--text-secondary) hover:text-(--text-primary)"
         >
           <Copy size={10} />
-          {copied ? "Copied!" : "Copy"}
+          {copied ? t("Copied!") : t("Copy")}
         </button>
       </div>
 
@@ -323,16 +328,16 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             {fhirLoading ? (
               <div className="flex items-center gap-2 text-(--text-secondary) py-6 justify-center">
                 <Loader2 size={14} className="animate-spin" />
-                Loading FHIR bundle…
+                {t("Loading FHIR bundle…")}
               </div>
             ) : fhirBundle ? (
               <FhirResourceViewer
                 bundle={fhirBundle}
-                title={`FHIR Resources — ${name}`}
+                title={t("FHIR Resources: {name}", { name: String(name) })}
               />
             ) : (
               <p className="text-(--text-secondary) text-xs text-center py-6">
-                No FHIR bundle data available for this asset.
+                {t("No FHIR bundle data available for this asset.")}
               </p>
             )}
           </div>
@@ -342,7 +347,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             {extraEntries.length > 0 && (
               <div>
                 <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide mb-1.5">
-                  EDC Metadata
+                  {t("EDC Metadata")}
                 </div>
                 <div className="space-y-1 font-mono text-xs">
                   {extraEntries.map(([k, v]) => (
@@ -360,7 +365,7 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
             {propEntries.length > 0 && (
               <div>
                 <div className="text-[10px] text-(--text-secondary) uppercase tracking-wide mb-1.5">
-                  Properties
+                  {t("Properties")}
                 </div>
                 <div className="space-y-1 font-mono text-xs">
                   {propEntries.map(([k, v]) => (
@@ -385,7 +390,15 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
   );
 }
 
+type CreateResult = { ok: true } | { ok: false; detail: string };
+
+const assetLabel = (a: Asset) =>
+  String(a.name || a["edc:name"] || a.properties?.name || a["@id"]);
+
 export default function DataSharePage() {
+  const t = useT("holder");
+  const tn = useT("nav");
+  const th = useT("home");
   const [tab, setTab] = useState<Tab>("existing");
   const [participants, setParticipants] = useState<ParticipantCtx[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
@@ -399,7 +412,7 @@ export default function DataSharePage() {
   const [contentType, setContentType] = useState("application/fhir+json");
   const [baseUrl, setBaseUrl] = useState("");
   const [creating, setCreating] = useState(false);
-  const [createResult, setCreateResult] = useState<string | null>(null);
+  const [createResult, setCreateResult] = useState<CreateResult | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -449,7 +462,7 @@ export default function DataSharePage() {
       });
 
       if (res.ok) {
-        setCreateResult("Asset created successfully!");
+        setCreateResult({ ok: true });
         setAssetName("");
         setAssetDesc("");
         setBaseUrl("");
@@ -461,10 +474,14 @@ export default function DataSharePage() {
         setAssets(Array.isArray(data.assets) ? data.assets : []);
       } else {
         const err = await res.json();
-        setCreateResult(`Error: ${err.error || "Creation failed"}`);
+        // The API's error stays as it is; only the fallback is ours.
+        setCreateResult({
+          ok: false,
+          detail: err.error || t("Creation failed"),
+        });
       }
     } catch {
-      setCreateResult("Error: Failed to create asset");
+      setCreateResult({ ok: false, detail: t("Failed to create asset") });
     } finally {
       setCreating(false);
     }
@@ -474,28 +491,35 @@ export default function DataSharePage() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
-          title="Share Data"
+          title={tn("Share Data")}
           icon={Upload}
-          description="Register data assets for sharing in the EHDS dataspace. Define FHIR or OMOP datasets with their access policies, then publish them so other participants can discover and negotiate access."
-          prevStep={{ href: "/credentials", label: "Verifiable Credentials" }}
-          nextStep={{ href: "/data/discover", label: "Discover Data" }}
-          infoText="Each data asset is registered via the EDC-V management API with an ODRL policy. The asset becomes visible in the federated catalog once published."
-          docLink={{ href: "/docs/developer", label: "Developer Guide" }}
+          description={t(
+            "Register data assets for sharing in the EHDS dataspace. Define FHIR or OMOP datasets with their access policies, then publish them so other participants can discover and negotiate access.",
+          )}
+          prevStep={{
+            href: "/credentials",
+            label: t("Verifiable Credentials"),
+          }}
+          nextStep={{ href: "/data/discover", label: th("Discover Data") }}
+          infoText={t(
+            "Each data asset is registered via the EDC-V management API with an ODRL policy. The asset becomes visible in the federated catalog once published.",
+          )}
+          docLink={{ href: "/docs/developer", label: tn("Developer Guide") }}
         />
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 border-b border-(--border)">
-          {(["existing", "create"] as Tab[]).map((t) => (
+          {(["existing", "create"] as Tab[]).map((k) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={k}
+              onClick={() => setTab(k)}
               className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-                tab === t
+                tab === k
                   ? "border-layer2 text-teal-800 dark:text-teal-300"
                   : "border-transparent text-(--text-secondary) hover:text-(--text-primary)"
               }`}
             >
-              {t === "existing" ? "My Assets" : "Register New"}
+              {k === "existing" ? t("My Assets") : t("Register New")}
             </button>
           ))}
         </div>
@@ -504,19 +528,19 @@ export default function DataSharePage() {
           loading ? (
             <div className="flex items-center gap-2 text-(--text-secondary)">
               <Loader2 size={16} className="animate-spin" />
-              Loading assets…
+              {t("Loading assets…")}
             </div>
           ) : assets.length === 0 ? (
             <div className="text-center py-12">
               <Database size={40} className="text-gray-600 mx-auto mb-4" />
               <p className="text-(--text-secondary)">
-                No data assets registered yet
+                {t("No data assets registered yet")}
               </p>
               <button
                 onClick={() => setTab("create")}
                 className="mt-3 text-sm text-teal-800 dark:text-teal-300 hover:underline"
               >
-                Register your first asset →
+                {t("Register your first asset →")}
               </button>
             </div>
           ) : (
@@ -535,12 +559,11 @@ export default function DataSharePage() {
                   >
                     <button
                       className="w-full text-left p-4"
-                      aria-label={`${isOpen ? "Collapse" : "Expand"} ${
-                        a.name ||
-                        a["edc:name"] ||
-                        a.properties?.name ||
-                        a["@id"]
-                      }`}
+                      aria-label={
+                        isOpen
+                          ? t("Collapse {name}", { name: assetLabel(a) })
+                          : t("Expand {name}", { name: assetLabel(a) })
+                      }
                       onClick={() => setExpanded(isOpen ? null : id)}
                     >
                       <div className="flex items-center justify-between">
@@ -600,31 +623,35 @@ export default function DataSharePage() {
           <div className="border border-(--border) rounded-xl p-6">
             <div className="flex items-center gap-2 mb-6">
               <Upload size={18} className="text-teal-800 dark:text-teal-300" />
-              <h2 className="font-semibold text-sm">Register Data Asset</h2>
+              <h2 className="font-semibold text-sm">
+                {t("Register Data Asset")}
+              </h2>
             </div>
 
             {createResult && (
               <div
                 className={`mb-4 p-3 rounded text-sm ${
-                  createResult.startsWith("Error")
-                    ? "bg-(--role-admin-bg) border border-(--role-admin-border) text-(--role-admin-text)"
-                    : "bg-(--role-user-bg) border border-(--role-user-border) text-(--role-user-text)"
+                  createResult.ok
+                    ? "bg-(--role-user-bg) border border-(--role-user-border) text-(--role-user-text)"
+                    : "bg-(--role-admin-bg) border border-(--role-admin-border) text-(--role-admin-text)"
                 }`}
               >
-                {createResult.startsWith("Error") ? null : (
+                {createResult.ok ? (
                   <CheckCircle2 size={14} className="inline mr-1" />
-                )}
-                {createResult}
+                ) : null}
+                {createResult.ok
+                  ? t("Asset created successfully!")
+                  : t("Error: {detail}", { detail: createResult.detail })}
               </div>
             )}
 
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
                 <label className="text-xs text-(--text-secondary) mb-1 block">
-                  Participant Context
+                  {t("Participant Context")}
                 </label>
                 <select
-                  aria-label="Participant Context"
+                  aria-label={t("Participant Context")}
                   value={selectedCtx}
                   onChange={(e) => setSelectedCtx(e.target.value)}
                   className="w-full px-3 py-2 bg-(--surface-2) border border-gray-600 rounded-sm text-sm"
@@ -642,24 +669,26 @@ export default function DataSharePage() {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs text-(--text-secondary) mb-1 block">
-                    Asset Name
+                    {t("Asset Name")}
                   </label>
                   <input
-                    aria-label="Asset Name"
+                    aria-label={t("Asset Name")}
                     type="text"
                     required
                     value={assetName}
                     onChange={(e) => setAssetName(e.target.value)}
-                    placeholder="e.g. fhir-patient-cohort"
+                    placeholder={t("e.g. {example}", {
+                      example: "fhir-patient-cohort",
+                    })}
                     className="w-full px-3 py-2 bg-(--surface-2) border border-gray-600 rounded-sm text-sm outline-hidden focus:border-layer2"
                   />
                 </div>
                 <div>
                   <label className="text-xs text-(--text-secondary) mb-1 block">
-                    Content Type
+                    {t("Content Type")}
                   </label>
                   <select
-                    aria-label="Content Type"
+                    aria-label={t("Content Type")}
                     value={contentType}
                     onChange={(e) => setContentType(e.target.value)}
                     className="w-full px-3 py-2 bg-(--surface-2) border border-gray-600 rounded-sm text-sm"
@@ -676,23 +705,23 @@ export default function DataSharePage() {
 
               <div>
                 <label className="text-xs text-(--text-secondary) mb-1 block">
-                  Description
+                  {t("Description")}
                 </label>
                 <textarea
                   value={assetDesc}
                   onChange={(e) => setAssetDesc(e.target.value)}
                   rows={2}
-                  placeholder="Describe the dataset…"
+                  placeholder={t("Describe the dataset…")}
                   className="w-full px-3 py-2 bg-(--surface-2) border border-gray-600 rounded-sm text-sm outline-hidden focus:border-layer2"
                 />
               </div>
 
               <div>
                 <label className="text-xs text-(--text-secondary) mb-1 block">
-                  Data Source URL
+                  {t("Data Source URL")}
                 </label>
                 <input
-                  aria-label="Data Source URL"
+                  aria-label={t("Data Source URL")}
                   type="url"
                   value={baseUrl}
                   onChange={(e) => setBaseUrl(e.target.value)}
@@ -711,7 +740,7 @@ export default function DataSharePage() {
                 ) : (
                   <Upload size={16} />
                 )}
-                Register Asset
+                {t("Register Asset")}
               </button>
             </form>
           </div>

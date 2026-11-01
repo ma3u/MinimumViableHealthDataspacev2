@@ -22,6 +22,7 @@ import {
   minimalDescription,
   toTurtle,
 } from "@/lib/healthdcat-ap";
+import { useT } from "@/lib/i18n/translate";
 
 /* ── Types ─────────────────────────────────────────── */
 
@@ -289,12 +290,13 @@ function InputField({
 /* ── Main Page ─────────────────────────────────────── */
 
 export default function DcatApEditorPage() {
+  const tm = useT("common");
   return (
     <Suspense
       fallback={
         <div className="flex items-center gap-2 text-(--text-secondary) p-10">
           <Loader2 size={16} className="animate-spin" />
-          Loading…
+          {tm("Loading…")}
         </div>
       }
     >
@@ -304,6 +306,10 @@ export default function DcatApEditorPage() {
 }
 
 function EditorContent() {
+  const t = useT("holder");
+  const tc = useT("catalog");
+  const tn = useT("nav");
+  const th = useT("home");
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>("browse");
   const [datasets, setDatasets] = useState<DatasetEntry[]>([]);
@@ -415,8 +421,8 @@ function EditorContent() {
         setResult({
           ok: true,
           message: editingId
-            ? "Dataset metadata updated successfully."
-            : "Dataset metadata created successfully.",
+            ? t("Dataset metadata updated successfully.")
+            : t("Dataset metadata created successfully."),
         });
         setEditingId(null);
         setForm({ ...EMPTY_ENTRY });
@@ -424,14 +430,15 @@ function EditorContent() {
         setTimeout(() => setTab("browse"), 1500);
       } else {
         const body = await res.text();
-        setResult({ ok: false, message: body || "Failed to save." });
+        // The API's answer stays as it is; only the fallback is ours.
+        setResult({ ok: false, message: body || t("Failed to save.") });
       }
     } catch (err) {
       setResult({
         ok: false,
-        message: `Network error: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
+        message: t("Network error: {message}", {
+          message: err instanceof Error ? err.message : String(err),
+        }),
       });
     } finally {
       setSaving(false);
@@ -455,12 +462,16 @@ function EditorContent() {
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
         <PageIntro
-          title="HealthDCAT-AP Editor"
+          title={t("HealthDCAT-AP Editor")}
           icon={BookOpen}
-          description="Create and edit dataset descriptions for EHDS secondary use. The hub serves them in HealthDCAT-AP Release 8, the DCAT-AP 3.0 profile for health data that Implementing Regulation (EU) 2026/2098 makes the form of every dataset description."
-          prevStep={{ href: "/catalog", label: "Dataset Catalog" }}
-          nextStep={{ href: "/data/discover", label: "Discover Data" }}
-          infoText="Fields marked with * are mandatory in HealthDCAT-AP Release 8. A saved entry gets what Release 8 requires of every dataset (access body, distribution, variables, contact point), so it passes the official validation at once."
+          description={t(
+            "Create and edit dataset descriptions for EHDS secondary use. The hub serves them in HealthDCAT-AP Release 8, the DCAT-AP 3.0 profile for health data that Implementing Regulation (EU) 2026/2098 makes the form of every dataset description.",
+          )}
+          prevStep={{ href: "/catalog", label: tn("Dataset Catalog") }}
+          nextStep={{ href: "/data/discover", label: th("Discover Data") }}
+          infoText={t(
+            "Fields marked with * are mandatory in HealthDCAT-AP Release 8. A saved entry gets what Release 8 requires of every dataset (access body, distribution, variables, contact point), so it passes the official validation at once.",
+          )}
           docLink={{
             href: "https://data.health.europa.eu/healthdcat-ap/releases/release-8/",
             label: "HealthDCAT-AP Release 8",
@@ -478,7 +489,7 @@ function EditorContent() {
                 : "bg-(--surface-2) text-(--text-secondary) hover:text-(--text-primary)"
             }`}
           >
-            Browse ({datasets.length})
+            {t("Browse ({n})", { n: datasets.length })}
           </button>
           <button
             onClick={startNew}
@@ -489,7 +500,7 @@ function EditorContent() {
             }`}
           >
             <Plus size={14} />
-            New Entry
+            {t("New Entry")}
           </button>
 
           <div className="flex-1" />
@@ -498,10 +509,12 @@ function EditorContent() {
             <button
               onClick={() => downloadAllTurtle(datasets)}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-(--badge-active-bg) text-(--badge-active-text) border border-(--badge-active-border) hover:opacity-80 transition-colors"
-              title="Export the catalogue in HealthDCAT-AP Release 8, as RDF Turtle"
+              title={t(
+                "Export the catalogue in HealthDCAT-AP Release 8, as RDF Turtle",
+              )}
             >
               <Download size={14} />
-              Export All (.ttl)
+              {t("Export All (.ttl)")}
             </button>
           )}
           <a
@@ -509,10 +522,10 @@ function EditorContent() {
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-(--surface-2) text-(--text-secondary) hover:text-(--text-primary) transition-colors"
-            title="Open the official EHDS HealthDCAT-AP editor"
+            title={t("Open the official EHDS HealthDCAT-AP editor")}
           >
             <ExternalLink size={14} />
-            EHDS Editor
+            {t("EHDS Editor")}
           </a>
         </div>
 
@@ -522,16 +535,16 @@ function EditorContent() {
             {loading ? (
               <div className="flex items-center gap-2 text-(--text-secondary)">
                 <Loader2 size={16} className="animate-spin" />
-                Loading catalog…
+                {t("Loading catalog…")}
               </div>
             ) : datasets.length === 0 ? (
               <p className="text-(--text-secondary)">
-                No HealthDCAT-AP entries yet.{" "}
+                {t("No HealthDCAT-AP entries yet.")}{" "}
                 <button
                   onClick={startNew}
                   className="text-(--accent) hover:underline"
                 >
-                  Create one
+                  {t("Create one")}
                 </button>
               </p>
             ) : (
@@ -563,7 +576,9 @@ function EditorContent() {
                           )}
                           {d.recordCount != null && (
                             <span>
-                              {Number(d.recordCount).toLocaleString()} records
+                              {t("{n} records", {
+                                n: Number(d.recordCount).toLocaleString(),
+                              })}
                             </span>
                           )}
                         </div>
@@ -572,21 +587,23 @@ function EditorContent() {
                         <button
                           onClick={() => downloadTurtle(d)}
                           className="p-1.5 rounded-sm hover:bg-(--surface-2) text-(--text-secondary) hover:text-green-300"
-                          title="Download in HealthDCAT-AP Release 8, as RDF Turtle (.ttl)"
+                          title={t(
+                            "Download in HealthDCAT-AP Release 8, as RDF Turtle (.ttl)",
+                          )}
                         >
                           <Download size={14} />
                         </button>
                         <button
                           onClick={() => startEdit(d)}
                           className="p-1.5 rounded-sm hover:bg-(--surface-2) text-(--text-secondary) hover:text-(--accent)"
-                          title="Edit entry"
+                          title={t("Edit entry")}
                         >
                           <Edit3 size={14} />
                         </button>
                         <button
                           onClick={() => handleDelete(d.id)}
                           className="p-1.5 rounded-sm hover:bg-(--surface-2) text-(--text-secondary) hover:text-(--danger-text)"
-                          title="Delete entry"
+                          title={t("Delete entry")}
                         >
                           <Trash2 size={14} />
                         </button>
@@ -604,7 +621,7 @@ function EditorContent() {
           <form onSubmit={handleSave} className="space-y-6">
             {editingId && (
               <div className="text-xs text-(--text-secondary) bg-(--surface-2)/50 rounded-sm px-3 py-2">
-                Editing:{" "}
+                {t("Editing:")}{" "}
                 <span className="text-(--text-primary)">{editingId}</span>
               </div>
             )}
@@ -612,53 +629,57 @@ function EditorContent() {
             {/* Section: DCAT-AP Mandatory */}
             <fieldset className="space-y-4">
               <legend className="text-sm font-semibold text-(--accent) border-b border-(--border) pb-1 mb-2">
-                DCAT-AP Mandatory Fields
+                {t("DCAT-AP Mandatory Fields")}
               </legend>
 
-              <FormField label="Title" required>
+              <FormField label={t("Title")} required>
                 <InputField
                   value={form.title}
                   onChange={(v) => setField("title", v)}
-                  placeholder="e.g. Synthetic FHIR R4 Patient Cohort"
+                  placeholder={t("e.g. Synthetic FHIR R4 Patient Cohort")}
                 />
               </FormField>
 
-              <FormField label="Description">
+              <FormField label={t("Description")}>
                 <textarea
                   value={form.description}
                   onChange={(e) => setField("description", e.target.value)}
-                  placeholder="Describe the dataset contents, coverage and purpose…"
+                  placeholder={t(
+                    "Describe the dataset contents, coverage and purpose…",
+                  )}
                   rows={3}
                   className="w-full px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm text-(--text-primary) outline-hidden focus:border-purple-500 resize-y"
                 />
               </FormField>
 
               <div className="grid grid-cols-2 gap-4">
-                <FormField label="Publisher" required>
+                <FormField label={tc("Publisher")} required>
                   <SelectField
                     value={form.publisher}
                     onChange={(v) => setField("publisher", v)}
                     options={PUBLISHERS}
-                    placeholder="Select publisher…"
+                    placeholder={t("Select publisher…")}
                   />
                 </FormField>
 
                 <FormField
-                  label="Theme"
-                  help="Clinical area, mapped to the HealthDCAT-AP health theme"
+                  label={tc("Theme")}
+                  help={t(
+                    "Clinical area, mapped to the HealthDCAT-AP health theme",
+                  )}
                 >
                   <SelectField
                     value={form.theme}
                     onChange={(v) => setField("theme", v)}
                     options={THEMES}
-                    placeholder="Select theme…"
+                    placeholder={t("Select theme…")}
                   />
                 </FormField>
               </div>
 
               <FormField
-                label="Language"
-                help="ISO 639-1 code (e.g. en, de, nl, fr)"
+                label={t("Language")}
+                help={t("ISO 639-1 code (e.g. en, de, nl, fr)")}
               >
                 <InputField
                   value={form.language ?? ""}
@@ -671,13 +692,15 @@ function EditorContent() {
             {/* Section: DCAT-AP Recommended */}
             <fieldset className="space-y-4">
               <legend className="text-sm font-semibold text-(--accent) border-b border-(--border) pb-1 mb-2">
-                DCAT-AP Recommended Fields
+                {t("DCAT-AP Recommended Fields")}
               </legend>
 
               <div className="grid grid-cols-2 gap-4">
                 <FormField
-                  label="Conforms To"
-                  help="Standard URI (e.g. http://hl7.org/fhir/R4)"
+                  label={tc("Conforms To")}
+                  help={t("Standard URI (e.g. {uri})", {
+                    uri: "http://hl7.org/fhir/R4",
+                  })}
                 >
                   <InputField
                     value={form.conformsTo}
@@ -687,8 +710,8 @@ function EditorContent() {
                 </FormField>
 
                 <FormField
-                  label="Spatial Coverage"
-                  help="ISO 3166 country code (e.g. DE, NL, FR)"
+                  label={t("Spatial Coverage")}
+                  help={t("ISO 3166 country code (e.g. DE, NL, FR)")}
                 >
                   <InputField
                     value={form.spatial ?? ""}
@@ -698,7 +721,7 @@ function EditorContent() {
                 </FormField>
               </div>
 
-              <FormField label="License">
+              <FormField label={tc("License")}>
                 <SelectField
                   value={form.license}
                   onChange={(v) => setField("license", v)}
@@ -710,30 +733,30 @@ function EditorContent() {
             {/* Section: HealthDCAT-AP Extensions */}
             <fieldset className="space-y-4">
               <legend className="text-sm font-semibold text-(--accent) border-b border-(--border) pb-1 mb-2">
-                HealthDCAT-AP Extensions
+                {t("HealthDCAT-AP Extensions")}
               </legend>
 
               <div className="grid grid-cols-2 gap-4">
-                <FormField label="Dataset Type">
+                <FormField label={tc("Dataset Type")}>
                   <SelectField
                     value={form.datasetType}
                     onChange={(v) => setField("datasetType", v)}
                     options={DATASET_TYPES}
-                    placeholder="Select type…"
+                    placeholder={t("Select type…")}
                   />
                 </FormField>
 
-                <FormField label="Publisher Type">
+                <FormField label={t("Publisher Type")}>
                   <SelectField
                     value={form.publisherType ?? ""}
                     onChange={(v) => setField("publisherType", v)}
                     options={PUBLISHER_TYPES}
-                    placeholder="Select role…"
+                    placeholder={t("Select role…")}
                   />
                 </FormField>
               </div>
 
-              <FormField label="Legal Basis for Access">
+              <FormField label={t("Legal Basis for Access")}>
                 <SelectField
                   value={form.legalBasis}
                   onChange={(v) => setField("legalBasis", v)}
@@ -741,26 +764,33 @@ function EditorContent() {
                 />
               </FormField>
 
-              <FormField label="Purpose" help="Permitted purpose description">
+              <FormField
+                label={t("Purpose")}
+                help={t("Permitted purpose description")}
+              >
                 <InputField
                   value={form.purpose ?? ""}
                   onChange={(v) => setField("purpose", v)}
-                  placeholder="e.g. Secondary use for public health research"
+                  placeholder={t(
+                    "e.g. Secondary use for public health research",
+                  )}
                 />
               </FormField>
 
-              <FormField label="Population Coverage">
+              <FormField label={t("Population Coverage")}>
                 <InputField
                   value={form.populationCoverage ?? ""}
                   onChange={(v) => setField("populationCoverage", v)}
-                  placeholder="e.g. Adult patients (18+) in Berlin region"
+                  placeholder={t("e.g. Adult patients (18+) in Berlin region")}
                 />
               </FormField>
 
               <FormField
-                label="Health categories (Art. 51(1))"
+                label={t("Health categories (Art. 51(1))")}
                 required
-                help="The categories of electronic health data the dataset holds, as the data holder states them. Without one, the hub chooses from the dataset type."
+                help={t(
+                  "The categories of electronic health data the dataset holds, as the health data holder states them. Without one, the hub chooses from the dataset type.",
+                )}
               >
                 <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1 mt-1">
                   {HEALTH_CATEGORIES.map((c) => {
@@ -784,7 +814,9 @@ function EditorContent() {
                           className="w-4 h-4 mt-0.5 rounded-sm bg-(--surface-2) border-(--border-ui)"
                         />
                         <span>
-                          <span className="font-mono">{c.code}</span> {c.label}
+                          <span className="font-mono">{c.code}</span>{" "}
+                          {/* A library label: __tests__/unit/lib/i18n-holder.test.ts lists them. */}
+                          {t(c.label)}
                         </span>
                       </label>
                     );
@@ -793,7 +825,7 @@ function EditorContent() {
               </FormField>
 
               <div className="grid grid-cols-2 gap-4">
-                <FormField label="Contains Personal Data">
+                <FormField label={t("Contains Personal Data")}>
                   <div className="flex items-center gap-2 mt-1">
                     <input
                       type="checkbox"
@@ -803,11 +835,13 @@ function EditorContent() {
                       }
                       className="w-4 h-4 rounded-sm bg-(--surface-2) border-(--border-ui)"
                     />
-                    <span className="text-sm text-(--text-primary)">Yes</span>
+                    <span className="text-sm text-(--text-primary)">
+                      {t("Yes")}
+                    </span>
                   </div>
                 </FormField>
 
-                <FormField label="Contains Sensitive Data">
+                <FormField label={t("Contains Sensitive Data")}>
                   <div className="flex items-center gap-2 mt-1">
                     <input
                       type="checkbox"
@@ -817,7 +851,9 @@ function EditorContent() {
                       }
                       className="w-4 h-4 rounded-sm bg-(--surface-2) border-(--border-ui)"
                     />
-                    <span className="text-sm text-(--text-primary)">Yes</span>
+                    <span className="text-sm text-(--text-primary)">
+                      {t("Yes")}
+                    </span>
                   </div>
                 </FormField>
               </div>
@@ -826,22 +862,22 @@ function EditorContent() {
             {/* Section: Statistics */}
             <fieldset className="space-y-4">
               <legend className="text-sm font-semibold text-(--accent) border-b border-(--border) pb-1 mb-2">
-                Statistics
+                {t("Statistics")}
               </legend>
 
               <div className="grid grid-cols-2 gap-4">
-                <FormField label="Number of Records">
+                <FormField label={t("Number of Records")}>
                   <InputField
                     value={form.recordCount?.toString() ?? ""}
                     onChange={(v) =>
                       setField("recordCount", v ? parseInt(v, 10) : null)
                     }
-                    placeholder="e.g. 10000"
+                    placeholder={t("e.g. {example}", { example: "10000" })}
                     type="number"
                   />
                 </FormField>
 
-                <FormField label="Unique Individuals">
+                <FormField label={t("Unique Individuals")}>
                   <InputField
                     value={form.numberOfUniqueIndividuals?.toString() ?? ""}
                     onChange={(v) =>
@@ -850,31 +886,31 @@ function EditorContent() {
                         v ? parseInt(v, 10) : null,
                       )
                     }
-                    placeholder="e.g. 500"
+                    placeholder={t("e.g. {example}", { example: "500" })}
                     type="number"
                   />
                 </FormField>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <FormField label="Min Typical Age">
+                <FormField label={t("Min Typical Age")}>
                   <InputField
                     value={form.minTypicalAge?.toString() ?? ""}
                     onChange={(v) =>
                       setField("minTypicalAge", v ? parseInt(v, 10) : null)
                     }
-                    placeholder="e.g. 18"
+                    placeholder={t("e.g. {example}", { example: "18" })}
                     type="number"
                   />
                 </FormField>
 
-                <FormField label="Max Typical Age">
+                <FormField label={t("Max Typical Age")}>
                   <InputField
                     value={form.maxTypicalAge?.toString() ?? ""}
                     onChange={(v) =>
                       setField("maxTypicalAge", v ? parseInt(v, 10) : null)
                     }
-                    placeholder="e.g. 90"
+                    placeholder={t("e.g. {example}", { example: "90" })}
                     type="number"
                   />
                 </FormField>
@@ -911,7 +947,7 @@ function EditorContent() {
                 ) : (
                   <Save size={14} />
                 )}
-                {editingId ? "Update Entry" : "Create Entry"}
+                {editingId ? t("Update Entry") : t("Create Entry")}
               </button>
               <button
                 type="button"
@@ -923,7 +959,7 @@ function EditorContent() {
                 }}
                 className="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-(--text-primary) rounded-lg text-sm transition-colors"
               >
-                Cancel
+                {t("Cancel")}
               </button>
             </div>
           </form>
