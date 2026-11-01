@@ -17,6 +17,7 @@ import {
   Workflow,
 } from "lucide-react";
 import { DemoPersonaCards } from "@/components/DemoPersonaCards";
+import { T } from "@/lib/i18n/translate";
 import { PersonaJourneyCards } from "@/components/PersonaJourneyCards";
 import { FeatureCardGrid } from "@/components/FeatureCardGrid";
 import { HomeRegisterCta } from "@/components/HomeRegisterCta";
@@ -40,7 +41,7 @@ export default function Home() {
               id="hero-title"
               className="text-2xl sm:text-3xl lg:text-4xl font-bold"
             >
-              European Health Data Space
+              <T area="home">{"European Health Data Space"}</T>
             </h1>
             <a
               href="https://github.com/ma3u/MinimumViableHealthDataspacev2"
@@ -54,27 +55,25 @@ export default function Home() {
           </div>
 
           <p className="text-(--text-primary) text-base sm:text-lg leading-relaxed max-w-3xl mb-4">
-            This interactive demo is an{" "}
-            <strong className="text-(--accent)">
-              EHDS integration platform
-            </strong>{" "}
-            you can run, fork, and wire into your own stack. It shows how the{" "}
-            <a
-              href="https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-2 hover:text-(--accent) transition-colors"
+            <T
+              area="home"
+              tags={{
+                b: <strong className="text-(--accent)" />,
+                a: (
+                  <a
+                    href="https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-2 hover:text-(--accent) transition-colors"
+                  />
+                ),
+                s: <strong className="text-(--text-primary)" />,
+              }}
             >
-              EHDS regulation
-            </a>{" "}
-            enables secure cross-border health data sharing across Europe —
-            publishing clinical datasets, negotiating access contracts under
-            ODRL, and transferring FHIR / OMOP data through the{" "}
-            <strong className="text-(--text-primary)">
-              Dataspace Protocol
-            </strong>
-            . Every flow is exposed as a REST API you can exercise from Swagger,
-            Scalar, Bruno, or your own client.
+              {
+                "This interactive demo is an <b>EHDS integration platform</b> you can run, fork, and wire into your own stack. It shows how the <a>EHDS regulation</a> enables secure cross-border health data sharing across Europe: publishing clinical datasets, negotiating access contracts under ODRL, and transferring FHIR / OMOP data through the <s>Dataspace Protocol</s>. Every flow is exposed as a REST API you can exercise from Swagger, Scalar, Bruno, or your own client."
+              }
+            </T>
           </p>
 
           <div className="flex flex-wrap gap-3 text-sm text-(--text-secondary)">
@@ -84,7 +83,9 @@ export default function Home() {
                 className="text-green-800 dark:text-green-300"
                 aria-hidden="true"
               />
-              <span>127 synthetic patients</span>
+              <span>
+                <T area="home">{"127 synthetic patients"}</T>
+              </span>
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
               <Network
@@ -92,7 +93,9 @@ export default function Home() {
                 className="text-blue-800 dark:text-blue-300"
                 aria-hidden="true"
               />
-              <span>5,300+ graph nodes</span>
+              <span>
+                <T area="home">{"5,300+ graph nodes"}</T>
+              </span>
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
               <Globe
@@ -100,7 +103,9 @@ export default function Home() {
                 className="text-teal-800 dark:text-teal-300"
                 aria-hidden="true"
               />
-              <span>7 demo personas</span>
+              <span>
+                <T area="home">{"7 demo personas"}</T>
+              </span>
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-(--surface-2)/60 border border-(--border)">
               <Lock
@@ -108,7 +113,9 @@ export default function Home() {
                 className="text-purple-800 dark:text-purple-300"
                 aria-hidden="true"
               />
-              <span>All data is synthetic</span>
+              <span>
+                <T area="home">{"All data is synthetic"}</T>
+              </span>
             </span>
           </div>
 
@@ -128,26 +135,28 @@ export default function Home() {
         aria-labelledby="why-ehds-title"
       >
         <h2 id="why-ehds-title" className="text-lg sm:text-xl font-bold mb-2">
-          Why the European Health Data Space Matters
+          <T area="home">{"Why the European Health Data Space Matters"}</T>
         </h2>
 
         <p className="text-(--text-secondary) text-sm leading-relaxed max-w-3xl mb-5">
-          The{" "}
-          <a
-            href="https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-(--accent) underline underline-offset-2 hover:text-(--text-primary) transition-colors"
+          <T
+            area="home"
+            tags={{
+              a: (
+                <a
+                  href="https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space_en"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-(--accent) underline underline-offset-2 hover:text-(--text-primary) transition-colors"
+                />
+              ),
+              b: <strong className="text-(--text-primary)" />,
+            }}
           >
-            EHDS regulation
-          </a>{" "}
-          creates a unified framework for sharing health data across EU member
-          states while safeguarding patient rights under GDPR. It distinguishes
-          between <strong className="text-(--text-primary)">primary use</strong>{" "}
-          (patients accessing their own records) and{" "}
-          <strong className="text-(--text-primary)">secondary use</strong>{" "}
-          (research, policy, innovation), each with strict governance and
-          oversight.
+            {
+              "The <a>EHDS regulation</a> creates a unified framework for sharing health data across EU member states while safeguarding patient rights under GDPR. It distinguishes between <b>primary use</b> (patients accessing their own records) and <b>secondary use</b> (research, policy, innovation), each with strict governance and oversight."
+            }
+          </T>
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -159,22 +168,20 @@ export default function Home() {
                 aria-hidden="true"
               />
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
-                For Researchers
+                <T area="home">{"For Researchers"}</T>
               </h3>
             </div>
             <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-              Cross-border access to standardised health datasets in{" "}
-              <strong className="text-gray-800 dark:text-gray-200">
-                FHIR R4
-              </strong>{" "}
-              and{" "}
-              <strong className="text-gray-800 dark:text-gray-200">
-                OMOP CDM
-              </strong>{" "}
-              format, ending bilateral negotiations with each hospital. The
-              Health Data Access Body (HDAB) provides a single-window approval
-              process under Art.&nbsp;46, cutting months of bureaucracy to
-              weeks.
+              <T
+                area="home"
+                tags={{
+                  b: <strong className="text-gray-800 dark:text-gray-200" />,
+                }}
+              >
+                {
+                  "Cross-border access to standardised health datasets in <b>FHIR R4</b> and <b>OMOP CDM</b> format, ending bilateral negotiations with each hospital. The health data access body decides on one application under Art. 67 and 68, cutting months of bureaucracy to weeks."
+                }
+              </T>
             </p>
           </div>
 
@@ -186,21 +193,20 @@ export default function Home() {
                 aria-hidden="true"
               />
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
-                For Hospitals
+                <T area="home">{"For Hospitals"}</T>
               </h3>
             </div>
             <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-              A clear legal basis for sharing data with researchers while
-              staying GDPR-compliant. Publish datasets once via{" "}
-              <strong className="text-gray-800 dark:text-gray-200">
-                HealthDCAT-AP
-              </strong>{" "}
-              catalogues, manage access through standardised{" "}
-              <strong className="text-gray-800 dark:text-gray-200">
-                DSP contracts
-              </strong>
-              , and let the HDAB handle regulatory approval, reducing legal risk
-              and administrative burden.
+              <T
+                area="home"
+                tags={{
+                  b: <strong className="text-gray-800 dark:text-gray-200" />,
+                }}
+              >
+                {
+                  "A clear legal basis for sharing data with researchers while staying GDPR-compliant. Publish datasets once via <b>HealthDCAT-AP</b> catalogues, manage access through standardised <b>DSP contracts</b>, and let the health data access body handle regulatory approval, reducing legal risk and administrative burden."
+                }
+              </T>
             </p>
           </div>
 
@@ -212,21 +218,20 @@ export default function Home() {
                 aria-hidden="true"
               />
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
-                For Patients
+                <T area="home">{"For Patients"}</T>
               </h3>
             </div>
             <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-              Full control over your health records across borders. Access your
-              data from any EU provider via{" "}
-              <strong className="text-gray-800 dark:text-gray-200">
-                EEHRxF
-              </strong>{" "}
-              (European Electronic Health Record exchange Format), with{" "}
-              <strong className="text-gray-800 dark:text-gray-200">
-                GDPR Art.&nbsp;15-22
-              </strong>{" "}
-              rights to access, rectify, and control how your data is used for
-              research.
+              <T
+                area="home"
+                tags={{
+                  b: <strong className="text-gray-800 dark:text-gray-200" />,
+                }}
+              >
+                {
+                  "Full control over your health records across borders. Access your data from any EU provider via <b>EEHRxF</b> (European Electronic Health Record exchange Format), with <b>GDPR Art. 15-22</b> rights to access, rectify, and control how your data is used for research."
+                }
+              </T>
             </p>
           </div>
 
@@ -238,20 +243,20 @@ export default function Home() {
                 aria-hidden="true"
               />
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base">
-                For Regulators
+                <T area="home">{"For Regulators"}</T>
               </h3>
             </div>
             <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-              Enforce EHDS Art.&nbsp;46-51 data access permits through the{" "}
-              <strong className="text-gray-800 dark:text-gray-200">
-                Health Data Access Body
-              </strong>
-              . Audit compliance via{" "}
-              <strong className="text-gray-800 dark:text-gray-200">
-                verifiable credentials
-              </strong>
-              , ensure protocol conformance, and govern trust anchors across the
-              dataspace.
+              <T
+                area="home"
+                tags={{
+                  b: <strong className="text-gray-800 dark:text-gray-200" />,
+                }}
+              >
+                {
+                  "Issue and enforce EHDS data permits (Art. 68) as the <b>health data access body</b>. Audit compliance via <b>verifiable credentials</b>, ensure protocol conformance, and govern trust anchors across the dataspace."
+                }
+              </T>
             </p>
           </div>
         </div>
@@ -264,12 +269,14 @@ export default function Home() {
         aria-labelledby="standards-title"
       >
         <h2 id="standards-title" className="text-lg sm:text-xl font-bold mb-2">
-          Standards & Interoperability
+          <T area="home">{"Standards & Interoperability"}</T>
         </h2>
         <p className="text-(--text-secondary) text-sm leading-relaxed max-w-3xl mb-5">
-          The EHDS builds on established open standards to ensure
-          interoperability across all EU member states. This demo implements
-          each standard end-to-end.
+          <T area="home">
+            {
+              "The EHDS builds on established open standards to ensure interoperability across all EU member states. This demo implements each standard end-to-end."
+            }
+          </T>
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -327,10 +334,10 @@ export default function Home() {
               }`}
             >
               <span className="font-semibold text-sm sm:text-base text-gray-900 dark:text-gray-100 mb-2">
-                {name}
+                <T area="home">{name}</T>
               </span>
               <p className="flex-1 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                {desc}
+                <T area="home">{desc}</T>
               </p>
               <ExternalLink
                 size={14}
@@ -349,17 +356,22 @@ export default function Home() {
         aria-labelledby="learn-title"
       >
         <h2 id="learn-title" className="text-lg sm:text-xl font-bold mb-2">
-          Learn the New Principles: Dataspaces & Data Mesh
+          <T area="home">
+            {"Learn the New Principles: Dataspaces & Data Mesh"}
+          </T>
         </h2>
         <p className="text-(--text-secondary) text-sm leading-relaxed max-w-3xl mb-5">
-          Health data is no longer moved by point-to-point integrations. The
-          EHDS is built on{" "}
-          <strong className="text-(--text-primary)">dataspace</strong> and{" "}
-          <strong className="text-(--text-primary)">data mesh</strong>{" "}
-          principles: sovereign participants own their <em>data domains</em>,
-          publish them as <em>data products</em>, and exchange them through open
-          protocols instead of bulk copies. Use this demo to get hands-on with
-          the four building blocks every implementer needs to understand.
+          <T
+            area="home"
+            tags={{
+              b: <strong className="text-(--text-primary)" />,
+              i: <em />,
+            }}
+          >
+            {
+              "Health data is no longer moved by point-to-point integrations. The EHDS is built on <b>dataspace</b> and <b>data mesh</b> principles: sovereign participants own their <i>data domains</i>, publish them as <i>data products</i>, and exchange them through open protocols instead of bulk copies. Use this demo to get hands-on with the four building blocks every implementer needs to understand."
+            }
+          </T>
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -371,22 +383,27 @@ export default function Home() {
                 aria-hidden="true"
               />
               <h3 className="font-semibold text-(--text-primary) text-sm sm:text-base">
-                Data Domains & Data Products
+                <T area="home">{"Data Domains & Data Products"}</T>
               </h3>
             </div>
             <p className="text-sm text-(--text-secondary) leading-relaxed">
-              Each hospital, registry, or research org is a domain that owns its
-              data end-to-end. A{" "}
-              <strong className="text-(--text-primary)">data product</strong>{" "}
-              packages a dataset with metadata (HealthDCAT-AP), contract terms
-              (ODRL), and an access endpoint (FHIR / OMOP). Browse them in the
-              catalogue to see what federated ownership actually looks like.
+              <T
+                area="home"
+                tags={{
+                  b: <strong className="text-(--text-primary)" />,
+                  i: <em />,
+                }}
+              >
+                {
+                  "Each hospital, registry, or research org is a domain that owns its data end-to-end. A <b>data product</b> packages a dataset with metadata (HealthDCAT-AP), contract terms (ODRL), and an access endpoint (FHIR / OMOP). Browse them in the catalogue to see what federated ownership actually looks like."
+                }
+              </T>
             </p>
             <Link
               href="/catalog"
               className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-(--accent) hover:underline"
             >
-              Explore the catalogue{" "}
+              <T area="home">{"Explore the catalogue"}</T>{" "}
               <ExternalLink size={12} aria-hidden="true" />
             </Link>
           </div>
@@ -399,21 +416,27 @@ export default function Home() {
                 aria-hidden="true"
               />
               <h3 className="font-semibold text-(--text-primary) text-sm sm:text-base">
-                Dataspace Protocol (DSP) — Exchange
+                <T area="home">{"Dataspace Protocol (DSP): Exchange"}</T>
               </h3>
             </div>
             <p className="text-sm text-(--text-secondary) leading-relaxed">
-              DSP 2025-1 standardises the four exchange phases —{" "}
-              <em>catalogue → negotiation → agreement → transfer</em> — so any
-              two participants can trade data without bilateral glue code. Walk
-              through a full negotiation and watch the state transitions in the
-              live graph.
+              <T
+                area="home"
+                tags={{
+                  b: <strong className="text-(--text-primary)" />,
+                  i: <em />,
+                }}
+              >
+                {
+                  "DSP 2025-1 standardises the four exchange phases, <i>catalogue → negotiation → agreement → transfer</i>, so any two participants can trade data without bilateral glue code. Walk through a full negotiation and watch the state transitions in the live graph."
+                }
+              </T>
             </p>
             <Link
               href="/negotiate"
               className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-(--accent) hover:underline"
             >
-              Run a DSP negotiation{" "}
+              <T area="home">{"Run a DSP negotiation"}</T>{" "}
               <ExternalLink size={12} aria-hidden="true" />
             </Link>
           </div>
@@ -426,26 +449,30 @@ export default function Home() {
                 aria-hidden="true"
               />
               <h3 className="font-semibold text-(--text-primary) text-sm sm:text-base">
-                W3C DID & Verifiable Credentials — Authentication
+                <T area="home">
+                  {"W3C DID & Verifiable Credentials: Authentication"}
+                </T>
               </h3>
             </div>
             <p className="text-sm text-(--text-secondary) leading-relaxed">
-              Participants identify themselves with{" "}
-              <strong className="text-(--text-primary)">did:web</strong>{" "}
-              identifiers and prove membership, HDAB approval, or researcher
-              status with{" "}
-              <strong className="text-(--text-primary)">
-                W3C Verifiable Credentials
-              </strong>{" "}
-              issued via the Decentralised Claims Protocol (DCP). No central
-              identity broker — trust is federated and cryptographically
-              verifiable.
+              <T
+                area="home"
+                tags={{
+                  b: <strong className="text-(--text-primary)" />,
+                  i: <em />,
+                }}
+              >
+                {
+                  "Participants identify themselves with <b>did:web</b> identifiers and prove membership, health data access body approval, or researcher status with <b>W3C Verifiable Credentials</b> issued via the Decentralised Claims Protocol (DCP). No central identity broker: trust is federated and cryptographically verifiable."
+                }
+              </T>
             </p>
             <Link
               href="/credentials"
               className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-(--accent) hover:underline"
             >
-              Inspect credentials <ExternalLink size={12} aria-hidden="true" />
+              <T area="home">{"Inspect credentials"}</T>{" "}
+              <ExternalLink size={12} aria-hidden="true" />
             </Link>
           </div>
 
@@ -457,22 +484,28 @@ export default function Home() {
                 aria-hidden="true"
               />
               <h3 className="font-semibold text-(--text-primary) text-sm sm:text-base">
-                W3C ODRL Policies — Authorization
+                <T area="home">{"W3C ODRL Policies: Authorization"}</T>
               </h3>
             </div>
             <p className="text-sm text-(--text-secondary) leading-relaxed">
-              Every data product is governed by a machine-readable{" "}
-              <strong className="text-(--text-primary)">ODRL 2.2 policy</strong>{" "}
-              declaring permissions, prohibitions, and duties (purpose limits,
-              retention, geographic scope, anonymisation). Policies travel with
-              the contract and are enforced at the data plane — not as free-text
-              T&amp;Cs.
+              <T
+                area="home"
+                tags={{
+                  b: <strong className="text-(--text-primary)" />,
+                  i: <em />,
+                }}
+              >
+                {
+                  "Every data product is governed by a machine-readable <b>ODRL 2.2 policy</b> declaring permissions, prohibitions, and duties (purpose limits, retention, geographic scope, anonymisation). Policies travel with the contract and are enforced at the data plane, not as free-text T&Cs."
+                }
+              </T>
             </p>
             <Link
               href="/admin/policies"
               className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-(--accent) hover:underline"
             >
-              Edit ODRL policies <ExternalLink size={12} aria-hidden="true" />
+              <T area="home">{"Edit ODRL policies"}</T>{" "}
+              <ExternalLink size={12} aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -488,14 +521,17 @@ export default function Home() {
           id="integration-title"
           className="text-lg sm:text-xl font-bold mb-2"
         >
-          Integrate It: REST API Tools
+          <T area="home">{"Integrate It: REST API Tools"}</T>
         </h2>
         <p className="text-(--text-secondary) text-sm leading-relaxed max-w-3xl mb-5">
-          All 36 endpoints are documented in{" "}
-          <strong className="text-(--text-primary)">OpenAPI 3.1</strong> and can
-          be exercised from three interactive explorers, a portable Bruno
-          collection, or any HTTP client. Use them to test flows, build
-          integrations, or wire the platform into a downstream system.
+          <T
+            area="home"
+            tags={{ b: <strong className="text-(--text-primary)" /> }}
+          >
+            {
+              "Every endpoint is documented in <b>OpenAPI 3.1</b> and can be exercised from three interactive explorers, a portable Bruno collection, or any HTTP client. Use them to test flows, build integrations, or wire the platform into a downstream system."
+            }
+          </T>
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -510,12 +546,15 @@ export default function Home() {
                 aria-hidden="true"
               />
               <span className="font-semibold text-sm text-(--text-primary)">
-                Scalar Reference
+                <T area="home">{"Scalar Reference"}</T>
               </span>
             </div>
             <p className="flex-1 text-xs text-(--text-secondary) leading-relaxed">
-              Modern API reference with try-it-now requests, language samples,
-              and schema navigation. Powered by Scalar.
+              <T area="home">
+                {
+                  "Modern API reference with try-it-now requests, language samples, and schema navigation. Powered by Scalar."
+                }
+              </T>
             </p>
             <ExternalLink
               size={14}
@@ -535,12 +574,15 @@ export default function Home() {
                 aria-hidden="true"
               />
               <span className="font-semibold text-sm text-(--text-primary)">
-                Swagger UI
+                <T area="home">{"Swagger UI"}</T>
               </span>
             </div>
             <p className="flex-1 text-xs text-(--text-secondary) leading-relaxed">
-              Classic OpenAPI explorer for testing endpoints against the live
-              instance with OIDC auth.
+              <T area="home">
+                {
+                  "Classic OpenAPI explorer for testing endpoints against the live instance with OIDC auth."
+                }
+              </T>
             </p>
             <ExternalLink
               size={14}
@@ -561,12 +603,15 @@ export default function Home() {
                 aria-hidden="true"
               />
               <span className="font-semibold text-sm text-(--text-primary)">
-                OpenAPI 3.1 Spec
+                <T area="home">{"OpenAPI 3.1 Spec"}</T>
               </span>
             </div>
             <p className="flex-1 text-xs text-(--text-secondary) leading-relaxed">
-              Raw YAML spec for codegen, Postman import, or custom tooling.
-              Source of truth for every route.
+              <T area="home">
+                {
+                  "Raw YAML spec for codegen, Postman import, or custom tooling. Source of truth for every route."
+                }
+              </T>
             </p>
             <ExternalLink
               size={14}
@@ -588,12 +633,15 @@ export default function Home() {
                 aria-hidden="true"
               />
               <span className="font-semibold text-sm text-(--text-primary)">
-                Bruno Collection
+                <T area="home">{"Bruno Collection"}</T>
               </span>
             </div>
             <p className="flex-1 text-xs text-(--text-secondary) leading-relaxed">
-              Git-friendly, offline-capable API client. Clone the repo and run
-              every DSP, FHIR, and OMOP journey locally.
+              <T area="home">
+                {
+                  "Git-friendly, offline-capable API client. Clone the repo and run every DSP, FHIR, and OMOP journey locally."
+                }
+              </T>
             </p>
             <ExternalLink
               size={14}
@@ -614,12 +662,14 @@ export default function Home() {
         aria-labelledby="workflow-title"
       >
         <h2 id="workflow-title" className="text-lg sm:text-xl font-bold mb-2">
-          How the EHDS Demo Works
+          <T area="home">{"How the EHDS Demo Works"}</T>
         </h2>
         <p className="text-(--text-secondary) text-sm mb-6 max-w-2xl">
-          Sign in as one of 5 personas and follow their journey through the
-          dataspace. Each role sees different pages, data, and actions,
-          mirroring real EHDS workflows.
+          <T area="home">
+            {
+              "Sign in as one of the demo personas and follow their journey through the dataspace. Each role sees different pages, data, and actions, mirroring real EHDS workflows."
+            }
+          </T>
         </p>
 
         <PersonaJourneyCards />
@@ -631,12 +681,14 @@ export default function Home() {
           id="explore-title"
           className="text-sm font-semibold text-(--text-secondary) uppercase tracking-wider mb-1"
         >
-          Explore
+          <T area="home">{"Explore"}</T>
         </h2>
         <p className="text-xs text-(--text-secondary) mb-3 max-w-2xl">
-          The persona overview, the HealthDCAT-AP dataset catalogue, FHIR
-          patient journeys, OMOP analytics, EEHRxF profile coverage and natural
-          language queries. On the live demo, each opens after you sign in.
+          <T area="home">
+            {
+              "The persona overview, the HealthDCAT-AP dataset catalogue, FHIR patient journeys, OMOP analytics, EEHRxF profile coverage and natural language queries. On the live demo, each opens after you sign in."
+            }
+          </T>
         </p>
         <FeatureCardGrid section="explore" delay={1200} />
       </section>
@@ -648,13 +700,14 @@ export default function Home() {
           id="exchange-title"
           className="text-sm font-semibold text-(--text-secondary) uppercase tracking-wider mb-1"
         >
-          Exchange · Transfer · Negotiate
+          <T area="home">{"Exchange · Transfer · Negotiate"}</T>
         </h2>
         <p className="text-xs text-(--text-secondary) mb-3 max-w-2xl">
-          The DSP data exchange lifecycle: hospitals publish datasets,
-          researchers discover and request access, contracts are negotiated
-          under ODRL policies, and approved FHIR/OMOP data is transferred
-          securely.
+          <T area="home">
+            {
+              "The DSP data exchange lifecycle: hospitals publish datasets, researchers discover and request access, contracts are negotiated under ODRL policies, and approved FHIR/OMOP data is transferred securely."
+            }
+          </T>
         </p>
         <FeatureCardGrid section="exchange" delay={1400} />
       </section>
@@ -666,12 +719,14 @@ export default function Home() {
           id="govern-title"
           className="text-sm font-semibold text-(--text-secondary) uppercase tracking-wider mb-1"
         >
-          Govern · Manage · Docs
+          <T area="home">{"Govern · Manage · Docs"}</T>
         </h2>
         <p className="text-xs text-(--text-secondary) mb-3 max-w-2xl">
-          EHDS compliance monitoring, DCP verifiable credentials, participant
-          onboarding with DID:web identities, portal administration, and
-          architecture documentation.
+          <T area="home">
+            {
+              "EHDS compliance monitoring, DCP verifiable credentials, participant onboarding with DID:web identities, portal administration, and architecture documentation."
+            }
+          </T>
         </p>
         <FeatureCardGrid section="govern" delay={1600} />
       </section>
@@ -700,12 +755,15 @@ export default function Home() {
               id="feedback-title"
               className="text-sm sm:text-base font-semibold text-(--text-primary)"
             >
-              Feedback & Contributions
+              <T area="home">{"Feedback & Contributions"}</T>
             </h2>
           </div>
           <p className="text-sm text-(--text-secondary) mb-4 max-w-lg mx-auto">
-            Found a bug, have a feature idea, or want to discuss the EHDS
-            architecture? We&apos;d love to hear from you.
+            <T area="home">
+              {
+                "Found a bug, have a feature idea, or want to discuss the EHDS architecture? We'd love to hear from you."
+              }
+            </T>
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3">
             <a
@@ -715,7 +773,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-(--surface-2) text-(--text-primary) border border-(--border-ui) hover:border-layer1 hover:text-(--text-primary) transition-colors"
             >
               <Github size={16} aria-hidden="true" />
-              Report an Issue
+              <T area="home">{"Report an Issue"}</T>
             </a>
             <a
               href="https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions"
@@ -724,7 +782,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-(--surface-2) text-(--text-primary) border border-(--border-ui) hover:border-layer2 hover:text-(--text-primary) transition-colors"
             >
               <MessageCircle size={16} aria-hidden="true" />
-              Join the Discussion
+              <T area="home">{"Join the Discussion"}</T>
             </a>
           </div>
         </div>
@@ -736,8 +794,11 @@ export default function Home() {
       {/* ── Footer ────────────────────────────────────────────────────────── */}
       <footer className="mt-8 sm:mt-10 pt-6 border-t border-(--border) text-center text-xs text-(--text-secondary)">
         <p>
-          Reference implementation. All data is synthetic. No real patient
-          records.
+          <T area="home">
+            {
+              "Reference implementation. All data is synthetic. No real patient records."
+            }
+          </T>
         </p>
         <p className="mt-2 flex flex-wrap justify-center gap-x-1.5 gap-y-0.5">
           <a
@@ -746,7 +807,7 @@ export default function Home() {
             rel="noopener noreferrer"
             className="hover:text-(--text-secondary) transition-colors"
           >
-            EHDS Art.&nbsp;3-12, 46-51
+            <T area="home">{"EHDS Chapters II and IV"}</T>
           </a>
           <span>·</span>
           <a

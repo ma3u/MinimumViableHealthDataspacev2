@@ -1,6 +1,6 @@
 /**
  * Issue #782, phase 1: dataset descriptions in more than one language and
- * the national implementation profiles (J1006 to J1014).
+ * the national implementation profiles (J1006 to J1015).
  *
  * The catalogue shows a dataset's title and description in the language a
  * visitor picks in the menu bar and falls back to English, marked as such; the HealthDCAT-AP
@@ -271,6 +271,29 @@ test.describe("Issue #782 · the interface follows the picker", () => {
     ).toBeVisible({ timeout: 20_000 });
     await expect(page.getByPlaceholder("Datensätze suchen…")).toBeVisible();
     await languagePicker(page).selectOption("en");
+  });
+});
+
+test.describe("Issue #782 · the start page follows the picker", () => {
+  test("J1015 the start page in German, French, Dutch and Spanish, and back", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const cases: [string, string, string][] = [
+      ["de", "Europäischer Gesundheitsdatenraum", "Für Forschende"],
+      ["fr", "Espace européen des données de santé", "Pour les chercheurs"],
+      ["nl", "Europese ruimte voor gezondheidsgegevens", "Voor onderzoekers"],
+      ["es", "Espacio Europeo de Datos de Salud", "Para investigadores"],
+      ["en", "European Health Data Space", "For Researchers"],
+    ];
+    for (const [lang, title, card] of cases) {
+      await languagePicker(page).selectOption(lang);
+      await expect(
+        page.getByRole("heading", { level: 1, name: title }),
+      ).toBeVisible();
+      await expect(page.getByRole("heading", { name: card })).toBeVisible();
+      await expect(page.locator("html")).toHaveAttribute("lang", lang);
+    }
   });
 });
 

@@ -2,6 +2,7 @@ import { Smartphone } from "lucide-react";
 import { IS_STATIC } from "@/lib/static-export";
 import { TestflightJoin } from "@/components/TestflightJoin";
 import { KlarbefundTourPhone } from "@/components/KlarbefundTourPhone";
+import { T } from "@/lib/i18n/translate";
 
 /** The GitHub Pages export is served under a basePath; plain <video> and <img>
  *  URLs must carry it (same pattern as the journey page). */
@@ -24,7 +25,9 @@ export function KlarbefundShowcase() {
             aria-hidden="true"
           />
           <h2 id="klarbefund-title" className="text-lg sm:text-xl font-bold">
-            Klarbefund: real data for the dataspace, held by the patient
+            <T area="home">
+              {"Klarbefund: real data for the dataspace, held by the patient"}
+            </T>
           </h2>
         </div>
         <p className="text-(--text-secondary) text-sm leading-relaxed max-w-2xl mb-3">
