@@ -13,6 +13,7 @@
  */
 import { test, expect, type Page } from "@playwright/test";
 import { apiGet, loginAs, skipIfKeycloakDown } from "./helpers";
+import { checkLanguages } from "./i18n-helpers";
 
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
@@ -370,25 +371,12 @@ test.describe("Issue #782 · the compliance page follows the picker", () => {
 
 test.describe("Issue #782 · the access body's procedures follow the picker", () => {
   /** [lang, heading, one label inside the page] per page. */
-  type Case = [string, string, string];
-  async function check(page: Page, path: string, cases: Case[]) {
-    for (const [lang, title, label] of cases) {
-      await page.goto(`${path}?lang=${lang}`);
-      await expect(
-        page.getByRole("heading", { level: 1, name: title }),
-      ).toBeVisible({ timeout: 15_000 });
-      await expect(page.getByText(label).first()).toBeVisible({
-        timeout: 15_000,
-      });
-    }
-  }
-
   test("J1021 a data user's applications and statistical requests in every language", async ({
     page,
   }) => {
     await skipIfKeycloakDown();
     await loginAs(page, "researcher", "researcher");
-    await check(page, "/applications", [
+    await checkLanguages(page, "/applications", [
       ["de", "Anträge auf Datengenehmigung", "Datengenehmigung beantragen"],
       [
         "fr",
@@ -407,7 +395,7 @@ test.describe("Issue #782 · the access body's procedures follow the picker", ()
       ],
       ["en", "Data permit applications", "Apply for a data permit"],
     ]);
-    await check(page, "/requests", [
+    await checkLanguages(page, "/requests", [
       ["de", "Gesundheitsdatenanfragen", "Statistik anfragen"],
       ["fr", "Demandes de données de santé", "Demander une statistique"],
       ["nl", "Verzoeken om gezondheidsgegevens", "Een statistiek vragen"],
@@ -421,14 +409,14 @@ test.describe("Issue #782 · the access body's procedures follow the picker", ()
   }) => {
     await skipIfKeycloakDown();
     await loginAs(page, "regulator", "regulator");
-    await check(page, "/supervision", [
+    await checkLanguages(page, "/supervision", [
       ["de", "Aufsicht", "Feststellung eines Verstoßes erfassen"],
       ["fr", "Supervision", "Enregistrer une constatation de non-conformité"],
       ["nl", "Toezicht", "Een bevinding van niet-naleving vastleggen"],
       ["es", "Supervisión", "Registrar una constatación de incumplimiento"],
       ["en", "Supervision", "Record a finding of non-compliance"],
     ]);
-    await check(page, "/activity-report", [
+    await checkLanguages(page, "/activity-report", [
       [
         "de",
         "Tätigkeitsbericht der Zugangsstelle für Gesundheitsdaten",

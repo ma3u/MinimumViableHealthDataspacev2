@@ -95,29 +95,22 @@ describe("translate", () => {
 
 describe("the code and the dictionaries", () => {
   // Every literal handed to t("...") must be a key of some area, or it is
-  // shown in English in every language without anyone noticing.
-  const files = [
-    "src/components/Navigation.tsx",
-    "src/components/UserMenu.tsx",
-    "src/components/ThemeToggle.tsx",
-    "src/components/LanguagePicker.tsx",
-    "src/app/auth/signin/page.tsx",
-    "src/app/catalog/page.tsx",
-    "src/app/jurisdictions/page.tsx",
-    "src/app/page.tsx",
-    "src/components/FeatureCardGrid.tsx",
-    "src/components/PersonaJourneyCards.tsx",
-    "src/components/HomeRegisterCta.tsx",
-    "src/components/DemoPersonaCards.tsx",
-    "src/components/KlarbefundShowcase.tsx",
-    "src/app/information/page.tsx",
-    "src/app/permits/page.tsx",
-    "src/app/applications/page.tsx",
-    "src/app/requests/page.tsx",
-    "src/app/supervision/page.tsx",
-    "src/app/activity-report/page.tsx",
-    "src/app/compliance/page.tsx",
-  ];
+  // shown in English in every language without anyone noticing. The files
+  // are the ones that import the hook or <T>, found rather than listed, so
+  // pages translated in parallel do not all edit one list (#782).
+  const files = (readdirSync("src", { recursive: true }) as string[])
+    .map((f) => path.join("src", f))
+    .filter(
+      (f) =>
+        /\.tsx?$/.test(f) &&
+        readFileSync(f, "utf8").includes("@/lib/i18n/translate"),
+    )
+    .sort();
+
+  it("finds the translated files", () => {
+    expect(files.length).toBeGreaterThanOrEqual(20);
+    expect(files).toContain(path.join("src", "components", "Navigation.tsx"));
+  });
   const known = new Set(AREAS.flatMap((a) => Object.keys(MESSAGES.en[a])));
 
   it("has an entry for every literal the code translates", () => {
