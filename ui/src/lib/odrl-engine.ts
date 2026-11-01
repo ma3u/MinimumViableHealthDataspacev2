@@ -2,6 +2,7 @@ import { runQuery } from "@/lib/neo4j";
 import { findPermits, type PermitRow } from "@/lib/permit-gate";
 import { parseGraphTime } from "@/lib/permits";
 import { IS_STATIC } from "@/lib/static-export";
+import { testIdentityDid } from "@/lib/test-identity";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 
@@ -63,13 +64,19 @@ const USERNAME_TO_DID: Record<string, string> = {
 
 /**
  * Map a session username + roles to the corresponding participant DID.
+ * A forged test session (`<persona>@ci.test`) maps to
+ * `did:web:ci.test:<persona>`, so its accesses say they were a test.
  * Falls back to a generic participant DID if no mapping exists.
  */
 export function userToParticipantId(
   username: string,
   _roles: string[],
 ): string {
-  return USERNAME_TO_DID[username] ?? `did:web:unknown:${username}`;
+  return (
+    USERNAME_TO_DID[username] ??
+    testIdentityDid(username) ??
+    `did:web:unknown:${username}`
+  );
 }
 
 /* ── Static fallback ───────────────────────────────────────────── */

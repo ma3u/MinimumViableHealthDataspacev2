@@ -16,6 +16,7 @@ import { GET as complianceGET } from "@/app/api/compliance/route";
 import { GET as permitsGET } from "@/app/api/permits/route";
 import { GET as credentialsGET } from "@/app/api/credentials/route";
 import { userToParticipantId } from "@/lib/odrl-engine";
+import { isTestIdentity } from "@/lib/test-identity";
 import {
   buildHdabView,
   type ContractShape,
@@ -430,6 +431,9 @@ async function hospitalView(
     requestedMe ??
     (fromUser &&
     !fromUser.startsWith("did:web:unknown") &&
+    // A forged test session has no organisation of its own: like an
+    // unknown login it sees the demo participant's view.
+    !isTestIdentity(fromUser) &&
     !fromUser.endsWith(":hdab")
       ? fromUser
       : DEFAULT_HOLDER.did);
@@ -561,6 +565,9 @@ async function researcherView(
     requestedMe ??
     (fromUser &&
     !fromUser.startsWith("did:web:unknown") &&
+    // A forged test session has no organisation of its own: like an
+    // unknown login it sees the demo participant's view.
+    !isTestIdentity(fromUser) &&
     !fromUser.endsWith(":hdab")
       ? fromUser
       : DEFAULT_USER.did);

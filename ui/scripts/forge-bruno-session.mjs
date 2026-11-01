@@ -25,22 +25,34 @@
 
 import { encode } from "next-auth/jwt";
 
+// A forged session signs in as <persona>@ci.test, which the hub maps to
+// did:web:ci.test:<persona> (src/lib/test-identity.ts), so the access log
+// marks what the collection read as an automated test rather than an
+// unknown consumer. None of these mails mapped to a participant before, so
+// no request loses an identity it had; a patient's record is still found by
+// the mail's local part (patient1). The roles are unchanged.
+//
+// The researcher is the exception: it acts for PharmaCo Research AG, and the
+// permit journey needs that. It applies as did:web:pharmaco.de:research (an
+// applicant must be a participant in the graph) and answers the finding the
+// access body opens against that DID ("07 Journey - Data permit", 08 to 11).
+// Its reads are logged as PharmaCo's.
 const PERSONAS = {
   edcadmin: {
     name: "EDC Administrator",
-    email: "edcadmin@health-dataspace.local",
+    email: "edcadmin@ci.test",
     preferred_username: "edcadmin",
     roles: ["EDC_ADMIN"],
   },
   clinicuser: {
     name: "Dr. Sophie Richter",
-    email: "clinicuser@alpha-klinik.de",
+    email: "clinicuser@ci.test",
     preferred_username: "clinicuser",
     roles: ["EDC_USER_PARTICIPANT", "DATA_HOLDER"],
   },
   lmcuser: {
     name: "Dr. Pieter van der Berg",
-    email: "lmcuser@lmc.nl",
+    email: "lmcuser@ci.test",
     preferred_username: "lmcuser",
     roles: ["EDC_USER_PARTICIPANT", "DATA_HOLDER"],
   },
@@ -52,13 +64,13 @@ const PERSONAS = {
   },
   regulator: {
     name: "Anke Hoffmann",
-    email: "regulator@medreg.de",
+    email: "regulator@ci.test",
     preferred_username: "regulator",
     roles: ["HDAB_AUTHORITY"],
   },
   patient1: {
     name: "Maria García",
-    email: "patient1@example.es",
+    email: "patient1@ci.test",
     preferred_username: "patient1",
     roles: ["PATIENT"],
   },
