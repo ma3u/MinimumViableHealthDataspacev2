@@ -217,23 +217,80 @@ build_images() {
   state_set SPE_LOADER_IMAGE "${ACR_LOGIN_SERVER}/${SPE_LOADER_REPO}@${ldig}"
   ok "spe-loader: ${SPE_LOADER_IMAGE}"
 
+  # TRUSTEE_KBS_SOURCE is repo:tag@digest, for the reader; az acr import takes
+  # a tag or a digest, not both (InvalidImportImageParameter), so it imports
+  # by the digest, and the copy in ACR must carry exactly that digest.
+  local pinned src_repo
+  pinned="${TRUSTEE_KBS_SOURCE##*@}"
+  src_repo="${TRUSTEE_KBS_SOURCE%@*}"
+  src_repo="${src_repo%:*}"
   if [ -z "$(digest_of key-broker-service "built-in-as-${TRUSTEE_VERSION}")" ]; then
     log "importing Trustee KBS ${TRUSTEE_VERSION} into ACR (pinned by digest)"
-    az acr import -n "$ACR_NAME" --source "$TRUSTEE_KBS_SOURCE" --image "key-broker-service:built-in-as-${TRUSTEE_VERSION}" -o none
+    az acr import -n "$ACR_NAME" --source "${src_repo}@${pinned}" \
+      --image "key-broker-service:built-in-as-${TRUSTEE_VERSION}" -o none
   fi
   tdig="$(digest_of key-broker-service "built-in-as-${TRUSTEE_VERSION}")"
   need "$tdig" "the digest of key-broker-service:built-in-as-${TRUSTEE_VERSION}"
+  if [ "$tdig" != "$pinned" ]; then
+    err "key-broker-service:built-in-as-${TRUSTEE_VERSION} in ACR is ${tdig}, not the pinned ${pinned}"
+    exit 1
+  fi
   state_set TRUSTEE_KBS_DIGEST "$tdig"
   ok "KBS: ${TRUSTEE_KBS_IMAGE}@${TRUSTEE_KBS_DIGEST}"
 }
 
+# ── the confidential computing policy ──────────────────────────────────────
+# policygen <template> <params>: az confcom acipolicygen, which writes the
+# ccePolicy into the template. The confcom extension refuses macOS ("The
+# extension for MacOS has not been implemented"), so on a Mac the images are
+# pulled here, where `az acr login` signed Docker in, and the same az and
+# confcom versions run in a Linux container against this Docker daemon,
+# which then has the images. The policy measures the images, not the host,
+# so where it is computed does not change it.
+AZ_CLI_IMAGE="${AZ_CLI_IMAGE:-mcr.microsoft.com/azure-cli:2.89.1}"
+CONFCOM_VERSION="${CONFCOM_VERSION:-2.4.1}"
+policygen() {
+  local tmpl="$1" params="$2" img dir
+  if [ "$(uname -s)" != Darwin ]; then
+    az confcom acipolicygen -a "$tmpl" -p "$params" -y >/dev/null
+    return
+  fi
+  az acr login -n "$ACR_NAME" >/dev/null
+  for img in $(jq -r '.parameters.loaderImage.value, .parameters.neo4jImage.value' "$params"); do
+    docker pull --platform linux/amd64 -q "$img" >/dev/null
+  done
+  dir="$(dirname "$tmpl")"
+  docker run --rm --platform linux/amd64 \
+    -v /var/run/docker.sock:/var/run/docker.sock -v "${dir}:${dir}" -w "$dir" \
+    "$AZ_CLI_IMAGE" sh -c 'az extension add --name confcom --version "$0" -y >/dev/null 2>&1 &&
+      az confcom acipolicygen -a "$1" -p "$2" -y >/dev/null' "$CONFCOM_VERSION" "$tmpl" "$params"
+}
+
 # ── the admin job (as MedReg DE) ────────────────────────────────────────────
 run_admin() {  # run_admin <command> <args...>: one execution of mvhd-trustee-admin, waited for
-  local cmd="$1" execution status="" deadline
+  local cmd="$1" execution status="" deadline spec
   shift
+  # The execution goes in as a template file, not as flags: `--args` is
+  # argparse nargs='+' and refuses any value that starts with a dash
+  # ("unrecognized arguments: --url ..."), and kbs-client takes nothing else.
+  # The job's own containers are kept (volumes, environment, resources); the
+  # admin container gets the image, command and arguments of this run.
+  # jq reads "--url" as one of its own options too, even after --args, so
+  # the arguments reach it as a JSON array (one per line; none has a newline).
+  local args_json
+  args_json="$(printf '%s\n' "$@" | jq -R . | jq -sc .)"
+  spec="$(mktemp)"
+  az containerapp job show -n "$TRUSTEE_ADMIN_JOB" -g "$RG" -o json |
+    jq --arg image "$SPE_LOADER_IMAGE" --arg cmd "$cmd" --argjson args "$args_json" '
+      .properties.template
+      | {containers: [.containers[]
+           | if .name == "trustee-admin"
+             then .image = $image | .command = [$cmd] | .args = $args
+             else . end],
+         initContainers: (.initContainers // [])}' >"$spec"
   execution="$(az containerapp job start -n "$TRUSTEE_ADMIN_JOB" -g "$RG" \
-    --image "$SPE_LOADER_IMAGE" --container-name trustee-admin \
-    --command "$cmd" --args "$@" --query name -o tsv)"
+    --yaml "$spec" --query name -o tsv)"
+  rm -f "$spec"
   need "$execution" "the ${TRUSTEE_ADMIN_JOB} execution"
   log "${TRUSTEE_ADMIN_JOB}: ${execution} (${cmd} $1)"
   deadline=$((SECONDS + JOB_TIMEOUT_SECONDS))
@@ -501,7 +558,7 @@ policy() {
     tmpl="$WORK/template.json"
     cp "$TEMPLATE" "$tmpl"
     params_file "$n" "$WORK/params.json" 0
-    az confcom acipolicygen -a "$tmpl" -p "$WORK/params.json" -y >/dev/null
+    policygen "$tmpl" "$WORK/params.json"
     jq -e '.resources[0].properties.confidentialComputeProperties.ccePolicy | length > 0' "$tmpl" >/dev/null ||
       { err "acipolicygen left ccePolicy empty for SPE-${n}"; exit 1; }
     cp "$tmpl" "${SPE_STATE_DIR}/template-spe${n}.json"
