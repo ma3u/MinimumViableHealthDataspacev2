@@ -17,7 +17,11 @@ import {
  * language of the interface (lib/i18n/translate.tsx) and of the dataset
  * descriptions; a text not yet translated shows in English.
  */
-export default function LanguagePicker() {
+export default function LanguagePicker({
+  className = "",
+}: {
+  className?: string;
+}) {
   const lang = useLanguage();
   const t = useT("nav");
   // The page is in this language now; a screen reader reads it so
@@ -27,7 +31,9 @@ export default function LanguagePicker() {
   }, [lang]);
   return (
     <label
-      className="flex items-center gap-1 px-1.5 py-1 rounded-md text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) transition-colors"
+      className={`items-center gap-1 px-1.5 py-1 rounded-md text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) transition-colors ${
+        className || "flex"
+      }`}
       title={t("Language")}
     >
       <Languages size={16} aria-hidden="true" />

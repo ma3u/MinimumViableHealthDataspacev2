@@ -664,7 +664,9 @@ export default function Navigation() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          <LanguagePicker />
+          {/* In the bar from md up; on a phone the full language name made the
+              bar wider than the screen, so there it sits in the menu panel. */}
+          <LanguagePicker className="hidden md:flex" />
           <ThemeToggle />
           <UserMenu />
           {/* Mobile hamburger */}
@@ -690,6 +692,9 @@ export default function Navigation() {
           id="mobile-nav"
           className="md:hidden border-t border-(--border) bg-(--surface) px-4 py-3 space-y-1 animate-fade-in-up"
         >
+          <div className="mb-2 px-1">
+            <LanguagePicker />
+          </div>
           {visibleGroups.map((g) => (
             <div key={g.label} className="mb-2">
               <span className="text-xs font-semibold text-(--text-secondary) uppercase tracking-wider px-2">

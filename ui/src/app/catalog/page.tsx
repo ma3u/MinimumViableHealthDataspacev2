@@ -344,7 +344,7 @@ function CatalogContent() {
 
   return (
     <div className="min-h-screen bg-(--bg)">
-      <div className="max-w-7xl mx-auto px-6 pb-12 pt-10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-12 pt-10">
         {/* Page header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
@@ -360,7 +360,7 @@ function CatalogContent() {
               )}
             </p>
           </div>
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-3 sm:shrink-0">
             {!loading && (
               <span className="text-sm font-bold text-(--accent) px-4 py-2 bg-(--accent-surface) rounded-full">
                 {t("{shown} of {total} datasets", {
@@ -375,7 +375,7 @@ function CatalogContent() {
               aria-label={t("Search datasets")}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="px-3 py-2 bg-(--surface-card) border border-(--border-ui) rounded-xl text-sm outline-hidden focus:border-(--accent) text-(--text-primary) placeholder:text-(--text-secondary) w-52"
+              className="px-3 py-2 bg-(--surface-card) border border-(--border-ui) rounded-xl text-sm outline-hidden focus:border-(--accent) text-(--text-primary) placeholder:text-(--text-secondary) w-full min-w-0 sm:w-52"
             />
           </div>
         </div>
@@ -396,7 +396,7 @@ function CatalogContent() {
         ) : (
           <div className="grid grid-cols-12 gap-8">
             {/* ── Filter Sidebar ── */}
-            <aside className="col-span-12 lg:col-span-3">
+            <aside className="col-span-12 lg:col-span-3 min-w-0">
               <div className="bg-(--surface) rounded-xl p-6 sticky top-6">
                 <h3 className="text-xs font-black text-(--text-primary) uppercase tracking-widest mb-6">
                   {t("Refine Search")}
@@ -487,9 +487,9 @@ function CatalogContent() {
             </aside>
 
             {/* ── Main Grid ── */}
-            <div className="col-span-12 lg:col-span-9">
+            <div className="col-span-12 lg:col-span-9 min-w-0">
               {/* Sort bar */}
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-wrap justify-between items-center gap-x-4 gap-y-1 mb-6">
                 <p className="text-sm font-semibold text-(--text-secondary)">
                   {t("{count} datasets found", { count: visible.length })}
                 </p>
