@@ -602,7 +602,7 @@
   "Sub-processor disclosure if third-party cloud infrastructure is involved in processing.": "Déclaration des sous-traitants ultérieurs si une infrastructure en nuage tierce participe au traitement.",
   "Breach notification procedure within 72 hours per GDPR Art. 33.": "Procédure de notification des violations sous 72 heures selon l’art. 33 du RGPD.",
   "Technical Dataspace Prerequisites (EDC-V / DCP)": "Prérequis techniques de l’espace de données (EDC-V / DCP)",
-  "Valid did:web DID registered with IdentityHub and endorsed by HDAB VC credential.": "DID did:web valide, enregistré auprès de l’IdentityHub et approuvé par une VC de l’organisme responsable de l’accès aux données de santé.",
+  "Valid did:web DID registered with IdentityHub and endorsed by HDAB VC credential.": "DID did:web valide, enregistré auprès de l’IdentityHub et approuvé par une attestation (VC) de l’organisme responsable de l’accès aux données de santé.",
   "Signed EDC-V connector policies: dataspace membership, EHDS-purpose, data-usage constraints.": "Politiques signées du connecteur EDC-V : appartenance à l’espace de données, finalité EEDS, contraintes d’utilisation des données.",
   "Encrypted transfer channel (AES-256-GCM) via EDC Dataspace Protocol (DCP).": "Canal de transfert chiffré (AES-256-GCM) via l’EDC Dataspace Protocol (DCP).",
   "NATS event subscription for real-time audit events and contract negotiation callbacks.": "Abonnement aux événements NATS pour les événements d’audit en temps réel et les rappels de négociation de contrat.",

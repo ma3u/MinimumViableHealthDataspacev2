@@ -29,7 +29,7 @@
   "HDAB Approval:": "Genehmigung der Zugangsstelle:",
   "Dataset grant:": "Freigabe des Datensatzes:",
   "Contract:": "Vertrag:",
-  "EHDS Verifiable Credentials": "EHDS-Verifiable-Credentials",
+  "EHDS Verifiable Credentials": "Verifizierbare EHDS-Nachweise",
   "DCP credential definitions registered on IssuerService, presented during DSP negotiation": "Beim IssuerService registrierte DCP-Nachweisdefinitionen, vorgelegt während der DSP-Verhandlung",
   "Trust Center: Pseudonym Resolution": "Vertrauensstelle: Auflösung der Pseudonyme",
   "EHDS Art. 66 and 73: HDAB-designated trust centers enabling cross-provider longitudinal patient linkage without exposing real identities to researchers. Provider pseudonyms are resolved to research pseudonyms inside the Secure Processing Environment only.": "EHDS Art. 66 und 73: von der Zugangsstelle benannte Vertrauensstellen verknüpfen Patientendaten über Leistungserbringer hinweg, ohne Forschenden echte Identitäten zu zeigen. Pseudonyme der Leistungserbringer werden nur in der sicheren Verarbeitungsumgebung in Forschungspseudonyme umgesetzt.",
