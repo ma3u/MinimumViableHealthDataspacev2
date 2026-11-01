@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, ExternalLink, Scale } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ExternalLink,
+  Languages,
+  Scale,
+} from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 import { docsInSection, REPO_URL } from "@/lib/docs/published-docs";
 
@@ -62,6 +68,13 @@ export default function EhdsDocsPage() {
           repository may still cite the 2022 proposal, and the numbering page
           maps one to the other.
         </p>
+        <Link
+          href="/docs/ehds/glossary"
+          className="inline-flex items-center gap-1 mt-3 text-sm text-(--accent) hover:underline"
+        >
+          <Languages size={14} aria-hidden="true" /> EHDS Glossary: the
+          Regulation&apos;s terms in five languages <ArrowRight size={14} />
+        </Link>
       </div>
 
       <div

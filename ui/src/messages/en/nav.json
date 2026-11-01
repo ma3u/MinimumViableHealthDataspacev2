@@ -69,5 +69,13 @@
   "Close menu": "Close menu",
   "Switch to light mode": "Switch to light mode",
   "Switch to dark mode": "Switch to dark mode",
-  "Language": "Language"
+  "Language": "Language",
+  "Dataspace Admin": "Dataspace Admin",
+  "Participant": "Participant",
+  "HDAB Authority": "HDAB Authority",
+  "Data Holder": "Data Holder",
+  "Researcher": "Researcher",
+  "Trust Center": "Trust Center",
+  "Patient / Citizen": "Patient / Citizen",
+  "Glossary": "Glossary"
 }
