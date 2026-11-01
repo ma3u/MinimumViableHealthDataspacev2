@@ -1,6 +1,6 @@
 /**
  * Issue #782, phase 1: dataset descriptions in more than one language and
- * the national implementation profiles (J1006 to J1013).
+ * the national implementation profiles (J1006 to J1014).
  *
  * The catalogue shows a dataset's title and description in the language a
  * visitor picks in the menu bar and falls back to English, marked as such; the HealthDCAT-AP
@@ -160,21 +160,22 @@ test.describe("Issue #782 · multilingual catalogue, national profiles", () => {
         name,
       ).toBe(true);
       if (lang === "en") {
-        await expect(page.getByLabel(/shown in English/)).toHaveCount(0);
+        await expect(page.getByTestId("english-fallback")).toHaveCount(0);
       } else {
         expect(langs, `${name}: a title in ${lang}`).toContain(lang);
         const fallbacks = langs.filter((l) => l === "en").length;
-        await expect(
-          page.getByLabel(`shown in English, no ${name} text yet`),
-        ).toHaveCount(await countMarks(page, name, fallbacks));
+        await expect(page.getByTestId("english-fallback")).toHaveCount(
+          await countMarks(page, name, fallbacks),
+        );
       }
       // The detail of the first dataset carries the same language.
-      await page.getByTitle("View HealthDCAT-AP metadata").first().click();
+      await page.getByTestId("dataset-details").first().click();
       await expect(page.locator(".fixed [lang]").first()).toHaveAttribute(
         "lang",
         new RegExp(`^(${lang}|en)$`),
       );
-      await page.getByRole("button", { name: "Close" }).click();
+      await page.keyboard.press("Escape");
+      await page.mouse.click(5, 5);
       await page.screenshot({
         path: testInfo.outputPath(`catalog-${lang}.png`),
         fullPage: false,
@@ -231,17 +232,60 @@ test.describe("Issue #782 · the browser's language", () => {
   });
 });
 
+test.describe("Issue #782 · the interface follows the picker", () => {
+  test("J1014 menu, sign-in page and catalogue switch to German, French, Dutch and Spanish", async ({
+    page,
+  }) => {
+    // Signed out: the sign-in page and the menu bar.
+    await page.goto("/auth/signin");
+    const picker = languagePicker(page);
+    const cases: [string, string, string, string][] = [
+      ["de", "Mit Keycloak anmelden", "Entdecken", "Sprache"],
+      ["fr", "Se connecter avec Keycloak", "Explorer", "Langue"],
+      ["nl", "Inloggen met Keycloak", "Verkennen", "Taal"],
+      ["es", "Iniciar sesión con Keycloak", "Explorar", "Idioma"],
+    ];
+    for (const [lang, signIn, explore, language] of cases) {
+      await picker.selectOption(lang);
+      await expect(page.getByRole("button", { name: signIn })).toBeVisible();
+      await expect(
+        page.getByRole("navigation", { name: "Main navigation" }),
+      ).toContainText(explore);
+      await expect(page.getByRole("combobox", { name: language })).toHaveValue(
+        lang,
+      );
+      await expect(page.locator("html")).toHaveAttribute("lang", lang);
+    }
+    await picker.selectOption("en");
+    await expect(
+      page.getByRole("button", { name: "Sign in with Keycloak" }),
+    ).toBeVisible();
+
+    // Signed in: the catalogue's own texts follow too.
+    await skipIfKeycloakDown();
+    await loginAs(page, "researcher", "researcher");
+    await page.goto("/catalog");
+    await languagePicker(page).selectOption("de");
+    await expect(
+      page.getByRole("heading", { name: "Datensatzkatalog" }),
+    ).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByPlaceholder("Datensätze suchen…")).toBeVisible();
+    await languagePicker(page).selectOption("en");
+  });
+});
+
 /** The language picker in the menu bar (components/LanguagePicker.tsx). */
 function languagePicker(page: Page) {
-  return page.getByRole("combobox", { name: "Language" });
+  // By place, not by name: its label is "Sprache" once German is picked.
+  return page
+    .getByRole("navigation", { name: "Main navigation" })
+    .getByRole("combobox");
 }
 
 /** The marks shown for English fallbacks: one per title, plus one per
  * description that falls back too, so at least the titles' count. */
 async function countMarks(page: Page, name: string, titles: number) {
-  const marks = await page
-    .getByLabel(`shown in English, no ${name} text yet`)
-    .count();
+  const marks = await page.getByTestId("english-fallback").count();
   expect(marks).toBeGreaterThanOrEqual(titles);
   return marks;
 }

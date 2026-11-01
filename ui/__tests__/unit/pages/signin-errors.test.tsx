@@ -59,7 +59,7 @@ describe("SignInPage — error messages", () => {
     render(<SignInPage />);
     expect(
       screen.getByText(
-        /OAuth callback error — check that Keycloak is running and the redirect URI is registered/,
+        /OAuth callback error: check that Keycloak is running and the redirect URI is registered/,
       ),
     ).toBeInTheDocument();
   });

@@ -9,6 +9,7 @@ import type {
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AlertCircle, ExternalLink, Loader2, Scale } from "lucide-react";
+import { useT } from "@/lib/i18n/translate";
 
 /**
  * How six member states implement the secondary use of Regulation (EU)
@@ -53,6 +54,7 @@ function Field({
 }
 
 function MilestoneList({ milestones }: { milestones: Milestone[] }) {
+  const t = useT("jurisdictions");
   return (
     <ol className="space-y-1">
       {milestones.map((m) => (
@@ -63,8 +65,8 @@ function MilestoneList({ milestones }: { milestones: Milestone[] }) {
           <span>
             {m.label}
             <span className="ml-2 text-[10px] font-bold uppercase tracking-wider text-(--text-secondary)">
-              {m.scope === "EU" ? "EU" : "national"}
-              {m.status === "PLANNED" ? ", planned" : ""}
+              {m.scope === "EU" ? "EU" : t("national")}
+              {m.status === "PLANNED" ? t(", planned") : ""}
             </span>
           </span>
         </li>
@@ -75,6 +77,7 @@ function MilestoneList({ milestones }: { milestones: Milestone[] }) {
 
 function Profile({ j }: { j: Jurisdiction }) {
   const lang = j.languages[0];
+  const t = useT("jurisdictions");
   return (
     <section
       id={j.code.toLowerCase()}
@@ -98,7 +101,7 @@ function Profile({ j }: { j: Jurisdiction }) {
       <p className="text-sm text-(--text-secondary) mt-2">{j.summary}</p>
 
       <dl className="mt-4">
-        <Field label="Access body (role)">
+        <Field label={t("Access body (role)")}>
           <span lang={lang}>{j.accessBodyRole}</span>
           {j.accessBodyRoleEn !== j.accessBodyRole && (
             <span className="text-(--text-secondary)">
@@ -110,28 +113,30 @@ function Profile({ j }: { j: Jurisdiction }) {
             {j.designationStatus}
           </p>
         </Field>
-        <Field label="On the hub">
+        <Field label={t("On the hub")}>
           {j.accessBodies.length > 0 ? (
             j.accessBodies.map((b) => (
               <span key={b.participantId} className="mr-3">
                 {b.name}{" "}
                 <span className="text-xs text-(--text-secondary)">
-                  (fictional access body)
+                  {t("(fictional access body)")}
                 </span>
               </span>
             ))
           ) : (
             <span className="text-(--text-secondary)">
-              No access body of this country on the hub yet.
+              {t("No access body of this country on the hub yet.")}
             </span>
           )}
           {j.participants.length > 0 && (
             <p className="text-xs text-(--text-secondary) mt-1">
-              Also under it: {j.participants.map((p) => p.name).join(", ")}
+              {t("Also under it: {names}", {
+                names: j.participants.map((p) => p.name).join(", "),
+              })}
             </p>
           )}
         </Field>
-        <Field label="National legal basis">
+        <Field label={t("National legal basis")}>
           <ul className="space-y-1.5">
             {j.laws.map((l) => (
               <li key={l.lawId}>
@@ -156,21 +161,23 @@ function Profile({ j }: { j: Jurisdiction }) {
                 <span className="block text-xs text-(--text-secondary)">
                   {l.titleEn}
                   {" · "}
-                  {LAW_STATUS[l.status] ?? l.status}
+                  {LAW_STATUS[l.status] ? t(LAW_STATUS[l.status]) : l.status}
                 </span>
               </li>
             ))}
           </ul>
         </Field>
-        <Field label="Objecting (Art. 71)">{j.optOutModel}</Field>
-        <Field label="Fees (Art. 62)">{j.fees}</Field>
-        <Field label="Languages">
-          {j.languages.map((l) => LANGUAGE_NAMES[l] ?? l).join(", ")}
+        <Field label={t("Objecting (Art. 71)")}>{j.optOutModel}</Field>
+        <Field label={t("Fees (Art. 62)")}>{j.fees}</Field>
+        <Field label={t("Languages")}>
+          {j.languages
+            .map((l) => (LANGUAGE_NAMES[l] ? t(LANGUAGE_NAMES[l]) : l))
+            .join(", ")}
         </Field>
-        <Field label="Timeline">
+        <Field label={t("Timeline")}>
           <MilestoneList milestones={j.milestones} />
         </Field>
-        <Field label="Sources">
+        <Field label={t("Sources")}>
           <ul className="space-y-0.5">
             {j.sources.map((s) => (
               <li key={s} className="text-xs break-all">
@@ -195,6 +202,8 @@ function Profile({ j }: { j: Jurisdiction }) {
 export default function JurisdictionsPage() {
   const [data, setData] = useState<JurisdictionsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const t = useT("jurisdictions");
+  const tc = useT("common");
 
   useEffect(() => {
     fetchApi("/api/jurisdictions")
@@ -217,56 +226,61 @@ export default function JurisdictionsPage() {
         <div className="mb-6">
           <h1 className="page-header flex items-center gap-2">
             <Scale size={28} />
-            National implementation of the EHDS
+            {t("National implementation of the EHDS")}
           </h1>
           <p className="text-(--text-secondary) text-lg mt-1">
-            One Regulation, (EU) 2025/327, and six ways of putting it to work:
-            who grants access, under which national law, how a person objects,
-            what access costs and when it applies.
+            {t(
+              "One Regulation, (EU) 2025/327, and six ways of putting it to work: who grants access, under which national law, how a person objects, what access costs and when it applies.",
+            )}
           </p>
         </div>
 
         <div className="rounded-lg border border-(--border) bg-(--surface-2) p-4 text-sm text-(--text-secondary) mb-6 space-y-1">
           <p>
-            The laws and the legal roles are real and linked to their official
-            sources. The organisations on this hub are fictional; the real
-            institution that holds each role is not named. This is an overview
-            for demonstration, not legal advice.
+            {t(
+              "The laws and the legal roles are real and linked to their official sources. The organisations on this hub are fictional; the real institution that holds each role is not named. This is an overview for demonstration, not legal advice.",
+            )}
           </p>
           {data?.reviewedOn && (
             <p>
-              Checked against the sources on{" "}
-              <span className="font-mono">{data.reviewedOn}</span>. National
-              implementation is moving; a bill can change before it passes.
+              {t(
+                "Checked against the sources on {date}. National implementation is moving; a bill can change before it passes.",
+                { date: data.reviewedOn },
+              )}
             </p>
           )}
           <p>
-            The dataset descriptions in the{" "}
+            {t(
+              "The dataset descriptions in the catalogue are available in German and Spanish, and some in French and Dutch.",
+            )}{" "}
             <Link href="/catalog" className="text-(--accent) underline">
-              catalogue
-            </Link>{" "}
-            are available in German and Spanish, and some in French and Dutch;
-            pick the language in the menu bar.
+              {t("Open the catalogue")}
+            </Link>
           </p>
         </div>
 
         {error && (
           <div className="rounded-lg border border-(--border) bg-(--surface) p-4 text-sm flex items-start gap-2 mb-6">
             <AlertCircle size={16} className="mt-0.5" />
-            <span>The national profiles are unavailable: {error}</span>
+            <span>
+              {t("The national profiles are unavailable: {error}", { error })}
+            </span>
           </div>
         )}
 
         {!data && !error && (
           <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
-            Loading…
+            {tc("Loading…")}
           </div>
         )}
 
         {data && (
           <>
-            <nav aria-label="Countries" className="flex flex-wrap gap-2 mb-6">
+            <nav
+              aria-label={t("Countries")}
+              className="flex flex-wrap gap-2 mb-6"
+            >
               {data.jurisdictions.map((j) => (
                 <a
                   key={j.code}

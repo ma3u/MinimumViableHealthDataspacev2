@@ -142,8 +142,15 @@ const WEB = filesUnder(path.join(REPO, "ui/src"), /\.tsx?$/, [
   "ui/src/content",
 ])
   .map((f) => withoutComments(fs.readFileSync(f, "utf8")))
+  // The English dictionary holds what a translated page renders (#782).
+  .concat(
+    filesUnder(path.join(REPO, "ui/src/messages/en"), /\.json$/).map((f) =>
+      fs.readFileSync(f, "utf8"),
+    ),
+  )
   .join("\n")
   .replace(/\$?\{\s*(?:CITIZEN_)?WALLET\.name\s*\}/g, CITIZEN_WALLET.name)
+  .replace(/\{wallet\}/g, CITIZEN_WALLET.name)
   .replace(/\s+/g, " ");
 
 const IOS = path.join(REPO, "clients/ios/Sources");

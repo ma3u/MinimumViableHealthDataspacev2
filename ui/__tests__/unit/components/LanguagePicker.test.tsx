@@ -55,9 +55,8 @@ describe("LanguagePicker", () => {
     vi.spyOn(navigator, "languages", "get").mockReturnValue(["nl-BE", "fr"]);
     render(<LanguagePicker />);
     await waitFor(() =>
-      expect(screen.getByRole("combobox", { name: "Language" })).toHaveValue(
-        "nl",
-      ),
+      // The label follows the language too: "Taal" in Dutch.
+      expect(screen.getByRole("combobox", { name: "Taal" })).toHaveValue("nl"),
     );
   });
 

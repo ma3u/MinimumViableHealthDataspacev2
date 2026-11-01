@@ -42,6 +42,7 @@ import {
 import UserMenu from "./UserMenu";
 import ThemeToggle from "./ThemeToggle";
 import LanguagePicker from "./LanguagePicker";
+import { useT } from "@/lib/i18n/translate";
 import { useState, useRef, useEffect } from "react";
 import { deriveParticipantType, derivePersonaId } from "@/lib/auth";
 import { useDemoPersona } from "@/lib/use-demo-persona";
@@ -522,6 +523,7 @@ function NavDropdown({
   group: NavGroup;
   onNavigate?: () => void;
 }) {
+  const t = useT("nav");
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -551,7 +553,7 @@ function NavDropdown({
         }`}
       >
         <group.icon size={15} aria-hidden="true" />
-        {group.label}
+        {t(group.label)}
         <ChevronDown
           size={12}
           aria-hidden="true"
@@ -579,7 +581,7 @@ function NavDropdown({
               }`}
             >
               <l.icon size={14} aria-hidden="true" />
-              {l.label}
+              {t(l.label)}
             </Link>
           ))}
         </div>
@@ -596,6 +598,7 @@ export default function Navigation() {
   // Always call useDemoPersona — hook rules require unconditional calls.
   // In live mode the return value is ignored.
   const demoPersona = useDemoPersona();
+  const t = useT("nav");
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // In static demo mode, derive everything from the stored persona.
@@ -670,7 +673,7 @@ export default function Navigation() {
             className="md:hidden p-2 rounded-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) touch-target"
             aria-expanded={mobileOpen}
             aria-controls="mobile-nav"
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-label={mobileOpen ? t("Close menu") : t("Open menu")}
           >
             {mobileOpen ? (
               <X size={22} aria-hidden="true" />
@@ -690,7 +693,7 @@ export default function Navigation() {
           {visibleGroups.map((g) => (
             <div key={g.label} className="mb-2">
               <span className="text-xs font-semibold text-(--text-secondary) uppercase tracking-wider px-2">
-                {g.label}
+                {t(g.label)}
               </span>
               <div className="mt-1 space-y-0.5">
                 {g.links.map((l) => (
@@ -701,7 +704,7 @@ export default function Navigation() {
                     className="flex items-center gap-2 px-3 py-2.5 rounded-sm text-sm text-(--text-secondary) hover:bg-(--surface-2) hover:text-(--text-primary) transition-colors touch-target-sm"
                   >
                     <l.icon size={16} aria-hidden="true" />
-                    {l.label}
+                    {t(l.label)}
                   </Link>
                 ))}
               </div>

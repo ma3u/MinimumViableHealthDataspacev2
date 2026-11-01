@@ -25,11 +25,11 @@ import {
   type CatalogLanguage,
   type MetadataLanguage,
   type Translation,
-  LANGUAGE_NAMES,
   localise,
   searchableText,
 } from "@/lib/metadata-language";
 import { useLanguage } from "@/lib/use-language";
+import { useT } from "@/lib/i18n/translate";
 
 interface Dataset {
   id: string;
@@ -62,14 +62,16 @@ function InLanguage({
   shown: CatalogLanguage;
   children: React.ReactNode;
 }) {
+  const t = useT("catalog");
   return (
     <>
       <span lang={lang}>{children}</span>
       {lang !== shown && (
         <span
           className="ml-1.5 align-middle text-[9px] font-bold uppercase tracking-wider px-1 py-px rounded-sm bg-white/20 border border-current opacity-80"
-          title={`No ${LANGUAGE_NAMES[shown]} text yet, shown in English`}
-          aria-label={`shown in English, no ${LANGUAGE_NAMES[shown]} text yet`}
+          data-testid="english-fallback"
+          title={t("No text in this language yet, shown in English")}
+          aria-label={t("shown in English, no text in this language yet")}
         >
           EN
         </span>
@@ -245,6 +247,8 @@ function CatalogContent() {
   // The language of the dataset descriptions, picked in the menu (#782);
   // the rest of the page stays English until the interface is translated.
   const lang = useLanguage();
+  const t = useT("catalog");
+  const tc = useT("common");
 
   // The live hub hands over the proxy's HealthDCAT-AP Release 8 document, the
   // one CI validates with the official SHACL (#700); the static export has no
@@ -348,23 +352,27 @@ function CatalogContent() {
               HealthDCAT-AP · EHDS Art. 53
             </p>
             <h1 className="text-4xl font-extrabold text-(--text-primary) tracking-tight">
-              Dataset Catalog
+              {t("Dataset Catalog")}
             </h1>
             <p className="text-(--text-secondary) text-base font-medium">
-              Explore curated FHIR R4 and OMOP datasets for cross-border health
-              research.
+              {t(
+                "Explore curated FHIR R4 and OMOP datasets for cross-border health research.",
+              )}
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
             {!loading && (
               <span className="text-sm font-bold text-(--accent) px-4 py-2 bg-(--accent-surface) rounded-full">
-                {visible.length} of {datasets.length} datasets
+                {t("{shown} of {total} datasets", {
+                  shown: visible.length,
+                  total: datasets.length,
+                })}
               </span>
             )}
             <input
               type="search"
-              placeholder="Search datasets…"
-              aria-label="Search datasets"
+              placeholder={t("Search datasets…")}
+              aria-label={t("Search datasets")}
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               className="px-3 py-2 bg-(--surface-card) border border-(--border-ui) rounded-xl text-sm outline-hidden focus:border-(--accent) text-(--text-primary) placeholder:text-(--text-secondary) w-52"
@@ -376,14 +384,14 @@ function CatalogContent() {
             href="/jurisdictions"
             className="ml-auto text-xs font-bold text-(--accent) hover:underline"
           >
-            National EHDS rules →
+            {t("National EHDS rules →")}
           </Link>
         </div>
 
         {loading ? (
           <div className="flex items-center gap-2 text-(--text-secondary)">
             <Loader2 size={16} className="animate-spin" />
-            Connecting to Neo4j…
+            {t("Connecting to Neo4j…")}
           </div>
         ) : (
           <div className="grid grid-cols-12 gap-8">
@@ -391,13 +399,13 @@ function CatalogContent() {
             <aside className="col-span-12 lg:col-span-3">
               <div className="bg-(--surface) rounded-xl p-6 sticky top-6">
                 <h3 className="text-xs font-black text-(--text-primary) uppercase tracking-widest mb-6">
-                  Refine Search
+                  {t("Refine Search")}
                 </h3>
 
                 {/* Theme filter */}
                 <div className="mb-6">
                   <p className="text-[10px] font-bold text-(--text-secondary) uppercase tracking-wider mb-3">
-                    Theme
+                    {t("Theme")}
                   </p>
                   <div className="space-y-2">
                     {allThemes.map((t) => (
@@ -422,7 +430,7 @@ function CatalogContent() {
                 {/* DatasetType filter */}
                 <div className="mb-6">
                   <p className="text-[10px] font-bold text-(--text-secondary) uppercase tracking-wider mb-3">
-                    Data Type
+                    {t("Data Type")}
                   </p>
                   <div className="space-y-2">
                     {allTypes.map((t) => (
@@ -447,7 +455,7 @@ function CatalogContent() {
                 {/* Sample size range */}
                 <div className="mb-6">
                   <p className="text-[10px] font-bold text-(--text-secondary) uppercase tracking-wider mb-3">
-                    Min. Sample Size
+                    {t("Min. Sample Size")}
                   </p>
                   <input
                     type="range"
@@ -456,7 +464,7 @@ function CatalogContent() {
                     step={100}
                     value={minSamples}
                     onChange={(e) => setMinSamples(Number(e.target.value))}
-                    aria-label="Minimum sample size"
+                    aria-label={t("Minimum sample size")}
                     className="w-full h-1.5 bg-(--border) rounded-lg appearance-none cursor-pointer accent-(--accent)"
                   />
                   <div className="flex justify-between mt-2 text-[10px] font-bold text-(--text-secondary)">
@@ -473,7 +481,7 @@ function CatalogContent() {
                   className="w-full py-2.5 bg-(--surface-2) text-(--accent) font-bold text-xs rounded-lg uppercase tracking-wider hover:bg-(--accent) hover:text-white transition-all flex items-center justify-center gap-2"
                 >
                   <RotateCcw size={12} />
-                  Reset All Filters
+                  {t("Reset All Filters")}
                 </button>
               </div>
             </aside>
@@ -483,8 +491,7 @@ function CatalogContent() {
               {/* Sort bar */}
               <div className="flex justify-between items-center mb-6">
                 <p className="text-sm font-semibold text-(--text-secondary)">
-                  {visible.length} dataset{visible.length !== 1 ? "s" : ""}{" "}
-                  found
+                  {t("{count} datasets found", { count: visible.length })}
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-(--text-secondary)">
@@ -500,13 +507,13 @@ function CatalogContent() {
                     className="mx-auto mb-3 text-(--text-secondary)"
                   />
                   <p className="text-(--text-secondary)">
-                    No datasets match the current filters.
+                    {t("No datasets match the current filters.")}
                   </p>
                   <button
                     onClick={resetFilters}
                     className="mt-4 text-sm text-(--accent) hover:underline"
                   >
-                    Clear filters
+                    {t("Clear filters")}
                   </button>
                 </div>
               ) : (
@@ -558,7 +565,7 @@ function CatalogContent() {
                               <span
                                 className={`text-xs font-bold uppercase ${status.textColor}`}
                               >
-                                {status.label}
+                                {t(status.label)}
                               </span>
                             </div>
                             <span className="text-[10px] font-mono text-(--text-secondary)">
@@ -570,7 +577,7 @@ function CatalogContent() {
                           <div className="grid grid-cols-3 gap-4 mb-5">
                             <div className="flex flex-col">
                               <span className="text-[9px] font-bold text-(--text-secondary) uppercase tracking-wider">
-                                Samples
+                                {t("Samples")}
                               </span>
                               <span className="text-sm font-black text-(--text-primary) tabular-nums">
                                 {d.recordCount != null
@@ -580,7 +587,7 @@ function CatalogContent() {
                             </div>
                             <div className="flex flex-col">
                               <span className="text-[9px] font-bold text-(--text-secondary) uppercase tracking-wider">
-                                Data Type
+                                {t("Data Type")}
                               </span>
                               <span className="text-sm font-black text-(--text-primary)">
                                 {dataTypeLabel(d.datasetType)}
@@ -588,7 +595,7 @@ function CatalogContent() {
                             </div>
                             <div className="flex flex-col">
                               <span className="text-[9px] font-bold text-(--text-secondary) uppercase tracking-wider">
-                                Provider
+                                {t("Provider")}
                               </span>
                               <span className="text-sm font-black text-(--text-primary)">
                                 {shortPublisher(d.publisher)}
@@ -626,13 +633,14 @@ function CatalogContent() {
                               )}`}
                               className="grow py-2.5 btn-gradient text-center text-sm font-bold rounded-xl active:scale-95 transition-all"
                             >
-                              Request Access
+                              {t("Request Access")}
                             </Link>
                             <button
                               onClick={() => setDetailDataset(d)}
                               className="w-11 h-11 flex items-center justify-center bg-(--surface-2) text-(--text-secondary) rounded-xl hover:bg-(--accent-surface) hover:text-(--accent) transition-colors"
-                              aria-label="View dataset details"
-                              title="View HealthDCAT-AP metadata"
+                              data-testid="dataset-details"
+                              aria-label={t("View dataset details")}
+                              title={t("View HealthDCAT-AP metadata")}
                             >
                               <Bookmark size={16} />
                             </button>
@@ -672,14 +680,14 @@ function CatalogContent() {
                     </InLanguage>
                   </p>
                   <p className="text-xs text-(--text-secondary)">
-                    HealthDCAT-AP Metadata
+                    {t("HealthDCAT-AP Metadata")}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setDetailDataset(null)}
                 className="text-(--text-secondary) hover:text-(--text-primary)"
-                aria-label="Close"
+                aria-label={tc("Close")}
               >
                 <X size={18} />
               </button>
@@ -712,7 +720,9 @@ function CatalogContent() {
                   {
                     label: "FHIR Patients",
                     value: detailDataset.fhirResources?.length
-                      ? `${detailDataset.fhirResources.length} linked`
+                      ? t("{count} linked", {
+                          count: detailDataset.fhirResources.length,
+                        })
                       : undefined,
                   },
                   {
@@ -744,7 +754,7 @@ function CatalogContent() {
                       className="flex gap-3 py-1.5 border-b border-(--border) last:border-0"
                     >
                       <span className="text-xs text-(--text-secondary) w-32 shrink-0">
-                        {r.label}
+                        {t(r.label)}
                       </span>
                       <span className="text-xs text-(--text-primary) break-all">
                         {r.value}
@@ -790,14 +800,14 @@ function CatalogContent() {
                   className="inline-flex items-center gap-1.5 text-xs text-(--accent) hover:underline font-medium"
                 >
                   <GitBranch size={12} />
-                  Data Model Diagram
+                  {t("Data Model Diagram")}
                 </button>
                 <button
                   onClick={() => downloadDcatAp(detailDataset)}
                   className="inline-flex items-center gap-1.5 text-xs text-(--accent) hover:underline font-medium"
                 >
                   <Download size={12} />
-                  Download DCAT-AP
+                  {t("Download DCAT-AP")}
                 </button>
                 <Link
                   href={`/graph?highlight=${encodeURIComponent(
@@ -807,7 +817,7 @@ function CatalogContent() {
                   onClick={() => setDetailDataset(null)}
                 >
                   <Network size={12} />
-                  View in Graph
+                  {t("View in Graph")}
                 </Link>
                 <a
                   href="https://ehds.healthdataportal.eu/editor2/"
@@ -816,7 +826,7 @@ function CatalogContent() {
                   className="inline-flex items-center gap-1.5 text-xs text-(--text-secondary) hover:text-(--accent) hover:underline font-medium"
                 >
                   <Edit3 size={12} />
-                  EHDS DCAT-AP Editor
+                  {t("EHDS DCAT-AP Editor")}
                 </a>
                 <a
                   href="https://data.health.europa.eu/healthdcat-ap/releases/latest/"
@@ -825,7 +835,7 @@ function CatalogContent() {
                   className="inline-flex items-center gap-1.5 text-xs text-(--text-secondary) hover:text-(--accent) hover:underline font-medium"
                 >
                   <ExternalLink size={12} />
-                  HealthDCAT-AP Spec
+                  {t("HealthDCAT-AP Spec")}
                 </a>
               </div>
             </div>
@@ -851,7 +861,7 @@ function CatalogContent() {
               <button
                 onClick={() => setDiagramDataset(null)}
                 className="text-(--text-secondary) hover:text-(--text-primary)"
-                aria-label="Close diagram"
+                aria-label={t("Close diagram")}
               >
                 <X size={18} />
               </button>
