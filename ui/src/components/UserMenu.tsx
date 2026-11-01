@@ -25,6 +25,7 @@ import {
 import { useTabSession, markSessionSwitch } from "@/lib/use-tab-session";
 import { BuildInfo } from "@/components/BuildInfo";
 import { IS_STATIC } from "@/lib/static-export";
+import { useT } from "@/lib/i18n/translate";
 
 /** Badge colours per role code — uses semantic CSS tokens, adapts to light/dark. */
 const ROLE_BADGE: Record<string, string> = {
@@ -201,6 +202,8 @@ export default function UserMenu() {
       : "unauthenticated"
     : tabStatus;
   const [open, setOpen] = useState(false);
+  const t = useT("nav");
+  const tc = useT("common");
   const ref = useRef<HTMLDivElement>(null);
   // Runtime Keycloak config — fetched once on mount from /api/auth/keycloak-config.
   // We can't use NEXT_PUBLIC_* env vars because they're baked in at `npm run build`
@@ -255,7 +258,7 @@ export default function UserMenu() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) transition-colors"
           >
             <LogIn size={15} />
-            Sign in
+            {t("Sign in")}
           </button>
           {open && (
             <div className="absolute right-0 top-full mt-1 w-64 bg-(--surface-2) border border-(--border) rounded-lg shadow-xl z-50">
@@ -292,7 +295,9 @@ export default function UserMenu() {
                         }`}
                       >
                         <Shield size={8} />
-                        {ROLE_LABELS[pRole ?? ""] ?? pRole}
+                        {ROLE_LABELS[pRole ?? ""]
+                          ? tc(ROLE_LABELS[pRole ?? ""])
+                          : pRole}
                       </span>
                       <span className="font-mono text-xs truncate text-(--text-primary)">
                         {persona.username}
@@ -315,14 +320,14 @@ export default function UserMenu() {
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) transition-colors"
         >
           <LogIn size={15} />
-          Sign in
+          {t("Sign in")}
         </button>
         {open && (
           <div className="absolute right-0 top-full mt-1 w-64 bg-(--surface-2) border border-(--border) rounded-lg shadow-xl z-50">
             <div className="px-3 pt-2 pb-1 flex items-center gap-1.5">
               <Users size={11} className="text-(--text-secondary)" />
               <span className="text-[10px] text-(--text-secondary) uppercase tracking-wide font-semibold">
-                Returning users
+                {t("Returning users")}
               </span>
             </div>
             <div className="px-2 pb-2 space-y-0.5">
@@ -356,7 +361,9 @@ export default function UserMenu() {
                       }`}
                     >
                       <Shield size={8} />
-                      {ROLE_LABELS[pRole ?? ""] ?? pRole}
+                      {ROLE_LABELS[pRole ?? ""]
+                        ? tc(ROLE_LABELS[pRole ?? ""])
+                        : pRole}
                     </span>
                     <span className="font-mono text-xs truncate text-(--text-primary)">
                       {persona.username}
@@ -390,7 +397,9 @@ export default function UserMenu() {
   const _participantType = deriveParticipantType(roles, username);
 
   // Short role label for the nav bar chip
-  const navLabel = ROLE_LABELS[primaryRole] ?? username;
+  const navLabel = ROLE_LABELS[primaryRole]
+    ? tc(ROLE_LABELS[primaryRole])
+    : username;
   const accentClass = ROLE_ACCENT[primaryRole] ?? "border-gray-600";
   const shieldClass = ROLE_SHIELD[primaryRole] ?? "text-(--text-secondary)";
 
@@ -400,7 +409,7 @@ export default function UserMenu() {
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm text-sm text-(--text-primary) hover:text-(--text-primary) hover:bg-(--surface-2) transition-colors"
-        aria-label="User menu"
+        aria-label={t("User menu")}
       >
         <Shield size={14} className={shieldClass} />
         <span className="max-w-[140px] truncate text-xs font-medium">
@@ -447,7 +456,7 @@ export default function UserMenu() {
                   } border-transparent`}
                 >
                   <Shield size={9} />
-                  {ROLE_LABELS[role] ?? role}
+                  {ROLE_LABELS[role] ? tc(ROLE_LABELS[role]) : role}
                 </span>
               ))}
             </div>
@@ -472,7 +481,7 @@ export default function UserMenu() {
             <div className="px-3 pt-2 pb-1 flex items-center gap-1.5">
               <Users size={11} className="text-(--text-secondary)" />
               <span className="text-[10px] text-(--text-secondary) uppercase tracking-wide font-semibold">
-                {IS_STATIC ? "Switch demo persona" : "Returning users"}
+                {IS_STATIC ? t("Switch demo persona") : t("Returning users")}
               </span>
             </div>
             <div className="px-2 pb-2 space-y-0.5">
@@ -518,7 +527,9 @@ export default function UserMenu() {
                       }`}
                     >
                       <Shield size={8} />
-                      {ROLE_LABELS[primaryRole ?? ""] ?? primaryRole}
+                      {ROLE_LABELS[primaryRole ?? ""]
+                        ? tc(ROLE_LABELS[primaryRole ?? ""])
+                        : primaryRole}
                     </span>
                     <span
                       className={`font-mono text-xs truncate ${
@@ -584,7 +595,7 @@ export default function UserMenu() {
               className="flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-(--surface-2) rounded-sm transition-colors"
             >
               <LogOut size={14} />
-              Sign out
+              {t("Sign out")}
             </button>
             <BuildInfo />
           </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Sun, Moon } from "lucide-react";
+import { useT } from "@/lib/i18n/translate";
 
 const THEME_KEY = "theme";
 const THEME_CHANGE_EVENT = "theme-change";
@@ -11,6 +12,7 @@ export const themeChangeTarget = new EventTarget();
 
 export default function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
+  const t = useT("nav");
 
   useEffect(() => {
     // Sync initial state from html class (set by inline script in layout.tsx)
@@ -34,8 +36,8 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggle}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={isDark ? t("Switch to light mode") : t("Switch to dark mode")}
+      title={isDark ? t("Switch to light mode") : t("Switch to dark mode")}
       className="p-2 rounded-md touch-target-sm text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) transition-colors"
     >
       {isDark ? (

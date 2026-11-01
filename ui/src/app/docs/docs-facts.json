@@ -1160,6 +1160,12 @@
       "file": "ADR-069-two-spe-workspaces-as-aci-confidential-containers.md",
       "title": "Two SPE workspaces as ACI confidential containers",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-070",
+      "file": "ADR-070-the-interface-follows-the-language-picker-without-locale-urls.md",
+      "title": "ADR-070-the-interface-follows-the-language-picker-without-locale-urls.md",
+      "status": ""
     }
   ],
   "complianceFloors": {

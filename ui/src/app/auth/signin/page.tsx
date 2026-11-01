@@ -7,20 +7,27 @@ import { Suspense } from "react";
 import { ShieldCheck, Shield, Smartphone } from "lucide-react";
 import { DEMO_PERSONAS, ROLE_LABELS, landingFor } from "@/lib/auth";
 import { IS_STATIC } from "@/lib/static-export";
+import { useT } from "@/lib/i18n/translate";
 
 /** Wallet QR sign-in needs server API routes — absent in the static export. */
 
 /** Error message mapping for common OAuth errors. */
-function oauthErrorMessage(error: string): string {
+function oauthErrorMessage(error: string, t: ReturnType<typeof useT>): string {
   switch (error) {
     case "OAuthCallback":
-      return "Authentication callback failed. Keycloak may be unreachable or misconfigured.";
+      return t(
+        "Authentication callback failed. Keycloak may be unreachable or misconfigured.",
+      );
     case "Callback":
-      return "OAuth callback error — check that Keycloak is running and the redirect URI is registered.";
+      return t(
+        "OAuth callback error: check that Keycloak is running and the redirect URI is registered.",
+      );
     case "OAuthSignin":
-      return "Could not start sign-in flow. Is Keycloak running on port 8080?";
+      return t(
+        "Could not start sign-in flow. Is Keycloak running on port 8080?",
+      );
     default:
-      return `Error: ${error}`;
+      return t("Error: {error}", { error });
   }
 }
 
@@ -28,6 +35,8 @@ function SignInContent() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/";
   const error = searchParams.get("error");
+  const t = useT("signin");
+  const tc = useT("common");
 
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center gap-8 py-10 px-4">
@@ -38,19 +47,21 @@ function SignInContent() {
           className="mx-auto mb-4 text-blue-800 dark:text-blue-300"
         />
         <h1 className="text-2xl font-bold text-(--text-primary) mb-2">
-          Health Dataspace Login
+          {t("Health Dataspace Login")}
         </h1>
         <p className="text-(--text-secondary) mb-6">
-          Sign in with your Keycloak account to access protected resources.
+          {t(
+            "Sign in with your Keycloak account to access protected resources.",
+          )}
           <br />
           <span className="text-(--text-secondary) text-xs mt-1 block">
-            Password = username (local dev only)
+            {t("Password = username (local dev only)")}
           </span>
         </p>
 
         {error && (
           <div className="bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 rounded-sm p-3 mb-4 text-sm text-red-800 dark:text-red-300">
-            {oauthErrorMessage(error)}
+            {oauthErrorMessage(error, t)}
           </div>
         )}
 
@@ -58,14 +69,14 @@ function SignInContent() {
           onClick={() => signIn("keycloak", { callbackUrl })}
           className="w-full px-4 py-3 bg-(--accent) hover:bg-(--accent-hover) text-white dark:text-gray-900 rounded-lg font-medium transition-colors"
         >
-          Sign in with Keycloak
+          {t("Sign in with Keycloak")}
         </button>
 
         {!IS_STATIC && (
           <>
             <div className="flex items-center gap-3 my-4">
               <div className="h-px flex-1 bg-(--text-secondary)/20" />
-              <span className="text-xs text-(--text-secondary)">or</span>
+              <span className="text-xs text-(--text-secondary)">{t("or")}</span>
               <div className="h-px flex-1 bg-(--text-secondary)/20" />
             </div>
             <a
@@ -74,24 +85,25 @@ function SignInContent() {
               )}`}
               className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 border border-(--accent) text-(--accent) hover:bg-(--accent)/10 rounded-lg font-medium transition-colors"
             >
-              <Smartphone size={18} /> Sign in with {CITIZEN_WALLET.name} (QR)
+              <Smartphone size={18} />{" "}
+              {t("Sign in with {wallet} (QR)", { wallet: CITIZEN_WALLET.name })}
             </a>
             <p className="text-(--text-secondary) text-[11px] mt-2">
-              Patient login via OpenID4VP · {CITIZEN_WALLET.description},{" "}
+              {t("Patient login via OpenID4VP")} · {CITIZEN_WALLET.description},{" "}
               {CITIZEN_WALLET.alternatives}
             </p>
           </>
         )}
 
         <p className="text-(--text-secondary) text-xs mt-4">
-          EHDS-compliant authentication via Keycloak SSO
+          {t("EHDS-compliant authentication via Keycloak SSO")}
         </p>
       </div>
 
       {/* ── Demo persona reference cards ── */}
       <div className="w-full max-w-3xl">
         <p className="text-xs text-(--text-secondary) text-center mb-3 uppercase tracking-wide font-semibold">
-          Demo users — sign in as any of these to test role-specific views
+          {t("Demo users: sign in as any of these to test role-specific views")}
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {DEMO_PERSONAS.map((persona) => (
@@ -135,24 +147,24 @@ function SignInContent() {
                       className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-sm font-medium ${persona.badge}`}
                     >
                       <Shield size={8} />
-                      {ROLE_LABELS[role] ?? role}
+                      {ROLE_LABELS[role] ? tc(ROLE_LABELS[role]) : role}
                     </span>
                   ))}
               </div>
               {/* Description */}
               <p className="text-xs text-(--text-secondary) leading-tight">
-                {persona.description}
+                {t(persona.description)}
               </p>
               <p className="text-[10px] text-(--text-secondary) mt-1.5">
-                → opens graph:{" "}
+                → {t("opens graph:")}{" "}
                 <span className="font-mono">{persona.personaId}</span>
               </p>
             </button>
           ))}
         </div>
         <p className="text-[10px] text-(--text-secondary) text-center mt-3">
-          Password = username &nbsp;·&nbsp; Keycloak realm: EDCV &nbsp;·&nbsp;
-          http://localhost:8080
+          {t("Password = username")} &nbsp;·&nbsp; Keycloak realm: EDCV
+          &nbsp;·&nbsp; http://localhost:8080
         </p>
       </div>
     </div>
