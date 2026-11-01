@@ -48,6 +48,10 @@ export const LABEL_LAYER: Record<string, number> = {
   // L1 discussion #265: persona overview
   ResearchStudy: 1,
   StudyEnrolment: 1,
+  // L1 #782: national implementation of the EHDS
+  Jurisdiction: 1,
+  NationalLaw: 1,
+  JurisdictionMilestone: 1,
   // L2: HealthDCAT-AP Metadata
   HealthDataset: 2,
   Distribution: 2,
@@ -216,6 +220,9 @@ export const NODE_DISPLAY_NAMES: Record<string, string> = {
   ResearchStudy: "Study",
   StudyEnrolment: "Enrolment",
   QualityAssessment: "Quality Assessment",
+  Jurisdiction: "National EHDS Rules",
+  NationalLaw: "National Law",
+  JurisdictionMilestone: "Milestone",
   // L2 Catalog
   HealthDataset: "Dataset Description",
   Distribution: "Data Format",

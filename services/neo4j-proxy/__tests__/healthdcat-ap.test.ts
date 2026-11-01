@@ -108,6 +108,52 @@ describe("toDataset", () => {
     expect(ds["foaf:page"]["@id"]).toMatch(/^https:\/\/ma3u\.github\.io\//);
   });
 
+  it("tags title, description and keywords with their language (#782)", () => {
+    const d = toDataset(fhir) as Record<string, any>;
+    expect(d["dct:title"]).toEqual([
+      { "@value": "AlphaKlinik Berlin Cardiac Registry", "@language": "en" },
+      {
+        "@value": "Kardiologisches Register der AlphaKlinik Berlin",
+        "@language": "de",
+      },
+    ]);
+    expect(d["dct:description"].map((v: any) => v["@language"])).toEqual([
+      "en",
+      "de",
+    ]);
+    expect(d["dcat:keyword"]).toContainEqual({
+      "@value": "Kardiologie",
+      "@language": "de",
+    });
+    expect(d["dcat:keyword"]).toContainEqual({
+      "@value": "Cardiology",
+      "@language": "en",
+    });
+  });
+
+  it("keeps a dataset with English only as one tagged value", () => {
+    const d = toDataset(omop) as Record<string, any>;
+    expect(d["dct:title"]).toEqual({
+      "@value": "Limburg Medical Centre OMOP Analytics",
+      "@language": "en",
+    });
+  });
+
+  it("describes a dataset by its title in a language that has no description", () => {
+    const d = toDataset({
+      ds: { datasetId: "x", title: "X", titleFr: "X en français" },
+      distributions: [],
+      publisher: null,
+      contact: null,
+      hdab: null,
+      variables: [],
+    }) as Record<string, any>;
+    expect(d["dct:description"]).toEqual([
+      { "@value": "X", "@language": "en" },
+      { "@value": "X en français", "@language": "fr" },
+    ]);
+  });
+
   it("leaves out what it cannot state rather than guessing", () => {
     const ds = toDataset(omop) as Record<string, any>;
     // A licence with no stable IRI, no analytics, no population text.

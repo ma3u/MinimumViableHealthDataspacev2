@@ -74,6 +74,8 @@ const PROTECTED_PATHS = [
   "/query",
   "/eehrxf",
   "/tasks",
+  // #782: the national implementation profiles; their API needs a session.
+  "/jurisdictions",
 ] as const;
 
 function generateNonce(): string {

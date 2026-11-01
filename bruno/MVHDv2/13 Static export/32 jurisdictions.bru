@@ -1,0 +1,32 @@
+meta {
+  name: 32 jurisdictions
+  type: http
+  seq: 32
+}
+
+get {
+  url: {{baseUrl}}/mock/jurisdictions.json
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}=not-a-session
+}
+
+assert {
+  res.status: eq 200
+  res.body.jurisdictions: isArray
+  res.body.reviewedOn: isString
+}
+
+tests {
+  test("the six member states of #782 are there", function () {
+    const codes = res.getBody().jurisdictions.map((j) => j.code).sort();
+    expect(codes).to.deep.equal(["AT", "BE", "DE", "ES", "FR", "NL"]);
+  });
+}
+
+docs {
+  ui/public/mock/jurisdictions.json stands in for /api/jurisdictions in the static build.
+}

@@ -9,6 +9,7 @@ import {
   Shield,
   AlertTriangle,
   Globe,
+  Scale,
   Database,
   Search,
   BarChart3,
@@ -1503,6 +1504,23 @@ export default function UserGuidePage() {
             <p className="text-(--text-secondary) text-xs italic">
               Example: A patient reads which research projects use data from
               AlphaKlinik Berlin and how to opt out.
+            </p>
+          </FeatureCard>
+          <FeatureCard
+            href="/jurisdictions"
+            title="National EHDS Rules"
+            icon={Scale}
+          >
+            <p className="text-(--text-secondary) text-sm mb-2">
+              How Germany, Austria, Belgium, France, the Netherlands and Spain
+              implement secondary use: the legal role of the access body, the
+              national law it acts under, how a person objects (Art. 71), the
+              fees (Art. 62) and the dates, each with its official source. The
+              laws are real, the organisations on the hub fictional.
+            </p>
+            <p className="text-(--text-secondary) text-xs italic">
+              Example: A Spanish researcher checks how the opt-out works in
+              Germany before applying for data held by AlphaKlinik Berlin.
             </p>
           </FeatureCard>
         </div>

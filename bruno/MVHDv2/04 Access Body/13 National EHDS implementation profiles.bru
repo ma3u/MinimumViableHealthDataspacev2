@@ -1,0 +1,44 @@
+meta {
+  name: 13 National EHDS implementation profiles
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/api/jurisdictions
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenRegulator}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.jurisdictions: isArray
+  res.body.regulation.eli: eq http://data.europa.eu/eli/reg/2025/327/oj
+}
+
+tests {
+  // #782: how DE, AT, BE, FR, NL and ES implement secondary use. Each
+  // profile names a real law and the legal role; the hub's own access
+  // bodies under it stay fictional.
+  const js = res.getBody().jurisdictions;
+  test("the six member states are there", function () {
+    const codes = js.map((j) => j.code).sort();
+    expect(codes).to.deep.equal(["AT", "BE", "DE", "ES", "FR", "NL"]);
+  });
+  test("each names its legal basis, its access body role and its sources", function () {
+    for (const j of js) {
+      expect(j.laws.length, j.code + " laws").to.be.above(0);
+      expect(j.accessBodyRole, j.code).to.be.a("string");
+      expect(j.sources.length, j.code + " sources").to.be.above(0);
+      expect(j.milestones.length, j.code + " milestones").to.be.above(0);
+    }
+  });
+  test("MedReg DE acts under the German profile", function () {
+    const de = js.find((j) => j.code === "DE");
+    expect(de.accessBodies.map((b) => b.name)).to.include("MedReg DE");
+  });
+}

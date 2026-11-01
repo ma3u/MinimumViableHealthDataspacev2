@@ -169,6 +169,29 @@ components:
         numberOfUniqueIndividuals: { type: integer, nullable: true }
         minTypicalAge: { type: integer, nullable: true }
         maxTypicalAge: { type: integer, nullable: true }
+        translations:
+          description: >
+            Title, description and keywords in the languages the dataset has
+            besides English (#782), keyed by ISO 639-1 code (de, fr, nl, es).
+            English is title and description above; a missing text falls
+            back to it.
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              title: { type: string }
+              description: { type: string }
+              keywords:
+                type: array
+                items: { type: string }
+        accessBody:
+          description: The health data access body that governs the dataset.
+          type: string
+          nullable: true
+        accessBodyCountry:
+          description: Its country, ISO 3166-1 alpha-2.
+          type: string
+          nullable: true
         providers:
           type: array
           items: { type: string }
@@ -184,6 +207,64 @@ components:
         conformsTo:
           type: array
           items: { type: string, format: uri }
+    Jurisdiction:
+      type: object
+      required: [code, name, laws, milestones, accessBodies, participants]
+      properties:
+        code: { type: string, description: ISO 3166-1 alpha-2 }
+        name: { type: string }
+        nameNative: { type: string }
+        languages:
+          type: array
+          items: { type: string }
+        accessBodyRole:
+          {
+            type: string,
+            description: The legal role,
+            in the national language,
+          }
+        accessBodyRoleEn: { type: string }
+        designationStatus: { type: string }
+        optOutModel: { type: string }
+        fees: { type: string }
+        summary: { type: string }
+        sources:
+          type: array
+          items: { type: string, format: uri }
+        laws:
+          type: array
+          items:
+            type: object
+            properties:
+              lawId: { type: string }
+              title: { type: string }
+              titleEn: { type: string }
+              citation: { type: string, nullable: true }
+              year: { type: integer, nullable: true }
+              url: { type: string, format: uri, nullable: true }
+              status: { type: string, enum: [IN_FORCE, BILL, DRAFT] }
+        milestones:
+          type: array
+          items:
+            type: object
+            properties:
+              milestoneId: { type: string }
+              date: { type: string }
+              label: { type: string }
+              scope: { type: string, enum: [EU, NATIONAL] }
+              status: { type: string, enum: [DONE, PLANNED] }
+        accessBodies:
+          type: array
+          items: { $ref: "#/components/schemas/ParticipantRef" }
+        participants:
+          type: array
+          items: { $ref: "#/components/schemas/ParticipantRef" }
+    ParticipantRef:
+      type: object
+      properties:
+        participantId: { type: string }
+        name: { type: string }
+        type: { type: string, nullable: true }
     Patient:
       type: object
       properties:
@@ -575,6 +656,41 @@ paths:
         "204": { description: Deleted }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/jurisdictions:
+    get:
+      tags: [Catalog]
+      summary: National implementation profiles of the EHDS
+      description: >
+        How DE, AT, BE, FR, NL and ES implement the secondary use of
+        Regulation (EU) 2025/327 (#782): the legal role of the access body,
+        the national laws, the opt-out (Art. 71), fees (Art. 62) and dates,
+        each with its official source, and which of the hub's fictional
+        participants is under which. Any signed-in participant (ADR-044).
+      responses:
+        "200":
+          description: The profiles
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reviewedOn, regulation, jurisdictions]
+                properties:
+                  reviewedOn:
+                    {
+                      type: string,
+                      description: ISO date the profiles were last checked against their sources,
+                    }
+                  regulation:
+                    type: object
+                    properties:
+                      title: { type: string }
+                      eli: { type: string, format: uri }
+                  jurisdictions:
+                    type: array
+                    items: { $ref: "#/components/schemas/Jurisdiction" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "503": { description: No profiles in the graph and none bundled }
 
   /api/graph:
     get:

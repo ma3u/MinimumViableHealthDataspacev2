@@ -16,8 +16,8 @@
 
 <https://ehds.mabu.red/catalog>
     a dcat:Catalog ;
-    dct:title "EHDS integration hub, HealthDCAT-AP catalogue" ;
-    dct:description "Health datasets of the hub, described in HealthDCAT-AP Release 8. All are synthetic." ;
+    dct:title "EHDS integration hub, HealthDCAT-AP catalogue"@en, "EHDS-Integrationshub, HealthDCAT-AP-Katalog"@de ;
+    dct:description "Health datasets of the hub, described in HealthDCAT-AP Release 8. All are synthetic."@en, "Gesundheitsdatensätze des Hubs, beschrieben in HealthDCAT-AP Release 8. Alle sind synthetisch."@de ;
     dcatap:applicableLegislation <http://data.europa.eu/eli/reg/2025/327/oj> ;
     dct:publisher <https://ehds.mabu.red/agents/operator> ;
     dct:conformsTo <https://data.health.europa.eu/healthdcat-ap/releases/release-8/> ;
@@ -34,13 +34,13 @@
 <https://ehds.mabu.red/catalog/datasets/dataset%3Aalpha-klinik-cardio-registry>
     a dcat:Dataset ;
     dct:identifier "dataset:alpha-klinik-cardio-registry" ;
-    dct:title "AlphaKlinik Berlin Cardiac Registry" ;
-    dct:description "Synthetic registry of cardiac outcomes at AlphaKlinik Berlin, FHIR R4." ;
+    dct:title "AlphaKlinik Berlin Cardiac Registry"@en, "Kardiologisches Register der AlphaKlinik Berlin"@de ;
+    dct:description "Synthetic registry of cardiac outcomes at AlphaKlinik Berlin, FHIR R4."@en, "Synthetisches Register kardialer Behandlungsergebnisse der AlphaKlinik Berlin, FHIR R4."@de ;
     dct:accessRights <http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC> ;
     dcatap:applicableLegislation <http://data.europa.eu/eli/reg/2025/327/oj> ;
     dct:type <http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC_DATA> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/HEAL> ;
-    dcat:keyword "Cardiology", "RegistryData", "synthetic data", "EHDS secondary use" ;
+    dcat:keyword "Cardiology"@en, "RegistryData"@en, "synthetic data"@en, "EHDS secondary use"@en, "Kardiologie"@de, "Registerdaten"@de, "synthetische Daten"@de, "EHDS-Sekundärnutzung"@de ;
     dct:provenance [ a dct:ProvenanceStatement ; rdfs:label "Synthetic data generated for the EHDS integration hub; it describes no real person." ] ;
     healthdcatap:healthCategory <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/EHRS>, <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/MRMR> ;
     healthdcatap:healthTheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/NONCOMMUNICABLE_DISEASES> ;
@@ -189,13 +189,13 @@
 <https://ehds.mabu.red/catalog/datasets/dataset%3Almc-omop-analytics>
     a dcat:Dataset ;
     dct:identifier "dataset:lmc-omop-analytics" ;
-    dct:title "Limburg Medical Centre OMOP Analytics" ;
-    dct:description "Synthetic OMOP CDM 5.4 warehouse at Limburg Medical Centre." ;
+    dct:title "Limburg Medical Centre OMOP Analytics"@en ;
+    dct:description "Synthetic OMOP CDM 5.4 warehouse at Limburg Medical Centre."@en ;
     dct:accessRights <http://publications.europa.eu/resource/authority/access-right/NON_PUBLIC> ;
     dcatap:applicableLegislation <http://data.europa.eu/eli/reg/2025/327/oj> ;
     dct:type <http://publications.europa.eu/resource/authority/dataset-type/SYNTHETIC_DATA> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/HEAL> ;
-    dcat:keyword "Clinical Research", "AnalyticsData", "synthetic data" ;
+    dcat:keyword "Clinical Research"@en, "AnalyticsData"@en, "synthetic data"@en ;
     dct:provenance [ a dct:ProvenanceStatement ; rdfs:label "Synthetic data transformed from FHIR R4 to OMOP CDM 5.4; it describes no real person." ] ;
     healthdcatap:healthCategory <https://hdeu-dcat.data.health.europa.eu/resource/authority/healthcategories/EHRS> ;
     healthdcatap:healthTheme <https://hdeu-dcat.data.health.europa.eu/resource/authority/health-theme/HEALTH_PRODUCTS> ;

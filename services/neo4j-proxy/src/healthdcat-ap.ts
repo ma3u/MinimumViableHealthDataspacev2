@@ -32,6 +32,14 @@ export const HEALTHDCAT_AP_CONTEXT = {
 
 export const RELEASE = "HealthDCAT-AP Release 8";
 
+/**
+ * The languages a description can carry besides English, the source language
+ * (#782). A translation sits on the dataset as a property named with the
+ * language as suffix: titleDe, descriptionDe, hdcatapKeywordsDe. DCAT-AP asks
+ * for one value per language, each tagged with it.
+ */
+export const METADATA_LANGUAGES = ["de", "fr", "nl", "es"] as const;
+
 /** The Regulation every description and distribution names. */
 export const EHDS_ELI = "http://data.europa.eu/eli/reg/2025/327/oj";
 
@@ -236,6 +244,37 @@ const slug = (s: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
+const suffix = (lang: string) => lang[0].toUpperCase() + lang.slice(1);
+
+type Tagged = { "@value": string; "@language": string };
+
+/**
+ * A text in English and in every language the dataset has it in, each value
+ * tagged with its language; one value stays a single object. `fallback` is
+ * the property that stands in for a missing one, in the same language (a
+ * description falls back to the title).
+ */
+function inLanguages(ds: Props, key: string, fallback?: string) {
+  const values: Tagged[] = [];
+  for (const lang of ["en", ...METADATA_LANGUAGES]) {
+    const name = (k: string) => (lang === "en" ? k : k + suffix(lang));
+    const v = ds[name(key)] ?? (fallback ? ds[name(fallback)] : undefined);
+    if (v != null && v !== "") {
+      values.push({ "@value": String(v), "@language": lang });
+    }
+  }
+  return values.length === 1 ? values[0] : values;
+}
+
+/** The keywords in English and in every language the dataset has them in. */
+function keywords(ds: Props): Tagged[] {
+  return ["en", ...METADATA_LANGUAGES].flatMap((lang) =>
+    list(
+      ds[lang === "en" ? "hdcatapKeywords" : "hdcatapKeywords" + suffix(lang)],
+    ).map((k) => ({ "@value": k, "@language": lang })),
+  );
+}
+
 /** The IRI of a dataset's description. */
 export function datasetIri(id: string): string {
   return `${BASE}/catalog/datasets/${encodeURIComponent(id)}`;
@@ -303,8 +342,8 @@ export function toDataset(r: DatasetRecord): Record<string, unknown> {
     "@id": datasetIri(id),
     "@type": "dcat:Dataset",
     "dct:identifier": id,
-    "dct:title": ds.title,
-    "dct:description": ds.description ?? ds.title,
+    "dct:title": inLanguages(ds, "title"),
+    "dct:description": inLanguages(ds, "description", "title"),
     "dct:accessRights": {
       "@id": NAL.accessRight + String(ds.hdcatapAccessRights ?? "NON_PUBLIC"),
       "@type": "dct:RightsStatement",
@@ -319,7 +358,7 @@ export function toDataset(r: DatasetRecord): Record<string, unknown> {
       EU_LABELS,
     ),
     "dcat:theme": concept(NAL.dataTheme, "HEAL", EU_LABELS),
-    "dcat:keyword": list(ds.hdcatapKeywords),
+    "dcat:keyword": keywords(ds),
     "dct:provenance": {
       "@type": "dct:ProvenanceStatement",
       "rdfs:label": String(ds.hdcatapProvenance ?? "Synthetic data"),
@@ -484,8 +523,26 @@ export function toCatalog(records: DatasetRecord[]): Record<string, unknown> {
     "@context": HEALTHDCAT_AP_CONTEXT,
     "@id": `${BASE}/catalog`,
     "@type": "dcat:Catalog",
-    "dct:title": "EHDS integration hub, HealthDCAT-AP catalogue",
-    "dct:description": `Health datasets of the hub, described in ${RELEASE}. All are synthetic.`,
+    "dct:title": [
+      {
+        "@value": "EHDS integration hub, HealthDCAT-AP catalogue",
+        "@language": "en",
+      },
+      {
+        "@value": "EHDS-Integrationshub, HealthDCAT-AP-Katalog",
+        "@language": "de",
+      },
+    ],
+    "dct:description": [
+      {
+        "@value": `Health datasets of the hub, described in ${RELEASE}. All are synthetic.`,
+        "@language": "en",
+      },
+      {
+        "@value": `Gesundheitsdatensätze des Hubs, beschrieben in ${RELEASE}. Alle sind synthetisch.`,
+        "@language": "de",
+      },
+    ],
     "dcatap:applicableLegislation": {
       "@id": EHDS_ELI,
       "@type": "eli:LegalResource",

@@ -33,3 +33,4 @@
 13 Static export/29 patient.bru
 13 Static export/30 graph.bru
 13 Static export/31 admin-spe.bru
+13 Static export/32 jurisdictions.bru

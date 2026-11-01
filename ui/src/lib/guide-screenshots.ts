@@ -36,6 +36,7 @@ export const GUIDE_SCREENS: { href: string; persona: string | null }[] = [
   { href: "/permits", persona: "regulator" },
   { href: "/activity-report", persona: "regulator" },
   { href: "/information", persona: "regulator" },
+  { href: "/jurisdictions", persona: "regulator" },
   { href: "/data/share", persona: "clinicuser" },
   { href: "/data/discover", persona: "researcher" },
   { href: "/negotiate", persona: "researcher" },

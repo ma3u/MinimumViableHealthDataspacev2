@@ -39,7 +39,15 @@
         "hdcatapTemporalResolution": "P1D",
         "hdcatapRetentionStart": "2020-01-01",
         "hdcatapRetentionEnd": "2035-12-31",
-        "hdcatapAnalyticsURL": "https://ehds.mabu.red/analytics"
+        "hdcatapAnalyticsURL": "https://ehds.mabu.red/analytics",
+        "titleDe": "Kardiologisches Register der AlphaKlinik Berlin",
+        "descriptionDe": "Synthetisches Register kardialer Behandlungsergebnisse der AlphaKlinik Berlin, FHIR R4.",
+        "hdcatapKeywordsDe": [
+          "Kardiologie",
+          "Registerdaten",
+          "synthetische Daten",
+          "EHDS-Sekundärnutzung"
+        ]
       },
       "distributions": [
         {
