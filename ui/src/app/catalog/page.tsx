@@ -26,6 +26,7 @@ import {
   type MetadataLanguage,
   type Translation,
   LANGUAGE_NAMES,
+  initialLanguage,
   languagesOf,
   localise,
   searchableText,
@@ -245,11 +246,14 @@ function CatalogContent() {
   const [detailDataset, setDetailDataset] = useState<Dataset | null>(null);
   const [diagramDataset, setDiagramDataset] = useState<Dataset | null>(null);
   // The language of the dataset descriptions (#782); the rest of the page
-  // stays English until the interface itself is translated (phase 2).
+  // stays English until the interface itself is translated (phase 2). Set
+  // once the datasets are there, since only then is it known which
+  // languages they come in: ?lang=, the stored choice, the browser's.
   const [lang, setLang] = useState<CatalogLanguage>("en");
-  useEffect(() => setLang(storedLanguage()), []);
+  const [langSettled, setLangSettled] = useState(false);
   const chooseLanguage = (l: CatalogLanguage) => {
     setLang(l);
+    setLangSettled(true);
     storeLanguage(l);
   };
 
@@ -310,6 +314,16 @@ function CatalogContent() {
   ].sort();
 
   const languages = languagesOf(datasets);
+  const languageKey = languages.join(",");
+  useEffect(() => {
+    if (langSettled || datasets.length === 0) return;
+    setLang(
+      initialLanguage(languages, searchParams.get("lang"), storedLanguage()),
+    );
+    setLangSettled(true);
+    // languageKey stands for languages, which is a new array every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [languageKey, datasets.length, langSettled, searchParams]);
 
   const visible = datasets.filter((d) => {
     // A search finds a dataset in any language it is described in.

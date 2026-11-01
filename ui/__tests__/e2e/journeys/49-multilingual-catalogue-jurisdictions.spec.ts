@@ -1,6 +1,6 @@
 /**
  * Issue #782, phase 1: dataset descriptions in more than one language and
- * the national implementation profiles (J1006 to J1012).
+ * the national implementation profiles (J1006 to J1013).
  *
  * The catalogue shows a dataset's title and description in the language a
  * visitor chooses and falls back to English, marked as such; the HealthDCAT-AP
@@ -215,6 +215,39 @@ test.describe("Issue #782 · multilingual catalogue, national profiles", () => {
         profile.getByRole("link").filter({ hasText: /\S/ }).first(),
       ).toHaveAttribute("href", /^https:\/\//);
     }
+  });
+});
+
+test.describe("Issue #782 · the browser's language", () => {
+  test.use({ locale: "de-DE" });
+
+  test("J1013 a German browser sees German descriptions; ?lang=en and a stored choice win", async ({
+    page,
+  }) => {
+    await skipIfKeycloakDown();
+    await loginAs(page, "researcher", "researcher");
+    const group = page.getByRole("group", {
+      name: "Language of the dataset descriptions",
+    });
+
+    await page.goto("/catalog");
+    await expect(
+      group.getByRole("button", { name: "Deutsch" }),
+    ).toHaveAttribute("aria-pressed", "true", { timeout: 20_000 });
+    await expect(page.locator('h3 [lang="de"]').first()).toBeVisible();
+
+    // A shared English link stays English.
+    await page.goto("/catalog?lang=en");
+    await expect(
+      group.getByRole("button", { name: "English" }),
+    ).toHaveAttribute("aria-pressed", "true", { timeout: 20_000 });
+
+    // So does a visitor who chose English once.
+    await group.getByRole("button", { name: "English" }).click();
+    await page.goto("/catalog");
+    await expect(
+      group.getByRole("button", { name: "English" }),
+    ).toHaveAttribute("aria-pressed", "true", { timeout: 20_000 });
   });
 });
 

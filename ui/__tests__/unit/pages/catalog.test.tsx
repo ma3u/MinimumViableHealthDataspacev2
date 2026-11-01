@@ -435,6 +435,37 @@ describe("CatalogPage in another language", () => {
     expect(localStorage.getItem("catalog-metadata-language")).toBe("de");
   });
 
+  it("starts in the browser's language when the visitor never chose", async () => {
+    const languages = vi
+      .spyOn(navigator, "languages", "get")
+      .mockReturnValue(["de-AT", "en"]);
+    mockFetchApi.mockReturnValue(mockResponse([translated]));
+    render(<CatalogPage />);
+    expect(
+      await screen.findByText("Synthetische FHIR-Patientenkohorte"),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Deutsch" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    // Detected, not chosen: nothing is stored until the visitor picks.
+    expect(localStorage.getItem("catalog-metadata-language")).toBeNull();
+    languages.mockRestore();
+  });
+
+  it("keeps a stored English over a German browser", async () => {
+    localStorage.setItem("catalog-metadata-language", "en");
+    const languages = vi
+      .spyOn(navigator, "languages", "get")
+      .mockReturnValue(["de-DE"]);
+    mockFetchApi.mockReturnValue(mockResponse([translated]));
+    render(<CatalogPage />);
+    expect(
+      await screen.findByText("Synthetic FHIR Patient Cohort"),
+    ).toBeInTheDocument();
+    languages.mockRestore();
+  });
+
   it("starts in the language chosen before", async () => {
     localStorage.setItem("catalog-metadata-language", "de");
     mockFetchApi.mockReturnValue(mockResponse([translated]));
