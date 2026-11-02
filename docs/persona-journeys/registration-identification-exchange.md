@@ -386,8 +386,8 @@ seed identities.
 
 ## 8. Getting data into the ePA: the current build focus
 
-Set by the platform owner, 2026-09-12, from a real case: lab results from the Friede Springer
-Cardiovascular Prevention Center cohort study at Charité, to be combined with Apple Health
+Set by the platform owner, 2026-09-12, from a real case: lab results from the cardiovascular
+prevention centre cohort study at AlphaKlinik Berlin, to be combined with Apple Health
 trends and made readable by a Hausarzt.
 
 **The premise that decides the design: researchers, labs and hospitals are paper-based

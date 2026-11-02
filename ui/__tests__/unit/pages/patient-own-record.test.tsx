@@ -2,8 +2,11 @@
  * /patient/insights and /patient/research ask for the signed-in patient's own
  * record. Both used to ask for "demo-patient-1", which the routes refuse a
  * PATIENT with a 403 (#475, refuseForeignRecord), so patient1 and patient2 saw
- * no insights and no programmes. An operator still sees demo-patient-1, and
- * the static build still renders from public/mock for the demo persona.
+ * no insights and no programmes. demo-patient-1 exists in no seed either, so
+ * an operator now sees P1, the demo cohort's first patient. The static build
+ * renders from public/mock, each demo persona from their own record's file,
+ * and /patient/profile opens the persona's own patient. A refusal or an error
+ * says so instead of passing for an empty list.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -57,6 +60,7 @@ import { fetchApi } from "@/lib/api";
 import { setDemoPersona } from "@/lib/use-demo-persona";
 import ResearchInsightsPage from "@/app/patient/insights/page";
 import ResearchProgramsPage from "@/app/patient/research/page";
+import PatientProfilePage from "@/app/patient/profile/page";
 
 const PUBLIC = path.resolve(__dirname, "../../../public");
 const mock = (name: string) =>
@@ -181,48 +185,186 @@ describe("before the session is known", () => {
 });
 
 describe("an operator (EDC_ADMIN)", () => {
-  it("still sees the demo record on both pages", async () => {
+  it("sees P1, a record the seeds carry, on both pages", async () => {
     state.session = sessionFor("edcadmin", ["EDC_ADMIN"]);
     stubFetch();
     render(<ResearchInsightsPage />);
     render(<ResearchProgramsPage />);
     await waitFor(() => {
       expect(asked("/api/patient/insights")).toEqual([
-        "/api/patient/insights?patientId=demo-patient-1",
+        "/api/patient/insights?patientId=P1",
       ]);
       expect(asked("/api/patient/research")).toEqual([
-        "/api/patient/research?patientId=demo-patient-1",
+        "/api/patient/research?patientId=P1",
       ]);
     });
   });
 });
 
 describe.each([
-  ["patient1", "P1"],
-  ["patient2", "P2"],
-])("static build, demo persona %s", (username, own) => {
+  ["patient1", "P1", "patient_insights.json", "patient_research.json"],
+  [
+    "patient2",
+    "P2",
+    "patient_insights_patient2.json",
+    "patient_research_patient2.json",
+  ],
+])(
+  "static build, demo persona %s",
+  (username, own, insightsFile, researchFile) => {
+    beforeEach(() => {
+      state.isStatic = true;
+      state.session = null;
+      state.status = "unauthenticated";
+      vi.stubEnv("NEXT_PUBLIC_STATIC_EXPORT", "true");
+      setDemoPersona(username);
+      stubFetch();
+    });
+
+    /** The mock files the stubbed fetch was asked for. */
+    const files = () =>
+      vi
+        .mocked(fetch)
+        .mock.calls.map(([url]) => String(url))
+        .filter((url) => url.includes("/mock/"))
+        .map((url) => url.slice(url.indexOf("/mock/") + "/mock/".length));
+
+    it(`renders ${own}'s insights fixture, asked for as ${own}`, async () => {
+      const finding = mock(insightsFile).findings[0].finding as string;
+      render(<ResearchInsightsPage />);
+      expect(await screen.findByText(finding)).toBeInTheDocument();
+      expect(asked("/api/patient/insights")).toEqual([
+        `/api/patient/insights?patientId=${own}`,
+      ]);
+      expect(files()).toContain(insightsFile);
+    });
+
+    it(`renders ${own}'s programmes and consents, asked for as ${own}`, async () => {
+      const research = mock(researchFile);
+      render(<ResearchProgramsPage />);
+      expect(
+        await screen.findByText(research.programs[0].studyName as string),
+      ).toBeInTheDocument();
+      expect(asked("/api/patient/research")).toEqual([
+        `/api/patient/research?patientId=${own}`,
+      ]);
+      expect(files()).toContain(researchFile);
+      for (const c of research.consents) {
+        expect(screen.getAllByText(c.studyId as string).length).toBeGreaterThan(
+          0,
+        );
+      }
+    });
+
+    it(`opens ${own} on the profile, and lists no other patient`, async () => {
+      render(<PatientProfilePage />);
+      await waitFor(() => {
+        expect(asked("/api/patient/profile")).toContain(
+          `/api/patient/profile?patientId=${own}`,
+        );
+      });
+      expect(
+        asked("/api/patient/profile").filter((u) => u.includes("patientId=")),
+      ).toEqual([`/api/patient/profile?patientId=${own}`]);
+    });
+  },
+);
+
+describe("the two demo patients' static fixtures", () => {
+  it("patient2's files are P2's own, and match P2's profile", () => {
+    const profile = mock("patient_profile_patient2.json");
+    const insights = mock("patient_insights_patient2.json");
+    const research = mock("patient_research_patient2.json");
+    expect(insights.patientId).toBe("P2");
+    expect(insights.activeDonations).toBe(
+      research.consents.filter((c: { revoked: boolean }) => !c.revoked).length,
+    );
+    expect(
+      insights.donatedStudies.map((d: { studyId: string }) => d.studyId),
+    ).toEqual(research.consents.map((c: { studyId: string }) => c.studyId));
+    // Every finding concerns a condition on P2's profile.
+    const conditions = profile.conditions
+      .map((c: { display: string }) => c.display.toLowerCase())
+      .join(" | ");
+    for (const f of insights.findings) {
+      for (const c of f.relevantConditions as string[]) {
+        expect(conditions).toContain(c.toLowerCase());
+      }
+    }
+    // Not P1's file under another name.
+    expect(insights).not.toEqual(INSIGHTS);
+    expect(research.consents).not.toEqual(RESEARCH.consents);
+  });
+});
+
+describe("a refusal or an error is not an empty list", () => {
   beforeEach(() => {
-    state.isStatic = true;
-    state.session = null;
-    state.status = "unauthenticated";
-    vi.stubEnv("NEXT_PUBLIC_STATIC_EXPORT", "true");
-    setDemoPersona(username);
-    stubFetch();
+    state.session = sessionFor("patient1", ["PATIENT"]);
   });
 
-  it(`renders the insights fixture, asked for as ${own}`, async () => {
-    render(<ResearchInsightsPage />);
-    expect(await screen.findByText(FIRST_FINDING)).toBeInTheDocument();
-    expect(asked("/api/patient/insights")).toEqual([
-      `/api/patient/insights?patientId=${own}`,
-    ]);
-  });
+  function answer(status: number) {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string) => {
+        const url = String(input);
+        if (url.startsWith("/api/patient/opt-out")) {
+          return new Response(JSON.stringify(OPT_OUT));
+        }
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status,
+        });
+      }),
+    );
+  }
 
-  it(`renders the programmes fixture, asked for as ${own}`, async () => {
+  it("research: a 403 says the programmes are not the patient's to see", async () => {
+    answer(403);
     render(<ResearchProgramsPage />);
-    expect(await screen.findByText(FIRST_PROGRAMME)).toBeInTheDocument();
-    expect(asked("/api/patient/research")).toEqual([
-      `/api/patient/research?patientId=${own}`,
-    ]);
+    expect(await screen.findByTestId("research-load-error")).toHaveTextContent(
+      "You may not see these research programs",
+    );
+    expect(screen.queryByText(/No research programs found/)).toBeNull();
+  });
+
+  it("research: a 500 says loading failed, with the status", async () => {
+    answer(500);
+    render(<ResearchProgramsPage />);
+    expect(await screen.findByTestId("research-load-error")).toHaveTextContent(
+      "The research programs could not be loaded (HTTP 500).",
+    );
+    expect(screen.queryByText(/No research programs found/)).toBeNull();
+  });
+
+  it("research: an empty list still says there are none", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: string) =>
+        String(input).startsWith("/api/patient/opt-out")
+          ? new Response(JSON.stringify(OPT_OUT))
+          : new Response(JSON.stringify({ programs: [], consents: [] })),
+      ),
+    );
+    render(<ResearchProgramsPage />);
+    expect(
+      await screen.findByText(/No research programs found/),
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("research-load-error")).toBeNull();
+  });
+
+  it("insights: a 403 says the insights are not the patient's to see", async () => {
+    answer(403);
+    render(<ResearchInsightsPage />);
+    expect(await screen.findByTestId("insights-load-error")).toHaveTextContent(
+      "You may not see these insights",
+    );
+    expect(screen.queryByText("No insights available.")).toBeNull();
+  });
+
+  it("insights: a 502 says loading failed, with the status", async () => {
+    answer(502);
+    render(<ResearchInsightsPage />);
+    expect(await screen.findByTestId("insights-load-error")).toHaveTextContent(
+      "The insights could not be loaded (HTTP 502).",
+    );
   });
 });

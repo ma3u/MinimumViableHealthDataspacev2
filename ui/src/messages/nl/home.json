@@ -132,5 +132,8 @@
   "Already have it? Sign in": "Al in bezit? Inloggen",
   "Demo Users & Roles": "Demogebruikers en rollen",
   "Sign in as any persona to explore role-specific views.": "Log in als een willekeurige persona om de weergaven per rol te verkennen.",
-  "Klarbefund: real data for the dataspace, held by the patient": "Klarbefund: echte gegevens voor de dataspace, in handen van de patiënt"
+  "Klarbefund: real data for the dataspace, held by the patient": "Klarbefund: echte gegevens voor de dataspace, in handen van de patiënt",
+  "Register in the European Health Data Space": "Registreren in de Europese ruimte voor gezondheidsgegevens",
+  "Create your EHDS patient account with {wallet}, the German EUDI wallet. You share only the exact identity claims requested (name, age over 18).": "Maak uw EHDS-patiëntaccount aan met {wallet}, de Duitse EUDI-wallet. U deelt alleen de gevraagde identiteitsgegevens (naam, ouder dan 18).",
+  "Passwordless and sovereign: no email or password. You approve on your phone and share only the exact claims requested. Tap to see the full patient journey.": "Zonder wachtwoord en soeverein: geen e-mail of wachtwoord. U keurt goed op uw telefoon en deelt alleen de gevraagde gegevens. Tik om de hele patiëntreis te zien."
 }

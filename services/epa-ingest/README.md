@@ -11,7 +11,7 @@ npm install          # optional deps: pdfjs-dist (PDF text layer), tesseract.js 
 npm test             # 62 unit tests, no network, no native toolchain
 
 npx tsx src/index.ts befund.pdf \
-  --date 2026-08-14 --performer "FS-CPC" --title "Kardiovaskuläres Risikoprofil" \
+  --date 2026-08-14 --performer "AlphaKlinik Berlin CPC" --title "Kardiovaskuläres Risikoprofil" \
   --out bundle.json
 ```
 

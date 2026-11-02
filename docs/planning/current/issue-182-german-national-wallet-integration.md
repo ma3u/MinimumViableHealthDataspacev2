@@ -341,8 +341,8 @@ Two honesty constraints that must survive into the UI copy:
 
 ### W9: ePA ingest path (re-scoped 2026-09-12)
 
-**Re-scoped by the platform owner**, from a real case: study lab results from the Friede
-Springer Cardiovascular Prevention Center at Charité, to be combined with Apple Health trends
+**Re-scoped by the platform owner**, from a real case: study lab results from the
+cardiovascular prevention centre at AlphaKlinik Berlin, to be combined with Apple Health trends
 and read by a Hausarzt. Two corrections came with it, and both narrow the work:
 
 1. **The GP never logs into this platform.** They read the ePA through their practice system

@@ -52,7 +52,9 @@ export function HomeRegisterCta() {
       </button>
       <Link
         href="/journey"
-        title="Passwordless & sovereign — no email or password. You approve on your phone and share only the exact claims requested. Tap to see the full patient journey."
+        title={t(
+          "Passwordless and sovereign: no email or password. You approve on your phone and share only the exact claims requested. Tap to see the full patient journey.",
+        )}
         className="inline-flex items-center gap-1.5 text-sm font-medium text-(--accent) hover:underline"
       >
         <Info size={15} aria-hidden="true" />
@@ -69,8 +71,11 @@ export function HomeRegisterCta() {
       {open && (
         <RegisterDialog
           mode="register"
-          title="Register in the European Health Dataspace"
-          subtitle={`Create your EHDS patient account with ${CITIZEN_WALLET.description}. You share only the exact identity claims requested (name, age over 18).`}
+          title={t("Register in the European Health Data Space")}
+          subtitle={t(
+            "Create your EHDS patient account with {wallet}, the German EUDI wallet. You share only the exact identity claims requested (name, age over 18).",
+            { wallet: CITIZEN_WALLET.name },
+          )}
           onClose={() => setOpen(false)}
           onComplete={onComplete}
         />

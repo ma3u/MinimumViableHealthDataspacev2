@@ -16,15 +16,15 @@
  *   - neo4j-proxy on localhost:9090
  */
 import { test, expect, type Page } from "@playwright/test";
+import { setPersona as setDemoPersonaStores } from "./helpers";
 
 const BASE = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
 const API = `${BASE}/api`;
 
-// Helper: set demo persona via localStorage
+// Helper: set the demo persona in both stores the app reads (helpers.ts)
 async function setPersona(page: Page, username: string) {
   await page.goto(BASE);
-  await page.evaluate((u) => localStorage.setItem("demo-persona", u), username);
-  await page.reload();
+  await setDemoPersonaStores(page, username);
 }
 
 // Helper: fetch API route without session (unauthenticated)

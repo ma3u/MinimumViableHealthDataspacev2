@@ -55,10 +55,16 @@ const EVIDENCE_BADGE: Record<string, string> = {
 };
 
 /**
- * The record an operator (EDC_ADMIN) sees here. A patient sees their own:
- * the route refuses any other record with a 403 (#475).
+ * The record an operator (EDC_ADMIN) sees here: P1, the demo cohort's first
+ * patient, which every seed carries. A patient sees their own: the route
+ * refuses any other record with a 403 (#475).
  */
-const DEMO_PATIENT_ID = "demo-patient-1";
+const DEMO_PATIENT_ID = "P1";
+
+/** Why the insights did not load: refused (401, 403) or failed (anything else). */
+type LoadError =
+  | { kind: "refused" }
+  | { kind: "failed"; status: number | null };
 
 export default function ResearchInsightsPage() {
   const t = useT("patient");
@@ -79,6 +85,7 @@ export default function ResearchInsightsPage() {
         : t("low priority");
   const [insights, setInsights] = useState<Insights | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<LoadError | null>(null);
   const subject = useOwnRecord();
   const patientId =
     subject.kind === "own"
@@ -91,16 +98,32 @@ export default function ResearchInsightsPage() {
     if (subject.kind === "pending") return;
     let cancelled = false;
     setLoading(true);
-    // A refusal (a patient asking for another record answers 403) is no
-    // insights, not an object without findings that the page would crash on.
+    // A refusal (a patient asking for another record answers 403) or an error
+    // is no insights, and the page says which; it is not an object without
+    // findings that the page would crash on.
     fetchApi(
       patientId
         ? `/api/patient/insights?patientId=${encodeURIComponent(patientId)}`
         : "/api/patient/insights",
     )
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (!cancelled) setInsights(d);
+      .then(async (r) => {
+        if (cancelled) return;
+        if (!r.ok) {
+          setInsights(null);
+          setLoadError(
+            r.status === 401 || r.status === 403
+              ? { kind: "refused" }
+              : { kind: "failed", status: r.status },
+          );
+          return;
+        }
+        const d = await r.json();
+        if (cancelled) return;
+        setInsights(d);
+        setLoadError(null);
+      })
+      .catch(() => {
+        if (!cancelled) setLoadError({ kind: "failed", status: null });
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -150,6 +173,25 @@ export default function ResearchInsightsPage() {
         {loading ? (
           <div className="text-(--text-secondary) text-sm">
             {t("Loading insights…")}
+          </div>
+        ) : loadError ? (
+          <div
+            role="alert"
+            data-testid="insights-load-error"
+            className="rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm text-amber-900 dark:text-amber-200"
+          >
+            {loadError.kind === "refused"
+              ? t(
+                  "You may not see these insights: a patient sees their own record only. If your session has ended, sign in again.",
+                )
+              : loadError.status
+                ? t(
+                    "The insights could not be loaded (HTTP {status}). Please try again later.",
+                    { status: loadError.status },
+                  )
+                : t(
+                    "The insights could not be loaded. Please try again later.",
+                  )}
           </div>
         ) : !insights ? (
           <div className="text-(--text-secondary) text-sm">

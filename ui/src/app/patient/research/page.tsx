@@ -45,10 +45,16 @@ interface OptOutState {
 }
 
 /**
- * The record an operator (EDC_ADMIN) sees here. A patient sees and consents
- * for their own: the route refuses any other record with a 403 (#475).
+ * The record an operator (EDC_ADMIN) sees here: P1, the demo cohort's first
+ * patient, which every seed carries. A patient sees and consents for their
+ * own: the route refuses any other record with a 403 (#475).
  */
-const DEMO_PATIENT_ID = "demo-patient-1";
+const DEMO_PATIENT_ID = "P1";
+
+/** Why the programmes did not load: refused (401, 403) or failed (anything else). */
+type LoadError =
+  | { kind: "refused" }
+  | { kind: "failed"; status: number | null };
 
 const day = (iso: string | null) => (iso ? iso.slice(0, 10) : "");
 
@@ -64,6 +70,7 @@ export default function ResearchProgramsPage() {
   const [optOut, setOptOut] = useState<OptOutState | null>(null);
   const [optOutError, setOptOutError] = useState<string | null>(null);
   const [switching, setSwitching] = useState(false);
+  const [loadError, setLoadError] = useState<LoadError | null>(null);
 
   const subject = useOwnRecord();
   const patientId =
@@ -80,11 +87,24 @@ export default function ResearchProgramsPage() {
         ? `/api/patient/research?patientId=${encodeURIComponent(patientId)}`
         : "/api/patient/research",
     )
-      .then((r) => r.json())
-      .then((d) => {
+      .then(async (r) => {
+        // A refusal or an error is not an empty list: say which it is.
+        if (!r.ok) {
+          setPrograms([]);
+          setConsents([]);
+          setLoadError(
+            r.status === 401 || r.status === 403
+              ? { kind: "refused" }
+              : { kind: "failed", status: r.status },
+          );
+          return;
+        }
+        const d = await r.json();
         setPrograms(d.programs ?? []);
         setConsents(d.consents ?? []);
+        setLoadError(null);
       })
+      .catch(() => setLoadError({ kind: "failed", status: null }))
       .finally(() => setLoading(false));
   };
 
@@ -302,6 +322,25 @@ export default function ResearchProgramsPage() {
         {loading ? (
           <div className="text-(--text-secondary) text-sm">
             {t("Loading research programs…")}
+          </div>
+        ) : loadError ? (
+          <div
+            role="alert"
+            data-testid="research-load-error"
+            className="rounded-lg border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 p-3 text-sm text-amber-900 dark:text-amber-200"
+          >
+            {loadError.kind === "refused"
+              ? t(
+                  "You may not see these research programs: a patient sees and consents for their own record only. If your session has ended, sign in again.",
+                )
+              : loadError.status
+                ? t(
+                    "The research programs could not be loaded (HTTP {status}). Please try again later.",
+                    { status: loadError.status },
+                  )
+                : t(
+                    "The research programs could not be loaded. Please try again later.",
+                  )}
           </div>
         ) : (
           <div className="space-y-4">

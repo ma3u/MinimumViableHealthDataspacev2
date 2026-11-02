@@ -1,0 +1,60 @@
+{
+  "patientId": "P2",
+  "activeDonations": 1,
+  "activeStudies": 1,
+  "donatedStudies": [
+    {
+      "studyId": "STUDY-CARDIO-2024",
+      "studyName": "European Cardiovascular Risk Study",
+      "grantedAt": "2025-04-14",
+      "status": "active",
+      "institution": "PharmaCo Research AG"
+    }
+  ],
+  "findings": [
+    {
+      "insightId": "INS-002",
+      "studyId": "STUDY-CARDIO-2024",
+      "finding": "Patients with hypertension + obesity (BMI > 30) have 31% higher 10-year cardiovascular event probability.",
+      "relevantConditions": ["Hypertension", "Obesity"],
+      "recommendation": "Discuss statin therapy review with your cardiologist.",
+      "evidenceLevel": "high"
+    },
+    {
+      "insightId": "INS-004",
+      "studyId": "STUDY-CARDIO-2024",
+      "finding": "Patients with atrial fibrillation on warfarin whose INR was checked at least monthly had 27% fewer strokes than those checked less often.",
+      "relevantConditions": ["Atrial fibrillation"],
+      "recommendation": "Ask your GP how often your INR is checked while you take warfarin.",
+      "evidenceLevel": "moderate"
+    }
+  ],
+  "recommendations": [
+    {
+      "category": "Monitoring",
+      "action": "Keep INR checks at least monthly while you take warfarin.",
+      "priority": "high",
+      "basedOn": "Atrial fibrillation + anticoagulation pattern (n=1,912 across EHDS SPEs)",
+      "ehdsArticle": "EHDS Art. 73, aggregate SPE finding"
+    },
+    {
+      "category": "Respiratory",
+      "action": "Ask for a yearly spirometry check for your COPD.",
+      "priority": "medium",
+      "basedOn": "COPD + smoking co-morbidity pattern (n=640)",
+      "ehdsArticle": "EHDS Art. 73, aggregate SPE finding"
+    },
+    {
+      "category": "Lifestyle",
+      "action": "Join a smoking cessation programme; your profile lists it as an interest.",
+      "priority": "medium",
+      "basedOn": "Patient interest profile",
+      "ehdsArticle": "EHDS Art. 3, informed health decisions"
+    }
+  ],
+  "privacyNote": "All findings are aggregate results (k ≥ 5 participants per cohort). Your data contributed pseudonymously via the Limburg Trust Centre NL under the Secure Processing Environment protections of EHDS Art. 73.",
+  "ehdsArticles": {
+    "primaryAccess": "EHDS Art. 3, patient electronic health record access rights",
+    "speProtection": "EHDS Art. 73, Secure Processing Environment for secondary use"
+  }
+}

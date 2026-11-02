@@ -239,3 +239,21 @@ export async function skipIfKeycloakDown() {
     test.skip(true, "Keycloak unavailable");
   }
 }
+
+/**
+ * Pick the static demo's persona the way the app's setDemoPersona() does
+ * (ui/src/lib/use-demo-persona.ts): sessionStorage, which useDemoPersona()
+ * and so the navigation and the patient pages read, and localStorage, which
+ * lib/api.ts reads to serve a patient their own record's mock. Writing only
+ * one of them left the other at its default. Reloads so both apply.
+ */
+export async function setPersona(page: Page, username: string) {
+  await page.evaluate(
+    ([key, value]) => {
+      sessionStorage.setItem(key, value);
+      localStorage.setItem(key, value);
+    },
+    ["demo-persona", username],
+  );
+  await page.reload({ waitUntil: "networkidle" });
+}

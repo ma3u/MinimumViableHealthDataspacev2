@@ -287,5 +287,11 @@
   "Your ePA is now in the EHDS portal as FHIR R4. End-to-end encrypted: {insurer} cannot read it. Withdraw consent any time.": "Ihre ePA liegt jetzt als FHIR R4 im EHDS-Portal. Ende-zu-Ende-verschlüsselt: {insurer} kann sie nicht lesen. Einwilligung jederzeit widerrufbar.",
   "Approve {wallet} register": "Registrierung mit {wallet} bestätigen",
   "Approve {wallet} login": "Anmeldung mit {wallet} bestätigen",
-  "Approve in the insurer app": "In der App der Krankenkasse bestätigen"
+  "Approve in the insurer app": "In der App der Krankenkasse bestätigen",
+  "You may not see these research programs: a patient sees and consents for their own record only. If your session has ended, sign in again.": "Sie dürfen diese Forschungsprogramme nicht sehen: Eine Patientin oder ein Patient sieht nur die eigene Akte und willigt nur für sie ein. Ist Ihre Sitzung abgelaufen, melden Sie sich erneut an.",
+  "The research programs could not be loaded (HTTP {status}). Please try again later.": "Die Forschungsprogramme konnten nicht geladen werden (HTTP {status}). Bitte versuchen Sie es später erneut.",
+  "The research programs could not be loaded. Please try again later.": "Die Forschungsprogramme konnten nicht geladen werden. Bitte versuchen Sie es später erneut.",
+  "You may not see these insights: a patient sees their own record only. If your session has ended, sign in again.": "Sie dürfen diese Erkenntnisse nicht sehen: Eine Patientin oder ein Patient sieht nur die eigene Akte. Ist Ihre Sitzung abgelaufen, melden Sie sich erneut an.",
+  "The insights could not be loaded (HTTP {status}). Please try again later.": "Die Erkenntnisse konnten nicht geladen werden (HTTP {status}). Bitte versuchen Sie es später erneut.",
+  "The insights could not be loaded. Please try again later.": "Die Erkenntnisse konnten nicht geladen werden. Bitte versuchen Sie es später erneut."
 }

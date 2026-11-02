@@ -29,7 +29,7 @@
  */
 
 import { test, expect, type Page } from "@playwright/test";
-import { T } from "./helpers";
+import { T, setPersona } from "./helpers";
 
 // ── Constants ──────────────────────────────────────────────────────────────────
 
@@ -39,15 +39,6 @@ const BP = "/MinimumViableHealthDataspacev2";
 /** Prepend the basePath so Playwright resolves the full URL correctly. */
 function P(path: string): string {
   return BP + path;
-}
-
-/** Set the demo persona in sessionStorage and reload. */
-async function setPersona(page: Page, username: string) {
-  await page.evaluate(
-    ([key, value]) => sessionStorage.setItem(key, value),
-    ["demo-persona", username],
-  );
-  await page.reload({ waitUntil: "networkidle" });
 }
 
 /** Navigate to a page (respecting basePath) and set persona. */

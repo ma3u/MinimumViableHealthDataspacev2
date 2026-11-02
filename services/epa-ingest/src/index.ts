@@ -8,7 +8,7 @@
  * only write there as a listed DiGA with a productive SMC-B DiGA, so the end
  * of this pipeline is a file, not a transfer.
  *
- *   epa-ingest befund.pdf --date 2026-08-14 --performer "FS-CPC Charite" \
+ *   epa-ingest befund.pdf --date 2026-08-14 --performer "AlphaKlinik Berlin CPC" \
  *     --out bundle.json
  */
 import { writeFile } from "node:fs/promises";

@@ -60,7 +60,17 @@ const STATIC_MOCK_PREFIX: [string, string][] = [
   ["/api/patient/profile?patientId=P1", "/mock/patient_profile_patient1.json"],
   ["/api/patient/profile?patientId=P2", "/mock/patient_profile_patient2.json"],
   ["/api/patient/profile?", "/mock/patient_profile_patient1.json"],
-  // Patient sub-routes with query params
+  // Patient sub-routes with query params. The pages ask for the persona's
+  // own record (useOwnRecord), so patient2 gets P2's file; any other id, P1
+  // included, gets the P1 file.
+  [
+    "/api/patient/insights?patientId=P2",
+    "/mock/patient_insights_patient2.json",
+  ],
+  [
+    "/api/patient/research?patientId=P2",
+    "/mock/patient_research_patient2.json",
+  ],
   ["/api/patient/insights?", "/mock/patient_insights.json"],
   ["/api/patient/research?", "/mock/patient_research.json"],
   ["/api/patient/opt-out?", "/mock/patient_opt_out.json"],

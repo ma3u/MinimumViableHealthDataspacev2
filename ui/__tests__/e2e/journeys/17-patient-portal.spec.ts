@@ -13,8 +13,16 @@
  *
  * API tests (J176–J190) and UI tests (J191–J195) require Keycloak
  * authentication as patient1 because the patient routes check session roles.
+ * They sign in before the Neo4j probe, which needs a session (#404), and ask
+ * for patient1's own record, P1 (#475).
+ *
+ * J183 and J185 write: a consent of P1, which each removes again before it
+ * ends (Bolt, E2E_NEO4J_BOLT, default bolt://localhost:7687). They skip
+ * unless PLAYWRIGHT_BASE_URL is localhost or 127.0.0.1, so they never write
+ * to the live hub.
  */
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+import neo4j, { type Driver } from "neo4j-driver";
 import {
   T,
   apiGet,
@@ -23,18 +31,119 @@ import {
   loginAs,
 } from "./helpers";
 
+/** patient1 owns P1; the routes refuse any other record with a 403 (#475). */
+const OWN = "P1";
+
+const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+/** Writes run only against a stack on this machine, never the live hub. */
+const LOCAL_STACK = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/.test(
+  BASE_URL,
+);
+const BOLT = process.env.E2E_NEO4J_BOLT ?? "bolt://localhost:7687";
+
+/**
+ * A Neo4j connection to take back what a test wrote, or null. DELETE
+ * /api/patient/research only revokes (the consent stays, marked revoked), so
+ * a test that consents removes its consent node itself afterwards.
+ */
+async function cleanupDriver(): Promise<Driver | null> {
+  const driver = neo4j.driver(
+    BOLT,
+    neo4j.auth.basic(
+      process.env.NEO4J_USER ?? "neo4j",
+      process.env.NEO4J_PASSWORD ?? "healthdataspace",
+    ),
+  );
+  try {
+    await driver.verifyConnectivity();
+    return driver;
+  } catch {
+    await driver.close();
+    return null;
+  }
+}
+
+/**
+ * Remove the consent of `patientId` to `studyId`. Called only for a pair that
+ * had no consent before the test: the route MERGEs on the pair, so whatever
+ * is there now is the test's own.
+ */
+async function removeConsent(
+  driver: Driver,
+  patientId: string,
+  studyId: string,
+): Promise<void> {
+  const session = driver.session();
+  try {
+    await session.run(
+      `MATCH (pc:PatientConsent {patientId: $patientId, studyId: $studyId})
+       DETACH DELETE pc`,
+      { patientId, studyId },
+    );
+  } finally {
+    await session.close();
+  }
+}
+
+/** A programme the patient has never consented to, or null. */
+async function studyWithoutConsent(page: Page): Promise<string | null> {
+  const data = await apiGet(page, `/api/patient/research?patientId=${OWN}`);
+  const taken = new Set(
+    (data.consents as { studyId: string }[]).map((c) => c.studyId),
+  );
+  const free = (data.programs as { studyId: string }[]).find(
+    (p) => !taken.has(p.studyId),
+  );
+  return free?.studyId ?? null;
+}
+
+/**
+ * Skips unless the test may write and can undo it; returns what it needs.
+ * The caller removes the consent in a `finally`.
+ */
+async function prepareWrite(
+  page: Page,
+): Promise<{ driver: Driver; studyId: string } | null> {
+  if (!LOCAL_STACK) {
+    test.skip(
+      true,
+      `Writes a consent: runs only against a local stack (localhost or 127.0.0.1), not ${BASE_URL}`,
+    );
+    return null;
+  }
+  const driver = await cleanupDriver();
+  if (!driver) {
+    test.skip(
+      true,
+      `Cannot remove the test's consent afterwards: no Neo4j on ${BOLT} (set E2E_NEO4J_BOLT)`,
+    );
+    return null;
+  }
+  const studyId = await studyWithoutConsent(page);
+  if (!studyId) {
+    await driver.close();
+    test.skip(true, `Every programme already holds a consent of ${OWN}`);
+    return null;
+  }
+  return { driver, studyId };
+}
+
 // ── J176–J180: Patient profile API ───────────────────────────────────────────
 
 test.describe("P · Patient Profile — GDPR Art. 15 / EHDS Art. 3", () => {
   test.beforeEach(async ({ page }) => {
     await skipIfKeycloakDown();
-    await skipIfNeo4jDown(page);
+    // Signed in first: /api/graph, the Neo4j probe, needs a session (#404).
     await loginAs(page, "patient1", "patient1");
+    await skipIfNeo4jDown(page);
   });
 
-  test("J176 — /api/patient/profile lists patients", async ({ page }) => {
+  test("J176 — /api/patient/profile lists the patient's own record", async ({
+    page,
+  }) => {
     const data = await apiGet(page, "/api/patient/profile");
     expect(Array.isArray(data.patients)).toBe(true);
+    for (const p of data.patients) expect(p.id).toBe(OWN);
   });
 
   test("J177 — Patient list entries have required fields", async ({ page }) => {
@@ -48,15 +157,9 @@ test.describe("P · Patient Profile — GDPR Art. 15 / EHDS Art. 3", () => {
   });
 
   test("J178 — Patient profile returns risk scores", async ({ page }) => {
-    const list = await apiGet(page, "/api/patient/profile");
-    if (list.patients.length === 0) {
-      test.skip(true, "No patients in graph");
-      return;
-    }
-    const pid = list.patients[0].id;
     const data = await apiGet(
       page,
-      `/api/patient/profile?patientId=${encodeURIComponent(pid)}`,
+      `/api/patient/profile?patientId=${encodeURIComponent(OWN)}`,
     );
     expect(data.patient).toBeDefined();
     expect(data.riskScores).toBeDefined();
@@ -67,15 +170,9 @@ test.describe("P · Patient Profile — GDPR Art. 15 / EHDS Art. 3", () => {
   });
 
   test("J179 — Profile includes GDPR rights metadata", async ({ page }) => {
-    const list = await apiGet(page, "/api/patient/profile");
-    if (list.patients.length === 0) {
-      test.skip(true, "No patients");
-      return;
-    }
-    const pid = list.patients[0].id;
     const data = await apiGet(
       page,
-      `/api/patient/profile?patientId=${encodeURIComponent(pid)}`,
+      `/api/patient/profile?patientId=${encodeURIComponent(OWN)}`,
     );
     expect(data.gdprRights).toBeDefined();
     expect(data.gdprRights.rightToAccess).toContain("Art. 15");
@@ -83,15 +180,9 @@ test.describe("P · Patient Profile — GDPR Art. 15 / EHDS Art. 3", () => {
   });
 
   test("J180 — Profile includes conditions list", async ({ page }) => {
-    const list = await apiGet(page, "/api/patient/profile");
-    if (list.patients.length === 0) {
-      test.skip(true, "No patients");
-      return;
-    }
-    const pid = list.patients[0].id;
     const data = await apiGet(
       page,
-      `/api/patient/profile?patientId=${encodeURIComponent(pid)}`,
+      `/api/patient/profile?patientId=${encodeURIComponent(OWN)}`,
     );
     expect(Array.isArray(data.conditions)).toBe(true);
     expect(Array.isArray(data.interests)).toBe(true);
@@ -104,8 +195,9 @@ test.describe("P · Patient Profile — GDPR Art. 15 / EHDS Art. 3", () => {
 test.describe("P · Research Programs — study consent and the Art. 71 opt-out", () => {
   test.beforeEach(async ({ page }) => {
     await skipIfKeycloakDown();
-    await skipIfNeo4jDown(page);
+    // Signed in first: /api/graph, the Neo4j probe, needs a session (#404).
     await loginAs(page, "patient1", "patient1");
+    await skipIfNeo4jDown(page);
   });
 
   test("J181 — /api/patient/research returns programs array", async ({
@@ -127,61 +219,91 @@ test.describe("P · Research Programs — study consent and the Art. 71 opt-out"
     }
   });
 
-  test("J183 — POST /api/patient/research registers consent", async ({
+  test("J184 — GET with the patient's own id returns consents array", async ({
     page,
   }) => {
-    const programs = await apiGet(page, "/api/patient/research");
-    if (programs.programs.length === 0) {
-      test.skip(true, "No programs available");
-      return;
-    }
-    const studyId = programs.programs[0].studyId;
-    const res = await page.request.post("/api/patient/research", {
-      data: { patientId: "test-patient-e2e", studyId },
-      headers: { "Content-Type": "application/json" },
-    });
-    expect(res.ok()).toBe(true);
-    const data = await res.json();
-    expect(typeof data.consentId).toBe("string");
-    expect(data.ehdsArticle).toContain("GDPR Art. 9(2)(a)");
-  });
-
-  test("J184 — GET with patientId returns consents array", async ({ page }) => {
     const data = await apiGet(
       page,
-      "/api/patient/research?patientId=test-patient-e2e",
+      `/api/patient/research?patientId=${encodeURIComponent(OWN)}`,
     );
     expect(Array.isArray(data.consents)).toBe(true);
   });
 
-  test("J185 — DELETE /api/patient/research revokes consent", async ({
-    page,
-  }) => {
-    // First create a consent to revoke
-    const programs = await apiGet(page, "/api/patient/research");
-    if (programs.programs.length === 0) {
-      test.skip(true, "No programs");
-      return;
-    }
-    const studyId = programs.programs[0].studyId;
-    const patientId = "test-patient-revoke-e2e";
-    const createRes = await page.request.post("/api/patient/research", {
-      data: { patientId, studyId },
-      headers: { "Content-Type": "application/json" },
+  // The two that write: one after the other, so they never pick the same
+  // programme, and each removes its consent before it ends.
+  test.describe("consent and withdrawal, on a local stack only", () => {
+    test.describe.configure({ mode: "serial" });
+
+    test("J183 — POST /api/patient/research registers the patient's own consent", async ({
+      page,
+    }) => {
+      const ready = await prepareWrite(page);
+      if (!ready) return;
+      const { driver, studyId } = ready;
+      try {
+        const res = await page.request.post("/api/patient/research", {
+          data: { patientId: OWN, studyId },
+          headers: { "Content-Type": "application/json" },
+        });
+        expect(res.ok()).toBe(true);
+        const data = await res.json();
+        expect(typeof data.consentId).toBe("string");
+        expect(data.patientId).toBe(OWN);
+        expect(data.ehdsArticle).toContain("GDPR Art. 9(2)(a)");
+
+        const after = await apiGet(
+          page,
+          `/api/patient/research?patientId=${OWN}`,
+        );
+        expect(
+          after.consents.some(
+            (c: { consentId: string; revoked: boolean }) =>
+              c.consentId === data.consentId && !c.revoked,
+          ),
+        ).toBe(true);
+      } finally {
+        await removeConsent(driver, OWN, studyId);
+        await driver.close();
+      }
+      const end = await apiGet(page, `/api/patient/research?patientId=${OWN}`);
+      expect(
+        end.consents.some((c: { studyId: string }) => c.studyId === studyId),
+      ).toBe(false);
     });
-    const consent = await createRes.json();
-    if (!consent.consentId) {
-      test.skip(true, "Consent creation failed");
-      return;
-    }
-    // Now revoke it
-    const delRes = await page.request.delete(
-      `/api/patient/research?consentId=${consent.consentId}&patientId=${patientId}`,
-    );
-    expect(delRes.ok()).toBe(true);
-    const data = await delRes.json();
-    expect(data.revoked).toBe(true);
-    expect(data.gdprArticle).toContain("Art. 17");
+
+    test("J185 — DELETE /api/patient/research withdraws the patient's consent", async ({
+      page,
+    }) => {
+      const ready = await prepareWrite(page);
+      if (!ready) return;
+      const { driver, studyId } = ready;
+      try {
+        const createRes = await page.request.post("/api/patient/research", {
+          data: { patientId: OWN, studyId },
+          headers: { "Content-Type": "application/json" },
+        });
+        expect(createRes.ok()).toBe(true);
+        const consent = await createRes.json();
+        expect(typeof consent.consentId).toBe("string");
+
+        const delRes = await page.request.delete(
+          `/api/patient/research?consentId=${encodeURIComponent(
+            consent.consentId,
+          )}&patientId=${OWN}`,
+        );
+        expect(delRes.ok()).toBe(true);
+        const data = await delRes.json();
+        expect(data.revoked).toBe(true);
+        expect(data.gdprArticle).toContain("Art. 7(3)");
+      } finally {
+        await removeConsent(driver, OWN, studyId);
+        await driver.close();
+      }
+      const end = await apiGet(page, `/api/patient/research?patientId=${OWN}`);
+      expect(
+        end.consents.some((c: { studyId: string }) => c.studyId === studyId),
+      ).toBe(false);
+    });
   });
 });
 

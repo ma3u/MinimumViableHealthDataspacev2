@@ -186,7 +186,7 @@ Phase 2 implements the full DCP v1.0 credential lifecycle using JAD's IdentityHu
 
 ### Phase 3: Health Knowledge Graph Layer ✅
 
-8. Deploy Neo4j with the [5-layer health graph schema](health-dataspace-graph-schema.md)
+8. Deploy Neo4j with the [5-layer health graph schema](../health-dataspace-graph-schema.md)
 9. Implement **FHIR-to-Graph ingestion** pipeline:
    - Generate synthetic patient data with [Synthea](https://github.com/synthetichealth/synthea)
    - Load FHIR Bundles via CyFHIR into Neo4j
@@ -451,11 +451,11 @@ Phase 4 wires the Neo4j health knowledge graph into the live EDC-V data plane, e
 
 > **Federated Catalog Results (Phase 4c):**
 >
-> | Consumer       | Provider       | Discovery  | Negotiation                                                                       | Transfer                |
-> | -------------- | -------------- | ---------- | --------------------------------------------------------------------------------- | ----------------------- |
-> | CRO Bayer      | Clinic Charité | 4 datasets | 3 FINALIZED (fhir-patient-everything, fhir-cohort-bundle, omop-cohort-statistics) | 1 STARTED               |
-> | HDAB BfArM     | Clinic Charité | 4 datasets | 1 FINALIZED (healthdcatap-catalog)                                                | 1 STARTED               |
-> | Clinic Charité | (provider)     | —          | 4 FINALIZED (provider-side)                                                       | 2 STARTED + 2 REQUESTED |
+> | Consumer             | Provider           | Discovery  | Negotiation                                                                       | Transfer                |
+> | -------------------- | ------------------ | ---------- | --------------------------------------------------------------------------------- | ----------------------- |
+> | PharmaCo Research AG | AlphaKlinik Berlin | 4 datasets | 3 FINALIZED (fhir-patient-everything, fhir-cohort-bundle, omop-cohort-statistics) | 1 STARTED               |
+> | MedReg DE            | AlphaKlinik Berlin | 4 datasets | 1 FINALIZED (healthdcatap-catalog)                                                | 1 STARTED               |
+> | AlphaKlinik Berlin   | (provider)         | —          | 4 FINALIZED (provider-side)                                                       | 2 STARTED + 2 REQUESTED |
 >
 > **Discoverable Assets via DSP 2025-1:**
 >
@@ -480,8 +480,8 @@ Phase 4 wires the Neo4j health knowledge graph into the live EDC-V data plane, e
 
 | Metric                  | Value                                                          |
 | ----------------------- | -------------------------------------------------------------- |
-| FHIR patients via DCore | 100 (CRO Bayer → data plane → neo4j-proxy → Neo4j)             |
-| HealthDCAT-AP datasets  | 2 (HDAB BfArM → data plane → neo4j-proxy → Neo4j)              |
+| FHIR patients via DCore | 100 (PharmaCo Research AG → data plane → neo4j-proxy → Neo4j)  |
+| HealthDCAT-AP datasets  | 2 (MedReg DE → data plane → neo4j-proxy → Neo4j)               |
 | Auth mechanism          | Ed25519 JWT (kid=`dataplane-fhir-private`, alg=`Ed25519`)      |
 | Data flow               | Consumer → DCore Data Plane → Neo4j Query Proxy → Neo4j KG     |
 | Audit events in Neo4j   | TransferEvent nodes with timestamp, endpoint, resultCount      |

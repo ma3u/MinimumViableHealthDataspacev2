@@ -49,7 +49,7 @@ function build(source: TextSource) {
     meta: {
       patientId: "self",
       effectiveDateTime: "2026-08-14",
-      performer: "FS-CPC",
+      performer: "AlphaKlinik Berlin CPC",
       title: "Kardiovaskulaeres Risikoprofil",
     },
     source,

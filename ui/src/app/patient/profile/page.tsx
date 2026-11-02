@@ -18,6 +18,8 @@ import ConnectAppCard from "@/components/ConnectAppCard";
 import HealthInterests from "@/components/HealthInterests";
 import { useSession } from "next-auth/react";
 import { T, useT } from "@/lib/i18n/translate";
+import { useOwnRecord } from "@/lib/patient/use-own-record";
+import { IS_STATIC } from "@/lib/static-export";
 
 interface RiskScore {
   score: number;
@@ -104,15 +106,27 @@ export default function PatientProfilePage() {
     (session?.user as { preferredUsername?: string } | undefined)
       ?.preferredUsername ?? "";
 
+  // A patient opens their own record. The route lists only that one; the
+  // static build's list fixture holds both demo patients, so there the page
+  // narrows it the same way (patient2 opens P2, not the first entry).
+  const subject = useOwnRecord();
+  const ownId = subject.kind === "own" ? subject.patientId : null;
+
   useEffect(() => {
+    if (subject.kind === "pending") return;
     fetchApi("/api/patient/profile")
       .then((r) => r.json())
       .then((d) => {
-        setPatients(d.patients ?? []);
-        if ((d.patients ?? []).length > 0) setSelectedId(d.patients[0].id);
+        const all: PatientItem[] = d.patients ?? [];
+        const list =
+          IS_STATIC && subject.kind === "own"
+            ? all.filter((p) => p.id === ownId)
+            : all;
+        setPatients(list);
+        if (list.length > 0) setSelectedId(list[0].id);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [subject.kind, ownId]);
 
   useEffect(() => {
     if (!selectedId) return;

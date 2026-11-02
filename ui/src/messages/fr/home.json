@@ -132,5 +132,8 @@
   "Already have it? Sign in": "Vous l’avez déjà ? Se connecter",
   "Demo Users & Roles": "Utilisateurs de démo et rôles",
   "Sign in as any persona to explore role-specific views.": "Connectez-vous avec n’importe quelle persona pour explorer les vues par rôle.",
-  "Klarbefund: real data for the dataspace, held by the patient": "Klarbefund : de vraies données pour l’espace de données, détenues par le patient"
+  "Klarbefund: real data for the dataspace, held by the patient": "Klarbefund : de vraies données pour l’espace de données, détenues par le patient",
+  "Register in the European Health Data Space": "S’inscrire dans l’espace européen des données de santé",
+  "Create your EHDS patient account with {wallet}, the German EUDI wallet. You share only the exact identity claims requested (name, age over 18).": "Créez votre compte patient EEDS avec {wallet}, le portefeuille EUDI allemand. Vous ne partagez que les attributs d’identité demandés (nom, plus de 18 ans).",
+  "Passwordless and sovereign: no email or password. You approve on your phone and share only the exact claims requested. Tap to see the full patient journey.": "Sans mot de passe et souverain : ni e-mail ni mot de passe. Vous approuvez sur votre téléphone et ne partagez que les attributs demandés. Touchez pour voir tout le parcours patient."
 }
