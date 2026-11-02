@@ -1,0 +1,241 @@
+---
+source: docs/security/threat-model.md
+sourceHash: 7dd719e1cad0af1761954b2a7e3ec54002d86543fc9ac430bca41b4230ef456c
+language: fr
+---
+
+# Modèle de menaces : le hub d’intégration EEDS
+
+STRIDE, pour le hub tel qu’il fonctionne sur Azure Container Apps : l’UI et
+son API (Next.js 15), Keycloak 26.8, le neo4j-proxy, les connecteurs EDC-V
+avec leur IdentityHub et leur IssuerService, Neo4j 5.26 et le PostgreSQL
+Flexible Server. Rédigé le 2026-10-16 ; chaque mesure d’atténuation cite le
+code, le test ou la décision qui la démontre. L’application qui se connecte au
+hub a son propre modèle,
+[`threat-model-klarbefund.md`](threat-model-klarbefund.md). Ce que le projet a
+testé et constaté figure dans le
+[rapport de test de sécurité](security-test-report-2026-10-15.md) ; la manière
+dont la plateforme serait exploitée avec des données réelles est décrite dans
+le [guide d’exploitation](operational-guideline.md).
+
+Les données du hub sont synthétiques : 127 patients générés, des organisations
+fictives, des sessions de test de charge forgées. Les menaces ci-dessous sont
+évaluées comme si les données étaient réelles, car le hub est une
+implémentation de référence pour une plateforme qui contiendra des données
+réelles ; lorsqu’une mesure suffit pour la démonstration mais pas pour des
+données réelles, le tableau l’indique.
+
+## Comment lire ce modèle
+
+STRIDE pose six questions à chaque flux de données : l’expéditeur peut-il être
+usurpé, les données falsifiées, l’action répudiée, des informations
+divulguées, le service refusé, des privilèges élevés ? Le contexte système de
+la section 1 numérote les flux de données et les frontières de confiance
+qu’ils franchissent ; la séquence de la section 3 montre un échange complet
+avec l’identifiant de chaque menace à l’étape où elle se produirait ; les six
+tableaux contiennent ensuite une ligne par menace, avec le flux sur lequel
+elle se situe, son statut et la mesure d’atténuation avec sa preuve. La preuve
+est un fichier, un test, un script ou une décision dans ce dépôt, de sorte que
+chaque ligne peut être vérifiée sans rien demander à personne.
+
+Quatre attaquants sont supposés, et chaque ligne en désigne au moins un
+implicitement par son flux :
+
+| Attaquant                                 | Atteint                                                  | Détient                                                                                | Veut                                                                                                                                                                |
+| ----------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| N’importe qui sur Internet                | B1 : les pages et l’API du hub, la connexion de Keycloak | Rien ; ou un cookie, un jeton ou un mot de passe divulgué                              | Le dossier d’un patient, une session, la console d’administration, la plateforme hors ligne                                                                         |
+| Un participant connecté                   | B1 avec une session valide, dans son rôle                | Un compte légitime dans un rôle                                                        | Des données hors de son rôle ou de son autorisation de traitement de données, le dossier d’un autre patient, plus de poids que sa limite de débit ne lui en accorde |
+| Un connecteur pair                        | B2 via le plan de contrôle public                        | Son propre DID et ses attestations ; des attestations forgées ou volées                | Un contrat auquel il n’a pas droit, des données sans accord, une fausse identité                                                                                    |
+| Un initié disposant de droits d’opérateur | B2 et B3 via `az`, `gh` et les scripts                   | Des droits sur l’abonnement, l’identité de déploiement, le mot de passe administrateur | Des secrets, une modification silencieuse, une piste d’audit effacée                                                                                                |
+
+Un cinquième, la chaîne d’approvisionnement, n’a pas de flux propre : une
+dépendance ou une image compromise arrive par le déploiement (F7) et est
+traitée sous Tampering (falsification) (T-07).
+
+## 1. Contexte système : flux de données et frontières de confiance
+
+![Les flux de données et les frontières de confiance du hub : à l’extérieur, les personnes, l’application, un connecteur pair et l’opérateur ; l’UI et Keycloak derrière la frontière Internet ; le proxy, les connecteurs, le crawler et l’observabilité dans l’environnement ; Neo4j, PostgreSQL, Vault et Key Vault derrière la frontière des données ; vingt et un flux numérotés](img/hub-trust-boundaries.svg)
+
+Source : [`diagrams/hub-trust-boundaries.puml`](diagrams/hub-trust-boundaries.puml),
+rendu avec `scripts/render-plantuml.sh`.
+
+Trois frontières, et ce que signifie le franchissement de chacune :
+
+| Frontière                 | Qui peut envoyer une requête à travers elle                    | Ce qui prouve l’identité                                                                          |
+| ------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| B1, la frontière Internet | N’importe qui                                                  | Le cookie de session (JWT NextAuth), un jeton porteur de Keycloak ou une attestation DCP          |
+| B2, l’environnement       | Les applications et jobs propres au hub, via l’ingress interne | L’en-tête d’appelant que le hub définit (`X-Caller`), le jeton du catalogue, le DID du connecteur |
+| B3, données et secrets    | L’environnement uniquement                                     | L’identité managée (références Key Vault), le jeton Vault, les identifiants de la base de données |
+
+Les flux numérotés (F1 à F21) sont ceux auxquels renvoient les tableaux
+STRIDE. Ceux qui comptent le plus, et pourquoi :
+
+| Flux      | Ce qui transite                                                          | Pourquoi c’est celui à surveiller                                                                                                  |
+| --------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| F1        | Chaque requête de page et d’API, avec le cookie de session               | Le seul chemin dont dispose un attaquant anonyme vers les données ; chaque route derrière lui exige une session (ADR-044)          |
+| F2, F8    | La connexion et l’échange de jetons avec Keycloak                        | Un jeton forgé ou d’une portée excessive est une identité forgée pour tout ce qui se trouve en aval                                |
+| F3, F4    | Le jeton porteur de l’application et sa création de compte               | Un téléphone échappe au contrôle de quiconque ; App Attest est ce qui réserve la création de compte à l’application authentique    |
+| F5        | DSP et DCP entre connecteurs                                             | Le seul flux où le logiciel d’un inconnu parle au nôtre par conception ; l’identité est le DID et l’attestation, pas une connexion |
+| F9        | L’appel du hub au proxy, avec l’en-tête d’appelant                       | Le proxy fait confiance à l’en-tête parce que seul le hub peut l’atteindre ; c’est la frontière B2 qui rend cette confiance fondée |
+| F10, F11  | L’API de gestion et le jeton du catalogue                                | Le contrôle total des connecteurs ; l’ingress interne et un jeton dans Key Vault constituent toute la défense                      |
+| F14, F15  | Les lectures et écritures dans le graphe, et les enregistrements d’audit | Là où se trouvent les données des patients et les preuves ; les requêtes paramétrées et la chaîne de hachage sont les contrôles    |
+| F19 à F21 | Clés et secrets                                                          | Vault, son état scellé et Key Vault ; rien ici n’est jamais copié dans une application                                             |
+
+## 2. Actifs
+
+| Actif                                                                                                                   | Sensibilité | Emplacement                                                 | Remarques                                                                                                                |
+| ----------------------------------------------------------------------------------------------------------------------- | ----------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Dossiers des patients (FHIR, OMOP)                                                                                      | Élevée      | Neo4j (B3)                                                  | Synthétiques aujourd’hui ; le modèle les traite comme réels                                                              |
+| Qui a lu le dossier de qui, la chaîne d’audit                                                                           | Élevée      | Neo4j, chaînée par hachage (B3)                             | Preuve réglementaire (art. 73) ; dix ans ([politique de conservation](../audit-retention-policy.md))                     |
+| Clés de signature des participants                                                                                      | Élevée      | Vault, état sur le Flexible Server (B3)                     | Ne quittent jamais Vault ; ADR-046                                                                                       |
+| Secrets d’opérateur : `NEXTAUTH_SECRET`, mots de passe de la base de données et d’administration, le jeton du catalogue | Élevée      | Azure Key Vault, référencé par les applications (B3)        | ADR-036 ; le `NEXTAUTH_SECRET` en production a fait l’objet d’une rotation après avoir été une valeur par défaut publiée |
+| Sessions et jetons                                                                                                      | Élevée      | Cookie dans le navigateur, jeton porteur dans l’application | JWT NextAuth ; jetons d’accès et d’actualisation de Keycloak                                                             |
+| Attestations vérifiables et autorisations de traitement de données                                                      | Moyenne     | IdentityHub (B2)                                            | Adhésion, participant EEDS, finalité, label de qualité, l’autorisation de traitement de données en tant qu’attestation   |
+| Contrats, transferts, tâches                                                                                            | Moyenne     | État EDC dans PostgreSQL (B3), répliqué dans Neo4j          | Politiques ODRL, accords, nœuds `TransferEvent`                                                                          |
+| Métadonnées du catalogue                                                                                                | Faible      | Neo4j, les connecteurs                                      | HealthDCAT-AP ; publiques par conception                                                                                 |
+| Le schéma du graphe et le code                                                                                          | Faible      | GitHub, public                                              | La documentation est le schéma                                                                                           |
+
+## 3. STRIDE
+
+![Un échange de données sous forme de séquence, avec l’identifiant STRIDE de chaque menace à l’étape où elle se situe : connexion et requête via le hub, puis la négociation DSP et la vérification de l’attestation DCP dans les connecteurs, puis le transfert et l’enregistrement d’audit](img/hub-exchange-threats.svg)
+
+Source : [`diagrams/hub-exchange-threats.puml`](diagrams/hub-exchange-threats.puml).
+
+Statut : **Fermé** signifie qu’un test ou un paramètre de build le verrouille ;
+**En place** signifie que le code le fait et qu’un test l’exerce
+indirectement ; **Démo** signifie suffisant pour des données synthétiques et
+signalé comme ouvert pour des données réelles ; **Ouvert** signifie que rien
+ne le fait encore.
+
+### Spoofing (usurpation d’identité)
+
+| ID   | Menace                                               | Flux   | Statut   | Atténuation et preuve                                                                                                                                                                                                                                                                                                                                                                   |
+| ---- | ---------------------------------------------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S-01 | Un connecteur usurpe l’identité d’un participant     | F5     | En place | Résolution `did:web` par rapport au document DID de l’IdentityHub, un par participant ; la présentation DCP porte l’attestation d’adhésion (ADR-007, ADR-009). Vérifié par `scripts/run-ehds-identity-checks.sh` à chaque pull request.                                                                                                                                                 |
+| S-02 | Une session forgée atteint une route d’API           | F1     | Fermé    | JWT NextAuth signé avec `NEXTAUTH_SECRET` issu de Key Vault ; `requireAuth()` dans chaque handler, verrouillé par `ui/__tests__/unit/api/every-route-needs-a-session.test.ts` (ADR-044).                                                                                                                                                                                                |
+| S-03 | Une présentation d’attestation rejouée               | F5     | En place | L’implémentation DCP d’EDC-V lie la présentation à la requête ; les vérifications DCP de `compliance.yml` l’exécutent. Non revérifié par le hub lui-même.                                                                                                                                                                                                                               |
+| S-04 | Prise de contrôle du realm ou de la console Keycloak | F2, F6 | Fermé    | La console d’administration n’est pas accessible depuis Internet (`guard-keycloak-console.sh`, F10 du rapport de test) ; le mot de passe administrateur est dans Key Vault ; le realm est versionné et sa dérive est contrôlée ([runbook](../knowledge/runbooks/keycloak-realm-drift.md)). L’authentification multifacteur de l’administrateur relève de l’opérateur (guide, identité). |
+| S-05 | Un faux Klarbefund crée des comptes                  | F3     | En place | La création de compte ne répond qu’à une requête dont l’attestation Apple App Attest est vérifiée (ADR-054) ; le défi est signé et vit cinq minutes.                                                                                                                                                                                                                                    |
+
+### Tampering (falsification)
+
+| ID   | Menace                                                                             | Flux     | Statut   | Atténuation et preuve                                                                                                                                                                                                                                                         |
+| ---- | ---------------------------------------------------------------------------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T-01 | Injection Cypher                                                                   | F14, F15 | Fermé    | Cypher paramétré partout ; le moteur NLQ refuse une requête qui lirait l’identité d’un patient sauf si l’UI indique que le rôle y est autorisé (`revealsPatientIdentity()`) ; tests dans `services/neo4j-proxy/__tests__/`.                                                   |
+| T-02 | Conditions contractuelles modifiées en transit                                     | F5       | En place | TLS en périphérie ; l’accord est signé par le connecteur du fournisseur. Des points de terminaison DSP à authentification mutuelle sont un élément du guide pour les données réelles.                                                                                         |
+| T-03 | Une revendication d’attestation forgée                                             | F5       | En place | Les attestations sont émises et vérifiées par l’IssuerService et l’IdentityHub (EDC-V) ; le hub affiche, il ne re-signe pas. Un HSM pour la clé de l’émetteur est un élément du guide.                                                                                        |
+| T-04 | Falsification de requête intersite (CSRF) sur une mutation                         | F1       | En place | Cookie de session `SameSite=Lax` (NextAuth) ; la CSP interdit les scripts inline ; aucune mutation ne lit ses paramètres depuis un GET.                                                                                                                                       |
+| T-05 | Un saut d’état dans la négociation                                                 | F5       | En place | Les machines à états se trouvent dans le plan de contrôle EDC-V (REQUESTED, AGREED, FINALIZED ; transferts de REQUESTED à COMPLETED) et sont gérées par baux (leases) dans PostgreSQL ; le hub réplique, il ne pilote pas. Le TCK DSP 2025-1 s’exécute à chaque pull request. |
+| T-06 | La piste d’audit modifiée                                                          | F15      | Fermé    | Chaque enregistrement porte le hachage de son prédécesseur, SHA-256 sur du JSON canonique ; `verifyChain()` signale toute modification, suppression ou réorganisation (ADR-045, `audit-chain.ts`). Les deux chaînes étaient intactes après chaque test de charge.             |
+| T-07 | Une modification de la chaîne d’approvisionnement dans une dépendance ou une image | F7       | Fermé    | Une nomenclature CycloneDX par composant, vérifiée par rapport aux lockfiles ; grype et trivy à chaque push ; npm audit en pre-push avec des exceptions limitées dans le temps ; images épinglées ; CodeQL. [SBOM](../sbom/README.md), `security-scan.yml`.                   |
+
+### Repudiation (répudiation)
+
+| ID   | Menace                                                     | Flux     | Statut   | Atténuation et preuve                                                                                                                                                                                                                                  |
+| ---- | ---------------------------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R-01 | Une partie nie qu’un transfert a eu lieu                   | F15      | Fermé    | `TransferEvent` avec le DID de l’expéditeur et du destinataire et un horodatage, dans la chaîne `dsp` chaînée par hachage (ADR-045).                                                                                                                   |
+| R-02 | Une partie nie avoir accepté un contrat                    | F5       | En place | L’accord est signé par le connecteur et stocké dans l’état EDC ; répliqué dans le graphe avec son identifiant.                                                                                                                                         |
+| R-03 | Une lecture du dossier d’un patient est niée ou dissimulée | F14, F15 | Fermé    | Chaque accès servi par le proxy est un événement d’accès dans la chaîne `query` ; le patient voit sur sa propre page qui a lu son dossier ; conservation dix ans ([politique](../audit-retention-policy.md)).                                          |
+| R-04 | Une action d’opérateur ne laisse aucune trace              | F6, F7   | En place | Événements de connexion Keycloak conservés sept jours ; les déploiements sont des exécutions GitHub Actions ; chaque étape en production est un script sous `scripts/azure/` et consignée dans les gotchas ou un ADR. Un SIEM est un élément du guide. |
+
+### Information disclosure (divulgation d’informations)
+
+| ID   | Menace                                                         | Flux      | Statut   | Atténuation et preuve                                                                                                                                                                                                                                                                                                                                           |
+| ---- | -------------------------------------------------------------- | --------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| I-01 | Un appelant anonyme lit des données                            | F1        | Fermé    | Chaque route d’API exige une session (ADR-044) ; les pages qui les lisent figurent dans `PROTECTED_PATHS` et redirigent ; 40 contrôles en boîte noire du hub en production confirment les 401 et les redirections (`check-hub-blackbox.sh`).                                                                                                                    |
+| I-02 | L’API de gestion des connecteurs accessible depuis l’extérieur | F10       | En place | Ingress interne uniquement ; l’UI l’atteint par son nom interne, fixé à chaque déploiement (#648). Le crawler du catalogue n’envoie son jeton qu’aux hôtes listés.                                                                                                                                                                                              |
+| I-03 | Des secrets dans la page ou le dépôt                           | F1, F7    | Fermé    | Environnement côté serveur uniquement ; références Key Vault (ADR-036) ; gitleaks dans les hooks et dans la CI ; un test vérifie qu’aucun secret n’atteint le HTML.                                                                                                                                                                                             |
+| I-04 | Un cross-site scripting exfiltre une session                   | F1        | Fermé    | Un nonce par requête dans la CSP avec `strict-dynamic`, pas de `unsafe-inline` pour les scripts ; cookie de session `HttpOnly` ; en-têtes fixés par `next.config.js` et contrôlés en boîte noire. La page hors heures d’ouverture a manqué certains en-têtes une fois (F8, observe).                                                                            |
+| I-05 | Une base de données accessible depuis Internet                 | F14 à F20 | Fermé    | Neo4j, PostgreSQL et Vault n’ont pas d’ingress public ; le Flexible Server n’autorise que l’environnement.                                                                                                                                                                                                                                                      |
+| I-06 | Clickjacking                                                   | F1        | Fermé    | `X-Frame-Options: DENY` et `frame-ancestors 'none'`, contrôlés en boîte noire.                                                                                                                                                                                                                                                                                  |
+| I-07 | Réidentification à partir d’une cohorte                        | F9, F12   | En place | `MIN_COHORT_SIZE` de 5 dans le proxy pour les requêtes fédérées ; les rôles autres que le détenteur de données de santé et l’opérateur voient un pseudonyme, l’année de naissance et aucun lieu de résidence (#475). Le contrôle des résultats par l’organisme responsable de l’accès aux données de santé est un processus que la démonstration n’exécute pas. |
+| I-08 | Une attestation expirée ou révoquée acceptée                   | F5        | Démo     | L’IdentityHub vérifie l’expiration ; il n’y a pas de liste de révocation dans la démonstration. Des listes de statut et une procédure de révocation sont des éléments du guide pour les données réelles.                                                                                                                                                        |
+| I-09 | Les journaux contiennent des données personnelles              | F13       | En place | Le proxy journalise des comptages et des codes, l’appelant sous forme de hachage ; Azure Monitor conserve 30 jours ; les journaux opérationnels sont séparés de la chaîne d’audit (ADR-045).                                                                                                                                                                    |
+
+### Denial of service (déni de service)
+
+| ID   | Menace                                         | Flux     | Statut   | Atténuation et preuve                                                                                                                                                                                                                                                                                                                                             |
+| ---- | ---------------------------------------------- | -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D-01 | Un utilisateur épuise le proxy                 | F9       | Fermé    | Par utilisateur : `RATE_LIMIT_MAX` requêtes et `RATE_LIMIT_HEAVY_MAX` requêtes analytiques par `RATE_LIMIT_WINDOW_MS` ; par participant, dix fois plus pour les appelants qui ne nomment aucun utilisateur ; la route d’audit a sa propre limite. Mesuré : 83.6 % refusées avant, 23.2 % après la limite par utilisateur (2026-10-05).                            |
+| D-02 | Un afflux de messages DSP vers les connecteurs | F5       | Démo     | Le plan de contrôle EDC-V gère ses machines à états par baux dans PostgreSQL et applique des délais d’expiration ; aucune limite de débit à la périphérie du connecteur. Un WAF et des limites de débit par nom d’hôte sont des éléments du guide.                                                                                                                |
+| D-03 | Une requête non bornée                         | F14, F15 | Fermé    | `LIMIT` sur chaque route de liste ; les vues du graphe plafonnées aux 30 événements d’accès les plus récents (#580), ce qui a supprimé la seule requête qui faisait tomber l’UI à 90 utilisateurs simultanés ; chaque appel sortant a un délai d’expiration.                                                                                                      |
+| D-04 | La charge fait tomber la plateforme            | F1       | En place | 400 utilisateurs sans aucune requête en échec (2026-10-06) ; l’UI passe à l’échelle selon une règle de concurrence HTTP jusqu’à six réplicas à cœurs entiers (ADR-061) ; health checks sur chaque image ; un déploiement attend tant qu’un test de charge est en cours. Les SLO de latence sont dépassés à partir de 200 utilisateurs ; prochaine mesure à venir. |
+| D-05 | La pile est arrêtée                            | F1       | Accepté  | Tout s’arrête hors heures d’ouverture par décision (ADR-053) et l’UI l’indique ; un contrat 24x7 supprime ce calendrier (guide, disponibilité).                                                                                                                                                                                                                   |
+
+### Elevation of privilege (élévation de privilèges)
+
+| ID   | Menace                                                                 | Flux     | Statut   | Atténuation et preuve                                                                                                                                                                                                                                              |
+| ---- | ---------------------------------------------------------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| E-01 | Un patient atteint une route d’administration                          | F1       | Fermé    | `requireAuth(["EDC_ADMIN"])` sur les routes d’administration, 403 pour tout autre rôle ; la matrice des rôles dans `.claude/rules/api-conventions.md` ; le dossier Bruno `09 Access control` le vérifie sur un vrai serveur.                                       |
+| E-02 | Un chercheur lit l’identité d’un patient                               | F1, F9   | Fermé    | `seesPatientIdentity()` décide selon le rôle ; `refuseForeignRecord()` répond 403 pour le dossier d’un autre patient ; le proxy NLQ refuse les lectures d’identité sans l’en-tête de l’UI (#475). Bruno `09 Access control/28` à `/30`.                            |
+| E-03 | Des rôles injectés dans le jeton                                       | F2, F8   | Fermé    | Les rôles proviennent uniquement des claims du realm ; le client de l’UI a le full scope désactivé et exactement les sept rôles EEDS dans sa portée (#648, `wire-ui-client-scope.sh`) ; `auth.ts` ne mappe rien d’autre.                                           |
+| E-04 | Le jeton du catalogue utilisé depuis ailleurs                          | F10, F11 | En place | Un seul jeton dans Key Vault, transmis à l’UI et au crawler sous forme de référence ; le crawler ne l’envoie qu’à `DSP_CATALOG_TOKEN_HOSTS` ; un jeton erroné donne 401, jamais un repli sur la session (ADR-020, ADR-036).                                        |
+| E-05 | Un transfert sans accord                                               | F5, F12  | En place | Le plan de données ne délivre un EDR que pour un accord finalisé (EDC-V) ; le hub enregistre le `contractId` avec chaque transfert. Le TCK couvre le protocole.                                                                                                    |
+| E-06 | Le compte d’opérateur `edcadmin` avec un mot de passe de démonstration | F2       | Ouvert   | `EDC_ADMIN` lit le dossier d’un patient sans négociation de contrat. `scripts/azure/secure-accounts.sh` le fait passer, ainsi que chaque compte hors démonstration, à un mot de passe généré stocké dans Key Vault ; à exécuter sur le realm de production (#671). |
+
+### Synthèse
+
+| Catégorie              | Menaces |  Fermé | En place |  Démo | Ouvert | Accepté |
+| ---------------------- | ------: | -----: | -------: | ----: | -----: | ------: |
+| Spoofing               |       5 |      2 |        3 |     0 |      0 |       0 |
+| Tampering              |       7 |      3 |        4 |     0 |      0 |       0 |
+| Repudiation            |       4 |      2 |        2 |     0 |      0 |       0 |
+| Information disclosure |       9 |      5 |        3 |     1 |      0 |       0 |
+| Denial of service      |       5 |      2 |        1 |     1 |      0 |       1 |
+| Elevation of privilege |       6 |      3 |        2 |     0 |      1 |       0 |
+| **Total**              |  **36** | **17** |   **15** | **2** |  **1** |   **1** |
+
+Fermé et en place diffèrent par la manière dont ils sont prouvés : une ligne
+fermée a un test ou un paramètre de build qui échoue lorsque la mesure
+disparaît ; une ligne en place repose sur le fait que le code l’applique et
+sur les suites qui l’exercent. Transformer des lignes en place en lignes
+fermées est le travail ordinaire de ce modèle.
+
+## 4. Ce que la démonstration accepte, et ce qu’exigent des données réelles
+
+| Risque résiduel                                                    | Pourquoi il est accepté pour la démonstration                                | Ce qui le clôt                                                                                                     |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Pas de révocation des attestations (I-08)                          | Chaque attestation est émise par la démonstration à un participant fictif    | Une liste de statut dans l’IssuerService et une procédure de révocation ; guide, identité                          |
+| Pas de limite de débit à la périphérie des connecteurs (D-02)      | Les connecteurs ne dialoguent qu’avec des pairs fictifs                      | Un WAF et des limites par nom d’hôte ; guide, périphérie                                                           |
+| Pas de mTLS entre les applications (T-02)                          | Un seul environnement, ingress interne                                       | Des points de terminaison privés et des points de terminaison DSP à authentification mutuelle ; guide, connecteurs |
+| Neo4j a un seul utilisateur de base de données                     | L’accès est décidé dans le hub et le proxy, et les données sont synthétiques | Neo4j Enterprise ou un graphe managé avec des rôles et des sauvegardes ; guide, données                            |
+| Comptes d’opérateur avec des mots de passe de démonstration (E-06) | Aucune donnée réelle de qui que ce soit ne se trouve derrière eux            | `secure-accounts.sh --all-non-demo` ; #671                                                                         |
+| Pas de test indépendant                                            | Les tests propres au projet constituent la preuve jusqu’ici                  | Un test d’intrusion du hub ; rapport de test, dernière section ; #655                                              |
+| La pile est arrêtée en dehors des heures d’ouverture (D-05)        | Une décision de coût pour une démonstration                                  | Un contrat de service 24x7 ; guide, disponibilité                                                                  |
+
+## 5. Comment ce modèle reste exact
+
+- Une nouvelle route d’API exige une session ou un ADR qui remplace
+  l’existant ; sinon le test `every-route-needs-a-session.test.ts` échoue.
+- Une nouvelle route qui renvoie des champs de patient interroge d’abord
+  `seesPatientIdentity()`, et la collection Bruno reçoit une requête qui
+  vérifie le refus.
+- Chaque modification exécute l’analyse de sécurité, CodeQL, les suites de
+  conformité et les contrôles en boîte noire ; un constat entre dans le
+  rapport de test de sécurité avec un statut, jamais uniquement dans un
+  message de commit.
+- Les diagrammes sont des sources PlantUML sous `diagrams/`, rendues par
+  `scripts/render-plantuml.sh` ; un flux ajouté au système reçoit ici un
+  numéro et une ligne dans le tableau qui l’analyse.
+
+## 6. Comment vérifier ce modèle vous-même
+
+Chaque ligne fermée dispose d’un contrôle qui peut être exécuté sur un
+ordinateur portable ou consulté dans la CI :
+
+```bash
+cd ui && npx vitest run __tests__/unit/api/every-route-needs-a-session.test.ts   # S-02, I-01, E-01
+cd ui && npx vitest run __tests__/unit/api/patient-route.test.ts                   # E-02, I-07
+scripts/security/check-hub-blackbox.sh                                             # I-01, I-04, I-06, S-04 against the live hub
+scripts/security/scan-repo.sh                                                      # T-07: grype, npm audit, trivy, gitleaks, semgrep, hadolint, shellcheck
+scripts/security/generate-sbom.sh --check                                          # T-07: the bills match the lockfiles
+./scripts/run-api-tests.sh Azure-Dev "09 Access control"                           # E-01, E-02, E-04 by persona, against a real server
+scripts/azure/guard-keycloak-console.sh --check                                    # S-04: console 403, admin REST 401, master realm 401
+cd services/neo4j-proxy && npm test                                                # T-01, T-06, D-01, D-03
+```
+
+Les suites de conformité (`compliance.yml` : le TCK DSP 2025-1, les
+vérifications DCP, les suites EEDS) couvrent les lignes des connecteurs,
+S-01, S-03, T-05, E-05, à chaque pull request. Une ligne dont le contrôle
+manque dans cette liste est une ligne en place, et l’étape suivante pour elle
+est le test qui la ferait passer.

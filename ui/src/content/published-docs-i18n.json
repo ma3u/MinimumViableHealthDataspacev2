@@ -7,10 +7,310 @@
     "es"
   ],
   "docs": {
+    "ehds/regulation-implementation": {
+      "de": {
+        "status": "current",
+        "title": "Was der Integrations-Hub von der EHDS-Verordnung umsetzt"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Ce que le hub d’intégration met en œuvre du règlement EEDS"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Wat de integratiehub van de EHDS-verordening implementeert"
+      },
+      "es": {
+        "status": "current",
+        "title": "Qué aplica el hub de integración del Reglamento del EEDS"
+      }
+    },
+    "ehds/article-numbering": {
+      "de": {
+        "status": "current",
+        "title": "EHDS-Artikelnummerierung: Vorschlag und verabschiedete Fassung"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Numérotation des articles de l’EEDS : proposition et texte adopté"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Nummering van de EHDS-artikelen: voorstel en vastgestelde tekst"
+      },
+      "es": {
+        "status": "current",
+        "title": "Numeración de los artículos del EEDS: propuesta y texto adoptado"
+      }
+    },
+    "klarbefund/klarbefund-user-guide": {
+      "de": {
+        "status": "current",
+        "title": "Benutzerhandbuch für Klarbefund"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Guide d’utilisation de Klarbefund"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Gebruikershandleiding van Klarbefund"
+      },
+      "es": {
+        "status": "current",
+        "title": "Guía del usuario de Klarbefund"
+      }
+    },
+    "klarbefund/klarbefund-developer-guide": {
+      "de": {
+        "status": "current",
+        "title": "Entwicklerhandbuch für Klarbefund"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Guide du développeur de Klarbefund"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Ontwikkelaarshandleiding van Klarbefund"
+      },
+      "es": {
+        "status": "current",
+        "title": "Guía para desarrolladores de Klarbefund"
+      }
+    },
+    "operations/operational-guideline": {
+      "de": {
+        "status": "current",
+        "title": "Betriebsleitfaden: Betrieb des Hubs und von Klarbefund nach dem EHDS und den BSI-Standards"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Guide d’exploitation : héberger le hub et Klarbefund dans le cadre de l’EEDS et des normes du BSI"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Operationele richtlijn: de hub en Klarbefund hosten onder de EHDS en de BSI-normen"
+      },
+      "es": {
+        "status": "current",
+        "title": "Guía operativa: alojar el hub y Klarbefund conforme al EEDS y a las normas del BSI"
+      }
+    },
+    "operations/dashboards": {
+      "de": {
+        "status": "current",
+        "title": "Die Dashboards"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Les tableaux de bord"
+      },
+      "nl": {
+        "status": "current",
+        "title": "De dashboards"
+      },
+      "es": {
+        "status": "current",
+        "title": "Los cuadros de mando"
+      }
+    },
+    "operations/load-tests": {
+      "de": {
+        "status": "current",
+        "title": "Last-, Stress- und Spike-Tests: Ergebnisse und Dashboards"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Tests de charge, de stress et de pic : résultats et tableaux de bord"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Belasting-, stress- en piektests: resultaten en dashboards"
+      },
+      "es": {
+        "status": "current",
+        "title": "Pruebas de carga, estrés y picos: resultados y cuadros de mando"
+      }
+    },
+    "operations/production-readiness-2026-10": {
+      "de": {
+        "status": "current",
+        "title": "Bewertung der Produktionsreife, Oktober 2026"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Évaluation de la préparation à la production, octobre 2026"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Beoordeling van de productiegereedheid, oktober 2026"
+      },
+      "es": {
+        "status": "current",
+        "title": "Evaluación de preparación para producción, octubre de 2026"
+      }
+    },
+    "security/security-test-report": {
+      "de": {
+        "status": "current",
+        "title": "Sicherheitstestbericht, 2026-10-15"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Rapport de test de sécurité, 2026-10-15"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Beveiligingstestrapport, 2026-10-15"
+      },
+      "es": {
+        "status": "current",
+        "title": "Informe de pruebas de seguridad, 2026-10-15"
+      }
+    },
+    "security/threat-model-hub": {
+      "de": {
+        "status": "current",
+        "title": "Bedrohungsmodell: der EHDS Integration Hub"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Modèle de menaces : le hub d’intégration EEDS"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Dreigingsmodel: de EHDS Integration Hub"
+      },
+      "es": {
+        "status": "current",
+        "title": "Modelo de amenazas: el hub de integración del EEDS"
+      }
+    },
+    "security/threat-model-klarbefund": {
+      "de": {
+        "status": "current",
+        "title": "Bedrohungsmodell: Klarbefund, die iPhone-App"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Modèle de menaces : Klarbefund, l’application iPhone"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Dreigingsmodel: Klarbefund, de iPhone-app"
+      },
+      "es": {
+        "status": "current",
+        "title": "Modelo de amenazas: Klarbefund, la aplicación para iPhone"
+      }
+    },
+    "security/klarbefund-self-assessment": {
+      "de": {
+        "status": "current",
+        "title": "Klarbefund: Selbstbewertung"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Klarbefund : auto-évaluation"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Klarbefund: zelfbeoordeling"
+      },
+      "es": {
+        "status": "current",
+        "title": "Klarbefund: autoevaluación"
+      }
+    },
+    "security/klarbefund-evidence": {
+      "de": {
+        "status": "current",
+        "title": "Klarbefund: Belege"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Klarbefund : preuves"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Klarbefund: bewijs"
+      },
+      "es": {
+        "status": "current",
+        "title": "Klarbefund: pruebas"
+      }
+    },
+    "security/report-for-health-insurers": {
+      "de": {
+        "status": "current",
+        "title": "Klarbefund: Nachweisbericht für Krankenversicherungen"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Klarbefund : rapport de preuves pour les assureurs santé"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Klarbefund: bewijsrapport voor zorgverzekeraars"
+      },
+      "es": {
+        "status": "current",
+        "title": "Klarbefund: informe de pruebas para aseguradoras de salud"
+      }
+    },
+    "security/klarbefund-run-on-mac": {
+      "de": {
+        "status": "current",
+        "title": "Klarbefund: die Nachweise auf einem Mac erzeugen"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Klarbefund : produire les preuves sur un Mac"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Klarbefund: het bewijs op een Mac genereren"
+      },
+      "es": {
+        "status": "current",
+        "title": "Klarbefund: generar la evidencia en un Mac"
+      }
+    },
+    "security/bsi-c5-gap-analysis": {
+      "de": {
+        "status": "current",
+        "title": "BSI-C5-Lückenanalyse: EHDS Integration Hub"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Analyse des écarts BSI C5 : hub d’intégration EEDS"
+      },
+      "nl": {
+        "status": "current",
+        "title": "BSI C5-gapanalyse: EHDS-integratiehub"
+      },
+      "es": {
+        "status": "current",
+        "title": "Análisis de brechas BSI C5: hub de integración EEDS"
+      }
+    },
     "security/sbom": {
       "de": {
         "status": "current",
         "title": "Software-Stücklisten"
+      },
+      "fr": {
+        "status": "current",
+        "title": "Nomenclatures logicielles"
+      },
+      "nl": {
+        "status": "current",
+        "title": "Software bills of materials"
+      },
+      "es": {
+        "status": "current",
+        "title": "Listas de materiales de software"
       }
     }
   }
