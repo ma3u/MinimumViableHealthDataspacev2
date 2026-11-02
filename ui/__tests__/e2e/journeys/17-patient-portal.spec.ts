@@ -11,8 +11,9 @@
  *   J1081–J1082 — patient1 sees their own insights and programmes
  *   J196–J200 — Patient persona graph + navigation
  *
- * API tests (J176–J190) and UI tests (J191–J195) require Keycloak
- * authentication as patient1 because the patient routes check session roles.
+ * API tests (J176–J190), UI tests (J191–J195) and the graph tests
+ * (J196–J198) require Keycloak authentication as patient1 because the
+ * patient routes check session roles and /graph needs a session (ADR-044).
  * They sign in before the Neo4j probe, which needs a session (#404), and ask
  * for patient1's own record, P1 (#475).
  *
@@ -434,38 +435,53 @@ test.describe("P · Patient Portal UI", () => {
 // ── J196–J200: Patient persona + navigation ───────────────────────────────────
 
 test.describe("P · Patient Persona & Navigation", () => {
-  test("J196 — /api/graph?persona=patient returns patient-focused nodes", async ({
-    page,
-  }) => {
-    await skipIfNeo4jDown(page);
-    const data = await apiGet(page, "/api/graph?persona=patient");
-    expect(data.persona).toBe("patient");
-    expect(Array.isArray(data.nodes)).toBe(true);
-    if (data.nodes.length > 0) {
-      const labels = new Set(data.nodes.map((n: { label: string }) => n.label));
-      const hasClinical =
-        labels.has("Patient") ||
-        labels.has("Condition") ||
-        labels.has("OMOPPerson");
-      expect(hasClinical).toBe(true);
-    }
-  });
-
-  test("J197 — Graph shows Patient/Citizen persona via URL", async ({
-    page,
-  }) => {
-    await page.goto("/graph?persona=patient");
-    await expect(page.getByText("Patient / Citizen").first()).toBeVisible({
-      timeout: T,
+  // /api/graph and /graph need a session (#404, ADR-044): signed out, the
+  // API answers 401 and the page sends the visitor to sign in. J199 and J200
+  // look at the sign-in page itself and stay signed out.
+  test.describe("signed in as patient1", () => {
+    test.beforeEach(async ({ page }) => {
+      await skipIfKeycloakDown();
+      await loginAs(page, "patient1", "patient1");
     });
-  });
 
-  test("J198 — Patient persona shows EHDS Art. 3-12 article", async ({
-    page,
-  }) => {
-    await page.goto("/graph?persona=patient");
-    await expect(page.getByText("Art. 3–12").first()).toBeVisible({
-      timeout: T,
+    test("J196 — /api/graph?persona=patient returns patient-focused nodes", async ({
+      page,
+    }) => {
+      await skipIfNeo4jDown(page);
+      const data = await apiGet(page, "/api/graph?persona=patient");
+      expect(data.persona).toBe("patient");
+      expect(Array.isArray(data.nodes)).toBe(true);
+      if (data.nodes.length > 0) {
+        const labels = new Set(
+          data.nodes.map((n: { label: string }) => n.label),
+        );
+        const hasClinical =
+          labels.has("Patient") ||
+          labels.has("Condition") ||
+          labels.has("OMOPPerson");
+        expect(hasClinical).toBe(true);
+      }
+    });
+
+    test("J197 — Graph shows Patient/Citizen persona via URL", async ({
+      page,
+    }) => {
+      await page.goto("/graph?persona=patient");
+      // The graph itself, not the sign-in page it redirects a visitor to
+      await expect(page).toHaveURL(/\/graph\?persona=patient/);
+      await expect(page.getByText("Patient / Citizen").first()).toBeVisible({
+        timeout: T,
+      });
+    });
+
+    test("J198 — Patient persona shows EHDS Art. 3-12 article", async ({
+      page,
+    }) => {
+      await page.goto("/graph?persona=patient");
+      await expect(page).toHaveURL(/\/graph\?persona=patient/);
+      await expect(page.getByText("Art. 3–12").first()).toBeVisible({
+        timeout: T,
+      });
     });
   });
 
