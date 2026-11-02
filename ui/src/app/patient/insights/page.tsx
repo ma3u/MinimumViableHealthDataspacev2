@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Lightbulb, Shield, TrendingUp, Activity } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { useT } from "@/lib/i18n/translate";
+import { useOwnRecord } from "@/lib/patient/use-own-record";
 
 interface Finding {
   insightId: string;
@@ -53,6 +54,10 @@ const EVIDENCE_BADGE: Record<string, string> = {
   low: "bg-(--surface-2) text-(--text-secondary)",
 };
 
+/**
+ * The record an operator (EDC_ADMIN) sees here. A patient sees their own:
+ * the route refuses any other record with a 403 (#475).
+ */
 const DEMO_PATIENT_ID = "demo-patient-1";
 
 export default function ResearchInsightsPage() {
@@ -74,15 +79,36 @@ export default function ResearchInsightsPage() {
         : t("low priority");
   const [insights, setInsights] = useState<Insights | null>(null);
   const [loading, setLoading] = useState(true);
+  const subject = useOwnRecord();
+  const patientId =
+    subject.kind === "own"
+      ? subject.patientId
+      : subject.kind === "operator"
+        ? DEMO_PATIENT_ID
+        : null;
 
   useEffect(() => {
+    if (subject.kind === "pending") return;
+    let cancelled = false;
+    setLoading(true);
     // A refusal (a patient asking for another record answers 403) is no
     // insights, not an object without findings that the page would crash on.
-    fetchApi(`/api/patient/insights?patientId=${DEMO_PATIENT_ID}`)
+    fetchApi(
+      patientId
+        ? `/api/patient/insights?patientId=${encodeURIComponent(patientId)}`
+        : "/api/patient/insights",
+    )
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => setInsights(d))
-      .finally(() => setLoading(false));
-  }, []);
+      .then((d) => {
+        if (!cancelled) setInsights(d);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [subject.kind, patientId]);
 
   return (
     <div className="min-h-screen bg-(--bg)">

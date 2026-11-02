@@ -8,6 +8,7 @@
  *   J181–J185 — /api/patient/research (study consent, GDPR Art. 9(2)(a))
  *   J186–J190 — /api/patient/insights (findings; SPE, EHDS Art. 73)
  *   J191–J195 — Patient portal UI pages
+ *   J1081–J1082 — patient1 sees their own insights and programmes
  *   J196–J200 — Patient persona graph + navigation
  *
  * API tests (J176–J190) and UI tests (J191–J195) require Keycloak
@@ -186,20 +187,19 @@ test.describe("P · Research Programs — study consent and the Art. 71 opt-out"
 
 // ── J186–J190: Research insights API ─────────────────────────────────────────
 
+// patient1 owns P1; any other record is refused with a 403 (#475).
 test.describe("P · Research Insights — EHDS Art. 73", () => {
   test.beforeEach(async ({ page }) => {
     await skipIfKeycloakDown();
-    await skipIfNeo4jDown(page);
+    // Signed in first: /api/graph, the Neo4j probe, needs a session (#404).
     await loginAs(page, "patient1", "patient1");
+    await skipIfNeo4jDown(page);
   });
 
   test("J186 — /api/patient/insights returns insights structure", async ({
     page,
   }) => {
-    const data = await apiGet(
-      page,
-      "/api/patient/insights?patientId=demo-patient-1",
-    );
+    const data = await apiGet(page, "/api/patient/insights?patientId=P1");
     expect(typeof data.activeDonations).toBe("number");
     expect(Array.isArray(data.findings)).toBe(true);
     expect(Array.isArray(data.recommendations)).toBe(true);
@@ -208,29 +208,20 @@ test.describe("P · Research Insights — EHDS Art. 73", () => {
   test("J187 — Insights include privacy note about k-anonymity", async ({
     page,
   }) => {
-    const data = await apiGet(
-      page,
-      "/api/patient/insights?patientId=demo-patient-1",
-    );
+    const data = await apiGet(page, "/api/patient/insights?patientId=P1");
     expect(typeof data.privacyNote).toBe("string");
     expect(data.privacyNote.toLowerCase()).toMatch(/k.*5|aggregate|pseudonym/);
   });
 
   test("J188 — Insights include EHDS article references", async ({ page }) => {
-    const data = await apiGet(
-      page,
-      "/api/patient/insights?patientId=demo-patient-1",
-    );
+    const data = await apiGet(page, "/api/patient/insights?patientId=P1");
     expect(data.ehdsArticles).toBeDefined();
     expect(data.ehdsArticles.primaryAccess).toContain("Art. 3");
     expect(data.ehdsArticles.speProtection).toContain("Art. 73");
   });
 
   test("J189 — Findings have required fields", async ({ page }) => {
-    const data = await apiGet(
-      page,
-      "/api/patient/insights?patientId=demo-patient-1",
-    );
+    const data = await apiGet(page, "/api/patient/insights?patientId=P1");
     if (data.findings.length > 0) {
       const f = data.findings[0];
       expect(typeof f.insightId).toBe("string");
@@ -242,10 +233,7 @@ test.describe("P · Research Insights — EHDS Art. 73", () => {
   test("J190 — Recommendations include priority and action", async ({
     page,
   }) => {
-    const data = await apiGet(
-      page,
-      "/api/patient/insights?patientId=demo-patient-1",
-    );
+    const data = await apiGet(page, "/api/patient/insights?patientId=P1");
     if (data.recommendations.length > 0) {
       const rec = data.recommendations[0];
       expect(typeof rec.action).toBe("string");
@@ -297,6 +285,27 @@ test.describe("P · Patient Portal UI", () => {
     await expect(
       page.getByText(/Research Insights|Medical Recommendations/i).first(),
     ).toBeVisible({ timeout: T });
+  });
+
+  // Both pages asked for "demo-patient-1", which the routes refuse a patient
+  // (#475), so patient1 saw no insights and no programmes.
+  test("J1081 — patient1 sees their own research insights", async ({
+    page,
+  }) => {
+    await skipIfNeo4jDown(page);
+    await page.goto("/patient/insights");
+    await expect(page.getByTestId("research-finding").first()).toBeVisible({
+      timeout: T,
+    });
+    await expect(page.getByText("No insights available.")).toHaveCount(0);
+  });
+
+  test("J1082 — patient1 sees the research programmes", async ({ page }) => {
+    await skipIfNeo4jDown(page);
+    await page.goto("/patient/research");
+    await expect(page.getByTestId("research-program-card").first()).toBeVisible(
+      { timeout: T },
+    );
   });
 });
 

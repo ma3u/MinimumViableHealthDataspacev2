@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import { useT } from "@/lib/i18n/translate";
+import { useOwnRecord } from "@/lib/patient/use-own-record";
 
 interface Program {
   studyId: string;
@@ -43,6 +44,10 @@ interface OptOutState {
   history: OptOutRecord[];
 }
 
+/**
+ * The record an operator (EDC_ADMIN) sees here. A patient sees and consents
+ * for their own: the route refuses any other record with a 403 (#475).
+ */
 const DEMO_PATIENT_ID = "demo-patient-1";
 
 const day = (iso: string | null) => (iso ? iso.slice(0, 10) : "");
@@ -60,10 +65,21 @@ export default function ResearchProgramsPage() {
   const [optOutError, setOptOutError] = useState<string | null>(null);
   const [switching, setSwitching] = useState(false);
 
-  const patientId = DEMO_PATIENT_ID;
+  const subject = useOwnRecord();
+  const patientId =
+    subject.kind === "own"
+      ? subject.patientId
+      : subject.kind === "operator"
+        ? DEMO_PATIENT_ID
+        : null;
 
   const reload = () => {
-    fetchApi(`/api/patient/research?patientId=${patientId}`)
+    if (subject.kind === "pending") return;
+    fetchApi(
+      patientId
+        ? `/api/patient/research?patientId=${encodeURIComponent(patientId)}`
+        : "/api/patient/research",
+    )
       .then((r) => r.json())
       .then((d) => {
         setPrograms(d.programs ?? []);
@@ -89,8 +105,12 @@ export default function ResearchProgramsPage() {
       .catch((e: Error) => setOptOutError(e.message));
   };
 
+  // The programmes wait for the session, so they ask for the right record.
   useEffect(() => {
     reload();
+  }, [subject.kind, patientId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
     loadOptOut();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -141,7 +161,9 @@ export default function ResearchProgramsPage() {
     setMessage(null);
     try {
       await fetchApi(
-        `/api/patient/research?consentId=${consent.consentId}&patientId=${patientId}`,
+        `/api/patient/research?consentId=${encodeURIComponent(
+          consent.consentId,
+        )}&patientId=${encodeURIComponent(patientId ?? "")}`,
         { method: "DELETE" },
       );
       setMessage(
