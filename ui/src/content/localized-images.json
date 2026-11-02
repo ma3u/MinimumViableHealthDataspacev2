@@ -6,5 +6,348 @@
     "nl",
     "es"
   ],
-  "images": {}
+  "images": {
+    "/images/guide/activity-report.webp": {
+      "de": "/images/guide/de/activity-report.webp",
+      "fr": "/images/guide/fr/activity-report.webp",
+      "nl": "/images/guide/nl/activity-report.webp",
+      "es": "/images/guide/es/activity-report.webp"
+    },
+    "/images/guide/admin-attestation.webp": {
+      "de": "/images/guide/de/admin-attestation.webp",
+      "fr": "/images/guide/fr/admin-attestation.webp",
+      "nl": "/images/guide/nl/admin-attestation.webp",
+      "es": "/images/guide/es/admin-attestation.webp"
+    },
+    "/images/guide/admin-audit.webp": {
+      "de": "/images/guide/de/admin-audit.webp",
+      "fr": "/images/guide/fr/admin-audit.webp",
+      "nl": "/images/guide/nl/admin-audit.webp",
+      "es": "/images/guide/es/admin-audit.webp"
+    },
+    "/images/guide/admin-components.webp": {
+      "de": "/images/guide/de/admin-components.webp",
+      "fr": "/images/guide/fr/admin-components.webp",
+      "nl": "/images/guide/nl/admin-components.webp",
+      "es": "/images/guide/es/admin-components.webp"
+    },
+    "/images/guide/admin-participants.webp": {
+      "de": "/images/guide/de/admin-participants.webp",
+      "fr": "/images/guide/fr/admin-participants.webp",
+      "nl": "/images/guide/nl/admin-participants.webp",
+      "es": "/images/guide/es/admin-participants.webp"
+    },
+    "/images/guide/admin-policies.webp": {
+      "de": "/images/guide/de/admin-policies.webp",
+      "fr": "/images/guide/fr/admin-policies.webp",
+      "nl": "/images/guide/nl/admin-policies.webp",
+      "es": "/images/guide/es/admin-policies.webp"
+    },
+    "/images/guide/admin-tenants.webp": {
+      "de": "/images/guide/de/admin-tenants.webp",
+      "fr": "/images/guide/fr/admin-tenants.webp",
+      "nl": "/images/guide/nl/admin-tenants.webp",
+      "es": "/images/guide/es/admin-tenants.webp"
+    },
+    "/images/guide/admin.webp": {
+      "de": "/images/guide/de/admin.webp",
+      "fr": "/images/guide/fr/admin.webp",
+      "nl": "/images/guide/nl/admin.webp",
+      "es": "/images/guide/es/admin.webp"
+    },
+    "/images/guide/analytics.webp": {
+      "de": "/images/guide/de/analytics.webp",
+      "fr": "/images/guide/fr/analytics.webp",
+      "nl": "/images/guide/nl/analytics.webp",
+      "es": "/images/guide/es/analytics.webp"
+    },
+    "/images/guide/applications.webp": {
+      "de": "/images/guide/de/applications.webp",
+      "fr": "/images/guide/fr/applications.webp",
+      "nl": "/images/guide/nl/applications.webp",
+      "es": "/images/guide/es/applications.webp"
+    },
+    "/images/guide/auth-eudi-qr.webp": {
+      "de": "/images/guide/de/auth-eudi-qr.webp",
+      "fr": "/images/guide/fr/auth-eudi-qr.webp",
+      "nl": "/images/guide/nl/auth-eudi-qr.webp",
+      "es": "/images/guide/es/auth-eudi-qr.webp"
+    },
+    "/images/guide/auth-signin.webp": {
+      "de": "/images/guide/de/auth-signin.webp",
+      "fr": "/images/guide/fr/auth-signin.webp",
+      "nl": "/images/guide/nl/auth-signin.webp",
+      "es": "/images/guide/es/auth-signin.webp"
+    },
+    "/images/guide/catalog-editor.webp": {
+      "de": "/images/guide/de/catalog-editor.webp",
+      "fr": "/images/guide/fr/catalog-editor.webp",
+      "nl": "/images/guide/nl/catalog-editor.webp",
+      "es": "/images/guide/es/catalog-editor.webp"
+    },
+    "/images/guide/catalog.webp": {
+      "de": "/images/guide/de/catalog.webp",
+      "fr": "/images/guide/fr/catalog.webp",
+      "nl": "/images/guide/nl/catalog.webp",
+      "es": "/images/guide/es/catalog.webp"
+    },
+    "/images/guide/compliance-tck.webp": {
+      "de": "/images/guide/de/compliance-tck.webp",
+      "fr": "/images/guide/fr/compliance-tck.webp",
+      "nl": "/images/guide/nl/compliance-tck.webp",
+      "es": "/images/guide/es/compliance-tck.webp"
+    },
+    "/images/guide/compliance.webp": {
+      "de": "/images/guide/de/compliance.webp",
+      "fr": "/images/guide/fr/compliance.webp",
+      "nl": "/images/guide/nl/compliance.webp",
+      "es": "/images/guide/es/compliance.webp"
+    },
+    "/images/guide/credentials.webp": {
+      "de": "/images/guide/de/credentials.webp",
+      "fr": "/images/guide/fr/credentials.webp",
+      "nl": "/images/guide/nl/credentials.webp",
+      "es": "/images/guide/es/credentials.webp"
+    },
+    "/images/guide/data-discover.webp": {
+      "de": "/images/guide/de/data-discover.webp",
+      "fr": "/images/guide/fr/data-discover.webp",
+      "nl": "/images/guide/nl/data-discover.webp",
+      "es": "/images/guide/es/data-discover.webp"
+    },
+    "/images/guide/data-share.webp": {
+      "de": "/images/guide/de/data-share.webp",
+      "fr": "/images/guide/fr/data-share.webp",
+      "nl": "/images/guide/nl/data-share.webp",
+      "es": "/images/guide/es/data-share.webp"
+    },
+    "/images/guide/data-transfer.webp": {
+      "de": "/images/guide/de/data-transfer.webp",
+      "fr": "/images/guide/fr/data-transfer.webp",
+      "nl": "/images/guide/nl/data-transfer.webp",
+      "es": "/images/guide/es/data-transfer.webp"
+    },
+    "/images/guide/eehrxf.webp": {
+      "de": "/images/guide/de/eehrxf.webp",
+      "fr": "/images/guide/fr/eehrxf.webp",
+      "nl": "/images/guide/nl/eehrxf.webp",
+      "es": "/images/guide/es/eehrxf.webp"
+    },
+    "/images/guide/home.webp": {
+      "de": "/images/guide/de/home.webp",
+      "fr": "/images/guide/fr/home.webp",
+      "nl": "/images/guide/nl/home.webp",
+      "es": "/images/guide/es/home.webp"
+    },
+    "/images/guide/information.webp": {
+      "de": "/images/guide/de/information.webp",
+      "fr": "/images/guide/fr/information.webp",
+      "nl": "/images/guide/nl/information.webp",
+      "es": "/images/guide/es/information.webp"
+    },
+    "/images/guide/jurisdictions.webp": {
+      "de": "/images/guide/de/jurisdictions.webp",
+      "fr": "/images/guide/fr/jurisdictions.webp",
+      "nl": "/images/guide/nl/jurisdictions.webp",
+      "es": "/images/guide/es/jurisdictions.webp"
+    },
+    "/images/guide/negotiate.webp": {
+      "de": "/images/guide/de/negotiate.webp",
+      "fr": "/images/guide/fr/negotiate.webp",
+      "nl": "/images/guide/nl/negotiate.webp",
+      "es": "/images/guide/es/negotiate.webp"
+    },
+    "/images/guide/onboarding.webp": {
+      "de": "/images/guide/de/onboarding.webp",
+      "fr": "/images/guide/fr/onboarding.webp",
+      "nl": "/images/guide/nl/onboarding.webp",
+      "es": "/images/guide/es/onboarding.webp"
+    },
+    "/images/guide/overview.webp": {
+      "de": "/images/guide/de/overview.webp",
+      "fr": "/images/guide/fr/overview.webp",
+      "nl": "/images/guide/nl/overview.webp",
+      "es": "/images/guide/es/overview.webp"
+    },
+    "/images/guide/patient-insights.webp": {
+      "de": "/images/guide/de/patient-insights.webp",
+      "fr": "/images/guide/fr/patient-insights.webp",
+      "nl": "/images/guide/nl/patient-insights.webp",
+      "es": "/images/guide/es/patient-insights.webp"
+    },
+    "/images/guide/patient-profile.webp": {
+      "de": "/images/guide/de/patient-profile.webp",
+      "fr": "/images/guide/fr/patient-profile.webp",
+      "nl": "/images/guide/nl/patient-profile.webp",
+      "es": "/images/guide/es/patient-profile.webp"
+    },
+    "/images/guide/patient-query.webp": {
+      "de": "/images/guide/de/patient-query.webp",
+      "fr": "/images/guide/fr/patient-query.webp",
+      "nl": "/images/guide/nl/patient-query.webp",
+      "es": "/images/guide/es/patient-query.webp"
+    },
+    "/images/guide/patient-research.webp": {
+      "de": "/images/guide/de/patient-research.webp",
+      "fr": "/images/guide/fr/patient-research.webp",
+      "nl": "/images/guide/nl/patient-research.webp",
+      "es": "/images/guide/es/patient-research.webp"
+    },
+    "/images/guide/patient.webp": {
+      "de": "/images/guide/de/patient.webp",
+      "fr": "/images/guide/fr/patient.webp",
+      "nl": "/images/guide/nl/patient.webp",
+      "es": "/images/guide/es/patient.webp"
+    },
+    "/images/guide/permits.webp": {
+      "de": "/images/guide/de/permits.webp",
+      "fr": "/images/guide/fr/permits.webp",
+      "nl": "/images/guide/nl/permits.webp",
+      "es": "/images/guide/es/permits.webp"
+    },
+    "/images/guide/query.webp": {
+      "de": "/images/guide/de/query.webp",
+      "fr": "/images/guide/fr/query.webp",
+      "nl": "/images/guide/nl/query.webp",
+      "es": "/images/guide/es/query.webp"
+    },
+    "/images/guide/requests.webp": {
+      "de": "/images/guide/de/requests.webp",
+      "fr": "/images/guide/fr/requests.webp",
+      "nl": "/images/guide/nl/requests.webp",
+      "es": "/images/guide/es/requests.webp"
+    },
+    "/images/guide/settings.webp": {
+      "de": "/images/guide/de/settings.webp",
+      "fr": "/images/guide/fr/settings.webp",
+      "nl": "/images/guide/nl/settings.webp",
+      "es": "/images/guide/es/settings.webp"
+    },
+    "/images/guide/supervision.webp": {
+      "de": "/images/guide/de/supervision.webp",
+      "fr": "/images/guide/fr/supervision.webp",
+      "nl": "/images/guide/nl/supervision.webp",
+      "es": "/images/guide/es/supervision.webp"
+    },
+    "/images/guide/tasks.webp": {
+      "de": "/images/guide/de/tasks.webp",
+      "fr": "/images/guide/fr/tasks.webp",
+      "nl": "/images/guide/nl/tasks.webp",
+      "es": "/images/guide/es/tasks.webp"
+    },
+    "/images/screenshots/ehds-fhir-dataset-catalog-browser.png": {
+      "de": "/images/screenshots/de/ehds-fhir-dataset-catalog-browser.png",
+      "fr": "/images/screenshots/fr/ehds-fhir-dataset-catalog-browser.png",
+      "nl": "/images/screenshots/nl/ehds-fhir-dataset-catalog-browser.png",
+      "es": "/images/screenshots/es/ehds-fhir-dataset-catalog-browser.png"
+    },
+    "/images/screenshots/ehds-health-dataspace-home-dashboard.png": {
+      "de": "/images/screenshots/de/ehds-health-dataspace-home-dashboard.png",
+      "fr": "/images/screenshots/fr/ehds-health-dataspace-home-dashboard.png",
+      "nl": "/images/screenshots/nl/ehds-health-dataspace-home-dashboard.png",
+      "es": "/images/screenshots/es/ehds-health-dataspace-home-dashboard.png"
+    },
+    "/images/screenshots/ehds-signin-persona-cards.png": {
+      "de": "/images/screenshots/de/ehds-signin-persona-cards.png",
+      "fr": "/images/screenshots/fr/ehds-signin-persona-cards.png",
+      "nl": "/images/screenshots/nl/ehds-signin-persona-cards.png",
+      "es": "/images/screenshots/es/ehds-signin-persona-cards.png"
+    },
+    "/images/screenshots/graph-explorer-default.png": {
+      "de": "/images/screenshots/de/graph-explorer-default.png",
+      "fr": "/images/screenshots/fr/graph-explorer-default.png",
+      "nl": "/images/screenshots/nl/graph-explorer-default.png",
+      "es": "/images/screenshots/es/graph-explorer-default.png"
+    },
+    "/images/screenshots/graph-explorer-edc-admin-persona.png": {
+      "de": "/images/screenshots/de/graph-explorer-edc-admin-persona.png",
+      "fr": "/images/screenshots/fr/graph-explorer-edc-admin-persona.png",
+      "nl": "/images/screenshots/nl/graph-explorer-edc-admin-persona.png",
+      "es": "/images/screenshots/es/graph-explorer-edc-admin-persona.png"
+    },
+    "/images/screenshots/graph-explorer-hdab-persona.png": {
+      "de": "/images/screenshots/de/graph-explorer-hdab-persona.png",
+      "fr": "/images/screenshots/fr/graph-explorer-hdab-persona.png",
+      "nl": "/images/screenshots/nl/graph-explorer-hdab-persona.png",
+      "es": "/images/screenshots/es/graph-explorer-hdab-persona.png"
+    },
+    "/images/screenshots/graph-explorer-hospital-persona.png": {
+      "de": "/images/screenshots/de/graph-explorer-hospital-persona.png",
+      "fr": "/images/screenshots/fr/graph-explorer-hospital-persona.png",
+      "nl": "/images/screenshots/nl/graph-explorer-hospital-persona.png",
+      "es": "/images/screenshots/es/graph-explorer-hospital-persona.png"
+    },
+    "/images/screenshots/graph-explorer-researcher-persona.png": {
+      "de": "/images/screenshots/de/graph-explorer-researcher-persona.png",
+      "fr": "/images/screenshots/fr/graph-explorer-researcher-persona.png",
+      "nl": "/images/screenshots/nl/graph-explorer-researcher-persona.png",
+      "es": "/images/screenshots/es/graph-explorer-researcher-persona.png"
+    },
+    "/images/screenshots/graph-explorer-trust-center-persona.png": {
+      "de": "/images/screenshots/de/graph-explorer-trust-center-persona.png",
+      "fr": "/images/screenshots/fr/graph-explorer-trust-center-persona.png",
+      "nl": "/images/screenshots/nl/graph-explorer-trust-center-persona.png",
+      "es": "/images/screenshots/es/graph-explorer-trust-center-persona.png"
+    },
+    "/images/screenshots/neo4j-health-dataspace-graph-explorer.png": {
+      "de": "/images/screenshots/de/neo4j-health-dataspace-graph-explorer.png",
+      "fr": "/images/screenshots/fr/neo4j-health-dataspace-graph-explorer.png",
+      "nl": "/images/screenshots/nl/neo4j-health-dataspace-graph-explorer.png",
+      "es": "/images/screenshots/es/neo4j-health-dataspace-graph-explorer.png"
+    },
+    "/published-docs/cicd-pipeline.svg": {
+      "de": "/published-docs/cicd-pipeline.de.svg",
+      "fr": "/published-docs/cicd-pipeline.fr.svg",
+      "nl": "/published-docs/cicd-pipeline.nl.svg",
+      "es": "/published-docs/cicd-pipeline.es.svg"
+    },
+    "/published-docs/data-flow-sequence.svg": {
+      "de": "/published-docs/data-flow-sequence.de.svg",
+      "fr": "/published-docs/data-flow-sequence.fr.svg",
+      "nl": "/published-docs/data-flow-sequence.nl.svg",
+      "es": "/published-docs/data-flow-sequence.es.svg"
+    },
+    "/published-docs/deployment.svg": {
+      "de": "/published-docs/deployment.de.svg",
+      "fr": "/published-docs/deployment.fr.svg",
+      "nl": "/published-docs/deployment.nl.svg",
+      "es": "/published-docs/deployment.es.svg"
+    },
+    "/published-docs/developer-data-flow.svg": {
+      "de": "/published-docs/developer-data-flow.de.svg",
+      "fr": "/published-docs/developer-data-flow.fr.svg",
+      "nl": "/published-docs/developer-data-flow.nl.svg",
+      "es": "/published-docs/developer-data-flow.es.svg"
+    },
+    "/published-docs/dsp-negotiation-sequence.svg": {
+      "de": "/published-docs/dsp-negotiation-sequence.de.svg",
+      "fr": "/published-docs/dsp-negotiation-sequence.fr.svg",
+      "nl": "/published-docs/dsp-negotiation-sequence.nl.svg",
+      "es": "/published-docs/dsp-negotiation-sequence.es.svg"
+    },
+    "/published-docs/dsp-negotiation.svg": {
+      "de": "/published-docs/dsp-negotiation.de.svg",
+      "fr": "/published-docs/dsp-negotiation.fr.svg",
+      "nl": "/published-docs/dsp-negotiation.nl.svg",
+      "es": "/published-docs/dsp-negotiation.es.svg"
+    },
+    "/published-docs/graph-schema.svg": {
+      "de": "/published-docs/graph-schema.de.svg",
+      "fr": "/published-docs/graph-schema.fr.svg",
+      "nl": "/published-docs/graph-schema.nl.svg",
+      "es": "/published-docs/graph-schema.es.svg"
+    },
+    "/published-docs/identity-trust.svg": {
+      "de": "/published-docs/identity-trust.de.svg",
+      "fr": "/published-docs/identity-trust.fr.svg",
+      "nl": "/published-docs/identity-trust.nl.svg",
+      "es": "/published-docs/identity-trust.es.svg"
+    },
+    "/published-docs/knowledge-graph-layers.svg": {
+      "de": "/published-docs/knowledge-graph-layers.de.svg",
+      "fr": "/published-docs/knowledge-graph-layers.fr.svg",
+      "nl": "/published-docs/knowledge-graph-layers.nl.svg",
+      "es": "/published-docs/knowledge-graph-layers.es.svg"
+    }
+  }
 }
