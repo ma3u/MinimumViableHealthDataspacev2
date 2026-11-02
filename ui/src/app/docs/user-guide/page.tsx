@@ -40,6 +40,11 @@ import {
 
 const LIVE_URL = "https://ma3u.github.io/MinimumViableHealthDataspacev2";
 
+/** The live hub's host, and a credential type: names, never translated
+ *  (the French and Spanish texts write the Regulation EEDS, not EHDS). */
+const LIVE_HOST = "ehds.mabu.red";
+const PARTICIPANT_CREDENTIAL = "EHDSParticipantCredential";
+
 const FULL_JOURNEY_URL =
   "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md";
 
@@ -49,9 +54,11 @@ import { LocalizedImage } from "@/components/docs/LocalizedImage";
 import { visibleNavGroups } from "@/components/Navigation";
 import { guideScreenshotSrc } from "@/lib/guide-screenshots";
 import { localizedChart } from "@/lib/i18n/diagrams";
+import { T, useT } from "@/lib/i18n/translate";
 import { useLanguage } from "@/lib/use-language";
 
-/** The demo personas' realm roles (jad/keycloak-realm.json). */
+/** The demo personas' realm roles (jad/keycloak-realm.json). `nav` labels
+ *  are translated with the menu's words, the others in docsGuide. */
 const MATRIX_PERSONAS = [
   {
     label: "Patient",
@@ -60,11 +67,13 @@ const MATRIX_PERSONAS = [
   },
   {
     label: "Data Holder",
+    nav: true,
     roles: ["EDC_USER_PARTICIPANT", "DATA_HOLDER"],
     className: "text-(--accent)",
   },
   {
     label: "Researcher",
+    nav: true,
     roles: ["EDC_USER_PARTICIPANT", "DATA_USER"],
     className: "text-(--success-text)",
   },
@@ -123,11 +132,12 @@ function ScreenshotDialog({
   href: string;
   dialogRef: React.RefObject<HTMLDialogElement>;
 }) {
+  const t = useT("docsGuide");
   const close = () => dialogRef.current?.close();
   return (
     <dialog
       ref={dialogRef}
-      aria-label={`Screenshot: ${title}`}
+      aria-label={t("Screenshot: {title}", { title })}
       onClick={(e) => {
         // The dialog itself is the backdrop area; its content stops here.
         if (e.target === e.currentTarget) close();
@@ -148,13 +158,13 @@ function ScreenshotDialog({
               onClick={close}
               className="inline-flex min-h-11 items-center gap-1 rounded-lg px-3 text-sm text-indigo-700 hover:bg-indigo-500/10 dark:text-indigo-400"
             >
-              Try it <ArrowRight size={14} />
+              {t("Try it")} <ArrowRight size={14} />
             </Link>
             <button
               type="button"
               onClick={close}
               data-close
-              aria-label="Close screenshot"
+              aria-label={t("Close screenshot")}
               className="inline-flex size-11 items-center justify-center rounded-lg text-(--text-secondary) hover:bg-(--surface-2)"
             >
               <X size={20} />
@@ -163,7 +173,7 @@ function ScreenshotDialog({
         </div>
         <LocalizedImage
           src={src}
-          alt={`Screenshot: ${title}`}
+          alt={t("Screenshot: {title}", { title })}
           loading="lazy"
           width={1200}
           height={750}
@@ -187,6 +197,7 @@ function FeatureCard({
   requiresJAD?: boolean;
   children: React.ReactNode;
 }) {
+  const t = useT("docsGuide");
   const isExternal = href.startsWith("http");
   const screenshot = guideScreenshotSrc(href);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -219,7 +230,7 @@ function FeatureCard({
               className="block h-auto w-full"
             />
             <figcaption className="px-3 py-1.5 text-[11px] text-(--text-secondary)">
-              Click to enlarge
+              {t("Click to enlarge")}
             </figcaption>
           </figure>
           <ScreenshotDialog
@@ -254,7 +265,7 @@ function FeatureCard({
           <div className="flex items-center gap-2">
             {requiresJAD && (
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-900 dark:text-amber-300 border border-amber-500/30 font-medium">
-                JAD Stack
+                {t("JAD Stack")}
               </span>
             )}
             {screenshot && (
@@ -262,11 +273,11 @@ function FeatureCard({
                 type="button"
                 onClick={openScreenshot}
                 aria-haspopup="dialog"
-                aria-label={`Show screenshot: ${title}`}
+                aria-label={t("Show screenshot: {title}", { title })}
                 className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs text-(--text-secondary) hover:text-indigo-700 dark:hover:text-indigo-400 transition-colors"
               >
                 <ImageIcon size={14} />
-                <span className="hidden sm:inline">Screenshot</span>
+                <span className="hidden sm:inline">{t("Screenshot")}</span>
               </button>
             )}
             {isExternal ? (
@@ -276,14 +287,14 @@ function FeatureCard({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-xs text-(--text-secondary) hover:text-indigo-700 dark:hover:text-indigo-400 transition-colors"
               >
-                Open <ExternalLink size={12} />
+                {t("Open")} <ExternalLink size={12} />
               </a>
             ) : (
               <Link
                 href={href}
                 className="inline-flex items-center gap-1 text-xs text-(--text-secondary) hover:text-indigo-700 dark:hover:text-indigo-400 transition-colors"
               >
-                Try it <ArrowRight size={12} />
+                {t("Try it")} <ArrowRight size={12} />
               </Link>
             )}
           </div>
@@ -295,54 +306,112 @@ function FeatureCard({
 }
 
 /** Table of Contents section IDs */
+/** Table of Contents section IDs; `nav` labels are the menu's own words. */
 const TOC_SECTIONS = [
   { id: "purpose", label: "Purpose" },
   { id: "personas", label: "Personas & Roles" },
   { id: "getting-started", label: "Getting Started" },
   { id: "availability", label: "When Is the Live Demo Available?" },
-  { id: "explore", label: "Explore" },
-  { id: "governance", label: "Governance" },
+  { id: "explore", label: "Explore", nav: true },
+  { id: "governance", label: "Governance", nav: true },
   { id: "data-exchange", label: "Data Exchange" },
   { id: "admin", label: "Administration" },
   { id: "help", label: "Need Help?" },
 ] as const;
 
+/** A link that opens in a new tab with the external-link icon after its text. */
+function ExternalTextLink({
+  href,
+  children,
+}: {
+  href: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex items-center gap-1 text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
+    >
+      {children}
+      <ExternalLink size={12} />
+    </a>
+  );
+}
+
 export default function UserGuidePage() {
   const lang = useLanguage();
+  const t = useT("docsGuide");
+  const tn = useT("nav");
+  const tc = useT("common");
+  const te = useT("explore");
+
+  // The marked parts of a translated text (<T tags>), made once here.
+  const LINK_CLASS =
+    "text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline";
+  const liveLink = (
+    <a
+      href={LIVE_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={LINK_CLASS}
+    />
+  );
+  const liveLinkPlain = (
+    <a
+      href={LIVE_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="underline"
+    />
+  );
+  const journeyLink = <ExternalTextLink href={FULL_JOURNEY_URL} />;
+  const devGuideLink = <Link href="/docs/developer" className={LINK_CLASS} />;
+  const archLink = <Link href="/docs/architecture" className={LINK_CLASS} />;
+  const availabilityLink = <a href="#availability" className="underline" />;
+  const strong = <strong />;
+  const strongPrimary = <strong className="text-(--text-primary)" />;
+  const code = <code />;
+  const codeXs = <code className="text-xs" />;
+  const signinCode = (
+    <code className="text-xs bg-(--surface-2) px-1 py-0.5 rounded-sm" />
+  );
+  const attestationLink = (
+    <Link
+      href="/admin/attestation"
+      className="text-indigo-700 dark:text-indigo-400 hover:underline"
+    />
+  );
+  const l1 = <strong className="text-(--accent)" />;
+  const l2 = <strong className="text-emerald-700 dark:text-teal-300" />;
+  const l3 = <strong className="text-green-700 dark:text-green-300" />;
+  const l4 = <strong className="text-orange-700 dark:text-orange-400" />;
+  const l5 = <strong className="text-purple-700 dark:text-purple-400" />;
+  const adr068Link = (
+    <a
+      href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-indigo-700 dark:text-indigo-400 hover:underline"
+    />
+  );
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
       <Link
         href="/docs"
         className="inline-flex items-center gap-1 text-sm text-(--text-secondary) hover:text-(--text-primary) mb-6"
       >
-        <ArrowLeft size={14} /> Back to Docs
+        <ArrowLeft size={14} /> {t("Back to Docs")}
       </Link>
-      <h1 className="text-3xl font-bold mb-2">User Guide</h1>
+      <h1 className="text-3xl font-bold mb-2">{tn("User Guide")}</h1>
       <DocsLastUpdated page="/docs/user-guide" />
       <p className="text-(--text-secondary) mb-4">
-        A practical guide for business users, researchers, and data stewards
-        working with the Health Dataspace platform. Each section links directly
-        to the feature page in the{" "}
-        <a
-          href={LIVE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
-        >
-          live demo
-        </a>
-        . For a complete end-to-end walkthrough covering every persona and
-        workflow, see the{" "}
-        <a
-          href={FULL_JOURNEY_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
-        >
-          Full User Journey
-          <ExternalLink size={12} />
-        </a>
-        .
+        <T area="docsGuide" tags={{ a: liveLink, j: journeyLink }}>
+          {
+            "A practical guide for business users, researchers, and data stewards working with the Health Dataspace platform. Each section links directly to the feature page in the <a>live demo</a>. For a complete end-to-end walkthrough covering every persona and workflow, see the <j>Full User Journey</j>."
+          }
+        </T>
       </p>
 
       {/* ── Table of Contents ── */}
@@ -352,7 +421,7 @@ export default function UserGuidePage() {
             size={16}
             className="text-indigo-700 dark:text-indigo-400"
           />
-          Table of Contents
+          {t("Table of Contents")}
         </h2>
         <ol className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-1.5">
           {TOC_SECTIONS.map((s, i) => (
@@ -364,7 +433,7 @@ export default function UserGuidePage() {
                 <span className="font-mono text-xs text-(--text-secondary) mr-1">
                   {i + 1}.
                 </span>
-                {s.label}
+                {"nav" in s ? tn(s.label) : t(s.label)}
               </a>
             </li>
           ))}
@@ -380,57 +449,62 @@ export default function UserGuidePage() {
           />
           <div>
             <h3 className="font-semibold text-amber-700 dark:text-amber-400 mb-1">
-              Static Demo vs Full Stack
+              {t("Static Demo vs Full Stack")}
             </h3>
             <p className="text-(--text-secondary) text-sm mb-3">
-              The{" "}
-              <a
-                href={LIVE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
+              <T
+                area="docsGuide"
+                tags={{ a: liveLinkPlain, c: code, h: availabilityLink }}
+                vars={{ host: LIVE_HOST }}
               >
-                GitHub Pages demo
-              </a>{" "}
-              runs as a static export with mock data. The Azure EHDS Portal at{" "}
-              <code>ehds.mabu.red</code> runs the full stack with live services,
-              on weekdays in office hours (see{" "}
-              <a href="#availability" className="underline">
-                When Is the Live Demo Available?
-              </a>
-              ). The following features require the full stack:
+                {
+                  "The <a>GitHub Pages demo</a> runs as a static export with mock data. The Azure EHDS Portal at <c>{host}</c> runs the full stack with live services, on weekdays in office hours (see <h>When Is the Live Demo Available?</h>). The following features require the full stack:"
+                }
+              </T>
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
               <li>
-                <strong>Keycloak SSO login</strong> — the static demo uses a
-                persona switcher instead
+                <T area="docsGuide" tags={{ b: strong }}>
+                  {
+                    "<b>Keycloak SSO login</b>: the static demo uses a persona switcher instead"
+                  }
+                </T>
               </li>
               <li>
-                <strong>Live Neo4j graph queries</strong> — the persona overview
-                and the other views read pre-loaded mock data
+                <T area="docsGuide" tags={{ b: strong }}>
+                  {
+                    "<b>Live Neo4j graph queries</b>: the persona overview and the other views read pre-loaded mock data"
+                  }
+                </T>
               </li>
               <li>
-                <strong>Contract negotiation &amp; transfers</strong> — require
-                EDC connectors
+                <T area="docsGuide" tags={{ b: strong }}>
+                  {
+                    "<b>Contract negotiation & transfers</b>: require EDC connectors"
+                  }
+                </T>
               </li>
               <li>
-                <strong>Natural language / federated queries</strong> — require
-                neo4j-proxy service
+                <T area="docsGuide" tags={{ b: strong }}>
+                  {
+                    "<b>Natural language / federated queries</b>: require neo4j-proxy service"
+                  }
+                </T>
               </li>
               <li>
-                <strong>ODRL policy enforcement</strong> — requires live
-                dataspace middleware
+                <T area="docsGuide" tags={{ b: strong }}>
+                  {
+                    "<b>ODRL policy enforcement</b>: requires live dataspace middleware"
+                  }
+                </T>
               </li>
             </ul>
             <p className="text-(--text-secondary) text-xs mt-3">
-              See the{" "}
-              <Link
-                href="/docs/developer"
-                className="text-indigo-700 dark:text-indigo-400 underline"
-              >
-                Developer Guide
-              </Link>{" "}
-              for full stack setup instructions.
+              <T area="docsGuide" tags={{ l: devGuideLink }}>
+                {
+                  "See the <l>Developer Guide</l> for full stack setup instructions."
+                }
+              </T>
             </p>
           </div>
         </div>
@@ -438,25 +512,21 @@ export default function UserGuidePage() {
 
       {/* ── 0. Purpose ── */}
       <section className="mb-12" id="purpose">
-        <h2 className="text-2xl font-semibold mb-3">Purpose</h2>
+        <h2 className="text-2xl font-semibold mb-3">{t("Purpose")}</h2>
         <div className="border border-(--border) rounded-xl p-5 bg-(--surface-2)/20">
           <p className="text-(--text-secondary) text-sm mb-3">
-            This platform is a{" "}
-            <strong className="text-(--text-primary)">
-              reference implementation of the European Health Data Space (EHDS)
-              regulation
-            </strong>
-            . Its purpose is to demonstrate how sovereign health data exchange
-            works in practice — combining the Dataspace Protocol (DSP 2025-1),
-            FHIR R4 clinical resources, OMOP CDM analytics, and biomedical
-            ontologies into a unified Neo4j knowledge graph.
+            <T area="docsGuide" tags={{ b: strongPrimary }}>
+              {
+                "This platform is a <b>reference implementation of the European Health Data Space (EHDS) regulation</b>. Its purpose is to demonstrate how sovereign health data exchange works in practice, combining the Dataspace Protocol (DSP 2025-1), FHIR R4 clinical resources, OMOP CDM analytics, and biomedical ontologies into a unified Neo4j knowledge graph."
+              }
+            </T>
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
             {[
-              { label: "Synthetic patients", value: "127" },
-              { label: "Graph nodes", value: "5,300+" },
-              { label: "Architecture layers", value: "5" },
-              { label: "Fictional organisations", value: "5" },
+              { label: t("Synthetic patients"), value: "127" },
+              { label: t("Graph nodes"), value: "5,300+" },
+              { label: t("Architecture layers"), value: "5" },
+              { label: t("Fictional organisations"), value: "5" },
             ].map((stat) => (
               <div
                 key={stat.label}
@@ -472,46 +542,51 @@ export default function UserGuidePage() {
             ))}
           </div>
           <p className="text-(--text-secondary) text-sm mb-2">
-            The five knowledge-graph layers model the complete EHDS data
-            lifecycle:
+            {t(
+              "The five knowledge-graph layers model the complete EHDS data lifecycle:",
+            )}
           </p>
           <ol className="text-(--text-secondary) text-sm space-y-1 ml-4 list-decimal">
             <li>
-              <strong className="text-(--accent)">
-                L1 Dataspace Marketplace
-              </strong>{" "}
-              — Participants, DataProducts, ODRL policies, contracts, HDAB
-              approvals
+              <T area="docsGuide" tags={{ b: l1 }}>
+                {
+                  "<b>L1 Dataspace Marketplace</b>: Participants, DataProducts, ODRL policies, contracts, HDAB approvals"
+                }
+              </T>
             </li>
             <li>
-              <strong className="text-emerald-700 dark:text-teal-300">
-                L2 HealthDCAT-AP Metadata
-              </strong>{" "}
-              — Catalogues, datasets, distributions, data services
+              <T area="docsGuide" tags={{ b: l2 }}>
+                {
+                  "<b>L2 HealthDCAT-AP Metadata</b>: Catalogues, datasets, distributions, data services"
+                }
+              </T>
             </li>
             <li>
-              <strong className="text-green-700 dark:text-green-300">
-                L3 FHIR R4 Clinical
-              </strong>{" "}
-              — Patients, encounters, conditions, observations, medications
+              <T area="docsGuide" tags={{ b: l3 }}>
+                {
+                  "<b>L3 FHIR R4 Clinical</b>: Patients, encounters, conditions, observations, medications"
+                }
+              </T>
             </li>
             <li>
-              <strong className="text-orange-700 dark:text-orange-400">
-                L4 OMOP CDM Analytics
-              </strong>{" "}
-              — Persons, condition occurrences, drug exposures, measurements
+              <T area="docsGuide" tags={{ b: l4 }}>
+                {
+                  "<b>L4 OMOP CDM Analytics</b>: Persons, condition occurrences, drug exposures, measurements"
+                }
+              </T>
             </li>
             <li>
-              <strong className="text-purple-700 dark:text-purple-400">
-                L5 Biomedical Ontology
-              </strong>{" "}
-              — SNOMED CT, ICD-10, RxNorm, LOINC concept mappings
+              <T area="docsGuide" tags={{ b: l5 }}>
+                {
+                  "<b>L5 Biomedical Ontology</b>: SNOMED CT, ICD-10, RxNorm, LOINC concept mappings"
+                }
+              </T>
             </li>
           </ol>
           <p className="text-(--text-secondary) text-xs mt-3">
-            All data is fully synthetic. Organisation names are fictional
-            (AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg
-            Medical Centre, Institut de Recherche Sant&eacute;).
+            {t(
+              "All data is fully synthetic. Organisation names are fictional (AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg Medical Centre, Institut de Recherche Santé).",
+            )}
           </p>
         </div>
       </section>
@@ -519,29 +594,25 @@ export default function UserGuidePage() {
       {/* ── 1. Personas & Roles ── */}
       <section className="mb-12" id="personas">
         <h2 className="text-2xl font-semibold mb-3">
-          Personas &amp; Roles — Who Uses What?
+          {t("Personas & Roles: Who Uses What?")}
         </h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          The EHDS regulation defines distinct participant roles to ensure
-          accountability, data sovereignty, and patient rights across the health
-          data ecosystem. This platform adapts its navigation, persona overview,
-          and available actions to the signed-in user&apos;s EHDS role. Sign in
-          at{" "}
-          <code className="text-xs bg-(--surface-2) px-1 py-0.5 rounded-sm">
-            /auth/signin
-          </code>{" "}
-          with any demo account — password equals username in local dev.
+          <T area="docsGuide" tags={{ c: signinCode }}>
+            {
+              "The EHDS regulation defines distinct participant roles to ensure accountability, data sovereignty, and patient rights across the health data ecosystem. This platform adapts its navigation, persona overview, and available actions to the signed-in user's EHDS role. Sign in at <c>/auth/signin</c> with any demo account: password equals username in local dev."
+            }
+          </T>
         </p>
 
         <FeatureCard
           href="/auth/signin"
-          title="Sign In — Demo Persona Cards"
+          title={t("Sign In: Demo Persona Cards")}
           icon={Users}
         >
           <p className="text-(--text-secondary) text-sm mb-3">
-            The sign-in page lists every demo account with its role badge and
-            organisation. Clicking a card signs in through Keycloak SSO and
-            opens the persona overview with the tab for that role.
+            {t(
+              "The sign-in page lists every demo account with its role badge and organisation. Clicking a card signs in through Keycloak SSO and opens the persona overview with the tab for that role.",
+            )}
           </p>
 
           {/* Demo users table with EHDS regulatory context */}
@@ -549,60 +620,72 @@ export default function UserGuidePage() {
             <table className="text-xs w-full border-collapse">
               <thead>
                 <tr className="border-b border-(--border) text-(--text-secondary)">
-                  <th className="text-left py-1.5 pr-3">Username</th>
-                  <th className="text-left py-1.5 pr-3">Organisation</th>
-                  <th className="text-left py-1.5 pr-3">Role</th>
-                  <th className="text-left py-1.5 pr-3">Overview tab</th>
-                  <th className="text-left py-1.5 pr-3">Primary question</th>
-                  <th className="text-left py-1.5">EHDS basis</th>
+                  <th className="text-left py-1.5 pr-3">{t("Username")}</th>
+                  <th className="text-left py-1.5 pr-3">{t("Organisation")}</th>
+                  <th className="text-left py-1.5 pr-3">{t("Role")}</th>
+                  <th className="text-left py-1.5 pr-3">{t("Overview tab")}</th>
+                  <th className="text-left py-1.5 pr-3">
+                    {t("Primary question")}
+                  </th>
+                  <th className="text-left py-1.5">{t("EHDS basis")}</th>
                 </tr>
               </thead>
               <tbody>
                 {[
                   {
                     user: "edcadmin",
-                    org: "Dataspace Operator",
-                    role: "EDC Admin",
+                    org: t("Dataspace Operator"),
+                    role: t("EDC Admin"),
                     color: "text-(--danger-text)",
-                    graph: "Access body",
-                    q: "Who are my participants? What contracts are active?",
-                    ehds: "EHDS Art. 75 — operates the dataspace infrastructure and ensures interoperability between participants",
+                    graph: te("Access body"),
+                    q: t("Who are my participants? What contracts are active?"),
+                    ehds: t(
+                      "EHDS Art. 75: operates the dataspace infrastructure and ensures interoperability between participants",
+                    ),
                   },
                   {
                     user: "clinicuser",
                     org: "AlphaKlinik Berlin",
-                    role: "Data Holder",
+                    role: tc("Data Holder"),
                     color: "text-(--accent)",
-                    graph: "Data holder",
-                    q: "Who has approved access to my datasets?",
-                    ehds: "EHDS Art. 60 — health data holders must make electronic health data available for secondary use when authorized",
+                    graph: te("Data holder"),
+                    q: t("Who has approved access to my datasets?"),
+                    ehds: t(
+                      "EHDS Art. 60: health data holders must make electronic health data available for secondary use when authorized",
+                    ),
                   },
                   {
                     user: "lmcuser",
                     org: "Limburg Medical Centre",
-                    role: "Data Holder",
+                    role: tc("Data Holder"),
                     color: "text-(--accent)",
-                    graph: "Data holder",
-                    q: "What contracts are active for my NL datasets?",
-                    ehds: "EHDS Art. 60 — cross-border data holder demonstrating multi-country interoperability",
+                    graph: te("Data holder"),
+                    q: t("What contracts are active for my NL datasets?"),
+                    ehds: t(
+                      "EHDS Art. 60: cross-border data holder demonstrating multi-country interoperability",
+                    ),
                   },
                   {
                     user: "researcher",
                     org: "PharmaCo Research AG",
-                    role: "Researcher",
+                    role: tc("Researcher"),
                     color: "text-(--success-text)",
-                    graph: "Researcher",
-                    q: "What datasets match my study protocol?",
-                    ehds: "EHDS Art. 53(1) — data users access health data for permitted secondary use purposes (research, innovation, public health)",
+                    graph: te("Researcher"),
+                    q: t("What datasets match my study protocol?"),
+                    ehds: t(
+                      "EHDS Art. 53(1): data users access health data for permitted secondary use purposes (research, innovation, public health)",
+                    ),
                   },
                   {
                     user: "regulator",
                     org: "MedReg DE",
-                    role: "HDAB Authority",
+                    role: tc("HDAB Authority"),
                     color: "text-amber-700 dark:text-amber-400",
-                    graph: "Access body",
-                    q: "What approvals are pending? Is the chain complete?",
-                    ehds: "EHDS Art. 55 and 57 — Health Data Access Bodies are designated by each Member State to authorize secondary use of health data",
+                    graph: te("Access body"),
+                    q: t("What approvals are pending? Is the chain complete?"),
+                    ehds: t(
+                      "EHDS Art. 55 and 57: Health Data Access Bodies are designated by each Member State to authorize secondary use of health data",
+                    ),
                   },
                 ].map((p) => (
                   <tr key={p.user} className="border-b border-(--border)">
@@ -637,49 +720,63 @@ export default function UserGuidePage() {
         {/* EHDS role background */}
         <div className="mt-6 border border-(--border) rounded-xl p-5">
           <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-400 mb-3">
-            Why These Roles? — EHDS Regulatory Background
+            {t("Why These Roles? EHDS Regulatory Background")}
           </h3>
           <p className="text-(--text-secondary) text-sm mb-4">
-            The European Health Data Space regulation establishes a governance
-            framework for both primary use (patient access to their own data)
-            and secondary use (research, innovation, policy-making). Each role
-            in this platform maps to a specific actor defined in the regulation:
+            {t(
+              "The European Health Data Space regulation establishes a governance framework for both primary use (patient access to their own data) and secondary use (research, innovation, policy-making). Each role in this platform maps to a specific actor defined in the regulation:",
+            )}
           </p>
           <div className="space-y-3">
             {[
               {
-                role: "Data Holder",
+                id: "holder",
+                role: tc("Data Holder"),
                 color: "text-(--accent)",
-                article: "Art. 60",
-                why: "Healthcare providers, insurers, and registries that hold electronic health data are legally required to make it available for authorized secondary use. They retain sovereignty over their data and control access through ODRL policies and contract negotiation.",
+                article: t("Art. 60"),
+                why: t(
+                  "Healthcare providers, insurers, and registries that hold electronic health data are legally required to make it available for authorized secondary use. They retain sovereignty over their data and control access through ODRL policies and contract negotiation.",
+                ),
               },
               {
-                role: "Data User (Researcher)",
+                id: "user",
+                role: t("Data User (Researcher)"),
                 color: "text-(--success-text)",
-                article: "Art. 53(1), Art. 67-68",
-                why: "Researchers, public health agencies, and innovators who need health data for permitted purposes must apply through an HDAB, receive a data permit, and access data only in a secure processing environment. They never receive raw patient data directly.",
+                article: t("Art. 53(1), Art. 67-68"),
+                why: t(
+                  "Researchers, public health agencies, and innovators who need health data for permitted purposes must apply through an HDAB, receive a data permit, and access data only in a secure processing environment. They never receive raw patient data directly.",
+                ),
               },
               {
-                role: "HDAB Authority",
+                id: "hdab",
+                role: tc("HDAB Authority"),
                 color: "text-amber-700 dark:text-amber-400",
-                article: "Art. 55, 57",
-                why: "Each EU Member State must designate one or more Health Data Access Bodies (HDABs) as the national authority that reviews data access applications, issues data permits, and ensures compliance. MedReg DE represents the German HDAB in this implementation.",
+                article: t("Art. 55, 57"),
+                why: t(
+                  "Each EU Member State must designate one or more Health Data Access Bodies (HDABs) as the national authority that reviews data access applications, issues data permits, and ensures compliance. MedReg DE represents the German HDAB in this implementation.",
+                ),
               },
               {
-                role: "EDC Admin / Dataspace Operator",
+                id: "operator",
+                role: t("EDC Admin / Dataspace Operator"),
                 color: "text-(--danger-text)",
-                article: "Art. 75",
-                why: "The dataspace operator runs the technical infrastructure: participant onboarding, connector management, federated catalog, and transfer monitoring. They ensure interoperability across all participants but do not access health data directly.",
+                article: t("Art. 75"),
+                why: t(
+                  "The dataspace operator runs the technical infrastructure: participant onboarding, connector management, federated catalog, and transfer monitoring. They ensure interoperability across all participants but do not access health data directly.",
+                ),
               },
               {
-                role: "Trust Center Operator",
+                id: "trust-center",
+                role: t("Trust Center Operator"),
                 color: "text-violet-700 dark:text-violet-400",
-                article: "Art. 73(1)(e)",
-                why: "The EHDS mandates pseudonymisation and re-identification controls. The Trust Center manages pseudonym resolution, secure processing environment (SPE) sessions, and ensures that data users only access de-identified data. This role enforces the technical privacy safeguards the regulation requires.",
+                article: t("Art. 73(1)(e)"),
+                why: t(
+                  "The EHDS mandates pseudonymisation and re-identification controls. The Trust Center manages pseudonym resolution, secure processing environment (SPE) sessions, and ensures that data users only access de-identified data. This role enforces the technical privacy safeguards the regulation requires.",
+                ),
               },
             ].map((r) => (
               <div
-                key={r.role}
+                key={r.id}
                 className="border border-(--border) rounded-lg p-3"
               >
                 <div className="flex items-center gap-2 mb-1">
@@ -699,22 +796,23 @@ export default function UserGuidePage() {
         {/* Menu items per role */}
         <div className="mt-6 border border-(--border) rounded-xl p-5">
           <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-400 mb-3">
-            Menu Items per Role
+            {t("Menu Items per Role")}
           </h3>
           <p className="text-(--text-secondary) text-sm mb-4">
-            Navigation is filtered by role — items not relevant to a user&apos;s
-            function are hidden entirely. This separation of concerns reflects
-            the EHDS principle that each actor should only see the tools and
-            data relevant to their regulatory function.
+            {t(
+              "Navigation is filtered by role: items not relevant to a user's function are hidden entirely. This separation of concerns reflects the EHDS principle that each actor should only see the tools and data relevant to their regulatory function.",
+            )}
           </p>
           <div className="overflow-x-auto">
             <table className="text-xs w-full border-collapse">
               <thead>
                 <tr className="border-b border-(--border)">
-                  <th className="text-left py-1.5 pr-2">Page</th>
+                  <th className="text-left py-1.5 pr-2">{t("Page")}</th>
                   {MATRIX_PERSONAS.map((p) => (
                     <th key={p.label} className="text-center py-1.5 px-2">
-                      <span className={p.className}>{p.label}</span>
+                      <span className={p.className}>
+                        {p.nav ? tn(p.label) : t(p.label)}
+                      </span>
                     </th>
                   ))}
                 </tr>
@@ -723,14 +821,16 @@ export default function UserGuidePage() {
                 {MENU_MATRIX.map(({ href, label, seenBy }) => (
                   <tr key={href} className="border-b border-(--border)/50">
                     <td className="py-1.5 pr-2">
-                      <span className="text-(--text-primary)">{label}</span>{" "}
+                      <span className="text-(--text-primary)">{tn(label)}</span>{" "}
                       <code className="text-(--text-secondary)">{href}</code>
                     </td>
                     {seenBy.map((seen, i) => (
                       <td
                         key={MATRIX_PERSONAS[i].label}
                         className="text-center py-1.5 px-2"
-                        aria-label={seen ? "in the menu" : "not in the menu"}
+                        aria-label={
+                          seen ? t("in the menu") : t("not in the menu")
+                        }
                       >
                         {seen ? "\u2705" : "\u2014"}
                       </td>
@@ -741,58 +841,67 @@ export default function UserGuidePage() {
             </table>
           </div>
           <p className="text-(--text-secondary) text-xs mt-3">
-            Generated from the navigation itself, so it shows exactly what each
-            persona&apos;s menu holds. Every page except the start page and this
-            documentation needs a sign-in (ADR-044); a page missing from a menu
-            is not necessarily forbidden, the middleware decides that.
+            {t(
+              "Generated from the navigation itself, so it shows exactly what each persona's menu holds. Every page except the start page and this documentation needs a sign-in (ADR-044); a page missing from a menu is not necessarily forbidden, the middleware decides that.",
+            )}
           </p>
         </div>
 
         {/* Persona overview views (the graph explorer is retired) */}
         <div className="mt-6 border border-(--border) rounded-xl p-5">
           <h3 className="text-lg font-semibold text-indigo-700 dark:text-indigo-400 mb-3">
-            Persona Overview — one view per role
+            {t("Persona Overview: one view per role")}
           </h3>
           <p className="text-(--text-secondary) text-sm mb-4">
-            The persona overview answers each role&apos;s primary question in a
-            single layered view: what is wrong right now, with the article it
-            breaks, and the nodes behind it. It replaces the graph explorer,
-            which is retired. Pick a role with the tabs at the top of the page
-            or straight from here.
+            {t(
+              "The persona overview answers each role's primary question in a single layered view: what is wrong right now, with the article it breaks, and the nodes behind it. It replaces the graph explorer, which is retired. Pick a role with the tabs at the top of the page or straight from here.",
+            )}
           </p>
           <div className="space-y-3">
             {[
               {
                 id: "patient",
-                label: "Patient",
-                title: "My health, in one view",
+                label: te("Patient"),
+                title: te("My health, in one view"),
                 color: "text-teal-700 dark:text-teal-400",
-                q: "Which parameters put me at risk, what should I do about them, and who is using my data?",
-                articles: "Art. 3, 8, 14, 71, 73",
+                q: te(
+                  "Which parameters put me at risk, what should I do about them, and who is using my data?",
+                ),
+                articles: t("Regulation (EU) 2025/327 Art. 3, 8, 14, 71, 73"),
               },
               {
                 id: "researcher",
-                label: "Researcher / Data User",
-                title: "My research, in one view",
+                label: te("Researcher / Data User"),
+                title: te("My research, in one view"),
                 color: "text-(--success-text)",
-                q: "What am I allowed to use today, what is pending or blocked, and what am I missing?",
-                articles: "Art. 53, 61, 67, 68, 69, 73",
+                q: te(
+                  "What am I allowed to use today, what is pending or blocked, and what am I missing?",
+                ),
+                articles: t(
+                  "Regulation (EU) 2025/327 Art. 53, 61, 67, 68, 69, 73",
+                ),
               },
               {
                 id: "hdab",
-                label: "Health Data Access Body",
-                title: "Compliance, in one view",
+                label: t("Health Data Access Body"),
+                title: te("Compliance, in one view"),
                 color: "text-amber-700 dark:text-amber-400",
-                q: "Which operations are non-compliant right now, and are my own decisions on time?",
-                articles: "Art. 57, 61, 63, 68, 73, 78",
+                q: te(
+                  "Which operations are non-compliant right now, and are my own decisions on time?",
+                ),
+                articles: t(
+                  "Regulation (EU) 2025/327 Art. 57, 61, 63, 68, 73, 78",
+                ),
               },
               {
                 id: "hospital",
-                label: "Hospital / Data Holder",
-                title: "My data, in one view",
+                label: te("Hospital / Data Holder"),
+                title: te("My data, in one view"),
                 color: "text-(--accent)",
-                q: "Which consumers are trusted, what is flowing without cover, and are my own duties in order?",
-                articles: "Art. 60, 61, 73, 77, 78",
+                q: te(
+                  "Which consumers are trusted, what is flowing without cover, and are my own duties in order?",
+                ),
+                articles: t("Regulation (EU) 2025/327 Art. 60, 61, 73, 77, 78"),
               },
             ].map((p) => (
               <div
@@ -812,15 +921,13 @@ export default function UserGuidePage() {
                     href={`/overview?persona=${p.id}`}
                     className="inline-flex items-center gap-1 text-xs text-(--text-secondary) hover:text-indigo-700 dark:hover:text-indigo-400 transition-colors"
                   >
-                    Try it <ArrowRight size={12} />
+                    {t("Try it")} <ArrowRight size={12} />
                   </Link>
                 </div>
                 <p className="text-(--text-secondary) text-xs italic mb-1">
-                  &ldquo;{p.q}&rdquo;
+                  {t("“{q}”", { q: p.q })}
                 </p>
-                <p className="text-(--text-secondary) text-xs">
-                  Regulation (EU) 2025/327 {p.articles}
-                </p>
+                <p className="text-(--text-secondary) text-xs">{p.articles}</p>
               </div>
             ))}
           </div>
@@ -829,92 +936,92 @@ export default function UserGuidePage() {
 
       {/* ── 2. Getting Started ── */}
       <section className="mb-12" id="getting-started">
-        <h2 className="text-2xl font-semibold mb-3">Getting Started</h2>
+        <h2 className="text-2xl font-semibold mb-3">{t("Getting Started")}</h2>
         <MermaidDiagram
           chart={localizedChart("user-guide-workflow", lang)}
-          caption="User workflow overview"
+          caption={t("User workflow overview")}
         />
         <p className="text-(--text-secondary) text-sm mt-3 mb-6">
-          After authenticating through Keycloak SSO, you land on the persona
-          overview, opened at the tab for your role. From there you browse
-          datasets, review patient timelines, run analytics, or check EHDS
-          compliance. The <strong>UserMenu</strong> (top-right) shows your role
-          badge.
+          <T area="docsGuide" tags={{ b: strong }}>
+            {
+              "After authenticating through Keycloak SSO, you land on the persona overview, opened at the tab for your role. From there you browse datasets, review patient timelines, run analytics, or check EHDS compliance. The <b>UserMenu</b> (top-right) shows your role badge."
+            }
+          </T>
         </p>
 
         <div className="space-y-6">
-          <FeatureCard href="/" title="Home Dashboard" icon={LayoutDashboard}>
+          <FeatureCard
+            href="/"
+            title={t("Home Dashboard")}
+            icon={LayoutDashboard}
+          >
             <p className="text-(--text-secondary) text-sm mb-2">
-              The landing page presents a high-level overview of the dataspace:
-              active participants, registered datasets, and recent transfers.
-              Quick-action cards let you jump to common tasks.
+              {t(
+                "The landing page presents a high-level overview of the dataspace: active participants, registered datasets, and recent transfers. Quick-action cards let you jump to common tasks.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: PharmaCo Research AG logs in and sees 5 active
-              participants, 3 published datasets, and a pending contract
-              negotiation with AlphaKlinik Berlin.
+              {t(
+                "Example: PharmaCo Research AG logs in and sees 5 active participants, 3 published datasets, and a pending contract negotiation with AlphaKlinik Berlin.",
+              )}
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/onboarding"
-            title="Participant Onboarding"
+            title={t("Participant Onboarding")}
             icon={UserPlus}
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              The onboarding wizard guides new participants through dataspace
-              registration: creating a DID identity, registering with the
-              Credential Federated Manager, and enrolling in the federated
-              catalog. This process implements the EHDS requirement for
-              authorised participation (Art. 75) with verifiable credentials.
+              {t(
+                "The onboarding wizard guides new participants through dataspace registration: creating a DID identity, registering with the Credential Federated Manager, and enrolling in the federated catalog. This process implements the EHDS requirement for authorised participation (Art. 75) with verifiable credentials.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: Limburg Medical Centre joins the EHDS dataspace by
-              providing its organization details, generating{" "}
-              <code className="text-xs">did:web:lmc.nl:clinic</code>, and
-              obtaining a MembershipCredential.
+              <T area="docsGuide" tags={{ c: codeXs }}>
+                {
+                  "Example: Limburg Medical Centre joins the EHDS dataspace by providing its organization details, generating <c>did:web:lmc.nl:clinic</c>, and obtaining a MembershipCredential."
+                }
+              </T>
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/settings"
-            title="Participant Settings"
+            title={t("Participant Settings")}
             icon={Settings}
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              View and manage your participant profile, verifiable credentials
-              (MembershipCredential, EHDSParticipantCredential), connector
-              endpoints, and Keycloak SSO configuration.
+              {t(
+                "View and manage your participant profile, verifiable credentials (MembershipCredential, {credential}), connector endpoints, and Keycloak SSO configuration.",
+                { credential: PARTICIPANT_CREDENTIAL },
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: AlphaKlinik Berlin checks that both its
-              MembershipCredential and EHDSParticipantCredential are active and
-              not expired before publishing a new dataset.
+              {t(
+                "Example: AlphaKlinik Berlin checks that both its MembershipCredential and {credential} are active and not expired before publishing a new dataset.",
+                { credential: PARTICIPANT_CREDENTIAL },
+              )}
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/auth/eudi-qr"
-            title="Sign in with the EUDI Wallet"
+            title={t("Sign in with the EUDI Wallet")}
             icon={Wallet}
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              A patient signs in with the person identification data (PID) in an
-              EUDI Wallet, such as the German d-you wallet, instead of a
-              password: the sign-in page shows a QR code, the wallet presents
-              the PID over OpenID4VP, and the hub checks it with its own
-              verifier (EHDS Art. 16, eIDAS). An account the Klarbefund app
-              created can be linked to a PID once under My Health, Connect your
-              EUDI wallet; the hub keeps a keyed fingerprint of the PID, never
-              the name or birth date.
+              {t(
+                "A patient signs in with the person identification data (PID) in an EUDI Wallet, such as the German d-you wallet, instead of a password: the sign-in page shows a QR code, the wallet presents the PID over OpenID4VP, and the hub checks it with its own verifier (EHDS Art. 16, eIDAS). An account the Klarbefund app created can be linked to a PID once under My Health, Connect your EUDI wallet; the hub keeps a keyed fingerprint of the PID, never the name or birth date.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A patient scans the QR code with d-you, approves the
-              presentation and lands in their own record at assurance level
-              high. The static demo shows the flow with a simulated phone.
+              {t(
+                "Example: A patient scans the QR code with d-you, approves the presentation and lands in their own record at assurance level high. The static demo shows the flow with a simulated phone.",
+              )}
             </p>
           </FeatureCard>
         </div>
@@ -923,28 +1030,27 @@ export default function UserGuidePage() {
       {/* ── Availability (ADR-053) ── */}
       <section className="mb-12" id="availability">
         <h2 className="text-2xl font-semibold mb-3">
-          When Is the Live Demo Available?
+          {t("When Is the Live Demo Available?")}
         </h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          The demo exists twice. The live dataspace runs the real connectors,
-          identity services and databases, and to save running costs it is
-          stopped outside office hours. The static demo is a copy of the same
-          pages with synthetic data, and it is always available.
+          {t(
+            "The demo exists twice. The live dataspace runs the real connectors, identity services and databases, and to save running costs it is stopped outside office hours. The static demo is a copy of the same pages with synthetic data, and it is always available.",
+          )}
         </p>
         <div className="overflow-x-auto mb-4">
           <table className="w-full text-sm border border-(--border) rounded-lg">
             <thead>
               <tr className="bg-(--surface-2) text-left">
                 <th className="px-3 py-2 font-semibold"></th>
-                <th className="px-3 py-2 font-semibold">Live demo</th>
-                <th className="px-3 py-2 font-semibold">Static demo</th>
+                <th className="px-3 py-2 font-semibold">{t("Live demo")}</th>
+                <th className="px-3 py-2 font-semibold">{t("Static demo")}</th>
               </tr>
             </thead>
             <tbody className="text-(--text-secondary)">
               <tr className="border-t border-(--border)">
-                <td className="px-3 py-2 font-medium">Address</td>
+                <td className="px-3 py-2 font-medium">{t("Address")}</td>
                 <td className="px-3 py-2">
-                  <code>ehds.mabu.red</code>
+                  <code>{LIVE_HOST}</code>
                 </td>
                 <td className="px-3 py-2">
                   <a
@@ -958,182 +1064,183 @@ export default function UserGuidePage() {
                 </td>
               </tr>
               <tr className="border-t border-(--border)">
-                <td className="px-3 py-2 font-medium">Available</td>
+                <td className="px-3 py-2 font-medium">{t("Available")}</td>
                 <td className="px-3 py-2">
-                  Monday to Friday, 07:00 to 20:00 Berlin time in summer and
-                  06:00 to 19:00 in winter. Closed on Berlin public holidays.
+                  {t(
+                    "Monday to Friday, 07:00 to 20:00 Berlin time in summer and 06:00 to 19:00 in winter. Closed on Berlin public holidays.",
+                  )}
                 </td>
-                <td className="px-3 py-2">Always</td>
+                <td className="px-3 py-2">{t("Always")}</td>
               </tr>
               <tr className="border-t border-(--border)">
-                <td className="px-3 py-2 font-medium">Sign-in</td>
-                <td className="px-3 py-2">Keycloak accounts per persona</td>
-                <td className="px-3 py-2">A persona picker, no password</td>
-              </tr>
-              <tr className="border-t border-(--border)">
-                <td className="px-3 py-2 font-medium">Data</td>
+                <td className="px-3 py-2 font-medium">{t("Sign-in")}</td>
                 <td className="px-3 py-2">
-                  The live knowledge graph; negotiations and transfers really
-                  run
+                  {t("Keycloak accounts per persona")}
                 </td>
                 <td className="px-3 py-2">
-                  A fixed snapshot; actions are shown but not carried out
+                  {t("A persona picker, no password")}
+                </td>
+              </tr>
+              <tr className="border-t border-(--border)">
+                <td className="px-3 py-2 font-medium">{t("Data")}</td>
+                <td className="px-3 py-2">
+                  {t(
+                    "The live knowledge graph; negotiations and transfers really run",
+                  )}
+                </td>
+                <td className="px-3 py-2">
+                  {t("A fixed snapshot; actions are shown but not carried out")}
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
         <p className="text-(--text-secondary) text-sm">
-          If you open the live demo outside these hours, every page shows a
-          notice saying when it is back, with a button that opens the same page
-          in the static demo. The Klarbefund app cannot connect to EHDS or use
-          its cloud analysis during these times either. Analysis on the phone
-          keeps working.
+          {t(
+            "If you open the live demo outside these hours, every page shows a notice saying when it is back, with a button that opens the same page in the static demo. The Klarbefund app cannot connect to EHDS or use its cloud analysis during these times either. Analysis on the phone keeps working.",
+          )}
         </p>
       </section>
 
       {/* ── 3. Explore ── */}
       <section className="mb-12" id="explore">
-        <h2 className="text-2xl font-semibold mb-4">Explore</h2>
+        <h2 className="text-2xl font-semibold mb-4">{tn("Explore")}</h2>
         <div className="space-y-6">
-          <FeatureCard href="/overview" title="Persona Overview" icon={Globe}>
+          <FeatureCard
+            href="/overview"
+            title={tn("Persona Overview")}
+            icon={Globe}
+          >
             <p className="text-(--text-secondary) text-sm mb-2">
-              One view per role that answers the role&apos;s primary question.
-              On the left, what needs attention right now, most urgent first,
-              each with the article of Regulation (EU) 2025/327 it concerns. On
-              the right, a layered 3D scene of the knowledge graph behind it:
-              the role&apos;s own decisions and their clocks, credentials,
-              permits and contracts, data users and holders, datasets, and the
-              months unfolded over time.
+              {t(
+                "One view per role that answers the role's primary question. On the left, what needs attention right now, most urgent first, each with the article of Regulation (EU) 2025/327 it concerns. On the right, a layered 3D scene of the knowledge graph behind it: the role's own decisions and their clocks, credentials, permits and contracts, data users and holders, datasets, and the months unfolded over time.",
+              )}
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
-              <li>Tabs for Patient, Researcher, Access body and Data holder</li>
               <li>
-                Click a finding to select its node in the scene and unfold what
-                lies behind it
+                {t("Tabs for Patient, Researcher, Access body and Data holder")}
               </li>
               <li>
-                Turn the scene off (or ask your system for reduced motion) and
-                the list on the left is the full view
+                {t(
+                  "Click a finding to select its node in the scene and unfold what lies behind it",
+                )}
+              </li>
+              <li>
+                {t(
+                  "Turn the scene off (or ask your system for reduced motion) and the list on the left is the full view",
+                )}
               </li>
             </ul>
             <p className="text-(--text-secondary) text-xs italic mt-2">
-              Example: MedReg DE sees that three applications passed the
-              three-month decision deadline of Art. 68(4) and opens the queue by
-              month.
+              {t(
+                "Example: MedReg DE sees that three applications passed the three-month decision deadline of Art. 68(4) and opens the queue by month.",
+              )}
             </p>
           </FeatureCard>
 
-          <FeatureCard href="/catalog" title="Dataset Catalog" icon={Database}>
+          <FeatureCard
+            href="/catalog"
+            title={tn("Dataset Catalog")}
+            icon={Database}
+          >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Browse and search HealthDCAT-AP metadata records for all published
-              datasets. Each entry shows title, description, publisher,
-              temporal/spatial coverage, and distribution formats. The catalog
-              implements the EHDS metadata requirements (Art. 77) for
-              discoverable, machine-readable dataset descriptions.
+              {t(
+                "Browse and search HealthDCAT-AP metadata records for all published datasets. Each entry shows title, description, publisher, temporal/spatial coverage, and distribution formats. The catalog implements the EHDS metadata requirements (Art. 77) for discoverable, machine-readable dataset descriptions.",
+              )}
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
-              <li>Filter by publisher, theme, or keyword</li>
-              <li>View distribution endpoints (FHIR, OMOP, bulk export)</li>
-              <li>Check data quality metrics (DQV dimensions)</li>
-              <li>Initiate data access requests from catalog entries</li>
+              <li>{t("Filter by publisher, theme, or keyword")}</li>
+              <li>
+                {t("View distribution endpoints (FHIR, OMOP, bulk export)")}
+              </li>
+              <li>{t("Check data quality metrics (DQV dimensions)")}</li>
+              <li>{t("Initiate data access requests from catalog entries")}</li>
             </ul>
             <p className="text-(--text-secondary) text-xs italic mt-2">
-              Example: PharmaCo Research AG searches for &quot;diabetes&quot;
-              datasets and finds AlphaKlinik Berlin&apos;s Type 2 Diabetes
-              Cohort with FHIR R4 and OMOP CDM distributions.
+              {t(
+                "Example: PharmaCo Research AG searches for “diabetes” datasets and finds AlphaKlinik Berlin's Type 2 Diabetes Cohort with FHIR R4 and OMOP CDM distributions.",
+              )}
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/catalog/editor"
-            title="HealthDCAT-AP Editor"
+            title={t("HealthDCAT-AP Editor")}
             icon={PencilLine}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Data holders create and edit their dataset descriptions here. The
-              hub serves them as HealthDCAT-AP Release 8, the form Implementing
-              Regulation (EU) 2026/2098 sets for every dataset description.
-              Mandatory fields are marked, and a saved entry carries what
-              Release 8 requires (access body, distribution, variables, contact
-              point), so it passes the official validation at once.
+              {t(
+                "Data holders create and edit their dataset descriptions here. The hub serves them as HealthDCAT-AP Release 8, the form Implementing Regulation (EU) 2026/2098 sets for every dataset description. Mandatory fields are marked, and a saved entry carries what Release 8 requires (access body, distribution, variables, contact point), so it passes the official validation at once.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic mt-2">
-              Example: AlphaKlinik Berlin adds its Type 2 Diabetes Cohort with
-              an Art. 68 data permit as the legal basis, then exports the
-              catalogue as Turtle.
+              {t(
+                "Example: AlphaKlinik Berlin adds its Type 2 Diabetes Cohort with an Art. 68 data permit as the legal basis, then exports the catalogue as Turtle.",
+              )}
             </p>
           </FeatureCard>
 
-          <FeatureCard href="/patient" title="Patient Journey" icon={Search}>
+          <FeatureCard
+            href="/patient"
+            title={tn("Patient Journey")}
+            icon={Search}
+          >
             <p className="text-(--text-secondary) text-sm mb-2">
-              View the clinical timeline for synthetic patients, showing FHIR R4
-              resources (Encounters, Conditions, Observations, Medications,
-              Procedures) mapped to their OMOP CDM equivalents. This dual-view
-              demonstrates how primary-use clinical data (EHDS Chapter II) can
-              be transformed for secondary-use analytics while preserving
-              semantic integrity.
+              {t(
+                "View the clinical timeline for synthetic patients, showing FHIR R4 resources (Encounters, Conditions, Observations, Medications, Procedures) mapped to their OMOP CDM equivalents. This dual-view demonstrates how primary-use clinical data (EHDS Chapter II) can be transformed for secondary-use analytics while preserving semantic integrity.",
+              )}
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
-              <li>Select patients from the patient list</li>
-              <li>Timeline displays events chronologically</li>
-              <li>Toggle between FHIR and OMOP views</li>
-              <li>Explore SNOMED/LOINC/RxNorm concept mappings</li>
+              <li>{t("Select patients from the patient list")}</li>
+              <li>{t("Timeline displays events chronologically")}</li>
+              <li>{t("Toggle between FHIR and OMOP views")}</li>
+              <li>{t("Explore SNOMED/LOINC/RxNorm concept mappings")}</li>
             </ul>
             <p className="text-(--text-secondary) text-xs italic mt-2">
-              Example: A data steward reviews the timeline for a synthetic
-              patient with hypertension, verifying that the FHIR Condition
-              correctly maps to OMOP condition_occurrence with SNOMED code
-              38341003.
+              {t(
+                "Example: A data steward reviews the timeline for a synthetic patient with hypertension, verifying that the FHIR Condition correctly maps to OMOP condition_occurrence with SNOMED code 38341003.",
+              )}
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/analytics"
-            title="OMOP Analytics"
+            title={tn("OMOP Analytics")}
             icon={BarChart3}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Cohort-level research analytics powered by the OMOP CDM layer. Run
-              aggregate queries across conditions, measurements, drug exposures,
-              and procedures. This implements the EHDS secondary-use analytics
-              capability (Art. 53) where researchers work with de-identified,
-              standardised data.
+              {t(
+                "Cohort-level research analytics powered by the OMOP CDM layer. Run aggregate queries across conditions, measurements, drug exposures, and procedures. This implements the EHDS secondary-use analytics capability (Art. 53) where researchers work with de-identified, standardised data.",
+              )}
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
-              <li>View condition prevalence and demographics</li>
-              <li>Analyse drug exposure patterns</li>
-              <li>Run cohort characterisation queries</li>
-              <li>Export results for further analysis</li>
+              <li>{t("View condition prevalence and demographics")}</li>
+              <li>{t("Analyse drug exposure patterns")}</li>
+              <li>{t("Run cohort characterisation queries")}</li>
+              <li>{t("Export results for further analysis")}</li>
             </ul>
             <p className="text-(--text-secondary) text-xs italic mt-2">
-              Example: PharmaCo Research AG runs a cohort query to identify
-              patients with Type 2 Diabetes who received Metformin, showing age
-              and gender distribution across the cohort.
+              {t(
+                "Example: PharmaCo Research AG runs a cohort query to identify patients with Type 2 Diabetes who received Metformin, showing age and gender distribution across the cohort.",
+              )}
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/query"
-            title="Natural Language / Federated Query"
+            title={t("Natural Language / Federated Query")}
             icon={MessageSquare}
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              A researcher with a data permit asks a question in plain language.
-              A prepared question, a fulltext search or, where one is
-              configured, a language model turns it into Cypher, which runs
-              inside the secure processing environment; the page shows the
-              Cypher, the permit it ran under and the rows that came back. The
-              Federated button asks every SPE and merges the answers. Every
-              answer about persons is k-anonymous: a count below 5 is shown as
-              &lt;5, and a share computed from it with it.
+              {t(
+                "A researcher with a data permit asks a question in plain language. A prepared question, a fulltext search or, where one is configured, a language model turns it into Cypher, which runs inside the secure processing environment; the page shows the Cypher, the permit it ran under and the rows that came back. The Federated button asks every SPE and merges the answers. Every answer about persons is k-anonymous: a count below 5 is shown as <5, and a share computed from it with it.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A researcher asks &quot;What is the age
-              distribution?&quot;; the 0-17 group holds one person and comes
-              back as &lt;5, with a k = 5 badge saying how many values were
-              suppressed.
+              {t(
+                "Example: A researcher asks “What is the age distribution?”; the 0-17 group holds one person and comes back as <5, with a k = 5 badge saying how many values were suppressed.",
+              )}
             </p>
           </FeatureCard>
 
@@ -1142,76 +1249,61 @@ export default function UserGuidePage() {
             className="rounded-xl border border-(--border) bg-(--surface-2) p-5"
           >
             <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold text-indigo-700 dark:text-indigo-400">
-              <Server size={18} aria-hidden /> Two secure processing
-              environments
+              <Server size={18} aria-hidden />{" "}
+              {t("Two secure processing environments")}
             </h3>
             <p className="text-(--text-secondary) text-sm mb-2">
-              Row-level data is processed only inside a secure processing
-              environment (EHDS Art. 73); only answers leave it. SPE-1 holds
-              AlphaKlinik Berlin&apos;s patients, SPE-2 Limburg Medical
-              Centre&apos;s, each a Neo4j workspace loaded for the permit, so a
-              federated question has two contributors. Both apply the same rules
-              before anything leaves: the data permit, the ODRL policy, the Art.
-              71 opt-out (persons who opted out are never counted) and k = 5,
-              including the rule that a contributor with fewer than 5 records
-              withholds the whole answer, since a missing contributor would
-              identify people. Every question is recorded on the audit chain.
+              {t(
+                "Row-level data is processed only inside a secure processing environment (EHDS Art. 73); only answers leave it. SPE-1 holds AlphaKlinik Berlin's patients, SPE-2 Limburg Medical Centre's, each a Neo4j workspace loaded for the permit, so a federated question has two contributors. Both apply the same rules before anything leaves: the data permit, the ODRL policy, the Art. 71 opt-out (persons who opted out are never counted) and k = 5, including the rule that a contributor with fewer than 5 records withholds the whole answer, since a missing contributor would identify people. Every question is recorded on the audit chain.",
+              )}
             </p>
             <ul className="text-(--text-secondary) text-sm mb-2 list-disc pl-5 space-y-1">
               <li>
-                Ask &quot;How many SPEs can I access?&quot; on the query page to
-                see the environments and how many patients each holds.
+                {t(
+                  "Ask “How many SPEs can I access?” on the query page to see the environments and how many patients each holds.",
+                )}
               </li>
               <li>
-                Locally both run as workspaces loaded per permit from an
-                encrypted extract (<code>docker-compose.trustee.yml</code> with
-                the <code>federated</code> profile), with the access body&apos;s
-                Trustee and its sample attester: labelled &quot;Simulated
-                attestation&quot;. The static demo shows the same.
+                <T area="docsGuide" tags={{ c: code, d: code }}>
+                  {
+                    "Locally both run as workspaces loaded per permit from an encrypted extract (<c>docker-compose.trustee.yml</c> with the <d>federated</d> profile), with the access body's Trustee and its sample attester: labelled “Simulated attestation”. The static demo shows the same."
+                  }
+                </T>
               </li>
               <li>
-                On Azure both run as ACI confidential container groups,{" "}
-                <code>mvhd-spe-1</code> and <code>mvhd-spe-2</code>, once{" "}
-                <code>scripts/azure/21-aci-confidential-spe.sh</code> has run.
-                Each proves its own container group on AMD SEV-SNP hardware:
-                labelled &quot;Attested: confidential workload&quot;, and the
-                permit&apos;s policy hash is checked by hardware.
+                <T area="docsGuide" tags={{ c: code, d: code, e: code }}>
+                  {
+                    "On Azure both run as ACI confidential container groups, <c>mvhd-spe-1</c> and <d>mvhd-spe-2</d>, once <e>scripts/azure/21-aci-confidential-spe.sh</e> has run. Each proves its own container group on AMD SEV-SNP hardware: labelled “Attested: confidential workload”, and the permit's policy hash is checked by hardware."
+                  }
+                </T>
               </li>
               <li>
-                The operator sees the evidence behind each label on{" "}
-                <Link
-                  href="/admin/attestation"
-                  className="text-indigo-700 dark:text-indigo-400 hover:underline"
+                <T
+                  area="docsGuide"
+                  tags={{ l: attestationLink, a: adr068Link }}
                 >
-                  SPE attestation
-                </Link>
-                . The design is{" "}
-                <a
-                  href="https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-indigo-700 dark:text-indigo-400 hover:underline"
-                >
-                  ADR-068
-                </a>
-                ; where it runs on Azure is ADR-069 (proposed, #774).
+                  {
+                    "The operator sees the evidence behind each label on <l>SPE attestation</l>. The design is <a>ADR-068</a>; where it runs on Azure is ADR-069 (proposed, #774)."
+                  }
+                </T>
               </li>
             </ul>
           </div>
 
-          <FeatureCard href="/eehrxf" title="EEHRxF Profiles" icon={FileCheck}>
+          <FeatureCard
+            href="/eehrxf"
+            title={tn("EEHRxF Profiles")}
+            icon={FileCheck}
+          >
             <p className="text-(--text-secondary) text-sm mb-2">
-              European EHR Exchange Format profile alignment view. Analyse which
-              FHIR profiles satisfy EHDS priority categories (Patient Summary,
-              ePrescription, Laboratory Results, Medical Imaging, Hospital
-              Discharge) and identify coverage gaps. The EEHRxF is mandated by
-              EHDS Art. 15 to ensure interoperability of primary-use health data
-              across Member States.
+              {t(
+                "European EHR Exchange Format profile alignment view. Analyse which FHIR profiles satisfy EHDS priority categories (Patient Summary, ePrescription, Laboratory Results, Medical Imaging, Hospital Discharge) and identify coverage gaps. The EEHRxF is mandated by EHDS Art. 15 to ensure interoperability of primary-use health data across Member States.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: MedReg DE reviews AlphaKlinik Berlin&apos;s profile
-              coverage and sees that Patient Summary and Laboratory Results are
-              fully aligned, while ePrescription has one missing profile.
+              {t(
+                "Example: MedReg DE reviews AlphaKlinik Berlin's profile coverage and sees that Patient Summary and Laboratory Results are fully aligned, while ePrescription has one missing profile.",
+              )}
             </p>
           </FeatureCard>
         </div>
@@ -1219,95 +1311,91 @@ export default function UserGuidePage() {
 
       {/* ── My Health: the patient's pages ── */}
       <section className="mb-12" id="my-health">
-        <h2 className="text-2xl font-semibold mb-3">My Health</h2>
+        <h2 className="text-2xl font-semibold mb-3">{tn("My Health")}</h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          A signed-in patient gets their own menu: one overview, their records,
-          and the pages below. Each shows that patient&apos;s own record only;
-          any other patient&apos;s record is refused (EHDS Art. 3, GDPR Art.
-          15).
+          {t(
+            "A signed-in patient gets their own menu: one overview, their records, and the pages below. Each shows that patient's own record only; any other patient's record is refused (EHDS Art. 3, GDPR Art. 15).",
+          )}
         </p>
         <div className="space-y-6">
           <FeatureCard
             href="/patient/query"
-            title="Personal Research"
+            title={tn("Personal Research")}
             icon={Search}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              A natural-language question over the patient&apos;s own record
-              (EHDS Art. 3, GDPR Art. 15): trends from fitness, lab and
-              nutrition data, together with the relevant ePA events, computed
-              only from that patient&apos;s data.
+              {t(
+                "A natural-language question over the patient's own record (EHDS Art. 3, GDPR Art. 15): trends from fitness, lab and nutrition data, together with the relevant ePA events, computed only from that patient's data.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A patient asks how their cholesterol has changed since
-              their last check-up.
+              {t(
+                "Example: A patient asks how their cholesterol has changed since their last check-up.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/patient/profile"
-            title="Health Profile &amp; Risks"
+            title={tn("Health Profile & Risks")}
             icon={Users}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              The patient&apos;s health profile and risk assessment, derived
-              from their own record.
+              {t(
+                "The patient's health profile and risk assessment, derived from their own record.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A patient reviews the risk factors the profile derives
-              from their last lab results.
+              {t(
+                "Example: A patient reviews the risk factors the profile derives from their last lab results.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/patient/research"
-            title="Research Programs"
+            title={tn("Research Programs")}
             icon={TestTube}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              The opt-out from all secondary use (EHDS Art. 71), at any time and
-              reversible, and, separately, the research programmes the patient
-              can join or leave, with the history of every consent given or
-              withdrawn (GDPR Art. 7(3)).
+              {t(
+                "The opt-out from all secondary use (EHDS Art. 71), at any time and reversible, and, separately, the research programmes the patient can join or leave, with the history of every consent given or withdrawn (GDPR Art. 7(3)).",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A patient opts out of secondary use; from then on every
-              new research query leaves them out, and the opt-out is kept with
-              its date until they opt back in.
+              {t(
+                "Example: A patient opts out of secondary use; from then on every new research query leaves them out, and the opt-out is kept with its date until they opt back in.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/patient/insights"
-            title="Research Insights"
+            title={tn("Research Insights")}
             icon={Award}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              What research using the patient&apos;s data found, and the
-              recommendations that follow for them.
+              {t(
+                "What research using the patient's data found, and the recommendations that follow for them.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A patient reads an insight from a diabetes study they
-              contributed to.
+              {t(
+                "Example: A patient reads an insight from a diabetes study they contributed to.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/docs/klarbefund"
-            title="Klarbefund: the iPhone app"
+            title={t("Klarbefund: the iPhone app")}
             icon={Smartphone}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Klarbefund turns a paper lab report into checkable values on the
-              phone. Connected to the hub, it either creates its own sandbox
-              account with an empty record (gated by Apple App Attest) or
-              connects to an existing one: Health Profile shows a QR code, the
-              app scans it and is connected. It sends the reports, vaccinations
-              and medication plan the person chooses, and weekly device means
-              behind a switch of their own. Delete all my data in the app also
-              deletes the account it created on the hub. The beta is open
-              through TestFlight.
+              {t(
+                "Klarbefund turns a paper lab report into checkable values on the phone. Connected to the hub, it either creates its own sandbox account with an empty record (gated by Apple App Attest) or connects to an existing one: Health Profile shows a QR code, the app scans it and is connected. It sends the reports, vaccinations and medication plan the person chooses, and weekly device means behind a switch of their own. Delete all my data in the app also deletes the account it created on the hub. The beta is open through TestFlight.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A patient photographs a lab report, checks the values
-              Klarbefund read, and sends the report to their record, where it
-              appears under Patient Journey.
+              {t(
+                "Example: A patient photographs a lab report, checks the values Klarbefund read, and sends the report to their record, where it appears under Patient Journey.",
+              )}
             </p>
           </FeatureCard>
         </div>
@@ -1315,187 +1403,183 @@ export default function UserGuidePage() {
 
       {/* ── 4. Governance ── */}
       <section className="mb-12" id="governance">
-        <h2 className="text-2xl font-semibold mb-3">Governance</h2>
+        <h2 className="text-2xl font-semibold mb-3">{tn("Governance")}</h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          The governance modules manage EHDS compliance, protocol testing, and
-          verifiable credential issuance as required by the European Health Data
-          Space regulation (Chapter IV, Art. 50 to 81). These modules ensure
-          that every data access follows the legally mandated approval chain:
-          application, HDAB review, data permit issuance, contract negotiation,
-          and audited transfer.
+          {t(
+            "The governance modules manage EHDS compliance, protocol testing, and verifiable credential issuance as required by the European Health Data Space regulation (Chapter IV, Art. 50 to 81). These modules ensure that every data access follows the legally mandated approval chain: application, HDAB review, data permit issuance, contract negotiation, and audited transfer.",
+          )}
         </p>
         <MermaidDiagram
           chart={localizedChart("user-guide-compliance", lang)}
-          caption="EHDS data access compliance workflow"
+          caption={t("EHDS data access compliance workflow")}
         />
 
         <div className="space-y-6 mt-6">
           <FeatureCard
             href="/compliance"
-            title="EHDS Approval"
+            title={tn("EHDS Approval")}
             icon={Award}
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Manage data access permits as required by EHDS Art. 67 and 68.
-              Data users submit applications specifying the purpose, scope, and
-              duration of data access. HDABs review applications against the
-              permitted purposes in Art. 53(1) and issue verifiable credentials
-              as proof of authorization.
+              {t(
+                "Manage data access permits as required by EHDS Art. 67 and 68. Data users submit applications specifying the purpose, scope, and duration of data access. HDABs review applications against the permitted purposes in Art. 53(1) and issue verifiable credentials as proof of authorization.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: PharmaCo Research AG submits a data access application
-              for the diabetes cohort. MedReg DE (HDAB) reviews the request,
-              approves it under Art. 68, and a DataPermitCredential is issued.
+              {t(
+                "Example: PharmaCo Research AG submits a data access application for the diabetes cohort. MedReg DE (HDAB) reviews the request, approves it under Art. 68, and a DataPermitCredential is issued.",
+              )}
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/compliance/tck"
-            title="Protocol TCK"
+            title={tn("Protocol TCK")}
             icon={TestTube}
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              The Technology Compatibility Kit validates that your EDC connector
-              implements the Dataspace Protocol (DSP 2025-1) correctly. Tests
-              cover catalog queries, contract negotiations, and transfer
-              processes. Passing the TCK is a prerequisite for interoperability
-              within the EHDS ecosystem.
+              {t(
+                "The Technology Compatibility Kit validates that your EDC connector implements the Dataspace Protocol (DSP 2025-1) correctly. Tests cover catalog queries, contract negotiations, and transfer processes. Passing the TCK is a prerequisite for interoperability within the EHDS ecosystem.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: The operator runs the TCK suite and compares the result
-              with the floor recorded in{" "}
-              <code>scripts/compliance-baseline.json</code>; a drop below it
-              fails the compliance workflow.
+              <T area="docsGuide" tags={{ c: code }}>
+                {
+                  "Example: The operator runs the TCK suite and compares the result with the floor recorded in <c>scripts/compliance-baseline.json</c>; a drop below it fails the compliance workflow."
+                }
+              </T>
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/credentials"
-            title="Verifiable Credentials"
+            title={te("Verifiable Credentials")}
             icon={Shield}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              View and manage verifiable credentials across all dataspace
-              participants. Each participant holds a MembershipCredential and an
-              EHDSParticipantCredential, issued by the trusted issuer service.
-              Credentials follow the DCP v1.0 standard for decentralised claims,
-              enabling trust without a central authority.
+              {t(
+                "View and manage verifiable credentials across all dataspace participants. Each participant holds a MembershipCredential and an {credential}, issued by the trusted issuer service. Credentials follow the DCP v1.0 standard for decentralised claims, enabling trust without a central authority.",
+                { credential: PARTICIPANT_CREDENTIAL },
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: The operator verifies that all 5 participants
-              (AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg
-              Medical Centre, Institut de Recherche Sant&eacute;) each hold 2
-              active credentials.
+              {t(
+                "Example: The operator verifies that all 5 participants (AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg Medical Centre, Institut de Recherche Santé) each hold 2 active credentials.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/applications"
-            title="Apply for a Permit"
+            title={tn("Apply for a Permit")}
             icon={FileCheck}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              A data user applies for a data permit with the eleven items of
-              Regulation (EU) 2025/327 Art. 67(2), then follows what becomes of
-              it: the access body&apos;s clock (Art. 68(4)), a notice that items
-              are missing, the permit or the refusal, and the results the user
-              communicates afterwards (Art. 61(4)).
+              {t(
+                "A data user applies for a data permit with the eleven items of Regulation (EU) 2025/327 Art. 67(2), then follows what becomes of it: the access body's clock (Art. 68(4)), a notice that items are missing, the permit or the refusal, and the results the user communicates afterwards (Art. 61(4)).",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: PharmaCo Research AG applies for the Type 2 Diabetes
-              Cohort and sees the access body&apos;s decision deadline count
-              down.
+              {t(
+                "Example: PharmaCo Research AG applies for the Type 2 Diabetes Cohort and sees the access body's decision deadline count down.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/requests"
-            title="Statistical Requests"
+            title={tn("Statistical Requests")}
             icon={BarChart3}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              A health data request under Art. 69: the data user asks a question
-              and, if the access body approves, receives an anonymised statistic
-              and nothing else. The access body decides on the same page.
+              {t(
+                "A health data request under Art. 69: the data user asks a question and, if the access body approves, receives an anonymised statistic and nothing else. The access body decides on the same page.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A researcher asks how many patients in the cohort have
-              HbA1c above 7 % and receives a single count.
+              {t(
+                "Example: A researcher asks how many patients in the cohort have HbA1c above 7 % and receives a single count.",
+              )}
             </p>
           </FeatureCard>
-          <FeatureCard href="/supervision" title="Supervision" icon={Shield}>
+          <FeatureCard
+            href="/supervision"
+            title={tn("Supervision")}
+            icon={Shield}
+          >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Art. 63: the access body records a finding of non-compliance
-              against a data user or holder, the party states its views within
-              four weeks, the body takes a measure and publishes it; the body
-              can also ask a party for information, answered on record.
+              {t(
+                "Art. 63: the access body records a finding of non-compliance against a data user or holder, the party states its views within four weeks, the body takes a measure and publishes it; the body can also ask a party for information, answered on record.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: MedReg DE records a finding against a data user and the
-              user responds within the four-week window.
+              {t(
+                "Example: MedReg DE records a finding against a data user and the user responds within the four-week window.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/permits"
-            title="Permits Register"
+            title={tn("Permits Register")}
             icon={ClipboardList}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              The access body&apos;s register of applications received and
-              permits granted, refused or revoked (Art. 57). Any signed-in
-              participant can read it.
+              {t(
+                "The access body's register of applications received and permits granted, refused or revoked (Art. 57). Any signed-in participant can read it.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A data holder checks which permits currently cover its
-              datasets.
+              {t(
+                "Example: A data holder checks which permits currently cover its datasets.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/activity-report"
-            title="Activity Report"
+            title={tn("Activity Report")}
             icon={BarChart3}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              The access body&apos;s activity report under Art. 59(1)(a) to (k),
-              generated from the graph for a chosen period, with a Markdown
-              export.
+              {t(
+                "The access body's activity report under Art. 59(1)(a) to (k), generated from the graph for a chosen period, with a Markdown export.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: MedReg DE generates the report for the last 24 months
-              before publishing it.
+              {t(
+                "Example: MedReg DE generates the report for the last 24 months before publishing it.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/information"
-            title="Secondary Use Information"
+            title={t("Secondary Use Information")}
             icon={BookOpen}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              What the access body tells the public about secondary use (Art.
-              58(1)): the legal basis, the safeguards, people&apos;s rights and
-              how to exercise them, who has access to which datasets and why,
-              and the results of the projects.
+              {t(
+                "What the access body tells the public about secondary use (Art. 58(1)): the legal basis, the safeguards, people's rights and how to exercise them, who has access to which datasets and why, and the results of the projects.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A patient reads which research projects use data from
-              AlphaKlinik Berlin and how to opt out.
+              {t(
+                "Example: A patient reads which research projects use data from AlphaKlinik Berlin and how to opt out.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/jurisdictions"
-            title="National EHDS Rules"
+            title={tn("National EHDS Rules")}
             icon={Scale}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              How Germany, Austria, Belgium, France, the Netherlands and Spain
-              implement secondary use: the legal role of the access body, the
-              national law it acts under, how a person objects (Art. 71), the
-              fees (Art. 62) and the dates, each with its official source. The
-              laws are real, the organisations on the hub fictional.
+              {t(
+                "How Germany, Austria, Belgium, France, the Netherlands and Spain implement secondary use: the legal role of the access body, the national law it acts under, how a person objects (Art. 71), the fees (Art. 62) and the dates, each with its official source. The laws are real, the organisations on the hub fictional.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: A Spanish researcher checks how the opt-out works in
-              Germany before applying for data held by AlphaKlinik Berlin.
+              {t(
+                "Example: A Spanish researcher checks how the opt-out works in Germany before applying for data held by AlphaKlinik Berlin.",
+              )}
             </p>
           </FeatureCard>
         </div>
@@ -1503,114 +1587,101 @@ export default function UserGuidePage() {
 
       {/* ── 5. Data Exchange ── */}
       <section className="mb-12" id="data-exchange">
-        <h2 className="text-2xl font-semibold mb-3">Data Exchange</h2>
+        <h2 className="text-2xl font-semibold mb-3">{t("Data Exchange")}</h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          The sovereign data exchange pipeline follows the Dataspace Protocol
-          (DSP 2025-1): share assets, discover via federated catalog, negotiate
-          contracts, manage tasks, and transfer data. This pipeline implements
-          EHDS Art. 51 and 60 requirements for making health data available
-          while preserving data holder sovereignty through policy-controlled
-          access.
+          {t(
+            "The sovereign data exchange pipeline follows the Dataspace Protocol (DSP 2025-1): share assets, discover via federated catalog, negotiate contracts, manage tasks, and transfer data. This pipeline implements EHDS Art. 51 and 60 requirements for making health data available while preserving data holder sovereignty through policy-controlled access.",
+          )}
         </p>
 
         <div className="space-y-6">
           <FeatureCard
             href="/data/share"
-            title="Share Data"
+            title={tn("Share Data")}
             icon={Share2}
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Publish datasets with HealthDCAT-AP metadata and ODRL access
-              policies for the federated catalog. Define distribution endpoints,
-              data quality attributes, and usage constraints. Data holders use
-              this page to fulfil their obligation under EHDS Art. 60 to make
-              data available for secondary use.
+              {t(
+                "Publish datasets with HealthDCAT-AP metadata and ODRL access policies for the federated catalog. Define distribution endpoints, data quality attributes, and usage constraints. Data holders use this page to fulfil their obligation under EHDS Art. 60 to make data available for secondary use.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: AlphaKlinik Berlin publishes a &quot;Synthetic Diabetes
-              Cohort&quot; dataset with FHIR R4 bulk export distribution, EHDS
-              Art. 33 usage policy, and spatial coverage set to DE.
+              {t(
+                "Example: AlphaKlinik Berlin publishes a “Synthetic Diabetes Cohort” dataset with FHIR R4 bulk export distribution, EHDS Art. 33 usage policy, and spatial coverage set to DE.",
+              )}
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/data/discover"
-            title="Discover"
+            title={tn("Discover")}
             icon={Compass}
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Search the federated catalog across all connected dataspace
-              participants. Results aggregate datasets from multiple EDC
-              connectors, showing availability and access terms. The federated
-              catalog enables cross-border dataset discovery without
-              centralising metadata.
+              {t(
+                "Search the federated catalog across all connected dataspace participants. Results aggregate datasets from multiple EDC connectors, showing availability and access terms. The federated catalog enables cross-border dataset discovery without centralising metadata.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: PharmaCo Research AG discovers 3 datasets across 2
-              participants for &quot;cardiovascular&quot; research — one from
-              AlphaKlinik Berlin and two from Limburg Medical Centre.
+              {t(
+                "Example: PharmaCo Research AG discovers 3 datasets across 2 participants for “cardiovascular” research: one from AlphaKlinik Berlin and two from Limburg Medical Centre.",
+              )}
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/negotiate"
-            title="Negotiate"
+            title={tn("Negotiate")}
             icon={Handshake}
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Initiate and track DSP contract negotiations with data holders.
-              View negotiation state (REQUESTED, AGREED, VERIFIED, FINALIZED),
-              ODRL policy terms, and counter-offer history. Contract negotiation
-              ensures that data access terms are mutually agreed before any
-              transfer occurs, as required by EHDS Art. 34.
+              {t(
+                "Initiate and track DSP contract negotiations with data holders. View negotiation state (REQUESTED, AGREED, VERIFIED, FINALIZED), ODRL policy terms, and counter-offer history. Contract negotiation ensures that data access terms are mutually agreed before any transfer occurs, as required by EHDS Art. 34.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: PharmaCo Research AG initiates a contract negotiation
-              with AlphaKlinik Berlin for the diabetes cohort. The negotiation
-              progresses to FINALIZED with an EHDS Art. 33(c) research use
-              policy.
+              {t(
+                "Example: PharmaCo Research AG initiates a contract negotiation with AlphaKlinik Berlin for the diabetes cohort. The negotiation progresses to FINALIZED with an EHDS Art. 33(c) research use policy.",
+              )}
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/tasks"
-            title="Tasks"
+            title={tn("Tasks")}
             icon={ClipboardList}
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Monitor the task queue for pending and active data transfer
-              operations. Tasks track the full lifecycle from initiation through
-              provisioning to completion, providing the audit trail required by
-              EHDS for accountability.
+              {t(
+                "Monitor the task queue for pending and active data transfer operations. Tasks track the full lifecycle from initiation through provisioning to completion, providing the audit trail required by EHDS for accountability.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: The operator monitors a bulk FHIR export task from
-              AlphaKlinik Berlin to PharmaCo Research AG — currently at the
-              provisioning stage with an estimated 2-minute completion time.
+              {t(
+                "Example: The operator monitors a bulk FHIR export task from AlphaKlinik Berlin to PharmaCo Research AG, currently at the provisioning stage with an estimated 2-minute completion time.",
+              )}
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/data/transfer"
-            title="Transfer"
+            title={tn("Transfer")}
             icon={ArrowLeftRight}
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              View the complete history of data transfers — both initiated and
-              received. Each entry includes timestamps, transfer size, protocol
-              used, and a link to the audit trail. Transfer logging implements
-              the EHDS requirement for full traceability of all health data
-              movements across the dataspace.
+              {t(
+                "View the complete history of data transfers, both initiated and received. Each entry includes timestamps, transfer size, protocol used, and a link to the audit trail. Transfer logging implements the EHDS requirement for full traceability of all health data movements across the dataspace.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: PharmaCo Research AG reviews its transfer history showing
-              a completed 12 MB FHIR bulk export from AlphaKlinik Berlin,
-              transferred via HTTP-PUSH with full W3C PROV audit trail.
+              {t(
+                "Example: PharmaCo Research AG reviews its transfer history showing a completed 12 MB FHIR bulk export from AlphaKlinik Berlin, transferred via HTTP-PUSH with full W3C PROV audit trail.",
+              )}
             </p>
           </FeatureCard>
         </div>
@@ -1618,133 +1689,128 @@ export default function UserGuidePage() {
 
       {/* ── 6. Administration ── */}
       <section className="mb-12" id="admin">
-        <h2 className="text-2xl font-semibold mb-3">Administration</h2>
+        <h2 className="text-2xl font-semibold mb-3">{t("Administration")}</h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          Platform administrators manage participants, access policies, and
-          audit logs. The admin dashboard provides an overview of system health,
-          active connections, and recent activity. Access requires the EDC_ADMIN
-          role assigned through Keycloak. The operator role is defined by EHDS
-          Art. 52 as responsible for ensuring the technical infrastructure
-          supports interoperable, sovereign data exchange.
+          {t(
+            "Platform administrators manage participants, access policies, and audit logs. The admin dashboard provides an overview of system health, active connections, and recent activity. Access requires the EDC_ADMIN role assigned through Keycloak. The operator role is defined by EHDS Art. 52 as responsible for ensuring the technical infrastructure supports interoperable, sovereign data exchange.",
+          )}
         </p>
 
         <div className="space-y-6">
           <FeatureCard
             href="/admin"
-            title="Operator Dashboard"
+            title={tn("Operator Dashboard")}
             icon={LayoutDashboard}
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              The admin dashboard shows system health at a glance: connector
-              uptime, active participants, recent negotiations, transfer
-              throughput, and credential status.
+              {t(
+                "The admin dashboard shows system health at a glance: connector uptime, active participants, recent negotiations, transfer throughput, and credential status.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: The operator sees all 5 participants are online, 3
-              contract negotiations are active, and 12 transfers completed in
-              the last 24 hours with no failures.
+              {t(
+                "Example: The operator sees all 5 participants are online, 3 contract negotiations are active, and 12 transfers completed in the last 24 hours with no failures.",
+              )}
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/admin/components"
-            title="EDC Components"
+            title={tn("EDC Components")}
             icon={Cpu}
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Inspect the runtime status of Eclipse Dataspace Connector
-              components — Control Plane, Data Plane, Identity Hub, Issuer
-              Service, and the Connector Fabric Manager. View health checks,
-              versions, and configuration details.
+              {t(
+                "Inspect the runtime status of Eclipse Dataspace Connector components: Control Plane, Data Plane, Identity Hub, Issuer Service, and the Connector Fabric Manager. View health checks, versions, and configuration details.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: The operator checks that the Control Plane (port 11003),
-              the FHIR Data Plane (port 11002) and the Identity Hub (port 11005)
-              all report healthy on the local stack.
+              {t(
+                "Example: The operator checks that the Control Plane (port 11003), the FHIR Data Plane (port 11002) and the Identity Hub (port 11005) all report healthy on the local stack.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/admin/attestation"
-            title="SPE attestation"
+            title={tn("SPE attestation")}
             icon={Fingerprint}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              The evidence behind each secure processing environment&apos;s
-              label, for the operator (EDC_ADMIN): the verdict, who verified it
-              (the access body&apos;s Trustee), what was proven and what was
-              not, the measurements, and the chain from the data permit to its
-              policy hash, the Trustee&apos;s key release and the loaded
-              workspace, with the SPE&apos;s last audit events. Each SPE on the
-              operator dashboard links to it.
+              {t(
+                "The evidence behind each secure processing environment's label, for the operator (EDC_ADMIN): the verdict, who verified it (the access body's Trustee), what was proven and what was not, the measurements, and the chain from the data permit to its policy hash, the Trustee's key release and the loaded workspace, with the SPE's last audit events. Each SPE on the operator dashboard links to it.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: the operator checks that SPE-2 of Limburg Medical Centre
-              got its key for MedReg DE&apos;s permit, and reads why an earlier
-              attempt was refused.
+              {t(
+                "Example: the operator checks that SPE-2 of Limburg Medical Centre got its key for MedReg DE's permit, and reads why an earlier attempt was refused.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/admin/tenants"
-            title="Tenant Management"
+            title={t("Tenant Management")}
             icon={Users}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              The participants&apos; tenants in the Connector Fabric Manager:
-              their virtual participant agents and provisioning state.
+              {t(
+                "The participants' tenants in the Connector Fabric Manager: their virtual participant agents and provisioning state.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: The operator checks that a newly onboarded clinic&apos;s
-              tenant finished provisioning.
+              {t(
+                "Example: The operator checks that a newly onboarded clinic's tenant finished provisioning.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/admin/participants"
-            title="Participant Directory"
+            title={t("Participant Directory")}
             icon={UserPlus}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              Every participant in the dataspace with its DID and credentials;
-              the operator can add or remove one.
+              {t(
+                "Every participant in the dataspace with its DID and credentials; the operator can add or remove one.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: The operator adds Limburg Medical Centre and confirms its
-              DID resolves.
+              {t(
+                "Example: The operator adds Limburg Medical Centre and confirms its DID resolves.",
+              )}
             </p>
           </FeatureCard>
           <FeatureCard
             href="/admin/policies"
-            title="Policy Definitions"
+            title={t("Policy Definitions")}
             icon={ScrollText}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              The ODRL policies each participant offers its data under, grouped
-              by participant. New policies start from a template for a permitted
-              purpose of Art. 53 (scientific research, public health, official
-              statistics, AI training and more), with the permitted purposes,
-              the duration of use and the duties attached; the JSON can be
-              edited directly.
+              {t(
+                "The ODRL policies each participant offers its data under, grouped by participant. New policies start from a template for a permitted purpose of Art. 53 (scientific research, public health, official statistics, AI training and more), with the permitted purposes, the duration of use and the duties attached; the JSON can be edited directly.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: the operator gives Limburg Medical Centre a policy for
-              scientific research only, valid one year, that forbids
-              re-identification.
+              {t(
+                "Example: the operator gives Limburg Medical Centre a policy for scientific research only, valid one year, that forbids re-identification.",
+              )}
             </p>
           </FeatureCard>
 
           <FeatureCard
             href="/admin/audit"
-            title="Audit &amp; Provenance"
+            title={tn("Audit & Provenance")}
             icon={FileCheck}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              The audit log and provenance trail, with the retention settings.
-              Shared with the access body, which uses it for supervision.
+              {t(
+                "The audit log and provenance trail, with the retention settings. Shared with the access body, which uses it for supervision.",
+              )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              Example: MedReg DE traces which queries touched a dataset in the
-              last month.
+              {t(
+                "Example: MedReg DE traces which queries touched a dataset in the last month.",
+              )}
             </p>
           </FeatureCard>
         </div>
@@ -1755,46 +1821,23 @@ export default function UserGuidePage() {
         className="bg-(--surface-2)/50 border border-(--border) rounded-xl p-6"
         id="help"
       >
-        <h2 className="font-semibold mb-2">Need Help?</h2>
+        <h2 className="font-semibold mb-2">{t("Need Help?")}</h2>
         <p className="text-(--text-secondary) text-sm mb-2">
-          For technical questions, see the{" "}
-          <Link
-            href="/docs/developer"
-            className="text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
+          <T
+            area="docsGuide"
+            tags={{ d: devGuideLink, r: archLink, a: liveLink }}
           >
-            Developer Guide
-          </Link>
-          . For architecture details, visit the{" "}
-          <Link
-            href="/docs/architecture"
-            className="text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
-          >
-            Architecture Diagrams
-          </Link>
-          . Try the live demo at{" "}
-          <a
-            href={LIVE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
-          >
-            GitHub Pages
-          </a>
-          .
+            {
+              "For technical questions, see the <d>Developer Guide</d>. For architecture details, visit the <r>Architecture Diagrams</r>. Try the live demo at <a>GitHub Pages</a>."
+            }
+          </T>
         </p>
         <p className="text-(--text-secondary) text-sm">
-          For the complete end-to-end walkthrough of every persona and workflow,
-          read the{" "}
-          <a
-            href={FULL_JOURNEY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline"
-          >
-            Full User Journey
-            <ExternalLink size={12} />
-          </a>
-          .
+          <T area="docsGuide" tags={{ j: journeyLink }}>
+            {
+              "For the complete end-to-end walkthrough of every persona and workflow, read the <j>Full User Journey</j>."
+            }
+          </T>
         </p>
       </section>
     </div>

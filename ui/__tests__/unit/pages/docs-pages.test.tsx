@@ -158,7 +158,7 @@ describe("UserGuidePage", () => {
   it("renders feature sections", () => {
     render(<UserGuidePage />);
     expect(
-      screen.getByText(/Persona Overview — one view per role/),
+      screen.getByText(/Persona Overview: one view per role/),
     ).toBeInTheDocument();
   });
 
