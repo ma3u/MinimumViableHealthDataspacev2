@@ -83,6 +83,12 @@ export interface SpeEntry {
   patients: number | null;
   status: "ready" | "loading" | "refused" | "unreachable";
   attestation: SpeAttestationDetail;
+  /**
+   * The last federated query that asked this workspace (ADR-072), from any
+   * proxy replica as far as the sync has merged them; null when none since
+   * the hub started keeping it. The idle stop reads it.
+   */
+  lastQueriedAt: string | null;
 }
 
 /**
@@ -278,11 +284,21 @@ export function attestationDetail(
   };
 }
 
-/** One SPE in the contract's shape, from what its workspace says. */
+/**
+ * One SPE in the contract's shape, from what its workspace says.
+ *
+ * Where it runs: what the deployment configured on the proxy
+ * (SPE1_RUNS_ON / SPE2_RUNS_ON, set by 21-aci-confidential-spe.sh
+ * --wire-proxy) wins over what the workspace recorded, because a loader
+ * without SPE_RUNS_ON recorded its local default, and the live
+ * /admin/attestation said "Docker Compose (local)" for an ACI group
+ * (2026-11-02). Unconfigured, the record wins, then the generic default.
+ */
 export function speEntry(
   id: "SPE-1" | "SPE-2",
   read: WorkspaceRead | null,
   runsOnDefault: string,
+  runsOnConfigured?: string,
 ): SpeEntry {
   const a = read?.attestation ?? null;
   const status: SpeEntry["status"] = !read
@@ -295,7 +311,7 @@ export function speEntry(
   return {
     id,
     holder: str(a?.holder) ?? HOLDERS[id],
-    runsOn: str(a?.runsOn) ?? runsOnDefault,
+    runsOn: runsOnConfigured || (str(a?.runsOn) ?? runsOnDefault),
     teeType: str(a?.teeType) ?? "none",
     attestationScope: str(a?.attestationScope) ?? "none",
     simulated: a ? a.simulated !== false : true,
@@ -311,6 +327,7 @@ export function speEntry(
       a?.attestation,
       status === "refused" ? str(a?.reason) : null,
     ),
+    lastQueriedAt: speLastQueriedAt(id),
   };
 }
 
@@ -334,14 +351,16 @@ export async function probeTrustee(
 
 function runsOnDefault(id: "SPE-1" | "SPE-2"): string {
   if (id === "SPE-1") {
-    return (
-      SPE1_RUNS_ON ??
-      (spe1IsWorkspace()
-        ? "SPE-1 workspace"
-        : "The hub graph (no workspace of its own)")
-    );
+    return spe1IsWorkspace()
+      ? "SPE-1 workspace"
+      : "The hub graph (no workspace of its own)";
   }
-  return SPE2_RUNS_ON ?? "SPE-2 workspace";
+  return "SPE-2 workspace";
+}
+
+/** Where the deployment says each SPE runs (the proxy's environment). */
+function runsOnConfigured(id: "SPE-1" | "SPE-2"): string | undefined {
+  return (id === "SPE-1" ? SPE1_RUNS_ON : SPE2_RUNS_ON) || undefined;
 }
 
 interface Target {
@@ -362,14 +381,17 @@ function targets(): Target[] {
   ];
 }
 
-async function readAll(): Promise<
-  Array<{ target: Target; read: WorkspaceRead | null }>
-> {
+async function readAll(
+  skip: ReadonlySet<string> = new Set(),
+): Promise<Array<{ target: Target; read: WorkspaceRead | null }>> {
   return Promise.all(
     targets()
       .filter((t) => t.configured)
       .map(async (target) => {
-        if (!target.driver) return { target, read: null };
+        // A workspace the caller knows is stopped (ARM, ADR-072) is not
+        // waited for: it is reported unreachable at once.
+        if (!target.driver || skip.has(target.id))
+          return { target, read: null };
         try {
           return { target, read: await readWorkspace(target.driver) };
         } catch (err) {
@@ -380,12 +402,15 @@ async function readAll(): Promise<
   );
 }
 
-export async function speStatus(fetchImpl: typeof fetch = fetch): Promise<{
+export async function speStatus(
+  fetchImpl: typeof fetch = fetch,
+  skip: ReadonlySet<string> = new Set(),
+): Promise<{
   status: SpeStatus;
   reads: Array<{ id: string; read: WorkspaceRead | null }>;
 }> {
   const [reads, reachable] = await Promise.all([
-    readAll(),
+    readAll(skip),
     probeTrustee(TRUSTEE_PROBE_URL, fetchImpl),
   ]);
   return {
@@ -400,7 +425,12 @@ export async function speStatus(fetchImpl: typeof fetch = fetch): Promise<{
           }
         : null,
       spes: reads.map(({ target, read }) =>
-        speEntry(target.id, read, runsOnDefault(target.id)),
+        speEntry(
+          target.id,
+          read,
+          runsOnDefault(target.id),
+          runsOnConfigured(target.id),
+        ),
       ),
       residualTrust: RESIDUAL_TRUST[SPE_ENVIRONMENT],
     },
@@ -807,6 +837,105 @@ export async function syncOptOuts(
   return out;
 }
 
+// ---- when each workspace was last queried (ADR-072) -------------------------
+//
+// The workspaces start on demand and stop themselves when idle. The proxy is
+// the one that queries them, so it keeps when it last did: in memory on the
+// query path (no write there, so a query never waits on it), merged into the
+// hub's (:SpeWorkspace {speId}).lastQueriedAt by the sync, and read back from
+// there, so every replica reports the latest of all of them.
+
+const lastQueried = new Map<string, string>();
+const dirty = new Set<string>();
+
+/** Called by the federated paths for every workspace they asked. */
+export function noteSpeQueried(
+  ids: readonly string[],
+  now: Date = new Date(),
+): void {
+  const at = now.toISOString();
+  for (const id of ids) {
+    const prev = lastQueried.get(id);
+    if (!prev || prev < at) {
+      lastQueried.set(id, at);
+      dirty.add(id);
+    }
+  }
+}
+
+export function speLastQueriedAt(id: string): string | null {
+  return lastQueried.get(id) ?? null;
+}
+
+export function resetSpeActivity(): void {
+  lastQueried.clear();
+  dirty.clear();
+}
+
+/**
+ * Writes this replica's newer query times to the hub and reads back every
+ * replica's. ISO-8601 UTC strings compare in time order. Never throws.
+ */
+export async function syncSpeActivity(hub: Driver): Promise<void> {
+  if (dirty.size > 0) {
+    const rows = [...dirty].map((id) => ({ id, at: lastQueried.get(id) }));
+    const session = hub.session({ database: "neo4j" });
+    try {
+      await withTimeout(
+        session.executeWrite((tx) =>
+          tx.run(
+            `UNWIND $rows AS r
+             MERGE (w:SpeWorkspace {speId: r.id})
+               ON CREATE SET w.createdAt = datetime(), w.lastQueriedAt = r.at
+               ON MATCH SET w.lastQueriedAt =
+                 CASE WHEN w.lastQueriedAt IS NULL OR w.lastQueriedAt < r.at
+                      THEN r.at ELSE w.lastQueriedAt END`,
+            { rows },
+          ),
+        ),
+        SPE_READ_TIMEOUT_MS,
+        "SPE activity write",
+      );
+      for (const r of rows) dirty.delete(r.id);
+    } catch (err) {
+      logger.warn({ err }, "SPE query times not yet on the hub");
+    } finally {
+      await withTimeout(session.close(), 2000, "hub session close").catch(
+        () => undefined,
+      );
+    }
+  }
+  const session = hub.session({
+    database: "neo4j",
+    defaultAccessMode: neo4j.session.READ,
+  });
+  try {
+    const res = await withTimeout(
+      session.run(
+        `MATCH (w:SpeWorkspace) WHERE w.lastQueriedAt IS NOT NULL
+         RETURN w.speId AS speId, w.lastQueriedAt AS at`,
+        {},
+        { timeout: SPE_READ_TIMEOUT_MS },
+      ),
+      SPE_READ_TIMEOUT_MS,
+      "SPE activity read",
+    );
+    for (const r of res?.records ?? []) {
+      const id = r.get("speId");
+      const at = r.get("at");
+      if (typeof id !== "string" || typeof at !== "string") continue;
+      const prev = lastQueried.get(id);
+      if (!prev || prev < at) lastQueried.set(id, at);
+    }
+  } catch (err) {
+    logger.warn({ err }, "SPE query times not read from the hub");
+  } finally {
+    await withTimeout(session.close(), 2000, "hub session close").catch(
+      () => undefined,
+    );
+  }
+}
+
 // ---- the sync ----------------------------------------------------------------
 
 let running = false;
@@ -847,6 +976,7 @@ export async function runSpeSync(
       reads.map(({ target, read }) => ({ id: target.id, read })),
       now,
     );
+    await syncSpeActivity(driver);
     return true;
   } catch (err) {
     logger.warn({ err }, "SPE sync failed");

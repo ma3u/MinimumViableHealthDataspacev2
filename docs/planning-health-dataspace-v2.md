@@ -298,8 +298,9 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [069](ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)                      | Two SPE workspaces as ACI confidential containers, attested per workload to the access body's Trustee; extends ADR-053 (the groups stop off hours)  | 2026-10-31 | Proposed          |
 | [070](ADRs/ADR-070-the-interface-follows-the-language-picker-without-locale-urls.md)          | The interface follows the language picker: an in-house dictionary, English as the key, no `/de/` URLs, legal terms from the Official Journal (#782) | 2026-11-01 | Proposed          |
 | [071](ADRs/ADR-071-the-documentation-follows-the-language-picker.md)                          | The documentation follows the language picker: translated Markdown with a source hash, per-language images and charts; extends ADR-070 (#782)       | 2026-11-01 | Proposed          |
+| [072](ADRs/ADR-072-spe-workspaces-start-on-demand.md)                                         | SPE workspaces stop by default and start on demand; a query gets a cold-start answer, an idle one stops itself; amends ADR-069 decision 8           | 2026-11-02 | Proposed          |
 
-Numbers taken by open work, so a new ADR starts at **072**: 051 (#475). 050
+Numbers taken by open work, so a new ADR starts at **073**: 051 (#475). 050
 (#477), 054 (#520) and 055 (#517) are merged.
 
 ADR-045 to ADR-049 accepted on 2026-10-04.

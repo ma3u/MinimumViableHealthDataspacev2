@@ -11,6 +11,8 @@ import path from "node:path";
 import { MESSAGES } from "@/messages";
 import {
   SPE_EVENT_LABELS,
+  SPE_POWER_REASONS,
+  SPE_POWER_STATES,
   attestationVerdict,
   policyCheckDepth,
   speLabelText,
@@ -52,6 +54,19 @@ describe("the admin area knows every label its pages take from elsewhere", () =>
     ];
     expect(texts).toHaveLength(15);
     expect(missing(texts)).toEqual([]);
+  });
+
+  it("the SPE power states and the reasons a caller may not start one (ADR-072)", () => {
+    const texts = [...SPE_POWER_STATES, ...Object.values(SPE_POWER_REASONS)];
+    expect(texts).toHaveLength(6);
+    expect(missing(texts)).toEqual([]);
+    for (const lang of ["de", "fr", "nl", "es"] as const) {
+      const d = MESSAGES[lang].admin as Record<string, string>;
+      expect(
+        texts.filter((x) => !(x in d)),
+        lang,
+      ).toEqual([]);
+    }
   });
 
   it("the wallet's description and footnote", () => {

@@ -852,5 +852,21 @@
   "Valid ODRL 2.2 and fit for secondary use.": "Gültiges ODRL 2.2 und geeignet für die Sekundärnutzung.",
   "Warning": "Warnung",
   "Note": "Hinweis",
-  "e.g. {example}": "z. B. {example}"
+  "e.g. {example}": "z. B. {example}",
+  "starting": "startet",
+  "Start": "Starten",
+  "Stop": "Stoppen",
+  "Power of {id}": "Betriebszustand von {id}",
+  "Workspace: {state}": "Workspace: {state}",
+  "Start {id}": "{id} starten",
+  "Stop {id}": "{id} stoppen",
+  "Starting: attesting to Trustee, releasing the key, loading the data; about 3 to 4 minutes": "Startet: Attestierung beim Trustee, Freigabe des Schlüssels, Laden der Daten; etwa 3 bis 4 Minuten",
+  "Last queried {when}": "Zuletzt abgefragt {when}",
+  "No query recorded yet": "Noch keine Abfrage erfasst",
+  "Stopped by default, starts on demand, stops itself after 30 minutes without a query (ADR-072)": "Standardmäßig gestoppt, startet bei Bedarf, stoppt sich nach 30 Minuten ohne Abfrage selbst (ADR-072)",
+  "Static demo: nothing is started or stopped.": "Statische Demo: Es wird nichts gestartet oder gestoppt.",
+  "Could not change the workspace: {error}": "Der Workspace konnte nicht geändert werden: {error}",
+  "An owner of the resource group runs once:": "Ein Owner der Ressourcengruppe führt einmal aus:",
+  "Starting and stopping needs the Azure deployment": "Starten und Stoppen setzt die Azure-Bereitstellung voraus",
+  "Only the operator and the access body start and stop workspaces": "Nur der Betreiber und die Zugangsstelle starten und stoppen Workspaces"
 }

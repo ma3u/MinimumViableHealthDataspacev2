@@ -461,7 +461,11 @@ async function runIngest(
       const res = await ingest(outcome, plaintext, {
         workspace: sessionWorkspace(session),
         spe,
-        runsOn: env("SPE_RUNS_ON", "Docker Compose (local)"),
+        // Never a place it may not be: an ACI group whose SPE_RUNS_ON was
+        // missing recorded "Docker Compose (local)" (2026-11-02). The proxy's
+        // SPE<n>_RUNS_ON wins over this record on Azure anyway.
+        runsOn:
+          env("SPE_RUNS_ON") || `SPE-${n} workspace (SPE_RUNS_ON not set)`,
         cypherDir: cypherDir(),
         log,
       });

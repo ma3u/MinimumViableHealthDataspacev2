@@ -110,6 +110,29 @@ components:
       required: [error]
       properties:
         error: { type: string }
+    SpeColdStart:
+      description: >
+        A federated query needs an SPE workspace that is not up (ADR-072).
+        A stopped workspace is started when the caller may (EDC_ADMIN,
+        HDAB_AUTHORITY, DATA_USER); `Retry-After` carries `spe.etaSeconds`.
+      type: object
+      required: [error, spe, spes, started]
+      properties:
+        error: { type: string }
+        spe: { $ref: "#/components/schemas/SpeColdStartEntry" }
+        spes:
+          type: array
+          items: { $ref: "#/components/schemas/SpeColdStartEntry" }
+        started:
+          type: boolean
+          description: True when this request started at least one workspace
+    SpeColdStartEntry:
+      type: object
+      required: [id, state, etaSeconds]
+      properties:
+        id: { type: string, enum: [SPE-1, SPE-2] }
+        state: { type: string, enum: [starting, stopped] }
+        etaSeconds: { type: integer, example: 240 }
     Health:
       type: object
       properties:
@@ -1825,6 +1848,13 @@ paths:
       summary: Federated cross-site cohort query (k-anonymity)
       responses:
         "200": { description: Cohort summary }
+        "503":
+          description: >
+            An SPE workspace is stopped or still starting (ADR-072); a
+            stopped one has been started when the caller may
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SpeColdStart" }
 
   /api/nlq:
     get:
@@ -1845,9 +1875,19 @@ paths:
               properties:
                 question: { type: string }
                 templateId: { type: string, default: auto }
+                federated:
+                  type: boolean
+                  description: Ask every SPE workspace, not the hub graph
       responses:
         "200": { description: NLQ result }
         "502": { description: Proxy error }
+        "503":
+          description: >
+            A federated question needs an SPE workspace that is stopped or
+            still starting (ADR-072)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SpeColdStart" }
 
   /api/eehrxf:
     get:
@@ -2031,6 +2071,22 @@ paths:
                         status:
                           type: string
                           enum: [ready, loading, refused, unreachable]
+                        powerState:
+                          description: >
+                            ADR-072: the ACI group's power state on Azure
+                            combined with the proxy's read; the read alone
+                            elsewhere.
+                          type: string
+                          enum: [running, starting, stopped, unreachable]
+                        armState:
+                          type: string
+                          nullable: true
+                          description: The group's instanceView.state on Azure
+                        lastQueriedAt:
+                          type: string
+                          format: date-time
+                          nullable: true
+                          description: The last federated query that asked it
                         attestation:
                           description: >
                             The evidence the Trustee verified; null in the
@@ -2079,8 +2135,90 @@ paths:
                     type: object
                     properties:
                       reason: { type: string }
+                  power:
+                    description: Whether this caller may start and stop the workspaces (ADR-072)
+                    type: object
+                    properties:
+                      available: { type: boolean }
+                      reason: { type: string, nullable: true }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
+
+  /api/admin/spe/power:
+    post:
+      tags: [Admin]
+      summary: Start or stop the SPE workspaces (operator and access body)
+      description: >
+        ADR-072. Starts or stops the ACI confidential container groups
+        mvhd-spe-1 and mvhd-spe-2 with the UI's managed identity. A start takes
+        about 3 to 4 minutes: attest to Trustee, release the key, load the
+        sealed extract. 403 also when the hub's identity lacks the built-in
+        "Azure Container Instances Contributor Role" on the groups; the body
+        then names the role and the command an owner runs. 501 off Azure. The
+        static demo answers 202 with `static: true` and starts nothing.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action, spe]
+              properties:
+                action: { type: string, enum: [start, stop] }
+                spe: { type: string, enum: [SPE-1, SPE-2, all] }
+      responses:
+        "202":
+          description: The start or stop is under way
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  action: { type: string, enum: [start, stop] }
+                  static: { type: boolean }
+                  spes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string }
+                        group: { type: string }
+                        state: { type: string, enum: [starting, stopped] }
+                        etaSeconds: { type: integer }
+        "400":
+          description: Unknown action or workspace
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403":
+          description: >
+            The caller is not the operator or the access body, or the hub's
+            identity lacks the role (then with `role` and `command`)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [error]
+                properties:
+                  error: { type: string }
+                  role: { type: string }
+                  command: { type: string }
+        "404":
+          description: The container group does not exist
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "501":
+          description: Not the Azure deployment
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "502":
+          description: ARM refused for another reason
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
 
   /api/admin/components:
     get:

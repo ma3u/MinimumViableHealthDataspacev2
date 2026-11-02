@@ -852,5 +852,21 @@
   "Valid ODRL 2.2 and fit for secondary use.": "Geldige ODRL 2.2 en geschikt voor secundair gebruik.",
   "Warning": "Waarschuwing",
   "Note": "Opmerking",
-  "e.g. {example}": "bijv. {example}"
+  "e.g. {example}": "bijv. {example}",
+  "starting": "start op",
+  "Start": "Starten",
+  "Stop": "Stoppen",
+  "Power of {id}": "Bedrijfstoestand van {id}",
+  "Workspace: {state}": "Werkruimte: {state}",
+  "Start {id}": "{id} starten",
+  "Stop {id}": "{id} stoppen",
+  "Starting: attesting to Trustee, releasing the key, loading the data; about 3 to 4 minutes": "Start op: attestatie bij de Trustee, vrijgave van de sleutel, laden van de gegevens; ongeveer 3 tot 4 minuten",
+  "Last queried {when}": "Laatst bevraagd {when}",
+  "No query recorded yet": "Nog geen bevraging vastgelegd",
+  "Stopped by default, starts on demand, stops itself after 30 minutes without a query (ADR-072)": "Standaard gestopt, start op aanvraag, stopt zichzelf na 30 minuten zonder bevraging (ADR-072)",
+  "Static demo: nothing is started or stopped.": "Statische demo: er wordt niets gestart of gestopt.",
+  "Could not change the workspace: {error}": "De werkruimte kon niet worden gewijzigd: {error}",
+  "An owner of the resource group runs once:": "Een eigenaar van de resourcegroep voert eenmalig uit:",
+  "Starting and stopping needs the Azure deployment": "Starten en stoppen vereist de Azure-implementatie",
+  "Only the operator and the access body start and stop workspaces": "Alleen de beheerder en de instantie voor toegang starten en stoppen werkruimten"
 }

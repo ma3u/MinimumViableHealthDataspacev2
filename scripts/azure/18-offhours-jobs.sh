@@ -17,6 +17,12 @@ set -euo pipefail
 #   mvhd-offhours-stop    18:13 UTC daily       (20:13 Berlin in summer time)
 #   mvhd-offhours-start   05:17 UTC Mon to Fri  (07:17 Berlin in summer time)
 #   mvhd-offhours-check   manual only: signs in and decides both, changes nothing
+#   mvhd-spe-idle-stop    every 15 minutes: stops an SPE workspace nobody has
+#                         queried for 30 minutes (offhours.sh idle-stop, ADR-072)
+#
+# The SPE workspaces start on demand (ADR-072): the evening stop stops them,
+# the morning start leaves them stopped (SPE_START_WITH_STACK=true when this
+# script runs restores the old start), the hub starts them.
 #
 # They sign in as the user-assigned identity id-mvhd-offhours, so nobody logs
 # in anywhere and no GitHub token exists. Its roles, each as narrow as the
@@ -26,6 +32,13 @@ set -euo pipefail
 #   Contributor                 the Flexible Server only   stop and start Postgres
 #   Key Vault Secrets User      kv-mvhd-b53a0449           the realm restore's Keycloak password
 #   mvhd-aci-power (custom)     rg-mvhd-dev                read, start, stop, restart container groups (the SPE workspaces, ADR-069)
+#     or, where the account may not define roles (the maintainer's PIM role
+#     excludes roleDefinitions/write, 2026-11-02):
+#   Azure Container Instances   mvhd-spe-1, mvhd-spe-2     the built-in role, on the two groups only; it also
+#   Contributor Role                                       allows create, delete and exec in them (ADR-072)
+#
+# The same ACI role goes to the system-assigned identity of mvhd-ui, so the
+# hub's Start and Stop and a query's cold start can reach ARM (ADR-072).
 #
 # Each execution downloads the seven files it runs from this public repository
 # at REPO_REF, the commit deploy-azure.yml last deployed, so the jobs run the
@@ -42,7 +55,15 @@ source "$SCRIPT_DIR/env.sh"
 IDENTITY="id-mvhd-offhours"
 IMAGE="mcr.microsoft.com/azure-cli:2.91.0"
 REPO="ma3u/MinimumViableHealthDataspacev2"
-JOBS=("mvhd-offhours-stop|13 18 * * *|stop" "mvhd-offhours-start|17 5 * * 1-5|start" "mvhd-offhours-check|manual|decide-all")
+JOBS=("mvhd-offhours-stop|13 18 * * *|stop" "mvhd-offhours-start|17 5 * * 1-5|start" "mvhd-offhours-check|manual|decide-all"
+      "mvhd-spe-idle-stop|*/15 * * * *|idle-stop")
+# ADR-072: what the jobs pass to offhours.sh; set them when running this
+# script to change them (e.g. SPE_START_WITH_STACK=true restores the morning start).
+SPE_START_WITH_STACK="${SPE_START_WITH_STACK:-false}"
+SPE_IDLE_STOP_MINUTES="${SPE_IDLE_STOP_MINUTES:-30}"
+SPE_STATUS_URL="${SPE_STATUS_URL:-http://mvhd-neo4j-proxy/spe/status}"
+SPE_GROUPS=(mvhd-spe-1 mvhd-spe-2)
+ACI_BUILTIN_ROLE="Azure Container Instances Contributor Role"
 FILES="scripts/azure/offhours.sh scripts/azure/set-app-power.sh scripts/azure/retire-stale-revisions.sh scripts/azure/restore-keycloak-realm.sh scripts/azure/check-keycloak-health.sh scripts/azure/env.sh jad/keycloak-realm.json"
 
 MODE="apply"; REF=""
@@ -75,6 +96,12 @@ if [ "$MODE" = check ]; then report; exit 0; fi
 if [ "$MODE" = ref ]; then
   for entry in "${JOBS[@]}"; do
     name="${entry%%|*}"
+    # A job this script added later (mvhd-spe-idle-stop, ADR-072) exists only
+    # once someone ran it in apply mode; the deploy must not fail before that.
+    if ! az containerapp job show -n "$name" -g "$RG" -o none 2>/dev/null; then
+      warn "${name} does not exist yet: run $0 once (the PIM role) to create it"
+      continue
+    fi
     az containerapp job update -n "$name" -g "$RG" --set-env-vars "REPO_REF=${REF}" -o none
     ok "${name} runs ${REF:0:7}"
   done
@@ -104,17 +131,18 @@ ok "identity ${IDENTITY} (${ID_CLIENT})"
 RG_ID=$(az group show -n "$RG" --query id -o tsv)
 PG_ID=$(az postgres flexible-server show -n "$PG_FLEX_NAME" -g "$RG" --query id -o tsv)
 KV_ID=$(az keyvault show -n "$KEY_VAULT_NAME" --query id -o tsv)
-grant() {  # grant <role> <scope>
-  if [ -n "$(az role assignment list --assignee "$ID_PRINCIPAL" --role "$1" --scope "$2" --query '[0].id' -o tsv 2>/dev/null)" ]; then
+grant() {  # grant <role> <scope> [principal id, default id-mvhd-offhours]
+  local principal="${3:-$ID_PRINCIPAL}"
+  if [ -n "$(az role assignment list --assignee "$principal" --role "$1" --scope "$2" --query '[0].id' -o tsv 2>/dev/null)" ]; then
     ok "  ${1} on ${2##*/}: present"
   else
     # A new identity takes a while to reach the directory; retry for a minute.
     for _ in 1 2 3 4 5 6; do
-      az role assignment create --assignee-object-id "$ID_PRINCIPAL" --assignee-principal-type ServicePrincipal \
+      az role assignment create --assignee-object-id "$principal" --assignee-principal-type ServicePrincipal \
         --role "$1" --scope "$2" -o none 2>/dev/null && break
       sleep 10
     done
-    [ -n "$(az role assignment list --assignee "$ID_PRINCIPAL" --role "$1" --scope "$2" --query '[0].id' -o tsv)" ] ||
+    [ -n "$(az role assignment list --assignee "$principal" --role "$1" --scope "$2" --query '[0].id' -o tsv)" ] ||
       { err "could not grant ${1} on ${2}"; exit 1; }
     ok "  ${1} on ${2##*/}: granted"
   fi
@@ -143,14 +171,30 @@ if [ -z "$(az role definition list --name "$ACI_ROLE" --scope "$RG_ID" --query '
     sleep 30   # a new role definition takes a moment to be assignable
   else
     warn "could not create the custom role ${ACI_ROLE} (this account may not define roles)."
-    warn "Until someone who may runs this script, the off-hours jobs cannot stop or start"
-    warn "mvhd-spe-1/2: offhours.sh warns and carries on, and the groups keep running (and billing)."
+    warn "Granting the built-in '${ACI_BUILTIN_ROLE}' on the two SPE groups instead (ADR-072):"
+    warn "scoped to mvhd-spe-1/2 only, but it also allows create, delete and exec in them."
     ACI_ROLE=""
   fi
   rm -f "$ROLE_DEF"
 fi
+# The principals that start and stop the workspaces: this job identity, and
+# the hub itself (mvhd-ui's system-assigned identity: Start, Stop and a
+# query's cold start, ADR-072).
+UI_PRINCIPAL=$(az containerapp show -n mvhd-ui -g "$RG" --query identity.principalId -o tsv 2>/dev/null || true)
+[ -n "$UI_PRINCIPAL" ] || warn "mvhd-ui has no system-assigned identity: the hub cannot start or stop the SPE workspaces"
 if [ -n "$ACI_ROLE" ]; then
   grant "$ACI_ROLE" "$RG_ID"
+  if [ -n "$UI_PRINCIPAL" ]; then grant "$ACI_ROLE" "$RG_ID" "$UI_PRINCIPAL"; fi
+else
+  for g in "${SPE_GROUPS[@]}"; do
+    gid=$(az container show -n "$g" -g "$RG" --query id -o tsv 2>/dev/null || true)
+    if [ -z "$gid" ]; then
+      warn "  ${g} does not exist yet: run this script again after 21-aci-confidential-spe.sh --workspaces"
+      continue
+    fi
+    grant "$ACI_BUILTIN_ROLE" "$gid"
+    if [ -n "$UI_PRINCIPAL" ]; then grant "$ACI_BUILTIN_ROLE" "$gid" "$UI_PRINCIPAL"; fi
+  done
 fi
 
 # ── the jobs ────────────────────────────────────────────────────────────────
@@ -188,7 +232,7 @@ esac
 doc = {"location": "${LOCATION}",
   "identity": {"type": "UserAssigned", "userAssignedIdentities": {"${ID_ID}": {}}},
   "properties": {"environmentId": "${ENV_ID}",
-    "configuration": dict({"replicaTimeout": 3600, "replicaRetryLimit": 0},
+    "configuration": dict({"replicaTimeout": 600 if "${action}" == "idle-stop" else 3600, "replicaRetryLimit": 0},
       **({"triggerType": "Manual", "manualTriggerConfig": {"parallelism": 1, "replicaCompletionCount": 1}}
          if "${cron}" == "manual" else
          {"triggerType": "Schedule", "scheduleTriggerConfig": {"cronExpression": "${cron}", "parallelism": 1, "replicaCompletionCount": 1}})),
@@ -197,7 +241,10 @@ doc = {"location": "${LOCATION}",
       "resources": {"cpu": 0.5, "memory": "1Gi"},
       "env": [{"name": "ACTION", "value": "${action}"}, {"name": "REPO_REF", "value": "${REF}"},
               {"name": "AZURE_CLIENT_ID", "value": "${ID_CLIENT}"}, {"name": "SUBSCRIPTION_ID", "value": "${SUB_ID}"},
-              {"name": "RESOURCE_GROUP", "value": "${RG}"}, {"name": "PG_FLEX_NAME", "value": "${PG_FLEX_NAME}"}]}]}}}
+              {"name": "RESOURCE_GROUP", "value": "${RG}"}, {"name": "PG_FLEX_NAME", "value": "${PG_FLEX_NAME}"},
+              {"name": "SPE_START_WITH_STACK", "value": "${SPE_START_WITH_STACK}"},
+              {"name": "SPE_IDLE_STOP_MINUTES", "value": "${SPE_IDLE_STOP_MINUTES}"},
+              {"name": "SPE_STATUS_URL", "value": "${SPE_STATUS_URL}"}]}]}}}
 yaml.safe_dump(doc, open(sys.argv[1], "w"), sort_keys=False)
 PY
   if az containerapp job show -n "$name" -g "$RG" -o none 2>/dev/null; then

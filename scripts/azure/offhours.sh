@@ -8,6 +8,8 @@
 #   offhours.sh start               start: Postgres, the apps in order, UI online last
 #   offhours.sh auto-stop           decide stop, then do it (the scheduled path)
 #   offhours.sh auto-start          decide start, then do it
+#   offhours.sh idle-stop           stop each SPE workspace idle for
+#                                   SPE_IDLE_STOP_MINUTES (default 30, ADR-072)
 #
 # The one place this logic lives. Two callers:
 #   - the ACA jobs mvhd-offhours-stop and mvhd-offhours-start, on Azure's own
@@ -17,6 +19,17 @@
 #   - .github/workflows/aca-schedule.yml: a manual start or stop, and a
 #     fallback cron an hour after the jobs, which finds nothing to do when the
 #     job did its work.
+#   - the ACA job mvhd-spe-idle-stop, every 15 minutes: idle-stop (ADR-072).
+#
+# The SPE workspaces (ADR-069) start on demand (ADR-072): the evening stop
+# stops them, the morning start leaves them stopped, and the hub starts one
+# when an operator presses Start or a federated query needs it. idle-stop
+# stops one nobody has queried for SPE_IDLE_STOP_MINUTES.
+#   SPE_START_WITH_STACK=true   the morning start starts them again, as
+#                               before ADR-072 (default false)
+#   SPE_IDLE_STOP_MINUTES=0     idle-stop stops nothing
+#   SPE_STATUS_URL              where idle-stop reads lastQueriedAt (the
+#                               proxy's /spe/status, internal ingress)
 #
 # Holds (stop skipped):
 #   KEEP_UP_DATES          Berlin dates, space separated (below, in the repo)
@@ -73,6 +86,10 @@ CFM_APPS=(mvhd-cfm-cp-shim mvhd-cfm-kcagent mvhd-cfm-edcvagent mvhd-cfm-regagent
 # from the sealed extract: nothing row-level survives a stop, by design.
 SPE_GROUPS=(mvhd-spe-1 mvhd-spe-2)
 TRUSTEE_APP="${TRUSTEE_APP:-mvhd-trustee}"
+# ADR-072: off by default, started on demand; true restores the morning start.
+SPE_START_WITH_STACK="${SPE_START_WITH_STACK:-false}"
+SPE_IDLE_STOP_MINUTES="${SPE_IDLE_STOP_MINUTES:-30}"
+SPE_STATUS_URL="${SPE_STATUS_URL:-http://mvhd-neo4j-proxy/spe/status}"
 
 # GitHub annotations when run there, plain lines anywhere else.
 gh_mark() { if [ -n "${GITHUB_ACTIONS:-}" ]; then echo "::$1::$2"; else echo "$(tr '[:lower:]' '[:upper:]' <<<"$1"): $2"; fi; }
@@ -105,6 +122,21 @@ spe_power() {  # spe_power stop|start: both SPE groups, in order, those that exi
     az container "$verb" --name "$g" --resource-group "$RESOURCE_GROUP" -o none ||
       warn "az container $verb $g failed"
   done < <(spe_groups)
+}
+# Not ${1,,}: macOS runs this with bash 3.2.
+is_true() { case "${1:-}" in true|TRUE|True|1|yes|on) return 0 ;; *) return 1 ;; esac; }
+# ISO-8601 to epoch seconds; empty for anything it cannot read. python3, not
+# date -d: the same on GNU (the job's image) and BSD (a Mac).
+to_epoch() {
+  [ -n "${1:-}" ] || return 0
+  python3 -c 'import sys, re, datetime
+t = re.sub(r"\.[0-9]+", "", sys.argv[1].strip()).replace("Z", "+00:00")
+try:
+    d = datetime.datetime.fromisoformat(t)
+    if d.tzinfo is None: d = d.replace(tzinfo=datetime.timezone.utc)
+    print(int(d.timestamp()))
+except ValueError:
+    pass' "$1" 2>/dev/null || true
 }
 scale() {  # scale <min> <max> <app>...
   local min="$1" max="$2" app; shift 2
@@ -158,6 +190,61 @@ decide() {
       fi ;;
     *) error "decide start|stop"; exit 64 ;;
   esac
+}
+
+# ── idle stop (ADR-072) ─────────────────────────────────────────────────────
+# A workspace is idle when neither its last query (the proxy's lastQueriedAt)
+# nor its start (ARM, the neo4j container's start time) is within
+# SPE_IDLE_STOP_MINUTES. A hold or a keep-up date skips it, as it skips the
+# evening stop, so a demo never meets a cold start. The proxy unreachable
+# means nobody can query a workspace: its start time alone decides. A start
+# time ARM does not report leaves the group running (the evening stop still
+# comes).
+idle_stop() {
+  local minutes="$SPE_IDLE_STOP_MINUTES" now today hold status g id state started last ref idle
+  if ! [[ "$minutes" =~ ^[0-9]+$ ]] || [ "$minutes" -eq 0 ]; then
+    log "idle stop off (SPE_IDLE_STOP_MINUTES=${minutes})"; return 0
+  fi
+  now="${OFFHOURS_NOW:-$(date -u +%s)}"
+  today=$(TZ=Europe/Berlin date +%F)
+  hold=$(hold_until || true)
+  if [ -n "$hold" ] && [ "$now" -lt "$hold" ]; then
+    log "held until $hold (epoch): no idle stop"; return 0
+  fi
+  if [[ " $KEEP_UP_DATES " == *" $today "* ]]; then
+    log "keep-up date ($today): no idle stop"; return 0
+  fi
+  status=$(curl -sf --max-time 20 "$SPE_STATUS_URL" 2>/dev/null || true)
+  if [ -z "$status" ] || ! jq -e '.spes | type == "array"' >/dev/null 2>&1 <<<"$status"; then
+    log "the proxy's /spe/status did not answer: start times alone decide"
+    status='{"spes":[]}'
+  fi
+  while read -r g; do
+    [ -n "$g" ] || continue
+    id="SPE-${g##*-}"
+    state=$(az container show --name "$g" --resource-group "$RESOURCE_GROUP" \
+      --query instanceView.state -o tsv 2>/dev/null || true)
+    if [ "$state" != Running ]; then
+      log "  $g: ${state:-unknown}, nothing to stop"; continue
+    fi
+    started=$(az container show --name "$g" --resource-group "$RESOURCE_GROUP" \
+      --query "containers[?name=='neo4j'] | [0].instanceView.currentState.startTime" -o tsv 2>/dev/null || true)
+    last=$(jq -r --arg id "$id" '.spes[]? | select(.id == $id) | .lastQueriedAt // empty' <<<"$status")
+    started=$(to_epoch "$started"); last=$(to_epoch "$last")
+    if [ -z "$started" ]; then
+      warn "$g runs, but ARM reports no start time: left running"; continue
+    fi
+    ref="$started"
+    if [ -n "$last" ] && [ "$last" -gt "$ref" ]; then ref="$last"; fi
+    idle=$(( (now - ref) / 60 ))
+    if [ "$idle" -ge "$minutes" ]; then
+      log "  $g: idle ${idle} min (>= ${minutes}): az container stop"
+      az container stop --name "$g" --resource-group "$RESOURCE_GROUP" -o none ||
+        warn "az container stop $g failed"
+    else
+      log "  $g: last used ${idle} min ago, keeps running"
+    fi
+  done < <(spe_groups)
 }
 
 # ── stop ────────────────────────────────────────────────────────────────────
@@ -215,15 +302,20 @@ do_start() {
   # still runs replicas (an old Neo4j revision held the store lock, 2026-10-04).
   "${SCRIPT_DIR}/retire-stale-revisions.sh" || warn "A stale revision could not be deactivated, see above"
 
-  # Trustee first, then the SPE workspaces, which attest to it as they start
-  # (and keep trying while it comes up); the proxy, among the core apps,
-  # reconnects to them as they finish loading (ADR-069).
+  # Trustee first: a workspace started on demand attests to it (ADR-069).
+  # The workspaces themselves stay stopped until the hub starts one
+  # (ADR-072); SPE_START_WITH_STACK=true starts them here as before, and the
+  # proxy, among the core apps, reconnects to them as they finish loading.
   local -a core=("${CORE_APPS[@]}")
   if trustee_present; then core=("$TRUSTEE_APP" "${core[@]}"); fi
   log "core apps"
   "${SCRIPT_DIR}/set-app-power.sh" start "${core[@]}" || warn "Not every core app reported running, see above"
-  log "SPE workspaces (ACI)"
-  spe_power start
+  if is_true "$SPE_START_WITH_STACK"; then
+    log "SPE workspaces (ACI): SPE_START_WITH_STACK=${SPE_START_WITH_STACK}"
+    spe_power start
+  else
+    log "SPE workspaces (ACI): left stopped, they start on demand (ADR-072)"
+  fi
   scale 1 1 mvhd-neo4j mvhd-keycloak mvhd-vault mvhd-catalog-enricher mvhd-claude-federation
   # A scale change can make a new Neo4j revision; the old one keeps the lock.
   "${SCRIPT_DIR}/retire-stale-revisions.sh" mvhd-neo4j || warn "A stale mvhd-neo4j revision could not be deactivated, see above"
@@ -283,5 +375,7 @@ case "${1:-}" in
   start)      do_start ;;
   auto-stop)  a=$(decide stop);  log "decision: $a"; [ "$a" = stop ]  && do_stop;  true ;;
   auto-start) a=$(decide start); log "decision: $a"; [ "$a" = start ] && do_start; true ;;
-  *) sed -n '5,10p' "$0"; exit 64 ;;
+  # auto-idle-stop: the name the ACA job's "auto-${ACTION}" gives it.
+  idle-stop|auto-idle-stop) idle_stop ;;
+  *) sed -n '5,12p' "$0"; exit 64 ;;
 esac

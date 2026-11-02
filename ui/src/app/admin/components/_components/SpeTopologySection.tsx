@@ -3,6 +3,7 @@
 import { Cpu, KeyRound, Lock, ShieldQuestion } from "lucide-react";
 import { useSpeStatus } from "@/components/spe/use-spe-status";
 import { SpeLabelBadge, SpeStatusText } from "@/components/spe/SpeBadges";
+import { SpePowerControls } from "@/components/spe/SpePowerControls";
 import { aciGroupMonthlyEur, formatEur } from "@/lib/azure-pricing";
 import { ADR_068_URL, type SpeStatusResponse } from "@/lib/spe";
 import { ACI_SPE_DETAILS, ACI_SPE_GROUPS } from "./constants";
@@ -18,7 +19,14 @@ function speIdOf(group: string): string {
  * container group per SPE workspace, and the access body's Trustee on ACA. A
  * group is marked "in use" only when its SPE says it runs there.
  */
-export function SpeTopologyView({ data }: { data: SpeStatusResponse | null }) {
+export function SpeTopologyView({
+  data,
+  onPowerChange,
+}: {
+  data: SpeStatusResponse | null;
+  /** Called after a Start or Stop: the page polls until it settles (ADR-072). */
+  onPowerChange?: () => void;
+}) {
   const t = useT("admin");
   const spes = data?.spes ?? [];
   const trustee = data?.trustee ?? null;
@@ -111,6 +119,13 @@ export function SpeTopologyView({ data }: { data: SpeStatusResponse | null }) {
                       {spe.runsOn}
                     </p>
                     <SpeLabelBadge spe={spe} />
+                    {spe.powerState && (
+                      <SpePowerControls
+                        spe={spe}
+                        power={data?.power}
+                        onChange={onPowerChange ?? (() => undefined)}
+                      />
+                    )}
                   </div>
                 ) : (
                   <p className="text-(--text-secondary)">
@@ -176,6 +191,6 @@ export function SpeTopologyView({ data }: { data: SpeStatusResponse | null }) {
 }
 
 export function SpeTopologySection() {
-  const { data } = useSpeStatus();
-  return <SpeTopologyView data={data} />;
+  const { data, watch } = useSpeStatus();
+  return <SpeTopologyView data={data} onPowerChange={watch} />;
 }

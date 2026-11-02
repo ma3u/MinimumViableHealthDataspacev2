@@ -25,7 +25,7 @@ process.env.TRUSTEE_URL = "https://mvhd-trustee.example.test";
 process.env.SPE1_RUNS_ON =
   "ACI confidential container group mvhd-spe-1 (westeurope)";
 process.env.SPE2_RUNS_ON =
-  "ACI confidential container group mvhd-spe-1 (westeurope)";
+  "ACI confidential container group mvhd-spe-2 (westeurope)";
 process.env.SPE_AUDIT_SYNC_MS = "0";
 
 type Row = Record<string, unknown>;
@@ -93,7 +93,14 @@ const { app, main } = await import("../src/index.js");
 const { setSpe2Driver, getSpeDrivers, workspaceDriverOptions } = await import(
   "../src/db.js"
 );
-const { resetSpeAuditCache, runSpeSync } = await import("../src/spe-status.js");
+const {
+  noteSpeQueried,
+  resetSpeActivity,
+  resetSpeAuditCache,
+  runSpeSync,
+  speEntry,
+  speLastQueriedAt,
+} = await import("../src/spe-status.js");
 import supertest from "supertest";
 
 const request = supertest(app);
@@ -181,6 +188,7 @@ beforeAll(async () => {
 beforeEach(() => {
   setSpe2Driver(spe2 as never);
   resetSpeAuditCache();
+  resetSpeActivity();
   appendAuditEvent.mockReset();
   appendAuditEvent.mockImplementation(
     async (chain: string, resource: { id: string }) => ({
@@ -249,6 +257,7 @@ describe("GET /spe/status", () => {
           patients: 108,
           status: "ready",
           attestation: ATTESTATION,
+          lastQueriedAt: null,
         },
         expect.objectContaining({
           id: "SPE-2",
@@ -634,5 +643,142 @@ describe("workspaceDriverOptions", () => {
       uri: "bolt://neo4j-spe2:7687",
       config: {},
     });
+  });
+});
+
+describe("where an SPE runs (runsOn)", () => {
+  const read = (runsOn: string) => ({
+    attestation: { status: "ready", runsOn },
+    patients: 108,
+    events: [],
+  });
+
+  it("names the ACI group the deployment configured, over a loader's local default", async () => {
+    // The live bug of 2026-11-02: the loader in mvhd-spe-1 had no
+    // SPE_RUNS_ON and recorded "Docker Compose (local)".
+    spe1.run.mockResolvedValue(
+      statusResult(
+        speAttestation("SPE-1", "load-1", { runsOn: "Docker Compose (local)" }),
+        108,
+        [],
+      ),
+    );
+    spe2.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-2", "load-2"), 108, []),
+    );
+    const res = await request.get("/spe/status");
+    expect(res.body.spes[0].runsOn).toBe(
+      "ACI confidential container group mvhd-spe-1 (westeurope)",
+    );
+    expect(res.body.spes[1].runsOn).toBe(
+      "ACI confidential container group mvhd-spe-2 (westeurope)",
+    );
+  });
+
+  it("takes the workspace's record when nothing is configured, then the default", () => {
+    expect(
+      speEntry(
+        "SPE-1",
+        read("Docker Compose (local), neo4j-spe1"),
+        "SPE-1 workspace",
+      ).runsOn,
+    ).toBe("Docker Compose (local), neo4j-spe1");
+    expect(speEntry("SPE-2", null, "SPE-2 workspace").runsOn).toBe(
+      "SPE-2 workspace",
+    );
+    expect(
+      speEntry("SPE-2", read("anything"), "SPE-2 workspace", "ACI group 2")
+        .runsOn,
+    ).toBe("ACI group 2");
+  });
+});
+
+describe("start on demand and the idle stop (ADR-072)", () => {
+  it("does not wait for a workspace the caller says is stopped", async () => {
+    spe1.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-1", "load-1"), 108, []),
+    );
+    const res = await request.get("/spe/status?skip=SPE-2,nonsense");
+    expect(res.status).toBe(200);
+    expect(spe2.run).not.toHaveBeenCalled();
+    expect(res.body.spes[1]).toMatchObject({
+      id: "SPE-2",
+      status: "unreachable",
+    });
+    expect(res.body.spes[0].status).toBe("ready");
+  });
+
+  it("records when the federated statistics asked each workspace", async () => {
+    spe1.run.mockResolvedValue({ records: [] });
+    spe2.run.mockResolvedValue({ records: [] });
+    expect(speLastQueriedAt("SPE-1")).toBeNull();
+    const before = new Date().toISOString();
+    const res = await request.get("/federated/stats");
+    expect(res.status).toBe(200);
+    expect(speLastQueriedAt("SPE-1")! >= before).toBe(true);
+    expect(speLastQueriedAt("SPE-2")! >= before).toBe(true);
+  });
+
+  it("merges the query times through the hub, newest wins, and reports them", async () => {
+    noteSpeQueried(["SPE-1"], new Date("2026-11-02T09:00:00.000Z"));
+    // Another replica asked SPE-1 later, and SPE-2 too.
+    hub.run.mockImplementation(async (q: string) =>
+      /lastQueriedAt IS NOT NULL/.test(q)
+        ? {
+            records: [
+              record({ speId: "SPE-1", at: "2026-11-02T09:10:00.000Z" }),
+              record({ speId: "SPE-2", at: "2026-11-02T08:00:00.000Z" }),
+            ],
+          }
+        : { records: [] },
+    );
+    spe1.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-1", "load-1"), 108, []),
+    );
+    spe2.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-2", "load-2"), 108, []),
+    );
+
+    await runSpeSync();
+
+    const write = hubWrite.mock.calls.find((c) =>
+      String(c[0]).includes("lastQueriedAt"),
+    );
+    expect(write?.[0]).toContain("MERGE (w:SpeWorkspace {speId: r.id})");
+    expect(write?.[1]).toEqual({
+      rows: [{ id: "SPE-1", at: "2026-11-02T09:00:00.000Z" }],
+    });
+    const res = await request.get("/spe/status");
+    expect(res.body.spes[0].lastQueriedAt).toBe("2026-11-02T09:10:00.000Z");
+    expect(res.body.spes[1].lastQueriedAt).toBe("2026-11-02T08:00:00.000Z");
+
+    // Nothing new since: the next sync writes nothing, only reads.
+    hubWrite.mockClear();
+    await runSpeSync();
+    expect(
+      hubWrite.mock.calls.filter((c) => String(c[0]).includes("lastQueriedAt")),
+    ).toEqual([]);
+  });
+
+  it("keeps the query time when the hub cannot be written, and tries again", async () => {
+    noteSpeQueried(["SPE-2"], new Date("2026-11-02T10:00:00.000Z"));
+    hubWrite.mockImplementation(async (q: string) => {
+      if (String(q).includes("lastQueriedAt")) throw new Error("deadlock");
+      return { records: [record({ before: null })] };
+    });
+    spe1.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-1", "load-1"), 108, []),
+    );
+    spe2.run.mockResolvedValue(
+      statusResult(speAttestation("SPE-2", "load-2"), 108, []),
+    );
+    await expect(runSpeSync()).resolves.toBe(true);
+    expect(speLastQueriedAt("SPE-2")).toBe("2026-11-02T10:00:00.000Z");
+    hubWrite.mockReset();
+    hubWrite.mockResolvedValue({ records: [record({ before: null })] });
+    await runSpeSync();
+    expect(
+      hubWrite.mock.calls.some((c) => String(c[0]).includes("lastQueriedAt")),
+    ).toBe(true);
   });
 });

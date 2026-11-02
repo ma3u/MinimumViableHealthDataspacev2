@@ -16,6 +16,12 @@ export const ADR_068_URL =
 export type SpeEnvironment = "azure" | "local" | "static";
 export type AttestationScope = "node" | "workload" | "none";
 export type SpeStatusValue = "ready" | "loading" | "refused" | "unreachable";
+/**
+ * Whether a workspace is up (ADR-072): from the ACI group's power state on
+ * Azure, combined with what the proxy reads from the workspace; from the
+ * proxy alone elsewhere.
+ */
+export type SpePowerState = "running" | "starting" | "stopped" | "unreachable";
 
 /** The three labels of ADR-068 decision 5, one per depth. */
 export const SPE_LABEL_SIMULATED = "Simulated attestation";
@@ -53,6 +59,12 @@ export interface SpeEntry {
    * older proxy may leave it out.
    */
   attestation?: SpeAttestation | null;
+  /** running, starting, stopped or unreachable (ADR-072); set by the UI route. */
+  powerState?: SpePowerState;
+  /** The ACI group's instanceView.state on Azure ("Running", "Stopped"...), else null. */
+  armState?: string | null;
+  /** The last federated query that asked this workspace, as the proxy saw it. */
+  lastQueriedAt?: string | null;
 }
 
 /** What the attestation measured, as the verifier reports it; any may be null. */
@@ -90,6 +102,136 @@ export interface SpeStatusResponse {
    * contract.
    */
   fallback?: { reason: string };
+  /**
+   * Whether this caller may start and stop the workspaces from the hub
+   * (ADR-072): an operator or the access body, on Azure. Set by the UI.
+   */
+  power?: { available: boolean; reason: string | null };
+}
+
+// ---- starting and stopping the workspaces (ADR-072) -------------------------
+
+/** Why a caller may not start or stop a workspace; translated where shown. */
+export const SPE_POWER_REASONS = {
+  notAzure: "Starting and stopping needs the Azure deployment",
+  notAllowed: "Only the operator and the access body start and stop workspaces",
+} as const;
+
+export const SPE_POWER_STATES: readonly SpePowerState[] = [
+  "running",
+  "starting",
+  "stopped",
+  "unreachable",
+];
+
+/** From the start command to both workspaces answering, measured 2026-11-02. */
+export const SPE_COLD_START_SECONDS = 240;
+/** From the neo4j container's start to the data being loaded. */
+const SPE_LOAD_AFTER_START_SECONDS = 180;
+/** A running group whose workspace still does not answer after this is unreachable. */
+const SPE_START_GRACE_SECONDS = 600;
+
+/** ARM's container group power, as getContainerGroupState() reads it. */
+export interface SpeArmPower {
+  provisioningState: string | null;
+  state: string | null;
+  startedAt: string | null;
+}
+
+const ARM_STARTING = new Set([
+  "Pending",
+  "Creating",
+  "Starting",
+  "Repairing",
+  "Updating",
+  "Waiting",
+]);
+const ARM_STOPPED = new Set(["Stopped", "Succeeded", "Failed", "Terminated"]);
+
+/** What the proxy's workspace read alone says about power. */
+function powerFromProxyStatus(
+  status: SpeStatusValue | string | undefined,
+): SpePowerState {
+  if (status === "ready" || status === "refused") return "running";
+  if (status === "loading") return "starting";
+  return "unreachable";
+}
+
+/**
+ * One workspace's power state. ARM decides whether the group runs at all;
+ * the proxy decides whether a running group has loaded. A running group
+ * whose workspace has not answered is starting for its first ten minutes and
+ * unreachable after that. Without ARM (locally, or no Reader role) the
+ * proxy's read alone decides. `proxyStatus` undefined means the proxy was not
+ * asked (the query gate): then a group counts as starting for the three
+ * minutes its load takes after its containers start.
+ */
+export function spePowerState(
+  arm: SpeArmPower | null,
+  proxyStatus: SpeStatusValue | string | undefined,
+  now: number = Date.now(),
+): SpePowerState {
+  if (!arm) return powerFromProxyStatus(proxyStatus);
+  const state = arm.state ?? "";
+  const prov = arm.provisioningState ?? "";
+  if (ARM_STARTING.has(state) || ARM_STARTING.has(prov)) return "starting";
+  if (state === "Running") {
+    if (proxyStatus === "ready" || proxyStatus === "refused") return "running";
+    const since = arm.startedAt
+      ? (now - Date.parse(arm.startedAt)) / 1000
+      : null;
+    if (proxyStatus === undefined) {
+      return since !== null && since < SPE_LOAD_AFTER_START_SECONDS
+        ? "starting"
+        : "running";
+    }
+    return since === null || since < SPE_START_GRACE_SECONDS
+      ? "starting"
+      : "unreachable";
+  }
+  if (ARM_STOPPED.has(state)) return "stopped";
+  return powerFromProxyStatus(proxyStatus);
+}
+
+/** Seconds until a workspace in this state should answer: 240 from stopped. */
+export function speEtaSeconds(
+  power: SpePowerState,
+  arm: SpeArmPower | null,
+  now: number = Date.now(),
+): number {
+  if (power !== "starting" || !arm?.startedAt) return SPE_COLD_START_SECONDS;
+  const since = (now - Date.parse(arm.startedAt)) / 1000;
+  return Math.max(30, Math.round(SPE_LOAD_AFTER_START_SECONDS - since));
+}
+
+/** One workspace in the 503 a query gets while it is not up (ADR-072). */
+export interface SpeColdStartEntry {
+  id: string;
+  state: "starting" | "stopped";
+  etaSeconds: number;
+}
+
+/** The 503 body of a query that needs a workspace that is not up. */
+export interface SpeColdStartBody {
+  error: string;
+  /** The first workspace that is not up. */
+  spe: SpeColdStartEntry;
+  /** Every workspace that is not up. */
+  spes: SpeColdStartEntry[];
+  /** True when this request started at least one of them. */
+  started: boolean;
+}
+
+export function isSpeColdStart(v: unknown): v is SpeColdStartBody {
+  if (!v || typeof v !== "object") return false;
+  const spe = (v as { spe?: unknown }).spe;
+  if (!spe || typeof spe !== "object") return false;
+  const s = spe as Record<string, unknown>;
+  return (
+    typeof s.id === "string" &&
+    (s.state === "starting" || s.state === "stopped") &&
+    typeof s.etaSeconds === "number"
+  );
 }
 
 /** The six audit event types of #774 on the ADR-045 chain `spe`. */

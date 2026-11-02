@@ -4,6 +4,7 @@ import { resolveOdrlScope, userToParticipantId } from "@/lib/odrl-engine";
 import { gateSecondaryUse } from "@/lib/permit-gate";
 import { NEO4J_PROXY_URL, callerHeaders, loadTestHeaders } from "@/lib/proxy";
 import { seesPatientIdentity } from "@/lib/patient-identity";
+import { speColdStartGate } from "@/lib/spe-power";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +34,13 @@ export async function POST(request: NextRequest) {
     if (!gate.allowed) {
       return NextResponse.json(gate.body, { status: gate.status });
     }
+    // A federated question asks every SPE workspace; a stopped one is
+    // started (when the caller may) and the caller told to come back
+    // (ADR-072). Without `federated` the hub graph answers, no workspace.
+    if (body.federated === true) {
+      const coldStart = await speColdStartGate(session.roles);
+      if (coldStart) return coldStart;
+    }
     const odrlScope = await resolveOdrlScope(participantId);
 
     // The proxy records the query as a TransferEvent; the gate's headers give
@@ -54,6 +62,13 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({ ...body, odrlScope }),
     });
     const data = await resp.json();
+    // A template that asks every SPE (spe_access) goes federated in the
+    // proxy without the flag; when that failed, a stopped workspace is the
+    // likely cause, and the caller gets the cold-start answer instead.
+    if (resp.status >= 500 && body.federated !== true) {
+      const coldStart = await speColdStartGate(session.roles);
+      if (coldStart) return coldStart;
+    }
     return NextResponse.json(data, { status: resp.status });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "NLQ proxy error";

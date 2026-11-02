@@ -16,6 +16,7 @@ import {
   readSession,
 } from "../db.js";
 import { app } from "../app.js";
+import { noteSpeQueried } from "../spe-status.js";
 import { auditContext, logTransferEvent } from "../audit.js";
 import { appendQueryAudit, auditUnavailable } from "../audit-chain.js";
 import {
@@ -314,8 +315,11 @@ app.post("/nlq", async (req: Request, res: Response, next: NextFunction) => {
 
     if (federated && federationAvailable()) {
       // Federated execution across all SPEs
+      const spes = getSpeDrivers();
+      // When each workspace was last asked, for the idle stop (ADR-072).
+      noteSpeQueried(spes.map((s) => s.label));
       await Promise.all(
-        getSpeDrivers().map(async ({ label, driver: d }) => {
+        spes.map(async ({ label, driver: d }) => {
           const session = readSession(d);
           try {
             // nosemgrep: cypher-built-from-request-input -- generated Cypher in a read-only session; WRITE_PATTERN and checkReIdentification above

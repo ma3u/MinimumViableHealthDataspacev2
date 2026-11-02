@@ -3,12 +3,19 @@ import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { userToParticipantId } from "@/lib/odrl-engine";
 import { activePermitHeaders } from "@/lib/permit-gate";
 import { NEO4J_PROXY_URL, callerHeaders, loadTestHeaders } from "@/lib/proxy";
+import { speColdStartGate } from "@/lib/spe-power";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const auth = await requireAuth();
   if (isAuthError(auth)) return auth;
+
+  // The statistics ask every SPE workspace. A stopped one is started (when
+  // the caller may) and the caller is told to come back (ADR-072), rather
+  // than waiting for a workspace that is not there.
+  const coldStart = await speColdStartGate(auth.session.roles);
+  if (coldStart) return coldStart;
 
   try {
     // The proxy records every request it serves as a TransferEvent, the

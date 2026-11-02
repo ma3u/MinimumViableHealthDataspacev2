@@ -852,5 +852,21 @@
   "Valid ODRL 2.2 and fit for secondary use.": "Valid ODRL 2.2 and fit for secondary use.",
   "Warning": "Warning",
   "Note": "Note",
-  "e.g. {example}": "e.g. {example}"
+  "e.g. {example}": "e.g. {example}",
+  "starting": "starting",
+  "Start": "Start",
+  "Stop": "Stop",
+  "Power of {id}": "Power of {id}",
+  "Workspace: {state}": "Workspace: {state}",
+  "Start {id}": "Start {id}",
+  "Stop {id}": "Stop {id}",
+  "Starting: attesting to Trustee, releasing the key, loading the data; about 3 to 4 minutes": "Starting: attesting to Trustee, releasing the key, loading the data; about 3 to 4 minutes",
+  "Last queried {when}": "Last queried {when}",
+  "No query recorded yet": "No query recorded yet",
+  "Stopped by default, starts on demand, stops itself after 30 minutes without a query (ADR-072)": "Stopped by default, starts on demand, stops itself after 30 minutes without a query (ADR-072)",
+  "Static demo: nothing is started or stopped.": "Static demo: nothing is started or stopped.",
+  "Could not change the workspace: {error}": "Could not change the workspace: {error}",
+  "An owner of the resource group runs once:": "An owner of the resource group runs once:",
+  "Starting and stopping needs the Azure deployment": "Starting and stopping needs the Azure deployment",
+  "Only the operator and the access body start and stop workspaces": "Only the operator and the access body start and stop workspaces"
 }
