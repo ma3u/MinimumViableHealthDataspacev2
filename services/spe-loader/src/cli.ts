@@ -14,7 +14,14 @@ import neo4j, { type Driver } from "neo4j-driver";
 import { newExtractKey, seal } from "./crypto.js";
 import { parseJsonl, toJsonl, type ExtractHeader } from "./extract.js";
 import { exportExtract, recordPermit } from "./hub.js";
-import { KbsError, kbsAdmin, kbsClient, type ReferenceValue } from "./kbs.js";
+import {
+  ATTESTATION_POLICY_ID,
+  checkMinimum,
+  KbsError,
+  kbsAdmin,
+  kbsClient,
+  type ReferenceValue,
+} from "./kbs.js";
 import { ingestCommand } from "./ingest-command.js";
 import {
   ingest,
@@ -34,8 +41,9 @@ const USAGE = `spe-loader <command> [options]
 
   policy-hash --workload <file.json>                 the permit's policy hash of a pod spec
   trustee-configure [--resource-policy <file.rego> | --resource-policy-template <file.tmpl>
-                     --policy-hashes '{"spe-1":"sha256:..."}'] [--reference-values <file.json|json>]
-                                                     the access body's policy and reference values
+                     --policy-hashes '{"spe-1":"sha256:..."}'] [--attestation-policy <file.rego>]
+                     [--reference-values <file.json|json>]
+                                                     the access body's policies and reference values
   record-permit --spe <1|2> --policy-hash <sha256:...> the permit records its policy hash (hub)
   export  --spe <1|2> [--out <file.jsonl>]           hub graph to a plain extract (for inspection)
   encrypt --in <file.jsonl> --out <file.enc>         seal it under a new key and put the key into Trustee
@@ -205,6 +213,7 @@ async function main(): Promise<number> {
       "resource-policy": { type: "string" },
       "resource-policy-template": { type: "string" },
       "policy-hashes": { type: "string" },
+      "attestation-policy": { type: "string" },
       "reference-values": { type: "string" },
       stay: { type: "boolean", default: false },
     },
@@ -220,8 +229,29 @@ async function main(): Promise<number> {
       return 0;
     }
     case "trustee-configure": {
-      // The access body's side of Trustee: the resource policy and the
-      // reference values the attestation policy compares the evidence with.
+      // The access body's side of Trustee: the resource policy, the
+      // attestation policy (TCB minimums, ADR-073) and the reference values
+      // it compares the evidence with. Everything is checked before the
+      // first call, so a bad file changes nothing.
+      const attestationPolicy = values["attestation-policy"] as
+        string | undefined;
+      if (attestationPolicy && !existsSync(attestationPolicy))
+        throw new Error(`no attestation policy file ${attestationPolicy}`);
+      const rvArg = values["reference-values"] as string | undefined;
+      const rv = rvArg
+        ? jsonArg<Record<string, ReferenceValue>>(rvArg)
+        : undefined;
+      const entries = Object.entries(rv ?? {}).filter(
+        ([n]) => !n.startsWith("_"),
+      );
+      for (const [name, value] of entries) {
+        if (JSON.stringify(value).includes("REPLACE")) {
+          throw new Error(
+            `reference value '${name}' is still a placeholder; take it from the first attestation (21-aci-confidential-spe.sh --check)`,
+          );
+        }
+        checkMinimum(name, value);
+      }
       const admin = kbsAdmin({
         url: trusteeUrl(),
         adminTokenFile: adminToken(),
@@ -252,20 +282,23 @@ async function main(): Promise<number> {
         await withTrustee(() => admin.setResourcePolicy(file));
         log(`resource policy set from ${file}`);
       }
-      const rvArg = values["reference-values"] as string | undefined;
-      if (rvArg) {
-        const rv = jsonArg<Record<string, ReferenceValue>>(rvArg);
-        const names = Object.keys(rv).filter((n) => !n.startsWith("_"));
-        for (const name of names) {
-          if (JSON.stringify(rv[name]).includes("REPLACE")) {
-            throw new Error(
-              `reference value '${name}' is still a placeholder; take it from the first attestation (21-aci-confidential-spe.sh --check)`,
-            );
-          }
-        }
-        for (const name of names)
-          await withTrustee(() => admin.setReferenceValue(name, rv[name]));
-        log(`${names.length} reference values set`);
+      if (attestationPolicy) {
+        await withTrustee(() => admin.setAttestationPolicy(attestationPolicy));
+        log(
+          `attestation policy ${ATTESTATION_POLICY_ID} set from ${attestationPolicy}`,
+        );
+      }
+      if (rv) {
+        for (const [name, value] of entries)
+          await withTrustee(() => admin.setReferenceValue(name, value));
+        const minimums = entries
+          .filter(([n]) => n.endsWith("_min"))
+          .map(([n, v]) => `${n}=${String(v)}`);
+        log(
+          `${entries.length} reference values set${
+            minimums.length > 0 ? ` (TCB minimums: ${minimums.join(", ")})` : ""
+          }`,
+        );
       }
       return 0;
     }

@@ -2,7 +2,7 @@
 type: runbook
 title: SPE attestation on Azure (ACI confidential containers and Trustee)
 description: Set up, pin, check, stop and start the two SPE workspaces on ACI confidential container groups, attested to the access body's Trustee; with every failure seen on 2026-11-01/02, its log line and its fix.
-resource: scripts/azure/21-aci-confidential-spe.sh, scripts/azure/aci/spe-workspace.template.json, services/spe-loader/, services/spe-loader/patches/snp-attester-plain-report.patch, trustee/reference-values-aci.example.json, ui/src/app/admin/attestation/
+resource: scripts/azure/21-aci-confidential-spe.sh, scripts/azure/aci/spe-workspace.template.json, services/spe-loader/, services/spe-loader/patches/snp-attester-plain-report.patch, trustee/reference-values-aci.example.json, trustee/policies/attestation-ear-cpu.rego, ui/src/app/admin/attestation/
 tags:
   [
     runbook,
@@ -13,6 +13,7 @@ tags:
     trustee,
     spe,
     issue-774,
+    issue-833,
   ]
 generated: { by: claude-code/opus-5.5, at: 2026-11-02T00:00:00Z }
 verified: { by: UNKNOWN, at: UNKNOWN }
@@ -25,7 +26,9 @@ themselves on Azure before they get any data. Design:
 (Trustee run by the access body, Neo4j loaded per permit from a sealed extract);
 placement on Azure:
 [ADR-069](../../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)
-(accepted 2026-11-02). Everything below was done live in
+(accepted 2026-11-02); TCB minimums:
+[ADR-073](../../ADRs/ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md)
+(proposed). Everything below was done live in
 [#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774) on
 2026-11-01 and 2026-11-02.
 
@@ -43,7 +46,8 @@ placement on Azure:
 The chain of trust, in one line: the AMD-signed SEV-SNP report carries the
 launch measurement of Microsoft's utility VM and, as HOST_DATA, the SHA-256 of
 the group's ccePolicy; Trustee checks the signature back to AMD (VCEK from AMD
-KDS), the measurement and TCB against pinned reference values, and HOST_DATA
+KDS), the measurement against a pinned reference value and the TCB against a
+pinned minimum (ADR-073), and HOST_DATA
 against the permit's policy hash, and only then releases the key. No key, no
 data.
 
@@ -78,18 +82,18 @@ data.
 All steps are `scripts/azure/21-aci-confidential-spe.sh <phase>`; each is
 idempotent and can run again.
 
-| #   | Command                                                          | What it does                                                                                                                                                                                      |
-| --- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | `--trustee`                                                      | identity, shares, images (the KBS imported by digest; kbs-client with the plain-report patch, tag `v0.22.0-<commit>`), `mvhd-trustee` and its admin job. Deny-all until a permit is bound.        |
-| 2   | `--extracts` (`--rekey` on a re-run)                             | exports each SPE's half of the hub's synthetic patients (107 and 108 on 2026-11-01), seals it, puts the key into Trustee, bakes the ciphertext into `mvhd-spe-loader-spe<n>`.                     |
-| 3   | `--policy`                                                       | TLS certificates, Neo4j passwords (written to Key Vault without a trailing newline), `az confcom acipolicygen` per group; prints each policy hash, records it on the permit, binds it in Trustee. |
-| 4   | `--workspaces`                                                   | deploys `mvhd-spe-1` and `mvhd-spe-2`. The first attestation is refused, by design (next section).                                                                                                |
-| 5   | `--check`                                                        | prints each group's state, the `spe-unlock` lines (`attested`, `refused`, `pinnable claims`, `platform`, `HOST_DATA`) and the last `spe-ingest` lines.                                            |
-| 6   | pin reference values, then `--trustee --reference-values <file>` | see the next section.                                                                                                                                                                             |
-| 7   | `--workspaces` again                                             | **not** `az container restart`: a restart does not re-run `spe-unlock` (see gotchas).                                                                                                             |
-| 8   | `--check`                                                        | both groups `attested: Attested: confidential workload, ear.status affirming` and `unlocked; the sidecar loads it`.                                                                               |
-| 9   | `--wire-proxy`                                                   | points `mvhd-neo4j-proxy` at both groups (Bolt with TLS, CA pinned); records what it replaces (undo: `--unwire-proxy`).                                                                           |
-| 10  | `scripts/azure/18-offhours-jobs.sh`                              | lets the off-hours identity stop and start the groups; see "Stopping, starting, costs" for the role it actually got.                                                                              |
+| #   | Command                                                          | What it does                                                                                                                                                                                                    |
+| --- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `--trustee`                                                      | identity, shares, images (the KBS imported by digest; kbs-client with the plain-report patch, tag `v0.22.0-<commit>`), `mvhd-trustee`, its admin job, the attestation policy. Deny-all until a permit is bound. |
+| 2   | `--extracts` (`--rekey` on a re-run)                             | exports each SPE's half of the hub's synthetic patients (107 and 108 on 2026-11-01), seals it, puts the key into Trustee, bakes the ciphertext into `mvhd-spe-loader-spe<n>`.                                   |
+| 3   | `--policy`                                                       | TLS certificates, Neo4j passwords (written to Key Vault without a trailing newline), `az confcom acipolicygen` per group; prints each policy hash, records it on the permit, binds it in Trustee.               |
+| 4   | `--workspaces`                                                   | deploys `mvhd-spe-1` and `mvhd-spe-2`. The first attestation is refused, by design (next section).                                                                                                              |
+| 5   | `--check`                                                        | prints each group's state, the `spe-unlock` lines (`attested`, `refused`, `pinnable claims`, `platform`, `HOST_DATA`) and the last `spe-ingest` lines.                                                          |
+| 6   | pin reference values, then `--trustee --reference-values <file>` | see the next section.                                                                                                                                                                                           |
+| 7   | `--workspaces` again                                             | **not** `az container restart`: a restart does not re-run `spe-unlock` (see gotchas).                                                                                                                           |
+| 8   | `--check`                                                        | both groups `attested: Attested: confidential workload, ear.status affirming` and `unlocked; the sidecar loads it`.                                                                                             |
+| 9   | `--wire-proxy`                                                   | points `mvhd-neo4j-proxy` at both groups (Bolt with TLS, CA pinned); records what it replaces (undo: `--unwire-proxy`).                                                                                         |
+| 10  | `scripts/azure/18-offhours-jobs.sh`                              | lets the off-hours identity stop and start the groups; see "Stopping, starting, costs" for the role it actually got.                                                                                            |
 
 The policy hashes on permit `hdab-medreg-spe-2026-001` after the 2026-11-01 run:
 SPE-1 `sha256:0549ab01…bcb024`, SPE-2 `sha256:a7fc94f3…c914ca`. A new image,
@@ -138,14 +142,41 @@ token says `ear.status contraindicated` and the resource policy refuses the key:
    `~/.mvhd/spe-state/reference-values-aci.json`, shaped like
    [`trustee/reference-values-aci.example.json`](../../../trustee/reference-values-aci.example.json):
    11 values. Lists mean "one of", scalars an exact value. The loader refuses a
-   file that still contains `REPLACE`.
-4. **TCB values are lists, one entry per host seen.** The two groups ran on
-   hosts with different TCB: bootloader 10 and 12, microcode 84 and 88, snp 23
-   and 28, tee 0. Pin both values of each (#801). The admin job posts lists to
-   Trustee's admin API over HTTP inside the ACA environment (#805).
-5. `21-aci-confidential-spe.sh --trustee --reference-values ~/.mvhd/spe-state/reference-values-aci.json`
-   (log: `11 reference values set`), then `--workspaces` (not restart), then
-   `--check`.
+   file that still contains `REPLACE`, and a `_min` that is not one
+   non-negative integer.
+4. **The TCB is a minimum per component, not a list of hosts**
+   ([ADR-073](../../ADRs/ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md),
+   #833). `snp_bootloader_min`, `snp_microcode_min`, `snp_snp_svn_min` and
+   `snp_tee_svn_min` are integers; a reported value at or above its minimum
+   passes, so a host with newer AMD firmware is accepted without a change
+   here. Start with the lowest value seen across the hosts: on 2026-11-02 the
+   two groups reported bootloader 10 and 12, microcode 84 and 88, snp 23 and
+   28, tee 0, so 10, 84, 23, 0. Raise a minimum when AMD revokes the firmware
+   below it; never lower it to admit an older host. The attestation policy
+   that reads them,
+   [`trustee/policies/attestation-ear-cpu.rego`](../../../trustee/policies/attestation-ear-cpu.rego),
+   replaces Trustee's `default_cpu` on every `--trustee` run; without a
+   `_min` a component falls back to the lists of #801 and #805
+   (`snp_bootloader` and so on), which RVPS still holds.
+5. `21-aci-confidential-spe.sh --trustee --reference-values ~/.mvhd/spe-state/reference-values-aci.json`.
+   The admin job's log and the script then say:
+
+   ```
+   [spe-loader] attestation policy default_cpu set from /app/trustee/policies/attestation-ear-cpu.rego
+   [spe-loader] 11 reference values set (TCB minimums: snp_bootloader_min=10, snp_microcode_min=84, snp_snp_svn_min=23, snp_tee_svn_min=0)
+   attestation policy: TCB minimums (attestation-ear-cpu.rego, as committed)
+   ```
+
+   Then `--workspaces`, or `az container stop` and `az container start` for
+   both groups (not restart), then `--check`.
+
+**Moving a running hub from lists to minimums (once, #833).** Add the four
+`_min` keys to your file; the four lists may stay, a minimum wins over its
+list. From a clone at the commit that carries ADR-073, run step 5: `--trustee`
+builds a new `spe-loader` image (its tag follows `trustee/` and
+`services/spe-loader`), sets the attestation policy and the reference values.
+The old lists stay in RVPS, unused while a minimum is set. Nothing changes for
+a running group until it starts again.
 
 When Microsoft updates the UVM, the measurement changes and Trustee refuses
 until the new one is checked and pinned: fails safe, and needs this section
@@ -177,7 +208,7 @@ and no `Neo.ClientError.Security.Unauthorized`.
 | Scope                          | Workload level; Host data = the permit's policy hash |
 | Verifier, Trustee operator     | snp, MedReg DE                                       |
 | Measurement                    | `dc3f5a93…b9866` (until Microsoft updates the UVM)   |
-| Reported TCB                   | one of the pinned TCB values                         |
+| Reported TCB                   | each component at or above its pinned minimum        |
 | Key released, Workspace loaded | times of this start                                  |
 | Environment chip               | Azure                                                |
 
@@ -227,8 +258,8 @@ az container show  -n mvhd-spe-1 -g rg-mvhd-dev --query instanceView.state -o ts
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Trustee logs `POST /kbs/v0/auth` 200 every second and no `/kbs/v0/attest`; `spe-unlock`: `RCAR handshake failed … get composite evidence failed … GetEvidence("Failed to get attestation report")` | The attester never produced a report. Trustee v0.22.0's snp-attester asks for the _extended_ report, which ACI does not serve                                                                          | The patched kbs-client ([#798](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/798)), `--trustee` to rebuild                                                                     |
 | `GetEvidence("Failed to get attestation report (extended: FirmwareError(UnknownSevError(0)))")` although a plain-report fallback exists                                                            | A failed extended request makes the guest driver drop its VMPCK, so every later request fails, the plain one included (`ENOTTY`; probed on kernel 6.1.10). A fallback after the failure can never work | Ask for the plain report only ([`snp-attester-plain-report.patch`](../../../services/spe-loader/patches/snp-attester-plain-report.patch)); Trustee fetches the VCEK from AMD KDS             |
-| `attested: … ear.status contraindicated`, then `refused: Trustee refused default/spe-<n>/extract-key`                                                                                              | First run: nothing pinned yet; or a measurement or TCB not in the pinned values (a new UVM, a new host)                                                                                                | Compare the `pinnable claims` with your file; check a new measurement against the endorsement; add the value to the list; `--trustee --reference-values <file>`, then `--workspaces`         |
-| A group that worked is refused after a stop and start                                                                                                                                              | It landed on a host with another TCB                                                                                                                                                                   | Add that host's TCB values to the lists (as above)                                                                                                                                           |
+| `attested: … ear.status contraindicated`, then `refused: Trustee refused default/spe-<n>/extract-key`                                                                                              | First run: nothing pinned yet; or a measurement not in the pinned list (a new UVM); or a TCB component below its minimum                                                                               | Compare the `pinnable claims` with your file; check a new measurement against the endorsement and add it; `--trustee --reference-values <file>`, then `--workspaces`                         |
+| A group that worked is refused after a stop and start                                                                                                                                              | It landed on a host with older firmware than a minimum, or Trustee still runs its built-in `default_cpu` (lists only): `--check` prints `attestation policy (default_cpu): Trustee's built-in default` | Below a minimum: refused by design, start it again to land elsewhere. Built-in default: `--trustee` sets the policy                                                                          |
 | After pinning and `az container restart`, nothing changes; Trustee sees no request                                                                                                                 | A restart does not re-run the init container `spe-unlock`                                                                                                                                              | `--workspaces` (redeploy) or `az container stop` + `az container start`                                                                                                                      |
 | `attested: … ear.status affirming`, then `refused: Trustee refused default/spe-<n>/extract-key (ear.status affirming)`                                                                             | The evidence verified, but the resource policy denied: HOST_DATA is not the policy hash bound for that SPE (template, image or extract changed since `--policy`), or no permit is bound (deny-all)     | `--policy --workspaces`, so the new hash is recorded on the permit and bound                                                                                                                 |
 | Proxy: `Neo.ClientError.Security.Unauthorized` for SPE-1/SPE-2; `/admin/attestation` shows no evidence                                                                                             | The Key Vault passwords carried a trailing newline: the shell drops it when the group gets the password, a Key Vault reference keeps it                                                                | Fixed in the proxy ([#809](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/809)) and in `--policy`; rewriting the secrets without the newline also works (the maintainer's call) |

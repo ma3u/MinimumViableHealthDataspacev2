@@ -25,6 +25,8 @@ export interface Kbs {
 export interface KbsAdmin {
   setResource(path: string, value: Buffer): Promise<void>;
   setResourcePolicy(regoFile: string): Promise<void>;
+  /** The attestation service's policy for CPU evidence (ADR-073). */
+  setAttestationPolicy(regoFile: string): Promise<void>;
   /** One RVPS reference value through the sample extractor (Trustee's admin API). */
   setReferenceValue(name: string, value: ReferenceValue): Promise<void>;
 }
@@ -37,6 +39,49 @@ export interface KbsAdmin {
  */
 type Scalar = string | number | boolean;
 export type ReferenceValue = Scalar | Scalar[];
+
+/**
+ * The attestation policy id Trustee v0.22.0 evaluates for CPU evidence: the
+ * KBS asks for policy "default" and the EAR broker appends the TEE class
+ * ("<id>_cpu", attestation-service/src/ear_token/broker.rs). Setting it
+ * replaces the built-in default_cpu, which Trustee writes on start only when
+ * its store has none, so the replacement survives a restart.
+ */
+export const ATTESTATION_POLICY_ID = "default_cpu";
+
+/** kbs-client arguments that set the attestation policy from a Rego file. */
+export function attestationPolicyArgs(
+  regoFile: string,
+  id: string = ATTESTATION_POLICY_ID,
+): string[] {
+  if (!/^[A-Za-z0-9_]+$/.test(id))
+    throw new Error(`refusing attestation policy id '${id}'`);
+  return [
+    "set-attestation-policy",
+    "--type",
+    "rego",
+    "--id",
+    id,
+    "--policy-file",
+    regoFile,
+  ];
+}
+
+/**
+ * A TCB minimum (ADR-073): a reference value whose name ends in `_min` is a
+ * floor the attestation policy compares the reported SVN with, so it is one
+ * non-negative integer, never a list or a string. A string would not be a
+ * number to the policy, which then falls back to the list, silently.
+ */
+export function checkMinimum(name: string, value: ReferenceValue): void {
+  if (!name.endsWith("_min")) return;
+  if (typeof value !== "number" || !Number.isInteger(value) || value < 0)
+    throw new Error(
+      `reference value '${name}' is a TCB minimum: one non-negative integer, got ${JSON.stringify(
+        value,
+      )}`,
+    );
+}
 
 /** kbs-client arguments for one reference value. */
 export function referenceValueArgs(
@@ -264,6 +309,9 @@ export function kbsAdmin(opts: {
   return {
     async setResourcePolicy(regoFile) {
       await exec([...config, "set-resource-policy", "--policy-file", regoFile]);
+    },
+    async setAttestationPolicy(regoFile) {
+      await exec([...config, ...attestationPolicyArgs(regoFile)]);
     },
     async setReferenceValue(name, value) {
       if (Array.isArray(value) && value.length > 1) {

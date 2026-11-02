@@ -34,15 +34,25 @@ After pinning the reference values, both SPE groups were restarted with
 `az container stop` followed by `az container start`; a stopped group starts
 fresh and attests again.
 
-## 2026-11-01: two ACI hosts, two TCBs, so a reference value is a list
+## 2026-11-01: two ACI hosts, two TCBs, so the TCB is a minimum
 
 `mvhd-spe-1` and `mvhd-spe-2` ran on hosts with different firmware: bootloader
 10 and 12, microcode 84 and 88, snp 23 and 28. A single pinned value would
 refuse one of them, and any later start that lands on another host. Trustee's
-default policy compares each value as "one of" a list, so pin every TCB value
-seen (#801; the admin job posts lists over HTTP inside the environment, #805).
-A start that is refused with `ear.status contraindicated` after it worked
-before is most likely a new host: add its values to the lists.
+default policy compares each value as "one of" a list, so at first every TCB
+value seen was pinned (#801; the admin job posts lists over HTTP inside the
+environment, #805). A list refuses the next host with newer firmware too, the
+better-patched one. Since ADR-073 (#833) the access body sets its own
+attestation policy (`trustee/policies/attestation-ear-cpu.rego`, as
+`default_cpu`), and the TCB is pinned as a minimum per component,
+`snp_bootloader_min` 10, `snp_microcode_min` 84, `snp_snp_svn_min` 23,
+`snp_tee_svn_min` 0: any value at or above passes. A start refused with
+`ear.status contraindicated` after it worked before is now a host below a
+minimum (refused by design) or a Trustee that still runs its built-in
+`default_cpu` (`21-aci-confidential-spe.sh --check` says which; `--trustee`
+sets it). Watch for one Rego trap when writing such a rule: Trustee answers
+null for a reference value it does not hold, and `10 >= null` is true, so a
+minimum must pass `is_number` before it is compared.
 
 ## 2026-11-01: a failed extended SEV-SNP report request breaks every request after it
 

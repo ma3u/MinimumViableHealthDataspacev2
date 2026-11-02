@@ -299,8 +299,9 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [070](ADRs/ADR-070-the-interface-follows-the-language-picker-without-locale-urls.md)          | The interface follows the language picker: an in-house dictionary, English as the key, no `/de/` URLs, legal terms from the Official Journal (#782) | 2026-11-01 | Accepted (2026-11-02) |
 | [071](ADRs/ADR-071-the-documentation-follows-the-language-picker.md)                          | The documentation follows the language picker: translated Markdown with a source hash, per-language images and charts; extends ADR-070 (#782)       | 2026-11-01 | Accepted (2026-11-02) |
 | [072](ADRs/ADR-072-spe-workspaces-start-on-demand.md)                                         | SPE workspaces stop by default and start on demand; a query gets a cold-start answer, an idle one stops itself; amends ADR-069 decision 8           | 2026-11-02 | Accepted (2026-11-02) |
+| [073](ADRs/ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md)                                    | The SPE workspaces' SEV-SNP TCB is checked against a minimum per component, not a list of hosts seen; amends ADR-069 decision 3 (#833)              | 2026-11-02 | Proposed              |
 
-Numbers taken by open work, so a new ADR starts at **073**: 051 (#475). 050
+Numbers taken by open work, so a new ADR starts at **074**: 051 (#475). 050
 (#477), 054 (#520) and 055 (#517) are merged.
 
 ADR-045 to ADR-049 accepted on 2026-10-04.
