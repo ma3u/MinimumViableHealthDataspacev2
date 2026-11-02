@@ -392,6 +392,21 @@ describe("GET /api/overview", () => {
     ).toBe(true);
   });
 
+  it("shows a test identity the demo participant's view, as an unknown login", async () => {
+    // A forged CI session has no organisation of its own.
+    vi.mocked(getServerSession).mockResolvedValue(
+      session(["DATA_USER"], "researcher@ci.test"),
+    );
+    const user = await (await GET(makeReq("?asOf=2026-09-23"))).json();
+    expect(user.me.id).toBe(PHARMACO);
+
+    vi.mocked(getServerSession).mockResolvedValue(
+      session(["DATA_HOLDER"], "clinicuser@ci.test"),
+    );
+    const holder = await (await GET(makeReq("?asOf=2026-09-23"))).json();
+    expect(holder.me.id).toBe(ALPHA);
+  });
+
   it("returns 502 when the graph is down", async () => {
     mockRunQuery.mockRejectedValue(new Error("ECONNREFUSED"));
     const res = await GET(makeReq("?persona=patient"));

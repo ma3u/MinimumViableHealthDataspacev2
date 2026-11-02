@@ -13,16 +13,14 @@ import {
   ChevronDown,
   ChevronRight,
   Database,
-  Eye,
   AlertTriangle,
 } from "lucide-react";
+import { AccessLogSection } from "./_components/AccessLogSection";
 import { ComplianceButton } from "./_components/ComplianceButton";
 import { FilterBar } from "./_components/FilterBar";
-import { RetentionLine } from "./_components/RetentionLine";
 import { SpeAuditSection } from "./_components/SpeAuditSection";
 import { EMPTY_FILTERS, TABS } from "./_components/constants";
 import {
-  accessTypeBadge,
   directionBadge,
   displayName,
   ehdsArticle,
@@ -47,7 +45,6 @@ export default function AdminAuditPage() {
   const [error, setError] = useState<string | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [expandedNeg, setExpandedNeg] = useState<Set<string>>(new Set());
-  const [expandedLog, setExpandedLog] = useState<Set<string>>(new Set());
 
   // Load participant list once for filter dropdowns
   useEffect(() => {
@@ -912,226 +909,7 @@ export default function AdminAuditPage() {
             )}
 
             {activeTab === "accesslogs" && (
-              <section className="mb-8">
-                <h2 className="font-semibold text-sm mb-3 flex items-center gap-2">
-                  <Eye size={14} className="text-teal-800 dark:text-teal-300" />
-                  {t("Data Access Logs ({n})", {
-                    n: data.accesslogs?.length ?? 0,
-                  })}
-                </h2>
-                <RetentionLine />
-                {!data.accesslogs || data.accesslogs.length === 0 ? (
-                  <p className="text-(--text-secondary) text-sm">
-                    {t("No access logs recorded")}
-                  </p>
-                ) : (
-                  <div className="overflow-auto">
-                    <table className="w-full text-xs">
-                      <thead>
-                        <tr className="text-(--text-secondary) border-b border-(--border)">
-                          <th className="text-left py-2 px-2">
-                            {t("Consumer")}
-                          </th>
-                          <th className="text-left py-2 px-2">
-                            {t("Provider")}
-                          </th>
-                          <th className="text-left py-2 px-2">{t("Asset")}</th>
-                          <th className="text-left py-2 px-2">{t("Type")}</th>
-                          <th className="text-left py-2 px-2">
-                            {t("Purpose")}
-                          </th>
-                          <th className="text-left py-2 px-2">
-                            {t("Accessed At")}
-                          </th>
-                          <th className="text-left py-2 px-2">{t("Bytes")}</th>
-                          <th className="text-left py-2 px-2">
-                            {t("Contract")}
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.accesslogs.map((a, i) => {
-                          const logKey = a.id ?? `log-${i}`;
-                          const isOpen = expandedLog.has(logKey);
-                          const detail: [
-                            string,
-                            string | number | null | undefined,
-                          ][] = [
-                            [t("Event"), a.id],
-                            [t("Recorded"), a.accessedAt],
-                            [t("Consumer"), a.consumerDid],
-                            [t("Provider"), a.providerDid],
-                            [
-                              t("Dataset"),
-                              a.assetTitle
-                                ? `${a.assetTitle} (${a.assetId})`
-                                : a.assetId,
-                            ],
-                            [
-                              t("Request"),
-                              a.endpoint
-                                ? `${a.method ?? ""} ${a.endpoint}`.trim()
-                                : null,
-                            ],
-                            [t("Status"), a.statusCode],
-                            [t("Results"), a.resultCount],
-                            [t("Bytes"), a.bytesAccessed],
-                            [
-                              t("Duration"),
-                              a.durationMs != null
-                                ? `${a.durationMs} ms`
-                                : null,
-                            ],
-                            [t("Content type"), a.contentType],
-                            [t("Protocol"), a.protocol],
-                            [t("Purpose, Art. 53(1)"), a.purpose],
-                            [
-                              t("Data permit, Art. 68"),
-                              a.permitId
-                                ? `${a.permitId}${
-                                    a.permitStatus
-                                      ? ` (${a.permitStatus}${
-                                          a.permitValidUntil
-                                            ? `, ${t("valid until {date}", {
-                                                date: a.permitValidUntil.slice(
-                                                  0,
-                                                  10,
-                                                ),
-                                              })}`
-                                            : ""
-                                        })`
-                                      : ""
-                                  }`
-                                : null,
-                            ],
-                            [t("Contract"), a.contractId],
-                            [t("Transfer"), a.transferId],
-                            [t("Error"), a.errorMessage],
-                            [
-                              t("Origin"),
-                              a.demo
-                                ? t("seeded demo event")
-                                : t("recorded by the neo4j-proxy"),
-                            ],
-                          ];
-                          return (
-                            <Fragment key={logKey}>
-                              <tr
-                                onClick={() =>
-                                  setExpandedLog((prev) => {
-                                    const next = new Set(prev);
-                                    if (next.has(logKey)) next.delete(logKey);
-                                    else next.add(logKey);
-                                    return next;
-                                  })
-                                }
-                                aria-expanded={isOpen}
-                                data-testid="access-log-row"
-                                className="border-b border-(--border) hover:bg-(--surface-2)/50 cursor-pointer"
-                              >
-                                <td className="py-2 px-2 text-(--text-primary)">
-                                  <span className="inline-flex items-center gap-1">
-                                    {isOpen ? (
-                                      <ChevronDown size={11} />
-                                    ) : (
-                                      <ChevronRight size={11} />
-                                    )}
-                                    {a.consumerName ?? a.consumerDid ?? "—"}
-                                  </span>
-                                  {a.consumerCountry && (
-                                    <span className="text-(--text-secondary)">
-                                      {" "}
-                                      ({a.consumerCountry})
-                                    </span>
-                                  )}
-                                </td>
-                                <td className="py-2 px-2 text-(--text-primary)">
-                                  {a.providerName ?? a.providerDid ?? "—"}
-                                  {a.providerCountry && (
-                                    <span className="text-(--text-secondary)">
-                                      {" "}
-                                      ({a.providerCountry})
-                                    </span>
-                                  )}
-                                </td>
-                                <td
-                                  className="py-2 px-2 text-(--text-secondary) max-w-[180px] truncate"
-                                  title={a.assetId ?? ""}
-                                >
-                                  {a.assetTitle ?? a.assetId ?? "—"}
-                                </td>
-                                <td className="py-2 px-2">
-                                  {accessTypeBadge(a.accessType, t)}
-                                </td>
-                                <td
-                                  className="py-2 px-2 text-(--text-secondary) max-w-[140px] truncate"
-                                  title={a.purpose}
-                                >
-                                  {a.purpose ?? "—"}
-                                </td>
-                                <td className="py-2 px-2 text-(--text-secondary)">
-                                  {a.accessedAt
-                                    ? a.accessedAt.slice(0, 10)
-                                    : "—"}
-                                </td>
-                                <td className="py-2 px-2 text-(--text-secondary)">
-                                  {formatBytes(a.bytesAccessed)}
-                                </td>
-                                <td
-                                  className="py-2 px-2 font-mono text-(--text-secondary) text-[10px]"
-                                  title={a.contractId ?? ""}
-                                >
-                                  {a.contractId
-                                    ? a.contractId.length > 14
-                                      ? a.contractId.slice(0, 12) + "…"
-                                      : a.contractId
-                                    : "—"}
-                                </td>
-                              </tr>
-                              {isOpen && (
-                                <tr
-                                  className="border-b border-(--border) bg-(--surface)"
-                                  data-testid="access-log-detail"
-                                >
-                                  <td colSpan={8} className="px-4 py-3">
-                                    {a.name && (
-                                      <div className="text-xs font-semibold text-(--text-primary) mb-2">
-                                        {a.name}
-                                      </div>
-                                    )}
-                                    <dl className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-1 text-xs">
-                                      {detail
-                                        .filter(
-                                          ([, v]) =>
-                                            v !== null &&
-                                            v !== undefined &&
-                                            v !== "",
-                                        )
-                                        .map(([label, value]) => (
-                                          <div
-                                            key={label}
-                                            className="flex gap-2 min-w-0"
-                                          >
-                                            <dt className="text-(--text-secondary) shrink-0">
-                                              {label}
-                                            </dt>
-                                            <dd className="font-mono text-(--text-primary) break-all">
-                                              {String(value)}
-                                            </dd>
-                                          </div>
-                                        ))}
-                                    </dl>
-                                  </td>
-                                </tr>
-                              )}
-                            </Fragment>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </section>
+              <AccessLogSection logs={data.accesslogs ?? []} />
             )}
           </>
         )}

@@ -19,6 +19,12 @@ export const NO_FORGED_SESSION =
   "NEXTAUTH_SECRET is not set, so no session can be forged for the API calls " +
   "(local stack: docker exec health-dataspace-ui printenv NEXTAUTH_SECRET)";
 
+// Every forged session signs in as <persona>@ci.test, which the hub maps to
+// did:web:ci.test:<persona> (src/lib/test-identity.ts): the access log then
+// marks what a spec read as an automated test, not as an unknown consumer
+// (2026-11-01). The roles stay as they are; specs depend on them.
+const TEST_MAIL_DOMAIN = "ci.test";
+
 const PERSONAS = {
   // Only the base role: /graph derives the "default" view from it, the view
   // an anonymous visitor got before #404.
@@ -43,6 +49,7 @@ async function forgeCookie(baseURL: string, persona: Persona) {
   const value = await encode({
     token: {
       name: profile.name,
+      email: `${persona}@${TEST_MAIL_DOMAIN}`,
       sub: `e2e-${persona}-${now}`,
       preferred_username: persona,
       roles: [...profile.roles],

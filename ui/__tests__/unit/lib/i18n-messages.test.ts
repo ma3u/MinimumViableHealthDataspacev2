@@ -187,6 +187,14 @@ describe("the code and the dictionaries", () => {
     expect(texts.filter((x) => !(x in MESSAGES.en.access))).toEqual([]);
   });
 
+  it("knows every reason an access's criticality gives", async () => {
+    const { CRITICALITY_REASONS } = await import("@/lib/access-criticality");
+    expect(CRITICALITY_REASONS.length).toBeGreaterThan(5);
+    expect(
+      CRITICALITY_REASONS.filter((r) => !(r in MESSAGES.en.admin)),
+    ).toEqual([]);
+  });
+
   it("knows every health interest a patient can choose", async () => {
     const { HEALTH_INTERESTS } = await import("@/lib/patient/interests");
     expect(

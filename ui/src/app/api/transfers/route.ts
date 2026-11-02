@@ -202,6 +202,8 @@ async function consumerForTransfer(
     );
     if (did) return did;
   }
+  // A test session's did:web:ci.test:<persona> is kept: the transfer then
+  // says it was a test, where an unknown login names nobody.
   return callerDid && !callerDid.startsWith("did:web:unknown:")
     ? callerDid
     : null;

@@ -79,6 +79,17 @@ describe("odrl-engine", () => {
       expect(did).toBe("did:web:unknown:unknown@example.com");
     });
 
+    it("names a forged test session as a test, not as unknown", () => {
+      // The CI smoke's session read /federated/stats and the access log
+      // showed did:web:unknown:Demo Participant (2026-11-01).
+      expect(userToParticipantId("participant@ci.test", [])).toBe(
+        "did:web:ci.test:participant",
+      );
+      expect(userToParticipantId("Demo Participant", [])).toBe(
+        "did:web:unknown:Demo Participant",
+      );
+    });
+
     it("should ignore roles parameter (uses username only)", () => {
       const did1 = userToParticipantId("researcher@pharmaco.de", ["EDC_ADMIN"]);
       const did2 = userToParticipantId("researcher@pharmaco.de", ["PATIENT"]);
