@@ -30,6 +30,7 @@ import {
   Scan,
   X,
 } from "lucide-react";
+import { useT } from "@/lib/i18n/translate";
 
 const MIN_SCALE = 0.1;
 const MAX_SCALE = 8;
@@ -75,7 +76,7 @@ export function DocFigureViewer({ children }: { children: ReactNode }) {
     e.preventDefault();
     setFigure({
       src: img.getAttribute("src") ?? img.src,
-      alt: img.alt || "Figure",
+      alt: img.alt,
       opener,
     });
   }, []);
@@ -102,6 +103,8 @@ function FigureOverlay({
   figure: Figure;
   onClose: () => void;
 }) {
+  const t = useT("docsCommon");
+  const name = figure.alt || t("Figure");
   const dialogRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -298,7 +301,7 @@ function FigureOverlay({
       ref={dialogRef}
       role="dialog"
       aria-modal="true"
-      aria-label={figure.alt}
+      aria-label={name}
       data-testid="doc-figure-viewer"
       className="fixed inset-0 z-100 flex flex-col bg-gray-950 text-gray-100 select-none"
     >
@@ -308,8 +311,8 @@ function FigureOverlay({
             type="button"
             className={btn}
             onClick={zoomOut}
-            aria-label="Zoom out"
-            title="Zoom out (-)"
+            aria-label={t("Zoom out")}
+            title={t("Zoom out ({key})", { key: "-" })}
             disabled={view.scale <= MIN_SCALE}
           >
             <Minus size={16} />
@@ -325,8 +328,8 @@ function FigureOverlay({
             type="button"
             className={btn}
             onClick={zoomIn}
-            aria-label="Zoom in"
-            title="Zoom in (+)"
+            aria-label={t("Zoom in")}
+            title={t("Zoom in ({key})", { key: "+" })}
             disabled={view.scale >= MAX_SCALE}
           >
             <Plus size={16} />
@@ -335,8 +338,8 @@ function FigureOverlay({
             type="button"
             className={btn}
             onClick={fit}
-            aria-label="Fit to screen"
-            title="Fit to screen (0)"
+            aria-label={t("Fit to screen")}
+            title={t("Fit to screen ({key})", { key: "0" })}
           >
             <Scan size={16} />
           </button>
@@ -344,13 +347,13 @@ function FigureOverlay({
             type="button"
             className={`${btn} text-xs font-medium`}
             onClick={actualSize}
-            title="Actual size (1)"
+            title={t("Actual size ({key})", { key: "1" })}
           >
             1:1
           </button>
         </div>
         <p className="flex-1 min-w-0 truncate px-3 text-gray-400 hidden sm:block">
-          {figure.alt}
+          {name}
         </p>
         <div className="ml-auto flex items-center gap-1">
           <a
@@ -358,8 +361,8 @@ function FigureOverlay({
             target="_blank"
             rel="noopener noreferrer"
             className={btn}
-            aria-label="Open the file in a new tab"
-            title="Open the file in a new tab"
+            aria-label={t("Open the file in a new tab")}
+            title={t("Open the file in a new tab")}
           >
             <ExternalLink size={16} />
           </a>
@@ -367,8 +370,8 @@ function FigureOverlay({
             type="button"
             className={btn}
             onClick={toggleFullscreen}
-            aria-label={fullscreen ? "Leave fullscreen" : "Fullscreen"}
-            title={fullscreen ? "Leave fullscreen" : "Fullscreen"}
+            aria-label={fullscreen ? t("Leave fullscreen") : t("Fullscreen")}
+            title={fullscreen ? t("Leave fullscreen") : t("Fullscreen")}
           >
             {fullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
           </button>
@@ -377,8 +380,8 @@ function FigureOverlay({
             type="button"
             className={btn}
             onClick={onClose}
-            aria-label="Close"
-            title="Close (Esc)"
+            aria-label={t("Close")}
+            title={t("Close ({key})", { key: "Esc" })}
           >
             <X size={18} />
           </button>
@@ -400,7 +403,7 @@ function FigureOverlay({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={figure.src}
-          alt={figure.alt}
+          alt={name}
           draggable={false}
           data-testid="doc-figure-image"
           onLoad={(e) => {

@@ -11,7 +11,9 @@ import {
   ChartGantt,
 } from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
+import { T } from "@/lib/i18n/translate";
 
+/** `label` is the menu's (nav area), `desc` a key of docsCommon. */
 const sections = [
   {
     href: "/docs/user-guide",
@@ -75,11 +77,16 @@ export default function DocsPage() {
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
       <div className="mb-10">
-        <h1 className="text-3xl font-bold mb-2">Documentation</h1>
+        <h1 className="text-3xl font-bold mb-2">
+          <T area="docsCommon">{"Documentation"}</T>
+        </h1>
         <DocsLastUpdated page="/docs" />
         <p className="text-(--text-secondary) text-lg">
-          Health Dataspace v2 — comprehensive guides for business users and
-          developers.
+          <T area="docsCommon">
+            {
+              "Health Dataspace v2: comprehensive guides for business users and developers."
+            }
+          </T>
         </p>
       </div>
 
@@ -93,13 +100,15 @@ export default function DocsPage() {
           >
             <div className="flex items-center gap-2 mb-3">
               <Icon size={22} />
-              <span className="font-semibold text-lg">{label}</span>
+              <span className="font-semibold text-lg">
+                <T area="nav">{label}</T>
+              </span>
             </div>
             <p className="text-sm text-(--text-secondary) mb-4 flex-1">
-              {desc}
+              <T area="docsCommon">{desc}</T>
             </p>
             <span className="inline-flex items-center gap-1 text-sm text-(--accent) group-hover:underline mt-auto">
-              Read more <ArrowRight size={14} />
+              <T area="docsCommon">{"Read more"}</T> <ArrowRight size={14} />
             </span>
           </Link>
         ))}
@@ -108,21 +117,24 @@ export default function DocsPage() {
       {/* About callout — WCAG-safe contrast in both light and dark */}
       <div className="mt-2 bg-(--surface-2) border border-(--border) rounded-xl p-6">
         <h3 className="font-semibold text-(--text-primary) mb-2">
-          About Health Dataspace v2
+          <T area="docsCommon">{"About Health Dataspace v2"}</T>
         </h3>
         <p className="text-sm text-(--text-secondary) leading-relaxed">
-          An EHDS-compliant demonstration platform built with Eclipse EDC-V,
-          DCore, CFM, Neo4j, FHIR R4, and OMOP CDM. The project implements the
-          European Health Data Space regulation through a 5-layer knowledge
-          graph architecture — from DSP Marketplace discovery to Ontology
-          alignment — enabling sovereign health data exchange between data
-          holders and approved research users.{" "}
-          <Link
-            href="/docs/architecture"
-            className="text-(--accent) underline hover:opacity-80"
+          <T
+            area="docsCommon"
+            tags={{
+              a: (
+                <Link
+                  href="/docs/architecture"
+                  className="text-(--accent) underline hover:opacity-80"
+                />
+              ),
+            }}
           >
-            Explore the architecture&nbsp;&rarr;
-          </Link>
+            {
+              "An EHDS-compliant demonstration platform built with Eclipse EDC-V, DCore, CFM, Neo4j, FHIR R4, and OMOP CDM. The project implements the European Health Data Space regulation through a 5-layer knowledge graph architecture, from DSP Marketplace discovery to Ontology alignment, enabling sovereign health data exchange between data holders and approved research users. <a>Explore the architecture →</a>"
+            }
+          </T>
         </p>
       </div>
     </div>

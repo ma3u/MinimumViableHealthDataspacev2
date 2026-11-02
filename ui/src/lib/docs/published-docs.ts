@@ -30,3 +30,19 @@ export function findDoc(
 ): PublishedDoc | undefined {
   return publishedDocs.find((d) => d.section === section && d.slug === slug);
 }
+
+/** What a section page's cards show of a document; the Markdown stays on
+ *  the server. */
+export type DocCard = Pick<
+  PublishedDoc,
+  "section" | "slug" | "title" | "summary"
+>;
+
+export function docCards(docs: readonly PublishedDoc[]): DocCard[] {
+  return docs.map(({ section, slug, title, summary }) => ({
+    section,
+    slug,
+    title,
+    summary,
+  }));
+}
