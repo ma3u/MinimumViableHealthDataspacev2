@@ -549,7 +549,9 @@ policy() {
     s="$(eval "printf '%s' \"\$KV_SPE${n}_NEO4J_PASSWORD\"")"
     if [ "$(kv_state "$s")" = missing ]; then
       workdir
-      openssl rand -base64 24 | tr -d '/+=\n' | cut -c1-28 >"$WORK/pw"
+      # No trailing newline: a Key Vault reference keeps it, the shell does
+      # not, and the proxy was refused by the workspace (#774).
+      printf '%s' "$(openssl rand -base64 24 | tr -d '/+=\n' | cut -c1-28)" >"$WORK/pw"
       az keyvault secret set --vault-name "$KEY_VAULT_NAME" --name "$s" --file "$WORK/pw" --encoding utf-8 -o none
       rm -rf "$WORK"; WORK=""
       ok "created ${s} in ${KEY_VAULT_NAME} (not displayed)"
