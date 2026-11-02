@@ -2,6 +2,7 @@
 source: docs/security/threat-model-klarbefund.md
 sourceHash: 1ceeaff87c54101e16f2d380ce062cdedff21add41e30c2256406c9c72351e5a
 language: nl
+summary: "STRIDE-analyse van de iPhone-app; elke maatregel noemt de code of test die haar aantoont."
 ---
 
 # Dreigingsmodel: Klarbefund, de iPhone-app

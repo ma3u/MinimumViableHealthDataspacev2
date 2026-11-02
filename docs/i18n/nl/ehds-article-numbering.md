@@ -2,6 +2,7 @@
 source: docs/ehds-article-numbering.md
 sourceHash: 24f0877aa01c505e0eaaf88227f833c73f760a93dc625a2f9f9919bca8f7b092
 language: nl
+summary: "De artikelnummers van het voorstel van 2022 naast de vastgestelde en de data van art. 105; zo leest u oudere stukken naast de verordening."
 ---
 
 # Nummering van de EHDS-artikelen: voorstel en vastgestelde tekst

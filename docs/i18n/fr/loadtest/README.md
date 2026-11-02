@@ -2,6 +2,7 @@
 source: docs/loadtest/README.md
 sourceHash: 9b7e7f5dd475758fc226e0d982b2c501af4ad553de56333c6de01c2760ad9ecf
 language: fr
+summary: "Chaque test de charge, de stress et de pic contre le hub en ligne et la pile Compose, avec son tableau de bord Grafana, ce qu’il a trouvé, ce qui a changé en conséquence et les tests encore à faire."
 ---
 
 # Tests de charge, de stress et de pic : résultats et tableaux de bord

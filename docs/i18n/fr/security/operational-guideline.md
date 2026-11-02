@@ -2,6 +2,7 @@
 source: docs/security/operational-guideline.md
 sourceHash: ecd7586f5a4e88a5099596d7c1f9eec81a888d8df3250d3cacbcab6dc9a5a13a
 language: fr
+summary: "Comment exploiter réellement le hub et Klarbefund : quel rôle de l’EEDS (règlement (UE) 2025/327) exploite quelle partie, ce que BSI C5, IT-Grundschutz, TR-02102 et TR-03161 exigent de chaque partie, les délais en cas d’incident, la conservation et la liste de contrôle de mise en production par rôle."
 ---
 
 # Guide d’exploitation : héberger le hub et Klarbefund dans le cadre de l’EEDS et des normes du BSI

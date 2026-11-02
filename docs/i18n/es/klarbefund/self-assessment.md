@@ -2,6 +2,7 @@
 source: docs/klarbefund/self-assessment.md
 sourceHash: 62c9b83ff283cb2362f6125d65a73ae849be9d47cd40ca175213fbfb881790bf
 language: es
+summary: "Protección de datos (RGPD), BSI TR-03161 objetivo por objetivo, la etiqueta del Reglamento de IA y el estado MDR de la app, cada línea remitiendo al código o la prueba que lo demuestra."
 ---
 
 # Klarbefund: autoevaluación

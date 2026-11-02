@@ -2,6 +2,7 @@
 source: docs/klarbefund/user-guide.md
 sourceHash: 24429d590488e64628ed0a7526474932a5704fb0e947dee10cd5df5912d6ba82
 language: nl
+summary: "De app zoals iemand die gebruikt, scherm voor scherm met schermafbeeldingen: een uitslag invoeren, een waarde met het papier vergelijken, trends, toestemmingen, verbinden met de EHDS, exports en uw rechten op uw gegevens."
 ---
 
 # Gebruikershandleiding van Klarbefund

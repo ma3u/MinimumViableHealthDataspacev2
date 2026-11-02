@@ -2,6 +2,7 @@
 source: docs/security/threat-model.md
 sourceHash: 7dd719e1cad0af1761954b2a7e3ec54002d86543fc9ac430bca41b4230ef456c
 language: fr
+summary: "STRIDE pour le hub sur Azure : flux de données et frontières de confiance, les quatre attaquants, un échange avec chaque menace à son étape, et chaque mesure avec le code, le test ou la décision qui la prouve ; ce que la démo accepte, ce que demandent des données réelles et comment vérifier chaque ligne."
 ---
 
 # Modèle de menaces : le hub d’intégration EEDS

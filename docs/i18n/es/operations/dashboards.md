@@ -2,6 +2,7 @@
 source: docs/operations/dashboards.md
 sourceHash: 39db3b7928f591277ed59e3c3ca266cb08249a1cebe8b4abc594966839e6f1b1
 language: es
+summary: "Los tres paneles de Grafana del hub en producción, con capturas: contratos y transferencias EDC, la pista de auditoría del EEDS y la prueba de carga y estrés; qué muestra cada fila, cómo leerla y cómo iniciar sesión."
 ---
 
 # Los cuadros de mando

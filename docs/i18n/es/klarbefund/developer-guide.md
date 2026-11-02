@@ -2,6 +2,7 @@
 source: docs/klarbefund/developer-guide.md
 sourceHash: 48236d50693674d8724bcd9602038d3c906575395278be36555efd640d0eaf1c
 language: es
+summary: "Compilar, ejecutar y probar la app: el proceso desde la cámara hasta el almacén sellado, el diccionario compartido, la estructura del almacén, el conjunto de datos de desarrollo, los dos conjuntos de pruebas, el diagnóstico y TestFlight."
 ---
 
 # Guía para desarrolladores de Klarbefund

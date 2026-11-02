@@ -2,6 +2,7 @@
 source: docs/operations/dashboards.md
 sourceHash: 39db3b7928f591277ed59e3c3ca266cb08249a1cebe8b4abc594966839e6f1b1
 language: fr
+summary: "Les trois tableaux de bord Grafana du hub en ligne, avec captures : contrats et transferts EDC, la piste d’audit EEDS, et les tests de charge et de stress ; ce que montre chaque ligne, comment la lire et comment se connecter."
 ---
 
 # Les tableaux de bord

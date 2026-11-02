@@ -2,6 +2,7 @@
 source: docs/klarbefund/developer-guide.md
 sourceHash: 48236d50693674d8724bcd9602038d3c906575395278be36555efd640d0eaf1c
 language: nl
+summary: "De app bouwen, starten en testen: de pijplijn van camera tot verzegelde opslag, het gedeelde woordenboek, de opbouw van de opslag, de ontwikkeldataset, de twee testsuites, diagnose en TestFlight."
 ---
 
 # Ontwikkelaarshandleiding van Klarbefund

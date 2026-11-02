@@ -2,6 +2,7 @@
 source: docs/security/security-test-report-2026-10-15.md
 sourceHash: 2fe16cb597be0f195ad27d22b32358b413b2396729b066bd01423838ded6dc78
 language: de
+summary: "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, die Sicherheitstests der App und die anonymen Black-Box-Prüfungen des Live-Hubs; die Befunde F1 bis F10 mit ihrem Stand nach den Korrekturen, und was ein unabhängiger Test ergänzen würde."
 ---
 
 # Sicherheitstestbericht, 2026-10-15

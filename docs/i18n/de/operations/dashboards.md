@@ -2,6 +2,7 @@
 source: docs/operations/dashboards.md
 sourceHash: 39db3b7928f591277ed59e3c3ca266cb08249a1cebe8b4abc594966839e6f1b1
 language: de
+summary: "Die drei Grafana-Dashboards des Live-Hubs mit Screenshots: EDC-Verträge und Übertragungen, der EHDS-Audit-Trail sowie Last- und Stresstest; was jede Zeile zeigt, wie man sie liest und wie man sich anmeldet."
 ---
 
 # Die Dashboards

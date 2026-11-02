@@ -2,6 +2,7 @@
 source: docs/sbom/README.md
 sourceHash: 0d5a61c2ea379e0356f9642c14a9acd6110406a380ecb6a29fad43f3930ac18a
 language: fr
+summary: "Une nomenclature CycloneDX par composant déployable, stable à l’octet près ; --check échoue quand une nomenclature ne correspond plus à son fichier de verrouillage."
 ---
 
 # Nomenclatures logicielles

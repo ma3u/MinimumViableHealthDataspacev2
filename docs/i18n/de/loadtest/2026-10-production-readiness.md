@@ -2,6 +2,7 @@
 source: docs/loadtest/2026-10-production-readiness.md
 sourceHash: 4927266d5659782d41e2b19dcb537020f6b7d2b195229b9b5c4576bd7992496b
 language: de
+summary: "Die Bewertung nach Well-Architected und Cloud Adoption Framework mit Stand 16.10.2026: was je Säule umgesetzt ist, mit Belegen, was offen ist, die Bewertungen und was zwischen dem Demonstrator und einer betreibbaren Plattform steht."
 ---
 
 # Bewertung der Produktionsreife, Oktober 2026

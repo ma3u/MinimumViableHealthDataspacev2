@@ -2,6 +2,7 @@
 source: docs/loadtest/README.md
 sourceHash: 9b7e7f5dd475758fc226e0d982b2c501af4ad553de56333c6de01c2760ad9ecf
 language: es
+summary: "Cada prueba de carga, estrés y picos contra el hub en producción y la pila de Compose, con su panel de Grafana, lo que encontró, lo que cambió por ello y las pruebas que faltan."
 ---
 
 # Pruebas de carga, estrés y picos: resultados y cuadros de mando

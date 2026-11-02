@@ -2,6 +2,7 @@
 source: docs/klarbefund/evidence.md
 sourceHash: fc5bb296ce79d86a900f5cca02fcf97d746c0622fb87b553939e7d62d0325723
 language: nl
+summary: "De nauwkeurigheidsbenchmark, de pariteitscontrole van het woordenboek, het runverslag en wat nog ontbreekt."
 ---
 
 # Klarbefund: bewijs

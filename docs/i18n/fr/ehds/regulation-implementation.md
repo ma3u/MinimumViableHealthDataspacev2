@@ -2,6 +2,7 @@
 source: docs/ehds/regulation-implementation.md
 sourceHash: 2dcaadded3a70651eb09b37b2a3f1fd29deea20b434d51885ea17a09f5a3a726
 language: fr
+summary: "Ce que le hub d’intégration met en œuvre du règlement (UE) 2025/327, article par article : l’état, la page, la route ou le fichier qui le réalise, le test qui le montre et la lacune avec son ticket."
 ---
 
 # Ce que le hub d’intégration met en œuvre du règlement EEDS

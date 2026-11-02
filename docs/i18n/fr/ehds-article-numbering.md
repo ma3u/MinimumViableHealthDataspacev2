@@ -2,6 +2,7 @@
 source: docs/ehds-article-numbering.md
 sourceHash: 24f0877aa01c505e0eaaf88227f833c73f760a93dc625a2f9f9919bca8f7b092
 language: fr
+summary: "Les numéros d’article de la proposition de 2022 face à ceux adoptés, et les dates de l’article 105 ; pour lire les documents plus anciens à côté du règlement."
 ---
 
 # Numérotation des articles de l’EEDS : proposition et texte adopté

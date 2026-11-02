@@ -2,6 +2,7 @@
 source: docs/security/threat-model.md
 sourceHash: 7dd719e1cad0af1761954b2a7e3ec54002d86543fc9ac430bca41b4230ef456c
 language: de
+summary: "STRIDE für den Hub auf Azure: Datenflüsse und Vertrauensgrenzen, die vier Angreifer, ein Austausch mit jeder Bedrohung an ihrem Schritt und jede Gegenmaßnahme mit dem Code, dem Test oder der Entscheidung, die sie belegt; was die Demo hinnimmt, was echte Daten brauchen und wie man jede Zeile prüft."
 ---
 
 # Bedrohungsmodell: der EHDS Integration Hub

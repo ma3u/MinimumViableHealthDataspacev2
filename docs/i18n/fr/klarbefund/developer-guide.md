@@ -2,6 +2,7 @@
 source: docs/klarbefund/developer-guide.md
 sourceHash: 48236d50693674d8724bcd9602038d3c906575395278be36555efd640d0eaf1c
 language: fr
+summary: "Construire, lancer et tester l’app : le pipeline de la caméra au stockage scellé, le dictionnaire partagé, l’organisation du stockage, le jeu de données de développement, les deux suites de tests, le diagnostic et TestFlight."
 ---
 
 # Guide du développeur de Klarbefund

@@ -10,307 +10,375 @@
     "ehds/regulation-implementation": {
       "de": {
         "status": "current",
-        "title": "Was der Integrations-Hub von der EHDS-Verordnung umsetzt"
+        "title": "Was der Integrations-Hub von der EHDS-Verordnung umsetzt",
+        "summary": "Was der Integrations-Hub von der Verordnung (EU) 2025/327 umsetzt, Artikel für Artikel: der Stand, die Seite, Route oder Datei, die es leistet, der Test, der es zeigt, und die Lücke mit ihrem Issue."
       },
       "fr": {
         "status": "current",
-        "title": "Ce que le hub d’intégration met en œuvre du règlement EEDS"
+        "title": "Ce que le hub d’intégration met en œuvre du règlement EEDS",
+        "summary": "Ce que le hub d’intégration met en œuvre du règlement (UE) 2025/327, article par article : l’état, la page, la route ou le fichier qui le réalise, le test qui le montre et la lacune avec son ticket."
       },
       "nl": {
         "status": "current",
-        "title": "Wat de integratiehub van de EHDS-verordening implementeert"
+        "title": "Wat de integratiehub van de EHDS-verordening implementeert",
+        "summary": "Wat de integratiehub van Verordening (EU) 2025/327 uitvoert, artikel voor artikel: de status, de pagina, route of het bestand dat het doet, de test die het aantoont en het gat met zijn issue."
       },
       "es": {
         "status": "current",
-        "title": "Qué aplica el hub de integración del Reglamento del EEDS"
+        "title": "Qué aplica el hub de integración del Reglamento del EEDS",
+        "summary": "Lo que el hub de integración aplica del Reglamento (UE) 2025/327, artículo por artículo: el estado, la página, ruta o archivo que lo hace, la prueba que lo demuestra y la carencia con su incidencia."
       }
     },
     "ehds/article-numbering": {
       "de": {
         "status": "current",
-        "title": "EHDS-Artikelnummerierung: Vorschlag und verabschiedete Fassung"
+        "title": "EHDS-Artikelnummerierung: Vorschlag und verabschiedete Fassung",
+        "summary": "Die Artikelnummern des Entwurfs von 2022 neben den verabschiedeten und die Fristen aus Art. 105; so lesen sich ältere Unterlagen neben der Verordnung."
       },
       "fr": {
         "status": "current",
-        "title": "Numérotation des articles de l’EEDS : proposition et texte adopté"
+        "title": "Numérotation des articles de l’EEDS : proposition et texte adopté",
+        "summary": "Les numéros d’article de la proposition de 2022 face à ceux adoptés, et les dates de l’article 105 ; pour lire les documents plus anciens à côté du règlement."
       },
       "nl": {
         "status": "current",
-        "title": "Nummering van de EHDS-artikelen: voorstel en vastgestelde tekst"
+        "title": "Nummering van de EHDS-artikelen: voorstel en vastgestelde tekst",
+        "summary": "De artikelnummers van het voorstel van 2022 naast de vastgestelde en de data van art. 105; zo leest u oudere stukken naast de verordening."
       },
       "es": {
         "status": "current",
-        "title": "Numeración de los artículos del EEDS: propuesta y texto adoptado"
+        "title": "Numeración de los artículos del EEDS: propuesta y texto adoptado",
+        "summary": "Los números de artículo de la propuesta de 2022 frente a los adoptados y las fechas del art. 105; para leer el material anterior junto al Reglamento."
       }
     },
     "klarbefund/klarbefund-user-guide": {
       "de": {
         "status": "current",
-        "title": "Benutzerhandbuch für Klarbefund"
+        "title": "Benutzerhandbuch für Klarbefund",
+        "summary": "Die App, wie eine Person sie nutzt, Bildschirm für Bildschirm mit Screenshots: einen Befund erfassen, einen Wert mit dem Papier abgleichen, Verläufe, Einwilligungen, die Verbindung zum EHDS, Exporte und Ihre Rechte an Ihren Daten."
       },
       "fr": {
         "status": "current",
-        "title": "Guide d’utilisation de Klarbefund"
+        "title": "Guide d’utilisation de Klarbefund",
+        "summary": "L’app telle qu’une personne l’utilise, écran par écran avec captures : saisir un compte rendu, vérifier une valeur avec le papier, tendances, consentements, connexion à l’EEDS, exports et vos droits sur vos données."
       },
       "nl": {
         "status": "current",
-        "title": "Gebruikershandleiding van Klarbefund"
+        "title": "Gebruikershandleiding van Klarbefund",
+        "summary": "De app zoals iemand die gebruikt, scherm voor scherm met schermafbeeldingen: een uitslag invoeren, een waarde met het papier vergelijken, trends, toestemmingen, verbinden met de EHDS, exports en uw rechten op uw gegevens."
       },
       "es": {
         "status": "current",
-        "title": "Guía del usuario de Klarbefund"
+        "title": "Guía del usuario de Klarbefund",
+        "summary": "La app tal como la usa una persona, pantalla a pantalla con capturas: incorporar un informe, comprobar un valor con el papel, tendencias, consentimientos, conectar con el EEDS, exportaciones y sus derechos sobre sus datos."
       }
     },
     "klarbefund/klarbefund-developer-guide": {
       "de": {
         "status": "current",
-        "title": "Entwicklerhandbuch für Klarbefund"
+        "title": "Entwicklerhandbuch für Klarbefund",
+        "summary": "Die App bauen, starten und testen: die Pipeline von der Kamera bis zum versiegelten Speicher, das gemeinsame Wörterbuch, der Aufbau des Speichers, der Entwicklungsdatensatz, die beiden Testsuiten, Diagnose und TestFlight."
       },
       "fr": {
         "status": "current",
-        "title": "Guide du développeur de Klarbefund"
+        "title": "Guide du développeur de Klarbefund",
+        "summary": "Construire, lancer et tester l’app : le pipeline de la caméra au stockage scellé, le dictionnaire partagé, l’organisation du stockage, le jeu de données de développement, les deux suites de tests, le diagnostic et TestFlight."
       },
       "nl": {
         "status": "current",
-        "title": "Ontwikkelaarshandleiding van Klarbefund"
+        "title": "Ontwikkelaarshandleiding van Klarbefund",
+        "summary": "De app bouwen, starten en testen: de pijplijn van camera tot verzegelde opslag, het gedeelde woordenboek, de opbouw van de opslag, de ontwikkeldataset, de twee testsuites, diagnose en TestFlight."
       },
       "es": {
         "status": "current",
-        "title": "Guía para desarrolladores de Klarbefund"
+        "title": "Guía para desarrolladores de Klarbefund",
+        "summary": "Compilar, ejecutar y probar la app: el proceso desde la cámara hasta el almacén sellado, el diccionario compartido, la estructura del almacén, el conjunto de datos de desarrollo, los dos conjuntos de pruebas, el diagnóstico y TestFlight."
       }
     },
     "operations/operational-guideline": {
       "de": {
         "status": "current",
-        "title": "Betriebsleitfaden: Betrieb des Hubs und von Klarbefund nach dem EHDS und den BSI-Standards"
+        "title": "Betriebsleitfaden: Betrieb des Hubs und von Klarbefund nach dem EHDS und den BSI-Standards",
+        "summary": "Wie man den Hub und Klarbefund wirklich betreibt: welche EHDS-Rolle (Verordnung (EU) 2025/327) welchen Teil betreibt, was BSI C5, IT-Grundschutz, TR-02102 und TR-03161 von jedem Teil verlangen, die Fristen bei Vorfällen, die Aufbewahrung und die Go-live-Checkliste je Rolle."
       },
       "fr": {
         "status": "current",
-        "title": "Guide d’exploitation : héberger le hub et Klarbefund dans le cadre de l’EEDS et des normes du BSI"
+        "title": "Guide d’exploitation : héberger le hub et Klarbefund dans le cadre de l’EEDS et des normes du BSI",
+        "summary": "Comment exploiter réellement le hub et Klarbefund : quel rôle de l’EEDS (règlement (UE) 2025/327) exploite quelle partie, ce que BSI C5, IT-Grundschutz, TR-02102 et TR-03161 exigent de chaque partie, les délais en cas d’incident, la conservation et la liste de contrôle de mise en production par rôle."
       },
       "nl": {
         "status": "current",
-        "title": "Operationele richtlijn: de hub en Klarbefund hosten onder de EHDS en de BSI-normen"
+        "title": "Operationele richtlijn: de hub en Klarbefund hosten onder de EHDS en de BSI-normen",
+        "summary": "Hoe u de hub en Klarbefund echt host: welke EHDS-rol (Verordening (EU) 2025/327) welk deel beheert, wat BSI C5, IT-Grundschutz, TR-02102 en TR-03161 van elk deel vragen, de termijnen bij incidenten, de bewaring en de go-livechecklist per rol."
       },
       "es": {
         "status": "current",
-        "title": "Guía operativa: alojar el hub y Klarbefund conforme al EEDS y a las normas del BSI"
+        "title": "Guía operativa: alojar el hub y Klarbefund conforme al EEDS y a las normas del BSI",
+        "summary": "Cómo alojar de verdad el hub y Klarbefund: qué rol del EEDS (Reglamento (UE) 2025/327) opera cada parte, qué exigen BSI C5, IT-Grundschutz, TR-02102 y TR-03161 a cada parte, los plazos ante incidentes, la conservación y la lista de comprobación de puesta en producción por rol."
       }
     },
     "operations/dashboards": {
       "de": {
         "status": "current",
-        "title": "Die Dashboards"
+        "title": "Die Dashboards",
+        "summary": "Die drei Grafana-Dashboards des Live-Hubs mit Screenshots: EDC-Verträge und Übertragungen, der EHDS-Audit-Trail sowie Last- und Stresstest; was jede Zeile zeigt, wie man sie liest und wie man sich anmeldet."
       },
       "fr": {
         "status": "current",
-        "title": "Les tableaux de bord"
+        "title": "Les tableaux de bord",
+        "summary": "Les trois tableaux de bord Grafana du hub en ligne, avec captures : contrats et transferts EDC, la piste d’audit EEDS, et les tests de charge et de stress ; ce que montre chaque ligne, comment la lire et comment se connecter."
       },
       "nl": {
         "status": "current",
-        "title": "De dashboards"
+        "title": "De dashboards",
+        "summary": "De drie Grafana-dashboards van de live hub, met schermafbeeldingen: EDC-contracten en -overdrachten, het EHDS-audittrail en de belasting- en stresstest; wat elke rij toont, hoe u die leest en hoe u zich aanmeldt."
       },
       "es": {
         "status": "current",
-        "title": "Los cuadros de mando"
+        "title": "Los cuadros de mando",
+        "summary": "Los tres paneles de Grafana del hub en producción, con capturas: contratos y transferencias EDC, la pista de auditoría del EEDS y la prueba de carga y estrés; qué muestra cada fila, cómo leerla y cómo iniciar sesión."
       }
     },
     "operations/load-tests": {
       "de": {
         "status": "current",
-        "title": "Last-, Stress- und Spike-Tests: Ergebnisse und Dashboards"
+        "title": "Last-, Stress- und Spike-Tests: Ergebnisse und Dashboards",
+        "summary": "Jeder Last-, Stress- und Spike-Lauf gegen den Live-Hub und den Compose-Stack, mit seinem Grafana-Dashboard, was er gefunden hat, was sich dadurch geändert hat, und die noch ausstehenden Läufe."
       },
       "fr": {
         "status": "current",
-        "title": "Tests de charge, de stress et de pic : résultats et tableaux de bord"
+        "title": "Tests de charge, de stress et de pic : résultats et tableaux de bord",
+        "summary": "Chaque test de charge, de stress et de pic contre le hub en ligne et la pile Compose, avec son tableau de bord Grafana, ce qu’il a trouvé, ce qui a changé en conséquence et les tests encore à faire."
       },
       "nl": {
         "status": "current",
-        "title": "Belasting-, stress- en piektests: resultaten en dashboards"
+        "title": "Belasting-, stress- en piektests: resultaten en dashboards",
+        "summary": "Elke belasting-, stress- en piektest tegen de live hub en de Compose-stack, met het Grafana-dashboard ervan, wat die vond, wat daardoor veranderde en de tests die nog moeten."
       },
       "es": {
         "status": "current",
-        "title": "Pruebas de carga, estrés y picos: resultados y cuadros de mando"
+        "title": "Pruebas de carga, estrés y picos: resultados y cuadros de mando",
+        "summary": "Cada prueba de carga, estrés y picos contra el hub en producción y la pila de Compose, con su panel de Grafana, lo que encontró, lo que cambió por ello y las pruebas que faltan."
       }
     },
     "operations/production-readiness-2026-10": {
       "de": {
         "status": "current",
-        "title": "Bewertung der Produktionsreife, Oktober 2026"
+        "title": "Bewertung der Produktionsreife, Oktober 2026",
+        "summary": "Die Bewertung nach Well-Architected und Cloud Adoption Framework mit Stand 16.10.2026: was je Säule umgesetzt ist, mit Belegen, was offen ist, die Bewertungen und was zwischen dem Demonstrator und einer betreibbaren Plattform steht."
       },
       "fr": {
         "status": "current",
-        "title": "Évaluation de la préparation à la production, octobre 2026"
+        "title": "Évaluation de la préparation à la production, octobre 2026",
+        "summary": "L’évaluation Well-Architected et Cloud Adoption au 16 octobre 2026 : ce qui est en place par pilier, avec les preuves, ce qui reste ouvert, les scores et ce qui sépare le démonstrateur d’une plateforme exploitable."
       },
       "nl": {
         "status": "current",
-        "title": "Beoordeling van de productiegereedheid, oktober 2026"
+        "title": "Beoordeling van de productiegereedheid, oktober 2026",
+        "summary": "De Well-Architected- en Cloud Adoption-beoordeling per 16 oktober 2026: wat per pijler aanwezig is, met het bewijs, wat open is, de scores en wat er tussen de demonstrator en een beheerbaar platform staat."
       },
       "es": {
         "status": "current",
-        "title": "Evaluación de preparación para producción, octubre de 2026"
+        "title": "Evaluación de preparación para producción, octubre de 2026",
+        "summary": "La evaluación Well-Architected y Cloud Adoption a 16 de octubre de 2026: lo que hay por pilar, con las evidencias, lo pendiente, las puntuaciones y lo que separa al demostrador de una plataforma operable."
       }
     },
     "security/security-test-report": {
       "de": {
         "status": "current",
-        "title": "Sicherheitstestbericht, 2026-10-15"
+        "title": "Sicherheitstestbericht, 2026-10-15",
+        "summary": "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, die Sicherheitstests der App und die anonymen Black-Box-Prüfungen des Live-Hubs; die Befunde F1 bis F10 mit ihrem Stand nach den Korrekturen, und was ein unabhängiger Test ergänzen würde."
       },
       "fr": {
         "status": "current",
-        "title": "Rapport de test de sécurité, 2026-10-15"
+        "title": "Rapport de test de sécurité, 2026-10-15",
+        "summary": "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, les tests de posture de l’app et les vérifications anonymes en boîte noire du hub en ligne ; les constats F1 à F10 avec leur statut après correction, et ce qu’un test indépendant apporterait."
       },
       "nl": {
         "status": "current",
-        "title": "Beveiligingstestrapport, 2026-10-15"
+        "title": "Beveiligingstestrapport, 2026-10-15",
+        "summary": "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, de beveiligingstests van de app en de anonieme black-boxcontroles van de live hub; de bevindingen F1 tot en met F10 met hun status na de correcties, en wat een onafhankelijke test zou toevoegen."
       },
       "es": {
         "status": "current",
-        "title": "Informe de pruebas de seguridad, 2026-10-15"
+        "title": "Informe de pruebas de seguridad, 2026-10-15",
+        "summary": "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, las pruebas de postura de la app y las comprobaciones anónimas de caja negra del hub en producción; los hallazgos F1 a F10 con su estado tras las correcciones, y lo que añadiría una prueba independiente."
       }
     },
     "security/threat-model-hub": {
       "de": {
         "status": "current",
-        "title": "Bedrohungsmodell: der EHDS Integration Hub"
+        "title": "Bedrohungsmodell: der EHDS Integration Hub",
+        "summary": "STRIDE für den Hub auf Azure: Datenflüsse und Vertrauensgrenzen, die vier Angreifer, ein Austausch mit jeder Bedrohung an ihrem Schritt und jede Gegenmaßnahme mit dem Code, dem Test oder der Entscheidung, die sie belegt; was die Demo hinnimmt, was echte Daten brauchen und wie man jede Zeile prüft."
       },
       "fr": {
         "status": "current",
-        "title": "Modèle de menaces : le hub d’intégration EEDS"
+        "title": "Modèle de menaces : le hub d’intégration EEDS",
+        "summary": "STRIDE pour le hub sur Azure : flux de données et frontières de confiance, les quatre attaquants, un échange avec chaque menace à son étape, et chaque mesure avec le code, le test ou la décision qui la prouve ; ce que la démo accepte, ce que demandent des données réelles et comment vérifier chaque ligne."
       },
       "nl": {
         "status": "current",
-        "title": "Dreigingsmodel: de EHDS Integration Hub"
+        "title": "Dreigingsmodel: de EHDS Integration Hub",
+        "summary": "STRIDE voor de hub op Azure: de gegevensstromen en vertrouwensgrenzen, de vier aanvallers, één uitwisseling met elke dreiging bij haar stap, en elke maatregel met de code, de test of het besluit dat haar aantoont; wat de demo accepteert, wat echte gegevens vragen en hoe u elke rij controleert."
       },
       "es": {
         "status": "current",
-        "title": "Modelo de amenazas: el hub de integración del EEDS"
+        "title": "Modelo de amenazas: el hub de integración del EEDS",
+        "summary": "STRIDE para el hub en Azure: los flujos de datos y los límites de confianza, los cuatro atacantes, un intercambio con cada amenaza en su paso y cada mitigación con el código, la prueba o la decisión que la demuestra; lo que acepta la demo, lo que exigen los datos reales y cómo verificar cada fila."
       }
     },
     "security/threat-model-klarbefund": {
       "de": {
         "status": "current",
-        "title": "Bedrohungsmodell: Klarbefund, die iPhone-App"
+        "title": "Bedrohungsmodell: Klarbefund, die iPhone-App",
+        "summary": "STRIDE-Analyse der iPhone-App; jede Gegenmaßnahme nennt den Code oder Test, der sie belegt."
       },
       "fr": {
         "status": "current",
-        "title": "Modèle de menaces : Klarbefund, l’application iPhone"
+        "title": "Modèle de menaces : Klarbefund, l’application iPhone",
+        "summary": "Analyse STRIDE de l’app iPhone ; chaque mesure cite le code ou le test qui la prouve."
       },
       "nl": {
         "status": "current",
-        "title": "Dreigingsmodel: Klarbefund, de iPhone-app"
+        "title": "Dreigingsmodel: Klarbefund, de iPhone-app",
+        "summary": "STRIDE-analyse van de iPhone-app; elke maatregel noemt de code of test die haar aantoont."
       },
       "es": {
         "status": "current",
-        "title": "Modelo de amenazas: Klarbefund, la aplicación para iPhone"
+        "title": "Modelo de amenazas: Klarbefund, la aplicación para iPhone",
+        "summary": "Análisis STRIDE de la app para iPhone; cada mitigación cita el código o la prueba que la demuestra."
       }
     },
     "security/klarbefund-self-assessment": {
       "de": {
         "status": "current",
-        "title": "Klarbefund: Selbstbewertung"
+        "title": "Klarbefund: Selbstbewertung",
+        "summary": "Datenschutz (DSGVO), BSI TR-03161 Ziel für Ziel, die Kennzeichnung nach der KI-Verordnung und der MDR-Status der App, jede Zeile mit Verweis auf den Code oder Test, der sie belegt."
       },
       "fr": {
         "status": "current",
-        "title": "Klarbefund : auto-évaluation"
+        "title": "Klarbefund : auto-évaluation",
+        "summary": "Protection des données (RGPD), BSI TR-03161 objectif par objectif, l’étiquette au titre du règlement sur l’IA et le statut MDR de l’app, chaque ligne renvoyant au code ou au test qui la prouve."
       },
       "nl": {
         "status": "current",
-        "title": "Klarbefund: zelfbeoordeling"
+        "title": "Klarbefund: zelfbeoordeling",
+        "summary": "Gegevensbescherming (AVG), BSI TR-03161 doel voor doel, het label volgens de AI-verordening en de MDR-status van de app, elke regel met een verwijzing naar de code of test die het aantoont."
       },
       "es": {
         "status": "current",
-        "title": "Klarbefund: autoevaluación"
+        "title": "Klarbefund: autoevaluación",
+        "summary": "Protección de datos (RGPD), BSI TR-03161 objetivo por objetivo, la etiqueta del Reglamento de IA y el estado MDR de la app, cada línea remitiendo al código o la prueba que lo demuestra."
       }
     },
     "security/klarbefund-evidence": {
       "de": {
         "status": "current",
-        "title": "Klarbefund: Belege"
+        "title": "Klarbefund: Belege",
+        "summary": "Der Genauigkeits-Benchmark, die Paritätsprüfung des Wörterbuchs, das Laufprotokoll und was noch fehlt."
       },
       "fr": {
         "status": "current",
-        "title": "Klarbefund : preuves"
+        "title": "Klarbefund : preuves",
+        "summary": "Le banc d’essai de précision, le contrôle de parité du dictionnaire, le journal d’exécution et ce qui manque encore."
       },
       "nl": {
         "status": "current",
-        "title": "Klarbefund: bewijs"
+        "title": "Klarbefund: bewijs",
+        "summary": "De nauwkeurigheidsbenchmark, de pariteitscontrole van het woordenboek, het runverslag en wat nog ontbreekt."
       },
       "es": {
         "status": "current",
-        "title": "Klarbefund: pruebas"
+        "title": "Klarbefund: pruebas",
+        "summary": "La prueba de precisión, la comprobación de paridad del diccionario, el registro de ejecución y lo que aún falta."
       }
     },
     "security/report-for-health-insurers": {
       "de": {
         "status": "current",
-        "title": "Klarbefund: Nachweisbericht für Krankenversicherungen"
+        "title": "Klarbefund: Nachweisbericht für Krankenversicherungen",
+        "summary": "Die drei Fragen einer Krankenversicherung, ist die Erfassung richtig, sind die Daten sicher, ist es ein Medizinprodukt, mit den Belegen beantwortet, dazu das White-Label- und Beratungsangebot."
       },
       "fr": {
         "status": "current",
-        "title": "Klarbefund : rapport de preuves pour les assureurs santé"
+        "title": "Klarbefund : rapport de preuves pour les assureurs santé",
+        "summary": "Les trois questions d’un assureur santé, l’extraction est-elle juste, les données sont-elles sûres, est-ce un dispositif médical, avec les preuves, plus l’offre en marque blanche et de conseil."
       },
       "nl": {
         "status": "current",
-        "title": "Klarbefund: bewijsrapport voor zorgverzekeraars"
+        "title": "Klarbefund: bewijsrapport voor zorgverzekeraars",
+        "summary": "De drie vragen van een zorgverzekeraar, klopt de extractie, zijn de gegevens veilig, is het een medisch hulpmiddel, beantwoord met het bewijs, plus het white-label- en adviesaanbod."
       },
       "es": {
         "status": "current",
-        "title": "Klarbefund: informe de pruebas para aseguradoras de salud"
+        "title": "Klarbefund: informe de pruebas para aseguradoras de salud",
+        "summary": "Las tres preguntas de una aseguradora, si la extracción es correcta, si los datos están seguros, si es un producto sanitario, respondidas con las evidencias, además de la oferta de marca blanca y consultoría."
       }
     },
     "security/klarbefund-run-on-mac": {
       "de": {
         "status": "current",
-        "title": "Klarbefund: die Nachweise auf einem Mac erzeugen"
+        "title": "Klarbefund: die Nachweise auf einem Mac erzeugen",
+        "summary": "Wie man jede Zahl aus den Belegen auf einem Mac mit Xcode nachvollzieht."
       },
       "fr": {
         "status": "current",
-        "title": "Klarbefund : produire les preuves sur un Mac"
+        "title": "Klarbefund : produire les preuves sur un Mac",
+        "summary": "Comment reproduire chaque chiffre des preuves sur un Mac avec Xcode."
       },
       "nl": {
         "status": "current",
-        "title": "Klarbefund: het bewijs op een Mac genereren"
+        "title": "Klarbefund: het bewijs op een Mac genereren",
+        "summary": "Hoe u elk getal uit het bewijs op een Mac met Xcode reproduceert."
       },
       "es": {
         "status": "current",
-        "title": "Klarbefund: generar la evidencia en un Mac"
+        "title": "Klarbefund: generar la evidencia en un Mac",
+        "summary": "Cómo reproducir cada cifra de las evidencias en un Mac con Xcode."
       }
     },
     "security/bsi-c5-gap-analysis": {
       "de": {
         "status": "current",
-        "title": "BSI-C5-Lückenanalyse: EHDS Integration Hub"
+        "title": "BSI-C5-Lückenanalyse: EHDS Integration Hub",
+        "summary": "Der Hub gegen den Kriterienkatalog BSI C5:2020, für Art. 50 Abs. 6 EHDS."
       },
       "fr": {
         "status": "current",
-        "title": "Analyse des écarts BSI C5 : hub d’intégration EEDS"
+        "title": "Analyse des écarts BSI C5 : hub d’intégration EEDS",
+        "summary": "Le hub face au catalogue de critères BSI C5:2020, pour l’article 50, paragraphe 6, de l’EEDS."
       },
       "nl": {
         "status": "current",
-        "title": "BSI C5-gapanalyse: EHDS-integratiehub"
+        "title": "BSI C5-gapanalyse: EHDS-integratiehub",
+        "summary": "De hub tegen de criteriacatalogus BSI C5:2020, voor art. 50, lid 6, EHDS."
       },
       "es": {
         "status": "current",
-        "title": "Análisis de brechas BSI C5: hub de integración EEDS"
+        "title": "Análisis de brechas BSI C5: hub de integración EEDS",
+        "summary": "El hub frente al catálogo de criterios BSI C5:2020, para el art. 50, apartado 6, del EEDS."
       }
     },
     "security/sbom": {
       "de": {
         "status": "current",
-        "title": "Software-Stücklisten"
+        "title": "Software-Stücklisten",
+        "summary": "Eine CycloneDX-Stückliste je auslieferbarem Teil, bytegenau stabil; --check schlägt fehl, wenn eine Stückliste nicht mehr zu ihrer Lock-Datei passt."
       },
       "fr": {
         "status": "current",
-        "title": "Nomenclatures logicielles"
+        "title": "Nomenclatures logicielles",
+        "summary": "Une nomenclature CycloneDX par composant déployable, stable à l’octet près ; --check échoue quand une nomenclature ne correspond plus à son fichier de verrouillage."
       },
       "nl": {
         "status": "current",
-        "title": "Software bills of materials"
+        "title": "Software bills of materials",
+        "summary": "Eén CycloneDX-stuklijst per uitrolbaar onderdeel, bytestabiel; --check faalt als een stuklijst niet meer bij haar lockfile past."
       },
       "es": {
         "status": "current",
-        "title": "Listas de materiales de software"
+        "title": "Listas de materiales de software",
+        "summary": "Una lista de materiales CycloneDX por componente desplegable, estable byte a byte; --check falla cuando una lista ya no coincide con su archivo de bloqueo."
       }
     }
   }

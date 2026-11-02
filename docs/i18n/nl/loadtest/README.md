@@ -2,6 +2,7 @@
 source: docs/loadtest/README.md
 sourceHash: 9b7e7f5dd475758fc226e0d982b2c501af4ad553de56333c6de01c2760ad9ecf
 language: nl
+summary: "Elke belasting-, stress- en piektest tegen de live hub en de Compose-stack, met het Grafana-dashboard ervan, wat die vond, wat daardoor veranderde en de tests die nog moeten."
 ---
 
 # Belasting-, stress- en piektests: resultaten en dashboards

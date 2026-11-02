@@ -2,6 +2,7 @@
 source: docs/klarbefund/self-assessment.md
 sourceHash: 62c9b83ff283cb2362f6125d65a73ae849be9d47cd40ca175213fbfb881790bf
 language: de
+summary: "Datenschutz (DSGVO), BSI TR-03161 Ziel für Ziel, die Kennzeichnung nach der KI-Verordnung und der MDR-Status der App, jede Zeile mit Verweis auf den Code oder Test, der sie belegt."
 ---
 
 # Klarbefund: Selbstbewertung

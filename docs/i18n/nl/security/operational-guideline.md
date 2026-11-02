@@ -2,6 +2,7 @@
 source: docs/security/operational-guideline.md
 sourceHash: ecd7586f5a4e88a5099596d7c1f9eec81a888d8df3250d3cacbcab6dc9a5a13a
 language: nl
+summary: "Hoe u de hub en Klarbefund echt host: welke EHDS-rol (Verordening (EU) 2025/327) welk deel beheert, wat BSI C5, IT-Grundschutz, TR-02102 en TR-03161 van elk deel vragen, de termijnen bij incidenten, de bewaring en de go-livechecklist per rol."
 ---
 
 # Operationele richtlijn: de hub en Klarbefund hosten onder de EHDS en de BSI-normen

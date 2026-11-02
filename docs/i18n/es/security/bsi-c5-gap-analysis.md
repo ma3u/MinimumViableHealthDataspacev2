@@ -2,6 +2,7 @@
 source: docs/security/bsi-c5-gap-analysis.md
 sourceHash: 09e0d014903c7a9c94c0d15df0d72be1ab532ba429c5804bcaf34cc64d921295
 language: es
+summary: "El hub frente al catálogo de criterios BSI C5:2020, para el art. 50, apartado 6, del EEDS."
 ---
 
 # Análisis de brechas BSI C5: hub de integración EEDS
