@@ -147,6 +147,11 @@ const UNIT_MAP: Record<string, string> = {
   "pg/ml": "pg/mL",
   "mmol/l": "mmol/L",
   "umol/l": "umol/L",
+  // Nanomoles per millilitre, as a home amino acid test prints it. The same
+  // quantity as micromoles per litre, not a conversion: 10^-9 mol in 10^-3 L
+  // is 10^-6 mol in 1 L, so the number stays as printed and the values join
+  // a laboratory's µmol/l series.
+  "nmol/ml": "umol/L",
   "nmol/l": "nmol/L",
   "pmol/l": "pmol/L",
   "mmol/mol": "mmol/mol",
@@ -2810,6 +2815,60 @@ const DEFINITIONS: AnalyteDefinition[] = [
       ),
     },
   },
+  // Four more that a full home panel prints, with the same specimen and
+  // property as the rest, checked against the NLM clinical tables API.
+  {
+    key: "beta-alanine",
+    description:
+      "Not a building block of protein but part of carnosine in muscle. Rises with meat and with supplements.",
+    labels: ["Beta-Alanin", "Betaalanin"],
+    byUnit: {
+      "umol/L": c(
+        "26604-9",
+        "Beta alanine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "gaba",
+    description:
+      "Gamma-aminobutyric acid, the main inhibitory messenger of the brain. Little of it circulates in blood.",
+    labels: ["Gamma-Aminobuttersäure", "GABA", "Gamma-Aminobutyrat"],
+    byUnit: {
+      "umol/L": c(
+        "26609-8",
+        "Gamma aminobutyrate [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "homoarginine",
+    description:
+      "A relative of arginine that the kidney makes. Low levels go with a higher cardiovascular risk in studies.",
+    labels: ["Homoarginin", "hArg"],
+    byUnit: {
+      "umol/L": c(
+        "79612-8",
+        "L-homoarginine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
+  {
+    key: "sarcosine",
+    description:
+      "N-methylglycine, a step in the breakdown of choline to glycine.",
+    labels: ["Sarkosin", "Sarcosin", "N-Methylglycin"],
+    byUnit: {
+      "umol/L": c(
+        "26613-0",
+        "Sarcosine [Moles/volume] in Serum or Plasma",
+        "umol/L",
+      ),
+    },
+  },
   {
     key: "body-height",
     description: "Standing height, entered by you.",
@@ -4470,6 +4529,13 @@ export const ANALYTE_DESCRIPTIONS_DE: Readonly<Record<string, string>> = {
     "Keine Aminosäure im engeren Sinn, sondern eine Aminosulfonsäure. Reichlich in Herz und Netzhaut.",
   tyrosine:
     "Aus Phenylalanin gebildet, Vorstufe von Dopamin, Adrenalin und der Schilddrüsenhormone.",
+  "beta-alanine":
+    "Kein Baustein von Eiweiß, sondern Teil des Carnosins im Muskel. Steigt mit Fleisch und mit Nahrungsergänzung.",
+  gaba: "Gamma-Aminobuttersäure, der wichtigste hemmende Botenstoff im Gehirn. Im Blut kreist nur wenig davon.",
+  homoarginine:
+    "Ein Verwandter des Arginins, den die Niere bildet. Niedrige Werte gehen in Studien mit höherem Herz-Kreislauf-Risiko einher.",
+  sarcosine:
+    "N-Methylglycin, ein Zwischenschritt beim Abbau von Cholin zu Glycin.",
   "body-height": "Die Körpergröße im Stehen, von Ihnen eingetragen.",
   "body-weight":
     "Das Körpergewicht, von Ihnen eingetragen oder von einer Waage übernommen.",

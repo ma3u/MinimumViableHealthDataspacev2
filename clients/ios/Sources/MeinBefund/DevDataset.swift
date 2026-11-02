@@ -103,7 +103,7 @@ import Shared
           line: "\(row.label)  \(Measurement.text(row.value))  \(row.unit)  \(row.printedRange)",
           lineNumber: index + 2,
           region: SourceRegion(
-            page: 1, x: 0.07, y: 0.84 - Double(index) * 0.035, width: 0.86, height: 0.028))
+            page: 1, x: 0.07, y: max(0, 0.84 - Double(index) * 0.035), width: 0.86, height: 0.028))
         if let coding = Analytes.lookup(label: row.label, unit: row.unit) {
           coded.append(CodedLabValue(raw: raw, coding: coding, source: sheet.source))
         } else {
@@ -647,6 +647,43 @@ import Shared
           Row("Threonin", 96.4, "µmol/l", 70, 200),
           Row("Tryptophan", 48.9, "µmol/l", 30, 90),
           Row("Valin", 212, "µmol/l", 150, 330),
+        ]),
+
+      // A home amino acid test: the whole panel, essential and non-essential,
+      // in nanomoles per millilitre, which is the same quantity as the
+      // aminogram's micromoles per litre, so the eight essentials continue
+      // its trend. One value below its range. Invented values and ranges.
+      Sheet(
+        id: "00000000-0000-0000-0000-00000000D021", year: 2026, month: 10, day: 14,
+        title: "Aminosäuren-Test, Labor Nordstadt", laboratory: "Labor Nordstadt",
+        source: .labIssuedDigital,
+        rows: [
+          Row("Isoleucin", 61.4, "nmol/ml", 30, 110),
+          Row("Leucin", 121.8, "nmol/ml", 55, 185),
+          Row("Lysin", 104.5, "nmol/ml", 70, 165),
+          Row("Methionin", 21.7, "nmol/ml", 12, 35),
+          Row("Phenylalanin", 54.3, "nmol/ml", 35, 80),
+          Row("Threonin", 102.6, "nmol/ml", 55, 150),
+          Row("Tryptophan", 41.2, "nmol/ml", 20, 50),
+          Row("Valin", 231.5, "nmol/ml", 100, 280),
+          Row("Histidin", 66.1, "nmol/ml", 15, 75),
+          Row("Arginin", 38.4, "nmol/ml", 2, 48),
+          Row("Asparagin", 47.9, "nmol/ml", 35, 70),
+          Row("Glutamin", 352.6, "nmol/ml", 10, 520),
+          Row("Glycin", 241.3, "nmol/ml", 150, 400),
+          Row("Prolin", 168.9, "nmol/ml", 85, 300),
+          Row("Tyrosin", 58.7, "nmol/ml", 25, 95),
+          Row("Alanin", 312.4, "nmol/ml", 170, 440),
+          Row("Asparaginsäure", 24.2, "nmol/ml", 30, 160),
+          Row("Beta-Alanin", 6.4, "nmol/ml", 4, 18),
+          Row("Citrullin", 28.3, "nmol/ml", 14, 38),
+          Row("Gamma-Aminobuttersäure", 0.82, "nmol/ml", 0.1, 1.6),
+          Row("Glutaminsäure", 186.5, "nmol/ml", 120, 300),
+          Row("Homoarginin", 1.9, "nmol/ml", 0.6, 3),
+          Row("Ornithin", 98.2, "nmol/ml", 50, 150),
+          Row("Sarkosin", 1.7, "nmol/ml", 0.5, 3.5),
+          Row("Serin", 197.3, "nmol/ml", 120, 290),
+          Row("Taurin", 168.4, "nmol/ml", 90, 250),
         ]),
 
       // The first page of the lipid profile below, scanned again on its own:

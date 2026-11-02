@@ -7,7 +7,8 @@ import Foundation
 /// Each reader recognises its own document and leaves any other untouched:
 /// a 24-hour blood pressure report and an ECG printout by geometry, a
 /// Holter summary, a DXA scan, an ergometry, a spiroergometry and a lactate
-/// test by their labels, a glucose sensor's daily pattern by position.
+/// test by their labels, a home amino acid panel by its names and ranges, a
+/// glucose sensor's daily pattern by position.
 public enum DocumentReaders {
 
   public static func applied(
@@ -20,6 +21,7 @@ public enum DocumentReaders {
     result = ExerciseECG.applied(to: result, pageTexts: pageTexts)
     result = CardiopulmonaryExercise.applied(to: result, pageTexts: pageTexts)
     result = LactateTest.applied(to: result, pageTexts: pageTexts)
+    result = AminoAcidPanel.applied(to: result, pageTexts: pageTexts)
     result = GlucoseProfile.applied(to: result, pageTexts: pageTexts, pages: pages)
     return result
   }
