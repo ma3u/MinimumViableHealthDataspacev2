@@ -10,5 +10,7 @@
   "Close": "Fermer",
   "How does this work?": "Comment cela fonctionne-t-il ?",
   "Hide details": "Masquer les détails",
-  "Sign in required": "Connexion requise"
+  "Sign in required": "Connexion requise",
+  "Skip to main content": "Aller au contenu principal",
+  "Diagram render error: {error}": "Erreur de rendu du diagramme : {error}"
 }

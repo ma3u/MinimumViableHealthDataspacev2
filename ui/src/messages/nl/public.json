@@ -77,5 +77,13 @@
   "Party": "Partij",
   "Measure": "Maatregel",
   "Reason": "Reden",
-  "Notified": "Kennisgegeven op"
+  "Notified": "Kennisgegeven op",
+  "statistical request, Art. 69": "verzoek om gezondheidsgegevens, art. 69",
+  "access application, Art. 67": "aanvraag voor toegang tot gezondheidsgegevens, art. 67",
+  "revoked {date}": "ingetrokken op {date}",
+  "answered by the trusted data holder (Art. 72)": "beantwoord door de betrouwbare houder van gezondheidsgegevens (art. 72)",
+  "fee {amount} EUR (Art. 62)": "vergoeding {amount} EUR (art. 62)",
+  "late": "te laat",
+  "met": "gehaald",
+  "Register read on {time} UTC.": "Register gelezen op {time} UTC."
 }

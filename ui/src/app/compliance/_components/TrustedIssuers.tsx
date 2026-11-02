@@ -1,4 +1,7 @@
+"use client";
+
 import trusted from "@/content/trusted-issuers.json";
+import { useT } from "@/lib/i18n/translate";
 
 /**
  * The issuers the control plane trusts, each for the credential types it may
@@ -7,14 +10,16 @@ import trusted from "@/content/trusted-issuers.json";
  * (TRUST-6.1), so what this shows is what the connector enforces.
  */
 export function TrustedIssuers() {
+  const t = useT("access");
   return (
     <div className="mt-8" data-testid="trusted-issuers">
       <h3 className="text-sm font-semibold mb-1 text-(--text-primary)">
-        Trusted issuers
+        {t("Trusted issuers")}
       </h3>
       <p className="text-(--text-secondary) text-xs mb-3">
-        A credential counts only if its issuer is trusted for its type; one that
-        is not makes the connector refuse the whole request.
+        {t(
+          "A credential counts only if its issuer is trusted for its type; one that is not makes the connector refuse the whole request.",
+        )}
       </p>
       <ul className="space-y-3">
         {trusted.issuers.map((issuer) => (
@@ -28,13 +33,17 @@ export function TrustedIssuers() {
             </code>
             {"azureDid" in issuer && (
               <div className="text-xs text-(--text-secondary) mt-0.5">
-                On Azure: <code className="break-all">{issuer.azureDid}</code>
+                {t("On Azure:")}{" "}
+                <code className="break-all">{issuer.azureDid}</code>
               </div>
             )}
             <p className="text-xs text-(--text-secondary) mt-1">
               {issuer.role}
             </p>
-            <div className="flex flex-wrap gap-1.5 mt-2" aria-label="May issue">
+            <div
+              className="flex flex-wrap gap-1.5 mt-2"
+              aria-label={t("May issue")}
+            >
               {issuer.types.map((type) => (
                 <span
                   key={type}
@@ -45,7 +54,7 @@ export function TrustedIssuers() {
               ))}
             </div>
             <div className="text-xs text-(--text-secondary) mt-2">
-              Trusted on: {issuer.environments.join(", ")}
+              {t("Trusted on:")} {issuer.environments.join(", ")}
             </div>
           </li>
         ))}

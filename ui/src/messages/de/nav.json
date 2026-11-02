@@ -77,5 +77,15 @@
   "Researcher": "Forschende",
   "Trust Center": "Vertrauensstelle",
   "Patient / Citizen": "Patient",
-  "Glossary": "Glossar"
+  "Glossary": "Glossar",
+  "Main navigation": "Hauptnavigation",
+  "Choose a demo persona": "Demo-Persona wählen",
+  "All users & details": "Alle Benutzer und Details",
+  "(demo)": "(Demo)",
+  "demo mode": "Demomodus",
+  "Settings": "Einstellungen",
+  "active": "aktiv",
+  "<b>Demo mode:</b> You are using a default password.": "<b>Demomodus:</b> Sie verwenden ein Standardpasswort.",
+  "Change your password": "Passwort ändern",
+  "Dismiss password warning": "Passwortwarnung schließen"
 }

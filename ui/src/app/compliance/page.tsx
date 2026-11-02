@@ -247,7 +247,9 @@ export default function CompliancePage() {
                     <th className="text-left px-3 py-2 font-medium">
                       {t("Participant")}
                     </th>
-                    <th className="text-left px-3 py-2 font-medium">Role</th>
+                    <th className="text-left px-3 py-2 font-medium">
+                      {t("Role")}
+                    </th>
                     <th className="text-center px-3 py-2 font-medium">
                       {t("Application")}
                     </th>
@@ -257,7 +259,9 @@ export default function CompliancePage() {
                     <th className="text-left px-3 py-2 font-medium">
                       {t("Decision due")}
                     </th>
-                    <th className="text-left px-3 py-2 font-medium">Dataset</th>
+                    <th className="text-left px-3 py-2 font-medium">
+                      {t("Dataset")}
+                    </th>
                     <th className="text-center px-3 py-2 font-medium">
                       {t("Contract")}
                     </th>
@@ -344,15 +348,15 @@ export default function CompliancePage() {
                               title={row.applicationStatus ?? ""}
                             >
                               {row.applicationStatus === "APPROVED"
-                                ? "✓ Approved"
+                                ? `✓ ${t("Approved")}`
                                 : row.applicationStatus === "REJECTED"
-                                  ? "✗ Rejected"
+                                  ? `✗ ${t("Rejected")}`
                                   : row.applicationStatus === "UNDER_REVIEW"
-                                    ? "◔ Under Review"
+                                    ? `◔ ${t("Under Review")}`
                                     : row.applicationStatus === "PENDING"
-                                      ? "◔ Pending"
+                                      ? `◔ ${t("Pending")}`
                                       : row.applicationStatus === "INCOMPLETE"
-                                        ? "◔ Incomplete"
+                                        ? `◔ ${t("Incomplete")}`
                                         : row.applicationStatus ?? "✓"}
                             </span>
                           ) : (
@@ -373,11 +377,11 @@ export default function CompliancePage() {
                               title={row.approvalStatus ?? ""}
                             >
                               {row.approvalStatus === "APPROVED"
-                                ? "✓ Approved"
+                                ? `✓ ${t("Approved")}`
                                 : row.approvalStatus === "REJECTED"
-                                  ? "✗ Denied"
+                                  ? `✗ ${t("Denied")}`
                                   : row.approvalStatus === "REVOKED"
-                                    ? "✗ Revoked"
+                                    ? `✗ ${t("Revoked")}`
                                     : row.approvalStatus ?? "—"}
                             </span>
                           ) : (
@@ -452,7 +456,7 @@ export default function CompliancePage() {
             <div className="mt-4 rounded-xl border border-(--border) bg-(--surface) p-4">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-sm text-(--text-primary)">
-                  {detailRow.consumerName} — Approval Chain Detail
+                  {detailRow.consumerName} — {t("Approval Chain Detail")}
                 </h3>
                 <button
                   onClick={() => {
@@ -488,11 +492,13 @@ export default function CompliancePage() {
                     <table className="text-xs w-full border-collapse">
                       <thead>
                         <tr className="text-(--text-secondary) border-b border-(--border)">
-                          <th className="text-left pb-1">Application</th>
-                          <th className="text-left pb-1">Status</th>
-                          <th className="text-left pb-1">Approval</th>
-                          <th className="text-left pb-1">EHDS Article</th>
-                          <th className="text-left pb-1">Contract</th>
+                          <th className="text-left pb-1">{t("Application")}</th>
+                          <th className="text-left pb-1">{t("Status")}</th>
+                          <th className="text-left pb-1">{t("Approval")}</th>
+                          <th className="text-left pb-1">
+                            {t("EHDS Article")}
+                          </th>
+                          <th className="text-left pb-1">{t("Contract")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -529,26 +535,28 @@ export default function CompliancePage() {
                     <p>
                       <strong>{t("Application:")}</strong>{" "}
                       {detailRow.hasApplication
-                        ? `✓ ${detailRow.applicationStatus ?? "submitted"}`
-                        : "✗ No AccessApplication submitted"}
+                        ? `✓ ${detailRow.applicationStatus ?? t("submitted")}`
+                        : `✗ ${t("No AccessApplication submitted")}`}
                     </p>
                     <p>
                       <strong>{t("HDAB Approval:")}</strong>{" "}
                       {detailRow.hasApproval
-                        ? `✓ ${detailRow.approvalStatus ?? "exists"}`
-                        : "✗ No HDABApproval linked"}
+                        ? `✓ ${detailRow.approvalStatus ?? t("exists")}`
+                        : `✗ ${t("No HDABApproval linked")}`}
                     </p>
                     <p>
                       <strong>{t("Dataset grant:")}</strong>{" "}
                       {detailRow.datasetId
                         ? `✓ ${detailRow.datasetTitle}`
-                        : "✗ No GRANTS_ACCESS_TO relationship to a dataset"}
+                        : `✗ ${t(
+                            "No GRANTS_ACCESS_TO relationship to a dataset",
+                          )}`}
                     </p>
                     <p>
                       <strong>{t("Contract:")}</strong>{" "}
                       {detailRow.hasContract
-                        ? "✓ Contract governs DataProduct"
-                        : "✗ No Contract → DataProduct → Dataset chain"}
+                        ? `✓ ${t("Contract governs DataProduct")}`
+                        : `✗ ${t("No Contract → DataProduct → Dataset chain")}`}
                     </p>
                   </div>
                 </div>
@@ -573,7 +581,9 @@ export default function CompliancePage() {
 
           {credentials.length === 0 ? (
             <div className="text-(--text-secondary) text-sm">
-              {optionsLoading ? "Loading…" : "No credentials found in graph."}
+              {optionsLoading
+                ? t("Loading…")
+                : t("No credentials found in graph.")}
             </div>
           ) : (
             <div className="space-y-4">
@@ -614,7 +624,9 @@ export default function CompliancePage() {
 
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-(--text-secondary)">
                     <div>
-                      <span className="text-(--text-secondary)">Holder:</span>{" "}
+                      <span className="text-(--text-secondary)">
+                        {t("Holder:")}
+                      </span>{" "}
                       {vc.holderName ?? "—"}
                       {vc.holderType && (
                         <span className="text-(--text-secondary)">
@@ -624,7 +636,9 @@ export default function CompliancePage() {
                       )}
                     </div>
                     <div>
-                      <span className="text-(--text-secondary)">Subject:</span>{" "}
+                      <span className="text-(--text-secondary)">
+                        {t("Subject:")}
+                      </span>{" "}
                       <span className="font-mono">
                         {vc.subjectDid?.replace(
                           /did:web:identityhub%3A7083:/,
@@ -633,7 +647,9 @@ export default function CompliancePage() {
                       </span>
                     </div>
                     <div>
-                      <span className="text-(--text-secondary)">Issuer:</span>{" "}
+                      <span className="text-(--text-secondary)">
+                        {t("Issuer:")}
+                      </span>{" "}
                       <span className="font-mono">
                         {vc.issuerDid?.replace(
                           /did:web:issuerservice%3A10016:/,
@@ -642,7 +658,9 @@ export default function CompliancePage() {
                       </span>
                     </div>
                     <div>
-                      <span className="text-(--text-secondary)">Format:</span>{" "}
+                      <span className="text-(--text-secondary)">
+                        {t("Format:")}
+                      </span>{" "}
                       VC1_0_JWT
                     </div>
 
@@ -650,7 +668,7 @@ export default function CompliancePage() {
                     {vc.purpose && (
                       <div className="col-span-2">
                         <span className="text-(--text-secondary)">
-                          Purpose:
+                          {t("Purpose:")}
                         </span>{" "}
                         {vc.purpose}
                       </div>
@@ -658,7 +676,7 @@ export default function CompliancePage() {
                     {vc.datasetId && (
                       <div className="col-span-2">
                         <span className="text-(--text-secondary)">
-                          Dataset:
+                          {t("Dataset:")}
                         </span>{" "}
                         <span className="font-mono">{vc.datasetId}</span>
                       </div>
@@ -666,17 +684,19 @@ export default function CompliancePage() {
                     {vc.completeness != null && (
                       <div className="col-span-2 mt-1">
                         <span className="text-(--text-secondary)">
-                          Quality:
+                          {t("Quality:")}
                         </span>{" "}
-                        Completeness{" "}
+                        {t("Completeness")}{" "}
                         <span className="text-(--success-text)">
                           {(vc.completeness * 100).toFixed(0)}%
                         </span>
-                        {" · "}Conformance{" "}
+                        {" · "}
+                        {t("Conformance")}{" "}
                         <span className="text-(--success-text)">
                           {((vc.conformance ?? 0) * 100).toFixed(0)}%
                         </span>
-                        {" · "}Timeliness{" "}
+                        {" · "}
+                        {t("Timeliness")}{" "}
                         <span className="text-(--success-text)">
                           {((vc.timeliness ?? 0) * 100).toFixed(0)}%
                         </span>
@@ -691,27 +711,27 @@ export default function CompliancePage() {
           {/* Trust chain diagram */}
           <div className="mt-6 rounded-lg border border-(--border) bg-(--surface)/50 p-4">
             <h3 className="text-sm font-semibold mb-3 text-(--text-primary)">
-              DCP Trust Chain — Credential Presentation Flow
+              {t("DCP Trust Chain")} — {t("Credential Presentation Flow")}
             </h3>
             <div className="flex items-center gap-2 text-xs text-(--text-secondary) flex-wrap">
               <span className="px-2 py-1 rounded-sm bg-layer1/20 text-blue-800 dark:text-blue-300 font-medium">
                 IssuerService
               </span>
-              <span>→ signs VC →</span>
+              <span>→ {t("signs VC")} →</span>
               <span className="px-2 py-1 rounded-sm bg-layer2/20 text-teal-800 dark:text-teal-300 font-medium">
                 IdentityHub
               </span>
-              <span>→ stores →</span>
+              <span>→ {t("stores")} →</span>
               <span className="px-2 py-1 rounded-sm bg-layer3/20 text-green-800 dark:text-green-300 font-medium">
                 DCP Presentation
               </span>
-              <span>→ verifies →</span>
+              <span>→ {t("verifies")} →</span>
               <span className="px-2 py-1 rounded-sm bg-layer5/20 text-purple-800 dark:text-purple-300 font-medium">
                 Policy Engine
               </span>
-              <span>→ evaluates →</span>
+              <span>→ {t("evaluates")} →</span>
               <span className="px-2 py-1 rounded-sm bg-(--badge-active-bg) text-(--badge-active-text) border border-(--badge-active-border) font-medium">
-                ✓ Access Granted
+                ✓ {t("Access Granted")}
               </span>
             </div>
           </div>
@@ -751,11 +771,18 @@ export default function CompliancePage() {
             </div>
           ) : trustCenters.length === 0 ? (
             <div className="text-(--text-secondary) text-sm">
-              No trust centers found. Run{" "}
-              <code className="font-mono text-xs bg-(--surface-2) px-1 py-0.5 rounded-sm">
-                neo4j/seed-trust-center.cypher
-              </code>{" "}
-              to seed demo data.
+              <T
+                area="compliance"
+                tags={{
+                  code: (
+                    <code className="font-mono text-xs bg-(--surface-2) px-1 py-0.5 rounded-sm" />
+                  ),
+                }}
+              >
+                {
+                  "No trust centers found. Run <code>neo4j/seed-trust-center.cypher</code> to seed demo data."
+                }
+              </T>
             </div>
           ) : (
             <div className="space-y-4">
@@ -790,12 +817,14 @@ export default function CompliancePage() {
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-(--text-secondary) mb-3">
                     <div>
                       <span className="text-(--text-secondary)">
-                        Operated by:
+                        {t("Operated by:")}
                       </span>{" "}
                       {tc.operatedBy}
                     </div>
                     <div>
-                      <span className="text-(--text-secondary)">Protocol:</span>{" "}
+                      <span className="text-(--text-secondary)">
+                        {t("Protocol:")}
+                      </span>{" "}
                       {tc.protocol}
                     </div>
                     <div className="col-span-2">
@@ -805,7 +834,7 @@ export default function CompliancePage() {
                     {tc.hdabApprovalId && (
                       <div>
                         <span className="text-(--text-secondary)">
-                          HDAB Approval:
+                          {t("HDAB Approval:")}
                         </span>{" "}
                         <span className="font-mono">{tc.hdabApprovalId}</span>{" "}
                         <span
@@ -821,13 +850,13 @@ export default function CompliancePage() {
                     )}
                     <div>
                       <span className="text-(--text-secondary)">
-                        Datasets covered:
+                        {t("Datasets covered:")}
                       </span>{" "}
                       {tc.datasetCount}
                     </div>
                     <div>
                       <span className="text-(--text-secondary)">
-                        Active RPSNs:
+                        {t("Active RPSNs:")}
                       </span>{" "}
                       <span className="text-(--success-text)">
                         {tc.activeRpsnCount}
@@ -836,7 +865,9 @@ export default function CompliancePage() {
                     {tc.recognisedCountries.length > 0 && (
                       <div className="col-span-2">
                         <span className="text-(--text-secondary)">
-                          Mutual recognition (HealthData@EU, EHDS Art. 75):
+                          {t(
+                            "Mutual recognition (HealthData@EU, EHDS Art. 75):",
+                          )}
                         </span>{" "}
                         {tc.recognisedCountries.join(", ")}
                       </div>
@@ -848,7 +879,7 @@ export default function CompliancePage() {
                     <span className="px-2 py-1 rounded-sm bg-layer1/20 text-blue-800 dark:text-blue-300 font-medium">
                       Provider PSN
                     </span>
-                    <span>→ HDAB-auth resolve →</span>
+                    <span>→ {t("HDAB-auth resolve")} →</span>
                     <span className="px-2 py-1 rounded-sm bg-layer5/20 text-purple-800 dark:text-purple-300 font-medium">
                       {tc.name}
                     </span>
@@ -856,9 +887,9 @@ export default function CompliancePage() {
                     <span className="px-2 py-1 rounded-sm bg-layer3/20 text-green-800 dark:text-green-300 font-medium">
                       SPE (TEE)
                     </span>
-                    <span>→ aggregate-only →</span>
+                    <span>→ {t("aggregate-only")} →</span>
                     <span className="px-2 py-1 rounded-sm bg-(--badge-active-bg) text-(--badge-active-text) border border-(--badge-active-border) font-medium">
-                      Researcher
+                      {t("Researcher")}
                     </span>
                   </div>
                 </div>
@@ -875,12 +906,12 @@ export default function CompliancePage() {
               <table className="text-xs w-full border-collapse">
                 <thead>
                   <tr className="text-(--text-secondary) border-b border-(--border)">
-                    <th className="text-left pb-1">Session ID</th>
-                    <th className="text-left pb-1">Study</th>
-                    <th className="text-left pb-1">Status</th>
+                    <th className="text-left pb-1">{t("Session ID")}</th>
+                    <th className="text-left pb-1">{t("Study")}</th>
+                    <th className="text-left pb-1">{t("Status")}</th>
                     <th className="text-left pb-1">k-anon</th>
-                    <th className="text-left pb-1">Output Policy</th>
-                    <th className="text-left pb-1">Created by</th>
+                    <th className="text-left pb-1">{t("Output Policy")}</th>
+                    <th className="text-left pb-1">{t("Created by")}</th>
                   </tr>
                 </thead>
                 <tbody>

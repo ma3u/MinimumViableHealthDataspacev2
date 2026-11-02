@@ -10,5 +10,7 @@
   "Close": "Schließen",
   "How does this work?": "Wie funktioniert das?",
   "Hide details": "Details ausblenden",
-  "Sign in required": "Anmeldung erforderlich"
+  "Sign in required": "Anmeldung erforderlich",
+  "Skip to main content": "Zum Hauptinhalt springen",
+  "Diagram render error: {error}": "Fehler beim Zeichnen des Diagramms: {error}"
 }

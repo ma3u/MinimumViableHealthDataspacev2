@@ -289,5 +289,7 @@
   "The access body's register of applications and permits, Art. 57": "Het register van aanvragen en gegevensvergunningen van de instantie voor toegang tot gezondheidsgegevens, art. 57",
   "Negotiations and transfers across all participant contexts, as one task list": "Onderhandelingen en transfers over alle deelnemercontexten, als één takenlijst",
   "Data transfers": "Gegevensoverdrachten",
-  "Trust centers with their governance chain and statistics": "Trustcenters met hun governanceketen en statistieken"
+  "Trust centers with their governance chain and statistics": "Trustcenters met hun governanceketen en statistieken",
+  "Back to Developer Guide": "Terug naar de ontwikkelaarshandleiding",
+  "Interactive, three-column reference for all REST endpoints of the EHDS Integration Hub. Powered by Scalar: try any endpoint directly from the right-hand code panel.": "Interactieve referentie in drie kolommen voor alle REST-endpoints van de EHDS Integration Hub. Gemaakt met Scalar: probeer elk endpoint direct uit in het codepaneel rechts."
 }

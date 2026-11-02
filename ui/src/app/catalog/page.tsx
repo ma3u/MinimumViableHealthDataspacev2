@@ -29,7 +29,7 @@ import {
   searchableText,
 } from "@/lib/metadata-language";
 import { useLanguage } from "@/lib/use-language";
-import { useT } from "@/lib/i18n/translate";
+import { T, useT } from "@/lib/i18n/translate";
 
 interface Dataset {
   id: string;
@@ -224,7 +224,7 @@ export default function CatalogPage() {
       fallback={
         <div className="flex items-center gap-2 text-(--text-secondary) p-10">
           <Loader2 size={16} className="animate-spin" />
-          Loading…
+          <T area="common">{"Loading…"}</T>
         </div>
       }
     >
@@ -471,7 +471,7 @@ function CatalogContent() {
                   <div className="flex justify-between mt-2 text-[10px] font-bold text-(--text-secondary)">
                     <span>0</span>
                     <span>
-                      {minSamples > 0 ? minSamples.toLocaleString() : "Any"}
+                      {minSamples > 0 ? minSamples.toLocaleString() : t("Any")}
                     </span>
                     <span>{maxRecords.toLocaleString()}</span>
                   </div>
@@ -496,7 +496,7 @@ function CatalogContent() {
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-(--text-secondary)">
-                    EHDS Art. 77 · HealthDCAT-AP Release 8
+                    {t("EHDS Art. 77 · HealthDCAT-AP Release 8")}
                   </span>
                 </div>
               </div>
@@ -854,7 +854,7 @@ function CatalogContent() {
             <div className="flex items-center justify-between px-5 py-3 border-b border-(--border)">
               <h2 className="font-semibold text-sm text-(--accent)">
                 <GitBranch size={14} className="inline mr-1.5" />
-                HealthDCAT-AP Data Model — {diagramDataset.title}
+                {t("HealthDCAT-AP Data Model")} — {diagramDataset.title}
               </h2>
               <button
                 onClick={() => setDiagramDataset(null)}

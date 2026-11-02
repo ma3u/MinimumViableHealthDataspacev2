@@ -648,7 +648,7 @@ export default function Navigation() {
     <nav
       className="glass border-b border-(--border) sticky top-0 z-50 flex flex-col max-h-dvh"
       role="navigation"
-      aria-label="Main navigation"
+      aria-label={t("Main navigation")}
     >
       <div className="flex items-center gap-1 px-4 py-2">
         <Link

@@ -289,5 +289,7 @@
   "The access body's register of applications and permits, Art. 57": "El registro de solicitudes y permisos de datos del organismo de acceso, art. 57",
   "Negotiations and transfers across all participant contexts, as one task list": "Negociaciones y transferencias de todos los contextos de participantes, como una sola lista de tareas",
   "Data transfers": "Transferencias de datos",
-  "Trust centers with their governance chain and statistics": "Centros de confianza con su cadena de gobernanza y sus estadísticas"
+  "Trust centers with their governance chain and statistics": "Centros de confianza con su cadena de gobernanza y sus estadísticas",
+  "Back to Developer Guide": "Volver a la guía para desarrolladores",
+  "Interactive, three-column reference for all REST endpoints of the EHDS Integration Hub. Powered by Scalar: try any endpoint directly from the right-hand code panel.": "Referencia interactiva en tres columnas de todos los endpoints REST del EEDS Integration Hub. Con Scalar: pruebe cualquier endpoint directamente desde el panel de código de la derecha."
 }

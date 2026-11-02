@@ -303,7 +303,7 @@ export function FeatureCardGrid({
               {isRelevant && (
                 <span
                   className="ml-auto shrink-0 w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center"
-                  title="Relevant for your role"
+                  title={t("Relevant for your role")}
                 >
                   <Check
                     size={12}

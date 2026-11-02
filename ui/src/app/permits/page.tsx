@@ -265,8 +265,8 @@ export default function PermitsRegisterPage() {
                             </div>
                             <div className="text-(--text-secondary)">
                               {e.kind === "request"
-                                ? "statistical request, Art. 69"
-                                : "access application, Art. 67"}
+                                ? t("statistical request, Art. 69")
+                                : t("access application, Art. 67")}
                               {e.applicantCountry
                                 ? ` · ${e.applicantCountry}`
                                 : ""}
@@ -284,7 +284,9 @@ export default function PermitsRegisterPage() {
                             <OutcomeBadge outcome={e.outcome} />
                             {e.outcome === "permit revoked" && (
                               <div className="mt-1 text-(--danger-text)">
-                                revoked {shortDate(e.revokedAt)}
+                                {t("revoked {date}", {
+                                  date: shortDate(e.revokedAt),
+                                })}
                                 {e.revocationReason
                                   ? `: ${e.revocationReason}`
                                   : ""}
@@ -298,13 +300,16 @@ export default function PermitsRegisterPage() {
                             {e.kind === "request" &&
                               e.decidedUnder === "Art. 72" && (
                                 <div className="mt-1 text-(--text-secondary)">
-                                  answered by the trusted data holder (Art. 72)
+                                  {t(
+                                    "answered by the trusted data holder (Art. 72)",
+                                  )}
                                 </div>
                               )}
                             {e.feeEur ? (
                               <div className="mt-1 text-(--text-secondary)">
-                                fee {e.feeEur.toLocaleString("en-GB")} EUR (Art.
-                                62)
+                                {t("fee {amount} EUR (Art. 62)", {
+                                  amount: e.feeEur.toLocaleString("en-GB"),
+                                })}
                               </div>
                             ) : null}
                             {e.results && (
@@ -503,12 +508,12 @@ export default function PermitsRegisterPage() {
                             {r.onTime === false ? (
                               <span className="text-(--danger-text)">
                                 {" "}
-                                · late
+                                · {t("late")}
                               </span>
                             ) : r.onTime === true ? (
                               <span className="text-(--text-secondary)">
                                 {" "}
-                                · met
+                                · {t("met")}
                               </span>
                             ) : null}
                           </td>
@@ -593,8 +598,9 @@ export default function PermitsRegisterPage() {
 
             {register?.generatedAt && (
               <p className="mt-6 text-xs text-(--text-secondary)">
-                Register read on{" "}
-                {register.generatedAt.slice(0, 19).replace("T", " ")} UTC.
+                {t("Register read on {time} UTC.", {
+                  time: register.generatedAt.slice(0, 19).replace("T", " "),
+                })}
               </p>
             )}
           </>

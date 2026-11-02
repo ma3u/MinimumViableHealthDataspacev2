@@ -850,7 +850,9 @@ function OnboardingContent() {
                   required
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="e.g. University Hospital Berlin"
+                  placeholder={t("e.g. {example}", {
+                    example: "University Hospital Berlin",
+                  })}
                   className="w-full px-3 py-2 bg-(--surface-2) border border-gray-600 rounded-sm text-sm outline-hidden focus:border-layer2"
                 />
               </div>
@@ -865,7 +867,9 @@ function OnboardingContent() {
                   required
                   value={organization}
                   onChange={(e) => setOrganization(e.target.value)}
-                  placeholder="e.g. AlphaKlinik Berlin University Hospital"
+                  placeholder={t("e.g. {example}", {
+                    example: "AlphaKlinik Berlin University Hospital",
+                  })}
                   className="w-full px-3 py-2 bg-(--surface-2) border border-gray-600 rounded-sm text-sm outline-hidden focus:border-layer2"
                 />
               </div>

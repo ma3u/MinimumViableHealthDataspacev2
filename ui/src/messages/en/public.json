@@ -77,5 +77,13 @@
   "Party": "Party",
   "Measure": "Measure",
   "Reason": "Reason",
-  "Notified": "Notified"
+  "Notified": "Notified",
+  "statistical request, Art. 69": "statistical request, Art. 69",
+  "access application, Art. 67": "access application, Art. 67",
+  "revoked {date}": "revoked {date}",
+  "answered by the trusted data holder (Art. 72)": "answered by the trusted data holder (Art. 72)",
+  "fee {amount} EUR (Art. 62)": "fee {amount} EUR (Art. 62)",
+  "late": "late",
+  "met": "met",
+  "Register read on {time} UTC.": "Register read on {time} UTC."
 }

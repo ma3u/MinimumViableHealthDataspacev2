@@ -2,6 +2,7 @@
 
 import { fetchApi } from "@/lib/api";
 import { useState } from "react";
+import { useT } from "@/lib/i18n/translate";
 import { shortDate } from "./helpers";
 import type { MatrixRow } from "./types";
 
@@ -16,6 +17,7 @@ export function ClockActions({
   row: MatrixRow;
   onDone: () => Promise<void>;
 }) {
+  const t = useT("access");
   const [reason, setReason] = useState<string>(
     row.completeness && !row.completeness.complete
       ? `Missing: ${row.completeness.missing
@@ -52,12 +54,14 @@ export function ClockActions({
       }
       setMsg(
         action === "EXTEND"
-          ? `Extended once by three months; the decision is now due ${shortDate(
-              String(body.decisionDue ?? ""),
-            )} (Art. 68(4)).`
-          : `Applicant notified; the application must be completed by ${shortDate(
-              String(body.completeBy ?? ""),
-            )}; the three months run again from the complete application (Art. 68(4)).`,
+          ? t(
+              "Extended once by three months; the decision is now due {date} (Art. 68(4)).",
+              { date: shortDate(String(body.decisionDue ?? "")) },
+            )
+          : t(
+              "Applicant notified; the application must be completed by {date}; the three months run again from the complete application (Art. 68(4)).",
+              { date: shortDate(String(body.completeBy ?? "")) },
+            ),
       );
       await onDone();
     } catch (e) {
@@ -74,22 +78,25 @@ export function ClockActions({
       data-testid="clock-actions"
     >
       <div className="font-semibold text-(--text-primary)">
-        The clock, Art. 68(4)
+        {t("The clock, Art. 68(4)")}
         <span className="font-normal text-(--text-secondary)">
           {" "}
           ·{" "}
           {paused
-            ? `stopped since ${shortDate(row.incompleteNoticeAt)}: ${
-                row.incompleteReason ?? "incomplete"
-              }`
+            ? t("stopped since {date}: {reason}", {
+                date: shortDate(row.incompleteNoticeAt),
+                reason: row.incompleteReason ?? t("incomplete"),
+              })
             : row.extended
-              ? `extended once: ${row.extensionReason ?? ""}`
-              : "running"}
+              ? t("extended once: {reason}", {
+                  reason: row.extensionReason ?? "",
+                })
+              : t("running")}
         </span>
       </div>
       <label className="flex flex-col gap-1">
         <span className="text-(--text-secondary)">
-          Reasons (what is missing, or why the extension)
+          {t("Reasons (what is missing, or why the extension)")}
         </span>
         <textarea
           id={`clock-reason-${row.applicationId}`}
@@ -107,11 +114,13 @@ export function ClockActions({
           className="px-3 py-1.5 rounded-sm font-semibold border border-(--border) disabled:opacity-50"
           title={
             paused
-              ? "The applicant has already been asked to complete the application"
-              : "Send the applicant back for the missing items; four weeks"
+              ? t(
+                  "The applicant has already been asked to complete the application",
+                )
+              : t("Send the applicant back for the missing items; four weeks")
           }
         >
-          {busy === "INCOMPLETE" ? "Notifying…" : "Notify incomplete"}
+          {busy === "INCOMPLETE" ? t("Notifying…") : t("Notify incomplete")}
         </button>
         <button
           type="button"
@@ -120,11 +129,11 @@ export function ClockActions({
           className="px-3 py-1.5 rounded-sm font-semibold border border-(--border) disabled:opacity-50"
           title={
             row.extended
-              ? "Art. 68(4) allows one extension"
-              : "Extend the three months once, by three, with reasons"
+              ? t("Art. 68(4) allows one extension")
+              : t("Extend the three months once, by three, with reasons")
           }
         >
-          {busy === "EXTEND" ? "Extending…" : "Extend by three months"}
+          {busy === "EXTEND" ? t("Extending…") : t("Extend by three months")}
         </button>
       </div>
       {error && (

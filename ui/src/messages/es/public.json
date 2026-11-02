@@ -77,5 +77,13 @@
   "Party": "Parte",
   "Measure": "Medida",
   "Reason": "Motivo",
-  "Notified": "Notificado el"
+  "Notified": "Notificado el",
+  "statistical request, Art. 69": "petición de datos de salud, art. 69",
+  "access application, Art. 67": "solicitud de acceso a datos de salud, art. 67",
+  "revoked {date}": "revocado el {date}",
+  "answered by the trusted data holder (Art. 72)": "respondida por el tenedor fiable de datos de salud (art. 72)",
+  "fee {amount} EUR (Art. 62)": "tasa {amount} EUR (art. 62)",
+  "late": "con retraso",
+  "met": "cumplido",
+  "Register read on {time} UTC.": "Registro leído el {time} UTC."
 }
