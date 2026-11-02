@@ -29,6 +29,7 @@ import {
   Settings,
   ScanLine,
 } from "lucide-react";
+import { useT } from "@/lib/i18n/translate";
 
 export interface WalletStep {
   /** the step's body content */
@@ -99,11 +100,12 @@ function DyouHeader({
   interactive: boolean;
   onCancel?: () => void;
 }) {
+  const t = useT("patient");
   const close = interactive ? (
     <button
       type="button"
       onClick={onCancel}
-      aria-label="Dismiss request"
+      aria-label={t("Dismiss request")}
       className="p-1 rounded-full hover:bg-gray-100"
       style={{ color: DYOU.onSurface }}
     >
@@ -141,6 +143,7 @@ function DyouTabBar({
   interactive: boolean;
   onPrimary?: () => void;
 }) {
+  const t = useT("patient");
   const tabs = [
     { label: "Overview", Icon: LayoutGrid, active: true },
     { label: "Activity", Icon: History, active: false },
@@ -174,7 +177,7 @@ function DyouTabBar({
             }}
           >
             <Icon size={14} strokeWidth={1.75} />
-            {label}
+            {t(label)}
           </span>
         ))}
       </div>
@@ -230,6 +233,8 @@ function Buttons({
   onPrimary?: () => void;
   onCancel?: () => void;
 }) {
+  const t = useT("patient");
+  const tc = useT("common");
   if (theme === "dyou") {
     if (layout === "dashboard") {
       return (
@@ -310,7 +315,7 @@ function Buttons({
     return (
       <div className="flex gap-2 px-3 pb-3 pt-2">
         <div className="flex-1 text-center rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold py-2.5">
-          Stop
+          {t("Stop")}
         </div>
         <div className="flex-1 text-center rounded-xl bg-gray-900 text-white text-sm font-semibold py-2.5 relative">
           {primary}
@@ -330,7 +335,7 @@ function Buttons({
         onClick={onCancel}
         className="flex-1 rounded-xl bg-gray-100 text-gray-600 text-sm font-semibold py-2.5 hover:bg-gray-200 transition-colors"
       >
-        {atEnd ? "Close" : "Cancel"}
+        {atEnd ? tc("Close") : t("Cancel")}
       </button>
       <button
         type="button"
@@ -369,6 +374,7 @@ export function WalletFlow({
   onComplete?: () => void;
   onCancel?: () => void;
 }) {
+  const t = useT("patient");
   const [step, setStep] = useState(0);
   const atEnd = step >= steps.length - 1;
 
@@ -376,11 +382,11 @@ export function WalletFlow({
     // Interactive steps wait for a click, except transitional `auto` steps.
     if (interactive && !steps[step].auto) return;
     if (atEnd && !loop) return;
-    const t = setTimeout(
+    const timer = setTimeout(
       () => setStep((s) => (s + 1) % steps.length),
       steps[step].ms,
     );
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
   }, [step, steps, loop, interactive, atEnd]);
 
   const onPrimary = () => {
@@ -454,8 +460,8 @@ export function WalletFlow({
       </div>
 
       <Buttons
-        primary={current.primary}
-        secondary={current.secondary}
+        primary={t(current.primary)}
+        secondary={current.secondary && t(current.secondary)}
         accent={accent}
         interactive={interactive}
         atEnd={atEnd}

@@ -125,9 +125,15 @@ export function EudiApprovalFlow({
           steps={[...cfg.steps]}
           brand={cfg.brand}
           theme={cfg.theme}
-          ariaLabel={`Approve ${
-            mode === "ehr" ? "insurer app" : CITIZEN_WALLET.name
-          } ${mode}`}
+          ariaLabel={
+            mode === "ehr"
+              ? t("Approve in the insurer app")
+              : mode === "login"
+                ? t("Approve {wallet} login", { wallet: CITIZEN_WALLET.name })
+                : t("Approve {wallet} register", {
+                    wallet: CITIZEN_WALLET.name,
+                  })
+          }
           onComplete={onComplete}
           onCancel={onCancel}
         />
