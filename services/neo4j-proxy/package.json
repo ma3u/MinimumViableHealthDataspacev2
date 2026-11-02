@@ -24,9 +24,9 @@
     "@opentelemetry/sdk-logs": "^3.0.0",
     "@opentelemetry/sdk-node": "^0.300.0",
     "@opentelemetry/sdk-trace": "^3.0.0",
-    "@opentelemetry/semantic-conventions": "^1.43.0",
+    "@opentelemetry/semantic-conventions": "^1.44.0",
     "express": "^4.22.3",
-    "express-rate-limit": "^8.7.1",
+    "express-rate-limit": "^8.7.2",
     "neo4j-driver": "^5.28.1",
     "pg": "^8.23.1",
     "pino": "^10.4.0"
