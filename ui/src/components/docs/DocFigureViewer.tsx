@@ -422,13 +422,14 @@ function FigureOverlay({
         />
         {!natural && (
           <p className="absolute inset-0 grid place-items-center text-gray-500">
-            Loading the diagram
+            {t("Loading the diagram")}
           </p>
         )}
       </div>
       <p className="px-3 py-1 text-xs text-gray-500 border-t border-white/10 bg-gray-900/95 hidden sm:block">
-        Scroll or pinch to zoom, drag to move, double click to zoom in, 0 fits
-        the screen, Esc closes.
+        {t(
+          "Scroll or pinch to zoom, drag to move, double click to zoom in, 0 fits the screen, Esc closes.",
+        )}
       </p>
     </div>,
     document.body,

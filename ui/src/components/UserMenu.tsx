@@ -272,7 +272,7 @@ export default function UserMenu() {
               <div className="px-3 pt-2 pb-1 flex items-center gap-1.5">
                 <Users size={11} className="text-(--text-secondary)" />
                 <span className="text-[10px] text-(--text-secondary) uppercase tracking-wide font-semibold">
-                  Choose a demo persona
+                  {t("Choose a demo persona")}
                 </span>
               </div>
               <div className="px-2 pb-2 space-y-0.5">
@@ -384,7 +384,7 @@ export default function UserMenu() {
                 className="flex items-center justify-center gap-1.5 w-full px-3 py-2 text-xs text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) rounded-sm transition-colors"
               >
                 <ShieldCheck size={12} />
-                All users &amp; details
+                {t("All users & details")}
               </a>
             </div>
             <BuildInfo />
@@ -418,7 +418,9 @@ export default function UserMenu() {
         <span className="max-w-[140px] truncate text-xs font-medium">
           {username}
           {IS_STATIC && (
-            <span className="ml-1 text-[9px] text-amber-400">(demo)</span>
+            <span className="ml-1 text-[9px] text-amber-400">
+              {t("(demo)")}
+            </span>
           )}
         </span>
         {/* Role chip — hidden on very small screens */}
@@ -443,7 +445,7 @@ export default function UserMenu() {
               {username}
               {IS_STATIC && (
                 <span className="ml-1.5 text-[10px] text-amber-400 font-normal">
-                  demo mode
+                  {t("demo mode")}
                 </span>
               )}
             </p>
@@ -475,7 +477,7 @@ export default function UserMenu() {
                 className="flex items-center gap-2 w-full px-3 py-2 rounded-sm text-sm text-(--text-primary) hover:bg-(--surface-2) transition-colors"
               >
                 <Settings size={14} />
-                <span className="font-medium">Settings</span>
+                <span className="font-medium">{t("Settings")}</span>
               </a>
             </div>
           )}
@@ -545,7 +547,7 @@ export default function UserMenu() {
                     </span>
                     {isActive && (
                       <span className="ml-auto text-[9px] text-(--text-secondary) shrink-0">
-                        active
+                        {t("active")}
                       </span>
                     )}
                   </button>

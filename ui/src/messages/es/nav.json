@@ -77,5 +77,15 @@
   "Researcher": "Investigador",
   "Trust Center": "Centro de confianza",
   "Patient / Citizen": "Paciente",
-  "Glossary": "Glosario"
+  "Glossary": "Glosario",
+  "Main navigation": "Navegación principal",
+  "Choose a demo persona": "Elija una persona de demostración",
+  "All users & details": "Todos los usuarios y detalles",
+  "(demo)": "(demo)",
+  "demo mode": "modo demo",
+  "Settings": "Ajustes",
+  "active": "activa",
+  "<b>Demo mode:</b> You are using a default password.": "<b>Modo demo:</b> está usando una contraseña predeterminada.",
+  "Change your password": "Cambie su contraseña",
+  "Dismiss password warning": "Cerrar el aviso de contraseña"
 }

@@ -176,6 +176,7 @@ describe("the code and the dictionaries", () => {
       ...Object.values(RESULT_KIND_LABELS),
       ...Object.values(MEASURE_LABELS),
       ...Object.values(ITEM_TITLES),
+      ...Object.values(permits.CRITERIA_LABELS),
     ];
     // The activity report's figures: <Stat label="..."> translates its label.
     const report = readFileSync(
@@ -185,6 +186,16 @@ describe("the code and the dictionaries", () => {
     texts.push(...[...report.matchAll(/\blabel="([^"]+)"/g)].map((m) => m[1]));
     expect(texts.length).toBeGreaterThan(40);
     expect(texts.filter((x) => !(x in MESSAGES.en.access))).toEqual([]);
+  });
+
+  it("knows every resource group of the FHIR viewer", () => {
+    const src = readFileSync(
+      path.resolve("src/components/FhirResourceViewer.tsx"),
+      "utf8",
+    );
+    const labels = [...src.matchAll(/\blabel: "([^"]+)"/g)].map((m) => m[1]);
+    expect(labels.length).toBeGreaterThan(10);
+    expect(labels.filter((l) => !(l in MESSAGES.en.holder))).toEqual([]);
   });
 
   it("knows every reason an access's criticality gives", async () => {

@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import { ShieldCheck, Shield, Smartphone } from "lucide-react";
 import { DEMO_PERSONAS, ROLE_LABELS, landingFor } from "@/lib/auth";
 import { IS_STATIC } from "@/lib/static-export";
-import { useT } from "@/lib/i18n/translate";
+import { T, useT } from "@/lib/i18n/translate";
 
 /** Wallet QR sign-in needs server API routes — absent in the static export. */
 
@@ -176,7 +176,9 @@ export default function SignInPage() {
     <Suspense
       fallback={
         <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="text-(--text-secondary)">Loading…</div>
+          <div className="text-(--text-secondary)">
+            <T area="common">{"Loading…"}</T>
+          </div>
         </div>
       }
     >

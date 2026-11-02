@@ -10,5 +10,7 @@
   "Close": "Sluiten",
   "How does this work?": "Hoe werkt dit?",
   "Hide details": "Details verbergen",
-  "Sign in required": "Aanmelden vereist"
+  "Sign in required": "Aanmelden vereist",
+  "Skip to main content": "Naar de hoofdinhoud",
+  "Diagram render error: {error}": "Fout bij het tekenen van het diagram: {error}"
 }

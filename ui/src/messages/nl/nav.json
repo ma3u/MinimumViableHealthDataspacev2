@@ -77,5 +77,15 @@
   "Researcher": "Onderzoeker",
   "Trust Center": "Vertrouwenscentrum",
   "Patient / Citizen": "Patiënt",
-  "Glossary": "Woordenlijst"
+  "Glossary": "Woordenlijst",
+  "Main navigation": "Hoofdnavigatie",
+  "Choose a demo persona": "Kies een demopersona",
+  "All users & details": "Alle gebruikers en details",
+  "(demo)": "(demo)",
+  "demo mode": "demomodus",
+  "Settings": "Instellingen",
+  "active": "actief",
+  "<b>Demo mode:</b> You are using a default password.": "<b>Demomodus:</b> u gebruikt een standaardwachtwoord.",
+  "Change your password": "Wijzig uw wachtwoord",
+  "Dismiss password warning": "Wachtwoordwaarschuwing sluiten"
 }

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import "@scalar/api-reference-react/style.css";
 import { IS_STATIC } from "@/lib/static-export";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
+import { useT } from "@/lib/i18n/translate";
 
 const ApiReferenceReact = dynamic(
   () => import("@scalar/api-reference-react").then((m) => m.ApiReferenceReact),
@@ -23,6 +24,7 @@ export default function ApiReferencePage() {
   // ehds.mabu.red, leaving copy-pasted curl snippets pointing at the wrong
   // host. Pinning baseServerURL to the actual origin makes every example
   // self-consistent on whichever environment the user is viewing.
+  const t = useT("docsDeveloper");
   const [baseServerUrl, setBaseServerUrl] = useState<string>("");
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -37,14 +39,14 @@ export default function ApiReferencePage() {
           href="/docs/developer"
           className="inline-flex items-center gap-1 text-sm text-(--text-secondary) hover:text-(--text-primary)"
         >
-          <ArrowLeft size={14} /> Back to Developer Guide
+          <ArrowLeft size={14} /> {t("Back to Developer Guide")}
         </Link>
-        <h1 className="text-2xl font-bold mt-2">API Reference</h1>
+        <h1 className="text-2xl font-bold mt-2">{t("API Reference")}</h1>
         <DocsLastUpdated page="/docs/developer/reference" />
         <p className="text-sm text-(--text-secondary) mt-1">
-          Interactive, three-column reference for all REST endpoints of the EHDS
-          Integration Hub. Powered by Scalar — try any endpoint directly from
-          the right-hand code panel.
+          {t(
+            "Interactive, three-column reference for all REST endpoints of the EHDS Integration Hub. Powered by Scalar: try any endpoint directly from the right-hand code panel.",
+          )}
         </p>
       </div>
       <div className="flex-1 bg-white">

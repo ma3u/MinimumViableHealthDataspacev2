@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { AlertTriangle, ExternalLink, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { IS_STATIC } from "@/lib/static-export";
+import { T, useT } from "@/lib/i18n/translate";
 
 /**
  * The shared demo logins of jad/keycloak-realm.json, whose passwords are
@@ -34,6 +35,7 @@ export const DEMO_ACCOUNTS: readonly string[] = [
  */
 export default function DemoPasswordBanner() {
   const { data: session, status } = useSession();
+  const t = useT("nav");
   // Read after mount, never in the initialiser: the server has no
   // sessionStorage, and a first client render that differs is React #418 (#447).
   const [dismissed, setDismissed] = useState(false);
@@ -95,22 +97,23 @@ export default function DemoPasswordBanner() {
     >
       <AlertTriangle size={16} className="text-(--warning-text) shrink-0" />
       <p className="text-(--warning-text) flex-1">
-        <span className="font-semibold">Demo mode:</span> You are using a
-        default password.{" "}
+        <T area="nav" tags={{ b: <span className="font-semibold" /> }}>
+          {"<b>Demo mode:</b> You are using a default password."}
+        </T>{" "}
         <a
           href={passwordUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-(--warning-text) underline underline-offset-2 hover:opacity-80 transition-opacity"
         >
-          Change your password
+          {t("Change your password")}
           <ExternalLink size={12} />
         </a>
       </p>
       <button
         onClick={handleDismiss}
         className="text-(--warning-text) hover:bg-amber-100 dark:hover:bg-amber-800/40 transition-colors p-1 rounded-sm"
-        aria-label="Dismiss password warning"
+        aria-label={t("Dismiss password warning")}
       >
         <X size={16} />
       </button>

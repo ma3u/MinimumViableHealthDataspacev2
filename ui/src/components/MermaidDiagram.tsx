@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useT } from "@/lib/i18n/translate";
 
 interface MermaidDiagramProps {
   chart: string;
@@ -30,6 +31,7 @@ export default function MermaidDiagram({
   transform,
 }: MermaidDiagramProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const t = useT("common");
   const [svg, setSvg] = useState<string>("");
   const [error, setError] = useState<string>("");
 
@@ -86,7 +88,9 @@ export default function MermaidDiagram({
   if (error) {
     return (
       <div className="border border-red-700 rounded-lg p-4 my-4">
-        <p className="text-red-400 text-sm">Diagram render error: {error}</p>
+        <p className="text-red-400 text-sm">
+          {t("Diagram render error: {error}", { error })}
+        </p>
         <pre className="text-xs text-(--text-secondary) mt-2 overflow-x-auto">
           {chart}
         </pre>

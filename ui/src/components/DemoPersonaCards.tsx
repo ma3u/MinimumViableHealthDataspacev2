@@ -32,7 +32,7 @@ export function DemoPersonaCards() {
         {t("Sign in as any persona to explore role-specific views.")}
         <span className="text-gray-500 dark:text-gray-400">
           {" "}
-          Password = username · Keycloak realm: EDCV
+          {t("Password = username · Keycloak realm: EDCV")}
         </span>
       </p>
       <div

@@ -1,4 +1,9 @@
+"use client";
+
 import { Sparkles } from "lucide-react";
+import { useT } from "@/lib/i18n/translate";
+import type { CatalogLanguage } from "@/lib/metadata-language";
+import { useLanguage } from "@/lib/use-language";
 
 const REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
 
@@ -9,9 +14,59 @@ interface Update {
   links: { label: string; href: string }[];
 }
 
+const pr = (n: number) => ({ label: `#${n}`, href: `${REPO}/pull/${n}` });
+
 /** Newest first. Each entry names what changed for a visitor and links the
- *  pull request or decision behind it; keep it to the last few weeks. */
-const LATEST_UPDATES: Update[] = [
+ *  pull request or decision behind it; keep it to the last few weeks. The
+ *  title, the text and a link label that is not a number are English keys of
+ *  the home dictionary, translated at display (#782); a unit test checks
+ *  that every language has them. */
+export const LATEST_UPDATES: Update[] = [
+  {
+    date: "2026-11-02",
+    title: "The documentation in five languages",
+    text: "Every docs page, the 17 published documents, their screenshots and their diagrams follow the language picker. A translation that falls behind the English says so.",
+    links: [
+      {
+        label: "ADR-071",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-071-the-documentation-follows-the-language-picker.md`,
+      },
+      ...[820, 821, 822, 823, 824, 825, 826, 827].map(pr),
+    ],
+  },
+  {
+    date: "2026-11-02",
+    title: "Every page of the hub in five languages",
+    text: "The pages of the health data access body, the health data holder, the health data user and the patient, the explore pages, the administration and the wallet's phone screens follow the picker too, with one word for credentials in each language.",
+    links: [794, 795, 799, 802, 803, 804, 806, 807, 818, 828].map(pr),
+  },
+  {
+    date: "2026-11-02",
+    title: "ODRL policies in plain language",
+    text: "Every policy on the policies page is explained in plain sentences and checked against ODRL 2.2 and the EHDS rules for secondary use: valid, with warnings or with errors.",
+    links: [pr(819)],
+  },
+  {
+    date: "2026-11-02",
+    title: "A criticality for every access",
+    text: "The access log rates each access low, medium or high and says why, and accesses made by automated tests carry a Test badge.",
+    links: [pr(817)],
+  },
+  {
+    date: "2026-11-02",
+    title: "Confidential SPEs attest on Azure",
+    text: "Both SPE workspaces on Azure confidential containers get their data key from Trustee only after AMD SEV-SNP hardware attestation, checked against Microsoft's endorsed measurement.",
+    links: [
+      { label: "#774", href: `${REPO}/issues/774` },
+      ...[791, 798, 801, 805, 809].map(pr),
+    ],
+  },
+  {
+    date: "2026-11-02",
+    title: "Patients see their own insights and studies",
+    text: "A signed-in patient's insights and research pages read their own record, and the recommendations follow their own conditions.",
+    links: [829, 830, 831].map(pr),
+  },
   {
     date: "2026-11-01",
     title: "In German, French, Dutch and Spanish",
@@ -97,8 +152,19 @@ const LATEST_UPDATES: Update[] = [
   },
 ];
 
-function formatDate(iso: string): string {
-  return new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-GB", {
+const LOCALE: Record<CatalogLanguage, string> = {
+  en: "en-GB",
+  de: "de-DE",
+  fr: "fr-FR",
+  nl: "nl-NL",
+  es: "es-ES",
+};
+
+/** A link label to translate: not a pull request, issue or ADR number. */
+export const isWordLabel = (label: string) => !/^(#\d+|ADR-\d+)$/.test(label);
+
+function formatDate(iso: string, lang: CatalogLanguage): string {
+  return new Date(`${iso}T12:00:00Z`).toLocaleDateString(LOCALE[lang], {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -107,6 +173,8 @@ function formatDate(iso: string): string {
 }
 
 export function LatestUpdates() {
+  const t = useT("home");
+  const lang = useLanguage();
   return (
     <section
       className="mt-12 sm:mt-16 animate-fade-in-up"
@@ -120,7 +188,7 @@ export function LatestUpdates() {
           aria-hidden="true"
         />
         <h2 id="updates-title" className="text-lg sm:text-xl font-bold">
-          Latest updates
+          {t("Latest updates")}
         </h2>
       </div>
       <ol className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -131,17 +199,17 @@ export function LatestUpdates() {
           >
             <div className="flex items-baseline justify-between gap-3 mb-1">
               <h3 className="text-sm font-semibold text-(--text-primary)">
-                {u.title}
+                {t(u.title)}
               </h3>
               <time
                 dateTime={u.date}
                 className="shrink-0 text-xs text-(--text-secondary)"
               >
-                {formatDate(u.date)}
+                {formatDate(u.date, lang)}
               </time>
             </div>
             <p className="text-sm text-(--text-secondary) leading-relaxed mb-2">
-              {u.text}
+              {t(u.text)}
             </p>
             <div className="flex flex-wrap gap-2 text-xs">
               {u.links.map((l) => {
@@ -155,7 +223,7 @@ export function LatestUpdates() {
                       : {})}
                     className="text-(--accent) underline underline-offset-2 hover:text-(--text-primary) transition-colors"
                   >
-                    {l.label}
+                    {isWordLabel(l.label) ? t(l.label) : l.label}
                   </a>
                 );
               })}

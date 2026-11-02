@@ -10,5 +10,7 @@
   "Close": "Cerrar",
   "How does this work?": "¿Cómo funciona?",
   "Hide details": "Ocultar detalles",
-  "Sign in required": "Inicio de sesión requerido"
+  "Sign in required": "Inicio de sesión requerido",
+  "Skip to main content": "Ir al contenido principal",
+  "Diagram render error: {error}": "Error al dibujar el diagrama: {error}"
 }

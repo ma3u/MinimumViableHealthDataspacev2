@@ -77,5 +77,13 @@
   "Party": "Beteiligter",
   "Measure": "Maßnahme",
   "Reason": "Grund",
-  "Notified": "Mitgeteilt"
+  "Notified": "Mitgeteilt",
+  "statistical request, Art. 69": "Gesundheitsdatenanfrage, Art. 69",
+  "access application, Art. 67": "Antrag auf Zugang zu Gesundheitsdaten, Art. 67",
+  "revoked {date}": "widerrufen am {date}",
+  "answered by the trusted data holder (Art. 72)": "beantwortet vom vertrauenswürdigen Gesundheitsdateninhaber (Art. 72)",
+  "fee {amount} EUR (Art. 62)": "Gebühr {amount} EUR (Art. 62)",
+  "late": "verspätet",
+  "met": "eingehalten",
+  "Register read on {time} UTC.": "Register gelesen am {time} UTC."
 }

@@ -242,5 +242,7 @@
   "The Art. 71 opt-out from secondary use": "Der Widerspruch gegen die Sekundärnutzung nach Art. 71",
   "HealthDCAT-AP Release 8 for Art. 77 dataset descriptions": "HealthDCAT-AP Release 8 für die Beschreibungen der Datensätze nach Art. 77",
   "Every API route needs a session": "Jede API-Route braucht eine Sitzung",
-  "The audit trail behind Art. 73(1)(e)": "Der Prüfpfad hinter Art. 73(1)(e)"
+  "The audit trail behind Art. 73(1)(e)": "Der Prüfpfad hinter Art. 73(1)(e)",
+  "Loading the diagram": "Diagramm wird geladen",
+  "Scroll or pinch to zoom, drag to move, double click to zoom in, 0 fits the screen, Esc closes.": "Scrollen oder mit zwei Fingern zoomen, ziehen zum Verschieben, Doppelklick vergrößert, 0 passt an den Bildschirm an, Esc schließt."
 }

@@ -18,6 +18,7 @@ import {
   AlertTriangle,
   X,
 } from "lucide-react";
+import { T, useT } from "@/lib/i18n/translate";
 
 /* ── Types ─────────────────────────────────────── */
 
@@ -198,6 +199,7 @@ function getObservationValue(r: FhirResource): string | null {
 /* ── Sub-components ────────────────────────────── */
 
 function ResourceDetail({ resource }: { resource: FhirResource }) {
+  const t = useT("holder");
   const [copied, setCopied] = useState(false);
   const copyJson = useCallback(() => {
     navigator.clipboard.writeText(JSON.stringify(resource, null, 2));
@@ -227,7 +229,7 @@ function ResourceDetail({ resource }: { resource: FhirResource }) {
           className="flex items-center gap-1 text-[10px] text-(--text-secondary) hover:text-(--text-primary)"
         >
           <Copy size={10} />
-          {copied ? "Copied!" : "JSON"}
+          {copied ? t("Copied!") : "JSON"}
         </button>
       </div>
       {/* Key-value pairs */}
@@ -258,6 +260,7 @@ function ResourceGroup({
   resourceType: string;
   resources: FhirResource[];
 }) {
+  const t = useT("holder");
   const [expanded, setExpanded] = useState(false);
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   const meta = RESOURCE_META[resourceType] ?? DEFAULT_META;
@@ -279,10 +282,12 @@ function ResourceGroup({
         )}
         <Icon size={14} style={{ color: meta.color }} />
         <span className="text-sm font-medium" style={{ color: meta.color }}>
-          {meta.label}
+          {t(meta.label)}
         </span>
         <span className="text-xs text-(--text-secondary) ml-auto">
-          {resources.length} resource{resources.length !== 1 ? "s" : ""}
+          {resources.length === 1
+            ? t("1 resource")
+            : t("{n} resources", { n: resources.length })}
         </span>
       </button>
 
@@ -357,6 +362,7 @@ export default function FhirResourceViewer({
   title,
   onClose,
 }: FhirResourceViewerProps) {
+  const t = useT("holder");
   // Group entries by resource type
   const grouped: Record<string, FhirResource[]> = {};
   for (const entry of bundle.entry ?? []) {
@@ -380,8 +386,8 @@ export default function FhirResourceViewer({
     "CarePlan",
   ];
   const orderedTypes = [
-    ...typeOrder.filter((t) => grouped[t]),
-    ...Object.keys(grouped).filter((t) => !typeOrder.includes(t)),
+    ...typeOrder.filter((type) => grouped[type]),
+    ...Object.keys(grouped).filter((type) => !typeOrder.includes(type)),
   ];
 
   const totalResources = bundle.entry?.length ?? 0;
@@ -393,10 +399,13 @@ export default function FhirResourceViewer({
         <div className="flex items-center gap-2">
           <Activity size={14} className="text-green-800 dark:text-green-300" />
           <span className="text-sm font-semibold text-green-800 dark:text-green-300">
-            {title ?? "FHIR Resource Viewer"}
+            {title ?? t("FHIR Resource Viewer")}
           </span>
           <span className="text-xs text-(--text-secondary)">
-            {totalResources} resources · {orderedTypes.length} types
+            {t("{n} resources · {types} types", {
+              n: totalResources,
+              types: orderedTypes.length,
+            })}
           </span>
         </div>
         {onClose && (
@@ -413,23 +422,27 @@ export default function FhirResourceViewer({
       <div className="px-4 py-2 bg-amber-950/60 border-b border-amber-700/50 flex items-center gap-2 text-xs text-amber-300">
         <AlertTriangle size={12} className="shrink-0" />
         <span>
-          <strong>Synthea Synthetic Data</strong> — algorithmically generated
-          patients, not real individuals. No pseudonymisation required.
+          <T area="holder" tags={{ b: <strong /> }}>
+            {
+              "<b>Synthea Synthetic Data:</b> algorithmically generated patients, not real individuals. No pseudonymisation required."
+            }
+          </T>
         </span>
       </div>
 
       {/* Bundle info bar */}
       <div className="px-4 py-2 border-b border-(--border) flex flex-wrap gap-4 text-xs text-(--text-secondary)">
         <span>
-          Bundle ID:{" "}
+          {t("Bundle ID:")}{" "}
           <span className="text-(--text-primary)">{bundle.id ?? "—"}</span>
         </span>
         <span>
-          Type:{" "}
+          {t("Type:")}{" "}
           <span className="text-(--text-primary)">{bundle.type ?? "—"}</span>
         </span>
         <span>
-          Total: <span className="text-(--text-primary)">{totalResources}</span>
+          {t("Total:")}{" "}
+          <span className="text-(--text-primary)">{totalResources}</span>
         </span>
       </div>
 

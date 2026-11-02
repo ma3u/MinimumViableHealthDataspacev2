@@ -851,5 +851,6 @@
   "ODRL findings make a policy invalid or ambiguous; EHDS findings say what secondary use needs.": "Les constats ODRL rendent une politique invalide ou ambiguë ; les constats EEDS indiquent ce dont l’utilisation secondaire a besoin.",
   "Valid ODRL 2.2 and fit for secondary use.": "ODRL 2.2 valide et apte à l’utilisation secondaire.",
   "Warning": "Avertissement",
-  "Note": "Remarque"
+  "Note": "Remarque",
+  "e.g. {example}": "p. ex. {example}"
 }

@@ -2,6 +2,7 @@
 
 import { fetchApi } from "@/lib/api";
 import { useState } from "react";
+import { useT } from "@/lib/i18n/translate";
 
 /**
  * Revocation of an issued permit (Art. 63(3)). A refusal of a later
@@ -15,6 +16,7 @@ export function RevokeForm({
   permitId: string;
   onDone: () => Promise<void>;
 }) {
+  const t = useT("access");
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +40,10 @@ export function RevokeForm({
         return;
       }
       setDone(
-        `Data permit ${permitId} revoked; transfers under it stop now and the register lists the measure (Art. 63(3)).`,
+        t(
+          "Data permit {id} revoked; transfers under it stop now and the register lists the measure (Art. 63(3)).",
+          { id: permitId },
+        ),
       );
       await onDone();
     } catch (e) {
@@ -52,18 +57,18 @@ export function RevokeForm({
     <form
       className="rounded-lg border border-(--danger-text)/40 bg-(--bg) p-3 space-y-2 text-xs"
       onSubmit={(e) => e.preventDefault()}
-      aria-label="Revoke data permit"
+      aria-label={t("Revoke data permit")}
     >
       <div className="font-semibold text-(--text-primary)">
-        Revoke this permit
+        {t("Revoke this permit")}
         <span className="font-normal text-(--text-secondary)">
           {" "}
-          · Art. 63(3), on non-compliance by the data user
+          · {t("Art. 63(3), on non-compliance by the data user")}
         </span>
       </div>
       <label className="flex flex-col gap-1">
         <span className="text-(--text-secondary)">
-          Reason (published with the measure, Art. 57(1)(j)(iv))
+          {t("Reason (published with the measure, Art. 57(1)(j)(iv))")}
         </span>
         <textarea
           id={`revoke-reason-${permitId}`}
@@ -78,9 +83,9 @@ export function RevokeForm({
         disabled={busy || !reason.trim() || done !== null}
         onClick={revoke}
         className="px-3 py-1.5 rounded-sm font-semibold border border-(--danger-text) text-(--danger-text) disabled:opacity-50"
-        title={reason.trim() ? "" : "A revocation needs a reason"}
+        title={reason.trim() ? "" : t("A revocation needs a reason")}
       >
-        {busy ? "Revoking…" : "Revoke permit"}
+        {busy ? t("Revoking…") : t("Revoke permit")}
       </button>
       {error && (
         <p className="text-(--danger-text)" role="alert">

@@ -6,6 +6,7 @@ import DemoPasswordBanner from "@/components/DemoPasswordBanner";
 import AuthProvider from "@/components/AuthProvider";
 import PersonaFromQuery from "@/components/PersonaFromQuery";
 import { Suspense } from "react";
+import { T } from "@/lib/i18n/translate";
 
 // Resolve the canonical base URL for metadata (og:image, canonical links, etc.).
 // - Azure prod:     https://ehds.mabu.red
@@ -99,7 +100,7 @@ export default async function RootLayout({
             <PersonaFromQuery />
           </Suspense>
           <a href="#main-content" className="skip-to-content">
-            Skip to main content
+            <T area="common">{"Skip to main content"}</T>
           </a>
           <Navigation />
           <DemoPasswordBanner />

@@ -242,5 +242,7 @@
   "The Art. 71 opt-out from secondary use": "El derecho de autoexclusión del uso secundario del art. 71",
   "HealthDCAT-AP Release 8 for Art. 77 dataset descriptions": "HealthDCAT-AP Release 8 para las descripciones de conjuntos de datos del art. 77",
   "Every API route needs a session": "Cada ruta de API exige una sesión",
-  "The audit trail behind Art. 73(1)(e)": "El registro de auditoría detrás del art. 73, apartado 1, letra e)"
+  "The audit trail behind Art. 73(1)(e)": "El registro de auditoría detrás del art. 73, apartado 1, letra e)",
+  "Loading the diagram": "Cargando el diagrama",
+  "Scroll or pinch to zoom, drag to move, double click to zoom in, 0 fits the screen, Esc closes.": "Desplace o pellizque para hacer zoom, arrastre para mover, doble clic para ampliar, 0 ajusta a la pantalla, Esc cierra."
 }

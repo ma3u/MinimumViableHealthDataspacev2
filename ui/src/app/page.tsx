@@ -48,8 +48,10 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
               className="text-(--text-secondary) hover:text-(--text-primary) transition-colors touch-target-sm"
-              aria-label="View source on GitHub"
             >
+              <span className="sr-only">
+                <T area="home">{"View source on GitHub"}</T>
+              </span>
               <Github size={24} aria-hidden="true" />
             </a>
           </div>
@@ -846,7 +848,9 @@ export default function Home() {
             DCP v1.0
           </a>
           <span>·</span>
-          <span>GDPR Art.&nbsp;15-22</span>
+          <span className="whitespace-nowrap">
+            <T area="home">{"GDPR Art. 15-22"}</T>
+          </span>
         </p>
       </footer>
     </div>

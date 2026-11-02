@@ -1,6 +1,7 @@
 "use client";
 
 import { APPLICATION_ITEMS, hasApplicationItem } from "@/lib/permits";
+import { useT } from "@/lib/i18n/translate";
 import type { MatrixRow } from "./types";
 
 /**
@@ -10,6 +11,7 @@ import type { MatrixRow } from "./types";
  */
 /** The eleven items of Art. 67(2) as the application carries them. */
 export function ApplicationItemsList({ row }: { row: MatrixRow }) {
+  const t = useT("access");
   const value = (item: (typeof APPLICATION_ITEMS)[number]["item"]): string => {
     switch (item) {
       case "a":
@@ -24,7 +26,7 @@ export function ApplicationItemsList({ row }: { row: MatrixRow }) {
           .join(" · ");
       case "e":
         return row.identifiability
-          ? `${row.identifiability.toLowerCase()}${
+          ? `${t(row.identifiability.toLowerCase())}${
               row.pseudonymisationJustification
                 ? `: ${row.pseudonymisationJustification}`
                 : ""
@@ -36,7 +38,7 @@ export function ApplicationItemsList({ row }: { row: MatrixRow }) {
         return row.safeguards ?? "";
       case "h":
         return row.processingPeriodMonths
-          ? `${row.processingPeriodMonths} months`
+          ? t("{n} months", { n: row.processingPeriodMonths })
           : "";
       case "i":
         return row.speTools ?? "";
@@ -45,8 +47,10 @@ export function ApplicationItemsList({ row }: { row: MatrixRow }) {
       case "k":
         return typeof row.art71Exception === "boolean"
           ? row.art71Exception
-            ? `invoked: ${row.art71ExceptionJustification ?? ""}`
-            : "not invoked"
+            ? t("invoked: {reason}", {
+                reason: row.art71ExceptionJustification ?? "",
+              })
+            : t("not invoked")
           : "";
     }
   };
@@ -57,11 +61,14 @@ export function ApplicationItemsList({ row }: { row: MatrixRow }) {
       data-testid="application-items"
     >
       <summary className="cursor-pointer font-semibold text-(--text-primary)">
-        Art. 67(2) items:{" "}
+        {t("Art. 67(2) items:")}{" "}
         {c
           ? c.complete
-            ? `complete, ${c.present} of ${c.total}`
-            : `incomplete, ${c.present} of ${c.total}`
+            ? t("complete, {n} of {total}", { n: c.present, total: c.total })
+            : t("incomplete, {n} of {total}", {
+                n: c.present,
+                total: c.total,
+              })
           : "—"}
       </summary>
       <ol className="mt-2 space-y-1">
@@ -73,15 +80,15 @@ export function ApplicationItemsList({ row }: { row: MatrixRow }) {
                 className={
                   present ? "text-(--success-text)" : "text-(--danger-text)"
                 }
-                aria-label={present ? "present" : "missing"}
+                aria-label={present ? t("present") : t("missing")}
               >
                 {present ? "✓" : "✗"}
               </span>
               <span>
                 <span className="text-(--text-secondary)">
-                  ({i.item}) {i.label}:{" "}
+                  ({i.item}) {t(i.label)}:{" "}
                 </span>
-                {present ? value(i.item) : "missing"}
+                {present ? value(i.item) : t("missing")}
               </span>
             </li>
           );

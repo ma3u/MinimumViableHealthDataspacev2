@@ -10,6 +10,7 @@ import {
 } from "@/lib/permits";
 import { estimateFee } from "@/lib/fees";
 import { useState } from "react";
+import { useT } from "@/lib/i18n/translate";
 import { ApplicationItemsList } from "./ApplicationItemsList";
 import { ClockActions } from "./ClockActions";
 import { RevokeForm } from "./RevokeForm";
@@ -25,6 +26,8 @@ export function ApplicationPanel({
   canDecide: boolean;
   onDecided: () => Promise<void>;
 }) {
+  const t = useT("access");
+  const tp = useT("public");
   const [purpose, setPurpose] = useState<string>(
     row.requestedPurpose &&
       (PURPOSES as readonly string[]).includes(row.requestedPurpose)
@@ -98,67 +101,77 @@ export function ApplicationPanel({
     <div className="mb-4 space-y-3" data-testid="application-panel">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-xs">
         <div>
-          <span className="text-(--text-secondary)">Application </span>
+          <span className="text-(--text-secondary)">{t("Application")} </span>
           <span className="font-mono">{row.applicationId}</span>
         </div>
         <div>
-          <span className="text-(--text-secondary)">Submitted </span>
+          <span className="text-(--text-secondary)">{t("Submitted")} </span>
           {shortDate(row.submittedAt) || "—"}
           {row.decisionDue && (
             <span className="text-(--text-secondary)">
               {" "}
-              · the access body&apos;s permit decision is due{" "}
-              {shortDate(row.decisionDue)}, three months after the application
-              (Art. 68(4))
+              ·{" "}
+              {t(
+                "the access body's permit decision is due {date}, three months after the application (Art. 68(4))",
+                { date: shortDate(row.decisionDue) },
+              )}
             </span>
           )}
         </div>
         <div>
-          <span className="text-(--text-secondary)">Purpose </span>
+          <span className="text-(--text-secondary)">{t("Purpose")} </span>
           {row.requestedPurpose ?? "—"}
         </div>
         <div>
-          <span className="text-(--text-secondary)">Dataset </span>
+          <span className="text-(--text-secondary)">{t("Dataset")} </span>
           {row.requestedDatasetTitle ?? row.requestedDatasetId ?? "—"}
         </div>
         <div className="md:col-span-2">
-          <span className="text-(--text-secondary)">Justification </span>
+          <span className="text-(--text-secondary)">{t("Justification")} </span>
           {row.justification ?? "—"}
         </div>
         {row.ethicsCommitteeRef && (
           <div>
-            <span className="text-(--text-secondary)">Ethics </span>
+            <span className="text-(--text-secondary)">{t("Ethics")} </span>
             {row.ethicsCommitteeRef}
           </div>
         )}
         {row.completedAt && (
           <div>
-            <span className="text-(--text-secondary)">Completed </span>
+            <span className="text-(--text-secondary)">{t("Completed")} </span>
             {shortDate(row.completedAt)}
             <span className="text-(--text-secondary)">
               {" "}
-              · the three months run from here (Art. 68(4))
+              · {t("the three months run from here (Art. 68(4))")}
             </span>
           </div>
         )}
         {row.hasApproval && (
           <div className="md:col-span-2">
-            <span className="text-(--text-secondary)">Decision </span>
+            <span className="text-(--text-secondary)">{t("Decision")} </span>
             {row.approvalStatus === "REJECTED"
-              ? "refused"
+              ? t("refused")
               : row.approvalStatus === "REVOKED"
-                ? "data permit revoked"
-                : "data permit issued"}
-            {row.decidedAt ? ` on ${shortDate(row.decidedAt)}` : ""}
-            {row.validUntil ? `, valid until ${shortDate(row.validUntil)}` : ""}
+                ? t("data permit revoked")
+                : t("data permit issued")}
+            {row.decidedAt
+              ? ` ${t("on {date}", { date: shortDate(row.decidedAt) })}`
+              : ""}
+            {row.validUntil
+              ? `, ${t("valid until {date}", {
+                  date: shortDate(row.validUntil),
+                })}`
+              : ""}
             {row.decisionJustification ? ` · ${row.decisionJustification}` : ""}
             {row.revokedAt
-              ? ` · revoked ${shortDate(row.revokedAt)}${
+              ? ` · ${t("revoked {date}", { date: shortDate(row.revokedAt) })}${
                   row.revocationReason ? `: ${row.revocationReason}` : ""
                 }`
               : ""}
             {row.statisticalAlternativeOffered
-              ? " · an anonymised statistical answer was offered instead (Art. 68(3))"
+              ? ` · ${t(
+                  "an anonymised statistical answer was offered instead (Art. 68(3))",
+                )}`
               : ""}
           </div>
         )}
@@ -169,21 +182,28 @@ export function ApplicationPanel({
       {undecided && (
         <p className="text-xs" data-testid="fee-estimate">
           <span className="text-(--text-secondary)">
-            Fee estimate, Art. 62:{" "}
+            {t("Fee estimate, Art. 62:")}{" "}
           </span>
           {(() => {
             const f = estimateFee(row);
-            return `${f.totalEur.toLocaleString(
-              "en-GB",
-            )} EUR, access body ${f.bodyEur.toLocaleString(
-              "en-GB",
-            )} and data holder ${f.holderEur.toLocaleString("en-GB")}${
-              f.reduction > 0
-                ? `, reduced by ${Math.round(f.reduction * 100)}% for a ${
-                    f.categoryLabel
-                  } (Art. 62(3))`
-                : ""
-            }`;
+            const eur = (n: number) => n.toLocaleString("en-GB");
+            const split = t(
+              "{total} EUR, access body {body} and data holder {holder}",
+              {
+                total: eur(f.totalEur),
+                body: eur(f.bodyEur),
+                holder: eur(f.holderEur),
+              },
+            );
+            return f.reduction > 0
+              ? `${split}, ${t(
+                  "reduced by {pct}% for a {category} (Art. 62(3))",
+                  {
+                    pct: Math.round(f.reduction * 100),
+                    category: t(f.categoryLabel),
+                  },
+                )}`
+              : split;
           })()}
         </p>
       )}
@@ -194,18 +214,18 @@ export function ApplicationPanel({
         <form
           className="rounded-lg border border-(--border) bg-(--bg) p-3 space-y-3 text-xs"
           onSubmit={(e) => e.preventDefault()}
-          aria-label="Data permit decision"
+          aria-label={t("Data permit decision")}
         >
           <div className="font-semibold text-(--text-primary)">
-            {undecided ? "Decide this application" : "Decide again"}
+            {undecided ? t("Decide this application") : t("Decide again")}
             <span className="font-normal text-(--text-secondary)">
               {" "}
-              · Regulation (EU) 2025/327, Art. 68
+              · {t("Regulation (EU) 2025/327, Art. 68")}
             </span>
           </div>
           <fieldset className="space-y-1">
             <legend className="text-(--text-secondary) mb-1">
-              Criteria assessed, Art. 68(1)
+              {t("Criteria assessed, Art. 68(1)")}
             </legend>
             {CRITERIA.map((c) => (
               <label key={c} className="flex items-start gap-2">
@@ -218,7 +238,7 @@ export function ApplicationPanel({
                   }
                 />
                 <span>
-                  ({c}) {CRITERIA_LABELS[c]}
+                  ({c}) {t(CRITERIA_LABELS[c])}
                 </span>
               </label>
             ))}
@@ -226,7 +246,7 @@ export function ApplicationPanel({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <label className="flex flex-col gap-1">
               <span className="text-(--text-secondary)">
-                Purpose, Art. 53(1)
+                {t("Purpose, Art. 53(1)")}
               </span>
               <select
                 id={`purpose-${row.applicationId}`}
@@ -236,13 +256,15 @@ export function ApplicationPanel({
               >
                 {PURPOSES.map((p) => (
                   <option key={p} value={p}>
-                    {PURPOSE_LABELS[p]}
+                    {tp(PURPOSE_LABELS[p])}
                   </option>
                 ))}
               </select>
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-(--text-secondary)">Valid until</span>
+              <span className="text-(--text-secondary)">
+                {t("Valid until")}
+              </span>
               <input
                 id={`valid-until-${row.applicationId}`}
                 type="date"
@@ -254,7 +276,7 @@ export function ApplicationPanel({
           </div>
           <label className="flex flex-col gap-1">
             <span className="text-(--text-secondary)">
-              Conditions, one per line
+              {t("Conditions, one per line")}
             </span>
             <textarea
               id={`conditions-${row.applicationId}`}
@@ -266,8 +288,9 @@ export function ApplicationPanel({
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-(--text-secondary)">
-              Justification (required for a refusal; published with the
-              decision, Art. 57(1)(j)(iii))
+              {t(
+                "Justification (required for a refusal; published with the decision, Art. 57(1)(j)(iii))",
+              )}
             </span>
             <textarea
               id={`justification-${row.applicationId}`}
@@ -285,8 +308,9 @@ export function ApplicationPanel({
               onChange={(e) => setStatisticalAlternative(e.target.checked)}
             />
             <span>
-              With a refusal, offer an anonymised statistical answer instead of
-              the data (Art. 68(3); the applicant files a request under Art. 69)
+              {t(
+                "With a refusal, offer an anonymised statistical answer instead of the data (Art. 68(3); the applicant files a request under Art. 69)",
+              )}
             </span>
           </label>
           <div className="flex flex-wrap gap-2">
@@ -296,7 +320,7 @@ export function ApplicationPanel({
               onClick={() => decide("APPROVED")}
               className="px-3 py-1.5 rounded-sm font-semibold bg-(--accent) text-white disabled:opacity-60"
             >
-              {busy === "APPROVED" ? "Issuing…" : "Issue data permit"}
+              {busy === "APPROVED" ? t("Issuing…") : t("Issue data permit")}
             </button>
             <button
               type="button"
@@ -304,10 +328,10 @@ export function ApplicationPanel({
               onClick={() => decide("REJECTED")}
               className="px-3 py-1.5 rounded-sm font-semibold border border-(--danger-text) text-(--danger-text) disabled:opacity-50"
               title={
-                justification.trim() ? "" : "A refusal needs a justification"
+                justification.trim() ? "" : t("A refusal needs a justification")
               }
             >
-              {busy === "REJECTED" ? "Refusing…" : "Refuse"}
+              {busy === "REJECTED" ? t("Refusing…") : t("Refuse")}
             </button>
           </div>
           {error && (
@@ -318,17 +342,21 @@ export function ApplicationPanel({
           {result && (
             <p className="text-(--success-text)" role="status">
               {result.decision === "APPROVED"
-                ? `Data permit ${
-                    result.permitId
-                  } issued, valid until ${shortDate(result.validUntil)}.`
-                : `Application refused; ${
-                    result.permitId
-                  } records the justification${
-                    result.statisticalAlternative
-                      ? ", and an anonymised statistical answer is offered instead (Art. 68(3))"
-                      : ""
-                  }.`}{" "}
-              Publish by {result.publishBy} (Art. 57(1)(j)(iii)).
+                ? t("Data permit {id} issued, valid until {date}.", {
+                    id: result.permitId,
+                    date: shortDate(result.validUntil),
+                  })
+                : result.statisticalAlternative
+                  ? t(
+                      "Application refused; {id} records the justification, and an anonymised statistical answer is offered instead (Art. 68(3)).",
+                      { id: result.permitId },
+                    )
+                  : t("Application refused; {id} records the justification.", {
+                      id: result.permitId,
+                    })}{" "}
+              {t("Publish by {date} (Art. 57(1)(j)(iii)).", {
+                date: result.publishBy,
+              })}
             </p>
           )}
         </form>
