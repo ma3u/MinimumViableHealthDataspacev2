@@ -23,12 +23,18 @@ const VERIFIABLE = {
 const LANGS = Object.keys(WORD) as (keyof typeof WORD)[];
 const AREAS = Object.keys(MESSAGES.en) as Area[];
 /**
- * The prose of a text: code (<c>, <code>) and paths such as
- * /api/credentials/present are names, not the word, and stay English.
+ * The prose of a text: code (<c>, <code>), paths such as
+ * /api/credentials/present, {placeholders} and the product name Credential
+ * Federated Manager are names, not the word, and stay English. Storage
+ * credentials (Iceberg, a REST catalog) are access data, not verifiable
+ * credentials, and are translated as such (DE Zugangsdaten).
  */
 const prose = (s: string) =>
   s
     .replace(/<(c|code)>[\s\S]*?<\/\1>/g, " ")
+    .replace(/\{\w+\}/g, " ")
+    .replace(/Credential Federated Manager/g, " ")
+    .replace(/\b(?:storage credentials|credentials vended)\b/gi, " ")
     .replace(/<\/?[a-z]+>/g, " ")
     .replace(/\S*\/\S*/g, " ");
 const keys = (re: RegExp) =>
