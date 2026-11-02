@@ -89,8 +89,8 @@ function SignInContent() {
               {t("Sign in with {wallet} (QR)", { wallet: CITIZEN_WALLET.name })}
             </a>
             <p className="text-(--text-secondary) text-[11px] mt-2">
-              {t("Patient login via OpenID4VP")} · {CITIZEN_WALLET.description},{" "}
-              {CITIZEN_WALLET.alternatives}
+              {t("Patient login via OpenID4VP")} ·{" "}
+              {t(CITIZEN_WALLET.description)}, {t(CITIZEN_WALLET.alternatives)}
             </p>
           </>
         )}

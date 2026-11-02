@@ -9,6 +9,7 @@ docs {
   and the Art. 59 activity report. Since #404 (ADR-044) every API route needs a
   session, so these are read signed in, with the collection's default session. Only requests 01 (is
   the hub up) and 06 (where to sign in) still go without one, because they are
-  what makes signing in possible, and 07, the start page's TestFlight form,
-  which visitors without an account send (ADR-048).
+  what makes signing in possible, and 08 and 09, the Klarbefund app's account
+  creation, which answers only a verified App Attest attestation (ADR-054).
+  The start page's TestFlight form (07, ADR-048) is gone (ADR-050).
 }

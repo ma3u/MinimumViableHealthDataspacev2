@@ -152,8 +152,10 @@ export default function ApiReferencePage() {
             FHIR R4, OMOP CDM, HealthDCAT-AP). The PR Gate blocks any new route
             that is not in the spec, and the backlog only shrinks. Use{" "}
             <strong>Try it out</strong> to call live endpoints. Every route
-            needs a session cookie except the sign-in flows, the health probe
-            and the TestFlight form (ADR-044, ADR-048).
+            needs a session cookie (ADR-044) except the sign-in flows, the
+            Keycloak address for the sign-in banner, the health probe, and the
+            Klarbefund app&apos;s account creation, which answers only a
+            verified Apple App Attest attestation (ADR-054).
           </p>
         </div>
 

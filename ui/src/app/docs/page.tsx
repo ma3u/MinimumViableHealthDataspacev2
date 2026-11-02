@@ -33,7 +33,7 @@ const sections = [
     href: "/docs/architecture",
     icon: Layers,
     label: "Architecture",
-    desc: "Interactive Mermaid diagrams: 5-layer graph model, data flows, deployment topology, and identity trust.",
+    desc: "ArchiMate 3.2 views and sequence diagrams: 5-layer graph model, data flow, deployment topology, data permit and negotiation, and identity and trust.",
     color: "border-layer3 hover:bg-layer3/10",
   },
   {

@@ -12,7 +12,8 @@ import { T, useT } from "@/lib/i18n/translate";
  * Regulation (EU) 2025/327 Art. 58(1): (a) the legal basis, (b) the
  * safeguards, (c) the rights of natural persons, (d) how to exercise them,
  * (e) the body and how to reach it, (f) who has access to which datasets and
- * why, (g) the results of the projects. No sign-in. Issue #206, M6.
+ * why, (g) the results of the projects. Any signed-in participant reads it
+ * (ADR-044). Issue #206, M6.
  */
 
 interface Body {

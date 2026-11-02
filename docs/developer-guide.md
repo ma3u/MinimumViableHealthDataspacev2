@@ -104,7 +104,7 @@ open http://traefik.localhost        # Traefik Dashboard
 | 6     | seed-federated-catalog.sh    | Control Plane  | MedReg ↔ LMC federated catalog negotiation |
 | 7     | seed-data-transfer.sh        | Data Plane     | Verify EDR tokens and data plane transfers  |
 
-> **Important:** Vault secrets are lost on Docker restart (in-memory dev mode). Re-run `./scripts/bootstrap-jad.sh --seed` after any `docker compose down`.
+> **Important:** Vault keeps its secrets on disk (volumes `vault_data` and `vault_keys`; the `vault-unseal` sidecar unseals it on every start), so a restart or a `docker compose down` keeps every secret. Only removing the volumes (`docker compose down -v` or `./scripts/bootstrap-jad.sh --reset`) deletes them; bootstrap and seed the stack again after that. If IdentityHub logs `Private key ... not found`, check that `health-dataspace-vault-unseal` reported `ready`.
 
 ## Neo4j Graph Schema
 

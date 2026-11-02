@@ -238,6 +238,15 @@ describe("the code and the dictionaries", () => {
     ).toEqual([]);
   });
 
+  it("knows the wallet line of the sign-in page", async () => {
+    const { CITIZEN_WALLET } = await import("@/lib/wallet-config");
+    expect(
+      [CITIZEN_WALLET.description, CITIZEN_WALLET.alternatives].filter(
+        (d) => !(d in MESSAGES.en.signin),
+      ),
+    ).toEqual([]);
+  });
+
   it("lists every dictionary folder in the index", () => {
     expect(
       readdirSync(path.resolve("src/messages"))
