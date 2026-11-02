@@ -11,6 +11,22 @@ Date: 2026-10-31
 
 Proposed (2026-10-31). The policy exemption for AKS: requested, pending.
 
+**Implementation status (2026-11-02).** Phase 21 ran end to end on Azure
+([#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774)):
+both groups attested ("Attested: confidential workload", `ear.status
+affirming`), Trustee released both keys, both workspaces loaded, and the
+`spe.*` events reached the audit chain. What differs from the text below: the
+attester asks for the plain SEV-SNP report only (#798); TCB reference values
+are lists, one entry per host (#801, #805); after pinning, a redeploy or a
+stop and start re-runs `spe-unlock`, a restart does not; the proxy trims the
+workspace password's trailing newline (#809); `mvhd-aci-power` cannot be
+created in this tenant, so `id-mvhd-offhours` has the built-in Azure Container
+Instances Contributor Role on the two groups (decision 8). The launch
+measurement was checked against Microsoft's endorsement by issuer and content,
+not by its signature. Steps and failures:
+[runbook spe-attestation-azure](../knowledge/runbooks/spe-attestation-azure.md).
+The status is the maintainer's decision.
+
 ## Context
 
 ADR-068 decided that the SPE runs on Confidential Containers with a Trustee

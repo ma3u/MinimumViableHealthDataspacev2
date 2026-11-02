@@ -27,3 +27,7 @@
   HealthDCAT-AP Release 8 and its namespace (ADR-063, superseding ADR-003).
 - 2026-10-27 · `datamodels/healthdcat-ap.md`: the Release 8 content of #700 (seed,
   variables model, serialiser, SHACL validation, federation).
+- 2026-11-02 · Added `runbooks/spe-attestation-azure.md` (status draft): phase 21 of
+  #774 / ADR-069, the two SPE workspaces on ACI confidential containers attested to
+  the access body's Trustee; pinning reference values, checks, stop and start, and
+  the failures of 2026-11-01/02 by symptom.

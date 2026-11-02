@@ -54,7 +54,8 @@ frontmatter. Spec:
 [live-demo-off-hours](runbooks/live-demo-off-hours.md) ·
 [query-audit-chain](runbooks/query-audit-chain.md) ·
 [load-and-stress-test](runbooks/load-and-stress-test.md) ·
-[edc-v018-on-azure](runbooks/edc-v018-on-azure.md)
+[edc-v018-on-azure](runbooks/edc-v018-on-azure.md) ·
+[spe-attestation-azure](runbooks/spe-attestation-azure.md)
 
 ## security/ — reports and assessments
 
