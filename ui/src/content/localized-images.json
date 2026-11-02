@@ -127,6 +127,12 @@
       "nl": "/images/guide/nl/data-transfer.webp",
       "es": "/images/guide/es/data-transfer.webp"
     },
+    "/images/guide/docs-klarbefund.webp": {
+      "de": "/images/guide/de/docs-klarbefund.webp",
+      "fr": "/images/guide/fr/docs-klarbefund.webp",
+      "nl": "/images/guide/nl/docs-klarbefund.webp",
+      "es": "/images/guide/es/docs-klarbefund.webp"
+    },
     "/images/guide/eehrxf.webp": {
       "de": "/images/guide/de/eehrxf.webp",
       "fr": "/images/guide/fr/eehrxf.webp",
@@ -252,6 +258,12 @@
       "fr": "/images/screenshots/fr/ehds-signin-persona-cards.png",
       "nl": "/images/screenshots/nl/ehds-signin-persona-cards.png",
       "es": "/images/screenshots/es/ehds-signin-persona-cards.png"
+    },
+    "/images/screenshots/ehds-user-guide-overview.png": {
+      "de": "/images/screenshots/de/ehds-user-guide-overview.png",
+      "fr": "/images/screenshots/fr/ehds-user-guide-overview.png",
+      "nl": "/images/screenshots/nl/ehds-user-guide-overview.png",
+      "es": "/images/screenshots/es/ehds-user-guide-overview.png"
     },
     "/images/screenshots/graph-explorer-default.png": {
       "de": "/images/screenshots/de/graph-explorer-default.png",
