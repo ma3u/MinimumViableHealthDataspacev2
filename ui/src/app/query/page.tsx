@@ -19,6 +19,8 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useT } from "@/lib/i18n/translate";
+import { isSpeColdStart, type SpeColdStartBody } from "@/lib/spe";
+import { SpeColdStartNotice } from "@/components/spe/SpeColdStartNotice";
 
 interface ScopePermit {
   permitId: string;
@@ -216,6 +218,8 @@ export default function NlqPage() {
   const [showCypher, setShowCypher] = useState(false);
   const [history, setHistory] = useState<NlqResult[]>([]);
   const [odrlScope, setOdrlScope] = useState<OdrlScope | null>(null);
+  // A federated answer that needs a workspace still starting (ADR-072).
+  const [coldStart, setColdStart] = useState<SpeColdStartBody | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -225,7 +229,12 @@ export default function NlqPage() {
       .then((d) => setTemplates(d?.templates ?? []))
       .catch(() => {});
     fetchApi("/api/federated")
-      .then((r) => (r.ok ? r.json() : null))
+      .then(async (r) => {
+        if (r.ok) return r.json();
+        const body: unknown = await r.json().catch(() => null);
+        if (isSpeColdStart(body)) setColdStart(body);
+        return null;
+      })
       .then((d) => {
         if (d?.totals) setStats(d);
       })
@@ -243,13 +252,19 @@ export default function NlqPage() {
     if (!query.trim()) return;
     setLoading(true);
     setResult(null);
+    setColdStart(null);
     try {
       const resp = await fetchApi("/api/nlq", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: query, federated }),
       });
-      const data: NlqResult = await resp.json();
+      const raw: unknown = await resp.json();
+      if (!resp.ok && isSpeColdStart(raw)) {
+        setColdStart(raw);
+        return;
+      }
+      const data = raw as NlqResult;
       // Normalize: NLQ "none" responses may lack results/totalRows
       const normalized: NlqResult = {
         ...data,
@@ -360,6 +375,8 @@ export default function NlqPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
+        {coldStart && <SpeColdStartNotice body={coldStart} />}
+
         {/* Query input */}
         <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
           <form

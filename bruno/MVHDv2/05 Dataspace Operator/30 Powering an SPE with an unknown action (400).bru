@@ -1,0 +1,34 @@
+meta {
+  name: 30 Powering an SPE with an unknown action (400)
+  type: http
+  seq: 30
+}
+
+post {
+  url: {{baseUrl}}/api/admin/spe/power
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "action": "restart",
+    "spe": "SPE-1"
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: contains action must be
+}
+
+docs {
+  ADR-072: the operator and the access body start and stop the SPE workspaces
+  (start | stop, SPE-1 | SPE-2 | all). An unknown action is refused before ARM
+  is asked, on every stack, so this request changes nothing on the live demo:
+  a real Start would cost a cold start and about €0.13 an hour.
+}

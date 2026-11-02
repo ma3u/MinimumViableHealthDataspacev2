@@ -18,8 +18,11 @@ import { join, resolve } from "node:path";
  * body's Trustee (mvhd-trustee on ACA) with the rest of the stack (ADR-053,
  * ADR-069), and only once 21-aci-confidential-spe.sh has created them:
  *   - stop: both groups first, in order, then the apps, Trustee among them;
- *   - start: Trustee first, then both groups, in order, while the proxy
- *     (a core app) keeps retrying until the workspaces have loaded.
+ *   - start: Trustee first; the groups stay stopped and start on demand
+ *     (ADR-072), unless SPE_START_WITH_STACK=true restores the old start of
+ *     both, in order, after the core apps;
+ *   - idle-stop: stops a running group whose last query and start are both
+ *     older than SPE_IDLE_STOP_MINUTES (ADR-072).
  * A group or app that does not exist is left out, so the evening stop never
  * fails on a missing resource.
  *
@@ -32,7 +35,12 @@ const OFFHOURS = resolve(__dirname, "../../../../scripts/azure/offhours.sh");
 
 const AZ_STUB = `#!/usr/bin/env bash
 echo "az $*" >> "$STATE/all.log"
+name=$(echo "$*" | sed -n 's/.*--name \\([^ ]*\\).*/\\1/p')
 case "$*" in
+  *"container show"*"instanceView.state"*)
+    cat "$STATE/state-$name" 2>/dev/null; exit 0 ;;
+  *"container show"*"currentState.startTime"*)
+    cat "$STATE/start-$name" 2>/dev/null; exit 0 ;;
   *"container show --name mvhd-spe-"*)
     for g in $SPE_GROUPS_EXIST; do
       case "$*" in *"--name $g "*) echo "$g"; exit 0 ;; esac
@@ -60,8 +68,8 @@ exit 0
 let dir: string;
 
 function run(
-  action: "stop" | "start",
-  opts: { groups: string[]; trustee: boolean },
+  action: "stop" | "start" | "idle-stop",
+  opts: { groups: string[]; trustee: boolean; env?: Record<string, string> },
 ) {
   writeFileSync(join(dir, "pg"), action === "stop" ? "Ready\n" : "Stopped\n");
   writeFileSync(join(dir, "ui_flag"), action === "stop" ? "false\n" : "true\n");
@@ -72,6 +80,7 @@ function run(
       STATE: dir,
       SPE_GROUPS_EXIST: opts.groups.join(" "),
       TRUSTEE_EXISTS: opts.trustee ? "1" : "0",
+      ...(opts.env ?? {}),
     },
     encoding: "utf8",
     timeout: 30000,
@@ -97,7 +106,9 @@ beforeEach(() => {
   copyFileSync(OFFHOURS, join(dir, "offhours.sh"));
   const stubs: Record<string, string> = {
     "bin/az": AZ_STUB,
-    "bin/curl": "#!/usr/bin/env bash\necho 200\n",
+    // The proxy's /spe/status answers from a file, or not at all.
+    "bin/curl":
+      '#!/usr/bin/env bash\ncase "$*" in *"/spe/status"*) [ -f "$STATE/spe_status" ] || exit 7; cat "$STATE/spe_status" ;; *) echo 200 ;; esac\n',
     "bin/sleep": "#!/usr/bin/env bash\nexit 0\n",
     "set-app-power.sh": RECORDER,
     "retire-stale-revisions.sh": RECORDER,
@@ -115,10 +126,16 @@ afterEach(() => {
   rmSync(dir, { recursive: true, force: true });
 });
 
+/**
+ * Each run spawns bash and a few dozen stubbed calls; under the full
+ * parallel suite one start took 7 s, past Vitest's default 5 s.
+ */
+const SLOW = { timeout: 30_000 };
+
 const BOTH = { groups: ["mvhd-spe-1", "mvhd-spe-2"], trustee: true };
 const NONE = { groups: [], trustee: false };
 
-describe("offhours.sh and the SPE workspaces on ACI (ADR-069)", () => {
+describe("offhours.sh and the SPE workspaces on ACI (ADR-069)", SLOW, () => {
   it("stops both groups, in order, before the apps, and Trustee with the apps", () => {
     const { status, stderr, log } = run("stop", BOTH);
     expect(status, stderr).toBe(0);
@@ -135,12 +152,24 @@ describe("offhours.sh and the SPE workspaces on ACI (ADR-069)", () => {
     );
   });
 
-  it("starts Trustee first, then both groups, in order", () => {
+  it("starts Trustee first and leaves both groups stopped: they start on demand (ADR-072)", () => {
     const { status, stderr, log } = run("start", BOTH);
     expect(status, stderr).toBe(0);
     const core = appsOf(log, "set-app-power.sh start");
     expect(core[0]).toBe("mvhd-trustee");
     expect(core).toContain("mvhd-neo4j-proxy");
+    expect(log.filter((l) => / container start /.test(l))).toEqual([]);
+    expect(stderr).toContain("they start on demand (ADR-072)");
+  });
+
+  it("starts both groups, in order, after Trustee, with SPE_START_WITH_STACK=true", () => {
+    const { status, stderr, log } = run("start", {
+      ...BOTH,
+      env: { SPE_START_WITH_STACK: "true" },
+    });
+    expect(status, stderr).toBe(0);
+    const core = appsOf(log, "set-app-power.sh start");
+    expect(core[0]).toBe("mvhd-trustee");
     const coreAt = indexOf(log, "set-app-power.sh start");
     const one = indexOf(log, "az container start --name mvhd-spe-1");
     const two = indexOf(log, "az container start --name mvhd-spe-2");
@@ -177,3 +206,106 @@ describe("offhours.sh and the SPE workspaces on ACI (ADR-069)", () => {
     expect(appsOf(log, "set-app-power.sh start")).toContain("mvhd-neo4j-proxy");
   });
 });
+
+/** 2026-11-02T10:00:00Z, the "now" of every idle-stop run below. */
+const NOW = 1793613600;
+const iso = (secondsBeforeNow: number) =>
+  new Date((NOW - secondsBeforeNow) * 1000).toISOString();
+
+function group(name: string, state: string, startedSecondsAgo?: number) {
+  writeFileSync(join(dir, `state-${name}`), `${state}\n`);
+  if (startedSecondsAgo !== undefined) {
+    writeFileSync(join(dir, `start-${name}`), `${iso(startedSecondsAgo)}\n`);
+  }
+}
+
+function proxyStatus(lastQueried: Record<string, number | null>) {
+  writeFileSync(
+    join(dir, "spe_status"),
+    JSON.stringify({
+      environment: "azure",
+      spes: Object.entries(lastQueried).map(([id, ago]) => ({
+        id,
+        lastQueriedAt: ago === null ? null : iso(ago),
+      })),
+    }),
+  );
+}
+
+const idle = (env: Record<string, string> = {}) =>
+  run("idle-stop", { ...BOTH, env: { OFFHOURS_NOW: String(NOW), ...env } });
+
+const stops = (log: string[]) =>
+  log
+    .filter((l) => l.startsWith("az container stop"))
+    .map((l) => /--name (\S+)/.exec(l)?.[1]);
+
+describe(
+  "offhours.sh idle-stop: a workspace nobody queries stops itself (ADR-072)",
+  SLOW,
+  () => {
+    it("stops the group idle for 30 minutes and keeps the one queried 10 minutes ago", () => {
+      group("mvhd-spe-1", "Running", 2 * 3600);
+      group("mvhd-spe-2", "Running", 2 * 3600);
+      proxyStatus({ "SPE-1": 10 * 60, "SPE-2": 45 * 60 });
+      const { status, stderr, log } = idle();
+      expect(status, stderr).toBe(0);
+      expect(stops(log)).toEqual(["mvhd-spe-2"]);
+      expect(stderr).toContain(
+        "mvhd-spe-1: last used 10 min ago, keeps running",
+      );
+    });
+
+    it("keeps a group started on demand 5 minutes ago that nobody has queried yet", () => {
+      group("mvhd-spe-1", "Running", 5 * 60);
+      group("mvhd-spe-2", "Stopped");
+      proxyStatus({ "SPE-1": null, "SPE-2": null });
+      const { status, stderr, log } = idle();
+      expect(status, stderr).toBe(0);
+      expect(stops(log)).toEqual([]);
+      expect(stderr).toContain("mvhd-spe-2: Stopped, nothing to stop");
+    });
+
+    it("lets the start time decide when the proxy does not answer", () => {
+      group("mvhd-spe-1", "Running", 3600);
+      group("mvhd-spe-2", "Running", 10 * 60);
+      const { status, stderr, log } = idle();
+      expect(status, stderr).toBe(0);
+      expect(stops(log)).toEqual(["mvhd-spe-1"]);
+      expect(stderr).toContain("did not answer");
+    });
+
+    it("follows SPE_IDLE_STOP_MINUTES, and 0 turns it off", () => {
+      group("mvhd-spe-1", "Running", 3600);
+      group("mvhd-spe-2", "Running", 3600);
+      proxyStatus({ "SPE-1": 20 * 60, "SPE-2": 5 * 60 });
+      expect(stops(idle({ SPE_IDLE_STOP_MINUTES: "15" }).log)).toEqual([
+        "mvhd-spe-1",
+      ]);
+      writeFileSync(join(dir, "all.log"), "");
+      expect(stops(idle({ SPE_IDLE_STOP_MINUTES: "0" }).log)).toEqual([]);
+    });
+
+    it("leaves a running group without a start time alone, with a warning", () => {
+      group("mvhd-spe-1", "Running");
+      group("mvhd-spe-2", "Stopped");
+      proxyStatus({ "SPE-1": null });
+      const { status, stderr, log } = idle();
+      expect(status, stderr).toBe(0);
+      expect(stops(log)).toEqual([]);
+      expect(stderr).toContain("no start time: left running");
+    });
+
+    it("stops nothing on a keep-up date, as the evening stop does", () => {
+      group("mvhd-spe-1", "Running", 3600);
+      group("mvhd-spe-2", "Running", 3600);
+      const today = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Europe/Berlin",
+      }).format(new Date());
+      const { status, stderr, log } = idle({ KEEP_UP_DATES: today });
+      expect(status, stderr).toBe(0);
+      expect(stops(log)).toEqual([]);
+      expect(stderr).toContain("no idle stop");
+    });
+  },
+);

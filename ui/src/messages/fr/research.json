@@ -220,5 +220,8 @@
   "Recorded by this demonstrator, not negotiated with a counter-party. It has no record in the control plane, so it cannot be opened.": "Enregistré par ce démonstrateur, non négocié avec une contrepartie. Il n’existe aucun enregistrement dans le plan de contrôle, il ne peut donc pas être ouvert.",
   "Bundled sample data, shown so the page is not empty. It has no record in the control plane, so it cannot be opened.": "Données d’exemple fournies pour que la page ne soit pas vide. Il n’existe aucun enregistrement dans le plan de contrôle, elles ne peuvent donc pas être ouvertes.",
   "Female": "Femme",
-  "Male": "Homme"
+  "Male": "Homme",
+  "Secure processing environment not ready": "Environnement de traitement sécurisé pas encore prêt",
+  "{id} is starting (cold start, about 3 to 4 minutes): attesting, releasing the key, loading the data. Try again in a few minutes.": "{id} démarre (démarrage à froid, environ 3 à 4 minutes) : attestation, libération de la clé, chargement des données. Réessayez dans quelques minutes.",
+  "{id} is stopped. An operator or the access body can start it.": "{id} est arrêté. L’opérateur ou l’organisme responsable de l’accès peut le démarrer."
 }

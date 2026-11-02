@@ -160,7 +160,12 @@ jobs:
       - name: Point the off-hours jobs at this commit
         run: |
           if az containerapp job show -n mvhd-offhours-stop -g ${{ env.RESOURCE_GROUP }} -o none 2>/dev/null; then
-            for job in mvhd-offhours-stop mvhd-offhours-start mvhd-offhours-check; do
+            # mvhd-spe-idle-stop (ADR-072) exists once 18-offhours-jobs.sh has run after it.
+            for job in mvhd-offhours-stop mvhd-offhours-start mvhd-offhours-check mvhd-spe-idle-stop; do
+              if ! az containerapp job show -n "$job" -g ${{ env.RESOURCE_GROUP }} -o none 2>/dev/null; then
+                echo "::warning::$job does not exist yet (scripts/azure/18-offhours-jobs.sh)"
+                continue
+              fi
               az containerapp job update -n "$job" -g ${{ env.RESOURCE_GROUP }} \
                 --set-env-vars "REPO_REF=${{ github.sha }}" -o none ||
                 echo "::warning::could not point $job at ${{ github.sha }}"

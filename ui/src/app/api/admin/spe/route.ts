@@ -5,9 +5,18 @@ import { userToParticipantId } from "@/lib/odrl-engine";
 import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
 import {
   SPE_LABEL_SIMULATED,
+  SPE_POWER_REASONS,
+  spePowerState,
+  type SpeArmPower,
   type SpeEntry,
   type SpeStatusResponse,
 } from "@/lib/spe";
+import {
+  SPE_IDS,
+  SPE_POWER_ROLES,
+  readArmPower,
+  spePowerAvailable,
+} from "@/lib/spe-power";
 
 export const dynamic = "force-dynamic";
 
@@ -86,10 +95,48 @@ function fallbackStatus(reason: string): SpeStatusResponse {
 }
 
 /**
+ * Each SPE's power state (ADR-072): ARM's view of its ACI group on Azure,
+ * combined with the proxy's read of the workspace. A group ARM reports and
+ * the proxy did not list (SPE-2 in the fallback without
+ * NEO4J_SPE2_CONFIGURED) is added, so a stopped workspace still shows.
+ */
+function withPower(
+  status: SpeStatusResponse,
+  arm: Record<string, SpeArmPower | null>,
+  roles: string[],
+): SpeStatusResponse {
+  const spes = [...status.spes];
+  for (const id of SPE_IDS) {
+    if (arm[id] && !spes.some((s) => s.id === id)) spes.push(unattested(id));
+  }
+  const available = spePowerAvailable();
+  const allowed = roles.some((r) => (SPE_POWER_ROLES as string[]).includes(r));
+  return {
+    ...status,
+    spes: spes.map((spe) => ({
+      ...spe,
+      powerState: spePowerState(arm[spe.id] ?? null, spe.status),
+      armState: arm[spe.id]?.state ?? null,
+      lastQueriedAt: spe.lastQueriedAt ?? null,
+    })),
+    power: {
+      available: available && allowed,
+      reason: !available
+        ? SPE_POWER_REASONS.notAzure
+        : allowed
+          ? null
+          : SPE_POWER_REASONS.notAllowed,
+    },
+  };
+}
+
+/**
  * GET /api/admin/spe: the confidential SPEs of ADR-068 (#774), for the
  * operator and the access body. Passes the proxy's `/spe/status` through;
  * when the proxy does not have it yet or cannot be reached, answers with the
- * fallback above, labelled "Simulated attestation", and the reason.
+ * fallback above, labelled "Simulated attestation", and the reason. Each SPE
+ * carries its power state (ADR-072). A workspace ARM reports stopped is
+ * named in `skip`, so the proxy does not wait for it.
  */
 export async function GET(): Promise<NextResponse> {
   const auth = await requireAuth(["EDC_ADMIN", "HDAB_AUTHORITY"]);
@@ -105,16 +152,24 @@ export async function GET(): Promise<NextResponse> {
     ...callerHeaders(session),
   };
 
+  const arm = await readArmPower();
+  const stopped = SPE_IDS.filter(
+    (id) => arm[id] && spePowerState(arm[id], undefined) === "stopped",
+  );
+  const query = stopped.length > 0 ? `?skip=${stopped.join(",")}` : "";
+
   let reason: string;
   try {
-    const resp = await fetch(`${NEO4J_PROXY_URL}/spe/status`, {
+    const resp = await fetch(`${NEO4J_PROXY_URL}/spe/status${query}`, {
       headers,
       cache: "no-store",
       signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
     });
     if (resp.ok) {
       const data: unknown = await resp.json();
-      if (isSpeStatusResponse(data)) return NextResponse.json(data);
+      if (isSpeStatusResponse(data)) {
+        return NextResponse.json(withPower(data, arm, session.roles));
+      }
       reason = "The query proxy's /spe/status answered in an unknown shape";
     } else if (resp.status === 404) {
       reason = "The query proxy has no /spe/status yet";
@@ -125,5 +180,7 @@ export async function GET(): Promise<NextResponse> {
     reason = "The query proxy is unreachable";
   }
 
-  return NextResponse.json(fallbackStatus(reason));
+  return NextResponse.json(
+    withPower(fallbackStatus(reason), arm, session.roles),
+  );
 }

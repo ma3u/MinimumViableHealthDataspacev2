@@ -83,11 +83,25 @@ describe("GET /api/admin/spe", () => {
     vi.unstubAllEnvs();
   });
 
-  it("passes the proxy's /spe/status through unchanged", async () => {
+  it("passes the proxy's /spe/status through, with each SPE's power state (ADR-072)", async () => {
     proxyAnswers({ "/spe/status": () => json(PROXY_STATUS) });
     const res = await GET();
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual(PROXY_STATUS);
+    // Off Azure there is no ARM: the proxy's read decides, and nobody may
+    // start or stop a workspace from the hub.
+    expect(await res.json()).toEqual({
+      ...PROXY_STATUS,
+      spes: PROXY_STATUS.spes.map((s) => ({
+        ...s,
+        powerState: "running",
+        armState: null,
+        lastQueriedAt: null,
+      })),
+      power: {
+        available: false,
+        reason: "Starting and stopping needs the Azure deployment",
+      },
+    });
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 

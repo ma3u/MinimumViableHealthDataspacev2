@@ -14,6 +14,9 @@
  *   - System-assigned managed identity enabled on the UI container app
  *   - "Monitoring Reader" role on the resource group scope
  *   - "Reader" role on the resource group scope (to list container apps)
+ *   - "Azure Container Instances Contributor Role" on mvhd-spe-1 and
+ *     mvhd-spe-2, to start and stop the SPE workspaces (ADR-072); reading
+ *     their state needs Reader only
  *
  * When any of the above is missing, callers fall back to the unknown-state
  * component list, matching the Docker-socket-unavailable behaviour.
@@ -93,6 +96,20 @@ async function getArmAccessToken(): Promise<string> {
 
 const ARM_BASE = "https://management.azure.com";
 
+/**
+ * An ARM answer that was not 2xx, with its status, so a caller can tell a
+ * missing role (403) from a missing resource (404) from anything else.
+ */
+export class ArmError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "ArmError";
+  }
+}
+
 async function armGet<T>(path: string): Promise<T> {
   const token = await getArmAccessToken();
   const url = path.startsWith("http") ? path : `${ARM_BASE}${path}`;
@@ -106,7 +123,10 @@ async function armGet<T>(path: string): Promise<T> {
     signal: AbortSignal.timeout(ARM_FETCH_TIMEOUT_MS),
   });
   if (!res.ok) {
-    throw new Error(`ARM ${path} → ${res.status} ${await res.text()}`);
+    throw new ArmError(
+      `ARM ${path} → ${res.status} ${await res.text()}`,
+      res.status,
+    );
   }
   return (await res.json()) as T;
 }
@@ -326,7 +346,10 @@ async function armPost<T>(path: string, body?: unknown): Promise<T | null> {
     signal: AbortSignal.timeout(ARM_FETCH_TIMEOUT_MS),
   });
   if (!res.ok) {
-    throw new Error(`ARM POST ${path} → ${res.status} ${await res.text()}`);
+    throw new ArmError(
+      `ARM POST ${path} → ${res.status} ${await res.text()}`,
+      res.status,
+    );
   }
   if (res.status === 204) return null;
   const text = await res.text();
@@ -386,4 +409,102 @@ export async function setContainerAppMinReplicas(
   await armPatch(path, {
     properties: { template: { scale: { minReplicas } } },
   });
+}
+
+// ───────────────────────────────────────────────────────────────────────────
+// ACI container groups: the SPE workspaces (ADR-069, ADR-072)
+// ───────────────────────────────────────────────────────────────────────────
+
+const ACI_API_VERSION = "2023-05-01";
+
+function containerGroupPath(
+  subscriptionId: string,
+  resourceGroup: string,
+  groupName: string,
+  action?: "start" | "stop",
+): string {
+  return (
+    `/subscriptions/${subscriptionId}/resourceGroups/${resourceGroup}` +
+    `/providers/Microsoft.ContainerInstance/containerGroups/` +
+    `${encodeURIComponent(groupName)}${action ? `/${action}` : ""}` +
+    `?api-version=${ACI_API_VERSION}`
+  );
+}
+
+interface ContainerGroupResource {
+  name?: string;
+  properties?: {
+    provisioningState?: string;
+    instanceView?: { state?: string };
+    containers?: {
+      name?: string;
+      properties?: {
+        instanceView?: {
+          currentState?: { state?: string; startTime?: string };
+        };
+      };
+    }[];
+  };
+}
+
+/** What ARM says about a container group, as far as power goes. */
+export interface ContainerGroupState {
+  name: string;
+  /** provisioningState: Succeeded, Pending, Creating, Updating, Failed... */
+  provisioningState: string | null;
+  /** instanceView.state: Running, Pending, Stopped, Succeeded, Failed... */
+  state: string | null;
+  /** When the group's first running container started, ISO-8601. */
+  startedAt: string | null;
+}
+
+export async function getContainerGroupState(
+  subscriptionId: string,
+  resourceGroup: string,
+  groupName: string,
+): Promise<ContainerGroupState> {
+  const g = await armGet<ContainerGroupResource>(
+    containerGroupPath(subscriptionId, resourceGroup, groupName),
+  );
+  const starts = (g.properties?.containers ?? [])
+    .map((c) => c.properties?.instanceView?.currentState)
+    .filter((cs) => cs?.state === "Running" && cs.startTime)
+    .map((cs) => cs!.startTime as string)
+    .sort();
+  return {
+    name: g.name ?? groupName,
+    provisioningState: g.properties?.provisioningState ?? null,
+    state: g.properties?.instanceView?.state ?? null,
+    startedAt: starts[0] ?? null,
+  };
+}
+
+/**
+ * Starts a stopped container group. ARM answers 202 and runs the start in
+ * the background; the group then pulls, attests and loads (ADR-069).
+ * Needs Microsoft.ContainerInstance/containerGroups/start/action.
+ */
+export async function startContainerGroup(
+  subscriptionId: string,
+  resourceGroup: string,
+  groupName: string,
+): Promise<void> {
+  await armPost(
+    containerGroupPath(subscriptionId, resourceGroup, groupName, "start"),
+  );
+}
+
+/**
+ * Stops a container group: its containers end, its memory-backed store goes
+ * with them, and it bills nothing until started again.
+ * Needs Microsoft.ContainerInstance/containerGroups/stop/action.
+ */
+export async function stopContainerGroup(
+  subscriptionId: string,
+  resourceGroup: string,
+  groupName: string,
+): Promise<void> {
+  await armPost(
+    containerGroupPath(subscriptionId, resourceGroup, groupName, "stop"),
+  );
 }

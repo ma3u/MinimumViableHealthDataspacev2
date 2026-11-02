@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowDown, CheckCircle2, CircleSlash, XCircle } from "lucide-react";
 import { PolicyHash, SpeLabelBadge } from "@/components/spe/SpeBadges";
+import { SpePowerControls } from "@/components/spe/SpePowerControls";
 import {
   attestationAnchor,
   attestationVerdict,
@@ -12,6 +13,7 @@ import {
   type AttestationVerdict,
   type SpeAuditEvent,
   type SpeEntry,
+  type SpeStatusResponse,
   type SpeTrustee,
 } from "@/lib/spe";
 import { useT } from "@/lib/i18n/translate";
@@ -77,12 +79,18 @@ export function AttestationCard({
   trustee,
   residualTrust,
   events,
+  power,
+  onPowerChange,
 }: {
   spe: SpeEntry;
   trustee: SpeTrustee | null;
   residualTrust: string[];
   /** This SPE's spe.* events, newest first. */
   events: SpeAuditEvent[];
+  /** Whether this caller may start and stop it (ADR-072). */
+  power?: SpeStatusResponse["power"];
+  /** Called after a Start or Stop: the page polls until it settles. */
+  onPowerChange?: () => void;
 }) {
   const t = useT("admin");
   const optOutText = useOptOutText();
@@ -131,6 +139,15 @@ export function AttestationCard({
             {spe.id} · {spe.holder}
           </h2>
           <p className="text-xs text-(--text-secondary)">{spe.runsOn}</p>
+          {spe.powerState && (
+            <div className="mt-2">
+              <SpePowerControls
+                spe={spe}
+                power={power}
+                onChange={onPowerChange ?? (() => undefined)}
+              />
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <span

@@ -220,5 +220,8 @@
   "Recorded by this demonstrator, not negotiated with a counter-party. It has no record in the control plane, so it cannot be opened.": "Vastgelegd door deze demonstrator, niet onderhandeld met een tegenpartij. Er is geen record in het control plane, dus het kan niet worden geopend.",
   "Bundled sample data, shown so the page is not empty. It has no record in the control plane, so it cannot be opened.": "Meegeleverde voorbeeldgegevens, zodat de pagina niet leeg is. Er is geen record in het control plane, dus het kan niet worden geopend.",
   "Female": "Vrouw",
-  "Male": "Man"
+  "Male": "Man",
+  "Secure processing environment not ready": "Beveiligde verwerkingsomgeving nog niet gereed",
+  "{id} is starting (cold start, about 3 to 4 minutes): attesting, releasing the key, loading the data. Try again in a few minutes.": "{id} start op (koude start, ongeveer 3 tot 4 minuten): attestatie, vrijgave van de sleutel, laden van de gegevens. Probeer het over een paar minuten opnieuw.",
+  "{id} is stopped. An operator or the access body can start it.": "{id} is gestopt. De beheerder of de instantie voor toegang kan het starten."
 }

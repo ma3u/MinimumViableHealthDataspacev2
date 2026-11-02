@@ -13,6 +13,7 @@ import { appendQueryAudit, auditUnavailable } from "../audit-chain.js";
 import { logger } from "../logger.js";
 import { secondaryUseSession } from "../opt-out.js";
 import { suppressSmallGroups } from "../k-anonymity.js";
+import { noteSpeQueried } from "../spe-status.js";
 
 /** A refused federated query is recorded before the refusal goes out. */
 async function auditFederatedRefusal(
@@ -111,6 +112,8 @@ app.post(
       }
 
       const spes = getSpeDrivers();
+      // When each workspace was last asked, for the idle stop (ADR-072).
+      noteSpeQueried(spes.map((s) => s.label));
       const allResults: Array<{ source: string; records: any[] }> = [];
 
       // Dispatch to all SPEs in parallel
@@ -218,6 +221,7 @@ app.get(
   async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const spes = getSpeDrivers();
+      noteSpeQueried(spes.map((s) => s.label));
       const stats: Array<{
         source: string;
         patients: number;

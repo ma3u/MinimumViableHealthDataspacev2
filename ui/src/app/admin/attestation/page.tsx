@@ -22,7 +22,7 @@ const ENVIRONMENT_LABELS: Record<string, string> = {
  */
 export default function AdminAttestationPage() {
   const t = useT("admin");
-  const { data, loading, error } = useSpeStatus();
+  const { data, loading, error, watch } = useSpeStatus();
   const [events, setEvents] = useState<SpeAuditEvent[]>([]);
 
   useEffect(() => {
@@ -99,6 +99,8 @@ export default function AdminAttestationPage() {
                   trustee={data.trustee}
                   residualTrust={data.residualTrust}
                   events={events.filter((e) => e.speId === spe.id)}
+                  power={data.power}
+                  onPowerChange={watch}
                 />
               ))
             )}

@@ -38,6 +38,10 @@
       "methods": ["GET", "POST", "PUT", "DELETE"]
     },
     {
+      "path": "/api/admin/spe/power",
+      "methods": ["POST"]
+    },
+    {
       "path": "/api/admin/spe",
       "methods": ["GET"]
     },
@@ -1179,6 +1183,12 @@
       "file": "ADR-071-the-documentation-follows-the-language-picker.md",
       "title": "ADR-071-the-documentation-follows-the-language-picker.md",
       "status": ""
+    },
+    {
+      "id": "ADR-072",
+      "file": "ADR-072-spe-workspaces-start-on-demand.md",
+      "title": "SPE workspaces are stopped by default and start on demand",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1217,8 +1227,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 54,
-    "operations": 71
+    "paths": 55,
+    "operations": 72
   },
   "workflowJobs": {
     "test.yml": [
@@ -1274,7 +1284,7 @@
     "/docs": "2026-11-02",
     "/docs/user-guide": "2026-11-02",
     "/docs/developer": "2026-11-02",
-    "/docs/developer/quality-gates": "2026-11-01",
+    "/docs/developer/quality-gates": "2026-11-02",
     "/docs/developer/api": "2026-11-02",
     "/docs/developer/reference": "2026-11-02",
     "/docs/architecture": "2026-11-02",

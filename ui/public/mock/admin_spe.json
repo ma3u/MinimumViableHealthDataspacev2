@@ -39,7 +39,10 @@
           "vmId": null
         },
         "refusalReason": null
-      }
+      },
+      "powerState": "running",
+      "armState": null,
+      "lastQueriedAt": "2026-10-30T09:12:40Z"
     },
     {
       "id": "SPE-2",
@@ -73,10 +76,17 @@
           "vmId": null
         },
         "refusalReason": null
-      }
+      },
+      "powerState": "running",
+      "armState": null,
+      "lastQueriedAt": "2026-10-30T09:12:41Z"
     }
   ],
   "residualTrust": [
     "None proven: no TEE on this machine, the evidence comes from Trustee's sample attester"
-  ]
+  ],
+  "power": {
+    "available": false,
+    "reason": "Starting and stopping needs the Azure deployment"
+  }
 }

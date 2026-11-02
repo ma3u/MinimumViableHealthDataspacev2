@@ -467,4 +467,66 @@ describe("NlqPage", () => {
     );
     expect(permits).toHaveTextContent("valid until 2027-12-31");
   });
+
+  describe("a workspace that is still starting (ADR-072)", () => {
+    const COLD = {
+      error: "SPE-1 is starting (cold start, about 3 to 4 minutes)",
+      spe: { id: "SPE-1", state: "starting", etaSeconds: 240 },
+      spes: [{ id: "SPE-1", state: "starting", etaSeconds: 240 }],
+      started: true,
+    };
+    const coldReply = () =>
+      Promise.resolve({
+        ok: false,
+        status: 503,
+        json: () => Promise.resolve(COLD),
+      });
+
+    it("says the workspace is starting instead of the federated statistics", async () => {
+      mockFetchApiResponses();
+      const base = mockFetchApi.getMockImplementation()!;
+      mockFetchApi.mockImplementation((url: string, opts?: unknown) =>
+        url === "/api/federated" ? coldReply() : base(url, opts),
+      );
+      render(<NlqPage />);
+      const notice = await screen.findByRole("status", {
+        name: "Secure processing environment not ready",
+      });
+      expect(notice).toHaveTextContent(
+        "SPE-1 is starting (cold start, about 3 to 4 minutes): attesting, releasing the key, loading the data. Try again in a few minutes.",
+      );
+    });
+
+    it("answers a federated question with the cold-start message, not an error", async () => {
+      mockFetchApiResponses();
+      const base = mockFetchApi.getMockImplementation()!;
+      mockFetchApi.mockImplementation((url: string, opts?: unknown) =>
+        url === "/api/nlq" && (opts as { method?: string })?.method === "POST"
+          ? Promise.resolve({
+              ok: false,
+              status: 503,
+              json: () =>
+                Promise.resolve({
+                  ...COLD,
+                  spe: { id: "SPE-2", state: "stopped", etaSeconds: 240 },
+                  spes: [{ id: "SPE-2", state: "stopped", etaSeconds: 240 }],
+                  started: false,
+                }),
+            })
+          : base(url, opts),
+      );
+      render(<NlqPage />);
+      await userEvent.type(
+        screen.getByLabelText("Ask a question about the health data"),
+        "How many patients per SPE?{enter}",
+      );
+      const notice = await screen.findByRole("status", {
+        name: "Secure processing environment not ready",
+      });
+      expect(notice).toHaveTextContent(
+        "SPE-2 is stopped. An operator or the access body can start it.",
+      );
+      expect(screen.queryByTestId("nlq-error")).toBeNull();
+    });
+  });
 });

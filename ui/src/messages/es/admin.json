@@ -852,5 +852,21 @@
   "Valid ODRL 2.2 and fit for secondary use.": "ODRL 2.2 válido y apto para el uso secundario.",
   "Warning": "Advertencia",
   "Note": "Nota",
-  "e.g. {example}": "p. ej. {example}"
+  "e.g. {example}": "p. ej. {example}",
+  "starting": "arrancando",
+  "Start": "Iniciar",
+  "Stop": "Detener",
+  "Power of {id}": "Estado de funcionamiento de {id}",
+  "Workspace: {state}": "Espacio de trabajo: {state}",
+  "Start {id}": "Iniciar {id}",
+  "Stop {id}": "Detener {id}",
+  "Starting: attesting to Trustee, releasing the key, loading the data; about 3 to 4 minutes": "Arrancando: atestación ante el Trustee, liberación de la clave, carga de los datos; unos 3 a 4 minutos",
+  "Last queried {when}": "Última consulta {when}",
+  "No query recorded yet": "Aún no se ha registrado ninguna consulta",
+  "Stopped by default, starts on demand, stops itself after 30 minutes without a query (ADR-072)": "Detenido por defecto, arranca bajo demanda y se detiene solo tras 30 minutos sin consultas (ADR-072)",
+  "Static demo: nothing is started or stopped.": "Demo estática: no se inicia ni se detiene nada.",
+  "Could not change the workspace: {error}": "No se pudo cambiar el espacio de trabajo: {error}",
+  "An owner of the resource group runs once:": "Un propietario del grupo de recursos ejecuta una vez:",
+  "Starting and stopping needs the Azure deployment": "Iniciar y detener requiere el despliegue en Azure",
+  "Only the operator and the access body start and stop workspaces": "Solo el operador y el organismo de acceso inician y detienen espacios de trabajo"
 }
