@@ -76,7 +76,9 @@ are mirrors of the same conventions.
 
 ## Top gotchas
 
-1. **Vault secrets are lost on Docker restart** — in-memory only; re-run
+1. **Vault is file-backed since 2026-09-26** (`jad/vault.hcl`, volumes
+   `vault_data`/`vault_keys`, `vault-unseal` sidecar); a restart keeps every
+   secret. Only `docker compose down -v` deletes them; then re-run
    `./scripts/bootstrap-jad.sh`.
 2. **JAD seed phases 1–7 are strictly ordered** — FHIR before OMOP (phase 4 needs
    phase 3).

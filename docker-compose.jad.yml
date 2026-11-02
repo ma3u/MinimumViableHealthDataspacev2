@@ -92,7 +92,7 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # HashiCorp Vault — Secret management (dev mode)
+  # HashiCorp Vault: secret management (file storage, see jad/vault.hcl)
   # ---------------------------------------------------------------------------
   # File storage on a named volume, not `-dev`: dev mode is in-memory and a
   # restart on 2026-09-24 took every participant's signing key and STS client
@@ -241,8 +241,8 @@ services:
   # ---------------------------------------------------------------------------
   # Vault Bootstrap Sidecar — Initializes JWT auth, secrets engine, policies
   # Stays alive so Docker restarts it after an OrbStack/daemon crash.
-  # Since Vault dev mode uses in-memory storage, secrets are lost on restart.
-  # This sidecar re-runs the idempotent bootstrap on every container start.
+  # Vault keeps its secrets on the vault_data volume across restarts; this
+  # sidecar re-runs the idempotent bootstrap on every container start.
   # ---------------------------------------------------------------------------
   vault-bootstrap:
     image: hashicorp/vault:2.0

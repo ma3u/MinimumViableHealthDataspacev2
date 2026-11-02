@@ -83,7 +83,7 @@ Schema definition: `neo4j/init-schema.cypher`
 | neo4j-proxy     | 9090        | Express bridge (FHIR/OMOP queries) |
 | UI (Next.js 14) | 3000        | Frontend                           |
 | Keycloak        | 8080        | OIDC authentication                |
-| Vault           | 8200        | Secrets (in-memory dev mode)       |
+| Vault           | 8200        | Secrets (file-backed, on a volume) |
 | NATS            | 4222        | Async event bus                    |
 | PostgreSQL      | 5432        | JAD service metadata               |
 

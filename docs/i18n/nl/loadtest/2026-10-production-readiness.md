@@ -13,17 +13,17 @@ Apps draait. Elke pijler vermeldt wat er is, met het bewijs, en wat nog
 openstaat. De scores zijn het eigen oordeel van het project op een
 tienpuntsschaal; niets hiervan is een onafhankelijke audit.
 
-| Pijler                      | Score    | In één regel                                                                                                            |
-| --------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
-| WAF: Operational Excellence | 7/10     | Uitrol bij elke merge, tracing en gestructureerde logs, zestien runbooks; geen alertregels, geen piketdienst            |
-| WAF: Security               | 8/10     | Door het project getest, negen van de tien bevindingen gesloten; geen onafhankelijke test                               |
-| WAF: Reliability            | 6/10     | 400 gebruikers zonder mislukt verzoek, overal healthchecks, beheerde Postgres met herstel; Neo4j één node, geen back-up |
-| WAF: Performance Efficiency | 7/10     | Gedimensioneerd op basis van metingen, 50 gebruikers binnen elke SLO; 200 gebruikers nog niet                           |
-| WAF: Cost Optimization      | 7/10     | Alles stopt buiten kantoortijden, kosten per 1.000 verzoeken gemeten; geen kostentoerekening per tenant                 |
-| WAF: Sustainability         | 6/10     | De stack draait een derde van de week; geen CO2-bewuste keuze                                                           |
-| CAF: Strategy & Plan        | 8/10     | De EHDS-rollen, de BSI-normen en eenenzestig beslissingen vastgelegd; geen SLA                                          |
-| CAF: Govern & Manage        | 6/10     | Bewaarbeleid, audittrail, incidenttermijnen; geen SOC, geen benoemd incidentteam                                        |
-| **Totaal**                  | **7/10** | **Een gemeten demonstrator. Geen exploiteerbaar platform voor echte gegevens; het gat staat aan het eind opgesomd.**    |
+| Pijler                           | Score    | In één regel                                                                                                            |
+| -------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------------------- |
+| WAF: Operationele uitmuntendheid | 7/10     | Uitrol bij elke merge, tracing en gestructureerde logs, zestien runbooks; geen alertregels, geen piketdienst            |
+| WAF: Beveiliging                 | 8/10     | Door het project getest, negen van de tien bevindingen gesloten; geen onafhankelijke test                               |
+| WAF: Betrouwbaarheid             | 6/10     | 400 gebruikers zonder mislukt verzoek, overal healthchecks, beheerde Postgres met herstel; Neo4j één node, geen back-up |
+| WAF: Prestatie-efficiëntie       | 7/10     | Gedimensioneerd op basis van metingen, 50 gebruikers binnen elke SLO; 200 gebruikers nog niet                           |
+| WAF: Kostenoptimalisatie         | 7/10     | Alles stopt buiten kantoortijden, kosten per 1.000 verzoeken gemeten; geen kostentoerekening per tenant                 |
+| WAF: Duurzaamheid                | 6/10     | De stack draait een derde van de week; geen CO2-bewuste keuze                                                           |
+| CAF: Strategie en plan           | 8/10     | De EHDS-rollen, de BSI-normen en eenenzestig beslissingen vastgelegd; geen SLA                                          |
+| CAF: Besturen en beheren         | 6/10     | Bewaarbeleid, audittrail, incidenttermijnen; geen SOC, geen benoemd incidentteam                                        |
+| **Totaal**                       | **7/10** | **Een gemeten demonstrator. Geen exploiteerbaar platform voor echte gegevens; het gat staat aan het eind opgesomd.**    |
 
 Het beoordeelde platform: de hub en zijn connectoren op Azure Container Apps in
 `rg-mvhd-dev`, West Europe, 21 apps en 9 jobs. PostgreSQL op een Flexible
@@ -38,7 +38,7 @@ stand van de beveiliging is het [beveiligingstestrapport van 2026-10-15](../secu
 hoe het platform echt bedoeld is te worden geëxploiteerd, staat in de
 [operationele richtlijn](../security/operational-guideline.md).
 
-## WAF-pijler 1: Operational Excellence, 7/10
+## WAF-pijler 1: Operationele uitmuntendheid, 7/10
 
 Aanwezig:
 
@@ -70,7 +70,7 @@ Open:
   beschrijft de rollen, het project kan ze niet invullen.
 - Geen feature flags buiten de demoschakelaars.
 
-## WAF-pijler 2: Security, 8/10
+## WAF-pijler 2: Beveiliging, 8/10
 
 Aanwezig:
 
@@ -120,7 +120,7 @@ Open:
   Key Vault zodra `scripts/azure/secure-accounts.sh` tegen de live realm is
   uitgevoerd.
 
-## WAF-pijler 3: Reliability, 6/10
+## WAF-pijler 3: Betrouwbaarheid, 6/10
 
 Aanwezig:
 
@@ -153,7 +153,7 @@ Open:
   belasting.
 - Geen chaos engineering; de stressruns komen er het dichtst bij.
 
-## WAF-pijler 4: Performance Efficiency, 7/10
+## WAF-pijler 4: Prestatie-efficiëntie, 7/10
 
 Aanwezig:
 
@@ -179,7 +179,7 @@ Open:
   `size-ui.sh`; de p95 per fase komt in de tabel van ADR-061.
 - Geen CDN vóór de live hub.
 
-## WAF-pijler 5: Cost Optimization, 7/10
+## WAF-pijler 5: Kostenoptimalisatie, 7/10
 
 Aanwezig:
 
@@ -201,7 +201,7 @@ Open:
 - De kosten per 1.000 verzoeken uit Cost Management over een `soak`-venster
   moeten nog worden bepaald.
 
-## WAF-pijler 6: Sustainability, 6/10
+## WAF-pijler 6: Duurzaamheid, 6/10
 
 Aanwezig:
 
@@ -216,7 +216,7 @@ Open:
 
 ## CAF
 
-**Strategy and plan, 8/10.** De regelgevende motivatie is per artikel
+**Strategie en plan, 8/10.** De regelgevende motivatie is per artikel
 vastgelegd (Verordening (EU) 2025/327 in haar vastgestelde nummering); de
 [operationele richtlijn](../security/operational-guideline.md) noemt welke
 EHDS-rol welk onderdeel exploiteert en wat BSI C5, IT-Grundschutz, TR-02102 en
@@ -224,18 +224,18 @@ TR-03161 van elk vragen; eenenzestig ADR's leggen de beslissingen vast; de
 planningsindex volgt het werk. Open: een formele SLA voor deelnemers, die de
 richtlijn in het dienstverleningscontract van de operator onderbrengt.
 
-**Ready, 7/10.** Azure vanaf een merge; de lokale stack met één
+**Gereed, 7/10.** Azure vanaf een merge; de lokale stack met één
 compose-commando; de seedfasen hervatbaar; één Dockerfile per onderdeel met zijn
 stuklijst. Open: de eigen omgeving van de operator, die nog niet bestaat.
 
-**Adopt, 7/10.** De DSP 2025-1-TCK, DCP- en EHDS-compliancesuites bij elk pull
+**Toepassen, 7/10.** De DSP 2025-1-TCK, DCP- en EHDS-compliancesuites bij elk pull
 request; de Bruno-collectie toetst elke route per persona
 ([ADR-031](../ADRs/ADR-031-checks-must-assert.md), [ADR-032](../ADRs/ADR-032-persona-organised-api-collection.md));
 2.317 UI-unittests, 1.145 Playwright-journeys, 279 Swift-tests. Open: chaos
 engineering, en een generale repetitie van de migratie van Neo4j 5 naar 2025
 ([ADR-030](../ADRs/ADR-030-neo4j-2025-lts-migration.md)).
 
-**Govern and manage, 6/10.** Het bewaarbeleid en de manipulatiebestendige
+**Besturen en beheren, 6/10.** Het bewaarbeleid en de manipulatiebestendige
 audittrail bestaan (ADR-045); de incidenttermijnen van de AVG en NIS2 en wie
 elk ervan draagt, staan in de richtlijn (sectie 7); de EHDS-rollen hebben hun
 checklist voor de livegang (sectie 10). Open: een SLA en het dashboard ervan,
@@ -248,13 +248,13 @@ Het gat zit niet meer in de code; het zit in de exploitatie, en de
 [checklist van de richtlijn](../security/operational-guideline.md#10-before-go-live-the-checklist-by-role)
 somt het per EHDS-rol op. De punten die het project zelf nog kan doen:
 
-| #   | Punt                                                                                                          | Pijler                   | Gevolgd in                |
-| --- | ------------------------------------------------------------------------------------------------------------- | ------------------------ | ------------------------- |
-| 1   | `stress` na `size-ui.sh`, daarna `spike`, `soak` en `signin`; de p95 per fase in ADR-061                      | Performance, Reliability | #571                      |
-| 2   | Alertregels op het belastingdashboard en de auditketen, en wie wordt opgeroepen                               | Operational Excellence   | open                      |
-| 3   | Een back-up van Neo4j, of Neo4j Enterprise of een beheerde graafdatabase, vóór niet-synthetische gegevens     | Reliability              | richtlijn, sectie 2       |
-| 4   | Compressie en een korte cache op de antwoorden van de catalogus en het overzicht                              | Performance              | open                      |
-| 5   | Rotatie van geheimen volgens schema: de Keycloak-clients, de accountdienst, het catalogustoken                | Security                 | richtlijn, sectie 2       |
-| 6   | Een onafhankelijke penetratietest van de hub en een TR-03161-test van de app                                  | Security                 | #655                      |
-| 7   | Operatoraccounts en `edcadmin` op gegenereerde wachtwoorden in Key Vault (`scripts/azure/secure-accounts.sh`) | Security                 | #671                      |
-| 8   | Een SLA met haar dashboard, en het incidentresponsplan met een benoemd team                                   | Govern and manage        | richtlijn, secties 7 en 8 |
+| #   | Punt                                                                                                          | Pijler                                 | Gevolgd in                |
+| --- | ------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ------------------------- |
+| 1   | `stress` na `size-ui.sh`, daarna `spike`, `soak` en `signin`; de p95 per fase in ADR-061                      | Prestatie-efficiëntie, betrouwbaarheid | #571                      |
+| 2   | Alertregels op het belastingdashboard en de auditketen, en wie wordt opgeroepen                               | Operationele uitmuntendheid            | open                      |
+| 3   | Een back-up van Neo4j, of Neo4j Enterprise of een beheerde graafdatabase, vóór niet-synthetische gegevens     | Betrouwbaarheid                        | richtlijn, sectie 2       |
+| 4   | Compressie en een korte cache op de antwoorden van de catalogus en het overzicht                              | Prestatie-efficiëntie                  | open                      |
+| 5   | Rotatie van geheimen volgens schema: de Keycloak-clients, de accountdienst, het catalogustoken                | Beveiliging                            | richtlijn, sectie 2       |
+| 6   | Een onafhankelijke penetratietest van de hub en een TR-03161-test van de app                                  | Beveiliging                            | #655                      |
+| 7   | Operatoraccounts en `edcadmin` op gegenereerde wachtwoorden in Key Vault (`scripts/azure/secure-accounts.sh`) | Beveiliging                            | #671                      |
+| 8   | Een SLA met haar dashboard, en het incidentresponsplan met een benoemd team                                   | Besturen en beheren                    | richtlijn, secties 7 en 8 |

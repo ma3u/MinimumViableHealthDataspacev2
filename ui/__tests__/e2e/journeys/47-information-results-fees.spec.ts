@@ -3,7 +3,7 @@
  * (J1000 to J1004).
  *
  * Regulation (EU) 2025/327: the access body informs the public (Art. 58(1))
- * on a page that needs no sign-in; a permit carries a fee split between the
+ * on a page any signed-in participant reads (ADR-044); a permit carries a fee split between the
  * body and the holder, reduced for the categories of Art. 62(3); the data
  * user communicates the results of its use within 18 months (Art. 61(4))
  * and they are published (Art. 57(1)(j)(v)) and reported (Art. 59(1)(j));

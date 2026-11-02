@@ -80,9 +80,10 @@ function InLanguage({
   );
 }
 
-const LEGAL_BASIS_LABELS: Record<string, string> = {
-  "EHDS-Art53-SecondaryUse": "EHDS Art. 53",
-};
+/** The legal basis a dataset names, as the reader's language writes it. */
+function legalBasisLabel(basis: string, t: (text: string) => string): string {
+  return basis === "EHDS-Art53-SecondaryUse" ? t("EHDS Art. 53") : basis;
+}
 
 /** Theme → Tailwind gradient classes */
 const THEME_GRADIENT: Record<string, string> = {
@@ -349,7 +350,7 @@ function CatalogContent() {
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
             <p className="text-xs font-bold text-(--text-secondary) uppercase tracking-widest">
-              HealthDCAT-AP · EHDS Art. 53
+              {t("HealthDCAT-AP · EHDS Art. 53")}
             </p>
             <h1 className="text-4xl font-extrabold text-(--text-primary) tracking-tight">
               {t("Dataset Catalog")}
@@ -619,8 +620,7 @@ function CatalogContent() {
                           {d.legalBasis && (
                             <div className="mb-4">
                               <span className="text-[10px] font-bold text-(--role-hdab-text) bg-(--role-hdab-bg) border border-(--role-hdab-border) px-2 py-0.5 rounded-full">
-                                {LEGAL_BASIS_LABELS[d.legalBasis] ??
-                                  d.legalBasis}
+                                {legalBasisLabel(d.legalBasis, t)}
                               </span>
                             </div>
                           )}
@@ -732,9 +732,7 @@ function CatalogContent() {
                   { label: "Dataset Type", value: detailDataset.datasetType },
                   {
                     label: "Legal Basis",
-                    value:
-                      LEGAL_BASIS_LABELS[detailDataset.legalBasis] ??
-                      detailDataset.legalBasis,
+                    value: legalBasisLabel(detailDataset.legalBasis, t),
                   },
                   {
                     label: "Record Count",

@@ -8,10 +8,12 @@ import Link from "next/link";
 import { ScrollText, ShieldCheck, AlertCircle } from "lucide-react";
 
 /**
- * The public register of the health data access body. No sign-in: Regulation
- * (EU) 2025/327 requires it to be public (Art. 57(1)(j)(ii) to (iv), Art.
- * 58(1)(f)). The access body works on /compliance; this page is what the
- * public and the natural persons concerned get to see. Issue #206, M2.
+ * The public register of the health data access body. Regulation (EU)
+ * 2025/327 requires it to be public (Art. 57(1)(j)(ii) to (iv), Art.
+ * 58(1)(f)); this demo shows it to any signed-in participant, since every
+ * route needs a session (ADR-044). The access body works on /compliance;
+ * this page is what the public and the natural persons concerned get to
+ * see. Issue #206, M2.
  */
 
 interface Entry {

@@ -716,7 +716,7 @@ open http://traefik.localhost`}</pre>
             <p className="text-(--text-secondary) text-xs">
               <T area="docsDeveloper" tags={{ b: warn, c: small }}>
                 {
-                  "<b>Important:</b> Vault secrets are lost on Docker restart (in-memory dev mode). Re-run <c>./scripts/bootstrap-jad.sh --seed</c> after any <c>docker compose down</c>."
+                  "<b>Important:</b> Vault keeps its secrets on disk (volumes <c>vault_data</c> and <c>vault_keys</c>; the <c>vault-unseal</c> sidecar unseals it on every start), so a restart or a <c>docker compose down</c> keeps every secret. Only removing the volumes (<c>docker compose down -v</c> or <c>./scripts/bootstrap-jad.sh --reset</c>) deletes them; bootstrap and seed the stack again after that. If IdentityHub logs <c>Private key ... not found</c>, check that <c>health-dataspace-vault-unseal</c> reported <c>ready</c>."
                 }
               </T>
             </p>
@@ -1152,7 +1152,7 @@ open http://traefik.localhost`}</pre>
               }}
             >
               {
-                "{routes} Next.js API routes ({ops} operations) proxy to Neo4j and the EDC-V services; the table is generated from <c>ui/src/app/api/</c>. Every route needs a session except the sign-in flows, the health probe and the TestFlight form (ADR-044, ADR-048). Routes are disabled in the static export; mock data is served from <k>ui/public/mock/*.json</k>."
+                "{routes} Next.js API routes ({ops} operations) proxy to Neo4j and the EDC-V services; the table is generated from <c>ui/src/app/api/</c>. Every route needs a session (ADR-044) except the sign-in flows, the Keycloak address for the sign-in banner, the health probe, and the Klarbefund app's account creation, which answers only a verified Apple App Attest attestation (ADR-054). Routes are disabled in the static export; mock data is served from <k>ui/public/mock/*.json</k>."
               }
             </T>
           </p>

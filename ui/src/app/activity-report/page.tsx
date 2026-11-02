@@ -13,8 +13,9 @@ import { T, useT } from "@/lib/i18n/translate";
 
 /**
  * The activity report of the health data access body, Regulation (EU)
- * 2025/327 Art. 59(1)(a) to (k), generated from the graph. Public, no
- * sign-in: the regulation wants it on the body's website. Issue #206, M6.
+ * 2025/327 Art. 59(1)(a) to (k), generated from the graph. The regulation
+ * wants it on the body's website; this demo shows it to any signed-in
+ * participant, since every route needs a session (ADR-044). Issue #206, M6.
  */
 
 type ItemKey = keyof ActivityReport["items"];
@@ -394,7 +395,9 @@ export default function ActivityReportPage() {
             {t("Activity report of the health data access body")}
           </h1>
           <p className="text-(--text-secondary) text-lg mt-1">
-            {t("Regulation (EU) 2025/327, Art. 59 · public, no sign-in")}
+            {t(
+              "Regulation (EU) 2025/327, Art. 59 · for every signed-in participant",
+            )}
           </p>
         </div>
 
