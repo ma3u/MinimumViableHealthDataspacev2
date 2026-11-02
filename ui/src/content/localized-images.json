@@ -331,17 +331,59 @@
       "nl": "/published-docs/dsp-negotiation.nl.svg",
       "es": "/published-docs/dsp-negotiation.es.svg"
     },
+    "/published-docs/ehds-incident-coordination.svg": {
+      "de": "/published-docs/ehds-incident-coordination.de.svg",
+      "fr": "/published-docs/ehds-incident-coordination.fr.svg",
+      "nl": "/published-docs/ehds-incident-coordination.nl.svg",
+      "es": "/published-docs/ehds-incident-coordination.es.svg"
+    },
+    "/published-docs/ehds-operating-model.svg": {
+      "de": "/published-docs/ehds-operating-model.de.svg",
+      "fr": "/published-docs/ehds-operating-model.fr.svg",
+      "nl": "/published-docs/ehds-operating-model.nl.svg",
+      "es": "/published-docs/ehds-operating-model.es.svg"
+    },
+    "/published-docs/ehds-solution-layers.svg": {
+      "de": "/published-docs/ehds-solution-layers.de.svg",
+      "fr": "/published-docs/ehds-solution-layers.fr.svg",
+      "nl": "/published-docs/ehds-solution-layers.nl.svg",
+      "es": "/published-docs/ehds-solution-layers.es.svg"
+    },
     "/published-docs/graph-schema.svg": {
       "de": "/published-docs/graph-schema.de.svg",
       "fr": "/published-docs/graph-schema.fr.svg",
       "nl": "/published-docs/graph-schema.nl.svg",
       "es": "/published-docs/graph-schema.es.svg"
     },
+    "/published-docs/hub-exchange-threats.svg": {
+      "de": "/published-docs/hub-exchange-threats.de.svg",
+      "fr": "/published-docs/hub-exchange-threats.fr.svg",
+      "nl": "/published-docs/hub-exchange-threats.nl.svg",
+      "es": "/published-docs/hub-exchange-threats.es.svg"
+    },
+    "/published-docs/hub-trust-boundaries.svg": {
+      "de": "/published-docs/hub-trust-boundaries.de.svg",
+      "fr": "/published-docs/hub-trust-boundaries.fr.svg",
+      "nl": "/published-docs/hub-trust-boundaries.nl.svg",
+      "es": "/published-docs/hub-trust-boundaries.es.svg"
+    },
     "/published-docs/identity-trust.svg": {
       "de": "/published-docs/identity-trust.de.svg",
       "fr": "/published-docs/identity-trust.fr.svg",
       "nl": "/published-docs/identity-trust.nl.svg",
       "es": "/published-docs/identity-trust.es.svg"
+    },
+    "/published-docs/klarbefund-architecture.svg": {
+      "de": "/published-docs/klarbefund-architecture.de.svg",
+      "fr": "/published-docs/klarbefund-architecture.fr.svg",
+      "nl": "/published-docs/klarbefund-architecture.nl.svg",
+      "es": "/published-docs/klarbefund-architecture.es.svg"
+    },
+    "/published-docs/klarbefund-scan-pipeline.svg": {
+      "de": "/published-docs/klarbefund-scan-pipeline.de.svg",
+      "fr": "/published-docs/klarbefund-scan-pipeline.fr.svg",
+      "nl": "/published-docs/klarbefund-scan-pipeline.nl.svg",
+      "es": "/published-docs/klarbefund-scan-pipeline.es.svg"
     },
     "/published-docs/knowledge-graph-layers.svg": {
       "de": "/published-docs/knowledge-graph-layers.de.svg",
