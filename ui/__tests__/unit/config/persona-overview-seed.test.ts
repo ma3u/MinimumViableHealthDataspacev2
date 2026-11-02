@@ -10,7 +10,7 @@
  * generator must keep producing, whoever edits it next.
  */
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const ROOT = join(__dirname, "../../../..");
@@ -269,6 +269,28 @@ describe("wiring of the seed", () => {
     expect(schema).toContain(
       "FOR (qa:QualityAssessment) REQUIRE qa.assessmentId IS UNIQUE",
     );
+  });
+});
+
+describe("the static demo's mock fixtures", () => {
+  // Every file under public/mock, so a refreshed or new mock cannot bring a
+  // real organisation back into the GitHub Pages build.
+  const MOCK_DIR = "ui/public/mock";
+  const mocks = readdirSync(join(ROOT, MOCK_DIR)).filter((f) =>
+    f.endsWith(".json"),
+  );
+
+  it("finds the mock fixtures", () => {
+    expect(mocks.length).toBeGreaterThan(40);
+  });
+
+  it.each(mocks)("%s names only fictional organisations", (file) => {
+    const text = read(`${MOCK_DIR}/${file}`);
+    for (const name of FORBIDDEN) {
+      expect(text, `real organisation "${name}" in ${file}`).not.toContain(
+        name,
+      );
+    }
   });
 });
 

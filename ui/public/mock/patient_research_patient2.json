@@ -1,0 +1,53 @@
+{
+  "programs": [
+    {
+      "studyId": "STUDY-CARDIO-2024",
+      "studyName": "European Cardiovascular Risk Study",
+      "institution": "PharmaCo Research AG",
+      "purpose": "secondary-use",
+      "description": "Multi-centre cohort study of cardiovascular risk factors across EHDS member states. Aims to improve 10-year event prediction models.",
+      "dataNeeded": "FHIR Conditions, Observations (blood pressure, cholesterol), Medications",
+      "status": "open",
+      "participantCount": 4821,
+      "countries": ["DE", "NL", "FR", "ES"],
+      "ethicsApproval": "EK-Berlin-2024-0041"
+    },
+    {
+      "studyId": "STUDY-DIAB-2023",
+      "studyName": "T2D Progression Biomarkers",
+      "institution": "Institut de Recherche Santé",
+      "purpose": "secondary-use",
+      "description": "Identifying biomarker patterns predicting Type 2 Diabetes complication onset using longitudinal EHR data.",
+      "dataNeeded": "OMOP Drug Exposures, Condition Occurrences, Measurements (HbA1c, eGFR)",
+      "status": "open",
+      "participantCount": 2103,
+      "countries": ["FR", "DE", "BE"],
+      "ethicsApproval": "CPP-IDF-2023-0178"
+    },
+    {
+      "studyId": "STUDY-RESP-2025",
+      "studyName": "Respiratory EHDS Cohort",
+      "institution": "MedReg DE",
+      "purpose": "secondary-use",
+      "description": "Cross-border respiratory disease surveillance leveraging EHDS priority datasets (COPD, asthma).",
+      "dataNeeded": "FHIR Conditions (asthma, COPD), Observation spirometry values",
+      "status": "recruiting",
+      "participantCount": 890,
+      "countries": ["DE", "AT", "CH"],
+      "ethicsApproval": "MedReg-EK-2025-0022"
+    }
+  ],
+  "consents": [
+    {
+      "consentId": "CONSENT-P2-001",
+      "studyId": "STUDY-CARDIO-2024",
+      "grantedAt": "2025-04-14T10:15:00Z",
+      "revoked": false,
+      "purpose": "secondary-use",
+      "dataScope": "FHIR Conditions + Observations + Medications",
+      "trustCenterDid": "did:web:lmc.nl:trustcentre"
+    }
+  ],
+  "ehdsArticle": "EHDS Art. 10 — Secondary use opt-in consent",
+  "gdprBasis": "GDPR Art. 9(2)(j) — scientific research with appropriate safeguards"
+}

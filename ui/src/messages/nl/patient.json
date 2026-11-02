@@ -287,5 +287,11 @@
   "Your ePA is now in the EHDS portal as FHIR R4. End-to-end encrypted: {insurer} cannot read it. Withdraw consent any time.": "Uw ePA staat nu als FHIR R4 in het EHDS-portaal. End-to-end versleuteld: {insurer} kan het niet lezen. Toestemming altijd in te trekken.",
   "Approve {wallet} register": "Registratie met {wallet} goedkeuren",
   "Approve {wallet} login": "Aanmelding met {wallet} goedkeuren",
-  "Approve in the insurer app": "Goedkeuren in de app van de zorgverzekeraar"
+  "Approve in the insurer app": "Goedkeuren in de app van de zorgverzekeraar",
+  "You may not see these research programs: a patient sees and consents for their own record only. If your session has ended, sign in again.": "U mag deze onderzoeksprogramma’s niet zien: een patiënt ziet alleen het eigen dossier en geeft alleen daarvoor toestemming. Is uw sessie verlopen, meld u dan opnieuw aan.",
+  "The research programs could not be loaded (HTTP {status}). Please try again later.": "De onderzoeksprogramma’s konden niet worden geladen (HTTP {status}). Probeer het later opnieuw.",
+  "The research programs could not be loaded. Please try again later.": "De onderzoeksprogramma’s konden niet worden geladen. Probeer het later opnieuw.",
+  "You may not see these insights: a patient sees their own record only. If your session has ended, sign in again.": "U mag deze inzichten niet zien: een patiënt ziet alleen het eigen dossier. Is uw sessie verlopen, meld u dan opnieuw aan.",
+  "The insights could not be loaded (HTTP {status}). Please try again later.": "De inzichten konden niet worden geladen (HTTP {status}). Probeer het later opnieuw.",
+  "The insights could not be loaded. Please try again later.": "De inzichten konden niet worden geladen. Probeer het later opnieuw."
 }

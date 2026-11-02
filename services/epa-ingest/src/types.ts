@@ -173,6 +173,6 @@ export interface ReportMeta {
   effectiveDateTime: string;
   /** Free-text name of the issuing lab, study centre or hospital. */
   performer?: string;
-  /** Title for the DiagnosticReport, e.g. "Laborbefund FS-CPC". */
+  /** Title for the DiagnosticReport, e.g. "Laborbefund AlphaKlinik Berlin CPC". */
   title?: string;
 }

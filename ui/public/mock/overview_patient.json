@@ -447,19 +447,19 @@
       "facts": [
         ["granted", "2024-03-10"],
         ["state", "active"],
-        ["pseudonymised by", "did:web:rki.de:trust-center"]
+        ["pseudonymised by", "did:web:medreg.de:trustcentre"]
       ],
       "article": "GDPR Art. 9(2)(j) — scientific research with appropriate safeguards"
     },
     {
-      "id": "tc:did-web-rki-de-trust-center",
-      "label": "did:web:rki.de:trust-center",
+      "id": "tc:did-web-medreg-de-trustcentre",
+      "label": "did:web:medreg.de:trustcentre",
       "layer": "use",
       "kind": "Trust centre",
       "size": 1.1,
       "color": "#ef4444",
       "title": "Trust centre",
-      "sub": "did:web:rki.de:trust-center",
+      "sub": "did:web:medreg.de:trustcentre",
       "article": "Pseudonymisation before the SPE, Art. 73"
     },
     {
@@ -510,19 +510,19 @@
       "facts": [
         ["granted", "2023-11-15"],
         ["state", "active"],
-        ["pseudonymised by", "did:web:rivm.nl:trust-center"]
+        ["pseudonymised by", "did:web:lmc.nl:trustcentre"]
       ],
       "article": "GDPR Art. 9(2)(j) — scientific research with appropriate safeguards"
     },
     {
-      "id": "tc:did-web-rivm-nl-trust-center",
-      "label": "did:web:rivm.nl:trust-center",
+      "id": "tc:did-web-lmc-nl-trustcentre",
+      "label": "did:web:lmc.nl:trustcentre",
       "layer": "use",
       "kind": "Trust centre",
       "size": 1.1,
       "color": "#ef4444",
       "title": "Trust centre",
-      "sub": "did:web:rivm.nl:trust-center",
+      "sub": "did:web:lmc.nl:trustcentre",
       "article": "Pseudonymisation before the SPE, Art. 73"
     },
     {
@@ -541,7 +541,7 @@
           "FHIR Conditions (asthma, COPD), Observation spirometry values"
         ],
         ["status", "recruiting"],
-        ["ethics", "BfArM-2025-0022"]
+        ["ethics", "MedReg-EK-2025-0022"]
       ],
       "article": "Not joined. Art. 71: secondary use continues unless I opt out; a study invitation is a separate consent",
       "links": [
@@ -3001,7 +3001,7 @@
     },
     {
       "source": "consent:CONSENT-001",
-      "target": "tc:did-web-rki-de-trust-center",
+      "target": "tc:did-web-medreg-de-trustcentre",
       "kind": "pseudonymised by",
       "color": "#ef4444",
       "distance": 40
@@ -3038,7 +3038,7 @@
     },
     {
       "source": "consent:CONSENT-002",
-      "target": "tc:did-web-rivm-nl-trust-center",
+      "target": "tc:did-web-lmc-nl-trustcentre",
       "kind": "pseudonymised by",
       "color": "#ef4444",
       "distance": 40

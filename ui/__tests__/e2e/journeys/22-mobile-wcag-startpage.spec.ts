@@ -10,8 +10,8 @@
  *   - GitHub Pages: NEXT_PUBLIC_STATIC_EXPORT=true PLAYWRIGHT_BASE_URL=https://ma3u.github.io npx playwright test 22-mobile-wcag-startpage.spec.ts
  */
 
-import { test, expect, type Page } from "@playwright/test";
-import { T } from "./helpers";
+import { test, expect } from "@playwright/test";
+import { T, setPersona } from "./helpers";
 
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
@@ -20,14 +20,6 @@ const BP = IS_STATIC ? "/MinimumViableHealthDataspacev2" : "";
 
 function P(path: string): string {
   return BP + path;
-}
-
-async function setPersona(page: Page, username: string) {
-  await page.evaluate(
-    ([key, value]) => sessionStorage.setItem(key, value),
-    ["demo-persona", username],
-  );
-  await page.reload({ waitUntil: "networkidle" });
 }
 
 // ── U1: Start Page Content ──────────────────────────────────────────────────

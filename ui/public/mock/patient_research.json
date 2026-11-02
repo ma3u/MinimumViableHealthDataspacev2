@@ -34,7 +34,7 @@
       "status": "recruiting",
       "participantCount": 890,
       "countries": ["DE", "AT", "CH"],
-      "ethicsApproval": "BfArM-2025-0022"
+      "ethicsApproval": "MedReg-EK-2025-0022"
     }
   ],
   "consents": [
@@ -45,7 +45,7 @@
       "revoked": false,
       "purpose": "secondary-use",
       "dataScope": "FHIR Conditions + Observations",
-      "trustCenterDid": "did:web:rki.de:trust-center"
+      "trustCenterDid": "did:web:medreg.de:trustcentre"
     },
     {
       "consentId": "CONSENT-002",
@@ -54,7 +54,7 @@
       "revoked": false,
       "purpose": "secondary-use",
       "dataScope": "OMOP Drug Exposures + Conditions",
-      "trustCenterDid": "did:web:rivm.nl:trust-center"
+      "trustCenterDid": "did:web:lmc.nl:trustcentre"
     }
   ],
   "ehdsArticle": "EHDS Art. 10 — Secondary use opt-in consent",
