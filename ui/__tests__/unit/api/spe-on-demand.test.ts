@@ -69,7 +69,7 @@ function world(w: World) {
   posts.length = 0;
   proxyCalls.length = 0;
   mockFetch.mockImplementation(async (url: string, init?: RequestInit) => {
-    if (url.startsWith("http://identity.test")) {
+    if (new URL(url).origin === "http://identity.test") {
       return json({
         access_token: "t",
         expires_on: String(Math.floor(Date.now() / 1000) + 3600),

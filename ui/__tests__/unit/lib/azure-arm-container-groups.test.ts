@@ -25,7 +25,7 @@ function json(body: unknown, status = 200) {
 
 function answer(arm: (url: string, init?: RequestInit) => Response) {
   mockFetch.mockImplementation(async (url: string, init?: RequestInit) => {
-    if (url.startsWith("http://identity.test")) {
+    if (new URL(url).origin === "http://identity.test") {
       return json({
         access_token: "token-1",
         expires_on: String(Math.floor(Date.now() / 1000) + 3600),
@@ -95,8 +95,8 @@ describe("ACI container group helpers", () => {
       state: "Running",
       startedAt: "2026-11-02T08:01:02Z",
     });
-    const armCall = mockFetch.mock.calls.find((c) =>
-      String(c[0]).startsWith("https://management.azure.com"),
+    const armCall = mockFetch.mock.calls.find(
+      (c) => new URL(String(c[0])).origin === "https://management.azure.com",
     )!;
     expect(armCall[0]).toBe(`${GROUP}?api-version=2023-05-01`);
     expect(
