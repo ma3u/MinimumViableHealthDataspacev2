@@ -4,7 +4,6 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
-  rmSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -16,6 +15,7 @@ import { newExtractKey, seal } from "./crypto.js";
 import { parseJsonl, toJsonl, type ExtractHeader } from "./extract.js";
 import { exportExtract, recordPermit } from "./hub.js";
 import { KbsError, kbsAdmin, kbsClient, type ReferenceValue } from "./kbs.js";
+import { ingestCommand } from "./ingest-command.js";
 import {
   ingest,
   sessionWorkspace,
@@ -42,7 +42,8 @@ const USAGE = `spe-loader <command> [options]
   extract --spe <1|2> --out <file.enc> [--record-permit]
                                                      export + encrypt in memory: no plaintext on disk
   unlock  --spe <1|2> --in <file.enc> --work <dir>   attest, fetch the key, decrypt into <dir> (init container)
-  ingest  --spe <1|2> --work <dir> [--stay]          load what unlock left into the workspace (sidecar)
+  ingest  --spe <1|2> --work <dir> [--stay]          load what unlock left into the workspace; --stay keeps
+                                                     running until SIGTERM (ACI sidecar), without it a one-shot
   load    --spe <1|2> --in <file.enc>                unlock + ingest (compose one-shot)
 
 Options for export/extract: --permit <id> (SPE_PERMIT_ID), --workload <file.json> or
@@ -417,25 +418,16 @@ async function main(): Promise<number> {
     }
     case "ingest": {
       const spe = speByNumber(String(values.spe));
-      const work = (values.work as string | undefined) ?? "/work";
-      const outcome = JSON.parse(
-        readFileSync(join(work, "unlock.json"), "utf8"),
-      ) as UnlockOutcome;
-      const file = join(work, "extract.jsonl");
-      const plaintext = existsSync(file) ? readFileSync(file) : null;
-      const code = await runIngest(
-        spe.n,
-        outcome,
-        plaintext,
-        Boolean(values.stay),
+      const stay = Boolean(values.stay);
+      return ingestCommand(
+        (values.work as string | undefined) ?? "/work",
+        stay,
+        {
+          load: (outcome, plaintext) =>
+            runIngest(spe.n, outcome, plaintext, stay),
+          log,
+        },
       );
-      // The plain extract has done its job; the data now lives in Neo4j's memory-backed store.
-      if (plaintext) rmSync(file, { force: true });
-      if (values.stay) {
-        log("loaded; staying up so the pod keeps running");
-        await new Promise(() => undefined);
-      }
-      return code;
     }
     default:
       process.stderr.write(`${USAGE}\n`);

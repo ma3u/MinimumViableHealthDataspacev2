@@ -13,6 +13,9 @@
 export const ADR_068_URL =
   "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md";
 
+export const ADR_069_URL =
+  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md";
+
 export type SpeEnvironment = "azure" | "local" | "static";
 export type AttestationScope = "node" | "workload" | "none";
 export type SpeStatusValue = "ready" | "loading" | "refused" | "unreachable";
@@ -107,6 +110,27 @@ export interface SpeStatusResponse {
    * (ADR-072): an operator or the access body, on Azure. Set by the UI.
    */
   power?: { available: boolean; reason: string | null };
+  /**
+   * The data permits (HDABApproval) the hub holds a policy hash for, as
+   * `spe-loader record-permit` wrote them (#833). Set by the UI from the hub
+   * graph, so a stopped workspace still shows its permit and hash.
+   */
+  permits?: SpePermitRecord[];
+}
+
+/** A data permit (HDABApproval) as the hub records it for the SPEs (#833). */
+export interface SpePermitRecord {
+  permitId: string;
+  name: string | null;
+  status: string | null;
+  /** The hash recorded last; with several workspaces, see `policyHashBySpe`. */
+  policyHash: string | null;
+  /** Each workspace's hash ("SPE-1" to "sha256:..."), recorded since #833. */
+  policyHashBySpe: Record<string, string>;
+  speWorkspaces: string[];
+  /** The Trustee resources the permit opens, e.g. default/spe-1/extract-key. */
+  trusteeResources: string[];
+  recordedAt: string | null;
 }
 
 // ---- starting and stopping the workspaces (ADR-072) -------------------------
@@ -356,6 +380,106 @@ export function policyCheckDepth(spe: {
   }
   const depth = spe.simulated === false ? "A1" : "M1";
   return { checked, depth, text: `Recorded only (${depth})` };
+}
+
+/** How far hardware checks a permit's policy hash for one workspace (#833). */
+export type PermitHashCheck = "hardware" | "on-start" | "recorded";
+
+export const PERMIT_HASH_CHECK_TEXTS = {
+  hardware: "Checked by hardware: HOST_DATA of the SEV-SNP report (A2)",
+  onStart:
+    "Workspace stopped: hardware checks it at the next start (HOST_DATA)",
+} as const;
+
+/**
+ * Whether hardware checks the hash. "hardware": the workspace's own evidence
+ * says so (A2: on ACI the hash is the SEV-SNP report's HOST_DATA, and
+ * Trustee releases the key only when it matches). "on-start": an ACI group
+ * ARM reports not running, so there is no evidence now, but its next start
+ * attests again and Trustee compares HOST_DATA then. "recorded": the hash is
+ * on the permit and nothing measured proves the running pod matches it (the
+ * local stack, "Simulated attestation"; or A1). Never more than was reported.
+ */
+export function permitHashCheck(
+  spe: Pick<
+    SpeEntry,
+    | "policyCheckedByHardware"
+    | "attestationScope"
+    | "simulated"
+    | "armState"
+    | "powerState"
+  >,
+  environment: SpeEnvironment,
+): { kind: PermitHashCheck; depth: string; text: string } {
+  const depth = policyCheckDepth(spe);
+  if (depth.checked) {
+    return {
+      kind: "hardware",
+      depth: "A2",
+      text: PERMIT_HASH_CHECK_TEXTS.hardware,
+    };
+  }
+  if (
+    environment === "azure" &&
+    spe.armState &&
+    spe.powerState &&
+    spe.powerState !== "running"
+  ) {
+    return {
+      kind: "on-start",
+      depth: "A2",
+      text: PERMIT_HASH_CHECK_TEXTS.onStart,
+    };
+  }
+  return { kind: "recorded", depth: depth.depth, text: depth.text };
+}
+
+/** One row of "Data permits in secure processing": a workspace and its permit. */
+export interface PermitBinding {
+  spe: SpeEntry;
+  permitId: string | null;
+  permitName: string | null;
+  policyHash: string | null;
+  /** Where the hash comes from: the workspace's record, or the hub's permit. */
+  hashSource: "workspace" | "permit" | null;
+  trusteeResource: string;
+  check: { kind: PermitHashCheck; depth: string; text: string };
+}
+
+/**
+ * Each workspace with its data permit, policy hash and Trustee resource.
+ * The workspace's own record wins (it is what the running pod was loaded
+ * under); the hub's permit fills in what a stopped or unreachable workspace
+ * cannot say. A permit with several workspaces and only one hash recorded
+ * (before #833) gives no hash for any of them: the last one written would
+ * be the wrong one for the others.
+ */
+export function permitBindings(data: SpeStatusResponse): PermitBinding[] {
+  const permits = data.permits ?? [];
+  return data.spes.map((spe) => {
+    const resource = trusteeResource(spe.id);
+    const permit =
+      permits.find((p) => p.permitId === spe.permitId) ??
+      permits.find(
+        (p) =>
+          p.speWorkspaces.includes(spe.id) ||
+          p.trusteeResources.includes(resource),
+      ) ??
+      null;
+    const fromPermit =
+      permit?.policyHashBySpe[spe.id] ??
+      (permit && permit.speWorkspaces.length <= 1 ? permit.policyHash : null);
+    const policyHash = spe.policyHash ?? fromPermit ?? null;
+    return {
+      spe,
+      permitId: spe.permitId ?? permit?.permitId ?? null,
+      permitName: permit?.name ?? null,
+      policyHash,
+      hashSource: spe.policyHash ? "workspace" : policyHash ? "permit" : null,
+      trusteeResource: resource,
+      check: permitHashCheck(spe, data.environment),
+    };
+  });
 }
 
 export function formatSpeTime(iso: string | null | undefined): string {

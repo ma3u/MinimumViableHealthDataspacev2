@@ -2141,6 +2141,34 @@ paths:
                     properties:
                       available: { type: boolean }
                       reason: { type: string, nullable: true }
+                  permits:
+                    description: >
+                      The data permits (HDABApproval) the hub records a policy
+                      hash or Trustee resource for (#833), read from the hub
+                      graph, so a stopped workspace still shows its permit.
+                      Empty when the hub does not answer within three seconds.
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        permitId: { type: string }
+                        name: { type: string, nullable: true }
+                        status: { type: string, nullable: true }
+                        policyHash:
+                          type: string
+                          nullable: true
+                          description: The hash recorded last
+                        policyHashBySpe:
+                          type: object
+                          description: Each workspace's hash, e.g. SPE-1 to sha256:...
+                          additionalProperties: { type: string }
+                        speWorkspaces: { type: array, items: { type: string } }
+                        trusteeResources:
+                          type: array
+                          items: { type: string }
+                          description: e.g. default/spe-1/extract-key
+                        recordedAt:
+                          { type: string, format: date-time, nullable: true }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "403": { $ref: "#/components/responses/Forbidden" }
 

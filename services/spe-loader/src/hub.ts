@@ -180,6 +180,9 @@ export async function exportExtract(
  * Records on the permit what the access body bound its key to: the policy
  * hash and the Trustee resource (ADR-068 decision 2). An existing permit
  * keeps every other field; a missing one is created as the demo's SPE permit.
+ * One permit can cover both workspaces, each with its own hash (on ACI, each
+ * group's ccePolicy): `policyHash` is the last one recorded,
+ * `policyHashBySpe` keeps each as "SPE-<n>=sha256:..." (#833).
  */
 export async function recordPermit(
   session: Session,
@@ -205,7 +208,9 @@ export async function recordPermit(
          a.policyHashRecordedAt = datetime(),
          a.policyCheckedByHardware = false,
          a.trusteeResources = [r IN coalesce(a.trusteeResources, []) WHERE r <> $keyPath] + $keyPath,
-         a.speWorkspaces = [s IN coalesce(a.speWorkspaces, []) WHERE s <> $speId] + $speId`,
+         a.speWorkspaces = [s IN coalesce(a.speWorkspaces, []) WHERE s <> $speId] + $speId,
+         a.policyHashBySpe = [h IN coalesce(a.policyHashBySpe, []) WHERE NOT h STARTS WITH ($speId + '=')]
+                             + ($speId + '=' + $policyHash)`,
     p,
   );
 }

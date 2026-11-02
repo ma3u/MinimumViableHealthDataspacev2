@@ -7,12 +7,16 @@ import { describe, it, expect } from "vitest";
 import {
   attestationAnchor,
   attestationVerdict,
+  permitBindings,
+  permitHashCheck,
   policyCheckDepth,
   shortPolicyHash,
   speEventLabel,
   speLabelText,
   speLabelTone,
   trusteeResource,
+  type SpeEntry,
+  type SpeStatusResponse,
 } from "@/lib/spe";
 import { normaliseSpeEvent } from "@/lib/spe-audit";
 
@@ -246,5 +250,134 @@ describe("normaliseSpeEvent", () => {
     expect(normaliseSpeEvent({ id: "q", resource: "{}" })).toBeNull();
     expect(normaliseSpeEvent({ eventType: "query" })).toBeNull();
     expect(normaliseSpeEvent({ resource: "not json" })).toBeNull();
+  });
+});
+
+describe("permitHashCheck and permitBindings (#833)", () => {
+  const spe = (over: Partial<SpeEntry>): SpeEntry => ({
+    id: "SPE-1",
+    holder: "AlphaKlinik Berlin",
+    runsOn: "x",
+    teeType: "none",
+    attestationScope: "none",
+    simulated: true,
+    label: "Simulated attestation",
+    attestedAt: null,
+    keyReleasedAt: null,
+    permitId: null,
+    policyHash: null,
+    policyCheckedByHardware: false,
+    patients: null,
+    status: "ready",
+    ...over,
+  });
+  const A2 = {
+    attestationScope: "workload" as const,
+    simulated: false,
+    policyCheckedByHardware: true,
+  };
+
+  it("hardware when the workspace's evidence says so (ACI: HOST_DATA)", () => {
+    expect(permitHashCheck(spe(A2), "azure")).toEqual({
+      kind: "hardware",
+      depth: "A2",
+      text: "Checked by hardware: HOST_DATA of the SEV-SNP report (A2)",
+    });
+  });
+
+  it("on-start only for an ACI group ARM reports not running", () => {
+    expect(
+      permitHashCheck(
+        spe({ armState: "Stopped", powerState: "stopped" }),
+        "azure",
+      ).kind,
+    ).toBe("on-start");
+    // No ARM state: not an ACI group (the proxy unwired, SPE-1 the hub graph).
+    expect(permitHashCheck(spe({ powerState: "starting" }), "azure").kind).toBe(
+      "recorded",
+    );
+    // A running group whose evidence is not A2 is reported as it is.
+    expect(
+      permitHashCheck(
+        spe({ armState: "Running", powerState: "running" }),
+        "azure",
+      ).kind,
+    ).toBe("recorded");
+  });
+
+  it("recorded only on the local stack, whatever the power state", () => {
+    expect(
+      permitHashCheck(spe({ powerState: "unreachable" }), "local"),
+    ).toEqual({ kind: "recorded", depth: "M1", text: "Recorded only (M1)" });
+  });
+
+  it("takes the workspace's own record first, the hub's permit for the rest", () => {
+    const own = `sha256:${"a".repeat(64)}`;
+    const hub = `sha256:${"b".repeat(64)}`;
+    const data: SpeStatusResponse = {
+      environment: "azure",
+      trustee: null,
+      residualTrust: [],
+      spes: [
+        spe({ id: "SPE-1", permitId: "p-1", policyHash: own }),
+        spe({ id: "SPE-2", armState: "Stopped", powerState: "stopped" }),
+      ],
+      permits: [
+        {
+          permitId: "p-1",
+          name: "Permit one",
+          status: "APPROVED",
+          policyHash: hub,
+          policyHashBySpe: { "SPE-1": hub, "SPE-2": hub },
+          speWorkspaces: ["SPE-1", "SPE-2"],
+          trusteeResources: [],
+          recordedAt: null,
+        },
+      ],
+    };
+    const [one, two] = permitBindings(data);
+    expect(one).toMatchObject({
+      permitId: "p-1",
+      permitName: "Permit one",
+      policyHash: own,
+      hashSource: "workspace",
+      trusteeResource: "default/spe-1/extract-key",
+    });
+    expect(two).toMatchObject({
+      permitId: "p-1",
+      policyHash: hub,
+      hashSource: "permit",
+      trusteeResource: "default/spe-2/extract-key",
+      check: { kind: "on-start" },
+    });
+  });
+
+  it("finds a permit by its Trustee resource and gives none when there is none", () => {
+    const data: SpeStatusResponse = {
+      environment: "local",
+      trustee: null,
+      residualTrust: [],
+      spes: [spe({ id: "SPE-2" }), spe({ id: "SPE-1" })],
+      permits: [
+        {
+          permitId: "p-2",
+          name: null,
+          status: null,
+          policyHash: `sha256:${"c".repeat(64)}`,
+          policyHashBySpe: {},
+          speWorkspaces: [],
+          trusteeResources: ["default/spe-2/extract-key"],
+          recordedAt: null,
+        },
+      ],
+    };
+    const [two, one] = permitBindings(data);
+    expect(two.permitId).toBe("p-2");
+    expect(two.hashSource).toBe("permit");
+    expect(one).toMatchObject({
+      permitId: null,
+      policyHash: null,
+      hashSource: null,
+    });
   });
 });

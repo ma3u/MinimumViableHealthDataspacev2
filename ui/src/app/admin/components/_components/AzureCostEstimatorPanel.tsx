@@ -310,7 +310,7 @@ export function AzureCostEstimatorPanel({
         </div>
         <p className="text-[10px] text-(--text-secondary) mt-2">
           {t(
-            'Meters "Confidential containers ACI vCPU Duration" €{vcpu} per vCPU-hour and "Confidential containers ACI Memory Duration" €{mem} per GB-hour, westeurope, Azure retail price list read {date} · ADR-069 (proposed, #774) ·',
+            'Meters "Confidential containers ACI vCPU Duration" €{vcpu} per vCPU-hour and "Confidential containers ACI Memory Duration" €{mem} per GB-hour, westeurope, Azure retail price list read {date} · ADR-069 (#774) ·',
             {
               vcpu: ACI_CONFIDENTIAL_RATES.vcpuEurPerHour,
               mem: ACI_CONFIDENTIAL_RATES.memEurPerGbHour,

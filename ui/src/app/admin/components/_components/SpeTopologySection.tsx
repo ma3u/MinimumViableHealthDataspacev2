@@ -52,7 +52,7 @@ export function SpeTopologyView({
               ),
             }}
           >
-            {"(<a>ADR-068</a>, ADR-069 proposed)"}
+            {"(<a>ADR-068</a>, ADR-069)"}
           </T>
         </span>
       </h2>

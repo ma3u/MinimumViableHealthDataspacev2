@@ -2,14 +2,15 @@
 
 Date: 2026-10-31
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-02)
 **Relates to:** [ADR-068](ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md) (the design this places on Azure), [ADR-012](ADR-012-azure-container-apps.md), [ADR-045](ADR-045-observability-and-regulatory-audit-trail.md), [ADR-053](ADR-053-everything-stops-off-hours.md) (extended here, not edited), [ADR-056](ADR-056-neo4j-grows-to-2-vcpu-and-4-gib.md), [ADR-062](ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md)
 **Tracks:** [#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774) (WP1, WP2), [#716](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/716)
 **Replaces:** the unmerged draft of this ADR (2026-10-30), which ran SPE-2 as a plain Neo4j container app seeded from SPE-1
 
 ## Status
 
-Proposed (2026-10-31). The policy exemption for AKS: requested, pending.
+Accepted (2026-11-02, by the maintainer); proposed 2026-10-31. The policy
+exemption for AKS: requested, pending.
 
 **Implementation status (2026-11-02).** Phase 21 ran end to end on Azure
 ([#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774)):
@@ -25,7 +26,7 @@ Instances Contributor Role on the two groups (decision 8). The launch
 measurement was checked against Microsoft's endorsement by issuer and content,
 not by its signature. Steps and failures:
 [runbook spe-attestation-azure](../knowledge/runbooks/spe-attestation-azure.md).
-The status is the maintainer's decision.
+The maintainer accepted it on 2026-11-02.
 
 ## Context
 

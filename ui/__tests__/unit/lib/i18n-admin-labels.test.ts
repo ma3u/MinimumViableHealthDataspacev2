@@ -10,6 +10,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { MESSAGES } from "@/messages";
 import {
+  PERMIT_HASH_CHECK_TEXTS,
   SPE_EVENT_LABELS,
   SPE_POWER_REASONS,
   SPE_POWER_STATES,
@@ -54,6 +55,19 @@ describe("the admin area knows every label its pages take from elsewhere", () =>
     ];
     expect(texts).toHaveLength(15);
     expect(missing(texts)).toEqual([]);
+  });
+
+  it("whether hardware checks a permit's policy hash (#833)", () => {
+    const texts = Object.values(PERMIT_HASH_CHECK_TEXTS);
+    expect(texts).toHaveLength(2);
+    expect(missing(texts)).toEqual([]);
+    for (const lang of ["de", "fr", "nl", "es"] as const) {
+      const d = MESSAGES[lang].admin as Record<string, string>;
+      expect(
+        texts.filter((x) => !(x in d)),
+        lang,
+      ).toEqual([]);
+    }
   });
 
   it("the SPE power states and the reasons a caller may not start one (ADR-072)", () => {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { isAzureDeployment } from "@/lib/azure-arm";
+import { runQuery } from "@/lib/neo4j";
 import { userToParticipantId } from "@/lib/odrl-engine";
 import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
 import {
@@ -9,6 +10,7 @@ import {
   spePowerState,
   type SpeArmPower,
   type SpeEntry,
+  type SpePermitRecord,
   type SpeStatusResponse,
 } from "@/lib/spe";
 import {
@@ -130,13 +132,75 @@ function withPower(
   };
 }
 
+const PERMIT_TIMEOUT_MS = 3_000;
+
+const strOrNull = (v: unknown): string | null =>
+  typeof v === "string" && v !== "" ? v : null;
+const strings = (v: unknown): string[] =>
+  Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+
+/** "SPE-1=sha256:..." entries, as `spe-loader record-permit` writes them. */
+function hashBySpe(v: unknown): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const entry of strings(v)) {
+    const at = entry.indexOf("=");
+    if (at > 0) out[entry.slice(0, at)] = entry.slice(at + 1);
+  }
+  return out;
+}
+
+/**
+ * The data permits the hub holds a policy hash or Trustee resource for
+ * (#833), so the policies page shows a stopped workspace's permit too. Best
+ * effort: an unreachable hub, or one slower than three seconds, gives none,
+ * and the page shows what the workspaces reported.
+ */
+async function readPermits(): Promise<SpePermitRecord[]> {
+  const query = runQuery<Record<string, unknown>>(
+    `MATCH (a:HDABApproval)
+     WHERE a.policyHash IS NOT NULL OR size(coalesce(a.trusteeResources, [])) > 0
+     RETURN a.approvalId AS permitId, a.name AS name, a.status AS status,
+            a.policyHash AS policyHash, a.policyHashBySpe AS policyHashBySpe,
+            coalesce(a.speWorkspaces, []) AS speWorkspaces,
+            coalesce(a.trusteeResources, []) AS trusteeResources,
+            toString(a.policyHashRecordedAt) AS recordedAt
+     ORDER BY permitId`,
+  );
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<null>((resolve) => {
+    timer = setTimeout(() => resolve(null), PERMIT_TIMEOUT_MS);
+  });
+  try {
+    const rows = await Promise.race([query, timeout]);
+    if (!rows) return [];
+    return rows
+      .filter((r) => typeof r.permitId === "string")
+      .map((r) => ({
+        permitId: r.permitId as string,
+        name: strOrNull(r.name),
+        status: strOrNull(r.status),
+        policyHash: strOrNull(r.policyHash),
+        policyHashBySpe: hashBySpe(r.policyHashBySpe),
+        speWorkspaces: strings(r.speWorkspaces),
+        trusteeResources: strings(r.trusteeResources),
+        recordedAt: strOrNull(r.recordedAt),
+      }));
+  } catch {
+    return [];
+  } finally {
+    clearTimeout(timer);
+    query.catch(() => undefined);
+  }
+}
+
 /**
  * GET /api/admin/spe: the confidential SPEs of ADR-068 (#774), for the
  * operator and the access body. Passes the proxy's `/spe/status` through;
  * when the proxy does not have it yet or cannot be reached, answers with the
  * fallback above, labelled "Simulated attestation", and the reason. Each SPE
  * carries its power state (ADR-072). A workspace ARM reports stopped is
- * named in `skip`, so the proxy does not wait for it.
+ * named in `skip`, so the proxy does not wait for it. `permits` are the data
+ * permits the hub records a policy hash for (#833).
  */
 export async function GET(): Promise<NextResponse> {
   const auth = await requireAuth(["EDC_ADMIN", "HDAB_AUTHORITY"]);
@@ -152,6 +216,7 @@ export async function GET(): Promise<NextResponse> {
     ...callerHeaders(session),
   };
 
+  const permitsRead = readPermits();
   const arm = await readArmPower();
   const stopped = SPE_IDS.filter(
     (id) => arm[id] && spePowerState(arm[id], undefined) === "stopped",
@@ -168,7 +233,10 @@ export async function GET(): Promise<NextResponse> {
     if (resp.ok) {
       const data: unknown = await resp.json();
       if (isSpeStatusResponse(data)) {
-        return NextResponse.json(withPower(data, arm, session.roles));
+        return NextResponse.json({
+          ...withPower(data, arm, session.roles),
+          permits: await permitsRead,
+        });
       }
       reason = "The query proxy's /spe/status answered in an unknown shape";
     } else if (resp.status === 404) {
@@ -180,7 +248,8 @@ export async function GET(): Promise<NextResponse> {
     reason = "The query proxy is unreachable";
   }
 
-  return NextResponse.json(
-    withPower(fallbackStatus(reason), arm, session.roles),
-  );
+  return NextResponse.json({
+    ...withPower(fallbackStatus(reason), arm, session.roles),
+    permits: await permitsRead,
+  });
 }
