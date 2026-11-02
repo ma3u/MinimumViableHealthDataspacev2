@@ -22,10 +22,19 @@ const VERIFIABLE = {
 } as const;
 const LANGS = Object.keys(WORD) as (keyof typeof WORD)[];
 const AREAS = Object.keys(MESSAGES.en) as Area[];
+/**
+ * The prose of a text: code (<c>, <code>) and paths such as
+ * /api/credentials/present are names, not the word, and stay English.
+ */
+const prose = (s: string) =>
+  s
+    .replace(/<(c|code)>[\s\S]*?<\/\1>/g, " ")
+    .replace(/<\/?[a-z]+>/g, " ")
+    .replace(/\S*\/\S*/g, " ");
 const keys = (re: RegExp) =>
   AREAS.flatMap((area) =>
     Object.keys(MESSAGES.en[area])
-      .filter((k) => re.test(k))
+      .filter((k) => re.test(prose(k)))
       .map((k) => ({ area, k })),
   );
 
@@ -65,7 +74,7 @@ describe("the word for credentials", () => {
     it(`${lang} keeps no English "credentials" in a translation`, () => {
       const off = AREAS.flatMap((area) =>
         Object.entries(MESSAGES[lang][area])
-          .filter(([, v]) => /\b(?:verifiable )?credentials?\b/i.test(v))
+          .filter(([, v]) => /\b(?:verifiable )?credentials?\b/i.test(prose(v)))
           .map(([k, v]) => `${area}: ${k} -> ${v}`),
       );
       expect(off).toEqual([]);
