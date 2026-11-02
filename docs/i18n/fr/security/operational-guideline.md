@@ -1,0 +1,377 @@
+---
+source: docs/security/operational-guideline.md
+sourceHash: ecd7586f5a4e88a5099596d7c1f9eec81a888d8df3250d3cacbcab6dc9a5a13a
+language: fr
+---
+
+# Guide d’exploitation : héberger le hub et Klarbefund dans le cadre de l’EEDS et des normes du BSI
+
+Ce que contient ce dépôt est un démonstrateur : un groupe de ressources Azure, un
+exploitant, des participants fictifs, des patients synthétiques et une pile qui s’arrête
+la nuit pour rester dans les limites d’un crédit personnel. Ce guide est rédigé pour le
+jour où quelqu’un l’hébergera réellement : un organisme responsable de l’accès aux données de santé, une société
+d’exploitation travaillant pour lui, une assurance maladie, un groupe hospitalier ou un éditeur qui
+reprend l’application en marque blanche. Il indique quel rôle du règlement (UE) 2025/327
+(l’EEDS) exploite quelle partie, ce que les normes du BSI exigent de chaque partie,
+et ce qui doit changer par rapport à la démo avant que des données de santé réelles n’y entrent.
+
+Les numéros d’articles sont ceux du règlement adopté. Des fichiers plus anciens de ce
+dépôt portent encore les numéros de la proposition de 2022 ; la correspondance figure dans
+[`docs/ehds-article-numbering.md`](../ehds-article-numbering.md). Les
+preuves de chaque « la démo le fait déjà » ci-dessous se trouvent dans le
+[rapport de tests de sécurité](security-test-report-2026-10-15.md), les deux modèles de
+menaces ([hub](threat-model.md), [application](threat-model-klarbefund.md)),
+l’[analyse des écarts C5](bsi-c5-gap-analysis.md) et
+l’[auto-évaluation](../klarbefund/self-assessment.md) de Klarbefund. Ce document est un
+guide du projet, ni un avis juridique ni une certification.
+
+## 1. Les rôles de l’EEDS, et qui exploite quoi
+
+Le règlement nomme les rôles ; il ne dit pas qui fait fonctionner les serveurs en aval de
+l’organisme responsable de l’accès. Les sept rôles Keycloak du hub sont l’ombre technique des
+rôles juridiques, et le tableau indique quel acteur juridique se tient derrière chaque
+rôle technique lorsque le système quitte la démo.
+
+| Rôle EEDS (règl. 2025/327)                                                                                                     | Ce que le règlement attend de lui                                                                                                                                                                                                                                             | Rôle / composant du hub                                                                                                                 | Qui l’exploite dans un déploiement réel                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Personne physique** (le patient), art. 3 à 10, refus art. 71                                                                 | Accès à ses propres données de santé électroniques, ajout, rectification, limitation, information sur qui y a accédé ; le droit de refuser l’utilisation secondaire.                                                                                                          | `PATIENT` ; `/patient/*` ; Klarbefund sur le téléphone ; connexion par portefeuille EUDI (ADR-028)                                      | La personne elle-même, via le service d’accès de l’autorité de santé numérique ou un système de DSE ; l’application lui appartient, l’exploitant n’en voit jamais le contenu.                     |
+| **Professionnel de santé**, art. 11                                                                                            | Accès aux catégories prioritaires des personnes dont il a la charge, journalisé et visible pour la personne.                                                                                                                                                                  | Pas un rôle dans la démo (l’accès au dossier pour l’utilisation primaire passe par l’ePA, pas par le hub)                               | L’exploitant du système de DSE ; le hub ne reçoit que ce que la personne exporte.                                                                                                                 |
+| **Détenteur de données de santé**, art. 2(2)(y), obligations art. 60, description des ensembles de données art. 77             | Mettre à disposition les catégories de l’art. 51 sur autorisation, décrire les ensembles de données, communiquer avec l’organisme responsable de l’accès, appliquer le label de qualité (art. 78).                                                                            | `DATA_HOLDER` ; `/data/share`, `/data/transfer` ; le connecteur (plan de contrôle, plan de données, IdentityHub)                        | Le détenteur lui-même (un hôpital, un assureur, un registre) ; la société d’exploitation peut héberger son connecteur dans le cadre d’un contrat de sous-traitance au titre de l’art. 28 du RGPD. |
+| **Utilisateur de données de santé**, art. 61, demandes art. 67, autorisation art. 68                                           | Traiter uniquement dans l’environnement de traitement sécurisé, uniquement pour la finalité de l’autorisation (art. 53), jamais pour les finalités interdites (art. 54), publier les résultats, signaler les violations.                                                      | `DATA_USER` ; `/data/discover`, `/negotiate`, `/analytics`, `/query`                                                                    | L’institution du chercheur ; elle n’exploite jamais d’infrastructure, elle est locataire du SPE.                                                                                                  |
+| **Organisme responsable de l’accès aux données de santé (HDAB)**, art. 55, missions art. 57, contrôle de l’application art. 63 | Statuer sur les demandes, délivrer les autorisations, fournir le SPE (art. 73), tenir le registre public et remplir les obligations d’information (art. 58, 59), faire respecter les règles (art. 63), être responsable du traitement pour le SPE (art. 74).                  | `HDAB_AUTHORITY` ; `/compliance`, `/admin/policies`, le registre des autorisations, nœuds `HDABApproval`                                | L’organisme public désigné ; il détient les décisions et la responsabilité du traitement même lorsqu’il achète l’exploitation.                                                                    |
+| **Détenteur de données de santé de confiance**, art. 72                                                                        | Un détenteur autorisé à appliquer la procédure simplifiée pour ses propres données, avec les mêmes obligations de SPE et de journalisation.                                                                                                                                   | Un `DATA_HOLDER` disposant de droits délégués par le HDAB (non modélisé séparément dans la démo)                                        | Le détenteur, sous la supervision de l’organisme responsable de l’accès.                                                                                                                          |
+| **Exploitant de l’environnement de traitement sécurisé**, art. 73                                                              | Accès uniquement pour des personnes physiques autorisées, aucun téléchargement de données à caractère personnel, chaque accès et chaque résultat journalisés, résultats vérifiés quant à la présence de données à caractère personnel avant leur diffusion, sécurité auditée. | `TRUST_CENTER_OPERATOR` ; `/analytics`, `/query`, `SPESession`, les agrégats OMOP ; ADR-037, ADR-052                                    | L’organisme responsable de l’accès ou sa société d’exploitation ; sur un cloud certifié (attestation C5) avec informatique confidentielle lorsque les données le justifient.                      |
+| **Autorité de santé numérique**, art. 19 ; points de contact nationaux, art. 23 et 75                                          | Utilisation primaire : le service d’accès, MyHealth@EU ; utilisation secondaire : HealthData@EU et les autorisations transfrontières.                                                                                                                                         | Le second organisme responsable de l’accès et l’autorisation transfrontière dans les données d’amorçage ; le catalogue fédéré (ADR-020) | Les autorités désignées de l’État membre ; le hub est un participant, jamais le point de contact national lui-même.                                                                               |
+| **Fabricant de système de DSE**, chapitre III ; label des **applications de bien-être**, art. 48                               | Conformité des composants européens d’interopérabilité et de journalisation du système de DSE ; une application de bien-être peut déclarer son interopérabilité avec un système de DSE.                                                                                       | Klarbefund en tant qu’application de type bien-être qui exporte vers l’ePA ; FHIR R4 dans les profils EEHRxF                            | L’éditeur qui livre l’application ; dans le cas de la marque blanche, l’assureur en tant qu’entité qui la met sur le marché.                                                                      |
+| **Exploitant de la plateforme** (pas un rôle de l’EEDS ; la société d’exploitation de `docs/ehds-operating-company.md`)        | Fait fonctionner l’identité, le catalogue, les connecteurs, le SPE et la supervision pour les acteurs ci-dessus ; sous-traitant au sens de l’art. 28 du RGPD pour chacun d’eux.                                                                                               | `EDC_ADMIN` ; `/admin/*`, le groupe de ressources Azure, Keycloak, Vault, Key Vault, les pipelines                                      | Un exploitant sous contrat disposant d’un SMSI ISO 27001 sur la base de l’IT-Grundschutz et d’un cloud attesté C5 en dessous.                                                                     |
+| **Autorités de contrôle** : protection des données (RGPD), surveillance du marché (chapitre III), BSI / CSIRT national (NIS2)  | Reçoivent les notifications de violation, auditent, font respecter les règles.                                                                                                                                                                                                | La piste d’audit (ADR-045), le rapport d’activité, le registre des autorisations                                                        | Pas des exploitants ; l’exploitant doit pouvoir leur répondre dans les délais de la section 7.                                                                                                    |
+
+### Le modèle d’exploitation sous forme de processus
+
+Le diagramme est un processus de style BPMN avec un couloir par rôle : les rectangles sont
+des tâches, les losanges des décisions, la boucle finale est le contrôle des résultats,
+les points verts sont le début et la fin. Les numéros d’articles sont ceux du texte adopté. Les
+couloirs du détenteur, de l’utilisateur et de la personne leur sont propres ; le couloir de
+l’organisme responsable de l’accès est celui où se trouve chaque décision ; les couloirs de la société d’exploitation et de
+l’exploitant du SPE contiennent le travail technique que ce dépôt
+implémente.
+
+![Modèle d’exploitation de l’EEDS : un couloir par rôle, de l’intégration du détenteur à la demande, l’autorisation, le refus, l’extraction, l’environnement de traitement sécurisé et le contrôle des résultats jusqu’aux résultats publiés](img/ehds-operating-model.svg)
+
+Source : [`diagrams/ehds-operating-model.puml`](diagrams/ehds-operating-model.puml), rendu avec `scripts/render-plantuml.sh`.
+
+Trois responsabilités que le diagramme rend visibles et qu’un contrat doit
+reprendre : l’organisme responsable de l’accès décide et l’exploitant exécute ; le refus de la personne
+atteint l’extraction du détenteur par l’évaluation des politiques de l’exploitant,
+et non par bonne volonté ; et aucun résultat ne quitte le SPE sur la seule parole de
+l’exploitant, uniquement sur celle de l’organisme responsable de l’accès.
+
+Deux conséquences en découlent. **La responsabilité du traitement n’appartient jamais à l’exploitant.** L’organisme
+responsable de l’accès est responsable du traitement pour le SPE et les données des autorisations (art. 74) ; le détenteur est
+responsable du traitement de ses données sources ; l’exploitant traite sur instruction. Chaque
+contrat d’hébergement le reprend. **Les attributions de rôles sont des décisions, pas des tickets.**
+Qui devient `HDAB_AUTHORITY` ou `TRUST_CENTER_OPERATOR` est décidé par
+l’organisme responsable de l’accès par écrit ; l’exploitant exécute l’attribution dans Keycloak et
+l’attribution est journalisée (ADR-045). La démo attribue les rôles dans un fichier d’amorçage ; un
+déploiement réel supprime ce fichier et conserve l’historique des attributions.
+
+## 2. Architecture d’hébergement : de la démo à une plateforme exploitable
+
+La démo fait tout fonctionner dans un seul environnement Azure Container Apps,
+`rg-mvhd-dev` (ADR-012), arrêté hors des heures de bureau (ADR-053, ADR-058). La forme
+ci-dessous conserve les composants et change leur placement.
+
+### La solution en couches
+
+![La solution sous forme de vue en couches ArchiMate : la couche métier avec les six rôles de l’EEDS et les processus que chacun exécute, la couche applicative avec les six services et les composants qui les réalisent, la couche technologique avec la plateforme Azure, les bases de données, les coffres et l’iPhone](img/ehds-solution-layers.svg)
+
+Source : [`diagrams/ehds-solution-layers.puml`](diagrams/ehds-solution-layers.puml),
+notation ArchiMate 3.2. La couche métier est la section 1 de ce guide :
+chaque rôle exécute ses propres processus, et la procédure bilatérale du chapitre
+IV (demander, décider, traiter) se déroule de gauche à droite. La couche applicative nomme
+ce que le hub fournit à ces processus et quel composant le réalise ;
+la couche technologique est la plateforme du tableau ci-dessous, telle que la démo la fait fonctionner
+aujourd’hui. Une flèche d’une bande inférieure vers une bande supérieure se lit « sert ».
+
+| Zone                | Composants                                                                          | Démo aujourd’hui                                                                                           | Requis pour des données réelles                                                                                                                                                                                                                                                                                                        |
+| ------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Périphérie          | Terminaison TLS, WAF, limites de débit                                              | Ingress ACA avec certificats gérés ; en-têtes définis par `next.config` (F8)                               | Un pare-feu applicatif web devant chaque nom d’hôte public ; TLS selon la BSI TR-02102-2 (TLS 1.2 au minimum, 1.3 de préférence, pas de suites CBC) ; HSTS en préchargement ; limites de débit par route et par identité ; protection contre les bots et les attaques DDoS fournie par le cloud.                                       |
+| Identité            | Keycloak, IdentityHub, IssuerService, le backend du portefeuille EUDI               | Keycloak `start-dev` derrière une protection Caddy (F10) ; realm issu de `keycloak-realm.json`             | Keycloak en mode production avec sa propre base de données sur le Flexible Server, console d’administration accessible uniquement depuis le réseau de l’exploitant, MFA pour chaque rôle privilégié (C5 IAM-04), le realm sous gestion de versions et contrôlé contre les dérives (`docs/knowledge/runbooks/keycloak-realm-drift.md`). |
+| Application         | Le hub (Next.js), le neo4j-proxy, le service d’explication, les robots d’indexation | Ingress public pour le hub et Keycloak ; ingress interne pour le reste                                     | Seuls le hub et Keycloak sont publics ; tout le reste sur ingress interne ou points de terminaison privés ; chaque image signée et épinglée par condensé ; les nomenclatures logicielles de `docs/sbom/` régénérées à chaque changement de dépendance.                                                                                 |
+| Connecteurs         | Plan de contrôle, plans de données, IdentityHub, Vault par participant              | Un jeu de connecteurs par participant fictif (ADR-024)                                                     | Un connecteur par détenteur juridique, exploité par le détenteur ou par l’exploitant sous contrat ; points de terminaison DSP à authentification mutuelle ; les clés du participant dans son propre espace de noms Vault (ADR-046), jamais partagées.                                                                                  |
+| Données             | Neo4j, le PostgreSQL Flexible Server, Azure Files                                   | Postgres géré (ADR-041) ; Neo4j sur Azure Files (ADR-017) ; pas de sauvegardes                             | Chiffrement au repos avec des clés gérées par le client (C5 CRY-03, DIP-02) ; Postgres redondant entre zones avec restauration à un instant donné ; Neo4j Enterprise ou un graphe géré avec des sauvegardes testées chaque trimestre (DIP-03) ; jamais de données synthétiques et de données réelles dans la même instance.            |
+| Traitement sécurisé | `/analytics`, `/query`, les agrégats OMOP, `SPESession`                             | Agrégats dans le même Neo4j ; informatique confidentielle évaluée (ADR-037, ADR-052)                       | Un environnement séparé au sens de l’art. 73 : réseau isolé, pas d’accès sortant à Internet, aucune voie de téléchargement, résultats vérifiés par l’organisme responsable de l’accès avant diffusion, VM confidentielles ou enclaves lorsque les données de l’autorisation le justifient ; audité au moins une fois par an.           |
+| Secrets             | Key Vault, Vault                                                                    | Chaque secret de l’exploitant est une référence Key Vault (ADR-036) ; état de Vault sur Postgres (ADR-046) | À conserver ; ajouter une rotation planifiée (C5 CRY-04), des clés adossées à un HSM pour les justificatifs de signature et une procédure documentée de bris de glace avec approbation à deux personnes.                                                                                                                               |
+| Observabilité       | Le collecteur OpenTelemetry, Grafana, Loki, Tempo, Prometheus (ADR-045)             | Une application d’observabilité ; journaux dans Azure Monitor                                              | Journaux transmis à un SIEM surveillé par le SOC de l’exploitant ; immuabilité de la piste d’audit (DIP-06) ; conservation selon la section 6 ; alertes sur les événements de la section 7.                                                                                                                                            |
+| Disponibilité       | L’ensemble de la pile                                                               | S’arrête à 18:13 UTC, démarre à 05:17 UTC les jours ouvrés                                                 | 24x7 avec les objectifs du contrat de service ; le planning hors des heures de bureau est une mesure d’économie de la démo et est supprimé (c’est un appel `az`, `scripts/azure/offhours.sh`, et l’ADR-053 est remplacé par la décision d’hébergement).                                                                                |
+
+Le groupe de ressources unique de la démo devient au moins trois abonnements ou
+groupes de ressources avec des identités séparées : identité et périphérie, la plateforme,
+et l’environnement de traitement sécurisé. L’identité du SPE n’a jamais de droits
+dans les autres. C’est le domaine de contrôle C5 « PSS » (portabilité et
+ségrégation) et l’IT-Grundschutz NET.1.1 mis en pratique.
+
+## 3. Les normes du BSI, partie par partie
+
+| Norme                                                                              | S’applique à                                                                   | Ce qu’elle exige ici                                                                                                                                                                                                                                                                                                                                 | Où en est le projet                                                                                                                                                                                                                                       |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **BSI C5:2020** (catalogue de critères de conformité pour l’informatique en nuage) | Le cloud sous-jacent et l’exploitant en tant que fournisseur de services cloud | Un rapport d’attestation (type 2) pour l’infrastructure, fourni par le fournisseur cloud, et le rapport C5 propre de l’exploitant pour la plateforme s’il la propose en tant que service. Les critères que le code peut satisfaire sont suivis contrôle par contrôle.                                                                                | [Analyse des écarts C5](bsi-c5-gap-analysis.md) : les critères de développement, d’IAM et de journalisation d’audit sont satisfaits ou partiellement satisfaits ; les critères organisationnels restent ouverts.                                          |
+| **ISO 27001 sur la base de l’IT-Grundschutz**                                      | L’exploitant                                                                   | Un SMSI avec les modules correspondant à cette pile : APP.3.1 applications web, APP.4.4 Kubernetes (ACA suit le même modèle), SYS.1.6 conteneurs, CON.1 cryptographie, ORP.4 gestion des identités et des autorisations, OPS.1.1.5 journalisation, OPS.1.2.5 maintenance à distance, DER.2.1 traitement des incidents, CON.2 protection des données. | Ce n’est pas quelque chose qu’un dépôt peut contenir ; les modèles de menaces et le rapport de tests sont des intrants de l’analyse des risques.                                                                                                          |
+| **TR-02102-1 et -2** (mécanismes cryptographiques, TLS)                            | Chaque connexion et chaque secret stocké                                       | TLS 1.2 ou 1.3 avec les suites listées ; AES-GCM 256 bits pour les données au repos ; RSA 3000 bits ou ECDSA P-256 et au-delà pour les signatures ; SHA-256 et au-delà ; rotation des clés.                                                                                                                                                          | L’application : AES-GCM par enregistrement, clé dans la Secure Enclave (auto-évaluation O.Cryp). Le hub : TLS fourni par la plateforme, vérifié en boîte noire ; les suites de la périphérie sont celles du cloud et doivent être fixées dans le contrat. |
+| **TR-03161** (exigences de sécurité pour les applications de santé)                | Klarbefund, et toute version en marque blanche de celle-ci                     | Les objectifs de la partie 1 (applications mobiles) et de la partie 2 (web/backends) : finalité, architecture, code source, tiers, cryptographie, authentification, stockage des données, ressources payantes, réseau, plateforme, résilience.                                                                                                       | [Auto-évaluation](../klarbefund/self-assessment.md), objectif par objectif ; la liste au niveau des exigences et un test indépendant restent ouverts (rapport de tests, section « What an independent test would add »).                                  |
+| **TR-03116-4** (TLS dans les projets fédéraux)                                     | Tout déploiement pour un organisme public                                      | Le profil TLS qu’un exploitant fédéral doit utiliser ; plus strict que la TR-02102-2 sur les suites de chiffrement et les chaînes de certificats.                                                                                                                                                                                                    | Non vérifié ; la configuration de la périphérie est celle du cloud.                                                                                                                                                                                       |
+| **TR-03107-1** (identités électroniques et services de confiance)                  | Connexion des personnes physiques                                              | Niveaux de garantie pour l’identification ; « substantiel » ou « élevé » pour l’accès à son propre dossier de santé.                                                                                                                                                                                                                                 | La connexion par portefeuille EUDI (ADR-028) vise le niveau « élevé » via le portefeuille ; le nom d’utilisateur et le mot de passe Keycloak servent uniquement à la démo.                                                                                |
+| **NIS2 telle que transposée (BSIG)**, seuils KRITIS                                | L’exploitant et les entités de santé présentes sur la plateforme               | Mesures de gestion des risques, notification des incidents en 24 heures (alerte précoce) et en 72 heures, sécurité de la chaîne d’approvisionnement, responsabilité de la direction ; enregistrement KRITIS si les seuils applicables à la santé sont atteints.                                                                                      | La section 7 donne les délais ; le document sur la société d’exploitation contient le modèle d’escalade.                                                                                                                                                  |
+
+L’ordre compte pour un appel d’offres : le rapport C5 du cloud est ce qu’un acheteur
+public demande en premier, le SMSI de l’exploitant en deuxième, le test TR-03161 de l’application
+en troisième. Aucun d’eux n’est produit par du code ; le code produit les preuves
+qu’ils examinent.
+
+## 4. Identité et accès
+
+- **Un seul fournisseur d’identité, exploité par l’exploitant de la plateforme, avec le
+  realm sous gestion de versions.** Keycloak détient les rôles ; le hub ne fait confiance qu’aux
+  rôles contenus dans le jeton (`ui/src/lib/auth.ts`). Chaque route d’API exige une
+  session (ADR-044) ; toute exception pour une route est consignée dans un ADR, jamais
+  dans un indicateur de configuration.
+- **Les organisations prouvent leur identité au moyen de justificatifs vérifiables** délivrés
+  sur la base d’un registre faisant autorité (DCP v1.0, `did:web`). L’IssuerService
+  appartient à l’exploitant ; les clés du détenteur restent dans l’espace de noms Vault
+  du détenteur. Les données d’amorçage de la démo délivrent des justificatifs à des organisations fictives ;
+  un déploiement réel ne les délivre qu’après les étapes d’intégration du
+  document sur la société d’exploitation, étape 3.
+- **Les personnes physiques se connectent par le portefeuille EUDI ou l’eID national**,
+  au niveau de garantie « élevé » pour leur propre dossier (art. 16, gestion de
+  l’identification ; TR-03107). Le nom d’utilisateur et le mot de passe restent réservés au personnel, avec MFA,
+  et jamais aux patients.
+- **Les rôles privilégiés** (`EDC_ADMIN`, `HDAB_AUTHORITY`,
+  `TRUST_CENTER_OPERATOR`) exigent la MFA, une personne nommément désignée, une attribution documentée par
+  l’organisme responsable de l’accès et une revue chaque trimestre. Les comptes de service (le
+  jeton du robot d’indexation du catalogue, ADR-020 ; le compte bac à sable de l’application, ADR-054) sont
+  répertoriés avec leur propriétaire, leur périmètre et leur date de rotation.
+- **La console d’administration Keycloak n’est pas sur Internet** (constat F10, la
+  protection Caddy dans `scripts/azure/guard-keycloak-console.sh`) ; l’administration
+  passe par un réseau privé ou un bastion avec enregistrement des sessions.
+- **Les sessions** sont courtes pour les rôles privilégiés, liées au client et
+  révoquées lors d’un changement de rôle. `NEXTAUTH_SECRET` et tout autre secret de l’exploitant
+  est une référence Key Vault (ADR-036), soumise à une rotation planifiée.
+- **Qui voit l’identité d’un patient est décidé par le rôle, jamais par un
+  paramètre** (`ui/src/lib/patient-identity.ts`) : les détenteurs et l’exploitant de la
+  plateforme pour l’utilisation primaire, le patient pour son propre dossier uniquement
+  (`refuseForeignRecord`), tous les autres un pseudonyme. Le proxy NLQ refuse
+  les requêtes qui révéleraient l’identité. Cela reste tel quel et est testé à chaque
+  build.
+
+## 5. Protection des données
+
+- **Responsabilité du traitement et contrats.** L’organisme responsable de l’accès est responsable du traitement pour
+  l’environnement de traitement sécurisé (art. 74) et donne ses instructions de sous-traitance à
+  l’exploitant ; le détenteur est responsable du traitement de ses données sources ; l’utilisateur de données est
+  responsable du traitement de ce qu’il est autorisé à traiter, uniquement à l’intérieur du SPE. Chaque
+  paire signe un contrat au titre de l’art. 28 du RGPD ; le document sur la société d’exploitation en donne
+  le modèle.
+- **Une analyse d’impact relative à la protection des données** avant la mise en service, pour la plateforme
+  dans son ensemble et pour le SPE séparément. Les deux modèles de menaces constituent
+  l’intrant technique ; l’AIPD ajoute la base juridique par catégorie de données (art. 51)
+  et les risques résiduels.
+- **Minimisation des données et limitation des finalités** (art. 66) : l’organisme responsable de l’accès
+  décide pour chaque autorisation si des données anonymisées répondent à la question, et
+  seulement ensuite des données pseudonymisées. Les agrégats OMOP du hub et le k-anonymat
+  des vues de cohortes constituent la voie anonymisée ; l’extraction FHIR est la voie
+  pseudonymisée et ne s’exécute qu’à l’intérieur du SPE.
+- **Les clés de pseudonymisation** sont détenues par l’organisme responsable de l’accès ou par un tiers
+  de confiance, jamais par l’utilisateur de données et jamais par l’exploitant du SPE.
+- **Le refus** (art. 71) est un registre que tient l’organisme responsable de l’accès ; le
+  connecteur du détenteur le consulte avant l’extraction. La démo dispose d’enregistrements de
+  consentement dans l’application et sur la page patient ; un déploiement réel raccorde le
+  registre national des refus à l’évaluation des politiques ODRL.
+- **Les droits des patients pour l’utilisation primaire** (art. 3 à 10) : accès, ajout,
+  rectification, limitation et la liste des personnes ayant accédé. Le journal des accès de la
+  page patient et la piste d’audit (ADR-045) en sont l’implémentation ;
+  l’exploitant doit répondre à une demande dans le délai d’un mois du RGPD.
+- **Localisation.** Chaque sous-traitant se trouve dans l’UE ou l’EEE ; le fournisseur de modèle du
+  service d’explication est choisi selon la région et le quota (ADR-035), et le
+  modèle sur l’appareil est le choix par défaut, de sorte qu’aucune valeur de santé ne quitte le téléphone
+  sans que la personne ne l’envoie.
+- **L’application** ne contient rien que l’exploitant puisse lire : les valeurs, les pages et
+  les diagnostics sont chiffrés par enregistrement avec une clé dans la Secure Enclave,
+  exclus des sauvegardes, protégés par Face ID ou le code d’accès (ADR-060). L’exploitant
+  en marque blanche en hérite ; il ne doit pas ajouter de télémétrie qui
+  transporte des valeurs.
+
+## 6. Journalisation, conservation et piste d’audit
+
+Ce qui doit être journalisé, pendant combien de temps, et qui peut le lire. La
+[politique de conservation des audits](../audit-retention-policy.md) du projet contient les valeurs
+actuelles (elle cite encore les numéros d’articles de la proposition) ; les obligations découlent
+de l’art. 57 (l’organisme responsable de l’accès tient un registre des demandes et des autorisations),
+de l’art. 73 (chaque accès au SPE et chaque résultat journalisés), des art. 58 et 59
+(information du public, rapport annuel) et du principe de responsabilité du RGPD.
+
+| Événement                                                                      | Journalisé par                                 | Lisible par                                                                      | Conservation (politique du projet)                    |
+| ------------------------------------------------------------------------------ | ---------------------------------------------- | -------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Accès aux données, transfert, contrat (la chaîne `TransferEvent`)              | Le neo4j-proxy et les connecteurs              | L’organisme responsable de l’accès, le détenteur pour ses données, les auditeurs | 10 ans                                                |
+| Décisions sur les autorisations, révocations                                   | L’organisme responsable de l’accès dans le hub | Registre public pour la décision, parties pour le dossier                        | 10 ans                                                |
+| Sessions du SPE : qui, quel ensemble de données, quelle requête, quel résultat | Le SPE                                         | L’organisme responsable de l’accès ; l’utilisateur de données pour les siennes   | 10 ans                                                |
+| Attributions et révocations de rôles, connexions privilégiées                  | Keycloak, transmis au SIEM                     | L’équipe de sécurité de l’exploitant, les auditeurs                              | 2 ans, plus longtemps si un incident y fait référence |
+| Accès HTTP en périphérie, événements d’authentification                        | La périphérie et Keycloak                      | L’équipe de sécurité de l’exploitant                                             | 2 ans                                                 |
+| Dossier du patient : chaque lecture, par qui                                   | Le hub                                         | Le patient, sur sa page                                                          | Aussi longtemps que le dossier                        |
+| Application : diagnostics que la personne choisit d’exporter                   | L’application, uniquement sur l’appareil       | La personne ; les développeurs uniquement s’ils leur sont envoyés                | La personne décide                                    |
+
+Trois règles que la démo respecte déjà et qu’un déploiement réel doit respecter :
+la piste d’audit est écrite par le service qui a exécuté l’action, et non par
+le client ; elle est en ajout seul pour tous sauf la tâche de conservation
+(DIP-06, à mettre en œuvre avec un stockage immuable ou une chaîne signée) ; et aucune ligne
+de journal ne contient une valeur de santé ou un nom là où un pseudonyme suffit.
+
+## 7. Incidents, délais et qui notifie qui
+
+| Déclencheur                                                      | Délai                                                                                                                           | Qui notifie qui                                                                                                                                                                            |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Violation de données à caractère personnel                       | RGPD art. 33 : 72 heures à l’autorité de contrôle ; art. 34 : les personnes dans les meilleurs délais                           | L’exploitant informe le responsable du traitement (organisme responsable de l’accès ou détenteur) dans les meilleurs délais ; le responsable du traitement notifie l’autorité.             |
+| Incident important chez une entité de santé ou chez l’exploitant | NIS2 telle que transposée : alerte précoce en 24 heures, notification en 72 heures, rapport final dans un délai d’un mois       | Le contact CSIRT de l’exploitant vers le BSI ; les détenteurs concernés en parallèle.                                                                                                      |
+| Données utilisées en dehors de l’autorisation                    | Art. 63(2) : l’organisme responsable de l’accès peut révoquer l’autorisation et arrêter le traitement dans les meilleurs délais | L’exploitant du SPE en informe immédiatement l’organisme responsable de l’accès ; celui-ci décide et, si une violation du RGPD est possible, informe immédiatement l’autorité de contrôle. |
+| Un audit du SPE relève une lacune                                | Art. 73(3) : mesures correctives                                                                                                | L’organisme responsable de l’accès donne ses instructions à l’exploitant ; la correction est attestée lors de l’audit suivant.                                                             |
+| Incident grave d’un système de DSE ou d’une application          | Art. 44 (risques et incidents graves)                                                                                           | Le fabricant vers l’autorité de surveillance du marché ; pour l’application en marque blanche, l’entité qui la met sur le marché.                                                          |
+| Vulnérabilité élevée ou critique dans une dépendance             | Règle du projet : corrigée ou exception limitée dans le temps dans le contrôle CI (`docs/npm-audit-exceptions.json`)            | L’équipe de sécurité de l’exploitant ; l’analyse s’exécute à chaque push (`security-scan.yml`).                                                                                            |
+
+### Coordination des incidents entre les parties
+
+Une escalade est un ensemble de notifications assorties de délais, elle est donc représentée comme une
+séquence : une ligne de vie par partie, un message par notification, les délais
+légaux en gras sur le message, et les branches qui se déroulent en même temps dans
+un bloc parallèle.
+
+![Coordination des incidents sous forme de séquence : l’exploitant détecte, trie et contient dans l’heure ; puis, en parallèle, le responsable du traitement notifie l’autorité de protection des données dans les 72 heures et les personnes dans les meilleurs délais, l’exploitant alerte le CSIRT dans les 24 heures et fait rapport dans les 72 heures et dans un délai d’un mois, l’organisme responsable de l’accès révoque une autorisation utilisée abusivement et les détenteurs peuvent suspendre ; puis la correction, le rapport post-incident et les mesures correctives après un audit du SPE](img/ehds-incident-coordination.svg)
+
+Source : [`diagrams/ehds-incident-coordination.puml`](diagrams/ehds-incident-coordination.puml),
+rendu avec `scripts/render-plantuml.sh`. Les délais proviennent des
+[art. 33 et 34 du RGPD](https://eur-lex.europa.eu/eli/reg/2016/679/oj),
+de l’[art. 23 de NIS2](https://eur-lex.europa.eu/eli/dir/2022/2555/oj) tel que transposé
+dans le BSIG, et du [règlement (UE) 2025/327](https://eur-lex.europa.eu/eli/reg/2025/327/oj),
+art. 61, 63(2) et 73(3) ; le tableau ci-dessus nomme chacun d’eux.
+
+Les délais ne sont pas négociables par l’exploitant : le responsable du traitement détient ceux du
+RGPD, l’exploitant ceux de NIS2, l’organisme responsable de l’accès ceux de l’EEDS. La
+liste de contacts de la procédure d’incident nomme une personne pour chacun, avec un
+suppléant, et l’exercice sur table avant la mise en service parcourt ce diagramme une fois.
+
+Les alertes qui alimentent ce tableau, au minimum : une connexion privilégiée depuis un
+nouvel emplacement, toute requête vers la console d’administration qui atteint Keycloak, une requête
+dans le SPE qui révélerait l’identité, des échecs de vérification App Attest en
+volume, un connecteur dont la vérification des justificatifs échoue, une tâche de sauvegarde qui
+ne s’est pas exécutée, et tout taux de HTTP 5xx supérieur au plancher.
+
+## 8. Exploiter la plateforme
+
+- **Gestion des changements.** Chaque changement est une pull request soumise aux contrôles de
+  `docs/quality-gates.md` : vérification des types, lint, tests unitaires et de parcours, la
+  collection Bruno contre le hub, Semgrep, gitleaks, hadolint, la vérification de la
+  SBOM, CodeQL pour TypeScript et Swift, trivy et grype. Les fusions déploient
+  via `deploy-azure.yml` depuis `main` uniquement ; l’environnement de production
+  ajoute une approbation de mise en production par le comité des changements de l’exploitant et une image signée.
+- **Gestion des vulnérabilités.** Les analyses de `scripts/security/scan-repo.sh`
+  s’exécutent à chaque push et chaque nuit ; les constats élevés et critiques sont corrigés dans
+  le délai du contrat ou font l’objet d’une exception écrite limitée dans le temps. Le
+  [rapport de tests de sécurité](security-test-report-2026-10-15.md) est renouvelé à
+  chaque version et une fois par an par un testeur indépendant.
+- **Correctifs.** Images de base reconstruites chaque mois et lors des avis de sécurité ; Keycloak,
+  Neo4j et Postgres sur des versions majeures prises en charge (ADR-030 pour Neo4j, le
+  runbook de Postgres 16 vers 17 comme modèle).
+- **Sauvegardes et reprise.** Postgres avec restauration à un instant donné entre
+  zones ; Neo4j avec des sauvegardes quotidiennes et un test de restauration chaque trimestre ; l’état
+  de Vault est sur Postgres (ADR-046) et les clés de descellement dans Key Vault, avec un
+  exercice de reprise documenté. Objectifs à convenir dans le contrat : point de
+  reprise d’une heure, délai de reprise de quatre heures pour le hub, d’un jour ouvré pour
+  le SPE.
+- **Disponibilité.** 24x7 ; le planning de la démo est supprimé ; contrôles de santé dans
+  chaque image (constat F6) et sondes dans chaque définition d’application ; deux réplicas
+  pour le hub et le proxy ; la page hors des heures de bureau devient une page de maintenance
+  utilisée uniquement pendant des fenêtres annoncées.
+- **Gestion des clés.** Clés de signature des justificatifs dans un HSM ; certificats TLS
+  automatisés ; chaque secret soumis à rotation au moins une fois par an et lors d’un
+  changement de personnel ; la procédure de bris de glace avec approbation à deux personnes et un
+  journal.
+- **Sécurité des fournisseurs** (C5 OIS-05) : Keycloak, Neo4j, les composants EDC,
+  le cloud et le fournisseur de modèle évalués et répertoriés avec leurs
+  attestations ; les nomenclatures logicielles de `docs/sbom/` constituent l’inventaire.
+- **Sortie.** L’export de données en FHIR R4 et OMOP CDM est déjà l’interface du hub ;
+  le contrat précise le format, le délai et la preuve de suppression à la fin.
+
+## 9. Klarbefund dans un déploiement en marque blanche
+
+L’application change de propriétaire, mais pas d’architecture. L’entité qui la met sur
+le marché :
+
+- conserve le traitement sur l’appareil par défaut : les valeurs, les pages et l’explication restent sur le
+  téléphone, sauf si la personne les envoie (auto-évaluation O.Purp, O.Data) ;
+- conserve le verrouillage de l’application et le chiffrement par enregistrement (ADR-060, O.Auth,
+  O.Cryp) et n’ajoute pas d’outils d’analyse qui voient les valeurs ;
+- exploite le service de comptes bac à sable (ADR-054) et, s’il est proposé, le
+  service d’explication (ADR-034, ADR-035) dans l’UE sous son propre nom et
+  avec sa propre AIPD ;
+- publie une politique de confidentialité dans la langue de la personne et une adresse de
+  signalement des vulnérabilités ;
+- fait réaliser le test TR-03161 et, si elle revendique l’interopérabilité avec un
+  système de DSE, la déclaration de l’art. 48 ; elle ne revendique pas le statut DiGA sans
+  le marquage CE qu’exige la voie DiGA (auto-évaluation, « Regulation ») ;
+- reproduit les preuves d’exactitude sur ses propres formats de rapports avant le pilote
+  (le banc d’essai de [`evidence.md`](../klarbefund/evidence.md) est synthétique).
+
+## 10. Avant la mise en service : la liste de contrôle par rôle
+
+| #   | Élément                                                                                                                               | Responsable                                                  | Preuve                                                                                                           |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| 1   | Contrat d’hébergement avec la responsabilité du traitement au sens de l’art. 74 et des clauses de l’art. 28 du RGPD pour chaque paire | Organisme responsable de l’accès, exploitant                 | Contrats signés                                                                                                  |
+| 2   | Rapport C5 de type 2 du fournisseur cloud examiné ; le périmètre couvre chaque service utilisé                                        | Exploitant                                                   | Rapport, correspondance du périmètre                                                                             |
+| 3   | SMSI de l’exploitant certifié ou sur un plan daté ; les modules de la section 3 attribués                                             | Exploitant                                                   | Certificat ou plan d’audit                                                                                       |
+| 4   | AIPD pour la plateforme et pour le SPE                                                                                                | Organisme responsable de l’accès (responsable du traitement) | Documents d’AIPD                                                                                                 |
+| 5   | Zones réseau, points de terminaison privés, WAF, profil TLS selon la TR-02102-2 ou la TR-03116-4                                      | Exploitant                                                   | Architecture, analyse depuis l’extérieur (`check-hub-blackbox.sh` étendu)                                        |
+| 6   | Keycloak en mode production, console d’administration privée, MFA sur les rôles privilégiés, realm dans git                           | Exploitant                                                   | Diff du realm, `guard-keycloak-console.sh --check`                                                               |
+| 7   | Connexion EUDI ou eID pour les personnes physiques au niveau de garantie « élevé »                                                    | Exploitant, autorité de santé numérique                      | Test de conformité du parcours du portefeuille                                                                   |
+| 8   | Chiffrement au repos avec des clés gérées par le client ; sauvegardes et exercice de restauration                                     | Exploitant                                                   | Configuration de Key Vault, compte rendu de l’exercice                                                           |
+| 9   | SPE isolé, aucune voie de téléchargement, procédure de contrôle des résultats, audit annuel planifié                                  | Organisme responsable de l’accès, exploitant du SPE          | Plan d’audit, procédure                                                                                          |
+| 10  | Piste d’audit immuable, transmise au SIEM, conservation selon la section 6                                                            | Exploitant                                                   | Configuration du SIEM, tâche de conservation                                                                     |
+| 11  | Procédure d’incident avec les délais de la section 7 et des contacts nommément désignés                                               | Exploitant, organisme responsable de l’accès                 | Procédure, liste de contacts, un exercice sur table                                                              |
+| 12  | Test d’intrusion indépendant du hub et test TR-03161 de l’application                                                                 | Exploitant, propriétaire de l’application                    | Rapports ; constats clos ou acceptés par écrit                                                                   |
+| 13  | Planning hors des heures de bureau supprimé ; réplicas et sondes en place                                                             | Exploitant                                                   | Définitions des applications                                                                                     |
+| 14  | Données synthétiques retirées du graphe de production ; données d’amorçage désactivées ; indicateur de démo désactivé                 | Exploitant                                                   | `MATCH (p:Patient) RETURN count(p)` égal au nombre déclaré par les détenteurs ; `NEXT_PUBLIC_DEMO_TK` non défini |
+| 15  | Registre des refus raccordé à l’évaluation des politiques                                                                             | Organisme responsable de l’accès, exploitant                 | Test de politique avec un enregistrement ayant exercé son refus                                                  |
+| 16  | Adresse de signalement des vulnérabilités publiée ; liste des fournisseurs avec leurs attestations                                    | Exploitant                                                   | `SECURITY.md`, registre des fournisseurs                                                                         |
+
+## 11. Ce que le démonstrateur ne fait pas
+
+Pour que personne n’y lise plus que ce qui s’y trouve :
+
+- C’est un locataire, un exploitant, une région, arrêté la nuit.
+- Ses participants, organismes responsables de l’accès et patients sont fictifs ; ses justificatifs
+  sont délivrés par son propre émetteur sans aucun registre.
+- Il n’a ni SIEM, ni WAF, ni clés gérées par le client, ni sauvegarde du graphe,
+  ni MFA, et l’environnement de traitement sécurisé est un ensemble de vues sur la même
+  base de données, et non un environnement isolé (l’ADR-037 et l’ADR-052 consignent ce qui a été
+  évalué).
+- Il n’a fait l’objet d’aucun test d’intrusion indépendant ni d’aucun test TR-03161 ; le
+  [rapport de tests de sécurité](security-test-report-2026-10-15.md) est le projet qui
+  se teste lui-même.
+- Ses références aux articles de l’EEDS sont en partie les numéros de la proposition ; ce
+  document utilise ceux du texte adopté.
+
+Ce qu’il possède, c’est la forme, les rôles, la journalisation, les règles d’identité
+fondées sur les rôles, les connecteurs et les exports dont un déploiement réel
+a besoin, avec chaque décision consignée dans un ADR et chaque affirmation liée à un test.
+C’est ce qui en fait une référence et non un produit.
+
+## Sources
+
+- Règlement (UE) 2025/327 relatif à l’espace européen des données de santé, JO L du 5 mars 2025.
+- Règlement (UE) 2016/679 (RGPD), art. 28, 33, 34, 35.
+- Directive (UE) 2022/2555 (NIS2) et sa transposition nationale.
+- BSI, catalogue de critères de conformité pour l’informatique en nuage C5:2020.
+- BSI, IT-Grundschutz-Kompendium, édition en vigueur ; normes BSI 200-1 à 200-3.
+- BSI TR-02102-1 et TR-02102-2, mécanismes cryptographiques et TLS.
+- BSI TR-03161, exigences de sécurité pour les applications de santé numériques, parties 1 à 3.
+- BSI TR-03116-4, exigences cryptographiques pour les projets fédéraux, TLS.
+- BSI TR-03107-1, identités électroniques et services de confiance dans l’administration électronique.
+- Ce dépôt : les ADR cités ci-dessus, `docs/ehds-operating-company.md`,
+  `docs/audit-retention-policy.md`, `docs/ehds-article-numbering.md`.
