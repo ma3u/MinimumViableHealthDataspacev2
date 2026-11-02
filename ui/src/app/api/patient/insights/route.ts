@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { runQuery } from "@/lib/neo4j";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { refuseForeignRecord } from "@/lib/patient/own-record";
+import {
+  recommendationsFor,
+  type PatientCondition,
+} from "@/lib/patient/recommendations";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +20,8 @@ export const dynamic = "force-dynamic";
  * Returns:
  *  - Active donations (studies currently using patient's data)
  *  - Aggregate findings from completed studies
- *  - Personalised medical recommendations based on relevant findings
+ *  - Recommendations chosen by the patient's own conditions, or one general
+ *    recommendation when none matches (no patientId: the general one)
  */
 export async function GET(req: Request) {
   const auth = await requireAuth(["PATIENT", "EDC_ADMIN"]);
@@ -30,7 +35,7 @@ export async function GET(req: Request) {
     if (foreign) return foreign;
   }
 
-  const [consentRows, insightRows, speRows] = await Promise.all([
+  const [consentRows, insightRows, speRows, conditionRows] = await Promise.all([
     // Patient's active consents → studies using their data
     patientId
       ? runQuery<{
@@ -77,6 +82,17 @@ export async function GET(req: Request) {
               coalesce(ss.status, 'active') AS status
        LIMIT 5`,
     ),
+
+    // The patient's conditions, which choose the recommendations below
+    patientId
+      ? runQuery<PatientCondition>(
+          `MATCH (p:Patient)-[:HAS_CONDITION]->(c:Condition)
+           WHERE coalesce(p.id, p.resourceId, elementId(p)) = $patientId
+           RETURN coalesce(c.code, '') AS code,
+                  coalesce(c.display, '') AS display`,
+          { patientId },
+        )
+      : Promise.resolve([]),
   ]);
 
   // Merge seeded insights with demo insights (for empty-graph fallback)
@@ -105,30 +121,8 @@ export async function GET(req: Request) {
           },
         ];
 
-  // Recommendations prioritised by patient conditions (simple rule-based)
-  const recommendations = [
-    {
-      category: "cardiovascular",
-      action: "Annual cardiovascular risk assessment (ECG + lipid panel)",
-      priority: "high",
-      basedOn: "Study T2D Cohort 2020-2025",
-      ehdsArticle: "EHDS Art. 3 — informed health decisions",
-    },
-    {
-      category: "diabetes",
-      action: "Bi-annual HbA1c monitoring (LOINC 4548-4)",
-      priority: "high",
-      basedOn: "Study NL Cardio 2025",
-      ehdsArticle: "EHDS Art. 3",
-    },
-    {
-      category: "longevity",
-      action: "Participate in the T2D Longevity research program",
-      priority: "medium",
-      basedOn: "Patient interest profile",
-      ehdsArticle: "GDPR Art. 9(2)(a) — consent to join a study",
-    },
-  ];
+  // Only what the patient's own conditions call for, never one list for all
+  const recommendations = recommendationsFor(conditionRows);
 
   return NextResponse.json({
     patientId,

@@ -118,7 +118,12 @@ npx playwright test --project=live   # requires JAD stack
 
 ### Patterns in this codebase
 
-- Helper `setPersona(page, username)`: injects `localStorage.setItem("demo-persona", username)` then reloads — used in static GitHub Pages tests.
+- Helper `setPersona(page, username)` in `ui/__tests__/e2e/journeys/helpers.ts`, the one shared
+  copy: writes `demo-persona` to sessionStorage (what `useDemoPersona()`, the navigation and the
+  patient pages read) and localStorage (what `lib/api.ts` reads to pick a patient's own mock),
+  then reloads. Used in static GitHub Pages tests; import it from there.
+- A page or API that needs a session (ADR-044) gets a real sign-in first: `loginAs()` from the
+  same helpers, never `setPersona()`.
 - E2E journey tests are numbered sequentially; new tests get the next available `J` number range.
 - Tests assert on visible text, aria-labels, and `data-testid` attributes — not on CSS class names.
 - Broken image check: `page.evaluate(() => [...document.images].filter(img => !img.complete || img.naturalWidth === 0))`.
@@ -132,7 +137,7 @@ npx playwright test --project=live   # requires JAD stack
 
 The spec `19-static-github-pages.spec.ts` (J221–J260) tests the static export:
 
-- Uses `setPersona()` helper to inject localStorage before navigation.
+- Uses the shared `setPersona()` helper (sessionStorage and localStorage, then a reload).
 - Tests each of 7 demo personas: correct nav groups visible, persona-specific data displayed.
 - Broken image audit across 10 pages.
 - Broken link audit (excludes anchors).
@@ -152,7 +157,7 @@ The spec `19-static-github-pages.spec.ts` (J221–J260) tests the static export:
 ## What Not to Mock
 
 - Do not mock Neo4j driver internals in integration-style tests; use the mock JSON fixtures under `ui/public/mock/`.
-- Do not mock `next-auth/react` session in E2E tests; use the `setPersona` localStorage helper instead.
+- Do not mock `next-auth/react` session in E2E tests; sign in with `loginAs()`, or pick a static persona with `setPersona()`.
 - Playwright tests hit the actual running server; nothing in them is stubbed.
 
 ## iOS UI Tests (XCUITest)
