@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * DocFigure: a rendered diagram on a hand-written docs page.
  *
@@ -8,13 +10,12 @@
  * published Markdown document, so DocFigureViewer opens it full screen with
  * zoom when the page is wrapped in one; a click with a modifier key opens
  * the file itself.
+ *
+ * A translated variant, <stem>.<lang>.svg next to the source, is shown in
+ * that language (ADR-071, scripts/gen-localized-images.py).
  */
 import type { ReactNode } from "react";
-
-const BASE_PATH =
-  process.env.NEXT_PUBLIC_STATIC_EXPORT === "true"
-    ? "/MinimumViableHealthDataspacev2"
-    : "";
+import { useLocalizedImageSrc } from "@/components/docs/LocalizedImage";
 
 export function DocFigure({
   file,
@@ -26,7 +27,7 @@ export function DocFigure({
   alt: string;
   caption: ReactNode;
 }) {
-  const src = `${BASE_PATH}/published-docs/${file}`;
+  const src = useLocalizedImageSrc(`/published-docs/${file}`);
   return (
     <figure className="my-6 doc-prose">
       <a

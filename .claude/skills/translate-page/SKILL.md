@@ -1,7 +1,14 @@
 ---
 name: translate-page
-description: Use when a page or component of the UI is made to follow the language picker (EN, DE, FR, NL, ES), issue #782, ADR-070.
-paths: ["ui/src/messages/**", "ui/src/lib/i18n/**"]
+description: Use when a page or component of the UI, or a documentation page, published document, screenshot or diagram, is made to follow the language picker (EN, DE, FR, NL, ES), issue #782, ADR-070, ADR-071.
+paths:
+  [
+    "ui/src/messages/**",
+    "ui/src/lib/i18n/**",
+    "docs/i18n/**",
+    "ui/src/app/docs/**",
+    "ui/src/content/diagrams/**",
+  ]
 ---
 
 # Translating a page
@@ -53,6 +60,50 @@ Sources: `.claude/rules/i18n.md` (the rules), `ui/src/lib/i18n/translate.tsx`
    reformats files fails the commit: add again, commit again, check HEAD
    moved. PR against main; comment on #782 with the PR and what stays
    English.
+
+## Docs (ADR-071)
+
+The documentation follows the picker too. Six conventions, exactly these:
+
+1. **Published Markdown** (the 17 documents in `DOCS` of
+   `scripts/gen-docs-content.py`). Translate `docs/<path>` into
+   `docs/i18n/<lang>/<path>` (e.g. `docs/i18n/de/sbom/README.md`). Keep every
+   relative link and image path as in the English file; the generator
+   resolves them against the English folder. Translate Mermaid inside its
+   fence; keep node ids. Then
+   `python3 scripts/gen-docs-content.py --stamp docs/i18n/<lang>/<path>`
+   (writes `source`, `sourceHash` = SHA-256 of the English file now,
+   `language`; an optional `summary:` line survives) and
+   `python3 scripts/gen-docs-content.py`. Commit the translation, its
+   `ui/public/published-docs/i18n/<lang>/<section>/<slug>.json` and
+   `ui/src/content/published-docs-i18n.json`. Example: the German SBOM README.
+2. **Stale.** When the English changes, the index marks the translation
+   `stale` and the page says so; nothing fails. Bring the translation up to
+   date, `--stamp` again, regenerate. `--report-i18n` lists per language what
+   is missing and stale.
+3. **TSX pages**: areas `docsGuide` (user guide), `docsDeveloper` (developer
+   guide and its subpages), `docsArchitecture`, `docsCommon` (docs index,
+   section pages, roadmap, glossary chrome). Procedure as above (steps 1 to
+   5); long paragraphs are fine as keys, a paragraph with links or `<code>`
+   uses `<T>` with `tags` or a `t()` per sentence.
+4. **Images**: a translated screenshot is the same file name under
+   `ui/public/images/guide/<lang>/` or `ui/public/images/screenshots/<lang>/`;
+   capture with `SCREENSHOT_LANG=<lang>` on `capture-screenshots.spec.ts` or
+   `capture-guide-screenshots.spec.ts`. A translated diagram SVG/PNG is
+   `<name>.<lang>.<ext>` next to the English source (e.g.
+   `docs/architecture/img/deployment.de.svg`); for a `docs/diagrams/*.py`
+   diagram, write that variant beside its output. Run
+   `python3 scripts/gen-docs-content.py` (copies diagrams) and
+   `python3 scripts/gen-localized-images.py` (the manifest; its `--check` is
+   a pre-commit hook). Pages show docs images with `LocalizedImage` or
+   `useLocalizedImageSrc`, never a bare `<img>`.
+5. **Charts in TSX pages**: `ui/src/content/diagrams/<id>.ts`; add a key
+   (`de:` etc.) next to `en:` with the same node ids and `${...}`
+   expressions; the page draws `localizedChart(id, lang)`. A new chart is a
+   module plus one line in `ui/src/content/diagrams/index.ts`.
+6. **Checks**: `python3 scripts/gen-docs-content.py --check`,
+   `python3 scripts/gen-localized-images.py --check`, and
+   `npx vitest run __tests__/unit/lib/docs-i18n-index.test.ts`.
 
 ## Output contract
 

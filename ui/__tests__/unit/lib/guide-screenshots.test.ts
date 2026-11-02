@@ -58,7 +58,11 @@ describe("the user guide", () => {
     expect(cardHrefs.filter((h) => !listed.includes(h))).toEqual([]);
     expect(listed.filter((h) => !cardHrefs.includes(h))).toEqual([]);
 
-    const files = readdirSync(SHOTS).sort();
+    // The English screenshots; <lang>/ folders hold translations (ADR-071).
+    const files = readdirSync(SHOTS, { withFileTypes: true })
+      .filter((f) => f.isFile())
+      .map((f) => f.name)
+      .sort();
     expect(files).toEqual(
       listed.map((h) => `${guideScreenshotSlug(h)}.webp`).sort(),
     );

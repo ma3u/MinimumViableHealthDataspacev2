@@ -4,3 +4,10 @@ docs/sbom/*.cdx.json
 
 # Published copy of the security reports, written by scripts/gen-docs-content.py and byte-compared by --check
 ui/src/content/published-docs.json
+
+# Translated published documents and their index (ADR-071), written by scripts/gen-docs-content.py and byte-compared by --check
+ui/src/content/published-docs-i18n.json
+ui/public/published-docs/i18n/
+
+# Localized image manifest (ADR-071), written by scripts/gen-localized-images.py and byte-compared by --check
+ui/src/content/localized-images.json

@@ -144,6 +144,9 @@ repos:
         language: system
         entry: 'bash -c ''if command -v lychee >/dev/null 2>&1; then lychee --no-progress --offline "$@"; elif command -v markdown-link-check >/dev/null 2>&1; then for f in "$@"; do markdown-link-check --quiet "$f" || exit 1; done; else echo "[WARN] Neither lychee nor markdown-link-check installed"; fi'' --'
         files: \.(md|markdown)$
+        # A translation keeps the English file's relative links, which resolve
+        # from the English folder; gen-docs-content.py checks those (ADR-071).
+        exclude: ^docs/i18n/
         stages: [pre-commit]
 
       - id: check-no-screenshot-imports
@@ -198,7 +201,17 @@ repos:
         name: Published reports match their sources (docs/security, docs/klarbefund)
         language: python
         entry: python3 scripts/gen-docs-content.py --check
-        files: ^(docs/ehds/.*\.md|docs/ehds-article-numbering\.md|docs/security/.*\.md|docs/klarbefund/.*\.(md|html)|docs/loadtest/.*\.md|docs/operations/.*\.md|docs/sbom/README\.md|docs/(security|klarbefund|architecture|loadtest|operations)/img/.*|ui/public/published-docs/.*|ui/src/content/published-docs\.json|scripts/gen-docs-content\.py)$
+        files: ^(docs/ehds/.*\.md|docs/ehds-article-numbering\.md|docs/security/.*\.md|docs/klarbefund/.*\.(md|html)|docs/loadtest/.*\.md|docs/operations/.*\.md|docs/sbom/README\.md|docs/(security|klarbefund|architecture|loadtest|operations)/img/.*|docs/i18n/.*|ui/public/published-docs/.*|ui/src/content/published-docs(-i18n)?\.json|scripts/gen-docs-content\.py)$
+        pass_filenames: false
+        stages: [pre-commit]
+
+      # The translated screenshots and diagrams the docs pages show in the
+      # picked language (ADR-071): the manifest LocalizedImage reads.
+      - id: localized-images
+        name: Localized image manifest matches ui/public
+        language: python
+        entry: python3 scripts/gen-localized-images.py --check
+        files: ^(ui/public/images/(guide|screenshots)/.*|ui/public/published-docs/[^/]+|ui/src/content/localized-images\.json|scripts/gen-localized-images\.py)$
         pass_filenames: false
         stages: [pre-commit]
 

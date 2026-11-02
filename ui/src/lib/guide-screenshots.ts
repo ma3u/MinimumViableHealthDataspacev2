@@ -7,8 +7,6 @@
  * site; __tests__/unit/lib/guide-screenshots.test.ts fails when a card has no
  * screenshot or a screenshot no card.
  */
-import { IS_STATIC } from "@/lib/static-export";
-
 export const GUIDE_SCREENS: { href: string; persona: string | null }[] = [
   { href: "/auth/signin", persona: null },
   { href: "/", persona: null },
@@ -56,9 +54,10 @@ export function guideScreenshotSlug(href: string): string {
   return href.replace(/^\//, "").replace(/\//g, "-") || "home";
 }
 
-/** Where the page finds the screenshot, under the static site's base path. */
+/** The English screenshot's public path, without the static site's base
+ *  path: LocalizedImage adds that, and picks a translated variant under
+ *  /images/guide/<lang>/ when there is one (ADR-071). */
 export function guideScreenshotSrc(href: string): string | null {
   if (!GUIDE_SCREENS.some((s) => s.href === href)) return null;
-  const base = IS_STATIC ? "/MinimumViableHealthDataspacev2" : "";
-  return `${base}/images/guide/${guideScreenshotSlug(href)}.webp`;
+  return `/images/guide/${guideScreenshotSlug(href)}.webp`;
 }

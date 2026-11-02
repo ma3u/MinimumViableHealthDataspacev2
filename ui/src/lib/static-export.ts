@@ -8,3 +8,10 @@
  * call time instead.
  */
 export const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
+
+/**
+ * The path the static export is served under, "" on the hub. Next adds it to
+ * its own links and assets; a plain <img src> or fetch() of a file in public/
+ * adds it itself.
+ */
+export const BASE_PATH = IS_STATIC ? "/MinimumViableHealthDataspacev2" : "";

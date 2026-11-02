@@ -12,6 +12,11 @@
  * merge (and the Pages deploy) before it can be captured.
  *
  * Skipped unless CAPTURE_GUIDE=1: it calls the public site, which CI must not.
+ *
+ * In another language (ADR-071): SCREENSHOT_LANG=de (or fr, nl, es) opens
+ * every page with ?lang=de and saves into <GUIDE_SHOTS_DIR>/de/; the WebPs
+ * then go to public/images/guide/de/, where scripts/gen-localized-images.py
+ * finds them for LocalizedImage.
  */
 import { test } from "@playwright/test";
 import path from "path";
@@ -19,13 +24,18 @@ import {
   GUIDE_SCREENS,
   guideScreenshotSlug,
 } from "../../src/lib/guide-screenshots";
+import { screenshotLang, withLang } from "./helpers/screenshot-lang";
+
+const LANG = screenshotLang();
 
 const SITE =
   process.env.GUIDE_SITE ??
   "https://ma3u.github.io/MinimumViableHealthDataspacev2";
-const OUT =
+const OUT = path.join(
   process.env.GUIDE_SHOTS_DIR ??
-  path.resolve(__dirname, "../../test-results/guide-screenshots");
+    path.resolve(__dirname, "../../test-results/guide-screenshots"),
+  LANG ?? "",
+);
 
 test.describe("User guide hover previews", () => {
   test.skip(!process.env.CAPTURE_GUIDE, "set CAPTURE_GUIDE=1 to capture");
@@ -44,7 +54,9 @@ test.describe("User guide hover previews", () => {
           localStorage.setItem("demo-persona", p);
         }
       }, persona);
-      await page.goto(SITE + href, { waitUntil: "networkidle" });
+      await page.goto(SITE + withLang(href, LANG), {
+        waitUntil: "networkidle",
+      });
       await page.waitForTimeout(2000);
       await page.screenshot({
         path: `${OUT}/${guideScreenshotSlug(href)}.png`,

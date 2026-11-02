@@ -75,6 +75,26 @@ import esResearch from "./es/research.json";
 import esHolder from "./es/holder.json";
 import esExplore from "./es/explore.json";
 import esAdmin from "./es/admin.json";
+import enDocsGuide from "./en/docsGuide.json";
+import enDocsDeveloper from "./en/docsDeveloper.json";
+import enDocsArchitecture from "./en/docsArchitecture.json";
+import enDocsCommon from "./en/docsCommon.json";
+import deDocsGuide from "./de/docsGuide.json";
+import deDocsDeveloper from "./de/docsDeveloper.json";
+import deDocsArchitecture from "./de/docsArchitecture.json";
+import deDocsCommon from "./de/docsCommon.json";
+import frDocsGuide from "./fr/docsGuide.json";
+import frDocsDeveloper from "./fr/docsDeveloper.json";
+import frDocsArchitecture from "./fr/docsArchitecture.json";
+import frDocsCommon from "./fr/docsCommon.json";
+import nlDocsGuide from "./nl/docsGuide.json";
+import nlDocsDeveloper from "./nl/docsDeveloper.json";
+import nlDocsArchitecture from "./nl/docsArchitecture.json";
+import nlDocsCommon from "./nl/docsCommon.json";
+import esDocsGuide from "./es/docsGuide.json";
+import esDocsDeveloper from "./es/docsDeveloper.json";
+import esDocsArchitecture from "./es/docsArchitecture.json";
+import esDocsCommon from "./es/docsCommon.json";
 
 export type Area =
   | "nav"
@@ -90,7 +110,11 @@ export type Area =
   | "research"
   | "holder"
   | "explore"
-  | "admin";
+  | "admin"
+  | "docsGuide"
+  | "docsDeveloper"
+  | "docsArchitecture"
+  | "docsCommon";
 
 type Dictionary = Record<Area, Record<string, string>>;
 
@@ -110,6 +134,10 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     holder: enHolder,
     explore: enExplore,
     admin: enAdmin,
+    docsGuide: enDocsGuide,
+    docsDeveloper: enDocsDeveloper,
+    docsArchitecture: enDocsArchitecture,
+    docsCommon: enDocsCommon,
   },
   de: {
     nav: deNav,
@@ -126,6 +154,10 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     holder: deHolder,
     explore: deExplore,
     admin: deAdmin,
+    docsGuide: deDocsGuide,
+    docsDeveloper: deDocsDeveloper,
+    docsArchitecture: deDocsArchitecture,
+    docsCommon: deDocsCommon,
   },
   fr: {
     nav: frNav,
@@ -142,6 +174,10 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     holder: frHolder,
     explore: frExplore,
     admin: frAdmin,
+    docsGuide: frDocsGuide,
+    docsDeveloper: frDocsDeveloper,
+    docsArchitecture: frDocsArchitecture,
+    docsCommon: frDocsCommon,
   },
   nl: {
     nav: nlNav,
@@ -158,6 +194,10 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     holder: nlHolder,
     explore: nlExplore,
     admin: nlAdmin,
+    docsGuide: nlDocsGuide,
+    docsDeveloper: nlDocsDeveloper,
+    docsArchitecture: nlDocsArchitecture,
+    docsCommon: nlDocsCommon,
   },
   es: {
     nav: esNav,
@@ -174,5 +214,9 @@ export const MESSAGES: Record<CatalogLanguage, Dictionary> = {
     holder: esHolder,
     explore: esExplore,
     admin: esAdmin,
+    docsGuide: esDocsGuide,
+    docsDeveloper: esDocsDeveloper,
+    docsArchitecture: esDocsArchitecture,
+    docsCommon: esDocsCommon,
   },
 };

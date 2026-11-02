@@ -45,8 +45,11 @@ const FULL_JOURNEY_URL =
 
 import MermaidDiagram from "@/components/MermaidDiagram";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
+import { LocalizedImage } from "@/components/docs/LocalizedImage";
 import { visibleNavGroups } from "@/components/Navigation";
 import { guideScreenshotSrc } from "@/lib/guide-screenshots";
+import { localizedChart } from "@/lib/i18n/diagrams";
+import { useLanguage } from "@/lib/use-language";
 
 /** The demo personas' realm roles (jad/keycloak-realm.json). */
 const MATRIX_PERSONAS = [
@@ -100,33 +103,6 @@ const MENU_MATRIX = (() => {
     seenBy: menus.map((m) => m.has(href)),
   }));
 })();
-
-const userWorkflowDiagram = `graph LR
-  A[Sign in<br/>Keycloak or EUDI Wallet] --> O[Persona overview<br/>one view per role]
-  O --> B{Choose task}
-  B --> D[Browse<br/>Dataset Catalog]
-  B --> E[Review<br/>Patient Journey]
-  B --> F[Run<br/>Analytics]
-  B --> G[Govern<br/>permits and supervision]
-  D --> I[Search HealthDCAT-AP<br/>metadata]
-  E --> J[View FHIR→OMOP<br/>timeline]
-  F --> K[Cohort analytics<br/>dashboards]
-  G --> L[EHDS Art. 57-69<br/>application to permit]`;
-
-const complianceDiagram = `sequenceDiagram
-  participant USER as Research User
-  participant UI as Compliance Portal
-  participant HDAB as HDAB Authority
-  participant DH as Data Holder
-
-  USER->>UI: Start data access application
-  UI->>UI: Select dataset from catalog
-  UI->>HDAB: Submit permit request<br/>(EHDS Art. 67-68)
-  HDAB->>HDAB: Review & approve
-  HDAB-->>UI: Data permit issued (VC)
-  UI->>DH: Initiate contract negotiation
-  DH-->>UI: Contract agreement
-  UI->>USER: Access granted<br/>with audit trail`;
 
 /** Reusable card linking to a feature page */
 /**
@@ -185,8 +161,7 @@ function ScreenshotDialog({
             </button>
           </div>
         </div>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <LocalizedImage
           src={src}
           alt={`Screenshot: ${title}`}
           loading="lazy"
@@ -235,8 +210,7 @@ function FeatureCard({
             aria-hidden="true"
             className="pointer-events-none invisible absolute right-4 top-full z-30 -mt-3 w-[min(22rem,calc(100%-2rem))] translate-y-1 overflow-hidden rounded-lg border border-(--border) bg-(--surface) opacity-0 shadow-2xl transition duration-150 ease-out group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-hover:delay-200 motion-reduce:transition-none group-has-[dialog[open]]:hidden"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <LocalizedImage
               src={screenshot}
               alt=""
               loading="lazy"
@@ -334,6 +308,7 @@ const TOC_SECTIONS = [
 ] as const;
 
 export default function UserGuidePage() {
+  const lang = useLanguage();
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
       <Link
@@ -856,7 +831,7 @@ export default function UserGuidePage() {
       <section className="mb-12" id="getting-started">
         <h2 className="text-2xl font-semibold mb-3">Getting Started</h2>
         <MermaidDiagram
-          chart={userWorkflowDiagram}
+          chart={localizedChart("user-guide-workflow", lang)}
           caption="User workflow overview"
         />
         <p className="text-(--text-secondary) text-sm mt-3 mb-6">
@@ -1350,7 +1325,7 @@ export default function UserGuidePage() {
           and audited transfer.
         </p>
         <MermaidDiagram
-          chart={complianceDiagram}
+          chart={localizedChart("user-guide-compliance", lang)}
           caption="EHDS data access compliance workflow"
         />
 
