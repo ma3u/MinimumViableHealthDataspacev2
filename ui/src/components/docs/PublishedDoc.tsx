@@ -1,17 +1,20 @@
 import Link from "next/link";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { DocFigureViewer } from "@/components/docs/DocFigureViewer";
 import {
   DocsLastUpdated,
   type DocsPage,
 } from "@/components/docs/DocsLastUpdated";
+import { ExternalA } from "@/components/docs/ExternalA";
 import { LocalizedDocBody } from "@/components/docs/LocalizedDocBody";
 import MermaidDiagram from "@/components/MermaidDiagram";
 import { docSegments } from "@/lib/docs/markdown";
+import { T } from "@/lib/i18n/translate";
 import { REPO_URL, type PublishedDoc } from "@/lib/docs/published-docs";
 
 /** One document published from docs/, rendered from its Markdown at build
- *  time, with the link back to its section and to its source on GitHub. */
+ *  time, with the link back to its section and to its source on GitHub.
+ *  `backLabel` is the section's menu label, translated from the nav area. */
 export function PublishedDocPage({
   doc,
   backHref,
@@ -32,18 +35,17 @@ export function PublishedDocPage({
         href={backHref}
         className="inline-flex items-center gap-1 text-sm text-(--text-secondary) hover:text-(--text-primary) mb-6"
       >
-        <ArrowLeft size={14} /> {backLabel}
+        <ArrowLeft size={14} /> <T area="nav">{backLabel}</T>
       </Link>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-6">
         <DocsLastUpdated page={lastUpdatedPage} />
-        <a
+        <ExternalA
           href={`${REPO_URL}/blob/main/${doc.source}`}
-          target="_blank"
-          rel="noopener noreferrer"
           className="inline-flex items-center gap-1 text-xs text-(--accent) underline mb-4"
+          iconSize={11}
         >
-          <code>{doc.source}</code> on GitHub <ExternalLink size={11} />
-        </a>
+          <code>{doc.source}</code> <T area="docsCommon">{"on GitHub"}</T>
+        </ExternalA>
       </div>
       {/* A click on a diagram or screenshot opens it full screen with zoom. */}
       <article className="doc-prose" data-testid="published-doc">

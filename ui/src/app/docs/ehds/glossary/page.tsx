@@ -3,6 +3,7 @@ import { ArrowLeft, ExternalLink, Languages } from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 import { REPO_URL } from "@/lib/docs/published-docs";
 import terminology from "@/lib/i18n/ehds-terminology.json";
+import { T } from "@/lib/i18n/translate";
 
 export const metadata = {
   title: "EHDS Glossary",
@@ -33,20 +34,22 @@ export default function EhdsGlossaryPage() {
         href="/docs/ehds"
         className="inline-flex items-center gap-1 text-sm text-(--text-secondary) hover:text-(--text-primary) mb-6"
       >
-        <ArrowLeft size={14} /> Back to EHDS Regulation
+        <ArrowLeft size={14} />{" "}
+        <T area="docsCommon">{"Back to EHDS Regulation"}</T>
       </Link>
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 inline-flex items-center gap-2">
-          <Languages size={28} aria-hidden="true" /> EHDS Glossary
+          <Languages size={28} aria-hidden="true" />{" "}
+          <T area="docsCommon">{"EHDS Glossary"}</T>
         </h1>
         <DocsLastUpdated page="/docs/ehds/glossary" />
         <p className="text-(--text-secondary) text-lg">
-          The terms of Regulation (EU) 2025/327 the hub uses, in each language
-          of its interface, as the Official Journal writes them. Every
-          translation in the interface and in the dataset descriptions takes its
-          term from this list; a variant the Regulation does not use fails the
-          build.
+          <T area="docsCommon">
+            {
+              "The terms of Regulation (EU) 2025/327 the hub uses, in each language of its interface, as the Official Journal writes them. Every translation in the interface and in the dataset descriptions takes its term from this list; a variant the Regulation does not use fails the build."
+            }
+          </T>
         </p>
       </div>
 
@@ -55,7 +58,7 @@ export default function EhdsGlossaryPage() {
           <thead className="bg-(--surface-2) text-left">
             <tr>
               <th scope="col" className="px-3 py-2 font-semibold">
-                Article
+                <T area="docsCommon">{"Article"}</T>
               </th>
               {LANGS.map(([code, name]) => (
                 <th
@@ -84,7 +87,12 @@ export default function EhdsGlossaryPage() {
                     <span className="font-medium">{t[code]}</span>
                     {t.avoid?.[code] && (
                       <span className="block text-xs text-(--text-secondary)">
-                        not: {t.avoid[code].join(", ")}
+                        <T
+                          area="docsCommon"
+                          vars={{ terms: t.avoid[code].join(", ") }}
+                        >
+                          {"not: {terms}"}
+                        </T>
                       </span>
                     )}
                   </td>
@@ -95,22 +103,33 @@ export default function EhdsGlossaryPage() {
         </table>
       </div>
 
-      <h2 className="text-xl font-semibold mt-10 mb-3">Notes</h2>
+      <h2 className="text-xl font-semibold mt-10 mb-3">
+        <T area="docsCommon">{"Notes"}</T>
+      </h2>
       <ul className="list-disc pl-6 space-y-2 text-(--text-secondary)">
         {terms
           .filter((t) => t.note)
           .map((t) => (
-            <li key={t.id}>
+            <li key={t.id} lang="en">
               <span className="font-medium text-(--text-primary)">{t.en}</span>:{" "}
               {t.note}
             </li>
           ))}
       </ul>
 
-      <h2 className="text-xl font-semibold mt-10 mb-3">Sources</h2>
+      <h2 className="text-xl font-semibold mt-10 mb-3">
+        <T area="docsCommon">{"Sources"}</T>
+      </h2>
       <p className="text-(--text-secondary) mb-3">
-        Checked on {terminology.source.checkedOn} by{" "}
-        {terminology.source.checkedBy}.
+        <T
+          area="docsCommon"
+          vars={{
+            date: terminology.source.checkedOn,
+            who: terminology.source.checkedBy,
+          }}
+        >
+          {"Checked on {date} by {who}."}
+        </T>
       </p>
       <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
         {LANGS.map(([code, name]) => (
@@ -119,7 +138,10 @@ export default function EhdsGlossaryPage() {
               href={terminology.source.languageVersions[code]}
               className="inline-flex items-center gap-1 text-(--accent) hover:underline"
             >
-              The Regulation in {name} <ExternalLink size={12} />
+              <T area="docsCommon" vars={{ language: name }}>
+                {"The Regulation in {language}"}
+              </T>{" "}
+              <ExternalLink size={12} />
             </a>
           </li>
         ))}

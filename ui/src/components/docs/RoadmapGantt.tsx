@@ -1,7 +1,14 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import MermaidDiagram from "@/components/MermaidDiagram";
-import { roadmapGantt, roadmapTargets } from "@/lib/docs/roadmap";
+import {
+  roadmapGantt,
+  roadmapTargets,
+  type Translate,
+} from "@/lib/docs/roadmap";
+import { translate } from "@/lib/i18n/translate";
+import { useLanguage } from "@/lib/use-language";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -26,12 +33,13 @@ function wrapInLink(el: Element, href: string, label: string) {
  * milestone, and its label, becomes a link to its issue or its source, with
  * the details as a tooltip; the bars get an index the CSS staggers their
  * grow-in by (globals.css, `.roadmap-gantt`; reduced motion turns it off).
+ * The tooltips are in the language `tr` translates into, English without it.
  */
-export function linkRoadmap(svg: SVGSVGElement) {
+export function linkRoadmap(svg: SVGSVGElement, tr?: Translate) {
   svg.classList.add("roadmap-gantt");
   // Mermaid 11 prefixes every id with the diagram's own: <svg id>-<task id>.
   const prefix = svg.id ? `${svg.id}-` : "";
-  roadmapTargets().forEach((t, index) => {
+  roadmapTargets(tr).forEach((t, index) => {
     const bar = svg.querySelector(`[id="${prefix}${t.taskId}"]`);
     const text = svg.querySelector(`[id="${prefix}${t.taskId}-text"]`);
     if (bar) {
@@ -58,12 +66,25 @@ export function linkRoadmap(svg: SVGSVGElement) {
 }
 
 export default function RoadmapGantt() {
+  // The chart and its links are drawn again only when the language changes.
+  const lang = useLanguage();
+  const tr = useCallback<Translate>(
+    (text, vars) => translate(lang, "docsCommon", text, vars),
+    [lang],
+  );
+  const chart = useMemo(() => roadmapGantt(tr), [tr]);
+  const transform = useCallback(
+    (svg: SVGSVGElement) => linkRoadmap(svg, lang === "en" ? undefined : tr),
+    [lang, tr],
+  );
   return (
     <div data-testid="roadmap-gantt">
       <MermaidDiagram
-        chart={roadmapGantt()}
-        caption="Click a bar for its issue, a diamond for its source. The red line is today."
-        transform={linkRoadmap}
+        chart={chart}
+        caption={tr(
+          "Click a bar for its issue, a diamond for its source. The red line is today.",
+        )}
+        transform={transform}
       />
     </div>
   );

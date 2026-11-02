@@ -16,6 +16,7 @@
 import { useEffect, useState } from "react";
 import { List } from "lucide-react";
 import { headingId } from "@/lib/docs/markdown";
+import { useT } from "@/lib/i18n/translate";
 
 export interface TocEntry {
   id: string;
@@ -139,16 +140,17 @@ function TocList({
 /** The sticky index at the right, on screens wide enough for a column. */
 export function DocsTocSidebar() {
   const { entries, active } = useDocsToc();
+  const t = useT("docsCommon");
   if (entries.length < 2) return null;
   return (
     <aside
-      aria-label="On this page"
+      aria-label={t("On this page")}
       data-testid="docs-toc"
       className="hidden xl:block pr-6 py-12"
     >
       <nav className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto">
         <p className="text-xs font-semibold uppercase tracking-wide text-(--text-secondary) mb-2 pl-3 inline-flex items-center gap-1.5">
-          <List size={12} aria-hidden="true" /> On this page
+          <List size={12} aria-hidden="true" /> {t("On this page")}
         </p>
         <TocList entries={entries} active={active} />
       </nav>
@@ -159,6 +161,7 @@ export function DocsTocSidebar() {
 /** The same index folded into a disclosure at the top, for narrow screens. */
 export function DocsTocInline() {
   const { entries, active } = useDocsToc();
+  const t = useT("docsCommon");
   const [open, setOpen] = useState(false);
   if (entries.length < 2) return null;
   return (
@@ -169,7 +172,7 @@ export function DocsTocInline() {
       onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}
     >
       <summary className="cursor-pointer px-4 py-2 text-sm font-medium inline-flex items-center gap-2 select-none">
-        <List size={14} aria-hidden="true" /> On this page
+        <List size={14} aria-hidden="true" /> {t("On this page")}
       </summary>
       <div className="px-2 pb-3">
         <TocList

@@ -7,8 +7,10 @@ import {
   LANES,
   REPO,
   ROADMAP_PLANNED_ON,
+  STATUS_LABEL,
   issueUrl,
 } from "@/lib/docs/roadmap";
+import { T } from "@/lib/i18n/translate";
 
 export const metadata = {
   title: "Roadmap",
@@ -18,7 +20,8 @@ export const metadata = {
 
 const EURLEX = "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=";
 
-/** The six drivers, each with the sources it rests on. */
+/** The six drivers, each with the sources it rests on. Titles, texts and
+ *  link labels are keys of the docsCommon dictionary (ADR-071). */
 const DRIVERS: {
   title: string;
   text: string;
@@ -144,13 +147,6 @@ const DRIVERS: {
   },
 ];
 
-const STATUS_LABEL = {
-  done: "Done",
-  "in-progress": "In progress",
-  planned: "Planned",
-  blocked: "Blocked",
-} as const;
-
 export default function RoadmapDocsPage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-12">
@@ -158,50 +154,67 @@ export default function RoadmapDocsPage() {
         href="/docs"
         className="inline-flex items-center gap-1 text-sm text-(--text-secondary) hover:text-(--text-primary) mb-6"
       >
-        <ArrowLeft size={14} /> Back to Docs
+        <ArrowLeft size={14} /> <T area="docsCommon">{"Back to Docs"}</T>
       </Link>
 
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2 inline-flex items-center gap-2">
-          <ChartGantt size={28} aria-hidden="true" /> Roadmap
+          <ChartGantt size={28} aria-hidden="true" />{" "}
+          <T area="nav">{"Roadmap"}</T>
         </h1>
         <DocsLastUpdated page="/docs/roadmap" />
         <p className="text-(--text-secondary) text-lg">
-          The roadmap to 2031, set by the dates of the EHDS Regulation and its
-          implementing acts, the EUDI and Business Wallets and Simpl-Open. The
-          diamonds are dates set by law or by the programmes; the bars are
-          planning windows set on {ROADMAP_PLANNED_ON}. P1 is due by 26 March
-          2027, P2 by 26 March 2029; P3 is a comment, not a build. The plan is{" "}
-          <a
-            href={issueUrl(725)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-(--accent) underline"
+          <T
+            area="docsCommon"
+            vars={{ date: ROADMAP_PLANNED_ON }}
+            tags={{
+              a: (
+                <a
+                  href={issueUrl(725)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-(--accent) underline"
+                />
+              ),
+            }}
           >
-            #725
-          </a>
-          .
+            {
+              "The roadmap to 2031, set by the dates of the EHDS Regulation and its implementing acts, the EUDI and Business Wallets and Simpl-Open. The diamonds are dates set by law or by the programmes; the bars are planning windows set on {date}. P1 is due by 26 March 2027, P2 by 26 March 2029; P3 is a comment, not a build. The plan is <a>#725</a>."
+            }
+          </T>
         </p>
       </div>
 
       <section aria-labelledby="chart">
         <h2 id="chart" className="text-xl font-semibold mb-2">
-          The chart
+          <T area="docsCommon">{"The chart"}</T>
         </h2>
         <ul className="flex flex-wrap gap-4 text-xs text-(--text-secondary) mb-2">
-          <li>Light bar with a blue border: planned</li>
-          <li>Solid blue bar: in progress</li>
-          <li>Red bar: blocked</li>
-          <li>Grey bar: done</li>
-          <li>Diamond: a fixed date</li>
-          <li>Red line: today</li>
+          <li>
+            <T area="docsCommon">{"Light bar with a blue border: planned"}</T>
+          </li>
+          <li>
+            <T area="docsCommon">{"Solid blue bar: in progress"}</T>
+          </li>
+          <li>
+            <T area="docsCommon">{"Red bar: blocked"}</T>
+          </li>
+          <li>
+            <T area="docsCommon">{"Grey bar: done"}</T>
+          </li>
+          <li>
+            <T area="docsCommon">{"Diamond: a fixed date"}</T>
+          </li>
+          <li>
+            <T area="docsCommon">{"Red line: today"}</T>
+          </li>
         </ul>
         <RoadmapGantt />
       </section>
 
       <section aria-labelledby="drivers" className="mt-10">
         <h2 id="drivers" className="text-xl font-semibold mb-4">
-          What drives it
+          <T area="docsCommon">{"What drives it"}</T>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {DRIVERS.map((d) => (
@@ -209,14 +222,18 @@ export default function RoadmapDocsPage() {
               key={d.title}
               className="border border-(--border) rounded-xl p-5"
             >
-              <h3 className="font-semibold mb-2">{d.title}</h3>
-              <p className="text-sm text-(--text-secondary) mb-3">{d.text}</p>
+              <h3 className="font-semibold mb-2">
+                <T area="docsCommon">{d.title}</T>
+              </h3>
+              <p className="text-sm text-(--text-secondary) mb-3">
+                <T area="docsCommon">{d.text}</T>
+              </p>
               <ul className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
                 {d.links.map((l) => (
                   <li key={l.href}>
                     {l.href.startsWith("/") ? (
                       <Link href={l.href} className="text-(--accent) underline">
-                        {l.label}
+                        <T area="docsCommon">{l.label}</T>
                       </Link>
                     ) : (
                       <a
@@ -225,7 +242,8 @@ export default function RoadmapDocsPage() {
                         rel="noopener noreferrer"
                         className="text-(--accent) underline inline-flex items-center gap-1"
                       >
-                        {l.label} <ExternalLink size={11} aria-hidden="true" />
+                        <T area="docsCommon">{l.label}</T>{" "}
+                        <ExternalLink size={11} aria-hidden="true" />
                       </a>
                     )}
                   </li>
@@ -238,16 +256,18 @@ export default function RoadmapDocsPage() {
 
       <section aria-labelledby="items" className="mt-10">
         <h2 id="items" className="text-xl font-semibold mb-4">
-          Every item
+          <T area="docsCommon">{"Every item"}</T>
         </h2>
         {LANES.map((lane) => {
           const items = ITEMS.filter((i) => i.lane === lane.id);
           if (items.length === 0) return null;
           return (
             <div key={lane.id} className="mb-6">
-              <h3 className="font-semibold">{lane.label}</h3>
+              <h3 className="font-semibold">
+                <T area="docsCommon">{lane.label}</T>
+              </h3>
               <p className="text-xs text-(--text-secondary) mb-2">
-                {lane.driver}
+                <T area="docsCommon">{lane.driver}</T>
               </p>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[40rem] table-fixed text-sm">
@@ -260,11 +280,21 @@ export default function RoadmapDocsPage() {
                   </colgroup>
                   <thead>
                     <tr className="text-left text-(--text-secondary) border-b border-(--border)">
-                      <th className="py-1 pr-3 font-medium">Issue</th>
-                      <th className="py-1 pr-3 font-medium">What</th>
-                      <th className="py-1 pr-3 font-medium">Priority</th>
-                      <th className="py-1 pr-3 font-medium">Status</th>
-                      <th className="py-1 pr-3 font-medium">Window</th>
+                      <th className="py-1 pr-3 font-medium">
+                        <T area="docsCommon">{"Issue"}</T>
+                      </th>
+                      <th className="py-1 pr-3 font-medium">
+                        <T area="docsCommon">{"What"}</T>
+                      </th>
+                      <th className="py-1 pr-3 font-medium">
+                        <T area="docsCommon">{"Priority"}</T>
+                      </th>
+                      <th className="py-1 pr-3 font-medium">
+                        <T area="docsCommon">{"Status"}</T>
+                      </th>
+                      <th className="py-1 pr-3 font-medium">
+                        <T area="docsCommon">{"Window"}</T>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -284,17 +314,22 @@ export default function RoadmapDocsPage() {
                           </a>
                         </td>
                         <td className="py-1.5 pr-3">
-                          {i.title}
+                          <T area="docsCommon">{i.title}</T>
                           <span className="block text-xs text-(--text-secondary)">
-                            {i.note}
+                            <T area="docsCommon">{i.note}</T>
                           </span>
                         </td>
                         <td className="py-1.5 pr-3">{i.priority}</td>
                         <td className="py-1.5 pr-3">
-                          {STATUS_LABEL[i.status]}
+                          <T area="docsCommon">{STATUS_LABEL[i.status]}</T>
                         </td>
                         <td className="py-1.5 pr-3 whitespace-nowrap">
-                          {i.start} to {i.end}
+                          <T
+                            area="docsCommon"
+                            vars={{ start: i.start, end: i.end }}
+                          >
+                            {"{start} to {end}"}
+                          </T>
                         </td>
                       </tr>
                     ))}

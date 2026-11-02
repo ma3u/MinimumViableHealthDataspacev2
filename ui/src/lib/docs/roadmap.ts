@@ -63,6 +63,29 @@ export const LANES: readonly Lane[] = [
 export type Priority = "P1" | "P2" | "P3";
 export type Status = "done" | "in-progress" | "planned" | "blocked";
 
+/** How the page and the chart's tooltips name a status. */
+export const STATUS_LABEL: Record<Status, string> = {
+  done: "Done",
+  "in-progress": "In progress",
+  planned: "Planned",
+  blocked: "Blocked",
+};
+
+/** The labels in the picked language (ADR-071): the page hands in the
+ *  docsCommon translator, so this file stays free of the client-side hook.
+ *  Without one the labels are English. */
+export type Translate = (
+  text: string,
+  vars?: Record<string, string | number>,
+) => string;
+
+const english: Translate = (text, vars) =>
+  vars
+    ? text.replace(/\{(\w+)\}/g, (m, k: string) =>
+        k in vars ? String(vars[k]) : m,
+      )
+    : text;
+
 export interface RoadmapItem {
   /** The GitHub issue number; also the item's id. */
   issue: number;
@@ -427,21 +450,28 @@ const itemTaskId = (n: number) => `i${n}`;
 const milestoneTaskId = (id: string) => `m_${id.replace(/[^a-z0-9]/gi, "_")}`;
 
 /** Every bar and marker: its task id, where a click goes, and what it says. */
-export function roadmapTargets(): {
+export function roadmapTargets(tr?: Translate): {
   taskId: string;
   href: string;
   label: string;
 }[] {
+  // English keeps the status ids ("in-progress") the tooltips always had.
+  const t = tr ?? english;
+  const status = (s: Status) => (tr ? tr(STATUS_LABEL[s]) : s);
   return [
     ...ITEMS.map((i) => ({
       taskId: itemTaskId(i.issue),
       href: issueUrl(i.issue),
-      label: `#${i.issue} ${i.title} (${i.priority}, ${i.status}, ${i.start} to ${i.end}). ${i.note}`,
+      label: `#${i.issue} ${t(i.title)} (${i.priority}, ${status(
+        i.status,
+      )}, ${t("{start} to {end}", { start: i.start, end: i.end })}). ${t(
+        i.note,
+      )}`,
     })),
     ...MILESTONES.map((m) => ({
       taskId: milestoneTaskId(m.id),
       href: m.href,
-      label: `${m.date}: ${m.label}. ${m.detail}`,
+      label: `${m.date}: ${t(m.label)}. ${t(m.detail)}`,
     })),
   ];
 }
@@ -456,8 +486,10 @@ const TAG: Record<Status, string> = {
 /** The width the chart is drawn at, in SVG units, before it is scaled to the page. */
 const GANTT_WIDTH = 1400;
 
-/** The roadmap as a Mermaid Gantt chart, one section per lane. */
-export function roadmapGantt(): string {
+/** The roadmap as a Mermaid Gantt chart, one section per lane. A
+ *  translation of a label keeps clear of the Gantt syntax's colon, semicolon
+ *  and hash, as the English does. */
+export function roadmapGantt(tr: Translate = english): string {
   const lines = [
     // Mermaid measures the width of its temporary render element, which is 0
     // in the browser; a fixed drawing width that useMaxWidth scales to the page
@@ -479,17 +511,19 @@ export function roadmapGantt(): string {
     `  todayMarker stroke-width:3px,stroke:#e11d48,opacity:0.8`,
   ];
   for (const lane of LANES) {
-    lines.push(`  section ${lane.label}`);
+    lines.push(`  section ${tr(lane.label)}`);
     for (const m of MILESTONES.filter((x) => x.lane === lane.id)) {
       lines.push(
-        `    ${m.label} :milestone, ${milestoneTaskId(m.id)}, ${m.date}, 0d`,
+        `    ${tr(m.label)} :milestone, ${milestoneTaskId(m.id)}, ${
+          m.date
+        }, 0d`,
       );
     }
     for (const i of ITEMS.filter((x) => x.lane === lane.id)) {
       lines.push(
-        `    ${i.issue} ${i.short} :${TAG[i.status]}${itemTaskId(i.issue)}, ${
-          i.start
-        }, ${i.end}`,
+        `    ${i.issue} ${tr(i.short)} :${TAG[i.status]}${itemTaskId(
+          i.issue,
+        )}, ${i.start}, ${i.end}`,
       );
     }
   }

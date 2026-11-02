@@ -1,8 +1,11 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, ExternalLink, Smartphone } from "lucide-react";
+import { ArrowLeft, Smartphone } from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
-import { docsInSection, REPO_URL } from "@/lib/docs/published-docs";
+import { ExternalA } from "@/components/docs/ExternalA";
+import { PublishedDocCards } from "@/components/docs/PublishedDocCards";
+import { docCards, docsInSection, REPO_URL } from "@/lib/docs/published-docs";
 import { INSURER_REPORT_PAGE } from "@/lib/docs/security-docs";
+import { T } from "@/lib/i18n/translate";
 
 export const metadata = {
   title: "Klarbefund",
@@ -13,7 +16,8 @@ export const metadata = {
 /** Klarbefund's public TestFlight beta (ADR-050). */
 const TESTFLIGHT_URL = "https://testflight.apple.com/join/ssADSXX6";
 
-/** The reports about the app that live in the security section. */
+/** The reports about the app that live in the security section; the label
+ *  is a key of docsCommon. */
 const REPORTS = [
   ["klarbefund-self-assessment", "Self-assessment"],
   ["klarbefund-evidence", "Evidence"],
@@ -30,52 +34,36 @@ export default function KlarbefundDocsPage() {
         href="/docs"
         className="inline-flex items-center gap-1 text-sm text-(--text-secondary) hover:text-(--text-primary) mb-6"
       >
-        <ArrowLeft size={14} /> Back to Docs
+        <ArrowLeft size={14} /> <T area="docsCommon">{"Back to Docs"}</T>
       </Link>
 
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 inline-flex items-center gap-2">
-          <Smartphone size={28} aria-hidden="true" /> Klarbefund
+          <Smartphone size={28} aria-hidden="true" />{" "}
+          <T area="nav">{"Klarbefund"}</T>
         </h1>
         <DocsLastUpdated page="/docs/klarbefund" />
         <p className="text-(--text-secondary) text-lg">
-          Klarbefund is the iPhone app of this project. It scans a paper lab
-          report, reads the values on the device, codes them with LOINC, keeps
-          them encrypted on the phone and exports them as FHIR and OMOP, or
-          sends them to the person&apos;s own record on the hub when they say
-          so. Every screenshot shows invented data from the app&apos;s own demo
-          dataset.
+          <T area="docsCommon">
+            {
+              "Klarbefund is the iPhone app of this project. It scans a paper lab report, reads the values on the device, codes them with LOINC, keeps them encrypted on the phone and exports them as FHIR and OMOP, or sends them to the person's own record on the hub when they say so. Every screenshot shows invented data from the app's own demo dataset."
+            }
+          </T>
         </p>
       </div>
 
-      <div
-        className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10"
-        data-testid="klarbefund-guides"
-      >
-        {guides.map((d) => (
-          <Link
-            key={d.slug}
-            href={`/docs/klarbefund/${d.slug}`}
-            className="flex flex-col border border-(--border) rounded-xl p-5 hover:border-indigo-500/50 transition-colors group"
-          >
-            <span className="font-semibold mb-2 text-indigo-700 dark:text-indigo-400">
-              {d.title}
-            </span>
-            <span className="text-sm text-(--text-secondary) mb-3 flex-1">
-              {d.summary}
-            </span>
-            <span className="inline-flex items-center gap-1 text-sm text-(--accent) group-hover:underline mt-auto">
-              Read <ArrowRight size={14} />
-            </span>
-          </Link>
-        ))}
-      </div>
+      <PublishedDocCards docs={docCards(guides)} testId="klarbefund-guides" />
 
       <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-3">Reports about the app</h2>
+        <h2 className="text-xl font-semibold mb-3">
+          <T area="docsCommon">{"Reports about the app"}</T>
+        </h2>
         <p className="text-sm text-(--text-secondary) mb-3">
-          Accuracy, data protection, the BSI TR-03161 objectives and the
-          medical-device question are assessed in the security section:
+          <T area="docsCommon">
+            {
+              "Accuracy, data protection, the BSI TR-03161 objectives and the medical-device question are assessed in the security section:"
+            }
+          </T>
         </p>
         <ul className="text-sm space-y-1.5">
           {REPORTS.map(([slug, label]) => (
@@ -84,57 +72,57 @@ export default function KlarbefundDocsPage() {
                 href={`/docs/security/${slug}`}
                 className="text-(--accent) underline"
               >
-                {label}
+                <T area="docsCommon">{label}</T>
               </Link>
             </li>
           ))}
           <li>
-            <a
-              href={INSURER_REPORT_PAGE}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-(--accent) underline inline-flex items-center gap-1"
+            <T
+              area="docsCommon"
+              tags={{ a: <ExternalA href={INSURER_REPORT_PAGE} /> }}
             >
-              Report for health insurers, on one page <ExternalLink size={12} />
-            </a>{" "}
-            for a steering meeting.
+              {
+                "<a>Report for health insurers, on one page</a> for a steering meeting."
+              }
+            </T>
           </li>
         </ul>
       </section>
 
       <section className="mb-4">
-        <h2 className="text-xl font-semibold mb-3">Get the app</h2>
+        <h2 className="text-xl font-semibold mb-3">
+          <T area="docsCommon">{"Get the app"}</T>
+        </h2>
         <ul className="text-sm space-y-2 text-(--text-secondary)">
           <li>
-            <a
-              href={TESTFLIGHT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-(--accent) underline inline-flex items-center gap-1"
+            <T
+              area="docsCommon"
+              tags={{ a: <ExternalA href={TESTFLIGHT_URL} /> }}
             >
-              Join the beta on TestFlight <ExternalLink size={12} />
-            </a>{" "}
-            on an iPhone with iOS 26 or later.
+              {
+                "<a>Join the beta on TestFlight</a> on an iPhone with iOS 26 or later."
+              }
+            </T>
           </li>
           <li>
-            <a
-              href={`${REPO_URL}/tree/main/clients/ios`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-(--accent) underline inline-flex items-center gap-1"
+            <T
+              area="docsCommon"
+              tags={{
+                a: <ExternalA href={`${REPO_URL}/tree/main/clients/ios`} />,
+                issue: (
+                  <a
+                    href={`${REPO_URL}/issues/186`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-(--accent) underline"
+                  />
+                ),
+              }}
             >
-              Source code <ExternalLink size={12} />
-            </a>{" "}
-            and the work tracked in{" "}
-            <a
-              href={`${REPO_URL}/issues/186`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-(--accent) underline"
-            >
-              issue #186
-            </a>
-            .
+              {
+                "<a>Source code</a> and the work tracked in <issue>issue #186</issue>."
+              }
+            </T>
           </li>
         </ul>
       </section>
