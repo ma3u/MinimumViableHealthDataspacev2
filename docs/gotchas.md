@@ -3,6 +3,66 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-02: the PIM role cannot define roles, so the off-hours identity cannot get mvhd-aci-power
+
+`18-offhours-jobs.sh` creates the custom role `mvhd-aci-power` (read, start,
+stop, restart container groups) for `id-mvhd-offhours`, so the evening job can
+stop the SPE workspaces. It never could: `rol-ssg-prd-project_owner` has
+`Microsoft.Authorization/roleDefinitions/write` in its notActions. The script
+warns and carries on, and the groups kept running (and billing) overnight on
+2026-11-01. Instead the maintainer assigned the built-in "Azure Container
+Instances Contributor Role" on the two groups only. The warning about the
+custom role is now expected. See
+`docs/knowledge/runbooks/spe-attestation-azure.md`.
+
+## 2026-11-01: a Key Vault reference keeps the newline the shell drops
+
+After `--wire-proxy`, both SPE workspaces refused the proxy with
+`Neo.ClientError.Security.Unauthorized`, and `/admin/attestation` showed no
+evidence. The Neo4j passwords were stored in Key Vault with a trailing newline.
+The group got its password through the shell, which drops it; the proxy got it
+through a `keyvaultref`, which keeps it. Fix (#809): the proxy trims a trailing
+line break from a workspace password, and `--policy` writes new passwords
+without one.
+
+## 2026-11-01: `az container restart` does not re-run an init container
+
+After pinning the reference values, both SPE groups were restarted with
+`az container restart`. Neither contacted Trustee again: the init container
+`spe-unlock`, which attests and fetches the key, did not run. Run
+`21-aci-confidential-spe.sh --workspaces` (a redeploy) or
+`az container stop` followed by `az container start`; a stopped group starts
+fresh and attests again.
+
+## 2026-11-01: two ACI hosts, two TCBs, so a reference value is a list
+
+`mvhd-spe-1` and `mvhd-spe-2` ran on hosts with different firmware: bootloader
+10 and 12, microcode 84 and 88, snp 23 and 28. A single pinned value would
+refuse one of them, and any later start that lands on another host. Trustee's
+default policy compares each value as "one of" a list, so pin every TCB value
+seen (#801; the admin job posts lists over HTTP inside the environment, #805).
+A start that is refused with `ear.status contraindicated` after it worked
+before is most likely a new host: add its values to the lists.
+
+## 2026-11-01: a failed extended SEV-SNP report request breaks every request after it
+
+In ACI confidential groups, Trustee v0.22.0's snp-attester failed with
+`get composite evidence failed … Failed to get attestation report`, and a
+fallback to the plain report failed too. A probe against `/dev/sev-guest`
+(kernel 6.1.10) showed why: the plain report works at every VMPL, the extended
+one fails, and after that failure the guest driver has dropped its VMPCK, so
+every later request answers `ENOTTY`. A fallback after the failure can never
+succeed. Fix (#798): the attester asks for the plain report only
+(`services/spe-loader/patches/snp-attester-plain-report.patch`); Trustee
+fetches the VCEK from AMD KDS.
+
+## 2026-11-01: a PIM role activated after `az login` is not in the token
+
+Phase 21's first `--trustee` failed with `AuthorizationFailed` on the share
+`trustee-data`, although `rol-ssg-prd-project_owner` was active and the role
+assignment step reported success. The CLI token was older than the PIM
+activation. Activate PIM first, then `az login`, or log in again after.
+
 ## 2026-10-28: the wallet sign-in expired at once on six UI replicas
 
 On https://ehds.mabu.red/auth/eudi-qr the page said "This sign-in request

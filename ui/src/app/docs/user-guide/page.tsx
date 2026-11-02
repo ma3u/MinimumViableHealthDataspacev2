@@ -47,6 +47,10 @@ const PARTICIPANT_CREDENTIAL = "EHDSParticipantCredential";
 
 const FULL_JOURNEY_URL =
   "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/FULL_USER_JOURNEY.md";
+const SPE_RUNBOOK_URL =
+  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/knowledge/runbooks/spe-attestation-azure.md";
+const ISSUE_774_URL =
+  "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774";
 
 import MermaidDiagram from "@/components/MermaidDiagram";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
@@ -383,6 +387,14 @@ export default function UserGuidePage() {
       className="text-indigo-700 dark:text-indigo-400 hover:underline"
     />
   );
+  const auditLink = (
+    <Link
+      href="/admin/audit"
+      className="text-indigo-700 dark:text-indigo-400 hover:underline"
+    />
+  );
+  const issue774Link = <ExternalTextLink href={ISSUE_774_URL} />;
+  const speRunbookLink = <ExternalTextLink href={SPE_RUNBOOK_URL} />;
   const l1 = <strong className="text-(--accent)" />;
   const l2 = <strong className="text-emerald-700 dark:text-teal-300" />;
   const l3 = <strong className="text-green-700 dark:text-green-300" />;
@@ -1748,6 +1760,89 @@ export default function UserGuidePage() {
               )}
             </p>
           </FeatureCard>
+          <div
+            id="spe-attestation"
+            className="rounded-xl border border-(--border) bg-(--surface-2) p-5"
+          >
+            <h3 className="mb-2 flex items-center gap-2 text-lg font-semibold text-indigo-700 dark:text-indigo-400">
+              <Fingerprint size={18} aria-hidden />{" "}
+              {t("SPE attestation: what the page proves")}
+            </h3>
+            <p className="text-(--text-secondary) text-sm mb-2">
+              <T area="docsGuide" tags={{ l: attestationLink }}>
+                {
+                  "<l>SPE attestation</l> shows, for each secure processing environment, the evidence its workspace sent before it got the key to its encrypted extract, and what the access body's Trustee concluded from it."
+                }
+              </T>
+            </p>
+            <ul className="text-(--text-secondary) text-sm mb-2 list-disc pl-5 space-y-1">
+              <li>
+                <T area="docsGuide" tags={{ b: strongPrimary }}>
+                  {
+                    "<b>Verdict.</b> “Verified, key released”: the Trustee checked the evidence against its reference values and the data permit's policy hash, and released the key. “Verified, key refused”: the evidence was genuine but did not match, so the workspace holds no data."
+                  }
+                </T>
+              </li>
+              <li>
+                <T area="docsGuide" tags={{ b: strongPrimary }}>
+                  {
+                    "<b>Label.</b> “Attested: confidential workload” is hardware evidence for this container group, on Azure. “Simulated attestation” means the Trustee, its policy, the key release and the audit record are real, but the evidence comes from the sample attester, so nothing is proven in hardware: this is what the local stack and the static demo show."
+                  }
+                </T>
+              </li>
+              <li>
+                <T area="docsGuide" tags={{ b: strongPrimary }}>
+                  {
+                    "<b>Scope and host data.</b> Scope “Workload level” means the report's HOST_DATA is the SHA-256 of the container group's policy, which is the data permit's policy hash: the hardware checks that the workspace runs exactly what the permit allows."
+                  }
+                </T>
+              </li>
+              <li>
+                <T area="docsGuide" tags={{ b: strongPrimary }}>
+                  {
+                    "<b>Measurement.</b> The launch measurement of Microsoft's utility VM, which runs the containers. The operator pinned it after comparing it with Microsoft's signed endorsement."
+                  }
+                </T>
+              </li>
+              <li>
+                <T area="docsGuide" tags={{ b: strongPrimary }}>
+                  {
+                    "<b>Reported TCB.</b> The firmware versions of the host the group runs on. Hosts differ, so the Trustee accepts each version that was pinned and refuses a host whose versions were not."
+                  }
+                </T>
+              </li>
+              <li>
+                <T
+                  area="docsGuide"
+                  tags={{
+                    b: strongPrimary,
+                    c: codeXs,
+                    d: codeXs,
+                    e: codeXs,
+                    a: auditLink,
+                  }}
+                >
+                  {
+                    "<b>Key released and Workspace loaded.</b> When the Trustee released the key and when the extract was loaded. The same steps are on the audit chain as <c>spe.attestation</c>, <d>spe.key_release</d> and <e>spe.workspace_loaded</e>, in the tab Secure processing of <a>Audit & Provenance</a>."
+                  }
+                </T>
+              </li>
+            </ul>
+            <p className="text-(--text-secondary) text-sm mb-2">
+              <T area="docsGuide" tags={{ b: strongPrimary }}>
+                {
+                  "<b>Residual trust.</b> The evidence rests on AMD's root of trust, and the utility VM image is trusted because Microsoft endorses its measurement; the endorsement's issuer and content were checked, its signature not yet cryptographically. The Trustee runs in the hub's own subscription, operated as if by MedReg DE; for the claim to hold fully, the access body runs it in a subscription of its own."
+                }
+              </T>
+            </p>
+            <p className="text-(--text-secondary) text-sm">
+              <T area="docsGuide" tags={{ i: issue774Link, r: speRunbookLink }}>
+                {
+                  "On Azure the workspaces stop off hours. A start takes about a minute until attestation and key release, and three to four minutes until both answer queries; starting them on demand is planned (<i>#774</i>). How the attestation is set up, pinned and checked: the <r>runbook</r>."
+                }
+              </T>
+            </p>
+          </div>
           <FeatureCard
             href="/admin/tenants"
             title={t("Tenant Management")}
