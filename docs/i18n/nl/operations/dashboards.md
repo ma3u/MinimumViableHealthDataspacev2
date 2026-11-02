@@ -2,6 +2,7 @@
 source: docs/operations/dashboards.md
 sourceHash: 39db3b7928f591277ed59e3c3ca266cb08249a1cebe8b4abc594966839e6f1b1
 language: nl
+summary: "De drie Grafana-dashboards van de live hub, met schermafbeeldingen: EDC-contracten en -overdrachten, het EHDS-audittrail en de belasting- en stresstest; wat elke rij toont, hoe u die leest en hoe u zich aanmeldt."
 ---
 
 # De dashboards

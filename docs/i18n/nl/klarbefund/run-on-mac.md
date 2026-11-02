@@ -2,6 +2,7 @@
 source: docs/klarbefund/run-on-mac.md
 sourceHash: fd049dc9c178d6abd40839b357d6b7313f8fb4ffb89922fe7830e8b68f8df30a
 language: nl
+summary: "Hoe u elk getal uit het bewijs op een Mac met Xcode reproduceert."
 ---
 
 # Klarbefund: het bewijs op een Mac genereren

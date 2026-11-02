@@ -2,6 +2,7 @@
 source: docs/loadtest/README.md
 sourceHash: 9b7e7f5dd475758fc226e0d982b2c501af4ad553de56333c6de01c2760ad9ecf
 language: de
+summary: "Jeder Last-, Stress- und Spike-Lauf gegen den Live-Hub und den Compose-Stack, mit seinem Grafana-Dashboard, was er gefunden hat, was sich dadurch geändert hat, und die noch ausstehenden Läufe."
 ---
 
 # Last-, Stress- und Spike-Tests: Ergebnisse und Dashboards

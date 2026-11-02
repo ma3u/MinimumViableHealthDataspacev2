@@ -2,6 +2,7 @@
 source: docs/klarbefund/developer-guide.md
 sourceHash: 48236d50693674d8724bcd9602038d3c906575395278be36555efd640d0eaf1c
 language: de
+summary: "Die App bauen, starten und testen: die Pipeline von der Kamera bis zum versiegelten Speicher, das gemeinsame Wörterbuch, der Aufbau des Speichers, der Entwicklungsdatensatz, die beiden Testsuiten, Diagnose und TestFlight."
 ---
 
 # Entwicklerhandbuch für Klarbefund

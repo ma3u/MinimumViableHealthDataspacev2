@@ -2,6 +2,7 @@
 source: docs/klarbefund/report-for-health-insurers.md
 sourceHash: 821e6839f6e4c6afb7b5fe7ead3e9e6b766be700275755cd2ba9f59988ae279a
 language: es
+summary: "Las tres preguntas de una aseguradora, si la extracción es correcta, si los datos están seguros, si es un producto sanitario, respondidas con las evidencias, además de la oferta de marca blanca y consultoría."
 ---
 
 # Klarbefund: informe de pruebas para aseguradoras de salud

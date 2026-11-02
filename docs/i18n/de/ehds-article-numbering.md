@@ -2,6 +2,7 @@
 source: docs/ehds-article-numbering.md
 sourceHash: 24f0877aa01c505e0eaaf88227f833c73f760a93dc625a2f9f9919bca8f7b092
 language: de
+summary: "Die Artikelnummern des Entwurfs von 2022 neben den verabschiedeten und die Fristen aus Art. 105; so lesen sich ältere Unterlagen neben der Verordnung."
 ---
 
 # EHDS-Artikelnummerierung: Vorschlag und verabschiedete Fassung

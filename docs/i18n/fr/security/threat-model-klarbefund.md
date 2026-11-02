@@ -2,6 +2,7 @@
 source: docs/security/threat-model-klarbefund.md
 sourceHash: 1ceeaff87c54101e16f2d380ce062cdedff21add41e30c2256406c9c72351e5a
 language: fr
+summary: "Analyse STRIDE de l’app iPhone ; chaque mesure cite le code ou le test qui la prouve."
 ---
 
 # Modèle de menaces : Klarbefund, l’application iPhone

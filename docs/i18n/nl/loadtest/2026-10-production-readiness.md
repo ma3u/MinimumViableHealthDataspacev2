@@ -2,6 +2,7 @@
 source: docs/loadtest/2026-10-production-readiness.md
 sourceHash: 4927266d5659782d41e2b19dcb537020f6b7d2b195229b9b5c4576bd7992496b
 language: nl
+summary: "De Well-Architected- en Cloud Adoption-beoordeling per 16 oktober 2026: wat per pijler aanwezig is, met het bewijs, wat open is, de scores en wat er tussen de demonstrator en een beheerbaar platform staat."
 ---
 
 # Beoordeling van de productiegereedheid, oktober 2026

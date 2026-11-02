@@ -2,6 +2,7 @@
 source: docs/klarbefund/user-guide.md
 sourceHash: 24429d590488e64628ed0a7526474932a5704fb0e947dee10cd5df5912d6ba82
 language: fr
+summary: "L’app telle qu’une personne l’utilise, écran par écran avec captures : saisir un compte rendu, vérifier une valeur avec le papier, tendances, consentements, connexion à l’EEDS, exports et vos droits sur vos données."
 ---
 
 # Guide d’utilisation de Klarbefund

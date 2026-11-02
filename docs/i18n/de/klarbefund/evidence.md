@@ -2,6 +2,7 @@
 source: docs/klarbefund/evidence.md
 sourceHash: fc5bb296ce79d86a900f5cca02fcf97d746c0622fb87b553939e7d62d0325723
 language: de
+summary: "Der Genauigkeits-Benchmark, die Paritätsprüfung des Wörterbuchs, das Laufprotokoll und was noch fehlt."
 ---
 
 # Klarbefund: Belege

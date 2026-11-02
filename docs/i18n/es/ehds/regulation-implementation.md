@@ -2,6 +2,7 @@
 source: docs/ehds/regulation-implementation.md
 sourceHash: 2dcaadded3a70651eb09b37b2a3f1fd29deea20b434d51885ea17a09f5a3a726
 language: es
+summary: "Lo que el hub de integración aplica del Reglamento (UE) 2025/327, artículo por artículo: el estado, la página, ruta o archivo que lo hace, la prueba que lo demuestra y la carencia con su incidencia."
 ---
 
 # Qué aplica el hub de integración del Reglamento del EEDS

@@ -2,6 +2,7 @@
 source: docs/klarbefund/report-for-health-insurers.md
 sourceHash: 821e6839f6e4c6afb7b5fe7ead3e9e6b766be700275755cd2ba9f59988ae279a
 language: nl
+summary: "De drie vragen van een zorgverzekeraar, klopt de extractie, zijn de gegevens veilig, is het een medisch hulpmiddel, beantwoord met het bewijs, plus het white-label- en adviesaanbod."
 ---
 
 # Klarbefund: bewijsrapport voor zorgverzekeraars

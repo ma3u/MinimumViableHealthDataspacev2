@@ -2,6 +2,7 @@
 source: docs/klarbefund/self-assessment.md
 sourceHash: 62c9b83ff283cb2362f6125d65a73ae849be9d47cd40ca175213fbfb881790bf
 language: nl
+summary: "Gegevensbescherming (AVG), BSI TR-03161 doel voor doel, het label volgens de AI-verordening en de MDR-status van de app, elke regel met een verwijzing naar de code of test die het aantoont."
 ---
 
 # Klarbefund: zelfbeoordeling

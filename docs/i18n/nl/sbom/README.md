@@ -2,6 +2,7 @@
 source: docs/sbom/README.md
 sourceHash: 0d5a61c2ea379e0356f9642c14a9acd6110406a380ecb6a29fad43f3930ac18a
 language: nl
+summary: "Eén CycloneDX-stuklijst per uitrolbaar onderdeel, bytestabiel; --check faalt als een stuklijst niet meer bij haar lockfile past."
 ---
 
 # Software bills of materials

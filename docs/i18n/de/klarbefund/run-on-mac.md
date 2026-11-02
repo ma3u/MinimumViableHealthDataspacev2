@@ -2,6 +2,7 @@
 source: docs/klarbefund/run-on-mac.md
 sourceHash: fd049dc9c178d6abd40839b357d6b7313f8fb4ffb89922fe7830e8b68f8df30a
 language: de
+summary: "Wie man jede Zahl aus den Belegen auf einem Mac mit Xcode nachvollzieht."
 ---
 
 # Klarbefund: die Nachweise auf einem Mac erzeugen

@@ -2,6 +2,7 @@
 source: docs/klarbefund/report-for-health-insurers.md
 sourceHash: 821e6839f6e4c6afb7b5fe7ead3e9e6b766be700275755cd2ba9f59988ae279a
 language: fr
+summary: "Les trois questions d’un assureur santé, l’extraction est-elle juste, les données sont-elles sûres, est-ce un dispositif médical, avec les preuves, plus l’offre en marque blanche et de conseil."
 ---
 
 # Klarbefund : rapport de preuves pour les assureurs santé

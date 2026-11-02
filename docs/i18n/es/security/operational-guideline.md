@@ -2,6 +2,7 @@
 source: docs/security/operational-guideline.md
 sourceHash: ecd7586f5a4e88a5099596d7c1f9eec81a888d8df3250d3cacbcab6dc9a5a13a
 language: es
+summary: "Cómo alojar de verdad el hub y Klarbefund: qué rol del EEDS (Reglamento (UE) 2025/327) opera cada parte, qué exigen BSI C5, IT-Grundschutz, TR-02102 y TR-03161 a cada parte, los plazos ante incidentes, la conservación y la lista de comprobación de puesta en producción por rol."
 ---
 
 # Guía operativa: alojar el hub y Klarbefund conforme al EEDS y a las normas del BSI

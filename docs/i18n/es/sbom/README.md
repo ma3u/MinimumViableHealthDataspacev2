@@ -2,6 +2,7 @@
 source: docs/sbom/README.md
 sourceHash: 0d5a61c2ea379e0356f9642c14a9acd6110406a380ecb6a29fad43f3930ac18a
 language: es
+summary: "Una lista de materiales CycloneDX por componente desplegable, estable byte a byte; --check falla cuando una lista ya no coincide con su archivo de bloqueo."
 ---
 
 # Listas de materiales de software

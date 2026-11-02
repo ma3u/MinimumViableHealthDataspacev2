@@ -2,6 +2,7 @@
 source: docs/security/security-test-report-2026-10-15.md
 sourceHash: 2fe16cb597be0f195ad27d22b32358b413b2396729b066bd01423838ded6dc78
 language: es
+summary: "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, las pruebas de postura de la app y las comprobaciones anónimas de caja negra del hub en producción; los hallazgos F1 a F10 con su estado tras las correcciones, y lo que añadiría una prueba independiente."
 ---
 
 # Informe de pruebas de seguridad, 2026-10-15

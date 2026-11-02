@@ -2,6 +2,7 @@
 source: docs/security/security-test-report-2026-10-15.md
 sourceHash: 2fe16cb597be0f195ad27d22b32358b413b2396729b066bd01423838ded6dc78
 language: fr
+summary: "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, les tests de posture de l’app et les vérifications anonymes en boîte noire du hub en ligne ; les constats F1 à F10 avec leur statut après correction, et ce qu’un test indépendant apporterait."
 ---
 
 # Rapport de test de sécurité, 2026-10-15

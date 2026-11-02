@@ -2,6 +2,7 @@
 source: docs/klarbefund/run-on-mac.md
 sourceHash: fd049dc9c178d6abd40839b357d6b7313f8fb4ffb89922fe7830e8b68f8df30a
 language: fr
+summary: "Comment reproduire chaque chiffre des preuves sur un Mac avec Xcode."
 ---
 
 # Klarbefund : produire les preuves sur un Mac

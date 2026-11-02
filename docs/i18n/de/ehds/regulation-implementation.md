@@ -2,6 +2,7 @@
 source: docs/ehds/regulation-implementation.md
 sourceHash: 2dcaadded3a70651eb09b37b2a3f1fd29deea20b434d51885ea17a09f5a3a726
 language: de
+summary: "Was der Integrations-Hub von der Verordnung (EU) 2025/327 umsetzt, Artikel für Artikel: der Stand, die Seite, Route oder Datei, die es leistet, der Test, der es zeigt, und die Lücke mit ihrem Issue."
 ---
 
 # Was der Integrations-Hub von der EHDS-Verordnung umsetzt

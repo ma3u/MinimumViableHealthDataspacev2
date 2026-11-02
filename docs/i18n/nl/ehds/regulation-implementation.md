@@ -2,6 +2,7 @@
 source: docs/ehds/regulation-implementation.md
 sourceHash: 2dcaadded3a70651eb09b37b2a3f1fd29deea20b434d51885ea17a09f5a3a726
 language: nl
+summary: "Wat de integratiehub van Verordening (EU) 2025/327 uitvoert, artikel voor artikel: de status, de pagina, route of het bestand dat het doet, de test die het aantoont en het gat met zijn issue."
 ---
 
 # Wat de integratiehub van de EHDS-verordening implementeert

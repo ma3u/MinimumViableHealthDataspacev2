@@ -2,6 +2,7 @@
 source: docs/loadtest/2026-10-production-readiness.md
 sourceHash: 4927266d5659782d41e2b19dcb537020f6b7d2b195229b9b5c4576bd7992496b
 language: fr
+summary: "L’évaluation Well-Architected et Cloud Adoption au 16 octobre 2026 : ce qui est en place par pilier, avec les preuves, ce qui reste ouvert, les scores et ce qui sépare le démonstrateur d’une plateforme exploitable."
 ---
 
 # Évaluation de la préparation à la production, octobre 2026

@@ -2,6 +2,7 @@
 source: docs/klarbefund/user-guide.md
 sourceHash: 24429d590488e64628ed0a7526474932a5704fb0e947dee10cd5df5912d6ba82
 language: de
+summary: "Die App, wie eine Person sie nutzt, Bildschirm für Bildschirm mit Screenshots: einen Befund erfassen, einen Wert mit dem Papier abgleichen, Verläufe, Einwilligungen, die Verbindung zum EHDS, Exporte und Ihre Rechte an Ihren Daten."
 ---
 
 # Benutzerhandbuch für Klarbefund

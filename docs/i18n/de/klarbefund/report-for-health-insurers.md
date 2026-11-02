@@ -2,6 +2,7 @@
 source: docs/klarbefund/report-for-health-insurers.md
 sourceHash: 821e6839f6e4c6afb7b5fe7ead3e9e6b766be700275755cd2ba9f59988ae279a
 language: de
+summary: "Die drei Fragen einer Krankenversicherung, ist die Erfassung richtig, sind die Daten sicher, ist es ein Medizinprodukt, mit den Belegen beantwortet, dazu das White-Label- und Beratungsangebot."
 ---
 
 # Klarbefund: Nachweisbericht für Krankenversicherungen

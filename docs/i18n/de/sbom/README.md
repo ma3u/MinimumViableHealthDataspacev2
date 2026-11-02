@@ -2,6 +2,7 @@
 source: docs/sbom/README.md
 sourceHash: 0d5a61c2ea379e0356f9642c14a9acd6110406a380ecb6a29fad43f3930ac18a
 language: de
+summary: "Eine CycloneDX-Stückliste je auslieferbarem Teil, bytegenau stabil; --check schlägt fehl, wenn eine Stückliste nicht mehr zu ihrer Lock-Datei passt."
 ---
 
 # Software-Stücklisten
