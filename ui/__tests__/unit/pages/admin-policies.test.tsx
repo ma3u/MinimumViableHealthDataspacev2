@@ -9,8 +9,9 @@
  * external ODRL docs link.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { setLanguage } from "@/lib/use-language";
 
 /* ── Mocks ── */
 
@@ -288,14 +289,150 @@ describe("AdminPoliciesPage", () => {
     expect(summaries).toHaveLength(2);
   });
 
-  it("renders purpose label from permission constraints", async () => {
+  /* ─── Plain-language description and check (ODRL 2.2, EHDS) ─── */
+
+  it("describes each policy in plain language under its title", async () => {
     const user = userEvent.setup();
     await renderLoaded();
 
     await user.click(screen.getByText("alpha-klinik.de:participant"));
+    const descriptions = screen.getAllByTestId("policy-description");
+    expect(descriptions).toHaveLength(2);
+    expect(descriptions[0]).toHaveTextContent(
+      'Anyone who has a contract may use the data, only for "EHDS Article 53(1)(c) — scientific research", without time limit. No further conditions, prohibitions or duties.',
+    );
+  });
+
+  const CHECK_GROUPS = [
+    {
+      participantId: "participant-pharmaco",
+      identity: "did:web:identityhub%3A7083:pharmaco",
+      policies: [
+        {
+          "@id": "research-access-policy",
+          "@type": "PolicyDefinition",
+          policy: { "@type": "Set", permission: [{ action: "use" }] },
+        },
+        {
+          "@id": "fit-policy",
+          policy: {
+            "@type": "Set",
+            permission: [
+              {
+                action: "use",
+                constraint: [
+                  {
+                    leftOperand: "purpose",
+                    operator: "eq",
+                    rightOperand: "SCIENTIFIC_RESEARCH",
+                  },
+                  {
+                    leftOperand: "dataPermit",
+                    operator: "eq",
+                    rightOperand: "permit-1",
+                  },
+                  {
+                    leftOperand: "inForceDate",
+                    operator: "lteq",
+                    rightOperand: "contractAgreement+90d",
+                  },
+                ],
+                duty: [{ action: "secureProcessingEnvironment" }],
+              },
+            ],
+            prohibition: [
+              { action: "reIdentify" },
+              { action: "commercialize" },
+            ],
+          },
+        },
+        {
+          "@id": "conflicting-policy",
+          policy: {
+            permission: [{ action: "distribute" }],
+            prohibition: [{ action: "distribute" }],
+          },
+        },
+      ],
+    },
+  ];
+
+  it("says in one line how many of a participant's policies fall short", async () => {
+    await renderLoaded(CHECK_GROUPS);
+    expect(screen.getByText("1 with errors")).toBeInTheDocument();
+    expect(screen.getByText("1 with warnings")).toBeInTheDocument();
+  });
+
+  it("explains the bare use policy and lists what it lacks for EHDS", async () => {
+    const user = userEvent.setup();
+    await renderLoaded(CHECK_GROUPS);
+    await user.click(screen.getByText("identityhub:7083:pharmaco"));
+
+    expect(screen.getAllByTestId("policy-description")[0]).toHaveTextContent(
+      "Anyone who has a contract may use the data, for any purpose, without time limit. No conditions, prohibitions or duties.",
+    );
+    const badges = screen.getAllByTestId("policy-verdict");
+    expect(badges.map((b) => b.textContent)).toEqual([
+      "Warnings (6)",
+      "Valid",
+      "Errors (1)",
+    ]);
+    expect(screen.queryByTestId("policy-findings")).not.toBeInTheDocument();
+
+    await user.click(badges[0]);
+    expect(badges[0]).toHaveAttribute("aria-expanded", "true");
+    const findings = screen.getByTestId("policy-findings");
+    for (const text of [
+      /No purpose: the data may be used for anything/,
+      /No data permit/,
+      /No time limit/,
+      /Re-identifying persons in the data is not forbidden/,
+      /Nothing forbids the uses Art\. 54 prohibits/,
+      /No secure processing environment/,
+    ]) {
+      expect(within(findings).getByText(text)).toBeInTheDocument();
+    }
+    expect(findings).toHaveTextContent("(EHDS Art. 68)");
+    expect(findings).toHaveTextContent("(EHDS Art. 61(3))");
+  });
+
+  it("shows a valid policy as valid, and a conflict as an ODRL error", async () => {
+    const user = userEvent.setup();
+    await renderLoaded(CHECK_GROUPS);
+    await user.click(screen.getByText("identityhub:7083:pharmaco"));
+    const badges = screen.getAllByTestId("policy-verdict");
+
+    await user.click(badges[1]);
     expect(
-      screen.getByText("EHDS Article 53(1)(c) — scientific research"),
+      screen.getByText("Valid ODRL 2.2 and fit for secondary use."),
     ).toBeInTheDocument();
+
+    await user.click(badges[2]);
+    const findings = screen.getByTestId("policy-findings");
+    expect(within(findings).getByText("Error")).toBeInTheDocument();
+    expect(within(findings).getByText("ODRL")).toBeInTheDocument();
+    expect(
+      within(findings).getByText(
+        /distribute the data is both permitted and prohibited/,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("describes and checks in the language of the picker", async () => {
+    const user = userEvent.setup();
+    await renderLoaded(CHECK_GROUPS);
+    act(() => setLanguage("de"));
+    await user.click(
+      screen.getByRole("button", { name: /identityhub:7083:pharmaco/ }),
+    );
+    expect(screen.getAllByTestId("policy-description")[0]).toHaveTextContent(
+      "Jeder mit einem Vertrag darf: die Daten nutzen, für jeden Zweck, ohne zeitliche Begrenzung. Keine Bedingungen, Verbote oder Pflichten.",
+    );
+    await user.click(screen.getAllByTestId("policy-verdict")[0]);
+    expect(
+      screen.getByText(/Keine Datengenehmigung: Nichts bindet die Nutzung/),
+    ).toBeInTheDocument();
+    act(() => setLanguage("en"));
   });
 
   it("renders OdrlJsonHighlighter in policy card details", async () => {

@@ -195,6 +195,31 @@ describe("the code and the dictionaries", () => {
     ).toEqual([]);
   });
 
+  it("knows every text the policy check on /admin/policies shows", async () => {
+    // lib/odrl-describe.ts and lib/odrl-validate.ts build their sentences
+    // from p("...") templates, label maps and citations; the page passes
+    // them through t() at the point of display.
+    const { ODRL_LABEL_TEXTS } = await import("@/lib/odrl-describe");
+    const texts = [...ODRL_LABEL_TEXTS];
+    for (const f of ["src/lib/odrl-describe.ts", "src/lib/odrl-validate.ts"]) {
+      const src = readFileSync(path.resolve(f), "utf8");
+      texts.push(
+        ...[...src.matchAll(/\bp\(\s*"((?:[^"\\]|\\.)*)"/g)].map((m) => m[1]),
+        ...[...src.matchAll(/"((?:EHDS|ODRL 2\.2)[^"]*)"/g)].map((m) => m[1]),
+      );
+    }
+    const page = readFileSync(
+      path.resolve("src/app/admin/policies/page.tsx"),
+      "utf8",
+    );
+    const severities = /SEVERITY_LABELS[^=]*=\s*\{([^}]*)\}/.exec(page)?.[1];
+    texts.push(
+      ...[...(severities ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1]),
+    );
+    expect(texts.length).toBeGreaterThan(120);
+    expect(texts.filter((x) => !(x in MESSAGES.en.admin))).toEqual([]);
+  });
+
   it("knows every health interest a patient can choose", async () => {
     const { HEALTH_INTERESTS } = await import("@/lib/patient/interests");
     expect(

@@ -1,8 +1,9 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import {
+  AlertTriangle,
   Ban,
   Check,
   ChevronDown,
@@ -14,14 +15,22 @@ import {
   Lock,
   Pencil,
   Plus,
-  Shield,
   ShieldCheck,
   Trash2,
   X,
+  XCircle,
 } from "lucide-react";
 import OdrlJsonHighlighter from "@/components/OdrlJsonHighlighter";
 import { SpePermitBindings } from "@/components/spe/SpePermitBindings";
 import { T, useT } from "@/lib/i18n/translate";
+import { describePolicy, renderPolicyText } from "@/lib/odrl-describe";
+import {
+  policyVerdict,
+  validatePolicy,
+  type PolicyFinding,
+  type PolicyVerdict,
+  type Severity,
+} from "@/lib/odrl-validate";
 
 /* ── Types ────────────────────────────────────────────────────── */
 
@@ -546,6 +555,26 @@ function friendlyOp(op: string): string {
   return OP_LABELS[op] ?? op.replace(/^odrl:/, "");
 }
 
+/* ── The check's badge and findings ───────────────────────────── */
+
+const VERDICT_STYLE: Record<PolicyVerdict, string> = {
+  valid: "bg-green-500/10 text-green-700 dark:text-green-400",
+  warnings: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+  errors: "bg-red-500/10 text-red-700 dark:text-red-400",
+};
+
+const SEVERITY_STYLE: Record<Severity, string> = {
+  error: "bg-red-500/10 text-red-700 dark:text-red-400",
+  warning: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+  info: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
+};
+
+const SEVERITY_LABELS: Record<Severity, string> = {
+  error: "Error",
+  warning: "Warning",
+  info: "Note",
+};
+
 /* ── Component ────────────────────────────────────────────────── */
 
 export default function AdminPoliciesPage() {
@@ -554,6 +583,7 @@ export default function AdminPoliciesPage() {
   const [groups, setGroups] = useState<PolicyGroup[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [openFindings, setOpenFindings] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
 
   /* Create-form state */
@@ -606,6 +636,23 @@ export default function AdminPoliciesPage() {
     loadPolicies();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /** Every policy checked once per load, by participant and position. */
+  const checked = useMemo(() => {
+    const out: Record<
+      string,
+      { findings: PolicyFinding[]; verdict: PolicyVerdict }[]
+    > = {};
+    for (const g of groups) {
+      out[g.participantId] = (Array.isArray(g.policies) ? g.policies : []).map(
+        (p) => {
+          const findings = validatePolicy(p);
+          return { findings, verdict: policyVerdict(findings) };
+        },
+      );
+    }
+    return out;
+  }, [groups]);
 
   const totalPolicies = groups.reduce(
     (sum, g) => sum + (Array.isArray(g.policies) ? g.policies.length : 0),
@@ -917,6 +964,13 @@ export default function AdminPoliciesPage() {
             {groups.map((g) => {
               const isOpen = expanded === g.participantId;
               const policies = Array.isArray(g.policies) ? g.policies : [];
+              const verdicts = (checked[g.participantId] ?? []).map(
+                (c) => c.verdict,
+              );
+              const errorCount = verdicts.filter((v) => v === "errors").length;
+              const warningCount = verdicts.filter(
+                (v) => v === "warnings",
+              ).length;
               return (
                 <div
                   key={g.participantId}
@@ -954,6 +1008,16 @@ export default function AdminPoliciesPage() {
                               ? "{n} policy"
                               : "{n} policies",
                             { n: policies.length },
+                          )}
+                          {errorCount > 0 && (
+                            <span className="text-red-800 dark:text-red-400 ml-2">
+                              {t("{n} with errors", { n: errorCount })}
+                            </span>
+                          )}
+                          {warningCount > 0 && (
+                            <span className="text-amber-800 dark:text-amber-400 ml-2">
+                              {t("{n} with warnings", { n: warningCount })}
+                            </span>
                           )}
                           {g.error && (
                             <span className="text-red-800 dark:text-red-400 ml-2">
@@ -1010,22 +1074,12 @@ export default function AdminPoliciesPage() {
                               firstPerm?.["odrl:duty"] ?? firstPerm?.["duty"],
                             );
 
-                            // Extract purpose
-                            const purposeC = constraints.find(
-                              (c) =>
-                                actionId(
-                                  c["odrl:leftOperand"] ?? c["leftOperand"],
-                                ) === "edc:purpose",
-                            );
-                            const purposes = purposeC
-                              ? purposeC["odrl:rightOperand"] ??
-                                purposeC["rightOperand"]
-                              : null;
-                            const purposeLabel = Array.isArray(purposes)
-                              ? purposes.join("; ")
-                              : typeof purposes === "string"
-                                ? purposes
-                                : "—";
+                            // The policy in plain language, and its check.
+                            const description = describePolicy(p);
+                            const { findings, verdict } =
+                              checked[g.participantId][i];
+                            const findingsKey = `${g.participantId}/${i}`;
+                            const findingsOpen = openFindings === findingsKey;
 
                             // Extract duration
                             const durationC = constraints.find(
@@ -1061,11 +1115,50 @@ export default function AdminPoliciesPage() {
                                         {(pObj["@id"] as string) ||
                                           t("Policy #{n}", { n: i + 1 })}
                                       </p>
-                                      <p className="text-xs text-(--text-secondary) mt-0.5 line-clamp-2">
-                                        {purposeLabel}
+                                      <p
+                                        data-testid="policy-description"
+                                        className="text-xs text-(--text-secondary) mt-0.5"
+                                      >
+                                        {description.sentences
+                                          .map((s) => renderPolicyText(s, t))
+                                          .join(" ")}
                                       </p>
                                     </div>
                                     <div className="flex items-center gap-1.5 shrink-0">
+                                      <button
+                                        type="button"
+                                        data-testid="policy-verdict"
+                                        aria-expanded={findingsOpen}
+                                        title={t("Show the findings")}
+                                        onClick={() =>
+                                          setOpenFindings(
+                                            findingsOpen ? null : findingsKey,
+                                          )
+                                        }
+                                        className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full ${VERDICT_STYLE[verdict]}`}
+                                      >
+                                        {verdict === "valid" ? (
+                                          <ShieldCheck size={10} />
+                                        ) : verdict === "warnings" ? (
+                                          <AlertTriangle size={10} />
+                                        ) : (
+                                          <XCircle size={10} />
+                                        )}
+                                        {verdict === "valid"
+                                          ? t("Valid")
+                                          : verdict === "warnings"
+                                            ? t("Warnings ({n})", {
+                                                n: findings.filter(
+                                                  (f) =>
+                                                    f.severity === "warning",
+                                                ).length,
+                                              })
+                                            : t("Errors ({n})", {
+                                                n: findings.filter(
+                                                  (f) => f.severity === "error",
+                                                ).length,
+                                              })}
+                                      </button>
                                       {durationLabel && (
                                         <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
                                           <Clock size={10} />
@@ -1112,6 +1205,61 @@ export default function AdminPoliciesPage() {
                                     </div>
                                   </div>
                                 </div>
+
+                                {/* Findings of the check */}
+                                {findingsOpen && (
+                                  <div
+                                    data-testid="policy-findings"
+                                    className="px-4 py-3 border-b border-(--border)/50 space-y-2"
+                                  >
+                                    <p className="text-[11px] text-(--text-secondary)">
+                                      {t(
+                                        "ODRL findings make a policy invalid or ambiguous; EHDS findings say what secondary use needs.",
+                                      )}
+                                    </p>
+                                    {findings.length === 0 ? (
+                                      <p className="text-xs text-(--success-text)">
+                                        {t(
+                                          "Valid ODRL 2.2 and fit for secondary use.",
+                                        )}
+                                      </p>
+                                    ) : (
+                                      <ul className="space-y-1.5">
+                                        {findings.map((f, k) => (
+                                          <li
+                                            key={k}
+                                            className="flex items-start gap-2 text-xs"
+                                          >
+                                            <span
+                                              className={`shrink-0 mt-px text-[10px] font-semibold px-1.5 rounded-sm ${
+                                                SEVERITY_STYLE[f.severity]
+                                              }`}
+                                            >
+                                              {t(SEVERITY_LABELS[f.severity])}
+                                            </span>
+                                            <span className="shrink-0 mt-px text-[10px] font-mono text-(--text-secondary)">
+                                              {f.kind === "odrl"
+                                                ? "ODRL"
+                                                : t("EHDS")}
+                                            </span>
+                                            <span className="text-(--text-primary)">
+                                              {f.where && (
+                                                <span className="font-medium">
+                                                  {renderPolicyText(f.where, t)}
+                                                  :{" "}
+                                                </span>
+                                              )}
+                                              {renderPolicyText(f.message, t)}{" "}
+                                              <span className="text-(--text-secondary)">
+                                                ({t(f.article)})
+                                              </span>
+                                            </span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </div>
+                                )}
 
                                 {/* Structured body */}
                                 <div className="px-4 py-3 space-y-2.5">
