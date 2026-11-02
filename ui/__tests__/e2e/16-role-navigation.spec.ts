@@ -336,7 +336,7 @@ test.describe("User guide — persona & role section", () => {
 
   test("shows sign-in persona cards screenshot", async ({ page }) => {
     await page.goto("/docs/user-guide");
-    await expect(page.getByText("Sign In — Demo Persona Cards")).toBeVisible({
+    await expect(page.getByText("Sign In: Demo Persona Cards")).toBeVisible({
       timeout: T,
     });
   });
