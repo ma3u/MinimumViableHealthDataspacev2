@@ -73,7 +73,7 @@ export function AttestationExplainer() {
           }}
         >
           {
-            "<a>ADR-068: a sovereign confidential SPE</a> · ADR-069: two SPE workspaces as ACI confidential containers (proposed, #774)"
+            "<a>ADR-068: a sovereign confidential SPE</a> · ADR-069: two SPE workspaces as ACI confidential containers (#774)"
           }
         </T>
       </p>

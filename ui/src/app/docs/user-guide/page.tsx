@@ -1295,7 +1295,7 @@ export default function UserGuidePage() {
                   tags={{ l: attestationLink, a: adr068Link }}
                 >
                   {
-                    "The operator sees the evidence behind each label on <l>SPE attestation</l>. The design is <a>ADR-068</a>; where it runs on Azure is ADR-069 (proposed, #774)."
+                    "The operator sees the evidence behind each label on <l>SPE attestation</l>. The design is <a>ADR-068</a>; where it runs on Azure is ADR-069 (#774)."
                   }
                 </T>
               </li>

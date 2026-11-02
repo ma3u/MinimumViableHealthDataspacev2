@@ -19,6 +19,8 @@ import { NextRequest } from "next/server";
 
 vi.unmock("@/lib/auth-guard");
 
+// The data permits /api/admin/spe reads from the hub (#833): none here.
+vi.mock("@/lib/neo4j", () => ({ runQuery: vi.fn(async () => []) }));
 vi.mock("@/lib/permit-gate", () => ({
   gateSecondaryUse: vi.fn(async () => ({ allowed: true, headers: {} })),
   activePermitHeaders: vi.fn(async () => ({})),

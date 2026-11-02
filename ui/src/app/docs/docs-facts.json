@@ -1170,7 +1170,7 @@
       "id": "ADR-069",
       "file": "ADR-069-two-spe-workspaces-as-aci-confidential-containers.md",
       "title": "Two SPE workspaces as ACI confidential containers",
-      "status": "Proposed"
+      "status": "Accepted"
     },
     {
       "id": "ADR-070",
@@ -1188,7 +1188,7 @@
       "id": "ADR-072",
       "file": "ADR-072-spe-workspaces-start-on-demand.md",
       "title": "SPE workspaces are stopped by default and start on demand",
-      "status": "Proposed"
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {

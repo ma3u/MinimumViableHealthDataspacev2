@@ -4,7 +4,7 @@ Date: 2026-11-01
 
 ## Status
 
-Proposed. Extends ADR-070, which left the documentation out of scope.
+Accepted (2026-11-02). Extends ADR-070, which left the documentation out of scope.
 
 ## Context
 

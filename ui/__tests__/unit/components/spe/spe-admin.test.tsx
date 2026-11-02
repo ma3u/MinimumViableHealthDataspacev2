@@ -16,7 +16,10 @@ vi.mock("@/lib/api", () => ({
 }));
 
 import { SpeStatusCard, SpeStatusView } from "@/components/spe/SpeStatusCard";
-import { SpePermitBindingsView } from "@/components/spe/SpePermitBindings";
+import {
+  SpePermitBindings,
+  SpePermitBindingsView,
+} from "@/components/spe/SpePermitBindings";
 import { SpeTopologyView } from "@/app/admin/components/_components/SpeTopologySection";
 import { SpeAuditSection } from "@/app/admin/audit/_components/SpeAuditSection";
 import {
@@ -310,9 +313,117 @@ describe("SpePermitBindingsView (/admin/policies)", () => {
       within(
         screen.getByRole("row", { name: "Permit binding for SPE-2" }),
       ).getByLabelText(
-        "Policy check: Checked by hardware (A2, workload evidence)",
+        "Policy check: Checked by hardware: HOST_DATA of the SEV-SNP report (A2)",
       ),
     ).toBeInTheDocument();
+  });
+
+  it("names each permit from the hub and labels the local stack's hashes simulated (static mock)", async () => {
+    mockFetchApi.mockReset();
+    mockFetchApi.mockImplementation(
+      async () => new Response(JSON.stringify(STATIC_SPE), { status: 200 }),
+    );
+    render(<SpePermitBindings />);
+    const row = await screen.findByRole("row", {
+      name: "Permit binding for SPE-1",
+    });
+    expect(mockFetchApi).toHaveBeenCalledWith("/api/admin/spe");
+    expect(row).toHaveTextContent(
+      "Data permit for SPE-1 (PharmaCo Research AG, MedReg DE)",
+    );
+    expect(row).toHaveTextContent("Simulated attestation");
+    expect(
+      within(row).getByLabelText("Policy check: Recorded only (M1)"),
+    ).toBeInTheDocument();
+    // The workspace reported its own hash: no note that it came from the hub.
+    expect(row).not.toHaveTextContent("as recorded on the permit in the hub");
+    expect(screen.getByRole("link", { name: "ADR-069" })).toHaveAttribute(
+      "href",
+      expect.stringContaining("ADR-069-"),
+    );
+    expect(screen.getByText(/HOST_DATA of its SEV-SNP report/)).toBeVisible();
+  });
+
+  it("on Azure, a stopped workspace still shows its permit and hash, checked at its next start", () => {
+    const h1 = `sha256:${"1".repeat(64)}`;
+    const h2 = `sha256:${"2".repeat(64)}`;
+    const stopped: SpeStatusResponse = {
+      ...AZURE,
+      spes: AZURE.spes.map((s) => ({
+        ...s,
+        // The proxy skipped it (ADR-072): nothing the workspace said.
+        permitId: null,
+        policyHash: null,
+        policyCheckedByHardware: false,
+        attestationScope: "none" as const,
+        simulated: true,
+        label: "Simulated attestation",
+        status: "unreachable" as const,
+        powerState: "stopped" as const,
+        armState: "Stopped",
+      })),
+      permits: [
+        {
+          permitId: "hdab-medreg-spe-2026-001",
+          name: "Data permit for the SPE workspaces (PharmaCo Research AG)",
+          status: "APPROVED",
+          policyHash: h2,
+          policyHashBySpe: { "SPE-1": h1, "SPE-2": h2 },
+          speWorkspaces: ["SPE-1", "SPE-2"],
+          trusteeResources: [
+            "default/spe-1/extract-key",
+            "default/spe-2/extract-key",
+          ],
+          recordedAt: "2026-11-02T10:00:00Z",
+        },
+      ],
+    };
+    render(<SpePermitBindingsView data={stopped} />);
+    for (const [id, hash] of [
+      ["SPE-1", h1],
+      ["SPE-2", h2],
+    ]) {
+      const row = screen.getByRole("row", { name: `Permit binding for ${id}` });
+      expect(row).toHaveTextContent("hdab-medreg-spe-2026-001");
+      expect(within(row).getByTestId("policy-hash")).toHaveAttribute(
+        "title",
+        hash,
+      );
+      expect(row).toHaveTextContent("as recorded on the permit in the hub");
+      expect(
+        within(row).getByLabelText(
+          "Policy check: Workspace stopped: hardware checks it at the next start (HOST_DATA)",
+        ),
+      ).toBeInTheDocument();
+    }
+  });
+
+  it("shows no hash for a shared permit that recorded only one (before #833)", () => {
+    const shared: SpeStatusResponse = {
+      ...STATIC_SPE,
+      spes: STATIC_SPE.spes.map((s) => ({
+        ...s,
+        permitId: null,
+        policyHash: null,
+      })),
+      permits: [
+        {
+          permitId: "hdab-medreg-spe-2026-001",
+          name: null,
+          status: "APPROVED",
+          policyHash: `sha256:${"2".repeat(64)}`,
+          policyHashBySpe: {},
+          speWorkspaces: ["SPE-1", "SPE-2"],
+          trusteeResources: [],
+          recordedAt: null,
+        },
+      ],
+    };
+    render(<SpePermitBindingsView data={shared} />);
+    const row = screen.getByRole("row", { name: "Permit binding for SPE-1" });
+    expect(row).toHaveTextContent("hdab-medreg-spe-2026-001");
+    expect(row).toHaveTextContent("none recorded");
+    expect(within(row).queryByTestId("policy-hash")).toBeNull();
   });
 
   it("copies the full hash", async () => {

@@ -13,6 +13,11 @@ import { getServerSession } from "next-auth/next";
 
 vi.unmock("@/lib/auth-guard");
 
+const mockRunQuery = vi.fn();
+vi.mock("@/lib/neo4j", () => ({
+  runQuery: (...args: unknown[]) => mockRunQuery(...args),
+}));
+
 import { GET } from "@/app/api/admin/spe/route";
 import type { SpeStatusResponse } from "@/lib/spe";
 
@@ -74,6 +79,8 @@ function proxyAnswers(routes: Record<string, () => Response | never>) {
 describe("GET /api/admin/spe", () => {
   beforeEach(() => {
     mockFetch.mockReset();
+    mockRunQuery.mockReset();
+    mockRunQuery.mockResolvedValue([]);
     vi.stubGlobal("fetch", mockFetch);
     vi.mocked(getServerSession).mockResolvedValue(ADMIN as never);
   });
@@ -101,6 +108,7 @@ describe("GET /api/admin/spe", () => {
         available: false,
         reason: "Starting and stopping needs the Azure deployment",
       },
+      permits: [],
     });
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
@@ -201,6 +209,76 @@ describe("GET /api/admin/spe", () => {
     expect(body.fallback?.reason).toBe(
       "The query proxy's /spe/status answered 503",
     );
+  });
+
+  describe("the data permits from the hub (#833)", () => {
+    const hash1 = `sha256:${"1".repeat(64)}`;
+    const hash2 = `sha256:${"2".repeat(64)}`;
+
+    it("adds each permit with its hash per workspace and its Trustee resources", async () => {
+      mockRunQuery.mockResolvedValue([
+        {
+          permitId: "hdab-medreg-spe-2026-001",
+          name: "Data permit for the SPE workspaces (PharmaCo Research AG)",
+          status: "APPROVED",
+          policyHash: hash2,
+          policyHashBySpe: [`SPE-1=${hash1}`, `SPE-2=${hash2}`, "junk"],
+          speWorkspaces: ["SPE-1", "SPE-2"],
+          trusteeResources: [
+            "default/spe-1/extract-key",
+            "default/spe-2/extract-key",
+          ],
+          recordedAt: "2026-11-02T10:00:00Z",
+        },
+        { permitId: null },
+      ]);
+      proxyAnswers({ "/spe/status": () => json(PROXY_STATUS) });
+      const body = (await (await GET()).json()) as SpeStatusResponse;
+      expect(body.permits).toEqual([
+        {
+          permitId: "hdab-medreg-spe-2026-001",
+          name: "Data permit for the SPE workspaces (PharmaCo Research AG)",
+          status: "APPROVED",
+          policyHash: hash2,
+          policyHashBySpe: { "SPE-1": hash1, "SPE-2": hash2 },
+          speWorkspaces: ["SPE-1", "SPE-2"],
+          trusteeResources: [
+            "default/spe-1/extract-key",
+            "default/spe-2/extract-key",
+          ],
+          recordedAt: "2026-11-02T10:00:00Z",
+        },
+      ]);
+      // Only permits the SPEs recorded something on, never a write.
+      const [cypher] = mockRunQuery.mock.calls[0] as [string];
+      expect(cypher).toContain("MATCH (a:HDABApproval)");
+      expect(cypher).not.toMatch(/\b(MERGE|SET|CREATE|DELETE)\b/);
+    });
+
+    it("adds them in the fallback too", async () => {
+      mockRunQuery.mockResolvedValue([
+        { permitId: "p-1", policyHash: hash1, speWorkspaces: ["SPE-1"] },
+      ]);
+      proxyAnswers({ "/spe/status": () => json({}, 404) });
+      const body = (await (await GET()).json()) as SpeStatusResponse;
+      expect(body.fallback).toBeDefined();
+      expect(body.permits?.[0]).toMatchObject({
+        permitId: "p-1",
+        policyHash: hash1,
+        policyHashBySpe: {},
+        trusteeResources: [],
+      });
+    });
+
+    it("answers without permits when the hub fails", async () => {
+      mockRunQuery.mockRejectedValue(new Error("ServiceUnavailable"));
+      proxyAnswers({ "/spe/status": () => json(PROXY_STATUS) });
+      const res = await GET();
+      expect(res.status).toBe(200);
+      const body = (await res.json()) as SpeStatusResponse;
+      expect(body.permits).toEqual([]);
+      expect(body.spes[0].id).toBe("SPE-1");
+    });
   });
 
   describe("the role gate", () => {

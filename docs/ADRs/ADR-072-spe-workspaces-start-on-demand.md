@@ -2,12 +2,12 @@
 
 Date: 2026-11-02
 
-**Status:** Proposed
+**Status:** Accepted (2026-11-02)
 **Relates to:** [ADR-053](ADR-053-everything-stops-off-hours.md), [ADR-058](ADR-058-azure-triggers-the-off-hours-schedule.md), [ADR-068](ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md), [ADR-069](ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)
 
 ## Status
 
-Proposed. Amends decision 8 of
+Accepted (2026-11-02). Amends decision 8 of
 [ADR-069](ADR-069-two-spe-workspaces-as-aci-confidential-containers.md) (the
 morning start); extends [ADR-053](ADR-053-everything-stops-off-hours.md) and
 [ADR-058](ADR-058-azure-triggers-the-off-hours-schedule.md).

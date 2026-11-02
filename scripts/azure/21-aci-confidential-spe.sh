@@ -457,7 +457,8 @@ YAML
   if [ -n "$rv" ]; then
     [ -s "$rv" ] || { err "no reference values file ${rv}"; exit 1; }
     run_admin spe-loader trustee-configure --reference-values "$(jq -c . "$rv")"
-    ok "reference values set from ${rv}; restart the workspaces: az container restart -n mvhd-spe-<n> -g ${RG}"
+    ok "reference values set from ${rv}; now re-run spe-unlock in each group: $0 --workspaces (a redeploy)," \
+      "or az container stop then az container start -n mvhd-spe-<n> -g ${RG}; az container restart does not re-run the init container"
   fi
 }
 
@@ -707,7 +708,9 @@ check() {
   echo "  First run: Trustee refuses every key until the reference values are pinned (no unlock on"
   echo "  first use). Copy the pinnable claims into a file shaped like"
   echo "  trustee/reference-values-aci.example.json, check snp_launch_measurement against Microsoft's"
-  echo "  endorsement, then: $0 --trustee --reference-values <file> and restart both groups."
+  echo "  endorsement, then: $0 --trustee --reference-values <file>, then $0 --workspaces"
+  echo "  (or az container stop, then az container start, for each group). Not az container restart:"
+  echo "  it does not re-run the init container spe-unlock, so nothing attests again (docs/gotchas.md)."
 }
 
 # ── arguments ───────────────────────────────────────────────────────────────

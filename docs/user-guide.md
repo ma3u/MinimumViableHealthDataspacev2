@@ -149,7 +149,9 @@ SPEs can I access?" to see them.
 
 The design is
 [ADR-068](ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md);
-where it runs on Azure is ADR-069 (proposed, #774).
+where it runs on Azure is
+[ADR-069](ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)
+(#774).
 
 ### EUDI Wallet and Klarbefund
 
