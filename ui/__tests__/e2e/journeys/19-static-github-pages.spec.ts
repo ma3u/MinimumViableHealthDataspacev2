@@ -609,10 +609,11 @@ test.describe("S · Patient1 — My Health pages with mock data", () => {
       page.getByRole("heading", { name: /Health Profile/ }),
     ).toBeVisible({ timeout: T });
     // Demographics in the profile card: the pseudonym and an age, never the
-    // name or the birth date (#475). nth(1) skips the hidden <option> copy.
-    await expect(page.getByText("Patient 7f915eed").nth(1)).toBeVisible({
-      timeout: T,
-    });
+    // name or the birth date (#475). The card's heading, since the nav chip
+    // and the picker's <option> carry the pseudonym too.
+    await expect(
+      page.getByRole("heading", { name: "Patient 7f915eed" }),
+    ).toBeVisible({ timeout: T });
     await expect(page.getByText(/Age:/)).toBeVisible({ timeout: T });
     await expect(page.getByText("1979-03-15")).toHaveCount(0);
     await expect(page.getByText(/Medications:/).first()).toBeVisible({
@@ -717,9 +718,9 @@ test.describe("S · Patient1 — My Health pages with mock data", () => {
     await expect(
       page.getByText("Donate my EHR to this study").first(),
     ).toBeVisible({ timeout: T });
-    await expect(page.getByText(/Revoke consent/).first()).toBeVisible({
-      timeout: T,
-    });
+    await expect(
+      page.getByRole("button", { name: /Withdraw consent/ }).first(),
+    ).toBeVisible({ timeout: T });
   });
 
   test("J270 — /patient/insights shows aggregate research findings", async ({
@@ -1269,8 +1270,10 @@ test.describe("S · Patient data isolation (static)", () => {
     await expect(
       page.getByText("Showing your personal health record"),
     ).toBeVisible({ timeout: T });
-    // The <select> dropdown should NOT be visible
-    await expect(page.locator("select")).not.toBeVisible();
+    // No patient picker (the nav's language picker is a <select> as well)
+    await expect(
+      page.getByRole("combobox", { name: /Select patient/ }),
+    ).toHaveCount(0);
   });
 
   test("J310 — patient1 sees only 1 patient in stats", async ({ page }) => {
@@ -1283,8 +1286,8 @@ test.describe("S · Patient data isolation (static)", () => {
     page,
   }) => {
     await gotoAs(page, "/patient", "researcher");
-    // Researcher should see the <select> dropdown with all patients
-    const select = page.locator("select");
+    // Researcher should see the patient picker with all patients
+    const select = page.getByRole("combobox", { name: /Select patient/ });
     await expect(select).toBeVisible({ timeout: T });
     const options = select.locator("option");
     const count = await options.count();
@@ -1296,7 +1299,7 @@ test.describe("S · Patient data isolation (static)", () => {
     page,
   }) => {
     await gotoAs(page, "/patient", "edcadmin");
-    const select = page.locator("select");
+    const select = page.getByRole("combobox", { name: /Select patient/ });
     await expect(select).toBeVisible({ timeout: T });
   });
 
@@ -1305,7 +1308,9 @@ test.describe("S · Patient data isolation (static)", () => {
     await expect(
       page.getByText("Showing your personal health record"),
     ).toBeVisible({ timeout: T });
-    await expect(page.locator("select")).not.toBeVisible();
+    await expect(
+      page.getByRole("combobox", { name: /Select patient/ }),
+    ).toHaveCount(0);
   });
 });
 
