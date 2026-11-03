@@ -801,6 +801,7 @@ jobs:
   compliance-report:
     name: Compliance Report
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [dsp-tck, dcp-compliance, ehds-compliance, bruno-api]
     if: always() && (github.event_name != 'workflow_dispatch' || inputs.target == 'local')
     steps:

@@ -1,14 +1,17 @@
 # ---------------------------------------------------------------------------
 # Test Suite — Health Dataspace v2
 # ---------------------------------------------------------------------------
-# Runs unit tests, API integration tests, lint, and E2E tests for the
-# Next.js UI and the Neo4j Query Proxy service.
+# Runs unit tests, API integration tests, lint and the scanners for the
+# Next.js UI and the services.
 #
-# Unit/API tests use vi.mock() — NO live Neo4j, EDC-V, or Keycloak needed.
-# E2E tests (Playwright) build the Next.js app and run against it.
+# Unit/API tests use vi.mock(): NO live Neo4j, EDC-V, or Keycloak needed.
+# The Playwright E2E suite runs in pages.yml (tests job), against a seeded
+# Neo4j. The copy that ran here had no Neo4j: 96 minutes, a quarter of the
+# tests failing, and continue-on-error on every step, so it could not fail
+# (#847).
 #
 # Triggers:
-#   - Push to any branch
+#   - Push to a branch without a slash (in practice main)
 #   - Pull request to main
 #   - Manual dispatch
 # ---------------------------------------------------------------------------
@@ -51,13 +54,64 @@ env:
 permissions:
   contents: read
 
+# A newer commit on the same pull request replaces the older run. Every other
+# run gets its own group, so each push to main still runs to the end and a red
+# run names the commit that broke it.
+concurrency:
+  group: test-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
+  # -----------------------------------------------------------------------
+  # What changed: the iOS parity check needs a macOS runner, of which a
+  # public repository gets five at a time, so it runs only when the Swift
+  # package changes. analytes.ts reaches it through the generated Swift file,
+  # which the epa-ingest drift check keeps current.
+  # -----------------------------------------------------------------------
+  changes:
+    name: Changed paths
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      ios: ${{ steps.diff.outputs.ios }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Diff against the base
+        id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          case "$EVENT" in
+            pull_request) base="origin/$BASE_REF" ;;
+            push) base="$BEFORE" ;;
+            *) base="" ;;
+          esac
+          # A manual run, a new branch (before is all zeros) or a base that
+          # is not in the clone: run everything.
+          if [ -z "$base" ] || ! git cat-file -e "$base^{commit}" 2>/dev/null; then
+            echo "ios=true" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+          files=$(git diff --name-only "$base"...HEAD)
+          if grep -qE '^(clients/ios/|\.github/workflows/test\.yml$)' <<<"$files"; then
+            echo "ios=true" >>"$GITHUB_OUTPUT"
+          else
+            echo "ios=false" >>"$GITHUB_OUTPUT"
+          fi
+
   # -----------------------------------------------------------------------
   # UI Unit + API Integration Tests (Vitest)
   # -----------------------------------------------------------------------
   ui-tests:
     name: UI Tests (Vitest)
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: ./ui
@@ -101,6 +155,7 @@ jobs:
   proxy-tests:
     name: Neo4j Proxy Tests (Vitest)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: ./services/neo4j-proxy
@@ -146,6 +201,7 @@ jobs:
   spe-loader-tests:
     name: SPE Loader Tests (Vitest)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: ./services/spe-loader
@@ -176,6 +232,7 @@ jobs:
   trustee-policy-tests:
     name: Trustee Policy Tests (opa test)
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
 
@@ -190,6 +247,7 @@ jobs:
   epa-ingest-tests:
     name: ePA Ingest Tests (Vitest)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: ./services/epa-ingest
@@ -230,12 +288,16 @@ jobs:
   # Proves the generated Swift BEHAVES like the TypeScript it came from: same
   # codings, same label/unit folding, same refusals. The drift check in
   # epa-ingest-tests proves the file is current; this proves it is correct.
-  # macOS runners are free for public repos but scarce, so this is path-filtered
-  # and never gates the web or service suites.
+  # macOS runners are free for public repos but scarce, so this runs only when
+  # the changes job saw the Swift package change, and never gates the web or
+  # service suites.
   # -----------------------------------------------------------------------
   ios-analyte-parity:
     name: iOS Analyte Parity (Swift)
+    needs: changes
+    if: needs.changes.outputs.ios == 'true'
     runs-on: macos-latest
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: ./clients/ios
@@ -257,6 +319,7 @@ jobs:
   secret-scan:
     name: Secret Scan (gitleaks)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
         with:
@@ -295,6 +358,7 @@ jobs:
   dependency-audit:
     name: Dependency Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
 
@@ -339,6 +403,7 @@ jobs:
   sbom:
     name: SBOM Generation
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
 
@@ -386,6 +451,7 @@ jobs:
   license-check:
     name: Licence Compliance
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
 
@@ -447,6 +513,7 @@ jobs:
   trivy-scan:
     name: Trivy Security Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       security-events: write # required to upload SARIF to Security tab
       contents: read
@@ -514,6 +581,7 @@ jobs:
   kubescape-scan:
     name: Kubescape K8s Posture
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
 
@@ -574,6 +642,7 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: ./ui
@@ -599,6 +668,7 @@ jobs:
   lighthouse:
     name: Performance Budget (Lighthouse)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
     defaults:
       run:
@@ -663,76 +733,4 @@ jobs:
         with:
           name: lighthouse-reports
           path: ui/.lighthouseci/
-          retention-days: 30
-
-  # -----------------------------------------------------------------------
-  # E2E Tests (Playwright) — only on main / manual dispatch
-  # -----------------------------------------------------------------------
-  e2e-tests:
-    name: E2E Tests (Playwright)
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-    defaults:
-      run:
-        working-directory: ./ui
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: ./ui/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build application
-        run: npm run build
-        env:
-          NEXT_PUBLIC_STATIC_EXPORT: "false"
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
-
-      - name: Run Playwright tests
-        continue-on-error: true # Neo4j not available in CI — some tests expected to fail
-        run: npx playwright test --project=chromium
-        env:
-          CI: true
-          NEXT_PUBLIC_STATIC_EXPORT: "false"
-          NEXTAUTH_SECRET: ci-test-secret-not-for-production
-          NEXTAUTH_URL: http://localhost:3000
-
-      - name: WCAG 2.2 AA accessibility audit
-        # continue-on-error matches the surrounding playwright/security
-        # steps: Neo4j is not available in CI so several pages render in
-        # their error state (Graph, Catalog, Patient), and the contrast
-        # ratchet for Developer Guide / Architecture (tracked in issue
-        # #25) hasn't been driven to zero yet. Drop continue-on-error
-        # once those two are addressed.
-        continue-on-error: true
-        run: npx playwright test __tests__/e2e/journeys/27-wcag-accessibility.spec.ts --project=chromium
-        env:
-          CI: true
-          NEXT_PUBLIC_STATIC_EXPORT: "false"
-          NEXTAUTH_SECRET: ci-test-secret-not-for-production
-          NEXTAUTH_URL: http://localhost:3000
-
-      - name: Security & penetration tests (OWASP/BSI)
-        continue-on-error: true # requires running services for full coverage
-        run: npx playwright test __tests__/e2e/journeys/28-security-pentest.spec.ts --project=chromium --grep-invert "SEC-4[1-9]|SEC-50"
-        env:
-          CI: true
-          NEXT_PUBLIC_STATIC_EXPORT: "false"
-          NEXTAUTH_SECRET: ci-test-secret-not-for-production
-          NEXTAUTH_URL: http://localhost:3000
-
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: playwright-report
-          path: ui/playwright-report/
           retention-days: 30

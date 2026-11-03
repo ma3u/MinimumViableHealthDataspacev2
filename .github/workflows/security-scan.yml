@@ -294,6 +294,7 @@ jobs:
     needs: [source-sbom, image-scan, deployed-image-scan]
     if: always() && github.event_name == 'workflow_dispatch' && github.event.inputs.fail_on_severity != 'none'
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
       - name: Fail on ${{ github.event.inputs.fail_on_severity }}+
@@ -308,6 +309,7 @@ jobs:
     needs: [source-sbom, image-scan, deployed-image-scan]
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Write summary
         run: |

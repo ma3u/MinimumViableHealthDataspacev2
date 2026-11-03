@@ -1,10 +1,12 @@
 # ---------------------------------------------------------------------------
 # CodeQL — Swift (the Klarbefund iPhone app)
 # ---------------------------------------------------------------------------
-# CodeQL cannot read Swift from source; it watches a real build, which needs a
-# macOS runner and about 17 minutes. So this runs only when clients/ios
-# changes, plus weekly so new queries reach unchanged code. Before pushing
-# iOS changes, run the same thing locally: clients/ios/Scripts/codeql-swift.sh.
+# CodeQL cannot read Swift from source; it watches a real build on a macOS
+# runner, which has taken up to the 90-minute limit (#765). So it runs weekly
+# and by hand, and on a pull request only when this workflow or the local
+# script changes, so a fix to the analysis shows on its own PR. A change to
+# the app itself is checked before it leaves the laptop: the pre-push hook
+# codeql-swift runs clients/ios/Scripts/codeql-swift.sh (#847).
 #
 # The build is the app scheme from project.yml (Sources/MeinBefund and
 # Sources/Shared). The default setup this
@@ -15,16 +17,11 @@
 name: CodeQL (Swift)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "clients/ios/**"
-      - ".github/workflows/codeql-swift.yml"
   pull_request:
     branches: [main]
     paths:
-      - "clients/ios/**"
       - ".github/workflows/codeql-swift.yml"
+      - "clients/ios/Scripts/codeql-swift.sh"
   schedule:
     - cron: "41 4 * * 1"
   workflow_dispatch:
