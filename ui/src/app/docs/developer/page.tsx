@@ -76,6 +76,26 @@ export default function DeveloperGuidePage() {
       className="text-indigo-700 dark:text-indigo-400 underline"
     />
   );
+  // Links of the "Writing the Documentation" examples: a file on GitHub, a
+  // route of the hub, or an outside reference.
+  const repoFile = (path: string, kind: "blob" | "tree" = "blob") => (
+    <a
+      href={`${GITHUB_REPO}/${kind}/main/${path}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="underline"
+    />
+  );
+  const route = (href: string) => <Link href={href} className="underline" />;
+  const cicdLink = <a href="#cicd" className="underline" />;
+  const externalLink = (href: string) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="underline"
+    />
+  );
   const securityLink = <Link href="/docs/security" className="underline" />;
   const klarbefundLink = <Link href="/docs/klarbefund" className="underline" />;
   const qualityGatesLink = (
@@ -1864,25 +1884,97 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
               }
             </T>
           </p>
+          <p className="text-(--text-secondary) text-sm mb-4">
+            <T area="docsDeveloper" tags={{ c }}>
+              {
+                "Choose the kind of page by its reader. A report, guide or runbook read from start to end is Markdown under <c>docs/</c>, which the hub publishes; a page that shows live facts, diagrams and links into the hub is a hand-written React page. Both get numbered headings and the index at the right without further work."
+              }
+            </T>
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div className="border border-(--border) rounded-lg p-4">
               <h4 className="font-semibold text-sm mb-2">
                 {t("Published documents")}
               </h4>
-              <p className="text-(--text-secondary) text-xs mb-2">
-                <T area="docsDeveloper" tags={{ c }}>
+              <ol className="text-(--text-secondary) text-xs space-y-1.5 list-decimal ml-4 mb-2">
+                <li>
+                  <T area="docsDeveloper" tags={{ c }}>
+                    {
+                      "Write the Markdown under <c>docs/</c>, linking other files by relative path."
+                    }
+                  </T>
+                </li>
+                <li>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      a: repoFile("scripts/gen-docs-content.py"),
+                      e: route("/docs/ehds"),
+                      o: route("/docs/operations"),
+                      s: securityLink,
+                      k: klarbefundLink,
+                      d: route("/docs/developer"),
+                    }}
+                  >
+                    {
+                      "Add it to <a>DOCS in scripts/gen-docs-content.py</a> with a section, a slug and a one-line summary. The sections are those of the docs menu: <e>EHDS Regulation</e>, <o>Operations</o>, <s>Security and Data Protection</s>, <k>Klarbefund</k> and <d>Developer Guide</d>."
+                    }
+                  </T>
+                </li>
+                <li>
+                  <T area="docsDeveloper" tags={{ c }}>
+                    {
+                      "Run <c>python3 scripts/gen-docs-content.py</c> and stage <c>ui/src/content/published-docs.json</c>; pre-commit runs its <c>--check</c>, so the copy never drifts from the source."
+                    }
+                  </T>
+                </li>
+              </ol>
+              <p className="text-(--text-secondary) text-xs">
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    c,
+                    a: repoFile("docs/developer/api-integration-tests.md"),
+                    p: route("/docs/developer/api-integration-tests"),
+                    m: route(
+                      "/docs/developer/sdlc#2-the-lifecycle-at-a-glance",
+                    ),
+                  }}
+                >
                   {
-                    "A Markdown file under <c>docs/</c> becomes a page when it is listed in <c>scripts/gen-docs-content.py</c> with a section (<c>security</c> or <c>klarbefund</c>), a slug and a one-line summary. The script writes <c>ui/src/content/published-docs.json</c>, rewrites relative links to the published route or to GitHub, copies every embedded image to <c>ui/public/published-docs/</c>, and its <c>--check</c> runs in pre-commit so the copy never drifts from the source. Headings are numbered when rendered unless the document numbers its own; anchors stay GitHub's."
+                    "Example: <a>docs/developer/api-integration-tests.md</a> is the page <p>/docs/developer/api-integration-tests</p>. A link to another published document becomes its route, any other relative link a GitHub link; embedded images are copied, and a <c>mermaid</c> block is drawn, as in <m>the SDLC's lifecycle</m>."
+                  }
+                </T>
+              </p>
+            </div>
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">
+                {t("Hand-written pages")}
+              </h4>
+              <p className="text-(--text-secondary) text-xs mb-2">
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    c,
+                    a: repoFile("ui/src/app/docs/developer/page.tsx"),
+                    m: repoFile("ui/src/messages", "tree"),
+                  }}
+                >
+                  {
+                    "A page under <c>ui/src/app/docs/</c> is a React component, like this guide, <a>developer/page.tsx</a>. Its texts go through <c>useT()</c> and the dictionaries in <m>ui/src/messages/</m>, one per language; <c>i18n-messages.test.ts</c> fails on a text without an entry."
                   }
                 </T>
               </p>
               <p className="text-(--text-secondary) text-xs">
                 <T
                   area="docsDeveloper"
-                  tags={{ a: securityLink, k: klarbefundLink }}
+                  tags={{
+                    c,
+                    a: repoFile("ui/src/components/docs/DocsToc.tsx"),
+                  }}
                 >
                   {
-                    "<a>/docs/security</a> holds the reports, <k>/docs/klarbefund</k> the app's user and developer guides."
+                    "<a>DocsToc</a> numbers every h2 and h3 and lists it in the index at the right; a heading inside a <c>nav</c> or a <c>data-toc-skip</c> block stays out, and one that shows its own number keeps it."
                   }
                 </T>
               </p>
@@ -1891,13 +1983,53 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
               <h4 className="font-semibold text-sm mb-2">
                 {t("Diagrams in ArchiMate and UML")}
               </h4>
-              <p className="text-(--text-secondary) text-xs mb-2">
-                <T area="docsDeveloper" tags={{ c }}>
-                  {
-                    "Architecture figures are PlantUML sources under <c>docs/<section>/diagrams/*.puml</c>, ArchiMate 3.2 for structure (business, application and technology as horizontal bands) and sequence diagrams where the order of messages matters. <c>scripts/render-plantuml.sh</c> renders them to the sibling <c>img/</c> folder (needs <c>brew install plantuml</c>); the content generator copies the SVGs to the hub. A hand-written page embeds one with <c>DocFigure</c> inside a <c>DocFigureViewer</c>."
-                  }
-                </T>
-              </p>
+              <ol className="text-(--text-secondary) text-xs space-y-1.5 list-decimal ml-4 mb-2">
+                <li>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      c,
+                      l: externalLink(
+                        "https://github.com/plantuml-stdlib/Archimate-PlantUML",
+                      ),
+                      v: externalLink(
+                        "https://pubs.opengroup.org/architecture/archimate32-doc/",
+                      ),
+                      q: externalLink("https://plantuml.com/sequence-diagram"),
+                      a: repoFile(
+                        "docs/architecture/diagrams/cicd-pipeline.puml",
+                      ),
+                    }}
+                  >
+                    {
+                      "Write the PlantUML source in <c>docs/<area>/diagrams/</c> with the <l>ArchiMate library</l> (<v>ArchiMate 3.2</v>) for structure, or as a <q>sequence diagram</q> where the order of messages matters. Example: <a>cicd-pipeline.puml</a>."
+                    }
+                  </T>
+                </li>
+                <li>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      c,
+                      a: repoFile("docs/architecture/img/cicd-pipeline.svg"),
+                      b: repoFile(
+                        "docs/architecture/diagrams/cicd-pipeline.labels.json",
+                      ),
+                    }}
+                  >
+                    {
+                      "Render it with <c>scripts/render-plantuml.sh</c> (needs <c>brew install plantuml</c>) to <a>img/cicd-pipeline.svg</a>; translate its labels in <b>cicd-pipeline.labels.json</b> and run <c>python3 scripts/render-plantuml-i18n.py</c> for the German, French, Dutch and Spanish variants."
+                    }
+                  </T>
+                </li>
+                <li>
+                  <T area="docsDeveloper" tags={{ c, a: cicdLink }}>
+                    {
+                      "Embed it with <c>DocFigure</c> inside a <c>DocFigureViewer</c>, as <a>the CI/CD section</a> of this page does; a click opens it full screen with zoom."
+                    }
+                  </T>
+                </li>
+              </ol>
               <p className="text-(--text-secondary) text-xs">
                 <T area="docsDeveloper" tags={{ c }}>
                   {
@@ -1908,10 +2040,34 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
             </div>
             <div className="border border-(--border) rounded-lg p-4">
               <h4 className="font-semibold text-sm mb-2">{t("Screenshots")}</h4>
-              <p className="text-(--text-secondary) text-xs">
-                <T area="docsDeveloper" tags={{ c }}>
+              <p className="text-(--text-secondary) text-xs mb-2">
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    c,
+                    a: repoFile(
+                      "ui/__tests__/e2e/capture-guide-screenshots.spec.ts",
+                    ),
+                    g: repoFile("scripts/gen-localized-images.py"),
+                  }}
+                >
                   {
-                    "Klarbefund's screenshots come from a simulator through <c>clients/ios/Scripts/capture-screenshots.sh</c>, which launches each screen by argument with the fictional dev dataset (<c>-MBDevData -MBShot <screen></c>); a demo launch never shows the app lock. They are stored at half the simulator's resolution under <c>docs/klarbefund/img/</c>. No real report, value or organisation may ever appear in one."
+                    "The user guide's previews are taken from the public demo by <a>capture-guide-screenshots.spec.ts</a> (<c>CAPTURE_GUIDE=1</c>, one WebP per page, <c>SCREENSHOT_LANG=de</c> for a language) and shown through <c>LocalizedImage</c>; <g>gen-localized-images.py</g> lists the translated variants."
+                  }
+                </T>
+              </p>
+              <p className="text-(--text-secondary) text-xs">
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    c,
+                    a: repoFile("clients/ios/Scripts/capture-screenshots.sh"),
+                    i: repoFile("docs/klarbefund/img", "tree"),
+                    k: klarbefundLink,
+                  }}
+                >
+                  {
+                    "Klarbefund's come from a simulator through <a>clients/ios/Scripts/capture-screenshots.sh</a> with the fictional dev dataset (<c>-MBDevData -MBShot <screen></c>), at half resolution under <i>docs/klarbefund/img/</i>, as in <k>the Klarbefund guides</k>. No real report, value or organisation may ever appear in one."
                   }
                 </T>
               </p>
@@ -1920,10 +2076,38 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
               <h4 className="font-semibold text-sm mb-2">
                 {t("Facts and dates")}
               </h4>
-              <p className="text-(--text-secondary) text-xs">
+              <p className="text-(--text-secondary) text-xs mb-2">
                 <T area="docsDeveloper" tags={{ c }}>
                   {
                     "Numbers on these pages (routes, services, hooks, versions) come from <c>ui/src/app/docs/docs-facts.json</c>, written by <c>scripts/gen-docs-facts.py</c> from the repository; the same script keeps each page's last-updated date, and its check fails a commit whose page changed without it. Run <c>python3 scripts/gen-docs-facts.py</c> after editing a docs page."
+                  }
+                </T>
+              </p>
+              <p className="text-(--text-secondary) text-xs">
+                <T area="docsDeveloper" tags={{ c, a: cicdLink }}>
+                  {
+                    "Example: the job list under <a>CI/CD Pipeline</a> is <c>facts.workflowJobs</c>, so a new job in <c>test.yml</c> appears there by itself."
+                  }
+                </T>
+              </p>
+            </div>
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">
+                {t("Translations")}
+              </h4>
+              <p className="text-(--text-secondary) text-xs">
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    c,
+                    a: repoFile(
+                      "docs/ADRs/ADR-071-the-documentation-follows-the-language-picker.md",
+                    ),
+                    e: repoFile("docs/i18n/de/ehds-article-numbering.md"),
+                  }}
+                >
+                  {
+                    "Every page follows the language picker (<a>ADR-071</a>). A published document's translation is <c>docs/i18n/<lang>/<path></c>, stamped with the English file's hash by <c>gen-docs-content.py --stamp</c>, for example <e>the German article numbering</e>; <c>--report-i18n</c> lists what is missing or stale. A page's texts live in the dictionaries, a diagram's in its <c>.labels.json</c>, a screenshot's variant in a <c><lang>/</c> folder next to it."
                   }
                 </T>
               </p>
