@@ -3,6 +3,18 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-03: Bruno's cookie jar drops the forged session behind sticky sessions
+
+From 2026-10-28 every Azure-Dev run of the API collection answered 401 on all
+but the anonymous requests (Demo Smoke, 30 of 166 passed). The secret was not
+the cause: a session forged with the live `nextauth-secret` and sent by curl got 200. Sticky sessions on `mvhd-ui` (#745) make the ingress set an `acaAffinity`
+cookie on every response. The Bruno CLI keeps a cookie jar, and from the second
+request on the jar's cookies replaced the request's own `Cookie` header, so the
+session never reached the hub. A local listener that sets one cookie shows it:
+the first request carries the session, every later one only the jar's cookie.
+Fix (#839): `scripts/run-api-tests.sh` runs Bruno with `--disable-cookies`; the
+same run against the live hub went from 30 to 165 of 166.
+
 ## 2026-11-02: the PIM role cannot define roles, so the off-hours identity cannot get mvhd-aci-power
 
 `18-offhours-jobs.sh` creates the custom role `mvhd-aci-power` (read, start,

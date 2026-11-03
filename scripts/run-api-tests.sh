@@ -110,7 +110,12 @@ set +e
 (
   # ${arr[@]+"${arr[@]}"}: an empty array is an unbound variable under `set -u`
   # on bash 3.2, which is what macOS ships. Static-mock passes no --env-var.
+  # --disable-cookies: every request sends its session in its own Cookie header.
+  # With the jar on, the acaAffinity cookie the Azure ingress sets since sticky
+  # sessions (#745) replaced that header from the second request on, so every
+  # forged session was dropped and Azure-Dev answered 401 (#839).
   cd "$COLLECTION" && $BRUNO_BIN run "${PATHS[@]}" -r --env "$ENV_NAME" \
+    --disable-cookies \
     ${ENV_VARS[@]+"${ENV_VARS[@]}"} \
     --reporter-json "$JSON_REPORT" --reporter-html "$HTML_REPORT" \
     --reporter-junit "$JUNIT_REPORT"
