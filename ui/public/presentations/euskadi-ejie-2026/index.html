@@ -326,6 +326,126 @@
         font-style: italic;
         color: var(--body);
       }
+      /* Where a lesson comes from, the component view and the tables (revision of 3 November 2026). */
+      .src {
+        display: inline-block;
+        padding: 4px 14px;
+        border-radius: 999px;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        white-space: nowrap;
+      }
+      .src-cx {
+        background: var(--mist);
+        color: var(--navy);
+      }
+      .src-demo {
+        background: #d7ece9;
+        color: var(--teal);
+      }
+      .comp {
+        background: var(--card);
+        border: 1px solid var(--rule);
+        border-radius: 14px;
+        padding: 12px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .comp h3 {
+        font-size: 23px;
+        line-height: 1.15;
+      }
+      .comp .ex {
+        font-size: 18px;
+        color: var(--muted);
+        line-height: 1.3;
+      }
+      .comp .status {
+        width: auto;
+        align-self: flex-start;
+        padding: 3px 14px;
+        font-size: 17px;
+      }
+      .rowlab {
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--muted);
+        align-self: center;
+      }
+      .reveal table.tbl {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+        font-size: 21px;
+      }
+      .reveal table.tbl th {
+        text-align: left;
+        font-size: 18px;
+        letter-spacing: 1px;
+        color: var(--muted);
+        padding: 8px 14px;
+        border-bottom: 2px solid var(--rule);
+      }
+      .reveal table.tbl td {
+        padding: 9px 14px;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+        color: var(--body);
+        line-height: 1.3;
+      }
+      .reveal table.tbl td:first-child {
+        font-weight: 700;
+        color: var(--navy);
+      }
+      .reveal .dark table.tbl th {
+        color: var(--amber);
+        border-bottom-color: #2e6386;
+      }
+      .reveal .dark table.tbl td {
+        color: var(--mist);
+        border-bottom-color: #2e6386;
+      }
+      .reveal .dark table.tbl td:first-child {
+        color: var(--cream);
+      }
+      .fte {
+        width: 120px;
+        height: 64px;
+        border-radius: 32px;
+        flex: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Sora", sans-serif;
+        font-size: 28px;
+        font-weight: 700;
+        background: var(--accent, var(--navy));
+        color: var(--cream);
+      }
+      .fte.light {
+        color: var(--navy);
+      }
+      .opt {
+        flex: 1;
+        background: var(--card);
+        border: 1px solid var(--rule);
+        border-top: 8px solid var(--accent, var(--navy));
+        border-radius: 20px;
+        padding: 28px 32px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .opt h3 {
+        font-size: 30px;
+      }
+      .opt p {
+        font-size: 24px;
+        color: var(--body);
+      }
       /* Narration and subtitles. */
       .narration {
         position: fixed;
@@ -400,7 +520,7 @@
               Answers to your eight questions, and a pilot
             </p>
             <p class="rise" style="--d: 1.1s; font-size: 24px; color: var(--mist); margin-top: 90px">
-              EJIE · Gobierno Vasco · October 2026
+              EJIE · Gobierno Vasco · revised 3 November 2026
             </p>
           </div>
           <aside class="notes">
@@ -417,57 +537,88 @@
             <div class="card fragment fade-up" data-fragment-index="0" style="--accent: var(--red);"><p style="font-family: Sora; font-size: 40px; font-weight: 700; color: var(--red)">01</p><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">CHALLENGES</p><h3 style="font-size: 30px">Culture, not technology.</h3></div>
             <div class="card fragment fade-up" data-fragment-index="1" style="--accent: var(--teal);"><p style="font-family: Sora; font-size: 40px; font-weight: 700; color: var(--teal)">02</p><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">LESSONS</p><h3 style="font-size: 30px">Build on existing standards.</h3></div>
             <div class="card fragment fade-up" data-fragment-index="2" style="--accent: var(--navy);"><p style="font-family: Sora; font-size: 40px; font-weight: 700; color: var(--navy)">03</p><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">DECISIONS</p><h3 style="font-size: 30px">Open standards, decided in public.</h3></div>
-            <div class="card fragment fade-up" data-fragment-index="3" style="--accent: var(--green);"><p style="font-family: Sora; font-size: 40px; font-weight: 700; color: var(--green)">04</p><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">ARCHITECTURE</p><h3 style="font-size: 30px">The Catena-X operating model.</h3></div>
+            <div class="card fragment fade-up" data-fragment-index="3" style="--accent: var(--green);"><p style="font-family: Sora; font-size: 40px; font-weight: 700; color: var(--green)">04</p><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">ARCHITECTURE</p><h3 style="font-size: 30px">Reuse components first, build what is missing.</h3></div>
             <div class="card fragment fade-up" data-fragment-index="4" style="--accent: var(--amber);"><p style="font-family: Sora; font-size: 40px; font-weight: 700; color: var(--amber-ink)">05</p><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">MATURITY</p><h3 style="font-size: 30px">Protocol stable, secure environments young.</h3></div>
             <div class="card fragment fade-up" data-fragment-index="5" style="--accent: var(--teal);"><p style="font-family: Sora; font-size: 40px; font-weight: 700; color: var(--teal)">06</p><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">GOVERNANCE</p><h3 style="font-size: 30px">Keep rules and operation apart.</h3></div>
-            <div class="card fragment fade-up" data-fragment-index="6" style="--accent: var(--green);"><p style="font-family: Sora; font-size: 40px; font-weight: 700; color: var(--green)">07</p><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">COSTS</p><h3 style="font-size: 30px">No licences. You pay for people.</h3></div>
+            <div class="card fragment fade-up" data-fragment-index="6" style="--accent: var(--green);"><p style="font-family: Sora; font-size: 40px; font-weight: 700; color: var(--green)">07</p><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">COSTS</p><h3 style="font-size: 30px">No licences. You pay for people and hosting.</h3></div>
             <div class="card fragment fade-up" data-fragment-index="7" style="--accent: var(--navy);"><p style="font-family: Sora; font-size: 40px; font-weight: 700; color: var(--navy)">08</p><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">TEAM</p><h3 style="font-size: 30px">8 to 12 people for a pilot.</h3></div>
           </div>
           <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco</p>
           <aside class="notes">[0:30] The eight answers on one page. If you remember one slide, remember this one.</aside>
         </section>
 
-        <!-- 3 · Q1 -->
+        <!-- 3 · Q1 challenges -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 1 · CHALLENGES</p>
           <div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           <h2 class="h2">Culture was harder than technology</h2>
-          <p class="stand">What we met in Catena-X, and what it means for health.</p>
-          <div class="body row">
-            <div class="card fragment fade-up" data-fragment-index="0" style="--accent: var(--red); --d: 0.15s">
-              <h3>Culture</h3>
-              <p>Open source and open collaboration were new for most companies and institutions.</p>
-              <p>Working groups delivered only when top management gave its experts <b>time and a mandate</b>.</p>
-            </div>
-            <div class="card fragment fade-up" data-fragment-index="1" style="--accent: var(--amber); --d: 0.35s">
-              <h3>Meaning of the data</h3>
-              <p>Agreeing what the data means took far more work than moving it.</p>
-              <p>In health this means <b>FHIR</b>, terminologies such as <b>SNOMED CT</b> and <b>ICD-10</b>, and <b>OMOP</b>.</p>
-            </div>
+          <p class="stand">Four challenges, and where each lesson comes from.</p>
+          <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+            <div class="card fragment fade-up" data-fragment-index="0" style="--accent: var(--red); padding: 22px 32px; gap: 10px"><div style="display: flex; justify-content: space-between; align-items: center"><h3 style="font-size: 32px">Culture</h3><span class="src src-cx">FROM CATENA-X</span></div><p style="font-size: 25px">Working groups delivered only when top management gave its experts <b>time and a mandate</b>. In a hospital the same holds for clinicians and clinical coders.</p></div>
+            <div class="card fragment fade-up" data-fragment-index="1" style="--accent: var(--teal); padding: 22px 32px; gap: 10px"><div style="display: flex; justify-content: space-between; align-items: center"><h3 style="font-size: 32px">Onboarding</h3><span class="src src-cx">FROM CATENA-X</span></div><p style="font-size: 25px">Joining was contracts, identity and a certificate check first, software second. A small participant needs a <b>hosted connector</b>, not its own engineers.</p></div>
+            <div class="card fragment fade-up" data-fragment-index="2" style="--accent: var(--navy); padding: 22px 32px; gap: 10px"><div style="display: flex; justify-content: space-between; align-items: center"><h3 style="font-size: 32px">Governance</h3><span class="src src-cx">FROM CATENA-X</span></div><p style="font-size: 25px">Without a rulebook nobody could say who may join, or what happens when a rule is broken. Health adds a layer Catena-X never had: the <b>data permit</b>.</p></div>
+            <div class="card fragment fade-up" data-fragment-index="3" style="--accent: var(--amber); padding: 22px 32px; gap: 10px"><div style="display: flex; justify-content: space-between; align-items: center"><h3 style="font-size: 32px">Meaning of the data</h3><span class="src src-demo">FROM OUR EHDS DEMONSTRATOR</span></div><p style="font-size: 25px">Mapping to <b>FHIR</b>, <b>SNOMED CT</b>, <b>ICD-10</b> and <b>OMOP</b> took more work than the connector. Identity and keys failed more often than the data exchange.</p></div>
           </div>
-          <div class="band fragment fade-up" data-fragment-index="1" style="transition-delay: 0.12s; --d: 0.7s">Moving data is easy. <span>Agreeing on what it means is hard.</span></div>
+          <div class="band fragment fade-up" data-fragment-index="3" style="transition-delay: 0.12s; margin-top: 22px">Moving data is easy. <span>Agreeing on what it means is hard.</span></div>
           <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco</p>
-          <aside class="notes">[1:30] Culture, not technology. Working groups delivered only with time and a mandate. Moving data is easy; agreeing on meaning is hard.</aside>
+          <aside class="notes">[1:45] Culture, onboarding and governance are the Catena-X lessons; the meaning of the data is what our EHDS demonstrator taught us. The next slide makes it concrete.</aside>
         </section>
 
-        <!-- 4 · Q2 -->
+        <!-- 4 · Q1 example -->
+        <section data-background-color="#FBF8F3">
+          <p class="qpill">QUESTION 1 · CHALLENGES · AN EXAMPLE</p>
+          <div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <h2 class="h2">Example: a hospital cancer registry joins</h2>
+          <p class="stand">What a hospital actually does, and how its local codes become standard ones.</p>
+          <div class="row" style="margin-top: 30px; gap: 28px">
+            <div class="col fragment fade-up" data-fragment-index="0" style="width: 640px; flex: none; gap: 10px">
+              <p style="font-size: 20px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">WHAT THE HOSPITAL DOES</p>
+              <div class="rowcard" style="padding: 10px 20px; gap: 18px"><div class="num" style="width: 48px; height: 48px; font-size: 24px; --accent: var(--navy)">1</div><p style="font-size: 23px">Signs the participation agreement and the rulebook.</p></div>
+              <div class="rowcard" style="padding: 10px 20px; gap: 18px"><div class="num" style="width: 48px; height: 48px; font-size: 24px; --accent: var(--navy)">2</div><p style="font-size: 23px">Gets its identity: an organisation credential, for example from an FNMT certificate.</p></div>
+              <div class="rowcard" style="padding: 10px 20px; gap: 18px"><div class="num" style="width: 48px; height: 48px; font-size: 24px; --accent: var(--navy)">3</div><p style="font-size: 23px">Gets a connector: hosted by the operator, or its own.</p></div>
+              <div class="rowcard" style="padding: 10px 20px; gap: 18px"><div class="num" style="width: 48px; height: 48px; font-size: 24px; --accent: var(--teal)">4</div><p style="font-size: 23px">Maps the registry to FHIR and OMOP, with a clinical coder.</p></div>
+              <div class="rowcard" style="padding: 10px 20px; gap: 18px"><div class="num" style="width: 48px; height: 48px; font-size: 24px; --accent: var(--navy)">5</div><p style="font-size: 23px">Describes the dataset in the HealthDCAT-AP catalogue.</p></div>
+              <div class="rowcard" style="padding: 10px 20px; gap: 18px"><div class="num" style="width: 48px; height: 48px; font-size: 24px; --accent: var(--navy)">6</div><p style="font-size: 23px">Passes the conformity tests, then goes live.</p></div>
+            </div>
+            <div class="col" style="flex: 1; gap: 14px">
+              <p class="fragment fade-up" data-fragment-index="1" style="font-size: 20px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">STEP 4: HOW LOCAL CODES ARE MAPPED</p>
+              <div class="fragment fade-up" data-fragment-index="1" style="background: #fff; border-radius: 16px; padding: 8px 10px">
+                <table class="tbl">
+                  <tr><th>IN THE HOSPITAL</th><th>STANDARD</th><th>IN OMOP</th></tr>
+                  <tr><td>Diagnosis, CIE-10-ES C50.912</td><td>ICD-10 C50.9 · SNOMED CT 254837009, malignant neoplasm of breast</td><td>condition</td></tr>
+                  <tr><td>Tumour, ICD-O-3 C50.4 and 8500/3</td><td>ICD-O-3, kept as it is</td><td>oncology extension</td></tr>
+                  <tr><td>Lab, local code "HER2 IHQ"</td><td>LOINC 18474-7, HER2 by immune stain</td><td>measurement</td></tr>
+                  <tr><td>Stage, text "T2 N1 M0"</td><td>TNM, coded in SNOMED CT</td><td>measurement</td></tr>
+                </table>
+              </div>
+              <div class="fragment fade-up" data-fragment-index="2" style="background: #f1e9d8; border-left: 10px solid var(--teal); border-radius: 16px; padding: 18px 28px; display: flex; flex-direction: column; gap: 10px">
+                <p style="font-size: 24px; font-weight: 700">A terminology service proposes each mapping, a clinical coder approves it, and every hospital reuses the approved table.</p>
+                <p style="font-size: 21px; color: var(--body)"><span class="src src-demo">FROM OUR EHDS DEMONSTRATOR</span> the same pipeline, FHIR to OMOP, on synthetic data.</p>
+              </div>
+            </div>
+          </div>
+          <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco</p>
+          <aside class="notes">[1:30] Six steps to join; the mapping is step 4 and the largest. Local CIE-10-ES becomes SNOMED CT, the registry keeps ICD-O-3 through the OMOP oncology extension, lab codes go to LOINC. Coders approve, everyone reuses.</aside>
+        </section>
+
+        <!-- 5 · Q2 lessons -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 2 · LESSONS</p>
           <div class="dots"><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
           <h2 class="h2">Four lessons to avoid common mistakes</h2>
-          <p class="stand">What we would do again, and what we recommend for the Basque Country.</p>
+          <p class="stand">What we would do again, where we learned it, and what we recommend for the Basque Country.</p>
           <div class="body row">
-            <div class="card fragment fade-up" data-fragment-index="0" style="--accent: var(--teal); --d: 0.1s"><div class="num">1</div><h3 style="font-size: 32px">Build on what exists</h3><p style="font-size: 26px">Run open working groups on FHIR, SNOMED CT, ICD-10, OMOP and HealthDCAT-AP. Do not invent new standards.</p></div>
-            <div class="card fragment fade-up" data-fragment-index="1" style="--accent: var(--green); --d: 0.25s"><div class="num">2</div><h3 style="font-size: 32px">Start small</h3><p style="font-size: 26px">Choose one or two use cases. Show value that you can measure.</p></div>
-            <div class="card fragment fade-up" data-fragment-index="2" style="--accent: var(--amber); --d: 0.4s"><div class="num light">3</div><h3 style="font-size: 32px">Give back</h3><p style="font-size: 26px">Send improvements back to the open-source projects. Keep no private copies.</p></div>
-            <div class="card fragment fade-up" data-fragment-index="3" style="--accent: var(--red); --d: 0.55s"><div class="num">4</div><h3 style="font-size: 32px">Buy standards, not products</h3><p style="font-size: 26px">Write the tender around standards and conformity tests. This avoids vendor lock-in.</p></div>
+            <div class="card fragment fade-up" data-fragment-index="0" style="--accent: var(--teal)"><div class="num">1</div><h3 style="font-size: 32px">Build on what exists</h3><p style="font-size: 25px">Run open working groups on FHIR, SNOMED CT, ICD-10, OMOP and HealthDCAT-AP. Do not invent new standards.</p><div><span class="src src-cx">FROM CATENA-X</span></div><div><span class="src src-demo">FROM OUR EHDS DEMONSTRATOR</span></div></div>
+            <div class="card fragment fade-up" data-fragment-index="1" style="--accent: var(--green)"><div class="num">2</div><h3 style="font-size: 32px">Start small</h3><p style="font-size: 25px">Choose one or two use cases. Show value that you can measure.</p><div><span class="src src-cx">FROM CATENA-X</span></div></div>
+            <div class="card fragment fade-up" data-fragment-index="2" style="--accent: var(--amber)"><div class="num light">3</div><h3 style="font-size: 32px">Budget for meaning</h3><p style="font-size: 25px">Plan most of the effort for mapping and clinical coders, not for the connector.</p><div><span class="src src-demo">FROM OUR EHDS DEMONSTRATOR</span></div></div>
+            <div class="card fragment fade-up" data-fragment-index="3" style="--accent: var(--red)"><div class="num">4</div><h3 style="font-size: 32px">Buy standards, not products</h3><p style="font-size: 25px">Tender on standards and conformity tests. Give improvements back to the open-source projects.</p><div><span class="src src-cx">FROM CATENA-X</span></div></div>
           </div>
-          <div class="band fragment fade-up" data-fragment-index="2" style="transition-delay: 0.12s; font-size: 30px">A private copy of open source <span>becomes your own product to maintain.</span></div>
+          <div class="band fragment fade-up" data-fragment-index="3" style="transition-delay: 0.12s; font-size: 30px">A private copy of open source <span>becomes your own product to maintain.</span></div>
           <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco</p>
-          <aside class="notes">[1:30] Build on what exists; start small; give back; tender for standards, not products.</aside>
+          <aside class="notes">[1:30] Build on what exists; start small; budget for meaning, not movement; tender for standards, not products. Each card says whether it comes from Catena-X or from our demonstrator.</aside>
         </section>
 
-        <!-- 5 · Q3 -->
+        <!-- 6 · Q3 decisions -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 3 · DECISIONS</p>
           <div class="dots"><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -488,16 +639,84 @@
             <span class="chip fragment fade-up" data-fragment-index="2" style="transition-delay: 0.48s; flex: 1; background: var(--card); border: 3px solid var(--amber); color: var(--navy)">Mature technology</span>
             <span class="chip fragment fade-up" data-fragment-index="2" style="transition-delay: 0.60s; flex: 1.1; background: var(--card); border: 3px solid var(--red); color: var(--navy)">A clear exit strategy</span>
           </div>
-          <div class="band fragment fade-up" data-fragment-index="3" style="font-size: 30px">Our EHDS demonstrator works the same way: <span>57 decision records, public on GitHub.</span></div>
+          <div class="band fragment fade-up" data-fragment-index="3" style="font-size: 30px">Our EHDS demonstrator works the same way: <span>more than 70 decision records, public on GitHub.</span></div>
           <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco</p>
           <aside class="notes">[1:30] Every decision is an ADR anyone can read. Working groups propose, builders decide. Five criteria; the exit strategy matters most for a public body.</aside>
         </section>
 
-        <!-- 6 · Q4 -->
+        <!-- 7 · Q4 components -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 4 · ARCHITECTURE</p>
           <div class="dots"><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i></div>
-          <h2 class="h2">The Catena-X operating model</h2>
+          <h2 class="h2">A possible reference implementation</h2>
+          <p class="stand">The components by function. Technologies are only examples; none is chosen yet.</p>
+          <div class="col" style="margin-top: 26px; gap: 14px">
+            <div class="fragment fade-up" data-fragment-index="0" style="display: grid; grid-template-columns: 210px repeat(5, 1fr); gap: 12px"><p class="rowlab">AT EACH HOSPITAL</p><div class="comp"><span class="status st-avail">reuse</span><h3>Source systems and data lake</h3><p class="ex">the Osakidetza data lake, hospital systems</p></div><div class="comp"><span class="status st-prog">adapt</span><h3>Mapping to FHIR and OMOP</h3><p class="ex">for example OHDSI WhiteRabbit and Usagi</p></div><div class="comp"><span class="status st-prog">adapt</span><h3>Pseudonymisation</h3><p class="ex">for example a trusted third-party service</p></div><div class="comp"><span class="status st-avail">reuse</span><h3>Terminology service</h3><p class="ex">for example a FHIR terminology server</p></div><div class="comp"><span class="status st-avail">reuse</span><h3>Dataspace connector</h3><p class="ex">for example Eclipse EDC or the Simpl-Open agent</p></div></div>
+            <div class="fragment fade-up" data-fragment-index="1" style="display: grid; grid-template-columns: 210px repeat(5, 1fr); gap: 12px"><p class="rowlab">SHARED, RUN BY THE OPERATOR</p><div class="comp"><span class="status st-prog">adapt</span><h3>Identity and credentials</h3><p class="ex">for example DCP credentials, linked to Cl@ve and FNMT</p></div><div class="comp"><span class="status st-avail">reuse</span><h3>Dataset catalogue</h3><p class="ex">HealthDCAT-AP; for example the HealthData@EU catalogue code</p></div><div class="comp"><span class="status st-prog">adapt</span><h3>Onboarding and participant register</h3><p class="ex">the Catena-X onboarding service as a model</p></div><div class="comp"><span class="status st-prog">adapt</span><h3>Conformity tests</h3><p class="ex">for example the Dataspace Protocol test kit</p></div><div class="comp"><span class="status st-avail">reuse</span><h3>Monitoring and audit log</h3><p class="ex">for example OpenTelemetry and a log store</p></div></div>
+            <div class="fragment fade-up" data-fragment-index="2" style="display: grid; grid-template-columns: 210px repeat(5, 1fr); gap: 12px"><p class="rowlab">FOR THE ACCESS BODY</p><div class="comp"><span class="status st-prog">adapt</span><h3>Applications and data permits</h3><p class="ex">a case workflow on the EU application form</p></div><div class="comp"><span class="status st-build">build</span><h3>Opt-out register</h3><p class="ex">EHDS Art. 71: applied before any data leaves</p></div><div class="comp"><span class="status st-build">build</span><h3>Fees and public reports</h3><p class="ex">EHDS Art. 62, 58 and 59</p></div><div class="comp"><span class="status st-prog">adapt</span><h3>Data quality and utility label</h3><p class="ex">taken from the catalogue metadata</p></div><div class="comp"><span class="status st-open">open decision</span><h3>Secure processing environment</h3><p class="ex">own or ENDS; for example confidential containers</p></div></div>
+          </div>
+          <div class="foot" style="display: flex; gap: 12px; align-items: center; color: var(--muted)">
+            <span class="status st-avail" style="width: auto; padding: 2px 12px; font-size: 17px">reuse</span> use as it is
+            <span class="status st-prog" style="width: auto; padding: 2px 12px; font-size: 17px; margin-left: 14px">adapt</span> configure or extend
+            <span class="status st-build" style="width: auto; padding: 2px 12px; font-size: 17px; margin-left: 14px">build</span> nothing fits today
+            <span class="status st-open" style="width: auto; padding: 2px 12px; font-size: 17px; margin-left: 14px">open decision</span>
+          </div>
+          <aside class="notes">[1:45, three clicks] Hospital side, shared services run by the operator, services for the access body. Green reuse, amber adapt, white build; the secure environment is still an open decision.</aside>
+        </section>
+
+        <!-- 8 · Q5 maturity -->
+        <section data-background-color="#FBF8F3">
+          <p class="qpill">QUESTION 5 · MATURITY</p>
+          <div class="dots"><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div>
+          <h2 class="h2">How mature are the components?</h2>
+          <p class="stand">The components follow the service map. Health standards are mature; secure environments are not yet.</p>
+          <div class="body row">
+            <div class="fragment fade-up" data-fragment-index="0" style="width: 520px; flex: none; background: var(--navy); border-radius: 20px; padding: 36px 40px; display: flex; flex-direction: column; gap: 16px">
+              <h3 style="font-size: 34px; color: var(--cream)">The service map</h3>
+              <span class="chip" style="background: var(--cream); color: var(--navy)">Connectors</span>
+              <span class="chip" style="background: var(--cream); color: var(--navy)">Identity and credentials</span>
+              <span class="chip" style="background: var(--cream); color: var(--navy)">Catalogue</span>
+              <span class="chip" style="background: var(--cream); color: var(--navy)">Onboarding</span>
+              <span class="chip" style="background: var(--cream); color: var(--navy)">Conformity testing</span>
+            </div>
+            <div class="col" style="flex: 1">
+              <div class="rowcard fragment fade-up" data-fragment-index="0" style="transition-delay: 0.12s; --d: 0.3s"><span class="status st-avail">Stable</span><div class="grow"><h3>Dataspace Protocol</h3><p>On its way to an ISO standard, ISO/IEC 26450.</p></div></div>
+              <div class="rowcard fragment fade-up" data-fragment-index="1" style="--d: 0.45s"><span class="status st-avail">Mature</span><div class="grow"><h3>FHIR and OMOP</h3><p>Health standards used around the world.</p></div></div>
+              <div class="rowcard fragment fade-up" data-fragment-index="2" style="--d: 0.6s"><span class="status st-prog">Changing</span><div class="grow"><h3>Dataspace connector, for example Eclipse EDC</h3><p>In production since 2023 (Catena-X runs its Tractus-X distribution), still version 0.x. Breaking changes every quarter.</p></div></div>
+              <div class="rowcard fragment fade-up" data-fragment-index="3" style="--d: 0.75s"><span class="status st-open">Young</span><div class="grow"><h3>Secure processing and data permits</h3><p>The least mature parts. Plan extra time and budget here.</p></div></div>
+            </div>
+          </div>
+          <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco</p>
+          <aside class="notes">[1:45] DSP stable; FHIR and OMOP mature; the connector (Eclipse EDC; Tractus-X in Catena-X) changes every quarter; secure environments and permits are young.</aside>
+        </section>
+
+        <!-- 9 · Q6 three roles -->
+        <section data-background-color="#FBF8F3">
+          <p class="qpill">QUESTION 6 · GOVERNANCE</p>
+          <div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div>
+          <h2 class="h2">Three roles, kept apart</h2>
+          <p class="stand">Catena-X separates the rules, the code and the operation. We suggest the same here.</p>
+          <div class="row" style="margin-top: 36px">
+            <div class="card fragment fade-up" data-fragment-index="0" style="--accent: var(--navy); gap: 8px; padding: 28px 32px"><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">RULES · IN CATENA-X</p><h3 style="font-size: 32px">Catena-X Association</h3><p style="font-size: 26px">Sets standards, runs certification.</p></div>
+            <div class="card fragment fade-up" data-fragment-index="0" style="transition-delay: 0.12s; --accent: var(--teal); gap: 8px; padding: 28px 32px"><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">CODE · IN CATENA-X</p><h3 style="font-size: 32px">Eclipse Foundation</h3><p style="font-size: 26px">Hosts the open-source code.</p></div>
+            <div class="card fragment fade-up" data-fragment-index="0" style="transition-delay: 0.24s; --accent: var(--amber); gap: 8px; padding: 28px 32px"><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">OPERATION · IN CATENA-X</p><h3 style="font-size: 32px">Cofinity-X</h3><p style="font-size: 26px">Runs the operation.</p></div>
+          </div>
+          <div class="row fragment fade-up" data-fragment-index="1" style="margin: 10px 0; justify-content: space-around; font-size: 48px; color: var(--amber)"><span>↓</span><span>↓</span><span>↓</span></div>
+          <div class="row">
+            <div class="fragment fade-up" data-fragment-index="1" style="transition-delay: 0.12s; flex: 1; background: var(--navy); border-left: 10px solid var(--s-open); border-radius: 20px; padding: 26px 32px"><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--amber)">BASQUE COUNTRY</p><h3 style="font-size: 32px; color: var(--cream)">Access body: open point</h3><p style="font-size: 26px; color: var(--mist)">three options, two slides on.</p></div>
+            <div class="fragment fade-up" data-fragment-index="1" style="transition-delay: 0.24s; flex: 1; background: var(--navy); border-left: 10px solid #2a9d8f; border-radius: 20px; padding: 26px 32px"><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--amber)">BASQUE COUNTRY</p><h3 style="font-size: 32px; color: var(--cream)">Open-source projects</h3><p style="font-size: 26px; color: var(--mist)">used, and improved together.</p></div>
+            <div class="fragment fade-up" data-fragment-index="1" style="transition-delay: 0.36s; flex: 1; background: var(--navy); border-left: 10px solid var(--amber); border-radius: 20px; padding: 26px 32px"><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--amber)">BASQUE COUNTRY</p><h3 style="font-size: 32px; color: var(--cream)">EJIE</h3><p style="font-size: 26px; color: var(--mist)">runs the core services.</p></div>
+          </div>
+          <div class="fragment fade-up" data-fragment-index="2" style="margin-top: 24px; background: #f1e9d8; border-left: 10px solid var(--teal); border-radius: 16px; padding: 20px 40px; font-size: 28px; font-weight: 700">Keep rules and operation apart. Design the governance for several domains from the start.</div>
+          <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco</p>
+          <aside class="notes">[1:45] Association, Eclipse, Cofinity-X. In Euskadi: EJIE as operator; the access body is an open point with three options. Several domains from the start.</aside>
+        </section>
+
+        <!-- 10 · Q6 operating model -->
+        <section data-background-color="#FBF8F3">
+          <p class="qpill">QUESTION 6 · GOVERNANCE</p>
+          <div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div>
+          <h2 class="h2">Who runs what: the Catena-X operating model</h2>
           <p class="stand">A service map with clear roles. The EHDS defines the roles, but not who runs them.</p>
           <svg class="layers" viewBox="0 0 2400 800" role="img" aria-label="Four layers: European Union, closed by law; Member State, cannot be delegated; the operating company, open; and who it serves: health data holders, researchers and regulators, citizens" style="display: block; margin-top: 36px; width: 1664px; height: 470px; background: #fff; border-radius: 20px; font-family: Inter, 'DM Sans', Arial, sans-serif">
 <g class="fragment fade-in" data-fragment-index="1">
@@ -566,55 +785,46 @@
           <aside class="notes">[1:45] The Regulation gives the roles but not who runs the system day to day: that is the orange layer, the operating company.</aside>
         </section>
 
-        <!-- 7 · Q5 -->
-        <section data-background-color="#FBF8F3">
-          <p class="qpill">QUESTION 5 · MATURITY</p>
-          <div class="dots"><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div>
-          <h2 class="h2">How mature are the components?</h2>
-          <p class="stand">The components follow the service map. Health standards are mature; secure environments are not yet.</p>
-          <div class="body row">
-            <div class="fragment fade-up" data-fragment-index="0" style="width: 520px; flex: none; background: var(--navy); border-radius: 20px; padding: 36px 40px; display: flex; flex-direction: column; gap: 16px">
-              <h3 style="font-size: 34px; color: var(--cream)">The service map</h3>
-              <span class="chip" style="background: var(--cream); color: var(--navy)">Connectors</span>
-              <span class="chip" style="background: var(--cream); color: var(--navy)">Identity and credentials</span>
-              <span class="chip" style="background: var(--cream); color: var(--navy)">Catalogue</span>
-              <span class="chip" style="background: var(--cream); color: var(--navy)">Onboarding</span>
-              <span class="chip" style="background: var(--cream); color: var(--navy)">Conformity testing</span>
-            </div>
-            <div class="col" style="flex: 1">
-              <div class="rowcard fragment fade-up" data-fragment-index="0" style="transition-delay: 0.12s; --d: 0.3s"><span class="status st-avail">Stable</span><div class="grow"><h3>Dataspace Protocol</h3><p>On its way to an ISO standard, ISO/IEC 26450.</p></div></div>
-              <div class="rowcard fragment fade-up" data-fragment-index="1" style="--d: 0.45s"><span class="status st-avail">Mature</span><div class="grow"><h3>FHIR and OMOP</h3><p>Health standards used around the world.</p></div></div>
-              <div class="rowcard fragment fade-up" data-fragment-index="2" style="--d: 0.6s"><span class="status st-prog">Changing</span><div class="grow"><h3>Tractus-X connector</h3><p>In production since 2023, but still version 0.x. Breaking changes every quarter.</p></div></div>
-              <div class="rowcard fragment fade-up" data-fragment-index="3" style="--d: 0.75s"><span class="status st-open">Young</span><div class="grow"><h3>Secure processing and data permits</h3><p>The least mature parts. Plan extra time and budget here.</p></div></div>
-            </div>
-          </div>
-          <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco</p>
-          <aside class="notes">[1:45] DSP stable; FHIR and OMOP mature; the connector changes every quarter; secure environments and permits are young.</aside>
-        </section>
-
-        <!-- 8 · Q6 -->
+        <!-- 11 · Q6 functions -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 6 · GOVERNANCE</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div>
-          <h2 class="h2">Three roles, kept apart</h2>
-          <p class="stand">Catena-X separates the rules, the code and the operation. We suggest the same here.</p>
-          <div class="row" style="margin-top: 36px">
-            <div class="card fragment fade-up" data-fragment-index="0" style="--accent: var(--navy); gap: 8px; padding: 28px 32px"><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">RULES · IN CATENA-X</p><h3 style="font-size: 32px">Catena-X Association</h3><p style="font-size: 26px">Sets standards, runs certification.</p></div>
-            <div class="card fragment fade-up" data-fragment-index="0" style="transition-delay: 0.12s; --accent: var(--teal); gap: 8px; padding: 28px 32px"><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">CODE · IN CATENA-X</p><h3 style="font-size: 32px">Eclipse Foundation</h3><p style="font-size: 26px">Hosts the open-source code.</p></div>
-            <div class="card fragment fade-up" data-fragment-index="0" style="transition-delay: 0.24s; --accent: var(--amber); gap: 8px; padding: 28px 32px"><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">OPERATION · IN CATENA-X</p><h3 style="font-size: 32px">Cofinity-X</h3><p style="font-size: 26px">Runs the operation.</p></div>
+          <h2 class="h2">From Catena-X to a health data space</h2>
+          <p class="stand">Who does what. The EHDS adds two functions Catena-X never had: data permits and the secure environment.</p>
+          <div style="margin-top: 26px; background: #fff; border-radius: 16px; padding: 8px 12px">
+            <table class="tbl">
+              <tr><th style="width: 15%">FUNCTION</th><th style="width: 27%">IN CATENA-X</th><th>IN A BASQUE HEALTH DATA SPACE</th><th style="width: 13%">BASIS</th></tr>
+              <tr class="fragment fade-up" data-fragment-index="0"><td>Rule-setting</td><td>The Association: standards and the rulebook</td><td>The Health Department with the access body; hospitals in the working groups</td><td>EHDS Art. 55</td></tr>
+              <tr class="fragment fade-up" data-fragment-index="0"><td>Data permits</td><td><i>none: contracts between companies</i></td><td>The access body (open point: which one)</td><td>Art. 68</td></tr>
+              <tr class="fragment fade-up" data-fragment-index="0"><td>Onboarding</td><td>The operator and onboarding service providers</td><td>EJIE as operator, with each hospital's IT</td><td>rulebook</td></tr>
+              <tr class="fragment fade-up" data-fragment-index="0"><td>Catalogue</td><td>The operator runs discovery</td><td>The access body owns it, EJIE runs it, in HealthDCAT-AP</td><td>Art. 77</td></tr>
+              <tr class="fragment fade-up" data-fragment-index="1"><td>Secure environment</td><td><i>none</i></td><td>The access body is responsible; EJIE or ENDS runs it (open point)</td><td>Art. 73</td></tr>
+              <tr class="fragment fade-up" data-fragment-index="1"><td>Certification</td><td>The Association, through conformity assessment bodies</td><td>Conformity tests for connectors; a quality and utility label for datasets</td><td>rulebook, EHDS</td></tr>
+              <tr class="fragment fade-up" data-fragment-index="1"><td>Incidents</td><td>The operator, with the participants</td><td>EJIE runs incident response; personal data breaches go to the data protection authority</td><td>ENS, GDPR Art. 33</td></tr>
+              <tr class="fragment fade-up" data-fragment-index="1"><td>Support</td><td>The operator and its service providers</td><td>EJIE service desk; each hospital for its own systems</td><td>service levels</td></tr>
+            </table>
           </div>
-          <div class="row fragment fade-up" data-fragment-index="1" style="margin: 10px 0; justify-content: space-around; font-size: 48px; color: var(--amber)"><span>↓</span><span>↓</span><span>↓</span></div>
-          <div class="row">
-            <div class="fragment fade-up" data-fragment-index="1" style="transition-delay: 0.12s; flex: 1; background: var(--navy); border-left: 10px solid #8fb3cc; border-radius: 20px; padding: 26px 32px"><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--amber)">BASQUE COUNTRY</p><h3 style="font-size: 32px; color: var(--cream)">Health Data Office</h3><p style="font-size: 26px; color: var(--mist)">acts as the data access body.</p></div>
-            <div class="fragment fade-up" data-fragment-index="1" style="transition-delay: 0.24s; flex: 1; background: var(--navy); border-left: 10px solid #2a9d8f; border-radius: 20px; padding: 26px 32px"><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--amber)">BASQUE COUNTRY</p><h3 style="font-size: 32px; color: var(--cream)">Open-source projects</h3><p style="font-size: 26px; color: var(--mist)">used, and improved together.</p></div>
-            <div class="fragment fade-up" data-fragment-index="1" style="transition-delay: 0.36s; flex: 1; background: var(--navy); border-left: 10px solid var(--amber); border-radius: 20px; padding: 26px 32px"><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--amber)">BASQUE COUNTRY</p><h3 style="font-size: 32px; color: var(--cream)">EJIE</h3><p style="font-size: 26px; color: var(--mist)">runs the core services.</p></div>
-          </div>
-          <div class="fragment fade-up" data-fragment-index="2" style="margin-top: 24px; background: #f1e9d8; border-left: 10px solid var(--teal); border-radius: 16px; padding: 20px 40px; font-size: 28px; font-weight: 700">Keep rules and operation apart. Design the governance for several domains from the start.</div>
           <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco</p>
-          <aside class="notes">[1:45] Association, Eclipse, Cofinity-X. In Euskadi: Health Data Office as access body, EJIE as operator. Several domains from the start.</aside>
+          <aside class="notes">[1:30, two clicks] Function by function. Permits and the secure environment have no Catena-X counterpart. Rule of thumb: the access body decides, EJIE operates.</aside>
         </section>
 
-        <!-- 9 · Q7 -->
+        <!-- 12 · Q6 open point -->
+        <section data-background-color="#FBF8F3">
+          <p class="qpill">QUESTION 6 · GOVERNANCE · OPEN POINT</p>
+          <div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div>
+          <h2 class="h2">Open point: who is the access body?</h2>
+          <p class="stand">The Basque Health Data Office was announced in 2025. Its role under the EHDS is not decided yet.</p>
+          <div class="body row" style="gap: 28px">
+            <div class="opt fragment fade-up" data-fragment-index="0" style="--accent: var(--teal)"><p style="font-family: Sora; font-size: 44px; font-weight: 700; color: var(--teal)">A</p><h3>A Basque access body</h3><p>The Basque office is an access body, with a national coordinator (Art. 55(1)).</p><p><b style="color: var(--green)">For:</b> decisions close to the data.</p><p><b style="color: var(--red)">Against:</b> the Ley de Salud Digital must allow it.</p></div>
+            <div class="opt fragment fade-up" data-fragment-index="1" style="--accent: var(--navy)"><p style="font-family: Sora; font-size: 44px; font-weight: 700; color: var(--navy)">B</p><h3>One national access body</h3><p>Spain designates one body. The Basque office prepares requests and runs the regional node.</p><p><b style="color: var(--green)">For:</b> one door for applicants.</p><p><b style="color: var(--red)">Against:</b> less regional control.</p></div>
+            <div class="opt fragment fade-up" data-fragment-index="2" style="--accent: var(--amber)"><p style="font-family: Sora; font-size: 44px; font-weight: 700; color: var(--amber-ink)">C</p><h3>Start now, decide later</h3><p>The pilot starts under a cooperation agreement. The role is settled when the law passes.</p><p><b style="color: var(--green)">For:</b> the pilot is not blocked.</p><p><b style="color: var(--red)">Against:</b> the role must be revisited.</p></div>
+          </div>
+          <div class="band fragment fade-up" data-fragment-index="3" style="font-size: 30px">Spain designates its access bodies by 26 March 2027. <span>The pilot can start under any of the three.</span></div>
+          <p class="foot">Regulation (EU) 2025/327, Art. 55(1) · Ley de Salud Digital, draft of September 2025</p>
+          <aside class="notes">[1:15, four clicks] A regional body with a coordinator, one national body, or start under an agreement and decide later. The pilot does not have to wait.</aside>
+        </section>
+
+        <!-- 13 · Q7 costs -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 7 · COSTS</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i></div>
@@ -628,15 +838,32 @@
           </div>
           <p class="fragment fade-up" data-fragment-index="3" style="margin-top: 26px; font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--teal)">BASQUE REGIONAL PILOT, OUR ESTIMATE</p>
           <div class="row" style="margin-top: 14px">
-            <div class="fragment fade-up" data-fragment-index="3" style="transition-delay: 0.12s; flex: 1; background: var(--navy); border-left: 10px solid #2a9d8f; border-radius: 20px; padding: 26px 32px"><p style="font-family: Sora; font-size: 52px; font-weight: 700; color: var(--cream)">€0.8 – 1.5M</p><p style="font-size: 28px; font-weight: 700; color: var(--amber)">To build the pilot</p><p style="font-size: 24px; color: var(--mist)">Engineering and onboarding.</p></div>
+            <div class="fragment fade-up" data-fragment-index="3" style="transition-delay: 0.12s; flex: 1; background: var(--navy); border-left: 10px solid #2a9d8f; border-radius: 20px; padding: 26px 32px"><p style="font-family: Sora; font-size: 52px; font-weight: 700; color: var(--cream)">€0.8 – 1.5M</p><p style="font-size: 28px; font-weight: 700; color: var(--amber)">To build the pilot</p><p style="font-size: 24px; color: var(--mist)">Engineering, mapping and onboarding. Assumptions on the next slide.</p></div>
             <div class="fragment fade-up" data-fragment-index="4" style="flex: 1; background: var(--navy); border-left: 10px solid var(--red); border-radius: 20px; padding: 26px 32px"><p style="font-family: Sora; font-size: 52px; font-weight: 700; color: var(--cream)">15 – 25% a year</p><p style="font-size: 28px; font-weight: 700; color: var(--amber)">To operate it</p><p style="font-size: 24px; color: var(--mist)">Of the build cost: about €120,000 – 375,000 a year.</p></div>
-            <div class="fragment fade-up" data-fragment-index="5" style="flex: 1; background: var(--navy); border-left: 10px solid var(--amber); border-radius: 20px; padding: 26px 32px"><p style="font-family: Sora; font-size: 52px; font-weight: 700; color: var(--cream)">€3,000 a month</p><p style="font-size: 28px; font-weight: 700; color: var(--amber)">Hosting: prod, test and dev</p><p style="font-size: 24px; color: var(--mist)">€1,000 per environment, €36,000 a year. Plus SDLC and developer tools.</p></div>
+            <div class="fragment fade-up" data-fragment-index="5" style="flex: 1; background: var(--navy); border-left: 10px solid var(--amber); border-radius: 20px; padding: 26px 32px"><p style="font-family: Sora; font-size: 52px; font-weight: 700; color: var(--cream)">€3,000 a month</p><p style="font-size: 28px; font-weight: 700; color: var(--amber)">Hosting: prod, test and dev</p><p style="font-size: 24px; color: var(--mist)">€1,000 per environment, €36,000 a year, plus developer tools. The secure environment comes on top.</p></div>
           </div>
           <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco</p>
           <aside class="notes">[1:45] Near-zero licences. Catena-X: over €100M public money for an industry, €1.5k–71k per participant a year. Pilot €0.8–1.5M, then 15–25% a year. Hosting: prod, test and dev at €1,000 a month each, €36,000 a year, plus SDLC and developer tools.</aside>
         </section>
 
-        <!-- 10 · Q8 -->
+        <!-- 14 · Q7 assumptions -->
+        <section data-background-color="#FBF8F3">
+          <p class="qpill">QUESTION 7 · COSTS · ASSUMPTIONS</p>
+          <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i></div>
+          <h2 class="h2">The assumptions behind the estimate</h2>
+          <p class="stand">What €0.8 to 1.5M includes, and what it does not.</p>
+          <div style="margin-top: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+            <div class="card fragment fade-up" data-fragment-index="0" style="--accent: var(--navy); padding: 22px 32px; gap: 8px"><h3 style="font-size: 30px">Duration and rate</h3><p style="font-size: 24px">12 months to build, with 8 to 12 full-time people. That is about <b>€100,000 to €125,000 per person-year</b>, or roughly €450 to €570 per person-day, blended across the profiles.</p></div>
+            <div class="card fragment fade-up" data-fragment-index="1" style="--accent: var(--teal); padding: 22px 32px; gap: 8px"><h3 style="font-size: 30px">Scope</h3><p style="font-size: 24px"><b>2 to 3 Osakidetza hospitals</b> and the hospital cancer registry. Two use cases, one regional node. Mapping the data to FHIR and OMOP for those use cases <b>is included</b>.</p></div>
+            <div class="card fragment fade-up" data-fragment-index="2" style="--accent: var(--red); padding: 22px 32px; gap: 8px"><h3 style="font-size: 30px">Not included</h3><p style="font-size: 24px">Hospital staff time (clinical coders, IT). The data lake, already funded. The secure processing environment. The access body's own staff. Tender costs and VAT.</p></div>
+            <div class="card fragment fade-up" data-fragment-index="3" style="--accent: var(--amber); padding: 22px 32px; gap: 8px"><h3 style="font-size: 30px">€1,000 per environment</h3><p style="font-size: 24px">Covers the connector, catalogue, identity and monitoring on managed containers, per month. Realistic for those services; <b>not</b> for a secure environment.</p></div>
+          </div>
+          <div class="band fragment fade-up" data-fragment-index="4" style="margin-top: 22px; font-size: 28px">The secure environment is its own line, <span>sized with the use cases: several thousand euros a month.</span><p style="font-family: 'DM Sans'; font-size: 21px; font-weight: 400; color: var(--mist); margin-top: 8px">For scale: in our demonstrator one confidential compute node costs about 150 to 300 US dollars a month while it runs. A pilot adds research workspaces, storage, backup and ENS controls.</p></div>
+          <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco</p>
+          <aside class="notes">[1:30, five clicks] 12 months, 8 to 12 FTE, so about €100k to €125k per person-year. Two to three hospitals plus the cancer registry, two use cases, mapping included. Hospital staff, data lake, secure environment, access body staff, tender and VAT excluded. €1,000 per environment covers the dataspace services only.</aside>
+        </section>
+
+        <!-- 15 · Q8 team -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 8 · TEAM</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i></div>
@@ -646,46 +873,27 @@
             <div class="fragment fade-up" data-fragment-index="0" style="width: 540px; flex: none; background: var(--navy); border-radius: 20px; padding: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px">
               <p style="font-family: Sora; font-size: 150px; font-weight: 700; line-height: 1.05; color: var(--cream)">8–12</p>
               <p style="font-size: 36px; font-weight: 700; color: var(--amber)">full-time people</p>
-              <p style="font-size: 26px; color: var(--mist)">Experts need time and a mandate from top management. See question 1.</p>
+              <p style="font-size: 26px; color: var(--mist)">1 + 2–3 + 2–3 + 2–4 + 1. Experts need time and a mandate from top management.</p>
             </div>
             <div class="col" style="flex: 1">
-              <div class="rowcard fragment fade-up" data-fragment-index="1" style="--d: 0.3s"><div class="num" style="--accent: var(--navy)">1</div><div class="grow"><h3>Architect</h3><p>One person who holds the whole picture.</p></div></div>
-              <div class="rowcard fragment fade-up" data-fragment-index="1" style="transition-delay: 0.12s; --d: 0.45s"><div class="num" style="--accent: var(--teal)">2</div><div class="grow"><h3>Connector engineers</h3><p>Run and update the dataspace connectors.</p></div></div>
-              <div class="rowcard fragment fade-up" data-fragment-index="1" style="transition-delay: 0.24s; --d: 0.6s"><div class="num" style="--accent: var(--green)">3</div><div class="grow"><h3>Platform and security (DevSecOps)</h3><p>Hosting, identity, monitoring and security.</p></div></div>
-              <div class="rowcard fragment fade-up" data-fragment-index="1" style="transition-delay: 0.36s; --d: 0.75s"><div class="num light" style="--accent: var(--amber)">4</div><div class="grow"><h3>FHIR and OMOP specialist</h3><p>Makes the data mean the same thing everywhere.</p></div></div>
-              <div class="rowcard fragment fade-up" data-fragment-index="1" style="transition-delay: 0.48s; --d: 0.9s"><div class="num" style="--accent: var(--red)">5</div><div class="grow"><h3>Data protection and legal</h3><p>GDPR, EHDS, data permits and contracts.</p></div></div>
+              <div class="rowcard fragment fade-up" data-fragment-index="1" style="--d: 0.3s"><div class="fte" style="--accent: var(--navy)">1</div><div class="grow"><h3>Architect</h3><p>One person who holds the whole picture.</p></div></div>
+              <div class="rowcard fragment fade-up" data-fragment-index="1" style="transition-delay: 0.12s; --d: 0.45s"><div class="fte" style="--accent: var(--teal)">2–3</div><div class="grow"><h3>Connector engineers</h3><p>Run and update the dataspace connectors.</p></div></div>
+              <div class="rowcard fragment fade-up" data-fragment-index="1" style="transition-delay: 0.24s; --d: 0.6s"><div class="fte" style="--accent: var(--green)">2–3</div><div class="grow"><h3>Platform and security (DevSecOps)</h3><p>Hosting, identity, monitoring and security.</p></div></div>
+              <div class="rowcard fragment fade-up" data-fragment-index="1" style="transition-delay: 0.36s; --d: 0.75s"><div class="fte light" style="--accent: var(--amber)">2–4</div><div class="grow"><h3>FHIR, OMOP and terminology</h3><p>Make the data mean the same everywhere. The largest task.</p></div></div>
+              <div class="rowcard fragment fade-up" data-fragment-index="1" style="transition-delay: 0.48s; --d: 0.9s"><div class="fte" style="--accent: var(--red)">1</div><div class="grow"><h3>Data protection and legal</h3><p>GDPR, EHDS, data permits and contracts.</p></div></div>
             </div>
           </div>
           <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco</p>
-          <aside class="notes">[1:15] Architect, connector engineers, DevSecOps, a FHIR and OMOP specialist, data protection and legal.</aside>
+          <aside class="notes">[1:15] People per profile: 1 architect, 2–3 connector engineers, 2–3 platform and security, 2–4 FHIR, OMOP and terminology, 1 data protection and legal: 8 to 12.</aside>
         </section>
 
-        <!-- 11 · next steps -->
-        <section data-background-color="#143D59" class="dark">
-          <p class="eyebrow" style="color: var(--amber)">WHAT COULD COME NEXT</p>
-          <h2 class="h2" style="color: var(--cream)">Suggested next steps</h2>
-          <p class="stand" style="color: var(--mist)">Small steps. Each one is useful on its own.</p>
-          <div class="body row">
-            <div class="fragment fade-up" data-fragment-index="0" style="flex: 1; background: var(--navy-2); border: 1px solid #2e6386; border-radius: 20px; padding: 36px 40px"><p style="font-family: Sora; font-size: 72px; font-weight: 700; color: var(--amber)">1</p><h3 style="font-size: 32px; color: var(--cream)">Choose use cases</h3><p style="font-size: 26px; color: var(--mist); margin-top: 10px">One or two, with a result you can measure.</p></div>
-            <div class="fragment fade-up" data-fragment-index="1" style="flex: 1; background: var(--navy-2); border: 1px solid #2e6386; border-radius: 20px; padding: 36px 40px"><p style="font-family: Sora; font-size: 72px; font-weight: 700; color: var(--amber)">2</p><h3 style="font-size: 32px; color: var(--cream)">Agree the roles</h3><p style="font-size: 26px; color: var(--mist); margin-top: 10px">The Health Data Office as access body, EJIE as operator.</p></div>
-            <div class="fragment fade-up" data-fragment-index="2" style="flex: 1; background: var(--navy-2); border: 1px solid #2e6386; border-radius: 20px; padding: 36px 40px"><p style="font-family: Sora; font-size: 72px; font-weight: 700; color: var(--amber)">3</p><h3 style="font-size: 32px; color: var(--cream)">Open working groups</h3><p style="font-size: 26px; color: var(--mist); margin-top: 10px">With the hospitals, on existing standards.</p></div>
-            <div class="fragment fade-up" data-fragment-index="3" style="flex: 1; background: var(--navy-2); border: 1px solid #2e6386; border-radius: 20px; padding: 36px 40px"><p style="font-family: Sora; font-size: 72px; font-weight: 700; color: var(--amber)">4</p><h3 style="font-size: 32px; color: var(--cream)">Build a pilot</h3><p style="font-size: 26px; color: var(--mist); margin-top: 10px">Tendered on standards and conformity tests.</p></div>
-          </div>
-          <div class="row" style="margin-top: 36px">
-            <div class="fragment fade-up" data-fragment-index="4" style="flex: 1; border: 2px solid var(--amber); border-radius: 20px; padding: 26px 40px"><p style="font-family: Sora; font-size: 48px; font-weight: 700; color: var(--amber)">March 2027</p><p style="font-size: 28px; color: var(--cream)">Access bodies must be designated.</p></div>
-            <div class="fragment fade-up" data-fragment-index="4" style="transition-delay: 0.12s; flex: 1; border: 2px solid var(--amber); border-radius: 20px; padding: 26px 40px"><p style="font-family: Sora; font-size: 48px; font-weight: 700; color: var(--amber)">March 2029</p><p style="font-size: 28px; color: var(--cream)">Secondary use applies in full.</p></div>
-          </div>
-          <p class="foot">Regulation (EU) 2025/327, Art. 55(6) and 105</p>
-          <aside class="notes">[0:45] Four small steps. The dates are fixed by the Regulation.</aside>
-        </section>
-
-        <!-- 12 · pilot overview, built by click -->
+        <!-- 16 · pilot overview, built by click -->
         <section data-background-color="#FBF8F3" data-auto-animate>
           <p class="eyebrow">THE SUGGESTED PILOT · A REGIONAL EHDS NODE</p>
           <h2 class="h2">Euskadi pilot: start regional, connect upwards</h2>
           <p class="stand">Build one Basque node first. Then connect it to Spain, and through Spain to the EU.</p>
           <div class="stair fragment fade-up" data-fragment-index="0" data-id="st1" style="left: 128px; top: 430px; height: 363px; background: #ee9633; color: var(--navy)">
-            <p class="lab">STEP 1 · 2027 · BUILD</p>
+            <p class="lab">STEP 1 · 2027–28 · BUILD</p>
             <h3>Euskadi pilot</h3>
             <p class="item"><i class="dot d-prog"></i>Basque Health Data Office</p>
             <p class="item"><i class="dot d-prog"></i>Data lake → FHIR and OMOP</p>
@@ -729,29 +937,29 @@
             <i class="dot d-avail" style="color: var(--navy)"></i>available
             <i class="dot d-prog" style="color: var(--navy); margin-left: 14px"></i>in progress
             <i class="dot d-open" style="color: var(--navy); margin-left: 14px"></i>open decision, clarify with the Ministry
-            <i class="dot d-build" style="color: var(--navy); margin-left: 14px"></i>we build it · status October 2026
+            <i class="dot d-build" style="color: var(--navy); margin-left: 14px"></i>we build it · status November 2026
           </div>
           <aside class="notes">[0:45, six clicks] Step 1, arrow, Step 2, arrow, Step 3, foundation.</aside>
         </section>
 
-        <!-- 13 · pilot step 1 -->
+        <!-- 17 · pilot step 1 -->
         <section data-background-color="#FBF8F3" data-auto-animate>
-          <p class="eyebrow">THE PILOT · STEP 1 OF 3 · 2027</p>
+          <p class="eyebrow">THE PILOT · STEP 1 OF 3 · 2027–2028</p>
           <h2 class="h2">Step 1: build the Euskadi pilot</h2>
-          <p class="stand">Build with Osakidetza and EJIE, under the Basque Health Data Office.</p>
+          <p class="stand">Build with Osakidetza and EJIE. Who acts as access body is still open (question 6).</p>
           <div data-id="st1" style="position: absolute; left: 128px; top: 296px; width: 1664px; height: 614px; background: #ee9633; border-radius: 20px"></div>
           <div class="col" style="position: absolute; left: 156px; top: 320px; width: 1608px; gap: 14px">
-            <div class="rowcard fragment fade-up" data-fragment-index="0" style="background: #fff6ea; border: none; padding: 14px 28px"><div class="grow"><h3 style="font-size: 28px">Basque Health Data Office: governance and requests</h3><p style="font-size: 24px"><a target="_blank" rel="noopener" href="https://www.euskadi.eus/gobierno-vasco/-/noticia/2025/euskadi-dedicara-1-35-millones-fondos-europeos-creacion-del-espacio-nacional-datos-salud-consejo-gobierno-18-02-2025/">Announced in January 2025</a>. A model: <a target="_blank" rel="noopener" href="https://www.redaccionmedica.com/autonomias/20251008/aragon-primera-comunidad-autonoma-en-crear-la-oficina-del-dato-de-salud/250739_0.html">Aragón opened Spain's first regional office</a>, October 2025.</p></div><span class="status st-prog">in progress</span></div>
+            <div class="rowcard fragment fade-up" data-fragment-index="0" style="background: #fff6ea; border: none; padding: 14px 28px"><div class="grow"><h3 style="font-size: 28px">Basque Health Data Office: announced, its EHDS role still open</h3><p style="font-size: 24px"><a target="_blank" rel="noopener" href="https://www.euskadi.eus/gobierno-vasco/-/noticia/2025/euskadi-dedicara-1-35-millones-fondos-europeos-creacion-del-espacio-nacional-datos-salud-consejo-gobierno-18-02-2025/">Announced in January 2025</a>. A model: <a target="_blank" rel="noopener" href="https://www.redaccionmedica.com/autonomias/20251008/aragon-primera-comunidad-autonoma-en-crear-la-oficina-del-dato-de-salud/250739_0.html">Aragón opened Spain's first regional office</a>, October 2025.</p></div><span class="status st-prog">in progress</span></div>
             <div class="rowcard fragment fade-up" data-fragment-index="1" style="background: #fff6ea; border: none; padding: 14px 28px"><div class="grow"><h3 style="font-size: 28px">Osakidetza data lake → FHIR and OMOP</h3><p style="font-size: 24px">The data lake is Euskadi's part of the national ENDS: <a target="_blank" rel="noopener" href="https://www.euskadi.eus/gobierno-vasco/-/noticia/2025/euskadi-dedicara-1-35-millones-fondos-europeos-creacion-del-espacio-nacional-datos-salud-consejo-gobierno-18-02-2025/">€1.35M of EU recovery funds</a>, February 2025.</p></div><span class="status st-prog">in progress</span></div>
-            <div class="rowcard fragment fade-up" data-fragment-index="2" style="background: #fff6ea; border: none; padding: 14px 28px"><div class="grow"><h3 style="font-size: 28px">One regional node: connector and metadata</h3><p style="font-size: 24px">An <a target="_blank" rel="noopener" href="https://github.com/eclipse-edc">Eclipse EDC</a> connector and a HealthDCAT-AP catalogue, operated by <a target="_blank" rel="noopener" href="https://www.ejie.eus/">EJIE</a>.</p></div><span class="status st-build">we build it</span></div>
+            <div class="rowcard fragment fade-up" data-fragment-index="2" style="background: #fff6ea; border: none; padding: 14px 28px"><div class="grow"><h3 style="font-size: 28px">One regional node: connector and metadata</h3><p style="font-size: 24px">A dataspace connector (for example <a target="_blank" rel="noopener" href="https://github.com/eclipse-edc">Eclipse EDC</a>) and a HealthDCAT-AP catalogue, operated by <a target="_blank" rel="noopener" href="https://www.ejie.eus/">EJIE</a>.</p></div><span class="status st-build">we build it</span></div>
             <div class="rowcard fragment fade-up" data-fragment-index="3" style="background: #fff6ea; border: none; padding: 14px 28px"><div class="grow"><h3 style="font-size: 28px">Secure processing environment: our own, or national?</h3><p style="font-size: 24px">A Basque environment, or the processing capacity of <a target="_blank" rel="noopener" href="https://www.sanidad.gob.es/areas/saludDigital/espacioNacionalDS/home.htm">ENDS</a>. Either way it must meet the <a target="_blank" rel="noopener" href="https://ens.ccn.cni.es/">ENS</a>.</p></div><span class="status st-open">open decision</span></div>
             <div class="rowcard fragment fade-up" data-fragment-index="4" style="background: #fff6ea; border: none; padding: 14px 28px"><div class="grow"><h3 style="font-size: 28px">Two use cases: cohort discovery and a disease registry</h3><p style="font-size: 24px">For example the <a target="_blank" rel="noopener" href="https://www.osakidetza.euskadi.eus/contenidos/informacion/osk_pro_dat_datatable/es_def/adjuntos/avisos/ci-REGISTROS-HOSPITALARIOS-DEL-CANCER_v1.pdf">hospital cancer registries</a> that Osakidetza already runs.</p></div><span class="status st-build">we build it</span></div>
           </div>
-          <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco · status October 2026</p>
+          <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco · status November 2026</p>
           <aside class="notes">[0:45, five clicks] Office announced Jan 2025, Aragón as model; data lake funded as Euskadi's ENDS part; one node run by EJIE; own or national secure environment; two use cases.</aside>
         </section>
 
-        <!-- 14 · pilot step 2 -->
+        <!-- 18 · pilot step 2 -->
         <section data-background-color="#FBF8F3">
           <p class="eyebrow">THE PILOT · STEP 2 OF 3 · 2028</p>
           <h2 class="h2">Step 2: connect to Spain</h2>
@@ -763,11 +971,11 @@
             <div class="rowcard fragment fade-up" data-fragment-index="2" style="background: #f1f3f5; border: none; padding: 16px 28px"><div class="grow"><h3 style="font-size: 28px">Ley de Salud Digital: the legal role of the regions</h3><p style="font-size: 24px">Still a draft (<a target="_blank" rel="noopener" href="https://www.sanidad.gob.es/normativa/docs/2025.09.22_CPP_CPP_APL_Salud_Digital1_.pdf">public consultation</a> from September 2025). It sets up the access bodies and both national and regional catalogues.</p></div><span class="status st-open">open decision</span></div>
             <div class="rowcard fragment fade-up" data-fragment-index="3" style="background: #f1f3f5; border: none; padding: 16px 28px"><div class="grow"><h3 style="font-size: 28px">MyHealth@EU national contact point: HCDSNS and e-Receta</h3><p style="font-size: 24px">Primary use, and already live: the Basque Country is <a target="_blank" rel="noopener" href="https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/sanidad14/Paginas/2023/180423-interoperabilidad-clinica-paises-ue.aspx">connected to the EU service since 2023</a>. Proof that the path upwards works. <a target="_blank" rel="noopener" href="https://health.ec.europa.eu/ehealth-digital-health-and-care/electronic-cross-border-health-services_en">MyHealth@EU</a></p></div><span class="status st-avail">available</span></div>
           </div>
-          <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco · status October 2026</p>
+          <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco · status November 2026</p>
           <aside class="notes">[0:45, four clicks] ENDS opened Jan 2026 as a network of regional platforms; access body by March 2027, one or several; the law is still a draft; MyHealth@EU already live since 2023.</aside>
         </section>
 
-        <!-- 15 · pilot step 3 -->
+        <!-- 19 · pilot step 3 -->
         <section data-background-color="#FBF8F3">
           <p class="eyebrow">THE PILOT · STEP 3 OF 3 · MARCH 2029</p>
           <h2 class="h2">Step 3: connect to the EU, on a ready foundation</h2>
@@ -785,11 +993,34 @@
             <div class="fragment fade-up" data-fragment-index="6" style="background: var(--card); border: 1px solid var(--rule); border-left: 10px solid var(--s-avail); border-radius: 16px; padding: 12px 24px"><h3 style="font-size: 26px">FHIR · OMOP · SNOMED CT</h3><p style="font-size: 24px; color: var(--body)"><a target="_blank" rel="noopener" href="https://hl7.org/fhir/R4/">FHIR R4</a>, <a target="_blank" rel="noopener" href="https://ohdsi.github.io/CommonDataModel/">OMOP CDM</a> and <a target="_blank" rel="noopener" href="https://www.snomed.org/">SNOMED CT</a>: mature, used worldwide.</p></div>
             <div class="fragment fade-up" data-fragment-index="7" style="background: var(--card); border: 1px solid var(--rule); border-left: 10px solid var(--s-avail); border-radius: 16px; padding: 12px 24px"><h3 style="font-size: 26px">Cl@ve · FNMT · ENS (CCN)</h3><p style="font-size: 24px; color: var(--body)"><a target="_blank" rel="noopener" href="https://clave.gob.es/">Cl@ve</a> identity, <a target="_blank" rel="noopener" href="https://www.fnmt.es/">FNMT</a> certificates, the <a target="_blank" rel="noopener" href="https://ens.ccn.cni.es/">ENS</a> security scheme.</p></div>
           </div>
-          <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco · status October 2026</p>
+          <p class="foot">Reunión de preparación · Espacio de Datos EJIE · País Vasco · status November 2026</p>
           <aside class="notes">[0:45, eight clicks] HealthData@EU 2029; implementing acts 2027; EUDI wallet end 2026; then the four foundation blocks.</aside>
         </section>
 
-        <!-- 16 · discussion with QR -->
+        <!-- 20 · next steps -->
+        <section data-background-color="#143D59" class="dark">
+          <p class="eyebrow" style="color: var(--amber)">WHAT COULD COME NEXT</p>
+          <h2 class="h2" style="color: var(--cream)">From a first definition to an operational pilot</h2>
+          <p class="stand" style="color: var(--mist)">Five phases. Each ends with a deliverable and a clear criterion for moving on.</p>
+          <div style="margin-top: 26px">
+            <table class="tbl" style="font-size: 20px">
+              <tr><th style="width: 11%">PHASE</th><th style="width: 27%">ACTIVITIES</th><th style="width: 17%">OWNER</th><th style="width: 10%">DURATION</th><th style="width: 15%">DELIVERABLE</th><th>MOVE ON WHEN</th></tr>
+              <tr class="fragment fade-up" data-fragment-index="0"><td><span style="color: var(--amber)">1</span> Define</td><td>Choose one or two use cases, agree scope and roles, name a sponsor</td><td>EJIE, with the Health Department and Osakidetza</td><td>2–3 months</td><td>Pilot charter</td><td>Use cases and sponsor approved</td></tr>
+              <tr class="fragment fade-up" data-fragment-index="1"><td><span style="color: var(--amber)">2</span> Prepare</td><td>Working groups with the hospitals, data inventory, target architecture, tender on standards and conformity tests, impact assessment</td><td>EJIE, with the hospitals</td><td>3–4 months</td><td>Tender specification</td><td>Budget committed, specification approved</td></tr>
+              <tr class="fragment fade-up" data-fragment-index="2"><td><span style="color: var(--amber)">3</span> Tender</td><td>Publish, evaluate, award</td><td>EJIE procurement</td><td>6–9 months</td><td>Signed contract</td><td>Contract awarded</td></tr>
+              <tr class="fragment fade-up" data-fragment-index="3"><td><span style="color: var(--amber)">4</span> Build</td><td>Node, identity, catalogue, mapping; onboard 2 to 3 hospitals</td><td>Supplier, with EJIE</td><td>9–12 months</td><td>A node that passes the conformity tests</td><td>Tests passed, ENS accreditation, impact assessment updated</td></tr>
+              <tr class="fragment fade-up" data-fragment-index="4"><td><span style="color: var(--amber)">5</span> Operate</td><td>First data permits, measure the use cases</td><td>EJIE; the access body for permits</td><td>6 months</td><td>Pilot report with measured results</td><td>Decision to scale and connect to ENDS</td></tr>
+            </table>
+          </div>
+          <div class="row" style="margin-top: 26px">
+            <div class="fragment fade-up" data-fragment-index="5" style="flex: 1; border: 2px solid var(--amber); border-radius: 20px; padding: 18px 32px"><p style="font-family: Sora; font-size: 36px; font-weight: 700; color: var(--amber)">March 2027</p><p style="font-size: 24px; color: var(--cream)">Access bodies designated, during phase 2.</p></div>
+            <div class="fragment fade-up" data-fragment-index="5" style="transition-delay: 0.12s; flex: 1; border: 2px solid var(--amber); border-radius: 20px; padding: 18px 32px"><p style="font-family: Sora; font-size: 36px; font-weight: 700; color: var(--amber)">March 2029</p><p style="font-size: 24px; color: var(--cream)">Secondary use applies in full. Starting phase 1 now, the pilot is live around then.</p></div>
+          </div>
+          <p class="foot">Regulation (EU) 2025/327, Art. 55(6) and 105 · durations are indicative</p>
+          <aside class="notes">[1:30, six clicks] Define, prepare, tender, build, operate: about 26 to 34 months from today. The tender takes six to nine months, so phase 1 has to start now to be live around March 2029.</aside>
+        </section>
+
+        <!-- 21 · discussion with QR -->
         <section data-background-color="#FBF8F3">
           <p class="eyebrow">LET'S DISCUSS</p>
           <h2 class="h2" style="width: 1000px">Three questions to start our discussion</h2>

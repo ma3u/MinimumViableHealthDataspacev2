@@ -52,8 +52,8 @@
           "frag": 2
         },
         {
-          "es": "Cuatro: el modelo operativo de Catena-X.",
-          "eu": "Lau: Catena-Xen eredu operatiboa.",
+          "es": "Cuatro: reutilizar componentes primero, y construir solo lo que falta.",
+          "eu": "Lau: osagaiak berrerabili lehenik, eta falta dena bakarrik eraiki.",
           "frag": 3
         },
         {
@@ -67,8 +67,8 @@
           "frag": 5
         },
         {
-          "es": "Siete: no hay licencias; se paga a la gente.",
-          "eu": "Zazpi: ez dago lizentziarik; jendea ordaintzen da.",
+          "es": "Siete: no hay licencias; se paga a la gente y el alojamiento.",
+          "eu": "Zazpi: ez dago lizentziarik; jendea eta ostatatzea ordaintzen dira.",
           "frag": 6
         },
         {
@@ -91,17 +91,51 @@
           "frag": 0
         },
         {
-          "es": "Las empresas sabían comprar productos. No sabían construir juntas, en abierto.",
-          "eu": "Enpresek bazekiten produktuak erosten. Ez zekiten elkarrekin eraikitzen, irekian."
+          "es": "Los grupos de trabajo solo avanzaban cuando la dirección les daba tiempo y un mandato claro. En un hospital pasa lo mismo con los médicos y los codificadores.",
+          "eu": "Lan-taldeek zuzendaritzak denbora eta agindu argia ematen zienean bakarrik egiten zuten aurrera. Ospitale batean gauza bera gertatzen da medikuekin eta kodetzaileekin."
         },
         {
-          "es": "Los grupos de trabajo solo avanzaban cuando la dirección les daba tiempo y un mandato claro.",
-          "eu": "Lan-taldeek zuzendaritzak denbora eta agindu argia ematen zienean bakarrik egiten zuten aurrera."
+          "es": "Segundo, la incorporación: primero contratos e identidad, después el software. Un hospital pequeño necesita un conector alojado, no sus propios ingenieros.",
+          "eu": "Bigarrena, sarrera: lehenik kontratuak eta identitatea, gero softwarea. Ospitale txiki batek ostatatutako konektore bat behar du, ez bere ingeniariak.",
+          "frag": 1
+        },
+        {
+          "es": "Tercero, la gobernanza: sin reglas comunes, nadie sabía quién podía entrar. En salud se añade el permiso de datos, algo que Catena-X nunca tuvo.",
+          "eu": "Hirugarrena, gobernantza: arau komunik gabe, inork ez zekien nor sar zitekeen. Osasunean datu-baimena gehitzen da, Catena-Xek inoiz izan ez zuena.",
+          "frag": 2
+        },
+        {
+          "es": "Y cuarto, lo que aprendimos en nuestro demostrador: mapear los datos a FHIR, SNOMED, CIE-10 y OMOP costó más que el conector.",
+          "eu": "Eta laugarrena, gure erakuslean ikasi genuena: datuak FHIR, SNOMED, GNS-10 eta OMOPera mapatzeak konektoreak baino gehiago kostatu zuen.",
+          "frag": 3
         },
         {
           "es": "Mover datos es fácil. Ponerse de acuerdo sobre lo que significan: eso es lo difícil.",
-          "eu": "Datuak mugitzea erraza da. Zer esan nahi duten adostea: hori da zaila.",
+          "eu": "Datuak mugitzea erraza da. Zer esan nahi duten adostea: hori da zaila."
+        }
+      ]
+    },
+    {
+      "id": "q1example",
+      "cues": [
+        {
+          "es": "Un ejemplo concreto: el registro hospitalario de cáncer.",
+          "eu": "Adibide zehatz bat: ospitaleko minbizi-erregistroa."
+        },
+        {
+          "es": "¿Qué hace el hospital para unirse? Seis pasos: firmar las reglas, obtener su identidad, tener un conector, mapear los datos, describirlos en el catálogo y pasar las pruebas.",
+          "eu": "Zer egiten du ospitaleak batzeko? Sei urrats: arauak sinatu, bere identitatea lortu, konektore bat izan, datuak mapatu, katalogoan deskribatu eta probak gainditu.",
+          "frag": 0
+        },
+        {
+          "es": "Y los códigos locales: un diagnóstico en CIE-10-ES pasa a un concepto de SNOMED, el tumor se queda en CIE-O-3, y el laboratorio pasa a LOINC.",
+          "eu": "Eta tokiko kodeak: GNS-10-ES-ko diagnostiko bat SNOMED kontzeptu bihurtzen da, tumoreak GNS-O-3 mantentzen du, eta laborategia LOINCera pasatzen da.",
           "frag": 1
+        },
+        {
+          "es": "Un servicio de terminología propone cada correspondencia, un codificador la aprueba, y todos los hospitales la reutilizan.",
+          "eu": "Terminologia-zerbitzu batek baliokidetasun bakoitza proposatzen du, kodetzaile batek onartzen du, eta ospitale guztiek berrerabiltzen dute.",
+          "frag": 2
         }
       ]
     },
@@ -109,32 +143,32 @@
       "id": "q2",
       "cues": [
         {
-          "es": "Cuatro lecciones.",
-          "eu": "Lau ikasgai."
+          "es": "Cuatro lecciones, y de dónde viene cada una.",
+          "eu": "Lau ikasgai, eta bakoitza nondik datorren."
         },
         {
-          "es": "Una: no inventéis nada. FHIR, SNOMED, OMOP, HealthDCAT-AP ya existen. ¡Usadlos!",
-          "eu": "Bat: ez asmatu ezer. FHIR, SNOMED, OMOP, HealthDCAT-AP badaude. Erabili itzazue!",
+          "es": "Una, de Catena-X y de nuestro demostrador: no inventéis nada. FHIR, SNOMED, OMOP, HealthDCAT-AP ya existen. ¡Usadlos!",
+          "eu": "Bat, Catena-Xetik eta gure erakuslearengandik: ez asmatu ezer. FHIR, SNOMED, OMOP, HealthDCAT-AP badaude. Erabili itzazue!",
           "frag": 0
         },
         {
-          "es": "Dos: empezad pequeño. Uno o dos casos de uso, y un resultado que se pueda medir.",
-          "eu": "Bi: hasi txiki. Erabilera-kasu bat edo bi, eta neur daitekeen emaitza bat.",
+          "es": "Dos, de Catena-X: empezad pequeño. Uno o dos casos de uso, y un resultado que se pueda medir.",
+          "eu": "Bi, Catena-Xetik: hasi txiki. Erabilera-kasu bat edo bi, eta neur daitekeen emaitza bat.",
           "frag": 1
         },
         {
-          "es": "Tres: devolved las mejoras al código abierto. Una copia privada la pagáis para siempre.",
-          "eu": "Hiru: itzuli hobekuntzak kode irekira. Kopia pribatu bat betiko ordainduko duzue.",
+          "es": "Tres, de nuestro demostrador: reservad el presupuesto para el significado de los datos, no para moverlos.",
+          "eu": "Hiru, gure erakuslearengandik: gorde aurrekontua datuen esanahirako, ez mugitzeko.",
           "frag": 2
         },
         {
-          "es": "Cuatro: en la licitación, pedid estándares y pruebas de conformidad, no un producto.",
-          "eu": "Lau: lizitazioan, eskatu estandarrak eta adostasun-probak, ez produktu bat.",
+          "es": "Cuatro, de Catena-X: en la licitación, pedid estándares y pruebas de conformidad, no un producto. Y devolved las mejoras al código abierto.",
+          "eu": "Lau, Catena-Xetik: lizitazioan, eskatu estandarrak eta adostasun-probak, ez produktu bat. Eta itzuli hobekuntzak kode irekira.",
           "frag": 3
         },
         {
-          "es": "Así nunca dependéis de un solo proveedor.",
-          "eu": "Horrela ez zarete inoiz hornitzaile bakar baten menpe egongo."
+          "es": "Una copia privada la pagáis para siempre.",
+          "eu": "Kopia pribatu bat betiko ordainduko duzue."
         }
       ]
     },
@@ -161,18 +195,107 @@
           "eu": "Erakunde publiko batentzat, hornitzailez aldatu ahal izatea ez da xehetasun bat. Funtsezkoa da."
         },
         {
-          "es": "Nuestro demostrador hace lo mismo: cincuenta y siete decisiones, todas públicas.",
-          "eu": "Gure erakusleak gauza bera egiten du: berrogeita hamazazpi erabaki, guztiak publikoak.",
+          "es": "Nuestro demostrador hace lo mismo: más de setenta decisiones, todas públicas.",
+          "eu": "Gure erakusleak gauza bera egiten du: hirurogeita hamar erabaki baino gehiago, guztiak publikoak.",
           "frag": 3
         }
       ]
     },
     {
-      "id": "q4",
+      "id": "components",
       "cues": [
         {
-          "es": "La arquitectura: el modelo operativo de Catena-X. Cada servicio, con un responsable claro.",
-          "eu": "Arkitektura: Catena-Xen eredu operatiboa. Zerbitzu bakoitza, arduradun argi batekin.",
+          "es": "La arquitectura: una posible implementación de referencia, descrita por funciones.",
+          "eu": "Arkitektura: erreferentziazko inplementazio posible bat, funtzioen arabera deskribatua."
+        },
+        {
+          "es": "Las tecnologías son solo ejemplos. Todavía no elegimos ninguna.",
+          "eu": "Teknologiak adibideak besterik ez dira. Oraindik ez dugu bat ere aukeratu."
+        },
+        {
+          "es": "En cada hospital: los sistemas y el data lake, el mapeo a FHIR y OMOP, la seudonimización, las terminologías y el conector.",
+          "eu": "Ospitale bakoitzean: sistemak eta datu-lakua, FHIR eta OMOPerako mapaketa, izengoitzea, terminologiak eta konektorea.",
+          "frag": 0
+        },
+        {
+          "es": "En el centro, operado por EJIE: identidad, catálogo, incorporación, pruebas de conformidad y monitorización.",
+          "eu": "Erdian, EJIEk kudeatua: identitatea, katalogoa, sarrera, adostasun-probak eta monitorizazioa.",
+          "frag": 1
+        },
+        {
+          "es": "Y para el organismo de acceso: solicitudes y permisos, la exclusión voluntaria, las tasas, la etiqueta de calidad y el entorno seguro.",
+          "eu": "Eta sarbide-erakundearentzat: eskaerak eta baimenak, borondatezko uko egitea, tasak, kalitate-etiketa eta ingurune segurua.",
+          "frag": 2
+        },
+        {
+          "es": "Verde se reutiliza, ámbar se adapta, blanco se construye. Y el entorno seguro sigue siendo una decisión abierta.",
+          "eu": "Berdea berrerabiltzen da, anbarra egokitzen da, zuria eraikitzen da. Eta ingurune segurua erabaki irekia da oraindik."
+        }
+      ]
+    },
+    {
+      "id": "q5",
+      "cues": [
+        {
+          "es": "¿Qué está maduro? El protocolo de espacios de datos es estable, y va camino de ser norma ISO.",
+          "eu": "Zer dago heldu? Datu-espazioen protokoloa egonkorra da, eta ISO arau bihurtzeko bidean dago.",
+          "frag": 0
+        },
+        {
+          "es": "FHIR y OMOP: maduros.",
+          "eu": "FHIR eta OMOP: helduak.",
+          "frag": 1
+        },
+        {
+          "es": "El conector, por ejemplo Eclipse EDC, funciona en producción desde 2023, aunque todavía cambia cada trimestre.",
+          "eu": "Konektorea, adibidez Eclipse EDC, 2023tik dabil ekoizpenean, nahiz eta oraindik hiruhileko bakoitzean aldatzen den.",
+          "frag": 2
+        },
+        {
+          "es": "¿Lo más joven? Los entornos de tratamiento seguro y los permisos de datos.",
+          "eu": "Gazteena? Tratamendu seguruko inguruneak eta datu-baimenak.",
+          "frag": 3
+        },
+        {
+          "es": "Ahí, reservad más tiempo y más presupuesto.",
+          "eu": "Hor, gorde denbora eta aurrekontu gehiago."
+        }
+      ]
+    },
+    {
+      "id": "q6",
+      "cues": [
+        {
+          "es": "Gobernanza. Catena-X separa tres papeles.",
+          "eu": "Gobernantza. Catena-Xek hiru rol bereizten ditu.",
+          "frag": 0
+        },
+        {
+          "es": "La asociación fija las reglas y certifica. Eclipse aloja el código. Y Cofinity-X opera.",
+          "eu": "Elkarteak arauak finkatzen ditu eta ziurtatzen du. Eclipsek kodea hartzen du. Eta Cofinity-Xek kudeatzen du."
+        },
+        {
+          "es": "En Euskadi, EJIE operaría los servicios centrales. Quién será el organismo de acceso sigue abierto.",
+          "eu": "Euskadin, EJIEk zerbitzu nagusiak kudeatuko lituzke. Nor izango den sarbide-erakundea irekita dago oraindik.",
+          "frag": 1
+        },
+        {
+          "es": "Nuestro consejo: quien fija las reglas no debe ser quien opera.",
+          "eu": "Gure aholkua: arauak finkatzen dituena ez da izan behar kudeatzen duena.",
+          "frag": 2
+        },
+        {
+          "es": "Y pensad en varios dominios desde el primer día, no solo en salud.",
+          "eu": "Eta pentsatu hainbat domeinutan lehen egunetik, ez osasunean bakarrik."
+        }
+      ]
+    },
+    {
+      "id": "q6model",
+      "cues": [
+        {
+          "es": "¿Quién opera qué? El modelo operativo de Catena-X: cada servicio, con un responsable claro.",
+          "eu": "Nork kudeatzen du zer? Catena-Xen eredu operatiboa: zerbitzu bakoitza, arduradun argi batekin.",
           "frag": 0
         },
         {
@@ -207,59 +330,58 @@
       ]
     },
     {
-      "id": "q5",
+      "id": "q6table",
       "cues": [
         {
-          "es": "¿Qué está maduro? El protocolo de espacios de datos es estable, y va camino de ser norma ISO.",
-          "eu": "Zer dago heldu? Datu-espazioen protokoloa egonkorra da, eta ISO arau bihurtzeko bidean dago.",
+          "es": "¿Cómo se traduce esto a un espacio de datos de salud? Función por función.",
+          "eu": "Nola itzultzen da hau osasun-datuen espazio batera? Funtzioz funtzio."
+        },
+        {
+          "es": "Las reglas, los permisos, la incorporación y el catálogo.",
+          "eu": "Arauak, baimenak, sarrera eta katalogoa.",
           "frag": 0
         },
         {
-          "es": "FHIR y OMOP: maduros.",
-          "eu": "FHIR eta OMOP: helduak.",
+          "es": "Fijaos: los permisos de datos no existen en Catena-X. El reglamento los añade.",
+          "eu": "Begiratu: datu-baimenak ez daude Catena-Xen. Erregelamenduak gehitzen ditu."
+        },
+        {
+          "es": "Después, el entorno seguro, la certificación, los incidentes y el soporte.",
+          "eu": "Ondoren, ingurune segurua, ziurtapena, gorabeherak eta laguntza.",
           "frag": 1
         },
         {
-          "es": "El conector Tractus-X funciona en producción desde 2023, aunque todavía cambia cada trimestre.",
-          "eu": "Tractus-X konektorea 2023tik dabil ekoizpenean, nahiz eta oraindik hiruhileko bakoitzean aldatzen den.",
-          "frag": 2
-        },
-        {
-          "es": "¿Lo más joven? Los entornos de tratamiento seguro y los permisos de datos.",
-          "eu": "Gazteena? Tratamendu seguruko inguruneak eta datu-baimenak.",
-          "frag": 3
-        },
-        {
-          "es": "Ahí, reservad más tiempo y más presupuesto.",
-          "eu": "Hor, gorde denbora eta aurrekontu gehiago."
+          "es": "La regla general: el organismo de acceso decide, y EJIE opera.",
+          "eu": "Arau orokorra: sarbide-erakundeak erabakitzen du, eta EJIEk kudeatzen du."
         }
       ]
     },
     {
-      "id": "q6",
+      "id": "q6open",
       "cues": [
         {
-          "es": "Gobernanza. Catena-X separa tres papeles.",
-          "eu": "Gobernantza. Catena-Xek hiru rol bereizten ditu.",
+          "es": "Un punto abierto: ¿quién será el organismo de acceso en Euskadi?",
+          "eu": "Puntu ireki bat: nor izango da sarbide-erakundea Euskadin?"
+        },
+        {
+          "es": "Opción A: la oficina vasca como organismo de acceso, con un coordinador nacional. El reglamento lo permite.",
+          "eu": "A aukera: euskal bulegoa sarbide-erakunde gisa, koordinatzaile nazional batekin. Erregelamenduak baimentzen du.",
           "frag": 0
         },
         {
-          "es": "La asociación fija las reglas y certifica. Eclipse aloja el código. Y Cofinity-X opera.",
-          "eu": "Elkarteak arauak finkatzen ditu eta ziurtatzen du. Eclipsek kodea hartzen du. Eta Cofinity-Xek kudeatzen du."
-        },
-        {
-          "es": "En Euskadi podría ser así: la Oficina de Datos de Salud como organismo de acceso, y EJIE operando los servicios centrales.",
-          "eu": "Euskadin honela izan liteke: Osasun Datuen Bulegoa sarbide-erakunde gisa, eta EJIE zerbitzu nagusiak kudeatzen.",
+          "es": "Opción B: un único organismo nacional, y la oficina vasca prepara las solicitudes y opera el nodo.",
+          "eu": "B aukera: erakunde nazional bakarra, eta euskal bulegoak eskaerak prestatzen ditu eta nodoa kudeatzen du.",
           "frag": 1
         },
         {
-          "es": "Nuestro consejo: quien fija las reglas no debe ser quien opera.",
-          "eu": "Gure aholkua: arauak finkatzen dituena ez da izan behar kudeatzen duena.",
+          "es": "Opción C: empezar el piloto con un acuerdo de cooperación, y decidir cuando se apruebe la ley.",
+          "eu": "C aukera: pilotua lankidetza-hitzarmen batekin hasi, eta legea onartzen denean erabaki.",
           "frag": 2
         },
         {
-          "es": "Y pensad en varios dominios desde el primer día, no solo en salud.",
-          "eu": "Eta pentsatu hainbat domeinutan lehen egunetik, ez osasunean bakarrik."
+          "es": "España debe designar sus organismos antes del veintiséis de marzo de 2027. El piloto puede empezar con cualquiera de las tres.",
+          "eu": "Espainiak bere erakundeak izendatu behar ditu 2027ko martxoaren 26a baino lehen. Pilotua hiruretako edozeinekin has daiteke.",
+          "frag": 3
         }
       ]
     },
@@ -301,8 +423,42 @@
           "frag": 5
         },
         {
-          "es": "Más las herramientas de desarrollo y del ciclo de vida del software.",
-          "eu": "Gehi garapen-tresnak eta softwarearen bizi-zikloko tresnak."
+          "es": "Más las herramientas de desarrollo. El entorno seguro va aparte: lo vemos ahora.",
+          "eu": "Gehi garapen-tresnak. Ingurune segurua aparte doa: orain ikusiko dugu."
+        }
+      ]
+    },
+    {
+      "id": "q7assume",
+      "cues": [
+        {
+          "es": "¿Qué hay detrás de estas cifras?",
+          "eu": "Zer dago zifra hauen atzean?"
+        },
+        {
+          "es": "Doce meses de construcción, con ocho a doce personas. Es decir, entre cien y ciento veinticinco mil euros por persona y año.",
+          "eu": "Hamabi hilabeteko eraikuntza, zortzi eta hamabi pertsona artean. Hau da, ehun eta ehun eta hogeita bost mila euro artean pertsona eta urte bakoitzeko.",
+          "frag": 0
+        },
+        {
+          "es": "El alcance: dos o tres hospitales de Osakidetza y el registro de cáncer, dos casos de uso y un nodo. El mapeo de los datos está incluido.",
+          "eu": "Irismena: Osakidetzaren bizpahiru ospitale eta minbizi-erregistroa, bi erabilera-kasu eta nodo bat. Datuen mapaketa barne dago.",
+          "frag": 1
+        },
+        {
+          "es": "No incluye el tiempo del personal de los hospitales, el data lake, el entorno seguro, ni el personal del organismo de acceso.",
+          "eu": "Ez ditu barne hartzen ospitaleetako langileen denbora, datu-lakua, ingurune segurua, ezta sarbide-erakundeko langileak ere.",
+          "frag": 2
+        },
+        {
+          "es": "Los mil euros por entorno cubren el conector, el catálogo, la identidad y la monitorización. No el entorno seguro.",
+          "eu": "Ingurune bakoitzeko mila euroek konektorea, katalogoa, identitatea eta monitorizazioa estaltzen dituzte. Ez ingurune segurua.",
+          "frag": 3
+        },
+        {
+          "es": "El entorno seguro es una línea aparte. Con espacios de trabajo, almacenamiento y el Esquema Nacional de Seguridad, son varios miles de euros al mes.",
+          "eu": "Ingurune segurua lerro bereizia da. Lan-espazioekin, biltegiratzearekin eta Segurtasun Eskema Nazionalarekin, hilean hainbat mila euro dira.",
+          "frag": 4
         }
       ]
     },
@@ -315,47 +471,13 @@
           "frag": 0
         },
         {
-          "es": "Arquitectura, conectores, plataforma y seguridad, FHIR y OMOP, protección de datos y derecho.",
-          "eu": "Arkitektura, konektoreak, plataforma eta segurtasuna, FHIR eta OMOP, datuen babesa eta zuzenbidea.",
+          "es": "Un arquitecto, dos o tres ingenieros de conectores, dos o tres de plataforma y seguridad, de dos a cuatro especialistas en datos y terminologías, y una persona para protección de datos y derecho.",
+          "eu": "Arkitekto bat, konektoreetako bizpahiru ingeniari, plataforma eta segurtasuneko bizpahiru, datu eta terminologietako bi eta lau espezialista artean, eta pertsona bat datuen babeserako eta zuzenbiderako.",
           "frag": 1
         },
         {
           "es": "Y recordad la primera respuesta: sin tiempo y sin mandato de la dirección, no funciona.",
           "eu": "Eta gogoratu lehen erantzuna: zuzendaritzaren denborarik eta agindurik gabe, ez dabil."
-        }
-      ]
-    },
-    {
-      "id": "nextsteps",
-      "cues": [
-        {
-          "es": "¿Y ahora qué? Cuatro pasos, todos pequeños.",
-          "eu": "Eta orain zer? Lau urrats, denak txikiak."
-        },
-        {
-          "es": "Elegir uno o dos casos de uso.",
-          "eu": "Erabilera-kasu bat edo bi aukeratu.",
-          "frag": 0
-        },
-        {
-          "es": "Acordar los roles.",
-          "eu": "Rolak adostu.",
-          "frag": 1
-        },
-        {
-          "es": "Abrir grupos de trabajo con los hospitales.",
-          "eu": "Lan-taldeak ireki ospitaleekin.",
-          "frag": 2
-        },
-        {
-          "es": "Y construir el piloto.",
-          "eu": "Eta pilotua eraiki.",
-          "frag": 3
-        },
-        {
-          "es": "El reloj ya corre: organismos de acceso en marzo de 2027, uso secundario completo en marzo de 2029.",
-          "eu": "Erlojua martxan dago: sarbide-erakundeak 2027ko martxoan, bigarren mailako erabilera osoa 2029ko martxoan.",
-          "frag": 4
         }
       ]
     },
@@ -367,8 +489,8 @@
           "eu": "Hau da gure proposamena: Euskadin hasi, eta gorantz konektatu."
         },
         {
-          "es": "Paso uno, 2027: el piloto de Euskadi, con Osakidetza y EJIE.",
-          "eu": "Lehen urratsa, 2027: Euskadiko pilotua, Osakidetzarekin eta EJIErekin.",
+          "es": "Paso uno, 2027 y 2028: el piloto de Euskadi, con Osakidetza y EJIE.",
+          "eu": "Lehen urratsa, 2027 eta 2028: Euskadiko pilotua, Osakidetzarekin eta EJIErekin.",
           "frag": 0
         },
         {
@@ -519,6 +641,45 @@
           "es": "y los servicios españoles de identidad, certificados y seguridad.",
           "eu": "eta identitate, ziurtagiri eta segurtasuneko Espainiako zerbitzuak.",
           "frag": 7
+        }
+      ]
+    },
+    {
+      "id": "nextsteps",
+      "cues": [
+        {
+          "es": "¿Y ahora qué? Cinco fases, desde la definición hasta un piloto en marcha.",
+          "eu": "Eta orain zer? Bost fase, definiziotik martxan dagoen pilotu bateraino."
+        },
+        {
+          "es": "Primero, definir: casos de uso, alcance y roles, en dos o tres meses.",
+          "eu": "Lehenik, definitu: erabilera-kasuak, irismena eta rolak, bizpahiru hilabetean.",
+          "frag": 0
+        },
+        {
+          "es": "Después, preparar con los hospitales la especificación de la licitación.",
+          "eu": "Gero, ospitaleekin lizitazioaren zehaztapena prestatu.",
+          "frag": 1
+        },
+        {
+          "es": "La licitación misma: de seis a nueve meses.",
+          "eu": "Lizitazioa bera: sei eta bederatzi hilabete artean.",
+          "frag": 2
+        },
+        {
+          "es": "Construir el nodo y conectar los primeros hospitales: de nueve a doce meses.",
+          "eu": "Nodoa eraiki eta lehen ospitaleak konektatu: bederatzi eta hamabi hilabete artean.",
+          "frag": 3
+        },
+        {
+          "es": "Y operar el piloto, con los primeros permisos y resultados medidos.",
+          "eu": "Eta pilotua kudeatu, lehen baimenekin eta neurtutako emaitzekin.",
+          "frag": 4
+        },
+        {
+          "es": "Si empezamos ahora, el piloto estará listo hacia marzo de 2029, cuando el uso secundario se aplica en pleno.",
+          "eu": "Orain hasten bagara, pilotua prest egongo da 2029ko martxorako, bigarren mailako erabilera osorik aplikatzen denean.",
+          "frag": 5
         }
       ]
     },
