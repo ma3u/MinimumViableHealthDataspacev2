@@ -36,7 +36,9 @@ export interface TocEntry {
 
 /** A number the heading's own text starts with, "7. Incidents" or "7.2 Clocks";
  *  never a bare figure such as "127 synthetic patients". */
-const OWN_NUMBER = /^(\d+\.(?:\d+\.?)*)\s+/;
+// Each repetition needs its dot, so no string can be split two ways
+// (CodeQL js/redos on the earlier (?:\d+\.?)*).
+const OWN_NUMBER = /^(\d+\.(?:\d+(?:\.\d+)*\.?)?)\s+/;
 
 /** Headings that are navigation themselves, or boilerplate, stay out. */
 const SKIP = new Set(["contents", "on this page", "related documentation"]);

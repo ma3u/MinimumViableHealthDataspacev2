@@ -111,6 +111,18 @@ describe("the section numbers", () => {
     ]);
   });
 
+  it("reads a number with many parts quickly, and a long run of digits too", () => {
+    const main = page(`
+      <h2 id="a">1.2.3. Deep</h2>
+      <h2 id="b">0.${"0".repeat(5000)}x</h2>
+    `);
+    const started = performance.now();
+    const entries = collectHeadings(main);
+    expect(performance.now() - started).toBeLessThan(500);
+    expect(entries[0]).toMatchObject({ num: "1.2.3.", text: "Deep" });
+    expect(entries[1].num).toBe("2.");
+  });
+
   it("does not take a figure for a section number", () => {
     const main = page(`<h2 id="x">127 synthetic patients</h2>`);
     expect(collectHeadings(main)).toEqual([
