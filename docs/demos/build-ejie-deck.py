@@ -3,19 +3,24 @@
 in English, and euskadi-ejie-2026-es.pptx and -es.pdf in Spanish.
 
 The deck itself is the narrated web presentation in
-ui/public/presentations/euskadi-ejie-2026/ (Spanish narration, Basque
-subtitles). Since the revision of 3 November 2026 the PowerPoint is rendered
-from it rather than rebuilt by hand, so the two can no longer drift apart:
+ui/public/presentations/euskadi-ejie-2026/ (English or Spanish, narrated).
+The copies are rendered from it rather than rebuilt by hand, so they cannot
+drift apart:
 
-- export-ejie-deck.mjs renders every slide with all its builds shown, and
-  prints the deck to a vector PDF, one page per slide;
-- this script puts one image per slide into a 16:9 PowerPoint and copies each
-  slide's speaker notes from the web deck's <aside class="notes">.
+- export-ejie-deck.mjs prints the deck to a vector PDF, one page per slide with
+  every build shown, and a second one set in Arial (which every PowerPoint has)
+  with the cover photo cropped to its box;
+- LibreOffice imports that second PDF as an Impress document, so every text and
+  shape stays editable, and saves it as PowerPoint;
+- this script turns off word wrap in every text box and gives each a little
+  room, since the import sizes a box to the exact width of its line, and copies
+  each slide's speaker notes from the web deck's <aside class="notes">.
 
-The slides in the PowerPoint are pictures, not editable text: change the web
-deck and run this again.
+Each line is its own text box, as the PDF has it, so a longer edit is easier in
+the web deck: change it there and run this again.
 
     cd ui && npm ci                      # Playwright and its Chromium
+    brew install --cask libreoffice      # soffice
     pip install python-pptx
     python3 docs/demos/build-ejie-deck.py
 """
@@ -28,7 +33,6 @@ import tempfile
 from pathlib import Path
 
 from pptx import Presentation
-from pptx.util import Inches
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
@@ -47,25 +51,40 @@ def notes() -> list[str]:
     return out
 
 
+def editable(prs: Presentation) -> None:
+    """No word wrap and a quarter more width, so no line breaks where the PDF had none."""
+
+    def walk(shapes):
+        for sh in shapes:
+            if sh.shape_type == 6:  # a group
+                walk(sh.shapes)
+            elif sh.has_text_frame and sh.text_frame.text.strip():
+                sh.text_frame.word_wrap = False
+                sh.width = int(sh.width * 1.25) + 20000
+
+    for slide in prs.slides:
+        walk(slide.shapes)
+
+
 def build(lang: str) -> None:
     out, pdf = HERE / f"{FILES[lang]}.pptx", HERE / f"{FILES[lang]}.pdf"
     with tempfile.TemporaryDirectory() as tmp:
         subprocess.run(["node", str(HERE / "export-ejie-deck.mjs"), tmp, lang], check=True)
-        images = sorted(Path(tmp).glob("slide-*.jpg"))
+        subprocess.run(
+            ["soffice", "--headless", "--infilter=impress_pdf_import", "--convert-to", "pptx",
+             "--outdir", tmp, str(Path(tmp) / "editable.pdf")],
+            check=True, capture_output=True,
+        )
+        prs = Presentation(str(Path(tmp) / "editable.pptx"))
         texts = notes()
-        if len(images) != len(texts):
-            sys.exit(f"{len(images)} slide images but {len(texts)} slides in {DECK.name}")
-
-        prs = Presentation()
-        prs.slide_width, prs.slide_height = Inches(13.333), Inches(7.5)
-        blank = prs.slide_layouts[6]
-        for image, text in zip(images, texts):
-            s = prs.slides.add_slide(blank)
-            s.shapes.add_picture(str(image), 0, 0, prs.slide_width, prs.slide_height)
-            s.notes_slide.notes_text_frame.text = text
+        if len(prs.slides) != len(texts):
+            sys.exit(f"{len(prs.slides)} slides imported but {len(texts)} slides in {DECK.name}")
+        editable(prs)
+        for slide, text in zip(prs.slides, texts):
+            slide.notes_slide.notes_text_frame.text = text
         prs.save(out)
         pdf.write_bytes((Path(tmp) / "deck.pdf").read_bytes())
-    print(f"{len(images)} slides: {out.relative_to(ROOT)} and {pdf.relative_to(ROOT)}")
+    print(f"{len(texts)} slides: {out.relative_to(ROOT)} and {pdf.relative_to(ROOT)}")
 
 
 def main() -> int:
