@@ -111,14 +111,16 @@ describe("the section numbers", () => {
     ]);
   });
 
-  it("reads a number with many parts quickly, and a long run of digits too", () => {
+  it("reads a number with many parts, and a long run of digits in seconds", () => {
     const main = page(`
       <h2 id="a">1.2.3. Deep</h2>
       <h2 id="b">0.${"0".repeat(5000)}x</h2>
     `);
     const started = performance.now();
     const entries = collectHeadings(main);
-    expect(performance.now() - started).toBeLessThan(500);
+    // The backtracking pattern took minutes here; 5 s leaves room for a busy
+    // machine running the whole suite, so the test does not flake.
+    expect(performance.now() - started).toBeLessThan(5000);
     expect(entries[0]).toMatchObject({ num: "1.2.3.", text: "Deep" });
     expect(entries[1].num).toBe("2.");
   });

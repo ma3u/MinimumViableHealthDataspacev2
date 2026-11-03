@@ -85,7 +85,11 @@ describe("DocsPage (Hub)", () => {
 describe("DeveloperPage", () => {
   it("renders heading", () => {
     render(<DeveloperPage />);
-    expect(screen.getByText("Developer Guide")).toBeInTheDocument();
+    // Its own name also appears as a link, among the sections a published
+    // document can go in; the title is the level-1 heading.
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Developer Guide" }),
+    ).toBeInTheDocument();
   });
 
   it("shows its four diagrams from the hub, each opening at full size", () => {
