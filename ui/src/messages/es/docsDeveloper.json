@@ -250,7 +250,7 @@
   "<b>Commit messages:</b> Conventional Commits format (feat:, fix:, docs:, chore:)": "<b>Mensajes de commit:</b> formato Conventional Commits (feat:, fix:, docs:, chore:)",
   "<b>Branch strategy:</b> Feature branches → PR to main": "<b>Estrategia de ramas:</b> ramas de funcionalidad → pull request a main",
   "<b>Pre-commit:</b> {n} hooks, listed on the <a>quality gates page</a>: Prettier, ESLint, TypeScript, Semgrep, gitleaks, the API collection check and more": "<b>Pre-commit:</b> {n} hooks, enumerados en la <a>página de los quality gates</a>: Prettier, ESLint, TypeScript, Semgrep, gitleaks, la comprobación de la colección de API y más",
-  "<b>Pre-push:</b> Full Vitest suite (--bail), npm audit (HIGH+)": "<b>Pre-push:</b> suite completa de Vitest (--bail), npm audit (HIGH+)",
+  "<b>Pre-push:</b> Full Vitest suite (--bail), npm audit (HIGH+), and CodeQL on the iPhone app when it changed": "<b>Pre-push:</b> suite completa de Vitest (--bail), npm audit (HIGH+) y CodeQL en la app de iPhone cuando ha cambiado",
   "<b>Cypher:</b> UPPER_SNAKE_CASE relationships, PascalCase labels, camelCase properties, always MERGE": "<b>Cypher:</b> relaciones en UPPER_SNAKE_CASE, etiquetas en PascalCase, propiedades en camelCase, siempre MERGE",
   "<b>TypeScript:</b> Strict mode, no any, @/* path alias → ui/src/*": "<b>TypeScript:</b> modo estricto, sin any, alias de ruta @/* → ui/src/*",
   "<b>Fictional orgs only:</b> AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg Medical Centre, Institut de Recherche Santé": "<b>Solo organizaciones ficticias:</b> AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg Medical Centre, Institut de Recherche Santé",

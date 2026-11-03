@@ -14,7 +14,7 @@ globs:
 
 | Scope            | Framework      | Config                                 |
 | ---------------- | -------------- | -------------------------------------- |
-| Unit / component | Vitest 4       | `ui/vitest.config.ts`                  |
+| Unit / component | Vitest 5       | `ui/vitest.config.ts`                  |
 | E2E browser      | Playwright     | `ui/playwright.config.ts`              |
 | iOS unit         | Swift Testing  | `cd clients/ios && swift test`         |
 | iOS on screen    | XCUITest       | `clients/ios/Scripts/run-ui-tests.sh`  |
@@ -78,7 +78,7 @@ npx vitest run __tests__/unit/components/Navigation.test.tsx  # single file
   answer stubs `fetch` itself, `vi.stubGlobal("fetch", ...)` or `vi.spyOn(globalThis, "fetch")`,
   and restores it in `afterEach`. Neo4j is mocked at `@/lib/neo4j` (`runQuery`), never deeper.
 - Hooks that reset a mock use braces, `beforeEach(() => { m.mockReset(); })`: `mockReset()`
-  returns the mock and Vitest 4 runs a function returned from a hook as the test's teardown
+  returns the mock and Vitest (4 and later) runs a function returned from a hook as the test's teardown
   (see `docs/gotchas.md`, 2026-09-18).
 - Coverage provider: v8. Minimum thresholds not yet enforced; aim for critical-path coverage.
 

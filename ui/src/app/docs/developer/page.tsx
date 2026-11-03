@@ -2308,7 +2308,7 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
               <li>
                 <T area="docsDeveloper" tags={{ b }}>
                   {
-                    "<b>Pre-push:</b> Full Vitest suite (--bail), npm audit (HIGH+)"
+                    "<b>Pre-push:</b> Full Vitest suite (--bail), npm audit (HIGH+), and CodeQL on the iPhone app when it changed"
                   }
                 </T>
               </li>

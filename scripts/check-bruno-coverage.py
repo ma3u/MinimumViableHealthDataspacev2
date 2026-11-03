@@ -99,7 +99,10 @@ def requested():
                 continue
             full = os.path.join(dirpath, name)
             rel = os.path.relpath(full, COLLECTION)
-            files.append(rel)
+            # An environment is scanned for credentials below but is not a
+            # request, so it is not counted as one (230 said 227, #839).
+            if not rel.startswith("environments" + os.sep):
+                files.append(rel)
             src = open(full, encoding="utf-8").read()
             for pattern, what in SECRET_PATTERNS:
                 m = pattern.search(src)

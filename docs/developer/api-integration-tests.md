@@ -107,11 +107,10 @@ Measured on 2026-11-03 against `main` at `b0586238`:
 | EHDS domain checks (CI)                      | 25 passed, 0 failed, 5 skipped of 30, above the floor of 18/0.                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 So the collection is current with the code: every route is covered and the
-coverage gate keeps it so. What is not current is two results on `main`, and
-both are tracked as open tasks in [#839](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/839). Two smaller things are out of date: the coverage check's
-"requests in collection" says 230 because it also counts the three environment
-files, and a comment in `compliance.yml` still speaks of a 149-request Local
-run and 30 fixture requests (today 192 and 32).
+coverage gate keeps it so. On 2026-11-03 both results on `main` were red; both
+are fixed and tracked in
+[#839](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/839). The
+live run scores 166 of 166 since #853, and its floor is 166/0 since #856.
 
 ## The compliance baseline
 

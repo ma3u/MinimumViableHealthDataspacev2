@@ -1,0 +1,4 @@
+# Every path is owned by the maintainer, so GitHub asks the maintainer to
+# review a pull request from anyone else. Reviews are not required by the
+# ruleset (docs/SDLC.md, 4.1).
+* @ma3u

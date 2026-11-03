@@ -144,7 +144,7 @@ the layers live in the [graph explorer](https://ma3u.github.io/MinimumViableHeal
 | EDC-V control plane, data planes, IdentityHub, IssuerService, CFM | 10013-11012 | the connector and its identity layer                     | [`docker-compose.jad.yml`](../docker-compose.jad.yml), [glossary](developer/stack-and-environment.md#the-connector-edc-v) |
 
 Every port is in [the port table](developer/stack-and-environment.md#ports).
-The reasons behind each part are in the [ADRs](ADRs/), ADR-001 to ADR-073.
+The reasons behind each part are in the [ADRs](ADRs/), from ADR-001 on.
 
 ---
 
@@ -309,7 +309,7 @@ the latest reports: [unit coverage](test-coverage-report.md),
 
 ### Add an ADR (Architecture Decision Record)
 
-1. Check the existing [ADRs](ADRs/) (ADR-001 to ADR-073; 051 is reserved) and the ADR table in [`docs/planning-health-dataspace-v2.md`](planning-health-dataspace-v2.md).
+1. Check the existing [ADRs](ADRs/) (from ADR-001 on; 051 is reserved) and the ADR table in [`docs/planning-health-dataspace-v2.md`](planning-health-dataspace-v2.md).
 2. Copy [the template](adr/0000-template.md) to `docs/ADRs/ADR-NNN-slug.md` with the next free number.
 3. Add it to that ADR table.
 4. Link the issue it belongs to. An accepted ADR is never edited, only superseded.

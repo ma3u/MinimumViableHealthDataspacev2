@@ -7,7 +7,7 @@ Live deployment: https://ehds.mabu.red (Azure Container Apps, resource group `rg
 ## Commands
 
 ```bash
-# UI (Next.js 14) — primary working area
+# UI (Next.js 15) — primary working area
 cd ui && npm install
 npm run dev            # http://localhost:3000
 npm run build          # production build
@@ -34,7 +34,7 @@ docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d
 ## Directory map
 
 ```
-ui/src/app/             — Next.js 14 app router (pages + api/ routes)
+ui/src/app/             — Next.js 15 app router (pages + api/ routes)
 ui/src/lib/             — auth.ts, api.ts (static-export mock map), neo4j.ts
 ui/__tests__/           — unit/ (Vitest) · e2e/journeys/ (Playwright)
 ui/public/mock/         — JSON fixtures for NEXT_PUBLIC_STATIC_EXPORT=true
@@ -88,7 +88,7 @@ docs/                   — see "Knowledge & planning" below
 - `docs/knowledge/index.md` — OKF v0.2 concept bundle: services, data models, APIs, runbooks.
 - `docs/planning/index.md` — work items in `done/ · current/ · future/`; roadmap detail in
   `docs/planning/roadmap-phases-*.md`; issue table in `docs/planning-health-dataspace-v2.md`.
-- `docs/ADRs/` — canonical ADR corpus (ADR-001…061 (051 is reserved by #475), statuses in the ADR table of `docs/planning-health-dataspace-v2.md`). `docs/adr/0000-template.md` is the
+- `docs/ADRs/` — canonical ADR corpus (ADR-001 onwards, 051 reserved by #475, statuses in the ADR table of `docs/planning-health-dataspace-v2.md`). `docs/adr/0000-template.md` is the
   Nygard template for new ones; never edit an accepted ADR — supersede it.
 - Before significant changes: check ADRs + planning index + `gh issue list`. Keep any
   routinely-loaded doc under ~15K tokens (ADR-026) — index stays small, detail in archives.
