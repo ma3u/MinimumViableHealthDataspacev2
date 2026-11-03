@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Narrate the EJIE deck in Spanish in the presenter's voice, with Basque subtitles.
+"""Narrate the EJIE deck in the presenter's voice: Spanish with Basque subtitles, or English.
 
 Reads ui/public/presentations/euskadi-ejie-2026/narration-source.json, where
 every cue is one sentence: "es" is spoken, "eu" is the Basque subtitle shown
@@ -7,9 +7,12 @@ while it plays, and "frag" reveals that slide's fragment. Each slide goes to
 ElevenLabs' text-to-speech "with-timestamps" endpoint, which returns the audio
 and the start time of every character. The script writes:
 
-    audio/<id>.mp3               the narration of the slide with that id
+    audio/<id>.mp3               the Spanish narration of the slide with that id
     subtitles/<id>.eu.vtt        Basque WebVTT, one cue per spoken sentence
     narration.json               cue times, subtitles and fragments, for the player
+
+and with --lang en, from each cue's "en", audio/en/<id>.mp3 and narration.en.json
+(no subtitles). The deck plays the narration of the language it is shown in.
 
 ElevenLabs has no Basque voice (checked on 2026-10-10 against every model the
 account offers), so the audio is Spanish and Basque is the subtitle language.
@@ -22,8 +25,9 @@ Run from the repository root:
 
     python3 scripts/narrate-euskadi-deck.py              # every slide
     python3 scripts/narrate-euskadi-deck.py q3 pilot1    # only these slide ids
+    python3 scripts/narrate-euskadi-deck.py --lang en    # the English narration
 """
-import base64, hashlib, json, os, pathlib, shutil, sys, urllib.error, urllib.request
+import base64, hashlib, json, os, pathlib, shutil, sys, time, urllib.error, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DECK = ROOT / "ui/public/presentations/euskadi-ejie-2026"
@@ -83,15 +87,27 @@ if not voice:
     voice = match[0]["voice_id"]
     print(f"voice: {match[0]['name']}")
 
+ARGS = sys.argv[1:]
+LANG = "es"
+if "--lang" in ARGS:
+    i = ARGS.index("--lang")
+    LANG = ARGS[i + 1]
+    del ARGS[i : i + 2]
+# Spanish keeps the original paths; another language gets its own folder and file.
+AUDIO = "audio" if LANG == "es" else f"audio/{LANG}"
+SUBS = LANG == "es"
+if LANG != "es":
+    OUT_JSON = DECK / f"narration.{LANG}.json"
+
 previous = {}
 if OUT_JSON.is_file():
     previous = {s["id"]: s for s in json.loads(OUT_JSON.read_text())["slides"]}
-only = set(sys.argv[1:])
+only = set(ARGS)
 unknown = only - {s["id"] for s in src["slides"]}
 if unknown:
     sys.exit(f"unknown slide ids: {', '.join(sorted(unknown))}")
 
-(DECK / "audio").mkdir(exist_ok=True)
+(DECK / AUDIO).mkdir(parents=True, exist_ok=True)
 (DECK / "subtitles").mkdir(exist_ok=True)
 
 
@@ -100,11 +116,13 @@ def spoken_key(slide: dict) -> str:
 
     Subtitles and fragment indices are not in it, so changing those reuses the audio.
     """
-    what = [[c["es"] for c in slide["cues"]], src["model"], src.get("voice_settings", DEFAULT_VOICE_SETTINGS)]
+    what = [[c[LANG] for c in slide["cues"]], src["model"], src.get("voice_settings", DEFAULT_VOICE_SETTINGS)]
     return hashlib.sha256(json.dumps(what, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:16]
 
 
 def write_vtt(sid: str, cues: list) -> None:
+    if not SUBS:
+        return
     vtt = ["WEBVTT", "Language: eu", ""]
     for c in cues:
         vtt += [f"{vtt_time(c['start'])} --> {vtt_time(c['end'])}", c["eu"], ""]
@@ -125,11 +143,14 @@ for n, slide in enumerate(src["slides"], 1):
                 c["frag"] = cue["frag"]
             cues.append(c)
         # Files are named by slide id, so a slide keeps its audio when the deck is reordered.
-        audio = f"audio/{sid}.mp3"
+        audio = f"{AUDIO}/{sid}.mp3"
         if old["audio"] != audio:
             shutil.copyfile(DECK / old["audio"], DECK / audio)
         write_vtt(sid, cues)
-        result.append({**old, "audio": audio, "subtitles": f"subtitles/{sid}.eu.vtt", "cues": cues})
+        entry = {**old, "audio": audio, "cues": cues}
+        if SUBS:
+            entry["subtitles"] = f"subtitles/{sid}.eu.vtt"
+        result.append(entry)
         print(f"slide {n:2d} {sid:10s} audio kept, cues refreshed")
         continue
     if only and sid not in only and old:
@@ -140,20 +161,28 @@ for n, slide in enumerate(src["slides"], 1):
     for cue in slide["cues"]:
         if text:
             text += " "
-        spans.append((len(text), len(text) + len(cue["es"])))
-        text += cue["es"]
+        spans.append((len(text), len(text) + len(cue[LANG])))
+        text += cue[LANG]
     req = urllib.request.Request(
         f"https://api.elevenlabs.io/v1/text-to-speech/{voice}/with-timestamps?output_format={FORMAT}",
         data=json.dumps({"text": text, "model_id": src["model"],
                          "voice_settings": src.get("voice_settings", DEFAULT_VOICE_SETTINGS)}).encode(),
         headers=HEADERS,
     )
-    try:
-        with urllib.request.urlopen(req, timeout=180) as r:
-            body = json.load(r)
-    except urllib.error.HTTPError as e:
-        sys.exit(f"{sid}: HTTP {e.code} {e.read()[:300]!r}")
-    audio = f"audio/{sid}.mp3"
+    # A long run meets the odd dropped connection; try a slide three times before giving up.
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=180) as r:
+                body = json.load(r)
+            break
+        except urllib.error.HTTPError as e:
+            sys.exit(f"{sid}: HTTP {e.code} {e.read()[:300]!r}")
+        except (ConnectionError, TimeoutError, urllib.error.URLError) as e:
+            if attempt == 2:
+                sys.exit(f"{sid}: {e}")
+            print(f"{sid}: {e}, retrying")
+            time.sleep(5 * (attempt + 1))
+    audio = f"{AUDIO}/{sid}.mp3"
     (DECK / audio).write_bytes(base64.b64decode(body["audio_base64"]))
     al = body["alignment"]
     starts, ends = al["character_start_times_seconds"], al["character_end_times_seconds"]
@@ -170,15 +199,15 @@ for n, slide in enumerate(src["slides"], 1):
             c["frag"] = cue["frag"]
         cues.append(c)
     write_vtt(sid, cues)
-    result.append({"id": sid, "audio": audio, "subtitles": f"subtitles/{sid}.eu.vtt",
+    result.append({"id": sid, "audio": audio, **({"subtitles": f"subtitles/{sid}.eu.vtt"} if SUBS else {}),
                    "duration": duration, "spoken": key, "cues": cues})
     print(f"slide {n:2d} {sid:10s} {duration:6.1f}s  {len(text)} characters")
 
-OUT_JSON.write_text(json.dumps({"language": src["language"], "subtitles": "eu", "slides": result},
+OUT_JSON.write_text(json.dumps({"language": LANG, **({"subtitles": "eu"} if SUBS else {}), "slides": result},
                                ensure_ascii=False, indent=1) + "\n")
 # Drop the files no slide uses any more, such as the numbered names of earlier versions.
-used = {s["audio"] for s in result} | {s["subtitles"] for s in result}
-for f in [*(DECK / "audio").glob("*.mp3"), *(DECK / "subtitles").glob("*.vtt")]:
+used = {s["audio"] for s in result} | {s.get("subtitles") for s in result}
+for f in [*(DECK / AUDIO).glob("*.mp3"), *((DECK / "subtitles").glob("*.vtt") if SUBS else [])]:
     if str(f.relative_to(DECK)) not in used:
         f.unlink()
 total = sum(s["duration"] for s in result)

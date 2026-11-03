@@ -470,6 +470,19 @@
         background: var(--navy);
         color: var(--cream);
       }
+      .narration .langs {
+        display: inline-flex;
+      }
+      .narration .langs button {
+        padding: 7px 10px;
+      }
+      .narration .langs button:first-child {
+        border-radius: 999px 0 0 999px;
+      }
+      .narration .langs button:last-child {
+        border-radius: 0 999px 999px 0;
+        border-left: none;
+      }
       .narration span {
         font-size: 14px;
         color: var(--muted);
@@ -506,9 +519,6 @@
           />
           <div style="position: absolute; left: 1000px; top: 0; width: 10px; height: 1080px; background: var(--amber)"></div>
           <div style="position: absolute; left: 128px; top: 170px; width: 820px">
-            <p class="rise" style="--d: 0.1s; font-size: 24px; font-weight: 700; letter-spacing: 4px; color: var(--amber)">
-              PREPARATORY MEETING
-            </p>
             <h1 class="rise" style="--d: 0.3s; font-size: 78px; line-height: 1.1; color: var(--cream); margin-top: 22px">
               EJIE Data Space · Euskadi
             </h1>
@@ -543,7 +553,7 @@
             <div class="card fragment fade-up" data-fragment-index="6" style="--accent: var(--green);"><p style="font-family: Sora; font-size: 40px; font-weight: 700; color: var(--green)">07</p><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">COSTS</p><h3 style="font-size: 30px">No licences. You pay for people and hosting.</h3></div>
             <div class="card fragment fade-up" data-fragment-index="7" style="--accent: var(--navy);"><p style="font-family: Sora; font-size: 40px; font-weight: 700; color: var(--navy)">08</p><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--muted)">TEAM</p><h3 style="font-size: 30px">8 to 15 people for a pilot.</h3></div>
           </div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[0:30] The eight answers on one page. If you remember one slide, remember this one.</aside>
         </section>
 
@@ -560,7 +570,7 @@
             <div class="card fragment fade-up" data-fragment-index="3" style="--accent: var(--amber); padding: 22px 32px; gap: 10px"><div style="display: flex; justify-content: space-between; align-items: center"><h3 style="font-size: 32px">Meaning of the data</h3><span class="src src-demo">FROM OUR EHDS DEMONSTRATOR</span></div><p style="font-size: 25px">Mapping to <b>FHIR</b>, <b>SNOMED CT</b>, <b>ICD-10</b> and <b>OMOP</b> took more work than the connector. Identity and keys failed more often than the data exchange.</p></div>
           </div>
           <div class="band fragment fade-up" data-fragment-index="3" style="transition-delay: 0.12s; margin-top: 22px">Moving data is easy. <span>Agreeing on what it means is hard.</span></div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[1:45] Culture, onboarding and governance are the Catena-X lessons; the meaning of the data is what our EHDS demonstrator taught us. The next slide makes it concrete.</aside>
         </section>
 
@@ -597,7 +607,7 @@
               </div>
             </div>
           </div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[1:30] Six steps to join; the mapping is step 4 and the largest. Local CIE-10-ES becomes SNOMED CT, the registry keeps ICD-O-3 through the OMOP oncology extension, lab codes go to LOINC. Coders approve, everyone reuses.</aside>
         </section>
 
@@ -614,7 +624,7 @@
             <div class="card fragment fade-up" data-fragment-index="3" style="--accent: var(--red)"><div class="num">4</div><h3 style="font-size: 32px">Buy standards, not products</h3><p style="font-size: 25px">Tender on standards and conformity tests. Give improvements back to the open-source projects.</p><div><span class="src src-cx">FROM CATENA-X</span></div></div>
           </div>
           <div class="band fragment fade-up" data-fragment-index="3" style="transition-delay: 0.12s; font-size: 30px">A private copy of open source <span>becomes your own product to maintain.</span></div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[1:30] Build on what exists; start small; budget for meaning, not movement; tender for standards, not products. Each card says whether it comes from Catena-X or from our demonstrator.</aside>
         </section>
 
@@ -639,8 +649,8 @@
             <span class="chip fragment fade-up" data-fragment-index="2" style="transition-delay: 0.48s; flex: 1; background: var(--card); border: 3px solid var(--amber); color: var(--navy)">Mature technology</span>
             <span class="chip fragment fade-up" data-fragment-index="2" style="transition-delay: 0.60s; flex: 1.1; background: var(--card); border: 3px solid var(--red); color: var(--navy)">A clear exit strategy</span>
           </div>
-          <div class="band fragment fade-up" data-fragment-index="3" style="font-size: 30px">Our EHDS demonstrator works the same way: <span>more than 70 decision records, public on GitHub.</span><p style="font-family: 'DM Sans'; font-size: 24px; font-weight: 400; color: var(--mist); margin-top: 8px">See it yourself: <a target="_blank" rel="noopener" style="color: var(--amber)" href="https://ma3u.github.io/MinimumViableHealthDataspacev2/">the demonstrator</a> · <a target="_blank" rel="noopener" style="color: var(--amber)" href="https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/docs/ADRs">its decision records</a></p></div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <div class="band fragment fade-up" data-fragment-index="3" style="font-size: 30px"><span>Our EHDS demonstrator works the same way: <span>more than 70 decision records, public on GitHub.</span></span><p style="font-family: 'DM Sans'; font-size: 24px; font-weight: 400; color: var(--mist); margin-top: 8px">See it yourself: <a target="_blank" rel="noopener" style="color: var(--amber)" href="https://ma3u.github.io/MinimumViableHealthDataspacev2/">the demonstrator</a> · <a target="_blank" rel="noopener" style="color: var(--amber)" href="https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/docs/ADRs">its decision records</a></p></div>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[1:30] Every decision is an ADR anyone can read. Working groups propose, builders decide. Five criteria; the exit strategy matters most for a public body.</aside>
         </section>
 
@@ -676,7 +686,19 @@
           <aside class="notes">[1:45, five clicks] Trust layer on top; the hospital, the operator and the access body; the Dataspace Protocol along the bottom, which also connects upwards to ENDS and HealthData@EU. Every box runs in the demonstrator today.</aside>
         </section>
 
-        <!-- 9 · Q5 maturity -->
+        <!-- 9 · Q4 deployment -->
+        <section data-background-color="#FBF8F3">
+          <p class="qpill">QUESTION 4 · ARCHITECTURE</p>
+          <div class="dots"><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i></div>
+          <h2 class="h2">High-level architecture: deployment at EJIE</h2>
+          <p class="stand">Every component runs in a container on EJIE's platform, one Helm chart each.</p>
+          <div style="margin-top: 24px">
+            <svg viewBox="0 0 1664 676" width="1664" height="676" role="img" aria-label="Deployment: users reach the web portals through a reverse proxy; the portals, API services, connector, identity hub, Keycloak, key vault, secure environment, crawler, audit, Neo4j and PostgreSQL run on the EJIE container platform; the data lake, Cl@ve and FNMT, ENDS and HealthData@EU are outside" style="display: block; font-family: 'DM Sans', Arial, sans-serif"><defs><marker id="ah-2E8B6E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2E8B6E"/></marker><marker id="ah-6B7F8E" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#6B7F8E"/></marker><marker id="ah-C0394B" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#C0394B"/></marker><marker id="ah-7B6CC4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#7B6CC4"/></marker><marker id="ah-B9822F" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#B9822F"/></marker><marker id="ah-2E9BC0" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2E9BC0"/></marker></defs><rect x="556" y="16" width="1100" height="448" rx="14" fill="#FBF6EA" fill-opacity="0.55" stroke="#C99A3E" stroke-width="2" stroke-dasharray="10 7"/><rect x="572" y="4" width="560" height="26" rx="5" fill="#FFF7E3" stroke="#C99A3E"/><text x="584" y="22" font-size="15" font-weight="700" fill="#8A6116">EJIE container platform (for example OpenShift) · one Helm chart per component</text><rect x="20" y="56" width="232" height="76" rx="10" fill="#EEF1F3" stroke="#6B7F8E" stroke-width="2.2"/><rect x="30" y="66" width="10" height="10" rx="2" fill="#6B7F8E"/><text x="136.0" y="89" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">Users</text><text x="136.0" y="114" font-size="15.5" fill="#4A5568" text-anchor="middle">browser, five role portals</text><rect x="290" y="56" width="232" height="76" rx="10" fill="#FBECEE" stroke="#C0394B" stroke-width="2.2"/><rect x="300" y="66" width="10" height="10" rx="2" fill="#C0394B"/><text x="406.0" y="89" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">Reverse proxy</text><text x="406.0" y="114" font-size="15.5" fill="#4A5568" text-anchor="middle">DMZ, TLS, web firewall</text><rect x="290" y="364" width="232" height="76" rx="10" fill="#F9F2E6" stroke="#B9822F" stroke-width="2.2"/><rect x="300" y="374" width="10" height="10" rx="2" fill="#B9822F"/><text x="406.0" y="397" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">Cl@ve · FNMT</text><text x="406.0" y="422" font-size="15.5" fill="#4A5568" text-anchor="middle">identity for people, organisations</text><rect x="20" y="518" width="232" height="76" rx="10" fill="#F9F2E6" stroke="#B9822F" stroke-width="2.2"/><rect x="30" y="528" width="10" height="10" rx="2" fill="#B9822F"/><text x="136.0" y="551" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">CI/CD and registry</text><text x="136.0" y="576" font-size="15.5" fill="#4A5568" text-anchor="middle">EJIE pipeline, image registry</text><rect x="576" y="56" width="232" height="76" rx="10" fill="#E8F5FA" stroke="#2E9BC0" stroke-width="2.2"/><rect x="586" y="66" width="10" height="10" rx="2" fill="#2E9BC0"/><text x="692.0" y="89" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">Web portals</text><text x="692.0" y="114" font-size="15.5" fill="#4A5568" text-anchor="middle">researcher, hospital, access body</text><rect x="836" y="56" width="232" height="76" rx="10" fill="#E8F4EF" stroke="#2E8B6E" stroke-width="2.2"/><rect x="846" y="66" width="10" height="10" rx="2" fill="#2E8B6E"/><text x="952.0" y="89" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">API services</text><text x="952.0" y="114" font-size="15.5" fill="#4A5568" text-anchor="middle">FHIR, OMOP, query, catalogue</text><rect x="1096" y="56" width="232" height="76" rx="10" fill="#E8F4EF" stroke="#2E8B6E" stroke-width="2.2"/><rect x="1106" y="66" width="10" height="10" rx="2" fill="#2E8B6E"/><text x="1212.0" y="89" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">Connector</text><text x="1212.0" y="114" font-size="15.5" fill="#4A5568" text-anchor="middle">control and data plane (EDC)</text><rect x="1356" y="56" width="232" height="76" rx="10" fill="#FBECEE" stroke="#C0394B" stroke-width="2.2"/><rect x="1366" y="66" width="10" height="10" rx="2" fill="#C0394B"/><text x="1472.0" y="89" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">Identity hub and issuer</text><text x="1472.0" y="114" font-size="15.5" fill="#4A5568" text-anchor="middle">DCP credentials, DIDs</text><rect x="576" y="210" width="232" height="76" rx="10" fill="#FBECEE" stroke="#C0394B" stroke-width="2.2"/><rect x="586" y="220" width="10" height="10" rx="2" fill="#C0394B"/><text x="692.0" y="243" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">Keycloak</text><text x="692.0" y="268" font-size="15.5" fill="#4A5568" text-anchor="middle">identities and SSO</text><rect x="1096" y="210" width="232" height="76" rx="10" fill="#E8F4EF" stroke="#2E8B6E" stroke-width="2.2"/><rect x="1106" y="220" width="10" height="10" rx="2" fill="#2E8B6E"/><text x="1212.0" y="243" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">Secure environment</text><text x="1212.0" y="268" font-size="15.5" fill="#4A5568" text-anchor="middle">confidential containers</text><rect x="1356" y="210" width="232" height="76" rx="10" fill="#FBECEE" stroke="#C0394B" stroke-width="2.2"/><rect x="1366" y="220" width="10" height="10" rx="2" fill="#C0394B"/><text x="1472.0" y="243" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">Key vault</text><text x="1472.0" y="268" font-size="15.5" fill="#4A5568" text-anchor="middle">signing keys (Vault)</text><rect x="576" y="364" width="232" height="76" rx="10" fill="#E8F4EF" stroke="#2E8B6E" stroke-width="2.2"/><rect x="586" y="374" width="10" height="10" rx="2" fill="#2E8B6E"/><text x="692.0" y="397" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">Catalogue crawler</text><text x="692.0" y="422" font-size="15.5" fill="#4A5568" text-anchor="middle">HealthDCAT-AP, federated</text><rect x="836" y="364" width="232" height="76" rx="10" fill="#EFECF9" stroke="#7B6CC4" stroke-width="2.2"/><rect x="846" y="374" width="10" height="10" rx="2" fill="#7B6CC4"/><text x="952.0" y="397" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">Neo4j</text><text x="952.0" y="422" font-size="15.5" fill="#4A5568" text-anchor="middle">knowledge graph, 5 layers</text><rect x="1096" y="364" width="232" height="76" rx="10" fill="#E8F4EF" stroke="#2E8B6E" stroke-width="2.2"/><rect x="1106" y="374" width="10" height="10" rx="2" fill="#2E8B6E"/><text x="1212.0" y="397" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">Audit and monitoring</text><text x="1212.0" y="422" font-size="15.5" fill="#4A5568" text-anchor="middle">every request and transfer</text><rect x="1356" y="364" width="232" height="76" rx="10" fill="#EFECF9" stroke="#7B6CC4" stroke-width="2.2"/><rect x="1366" y="374" width="10" height="10" rx="2" fill="#7B6CC4"/><text x="1472.0" y="397" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">PostgreSQL</text><text x="1472.0" y="422" font-size="15.5" fill="#4A5568" text-anchor="middle">connector, Keycloak, vault</text><rect x="836" y="540" width="232" height="76" rx="10" fill="#F9F2E6" stroke="#B9822F" stroke-width="2.2"/><rect x="846" y="550" width="10" height="10" rx="2" fill="#B9822F"/><text x="952.0" y="573" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">Osakidetza data lake</text><text x="952.0" y="598" font-size="15.5" fill="#4A5568" text-anchor="middle">hospital systems, registries</text><rect x="1226.0" y="540" width="232" height="76" rx="10" fill="#EEF1F3" stroke="#6B7F8E" stroke-width="2.2"/><rect x="1236.0" y="550" width="10" height="10" rx="2" fill="#6B7F8E"/><text x="1342.0" y="573" font-size="18" font-weight="700" fill="#143D59" text-anchor="middle">ENDS · HealthData@EU</text><text x="1342.0" y="598" font-size="15.5" fill="#4A5568" text-anchor="middle">national and EU nodes</text><path d="M240 94.0 H288" fill="none" stroke="#2E8B6E" stroke-width="2.6" marker-end="url(#ah-2E8B6E)"/><rect x="234" y="55.0" width="61" height="24" rx="5" fill="#FFFFFF" stroke="#2E8B6E" stroke-width="1.3"/><text x="264" y="72.0" font-size="14" fill="#2E8B6E" text-anchor="middle">HTTPS</text><path d="M522 94.0 H574" fill="none" stroke="#2E8B6E" stroke-width="2.6" marker-end="url(#ah-2E8B6E)"/><rect x="504" y="55.0" width="61" height="24" rx="5" fill="#FFFFFF" stroke="#2E8B6E" stroke-width="1.3"/><text x="534" y="72.0" font-size="14" fill="#2E8B6E" text-anchor="middle">HTTPS</text><path d="M808 94.0 H834" fill="none" stroke="#6B7F8E" stroke-width="2.6" marker-end="url(#ah-6B7F8E)"/><rect x="796" y="55.0" width="52" height="24" rx="5" fill="#FFFFFF" stroke="#6B7F8E" stroke-width="1.3"/><text x="822.0" y="72.0" font-size="14" fill="#6B7F8E" text-anchor="middle">REST</text><path d="M1068 94.0 H1094" fill="none" stroke="#2E8B6E" stroke-width="2.6" marker-end="url(#ah-2E8B6E)"/><rect x="1034" y="55.0" width="97" height="24" rx="5" fill="#FFFFFF" stroke="#2E8B6E" stroke-width="1.3"/><text x="1082.0" y="72.0" font-size="14" fill="#2E8B6E" text-anchor="middle">contracts</text><path d="M1328 94.0 H1354" fill="none" stroke="#C0394B" stroke-width="2.6" marker-end="url(#ah-C0394B)"/><rect x="1320" y="55.0" width="43" height="24" rx="5" fill="#FFFFFF" stroke="#C0394B" stroke-width="1.3"/><text x="1342.0" y="72.0" font-size="14" fill="#C0394B" text-anchor="middle">DCP</text><path d="M406 132 V248 H574" fill="none" stroke="#C0394B" stroke-width="2.6" stroke-dasharray="7 5" marker-end="url(#ah-C0394B)"/><rect x="399" y="235" width="142" height="24" rx="5" fill="#FFFFFF" stroke="#C0394B" stroke-width="1.3"/><text x="470" y="252" font-size="14" fill="#C0394B" text-anchor="middle">sign-in (OIDC)</text><path d="M692.0 210 V134" fill="none" stroke="#C0394B" stroke-width="2.6" stroke-dasharray="7 5" marker-end="url(#ah-C0394B)"/><rect x="670" y="158" width="43" height="24" rx="5" fill="#FFFFFF" stroke="#C0394B" stroke-width="1.3"/><text x="692.0" y="175" font-size="14" fill="#C0394B" text-anchor="middle">JWT</text><path d="M522 402 H544 V272 H574" fill="none" stroke="#B9822F" stroke-width="2.6" stroke-dasharray="7 5" marker-end="url(#ah-B9822F)"/><rect x="464" y="327" width="151" height="24" rx="5" fill="#FFFFFF" stroke="#B9822F" stroke-width="1.3"/><text x="540" y="344" font-size="14" fill="#B9822F" text-anchor="middle">identity broker</text><path d="M952.0 132 V362" fill="none" stroke="#7B6CC4" stroke-width="2.6" marker-end="url(#ah-7B6CC4)"/><rect x="926" y="235.0" width="52" height="24" rx="5" fill="#FFFFFF" stroke="#7B6CC4" stroke-width="1.3"/><text x="952.0" y="252.0" font-size="14" fill="#7B6CC4" text-anchor="middle">Bolt</text><path d="M1212.0 132 V208" fill="none" stroke="#2E8B6E" stroke-width="2.6" marker-end="url(#ah-2E8B6E)"/><rect x="1168" y="158.0" width="88" height="24" rx="5" fill="#FFFFFF" stroke="#2E8B6E" stroke-width="1.3"/><text x="1212.0" y="175.0" font-size="14" fill="#2E8B6E" text-anchor="middle">transfer</text><path d="M1472.0 132 V208" fill="none" stroke="#C0394B" stroke-width="2.6" marker-end="url(#ah-C0394B)"/><rect x="1446" y="158.0" width="52" height="24" rx="5" fill="#FFFFFF" stroke="#C0394B" stroke-width="1.3"/><text x="1472.0" y="175.0" font-size="14" fill="#C0394B" text-anchor="middle">keys</text><path d="M1472.0 286 V362" fill="none" stroke="#7B6CC4" stroke-width="2.6" marker-end="url(#ah-7B6CC4)"/><rect x="1432" y="312.0" width="79" height="24" rx="5" fill="#FFFFFF" stroke="#7B6CC4" stroke-width="1.3"/><text x="1472.0" y="329.0" font-size="14" fill="#7B6CC4" text-anchor="middle">storage</text><path d="M1212.0 286 V362" fill="none" stroke="#2E8B6E" stroke-width="2.6" marker-end="url(#ah-2E8B6E)"/><rect x="1186" y="312.0" width="52" height="24" rx="5" fill="#FFFFFF" stroke="#2E8B6E" stroke-width="1.3"/><text x="1212.0" y="329.0" font-size="14" fill="#2E8B6E" text-anchor="middle">logs</text><path d="M808 402 H834" fill="none" stroke="#2E8B6E" stroke-width="2.6" marker-end="url(#ah-2E8B6E)"/><path d="M952.0 540 V442" fill="none" stroke="#B9822F" stroke-width="2.6" marker-end="url(#ah-B9822F)"/><rect x="876" y="487" width="151" height="24" rx="5" fill="#FFFFFF" stroke="#B9822F" stroke-width="1.3"/><text x="952.0" y="504" font-size="14" fill="#B9822F" text-anchor="middle">ETL: FHIR, OMOP</text><path d="M1314 132 V154 H1342.0 V538" fill="none" stroke="#6B7F8E" stroke-width="2.6" stroke-dasharray="7 5" marker-end="url(#ah-6B7F8E)"/><rect x="1320" y="487" width="43" height="24" rx="5" fill="#FFFFFF" stroke="#6B7F8E" stroke-width="1.3"/><text x="1342.0" y="504" font-size="14" fill="#6B7F8E" text-anchor="middle">DSP</text><path d="M240 556 H554" fill="none" stroke="#7B6CC4" stroke-width="2.6" stroke-dasharray="7 5" marker-end="url(#ah-7B6CC4)"/><rect x="374" y="543" width="52" height="24" rx="5" fill="#FFFFFF" stroke="#7B6CC4" stroke-width="1.3"/><text x="400" y="560" font-size="14" fill="#7B6CC4" text-anchor="middle">Helm</text><text x="20" y="660" font-size="17" font-weight="700" fill="#143D59">Legend</text><rect x="110" y="645" width="30" height="18" rx="4" fill="#E8F5FA" stroke="#2E9BC0" stroke-width="2"/><text x="150" y="660" font-size="16" fill="#4A5568">Frontend</text><rect x="283.6" y="645" width="30" height="18" rx="4" fill="#E8F4EF" stroke="#2E8B6E" stroke-width="2"/><text x="323.6" y="660" font-size="16" fill="#4A5568">Backend</text><rect x="448.0" y="645" width="30" height="18" rx="4" fill="#EFECF9" stroke="#7B6CC4" stroke-width="2"/><text x="488.0" y="660" font-size="16" fill="#4A5568">Database</text><rect x="621.6" y="645" width="30" height="18" rx="4" fill="#F9F2E6" stroke="#B9822F" stroke-width="2"/><text x="661.6" y="660" font-size="16" fill="#4A5568">Existing systems</text><rect x="868.8" y="645" width="30" height="18" rx="4" fill="#FBECEE" stroke="#C0394B" stroke-width="2"/><text x="908.8" y="660" font-size="16" fill="#4A5568">Security</text><rect x="1042.3999999999999" y="645" width="30" height="18" rx="4" fill="#EEF1F3" stroke="#6B7F8E" stroke-width="2"/><text x="1082.3999999999999" y="660" font-size="16" fill="#4A5568">Third parties</text><text x="1644" y="660" font-size="15" font-style="italic" fill="#8A94A3" text-anchor="end">Products are the demonstrator's, as examples</text></svg>
+          </div>
+          <aside class="notes">[1:15] Users come in through the reverse proxy to the portals; sign-in through Keycloak, brokered to Cl@ve. API services read the knowledge graph, the connector negotiates and transfers, the identity hub holds the credentials, the vault the keys. The data lake feeds the graph; the connector talks DSP to ENDS and HealthData@EU.</aside>
+        </section>
+
+        <!-- 10 · Q5 maturity -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 5 · MATURITY</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div>
@@ -698,11 +720,11 @@
               <div class="rowcard fragment fade-up" data-fragment-index="3" style="--d: 0.75s"><span class="status st-open">Young</span><div class="grow"><h3>Secure processing and data permits</h3><p>The least mature parts. Plan extra time and budget here.</p></div></div>
             </div>
           </div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[1:45] DSP stable; FHIR and OMOP mature; the connector (Eclipse EDC; Tractus-X in Catena-X) changes every quarter; secure environments and permits are young.</aside>
         </section>
 
-        <!-- 10 · Q6 three roles -->
+        <!-- 11 · Q6 three roles -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 6 · GOVERNANCE</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div>
@@ -720,11 +742,11 @@
             <div class="fragment fade-up" data-fragment-index="1" style="transition-delay: 0.36s; flex: 1; background: var(--navy); border-left: 10px solid var(--amber); border-radius: 20px; padding: 26px 32px"><p style="font-size: 24px; font-weight: 700; letter-spacing: 1px; color: var(--amber)">EUSKADI</p><h3 style="font-size: 32px; color: var(--cream)">EJIE</h3><p style="font-size: 26px; color: var(--mist)">runs the core services.</p></div>
           </div>
           <div class="fragment fade-up" data-fragment-index="2" style="margin-top: 24px; background: #f1e9d8; border-left: 10px solid var(--teal); border-radius: 16px; padding: 20px 40px; font-size: 28px; font-weight: 700">Keep rules and operation apart. Design the governance for several domains from the start.</div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[1:45] Association, Eclipse, Cofinity-X. In Euskadi: EJIE as operator; the access body is an open point with three options. Several domains from the start.</aside>
         </section>
 
-        <!-- 11 · Q6 operating model -->
+        <!-- 12 · Q6 operating model -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 6 · GOVERNANCE</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div>
@@ -793,11 +815,11 @@
             <div class="fragment fade-up" data-fragment-index="0" style="flex: 1; background: var(--card); border: 1px solid var(--rule); border-left: 10px solid var(--green); border-radius: 16px; padding: 18px 28px"><p style="font-size: 26px; color: var(--body)"><b style="color: var(--navy)">Implemented:</b> the Catena-X operating model, with a service map and clear roles.</p></div>
             <div class="fragment fade-up" data-fragment-index="3" style="flex: 1; background: var(--card); border: 1px solid var(--rule); border-left: 10px solid var(--amber); border-radius: 16px; padding: 18px 28px"><p style="font-size: 26px; color: var(--body)"><b style="color: var(--navy)">Considered:</b> the EHDS role model alone. It has no answer for operations and onboarding.</p></div>
           </div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[1:45] The Regulation gives the roles but not who runs the system day to day: that is the orange layer, the operating company.</aside>
         </section>
 
-        <!-- 12 · Q6 functions -->
+        <!-- 13 · Q6 functions -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 6 · GOVERNANCE</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div>
@@ -816,11 +838,11 @@
               <tr class="fragment fade-up" data-fragment-index="1"><td>Support</td><td>The operator and its service providers</td><td>EJIE service desk; each hospital for its own systems</td><td>service levels</td></tr>
             </table>
           </div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[1:30, two clicks] Function by function. Permits and the secure environment have no Catena-X counterpart. Rule of thumb: the access body decides, EJIE operates.</aside>
         </section>
 
-        <!-- 13 · Q6 open point -->
+        <!-- 14 · Q6 open point -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 6 · GOVERNANCE · OPEN POINT</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div>
@@ -836,7 +858,7 @@
           <aside class="notes">[1:15, four clicks] A regional body with a coordinator, one national body, or start under an agreement and decide later. The pilot does not have to wait.</aside>
         </section>
 
-        <!-- 14 · Q7 costs -->
+        <!-- 15 · Q7 costs -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 7 · COSTS</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i></div>
@@ -848,11 +870,11 @@
             <div class="fragment fade-up" data-fragment-index="1" style="flex: 1; background: var(--navy); border-left: 10px solid var(--red); border-radius: 20px; padding: 40px 36px"><p style="font-family: Sora; font-size: 52px; font-weight: 700; color: var(--cream)">15 – 25% a year</p><p style="font-size: 28px; font-weight: 700; color: var(--amber)">To operate it</p><p style="font-size: 24px; color: var(--mist)">Of the build cost: about €120,000 – 375,000 a year.</p></div>
             <div class="fragment fade-up" data-fragment-index="2" style="flex: 1; background: var(--navy); border-left: 10px solid var(--amber); border-radius: 20px; padding: 40px 36px"><p style="font-family: Sora; font-size: 52px; font-weight: 700; color: var(--cream)">€3,000 a month</p><p style="font-size: 28px; font-weight: 700; color: var(--amber)">Hosting: prod, test and dev</p><p style="font-size: 24px; color: var(--mist)">The monthly price depends on the hyperscaler. Plus SDLC and developer tools; the secure environment comes on top.</p></div>
           </div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[1:15, three clicks] Near-zero licences; the money goes into people and hosting. Pilot €0.8–1.5M, pending EJIE's detail, then 15–25% a year to operate. Hosting about €3,000 a month for production, test and development, priced by the hyperscaler.</aside>
         </section>
 
-        <!-- 15 · Q7 assumptions -->
+        <!-- 16 · Q7 assumptions -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 7 · COSTS · ASSUMPTIONS</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i></div>
@@ -864,12 +886,12 @@
             <div class="card fragment fade-up" data-fragment-index="2" style="--accent: var(--red); padding: 22px 32px; gap: 8px"><h3 style="font-size: 30px">Not included</h3><p style="font-size: 24px">Hospital staff time (clinical coders, IT). The data lake, already funded. The secure processing environment. The access body's own staff. Tender costs and VAT.</p></div>
             <div class="card fragment fade-up" data-fragment-index="3" style="--accent: var(--amber); padding: 22px 32px; gap: 8px"><h3 style="font-size: 30px">Hosting, about €3,000 a month</h3><p style="font-size: 24px">Production, test and development: connector, catalogue, identity and monitoring on managed containers. Priced by the hyperscaler; <b>not</b> the secure environment.</p></div>
           </div>
-          <div class="band fragment fade-up" data-fragment-index="4" style="margin-top: 22px; font-size: 28px">The secure environment is its own line, <span>sized with the use cases: several thousand euros a month.</span><p style="font-family: 'DM Sans'; font-size: 21px; font-weight: 400; color: var(--mist); margin-top: 8px">For scale: in our demonstrator one confidential compute node costs about 150 to 300 US dollars a month while it runs. A pilot adds research workspaces, storage, backup and ENS controls.</p></div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <div class="band fragment fade-up" data-fragment-index="4" style="margin-top: 22px; font-size: 28px"><span>The secure environment is its own line, <span>sized with the use cases: several thousand euros a month.</span></span><p style="font-family: 'DM Sans'; font-size: 21px; font-weight: 400; color: var(--mist); margin-top: 8px">For scale: in our demonstrator one confidential compute node costs about 150 to 300 US dollars a month while it runs. A pilot adds research workspaces, storage, backup and ENS controls.</p></div>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[1:30, five clicks] 12 months, 8 to 15 FTE, so about €100k per person-year. Two to three hospitals plus the cancer registry, two use cases, mapping included. Hospital staff, data lake, secure environment, access body staff, tender and VAT excluded. Hosting is priced by the hyperscaler and covers the dataspace services only.</aside>
         </section>
 
-        <!-- 16 · Q8 team -->
+        <!-- 17 · Q8 team -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 8 · TEAM</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i></div>
@@ -890,11 +912,11 @@
               <div class="rowcard fragment fade-up" data-fragment-index="1" style="padding: 12px 28px; transition-delay: 0.48s; --d: 0.9s"><div class="fte" style="--accent: var(--red)">1–2</div><div class="grow"><h3>Data protection and legal</h3><p>GDPR, EHDS, data permits and contracts.</p></div></div>
             </div>
           </div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[1:15] Profile typology: 1–2 architects, 2–3 connector engineers, 2–3 platform and security, 2–5 FHIR, OMOP and terminology, 1–2 data protection and legal: 8 to 15. The pyramid is sized with the project details.</aside>
         </section>
 
-        <!-- 17 · pilot overview, built by click -->
+        <!-- 18 · pilot overview, built by click -->
         <section data-background-color="#FBF8F3" data-auto-animate>
           <p class="eyebrow">THE SUGGESTED PILOT · A REGIONAL EHDS NODE</p>
           <h2 class="h2">Euskadi pilot: start regional, connect upwards</h2>
@@ -949,7 +971,7 @@
           <aside class="notes">[0:45, six clicks] Step 1, arrow, Step 2, arrow, Step 3, foundation.</aside>
         </section>
 
-        <!-- 18 · pilot step 1 -->
+        <!-- 19 · pilot step 1 -->
         <section data-background-color="#FBF8F3" data-auto-animate>
           <p class="eyebrow">THE PILOT · STEP 1 OF 3 · 2027–2028</p>
           <h2 class="h2">Step 1: build the Euskadi pilot</h2>
@@ -962,11 +984,11 @@
             <div class="rowcard fragment fade-up" data-fragment-index="3" style="background: #fff6ea; border: none; padding: 14px 28px"><div class="grow"><h3 style="font-size: 28px">Secure processing environment: our own, or national?</h3><p style="font-size: 24px">A Basque environment, or the processing capacity of <a target="_blank" rel="noopener" href="https://www.sanidad.gob.es/areas/saludDigital/espacioNacionalDS/home.htm">ENDS</a>. Either way it must meet the <a target="_blank" rel="noopener" href="https://ens.ccn.cni.es/">ENS</a>.</p></div><span class="status st-open">open decision</span></div>
             <div class="rowcard fragment fade-up" data-fragment-index="4" style="background: #fff6ea; border: none; padding: 14px 28px"><div class="grow"><h3 style="font-size: 28px">Two use cases: cohort discovery and a disease registry</h3><p style="font-size: 24px">For example the <a target="_blank" rel="noopener" href="https://www.osakidetza.euskadi.eus/contenidos/informacion/osk_pro_dat_datatable/es_def/adjuntos/avisos/ci-REGISTROS-HOSPITALARIOS-DEL-CANCER_v1.pdf">hospital cancer registries</a> that Osakidetza already runs.</p></div><span class="status st-build">we build it</span></div>
           </div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[0:45, five clicks] Office announced Jan 2025, Aragón as model; data lake funded as Euskadi's ENDS part; one node run by EJIE; own or national secure environment; two use cases.</aside>
         </section>
 
-        <!-- 19 · pilot step 2 -->
+        <!-- 20 · pilot step 2 -->
         <section data-background-color="#FBF8F3">
           <p class="eyebrow">THE PILOT · STEP 2 OF 3 · 2028</p>
           <h2 class="h2">Step 2: connect to Spain</h2>
@@ -978,11 +1000,11 @@
             <div class="rowcard fragment fade-up" data-fragment-index="2" style="background: #f1f3f5; border: none; padding: 16px 28px"><div class="grow"><h3 style="font-size: 28px">Ley de Salud Digital: the legal role of the regions</h3><p style="font-size: 24px">Still a draft (<a target="_blank" rel="noopener" href="https://www.sanidad.gob.es/normativa/docs/2025.09.22_CPP_CPP_APL_Salud_Digital1_.pdf">public consultation</a> from September 2025). It sets up the access bodies and both national and regional catalogues.</p></div><span class="status st-open">open decision</span></div>
             <div class="rowcard fragment fade-up" data-fragment-index="3" style="background: #f1f3f5; border: none; padding: 16px 28px"><div class="grow"><h3 style="font-size: 28px">MyHealth@EU national contact point: HCDSNS and e-Receta</h3><p style="font-size: 24px">Primary use, and already live: Euskadi is <a target="_blank" rel="noopener" href="https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/sanidad14/Paginas/2023/180423-interoperabilidad-clinica-paises-ue.aspx">connected to the EU service since 2023</a>. Proof that the path upwards works. <a target="_blank" rel="noopener" href="https://health.ec.europa.eu/ehealth-digital-health-and-care/electronic-cross-border-health-services_en">MyHealth@EU</a></p></div><span class="status st-avail">available</span></div>
           </div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[0:45, four clicks] ENDS opened Jan 2026 as a network of regional platforms; access body by March 2027, one or several; the law is still a draft; MyHealth@EU already live since 2023.</aside>
         </section>
 
-        <!-- 20 · pilot step 3 -->
+        <!-- 21 · pilot step 3 -->
         <section data-background-color="#FBF8F3">
           <p class="eyebrow">THE PILOT · STEP 3 OF 3 · MARCH 2029</p>
           <h2 class="h2">Step 3: connect to the EU, on a ready foundation</h2>
@@ -1000,11 +1022,11 @@
             <div class="fragment fade-up" data-fragment-index="6" style="background: var(--card); border: 1px solid var(--rule); border-left: 10px solid var(--s-avail); border-radius: 16px; padding: 12px 24px"><h3 style="font-size: 26px">FHIR · OMOP · SNOMED CT</h3><p style="font-size: 24px; color: var(--body)"><a target="_blank" rel="noopener" href="https://hl7.org/fhir/R4/">FHIR R4</a>, <a target="_blank" rel="noopener" href="https://ohdsi.github.io/CommonDataModel/">OMOP CDM</a> and <a target="_blank" rel="noopener" href="https://www.snomed.org/">SNOMED CT</a>: mature, used worldwide.</p></div>
             <div class="fragment fade-up" data-fragment-index="7" style="background: var(--card); border: 1px solid var(--rule); border-left: 10px solid var(--s-avail); border-radius: 16px; padding: 12px 24px"><h3 style="font-size: 26px">Cl@ve · FNMT · ENS (CCN)</h3><p style="font-size: 24px; color: var(--body)"><a target="_blank" rel="noopener" href="https://clave.gob.es/">Cl@ve</a> identity, <a target="_blank" rel="noopener" href="https://www.fnmt.es/">FNMT</a> certificates, the <a target="_blank" rel="noopener" href="https://ens.ccn.cni.es/">ENS</a> security scheme.</p></div>
           </div>
-          <p class="foot">Preparatory meeting · EJIE Data Space · Euskadi</p>
+          <p class="foot">EJIE Data Space · Euskadi</p>
           <aside class="notes">[0:45, eight clicks] HealthData@EU 2029; implementing acts 2027; EUDI wallet end 2026; then the four foundation blocks.</aside>
         </section>
 
-        <!-- 21 · next steps -->
+        <!-- 22 · next steps -->
         <section data-background-color="#143D59" class="dark">
           <p class="eyebrow" style="color: var(--amber)">WHAT COULD COME NEXT</p>
           <h2 class="h2" style="color: var(--cream)">From a first definition to an operational pilot</h2>
@@ -1027,7 +1049,7 @@
           <aside class="notes">[1:30, six clicks] Define, prepare, tender, build, operate: about 26 to 34 months from today. The tender takes six to nine months, so phase 1 has to start now to be live around March 2029.</aside>
         </section>
 
-        <!-- 22 · timeline -->
+        <!-- 23 · timeline -->
         <section data-background-color="#FBF8F3">
           <p class="eyebrow">WHAT COULD COME NEXT · TIMELINE</p>
           <h2 class="h2">The timeline, from today to the March 2029 deadline</h2>
@@ -1038,7 +1060,7 @@
           <aside class="notes">[1:15, six clicks] Define and prepare by mid 2027; the tender runs into 2028; building ends between autumn 2028 and spring 2029. The March 2027 and March 2029 deadlines in red.</aside>
         </section>
 
-        <!-- 23 · discussion with QR -->
+        <!-- 24 · discussion with QR -->
         <section data-background-color="#FBF8F3">
           <p class="eyebrow">LET'S DISCUSS</p>
           <h2 class="h2" style="width: 1000px">Three questions to start our discussion</h2>
@@ -1060,9 +1082,13 @@
       </div>
     </div>
 
-    <div class="narration" aria-label="Narración">
-      <button type="button" id="narrate" title="Narración en español (tecla N)">▶ Narración</button>
+    <div class="narration" aria-label="Narration">
+      <button type="button" id="narrate" title="Narration (key N)">▶ Narration</button>
       <button type="button" id="subs" title="Azpitituluak euskaraz (tecla C)">EU azpitituluak</button>
+      <span class="langs" role="group" aria-label="Language">
+        <button type="button" data-lang="en" lang="en" title="English">EN</button>
+        <button type="button" data-lang="es" lang="es" title="Español">ES</button>
+      </span>
       <span id="narrate-state"></span>
     </div>
     <div id="subtitle" lang="eu" role="status" aria-live="polite" hidden></div>
@@ -1070,6 +1096,97 @@
     <script src="../hl7-showcase-2026/reveal/reveal.js"></script>
     <script src="../hl7-showcase-2026/reveal/plugin/notes/notes.js"></script>
     <script>
+      // Language. The slides are written in English; in Spanish each text element is replaced
+      // by the translation of its English HTML from i18n/es.json, before reveal.js lays the
+      // deck out. The choice comes from ?lang=, then the viewer's last choice, then the
+      // browser: Spanish, Basque, Catalan and Galician read the deck in Spanish.
+      var LANGS = ["en", "es"];
+      var LANG = (function () {
+        var q = new URLSearchParams(location.search).get("lang");
+        if (LANGS.indexOf(q) >= 0) {
+          try {
+            localStorage.setItem("ejie-deck-lang", q);
+          } catch (e) {}
+          return q;
+        }
+        try {
+          var saved = localStorage.getItem("ejie-deck-lang");
+          if (LANGS.indexOf(saved) >= 0) return saved;
+        } catch (e) {}
+        var list = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || "en"];
+        for (var i = 0; i < list.length; i++) {
+          var l = String(list[i]).toLowerCase();
+          if (/^(es|eu|ca|gl)\b/.test(l)) return "es";
+          if (/^en\b/.test(l)) return "en";
+        }
+        return "en";
+      })();
+      document.documentElement.lang = LANG;
+      var UI = {
+        en: { title: "EJIE Data Space Euskadi", narration: "Narration", key: "Narration (key N)", noFile: "no narration file", noSlide: "no narration for this slide", loading: "loading…", allow: "click once more to allow audio", failed: "audio failed" },
+        es: { title: "Espacio de Datos EJIE Euskadi", narration: "Narración", key: "Narración (tecla N)", noFile: "sin archivo de narración", noSlide: "sin narración para esta diapositiva", loading: "cargando…", allow: "haz clic otra vez para permitir el audio", failed: "el audio falló" },
+      }[LANG];
+      // The elements that carry text: everything below them is inline (b, i, a, span) or empty.
+      // check-ejie-i18n.mjs uses the same rule, so its keys are exactly the ones looked up here.
+      function deckTextUnits(root) {
+        var INLINE = { B: 1, I: 1, A: 1, SPAN: 1, BR: 1, EM: 1, STRONG: 1, SUP: 1, SUB: 1, TSPAN: 1 };
+        var words = /[A-Za-z]{2}/;
+        function inlineOnly(el) {
+          var all = el.getElementsByTagName("*");
+          for (var i = 0; i < all.length; i++) {
+            if (!INLINE[all[i].tagName.toUpperCase()] && all[i].textContent.trim()) return false;
+          }
+          return true;
+        }
+        var out = [];
+        var walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
+        var el;
+        while ((el = walker.nextNode())) {
+          if (el.closest("aside, script, style") || !words.test(el.textContent) || !inlineOnly(el)) continue;
+          var parent = el.parentElement;
+          if (parent && parent !== root && inlineOnly(parent) && words.test(parent.textContent)) continue;
+          out.push(el);
+        }
+        return out;
+      }
+      function deckKey(el) {
+        return el.innerHTML.replace(/\s+/g, " ").trim();
+      }
+      window.deckTextUnits = deckTextUnits;
+      window.deckKey = deckKey;
+      var translated =
+        LANG === "en"
+          ? Promise.resolve()
+          : fetch("i18n/" + LANG + ".json")
+              .then(function (r) {
+                return r.json();
+              })
+              .then(function (dict) {
+                var missing = [];
+                deckTextUnits(document.querySelector(".reveal .slides")).forEach(function (el) {
+                  var k = deckKey(el);
+                  if (dict[k]) el.innerHTML = dict[k];
+                  else missing.push(k);
+                });
+                window.deckI18nMissing = missing;
+              })
+              .catch(function () {
+                window.deckI18nMissing = ["i18n/" + LANG + ".json did not load"];
+              });
+      document.title = UI.title;
+      document.querySelectorAll(".narration .langs button").forEach(function (b) {
+        b.classList.toggle("on", b.getAttribute("data-lang") === LANG);
+        b.addEventListener("click", function () {
+          // Only the two known values reach the URL; setting search keeps the path and the slide.
+          var l = b.getAttribute("data-lang") === "es" ? "es" : "en";
+          try {
+            localStorage.setItem("ejie-deck-lang", l);
+          } catch (e) {}
+          location.search = "?lang=" + l;
+        });
+      });
+      translated.then(start);
+      function start() {
       Reveal.initialize({
         hash: true,
         slideNumber: "c/t",
@@ -1094,10 +1211,11 @@
         if (document.fonts && document.fonts.ready) document.fonts.ready.then(ready);
         setTimeout(ready, 2000);
       })();
-      // Narration: Spanish audio in the presenter's voice, one file per slide, with
-      // Basque subtitles and the slide's click-builds timed to the spoken sentences.
-      // Everything comes from narration.json (scripts/narrate-euskadi-deck.py). Off by
-      // default, so a live talk is never talked over; on, the deck plays itself.
+      // Narration: audio in the presenter's voice, in the deck's language, one file per
+      // slide, with the slide's click-builds timed to the spoken sentences (and, in Spanish,
+      // optional Basque subtitles). Everything comes from narration.json or narration.en.json
+      // (scripts/narrate-euskadi-deck.py). Off by default, so a live talk is never talked
+      // over; on, the deck plays itself.
       (function () {
         var data = null;
         var on = false;
@@ -1114,7 +1232,11 @@
         var subsBtn = document.getElementById("subs");
         var state = document.getElementById("narrate-state");
         var sub = document.getElementById("subtitle");
-        fetch("narration.json")
+        btn.textContent = "▶ " + UI.narration;
+        btn.title = UI.key;
+        // The Basque subtitles belong to the Spanish narration.
+        subsBtn.hidden = LANG !== "es";
+        fetch(LANG === "es" ? "narration.json" : "narration." + LANG + ".json")
           .then(function (r) {
             return r.json();
           })
@@ -1122,7 +1244,7 @@
             data = j;
           })
           .catch(function () {
-            state.textContent = "no narration file";
+            state.textContent = UI.noFile;
           });
         function current() {
           if (!data) return null;
@@ -1142,7 +1264,7 @@
           if (!on) return;
           var s = current();
           if (!s) {
-            state.textContent = data ? "no narration for this slide" : "loading…";
+            state.textContent = data ? UI.noSlide : UI.loading;
             return;
           }
           // Start the slide with its builds hidden; the cues reveal them.
@@ -1155,7 +1277,7 @@
           player.play().catch(function (err) {
             if (err && err.name === "AbortError") return;
             state.textContent =
-              err && err.name === "NotAllowedError" ? "click once more to allow audio" : "audio failed";
+              err && err.name === "NotAllowedError" ? UI.allow : UI.failed;
           });
         }
         player.addEventListener("timeupdate", function () {
@@ -1188,7 +1310,7 @@
         function setOn(v) {
           on = v;
           btn.classList.toggle("on", on);
-          btn.textContent = on ? "■ Narración" : "▶ Narración";
+          btn.textContent = (on ? "■ " : "▶ ") + UI.narration;
           if (on) play();
           else stop();
         }
@@ -1203,13 +1325,14 @@
         Reveal.on("slidechanged", function () {
           if (on) play();
         });
-        Reveal.addKeyBinding({ keyCode: 78, key: "N", description: "Narración" }, function () {
+        Reveal.addKeyBinding({ keyCode: 78, key: "N", description: UI.narration }, function () {
           setOn(!on);
         });
         Reveal.addKeyBinding({ keyCode: 67, key: "C", description: "Azpitituluak" }, function () {
           subsBtn.click();
         });
       })();
+      }
     </script>
   </body>
 </html>

@@ -5,12 +5,12 @@ decks, two guides, four generators, and one narrated web presentation.
 
 ## Decks
 
-| File                                                             | Slides | When to use it                                                                                                                                                                                                                                                         |
-| ---------------------------------------------------------------- | -----: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`spain-ehds-5-slides.pptx`](spain-ehds-5-slides.pptx)           |  **5** | A short slot, or leaving something behind. **Secondary use**: the problem, what the Regulation puts in place, the demonstrated journey, the proposed operating model, the ask.                                                                                         |
-| [`spain-ehds-ministry-deck.pptx`](spain-ehds-ministry-deck.pptx) | **24** | The full story, primary and secondary use: personas, the federated architecture, integration, outcomes, roadmap, and five closing slides on who operates it.                                                                                                           |
-| [`basque-ehds-15min.pptx`](basque-ehds-15min.pptx)               | **11** | 15 minutes for the Basque Government's Department of Health. Answers its eight questions in order: challenges, lessons, decision criteria, architecture, maturity, governance, costs, team. Simple English, timed speaker notes.                                       |
-| [`euskadi-ejie-2026.pptx`](euskadi-ejie-2026.pptx)               | **23** | Offline copy of the EJIE deck, revised 3 November 2026 after the feedback of EJIE and our team. Rendered from the web deck, one picture per slide with every build shown and the speaker notes. [`euskadi-ejie-2026.pdf`](euskadi-ejie-2026.pdf) is the same as a PDF. |
+| File                                                             | Slides | When to use it                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------------------------------------------------------------- | -----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`spain-ehds-5-slides.pptx`](spain-ehds-5-slides.pptx)           |  **5** | A short slot, or leaving something behind. **Secondary use**: the problem, what the Regulation puts in place, the demonstrated journey, the proposed operating model, the ask.                                                                                                                                                                                                        |
+| [`spain-ehds-ministry-deck.pptx`](spain-ehds-ministry-deck.pptx) | **24** | The full story, primary and secondary use: personas, the federated architecture, integration, outcomes, roadmap, and five closing slides on who operates it.                                                                                                                                                                                                                          |
+| [`basque-ehds-15min.pptx`](basque-ehds-15min.pptx)               | **11** | 15 minutes for the Basque Government's Department of Health. Answers its eight questions in order: challenges, lessons, decision criteria, architecture, maturity, governance, costs, team. Simple English, timed speaker notes.                                                                                                                                                      |
+| [`euskadi-ejie-2026.pptx`](euskadi-ejie-2026.pptx)               | **24** | Offline copy of the EJIE deck in English, revised 3 November 2026. Rendered from the web deck, one picture per slide with every build shown and the speaker notes. [`euskadi-ejie-2026.pdf`](euskadi-ejie-2026.pdf) is the same as a PDF; [`euskadi-ejie-2026-es.pptx`](euskadi-ejie-2026-es.pptx) and [`euskadi-ejie-2026-es.pdf`](euskadi-ejie-2026-es.pdf) are the Spanish copies. |
 
 The five-slide deck is not a subset of the long one. It is a separate file built
 by a generator, so the long deck is never edited to produce it and nothing gets
@@ -52,14 +52,17 @@ soffice --headless --convert-to pdf --outdir /tmp docs/demos/spain-ehds-5-slides
 served at
 [ma3u.github.io/MinimumViableHealthDataspacev2/presentations/euskadi-ejie-2026/](https://ma3u.github.io/MinimumViableHealthDataspacev2/presentations/euskadi-ejie-2026/)
 and [ehds.mabu.red/presentations/euskadi-ejie-2026/](https://ehds.mabu.red/presentations/euskadi-ejie-2026/).
-The 23 slides of the EJIE deck in reveal.js. **Narración** (or the N key) plays a Spanish
-narration in the presenter's cloned voice, shows Basque subtitles (C toggles
-them), reveals each slide's builds as the sentence that names them is spoken,
-and moves on by itself. Off, it is an ordinary click-through deck.
+The 24 slides of the EJIE deck in reveal.js, in English or Spanish: the deck follows the browser's language (Spanish for es, eu, ca and gl), and EN and ES switch it. The Spanish text is in `i18n/es.json`, keyed by each element's English HTML; [`check-ejie-i18n.mjs`](check-ejie-i18n.mjs) fails on a missing or stale entry. **Narration** (or the N key) plays the
+narration in the deck's language in the presenter's cloned voice, reveals each
+slide's builds as the sentence that names them is spoken, and moves on by
+itself. In Spanish, C turns on Basque subtitles (off by default). Off, it is an
+ordinary click-through deck.
 
 ElevenLabs has no Basque voice, so Basque is the subtitle language. The text of
-both is in `narration-source.json`, one sentence per cue; the Basque is a
-machine translation and needs a native proofread.
+all three is in `narration-source.json`, one sentence per cue ("es", "en", "eu");
+the Basque is a machine translation and needs a native proofread.
+`scripts/narrate-euskadi-deck.py` builds the Spanish audio, and with `--lang en`
+the English audio in `audio/en/`.
 `python3 scripts/narrate-euskadi-deck.py [slide-id …]` regenerates the audio,
 `subtitles/*.eu.vtt` and the cue times in `narration.json`.
 

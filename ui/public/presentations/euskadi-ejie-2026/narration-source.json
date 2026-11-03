@@ -1,5 +1,5 @@
 {
-  "about": "Narration for the EJIE deck. Each cue is one sentence: 'es' is spoken in the presenter's voice (ElevenLabs), 'eu' is the Basque subtitle shown while it plays, 'frag' reveals the slide's fragment with that data-fragment-index. scripts/narrate-euskadi-deck.py turns this into audio/slide-N.mp3 and narration.json. The Basque text is a machine translation; the subtitles are off by default (the team does not need them for the video).",
+  "about": "Narration for the EJIE deck. Each cue is one sentence: 'es' is spoken in the Spanish deck and 'en' in the English one (the presenter's voice, ElevenLabs), 'eu' is the optional Basque subtitle of the Spanish narration, 'frag' reveals the slide's fragment with that data-fragment-index. scripts/narrate-euskadi-deck.py turns this into audio/<id>.mp3 and narration.json (Spanish), and with --lang en into audio/en/<id>.mp3 and narration.en.json.",
   "voice_name": "Matthi German",
   "model": "eleven_multilingual_v2",
   "language": "es",
@@ -9,23 +9,28 @@
       "cues": [
         {
           "es": "¡Egun on! Buenos días.",
-          "eu": "Egun on!"
+          "eu": "Egun on!",
+          "en": "Egun on! Good morning."
         },
         {
           "es": "Gracias por invitarnos. Vamos al grano.",
-          "eu": "Eskerrik asko gonbidapenagatik. Goazen harira."
+          "eu": "Eskerrik asko gonbidapenagatik. Goazen harira.",
+          "en": "Thank you for inviting us. Let's get straight to it."
         },
         {
           "es": "Nos enviasteis ocho preguntas. Hoy tenéis ocho respuestas, en vuestro orden.",
-          "eu": "Zortzi galdera bidali zenizkiguten. Gaur zortzi erantzun dituzue, zuen ordenan."
+          "eu": "Zortzi galdera bidali zenizkiguten. Gaur zortzi erantzun dituzue, zuen ordenan.",
+          "en": "You sent us eight questions. Today you get eight answers, in your order."
         },
         {
           "es": "Vengo de Catena-X, el espacio de datos del automóvil, que ya funciona en producción.",
-          "eu": "Catena-Xetik nator, automobilgintzaren datu-espaziotik, dagoeneko ekoizpenean dabilena."
+          "eu": "Catena-Xetik nator, automobilgintzaren datu-espaziotik, dagoeneko ekoizpenean dabilena.",
+          "en": "I come from Catena-X, the automotive data space, which already runs in production."
         },
         {
           "es": "Y traigo un demostrador del Espacio Europeo de Datos Sanitarios que funciona hoy, en directo.",
-          "eu": "Eta Osasun Datuen Europako Espazioaren erakusle bat dakart, gaur zuzenean dabilena."
+          "eu": "Eta Osasun Datuen Europako Espazioaren erakusle bat dakart, gaur zuzenean dabilena.",
+          "en": "And I bring a demonstrator of the European Health Data Space that runs today, live."
         }
       ]
     },
@@ -34,51 +39,61 @@
       "cues": [
         {
           "es": "Aquí tenéis las ocho respuestas, en una sola página.",
-          "eu": "Hemen dituzue zortzi erantzunak, orrialde bakar batean."
+          "eu": "Hemen dituzue zortzi erantzunak, orrialde bakar batean.",
+          "en": "Here are the eight answers, on a single page."
         },
         {
           "es": "Uno: la cultura, no la tecnología.",
           "eu": "Bat: kultura, ez teknologia.",
-          "frag": 0
+          "frag": 0,
+          "en": "One: culture, not technology."
         },
         {
           "es": "Dos: construir sobre los estándares que ya existen.",
           "eu": "Bi: dauden estandarren gainean eraiki.",
-          "frag": 1
+          "frag": 1,
+          "en": "Two: build on the standards that already exist."
         },
         {
           "es": "Tres: estándares abiertos, decididos en público.",
           "eu": "Hiru: estandar irekiak, publikoan erabakiak.",
-          "frag": 2
+          "frag": 2,
+          "en": "Three: open standards, decided in public."
         },
         {
           "es": "Cuatro: reutilizar componentes primero, y construir solo lo que falta.",
           "eu": "Lau: osagaiak berrerabili lehenik, eta falta dena bakarrik eraiki.",
-          "frag": 3
+          "frag": 3,
+          "en": "Four: reuse components first, and build only what is missing."
         },
         {
           "es": "Cinco: el protocolo es estable; los entornos seguros, todavía jóvenes.",
           "eu": "Bost: protokoloa egonkorra da; ingurune seguruak, oraindik gazteak.",
-          "frag": 4
+          "frag": 4,
+          "en": "Five: the protocol is stable; secure environments are still young."
         },
         {
           "es": "Seis: separar las reglas de la operación.",
           "eu": "Sei: arauak eta eragiketa bereiztu.",
-          "frag": 5
+          "frag": 5,
+          "en": "Six: keep the rules apart from the operation."
         },
         {
           "es": "Siete: no hay licencias; se paga a la gente y el alojamiento.",
           "eu": "Zazpi: ez dago lizentziarik; jendea eta ostatatzea ordaintzen dira.",
-          "frag": 6
+          "frag": 6,
+          "en": "Seven: no licences; you pay for people and hosting."
         },
         {
           "es": "Ocho: de ocho a quince personas para un piloto.",
           "eu": "Zortzi: zortzitik hamabost pertsonara pilotu baterako.",
-          "frag": 7
+          "frag": 7,
+          "en": "Eight: eight to fifteen people for a pilot."
         },
         {
           "es": "Si os quedáis con una sola diapositiva, que sea esta. ¡Vamos una por una!",
-          "eu": "Diapositiba bakarra gogoratzen baduzue, izan dadila hau. Goazen banan-banan!"
+          "eu": "Diapositiba bakarra gogoratzen baduzue, izan dadila hau. Goazen banan-banan!",
+          "en": "If you remember one slide, make it this one. Let's go one by one!"
         }
       ]
     },
@@ -88,30 +103,36 @@
         {
           "es": "¿Cuál fue el mayor reto? No fue la tecnología. Fue la cultura.",
           "eu": "Zein izan zen erronkarik handiena? Ez teknologia. Kultura baizik.",
-          "frag": 0
+          "frag": 0,
+          "en": "What was the biggest challenge? Not the technology. It was the culture."
         },
         {
           "es": "Los grupos de trabajo solo avanzaban cuando la dirección les daba tiempo y un mandato claro. En un hospital pasa lo mismo con los médicos y los codificadores.",
-          "eu": "Lan-taldeek zuzendaritzak denbora eta agindu argia ematen zienean bakarrik egiten zuten aurrera. Ospitale batean gauza bera gertatzen da medikuekin eta kodetzaileekin."
+          "eu": "Lan-taldeek zuzendaritzak denbora eta agindu argia ematen zienean bakarrik egiten zuten aurrera. Ospitale batean gauza bera gertatzen da medikuekin eta kodetzaileekin.",
+          "en": "Working groups only moved when management gave them time and a clear mandate. In a hospital it is the same with clinicians and coders."
         },
         {
           "es": "Segundo, la incorporación: primero contratos e identidad, después el software. Un hospital pequeño necesita un conector alojado, no sus propios ingenieros.",
           "eu": "Bigarrena, sarrera: lehenik kontratuak eta identitatea, gero softwarea. Ospitale txiki batek ostatatutako konektore bat behar du, ez bere ingeniariak.",
-          "frag": 1
+          "frag": 1,
+          "en": "Second, onboarding: contracts and identity first, software second. A small hospital needs a hosted connector, not its own engineers."
         },
         {
           "es": "Tercero, la gobernanza: sin reglas comunes, nadie sabía quién podía entrar. En salud se añade el permiso de datos, algo que Catena-X nunca tuvo.",
           "eu": "Hirugarrena, gobernantza: arau komunik gabe, inork ez zekien nor sar zitekeen. Osasunean datu-baimena gehitzen da, Catena-Xek inoiz izan ez zuena.",
-          "frag": 2
+          "frag": 2,
+          "en": "Third, governance: without common rules, nobody knew who could join. Health adds the data permit, something Catena-X never had."
         },
         {
           "es": "Y cuarto, lo que aprendimos en nuestro demostrador: mapear los datos a FHIR, SNOMED, CIE-10 y OMOP costó más que el conector.",
           "eu": "Eta laugarrena, gure erakuslean ikasi genuena: datuak FHIR, SNOMED, GNS-10 eta OMOPera mapatzeak konektoreak baino gehiago kostatu zuen.",
-          "frag": 3
+          "frag": 3,
+          "en": "And fourth, what we learned in our demonstrator: mapping the data to FHIR, SNOMED, ICD-10 and OMOP cost more than the connector."
         },
         {
           "es": "Mover datos es fácil. Ponerse de acuerdo sobre lo que significan: eso es lo difícil.",
-          "eu": "Datuak mugitzea erraza da. Zer esan nahi duten adostea: hori da zaila."
+          "eu": "Datuak mugitzea erraza da. Zer esan nahi duten adostea: hori da zaila.",
+          "en": "Moving data is easy. Agreeing on what it means: that is the hard part."
         }
       ]
     },
@@ -120,22 +141,26 @@
       "cues": [
         {
           "es": "Un ejemplo concreto: el registro hospitalario de cáncer.",
-          "eu": "Adibide zehatz bat: ospitaleko minbizi-erregistroa."
+          "eu": "Adibide zehatz bat: ospitaleko minbizi-erregistroa.",
+          "en": "A concrete example: the hospital cancer registry."
         },
         {
           "es": "¿Qué hace el hospital para unirse? Seis pasos: firmar las reglas, obtener su identidad, tener un conector, mapear los datos, describirlos en el catálogo y pasar las pruebas.",
           "eu": "Zer egiten du ospitaleak batzeko? Sei urrats: arauak sinatu, bere identitatea lortu, konektore bat izan, datuak mapatu, katalogoan deskribatu eta probak gainditu.",
-          "frag": 0
+          "frag": 0,
+          "en": "What does the hospital do to join? Six steps: sign the rules, get its identity, get a connector, map the data, describe it in the catalogue and pass the tests."
         },
         {
           "es": "Y los códigos locales: un diagnóstico en CIE-10-ES pasa a un concepto de SNOMED, el tumor se queda en CIE-O-3, y el laboratorio pasa a LOINC.",
           "eu": "Eta tokiko kodeak: GNS-10-ES-ko diagnostiko bat SNOMED kontzeptu bihurtzen da, tumoreak GNS-O-3 mantentzen du, eta laborategia LOINCera pasatzen da.",
-          "frag": 1
+          "frag": 1,
+          "en": "And the local codes: a diagnosis in the Spanish ICD-10 becomes a SNOMED concept, the tumour stays in ICD-O-3, and the lab result goes to LOINC."
         },
         {
           "es": "Un servicio de terminología propone cada correspondencia, un codificador la aprueba, y todos los hospitales la reutilizan.",
           "eu": "Terminologia-zerbitzu batek baliokidetasun bakoitza proposatzen du, kodetzaile batek onartzen du, eta ospitale guztiek berrerabiltzen dute.",
-          "frag": 2
+          "frag": 2,
+          "en": "A terminology service proposes each mapping, a coder approves it, and every hospital reuses it."
         }
       ]
     },
@@ -144,31 +169,37 @@
       "cues": [
         {
           "es": "Cuatro lecciones, y de dónde viene cada una.",
-          "eu": "Lau ikasgai, eta bakoitza nondik datorren."
+          "eu": "Lau ikasgai, eta bakoitza nondik datorren.",
+          "en": "Four lessons, and where each one comes from."
         },
         {
           "es": "Una, de Catena-X y de nuestro demostrador: no inventéis nada. FHIR, SNOMED, OMOP, HealthDCAT-AP ya existen. ¡Usadlos!",
           "eu": "Bat, Catena-Xetik eta gure erakuslearengandik: ez asmatu ezer. FHIR, SNOMED, OMOP, HealthDCAT-AP badaude. Erabili itzazue!",
-          "frag": 0
+          "frag": 0,
+          "en": "One, from Catena-X and from our demonstrator: don't invent anything. FHIR, SNOMED, OMOP and HealthDCAT-AP already exist. Use them!"
         },
         {
           "es": "Dos, de Catena-X: empezad pequeño. Uno o dos casos de uso, y un resultado que se pueda medir.",
           "eu": "Bi, Catena-Xetik: hasi txiki. Erabilera-kasu bat edo bi, eta neur daitekeen emaitza bat.",
-          "frag": 1
+          "frag": 1,
+          "en": "Two, from Catena-X: start small. One or two use cases, and a result you can measure."
         },
         {
           "es": "Tres, de nuestro demostrador: reservad el presupuesto para el significado de los datos, no para moverlos.",
           "eu": "Hiru, gure erakuslearengandik: gorde aurrekontua datuen esanahirako, ez mugitzeko.",
-          "frag": 2
+          "frag": 2,
+          "en": "Three, from our demonstrator: keep the budget for the meaning of the data, not for moving it."
         },
         {
           "es": "Cuatro, de Catena-X: en la licitación, pedid estándares y pruebas de conformidad, no un producto. Y devolved las mejoras al código abierto.",
           "eu": "Lau, Catena-Xetik: lizitazioan, eskatu estandarrak eta adostasun-probak, ez produktu bat. Eta itzuli hobekuntzak kode irekira.",
-          "frag": 3
+          "frag": 3,
+          "en": "Four, from Catena-X: in the tender, ask for standards and conformity tests, not a product. And give the improvements back to open source."
         },
         {
           "es": "Una copia privada la pagáis para siempre.",
-          "eu": "Kopia pribatu bat betiko ordainduko duzue."
+          "eu": "Kopia pribatu bat betiko ordainduko duzue.",
+          "en": "A private copy is one you pay for forever."
         }
       ]
     },
@@ -178,26 +209,31 @@
         {
           "es": "¿Cómo decidimos? En público.",
           "eu": "Nola erabaki genuen? Publikoan.",
-          "frag": 0
+          "frag": 0,
+          "en": "How did we decide? In public."
         },
         {
           "es": "Cada decisión de arquitectura quedó escrita, con su porqué, para que cualquiera pudiera leerla.",
           "eu": "Arkitektura-erabaki bakoitza idatzita geratu zen, bere zergatiarekin, edonork irakur zezan.",
-          "frag": 1
+          "frag": 1,
+          "en": "Every architecture decision was written down, with its reasons, so anyone could read it."
         },
         {
           "es": "Cinco criterios: estándares abiertos, soberanía de los datos, encaje legal, madurez y una salida clara.",
           "eu": "Bost irizpide: estandar irekiak, datuen subiranotasuna, legezko egokitzapena, heldutasuna eta irteera argi bat.",
-          "frag": 2
+          "frag": 2,
+          "en": "Five criteria: open standards, data sovereignty, legal fit, maturity and a clear exit."
         },
         {
           "es": "Para un organismo público, poder cambiar de proveedor no es un detalle. Es esencial.",
-          "eu": "Erakunde publiko batentzat, hornitzailez aldatu ahal izatea ez da xehetasun bat. Funtsezkoa da."
+          "eu": "Erakunde publiko batentzat, hornitzailez aldatu ahal izatea ez da xehetasun bat. Funtsezkoa da.",
+          "en": "For a public body, being able to change supplier is not a detail. It is essential."
         },
         {
           "es": "Nuestro demostrador hace lo mismo: más de setenta decisiones, todas públicas.",
           "eu": "Gure erakusleak gauza bera egiten du: hirurogeita hamar erabaki baino gehiago, guztiak publikoak.",
-          "frag": 3
+          "frag": 3,
+          "en": "Our demonstrator does the same: more than seventy decisions, all public."
         }
       ]
     },
@@ -206,30 +242,36 @@
       "cues": [
         {
           "es": "La arquitectura: una posible implementación de referencia, descrita por funciones.",
-          "eu": "Arkitektura: erreferentziazko inplementazio posible bat, funtzioen arabera deskribatua."
+          "eu": "Arkitektura: erreferentziazko inplementazio posible bat, funtzioen arabera deskribatua.",
+          "en": "The architecture: a possible reference implementation, described by function."
         },
         {
           "es": "Las tecnologías son solo ejemplos. Todavía no elegimos ninguna.",
-          "eu": "Teknologiak adibideak besterik ez dira. Oraindik ez dugu bat ere aukeratu."
+          "eu": "Teknologiak adibideak besterik ez dira. Oraindik ez dugu bat ere aukeratu.",
+          "en": "The technologies are only examples. We haven't chosen any yet."
         },
         {
           "es": "En cada hospital: los sistemas y el data lake, el mapeo a FHIR y OMOP, la seudonimización, las terminologías y el conector.",
           "eu": "Ospitale bakoitzean: sistemak eta datu-lakua, FHIR eta OMOPerako mapaketa, izengoitzea, terminologiak eta konektorea.",
-          "frag": 0
+          "frag": 0,
+          "en": "At each hospital: the systems and the data lake, the mapping to FHIR and OMOP, pseudonymisation, terminologies and the connector."
         },
         {
           "es": "En el centro, operado por EJIE: identidad, catálogo, incorporación, pruebas de conformidad y monitorización.",
           "eu": "Erdian, EJIEk kudeatua: identitatea, katalogoa, sarrera, adostasun-probak eta monitorizazioa.",
-          "frag": 1
+          "frag": 1,
+          "en": "In the middle, run by EJIE: identity, catalogue, onboarding, conformity tests and monitoring."
         },
         {
           "es": "Y para el organismo de acceso: solicitudes y permisos, la exclusión voluntaria, las tasas, la etiqueta de calidad y el entorno seguro.",
           "eu": "Eta sarbide-erakundearentzat: eskaerak eta baimenak, borondatezko uko egitea, tasak, kalitate-etiketa eta ingurune segurua.",
-          "frag": 2
+          "frag": 2,
+          "en": "And for the access body: applications and permits, the opt-out, fees, the quality label and the secure environment."
         },
         {
           "es": "Verde se reutiliza, ámbar se adapta, blanco se construye. Y el entorno seguro sigue siendo una decisión abierta.",
-          "eu": "Berdea berrerabiltzen da, anbarra egokitzen da, zuria eraikitzen da. Eta ingurune segurua erabaki irekia da oraindik."
+          "eu": "Berdea berrerabiltzen da, anbarra egokitzen da, zuria eraikitzen da. Eta ingurune segurua erabaki irekia da oraindik.",
+          "en": "Green is reused, amber is adapted, white is built. And the secure environment is still an open decision."
         }
       ]
     },
@@ -238,36 +280,68 @@
       "cues": [
         {
           "es": "Esta es nuestra arquitectura: así se podría construir la solución.",
-          "eu": "Hau da gure arkitektura: horrela eraiki liteke irtenbidea."
+          "eu": "Hau da gure arkitektura: horrela eraiki liteke irtenbidea.",
+          "en": "This is our architecture: how the solution could be built."
         },
         {
           "es": "Arriba, la capa de confianza: credenciales verificables al incorporarse, Cl@ve y FNMT, y la cartera europea para los ciudadanos.",
           "eu": "Goian, konfiantza-geruza: sartzean egiaztagiri egiaztagarriak, Cl@ve eta FNMT, eta Europako zorroa herritarrentzat.",
-          "frag": 0
+          "frag": 0,
+          "en": "On top, the trust layer: verifiable credentials at onboarding, Cl@ve and FNMT, and the European wallet for citizens."
         },
         {
           "es": "En el hospital: los datos, su mapeo a FHIR y OMOP con las terminologías, y un conector que solo deja salir datos seudonimizados.",
           "eu": "Ospitalean: datuak, FHIR eta OMOPera mapatzea terminologiekin, eta izengoitutako datuak bakarrik ateratzen uzten dituen konektore bat.",
-          "frag": 1
+          "frag": 1,
+          "en": "At the hospital: the data, its mapping to FHIR and OMOP with the terminologies, and a connector that only lets pseudonymised data out."
         },
         {
           "es": "En el centro, EJIE como operador: la incorporación, la auditoría y el catálogo federado.",
           "eu": "Erdian, EJIE operadore gisa: sarrera, auditoria eta katalogo federatua.",
-          "frag": 2
+          "frag": 2,
+          "en": "In the middle, EJIE as operator: onboarding, audit and the federated catalogue."
         },
         {
           "es": "A la derecha, el organismo de acceso: los permisos, la exclusión voluntaria y el entorno seguro donde trabajan los investigadores.",
           "eu": "Eskuinean, sarbide-erakundea: baimenak, borondatezko uko egitea eta ikertzaileek lan egiten duten ingurune segurua.",
-          "frag": 3
+          "frag": 3,
+          "en": "On the right, the access body: permits, the opt-out and the secure environment where researchers work."
         },
         {
           "es": "Abajo, el protocolo de espacios de datos une a todos, y conecta hacia arriba con España y con Europa.",
           "eu": "Behean, datu-espazioen protokoloak denak lotzen ditu, eta gorantz konektatzen du Espainiarekin eta Europarekin.",
-          "frag": 4
+          "frag": 4,
+          "en": "Along the bottom, the dataspace protocol connects everyone, and connects upwards to Spain and to Europe."
         },
         {
           "es": "Todo esto funciona hoy en nuestro demostrador.",
-          "eu": "Hau guztia gaur dabil gure erakuslean."
+          "eu": "Hau guztia gaur dabil gure erakuslean.",
+          "en": "All of this runs today in our demonstrator."
+        }
+      ]
+    },
+    {
+      "id": "deployment",
+      "cues": [
+        {
+          "es": "Y así se desplegaría en EJIE: cada componente en un contenedor, con un chart de Helm cada uno.",
+          "en": "And this is how it would be deployed at EJIE: every component in a container, with one Helm chart each.",
+          "eu": "Eta honela hedatuko litzateke EJIEn: osagai bakoitza edukiontzi batean, Helm chart bana."
+        },
+        {
+          "es": "Los usuarios entran por el proxy inverso hasta los portales, e inician sesión con Keycloak, conectado a Cl@ve.",
+          "en": "Users come in through the reverse proxy to the portals, and sign in with Keycloak, connected to Cl@ve.",
+          "eu": "Erabiltzaileak alderantzizko proxytik sartzen dira atarietara, eta Keycloakekin hasten dute saioa, Cl@verekin konektatuta."
+        },
+        {
+          "es": "Los servicios de API leen el grafo de conocimiento; el conector negocia y transfiere; el identity hub guarda las credenciales y el almacén, las claves.",
+          "en": "The API services read the knowledge graph; the connector negotiates and transfers; the identity hub holds the credentials, and the vault the keys.",
+          "eu": "API zerbitzuek ezagutza-grafoa irakurtzen dute; konektoreak negoziatu eta transferitzen du; identity hub-ak egiaztagiriak gordetzen ditu, eta biltegiak gakoak."
+        },
+        {
+          "es": "El data lake de Osakidetza alimenta el grafo, y el conector habla el protocolo de espacios de datos con ENDS y HealthData@EU.",
+          "en": "The Osakidetza data lake feeds the graph, and the connector speaks the dataspace protocol with ENDS and HealthData@EU.",
+          "eu": "Osakidetzaren datu-lakuak grafoa elikatzen du, eta konektoreak datu-espazioen protokoloa erabiltzen du ENDS eta HealthData@EUrekin."
         }
       ]
     },
@@ -277,26 +351,31 @@
         {
           "es": "¿Qué está maduro? El protocolo de espacios de datos es estable, y va camino de ser norma ISO.",
           "eu": "Zer dago heldu? Datu-espazioen protokoloa egonkorra da, eta ISO arau bihurtzeko bidean dago.",
-          "frag": 0
+          "frag": 0,
+          "en": "What is mature? The dataspace protocol is stable, and on its way to an ISO standard."
         },
         {
           "es": "FHIR y OMOP: maduros.",
           "eu": "FHIR eta OMOP: helduak.",
-          "frag": 1
+          "frag": 1,
+          "en": "FHIR and OMOP: mature."
         },
         {
           "es": "El conector, por ejemplo Eclipse EDC, funciona en producción desde 2023, aunque todavía cambia cada trimestre.",
           "eu": "Konektorea, adibidez Eclipse EDC, 2023tik dabil ekoizpenean, nahiz eta oraindik hiruhileko bakoitzean aldatzen den.",
-          "frag": 2
+          "frag": 2,
+          "en": "The connector, for example Eclipse EDC, has run in production since 2023, but it still changes every quarter."
         },
         {
           "es": "¿Lo más joven? Los entornos de tratamiento seguro y los permisos de datos.",
           "eu": "Gazteena? Tratamendu seguruko inguruneak eta datu-baimenak.",
-          "frag": 3
+          "frag": 3,
+          "en": "The youngest parts? Secure processing environments and data permits."
         },
         {
           "es": "Ahí, reservad más tiempo y más presupuesto.",
-          "eu": "Hor, gorde denbora eta aurrekontu gehiago."
+          "eu": "Hor, gorde denbora eta aurrekontu gehiago.",
+          "en": "There, plan more time and more budget."
         }
       ]
     },
@@ -306,25 +385,30 @@
         {
           "es": "Gobernanza. Catena-X separa tres papeles.",
           "eu": "Gobernantza. Catena-Xek hiru rol bereizten ditu.",
-          "frag": 0
+          "frag": 0,
+          "en": "Governance. Catena-X separates three roles."
         },
         {
           "es": "La asociación fija las reglas y certifica. Eclipse aloja el código. Y Cofinity-X opera.",
-          "eu": "Elkarteak arauak finkatzen ditu eta ziurtatzen du. Eclipsek kodea hartzen du. Eta Cofinity-Xek kudeatzen du."
+          "eu": "Elkarteak arauak finkatzen ditu eta ziurtatzen du. Eclipsek kodea hartzen du. Eta Cofinity-Xek kudeatzen du.",
+          "en": "The association sets the rules and certifies. Eclipse hosts the code. And Cofinity-X runs the operation."
         },
         {
           "es": "En Euskadi, EJIE operaría los servicios centrales. Quién será el organismo de acceso sigue abierto.",
           "eu": "Euskadin, EJIEk zerbitzu nagusiak kudeatuko lituzke. Nor izango den sarbide-erakundea irekita dago oraindik.",
-          "frag": 1
+          "frag": 1,
+          "en": "In Euskadi, EJIE would run the core services. Who will be the access body is still open."
         },
         {
           "es": "Nuestro consejo: quien fija las reglas no debe ser quien opera.",
           "eu": "Gure aholkua: arauak finkatzen dituena ez da izan behar kudeatzen duena.",
-          "frag": 2
+          "frag": 2,
+          "en": "Our advice: whoever sets the rules should not be the one who operates."
         },
         {
           "es": "Y pensad en varios dominios desde el primer día, no solo en salud.",
-          "eu": "Eta pentsatu hainbat domeinutan lehen egunetik, ez osasunean bakarrik."
+          "eu": "Eta pentsatu hainbat domeinutan lehen egunetik, ez osasunean bakarrik.",
+          "en": "And think of several domains from day one, not only health."
         }
       ]
     },
@@ -334,36 +418,43 @@
         {
           "es": "¿Quién opera qué? El modelo operativo de Catena-X: cada servicio, con un responsable claro.",
           "eu": "Nork kudeatzen du zer? Catena-Xen eredu operatiboa: zerbitzu bakoitza, arduradun argi batekin.",
-          "frag": 0
+          "frag": 0,
+          "en": "Who runs what? The Catena-X operating model: every service, with a clear owner."
         },
         {
           "es": "Arriba, la Unión Europea: el catálogo europeo, el enrutamiento y los controles. Cerrado por ley.",
           "eu": "Goian, Europar Batasuna: Europako katalogoa, bideratzea eta kontrolak. Legez itxia.",
-          "frag": 1
+          "frag": 1,
+          "en": "At the top, the European Union: the EU catalogue, routing and checks. Closed by law."
         },
         {
           "es": "Debajo, el Estado miembro: permisos de datos, supervisión y tasas. Eso no se delega.",
           "eu": "Azpian, estatu kidea: datu-baimenak, ikuskapena eta tasak. Hori ez da eskuordetzen.",
-          "frag": 2
+          "frag": 2,
+          "en": "Below, the Member State: data permits, enforcement and fees. That cannot be delegated."
         },
         {
           "es": "El reglamento define todos estos roles. Pero no dice quién opera el sistema cada día.",
           "eu": "Erregelamenduak rol horiek guztiak definitzen ditu. Baina ez du esaten nork kudeatzen duen sistema egunero.",
-          "frag": 3
+          "frag": 3,
+          "en": "The Regulation defines all these roles. But it does not say who runs the system every day."
         },
         {
           "es": "¿Quién conecta un hospital nuevo? ¿Quién responde cuando algo falla a las tres de la mañana?",
-          "eu": "Nork konektatzen du ospitale berri bat? Nork erantzuten du goizeko hiruretan zerbaitek huts egiten duenean?"
+          "eu": "Nork konektatzen du ospitale berri bat? Nork erantzuten du goizeko hiruretan zerbaitek huts egiten duenean?",
+          "en": "Who connects a new hospital? Who answers when something breaks at three in the morning?"
         },
         {
           "es": "Esa es la capa naranja: la empresa operadora. Y está abierta.",
           "eu": "Hori da geruza laranja: enpresa operadorea. Eta irekita dago.",
-          "frag": 4
+          "frag": 4,
+          "en": "That is the orange layer: the operating company. And it is open."
         },
         {
           "es": "Y todo ello, al servicio de los hospitales, los investigadores y los ciudadanos.",
           "eu": "Eta hori guztia, ospitaleen, ikertzaileen eta herritarren zerbitzura.",
-          "frag": 5
+          "frag": 5,
+          "en": "And all of it serves hospitals, researchers and citizens."
         }
       ]
     },
@@ -372,25 +463,30 @@
       "cues": [
         {
           "es": "¿Cómo se traduce esto a un espacio de datos de salud? Función por función.",
-          "eu": "Nola itzultzen da hau osasun-datuen espazio batera? Funtzioz funtzio."
+          "eu": "Nola itzultzen da hau osasun-datuen espazio batera? Funtzioz funtzio.",
+          "en": "How does this translate to a health data space? Function by function."
         },
         {
           "es": "Las reglas, los permisos, la incorporación y el catálogo.",
           "eu": "Arauak, baimenak, sarrera eta katalogoa.",
-          "frag": 0
+          "frag": 0,
+          "en": "The rules, the permits, onboarding and the catalogue."
         },
         {
           "es": "Fijaos: los permisos de datos no existen en Catena-X. El reglamento los añade.",
-          "eu": "Begiratu: datu-baimenak ez daude Catena-Xen. Erregelamenduak gehitzen ditu."
+          "eu": "Begiratu: datu-baimenak ez daude Catena-Xen. Erregelamenduak gehitzen ditu.",
+          "en": "Note: data permits don't exist in Catena-X. The Regulation adds them."
         },
         {
           "es": "Después, el entorno seguro, la certificación, los incidentes y el soporte.",
           "eu": "Ondoren, ingurune segurua, ziurtapena, gorabeherak eta laguntza.",
-          "frag": 1
+          "frag": 1,
+          "en": "Then the secure environment, certification, incidents and support."
         },
         {
           "es": "La regla general: el organismo de acceso decide, y EJIE opera.",
-          "eu": "Arau orokorra: sarbide-erakundeak erabakitzen du, eta EJIEk kudeatzen du."
+          "eu": "Arau orokorra: sarbide-erakundeak erabakitzen du, eta EJIEk kudeatzen du.",
+          "en": "The rule of thumb: the access body decides, and EJIE operates."
         }
       ]
     },
@@ -399,27 +495,32 @@
       "cues": [
         {
           "es": "Un punto abierto: ¿quién será el organismo de acceso en Euskadi?",
-          "eu": "Puntu ireki bat: nor izango da sarbide-erakundea Euskadin?"
+          "eu": "Puntu ireki bat: nor izango da sarbide-erakundea Euskadin?",
+          "en": "An open point: who will be the access body in Euskadi?"
         },
         {
           "es": "Opción A: la oficina vasca como organismo de acceso, con un coordinador nacional. El reglamento lo permite.",
           "eu": "A aukera: euskal bulegoa sarbide-erakunde gisa, koordinatzaile nazional batekin. Erregelamenduak baimentzen du.",
-          "frag": 0
+          "frag": 0,
+          "en": "Option A: the Basque office as access body, with a national coordinator. The Regulation allows it."
         },
         {
           "es": "Opción B: un único organismo nacional, y la oficina vasca prepara las solicitudes y opera el nodo.",
           "eu": "B aukera: erakunde nazional bakarra, eta euskal bulegoak eskaerak prestatzen ditu eta nodoa kudeatzen du.",
-          "frag": 1
+          "frag": 1,
+          "en": "Option B: one national body, and the Basque office prepares the applications and runs the node."
         },
         {
           "es": "Opción C: empezar el piloto con un acuerdo de cooperación, y decidir cuando se apruebe la ley.",
           "eu": "C aukera: pilotua lankidetza-hitzarmen batekin hasi, eta legea onartzen denean erabaki.",
-          "frag": 2
+          "frag": 2,
+          "en": "Option C: start the pilot under a cooperation agreement, and decide when the law is passed."
         },
         {
           "es": "España debe designar sus organismos antes del veintiséis de marzo de 2027. El piloto puede empezar con cualquiera de las tres.",
           "eu": "Espainiak bere erakundeak izendatu behar ditu 2027ko martxoaren 26a baino lehen. Pilotua hiruretako edozeinekin has daiteke.",
-          "frag": 3
+          "frag": 3,
+          "en": "Spain must designate its bodies by the twenty-sixth of March 2027. The pilot can start under any of the three."
         }
       ]
     },
@@ -428,30 +529,36 @@
       "cues": [
         {
           "es": "Hablemos de dinero. Licencias: casi cero, porque el núcleo es código abierto.",
-          "eu": "Hitz egin dezagun diruaz. Lizentziak: ia zero, muina kode irekia delako."
+          "eu": "Hitz egin dezagun diruaz. Lizentziak: ia zero, muina kode irekia delako.",
+          "en": "Let's talk about money. Licences: almost zero, because the core is open source."
         },
         {
           "es": "Lo que cuesta es la gente: ingeniería, alojamiento y operación.",
-          "eu": "Kostatzen dena jendea da: ingeniaritza, ostatatzea eta eragiketa."
+          "eu": "Kostatzen dena jendea da: ingeniaritza, ostatatzea eta eragiketa.",
+          "en": "What costs money is people: engineering, hosting and operations."
         },
         {
           "es": "Nuestra estimación para un piloto regional, pendiente del detalle de EJIE: entre ochocientos mil euros y un millón y medio.",
           "eu": "Eskualdeko pilotu baterako gure estimazioa, EJIEren xehetasunaren zain: zortziehun mila euro eta milioi eta erdi artean.",
-          "frag": 0
+          "frag": 0,
+          "en": "Our estimate for a regional pilot, pending EJIE's detail: between eight hundred thousand and one and a half million euros."
         },
         {
           "es": "Después, operarlo cuesta entre un quince y un veinticinco por ciento al año.",
           "eu": "Ondoren, kudeatzeak urtean ehuneko hamabost eta hogeita bost artean kostatzen du.",
-          "frag": 1
+          "frag": 1,
+          "en": "After that, running it costs fifteen to twenty-five percent a year."
         },
         {
           "es": "Alojamiento: producción, pruebas y desarrollo, unos tres mil euros al mes, según el proveedor de nube.",
           "eu": "Ostatatzea: ekoizpena, probak eta garapena, hilean hiru mila euro inguru, hodei-hornitzailearen arabera.",
-          "frag": 2
+          "frag": 2,
+          "en": "Hosting: production, test and development, about three thousand euros a month, depending on the cloud provider."
         },
         {
           "es": "Más las herramientas de desarrollo. El entorno seguro va aparte: lo vemos ahora.",
-          "eu": "Gehi garapen-tresnak. Ingurune segurua aparte doa: orain ikusiko dugu."
+          "eu": "Gehi garapen-tresnak. Ingurune segurua aparte doa: orain ikusiko dugu.",
+          "en": "Plus the development tools. The secure environment comes on top: we'll see that now."
         }
       ]
     },
@@ -460,32 +567,38 @@
       "cues": [
         {
           "es": "¿Qué hay detrás de estas cifras?",
-          "eu": "Zer dago zifra hauen atzean?"
+          "eu": "Zer dago zifra hauen atzean?",
+          "en": "What is behind these figures?"
         },
         {
           "es": "Doce meses de construcción, con ocho a quince personas. Es decir, unos cien mil euros por persona y año.",
           "eu": "Hamabi hilabeteko eraikuntza, zortzi eta hamabost pertsona artean. Hau da, ehun mila euro inguru pertsona eta urte bakoitzeko.",
-          "frag": 0
+          "frag": 0,
+          "en": "Twelve months of build, with eight to fifteen people. That is about a hundred thousand euros per person per year."
         },
         {
           "es": "El alcance: dos o tres hospitales de Osakidetza y el registro de cáncer, dos casos de uso y un nodo. El mapeo de los datos está incluido.",
           "eu": "Irismena: Osakidetzaren bizpahiru ospitale eta minbizi-erregistroa, bi erabilera-kasu eta nodo bat. Datuen mapaketa barne dago.",
-          "frag": 1
+          "frag": 1,
+          "en": "The scope: two or three Osakidetza hospitals and the cancer registry, two use cases and one node. Mapping the data is included."
         },
         {
           "es": "No incluye el tiempo del personal de los hospitales, el data lake, el entorno seguro, ni el personal del organismo de acceso.",
           "eu": "Ez ditu barne hartzen ospitaleetako langileen denbora, datu-lakua, ingurune segurua, ezta sarbide-erakundeko langileak ere.",
-          "frag": 2
+          "frag": 2,
+          "en": "It does not include hospital staff time, the data lake, the secure environment, or the access body's staff."
         },
         {
           "es": "El alojamiento cubre el conector, el catálogo, la identidad y la monitorización, al precio del proveedor de nube. No el entorno seguro.",
           "eu": "Ostatatzeak konektorea, katalogoa, identitatea eta monitorizazioa estaltzen ditu, hodei-hornitzailearen prezioan. Ez ingurune segurua.",
-          "frag": 3
+          "frag": 3,
+          "en": "Hosting covers the connector, the catalogue, identity and monitoring, at the cloud provider's price. Not the secure environment."
         },
         {
           "es": "El entorno seguro es una línea aparte. Con espacios de trabajo, almacenamiento y el Esquema Nacional de Seguridad, son varios miles de euros al mes.",
           "eu": "Ingurune segurua lerro bereizia da. Lan-espazioekin, biltegiratzearekin eta Segurtasun Eskema Nazionalarekin, hilean hainbat mila euro dira.",
-          "frag": 4
+          "frag": 4,
+          "en": "The secure environment is a separate line. With workspaces, storage and the national security scheme, it is several thousand euros a month."
         }
       ]
     },
@@ -495,16 +608,19 @@
         {
           "es": "¿Y el equipo? Entre ocho y quince personas, a tiempo completo.",
           "eu": "Eta taldea? Zortzi eta hamabost pertsona artean, lanaldi osoan.",
-          "frag": 0
+          "frag": 0,
+          "en": "And the team? Between eight and fifteen people, full time."
         },
         {
           "es": "Los perfiles: uno o dos arquitectos, dos o tres ingenieros de conectores, dos o tres de plataforma y seguridad, de dos a cinco especialistas en datos y terminologías, y una o dos personas para protección de datos y derecho.",
           "eu": "Profilak: arkitekto bat edo bi, konektoreetako bizpahiru ingeniari, plataforma eta segurtasuneko bizpahiru, datu eta terminologietako bi eta bost espezialista artean, eta pertsona bat edo bi datuen babeserako eta zuzenbiderako.",
-          "frag": 1
+          "frag": 1,
+          "en": "The profiles: one or two architects, two or three connector engineers, two or three for platform and security, two to five data and terminology specialists, and one or two for data protection and legal."
         },
         {
           "es": "La pirámide exacta se dimensiona con el detalle del proyecto. Y sin tiempo ni mandato de la dirección, no funciona.",
-          "eu": "Piramide zehatza proiektuaren xehetasunarekin neurtzen da. Eta zuzendaritzaren denborarik eta agindurik gabe, ez dabil."
+          "eu": "Piramide zehatza proiektuaren xehetasunarekin neurtzen da. Eta zuzendaritzaren denborarik eta agindurik gabe, ez dabil.",
+          "en": "The exact pyramid is sized with the project details. And without time and a mandate from management, it does not work."
         }
       ]
     },
@@ -513,37 +629,44 @@
       "cues": [
         {
           "es": "Esta es nuestra propuesta: empezar en Euskadi, y conectar hacia arriba.",
-          "eu": "Hau da gure proposamena: Euskadin hasi, eta gorantz konektatu."
+          "eu": "Hau da gure proposamena: Euskadin hasi, eta gorantz konektatu.",
+          "en": "This is our proposal: start in Euskadi, and connect upwards."
         },
         {
           "es": "Paso uno, 2027 y 2028: el piloto de Euskadi, con Osakidetza y EJIE.",
           "eu": "Lehen urratsa, 2027 eta 2028: Euskadiko pilotua, Osakidetzarekin eta EJIErekin.",
-          "frag": 0
+          "frag": 0,
+          "en": "Step one, 2027 and 2028: the Euskadi pilot, with Osakidetza and EJIE."
         },
         {
           "es": "Luego, España.",
           "eu": "Gero, Espainia.",
-          "frag": 1
+          "frag": 1,
+          "en": "Then Spain."
         },
         {
           "es": "Paso dos, 2028: el Espacio Nacional de Datos de Salud, su organismo de acceso y la nueva ley de salud digital.",
           "eu": "Bigarren urratsa, 2028: Osasun Datuen Espazio Nazionala, bere sarbide-erakundea eta osasun digitalaren lege berria.",
-          "frag": 2
+          "frag": 2,
+          "en": "Step two, 2028: the National Health Data Space, its access body and the new digital health law."
         },
         {
           "es": "Y luego, Europa.",
           "eu": "Eta gero, Europa.",
-          "frag": 3
+          "frag": 3,
+          "en": "And then Europe."
         },
         {
           "es": "Paso tres, marzo de 2029: HealthData@EU arranca para el uso secundario.",
           "eu": "Hirugarren urratsa, 2029ko martxoa: HealthData@EU abian jartzen da bigarren mailako erabilerarako.",
-          "frag": 4
+          "frag": 4,
+          "en": "Step three, March 2029: HealthData@EU starts for secondary use."
         },
         {
           "es": "Y lo mejor: no empezamos de cero. La base ya existe hoy.",
           "eu": "Eta onena: ez gara zerotik hasten. Oinarria gaur badago.",
-          "frag": 5
+          "frag": 5,
+          "en": "And the best part: we don't start from zero. The foundation exists today."
         }
       ]
     },
@@ -552,40 +675,48 @@
       "cues": [
         {
           "es": "Paso uno: el piloto de Euskadi.",
-          "eu": "Lehen urratsa: Euskadiko pilotua."
+          "eu": "Lehen urratsa: Euskadiko pilotua.",
+          "en": "Step one: the Euskadi pilot."
         },
         {
           "es": "La Oficina Vasca de Datos de Salud se anunció en enero de 2025.",
           "eu": "Osasun Datuen Euskal Bulegoa 2025eko urtarrilean iragarri zen.",
-          "frag": 0
+          "frag": 0,
+          "en": "The Basque Health Data Office was announced in January 2025."
         },
         {
           "es": "Y Aragón ya abrió la primera oficina regional de España, en octubre de 2025.",
-          "eu": "Eta Aragoik Espainiako lehen eskualde-bulegoa ireki zuen jada, 2025eko urrian."
+          "eu": "Eta Aragoik Espainiako lehen eskualde-bulegoa ireki zuen jada, 2025eko urrian.",
+          "en": "And Aragón already opened Spain's first regional office, in October 2025."
         },
         {
           "es": "El data lake de Osakidetza ya está financiado como la parte vasca del espacio nacional.",
           "eu": "Osakidetzaren datu-lakua dagoeneko finantzatuta dago espazio nazionalaren euskal zati gisa.",
-          "frag": 1
+          "frag": 1,
+          "en": "The Osakidetza data lake is already funded as the Basque part of the national data space."
         },
         {
           "es": "Preparamos los datos en FHIR y OMOP.",
-          "eu": "Datuak FHIR eta OMOP formatuetan prestatzen ditugu."
+          "eu": "Datuak FHIR eta OMOP formatuetan prestatzen ditugu.",
+          "en": "We prepare the data in FHIR and OMOP."
         },
         {
           "es": "Un nodo regional, con conector y catálogo, operado por EJIE.",
           "eu": "Eskualde-nodo bat, konektore eta katalogoarekin, EJIEk kudeatua.",
-          "frag": 2
+          "frag": 2,
+          "en": "One regional node, with connector and catalogue, run by EJIE."
         },
         {
           "es": "La decisión abierta: ¿un entorno seguro propio, o el nacional? En los dos casos, con el Esquema Nacional de Seguridad.",
           "eu": "Erabaki irekia: ingurune seguru propioa, ala nazionala? Bi kasuetan, Segurtasun Eskema Nazionalarekin.",
-          "frag": 3
+          "frag": 3,
+          "en": "The open decision: our own secure environment, or the national one? Either way, under the national security scheme."
         },
         {
           "es": "Y dos casos de uso: descubrir cohortes, y un registro de enfermedades, como los registros hospitalarios de cáncer.",
           "eu": "Eta bi erabilera-kasu: kohorteak aurkitzea, eta gaixotasun-erregistro bat, ospitaleetako minbizi-erregistroak bezala.",
-          "frag": 4
+          "frag": 4,
+          "en": "And two use cases: cohort discovery, and a disease registry, like the hospital cancer registries."
         }
       ]
     },
@@ -594,31 +725,37 @@
       "cues": [
         {
           "es": "Paso dos: conectar con España.",
-          "eu": "Bigarren urratsa: Espainiarekin konektatu."
+          "eu": "Bigarren urratsa: Espainiarekin konektatu.",
+          "en": "Step two: connect to Spain."
         },
         {
           "es": "El Espacio Nacional de Datos de Salud se abrió en enero de 2026: una red de plataformas regionales con protocolos comunes.",
           "eu": "Osasun Datuen Espazio Nazionala 2026ko urtarrilean ireki zen: protokolo komunak dituzten eskualde-plataformen sarea.",
-          "frag": 0
+          "frag": 0,
+          "en": "The National Health Data Space opened in January 2026: a network of regional platforms on common protocols."
         },
         {
           "es": "Es decir: el enfoque de abajo arriba ya es el diseño nacional.",
-          "eu": "Hau da: behetik gorako ikuspegia dagoeneko diseinu nazionala da."
+          "eu": "Hau da: behetik gorako ikuspegia dagoeneko diseinu nazionala da.",
+          "en": "In other words: the bottom-up approach is already the national design."
         },
         {
           "es": "La decisión abierta: España debe designar su organismo de acceso antes de marzo de 2027. ¿Tendrá Euskadi el suyo?",
           "eu": "Erabaki irekia: Espainiak bere sarbide-erakundea izendatu behar du 2027ko martxoa baino lehen. Euskadik izango al du berea?",
-          "frag": 1
+          "frag": 1,
+          "en": "The open decision: Spain must designate its access body before March 2027. Will Euskadi have its own?"
         },
         {
           "es": "La ley de salud digital definirá el papel de las regiones. Todavía es un borrador: aclaradlo con el Ministerio en paralelo.",
           "eu": "Osasun digitalaren legeak eskualdeen papera zehaztuko du. Zirriborroa da oraindik: argitu Ministerioarekin batera.",
-          "frag": 2
+          "frag": 2,
+          "en": "The digital health law will define the role of the regions. It is still a draft: clarify it with the Ministry in parallel."
         },
         {
           "es": "Y para el uso primario, el camino ya funciona: Euskadi está conectada a MyHealth@EU desde 2023.",
           "eu": "Eta erabilera primariorako, bideak dagoeneko funtzionatzen du: Euskadi MyHealth@EUra konektatuta dago 2023tik.",
-          "frag": 3
+          "frag": 3,
+          "en": "And for primary use, the path already works: Euskadi has been connected to MyHealth@EU since 2023."
         }
       ]
     },
@@ -627,47 +764,56 @@
       "cues": [
         {
           "es": "Paso tres: conectar con Europa.",
-          "eu": "Hirugarren urratsa: Europarekin konektatu."
+          "eu": "Hirugarren urratsa: Europarekin konektatu.",
+          "en": "Step three: connect to Europe."
         },
         {
           "es": "HealthData@EU, la red europea para la investigación, se conecta en marzo de 2029.",
           "eu": "HealthData@EU, ikerketarako Europako sarea, 2029ko martxoan konektatzen da.",
-          "frag": 0
+          "frag": 0,
+          "en": "HealthData@EU, the European network for research, connects in March 2029."
         },
         {
           "es": "Los actos de ejecución llegan antes, en marzo de 2027, y definen lo que construimos en el paso uno.",
           "eu": "Betearazpen-egintzak lehenago iristen dira, 2027ko martxoan, eta lehen urratsean eraikitzen duguna zehazten dute.",
-          "frag": 1
+          "frag": 1,
+          "en": "The implementing acts come earlier, in March 2027, and they shape what we build in step one."
         },
         {
           "es": "Cada Estado miembro debe ofrecer una cartera de identidad digital antes de que acabe 2026.",
           "eu": "Estatu kide bakoitzak identitate digitaleko zorro bat eskaini behar du 2026a amaitu baino lehen.",
-          "frag": 2
+          "frag": 2,
+          "en": "Every Member State must offer a digital identity wallet before the end of 2026."
         },
         {
           "es": "Y la base ya está aquí:",
           "eu": "Eta oinarria hemen dago jada:",
-          "frag": 3
+          "frag": 3,
+          "en": "And the foundation is already here:"
         },
         {
           "es": "el conector de código abierto y Simpl-Open,",
           "eu": "kode irekiko konektorea eta Simpl-Open,",
-          "frag": 4
+          "frag": 4,
+          "en": "the open-source connector and Simpl-Open,"
         },
         {
           "es": "el código abierto de la plataforma HealthData@EU,",
           "eu": "HealthData@EU plataformaren kode irekia,",
-          "frag": 5
+          "frag": 5,
+          "en": "the open-source code of the HealthData@EU platform,"
         },
         {
           "es": "los estándares de salud,",
           "eu": "osasun-estandarrak,",
-          "frag": 6
+          "frag": 6,
+          "en": "the health standards,"
         },
         {
           "es": "y los servicios españoles de identidad, certificados y seguridad.",
           "eu": "eta identitate, ziurtagiri eta segurtasuneko Espainiako zerbitzuak.",
-          "frag": 7
+          "frag": 7,
+          "en": "and the Spanish identity, certificate and security services."
         }
       ]
     },
@@ -676,37 +822,44 @@
       "cues": [
         {
           "es": "¿Y ahora qué? Cinco fases, desde la definición hasta un piloto en marcha.",
-          "eu": "Eta orain zer? Bost fase, definiziotik martxan dagoen pilotu bateraino."
+          "eu": "Eta orain zer? Bost fase, definiziotik martxan dagoen pilotu bateraino.",
+          "en": "What now? Five phases, from definition to a running pilot."
         },
         {
           "es": "Primero, definir: casos de uso, alcance y roles, en dos o tres meses.",
           "eu": "Lehenik, definitu: erabilera-kasuak, irismena eta rolak, bizpahiru hilabetean.",
-          "frag": 0
+          "frag": 0,
+          "en": "First, define: use cases, scope and roles, in two to three months."
         },
         {
           "es": "Después, preparar con los hospitales la especificación de la licitación.",
           "eu": "Gero, ospitaleekin lizitazioaren zehaztapena prestatu.",
-          "frag": 1
+          "frag": 1,
+          "en": "Then prepare the tender specification with the hospitals."
         },
         {
           "es": "La licitación misma: de seis a nueve meses.",
           "eu": "Lizitazioa bera: sei eta bederatzi hilabete artean.",
-          "frag": 2
+          "frag": 2,
+          "en": "The tender itself: six to nine months."
         },
         {
           "es": "Construir el nodo y conectar los primeros hospitales: de nueve a doce meses.",
           "eu": "Nodoa eraiki eta lehen ospitaleak konektatu: bederatzi eta hamabi hilabete artean.",
-          "frag": 3
+          "frag": 3,
+          "en": "Build the node and connect the first hospitals: nine to twelve months."
         },
         {
           "es": "Y operar el piloto, con los primeros permisos y resultados medidos.",
           "eu": "Eta pilotua kudeatu, lehen baimenekin eta neurtutako emaitzekin.",
-          "frag": 4
+          "frag": 4,
+          "en": "And run the pilot, with the first permits and measured results."
         },
         {
           "es": "Si empezamos ahora, el piloto estará listo hacia marzo de 2029, cuando el uso secundario se aplica en pleno.",
           "eu": "Orain hasten bagara, pilotua prest egongo da 2029ko martxorako, bigarren mailako erabilera osorik aplikatzen denean.",
-          "frag": 5
+          "frag": 5,
+          "en": "If we start now, the pilot is ready around March 2029, when secondary use applies in full."
         }
       ]
     },
@@ -715,37 +868,44 @@
       "cues": [
         {
           "es": "El calendario, desde hoy hasta marzo de 2029.",
-          "eu": "Egutegia, gaurtik 2029ko martxora arte."
+          "eu": "Egutegia, gaurtik 2029ko martxora arte.",
+          "en": "The timeline, from today to March 2029."
         },
         {
           "es": "Definir, de dos a tres meses.",
           "eu": "Definitu, bizpahiru hilabete.",
-          "frag": 0
+          "frag": 0,
+          "en": "Define: two to three months."
         },
         {
           "es": "Preparar, de tres a cuatro.",
           "eu": "Prestatu, hiruzpalau.",
-          "frag": 1
+          "frag": 1,
+          "en": "Prepare: three to four."
         },
         {
           "es": "La licitación, de seis a nueve meses: es la fase que marca el ritmo.",
           "eu": "Lizitazioa, sei eta bederatzi hilabete artean: erritmoa markatzen duen fasea da.",
-          "frag": 2
+          "frag": 2,
+          "en": "The tender: six to nine months. This is the phase that sets the pace."
         },
         {
           "es": "Construir, de nueve a doce meses.",
           "eu": "Eraiki, bederatzi eta hamabi hilabete artean.",
-          "frag": 3
+          "frag": 3,
+          "en": "Build: nine to twelve months."
         },
         {
           "es": "Y operar el piloto, seis meses.",
           "eu": "Eta pilotua kudeatu, sei hilabete.",
-          "frag": 4
+          "frag": 4,
+          "en": "And run the pilot: six months."
         },
         {
           "es": "En rojo, los plazos del reglamento. Empezando ahora, el piloto está en marcha entre el otoño de 2028 y la primavera de 2029.",
           "eu": "Gorriz, erregelamenduaren epeak. Orain hasita, pilotua martxan dago 2028ko udazkenaren eta 2029ko udaberriaren artean.",
-          "frag": 5
+          "frag": 5,
+          "en": "In red, the Regulation's deadlines. Starting now, the pilot is running between autumn 2028 and spring 2029."
         }
       ]
     },
@@ -754,31 +914,37 @@
       "cues": [
         {
           "es": "¡Eskerrik asko! ¡Muchas gracias!",
-          "eu": "Eskerrik asko!"
+          "eu": "Eskerrik asko!",
+          "en": "Eskerrik asko! Thank you very much!"
         },
         {
           "es": "¿Seguimos hablando? Escanead el código: abre mi perfil de LinkedIn.",
           "eu": "Hitz egiten jarraituko dugu? Eskaneatu kodea: nire LinkedIn profila irekitzen du.",
-          "frag": 0
+          "frag": 0,
+          "en": "Shall we keep talking? Scan the code: it opens my LinkedIn profile."
         },
         {
           "es": "Y para arrancar el debate, tres preguntas.",
-          "eu": "Eta eztabaidari ekiteko, hiru galdera."
+          "eu": "Eta eztabaidari ekiteko, hiru galdera.",
+          "en": "And to start the discussion, three questions."
         },
         {
           "es": "¿Qué uno o dos casos de uso mostrarían valor primero?",
           "eu": "Zein erabilera-kasu batek edo bik erakutsiko lukete balioa lehenik?",
-          "frag": 1
+          "frag": 1,
+          "en": "Which one or two use cases would show value first?"
         },
         {
           "es": "¿Quién fijará las reglas, y quién operará los servicios?",
           "eu": "Nork finkatuko ditu arauak, eta nork kudeatuko ditu zerbitzuak?",
-          "frag": 2
+          "frag": 2,
+          "en": "Who will set the rules, and who will run the services?"
         },
         {
           "es": "¿Qué hospitales se unirían al primer grupo de trabajo?",
           "eu": "Zein ospitale batuko litzateke lehen lan-taldera?",
-          "frag": 3
+          "frag": 3,
+          "en": "Which hospitals would join the first working group?"
         }
       ]
     }
