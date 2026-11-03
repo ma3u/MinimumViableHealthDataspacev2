@@ -119,9 +119,11 @@ function MetricCard({
   sub?: string;
 }) {
   return (
-    <div className="surface-card p-5 flex items-start justify-between gap-3 border border-(--border)">
-      <div className="min-w-0 flex-1">
-        <p className="section-label mb-1 wrap-break-word">{label}</p>
+    // Icon above the label until the card is wide enough to sit beside it,
+    // so a label such as "Observations" never breaks inside the word.
+    <div className="surface-card p-5 flex flex-col-reverse justify-end items-start gap-3 lg:flex-row lg:justify-between border border-(--border)">
+      <div className="min-w-0 lg:flex-1">
+        <p className="section-label mb-1">{label}</p>
         <p className="text-3xl font-black text-(--text-primary) leading-none tracking-tight">
           {value != null ? value.toLocaleString() : "—"}
         </p>
@@ -551,7 +553,7 @@ export default function PatientPage() {
           <>
             {/* Cohort metric orb cards — Stitch patient_dashboard_day bento */}
             {stats && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
                 <MetricCard
                   label={t("Patients")}
                   value={stats.patients}
