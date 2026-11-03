@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # =============================================================================
-# `opa test` for Trustee's resource policies (ADR-068, ADR-069, #774)
+# `opa test` for Trustee's resource and attestation policies (ADR-068,
+# ADR-069, ADR-073, #774, #833)
 # =============================================================================
 #   scripts/test-trustee-policies.sh
 #
 # Each policy is `package policy`, so each is tested on its own: the policy
 # (the Azure template copied as .rego, its permit_policy_hash still empty;
 # the tests bind hashes with `with`) and its *_test.rego, in a scratch
-# directory. Uses a local `opa` when there is one, else the pinned image.
+# directory. The attestation policy calls Trustee's query_reference_value
+# extension, so query_reference_value_stub.rego goes beside it. Uses a local
+# `opa` when there is one, else the pinned image.
 # Exits non-zero when a test fails or none ran.
 # =============================================================================
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -25,11 +28,12 @@ opa_test() {  # opa_test <dir>
   fi
 }
 
-run() {  # run <name> <policy file> <test file>
+run() {  # run <name> <policy file> <test file> [<more policy files>...]
   local dir="${WORK}/$1" out
   mkdir -p "$dir"
   cp "$2" "${dir}/policy.rego"
   cp "$3" "${dir}/policy_test.rego"
+  [ $# -le 3 ] || cp "${@:4}" "$dir/"
   out="$(opa_test "$dir")" || { echo "$out"; echo "FAIL: $1"; exit 1; }
   echo "$out"
   grep -q "^PASS: [1-9]" <<<"$out" || { echo "FAIL: $1 ran no test"; exit 1; }
@@ -37,4 +41,6 @@ run() {  # run <name> <policy file> <test file>
 
 run azure "${POLICIES}/resource-azure.rego.tmpl" "${POLICIES}/resource_azure_test.rego"
 run local "${POLICIES}/resource-local.rego" "${POLICIES}/resource_local_test.rego"
-echo "Trustee resource policies: all tests pass"
+run attestation "${POLICIES}/attestation-ear-cpu.rego" "${POLICIES}/attestation_ear_cpu_test.rego" \
+  "${POLICIES}/query_reference_value_stub.rego"
+echo "Trustee resource and attestation policies: all tests pass"

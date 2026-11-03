@@ -1189,6 +1189,12 @@
       "file": "ADR-072-spe-workspaces-start-on-demand.md",
       "title": "SPE workspaces are stopped by default and start on demand",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-073",
+      "file": "ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md",
+      "title": "The SPE workspaces' SEV-SNP TCB is checked against a minimum, not a list",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {

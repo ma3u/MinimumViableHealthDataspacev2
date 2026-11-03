@@ -9,9 +9,11 @@ set -euo pipefail
 #        identity, shares, images, mvhd-trustee (KBS + built-in AS) and its
 #        admin job. The resource policy Trustee holds is read back from its
 #        share: a bound one is kept (re-applied with the same hashes), none is
-#        answered with deny-all. With --reference-values: set the SNP
-#        reference values (the first attestation is refused until they are,
-#        see --check).
+#        answered with deny-all. Sets the attestation policy
+#        (trustee/policies/attestation-ear-cpu.rego as default_cpu: TCB
+#        minimums, ADR-073). With --reference-values: set the SNP reference
+#        values, the TCB as snp_<component>_min (the first attestation is
+#        refused until they are, see --check).
 #   --extracts [--rekey]
 #        build kbs-client (snp attester) and spe-loader in ACR; the admin job
 #        exports each SPE's half of the hub's patients, seals it, puts the key
@@ -151,7 +153,9 @@ digest_of() {  # digest_of <repo> <tag> -> sha256:...
 # namespace at the top of trustee-data, named after it, {key: base64url}
 # (Trustee v0.22.0, deps/key-value-storage/src/local_json; checked
 # 2026-10-31). The resource policy is key "resource-policy.rego" in `kbs`;
-# an extract key is "default/spe-<n>/extract-key" in `repository`.
+# an extract key is "default/spe-<n>/extract-key" in `repository`; the
+# attestation policy for CPU evidence is "default_cpu.rego" in
+# `attestation_service_policy` (attestation-service/src/lib.rs).
 trustee_namespace() {  # trustee_namespace <name> <dest>: false when Trustee has not written it
   files download --share-name "$SHARE_TRUSTEE_DATA" --path "$1" --dest "$2" -o none 2>/dev/null && [ -s "$2" ]
 }
@@ -166,6 +170,26 @@ trustee_bound_hashes() {  # prints {"spe-1":"sha256:..",..} from the policy Trus
         map({(.k): ("sha256:" + .v)}) | add // {}'
   else
     echo '{}'
+  fi
+  rm -f "$f" "${f}.rego"
+}
+trustee_attestation_policy() {  # prints which default_cpu Trustee evaluates SEV-SNP evidence with
+  local f
+  f="$(mktemp)"
+  if trustee_namespace attestation_service_policy "$f"; then
+    # -j, not -r: no newline after the policy, so it compares byte for byte.
+    jq -j '.["default_cpu.rego"] // empty | gsub("-";"+") | gsub("_";"/") | @base64d' "$f" >"${f}.rego"
+    if cmp -s "${f}.rego" "${REPO_ROOT}/trustee/policies/attestation-ear-cpu.rego"; then
+      echo "TCB minimums (attestation-ear-cpu.rego, as committed)"
+    elif grep -q 'snp_tcb_ok' "${f}.rego"; then
+      echo "TCB minimums, another version than the committed attestation-ear-cpu.rego (run --trustee)"
+    elif [ -s "${f}.rego" ]; then
+      echo "Trustee's built-in default (TCB lists only; run --trustee)"
+    else
+      echo "none stored"
+    fi
+  else
+    echo "none stored"
   fi
   rm -f "$f" "${f}.rego"
 }
@@ -454,9 +478,19 @@ YAML
     run_admin kbs-client --url "http://${TRUSTEE_APP}" config --admin-token-file /keys/admin-token set-resource-policy --deny-all
     ok "no permit bound yet: deny-all until --policy"
   fi
+  # The attestation policy goes with every --trustee run, beside the
+  # reference values when there are some: TCB minimums where RVPS holds
+  # snp_<component>_min, the upstream lists where it does not (ADR-073).
+  # Trustee keeps it across restarts (its built-in default_cpu is written
+  # only when the store has none).
+  local configure=(trustee-configure --attestation-policy /app/trustee/policies/attestation-ear-cpu.rego)
   if [ -n "$rv" ]; then
     [ -s "$rv" ] || { err "no reference values file ${rv}"; exit 1; }
-    run_admin spe-loader trustee-configure --reference-values "$(jq -c . "$rv")"
+    configure+=(--reference-values "$(jq -c . "$rv")")
+  fi
+  run_admin spe-loader "${configure[@]}"
+  ok "attestation policy: $(trustee_attestation_policy)"
+  if [ -n "$rv" ]; then
     ok "reference values set from ${rv}; now re-run spe-unlock in each group: $0 --workspaces (a redeploy)," \
       "or az container stop then az container start -n mvhd-spe-<n> -g ${RG}; az container restart does not re-run the init container"
   fi
@@ -692,6 +726,7 @@ check() {
     echo "  ${TRUSTEE_APP}: $(az containerapp show -n "$TRUSTEE_APP" -g "$RG" --query properties.runningStatus -o tsv)," \
       "answers HTTP $(curl -s -o /dev/null -w '%{http_code}' "https://${TRUSTEE_FQDN:-none}/kbs/v0/auth" || echo 000)," \
       "resource policy bound to: $(trustee_bound_hashes | jq -r 'keys | join(", ") | if . == "" then "nothing (deny-all)" else . end')"
+    echo "  ${TRUSTEE_APP} attestation policy (default_cpu): $(trustee_attestation_policy)"
   else
     echo "  MISSING  ${TRUSTEE_APP}"
   fi
@@ -707,8 +742,9 @@ check() {
   done
   echo "  First run: Trustee refuses every key until the reference values are pinned (no unlock on"
   echo "  first use). Copy the pinnable claims into a file shaped like"
-  echo "  trustee/reference-values-aci.example.json, check snp_launch_measurement against Microsoft's"
-  echo "  endorsement, then: $0 --trustee --reference-values <file>, then $0 --workspaces"
+  echo "  trustee/reference-values-aci.example.json (the TCB as snp_<component>_min), check"
+  echo "  snp_launch_measurement against Microsoft's endorsement, then:"
+  echo "  $0 --trustee --reference-values <file>, then $0 --workspaces"
   echo "  (or az container stop, then az container start, for each group). Not az container restart:"
   echo "  it does not re-run the init container spe-unlock, so nothing attests again (docs/gotchas.md)."
 }

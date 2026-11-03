@@ -88,6 +88,8 @@ services:
       - trustee-configure
       - --resource-policy
       - /trustee/policies/resource-local.rego
+      - --attestation-policy
+      - /trustee/policies/attestation-ear-cpu.rego
       - --reference-values
       - /trustee/reference-values-local.json
     environment:
