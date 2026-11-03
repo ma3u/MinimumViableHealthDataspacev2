@@ -15,7 +15,7 @@ deployment: <https://ehds.mabu.red> (Azure Container Apps, resource group
 ## Commands
 
 ```bash
-# UI (Next.js 14) — primary working area
+# UI (Next.js 15) — primary working area
 cd ui && npm install
 npm run dev            # http://localhost:3000
 npm run build          # production build
@@ -47,7 +47,7 @@ pre-commit run --all-files
 
 | Path                                         | What lives there                                            |
 | -------------------------------------------- | ----------------------------------------------------------- |
-| `ui/src/app/`                                | Next.js 14 app router — pages + `api/` routes               |
+| `ui/src/app/`                                | Next.js 15 app router — pages + `api/` routes               |
 | `ui/src/lib/`                                | `auth.ts`, `api.ts` (static-export mock map), `neo4j.ts`    |
 | `ui/__tests__/`                              | `unit/` (Vitest) · `e2e/journeys/` (Playwright)             |
 | `services/neo4j-proxy/`                      | Express FHIR/OMOP/NLQ/federated bridge (port 9090)          |

@@ -15,7 +15,7 @@ globs:
 ### Module structure
 
 - All UI source lives under `ui/src/`. Use the `@/*` path alias (maps to `ui/src/*`) for all imports.
-- Pages live in `ui/src/app/` (Next.js 14 App Router). Each route has a `page.tsx`; server components are the default.
+- Pages live in `ui/src/app/` (Next.js 15 App Router). Each route has a `page.tsx`; server components are the default.
 - Client components must have `"use client"` as the first line.
 - API routes live in `ui/src/app/api/<resource>/route.ts` and export named HTTP method handlers (`GET`, `POST`, `DELETE`).
 

@@ -151,7 +151,7 @@ stays small and the detail moves to archives.
 
 ### ADRs
 
-`docs/ADRs/` holds ADR-001 to ADR-073 (051 is reserved). New ones follow the
+`docs/ADRs/` holds the ADRs from ADR-001 on (051 is reserved). New ones follow the
 Nygard template in `docs/adr/0000-template.md`; an accepted ADR is never
 edited, only superseded. Write one when a decision is expensive to reverse or
 cross-cutting: the database split ([ADR-001](./ADRs/ADR-001-postgresql-neo4j-split.md)),
@@ -171,8 +171,10 @@ every API route needing a session ([ADR-044](./ADRs/ADR-044-every-api-route-need
   commits on `main` follow it; no hook enforces it yet.
 - **Commits carry the author's name.** No AI co-author trailer is added; how
   the AI works in this project is documented in the companion document.
-- **A PR links its issue and its ADRs** and says how it was tested. There is
-  no PR template yet.
+- **A PR links its issue and its ADRs** and says how it was tested; the
+  [PR template](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/pull_request_template.md)
+  asks for both. [`CODEOWNERS`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/CODEOWNERS)
+  names the maintainer, so a PR from anyone else gets a review request.
 - **Squash merge.** The PR title becomes the commit on `main`, so it follows
   the commit convention too.
 
@@ -507,8 +509,7 @@ because they are the specifications the AI author reads.
    and drop `continue-on-error`.
 5. Automate the version bump and the changelog from the commit history, and
    decide a release cadence.
-6. Add a PR template and `CODEOWNERS`.
-7. Adopt the Eclipse DSP and DCP TCKs and make the compliance floors a PR
+6. Adopt the Eclipse DSP and DCP TCKs and make the compliance floors a PR
    signal; add provenance (SLSA) to releases.
 
 ---
