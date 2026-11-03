@@ -82,6 +82,9 @@ const STATIC_MOCK_PREFIX: [string, string][] = [
   ["/api/overview?persona=researcher", "/mock/overview_researcher.json"],
   ["/api/overview?persona=", "/mock/overview_not_implemented.json"],
   ["/api/overview", "/mock/overview_patient.json"],
+  // One patient's clinical timeline, the same synthetic events for any id
+  // (a PATIENT persona reads its own timeline from /api/patient instead)
+  ["/api/patient?patientId=", "/mock/patient_timeline.json"],
   // Legacy patient endpoint
   ["/api/patient?", "/mock/patient_default.json"],
   // Other prefixes

@@ -1,0 +1,464 @@
+{
+  "timeline": [
+    {
+      "fhirType": "Encounter",
+      "fhirId": "e24d02b8-afd3-5597-a029-d597703539dc",
+      "date": "2023-10-17",
+      "display": "Encounter for check up (procedure)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPVisitOccurrence",
+      "omopId": "9202"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "9e61f212-b590-59e4-a991-9e4323e26fda",
+      "date": "2023-10-17",
+      "display": "Heart rate",
+      "value": "72",
+      "unit": "/min",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3027018"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "b4bf7b20-d0b7-5114-9dc9-4866f1a25548",
+      "date": "2023-10-17",
+      "display": "Systolic Blood Pressure",
+      "value": "118",
+      "unit": "mm[Hg]",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3004249"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "88f343b7-8c47-53a1-8254-c70273f0bd97",
+      "date": "2023-10-17",
+      "display": "Diastolic Blood Pressure",
+      "value": "76",
+      "unit": "mm[Hg]",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3012888"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "636daf50-12a4-5224-860e-9cc84960bcc7",
+      "date": "2023-10-17",
+      "display": "Body temperature",
+      "value": "36.8",
+      "unit": "Cel",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3020891"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "2e7afaef-b6fe-5dba-b6dc-28f1b21232ba",
+      "date": "2023-10-17",
+      "display": "Respiratory rate",
+      "value": "14",
+      "unit": "/min",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3024171"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "cd662f70-33ac-599b-9f3d-0a94e859a974",
+      "date": "2023-10-17",
+      "display": "Hemoglobin [Mass/volume] in Blood",
+      "value": "14.1",
+      "unit": "g/dL",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3000963"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "025480d8-8bbe-5901-a93b-7cb112db3367",
+      "date": "2023-10-17",
+      "display": "Glucose [Mass/volume] in Serum or Plasma",
+      "value": "88",
+      "unit": "mg/dL",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3004501"
+    },
+    {
+      "fhirType": "Procedure",
+      "fhirId": "557ceaac-1368-5fa3-9c6c-bb9cc1bd15ed",
+      "date": "2023-10-17",
+      "display": "Assessment of health and social care needs (procedure)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPProcedureOccurrence",
+      "omopId": "46272459"
+    },
+    {
+      "fhirType": "Immunization",
+      "fhirId": "5779dc92-a911-5522-afaa-030bc31c47e0",
+      "date": "2023-10-17",
+      "display": "Influenza, seasonal, injectable, preservative free",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPDrugExposure",
+      "omopId": "40213154"
+    },
+    {
+      "fhirType": "Encounter",
+      "fhirId": "72cae6c1-9390-5019-9c22-b7f701235350",
+      "date": "2024-01-22",
+      "display": "Encounter for symptom (procedure)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPVisitOccurrence",
+      "omopId": "9202"
+    },
+    {
+      "fhirType": "Condition",
+      "fhirId": "869d9f38-9964-5f9b-8ba9-703677882251",
+      "date": "2024-01-22",
+      "display": "Viral sinusitis (disorder)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPConditionOccurrence",
+      "omopId": "40481087"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "2270197c-6b61-556f-b7e5-43fdc970f1a4",
+      "date": "2024-01-22",
+      "display": "Body temperature",
+      "value": "37.9",
+      "unit": "Cel",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3020891"
+    },
+    {
+      "fhirType": "MedicationRequest",
+      "fhirId": "da3e5a3b-9658-5a58-99e5-c50971ffda7a",
+      "date": "2024-01-22",
+      "display": "Amoxicillin 250 MG / Clavulanate 125 MG Oral Tablet",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPDrugExposure",
+      "omopId": "1713671"
+    },
+    {
+      "fhirType": "Procedure",
+      "fhirId": "658f5d1a-e2ae-5cc3-8fce-d4a53f251cfc",
+      "date": "2024-01-22",
+      "display": "Medication reconciliation (procedure)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPProcedureOccurrence",
+      "omopId": "4326177"
+    },
+    {
+      "fhirType": "Encounter",
+      "fhirId": "573f4e6a-3abf-599e-85aa-d1c2b63b5151",
+      "date": "2024-03-05",
+      "display": "Encounter for symptom (procedure)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPVisitOccurrence",
+      "omopId": "9202"
+    },
+    {
+      "fhirType": "Condition",
+      "fhirId": "9b5a0f2d-4d83-5336-8333-964ef943ebe8",
+      "date": "2024-03-05",
+      "display": "Acute bronchitis (disorder)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPConditionOccurrence",
+      "omopId": "260139"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "106179ef-a596-5df9-81fa-969e96d105dd",
+      "date": "2024-03-05",
+      "display": "Respiratory rate",
+      "value": "20",
+      "unit": "/min",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3024171"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "a3a6c45d-9dc0-50cf-a15b-60bf3286cb43",
+      "date": "2024-03-05",
+      "display": "Oxygen saturation in Arterial blood by Pulse oximetry",
+      "value": "96",
+      "unit": "%",
+      "omopType": "OMOPMeasurement",
+      "omopId": "40762499"
+    },
+    {
+      "fhirType": "MedicationRequest",
+      "fhirId": "ea0417ef-68a9-5cbf-8f3d-33acfad116d9",
+      "date": "2024-03-05",
+      "display": "Acetaminophen 325 MG Oral Tablet",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPDrugExposure",
+      "omopId": "1127433"
+    },
+    {
+      "fhirType": "Encounter",
+      "fhirId": "9418c9a3-d62d-56e5-a8f5-292c3048ba27",
+      "date": "2024-10-15",
+      "display": "Encounter for check up (procedure)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPVisitOccurrence",
+      "omopId": "9202"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "268bc1a3-7e10-5bda-9ac5-809cfc73ce52",
+      "date": "2024-10-15",
+      "display": "Heart rate",
+      "value": "70",
+      "unit": "/min",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3027018"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "68e59e36-f514-565d-90f4-43242e22cbea",
+      "date": "2024-10-15",
+      "display": "Systolic Blood Pressure",
+      "value": "121",
+      "unit": "mm[Hg]",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3004249"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "8e1cf9a7-a61d-5d29-b137-4817334abd82",
+      "date": "2024-10-15",
+      "display": "Diastolic Blood Pressure",
+      "value": "78",
+      "unit": "mm[Hg]",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3012888"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "ff338a80-c72b-51af-826a-253803697419",
+      "date": "2024-10-15",
+      "display": "Body temperature",
+      "value": "36.7",
+      "unit": "Cel",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3020891"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "ecb4bace-1aa9-5cf9-b637-3765527f011b",
+      "date": "2024-10-15",
+      "display": "Respiratory rate",
+      "value": "15",
+      "unit": "/min",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3024171"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "9b25bca3-0fd2-5d9b-84bd-d2cf7c9b4b36",
+      "date": "2024-10-15",
+      "display": "Hemoglobin [Mass/volume] in Blood",
+      "value": "13.9",
+      "unit": "g/dL",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3000963"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "eb3fdbcc-88be-58ce-bc7b-cef88ce16aa6",
+      "date": "2024-10-15",
+      "display": "Glucose [Mass/volume] in Serum or Plasma",
+      "value": "91",
+      "unit": "mg/dL",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3004501"
+    },
+    {
+      "fhirType": "Procedure",
+      "fhirId": "6895b1ec-7706-5ced-a97e-b22e73109cdd",
+      "date": "2024-10-15",
+      "display": "Assessment of health and social care needs (procedure)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPProcedureOccurrence",
+      "omopId": "46272459"
+    },
+    {
+      "fhirType": "Immunization",
+      "fhirId": "a89098c6-cfb0-5785-a112-9485fabaf276",
+      "date": "2024-10-15",
+      "display": "Influenza, seasonal, injectable, preservative free",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPDrugExposure",
+      "omopId": "40213154"
+    },
+    {
+      "fhirType": "Encounter",
+      "fhirId": "eb9f2fa3-f1a6-5895-ae78-79c0d2e07ff6",
+      "date": "2025-02-11",
+      "display": "Emergency room admission (procedure)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPVisitOccurrence",
+      "omopId": "9203"
+    },
+    {
+      "fhirType": "Condition",
+      "fhirId": "263a5549-6ec1-5b32-bd99-1ea9ba525c5b",
+      "date": "2025-02-11",
+      "display": "Acute viral pharyngitis (disorder)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPConditionOccurrence",
+      "omopId": "4112343"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "b5cabe2f-f206-559c-8851-14ba86bc65de",
+      "date": "2025-02-11",
+      "display": "Body temperature",
+      "value": "38.4",
+      "unit": "Cel",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3020891"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "73497f5e-26a7-5d86-8989-2db9a715778b",
+      "date": "2025-02-11",
+      "display": "Heart rate",
+      "value": "96",
+      "unit": "/min",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3027018"
+    },
+    {
+      "fhirType": "MedicationRequest",
+      "fhirId": "29db0d12-e7e7-5bb4-917b-f9e6675bed81",
+      "date": "2025-02-11",
+      "display": "Ibuprofen 200 MG Oral Tablet",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPDrugExposure",
+      "omopId": "19078461"
+    },
+    {
+      "fhirType": "Encounter",
+      "fhirId": "772f30fe-5fe4-5aca-9658-1659e38d6cac",
+      "date": "2025-10-14",
+      "display": "Encounter for check up (procedure)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPVisitOccurrence",
+      "omopId": "9202"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "cc20b126-f5e8-5f67-8fd7-ff612c9e86d0",
+      "date": "2025-10-14",
+      "display": "Heart rate",
+      "value": "68",
+      "unit": "/min",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3027018"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "a64a4718-12f0-596e-a188-bacb5cd25de2",
+      "date": "2025-10-14",
+      "display": "Systolic Blood Pressure",
+      "value": "119",
+      "unit": "mm[Hg]",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3004249"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "484ded51-4588-5682-a9b5-da3ed68c8004",
+      "date": "2025-10-14",
+      "display": "Diastolic Blood Pressure",
+      "value": "77",
+      "unit": "mm[Hg]",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3012888"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "ca35d29f-ce64-542a-bd2d-5d67ecde5f30",
+      "date": "2025-10-14",
+      "display": "Body temperature",
+      "value": "36.6",
+      "unit": "Cel",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3020891"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "cea81406-619a-58d4-9015-360c1f04ba1d",
+      "date": "2025-10-14",
+      "display": "Respiratory rate",
+      "value": "14",
+      "unit": "/min",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3024171"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "2e08ab16-1b30-53d6-b546-8e693c5ee073",
+      "date": "2025-10-14",
+      "display": "Hemoglobin [Mass/volume] in Blood",
+      "value": "14.0",
+      "unit": "g/dL",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3000963"
+    },
+    {
+      "fhirType": "Observation",
+      "fhirId": "e1a0439c-6d2a-5e1f-b8e8-7ff19ba98e3c",
+      "date": "2025-10-14",
+      "display": "Glucose [Mass/volume] in Serum or Plasma",
+      "value": "86",
+      "unit": "mg/dL",
+      "omopType": "OMOPMeasurement",
+      "omopId": "3004501"
+    },
+    {
+      "fhirType": "Procedure",
+      "fhirId": "5b1ef491-d90b-5847-9c10-5f648cd56410",
+      "date": "2025-10-14",
+      "display": "Assessment of health and social care needs (procedure)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPProcedureOccurrence",
+      "omopId": "46272459"
+    },
+    {
+      "fhirType": "Immunization",
+      "fhirId": "2faf5f11-4b6a-5052-93c5-12ca352bdf76",
+      "date": "2025-10-14",
+      "display": "Influenza, seasonal, injectable, preservative free",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPDrugExposure",
+      "omopId": "40213154"
+    },
+    {
+      "fhirType": "Procedure",
+      "fhirId": "e22d3171-50e1-567d-a2d2-50eecc2942c5",
+      "date": "2025-10-14",
+      "display": "Medication reconciliation (procedure)",
+      "value": null,
+      "unit": null,
+      "omopType": "OMOPProcedureOccurrence",
+      "omopId": "4326177"
+    }
+  ]
+}
