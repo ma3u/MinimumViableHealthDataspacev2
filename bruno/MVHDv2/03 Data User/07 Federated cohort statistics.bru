@@ -15,10 +15,31 @@ headers {
 }
 
 assert {
-  res.status: eq 200
   res.body: isJson
 }
 
+tests {
+  // The statistics ask every SPE workspace. A workspace that was stopped
+  // (idle for 30 minutes, or overnight) is started by this request, which
+  // then answers 503 with Retry-After (ADR-072). A data user may start it,
+  // so every workspace listed must be starting; "stopped" means the start
+  // failed, and that fails here.
+  test("the statistics of every workspace, or every workspace on its way up", function () {
+    const body = res.getBody();
+    if (res.getStatus() === 503) {
+      expect(Number(res.getHeader("retry-after"))).to.be.above(0);
+      expect(body.spes).to.be.an("array").that.is.not.empty;
+      for (const spe of body.spes) {
+        expect(spe.state, spe.id).to.equal("starting");
+      }
+    } else {
+      expect(res.getStatus()).to.equal(200);
+      expect(body.speCount).to.be.above(0);
+      expect(body.totals).to.have.property("patients");
+    }
+  });
+}
+
 docs {
-  Cross-site counts with k-anonymity, through the Neo4j proxy. A 502 here means the proxy image is older than the route (#349).
+  Cross-site counts with k-anonymity, through the Neo4j proxy. A 502 here means the proxy image is older than the route (#349). A 503 with Retry-After is a cold start: the workspaces were stopped and this request started them (ADR-072); run it again after the Retry-After seconds for the counts.
 }
