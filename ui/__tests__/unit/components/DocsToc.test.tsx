@@ -29,15 +29,15 @@ describe("collectHeadings", () => {
       <h2>Related Documentation</h2>
     `);
     expect(collectHeadings(main)).toEqual([
-      { id: "findings", text: "Findings", level: 2 },
-      { id: "f1", text: "F1", level: 3 },
+      { id: "findings", text: "Findings", level: 2, num: "1." },
+      { id: "f1", text: "F1", level: 3, num: "1.1" },
     ]);
   });
 
   it("uses the enclosing section's id and gives it to the heading", () => {
     const main = page(`<section id="purpose"><h2>Purpose</h2></section>`);
     expect(collectHeadings(main)).toEqual([
-      { id: "purpose", text: "Purpose", level: 2 },
+      { id: "purpose", text: "Purpose", level: 2, num: "1." },
     ]);
     expect(main.querySelector("h2")!.id).toBe("purpose");
   });
@@ -48,6 +48,87 @@ describe("collectHeadings", () => {
       "run-it-again",
       "run-it-again-2",
     ]);
+  });
+});
+
+describe("the section numbers", () => {
+  beforeEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  it("numbers a page's headings h2 1. and h3 1.1, on the heading itself", () => {
+    const main = page(`
+      <h3 id="intro">Before any section</h3>
+      <h2 id="a">Alpha</h2><h3 id="a1">One</h3><h3 id="a2">Two</h3>
+      <h2 id="b">Beta</h2><h3 id="b1">One</h3>
+    `);
+    expect(collectHeadings(main).map((e) => e.num)).toEqual([
+      "",
+      "1.",
+      "1.1",
+      "1.2",
+      "2.",
+      "2.1",
+    ]);
+    const shown = [...main.querySelectorAll("h2, h3")].map((h) =>
+      h.getAttribute("data-doc-num"),
+    );
+    expect(shown).toEqual([null, "1.", "1.1", "1.2", "2.", "2.1"]);
+  });
+
+  it("keeps a number the heading already shows, and counts on from it", () => {
+    const main = page(`
+      <h2 id="p"><span class="doc-num">1.</span> Purpose</h2>
+      <h2 id="s">6. Checks</h2><h3 id="s1">6.1 PR Gate</h3><h3 id="s2">Others</h3>
+      <h2 id="r">References</h2>
+    `);
+    const entries = collectHeadings(main);
+    expect(entries.map((e) => [e.num, e.text])).toEqual([
+      ["1.", "Purpose"],
+      ["6.", "Checks"],
+      ["6.1", "PR Gate"],
+      ["6.2", "Others"],
+      ["7.", "References"],
+    ]);
+    // A number already on the page is not drawn a second time.
+    expect(main.querySelector("#p")!.hasAttribute("data-doc-num")).toBe(false);
+    expect(main.querySelector("#s")!.hasAttribute("data-doc-num")).toBe(false);
+    expect(main.querySelector("#s2")!.getAttribute("data-doc-num")).toBe("6.2");
+  });
+
+  it("leaves the introduction of a self-numbered page without a number", () => {
+    const main = page(`
+      <h2 id="read">How to read this model</h2><h3 id="r1">Scope</h3>
+      <h2 id="ctx">1. System context</h2><h3 id="c1">Boundaries</h3>
+      <h2 id="assets">2. Assets</h2>
+    `);
+    expect(collectHeadings(main).map((e) => e.num)).toEqual([
+      "",
+      "",
+      "1.",
+      "1.1",
+      "2.",
+    ]);
+  });
+
+  it("does not take a figure for a section number", () => {
+    const main = page(`<h2 id="x">127 synthetic patients</h2>`);
+    expect(collectHeadings(main)).toEqual([
+      { id: "x", text: "127 synthetic patients", level: 2, num: "1." },
+    ]);
+  });
+
+  it("shows the same numbers in the index", async () => {
+    page(`<h2 id="a">Alpha</h2><h3 id="b">Beta</h3><h2 id="c">Gamma</h2>`);
+    await act(async () => {
+      render(<DocsTocSidebar />);
+    });
+    const toc = await screen.findByTestId("docs-toc");
+    expect(
+      within(toc)
+        .getAllByRole("link")
+        .map((l) => l.textContent),
+    ).toEqual(["1.Alpha", "1.1Beta", "2.Gamma"]);
   });
 });
 

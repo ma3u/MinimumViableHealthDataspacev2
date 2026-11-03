@@ -585,15 +585,11 @@
   margin: 0 0 1rem;
   text-wrap: balance;
 }
-/* A hand-written docs page numbers its sections like a published document:
-   every h2 with an id, in order; its table of contents is an <ol> in the
-   same order, so the two numbers agree. */
-.docs-numbered {
-  counter-reset: docs-section;
-}
-.docs-numbered h2[id]::before {
-  counter-increment: docs-section;
-  content: counter(docs-section) ". ";
+/* The section number DocsToc gives a docs heading that does not show one
+   itself, drawn in front of its text; the index shows the same number. */
+[data-doc-num]::before {
+  content: attr(data-doc-num);
+  margin-right: 0.35em;
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
 }
