@@ -748,7 +748,7 @@ def observations_bundle() -> dict:
                         "code": cat}]}],
                     "code": {"coding": [{"system": "http://loinc.org", "code": code, "display": display}],
                              "text": display},
-                    "subject": {"reference": "Patient/P1", "display": "Maria Schmidt"},
+                    "subject": {"reference": "Patient/P1", "display": "Patient 7f915eed"},
                     "effectiveDateTime": f"{visit}T08:30:00Z",
                     "performer": [{"display": "AlphaKlinik Berlin, Zentrallabor (fictional)"}],
                     "valueQuantity": {"value": value, "unit": unit, "system": "http://unitsofmeasure.org", "code": unit},
