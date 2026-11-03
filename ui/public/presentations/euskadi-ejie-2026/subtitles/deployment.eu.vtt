@@ -1,0 +1,14 @@
+WEBVTT
+Language: eu
+
+00:00:00.000 --> 00:00:07.883
+Eta honela hedatuko litzateke EJIEn: osagai bakoitza edukiontzi batean, Helm chart bana.
+
+00:00:07.883 --> 00:00:15.685
+Erabiltzaileak alderantzizko proxytik sartzen dira atarietara, eta Keycloakekin hasten dute saioa, Cl@verekin konektatuta.
+
+00:00:15.685 --> 00:00:27.307
+API zerbitzuek ezagutza-grafoa irakurtzen dute; konektoreak negoziatu eta transferitzen du; identity hub-ak egiaztagiriak gordetzen ditu, eta biltegiak gakoak.
+
+00:00:27.307 --> 00:00:38.777
+Osakidetzaren datu-lakuak grafoa elikatzen du, eta konektoreak datu-espazioen protokoloa erabiltzen du ENDS eta HealthData@EUrekin.

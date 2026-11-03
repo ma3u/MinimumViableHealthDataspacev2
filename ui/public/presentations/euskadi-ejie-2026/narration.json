@@ -351,6 +351,35 @@
       ]
     },
     {
+      "id": "deployment",
+      "audio": "audio/deployment.mp3",
+      "subtitles": "subtitles/deployment.eu.vtt",
+      "duration": 38.777,
+      "spoken": "2ce7831bc4d33335",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 7.883,
+          "eu": "Eta honela hedatuko litzateke EJIEn: osagai bakoitza edukiontzi batean, Helm chart bana."
+        },
+        {
+          "start": 7.883,
+          "end": 15.685,
+          "eu": "Erabiltzaileak alderantzizko proxytik sartzen dira atarietara, eta Keycloakekin hasten dute saioa, Cl@verekin konektatuta."
+        },
+        {
+          "start": 15.685,
+          "end": 27.307,
+          "eu": "API zerbitzuek ezagutza-grafoa irakurtzen dute; konektoreak negoziatu eta transferitzen du; identity hub-ak egiaztagiriak gordetzen ditu, eta biltegiak gakoak."
+        },
+        {
+          "start": 27.307,
+          "end": 38.777,
+          "eu": "Osakidetzaren datu-lakuak grafoa elikatzen du, eta konektoreak datu-espazioen protokoloa erabiltzen du ENDS eta HealthData@EUrekin."
+        }
+      ]
+    },
+    {
       "id": "q5",
       "audio": "audio/q5.mp3",
       "subtitles": "subtitles/q5.eu.vtt",

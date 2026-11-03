@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Builds docs/demos/euskadi-ejie-2026.pptx and .pdf, the offline copies of the EJIE deck.
+"""Builds docs/demos/euskadi-ejie-2026.pptx and .pdf, the offline copies of the EJIE deck,
+in English, and euskadi-ejie-2026-es.pptx and -es.pdf in Spanish.
 
 The deck itself is the narrated web presentation in
 ui/public/presentations/euskadi-ejie-2026/ (Spanish narration, Basque
@@ -32,12 +33,12 @@ from pptx.util import Inches
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent.parent
 DECK = ROOT / "ui/public/presentations/euskadi-ejie-2026/index.html"
-OUT = HERE / "euskadi-ejie-2026.pptx"
-PDF = HERE / "euskadi-ejie-2026.pdf"
+# The English copies keep the original names; the Spanish ones carry -es.
+FILES = {"en": "euskadi-ejie-2026", "es": "euskadi-ejie-2026-es"}
 
 
 def notes() -> list[str]:
-    """Each slide's speaker notes, in slide order, as plain text."""
+    """Each slide's speaker notes, in slide order, as plain text (they stay in English)."""
     out = []
     for section in re.findall(r"<section\b.*?</section>", DECK.read_text(), re.S):
         m = re.search(r'<aside class="notes">(.*?)</aside>', section, re.S)
@@ -46,9 +47,10 @@ def notes() -> list[str]:
     return out
 
 
-def main() -> int:
+def build(lang: str) -> None:
+    out, pdf = HERE / f"{FILES[lang]}.pptx", HERE / f"{FILES[lang]}.pdf"
     with tempfile.TemporaryDirectory() as tmp:
-        subprocess.run(["node", str(HERE / "export-ejie-deck.mjs"), tmp], check=True)
+        subprocess.run(["node", str(HERE / "export-ejie-deck.mjs"), tmp, lang], check=True)
         images = sorted(Path(tmp).glob("slide-*.jpg"))
         texts = notes()
         if len(images) != len(texts):
@@ -61,9 +63,14 @@ def main() -> int:
             s = prs.slides.add_slide(blank)
             s.shapes.add_picture(str(image), 0, 0, prs.slide_width, prs.slide_height)
             s.notes_slide.notes_text_frame.text = text
-        prs.save(OUT)
-        PDF.write_bytes((Path(tmp) / "deck.pdf").read_bytes())
-    print(f"{len(images)} slides: {OUT.relative_to(ROOT)} and {PDF.relative_to(ROOT)}")
+        prs.save(out)
+        pdf.write_bytes((Path(tmp) / "deck.pdf").read_bytes())
+    print(f"{len(images)} slides: {out.relative_to(ROOT)} and {pdf.relative_to(ROOT)}")
+
+
+def main() -> int:
+    for lang in FILES:
+        build(lang)
     return 0
 
 

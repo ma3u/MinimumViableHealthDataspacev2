@@ -3,13 +3,14 @@
 // with one page per slide. build-ejie-deck.py runs this and turns the JPEGs into the
 // PowerPoint fallback, so the web deck stays the only source.
 //
-//     node docs/demos/export-ejie-deck.mjs <out-dir>
+//     node docs/demos/export-ejie-deck.mjs <out-dir> [en|es]
 //
 // Needs the UI's dev dependencies (Playwright and its Chromium): cd ui && npm ci.
 import { createRequire } from "node:module";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
+import { createServer } from "node:http";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "../..");
@@ -18,9 +19,36 @@ const { chromium } = require("@playwright/test");
 
 const out = path.resolve(process.argv[2] ?? path.join(here, "ejie-export"));
 mkdirSync(out, { recursive: true });
-const deck = pathToFileURL(
-  path.join(root, "ui/public/presentations/euskadi-ejie-2026/index.html"),
-).href;
+const lang = process.argv[3] ?? "en";
+// The deck fetches its Spanish text, which file:// does not allow, so ui/public is served here.
+const pub = path.join(root, "ui/public");
+const TYPES = {
+  ".html": "text/html",
+  ".js": "text/javascript",
+  ".css": "text/css",
+  ".json": "application/json",
+};
+const server = createServer((req, res) => {
+  const file = path.join(
+    pub,
+    decodeURIComponent(new URL(req.url, "http://x").pathname),
+  );
+  let body;
+  try {
+    if (!file.startsWith(pub)) throw new Error("outside");
+    body = readFileSync(file);
+  } catch {
+    return res.writeHead(404).end();
+  }
+  res.writeHead(200, {
+    "Content-Type": TYPES[path.extname(file)] ?? "application/octet-stream",
+  });
+  res.end(body);
+});
+await new Promise((r) => server.listen(0, "127.0.0.1", r));
+const deck = `http://127.0.0.1:${
+  server.address().port
+}/presentations/euskadi-ejie-2026/index.html`;
 // The narration buttons and subtitles belong to the browser, not to a printed slide.
 const HIDE =
   ".narration, #subtitle, .reveal .controls, .reveal .progress, .reveal .slide-number { display: none !important; }";
@@ -30,7 +58,8 @@ try {
   const page = await browser.newPage({
     viewport: { width: 1920, height: 1080 },
   });
-  await page.goto(deck, { waitUntil: "networkidle" });
+  await page.goto(`${deck}?lang=${lang}`, { waitUntil: "networkidle" });
+  await page.waitForFunction(() => Reveal.isReady());
   await page.addStyleTag({ content: HIDE });
   await page.evaluate(() => document.fonts.ready);
   await page.evaluate(() =>
@@ -60,7 +89,10 @@ try {
       },
     });
   });
-  await print.goto(deck + "?print-pdf", { waitUntil: "networkidle" });
+  await print.goto(`${deck}?print-pdf&lang=${lang}`, {
+    waitUntil: "networkidle",
+  });
+  await print.waitForFunction(() => Reveal.isReady());
   await print.addStyleTag({ content: HIDE });
   await print.evaluate(() => document.fonts.ready);
   await print.waitForTimeout(2500);
@@ -73,4 +105,5 @@ try {
   console.log(`${total} slides and deck.pdf in ${out}`);
 } finally {
   await browser.close();
+  server.close();
 }
