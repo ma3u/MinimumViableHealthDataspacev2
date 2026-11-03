@@ -198,10 +198,10 @@ repos:
         stages: [pre-commit]
 
       - id: docs-content
-        name: Published reports match their sources (docs/security, docs/klarbefund)
+        name: Published documents match their sources (docs/security, docs/klarbefund, docs/developer)
         language: python
         entry: python3 scripts/gen-docs-content.py --check
-        files: ^(docs/ehds/.*\.md|docs/ehds-article-numbering\.md|docs/security/.*\.md|docs/klarbefund/.*\.(md|html)|docs/loadtest/.*\.md|docs/operations/.*\.md|docs/sbom/README\.md|docs/(security|klarbefund|architecture|loadtest|operations)/img/.*|docs/i18n/.*|ui/public/published-docs/.*|ui/src/content/published-docs(-i18n)?\.json|scripts/gen-docs-content\.py)$
+        files: ^(docs/ehds/.*\.md|docs/ehds-article-numbering\.md|docs/SDLC\.md|docs/developer/.*\.md|docs/security/.*\.md|docs/klarbefund/.*\.(md|html)|docs/loadtest/.*\.md|docs/operations/.*\.md|docs/sbom/README\.md|docs/(security|klarbefund|architecture|loadtest|operations)/img/.*|docs/i18n/.*|ui/public/published-docs/.*|ui/src/content/published-docs(-i18n)?\.json|scripts/gen-docs-content\.py)$
         pass_filenames: false
         stages: [pre-commit]
 

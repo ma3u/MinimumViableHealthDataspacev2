@@ -291,5 +291,18 @@
   "Data transfers": "Data transfers",
   "Trust centers with their governance chain and statistics": "Trust centers with their governance chain and statistics",
   "Back to Developer Guide": "Back to Developer Guide",
-  "Interactive, three-column reference for all REST endpoints of the EHDS Integration Hub. Powered by Scalar: try any endpoint directly from the right-hand code panel.": "Interactive, three-column reference for all REST endpoints of the EHDS Integration Hub. Powered by Scalar: try any endpoint directly from the right-hand code panel."
+  "Interactive, three-column reference for all REST endpoints of the EHDS Integration Hub. Powered by Scalar: try any endpoint directly from the right-hand code panel.": "Interactive, three-column reference for all REST endpoints of the EHDS Integration Hub. Powered by Scalar: try any endpoint directly from the right-hand code panel.",
+  "Working on the Project": "Working on the Project",
+  "How a change reaches the live hub, how it is tested through the APIs, and what each part of the stack is. Each page is published from the docs folder of the repository.": "How a change reaches the live hub, how it is tested through the APIs, and what each part of the stack is. Each page is published from the docs folder of the repository.",
+  "Development life cycle": "Development life cycle",
+  "Discussions and issues, branches and pull requests, every hook with its fix, the PR Gate and the other workflows, the deploys and the releases.": "Discussions and issues, branches and pull requests, every hook with its fix, the PR Gate and the other workflows, the deploys and the releases.",
+  "Integration tests through the APIs": "Integration tests through the APIs",
+  "The Bruno collection and the dataspace and identity checks: how to run them, and how current they are.": "The Bruno collection and the dataspace and identity checks: how to run them, and how current they are.",
+  "The stack and the development environment": "The stack and the development environment",
+  "EDC-V, JAD, CFM, DSP, DCP and the hub's own services in one glossary; the local stacks, the seed phases, the ports and the iPhone app.": "EDC-V, JAD, CFM, DSP, DCP and the hub's own services in one glossary; the local stacks, the seed phases, the ports and the iPhone app.",
+  "Contributing": "Contributing",
+  "Fork, branch, pull request: the short guide for outside contributors, under the Apache License 2.0, with fictional organisations only.": "Fork, branch, pull request: the short guide for outside contributors, under the Apache License 2.0, with fictional organisations only.",
+  "Klarbefund iPhone app, an overview per persona, the access body's tasks, compliance suites that can fail": "Klarbefund iPhone app, an overview per persona, the access body's tasks, compliance suites that can fail",
+  "GraphRAG for natural-language queries (GDS, FastRP, reranking), releases published automatically": "GraphRAG for natural-language queries (GDS, FastRP, reranking), releases published automatically",
+  "The version is the one in <c>ui/package.json</c>; when a merge to main changes it, <c>release.yml</c> tags it and publishes the release. <a>How releases and the TestFlight builds of the iPhone app work</a>": "The version is the one in <c>ui/package.json</c>; when a merge to main changes it, <c>release.yml</c> tags it and publishes the release. <a>How releases and the TestFlight builds of the iPhone app work</a>"
 }

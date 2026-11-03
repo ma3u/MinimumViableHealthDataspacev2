@@ -90,6 +90,11 @@ Run before `git push`. Catch issues that are too slow for pre-commit.
 | --- | ---------------- | ----------------------------------------------- | --------------- | ----------------------------------------------------------------------------------- |
 | 1   | Unit tests       | Vitest `--bail 1`                               | **Blocks push** | Stops on first failure                                                              |
 | 2   | Dependency audit | `scripts/check-npm-audit.py` (npm audit, high+) | **Blocks push** | HIGH + CRITICAL CVEs, except time-boxed entries in `docs/npm-audit-exceptions.json` |
+| 3   | CodeQL (Swift)   | `clients/ios/Scripts/codeql-swift.sh`           | **Blocks push** | Only when the iPhone app changes; macOS only; `SKIP=codeql-swift` skips it once     |
+
+The Stage 1 table above lists the main hooks. All 31 commit hooks and these
+three, each with what to do when it fails, are in
+[SDLC §5](./SDLC.md#5-the-hooks-on-your-machine).
 
 ---
 
@@ -101,10 +106,15 @@ hooks against the PR's diff (`pre-commit run --from-ref origin/main --to-ref
 HEAD`) on a neutral runner, plus a gitleaks scan across the PR's commits, since
 the local `gitleaks protect --staged` hook has nothing staged to inspect in CI.
 
-| #   | Check                     | Tool              | Severity         | Why it is here                                            |
-| --- | ------------------------- | ----------------- | ---------------- | --------------------------------------------------------- |
-| 1   | Stage 1 hooks on the diff | pre-commit        | **Blocks merge** | Catches `--no-verify`, or a clone without hooks installed |
-| 2   | Secret scan on PR commits | gitleaks `detect` | **Blocks merge** | The staged-only local hook cannot see CI's history        |
+| #   | Check                     | Tool                        | Severity         | Why it is here                                            |
+| --- | ------------------------- | --------------------------- | ---------------- | --------------------------------------------------------- |
+| 1   | Stage 1 hooks on the diff | pre-commit                  | **Blocks merge** | Catches `--no-verify`, or a clone without hooks installed |
+| 2   | API spec drift            | `check-api-spec-drift.py`   | **Blocks merge** | No new route without its OpenAPI entry                    |
+| 3   | Docs facts current        | `gen-docs-facts.py --check` | **Blocks merge** | A changed docs page must move its date                    |
+| 4   | API collection coverage   | `check-bruno-coverage.py`   | **Blocks merge** | Every route has a request that can fail                   |
+| 5   | HealthDCAT-AP Release 8   | pySHACL                     | **Blocks merge** | The catalogue's golden files pass the official shapes     |
+| 6   | Unused code               | knip                        | **Blocks merge** | No unused files, exports or dependencies                  |
+| 7   | Secret scan on PR commits | gitleaks `detect`           | **Blocks merge** | The staged-only local hook cannot see CI's history        |
 
 It does **not** re-run Stage 4. The heavy suites stay path-filtered so they
 cost nothing on changes they cannot affect.
