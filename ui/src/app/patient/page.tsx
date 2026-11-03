@@ -391,132 +391,144 @@ export default function PatientPage() {
         />
 
         {/* ── My personal health record (identity + Request EHR) ──────────── */}
-        <section className="mb-8">
-          <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
-            <div className="flex items-center gap-3">
-              <span
-                className="grid place-items-center w-12 h-12 rounded-full text-white shrink-0"
-                style={{ background: "var(--role-patient-text)" }}
-              >
-                <Heart size={22} />
-              </span>
-              <div>
-                <h2 className="text-xl font-extrabold text-(--text-primary) leading-tight">
-                  {selectedPatient?.name ?? t("My personal health record")}
-                </h2>
-                <p className="text-xs text-(--text-secondary)">
-                  {selectedPatient ? (
-                    <>
-                      <span className="capitalize">
-                        {gender(selectedPatient.gender)}
-                      </span>
-                      {selectedPatient.age != null
-                        ? ` · ${t("age {age}", { age: selectedPatient.age })}`
-                        : selectedPatient.birthDate
-                          ? ` · ${t("born {date}", {
-                              date: selectedPatient.birthDate,
-                            })}`
-                          : ""}
-                      {" · "}
-                      {timeline.length === 1
-                        ? t("{n} event on record", { n: timeline.length })
-                        : t("{n} events on record", { n: timeline.length })}
-                    </>
-                  ) : (
-                    t(
-                      "My own fitness, lab and nutrition data, plus my ePA on request.",
-                    )
-                  )}
-                </p>
-                {/* Only once the record is known: a sync, or none yet on the
-                    own record. Other roles have no record of their own. */}
-                {!loading && (lastEhrSync || restricted) && (
-                  <p
-                    className="text-xs text-(--text-secondary) mt-0.5"
-                    data-testid="last-ehr-sync"
-                  >
-                    {lastEhrSync ? (
+        {/* Only on the own record: every other role browses the cohort and
+            has no personal record, so it must not see the patient persona's
+            values or a selected patient's name as "my record". */}
+        {restricted && (
+          <section className="mb-8">
+            <div className="flex items-start justify-between gap-3 mb-4 flex-wrap">
+              <div className="flex items-center gap-3">
+                <span
+                  className="grid place-items-center w-12 h-12 rounded-full text-white shrink-0"
+                  style={{ background: "var(--role-patient-text)" }}
+                >
+                  <Heart size={22} />
+                </span>
+                <div>
+                  <h2 className="text-xl font-extrabold text-(--text-primary) leading-tight">
+                    {selectedPatient?.name ?? t("My personal health record")}
+                  </h2>
+                  <p className="text-xs text-(--text-secondary)">
+                    {selectedPatient ? (
                       <>
-                        {t("Last EHR sync:")}{" "}
-                        <time
-                          dateTime={lastEhrSync.at}
-                          className="font-semibold text-(--text-primary)"
-                        >
-                          {formatEhrSync(
-                            lastEhrSync.at,
-                            lang === "en" ? undefined : lang,
-                          )}
-                        </time>
-                        {lastEhrSync.source ? ` · ${lastEhrSync.source}` : ""}
+                        <span className="capitalize">
+                          {gender(selectedPatient.gender)}
+                        </span>
+                        {selectedPatient.age != null
+                          ? ` · ${t("age {age}", { age: selectedPatient.age })}`
+                          : selectedPatient.birthDate
+                            ? ` · ${t("born {date}", {
+                                date: selectedPatient.birthDate,
+                              })}`
+                            : ""}
+                        {" · "}
+                        {timeline.length === 1
+                          ? t("{n} event on record", { n: timeline.length })
+                          : t("{n} events on record", { n: timeline.length })}
                       </>
                     ) : (
                       t(
-                        "No EHR sync yet: your ePA has not been transferred into the portal.",
+                        "My own fitness, lab and nutrition data, plus my ePA on request.",
                       )
                     )}
                   </p>
-                )}
+                  {/* Only once the record is known: a sync, or none yet on the
+                    own record. Other roles have no record of their own. */}
+                  {!loading && (lastEhrSync || restricted) && (
+                    <p
+                      className="text-xs text-(--text-secondary) mt-0.5"
+                      data-testid="last-ehr-sync"
+                    >
+                      {lastEhrSync ? (
+                        <>
+                          {t("Last EHR sync:")}{" "}
+                          <time
+                            dateTime={lastEhrSync.at}
+                            className="font-semibold text-(--text-primary)"
+                          >
+                            {formatEhrSync(
+                              lastEhrSync.at,
+                              lang === "en" ? undefined : lang,
+                            )}
+                          </time>
+                          {lastEhrSync.source ? ` · ${lastEhrSync.source}` : ""}
+                        </>
+                      ) : (
+                        t(
+                          "No EHR sync yet: your ePA has not been transferred into the portal.",
+                        )
+                      )}
+                    </p>
+                  )}
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => setEhrModal(true)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold shadow-xs transition-all hover:scale-[1.02] shrink-0"
+                style={{
+                  background: brandBackgroundForWhiteText(insurer.brand),
+                }}
+              >
+                <ScanLine size={16} aria-hidden="true" />
+                {ehrReceived
+                  ? t("Request more EHR data")
+                  : t("Request EHR data")}
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setEhrModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-semibold shadow-xs transition-all hover:scale-[1.02] shrink-0"
-              style={{ background: brandBackgroundForWhiteText(insurer.brand) }}
-            >
-              <ScanLine size={16} aria-hidden="true" />
-              {ehrReceived ? t("Request more EHR data") : t("Request EHR data")}
-            </button>
-          </div>
 
-          {ehrReceived && (
-            <div className="mb-4 px-4 py-3 rounded-xl border border-(--role-holder-border) bg-(--role-holder-bg) text-sm text-(--role-holder-text) flex items-start gap-2">
-              <ShieldCheck size={16} className="mt-0.5 shrink-0" />
-              <span>
-                <T
-                  area="patient"
-                  vars={{ insurer: insurer.name, short: insurer.short }}
-                  tags={{ b: <strong className="font-semibold" /> }}
-                >
-                  {
-                    "Your ePA from <b>{insurer}</b> was transferred into the portal as FHIR R4: GesundheitsID-authenticated, end-to-end encrypted. {short} cannot read it; withdraw any time."
-                  }
-                </T>
-              </span>
-            </div>
-          )}
+            {ehrReceived && (
+              <div className="mb-4 px-4 py-3 rounded-xl border border-(--role-holder-border) bg-(--role-holder-bg) text-sm text-(--role-holder-text) flex items-start gap-2">
+                <ShieldCheck size={16} className="mt-0.5 shrink-0" />
+                <span>
+                  <T
+                    area="patient"
+                    vars={{ insurer: insurer.name, short: insurer.short }}
+                    tags={{ b: <strong className="font-semibold" /> }}
+                  >
+                    {
+                      "Your ePA from <b>{insurer}</b> was transferred into the portal as FHIR R4: GesundheitsID-authenticated, end-to-end encrypted. {short} cannot read it; withdraw any time."
+                    }
+                  </T>
+                </span>
+              </div>
+            )}
 
-          {/* A record Klarbefund created shows the person's own values; a demo
+            {/* A record Klarbefund created shows the person's own values; a demo
               persona keeps the illustration of journey-config. */}
-          {ownHealth && healthCards.length === 0 && (
-            <p
-              className="mb-4 text-sm text-(--text-secondary)"
-              data-testid="own-health-empty"
+            {ownHealth && healthCards.length === 0 && (
+              <p
+                className="mb-4 text-sm text-(--text-secondary)"
+                data-testid="own-health-empty"
+              >
+                {t(
+                  "No values from your devices or reports yet. In Klarbefund, switch on sending your reports and your device trends to your record.",
+                )}
+              </p>
+            )}
+            <div
+              className="grid sm:grid-cols-3 gap-4"
+              data-testid="health-cards"
             >
-              {t(
-                "No values from your devices or reports yet. In Klarbefund, switch on sending your reports and your device trends to your record.",
-              )}
-            </p>
-          )}
-          <div className="grid sm:grid-cols-3 gap-4" data-testid="health-cards">
-            {healthCards.map((s) => (
-              <PersonalHealthCard
-                key={s.id}
-                s={s}
-                onOpen={() => setDetailSource(s)}
-              />
-            ))}
-          </div>
+              {healthCards.map((s) => (
+                <PersonalHealthCard
+                  key={s.id}
+                  s={s}
+                  onOpen={() => setDetailSource(s)}
+                />
+              ))}
+            </div>
 
-          <Link
-            href="/patient/query"
-            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-(--accent) hover:underline"
-          >
-            <Sparkles size={16} aria-hidden="true" />
-            {t("Ask research questions about my own data")}
-            <ArrowRight size={14} aria-hidden="true" />
-          </Link>
-        </section>
+            <Link
+              href="/patient/query"
+              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-(--accent) hover:underline"
+            >
+              <Sparkles size={16} aria-hidden="true" />
+              {t("Ask research questions about my own data")}
+              <ArrowRight size={14} aria-hidden="true" />
+            </Link>
+          </section>
+        )}
 
         {detailSource && (
           <HealthDetailModal

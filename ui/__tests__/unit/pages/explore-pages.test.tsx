@@ -355,13 +355,34 @@ describe("PatientPage", () => {
     },
   };
 
-  it("shows the illustration cards for a demo record", async () => {
+  it("shows the illustration cards for a demo patient's own record", async () => {
+    mockFetchApi.mockReturnValue(
+      mockResponse({
+        ...patientData,
+        patients: [patientData.patients[0]],
+        restricted: true,
+        timeline: [],
+      }),
+    );
+    render(<PatientPage />);
+    await waitFor(() => {
+      expect(screen.getAllByText(/John Doe/).length).toBeGreaterThan(0);
+    });
+    expect(screen.getByText("62 %")).toBeInTheDocument();
+  });
+
+  it("shows a role browsing the cohort no personal health record", async () => {
     mockFetchApi.mockReturnValue(mockResponse(patientData));
     render(<PatientPage />);
     await waitFor(() => {
       expect(screen.getByText(/John Doe/)).toBeInTheDocument();
     });
-    expect(screen.getByText("62 %")).toBeInTheDocument();
+    expect(screen.queryByText("My personal health record")).toBeNull();
+    expect(screen.queryByTestId("health-cards")).toBeNull();
+    expect(screen.queryByText("62 %")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /Request EHR data/i }),
+    ).toBeNull();
   });
 
   it("shows a Klarbefund record its own values, not the illustration", async () => {
