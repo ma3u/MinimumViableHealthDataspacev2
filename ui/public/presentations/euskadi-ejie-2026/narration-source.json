@@ -1,5 +1,5 @@
 {
-  "about": "Narration for the EJIE deck. Each cue is one sentence: 'es' is spoken in the presenter's voice (ElevenLabs), 'eu' is the Basque subtitle shown while it plays, 'frag' reveals the slide's fragment with that data-fragment-index. scripts/narrate-euskadi-deck.py turns this into audio/slide-N.mp3 and narration.json. The Basque text is a machine translation and needs a native proofread.",
+  "about": "Narration for the EJIE deck. Each cue is one sentence: 'es' is spoken in the presenter's voice (ElevenLabs), 'eu' is the Basque subtitle shown while it plays, 'frag' reveals the slide's fragment with that data-fragment-index. scripts/narrate-euskadi-deck.py turns this into audio/slide-N.mp3 and narration.json. The Basque text is a machine translation; the subtitles are off by default (the team does not need them for the video).",
   "voice_name": "Matthi German",
   "model": "eleven_multilingual_v2",
   "language": "es",
@@ -72,8 +72,8 @@
           "frag": 6
         },
         {
-          "es": "Ocho: de ocho a doce personas para un piloto.",
-          "eu": "Zortzi: zortzitik hamabi pertsonara pilotu baterako.",
+          "es": "Ocho: de ocho a quince personas para un piloto.",
+          "eu": "Zortzi: zortzitik hamabost pertsonara pilotu baterako.",
           "frag": 7
         },
         {
@@ -234,6 +234,44 @@
       ]
     },
     {
+      "id": "architecture",
+      "cues": [
+        {
+          "es": "Esta es nuestra arquitectura: así se podría construir la solución.",
+          "eu": "Hau da gure arkitektura: horrela eraiki liteke irtenbidea."
+        },
+        {
+          "es": "Arriba, la capa de confianza: credenciales verificables al incorporarse, Cl@ve y FNMT, y la cartera europea para los ciudadanos.",
+          "eu": "Goian, konfiantza-geruza: sartzean egiaztagiri egiaztagarriak, Cl@ve eta FNMT, eta Europako zorroa herritarrentzat.",
+          "frag": 0
+        },
+        {
+          "es": "En el hospital: los datos, su mapeo a FHIR y OMOP con las terminologías, y un conector que solo deja salir datos seudonimizados.",
+          "eu": "Ospitalean: datuak, FHIR eta OMOPera mapatzea terminologiekin, eta izengoitutako datuak bakarrik ateratzen uzten dituen konektore bat.",
+          "frag": 1
+        },
+        {
+          "es": "En el centro, EJIE como operador: la incorporación, la auditoría y el catálogo federado.",
+          "eu": "Erdian, EJIE operadore gisa: sarrera, auditoria eta katalogo federatua.",
+          "frag": 2
+        },
+        {
+          "es": "A la derecha, el organismo de acceso: los permisos, la exclusión voluntaria y el entorno seguro donde trabajan los investigadores.",
+          "eu": "Eskuinean, sarbide-erakundea: baimenak, borondatezko uko egitea eta ikertzaileek lan egiten duten ingurune segurua.",
+          "frag": 3
+        },
+        {
+          "es": "Abajo, el protocolo de espacios de datos une a todos, y conecta hacia arriba con España y con Europa.",
+          "eu": "Behean, datu-espazioen protokoloak denak lotzen ditu, eta gorantz konektatzen du Espainiarekin eta Europarekin.",
+          "frag": 4
+        },
+        {
+          "es": "Todo esto funciona hoy en nuestro demostrador.",
+          "eu": "Hau guztia gaur dabil gure erakuslean."
+        }
+      ]
+    },
+    {
       "id": "q5",
       "cues": [
         {
@@ -390,37 +428,26 @@
       "cues": [
         {
           "es": "Hablemos de dinero. Licencias: casi cero, porque el núcleo es código abierto.",
-          "eu": "Hitz egin dezagun diruaz. Lizentziak: ia zero, muina kode irekia delako.",
-          "frag": 0
+          "eu": "Hitz egin dezagun diruaz. Lizentziak: ia zero, muina kode irekia delako."
         },
         {
           "es": "Lo que cuesta es la gente: ingeniería, alojamiento y operación.",
           "eu": "Kostatzen dena jendea da: ingeniaritza, ostatatzea eta eragiketa."
         },
         {
-          "es": "Como referencia: Catena-X recibió más de cien millones de euros de fondos públicos, para toda una industria.",
-          "eu": "Erreferentzia gisa: Catena-Xek ehun milioi euro baino gehiago jaso zituen funts publikoetatik, industria oso batentzat.",
-          "frag": 1
-        },
-        {
-          "es": "Cada participante paga al operador entre mil quinientos y setenta y un mil euros al año.",
-          "eu": "Parte-hartzaile bakoitzak urtean mila eta bostehun eta hirurogeita hamaika mila euro artean ordaintzen dio operadoreari.",
-          "frag": 2
-        },
-        {
-          "es": "¿Un piloto regional? Entre ochocientos mil euros y un millón y medio.",
-          "eu": "Eskualdeko pilotu bat? Zortziehun mila euro eta milioi eta erdi artean.",
-          "frag": 3
+          "es": "Nuestra estimación para un piloto regional, pendiente del detalle de EJIE: entre ochocientos mil euros y un millón y medio.",
+          "eu": "Eskualdeko pilotu baterako gure estimazioa, EJIEren xehetasunaren zain: zortziehun mila euro eta milioi eta erdi artean.",
+          "frag": 0
         },
         {
           "es": "Después, operarlo cuesta entre un quince y un veinticinco por ciento al año.",
           "eu": "Ondoren, kudeatzeak urtean ehuneko hamabost eta hogeita bost artean kostatzen du.",
-          "frag": 4
+          "frag": 1
         },
         {
-          "es": "Alojamiento: tres entornos, producción, pruebas y desarrollo, a unos mil euros al mes cada uno.",
-          "eu": "Ostatatzea: hiru ingurune, ekoizpena, probak eta garapena, hilean mila euro inguru bakoitza.",
-          "frag": 5
+          "es": "Alojamiento: producción, pruebas y desarrollo, unos tres mil euros al mes, según el proveedor de nube.",
+          "eu": "Ostatatzea: ekoizpena, probak eta garapena, hilean hiru mila euro inguru, hodei-hornitzailearen arabera.",
+          "frag": 2
         },
         {
           "es": "Más las herramientas de desarrollo. El entorno seguro va aparte: lo vemos ahora.",
@@ -436,8 +463,8 @@
           "eu": "Zer dago zifra hauen atzean?"
         },
         {
-          "es": "Doce meses de construcción, con ocho a doce personas. Es decir, entre cien y ciento veinticinco mil euros por persona y año.",
-          "eu": "Hamabi hilabeteko eraikuntza, zortzi eta hamabi pertsona artean. Hau da, ehun eta ehun eta hogeita bost mila euro artean pertsona eta urte bakoitzeko.",
+          "es": "Doce meses de construcción, con ocho a quince personas. Es decir, unos cien mil euros por persona y año.",
+          "eu": "Hamabi hilabeteko eraikuntza, zortzi eta hamabost pertsona artean. Hau da, ehun mila euro inguru pertsona eta urte bakoitzeko.",
           "frag": 0
         },
         {
@@ -451,8 +478,8 @@
           "frag": 2
         },
         {
-          "es": "Los mil euros por entorno cubren el conector, el catálogo, la identidad y la monitorización. No el entorno seguro.",
-          "eu": "Ingurune bakoitzeko mila euroek konektorea, katalogoa, identitatea eta monitorizazioa estaltzen dituzte. Ez ingurune segurua.",
+          "es": "El alojamiento cubre el conector, el catálogo, la identidad y la monitorización, al precio del proveedor de nube. No el entorno seguro.",
+          "eu": "Ostatatzeak konektorea, katalogoa, identitatea eta monitorizazioa estaltzen ditu, hodei-hornitzailearen prezioan. Ez ingurune segurua.",
           "frag": 3
         },
         {
@@ -466,18 +493,18 @@
       "id": "q8",
       "cues": [
         {
-          "es": "¿Y el equipo? Entre ocho y doce personas, a tiempo completo.",
-          "eu": "Eta taldea? Zortzi eta hamabi pertsona artean, lanaldi osoan.",
+          "es": "¿Y el equipo? Entre ocho y quince personas, a tiempo completo.",
+          "eu": "Eta taldea? Zortzi eta hamabost pertsona artean, lanaldi osoan.",
           "frag": 0
         },
         {
-          "es": "Un arquitecto, dos o tres ingenieros de conectores, dos o tres de plataforma y seguridad, de dos a cuatro especialistas en datos y terminologías, y una persona para protección de datos y derecho.",
-          "eu": "Arkitekto bat, konektoreetako bizpahiru ingeniari, plataforma eta segurtasuneko bizpahiru, datu eta terminologietako bi eta lau espezialista artean, eta pertsona bat datuen babeserako eta zuzenbiderako.",
+          "es": "Los perfiles: uno o dos arquitectos, dos o tres ingenieros de conectores, dos o tres de plataforma y seguridad, de dos a cinco especialistas en datos y terminologías, y una o dos personas para protección de datos y derecho.",
+          "eu": "Profilak: arkitekto bat edo bi, konektoreetako bizpahiru ingeniari, plataforma eta segurtasuneko bizpahiru, datu eta terminologietako bi eta bost espezialista artean, eta pertsona bat edo bi datuen babeserako eta zuzenbiderako.",
           "frag": 1
         },
         {
-          "es": "Y recordad la primera respuesta: sin tiempo y sin mandato de la dirección, no funciona.",
-          "eu": "Eta gogoratu lehen erantzuna: zuzendaritzaren denborarik eta agindurik gabe, ez dabil."
+          "es": "La pirámide exacta se dimensiona con el detalle del proyecto. Y sin tiempo ni mandato de la dirección, no funciona.",
+          "eu": "Piramide zehatza proiektuaren xehetasunarekin neurtzen da. Eta zuzendaritzaren denborarik eta agindurik gabe, ez dabil."
         }
       ]
     },
@@ -679,6 +706,45 @@
         {
           "es": "Si empezamos ahora, el piloto estará listo hacia marzo de 2029, cuando el uso secundario se aplica en pleno.",
           "eu": "Orain hasten bagara, pilotua prest egongo da 2029ko martxorako, bigarren mailako erabilera osorik aplikatzen denean.",
+          "frag": 5
+        }
+      ]
+    },
+    {
+      "id": "timeline",
+      "cues": [
+        {
+          "es": "El calendario, desde hoy hasta marzo de 2029.",
+          "eu": "Egutegia, gaurtik 2029ko martxora arte."
+        },
+        {
+          "es": "Definir, de dos a tres meses.",
+          "eu": "Definitu, bizpahiru hilabete.",
+          "frag": 0
+        },
+        {
+          "es": "Preparar, de tres a cuatro.",
+          "eu": "Prestatu, hiruzpalau.",
+          "frag": 1
+        },
+        {
+          "es": "La licitación, de seis a nueve meses: es la fase que marca el ritmo.",
+          "eu": "Lizitazioa, sei eta bederatzi hilabete artean: erritmoa markatzen duen fasea da.",
+          "frag": 2
+        },
+        {
+          "es": "Construir, de nueve a doce meses.",
+          "eu": "Eraiki, bederatzi eta hamabi hilabete artean.",
+          "frag": 3
+        },
+        {
+          "es": "Y operar el piloto, seis meses.",
+          "eu": "Eta pilotua kudeatu, sei hilabete.",
+          "frag": 4
+        },
+        {
+          "es": "En rojo, los plazos del reglamento. Empezando ahora, el piloto está en marcha entre el otoño de 2028 y la primavera de 2029.",
+          "eu": "Gorriz, erregelamenduaren epeak. Orain hasita, pilotua martxan dago 2028ko udazkenaren eta 2029ko udaberriaren artean.",
           "frag": 5
         }
       ]
