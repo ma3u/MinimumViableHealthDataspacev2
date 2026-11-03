@@ -232,7 +232,7 @@ Test runs are automated via GitHub Actions (`.github/workflows/test.yml`):
 - **Jobs:**
   - `ui-tests` — Runs all UI tests with coverage
   - `proxy-tests` — Runs all 10 proxy tests with coverage
-  - `e2e-tests` — Runs 102 Playwright E2E tests (main branch + manual)
+  - E2E: the Playwright suite runs in `pages.yml` (`tests` job) against a seeded Neo4j
   - `lint` — ESLint check on UI code
 - **Artifacts:** Coverage HTML reports uploaded for 30 days
 - **Summary:** Coverage tables written to GitHub job summary

@@ -1239,6 +1239,7 @@
   },
   "workflowJobs": {
     "test.yml": [
+      "Changed paths",
       "UI Tests (Vitest)",
       "Neo4j Proxy Tests (Vitest)",
       "SPE Loader Tests (Vitest)",
@@ -1252,8 +1253,7 @@
       "Trivy Security Scan",
       "Kubescape K8s Posture",
       "Lint",
-      "Performance Budget (Lighthouse)",
-      "E2E Tests (Playwright)"
+      "Performance Budget (Lighthouse)"
     ],
     "compliance.yml": [
       "Image platforms",
