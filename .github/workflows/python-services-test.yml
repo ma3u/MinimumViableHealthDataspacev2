@@ -23,6 +23,10 @@ on:
       - "services/catalog-crawler/**"
       - "services/catalog-enricher/**"
       - "scripts/leitlinien/**"
+      # The enricher's Release 8 test reads the proxy's golden catalogue, so
+      # a change to it is a change to what the test checks. #783 changed it
+      # to language-tagged titles and the test sat red, unrun, for two days.
+      - "services/neo4j-proxy/__tests__/fixtures/healthdcat-ap-r8.jsonld"
       - ".github/workflows/python-services-test.yml"
   push:
     branches: ["main"]
@@ -30,6 +34,7 @@ on:
       - "services/catalog-crawler/**"
       - "services/catalog-enricher/**"
       - "scripts/leitlinien/**"
+      - "services/neo4j-proxy/__tests__/fixtures/healthdcat-ap-r8.jsonld"
   workflow_dispatch:
   # Callable so the deploy workflows gate on THIS definition instead of a
   # duplicate. Three copies of the same pytest invocation would drift, and the

@@ -49,6 +49,32 @@ def _codes(value: Any) -> list[str]:
     return [iri.rstrip("/").rsplit("/", 1)[-1] for iri in map(_iri, _values(value)) if iri]
 
 
+def _tagged(value: Any) -> list[tuple[str, str | None]]:
+    """(text, language) pairs from a literal, a {"@value", "@language"} value or a list."""
+    out: list[tuple[str, str | None]] = []
+    for v in _values(value):
+        if isinstance(v, dict):
+            if v.get("@value") is not None:
+                out.append((str(v["@value"]), v.get("@language")))
+        elif v is not None and v != "":
+            out.append((str(v), None))
+    return out
+
+
+def _text(value: Any) -> str | None:
+    """One text from a literal that may be given in several languages (#782).
+
+    The graph keeps English as the source, so English wins, then an untagged
+    value, then whatever came first.
+    """
+    pairs = _tagged(value)
+    for wanted in ("en", None):
+        for text, lang in pairs:
+            if lang == wanted:
+                return text
+    return pairs[0][0] if pairs else None
+
+
 def _bool(value: Any) -> bool | None:
     if isinstance(value, dict):
         value = value.get("@value")
@@ -103,8 +129,8 @@ def extract_datasets(env: CrawlEnvelope) -> list[DatasetUpsert]:
         out.append(
             DatasetUpsert(
                 dataset_id=str(dataset_id),
-                title=str(raw.get("dct:title") or raw.get("title") or dataset_id),
-                description=raw.get("dct:description") or raw.get("description"),
+                title=_text(raw.get("dct:title") or raw.get("title")) or str(dataset_id),
+                description=_text(raw.get("dct:description") or raw.get("description")),
                 publisher_did=env.participant_did,
                 country=raw.get("dct:spatial")
                 or (raw.get("publisher") or {}).get("country"),
@@ -126,7 +152,11 @@ def extract_datasets(env: CrawlEnvelope) -> list[DatasetUpsert]:
                 coding_systems=_codes(raw.get("healthdcatap:hasCodingSystem")),
                 has_structured_data=_bool(raw.get("healthdcatap:hasStructuredData")),
                 hdab_did=_iri(raw.get("healthdcatap:hdab")),
-                keywords=[str(k) for k in _values(raw.get("dcat:keyword")) if k],
+                # English and untagged keywords: the translations are the
+                # same words again, and the graph keeps English as the source.
+                keywords=[
+                    k for k, lang in _tagged(raw.get("dcat:keyword")) if lang in ("en", None)
+                ],
             )
         )
     return out

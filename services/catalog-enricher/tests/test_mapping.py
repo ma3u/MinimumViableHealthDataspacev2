@@ -113,6 +113,12 @@ def test_release_8_properties_survive_federation():
     assert fhir.hdab_did == "did:web:medreg.de:hdab"
     assert fhir.license == "https://creativecommons.org/licenses/by/4.0/"
     assert "Cardiology" in fhir.keywords
+    # #782: title, description and keywords come in several languages; the
+    # English one is kept, not the list printed as a string.
+    assert fhir.title == "AlphaKlinik Berlin Cardiac Registry"
+    assert fhir.description.startswith("Synthetic registry of cardiac outcomes")
+    assert "Kardiologie" not in fhir.keywords
+    assert omop.title == "Limburg Medical Centre OMOP Analytics"
     assert fhir.distributions[0]["accessUrl"].startswith("https://ehds.mabu.red/data/discover")
     assert omop.coding_systems[0] == "OHDSI-VOCAB"
     assert omop.hdab_did == "did:web:irs.fr:hdab"
