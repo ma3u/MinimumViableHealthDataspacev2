@@ -1807,7 +1807,7 @@ export default function UserGuidePage() {
               <li>
                 <T area="docsGuide" tags={{ b: strongPrimary }}>
                   {
-                    "<b>Reported TCB.</b> The firmware versions of the host the group runs on. Hosts differ, so the Trustee accepts each version that was pinned and refuses a host whose versions were not."
+                    "<b>Reported TCB.</b> The firmware versions of the host the group runs on. Hosts differ, so the Trustee holds a minimum for each component and accepts any version at or above it: a host with newer AMD firmware passes, one below the minimum is refused."
                   }
                 </T>
               </li>
