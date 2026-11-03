@@ -1177,11 +1177,12 @@
       document.querySelectorAll(".narration .langs button").forEach(function (b) {
         b.classList.toggle("on", b.getAttribute("data-lang") === LANG);
         b.addEventListener("click", function () {
-          var l = b.getAttribute("data-lang");
+          // Only the two known values reach the URL; setting search keeps the path and the slide.
+          var l = b.getAttribute("data-lang") === "es" ? "es" : "en";
           try {
             localStorage.setItem("ejie-deck-lang", l);
           } catch (e) {}
-          location.href = location.pathname + "?lang=" + l + location.hash;
+          location.search = "?lang=" + l;
         });
       });
       translated.then(start);
