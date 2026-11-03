@@ -505,16 +505,10 @@ jobs:
       # completes the Release 8 description of every dataset the seeds before
       # it created. Without it HDCAT-2.6 (#700) found 4 incomplete datasets
       # and the baseline reported a regression on every run since #702.
-      #
-      # seed-catalog-translations.cypher follows it, as its header says: it
-      # adds the German, Spanish, French and Dutch titles to the datasets the
-      # Release 8 step completed. Without it `03 Data User/13` found an
-      # English title only, and the baseline reported a regression on every
-      # run since #783 (2026-11-01). SET only, so the counts are unchanged.
       - name: Seed Neo4j with the documented minimal data set (#345)
         run: |
           set -euo pipefail
-          for f in neo4j/insert-synthetic-schema-data.cypher neo4j/register-eehrxf-profiles.cypher neo4j/seed-compliance-matrix.cypher neo4j/seed-persona-overview.cypher neo4j/register-healthdcat-ap-r8.cypher neo4j/seed-catalog-translations.cypher; do
+          for f in neo4j/insert-synthetic-schema-data.cypher neo4j/register-eehrxf-profiles.cypher neo4j/seed-compliance-matrix.cypher neo4j/seed-persona-overview.cypher neo4j/register-healthdcat-ap-r8.cypher; do
             echo "== $f"
             docker exec -i health-dataspace-neo4j \
               cypher-shell -u neo4j -p healthdataspace < "$f"
@@ -669,12 +663,18 @@ jobs:
           # (ADR-059): reports, vaccinations, the medication plan. Without it
           # `01 Patient/06` fails on CI, and since the count stayed at 2 failed
           # it took the place of a request that had started passing.
+          # seed-catalog-translations.cypher gives the datasets their German,
+          # Spanish, French and Dutch titles (#782). Without it `03 Data User/13`
+          # found an English title only, and the baseline reported a
+          # regression on every run since #783 (2026-11-01). It only SETs
+          # properties on datasets the synthetic set created.
           for f in neo4j/insert-synthetic-schema-data.cypher \
                    neo4j/register-eehrxf-profiles.cypher \
                    neo4j/seed-compliance-matrix.cypher \
                    neo4j/participant-source-init.cypher \
                    neo4j/seed-persona-overview.cypher \
-                   neo4j/seed-study-results.cypher; do
+                   neo4j/seed-study-results.cypher \
+                   neo4j/seed-catalog-translations.cypher; do
             echo "== $f"
             docker exec -i health-dataspace-neo4j \
               cypher-shell -u neo4j -p healthdataspace < "$f"
