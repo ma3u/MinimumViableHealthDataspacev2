@@ -97,7 +97,7 @@ export default function DeveloperGuidePage() {
   );
   return (
     <DocFigureViewer>
-      <div className="docs-numbered max-w-5xl mx-auto px-6 py-12">
+      <div className="max-w-5xl mx-auto px-6 py-12">
         <Link
           href="/docs"
           className="inline-flex items-center gap-1 text-sm text-(--text-secondary) hover:text-(--text-primary) mb-6"
@@ -141,8 +141,8 @@ export default function DeveloperGuidePage() {
         {/* TOC */}
         <nav className="border border-(--border) rounded-xl p-5 mb-10">
           <h2 className="font-semibold mb-3">{t("Contents")}</h2>
-          {/* Numbered in the order of the sections, whose headings the
-              docs-numbered counter numbers the same way (globals.css). */}
+          {/* Numbered in the order of the sections, which DocsToc numbers
+              the same way on the headings and in the index at the right. */}
           <ol className="text-sm space-y-1.5 text-indigo-700 dark:text-indigo-400 columns-1 md:columns-2 list-decimal list-inside">
             <TocLink href="#onboarding">{t("Onboarding")}</TocLink>
             <TocLink href="#working-on-the-project">

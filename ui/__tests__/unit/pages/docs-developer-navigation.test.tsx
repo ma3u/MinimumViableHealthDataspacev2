@@ -1,7 +1,7 @@
 /**
- * The developer guide's sections are numbered by a CSS counter on every h2
- * with an id, and its table of contents is an <ol>: the two numbers agree
- * only while the contents list every such section, in page order. And each
+ * DocsToc numbers the developer guide's sections, and its own table of
+ * contents is an <ol>: the two numbers agree only while the contents list
+ * every section, in page order. And each
  * onboarding step leads somewhere a newcomer can follow.
  */
 import { describe, expect, it, vi } from "vitest";
@@ -27,7 +27,6 @@ import DeveloperPage from "@/app/docs/developer/page";
 describe("the developer guide's numbering", () => {
   it("lists every numbered section in the contents, in page order", () => {
     const { container } = render(<DeveloperPage />);
-    expect(container.querySelector(".docs-numbered")).not.toBeNull();
     const sections = [...container.querySelectorAll("h2[id]")].map(
       (h) => `#${h.id}`,
     );

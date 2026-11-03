@@ -10,6 +10,13 @@
  * its text, so every entry is a working anchor. The entry whose heading was
  * scrolled past last is marked current.
  *
+ * It also numbers the headings, h2 "1." and h3 "1.1", so the page and the
+ * index show the same number. A heading that already shows one (a published
+ * document's "doc-num", or a source that numbers itself, "## 6. Checks") keeps
+ * it and the count goes on from there; any other gets the number as a
+ * data-doc-num attribute, which globals.css draws in front of the text. An
+ * attribute, not a node, so React's markup of the heading is left alone.
+ *
  * `DocsTocSidebar` is the sticky column at the right on wide screens;
  * `DocsTocInline` is the collapsible list at the top on narrow ones.
  */
@@ -22,18 +29,63 @@ export interface TocEntry {
   id: string;
   text: string;
   level: 2 | 3;
+  /** The section number the heading shows, "2." or "2.1"; empty for an h3
+   *  before the first h2. */
+  num: string;
 }
+
+/** A number the heading's own text starts with, "7. Incidents" or "7.2 Clocks";
+ *  never a bare figure such as "127 synthetic patients". */
+// Each repetition needs its dot, so no string can be split two ways
+// (CodeQL js/redos on the earlier (?:\d+\.?)*).
+const OWN_NUMBER = /^(\d+\.(?:\d+(?:\.\d+)*\.?)?)\s+/;
 
 /** Headings that are navigation themselves, or boilerplate, stay out. */
 const SKIP = new Set(["contents", "on this page", "related documentation"]);
 
 export function collectHeadings(root: ParentNode): TocEntry[] {
-  const seen = new Set<string>();
-  const out: TocEntry[] = [];
+  const found = [];
   for (const h of Array.from(root.querySelectorAll("h2, h3"))) {
     if (h.closest("nav, [data-toc-skip]")) continue;
-    const text = (h.textContent ?? "").replace(/\s+/g, " ").trim();
+    const raw = (h.textContent ?? "").replace(/\s+/g, " ").trim();
+    const rendered = h.querySelector(".doc-num")?.textContent?.trim() ?? "";
+    const own = rendered || (raw.match(OWN_NUMBER)?.[1] ?? "");
+    const text = own ? raw.slice(raw.indexOf(own) + own.length).trim() : raw;
     if (!text || SKIP.has(text.toLowerCase())) continue;
+    found.push({ h, own, text, level: h.tagName === "H3" ? 3 : 2 } as const);
+  }
+  // A page that numbers its own sections may open with unnumbered ones ("How
+  // to read this model", then "1. System context"): those stay an
+  // introduction, without a number, so no two sections share one.
+  const firstOwn = found.findIndex((f) => f.level === 2 && f.own);
+
+  const seen = new Set<string>();
+  const out: TocEntry[] = [];
+  let h2 = 0;
+  let h3 = 0;
+  for (const [i, { h, own, text, level }] of found.entries()) {
+    let num = own;
+    if (own) {
+      const [major, minor] = own.replace(/\.$/, "").split(".").map(Number);
+      h2 = major;
+      h3 = level === 3 ? minor ?? h3 : 0;
+    } else if (level === 2 && i < firstOwn) {
+      h2 = 0;
+      h3 = 0;
+    } else if (level === 2) {
+      h2 += 1;
+      h3 = 0;
+      num = `${h2}.`;
+    } else if (h2 > 0) {
+      h3 += 1;
+      num = `${h2}.${h3}`;
+    }
+    // Only a number the heading does not show yet is drawn by the attribute.
+    const drawn = own ? null : num || null;
+    if (h.getAttribute("data-doc-num") !== drawn) {
+      if (drawn) h.setAttribute("data-doc-num", drawn);
+      else h.removeAttribute("data-doc-num");
+    }
     let id = h.id || h.closest("section[id]")?.id || "";
     if (!id || seen.has(id)) {
       const base = headingId(text) || "section";
@@ -48,7 +100,7 @@ export function collectHeadings(root: ParentNode): TocEntry[] {
       h.id = id;
     }
     seen.add(id);
-    out.push({ id, text, level: h.tagName === "H3" ? 3 : 2 });
+    out.push({ id, text, level, num });
   }
   return out;
 }
@@ -129,6 +181,11 @@ function TocList({
                 : "border-transparent text-(--text-secondary) hover:text-(--text-primary) hover:border-(--border-ui)"
             }`}
           >
+            {e.num && (
+              <span className="tabular-nums text-(--text-secondary) mr-1.5">
+                {e.num}
+              </span>
+            )}
             {e.text}
           </a>
         </li>
