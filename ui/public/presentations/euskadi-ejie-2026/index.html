@@ -288,10 +288,17 @@
           transform: none;
         }
       }
-      html.print-pdf .reveal .slides section .rise {
+      html.print-pdf .reveal .slides section .rise,
+      html.reveal-print .reveal .slides section .rise {
         opacity: 1;
         transform: none;
         animation: none;
+      }
+      /* reveal.js prints every section, inside its .pdf-page, with no padding; the PDF keeps the margins. */
+      html.reveal-print .reveal .slides .pdf-page > section {
+        padding: 96px 128px 120px !important;
+        width: 1920px;
+        height: 1080px !important;
       }
       @media (prefers-reduced-motion: reduce) {
         .reveal .slides section .rise {

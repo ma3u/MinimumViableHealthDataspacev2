@@ -1,7 +1,8 @@
 // Renders the EJIE web deck (ui/public/presentations/euskadi-ejie-2026/) for the files
-// that leave the browser: one JPEG per slide with every build shown, and a vector PDF
-// with one page per slide. build-ejie-deck.py runs this and turns the JPEGs into the
-// PowerPoint fallback, so the web deck stays the only source.
+// that leave the browser: one JPEG per slide with every build shown, a vector PDF with
+// one page per slide (deck.pdf), and the same PDF set in Arial with the cover photo
+// cropped (editable.pdf), which build-ejie-deck.py turns into an editable PowerPoint
+// through LibreOffice. The web deck stays the only source.
 //
 //     node docs/demos/export-ejie-deck.mjs <out-dir> [en|es]
 //
@@ -102,7 +103,49 @@ try {
     height: "1080px",
     printBackground: true,
   });
-  console.log(`${total} slides and deck.pdf in ${out}`);
+
+  // The editable copy: PowerPoint on another machine has Arial but not DM Sans or Sora,
+  // and LibreOffice's PDF import drops the clip that object-fit: cover makes, so the
+  // cover photo is cropped to its box first.
+  await print.addStyleTag({
+    content:
+      "* { font-family: Arial, Helvetica, sans-serif !important; letter-spacing: 0 !important; }",
+  });
+  await print.evaluate(async () => {
+    for (const img of document.querySelectorAll(".reveal img")) {
+      const w = img.offsetWidth,
+        h = img.offsetHeight;
+      if (!w || !h || getComputedStyle(img).objectFit !== "cover") continue;
+      const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+      const sw = w / scale,
+        sh = h / scale;
+      const c = document.createElement("canvas");
+      c.width = w * 2;
+      c.height = h * 2;
+      c.getContext("2d").drawImage(
+        img,
+        (img.naturalWidth - sw) / 2,
+        (img.naturalHeight - sh) / 2,
+        sw,
+        sh,
+        0,
+        0,
+        c.width,
+        c.height,
+      );
+      img.src = c.toDataURL("image/jpeg", 0.9);
+      img.style.objectFit = "fill";
+      await img.decode();
+    }
+  });
+  await print.waitForTimeout(1000);
+  await print.pdf({
+    path: path.join(out, "editable.pdf"),
+    width: "1920px",
+    height: "1080px",
+    printBackground: true,
+  });
+  console.log(`${total} slides, deck.pdf and editable.pdf in ${out}`);
 } finally {
   await browser.close();
   server.close();
