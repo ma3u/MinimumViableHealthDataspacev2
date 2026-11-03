@@ -22,7 +22,6 @@
 03 Data User/04 My applications and their clocks
 03 Data User/05 My credentials (DCP)
 03 Data User/06 Cohort analytics (OMOP CDM)
-03 Data User/07 Federated cohort statistics
 03 Data User/08 Natural-language query templates
 03 Data User/09 Which NLQ backend is answering
 03 Data User/10 Ask a question in natural language

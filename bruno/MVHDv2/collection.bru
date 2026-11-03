@@ -21,8 +21,12 @@ script:pre-request {
 }
 
 tests {
-  // A 5xx is never acceptable, whatever the request asserts.
+  // A 5xx is never acceptable, whatever the request asserts. The one answer
+  // that is not a fault is a 503 with Retry-After: the hub saying "come back
+  // later" while an SPE workspace starts (ADR-072). The request that meets it
+  // asserts what that answer must hold.
   test("response is not a server error", function () {
+    if (res.getStatus() === 503 && res.getHeader("retry-after")) return;
     expect(res.getStatus()).to.be.below(500);
   });
 }
