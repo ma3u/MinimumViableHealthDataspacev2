@@ -31,6 +31,9 @@ const LIVE_HOST = "ehds.mabu.red";
 const GITHUB_REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
 const basePath =
   process.env.NEXT_PUBLIC_STATIC_EXPORT === "true" ? PAGES_BASE : "";
+/** An onboarding step that leads to where it is explained or done. */
+const STEP_LINK =
+  "underline decoration-dotted underline-offset-2 hover:text-indigo-700 dark:hover:text-indigo-300";
 
 /** TOC entry helper */
 function TocLink({
@@ -85,9 +88,16 @@ export default function DeveloperGuidePage() {
     />
   );
   const warn = <strong className="text-amber-700 dark:text-amber-400" />;
+  // A key concept's term links to where the manual explains it.
+  const concept = (href: string) => (
+    <Link
+      href={href}
+      className="font-semibold underline decoration-dotted underline-offset-2"
+    />
+  );
   return (
     <DocFigureViewer>
-      <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="docs-numbered max-w-5xl mx-auto px-6 py-12">
         <Link
           href="/docs"
           className="inline-flex items-center gap-1 text-sm text-(--text-secondary) hover:text-(--text-primary) mb-6"
@@ -131,7 +141,9 @@ export default function DeveloperGuidePage() {
         {/* TOC */}
         <nav className="border border-(--border) rounded-xl p-5 mb-10">
           <h2 className="font-semibold mb-3">{t("Contents")}</h2>
-          <ul className="text-sm space-y-1.5 text-indigo-700 dark:text-indigo-400 columns-1 md:columns-2">
+          {/* Numbered in the order of the sections, whose headings the
+              docs-numbered counter numbers the same way (globals.css). */}
+          <ol className="text-sm space-y-1.5 text-indigo-700 dark:text-indigo-400 columns-1 md:columns-2 list-decimal list-inside">
             <TocLink href="#onboarding">{t("Onboarding")}</TocLink>
             <TocLink href="#working-on-the-project">
               {t("Working on the Project")}
@@ -165,10 +177,11 @@ export default function DeveloperGuidePage() {
             <TocLink href="#documentation">
               {t("Writing the Documentation")}
             </TocLink>
+            <TocLink href="#data-flow">{t("Data Flow")}</TocLink>
             <TocLink href="#releases">{t("Release Notes")}</TocLink>
             <TocLink href="#project-links">{t("Planning & Issues")}</TocLink>
             <TocLink href="#conventions">{t("Conventions")}</TocLink>
-          </ul>
+          </ol>
         </nav>
 
         {/* Onboarding */}
@@ -187,22 +200,49 @@ export default function DeveloperGuidePage() {
                 {t("1. Get Running")}
               </h4>
               <ol className="text-(--text-secondary) text-xs space-y-1 list-decimal ml-4">
-                <li>{t("Clone the repository")}</li>
                 <li>
-                  <T area="docsDeveloper" tags={{ c }}>
-                    {"<c>docker compose up -d</c> (Neo4j)"}
-                  </T>
-                </li>
-                <li>{t("Seed schema & data (cypher-shell)")}</li>
-                <li>
-                  <code>
-                    cd ui &amp;&amp; npm install &amp;&amp; npm run dev
-                  </code>
+                  <a
+                    href={GITHUB_REPO}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={STEP_LINK}
+                  >
+                    {t("Clone the repository")}
+                  </a>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ c }}>
-                    {"Open <c>http://localhost:3000</c>"}
-                  </T>
+                  <a href="#quick-start" className={STEP_LINK}>
+                    <T area="docsDeveloper" tags={{ c }}>
+                      {"<c>docker compose up -d</c> (Neo4j)"}
+                    </T>
+                  </a>
+                </li>
+                <li>
+                  <Link
+                    href="/docs/developer/stack-and-environment#two-ways-to-run-it"
+                    className={STEP_LINK}
+                  >
+                    {t("Seed schema & data (cypher-shell)")}
+                  </Link>
+                </li>
+                <li>
+                  <a href="#quick-start" className={STEP_LINK}>
+                    <code>
+                      cd ui &amp;&amp; npm install &amp;&amp; npm run dev
+                    </code>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="http://localhost:3000"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={STEP_LINK}
+                  >
+                    <T area="docsDeveloper" tags={{ c }}>
+                      {"Open <c>http://localhost:3000</c>"}
+                    </T>
+                  </a>
                 </li>
               </ol>
             </div>
@@ -211,11 +251,31 @@ export default function DeveloperGuidePage() {
                 {t("2. Explore the Platform")}
               </h4>
               <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
-                <li>{t("Switch personas via the User Menu")}</li>
-                <li>{t("Explore the Graph Explorer (center node)")}</li>
-                <li>{t("Browse the Data Catalog")}</li>
-                <li>{t("Check Patient Portal (PATIENT role)")}</li>
-                <li>{t("Review ODRL policies (HDAB role)")}</li>
+                {[
+                  {
+                    href: "/docs/user-guide#personas",
+                    text: t("Switch personas via the User Menu"),
+                  },
+                  {
+                    href: "/graph",
+                    text: t("Explore the Graph Explorer (center node)"),
+                  },
+                  { href: "/catalog", text: t("Browse the Data Catalog") },
+                  {
+                    href: "/patient/profile",
+                    text: t("Check Patient Portal (PATIENT role)"),
+                  },
+                  {
+                    href: "/admin/policies",
+                    text: t("Review ODRL policies (HDAB role)"),
+                  },
+                ].map((step) => (
+                  <li key={step.href}>
+                    <Link href={step.href} className={STEP_LINK}>
+                      {step.text}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
             <div className="border border-(--border) rounded-lg p-4">
@@ -224,27 +284,47 @@ export default function DeveloperGuidePage() {
               </h4>
               <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b: concept(
+                        "/docs/developer/stack-and-environment#protocols",
+                      ),
+                    }}
+                  >
                     {"<b>DSP:</b> Dataspace Protocol, sovereign data exchange"}
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b: concept(
+                        "/docs/developer/stack-and-environment#protocols",
+                      ),
+                    }}
+                  >
                     {"<b>DCP:</b> Decentralised Claims, DID + VC identity"}
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{ b: concept("#graph-schema") }}
+                  >
                     {"<b>FHIR R4:</b> Clinical data standard (EHR)"}
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{ b: concept("#graph-schema") }}
+                  >
                     {"<b>OMOP CDM:</b> Analytics layer for research"}
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
+                  <T area="docsDeveloper" tags={{ b: concept("/docs/ehds") }}>
                     {"<b>EHDS:</b> EU regulation for health data sharing"}
                   </T>
                 </li>
