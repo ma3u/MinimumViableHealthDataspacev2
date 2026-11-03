@@ -7,8 +7,8 @@ while it plays, and "frag" reveals that slide's fragment. Each slide goes to
 ElevenLabs' text-to-speech "with-timestamps" endpoint, which returns the audio
 and the start time of every character. The script writes:
 
-    audio/slide-N.mp3            the narration of slide N
-    subtitles/slide-N.eu.vtt     Basque WebVTT, one cue per spoken sentence
+    audio/<id>.mp3               the narration of the slide with that id
+    subtitles/<id>.eu.vtt        Basque WebVTT, one cue per spoken sentence
     narration.json               cue times, subtitles and fragments, for the player
 
 ElevenLabs has no Basque voice (checked on 2026-10-10 against every model the
@@ -23,7 +23,7 @@ Run from the repository root:
     python3 scripts/narrate-euskadi-deck.py              # every slide
     python3 scripts/narrate-euskadi-deck.py q3 pilot1    # only these slide ids
 """
-import base64, hashlib, json, os, pathlib, sys, urllib.error, urllib.request
+import base64, hashlib, json, os, pathlib, shutil, sys, urllib.error, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 DECK = ROOT / "ui/public/presentations/euskadi-ejie-2026"
@@ -104,11 +104,11 @@ def spoken_key(slide: dict) -> str:
     return hashlib.sha256(json.dumps(what, ensure_ascii=False, sort_keys=True).encode()).hexdigest()[:16]
 
 
-def write_vtt(n: int, cues: list) -> None:
+def write_vtt(sid: str, cues: list) -> None:
     vtt = ["WEBVTT", "Language: eu", ""]
     for c in cues:
         vtt += [f"{vtt_time(c['start'])} --> {vtt_time(c['end'])}", c["eu"], ""]
-    (DECK / f"subtitles/slide-{n}.eu.vtt").write_text("\n".join(vtt))
+    (DECK / f"subtitles/{sid}.eu.vtt").write_text("\n".join(vtt))
 
 
 result = []
@@ -124,8 +124,12 @@ for n, slide in enumerate(src["slides"], 1):
             if "frag" in cue:
                 c["frag"] = cue["frag"]
             cues.append(c)
-        write_vtt(n, cues)
-        result.append({**old, "cues": cues})
+        # Files are named by slide id, so a slide keeps its audio when the deck is reordered.
+        audio = f"audio/{sid}.mp3"
+        if old["audio"] != audio:
+            shutil.copyfile(DECK / old["audio"], DECK / audio)
+        write_vtt(sid, cues)
+        result.append({**old, "audio": audio, "subtitles": f"subtitles/{sid}.eu.vtt", "cues": cues})
         print(f"slide {n:2d} {sid:10s} audio kept, cues refreshed")
         continue
     if only and sid not in only and old:
@@ -149,7 +153,7 @@ for n, slide in enumerate(src["slides"], 1):
             body = json.load(r)
     except urllib.error.HTTPError as e:
         sys.exit(f"{sid}: HTTP {e.code} {e.read()[:300]!r}")
-    audio = f"audio/slide-{n}.mp3"
+    audio = f"audio/{sid}.mp3"
     (DECK / audio).write_bytes(base64.b64decode(body["audio_base64"]))
     al = body["alignment"]
     starts, ends = al["character_start_times_seconds"], al["character_end_times_seconds"]
@@ -165,12 +169,17 @@ for n, slide in enumerate(src["slides"], 1):
         if "frag" in cue:
             c["frag"] = cue["frag"]
         cues.append(c)
-    write_vtt(n, cues)
-    result.append({"id": sid, "audio": audio, "subtitles": f"subtitles/slide-{n}.eu.vtt",
+    write_vtt(sid, cues)
+    result.append({"id": sid, "audio": audio, "subtitles": f"subtitles/{sid}.eu.vtt",
                    "duration": duration, "spoken": key, "cues": cues})
     print(f"slide {n:2d} {sid:10s} {duration:6.1f}s  {len(text)} characters")
 
 OUT_JSON.write_text(json.dumps({"language": src["language"], "subtitles": "eu", "slides": result},
                                ensure_ascii=False, indent=1) + "\n")
+# Drop the files no slide uses any more, such as the numbered names of earlier versions.
+used = {s["audio"] for s in result} | {s["subtitles"] for s in result}
+for f in [*(DECK / "audio").glob("*.mp3"), *(DECK / "subtitles").glob("*.vtt")]:
+    if str(f.relative_to(DECK)) not in used:
+        f.unlink()
 total = sum(s["duration"] for s in result)
 print(f"{len(result)} slides, {int(total // 60)}:{int(total % 60):02d} of narration; {OUT_JSON.relative_to(ROOT)}")
