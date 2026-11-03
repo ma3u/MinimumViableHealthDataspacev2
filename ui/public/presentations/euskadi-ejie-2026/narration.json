@@ -40,65 +40,65 @@
       "id": "overview",
       "audio": "audio/overview.mp3",
       "subtitles": "subtitles/overview.eu.vtt",
-      "duration": 37.616,
-      "spoken": "dd6619b463d24bb9",
+      "duration": 43.421,
+      "spoken": "d6237bbae0ec12ac",
       "cues": [
         {
           "start": 0.0,
-          "end": 3.413,
+          "end": 3.936,
           "eu": "Hemen dituzue zortzi erantzunak, orrialde bakar batean."
         },
         {
-          "start": 3.413,
-          "end": 5.642,
+          "start": 3.936,
+          "end": 7.628,
           "eu": "Bat: kultura, ez teknologia.",
           "frag": 0
         },
         {
-          "start": 5.642,
-          "end": 9.207,
+          "start": 7.628,
+          "end": 11.378,
           "eu": "Bi: dauden estandarren gainean eraiki.",
           "frag": 1
         },
         {
-          "start": 9.207,
-          "end": 12.91,
+          "start": 11.378,
+          "end": 15.615,
           "eu": "Hiru: estandar irekiak, publikoan erabakiak.",
           "frag": 2
         },
         {
-          "start": 12.91,
-          "end": 18.495,
+          "start": 15.615,
+          "end": 20.411,
           "eu": "Lau: osagaiak berrerabili lehenik, eta falta dena bakarrik eraiki.",
           "frag": 3
         },
         {
-          "start": 18.495,
-          "end": 23.255,
+          "start": 20.411,
+          "end": 27.145,
           "eu": "Bost: protokoloa egonkorra da; ingurune seguruak, oraindik gazteak.",
           "frag": 4
         },
         {
-          "start": 23.255,
-          "end": 26.529,
+          "start": 27.145,
+          "end": 30.767,
           "eu": "Sei: arauak eta eragiketa bereiztu.",
           "frag": 5
         },
         {
-          "start": 26.529,
-          "end": 30.198,
+          "start": 30.767,
+          "end": 34.854,
           "eu": "Zazpi: ez dago lizentziarik; jendea eta ostatatzea ordaintzen dira.",
           "frag": 6
         },
         {
-          "start": 30.198,
-          "end": 33.495,
-          "eu": "Zortzi: zortzitik hamabi pertsonara pilotu baterako.",
+          "start": 34.854,
+          "end": 38.092,
+          "eu": "Zortzi: zortzitik hamabost pertsonara pilotu baterako.",
           "frag": 7
         },
         {
-          "start": 33.495,
-          "end": 37.616,
+          "start": 38.092,
+          "end": 43.421,
           "eu": "Diapositiba bakarra gogoratzen baduzue, izan dadila hau. Goazen banan-banan!"
         }
       ]
@@ -298,6 +298,55 @@
           "start": 38.696,
           "end": 48.251,
           "eu": "Berdea berrerabiltzen da, anbarra egokitzen da, zuria eraikitzen da. Eta ingurune segurua erabaki irekia da oraindik."
+        }
+      ]
+    },
+    {
+      "id": "architecture",
+      "audio": "audio/architecture.mp3",
+      "subtitles": "subtitles/architecture.eu.vtt",
+      "duration": 52.802,
+      "spoken": "500e0bb3b2bee89f",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 5.503,
+          "eu": "Hau da gure arkitektura: horrela eraiki liteke irtenbidea."
+        },
+        {
+          "start": 5.503,
+          "end": 16.358,
+          "eu": "Goian, konfiantza-geruza: sartzean egiaztagiri egiaztagarriak, Cl@ve eta FNMT, eta Europako zorroa herritarrentzat.",
+          "frag": 0
+        },
+        {
+          "start": 16.358,
+          "end": 26.784,
+          "eu": "Ospitalean: datuak, FHIR eta OMOPera mapatzea terminologiekin, eta izengoitutako datuak bakarrik ateratzen uzten dituen konektore bat.",
+          "frag": 1
+        },
+        {
+          "start": 26.784,
+          "end": 32.728,
+          "eu": "Erdian, EJIE operadore gisa: sarrera, auditoria eta katalogo federatua.",
+          "frag": 2
+        },
+        {
+          "start": 32.728,
+          "end": 41.274,
+          "eu": "Eskuinean, sarbide-erakundea: baimenak, borondatezko uko egitea eta ikertzaileek lan egiten duten ingurune segurua.",
+          "frag": 3
+        },
+        {
+          "start": 41.274,
+          "end": 48.809,
+          "eu": "Behean, datu-espazioen protokoloak denak lotzen ditu, eta gorantz konektatzen du Espainiarekin eta Europarekin.",
+          "frag": 4
+        },
+        {
+          "start": 48.809,
+          "end": 52.802,
+          "eu": "Hau guztia gaur dabil gure erakuslean."
         }
       ]
     },
@@ -504,53 +553,40 @@
       "id": "q7",
       "audio": "audio/q7.mp3",
       "subtitles": "subtitles/q7.eu.vtt",
-      "duration": 48.623,
-      "spoken": "b76f20fc2525235c",
+      "duration": 39.892,
+      "spoken": "b233ff8f965bd772",
       "cues": [
         {
           "start": 0.0,
-          "end": 6.722,
-          "eu": "Hitz egin dezagun diruaz. Lizentziak: ia zero, muina kode irekia delako.",
-          "frag": 0
+          "end": 6.815,
+          "eu": "Hitz egin dezagun diruaz. Lizentziak: ia zero, muina kode irekia delako."
         },
         {
-          "start": 6.722,
-          "end": 11.912,
+          "start": 6.815,
+          "end": 11.9,
           "eu": "Kostatzen dena jendea da: ingeniaritza, ostatatzea eta eragiketa."
         },
         {
-          "start": 11.912,
-          "end": 20.538,
-          "eu": "Erreferentzia gisa: Catena-Xek ehun milioi euro baino gehiago jaso zituen funts publikoetatik, industria oso batentzat.",
+          "start": 11.9,
+          "end": 20.828,
+          "eu": "Eskualdeko pilotu baterako gure estimazioa, EJIEren xehetasunaren zain: zortziehun mila euro eta milioi eta erdi artean.",
+          "frag": 0
+        },
+        {
+          "start": 20.828,
+          "end": 26.146,
+          "eu": "Ondoren, kudeatzeak urtean ehuneko hamabost eta hogeita bost artean kostatzen du.",
           "frag": 1
         },
         {
-          "start": 20.538,
-          "end": 25.554,
-          "eu": "Parte-hartzaile bakoitzak urtean mila eta bostehun eta hirurogeita hamaika mila euro artean ordaintzen dio operadoreari.",
+          "start": 26.146,
+          "end": 34.087,
+          "eu": "Ostatatzea: ekoizpena, probak eta garapena, hilean hiru mila euro inguru, hodei-hornitzailearen arabera.",
           "frag": 2
         },
         {
-          "start": 25.554,
-          "end": 29.64,
-          "eu": "Eskualdeko pilotu bat? Zortziehun mila euro eta milioi eta erdi artean.",
-          "frag": 3
-        },
-        {
-          "start": 29.64,
-          "end": 34.296,
-          "eu": "Ondoren, kudeatzeak urtean ehuneko hamabost eta hogeita bost artean kostatzen du.",
-          "frag": 4
-        },
-        {
-          "start": 34.296,
-          "end": 42.145,
-          "eu": "Ostatatzea: hiru ingurune, ekoizpena, probak eta garapena, hilean mila euro inguru bakoitza.",
-          "frag": 5
-        },
-        {
-          "start": 42.145,
-          "end": 48.623,
+          "start": 34.087,
+          "end": 39.892,
           "eu": "Gehi garapen-tresnak. Ingurune segurua aparte doa: orain ikusiko dugu."
         }
       ]
@@ -559,41 +595,41 @@
       "id": "q7assume",
       "audio": "audio/q7assume.mp3",
       "subtitles": "subtitles/q7assume.eu.vtt",
-      "duration": 54.102,
-      "spoken": "6719ef2d25e7e65d",
+      "duration": 51.037,
+      "spoken": "f6bba6ac4d7c5b6e",
       "cues": [
         {
           "start": 0.0,
-          "end": 2.31,
+          "end": 3.448,
           "eu": "Zer dago zifra hauen atzean?"
         },
         {
-          "start": 2.31,
-          "end": 12.725,
-          "eu": "Hamabi hilabeteko eraikuntza, zortzi eta hamabi pertsona artean. Hau da, ehun eta ehun eta hogeita bost mila euro artean pertsona eta urte bakoitzeko.",
+          "start": 3.448,
+          "end": 11.25,
+          "eu": "Hamabi hilabeteko eraikuntza, zortzi eta hamabost pertsona artean. Hau da, ehun mila euro inguru pertsona eta urte bakoitzeko.",
           "frag": 0
         },
         {
-          "start": 12.725,
-          "end": 23.069,
+          "start": 11.25,
+          "end": 21.246,
           "eu": "Irismena: Osakidetzaren bizpahiru ospitale eta minbizi-erregistroa, bi erabilera-kasu eta nodo bat. Datuen mapaketa barne dago.",
           "frag": 1
         },
         {
-          "start": 23.069,
-          "end": 32.368,
+          "start": 21.246,
+          "end": 30.894,
           "eu": "Ez ditu barne hartzen ospitaleetako langileen denbora, datu-lakua, ingurune segurua, ezta sarbide-erakundeko langileak ere.",
           "frag": 2
         },
         {
-          "start": 32.368,
-          "end": 41.54,
-          "eu": "Ingurune bakoitzeko mila euroek konektorea, katalogoa, identitatea eta monitorizazioa estaltzen dituzte. Ez ingurune segurua.",
+          "start": 30.894,
+          "end": 40.461,
+          "eu": "Ostatatzeak konektorea, katalogoa, identitatea eta monitorizazioa estaltzen ditu, hodei-hornitzailearen prezioan. Ez ingurune segurua.",
           "frag": 3
         },
         {
-          "start": 41.54,
-          "end": 54.102,
+          "start": 40.461,
+          "end": 51.037,
           "eu": "Ingurune segurua lerro bereizia da. Lan-espazioekin, biltegiratzearekin eta Segurtasun Eskema Nazionalarekin, hilean hainbat mila euro dira.",
           "frag": 4
         }
@@ -603,25 +639,25 @@
       "id": "q8",
       "audio": "audio/q8.mp3",
       "subtitles": "subtitles/q8.eu.vtt",
-      "duration": 25.449,
-      "spoken": "f46a582c31289a3b",
+      "duration": 28.7,
+      "spoken": "1792af69bcc3b2c3",
       "cues": [
         {
           "start": 0.0,
-          "end": 5.027,
-          "eu": "Eta taldea? Zortzi eta hamabi pertsona artean, lanaldi osoan.",
+          "end": 4.899,
+          "eu": "Eta taldea? Zortzi eta hamabost pertsona artean, lanaldi osoan.",
           "frag": 0
         },
         {
-          "start": 5.027,
-          "end": 19.562,
-          "eu": "Arkitekto bat, konektoreetako bizpahiru ingeniari, plataforma eta segurtasuneko bizpahiru, datu eta terminologietako bi eta lau espezialista artean, eta pertsona bat datuen babeserako eta zuzenbiderako.",
+          "start": 4.899,
+          "end": 20.538,
+          "eu": "Profilak: arkitekto bat edo bi, konektoreetako bizpahiru ingeniari, plataforma eta segurtasuneko bizpahiru, datu eta terminologietako bi eta bost espezialista artean, eta pertsona bat edo bi datuen babeserako eta zuzenbiderako.",
           "frag": 1
         },
         {
-          "start": 19.562,
-          "end": 25.449,
-          "eu": "Eta gogoratu lehen erantzuna: zuzendaritzaren denborarik eta agindurik gabe, ez dabil."
+          "start": 20.538,
+          "end": 28.7,
+          "eu": "Piramide zehatza proiektuaren xehetasunarekin neurtzen da. Eta zuzendaritzaren denborarik eta agindurik gabe, ez dabil."
         }
       ]
     },
@@ -880,6 +916,56 @@
           "start": 32.125,
           "end": 40.495,
           "eu": "Orain hasten bagara, pilotua prest egongo da 2029ko martxorako, bigarren mailako erabilera osorik aplikatzen denean.",
+          "frag": 5
+        }
+      ]
+    },
+    {
+      "id": "timeline",
+      "audio": "audio/timeline.mp3",
+      "subtitles": "subtitles/timeline.eu.vtt",
+      "duration": 28.05,
+      "spoken": "27f47c3a79661c5b",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 3.994,
+          "eu": "Egutegia, gaurtik 2029ko martxora arte."
+        },
+        {
+          "start": 3.994,
+          "end": 6.455,
+          "eu": "Definitu, bizpahiru hilabete.",
+          "frag": 0
+        },
+        {
+          "start": 6.455,
+          "end": 8.58,
+          "eu": "Prestatu, hiruzpalau.",
+          "frag": 1
+        },
+        {
+          "start": 8.58,
+          "end": 13.003,
+          "eu": "Lizitazioa, sei eta bederatzi hilabete artean: erritmoa markatzen duen fasea da.",
+          "frag": 2
+        },
+        {
+          "start": 13.003,
+          "end": 15.221,
+          "eu": "Eraiki, bederatzi eta hamabi hilabete artean.",
+          "frag": 3
+        },
+        {
+          "start": 15.221,
+          "end": 17.16,
+          "eu": "Eta pilotua kudeatu, sei hilabete.",
+          "frag": 4
+        },
+        {
+          "start": 17.16,
+          "end": 28.05,
+          "eu": "Gorriz, erregelamenduaren epeak. Orain hasita, pilotua martxan dago 2028ko udazkenaren eta 2029ko udaberriaren artean.",
           "frag": 5
         }
       ]
