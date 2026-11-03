@@ -79,6 +79,18 @@ DOCS = [
      "The Well-Architected and Cloud Adoption assessment as of 2026-10-16: what is in place per pillar, "
      "with the evidence, what is open, the scores, and what stands between the demonstrator and an "
      "operable platform."),
+    ("developer", "sdlc", "docs/SDLC.md",
+     "How a change reaches the live hub: discussions and issues, branches and pull requests, every "
+     "pre-commit and pre-push hook with its fix, the PR Gate and the other workflows, the deploys to "
+     "Azure and GitHub Pages, releases, how to contribute from outside, and how to define an SDLC for a "
+     "DevSecOps and AI project, with the tools for each stage."),
+    ("developer", "api-integration-tests", "docs/developer/api-integration-tests.md",
+     "The Bruno collection and the dataspace, identity and domain checks: what each covers, how to "
+     "run it, and whether it is up to date, with measured numbers."),
+    ("developer", "stack-and-environment", "docs/developer/stack-and-environment.md",
+     "A glossary of the stack (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, the "
+     "proxy, the catalogue services) and how it fits together; prerequisites, the two local stacks, "
+     "seed phases, ports, environment variables, the iPhone app and the day-one gotchas."),
     ("security", "security-test-report", "docs/security/security-test-report-2026-10-15.md",
      "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, the app's posture "
      "tests and the anonymous black-box checks of the live hub; findings F1 to F10 with their "

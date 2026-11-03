@@ -139,7 +139,13 @@ describe("the docs pages' texts are in their dictionaries", () => {
       ]),
     ).toEqual([]);
     // The back links of the documents are the sections' menu labels.
-    for (const section of ["security", "operations", "klarbefund", "ehds"]) {
+    for (const section of [
+      "security",
+      "operations",
+      "klarbefund",
+      "ehds",
+      "developer",
+    ]) {
       const page = src(`src/app/docs/${section}/[slug]/page.tsx`);
       const [, label] = page.match(/backLabel="([^"]+)"/)!;
       expect(MESSAGES.en.nav, section).toHaveProperty([label]);

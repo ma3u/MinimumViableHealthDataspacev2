@@ -77,6 +77,11 @@ PAGES = {
         "sources": ["ui/src/app/docs/developer/reference/page.tsx", "ui/public/openapi.yaml"],
         "facts": [],
     },
+    "/docs/developer/[slug]": {
+        "sources": ["ui/src/app/docs/developer/[slug]/page.tsx", "ui/src/components/docs/PublishedDoc.tsx",
+                    "ui/src/content/published-docs.json"],
+        "facts": [],
+    },
     "/docs/architecture": {
         "sources": ["ui/src/app/docs/architecture/page.tsx"],
         "facts": ["adrs", "apiRoutes", "uiPages", "composeServices", "postgresDbs"],

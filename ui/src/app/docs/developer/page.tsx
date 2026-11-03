@@ -21,6 +21,8 @@ const implementedOperations = facts.apiRoutes.reduce(
 );
 const COMPOSE_SERVICES = Object.values(facts.composeServices).flat().length;
 const PRE_COMMIT_HOOKS = facts.preCommitHooks.length;
+const hooksAt = (stage: string) =>
+  facts.preCommitHooks.filter((h) => h.stage === stage).length;
 
 const PAGES_BASE = "/MinimumViableHealthDataspacev2";
 // A placeholder in the text, so no dictionary holds the host name (FR and
@@ -29,6 +31,9 @@ const LIVE_HOST = "ehds.mabu.red";
 const GITHUB_REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
 const basePath =
   process.env.NEXT_PUBLIC_STATIC_EXPORT === "true" ? PAGES_BASE : "";
+/** An onboarding step that leads to where it is explained or done. */
+const STEP_LINK =
+  "underline decoration-dotted underline-offset-2 hover:text-indigo-700 dark:hover:text-indigo-300";
 
 /** TOC entry helper */
 function TocLink({
@@ -83,9 +88,16 @@ export default function DeveloperGuidePage() {
     />
   );
   const warn = <strong className="text-amber-700 dark:text-amber-400" />;
+  // A key concept's term links to where the manual explains it.
+  const concept = (href: string) => (
+    <Link
+      href={href}
+      className="font-semibold underline decoration-dotted underline-offset-2"
+    />
+  );
   return (
     <DocFigureViewer>
-      <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="docs-numbered max-w-5xl mx-auto px-6 py-12">
         <Link
           href="/docs"
           className="inline-flex items-center gap-1 text-sm text-(--text-secondary) hover:text-(--text-primary) mb-6"
@@ -129,8 +141,13 @@ export default function DeveloperGuidePage() {
         {/* TOC */}
         <nav className="border border-(--border) rounded-xl p-5 mb-10">
           <h2 className="font-semibold mb-3">{t("Contents")}</h2>
-          <ul className="text-sm space-y-1.5 text-indigo-700 dark:text-indigo-400 columns-1 md:columns-2">
+          {/* Numbered in the order of the sections, whose headings the
+              docs-numbered counter numbers the same way (globals.css). */}
+          <ol className="text-sm space-y-1.5 text-indigo-700 dark:text-indigo-400 columns-1 md:columns-2 list-decimal list-inside">
             <TocLink href="#onboarding">{t("Onboarding")}</TocLink>
+            <TocLink href="#working-on-the-project">
+              {t("Working on the Project")}
+            </TocLink>
             <TocLink href="#jad-architecture">
               {t("JAD Stack Architecture")}
             </TocLink>
@@ -160,10 +177,11 @@ export default function DeveloperGuidePage() {
             <TocLink href="#documentation">
               {t("Writing the Documentation")}
             </TocLink>
+            <TocLink href="#data-flow">{t("Data Flow")}</TocLink>
             <TocLink href="#releases">{t("Release Notes")}</TocLink>
             <TocLink href="#project-links">{t("Planning & Issues")}</TocLink>
             <TocLink href="#conventions">{t("Conventions")}</TocLink>
-          </ul>
+          </ol>
         </nav>
 
         {/* Onboarding */}
@@ -182,22 +200,49 @@ export default function DeveloperGuidePage() {
                 {t("1. Get Running")}
               </h4>
               <ol className="text-(--text-secondary) text-xs space-y-1 list-decimal ml-4">
-                <li>{t("Clone the repository")}</li>
                 <li>
-                  <T area="docsDeveloper" tags={{ c }}>
-                    {"<c>docker compose up -d</c> (Neo4j)"}
-                  </T>
-                </li>
-                <li>{t("Seed schema & data (cypher-shell)")}</li>
-                <li>
-                  <code>
-                    cd ui &amp;&amp; npm install &amp;&amp; npm run dev
-                  </code>
+                  <a
+                    href={GITHUB_REPO}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={STEP_LINK}
+                  >
+                    {t("Clone the repository")}
+                  </a>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ c }}>
-                    {"Open <c>http://localhost:3000</c>"}
-                  </T>
+                  <a href="#quick-start" className={STEP_LINK}>
+                    <T area="docsDeveloper" tags={{ c }}>
+                      {"<c>docker compose up -d</c> (Neo4j)"}
+                    </T>
+                  </a>
+                </li>
+                <li>
+                  <Link
+                    href="/docs/developer/stack-and-environment#two-ways-to-run-it"
+                    className={STEP_LINK}
+                  >
+                    {t("Seed schema & data (cypher-shell)")}
+                  </Link>
+                </li>
+                <li>
+                  <a href="#quick-start" className={STEP_LINK}>
+                    <code>
+                      cd ui &amp;&amp; npm install &amp;&amp; npm run dev
+                    </code>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="http://localhost:3000"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={STEP_LINK}
+                  >
+                    <T area="docsDeveloper" tags={{ c }}>
+                      {"Open <c>http://localhost:3000</c>"}
+                    </T>
+                  </a>
                 </li>
               </ol>
             </div>
@@ -206,11 +251,31 @@ export default function DeveloperGuidePage() {
                 {t("2. Explore the Platform")}
               </h4>
               <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
-                <li>{t("Switch personas via the User Menu")}</li>
-                <li>{t("Explore the Graph Explorer (center node)")}</li>
-                <li>{t("Browse the Data Catalog")}</li>
-                <li>{t("Check Patient Portal (PATIENT role)")}</li>
-                <li>{t("Review ODRL policies (HDAB role)")}</li>
+                {[
+                  {
+                    href: "/docs/user-guide#personas",
+                    text: t("Switch personas via the User Menu"),
+                  },
+                  {
+                    href: "/graph",
+                    text: t("Explore the Graph Explorer (center node)"),
+                  },
+                  { href: "/catalog", text: t("Browse the Data Catalog") },
+                  {
+                    href: "/patient/profile",
+                    text: t("Check Patient Portal (PATIENT role)"),
+                  },
+                  {
+                    href: "/admin/policies",
+                    text: t("Review ODRL policies (HDAB role)"),
+                  },
+                ].map((step) => (
+                  <li key={step.href}>
+                    <Link href={step.href} className={STEP_LINK}>
+                      {step.text}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
             <div className="border border-(--border) rounded-lg p-4">
@@ -219,27 +284,47 @@ export default function DeveloperGuidePage() {
               </h4>
               <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b: concept(
+                        "/docs/developer/stack-and-environment#protocols",
+                      ),
+                    }}
+                  >
                     {"<b>DSP:</b> Dataspace Protocol, sovereign data exchange"}
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b: concept(
+                        "/docs/developer/stack-and-environment#protocols",
+                      ),
+                    }}
+                  >
                     {"<b>DCP:</b> Decentralised Claims, DID + VC identity"}
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{ b: concept("#graph-schema") }}
+                  >
                     {"<b>FHIR R4:</b> Clinical data standard (EHR)"}
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{ b: concept("#graph-schema") }}
+                  >
                     {"<b>OMOP CDM:</b> Analytics layer for research"}
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
+                  <T area="docsDeveloper" tags={{ b: concept("/docs/ehds") }}>
                     {"<b>EHDS:</b> EU regulation for health data sharing"}
                   </T>
                 </li>
@@ -254,6 +339,73 @@ export default function DeveloperGuidePage() {
           >
             {t("Full Onboarding Guide →")} <ExternalLink size={12} />
           </a>
+        </section>
+
+        {/* Working on the project: the pages published from docs/ */}
+        <section className="mb-10">
+          <h2
+            className="text-2xl font-semibold mb-3"
+            id="working-on-the-project"
+          >
+            {t("Working on the Project")}
+          </h2>
+          <p className="text-(--text-secondary) text-sm mb-4">
+            {t(
+              "How a change reaches the live hub, how it is tested through the APIs, and what each part of the stack is. Each page is published from the docs folder of the repository.",
+            )}
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[
+              {
+                href: "/docs/developer/sdlc",
+                title: t("Development life cycle"),
+                desc: t(
+                  "Discussions and issues, branches and pull requests, every hook with its fix, the PR Gate and the other workflows, the deploys and the releases.",
+                ),
+              },
+              {
+                href: "/docs/developer/api-integration-tests",
+                title: t("Integration tests through the APIs"),
+                desc: t(
+                  "The Bruno collection and the dataspace and identity checks: how to run them, and how current they are.",
+                ),
+              },
+              {
+                href: "/docs/developer/stack-and-environment",
+                title: t("The stack and the development environment"),
+                desc: t(
+                  "EDC-V, JAD, CFM, DSP, DCP and the hub's own services in one glossary; the local stacks, the seed phases, the ports and the iPhone app.",
+                ),
+              },
+            ].map((card) => (
+              <Link
+                key={card.href}
+                href={card.href}
+                className="border border-(--border) rounded-lg p-4 hover:border-indigo-500/50 transition-colors block"
+              >
+                <h3 className="font-semibold text-sm mb-1 text-indigo-700 dark:text-indigo-400">
+                  {card.title}
+                </h3>
+                <p className="text-(--text-secondary) text-xs">{card.desc}</p>
+              </Link>
+            ))}
+            <a
+              href={`${GITHUB_REPO}/blob/main/.github/CONTRIBUTING.md`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border border-(--border) rounded-lg p-4 hover:border-indigo-500/50 transition-colors block"
+            >
+              <h3 className="font-semibold text-sm mb-1 text-indigo-700 dark:text-indigo-400 inline-flex items-center gap-1">
+                {t("Contributing")}
+                <ExternalLink size={12} />
+              </h3>
+              <p className="text-(--text-secondary) text-xs">
+                {t(
+                  "Fork, branch, pull request: the short guide for outside contributors, under the Apache License 2.0, with fictional organisations only.",
+                )}
+              </p>
+            </a>
+          </div>
         </section>
 
         {/* JAD Architecture */}
@@ -1378,9 +1530,9 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
             {[
-              ["15", t("Pre-commit hooks")],
-              ["2", t("Pre-push gates")],
-              ["13", t("CI jobs")],
+              [String(hooksAt("pre-commit")), t("Pre-commit hooks")],
+              [String(hooksAt("pre-push")), t("Pre-push gates")],
+              [String(facts.workflowJobs["test.yml"].length), t("CI jobs")],
               ["3", t("Compliance suites")],
             ].map(([count, label]) => (
               <div
@@ -1800,8 +1952,40 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
           <h2 className="text-2xl font-semibold mb-3" id="releases">
             {t("Release Notes")}
           </h2>
+          <p className="text-(--text-secondary) text-sm mb-4">
+            <T
+              area="docsDeveloper"
+              tags={{
+                c,
+                a: (
+                  <Link
+                    href="/docs/developer/sdlc#8-releases-and-versions"
+                    className="underline"
+                  />
+                ),
+              }}
+            >
+              {
+                "The version is the one in <c>ui/package.json</c>; when a merge to main changes it, <c>release.yml</c> tags it and publishes the release. <a>How releases and the TestFlight builds of the iPhone app work</a>"
+              }
+            </T>
+          </p>
           <div className="space-y-3">
             {[
+              {
+                version: "v2.0.0",
+                date: "2026-09-29",
+                highlights: t(
+                  "Klarbefund iPhone app, an overview per persona, the access body's tasks, compliance suites that can fail",
+                ),
+              },
+              {
+                version: "v1.5.0",
+                date: "2026-04-18",
+                highlights: t(
+                  "GraphRAG for natural-language queries (GDS, FastRP, reranking), releases published automatically",
+                ),
+              },
               {
                 version: "v1.2.0",
                 date: "2026-04-12",
@@ -1811,14 +1995,14 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
               },
               {
                 version: "v1.1.0",
-                date: "2026-04-10",
+                date: "2026-04-11",
                 highlights: t(
                   "WCAG 2.2 AA zero violations, ODRL policy enforcement, OWASP/BSI security pentest, 778 Playwright assertions",
                 ),
               },
               {
                 version: "v1.0.0",
-                date: "2026-04-08",
+                date: "2026-03-30",
                 highlights: t(
                   "Initial release: 5-layer Neo4j knowledge graph, 127 synthetic patients, DSP 2025-1 + DCP v1.0, 7 personas, GitHub Pages demo",
                 ),

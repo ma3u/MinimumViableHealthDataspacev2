@@ -1,41 +1,36 @@
 # Software Development Life Cycle (SDLC)
 
 - **Project:** Minimum Viable Health Dataspace v2 (EHDS reference implementation)
-- **Audience:** contributors, reviewers, and anyone curious how a one-person,
-  AI-assisted project keeps a regulated-domain codebase shippable.
-- **Last updated:** 2026-09-26
+- **Audience:** contributors, reviewers, and anyone who wants to know how a
+  one-person, AI-assisted project keeps a regulated-domain codebase shippable.
+- **Last updated:** 2026-11-03
 - **Maintainer:** Matthias (`@ma3u`)
 
-> Companion document: **[Deterministic Agentic AI Development with Claude
-> Code](./AGENTIC-DEVELOPMENT-WITH-CLAUDE-CODE.md)** — how the AI author plugs
-> into the lifecycle described here.
-
-> 🟢 **Not a software engineer?** Read the plain-language version first:
-> **[How We Build This Software](./SDLC-explained.md)**.
-
-> **SDLC** = _Software Development Life Cycle_ — the full process of planning,
-> building, testing, releasing, and operating software.
+How a change gets from an idea to the live hub: issues and discussions,
+branches and pull requests, the hooks on your machine, the checks on GitHub,
+the deploys, the releases, and how to contribute from outside. The
+plain-language version is [How We Build This Software](./SDLC-explained.md);
+how the AI author fits in is [Deterministic Agentic AI Development with Claude
+Code](./AGENTIC-DEVELOPMENT-WITH-CLAUDE-CODE.md). Two companion pages go
+deeper: [Integration tests through the APIs](developer/api-integration-tests.md)
+and [The stack and the development environment](developer/stack-and-environment.md).
+Section 12 is the recipe behind all of it: how to define an SDLC for a
+DevSecOps and AI project, stage by stage, with the tools.
 
 <details>
-<summary><b>Acronyms used in this document</b> (click to expand)</summary>
+<summary><b>Acronyms used in this document</b></summary>
 
-| Acronym             | Expansion                                                                               |
-| ------------------- | --------------------------------------------------------------------------------------- |
-| **CI/CD**           | Continuous Integration / Continuous Delivery — automated build-test-publish pipeline    |
-| **PR**              | Pull Request — a proposed change, reviewed before it is merged                          |
-| **ADR**             | Architecture Decision Record — a short written note capturing a decision and its reason |
-| **LLM**             | Large Language Model — the kind of AI behind Claude Code                                |
-| **SBOM**            | Software Bill of Materials — a machine-readable list of every third-party component     |
-| **CVE**             | Common Vulnerabilities and Exposures — a public catalogue of known security flaws       |
-| **WCAG**            | Web Content Accessibility Guidelines — accessibility (a11y) standard                    |
-| **OWASP**           | Open Worldwide Application Security Project — web-security best-practice body           |
-| **BSI C5**          | Germany's BSI Cloud Computing Compliance Criteria Catalogue                             |
-| **EU CRA**          | EU Cyber Resilience Act                                                                 |
-| **EHDS**            | European Health Data Space — the EU health-data regulation this project models          |
-| **DSP / DCP / TCK** | Dataspace Protocol / Decentralised Claims Protocol / Technology Compatibility Kit       |
-| **MSW**             | Mock Service Worker — intercepts network calls in tests                                 |
-| **SARIF**           | Static Analysis Results Interchange Format — how scanners report findings to GitHub     |
-| **SLSA**            | Supply-chain Levels for Software Artifacts — a build-provenance standard                |
+| Acronym             | Expansion                                                                          |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| **CI/CD**           | Continuous Integration / Continuous Delivery: the automated build, test and deploy |
+| **PR**              | Pull Request: a proposed change, checked and reviewed before it is merged          |
+| **ADR**             | Architecture Decision Record: a short note of a decision and its reasons           |
+| **OIDC**            | OpenID Connect; here the federated login of GitHub Actions to Azure                |
+| **SBOM**            | Software Bill of Materials: the list of every third-party component                |
+| **CVE**             | Common Vulnerabilities and Exposures: the public catalogue of known flaws          |
+| **SARIF**           | Static Analysis Results Interchange Format: how scanners report to GitHub          |
+| **DSP / DCP / TCK** | Dataspace Protocol / Decentralised Claims Protocol / Technology Compatibility Kit  |
+| **ACA**             | Azure Container Apps, where the live hub runs                                      |
 
 </details>
 
@@ -43,689 +38,557 @@
 
 ## 1. Philosophy: deterministic tooling around a non-deterministic author
 
-On my day job I run an SDLC for teams of **10–30 developers**. The non-negotiable
-lesson from those teams is this:
-
 > **The author proposes; deterministic tooling disposes.**
 
-It does not matter whether the author is a senior engineer, a junior, or an AI
-agent — humans and Large Language Models (LLMs) are both _non-deterministic_ (ask
-the same question twice, get two different answers). You make the _output_
-trustworthy by wrapping the author in **deterministic, repeatable, automated
-gates**: code formatters, [linters](https://eslint.org/) (tools that flag
-likely mistakes), type-checkers, tests, security scanners, and a **Continuous
-Integration / Continuous Delivery (CI/CD)** pipeline that runs the same way every
-time, for everyone.
+A senior engineer, a newcomer and an AI agent are all non-deterministic: ask
+the same question twice and you may get two answers. The output becomes
+trustworthy when the author is wrapped in gates that run the same way every
+time, for everyone: formatters, linters, type checks, tests, security scanners
+and a CI/CD pipeline.
 
-This project is currently **a team of one** (me) plus an AI pair-programmer
-([Claude Code](./AGENTIC-DEVELOPMENT-WITH-CLAUDE-CODE.md)). So I run a
-**pragmatic, partial SDLC**: I keep every deterministic gate a large team would
-have, and I consciously collapse the _people-coordination_ ceremonies (mandatory
-peer review, sprint rituals, release boards) that only make sense with more
-people. Section 10 is explicit about what is collapsed and why, and Section 11 is
-the outlook for re-introducing the parts that will matter as soon as a second
-contributor joins.
+The project is a team of one plus an AI pair programmer. So it keeps every
+deterministic gate a large team would have and collapses the coordination
+ceremonies (mandatory human review, sprint rituals, release boards) that only
+pay off with more people. Section 11 says what is collapsed and why.
 
-The deterministic backbone is **GitHub**: Issues, Pull Requests (PRs),
-[GitHub Actions](https://docs.github.com/actions) (CI/CD), GitHub Pages, GitHub
-Releases, and Architecture Decision Records (ADRs) checked into the repo.
-
-### Why this rigour matters
-
-This is a reference implementation for the **European Health Data Space
-(EHDS)** — a regulated domain where health data, patient rights, and audit
-obligations are in scope. In that world _how_ you build is part of _whether you
-can be trusted_. Concretely, the gates below buy five things:
-
-1. **Trust & safety.** A bug in health-data software can leak data or mislead a
-   clinician. Automated checks catch whole classes of mistakes _before_ they ship.
-2. **Auditability.** Every change is permanently logged with author, time, and
-   reason — you can prove what happened, which regulators and hospitals expect.
-3. **Repeatability.** The same checks run every time, so quality does not depend
-   on who was on shift or whether they were having a good day.
-4. **Cheap mistakes.** A problem caught by a local check costs seconds; the same
-   problem caught in production costs hours and erodes trust. Quality gates move
-   the cost of error as early (and cheap) as possible.
-5. **Safe AI assistance.** Because an AI writes much of the code, the gates are
-   what let it move fast _without_ being able to break things unnoticed (see the
-   [companion document](./AGENTIC-DEVELOPMENT-WITH-CLAUDE-CODE.md)).
+This matters more here than in most projects. It is a reference
+implementation of the European Health Data Space, a regulated domain with
+health data, patient rights and audit duties. The gates buy trust (whole
+classes of mistakes are caught before they ship), auditability (every change
+is logged with author, time and reason), repeatability, cheap mistakes (a
+local hook costs seconds, a production incident hours) and safe AI assistance.
 
 ---
 
 ## 2. The lifecycle at a glance
 
-Every change flows top-to-bottom through the same path. The **human/AI judgement**
-lives only at the top (deciding _what_ and _why_); everything below the dashed
-line is **automated and reproducible**.
-
 ```mermaid
 flowchart TD
-    A["💡 Idea / Issue"] --> B{"Architectural<br/>decision?"}
-    B -- yes --> C["📝 Write an ADR<br/>docs/ADRs/ADR-NNN"]
-    B -- no --> D["🌿 Short-lived branch"]
+    A["Idea"] --> Q{"Question or<br/>open design?"}
+    Q -- yes --> DI["GitHub Discussion"]
+    DI --> I
+    Q -- no --> I["GitHub Issue<br/>open tasks + test steps"]
+    I --> B{"Architectural<br/>decision?"}
+    B -- yes --> C["ADR<br/>docs/ADRs/ADR-NNN"]
+    B -- no --> D["Short-lived branch"]
     C --> D
-    D --> E["✏️ Make the change<br/>human + Claude Code"]
-    E --> F["🔒 Local gate<br/>(pre-commit hook on your machine)"]
-    F --> G["⬆️ Push &amp; open Pull Request"]
-    G --> H["🤖 CI gates<br/>(GitHub Actions, in the cloud)"]
-    H -- "✅ all green" --> I["🔀 Merge to main"]
-    H -- "❌ red — fix &amp; retry" --> E
-    I --> J["🏷️ Release<br/>version bump → tag → GitHub Release"]
-    I --> K["🚀 Deploy<br/>GitHub Pages + Azure Container Apps"]
-    J --> K
+    D --> E["Change<br/>human + Claude Code"]
+    E --> F["pre-commit hooks<br/>(31, on your machine)"]
+    F --> P["pre-push hooks<br/>(3: Vitest, npm audit, CodeQL Swift)"]
+    P --> G["Pull request"]
+    G --> H["PR Gate (required)<br/>+ advisory workflows"]
+    H -- "red: fix and push again" --> E
+    H -- "green" --> M["Squash merge to main"]
+    M --> K["Deploy: Azure Container Apps<br/>+ GitHub Pages"]
+    M --> R["Release when ui/package.json<br/>version changes"]
+    M --> S["Smoke and compliance runs on main"]
 ```
 
-**Step by step:**
-
-1. **Idea / Issue** — work starts as a GitHub _Issue_ (a public to-do card).
-2. **Architectural?** — if the change involves a hard-to-reverse or cross-cutting
-   decision, its reasoning is recorded first as an **ADR** (Section 3).
-3. **Short-lived branch** — the change is drafted on a side copy of the code, never
-   directly on the live `main` version.
-4. **Make the change** — a human and/or Claude Code edits the code (Section 4).
-5. **Local gate** — the moment you commit, the **pre-commit hook** runs fast
-   checks on your own machine (Section 5).
-6. **Push & open a Pull Request (PR)** — the change is published to a branch and
-   proposed for review as a side-by-side "before/after".
-7. **CI gates** — **GitHub Actions** runs the full battery of checks on neutral
-   cloud machines, the same way for everyone (Section 6).
-8. **Merge to main** — only if everything is green. Red means fix and retry.
-9. **Release & Deploy** — a version bump produces a tagged GitHub Release, and the
-   public demo + live system rebuild themselves automatically (Sections 6–7).
-
-> 💡 _Tip: the diagram renders larger if you open this file on GitHub and click
-> it; the numbered list above is the authoritative description either way._
+1. **Idea.** An open question or a design to explore starts as a Discussion;
+   a piece of work starts as an Issue (section 3).
+2. **ADR** when the decision is expensive to reverse or cross-cutting.
+3. **Branch** off `main`, short-lived.
+4. **Change**, by a human, Claude Code or both.
+5. **Hooks** on your machine: 31 at commit, 3 at push (section 5).
+6. **Pull request.** The **PR Gate** is the one required check; the other
+   workflows are advisory (section 6).
+7. **Squash merge** once the PR Gate is green and every review thread is
+   resolved.
+8. **On `main`:** the live hub and the static demo redeploy, the smoke and
+   compliance runs start, and a release is cut when the version changed
+   (sections 7 and 8).
 
 ---
 
-## 3. Plan before you build: Issues, ADRs, and a token-efficient plan
+## 3. Discussions, issues and the planning folder
 
-Before any significant change, the workflow (encoded in [`CLAUDE.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/CLAUDE.md)) is:
+### Discussion or issue?
 
-1. **Check existing ADRs.** Architecture Decision Records live in
-   `docs/ADRs/ADR-NNN-slug.md` — **27 ADRs** today (ADR-001 … ADR-027), each a
-   short, dated, _Status / Context / Decision / Consequences_ record. You start
-   from the ADR index table, then open only the ADR(s) relevant to the task.
-2. **Consult the planning index** at [`docs/planning-health-dataspace-v2.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/planning-health-dataspace-v2.md) — a
-   slim index (issue table, phase-status summary, ADR index, links). Per-phase
-   detail lives in `docs/planning/roadmap-phases-*.md` archives.
-3. **Check GitHub Issues** for related tracking:
-   `gh issue list --repo ma3u/MinimumViableHealthDataspacev2`.
-4. **Write a new ADR** for any architectural decision, and link it in the
-   planning index's ADR table.
+[Discussions](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions)
+are enabled, with the categories Announcements, General, Ideas, Polls, Q&A and
+Show and tell.
 
-**Why it matters:** an ADR is the project's long-term memory. It answers the
-question every newcomer (and the AI, every session) eventually asks — _"why was it
-done this way?"_ — without anyone having to remember. This is also the easiest
-place for a non-coder to contribute: you can read and question a decision without
-reading a line of code.
+| Open a **Discussion** when                                                                                                                                                                                | Open an **Issue** when                                                                              |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| you have a question ("how does the hub map X?"), want to compare options, or propose a direction that is not yet a task (Ideas; recent examples are #776 on FHIR and OMOP tooling and #701 on Simpl-Open) | there is something to do: a bug, a feature with a clear outcome, a gap with an acceptance criterion |
+| the answer may be "no" or "not now"                                                                                                                                                                       | someone will close it with a commit or a PR                                                         |
+| several people should weigh in before anything is decided                                                                                                                                                 | the decision is made, or an ADR will make it                                                        |
 
-### Why the plan is split into an index + archives
+A discussion that reaches a decision becomes an issue (and an ADR when the
+decision is architectural), linked both ways.
 
-This is itself an ADR — **[ADR-026: Token-Efficient Planning &
-ADR Structure](./ADRs/ADR-026-token-efficient-planning-structure.md)**. The
-planning document had grown to **72,000 tokens (288 KB)** — too large to load
-into an AI agent's context alongside working files. The rule now:
+### What an issue carries
 
-> Keep any routinely-loaded document under **~15K tokens (~60 KB)**. The index
-> stays slim; detail moves into phase archives, loaded only when that phase is
-> being worked.
+Use the templates in [`.github/ISSUE_TEMPLATE/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/.github/ISSUE_TEMPLATE)
+(bug report, feature request). Every issue that is being worked on carries:
 
-This is a _human_ readability win and an _AI_ effectiveness win — a smaller,
-sharper context produces better reasoning.
+- **The open tasks** as a checklist, kept current. When a PR leaves work
+  undone, the issue says what is left; nothing open lives only in a chat or a
+  commit message.
+- **Manual test steps** with links (to the static docs, a page of the hub, a
+  workflow run), so anyone can check the result without asking.
+- **The decisions**, each linked to its ADR.
 
-### When to write an ADR
+Labels in use: `bug`, `enhancement`, `documentation`, `question`, `security`,
+`infrastructure`, `azure`, `dependencies`, the priorities `P1` to `P3`, and the
+area labels `EHDS-compliance`, `dataspace-discovery`, `simpl`, `NLP`,
+`Agentic AI`, `production`, `load test`, `stress test`, `pentest`, `trivy`,
+`Cost`. New contributors look for `good first issue` and `help wanted`.
 
-Write one when a decision is **expensive to reverse** or **cross-cutting**:
-database split, protocol choice, deployment topology, testing strategy, cost
-trade-offs. Examples in the corpus: ADR-001 (PostgreSQL + Neo4j split), ADR-008
-(testing strategy), ADR-016/023/027 (off-hours scale-down cost decisions),
-ADR-022/024 (EDC connector cost vs. function).
+### The planning folder
 
----
+[`docs/planning/index.md`](./planning/index.md) lists work items as files that
+move `future/ → current/ → done/` and are never deleted. A file in `current/`
+is the long form of an issue (its phases, measurements, links); the issue
+stays the place for the checklist. Roadmap detail lives in
+`docs/planning/roadmap-phases-*.md`, and the issue and ADR tables in
+[`docs/planning-health-dataspace-v2.md`](./planning-health-dataspace-v2.md).
+`/plan` in Claude Code grooms the folder.
 
-## 4. Branching, commits, and pull requests
+Keep any document that is loaded routinely under about 15K tokens
+([ADR-026](./ADRs/ADR-026-token-efficient-planning-structure.md)): the index
+stays small and the detail moves to archives.
 
-- **Trunk-based.** `main` is the trunk and is always deployable. Work happens on
-  **short-lived branches** and merges back via a **Pull Request (PR)** — a
-  proposed change shown as before/after, open for review (recent examples: #52,
-  #53, #54). The static demo and the Azure live demo both build from `main`.
-- **[Conventional Commits](https://www.conventionalcommits.org/)** with scopes —
-  a standard naming convention for commit messages. Real history:
+### ADRs
 
-  - `fix(finops): scale the EDC stack off-hours — close ADR-024/023 cost gap (#54)`
-  - `feat(neo4j+ui): add 9th tenant — Health Dataspace Operations (EDC_ADMIN slot)`
-  - `docs(adr): ADR-026 — token-efficient planning & ADR structure`
-
-  The `type(scope): subject (#PR)` shape makes history machine-readable and
-  feeds automated release notes (Section 7).
-
-- **AI attribution.** Commits produced with the AI carry a
-  `Co-Authored-By: Claude …` trailer so the provenance of agent-assisted work is
-  always traceable in `git log` — important in a regulated domain.
-- **PRs reference Issues and ADRs.** A PR description links the Issue it closes
-  and any ADR it implements, so the _why_ is one click from the _what_.
-
-> ⚠️ Today, the Conventional-Commit format is followed by **convention, not
-> enforced** by a commit-message hook. Enforcing it is an outlook item (Section 11).
+`docs/ADRs/` holds ADR-001 to ADR-073 (051 is reserved). New ones follow the
+Nygard template in `docs/adr/0000-template.md`; an accepted ADR is never
+edited, only superseded. Write one when a decision is expensive to reverse or
+cross-cutting: the database split ([ADR-001](./ADRs/ADR-001-postgresql-neo4j-split.md)),
+the testing strategy ([ADR-008](./ADRs/ADR-008-testing-strategy.md)), checks
+that must be able to fail ([ADR-031](./ADRs/ADR-031-checks-must-assert.md)),
+every API route needing a session ([ADR-044](./ADRs/ADR-044-every-api-route-needs-a-session.md)).
 
 ---
 
-## 4.1 Branch protection on `main`
+## 4. Branches, commits and pull requests
 
-Until 2026-09-26 none of the above was enforced: `main` was an unprotected
-branch and "don't merge red" was a habit. It was a well-kept habit — 39 of the
-last 40 commits arrived through a PR — but a habit is not a control, and in a
-regulated domain the difference matters. A [repository
-ruleset](https://docs.github.com/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets)
-now targets the default branch:
+- **Trunk-based.** `main` is always deployable. Work happens on short-lived
+  branches named `type/short-slug` (`feat/…`, `fix/…`, `docs/…`, `chore/…`,
+  `ci/…`), often with the issue number: `fix/708-ui-sticky-sessions`.
+- **[Conventional Commits](https://www.conventionalcommits.org/)** with a
+  scope: `feat(spe): workspaces start on demand (ADR-072)`. All of the last 40
+  commits on `main` follow it; no hook enforces it yet.
+- **Commits carry the author's name.** No AI co-author trailer is added; how
+  the AI works in this project is documented in the companion document.
+- **A PR links its issue and its ADRs** and says how it was tested. There is
+  no PR template yet.
+- **Squash merge.** The PR title becomes the commit on `main`, so it follows
+  the commit convention too.
 
-| Rule                                | Effect                                                                                                                                                                                                                                                            |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Require a pull request**          | No direct pushes to `main`. **Zero approvals required** — see the note below.                                                                                                                                                                                     |
-| **Require conversation resolution** | Every review thread must be resolved before merge, so AI-review findings are answered rather than scrolled past.                                                                                                                                                  |
-| **Require status checks**           | **PR Gate** must be green. The list is deliberately one item long — see below.                                                                                                                                                                                    |
-| **Require linear history**          | Merge commits are rejected; squash (the existing habit) and rebase are fine. The ruleset pins `allowed_merge_methods` to squash and rebase, and merge commits are switched off in the repository settings, so the UI cannot offer a button the rule would refuse. |
-| **Block force pushes**              | `main` history cannot be rewritten.                                                                                                                                                                                                                               |
-| **Restrict deletions**              | `main` cannot be deleted.                                                                                                                                                                                                                                         |
+### 4.1 Branch protection on `main`
 
-**Zero required approvals is deliberate, not an oversight.** On a one-person
-project, requiring an approving review would mean requiring a second account,
-and the realistic outcome of that is a rubber stamp or a disabled rule. The
-review function is carried by the AI reviewers (`/review`, `/code-review`, the
-specialist sub-agents) and by the gates; the _mechanical_ protections — no
-direct push, no force push, no merge on red — are the part a solo maintainer
-genuinely cannot provide by discipline, so those are the part that is enforced.
-The moment a second contributor joins, raise this to 1.
+A repository ruleset on the default branch:
 
-**Repository admins can bypass, but only on a pull request.** The bypass mode
-is `pull_request`, not `always`: an admin can force a PR through when a required
-check is stuck — this is a demo that is also a live public deployment, and being
-unable to land a hotfix is a worse failure than a bypassed check — but a direct
-push to `main` is refused for everyone, including the owner. Verified:
+| Rule                                | Effect                                                                                                   |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Require a pull request**          | No direct pushes to `main`. Zero approvals required (see below).                                         |
+| **Require conversation resolution** | Every review thread is resolved before merge, so review findings are answered rather than scrolled past. |
+| **Require status checks**           | **PR Gate** must be green. It is the only required check.                                                |
+| **Require linear history**          | Squash or rebase only; merge commits are switched off.                                                   |
+| **Block force pushes, deletions**   | `main` cannot be rewritten or deleted.                                                                   |
 
-```
-$ git push origin main
-remote: error: GH013: Repository rule violations found for refs/heads/main.
-remote: - Changes must be made through a pull request.
-remote: - Required status check "PR Gate" is expected.
- ! [remote rejected] main -> main (push declined due to repository rule violations)
-```
+**Zero required approvals is deliberate.** With one maintainer, a required
+approval means a second account and a rubber stamp. Review is done by the AI
+reviewers and the gates; the mechanical protections (no direct push, no force
+push, no merge on red) are the part a solo maintainer cannot supply by
+discipline, so they are enforced. When a second regular contributor joins,
+this goes to one approval.
 
-That is the half a solo maintainer cannot supply by discipline, so that is the
-half with no escape hatch. Bypasses that do happen are recorded in the ruleset's
-insights.
+**Admins can bypass only on a pull request.** A stuck check can be overridden
+on a PR, which is better than being unable to land a hotfix on a live demo; a
+direct push to `main` is refused for everyone.
 
-One default worth knowing about: GitHub switches
-`require_extra_approval_for_unattributed_changes` **on** when you create a
-`pull_request` rule. Combined with zero required approvals it would demand an
-approval nobody can give as soon as a commit's author email is not linked to a
-GitHub account. It is explicitly off here.
+### 4.2 Why exactly one required check
 
-### Why exactly one required status check
-
-Every other workflow in this repository is **path-filtered**, which is correct
-for cost and wrong for branch protection. A required check that never _starts_
-does not fail — it stays pending, and the PR is unmergeable forever. This is
-not hypothetical: PR #303 collected 28 checks and PR #305, a one-line change to
-a shell script, collected none.
-
-So there is one workflow with no path filter,
-**[`pr-gate.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/pr-gate.yml)**,
-and it is the only required check. It runs the **same pre-commit hooks as the
-local hook, scoped to the PR's diff** (`pre-commit run --from-ref
-origin/main --to-ref HEAD`), plus a gitleaks scan across the PR's commits —
-because the local `gitleaks protect --staged` hook has nothing staged to look
-at in CI. What it catches is precisely the case Section 5's bypass policy
-leaves open: a commit made with `--no-verify`, or from a clone where
-`pre-commit install` was never run — including a cloud agent's clone.
-
-It carries one check of its own, beyond the hooks: **API spec drift**
-([`scripts/check-api-spec-drift.py`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/check-api-spec-drift.py)).
-It rebuilds the path/method inventory from `ui/src/app/api/**/route.ts`, diffs
-it against `ui/public/openapi.yaml`, and fails on a new undocumented operation,
-on a documented operation with no route, or on a stale allowlist entry.
-
-The reason it exists: between 2026-08-03 and 2026-09-26, implemented operations
-grew 61 to 87 while the spec stayed at 49, so documented coverage fell from
-80 % to 56 % and no build ever went red, because nothing compared the two. This
-is a **ratchet, not a wall**: the 38 operations already undocumented when it was
-written are listed in
-[`docs/api-spec-drift-allowlist.txt`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/api-spec-drift-allowlist.txt)
-and tolerated, so the backlog can be paid down deliberately instead of blocking
-every merge. Documenting an operation requires deleting its line in the same
-commit, which the stale-entry rule enforces, so the list can only shrink. Adding
-a line is not a fix; it is a decision to ship an undocumented endpoint and a
-reviewer should ask why. Regenerate with `--update`. Tracked in
-[#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338).
-
-It deliberately does **not** re-run the heavy suites. `test.yml` and the rest
-stay path-filtered and advisory, visible on the PR and read before merging. To
-promote one of them to required later, give that workflow a final job that
-always runs (`if: always()`, depending on the real jobs) and require _that_ job
-— the standard way to make a path-filtered workflow safe to require.
+Every other workflow is path-filtered, which is right for cost and wrong for
+branch protection: a required check that never starts stays pending, and the
+PR can never merge (#303 collected 28 checks, #305 none). So
+[`pr-gate.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/pr-gate.yml)
+has no path filter and is the one required check. Section 6.1 lists what it
+runs.
 
 ---
 
-## 5. Local quality gate — the pre-commit hook
+## 5. The hooks on your machine
 
-The first deterministic gate runs **on your machine, the moment you create a
-commit**. It is configured in **[`.pre-commit-config.yaml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.pre-commit-config.yaml)**
-and managed by the [pre-commit framework](https://pre-commit.com/) (install it
-once per clone with `pre-commit install`, which wires it into Git's local
-`.git/hooks/` — those generated hooks are _not_ committed, so the config file is
-the source of truth).
-
-It runs **fast** checks only — the heavy, slow suite runs in CI (Section 6).
-Several checks are **scoped by file type**, so they skip automatically when a
-commit doesn't touch the relevant files (e.g. a docs-only commit skips the
-TypeScript and Vitest hooks).
-
-| Group            | Hook(s)                                                                                                                                                                | What it does & why it matters                                                                                                       |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| **Formatting**   | [Prettier](https://prettier.io/)                                                                                                                                       | Auto-formats staged `*.md`, `*.yaml`, `*.json`, `*.ts(x)`, `*.js(x)` and re-stages them — so style never derails a review.          |
-| **Lint**         | [ESLint](https://eslint.org/) (`next lint --max-warnings 55`)                                                                                                          | Flags likely bugs and bad patterns in TypeScript/React; `--max-warnings 55` is the project's warning budget.                        |
-| **Type-check**   | [TypeScript `tsc`](https://www.typescriptlang.org/) ([`tsconfig.build.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/tsconfig.build.json)) | Confirms the typed pieces still fit together (strict mode; excludes tests). Catches whole classes of runtime errors at author time. |
-| **Tests**        | [Vitest](https://vitest.dev/) (`vitest run --bail 1`)                                                                                                                  | Runs the unit test suite when UI source changes, stopping at the first failure — so you can't commit code that breaks a known case. |
-| **Secrets**      | [gitleaks](https://github.com/gitleaks/gitleaks) + private-key detector                                                                                                | Blocks accidentally-staged passwords, tokens, and private keys — the cheapest possible place to stop a credential leak.             |
-| **Shell/Docker** | [shellcheck](https://www.shellcheck.net/), [hadolint](https://github.com/hadolint/hadolint)                                                                            | Lints Bash scripts and Dockerfiles for unsafe or fragile patterns.                                                                  |
-| **Dependencies** | [`npm audit`](https://docs.npmjs.com/cli/v10/commands/npm-audit) (HIGH+)                                                                                               | Fails on known HIGH/CRITICAL vulnerabilities in third-party packages.                                                               |
-| **File hygiene** | trailing-whitespace, end-of-file, valid YAML/JSON, no large files, no merge-conflict markers, case/symlinks                                                            | Standard sanity checks that keep the repo clean and prevent common foot-guns.                                                       |
-| **Docs**         | Markdown broken-link check, "no screenshot images in doc pages"                                                                                                        | Keeps documentation links working and enforces a project doc convention.                                                            |
-
-Because Prettier **re-writes and re-stages** files, a commit can require a
-`git add` + retry — that is by design, not a bug.
-
-> **Bypass policy:** `git commit --no-verify` is reserved for genuine
-> emergencies only. The CI gate (next section) re-runs the same checks, so a
-> bypass buys you nothing on `main`.
-
----
-
-## 6. CI gates — GitHub Actions
-
-**CI** stands for **Continuous Integration**: every time code is pushed, an
-automated pipeline rebuilds it from scratch on a clean cloud machine and runs the
-full set of checks. A **"gate"** is a check that can **block** a change from being
-merged if it fails. Because CI runs on neutral [GitHub Actions](https://docs.github.com/actions)
-runners — not on anyone's laptop — it is the **authoritative, deterministic
-verdict** on whether a change is safe. The pipeline is split into several
-workflows by purpose.
-
-Exactly one of them, **PR Gate**, is a _blocking_ gate in the branch-protection
-sense (Section 4.1). Everything below is advisory: it runs, it is visible on the
-PR, and merging over a red one is a deliberate act rather than something the
-platform prevents.
-
-### 6.1 Test Suite — [`.github/workflows/test.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/test.yml)
-
-Triggers: **push to any branch** and **pull request to `main`** (scoped to
-`ui/**` and `services/neo4j-proxy/**` paths), plus manual dispatch.
-
-| Job                                                                                          | What it checks                                                                                                  | Runs on                  |
-| -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| **UI Tests ([Vitest](https://vitest.dev/))**                                                 | unit + integration tests + coverage                                                                             | push & PR                |
-| **Neo4j Proxy Tests (Vitest)**                                                               | proxy service unit tests + coverage                                                                             | push & PR                |
-| **Lint ([ESLint](https://eslint.org/))**                                                     | `npm run lint`                                                                                                  | push & PR                |
-| **Secret Scan ([gitleaks](https://github.com/gitleaks/gitleaks))**                           | full-history secret detection — _blocks_                                                                        | push & PR                |
-| **Dependency Audit ([npm audit](https://docs.npmjs.com/cli/v10/commands/npm-audit))**        | `--audit-level=high` (UI blocks; proxy reports)                                                                 | push & PR                |
-| **SBOM ([CycloneDX](https://cyclonedx.org/))**                                               | a Software Bill of Materials (ingredients list of every dependency), spec 1.5                                   | push & PR                |
-| **Licence Compliance**                                                                       | confirms every dependency uses an approved open-source licence                                                  | push & PR                |
-| **Security Scan ([Trivy](https://trivy.dev/))**                                              | vulnerabilities / secrets / misconfigurations → SARIF to the GitHub Security tab                                | push & PR                |
-| **K8s Posture ([Kubescape](https://kubescape.io/))**                                         | scans [`k8s/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/k8s) against NSA/CIS benchmarks | push & PR                |
-| **Performance Budget ([Lighthouse](https://developer.chrome.com/docs/lighthouse/overview))** | Core Web Vitals (page-speed) budgets                                                                            | **main / dispatch only** |
-| **E2E ([Playwright](https://playwright.dev/)) + WCAG + pentest**                             | full browser journeys, accessibility (WCAG), OWASP/BSI security checks                                          | **main / dispatch only** |
-
-**What each gate protects against, in one line:** tests → behaviour regressions ·
-lint/type-check → bugs and bad patterns · secret scan → leaked credentials ·
-dependency audit + Trivy → known vulnerabilities (CVEs) · SBOM + licence →
-supply-chain transparency and legal compliance · Kubescape → insecure Kubernetes
-config · Lighthouse → slow pages · E2E/WCAG/pentest → broken user journeys,
-inaccessible UI, and common web-attack surfaces.
-
-Two deliberate design choices:
-
-- **Fast PR feedback.** The expensive jobs (Lighthouse, Playwright E2E) are
-  gated to `main`/dispatch, so a PR gets quick deterministic feedback from the
-  unit/lint/security tier. Depth runs after merge.
-- **Hard gates vs. reporting.** Unit tests, lint, and the secret scan _block_ a
-  merge. Some scanners (Trivy findings, the WCAG colour-contrast ratchet, the
-  pentest suite that needs live services) currently run as **report-only**
-  (`continue-on-error`) and publish to the GitHub **Security** tab / step
-  summaries. Driving those to _blocking_ is an outlook item.
-
-### 6.2 Supply-chain hardening (a concrete example)
-
-This is a regulated-domain reference implementation, so the pipeline is itself
-treated as an attack surface — a good illustration of "deterministic" meaning
-_pinned and verified_:
-
-- Security tools ([gitleaks](https://github.com/gitleaks/gitleaks),
-  [Trivy](https://trivy.dev/), [Kubescape](https://kubescape.io/)) are installed
-  as **official binaries pinned by version and verified by SHA-256 checksum**, not
-  via floating GitHub Actions.
-- After the **March 2026 `trivy-action` supply-chain compromise**
-  (CVE-2026-33634), the pipeline explicitly **avoids** `aquasecurity/trivy-action`
-  / `setup-trivy` and installs Trivy `0.69.3` (last clean version) directly. The
-  reasoning is documented inline in [`test.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/test.yml) so the next person — or the next
-  AI session — does not silently re-introduce the compromised action.
-
-The security/compliance jobs map to recognisable controls: **BSI C5**
-(Germany's cloud-security catalogue), **OWASP** (web-security best practice),
-**EU CRA** Art. 13 (the Cyber Resilience Act's SBOM requirement), and **EHDS**
-Art. 50 / SIMPL-Open.
-
-### 6.3 Protocol Compliance — [`.github/workflows/compliance.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/compliance.yml)
-
-Triggers: **push to `main`** (on protocol-relevant paths), **weekly (Mon 06:00
-UTC)**, and manual dispatch. Runs the **DSP 2025-1 TCK** (Dataspace Protocol
-Technology Compatibility Kit), **DCP v1.0** (Decentralised Claims Protocol), and
-**EHDS domain** suites against an ephemeral full stack spun up in CI. These are
-report-heavy and currently `continue-on-error` — the weekly cadence catches
-protocol drift without blocking day-to-day PRs.
-
-A manual dispatch with `target: azure` runs the same three suites from an ACA
-job inside the deployment instead (`scripts/azure/08-compliance-runner.sh`).
-That target produced nothing at all until 2026-09-26: the runner addressed the
-control plane on its ingress port rather than the Management API port, so all
-three suites died at participant discovery (#307, fixed in #314).
-
-> ⚠️ **Read this before citing the tier as evidence.** Every suite step is
-> `continue-on-error: true`, so a green **Protocol Compliance** run means the
-> workflow finished, not that anything conformed. Measured on 2026-09-26:
->
-> | Suite                | CI ephemeral stack                      | Azure deployment                     |
-> | -------------------- | --------------------------------------- | ------------------------------------ |
-> | EHDS domain          | **18 passed, 0 failed, 7 skipped / 25** | 20 passed, 0 failed, 5 skipped / 25  |
-> | EHDS dataspace (DSP) | **21 passed, 6 failed, 6 skipped / 33** | 23 passed, 0 failed, 10 skipped / 33 |
-> | EHDS identity (DCP)  | **22 passed, 0 failed / 22 verdicts**   | 10 passed, 1 failed, 11 skipped / 22 |
->
-> Re-measured 2026-09-26 from runs
-> [36250029604](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/36250029604)
-> and [36250153262](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/36250153262),
-> which agree exactly. Two rows moved, in opposite directions and for opposite
-> reasons.
->
-> **DSP's 25 / 0 was false, and 21 / 6 is what the stack does.** The DSP suite's
-> `CAT-1.1` branch accepted any non-empty, non-envelope body as a catalog, and
-> in CI that body was a Jetty "Error 500" HTML page: the provider's DSP endpoint
-> does not answer at `/api/dsp/<ctx>/2025-1/…` for any participant context, in
-> CI (500) or locally (404), activated or not. The shared helper now rejects
-> non-JSON bodies and `CAT-1.1` fails on anything without an `@type`, which is
-> where the six failures come from. The floor was lowered to match, with the
-> reason recorded in `scripts/compliance-baseline.json`. How this control plane
-> exposes per-participant DSP is the open question on #345 and #328; every
-> counterparty DSP figure ever published from this tier was the weak branch.
->
-> **DCP went 14/0 → 11/7 → 19/2 → 22/0 in one day, and each move was the
-> suite getting more honest.** #341 gave ten checks a reachable failure; they
-> found that the **CI IdentityHub held zero participants**, that the
-> **IssuerService had no identity of its own**, and that no participant was
-> registered as a holder (#345). Until then CI had been reporting an empty
-> identity layer as fully passing, and the null stub scored exactly the same
-> 11 / 7. Seeding those stores from the same sources the local stack uses
-> moved it to 19 / 2. The last two rows, `VC-3.2`/`VC-3.3`, needed a credential
-> actually issued over DCP: the hub's DID documents had no `CredentialService`
-> endpoint, so the issuer had nowhere to deliver and every request sat at
-> `APPROVED`. With the endpoint in the participant manifest (run
-> [36267331316](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/36267331316))
-> all five CI participants receive a `MembershipCredential` inside the job and
-> the suite scores 22 / 0 on issued credentials, not planted ones. The local
-> stack does the same for eight participants since its Vault became
-> file-backed (gotchas, 2026-09-26). **EHDS went 1/13 → 18/0**
-> once the job seeds the graph `docs/developer-guide.md` tells a developer to
-> load, plus `seed-compliance-matrix.cypher` for the `ART53-1.4` access chain.
->
-> The Azure column is the state after #316 seeded five participant contexts
-> onto the control plane, which it had never had. Before that, all three suites
-> ended at `Missing required participant contexts` and the DSP and DCP columns
-> were empty in the literal sense: neither had produced a verdict on any target,
-> ever. They now do, on Azure.
->
-> Both columns are post-seeding: `compliance.yml` seeds the ephemeral stack the
-> same way (#316), and the version fallback picks `v5beta` there against
-> `v4alpha` on Azure without being told. EHDS still scores 1/25 locally because
-> the ephemeral Neo4j is empty, which is a separate gap from the participant
-> one and the reason the two EHDS columns differ so widely.
->
-> The two targets disagree slightly on DSP and DCP. That is expected — the
-> local stack has assets and policies from its own seeds, Azure does not — and
-> the difference is now visible rather than hidden behind a shared silence.
->
-> **A 50-line stub scores the same.** `scripts/tck/null-connector-stub.py`
-> answers participant discovery and returns an empty JSON array to every other
-> request. It implements no protocol at all, and it scores **23 passed, 1
-> failed, 9 skipped** on the DSP suite and **14 passed, 0 failed, 8 skipped**
-> on DCP, the latter identical to the local stack and better than Azure. The
-> suites are ours, they drive the Management API with `curl`, and they never
-> act as a protocol peer, so they cannot tell a conforming connector from a
-> stub. Treat these rows as liveness and shape checks on our own APIs, not as
-> conformance. Reproduce with:
->
-> ```bash
-> python3 scripts/tck/null-connector-stub.py &
-> S=http://localhost:18099
-> EDC_MANAGEMENT_URL=$S ./scripts/run-ehds-dataspace-checks.sh 2>&1 | tail -5
-> EDC_MANAGEMENT_URL=$S EDC_IDENTITY_URL=$S EDC_ISSUER_URL=$S \
->   ./scripts/run-ehds-identity-checks.sh 2>&1 | tail -5
-> kill %1
-> ```
->
-> All three variables matter for DCP. Setting only `EDC_MANAGEMENT_URL` leaves
-> the suite talking to a real IdentityHub and IssuerService, which is how the
-> first published DCP figure for this stub came out too high.
->
-> Adopting the real [Eclipse DSP and DCP TCKs](https://github.com/eclipse-dataspacetck)
-> is Phase 1 of [#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338)
-> ([discussion #110](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/110)).
->
-> **Since 2026-09-26 the workflow can fail.** The suite steps keep
-> `continue-on-error: true`, but the `compliance-report` job ends with a
-> blocking **Compliance baseline** step
-> ([`scripts/check-compliance-baseline.py`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/check-compliance-baseline.py)).
-> It compares each suite against
-> [`scripts/compliance-baseline.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/compliance-baseline.json)
-> and fails when `passed` drops below the recorded floor or `failed` rises
-> above it.
->
-> It gates on a **recorded baseline, not on green** (Phase 0 of
-> [#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338)).
-> The suites do not pass today, so gating on green would block every merge
-> until an unbounded remediation finished, while gating on nothing is the
-> state this section used to describe. A suite with no recorded baseline is
-> reported and not failed, so the first run records real numbers rather than a
-> guess. `review_by` in that file makes the floor expire: past it the check
-> fails until someone tightens the numbers or moves the date deliberately,
-> which is the answer to the objection that a ratchet nobody raises is just a
-> slower way of not fixing it.
->
-> It is **not** a required status check on `main`. `compliance.yml` is
-> path-filtered and does not run on `pull_request`, so requiring it would leave
-> most PRs waiting forever on a check that never starts, which is the trap
-> Section 4.1 describes. **PR Gate** remains the only required check; this gate
-> blocks the push-to-`main` and scheduled runs, which is where the suites
-> actually execute.
-
-### 6.4 GitHub Pages (static demo) — [`.github/workflows/pages.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/pages.yml)
-
-Triggers: **push to `main`**. This is the public demo deploy and a nice example
-of an end-to-end deterministic build:
-
-1. Spin up a **Neo4j 5** database container and **seed** it from
-   [`neo4j/init-schema.cypher`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/neo4j/init-schema.cypher) + [`insert-synthetic-schema-data.cypher`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/neo4j/insert-synthetic-schema-data.cypher).
-2. Build the Next.js app, **refresh the mock JSON fixtures** from the live API
-   ([`scripts/refresh-mocks.sh`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/refresh-mocks.sh)) so the static fixtures match the real shapes.
-3. Run Vitest + Playwright + WCAG + pentest (report-only).
-4. **Disable API routes** (`mv src/app/api …`) and build the **static export**
-   (`NEXT_PUBLIC_STATIC_EXPORT=true`).
-5. Publish to **GitHub Pages**.
-
-> 🔑 **Gotcha:** in the static build there are _no_ server API routes — feature
-> pages fall back to `ui/public/mock/*.json`. Mock fixtures must match the live
-> API response shape exactly; CI regenerates them so they cannot drift.
-
-### 6.5 Release — [`.github/workflows/release.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/release.yml)
-
-Triggers: **push to `main` that changes [`ui/package.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/package.json)**. It resolves the
-version, creates the `vX.Y.Z` tag if missing, **composes release notes from the
-commit log since the previous tag**, and publishes a **GitHub Release**. It is
-idempotent (skips if the release already exists) — built specifically to stop the
-"tag pushed without a release entry" drift that bit an earlier version bump.
-
-### 6.6 Operations tier
-
-Beyond build/test, a family of workflows runs the **live Azure demo**: Azure
-Container Apps deploy, weekly demo reset (ADR-014), off-hours scale-down for cost
-(ADR-016/023/027), Keycloak custom domain, EDC participant seeding, and Bruno API
-smoke tests. They are operational automation, not part of the merge gate, but
-they follow the same principle: **every environment change is a versioned,
-re-runnable workflow**, never a manual click.
-
----
-
-## 7. Releasing & versioning
-
-- **Source of truth:** the `version` field in [`ui/package.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/package.json).
-- **Mechanism:** bump it in a PR → on merge, the Release workflow tags
-  `vX.Y.Z` and publishes notes generated from Conventional-Commit subjects.
-- **Changelog:** derived from `git log` (which is _why_ commit hygiene matters).
-
-Moving to **fully automated version bumps** (release-please / semantic-release)
-is an outlook item — today the human decides the semantic-version bump; the
-tooling does the tagging and publishing.
-
----
-
-## 8. Testing strategy
-
-Codified in **[ADR-008](./ADRs/ADR-008-testing-strategy.md)** as a four-tier
-pyramid:
-
-| Tier            | Framework                             | Scope                                                                                            | When it runs              |
-| --------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------- |
-| **Unit**        | [Vitest](https://vitest.dev/)         | pure functions, React components, API handlers mocked with `vi.mock()` — no live services, <30 s | every push (+ pre-commit) |
-| **Integration** | Vitest + [MSW](https://mswjs.io/)     | API routes with mocked Neo4j responses; validates request/response shapes                        | every push                |
-| **E2E**         | [Playwright](https://playwright.dev/) | numbered browser journeys (`J001`+) across 35 spec files                                         | `main` + dispatch         |
-| **Compliance**  | custom (DSP TCK / DCP / EHDS)         | protocol conformance                                                                             | weekly + protocol changes |
-
-**Why a pyramid?** Fast, cheap unit tests catch most mistakes in seconds; slower,
-broader end-to-end (E2E) tests confirm real user journeys still work. You want
-many of the former and a focused set of the latter.
-
-📊 **Live test reports** (regenerated by CI and published with the demo):
-
-- **[Unit & integration coverage report](./test-coverage-report.md)** — Vitest
-  coverage across the codebase.
-- **[End-to-end (E2E) test report](./e2e-test-report.md)** — Playwright journey
-  results.
-- **[Quality Gates reference](./quality-gates.md)** — the full list of CI quality
-  standards (lint, type-check, coverage, security).
-
-Conventions ([`.claude/rules/testing.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/testing.md)): unit tests in [`ui/__tests__/unit/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/ui/__tests__/unit)
-mirror [`ui/src/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/ui/src); E2E specs in `ui/__tests__/e2e/journeys/NN-*.spec.ts`; tests
-assert on visible text / aria-labels / `data-testid`, never CSS classes; do not
-mock the Neo4j driver — use the JSON fixtures under [`ui/public/mock/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/ui/public/mock).
-
-> Coverage is **collected and published** on every run but **thresholds are not
-> yet enforced** (aim: critical-path coverage). Enforcing minimums is an outlook
-> item.
-
----
-
-## 9. Environments
-
-| Environment              | How                                                                                                                                                                                                         | Purpose                      |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| **Local (minimal)**      | `docker compose up -d` (Neo4j + UI)                                                                                                                                                                         | day-to-day dev               |
-| **Local (full JAD)**     | `docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d` + [`./jad/seed-all.sh`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/jad/seed-all.sh) (phases 1–7, strict order) | full 19-service stack        |
-| **GitHub Pages**         | [`pages.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/pages.yml) static export                                                                                   | public, zero-backend demo    |
-| **Azure Container Apps** | [`deploy-azure.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/deploy-azure.yml) + ops workflows                                                                   | live demo with real services |
-
----
-
-## 10. The single-maintainer adaptation (what is collapsed, and why)
-
-| A 10–30 dev team has…                      | This project does instead                                                                              | Why it's acceptable _for now_                                                                       |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| Mandatory peer review on every PR          | **AI review** (`/review`, specialist sub-agents) + **CI gates**; maintainer self-merges                | Deterministic gates catch the regressions a second human would; the AI provides a first-pass review |
-| Branch-protection blocking merge on red CI | **Enforced** since 2026-09-26 (Section 4.1): PR required, PR Gate green, linear history, no force push | Admin bypass is limited to pull requests and is recorded; direct pushes are refused for everyone    |
-| Dedicated QA / release manager             | The testing pyramid + the Release workflow                                                             | Automation replaces the role, not the rigour                                                        |
-| Sprint/ceremony overhead                   | Issues + ADRs + planning index                                                                         | Lightweight, async, written-down                                                                    |
-
-The point is to keep **rigour** while shedding **coordination cost**. The moment
-a second contributor joins, the Section 11 items move from "nice" to "required".
-
----
-
-## 11. Outlook — next steps
-
-Ordered roughly by leverage. These are the gates a growing team would expect, and
-the natural maturation path for this repo:
-
-1. **Promote a real suite to required.** Branch protection landed on
-   2026-09-26 (Section 4.1), but only **PR Gate** is required, because every
-   other workflow is path-filtered and a required check that never starts
-   blocks a PR forever. Give `test.yml` a final `if: always()` summary job that
-   reports the aggregate, require that job, and the unit/E2E suites become
-   genuinely non-bypassable too.
-2. **Enforce Conventional Commits** — a `commitlint` + commit-message hook so the
-   format that drives release notes can't drift.
-3. **Enforce coverage thresholds** — start with critical paths, ratchet up.
-4. **Make report-only scanners blocking** — drive the WCAG contrast ratchet
-   (Issue #25) to zero and the pentest suite to green, then drop
-   `continue-on-error`.
-5. **Automated versioning** — release-please / semantic-release for changelog +
-   semantic version from commit history.
-6. **Governance files** — `CONTRIBUTING.md`, `CODEOWNERS`, PR template, Issue
-   templates; **Dependabot/Renovate** for dependency PRs.
-7. **Make compliance suites blocking** once stable, and add **release provenance /
-   SLSA attestation** to releases.
-8. **Promote the compliance + Lighthouse signals into PR status** so quality is
-   visible before merge, not only after.
-
----
-
-## 12. How to contribute
-
-### If you write code
+[`.pre-commit-config.yaml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.pre-commit-config.yaml),
+run by the [pre-commit framework](https://pre-commit.com/). Install both
+stages once per clone:
 
 ```bash
-gh issue list --repo ma3u/MinimumViableHealthDataspacev2   # pick / file an Issue
-git switch -c fix/short-slug                                # short-lived branch
-# … make the change (with or without Claude Code) …
-git commit -m "fix(scope): subject (#NN)"                  # pre-commit gate runs
-git push -u origin HEAD && gh pr create                     # CI gate runs
-# … merge once CI is green …
+pip install pre-commit
+pre-commit install --hook-type pre-commit --hook-type pre-push
+pre-commit run --all-files     # optional: everything, once
 ```
 
-For anything architectural, **open an ADR first** (`docs/ADRs/ADR-NNN-slug.md`)
-and link it from the planning index.
+Most hooks are scoped by file pattern, so a docs-only commit skips the
+TypeScript ones. Hooks that need a tool you have not installed (gitleaks,
+Semgrep, lychee, actionlint) print a warning and pass; the PR Gate installs
+gitleaks and actionlint and runs them anyway. Skip one hook once with
+`SKIP=<id> git commit`, never the whole set with `--no-verify`: the PR Gate
+runs the same hooks on the PR's diff, so a bypass only moves the failure.
 
-### If you work at the conceptual / governance / architecture layer
+**Hooks that rewrite files** (Prettier, the whitespace fixers, `docs-facts`)
+fail the commit after changing the file. Stage the file again and commit
+again, then check that `HEAD` moved: a failed commit leaves it where it was.
 
-You do **not** need to touch code to have outsized impact here — arguably the
-opposite. The highest-value contributions to an AI-assisted project are **better
-specifications**:
+### 5.1 At commit: 31 hooks
 
-- **File Issues** that pin down a requirement, a sequence diagram, a governance
-  rule, or a documentation gap precisely.
-- **Propose or correct ADRs** — these are exactly the durable specs the AI reads
-  every session, so a sharper ADR directly improves every future AI change.
-- **Review user-facing docs, diagrams, and journeys** and describe what's wrong
-  conceptually.
+| Hook (id)                                                                 | What it does                                                                                                                                                    | When it fails                                                                                                                                                          |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `trailing-whitespace`, `end-of-file-fixer`                                | strip trailing spaces, end every file with a newline (patches and the vendored HealthDCAT-AP shapes excepted)                                                   | it fixed the file: stage it again                                                                                                                                      |
+| `check-yaml`, `check-json`                                                | the files parse (multi-document YAML allowed)                                                                                                                   | fix the syntax it names                                                                                                                                                |
+| `check-added-large-files`                                                 | refuses a file over 5,000 KB                                                                                                                                    | keep it out of git, or make it smaller                                                                                                                                 |
+| `check-merge-conflict`                                                    | refuses leftover `<<<<<<<` markers                                                                                                                              | finish the merge                                                                                                                                                       |
+| `detect-private-key`                                                      | refuses a private key                                                                                                                                           | remove it; if it was real, rotate it                                                                                                                                   |
+| `check-case-conflict`, `check-symlinks`                                   | names that clash on a case-insensitive disk, symlinks that point nowhere                                                                                        | rename, or fix the link                                                                                                                                                |
+| `check-executables-have-shebangs`, `check-shebang-scripts-are-executable` | an executable file has a `#!` line, a `#!` file is executable                                                                                                   | `chmod +x` (or `-x`), and stage that path explicitly: a stray executable bit on a `.gitkeep` fails here                                                                |
+| `shellcheck`                                                              | Bash at error severity                                                                                                                                          | `shellcheck --severity=error <file>` and fix what it reports                                                                                                           |
+| `hadolint-docker`                                                         | Dockerfile best practice                                                                                                                                        | `hadolint <Dockerfile>`                                                                                                                                                |
+| `prettier`                                                                | formats JS, TS, JSON, YAML and Markdown                                                                                                                         | it rewrote the file: stage it again. Do not fight its output                                                                                                           |
+| `tsc-ui`                                                                  | `tsc --noEmit -p tsconfig.build.json` in `ui/` (strict, tests excluded)                                                                                         | run that command in `ui/`, fix the type error                                                                                                                          |
+| `eslint-ui`                                                               | `next lint --max-warnings 55` in `ui/`                                                                                                                          | an error, or a new warning above the budget of 55: `cd ui && npx next lint`                                                                                            |
+| `gitleaks`                                                                | secrets in the staged diff                                                                                                                                      | remove the secret and rotate it; a proven false positive goes in `.gitleaksignore`                                                                                     |
+| `semgrep`                                                                 | Semgrep CE on staged code: the registry's TypeScript, Next.js, React and secrets rules, and `.semgrep/cypher.yml` (request input reaches Cypher as a parameter) | fix it, or `// nosemgrep: <rule-id> -- <reason>` above the line. Behind a TLS-inspecting proxy the registry download fails and the hook exits 2: that is not a finding |
+| `semgrep-rule-tests`                                                      | the project's own Semgrep rules against `.semgrep/cypher.ts`                                                                                                    | the rule and its test disagree                                                                                                                                         |
+| `check-broken-links-md`                                                   | relative links in Markdown resolve (lychee offline, or markdown-link-check); translations under `docs/i18n/` excepted                                           | fix the path                                                                                                                                                           |
+| `check-no-screenshot-imports`                                             | docs pages under `ui/src/app/docs/` do not reference `images/screenshots`                                                                                       | use a diagram or a guide image instead                                                                                                                                 |
+| `api-spec-drift`                                                          | every route under `ui/src/app/api/` is in `ui/public/openapi.yaml`, and the other way round                                                                     | document the operation in the spec and delete its line from `docs/api-spec-drift-allowlist.txt`; adding a line is a decision to ship an undocumented route             |
+| `api-spec-shapes`                                                         | the spec describes the shape the hub answers with (checked against the fixtures in `ui/public/mock/`)                                                           | correct the schema, or the fixture                                                                                                                                     |
+| `docs-facts`                                                              | regenerates `ui/src/app/docs/docs-facts.json` (routes, hooks, services, ADRs, each docs page's last-updated date)                                               | it rewrote the file: stage it and commit again                                                                                                                         |
+| `docs-content`                                                            | the published copies of `docs/` match their sources (`gen-docs-content.py --check`)                                                                             | `python3 scripts/gen-docs-content.py`, stage `ui/src/content/` and `ui/public/published-docs/`                                                                         |
+| `localized-images`                                                        | the manifest of translated screenshots and diagrams matches `ui/public`                                                                                         | `python3 scripts/gen-localized-images.py`, stage the manifest                                                                                                          |
+| `bruno-coverage`                                                          | every API route has a request in `bruno/MVHDv2/`, every request can fail, no credential in a `.bru` file                                                        | add the request in the persona's folder; delete the one whose route is gone (see [the API tests](developer/api-integration-tests.md))                                  |
+| `bruno-strength`                                                          | a 2xx request asserts more than a container type                                                                                                                | assert a property's value                                                                                                                                              |
+| `workflow-paths`                                                          | a workflow's `paths` filter covers every script it runs                                                                                                         | add the path to the workflow's filter                                                                                                                                  |
+| `actionlint`                                                              | GitHub Actions workflows                                                                                                                                        | fix the workflow it names                                                                                                                                              |
+| `image-scan-coverage`                                                     | the CVE scan in `security-scan.yml` covers every image in the compose files                                                                                     | add the image to the scan matrix                                                                                                                                       |
 
-That feedback becomes the **input** that makes the next AI iteration better — the
-loop is described in the companion document, [Deterministic Agentic AI
-Development with Claude Code](./AGENTIC-DEVELOPMENT-WITH-CLAUDE-CODE.md#8-the-human-in-the-loop-the-conceptual-review-flywheel).
+### 5.2 At push: 3 hooks
+
+| Hook (id)      | What it does                                                                                                   | When it fails                                                                                                                                |
+| -------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vitest-ui`    | the whole UI suite, `vitest run --bail 1`, when the push changes `ui/src` or `ui/__tests__`                    | `cd ui && npx vitest run <file>` for the failing file. A hook that resets a mock uses braces: `beforeEach(() => { m.mockReset(); })`         |
+| `npm-audit-ui` | `scripts/check-npm-audit.py ui --omit=dev`: no HIGH or CRITICAL advisory in production dependencies            | update the dependency; when no fix exists, a time-boxed entry in `docs/npm-audit-exceptions.json` with a reason, an issue and an expiry date |
+| `codeql-swift` | CodeQL on the iPhone app when Swift sources, `Package.swift` or `project.yml` change (about 15 minutes, macOS) | fix the finding, or accept it with its reason in `clients/ios/Scripts/codeql-accepted.txt`; `SKIP=codeql-swift git push` skips it once       |
+
+[Quality Gates](./quality-gates.md) and the
+[quality gates page](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/developer/quality-gates)
+have the coverage figures and the gates still to come.
+
+---
+
+## 6. The checks on GitHub
+
+`.github/workflows/` holds 37 workflows. Only the **PR Gate** blocks a merge.
+
+### 6.1 PR Gate: the required check
+
+On every pull request and merge-queue run, no path filter, about 15 minutes at
+most:
+
+1. the pre-commit hooks on the PR's diff (`pre-commit run --from-ref
+origin/main --to-ref HEAD`), which catches a commit made with
+   `--no-verify` or from a clone without the hooks;
+2. API spec drift (`scripts/check-api-spec-drift.py`);
+3. docs facts current, with every changed docs page's date moved
+   (`scripts/gen-docs-facts.py --check`);
+4. the API collection covers every route (`scripts/check-bruno-coverage.py`);
+5. HealthDCAT-AP Release 8 conformance of the catalogue's golden files
+   (pySHACL against the official shapes);
+6. no unused files, exports or dependencies (`npm run --prefix ui knip`);
+7. gitleaks over the PR's commits, since the staged-only local hook sees
+   nothing in CI.
+
+### 6.2 The other workflows
+
+| Workflow                                      | Runs on                                                                                            | What it does                                                                                                                                                                                                                                           | Blocks        |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
+| `test.yml` Test Suite                         | push to any branch, PR to `main` (paths: `ui/`, the services, `clients/ios/`, the Klarbefund docs) | 15 jobs: Vitest for the UI, proxy, SPE loader and ePA ingest; OPA policy tests; iOS analyte parity; gitleaks; npm audit; SBOM; licences; Trivy; Kubescape; lint; and, on `main` only, Lighthouse and Playwright E2E with WCAG and the OWASP/BSI checks | no (advisory) |
+| `codeql.yml`                                  | push and PR to `main`, weekly                                                                      | CodeQL for JavaScript/TypeScript, Python and the workflows; results in the Security tab                                                                                                                                                                | no            |
+| `codeql-swift.yml`                            | changes to `clients/ios/`, weekly                                                                  | CodeQL for the iPhone app                                                                                                                                                                                                                              | no            |
+| `security-scan.yml`                           | PR, weekly, dispatch                                                                               | source SBOM and CVEs, image CVEs, the deployed images' CVEs, a severity gate                                                                                                                                                                           | no            |
+| `bruno-smoke.yml`                             | PR and `main` when the collection or `ui/src/app/api/` change                                      | the API collection against the static fixtures (Static-mock)                                                                                                                                                                                           | no            |
+| `python-services-test.yml`                    | PR, push to `main`                                                                                 | pytest for the Python services                                                                                                                                                                                                                         | no            |
+| `compliance.yml`                              | push to `main` (protocol paths), weekly, dispatch                                                  | DSP, DCP and EHDS domain checks and the full API collection against a fresh JAD stack; the report job fails below the recorded floor                                                                                                                   | `main` only   |
+| `deploy-azure.yml`                            | every push to `main`, dispatch                                                                     | builds the UI and proxy images, deploys them to Azure Container Apps, checks that sign-in works, then runs Playwright against the live hub                                                                                                             | `main` only   |
+| `pages.yml`                                   | every push to `main`, dispatch                                                                     | builds the static export and publishes it to GitHub Pages (6.4)                                                                                                                                                                                        | `main` only   |
+| `release.yml`                                 | push to `main` changing `ui/package.json`, dispatch                                                | tags and publishes a GitHub Release (section 8)                                                                                                                                                                                                        | `main` only   |
+| `demo-smoke.yml`                              | push to `main` (`ui/`, `bruno/`), daily 06:00 UTC                                                  | is the live hub up, the API collection against it (Azure-Dev), Playwright on public routes, a ZAP baseline, then removes what the collection created                                                                                                   | `main` only   |
+| `catalog-crawler.yml`, `catalog-enricher.yml` | push to `main` changing the service                                                                | tests and deploys the catalogue services                                                                                                                                                                                                               | `main` only   |
+| `aca-schedule.yml`                            | twice a day, dispatch                                                                              | fallback for the off-hours stop and start ([ADR-053](./ADRs/ADR-053-everything-stops-off-hours.md), [ADR-058](./ADRs/ADR-058-azure-triggers-the-off-hours-schedule.md))                                                                                | n/a           |
+
+The remaining 22 are **operations workflows run by hand** (`workflow_dispatch`)
+against Azure: seeding Neo4j, EDC participants, data assets and CFM; the
+Vault bootstrap; the FHIR loader; GraphRAG; the EUDI verifier; the Keycloak
+domain; cost guards; one-off repairs and retirements, each named after its
+issue or ADR. They follow the same rule as everything else: an environment
+change is a versioned, re-runnable workflow, not a click in the portal. Those
+that delete or rewrite have a `plan` mode that only reads.
+
+### 6.3 Protocol compliance
+
+`compliance.yml` brings up the JAD stack inside the job, seeds it, and runs
+the DSP, DCP and EHDS domain checks and the API collection. Every suite step
+may fail without stopping the job; the **Compliance Report** job then compares
+each result with its floor in `scripts/compliance-baseline.json` and fails on a
+regression. It gates on a recorded baseline, not on green, so a suite that
+does not pass yet still cannot get worse. The suites are ours and drive our
+APIs; they are not the Eclipse TCKs and do not prove conformance (#338).
+Current numbers and how to run them are in
+[Integration tests through the APIs](developer/api-integration-tests.md).
+
+### 6.4 GitHub Pages: the static demo
+
+`pages.yml` builds the public demo at
+[ma3u.github.io/MinimumViableHealthDataspacev2](https://ma3u.github.io/MinimumViableHealthDataspacev2/):
+it seeds a Neo4j container, refreshes the mock fixtures from the live API
+shape, runs Vitest, Playwright, the WCAG audit and the security checks (report
+only, `continue-on-error`), renames `ui/src/app/api/` out of the way, builds
+with `NEXT_PUBLIC_STATIC_EXPORT=true` and publishes. Without API routes every
+page reads `ui/public/mock/*.json`, so a page that GETs an `/api/...` path
+needs a fixture there, and `static-mock-coverage.test.ts` fails without one.
+
+### 6.5 Deploy to Azure
+
+Every push to `main` runs `deploy-azure.yml`:
+
+1. log in to Azure with **OIDC** (no stored password: a federated credential
+   trusts this repository's `main` branch);
+2. build the UI and the Neo4j proxy images, push them to the registry
+   `acrmvhdehds`;
+3. wait while a load test runs (the `LOAD_TEST_RUNNING` variable), so a merge
+   does not redeploy under k6;
+4. deploy both to Container Apps in `rg-mvhd-dev` as a new revision (ACA
+   caches `:latest`, so a restart alone would not pick up the image);
+5. verify the revisions, wait for the UI, and prove sign-in works end to end;
+6. if the hub is live (not stopped off hours), run Playwright, the WCAG audit
+   and the security checks against it.
+
+**OIDC works on `main` only.** The federated credential names
+`refs/heads/main`, so an Azure step on a pull request, a fork or another
+branch cannot log in. A job that needs Azure is gated to `main`, the schedule
+or a dispatch on `main`; letting PRs in means adding a federated credential
+in Azure, not editing the workflow. Off hours (Mon to Fri 07:00 to 20:00
+Europe/Berlin is on) everything is stopped
+([ADR-053](./ADRs/ADR-053-everything-stops-off-hours.md)), so a deploy then
+updates the revision without being able to test it live.
+
+---
+
+## 7. Testing strategy
+
+[ADR-008](./ADRs/ADR-008-testing-strategy.md) sets the tiers; the conventions
+are in [`.claude/rules/testing.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/testing.md).
+
+| Tier                | Framework                  | Scope                                                                                                 | When it runs                              |
+| ------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| **Unit**            | Vitest                     | functions, components and API route handlers; Neo4j mocked at `@/lib/neo4j`, `fetch` stubbed per test | pre-push, every push (`test.yml`)         |
+| **Service**         | Vitest, pytest, `opa test` | the Neo4j proxy, SPE loader, ePA ingest, the Python services, the Trustee policies                    | every push touching them                  |
+| **iOS**             | Swift Testing, XCUITest    | the app's parser and model; its screens with a fixed demo seed                                        | on the Mac; parity check in CI            |
+| **API integration** | Bruno, shell suites        | the hub's routes per persona; DSP, DCP, the health domain                                             | PR (fixtures), `main`, weekly, live daily |
+| **E2E**             | Playwright                 | numbered journeys in `ui/__tests__/e2e/journeys/`                                                     | `main`, dispatch, after each Azure deploy |
+
+Route tests run with the auth guard mocked open, so they test business logic,
+not the gate; a test that means to pin a gate closes it itself, and the
+`09 Access control` folder of the API collection checks the gates against a
+real server. Coverage is collected and published but no threshold is enforced
+yet.
+
+---
+
+## 8. Releases and versions
+
+What exists today, plainly:
+
+- **The hub has one version**, the `version` in
+  [`ui/package.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/package.json),
+  now `2.0.0`. A person decides the bump (semantic versioning, by judgement)
+  and changes it in a PR.
+- **On merge, `release.yml` cuts the release:** it tags `vX.Y.Z` if the tag
+  is missing, writes notes from `git log` since the previous tag, and
+  publishes a GitHub Release. It does nothing when the release exists, and a
+  dispatch with `force_version` re-runs it.
+- **Release notes for a major version are rewritten by hand.** v2.0.0's notes
+  are an essay, not the commit list the workflow writes.
+- **There is no cadence.** Eleven tags so far, v1.0.0 (2026-03-30) to v2.0.0
+  (2026-09-29); `main` has moved more than 350 commits since v2.0.0 without a
+  release. `main` is what runs live, so a release marks a milestone rather
+  than a deployment. v1.4.3 is a tag without a release.
+- **The Neo4j proxy and the other services are not versioned separately**
+  (`services/neo4j-proxy/package.json` says `0.1.0`); their images are tagged
+  by commit.
+
+### The iPhone app: TestFlight builds
+
+Klarbefund is versioned separately, in
+[`clients/ios/project.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/clients/ios/project.yml):
+`MARKETING_VERSION` (now `1.0`) and the build number
+`CURRENT_PROJECT_VERSION` (now `11`). Each TestFlight upload is its own PR,
+`chore(ios): build N for TestFlight, with its What to Test`, which raises the
+build number and writes the tester notes in English and German in
+`clients/ios/appstore/texts.py`. The upload is
+`clients/ios/Scripts/archive-and-upload.sh`, run on the Mac; App Store Connect
+refuses a build number it has seen. Testers join by the public TestFlight
+link ([ADR-050](./ADRs/ADR-050-klarbefund-beta-by-public-testflight-link.md)).
+The app has no App Store release yet.
+
+---
+
+## 9. Contributing from outside
+
+The repository is public under the
+[Apache License 2.0](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/LICENSE).
+The short version is in
+[`.github/CONTRIBUTING.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/CONTRIBUTING.md),
+which GitHub links from the issue and PR forms.
+
+1. **Start with a Discussion or an issue** (section 3), so the change is
+   agreed before the work. Small fixes to docs and typos can go straight to a
+   PR.
+2. **Fork, branch from `main`**, install the hooks (section 5) and set up the
+   stack you need ([The stack and the development environment](developer/stack-and-environment.md)).
+3. **Keep the PR to one change.** Follow the conventions in
+   [`.claude/rules/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/.claude/rules):
+   code style, testing and API conventions. A new API route needs
+   `requireAuth()`, a request in the API collection, a mock fixture and an
+   entry in `openapi.yaml`; the hooks tell you which is missing.
+4. **Fictional organisations only.** Demo data, docs, tests and screenshots
+   name AlphaKlinik Berlin, PharmaCo Research AG, MedReg DE, Limburg Medical
+   Centre and Institut de Recherche Santé, never a real hospital, company,
+   insurer or authority. Real names appear only behind the
+   `NEXT_PUBLIC_DEMO_TK` build flag, and real third-party screenshots are
+   never committed. No real patient data, ever: the patients are synthetic
+   (Synthea).
+5. **No secrets.** gitleaks runs locally and in the PR Gate; the local
+   defaults (`neo4j` / `healthdataspace`) are for development only.
+6. **Open the PR.** The PR Gate must be green; Azure steps do not run for a
+   fork (6.5), and the maintainer runs what needs the live hub. Answer every
+   review thread; the maintainer squash-merges.
+
+You do not need to write code to contribute. Sharper issues, ADR proposals
+and reviews of the user-facing docs and journeys improve every later change,
+because they are the specifications the AI author reads.
+
+---
+
+## 10. Environments
+
+| Environment              | How                                                                                   | Purpose                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| **Local, minimal**       | Neo4j in Docker and `npm run dev`                                                     | day-to-day UI and graph work                             |
+| **Local, full JAD**      | `docker-compose.yml` + `docker-compose.jad.yml`, seed phases 1 to 7                   | every service, sign-in, the protocol flows               |
+| **CI**                   | `compliance.yml` brings the JAD stack up inside the job                               | the compliance suites                                    |
+| **GitHub Pages**         | `pages.yml`, static export with fixtures                                              | the public demo, no backend                              |
+| **Azure Container Apps** | `deploy-azure.yml` and the operations workflows, `rg-mvhd-dev`, https://ehds.mabu.red | the live hub, on Mon to Fri 07:00 to 20:00 Europe/Berlin |
+
+---
+
+## 11. The single-maintainer adaptation
+
+| A team of 10 to 30 has… | This project does instead                                                          | Why it is acceptable for now                                                  |
+| ----------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| mandatory peer review   | AI review (`/review`, `/code-review`, specialist agents) and the gates; self-merge | the gates catch what a second reviewer would; review threads must be resolved |
+| merge blocked on red CI | enforced: PR required, PR Gate green, linear history, no force push                | admin bypass is limited to pull requests                                      |
+| a release manager       | `release.yml` and a human decision on the version                                  | automation replaces the role, not the judgement                               |
+| sprint ceremonies       | issues with open tasks, ADRs, the planning folder                                  | lightweight, asynchronous, written down                                       |
+
+### Next steps
+
+1. Give `test.yml` a final job that always runs and require it, so the unit
+   suites become non-bypassable like the PR Gate.
+2. Enforce Conventional Commits with a commit-message hook.
+3. Enforce coverage thresholds on the critical paths, then ratchet.
+4. Drive the report-only scanners (WCAG contrast, the pentest suite) to green
+   and drop `continue-on-error`.
+5. Automate the version bump and the changelog from the commit history, and
+   decide a release cadence.
+6. Add a PR template and `CODEOWNERS`.
+7. Adopt the Eclipse DSP and DCP TCKs and make the compliance floors a PR
+   signal; add provenance (SLSA) to releases.
+
+---
+
+## 12. How to define an SDLC for a DevSecOps and AI project
+
+The sections above describe this project. This one is the recipe behind it,
+for a team starting its own: what to decide at each stage, which tool does
+it, and how this repository does it. One idea carries it:
+
+> **Specs are the input, deterministic gates are the control, evidence is the
+> output.** An AI author is treated like any other contributor whose work you
+> cannot fully predict: it works from a written spec, inside the same gates,
+> and a person owns the merge.
+
+### 12.1 The stages and their tools
+
+| Stage                   | Decide                                                                                                                   | Tools                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Here                                                                                                                                                                                                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Explore**             | where open questions and options are discussed before anything is a task                                                 | [GitHub Discussions](https://docs.github.com/en/discussions)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Discussions, category Ideas (section 3)                                                                                                                                                                                                                                 |
+| **Specify**             | the spec format: the problem, requirements, acceptance criteria, then a plan and tasks; where it lives in the repository | [GitHub Spec Kit](https://github.com/github/spec-kit) ([introduction](https://github.blog/ai-and-ml/generative-ai/spec-driven-development-with-ai-get-started-with-a-new-open-source-toolkit/)), [Kiro specs](https://kiro.dev/docs/specs/), [AGENTS.md](https://agents.md/), [Claude Code memory (CLAUDE.md)](https://docs.anthropic.com/en/docs/claude-code/memory)                                                                                                                                                                                                                                                  | the issue's acceptance criteria and open tasks, a file in `docs/planning/current/`, `CLAUDE.md` and `.claude/rules/`                                                                                                                                                    |
+| **Decide**              | which decisions need a record, the template, who accepts, that an accepted record is superseded and never edited         | [Nygard's ADR](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions), [adr.github.io](https://adr.github.io/), [MADR](https://adr.github.io/madr/), [adr-tools](https://github.com/npryce/adr-tools), [Log4brains](https://github.com/thomvaill/log4brains)                                                                                                                                                                                                                                                                                                                                        | `docs/ADRs/`, the Nygard template in `docs/adr/0000-template.md`                                                                                                                                                                                                        |
+| **Plan and track**      | issue types and templates, labels and priorities, where open tasks and test steps are written                            | [Issues](https://docs.github.com/en/issues), [issue templates](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository), [Projects](https://docs.github.com/en/issues/planning-and-tracking-with-projects)                                                                                                                                                                                                                                                                                                                 | issues with open tasks and manual test steps, `P1` to `P3`, the planning folder                                                                                                                                                                                         |
+| **Build with AI**       | what the agent reads, what it may run, which checks run on every edit, how commits are named                             | [Claude Code hooks](https://docs.anthropic.com/en/docs/claude-code/hooks), [subagents](https://docs.anthropic.com/en/docs/claude-code/sub-agents), [pre-commit](https://pre-commit.com/), [Conventional Commits](https://www.conventionalcommits.org/), [commitlint](https://commitlint.js.org/)                                                                                                                                                                                                                                                                                                                       | `CLAUDE.md`, `.claude/` hooks and agents, 31 + 3 hooks (section 5)                                                                                                                                                                                                      |
+| **Secure**              | secrets, static analysis, dependencies, images, SBOM; the severity that blocks                                           | [gitleaks](https://github.com/gitleaks/gitleaks), [secret scanning](https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning), [Semgrep](https://semgrep.dev/docs/), [CodeQL](https://docs.github.com/en/code-security/code-scanning/introduction-to-code-scanning/about-code-scanning-with-codeql), [Dependabot](https://docs.github.com/en/code-security/dependabot), [Renovate](https://docs.renovatebot.com/), [Trivy](https://trivy.dev/), [CycloneDX](https://cyclonedx.org/)                                                                                                 | gitleaks, Semgrep and npm audit locally; CodeQL, Trivy, SBOM and Dependabot on GitHub (sections 5 and 6)                                                                                                                                                                |
+| **Test**                | the tiers and where each runs; that every check can fail                                                                 | [Vitest](https://vitest.dev/), [Playwright](https://playwright.dev/), [Bruno](https://www.usebruno.com/)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | section 7, [ADR-031](./ADRs/ADR-031-checks-must-assert.md)                                                                                                                                                                                                              |
+| **Review and merge**    | required checks, approvals, code owners, merge method                                                                    | [pull requests](https://docs.github.com/en/pull-requests), [rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets), [CODEOWNERS](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners), [merge queue](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/configuring-pull-request-merges/managing-a-merge-queue), [Claude Code GitHub Actions](https://docs.anthropic.com/en/docs/claude-code/github-actions) | one required check, review threads resolved, squash merge (section 4)                                                                                                                                                                                                   |
+| **Deliver**             | how CI reaches the cloud without stored passwords; how builds and releases are proven                                    | [GitHub Actions](https://docs.github.com/en/actions), [OIDC](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/about-security-hardening-with-openid-connect), [artifact attestations](https://docs.github.com/en/actions/security-for-github-actions/using-artifact-attestations/using-artifact-attestations-to-establish-provenance-for-builds), [SLSA](https://slsa.dev/), [release-please](https://github.com/googleapis/release-please), [semantic-release](https://semantic-release.gitbook.io/)                                                                 | OIDC on `main`, `release.yml`; attestations and SLSA not yet (sections 6.5 and 8)                                                                                                                                                                                       |
+| **Measure the process** | the framework you hold the SDLC against, and how often                                                                   | [NIST SSDF (SP 800-218)](https://csrc.nist.gov/pubs/sp/800/218/final), [OWASP SAMM](https://owaspsamm.org/), [OpenSSF Scorecard](https://scorecard.dev/)                                                                                                                                                                                                                                                                                                                                                                                                                                                               | the [quality gates](./quality-gates.md) and the security reports                                                                                                                                                                                                        |
+| **Govern the AI**       | which AI the product contains and which AI writes the code; the risks of each                                            | [EU AI Act (Regulation (EU) 2024/1689)](https://eur-lex.europa.eu/eli/reg/2024/1689/oj), [NIST AI RMF](https://www.nist.gov/itl/ai-risk-management-framework), [ISO/IEC 42001](https://www.iso.org/standard/42001), [OWASP Top 10 for LLM applications](https://genai.owasp.org/llm-top-10/)                                                                                                                                                                                                                                                                                                                           | the natural-language query refuses to read a patient's identity unless the UI allows it ([`api-conventions.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/api-conventions.md)); the AI author is covered by the companion document |
+
+### 12.2 Spec-driven development in practice
+
+A spec is written before the code and lives in the repository, so a person and
+an agent read the same text. Spec Kit names the steps: **specify** (what and
+why, with acceptance criteria), **plan** (how, within the project's
+constraints), **tasks** (small, checkable steps), **implement**. Whatever the
+tool, the spec is good when:
+
+- every acceptance criterion can be checked by a test or a manual step with a
+  link;
+- it names what is out of scope;
+- it points to the ADRs it relies on and says when a new one is needed;
+- the agent's standing instructions (`CLAUDE.md`, `AGENTS.md`, rules files)
+  hold what is true for every change, so the spec holds only this one.
+
+This repository does not use Spec Kit. The same steps live in the issue (what,
+why, acceptance criteria, open tasks), the ADR (the decision), the planning
+file (the plan) and `CLAUDE.md` with `.claude/rules/` (the constraints).
+
+### 12.3 Where each conversation belongs
+
+| It is…                             | Put it in                                   | It ends as                       |
+| ---------------------------------- | ------------------------------------------- | -------------------------------- |
+| a question, an idea, a comparison  | a Discussion                                | an answer, or an issue           |
+| a decision that is hard to reverse | an ADR, proposed in a PR                    | accepted, rejected or superseded |
+| something to do                    | an issue with acceptance criteria and tasks | closed by a PR, with test steps  |
+| the change itself                  | a pull request linking its issue and ADRs   | a squash merge on green          |
+| what happened after the merge      | the workflow run, the release, the issue    | evidence anyone can open         |
+
+### 12.4 Where to start
+
+In this order, each a day's work or less:
+
+1. A ruleset on `main`: pull request required, one required check with no
+   path filter, no force push.
+2. pre-commit with formatting, type checks and a secret scan, and the same
+   hooks re-run in that required check.
+3. Discussions on, issue templates, labels for type and priority.
+4. An ADR template and a first ADR: how you decide.
+5. Standing instructions for the AI author (`CLAUDE.md` or `AGENTS.md`) and
+   the rules it must follow.
+6. CodeQL, Dependabot or Renovate, and an SBOM.
+7. A spec template for features: acceptance criteria and out-of-scope.
+8. A release workflow, then provenance (attestations, SLSA) for what you ship.
 
 ---
 
 ## References
 
-- [`CLAUDE.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/CLAUDE.md) — the project's operating manual (build commands, architecture, conventions, gotchas).
-- [`.pre-commit-config.yaml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.pre-commit-config.yaml) — the local quality gate (Section 5).
-- [`.claude/rules/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/.claude/rules) — [`code-style.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/code-style.md), [`testing.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/testing.md), [`api-conventions.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.claude/rules/api-conventions.md).
-- [ADR-008 — Testing Strategy](./ADRs/ADR-008-testing-strategy.md) · [ADR-026 — Token-Efficient Planning & ADR Structure](./ADRs/ADR-026-token-efficient-planning-structure.md)
-- [Quality Gates](./quality-gates.md) · [Unit coverage report](./test-coverage-report.md) · [E2E test report](./e2e-test-report.md)
-- [`docs/planning-health-dataspace-v2.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/planning-health-dataspace-v2.md) — the slim planning index.
-- Companion: [Deterministic Agentic AI Development with Claude Code](./AGENTIC-DEVELOPMENT-WITH-CLAUDE-CODE.md)
+- [`CLAUDE.md`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/CLAUDE.md): commands, layout, the top gotchas.
+- [`.pre-commit-config.yaml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.pre-commit-config.yaml) and [`.github/workflows/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/.github/workflows).
+- [`.claude/rules/`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/.claude/rules): code style, testing, API conventions.
+- [Integration tests through the APIs](developer/api-integration-tests.md) · [The stack and the development environment](developer/stack-and-environment.md) · [Quality Gates](./quality-gates.md) · [Gotchas](./gotchas.md)
+- [ADR-008, testing strategy](./ADRs/ADR-008-testing-strategy.md) · [ADR-026, token-efficient planning](./ADRs/ADR-026-token-efficient-planning-structure.md) · [ADR-031, checks must assert](./ADRs/ADR-031-checks-must-assert.md) · [ADR-032, the persona-organised API collection](./ADRs/ADR-032-persona-organised-api-collection.md)
+- [Planning index](./planning/index.md) · [`docs/planning-health-dataspace-v2.md`](./planning-health-dataspace-v2.md)

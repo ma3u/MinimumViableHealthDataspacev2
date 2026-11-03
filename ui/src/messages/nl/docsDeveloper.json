@@ -291,5 +291,18 @@
   "Data transfers": "Gegevensoverdrachten",
   "Trust centers with their governance chain and statistics": "Trustcenters met hun governanceketen en statistieken",
   "Back to Developer Guide": "Terug naar de ontwikkelaarshandleiding",
-  "Interactive, three-column reference for all REST endpoints of the EHDS Integration Hub. Powered by Scalar: try any endpoint directly from the right-hand code panel.": "Interactieve referentie in drie kolommen voor alle REST-endpoints van de EHDS Integration Hub. Gemaakt met Scalar: probeer elk endpoint direct uit in het codepaneel rechts."
+  "Interactive, three-column reference for all REST endpoints of the EHDS Integration Hub. Powered by Scalar: try any endpoint directly from the right-hand code panel.": "Interactieve referentie in drie kolommen voor alle REST-endpoints van de EHDS Integration Hub. Gemaakt met Scalar: probeer elk endpoint direct uit in het codepaneel rechts.",
+  "Working on the Project": "Aan het project werken",
+  "How a change reaches the live hub, how it is tested through the APIs, and what each part of the stack is. Each page is published from the docs folder of the repository.": "Hoe een wijziging de live hub bereikt, hoe ze via de API’s wordt getest en wat elk deel van de stack is. Elke pagina wordt gepubliceerd uit de map docs van de repository.",
+  "Development life cycle": "Ontwikkelcyclus",
+  "Discussions and issues, branches and pull requests, every hook with its fix, the PR Gate and the other workflows, the deploys and the releases.": "Discussions en issues, branches en pull requests, elke hook met zijn oplossing, de PR Gate en de andere workflows, de deployments en de releases.",
+  "Integration tests through the APIs": "Integratietests via de API’s",
+  "The Bruno collection and the dataspace and identity checks: how to run them, and how current they are.": "De Bruno-collectie en de controles van de dataruimte en de identiteit: hoe je ze uitvoert en hoe actueel ze zijn.",
+  "The stack and the development environment": "De stack en de ontwikkelomgeving",
+  "EDC-V, JAD, CFM, DSP, DCP and the hub's own services in one glossary; the local stacks, the seed phases, the ports and the iPhone app.": "EDC-V, JAD, CFM, DSP, DCP en de eigen diensten van de hub in één woordenlijst; de lokale stacks, de seedfasen, de poorten en de iPhone-app.",
+  "Contributing": "Bijdragen",
+  "Fork, branch, pull request: the short guide for outside contributors, under the Apache License 2.0, with fictional organisations only.": "Fork, branch, pull request: de korte handleiding voor externe bijdragers, onder de Apache License 2.0, alleen met fictieve organisaties.",
+  "Klarbefund iPhone app, an overview per persona, the access body's tasks, compliance suites that can fail": "iPhone-app Klarbefund, een overzicht per persona, de taken van de instantie voor toegang tot gezondheidsgegevens, compliancesuites die kunnen falen",
+  "GraphRAG for natural-language queries (GDS, FastRP, reranking), releases published automatically": "GraphRAG voor vragen in natuurlijke taal (GDS, FastRP, herrangschikking), releases worden automatisch gepubliceerd",
+  "The version is the one in <c>ui/package.json</c>; when a merge to main changes it, <c>release.yml</c> tags it and publishes the release. <a>How releases and the TestFlight builds of the iPhone app work</a>": "De versie is die in <c>ui/package.json</c>; wanneer een merge naar main die wijzigt, tagt <c>release.yml</c> haar en publiceert de release. <a>Hoe releases en de TestFlight-builds van de iPhone-app werken</a>"
 }
