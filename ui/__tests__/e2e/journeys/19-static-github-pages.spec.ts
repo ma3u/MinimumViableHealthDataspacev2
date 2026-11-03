@@ -1478,7 +1478,9 @@ test.describe("S · Interactive EUDI Wallet approval (static)", () => {
     page,
   }) => {
     await page.goto(P("/patient"));
-    await expect(page.getByText("My personal health record")).toBeVisible({
+    await setPersona(page, "patient1");
+    // the heading is the patient's own name once the record has loaded
+    await expect(page.getByTestId("health-cards")).toBeVisible({
       timeout: T,
     });
     await expect(page.getByText("Fitness & recovery")).toBeVisible();
@@ -1489,10 +1491,26 @@ test.describe("S · Interactive EUDI Wallet approval (static)", () => {
     ).toBeVisible();
   });
 
+  test("J1083 — /patient shows an admin no personal health record", async ({
+    page,
+  }) => {
+    await page.goto(P("/patient"));
+    await setPersona(page, "edcadmin");
+    await expect(
+      page.getByRole("combobox", { name: /Select patient/i }),
+    ).toBeVisible({ timeout: T });
+    await expect(page.getByText("My personal health record")).toHaveCount(0);
+    await expect(page.getByTestId("health-cards")).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: /Request EHR data/i }),
+    ).toHaveCount(0);
+  });
+
   test("J322 — /patient Request EHR → approve → transferred-as-FHIR banner", async ({
     page,
   }) => {
     await page.goto(P("/patient"));
+    await setPersona(page, "patient1");
     await page.getByRole("button", { name: /Request EHR data/i }).click();
     await expect(page.getByRole("dialog")).toBeVisible({ timeout: T });
     await tap(page, "Authenticate");
