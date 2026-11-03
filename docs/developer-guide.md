@@ -200,11 +200,11 @@ baseline reports into `test-results/bruno/`. See `bruno/MVHDv2/README.md`.
 
 ### pages.yml — Deploy to GitHub Pages
 
-Runs on push to main: Vitest → Build → Playwright → WCAG → Security → disable API routes → static export → deploy.
+Runs on push to main: seed Neo4j and refresh the mock fixtures → disable API routes → static export with the latest nightly test reports → deploy.
 
-### compliance.yml — Weekly + Push to Main
+### nightly.yml: once a night when main changed
 
-DSP 2025-1 TCK, DCP v1.0, EHDS domain tests against full JAD stack. Scheduled Monday 06:00 UTC.
+Vitest with coverage, Playwright E2E with WCAG and the OWASP/BSI checks against a seeded Neo4j, Lighthouse, and `compliance.yml`: DSP 2025-1 TCK, DCP v1.0 and EHDS domain tests against the full JAD stack ([ADR-074](ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md)).
 
 ## Latest Reports
 

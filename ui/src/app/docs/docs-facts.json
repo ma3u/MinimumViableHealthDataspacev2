@@ -1196,6 +1196,12 @@
       "file": "ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md",
       "title": "The SPE workspaces' SEV-SNP TCB is checked against a minimum, not a list",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-074",
+      "file": "ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md",
+      "title": "E2E, compliance and performance suites run nightly when main changed, not on every push",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
@@ -1252,8 +1258,7 @@
       "Licence Compliance",
       "Trivy Security Scan",
       "Kubescape K8s Posture",
-      "Lint",
-      "Performance Budget (Lighthouse)"
+      "Lint"
     ],
     "compliance.yml": [
       "Image platforms",

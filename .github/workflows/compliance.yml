@@ -4,47 +4,22 @@
 # Runs DSP 2025-1 TCK, DCP v1.0, and EHDS domain compliance tests.
 #
 # Triggers:
-#   - Push to main
-#   - Weekly Monday 6am UTC
-#   - Manual dispatch
+#   - nightly.yml, once a night when main changed (ADR-074, #847). It used to
+#     run on pushes to main that touched the scripts, seeds, API routes or the
+#     collection, and weekly; the nightly run covers every change, so a fix to
+#     any file the suites run is picked up by the next night.
+#   - Manual dispatch, against the local stack or the Azure demo.
 # ---------------------------------------------------------------------------
 name: Protocol Compliance
 
 on:
-  push:
-    branches: [main]
-    # Keep this covering everything the suites actually run.
-    # scripts/check-workflow-paths.py asserts it, in pre-commit: it follows
-    # every script reference from this file, transitively, and fails when one
-    # of them would not re-trigger the workflow. The filter used to name only
-    # scripts/run-*.sh, so a push to main fixing a seed script left the last,
-    # red, result standing.
-    paths:
-      - "scripts/*.sh"
-      - "scripts/*.py"
-      - "scripts/lib/**"
-      - "scripts/compliance-baseline.json"
-      - "scripts/azure/env.sh"
-      - "scripts/azure/05-cp-participants.sh"
-      - "scripts/azure/compliance-runner/**"
-      - "scripts/azure/08-compliance-runner.sh"
-      - "ui/scripts/forge-bruno-session.mjs"
-      - "bruno/MVHDv2/**"
-      # The collection's subject, #371. This workflow is the only place the
-      # full 149-request Local run happens; bruno-smoke runs the 30 fixture
-      # requests of Static-mock. Without these, an API route change regresses
-      # the suite and nothing re-runs it, so the last result stands. They are
-      # what the collection exercises, not something this workflow executes,
-      # which is why check-workflow-paths.py cannot derive them.
-      - "ui/src/app/api/**"
-      - "ui/src/lib/**"
-      - "ui/Dockerfile"
-      - "jad/**"
-      - "neo4j/**"
-      - "docker-compose.jad.yml"
-      - ".github/workflows/compliance.yml"
-  schedule:
-    - cron: "0 6 * * 1" # Weekly Monday 6am UTC
+  workflow_call:
+    inputs:
+      target:
+        description: "Run suites against local JAD stack or the Azure demo env"
+        required: false
+        default: local
+        type: string
   workflow_dispatch:
     inputs:
       target:

@@ -131,7 +131,7 @@ npx playwright test --project=live   # requires JAD stack
 ### CI behaviour
 
 - CI runs Playwright with `--project=chromium` only.
-- E2E tests in `pages.yml` have `continue-on-error: true` so a test failure does not block the GitHub Pages deploy.
+- E2E tests run once a night in `nightly.yml` (ADR-074), with `continue-on-error: true`; their reports reach the GitHub Pages site.
 
 ## Static GitHub Pages Tests
 

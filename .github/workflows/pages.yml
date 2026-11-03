@@ -11,21 +11,18 @@ permissions:
   id-token: write
   actions: read # the site job fetches the last test run's reports artifact
 
-# Two tracks instead of one long job. The site is built and published first
-# (about 6 minutes); the tests run beside it and store their reports as an
-# artifact. Until 2026-10-03 one job ran the unit tests, Playwright, the WCAG
-# audit and the security tests before it built the site, so a change waited
-# 24 minutes for a 6-second publish.
+# The site is built and published here (about 6 minutes). The tests that
+# used to run beside it (unit tests with coverage, Playwright, the WCAG audit
+# and the security tests) run once a night in nightly.yml (ADR-074, #847) and
+# store their reports as the pages-test-reports artifact. Until 2026-10-03
+# they ran before the site was built, so a change waited 24 minutes for a
+# 6-second publish; until 2026-11-03 they ran beside it on every push.
 #
 # The reports on the site (/test-reports, /ci-e2e-report) are therefore the
-# ones from the last test run that had finished when the site was built,
-# usually the previous commit's. Publishing twice per run would avoid that
-# lag, but both deployments would carry the same build version, and the
-# github-pages environment only deploys from main, so it cannot be tried out
-# on a branch.
+# ones from the last nightly run, at most a day behind the site.
 #
-# Concurrency is per job. Site builds and test runs are cancelled by a newer
-# push; deploys run one at a time.
+# Concurrency is per job. Site builds are cancelled by a newer push; deploys
+# run one at a time.
 
 jobs:
   site:
@@ -129,9 +126,9 @@ jobs:
         env:
           NEXT_PUBLIC_STATIC_EXPORT: "true"
 
-      # The reports of the most recent finished test run on the branch being
-      # built (main, for every real deploy), so a test run on another branch
-      # never reaches the site. Missing on the very first run, and then the
+      # The reports of the most recent finished nightly run on the branch
+      # being built (main, for every real deploy), so a test run on another
+      # branch never reaches the site. Missing on the very first run, and then the
       # site goes out without them rather than not at all.
       - name: Add the latest test reports
         env:
@@ -169,185 +166,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-  # ── Tests, beside the site ────────────────────────────────────────────
-  # Unit tests with coverage, the Playwright suite, the WCAG 2.2 AA audit and
-  # the security tests, against a production build with the API routes on.
-  # All informational (continue-on-error), as before; their reports go out
-  # with the next site build.
-  tests:
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    concurrency:
-      group: "pages-tests"
-      cancel-in-progress: true
-    services:
-      neo4j:
-        image: neo4j:5-community
-        env:
-          NEO4J_AUTH: neo4j/healthdataspace
-          NEO4J_PLUGINS: "[]"
-        ports:
-          - 7474:7474
-          - 7687:7687
-        options: >-
-          --health-cmd "cypher-shell -u neo4j -p healthdataspace 'RETURN 1'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
-    defaults:
-      run:
-        working-directory: ./ui
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: ./ui/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Cache Next.js build
-        uses: actions/cache@v6
-        with:
-          path: ui/.next/cache
-          key: nextjs-tests-${{ hashFiles('ui/package-lock.json') }}-${{ hashFiles('ui/src/**', 'ui/public/**') }}
-          restore-keys: nextjs-tests-${{ hashFiles('ui/package-lock.json') }}-
-
-      - name: Cache Playwright browsers
-        id: pw-cache
-        uses: actions/cache@v6
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('ui/package-lock.json') }}
-
-      - name: Install cypher-shell
-        working-directory: .
-        run: |
-          wget -q https://dist.neo4j.org/cypher-shell/cypher-shell-5.26.0.zip -O /tmp/cs.zip
-          unzip -q /tmp/cs.zip -d /tmp/cs
-          echo "/tmp/cs/cypher-shell-5.26.0/bin" >> "$GITHUB_PATH"
-
-      - name: Seed Neo4j with schema and synthetic data
-        working-directory: .
-        run: |
-          cypher-shell -u neo4j -p healthdataspace -a bolt://localhost:7687 < neo4j/init-schema.cypher
-          cypher-shell -u neo4j -p healthdataspace -a bolt://localhost:7687 < neo4j/insert-synthetic-schema-data.cypher
-
-      - name: Run unit tests with coverage
-        run: npx vitest run --coverage --reporter=json --outputFile=test-results.json
-        continue-on-error: true
-
-      - name: Build for E2E tests
-        run: npx next build
-        env:
-          NEXT_PUBLIC_STATIC_EXPORT: "false"
-
-      - name: Install Playwright browsers
-        if: steps.pw-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
-
-      - name: Install Playwright system dependencies
-        if: steps.pw-cache.outputs.cache-hit == 'true'
-        run: npx playwright install-deps chromium
-
-      # Start ONE shared Next.js server for every Playwright step below.
-      # Each step sets PLAYWRIGHT_BASE_URL, which makes playwright.config.ts
-      # skip its own managed webServer — so no step tries to bind :3000.
-      # Previously the capped E2E step was SIGKILL'd at its timeout and
-      # orphaned the webServer it had spawned, which then broke the WCAG and
-      # security steps with "http://localhost:3000 is already used".
-      - name: Start Next.js server for E2E
-        run: |
-          npx next start -p 3000 &
-          echo "Waiting for server..."
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:3000/api/graph > /dev/null 2>&1 && break
-            sleep 2
-          done
-        env:
-          NEXT_PUBLIC_STATIC_EXPORT: "false"
-          NEO4J_URI: bolt://localhost:7687
-          NEO4J_USER: neo4j
-          NEO4J_PASSWORD: healthdataspace
-          NEXTAUTH_SECRET: ci-test-secret-not-for-production
-          NEXTAUTH_URL: http://localhost:3000
-
-      - name: Run Playwright E2E tests
-        # Informational only (continue-on-error) — runs against the shared
-        # server above. This is the only E2E run in CI since the copy in
-        # test.yml, which had no Neo4j, was removed (#847). The cap was 10
-        # minutes so the tests could not delay the deploy; the 1145 tests
-        # take about that long, so the step was killed before Playwright
-        # wrote its HTML report. It no longer delays anything, so it gets
-        # room to finish.
-        run: npx playwright test --project=chromium --retries=0 --workers=4
-        continue-on-error: true
-        timeout-minutes: 15
-        env:
-          CI: true
-          PLAYWRIGHT_BASE_URL: http://localhost:3000
-          NEXT_PUBLIC_STATIC_EXPORT: "false"
-          NEO4J_URI: bolt://localhost:7687
-          NEO4J_USER: neo4j
-          NEO4J_PASSWORD: healthdataspace
-          NEXTAUTH_SECRET: ci-test-secret-not-for-production
-          NEXTAUTH_URL: http://localhost:3000
-
-      - name: WCAG 2.2 AA accessibility audit
-        run: npx playwright test __tests__/e2e/journeys/27-wcag-accessibility.spec.ts --project=chromium --retries=0
-        continue-on-error: true
-        timeout-minutes: 6
-        env:
-          CI: true
-          PLAYWRIGHT_BASE_URL: http://localhost:3000
-          NEXT_PUBLIC_STATIC_EXPORT: "false"
-          NEXTAUTH_SECRET: ci-test-secret-not-for-production
-          NEXTAUTH_URL: http://localhost:3000
-
-      - name: Security & penetration tests (OWASP/BSI)
-        run: npx playwright test __tests__/e2e/journeys/28-security-pentest.spec.ts --project=chromium --grep-invert "SEC-4[1-9]|SEC-50" --retries=0
-        continue-on-error: true
-        timeout-minutes: 6
-        env:
-          CI: true
-          PLAYWRIGHT_BASE_URL: http://localhost:3000
-          NEXT_PUBLIC_STATIC_EXPORT: "false"
-          NEXTAUTH_SECRET: ci-test-secret-not-for-production
-          NEXTAUTH_URL: http://localhost:3000
-
-      - name: Stop Next.js E2E server
-        if: always()
-        run: |
-          pkill -f "next-server" 2>/dev/null || true
-          pkill -f "next start" 2>/dev/null || true
-          lsof -t -i:3000 2>/dev/null | xargs -r kill -9 2>/dev/null || true
-
-      # Laid out as the site expects them, so the site job can copy the
-      # artifact straight into out/.
-      - name: Collect test reports
-        if: always()
-        run: |
-          mkdir -p reports/test-reports reports/ci-e2e-report
-          # Vitest coverage
-          cp -r coverage/ reports/test-reports/coverage/ 2>/dev/null || true
-          cp test-results.json reports/test-reports/ 2>/dev/null || true
-          # CI Playwright report goes to ci-e2e-report/ (chromium-only).
-          # The committed public/e2e-report/ (live + chromium from JAD stack)
-          # reaches the site through the static export.
-          cp -r playwright-report/* reports/ci-e2e-report/ 2>/dev/null || true
-          # Generate comprehensive test report dashboard
-          node ../scripts/generate-test-report-page.js . reports/test-reports || echo "Report generation skipped"
-
-      - name: Upload test reports
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: pages-test-reports
-          path: ui/reports/
-          retention-days: 30

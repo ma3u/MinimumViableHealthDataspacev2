@@ -1614,10 +1614,6 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
                     "Seed Neo4j and refresh the mock fixtures from the live API",
                   )}
                 </li>
-                <li>{t("Run full Vitest suite with coverage")}</li>
-                <li>{t("Build Next.js for E2E, run Playwright")}</li>
-                <li>{t("Run WCAG 2.2 AA accessibility audit")}</li>
-                <li>{t("Run OWASP/BSI security tests")}</li>
                 <li>
                   <T area="docsDeveloper" tags={{ c }}>
                     {
@@ -1640,7 +1636,7 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="border border-(--border) rounded-lg p-4">
               <h4 className="font-semibold text-sm mb-2">
-                {t("compliance.yml: Weekly + Push to Main")}
+                {t("nightly.yml: once a night when main changed")}
               </h4>
               <p className="text-(--text-secondary) text-xs">
                 <T
@@ -1651,7 +1647,7 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
                   }}
                 >
                   {
-                    "Runs on the full JAD stack: {jobs}. Each suite is held to the floor in <c>scripts/compliance-baseline.json</c>. Scheduled Monday 06:00 UTC, and on pushes to main that touch the scripts, seeds, API routes or the API collection."
+                    "Playwright E2E with the WCAG 2.2 AA and OWASP/BSI checks against a seeded Neo4j, the Lighthouse budget, and on the full JAD stack: {jobs}. Each compliance suite is held to the floor in <c>scripts/compliance-baseline.json</c>. Skipped when main has no commit since the last green run; a red night opens an issue."
                   }
                 </T>
               </p>

@@ -1,0 +1,380 @@
+# ---------------------------------------------------------------------------
+# Nightly: the suites that take long and decide nothing at merge time
+# ---------------------------------------------------------------------------
+# ADR-074 (#847). Playwright E2E with WCAG 2.2 AA and the OWASP/BSI checks
+# against a seeded Neo4j, the Lighthouse performance budget, and the protocol
+# compliance suites on a fresh JAD stack. They used to run on every push to
+# main, about 15 a day, and none of them blocks a merge: the PR Gate does.
+#
+# Once a day, and only when main has a commit that no green run of this
+# workflow has seen; a manual run always runs every suite. A red night opens
+# an issue (or comments on the open one), and the next green night closes it,
+# so a failure does not wait for someone to look at the Actions tab.
+#
+# Nothing here reaches Azure: the stack is stopped at night (ADR-053).
+# GitHub starts scheduled runs late, often by hours, so the minute is off the
+# hour and the time is not relied on.
+# ---------------------------------------------------------------------------
+name: Nightly
+
+on:
+  schedule:
+    - cron: "23 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  # -----------------------------------------------------------------------
+  # Did main change since the last green night?
+  # -----------------------------------------------------------------------
+  gate:
+    name: New commits since the last green run
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - name: Compare with the last green run
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" != "schedule" ]; then
+            echo "run=true" >>"$GITHUB_OUTPUT"
+            echo "Started by hand: every suite runs." >>"$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          last=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow nightly.yml \
+            --branch main --status success --limit 1 --json headSha --jq '.[0].headSha // ""')
+          if [ "$last" = "$GITHUB_SHA" ]; then
+            echo "run=false" >>"$GITHUB_OUTPUT"
+            echo "No new commit on main since the last green run (${last:0:8}): nothing to do." >>"$GITHUB_STEP_SUMMARY"
+          else
+            echo "run=true" >>"$GITHUB_OUTPUT"
+            echo "main is at ${GITHUB_SHA:0:8}; the last green run saw ${last:0:8}." >>"$GITHUB_STEP_SUMMARY"
+          fi
+
+  # -----------------------------------------------------------------------
+  # Playwright E2E, WCAG 2.2 AA and OWASP/BSI against a seeded Neo4j.
+  # Moved from pages.yml; its reports still reach the GitHub Pages site.
+  # -----------------------------------------------------------------------
+  e2e:
+    name: E2E, WCAG and pentest (Neo4j)
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      neo4j:
+        image: neo4j:5-community
+        env:
+          NEO4J_AUTH: neo4j/healthdataspace
+          NEO4J_PLUGINS: "[]"
+        ports:
+          - 7474:7474
+          - 7687:7687
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p healthdataspace 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: ./ui
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Next.js build
+        uses: actions/cache@v6
+        with:
+          path: ui/.next/cache
+          key: nextjs-tests-${{ hashFiles('ui/package-lock.json') }}-${{ hashFiles('ui/src/**', 'ui/public/**') }}
+          restore-keys: nextjs-tests-${{ hashFiles('ui/package-lock.json') }}-
+
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('ui/package-lock.json') }}
+
+      - name: Install cypher-shell
+        working-directory: .
+        run: |
+          wget -q https://dist.neo4j.org/cypher-shell/cypher-shell-5.26.0.zip -O /tmp/cs.zip
+          unzip -q /tmp/cs.zip -d /tmp/cs
+          echo "/tmp/cs/cypher-shell-5.26.0/bin" >> "$GITHUB_PATH"
+
+      - name: Seed Neo4j with schema and synthetic data
+        working-directory: .
+        run: |
+          cypher-shell -u neo4j -p healthdataspace -a bolt://localhost:7687 < neo4j/init-schema.cypher
+          cypher-shell -u neo4j -p healthdataspace -a bolt://localhost:7687 < neo4j/insert-synthetic-schema-data.cypher
+
+      - name: Run unit tests with coverage
+        run: npx vitest run --coverage --reporter=json --outputFile=test-results.json
+        continue-on-error: true
+
+      - name: Build for E2E tests
+        run: npx next build
+        env:
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
+
+      - name: Install Playwright browsers
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright system dependencies
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      # Start ONE shared Next.js server for every Playwright step below.
+      # Each step sets PLAYWRIGHT_BASE_URL, which makes playwright.config.ts
+      # skip its own managed webServer — so no step tries to bind :3000.
+      # Previously the capped E2E step was SIGKILL'd at its timeout and
+      # orphaned the webServer it had spawned, which then broke the WCAG and
+      # security steps with "http://localhost:3000 is already used".
+      - name: Start Next.js server for E2E
+        run: |
+          npx next start -p 3000 &
+          echo "Waiting for server..."
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3000/api/graph > /dev/null 2>&1 && break
+            sleep 2
+          done
+        env:
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: healthdataspace
+          NEXTAUTH_SECRET: ci-test-secret-not-for-production
+          NEXTAUTH_URL: http://localhost:3000
+
+      - name: Run Playwright E2E tests
+        # Informational only (continue-on-error): runs against the shared
+        # server above. This is the only E2E run in CI (#847). The cap was 10
+        # minutes so the tests could not delay the deploy; the 1145 tests
+        # take about that long, so the step was killed before Playwright
+        # wrote its HTML report. It delays nothing here, so it gets room to
+        # finish.
+        run: npx playwright test --project=chromium --retries=0 --workers=4
+        continue-on-error: true
+        timeout-minutes: 15
+        env:
+          CI: true
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: healthdataspace
+          NEXTAUTH_SECRET: ci-test-secret-not-for-production
+          NEXTAUTH_URL: http://localhost:3000
+
+      - name: WCAG 2.2 AA accessibility audit
+        run: npx playwright test __tests__/e2e/journeys/27-wcag-accessibility.spec.ts --project=chromium --retries=0
+        continue-on-error: true
+        timeout-minutes: 6
+        env:
+          CI: true
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
+          NEXTAUTH_SECRET: ci-test-secret-not-for-production
+          NEXTAUTH_URL: http://localhost:3000
+
+      - name: Security & penetration tests (OWASP/BSI)
+        run: npx playwright test __tests__/e2e/journeys/28-security-pentest.spec.ts --project=chromium --grep-invert "SEC-4[1-9]|SEC-50" --retries=0
+        continue-on-error: true
+        timeout-minutes: 6
+        env:
+          CI: true
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
+          NEXTAUTH_SECRET: ci-test-secret-not-for-production
+          NEXTAUTH_URL: http://localhost:3000
+
+      - name: Stop Next.js E2E server
+        if: always()
+        run: |
+          pkill -f "next-server" 2>/dev/null || true
+          pkill -f "next start" 2>/dev/null || true
+          lsof -t -i:3000 2>/dev/null | xargs -r kill -9 2>/dev/null || true
+
+      # Laid out as the site expects them, so the site job of pages.yml can
+      # copy the artifact straight into out/. It takes the newest
+      # pages-test-reports artifact of main, which is this job's.
+      - name: Collect test reports
+        if: always()
+        run: |
+          mkdir -p reports/test-reports reports/ci-e2e-report
+          # Vitest coverage
+          cp -r coverage/ reports/test-reports/coverage/ 2>/dev/null || true
+          cp test-results.json reports/test-reports/ 2>/dev/null || true
+          # CI Playwright report goes to ci-e2e-report/ (chromium-only).
+          # The committed public/e2e-report/ (live + chromium from JAD stack)
+          # reaches the site through the static export.
+          cp -r playwright-report/* reports/ci-e2e-report/ 2>/dev/null || true
+          # Generate comprehensive test report dashboard
+          node ../scripts/generate-test-report-page.js . reports/test-reports || echo "Report generation skipped"
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pages-test-reports
+          path: ui/reports/
+          retention-days: 30
+
+  # -----------------------------------------------------------------------
+  # Lighthouse performance budget. Moved from test.yml.
+  # -----------------------------------------------------------------------
+  lighthouse:
+    name: Performance Budget (Lighthouse)
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: ./ui
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ./ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli
+
+      # `next start` fails with `output: export` configuration; our
+      # next.config.js flips to static export whenever GITHUB_ACTIONS is
+      # set AND NEXT_PUBLIC_STATIC_EXPORT != "false". Set the env var on
+      # the lhci step so next.config.js (re-read when `next start`
+      # launches) keeps the standalone server output.
+      #
+      # Assertions are scoped to the explicit performance budgets that
+      # matter for Core Web Vitals — dropped the `lighthouse:recommended`
+      # preset because it asserts minScore=1 on quality signals (meta
+      # description, aria-allowed-role, bf-cache, errors-in-console,
+      # legacy-javascript, etc.) that are orthogonal to the performance
+      # budget this job gates. Those live-check items belong in the
+      # WCAG / accessibility / security jobs, not the perf budget.
+      - name: Run Lighthouse CI
+        run: |
+          lhci autorun \
+            --collect.startServerCommand="npx next start -p 9222" \
+            --collect.url="http://localhost:9222/" \
+            --collect.url="http://localhost:9222/graph" \
+            --collect.url="http://localhost:9222/catalog" \
+            --collect.url="http://localhost:9222/docs" \
+            --collect.numberOfRuns=3 \
+            --assert.assertions.first-contentful-paint="warn:maxNumericValue=3000" \
+            --assert.assertions.largest-contentful-paint="error:maxNumericValue=4000" \
+            --assert.assertions.cumulative-layout-shift="error:maxNumericValue=0.1" \
+            --assert.assertions.total-blocking-time="warn:maxNumericValue=300" \
+            --assert.assertions.resource-summary:script:size="warn:maxNumericValue=500000"
+        env:
+          NEXT_PUBLIC_STATIC_EXPORT: "false"
+          NEXTAUTH_SECRET: ci-lighthouse-not-for-production
+          NEXTAUTH_URL: http://localhost:9222
+          LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
+
+      - name: Upload Lighthouse reports
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: ui/.lighthouseci/
+          retention-days: 30
+
+  # -----------------------------------------------------------------------
+  # DSP TCK, DCP, EHDS domain and the full API collection on a fresh JAD
+  # stack, held to the floors in scripts/compliance-baseline.json.
+  # -----------------------------------------------------------------------
+  compliance:
+    name: Protocol Compliance
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    # The called workflow asks for id-token (its Azure job, which a nightly
+    # run never starts); a caller has to grant at least what it asks for.
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/compliance.yml
+    with:
+      target: local
+    secrets: inherit
+
+  # -----------------------------------------------------------------------
+  # A red night opens an issue, or comments on the open one; a green night
+  # closes it. Only for scheduled runs: a manual run is being watched.
+  # -----------------------------------------------------------------------
+  report:
+    name: Report the night
+    needs: [gate, e2e, lighthouse, compliance]
+    if: always() && github.event_name == 'schedule' && needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Open, comment on or close the nightly issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          E2E: ${{ needs.e2e.result }}
+          LIGHTHOUSE: ${{ needs.lighthouse.result }}
+          COMPLIANCE: ${{ needs.compliance.result }}
+        run: |
+          set -euo pipefail
+          title="Nightly suites failed"
+          open=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "\"$title\" in:title" --json number,title \
+            --jq "[.[] | select(.title == \"$title\")][0].number // \"\"")
+          results="E2E: $E2E, Lighthouse: $LIGHTHOUSE, Protocol Compliance: $COMPLIANCE"
+          body="$results. Commit ${GITHUB_SHA:0:8}, run $RUN_URL"
+          if [[ "$E2E $LIGHTHOUSE $COMPLIANCE" == *failure* ]]; then
+            if [ -n "$open" ]; then
+              gh issue comment "$open" --repo "$GITHUB_REPOSITORY" --body "Still red. $body"
+            else
+              gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --label bug \
+                --body "A suite of the nightly run failed (ADR-074). $body"
+            fi
+          elif [ -n "$open" ]; then
+            gh issue close "$open" --repo "$GITHUB_REPOSITORY" --comment "Green again. $body"
+          fi

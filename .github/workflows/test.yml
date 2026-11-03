@@ -5,10 +5,10 @@
 # Next.js UI and the services.
 #
 # Unit/API tests use vi.mock(): NO live Neo4j, EDC-V, or Keycloak needed.
-# The Playwright E2E suite runs in pages.yml (tests job), against a seeded
-# Neo4j. The copy that ran here had no Neo4j: 96 minutes, a quarter of the
-# tests failing, and continue-on-error on every step, so it could not fail
-# (#847).
+# The Playwright E2E suite and the Lighthouse budget run once a night in
+# nightly.yml (ADR-074, #847). An E2E copy that ran here had no Neo4j: 96
+# minutes, a quarter of the tests failing, and continue-on-error on every
+# step, so it could not fail.
 #
 # Triggers:
 #   - Push to a branch without a slash (in practice main)
@@ -661,76 +661,3 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
-
-  # -----------------------------------------------------------------------
-  # Performance Budget (Lighthouse CI) — Core Web Vitals enforcement
-  # -----------------------------------------------------------------------
-  lighthouse:
-    name: Performance Budget (Lighthouse)
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
-    defaults:
-      run:
-        working-directory: ./ui
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: ./ui/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build application
-        run: npm run build
-        env:
-          NEXT_PUBLIC_STATIC_EXPORT: "false"
-
-      - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli
-
-      # `next start` fails with `output: export` configuration; our
-      # next.config.js flips to static export whenever GITHUB_ACTIONS is
-      # set AND NEXT_PUBLIC_STATIC_EXPORT != "false". Set the env var on
-      # the lhci step so next.config.js (re-read when `next start`
-      # launches) keeps the standalone server output.
-      #
-      # Assertions are scoped to the explicit performance budgets that
-      # matter for Core Web Vitals — dropped the `lighthouse:recommended`
-      # preset because it asserts minScore=1 on quality signals (meta
-      # description, aria-allowed-role, bf-cache, errors-in-console,
-      # legacy-javascript, etc.) that are orthogonal to the performance
-      # budget this job gates. Those live-check items belong in the
-      # WCAG / accessibility / security jobs, not the perf budget.
-      - name: Run Lighthouse CI
-        run: |
-          lhci autorun \
-            --collect.startServerCommand="npx next start -p 9222" \
-            --collect.url="http://localhost:9222/" \
-            --collect.url="http://localhost:9222/graph" \
-            --collect.url="http://localhost:9222/catalog" \
-            --collect.url="http://localhost:9222/docs" \
-            --collect.numberOfRuns=3 \
-            --assert.assertions.first-contentful-paint="warn:maxNumericValue=3000" \
-            --assert.assertions.largest-contentful-paint="error:maxNumericValue=4000" \
-            --assert.assertions.cumulative-layout-shift="error:maxNumericValue=0.1" \
-            --assert.assertions.total-blocking-time="warn:maxNumericValue=300" \
-            --assert.assertions.resource-summary:script:size="warn:maxNumericValue=500000"
-        env:
-          NEXT_PUBLIC_STATIC_EXPORT: "false"
-          NEXTAUTH_SECRET: ci-lighthouse-not-for-production
-          NEXTAUTH_URL: http://localhost:9222
-          LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
-
-      - name: Upload Lighthouse reports
-        uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: lighthouse-reports
-          path: ui/.lighthouseci/
-          retention-days: 30
