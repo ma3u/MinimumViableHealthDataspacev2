@@ -96,22 +96,22 @@ const STATIC_MOCK_PREFIX: [string, string][] = [
   ["/api/participants/", "/mock/credentials.json"],
 ];
 
-/** Check if the current demo persona is a PATIENT role (static mode only). */
-function isPatientPersona(): boolean {
-  if (typeof window === "undefined") return false;
+/** The demo patient persona in use, if any (static mode only). */
+function patientPersona(): "patient1" | "patient2" | null {
+  if (typeof window === "undefined") return null;
   try {
     const raw = localStorage.getItem("demo-persona");
-    return raw === "patient1" || raw === "patient2";
+    return raw === "patient1" || raw === "patient2" ? raw : null;
   } catch {
-    return false;
+    return null;
   }
 }
 
 function resolveMockPath(endpoint: string): string {
   // PATIENT role restriction: return restricted patient data (own record only)
-  if (endpoint === "/api/patient" && isPatientPersona()) {
-    return "/mock/patient_restricted.json";
-  }
+  const persona = endpoint === "/api/patient" ? patientPersona() : null;
+  if (persona === "patient2") return "/mock/patient_restricted_patient2.json";
+  if (persona === "patient1") return "/mock/patient_restricted.json";
 
   const exact = STATIC_MOCK_MAP[endpoint];
   if (exact) return exact;

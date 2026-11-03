@@ -114,6 +114,28 @@ describe("fetchApi", () => {
       );
     });
 
+    it.each([
+      ["patient1", "patient_restricted.json"],
+      ["patient2", "patient_restricted_patient2.json"],
+    ])(
+      "should give the %s persona its own record from /api/patient",
+      async (persona, file) => {
+        vi.stubEnv("NEXT_PUBLIC_STATIC_EXPORT", "true");
+        localStorage.setItem("demo-persona", persona);
+
+        mockFetch.mockResolvedValue(new Response("{}"));
+
+        const { fetchApi } = await import("@/lib/api");
+        await fetchApi("/api/patient");
+        localStorage.removeItem("demo-persona");
+
+        expect(mockFetch).toHaveBeenCalledWith(
+          `/MinimumViableHealthDataspacev2/mock/${file}`,
+          undefined,
+        );
+      },
+    );
+
     it("should route /api/analytics to /mock/analytics.json", async () => {
       vi.stubEnv("NEXT_PUBLIC_STATIC_EXPORT", "true");
 
