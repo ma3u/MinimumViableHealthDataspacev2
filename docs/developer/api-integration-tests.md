@@ -8,11 +8,11 @@ numbers measured on 2026-11-03.
 
 ## The three suites
 
-| Suite                 | What it calls                                                        | Run it with                                | Runs in CI                                                                        |
-| --------------------- | -------------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------- |
-| Bruno collection      | the hub's `/api/*` routes, plus the EDC services and the Neo4j proxy | `./scripts/run-api-tests.sh <environment>` | `bruno-smoke.yml` (PRs), `compliance.yml` (main, weekly), `demo-smoke.yml` (live) |
-| EHDS dataspace checks | the EDC control plane's Management API and DSP 2025-1 endpoints      | `./scripts/run-ehds-dataspace-checks.sh`   | `compliance.yml`, job "DSP 2025-1 TCK"                                            |
-| EHDS identity checks  | IdentityHub, IssuerService and the control plane (DCP 1.0)           | `./scripts/run-ehds-identity-checks.sh`    | `compliance.yml`, job "DCP v1.0 Compliance"                                       |
+| Suite                 | What it calls                                                        | Run it with                                | Runs in CI                                                                   |
+| --------------------- | -------------------------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------- |
+| Bruno collection      | the hub's `/api/*` routes, plus the EDC services and the Neo4j proxy | `./scripts/run-api-tests.sh <environment>` | `bruno-smoke.yml` (PRs), `compliance.yml` (nightly), `demo-smoke.yml` (live) |
+| EHDS dataspace checks | the EDC control plane's Management API and DSP 2025-1 endpoints      | `./scripts/run-ehds-dataspace-checks.sh`   | `compliance.yml`, job "DSP 2025-1 TCK"                                       |
+| EHDS identity checks  | IdentityHub, IssuerService and the control plane (DCP 1.0)           | `./scripts/run-ehds-identity-checks.sh`    | `compliance.yml`, job "DCP v1.0 Compliance"                                  |
 
 A fourth suite, `scripts/run-ehds-tests.sh`, checks the health domain in the
 graph (FHIR, OMOP, HealthDCAT-AP, the access chain of Art. 53) through Neo4j

@@ -241,10 +241,12 @@ repos:
 
       # A workflow whose paths filter misses a script it runs stops re-running
       # when that script is fixed, and the last, stale, result stands.
+      # compliance.yml left the list with ADR-074: nightly.yml runs it after any
+      # change to main, so it has no paths filter to keep complete.
       - id: workflow-paths
         name: Workflows re-run when what they run changes
         language: system
-        entry: python3 scripts/check-workflow-paths.py .github/workflows/bruno-smoke.yml .github/workflows/catalog-crawler.yml .github/workflows/compliance.yml .github/workflows/demo-smoke.yml .github/workflows/security-scan.yml
+        entry: python3 scripts/check-workflow-paths.py .github/workflows/bruno-smoke.yml .github/workflows/catalog-crawler.yml .github/workflows/demo-smoke.yml .github/workflows/security-scan.yml
         files: ^(\.github/workflows/.*\.ya?ml|scripts/.*|jad/.*|ui/scripts/.*)$
         pass_filenames: false
         stages: [pre-commit]

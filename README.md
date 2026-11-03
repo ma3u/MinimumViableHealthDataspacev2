@@ -648,7 +648,7 @@ Coverage reports and Playwright HTML reports are uploaded as GitHub Actions arti
 | EHDS User Journey     | [docs/FULL_USER_JOURNEY.md](docs/FULL_USER_JOURNEY.md)                                                             |
 
 > **Note:** `test-reports/` and `ci-e2e-report/` are generated during CI only
-> (by `pages.yml`). The committed `e2e-report/` in `ui/public/` is the source
+> (by `nightly.yml`, published by `pages.yml`). The committed `e2e-report/` in `ui/public/` is the source
 > of truth for the live Playwright report — it includes results from both
 > chromium and live (JAD stack) test projects.
 

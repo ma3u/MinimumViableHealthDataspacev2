@@ -144,7 +144,7 @@ def main(argv: list[str]) -> int:
         rel = workflow.relative_to(REPO)
         globs = globs_of(workflow)
         if not globs:
-            print(f"  ~ {rel}: no on.push.paths filter, so every push runs it")
+            print(f"  ~ {rel}: no on.push.paths filter, nothing to check")
             continue
         patterns = [to_regex(g) for g in globs]
         deps = dependencies(workflow)
