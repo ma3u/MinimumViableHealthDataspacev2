@@ -234,7 +234,8 @@ async function main(): Promise<number> {
       // it compares the evidence with. Everything is checked before the
       // first call, so a bad file changes nothing.
       const attestationPolicy = values["attestation-policy"] as
-        string | undefined;
+        | string
+        | undefined;
       if (attestationPolicy && !existsSync(attestationPolicy))
         throw new Error(`no attestation policy file ${attestationPolicy}`);
       const rvArg = values["reference-values"] as string | undefined;
