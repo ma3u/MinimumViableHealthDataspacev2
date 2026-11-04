@@ -91,6 +91,11 @@ DOCS = [
      "A glossary of the stack (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, the "
      "proxy, the catalogue services) and how it fits together; prerequisites, the two local stacks, "
      "seed phases, ports, environment variables, the iPhone app and the day-one gotchas."),
+    ("developer", "secure-processing-environment", "docs/developer/secure-processing-environment.md",
+     "How the hub builds the secure processing environment of Art. 73 from confidential containers: "
+     "the two SPE workspaces on ACI with AMD SEV-SNP, the Trustee the access body runs, how a "
+     "workspace earns its key, what a federated query goes through, how to run it on a laptop and "
+     "what is not done yet."),
     ("security", "security-test-report", "docs/security/security-test-report-2026-10-15.md",
      "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, the app's posture "
      "tests and the anonymous black-box checks of the live hub; findings F1 to F10 with their "
@@ -247,10 +252,26 @@ def parse_frontmatter(text):
         if not sep:
             continue
         value = value.strip()
-        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+        if len(value) >= 2 and value[0] == value[-1] == '"':
+            try:
+                value = json.loads(value)
+            except ValueError:
+                value = value[1:-1]
+        elif len(value) >= 2 and value[0] == value[-1] == "'":
             value = value[1:-1]
         meta[key.strip()] = value
     return meta, text[m.end():]
+
+
+# A value plain YAML would read as something else: a mapping (": "), a
+# comment (" #"), a flow or block indicator up front, or edge whitespace.
+NEEDS_QUOTES = re.compile(r":\s|\s#|^[-?:,\[\]{}#&*!|>'\"%@`]|^\s|\s$|^$")
+
+
+def frontmatter_value(value):
+    """The value as it goes back into the frontmatter, double-quoted (JSON
+    escapes are valid YAML) when it would not survive as a plain scalar."""
+    return json.dumps(value, ensure_ascii=False) if NEEDS_QUOTES.search(value) else value
 
 
 def translation_path(lang, source):
@@ -389,7 +410,7 @@ def stamp(paths):
         lang, src = by_rel[rel]
         with open(full, encoding="utf-8") as f:
             meta, body = parse_frontmatter(f.read())
-        extra = "".join(f"{k}: {v}\n" for k, v in (meta or {}).items()
+        extra = "".join(f"{k}: {frontmatter_value(v)}\n" for k, v in (meta or {}).items()
                         if k not in ("source", "sourceHash", "language"))
         head = f"---\nsource: {src}\nsourceHash: {sha256_of(src)}\nlanguage: {lang}\n{extra}---\n\n"
         with open(full, "w", encoding="utf-8") as f:
