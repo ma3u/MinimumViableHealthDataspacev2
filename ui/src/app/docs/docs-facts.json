@@ -1202,6 +1202,12 @@
       "file": "ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md",
       "title": "E2E, compliance and performance suites run nightly when main changed, not on every push",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-075",
+      "file": "ADR-075-a-minor-release-every-month.md",
+      "title": "A minor release every month, starting with v2.1.0",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
@@ -1294,7 +1300,7 @@
     "/docs/developer/api": "2026-11-02",
     "/docs/developer/reference": "2026-11-04",
     "/docs/developer/[slug]": "2026-11-04",
-    "/docs/architecture": "2026-11-03",
+    "/docs/architecture": "2026-11-04",
     "/docs/security": "2026-11-04",
     "/docs/security/[slug]": "2026-11-04",
     "/docs/klarbefund": "2026-11-04",
