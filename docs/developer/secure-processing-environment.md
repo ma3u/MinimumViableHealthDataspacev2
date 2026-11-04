@@ -243,10 +243,6 @@ themselves: `--extracts` refuses to re-key while Trustee holds keys unless
   containers were also being retired by Microsoft (ADR-068).
 - **Not decided** (ADR-068): which EU provider hosts the per-workload case
   outside Azure, and Trustee in a subscription of its own.
-- **Stale text.** The runbook's off-hours section still says the groups
-  start in the morning, which ADR-072 changed; and
-  [the EHDS implementation table](../ehds/regulation-implementation.md)
-  still calls the SPE "a query proxy", which predates ADR-069.
 
 Issues: [#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774)
 (the Azure deployment), [#27](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/27),
