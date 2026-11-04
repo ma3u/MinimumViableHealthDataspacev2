@@ -974,16 +974,16 @@
           "en": "And to start the discussion, three questions."
         },
         {
-          "es": "¿Qué uno o dos casos de uso mostrarían valor primero?",
-          "eu": "Zein erabilera-kasu batek edo bik erakutsiko lukete balioa lehenik?",
+          "es": "¿Cuáles son los dos primeros casos de uso que demostrarían valor?",
+          "eu": "Zein dira balioa erakutsiko luketen lehen bi erabilera-kasuak?",
           "frag": 1,
-          "en": "Which one or two use cases would show value first?"
+          "en": "What are the first two use cases that would demonstrate value?"
         },
         {
-          "es": "¿Quién fijará las reglas, y quién operará los servicios?",
-          "eu": "Nork finkatuko ditu arauak, eta nork kudeatuko ditu zerbitzuak?",
+          "es": "¿Quién fijará las reglas y quién operará los servicios?",
+          "eu": "Nork finkatuko ditu arauak eta nork kudeatuko ditu zerbitzuak?",
           "frag": 2,
-          "en": "Who will set the rules, and who will run the services?"
+          "en": "Who will set the rules, and who will operate the services?"
         },
         {
           "es": "¿Qué hospitales se unirían al primer grupo de trabajo?",
