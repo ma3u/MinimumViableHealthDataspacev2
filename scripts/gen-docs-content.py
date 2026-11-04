@@ -91,6 +91,11 @@ DOCS = [
      "A glossary of the stack (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, the "
      "proxy, the catalogue services) and how it fits together; prerequisites, the two local stacks, "
      "seed phases, ports, environment variables, the iPhone app and the day-one gotchas."),
+    ("developer", "secure-processing-environment", "docs/developer/secure-processing-environment.md",
+     "How the hub builds the secure processing environment of Art. 73 from confidential containers: "
+     "the two SPE workspaces on ACI with AMD SEV-SNP, the Trustee the access body runs, how a "
+     "workspace earns its key, what a federated query goes through, how to run it on a laptop and "
+     "what is not done yet."),
     ("security", "security-test-report", "docs/security/security-test-report-2026-10-15.md",
      "CodeQL, Semgrep, grype, npm audit, trivy, gitleaks, hadolint, shellcheck, the app's posture "
      "tests and the anonymous black-box checks of the live hub; findings F1 to F10 with their "

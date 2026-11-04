@@ -292,6 +292,8 @@
   "The Bruno collection and the dataspace and identity checks: how to run them, and how current they are.": "De Bruno-collectie en de controles van de dataruimte en de identiteit: hoe je ze uitvoert en hoe actueel ze zijn.",
   "The stack and the development environment": "De stack en de ontwikkelomgeving",
   "EDC-V, JAD, CFM, DSP, DCP and the hub's own services in one glossary; the local stacks, the seed phases, the ports and the iPhone app.": "EDC-V, JAD, CFM, DSP, DCP en de eigen diensten van de hub in één woordenlijst; de lokale stacks, de seedfasen, de poorten en de iPhone-app.",
+  "The secure processing environment": "De beveiligde verwerkingsomgeving",
+  "Confidential containers with AMD SEV-SNP, the Trustee that releases a workspace's key only to the workload its permit names, and what a federated query goes through.": "Confidential containers met AMD SEV-SNP, de Trustee die de sleutel van een werkruimte alleen vrijgeeft aan de workload die de vergunning noemt, en wat een gefedereerde query doorloopt.",
   "Contributing": "Bijdragen",
   "Fork, branch, pull request: the short guide for outside contributors, under the Apache License 2.0, with fictional organisations only.": "Fork, branch, pull request: de korte handleiding voor externe bijdragers, onder de Apache License 2.0, alleen met fictieve organisaties.",
   "Klarbefund iPhone app, an overview per persona, the access body's tasks, compliance suites that can fail": "iPhone-app Klarbefund, een overzicht per persona, de taken van de instantie voor toegang tot gezondheidsgegevens, compliancesuites die kunnen falen",

@@ -292,6 +292,8 @@
   "The Bruno collection and the dataspace and identity checks: how to run them, and how current they are.": "La colección Bruno y las comprobaciones del espacio de datos y de identidad: cómo ejecutarlas y lo actualizadas que están.",
   "The stack and the development environment": "La pila y el entorno de desarrollo",
   "EDC-V, JAD, CFM, DSP, DCP and the hub's own services in one glossary; the local stacks, the seed phases, the ports and the iPhone app.": "EDC-V, JAD, CFM, DSP, DCP y los servicios propios del hub en un glosario; las pilas locales, las fases de carga, los puertos y la app de iPhone.",
+  "The secure processing environment": "El entorno de tratamiento seguro",
+  "Confidential containers with AMD SEV-SNP, the Trustee that releases a workspace's key only to the workload its permit names, and what a federated query goes through.": "Contenedores confidenciales con AMD SEV-SNP, el Trustee que solo entrega la clave de un espacio de trabajo a la carga de trabajo que nombra su permiso, y lo que atraviesa una consulta federada.",
   "Contributing": "Contribuir",
   "Fork, branch, pull request: the short guide for outside contributors, under the Apache License 2.0, with fictional organisations only.": "Fork, rama, pull request: la guía breve para contribuidores externos, bajo la Apache License 2.0, solo con organizaciones ficticias.",
   "Klarbefund iPhone app, an overview per persona, the access body's tasks, compliance suites that can fail": "App de iPhone Klarbefund, una vista general por persona, las tareas del organismo de acceso a datos de salud, suites de cumplimiento que pueden fallar",
