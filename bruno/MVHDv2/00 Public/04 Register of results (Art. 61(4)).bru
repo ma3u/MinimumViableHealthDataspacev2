@@ -13,6 +13,13 @@ get {
 assert {
   res.status: eq 200
   res.body.results: isArray
+  res.body.article: contains 2025/327
+}
+
+tests {
+  test("results is not empty", function () {
+    expect(res.getBody().results).to.not.be.empty;
+  });
 }
 
 docs {

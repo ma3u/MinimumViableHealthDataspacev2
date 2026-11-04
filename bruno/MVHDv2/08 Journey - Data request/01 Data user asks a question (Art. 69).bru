@@ -30,6 +30,7 @@ assert {
   res.status: eq 201
   res.body.requestId: isDefined
   res.body.status: isDefined
+  res.body.status: eq PENDING
 }
 
 tests {

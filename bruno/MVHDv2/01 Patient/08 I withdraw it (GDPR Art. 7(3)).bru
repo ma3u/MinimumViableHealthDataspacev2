@@ -16,4 +16,5 @@ headers {
 
 assert {
   res.status: eq 200
+  res.body.revoked: eq true
 }

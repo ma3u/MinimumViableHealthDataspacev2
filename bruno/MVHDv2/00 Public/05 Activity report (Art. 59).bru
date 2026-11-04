@@ -15,4 +15,11 @@ assert {
   res.body.article: isDefined
   res.body.accessBodies: isArray
   res.body.items: isDefined
+  res.body.article: contains 2025/327
+}
+
+tests {
+  test("accessBodies is not empty", function () {
+    expect(res.getBody().accessBodies).to.not.be.empty;
+  });
 }

@@ -16,6 +16,12 @@ assert {
   res.body.articles: isDefined
 }
 
+tests {
+  test("entries is not empty", function () {
+    expect(res.getBody().entries).to.not.be.empty;
+  });
+}
+
 docs {
   Every permit the access body issued, with its purpose, its dataset and its conditions.
 }

@@ -13,4 +13,11 @@ get {
 assert {
   res.status: eq 200
   res.body: isJson
+  res.body.primaryLabel: eq Participant
+}
+
+tests {
+  test("labels is not empty", function () {
+    expect(res.getBody().labels).to.not.be.empty;
+  });
 }

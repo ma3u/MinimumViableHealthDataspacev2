@@ -15,3 +15,9 @@ assert {
   res.body.patients: isArray
   res.body.stats: isDefined
 }
+
+tests {
+  test("patients is not empty", function () {
+    expect(res.getBody().patients).to.not.be.empty;
+  });
+}

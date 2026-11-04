@@ -21,6 +21,12 @@ assert {
   res.body.permit: isDefined
 }
 
+tests {
+  test("topConditions is not empty", function () {
+    expect(res.getBody().topConditions).to.not.be.empty;
+  });
+}
+
 docs {
   The dashboard carries the permit it was computed under; analytics with no permit behind it is the failure this guards against.
 }

@@ -19,4 +19,11 @@ assert {
   res.body.permissions: isArray
   res.body.prohibitions: isArray
   res.body.participantId: isDefined
+  res.body.participantId: eq did:web:pharmaco.de:research
+}
+
+tests {
+  test("permissions is not empty", function () {
+    expect(res.getBody().permissions).to.not.be.empty;
+  });
 }

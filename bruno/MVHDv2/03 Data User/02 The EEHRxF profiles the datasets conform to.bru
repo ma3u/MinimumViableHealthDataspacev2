@@ -19,3 +19,9 @@ assert {
   res.body.categories: isArray
   res.body.summary: isDefined
 }
+
+tests {
+  test("categories is not empty", function () {
+    expect(res.getBody().categories).to.not.be.empty;
+  });
+}

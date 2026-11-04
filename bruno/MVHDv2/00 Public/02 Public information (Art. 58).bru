@@ -17,6 +17,16 @@ assert {
   res.body.access: isArray
   res.body.optOut: isDefined
   res.body.fees: isDefined
+  res.body.article: contains 2025/327
+}
+
+tests {
+  test("bodies is not empty", function () {
+    expect(res.getBody().bodies).to.not.be.empty;
+  });
+  test("access is not empty", function () {
+    expect(res.getBody().access).to.not.be.empty;
+  });
 }
 
 docs {
