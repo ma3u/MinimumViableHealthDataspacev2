@@ -15,3 +15,12 @@ assert {
   res.body.nodes: isArray
   res.body.links: isArray
 }
+
+tests {
+  test("nodes is not empty", function () {
+    expect(res.getBody().nodes).to.not.be.empty;
+  });
+  test("links is not empty", function () {
+    expect(res.getBody().links).to.not.be.empty;
+  });
+}

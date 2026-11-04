@@ -17,4 +17,11 @@ headers {
 assert {
   res.status: eq 200
   res.body: isJson
+  res.body.graphragReady: eq true
+}
+
+tests {
+  test("cascade is not empty", function () {
+    expect(res.getBody().cascade).to.not.be.empty;
+  });
 }

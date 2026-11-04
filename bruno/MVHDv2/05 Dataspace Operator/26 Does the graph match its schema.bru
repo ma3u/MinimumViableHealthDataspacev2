@@ -15,3 +15,9 @@ assert {
   res.body.summary: isDefined
   res.body.nodeCounts: isDefined
 }
+
+tests {
+  test("nodeCounts is not empty", function () {
+    expect(res.getBody().nodeCounts).to.not.be.empty;
+  });
+}

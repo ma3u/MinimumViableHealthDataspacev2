@@ -18,4 +18,11 @@ assert {
   res.status: eq 200
   res.body.applications: isArray
   res.body.scope: isDefined
+  res.body.scope: eq own
+}
+
+tests {
+  test("applications is not empty", function () {
+    expect(res.getBody().applications).to.not.be.empty;
+  });
 }

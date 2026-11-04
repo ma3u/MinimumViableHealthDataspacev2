@@ -25,4 +25,7 @@ tests {
     const mine = rows.find((r) => JSON.stringify(r).includes("alpha-klinik")) || rows[0];
     if (mine) bru.setVar("uiParticipantId", mine.participantId || mine.identity);
   });
+  test("the answer is not empty", function () {
+    expect(res.getBody()).to.not.be.empty;
+  });
 }

@@ -18,3 +18,9 @@ assert {
   res.status: eq 200
   res.body: isJson
 }
+
+tests {
+  test("templates is not empty", function () {
+    expect(res.getBody().templates).to.not.be.empty;
+  });
+}

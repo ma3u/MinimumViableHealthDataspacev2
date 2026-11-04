@@ -65,6 +65,25 @@ if [ "$ENV_NAME" != "Static-mock" ]; then
     ENV_VARS+=(--env-var "$var=$value")
   done
   echo "[bruno] forged 5 persona sessions for $ENV_NAME (cookie $COOKIE_NAME, 8h)"
+
+  # One request with the operator's session before the collection runs. A
+  # refused session turns every gated request into a 401, and a hundred 401s
+  # hide the one cause (#839): say it once and stop.
+  BASE_URL="$(sed -n 's/^[[:space:]]*baseUrl:[[:space:]]*//p' "$COLLECTION/environments/$ENV_NAME.bru" | head -1)"
+  admin="${ENV_VARS[1]#sessionToken=}"
+  probe="$(curl -s -o /dev/null -w '%{http_code}' -m 30 \
+    -H "Cookie: $COOKIE_NAME=$admin" "$BASE_URL/api/participants/me" || true)"
+  unset admin
+  if [ "$probe" = "401" ]; then
+    echo "[bruno] $BASE_URL refused the forged operator session (401 on /api/participants/me)." >&2
+    echo "[bruno] Either NEXTAUTH_SECRET is not the one $ENV_NAME signs with, or the cookie does not" >&2
+    echo "[bruno] reach the hub (docs/gotchas.md, 2026-11-03). Not running the collection." >&2
+    exit 2
+  fi
+  case "$probe" in
+    2??) echo "[bruno] $BASE_URL accepts the forged sessions (HTTP $probe on /api/participants/me)" ;;
+    *) echo "[bruno] $BASE_URL answered HTTP $probe to the session check; running the collection anyway" ;;
+  esac
 fi
 
 # what to run

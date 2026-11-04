@@ -15,3 +15,9 @@ assert {
   res.body.participants: isArray
   res.body.summary: isDefined
 }
+
+tests {
+  test("participants is not empty", function () {
+    expect(res.getBody().participants).to.not.be.empty;
+  });
+}

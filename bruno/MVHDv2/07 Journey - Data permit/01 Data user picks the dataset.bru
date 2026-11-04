@@ -26,4 +26,7 @@ tests {
     expect(omop, "the catalogue is empty; seed the graph first").to.not.equal(undefined);
     bru.setVar("datasetId", omop.id);
   });
+  test("the answer is not empty", function () {
+    expect(res.getBody()).to.not.be.empty;
+  });
 }

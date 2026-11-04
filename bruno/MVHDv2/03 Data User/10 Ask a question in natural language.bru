@@ -24,4 +24,11 @@ body:json {
 assert {
   res.status: eq 200
   res.body: isJson
+  res.body.odrlEnforced: eq true
+}
+
+tests {
+  test("results is not empty", function () {
+    expect(res.getBody().results).to.not.be.empty;
+  });
 }
