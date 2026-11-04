@@ -1230,7 +1230,7 @@
       "max_failed": 0
     },
     "bruno-api-results": {
-      "min_passed": 179,
+      "min_passed": 192,
       "max_failed": 0
     },
     "bruno-api-azure-results": {
