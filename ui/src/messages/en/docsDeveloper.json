@@ -292,6 +292,8 @@
   "The Bruno collection and the dataspace and identity checks: how to run them, and how current they are.": "The Bruno collection and the dataspace and identity checks: how to run them, and how current they are.",
   "The stack and the development environment": "The stack and the development environment",
   "EDC-V, JAD, CFM, DSP, DCP and the hub's own services in one glossary; the local stacks, the seed phases, the ports and the iPhone app.": "EDC-V, JAD, CFM, DSP, DCP and the hub's own services in one glossary; the local stacks, the seed phases, the ports and the iPhone app.",
+  "The secure processing environment": "The secure processing environment",
+  "Confidential containers with AMD SEV-SNP, the Trustee that releases a workspace's key only to the workload its permit names, and what a federated query goes through.": "Confidential containers with AMD SEV-SNP, the Trustee that releases a workspace's key only to the workload its permit names, and what a federated query goes through.",
   "Contributing": "Contributing",
   "Fork, branch, pull request: the short guide for outside contributors, under the Apache License 2.0, with fictional organisations only.": "Fork, branch, pull request: the short guide for outside contributors, under the Apache License 2.0, with fictional organisations only.",
   "Klarbefund iPhone app, an overview per persona, the access body's tasks, compliance suites that can fail": "Klarbefund iPhone app, an overview per persona, the access body's tasks, compliance suites that can fail",

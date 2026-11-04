@@ -397,6 +397,13 @@ export default function DeveloperGuidePage() {
                   "EDC-V, JAD, CFM, DSP, DCP and the hub's own services in one glossary; the local stacks, the seed phases, the ports and the iPhone app.",
                 ),
               },
+              {
+                href: "/docs/developer/secure-processing-environment",
+                title: t("The secure processing environment"),
+                desc: t(
+                  "Confidential containers with AMD SEV-SNP, the Trustee that releases a workspace's key only to the workload its permit names, and what a federated query goes through.",
+                ),
+              },
             ].map((card) => (
               <Link
                 key={card.href}
