@@ -1,5 +1,11 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+
+# A plain `pre-commit install` installs both stages. Without this it installs
+# only the commit hooks, and the push hooks (Vitest, npm audit, the iPhone
+# app's checks) silently never ran for anyone who forgot --hook-type pre-push.
+default_install_hook_types: [pre-commit, pre-push]
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
@@ -78,6 +84,22 @@ repos:
         language: system
         entry: bash -c 'cd ui && npx vitest run --bail 1'
         files: ^ui/(src|__tests__)/.*\.(ts|tsx)$
+        pass_filenames: false
+        stages: [pre-push]
+
+  # The analyte parity check before a push that changes the iPhone app's
+  # shared code (#847). GitHub runs it in test.yml on a macOS runner, the
+  # scarcest kind (five at once); here it takes seconds after the first build
+  # (about two minutes). It covers the generated table too, which
+  # services/epa-ingest regenerates from analytes.ts. It skips with a warning
+  # where there is no macOS or Swift.
+  - repo: local
+    hooks:
+      - id: ios-analyte-parity
+        name: iPhone app analyte parity (swift run AnalyteParity)
+        language: system
+        entry: 'bash -c ''if [ "$(uname)" != Darwin ] || ! command -v swift >/dev/null 2>&1; then echo "[WARN] ios-analyte-parity skipped: needs macOS and Swift"; exit 0; fi; cd clients/ios && swift run AnalyteParity'''
+        files: ^clients/ios/(Sources/Shared/.*\.swift|Tools/AnalyteParity/.*|Package\.swift)$
         pass_filenames: false
         stages: [pre-push]
 

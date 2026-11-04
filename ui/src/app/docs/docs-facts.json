@@ -508,6 +508,12 @@
       "stage": "pre-push"
     },
     {
+      "id": "ios-analyte-parity",
+      "name": "iPhone app analyte parity (swift run AnalyteParity)",
+      "source": "local",
+      "stage": "pre-push"
+    },
+    {
       "id": "codeql-swift",
       "name": "CodeQL on the iPhone app (Swift, about 15 min)",
       "source": "local",

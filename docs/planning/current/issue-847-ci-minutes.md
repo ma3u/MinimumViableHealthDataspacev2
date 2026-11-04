@@ -118,7 +118,7 @@ advisories arrive without a commit.
   pushes to main, unlike the plan: it keeps the Security tab's Trivy
   analysis and the per-commit SBOM current. The first scheduled nightly,
   2026-11-04, was green in every suite.
-- PR 4 in review: `cache-cleanup.yml` runs
+- PR 4 merged 2026-11-04 in #867: `cache-cleanup.yml` runs
   `scripts/prune-actions-caches.py` daily. It deletes the caches of closed
   pull requests and, for CodeQL overlay databases, Next.js builds,
   Playwright and Trivy, every entry but the newest per ref and family. Its
@@ -128,6 +128,13 @@ advisories arrive without a commit.
   `docs/`, Markdown or `clients/ios/`. The SwiftPM cache for iOS parity is
   left out: the job runs only when the app changes since PR 1, and a stale
   `.build` is a source of failures that a cold build does not have.
+  The first run deleted 65 of 86 caches; 3.1 GB stayed.
+- Developer side, in review: the `ios-analyte-parity` pre-push hook (seconds
+  once built, about two minutes cold), `default_install_hook_types` so a
+  plain `pre-commit install` also installs the push hooks, and the advice to
+  run `npm run test:e2e` locally before merging a UI change (SDLC 5,
+  CONTRIBUTING). The plan's `--hook-type commit-msg` was dropped: no hook
+  uses that stage.
 
 ## Nothing required is turned off
 

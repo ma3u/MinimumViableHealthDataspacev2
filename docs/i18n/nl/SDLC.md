@@ -1,6 +1,6 @@
 ---
 source: docs/SDLC.md
-sourceHash: 071e1c59635be69309452117b146741614bfe85cbcb97198fc92a8eb8621e797
+sourceHash: 1ab7a255491409059a340cdbbb5d347ddee53abab8a6e8fae702ba9070ea11aa
 language: nl
 summary: "Hoe een wijziging de live hub bereikt: discussies en issues, branches en pull requests, elke pre-commit- en pre-push-hook met de oplossing ervan, de PR Gate en de andere workflows, de deploys naar Azure en GitHub Pages, releases, hoe u van buitenaf bijdraagt, en hoe u een SDLC definieert voor een DevSecOps- en AI-project, met de tools voor elke fase."
 ---
@@ -223,7 +223,8 @@ uitvoert.
 
 [`.pre-commit-config.yaml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.pre-commit-config.yaml),
 uitgevoerd door het [pre-commit-framework](https://pre-commit.com/). Installeer beide
-fasen eenmaal per clone:
+fasen eenmaal per clone (sinds #847 doet een gewone `pre-commit install` hetzelfde,
+via `default_install_hook_types`):
 
 ```bash
 pip install pre-commit
@@ -274,23 +275,30 @@ opnieuw, en controleer daarna of `HEAD` is verschoven: een mislukte commit laat 
 | `actionlint`                                                              | GitHub Actions-workflows                                                                                                                                                          | herstel de workflow die hij noemt                                                                                                                                                            |
 | `image-scan-coverage`                                                     | de CVE-scan in `security-scan.yml` dekt elke image in de compose-bestanden                                                                                                        | voeg de image toe aan de scanmatrix                                                                                                                                                          |
 
-### 5.2 Bij het pushen: 3 hooks
+### 5.2 Bij het pushen: 4 hooks
 
-| Hook (id)      | Wat hij doet                                                                                                            | Wanneer hij faalt                                                                                                                                                     |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vitest-ui`    | de hele UI-suite, `vitest run --bail 1`, wanneer de push `ui/src` of `ui/__tests__` wijzigt                             | `cd ui && npx vitest run <file>` voor het falende bestand. Een hook die een mock reset, gebruikt accolades: `beforeEach(() => { m.mockReset(); })`                    |
-| `npm-audit-ui` | `scripts/check-npm-audit.py ui --omit=dev`: geen HIGH- of CRITICAL-advisory in productieafhankelijkheden                | werk de afhankelijkheid bij; wanneer er geen fix bestaat, een tijdgebonden vermelding in `docs/npm-audit-exceptions.json` met een reden, een issue en een vervaldatum |
-| `codeql-swift` | CodeQL op de iPhone-app wanneer Swift-bronnen, `Package.swift` of `project.yml` veranderen (ongeveer 15 minuten, macOS) | herstel de bevinding, of accepteer haar met haar reden in `clients/ios/Scripts/codeql-accepted.txt`; `SKIP=codeql-swift git push` slaat haar eenmalig over            |
+| Hook (id)            | Wat hij doet                                                                                                                                                   | Wanneer hij faalt                                                                                                                                                                                         |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vitest-ui`          | de hele UI-suite, `vitest run --bail 1`, wanneer de push `ui/src` of `ui/__tests__` wijzigt                                                                    | `cd ui && npx vitest run <file>` voor het falende bestand. Een hook die een mock reset, gebruikt accolades: `beforeEach(() => { m.mockReset(); })`                                                        |
+| `npm-audit-ui`       | `scripts/check-npm-audit.py ui --omit=dev`: geen HIGH- of CRITICAL-advisory in productieafhankelijkheden                                                       | werk de afhankelijkheid bij; wanneer er geen fix bestaat, een tijdgebonden vermelding in `docs/npm-audit-exceptions.json` met een reden, een issue en een vervaldatum                                     |
+| `ios-analyte-parity` | `swift run AnalyteParity` wanneer de gedeelde Swift-code van de app, de gegenereerde analyttabel of `Package.swift` veranderen (seconden zodra gebouwd, macOS) | de Swift-tabel herleidt een label of eenheid anders dan `analytes.ts`: genereer opnieuw met `npm run generate:swift` in `services/epa-ingest`, of herstel de normalisatie in `clients/ios/Sources/Shared` |
+| `codeql-swift`       | CodeQL op de iPhone-app wanneer Swift-bronnen, `Package.swift` of `project.yml` veranderen (ongeveer 15 minuten, macOS)                                        | herstel de bevinding, of accepteer haar met haar reden in `clients/ios/Scripts/codeql-accepted.txt`; `SKIP=codeql-swift git push` slaat haar eenmalig over                                                |
 
 [Quality Gates](./quality-gates.md) en de
 [pagina over de kwaliteitspoorten](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/developer/quality-gates)
 bevatten de dekkingscijfers en de poorten die nog moeten komen.
 
+E2E, de WCAG-audit en de pentest-specs draaien niet meer bij elke push, maar
+één keer per nacht wanneer `main` veranderd is
+([ADR-074](./ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md)).
+Voordat u een wijziging aan UI-pagina's of hun API-routes merget, draait u ze
+tegen de compose-stack: `docker compose up -d`, dan `cd ui && npm run test:e2e`.
+
 ---
 
 ## 6. De controles op GitHub
 
-`.github/workflows/` bevat 37 workflows. Alleen de **PR Gate** blokkeert een merge.
+`.github/workflows/` bevat 39 workflows. Alleen de **PR Gate** blokkeert een merge.
 
 ### 6.1 PR Gate: de verplichte controle
 

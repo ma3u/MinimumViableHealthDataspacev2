@@ -1,6 +1,6 @@
 ---
 source: docs/SDLC.md
-sourceHash: 071e1c59635be69309452117b146741614bfe85cbcb97198fc92a8eb8621e797
+sourceHash: 1ab7a255491409059a340cdbbb5d347ddee53abab8a6e8fae702ba9070ea11aa
 language: fr
 summary: "Comment une modification atteint le hub en production : discussions et tickets, branches et pull requests, chaque hook pre-commit et pre-push avec sa correction, le PR Gate et les autres workflows, les déploiements vers Azure et GitHub Pages, les versions publiées, la manière de contribuer de l’extérieur, et comment définir un SDLC pour un projet DevSecOps et IA, avec les outils de chaque étape."
 ---
@@ -223,7 +223,8 @@ exécute.
 
 [`.pre-commit-config.yaml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.pre-commit-config.yaml),
 exécuté par le [framework pre-commit](https://pre-commit.com/). Installez les deux
-étapes une fois par clone :
+étapes une fois par clone (depuis #847, un simple `pre-commit install` fait de même,
+via `default_install_hook_types`) :
 
 ```bash
 pip install pre-commit
@@ -274,23 +275,30 @@ font échouer le commit après avoir modifié le fichier. Indexez à nouveau le 
 | `actionlint`                                                              | les workflows GitHub Actions                                                                                                                                                                  | corrigez le workflow qu’il signale                                                                                                                                                                                        |
 | `image-scan-coverage`                                                     | l’analyse des CVE de `security-scan.yml` couvre chaque image des fichiers compose                                                                                                             | ajoutez l’image à la matrice d’analyse                                                                                                                                                                                    |
 
-### 5.2 Au push : 3 hooks
+### 5.2 Au push : 4 hooks
 
-| Hook (id)      | Ce qu’il fait                                                                                                                  | Quand il échoue                                                                                                                                                                          |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vitest-ui`    | toute la suite de l’UI, `vitest run --bail 1`, quand le push modifie `ui/src` ou `ui/__tests__`                                | `cd ui && npx vitest run <file>` pour le fichier en échec. Un hook qui réinitialise un mock utilise des accolades : `beforeEach(() => { m.mockReset(); })`                               |
-| `npm-audit-ui` | `scripts/check-npm-audit.py ui --omit=dev` : aucun avis HIGH ou CRITICAL dans les dépendances de production                    | mettez à jour la dépendance ; quand aucun correctif n’existe, une entrée limitée dans le temps dans `docs/npm-audit-exceptions.json` avec une raison, un ticket et une date d’expiration |
-| `codeql-swift` | CodeQL sur l’application iPhone quand les sources Swift, `Package.swift` ou `project.yml` changent (environ 15 minutes, macOS) | corrigez le résultat, ou acceptez-le avec sa raison dans `clients/ios/Scripts/codeql-accepted.txt` ; `SKIP=codeql-swift git push` l’ignore une fois                                      |
+| Hook (id)            | Ce qu’il fait                                                                                                                                                               | Quand il échoue                                                                                                                                                                                                   |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vitest-ui`          | toute la suite de l’UI, `vitest run --bail 1`, quand le push modifie `ui/src` ou `ui/__tests__`                                                                             | `cd ui && npx vitest run <file>` pour le fichier en échec. Un hook qui réinitialise un mock utilise des accolades : `beforeEach(() => { m.mockReset(); })`                                                        |
+| `npm-audit-ui`       | `scripts/check-npm-audit.py ui --omit=dev` : aucun avis HIGH ou CRITICAL dans les dépendances de production                                                                 | mettez à jour la dépendance ; quand aucun correctif n’existe, une entrée limitée dans le temps dans `docs/npm-audit-exceptions.json` avec une raison, un ticket et une date d’expiration                          |
+| `ios-analyte-parity` | `swift run AnalyteParity` quand le code Swift partagé de l’application, la table d’analytes générée ou `Package.swift` changent (quelques secondes une fois compilé, macOS) | la table Swift résout un libellé ou une unité autrement que `analytes.ts` : régénérez-la avec `npm run generate:swift` dans `services/epa-ingest`, ou corrigez la normalisation dans `clients/ios/Sources/Shared` |
+| `codeql-swift`       | CodeQL sur l’application iPhone quand les sources Swift, `Package.swift` ou `project.yml` changent (environ 15 minutes, macOS)                                              | corrigez le résultat, ou acceptez-le avec sa raison dans `clients/ios/Scripts/codeql-accepted.txt` ; `SKIP=codeql-swift git push` l’ignore une fois                                                               |
 
 [Quality Gates](./quality-gates.md) et la
 [page des contrôles qualité](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/developer/quality-gates)
 présentent les chiffres de couverture et les contrôles encore à venir.
 
+Les tests E2E, l’audit WCAG et les specs de pentest ne s’exécutent plus à chaque
+push : ils tournent une fois par nuit quand `main` a changé
+([ADR-074](./ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md)).
+Avant de fusionner une modification des pages de l’UI ou de leurs routes d’API,
+exécutez-les contre la stack compose : `docker compose up -d`, puis `cd ui && npm run test:e2e`.
+
 ---
 
 ## 6. Les contrôles sur GitHub
 
-`.github/workflows/` contient 37 workflows. Seul le **PR Gate** bloque une fusion.
+`.github/workflows/` contient 39 workflows. Seul le **PR Gate** bloque une fusion.
 
 ### 6.1 PR Gate : le contrôle obligatoire
 
