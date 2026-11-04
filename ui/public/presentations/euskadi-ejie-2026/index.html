@@ -294,6 +294,46 @@
         transform: none;
         animation: none;
       }
+      /* The researcher's journey builds in five clicks: in each, the arrows draw, then their
+         heads and labels appear, then the boxes they point to rise in. The PDF shows it whole. */
+      .reveal .flow .fb,
+      .reveal .flow .fl,
+      .reveal .flow .fh,
+      .reveal .flow .fd {
+        opacity: 0;
+        transition: opacity 0.45s ease, transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+        transition-delay: var(--d, 0s);
+      }
+      .reveal .flow .fb {
+        transform: translateY(12px);
+      }
+      .reveal .flow .fe {
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        transition: stroke-dashoffset 0.5s ease-in-out var(--d, 0s);
+      }
+      .reveal .flow .fragment.visible .fb,
+      .reveal .flow .fragment.visible .fl,
+      .reveal .flow .fragment.visible .fh,
+      .reveal .flow .fragment.visible .fd {
+        opacity: 1;
+        transform: none;
+      }
+      .reveal .flow .fragment.visible .fe {
+        stroke-dashoffset: 0;
+      }
+      html.reveal-print .reveal .flow .fb,
+      html.reveal-print .reveal .flow .fl,
+      html.reveal-print .reveal .flow .fh,
+      html.reveal-print .reveal .flow .fd {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+      html.reveal-print .reveal .flow .fe {
+        stroke-dasharray: none;
+        transition: none;
+      }
       /* reveal.js prints every section, inside its .pdf-page, with no padding; the PDF keeps the margins. */
       html.reveal-print .reveal .slides .pdf-page > section {
         padding: 96px 128px 120px !important;
@@ -537,7 +577,7 @@
               Answers to your eight questions, and a pilot
             </p>
             <p class="rise" style="--d: 1.1s; font-size: 24px; color: var(--mist); margin-top: 90px">
-              EJIE · Basque Government · revised 3 November 2026
+              EJIE · Basque Government · revised 4 November 2026
             </p>
           </div>
           <aside class="notes">
@@ -705,7 +745,19 @@
           <aside class="notes">[1:15] Users come in through the reverse proxy to the portals; sign-in through Keycloak, brokered to Cl@ve. API services read the knowledge graph, the connector negotiates and transfers, the identity hub holds the credentials, the vault the keys. The data lake feeds the graph; the connector talks DSP to ENDS and HealthData@EU.</aside>
         </section>
 
-        <!-- 10 · Q5 maturity -->
+        <!-- 10 · Q4 researcher journey -->
+        <section data-background-color="#FBF8F3">
+          <p class="qpill">QUESTION 4 · ARCHITECTURE</p>
+          <div class="dots"><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i></i></div>
+          <h2 class="h2">The researcher's journey, step by step</h2>
+          <p class="stand">From registration to an audited result: five roles, eight steps, all running in the demonstrator today.</p>
+          <div style="margin-top: 20px">
+            <svg class="flow" viewBox="0 0 1600 636" width="1664" height="661" role="img" aria-label="The researcher's journey in five lanes: the hospital, the researcher and the access body register; the hospital publishes, the researcher discovers and negotiates; the access body approves the permit; the hospital uploads pseudonymised data into the secure environment; the researcher analyses, shares results, and the use is audited" style="display: block"><rect x="0" y="20" width="1600" height="116" rx="10" fill="#E8F4F1"/><rect x="0" y="20" width="8" height="116" rx="4" fill="#148F77"/><text x="24" y="72" font-size="19" font-weight="700" fill="#148F77" font-family="'DM Sans', Arial, sans-serif">Registration</text><text x="24" y="96" font-size="19" font-weight="700" fill="#148F77" font-family="'DM Sans', Arial, sans-serif">and trust</text><rect x="0" y="144" width="1600" height="116" rx="10" fill="#FBEFE1"/><rect x="0" y="144" width="8" height="116" rx="4" fill="#CA6F1E"/><text x="24" y="196" font-size="19" font-weight="700" fill="#CA6F1E" font-family="'DM Sans', Arial, sans-serif">Data holder</text><text x="24" y="220" font-size="19" font-weight="700" fill="#CA6F1E" font-family="'DM Sans', Arial, sans-serif">(hospital)</text><rect x="0" y="268" width="1600" height="116" rx="10" fill="#EDF3F9"/><rect x="0" y="268" width="8" height="116" rx="4" fill="#2471A3"/><text x="24" y="320" font-size="19" font-weight="700" fill="#2471A3" font-family="'DM Sans', Arial, sans-serif">Data user</text><text x="24" y="344" font-size="19" font-weight="700" fill="#2471A3" font-family="'DM Sans', Arial, sans-serif">(researcher)</text><rect x="0" y="392" width="1600" height="116" rx="10" fill="#F5F1F8"/><rect x="0" y="392" width="8" height="116" rx="4" fill="#7D3C98"/><text x="24" y="444" font-size="19" font-weight="700" fill="#7D3C98" font-family="'DM Sans', Arial, sans-serif">Health Data</text><text x="24" y="468" font-size="19" font-weight="700" fill="#7D3C98" font-family="'DM Sans', Arial, sans-serif">Access Body</text><rect x="0" y="516" width="1600" height="116" rx="10" fill="#EAF4EC"/><rect x="0" y="516" width="8" height="116" rx="4" fill="#1E8449"/><text x="24" y="568" font-size="19" font-weight="700" fill="#1E8449" font-family="'DM Sans', Arial, sans-serif">Secure processing</text><text x="24" y="592" font-size="19" font-weight="700" fill="#1E8449" font-family="'DM Sans', Arial, sans-serif">environment</text><g class="fragment" data-fragment-index="0"><g class="fb" style="--d:0s"><rect x="195" y="45" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#148F77" stroke-width="2.4"/><text x="300" y="74" text-anchor="middle" font-size="17" font-weight="700" fill="#143D59" font-family="'DM Sans', Arial, sans-serif">1a · Hospital registers</text><text x="300" y="95" text-anchor="middle" font-size="15" fill="#4A5568" font-family="'DM Sans', Arial, sans-serif">did:web + credential</text></g><g class="fb" style="--d:0.15s"><rect x="515" y="45" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#148F77" stroke-width="2.4"/><text x="620" y="74" text-anchor="middle" font-size="17" font-weight="700" fill="#143D59" font-family="'DM Sans', Arial, sans-serif">1b · Researcher registers</text><text x="620" y="95" text-anchor="middle" font-size="15" fill="#4A5568" font-family="'DM Sans', Arial, sans-serif">did:web + credential</text></g><g class="fb" style="--d:0.3s"><rect x="1135" y="45" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#148F77" stroke-width="2.4"/><text x="1240" y="74" text-anchor="middle" font-size="17" font-weight="700" fill="#143D59" font-family="'DM Sans', Arial, sans-serif">1c · HDAB registers</text><text x="1240" y="95" text-anchor="middle" font-size="15" fill="#4A5568" font-family="'DM Sans', Arial, sans-serif">did:web + credential</text></g></g><g class="fragment" data-fragment-index="1"><path class="fe" style="--d:0s" pathLength="1" d="M300,111 L300,169" fill="none" stroke="#6B7F8E" stroke-width="2.6"/><path class="fh" style="--d:0.45s" d="M300,169 L293.5,156.0 L306.5,156.0 Z" fill="#6B7F8E"/><text class="fl" style="--d:0.30s" x="310" y="140" text-anchor="start" font-size="15" font-style="italic" fill="#5F6B7A" font-family="'DM Sans', Arial, sans-serif">registers</text><g class="fb" style="--d:0.3s"><rect x="195" y="169" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#CA6F1E" stroke-width="2.4"/><text x="300" y="198" text-anchor="middle" font-size="17" font-weight="700" fill="#143D59" font-family="'DM Sans', Arial, sans-serif">2 · Publish data</text><text x="300" y="219" text-anchor="middle" font-size="15" fill="#4A5568" font-family="'DM Sans', Arial, sans-serif">HealthDCAT-AP catalogue</text></g><path class="fe" style="--d:0.1s" pathLength="1" d="M620,111 L620,293" fill="none" stroke="#6B7F8E" stroke-width="2.6"/><path class="fh" style="--d:0.55s" d="M620,293 L613.5,280.0 L626.5,280.0 Z" fill="#6B7F8E"/><text class="fl" style="--d:0.40s" x="630" y="140" text-anchor="start" font-size="15" font-style="italic" fill="#5F6B7A" font-family="'DM Sans', Arial, sans-serif">registers</text><path class="fe" style="--d:0.5s" pathLength="1" d="M300,235 L300,279 L620,279 L620,293" fill="none" stroke="#6B7F8E" stroke-width="2.6"/><path class="fh" style="--d:0.95s" d="M620,293 L613.5,280.0 L626.5,280.0 Z" fill="#6B7F8E"/><text class="fl" style="--d:0.80s" x="310" y="262" text-anchor="start" font-size="15" font-style="italic" fill="#5F6B7A" font-family="'DM Sans', Arial, sans-serif">publishes DCAT</text><g class="fb" style="--d:0.7s"><rect x="515" y="293" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#2471A3" stroke-width="2.4"/><text x="620" y="322" text-anchor="middle" font-size="17" font-weight="700" fill="#143D59" font-family="'DM Sans', Arial, sans-serif">3 · Discover data</text><text x="620" y="343" text-anchor="middle" font-size="15" fill="#4A5568" font-family="'DM Sans', Arial, sans-serif">federated catalogue</text></g></g><g class="fragment" data-fragment-index="2"><path class="fe" style="--d:0s" pathLength="1" d="M725,326 L785,326" fill="none" stroke="#6B7F8E" stroke-width="2.6"/><path class="fh" style="--d:0.45s" d="M785,326 L772.0,332.5 L772.0,319.5 Z" fill="#6B7F8E"/><text class="fl" style="--d:0.30s" x="755" y="377" text-anchor="middle" font-size="15" font-style="italic" fill="#5F6B7A" font-family="'DM Sans', Arial, sans-serif">requests access</text><g class="fb" style="--d:0.3s"><rect x="785" y="293" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#2471A3" stroke-width="2.4"/><text x="890" y="322" text-anchor="middle" font-size="17" font-weight="700" fill="#143D59" font-family="'DM Sans', Arial, sans-serif">4 · Negotiate contract</text><text x="890" y="343" text-anchor="middle" font-size="15" fill="#4A5568" font-family="'DM Sans', Arial, sans-serif">DSP offer, accept, finalise</text></g><path class="fe" style="--d:0.5s" pathLength="1" d="M890,359 L890,417" fill="none" stroke="#6B7F8E" stroke-width="2.6"/><path class="fh" style="--d:0.95s" d="M890,417 L883.5,404.0 L896.5,404.0 Z" fill="#6B7F8E"/><text class="fl" style="--d:0.80s" x="882" y="408" text-anchor="end" font-size="15" font-style="italic" fill="#5F6B7A" font-family="'DM Sans', Arial, sans-serif">requests permit</text><path class="fe" style="--d:0.4s" pathLength="1" d="M1300,111 L1300,280 L1065,280 L1065,417" fill="none" stroke="#6B7F8E" stroke-width="2.6"/><path class="fh" style="--d:0.85s" d="M1065,417 L1058.5,404.0 L1071.5,404.0 Z" fill="#6B7F8E"/><text class="fl" style="--d:0.70s" x="1310" y="200" text-anchor="start" font-size="15" font-style="italic" fill="#5F6B7A" font-family="'DM Sans', Arial, sans-serif">registers</text><g class="fb" style="--d:0.8s"><rect x="875" y="417" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#7D3C98" stroke-width="2.4"/><text x="980" y="446" text-anchor="middle" font-size="17" font-weight="700" fill="#143D59" font-family="'DM Sans', Arial, sans-serif">4b · Approve the permit</text><text x="980" y="467" text-anchor="middle" font-size="15" fill="#4A5568" font-family="'DM Sans', Arial, sans-serif">Art. 68, opt-out checked</text></g></g><g class="fragment" data-fragment-index="3"><path class="fe" style="--d:0s" pathLength="1" d="M1030,417 L1030,235" fill="none" stroke="#6B7F8E" stroke-width="2.6"/><path class="fh" style="--d:0.45s" d="M1030,235 L1036.5,248.0 L1023.5,248.0 Z" fill="#6B7F8E"/><text class="fl" style="--d:0.30s" x="1022" y="270" text-anchor="end" font-size="15" font-style="italic" fill="#5F6B7A" font-family="'DM Sans', Arial, sans-serif">authorises access</text><g class="fb" style="--d:0.3s"><rect x="875" y="169" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#CA6F1E" stroke-width="2.4"/><text x="980" y="198" text-anchor="middle" font-size="17" font-weight="700" fill="#143D59" font-family="'DM Sans', Arial, sans-serif">5 · Extract and upload</text><text x="980" y="219" text-anchor="middle" font-size="15" fill="#4A5568" font-family="'DM Sans', Arial, sans-serif">FHIR, pseudonymised</text></g><path class="fe" style="--d:0.5s" pathLength="1" d="M1085,202 L1110,202 L1110,560 L1135,560" fill="none" stroke="#6B7F8E" stroke-width="2.6"/><path class="fh" style="--d:0.95s" d="M1135,560 L1122.0,566.5 L1122.0,553.5 Z" fill="#6B7F8E"/><text class="fl" style="--d:0.80s" x="1118" y="222" text-anchor="start" font-size="15" font-style="italic" fill="#5F6B7A" font-family="'DM Sans', Arial, sans-serif">uploads FHIR</text><path class="fd" style="--d:0.5s" d="M980,483 L980,595 L1135,595" fill="none" stroke="#6B7F8E" stroke-width="2.6" stroke-dasharray="8 6"/><path class="fh" style="--d:0.95s" d="M1135,595 L1122.0,601.5 L1122.0,588.5 Z" fill="#6B7F8E"/><text class="fl" style="--d:0.80s" x="990" y="584" text-anchor="start" font-size="15" font-style="italic" fill="#5F6B7A" font-family="'DM Sans', Arial, sans-serif">authorises SPE</text><g class="fb" style="--d:0.8s"><rect x="1135" y="541" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#1E8449" stroke-width="2.4"/><text x="1240" y="570" text-anchor="middle" font-size="17" font-weight="700" fill="#143D59" font-family="'DM Sans', Arial, sans-serif">Provision SPE</text><text x="1240" y="591" text-anchor="middle" font-size="15" fill="#4A5568" font-family="'DM Sans', Arial, sans-serif">and ingest the data</text></g></g><g class="fragment" data-fragment-index="4"><path class="fe" style="--d:0s" pathLength="1" d="M1240,541 L1240,359" fill="none" stroke="#6B7F8E" stroke-width="2.6"/><path class="fh" style="--d:0.45s" d="M1240,359 L1246.5,372.0 L1233.5,372.0 Z" fill="#6B7F8E"/><text class="fl" style="--d:0.30s" x="1250" y="470" text-anchor="start" font-size="15" font-style="italic" fill="#5F6B7A" font-family="'DM Sans', Arial, sans-serif">enables analysis</text><g class="fb" style="--d:0.3s"><rect x="1135" y="293" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#2471A3" stroke-width="2.4"/><text x="1240" y="322" text-anchor="middle" font-size="17" font-weight="700" fill="#143D59" font-family="'DM Sans', Arial, sans-serif">6 · Analyse in the SPE</text><text x="1240" y="343" text-anchor="middle" font-size="15" fill="#4A5568" font-family="'DM Sans', Arial, sans-serif">OMOP, pseudonyms only</text></g><path class="fe" style="--d:0.5s" pathLength="1" d="M1345,326 L1375,326" fill="none" stroke="#6B7F8E" stroke-width="2.6"/><path class="fh" style="--d:0.95s" d="M1375,326 L1362.0,332.5 L1362.0,319.5 Z" fill="#6B7F8E"/><text class="fl" style="--d:0.80s" x="1360" y="377" text-anchor="middle" font-size="15" font-style="italic" fill="#5F6B7A" font-family="'DM Sans', Arial, sans-serif">OMOP results</text><g class="fb" style="--d:0.65s"><rect x="1375" y="293" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#2471A3" stroke-width="2.4"/><text x="1480" y="322" text-anchor="middle" font-size="17" font-weight="700" fill="#143D59" font-family="'DM Sans', Arial, sans-serif">7 · Share results</text><text x="1480" y="343" text-anchor="middle" font-size="15" fill="#4A5568" font-family="'DM Sans', Arial, sans-serif">OMOP, plain language</text></g><path class="fd" style="--d:0.75s" d="M1480,359 L1480,417" fill="none" stroke="#6B7F8E" stroke-width="2.6" stroke-dasharray="8 6"/><path class="fh" style="--d:1.20s" d="M1480,417 L1473.5,404.0 L1486.5,404.0 Z" fill="#6B7F8E"/><text class="fl" style="--d:1.05s" x="1472" y="402" text-anchor="end" font-size="15" font-style="italic" fill="#5F6B7A" font-family="'DM Sans', Arial, sans-serif">reports use</text><g class="fb" style="--d:0.9s"><rect x="1375" y="417" width="210" height="66" rx="12" fill="#FFFFFF" stroke="#7D3C98" stroke-width="2.4"/><text x="1480" y="446" text-anchor="middle" font-size="17" font-weight="700" fill="#143D59" font-family="'DM Sans', Arial, sans-serif">8 · Audit report</text><text x="1480" y="467" text-anchor="middle" font-size="15" fill="#4A5568" font-family="'DM Sans', Arial, sans-serif">FHIR AuditEvent, chained</text></g></g></svg>
+          </div>
+          <aside class="notes">[1:00, five clicks] Three registrations, each a did:web and a credential. The hospital publishes in HealthDCAT-AP, the researcher discovers it in the federated catalogue. The contract is negotiated over DSP; the access body approves the permit with the opt-out checked. The hospital uploads the pseudonymised FHIR extract into the secure environment; the researcher analyses on OMOP, sees only pseudonyms, shares the results, and the use is reported to the access body as a chained FHIR AuditEvent. Synthetic data, real protocols.</aside>
+        </section>
+
+        <!-- 11 · Q5 maturity -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 5 · MATURITY</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i></i></div>
@@ -731,7 +783,7 @@
           <aside class="notes">[1:45] DSP stable; FHIR and OMOP mature; the connector (Eclipse EDC; Tractus-X in Catena-X) changes every quarter; secure environments and permits are young.</aside>
         </section>
 
-        <!-- 11 · Q6 three roles -->
+        <!-- 12 · Q6 three roles -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 6 · GOVERNANCE</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div>
@@ -753,7 +805,7 @@
           <aside class="notes">[1:45] Association, Eclipse, Cofinity-X. In Euskadi: EJIE as operator; the access body is an open point with three options. Several domains from the start.</aside>
         </section>
 
-        <!-- 12 · Q6 operating model -->
+        <!-- 13 · Q6 operating model -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 6 · GOVERNANCE</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div>
@@ -826,7 +878,7 @@
           <aside class="notes">[1:45] The Regulation gives the roles but not who runs the system day to day: that is the orange layer, the operating company.</aside>
         </section>
 
-        <!-- 13 · Q6 functions -->
+        <!-- 14 · Q6 functions -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 6 · GOVERNANCE</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div>
@@ -849,7 +901,7 @@
           <aside class="notes">[1:30, two clicks] Function by function. Permits and the secure environment have no Catena-X counterpart. Rule of thumb: the access body decides, EJIE operates.</aside>
         </section>
 
-        <!-- 14 · Q6 open point -->
+        <!-- 15 · Q6 open point -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 6 · GOVERNANCE · OPEN POINT</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i><i></i></div>
@@ -865,7 +917,7 @@
           <aside class="notes">[1:15, four clicks] A regional body with a coordinator, one national body, or start under an agreement and decide later. The pilot does not have to wait.</aside>
         </section>
 
-        <!-- 15 · Q7 costs -->
+        <!-- 16 · Q7 costs -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 7 · COSTS</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i></div>
@@ -881,7 +933,7 @@
           <aside class="notes">[1:15, three clicks] Near-zero licences; the money goes into people and hosting. Pilot €0.8–1.5M, pending EJIE's detail, then 15–25% a year to operate. Hosting about €3,000 a month for production, test and development, priced by the hyperscaler.</aside>
         </section>
 
-        <!-- 16 · Q7 assumptions -->
+        <!-- 17 · Q7 assumptions -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 7 · COSTS · ASSUMPTIONS</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i><i></i></div>
@@ -898,7 +950,7 @@
           <aside class="notes">[1:30, five clicks] 12 months, 8 to 15 FTE, so about €100k per person-year. Two to three hospitals plus the cancer registry, two use cases, mapping included. Hospital staff, data lake, secure environment, access body staff, tender and VAT excluded. Hosting is priced by the hyperscaler and covers the dataspace services only.</aside>
         </section>
 
-        <!-- 17 · Q8 team -->
+        <!-- 18 · Q8 team -->
         <section data-background-color="#FBF8F3">
           <p class="qpill">QUESTION 8 · TEAM</p>
           <div class="dots"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="on"></i></div>
@@ -923,7 +975,7 @@
           <aside class="notes">[1:15] Profile typology: 1–2 architects, 2–3 connector engineers, 2–3 platform and security, 2–5 FHIR, OMOP and terminology, 1–2 data protection and legal: 8 to 15. The pyramid is sized with the project details.</aside>
         </section>
 
-        <!-- 18 · pilot overview, built by click -->
+        <!-- 19 · pilot overview, built by click -->
         <section data-background-color="#FBF8F3" data-auto-animate>
           <p class="eyebrow">THE SUGGESTED PILOT · A REGIONAL EHDS NODE</p>
           <h2 class="h2">Euskadi pilot: start regional, connect upwards</h2>
@@ -978,7 +1030,7 @@
           <aside class="notes">[0:45, six clicks] Step 1, arrow, Step 2, arrow, Step 3, foundation.</aside>
         </section>
 
-        <!-- 19 · pilot step 1 -->
+        <!-- 20 · pilot step 1 -->
         <section data-background-color="#FBF8F3" data-auto-animate>
           <p class="eyebrow">THE PILOT · STEP 1 OF 3 · 2027–2028</p>
           <h2 class="h2">Step 1: build the Euskadi pilot</h2>
@@ -995,7 +1047,7 @@
           <aside class="notes">[0:45, five clicks] Office announced Jan 2025, Aragón as model; data lake funded as Euskadi's ENDS part; one node run by EJIE; own or national secure environment; two use cases.</aside>
         </section>
 
-        <!-- 20 · pilot step 2 -->
+        <!-- 21 · pilot step 2 -->
         <section data-background-color="#FBF8F3">
           <p class="eyebrow">THE PILOT · STEP 2 OF 3 · 2028</p>
           <h2 class="h2">Step 2: connect to Spain</h2>
@@ -1011,7 +1063,7 @@
           <aside class="notes">[0:45, four clicks] ENDS opened Jan 2026 as a network of regional platforms; access body by March 2027, one or several; the law is still a draft; MyHealth@EU already live since 2023.</aside>
         </section>
 
-        <!-- 21 · pilot step 3 -->
+        <!-- 22 · pilot step 3 -->
         <section data-background-color="#FBF8F3">
           <p class="eyebrow">THE PILOT · STEP 3 OF 3 · MARCH 2029</p>
           <h2 class="h2">Step 3: connect to the EU, on a ready foundation</h2>
@@ -1033,7 +1085,7 @@
           <aside class="notes">[0:45, eight clicks] HealthData@EU 2029; implementing acts 2027; EUDI wallet end 2026; then the four foundation blocks.</aside>
         </section>
 
-        <!-- 22 · next steps -->
+        <!-- 23 · next steps -->
         <section data-background-color="#143D59" class="dark">
           <p class="eyebrow" style="color: var(--amber)">WHAT COULD COME NEXT</p>
           <h2 class="h2" style="color: var(--cream)">From a first definition to an operational pilot</h2>
@@ -1056,7 +1108,7 @@
           <aside class="notes">[1:30, six clicks] Define, prepare, tender, build, operate: about 26 to 34 months from today. The tender takes six to nine months, so phase 1 has to start now to be live around March 2029.</aside>
         </section>
 
-        <!-- 23 · timeline -->
+        <!-- 24 · timeline -->
         <section data-background-color="#FBF8F3">
           <p class="eyebrow">WHAT COULD COME NEXT · TIMELINE</p>
           <h2 class="h2">The timeline, from today to the March 2029 deadline</h2>
@@ -1067,7 +1119,7 @@
           <aside class="notes">[1:15, six clicks] Define and prepare by mid 2027; the tender runs into 2028; building ends between autumn 2028 and spring 2029. The March 2027 and March 2029 deadlines in red.</aside>
         </section>
 
-        <!-- 24 · discussion with QR -->
+        <!-- 25 · discussion with QR -->
         <section data-background-color="#FBF8F3">
           <p class="eyebrow">LET'S DISCUSS</p>
           <h2 class="h2" style="width: 1000px">Three questions to start our discussion</h2>

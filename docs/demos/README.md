@@ -52,7 +52,7 @@ soffice --headless --convert-to pdf --outdir /tmp docs/demos/spain-ehds-5-slides
 served at
 [ma3u.github.io/MinimumViableHealthDataspacev2/presentations/euskadi-ejie-2026/](https://ma3u.github.io/MinimumViableHealthDataspacev2/presentations/euskadi-ejie-2026/)
 and [ehds.mabu.red/presentations/euskadi-ejie-2026/](https://ehds.mabu.red/presentations/euskadi-ejie-2026/).
-The 24 slides of the EJIE deck in reveal.js, in English or Spanish: the deck follows the browser's language (Spanish for es, eu, ca and gl), and EN and ES switch it. The Spanish text is in `i18n/es.json`, keyed by each element's English HTML; [`check-ejie-i18n.mjs`](check-ejie-i18n.mjs) fails on a missing or stale entry. **Narration** (or the N key) plays the
+The 25 slides of the EJIE deck in reveal.js, in English or Spanish: the deck follows the browser's language (Spanish for es, eu, ca and gl), and EN and ES switch it. The Spanish text is in `i18n/es.json`, keyed by each element's English HTML; [`check-ejie-i18n.mjs`](check-ejie-i18n.mjs) fails on a missing or stale entry. **Narration** (or the N key) plays the
 narration in the deck's language in the presenter's cloned voice, reveals each
 slide's builds as the sentence that names them is spoken, and moves on by
 itself. In Spanish, C turns on Basque subtitles (off by default). Off, it is an

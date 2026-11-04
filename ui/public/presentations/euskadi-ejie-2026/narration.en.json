@@ -370,6 +370,54 @@
       ]
     },
     {
+      "id": "journey",
+      "audio": "audio/en/journey.mp3",
+      "duration": 46.3,
+      "spoken": "2e0909a2708a4125",
+      "cues": [
+        {
+          "start": 0.0,
+          "end": 5.085,
+          "eu": "Hau da ikertzailearen ibilbidea, erregistrotik emaitza auditatu bateraino."
+        },
+        {
+          "start": 5.085,
+          "end": 13.05,
+          "eu": "Lehenik, ospitalea, ikertzailea eta sarbide-erakundea erregistratzen dira: bakoitzak identifikatzaile deszentralizatu bat eta egiaztagiri egiaztagarri bat jasotzen ditu.",
+          "frag": 0
+        },
+        {
+          "start": 13.05,
+          "end": 19.064,
+          "eu": "Ospitaleak bere datu-multzoak HealthDCAT-AP formatuan argitaratzen ditu, eta ikertzaileak katalogo federatuan aurkitzen ditu.",
+          "frag": 1
+        },
+        {
+          "start": 19.064,
+          "end": 27.156,
+          "eu": "Ikertzaileak kontratu bat negoziatzen du datu-espazioen protokoloarekin, eta datu-baimen bat eskatzen dio sarbide-erakundeari, zeinak borondatezko uko egitea egiaztatzen duen.",
+          "frag": 2
+        },
+        {
+          "start": 27.156,
+          "end": 33.553,
+          "eu": "Baimenarekin, ospitaleak datuak kargatzen ditu, izengoitutak, tratamendu-ingurune seguru batera.",
+          "frag": 3
+        },
+        {
+          "start": 33.553,
+          "end": 42.458,
+          "eu": "Han ikertzaileak OMOPen aztertzen ditu, izengoitiak bakarrik ikusten ditu eta emaitzak partekatzen ditu, eta erabilera oro kateatutako auditoria-txosten batean geratzen da.",
+          "frag": 4
+        },
+        {
+          "start": 42.458,
+          "end": 46.3,
+          "eu": "Urrats bakoitza gaur dabil gure erakuslean, datu sintetikoekin."
+        }
+      ]
+    },
+    {
       "id": "q5",
       "audio": "audio/en/q5.mp3",
       "duration": 22.894,
