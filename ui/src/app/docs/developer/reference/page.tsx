@@ -56,7 +56,11 @@ export default function ApiReferencePage() {
             theme: "default",
             layout: "modern",
             hideDarkModeToggle: false,
-            hideClientButton: false,
+            // "Open API Client" leaves for client.scalar.com, which cannot
+            // send this hub's session cookie (every route but /api/health
+            // needs one, ADR-044) and which some networks do not reach at
+            // all. The in-page client already sends requests, signed in.
+            hideClientButton: true,
             ...(baseServerUrl ? { baseServerURL: baseServerUrl } : {}),
             defaultHttpClient: {
               targetKey: "shell",
