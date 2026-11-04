@@ -13,11 +13,23 @@
 # ---------------------------------------------------------------------------
 name: CodeQL
 
+# A change that is only documentation or only the iPhone app has nothing for
+# these three languages to analyse (Swift is codeql-swift.yml), so it skips
+# them. On main a skipped push also stores no overlay database, which was one
+# 190 MB cache per push (#847).
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - "clients/ios/**"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - "clients/ios/**"
   schedule:
     - cron: "27 4 * * 1"
   workflow_dispatch:

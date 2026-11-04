@@ -111,12 +111,23 @@ advisories arrive without a commit.
 - PR 2 merged 2026-11-03 in #851 (`nightly.yml`, ADR-074). First manual
   nightly: E2E and Lighthouse green, compliance red on the request #843
   fixed.
-- PR 3 in review: Lint and the per-push gitleaks scan leave `test.yml`
+- PR 3 merged 2026-11-04 in #862: Lint and the per-push gitleaks scan leave `test.yml`
   (PR Gate runs both; gitleaks over the whole history moves to the
   nightly); Trivy, Kubescape, npm audit, SBOM and licences become one job;
   Demo Smoke loses its push trigger. The merged scanner job still runs on
   pushes to main, unlike the plan: it keeps the Security tab's Trivy
-  analysis and the per-commit SBOM current.
+  analysis and the per-commit SBOM current. The first scheduled nightly,
+  2026-11-04, was green in every suite.
+- PR 4 in review: `cache-cleanup.yml` runs
+  `scripts/prune-actions-caches.py` daily. It deletes the caches of closed
+  pull requests and, for CodeQL overlay databases, Next.js builds,
+  Playwright and Trivy, every entry but the newest per ref and family. Its
+  dry run on 2026-11-04 listed 65 of 86 caches, 7.1 of 10.2 GB. npm caches
+  stay with GitHub's seven-day rule. Image scans on pull requests restore
+  main's Trivy database and save none. CodeQL skips changes that are only
+  `docs/`, Markdown or `clients/ios/`. The SwiftPM cache for iOS parity is
+  left out: the job runs only when the app changes since PR 1, and a stale
+  `.build` is a source of failures that a cold build does not have.
 
 ## Nothing required is turned off
 

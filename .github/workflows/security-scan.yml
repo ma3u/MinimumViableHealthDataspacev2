@@ -125,10 +125,28 @@ jobs:
       # thousands are not thousands of actions: a third-party base image we do
       # not build has exactly one remediation, "move to a newer tag". Counting
       # them per-CVE in an alert list misrepresents that as a backlog.
+      # The vulnerability database, restored here and saved below rather than
+      # by trivy-action (`cache: "false"`), so that a pull request reads the
+      # one main saved and never stores its own. A pull request's cache can
+      # only be read by that pull request, and one of them stored 1 GB, which
+      # pushed the npm caches out of the full 10 GB (#847).
+      - name: Date of today's Trivy database
+        id: trivy-date
+        run: echo "date=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+
+      - name: Restore the Trivy database
+        id: trivy-db
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ github.workspace }}/.cache/trivy
+          key: cache-trivy-${{ steps.trivy-date.outputs.date }}
+          restore-keys: cache-trivy-
+
       - name: Scan ${{ matrix.image }} — CRITICAL, for the Security tab
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ matrix.image }}
+          cache: "false"
           format: sarif
           output: trivy.sarif
           severity: CRITICAL
@@ -152,11 +170,19 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ${{ matrix.image }}
+          cache: "false"
           format: table
           output: trivy-table.txt
           severity: CRITICAL,HIGH
           ignore-unfixed: true
           exit-code: "0"
+
+      - name: Save the Trivy database (not from a pull request)
+        if: github.event_name != 'pull_request' && steps.trivy-db.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ github.workspace }}/.cache/trivy
+          key: cache-trivy-${{ steps.trivy-date.outputs.date }}
 
       - name: Derive a SARIF category
         id: cat
