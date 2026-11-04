@@ -249,6 +249,28 @@
         "summary": "Un glosario de la pila (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, el proxy, los servicios de catálogo) y cómo encaja; requisitos previos, las dos pilas locales, las fases de carga, los puertos, las variables de entorno, la app de iPhone y los gotchas del primer día."
       }
     },
+    "developer/secure-processing-environment": {
+      "de": {
+        "status": "current",
+        "title": "Die sichere Verarbeitungsumgebung und ihre Confidential Containers",
+        "summary": "Wie der Hub die sichere Verarbeitungsumgebung nach Art. 73 aus Confidential Containers aufbaut: die beiden SPE-Workspaces auf ACI mit AMD SEV-SNP, der Trustee, den die Zugangsstelle betreibt, wie ein Workspace seinen Schlüssel erhält, was eine föderierte Abfrage durchläuft, wie Sie alles auf einem Laptop ausführen und was noch fehlt."
+      },
+      "fr": {
+        "status": "current",
+        "title": "L’environnement de traitement sécurisé et ses conteneurs confidentiels",
+        "summary": "Comment le hub construit l’environnement de traitement sécurisé de l’art. 73 à partir de conteneurs confidentiels : les deux espaces de travail SPE sur ACI avec AMD SEV-SNP, le Trustee que gère l’organisme d’accès, la manière dont un espace de travail obtient sa clé, ce que traverse une requête fédérée, comment l’exécuter sur un ordinateur portable et ce qui reste à faire."
+      },
+      "nl": {
+        "status": "current",
+        "title": "De beveiligde verwerkingsomgeving en haar confidential containers",
+        "summary": "Hoe de hub de beveiligde verwerkingsomgeving van art. 73 bouwt uit confidential containers: de twee SPE-werkruimten op ACI met AMD SEV-SNP, de Trustee die de instantie voor toegang tot gezondheidsgegevens draait, hoe een werkruimte haar sleutel verdient, wat een gefedereerde query doorloopt, hoe u het op een laptop draait en wat nog niet klaar is."
+      },
+      "es": {
+        "status": "current",
+        "title": "El entorno de tratamiento seguro y sus contenedores confidenciales",
+        "summary": "Cómo construye el hub el entorno de tratamiento seguro del art. 73 a partir de contenedores confidenciales: los dos espacios de trabajo SPE en ACI con AMD SEV-SNP, el Trustee que ejecuta el organismo de acceso, cómo obtiene un espacio de trabajo su clave, qué recorre una consulta federada, cómo ejecutarlo en un portátil y qué falta por hacer."
+      }
+    },
     "security/security-test-report": {
       "de": {
         "status": "current",

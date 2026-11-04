@@ -28,7 +28,26 @@ report proves that the workspace runs the code the data permit was issued
 for. **No key, no data**: a changed image, command or environment variable
 gives a different policy hash, and the key stays where it is.
 
-## 2. Terms
+## 2. The framework: CNCF Confidential Containers (CoCo)
+
+The SPE is built on [Confidential Containers](https://confidentialcontainers.org/) (CoCo), a
+[CNCF incubating project](https://www.cncf.io/blog/2026/07/22/confidential-containers-becomes-a-cncf-incubating-project/) since July 2026 that runs containers inside
+hardware TEEs and releases secrets only to workloads that prove what they
+are ([ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md), decision 1). CoCo has three parts; the hub uses two
+of them today:
+
+| CoCo part                                                                           | What it is                                                                                                                                                                      | Used here                                                                                                                                                                                                                                                                                                                 |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[Trustee](https://github.com/confidential-containers/trustee)**                   | The key broker service (KBS), the attestation service (AS) and the reference value provider service (RVPS): it verifies a TEE's evidence and releases secrets against a policy. | Yes, v0.22.0, run by the access body: ACA app `mvhd-trustee` on Azure, service `trustee` in `docker-compose.trustee.yml` locally.                                                                                                                                                                                         |
+| **[Guest components](https://github.com/confidential-containers/guest-components)** | What runs inside the TEE to collect the evidence and talk to Trustee: the attesters and `kbs-client`.                                                                           | Yes: the init container `spe-unlock` uses `kbs-client` with the SEV-SNP attester, patched to ask ACI for the plain report ([`kbs-client.aci.Dockerfile`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/services/spe-loader/kbs-client.aci.Dockerfile)).                                                |
+| **[Kata Containers](https://katacontainers.io/) runtime**                           | Starts each pod in its own confidential micro-VM, through a Kubernetes `RuntimeClass` or as peer pods on a cloud.                                                               | Not on Azure: the tenant policy refused AKS, and the peer pods' Azure tests are switched off. ACI's confidential container groups provide the SEV-SNP utility VM instead ([ADR-069](../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)). On a Mac it is an optional local runtime check (ADR-068, M2). |
+
+So on Azure the isolation comes from ACI, and the trust decision (which
+workload gets a key) from CoCo's Trustee. Moving to Kata on Kubernetes later
+changes the runtime and the policy generator (`genpolicy` instead of
+`az confcom`), not Trustee, the permit or its policy hash.
+
+## 3. Terms
 
 | Term                       | What it is                                                                                                                                                                                                   |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -42,7 +61,7 @@ gives a different policy hash, and the key stays where it is.
 | **Reference values**       | What Trustee compares the report against: the launch measurement of Microsoft's utility VM and the minimum TCB (firmware and microcode versions).                                                            |
 | **Sealed extract**         | A workspace's half of the synthetic patients, format `mvhd-spe-extract/1`: JSON lines, gzipped, encrypted with AES-256-GCM under a new key per permit.                                                       |
 
-## 3. Where it runs, and what each place proves
+## 4. Where it runs, and what each place proves
 
 The design is the same everywhere; what differs is whether real hardware
 signs the evidence. The UI says which, with one of three labels
@@ -59,7 +78,7 @@ The seeded `SPESession` nodes in the Trust Center graph
 ([`neo4j/seed-trust-center.cypher`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/neo4j/seed-trust-center.cypher))
 carry `simulated: true`; they illustrate the model and are not evidence.
 
-## 4. The parts on Azure
+## 5. The parts on Azure
 
 | Part                      | Azure resource                                                  | What it does                                                                                                                       |
 | ------------------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -78,7 +97,7 @@ Vault secure key release were considered and are deliberately **not** in the
 key path: the access body, not the cloud operator, decides who gets a key
 (ADR-068 decision 1, ADR-069 "Alternatives considered").
 
-## 5. The chain of trust
+## 6. The chain of trust
 
 ```mermaid
 sequenceDiagram
@@ -118,7 +137,7 @@ sequenceDiagram
 Secrets do not travel in the policy. They reach the group through its secret
 volume, so rotating one does not change the hash.
 
-## 6. Inside a workspace
+## 7. Inside a workspace
 
 Each group has three containers, built from
 [`services/spe-loader`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/services/spe-loader):
@@ -151,7 +170,7 @@ group never asks Trustee again; stop and start it instead
 `unlock`, `ingest` and `load`. Exit code 3 means the key was refused; 2 means
 a database or Trustee did not answer.
 
-## 7. What a federated query goes through
+## 8. What a federated query goes through
 
 1. A data user asks on `/query` or through natural language. The UI calls
    [`/api/federated`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/src/app/api/federated/route.ts)
@@ -187,7 +206,7 @@ appends them to the hub's audit chain `spe` (ADR-045): `spe.attestation`,
 - `/admin/policies`: which permit is bound to which policy hash.
 - `/query`: the cold-start notice while the workspaces start.
 
-## 8. Running it on a laptop
+## 9. Running it on a laptop
 
 Without the overlay below, SPE-1 is simply the hub graph and SPE-2 a second
 Neo4j: federation works, but nothing is sealed or attested. To get the real
@@ -217,7 +236,7 @@ Both run in [`test.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/
 the resource policy, including HOST_DATA in the place where Trustee v0.22.0
 puts it.
 
-## 9. Deploying it on Azure
+## 10. Deploying it on Azure
 
 [`scripts/azure/21-aci-confidential-spe.sh`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/azure/21-aci-confidential-spe.sh)
 does it in phases, in this order: `--trustee`, `--extracts`, `--policy`,
@@ -227,7 +246,7 @@ and what each phase prints; read it before the first run. Two phases protect
 themselves: `--extracts` refuses to re-key while Trustee holds keys unless
 `--rekey`, and `--trustee` keeps a resource policy that Trustee already holds.
 
-## 10. What is not done yet
+## 11. What is not done yet
 
 - **The access body does not yet run its own Trustee.** Trustee's shares sit
   in the hub's subscription, so the subscription owner could read them. For
@@ -243,10 +262,6 @@ themselves: `--extracts` refuses to re-key while Trustee holds keys unless
   containers were also being retired by Microsoft (ADR-068).
 - **Not decided** (ADR-068): which EU provider hosts the per-workload case
   outside Azure, and Trustee in a subscription of its own.
-- **Stale text.** The runbook's off-hours section still says the groups
-  start in the morning, which ADR-072 changed; and
-  [the EHDS implementation table](../ehds/regulation-implementation.md)
-  still calls the SPE "a query proxy", which predates ADR-069.
 
 Issues: [#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774)
 (the Azure deployment), [#27](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/27),
@@ -254,7 +269,7 @@ Issues: [#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774
 [#716](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/716),
 [#833](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/833).
 
-## 11. The decisions, in order
+## 12. The decisions, in order
 
 | ADR                                                                                               | Decision                                                                              | Status                |
 | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | --------------------- |
