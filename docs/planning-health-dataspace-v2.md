@@ -301,6 +301,7 @@ Planned without an issue: [BSI C5 production audit](planning/future/issue-4-bsi-
 | [072](ADRs/ADR-072-spe-workspaces-start-on-demand.md)                                         | SPE workspaces stop by default and start on demand; a query gets a cold-start answer, an idle one stops itself; amends ADR-069 decision 8           | 2026-11-02 | Accepted (2026-11-02) |
 | [073](ADRs/ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md)                                    | The SPE workspaces' SEV-SNP TCB is checked against a minimum per component, not a list of hosts seen; amends ADR-069 decision 3 (#833)              | 2026-11-02 | Proposed              |
 | [074](ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md)                | E2E, Lighthouse and the compliance suites run nightly when main changed, not on every push; PR Gate stays the only required check (#847)            | 2026-11-03 | Accepted (2026-11-03) |
+| [075](ADRs/ADR-075-a-minor-release-every-month.md)                                            | A minor release on the first working day of each month, starting with v2.1.0; patch releases only for urgent fixes (#839)                           | 2026-11-04 | Accepted (2026-11-04) |
 
 Numbers taken by open work, so a new ADR starts at **074**: 051 (#475). 050
 (#477), 054 (#520) and 055 (#517) are merged.

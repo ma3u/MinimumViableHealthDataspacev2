@@ -2153,6 +2153,13 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
           <div className="space-y-3">
             {[
               {
+                version: "v2.1.0",
+                date: "2026-11-04",
+                highlights: t(
+                  "Confidential SPE workspaces that start on demand, EUDI Wallet sign-in, the interface and documentation in five languages, Klarbefund connects to the hub",
+                ),
+              },
+              {
                 version: "v2.0.0",
                 date: "2026-09-29",
                 highlights: t(

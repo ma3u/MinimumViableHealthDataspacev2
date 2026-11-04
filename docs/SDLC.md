@@ -405,22 +405,26 @@ yet.
 
 ## 8. Releases and versions
 
-What exists today, plainly:
+[ADR-075](./ADRs/ADR-075-a-minor-release-every-month.md) sets the rhythm:
 
 - **The hub has one version**, the `version` in
-  [`ui/package.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/package.json),
-  now `2.0.0`. A person decides the bump (semantic versioning, by judgement)
-  and changes it in a PR.
-- **On merge, `release.yml` cuts the release:** it tags `vX.Y.Z` if the tag
-  is missing, writes notes from `git log` since the previous tag, and
-  publishes a GitHub Release. It does nothing when the release exists, and a
-  dispatch with `force_version` re-runs it.
-- **Release notes for a major version are rewritten by hand.** v2.0.0's notes
-  are an essay, not the commit list the workflow writes.
-- **There is no cadence.** Eleven tags so far, v1.0.0 (2026-03-30) to v2.0.0
-  (2026-09-29); `main` has moved more than 350 commits since v2.0.0 without a
-  release. `main` is what runs live, so a release marks a milestone rather
-  than a deployment. v1.4.3 is a tag without a release.
+  [`ui/package.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/package.json).
+- **A minor release on the first working day of each month**, starting with
+  v2.1.0 on 2026-11-04. A **patch** release in between only for a fix a
+  partner needs before the next month; a **major** release when something a
+  partner integrates against breaks (an API route or the graph model).
+- **A release is a pull request**, `chore(release): vX.Y.Z`: the version in
+  `ui/package.json` and the root of `ui/package-lock.json`, and a one-line
+  highlight in the developer guide's release list, in all five languages.
+- **On merge, `release.yml` cuts the release:** it tags `vX.Y.Z`, writes the
+  notes from `git log` since the previous tag, and publishes a GitHub
+  Release. A dispatch with `force_version` re-runs it. A short hand-written
+  summary may go above the generated list afterwards, as v2.0.0 has.
+- **`main` is still what runs live.** A release marks a point a reader can
+  cite and a changelog of at most a month, not a deployment.
+- **Before ADR-075** there was no cadence: eleven tags from v1.0.0
+  (2026-03-30) to v2.0.0 (2026-09-29), then about 350 commits without a
+  release; v1.4.3 is a tag without a release.
 - **The Neo4j proxy and the other services are not versioned separately**
   (`services/neo4j-proxy/package.json` says `0.1.0`); their images are tagged
   by commit.
@@ -507,8 +511,9 @@ because they are the specifications the AI author reads.
 3. Enforce coverage thresholds on the critical paths, then ratchet.
 4. Drive the report-only scanners (WCAG contrast, the pentest suite) to green
    and drop `continue-on-error`.
-5. Automate the version bump and the changelog from the commit history, and
-   decide a release cadence.
+5. Automate the monthly release PR and the changelog from the commit history
+   (release-please or semantic-release), once Conventional Commits are
+   enforced.
 6. Adopt the Eclipse DSP and DCP TCKs and make the compliance floors a PR
    signal; add provenance (SLSA) to releases.
 
