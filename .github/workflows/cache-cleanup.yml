@@ -1,0 +1,61 @@
+# ---------------------------------------------------------------------------
+# Cache cleanup: delete Actions caches nothing will restore again (#847)
+# ---------------------------------------------------------------------------
+# The repository's cache sat over its 10 GB limit (10.7 GB on 2026-11-04), so
+# GitHub evicted by least recent use and the npm caches every job restores
+# went with the rest. Two thirds of the space were entries no job reads
+# again: one CodeQL overlay database per push to main, one Next.js build
+# cache per UI change, older Playwright and Trivy caches, and caches of pull
+# requests already merged. scripts/prune-actions-caches.py says which and why.
+#
+# Daily, because CodeQL alone adds about 2.5 GB on a busy day. A run takes
+# under a minute. Dispatch with apply off to see the list without deleting.
+# ---------------------------------------------------------------------------
+name: Cache cleanup
+
+on:
+  schedule:
+    - cron: "41 5 * * *"
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Delete the caches (off: only list them)"
+        type: boolean
+        default: true
+
+permissions:
+  actions: write
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: cache-cleanup
+  cancel-in-progress: false
+
+jobs:
+  prune:
+    name: Prune caches
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts/prune-actions-caches.py
+          sparse-checkout-cone-mode: false
+
+      - name: Delete caches of closed pull requests and superseded entries
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APPLY: ${{ github.event_name == 'schedule' || inputs.apply }}
+        run: |
+          if [ "$APPLY" = "true" ]; then
+            python3 scripts/prune-actions-caches.py --apply | tee prune.txt
+          else
+            python3 scripts/prune-actions-caches.py | tee prune.txt
+          fi
+          {
+            echo "### Cache cleanup"
+            echo '```'
+            tail -n 1 prune.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

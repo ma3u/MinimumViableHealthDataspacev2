@@ -193,7 +193,7 @@ git log --oneline -1
 - [Deploy to GitHub Pages](../.github/workflows/pages.yml): the static export, API routes disabled.
 - [Deploy to Azure](../.github/workflows/deploy-azure.yml): the live hub, on every push to `main`.
 - [Nightly](../.github/workflows/nightly.yml): Playwright, Lighthouse and the [protocol compliance](../.github/workflows/compliance.yml) suites, once a night when `main` changed.
-- All [38 workflows](SDLC.md#62-the-other-workflows) and their [latest runs](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions).
+- All [39 workflows](SDLC.md#62-the-other-workflows) and their [latest runs](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions).
 
 ---
 
