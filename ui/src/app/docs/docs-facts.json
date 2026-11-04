@@ -1252,13 +1252,7 @@
       "Trustee Policy Tests (opa test)",
       "ePA Ingest Tests (Vitest)",
       "iOS Analyte Parity (Swift)",
-      "Secret Scan (gitleaks)",
-      "Dependency Audit",
-      "SBOM Generation",
-      "Licence Compliance",
-      "Trivy Security Scan",
-      "Kubescape K8s Posture",
-      "Lint"
+      "Supply-chain and posture scans"
     ],
     "compliance.yml": [
       "Image platforms",
@@ -1295,21 +1289,21 @@
   "lastUpdated": {
     "/docs": "2026-11-02",
     "/docs/user-guide": "2026-11-03",
-    "/docs/developer": "2026-11-03",
-    "/docs/developer/quality-gates": "2026-11-03",
+    "/docs/developer": "2026-11-04",
+    "/docs/developer/quality-gates": "2026-11-04",
     "/docs/developer/api": "2026-11-02",
     "/docs/developer/reference": "2026-11-02",
-    "/docs/developer/[slug]": "2026-11-03",
+    "/docs/developer/[slug]": "2026-11-04",
     "/docs/architecture": "2026-11-03",
-    "/docs/security": "2026-11-03",
-    "/docs/security/[slug]": "2026-11-03",
-    "/docs/klarbefund": "2026-11-03",
-    "/docs/ehds": "2026-11-03",
+    "/docs/security": "2026-11-04",
+    "/docs/security/[slug]": "2026-11-04",
+    "/docs/klarbefund": "2026-11-04",
+    "/docs/ehds": "2026-11-04",
     "/docs/ehds/glossary": "2026-11-02",
-    "/docs/ehds/[slug]": "2026-11-03",
+    "/docs/ehds/[slug]": "2026-11-04",
     "/docs/roadmap": "2026-11-02",
-    "/docs/operations": "2026-11-03",
-    "/docs/operations/[slug]": "2026-11-03",
-    "/docs/klarbefund/[slug]": "2026-11-03"
+    "/docs/operations": "2026-11-04",
+    "/docs/operations/[slug]": "2026-11-04",
+    "/docs/klarbefund/[slug]": "2026-11-04"
   }
 }

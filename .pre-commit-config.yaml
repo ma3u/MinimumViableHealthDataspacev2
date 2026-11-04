@@ -193,7 +193,7 @@ repos:
         language: python
         additional_dependencies: [pyyaml]
         entry: python3 scripts/gen-docs-facts.py
-        files: ^(ui/src/app/.*(page|route)\.tsx?|ui/src/app/docs/.*|ui/src/content/.*|ui/src/components/Navigation\.tsx|ui/public/openapi\.yaml|ui/__tests__/.*|ui/vitest\.config\.ts|ui/package\.json|services/neo4j-proxy/.*\.test\.ts|\.pre-commit-config\.yaml|docker-compose(\.jad)?\.yml|jad/init-postgres\.sql|docs/ADRs/ADR-.*\.md|scripts/compliance-baseline\.json|scripts/gen-docs-facts\.py|\.github/workflows/(test|compliance|security-scan|pr-gate|deploy-azure)\.yml)$
+        files: ^(ui/src/app/.*(page|route)\.tsx?|ui/src/app/docs/.*|ui/src/content/.*|ui/src/components/Navigation\.tsx|ui/public/openapi\.yaml|ui/__tests__/.*|ui/vitest\.config\.ts|ui/package\.json|services/neo4j-proxy/.*\.test\.ts|\.pre-commit-config\.yaml|docker-compose(\.jad)?\.yml|jad/init-postgres\.sql|docs/ADRs/ADR-.*\.md|scripts/compliance-baseline\.json|scripts/gen-docs-facts\.py|\.github/workflows/(test|nightly|compliance|security-scan|pr-gate|deploy-azure)\.yml)$
         pass_filenames: false
         stages: [pre-commit]
 
@@ -241,12 +241,13 @@ repos:
 
       # A workflow whose paths filter misses a script it runs stops re-running
       # when that script is fixed, and the last, stale, result stands.
-      # compliance.yml left the list with ADR-074: nightly.yml runs it after any
-      # change to main, so it has no paths filter to keep complete.
+      # compliance.yml left the list with ADR-074 (nightly.yml runs it after
+      # any change to main) and demo-smoke.yml with #847 (daily only): neither
+      # has a paths filter left to keep complete.
       - id: workflow-paths
         name: Workflows re-run when what they run changes
         language: system
-        entry: python3 scripts/check-workflow-paths.py .github/workflows/bruno-smoke.yml .github/workflows/catalog-crawler.yml .github/workflows/demo-smoke.yml .github/workflows/security-scan.yml
+        entry: python3 scripts/check-workflow-paths.py .github/workflows/bruno-smoke.yml .github/workflows/catalog-crawler.yml .github/workflows/security-scan.yml
         files: ^(\.github/workflows/.*\.ya?ml|scripts/.*|jad/.*|ui/scripts/.*)$
         pass_filenames: false
         stages: [pre-commit]

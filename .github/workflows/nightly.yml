@@ -2,8 +2,8 @@
 # Nightly: the suites that take long and decide nothing at merge time
 # ---------------------------------------------------------------------------
 # ADR-074 (#847). Playwright E2E with WCAG 2.2 AA and the OWASP/BSI checks
-# against a seeded Neo4j, the Lighthouse performance budget, and the protocol
-# compliance suites on a fresh JAD stack. They used to run on every push to
+# against a seeded Neo4j, the Lighthouse performance budget, gitleaks over the
+# whole history, and the protocol compliance suites on a fresh JAD stack. They used to run on every push to
 # main, about 15 a day, and none of them blocks a merge: the PR Gate does.
 #
 # Once a day, and only when main has a commit that no green run of this
@@ -323,6 +323,53 @@ jobs:
           retention-days: 30
 
   # -----------------------------------------------------------------------
+  # gitleaks over the whole history (BSI C5 DEV-08). Moved from test.yml:
+  # pre-commit scans what is staged and PR Gate the pull request's commits,
+  # so per push this only repeated them (#847).
+  # -----------------------------------------------------------------------
+  secret-scan:
+    name: Secret Scan (gitleaks)
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # full history needed for gitleaks --log-opts
+
+      - name: Install gitleaks
+        run: |
+          GITLEAKS_VERSION="8.27.2"
+          GITLEAKS_ARCHIVE="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${GITLEAKS_ARCHIVE}" \
+            -o "${GITLEAKS_ARCHIVE}"
+          curl -sfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_checksums.txt" \
+            -o gitleaks_checksums.txt
+          grep "${GITLEAKS_ARCHIVE}" gitleaks_checksums.txt | sha256sum -c -
+          tar -xzf "${GITLEAKS_ARCHIVE}" gitleaks
+          sudo mv gitleaks /usr/local/bin/gitleaks
+
+      - name: Scan git history for secrets
+        run: gitleaks detect --source . --log-opts="HEAD" --exit-code 1
+
+      - name: Secret scan summary
+        if: always()
+        run: |
+          # `cmd 2>&1 >> file` sends stderr to the OLD stdout (the job log) and
+          # only stdout to the file. gitleaks writes its findings to stderr, so
+          # that ordering silently produced an empty summary. Redirect the group
+          # so both streams land in the summary.
+          {
+            echo "## Secret Scan (gitleaks)"
+            gitleaks detect --source . --log-opts="HEAD" --no-banner || true
+          } >> "$GITHUB_STEP_SUMMARY" 2>&1
+
+  # -----------------------------------------------------------------------
+  # Dependency Vulnerability Audit (BSI C5 DEV-05 / OWASP A06)
+  # -----------------------------------------------------------------------
+
+  # -----------------------------------------------------------------------
   # DSP TCK, DCP, EHDS domain and the full API collection on a fresh JAD
   # stack, held to the floors in scripts/compliance-baseline.json.
   # -----------------------------------------------------------------------
@@ -346,7 +393,7 @@ jobs:
   # -----------------------------------------------------------------------
   report:
     name: Report the night
-    needs: [gate, e2e, lighthouse, compliance]
+    needs: [gate, e2e, lighthouse, secret-scan, compliance]
     if: always() && github.event_name == 'schedule' && needs.gate.outputs.run == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -359,6 +406,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           E2E: ${{ needs.e2e.result }}
           LIGHTHOUSE: ${{ needs.lighthouse.result }}
+          SECRETS: ${{ needs.secret-scan.result }}
           COMPLIANCE: ${{ needs.compliance.result }}
         run: |
           set -euo pipefail
@@ -366,9 +414,9 @@ jobs:
           open=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
             --search "\"$title\" in:title" --json number,title \
             --jq "[.[] | select(.title == \"$title\")][0].number // \"\"")
-          results="E2E: $E2E, Lighthouse: $LIGHTHOUSE, Protocol Compliance: $COMPLIANCE"
+          results="E2E: $E2E, Lighthouse: $LIGHTHOUSE, Secret scan: $SECRETS, Protocol Compliance: $COMPLIANCE"
           body="$results. Commit ${GITHUB_SHA:0:8}, run $RUN_URL"
-          if [[ "$E2E $LIGHTHOUSE $COMPLIANCE" == *failure* ]]; then
+          if [[ "$E2E $LIGHTHOUSE $SECRETS $COMPLIANCE" == *failure* ]]; then
             if [ -n "$open" ]; then
               gh issue comment "$open" --repo "$GITHUB_REPOSITORY" --body "Still red. $body"
             else
