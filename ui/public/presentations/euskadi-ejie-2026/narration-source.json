@@ -346,6 +346,51 @@
       ]
     },
     {
+      "id": "journey",
+      "cues": [
+        {
+          "es": "Este es el recorrido del investigador, desde el registro hasta un resultado auditado.",
+          "eu": "Hau da ikertzailearen ibilbidea, erregistrotik emaitza auditatu bateraino.",
+          "en": "This is the researcher's journey, from registration to an audited result."
+        },
+        {
+          "es": "Primero se registran el hospital, el investigador y el organismo de acceso: cada uno recibe un identificador descentralizado y una credencial verificable.",
+          "eu": "Lehenik, ospitalea, ikertzailea eta sarbide-erakundea erregistratzen dira: bakoitzak identifikatzaile deszentralizatu bat eta egiaztagiri egiaztagarri bat jasotzen ditu.",
+          "frag": 0,
+          "en": "First, the hospital, the researcher and the access body register: each gets a decentralised identifier and a verifiable credential."
+        },
+        {
+          "es": "El hospital publica sus conjuntos de datos en HealthDCAT-AP, y el investigador los encuentra en el catálogo federado.",
+          "eu": "Ospitaleak bere datu-multzoak HealthDCAT-AP formatuan argitaratzen ditu, eta ikertzaileak katalogo federatuan aurkitzen ditu.",
+          "frag": 1,
+          "en": "The hospital publishes its datasets in HealthDCAT-AP, and the researcher finds them in the federated catalogue."
+        },
+        {
+          "es": "El investigador negocia un contrato con el protocolo de espacios de datos y pide un permiso de datos al organismo de acceso, que comprueba la exclusión voluntaria.",
+          "eu": "Ikertzaileak kontratu bat negoziatzen du datu-espazioen protokoloarekin, eta datu-baimen bat eskatzen dio sarbide-erakundeari, zeinak borondatezko uko egitea egiaztatzen duen.",
+          "frag": 2,
+          "en": "The researcher negotiates a contract over the dataspace protocol and asks the access body for a data permit, which checks the opt-out."
+        },
+        {
+          "es": "Con el permiso, el hospital carga los datos, seudonimizados, en un entorno de tratamiento seguro.",
+          "eu": "Baimenarekin, ospitaleak datuak kargatzen ditu, izengoitutak, tratamendu-ingurune seguru batera.",
+          "frag": 3,
+          "en": "With the permit, the hospital uploads the data, pseudonymised, into a secure processing environment."
+        },
+        {
+          "es": "Allí el investigador los analiza en OMOP, solo ve seudónimos y comparte los resultados, y cada uso queda en un informe de auditoría encadenado.",
+          "eu": "Han ikertzaileak OMOPen aztertzen ditu, izengoitiak bakarrik ikusten ditu eta emaitzak partekatzen ditu, eta erabilera oro kateatutako auditoria-txosten batean geratzen da.",
+          "frag": 4,
+          "en": "There the researcher analyses them on OMOP, sees only pseudonyms and shares the results, and every use ends up in a chained audit report."
+        },
+        {
+          "es": "Cada paso funciona hoy en nuestro demostrador, con datos sintéticos.",
+          "eu": "Urrats bakoitza gaur dabil gure erakuslean, datu sintetikoekin.",
+          "en": "Every step runs today in our demonstrator, on synthetic data."
+        }
+      ]
+    },
+    {
       "id": "q5",
       "cues": [
         {
