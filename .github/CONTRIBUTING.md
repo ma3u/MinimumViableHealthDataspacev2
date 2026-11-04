@@ -41,12 +41,16 @@ pre-commit install --hook-type pre-commit --hook-type pre-push
 
 1. Fork the repository and create a feature branch from `main`.
 2. Keep changes focused: one feature or fix per PR, linked to its issue and any ADR.
-3. Use [Conventional Commits](https://www.conventionalcommits.org/) for the PR title
+3. E2E, WCAG and the pentest run once a night, not on your PR
+   ([ADR-074](../docs/ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md)).
+   For a change to UI pages or their API routes, run `npm run test:e2e` in `ui/` against
+   `docker compose up -d` before asking for a merge.
+4. Use [Conventional Commits](https://www.conventionalcommits.org/) for the PR title
    (`fix(scope): subject`); PRs are squash-merged.
-4. A new API route needs a request in `bruno/MVHDv2/`, a fixture in `ui/public/mock/` and an
+5. A new API route needs a request in `bruno/MVHDv2/`, a fixture in `ui/public/mock/` and an
    entry in `ui/public/openapi.yaml`; the hooks name what is missing.
-5. Update `docs/` and `neo4j/init-schema.cypher` if the graph schema changes.
-6. The **PR Gate** check must be green and every review thread resolved before merge.
+6. Update `docs/` and `neo4j/init-schema.cypher` if the graph schema changes.
+7. The **PR Gate** check must be green and every review thread resolved before merge.
 
 ## Fictional Organisations Only
 

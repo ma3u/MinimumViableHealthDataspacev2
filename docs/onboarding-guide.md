@@ -174,7 +174,7 @@ commit, among them [Prettier](https://prettier.io/),
 [gitleaks](https://github.com/gitleaks/gitleaks),
 [Semgrep](https://semgrep.dev/docs/) and the API collection check. At push it
 runs the whole Vitest suite, `npm audit` (HIGH and above) and, when the iPhone
-app changed, CodeQL. Each hook and what to do when it fails:
+app changed, its analyte parity check and CodeQL. Each hook and what to do when it fails:
 [the hooks on your machine](SDLC.md#5-the-hooks-on-your-machine).
 
 When a hook rewrites a file (Prettier, the docs facts), stage that file again

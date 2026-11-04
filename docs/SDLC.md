@@ -216,7 +216,8 @@ runs.
 
 [`.pre-commit-config.yaml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.pre-commit-config.yaml),
 run by the [pre-commit framework](https://pre-commit.com/). Install both
-stages once per clone:
+stages once per clone (since #847 a plain `pre-commit install` does the same,
+through `default_install_hook_types`):
 
 ```bash
 pip install pre-commit
@@ -267,23 +268,30 @@ again, then check that `HEAD` moved: a failed commit leaves it where it was.
 | `actionlint`                                                              | GitHub Actions workflows                                                                                                                                        | fix the workflow it names                                                                                                                                              |
 | `image-scan-coverage`                                                     | the CVE scan in `security-scan.yml` covers every image in the compose files                                                                                     | add the image to the scan matrix                                                                                                                                       |
 
-### 5.2 At push: 3 hooks
+### 5.2 At push: 4 hooks
 
-| Hook (id)      | What it does                                                                                                   | When it fails                                                                                                                                |
-| -------------- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vitest-ui`    | the whole UI suite, `vitest run --bail 1`, when the push changes `ui/src` or `ui/__tests__`                    | `cd ui && npx vitest run <file>` for the failing file. A hook that resets a mock uses braces: `beforeEach(() => { m.mockReset(); })`         |
-| `npm-audit-ui` | `scripts/check-npm-audit.py ui --omit=dev`: no HIGH or CRITICAL advisory in production dependencies            | update the dependency; when no fix exists, a time-boxed entry in `docs/npm-audit-exceptions.json` with a reason, an issue and an expiry date |
-| `codeql-swift` | CodeQL on the iPhone app when Swift sources, `Package.swift` or `project.yml` change (about 15 minutes, macOS) | fix the finding, or accept it with its reason in `clients/ios/Scripts/codeql-accepted.txt`; `SKIP=codeql-swift git push` skips it once       |
+| Hook (id)            | What it does                                                                                                                                  | When it fails                                                                                                                                                                                  |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vitest-ui`          | the whole UI suite, `vitest run --bail 1`, when the push changes `ui/src` or `ui/__tests__`                                                   | `cd ui && npx vitest run <file>` for the failing file. A hook that resets a mock uses braces: `beforeEach(() => { m.mockReset(); })`                                                           |
+| `npm-audit-ui`       | `scripts/check-npm-audit.py ui --omit=dev`: no HIGH or CRITICAL advisory in production dependencies                                           | update the dependency; when no fix exists, a time-boxed entry in `docs/npm-audit-exceptions.json` with a reason, an issue and an expiry date                                                   |
+| `ios-analyte-parity` | `swift run AnalyteParity` when the app's shared Swift code, the generated analyte table or `Package.swift` change (seconds once built, macOS) | the Swift table resolves a label or unit differently from `analytes.ts`: regenerate with `npm run generate:swift` in `services/epa-ingest`, or fix the folding in `clients/ios/Sources/Shared` |
+| `codeql-swift`       | CodeQL on the iPhone app when Swift sources, `Package.swift` or `project.yml` change (about 15 minutes, macOS)                                | fix the finding, or accept it with its reason in `clients/ios/Scripts/codeql-accepted.txt`; `SKIP=codeql-swift git push` skips it once                                                         |
 
 [Quality Gates](./quality-gates.md) and the
 [quality gates page](https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/developer/quality-gates)
 have the coverage figures and the gates still to come.
 
+E2E, the WCAG audit and the pentest specs no longer run on each push; they
+run once a night when `main` changed
+([ADR-074](./ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md)).
+Before you merge a change to UI pages or their API routes, run them against
+the compose stack: `docker compose up -d`, then `cd ui && npm run test:e2e`.
+
 ---
 
 ## 6. The checks on GitHub
 
-`.github/workflows/` holds 37 workflows. Only the **PR Gate** blocks a merge.
+`.github/workflows/` holds 39 workflows. Only the **PR Gate** blocks a merge.
 
 ### 6.1 PR Gate: the required check
 
