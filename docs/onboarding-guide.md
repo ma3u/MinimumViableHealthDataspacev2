@@ -189,7 +189,7 @@ git log --oneline -1
 ### CI Pipeline
 
 - [PR Gate](../.github/workflows/pr-gate.yml): the one required check on every PR.
-- [Test Suite](../.github/workflows/test.yml): unit tests, lint, security scans.
+- [Test Suite](../.github/workflows/test.yml): unit tests and one job of security scans.
 - [Deploy to GitHub Pages](../.github/workflows/pages.yml): the static export, API routes disabled.
 - [Deploy to Azure](../.github/workflows/deploy-azure.yml): the live hub, on every push to `main`.
 - [Nightly](../.github/workflows/nightly.yml): Playwright, Lighthouse and the [protocol compliance](../.github/workflows/compliance.yml) suites, once a night when `main` changed.

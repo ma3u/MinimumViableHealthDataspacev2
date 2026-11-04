@@ -1,8 +1,9 @@
 # ---------------------------------------------------------------------------
 # Test Suite — Health Dataspace v2
 # ---------------------------------------------------------------------------
-# Runs unit tests, API integration tests, lint and the scanners for the
-# Next.js UI and the services.
+# Runs unit tests and API integration tests for the Next.js UI and the
+# services, and one job of supply-chain and posture scans. Lint and the
+# per-push gitleaks scan are PR Gate's (#847).
 #
 # Unit/API tests use vi.mock(): NO live Neo4j, EDC-V, or Keycloak needed.
 # The Playwright E2E suite and the Lighthouse budget run once a night in
@@ -311,215 +312,34 @@ jobs:
         run: swift run AnalyteParity
 
   # -----------------------------------------------------------------------
-  # Secret Scan — gitleaks (BSI C5 DEV-08)
-  # Scans git history and staged files for accidentally committed secrets.
-  # Uses the official gitleaks binary (not the GitHub Action, which pins
-  # to a specific version via SHA for supply-chain safety).
-  # -----------------------------------------------------------------------
-  secret-scan:
-    name: Secret Scan (gitleaks)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0 # full history needed for gitleaks --log-opts
-
-      - name: Install gitleaks
-        run: |
-          GITLEAKS_VERSION="8.27.2"
-          GITLEAKS_ARCHIVE="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
-          curl -sfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${GITLEAKS_ARCHIVE}" \
-            -o "${GITLEAKS_ARCHIVE}"
-          curl -sfL "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_checksums.txt" \
-            -o gitleaks_checksums.txt
-          grep "${GITLEAKS_ARCHIVE}" gitleaks_checksums.txt | sha256sum -c -
-          tar -xzf "${GITLEAKS_ARCHIVE}" gitleaks
-          sudo mv gitleaks /usr/local/bin/gitleaks
-
-      - name: Scan git history for secrets
-        run: gitleaks detect --source . --log-opts="HEAD" --exit-code 1
-
-      - name: Secret scan summary
-        if: always()
-        run: |
-          # `cmd 2>&1 >> file` sends stderr to the OLD stdout (the job log) and
-          # only stdout to the file. gitleaks writes its findings to stderr, so
-          # that ordering silently produced an empty summary. Redirect the group
-          # so both streams land in the summary.
-          {
-            echo "## Secret Scan (gitleaks)"
-            gitleaks detect --source . --log-opts="HEAD" --no-banner || true
-          } >> "$GITHUB_STEP_SUMMARY" 2>&1
-
-  # -----------------------------------------------------------------------
-  # Dependency Vulnerability Audit (BSI C5 DEV-05 / OWASP A06)
-  # -----------------------------------------------------------------------
-  dependency-audit:
-    name: Dependency Audit
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: ./ui/package-lock.json
-
-      # Same gate as the pre-push hook, over all dependencies: high and
-      # critical fail unless excepted, with an expiry, in
-      # docs/npm-audit-exceptions.json (#435).
-      - name: Audit UI dependencies
-        run: python3 scripts/check-npm-audit.py ui
-
-      - name: Audit Neo4j proxy dependencies
-        # Use --omit=dev to audit only production dependencies for the proxy
-        run: python3 scripts/check-npm-audit.py services/neo4j-proxy --omit=dev
-        continue-on-error: true
-
-      - name: Audit summary
-        if: always()
-        # working-directory, not `cd ui && ... || true`: newer shellcheck flags
-        # that as SC2015, which failed PR Gate for any PR touching this file.
-        working-directory: ./ui
-        run: |
-          {
-            echo "## Dependency Audit"
-            echo "| Package | Severity |"
-            echo "| --- | --- |"
-          } >> "$GITHUB_STEP_SUMMARY"
-          npm audit --json 2>/dev/null | \
-            node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
-            Object.values(d.vulnerabilities||{}).forEach(v=>
-              process.stdout.write('| '+v.name+' | '+v.severity+' |\n')
-            )" >> "$GITHUB_STEP_SUMMARY" || true
-
-  # -----------------------------------------------------------------------
-  # SBOM Generation (CycloneDX) — EU CRA Art. 13, EHDS Art. 50, SIMPL-Open
-  # -----------------------------------------------------------------------
-  sbom:
-    name: SBOM Generation
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: ./ui/package-lock.json
-
-      - name: Install dependencies
-        working-directory: ./ui
-        run: npm ci
-
-      - name: Generate CycloneDX SBOM (UI)
-        working-directory: ./ui
-        run: npx @cyclonedx/cyclonedx-npm --output-file ../sbom-ui.cdx.json --spec-version 1.5
-
-      - name: Generate CycloneDX SBOM (Neo4j Proxy)
-        working-directory: ./services/neo4j-proxy
-        run: |
-          npm ci
-          npx @cyclonedx/cyclonedx-npm --output-file ../../sbom-neo4j-proxy.cdx.json --spec-version 1.5
-
-      - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@v7
-        with:
-          name: sbom
-          path: |
-            sbom-ui.cdx.json
-            sbom-neo4j-proxy.cdx.json
-          retention-days: 90
-
-      - name: SBOM summary
-        run: |
-          echo "## SBOM Generation" >> $GITHUB_STEP_SUMMARY
-          echo "| Component | Format | Spec |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| ui | CycloneDX | 1.5 |" >> $GITHUB_STEP_SUMMARY
-          echo "| neo4j-proxy | CycloneDX | 1.5 |" >> $GITHUB_STEP_SUMMARY
-
-  # -----------------------------------------------------------------------
-  # Licence Compliance — EU OSS Strategy, BSI C5 OPS-04, SIMPL-Open
-  # -----------------------------------------------------------------------
-  license-check:
-    name: Licence Compliance
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: ./ui/package-lock.json
-
-      - name: Install dependencies
-        working-directory: ./ui
-        run: npm ci
-
-      # license-checker@25.0.1 (the original) is unmaintained and crashes
-      # with TypeError: json.readme.toLowerCase is not a function on some
-      # modern package.json shapes. license-checker-rseidelsohn is the
-      # maintained fork and handles the same flags. Both ui/package.json
-      # and services/neo4j-proxy/package.json carry
-      # "license": "Apache-2.0" so the self-package passes its own
-      # allowlist without needing a version-pinned excludePackages entry.
-      # lightningcss (MPL-2.0) is the build-time CSS compiler; the image ships
-      # .next/standalone, which does not contain it. It shows under --production
-      # only because @unhead/bundler (via Scalar) declares it an optional peer,
-      # which marks the dev install devOptional. Excluded by name, not by
-      # adding MPL-2.0 to the allowlist.
-      - name: Check licences (UI)
-        working-directory: ./ui
-        run: |
-          npx --yes license-checker-rseidelsohn@4.4.2 --production --excludePrivatePackages --excludePackagesStartingWith "lightningcss" --onlyAllow "MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0;LGPL-3.0-or-later" --summary
-
-      - name: Check licences (Neo4j Proxy)
-        working-directory: ./services/neo4j-proxy
-        run: |
-          npm ci
-          npx --yes license-checker-rseidelsohn@4.4.2 --production --excludePrivatePackages --onlyAllow "MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0;LGPL-3.0-or-later" --summary
-
-      - name: Licence summary
-        if: always()
-        run: |
-          echo "## Licence Compliance" >> $GITHUB_STEP_SUMMARY
-          echo "Allowlist: MIT, Apache-2.0, ISC, BSD-2-Clause, BSD-3-Clause, 0BSD, CC0-1.0, CC-BY-4.0, Unlicense, Python-2.0, BlueOak-1.0.0" >> $GITHUB_STEP_SUMMARY
-
-  # -----------------------------------------------------------------------
-  # Trivy Security Scan (CVE-2026-33634 safe version pinned)
+  # Supply-chain and posture scans, in one job (#847)
   #
-  # ⚠️  IMPORTANT: Do NOT use aquasecurity/trivy-action or setup-trivy —
-  # those GitHub Actions were compromised in the March 2026 supply chain
-  # attack (CVE-2026-33634 / GHSA-69fq-xp46-6x23). Tags 0.69.4–0.69.6
-  # and all trivy-action tags were poisoned with credential-stealing
-  # malware. We install the Trivy binary directly at the last clean
-  # version (0.69.3) via the official install.sh, pinned by SHA-256.
+  # Trivy, Kubescape, npm audit, the CycloneDX SBOM and the licence check
+  # were five jobs, each paying for its own runner, checkout and setup, for
+  # about a minute of work each; on a free public repository that was five of
+  # the twenty jobs that can run at once. Every step after a failed one still
+  # runs (`!cancelled()`), so one red gate does not hide the others, and the
+  # job is red if any of them is. Trivy runs first, on the clean checkout,
+  # before npm ci puts node_modules in the tree. The job id stays trivy-scan:
+  # the Security tab and its SARIF category know it by that id.
   #
-  # Safe versions:
-  #   trivy binary : 0.69.3
-  #   trivy-action : DO NOT USE (compromised, not yet re-verified)
-  #   setup-trivy  : DO NOT USE (compromised, not yet re-verified)
+  # Lint and the gitleaks scan left this workflow: PR Gate runs ESLint and
+  # tsc through pre-commit and gitleaks over the pull request's commits, and
+  # the full-history gitleaks scan runs in nightly.yml.
   # -----------------------------------------------------------------------
   trivy-scan:
-    name: Trivy Security Scan
+    name: Supply-chain and posture scans
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     permissions:
       security-events: write # required to upload SARIF to Security tab
       contents: read
     steps:
       - uses: actions/checkout@v7
 
+      # Trivy 0.69.3 binary, pinned (CVE-2026-33634): do NOT use
+      # aquasecurity/trivy-action or setup-trivy, whose tags were poisoned in
+      # the March 2026 supply-chain attack (GHSA-69fq-xp46-6x23).
       # Install Trivy 0.69.3 binary directly — avoids compromised trivy-action
       # The install script is fetched from the official GitHub release, not Docker Hub.
       - name: Install Trivy 0.69.3 (pinned — CVE-2026-33634 safe)
@@ -547,14 +367,17 @@ jobs:
             .
         continue-on-error: true # upload report even on findings
 
+      # The category is the one the separate trivy-scan job used, so the
+      # Security tab keeps one Trivy analysis instead of starting a second.
       - name: Upload SARIF to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
-        if: always()
+        if: ${{ !cancelled() }}
         with:
           sarif_file: trivy-results.sarif
+          category: .github/workflows/test.yml:trivy-scan
 
       - name: Trivy summary table
-        if: always()
+        if: ${{ !cancelled() }}
         run: |
           echo "## Trivy Scan Results" >> $GITHUB_STEP_SUMMARY
           trivy fs \
@@ -573,24 +396,25 @@ jobs:
             --quiet \
             .
 
-  # -----------------------------------------------------------------------
-  # Kubescape K8s Posture Scan (BSI C5 / NSA hardening guide)
-  # Scans k8s/ manifest files against CIS and NSA frameworks.
-  # Does NOT require a live cluster — static manifest analysis only.
-  # -----------------------------------------------------------------------
-  kubescape-scan:
-    name: Kubescape K8s Posture
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-
+      # Kubescape: k8s/ manifests against the NSA and CIS frameworks,
+      # statically, no cluster needed.
+      # The upstream install script fails now and then (twice on 2026-11-03),
+      # and in one job that would fail every scan, so it gets three tries.
       - name: Install kubescape
+        if: ${{ !cancelled() }}
         run: |
-          curl -s https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | /bin/bash
+          for attempt in 1 2 3; do
+            if curl -sfL https://raw.githubusercontent.com/kubescape/kubescape/master/install.sh | /bin/bash; then
+              break
+            fi
+            [ "$attempt" = 3 ] && exit 1
+            echo "kubescape install failed, attempt $attempt; retrying"
+            sleep 10
+          done
           echo "$HOME/.kubescape/bin" >> "$GITHUB_PATH"
 
       - name: Scan k8s manifests (NSA framework)
+        if: ${{ !cancelled() }}
         run: |
           kubescape scan framework nsa \
             --severity-threshold critical \
@@ -604,6 +428,7 @@ jobs:
       # name, and only run the scan if it exists; otherwise just warn
       # and continue so the NSA scan still gates critical issues.
       - name: Scan k8s manifests (CIS benchmark)
+        if: ${{ !cancelled() }}
         run: |
           CIS_FRAMEWORK=$(kubescape list frameworks 2>/dev/null \
             | grep -oE "cis-v[^ ]+" | head -1 || true)
@@ -636,28 +461,111 @@ jobs:
             kubescape-cis.json
           retention-days: 30
 
-  # -----------------------------------------------------------------------
-  # Lint Check
-  # -----------------------------------------------------------------------
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    defaults:
-      run:
-        working-directory: ./ui
-    steps:
-      - uses: actions/checkout@v7
-
+      # Node: npm audit, the SBOM and the licence check share one install.
       - name: Setup Node.js
+        if: ${{ !cancelled() }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: ./ui/package-lock.json
+          cache-dependency-path: |
+            ./ui/package-lock.json
+            ./services/neo4j-proxy/package-lock.json
 
-      - name: Install dependencies
-        run: npm ci
+      # Same gate as the pre-push hook, over all dependencies: high and
+      # critical fail unless excepted, with an expiry, in
+      # docs/npm-audit-exceptions.json (#435).
+      - name: Audit UI dependencies
+        if: ${{ !cancelled() }}
+        run: python3 scripts/check-npm-audit.py ui
 
-      - name: Run ESLint
-        run: npm run lint
+      - name: Audit Neo4j proxy dependencies
+        if: ${{ !cancelled() }}
+        # Use --omit=dev to audit only production dependencies for the proxy
+        run: python3 scripts/check-npm-audit.py services/neo4j-proxy --omit=dev
+        continue-on-error: true
+
+      - name: Audit summary
+        if: always()
+        # working-directory, not `cd ui && ... || true`: newer shellcheck flags
+        # that as SC2015, which failed PR Gate for any PR touching this file.
+        working-directory: ./ui
+        run: |
+          {
+            echo "## Dependency Audit"
+            echo "| Package | Severity |"
+            echo "| --- | --- |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          npm audit --json 2>/dev/null | \
+            node -e "const d=JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+            Object.values(d.vulnerabilities||{}).forEach(v=>
+              process.stdout.write('| '+v.name+' | '+v.severity+' |\n')
+            )" >> "$GITHUB_STEP_SUMMARY" || true
+
+      # SBOM (CycloneDX): EU CRA Art. 13, EHDS Art. 50, SIMPL-Open.
+      - name: Install dependencies (UI and Neo4j proxy)
+        if: ${{ !cancelled() }}
+        run: |
+          npm ci --prefix ui
+          npm ci --prefix services/neo4j-proxy
+
+      - name: Generate CycloneDX SBOM (UI)
+        if: ${{ !cancelled() }}
+        working-directory: ./ui
+        run: npx @cyclonedx/cyclonedx-npm --output-file ../sbom-ui.cdx.json --spec-version 1.5
+
+      - name: Generate CycloneDX SBOM (Neo4j Proxy)
+        if: ${{ !cancelled() }}
+        working-directory: ./services/neo4j-proxy
+        run: |
+          npx @cyclonedx/cyclonedx-npm --output-file ../../sbom-neo4j-proxy.cdx.json --spec-version 1.5
+
+      - name: Upload SBOM artifacts
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: sbom
+          path: |
+            sbom-ui.cdx.json
+            sbom-neo4j-proxy.cdx.json
+          retention-days: 90
+
+      - name: SBOM summary
+        if: ${{ !cancelled() }}
+        run: |
+          echo "## SBOM Generation" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Format | Spec |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| ui | CycloneDX | 1.5 |" >> $GITHUB_STEP_SUMMARY
+          echo "| neo4j-proxy | CycloneDX | 1.5 |" >> $GITHUB_STEP_SUMMARY
+
+      # Licences: EU OSS Strategy, BSI C5 OPS-04, SIMPL-Open.
+      # license-checker@25.0.1 (the original) is unmaintained and crashes
+      # with TypeError: json.readme.toLowerCase is not a function on some
+      # modern package.json shapes. license-checker-rseidelsohn is the
+      # maintained fork and handles the same flags. Both ui/package.json
+      # and services/neo4j-proxy/package.json carry
+      # "license": "Apache-2.0" so the self-package passes its own
+      # allowlist without needing a version-pinned excludePackages entry.
+      # lightningcss (MPL-2.0) is the build-time CSS compiler; the image ships
+      # .next/standalone, which does not contain it. It shows under --production
+      # only because @unhead/bundler (via Scalar) declares it an optional peer,
+      # which marks the dev install devOptional. Excluded by name, not by
+      # adding MPL-2.0 to the allowlist.
+      - name: Check licences (UI)
+        if: ${{ !cancelled() }}
+        working-directory: ./ui
+        run: |
+          npx --yes license-checker-rseidelsohn@4.4.2 --production --excludePrivatePackages --excludePackagesStartingWith "lightningcss" --onlyAllow "MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0;LGPL-3.0-or-later" --summary
+
+      - name: Check licences (Neo4j Proxy)
+        if: ${{ !cancelled() }}
+        working-directory: ./services/neo4j-proxy
+        run: |
+          npx --yes license-checker-rseidelsohn@4.4.2 --production --excludePrivatePackages --onlyAllow "MIT;Apache-2.0;ISC;BSD-2-Clause;BSD-3-Clause;0BSD;CC0-1.0;CC-BY-4.0;Unlicense;Python-2.0;BlueOak-1.0.0;LGPL-3.0-or-later" --summary
+
+      - name: Licence summary
+        if: always()
+        run: |
+          echo "## Licence Compliance" >> $GITHUB_STEP_SUMMARY
+          echo "Allowlist: MIT, Apache-2.0, ISC, BSD-2-Clause, BSD-3-Clause, 0BSD, CC0-1.0, CC-BY-4.0, Unlicense, Python-2.0, BlueOak-1.0.0" >> $GITHUB_STEP_SUMMARY

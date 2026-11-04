@@ -7,26 +7,18 @@
 #   - ZAP baseline (anonymous)
 #
 # Triggers:
-#   - Daily 06:00 UTC
-#   - Push to main when UI or workflows change
+#   - Daily 06:00 UTC (GitHub starts it hours late, often around noon)
 #   - Manual dispatch
+#
+# Not on push to main (#847): nothing here waited for the deploy, so a push
+# checked the revision that was live before it. deploy-azure.yml's e2e-azure
+# job checks the new revision once it is serving.
 # ---------------------------------------------------------------------------
 name: Demo Smoke
 
 on:
   schedule:
     - cron: "0 6 * * *"
-  push:
-    branches: [main]
-    paths:
-      - "ui/**"
-      - "bruno/**"
-      # The runner and the floor it checks against, asserted by
-      # scripts/check-workflow-paths.py.
-      - "scripts/run-api-tests.sh"
-      - "scripts/check-compliance-baseline.py"
-      - "scripts/compliance-baseline.json"
-      - ".github/workflows/demo-smoke.yml"
   workflow_dispatch:
 
 env:

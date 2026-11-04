@@ -1258,13 +1258,7 @@
       "Trustee Policy Tests (opa test)",
       "ePA Ingest Tests (Vitest)",
       "iOS Analyte Parity (Swift)",
-      "Secret Scan (gitleaks)",
-      "Dependency Audit",
-      "SBOM Generation",
-      "Licence Compliance",
-      "Trivy Security Scan",
-      "Kubescape K8s Posture",
-      "Lint"
+      "Supply-chain and posture scans"
     ],
     "compliance.yml": [
       "Image platforms",
@@ -1302,9 +1296,9 @@
     "/docs": "2026-11-02",
     "/docs/user-guide": "2026-11-03",
     "/docs/developer": "2026-11-04",
-    "/docs/developer/quality-gates": "2026-11-03",
+    "/docs/developer/quality-gates": "2026-11-04",
     "/docs/developer/api": "2026-11-02",
-    "/docs/developer/reference": "2026-11-03",
+    "/docs/developer/reference": "2026-11-04",
     "/docs/developer/[slug]": "2026-11-04",
     "/docs/architecture": "2026-11-04",
     "/docs/security": "2026-11-04",

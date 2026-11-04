@@ -19,7 +19,7 @@ this script derives it from the code:
   openapi          ui/public/openapi.yaml (version, paths, operations)
   workflowJobs     the job names of the main CI workflows
   coverageThresholds  ui/vitest.config.ts
-  toolVersions     ui/package.json and the pinned CI tools in test.yml
+  toolVersions     ui/package.json and the pinned CI tools in test.yml and nightly.yml
   lastUpdated      per docs page, the date of its last content change
 
 A page's date moves to today when one of its sources is staged, or when a fact
@@ -233,7 +233,8 @@ def coverage_thresholds():
 def tool_versions():
     pkg = json.loads(read("ui/package.json"))
     deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
-    test_yml = read(".github/workflows/test.yml")
+    # gitleaks is pinned in nightly.yml since its scan left test.yml (#847).
+    test_yml = read(".github/workflows/test.yml") + read(".github/workflows/nightly.yml")
 
     def wf(var):
         m = re.search(rf'{var}="([^"]+)"', test_yml)

@@ -68,17 +68,17 @@ the pre-commit hooks on the changed files, so the Test Suite `lint` and
 
 ## Changes, ordered by saving divided by risk
 
-| PR  | Change                                                                  | Job-min / week saved | Risk                      |
-| --- | ----------------------------------------------------------------------- | -------------------: | ------------------------- |
-| 1   | Remove the no-backend E2E job (the Neo4j job already has WCAG, pentest) |                8,310 | low, it cannot fail today |
-| 1   | CodeQL Swift on schedule and dispatch only until #765                   |          1,750 macOS | low, it produces nothing  |
-| 1   | iOS Analyte Parity behind a job-level path filter, SwiftPM cache        |         ~1,150 macOS | low                       |
-| 1   | `timeout-minutes` on every job, `concurrency` for PR runs               |                 ~100 | low                       |
-| 2   | `nightly.yml`: Pages tests, Lighthouse, Compliance                      |               ~4,400 | medium, a day to notice   |
-| 3   | Main push keeps Vitest only from the PR jobs                            |                 ~620 | low, nightly covers       |
-| 3   | Demo Smoke without its push trigger (it races the deploy)               |                 ~600 | low, `e2e-azure` covers   |
-| 3   | PR: drop duplicate lint and gitleaks, merge five scanner jobs into one  |                 ~370 | low                       |
-| 4   | Cache hygiene, CodeQL `paths-ignore` for docs and iOS                   |                 ~250 | low                       |
+| PR  | Change                                                                  | Job-min / week saved | Risk                            |
+| --- | ----------------------------------------------------------------------- | -------------------: | ------------------------------- |
+| 1   | Remove the no-backend E2E job (the Neo4j job already has WCAG, pentest) |                8,310 | low, it cannot fail today       |
+| 1   | CodeQL Swift on schedule and dispatch only until #765                   |          1,750 macOS | low, it produces nothing        |
+| 1   | iOS Analyte Parity behind a job-level path filter, SwiftPM cache        |         ~1,150 macOS | low                             |
+| 1   | `timeout-minutes` on every job, `concurrency` for PR runs               |                 ~100 | low                             |
+| 2   | `nightly.yml`: Pages tests, Lighthouse, Compliance                      |               ~4,400 | medium, a day to notice         |
+| 3   | Main push drops lint and gitleaks; one scanner job instead of five      |                 ~300 | low, Security tab stays current |
+| 3   | Demo Smoke without its push trigger (it races the deploy)               |                 ~600 | low, `e2e-azure` covers         |
+| 3   | PR: drop duplicate lint and gitleaks, merge five scanner jobs into one  |                 ~370 | low                             |
+| 4   | Cache hygiene, CodeQL `paths-ignore` for docs and iOS                   |                 ~250 | low                             |
 
 Expected: from about 23,400 to about 6,200 job-min/week, macOS from about
 3,030 to about 150.
@@ -108,7 +108,15 @@ advisories arrive without a commit.
 ## Progress
 
 - PR 1 merged 2026-11-03 in #848.
-- PR 2 (`nightly.yml`, this ADR) in review.
+- PR 2 merged 2026-11-03 in #851 (`nightly.yml`, ADR-074). First manual
+  nightly: E2E and Lighthouse green, compliance red on the request #843
+  fixed.
+- PR 3 in review: Lint and the per-push gitleaks scan leave `test.yml`
+  (PR Gate runs both; gitleaks over the whole history moves to the
+  nightly); Trivy, Kubescape, npm audit, SBOM and licences become one job;
+  Demo Smoke loses its push trigger. The merged scanner job still runs on
+  pushes to main, unlike the plan: it keeps the Security tab's Trivy
+  analysis and the per-commit SBOM current.
 
 ## Nothing required is turned off
 
