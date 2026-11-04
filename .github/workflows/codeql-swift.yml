@@ -63,13 +63,33 @@ jobs:
       # The app scheme compiles Sources/MeinBefund and Sources/Shared. The
       # Swift package build is left out: it compiled Shared a second time,
       # under the tracer, only to add the developer tools, which do not ship.
+      #
+      # One architecture. The generic simulator destination builds arm64 and
+      # x86_64, so the tracer extracted every file twice for the same source.
+      # The index store is off as well: CodeQL does not read it.
+      #
+      # One compile job at a time. The Swift extractor is an x86_64 binary
+      # (codeql/swift/tools/osx64) and runs under Rosetta on the arm64
+      # runner, which has 7.5 GB and three cores. Three frontends with three
+      # extractors beside them (up to 860 MB each) and Rosetta's translator
+      # filled 6.4 GB of swap by minute 16, and the runner stopped
+      # answering: every run since 10-29 ended at the job limit with no log
+      # (#845, diagnosed with a memory watchdog on the runner).
+      #
+      # The step has its own limit, below the job's, so a slow build ends the
+      # step while the runner still answers, and its log is kept.
       - name: Build the app
+        timeout-minutes: 70
         run: |
           set -euo pipefail
           xcodegen generate
           xcodebuild -project MeinBefund.xcodeproj -scheme MeinBefund \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath "$RUNNER_TEMP/dd" CODE_SIGNING_ALLOWED=NO clean build -quiet
+            -derivedDataPath "$RUNNER_TEMP/dd" -jobs 1 \
+            CODE_SIGNING_ALLOWED=NO ARCHS=arm64 ONLY_ACTIVE_ARCH=YES \
+            COMPILER_INDEX_STORE_ENABLE=NO SWIFT_ENABLE_BATCH_MODE=NO \
+            'OTHER_SWIFT_FLAGS=$(inherited) -j1' \
+            clean build -quiet
 
       - uses: github/codeql-action/analyze@v4
         with:

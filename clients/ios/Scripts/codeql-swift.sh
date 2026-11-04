@@ -45,7 +45,9 @@ cat >"$work/build.sh" <<BUILD
 set -euo pipefail
 xcodebuild -project MeinBefund.xcodeproj -scheme MeinBefund \\
   -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \\
-  -derivedDataPath "$work/dd" CODE_SIGNING_ALLOWED=NO clean build -quiet
+  -derivedDataPath "$work/dd" CODE_SIGNING_ALLOWED=NO \\
+  ARCHS=arm64 ONLY_ACTIVE_ARCH=YES COMPILER_INDEX_STORE_ENABLE=NO \\
+  clean build -quiet
 BUILD
 chmod +x "$work/build.sh"
 
