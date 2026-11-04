@@ -408,6 +408,12 @@ export default function UserGuidePage() {
       className="text-indigo-700 dark:text-indigo-400 hover:underline"
     />
   );
+  const speDocLink = (
+    <Link
+      href="/docs/developer/secure-processing-environment"
+      className="text-indigo-700 dark:text-indigo-400 hover:underline"
+    />
+  );
   return (
     <div className="max-w-5xl mx-auto px-6 py-12">
       <Link
@@ -1299,6 +1305,13 @@ export default function UserGuidePage() {
                   }
                 </T>
               </li>
+              <li>
+                <T area="docsGuide" tags={{ s: speDocLink }}>
+                  {
+                    "How the workspaces are built from confidential containers, attested and queried, step by step: <s>the secure processing environment</s> in the developer guide."
+                  }
+                </T>
+              </li>
             </ul>
           </div>
 
@@ -1836,9 +1849,12 @@ export default function UserGuidePage() {
               </T>
             </p>
             <p className="text-(--text-secondary) text-sm">
-              <T area="docsGuide" tags={{ i: issue774Link, r: speRunbookLink }}>
+              <T
+                area="docsGuide"
+                tags={{ i: issue774Link, r: speRunbookLink, s: speDocLink }}
+              >
                 {
-                  "On Azure the workspaces stop off hours. A start takes about a minute until attestation and key release, and three to four minutes until both answer queries; starting them on demand is planned (<i>#774</i>). How the attestation is set up, pinned and checked: the <r>runbook</r>."
+                  "On Azure the workspaces are stopped by default and start on demand (ADR-072, <i>#774</i>): a federated query or Start on the admin page starts them, which takes about a minute until attestation and key release and three to four minutes until both answer queries; after 30 minutes without a query they stop again. How the attestation is set up, pinned and checked: the <r>runbook</r>. The concepts behind it: <s>the secure processing environment</s>."
                 }
               </T>
             </p>

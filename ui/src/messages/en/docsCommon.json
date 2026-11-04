@@ -244,5 +244,6 @@
   "Every API route needs a session": "Every API route needs a session",
   "The audit trail behind Art. 73(1)(e)": "The audit trail behind Art. 73(1)(e)",
   "Loading the diagram": "Loading the diagram",
-  "Scroll or pinch to zoom, drag to move, double click to zoom in, 0 fits the screen, Esc closes.": "Scroll or pinch to zoom, drag to move, double click to zoom in, 0 fits the screen, Esc closes."
+  "Scroll or pinch to zoom, drag to move, double click to zoom in, 0 fits the screen, Esc closes.": "Scroll or pinch to zoom, drag to move, double click to zoom in, 0 fits the screen, Esc closes.",
+  "How the hub does it": "How the hub does it"
 }

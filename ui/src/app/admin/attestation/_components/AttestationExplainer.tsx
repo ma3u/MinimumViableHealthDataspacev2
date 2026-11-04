@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Info } from "lucide-react";
 import { T, useT } from "@/lib/i18n/translate";
 import { ADR_068_URL } from "@/lib/spe";
@@ -74,6 +75,23 @@ export function AttestationExplainer() {
         >
           {
             "<a>ADR-068: a sovereign confidential SPE</a> · ADR-069: two SPE workspaces as ACI confidential containers (#774)"
+          }
+        </T>
+      </p>
+      <p>
+        <T
+          area="admin"
+          tags={{
+            s: (
+              <Link
+                href="/docs/developer/secure-processing-environment"
+                className="text-(--accent) hover:underline"
+              />
+            ),
+          }}
+        >
+          {
+            "How it works, from the permit's policy hash to the released key: <s>the secure processing environment</s> in the developer guide."
           }
         </T>
       </p>
