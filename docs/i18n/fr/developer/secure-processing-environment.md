@@ -1,6 +1,6 @@
 ---
 source: docs/developer/secure-processing-environment.md
-sourceHash: e239405eeba430b70ad23f7b848934def002cbc4756cb7075f35c358f05607a7
+sourceHash: 22e2633f418342a4ea8fcf8382d4df4a62cfc914278f6cc10693b081e3c24827
 language: fr
 summary: "Comment le hub construit l’environnement de traitement sécurisé de l’art. 73 à partir de conteneurs confidentiels : les deux espaces de travail SPE sur ACI avec AMD SEV-SNP, le Trustee que gère l’organisme d’accès, la manière dont un espace de travail obtient sa clé, ce que traverse une requête fédérée, comment l’exécuter sur un ordinateur portable et ce qui reste à faire."
 ---
@@ -35,7 +35,27 @@ signé prouve que l’espace de travail exécute le code pour lequel l’autoris
 délivrée. **Pas de clé, pas de données** : une image, une commande ou une variable d’environnement modifiée
 donne un autre hash de politique, et la clé reste où elle est.
 
-## 2. Termes
+## 2. Le framework : CNCF Confidential Containers (CoCo)
+
+Le SPE repose sur [Confidential Containers](https://confidentialcontainers.org/) (CoCo),
+[projet en incubation à la CNCF](https://www.cncf.io/blog/2026/07/22/confidential-containers-becomes-a-cncf-incubating-project/) depuis juillet 2026. CoCo exécute
+des conteneurs dans des TEE matériels et ne remet des secrets qu’aux charges
+de travail qui prouvent ce qu’elles sont ([ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md), décision 1).
+CoCo comporte trois parties ; le hub en utilise deux aujourd’hui :
+
+| Partie de CoCo                                                                        | Ce que c’est                                                                                                                                                                                 | Utilisée ici                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[Trustee](https://github.com/confidential-containers/trustee)**                     | Le service de courtage de clés (KBS), le service d’attestation (AS) et le service de valeurs de référence (RVPS) : il vérifie les preuves d’un TEE et remet des secrets selon une politique. | Oui, v0.22.0, géré par l’organisme d’accès : application ACA `mvhd-trustee` sur Azure, service `trustee` dans `docker-compose.trustee.yml` en local.                                                                                                                                                                                                                   |
+| **[Composants invités](https://github.com/confidential-containers/guest-components)** | Ce qui s’exécute dans le TEE pour recueillir les preuves et dialoguer avec Trustee : les attesteurs et `kbs-client`.                                                                         | Oui : le conteneur d’initialisation `spe-unlock` utilise `kbs-client` avec l’attesteur SEV-SNP, corrigé pour demander à ACI le rapport simple ([`kbs-client.aci.Dockerfile`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/services/spe-loader/kbs-client.aci.Dockerfile)).                                                                         |
+| **Environnement d’exécution [Kata Containers](https://katacontainers.io/)**           | Démarre chaque pod dans sa propre micro-VM confidentielle, via une `RuntimeClass` Kubernetes ou en peer pods dans un cloud.                                                                  | Pas sur Azure : la politique du tenant a refusé AKS, et les tests Azure des peer pods sont désactivés. Ce sont les groupes de conteneurs confidentiels d’ACI qui fournissent la VM utilitaire SEV-SNP ([ADR-069](../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)). Sur un Mac, Kata sert de contrôle d’exécution local facultatif (ADR-068, M2). |
+
+Sur Azure, l’isolation vient donc d’ACI, et la décision de confiance (quelle
+charge de travail reçoit une clé) du Trustee de CoCo. Passer plus tard à Kata
+sur Kubernetes change l’environnement d’exécution et le générateur de
+politique (`genpolicy` au lieu de `az confcom`), pas Trustee, l’autorisation
+ni son hash de politique.
+
+## 3. Termes
 
 | Terme                           | Ce que c’est                                                                                                                                                                                                                               |
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -49,7 +69,7 @@ donne un autre hash de politique, et la clé reste où elle est.
 | **Valeurs de référence**        | Ce à quoi Trustee compare le rapport : la mesure de lancement de la VM utilitaire de Microsoft et la TCB minimale (versions du firmware et du microcode).                                                                                  |
 | **Extrait scellé**              | La moitié des patients synthétiques qui revient à un espace de travail, au format `mvhd-spe-extract/1` : des lignes JSON, compressées en gzip, chiffrées en AES-256-GCM sous une nouvelle clé par autorisation.                            |
 
-## 3. Où il s’exécute, et ce que chaque lieu prouve
+## 4. Où il s’exécute, et ce que chaque lieu prouve
 
 La conception est partout la même ; ce qui change, c’est si un vrai matériel
 signe la preuve. L’UI l’indique par l’une de trois étiquettes
@@ -66,7 +86,7 @@ Les nœuds `SPESession` amorcés dans le graphe du Trust Center
 ([`neo4j/seed-trust-center.cypher`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/neo4j/seed-trust-center.cypher))
 portent `simulated: true` ; ils illustrent le modèle et ne constituent pas une preuve.
 
-## 4. Les éléments sur Azure
+## 5. Les éléments sur Azure
 
 | Élément                   | Ressource Azure                                                    | Ce qu’il fait                                                                                                                               |
 | ------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -85,7 +105,7 @@ libération sécurisée de clés de Key Vault ont été envisagées et ne sont d
 chemin de la clé : c’est l’organisme d’accès, et non l’opérateur du cloud, qui décide qui obtient une clé
 (ADR-068, décision 1 ; ADR-069, « Alternatives considered »).
 
-## 5. La chaîne de confiance
+## 6. La chaîne de confiance
 
 ```mermaid
 sequenceDiagram
@@ -125,7 +145,7 @@ sequenceDiagram
 Les secrets ne passent pas par la politique. Ils parviennent au groupe par son volume
 de secrets, si bien qu’en renouveler un ne change pas le hash.
 
-## 6. À l’intérieur d’un espace de travail
+## 7. À l’intérieur d’un espace de travail
 
 Chaque groupe a trois conteneurs, construits à partir de
 [`services/spe-loader`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/services/spe-loader) :
@@ -158,7 +178,7 @@ redémarré ne redemande jamais rien à Trustee ; arrêtez-le puis démarrez-le 
 `unlock`, `ingest` et `load`. Le code de sortie 3 signifie que la clé a été refusée ; 2 signifie
 qu’une base de données ou Trustee n’a pas répondu.
 
-## 7. Ce que traverse une requête fédérée
+## 8. Ce que traverse une requête fédérée
 
 1. Un utilisateur de données pose sa question sur `/query` ou en langage naturel. L’UI appelle
    [`/api/federated`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/src/app/api/federated/route.ts)
@@ -194,7 +214,7 @@ les ajoute à la chaîne d’audit `spe` du hub (ADR-045) : `spe.attestation`,
 - `/admin/policies` : quelle autorisation est liée à quel hash de politique.
 - `/query` : l’avis de démarrage à froid pendant que les espaces de travail démarrent.
 
-## 8. L’exécuter sur un ordinateur portable
+## 9. L’exécuter sur un ordinateur portable
 
 Sans la surcouche ci-dessous, SPE-1 est simplement le graphe du hub et SPE-2 un second
 Neo4j : la fédération fonctionne, mais rien n’est scellé ni attesté. Pour obtenir le vrai
@@ -224,7 +244,7 @@ Les deux s’exécutent dans [`test.yml`](https://github.com/ma3u/MinimumViableH
 la politique de ressources, y compris HOST_DATA à l’endroit où Trustee v0.22.0
 le place.
 
-## 9. Le déployer sur Azure
+## 10. Le déployer sur Azure
 
 [`scripts/azure/21-aci-confidential-spe.sh`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/azure/21-aci-confidential-spe.sh)
 procède par phases, dans cet ordre : `--trustee`, `--extracts`, `--policy`,
@@ -234,7 +254,7 @@ et ce qu’affiche chaque phase ; lisez-le avant la première exécution. Deux p
 elles-mêmes : `--extracts` refuse de changer les clés tant que Trustee en détient, sauf avec
 `--rekey`, et `--trustee` conserve une politique de ressources que Trustee détient déjà.
 
-## 10. Ce qui reste à faire
+## 11. Ce qui reste à faire
 
 - **L’organisme d’accès ne gère pas encore son propre Trustee.** Les partages de Trustee se trouvent
   dans l’abonnement du hub, si bien que le propriétaire de l’abonnement pourrait les lire. Pour
@@ -257,7 +277,7 @@ Tickets : [#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/7
 [#716](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/716),
 [#833](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/833).
 
-## 11. Les décisions, dans l’ordre
+## 12. Les décisions, dans l’ordre
 
 | ADR                                                                                               | Décision                                                                                             | Statut                |
 | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------- |

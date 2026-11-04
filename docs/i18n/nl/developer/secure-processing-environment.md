@@ -1,6 +1,6 @@
 ---
 source: docs/developer/secure-processing-environment.md
-sourceHash: e239405eeba430b70ad23f7b848934def002cbc4756cb7075f35c358f05607a7
+sourceHash: 22e2633f418342a4ea8fcf8382d4df4a62cfc914278f6cc10693b081e3c24827
 language: nl
 summary: "Hoe de hub de beveiligde verwerkingsomgeving van art. 73 bouwt uit confidential containers: de twee SPE-werkruimten op ACI met AMD SEV-SNP, de Trustee die de instantie voor toegang tot gezondheidsgegevens draait, hoe een werkruimte haar sleutel verdient, wat een gefedereerde query doorloopt, hoe u het op een laptop draait en wat nog niet klaar is."
 ---
@@ -37,7 +37,26 @@ afgegeven. **Geen sleutel, geen gegevens**: een gewijzigde image, opdracht of
 omgevingsvariabele geeft een andere beleidshash, en de sleutel blijft waar hij
 is.
 
-## 2. Begrippen
+## 2. Het framework: CNCF Confidential Containers (CoCo)
+
+De SPE is gebouwd op [Confidential Containers](https://confidentialcontainers.org/) (CoCo), sinds juli
+2026 een [CNCF-incubatieproject](https://www.cncf.io/blog/2026/07/22/confidential-containers-becomes-a-cncf-incubating-project/). CoCo draait containers in
+hardware-TEE's en geeft geheimen alleen vrij aan workloads die aantonen wat
+ze zijn ([ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md), besluit 1). CoCo heeft drie onderdelen; de hub
+gebruikt er vandaag twee:
+
+| CoCo-onderdeel                                                                      | Wat het is                                                                                                                                                                    | Hier gebruikt                                                                                                                                                                                                                                                                                                                                    |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **[Trustee](https://github.com/confidential-containers/trustee)**                   | De key broker service (KBS), de attestatiedienst (AS) en de referentiewaardendienst (RVPS): hij controleert het bewijs van een TEE en geeft geheimen vrij volgens een beleid. | Ja, v0.22.0, beheerd door de toegangsinstantie: ACA-app `mvhd-trustee` op Azure, lokaal de dienst `trustee` in `docker-compose.trustee.yml`.                                                                                                                                                                                                     |
+| **[Guest components](https://github.com/confidential-containers/guest-components)** | Wat in de TEE draait om het bewijs te verzamelen en met Trustee te praten: de attesters en `kbs-client`.                                                                      | Ja: de init-container `spe-unlock` gebruikt `kbs-client` met de SEV-SNP-attester, gepatcht zodat hij ACI om het gewone rapport vraagt ([`kbs-client.aci.Dockerfile`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/services/spe-loader/kbs-client.aci.Dockerfile)).                                                           |
+| **[Kata Containers](https://katacontainers.io/) als runtime**                       | Start elke pod in een eigen vertrouwelijke micro-VM, via een Kubernetes-`RuntimeClass` of als peer pods in een cloud.                                                         | Niet op Azure: het tenantbeleid weigerde AKS, en de Azure-tests van de peer pods staan uit. In plaats daarvan leveren de vertrouwelijke containergroepen van ACI de SEV-SNP-utility-VM ([ADR-069](../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)). Op een Mac is Kata een optionele lokale runtimecontrole (ADR-068, M2). |
+
+Op Azure komt de isolatie dus van ACI, en de vertrouwensbeslissing (welke
+workload een sleutel krijgt) van de Trustee van CoCo. Later overstappen op
+Kata op Kubernetes verandert de runtime en de beleidsgenerator (`genpolicy`
+in plaats van `az confcom`), niet Trustee, de vergunning of haar beleidshash.
+
+## 3. Begrippen
 
 | Begrip                     | Wat het is                                                                                                                                                                                                                 |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -51,7 +70,7 @@ is.
 | **Referentiewaarden**      | Waarmee Trustee het rapport vergelijkt: de startmeting van de utility-VM van Microsoft en de minimale TCB (versies van firmware en microcode).                                                                             |
 | **Verzegeld extract**      | De helft van de synthetische patiënten voor één werkruimte, formaat `mvhd-spe-extract/1`: JSON-regels, met gzip gecomprimeerd, versleuteld met AES-256-GCM onder een nieuwe sleutel per vergunning.                        |
 
-## 3. Waar het draait, en wat elke plek bewijst
+## 4. Waar het draait, en wat elke plek bewijst
 
 Het ontwerp is overal hetzelfde; het verschil is of echte hardware het bewijs
 ondertekent. De UI zegt welk van beide, met een van drie labels
@@ -68,7 +87,7 @@ De geseede `SPESession`-knooppunten in de Trust Center-graaf
 ([`neo4j/seed-trust-center.cypher`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/neo4j/seed-trust-center.cypher))
 dragen `simulated: true`; ze illustreren het model en zijn geen bewijs.
 
-## 4. De onderdelen op Azure
+## 5. De onderdelen op Azure
 
 | Onderdeel                 | Azure-resource                                                     | Wat het doet                                                                                                                              |
 | ------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -87,7 +106,7 @@ secure key release van Key Vault zijn overwogen en zitten bewust **niet** in
 het sleutelpad: de toegangsinstantie beslist wie een sleutel krijgt, niet de
 cloudbeheerder (ADR-068 beslissing 1, ADR-069 "Alternatives considered").
 
-## 5. De vertrouwensketen
+## 6. De vertrouwensketen
 
 ```mermaid
 sequenceDiagram
@@ -127,7 +146,7 @@ sequenceDiagram
 Geheimen reizen niet mee in het beleid. Ze bereiken de groep via haar secret
 volume, zodat het roteren van een geheim de hash niet verandert.
 
-## 6. Binnen een werkruimte
+## 7. Binnen een werkruimte
 
 Elke groep heeft drie containers, gebouwd uit
 [`services/spe-loader`](https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/services/spe-loader):
@@ -162,7 +181,7 @@ start haar in plaats daarvan ([`docs/gotchas.md`](../gotchas.md), 2026-11-01).
 `unlock`, `ingest` en `load`. Exitcode 3 betekent dat de sleutel is geweigerd;
 2 betekent dat een database of Trustee niet antwoordde.
 
-## 7. Wat een gefedereerde query doorloopt
+## 8. Wat een gefedereerde query doorloopt
 
 1. Een gegevensgebruiker vraagt op `/query` of in natuurlijke taal. De UI roept
    [`/api/federated`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/src/app/api/federated/route.ts)
@@ -199,7 +218,7 @@ voegt ze toe aan de auditketen `spe` van de hub (ADR-045): `spe.attestation`,
 - `/admin/policies`: welke vergunning aan welke beleidshash is gekoppeld.
 - `/query`: de melding over de koude start terwijl de werkruimten opstarten.
 
-## 8. Het draaien op een laptop
+## 9. Het draaien op een laptop
 
 Zonder de overlay hieronder is SPE-1 gewoon de graaf van de hub en SPE-2 een
 tweede Neo4j: federatie werkt, maar niets is verzegeld of geattesteerd. Voor de
@@ -230,7 +249,7 @@ Beide draaien in [`test.yml`](https://github.com/ma3u/MinimumViableHealthDataspa
 het resourcebeleid vast, ook HOST_DATA op de plek waar Trustee v0.22.0 het
 neerzet.
 
-## 9. Het deployen op Azure
+## 10. Het deployen op Azure
 
 [`scripts/azure/21-aci-confidential-spe.sh`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/azure/21-aci-confidential-spe.sh)
 doet het in fasen, in deze volgorde: `--trustee`, `--extracts`, `--policy`,
@@ -241,7 +260,7 @@ fase afdrukt; lees het voor de eerste run. Twee fasen beschermen zichzelf:
 tenzij met `--rekey`, en `--trustee` behoudt een resourcebeleid dat Trustee al
 heeft.
 
-## 10. Wat nog niet klaar is
+## 11. Wat nog niet klaar is
 
 - **De toegangsinstantie draait nog geen eigen Trustee.** De shares van Trustee
   staan in het abonnement van de hub, dus de eigenaar van het abonnement zou ze
@@ -265,7 +284,7 @@ Issues: [#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774
 [#716](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/716),
 [#833](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/833).
 
-## 11. De beslissingen, op volgorde
+## 12. De beslissingen, op volgorde
 
 | ADR                                                                                               | Beslissing                                                                                              | Status                    |
 | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------- |
