@@ -1052,44 +1052,44 @@
       "id": "discussion",
       "audio": "audio/discussion.mp3",
       "subtitles": "subtitles/discussion.eu.vtt",
-      "duration": 21.131,
+      "duration": 24.242,
+      "spoken": "bf1b8269b82a7028",
       "cues": [
         {
           "start": 0.0,
-          "end": 2.485,
+          "end": 2.984,
           "eu": "Eskerrik asko!"
         },
         {
-          "start": 2.485,
-          "end": 7.651,
+          "start": 2.984,
+          "end": 9.311,
           "eu": "Hitz egiten jarraituko dugu? Eskaneatu kodea: nire LinkedIn profila irekitzen du.",
           "frag": 0
         },
         {
-          "start": 7.651,
-          "end": 10.426,
+          "start": 9.311,
+          "end": 12.051,
           "eu": "Eta eztabaidari ekiteko, hiru galdera."
         },
         {
-          "start": 10.426,
-          "end": 14.35,
-          "eu": "Zein erabilera-kasu batek edo bik erakutsiko lukete balioa lehenik?",
+          "start": 12.051,
+          "end": 17.206,
+          "eu": "Zein dira balioa erakutsiko luketen lehen bi erabilera-kasuak?",
           "frag": 1
         },
         {
-          "start": 14.35,
-          "end": 18.437,
-          "eu": "Nork finkatuko ditu arauak, eta nork kudeatuko ditu zerbitzuak?",
+          "start": 17.206,
+          "end": 21.142,
+          "eu": "Nork finkatuko ditu arauak eta nork kudeatuko ditu zerbitzuak?",
           "frag": 2
         },
         {
-          "start": 18.437,
-          "end": 21.131,
+          "start": 21.142,
+          "end": 24.242,
           "eu": "Zein ospitale batuko litzateke lehen lan-taldera?",
           "frag": 3
         }
-      ],
-      "spoken": "f40320ae50d466f5"
+      ]
     }
   ]
 }
