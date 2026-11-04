@@ -183,6 +183,72 @@
         "summary": "La evaluación Well-Architected y Cloud Adoption a 16 de octubre de 2026: lo que hay por pilar, con las evidencias, lo pendiente, las puntuaciones y lo que separa al demostrador de una plataforma operable."
       }
     },
+    "developer/sdlc": {
+      "de": {
+        "status": "current",
+        "title": "Software Development Life Cycle (SDLC)",
+        "summary": "Wie eine Änderung den Live-Hub erreicht: Discussions und Issues, Branches und Pull Requests, jeder pre-commit- und pre-push-Hook mit seiner Behebung, das PR Gate und die übrigen Workflows, die Deployments nach Azure und auf GitHub Pages, Releases, wie Sie von außen beitragen und wie Sie einen SDLC für ein DevSecOps- und KI-Projekt festlegen, mit den Werkzeugen für jede Phase."
+      },
+      "fr": {
+        "status": "current",
+        "title": "Cycle de vie du développement logiciel (SDLC)",
+        "summary": "Comment une modification atteint le hub en production : discussions et tickets, branches et pull requests, chaque hook pre-commit et pre-push avec sa correction, le PR Gate et les autres workflows, les déploiements vers Azure et GitHub Pages, les versions publiées, la manière de contribuer de l’extérieur, et comment définir un SDLC pour un projet DevSecOps et IA, avec les outils de chaque étape."
+      },
+      "nl": {
+        "status": "current",
+        "title": "Software Development Life Cycle (SDLC)",
+        "summary": "Hoe een wijziging de live hub bereikt: discussies en issues, branches en pull requests, elke pre-commit- en pre-push-hook met de oplossing ervan, de PR Gate en de andere workflows, de deploys naar Azure en GitHub Pages, releases, hoe u van buitenaf bijdraagt, en hoe u een SDLC definieert voor een DevSecOps- en AI-project, met de tools voor elke fase."
+      },
+      "es": {
+        "status": "current",
+        "title": "Ciclo de vida del desarrollo de software (SDLC)",
+        "summary": "Cómo llega un cambio al hub en vivo: debates e incidencias, ramas y pull requests, cada hook de pre-commit y pre-push con su solución, el PR Gate y los demás flujos de trabajo, los despliegues en Azure y GitHub Pages, las versiones, cómo contribuir desde fuera y cómo definir un SDLC para un proyecto de DevSecOps e IA, con las herramientas de cada etapa."
+      }
+    },
+    "developer/api-integration-tests": {
+      "de": {
+        "status": "current",
+        "title": "Integrationstests über die APIs",
+        "summary": "Die Bruno-Sammlung und die Datenraum-, Identitäts- und Domänenprüfungen: was jede abdeckt, wie Sie sie ausführen und ob sie aktuell ist, mit gemessenen Zahlen."
+      },
+      "fr": {
+        "status": "current",
+        "title": "Tests d’intégration par les API",
+        "summary": "La collection Bruno et les contrôles de l’espace de données, de l’identité et du domaine : ce que couvre chacun, comment l’exécuter et s’il est à jour, avec des chiffres mesurés."
+      },
+      "nl": {
+        "status": "current",
+        "title": "Integratietests via de API's",
+        "summary": "De Bruno-collectie en de controles voor de dataspace, de identiteit en het domein: wat elke suite dekt, hoe u die uitvoert en of ze actueel is, met gemeten getallen."
+      },
+      "es": {
+        "status": "current",
+        "title": "Pruebas de integración a través de las API",
+        "summary": "La colección de Bruno y las comprobaciones del espacio de datos, de identidad y del dominio: qué cubre cada una, cómo ejecutarla y si está al día, con cifras medidas."
+      }
+    },
+    "developer/stack-and-environment": {
+      "de": {
+        "status": "current",
+        "title": "Der Stack und die Entwicklungsumgebung",
+        "summary": "Ein Glossar des Stacks (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, der Proxy, die Katalogdienste) und wie er zusammenwirkt; Voraussetzungen, die beiden lokalen Stacks, Seed-Phasen, Ports, Umgebungsvariablen, die iPhone-App und die Stolpersteine des ersten Tages."
+      },
+      "fr": {
+        "status": "current",
+        "title": "La pile et l’environnement de développement",
+        "summary": "Un glossaire de la pile (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, le proxy, les services de catalogue) et la manière dont ses éléments s’assemblent ; les prérequis, les deux piles locales, les phases d’amorçage, les ports, les variables d’environnement, l’app iPhone et les pièges du premier jour."
+      },
+      "nl": {
+        "status": "current",
+        "title": "De stack en de ontwikkelomgeving",
+        "summary": "Een woordenlijst van de stack (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, de proxy, de catalogusdiensten) en hoe die in elkaar past; vereisten, de twee lokale stacks, seedfasen, poorten, omgevingsvariabelen, de iPhone-app en de valkuilen van de eerste dag."
+      },
+      "es": {
+        "status": "current",
+        "title": "La pila y el entorno de desarrollo",
+        "summary": "Un glosario de la pila (EDC-V, JAD, CFM, DSP, DCP, IdentityHub, IssuerService, Vault, el proxy, los servicios de catálogo) y cómo encaja; requisitos previos, las dos pilas locales, las fases de carga, los puertos, las variables de entorno, la app de iPhone y los gotchas del primer día."
+      }
+    },
     "security/security-test-report": {
       "de": {
         "status": "current",
