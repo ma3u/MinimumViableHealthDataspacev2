@@ -187,16 +187,13 @@ baseline reports into `test-results/bruno/`. See `bruno/MVHDv2/README.md`.
 
 ## CI/CD Pipeline
 
-### test.yml — Every Push (8 jobs)
+### test.yml: every push and pull request
 
-1. UI Tests (Vitest) + coverage
-2. Neo4j Proxy Tests (Vitest)
-3. ESLint lint check
-4. Secret scan (gitleaks v8.27.2, SHA-256 verified)
-5. Dependency audit (npm audit --audit-level=high)
-6. Trivy security scan (v0.69.3, CVE-2026-33634 safe)
-7. Kubescape K8s posture (NSA + CIS)
-8. E2E + WCAG 2.2 AA + Security pentest (main only)
+1. Vitest for the UI (with coverage), the Neo4j proxy, the SPE loader and ePA ingest; OPA policy tests
+2. iOS analyte parity, only when `clients/ios/` changed
+3. One job of scans: Trivy (v0.69.3, CVE-2026-33634 safe), Kubescape (NSA + CIS), npm audit (high and above), the CycloneDX SBOM and the licence check
+
+ESLint, `tsc` and gitleaks over the pull request's commits run in PR Gate; E2E, WCAG 2.2 AA, the security pentest, Lighthouse and gitleaks over the whole history run in `nightly.yml`.
 
 ### pages.yml — Deploy to GitHub Pages
 
