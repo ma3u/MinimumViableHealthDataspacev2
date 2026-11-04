@@ -30,7 +30,10 @@ placement on Azure:
 [ADR-073](../../ADRs/ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md)
 (proposed). Everything below was done live in
 [#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774) on
-2026-11-01 and 2026-11-02.
+2026-11-01 and 2026-11-02. For the concepts behind these steps (CNCF
+Confidential Containers, the chain of trust, what a query goes through), read
+[the secure processing environment](../../developer/secure-processing-environment.md)
+in the developer manual first.
 
 ## What runs where
 

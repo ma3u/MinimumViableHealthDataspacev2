@@ -244,5 +244,6 @@
   "Every API route needs a session": "Elke API-route vereist een sessie",
   "The audit trail behind Art. 73(1)(e)": "Het audittraject achter art. 73, lid 1, onder e)",
   "Loading the diagram": "Diagram wordt geladen",
-  "Scroll or pinch to zoom, drag to move, double click to zoom in, 0 fits the screen, Esc closes.": "Scroll of knijp om te zoomen, sleep om te verplaatsen, dubbelklik om in te zoomen, 0 past op het scherm, Esc sluit."
+  "Scroll or pinch to zoom, drag to move, double click to zoom in, 0 fits the screen, Esc closes.": "Scroll of knijp om te zoomen, sleep om te verplaatsen, dubbelklik om in te zoomen, 0 past op het scherm, Esc sluit.",
+  "How the hub does it": "Hoe de hub het uitvoert"
 }

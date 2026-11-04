@@ -244,5 +244,6 @@
   "Every API route needs a session": "Cada ruta de API exige una sesión",
   "The audit trail behind Art. 73(1)(e)": "El registro de auditoría detrás del art. 73, apartado 1, letra e)",
   "Loading the diagram": "Cargando el diagrama",
-  "Scroll or pinch to zoom, drag to move, double click to zoom in, 0 fits the screen, Esc closes.": "Desplace o pellizque para hacer zoom, arrastre para mover, doble clic para ampliar, 0 ajusta a la pantalla, Esc cierra."
+  "Scroll or pinch to zoom, drag to move, double click to zoom in, 0 fits the screen, Esc closes.": "Desplace o pellizque para hacer zoom, arrastre para mover, doble clic para ampliar, 0 ajusta a la pantalla, Esc cierra.",
+  "How the hub does it": "Cómo lo aplica el hub"
 }

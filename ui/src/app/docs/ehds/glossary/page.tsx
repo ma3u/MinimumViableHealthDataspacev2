@@ -23,6 +23,8 @@ type Term = {
   id: string;
   article: string;
   note?: string;
+  /** A published page that explains how the hub implements the term. */
+  doc?: string;
   avoid?: Partial<Record<string, string[]>>;
 } & Record<(typeof LANGS)[number][0], string>;
 
@@ -81,6 +83,14 @@ export default function EhdsGlossaryPage() {
               >
                 <td className="px-3 py-2 whitespace-nowrap text-(--text-secondary)">
                   {t.article}
+                  {t.doc && (
+                    <Link
+                      href={t.doc}
+                      className="block text-xs text-indigo-700 dark:text-indigo-400 hover:underline"
+                    >
+                      <T area="docsCommon">{"How the hub does it"}</T>
+                    </Link>
+                  )}
                 </td>
                 {LANGS.map(([code]) => (
                   <td key={code} lang={code} className="px-3 py-2">

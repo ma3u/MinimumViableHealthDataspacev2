@@ -136,6 +136,7 @@
     {
       "id": "secure-processing-environment",
       "article": "Art. 73",
+      "doc": "/docs/developer/secure-processing-environment",
       "en": "secure processing environment",
       "de": "sichere Verarbeitungsumgebung",
       "fr": "environnement de traitement sécurisé",

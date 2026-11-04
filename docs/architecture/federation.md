@@ -92,6 +92,10 @@ A question about the SPEs themselves ("How many SPEs can I access?") is the
 
 ### Where the two SPEs run
 
+How the workspaces are built from confidential containers, attested and
+unlocked is explained in
+[the secure processing environment](../developer/secure-processing-environment.md).
+
 | Stack                       | SPE-1 (AlphaKlinik Berlin)                            | SPE-2 (Limburg Medical Centre)                     |
 | --------------------------- | ----------------------------------------------------- | -------------------------------------------------- |
 | Compose                     | the hub graph `neo4j` (Bolt 7687)                     | `neo4j-spe2`, profile `federated` (Bolt 7688)      |
