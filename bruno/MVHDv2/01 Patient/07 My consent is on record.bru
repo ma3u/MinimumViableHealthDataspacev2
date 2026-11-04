@@ -27,4 +27,7 @@ tests {
     expect(mine, "the consent granted in the previous request is not in the list").to.not.equal(undefined);
     bru.setVar("consentId", mine.consentId || mine.id);
   });
+  test("consents is not empty", function () {
+    expect(res.getBody().consents).to.not.be.empty;
+  });
 }

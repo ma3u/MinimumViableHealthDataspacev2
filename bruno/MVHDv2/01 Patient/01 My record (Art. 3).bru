@@ -22,6 +22,12 @@ assert {
   res.body.gdprRights: isDefined
 }
 
+tests {
+  test("conditions is not empty", function () {
+    expect(res.getBody().conditions).to.not.be.empty;
+  });
+}
+
 docs {
   The FHIR R4 summary of one patient: conditions, medications, observations, and the GDPR rights that apply.
 }

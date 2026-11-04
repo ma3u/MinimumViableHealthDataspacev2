@@ -17,6 +17,7 @@ headers {
 assert {
   res.status: eq 200
   res.body.requests: isArray
+  res.body.scope: eq own
 }
 
 tests {
@@ -24,5 +25,8 @@ tests {
     const mine = (res.getBody().requests || []).find((r) => r.requestId === bru.getVar("dataRequestId"));
     expect(mine, "the request just decided is not in my list").to.not.equal(undefined);
     expect(mine.status, "the decision is not on the request").to.not.equal("PENDING");
+  });
+  test("requests is not empty", function () {
+    expect(res.getBody().requests).to.not.be.empty;
   });
 }

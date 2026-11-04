@@ -14,3 +14,12 @@ assert {
   res.status: eq 200
   res.body: isJson
 }
+
+tests {
+  test("participants is not empty", function () {
+    expect(res.getBody().participants).to.not.be.empty;
+  });
+  test("infrastructure is not empty", function () {
+    expect(res.getBody().infrastructure).to.not.be.empty;
+  });
+}
