@@ -85,7 +85,7 @@ jobs:
           xcodegen generate
           xcodebuild -project MeinBefund.xcodeproj -scheme MeinBefund \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath "$RUNNER_TEMP/dd" -jobs 1 -parallelizeTargets NO \
+            -derivedDataPath "$RUNNER_TEMP/dd" -jobs 1 \
             CODE_SIGNING_ALLOWED=NO ARCHS=arm64 ONLY_ACTIVE_ARCH=YES \
             COMPILER_INDEX_STORE_ENABLE=NO SWIFT_ENABLE_BATCH_MODE=NO \
             'OTHER_SWIFT_FLAGS=$(inherited) -j1' \
