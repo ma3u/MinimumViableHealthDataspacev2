@@ -93,6 +93,29 @@ describe("gen-docs-content.py and the translations", () => {
     );
   });
 
+  it("keeps a summary quoted when it is restamped", () => {
+    // A summary with ": " is not a plain YAML scalar; stamping used to drop
+    // its quotes, and a parser then read "Wie: a" as a nested mapping (#839).
+    const summary = 'Wie eine Änderung den Hub erreicht: Hooks, "PR Gate"';
+    put(
+      "docs/i18n/de/sbom/README.md",
+      `---\nsource: docs/sbom/README.md\nsourceHash: ${"0".repeat(
+        64,
+      )}\nlanguage: de\nsummary: ${JSON.stringify(
+        summary,
+      )}\n---\n\n# Software-Stücklisten\n`,
+    );
+    expect(gen("--stamp", "docs/i18n/de/sbom/README.md").code).toBe(0);
+    expect(gen("--stamp", "docs/i18n/de/sbom/README.md").code).toBe(0);
+    const text = readFileSync(
+      join(root, "docs/i18n/de/sbom/README.md"),
+      "utf8",
+    );
+    expect(text).toContain(`\nsummary: ${JSON.stringify(summary)}\n`);
+    expect(gen().code).toBe(0);
+    expect(json(INDEX).docs["security/sbom"].de.summary).toBe(summary);
+  });
+
   it("writes each translation and lists it as current or stale", () => {
     gen("--stamp", "docs/i18n/de/sbom/README.md");
     const r = gen();

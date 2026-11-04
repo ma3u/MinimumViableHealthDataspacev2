@@ -240,11 +240,21 @@ az container show  -n mvhd-spe-1 -g rg-mvhd-dev --query instanceView.state -o ts
 - **Costs:** each group requests 2 vCPU and 5 GB (Neo4j 1.5/4, `spe-ingest`
   0.5/1); at EUR 0.051 per vCPU-hour and EUR 0.0056 per GB-hour (westeurope,
   read 2026-10-31, `ui/src/lib/azure-pricing.ts`) that is about EUR 0.13 an hour
-  per group, EUR 0.26 for both, about EUR 37 a month in office hours. The
+  per group, EUR 0.26 for both, about EUR 37 a month if they ran all office
+  hours; since ADR-072 they run only while someone uses them. The
   2026-11-01 overnight run (about 9 hours, both groups) cost roughly EUR 2.40.
   `mvhd-trustee` is a small ACA app and stops with the others.
-- **Off hours:** `offhours.sh` stops both groups first in the evening and
-  starts them after `mvhd-trustee` in the morning. The custom role
+- **On demand, not every morning**
+  ([ADR-072](../../ADRs/ADR-072-spe-workspaces-start-on-demand.md)): the
+  groups are stopped by default. A federated query by `EDC_ADMIN`,
+  `HDAB_AUTHORITY` or `DATA_USER`, or Start on `/admin/components`, starts
+  them; the query answers 503 with `Retry-After` until they are up (about 3 to
+  4 minutes). The ACA job `mvhd-spe-idle-stop` runs `offhours.sh idle-stop`
+  every 15 minutes and stops a group nobody has queried for
+  `SPE_IDLE_STOP_MINUTES` (30).
+- **Off hours:** `offhours.sh` stops both groups first in the evening. The
+  morning run starts `mvhd-trustee` but not the groups, unless the jobs were
+  set up with `SPE_START_WITH_STACK=true` (the old morning start). The custom role
   `mvhd-aci-power` that `18-offhours-jobs.sh` tries to create cannot be: the
   PIM role has `Microsoft.Authorization/roleDefinitions/write` in its
   notActions. Instead the maintainer gave `id-mvhd-offhours` the built-in
