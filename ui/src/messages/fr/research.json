@@ -266,5 +266,12 @@
   "The agreement could not be read: {detail}": "L'accord n'a pas pu être lu : {detail}",
   "Negotiate this offer again": "Renégocier cette offre",
   "no open transfer": "aucun transfert ouvert",
-  "A sample agreement from the demonstrator's fixtures: the connector holds no record of it, so there is no signed policy to show.": "Un accord d'exemple tiré des données de démonstration : le connecteur n'en a aucune trace, il n'y a donc pas de politique signée à afficher."
+  "A sample agreement from the demonstrator's fixtures: the connector holds no record of it, so there is no signed policy to show.": "Un accord d'exemple tiré des données de démonstration : le connecteur n'en a aucune trace, il n'y a donc pas de politique signée à afficher.",
+  "Import into": "Importer dans",
+  "Importing…": "Importation…",
+  "Import into SPE": "Importer dans l'EPS",
+  "The import failed: {detail}": "L'importation a échoué : {detail}",
+  "Imported {records} records with {relationships} references into {spe}.": "{records} enregistrements avec {relationships} références importés dans {spe}.",
+  "Patients are pseudonymised.": "Les patients sont pseudonymisés.",
+  "Show in the graph": "Afficher dans le graphe"
 }

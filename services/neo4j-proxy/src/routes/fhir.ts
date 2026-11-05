@@ -4,6 +4,7 @@ import { getSession } from "../db.js";
 import { app } from "../app.js";
 import { auditContext, logTransferEvent } from "../audit.js";
 import { releasable, secondaryUseSession } from "../opt-out.js";
+import { fhirIdOf, toFhirEntry, toFhirResource } from "../fhir-resource.js";
 
 // ---- FHIR Endpoints -------------------------------------------------------
 
@@ -47,13 +48,9 @@ app.get(
 
       const entries = result.records
         .filter((r) => releasable(r.get("p")))
-        .map((r) => {
-          const props = r.get("p").properties;
-          return {
-            fullUrl: `Patient/${props.fhirId}`,
-            resource: { resourceType: "Patient", ...props },
-          };
-        });
+        .map((r) =>
+          toFhirEntry(toFhirResource("Patient", r.get("p").properties)),
+        );
 
       const bundle = {
         resourceType: "Bundle",
@@ -179,32 +176,20 @@ app.get(
       const immunizations = props("immunizations");
       const statements = props("statements");
 
+      // Every record refers to its patient, so a consumer can relate them (#876).
+      const pid = fhirIdOf(patient);
+      const as = (type: string) => (n: any) =>
+        toFhirEntry(toFhirResource(type, n, pid));
       const entries = [
-        { resource: { resourceType: "Patient", ...patient } },
-        ...encounters.map((e: any) => ({
-          resource: { resourceType: "Encounter", ...e },
-        })),
-        ...conditions.map((c: any) => ({
-          resource: { resourceType: "Condition", ...c },
-        })),
-        ...observations.map((o: any) => ({
-          resource: { resourceType: "Observation", ...o },
-        })),
-        ...procedures.map((p: any) => ({
-          resource: { resourceType: "Procedure", ...p },
-        })),
-        ...medications.map((m: any) => ({
-          resource: { resourceType: "MedicationRequest", ...m },
-        })),
-        ...reports.map((r: any) => ({
-          resource: { resourceType: "DiagnosticReport", ...r },
-        })),
-        ...immunizations.map((i: any) => ({
-          resource: { resourceType: "Immunization", ...i },
-        })),
-        ...statements.map((s: any) => ({
-          resource: { resourceType: "MedicationStatement", ...s },
-        })),
+        toFhirEntry(toFhirResource("Patient", patient)),
+        ...encounters.map(as("Encounter")),
+        ...conditions.map(as("Condition")),
+        ...observations.map(as("Observation")),
+        ...procedures.map(as("Procedure")),
+        ...medications.map(as("MedicationRequest")),
+        ...reports.map(as("DiagnosticReport")),
+        ...immunizations.map(as("Immunization")),
+        ...statements.map(as("MedicationStatement")),
       ];
 
       const bundle = {
@@ -270,9 +255,9 @@ app.post(
 
       const entries = result.records
         .filter((r) => releasable(r.get("p")))
-        .map((r) => ({
-          resource: { resourceType: "Patient", ...r.get("p").properties },
-        }));
+        .map((r) =>
+          toFhirEntry(toFhirResource("Patient", r.get("p").properties)),
+        );
 
       res.setHeader("Content-Type", "application/fhir+json");
       res.json({

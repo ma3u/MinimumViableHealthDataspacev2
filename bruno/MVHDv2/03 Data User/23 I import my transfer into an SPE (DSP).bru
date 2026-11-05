@@ -1,0 +1,57 @@
+meta {
+  name: 23 I import my transfer into an SPE (DSP)
+  type: http
+  seq: 23
+}
+
+post {
+  url: {{baseUrl}}/api/transfers/{{dspTransferId}}/import
+  body: json
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "participantId": "{{dspConsumerCtx}}",
+    "speId": "SPE-1"
+  }
+}
+
+tests {
+  const body = res.getBody() || {};
+  bru.setVar("dspImported", "");
+  if (bru.getEnvVar("dspLiveFlow") !== "true") {
+    test("SKIPPED live check: this environment does not run the DSP flow end to end (#542)", function () {});
+  } else if (res.getStatus() === 502 && /certificate demo/.test(body.detail || "")) {
+    // As 21: no data plane for FHIR assets yet on this deployment (#888).
+    test("SKIPPED: the data plane serves no FHIR asset yet (" + body.detail + ")", function () {});
+  } else if (res.getStatus() === 503) {
+    // The SPE workspaces start on demand (ADR-072); a stopped one answers 503.
+    test("SKIPPED: " + body.error, function () {});
+  } else {
+    test("the transfer's data is in SPE-1", function () {
+      expect(res.getStatus(), `${body.step || ""} ${body.detail || body.error || ""}`).to.equal(200);
+      expect(body.speId).to.equal("SPE-1");
+      expect(body.datasetId).to.equal(bru.getVar("dspTransferId"));
+      expect(body.records, "nothing imported").to.be.above(0);
+      expect(body.graphUrl).to.equal(
+        `/graph?dataset=${encodeURIComponent(body.datasetId)}&spe=SPE-1`,
+      );
+    });
+    test("a data user's import is pseudonymised (#475)", function () {
+      expect(body.pseudonymised).to.equal(true);
+    });
+    bru.setVar("dspImported", body.datasetId);
+  }
+}
+
+docs {
+  A transfer ends in a secure processing environment (EHDS Art. 73, #876): the hub pulls the data
+  of the STARTED transfer as 21 does, pseudonymised for a data user, and the neo4j-proxy writes it
+  into the chosen SPE's graph (`services/neo4j-proxy/src/spe-import.ts`), SPE-1 by default. A
+  second import of the same transfer merges onto the first.
+}

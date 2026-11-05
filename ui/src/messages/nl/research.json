@@ -266,5 +266,12 @@
   "The agreement could not be read: {detail}": "De overeenkomst kon niet worden gelezen: {detail}",
   "Negotiate this offer again": "Dit aanbod opnieuw onderhandelen",
   "no open transfer": "geen open overdracht",
-  "A sample agreement from the demonstrator's fixtures: the connector holds no record of it, so there is no signed policy to show.": "Een voorbeeldovereenkomst uit de testgegevens van de demonstrator: de connector kent haar niet, dus er is geen ondertekend beleid om te tonen."
+  "A sample agreement from the demonstrator's fixtures: the connector holds no record of it, so there is no signed policy to show.": "Een voorbeeldovereenkomst uit de testgegevens van de demonstrator: de connector kent haar niet, dus er is geen ondertekend beleid om te tonen.",
+  "Import into": "Importeren in",
+  "Importing…": "Bezig met importeren…",
+  "Import into SPE": "Importeren in de SPE",
+  "The import failed: {detail}": "Het importeren is mislukt: {detail}",
+  "Imported {records} records with {relationships} references into {spe}.": "{records} records met {relationships} verwijzingen geïmporteerd in {spe}.",
+  "Patients are pseudonymised.": "Patiënten zijn gepseudonimiseerd.",
+  "Show in the graph": "Tonen in de graaf"
 }

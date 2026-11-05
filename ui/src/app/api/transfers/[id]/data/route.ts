@@ -3,10 +3,9 @@ import { edcClient } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { seesPatientIdentity } from "@/lib/patient-identity";
 import {
-  flowToken,
   isPlainId,
   pseudonymiseFhir,
-  pullData,
+  pullTransferData,
   TransferDataError,
 } from "@/lib/transfer-data";
 
@@ -64,11 +63,7 @@ export async function GET(
   }
 
   try {
-    const token = await flowToken(participantId, [
-      id,
-      String(transfer.correlationId ?? ""),
-    ]);
-    const pulled = await pullData(token);
+    const pulled = await pullTransferData(participantId, id, transfer);
     const data = seesPatientIdentity(auth.session.roles)
       ? pulled.data
       : pseudonymiseFhir(pulled.data);

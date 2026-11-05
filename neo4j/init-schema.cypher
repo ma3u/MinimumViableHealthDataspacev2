@@ -229,6 +229,11 @@ CREATE CONSTRAINT app_attest_key_id IF NOT EXISTS FOR (k:AppAttestKey) REQUIRE k
 CREATE CONSTRAINT jurisdiction_code IF NOT EXISTS FOR (j:Jurisdiction) REQUIRE j.code IS UNIQUE;
 CREATE CONSTRAINT national_law_id IF NOT EXISTS FOR (l:NationalLaw) REQUIRE l.lawId IS UNIQUE;
 CREATE CONSTRAINT jurisdiction_milestone_id IF NOT EXISTS FOR (m:JurisdictionMilestone) REQUIRE m.milestoneId IS UNIQUE;
+// #876: a transfer imported into an SPE workspace, its records keyed on the
+// dataset (services/neo4j-proxy/src/spe-import.ts). The SPE workspaces get the
+// same constraints from this file where it is applied to them.
+CREATE CONSTRAINT imported_dataset_id IF NOT EXISTS FOR (d:ImportedDataset) REQUIRE d.datasetId IS UNIQUE;
+CREATE CONSTRAINT imported_record_key IF NOT EXISTS FOR (r:ImportedRecord) REQUIRE r.recordKey IS UNIQUE;
 CREATE INDEX query_audit_timestamp IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.timestamp);
 CREATE INDEX query_audit_participant IF NOT EXISTS FOR (qa:QueryAuditEvent) ON (qa.participantId);
 
