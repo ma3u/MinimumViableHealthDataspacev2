@@ -109,5 +109,11 @@ test.describe("Live DSP negotiation from the page (#876)", () => {
         },
       )
       .toBe("FINALIZED");
+
+    // The page follows the negotiation itself and leads on to the transfer:
+    // a demo user must not be left at "Negotiation initiated".
+    await expect(
+      page.getByRole("link", { name: /Continue to transfer/ }),
+    ).toBeVisible({ timeout: 15_000 });
   });
 });

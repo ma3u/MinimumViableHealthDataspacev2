@@ -571,6 +571,61 @@ describe("NegotiatePage", () => {
     });
   });
 
+  describe("after the request: who acts next (#876)", () => {
+    async function startAndAnswer(row: Record<string, unknown>) {
+      setupDefaultMocks();
+      const user = userEvent.setup();
+      render(<NegotiatePage />);
+      await user.click(await screen.findByText("Discover Offers"));
+      await user.click(await screen.findByText("FHIR Patient Bundle"));
+      mockFetchApi.mockImplementation((url: string, init?: RequestInit) =>
+        url === "/api/negotiations" && init?.method === "POST"
+          ? mockResponse({ "@id": "neg-new" })
+          : mockResponse([{ "@id": "neg-new", ...row }, ...sampleNegotiations]),
+      );
+      await user.click(screen.getByText("Start Negotiation"));
+      return screen.findByTestId("negotiation-progress");
+    }
+
+    it("says nobody at the provider has to sign in while it waits", async () => {
+      const box = await startAndAnswer({ state: "REQUESTED" });
+
+      expect(box.textContent).toMatch(
+        /Waiting for AlphaKlinik Berlin to agree/,
+      );
+      expect(box.textContent).toMatch(
+        /nobody at AlphaKlinik Berlin has to sign in/,
+      );
+    });
+
+    it("offers the transfer once the contract is agreed", async () => {
+      await startAndAnswer({
+        state: "FINALIZED",
+        contractAgreementId: "agr-new",
+      });
+
+      const link = await screen.findByRole("link", {
+        name: /Continue to transfer/,
+      });
+      expect(link.getAttribute("href")).toBe(
+        "/data/transfer?participantId=ctx-pharmaco&contractId=agr-new",
+      );
+    });
+
+    it("says why when the negotiation ends without a contract", async () => {
+      await startAndAnswer({
+        state: "TERMINATED",
+        errorDetail: "Policy not satisfied",
+      });
+
+      expect(
+        await screen.findByText(
+          /ended without a contract: Policy not satisfied/,
+        ),
+      ).toBeTruthy();
+    });
+  });
+
   // ── 7. Existing negotiations list ──
   it("renders existing negotiations after loading", async () => {
     setupDefaultMocks();
