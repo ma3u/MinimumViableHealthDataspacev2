@@ -1,4 +1,7 @@
 dependencies {
+    // for the EHDS policy vocabulary (see the extension's comment)
+    implementation(libs.edc.spi.controlplane)
+
     runtimeOnly(libs.edc.bom.controlplane.virtual)
     runtimeOnly(libs.edc.bom.controlplane.virtual.sql)
     runtimeOnly(libs.edc.bom.controlplane.virtual.nats)

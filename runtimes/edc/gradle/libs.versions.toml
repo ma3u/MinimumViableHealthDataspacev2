@@ -21,6 +21,7 @@ edc-bom-issuerservice-sql = { module = "org.eclipse.edc:issuerservice-feature-sq
 edc-ih-api-did = { module = "org.eclipse.edc:did-api", version.ref = "edc" }
 edc-ih-api-participants = { module = "org.eclipse.edc:participant-context-api", version.ref = "edc" }
 edc-issuance-spi = { module = "org.eclipse.edc:issuerservice-issuance-spi", version.ref = "edc" }
+edc-spi-controlplane = { module = "org.eclipse.edc:control-plane-spi", version.ref = "edc" }
 
 # shared by every runtime
 edc-participantcontext-config = { module = "org.eclipse.edc:participant-context-config-core", version.ref = "edc" }

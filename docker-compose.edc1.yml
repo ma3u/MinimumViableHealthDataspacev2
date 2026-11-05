@@ -23,12 +23,12 @@ services:
     image: mvhd/edc-controlplane:1.0.0-RC5-local
     environment:
       edc.datasource.default.url: "jdbc:postgresql://postgres:5432/controlplane_v1"
-      # 1.0 refuses a policy whose actions are not bound to a policy scope. The
-      # standard EHDS policies (jad/policies, ADR-077) carry duties such as
-      # ehds:secureProcessingEnvironment that nothing binds, so the policy is
-      # refused and the offer leaves the catalogue. Off for the spike; the fix
-      # is to bind the EHDS actions (#881, finding 16).
-      edc.policy.validation.enabled: "false"
+      # 1.0 refuses a policy whose actions or left operands are bound to no
+      # policy scope. The launcher's EhdsPolicyVocabularyExtension declares the
+      # EHDS vocabulary of the standard policies (ADR-077) in a scope EDC never
+      # evaluates, so validation stays on (#881, finding 16). The default; kept
+      # here so switching it off is a visible change.
+      edc.policy.validation.enabled: "true"
 
   identityhub:
     image: mvhd/edc-identity-hub:1.0.0-RC5-local

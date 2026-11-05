@@ -38,5 +38,11 @@ to move into the seeds and the realm file:
   against siglet's JWKS and serves the dataset the token names. The JAD data
   planes `dataplane-fhir` and `dataplane-omop` are not needed.
 
-The only code here is `issuerservice/.../DemoAttestationsExtension.java`, the
-"membership" and "manufacturer" attestation types our seeds use.
+Two pieces of code, both exceptions to ADR-076 decision 1 awaiting their own ADR:
+
+- `issuerservice/.../DemoAttestationsExtension.java`: the "membership" and
+  "manufacturer" attestation types our seeds use.
+- `controlplane/.../EhdsPolicyVocabularyExtension.java`: declares the EHDS
+  actions and left operands of the standard policies (ADR-077), so 1.0's
+  policy validation accepts them. Declared, not enforced: they are bound to a
+  scope EDC never evaluates, as on 0.18, where they were not enforced either.
