@@ -46,7 +46,6 @@
     "node": ">=22"
   },
   "overrides": {
-    "path-to-regexp": "0.1.13",
     "qs": "^6.17.0"
   }
 }
