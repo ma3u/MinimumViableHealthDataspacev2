@@ -66,13 +66,20 @@ Every step names its gate. A failed gate stops the run; the next step does not s
 
 **6. UI and proxy.** Merge `feat/edc-1.0-rc` into `main`; `deploy-azure.yml` builds and rolls both apps. Then run `migrate-edc-to-v1.sh proxy` and `ui`, which set the JWKS and the 1.0 addresses. Gate: both revisions are Healthy, and `/api/participants` lists contexts and does not answer 502.
 
-**7. Seeds**, in the order of the local run: participants, IdentityHub, context config and DSP profile, issuer identity, holders, definitions, credentials, policies, assets, negotiations, federated catalogue. Gate: each script exits 0. The Azure seed path on 1.0 (`05-cp-participants.sh`, `seed-data-assets-job.sh` with `MGMT_V=v5`) has not been run yet; read each script's 1.0 changes from `scripts/` on the branch first.
+**7. Seeds**, in the order of the local run: participants, IdentityHub, context config and DSP profile, issuer identity, holders, definitions, credentials, policies (the standard set of ADR-077, #889), assets, negotiations, federated catalogue. Gate: each script exits 0. The Azure seed path on 1.0 (`05-cp-participants.sh`, `seed-data-assets-job.sh` with `MGMT_V=v5`) has not been run yet; read each script's 1.0 changes from `scripts/` on the branch first.
 
 **8. Re-onboard and check.**
 
 - Onboard the former CFM participants through the hub's onboarding page.
 - Run the compliance ACA job (`target=azure`) at the Azure floors.
-- Run Bruno `Azure-Dev` with the live DSP flow, and Playwright J1090 and J1091 in Demo Smoke.
+- Run the hub's own paths, which the #876 work put on `main`:
+  - `/api/participants` lists the contexts. They stay `CREATED` on 1.0, and the route falls back to them (#878, #891).
+  - `/api/negotiations` sends the offer's policy whole, to the server's DSP address. A stale context id answers 409.
+  - `/api/agreements/{id}` gives the period and the policy for Details.
+- Run Bruno `Azure-Dev` `03 Data User` 15 to 22 with the live DSP flow (`dspLiveFlow`, on for Azure-Dev): catalogue, FINALIZED, STARTED, data, agreement.
+  - Drop the skip on 21, the certificate-demo 404, once the proxy serves the data.
+  - 23 to 26, the SPE import, are **not a pass criterion** on Azure until Matthias decides how imports reach the ACI workspaces. Those start on demand (ADR-072) and keep their store in tmpfs, and a direct write bypasses the Trustee path of ADR-068.
+- Run Playwright J1090 and J1091 (`journeys/53`) in Demo Smoke.
 - Run one transfer whose data opens, and one new onboarding from the UI.
 
 ## Rollback
