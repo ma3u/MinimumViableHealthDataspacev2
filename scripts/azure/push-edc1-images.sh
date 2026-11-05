@@ -7,10 +7,10 @@
 #   scripts/azure/push-edc1-images.sh check   which tags ACR already holds
 #
 # Three images from runtimes/edc (controlplane, identity-hub, issuerservice),
-# tagged mvhd-edc-<runtime>:<EDC_VERSION>-<first 12 of the commit>, the tag
-# EDC1_TAG names in env.sh. The commit is the one the images are built from,
-# so a tag names its source. siglet 0.1.6 is imported by digest, as compose
-# pins it (docker-compose.edc1.yml).
+# tagged mvhd-edc-<runtime>:<EDC_VERSION>-<12 characters of the last commit
+# that changed runtimes/edc>, the tag migrate-edc-to-v1.sh takes as EDC1_TAG,
+# so a tag names its source. siglet 0.1.6 is not built here: 17-siglet.sh
+# imports it by the digest docker-compose.edc1.yml pins.
 #
 # `push` changes no running app: a Container App moves only when its revision
 # names the new tag (migrate-edc-to-v1.sh). It still writes to ACR, so it runs
@@ -26,11 +26,11 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 source "${SCRIPT_DIR}/env.sh"
 
 EDC_VERSION="${EDC_VERSION:-1.0.0-RC5}"
-REV="$(git -C "$REPO_ROOT" rev-parse HEAD)"
+# The last commit that changed the launchers, so later commits elsewhere do
+# not change the tag of the same images.
+REV="$(git -C "$REPO_ROOT" log -1 --format=%H -- runtimes/edc)"
 TAG="${EDC_VERSION}-${REV:0:12}"
 RUNTIMES=(controlplane identity-hub issuerservice)
-SIGLET_SRC="ghcr.io/eclipse-dataplane-core/dsdk-facet-rs/siglet:0.1.6@sha256:cb7895dd4d1b924061df0f4aae28dc3e7187e7508bca249e42d438fea8a6022e"
-SIGLET_DST="siglet:0.1.6"
 
 image() { echo "${ACR_LOGIN_SERVER}/mvhd-edc-$1:${TAG}"; }
 
@@ -58,8 +58,6 @@ cmd_push() {
       { err "$(image "$r") is not built; run '$0 build' first"; exit 1; }
     docker push "$(image "$r")"
   done
-  log "importing siglet 0.1.6 by digest"
-  az acr import --name "$ACR_NAME" --source "$SIGLET_SRC" --image "$SIGLET_DST" --force -o none
   ok "ACR holds the 1.0 images, tag ${TAG}; set EDC1_TAG=${TAG} for migrate-edc-to-v1.sh"
 }
 
@@ -71,9 +69,6 @@ cmd_check() {
       tr '\n' ' ' || printf '(none)'
     echo
   done
-  printf '%-26s ' "siglet"
-  az acr repository show-tags --name "$ACR_NAME" --repository siglet -o tsv 2>/dev/null | tr '\n' ' ' || printf '(none)'
-  echo
 }
 
 case "${1:-}" in
