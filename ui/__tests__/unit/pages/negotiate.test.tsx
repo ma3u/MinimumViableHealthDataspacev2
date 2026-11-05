@@ -620,6 +620,31 @@ describe("NegotiatePage", () => {
       );
     });
 
+    it("offers no second Start Negotiation once the contract is agreed", async () => {
+      await startAndAnswer({
+        state: "FINALIZED",
+        contractAgreementId: "agr-new",
+      });
+      await screen.findByRole("link", { name: /Continue to transfer/ });
+
+      expect(screen.queryByText("Start Negotiation")).toBeNull();
+      expect(screen.queryByTestId("offer-terms-accept")).toBeNull();
+      expect(screen.getByText("The terms you agreed to")).toBeTruthy();
+    });
+
+    it("lets the user negotiate the same offer again, on purpose", async () => {
+      await startAndAnswer({ state: "REQUESTED" });
+      const user = userEvent.setup();
+
+      await user.click(await screen.findByTestId("negotiate-again"));
+
+      expect(screen.getByText("Start Negotiation")).toBeTruthy();
+      expect(
+        (screen.getByTestId("offer-terms-accept") as HTMLInputElement).checked,
+      ).toBe(false);
+      expect(screen.queryByTestId("negotiation-progress")).toBeNull();
+    });
+
     it("says why when the negotiation ends without a contract", async () => {
       await startAndAnswer({
         state: "TERMINATED",

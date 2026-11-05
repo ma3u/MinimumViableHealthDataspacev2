@@ -29,6 +29,7 @@ export default function TransferDetails({
   providerDid,
   providerName,
   consumerName,
+  sample = false,
 }: {
   participantId: string;
   contractId: string;
@@ -37,6 +38,8 @@ export default function TransferDetails({
   providerDid: string;
   providerName: string;
   consumerName: string;
+  /** A sample agreement from the fixtures: the connector holds no record. */
+  sample?: boolean;
 }) {
   const t = useT("research");
   const [agreement, setAgreement] = useState<AgreementView | null>(null);
@@ -44,6 +47,10 @@ export default function TransferDetails({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (sample) {
+      setLoading(false);
+      return;
+    }
     let live = true;
     fetchApi(
       `/api/agreements/${encodeURIComponent(
@@ -61,7 +68,7 @@ export default function TransferDetails({
     return () => {
       live = false;
     };
-  }, [contractId, participantId]);
+  }, [contractId, participantId, sample]);
 
   return (
     <div
@@ -74,7 +81,7 @@ export default function TransferDetails({
             {t("Access open since")}
           </dt>
           <dd data-testid="transfer-opened" className="text-(--text-primary)">
-            {when(openedAt)}
+            {openedAt ? when(openedAt) : t("no open transfer")}
           </dd>
         </div>
         <div>
@@ -135,6 +142,12 @@ export default function TransferDetails({
         <p className="flex items-center gap-2 text-(--text-secondary)">
           <Loader2 size={14} className="animate-spin" />
           {t("Loading the agreement…")}
+        </p>
+      ) : sample ? (
+        <p className="text-xs text-(--text-secondary)">
+          {t(
+            "A sample agreement from the demonstrator's fixtures: the connector holds no record of it, so there is no signed policy to show.",
+          )}
         </p>
       ) : agreement ? (
         <OfferTerms
