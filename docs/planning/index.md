@@ -25,6 +25,8 @@ Groom with `/plan`. Token budget per ADR-026: keep this index small.
 - [phase-26g-deferred](future/phase-26g-deferred.md) — federation observability leftovers
 - [issue-26-healthdcat-ap-validation](future/issue-26-healthdcat-ap-validation.md) — SHACL validation + DQV source-level quality for the catalog
 
+- [simpl-live-and-ehds-partners-2026-11](future/simpl-live-and-ehds-partners-2026-11.md): Simpl-Live wave 1 is procured, not applied to; EU4Health EHDS Readiness Package (Q4 2026); calls, tenders and partner analysis; discussion [#895](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/895)
+
 - [ehds-operating-company](future/ehds-operating-company.md): what the demonstrator would need to show the operating model, not only the journey. Paper: [`../ehds-operating-company.md`](../ehds-operating-company.md)
 
 ## done/
