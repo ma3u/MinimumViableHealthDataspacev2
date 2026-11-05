@@ -20,6 +20,16 @@ subprojects {
         mainClass.set("org.eclipse.edc.boot.system.runtime.BaseRuntime")
     }
 
+    // org.glassfish:jakarta.json 2.0.1 bundles its own copy of the 2.0 API. In
+    // the shadow jar it overwrote jakarta.json-api 2.1.3, and serialising any
+    // policy with a numeric value failed with NoSuchMethodError
+    // Json.createValue(Number), so every provider whose offers carry a number
+    // answered DSP catalog requests with 401 (#881, finding 20). Parsson is
+    // the implementation EDC uses.
+    configurations.all {
+        exclude(group = "org.glassfish", module = "jakarta.json")
+    }
+
     tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
         mergeServiceFiles()
         archiveFileName.set("${project.name}.jar")
