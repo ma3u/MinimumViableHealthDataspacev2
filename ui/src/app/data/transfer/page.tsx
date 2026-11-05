@@ -25,6 +25,7 @@ import PageIntro from "@/components/PageIntro";
 import RowSourceBadge from "@/components/RowSourceBadge";
 import TransferDetails from "@/components/TransferDetails";
 import SpeImport from "@/components/SpeImport";
+import type { ExistingImport } from "@/lib/spe-import";
 import type { RowSource } from "@/lib/row-provenance";
 import { T, useT } from "@/lib/i18n/translate";
 
@@ -62,6 +63,45 @@ interface ParticipantCtx {
 }
 
 /* ── Helpers ── */
+
+/**
+ * Where a contract stands for the data user (#876, #894): one list, one row
+ * per agreement, instead of the agreements, My data and the transfer
+ * processes as three lists of the same things.
+ */
+type Stage = "agreed" | "progress" | "ready" | "imported" | "done";
+
+/** Most actionable first: data to use, then what is under way. */
+const STAGE_ORDER: Stage[] = [
+  "ready",
+  "imported",
+  "progress",
+  "agreed",
+  "done",
+];
+
+const STAGE_LABEL: Record<Stage, string> = {
+  agreed: "Ready to transfer",
+  progress: "Transfer in progress",
+  ready: "Data ready",
+  imported: "In an SPE",
+  done: "Transfer completed",
+};
+
+const STAGE_STYLE: Record<Stage, string> = {
+  agreed:
+    "bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)",
+  progress:
+    "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border border-yellow-400/40",
+  ready:
+    "bg-teal-100 dark:bg-teal-900/30 text-teal-800 dark:text-teal-300 border border-teal-500/40",
+  imported:
+    "bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300 border border-violet-500/40",
+  done: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-(--border)",
+};
+
+/** No import known for a transfer: one shared array, so a row does not refetch. */
+const NO_IMPORTS: ExistingImport[] = [];
 
 /** Read a transfer/agreement field that may be edc:-prefixed or unprefixed */
 function f(obj: Record<string, unknown>, field: string): string {
@@ -690,21 +730,19 @@ function DataTransferContent() {
   const [loading, setLoading] = useState(true);
   const [selectedCtx, setSelectedCtx] = useState(preselectedCtx);
 
-  // Initiate form
-  const [initiating, setInitiating] = useState(false);
-  const [selectedAgreements, setSelectedAgreements] = useState<Set<string>>(
-    preContractId ? new Set([preContractId]) : new Set(),
-  );
+  // Starting a transfer: the agreement it runs under, while it is sent.
+  const [initiating, setInitiating] = useState<string | null>(null);
   const [result, setResult] = useState<string | null>(null);
   const [resultIsError, setResultIsError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Agreement list pagination
-  const [showAllAgreements, setShowAllAgreements] = useState(false);
-  const AGREEMENTS_PAGE_SIZE = 25;
-
-  // Transfer status filter
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  // The one list: its filter, search and length (#894).
+  const [stageFilter, setStageFilter] = useState<Stage | "all">("all");
+  const [search, setSearch] = useState("");
+  const [showAll, setShowAll] = useState(false);
+  const PAGE_SIZE = 25;
+  // Which SPE holds which open transfer, from the duplicate check.
+  const [imports, setImports] = useState<Record<string, ExistingImport[]>>({});
 
   // FHIR viewer
   const [viewingTransferId, setViewingTransferId] = useState<string | null>(
@@ -805,10 +843,9 @@ function DataTransferContent() {
     setRefreshing(false);
   };
 
-  const handleInitiate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (selectedAgreements.size === 0) return;
-    setInitiating(true);
+  const startTransfers = async (ids: string[]) => {
+    if (ids.length === 0) return;
+    setInitiating(ids[0]);
     setResult(null);
     setResultIsError(false);
 
@@ -818,7 +855,7 @@ function DataTransferContent() {
     // only in this demonstrator. Reported separately: "started" would claim a
     // DSP transfer that never happened.
     const demoResults: string[] = [];
-    for (const agrId of Array.from(selectedAgreements)) {
+    for (const agrId of ids) {
       const agr = agreements.find((a) => a["@id"] === agrId);
       const assetId = agr ? f(agr as Record<string, unknown>, "assetId") : "";
       const counterPartyAddress =
@@ -894,88 +931,160 @@ function DataTransferContent() {
       setResult(errors.join("\n"));
     }
     await refreshTransfers();
-    setSelectedAgreements(new Set());
-    setInitiating(false);
+    setInitiating(null);
   };
 
-  // Check which agreements already have transfers
-  /**
-   * What the agreement's transfers have reached. It used to say "transfer in
-   * progress" for any transfer at all, a failed one included, and a STARTED
-   * PULL transfer stays STARTED while its data is ready (#876).
-   */
-  const agreementTransferLabel = (agrId: string): string | null => {
-    const states = transfers
-      .filter((tr) => f(tr as Record<string, unknown>, "contractId") === agrId)
-      .map((tr) => f(tr as Record<string, unknown>, "state").toUpperCase());
-    if (states.includes("COMPLETED")) return t("(transferred)");
-    if (states.includes("STARTED")) return t("(data ready)");
-    if (states.some((st) => st !== "TERMINATED" && st !== "SUSPENDED")) {
-      return t("(transfer in progress)");
+  // The open transfers' imports, for the stage and the import status (#876).
+  const liveIds = useMemo(
+    () => transfers.filter(isLiveTransfer).map((tr) => tr["@id"]),
+    [transfers],
+  );
+  const loadImports = useCallback(async () => {
+    if (liveIds.length === 0) {
+      setImports({});
+      return;
     }
-    return null;
-  };
-
-  // Multi-select helpers
-  const toggleAgreement = (agrId: string) => {
-    setSelectedAgreements((prev) => {
-      const next = new Set(prev);
-      if (next.has(agrId)) next.delete(agrId);
-      else next.add(agrId);
-      return next;
-    });
-  };
-
-  const toggleAll = () => {
-    if (selectedAgreements.size === agreements.length) {
-      setSelectedAgreements(new Set());
-    } else {
-      setSelectedAgreements(new Set(agreements.map((a) => a["@id"])));
+    const found: Record<string, ExistingImport[]> = {};
+    for (let i = 0; i < liveIds.length; i += 100) {
+      const ids = liveIds
+        .slice(i, i + 100)
+        .map(encodeURIComponent)
+        .join(",");
+      try {
+        const r = await fetchApi(`/api/spe-imports?ids=${ids}`);
+        const b = (await r.json()) as { imports?: ExistingImport[] };
+        for (const imp of b.imports ?? []) {
+          (found[imp.datasetId] ??= []).push(imp);
+        }
+      } catch {
+        /* no import status: the rows still work */
+      }
     }
-  };
+    setImports(found);
+  }, [liveIds]);
+  useEffect(() => {
+    void loadImports();
+  }, [loadImports]);
 
-  // Agreement pagination
-  const visibleAgreements = showAllAgreements
-    ? agreements
-    : agreements.slice(0, AGREEMENTS_PAGE_SIZE);
-  const hasMoreAgreements = agreements.length > AGREEMENTS_PAGE_SIZE;
-
-  // Transfer status filter
-  const transferStatuses = useMemo(() => {
-    const states = new Set<string>();
-    transfers.forEach((t) => {
-      const s = f(t as Record<string, unknown>, "state")?.toUpperCase();
-      if (s) states.add(s);
-    });
-    return ["ALL", ...Array.from(states).sort()];
-  }, [transfers]);
-
-  // Newest first: what the open transfers give access to.
-  const myData = transfers
-    .filter(isLiveTransfer)
-    .sort(
-      (a, b) =>
-        ((b.stateTimestamp as number) || 0) -
-        ((a.stateTimestamp as number) || 0),
+  /** One row per agreement, its transfers newest first, and its stage. */
+  const rows = useMemo(() => {
+    const ts = (tr: Transfer) =>
+      (tr.stateTimestamp as number) ||
+      (tr["edc:stateTimestamp"] as number) ||
+      0;
+    const byContract = new Map<string, Transfer[]>();
+    for (const tr of transfers) {
+      const cid =
+        f(tr as Record<string, unknown>, "contractId") ||
+        `transfer:${tr["@id"]}`;
+      byContract.set(cid, [...(byContract.get(cid) ?? []), tr]);
+    }
+    const ids = Array.from(
+      new Set([...agreements.map((a) => a["@id"]), ...byContract.keys()]),
     );
-
-  const providerDidOfContract = (contractId: string): string => {
-    const agr = agreements.find((a) => a["@id"] === contractId);
-    return agr ? f(agr as Record<string, unknown>, "counterPartyId") : "";
-  };
-  const providerOfContract = (contractId: string): string => {
-    const cp = providerDidOfContract(contractId);
-    return cp ? didToName(cp) : "";
-  };
-
-  const filteredTransfers =
-    statusFilter === "ALL"
-      ? transfers
-      : transfers.filter(
-          (t) =>
-            f(t as Record<string, unknown>, "state")?.toUpperCase() ===
-            statusFilter,
+    return ids
+      .map((id) => {
+        const agreement = agreements.find((a) => a["@id"] === id) ?? null;
+        const trs = [...(byContract.get(id) ?? [])].sort(
+          (a, b) => ts(b) - ts(a),
         );
+        const states = trs.map((tr) =>
+          f(tr as Record<string, unknown>, "state").toUpperCase(),
+        );
+        const open = trs.find(isLiveTransfer) ?? null;
+        const started =
+          open ??
+          trs.find(
+            (tr) =>
+              f(tr as Record<string, unknown>, "state").toUpperCase() ===
+              "STARTED",
+          ) ??
+          null;
+        const stage: Stage =
+          open && (imports[open["@id"]]?.length ?? 0) > 0
+            ? "imported"
+            : started
+              ? "ready"
+              : states.some(
+                    (st) =>
+                      !["COMPLETED", "TERMINATED", "SUSPENDED"].includes(st),
+                  )
+                ? "progress"
+                : states.includes("COMPLETED")
+                  ? "done"
+                  : "agreed";
+        const assetId =
+          (agreement && f(agreement as Record<string, unknown>, "assetId")) ||
+          (trs[0] &&
+            (trs[0].assetId ||
+              f(trs[0] as Record<string, unknown>, "assetId")));
+        const providerDid = agreement
+          ? f(agreement as Record<string, unknown>, "counterPartyId")
+          : "";
+        return {
+          id,
+          agreement,
+          transfers: trs,
+          open,
+          started,
+          stage,
+          name: assetId ? assetLabel(assetId as string) : id.slice(0, 12),
+          assetId: (assetId as string) || "",
+          providerDid,
+          provider: providerDid ? didToName(providerDid) : "",
+          isProviderSide:
+            !!agreement &&
+            f(agreement as Record<string, unknown>, "type") === "PROVIDER",
+          sample: agreement
+            ? agreement.source !== "controlplane"
+            : trs.every((tr) => tr.source !== "controlplane"),
+          lastFailed: states[0] === "TERMINATED",
+          lastAt: trs[0] ? ts(trs[0]) : 0,
+        };
+      })
+      .sort(
+        (a, b) =>
+          STAGE_ORDER.indexOf(a.stage) - STAGE_ORDER.indexOf(b.stage) ||
+          b.lastAt - a.lastAt,
+      );
+  }, [agreements, transfers, imports]);
+
+  const stageCounts = useMemo(() => {
+    const c: Record<string, number> = { all: rows.length };
+    for (const r of rows) c[r.stage] = (c[r.stage] ?? 0) + 1;
+    return c;
+  }, [rows]);
+
+  const shownRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return rows.filter(
+      (r) =>
+        (stageFilter === "all" || r.stage === stageFilter) &&
+        (!q ||
+          `${r.name} ${r.assetId} ${r.provider} ${r.id}`
+            .toLowerCase()
+            .includes(q)),
+    );
+  }, [rows, stageFilter, search]);
+  // A link to one agreement (?contractId=) shows it even past the first page.
+  const pageRows =
+    showAll || shownRows.length <= PAGE_SIZE
+      ? shownRows
+      : shownRows.slice(0, PAGE_SIZE);
+  const linked =
+    preContractId && !pageRows.some((r) => r.id === preContractId)
+      ? shownRows.find((r) => r.id === preContractId)
+      : undefined;
+  const visibleRows = linked ? [linked, ...pageRows] : pageRows;
+
+  // The linked agreement opens with its details and is scrolled to.
+  useEffect(() => {
+    if (!preContractId || loading) return;
+    setDetailsOpen((prev) => new Set(prev).add(`agr:${preContractId}`));
+    document
+      .getElementById(`contract-${preContractId}`)
+      ?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+  }, [preContractId, loading]);
 
   const loadLiveData = async (
     transferId: string,
@@ -1029,24 +1138,6 @@ function DataTransferContent() {
     URL.revokeObjectURL(url);
   };
 
-  const startButton = (testId: string) => (
-    <button
-      type="submit"
-      data-testid={testId}
-      disabled={initiating || selectedAgreements.size === 0}
-      className="flex items-center gap-2 px-4 py-2 bg-(--accent) text-white dark:text-gray-900 rounded-sm text-sm font-medium hover:bg-(--accent-hover) disabled:opacity-50"
-    >
-      {initiating ? (
-        <Loader2 size={14} className="animate-spin" />
-      ) : (
-        <ArrowRightLeft size={14} />
-      )}
-      {selectedAgreements.size > 1
-        ? t("Start {n} Transfers", { n: selectedAgreements.size })
-        : t("Start Transfer")}
-    </button>
-  );
-
   /** When this agreement's newest STARTED transfer opened, or 0. */
   const openedAtOf = (agrId: string): number =>
     transfers
@@ -1091,6 +1182,42 @@ function DataTransferContent() {
     }
   };
 
+  /** The data of one transfer, opened in its contract's row. */
+  const viewerFor = (tr: Transfer) => {
+    const aId = tr.assetId || f(tr as Record<string, unknown>, "assetId");
+    const live = isLiveTransfer(tr) ? liveData[tr["@id"]] : null;
+    const liveBundle = live?.result ? toBundle(live.result.data) : null;
+    const bundle = isLiveTransfer(tr)
+      ? liveBundle
+      : fhirBundles?.[aId as string] ?? null;
+    const viewerLoading = isLiveTransfer(tr) ? !!live?.loading : loadingFhir;
+    if (viewerLoading) {
+      return (
+        <div className="flex items-center gap-2 text-(--text-secondary) py-4 justify-center">
+          <Loader2 size={14} className="animate-spin" />
+          {isLiveTransfer(tr)
+            ? t("Fetching the data from the provider…")
+            : t("Loading FHIR data…")}
+        </div>
+      );
+    }
+    if (live?.error) return null;
+    if (live?.result && !liveBundle) {
+      return (
+        <div className="mt-3 font-mono text-xs overflow-x-auto max-h-96 overflow-y-auto p-3 border border-(--border) rounded-lg">
+          <JsonNode data={live.result.data} depth={0} />
+        </div>
+      );
+    }
+    return (
+      <FhirViewerPanel
+        transfer={tr}
+        bundle={bundle}
+        onClose={() => setViewingTransferId(null)}
+      />
+    );
+  };
+
   return (
     <div className="min-h-screen bg-(--bg)">
       <div className="max-w-5xl mx-auto px-6 py-10">
@@ -1132,23 +1259,36 @@ function DataTransferContent() {
           </select>
         </div>
 
-        {/* ── Initiate Transfer from Agreement ── */}
-        <div className="border border-(--border) rounded-xl p-5 mb-8">
-          <div className="flex items-center gap-2 mb-1">
-            <Play size={16} className="text-teal-800 dark:text-teal-300" />
-            <h2 className="font-semibold text-sm">
-              {t("Start Transfer from Agreement")}
+        {/* ── My contracts and data: one list, one row per agreement (#894) ── */}
+        <section
+          data-testid="contracts-list"
+          className="border border-(--border) rounded-xl p-5 mb-8"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
+            <h2 className="flex items-center gap-2 font-semibold text-sm">
+              <Play size={16} className="text-teal-800 dark:text-teal-300" />
+              {t("My contracts and data")}
             </h2>
+            <button
+              type="button"
+              onClick={() => {
+                void refreshTransfers();
+                void loadImports();
+              }}
+              disabled={refreshing}
+              className="flex items-center gap-1 text-xs text-(--text-secondary) hover:text-(--text-primary) disabled:opacity-50"
+            >
+              <RefreshCw
+                size={12}
+                className={refreshing ? "animate-spin" : ""}
+              />
+              {t("Refresh")}
+            </button>
           </div>
           <p className="text-xs text-(--text-secondary) mb-4">
-            <T
-              area="research"
-              tags={{ c: <code className="text-(--text-secondary)" /> }}
-            >
-              {
-                "Select a finalized contract agreement to pull data via <c>HttpData-PULL</c>."
-              }
-            </T>
+            {t(
+              "Each agreed contract once, with where it stands: start the transfer, open or download the data, import it into an SPE. Its transfer history is under Details.",
+            )}
           </p>
 
           {result && (
@@ -1163,7 +1303,12 @@ function DataTransferContent() {
             </div>
           )}
 
-          {agreements.length === 0 && !loading && (
+          {loading ? (
+            <div className="flex items-center gap-2 text-(--text-secondary)">
+              <Loader2 size={16} className="animate-spin" />
+              {t("Loading transfers…")}
+            </div>
+          ) : rows.length === 0 ? (
             <p className="text-xs text-(--text-secondary)">
               <T
                 area="research"
@@ -1181,115 +1326,329 @@ function DataTransferContent() {
                 }
               </T>
             </p>
-          )}
-
-          {agreements.length > 0 && (
-            <form onSubmit={handleInitiate} className="space-y-3">
-              {/* Select All */}
-              <label className="flex items-center gap-2 px-3 py-2 text-xs text-(--text-secondary) cursor-pointer hover:text-(--text-primary)">
+          ) : (
+            <>
+              {/* Filter and search */}
+              <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                {(["all", ...STAGE_ORDER] as const).map((st) => (
+                  <button
+                    key={st}
+                    type="button"
+                    data-testid={`stage-filter-${st}`}
+                    aria-pressed={stageFilter === st}
+                    onClick={() => {
+                      setStageFilter(st);
+                      setShowAll(false);
+                    }}
+                    className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
+                      stageFilter === st
+                        ? "bg-layer2/20 text-teal-800 dark:text-teal-300 border border-layer2/40"
+                        : "bg-(--surface-2) text-(--text-secondary) border border-(--border) hover:border-gray-500"
+                    }`}
+                  >
+                    {st === "all" ? t("All") : t(STAGE_LABEL[st])} (
+                    {stageCounts[st] ?? 0})
+                  </button>
+                ))}
                 <input
-                  type="checkbox"
-                  checked={selectedAgreements.size === agreements.length}
-                  onChange={toggleAll}
-                  className="accent-layer2"
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={t("Search dataset, provider or contract")}
+                  aria-label={t("Search dataset, provider or contract")}
+                  className="ml-auto min-w-[14rem] px-2 py-1 text-xs bg-(--surface-2) border border-(--border) rounded"
                 />
-                {t("Select All ({n})", { n: agreements.length })}
-              </label>
-              {/* At the top as well: the list can be a hundred rows long. */}
-              {startButton("start-transfer-top")}
+              </div>
+
+              {shownRows.length === 0 && (
+                <p className="text-sm text-(--text-secondary)">
+                  {t("No contract matches.")}
+                </p>
+              )}
 
               <div className="space-y-2">
-                {visibleAgreements.map((agr) => {
-                  const agrId = agr["@id"];
-                  const aId = f(agr as Record<string, unknown>, "assetId");
-                  const cp = f(
-                    agr as Record<string, unknown>,
-                    "counterPartyId",
+                {visibleRows.map((row) => {
+                  const live = row.open;
+                  const entry = live ? liveData[live["@id"]] : undefined;
+                  const detailsKey = `agr:${row.id}`;
+                  const viewing = row.transfers.find(
+                    (tr) => tr["@id"] === viewingTransferId,
                   );
-                  const transferLabel = agreementTransferLabel(agrId);
-
                   return (
-                    <div key={agrId}>
-                      <label
-                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                          selectedAgreements.has(agrId)
-                            ? "border-layer2 bg-layer2/10"
-                            : "border-(--border) hover:border-gray-500 bg-(--surface-2)/50"
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedAgreements.has(agrId)}
-                          onChange={() => toggleAgreement(agrId)}
-                          className="accent-layer2"
-                        />
+                    <div
+                      key={row.id}
+                      id={`contract-${row.id}`}
+                      data-testid="contract-row"
+                      data-stage={row.stage}
+                      className={`p-3 rounded-lg border bg-(--surface-2)/50 ${
+                        row.id === preContractId
+                          ? "border-layer2"
+                          : "border-(--border)"
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-(--text-primary)">
-                            {aId
-                              ? assetLabel(aId as string)
-                              : agrId.slice(0, 12)}
-                          </p>
-                          <p className="text-xs text-(--text-secondary)">
-                            {f(agr as Record<string, unknown>, "type") ===
-                            "PROVIDER"
-                              ? t("Consumer:")
-                              : t("Provider:")}{" "}
-                            {cp ? didToName(cp as string) : "—"}
-                            {transferLabel && (
-                              <span className="ml-2 text-yellow-800 dark:text-yellow-400">
-                                {transferLabel}
-                              </span>
+                          <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-(--text-primary)">
+                            {row.name}
+                            <span
+                              data-testid="contract-stage"
+                              className={`text-[10px] px-1.5 py-0.5 rounded-sm ${
+                                STAGE_STYLE[row.stage]
+                              }`}
+                            >
+                              {t(STAGE_LABEL[row.stage])}
+                            </span>
+                            {row.sample && (
+                              <RowSourceBadge
+                                source={
+                                  (row.agreement?.source as
+                                    | RowSource
+                                    | undefined) ??
+                                  (row.transfers[0]?.source as
+                                    | RowSource
+                                    | undefined) ??
+                                  "mock"
+                                }
+                              />
                             )}
                           </p>
+                          <p className="text-xs text-(--text-secondary)">
+                            {row.isProviderSide
+                              ? t("Consumer:")
+                              : t("Provider:")}{" "}
+                            {row.provider || "—"}
+                            {row.lastFailed && row.stage === "agreed" && (
+                              <span className="ml-2 text-(--badge-inactive-text)">
+                                {t("the last transfer failed")}
+                              </span>
+                            )}
+                            {entry?.result &&
+                              ` · ${Math.max(
+                                1,
+                                Math.round(entry.result.bytes / 1024),
+                              )} KB`}
+                          </p>
+                          {entry?.error && (
+                            <p className="text-xs text-(--badge-inactive-text) mt-1">
+                              {t("Could not fetch the data: {detail}", {
+                                detail: entry.error,
+                              })}
+                            </p>
+                          )}
                         </div>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)">
-                          AGREED
-                        </span>
+
+                        {/* The one next action for this stage */}
+                        {(row.stage === "agreed" || row.stage === "done") &&
+                          row.agreement &&
+                          !row.isProviderSide && (
+                            <button
+                              type="button"
+                              data-testid="start-transfer"
+                              disabled={initiating !== null}
+                              onClick={() => void startTransfers([row.id])}
+                              className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-(--accent) text-white dark:text-gray-900 hover:bg-(--accent-hover) disabled:opacity-50"
+                            >
+                              {initiating === row.id ? (
+                                <Loader2 size={12} className="animate-spin" />
+                              ) : (
+                                <ArrowRightLeft size={12} />
+                              )}
+                              {row.stage === "done"
+                                ? t("Transfer again")
+                                : t("Start Transfer")}
+                            </button>
+                          )}
+                        {row.stage === "progress" && (
+                          <span className="flex items-center gap-1 text-xs text-(--text-secondary)">
+                            <Loader2 size={12} className="animate-spin" />
+                            {t("Waiting for the provider")}
+                          </span>
+                        )}
+                        {live && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => void openFhirViewer(live["@id"])}
+                              className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-(--role-user-bg) text-(--role-user-text) hover:opacity-80"
+                            >
+                              {entry?.loading ? (
+                                <Loader2 size={12} className="animate-spin" />
+                              ) : (
+                                <FileJson2 size={12} />
+                              )}
+                              {viewing === live ? t("Close") : t("Open")}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                void downloadLiveData(
+                                  live["@id"],
+                                  row.assetId || "data",
+                                )
+                              }
+                              className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-(--border) text-(--text-primary) hover:border-gray-500"
+                            >
+                              <Download size={12} />
+                              {t("Download")}
+                            </button>
+                          </>
+                        )}
+                        {!live && row.transfers.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              void openFhirViewer(
+                                (row.started ?? row.transfers[0])["@id"],
+                              )
+                            }
+                            className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
+                              viewing
+                                ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
+                                : "bg-(--role-user-bg) text-(--role-user-text) hover:opacity-80"
+                            }`}
+                          >
+                            <FileJson2 size={12} />
+                            {viewing ? t("Hide FHIR") : t("View FHIR")}
+                          </button>
+                        )}
                         <button
                           type="button"
-                          aria-expanded={detailsOpen.has(`agr:${agrId}`)}
-                          onClick={(e) => {
-                            // Inside the row's label: do not tick the box.
-                            e.preventDefault();
-                            toggleDetails(`agr:${agrId}`);
-                          }}
+                          aria-expanded={detailsOpen.has(detailsKey)}
+                          onClick={() => toggleDetails(detailsKey)}
                           className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-(--border) text-(--text-primary) hover:border-gray-500"
                         >
-                          {detailsOpen.has(`agr:${agrId}`) ? (
+                          {detailsOpen.has(detailsKey) ? (
                             <ChevronDown size={12} />
                           ) : (
                             <ChevronRight size={12} />
                           )}
                           {t("Details")}
                         </button>
-                      </label>
-                      {detailsOpen.has(`agr:${agrId}`) && (
-                        <TransferDetails
+                      </div>
+
+                      {live && (
+                        <SpeImport
+                          transferId={live["@id"]}
                           participantId={selectedCtx}
-                          contractId={agrId}
-                          openedAt={openedAtOf(agrId)}
-                          providerDid={cp as string}
-                          providerName={cp ? didToName(cp as string) : "—"}
-                          consumerName={
-                            participants.find((p) => p["@id"] === selectedCtx)
-                              ?.displayName ?? ""
-                          }
-                          sample={agr.source !== "controlplane"}
+                          known={imports[live["@id"]] ?? NO_IMPORTS}
+                          onImported={() => void loadImports()}
                         />
+                      )}
+
+                      {viewing && viewerFor(viewing)}
+
+                      {detailsOpen.has(detailsKey) && (
+                        <div className="mt-3 space-y-3">
+                          {row.agreement && (
+                            <TransferDetails
+                              participantId={selectedCtx}
+                              contractId={row.id}
+                              openedAt={openedAtOf(row.id)}
+                              providerDid={row.providerDid}
+                              providerName={row.provider || "—"}
+                              consumerName={
+                                participants.find(
+                                  (p) => p["@id"] === selectedCtx,
+                                )?.displayName ?? ""
+                              }
+                              sample={row.sample}
+                            />
+                          )}
+                          <div data-testid="contract-history">
+                            <p className="text-[10px] uppercase tracking-wide text-(--text-secondary) mb-1">
+                              {t("Transfers under this contract ({n})", {
+                                n: row.transfers.length,
+                              })}
+                            </p>
+                            {row.transfers.length === 0 ? (
+                              <p className="text-xs text-(--text-secondary)">
+                                {t("No transfer yet.")}
+                              </p>
+                            ) : (
+                              <div className="space-y-2">
+                                {row.transfers.map((tr) => {
+                                  const state = f(
+                                    tr as Record<string, unknown>,
+                                    "state",
+                                  );
+                                  const transferType =
+                                    f(
+                                      tr as Record<string, unknown>,
+                                      "transferType",
+                                    ) || "HttpData-PULL";
+                                  const timestamp =
+                                    (tr.stateTimestamp as number) ||
+                                    (tr["edc:stateTimestamp"] as number) ||
+                                    0;
+                                  return (
+                                    <div
+                                      key={tr["@id"]}
+                                      id={`transfer-${tr["@id"]}`}
+                                      className="p-2 rounded border border-(--border) space-y-2"
+                                    >
+                                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-(--text-secondary)">
+                                        <span
+                                          className={`text-xs px-2 py-0.5 rounded-full ${stateBg(
+                                            state,
+                                          )}`}
+                                        >
+                                          {state || "UNKNOWN"}
+                                        </span>
+                                        <span className="px-1.5 py-0.5 rounded-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                          {transferType}
+                                        </span>
+                                        {timestamp > 0 && (
+                                          <span>
+                                            {t("Updated:")}{" "}
+                                            {new Date(timestamp).toLocaleString(
+                                              undefined,
+                                              {
+                                                dateStyle: "short",
+                                                timeStyle: "short",
+                                              },
+                                            )}
+                                          </span>
+                                        )}
+                                        <span>
+                                          {t("Process: {id}…", {
+                                            id: tr["@id"].slice(0, 8),
+                                          })}
+                                        </span>
+                                        {state
+                                          ?.toUpperCase()
+                                          .includes("COMPLETED") &&
+                                          (tr.dataPayload as DataPayload)
+                                            ?.total && (
+                                            <span className="text-green-800 dark:text-green-400">
+                                              {t("{n} resources transferred", {
+                                                n: (
+                                                  tr.dataPayload as DataPayload
+                                                ).total,
+                                              })}
+                                            </span>
+                                          )}
+                                      </div>
+                                      <DspPipeline state={state} />
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       )}
                     </div>
                   );
                 })}
               </div>
 
-              {/* Show more / Show less */}
-              {hasMoreAgreements && (
+              {shownRows.length > PAGE_SIZE && (
                 <button
                   type="button"
-                  onClick={() => setShowAllAgreements(!showAllAgreements)}
-                  className="flex items-center gap-1 text-xs text-teal-800 dark:text-teal-300 hover:text-teal-800/80 dark:hover:text-teal-300/80"
+                  onClick={() => setShowAll(!showAll)}
+                  className="mt-3 flex items-center gap-1 text-xs text-teal-800 dark:text-teal-300 hover:text-teal-800/80 dark:hover:text-teal-300/80"
                 >
-                  {showAllAgreements ? (
+                  {showAll ? (
                     <>
                       <ChevronDown size={12} /> {t("Show less")}
                     </>
@@ -1297,336 +1656,15 @@ function DataTransferContent() {
                     <>
                       <ChevronRight size={12} />{" "}
                       {t("Show {n} more", {
-                        n: agreements.length - AGREEMENTS_PAGE_SIZE,
+                        n: shownRows.length - PAGE_SIZE,
                       })}
                     </>
                   )}
                 </button>
               )}
-
-              {startButton("start-transfer-bottom")}
-            </form>
+            </>
           )}
-        </div>
-
-        {/* ── My data: what the open transfers give access to (#876) ── */}
-        {myData.length > 0 && (
-          <div
-            data-testid="my-data"
-            className="border border-(--border) rounded-xl p-5 mb-8"
-          >
-            <h2 className="font-semibold text-sm mb-1">{t("My data")}</h2>
-            <p className="text-xs text-(--text-secondary) mb-4">
-              {t(
-                "The assets you hold an open transfer for. Their data comes from the provider's data plane when you open or download it; patient identities are pseudonymised for data users.",
-              )}
-            </p>
-            <div className="space-y-2">
-              {myData.map((tr) => {
-                const id = tr["@id"];
-                const aId =
-                  tr.assetId || f(tr as Record<string, unknown>, "assetId");
-                const name = aId ? assetLabel(aId as string) : id.slice(0, 8);
-                const provider = providerOfContract(
-                  f(tr as Record<string, unknown>, "contractId"),
-                );
-                const entry = liveData[id];
-                const contractId = f(
-                  tr as Record<string, unknown>,
-                  "contractId",
-                );
-                return (
-                  <div
-                    key={id}
-                    className="p-3 rounded-lg border border-(--border) bg-(--surface-2)/50"
-                  >
-                    <div className="flex flex-wrap items-center gap-3">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-(--text-primary)">
-                          {name}
-                        </p>
-                        <p className="text-xs text-(--text-secondary)">
-                          {t("Provider:")} {provider || "—"} ·{" "}
-                          {t("Process: {id}…", { id: id.slice(0, 8) })}
-                          {entry?.result &&
-                            ` · ${Math.max(
-                              1,
-                              Math.round(entry.result.bytes / 1024),
-                            )} KB`}
-                        </p>
-                        {entry?.error && (
-                          <p className="text-xs text-(--badge-inactive-text) mt-1">
-                            {t("Could not fetch the data: {detail}", {
-                              detail: entry.error,
-                            })}
-                          </p>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          void openFhirViewer(id);
-                          document
-                            .getElementById(`transfer-${id}`)
-                            // Not every browser engine has it (jsdom has not).
-                            ?.scrollIntoView?.({ behavior: "smooth" });
-                        }}
-                        className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-(--role-user-bg) text-(--role-user-text) hover:opacity-80"
-                      >
-                        {entry?.loading ? (
-                          <Loader2 size={12} className="animate-spin" />
-                        ) : (
-                          <FileJson2 size={12} />
-                        )}
-                        {t("Open")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          void downloadLiveData(id, (aId as string) || "data")
-                        }
-                        className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-(--border) text-(--text-primary) hover:border-gray-500"
-                      >
-                        <Download size={12} />
-                        {t("Download")}
-                      </button>
-                      <button
-                        type="button"
-                        aria-expanded={detailsOpen.has(id)}
-                        onClick={() => toggleDetails(id)}
-                        className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-(--border) text-(--text-primary) hover:border-gray-500"
-                      >
-                        {detailsOpen.has(id) ? (
-                          <ChevronDown size={12} />
-                        ) : (
-                          <ChevronRight size={12} />
-                        )}
-                        {t("Details")}
-                      </button>
-                    </div>
-                    <SpeImport transferId={id} participantId={selectedCtx} />
-                    {detailsOpen.has(id) && contractId && (
-                      <TransferDetails
-                        participantId={selectedCtx}
-                        contractId={contractId}
-                        openedAt={(tr.stateTimestamp as number) || 0}
-                        providerDid={providerDidOfContract(contractId)}
-                        providerName={provider || "—"}
-                        consumerName={
-                          participants.find((p) => p["@id"] === selectedCtx)
-                            ?.displayName ?? ""
-                        }
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* ── Transfer Processes (DSP State Machine) ── */}
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-sm">
-            {t("Transfer Processes")}{" "}
-            <span className="font-normal text-(--text-secondary)">
-              {t("(DSP Signalling Protocol)")}
-            </span>
-          </h2>
-          <button
-            onClick={refreshTransfers}
-            disabled={refreshing}
-            className="flex items-center gap-1 text-xs text-(--text-secondary) hover:text-(--text-primary) disabled:opacity-50"
-          >
-            <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
-            {t("Refresh")}
-          </button>
-        </div>
-
-        {/* Status filter */}
-        {transfers.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {transferStatuses.map((s) => {
-              const count =
-                s === "ALL"
-                  ? transfers.length
-                  : transfers.filter(
-                      (t) =>
-                        f(
-                          t as Record<string, unknown>,
-                          "state",
-                        )?.toUpperCase() === s,
-                    ).length;
-              return (
-                <button
-                  key={s}
-                  onClick={() => setStatusFilter(s)}
-                  className={`text-xs px-2.5 py-1 rounded-full transition-colors ${
-                    statusFilter === s
-                      ? "bg-layer2/20 text-teal-800 dark:text-teal-300 border border-layer2/40"
-                      : "bg-(--surface-2) text-(--text-secondary) border border-(--border) hover:border-gray-500"
-                  }`}
-                >
-                  {s === "ALL" ? t("ALL") : s} ({count})
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {loading ? (
-          <div className="flex items-center gap-2 text-(--text-secondary)">
-            <Loader2 size={16} className="animate-spin" />
-            {t("Loading transfers…")}
-          </div>
-        ) : filteredTransfers.length === 0 ? (
-          <p className="text-(--text-secondary) text-sm">
-            {transfers.length === 0
-              ? t(
-                  "No transfer processes yet. Start one from an agreed contract above.",
-                )
-              : t('No transfers matching "{status}".', {
-                  status: statusFilter,
-                })}
-          </p>
-        ) : (
-          <div className="grid gap-3">
-            {filteredTransfers.map((tr) => {
-              const state = f(tr as Record<string, unknown>, "state");
-              const aId =
-                tr.assetId || f(tr as Record<string, unknown>, "assetId");
-              const transferType =
-                f(tr as Record<string, unknown>, "transferType") ||
-                "HttpData-PULL";
-              const timestamp =
-                (tr.stateTimestamp as number) ||
-                (tr["edc:stateTimestamp"] as number) ||
-                0;
-              const isCompleted = state?.toUpperCase().includes("COMPLETED");
-              const isViewing = viewingTransferId === tr["@id"];
-              const live = isLiveTransfer(tr) ? liveData[tr["@id"]] : null;
-              const liveBundle = live?.result
-                ? toBundle(live.result.data)
-                : null;
-              const bundle = isLiveTransfer(tr)
-                ? liveBundle
-                : fhirBundles?.[aId as string] ?? null;
-              const viewerLoading = isLiveTransfer(tr)
-                ? !!live?.loading
-                : loadingFhir;
-
-              return (
-                <div
-                  id={`transfer-${tr["@id"]}`}
-                  key={tr["@id"]}
-                  className={`p-4 border rounded-xl space-y-3 transition-colors ${
-                    isViewing
-                      ? "border-layer2/50 bg-(--surface-2)/30"
-                      : "border-(--border)"
-                  }`}
-                >
-                  {/* Header row */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <ArrowRightLeft size={14} className={stateColor(state)} />
-                      <span className="text-sm font-medium text-(--text-primary)">
-                        {aId
-                          ? assetLabel(aId as string)
-                          : tr["@id"].slice(0, 12)}
-                      </span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
-                        {transferType}
-                      </span>
-                      {/* A demo or sample transfer moved no data and has no
-                          record in the control plane. Unmarked, a COMPLETED
-                          badge on it claims a transfer that never ran. #358 */}
-                      <RowSourceBadge
-                        source={
-                          (tr.source as RowSource | undefined) ??
-                          (tr.demo === true ? "demo" : undefined)
-                        }
-                        reason={tr.demoReason as string | undefined}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => openFhirViewer(tr["@id"])}
-                        className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors ${
-                          isViewing
-                            ? "bg-layer2/20 text-teal-800 dark:text-teal-300"
-                            : "bg-(--role-user-bg) text-(--role-user-text) hover:opacity-80"
-                        }`}
-                      >
-                        <FileJson2 size={12} />
-                        {isViewing ? t("Hide FHIR") : t("View FHIR")}
-                      </button>
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${stateBg(
-                          state,
-                        )}`}
-                      >
-                        {state || "UNKNOWN"}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* DSP Pipeline visualization */}
-                  <DspPipeline state={state} />
-
-                  {/* Metadata row */}
-                  <div className="flex items-center gap-4 text-[11px] text-(--text-secondary)">
-                    {timestamp > 0 && (
-                      <span>
-                        {t("Updated:")}{" "}
-                        {new Date(timestamp).toLocaleString(undefined, {
-                          dateStyle: "short",
-                          timeStyle: "short",
-                        })}
-                      </span>
-                    )}
-                    <span>
-                      {t("Process: {id}…", { id: tr["@id"].slice(0, 8) })}
-                    </span>
-                    {isCompleted && (tr.dataPayload as DataPayload)?.total && (
-                      <span className="text-green-800 dark:text-green-400">
-                        {t("{n} resources transferred", {
-                          n: (tr.dataPayload as DataPayload).total,
-                        })}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* FHIR Viewer panel (expanded) */}
-                  {isViewing &&
-                    (viewerLoading ? (
-                      <div className="flex items-center gap-2 text-(--text-secondary) py-4 justify-center">
-                        <Loader2 size={14} className="animate-spin" />
-                        {isLiveTransfer(tr)
-                          ? t("Fetching the data from the provider…")
-                          : t("Loading FHIR data…")}
-                      </div>
-                    ) : live?.error ? (
-                      <p className="text-xs text-(--badge-inactive-text) py-2">
-                        {t("Could not fetch the data: {detail}", {
-                          detail: live.error,
-                        })}
-                      </p>
-                    ) : live?.result && !liveBundle ? (
-                      <div className="font-mono text-xs overflow-x-auto max-h-96 overflow-y-auto p-3 border border-(--border) rounded-lg">
-                        <JsonNode data={live.result.data} depth={0} />
-                      </div>
-                    ) : (
-                      <FhirViewerPanel
-                        transfer={tr}
-                        bundle={bundle}
-                        onClose={() => setViewingTransferId(null)}
-                      />
-                    ))}
-                </div>
-              );
-            })}
-          </div>
-        )}
+        </section>
       </div>
     </div>
   );

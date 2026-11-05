@@ -29,9 +29,15 @@ import { useT } from "@/lib/i18n/translate";
 export default function SpeImport({
   transferId,
   participantId,
+  known,
+  onImported,
 }: {
   transferId: string;
   participantId: string;
+  /** What the page already knows the SPEs hold; without it the row asks itself. */
+  known?: ExistingImport[];
+  /** After an import, so the page can move the row to its new stage. */
+  onImported?: () => void;
 }) {
   const t = useT("research");
   const [speId, setSpeId] = useState<string>(DEFAULT_IMPORT_SPE);
@@ -52,7 +58,10 @@ export default function SpeImport({
       .catch(() => setExisting([]));
   }, [transferId]);
 
-  useEffect(loadExisting, [loadExisting]);
+  useEffect(() => {
+    if (known) setExisting(known);
+    else loadExisting();
+  }, [known, loadExisting]);
 
   const inChosen = existing.find((e) => e.speId === speId);
   const elsewhere = existing.filter((e) => e.speId !== speId);
@@ -102,6 +111,7 @@ export default function SpeImport({
         graphUrl: body.graphUrl ?? importViewUrl(transferId, speId),
       });
       loadExisting();
+      onImported?.();
     } catch (err) {
       setError(String(err));
     } finally {

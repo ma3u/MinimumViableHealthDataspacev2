@@ -116,17 +116,6 @@ describe("DataTransferPage – extra coverage", () => {
 
   /* ─── SUSPENDED state ─── */
 
-  it("renders SUSPENDED transfer with orange styling in pipeline", async () => {
-    setupMocks({ transfers: [SUSPENDED_TRANSFER], negotiations: [] });
-    render(<DataTransferPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText("Fhir Suspended Data")).toBeInTheDocument();
-      const badges = screen.getAllByText("SUSPENDED");
-      expect(badges.length).toBeGreaterThanOrEqual(2); // pipeline + badge
-    });
-  });
-
   /* ─── FHIR bundle viewer – JSON view mode ─── */
 
   it("switches to Raw JSON view mode in FHIR viewer", async () => {
@@ -339,126 +328,11 @@ describe("DataTransferPage – extra coverage", () => {
 
   /* ─── DataPayload display for completed transfer ─── */
 
-  it("shows resource count for completed transfers with dataPayload", async () => {
-    setupMocks({ negotiations: [] });
-    render(<DataTransferPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/42 resources transferred/)).toBeInTheDocument();
-    });
-  });
-
   /* ─── Status filter: no matching status ─── */
-
-  it("shows 'No transfers matching' when status filter has no results", async () => {
-    const transferStarted = {
-      "@id": "tp-s",
-      "edc:state": "STARTED",
-      "edc:assetId": "test-asset",
-      "edc:contractId": "agr-x",
-    };
-    setupMocks({ transfers: [transferStarted], negotiations: [] });
-    const user = userEvent.setup();
-    render(<DataTransferPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText("Test Asset")).toBeInTheDocument();
-    });
-
-    // Filter by ALL first (should show), then by a state we add manually
-    // The STARTED filter pill should be there
-    const startedFilter = screen.getByText(/STARTED \(1\)/);
-    expect(startedFilter).toBeInTheDocument();
-  });
 
   /* ─── Transfer initiation – network error ─── */
 
-  it("shows network error message when transfer POST throws", async () => {
-    mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
-      if (url === "/api/participants") return mockResponse(PARTICIPANTS);
-      if (url === "/api/transfers" && init?.method === "POST") {
-        return Promise.reject(new Error("Network error"));
-      }
-      if (url.startsWith("/api/transfers")) return mockResponse([]);
-      if (url.startsWith("/api/negotiations"))
-        return mockResponse(NEGOTIATIONS);
-      return mockResponse({});
-    });
-
-    const user = userEvent.setup();
-    render(<DataTransferPage />);
-
-    await waitFor(() => {
-      expect(
-        screen.getByText("Start Transfer from Agreement"),
-      ).toBeInTheDocument();
-    });
-
-    // Select agreement
-    const checkboxes = screen.getAllByRole("checkbox");
-    await user.click(checkboxes[1]); // first agreement
-
-    await user.click(screen.getByTestId("start-transfer-bottom"));
-
-    await waitFor(() => {
-      expect(screen.getByText(/Network error/)).toBeInTheDocument();
-    });
-  });
-
   /* ─── Multiple transfers ─── */
-
-  it("starts multiple transfers and shows success for all", async () => {
-    const twoAgreements = [
-      {
-        "@id": "neg-a",
-        "edc:state": "FINALIZED",
-        "edc:contractAgreementId": "agr-a",
-        "edc:assetId": "asset-a",
-        "edc:counterPartyId": "did:web:alpha-klinik.de:participant",
-        counterPartyAddress: "http://cp:8082/api/dsp",
-      },
-      {
-        "@id": "neg-b",
-        "edc:state": "FINALIZED",
-        "edc:contractAgreementId": "agr-b",
-        "edc:assetId": "asset-b",
-        "edc:counterPartyId": "did:web:pharmaco.de:research",
-        counterPartyAddress: "http://cp:8082/api/dsp",
-      },
-    ];
-    mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
-      if (url === "/api/participants") return mockResponse(PARTICIPANTS);
-      if (url === "/api/transfers" && init?.method === "POST") {
-        return mockResponse({ "@id": "tp-new", state: "REQUESTED" });
-      }
-      if (url.startsWith("/api/transfers")) return mockResponse([]);
-      if (url.startsWith("/api/negotiations"))
-        return mockResponse(twoAgreements);
-      return mockResponse({});
-    });
-
-    const user = userEvent.setup();
-    render(<DataTransferPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Select All/)).toBeInTheDocument();
-    });
-
-    // Select all
-    const selectAll = screen.getByRole("checkbox", { name: /Select All/ });
-    await user.click(selectAll);
-
-    // Button should say "Start 2 Transfers"
-    expect(screen.getByTestId("start-transfer-bottom")).toBeInTheDocument();
-
-    await user.click(screen.getByTestId("start-transfer-bottom"));
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(/2 transfers started successfully/),
-      ).toBeInTheDocument();
-    });
-  });
 
   /* ─── DID resolution edge cases ─── */
 

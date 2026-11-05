@@ -42,7 +42,9 @@ describe("the research area", () => {
         (m) => m[1],
       ),
     );
-    expect(texts.length).toBe(3);
+    // The negotiate page's one and the transfer page's empty state; the
+    // transfer page's HttpData-PULL line went with its three lists (#894).
+    expect(texts.length).toBe(2);
     expect(missingIn(texts)).toEqual([]);
   });
 });

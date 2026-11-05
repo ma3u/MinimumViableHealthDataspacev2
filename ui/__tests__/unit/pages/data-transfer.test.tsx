@@ -202,19 +202,6 @@ describe("DataTransferPage", () => {
     });
   });
 
-  /* ─── 4. Shows empty state when no transfers exist ─── */
-  it("shows empty state message when there are no transfers", async () => {
-    setupDefaultMocks({ transfers: [], negotiations: [] });
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      expect(
-        screen.getByText(
-          /No transfer processes yet\. Start one from an agreed contract above\./,
-        ),
-      ).toBeInTheDocument();
-    });
-  });
-
   it("shows empty agreements message when no finalized negotiations", async () => {
     setupDefaultMocks({ negotiations: [], transfers: [] });
     render(<DataTransferPage />);
@@ -225,42 +212,6 @@ describe("DataTransferPage", () => {
     });
   });
 
-  /* ─── 5. Renders transfer list with DSP state pipeline ─── */
-  it("renders transfer cards with asset labels and state badges", async () => {
-    setupDefaultMocks({ negotiations: [] });
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      // Asset labels: "fhir-patient-bundle" → "Fhir Patient Bundle"
-      expect(screen.getByText("Fhir Patient Bundle")).toBeInTheDocument();
-      expect(screen.getByText("Omop Cohort Data")).toBeInTheDocument();
-    });
-    // State badges (also used in pipeline steps, so use getAllByText)
-    expect(screen.getAllByText("COMPLETED").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("STARTED").length).toBeGreaterThan(0);
-  });
-
-  it("renders DSP pipeline steps for each transfer", async () => {
-    setupDefaultMocks({ negotiations: [] });
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      expect(screen.getByText("Fhir Patient Bundle")).toBeInTheDocument();
-    });
-    // DSP_STATES are displayed for each transfer; there should be multiple instances
-    const requestedLabels = screen.getAllByText("REQUESTED");
-    expect(requestedLabels.length).toBeGreaterThanOrEqual(2); // one per transfer pipeline
-    const startedLabels = screen.getAllByText("STARTED");
-    expect(startedLabels.length).toBeGreaterThanOrEqual(1); // state badge + pipeline label(s)
-  });
-
-  it("shows transfer type badge", async () => {
-    setupDefaultMocks();
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      const badges = screen.getAllByText("HttpData-PULL");
-      expect(badges.length).toBeGreaterThan(0);
-    });
-  });
-
   it("shows View FHIR button on each transfer", async () => {
     setupDefaultMocks();
     render(<DataTransferPage />);
@@ -268,66 +219,6 @@ describe("DataTransferPage", () => {
       const viewButtons = screen.getAllByText("View FHIR");
       expect(viewButtons).toHaveLength(2);
     });
-  });
-
-  /* ─── 6. Shows FHIR bundle data after clicking view data ─── */
-  it("opens FHIR viewer panel when clicking View FHIR", async () => {
-    setupDefaultMocks({ negotiations: [] });
-
-    // Mock global fetch for /mock/fhir_bundles.json
-    const fhirBundles = {
-      "fhir-patient-bundle": {
-        resourceType: "Bundle",
-        id: "bundle-1",
-        type: "searchset",
-        total: 2,
-        entry: [
-          {
-            resource: {
-              resourceType: "Patient",
-              id: "pat-1",
-              name: [{ given: ["Jane"], family: "Doe" }],
-            },
-          },
-          {
-            resource: {
-              resourceType: "Observation",
-              id: "obs-1",
-              code: { text: "Blood Pressure" },
-              valueQuantity: { value: 120, unit: "mmHg" },
-            },
-          },
-        ],
-      },
-    };
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve(fhirBundles),
-    });
-
-    const user = userEvent.setup();
-    render(<DataTransferPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText("Fhir Patient Bundle")).toBeInTheDocument();
-    });
-
-    // Click the first "View FHIR" button
-    const viewButtons = screen.getAllByText("View FHIR");
-    await user.click(viewButtons[0]);
-
-    await waitFor(() => {
-      expect(screen.getByText(/FHIR Data/)).toBeInTheDocument();
-    });
-
-    // Should show resource type pills and resource cards
-    await waitFor(() => {
-      expect(screen.getByText("Patient")).toBeInTheDocument();
-      expect(screen.getByText("Observation")).toBeInTheDocument();
-    });
-
-    globalThis.fetch = originalFetch;
   });
 
   it("toggles FHIR viewer from Hide FHIR back to View FHIR", async () => {
@@ -380,21 +271,6 @@ describe("DataTransferPage", () => {
     });
   });
 
-  it("handles transfers/negotiations fetch failure gracefully", async () => {
-    mockFetchApi.mockImplementation((url: string) => {
-      if (url === "/api/participants") return mockResponse(PARTICIPANTS);
-      return Promise.reject(new Error("Server error"));
-    });
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      expect(
-        screen.getByText(
-          /No transfer processes yet\. Start one from an agreed contract above\./,
-        ),
-      ).toBeInTheDocument();
-    });
-  });
-
   it("handles non-ok participant response", async () => {
     mockFetchApi.mockImplementation((url: string) => {
       if (url === "/api/participants") return mockErrorResponse(500);
@@ -412,212 +288,241 @@ describe("DataTransferPage", () => {
     setupDefaultMocks({ transfers: [] });
     render(<DataTransferPage />);
     await waitFor(() => {
-      expect(
-        screen.getByText("Start Transfer from Agreement"),
-      ).toBeInTheDocument();
+      expect(screen.getByText("My contracts and data")).toBeInTheDocument();
     });
     // Agreements rendered with asset labels
     expect(screen.getByText("Fhir Patient Bundle")).toBeInTheDocument();
     expect(screen.getByText("Omop Cohort Data")).toBeInTheDocument();
   });
 
-  it("initiates transfer when Start Transfer is clicked", async () => {
-    setupDefaultMocks({ transfers: [] });
-    const user = userEvent.setup();
-    render(<DataTransferPage />);
+  describe("one list: each contract once, where it stands (#894)", () => {
+    const rowsOf = async () => {
+      await screen.findByTestId("contracts-list");
+      return screen.findAllByTestId("contract-row");
+    };
+    const stageOf = (row: HTMLElement) =>
+      within(row).getByTestId("contract-stage").textContent;
 
-    await waitFor(() => {
-      expect(
-        screen.getByText("Start Transfer from Agreement"),
-      ).toBeInTheDocument();
+    it("lists each agreement once, with its stage, data to use first", async () => {
+      setupDefaultMocks();
+      render(<DataTransferPage />);
+
+      const rows = await rowsOf();
+      expect(rows).toHaveLength(2);
+      // edc: prefixed fields (the fixtures) are read as well.
+      expect(within(rows[0]).getByText("Omop Cohort Data")).toBeTruthy();
+      expect(stageOf(rows[0])).toBe("Data ready");
+      expect(within(rows[1]).getByText("Fhir Patient Bundle")).toBeTruthy();
+      expect(stageOf(rows[1])).toBe("Transfer completed");
+      expect(screen.getAllByText("Fhir Patient Bundle")).toHaveLength(1);
+      expect(screen.queryByText("Transfer Processes")).toBeNull();
+      expect(screen.queryByText(/Select All/)).toBeNull();
     });
 
-    // Select the second agreement (Omop Cohort Data) via its checkbox
-    const checkboxes = screen.getAllByRole("checkbox");
-    // checkboxes[0] = Select All, checkboxes[1] = agr-001, checkboxes[2] = agr-002
-    await user.click(checkboxes[2]);
+    it("reads unprefixed fields too", async () => {
+      setupDefaultMocks({
+        transfers: [
+          {
+            "@id": "tp-plain",
+            state: "STARTED",
+            assetId: "omop-cohort-data",
+            contractId: "agr-002",
+            stateTimestamp: 1700002000000,
+          },
+        ],
+      });
+      render(<DataTransferPage />);
 
-    // Click start transfer
-    const startBtn = screen.getByTestId("start-transfer-bottom");
-    await user.click(startBtn);
+      const rows = await rowsOf();
+      expect(stageOf(rows[0])).toBe("Data ready");
+      expect(within(rows[0]).getByText("Omop Cohort Data")).toBeTruthy();
+    });
 
-    // Verify the POST was called
-    await waitFor(() => {
-      const postCalls = mockFetchApi.mock.calls.filter(
-        (c: unknown[]) =>
-          c[0] === "/api/transfers" && (c[1] as RequestInit)?.method === "POST",
+    it("counts each stage, filters by it and searches", async () => {
+      setupDefaultMocks();
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+      await rowsOf();
+
+      expect(screen.getByTestId("stage-filter-all").textContent).toBe(
+        "All (2)",
       );
-      expect(postCalls.length).toBe(1);
-      const body = JSON.parse((postCalls[0][1] as RequestInit).body as string);
-      expect(body.contractId).toBe("agr-002");
-      expect(body.assetId).toBe("omop-cohort-data");
-      // The data user transfers by default (#876).
-      expect(body.participantId).toBe("ctx-pharmaco");
+      expect(screen.getByTestId("stage-filter-done").textContent).toBe(
+        "Transfer completed (1)",
+      );
+      await user.click(screen.getByTestId("stage-filter-done"));
+      expect(screen.getAllByTestId("contract-row")).toHaveLength(1);
+      expect(screen.getByText("Fhir Patient Bundle")).toBeTruthy();
+
+      await user.click(screen.getByTestId("stage-filter-imported"));
+      expect(screen.queryAllByTestId("contract-row")).toHaveLength(0);
+      expect(screen.getByText("No contract matches.")).toBeTruthy();
+
+      await user.click(screen.getByTestId("stage-filter-all"));
+      await user.type(
+        screen.getByRole("searchbox", {
+          name: "Search dataset, provider or contract",
+        }),
+        "omop",
+      );
+      expect(screen.getAllByTestId("contract-row")).toHaveLength(1);
+      expect(screen.getByText("Omop Cohort Data")).toBeTruthy();
     });
 
-    // Should show success message
-    await waitFor(() => {
-      expect(
-        screen.getByText(/Transfer started for Omop Cohort Data/),
-      ).toBeInTheDocument();
-    });
-  });
-
-  // A transfer under a contract that exists only in this demonstrator is recorded
-  // by the API rather than sent (issue #25). "Transfer started" would claim a DSP
-  // transfer that never happened, so the page has to say which one it was.
-  it("reports a recorded demo transfer as recorded, not started", async () => {
-    mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
-      if (url === "/api/participants") return mockResponse(PARTICIPANTS);
-      if (url === "/api/transfers" && init?.method === "POST") {
-        return mockResponse({
-          "@id": "demo-transfer:agr-002",
-          state: "STARTED",
-          contractId: "agr-002",
-          demo: true,
-          demoReason: "The connector has never seen the contract.",
-        });
-      }
-      if (url.startsWith("/api/transfers")) return mockResponse([]);
-      if (url.startsWith("/api/negotiations")) {
-        return mockResponse(NEGOTIATIONS_FINALIZED);
-      }
-      return mockResponse({});
-    });
-    const user = userEvent.setup();
-    render(<DataTransferPage />);
-
-    await waitFor(() => {
-      expect(
-        screen.getByText("Start Transfer from Agreement"),
-      ).toBeInTheDocument();
-    });
-
-    const checkboxes = screen.getAllByRole("checkbox");
-    await user.click(checkboxes[2]);
-    await user.click(screen.getByTestId("start-transfer-bottom"));
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(/Demo transfer recorded for Omop Cohort Data/),
-      ).toBeInTheDocument();
-    });
-    expect(screen.queryByText(/Transfer started for/)).toBeNull();
-  });
-
-  it("shows error message when transfer initiation fails", async () => {
-    mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
-      if (url === "/api/participants") return mockResponse(PARTICIPANTS);
-      if (url === "/api/transfers" && init?.method === "POST") {
-        return mockErrorResponse(400);
-      }
-      if (url.startsWith("/api/transfers")) return mockResponse([]);
-      if (url.startsWith("/api/negotiations"))
-        return mockResponse(NEGOTIATIONS_FINALIZED);
-      return mockResponse({});
-    });
-
-    const user = userEvent.setup();
-    render(<DataTransferPage />);
-
-    await waitFor(() => {
-      expect(
-        screen.getByText("Start Transfer from Agreement"),
-      ).toBeInTheDocument();
-    });
-
-    // Select first agreement
-    const checkboxes = screen.getAllByRole("checkbox");
-    await user.click(checkboxes[1]);
-
-    await user.click(screen.getByTestId("start-transfer-bottom"));
-
-    await waitFor(() => {
-      expect(screen.getByText(/Error:/)).toBeInTheDocument();
-    });
-  });
-
-  it("supports Select All to toggle all agreements", async () => {
-    setupDefaultMocks();
-    const user = userEvent.setup();
-    render(<DataTransferPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Select All/)).toBeInTheDocument();
-    });
-
-    // Click Select All
-    const selectAllCheckbox = screen.getByRole("checkbox", {
-      name: /Select All/,
-    });
-    await user.click(selectAllCheckbox);
-
-    // Button should indicate multiple transfers
-    expect(screen.getByTestId("start-transfer-bottom")).toBeInTheDocument();
-  });
-
-  describe("what an agreement's transfers have reached (#876)", () => {
-    // It said "transfer in progress" for any transfer at all, a failed one
-    // included, and a STARTED pull transfer stays STARTED while its data is
-    // ready.
-    const only = (state: string) => [
-      { "@id": "tp-x", "edc:state": state, "edc:contractId": "agr-001" },
-    ];
-
-    it.each([
-      ["COMPLETED", "(transferred)"],
-      ["STARTED", "(data ready)"],
-      ["REQUESTED", "(transfer in progress)"],
-    ])("%s reads %s", async (state, label) => {
-      setupDefaultMocks({ transfers: only(state) });
+    it("starts a transfer from the agreement's row and says so", async () => {
+      setupDefaultMocks({ transfers: [] });
+      const user = userEvent.setup();
       render(<DataTransferPage />);
-      expect(await screen.findByText(label)).toBeInTheDocument();
+      const rows = await rowsOf();
+      const fhir = rows.find((r) =>
+        within(r).queryByText("Fhir Patient Bundle"),
+      )!;
+      expect(stageOf(fhir)).toBe("Ready to transfer");
+
+      await user.click(within(fhir).getByTestId("start-transfer"));
+
+      await screen.findByText(/Transfer started for Fhir Patient Bundle/);
+      const post = mockFetchApi.mock.calls.find(
+        ([u, init]) => u === "/api/transfers" && init?.method === "POST",
+      );
+      expect(JSON.parse(String(post?.[1]?.body))).toMatchObject({
+        participantId: "ctx-pharmaco",
+        contractId: "agr-001",
+        assetId: "fhir-patient-bundle",
+      });
     });
 
-    it("a failed transfer leaves the agreement unlabelled", async () => {
-      setupDefaultMocks({ transfers: only("TERMINATED") });
+    it("reports a recorded demo transfer as recorded, not started", async () => {
+      setupDefaultMocks({ transfers: [] });
+      mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
+        if (url === "/api/transfers" && init?.method === "POST") {
+          return mockResponse({ "@id": "tp-demo", demo: true });
+        }
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) return mockResponse([]);
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse(NEGOTIATIONS_FINALIZED);
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
       render(<DataTransferPage />);
-      await screen.findAllByText("TERMINATED");
-      expect(screen.queryByText(/transfer in progress|data ready/)).toBeNull();
+      const rows = await rowsOf();
+
+      await user.click(within(rows[0]).getByTestId("start-transfer"));
+
+      await screen.findByText(/Demo transfer recorded for/);
+      expect(screen.queryByText(/Transfer started for/)).toBeNull();
     });
-  });
 
-  it("offers Start Transfer above the agreement list as well (#876)", async () => {
-    setupDefaultMocks();
-    const user = userEvent.setup();
-    render(<DataTransferPage />);
-    await screen.findByText("Start Transfer from Agreement");
+    it("says why a transfer could not start, and when the network failed", async () => {
+      let fail: "http" | "network" = "http";
+      mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
+        if (url === "/api/transfers" && init?.method === "POST") {
+          return fail === "http"
+            ? mockResponse({ detail: "contract not found" }, false)
+            : Promise.reject(new Error("offline"));
+        }
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) return mockResponse([]);
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse([NEGOTIATIONS_FINALIZED[0]]);
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+      const rows = await rowsOf();
 
-    const top = screen.getByTestId("start-transfer-top");
-    expect((top as HTMLButtonElement).disabled).toBe(true);
-    await user.click(screen.getAllByRole("checkbox")[2]);
-    expect((top as HTMLButtonElement).disabled).toBe(false);
-  });
+      await user.click(within(rows[0]).getByTestId("start-transfer"));
+      await screen.findByText(/Fhir Patient Bundle: contract not found/);
 
-  it("shows Details for an agreement without ticking it; a sample says it is one", async () => {
-    setupDefaultMocks();
-    const user = userEvent.setup();
-    render(<DataTransferPage />);
-    await screen.findByText("Start Transfer from Agreement");
-    const before = screen
-      .getAllByRole("checkbox")
-      .map((c) => (c as HTMLInputElement).checked);
+      fail = "network";
+      await user.click(within(rows[0]).getByTestId("start-transfer"));
+      await screen.findByText(/Fhir Patient Bundle: Network error/);
+    });
 
-    await user.click(screen.getAllByText("Details")[0]);
+    it("keeps a contract's transfers under Details, with their pipeline", async () => {
+      setupDefaultMocks({
+        transfers: [TRANSFERS[0], TRANSFER_REQUESTED, TRANSFER_TERMINATED],
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+      const rows = await rowsOf();
+      const fhir = rows.find((r) =>
+        within(r).queryByText("Fhir Patient Bundle"),
+      )!;
+      // A REQUESTED transfer is under way: the contract waits for it.
+      expect(stageOf(fhir)).toBe("Transfer in progress");
+      expect(within(fhir).queryByTestId("contract-history")).toBeNull();
 
-    const details = await screen.findByTestId("transfer-details");
-    expect(details.textContent).toMatch(/sample agreement/);
-    expect(
-      screen
-        .getAllByRole("checkbox")
-        .map((c) => (c as HTMLInputElement).checked),
-    ).toEqual(before);
-    // No connector record to read for a sample row.
-    expect(
-      mockFetchApi.mock.calls.some(([u]) =>
-        String(u).startsWith("/api/agreements/"),
-      ),
-    ).toBe(false);
+      await user.click(within(fhir).getByText("Details"));
+
+      const history = within(fhir).getByTestId("contract-history");
+      expect(history.textContent).toMatch(
+        /Transfers under this contract \(3\)/,
+      );
+      expect(within(history).getAllByText("COMPLETED").length).toBeGreaterThan(
+        0,
+      );
+      expect(within(history).getAllByText("REQUESTED").length).toBeGreaterThan(
+        0,
+      );
+      expect(within(history).getAllByText("TERMINATED").length).toBeGreaterThan(
+        0,
+      );
+      expect(history.textContent).toMatch(/42 resources transferred/);
+      expect(history.textContent).toMatch(/HttpData-PULL/);
+    });
+
+    it("offers a new transfer after a failed one, and says it failed", async () => {
+      setupDefaultMocks({ transfers: [TRANSFER_TERMINATED] });
+      render(<DataTransferPage />);
+      const rows = await rowsOf();
+      const fhir = rows.find((r) =>
+        within(r).queryByText("Fhir Patient Bundle"),
+      )!;
+
+      expect(stageOf(fhir)).toBe("Ready to transfer");
+      expect(fhir.textContent).toMatch(/the last transfer failed/);
+      expect(within(fhir).getByTestId("start-transfer")).toBeTruthy();
+    });
+
+    it("resolves the provider's DID to its name", async () => {
+      setupDefaultMocks();
+      render(<DataTransferPage />);
+      const rows = await rowsOf();
+
+      expect(rows[1].textContent).toMatch(/Provider:\s*AlphaKlinik Berlin/);
+    });
+
+    it("says a sample agreement is one under Details", async () => {
+      setupDefaultMocks();
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+      const rows = await rowsOf();
+
+      await user.click(within(rows[1]).getByText("Details"));
+
+      expect(
+        within(rows[1]).getByTestId("transfer-details").textContent,
+      ).toMatch(/sample agreement/);
+      expect(
+        mockFetchApi.mock.calls.some(([u]) =>
+          String(u).startsWith("/api/agreements/"),
+        ),
+      ).toBe(false);
+    });
+
+    it("shows the empty state when the contracts cannot be read", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        return Promise.reject(new Error("down"));
+      });
+      render(<DataTransferPage />);
+
+      await screen.findByText(/No finalized agreements found/);
+    });
   });
 
   describe("My data: the data of open connector transfers (#876)", () => {
@@ -650,19 +555,6 @@ describe("DataTransferPage", () => {
       });
     }
 
-    it("lists the asset of a STARTED connector transfer, and only that", async () => {
-      mocks(() => mockResponse({}));
-      render(<DataTransferPage />);
-
-      const section = await screen.findByTestId("my-data");
-      expect(within(section).getByText("Fhir Patient Search")).toBeTruthy();
-      expect(
-        within(section).getByText(/Provider:\s*AlphaKlinik Berlin/),
-      ).toBeTruthy();
-      // tp-001 is a COMPLETED sample row: not in My data.
-      expect(within(section).queryByText("Fhir Patient Bundle")).toBeNull();
-    });
-
     it("Open fetches the transfer's own data and shows its resources", async () => {
       mocks(() =>
         mockResponse({
@@ -675,7 +567,7 @@ describe("DataTransferPage", () => {
       const user = userEvent.setup();
       render(<DataTransferPage />);
 
-      const section = await screen.findByTestId("my-data");
+      const section = await screen.findByTestId("contracts-list");
       await user.click(within(section).getByText("Open"));
 
       await waitFor(() => {
@@ -718,7 +610,7 @@ describe("DataTransferPage", () => {
       const user = userEvent.setup();
       render(<DataTransferPage />);
 
-      const section = await screen.findByTestId("my-data");
+      const section = await screen.findByTestId("contracts-list");
       const target = within(section).getByTestId(
         "spe-import-target",
       ) as HTMLSelectElement;
@@ -784,7 +676,7 @@ describe("DataTransferPage", () => {
       const user = userEvent.setup();
       render(<DataTransferPage />);
 
-      const section = await screen.findByTestId("my-data");
+      const section = await screen.findByTestId("contracts-list");
       const held = await within(section).findByTestId("spe-import-existing");
       expect(held.textContent).toMatch(
         /Imported into SPE-1 on 2026-11-05: 100 records/,
@@ -836,7 +728,7 @@ describe("DataTransferPage", () => {
       const user = userEvent.setup();
       render(<DataTransferPage />);
 
-      const section = await screen.findByTestId("my-data");
+      const section = await screen.findByTestId("contracts-list");
       await within(section).findByTestId("spe-import-existing");
       await user.selectOptions(
         within(section).getByTestId("spe-import-target"),
@@ -850,6 +742,46 @@ describe("DataTransferPage", () => {
       expect(
         within(section).getByTestId("spe-import-confirm-yes").textContent,
       ).toBe("Import as well");
+    });
+
+    it("Details of a connector agreement say since when, until when and the policy", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url.startsWith("/api/agreements/agr-001")) {
+          return mockResponse({
+            agreementId: "agr-001",
+            signedAt: "2026-11-05T13:56:30.000Z",
+            validUntil: "2027-11-05T13:56:30.000Z",
+            policy: { permission: [{ action: "use" }] },
+          });
+        }
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) return mockResponse([LIVE]);
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse([
+            { ...NEGOTIATIONS_FINALIZED[0], source: "controlplane" },
+          ]);
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("contracts-list");
+      const row = (await within(section).findAllByTestId("contract-row"))[0];
+      await user.click(within(row).getByText("Details"));
+
+      const details = await within(row).findByTestId("transfer-details");
+      await waitFor(() =>
+        expect(
+          within(details).getByTestId("transfer-until").textContent,
+        ).toMatch(/2027/),
+      );
+      expect(
+        within(details).getByTestId("transfer-opened").textContent,
+      ).not.toBe("no open transfer");
+      expect(within(row).getByTestId("contract-history").textContent).toMatch(
+        /Transfers under this contract \(1\)/,
+      );
     });
 
     it("says why an import failed", async () => {
@@ -872,80 +804,13 @@ describe("DataTransferPage", () => {
       const user = userEvent.setup();
       render(<DataTransferPage />);
 
-      const section = await screen.findByTestId("my-data");
+      const section = await screen.findByTestId("contracts-list");
       await user.click(within(section).getByTestId("spe-import-run"));
 
       expect(
         (await within(section).findByTestId("spe-import-error")).textContent,
       ).toMatch(/SPE-1 is not connected/);
       expect(within(section).queryByTestId("spe-import-done")).toBeNull();
-    });
-
-    it("Details say since when, until when, how, and the agreed policy", async () => {
-      mockFetchApi.mockImplementation((url: string) => {
-        if (url.startsWith("/api/agreements/agr-001")) {
-          return mockResponse({
-            agreementId: "agr-001",
-            assetId: "fhir-patient-search",
-            providerId: "did:web:alpha-klinik.de:participant",
-            consumerId: "did:web:pharmaco.de:research",
-            signedAt: "2026-11-05T13:56:30.000Z",
-            validUntil: "2027-11-05T13:56:30.000Z",
-            policy: {
-              permission: [
-                {
-                  action: "use",
-                  constraint: [
-                    {
-                      leftOperand: "inForceDate",
-                      operator: "lteq",
-                      rightOperand: "contractAgreement+365d",
-                    },
-                  ],
-                },
-              ],
-            },
-          });
-        }
-        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
-        if (url.startsWith("/api/transfers")) {
-          return mockResponse([LIVE, ...TRANSFERS]);
-        }
-        if (url.startsWith("/api/negotiations")) {
-          return mockResponse(NEGOTIATIONS_FINALIZED);
-        }
-        return mockResponse({});
-      });
-      const user = userEvent.setup();
-      render(<DataTransferPage />);
-
-      const section = await screen.findByTestId("my-data");
-      await user.click(within(section).getByText("Details"));
-
-      const details = await screen.findByTestId("transfer-details");
-      expect(within(details).getByText("Access open since")).toBeTruthy();
-      expect(
-        within(details).getByTestId("transfer-opened").textContent,
-      ).not.toBe("—");
-      await waitFor(() => {
-        expect(
-          within(details).getByTestId("transfer-until").textContent,
-        ).toMatch(/2027/);
-      });
-      expect(details.textContent).toMatch(/How to get the data/);
-      expect(details.textContent).toMatch(/Access policy/);
-      expect(
-        within(details).getByTestId("offer-policy-description").textContent,
-      ).toMatch(/for 1 year after the contract is agreed/);
-      // A signed agreement has nothing left to tick.
-      expect(within(details).queryByTestId("offer-terms-accept")).toBeNull();
-      expect(
-        mockFetchApi.mock.calls.some(([u]) =>
-          String(u).startsWith(
-            "/api/agreements/agr-001?participantId=ctx-pharmaco",
-          ),
-        ),
-      ).toBe(true);
     });
 
     it("says why when the data cannot be fetched", async () => {
@@ -961,7 +826,7 @@ describe("DataTransferPage", () => {
       const user = userEvent.setup();
       render(<DataTransferPage />);
 
-      const section = await screen.findByTestId("my-data");
+      const section = await screen.findByTestId("contracts-list");
       await user.click(within(section).getByText("Open"));
 
       expect(
@@ -971,112 +836,6 @@ describe("DataTransferPage", () => {
           )
         ).length,
       ).toBeGreaterThan(0);
-    });
-  });
-
-  /* ─── 9. DSP state pipeline stage display ─── */
-  it("shows COMPLETED state with green check in pipeline", async () => {
-    setupDefaultMocks({ transfers: [TRANSFERS[0]], negotiations: [] });
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      // COMPLETED appears in both state badge and pipeline step
-      const completed = screen.getAllByText("COMPLETED");
-      expect(completed.length).toBeGreaterThanOrEqual(2);
-    });
-    // Pipeline steps should all be present
-    const pipelineSteps = screen.getAllByText("REQUESTED");
-    expect(pipelineSteps.length).toBeGreaterThanOrEqual(1);
-  });
-
-  it("shows REQUESTED state correctly in pipeline", async () => {
-    setupDefaultMocks({
-      transfers: [TRANSFER_REQUESTED],
-      negotiations: [],
-    });
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      // The state badge + pipeline both show REQUESTED
-      const labels = screen.getAllByText("REQUESTED");
-      expect(labels.length).toBeGreaterThanOrEqual(2); // badge + pipeline step
-    });
-  });
-
-  it("shows TERMINATED state with error indicator", async () => {
-    setupDefaultMocks({
-      transfers: [TRANSFER_TERMINATED],
-      negotiations: [],
-    });
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      // TERMINATED shows in both the badge and extra pipeline node
-      const terminated = screen.getAllByText("TERMINATED");
-      expect(terminated.length).toBeGreaterThanOrEqual(2); // badge + pipeline
-    });
-  });
-
-  it("shows transfer status filter pills when transfers exist", async () => {
-    setupDefaultMocks();
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      // Status filter: ALL, COMPLETED, STARTED
-      expect(screen.getByText(/ALL \(2\)/)).toBeInTheDocument();
-    });
-  });
-
-  it("filters transfers by status when clicking a filter pill", async () => {
-    setupDefaultMocks({ negotiations: [] });
-    const user = userEvent.setup();
-    render(<DataTransferPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText("Fhir Patient Bundle")).toBeInTheDocument();
-      expect(screen.getByText("Omop Cohort Data")).toBeInTheDocument();
-    });
-
-    // Click the COMPLETED filter
-    const completedFilter = screen.getByText(/COMPLETED \(1\)/);
-    await user.click(completedFilter);
-
-    await waitFor(() => {
-      expect(screen.getByText("Fhir Patient Bundle")).toBeInTheDocument();
-      expect(screen.queryByText("Omop Cohort Data")).not.toBeInTheDocument();
-    });
-  });
-
-  /* ─── 10. edc: prefix field normalization ─── */
-  it("reads edc: prefixed fields correctly for asset ID and state", async () => {
-    // Use only edc:-prefixed fields (no unprefixed)
-    const transferEdcOnly = {
-      "@id": "tp-edc",
-      "edc:state": "STARTED",
-      "edc:assetId": "fhir-condition-report",
-      "edc:contractId": "agr-edc",
-      "edc:transferType": "HttpData-PULL",
-    };
-    setupDefaultMocks({ transfers: [transferEdcOnly], negotiations: [] });
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      expect(screen.getByText("Fhir Condition Report")).toBeInTheDocument();
-      // "STARTED" should appear as state badge
-      const startedLabels = screen.getAllByText("STARTED");
-      expect(startedLabels.length).toBeGreaterThanOrEqual(1);
-    });
-  });
-
-  it("reads unprefixed fields when edc: variants are absent", async () => {
-    const transferUnprefixed = {
-      "@id": "tp-plain",
-      state: "COMPLETED",
-      assetId: "omop-medication-data",
-      contractId: "agr-plain",
-      transferType: "HttpData-PULL",
-    };
-    setupDefaultMocks({ transfers: [transferUnprefixed], negotiations: [] });
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      expect(screen.getByText("Omop Medication Data")).toBeInTheDocument();
-      // COMPLETED appears in both badge and pipeline step
-      expect(screen.getAllByText("COMPLETED").length).toBeGreaterThanOrEqual(2);
     });
   });
 
@@ -1135,15 +894,6 @@ describe("DataTransferPage", () => {
     });
   });
 
-  it("shows AGREED badge on each agreement", async () => {
-    setupDefaultMocks();
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      const agreedBadges = screen.getAllByText("AGREED");
-      expect(agreedBadges.length).toBe(2);
-    });
-  });
-
   it("handles participants returned as { participants: [...] } wrapper", async () => {
     setupDefaultMocks({
       participants: { participants: PARTICIPANTS },
@@ -1164,15 +914,6 @@ describe("DataTransferPage", () => {
     render(<DataTransferPage />);
     await waitFor(() => {
       expect(screen.getByText("Fhir Patient Bundle")).toBeInTheDocument();
-    });
-  });
-
-  it("disables Start Transfer button when no agreement is selected", async () => {
-    setupDefaultMocks();
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      const btn = screen.getByTestId("start-transfer-bottom");
-      expect(btn).toBeDisabled();
     });
   });
 });
