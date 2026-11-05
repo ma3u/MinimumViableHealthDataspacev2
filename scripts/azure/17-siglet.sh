@@ -72,7 +72,16 @@ report() {
     --query "properties.configuration.ingress.additionalPortMappings[].exposedPort" -o tsv 2>/dev/null | tr '\n' ' ')
   echo "  ports    ${ports:-none} (want 8081 8082 8083; the control plane signals on 8081)"
 }
-if [ "$MODE" = "--check" ]; then report; exit 0; fi
+if [ "$MODE" = "--check" ]; then
+  report
+  # Without 8081 every transfer stops at "failed to prepare data flow" (#876).
+  exposed=$(az containerapp show --name "$SIGLET_APP" --resource-group "$RG" \
+    --query "properties.configuration.ingress.additionalPortMappings[].exposedPort" -o tsv 2>/dev/null || true)
+  for p in 8081 8082 8083; do
+    grep -qx "$p" <<<"$exposed" || { err "port ${p} is not exposed; run this script without --check"; exit 1; }
+  done
+  exit 0
+fi
 
 # ── 1. The database ─────────────────────────────────────────────────────────
 if az postgres flexible-server db show --server-name "$PG_FLEX_NAME" \

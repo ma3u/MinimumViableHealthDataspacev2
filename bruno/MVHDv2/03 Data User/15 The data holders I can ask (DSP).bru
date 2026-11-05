@@ -1,0 +1,44 @@
+meta {
+  name: 15 The data holders I can ask (DSP)
+  type: http
+  seq: 15
+}
+
+get {
+  url: {{baseUrl}}/api/participants
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+tests {
+  const rows = res.getBody();
+  const bySlug = (slug) => rows.find((p) => p.slug === slug);
+  test("PharmaCo and AlphaKlinik both have a participant context", function () {
+    expect(bySlug("pharmaco"), "no context for pharmaco").to.be.an("object");
+    expect(bySlug("alpha-klinik"), "no context for alpha-klinik").to.be.an("object");
+  });
+  bru.setVar("dspConsumerCtx", bySlug("pharmaco")?.participantId || "");
+  bru.setVar("dspProviderCtx", bySlug("alpha-klinik")?.participantId || "");
+  bru.setVar("dspProviderDid", bySlug("alpha-klinik")?.identity || "");
+}
+
+docs {
+  The first step of the live DSP journey (15 to 20, #876): PharmaCo Research AG asks
+  AlphaKlinik Berlin for its catalogue, negotiates a contract and starts a transfer, as the
+  negotiate and transfer pages do. Against Azure-Dev (`dspLiveFlow: true`) every step must reach
+  the real connector; elsewhere the steps run and check their shape, and the live assertions
+  skip loudly, because the compose data planes crash on start (#542).
+
+  On Azure every context has stayed CREATED since the 2026-10-28 re-seed. Until #876 this
+  route dropped them and served `public/mock/participants.json`, whose ids do not exist there,
+  so request 16 got the demo catalogue.
+}

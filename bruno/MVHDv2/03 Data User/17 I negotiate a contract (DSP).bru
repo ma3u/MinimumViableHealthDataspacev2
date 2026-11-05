@@ -1,0 +1,42 @@
+meta {
+  name: 17 I negotiate a contract (DSP)
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{baseUrl}}/api/negotiations
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "participantId": "{{dspConsumerCtx}}",
+    "counterPartyAddress": "{{dspEndpoint}}",
+    "counterPartyId": "{{dspProviderCtx}}",
+    "providerDid": "{{dspProviderDid}}",
+    "offerId": "{{dspOfferId}}",
+    "assetId": "{{dspAssetId}}"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body["@id"]: isDefined
+}
+
+tests {
+  const id = res.getBody()["@id"] || "";
+  bru.setVar("dspNegotiationId", id);
+  if (bru.getEnvVar("dspLiveFlow") === "true") {
+    test("the connector took the request, not the demo recorder", function () {
+      expect(id, "recorded as a demo negotiation").to.not.match(/^demo-/);
+    });
+  }
+}
