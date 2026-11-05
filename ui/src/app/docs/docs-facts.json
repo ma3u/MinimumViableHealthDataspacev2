@@ -1220,8 +1220,8 @@
       "status": "Accepted"
     },
     {
-      "id": "ADR-076",
-      "file": "ADR-076-a-minimal-set-of-standard-data-sharing-policies.md",
+      "id": "ADR-077",
+      "file": "ADR-077-a-minimal-set-of-standard-data-sharing-policies.md",
       "title": "A minimal set of standard data-sharing policies",
       "status": "Proposed"
     }

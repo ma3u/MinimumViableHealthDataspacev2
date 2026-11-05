@@ -1,5 +1,5 @@
 /**
- * The hub's standard data-sharing policies (ADR-076, #876).
+ * The hub's standard data-sharing policies (ADR-077, #876).
  *
  * A minimal set: four policies, one per way health data leaves a holder,
  * built from one vocabulary of clauses. Each clause names the provisions it
@@ -23,7 +23,7 @@
  * (lib/odrl-validate.ts) finds anything short of "valid" in one of them.
  *
  * Which clauses the connector enforces and which bind by contract is in
- * ADR-076: the connector filters out a constraint it has no function for,
+ * ADR-077: the connector filters out a constraint it has no function for,
  * so most of these are terms the parties agree to, enforced by the permit
  * gate, the SPE and audit, not by the negotiation.
  */

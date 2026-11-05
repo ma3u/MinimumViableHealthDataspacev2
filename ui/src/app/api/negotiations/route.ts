@@ -296,7 +296,7 @@ export async function POST(req: NextRequest) {
       protocol: DSP_PROTOCOL,
       // The offer as the catalog gave it: the connector compares the request
       // with the policy it offered, so an offer with constraints, duties or
-      // prohibitions (the standard policies, ADR-076) must come back whole.
+      // prohibitions (the standard policies, ADR-077) must come back whole.
       // Without one, the bare permission the seeded offers carried.
       policy: {
         ...(isPlainObject(offeredPolicy)

@@ -401,7 +401,7 @@ const ACTION_LABELS: Record<string, string> = {
   thirdPartySharing: "share the data with third parties",
   publishIndividualLevel: "publish individual-level data",
   advertise: "use the data for advertising or marketing",
-  // The standard policies' clauses (lib/standard-policies.ts, ADR-076)
+  // The standard policies' clauses (lib/standard-policies.ts, ADR-077)
   attestEnvironment: "prove the environment by remote attestation",
   publishResults: "publish the results within 18 months",
   reportIncident:

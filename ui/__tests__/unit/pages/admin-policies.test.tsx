@@ -520,7 +520,7 @@ describe("AdminPoliciesPage", () => {
     expect(screen.getByText("Art. 7")).toBeInTheDocument();
   });
 
-  it("shows the first standard policy by default (ADR-076)", async () => {
+  it("shows the first standard policy by default (ADR-077)", async () => {
     const user = userEvent.setup();
     await renderLoaded();
     await user.click(screen.getByRole("button", { name: /Create Policy/ }));

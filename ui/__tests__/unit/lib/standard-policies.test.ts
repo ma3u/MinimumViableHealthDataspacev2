@@ -1,5 +1,5 @@
 /**
- * The standard policies (ADR-076): each passes the hub's own check, says in
+ * The standard policies (ADR-077): each passes the hub's own check, says in
  * plain language what it allows, carries the clauses its regulations need,
  * and is the same in jad/policies/, which the connector seed reads.
  */

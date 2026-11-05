@@ -543,7 +543,7 @@ function NegotiateContent() {
           counterPartyId: providerCtxId,
           providerDid: selectedOffer?.assignerDid || providerDid,
           offerId,
-          // The terms the user agreed to, sent back whole (ADR-076).
+          // The terms the user agreed to, sent back whole (ADR-077).
           policy: selectedOffer?.policy,
         }),
       });

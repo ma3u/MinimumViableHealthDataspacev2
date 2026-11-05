@@ -1,4 +1,4 @@
-# ADR-076: A minimal set of standard data-sharing policies
+# ADR-077: A minimal set of standard data-sharing policies
 
 Date: 2026-11-05
 

@@ -157,7 +157,7 @@ print(json.dumps(policy_def))
   elif mgmt_call PUT "${MGMT_V}/participants/$ctx_id/policydefinitions/$policy_id" "$payload" \
       | python3 -c "import sys; t=sys.stdin.read().strip(); assert not t or 'error' not in t.lower()" 2>/dev/null; then
     # It existed: a re-seed now replaces it, so a changed policy reaches the
-    # connector (the standard policies, ADR-076). It used to be skipped.
+    # connector (the standard policies, ADR-077). It used to be skipped.
     ok "Policy '$policy_id' updated"
   else
     echo "  Response: $response"
@@ -165,7 +165,7 @@ print(json.dumps(policy_def))
   fi
 }
 
-# --- The standard policies (ADR-076) ---
+# --- The standard policies (ADR-077) ---
 # jad/policies/<id>.json, the same files the hub's checker tests
 # (ui/__tests__/unit/lib/standard-policies.test.ts). The Azure job ships the
 # folder next to this script.
@@ -294,7 +294,7 @@ AK_POLICY='{
 }'
 create_policy "$ALPHA_KLINIK_CTX" "open-fhir-access-policy" "$AK_POLICY"
 # Who may see the offer stays open; what a contract binds is the standard
-# policy for record-level data under a permit (ADR-076).
+# policy for record-level data under a permit (ADR-077).
 create_policy "$ALPHA_KLINIK_CTX" "mvhd-ehds-permit-spe" "$(standard_policy mvhd-ehds-permit-spe)"
 
 EDC_ID="https://w3id.org/edc/v0.0.1/ns/id"

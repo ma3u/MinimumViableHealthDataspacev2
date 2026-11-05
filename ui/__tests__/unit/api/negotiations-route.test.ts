@@ -345,7 +345,7 @@ describe("POST /api/negotiations", () => {
     expect(data.error).toContain("offerId");
   });
 
-  it("sends the offer's own policy back whole, its prohibitions included (ADR-076)", async () => {
+  it("sends the offer's own policy back whole, its prohibitions included (ADR-077)", async () => {
     mockManagement.mockResolvedValue({ "@id": "neg-1" });
     const offered = {
       "@type": "Offer",

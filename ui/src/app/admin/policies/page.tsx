@@ -111,7 +111,7 @@ const PROHIBIT_COMMERCIALIZE = {
 };
 
 /**
- * The standard policies first (lib/standard-policies.ts, ADR-076): the
+ * The standard policies first (lib/standard-policies.ts, ADR-077): the
  * minimal set across EHDS, GDPR, DGA, Data Act and AI Act. The period the
  * form picks replaces their one-year default.
  */
