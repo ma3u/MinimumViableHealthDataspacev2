@@ -273,5 +273,16 @@
   "The import failed: {detail}": "Het importeren is mislukt: {detail}",
   "Imported {records} records with {relationships} references into {spe}.": "{records} records met {relationships} verwijzingen geïmporteerd in {spe}.",
   "Patients are pseudonymised.": "Patiënten zijn gepseudonimiseerd.",
-  "Show in the graph": "Tonen in de graaf"
+  "Show in the graph": "Tonen in de graaf",
+  "Allowed for": "Toegestaan voor",
+  "Any purpose": "Elk doel",
+  "For how long": "Hoe lang",
+  "No time limit": "Zonder tijdslimiet",
+  "Only if": "Alleen als",
+  "Not allowed": "Niet toegestaan",
+  "You must": "U moet",
+  "Read the full terms": "De volledige voorwaarden lezen",
+  "You hold a data permit, valid until {date}.": "U hebt een gegevensvergunning, geldig tot {date}.",
+  "You hold {n} data permits; the latest is valid until {date}.": "U hebt {n} gegevensvergunningen; de laatste is geldig tot {date}.",
+  "Show the permits ({n})": "De vergunningen tonen ({n})"
 }

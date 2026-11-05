@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, ScrollText, ShieldCheck } from "lucide-react";
+import {
+  AlertCircle,
+  Ban,
+  CheckCircle2,
+  Clock,
+  ListChecks,
+  ScrollText,
+  ShieldCheck,
+  Target,
+} from "lucide-react";
 import { fetchApi } from "@/lib/api";
 import { describePolicy, renderPolicyText } from "@/lib/odrl-describe";
 import { validatePolicy } from "@/lib/odrl-validate";
@@ -22,6 +31,55 @@ interface OdrlScope {
 
 /** `re_identification` → `re identification`, as the scope names them. */
 const words = (token: string) => token.replace(/_/g, " ").toLowerCase();
+
+/**
+ * A purpose as a person says it: "EHDS Art. 53(1)(e) - scientific research"
+ * becomes "Scientific research", an IRI its last segment in words. The full
+ * value stays on the item's title.
+ */
+export function shortPurpose(value: string): string {
+  const afterDash = value.split(/\s[-\u2013]\s/).pop() ?? value;
+  const local = /^[a-z]+:\/\//i.test(afterDash)
+    ? afterDash.split(/[/#]/).pop() ?? afterDash
+    : afterDash;
+  const plain = local
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/_/g, " ")
+    .trim();
+  return plain.charAt(0).toUpperCase() + plain.slice(1).toLowerCase();
+}
+
+/** One labelled list of the short view; nothing when the list is empty. */
+function Glance({
+  icon,
+  label,
+  items,
+  testId,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  items: { text: string; title?: string }[];
+  testId: string;
+}) {
+  if (!items.length) return null;
+  return (
+    <div data-testid={testId} className="grid grid-cols-[8rem_1fr] gap-2">
+      <dt className="flex items-start gap-1.5 text-xs font-medium text-(--text-secondary)">
+        {icon}
+        {label}
+      </dt>
+      <dd>
+        <ul className="space-y-0.5 text-(--text-primary)">
+          {items.map((i) => (
+            <li key={i.text} title={i.title}>
+              {i.text}
+            </li>
+          ))}
+        </ul>
+      </dd>
+    </div>
+  );
+}
 
 /**
  * The terms a data user agrees to by negotiating an offer (#876): the offer's
@@ -84,6 +142,22 @@ export default function OfferTerms({
     [withAssigner],
   );
   const permits = scope?.permits ?? [];
+  const glance = useMemo(() => {
+    const pms = description.permissions;
+    const purposes = Array.from(new Set(pms.flatMap((pm) => pm.purposes)));
+    const time = pms.find((pm) => pm.timeLimit)?.timeLimit ?? null;
+    return {
+      purposes,
+      time,
+      conditions: pms.flatMap((pm) => pm.conditions),
+      prohibitions: description.prohibitions.map((r) => r.label),
+      duties: description.duties.map((r) => r.label),
+    };
+  }, [description]);
+  const latestPermit = permits
+    .map((p) => p.validUntil?.slice(0, 10) ?? "")
+    .sort()
+    .pop();
 
   return (
     <div
@@ -108,19 +182,55 @@ export default function OfferTerms({
         </p>
       </div>
 
-      <div>
-        <p className="text-xs font-medium text-(--text-secondary) uppercase tracking-wide">
-          {agreed
-            ? t("The usage policy (ODRL)")
-            : t("The offer's policy (ODRL)")}
-        </p>
-        <p
-          data-testid="offer-policy-description"
-          className="text-(--text-primary) mt-1"
-        >
-          {description.sentences.map((s) => renderPolicyText(s, ta)).join(" ")}
-        </p>
-      </div>
+      <dl data-testid="offer-terms-glance" className="space-y-2">
+        <Glance
+          testId="terms-purposes"
+          icon={<Target size={14} className="mt-0.5 shrink-0" />}
+          label={t("Allowed for")}
+          items={
+            glance.purposes.length
+              ? glance.purposes.map((v) => ({
+                  text: shortPurpose(v),
+                  title: v,
+                }))
+              : [{ text: t("Any purpose") }]
+          }
+        />
+        <Glance
+          testId="terms-time"
+          icon={<Clock size={14} className="mt-0.5 shrink-0" />}
+          label={t("For how long")}
+          items={[
+            {
+              text: glance.time
+                ? renderPolicyText(glance.time, ta)
+                : t("No time limit"),
+            },
+          ]}
+        />
+        <Glance
+          testId="terms-conditions"
+          icon={<ListChecks size={14} className="mt-0.5 shrink-0" />}
+          label={t("Only if")}
+          items={glance.conditions.map((c) => ({
+            text: renderPolicyText(c, ta),
+          }))}
+        />
+        <Glance
+          testId="terms-prohibitions"
+          icon={<Ban size={14} className="mt-0.5 shrink-0" />}
+          label={t("Not allowed")}
+          items={glance.prohibitions.map((c) => ({
+            text: renderPolicyText(c, ta),
+          }))}
+        />
+        <Glance
+          testId="terms-duties"
+          icon={<CheckCircle2 size={14} className="mt-0.5 shrink-0" />}
+          label={t("You must")}
+          items={glance.duties.map((c) => ({ text: renderPolicyText(c, ta) }))}
+        />
+      </dl>
 
       {findings.length > 0 && (
         <div data-testid="offer-policy-gaps">
@@ -143,12 +253,28 @@ export default function OfferTerms({
 
       <details>
         <summary className="cursor-pointer text-xs text-teal-800 dark:text-teal-300">
-          {t("Show the ODRL policy")}
+          {t("Read the full terms")}
         </summary>
-        <OdrlJsonHighlighter
-          data={policy}
-          className="mt-2 max-h-64 rounded border border-(--border) p-2"
-        />
+        <p className="mt-2 text-xs font-medium text-(--text-secondary) uppercase tracking-wide">
+          {agreed
+            ? t("The usage policy (ODRL)")
+            : t("The offer's policy (ODRL)")}
+        </p>
+        <p
+          data-testid="offer-policy-description"
+          className="text-(--text-primary) mt-1"
+        >
+          {description.sentences.map((s) => renderPolicyText(s, ta)).join(" ")}
+        </p>
+        <details className="mt-2">
+          <summary className="cursor-pointer text-xs text-teal-800 dark:text-teal-300">
+            {t("Show the ODRL policy")}
+          </summary>
+          <OdrlJsonHighlighter
+            data={policy}
+            className="mt-2 max-h-64 rounded border border-(--border) p-2"
+          />
+        </details>
       </details>
 
       {permits.length > 0 && (
@@ -157,20 +283,35 @@ export default function OfferTerms({
             <ShieldCheck size={14} />
             {t("Your data permit binds the use as well")}
           </p>
-          <ul className="mt-1 space-y-1 text-xs text-(--text-primary)">
-            {permits.map((p) => (
-              <li key={p.permitId}>
-                <code>{p.permitId}</code>
-                {p.datasetTitle ? ` · ${p.datasetTitle}` : ""}
-                {p.purpose ? ` · ${words(p.purpose)}` : ""}
-                {p.validUntil
-                  ? ` · ${t("valid until {date}", {
-                      date: p.validUntil.slice(0, 10),
-                    })}`
-                  : ""}
-              </li>
-            ))}
-          </ul>
+          <p className="mt-1 text-(--text-primary)">
+            {permits.length === 1
+              ? t("You hold a data permit, valid until {date}.", {
+                  date: latestPermit || "?",
+                })
+              : t(
+                  "You hold {n} data permits; the latest is valid until {date}.",
+                  { n: permits.length, date: latestPermit || "?" },
+                )}
+          </p>
+          <details className="mt-1">
+            <summary className="cursor-pointer text-xs text-teal-800 dark:text-teal-300">
+              {t("Show the permits ({n})", { n: permits.length })}
+            </summary>
+            <ul className="mt-1 space-y-1 text-xs text-(--text-primary)">
+              {permits.map((p) => (
+                <li key={p.permitId}>
+                  <code>{p.permitId}</code>
+                  {p.datasetTitle ? ` · ${p.datasetTitle}` : ""}
+                  {p.purpose ? ` · ${words(p.purpose)}` : ""}
+                  {p.validUntil
+                    ? ` · ${t("valid until {date}", {
+                        date: p.validUntil.slice(0, 10),
+                      })}`
+                    : ""}
+                </li>
+              ))}
+            </ul>
+          </details>
           {(scope?.permissions?.length ?? 0) > 0 && (
             <p className="mt-1 text-xs text-(--text-secondary)">
               {t("Permitted purposes: {list}", {

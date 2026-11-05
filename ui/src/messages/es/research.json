@@ -273,5 +273,16 @@
   "The import failed: {detail}": "La importación ha fallado: {detail}",
   "Imported {records} records with {relationships} references into {spe}.": "Se importaron {records} registros con {relationships} referencias en {spe}.",
   "Patients are pseudonymised.": "Los pacientes están seudonimizados.",
-  "Show in the graph": "Mostrar en el grafo"
+  "Show in the graph": "Mostrar en el grafo",
+  "Allowed for": "Permitido para",
+  "Any purpose": "Cualquier finalidad",
+  "For how long": "Durante cuánto tiempo",
+  "No time limit": "Sin límite de tiempo",
+  "Only if": "Solo si",
+  "Not allowed": "No permitido",
+  "You must": "Debe",
+  "Read the full terms": "Leer las condiciones completas",
+  "You hold a data permit, valid until {date}.": "Tiene un permiso de datos, válido hasta {date}.",
+  "You hold {n} data permits; the latest is valid until {date}.": "Tiene {n} permisos de datos; el último es válido hasta {date}.",
+  "Show the permits ({n})": "Mostrar los permisos ({n})"
 }

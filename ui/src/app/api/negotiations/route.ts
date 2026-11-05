@@ -416,6 +416,19 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("Failed to initiate negotiation:", err);
     const msg = err instanceof Error ? err.message : String(err);
+    // The connector was reset after the page loaded: its participant
+    // contexts have new ids, and the page still sends the old one (#876).
+    const stale = /ParticipantContext with ID ([\w-]+) was not found/.exec(msg);
+    if (stale) {
+      return NextResponse.json(
+        {
+          error: "Not found",
+          detail: `The connector no longer knows the participant context ${stale[1]}; it was reset after this page loaded. Reload the page and start the negotiation again.`,
+          staleContext: stale[1],
+        },
+        { status: 409 },
+      );
+    }
     return NextResponse.json(
       { error: "Failed to initiate contract negotiation", detail: msg },
       { status: 502 },
