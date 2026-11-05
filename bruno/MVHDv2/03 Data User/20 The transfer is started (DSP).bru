@@ -15,10 +15,20 @@ headers {
 }
 
 script:pre-request {
-  // The consumer prepares the data flow on siglet, then the provider starts it;
-  // on Azure it took under 25 s.
+  // Poll rather than wait a fixed time: on 2026-11-05 a 25 s wait found the
+  // negotiation at VERIFIED, one step short (#876). Up to 90 s, every 5 s.
   if (bru.getEnvVar("dspLiveFlow") === "true") {
-    await new Promise((resolve) => setTimeout(resolve, 25000));
+    const axios = require("axios");
+    const headers = {
+      Cookie: `${bru.getEnvVar("cookieName")}=${bru.getEnvVar("sessionTokenResearcher")}`,
+    };
+    const url = `${bru.getEnvVar("baseUrl")}/api/transfers?participantId=${bru.getVar("dspConsumerCtx")}`;
+    for (let i = 0; i < 18; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      const rows = (await axios.get(url, { headers, validateStatus: () => true })).data;
+      const row = Array.isArray(rows) ? rows.find((r) => r["@id"] === bru.getVar("dspTransferId")) : null;
+      if (row && ["STARTED", "COMPLETED", "TERMINATED"].includes(row.state)) break;
+    }
   }
 }
 
