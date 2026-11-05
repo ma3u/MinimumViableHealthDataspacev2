@@ -53,15 +53,11 @@ test.describe("Issue #782 · the health data user's pages in five languages", ()
 
   test("J1032 data transfers in every language", async ({ page }) => {
     await checkLanguages(page, "/data/transfer", [
-      ["de", "Datenübertragungen", "Übertragung aus Vereinbarung starten"],
-      ["fr", "Transferts de données", "Lancer un transfert depuis un accord"],
-      ["nl", "Gegevensoverdrachten", "Overdracht starten vanuit overeenkomst"],
-      [
-        "es",
-        "Transferencias de datos",
-        "Iniciar transferencia desde un acuerdo",
-      ],
-      ["en", "Data Transfers", "Start Transfer from Agreement"],
+      ["de", "Datenübertragungen", "Meine Verträge und Daten"],
+      ["fr", "Transferts de données", "Mes contrats et mes données"],
+      ["nl", "Gegevensoverdrachten", "Mijn contracten en gegevens"],
+      ["es", "Transferencias de datos", "Mis contratos y datos"],
+      ["en", "Data Transfers", "My contracts and data"],
     ]);
   });
 
