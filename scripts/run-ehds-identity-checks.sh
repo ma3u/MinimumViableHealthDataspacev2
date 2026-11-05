@@ -392,9 +392,11 @@ run_keypair_tests() {
     local alias enc missing=0 checked=0
     while IFS= read -r alias; do
       [ -n "$alias" ] || continue
-      # EDC url-encodes the alias once more for the vault path: ':' -> %3A,
-      # an existing '%' -> %25, '#' -> %23 (observed: did%3Aweb%3Aidentityhub%253A7083%3Almc%23key1).
-      enc=$(printf '%s' "$alias" | sed -e 's/%/%25/g' -e 's/:/%3A/g' -e 's/#/%23/g')
+      # EDC percent-encodes the alias once more for the vault path: ':' -> %3A,
+      # an existing '%' -> %25, '#' -> %23, '@' -> %40 (observed:
+      # did%3Aweb%3Aidentityhub%253A7083%3Almc%23key1, and on 1.0 the seeds'
+      # ...%23key1%40<context id>, #881 finding 18).
+      enc=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$alias")
       checked=$((checked + 1))
       # Where IdentityHub put it depends on the participant's Vault config:
       # CFM-created participants carry edc.vault.hashicorp.config with a
