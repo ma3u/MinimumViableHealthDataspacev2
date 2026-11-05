@@ -326,6 +326,10 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/transfers/[id]/data",
+      "methods": ["GET"]
+    },
+    {
       "path": "/api/transfers/[id]",
       "methods": ["GET"]
     },
@@ -1214,6 +1218,12 @@
       "file": "ADR-075-a-minor-release-every-month.md",
       "title": "A minor release every month, starting with v2.1.0",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-076",
+      "file": "ADR-076-a-minimal-set-of-standard-data-sharing-policies.md",
+      "title": "A minimal set of standard data-sharing policies",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1252,8 +1262,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 55,
-    "operations": 72
+    "paths": 56,
+    "operations": 73
   },
   "workflowJobs": {
     "test.yml": [
@@ -1302,11 +1312,11 @@
     "/docs": "2026-11-02",
     "/docs/user-guide": "2026-11-04",
     "/docs/developer": "2026-11-05",
-    "/docs/developer/quality-gates": "2026-11-04",
-    "/docs/developer/api": "2026-11-02",
-    "/docs/developer/reference": "2026-11-04",
+    "/docs/developer/quality-gates": "2026-11-05",
+    "/docs/developer/api": "2026-11-05",
+    "/docs/developer/reference": "2026-11-05",
     "/docs/developer/[slug]": "2026-11-04",
-    "/docs/architecture": "2026-11-04",
+    "/docs/architecture": "2026-11-05",
     "/docs/security": "2026-11-04",
     "/docs/security/[slug]": "2026-11-04",
     "/docs/klarbefund": "2026-11-04",

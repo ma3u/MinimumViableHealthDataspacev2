@@ -304,10 +304,16 @@ cmd_app() {
 cmd_ui() {
   # EDC_PROTOCOL_URL: the DSP base the hub's catalog request addresses a
   # provider under (ui/src/app/api/negotiations/route.ts, #542).
-  log "UI: EDC_MGMT_API_VERSION=v5beta, EDC_PROTOCOL_URL"
+  # SIGLET_TOKEN_URL, EDR_DATA_URL: where the hub reads the data of a STARTED
+  # pull transfer, the consumer siglet's token API (its 8080, the app's main
+  # ingress) and the FHIR data plane's data API (8186, siglet.toml's
+  # `endpoint`); ui/src/lib/transfer-data.ts, #876.
+  log "UI: EDC_MGMT_API_VERSION=v5beta, EDC_PROTOCOL_URL, SIGLET_TOKEN_URL, EDR_DATA_URL"
   az containerapp update --name "$UI_APP" --resource-group "$RG" \
     --set-env-vars "EDC_MGMT_API_VERSION=v5beta" \
-    "EDC_PROTOCOL_URL=http://${CONTROLPLANE_APP}:8082/api/dsp" -o none
+    "EDC_PROTOCOL_URL=http://${CONTROLPLANE_APP}:8082/api/dsp" \
+    "SIGLET_TOKEN_URL=http://${SIGLET_APP}" \
+    "EDR_DATA_URL=http://${DP_FHIR_APP}:8186/api/data" -o none
   wait_healthy "$UI_APP" "$(latest_rev "$UI_APP")"
 }
 

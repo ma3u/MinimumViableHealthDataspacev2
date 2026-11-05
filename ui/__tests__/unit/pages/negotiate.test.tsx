@@ -151,6 +151,12 @@ function setupDefaultMocks(
   });
 }
 
+/** Agree to the offer's terms, then start the negotiation (#876). */
+async function agreeAndStart(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(await screen.findByTestId("offer-terms-accept"));
+  await user.click(screen.getByText("Start Negotiation"));
+}
+
 // ── Tests ────────────────────────────────────────────────────────────
 describe("NegotiatePage", () => {
   beforeEach(() => {
@@ -344,8 +350,10 @@ describe("NegotiatePage", () => {
       expect(screen.getByText("Selected:")).toBeTruthy();
     });
 
-    // Start Negotiation should now be enabled
+    // Start Negotiation stays disabled until the terms are agreed (#876)
     const negotiateBtn = screen.getByText("Start Negotiation");
+    expect(negotiateBtn.closest("button")?.disabled).toBe(true);
+    await user.click(screen.getByTestId("offer-terms-accept"));
     expect(negotiateBtn.closest("button")?.disabled).toBe(false);
 
     // Mock the POST and subsequent refresh
@@ -417,7 +425,7 @@ describe("NegotiatePage", () => {
         return mockResponse([]);
       });
 
-      await user.click(screen.getByText("Start Negotiation"));
+      await agreeAndStart(user);
       return user;
     }
 
@@ -512,7 +520,7 @@ describe("NegotiatePage", () => {
       return mockResponse(sampleNegotiations);
     });
 
-    await user.click(screen.getByText("Start Negotiation"));
+    await agreeAndStart(user);
 
     await waitFor(() => {
       expect(
@@ -533,7 +541,7 @@ describe("NegotiatePage", () => {
           ? mockResponse({ "@id": "neg-new" })
           : mockResponse(sampleNegotiations),
       );
-      await user.click(screen.getByText("Start Negotiation"));
+      await agreeAndStart(user);
       await waitFor(() => {
         expect(
           mockFetchApi.mock.calls.some(
@@ -583,7 +591,7 @@ describe("NegotiatePage", () => {
           ? mockResponse({ "@id": "neg-new" })
           : mockResponse([{ "@id": "neg-new", ...row }, ...sampleNegotiations]),
       );
-      await user.click(screen.getByText("Start Negotiation"));
+      await agreeAndStart(user);
       return screen.findByTestId("negotiation-progress");
     }
 
@@ -623,6 +631,80 @@ describe("NegotiatePage", () => {
           /ended without a contract: Policy not satisfied/,
         ),
       ).toBeTruthy();
+    });
+  });
+
+  describe("the terms the data user agrees to (#876)", () => {
+    const SCOPE = {
+      permissions: ["scientific_research", "statistics"],
+      prohibitions: ["re_identification"],
+      permits: [
+        {
+          permitId: "hdab-medreg-pharmaco-2026-001",
+          datasetTitle: "OMOP CDM v5.4 Analytics Warehouse",
+          purpose: "SCIENTIFIC_RESEARCH",
+          validUntil: "2028-12-31T23:59:59.000Z",
+        },
+      ],
+    };
+
+    // As the live connector offers it: a bare "use", no assigner.
+    const LIVE_CATALOG = structuredClone(sampleCatalog) as {
+      "dcat:dataset": Record<string, unknown>[];
+    };
+    LIVE_CATALOG["dcat:dataset"][0]["odrl:hasPolicy"] = [
+      { "@id": "offer-1", "@type": "Offer", permission: [{ action: "use" }] },
+    ];
+
+    async function chooseOffer(name: string) {
+      setupDefaultMocks({
+        "/api/odrl/scope": () => mockResponse(SCOPE),
+        "catalog=true": () => mockResponse(LIVE_CATALOG),
+      });
+      const user = userEvent.setup();
+      render(<NegotiatePage />);
+      await user.click(await screen.findByText("Discover Offers"));
+      await user.click(await screen.findByText(name));
+      return user;
+    }
+
+    it("says what the offer allows, and what it leaves open under the EHDS", async () => {
+      await chooseOffer("FHIR Patient Bundle");
+
+      const terms = await screen.findByTestId("offer-terms");
+      expect(
+        within(terms).getByTestId("offer-policy-description").textContent,
+      ).toMatch(/may use the data, for any purpose, without time limit/);
+      const gaps = within(terms).getByTestId("offer-policy-gaps").textContent;
+      expect(gaps).toMatch(/No purpose/);
+      expect(gaps).toMatch(/EHDS Art\. 53\(1\)/);
+      // The catalogue's offer names no assigner; the provider is filled in.
+      expect(gaps).not.toMatch(/must name its assigner/);
+    });
+
+    it("shows the data permit that binds the use as well", async () => {
+      await chooseOffer("FHIR Patient Bundle");
+
+      const permit = await screen.findByTestId("offer-permit");
+      expect(permit.textContent).toMatch(/hdab-medreg-pharmaco-2026-001/);
+      expect(permit.textContent).toMatch(/valid until 2028-12-31/);
+      expect(permit.textContent).toMatch(/Forbidden: re identification/);
+    });
+
+    it("starts nothing until the user agrees, and asks again for another offer", async () => {
+      const user = await chooseOffer("FHIR Patient Bundle");
+      const start = () =>
+        screen.getByText("Start Negotiation").closest("button")!;
+
+      expect(start().disabled).toBe(true);
+      await user.click(screen.getByTestId("offer-terms-accept"));
+      expect(start().disabled).toBe(false);
+
+      await user.click(screen.getByText("OMOP Cohort Data"));
+      expect(
+        (screen.getByTestId("offer-terms-accept") as HTMLInputElement).checked,
+      ).toBe(false);
+      expect(start().disabled).toBe(true);
     });
   });
 
@@ -798,7 +880,7 @@ describe("NegotiatePage", () => {
       return mockResponse(sampleNegotiations);
     });
 
-    await user.click(screen.getByText("Start Negotiation"));
+    await agreeAndStart(user);
 
     await waitFor(() => {
       expect(

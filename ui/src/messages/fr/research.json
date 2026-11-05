@@ -231,5 +231,22 @@
   "Continue to transfer": "Passer au transfert",
   "The negotiation ended without a contract: {detail}": "La négociation s'est terminée sans contrat : {detail}",
   "No answer from {provider} after two minutes. The negotiation stays in the history below; if it does not move, the provider's connector cannot be reached.": "Pas de réponse de {provider} après deux minutes. La négociation reste dans l'historique ci-dessous ; si elle n'avance pas, le connecteur du fournisseur est injoignable.",
-  "Waiting for {provider} to agree ({state}). Its connector checks the request against its offer and answers on its own: nobody at {provider} has to sign in.": "En attente de l'accord de {provider} ({state}). Son connecteur compare la demande à son offre et répond de lui-même : personne chez {provider} n'a à se connecter."
+  "Waiting for {provider} to agree ({state}). Its connector checks the request against its offer and answers on its own: nobody at {provider} has to sign in.": "En attente de l'accord de {provider} ({state}). Son connecteur compare la demande à son offre et répond de lui-même : personne chez {provider} n'a à se connecter.",
+  "My data": "Mes données",
+  "The assets you hold an open transfer for. Their data comes from the provider's data plane when you open or download it; patient identities are pseudonymised for data users.": "Les actifs pour lesquels vous avez un transfert ouvert. Leurs données viennent du plan de données du fournisseur quand vous les ouvrez ou les téléchargez ; les identités des patients sont pseudonymisées pour les utilisateurs de données.",
+  "Open": "Ouvrir",
+  "Download": "Télécharger",
+  "(data ready)": "(données prêtes)",
+  "(transferred)": "(transféré)",
+  "Fetching the data from the provider…": "Récupération des données auprès du fournisseur…",
+  "Could not fetch the data: {detail}": "Impossible de récupérer les données : {detail}",
+  "The terms you agree to": "Les conditions que vous acceptez",
+  "{provider} offers this data under the policy below. Starting the negotiation means {consumer} accepts it.": "{provider} propose ces données selon la politique ci-dessous. En lançant la négociation, {consumer} l'accepte.",
+  "The offer's policy (ODRL)": "La politique de l'offre (ODRL)",
+  "What the offer leaves open ({n})": "Ce que l'offre laisse ouvert ({n})",
+  "Show the ODRL policy": "Afficher la politique ODRL",
+  "Your data permit binds the use as well": "Votre autorisation de données encadre aussi l'utilisation",
+  "Permitted purposes: {list}": "Finalités autorisées : {list}",
+  "Forbidden: {list}": "Interdit : {list}",
+  "I have read these terms and agree to them on behalf of {consumer}.": "J'ai lu ces conditions et je les accepte au nom de {consumer}."
 }
