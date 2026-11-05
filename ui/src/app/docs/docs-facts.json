@@ -1239,7 +1239,7 @@
       "id": "ADR-076",
       "file": "ADR-076-edc-1-runtimes-are-built-here.md",
       "title": "EDC 1.0 runtimes are built here, from released EDC artifacts",
-      "status": "Accepted"
+      "status": "Superseded"
     },
     {
       "id": "ADR-077",
@@ -1251,7 +1251,7 @@
       "id": "ADR-078",
       "file": "ADR-078-edc-1-on-container-apps-without-cfm.md",
       "title": "EDC 1.0 stays on Container Apps, and the hub provisions participants without CFM",
-      "status": "Proposed"
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {

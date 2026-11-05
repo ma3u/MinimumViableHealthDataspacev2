@@ -1,8 +1,8 @@
 # ADR-078: EDC 1.0 stays on Container Apps, and the hub provisions participants without CFM
 
-**Status:** Proposed (2026-11-05)
+**Status:** Accepted (2026-11-05, Matthias Buchhorn)
 **Date:** 2026-11-05
-**Supersedes:** [ADR-076](ADR-076-edc-1-runtimes-are-built-here.md), once accepted
+**Supersedes:** [ADR-076](ADR-076-edc-1-runtimes-are-built-here.md)
 **Relates to:** [ADR-012](ADR-012-azure-container-apps.md), [ADR-055](ADR-055-azure-runs-the-compose-jad-build.md), [ADR-053](ADR-053-everything-stops-off-hours.md), [ADR-077](ADR-077-a-minimal-set-of-standard-data-sharing-policies.md)
 **Tracks:** [Issue #881](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/881)
 
