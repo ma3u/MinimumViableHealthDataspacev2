@@ -806,6 +806,55 @@ describe("DataTransferPage", () => {
       );
     });
 
+    it("offers a new transfer when the access has expired", async () => {
+      const posts: unknown[] = [];
+      mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
+        if (url === "/api/transfers/tp-live/import") {
+          return mockResponse(
+            {
+              error: "Failed to fetch the transfer's data",
+              step: "token",
+              detail: "the access to this transfer has expired",
+              expired: true,
+            },
+            false,
+          );
+        }
+        if (url === "/api/transfers" && init?.method === "POST") {
+          posts.push(JSON.parse(String(init.body)));
+          return mockResponse({ "@id": "tp-new", state: "REQUESTED" });
+        }
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) {
+          return mockResponse([LIVE, ...TRANSFERS]);
+        }
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse(NEGOTIATIONS_FINALIZED);
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("contracts-list");
+      await user.click(within(section).getByTestId("spe-import-run"));
+
+      const msg = await within(section).findByTestId("spe-import-error");
+      expect(msg.textContent).toMatch(
+        /The access to this transfer has expired/,
+      );
+      await user.click(within(section).getByTestId("spe-import-restart"));
+
+      await waitFor(() =>
+        expect(posts).toEqual([
+          expect.objectContaining({
+            participantId: "ctx-pharmaco",
+            contractId: "agr-001",
+          }),
+        ]),
+      );
+    });
+
     it("says why an import failed", async () => {
       mockFetchApi.mockImplementation((url: string) => {
         if (url === "/api/transfers/tp-live/import") {

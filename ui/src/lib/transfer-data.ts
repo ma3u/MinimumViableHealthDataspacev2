@@ -34,10 +34,19 @@ export class TransferDataError extends Error {
     readonly step: "token" | "data",
     message: string,
     readonly status?: number,
+    /** The transfer's access has run out: only a new transfer helps. */
+    readonly expired = false,
   ) {
     super(message);
   }
 }
+
+/**
+ * Siglet answers 5xx when it cannot renew a flow's token after its hour, for
+ * example "no signing key mapping for participant context" on EDC 1.0 RC5
+ * (#881 finding 23, #888). For the user that is an expired access.
+ */
+const NOT_RENEWED = /signing key|expired|renew/i;
 
 /**
  * The access token siglet holds for this flow. The flow id is the consumer's
@@ -64,6 +73,17 @@ async function flowToken(
       if (body.token) return body.token;
       last = "siglet answered without a token";
       continue;
+    }
+    if (res.status >= 500) {
+      const detail = await res.text().catch(() => "");
+      if (NOT_RENEWED.test(detail)) {
+        throw new TransferDataError(
+          "token",
+          "the access to this transfer has expired and could not be renewed; start a new transfer",
+          res.status,
+          true,
+        );
+      }
     }
     last = `siglet answered ${res.status} for flow ${flowId}`;
     if (res.status !== 404) break;
@@ -136,6 +156,7 @@ async function pullData(token: string): Promise<PulledData> {
       "data",
       dataPlaneRefusal(res?.status),
       res?.status,
+      res?.status === 401 || res?.status === 403,
     );
   }
 

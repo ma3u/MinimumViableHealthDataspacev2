@@ -31,6 +31,7 @@ export default function SpeImport({
   participantId,
   known,
   onImported,
+  onRestart,
 }: {
   transferId: string;
   participantId: string;
@@ -38,6 +39,8 @@ export default function SpeImport({
   known?: ExistingImport[];
   /** After an import, so the page can move the row to its new stage. */
   onImported?: () => void;
+  /** Starts a new transfer under the same contract, when the access expired. */
+  onRestart?: () => void;
 }) {
   const t = useT("research");
   const [speId, setSpeId] = useState<string>(DEFAULT_IMPORT_SPE);
@@ -46,6 +49,7 @@ export default function SpeImport({
   const [result, setResult] = useState<SpeImportResult | null>(null);
   const [existing, setExisting] = useState<ExistingImport[]>([]);
   const [confirming, setConfirming] = useState(false);
+  const [expired, setExpired] = useState(false);
 
   const loadExisting = useCallback(() => {
     fetchApi(`/api/spe-imports?ids=${encodeURIComponent(transferId)}`)
@@ -69,6 +73,7 @@ export default function SpeImport({
   const runImport = async (overwrite: boolean) => {
     setBusy(true);
     setError("");
+    setExpired(false);
     setResult(null);
     setConfirming(false);
     try {
@@ -84,6 +89,7 @@ export default function SpeImport({
         error?: string;
         detail?: string;
         existing?: ExistingImport;
+        expired?: boolean;
       };
       if (!res.ok) {
         // Imported in the meantime: show it and ask, as for a known one.
@@ -95,6 +101,7 @@ export default function SpeImport({
           setConfirming(true);
           return;
         }
+        setExpired(!!body.expired);
         setError([body.error, body.detail].filter(Boolean).join(": "));
         return;
       }
@@ -245,14 +252,34 @@ export default function SpeImport({
         </div>
       )}
 
-      {error && (
-        <p
-          data-testid="spe-import-error"
-          className="text-(--badge-inactive-text)"
-        >
-          {t("The import failed: {detail}", { detail: error })}
-        </p>
-      )}
+      {error &&
+        (expired ? (
+          <p
+            data-testid="spe-import-error"
+            className="flex flex-wrap items-center gap-2 text-(--badge-inactive-text)"
+          >
+            {t(
+              "The access to this transfer has expired. Start a new transfer to get the data again.",
+            )}
+            {onRestart && (
+              <button
+                type="button"
+                data-testid="spe-import-restart"
+                onClick={onRestart}
+                className="px-2 py-1 rounded bg-(--accent) text-white hover:opacity-90"
+              >
+                {t("Start a new transfer")}
+              </button>
+            )}
+          </p>
+        ) : (
+          <p
+            data-testid="spe-import-error"
+            className="text-(--badge-inactive-text)"
+          >
+            {t("The import failed: {detail}", { detail: error })}
+          </p>
+        ))}
 
       {result && (
         <div

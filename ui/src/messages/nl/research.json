@@ -297,5 +297,7 @@
   "Transfers under this contract ({n})": "Overdrachten onder dit contract ({n})",
   "No transfer yet.": "Nog geen overdracht.",
   "agreed {date}": "overeengekomen {date}",
-  "imported {date}": "geïmporteerd {date}"
+  "imported {date}": "geïmporteerd {date}",
+  "The access to this transfer has expired. Start a new transfer to get the data again.": "De toegang tot deze overdracht is verlopen. Start een nieuwe overdracht om de gegevens opnieuw te krijgen.",
+  "Start a new transfer": "Een nieuwe overdracht starten"
 }
