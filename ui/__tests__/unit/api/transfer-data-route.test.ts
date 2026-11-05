@@ -226,4 +226,34 @@ describe("pseudonymiseFhir", () => {
     const obs = { resourceType: "Observation", subject: "Patient/X" };
     expect(pseudonymiseFhir(obs)).toEqual(obs);
   });
+
+  it("pseudonymises a patient the proxy knows only by its resourceId", () => {
+    const out = pseudonymiseFhir({
+      resourceType: "Bundle",
+      entry: [
+        {
+          resource: {
+            resourceType: "Patient",
+            resourceId: "fhir-pat-1001",
+            name: "Erika Musterfrau",
+            gender: "female",
+          },
+        },
+        {
+          resource: {
+            resourceType: "Condition",
+            subject: { reference: "Patient/fhir-pat-1001" },
+          },
+        },
+      ],
+    }) as { entry: Array<{ resource: Record<string, unknown> }> };
+
+    const patient = out.entry[0].resource;
+    expect(patient.id).toMatch(/^p-/);
+    expect(JSON.stringify(out)).not.toContain("Musterfrau");
+    expect(JSON.stringify(out)).not.toContain("fhir-pat-1001");
+    expect(out.entry[1].resource.subject).toEqual({
+      reference: `Patient/${patient.id}`,
+    });
+  });
 });

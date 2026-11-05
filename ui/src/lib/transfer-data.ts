@@ -44,7 +44,7 @@ export class TransferDataError extends Error {
  * transfer process id; the correlation id is tried after it, since the
  * control plane may key the flow by either.
  */
-export async function flowToken(
+async function flowToken(
   participantContextId: string,
   flowIds: string[],
 ): Promise<string> {
@@ -99,8 +99,25 @@ function dataPlaneRefusal(status: number | undefined): string {
   return `the data plane answered ${status ?? "nothing"}`;
 }
 
+/**
+ * The data of a STARTED transfer: the flow's token from siglet, keyed by the
+ * transfer id and then the correlation id, and the data with it. Shared by
+ * GET /api/transfers/[id]/data and the SPE import (#876).
+ */
+export async function pullTransferData(
+  participantContextId: string,
+  transferId: string,
+  transfer: Record<string, unknown>,
+): Promise<PulledData> {
+  const token = await flowToken(participantContextId, [
+    transferId,
+    String(transfer.correlationId ?? ""),
+  ]);
+  return pullData(token);
+}
+
 /** GET the data endpoint with the token, as a bare token and then as Bearer. */
-export async function pullData(token: string): Promise<PulledData> {
+async function pullData(token: string): Promise<PulledData> {
   let res: Response | null = null;
   for (const authorization of [token, `Bearer ${token}`]) {
     res = await fetch(EDR_DATA_URL, {
@@ -145,12 +162,20 @@ export async function pullData(token: string): Promise<PulledData> {
  */
 export function pseudonymiseFhir(data: unknown): unknown {
   const ids = new Map<string, string>();
+  // The hub's proxy answered graph properties before it gave FHIR ids
+  // (services/neo4j-proxy/src/fhir-resource.ts): a seeded patient is known
+  // by its resourceId, a loaded one by its fhirId.
+  const idOf = (r: Record<string, unknown>) => {
+    const id = r.id ?? r.fhirId ?? r.resourceId;
+    return typeof id === "string" ? id : undefined;
+  };
   const collect = (node: unknown): void => {
     if (Array.isArray(node)) return node.forEach(collect);
     if (!node || typeof node !== "object") return;
     const r = node as Record<string, unknown>;
-    if (r.resourceType === "Patient" && typeof r.id === "string") {
-      ids.set(r.id, patientPseudonym(r.id).replace("Patient ", "p-"));
+    const own = idOf(r);
+    if (r.resourceType === "Patient" && own) {
+      ids.set(own, patientPseudonym(own).replace("Patient ", "p-"));
     }
     Object.values(r).forEach(collect);
   };
@@ -167,7 +192,8 @@ export function pseudonymiseFhir(data: unknown): unknown {
     const r = node as Record<string, unknown>;
     if (r.resourceType === "Patient") {
       const out: Record<string, unknown> = { resourceType: "Patient" };
-      if (typeof r.id === "string") out.id = ids.get(r.id) ?? r.id;
+      const own = idOf(r);
+      if (own) out.id = ids.get(own) ?? own;
       if (r.gender !== undefined) out.gender = r.gender;
       const year = birthYear(r.birthDate);
       if (year) out.birthDate = year;

@@ -24,6 +24,7 @@ import {
 import PageIntro from "@/components/PageIntro";
 import RowSourceBadge from "@/components/RowSourceBadge";
 import TransferDetails from "@/components/TransferDetails";
+import SpeImport from "@/components/SpeImport";
 import type { RowSource } from "@/lib/row-provenance";
 import { T, useT } from "@/lib/i18n/translate";
 
@@ -1403,6 +1404,7 @@ function DataTransferContent() {
                         {t("Details")}
                       </button>
                     </div>
+                    <SpeImport transferId={id} participantId={selectedCtx} />
                     {detailsOpen.has(id) && contractId && (
                       <TransferDetails
                         participantId={selectedCtx}

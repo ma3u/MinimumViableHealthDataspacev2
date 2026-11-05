@@ -326,12 +326,20 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/spe-imports/[id]/graph",
+      "methods": ["GET"]
+    },
+    {
       "path": "/api/tasks",
       "methods": ["GET"]
     },
     {
       "path": "/api/transfers/[id]/data",
       "methods": ["GET"]
+    },
+    {
+      "path": "/api/transfers/[id]/import",
+      "methods": ["POST"]
     },
     {
       "path": "/api/transfers/[id]",
@@ -1272,8 +1280,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 57,
-    "operations": 74
+    "paths": 59,
+    "operations": 76
   },
   "workflowJobs": {
     "test.yml": [

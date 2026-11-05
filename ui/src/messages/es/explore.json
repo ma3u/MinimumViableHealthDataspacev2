@@ -462,5 +462,13 @@
   "This explorer is retired. The persona views live at <a>/overview</a>.": "Este explorador ya no se mantiene. Las vistas por persona están en <a>/overview</a>.",
   "Tracked in <a>issue #271</a>.": "Seguimiento en <a>la issue #271</a>.",
   "Select a persona below. Navigation, data, and views will update to match that participant's role. Switch anytime via the user menu → <em>Switch demo persona</em>.": "Elija una persona abajo. La navegación, los datos y las vistas se adaptan al rol de ese participante. Cambie en cualquier momento desde el menú de usuario → <em>Cambiar de persona de demostración</em>.",
-  "The Azure Container Apps deployment doesn't currently host the EDC controlplane / IdentityHub / IssuerService (single-port ingress vs EDC's 4-port architecture, see ADR-012 follow-up). For full DSP/DCP validation, run the local Docker stack: <code>docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d</code>.": "El despliegue en Azure Container Apps aún no aloja el controlplane de EDC, IdentityHub ni IssuerService (ingress de un solo puerto frente a la arquitectura de 4 puertos de EDC, véase el seguimiento del ADR-012). Para una validación DSP/DCP completa, ejecute la pila Docker local: <code>docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d</code>."
+  "The Azure Container Apps deployment doesn't currently host the EDC controlplane / IdentityHub / IssuerService (single-port ingress vs EDC's 4-port architecture, see ADR-012 follow-up). For full DSP/DCP validation, run the local Docker stack: <code>docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d</code>.": "El despliegue en Azure Container Apps aún no aloja el controlplane de EDC, IdentityHub ni IssuerService (ingress de un solo puerto frente a la arquitectura de 4 puertos de EDC, véase el seguimiento del ADR-012). Para una validación DSP/DCP completa, ejecute la pila Docker local: <code>docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d</code>.",
+  "The imported dataset could not be loaded: {detail}": "No se pudo cargar el conjunto de datos importado: {detail}",
+  "{name} in {spe}: {records} records": "{name} en {spe}: {records} registros",
+  "SPE Workspace": "Espacio de trabajo del SPE",
+  "Imported Transfer": "Transferencia importada",
+  "Imported Record": "Registro importado",
+  "A transfer's data imported into an SPE workspace": "Los datos de una transferencia importados a un espacio de trabajo del SPE",
+  "One FHIR resource of an imported transfer, pseudonymised": "Un recurso FHIR de una transferencia importada, seudonimizado",
+  "A secure processing environment (EHDS Art. 73)": "Un entorno de tratamiento seguro (EEDS art. 73)"
 }

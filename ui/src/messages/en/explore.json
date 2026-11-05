@@ -462,5 +462,13 @@
   "This explorer is retired. The persona views live at <a>/overview</a>.": "This explorer is retired. The persona views live at <a>/overview</a>.",
   "Tracked in <a>issue #271</a>.": "Tracked in <a>issue #271</a>.",
   "Select a persona below. Navigation, data, and views will update to match that participant's role. Switch anytime via the user menu → <em>Switch demo persona</em>.": "Select a persona below. Navigation, data, and views will update to match that participant's role. Switch anytime via the user menu → <em>Switch demo persona</em>.",
-  "The Azure Container Apps deployment doesn't currently host the EDC controlplane / IdentityHub / IssuerService (single-port ingress vs EDC's 4-port architecture, see ADR-012 follow-up). For full DSP/DCP validation, run the local Docker stack: <code>docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d</code>.": "The Azure Container Apps deployment doesn't currently host the EDC controlplane / IdentityHub / IssuerService (single-port ingress vs EDC's 4-port architecture, see ADR-012 follow-up). For full DSP/DCP validation, run the local Docker stack: <code>docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d</code>."
+  "The Azure Container Apps deployment doesn't currently host the EDC controlplane / IdentityHub / IssuerService (single-port ingress vs EDC's 4-port architecture, see ADR-012 follow-up). For full DSP/DCP validation, run the local Docker stack: <code>docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d</code>.": "The Azure Container Apps deployment doesn't currently host the EDC controlplane / IdentityHub / IssuerService (single-port ingress vs EDC's 4-port architecture, see ADR-012 follow-up). For full DSP/DCP validation, run the local Docker stack: <code>docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d</code>.",
+  "The imported dataset could not be loaded: {detail}": "The imported dataset could not be loaded: {detail}",
+  "{name} in {spe}: {records} records": "{name} in {spe}: {records} records",
+  "SPE Workspace": "SPE Workspace",
+  "Imported Transfer": "Imported Transfer",
+  "Imported Record": "Imported Record",
+  "A transfer's data imported into an SPE workspace": "A transfer's data imported into an SPE workspace",
+  "One FHIR resource of an imported transfer, pseudonymised": "One FHIR resource of an imported transfer, pseudonymised",
+  "A secure processing environment (EHDS Art. 73)": "A secure processing environment (EHDS Art. 73)"
 }

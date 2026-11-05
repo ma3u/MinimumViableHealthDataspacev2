@@ -1703,6 +1703,94 @@ paths:
         "502":
           description: The token or the data could not be fetched; `step` says which
 
+  /api/transfers/{id}/import:
+    post:
+      tags: [Transfers]
+      summary: Import a STARTED transfer's data into an SPE workspace
+      description: >-
+        Pulls the data as GET /api/transfers/{id}/data does, pseudonymised
+        for roles that do not see patient identity (#475), and has the
+        neo4j-proxy write it into the chosen SPE's graph as one dataset,
+        SPE-1 unless `speId` names another (EHDS Art. 73, #876). A second
+        import of the same transfer merges onto the first.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [participantId]
+              properties:
+                participantId: { type: string }
+                speId: { type: string, enum: [SPE-1, SPE-2], default: SPE-1 }
+      responses:
+        "200":
+          description: What was imported, and the graph viewer's link to it
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  datasetId: { type: string }
+                  speId: { type: string }
+                  records: { type: integer }
+                  relationships: { type: integer }
+                  byType:
+                    type: object
+                    additionalProperties: { type: integer }
+                  importedAt: { type: string, format: date-time }
+                  pseudonymised: { type: boolean }
+                  graphUrl: { type: string }
+        "400":
+          {
+            description: participantId,
+            a transfer id or a known SPE is missing,
+          }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { description: The transfer is not STARTED }
+        "413": { description: The data is too large to import at once }
+        "422": { description: The data is not a FHIR Bundle }
+        "502":
+          description: The token, the data or the import failed; `step` says which
+        "503": { description: The SPE workspace is not connected }
+
+  /api/spe-imports/{id}/graph:
+    get:
+      tags: [Transfers]
+      summary: An imported transfer as the graph viewer draws it
+      description: >-
+        The dataset, the SPE workspace it was loaded into, its records and
+        the references between them (#876). /graph?dataset={id}&spe=SPE-1
+        merges it into the view and focuses on the dataset.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: spe
+          in: query
+          schema: { type: string, enum: [SPE-1, SPE-2], default: SPE-1 }
+      responses:
+        "200":
+          description: Nodes and links for the graph viewer
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dataset: { type: object }
+                  nodes: { type: array, items: { type: object } }
+                  links: { type: array, items: { type: object } }
+                  truncated: { type: boolean }
+        "400": { description: A dataset id and a known SPE are required }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "503": { description: The SPE workspace is not connected }
+
   /api/agreements/{id}:
     get:
       tags: [Transfers]

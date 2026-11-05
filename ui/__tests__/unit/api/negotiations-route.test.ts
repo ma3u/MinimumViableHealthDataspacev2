@@ -297,6 +297,27 @@ describe("POST /api/negotiations", () => {
     expect(res.status).toBe(400);
   });
 
+  it("says the connector was reset when it no longer knows the context", async () => {
+    mockManagement.mockRejectedValue(
+      new Error(
+        'EDC API error [management] POST /v5/participants/old-ctx/contractnegotiations: 404 Not Found [{"message":"Object of type ParticipantContext with ID old-ctx was not found","type":"ObjectNotFound"}]',
+      ),
+    );
+    const res = await POST(
+      postReq({
+        participantId: "old-ctx",
+        counterPartyId: "prov-ctx",
+        assetId: "a1",
+        offerId: "o1",
+      }),
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(409);
+    expect(body.staleContext).toBe("old-ctx");
+    expect(body.detail).toMatch(/Reload the page/);
+  });
+
   it("uses this deployment's DSP base when counterPartyAddress is missing", async () => {
     // The page used to send a fixed http://controlplane:8082, which does not
     // resolve on Azure (#876); without an address the server's base applies.

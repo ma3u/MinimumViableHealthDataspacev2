@@ -1,0 +1,36 @@
+meta {
+  name: 24 My import in the graph (DSP)
+  type: http
+  seq: 24
+}
+
+get {
+  url: {{baseUrl}}/api/spe-imports/{{dspTransferId}}/graph?spe=SPE-1
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+tests {
+  const body = res.getBody() || {};
+  if (!bru.getVar("dspImported")) {
+    test("SKIPPED: 23 imported nothing on this run, so there is no dataset to draw", function () {});
+  } else {
+    test("the graph viewer gets the dataset, its SPE and its records", function () {
+      expect(res.getStatus(), body.error || "").to.equal(200);
+      const labels = (body.nodes || []).map((n) => n.label);
+      expect(labels).to.include("ImportedDataset");
+      expect(labels).to.include("SpeWorkspace");
+      expect(labels).to.include("ImportedRecord");
+      expect((body.links || []).map((l) => l.type)).to.include("LOADED_INTO");
+    });
+  }
+}
+
+docs {
+  What /graph?dataset=…&spe=SPE-1 draws after an import (#876): the dataset, the SPE workspace it
+  was loaded into, its records and the references between them.
+}

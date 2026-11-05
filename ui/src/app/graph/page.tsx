@@ -297,6 +297,9 @@ function GraphContent() {
   // Read URL params first so they can seed initial state
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("highlight");
+  // An imported transfer (#876): /graph?dataset=<transfer id>&spe=SPE-1
+  const importDataset = searchParams.get("dataset");
+  const importSpe = searchParams.get("spe") ?? "SPE-1";
   const urlPersona = searchParams.get("persona") as PersonaId | null;
 
   const { data: session, status: sessionStatus } = useSession();
@@ -482,7 +485,92 @@ function GraphContent() {
       });
   }, [activePersona, sessionStatus]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── An imported transfer: merge its dataset in and focus on it (#876) ─────
+  const [importFocus, setImportFocus] = useState<string | null>(null);
+  const [importNotice, setImportNotice] = useState<{
+    text: string;
+    error: boolean;
+  } | null>(null);
+  const importLoaded = useRef<string | null>(null);
+  // An imported node's properties come with the import; the hub has no node to ask.
+  const importProps = useRef(
+    new Map<string, Record<string, string | number | boolean>>(),
+  );
+  useEffect(() => {
+    if (!importDataset) return;
+    // The persona graph replaces the data on every load; merge again after it.
+    if (loading) {
+      importLoaded.current = null;
+      return;
+    }
+    const key = `${importSpe}/${importDataset}`;
+    if (importLoaded.current === key) return;
+    importLoaded.current = key;
+    fetchApi(
+      `/api/spe-imports/${encodeURIComponent(
+        importDataset,
+      )}/graph?spe=${encodeURIComponent(importSpe)}`,
+    )
+      .then(async (r) => {
+        const d = await r.json();
+        if (!r.ok || !Array.isArray(d.nodes)) {
+          setImportNotice({
+            text: t("The imported dataset could not be loaded: {detail}", {
+              detail: String(d.error ?? r.status),
+            }),
+            error: true,
+          });
+          return;
+        }
+        for (const n of d.nodes as Array<
+          GraphNode & { properties?: Record<string, string | number | boolean> }
+        >) {
+          if (n.properties) importProps.current.set(n.id, n.properties);
+        }
+        setData((prev) => mergeInto(prev, d.nodes, d.links, activePersona));
+        const focus = (d.nodes as GraphNode[]).find(
+          (n) => n.label === "ImportedDataset",
+        );
+        setImportFocus(focus?.id ?? null);
+        setImportNotice({
+          text: t("{name} in {spe}: {records} records", {
+            name: focus?.name ?? importDataset,
+            spe: importSpe,
+            records: String(
+              (d.nodes as GraphNode[]).filter(
+                (n) => n.label === "ImportedRecord",
+              ).length,
+            ),
+          }),
+          error: false,
+        });
+      })
+      .catch((e: unknown) =>
+        setImportNotice({
+          text: t("The imported dataset could not be loaded: {detail}", {
+            detail: String(e),
+          }),
+          error: true,
+        }),
+      );
+  }, [importDataset, importSpe, loading]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Auto-highlight from URL param ─────────────────────────────────────────
+  useEffect(() => {
+    if (!importFocus || data.nodes.length === 0) return;
+    const match = data.nodes.find((n) => n.id === importFocus);
+    if (!match) return;
+    setSelected(match);
+    setRightCollapsed(false);
+    setTimeout(() => {
+      if (fgRef.current && match.x != null) {
+        fgRef.current.centerAt(match.x, match.y, 600);
+        fgRef.current.zoom(3, 600);
+      }
+    }, 300);
+    setImportFocus(null);
+  }, [importFocus, data.nodes]);
+
   useEffect(() => {
     if (!highlightId || data.nodes.length === 0) return;
     const q = highlightId.toLowerCase();
@@ -648,6 +736,17 @@ function GraphContent() {
   useEffect(() => {
     if (!selected || selected.isValueCenter) {
       setNodeProps([]);
+      return;
+    }
+    const imported = importProps.current.get(selected.id);
+    if (imported) {
+      setNodeProps(
+        Object.entries(imported).map(([key, value]) => ({
+          key,
+          label: key,
+          value: String(value),
+        })),
+      );
       return;
     }
     setPropsLoading(true);
@@ -1414,6 +1513,18 @@ function GraphContent() {
 
       {/* Graph canvas */}
       <div ref={containerRef} className="relative flex-1 bg-(--bg)">
+        {importNotice && (
+          <div
+            data-testid="graph-import-notice"
+            className={`absolute bottom-3 left-3 z-10 rounded-lg border px-3 py-1.5 text-xs ${
+              importNotice.error
+                ? "border-red-700/50 bg-red-900/30 text-(--badge-inactive-text)"
+                : "border-green-700/50 bg-green-900/30 text-(--text-primary)"
+            }`}
+          >
+            {importNotice.text}
+          </div>
+        )}
         {loading ? (
           <div className="flex h-full items-center justify-center text-(--text-secondary)">
             <Loader2 size={14} className="mr-2 animate-spin" />

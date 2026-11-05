@@ -59,6 +59,7 @@ import "./routes/tck.js";
 import "./routes/trust-center.js";
 import "./routes/dsp-audit.js";
 import "./routes/spe.js";
+import "./routes/spe-import.js";
 import "./error-handler.js";
 import { logger } from "./logger.js";
 import { startSpeSync } from "./spe-status.js";

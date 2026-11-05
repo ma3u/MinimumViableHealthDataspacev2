@@ -656,7 +656,9 @@ describe("DataTransferPage", () => {
 
       const section = await screen.findByTestId("my-data");
       expect(within(section).getByText("Fhir Patient Search")).toBeTruthy();
-      expect(within(section).getByText(/AlphaKlinik Berlin/)).toBeTruthy();
+      expect(
+        within(section).getByText(/Provider:\s*AlphaKlinik Berlin/),
+      ).toBeTruthy();
       // tp-001 is a COMPLETED sample row: not in My data.
       expect(within(section).queryByText("Fhir Patient Bundle")).toBeNull();
     });
@@ -688,6 +690,86 @@ describe("DataTransferPage", () => {
       expect((await screen.findAllByText(/p-1a2b3c4d/)).length).toBeGreaterThan(
         0,
       );
+    });
+
+    it("imports into SPE-1 by default, or the SPE picked, and links to the graph", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/transfers/tp-live/import") {
+          return mockResponse({
+            datasetId: "tp-live",
+            speId: "SPE-2",
+            records: 12,
+            relationships: 30,
+            byType: { Patient: 12 },
+            importedAt: "2026-11-05T19:00:00.000Z",
+            pseudonymised: true,
+            graphUrl: "/graph?dataset=tp-live&spe=SPE-2",
+          });
+        }
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) {
+          return mockResponse([LIVE, ...TRANSFERS]);
+        }
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse(NEGOTIATIONS_FINALIZED);
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("my-data");
+      const target = within(section).getByTestId(
+        "spe-import-target",
+      ) as HTMLSelectElement;
+      expect(target.value).toBe("SPE-1");
+      await user.selectOptions(target, "SPE-2");
+      await user.click(within(section).getByTestId("spe-import-run"));
+
+      const done = await within(section).findByTestId("spe-import-done");
+      expect(done.textContent).toMatch(
+        /12 records with 30 references into SPE-2/,
+      );
+      expect(done.textContent).toMatch(/pseudonymised/);
+      expect(
+        within(section).getByTestId("spe-import-graph").getAttribute("href"),
+      ).toBe("/graph?dataset=tp-live&spe=SPE-2");
+      const call = mockFetchApi.mock.calls.find(
+        ([u]) => u === "/api/transfers/tp-live/import",
+      );
+      expect(JSON.parse(String(call?.[1]?.body))).toEqual({
+        participantId: "ctx-pharmaco",
+        speId: "SPE-2",
+      });
+    });
+
+    it("says why an import failed", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/transfers/tp-live/import") {
+          return mockResponse(
+            { error: "SPE-1 is not connected to the hub", step: "import" },
+            false,
+          );
+        }
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) {
+          return mockResponse([LIVE, ...TRANSFERS]);
+        }
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse(NEGOTIATIONS_FINALIZED);
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("my-data");
+      await user.click(within(section).getByTestId("spe-import-run"));
+
+      expect(
+        (await within(section).findByTestId("spe-import-error")).textContent,
+      ).toMatch(/SPE-1 is not connected/);
+      expect(within(section).queryByTestId("spe-import-done")).toBeNull();
     });
 
     it("Details say since when, until when, how, and the agreed policy", async () => {
