@@ -3,7 +3,7 @@ import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
 import {
   DEFAULT_IMPORT_SPE,
-  isImportSpe,
+  importSpeId,
   toGraphNodes,
 } from "@/lib/spe-import";
 import { isPlainId } from "@/lib/transfer-data";
@@ -26,8 +26,10 @@ export async function GET(
   if (isAuthError(auth)) return auth;
 
   const { id } = await params;
-  const speId = req.nextUrl.searchParams.get("spe") || DEFAULT_IMPORT_SPE;
-  if (!isPlainId(id) || !isImportSpe(speId)) {
+  const speId = importSpeId(
+    req.nextUrl.searchParams.get("spe") || DEFAULT_IMPORT_SPE,
+  );
+  if (!isPlainId(id) || !speId) {
     return NextResponse.json(
       { error: "A dataset id and SPE-1 or SPE-2 are required" },
       { status: 400 },
@@ -45,7 +47,7 @@ export async function GET(
       },
     );
   } catch (err) {
-    console.error(`Reading import ${id} from ${speId} failed:`, err);
+    console.error("Reading an import failed:", { id, speId }, err);
     return NextResponse.json(
       { error: `${speId} did not answer` },
       { status: 502 },

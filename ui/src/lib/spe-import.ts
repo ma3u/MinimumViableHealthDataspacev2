@@ -18,8 +18,12 @@ export const IMPORT_SPES = [
 /** Where a transfer goes unless the user picks another workspace. */
 export const DEFAULT_IMPORT_SPE = "SPE-1";
 
-export function isImportSpe(id: string): boolean {
-  return IMPORT_SPES.some((s) => s.id === id);
+/**
+ * The SPE id from the allowlist itself, never the caller's string, so a URL
+ * built from it carries only a constant (CodeQL js/request-forgery).
+ */
+export function importSpeId(requested: string): string | null {
+  return IMPORT_SPES.find((s) => s.id === requested)?.id ?? null;
 }
 
 export interface SpeImportResult {

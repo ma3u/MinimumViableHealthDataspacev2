@@ -6,7 +6,7 @@ import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
 import {
   DEFAULT_IMPORT_SPE,
   importGraphUrl,
-  isImportSpe,
+  importSpeId,
   type SpeImportResult,
 } from "@/lib/spe-import";
 import {
@@ -62,16 +62,17 @@ export async function POST(
     speId?: unknown;
   };
   const participantId = String(body.participantId ?? "");
-  const speId = String(body.speId || DEFAULT_IMPORT_SPE);
+  const requestedSpe = String(body.speId || DEFAULT_IMPORT_SPE);
+  const speId = importSpeId(requestedSpe);
   if (!isPlainId(participantId) || !isPlainId(id)) {
     return NextResponse.json(
       { error: "participantId and a transfer id are required" },
       { status: 400 },
     );
   }
-  if (!isImportSpe(speId)) {
+  if (!speId) {
     return NextResponse.json(
-      { error: `Unknown SPE '${speId}' (SPE-1 or SPE-2)` },
+      { error: `Unknown SPE '${requestedSpe}' (SPE-1 or SPE-2)` },
       { status: 400 },
     );
   }
@@ -82,7 +83,7 @@ export async function POST(
       `/v5alpha/participants/${participantId}/transferprocesses/${id}`,
     );
   } catch (err) {
-    console.error(`Transfer ${id} not readable:`, err);
+    console.error("Transfer not readable:", { id }, err);
     return NextResponse.json(
       { error: "Not found", detail: "The connector has no such transfer" },
       { status: 404 },
@@ -113,7 +114,7 @@ export async function POST(
   } catch (err) {
     const step = err instanceof TransferDataError ? err.step : "data";
     const detail = err instanceof Error ? err.message : String(err);
-    console.error(`Pulling transfer ${id} for import failed at ${step}:`, err);
+    console.error("Pulling a transfer for import failed:", { id, step }, err);
     return NextResponse.json(
       { error: "Failed to fetch the transfer's data", step, detail },
       { status: 502 },
@@ -151,7 +152,7 @@ export async function POST(
       },
     );
   } catch (err) {
-    console.error(`Importing transfer ${id} into ${speId} failed:`, err);
+    console.error("Importing a transfer failed:", { id, speId }, err);
     return NextResponse.json(
       {
         error: `${speId} did not answer`,

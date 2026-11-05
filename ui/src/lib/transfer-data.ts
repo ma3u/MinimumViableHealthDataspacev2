@@ -44,7 +44,7 @@ export class TransferDataError extends Error {
  * transfer process id; the correlation id is tried after it, since the
  * control plane may key the flow by either.
  */
-export async function flowToken(
+async function flowToken(
   participantContextId: string,
   flowIds: string[],
 ): Promise<string> {
@@ -117,7 +117,7 @@ export async function pullTransferData(
 }
 
 /** GET the data endpoint with the token, as a bare token and then as Bearer. */
-export async function pullData(token: string): Promise<PulledData> {
+async function pullData(token: string): Promise<PulledData> {
   let res: Response | null = null;
   for (const authorization of [token, `Bearer ${token}`]) {
     res = await fetch(EDR_DATA_URL, {
