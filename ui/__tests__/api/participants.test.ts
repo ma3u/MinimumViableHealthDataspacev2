@@ -9,7 +9,8 @@ import { NextRequest } from "next/server";
 vi.mock("@/lib/edc", () => ({
   edcClient: {
     management: vi.fn(),
-    tenant: vi.fn(),
+    identity: vi.fn(),
+    issuer: vi.fn(),
   },
   EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
 }));
@@ -32,7 +33,8 @@ import { GET, POST } from "@/app/api/participants/route";
 import { GET as ME_GET } from "@/app/api/participants/me/route";
 
 const mockManagement = vi.mocked(edcClient.management);
-const mockTenant = vi.mocked(edcClient.tenant);
+const mockIdentity = vi.mocked(edcClient.identity);
+const mockIssuer = vi.mocked(edcClient.issuer);
 
 describe("/api/participants", () => {
   beforeEach(() => {
@@ -154,11 +156,6 @@ describe("/api/participants", () => {
       expect(response.status).toBe(400);
     });
 
-    // Issue #203. On the Azure deployment there is no cell, no dataspace
-    // profile and possibly no Tenant Manager at all, because nothing outside
-    // jad/seed-jad.sh creates them and the cfm database is never created. That
-    // is the expected state there, not a failed registration, and it must never
-    // be reported as a provisioned participant either.
     function register(displayName = "Test Clinic") {
       return new NextRequest("http://localhost:3000/api/participants", {
         method: "POST",
@@ -170,38 +167,55 @@ describe("/api/participants", () => {
       });
     }
 
-    it("records the registration when the TenantManager has no cell", async () => {
-      mockTenant.mockResolvedValue([]);
+    /** The 1.0 stack answering every step, as lib/edc/provision.ts calls it. */
+    function stackAnswers() {
+      mockManagement.mockImplementation(async (path, method) =>
+        path === "/v5/participants" && method === "POST"
+          ? { "@id": "ctx-new" }
+          : undefined,
+      );
+      mockIdentity.mockResolvedValue(undefined);
+      mockIssuer.mockImplementation(async (path) =>
+        String(path).endsWith("/credentialdefinitions/query")
+          ? [{ id: "membership-def", credentialType: "MembershipCredential" }]
+          : undefined,
+      );
+    }
+
+    // ADR-078: the hub provisions the participant itself, without CFM.
+    it("provisions on the control plane and answers 201 with the context", async () => {
+      stackAnswers();
 
       const response = await POST(register());
       expect(response.status).toBe(201);
 
       const data = await response.json();
-      expect(data.provisioned).toBe(false);
-      expect(data.demo).toBe(true);
-      expect(data.demoReason).toMatch(/no did was registered/i);
-      expect(data.upstreamError).toContain("cell");
+      expect(data).toMatchObject({
+        tenantId: "ctx-new",
+        participantId: "ctx-new",
+        displayName: "Test Clinic",
+        role: "data_holder",
+        status: "provisioning",
+        provisioned: true,
+      });
+      expect(data.did).toMatch(/^did:web:identityhub%3A7083:test-clinic-/);
+      expect(data.steps).toHaveLength(7);
+      expect(mockManagement).toHaveBeenCalledWith(
+        "/v5/participants",
+        "POST",
+        expect.objectContaining({
+          properties: expect.objectContaining({
+            displayName: "Test Clinic",
+            organization: "Test Org",
+          }),
+        }),
+      );
     });
 
-    it("records the registration when there is no dataspace profile", async () => {
-      mockTenant
-        .mockResolvedValueOnce([{ id: "cell-1" }]) // cells
-        .mockResolvedValueOnce([]); // profiles, empty
-
-      const response = await POST(register());
-      expect(response.status).toBe(201);
-
-      const data = await response.json();
-      expect(data.provisioned).toBe(false);
-      expect(data.upstreamError).toContain("dataspace profile");
-    });
-
-    // A Tenant Manager that does not answer is the hosted demo outside its
-    // operating window (ADR-042), not a deployment without provisioning. It
-    // used to be recorded as a demo participant whose reason said the stack
-    // was not deployed at all (2026-10-03).
-    it("answers 503 and records nothing when the TenantManager is unreachable", async () => {
-      mockTenant.mockRejectedValue(new Error("dial tcp: connection refused"));
+    // A control plane that does not answer is the hosted demo outside its
+    // operating window (ADR-053), not a refused registration.
+    it("answers 503 and records nothing when the control plane is unreachable", async () => {
+      mockManagement.mockRejectedValue(new TypeError("fetch failed"));
 
       const response = await POST(register("Asleep Clinic"));
       expect(response.status).toBe(503);
@@ -211,271 +225,121 @@ describe("/api/participants", () => {
       expect(data.detail).toMatch(/nothing was registered/i);
       expect(data.detail).toMatch(/07:00 to 20:00 Europe\/Berlin/);
       // The cause travels with the answer, which is the whole point of #203.
-      expect(data.upstreamError).toContain("connection refused");
-      expect(mockTenant).not.toHaveBeenCalledWith(
-        "/v1alpha1/tenants",
-        "POST",
-        expect.anything(),
-      );
+      expect(data.upstreamError).toContain("fetch failed");
+      expect(mockIdentity).not.toHaveBeenCalled();
 
       // Nothing appears in the list the page reloads either.
       const listed = await (await ME_GET()).json();
       expect(listed).toEqual([]);
     });
 
-    it("keeps the recorded registration in the list the page reloads", async () => {
-      mockTenant.mockResolvedValue([]); // the manager answers: no cell
-      await POST(register("Recorded Clinic"));
-      mockTenant.mockRejectedValue(new Error("connection refused"));
-
-      const listed = await (await ME_GET()).json();
-
-      // The page calls loadTenants() straight after submitting; a registration
-      // that vanished there would look like it had failed.
-      expect(listed).toHaveLength(1);
-      expect(listed[0].properties.displayName).toBe("Recorded Clinic");
-      expect(listed[0].provisioned).toBe(false);
-    });
-
-    it("should create tenant + participant and return 201", async () => {
-      mockTenant
-        .mockResolvedValueOnce([{ id: "cell-1" }]) // cells
-        .mockResolvedValueOnce([{ id: "profile-1" }]) // profiles
-        .mockResolvedValueOnce({ id: "tenant-abc" }) // create tenant
-        .mockResolvedValueOnce({ id: "participant-xyz" }); // create participant
-
-      const req = new NextRequest("http://localhost:3000/api/participants", {
-        method: "POST",
-        body: JSON.stringify({
-          displayName: "Test Clinic",
-          organization: "Test Org",
-          role: "data_holder",
-          ehdsParticipantType: "data_holder",
-        }),
+    it("answers 502 with the failed step and what was undone", async () => {
+      stackAnswers();
+      mockIdentity.mockImplementation(async (path, method) => {
+        if (path === "/v1/participants" && method === "POST") {
+          throw new Error("EDC API error [identity] POST: 409 Conflict");
+        }
+        return undefined;
       });
-      const response = await POST(req);
-      const data = await response.json();
-
-      expect(response.status).toBe(201);
-      expect(data.tenantId).toBe("tenant-abc");
-      expect(data.participantId).toBe("participant-xyz");
-      expect(data.displayName).toBe("Test Clinic");
-      expect(data.status).toBe("provisioning");
-
-      // Verify tenant creation call
-      expect(mockTenant).toHaveBeenCalledWith(
-        "/v1alpha1/tenants",
-        "POST",
-        expect.objectContaining({
-          properties: expect.objectContaining({
-            displayName: "Test Clinic",
-            organization: "Test Org",
-          }),
-        }),
-      );
-
-      // Verify participant profile creation call
-      expect(mockTenant).toHaveBeenCalledWith(
-        "/v1alpha1/tenants/tenant-abc/participant-profiles",
-        "POST",
-        expect.objectContaining({
-          identifier: expect.stringMatching(
-            /^did:web:identityhub%3A7083:test-clinic-[0-9a-f]{6}$/,
-          ),
-          dataspaceProfileIds: ["profile-1"],
-          participantRoles: { "profile-1": ["provider"] },
-        }),
-      );
-    });
-
-    it("should return 502 when tenant creation fails", async () => {
-      // The cell and the profile are there, so this deployment can provision:
-      // a refusal of the write is then a real fault and must stay visible. The
-      // previous version of this test rejected the very first call, so it never
-      // reached tenant creation at all.
-      mockTenant
-        .mockResolvedValueOnce([{ id: "cell-1" }]) // cells
-        .mockResolvedValueOnce([{ id: "profile-1" }]) // profiles
-        .mockRejectedValueOnce(new Error("422 duplicate tenant"));
 
       const response = await POST(register());
       expect(response.status).toBe(502);
 
       const data = await response.json();
-      expect(data.error).toContain("Failed to create participant");
-      // "Failed to create participant" on its own was all the UI ever got.
-      expect(data.detail).toContain("422 duplicate tenant");
-      expect(data.provisioned).toBeUndefined();
+      expect(data.error).toBe("Failed to create participant");
+      expect(data.detail).toContain("IdentityHub participant failed");
+      expect(data.detail).toContain("409");
+      expect(data.steps.at(-1)).toEqual({
+        step: "undo: control plane context",
+        ok: true,
+      });
+      expect(mockManagement).toHaveBeenCalledWith(
+        "/v5/participants/ctx-new",
+        "DELETE",
+      );
     });
 
-    it("reports the provisioning activities rather than promising a DID", async () => {
-      // The Tenant Manager answers the profile create with three pending
-      // activities. Whether an agent will complete them is not knowable here,
-      // so the response names them and claims nothing further (issue #203).
-      mockTenant
-        .mockResolvedValueOnce([{ id: "cell-1" }])
-        .mockResolvedValueOnce([{ id: "profile-1" }])
-        .mockResolvedValueOnce({ id: "tenant-abc" })
-        .mockResolvedValueOnce({
-          id: "participant-xyz",
-          vpas: [
-            { type: "cfm.connector", state: "pending" },
-            { type: "cfm.credentialservice", state: "pending" },
-            { type: "cfm.dataplane", state: "pending" },
-          ],
-        });
-
-      const data = await (await POST(register())).json();
-
-      expect(data.activitiesPending).toBe(3);
-      expect(data.activityTypes).toEqual([
-        "cfm.connector",
-        "cfm.credentialservice",
-        "cfm.dataplane",
-      ]);
-      expect(data.vpas).toHaveLength(3);
-    });
-
-    it("copes with a Tenant Manager that returns no activities", async () => {
-      mockTenant
-        .mockResolvedValueOnce([{ id: "cell-1" }])
-        .mockResolvedValueOnce([{ id: "profile-1" }])
-        .mockResolvedValueOnce({ id: "tenant-abc" })
-        .mockResolvedValueOnce({ id: "participant-xyz" });
-
-      const data = await (await POST(register())).json();
-
-      expect(data.activitiesPending).toBe(0);
-      expect(data.activityTypes).toEqual([]);
-    });
-
-    it("marks a genuinely provisioned participant as provisioned", async () => {
-      mockTenant
-        .mockResolvedValueOnce([{ id: "cell-1" }])
-        .mockResolvedValueOnce([{ id: "profile-1" }])
-        .mockResolvedValueOnce({ id: "tenant-abc" })
-        .mockResolvedValueOnce({ id: "participant-xyz" });
-
-      const data = await (await POST(register())).json();
-
-      expect(data.provisioned).toBe(true);
-      expect(data.demo).toBeUndefined();
+    it("answers 400 to a body that is not JSON", async () => {
+      const req = new NextRequest("http://localhost:3000/api/participants", {
+        method: "POST",
+        body: "not json",
+      });
+      expect((await POST(req)).status).toBe(400);
     });
   });
 
   describe("GET /me provisioning state", () => {
-    const stale = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-
-    it("marks a tenant stalled when every activity is still pending", async () => {
-      // The live state of the two participants registered through the form on
-      // 2026-09-17 and 2026-09-18: tenant and profile real, all three
-      // activities pending ever since, because this deployment runs no CFM
-      // provisioning agents (issue #203).
-      mockTenant
-        .mockResolvedValueOnce([
-          { id: "tenant-1", version: 0, properties: { displayName: "Clinic" } },
-        ])
-        .mockResolvedValueOnce([
-          {
-            id: "profile-1",
-            vpas: [
-              {
-                type: "cfm.connector",
-                state: "pending",
-                stateTimestamp: stale,
-              },
-              {
-                type: "cfm.dataplane",
-                state: "pending",
-                stateTimestamp: stale,
-              },
-            ],
-          },
-        ]);
-
-      const listed = await (await ME_GET()).json();
-
-      expect(listed[0].provisioningStalled).toBe(true);
-      expect(listed[0].vpaSummary.pending).toBe(2);
-      expect(listed[0].stalledReason).toContain("no DID was registered");
+    const ctx = (registeredAt?: string) => ({
+      "@id": "ctx-new",
+      identity: "did:web:identityhub%3A7083:test-clinic-1a2b3c",
+      state: "CREATED",
+      properties: {
+        displayName: "Test Clinic",
+        role: "data_holder",
+        ...(registeredAt ? { registeredAt } : {}),
+      },
     });
 
-    it("reports a profile the agents rolled back as failed, with the reason", async () => {
-      mockTenant
-        .mockResolvedValueOnce([{ id: "t-1", version: 0, properties: {} }])
-        .mockResolvedValueOnce([
-          {
-            id: "p-1",
-            identifier: "did:web:identityhub%3A7083:x-1",
-            error: true,
-            vpas: [
-              { type: "cfm.connector", state: "disposed" },
-              { type: "cfm.dataplane", state: "disposed" },
-            ],
-          },
-        ]);
+    it("lists each context in the tenant shape, active once it holds its credential", async () => {
+      mockManagement.mockResolvedValue([ctx(new Date().toISOString())]);
+      mockIdentity.mockResolvedValue([{ id: "vc-1" }]);
 
       const listed = await (await ME_GET()).json();
-      expect(listed[0].provisioningFailed).toBe(true);
-      expect(listed[0].provisioningComplete).toBe(false);
-      expect(listed[0].failedReason).toMatch(/no DID was registered/);
+
+      expect(listed).toHaveLength(1);
+      expect(listed[0]).toMatchObject({
+        id: "ctx-new",
+        properties: { displayName: "Test Clinic" },
+        provisioningComplete: true,
+        provisioningStalled: false,
+      });
+      expect(listed[0].participantProfiles[0].identifier).toBe(
+        "did:web:identityhub%3A7083:test-clinic-1a2b3c",
+      );
+      expect(mockIdentity).toHaveBeenCalledWith(
+        "/v1/participants/ctx-new/credentials?type=MembershipCredential",
+      );
     });
 
-    it("reports a profile whose activities are all active as complete", async () => {
-      mockTenant
-        .mockResolvedValueOnce([{ id: "t-1", version: 0, properties: {} }])
-        .mockResolvedValueOnce([
-          {
-            id: "p-1",
-            error: false,
-            vpas: [
-              { type: "cfm.connector", state: "active" },
-              { type: "cfm.dataplane", state: "active" },
-            ],
-          },
-        ]);
+    it("leaves a fresh registration provisioning while its credential is on the way", async () => {
+      mockManagement.mockResolvedValue([ctx(new Date().toISOString())]);
+      mockIdentity.mockResolvedValue([]);
 
-      const listed = await (await ME_GET()).json();
-      expect(listed[0].provisioningFailed).toBe(false);
-      expect(listed[0].provisioningComplete).toBe(true);
-      expect(listed[0].failedReason).toBeUndefined();
+      const [one] = await (await ME_GET()).json();
+      expect(one.provisioningComplete).toBe(false);
+      expect(one.provisioningStalled).toBe(false);
+      expect(one.vpaSummary.pendingTypes).toEqual(["MembershipCredential"]);
     });
 
-    it("leaves a fresh registration alone", async () => {
-      mockTenant
-        .mockResolvedValueOnce([
-          { id: "tenant-1", version: 0, properties: { displayName: "Clinic" } },
-        ])
-        .mockResolvedValueOnce([
-          {
-            id: "profile-1",
-            vpas: [
-              {
-                type: "cfm.connector",
-                state: "pending",
-                stateTimestamp: new Date().toISOString(),
-              },
-            ],
-          },
-        ]);
+    it("marks it stalled, with the reason, when the credential never came", async () => {
+      mockManagement.mockResolvedValue([ctx("2026-09-17T19:53:20Z")]);
+      mockIdentity.mockResolvedValue([]);
 
-      const listed = await (await ME_GET()).json();
-
-      expect(listed[0].provisioningStalled).toBe(false);
-      expect(listed[0].stalledReason).toBeUndefined();
+      const [one] = await (await ME_GET()).json();
+      expect(one.provisioningStalled).toBe(true);
+      expect(one.stalledReason).toContain("MembershipCredential");
+      expect(one.stalledReason).toContain("2026-09-17");
     });
 
-    it("says nothing about provisioning when the profile lookup fails", async () => {
-      mockTenant
-        .mockResolvedValueOnce([
-          { id: "tenant-1", version: 0, properties: { displayName: "Clinic" } },
-        ])
-        .mockRejectedValueOnce(new Error("profiles unreachable"));
+    it("lists the newest registration first", async () => {
+      mockManagement.mockResolvedValue([
+        { ...ctx("2026-11-01T10:00:00Z"), "@id": "older" },
+        { ...ctx("2026-11-05T10:00:00Z"), "@id": "newer" },
+      ]);
+      mockIdentity.mockResolvedValue([]);
 
       const listed = await (await ME_GET()).json();
+      expect(listed.map((t: { id: string }) => t.id)).toEqual([
+        "newer",
+        "older",
+      ]);
+    });
 
-      expect(listed[0].participantProfiles).toEqual([]);
-      expect(listed[0].provisioningStalled).toBe(false);
+    it("answers an empty list, not a 502, when the control plane is down", async () => {
+      mockManagement.mockRejectedValue(new TypeError("fetch failed"));
+      const response = await ME_GET();
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual([]);
     });
   });
 });

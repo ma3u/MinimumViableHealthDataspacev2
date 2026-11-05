@@ -1,19 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient } from "@/lib/edc";
+import { getContext } from "@/lib/edc/participants";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
-
-interface ParticipantProfile {
-  id: string;
-  identifier?: string;
-  error?: boolean;
-  properties?: {
-    "cfm.vpa.state"?: {
-      participantContextId?: string;
-    };
-  };
-}
 
 interface VerifiableCredential {
   id?: string;
@@ -62,8 +52,10 @@ function toVC(r: IHCredentialResource): VerifiableCredential {
 
 /**
  * GET /api/participants/[id]/credentials
- * Fetches verifiable credentials from IdentityHub for every participant
- * context associated with this tenant.
+ * Fetches the verifiable credentials IdentityHub holds for one participant.
+ * The id is the control plane context id, which IdentityHub shares (ADR-078).
+ * Answers a one-element list, the shape the settings page read when a CFM
+ * tenant could have several participant profiles.
  */
 export async function GET(
   _req: NextRequest,
@@ -74,59 +66,24 @@ export async function GET(
 
   try {
     const { id } = await params;
-    const profiles = await edcClient.tenant<ParticipantProfile[]>(
-      `/v1alpha1/tenants/${id}/participant-profiles`,
-    );
+    const ctx = await getContext(id);
+    const did = ctx.identity ? decodeURIComponent(ctx.identity) : undefined;
+    const base = { profileId: id, participantContextId: id, did };
 
-    const results = await Promise.all(
-      profiles.map(async (pp) => {
-        const ctxId = pp.properties?.["cfm.vpa.state"]?.participantContextId;
-        const did = pp.identifier
-          ? decodeURIComponent(pp.identifier)
-          : undefined;
-
-        if (!ctxId) {
-          return {
-            profileId: pp.id,
-            participantContextId: null,
-            did,
-            credentials: [],
-            error: "No participant context ID",
-          };
-        }
-
-        try {
-          const data = await edcClient.identity<IHCredentialResource[]>(
-            `/v1/participants/${ctxId}/credentials`,
-          );
-          const vcs = Array.isArray(data) ? data.map(toVC) : [];
-          return {
-            profileId: pp.id,
-            participantContextId: ctxId,
-            did,
-            credentials: vcs,
-          };
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : String(err);
-          return {
-            profileId: pp.id,
-            participantContextId: ctxId,
-            did,
-            credentials: [],
-            error: msg,
-          };
-        }
-      }),
-    );
-
-    return NextResponse.json(results);
+    try {
+      const data = await edcClient.identity<IHCredentialResource[]>(
+        `/v1/participants/${encodeURIComponent(id)}/credentials`,
+      );
+      const vcs = Array.isArray(data) ? data.map(toVC) : [];
+      return NextResponse.json([{ ...base, credentials: vcs }]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return NextResponse.json([{ ...base, credentials: [], error: msg }]);
+    }
   } catch (err) {
-    // Carry the cause, the way /api/admin/policies already does. This route
-    // answers 502 on the CI stack and 200 locally, and the bare message says
-    // only that something upstream refused. The first guess, that CFM had
-    // provisioned no tenant there, was wrong: the collection logs 9 tenants,
-    // all 9 with participant profiles. Without the cause in the body the next
-    // person starts that guessing again from nothing.
+    // Carry the cause, the way /api/admin/policies already does: without it
+    // the bare message says only that something upstream refused, and the
+    // next person starts guessing from nothing.
     console.error("Failed to get credentials:", err);
     return NextResponse.json(
       { error: "Failed to get credentials", detail: String(err) },
