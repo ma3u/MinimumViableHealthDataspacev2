@@ -166,6 +166,16 @@ jobs:
           # with the live secret, and fails in CI without it rather than skip.
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
         run: npx playwright test __tests__/e2e/smoke.spec.ts --project=chromium
+      # A negotiation clicked through /negotiate must reach the live connector
+      # and finalize (#876). The API collection walks the same flow but sends
+      # its own addresses, so it stayed green while the page sent a host that
+      # does not resolve on Azure. Leaves one negotiation per run.
+      - name: Live DSP negotiation from the page
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ env.DEMO_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          LIVE_DSP_FLOW: "true"
+        run: npx playwright test __tests__/e2e/journeys/53-live-dsp-negotiate.spec.ts --project=chromium
       - uses: actions/upload-artifact@v7
         if: always()
         with:

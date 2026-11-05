@@ -46,6 +46,18 @@ interface CatalogOffer {
   name?: string;
   description?: string;
   contentType?: string;
+  /** The provider's DSP address, as the catalog's distribution names it. */
+  endpoint?: string;
+}
+
+/** The first distribution's DSP endpoint, in either JSON-LD spelling. */
+function datasetEndpoint(ds: Record<string, unknown>): string {
+  const one = (v: unknown) =>
+    (Array.isArray(v) ? v[0] : v) as Record<string, unknown> | undefined;
+  const dist = one(ds["distribution"] ?? ds["dcat:distribution"]);
+  const svc = one(dist?.["accessService"] ?? dist?.["dcat:accessService"]);
+  const url = svc?.["endpointURL"] ?? svc?.["dcat:endpointURL"] ?? "";
+  return typeof url === "string" ? url : "";
 }
 
 interface Negotiation {
@@ -104,6 +116,7 @@ function parseOffers(catalog: Record<string, unknown>): CatalogOffer[] {
       ds["dct:description"] ??
       "") as string;
     const contentType = (ds["contenttype"] ?? "") as string;
+    const endpoint = datasetEndpoint(ds);
 
     let policies = ds["hasPolicy"] ?? ds["odrl:hasPolicy"] ?? [];
     if (!Array.isArray(policies)) policies = [policies];
@@ -123,6 +136,7 @@ function parseOffers(catalog: Record<string, unknown>): CatalogOffer[] {
           name,
           description,
           contentType,
+          ...(endpoint ? { endpoint } : {}),
         });
       }
     }
@@ -171,7 +185,6 @@ function NegotiateContent() {
   );
   const [providerCtxId, setProviderCtxId] = useState(preProviderId);
   const [providerDid, setProviderDid] = useState(preProviderDid);
-  const [dspBase] = useState("http://controlplane:8082/api/dsp");
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [catalogNote, setCatalogNote] = useState<string | null>(null);
@@ -370,7 +383,10 @@ function NegotiateContent() {
         body: JSON.stringify({
           participantId: selectedCtx,
           assetId,
-          counterPartyAddress: dspBase,
+          // The address the provider's catalog gave, else the server's own
+          // DSP base. Never a fixed host: http://controlplane does not
+          // resolve on Azure (#876).
+          counterPartyAddress: selectedOffer?.endpoint,
           counterPartyId: providerCtxId,
           providerDid: selectedOffer?.assignerDid || providerDid,
           offerId,

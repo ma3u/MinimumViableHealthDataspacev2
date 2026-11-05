@@ -297,12 +297,26 @@ describe("POST /api/negotiations", () => {
     expect(res.status).toBe(400);
   });
 
-  it("should return 400 when counterPartyAddress is missing", async () => {
+  it("uses this deployment's DSP base when counterPartyAddress is missing", async () => {
+    // The page used to send a fixed http://controlplane:8082, which does not
+    // resolve on Azure (#876); without an address the server's base applies.
+    mockManagement.mockResolvedValue({ "@id": "neg-1" });
     const res = await POST(
-      postReq({ participantId: "ctx-1", assetId: "a1", offerId: "o1" }),
+      postReq({
+        participantId: "ctx-1",
+        counterPartyId: "prov-ctx",
+        assetId: "a1",
+        offerId: "o1",
+      }),
     );
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(201);
+    const sent = mockManagement.mock.calls.at(-1)?.[2] as {
+      counterPartyAddress: string;
+    };
+    expect(sent.counterPartyAddress).toBe(
+      "http://controlplane:8082/api/dsp/prov-ctx/http-dsp-profile-2025-1",
+    );
   });
 
   it("should return 400 when assetId is missing", async () => {
