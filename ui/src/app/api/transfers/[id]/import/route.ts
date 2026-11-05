@@ -21,6 +21,25 @@ export const dynamic = "force-dynamic";
 const PROXY_TIMEOUT_MS = 60_000;
 
 /**
+ * The provider of an agreement. An EDC 1.0 transfer process names no
+ * counterparty, the agreement does; without one the import has no provider.
+ */
+async function providerOfAgreement(
+  participantId: string,
+  agreementId: string,
+): Promise<string> {
+  if (!isPlainId(agreementId)) return "";
+  try {
+    const agreement = await edcClient.management<Record<string, unknown>>(
+      `/v5alpha/participants/${participantId}/contractagreements/${agreementId}`,
+    );
+    return String(agreement.providerId ?? "");
+  } catch {
+    return "";
+  }
+}
+
+/**
  * POST /api/transfers/[id]/import — body {participantId, speId?}.
  *
  * Ends a transfer where EHDS Art. 73 puts it, in a secure processing
@@ -101,6 +120,11 @@ export async function POST(
     );
   }
 
+  const agreementId = String(transfer.contractId ?? "");
+  const provider =
+    String(transfer.counterPartyId ?? "") ||
+    (await providerOfAgreement(participantId, agreementId));
+
   let res: Response;
   try {
     res = await fetch(
@@ -114,9 +138,9 @@ export async function POST(
         body: JSON.stringify({
           datasetId: id,
           transferId: id,
-          agreementId: String(transfer.contractId ?? ""),
+          agreementId,
           assetId: String(transfer.assetId ?? ""),
-          provider: String(transfer.counterPartyId ?? ""),
+          provider,
           consumer: participantId,
           importedBy: auth.session.user.name ?? "",
           pseudonymised,

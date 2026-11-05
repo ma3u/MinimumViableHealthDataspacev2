@@ -139,6 +139,26 @@ describe("POST /api/transfers/[id]/import", () => {
     expect(JSON.stringify(sent.bundle)).toContain("Musterfrau");
   });
 
+  it("takes the provider from the agreement when the transfer names none", async () => {
+    asRoles(["DATA_USER"]);
+    mockManagement
+      .mockResolvedValueOnce({ state: "STARTED", contractId: "agr-2" })
+      .mockResolvedValueOnce({ providerId: "did:web:alpha-from-agreement" });
+    fetchMock
+      .mockResolvedValueOnce(json({ token: "tok" }))
+      .mockResolvedValueOnce(json(BUNDLE))
+      .mockResolvedValueOnce(json({ datasetId: TP, records: 1 }));
+
+    const res = await post({ participantId: CTX });
+
+    expect(res.status).toBe(200);
+    expect(mockManagement.mock.calls[1][0]).toBe(
+      `/v5alpha/participants/${CTX}/contractagreements/agr-2`,
+    );
+    const sent = JSON.parse(fetchMock.mock.calls[2][1].body);
+    expect(sent.provider).toBe("did:web:alpha-from-agreement");
+  });
+
   it("refuses an SPE that does not exist, before reading anything", async () => {
     const res = await post({ participantId: CTX, speId: "SPE-9" });
 
