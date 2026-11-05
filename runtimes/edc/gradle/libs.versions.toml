@@ -1,0 +1,36 @@
+# The one place the EDC version is set (ADR-076). A release candidate is allowed
+# only on a spike branch; main runs a released version.
+[versions]
+edc = "1.0.0-RC5"
+bouncyCastle = "1.83"
+opentelemetry = "1.61.0"
+shadow = "9.6.1"
+
+[libraries]
+# control plane: the virtual (multi-participant) control plane, merged from EDC-V
+edc-bom-controlplane-virtual = { module = "org.eclipse.edc:controlplane-virtual-base-bom", version.ref = "edc" }
+edc-bom-controlplane-virtual-sql = { module = "org.eclipse.edc:controlplane-virtual-feature-sql-bom", version.ref = "edc" }
+edc-bom-controlplane-virtual-dcp = { module = "org.eclipse.edc:controlplane-virtual-feature-dcp-bom", version.ref = "edc" }
+edc-bom-controlplane-virtual-nats = { module = "org.eclipse.edc:controlplane-virtual-feature-nats-bom", version.ref = "edc" }
+
+# IdentityHub and IssuerService
+edc-bom-identityhub = { module = "org.eclipse.edc:identityhub-oauth2-bom", version.ref = "edc" }
+edc-bom-identityhub-sql = { module = "org.eclipse.edc:identityhub-feature-sql-bom", version.ref = "edc" }
+edc-bom-issuerservice = { module = "org.eclipse.edc:issuerservice-oauth2-bom", version.ref = "edc" }
+edc-bom-issuerservice-sql = { module = "org.eclipse.edc:issuerservice-feature-sql-bom", version.ref = "edc" }
+edc-ih-api-did = { module = "org.eclipse.edc:did-api", version.ref = "edc" }
+edc-ih-api-participants = { module = "org.eclipse.edc:participant-context-api", version.ref = "edc" }
+edc-issuance-spi = { module = "org.eclipse.edc:issuerservice-issuance-spi", version.ref = "edc" }
+
+# shared by every runtime
+edc-participantcontext-config = { module = "org.eclipse.edc:participant-context-config-core", version.ref = "edc" }
+edc-participantcontext-config-sql = { module = "org.eclipse.edc:participantcontext-config-store-sql", version.ref = "edc" }
+edc-vault-hashicorp = { module = "org.eclipse.edc:vault-hashicorp", version.ref = "edc" }
+edc-monitor-console = { module = "org.eclipse.edc:console-monitor", version.ref = "edc" }
+edc-monitor-otel = { module = "org.eclipse.edc:otel-monitor", version.ref = "edc" }
+edc-events-nats = { module = "org.eclipse.edc:events-nats", version.ref = "edc" }
+bouncyCastle-bcprov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncyCastle" }
+opentelemetry-exporter-otlp = { module = "io.opentelemetry:opentelemetry-exporter-otlp", version.ref = "opentelemetry" }
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

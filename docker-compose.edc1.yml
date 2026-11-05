@@ -1,0 +1,42 @@
+# EDC 1.0 spike overlay (#881, ADR-076). Swaps the Metaform JAD images for the
+# launchers built from runtimes/edc and points each at a fresh database, so
+# the 0.18 databases stay as they were:
+#
+#   psql -U cp -d controlplane -f jad/init-postgres-edc1.sql   (once, in the postgres container)
+#   docker compose -f docker-compose.yml -f docker-compose.jad.yml -f docker-compose.edc1.yml up -d
+#
+# Without this file the stack is 0.18 again. The data planes are not here yet:
+# they are rebuilt on the DataPlane SDK in a later step of the spike.
+services:
+  controlplane:
+    image: mvhd/edc-controlplane:1.0.0-RC5-local
+    environment:
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/controlplane_v1"
+      # 1.0 reads `prefix.mapping`, not `prefix-mapping`, and refuses to boot when
+      # a POLICY scope has none ("DcpScope prefixMapping cannot be null").
+      edc.iam.dcp.scopes.manufacturer.prefix.mapping: "ManufacturerCredential"
+      edc.iam.dcp.scopes.ehds-participant.prefix.mapping: "EHDSParticipantCredential"
+      edc.iam.dcp.scopes.data-processing-purpose.prefix.mapping: "DataProcessingPurposeCredential"
+      edc.iam.dcp.scopes.data-quality-label.prefix.mapping: "DataQualityLabelCredential"
+
+  identityhub:
+    image: mvhd/edc-identity-hub:1.0.0-RC5-local
+    environment:
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/identityhub_v1"
+
+  issuerservice:
+    image: mvhd/edc-issuerservice:1.0.0-RC5-local
+    environment:
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/issuerservice_v1"
+
+  simpl-ga-issuer:
+    image: mvhd/edc-issuerservice:1.0.0-RC5-local
+    environment:
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/simplga_v1"
+      edc.datasource.membership.url: "jdbc:postgresql://postgres:5432/simplga_v1"
+
+  rogue-issuer:
+    image: mvhd/edc-issuerservice:1.0.0-RC5-local
+    environment:
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/rogueissuer_v1"
+      edc.datasource.membership.url: "jdbc:postgresql://postgres:5432/rogueissuer_v1"
