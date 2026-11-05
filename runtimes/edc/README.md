@@ -30,9 +30,13 @@ to move into the seeds and the realm file:
 - API versions: Management API `v5` only; IdentityHub and IssuerService `v1`.
 - Each participant context is linked to the DSP profile:
   `PUT /v5/participants/{id}/profiles` with `["http-dsp-profile-2025-1"]`.
-- The data planes are not here: the 0.18 JAD data plane cannot talk to a 1.0
-  control plane (DPS 422). The plan is siglet as the data plane, with the
-  neo4j-proxy verifying its tokens.
+- There is no EDC data plane. siglet 0.1.6 is the data plane (`jad/siglet-edc1.toml`):
+  it answers the control plane's Data Plane Signaling and issues the access
+  token. The consumer reads `{endpoint, token}` from its siglet
+  (`GET /tokens/{participantContextId}/{transferId}` on port 8080), and the
+  endpoint is the neo4j-proxy's `/dataspace/data`, which verifies the token
+  against siglet's JWKS and serves the dataset the token names. The JAD data
+  planes `dataplane-fhir` and `dataplane-omop` are not needed.
 
 The only code here is `issuerservice/.../DemoAttestationsExtension.java`, the
 "membership" and "manufacturer" attestation types our seeds use.
