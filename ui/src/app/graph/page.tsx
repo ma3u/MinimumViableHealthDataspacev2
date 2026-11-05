@@ -492,6 +492,10 @@ function GraphContent() {
     error: boolean;
   } | null>(null);
   const importLoaded = useRef<string | null>(null);
+  // An imported node's properties come with the import; the hub has no node to ask.
+  const importProps = useRef(
+    new Map<string, Record<string, string | number | boolean>>(),
+  );
   useEffect(() => {
     if (!importDataset) return;
     // The persona graph replaces the data on every load; merge again after it.
@@ -517,6 +521,11 @@ function GraphContent() {
             error: true,
           });
           return;
+        }
+        for (const n of d.nodes as Array<
+          GraphNode & { properties?: Record<string, string | number | boolean> }
+        >) {
+          if (n.properties) importProps.current.set(n.id, n.properties);
         }
         setData((prev) => mergeInto(prev, d.nodes, d.links, activePersona));
         const focus = (d.nodes as GraphNode[]).find(
@@ -727,6 +736,17 @@ function GraphContent() {
   useEffect(() => {
     if (!selected || selected.isValueCenter) {
       setNodeProps([]);
+      return;
+    }
+    const imported = importProps.current.get(selected.id);
+    if (imported) {
+      setNodeProps(
+        Object.entries(imported).map(([key, value]) => ({
+          key,
+          label: key,
+          value: String(value),
+        })),
+      );
       return;
     }
     setPropsLoading(true);
@@ -1496,7 +1516,7 @@ function GraphContent() {
         {importNotice && (
           <div
             data-testid="graph-import-notice"
-            className={`absolute left-3 top-3 z-10 rounded-lg border px-3 py-1.5 text-xs ${
+            className={`absolute bottom-3 left-3 z-10 rounded-lg border px-3 py-1.5 text-xs ${
               importNotice.error
                 ? "border-red-700/50 bg-red-900/30 text-(--badge-inactive-text)"
                 : "border-green-700/50 bg-green-900/30 text-(--text-primary)"

@@ -194,7 +194,13 @@ describe("GET /spe/:speId/import/:datasetId/graph", () => {
       .mockResolvedValueOnce({
         records: [
           row({
-            d: { datasetId: "tp-1", name: "Transfer of x" },
+            d: {
+              datasetId: "tp-1",
+              name: "Transfer of x",
+              provider: "did:web:alpha",
+              agreementId: "agr-1",
+              records: 2,
+            },
             speId: "SPE-1",
           }),
         ],
@@ -220,9 +226,23 @@ describe("GET /spe/:speId/import/:datasetId/graph", () => {
     expect(res.body.nodes.map((n: { id: string }) => n.id)).toEqual([
       "import:tp-1",
       "spe:SPE-1",
+      "import-provider:did:web:alpha",
+      "import-agreement:agr-1",
       "import:tp-1/Patient/p1",
       "import:tp-1/Condition/c1",
     ]);
+    expect(res.body.nodes[0].properties).toMatchObject({
+      provider: "did:web:alpha",
+      agreementId: "agr-1",
+      records: 2,
+    });
+    expect(res.body.nodes[4].properties).toEqual({
+      resourceType: "Patient",
+      resourceId: "p1",
+    });
+    expect(res.body.links.map((l: { type: string }) => l.type)).toEqual(
+      expect.arrayContaining(["PROVIDED_BY", "UNDER_AGREEMENT"]),
+    );
     expect(res.body.links).toContainEqual({
       source: "import:tp-1/Condition/c1",
       target: "import:tp-1/Patient/p1",

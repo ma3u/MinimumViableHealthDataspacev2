@@ -208,7 +208,11 @@ export async function writeImport(
   const { records, references: refs } = bundleToRecords(meta.datasetId, bundle);
   const importedAt = now().toISOString();
   await session.executeWrite(async (tx) => {
-    await tx.run(WRITE_DATASET, { meta, importedAt, count: records.length });
+    await tx.run(WRITE_DATASET, {
+      meta,
+      importedAt,
+      count: neo4j.int(records.length),
+    });
     for (let i = 0; i < records.length; i += 500) {
       await tx.run(WRITE_RECORDS, {
         datasetId: meta.datasetId,
@@ -232,6 +236,8 @@ export async function writeImport(
   };
 }
 
+type Shown = Record<string, string | number | boolean>;
+
 export interface ImportGraph {
   dataset: Record<string, unknown>;
   nodes: Array<{
@@ -239,6 +245,8 @@ export interface ImportGraph {
     label: string;
     name: string;
     resourceType?: string;
+    /** What the viewer's inspector lists for the node. */
+    properties: Shown;
   }>;
   links: Array<{ source: string; target: string; type: string }>;
   truncated: boolean;
@@ -285,24 +293,76 @@ export async function readImportGraph(
 
   const datasetNode = `import:${datasetId}`;
   const workspaceNode = `spe:${speId}`;
+  const shown: Shown = {};
+  for (const k of [
+    "assetId",
+    "transferId",
+    "agreementId",
+    "provider",
+    "consumer",
+    "importedAt",
+    "records",
+    "pseudonymised",
+  ]) {
+    const v = dataset[k];
+    if (
+      typeof v === "string" ||
+      typeof v === "number" ||
+      typeof v === "boolean"
+    )
+      shown[k] = v;
+  }
   const nodes: ImportGraph["nodes"] = [
     {
       id: datasetNode,
       label: "ImportedDataset",
       name: String(dataset.name ?? datasetId),
+      properties: shown,
     },
-    { id: workspaceNode, label: "SpeWorkspace", name: speId },
+    {
+      id: workspaceNode,
+      label: "SpeWorkspace",
+      name: speId,
+      properties: { speId },
+    },
   ];
   const links: ImportGraph["links"] = [
     { source: datasetNode, target: workspaceNode, type: "LOADED_INTO" },
   ];
+  // Where the data came from and under which contract: kept on the dataset,
+  // drawn as nodes so the import shows its whole chain.
+  if (typeof dataset.provider === "string" && dataset.provider) {
+    const id = `import-provider:${dataset.provider}`;
+    nodes.push({
+      id,
+      label: "Participant",
+      name: dataset.provider,
+      properties: { did: dataset.provider },
+    });
+    links.push({ source: datasetNode, target: id, type: "PROVIDED_BY" });
+  }
+  if (typeof dataset.agreementId === "string" && dataset.agreementId) {
+    const id = `import-agreement:${dataset.agreementId}`;
+    nodes.push({
+      id,
+      label: "Contract",
+      name: dataset.agreementId,
+      properties: { agreementId: dataset.agreementId },
+    });
+    links.push({ source: datasetNode, target: id, type: "UNDER_AGREEMENT" });
+  }
   for (const r of recs) {
     const id = `import:${r.get("key")}`;
+    const key = String(r.get("key"));
     nodes.push({
       id,
       label: "ImportedRecord",
       name: String(r.get("name")),
       resourceType: String(r.get("type")),
+      properties: {
+        resourceType: String(r.get("type")),
+        resourceId: key.slice(key.lastIndexOf("/") + 1),
+      },
     });
     links.push({ source: datasetNode, target: id, type: "CONTAINS" });
   }

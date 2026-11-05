@@ -45,6 +45,7 @@ interface ProxyNode {
   label: string;
   name: string;
   resourceType?: string;
+  properties?: Record<string, string | number | boolean>;
 }
 
 /** The proxy's nodes as the graph viewer draws them: a layer and a colour. */
@@ -58,6 +59,7 @@ export function toGraphNodes(nodes: ProxyNode[]) {
       layer,
       color: NODE_ROLE_COLORS[n.label] ?? LAYER_COLORS[layer] ?? "#888",
       group: n.resourceType,
+      properties: n.properties ?? {},
     };
   });
 }

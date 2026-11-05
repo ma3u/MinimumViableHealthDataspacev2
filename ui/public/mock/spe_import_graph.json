@@ -5,7 +5,9 @@
     "speId": "SPE-1",
     "assetId": "fhir-patient-search",
     "records": 2,
-    "pseudonymised": true
+    "pseudonymised": true,
+    "agreementId": "agr-demo",
+    "provider": "did:web:alpha-klinik.de:participant"
   },
   "nodes": [
     {
@@ -13,14 +15,44 @@
       "name": "Transfer of fhir-patient-search",
       "label": "ImportedDataset",
       "layer": 2,
-      "color": "#7DD3C8"
+      "color": "#7DD3C8",
+      "properties": {
+        "assetId": "fhir-patient-search",
+        "agreementId": "agr-demo",
+        "provider": "did:web:alpha-klinik.de:participant",
+        "records": 2,
+        "pseudonymised": true
+      }
     },
     {
       "id": "spe:SPE-1",
       "name": "SPE-1",
       "label": "SpeWorkspace",
       "layer": 1,
-      "color": "#94A3B8"
+      "color": "#94A3B8",
+      "properties": {
+        "speId": "SPE-1"
+      }
+    },
+    {
+      "id": "import-provider:did:web:alpha-klinik.de:participant",
+      "name": "did:web:alpha-klinik.de:participant",
+      "label": "Participant",
+      "layer": 1,
+      "color": "#94A3B8",
+      "properties": {
+        "did": "did:web:alpha-klinik.de:participant"
+      }
+    },
+    {
+      "id": "import-agreement:agr-demo",
+      "name": "agr-demo",
+      "label": "Contract",
+      "layer": 1,
+      "color": "#94A3B8",
+      "properties": {
+        "agreementId": "agr-demo"
+      }
     },
     {
       "id": "import:demo-transfer/Patient/p-3f2a91",
@@ -28,7 +60,11 @@
       "label": "ImportedRecord",
       "layer": 3,
       "color": "#86EFAC",
-      "group": "Patient"
+      "group": "Patient",
+      "properties": {
+        "resourceType": "Patient",
+        "resourceId": "p-3f2a91"
+      }
     },
     {
       "id": "import:demo-transfer/Condition/c-1",
@@ -36,7 +72,11 @@
       "label": "ImportedRecord",
       "layer": 3,
       "color": "#86EFAC",
-      "group": "Condition"
+      "group": "Condition",
+      "properties": {
+        "resourceType": "Condition",
+        "resourceId": "c-1"
+      }
     }
   ],
   "links": [
@@ -44,6 +84,16 @@
       "source": "import:demo-transfer",
       "target": "spe:SPE-1",
       "type": "LOADED_INTO"
+    },
+    {
+      "source": "import:demo-transfer",
+      "target": "import-provider:did:web:alpha-klinik.de:participant",
+      "type": "PROVIDED_BY"
+    },
+    {
+      "source": "import:demo-transfer",
+      "target": "import-agreement:agr-demo",
+      "type": "UNDER_AGREEMENT"
     },
     {
       "source": "import:demo-transfer",
