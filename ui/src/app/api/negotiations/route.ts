@@ -44,10 +44,10 @@ async function loadMockNegotiations(): Promise<unknown[]> {
  * Build a DSP catalog from the bundled demo assets.
  *
  * Why this exists: `/api/participants` falls back to `public/mock/participants.json`
- * whenever the connector reports no ACTIVATED participant contexts, which is the
- * state of the Azure deployment today (issue #25, a deliberate scope split under
- * ADR-022). The negotiate page then took one of those demo context ids and sent
- * it to the live connector, which answered `404 Not Found` because no such
+ * whenever the connector reports no ACTIVATED or CREATED participant context.
+ * Before #876 it did so on Azure, where every context stays CREATED. The
+ * negotiate page then took one of those demo context ids and sent it to the
+ * live connector, which answered `404 Not Found` because no such
  * context exists there. The id was never real, so the request could not have
  * succeeded.
  *
@@ -179,7 +179,7 @@ export async function GET(req: NextRequest) {
           demoReason:
             "The connector has no participant context for this id, so these offers " +
             "come from the demonstrator's own catalogue rather than from a live DSP " +
-            "request. Tracked in issue #25.",
+            "request. Tracked in issue #876.",
           upstreamError: msg,
         });
       }
@@ -378,7 +378,7 @@ export async function POST(req: NextRequest) {
           "recorded here rather than sent to the connector, which has no participant " +
           "context for it. No DSP agreement was signed with anyone: the record is " +
           "finalized so that the transfer step has a contract to work with. " +
-          "Tracked in issue #25.",
+          "Tracked in issue #876.",
         upstreamError: msg,
       };
 

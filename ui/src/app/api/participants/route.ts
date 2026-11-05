@@ -111,34 +111,44 @@ export async function GET() {
       // CFM may be down — fall back to static map below
     }
 
-    // Enrich each participant with a displayName — skip stale CREATED contexts
-    const enriched = (Array.isArray(participants) ? participants : [])
-      .filter((p) => {
-        // Only show ACTIVATED participants in the UI
-        const state = (p as Record<string, unknown>).state as
-          | string
-          | undefined;
-        return state === "ACTIVATED";
-      })
-      .map((p) => {
-        const did = p.participantId ?? p.identity ?? "";
-        const slug = did ? didSlug(did) : "";
-        const staticEntry = SLUG_DISPLAY_NAMES[slug];
-        const displayName =
-          tenantMap[slug] ||
-          staticEntry?.displayName ||
-          slug ||
-          p["@id"].slice(0, 12);
-        const role = staticEntry?.role ?? "";
-        return {
-          ...p,
-          participantId: p["@id"],
-          displayName,
-          role,
-          slug,
-          identity: did,
-        };
-      });
+    // Enrich each participant with a displayName. ACTIVATED contexts win, so
+    // the stale CREATED ones a re-seed leaves on the compose stack stay hidden.
+    // When none is ACTIVATED, the CREATED ones are the real contexts: on Azure
+    // all of them have stayed CREATED since the 2026-10-28 re-seed and still
+    // answer DSP catalog requests. Dropping them served the compose stack's
+    // mock participants, whose ids and DIDs do not exist there, so every
+    // catalog request fell back to the demo catalogue (#876).
+    const all = Array.isArray(participants) ? participants : [];
+    const stateOf = (p: EdcParticipant) => p.state as string | undefined;
+    const activated = all.filter((p) => stateOf(p) === "ACTIVATED");
+    const usable = activated.length
+      ? activated
+      : all.filter((p) => stateOf(p) === "CREATED");
+    if (!activated.length && usable.length) {
+      console.warn(
+        `Management API answered with no ACTIVATED participant context; ` +
+          `using ${usable.length} CREATED context(s) (#876).`,
+      );
+    }
+    const enriched = usable.map((p) => {
+      const did = p.participantId ?? p.identity ?? "";
+      const slug = did ? didSlug(did) : "";
+      const staticEntry = SLUG_DISPLAY_NAMES[slug];
+      const displayName =
+        tenantMap[slug] ||
+        staticEntry?.displayName ||
+        slug ||
+        p["@id"].slice(0, 12);
+      const role = staticEntry?.role ?? "";
+      return {
+        ...p,
+        participantId: p["@id"],
+        displayName,
+        role,
+        slug,
+        identity: did,
+      };
+    });
 
     if (enriched.length > 0) {
       return NextResponse.json(enriched);
@@ -160,10 +170,7 @@ export async function GET() {
       ].sort();
       console.warn(
         `Management API answered with ${total} participant context(s), none ACTIVATED ` +
-          `(states: ${states.join(
-            ", ",
-          )}). Serving mock data. A context created through ` +
-          `the Management API stays CREATED and cannot currently be activated — see #328.`,
+          `or CREATED (states: ${states.join(", ")}). Serving mock data.`,
       );
     } else {
       console.warn(

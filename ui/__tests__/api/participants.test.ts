@@ -56,22 +56,45 @@ describe("/api/participants", () => {
       expect(mockManagement).toHaveBeenCalledWith("/v5alpha/participants");
     });
 
-    it("says the API answered but nothing is ACTIVATED, not that it failed", async () => {
-      // The live Azure state after #316: five real contexts, all CREATED,
-      // because a context cannot currently be activated (#328). That must not
-      // read the same as an unreachable Management API (#317).
+    it("lists CREATED contexts when nothing is ACTIVATED, and says so", async () => {
+      // The live Azure state since the 2026-10-28 re-seed: real contexts, all
+      // CREATED, which still answer DSP catalog requests. Serving the mock
+      // file here sent compose-stack ids to the Azure connector (#876).
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       mockManagement.mockResolvedValue([
         { "@id": "ctx-1", identity: "did:web:alpha-klinik", state: "CREATED" },
         { "@id": "ctx-2", identity: "did:web:pharmaco", state: "CREATED" },
       ]);
 
+      const data = await (await GET()).json();
+
+      expect(data.map((p: { "@id": string }) => p["@id"])).toEqual([
+        "ctx-1",
+        "ctx-2",
+      ]);
+      const said = warn.mock.calls.map((c) => String(c[0])).join("\n");
+      expect(said).toContain("no ACTIVATED participant context");
+      expect(said).toContain("2 CREATED context(s)");
+      warn.mockRestore();
+    });
+
+    it("says the API answered but nothing is usable, not that it failed", async () => {
+      // Answered, but with nothing ACTIVATED or CREATED. That must not read
+      // the same as an unreachable Management API (#317).
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      mockManagement.mockResolvedValue([
+        {
+          "@id": "ctx-1",
+          identity: "did:web:alpha-klinik",
+          state: "DEACTIVATED",
+        },
+      ]);
+
       await GET();
 
       const said = warn.mock.calls.map((c) => String(c[0])).join("\n");
-      expect(said).toContain("2 participant context(s), none ACTIVATED");
-      expect(said).toContain("CREATED");
-      expect(said).toContain("#328");
+      expect(said).toContain("1 participant context(s), none ACTIVATED");
+      expect(said).toContain("DEACTIVATED");
       warn.mockRestore();
     });
 

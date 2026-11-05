@@ -35,6 +35,76 @@ describe("/api/participants – extra coverage", () => {
     mockReadFile.mockRejectedValue(new Error("no mock file"));
   });
 
+  // ── Which contexts are listed (#876) ───────────────────────────────────
+
+  it("GET lists only the ACTIVATED contexts when there are any", async () => {
+    mockManagement.mockResolvedValue([
+      {
+        "@id": "ctx-live",
+        identity: "did:web:identityhub%3A7083:alpha-klinik",
+        state: "ACTIVATED",
+      },
+      {
+        "@id": "ctx-stale",
+        identity: "did:web:identityhub%3A7083:alpha-klinik",
+        state: "CREATED",
+      },
+    ]);
+    mockTenant.mockResolvedValue([]);
+
+    const data = await (await GET()).json();
+
+    expect(data.map((p: { "@id": string }) => p["@id"])).toEqual(["ctx-live"]);
+  });
+
+  it("GET lists the CREATED contexts, not the mock file, when none is ACTIVATED", async () => {
+    // The Azure control plane since the 2026-10-28 re-seed: every context
+    // CREATED, and still answering DSP catalog requests.
+    mockManagement.mockResolvedValue([
+      {
+        "@id": "36b1a04b-e352-47cb-b3ea-76412c70f405",
+        identity: "did:web:mvhd-identityhub%3A7083:alpha-klinik",
+        state: "CREATED",
+      },
+      {
+        "@id": "3386f049-185a-4b5c-a24a-e5719df88412",
+        identity: "did:web:mvhd-identityhub%3A7083:pharmaco",
+        state: "CREATED",
+      },
+      { "@id": "ctx-gone", identity: "did:web:x", state: "DEACTIVATED" },
+    ]);
+    mockTenant.mockResolvedValue([]);
+    mockReadFile.mockResolvedValue(JSON.stringify([{ "@id": "mock-ctx" }]));
+
+    const data = await (await GET()).json();
+
+    expect(data).toHaveLength(2);
+    expect(data[0]).toMatchObject({
+      participantId: "36b1a04b-e352-47cb-b3ea-76412c70f405",
+      identity: "did:web:mvhd-identityhub%3A7083:alpha-klinik",
+      displayName: "AlphaKlinik Berlin",
+      role: "DATA_HOLDER",
+      state: "CREATED",
+    });
+    expect(data[1]).toMatchObject({
+      displayName: "PharmaCo Research AG",
+      role: "DATA_USER",
+    });
+    expect(mockReadFile).not.toHaveBeenCalled();
+  });
+
+  it("GET serves the mock file when no context is ACTIVATED or CREATED", async () => {
+    mockManagement.mockResolvedValue([
+      { "@id": "ctx-gone", identity: "did:web:x", state: "DEACTIVATED" },
+    ]);
+    mockTenant.mockResolvedValue([]);
+    mockReadFile.mockResolvedValue(JSON.stringify([{ "@id": "mock-ctx" }]));
+
+    const data = await (await GET()).json();
+
+    expect(data).toEqual([{ "@id": "mock-ctx" }]);
+  });
+
   // ── CFM tenant enrichment (lines 80-92) ────────────────────────────────
 
   it("GET enriches participants with CFM tenant displayNames via DID slug", async () => {
