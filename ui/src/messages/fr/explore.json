@@ -462,5 +462,13 @@
   "This explorer is retired. The persona views live at <a>/overview</a>.": "Cet explorateur n’est plus maintenu. Les vues par persona se trouvent sur <a>/overview</a>.",
   "Tracked in <a>issue #271</a>.": "Suivi dans <a>l’issue #271</a>.",
   "Select a persona below. Navigation, data, and views will update to match that participant's role. Switch anytime via the user menu → <em>Switch demo persona</em>.": "Choisissez une persona ci-dessous. La navigation, les données et les vues s’adaptent au rôle de ce participant. Changez à tout moment via le menu utilisateur → <em>Changer de persona de démo</em>.",
-  "The Azure Container Apps deployment doesn't currently host the EDC controlplane / IdentityHub / IssuerService (single-port ingress vs EDC's 4-port architecture, see ADR-012 follow-up). For full DSP/DCP validation, run the local Docker stack: <code>docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d</code>.": "Le déploiement Azure Container Apps n’héberge pas encore le controlplane EDC, l’IdentityHub ni l’IssuerService (ingress à un seul port face à l’architecture EDC à 4 ports, voir la suite de l’ADR-012). Pour une validation DSP/DCP complète, lancez la pile Docker locale : <code>docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d</code>."
+  "The Azure Container Apps deployment doesn't currently host the EDC controlplane / IdentityHub / IssuerService (single-port ingress vs EDC's 4-port architecture, see ADR-012 follow-up). For full DSP/DCP validation, run the local Docker stack: <code>docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d</code>.": "Le déploiement Azure Container Apps n’héberge pas encore le controlplane EDC, l’IdentityHub ni l’IssuerService (ingress à un seul port face à l’architecture EDC à 4 ports, voir la suite de l’ADR-012). Pour une validation DSP/DCP complète, lancez la pile Docker locale : <code>docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d</code>.",
+  "The imported dataset could not be loaded: {detail}": "Le jeu de données importé n'a pas pu être chargé : {detail}",
+  "{name} in {spe}: {records} records": "{name} dans {spe} : {records} enregistrements",
+  "SPE Workspace": "Espace de travail EPS",
+  "Imported Transfer": "Transfert importé",
+  "Imported Record": "Enregistrement importé",
+  "A transfer's data imported into an SPE workspace": "Les données d'un transfert importées dans un espace de travail EPS",
+  "One FHIR resource of an imported transfer, pseudonymised": "Une ressource FHIR d'un transfert importé, pseudonymisée",
+  "A secure processing environment (EHDS Art. 73)": "Un environnement de traitement sécurisé (EEDS art. 73)"
 }

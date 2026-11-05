@@ -16,7 +16,15 @@ export const app = express();
 app.set("trust proxy", 1);
 // First, so every handler runs inside the request's trace context (#418).
 app.use(requestLogging());
-app.use(express.json());
+// A transfer's FHIR bundle into an SPE (routes/spe-import.ts) is larger than
+// the default 100 kB; every other route keeps the default.
+const jsonDefault = express.json();
+const jsonImport = express.json({ limit: "20mb" });
+app.use((req: Request, res: Response, next: NextFunction) =>
+  /^\/spe\/[^/]+\/import$/.test(req.path)
+    ? jsonImport(req, res, next)
+    : jsonDefault(req, res, next),
+);
 
 // ---------------------------------------------------------------------------
 // Rate Limiting (Fix #3 — P0 production blocker)

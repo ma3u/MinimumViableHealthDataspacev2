@@ -398,7 +398,7 @@ describe("DataTransferPage – extra coverage", () => {
     const checkboxes = screen.getAllByRole("checkbox");
     await user.click(checkboxes[1]); // first agreement
 
-    await user.click(screen.getByRole("button", { name: /Start Transfer/i }));
+    await user.click(screen.getByTestId("start-transfer-bottom"));
 
     await waitFor(() => {
       expect(screen.getByText(/Network error/)).toBeInTheDocument();
@@ -449,11 +449,9 @@ describe("DataTransferPage – extra coverage", () => {
     await user.click(selectAll);
 
     // Button should say "Start 2 Transfers"
-    expect(
-      screen.getByRole("button", { name: /Start 2 Transfers/ }),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("start-transfer-bottom")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /Start 2 Transfers/ }));
+    await user.click(screen.getByTestId("start-transfer-bottom"));
 
     await waitFor(() => {
       expect(

@@ -438,7 +438,7 @@ describe("DataTransferPage", () => {
     await user.click(checkboxes[2]);
 
     // Click start transfer
-    const startBtn = screen.getByRole("button", { name: /Start Transfer/i });
+    const startBtn = screen.getByTestId("start-transfer-bottom");
     await user.click(startBtn);
 
     // Verify the POST was called
@@ -495,7 +495,7 @@ describe("DataTransferPage", () => {
 
     const checkboxes = screen.getAllByRole("checkbox");
     await user.click(checkboxes[2]);
-    await user.click(screen.getByRole("button", { name: /Start Transfer/i }));
+    await user.click(screen.getByTestId("start-transfer-bottom"));
 
     await waitFor(() => {
       expect(
@@ -530,7 +530,7 @@ describe("DataTransferPage", () => {
     const checkboxes = screen.getAllByRole("checkbox");
     await user.click(checkboxes[1]);
 
-    await user.click(screen.getByRole("button", { name: /Start Transfer/i }));
+    await user.click(screen.getByTestId("start-transfer-bottom"));
 
     await waitFor(() => {
       expect(screen.getByText(/Error:/)).toBeInTheDocument();
@@ -553,9 +553,7 @@ describe("DataTransferPage", () => {
     await user.click(selectAllCheckbox);
 
     // Button should indicate multiple transfers
-    expect(
-      screen.getByRole("button", { name: /Start 2 Transfers/ }),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("start-transfer-bottom")).toBeInTheDocument();
   });
 
   describe("what an agreement's transfers have reached (#876)", () => {
@@ -582,6 +580,44 @@ describe("DataTransferPage", () => {
       await screen.findAllByText("TERMINATED");
       expect(screen.queryByText(/transfer in progress|data ready/)).toBeNull();
     });
+  });
+
+  it("offers Start Transfer above the agreement list as well (#876)", async () => {
+    setupDefaultMocks();
+    const user = userEvent.setup();
+    render(<DataTransferPage />);
+    await screen.findByText("Start Transfer from Agreement");
+
+    const top = screen.getByTestId("start-transfer-top");
+    expect((top as HTMLButtonElement).disabled).toBe(true);
+    await user.click(screen.getAllByRole("checkbox")[2]);
+    expect((top as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it("shows Details for an agreement without ticking it; a sample says it is one", async () => {
+    setupDefaultMocks();
+    const user = userEvent.setup();
+    render(<DataTransferPage />);
+    await screen.findByText("Start Transfer from Agreement");
+    const before = screen
+      .getAllByRole("checkbox")
+      .map((c) => (c as HTMLInputElement).checked);
+
+    await user.click(screen.getAllByText("Details")[0]);
+
+    const details = await screen.findByTestId("transfer-details");
+    expect(details.textContent).toMatch(/sample agreement/);
+    expect(
+      screen
+        .getAllByRole("checkbox")
+        .map((c) => (c as HTMLInputElement).checked),
+    ).toEqual(before);
+    // No connector record to read for a sample row.
+    expect(
+      mockFetchApi.mock.calls.some(([u]) =>
+        String(u).startsWith("/api/agreements/"),
+      ),
+    ).toBe(false);
   });
 
   describe("My data: the data of open connector transfers (#876)", () => {
@@ -620,7 +656,9 @@ describe("DataTransferPage", () => {
 
       const section = await screen.findByTestId("my-data");
       expect(within(section).getByText("Fhir Patient Search")).toBeTruthy();
-      expect(within(section).getByText(/AlphaKlinik Berlin/)).toBeTruthy();
+      expect(
+        within(section).getByText(/Provider:\s*AlphaKlinik Berlin/),
+      ).toBeTruthy();
       // tp-001 is a COMPLETED sample row: not in My data.
       expect(within(section).queryByText("Fhir Patient Bundle")).toBeNull();
     });
@@ -652,6 +690,86 @@ describe("DataTransferPage", () => {
       expect((await screen.findAllByText(/p-1a2b3c4d/)).length).toBeGreaterThan(
         0,
       );
+    });
+
+    it("imports into SPE-1 by default, or the SPE picked, and links to the graph", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/transfers/tp-live/import") {
+          return mockResponse({
+            datasetId: "tp-live",
+            speId: "SPE-2",
+            records: 12,
+            relationships: 30,
+            byType: { Patient: 12 },
+            importedAt: "2026-11-05T19:00:00.000Z",
+            pseudonymised: true,
+            graphUrl: "/graph?dataset=tp-live&spe=SPE-2",
+          });
+        }
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) {
+          return mockResponse([LIVE, ...TRANSFERS]);
+        }
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse(NEGOTIATIONS_FINALIZED);
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("my-data");
+      const target = within(section).getByTestId(
+        "spe-import-target",
+      ) as HTMLSelectElement;
+      expect(target.value).toBe("SPE-1");
+      await user.selectOptions(target, "SPE-2");
+      await user.click(within(section).getByTestId("spe-import-run"));
+
+      const done = await within(section).findByTestId("spe-import-done");
+      expect(done.textContent).toMatch(
+        /12 records with 30 references into SPE-2/,
+      );
+      expect(done.textContent).toMatch(/pseudonymised/);
+      expect(
+        within(section).getByTestId("spe-import-graph").getAttribute("href"),
+      ).toBe("/graph?dataset=tp-live&spe=SPE-2");
+      const call = mockFetchApi.mock.calls.find(
+        ([u]) => u === "/api/transfers/tp-live/import",
+      );
+      expect(JSON.parse(String(call?.[1]?.body))).toEqual({
+        participantId: "ctx-pharmaco",
+        speId: "SPE-2",
+      });
+    });
+
+    it("says why an import failed", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/transfers/tp-live/import") {
+          return mockResponse(
+            { error: "SPE-1 is not connected to the hub", step: "import" },
+            false,
+          );
+        }
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) {
+          return mockResponse([LIVE, ...TRANSFERS]);
+        }
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse(NEGOTIATIONS_FINALIZED);
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("my-data");
+      await user.click(within(section).getByTestId("spe-import-run"));
+
+      expect(
+        (await within(section).findByTestId("spe-import-error")).textContent,
+      ).toMatch(/SPE-1 is not connected/);
+      expect(within(section).queryByTestId("spe-import-done")).toBeNull();
     });
 
     it("Details say since when, until when, how, and the agreed policy", async () => {
@@ -944,7 +1062,7 @@ describe("DataTransferPage", () => {
     setupDefaultMocks();
     render(<DataTransferPage />);
     await waitFor(() => {
-      const btn = screen.getByRole("button", { name: /Start Transfer/i });
+      const btn = screen.getByTestId("start-transfer-bottom");
       expect(btn).toBeDisabled();
     });
   });

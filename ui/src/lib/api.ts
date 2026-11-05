@@ -90,6 +90,8 @@ const STATIC_MOCK_PREFIX: [string, string][] = [
   // Other prefixes
   ["/api/compliance?", "/mock/compliance_check.json"],
   ["/api/negotiations", "/mock/negotiations.json"],
+  // An imported transfer in the graph viewer (#876)
+  ["/api/spe-imports/", "/mock/spe_import_graph.json"],
   ["/api/transfers", "/mock/transfers.json"],
   // One contract agreement, for the transfer details (#876)
   ["/api/agreements/", "/mock/agreement.json"],

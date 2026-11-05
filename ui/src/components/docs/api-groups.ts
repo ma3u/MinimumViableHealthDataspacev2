@@ -40,6 +40,8 @@ export const API_GROUP_DESCRIPTIONS: Record<string, string> = {
   patient:
     "The patient's record, profile, insights, research consent, EHR sync, and the Klarbefund app pairing and devices",
   permits: "The access body's register of applications and permits, Art. 57",
+  "spe-imports":
+    "Transfers imported into an SPE workspace, as the graph viewer draws them (#876)",
   tasks:
     "Negotiations and transfers across all participant contexts, as one task list",
   transfers: "Data transfers",

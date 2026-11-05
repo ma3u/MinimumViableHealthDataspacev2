@@ -285,6 +285,10 @@ function NegotiateContent() {
   const [offerId, setOfferId] = useState("");
   // The user has read the offer's terms and agrees to them (#876).
   const [termsAccepted, setTermsAccepted] = useState(false);
+  // The offer a negotiation was started for. While it is the selected offer
+  // the page offers no second "Start Negotiation": the contract is under way
+  // or agreed, and another click would open a second one (#876).
+  const [negotiatedOffer, setNegotiatedOffer] = useState<string | null>(null);
   const [initiating, setInitiating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [resultIsError, setResultIsError] = useState(false);
@@ -468,7 +472,12 @@ function NegotiateContent() {
 
   function selectOffer(o: CatalogOffer) {
     // Agreeing is per offer: a new offer has new terms.
-    if (o.offerId !== selectedOffer?.offerId) setTermsAccepted(false);
+    if (o.offerId !== selectedOffer?.offerId) {
+      setTermsAccepted(false);
+      setNegotiatedOffer(null);
+      setTracked(null);
+      setResult(null);
+    }
     setSelectedOffer(o);
     setAssetId(o.assetId);
     setOfferId(o.offerId);
@@ -522,6 +531,17 @@ function NegotiateContent() {
     };
   }, [trackedId, selectedCtx]);
 
+  const negotiated =
+    !!selectedOffer && negotiatedOffer === selectedOffer.offerId;
+
+  /** Back to the agreement step for the same offer, on purpose. */
+  function negotiateAgain() {
+    setNegotiatedOffer(null);
+    setTracked(null);
+    setResult(null);
+    setTermsAccepted(false);
+  }
+
   const handleNegotiate = async (e: React.FormEvent) => {
     e.preventDefault();
     setInitiating(true);
@@ -550,6 +570,7 @@ function NegotiateContent() {
 
       if (res.ok) {
         const data = (await res.json()) as Record<string, unknown>;
+        setNegotiatedOffer(offerId);
         setResult(
           data.demo === true
             ? t("Demo negotiation recorded: {id}. {reason}", {
@@ -895,31 +916,43 @@ function NegotiateContent() {
                   ?.displayName ?? didToName(selectedCtx)
               }
               accepted={termsAccepted}
-              onAcceptedChange={setTermsAccepted}
+              onAcceptedChange={negotiated ? undefined : setTermsAccepted}
+              agreed={negotiated && tracked?.state === "FINALIZED"}
             />
           )}
 
-          <form onSubmit={handleNegotiate} className="space-y-3">
-            {/* Hidden fields — populated automatically from Step 1 */}
-            <input type="hidden" value={assetId} />
-            <input type="hidden" value={offerId} />
+          {negotiated ? (
             <button
-              type="submit"
-              disabled={
-                initiating ||
-                !offerId ||
-                (!!selectedOffer?.policy && !termsAccepted)
-              }
-              className="flex items-center gap-2 px-4 py-2 bg-(--accent) text-white dark:text-gray-900 rounded-sm text-sm font-medium hover:bg-(--accent-hover) disabled:opacity-50"
+              type="button"
+              data-testid="negotiate-again"
+              onClick={negotiateAgain}
+              className="text-xs text-(--text-secondary) underline hover:text-(--text-primary)"
             >
-              {initiating ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <FileSignature size={14} />
-              )}
-              {t("Start Negotiation")}
+              {t("Negotiate this offer again")}
             </button>
-          </form>
+          ) : (
+            <form onSubmit={handleNegotiate} className="space-y-3">
+              {/* Hidden fields — populated automatically from Step 1 */}
+              <input type="hidden" value={assetId} />
+              <input type="hidden" value={offerId} />
+              <button
+                type="submit"
+                disabled={
+                  initiating ||
+                  !offerId ||
+                  (!!selectedOffer?.policy && !termsAccepted)
+                }
+                className="flex items-center gap-2 px-4 py-2 bg-(--accent) text-white dark:text-gray-900 rounded-sm text-sm font-medium hover:bg-(--accent-hover) disabled:opacity-50"
+              >
+                {initiating ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <FileSignature size={14} />
+                )}
+                {t("Start Negotiation")}
+              </button>
+            </form>
+          )}
         </div>
 
         {/* Negotiation history */}

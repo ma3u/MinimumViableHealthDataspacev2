@@ -24,6 +24,7 @@ import {
 import PageIntro from "@/components/PageIntro";
 import RowSourceBadge from "@/components/RowSourceBadge";
 import TransferDetails from "@/components/TransferDetails";
+import SpeImport from "@/components/SpeImport";
 import type { RowSource } from "@/lib/row-provenance";
 import { T, useT } from "@/lib/i18n/translate";
 
@@ -778,6 +779,9 @@ function DataTransferContent() {
               assetId: f(n, "assetId") || n.assetId,
               counterPartyId: f(n, "counterPartyId"),
               counterPartyAddress: f(n, "counterPartyAddress"),
+              type: f(n, "type"),
+              // Only a connector's agreement can be read back for Details.
+              source: n.source,
             }));
         })
         .catch(() => []),
@@ -1025,6 +1029,37 @@ function DataTransferContent() {
     URL.revokeObjectURL(url);
   };
 
+  const startButton = (testId: string) => (
+    <button
+      type="submit"
+      data-testid={testId}
+      disabled={initiating || selectedAgreements.size === 0}
+      className="flex items-center gap-2 px-4 py-2 bg-(--accent) text-white dark:text-gray-900 rounded-sm text-sm font-medium hover:bg-(--accent-hover) disabled:opacity-50"
+    >
+      {initiating ? (
+        <Loader2 size={14} className="animate-spin" />
+      ) : (
+        <ArrowRightLeft size={14} />
+      )}
+      {selectedAgreements.size > 1
+        ? t("Start {n} Transfers", { n: selectedAgreements.size })
+        : t("Start Transfer")}
+    </button>
+  );
+
+  /** When this agreement's newest STARTED transfer opened, or 0. */
+  const openedAtOf = (agrId: string): number =>
+    transfers
+      .filter(
+        (tr) =>
+          f(tr as Record<string, unknown>, "contractId") === agrId &&
+          f(tr as Record<string, unknown>, "state").toUpperCase() === "STARTED",
+      )
+      .reduce(
+        (max, tr) => Math.max(max, (tr.stateTimestamp as number) || 0),
+        0,
+      );
+
   // Load FHIR bundles on demand
   const openFhirViewer = async (transferId: string) => {
     if (viewingTransferId === transferId) {
@@ -1160,6 +1195,8 @@ function DataTransferContent() {
                 />
                 {t("Select All ({n})", { n: agreements.length })}
               </label>
+              {/* At the top as well: the list can be a hundred rows long. */}
+              {startButton("start-transfer-top")}
 
               <div className="space-y-2">
                 {visibleAgreements.map((agr) => {
@@ -1172,41 +1209,75 @@ function DataTransferContent() {
                   const transferLabel = agreementTransferLabel(agrId);
 
                   return (
-                    <label
-                      key={agrId}
-                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedAgreements.has(agrId)
-                          ? "border-layer2 bg-layer2/10"
-                          : "border-(--border) hover:border-gray-500 bg-(--surface-2)/50"
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedAgreements.has(agrId)}
-                        onChange={() => toggleAgreement(agrId)}
-                        className="accent-layer2"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-(--text-primary)">
-                          {aId ? assetLabel(aId as string) : agrId.slice(0, 12)}
-                        </p>
-                        <p className="text-xs text-(--text-secondary)">
-                          {f(agr as Record<string, unknown>, "type") ===
-                          "PROVIDER"
-                            ? t("Consumer:")
-                            : t("Provider:")}{" "}
-                          {cp ? didToName(cp as string) : "—"}
-                          {transferLabel && (
-                            <span className="ml-2 text-yellow-800 dark:text-yellow-400">
-                              {transferLabel}
-                            </span>
+                    <div key={agrId}>
+                      <label
+                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                          selectedAgreements.has(agrId)
+                            ? "border-layer2 bg-layer2/10"
+                            : "border-(--border) hover:border-gray-500 bg-(--surface-2)/50"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedAgreements.has(agrId)}
+                          onChange={() => toggleAgreement(agrId)}
+                          className="accent-layer2"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-(--text-primary)">
+                            {aId
+                              ? assetLabel(aId as string)
+                              : agrId.slice(0, 12)}
+                          </p>
+                          <p className="text-xs text-(--text-secondary)">
+                            {f(agr as Record<string, unknown>, "type") ===
+                            "PROVIDER"
+                              ? t("Consumer:")
+                              : t("Provider:")}{" "}
+                            {cp ? didToName(cp as string) : "—"}
+                            {transferLabel && (
+                              <span className="ml-2 text-yellow-800 dark:text-yellow-400">
+                                {transferLabel}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)">
+                          AGREED
+                        </span>
+                        <button
+                          type="button"
+                          aria-expanded={detailsOpen.has(`agr:${agrId}`)}
+                          onClick={(e) => {
+                            // Inside the row's label: do not tick the box.
+                            e.preventDefault();
+                            toggleDetails(`agr:${agrId}`);
+                          }}
+                          className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-(--border) text-(--text-primary) hover:border-gray-500"
+                        >
+                          {detailsOpen.has(`agr:${agrId}`) ? (
+                            <ChevronDown size={12} />
+                          ) : (
+                            <ChevronRight size={12} />
                           )}
-                        </p>
-                      </div>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-(--role-user-bg) text-(--role-user-text) border border-(--role-user-border)">
-                        AGREED
-                      </span>
-                    </label>
+                          {t("Details")}
+                        </button>
+                      </label>
+                      {detailsOpen.has(`agr:${agrId}`) && (
+                        <TransferDetails
+                          participantId={selectedCtx}
+                          contractId={agrId}
+                          openedAt={openedAtOf(agrId)}
+                          providerDid={cp as string}
+                          providerName={cp ? didToName(cp as string) : "—"}
+                          consumerName={
+                            participants.find((p) => p["@id"] === selectedCtx)
+                              ?.displayName ?? ""
+                          }
+                          sample={agr.source !== "controlplane"}
+                        />
+                      )}
+                    </div>
                   );
                 })}
               </div>
@@ -1233,20 +1304,7 @@ function DataTransferContent() {
                 </button>
               )}
 
-              <button
-                type="submit"
-                disabled={initiating || selectedAgreements.size === 0}
-                className="flex items-center gap-2 px-4 py-2 bg-(--accent) text-white dark:text-gray-900 rounded-sm text-sm font-medium hover:bg-(--accent-hover) disabled:opacity-50"
-              >
-                {initiating ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <ArrowRightLeft size={14} />
-                )}
-                {selectedAgreements.size > 1
-                  ? t("Start {n} Transfers", { n: selectedAgreements.size })
-                  : t("Start Transfer")}
-              </button>
+              {startButton("start-transfer-bottom")}
             </form>
           )}
         </div>
@@ -1346,6 +1404,7 @@ function DataTransferContent() {
                         {t("Details")}
                       </button>
                     </div>
+                    <SpeImport transferId={id} participantId={selectedCtx} />
                     {detailsOpen.has(id) && contractId && (
                       <TransferDetails
                         participantId={selectedCtx}
