@@ -25,6 +25,7 @@
   "View in Graph": "Bekijken in graaf",
   "EDC Data Assets ({n})": "EDC-data-assets ({n})",
   "Provider:": "Aanbieder:",
+  "Consumer:": "Afnemer:",
   "Negotiate Access": "Toegang onderhandelen",
   "Failed to fetch catalog": "Catalogus kon niet worden opgehaald",
   "These offers come from the demonstrator's own catalogue, not from a live DSP request.": "Deze aanbiedingen komen uit de eigen catalogus van de demonstrator, niet uit een echt DSP-verzoek.",
@@ -223,5 +224,7 @@
   "Male": "Man",
   "Secure processing environment not ready": "Beveiligde verwerkingsomgeving nog niet gereed",
   "{id} is starting (cold start, about 3 to 4 minutes): attesting, releasing the key, loading the data. Try again in a few minutes.": "{id} start op (koude start, ongeveer 3 tot 4 minuten): attestatie, vrijgave van de sleutel, laden van de gegevens. Probeer het over een paar minuten opnieuw.",
-  "{id} is stopped. An operator or the access body can start it.": "{id} is gestopt. De beheerder of de instantie voor toegang kan het starten."
+  "{id} is stopped. An operator or the access body can start it.": "{id} is gestopt. De beheerder of de instantie voor toegang kan het starten.",
+  "You asked for access to “{title}”, published by {publisher}. In this demonstrator a catalogue dataset is requested through its holder's DSP offers, so {holder} is preselected below: discover the offers and choose the one that covers this dataset.": "U hebt toegang gevraagd tot „{title}”, gepubliceerd door {publisher}. In deze demonstrator wordt een catalogusdataset aangevraagd via de DSP-aanbiedingen van de houder, daarom is {holder} hieronder voorgeselecteerd: zoek de aanbiedingen op en kies de aanbieding die deze dataset dekt.",
+  "No participant of this dataspace offers “{title}” yet, so there is nothing to negotiate for it. Choose a data provider below to see what can be negotiated.": "Nog geen deelnemer van deze dataspace biedt „{title}” aan, dus er valt niets voor te onderhandelen. Kies hieronder een gegevensaanbieder om te zien wat er kan worden onderhandeld."
 }

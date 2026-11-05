@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { fetchApi } from "@/lib/api";
 import { useCallback, useEffect, useState } from "react";
@@ -217,12 +218,12 @@ function AssetDetailPanel({ asset }: { asset: Asset }) {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <a
+          <Link
             href={`/graph?highlight=${encodeURIComponent(String(name))}`}
             className="flex items-center gap-1 text-[11px] text-(--accent) hover:underline transition-colors"
           >
             {tc("View in Graph")} <Network size={10} />
-          </a>
+          </Link>
         </div>
       </div>
 

@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { fetchApi } from "@/lib/api";
 import { DEMO_PERSONAS } from "@/lib/auth";
@@ -325,12 +326,12 @@ export default function SettingsPage() {
               "Patient accounts use personal health credentials (eIDAS 2.0 / OIDC4VP), not DCP business profiles.",
             )}
           </p>
-          <a
+          <Link
             href="/patient"
             className="text-sm text-teal-800 dark:text-teal-300 hover:underline"
           >
             {t("Go to My Health")} →
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -381,12 +382,12 @@ export default function SettingsPage() {
             <p className="text-(--text-secondary) mb-2">
               {t("No participant profile found")}
             </p>
-            <a
+            <Link
               href="/onboarding"
               className="text-sm text-teal-800 dark:text-teal-300 hover:underline"
             >
               {t("Register first")} →
-            </a>
+            </Link>
           </div>
         ) : (
           <>

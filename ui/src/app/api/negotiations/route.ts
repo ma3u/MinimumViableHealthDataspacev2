@@ -9,6 +9,7 @@ import {
   recordDspEventAfter,
 } from "@/lib/dsp-audit";
 import { recordDemo, listDemo } from "@/lib/demo-records";
+import { buildDemoCatalog, type DemoAssetEntry } from "@/lib/demo-catalog";
 import { loadTestId } from "@/lib/proxy";
 import { tagRows } from "@/lib/row-provenance";
 import { promises as fs } from "fs";
@@ -62,48 +63,7 @@ async function loadDemoCatalog(
       path.join(process.cwd(), "public", "mock", "assets.json"),
       "utf-8",
     );
-    const entries = JSON.parse(raw) as {
-      participantId?: string;
-      identity?: string;
-      assets?: Record<string, unknown>[];
-    }[];
-
-    const wanted = decodeURIComponent(providerDid).toLowerCase();
-    const entry = entries.find(
-      (e) =>
-        decodeURIComponent(e.identity ?? "").toLowerCase() === wanted ||
-        e.participantId === providerDid,
-    );
-    if (!entry || !(entry.assets ?? []).length) return null;
-
-    const dataset = (entry.assets ?? []).map((asset) => {
-      const props = (asset.properties ?? {}) as Record<string, unknown>;
-      const assetId = (asset["@id"] ?? props.id ?? "") as string;
-      return {
-        "@id": assetId,
-        "@type": "dcat:Dataset",
-        name: props.name ?? assetId,
-        description: props.description ?? "",
-        contenttype: props.contenttype ?? "",
-        hasPolicy: [
-          {
-            "@id": `demo-offer:${assetId}`,
-            "@type": "odrl:Offer",
-            assigner: entry.identity ?? providerDid,
-            target: assetId,
-            permission: [{ action: "use" }],
-          },
-        ],
-      };
-    });
-
-    return {
-      "@context": [EDC_CONTEXT],
-      "@type": "dcat:Catalog",
-      participantId: entry.identity ?? providerDid,
-      dataset,
-      demo: true,
-    };
+    return buildDemoCatalog(JSON.parse(raw) as DemoAssetEntry[], providerDid);
   } catch {
     return null;
   }

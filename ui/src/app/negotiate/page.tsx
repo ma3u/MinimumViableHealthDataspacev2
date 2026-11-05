@@ -1,8 +1,12 @@
 "use client";
 
 import { fetchApi } from "@/lib/api";
+import { buildDemoCatalog, type DemoAssetEntry } from "@/lib/demo-catalog";
 import { DSP_PROTOCOL } from "@/lib/dsp-protocol";
-import { Suspense, useEffect, useState } from "react";
+import { didToName } from "@/lib/participant-name";
+import { IS_STATIC } from "@/lib/static-export";
+import Link from "next/link";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   FileSignature,
@@ -26,6 +30,13 @@ interface ParticipantCtx {
   participantId?: string;
   displayName?: string;
   role?: string;
+}
+
+/** A HealthDCAT-AP dataset the catalog page sent here (`?dataset=`). */
+interface RequestedDataset {
+  title: string;
+  publisher: string;
+  providers: string[];
 }
 
 interface CatalogOffer {
@@ -56,17 +67,23 @@ function negField(n: Negotiation, field: string): string {
     "") as string;
 }
 
-/** Resolve a DID to a short human-readable name */
-function didToName(did: string): string {
-  const slug = decodeURIComponent(did).split(":").pop()?.toLowerCase() ?? "";
-  const names: Record<string, string> = {
-    "alpha-klinik": "AlphaKlinik Berlin",
-    pharmaco: "PharmaCo Research AG",
-    medreg: "MedReg DE",
-    lmc: "Limburg Medical Centre",
-    irs: "Institut de Recherche Santé",
-  };
-  return names[slug] || slug || did.slice(0, 16);
+/**
+ * Who can be asked for a catalog: anyone but the requester and a DATA_USER.
+ * A DATA_USER requests data under a permit; it holds none to offer (EHDS
+ * Art. 2). A context without a role (a live connector that does not say)
+ * stays in the list. #876
+ */
+function isProviderFor(p: ParticipantCtx, consumerId: string): boolean {
+  return p["@id"] !== consumerId && p.role !== "DATA_USER";
+}
+
+/** The provider to preselect: the first data holder, else any provider. */
+function defaultProvider(
+  list: ParticipantCtx[],
+  consumerId: string,
+): ParticipantCtx | undefined {
+  const providers = list.filter((p) => isProviderFor(p, consumerId));
+  return providers.find((p) => p.role === "DATA_HOLDER") ?? providers[0];
 }
 
 /** Pretty-print an asset ID as a title */
@@ -136,6 +153,12 @@ function NegotiateContent() {
   const preAssetId = searchParams.get("assetId") || "";
   const preProviderId = searchParams.get("providerId") || "";
   const preProviderDid = searchParams.get("providerDid") || "";
+  // The catalog's "Request Access" sends the HealthDCAT-AP dataset id. It is
+  // not a DSP asset id, so it cannot select an offer; it names the dataset
+  // and, through its publisher, the participant to ask. #876
+  const preDataset = searchParams.get("dataset") || "";
+  const [requested, setRequested] = useState<RequestedDataset | null>(null);
+  const datasetHolderApplied = useRef(false);
 
   const [participants, setParticipants] = useState<ParticipantCtx[]>([]);
   const [negotiations, setNegotiations] = useState<Negotiation[]>([]);
@@ -170,20 +193,62 @@ function NegotiateContent() {
           ? d
           : d.participants ?? [];
         setParticipants(list);
-        if (list.length > 0) setSelectedCtx(list[0]["@id"]);
-        // Pre-select first non-consumer as provider
-        if (list.length > 1 && !preProviderId) {
-          const first = list[0];
-          setSelectedProviderCtx(first["@id"]);
-          setProviderCtxId(first["@id"]);
-          // identity holds the real DID; participantId is the UUID context ID
-          const did = first.identity ?? "";
-          setProviderDid(did);
+        // The requester is a data user when there is one: they are the ones
+        // who negotiate access. The provider used to be list[0] as well, the
+        // requester itself, which the dropdown could not show (it leaves the
+        // requester out), so it displayed the next entry while the catalog
+        // request asked the requester for its own offers. #876
+        const consumer =
+          list.find((p) => p.role === "DATA_USER") ?? list[0] ?? undefined;
+        if (consumer) setSelectedCtx(consumer["@id"]);
+        if (consumer && !preProviderId) {
+          chooseProvider(defaultProvider(list, consumer["@id"]));
         }
       })
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!preDataset) return;
+    fetchApi("/api/catalog")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((d) => {
+        const list = (
+          Array.isArray(d) ? d : d.datasets ?? d.catalog ?? []
+        ) as Record<string, unknown>[];
+        const ds = list.find(
+          (x) => x.id === preDataset || x.title === preDataset,
+        );
+        setRequested({
+          title: (ds?.title as string) || preDataset,
+          publisher: (ds?.publisher as string) || "",
+          providers: Array.isArray(ds?.providers)
+            ? (ds.providers as string[])
+            : [],
+        });
+      })
+      .catch(() =>
+        setRequested({ title: preDataset, publisher: "", providers: [] }),
+      );
+  }, [preDataset]);
+
+  // The participant that holds the requested dataset, if it is one of ours
+  const datasetHolder = requested
+    ? participants.find(
+        (p) =>
+          isProviderFor(p, selectedCtx) &&
+          !!p.displayName &&
+          [requested.publisher, ...requested.providers].includes(p.displayName),
+      )
+    : undefined;
+
+  useEffect(() => {
+    if (datasetHolderApplied.current || preProviderId || !datasetHolder) return;
+    datasetHolderApplied.current = true;
+    chooseProvider(datasetHolder);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [datasetHolder]);
 
   useEffect(() => {
     if (!selectedCtx) return;
@@ -205,6 +270,18 @@ function NegotiateContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [offers]);
 
+  function chooseProvider(chosen: ParticipantCtx | undefined) {
+    setSelectedProviderCtx(chosen?.["@id"] ?? "");
+    setProviderCtxId(chosen?.["@id"] ?? "");
+    // identity holds the real DID; participantId is the UUID context ID
+    setProviderDid(chosen?.identity ?? "");
+    // Reset previous catalog results when provider changes
+    setOffers([]);
+    setSelectedOffer(null);
+    setCatalogError(null);
+    setCatalogNote(null);
+  }
+
   /** Step 1: DCP catalog discovery via v1alpha participants/{ctxId}/catalog */
   const handleDiscoverCatalog = async () => {
     if (!selectedCtx || (!providerDid && !providerCtxId)) return;
@@ -221,12 +298,21 @@ function NegotiateContent() {
         .replace(/\s+/g, "-")}`;
 
     try {
-      const res = await fetchApi(
-        `/api/negotiations?participantId=${selectedCtx}&catalog=true&providerDid=${encodeURIComponent(
-          did,
-        )}`,
-      );
-      const data = await res.json();
+      // The static build has no API route, and fetchApi() would answer the
+      // catalog request with negotiations.json. Build the same demo catalog
+      // the route falls back to on the hub, from the same assets file.
+      const res = IS_STATIC
+        ? await fetchApi("/api/assets")
+        : await fetchApi(
+            `/api/negotiations?participantId=${selectedCtx}&catalog=true&providerDid=${encodeURIComponent(
+              did,
+            )}`,
+          );
+      const data = IS_STATIC
+        ? buildDemoCatalog((await res.json()) as DemoAssetEntry[], did) ?? {
+            dataset: [],
+          }
+        : await res.json();
 
       if (!res.ok) {
         const errData = data as Record<string, unknown>;
@@ -390,7 +476,12 @@ function NegotiateContent() {
           <select
             aria-label={t("Requesting as (your participant)")}
             value={selectedCtx}
-            onChange={(e) => setSelectedCtx(e.target.value)}
+            onChange={(e) => {
+              setSelectedCtx(e.target.value);
+              if (e.target.value === selectedProviderCtx) {
+                chooseProvider(defaultProvider(participants, e.target.value));
+              }
+            }}
             className="w-full max-w-md px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm"
           >
             {participants.map((p) => (
@@ -401,6 +492,31 @@ function NegotiateContent() {
             ))}
           </select>
         </div>
+
+        {requested && (
+          <div
+            data-testid="requested-dataset"
+            className="mb-5 p-3 rounded-sm bg-(--surface-2)/60 border border-(--border) text-sm text-(--text-primary) flex gap-2"
+          >
+            <BookOpen size={16} className="shrink-0 mt-0.5" />
+            <span>
+              {datasetHolder
+                ? t(
+                    "You asked for access to “{title}”, published by {publisher}. In this demonstrator a catalogue dataset is requested through its holder's DSP offers, so {holder} is preselected below: discover the offers and choose the one that covers this dataset.",
+                    {
+                      title: requested.title,
+                      publisher:
+                        requested.publisher || datasetHolder.displayName || "",
+                      holder: datasetHolder.displayName ?? "",
+                    },
+                  )
+                : t(
+                    "No participant of this dataspace offers “{title}” yet, so there is nothing to negotiate for it. Choose a data provider below to see what can be negotiated.",
+                    { title: requested.title },
+                  )}
+            </span>
+          </div>
+        )}
 
         {/* ── Step 1: Catalog discovery ── */}
         <div className="border border-(--border) rounded-xl p-5 mb-5">
@@ -427,16 +543,7 @@ function NegotiateContent() {
                 const chosen = participants.find(
                   (p) => p["@id"] === e.target.value,
                 );
-                if (!chosen) return;
-                setSelectedProviderCtx(chosen["@id"]);
-                setProviderCtxId(chosen["@id"]);
-                // identity holds the real DID; participantId is the UUID context ID
-                setProviderDid(chosen.identity ?? "");
-                // Reset previous catalog results when provider changes
-                setOffers([]);
-                setSelectedOffer(null);
-                setCatalogError(null);
-                setCatalogNote(null);
+                if (chosen) chooseProvider(chosen);
               }}
               className="w-full max-w-md px-3 py-2 bg-(--surface-2) border border-(--border-ui) rounded-sm text-sm"
               disabled={participants.length === 0}
@@ -445,7 +552,7 @@ function NegotiateContent() {
                 <option value="">{t("Loading participants…")}</option>
               )}
               {participants
-                .filter((p) => p["@id"] !== selectedCtx)
+                .filter((p) => isProviderFor(p, selectedCtx))
                 .map((p) => (
                   <option key={p["@id"]} value={p["@id"]}>
                     {displayId(p)}
@@ -628,6 +735,9 @@ function NegotiateContent() {
               const agreementId = negField(n, "contractAgreementId");
               const state = negField(n, "state");
               const counterParty = negField(n, "counterPartyId");
+              // On a PROVIDER-side negotiation the counter-party is the one
+              // who asked, so it is the consumer, not the provider.
+              const counterPartyIsConsumer = negField(n, "type") === "PROVIDER";
               return (
                 <div
                   key={n["@id"]}
@@ -641,7 +751,7 @@ function NegotiateContent() {
                         : n["@id"].slice(0, 12)}
                     </p>
                     <p className="text-xs text-(--text-secondary)">
-                      {t("Provider:")}{" "}
+                      {counterPartyIsConsumer ? t("Consumer:") : t("Provider:")}{" "}
                       {counterParty ? didToName(counterParty) : "—"}
                       {state === "FINALIZED" && ` · ${t("Agreement ready")}`}
                     </p>
@@ -670,14 +780,17 @@ function NegotiateContent() {
                       {state || "UNKNOWN"}
                     </span>
                     {agreementId && (
-                      <a
+                      // A Link, not an <a>: Next adds the GitHub Pages base
+                      // path to it, and a bare "/data/transfer" left the site
+                      // for ma3u.github.io/data/transfer, a 404. #876
+                      <Link
                         href={`/data/transfer?participantId=${encodeURIComponent(
                           selectedCtx,
                         )}&contractId=${encodeURIComponent(agreementId)}`}
                         className="flex items-center gap-1 text-xs text-teal-800 dark:text-teal-300 hover:underline"
                       >
                         {tn("Transfer")} <ArrowRight size={12} />
-                      </a>
+                      </Link>
                     )}
                   </div>
                 </div>

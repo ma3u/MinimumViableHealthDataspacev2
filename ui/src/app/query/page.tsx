@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { fetchApi } from "@/lib/api";
 import { useEffect, useState, useRef } from "react";
@@ -319,19 +320,19 @@ export default function NlqPage() {
                 )}
               </p>
               <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mt-2">
-                <a
+                <Link
                   href="/analytics"
                   className="hover:text-(--text-secondary) transition-colors"
                 >
                   ← {tn("OMOP Analytics")}
-                </a>
+                </Link>
                 <span>|</span>
-                <a
+                <Link
                   href="/eehrxf"
                   className="hover:text-(--text-secondary) transition-colors"
                 >
                   {tn("EEHRxF Profiles")} →
-                </a>
+                </Link>
               </div>
             </div>
             {stats?.totals && (

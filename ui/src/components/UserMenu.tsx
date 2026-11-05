@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { signIn, signOut } from "next-auth/react";
 import {
@@ -378,14 +379,14 @@ export default function UserMenu() {
               })}
             </div>
             <div className="p-2 border-t border-(--border)">
-              <a
+              <Link
                 href="/auth/signin"
                 onClick={() => setOpen(false)}
                 className="flex items-center justify-center gap-1.5 w-full px-3 py-2 text-xs text-(--text-secondary) hover:text-(--text-primary) hover:bg-(--surface-2) rounded-sm transition-colors"
               >
                 <ShieldCheck size={12} />
                 {t("All users & details")}
-              </a>
+              </Link>
             </div>
             <BuildInfo />
           </div>
@@ -471,14 +472,14 @@ export default function UserMenu() {
           {/* Settings link — hidden for PATIENT (no DCP business credentials) */}
           {!roles.includes("PATIENT") && (
             <div className="p-2 border-b border-(--border)">
-              <a
+              <Link
                 href="/settings"
                 onClick={() => setOpen(false)}
                 className="flex items-center gap-2 w-full px-3 py-2 rounded-sm text-sm text-(--text-primary) hover:bg-(--surface-2) transition-colors"
               >
                 <Settings size={14} />
                 <span className="font-medium">{t("Settings")}</span>
-              </a>
+              </Link>
             </div>
           )}
 

@@ -25,6 +25,7 @@
   "View in Graph": "View in Graph",
   "EDC Data Assets ({n})": "EDC Data Assets ({n})",
   "Provider:": "Provider:",
+  "Consumer:": "Consumer:",
   "Negotiate Access": "Negotiate Access",
   "Failed to fetch catalog": "Failed to fetch catalog",
   "These offers come from the demonstrator's own catalogue, not from a live DSP request.": "These offers come from the demonstrator's own catalogue, not from a live DSP request.",
@@ -223,5 +224,7 @@
   "Male": "Male",
   "Secure processing environment not ready": "Secure processing environment not ready",
   "{id} is starting (cold start, about 3 to 4 minutes): attesting, releasing the key, loading the data. Try again in a few minutes.": "{id} is starting (cold start, about 3 to 4 minutes): attesting, releasing the key, loading the data. Try again in a few minutes.",
-  "{id} is stopped. An operator or the access body can start it.": "{id} is stopped. An operator or the access body can start it."
+  "{id} is stopped. An operator or the access body can start it.": "{id} is stopped. An operator or the access body can start it.",
+  "You asked for access to “{title}”, published by {publisher}. In this demonstrator a catalogue dataset is requested through its holder's DSP offers, so {holder} is preselected below: discover the offers and choose the one that covers this dataset.": "You asked for access to “{title}”, published by {publisher}. In this demonstrator a catalogue dataset is requested through its holder's DSP offers, so {holder} is preselected below: discover the offers and choose the one that covers this dataset.",
+  "No participant of this dataspace offers “{title}” yet, so there is nothing to negotiate for it. Choose a data provider below to see what can be negotiated.": "No participant of this dataspace offers “{title}” yet, so there is nothing to negotiate for it. Choose a data provider below to see what can be negotiated."
 }

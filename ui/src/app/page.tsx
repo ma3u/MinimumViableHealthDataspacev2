@@ -1,3 +1,4 @@
+import { BASE_PATH } from "@/lib/static-export";
 import Link from "next/link";
 import {
   BookOpen,
@@ -594,7 +595,7 @@ export default function Home() {
           </Link>
 
           <a
-            href="/openapi.yaml"
+            href={`${BASE_PATH}/openapi.yaml`}
             className="group flex flex-col rounded-xl border border-layer2/50 bg-(--surface-2)/40 p-4 sm:p-5 transition-colors hover:bg-(--surface-2)/70"
             download="mvhdv2-openapi.yaml"
           >

@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { CITIZEN_WALLET } from "@/lib/wallet-config";
 
 import { signIn } from "next-auth/react";
@@ -79,7 +80,7 @@ function SignInContent() {
               <span className="text-xs text-(--text-secondary)">{t("or")}</span>
               <div className="h-px flex-1 bg-(--text-secondary)/20" />
             </div>
-            <a
+            <Link
               href={`/auth/eudi-qr?callbackUrl=${encodeURIComponent(
                 callbackUrl,
               )}`}
@@ -87,7 +88,7 @@ function SignInContent() {
             >
               <Smartphone size={18} />{" "}
               {t("Sign in with {wallet} (QR)", { wallet: CITIZEN_WALLET.name })}
-            </a>
+            </Link>
             <p className="text-(--text-secondary) text-[11px] mt-2">
               {t("Patient login via OpenID4VP")} ·{" "}
               {t(CITIZEN_WALLET.description)}, {t(CITIZEN_WALLET.alternatives)}

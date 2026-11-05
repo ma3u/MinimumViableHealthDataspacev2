@@ -25,6 +25,7 @@
   "View in Graph": "Im Graphen ansehen",
   "EDC Data Assets ({n})": "EDC-Daten-Assets ({n})",
   "Provider:": "Anbieter:",
+  "Consumer:": "Konsument:",
   "Negotiate Access": "Zugang verhandeln",
   "Failed to fetch catalog": "Katalog konnte nicht abgerufen werden",
   "These offers come from the demonstrator's own catalogue, not from a live DSP request.": "Diese Angebote stammen aus dem eigenen Katalog des Demonstrators, nicht aus einer echten DSP-Anfrage.",
@@ -223,5 +224,7 @@
   "Male": "Männlich",
   "Secure processing environment not ready": "Sichere Verarbeitungsumgebung nicht bereit",
   "{id} is starting (cold start, about 3 to 4 minutes): attesting, releasing the key, loading the data. Try again in a few minutes.": "{id} startet (Kaltstart, etwa 3 bis 4 Minuten): Attestierung, Freigabe des Schlüssels, Laden der Daten. Versuchen Sie es in ein paar Minuten erneut.",
-  "{id} is stopped. An operator or the access body can start it.": "{id} ist gestoppt. Der Betreiber oder die Zugangsstelle kann es starten."
+  "{id} is stopped. An operator or the access body can start it.": "{id} ist gestoppt. Der Betreiber oder die Zugangsstelle kann es starten.",
+  "You asked for access to “{title}”, published by {publisher}. In this demonstrator a catalogue dataset is requested through its holder's DSP offers, so {holder} is preselected below: discover the offers and choose the one that covers this dataset.": "Sie haben Zugang zu „{title}“ angefragt, veröffentlicht von {publisher}. In diesem Demonstrator wird ein Katalog-Datensatz über die DSP-Angebote seines Gesundheitsdateninhabers angefragt, daher ist {holder} unten vorausgewählt: Rufen Sie die Angebote ab und wählen Sie das, das diesen Datensatz abdeckt.",
+  "No participant of this dataspace offers “{title}” yet, so there is nothing to negotiate for it. Choose a data provider below to see what can be negotiated.": "Noch kein Teilnehmer dieses Datenraums bietet „{title}“ an, daher gibt es dafür nichts zu verhandeln. Wählen Sie unten einen Datenanbieter, um zu sehen, was verhandelt werden kann."
 }
