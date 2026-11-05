@@ -799,7 +799,7 @@
       "id": "ADR-005",
       "file": "ADR-005-jad-cfm-source-builds.md",
       "title": "JAD + CFM Source Builds",
-      "status": "Accepted"
+      "status": "Superseded"
     },
     {
       "id": "ADR-006",
@@ -1214,6 +1214,12 @@
       "file": "ADR-075-a-minor-release-every-month.md",
       "title": "A minor release every month, starting with v2.1.0",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-076",
+      "file": "ADR-076-edc-1-runtimes-are-built-here.md",
+      "title": "EDC 1.0 runtimes are built here, from released EDC artifacts",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
@@ -1306,7 +1312,7 @@
     "/docs/developer/api": "2026-11-02",
     "/docs/developer/reference": "2026-11-04",
     "/docs/developer/[slug]": "2026-11-04",
-    "/docs/architecture": "2026-11-04",
+    "/docs/architecture": "2026-11-05",
     "/docs/security": "2026-11-04",
     "/docs/security/[slug]": "2026-11-04",
     "/docs/klarbefund": "2026-11-04",

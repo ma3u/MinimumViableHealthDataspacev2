@@ -1,6 +1,6 @@
 # ADR-005: JAD + CFM Source Builds
 
-**Status:** Accepted (revised)
+**Status:** Superseded by [ADR-076](ADR-076-edc-1-runtimes-are-built-here.md) (2026-11-05)
 **Date:** 2026-03-09
 **Supersedes:** —
 
