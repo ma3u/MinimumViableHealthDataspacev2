@@ -29,6 +29,8 @@ tests {
   bru.setVar("dspConsumerCtx", bySlug("pharmaco")?.participantId || "");
   bru.setVar("dspProviderCtx", bySlug("alpha-klinik")?.participantId || "");
   bru.setVar("dspProviderDid", bySlug("alpha-klinik")?.identity || "");
+  // For a query string: the DID carries %3A, which the route would decode to ":".
+  bru.setVar("dspProviderDidQuery", encodeURIComponent(bySlug("alpha-klinik")?.identity || ""));
 }
 
 docs {
