@@ -1,0 +1,48 @@
+meta {
+  name: 21 I open the data of my transfer (DSP)
+  type: http
+  seq: 21
+}
+
+get {
+  url: {{baseUrl}}/api/transfers/{{dspTransferId}}/data?participantId={{dspConsumerCtx}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+tests {
+  const body = res.getBody() || {};
+  if (bru.getEnvVar("dspLiveFlow") !== "true") {
+    test("SKIPPED live check: this environment does not run the DSP flow end to end (#542)", function () {});
+  } else if (res.getStatus() === 502 && /certificate demo/.test(body.detail || "")) {
+    // The token works, but the data plane on Azure is JAD's certificate demo
+    // and serves no FHIR asset (2026-11-05, #876). Fails again once a data
+    // plane for HttpData assets answers with anything else.
+    test("SKIPPED: the data plane serves no FHIR asset yet (" + body.detail + ")", function () {});
+  } else {
+    test("the provider's data plane answered with the data", function () {
+      expect(res.getStatus(), `${body.step || ""} ${body.detail || body.error || ""}`).to.equal(200);
+      expect(body.transferId).to.equal(bru.getVar("dspTransferId"));
+      expect(body.data, "no data").to.not.equal(undefined);
+      expect(body.bytes, "an empty answer").to.be.above(0);
+    });
+    test("a data user sees no patient's name (#475)", function () {
+      const text = JSON.stringify(body.data || {});
+      const patients = (text.match(/"resourceType":"Patient"/g) || []).length;
+      if (patients > 0) {
+        expect(text, "a Patient carries a name").to.not.match(/"name":\[/);
+      }
+    });
+  }
+}
+
+docs {
+  The last step of the live DSP journey (#876): the hub asks PharmaCo's siglet for the flow's
+  token and AlphaKlinik's data plane for the data (`ui/src/lib/transfer-data.ts`). A STARTED
+  pull transfer stays STARTED while its data is ready; until #876 nothing read it. The token
+  never leaves the server. Patient resources come back pseudonymised for a data user.
+}

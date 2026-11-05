@@ -24,6 +24,7 @@ import OdrlJsonHighlighter from "@/components/OdrlJsonHighlighter";
 import { SpePermitBindings } from "@/components/spe/SpePermitBindings";
 import { T, useT } from "@/lib/i18n/translate";
 import { describePolicy, renderPolicyText } from "@/lib/odrl-describe";
+import { STANDARD_POLICIES } from "@/lib/standard-policies";
 import {
   policyVerdict,
   validatePolicy,
@@ -109,7 +110,45 @@ const PROHIBIT_COMMERCIALIZE = {
   "odrl:assignee": { "@id": "odrl:assignee" },
 };
 
+/**
+ * The standard policies first (lib/standard-policies.ts, ADR-077): the
+ * minimal set across EHDS, GDPR, DGA, Data Act and AI Act. The period the
+ * form picks replaces their one-year default.
+ */
+const STANDARD_TEMPLATES: EhdsPolicyTemplate[] = STANDARD_POLICIES.map(
+  (sp) => ({
+    id: sp.id,
+    label: sp.title,
+    article: sp.regulations.join(" · "),
+    description: sp.useWhen,
+    build: ({ duration }) => ({
+      "@type": "edc:PolicyDefinition",
+      "@id": `${sp.id}-${Date.now()}`,
+      "edc:policy": withPeriod(sp.policy, duration),
+    }),
+  }),
+);
+
+/** The policy with its inForceDate constraint set to this period. */
+function withPeriod(
+  policy: Record<string, unknown>,
+  duration: string,
+): Record<string, unknown> {
+  const copy = structuredClone(policy) as {
+    permission?: {
+      constraint?: { leftOperand: string; rightOperand: unknown }[];
+    }[];
+  };
+  for (const perm of copy.permission ?? []) {
+    for (const c of perm.constraint ?? []) {
+      if (c.leftOperand === "inForceDate") c.rightOperand = duration;
+    }
+  }
+  return copy as Record<string, unknown>;
+}
+
 const POLICY_TEMPLATES: EhdsPolicyTemplate[] = [
+  ...STANDARD_TEMPLATES,
   {
     id: "ehds-art53-1c-research",
     label: "Scientific Research",

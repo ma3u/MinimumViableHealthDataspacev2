@@ -74,6 +74,14 @@ test.describe("Live DSP negotiation from the page (#876)", () => {
         r.url().endsWith("/api/negotiations") &&
         r.request().method() === "POST",
     );
+    // The terms are shown and must be agreed before anything starts.
+    await expect(page.getByTestId("offer-policy-description")).toContainText(
+      /may use the data/,
+    );
+    await expect(
+      page.getByRole("button", { name: "Start Negotiation" }),
+    ).toBeDisabled();
+    await page.getByTestId("offer-terms-accept").check();
     await page.getByRole("button", { name: "Start Negotiation" }).click();
     const response = await started;
     const sent = response.request().postDataJSON() as {

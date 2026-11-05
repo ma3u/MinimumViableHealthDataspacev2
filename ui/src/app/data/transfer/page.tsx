@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Circle,
   Copy,
+  Download,
   FileJson2,
   Loader2,
   Play,
@@ -22,6 +23,7 @@ import {
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import RowSourceBadge from "@/components/RowSourceBadge";
+import TransferDetails from "@/components/TransferDetails";
 import type { RowSource } from "@/lib/row-provenance";
 import { T, useT } from "@/lib/i18n/translate";
 
@@ -212,6 +214,41 @@ interface FhirBundle {
   meta?: { lastUpdated?: string };
   link?: { relation: string; url: string }[];
   entry?: FhirBundleEntry[];
+}
+
+/** What GET /api/transfers/[id]/data answers (#876). */
+interface LiveData {
+  bytes: number;
+  truncated: boolean;
+  fetchedAt: string;
+  data: unknown;
+}
+
+/** A transfer whose access is open on the connector: its data can be read. */
+function isLiveTransfer(tr: Transfer): boolean {
+  return (
+    tr.source === "controlplane" &&
+    f(tr as Record<string, unknown>, "state").toUpperCase() === "STARTED"
+  );
+}
+
+/** FHIR data as a bundle for the viewer: a Bundle, a list or one resource. */
+function toBundle(data: unknown): FhirBundle | null {
+  const isResource = (r: unknown) =>
+    !!r && typeof r === "object" && "resourceType" in (r as object);
+  if (isResource(data) && (data as FhirBundle).resourceType === "Bundle") {
+    return data as FhirBundle;
+  }
+  const list = Array.isArray(data) ? data : isResource(data) ? [data] : null;
+  if (!list || !list.every(isResource)) return null;
+  return {
+    resourceType: "Bundle",
+    type: "collection",
+    total: list.length,
+    entry: list.map((resource) => ({
+      resource: resource as FhirBundleEntry["resource"],
+    })),
+  };
 }
 
 interface DataPayload {
@@ -677,6 +714,21 @@ function DataTransferContent() {
     FhirBundle
   > | null>(null);
   const [loadingFhir, setLoadingFhir] = useState(false);
+  // The real data of a STARTED connector transfer, fetched through the
+  // consumer's siglet (api/transfers/[id]/data). Before #876 "View FHIR"
+  // showed the bundled sample file for every row, real ones included.
+  // Which My data rows show their details (#876).
+  const [detailsOpen, setDetailsOpen] = useState<Set<string>>(new Set());
+  const toggleDetails = (id: string) =>
+    setDetailsOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  const [liveData, setLiveData] = useState<
+    Record<string, { loading: boolean; error?: string; result?: LiveData }>
+  >({});
 
   useEffect(() => {
     fetchApi("/api/participants")
@@ -687,7 +739,11 @@ function DataTransferContent() {
           : d.participants || [];
         setParticipants(list);
         if (!selectedCtx && list.length > 0) {
-          setSelectedCtx(list[0]["@id"]);
+          // The data user transfers; a data holder is the other side. As on
+          // /negotiate (#876).
+          setSelectedCtx(
+            (list.find((p) => p.role === "DATA_USER") ?? list[0])["@id"],
+          );
         } else if (list.length === 0) {
           setLoading(false);
         }
@@ -839,10 +895,22 @@ function DataTransferContent() {
   };
 
   // Check which agreements already have transfers
-  const agreementHasTransfer = (agrId: string) =>
-    transfers.some(
-      (t) => f(t as Record<string, unknown>, "contractId") === agrId,
-    );
+  /**
+   * What the agreement's transfers have reached. It used to say "transfer in
+   * progress" for any transfer at all, a failed one included, and a STARTED
+   * PULL transfer stays STARTED while its data is ready (#876).
+   */
+  const agreementTransferLabel = (agrId: string): string | null => {
+    const states = transfers
+      .filter((tr) => f(tr as Record<string, unknown>, "contractId") === agrId)
+      .map((tr) => f(tr as Record<string, unknown>, "state").toUpperCase());
+    if (states.includes("COMPLETED")) return t("(transferred)");
+    if (states.includes("STARTED")) return t("(data ready)");
+    if (states.some((st) => st !== "TERMINATED" && st !== "SUSPENDED")) {
+      return t("(transfer in progress)");
+    }
+    return null;
+  };
 
   // Multi-select helpers
   const toggleAgreement = (agrId: string) => {
@@ -878,6 +946,24 @@ function DataTransferContent() {
     return ["ALL", ...Array.from(states).sort()];
   }, [transfers]);
 
+  // Newest first: what the open transfers give access to.
+  const myData = transfers
+    .filter(isLiveTransfer)
+    .sort(
+      (a, b) =>
+        ((b.stateTimestamp as number) || 0) -
+        ((a.stateTimestamp as number) || 0),
+    );
+
+  const providerDidOfContract = (contractId: string): string => {
+    const agr = agreements.find((a) => a["@id"] === contractId);
+    return agr ? f(agr as Record<string, unknown>, "counterPartyId") : "";
+  };
+  const providerOfContract = (contractId: string): string => {
+    const cp = providerDidOfContract(contractId);
+    return cp ? didToName(cp) : "";
+  };
+
   const filteredTransfers =
     statusFilter === "ALL"
       ? transfers
@@ -887,6 +973,58 @@ function DataTransferContent() {
             statusFilter,
         );
 
+  const loadLiveData = async (
+    transferId: string,
+  ): Promise<LiveData | undefined> => {
+    const known = liveData[transferId];
+    if (known?.result) return known.result;
+    setLiveData((m) => ({ ...m, [transferId]: { loading: true } }));
+    try {
+      const res = await fetchApi(
+        `/api/transfers/${encodeURIComponent(
+          transferId,
+        )}/data?participantId=${encodeURIComponent(selectedCtx)}`,
+      );
+      const body = (await res.json()) as LiveData & {
+        error?: string;
+        detail?: string;
+      };
+      if (!res.ok) {
+        const error = [body.error, body.detail].filter(Boolean).join(": ");
+        setLiveData((m) => ({
+          ...m,
+          [transferId]: { loading: false, error },
+        }));
+        return undefined;
+      }
+      setLiveData((m) => ({
+        ...m,
+        [transferId]: { loading: false, result: body },
+      }));
+      return body;
+    } catch (err) {
+      setLiveData((m) => ({
+        ...m,
+        [transferId]: { loading: false, error: String(err) },
+      }));
+      return undefined;
+    }
+  };
+
+  const downloadLiveData = async (transferId: string, name: string) => {
+    const result = await loadLiveData(transferId);
+    if (!result) return;
+    const blob = new Blob([JSON.stringify(result.data, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${name}-${transferId.slice(0, 8)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   // Load FHIR bundles on demand
   const openFhirViewer = async (transferId: string) => {
     if (viewingTransferId === transferId) {
@@ -894,6 +1032,11 @@ function DataTransferContent() {
       return;
     }
     setViewingTransferId(transferId);
+    const row = transfers.find((tr) => tr["@id"] === transferId);
+    if (row && isLiveTransfer(row)) {
+      await loadLiveData(transferId);
+      return;
+    }
     if (!fhirBundles) {
       setLoadingFhir(true);
       try {
@@ -1026,7 +1169,7 @@ function DataTransferContent() {
                     agr as Record<string, unknown>,
                     "counterPartyId",
                   );
-                  const hasTransfer = agreementHasTransfer(agrId);
+                  const transferLabel = agreementTransferLabel(agrId);
 
                   return (
                     <label
@@ -1053,9 +1196,9 @@ function DataTransferContent() {
                             ? t("Consumer:")
                             : t("Provider:")}{" "}
                           {cp ? didToName(cp as string) : "—"}
-                          {hasTransfer && (
+                          {transferLabel && (
                             <span className="ml-2 text-yellow-800 dark:text-yellow-400">
-                              {t("(transfer in progress)")}
+                              {transferLabel}
                             </span>
                           )}
                         </p>
@@ -1107,6 +1250,121 @@ function DataTransferContent() {
             </form>
           )}
         </div>
+
+        {/* ── My data: what the open transfers give access to (#876) ── */}
+        {myData.length > 0 && (
+          <div
+            data-testid="my-data"
+            className="border border-(--border) rounded-xl p-5 mb-8"
+          >
+            <h2 className="font-semibold text-sm mb-1">{t("My data")}</h2>
+            <p className="text-xs text-(--text-secondary) mb-4">
+              {t(
+                "The assets you hold an open transfer for. Their data comes from the provider's data plane when you open or download it; patient identities are pseudonymised for data users.",
+              )}
+            </p>
+            <div className="space-y-2">
+              {myData.map((tr) => {
+                const id = tr["@id"];
+                const aId =
+                  tr.assetId || f(tr as Record<string, unknown>, "assetId");
+                const name = aId ? assetLabel(aId as string) : id.slice(0, 8);
+                const provider = providerOfContract(
+                  f(tr as Record<string, unknown>, "contractId"),
+                );
+                const entry = liveData[id];
+                const contractId = f(
+                  tr as Record<string, unknown>,
+                  "contractId",
+                );
+                return (
+                  <div
+                    key={id}
+                    className="p-3 rounded-lg border border-(--border) bg-(--surface-2)/50"
+                  >
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-(--text-primary)">
+                          {name}
+                        </p>
+                        <p className="text-xs text-(--text-secondary)">
+                          {t("Provider:")} {provider || "—"} ·{" "}
+                          {t("Process: {id}…", { id: id.slice(0, 8) })}
+                          {entry?.result &&
+                            ` · ${Math.max(
+                              1,
+                              Math.round(entry.result.bytes / 1024),
+                            )} KB`}
+                        </p>
+                        {entry?.error && (
+                          <p className="text-xs text-(--badge-inactive-text) mt-1">
+                            {t("Could not fetch the data: {detail}", {
+                              detail: entry.error,
+                            })}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void openFhirViewer(id);
+                          document
+                            .getElementById(`transfer-${id}`)
+                            // Not every browser engine has it (jsdom has not).
+                            ?.scrollIntoView?.({ behavior: "smooth" });
+                        }}
+                        className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-(--role-user-bg) text-(--role-user-text) hover:opacity-80"
+                      >
+                        {entry?.loading ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : (
+                          <FileJson2 size={12} />
+                        )}
+                        {t("Open")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void downloadLiveData(id, (aId as string) || "data")
+                        }
+                        className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-(--border) text-(--text-primary) hover:border-gray-500"
+                      >
+                        <Download size={12} />
+                        {t("Download")}
+                      </button>
+                      <button
+                        type="button"
+                        aria-expanded={detailsOpen.has(id)}
+                        onClick={() => toggleDetails(id)}
+                        className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-(--border) text-(--text-primary) hover:border-gray-500"
+                      >
+                        {detailsOpen.has(id) ? (
+                          <ChevronDown size={12} />
+                        ) : (
+                          <ChevronRight size={12} />
+                        )}
+                        {t("Details")}
+                      </button>
+                    </div>
+                    {detailsOpen.has(id) && contractId && (
+                      <TransferDetails
+                        participantId={selectedCtx}
+                        contractId={contractId}
+                        openedAt={(tr.stateTimestamp as number) || 0}
+                        providerDid={providerDidOfContract(contractId)}
+                        providerName={provider || "—"}
+                        consumerName={
+                          participants.find((p) => p["@id"] === selectedCtx)
+                            ?.displayName ?? ""
+                        }
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* ── Transfer Processes (DSP State Machine) ── */}
         <div className="flex items-center justify-between mb-3">
@@ -1187,10 +1445,20 @@ function DataTransferContent() {
                 0;
               const isCompleted = state?.toUpperCase().includes("COMPLETED");
               const isViewing = viewingTransferId === tr["@id"];
-              const bundle = fhirBundles?.[aId as string] ?? null;
+              const live = isLiveTransfer(tr) ? liveData[tr["@id"]] : null;
+              const liveBundle = live?.result
+                ? toBundle(live.result.data)
+                : null;
+              const bundle = isLiveTransfer(tr)
+                ? liveBundle
+                : fhirBundles?.[aId as string] ?? null;
+              const viewerLoading = isLiveTransfer(tr)
+                ? !!live?.loading
+                : loadingFhir;
 
               return (
                 <div
+                  id={`transfer-${tr["@id"]}`}
                   key={tr["@id"]}
                   className={`p-4 border rounded-xl space-y-3 transition-colors ${
                     isViewing
@@ -1271,10 +1539,22 @@ function DataTransferContent() {
 
                   {/* FHIR Viewer panel (expanded) */}
                   {isViewing &&
-                    (loadingFhir ? (
+                    (viewerLoading ? (
                       <div className="flex items-center gap-2 text-(--text-secondary) py-4 justify-center">
                         <Loader2 size={14} className="animate-spin" />
-                        {t("Loading FHIR data…")}
+                        {isLiveTransfer(tr)
+                          ? t("Fetching the data from the provider…")
+                          : t("Loading FHIR data…")}
+                      </div>
+                    ) : live?.error ? (
+                      <p className="text-xs text-(--badge-inactive-text) py-2">
+                        {t("Could not fetch the data: {detail}", {
+                          detail: live.error,
+                        })}
+                      </p>
+                    ) : live?.result && !liveBundle ? (
+                      <div className="font-mono text-xs overflow-x-auto max-h-96 overflow-y-auto p-3 border border-(--border) rounded-lg">
+                        <JsonNode data={live.result.data} depth={0} />
                       </div>
                     ) : (
                       <FhirViewerPanel

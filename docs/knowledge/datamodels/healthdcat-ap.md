@@ -41,11 +41,13 @@ variables:
 EU vocabularies' IRIs; `scripts/healthdcat-ap/validate.py` checks it with the
 official SHACL for non-public data, in CI on the golden fixture
 (`services/neo4j-proxy/__tests__/fixtures/healthdcat-ap-r8.jsonld`). It loads
-the class hierarchy the HealthData@EU validator imports, so both agree: 0
-violations on every dataset, and 17 on the catalogue node, where DCAT 2's
-`dcat:Catalog rdfs:subClassOf dcat:Dataset` brings in the Dataset shapes. That
-is an upstream question; the validator names it and does not fail on it
-(`--strict` does). The
+the class hierarchy the HealthData@EU validator imports, less one triple:
+DCAT 2's `dcat:Catalog rdfs:subClassOf dcat:Dataset` would bring the Dataset
+shapes onto the catalogue node (17 violations). The HealthDCAT-AP team
+confirmed this as upstream ([w3c/dx-dcat#136](https://github.com/w3c/dx-dcat/issues/136)),
+will work around it in Release 9 and advised dropping the triple until then
+(#884). With it dropped, 0 violations on the catalogue and on every dataset;
+`--as-published` keeps it. The
 catalogue enricher carries the properties through federation.
 
 The recommended properties come from the graph where it holds a dataset's

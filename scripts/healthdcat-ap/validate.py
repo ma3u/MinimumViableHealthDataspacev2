@@ -22,15 +22,18 @@ shape it belongs to; the constraint itself is unchanged. (Reported upstream.)
 
 The data graph also gets imports-hierarchy.ttl, the rdfs:subClassOf triples of
 the ontologies the HealthData@EU validator imports (snapshot-imports.py), so
-shapes target what they target there. One consequence is upstream's, not the
-hub's: DCAT 2 makes dcat:Catalog a dcat:Dataset, so the Dataset shapes also
-judge the catalogue (hdab, healthCategory, provenance, ...). Those violations
-are listed, named as that issue, and do not fail the run; --strict counts them.
+shapes target what they target there, with one workaround, made in memory
+and reported: DCAT 2 makes dcat:Catalog a subclass of dcat:Dataset, so every
+Dataset shape would also judge the catalogue (hdab, healthCategory,
+provenance, ...). The HealthDCAT-AP team confirmed this as upstream
+(w3c/dx-dcat#136), will work around it in Release 9 and advised validators to
+drop that triple until then (#884). --as-published keeps it, to see what the
+published validator reports today.
 
     python3 scripts/healthdcat-ap/validate.py services/neo4j-proxy/__tests__/fixtures/healthdcat-ap-r8.jsonld
     python3 scripts/healthdcat-ap/validate.py http://localhost:9090/catalog/datasets
     python3 scripts/healthdcat-ap/validate.py <file> --recommended   # list the warnings too
-    python3 scripts/healthdcat-ap/validate.py <file> --strict        # count the catalogue's too
+    python3 scripts/healthdcat-ap/validate.py <file> --as-published  # without the workaround
     python3 scripts/healthdcat-ap/validate.py a.ttl --same-as a.jsonld  # also: the same graph?
 
 A source ending in .ttl is read as Turtle, anything else as JSON-LD.
@@ -46,14 +49,15 @@ import sys
 import urllib.request
 
 from pyshacl import validate
-from rdflib import RDF, Graph, Namespace
+from rdflib import RDF, RDFS, Graph, Namespace
 from rdflib.compare import isomorphic
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RELEASE = os.path.join(HERE, "release-8")
 SH = Namespace("http://www.w3.org/ns/shacl#")
 DCAT = Namespace("http://www.w3.org/ns/dcat#")
-UPSTREAM = "https://code.europa.eu/healthdataeu/healthdcat-ap/-/issues"
+# Dropped from the imported hierarchy until HealthDCAT-AP Release 9 ships its own workaround (#884).
+WORKAROUNDS = [(DCAT.Catalog, RDFS.subClassOf, DCAT.Dataset)]
 
 DCAT_AP = "../dcat-ap-3.0.1/dcat-ap-SHACL.ttl"
 SHAPES = ["non-public-shapes.ttl", "range.ttl", "mdr-vocabularies.shape.ttl"]
@@ -114,34 +118,22 @@ def report(results, label):
         print(f"  {label} {int(r.n):4d} {sev:9s} {path:30s} {str(r.msg or '')[:100]}")
 
 
-def violations(results, catalogues):
-    """Top-level violations: (on a dcat:Catalog, elsewhere). Nested sh:detail results are not counted."""
-    on_catalogue = elsewhere = 0
-    for report in results.subjects(RDF.type, SH.ValidationReport):
-        for r in results.objects(report, SH.result):
-            if results.value(r, SH.resultSeverity) == SH.Violation:
-                if results.value(r, SH.focusNode) in catalogues:
-                    on_catalogue += 1
-                else:
-                    elsewhere += 1
-    return on_catalogue, elsewhere
-
-
-def verdict(results, catalogues, strict):
-    on_catalogue, elsewhere = violations(results, catalogues)
-    ok = elsewhere == 0 and (on_catalogue == 0 or not strict)
-    note = ""
-    if on_catalogue:
-        note = (f"; {on_catalogue} on the catalogue from the Dataset shapes (dcat:Catalog is a dcat:Dataset "
-                f"in DCAT 2), the upstream issue, {'counted' if strict else 'not counted'}")
-    return ok, f"{'conforms' if ok else 'DOES NOT CONFORM'} ({elsewhere} violation{'' if elsewhere == 1 else 's'}{note})"
+def verdict(results):
+    """Top-level violations only; nested sh:detail results are not counted."""
+    n = sum(
+        1
+        for report in results.subjects(RDF.type, SH.ValidationReport)
+        for r in results.objects(report, SH.result)
+        if results.value(r, SH.resultSeverity) == SH.Violation
+    )
+    return n == 0, f"{'conforms' if n == 0 else 'DOES NOT CONFORM'} ({n} violation{'' if n == 1 else 's'})"
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("source", help="a JSON-LD file or URL")
     ap.add_argument("--recommended", action="store_true", help="also list the recommended-property warnings")
-    ap.add_argument("--strict", action="store_true", help="also fail on the catalogue's violations from the Dataset shapes")
+    ap.add_argument("--as-published", action="store_true", help="keep dcat:Catalog rdfs:subClassOf dcat:Dataset (no workaround)")
     ap.add_argument("--same-as", metavar="OTHER", help="also fail unless OTHER holds the same graph (e.g. the Turtle of a JSON-LD)")
     args = ap.parse_args()
 
@@ -152,14 +144,19 @@ def main():
         if not same:
             return 1
     triples = len(data)
-    catalogues = set(data.subjects(RDF.type, DCAT.Catalog))
     data.parse(checked("vocabularies.ttl"), format="turtle")
     data.parse(checked(IMPORTS), format="turtle")
+    dropped = 0
+    if not args.as_published:
+        for triple in WORKAROUNDS:
+            if triple in data:
+                data.remove(triple)
+                dropped += 1
 
     base = Graph().parse(checked(DCAT_AP), format="turtle")
     _, base_results, _ = validate(data, shacl_graph=base, inference="none", allow_warnings=True)
-    base_ok, text = verdict(base_results, catalogues, args.strict)
-    print(f"1. DCAT-AP 3.0.1: {triples} triples, {text}")
+    base_ok, text = verdict(base_results)
+    print(f"1. DCAT-AP 3.0.1: {triples} triples, {text}; hierarchy workarounds: {dropped}")
     report(base_results, "dcat-ap ")
 
     shapes = Graph()
@@ -167,7 +164,7 @@ def main():
         shapes.parse(checked(name), format="turtle")
     fixed = repair(shapes)
     _, results, _ = validate(data, shacl_graph=shapes, inference="none", allow_warnings=True)
-    conforms, text = verdict(results, catalogues, args.strict)
+    conforms, text = verdict(results)
     print(f"2. HealthDCAT-AP Release 8, non-public: {text}; shape repairs: {fixed}")
     report(results, "required")
     conforms = conforms and base_ok
@@ -178,8 +175,6 @@ def main():
             rec.parse(checked(name), format="turtle")
         _, rec_results, _ = validate(data, shacl_graph=rec, inference="none", allow_warnings=True)
         report(rec_results, "recommended")
-    if not args.strict and violations(results, catalogues)[0]:
-        print(f"   The catalogue's violations are an upstream question, not the hub's: {UPSTREAM}")
     return 0 if conforms else 1
 
 

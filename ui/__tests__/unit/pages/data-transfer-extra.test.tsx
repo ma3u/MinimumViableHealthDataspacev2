@@ -658,9 +658,10 @@ describe("DataTransferPage – extra coverage", () => {
       (c[0] as string).startsWith("/api/transfers"),
     ).length;
 
-    // Switch participant
+    // Switch participant: the data user is the default since #876, so
+    // switch to the data holder.
     const select = screen.getByRole("combobox");
-    await user.selectOptions(select, "ctx-pharmaco");
+    await user.selectOptions(select, "ctx-alpha");
 
     await waitFor(() => {
       const callsAfter = mockFetchApi.mock.calls.filter((c: unknown[]) =>

@@ -1666,6 +1666,75 @@ paths:
               schema: { $ref: "#/components/schemas/TransferProcess" }
         "404": { $ref: "#/components/responses/NotFound" }
 
+  /api/transfers/{id}/data:
+    get:
+      tags: [Transfers]
+      summary: The data a STARTED pull transfer gives access to
+      description: >-
+        Asks the consumer's siglet for the flow's access token and the
+        provider's data plane for the data; the token stays on the server.
+        Patient resources are pseudonymised for roles that do not see
+        patient identity (#475, #876).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: "#/components/parameters/ParticipantId"
+      responses:
+        "200":
+          description: The data, with its size and when it was fetched
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transferId: { type: string }
+                  assetId: { type: string }
+                  contractId: { type: string }
+                  contentType: { type: string }
+                  bytes: { type: integer }
+                  truncated: { type: boolean }
+                  fetchedAt: { type: string, format: date-time }
+                  data: {}
+        "400": { description: participantId and a transfer id are required }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { description: The transfer is not STARTED }
+        "502":
+          description: The token or the data could not be fetched; `step` says which
+
+  /api/agreements/{id}:
+    get:
+      tags: [Transfers]
+      summary: One contract agreement, with its signing date, period and policy
+      description: >-
+        The agreement as the consumer's connector holds it; `validUntil` is
+        the end of the period its policy allows, counted from the signing
+        (#876).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: "#/components/parameters/ParticipantId"
+      responses:
+        "200":
+          description: The agreement
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agreementId: { type: string }
+                  assetId: { type: string }
+                  providerId: { type: string }
+                  consumerId: { type: string }
+                  signedAt: { type: string }
+                  validUntil: { type: string }
+                  policy: { type: object }
+        "400": { description: participantId and an agreement id are required }
+        "404": { $ref: "#/components/responses/NotFound" }
+
   /api/assets:
     get:
       tags: [Assets]

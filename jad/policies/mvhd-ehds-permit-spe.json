@@ -1,0 +1,109 @@
+{
+  "@context": [
+    "http://www.w3.org/ns/odrl.jsonld",
+    {
+      "ehds": "https://w3id.org/ehds/",
+      "edc": "https://w3id.org/edc/v0.0.1/ns/"
+    }
+  ],
+  "@type": "Set",
+  "@id": "mvhd-ehds-permit-spe",
+  "permission": [
+    {
+      "action": "use",
+      "constraint": [
+        {
+          "leftOperand": "ehds:purpose",
+          "operator": "isAnyOf",
+          "rightOperand": [
+            "EHDS Art. 53(1)(a) - public interest in public or occupational health",
+            "EHDS Art. 53(1)(b) - policymaking and regulatory activities",
+            "EHDS Art. 53(1)(c) - official statistics",
+            "EHDS Art. 53(1)(d) - education or teaching",
+            "EHDS Art. 53(1)(e) - scientific research",
+            "EHDS Art. 53(1)(f) - improvement of the delivery of care"
+          ]
+        },
+        {
+          "leftOperand": "ehds:dataPermit",
+          "operator": "eq",
+          "rightOperand": "issued by a health data access body for this dataset"
+        },
+        {
+          "leftOperand": "ehds:legalBasis",
+          "operator": "eq",
+          "rightOperand": "GDPR Art. 9(2)(g) to (j) with the data permit"
+        },
+        {
+          "leftOperand": "inForceDate",
+          "operator": "lteq",
+          "rightOperand": "contractAgreement+365d"
+        },
+        {
+          "leftOperand": "spatial",
+          "operator": "isPartOf",
+          "rightOperand": "EU/EEA"
+        },
+        {
+          "leftOperand": "ehds:processingEnvironment",
+          "operator": "eq",
+          "rightOperand": "confidential SPE with remote attestation"
+        },
+        {
+          "leftOperand": "ehds:certification",
+          "operator": "isAllOf",
+          "rightOperand": ["ISO/IEC 27001"]
+        }
+      ],
+      "duty": [
+        {
+          "action": "ehds:secureProcessingEnvironment"
+        },
+        {
+          "action": "ehds:attestEnvironment"
+        },
+        {
+          "action": "ehds:pseudonymize"
+        },
+        {
+          "action": "ehds:minimizeData"
+        },
+        {
+          "action": "ehds:maintainAuditTrail"
+        },
+        {
+          "action": "ehds:publishResults"
+        },
+        {
+          "action": "attribute"
+        },
+        {
+          "action": "ehds:reportIncident"
+        },
+        {
+          "action": "delete"
+        }
+      ]
+    }
+  ],
+  "prohibition": [
+    {
+      "action": "ehds:reIdentify"
+    },
+    {
+      "action": "extract"
+    },
+    {
+      "action": "ehds:advertise"
+    },
+    {
+      "action": "ehds:insuranceDecision"
+    },
+    {
+      "action": "ehds:detrimentalDecision"
+    },
+    {
+      "action": "ehds:transferOutsideEU"
+    }
+  ]
+}
