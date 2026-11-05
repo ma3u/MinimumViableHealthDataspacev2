@@ -71,12 +71,12 @@ interface ParticipantCtx {
  */
 type Stage = "agreed" | "progress" | "ready" | "imported" | "done";
 
-/** Most actionable first: data to use, then what is under way. */
+/** The filter chips, in the order a contract goes through. */
 const STAGE_ORDER: Stage[] = [
+  "agreed",
+  "progress",
   "ready",
   "imported",
-  "progress",
-  "agreed",
   "done",
 ];
 
@@ -99,6 +99,14 @@ const STAGE_STYLE: Record<Stage, string> = {
     "bg-violet-100 dark:bg-violet-900/30 text-violet-800 dark:text-violet-300 border border-violet-500/40",
   done: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-(--border)",
 };
+
+/** A date and time in the reader's locale. */
+function when(v: number | string): string {
+  const d = new Date(v);
+  return Number.isNaN(d.getTime())
+    ? ""
+    : d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+}
 
 /** No import known for a transfer: one shared array, so a row does not refetch. */
 const NO_IMPORTS: ExistingImport[] = [];
@@ -820,6 +828,8 @@ function DataTransferContent() {
               type: f(n, "type"),
               // Only a connector's agreement can be read back for Details.
               source: n.source,
+              // When it was negotiated: the list is ordered by it (#894).
+              agreedAt: Number(n.createdAt ?? n["edc:createdAt"]) || 0,
             }));
         })
         .catch(() => []),
@@ -982,71 +992,78 @@ function DataTransferContent() {
     const ids = Array.from(
       new Set([...agreements.map((a) => a["@id"]), ...byContract.keys()]),
     );
-    return ids
-      .map((id) => {
-        const agreement = agreements.find((a) => a["@id"] === id) ?? null;
-        const trs = [...(byContract.get(id) ?? [])].sort(
-          (a, b) => ts(b) - ts(a),
-        );
-        const states = trs.map((tr) =>
-          f(tr as Record<string, unknown>, "state").toUpperCase(),
-        );
-        const open = trs.find(isLiveTransfer) ?? null;
-        const started =
-          open ??
-          trs.find(
-            (tr) =>
-              f(tr as Record<string, unknown>, "state").toUpperCase() ===
-              "STARTED",
-          ) ??
-          null;
-        const stage: Stage =
-          open && (imports[open["@id"]]?.length ?? 0) > 0
-            ? "imported"
-            : started
-              ? "ready"
-              : states.some(
-                    (st) =>
-                      !["COMPLETED", "TERMINATED", "SUSPENDED"].includes(st),
-                  )
-                ? "progress"
-                : states.includes("COMPLETED")
-                  ? "done"
-                  : "agreed";
-        const assetId =
-          (agreement && f(agreement as Record<string, unknown>, "assetId")) ||
-          (trs[0] &&
-            (trs[0].assetId ||
-              f(trs[0] as Record<string, unknown>, "assetId")));
-        const providerDid = agreement
-          ? f(agreement as Record<string, unknown>, "counterPartyId")
-          : "";
-        return {
-          id,
-          agreement,
-          transfers: trs,
-          open,
-          started,
-          stage,
-          name: assetId ? assetLabel(assetId as string) : id.slice(0, 12),
-          assetId: (assetId as string) || "",
-          providerDid,
-          provider: providerDid ? didToName(providerDid) : "",
-          isProviderSide:
-            !!agreement &&
-            f(agreement as Record<string, unknown>, "type") === "PROVIDER",
-          sample: agreement
-            ? agreement.source !== "controlplane"
-            : trs.every((tr) => tr.source !== "controlplane"),
-          lastFailed: states[0] === "TERMINATED",
-          lastAt: trs[0] ? ts(trs[0]) : 0,
-        };
-      })
-      .sort(
-        (a, b) =>
-          STAGE_ORDER.indexOf(a.stage) - STAGE_ORDER.indexOf(b.stage) ||
-          b.lastAt - a.lastAt,
-      );
+    return (
+      ids
+        .map((id) => {
+          const agreement = agreements.find((a) => a["@id"] === id) ?? null;
+          const trs = [...(byContract.get(id) ?? [])].sort(
+            (a, b) => ts(b) - ts(a),
+          );
+          const states = trs.map((tr) =>
+            f(tr as Record<string, unknown>, "state").toUpperCase(),
+          );
+          const open = trs.find(isLiveTransfer) ?? null;
+          const started =
+            open ??
+            trs.find(
+              (tr) =>
+                f(tr as Record<string, unknown>, "state").toUpperCase() ===
+                "STARTED",
+            ) ??
+            null;
+          const stage: Stage =
+            open && (imports[open["@id"]]?.length ?? 0) > 0
+              ? "imported"
+              : started
+                ? "ready"
+                : states.some(
+                      (st) =>
+                        !["COMPLETED", "TERMINATED", "SUSPENDED"].includes(st),
+                    )
+                  ? "progress"
+                  : states.includes("COMPLETED")
+                    ? "done"
+                    : "agreed";
+          const assetId =
+            (agreement && f(agreement as Record<string, unknown>, "assetId")) ||
+            (trs[0] &&
+              (trs[0].assetId ||
+                f(trs[0] as Record<string, unknown>, "assetId")));
+          const providerDid = agreement
+            ? f(agreement as Record<string, unknown>, "counterPartyId")
+            : "";
+          return {
+            id,
+            agreement,
+            transfers: trs,
+            open,
+            started,
+            stage,
+            name: assetId ? assetLabel(assetId as string) : id.slice(0, 12),
+            assetId: (assetId as string) || "",
+            providerDid,
+            provider: providerDid ? didToName(providerDid) : "",
+            isProviderSide:
+              !!agreement &&
+              f(agreement as Record<string, unknown>, "type") === "PROVIDER",
+            sample: agreement
+              ? agreement.source !== "controlplane"
+              : trs.every((tr) => tr.source !== "controlplane"),
+            lastFailed: states[0] === "TERMINATED",
+            lastAt: trs[0] ? ts(trs[0]) : 0,
+            agreedAt: Number(agreement?.agreedAt) || 0,
+            importedAt: open
+              ? (imports[open["@id"]] ?? [])
+                  .map((i) => i.importedAt)
+                  .sort()
+                  .pop() ?? ""
+              : "",
+          };
+        })
+        // Newest contract first. A row keeps its place when its stage
+        // changes, so an import does not move it away (#894).
+        .sort((a, b) => (b.agreedAt || b.lastAt) - (a.agreedAt || a.lastAt))
+    );
   }, [agreements, transfers, imports]);
 
   const stageCounts = useMemo(() => {
@@ -1417,6 +1434,22 @@ function DataTransferContent() {
                               ? t("Consumer:")
                               : t("Provider:")}{" "}
                             {row.provider || "—"}
+                            {row.agreedAt > 0 && (
+                              <span data-testid="contract-agreed">
+                                {" · "}
+                                {t("agreed {date}", {
+                                  date: when(row.agreedAt),
+                                })}
+                              </span>
+                            )}
+                            {row.importedAt && (
+                              <span data-testid="contract-imported">
+                                {" · "}
+                                {t("imported {date}", {
+                                  date: when(row.importedAt),
+                                })}
+                              </span>
+                            )}
                             {row.lastFailed && row.stage === "agreed" && (
                               <span className="ml-2 text-(--badge-inactive-text)">
                                 {t("the last transfer failed")}

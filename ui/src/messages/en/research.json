@@ -295,5 +295,7 @@
   "Waiting for the provider": "Waiting for the provider",
   "Close": "Close",
   "Transfers under this contract ({n})": "Transfers under this contract ({n})",
-  "No transfer yet.": "No transfer yet."
+  "No transfer yet.": "No transfer yet.",
+  "agreed {date}": "agreed {date}",
+  "imported {date}": "imported {date}"
 }

@@ -323,12 +323,60 @@ RETURN properties(d) AS d, w.speId AS speId`;
 const READ_RECORDS = `
 MATCH (:ImportedDataset {datasetId: $datasetId})-[:CONTAINS]->(x:ImportedRecord)
 WITH x ORDER BY x.resourceType, x.resourceId LIMIT $limit
-RETURN x.recordKey AS key, x.resourceType AS type, x.name AS name`;
+RETURN x.recordKey AS key, x.resourceType AS type, x.name AS name,
+       x.resource AS resource`;
 
 const READ_REFERENCES = `
 MATCH (a:ImportedRecord)-[r:REFERS_TO]->(b:ImportedRecord)
 WHERE a.recordKey IN $keys AND b.recordKey IN $keys
 RETURN a.recordKey AS from, b.recordKey AS to, r.path AS path`;
+
+/** Fields that say nothing to a reader or repeat the node's own name. */
+const HIDDEN_FIELDS = new Set([
+  "resourceType",
+  "id",
+  "fhirId",
+  "resourceId",
+  "subject",
+  "encounter",
+  "meta",
+  "text",
+]);
+
+/**
+ * What the inspector lists for a record: its type and id, then the plain
+ * values of the stored resource (gender, birth year, code, value, date), at
+ * most twelve. Nested structures are left to the raw resource.
+ */
+export function recordFacts(
+  type: string,
+  key: string,
+  resource: unknown,
+): Record<string, string | number | boolean> {
+  const out: Record<string, string | number | boolean> = {
+    resourceType: type,
+    resourceId: key.slice(key.lastIndexOf("/") + 1),
+  };
+  let parsed: Record<string, unknown> = {};
+  try {
+    parsed = JSON.parse(String(resource ?? "{}")) as Record<string, unknown>;
+  } catch {
+    return out;
+  }
+  let n = 0;
+  for (const [k, v] of Object.entries(parsed)) {
+    if (n >= 12 || HIDDEN_FIELDS.has(k)) continue;
+    if (
+      typeof v === "string" ||
+      typeof v === "number" ||
+      typeof v === "boolean"
+    ) {
+      out[k] = v;
+      n++;
+    }
+  }
+  return out;
+}
 
 /** The dataset, its workspace, its records and how they refer to each other. */
 export async function readImportGraph(
@@ -422,10 +470,7 @@ export async function readImportGraph(
       label: "ImportedRecord",
       name: String(r.get("name")),
       resourceType: String(r.get("type")),
-      properties: {
-        resourceType: String(r.get("type")),
-        resourceId: key.slice(key.lastIndexOf("/") + 1),
-      },
+      properties: recordFacts(String(r.get("type")), key, r.get("resource")),
     });
     links.push({ source: datasetNode, target: id, type: "CONTAINS" });
   }

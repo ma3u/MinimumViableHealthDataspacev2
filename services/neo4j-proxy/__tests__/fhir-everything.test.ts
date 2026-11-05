@@ -21,6 +21,7 @@ vi.mock("neo4j-driver", () => ({
       close: vi.fn(),
     })),
     auth: { basic: vi.fn() },
+    int: (n: number) => n,
   },
 }));
 
@@ -141,5 +142,66 @@ describe("GET /fhir/Patient/:id/$everything", () => {
     expect(res.status).toBe(200);
     expect(res.body.total).toBe(1);
     expect(res.body.entry[0].resource.resourceType).toBe("Patient");
+  });
+});
+
+describe("GET /fhir/Observation (#876)", () => {
+  beforeEach(() => {
+    mockRun.mockReset();
+  });
+
+  it("answers observations with their subject, and each patient once as include", async () => {
+    mockRun.mockResolvedValue({
+      records: [
+        record({
+          p: node({ resourceId: "P1", gender: "female" }),
+          o: node({ resourceId: "O1", display: "HbA1c", valueQuantity: 8.1 }),
+        }),
+        record({
+          p: node({ resourceId: "P1", gender: "female" }),
+          o: node({ resourceId: "O2", display: "Glucose" }),
+        }),
+        record({
+          p: {
+            labels: ["Patient", "OptedOut"],
+            properties: { resourceId: "P2" },
+          },
+          o: node({ resourceId: "O3", display: "Weight" }),
+        }),
+      ],
+    });
+
+    const res = await request.get("/fhir/Observation?_count=10");
+
+    expect(res.status).toBe(200);
+    expect(res.headers["content-type"]).toMatch(/fhir\+json/);
+    expect(res.body.total).toBe(2);
+    const entries = res.body.entry as Array<{
+      resource: Record<string, unknown>;
+      search: { mode: string };
+    }>;
+    expect(
+      entries.map((e) => [
+        e.resource.resourceType,
+        e.resource.id,
+        e.search.mode,
+      ]),
+    ).toEqual([
+      ["Observation", "O1", "match"],
+      ["Observation", "O2", "match"],
+      ["Patient", "P1", "include"],
+    ]);
+    expect(entries[0].resource.subject).toEqual({ reference: "Patient/P1" });
+    // An opted-out person's observation is not served (Art. 71).
+    expect(JSON.stringify(res.body)).not.toContain("O3");
+  });
+
+  it("narrows by code", async () => {
+    mockRun.mockResolvedValue({ records: [] });
+
+    await request.get("/fhir/Observation?code=4548-4");
+
+    expect(mockRun.mock.calls[0][0]).toMatch(/WHERE o\.code = \$code/);
+    expect(mockRun.mock.calls[0][1]).toMatchObject({ code: "4548-4" });
   });
 });

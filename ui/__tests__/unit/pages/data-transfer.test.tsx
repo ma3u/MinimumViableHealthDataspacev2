@@ -303,7 +303,7 @@ describe("DataTransferPage", () => {
     const stageOf = (row: HTMLElement) =>
       within(row).getByTestId("contract-stage").textContent;
 
-    it("lists each agreement once, with its stage, data to use first", async () => {
+    it("lists each agreement once, with its stage", async () => {
       setupDefaultMocks();
       render(<DataTransferPage />);
 
@@ -317,6 +317,24 @@ describe("DataTransferPage", () => {
       expect(screen.getAllByText("Fhir Patient Bundle")).toHaveLength(1);
       expect(screen.queryByText("Transfer Processes")).toBeNull();
       expect(screen.queryByText(/Select All/)).toBeNull();
+    });
+
+    it("orders by contract date, newest first, and shows when it was agreed", async () => {
+      setupDefaultMocks({
+        negotiations: [
+          { ...NEGOTIATIONS_FINALIZED[0], createdAt: 1793900000000 },
+          { ...NEGOTIATIONS_FINALIZED[1], createdAt: 1793800000000 },
+        ],
+      });
+      render(<DataTransferPage />);
+
+      const rows = await rowsOf();
+      // agr-002 has data ready, agr-001 is completed: the date decides.
+      expect(within(rows[0]).getByText("Fhir Patient Bundle")).toBeTruthy();
+      expect(within(rows[1]).getByText("Omop Cohort Data")).toBeTruthy();
+      expect(
+        within(rows[0]).getByTestId("contract-agreed").textContent,
+      ).toMatch(/agreed .*2026/);
     });
 
     it("reads unprefixed fields too", async () => {
@@ -678,6 +696,10 @@ describe("DataTransferPage", () => {
 
       const section = await screen.findByTestId("contracts-list");
       const held = await within(section).findByTestId("spe-import-existing");
+      // The row says when, beside who provided it.
+      expect(
+        (await within(section).findByTestId("contract-imported")).textContent,
+      ).toMatch(/imported .*2026/);
       expect(held.textContent).toMatch(
         /Imported into SPE-1 on 2026-11-05: 100 records/,
       );

@@ -295,5 +295,7 @@
   "Waiting for the provider": "En attente du fournisseur",
   "Close": "Fermer",
   "Transfers under this contract ({n})": "Transferts sous ce contrat ({n})",
-  "No transfer yet.": "Pas encore de transfert."
+  "No transfer yet.": "Pas encore de transfert.",
+  "agreed {date}": "conclu le {date}",
+  "imported {date}": "importé le {date}"
 }

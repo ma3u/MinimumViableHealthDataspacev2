@@ -3,7 +3,11 @@
  * dataset of records and references, written into the SPE the user chose.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { bundleToRecords, MAX_RECORDS } from "../src/spe-import.js";
+import {
+  bundleToRecords,
+  MAX_RECORDS,
+  recordFacts,
+} from "../src/spe-import.js";
 
 const speDrivers = vi.fn();
 vi.mock("../src/db.js", async (importOriginal) => ({
@@ -358,5 +362,38 @@ describe("GET /spe/imports", () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/datasetIds/);
+  });
+});
+
+describe("recordFacts", () => {
+  it("lists a record's plain values, not its ids or references", () => {
+    const facts = recordFacts(
+      "Observation",
+      "tp-1/Observation/o1",
+      JSON.stringify({
+        resourceType: "Observation",
+        id: "o1",
+        resourceId: "fhir-obs-1",
+        display: "HbA1c",
+        valueQuantity: 8.1,
+        valueUnit: "%",
+        subject: { reference: "Patient/p-1" },
+        code: { text: "nested" },
+      }),
+    );
+    expect(facts).toEqual({
+      resourceType: "Observation",
+      resourceId: "o1",
+      display: "HbA1c",
+      valueQuantity: 8.1,
+      valueUnit: "%",
+    });
+  });
+
+  it("keeps type and id when the stored resource is not JSON", () => {
+    expect(recordFacts("Patient", "tp-1/Patient/p1", "{oops")).toEqual({
+      resourceType: "Patient",
+      resourceId: "p1",
+    });
   });
 });
