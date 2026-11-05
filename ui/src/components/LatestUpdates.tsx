@@ -17,104 +17,110 @@ interface Update {
 const pr = (n: number) => ({ label: `#${n}`, href: `${REPO}/pull/${n}` });
 
 /** Newest first. Each entry names what changed for a visitor and links the
- *  pull request or decision behind it; keep it to the last few weeks. The
+ *  pull requests or decisions behind it; similar changes share one entry,
+ *  and the list covers the last three months. The
  *  title, the text and a link label that is not a number are English keys of
  *  the home dictionary, translated at display (#782); a unit test checks
  *  that every language has them. */
 export const LATEST_UPDATES: Update[] = [
   {
-    date: "2026-11-02",
-    title: "The documentation in five languages",
-    text: "Every docs page, the 17 published documents, their screenshots and their diagrams follow the language picker. A translation that falls behind the English says so.",
+    date: "2026-11-05",
+    title: "EDC 1.0, tested before it goes live",
+    text: "On the local stack the connector, the identity hub and the issuer run on Eclipse Dataspace Components 1.0 (release candidate 5), with siglet as the data plane, and the hub provisions a new participant itself. The identity, dataspace and health checks pass there as they do on 0.18. The live hub, on EDC 0.18 since October with onboarding on Azure, moves once the final 1.0 is released.",
+    links: [
+      { label: "#881", href: `${REPO}/issues/881` },
+      {
+        label: "ADR-055",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-055-azure-runs-the-compose-jad-build.md`,
+      },
+      ...[593, 615, 878].map(pr),
+    ],
+  },
+  {
+    date: "2026-11-05",
+    title: "My data: contracts, transfers and the SPE in one place",
+    text: "A health data user sees their contracts and data in one list, each transfer with its dates, method and policy, imports a transfer into a secure processing environment and views it in 3D. The terms they agree to come from a minimal set of standard policies.",
     links: [
       {
-        label: "ADR-071",
-        href: `${REPO}/blob/main/docs/ADRs/ADR-071-the-documentation-follows-the-language-picker.md`,
+        label: "ADR-077",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-077-a-minimal-set-of-standard-data-sharing-policies.md`,
       },
-      ...[820, 821, 822, 823, 824, 825, 826, 827].map(pr),
+      ...[883, 885, 893, 896, 897, 898, 901].map(pr),
     ],
   },
   {
-    date: "2026-11-02",
-    title: "Every page of the hub in five languages",
-    text: "The pages of the health data access body, the health data holder, the health data user and the patient, the explore pages, the administration and the wallet's phone screens follow the picker too, with one word for credentials in each language.",
-    links: [794, 795, 799, 802, 803, 804, 806, 807, 818, 828].map(pr),
-  },
-  {
-    date: "2026-11-02",
-    title: "ODRL policies in plain language",
-    text: "Every policy on the policies page is explained in plain sentences and checked against ODRL 2.2 and the EHDS rules for secondary use: valid, with warnings or with errors.",
-    links: [pr(819)],
-  },
-  {
-    date: "2026-11-02",
-    title: "A criticality for every access",
-    text: "The access log rates each access low, medium or high and says why, and accesses made by automated tests carry a Test badge.",
-    links: [pr(817)],
-  },
-  {
-    date: "2026-11-02",
-    title: "Confidential SPEs attest on Azure",
-    text: "Both SPE workspaces on Azure confidential containers get their data key from Trustee only after AMD SEV-SNP hardware attestation, checked against Microsoft's endorsed measurement.",
+    date: "2026-11-03",
+    title: "Confidential secure processing environments",
+    text: "Two SPE workspaces run as Azure confidential containers and get their data key from the access body's Trustee only after AMD SEV-SNP hardware attestation. They start on demand, stop themselves when idle, and the administration shows where each runs.",
     links: [
       { label: "#774", href: `${REPO}/issues/774` },
-      ...[791, 798, 801, 805, 809].map(pr),
+      {
+        label: "ADR-068",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md`,
+      },
+      {
+        label: "ADR-072",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-072-spe-workspaces-start-on-demand.md`,
+      },
+      ...[775, 801, 835, 836].map(pr),
     ],
   },
   {
     date: "2026-11-02",
-    title: "Patients see their own insights and studies",
-    text: "A signed-in patient's insights and research pages read their own record, and the recommendations follow their own conditions.",
-    links: [829, 830, 831].map(pr),
-  },
-  {
-    date: "2026-11-01",
-    title: "In German, French, Dutch and Spanish",
-    text: "Pick a language in the menu bar: the menus, the sign-in page, this start page and the catalogue switch with it. Every dataset is described in German and Spanish, some in French and Dutch, and legal terms are the Regulation's own, checked against the Official Journal.",
+    title: "The hub and its documentation in five languages",
+    text: "Pick English, German, French, Dutch or Spanish in the menu bar: every page, the published documents, their screenshots and diagrams follow, legal terms are the Regulation's own, and every dataset is described in German and Spanish.",
     links: [
       { label: "#782", href: `${REPO}/issues/782` },
       {
         label: "ADR-070",
         href: `${REPO}/blob/main/docs/ADRs/ADR-070-the-interface-follows-the-language-picker-without-locale-urls.md`,
       },
-      { label: "#786", href: `${REPO}/pull/786` },
-      { label: "#787", href: `${REPO}/pull/787` },
+      {
+        label: "ADR-071",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-071-the-documentation-follows-the-language-picker.md`,
+      },
+      ...[787, 807, 818, 826].map(pr),
+    ],
+  },
+  {
+    date: "2026-11-02",
+    title: "Trust in every access",
+    text: "Every ODRL policy is explained in plain language and checked against ODRL 2.2 and the EHDS rules, the access log rates each access by criticality, every API route needs a sign-in, and questions in natural language run read-only, leave a hash-chained FHIR AuditEvent and respect k-anonymity.",
+    links: [
+      {
+        label: "ADR-044",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-044-every-api-route-needs-a-session.md`,
+      },
+      ...[819, 817, 498, 781, 772].map(pr),
     ],
   },
   {
     date: "2026-11-01",
-    title: "National EHDS rules for six member states",
-    text: "How Germany, Austria, Belgium, France, the Netherlands and Spain implement secondary use: the access body's legal role, the national law, the opt-out, fees and dates, each with its official source.",
-    links: [{ label: "#783", href: `${REPO}/pull/783` }],
-  },
-  {
-    date: "2026-10-31",
-    title: "Confidential secure processing environments",
-    text: "Two SPE workspaces as Azure confidential containers, which get their data key only after attesting to the access body's Trustee. The administration shows where each runs; bringing them up on Azure is under way.",
+    title: "HealthDCAT-AP Release 8, validated",
+    text: "Every dataset description passes the official Release 8 SHACL the way the HealthData@EU validator checks it, the Art. 71 opt-out filters every secondary-use query, and the national EHDS rules of Germany, Austria, Belgium, France, the Netherlands and Spain are documented with their official sources.",
     links: [
       {
-        label: "ADR-068",
-        href: `${REPO}/blob/main/docs/ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md`,
+        label: "ADR-063",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-063-healthdcat-ap-release-8-and-its-namespace.md`,
       },
-      { label: "#774", href: `${REPO}/issues/774` },
-    ],
-  },
-  {
-    date: "2026-10-31",
-    title: "Safer natural language questions",
-    text: "Cypher written by the language model runs in a read-only session, and k-anonymity applies to federated questions as it does to federated Cypher.",
-    links: [
-      { label: "#781", href: `${REPO}/pull/781` },
-      { label: "#772", href: `${REPO}/pull/772` },
+      {
+        label: "ADR-062",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md`,
+      },
+      ...[699, 702, 704, 783].map(pr),
     ],
   },
   {
     date: "2026-10-29",
-    title: "Klarbefund deletes everywhere",
-    text: '"Delete all my data" in the iPhone app now deletes the account and its values on the hub too, and the app\'s menu shows trends, the record and duplicates.',
+    title: "Klarbefund, the iPhone app",
+    text: 'The app reads paper lab reports into trends, creates its own sandbox account gated by App Attest and sends the reports into the person\'s own EHDS record. "Delete all my data" deletes on the hub too, and the beta is open by a public TestFlight link.',
     links: [
       { label: "The app", href: "#klarbefund-title" },
-      { label: "#769", href: `${REPO}/pull/769` },
+      {
+        label: "ADR-054",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md`,
+      },
+      ...[476, 555, 769].map(pr),
     ],
   },
   {
@@ -131,23 +137,49 @@ export const LATEST_UPDATES: Update[] = [
     ],
   },
   {
-    date: "2026-10-27",
-    title: "HealthDCAT-AP Release 8, validated",
-    text: "Every dataset description passes the official Release 8 SHACL the way the HealthData@EU validator checks it, and the Art. 71 opt-out filters every secondary-use query.",
+    date: "2026-10-28",
+    title: "Trusted issuers and protocol checks that can fail",
+    text: "Each issuer is trusted only for its own credential types, with a Simpl Governance Authority for membership, and a credential from a rogue issuer is refused. The DSP and DCP suites fail the build below their floors, and a daily check negotiates against the live hub.",
     links: [
-      { label: "#702", href: `${REPO}/pull/702` },
-      { label: "#704", href: `${REPO}/pull/704` },
-      { label: "#699", href: `${REPO}/pull/699` },
+      {
+        label: "ADR-031",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-031-checks-must-assert.md`,
+      },
+      ...[344, 739, 744, 878].map(pr),
     ],
   },
   {
     date: "2026-10-16",
     title: "Security and operations, published",
-    text: "The threat model, the security test report, the production readiness assessment and the load test results with their dashboards are under Docs.",
+    text: "The threat model, the security test report, the production readiness assessment and the load test results with their Grafana dashboards are under Docs. The audit trail and the connectors report to Grafana, and the hub stops off hours and starts again by itself.",
     links: [
-      { label: "#659", href: `${REPO}/pull/659` },
-      { label: "#672", href: `${REPO}/pull/672` },
-      { label: "#671", href: `${REPO}/pull/671` },
+      {
+        label: "ADR-053",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-053-everything-stops-off-hours.md`,
+      },
+      {
+        label: "ADR-058",
+        href: `${REPO}/blob/main/docs/ADRs/ADR-058-azure-triggers-the-off-hours-schedule.md`,
+      },
+      ...[659, 671, 672, 510, 546].map(pr),
+    ],
+  },
+  {
+    date: "2026-09-25",
+    title: "The access body decides, and the permit gates the data",
+    text: "The health data access body decides on applications, publishes the register of data permits, revokes a permit, answers health data requests in anonymised statistical form (Art. 69) and generates its activity report (Art. 59). Without a permit there is no transfer and no secure processing environment.",
+    links: [
+      { label: "#206", href: `${REPO}/issues/206` },
+      ...[207, 208, 210, 211, 212, 298].map(pr),
+    ],
+  },
+  {
+    date: "2026-09-24",
+    title: "An overview for every persona",
+    text: "Every sign-in lands on a 3D overview for the patient, the access body, the holder or the researcher, with time series, trends and the data behind each view, and the start page opens on a living body.",
+    links: [
+      { label: "#271", href: `${REPO}/issues/271` },
+      ...[274, 277, 279, 281, 461].map(pr),
     ],
   },
 ];
