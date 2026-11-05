@@ -263,5 +263,6 @@
   "Access policy": "Access policy",
   "{provider} decides who may see the offer at all. {consumer} saw it, so its connector met that policy, proving its membership with its credentials (DCP); the provider does not disclose the policy itself.": "{provider} decides who may see the offer at all. {consumer} saw it, so its connector met that policy, proving its membership with its credentials (DCP); the provider does not disclose the policy itself.",
   "Loading the agreement…": "Loading the agreement…",
-  "The agreement could not be read: {detail}": "The agreement could not be read: {detail}"
+  "The agreement could not be read: {detail}": "The agreement could not be read: {detail}",
+  "Negotiate this offer again": "Negotiate this offer again"
 }

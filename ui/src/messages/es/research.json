@@ -263,5 +263,6 @@
   "Access policy": "Política de acceso",
   "{provider} decides who may see the offer at all. {consumer} saw it, so its connector met that policy, proving its membership with its credentials (DCP); the provider does not disclose the policy itself.": "{provider} decide quién puede ver la oferta. {consumer} la vio, así que su conector cumplió esa política, demostrando su pertenencia con sus credenciales (DCP); el proveedor no revela la política en sí.",
   "Loading the agreement…": "Cargando el acuerdo…",
-  "The agreement could not be read: {detail}": "No se pudo leer el acuerdo: {detail}"
+  "The agreement could not be read: {detail}": "No se pudo leer el acuerdo: {detail}",
+  "Negotiate this offer again": "Negociar esta oferta de nuevo"
 }
