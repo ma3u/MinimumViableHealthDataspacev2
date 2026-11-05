@@ -1,0 +1,41 @@
+meta {
+  name: 20 The transfer is started (DSP)
+  type: http
+  seq: 20
+}
+
+get {
+  url: {{baseUrl}}/api/transfers?participantId={{dspConsumerCtx}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+script:pre-request {
+  // The consumer prepares the data flow on siglet, then the provider starts it;
+  // on Azure it took under 25 s.
+  if (bru.getEnvVar("dspLiveFlow") === "true") {
+    await new Promise((resolve) => setTimeout(resolve, 25000));
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+tests {
+  const row = res.getBody().find((t) => t["@id"] === bru.getVar("dspTransferId")) || {};
+  if (bru.getEnvVar("dspLiveFlow") !== "true") {
+    test("SKIPPED live check: this environment does not run the DSP flow end to end (#542)", function () {});
+  } else {
+    // "Connect timed out" here is the control plane failing to reach
+    // http://mvhd-siglet:8081: run scripts/azure/17-siglet.sh --check (#876).
+    test("STARTED", function () {
+      expect(row.state, `transfer ${bru.getVar("dspTransferId")}: ${row.errorDetail || "not listed"}`).to.equal("STARTED");
+    });
+  }
+}

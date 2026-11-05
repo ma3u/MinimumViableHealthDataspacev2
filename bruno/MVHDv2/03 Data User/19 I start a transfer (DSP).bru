@@ -1,0 +1,38 @@
+meta {
+  name: 19 I start a transfer (DSP)
+  type: http
+  seq: 19
+}
+
+post {
+  url: {{baseUrl}}/api/transfers
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "participantId": "{{dspConsumerCtx}}",
+    "contractId": "{{dspAgreementId}}",
+    "assetId": "{{dspAssetId}}",
+    "counterPartyAddress": "{{dspEndpoint}}"
+  }
+}
+
+tests {
+  const body = res.getBody() || {};
+  bru.setVar("dspTransferId", body["@id"] || "");
+  if (bru.getEnvVar("dspLiveFlow") !== "true") {
+    test("SKIPPED live check: this environment does not run the DSP flow end to end (#542)", function () {});
+  } else {
+    test("the connector took the transfer request", function () {
+      expect(res.getStatus(), JSON.stringify(body)).to.equal(201);
+      expect(body["@id"], "no transfer process id").to.be.a("string").that.does.not.match(/^demo-/);
+    });
+  }
+}

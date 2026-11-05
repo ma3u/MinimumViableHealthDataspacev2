@@ -1,0 +1,40 @@
+meta {
+  name: 18 The negotiation is finalized (DSP)
+  type: http
+  seq: 18
+}
+
+get {
+  url: {{baseUrl}}/api/negotiations?participantId={{dspConsumerCtx}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+script:pre-request {
+  // The connectors negotiate asynchronously; on Azure it took under 20 s.
+  if (bru.getEnvVar("dspLiveFlow") === "true") {
+    await new Promise((resolve) => setTimeout(resolve, 25000));
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+tests {
+  const row = res.getBody().find((n) => n["@id"] === bru.getVar("dspNegotiationId")) || {};
+  bru.setVar("dspAgreementId", row.contractAgreementId || "");
+  if (bru.getEnvVar("dspLiveFlow") !== "true") {
+    test("SKIPPED live check: this environment does not run the DSP flow end to end (#542)", function () {});
+  } else {
+    test("FINALIZED with a contract agreement", function () {
+      expect(row.state, `negotiation ${bru.getVar("dspNegotiationId")}: ${row.errorDetail || "not listed"}`).to.equal("FINALIZED");
+      expect(row.contractAgreementId, "no agreement").to.be.a("string").that.is.not.empty;
+    });
+  }
+}

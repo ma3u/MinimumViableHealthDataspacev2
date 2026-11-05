@@ -68,8 +68,20 @@ report() {
   else
     echo "  MISSING  app ${SIGLET_APP}"
   fi
+  ports=$(az containerapp show --name "$SIGLET_APP" --resource-group "$RG" \
+    --query "properties.configuration.ingress.additionalPortMappings[].exposedPort" -o tsv 2>/dev/null | tr '\n' ' ')
+  echo "  ports    ${ports:-none} (want 8081 8082 8083; the control plane signals on 8081)"
 }
-if [ "$MODE" = "--check" ]; then report; exit 0; fi
+if [ "$MODE" = "--check" ]; then
+  report
+  # Without 8081 every transfer stops at "failed to prepare data flow" (#876).
+  exposed=$(az containerapp show --name "$SIGLET_APP" --resource-group "$RG" \
+    --query "properties.configuration.ingress.additionalPortMappings[].exposedPort" -o tsv 2>/dev/null || true)
+  for p in 8081 8082 8083; do
+    grep -qx "$p" <<<"$exposed" || { err "port ${p} is not exposed; run this script without --check"; exit 1; }
+  done
+  exit 0
+fi
 
 # ── 1. The database ─────────────────────────────────────────────────────────
 if az postgres flexible-server db show --server-name "$PG_FLEX_NAME" \
@@ -185,21 +197,34 @@ ok "siglet HttpData-PULL -> ${SIGLET_PULL_ENDPOINT}"
 # reachable inside the environment as http://mvhd-siglet:<port>.
 az containerapp ingress update --name "$SIGLET_APP" --resource-group "$RG" \
   --type internal --target-port 8080 -o none
+# Through --yaml: `az containerapp update` has no --set, and argparse took
+# `--set` for `--set-env-vars`, so this used to add an environment variable
+# named properties.configuration.ingress.additionalPortMappings and expose no
+# port. 8081 stayed unreachable and every transfer stopped at "failed to
+# prepare data flow: Connect timed out" (#876). That variable is removed here.
 python3 - "$SIGLET_APP" "$RG" <<'PY'
-import json, subprocess, sys
+import json, subprocess, sys, tempfile
 app, rg = sys.argv[1:3]
-show = json.loads(subprocess.check_output(["az", "containerapp", "show", "-n", app, "-g", rg, "-o", "json"]))
-ing = show["properties"]["configuration"]["ingress"]
-have = {m["targetPort"] for m in ing.get("additionalPortMappings") or []}
-want = [p for p in (8081, 8082, 8083) if p not in have]
-if want:
-    maps = (ing.get("additionalPortMappings") or []) + [
-        {"targetPort": p, "exposedPort": p, "external": False} for p in want]
-    subprocess.check_call(["az", "containerapp", "update", "-n", app, "-g", rg, "-o", "none",
-        "--set", "properties.configuration.ingress.additionalPortMappings=" + json.dumps(maps)])
-print("ports 8080 (ingress), " + ", ".join(str(p) for p in (8081, 8082, 8083)) + " (internal)")
+doc = json.loads(subprocess.check_output(["az", "containerapp", "show", "-n", app, "-g", rg, "-o", "json"]))
+ing = doc["properties"]["configuration"]["ingress"]
+maps = [m for m in ing.get("additionalPortMappings") or [] if m.get("targetPort") not in (8081, 8082, 8083)]
+maps += [{"targetPort": p, "exposedPort": p, "external": False} for p in (8081, 8082, 8083)]
+ing["additionalPortMappings"] = maps
+c = doc["properties"]["template"]["containers"][0]
+c["env"] = [e for e in c.get("env") or [] if not e.get("name", "").startswith("properties.")]
+doc["properties"]["configuration"].pop("secrets", None)
+for k in ("latestRevisionName", "latestReadyRevisionName", "latestRevisionFqdn",
+          "outboundIpAddresses", "eventStreamEndpoint", "runningStatus", "provisioningState"):
+    doc["properties"].pop(k, None)
+with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+    json.dump(doc, f)
+subprocess.check_call(["az", "containerapp", "update", "-n", app, "-g", rg, "--yaml", f.name, "-o", "none"])
+got = json.loads(subprocess.check_output(["az", "containerapp", "show", "-n", app, "-g", rg,
+    "--query", "properties.configuration.ingress.additionalPortMappings[].exposedPort", "-o", "json"]))
+if sorted(got or []) != [8081, 8082, 8083]:
+    sys.exit(f"ports not exposed after the update: {got}")
+print("ports 8080 (ingress), 8081, 8082, 8083 (internal)")
 PY
-
 # ── 4. Healthy, and the key set answers ─────────────────────────────────────
 rev=$(az containerapp show --name "$SIGLET_APP" --resource-group "$RG" --query properties.latestRevisionName -o tsv)
 for _ in $(seq 1 40); do

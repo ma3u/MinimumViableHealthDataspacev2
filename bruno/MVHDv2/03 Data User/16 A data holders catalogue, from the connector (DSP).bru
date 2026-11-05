@@ -1,0 +1,41 @@
+meta {
+  name: 16 A data holders catalogue, from the connector (DSP)
+  type: http
+  seq: 16
+}
+
+get {
+  url: {{baseUrl}}/api/negotiations?participantId={{dspConsumerCtx}}&catalog=true&providerDid={{dspProviderDidQuery}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.dataset: isArray
+}
+
+tests {
+  const cat = res.getBody();
+  const ds = (cat.dataset || [])[0] || {};
+  const offer = (ds.hasPolicy || [])[0] || {};
+  bru.setVar("dspAssetId", ds["@id"] || "");
+  bru.setVar("dspOfferId", offer["@id"] || "");
+  bru.setVar(
+    "dspEndpoint",
+    ((ds.distribution || [])[0] || {}).accessService?.endpointURL || "",
+  );
+  if (bru.getEnvVar("dspLiveFlow") !== "true") {
+    test("SKIPPED live check: this environment does not run the DSP flow end to end (#542)", function () {});
+  } else {
+    test("the catalogue came from the connector, not the demo catalogue", function () {
+      expect(cat.demo, `demo catalogue served: ${cat.upstreamError || ""}`).to.not.equal(true);
+      expect(cat.dataset, "the provider offers nothing").to.not.be.empty;
+      expect(offer["@id"], "the first dataset carries no offer").to.be.a("string");
+    });
+  }
+}
