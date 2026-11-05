@@ -1242,6 +1242,12 @@
       "file": "ADR-077-a-minimal-set-of-standard-data-sharing-policies.md",
       "title": "A minimal set of standard data-sharing policies",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-078",
+      "file": "ADR-078-edc-1-on-container-apps-without-cfm.md",
+      "title": "EDC 1.0 stays on Container Apps, and the hub provisions participants without CFM",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
