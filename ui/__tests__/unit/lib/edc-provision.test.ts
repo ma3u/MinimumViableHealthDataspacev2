@@ -165,6 +165,27 @@ describe("provisionParticipant", () => {
     });
   });
 
+  it("takes a 2xx with an empty body as done (data plane, holder)", async () => {
+    happyPath();
+    const empty = () => {
+      throw new SyntaxError("Unexpected end of JSON input");
+    };
+    mgmt.mockImplementation(async (path: string, method?: string) => {
+      if (path === "/v5/participants" && method === "POST")
+        return { "@id": CTX };
+      if (path.endsWith("/dataplanes")) empty();
+      return undefined;
+    });
+    issuer.mockImplementation(async (path: string) => {
+      if (path.endsWith("/credentialdefinitions/query")) return DEFS;
+      if (path.endsWith("/holders")) empty();
+      return undefined;
+    });
+    const out = await provisionParticipant(REG);
+    expect(out.steps.every((s) => s.ok)).toBe(true);
+    expect(out.steps).toHaveLength(7);
+  });
+
   it("undoes what it created, in reverse, when a later step fails", async () => {
     happyPath();
     mgmt.mockImplementation(async (path: string, method?: string) => {
@@ -262,9 +283,19 @@ describe("provisionParticipant", () => {
 describe("identityManifest", () => {
   it("generates the key under an alias unique to the context", () => {
     const m = identityManifest(CTX, "did:web:identityhub%3A7083:x");
-    expect(m.keys[0].privateKeyAlias).toBe(
-      `did:web:identityhub%3A7083:x#key1@${CTX}`,
-    );
+    expect(m.keys[0].keyId).toBe("did:web:identityhub%3A7083:x#key1");
+    expect(m.keys[0].privateKeyAlias).toBe(`${CTX}-key1`);
+  });
+
+  it("keeps the alias short for the longest DID a name can make", () => {
+    // Vault's file storage fails on an alias of 93 characters or more.
+    const did = `did:web:identityhub%3A7083:${"n".repeat(40)}-abcdef`;
+    const m = identityManifest("5e4042a5-462a-4b8c-9b26-ac9974d4d704", did);
+    expect(m.keys[0].privateKeyAlias.length).toBeLessThan(93);
+  });
+
+  it("points the endpoints at the context", () => {
+    const m = identityManifest(CTX, "did:web:identityhub%3A7083:x");
     expect(m.serviceEndpoints.map((e) => e.serviceEndpoint)).toEqual([
       `http://identityhub:7082/api/credentials/v1/participants/${CTX}`,
       `http://controlplane:8082/api/dsp/${CTX}/http-dsp-profile-2025-1`,

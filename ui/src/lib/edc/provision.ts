@@ -73,6 +73,18 @@ export class ProvisioningError extends Error {
 const answered = (err: unknown) =>
   err instanceof Error && err.message.startsWith("EDC API error");
 
+/**
+ * A 2xx whose body is empty or not JSON is a success: apiRequest skips the
+ * parse only for a 204, and its JSON parse throws a SyntaxError otherwise.
+ */
+async function bodyNotNeeded(call: Promise<unknown>): Promise<void> {
+  try {
+    await call;
+  } catch (err) {
+    if (!(err instanceof SyntaxError)) throw err;
+  }
+}
+
 /** The registration's details, kept on the control plane's context. */
 export function contextProperties(r: Registration): Record<string, string> {
   return {
@@ -107,8 +119,11 @@ export function identityManifest(contextId: string, did: string) {
       {
         keyId: `${did}#key1`,
         // A fresh Vault alias per context: 1.0 will not generate a key under
-        // an alias Vault already holds (#881 finding 18).
-        privateKeyAlias: `${did}#key1@${contextId}`,
+        // an alias Vault already holds (#881 finding 18). Without the DID: the
+        // compose Vault's file storage turns an alias of 93 characters or more
+        // into a file name over 255 bytes ("file name too long"), and a
+        // registered name makes a DID of up to 74 (measured 2026-11-05).
+        privateKeyAlias: `${contextId}-key1`,
         active: true,
         keyGeneratorParams: { algorithm: "EdDSA" },
         usage: ["sign_token", "sign_presentation", "sign_credentials"],
@@ -237,12 +252,15 @@ export async function provisionParticipant(
     }),
   );
 
+  // 1.0 answers 200 with an empty body here, not 204 (measured 2026-11-05).
   await run("data plane (siglet)", () =>
-    edcClient.management(`/v5/participants/${contextId}/dataplanes`, "PUT", {
-      dataplaneId: `siglet-${contextId}`,
-      endpoint: `${SIGLET_SIGNALING_URL}/${contextId}/dataflows`,
-      transferTypes: ["HttpData-PULL"],
-    }),
+    bodyNotNeeded(
+      edcClient.management(`/v5/participants/${contextId}/dataplanes`, "PUT", {
+        dataplaneId: `siglet-${contextId}`,
+        endpoint: `${SIGLET_SIGNALING_URL}/${contextId}/dataflows`,
+        transferTypes: ["HttpData-PULL"],
+      }),
+    ),
   );
 
   // Keyed by the context id, not the DID as the seeds do: a did:web carries
@@ -250,11 +268,14 @@ export async function provisionParticipant(
   // "Ambiguous URI path encoding"), so a holder keyed by its DID can never be
   // deleted again. The issuer finds the holder by its DID either way.
   await run("issuer holder", async () => {
-    await edcClient.issuer(`/v1/participants/${ISSUER_CTX}/holders`, "POST", {
-      holderId: contextId,
-      did,
-      name: r.displayName,
-    });
+    // Created answers 2xx with an empty body (measured 2026-11-05).
+    await bodyNotNeeded(
+      edcClient.issuer(`/v1/participants/${ISSUER_CTX}/holders`, "POST", {
+        holderId: contextId,
+        did,
+        name: r.displayName,
+      }),
+    );
     undo.push({
       step: "issuer holder",
       run: () =>
@@ -267,8 +288,9 @@ export async function provisionParticipant(
 
   await run("MembershipCredential request", async () => {
     const definitionId = await membershipDefinitionId();
-    try {
-      await edcClient.identity(
+    // A 2xx whose body is the bare holderPid, not JSON, is a success.
+    await bodyNotNeeded(
+      edcClient.identity(
         `/v1/participants/${contextId}/credentials/request`,
         "POST",
         {
@@ -281,11 +303,8 @@ export async function provisionParticipant(
             },
           ],
         },
-      );
-    } catch (err) {
-      // A 2xx whose body is the bare holderPid, not JSON, is a success.
-      if (!(err instanceof SyntaxError)) throw err;
-    }
+      ),
+    );
   });
 
   return { contextId, did, steps };
