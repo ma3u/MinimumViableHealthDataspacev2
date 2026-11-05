@@ -185,6 +185,37 @@ describe("GET /api/transfers/[id]/data", () => {
     const expired = await (await get()).json();
     expect(expired.detail).toMatch(/refused the access token \(401\)/);
     expect(expired.detail).toMatch(/start a new transfer/);
+    expect(expired.expired).toBe(true);
+    expect(notServed.expired).toBe(false);
+  });
+
+  it("calls a token siglet cannot renew expired (#881 finding 23)", async () => {
+    mockManagement.mockResolvedValue({ state: "STARTED" });
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        '{"error":"no signing key mapping for participant context ctx"}',
+        { status: 500 },
+      ),
+    );
+
+    const res = await get();
+    const body = await res.json();
+
+    expect(res.status).toBe(502);
+    expect(body).toMatchObject({ step: "token", expired: true });
+    expect(body.detail).toMatch(/expired and could not be renewed/);
+  });
+
+  it("does not call another siglet failure expired", async () => {
+    mockManagement.mockResolvedValue({ state: "STARTED" });
+    fetchMock.mockResolvedValueOnce(
+      new Response("database down", { status: 500 }),
+    );
+
+    const body = await (await get()).json();
+
+    expect(body).toMatchObject({ step: "token", expired: false });
+    expect(body.detail).toMatch(/siglet answered 500/);
   });
 
   it("answers 409 for a transfer that is not STARTED", async () => {

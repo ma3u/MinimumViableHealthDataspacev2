@@ -115,10 +115,11 @@ export async function POST(
     bundle = pseudonymised ? pseudonymiseFhir(pulled.data) : pulled.data;
   } catch (err) {
     const step = err instanceof TransferDataError ? err.step : "data";
+    const expired = err instanceof TransferDataError && err.expired;
     const detail = err instanceof Error ? err.message : String(err);
     console.error("Pulling a transfer for import failed:", { id, step }, err);
     return NextResponse.json(
-      { error: "Failed to fetch the transfer's data", step, detail },
+      { error: "Failed to fetch the transfer's data", step, detail, expired },
       { status: 502 },
     );
   }
