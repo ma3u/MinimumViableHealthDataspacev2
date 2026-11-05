@@ -5,7 +5,8 @@ The official validator imports the ontologies listed in its
 imports/imports.ttl (DCAT 2, Dublin Core, FOAF, PROV, vCard, ...) into the
 data graph. Their rdfs:subClassOf triples decide what a shape targets: DCAT 2
 says dcat:Catalog is a dcat:Dataset, so every Dataset shape also applies to
-the catalogue. validate.py loads this snapshot rather than a dozen web hosts.
+the catalogue. validate.py loads this snapshot rather than a dozen web hosts,
+and drops that one triple in memory until HealthDCAT-AP Release 9 (#884).
 
     python3 scripts/healthdcat-ap/snapshot-imports.py
 
