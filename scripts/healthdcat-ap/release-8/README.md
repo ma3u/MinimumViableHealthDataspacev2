@@ -48,9 +48,16 @@ One consequence is upstream's: DCAT 2 makes `dcat:Catalog` a subclass of
 `dcat:Dataset`, so every Dataset shape also judges the catalogue (hdab,
 health category, provenance and the rest). The official validator reports
 17 such violations on the hub's catalogue and 0 on its 20 datasets; the
-release's own AGORA example, wrapped in a catalogue, shows the same. The
-validator lists them, names them as that issue and does not fail on them;
-`--strict` counts them. Remove that exception when upstream decides.
+release's own AGORA example, wrapped in a catalogue, shows the same.
+
+The HealthDCAT-AP team confirmed it on 2026-11-05: it comes from the W3C DCAT
+2 vocabulary ([w3c/dx-dcat#136](https://github.com/w3c/dx-dcat/issues/136)),
+Release 9 will carry a workaround, and until then a local validator should
+drop that triple (#884). `validate.py` does so in memory and reports it as
+"hierarchy workarounds: 1"; the snapshot stays as the official validator
+loads it, and `--as-published` validates without the workaround. When
+Release 9 is vendored, re-check whether `WORKAROUNDS` in `validate.py` is
+still needed.
 
 ## One repair
 
