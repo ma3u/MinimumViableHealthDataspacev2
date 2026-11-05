@@ -167,7 +167,7 @@ function PersonalHealthCard({
     <button
       type="button"
       onClick={onOpen}
-      aria-label={t("{title}: view 3-month trends", { title: s.title })}
+      aria-label={t("{title}: view 3-month trends", { title: t(s.title) })}
       className="surface-card border border-(--border) rounded-xl overflow-hidden text-left w-full transition-all hover:border-(--accent) hover:shadow-md focus:outline-hidden focus-visible:ring-2 focus-visible:ring-(--accent)"
     >
       {s.screenshot && imgOk ? (
@@ -175,7 +175,7 @@ function PersonalHealthCard({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={s.screenshot}
-            alt={t("{source} (real screenshot)", { source: s.source })}
+            alt={t("{source} (real screenshot)", { source: t(s.source) })}
             onError={() => setImgOk(false)}
             className="w-full h-full object-cover object-top"
           />
@@ -183,7 +183,7 @@ function PersonalHealthCard({
             className="absolute top-1.5 left-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
             style={{ background: brandBackgroundForWhiteText(s.brand) }}
           >
-            {s.source}
+            {t(s.source)}
           </span>
         </div>
       ) : null}
@@ -197,10 +197,10 @@ function PersonalHealthCard({
           </span>
           <div className="min-w-0">
             <p className="text-sm font-bold text-(--text-primary) truncate">
-              {s.title}
+              {t(s.title)}
             </p>
             <p className="text-[11px] text-(--text-secondary) truncate">
-              {s.source}
+              {t(s.source)}
             </p>
           </div>
         </div>
@@ -211,7 +211,7 @@ function PersonalHealthCard({
               className="rounded-lg bg-(--surface-2) px-2.5 py-1.5"
             >
               <p className="text-[10px] text-(--text-secondary) uppercase tracking-wide">
-                {m.label}
+                {t(m.label)}
               </p>
               <p className="text-sm font-bold text-(--text-primary)">
                 {m.value}
@@ -451,7 +451,9 @@ export default function PatientPage() {
                               lang === "en" ? undefined : lang,
                             )}
                           </time>
-                          {lastEhrSync.source ? ` · ${lastEhrSync.source}` : ""}
+                          {lastEhrSync.source
+                            ? ` · ${t(lastEhrSync.source)}`
+                            : ""}
                         </>
                       ) : (
                         t(
