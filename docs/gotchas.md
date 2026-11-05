@@ -3,6 +3,22 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-05: `az containerapp update --set` is `--set-env-vars`
+
+`az containerapp update` has no generic `--set`. Python's argparse accepts a
+unique prefix of a long option, so `--set properties.configuration.ingress.additionalPortMappings=[...]`
+ran as `--set-env-vars` and exited 0: `mvhd-siglet` got an environment variable
+of that name and no extra port. 8081 stayed unreachable from 2026-10-07, and
+every transfer on Azure stopped at "failed to prepare data flow: Connect timed
+out" (#876). Change Container App configuration through `--yaml` (show, edit
+the JSON, update), then read the property back. `17-siglet.sh --check` now
+fails without the ports, and the API collection's live DSP journey (`03 Data
+User/15`-`20`, Azure-Dev) fails when a transfer does not reach STARTED.
+
+Same issue, same day: Azure's participant contexts all stay `CREATED`, and
+`/api/participants` kept only `ACTIVATED` ones, so the live UI served the
+compose stack's mock participants for months. `CREATED` contexts answer DSP.
+
 ## 2026-11-03: Bruno's cookie jar drops the forged session behind sticky sessions
 
 From 2026-10-28 every Azure-Dev run of the API collection answered 401 on all
