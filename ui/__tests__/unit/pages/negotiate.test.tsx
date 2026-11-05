@@ -16,6 +16,24 @@ vi.mock("@/lib/api", () => ({
   fetchApi: (...args: unknown[]) => mockFetchApi(...args),
 }));
 
+// The GitHub Pages build is a constant per bundle; a getter lets one test
+// render the page as that build without reloading the module.
+const staticMode = vi.hoisted(() => ({ on: false }));
+vi.mock("@/lib/static-export", () => ({
+  get IS_STATIC() {
+    return staticMode.on;
+  },
+  BASE_PATH: "",
+}));
+
+// The query string the page is opened with, e.g. "dataset=..." from the catalog
+const query = vi.hoisted(() => ({ value: "" }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), prefetch: vi.fn() }),
+  usePathname: () => "/negotiate",
+  useSearchParams: () => new URLSearchParams(query.value),
+}));
+
 vi.mock("next/link", () => ({
   default: ({
     href,
@@ -137,6 +155,8 @@ function setupDefaultMocks(
 describe("NegotiatePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    staticMode.on = false;
+    query.value = "";
   });
 
   // ── 1. Page title rendering ──
@@ -851,14 +871,14 @@ describe("NegotiatePage", () => {
     const selects = screen.getAllByRole("combobox");
     const consumerSelect = selects[0];
 
-    await user.selectOptions(consumerSelect, "ctx-pharmaco");
+    await user.selectOptions(consumerSelect, "ctx-alpha");
 
     // fetchApi should be called again for the new participant's negotiations
     await waitFor(() => {
       const negotiationCalls = mockFetchApi.mock.calls.filter(
         (c: unknown[]) =>
           typeof c[0] === "string" &&
-          c[0].includes("negotiations?participantId=ctx-pharmaco"),
+          c[0].includes("negotiations?participantId=ctx-alpha"),
       );
       expect(negotiationCalls.length).toBeGreaterThan(0);
     });
@@ -875,6 +895,285 @@ describe("NegotiatePage", () => {
       expect(
         screen.getAllByText(/PharmaCo Research AG/).length,
       ).toBeGreaterThanOrEqual(1);
+    });
+  });
+
+  // ── Ana's review of the Spanish UI (#876) ──
+  describe("choosing who to ask for a catalog", () => {
+    const fourParticipants = [
+      ...sampleParticipants,
+      {
+        "@id": "ctx-medreg",
+        identity: "did:web:medreg.de:hdab",
+        displayName: "MedReg DE",
+        role: "HDAB",
+      },
+      {
+        "@id": "ctx-lmc",
+        identity: "did:web:lmc.nl:clinic",
+        displayName: "Limburg Medical Centre",
+        role: "DATA_HOLDER",
+      },
+    ];
+
+    function selects() {
+      const [consumer, provider] = screen.getAllByRole("combobox");
+      return {
+        consumer: consumer as HTMLSelectElement,
+        provider: provider as HTMLSelectElement,
+      };
+    }
+
+    it("requests as the data user and asks the first data holder", async () => {
+      setupDefaultMocks();
+      render(<NegotiatePage />);
+
+      await waitFor(() => {
+        expect(selects().consumer.value).toBe("ctx-pharmaco");
+        expect(selects().provider.value).toBe("ctx-alpha");
+      });
+    });
+
+    it("asks the provider the dropdown shows, never the requester itself", async () => {
+      setupDefaultMocks({
+        "/api/participants": () => mockResponse(fourParticipants),
+      });
+      const user = userEvent.setup();
+      render(<NegotiatePage />);
+      await waitFor(() => {
+        expect(selects().provider.value).toBe("ctx-alpha");
+      });
+
+      await user.click(screen.getByText("Discover Offers"));
+
+      await waitFor(() => {
+        const call = mockFetchApi.mock.calls.find(
+          (c: unknown[]) =>
+            typeof c[0] === "string" && c[0].includes("catalog=true"),
+        );
+        expect(call?.[0]).toContain("participantId=ctx-pharmaco");
+        expect(call?.[0]).toContain(
+          `providerDid=${encodeURIComponent(
+            "did:web:alpha-klinik.de:participant",
+          )}`,
+        );
+      });
+    });
+
+    it("does not offer a data user as a data provider", async () => {
+      setupDefaultMocks({
+        "/api/participants": () => mockResponse(fourParticipants),
+      });
+      const user = userEvent.setup();
+      render(<NegotiatePage />);
+      await waitFor(() => {
+        expect(selects().consumer.value).toBe("ctx-pharmaco");
+      });
+      // Requesting as a hospital: PharmaCo is now not the requester, but it
+      // is still a data user and has nothing to offer.
+      await user.selectOptions(selects().consumer, "ctx-medreg");
+
+      const offered = [...selects().provider.options].map((o) => o.value);
+      expect(offered).not.toContain("ctx-pharmaco");
+      expect(offered).not.toContain("ctx-medreg");
+      expect(offered).toEqual(["ctx-alpha", "ctx-lmc"]);
+    });
+
+    it("picks another provider when the requester becomes the provider", async () => {
+      setupDefaultMocks({
+        "/api/participants": () => mockResponse(fourParticipants),
+      });
+      const user = userEvent.setup();
+      render(<NegotiatePage />);
+      await waitFor(() => {
+        expect(selects().provider.value).toBe("ctx-alpha");
+      });
+
+      await user.selectOptions(selects().consumer, "ctx-alpha");
+
+      expect(selects().provider.value).toBe("ctx-lmc");
+    });
+  });
+
+  describe("on GitHub Pages, where there is no API route", () => {
+    const assets = [
+      {
+        participantId: "ctx-alpha",
+        identity: "did:web:alpha-klinik.de:participant",
+        assets: [
+          {
+            "@id": "fhir-patient-search",
+            properties: {
+              name: "FHIR Patient Search",
+              description: "Search FHIR R4 patients",
+              contenttype: "application/fhir+json",
+            },
+          },
+        ],
+      },
+    ];
+
+    it("lists the provider's offers from the demo assets", async () => {
+      staticMode.on = true;
+      setupDefaultMocks({ "/api/assets": () => mockResponse(assets) });
+      const user = userEvent.setup();
+      render(<NegotiatePage />);
+      await waitFor(() => {
+        expect(screen.getByText("Discover Offers")).toBeTruthy();
+      });
+
+      await user.click(screen.getByText("Discover Offers"));
+
+      await waitFor(() => {
+        expect(screen.getByText("FHIR Patient Search")).toBeTruthy();
+      });
+      expect(screen.queryByText(/No datasets with offers found/)).toBeNull();
+      // Labelled as the demonstrator's catalogue, not a live DSP answer
+      expect(screen.getByText(/demonstrator's own catalogue/)).toBeTruthy();
+      // The request negotiations.json would have answered never went out
+      expect(
+        mockFetchApi.mock.calls.some(
+          (c: unknown[]) =>
+            typeof c[0] === "string" && c[0].includes("catalog=true"),
+        ),
+      ).toBe(false);
+    });
+
+    it("says so when the provider has no demo assets", async () => {
+      staticMode.on = true;
+      setupDefaultMocks({ "/api/assets": () => mockResponse([]) });
+      const user = userEvent.setup();
+      render(<NegotiatePage />);
+      await waitFor(() => {
+        expect(screen.getByText("Discover Offers")).toBeTruthy();
+      });
+
+      await user.click(screen.getByText("Discover Offers"));
+
+      await waitFor(() => {
+        expect(screen.getByText(/No datasets with offers found/)).toBeTruthy();
+      });
+    });
+  });
+
+  describe("the negotiation history", () => {
+    it("names graph-layer DIDs by organisation, not by role slug", async () => {
+      setupDefaultMocks({
+        "negotiations?participantId=": () =>
+          mockResponse([
+            {
+              "@id": "neg-lmc",
+              type: "CONSUMER",
+              state: "FINALIZED",
+              contractAgreementId: "agr-lmc",
+              counterPartyId: "did:web:lmc.nl:clinic",
+              assetId: "fhir-cohort-bundle",
+            },
+          ]),
+      });
+      render(<NegotiatePage />);
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(/Provider: Limburg Medical Centre/),
+        ).toBeTruthy();
+      });
+      expect(screen.queryByText(/Provider: clinic/)).toBeNull();
+    });
+
+    it("calls the counter-party of a provider-side negotiation the consumer", async () => {
+      setupDefaultMocks({
+        "negotiations?participantId=": () =>
+          mockResponse([
+            {
+              "@id": "neg-provider",
+              type: "PROVIDER",
+              state: "FINALIZED",
+              contractAgreementId: "agr-p",
+              counterPartyId: "did:web:identityhub%3A7083:pharmaco",
+              assetId: "fhir-patient-search",
+            },
+          ]),
+      });
+      render(<NegotiatePage />);
+
+      await waitFor(() => {
+        expect(screen.getByText(/Consumer: PharmaCo Research AG/)).toBeTruthy();
+      });
+      expect(screen.queryByText(/Provider: PharmaCo Research AG/)).toBeNull();
+    });
+  });
+
+  describe("arriving from the catalog's Request Access (?dataset=)", () => {
+    const catalog = [
+      {
+        id: "Synthetic Type 2 Diabetes Patient Journey",
+        title: "Synthetic Type 2 Diabetes Patient Journey",
+        publisher: "Riverside General (CLINIC)",
+        providers: ["AlphaKlinik Berlin", "Riverside General (CLINIC)"],
+      },
+      {
+        id: "dataset:unheld",
+        title: "A dataset nobody here holds",
+        publisher: "Somewhere Else",
+        providers: [],
+      },
+    ];
+    const participants = [
+      sampleParticipants[1],
+      {
+        "@id": "ctx-lmc",
+        identity: "did:web:lmc.nl:clinic",
+        displayName: "Limburg Medical Centre",
+        role: "DATA_HOLDER",
+      },
+      sampleParticipants[0],
+    ];
+
+    it("names the dataset and preselects the participant that holds it", async () => {
+      query.value =
+        "dataset=" +
+        encodeURIComponent("Synthetic Type 2 Diabetes Patient Journey");
+      setupDefaultMocks({
+        "/api/participants": () => mockResponse(participants),
+        "/api/catalog": () => mockResponse(catalog),
+      });
+      render(<NegotiatePage />);
+
+      await waitFor(() => {
+        const note = screen.getByTestId("requested-dataset");
+        expect(note.textContent).toContain(
+          "Synthetic Type 2 Diabetes Patient Journey",
+        );
+        expect(note.textContent).toContain("AlphaKlinik Berlin");
+      });
+      // Not the first data holder in the list: the one that holds the dataset
+      const provider = screen.getAllByRole("combobox")[1] as HTMLSelectElement;
+      await waitFor(() => expect(provider.value).toBe("ctx-alpha"));
+    });
+
+    it("says plainly when no participant holds the dataset", async () => {
+      query.value = "dataset=dataset%3Aunheld";
+      setupDefaultMocks({
+        "/api/participants": () => mockResponse(participants),
+        "/api/catalog": () => mockResponse(catalog),
+      });
+      render(<NegotiatePage />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("requested-dataset").textContent).toContain(
+          "No participant of this dataspace offers",
+        );
+      });
+    });
+
+    it("shows no dataset note without the parameter", async () => {
+      setupDefaultMocks();
+      render(<NegotiatePage />);
+      await waitFor(() => {
+        expect(screen.getByText("Discover Offers")).toBeTruthy();
+      });
+      expect(screen.queryByTestId("requested-dataset")).toBeNull();
     });
   });
 });

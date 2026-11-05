@@ -25,6 +25,7 @@
   "View in Graph": "Ver en el grafo",
   "EDC Data Assets ({n})": "Activos de datos EDC ({n})",
   "Provider:": "Proveedor:",
+  "Consumer:": "Consumidor:",
   "Negotiate Access": "Negociar acceso",
   "Failed to fetch catalog": "No se pudo obtener el catálogo",
   "These offers come from the demonstrator's own catalogue, not from a live DSP request.": "Estas ofertas proceden del propio catálogo del demostrador, no de una petición DSP real.",
@@ -223,5 +224,7 @@
   "Male": "Hombre",
   "Secure processing environment not ready": "Entorno de tratamiento seguro aún no disponible",
   "{id} is starting (cold start, about 3 to 4 minutes): attesting, releasing the key, loading the data. Try again in a few minutes.": "{id} está arrancando (arranque en frío, unos 3 a 4 minutos): atestación, liberación de la clave, carga de los datos. Vuelva a intentarlo en unos minutos.",
-  "{id} is stopped. An operator or the access body can start it.": "{id} está detenido. El operador o el organismo de acceso puede iniciarlo."
+  "{id} is stopped. An operator or the access body can start it.": "{id} está detenido. El operador o el organismo de acceso puede iniciarlo.",
+  "You asked for access to “{title}”, published by {publisher}. In this demonstrator a catalogue dataset is requested through its holder's DSP offers, so {holder} is preselected below: discover the offers and choose the one that covers this dataset.": "Ha solicitado acceso a «{title}», publicado por {publisher}. En este demostrador, un conjunto de datos del catálogo se solicita a través de las ofertas DSP de su tenedor; por eso {holder} está preseleccionado abajo: descubra las ofertas y elija la que cubre este conjunto de datos.",
+  "No participant of this dataspace offers “{title}” yet, so there is nothing to negotiate for it. Choose a data provider below to see what can be negotiated.": "Ningún participante de este espacio de datos ofrece todavía «{title}», así que no hay nada que negociar para él. Elija un proveedor de datos abajo para ver qué se puede negociar."
 }

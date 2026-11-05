@@ -1,4 +1,5 @@
 "use client";
+import { BASE_PATH } from "@/lib/static-export";
 
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
@@ -1349,7 +1350,7 @@ open http://traefik.localhost`}</pre>
               Swagger UI →
             </Link>
             <a
-              href="/openapi.yaml"
+              href={`${BASE_PATH}/openapi.yaml`}
               download="ehds-integration-hub-openapi.yaml"
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-(--border) bg-(--surface-2) hover:bg-(--surface-3) transition-colors text-(--text-primary)"
             >

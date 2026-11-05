@@ -1,4 +1,6 @@
 "use client";
+import { BASE_PATH } from "@/lib/static-export";
+import Link from "next/link";
 
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -175,12 +177,12 @@ function EudiQrContent() {
           onComplete={onComplete}
           onCancel={() => router.push("/")}
         />
-        <a
+        <Link
           href="/auth/signin"
           className="text-xs text-(--text-secondary) hover:text-(--accent) underline"
         >
           ← {t("Back to other sign-in options")}
-        </a>
+        </Link>
       </div>
     );
   }
@@ -294,7 +296,7 @@ function EudiQrContent() {
                         tags={{
                           a: (
                             <a
-                              href="/hub/privacy.html"
+                              href={`${BASE_PATH}/hub/privacy.html`}
                               className="text-(--accent) underline"
                             />
                           ),
@@ -366,12 +368,12 @@ function EudiQrContent() {
         </div>
       </div>
 
-      <a
+      <Link
         href="/auth/signin"
         className="text-xs text-(--text-secondary) hover:text-(--accent) underline"
       >
         ← {t("Back to other sign-in options")}
-      </a>
+      </Link>
     </div>
   );
 }

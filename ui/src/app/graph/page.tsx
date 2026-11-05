@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { fetchApi } from "@/lib/api";
 import { themeChangeTarget } from "@/components/ThemeToggle";
@@ -1103,7 +1104,9 @@ function GraphContent() {
       >
         <T
           area="explore"
-          tags={{ a: <a href="/overview" className="underline font-medium" /> }}
+          tags={{
+            a: <Link href="/overview" className="underline font-medium" />,
+          }}
         >
           {
             "This explorer is retired. The persona views live at <a>/overview</a>."
@@ -1620,40 +1623,40 @@ function GraphContent() {
                 selected.label === "ResearchPseudonym") && (
                 <div className="px-5 py-3 border-b border-(--border) flex flex-wrap gap-2">
                   {selected.layer === 2 && (
-                    <a
+                    <Link
                       href={`/catalog?search=${encodeURIComponent(
                         selected.name,
                       )}`}
                       className="inline-flex items-center gap-1.5 text-[10px] font-bold text-(--layer2-text) bg-(--surface-2) px-2.5 py-1.5 rounded-full hover:bg-(--accent-surface) transition-colors"
                     >
                       <BookOpen size={10} /> {tn("Dataset Catalog")}
-                    </a>
+                    </Link>
                   )}
                   {(selected.layer === 3 || selected.layer === 4) && (
-                    <a
+                    <Link
                       href="/patient"
                       className="inline-flex items-center gap-1.5 text-[10px] font-bold text-(--layer3-text) bg-(--surface-2) px-2.5 py-1.5 rounded-full hover:bg-(--accent-surface) transition-colors"
                     >
                       <Activity size={10} /> {tn("Patient Journey")}
-                    </a>
+                    </Link>
                   )}
                   {selected.layer === 4 && (
-                    <a
+                    <Link
                       href="/analytics"
                       className="inline-flex items-center gap-1.5 text-[10px] font-bold text-(--layer4-text) bg-(--surface-2) px-2.5 py-1.5 rounded-full hover:bg-(--accent-surface) transition-colors"
                     >
                       <Database size={10} /> {tn("OMOP Analytics")}
-                    </a>
+                    </Link>
                   )}
                   {(selected.label === "TrustCenter" ||
                     selected.label === "SPESession" ||
                     selected.label === "ResearchPseudonym") && (
-                    <a
+                    <Link
                       href="/compliance#trust-center"
                       className="inline-flex items-center gap-1.5 text-[10px] font-bold text-(--layer1-text) bg-(--surface-2) px-2.5 py-1.5 rounded-full hover:bg-(--accent-surface) transition-colors"
                     >
                       <Lock size={10} /> {tn("Trust Center")}
-                    </a>
+                    </Link>
                   )}
                 </div>
               )}

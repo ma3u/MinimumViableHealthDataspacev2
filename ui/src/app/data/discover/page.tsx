@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { fetchApi } from "@/lib/api";
 import { Suspense, useEffect, useState } from "react";
@@ -401,7 +402,7 @@ function DataDiscoverContent() {
                               )}
                             </div>
                             <div className="flex flex-wrap gap-3">
-                              <a
+                              <Link
                                 href={`/catalog?search=${encodeURIComponent(
                                   c.title,
                                 )}`}
@@ -409,8 +410,8 @@ function DataDiscoverContent() {
                               >
                                 <BookOpen size={14} />
                                 {t("View in Catalog")}
-                              </a>
-                              <a
+                              </Link>
+                              <Link
                                 href={`/graph?highlight=${encodeURIComponent(
                                   c.title,
                                 )}`}
@@ -418,7 +419,7 @@ function DataDiscoverContent() {
                               >
                                 <Network size={14} />
                                 {t("View in Graph")}
-                              </a>
+                              </Link>
                             </div>
                           </div>
                         )}
@@ -510,14 +511,14 @@ function DataDiscoverContent() {
                               {JSON.stringify(a, null, 2)}
                             </pre>
                             <div className="flex flex-wrap gap-3">
-                              <a
+                              <Link
                                 href={`/negotiate?assetId=${a["@id"]}&providerId=${a._participantId}`}
                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-(--accent) text-white dark:text-gray-900 rounded-sm text-xs font-medium hover:bg-(--accent-hover)"
                               >
                                 <FileSignature size={14} />
                                 {t("Negotiate Access")}
-                              </a>
-                              <a
+                              </Link>
+                              <Link
                                 href={`/graph?highlight=${encodeURIComponent(
                                   assetField(a, "name"),
                                 )}`}
@@ -525,7 +526,7 @@ function DataDiscoverContent() {
                               >
                                 <Network size={14} />
                                 {t("View in Graph")}
-                              </a>
+                              </Link>
                             </div>
                           </div>
                         )}

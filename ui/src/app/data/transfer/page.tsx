@@ -1,6 +1,8 @@
 "use client";
+import Link from "next/link";
 
 import { fetchApi } from "@/lib/api";
+import { didToName } from "@/lib/participant-name";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
@@ -61,19 +63,6 @@ interface ParticipantCtx {
 /** Read a transfer/agreement field that may be edc:-prefixed or unprefixed */
 function f(obj: Record<string, unknown>, field: string): string {
   return (obj[field] ?? obj[`edc:${field}`] ?? "") as string;
-}
-
-/** Resolve a DID to a short human-readable name */
-function didToName(did: string): string {
-  const slug = decodeURIComponent(did).split(":").pop()?.toLowerCase() ?? "";
-  const names: Record<string, string> = {
-    "alpha-klinik": "AlphaKlinik Berlin",
-    pharmaco: "PharmaCo Research AG",
-    medreg: "MedReg DE",
-    lmc: "Limburg Medical Centre",
-    irs: "Institut de Recherche Santé",
-  };
-  return names[slug] || slug || did.slice(0, 16);
 }
 
 /** Pretty-print an asset ID as a title */
@@ -478,14 +467,14 @@ function FhirViewerPanel({
           )}
         </div>
         <div className="flex items-center gap-2">
-          <a
+          <Link
             href={`/graph?highlight=${encodeURIComponent(
               aId ? assetLabel(aId as string) : "FHIR",
             )}`}
             className="flex items-center gap-1 text-[11px] text-(--accent) hover:underline transition-colors"
           >
             {t("View in Graph")} <Network size={10} />
-          </a>
+          </Link>
           <button
             onClick={onClose}
             aria-label={tc("Close")}
@@ -1002,7 +991,7 @@ function DataTransferContent() {
                 area="research"
                 tags={{
                   a: (
-                    <a
+                    <Link
                       href="/negotiate"
                       className="text-teal-800 dark:text-teal-300 hover:underline"
                     />
@@ -1059,7 +1048,11 @@ function DataTransferContent() {
                           {aId ? assetLabel(aId as string) : agrId.slice(0, 12)}
                         </p>
                         <p className="text-xs text-(--text-secondary)">
-                          {t("Provider:")} {cp ? didToName(cp as string) : "—"}
+                          {f(agr as Record<string, unknown>, "type") ===
+                          "PROVIDER"
+                            ? t("Consumer:")
+                            : t("Provider:")}{" "}
+                          {cp ? didToName(cp as string) : "—"}
                           {hasTransfer && (
                             <span className="ml-2 text-yellow-800 dark:text-yellow-400">
                               {t("(transfer in progress)")}

@@ -25,6 +25,7 @@
   "View in Graph": "Voir dans le graphe",
   "EDC Data Assets ({n})": "Actifs de données EDC ({n})",
   "Provider:": "Fournisseur :",
+  "Consumer:": "Consommateur :",
   "Negotiate Access": "Négocier l’accès",
   "Failed to fetch catalog": "Impossible de récupérer le catalogue",
   "These offers come from the demonstrator's own catalogue, not from a live DSP request.": "Ces offres proviennent du catalogue du démonstrateur lui-même, et non d’une requête DSP réelle.",
@@ -223,5 +224,7 @@
   "Male": "Homme",
   "Secure processing environment not ready": "Environnement de traitement sécurisé pas encore prêt",
   "{id} is starting (cold start, about 3 to 4 minutes): attesting, releasing the key, loading the data. Try again in a few minutes.": "{id} démarre (démarrage à froid, environ 3 à 4 minutes) : attestation, libération de la clé, chargement des données. Réessayez dans quelques minutes.",
-  "{id} is stopped. An operator or the access body can start it.": "{id} est arrêté. L’opérateur ou l’organisme responsable de l’accès peut le démarrer."
+  "{id} is stopped. An operator or the access body can start it.": "{id} est arrêté. L’opérateur ou l’organisme responsable de l’accès peut le démarrer.",
+  "You asked for access to “{title}”, published by {publisher}. In this demonstrator a catalogue dataset is requested through its holder's DSP offers, so {holder} is preselected below: discover the offers and choose the one that covers this dataset.": "Vous avez demandé l'accès à « {title} », publié par {publisher}. Dans ce démonstrateur, un jeu de données du catalogue se demande via les offres DSP de son détenteur ; {holder} est donc présélectionné ci-dessous : découvrez les offres et choisissez celle qui couvre ce jeu de données.",
+  "No participant of this dataspace offers “{title}” yet, so there is nothing to negotiate for it. Choose a data provider below to see what can be negotiated.": "Aucun participant de cet espace de données ne propose encore « {title} » ; il n'y a donc rien à négocier pour lui. Choisissez un fournisseur de données ci-dessous pour voir ce qui peut être négocié."
 }
