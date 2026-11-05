@@ -23,7 +23,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 GA_DID="did:web:simpl-ga-issuer%3A10016:simpl-ga"
 HOLDER="${HOLDER:-irs}"
 
-SERVICE=simpl-ga-issuer CTX=simpl-ga DB=simplga ADMIN_PORT=10023 \
+SERVICE=simpl-ga-issuer CTX=simpl-ga DB="${SIMPLGA_DB:-simplga}" ADMIN_PORT=10023 \
 HOLDERS="did:web:identityhub%3A7083:${HOLDER}" \
   "${SCRIPT_DIR}/seed-test-issuer.sh"
 

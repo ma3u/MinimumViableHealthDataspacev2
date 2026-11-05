@@ -34,6 +34,8 @@ MGMT_V="${EDC_MGMT_API_VERSION:-v5}"
 IDENTITY_API="${EDC_IDENTITY_URL:-http://localhost:11005/api/identity}"
 ISSUER_API="${EDC_ISSUER_URL:-http://localhost:10013/api/admin}"
 MGMT_API="${EDC_MANAGEMENT_URL:-http://localhost:11003/api/mgmt}"
+# The IdentityHub database the trust checks read (identityhub_v1 with docker-compose.edc1.yml, #881).
+IH_DB="${IH_DB:-identityhub}"
 KEYCLOAK_URL="${KEYCLOAK_URL:-http://keycloak:8080}"
 REALM="${KEYCLOAK_REALM:-edcv}"
 CLIENT_ID="${EDC_CLIENT_ID:-admin}"
@@ -699,7 +701,7 @@ trust_catalog() {
 
 # The issuers of the holder's ISSUED (500) MembershipCredentials, one per line.
 trust_membership_issuers() {
-  docker exec health-dataspace-postgres psql -U ih -d identityhub -At -c \
+  docker exec health-dataspace-postgres psql -U ih -d "$IH_DB" -At -c \
     "select issuer_id from credential_resource where participant_context_id='$1' and vc_state=500 and verifiable_credential::text like '%MembershipCredential%'" 2>/dev/null
 }
 
@@ -791,8 +793,10 @@ print("; ".join(problems))
 
   # 6.3 — On that credential, a DSP request to a hub provider is accepted
   test_id="TRUST-6.3"
+  local accepted_on_authority=0
   res=$(trust_catalog "$holder_ctx" "$provider_ctx" "$provider_did")
   if [ "${res#* }" = "Catalog" ]; then
+    accepted_on_authority=1
     pass "$test_id: ${TRUST_HOLDER_SLUG} gets ${TRUST_PROVIDER_SLUG}'s catalogue on the Governance Authority's credential"
     record_result "$test_id" "trust" "passed"
   else
@@ -804,7 +808,7 @@ print("; ".join(problems))
   test_id="TRUST-6.4"
   local since rogue_ok=1
   since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-  PROFILE=trust-check SERVICE=rogue-issuer CTX=rogue DB=rogueissuer ADMIN_PORT=10033 \
+  PROFILE=trust-check SERVICE=rogue-issuer CTX=rogue DB="${ROGUE_DB:-rogueissuer}" ADMIN_PORT=10033 \
     HOLDERS="did:web:identityhub%3A7083:${TRUST_HOLDER_SLUG}" \
     "${repo_dir}/scripts/seed-test-issuer.sh" >/dev/null 2>&1 || rogue_ok=0
   if [ "$rogue_ok" -eq 1 ]; then
@@ -824,6 +828,12 @@ print("; ".join(problems))
     if [ "${res#* }" != "Catalog" ] && [[ "$cp_log" == *"not supported for issuer '${TRUST_ROGUE_DID}'"* ]]; then
       pass "$test_id: a MembershipCredential from ${TRUST_ROGUE_DID} is refused (answered ${res%% *}: issuer not trusted for the type)"
       record_result "$test_id" "trust" "passed"
+    elif [ "${res#* }" != "Catalog" ] && [ "$accepted_on_authority" -eq 1 ]; then
+      # EDC 1.0 refuses without logging the reason (#881). 6.3 accepted the same
+      # holder a moment ago, and the rogue credential is the only change, so the
+      # refusal is its; 6.5 checks that removing it restores access.
+      pass "$test_id: a MembershipCredential from ${TRUST_ROGUE_DID} is refused (answered ${res%% *}); 6.3 accepted the holder without it"
+      record_result "$test_id" "trust" "passed" "refused once the rogue credential was added; not named in the log"
     else
       fail "$test_id: with a credential from ${TRUST_ROGUE_DID} the request answered ${res}, and the control plane did not name the issuer as untrusted"
       record_result "$test_id" "trust" "failed" "untrusted issuer not refused"
@@ -833,7 +843,7 @@ print("; ".join(problems))
   # Clean up whatever happened above: the holder's rogue credentials and the
   # rogue issuer itself.
   local cred
-  for cred in $(docker exec health-dataspace-postgres psql -U ih -d identityhub -At -c \
+  for cred in $(docker exec health-dataspace-postgres psql -U ih -d "$IH_DB" -At -c \
       "select id from credential_resource where participant_context_id='${holder_ctx}' and issuer_id='${TRUST_ROGUE_DID}'" 2>/dev/null); do
     curl -s -o /dev/null --max-time 20 -X DELETE -H "$(auth_header)" \
       "${IDENTITY_API}/v1/participants/${holder_ctx}/credentials/${cred}" 2>/dev/null || true

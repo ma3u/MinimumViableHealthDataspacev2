@@ -106,7 +106,7 @@ log "${CONTAINER} healthy"
 PTOKEN=$(token provisioner provisioner-secret)
 [ -n "$PTOKEN" ] || die "no provisioner token from ${KEYCLOAK_URL}/realms/${REALM}"
 manifest=$(python3 - "$DID" "$HOST" "$CTX" <<'PY'
-import json, sys
+import json, sys, time
 did, host, ctx = sys.argv[1:4]
 print(json.dumps({
     "roles": ["admin"],
@@ -120,7 +120,10 @@ print(json.dumps({
     "did": did,
     "key": {
         "keyId": f"{did}#key-1",
-        "privateKeyAlias": f"{did}#key-1",
+        # A fresh Vault alias for every key the service generates: EDC 1.0 will
+        # not generate a key under an alias Vault already holds, and answers 500
+        # "No configuration found" (#881, finding 18). The key id stays #key-1.
+        "privateKeyAlias": f"{did}#key-1@{int(time.time())}",
         "keyGeneratorParams": {"algorithm": "EdDSA", "curve": "Ed25519"},
         "type": "JsonWebKey2020",
         "usage": ["sign_credentials", "sign_token", "sign_presentation"],

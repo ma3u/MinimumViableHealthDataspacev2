@@ -121,7 +121,11 @@ print(json.dumps({
     ],
     "keys": [{
         "keyId": f"{did}#key1",
-        "privateKeyAlias": f"{did}#key1",
+        # The context id in the Vault alias: every new context gets a fresh one.
+        # EDC 1.0 will not generate a key under an alias Vault already holds (a
+        # previous context's, or 0.18's, which a rollback still needs), and
+        # answers 500 "No configuration found" (#881, finding 18).
+        "privateKeyAlias": f"{did}#key1@{ctx}",
         "active": True,
         "keyGeneratorParams": {"algorithm": "EdDSA"},
         "usage": ["sign_token", "sign_presentation", "sign_credentials"],
