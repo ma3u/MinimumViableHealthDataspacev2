@@ -157,7 +157,7 @@ fi
 echo "✓ Got provisioner token"
 
 # Create issuer tenant (idempotent — 409 means already exists)
-STEP2_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$ISSUER_HOST:10015/api/identity/v1alpha/participants" \
+STEP2_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$ISSUER_HOST:10015/api/identity/v1/participants" \
   -H "Authorization: Bearer $PROVISIONER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -165,7 +165,7 @@ STEP2_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$ISSUER_HOST:1001
     "serviceEndpoints": [
       {
         "type": "IssuerService",
-        "serviceEndpoint": "http://issuerservice:10012/api/issuance/v1alpha/participants/issuer",
+        "serviceEndpoint": "http://issuerservice:10012/api/issuance/v1/participants/issuer",
         "id": "issuer-service-1"
       }
     ],
@@ -267,7 +267,7 @@ fi
 echo "✓ Got issuer token"
 
 echo "Creating Membership AttestationDefinition..."
-curl -sfS -w "\n  HTTP_STATUS:%{http_code}\n" -X POST "$ISSUER_HOST:10013/api/admin/v1alpha/participants/issuer/attestations" \
+curl -sfS -w "\n  HTTP_STATUS:%{http_code}\n" -X POST "$ISSUER_HOST:10013/api/admin/v1/participants/issuer/attestations" \
   -H "Authorization: Bearer $ISSUER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -277,7 +277,7 @@ curl -sfS -w "\n  HTTP_STATUS:%{http_code}\n" -X POST "$ISSUER_HOST:10013/api/ad
   }'
 
 echo "Creating Manufacturer AttestationDefinition..."
-curl -sfS -w "\n  HTTP_STATUS:%{http_code}\n" -X POST "$ISSUER_HOST:10013/api/admin/v1alpha/participants/issuer/attestations" \
+curl -sfS -w "\n  HTTP_STATUS:%{http_code}\n" -X POST "$ISSUER_HOST:10013/api/admin/v1/participants/issuer/attestations" \
   -H "Authorization: Bearer $ISSUER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -293,7 +293,7 @@ echo "  Step 4: Create CredentialDefinitions"
 echo "========================================================"
 
 echo "Creating Membership CredentialDefinition..."
-curl -sfS -w "\n  HTTP_STATUS:%{http_code}\n" -X POST "$ISSUER_HOST:10013/api/admin/v1alpha/participants/issuer/credentialdefinitions" \
+curl -sfS -w "\n  HTTP_STATUS:%{http_code}\n" -X POST "$ISSUER_HOST:10013/api/admin/v1/participants/issuer/credentialdefinitions" \
   -H "Authorization: Bearer $ISSUER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -313,7 +313,7 @@ curl -sfS -w "\n  HTTP_STATUS:%{http_code}\n" -X POST "$ISSUER_HOST:10013/api/ad
   }'
 
 echo "Creating Manufacturer CredentialDefinition..."
-curl -sfS -w "\n  HTTP_STATUS:%{http_code}\n" -X POST "$ISSUER_HOST:10013/api/admin/v1alpha/participants/issuer/credentialdefinitions" \
+curl -sfS -w "\n  HTTP_STATUS:%{http_code}\n" -X POST "$ISSUER_HOST:10013/api/admin/v1/participants/issuer/credentialdefinitions" \
   -H "Authorization: Bearer $ISSUER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{

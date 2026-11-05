@@ -54,7 +54,7 @@ describe("GET /api/negotiations/[id]", () => {
     expect(response.status).toBe(200);
     expect(data).toEqual(mockNeg);
     expect(mockManagement).toHaveBeenCalledWith(
-      "/v5alpha/participants/spe-1/contractnegotiations/neg-123",
+      "/v5/participants/spe-1/contractnegotiations/neg-123",
     );
   });
 

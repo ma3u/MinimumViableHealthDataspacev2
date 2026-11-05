@@ -32,7 +32,7 @@
 # ---------------------------------------------------------------------------
 
 # Version segments tried, in order, when the configured MGMT_V answers 404.
-MGMT_V_CANDIDATES="${EDC_MGMT_API_VERSION_CANDIDATES:-v5beta v5alpha v4alpha v3}"
+MGMT_V_CANDIDATES="${EDC_MGMT_API_VERSION_CANDIDATES:-v5}"
 
 # Results of the last request. These are globals rather than stdout because
 # every caller here runs inside `set -e` and a command substitution would put

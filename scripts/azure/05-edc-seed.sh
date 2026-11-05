@@ -56,7 +56,7 @@ fail() { printf '[seed] ERROR: %s\n' "$*" >&2; exit 1; }
 # ── 1. Wait for IH to answer ────────────────────────────────────────────────
 log "Probing IH at $IH ..."
 for i in $(seq 1 30); do
-  CODE=$(curl -sS -o /dev/null -w '%{http_code}' "$IH/v1alpha/participants" || echo 000)
+  CODE=$(curl -sS -o /dev/null -w '%{http_code}' "$IH/v1/participants" || echo 000)
   if [ "$CODE" != "000" ]; then
     log "  IH responding (HTTP $CODE)"
     break
@@ -120,7 +120,7 @@ JSON
 )
 
   HTTP=$(curl -sS -o /tmp/ih.out -w '%{http_code}' \
-    -X POST "$IH/v1alpha/participants" \
+    -X POST "$IH/v1/participants" \
     "${AUTHZ[@]}" \
     --data-binary "$PAYLOAD")
 
@@ -145,7 +145,7 @@ done
 # ── 4. Final state + summary ────────────────────────────────────────────────
 log ""
 log "Final IH participant list:"
-curl -sS "${AUTHZ[@]}" "$IH/v1alpha/participants" \
+curl -sS "${AUTHZ[@]}" "$IH/v1/participants" \
   | python3 -c "
 import json, sys
 try:

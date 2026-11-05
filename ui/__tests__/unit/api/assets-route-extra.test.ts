@@ -269,7 +269,7 @@ describe("/api/assets – extra coverage", () => {
 
     expect(res.status).toBe(201);
     expect(mockManagement).toHaveBeenCalledWith(
-      "/v5alpha/participants/p1/assets",
+      "/v5/participants/p1/assets",
       "POST",
       expect.objectContaining({
         properties: expect.objectContaining({

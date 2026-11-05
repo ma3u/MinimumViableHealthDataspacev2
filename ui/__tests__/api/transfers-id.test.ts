@@ -52,7 +52,7 @@ describe("GET /api/transfers/[id]", () => {
     expect(response.status).toBe(200);
     expect(data).toEqual(mockTransfer);
     expect(mockManagement).toHaveBeenCalledWith(
-      "/v5alpha/participants/spe-1/transferprocesses/tp-123",
+      "/v5/participants/spe-1/transferprocesses/tp-123",
     );
   });
 

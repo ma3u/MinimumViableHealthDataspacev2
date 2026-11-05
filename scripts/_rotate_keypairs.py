@@ -51,7 +51,7 @@ def main():
     token = get_mgmt_token()
 
     # Get all participants
-    code, body = api_call("GET", "/v1alpha/participants", token)
+    code, body = api_call("GET", "/v1/participants", token)
     participants = json.loads(body)
 
     for p in participants:
@@ -69,7 +69,7 @@ def main():
         token = get_mgmt_token()
 
         # Get current keypairs
-        code, body = api_call("GET", f"/v1alpha/participants/{ctx_id}/keypairs", token)
+        code, body = api_call("GET", f"/v1/participants/{ctx_id}/keypairs", token)
         keypairs = json.loads(body)
         if not keypairs:
             print("  No keypairs found")
@@ -111,7 +111,7 @@ def main():
         # Rotate: retire old key, create new successor
         print(f"  Rotating keypair {kp_id[:8]}...")
         code, body = api_call("POST",
-            f"/v1alpha/participants/{ctx_id}/keypairs/{kp_id}/rotate?duration=0",
+            f"/v1/participants/{ctx_id}/keypairs/{kp_id}/rotate?duration=0",
             token, new_key_descriptor)
         print(f"  Rotate response: HTTP {code}")
         if body:

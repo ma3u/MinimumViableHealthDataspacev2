@@ -83,9 +83,8 @@ export async function GET() {
   if (isAuthError(auth)) return auth;
 
   try {
-    const participants = await edcClient.management<EdcParticipant[]>(
-      "/v5alpha/participants",
-    );
+    const participants =
+      await edcClient.management<EdcParticipant[]>("/v5/participants");
 
     // Attempt to fetch CFM tenants for display names — non-blocking
     const tenantMap: Record<string, string> = {};

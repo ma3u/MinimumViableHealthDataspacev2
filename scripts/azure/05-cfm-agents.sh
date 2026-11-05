@@ -298,7 +298,7 @@ deploy_shim
 # identityhub.url uses port 7082, not the 7081 the local config uses. This
 # deployment passes WEB_HTTP_PORT=7081 and WEB_HTTP_IDENTITY_PORT=7082, so the
 # identity API is on 7082 here. Confirmed on 2026-09-29 with a provisioner
-# token: 7082/api/identity/v1alpha/participants answers 200 with a list, and
+# token: 7082/api/identity/v1/participants answers 200 with a list, and
 # 08-compliance-runner.sh and 05-cfm-ui.sh already call that port.
 #
 # STS (7084), DID (7083) and the credentials API (7085; on compose it is 7082,

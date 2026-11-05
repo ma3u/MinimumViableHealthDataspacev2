@@ -26,7 +26,7 @@ set -euo pipefail
 
 # EDC Management API version segment — v5beta since the EDC 0.18 JAD
 # launchers (issue #97 Phase B); override for older stacks.
-MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
+MGMT_V="${EDC_MGMT_API_VERSION:-v5}"
 
 # ---------------------------------------------------------------------------
 # Configuration

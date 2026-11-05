@@ -25,7 +25,7 @@ export async function GET() {
 
   try {
     const credDefs = await edcClient.issuer<Record<string, unknown>[]>(
-      "/v1alpha/participants/issuer/credentialdefinitions/query",
+      "/v1/participants/issuer/credentialdefinitions/query",
       "POST",
       {}, // empty QuerySpec → return all
       { timeoutMs: ISSUER_COLD_START_TIMEOUT_MS },

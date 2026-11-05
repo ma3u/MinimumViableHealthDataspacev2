@@ -53,7 +53,7 @@ describe("/api/participants", () => {
 
       expect(response.status).toBe(200);
       expect(data).toHaveLength(2);
-      expect(mockManagement).toHaveBeenCalledWith("/v5alpha/participants");
+      expect(mockManagement).toHaveBeenCalledWith("/v5/participants");
     });
 
     it("lists CREATED contexts when nothing is ACTIVATED, and says so", async () => {

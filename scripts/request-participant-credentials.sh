@@ -26,7 +26,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 IDENTITY_API="${EDC_IDENTITY_URL:-http://localhost:11005/api/identity}"
 MGMT_API="${EDC_MANAGEMENT_URL:-http://localhost:11003/api/mgmt}"
-MGMT_V_CANDIDATES="${EDC_MGMT_API_VERSION_CANDIDATES:-v5beta v5alpha v4alpha v3}"
+MGMT_V_CANDIDATES="${EDC_MGMT_API_VERSION_CANDIDATES:-v5}"
 KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8080}"
 REALM="${KEYCLOAK_REALM:-edcv}"
 CLIENT_ID="${EDC_CLIENT_ID:-admin}"
@@ -60,7 +60,7 @@ TOKEN=$(curl -sS --max-time 20 -X POST \
 if [ -z "$CREDENTIAL_DEFINITION_ID" ]; then
   CREDENTIAL_DEFINITION_ID=$(curl -sS --max-time 20 -X POST -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/json" -d '{}' \
-    "${ISSUER_API}/v1alpha/participants/${ISSUER_CTX}/credentialdefinitions/query" 2>/dev/null \
+    "${ISSUER_API}/v1/participants/${ISSUER_CTX}/credentialdefinitions/query" 2>/dev/null \
     | python3 -c "import json,sys
 t=sys.argv[1]
 try: rows=json.load(sys.stdin)
@@ -88,7 +88,7 @@ done
 # Success is therefore "one more of this type than before the request".
 issued_count() {
   curl -sS --max-time 20 -H "Authorization: Bearer ${TOKEN}" \
-    "${IDENTITY_API}/v1alpha/participants/$1/credentials" 2>/dev/null \
+    "${IDENTITY_API}/v1/participants/$1/credentials" 2>/dev/null \
     | python3 -c "import json,sys
 t=sys.argv[1]
 try: rows=json.load(sys.stdin)
@@ -115,7 +115,7 @@ while read -r ctx did; do
   body=$(python3 -c 'import json,sys; print(json.dumps({"issuerDid": sys.argv[1], "credentials": [{"id": sys.argv[4], "type": sys.argv[2], "format": sys.argv[3]}]}))' "$ISSUER_DID" "$CREDENTIAL_TYPE" "$CREDENTIAL_FORMAT" "$CREDENTIAL_DEFINITION_ID")
   tmp=$(mktemp); hdr=$(mktemp)
   status=$(curl -sS --max-time 30 -o "$tmp" -D "$hdr" -w '%{http_code}' \
-    -X POST "${IDENTITY_API}/v1alpha/participants/${ctx}/credentials/request" \
+    -X POST "${IDENTITY_API}/v1/participants/${ctx}/credentials/request" \
     -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" \
     -d "$body" 2>/dev/null) || status="000"
   detail=$(head -c 300 "$tmp" 2>/dev/null || true)
@@ -157,7 +157,7 @@ if [ "${#WATCH_CTX[@]}" -gt 0 ]; then
       # Ask the hub how the request is going; an ERROR is final and diagnosable.
       if [ -n "${WATCH_HPID[$i]}" ]; then
         st=$(curl -sS --max-time 15 -H "Authorization: Bearer ${TOKEN}" \
-          "${IDENTITY_API}/v1alpha/participants/${WATCH_CTX[$i]}/credentials/request/${WATCH_HPID[$i]}" 2>/dev/null \
+          "${IDENTITY_API}/v1/participants/${WATCH_CTX[$i]}/credentials/request/${WATCH_HPID[$i]}" 2>/dev/null \
           | python3 -c "import json,sys
 try: r=json.load(sys.stdin); print((r.get('status') or '')+'|'+(r.get('errorDetail') or ''))
 except Exception: print('|')" 2>/dev/null || echo '|')
@@ -205,7 +205,7 @@ if [ "$missing" -gt 0 ]; then
     [ -n "${WATCH_HPID[$i]}" ] || continue
     echo "  -- request record ${WATCH_DID[$i]##*:} / ${WATCH_HPID[$i]}:"
     curl -sS --max-time 15 -H "Authorization: Bearer ${TOKEN}" \
-      "${IDENTITY_API}/v1alpha/participants/${WATCH_CTX[$i]}/credentials/request/${WATCH_HPID[$i]}" 2>/dev/null \
+      "${IDENTITY_API}/v1/participants/${WATCH_CTX[$i]}/credentials/request/${WATCH_HPID[$i]}" 2>/dev/null \
       | head -c 600 | sed 's/^/     /'; echo
   done
   if command -v docker >/dev/null 2>&1 && docker ps --format '{{.Names}}' 2>/dev/null | grep -qx "${IDENTITYHUB_CONTAINER:-health-dataspace-identityhub}"; then
@@ -223,7 +223,7 @@ if [ "$missing" -gt 0 ]; then
   if [ -n "${ISSUER_API:-}" ]; then
     echo "  -- issuer issuance processes (state, errorDetail), newest first:"
     curl -sS --max-time 20 -X POST -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" -d '{}' \
-      "${ISSUER_API}/v1alpha/participants/${ISSUER_CTX}/issuanceprocesses/query" 2>/dev/null \
+      "${ISSUER_API}/v1/participants/${ISSUER_CTX}/issuanceprocesses/query" 2>/dev/null \
       | python3 -c "import json,sys
 try: rows=json.load(sys.stdin)
 except Exception: rows=[]

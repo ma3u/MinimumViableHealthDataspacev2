@@ -26,7 +26,7 @@ set -euo pipefail
 
 # EDC Management API version segment — v5beta since the EDC 0.18 JAD
 # launchers (issue #97 Phase B); override for older stacks.
-MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
+MGMT_V="${EDC_MGMT_API_VERSION:-v5}"
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -186,7 +186,7 @@ run_did_tests() {
 
     # Try participant query instead if direct DID endpoint doesn't exist
     if [ -z "$resp" ]; then
-      resp=$(identity_get "/v1alpha/participants/${ctx}/keypairs") || resp=""
+      resp=$(identity_get "/v1/participants/${ctx}/keypairs") || resp=""
     fi
 
     # Responding is not the property under test. DCP 3 requires a resolvable
@@ -197,7 +197,7 @@ run_did_tests() {
     fi
     if [ -z "$did" ]; then
       local part_resp
-      part_resp=$(identity_get "/v1alpha/participants") || part_resp=""
+      part_resp=$(identity_get "/v1/participants") || part_resp=""
       if [ -n "$part_resp" ]; then
         did=$(printf '%s' "$part_resp" | jq -r --arg c "$ctx" \
           '[.[] | select((.participantContextId // .participantId // .["@id"]) == $c)] | .[0].did // empty' 2>/dev/null) || did=""
@@ -222,7 +222,7 @@ run_did_tests() {
   # 1.2 — IdentityHub participant query returns all 4 contexts
   local test_id="DID-1.2"
   local resp
-  resp=$(identity_get "/v1alpha/participants") || resp=""
+  resp=$(identity_get "/v1/participants") || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
     local count
@@ -288,7 +288,7 @@ run_keypair_tests() {
     local ctx="${PARTICIPANT_CTXS[$i]}"
     local test_id="KEY-2.1-${slug}"
     local resp
-    resp=$(identity_get "/v1alpha/participants/${ctx}/keypairs") || resp=""
+    resp=$(identity_get "/v1/participants/${ctx}/keypairs") || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
@@ -307,7 +307,7 @@ run_keypair_tests() {
   # 2.2 — Key pair state is ACTIVATED
   local test_id="KEY-2.2"
   local resp
-  resp=$(identity_get "/v1alpha/participants/${PROVIDER_CTX}/keypairs") || resp=""
+  resp=$(identity_get "/v1/participants/${PROVIDER_CTX}/keypairs") || resp=""
 
   # IdentityHub serialises KeyPairState as its ordinal, not its name:
   # 100 CREATED, 200 ACTIVATED, 300 ROTATED, 400 REVOKED. Comparing against
@@ -433,7 +433,7 @@ run_credential_tests() {
     local ctx="${PARTICIPANT_CTXS[$i]}"
     local test_id="VC-3.1-${slug}"
     local resp
-    resp=$(identity_get "/v1alpha/participants/${ctx}/credentials") || resp=""
+    resp=$(identity_get "/v1/participants/${ctx}/credentials") || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
@@ -452,7 +452,7 @@ run_credential_tests() {
   # 3.2 — Credentials include EHDS-specific types
   local test_id="VC-3.2"
   local resp
-  resp=$(identity_get "/v1alpha/participants/${PROVIDER_CTX}/credentials") || resp=""
+  resp=$(identity_get "/v1/participants/${PROVIDER_CTX}/credentials") || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
     local types
@@ -534,8 +534,8 @@ run_issuer_tests() {
   # 4.2 — Credential definitions exist
   local test_id="ISS-4.2"
   local resp
-  # Issuer uses multi-tenant API: /v1alpha/participants/{ctxId}/credentialdefinitions/query
-  resp=$(issuer_post "/v1alpha/participants/issuer/credentialdefinitions/query" \
+  # Issuer uses multi-tenant API: /v1/participants/{ctxId}/credentialdefinitions/query
+  resp=$(issuer_post "/v1/participants/issuer/credentialdefinitions/query" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}') || resp=""
 
   # ISS-4.2 check: response may be either an error object or a valid array
@@ -836,7 +836,7 @@ print("; ".join(problems))
   for cred in $(docker exec health-dataspace-postgres psql -U ih -d identityhub -At -c \
       "select id from credential_resource where participant_context_id='${holder_ctx}' and issuer_id='${TRUST_ROGUE_DID}'" 2>/dev/null); do
     curl -s -o /dev/null --max-time 20 -X DELETE -H "$(auth_header)" \
-      "${IDENTITY_API}/v1alpha/participants/${holder_ctx}/credentials/${cred}" 2>/dev/null || true
+      "${IDENTITY_API}/v1/participants/${holder_ctx}/credentials/${cred}" 2>/dev/null || true
   done
   docker rm -f health-dataspace-rogue-issuer >/dev/null 2>&1 || true
 

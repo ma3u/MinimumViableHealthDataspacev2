@@ -343,7 +343,7 @@ describe("POST /api/admin/policies", () => {
     );
 
     expect(mockManagement).toHaveBeenCalledWith(
-      "/v5alpha/participants/ctx-1/policydefinitions",
+      "/v5/participants/ctx-1/policydefinitions",
       "POST",
       expect.objectContaining({
         "@context": ["https://w3id.org/edc/connector/management/v2"],

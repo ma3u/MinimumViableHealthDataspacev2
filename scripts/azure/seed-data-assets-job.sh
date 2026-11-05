@@ -8,7 +8,7 @@
 # SIGLET_SIGNALING_URL and, for apply, jad/seed-data-assets.sh beside it.
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MGMT="${CP_HOST}/api/mgmt/${MGMT_V:-v5beta}"
+MGMT="${CP_HOST}/api/mgmt/${MGMT_V:-v5}"
 CTX='https://w3id.org/edc/connector/management/v2'
 
 token() {

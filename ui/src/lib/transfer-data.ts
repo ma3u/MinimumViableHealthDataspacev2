@@ -10,13 +10,43 @@ import { birthYear, patientPseudonym } from "@/lib/patient-identity";
  * as on compose, scripts/azure/17-siglet.sh); the hub calls it server side and
  * never hands the token to the browser.
  *
- * The data endpoint is the one siglet puts in the transfer's data address for
- * HttpData-PULL (jad/siglet.toml, `endpoint`); the token API returns only the
- * token, so the hub is told the endpoint the same way.
+ * On EDC 1.0 (#881) siglet is the data plane and its token API answers with
+ * the endpoint as well, the neo4j-proxy's /dataspace/data (jad/siglet-edc1.toml).
+ * The provider chooses that endpoint, and the hub calls it server side with the
+ * token, so it is used only when its host is in EDR_DATA_HOSTS; anything else
+ * would let a provider point the hub at an internal address. Without an
+ * endpoint from siglet (0.18), EDR_DATA_URL is used.
  */
 const SIGLET_TOKEN_URL = process.env.SIGLET_TOKEN_URL || "http://siglet:8080";
 const EDR_DATA_URL =
-  process.env.EDR_DATA_URL || "http://dataplane-fhir:8186/api/data";
+  process.env.EDR_DATA_URL || "http://neo4j-proxy:9090/dataspace/data";
+const EDR_DATA_HOSTS = (
+  process.env.EDR_DATA_HOSTS || "neo4j-proxy,dataplane-fhir"
+)
+  .split(",")
+  .map((h) => h.trim().toLowerCase())
+  .filter(Boolean);
+
+/** The endpoint siglet names, if the hub may call it; otherwise EDR_DATA_URL. */
+export function dataEndpoint(fromSiglet: string | undefined): string {
+  if (!fromSiglet) return EDR_DATA_URL;
+  let url: URL;
+  try {
+    url = new URL(fromSiglet);
+  } catch {
+    throw new TransferDataError("token", `siglet named no valid endpoint`);
+  }
+  if (
+    !["http:", "https:"].includes(url.protocol) ||
+    !EDR_DATA_HOSTS.includes(url.hostname.toLowerCase())
+  ) {
+    throw new TransferDataError(
+      "token",
+      `siglet named the endpoint host ${url.hostname}, which is not in EDR_DATA_HOSTS`,
+    );
+  }
+  return url.toString();
+}
 
 /** Larger answers are cut off rather than streamed into the page. */
 const MAX_BYTES = 5_000_000;
@@ -39,15 +69,21 @@ export class TransferDataError extends Error {
   }
 }
 
+/** What siglet holds for a flow: the access token and, on 1.0, the endpoint. */
+export interface FlowAccess {
+  token: string;
+  endpoint: string;
+}
+
 /**
- * The access token siglet holds for this flow. The flow id is the consumer's
- * transfer process id; the correlation id is tried after it, since the
- * control plane may key the flow by either.
+ * The access token siglet holds for this flow, with the endpoint to call. The
+ * flow id is the consumer's transfer process id; the correlation id is tried
+ * after it, since the control plane may key the flow by either.
  */
-export async function flowToken(
+export async function flowAccess(
   participantContextId: string,
   flowIds: string[],
-): Promise<string> {
+): Promise<FlowAccess> {
   let last = "";
   for (const flowId of flowIds.filter(isPlainId)) {
     const res = await fetch(
@@ -60,8 +96,13 @@ export async function flowToken(
       );
     });
     if (res.ok) {
-      const body = (await res.json().catch(() => ({}))) as { token?: string };
-      if (body.token) return body.token;
+      const body = (await res.json().catch(() => ({}))) as {
+        token?: string;
+        endpoint?: string;
+      };
+      if (body.token) {
+        return { token: body.token, endpoint: dataEndpoint(body.endpoint) };
+      }
       last = "siglet answered without a token";
       continue;
     }
@@ -87,29 +128,36 @@ export interface PulledData {
  * Measured on Azure on 2026-11-05: a token a few minutes old is accepted and
  * answered 404, because the data plane there is JAD's certificate demo
  * (`/api/data/certs/...`) and serves no asset's data; a token two hours old
- * is answered 401, as siglet did not renew it (#876).
+ * is answered 401, as siglet did not renew it (#876). On 1.0 a 404 is an asset
+ * the proxy has no route for (DATASET_ROUTES in the neo4j-proxy).
  */
-function dataPlaneRefusal(status: number | undefined): string {
+function dataPlaneRefusal(
+  endpoint: string,
+  status: number | undefined,
+): string {
   if (status === 401 || status === 403) {
     return `the data plane refused the access token (${status}); it has expired or was revoked, so start a new transfer`;
   }
   if (status === 404) {
-    return `the data plane at ${EDR_DATA_URL} accepted the token but serves no data for this asset (404); on this deployment it is JAD's certificate demo, not a data plane for FHIR assets`;
+    return `the data plane at ${endpoint} accepted the token but serves no data for this asset (404)`;
   }
   return `the data plane answered ${status ?? "nothing"}`;
 }
 
 /** GET the data endpoint with the token, as a bare token and then as Bearer. */
-export async function pullData(token: string): Promise<PulledData> {
+export async function pullData({
+  token,
+  endpoint,
+}: FlowAccess): Promise<PulledData> {
   let res: Response | null = null;
   for (const authorization of [token, `Bearer ${token}`]) {
-    res = await fetch(EDR_DATA_URL, {
+    res = await fetch(endpoint, {
       headers: { Authorization: authorization, Accept: "application/json" },
       cache: "no-store",
     }).catch((err: unknown) => {
       throw new TransferDataError(
         "data",
-        `the data plane at ${EDR_DATA_URL} did not answer: ${String(err)}`,
+        `the data plane at ${endpoint} did not answer: ${String(err)}`,
       );
     });
     if (res.status !== 401 && res.status !== 403) break;
@@ -117,7 +165,7 @@ export async function pullData(token: string): Promise<PulledData> {
   if (!res || !res.ok) {
     throw new TransferDataError(
       "data",
-      dataPlaneRefusal(res?.status),
+      dataPlaneRefusal(endpoint, res?.status),
       res?.status,
     );
   }

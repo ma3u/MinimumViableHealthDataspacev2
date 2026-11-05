@@ -3,7 +3,7 @@ import { edcClient } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { seesPatientIdentity } from "@/lib/patient-identity";
 import {
-  flowToken,
+  flowAccess,
   isPlainId,
   pseudonymiseFhir,
   pullData,
@@ -42,7 +42,7 @@ export async function GET(
   let transfer: Record<string, unknown>;
   try {
     transfer = await edcClient.management<Record<string, unknown>>(
-      `/v5alpha/participants/${participantId}/transferprocesses/${id}`,
+      `/v5/participants/${participantId}/transferprocesses/${id}`,
     );
   } catch (err) {
     console.error(`Transfer ${id} not readable:`, err);
@@ -64,11 +64,11 @@ export async function GET(
   }
 
   try {
-    const token = await flowToken(participantId, [
+    const access = await flowAccess(participantId, [
       id,
       String(transfer.correlationId ?? ""),
     ]);
-    const pulled = await pullData(token);
+    const pulled = await pullData(access);
     const data = seesPatientIdentity(auth.session.roles)
       ? pulled.data
       : pseudonymiseFhir(pulled.data);

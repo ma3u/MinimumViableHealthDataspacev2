@@ -95,7 +95,7 @@ MANIFEST=$(cat <<JSON
   "roles": ["admin"],
   "serviceEndpoints": [{
     "type": "IssuerService",
-    "serviceEndpoint": "http://issuerservice:10012/api/issuance/v1alpha/participants/issuer",
+    "serviceEndpoint": "http://issuerservice:10012/api/issuance/v1/participants/issuer",
     "id": "issuer-service-1"
   }],
   "active": true,
@@ -130,7 +130,7 @@ MANIFEST=$(cat <<JSON
 JSON
 )
 out=$(printf '%s' "$MANIFEST" | incurl -sS --max-time 30 -o /dev/stderr -w '%{http_code}' \
-  -X POST "http://issuerservice:10015/api/identity/v1alpha/participants" \
+  -X POST "http://issuerservice:10015/api/identity/v1/participants" \
   -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" -d @- 2>/tmp/issuer-identity.body) || out="000"
 body=$(head -c 300 /tmp/issuer-identity.body 2>/dev/null || true); rm -f /tmp/issuer-identity.body
 case "$out" in

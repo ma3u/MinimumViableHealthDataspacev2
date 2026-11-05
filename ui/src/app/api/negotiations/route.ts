@@ -102,9 +102,10 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
  * page only knows the provider's DID.
  */
 async function providerContextId(did: string): Promise<string> {
-  const participants = await edcClient.management<
-    { "@id"?: string; identity?: string }[]
-  >("/v5alpha/participants");
+  const participants =
+    await edcClient.management<{ "@id"?: string; identity?: string }[]>(
+      "/v5/participants",
+    );
   const match = Array.isArray(participants)
     ? participants.find((p) => p.identity === did)
     : undefined;
@@ -160,7 +161,7 @@ export async function GET(req: NextRequest) {
       // catalog/request takes the provider's DSP address instead.
       const providerCtx = await providerContextId(providerDid);
       const catalogData = await edcClient.management(
-        `/v5alpha/participants/${participantId}/catalog/request`,
+        `/v5/participants/${participantId}/catalog/request`,
         "POST",
         {
           "@context": [EDC_CONTEXT],
@@ -200,7 +201,7 @@ export async function GET(req: NextRequest) {
   let realNegotiations: unknown[] = [];
   try {
     realNegotiations = await edcClient.management<unknown[]>(
-      `/v5alpha/participants/${participantId}/contractnegotiations/request`,
+      `/v5/participants/${participantId}/contractnegotiations/request`,
       "POST",
       { "@context": [EDC_CONTEXT], "@type": "QuerySpec", filterExpression: [] },
     );
@@ -338,7 +339,7 @@ export async function POST(req: NextRequest) {
 
     try {
       const result = await edcClient.management<Record<string, unknown>>(
-        `/v5alpha/participants/${participantId}/contractnegotiations`,
+        `/v5/participants/${participantId}/contractnegotiations`,
         "POST",
         negotiationPayload,
       );

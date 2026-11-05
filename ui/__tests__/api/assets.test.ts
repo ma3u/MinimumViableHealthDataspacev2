@@ -57,7 +57,7 @@ describe("/api/assets", () => {
         expect.objectContaining({ "@id": "asset-1", name: "FHIR Cohort" }),
       );
       expect(mockManagement).toHaveBeenCalledWith(
-        "/v5alpha/participants/spe-1/assets/request",
+        "/v5/participants/spe-1/assets/request",
         "POST",
         expect.objectContaining({ "@type": "QuerySpec" }),
       );

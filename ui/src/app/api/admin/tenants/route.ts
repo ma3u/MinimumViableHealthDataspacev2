@@ -169,9 +169,8 @@ export async function GET() {
     tenants = await edcClient.tenant<TenantRow[]>("/v1alpha1/tenants");
 
     try {
-      participants = await edcClient.management<ParticipantRow[]>(
-        "/v5alpha/participants",
-      );
+      participants =
+        await edcClient.management<ParticipantRow[]>("/v5/participants");
     } catch (err) {
       console.warn(
         "Could not fetch participants from EDC-V (auth may be unavailable):",

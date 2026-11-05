@@ -97,7 +97,7 @@ export async function GET(
 
         try {
           const data = await edcClient.identity<IHCredentialResource[]>(
-            `/v1alpha/participants/${ctxId}/credentials`,
+            `/v1/participants/${ctxId}/credentials`,
           );
           const vcs = Array.isArray(data) ? data.map(toVC) : [];
           return {

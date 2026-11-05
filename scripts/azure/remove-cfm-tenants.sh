@@ -37,7 +37,7 @@
 # =============================================================================
 set -uo pipefail
 MODE="${MODE:-plan}"
-MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
+MGMT_V="${EDC_MGMT_API_VERSION:-v5}"
 log()  { printf '[tenants] %s\n' "$*"; }
 fail() { printf '[tenants] FAIL %s\n' "$*"; exit 1; }
 
@@ -65,7 +65,7 @@ master_token() {
 }
 
 CP_LIST=$(curl -sS --max-time 30 -H "Authorization: Bearer ${ADMIN_TOKEN}" "${CP}/${MGMT_V}/participants")
-IH_LIST=$(curl -sS --max-time 30 -H "Authorization: Bearer ${ADMIN_TOKEN}" "${IH}/v1alpha/participants")
+IH_LIST=$(curl -sS --max-time 30 -H "Authorization: Bearer ${ADMIN_TOKEN}" "${IH}/v1/participants")
 
 delete() {  # delete <label> <url> <bearer>
   local code
@@ -114,7 +114,7 @@ EOF
     [ -n "$pid" ] || continue
     cp_ctx=$(printf '%s' "$CP_LIST" | jq -r --arg d "$did" '.[]? | select(.identity == $d) | ."@id"' | head -1)
     ih_ctx=$(printf '%s' "$IH_LIST" | jq -r --arg d "$did" '.[]? | select(.did == $d) | .participantContextId' | head -1)
-    if [ -n "$ih_ctx" ]; then delete "identityhub ${ih_ctx}" "${IH}/v1alpha/participants/${ih_ctx}" "$ADMIN_TOKEN" || failed=1; fi
+    if [ -n "$ih_ctx" ]; then delete "identityhub ${ih_ctx}" "${IH}/v1/participants/${ih_ctx}" "$ADMIN_TOKEN" || failed=1; fi
     if [ -n "$cp_ctx" ]; then delete "control plane ${cp_ctx}" "${CP}/${MGMT_V}/participants/${cp_ctx}" "$PROV_TOKEN" || failed=1; fi
     ctx="${cp_ctx:-$ih_ctx}"
     if [ -n "$ctx" ]; then

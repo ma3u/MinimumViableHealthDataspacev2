@@ -29,7 +29,7 @@ export async function GET(
 
   try {
     const raw = await edcClient.management<Record<string, unknown>>(
-      `/v5alpha/participants/${participantId}/contractagreements/${id}`,
+      `/v5/participants/${participantId}/contractagreements/${id}`,
     );
     return NextResponse.json(toAgreementView(raw));
   } catch (err) {

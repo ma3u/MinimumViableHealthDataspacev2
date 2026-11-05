@@ -571,7 +571,7 @@ If participants don't appear in the UI or EDC-V API after bootstrap:
 2. **Check participant contexts in EDC-V:**
 
    ```bash
-   curl -s http://localhost:11003/api/mgmt/v5alpha/participants | python3 -m json.tool
+   curl -s http://localhost:11003/api/mgmt/v5/participants | python3 -m json.tool
    ```
 
    If empty, participants haven't been onboarded yet — re-run `./jad/seed-all.sh --only 1`.

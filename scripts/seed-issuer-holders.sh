@@ -8,11 +8,11 @@
 # been honoured. This mirrors the control plane's participants (same ids and
 # DIDs the IdentityHub seed uses) into that registry.
 #
-# POST /v1alpha/participants/{ctx}/holders is NOT in
+# POST /v1/participants/{ctx}/holders is NOT in
 # jad/openapi/issuer-admin-api.yaml. The operation exists and validates a
 # body: probed with {} and got 400 "Missing required creator property
 # 'holderId'". Second vendored-spec operation found missing today, after
-# POST /v1alpha/participants on the Identity API.
+# POST /v1/participants on the Identity API.
 #
 # Idempotent: an existing holder answers 409 and is treated as success.
 # ---------------------------------------------------------------------------
@@ -22,7 +22,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ISSUER_API="${EDC_ISSUER_URL:-http://localhost:10013/api/admin}"
 ISSUER_CTX="${ISSUER_CTX:-issuer}"
 MGMT_API="${EDC_MANAGEMENT_URL:-http://localhost:11003/api/mgmt}"
-MGMT_V_CANDIDATES="${EDC_MGMT_API_VERSION_CANDIDATES:-v5beta v5alpha v4alpha v3}"
+MGMT_V_CANDIDATES="${EDC_MGMT_API_VERSION_CANDIDATES:-v5}"
 KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8080}"
 REALM="${KEYCLOAK_REALM:-edcv}"
 CLIENT_ID="${EDC_CLIENT_ID:-admin}"
@@ -63,7 +63,7 @@ while read -r ctx did; do
   body=$(python3 -c 'import json,sys; print(json.dumps({"holderId": sys.argv[1], "did": sys.argv[1], "name": sys.argv[2]}))' "$did" "$name")
   tmp=$(mktemp)
   status=$(curl -sS --max-time 30 -o "$tmp" -w '%{http_code}' \
-    -X POST "${ISSUER_API}/v1alpha/participants/${ISSUER_CTX}/holders" \
+    -X POST "${ISSUER_API}/v1/participants/${ISSUER_CTX}/holders" \
     -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" \
     -d "$body" 2>/dev/null) || status="000"
   detail=$(head -c 300 "$tmp" 2>/dev/null || true); rm -f "$tmp"
@@ -79,7 +79,7 @@ log "registered ${created}, already present ${existed}, failed ${failed}"
 
 # Read back: every mirrored DID must now be a known holder (ADR-031).
 known=$(curl -sS --max-time 20 -X POST -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" -d '{}' \
-  "${ISSUER_API}/v1alpha/participants/${ISSUER_CTX}/holders/query" 2>/dev/null \
+  "${ISSUER_API}/v1/participants/${ISSUER_CTX}/holders/query" 2>/dev/null \
   | python3 -c "import json,sys
 try: print('\n'.join(h.get('did','') for h in json.load(sys.stdin)))
 except Exception: pass" 2>/dev/null || true)

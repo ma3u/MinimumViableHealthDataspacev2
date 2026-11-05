@@ -74,11 +74,11 @@ describe("GET /api/negotiations", () => {
 
     expect(res.status).toBe(200);
     expect(data["@type"]).toBe("dcat:Catalog");
-    expect(mockManagement).toHaveBeenCalledWith("/v5alpha/participants");
+    expect(mockManagement).toHaveBeenCalledWith("/v5/participants");
     // The provider's DSP address carries its context id and the profile id;
     // the v1alpha catalog-by-DID endpoint is gone in EDC 0.18 (#542).
     expect(mockManagement).toHaveBeenCalledWith(
-      "/v5alpha/participants/ctx-1/catalog/request",
+      "/v5/participants/ctx-1/catalog/request",
       "POST",
       {
         "@context": ["https://w3id.org/edc/connector/management/v2"],
@@ -266,7 +266,7 @@ describe("GET /api/negotiations", () => {
     );
 
     expect(mockManagement).toHaveBeenCalledWith(
-      "/v5alpha/participants/my-ctx/contractnegotiations/request",
+      "/v5/participants/my-ctx/contractnegotiations/request",
       "POST",
       expect.objectContaining({
         "@type": "QuerySpec",

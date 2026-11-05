@@ -68,7 +68,7 @@ describe("/api/negotiations", () => {
         })),
       );
       expect(mockManagement).toHaveBeenCalledWith(
-        "/v5alpha/participants/spe-1/contractnegotiations/request",
+        "/v5/participants/spe-1/contractnegotiations/request",
         "POST",
         expect.objectContaining({ "@type": "QuerySpec" }),
       );
@@ -122,7 +122,7 @@ describe("/api/negotiations", () => {
       expect(response.status).toBe(201);
       expect(data).toEqual(mockResult);
       expect(mockManagement).toHaveBeenCalledWith(
-        "/v5alpha/participants/spe-1/contractnegotiations",
+        "/v5/participants/spe-1/contractnegotiations",
         "POST",
         expect.objectContaining({
           "@type": "ContractRequest",

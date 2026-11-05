@@ -67,7 +67,7 @@ export async function GET(req: NextRequest) {
     if (participantId) {
       // List assets for a specific participant
       const assets = await edcClient.management<Record<string, unknown>[]>(
-        `/v5alpha/participants/${participantId}/assets/request`,
+        `/v5/participants/${participantId}/assets/request`,
         "POST",
         {
           "@context": [EDC_CONTEXT],
@@ -79,9 +79,10 @@ export async function GET(req: NextRequest) {
     }
 
     // List all participant contexts, then aggregate assets
-    const participants = await edcClient.management<
-      { "@id": string; identity: string; state?: string }[]
-    >("/v5alpha/participants");
+    const participants =
+      await edcClient.management<
+        { "@id": string; identity: string; state?: string }[]
+      >("/v5/participants");
 
     // Only include ACTIVATED participants — skip stale CREATED contexts
     const active = (Array.isArray(participants) ? participants : []).filter(
@@ -92,7 +93,7 @@ export async function GET(req: NextRequest) {
     for (const p of active) {
       try {
         const assets = await edcClient.management<Record<string, unknown>[]>(
-          `/v5alpha/participants/${p["@id"]}/assets/request`,
+          `/v5/participants/${p["@id"]}/assets/request`,
           "POST",
           {
             "@context": [EDC_CONTEXT],
@@ -181,7 +182,7 @@ export async function POST(req: NextRequest) {
     };
 
     const result = await edcClient.management(
-      `/v5alpha/participants/${participantId}/assets`,
+      `/v5/participants/${participantId}/assets`,
       "POST",
       assetPayload,
     );

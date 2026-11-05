@@ -9,7 +9,7 @@
 # had them.
 #
 # This talks to the IdentityHub Identity API instead, which needs no CFM.
-# Note that POST /v1alpha/participants is NOT in jad/openapi/identity-api.yaml
+# Note that POST /v1/participants is NOT in jad/openapi/identity-api.yaml
 # even though ParticipantManifest is: the vendored spec is missing the
 # operation. Verified against the running service (#345).
 #
@@ -38,7 +38,7 @@ source "$SCRIPT_DIR/lib/dsp-protocol.sh"
 
 IDENTITY_API="${EDC_IDENTITY_URL:-http://localhost:11005/api/identity}"
 MGMT_API="${EDC_MANAGEMENT_URL:-http://localhost:11003/api/mgmt}"
-MGMT_V_CANDIDATES="${EDC_MGMT_API_VERSION_CANDIDATES:-v5beta v5alpha v4alpha v3}"
+MGMT_V_CANDIDATES="${EDC_MGMT_API_VERSION_CANDIDATES:-v5}"
 KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8080}"
 REALM="${KEYCLOAK_REALM:-edcv}"
 CLIENT_ID="${EDC_CLIENT_ID:-admin}"
@@ -132,7 +132,7 @@ PY
 
   tmp=$(mktemp)
   status=$(curl -sS --max-time 30 -o "$tmp" -w '%{http_code}' \
-    -X POST "${IDENTITY_API}/v1alpha/participants" \
+    -X POST "${IDENTITY_API}/v1/participants" \
     -H "Authorization: Bearer ${TOKEN}" \
     -H "Content-Type: application/json" \
     -d "$body" 2>/dev/null) || status="000"
@@ -158,7 +158,7 @@ log "created ${created}, already present ${existed}, failed ${failed}"
 # Assert the outcome rather than the mechanism (ADR-031). Creating without
 # reading back is how #325 claimed an activation that never happened.
 total=$(curl -sS --max-time 20 -H "Authorization: Bearer ${TOKEN}" \
-  "${IDENTITY_API}/v1alpha/participants" 2>/dev/null \
+  "${IDENTITY_API}/v1/participants" 2>/dev/null \
   | python3 -c "import json,sys; print(len(json.load(sys.stdin)))" 2>/dev/null || echo 0)
 log "IdentityHub now reports ${total} participant context(s)"
 

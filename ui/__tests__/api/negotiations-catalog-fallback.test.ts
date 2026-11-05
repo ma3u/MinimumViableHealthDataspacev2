@@ -74,7 +74,7 @@ describe("/api/negotiations catalog fallback", () => {
   it("serves the demo catalogue when the connector 404s on the context", async () => {
     mockManagement.mockRejectedValue(
       new Error(
-        "EDC API error [management] POST /v5beta/.../catalog/request 404 Not Found",
+        "EDC API error [management] POST /v5/.../catalog/request 404 Not Found",
       ),
     );
 

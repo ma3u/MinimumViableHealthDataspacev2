@@ -26,7 +26,7 @@ export async function GET(
 
   try {
     const transfer = await edcClient.management(
-      `/v5alpha/participants/${participantId}/transferprocesses/${id}`,
+      `/v5/participants/${participantId}/transferprocesses/${id}`,
     );
     return NextResponse.json(transfer);
   } catch (err) {

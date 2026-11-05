@@ -58,7 +58,7 @@ COMPOSE_PROJECT="${COMPOSE_PROJECT:-$(docker inspect "$PG_CONTAINER" \
 HOST="$SERVICE"
 DID="did:web:${HOST}%3A10016:${CTX}"
 CONTAINER="health-dataspace-${SERVICE}"
-ADMIN="http://localhost:${ADMIN_PORT}/api/admin/v1alpha/participants/${CTX}"
+ADMIN="http://localhost:${ADMIN_PORT}/api/admin/v1/participants/${CTX}"
 
 CYAN='\033[0;36m'; GREEN='\033[0;32m'; RED='\033[0;31m'; NC='\033[0m'
 log() { echo -e "${CYAN}[test-issuer ${CTX}]${NC} $*"; }
@@ -112,7 +112,7 @@ print(json.dumps({
     "roles": ["admin"],
     "serviceEndpoints": [{
         "type": "IssuerService",
-        "serviceEndpoint": f"http://{host}:10012/api/issuance/v1alpha/participants/{ctx}",
+        "serviceEndpoint": f"http://{host}:10012/api/issuance/v1/participants/{ctx}",
         "id": "issuer-service-1",
     }],
     "active": True,
@@ -137,7 +137,7 @@ print(json.dumps({
 PY
 )
 status=$(printf '%s' "$manifest" | incurl -sS --max-time 30 -o /dev/null -w '%{http_code}' \
-  -X POST "http://${HOST}:10015/api/identity/v1alpha/participants" \
+  -X POST "http://${HOST}:10015/api/identity/v1/participants" \
   -H "Authorization: Bearer ${PTOKEN}" -H "Content-Type: application/json" -d @- 2>/dev/null) || status="000"
 case "$status" in
   2??) log "participant context ${CTX} created" ;;
