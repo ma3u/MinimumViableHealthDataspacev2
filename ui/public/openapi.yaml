@@ -1728,9 +1728,13 @@ paths:
               properties:
                 participantId: { type: string }
                 speId: { type: string, enum: [SPE-1, SPE-2], default: SPE-1 }
+                overwrite:
+                  type: boolean
+                  default: false
+                  description: Replace the import the SPE holds already
       responses:
         "200":
-          description: What was imported, and the graph viewer's link to it
+          description: What was imported, and the link to its 3D overview
           content:
             application/json:
               schema:
@@ -1752,12 +1756,50 @@ paths:
             a transfer id or a known SPE is missing,
           }
         "404": { $ref: "#/components/responses/NotFound" }
-        "409": { description: The transfer is not STARTED }
+        "409":
+          description: >-
+            The transfer is not STARTED, or the SPE holds it already and
+            `overwrite` is not set; then `existing` describes that import
         "413": { description: The data is too large to import at once }
         "422": { description: The data is not a FHIR Bundle }
         "502":
           description: The token, the data or the import failed; `step` says which
         "503": { description: The SPE workspace is not connected }
+
+  /api/spe-imports:
+    get:
+      tags: [Transfers]
+      summary: Which transfers the SPE workspaces hold already
+      description: >-
+        The duplicate check behind My data (#876): for each transfer id, the
+        SPE that holds it, since when and with how many records. An SPE that
+        does not answer is listed in `unreachable`.
+      parameters:
+        - name: ids
+          in: query
+          required: true
+          description: One or more transfer ids, comma separated
+          schema: { type: string }
+      responses:
+        "200":
+          description: The imports found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  imports:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        datasetId: { type: string }
+                        speId: { type: string }
+                        records: { type: integer }
+                        importedAt: { type: string, format: date-time }
+                  unreachable: { type: array, items: { type: string } }
+        "400": { description: ids is required }
+        "502": { description: The SPE workspaces did not answer }
 
   /api/spe-imports/{id}/graph:
     get:

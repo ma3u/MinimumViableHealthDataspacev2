@@ -470,5 +470,17 @@
   "Imported Record": "Geïmporteerd record",
   "A transfer's data imported into an SPE workspace": "De gegevens van een overdracht, geïmporteerd in een SPE-werkruimte",
   "One FHIR resource of an imported transfer, pseudonymised": "Eén FHIR-resource van een geïmporteerde overdracht, gepseudonimiseerd",
-  "A secure processing environment (EHDS Art. 73)": "Een beveiligde verwerkingsomgeving (EHDS art. 73)"
+  "A secure processing environment (EHDS Art. 73)": "Een beveiligde verwerkingsomgeving (EHDS art. 73)",
+  "Back to my data": "Terug naar mijn gegevens",
+  "My import, in one view": "Mijn import, in één overzicht",
+  "What did this transfer bring into the SPE, from whom, and under which contract?": "Wat heeft deze overdracht in de SPE gebracht, van wie en onder welk contract?",
+  "Where it came from: provider and contract": "Waar het vandaan komt: aanbieder en contract",
+  "The secure processing environment and the import": "De beveiligde verwerkingsomgeving en de import",
+  "The imported records": "De geïmporteerde records",
+  "the imported dataset": "de geïmporteerde dataset",
+  "the SPE it is in": "de SPE waarin hij staat",
+  "the provider": "de aanbieder",
+  "the contract": "het contract",
+  "patients": "patiënten",
+  "observations": "observaties"
 }

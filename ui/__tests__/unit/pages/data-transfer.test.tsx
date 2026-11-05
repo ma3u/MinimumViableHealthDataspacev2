@@ -740,7 +740,116 @@ describe("DataTransferPage", () => {
       expect(JSON.parse(String(call?.[1]?.body))).toEqual({
         participantId: "ctx-pharmaco",
         speId: "SPE-2",
+        overwrite: false,
       });
+    });
+
+    it("shows a transfer an SPE holds already and asks before overwriting it", async () => {
+      const posted: unknown[] = [];
+      mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
+        if (url.startsWith("/api/spe-imports?ids=tp-live")) {
+          return mockResponse({
+            imports: [
+              {
+                datasetId: "tp-live",
+                speId: "SPE-1",
+                records: 100,
+                importedAt: "2026-11-05T20:12:36.622Z",
+              },
+            ],
+            unreachable: [],
+          });
+        }
+        if (url === "/api/transfers/tp-live/import") {
+          posted.push(JSON.parse(String(init?.body)));
+          return mockResponse({
+            datasetId: "tp-live",
+            speId: "SPE-1",
+            records: 100,
+            relationships: 0,
+            importedAt: "2026-11-05T21:00:00.000Z",
+            pseudonymised: true,
+            graphUrl: "/overview?import=tp-live&spe=SPE-1",
+          });
+        }
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) {
+          return mockResponse([LIVE, ...TRANSFERS]);
+        }
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse(NEGOTIATIONS_FINALIZED);
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("my-data");
+      const held = await within(section).findByTestId("spe-import-existing");
+      expect(held.textContent).toMatch(
+        /Imported into SPE-1 on 2026-11-05: 100 records/,
+      );
+      expect(within(held).getByText("Show in 3D").getAttribute("href")).toBe(
+        "/overview?import=tp-live&spe=SPE-1",
+      );
+
+      await user.click(within(section).getByText("Import again"));
+      const ask = within(section).getByTestId("spe-import-confirm");
+      expect(ask.textContent).toMatch(/SPE-1 holds this transfer already/);
+      expect(posted).toHaveLength(0);
+
+      await user.click(within(section).getByTestId("spe-import-confirm-no"));
+      expect(within(section).queryByTestId("spe-import-confirm")).toBeNull();
+      expect(posted).toHaveLength(0);
+
+      await user.click(within(section).getByText("Import again"));
+      await user.click(within(section).getByTestId("spe-import-confirm-yes"));
+      await within(section).findByTestId("spe-import-done");
+      expect(posted).toEqual([
+        { participantId: "ctx-pharmaco", speId: "SPE-1", overwrite: true },
+      ]);
+    });
+
+    it("asks before holding a transfer in a second SPE", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url.startsWith("/api/spe-imports?ids=tp-live")) {
+          return mockResponse({
+            imports: [
+              {
+                datasetId: "tp-live",
+                speId: "SPE-1",
+                records: 100,
+                importedAt: "2026-11-05T20:12:36.622Z",
+              },
+            ],
+          });
+        }
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) {
+          return mockResponse([LIVE, ...TRANSFERS]);
+        }
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse(NEGOTIATIONS_FINALIZED);
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("my-data");
+      await within(section).findByTestId("spe-import-existing");
+      await user.selectOptions(
+        within(section).getByTestId("spe-import-target"),
+        "SPE-2",
+      );
+      await user.click(within(section).getByText("Import again"));
+
+      expect(
+        within(section).getByTestId("spe-import-confirm").textContent,
+      ).toMatch(/in SPE-1 already\. Import it into SPE-2 as well/);
+      expect(
+        within(section).getByTestId("spe-import-confirm-yes").textContent,
+      ).toBe("Import as well");
     });
 
     it("says why an import failed", async () => {

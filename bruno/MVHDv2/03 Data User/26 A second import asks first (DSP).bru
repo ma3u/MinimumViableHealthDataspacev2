@@ -1,0 +1,40 @@
+meta {
+  name: 26 A second import asks first (DSP)
+  type: http
+  seq: 26
+}
+
+post {
+  url: {{baseUrl}}/api/transfers/{{dspTransferId}}/import
+  body: json
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+body:json {
+  {
+    "participantId": "{{dspConsumerCtx}}",
+    "speId": "SPE-1"
+  }
+}
+
+tests {
+  const body = res.getBody() || {};
+  if (!bru.getVar("dspImported")) {
+    test("SKIPPED: 23 imported nothing on this run, so there is nothing to import twice", function () {});
+  } else {
+    test("SPE-1 refuses to import the same transfer again without overwrite", function () {
+      expect(res.getStatus(), body.error || "").to.equal(409);
+      expect(body.existing.speId).to.equal("SPE-1");
+      expect(body.existing.datasetId).to.equal(bru.getVar("dspTransferId"));
+    });
+  }
+}
+
+docs {
+  An SPE holds a transfer once (#876). A second import without `overwrite: true` answers 409 with
+  the import it holds; My data asks the user to overwrite it or to cancel.
+}

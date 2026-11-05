@@ -470,5 +470,17 @@
   "Imported Record": "Imported Record",
   "A transfer's data imported into an SPE workspace": "A transfer's data imported into an SPE workspace",
   "One FHIR resource of an imported transfer, pseudonymised": "One FHIR resource of an imported transfer, pseudonymised",
-  "A secure processing environment (EHDS Art. 73)": "A secure processing environment (EHDS Art. 73)"
+  "A secure processing environment (EHDS Art. 73)": "A secure processing environment (EHDS Art. 73)",
+  "Back to my data": "Back to my data",
+  "My import, in one view": "My import, in one view",
+  "What did this transfer bring into the SPE, from whom, and under which contract?": "What did this transfer bring into the SPE, from whom, and under which contract?",
+  "Where it came from: provider and contract": "Where it came from: provider and contract",
+  "The secure processing environment and the import": "The secure processing environment and the import",
+  "The imported records": "The imported records",
+  "the imported dataset": "the imported dataset",
+  "the SPE it is in": "the SPE it is in",
+  "the provider": "the provider",
+  "the contract": "the contract",
+  "patients": "patients",
+  "observations": "observations"
 }

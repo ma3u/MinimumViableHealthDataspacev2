@@ -273,7 +273,6 @@
   "The import failed: {detail}": "L'importation a échoué : {detail}",
   "Imported {records} records with {relationships} references into {spe}.": "{records} enregistrements avec {relationships} références importés dans {spe}.",
   "Patients are pseudonymised.": "Les patients sont pseudonymisés.",
-  "Show in the graph": "Afficher dans le graphe",
   "Allowed for": "Autorisé pour",
   "Any purpose": "Toute finalité",
   "For how long": "Pour combien de temps",
@@ -284,5 +283,14 @@
   "Read the full terms": "Lire les conditions complètes",
   "You hold a data permit, valid until {date}.": "Vous détenez une autorisation de données, valable jusqu'au {date}.",
   "You hold {n} data permits; the latest is valid until {date}.": "Vous détenez {n} autorisations de données ; la dernière est valable jusqu'au {date}.",
-  "Show the permits ({n})": "Afficher les autorisations ({n})"
+  "Show the permits ({n})": "Afficher les autorisations ({n})",
+  "Imported into {spe} on {date}: {records} records.": "Importé dans {spe} le {date} : {records} enregistrements.",
+  "Show in 3D": "Afficher en 3D",
+  "Import again": "Importer à nouveau",
+  "Import again?": "Importer à nouveau ?",
+  "{spe} holds this transfer already ({records} records, imported on {date}). Overwrite it? Its records are replaced by the data as it is now.": "{spe} contient déjà ce transfert ({records} enregistrements, importé le {date}). L'écraser ? Ses enregistrements sont remplacés par les données actuelles.",
+  "This transfer is in {others} already. Import it into {spe} as well? It is then held twice.": "Ce transfert est déjà dans {others}. L'importer aussi dans {spe} ? Il sera alors détenu deux fois.",
+  "Overwrite": "Écraser",
+  "Import as well": "Importer aussi",
+  "Cancel": "Annuler"
 }

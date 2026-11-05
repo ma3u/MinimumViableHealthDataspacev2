@@ -1,0 +1,35 @@
+meta {
+  name: 25 Which of my transfers an SPE holds (DSP)
+  type: http
+  seq: 25
+}
+
+get {
+  url: {{baseUrl}}/api/spe-imports?ids={{dspTransferId}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+tests {
+  const body = res.getBody() || {};
+  if (!bru.getVar("dspImported")) {
+    test("SKIPPED: 23 imported nothing on this run, so no SPE holds the transfer", function () {});
+  } else {
+    test("SPE-1 holds the transfer 23 imported, with its record count", function () {
+      expect(res.getStatus(), body.error || "").to.equal(200);
+      const held = (body.imports || []).find((i) => i.speId === "SPE-1");
+      expect(held, JSON.stringify(body)).to.not.equal(undefined);
+      expect(held.datasetId).to.equal(bru.getVar("dspTransferId"));
+      expect(held.records).to.be.above(0);
+    });
+  }
+}
+
+docs {
+  The duplicate check behind My data (#876): which SPE holds which transfer, since when and with
+  how many records. The page shows it on each transfer and asks before importing again.
+}
