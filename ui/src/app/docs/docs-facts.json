@@ -803,7 +803,7 @@
       "id": "ADR-005",
       "file": "ADR-005-jad-cfm-source-builds.md",
       "title": "JAD + CFM Source Builds",
-      "status": "Accepted"
+      "status": "Superseded"
     },
     {
       "id": "ADR-006",
@@ -1220,6 +1220,12 @@
       "status": "Accepted"
     },
     {
+      "id": "ADR-076",
+      "file": "ADR-076-edc-1-runtimes-are-built-here.md",
+      "title": "EDC 1.0 runtimes are built here, from released EDC artifacts",
+      "status": "Accepted"
+    },
+    {
       "id": "ADR-077",
       "file": "ADR-077-a-minimal-set-of-standard-data-sharing-policies.md",
       "title": "A minimal set of standard data-sharing policies",
@@ -1314,7 +1320,7 @@
     "/docs/developer": "2026-11-05",
     "/docs/developer/quality-gates": "2026-11-05",
     "/docs/developer/api": "2026-11-05",
-    "/docs/developer/reference": "2026-11-05",
+    "/docs/developer/reference": "2026-11-04",
     "/docs/developer/[slug]": "2026-11-04",
     "/docs/architecture": "2026-11-05",
     "/docs/security": "2026-11-04",

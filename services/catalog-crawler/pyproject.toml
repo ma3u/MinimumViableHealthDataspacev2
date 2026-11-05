@@ -5,18 +5,18 @@ description = "Periodically fetches DSP dcat:Catalog JSON-LD from each dataspace
 requires-python = ">=3.12"
 dependencies = [
   "nats-py==2.16.0",
-  "neo4j==6.3.1",
+  "neo4j==6.4.1",
   "httpx==0.28.1",
-  "pydantic==2.13.5",
+  "pydantic==2.14.1",
   "prometheus-client==0.26.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-  "pytest==9.1.1",
-  "pytest-asyncio==1.4.0",
+  "pytest==9.2.0",
+  "pytest-asyncio==1.4.1",
   "respx==0.23.1",
-  "ruff==0.16.10",
+  "ruff==0.17.3",
 ]
 
 [tool.ruff]
