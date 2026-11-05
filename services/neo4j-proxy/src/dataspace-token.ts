@@ -26,6 +26,8 @@ export const DATASET_ROUTES: Record<
 > = {
   "fhir-patient-search": { method: "GET", path: "/fhir/Patient" },
   "fhir-patient-everything": { method: "GET", path: "/fhir/Patient" },
+  // A searchset of Observations with their Patients included (#898).
+  "fhir-observation-bundle": { method: "GET", path: "/fhir/Observation" },
   "fhir-cohort-bundle": { method: "POST", path: "/fhir/Bundle" },
   "omop-cohort-statistics": { method: "POST", path: "/omop/cohort" },
   "healthdcatap-catalog": { method: "GET", path: "/catalog/datasets" },

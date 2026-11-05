@@ -115,6 +115,10 @@ describe("verifyDataspaceToken", () => {
       method: "GET",
       path: "/fhir/Patient",
     });
+    expect(DATASET_ROUTES["fhir-observation-bundle"]).toEqual({
+      method: "GET",
+      path: "/fhir/Observation",
+    });
     expect(DATASET_ROUTES["omop-cohort-statistics"]).toEqual({
       method: "POST",
       path: "/omop/cohort",

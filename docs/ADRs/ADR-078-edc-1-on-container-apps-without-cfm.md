@@ -62,7 +62,9 @@ of Keycloak for service tokens.
 2. **CFM leaves the 1.0 stack.** The hub provisions a participant itself, on
    the server, with the sequence the seeds run on 1.0: control plane context,
    IdentityHub participant, context config and DSP profile, issuer holder,
-   MembershipCredential over DCP; on failure it removes what it created, in
+   MembershipCredential over DCP, and the participant's signing-key mapping in
+   siglet, without which siglet cannot renew an access token after its hour
+   (#881 finding 23; the siglet agent's job in the new CFM); on failure it removes what it created, in
    reverse order. The onboarding page calls that instead of CFM's tenant
    manager, and the participant list comes from the control plane's contexts.
    The Azure apps tenant manager, provision manager, the four agents and the
