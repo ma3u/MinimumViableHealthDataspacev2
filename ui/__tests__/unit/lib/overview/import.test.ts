@@ -96,11 +96,37 @@ describe("importOverview", () => {
       "Patients are pseudonymised: no names, addresses or exact birth dates.",
     );
     expect(texts).toContain("Patient: 1");
+    // Clicking a patient shows its own values and the records that refer to it.
     expect(
       view.nodes.find((n) => n.id === "import:tp-1/Patient/p1")?.facts,
     ).toEqual([
       ["resourceType", "Patient"],
       ["resourceId", "p1"],
+      ["Referred to by (1)", "Condition: x"],
     ]);
+    expect(
+      view.nodes.find((n) => n.id === "import:tp-1/Condition/c1")?.facts,
+    ).toEqual([["Refers to (1)", "Patient p1"]]);
+  });
+
+  it("names few records in the scene, and many only on hover", () => {
+    expect(
+      view.nodes.find((n) => n.id === "import:tp-1/Patient/p1")?.label,
+    ).toBe("Patient p1");
+    const many = importOverview({
+      ...GRAPH,
+      nodes: [
+        ...GRAPH.nodes,
+        ...Array.from({ length: 30 }, (_, i) => ({
+          id: `import:tp-1/Patient/x${i}`,
+          label: "ImportedRecord",
+          name: `Patient x${i}`,
+          group: "Patient",
+        })),
+      ],
+    });
+    const rec = many.nodes.find((n) => n.id === "import:tp-1/Patient/x1");
+    expect(rec?.label).toBe("");
+    expect(rec?.title).toBe("Patient x1");
   });
 });

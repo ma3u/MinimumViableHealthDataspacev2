@@ -143,13 +143,17 @@ function nodeObject(n: SceneNode): THREE.Object3D {
     g.add(halo);
     g.userData.halo = halo;
   }
-  const label = textSprite(n.label, {
-    size: (n.size ?? 1) >= 3 ? 26 : 20,
-    color: (n.size ?? 1) >= 3 ? "#fde68a" : "#e5e7eb",
-  });
-  label.position.set(0, -(r + 7), 0);
-  label.center.set(0.5, 1);
-  g.add(label);
+  // An empty label draws no text: a view with a hundred records names them
+  // on hover and in the detail panel instead (lib/overview/import.ts).
+  if (n.label) {
+    const label = textSprite(n.label, {
+      size: (n.size ?? 1) >= 3 ? 26 : 20,
+      color: (n.size ?? 1) >= 3 ? "#fde68a" : "#e5e7eb",
+    });
+    label.position.set(0, -(r + 7), 0);
+    label.center.set(0.5, 1);
+    g.add(label);
+  }
   return g;
 }
 
@@ -257,7 +261,10 @@ export default function OverviewScene({
       .showNavInfo(false)
       .nodeThreeObject((n) => nodeObject(n))
       .nodeLabel(
-        (n) => `<b>${escapeHtml(n.label)}</b><br>${escapeHtml(n.sub ?? "")}`,
+        (n) =>
+          `<b>${escapeHtml(n.title ?? n.label)}</b><br>${escapeHtml(
+            n.sub ?? "",
+          )}`,
       )
       .linkColor((l) => l.color ?? STATUS_COLOR[l.status ?? "none"])
       .linkOpacity(0.55)

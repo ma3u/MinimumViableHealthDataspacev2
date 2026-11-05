@@ -63,6 +63,9 @@ const RECORD_COLOR: Record<string, string> = {
 const facts = (p: Record<string, string | number | boolean> = {}): Fact[] =>
   Object.entries(p).map(([k, v]) => [k, String(v)]);
 
+/** Above this many records the scene names them on hover only. */
+const LABELLED_RECORDS = 20;
+
 export function importOverview(graph: ImportGraph): OverviewView {
   const d = graph.dataset;
   const speId = String(d.speId ?? "");
@@ -71,6 +74,37 @@ export function importOverview(graph: ImportGraph): OverviewView {
   const providerName = provider ? didToName(provider) : "";
   const datasetNodeId =
     graph.nodes.find((n) => n.label === "ImportedDataset")?.id ?? "";
+  const recordCount = graph.nodes.filter(
+    (n) => n.label === "ImportedRecord",
+  ).length;
+  const nameOf = new Map(graph.nodes.map((n) => [n.id, n.name]));
+  // What each record refers to and what refers to it: a patient's
+  // observations, an observation's patient (#876).
+  const refersTo = new Map<string, string[]>();
+  const referredBy = new Map<string, string[]>();
+  for (const l of graph.links) {
+    if (l.type !== "REFERS_TO") continue;
+    refersTo.set(l.source, [...(refersTo.get(l.source) ?? []), l.target]);
+    referredBy.set(l.target, [...(referredBy.get(l.target) ?? []), l.source]);
+  }
+  const related = (id: string): Fact[] => {
+    const list = (ids: string[] | undefined, title: string): Fact[] =>
+      ids?.length
+        ? [
+            [
+              `${title} (${ids.length})`,
+              ids
+                .slice(0, 8)
+                .map((x) => nameOf.get(x) ?? x)
+                .join("; ") + (ids.length > 8 ? "; …" : ""),
+            ],
+          ]
+        : [];
+    return [
+      ...list(refersTo.get(id), "Refers to"),
+      ...list(referredBy.get(id), "Referred to by"),
+    ];
+  };
 
   const nodes: OverviewNode[] = graph.nodes.map((n) => {
     switch (n.label) {
@@ -124,13 +158,14 @@ export function importOverview(graph: ImportGraph): OverviewView {
       default:
         return {
           id: n.id,
-          label: n.name,
+          label: recordCount > LABELLED_RECORDS ? "" : n.name,
           layer: "records",
           kind: n.group ?? "Record",
           size: 1,
           color: RECORD_COLOR[n.group ?? ""] ?? "#93c5fd",
           title: n.name,
-          facts: facts(n.properties),
+          sub: n.group,
+          facts: [...facts(n.properties), ...related(n.id)],
         };
     }
   });

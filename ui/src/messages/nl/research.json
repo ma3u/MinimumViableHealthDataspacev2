@@ -295,5 +295,7 @@
   "Waiting for the provider": "Wachten op de aanbieder",
   "Close": "Sluiten",
   "Transfers under this contract ({n})": "Overdrachten onder dit contract ({n})",
-  "No transfer yet.": "Nog geen overdracht."
+  "No transfer yet.": "Nog geen overdracht.",
+  "agreed {date}": "overeengekomen {date}",
+  "imported {date}": "geïmporteerd {date}"
 }
