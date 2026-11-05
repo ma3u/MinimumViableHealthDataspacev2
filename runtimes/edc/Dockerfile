@@ -1,7 +1,10 @@
 # Builds one EDC launcher image (ADR-076):
 #   docker build --build-arg RUNTIME=controlplane -t edc-controlplane runtimes/edc
 # RUNTIME is controlplane, identity-hub or issuerservice.
-FROM gradle:9.8.2-jdk21-alpine AS build
+# The jar is the same on every platform, so it builds on the builder's own
+# (a linux/amd64 image for Azure builds on an arm64 laptop without emulating
+# Gradle); only the runtime stage is the target platform.
+FROM --platform=$BUILDPLATFORM gradle:9.8.2-jdk21-alpine AS build
 ARG RUNTIME
 WORKDIR /src
 COPY . .
