@@ -41,13 +41,17 @@ export default function OfferTerms({
   consumerName,
   accepted,
   onAcceptedChange,
+  agreed = false,
 }: {
   policy: Record<string, unknown>;
   providerDid: string;
   providerName: string;
   consumerName: string;
-  accepted: boolean;
-  onAcceptedChange: (accepted: boolean) => void;
+  /** Absent for an agreement already signed: then there is nothing to tick. */
+  accepted?: boolean;
+  onAcceptedChange?: (accepted: boolean) => void;
+  /** The policy of a signed agreement rather than of an offer. */
+  agreed?: boolean;
 }) {
   const t = useT("research");
   const ta = useT("admin");
@@ -89,19 +93,26 @@ export default function OfferTerms({
       <div>
         <h3 className="flex items-center gap-2 font-semibold text-(--text-primary)">
           <ScrollText size={16} />
-          {t("The terms you agree to")}
+          {agreed ? t("The terms you agreed to") : t("The terms you agree to")}
         </h3>
         <p className="text-xs text-(--text-secondary) mt-1">
-          {t(
-            "{provider} offers this data under the policy below. Starting the negotiation means {consumer} accepts it.",
-            { provider: providerName, consumer: consumerName },
-          )}
+          {agreed
+            ? t(
+                "{consumer} and {provider} signed this policy; it governs every use of the data.",
+                { provider: providerName, consumer: consumerName },
+              )
+            : t(
+                "{provider} offers this data under the policy below. Starting the negotiation means {consumer} accepts it.",
+                { provider: providerName, consumer: consumerName },
+              )}
         </p>
       </div>
 
       <div>
         <p className="text-xs font-medium text-(--text-secondary) uppercase tracking-wide">
-          {t("The offer's policy (ODRL)")}
+          {agreed
+            ? t("The usage policy (ODRL)")
+            : t("The offer's policy (ODRL)")}
         </p>
         <p
           data-testid="offer-policy-description"
@@ -177,21 +188,23 @@ export default function OfferTerms({
         </div>
       )}
 
-      <label className="flex items-start gap-2 cursor-pointer">
-        <input
-          type="checkbox"
-          data-testid="offer-terms-accept"
-          checked={accepted}
-          onChange={(e) => onAcceptedChange(e.target.checked)}
-          className="mt-0.5 accent-layer2"
-        />
-        <span className="text-(--text-primary)">
-          {t(
-            "I have read these terms and agree to them on behalf of {consumer}.",
-            { consumer: consumerName },
-          )}
-        </span>
-      </label>
+      {onAcceptedChange && (
+        <label className="flex items-start gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            data-testid="offer-terms-accept"
+            checked={!!accepted}
+            onChange={(e) => onAcceptedChange(e.target.checked)}
+            className="mt-0.5 accent-layer2"
+          />
+          <span className="text-(--text-primary)">
+            {t(
+              "I have read these terms and agree to them on behalf of {consumer}.",
+              { consumer: consumerName },
+            )}
+          </span>
+        </label>
+      )}
     </div>
   );
 }

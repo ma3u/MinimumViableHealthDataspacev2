@@ -137,6 +137,23 @@ describe("GET /api/transfers/[id]/data", () => {
     );
   });
 
+  it("says what a 404 and a 401 from the data plane mean", async () => {
+    mockManagement.mockResolvedValue({ state: "STARTED" });
+    fetchMock
+      .mockResolvedValueOnce(siglet())
+      .mockResolvedValueOnce(new Response("", { status: 404 }));
+    const notServed = await (await get()).json();
+    expect(notServed.detail).toMatch(/serves no data for this asset \(404\)/);
+
+    fetchMock
+      .mockResolvedValueOnce(siglet())
+      .mockResolvedValueOnce(new Response("", { status: 401 }))
+      .mockResolvedValueOnce(new Response("", { status: 401 }));
+    const expired = await (await get()).json();
+    expect(expired.detail).toMatch(/refused the access token \(401\)/);
+    expect(expired.detail).toMatch(/start a new transfer/);
+  });
+
   it("answers 409 for a transfer that is not STARTED", async () => {
     mockManagement.mockResolvedValue({ state: "TERMINATED" });
 

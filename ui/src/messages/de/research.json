@@ -248,5 +248,20 @@
   "Your data permit binds the use as well": "Ihre Datengenehmigung bindet die Nutzung ebenfalls",
   "Permitted purposes: {list}": "Erlaubte Zwecke: {list}",
   "Forbidden: {list}": "Verboten: {list}",
-  "I have read these terms and agree to them on behalf of {consumer}.": "Ich habe diese Bedingungen gelesen und stimme ihnen im Namen von {consumer} zu."
+  "I have read these terms and agree to them on behalf of {consumer}.": "Ich habe diese Bedingungen gelesen und stimme ihnen im Namen von {consumer} zu.",
+  "The terms you agreed to": "Die Bedingungen, denen Sie zugestimmt haben",
+  "{consumer} and {provider} signed this policy; it governs every use of the data.": "{consumer} und {provider} haben diese Richtlinie unterzeichnet; sie regelt jede Nutzung der Daten.",
+  "The usage policy (ODRL)": "Die Nutzungsrichtlinie (ODRL)",
+  "Details": "Details",
+  "Access open since": "Zugang offen seit",
+  "Contract signed": "Vertrag unterzeichnet",
+  "Usable until": "Nutzbar bis",
+  "no end date in the contract": "kein Enddatum im Vertrag",
+  "How to get the data": "So erhalten Sie die Daten",
+  "Open shows the data here; Download saves it as a JSON file. Each time, the hub fetches it from {provider}'s data plane with a short-lived token your connector holds; the token never reaches your browser.": "Öffnen zeigt die Daten hier; Herunterladen speichert sie als JSON-Datei. Jedes Mal holt der Hub sie von der Datenebene von {provider} mit einem kurzlebigen Token, das Ihr Konnektor hält; das Token erreicht Ihren Browser nie.",
+  "The access stays open until the transfer is completed or ended, or the contract period runs out; after that a new negotiation is needed.": "Der Zugang bleibt offen, bis die Übertragung abgeschlossen oder beendet ist oder die Vertragslaufzeit endet; danach ist eine neue Verhandlung nötig.",
+  "Access policy": "Zugangsrichtlinie",
+  "{provider} decides who may see the offer at all. {consumer} saw it, so its connector met that policy, proving its membership with its credentials (DCP); the provider does not disclose the policy itself.": "{provider} entscheidet, wer das Angebot überhaupt sieht. {consumer} hat es gesehen, sein Konnektor erfüllte also diese Richtlinie und wies seine Mitgliedschaft mit seinen Nachweisen nach (DCP); die Richtlinie selbst legt der Anbieter nicht offen.",
+  "Loading the agreement…": "Vereinbarung wird geladen…",
+  "The agreement could not be read: {detail}": "Die Vereinbarung konnte nicht gelesen werden: {detail}"
 }

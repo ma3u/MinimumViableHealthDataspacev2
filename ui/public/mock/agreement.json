@@ -1,0 +1,23 @@
+{
+  "agreementId": "agr-demo-fhir-patient-search",
+  "assetId": "fhir-patient-search",
+  "providerId": "did:web:alpha-klinik.de:participant",
+  "consumerId": "did:web:pharmaco.de:research",
+  "signedAt": "2026-11-05T13:56:30.000Z",
+  "validUntil": "2027-11-05T13:56:30.000Z",
+  "policy": {
+    "@type": "Agreement",
+    "permission": [
+      {
+        "action": "use",
+        "constraint": [
+          {
+            "leftOperand": "inForceDate",
+            "operator": "lteq",
+            "rightOperand": "contractAgreement+365d"
+          }
+        ]
+      }
+    ]
+  }
+}

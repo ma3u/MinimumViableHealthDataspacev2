@@ -18,6 +18,11 @@ tests {
   const body = res.getBody() || {};
   if (bru.getEnvVar("dspLiveFlow") !== "true") {
     test("SKIPPED live check: this environment does not run the DSP flow end to end (#542)", function () {});
+  } else if (res.getStatus() === 502 && /certificate demo/.test(body.detail || "")) {
+    // The token works, but the data plane on Azure is JAD's certificate demo
+    // and serves no FHIR asset (2026-11-05, #876). Fails again once a data
+    // plane for HttpData assets answers with anything else.
+    test("SKIPPED: the data plane serves no FHIR asset yet (" + body.detail + ")", function () {});
   } else {
     test("the provider's data plane answered with the data", function () {
       expect(res.getStatus(), `${body.step || ""} ${body.detail || body.error || ""}`).to.equal(200);

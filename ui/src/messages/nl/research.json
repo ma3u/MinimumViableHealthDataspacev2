@@ -248,5 +248,20 @@
   "Your data permit binds the use as well": "Uw gegevensvergunning bindt het gebruik eveneens",
   "Permitted purposes: {list}": "Toegestane doeleinden: {list}",
   "Forbidden: {list}": "Verboden: {list}",
-  "I have read these terms and agree to them on behalf of {consumer}.": "Ik heb deze voorwaarden gelezen en ga ermee akkoord namens {consumer}."
+  "I have read these terms and agree to them on behalf of {consumer}.": "Ik heb deze voorwaarden gelezen en ga ermee akkoord namens {consumer}.",
+  "The terms you agreed to": "De voorwaarden waarmee u hebt ingestemd",
+  "{consumer} and {provider} signed this policy; it governs every use of the data.": "{consumer} en {provider} hebben dit beleid ondertekend; het regelt elk gebruik van de gegevens.",
+  "The usage policy (ODRL)": "Het gebruiksbeleid (ODRL)",
+  "Details": "Details",
+  "Access open since": "Toegang open sinds",
+  "Contract signed": "Contract ondertekend",
+  "Usable until": "Bruikbaar tot",
+  "no end date in the contract": "geen einddatum in het contract",
+  "How to get the data": "Zo krijgt u de gegevens",
+  "Open shows the data here; Download saves it as a JSON file. Each time, the hub fetches it from {provider}'s data plane with a short-lived token your connector holds; the token never reaches your browser.": "Openen toont de gegevens hier; Downloaden slaat ze op als JSON-bestand. Telkens haalt de hub ze op bij het dataplane van {provider} met een kortlevend token dat uw connector bewaart; het token bereikt uw browser nooit.",
+  "The access stays open until the transfer is completed or ended, or the contract period runs out; after that a new negotiation is needed.": "De toegang blijft open tot de overdracht is voltooid of beëindigd, of de contractperiode afloopt; daarna is een nieuwe onderhandeling nodig.",
+  "Access policy": "Toegangsbeleid",
+  "{provider} decides who may see the offer at all. {consumer} saw it, so its connector met that policy, proving its membership with its credentials (DCP); the provider does not disclose the policy itself.": "{provider} bepaalt wie het aanbod überhaupt mag zien. {consumer} zag het, dus zijn connector voldeed aan dat beleid en bewees zijn lidmaatschap met zijn bewijsstukken (DCP); de aanbieder maakt het beleid zelf niet bekend.",
+  "Loading the agreement…": "Overeenkomst wordt geladen…",
+  "The agreement could not be read: {detail}": "De overeenkomst kon niet worden gelezen: {detail}"
 }

@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import PageIntro from "@/components/PageIntro";
 import RowSourceBadge from "@/components/RowSourceBadge";
+import TransferDetails from "@/components/TransferDetails";
 import type { RowSource } from "@/lib/row-provenance";
 import { T, useT } from "@/lib/i18n/translate";
 
@@ -716,6 +717,15 @@ function DataTransferContent() {
   // The real data of a STARTED connector transfer, fetched through the
   // consumer's siglet (api/transfers/[id]/data). Before #876 "View FHIR"
   // showed the bundled sample file for every row, real ones included.
+  // Which My data rows show their details (#876).
+  const [detailsOpen, setDetailsOpen] = useState<Set<string>>(new Set());
+  const toggleDetails = (id: string) =>
+    setDetailsOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   const [liveData, setLiveData] = useState<
     Record<string, { loading: boolean; error?: string; result?: LiveData }>
   >({});
@@ -945,9 +955,12 @@ function DataTransferContent() {
         ((a.stateTimestamp as number) || 0),
     );
 
-  const providerOfContract = (contractId: string): string => {
+  const providerDidOfContract = (contractId: string): string => {
     const agr = agreements.find((a) => a["@id"] === contractId);
-    const cp = agr ? f(agr as Record<string, unknown>, "counterPartyId") : "";
+    return agr ? f(agr as Record<string, unknown>, "counterPartyId") : "";
+  };
+  const providerOfContract = (contractId: string): string => {
+    const cp = providerDidOfContract(contractId);
     return cp ? didToName(cp) : "";
   };
 
@@ -1260,60 +1273,92 @@ function DataTransferContent() {
                   f(tr as Record<string, unknown>, "contractId"),
                 );
                 const entry = liveData[id];
+                const contractId = f(
+                  tr as Record<string, unknown>,
+                  "contractId",
+                );
                 return (
                   <div
                     key={id}
-                    className="flex flex-wrap items-center gap-3 p-3 rounded-lg border border-(--border) bg-(--surface-2)/50"
+                    className="p-3 rounded-lg border border-(--border) bg-(--surface-2)/50"
                   >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-(--text-primary)">
-                        {name}
-                      </p>
-                      <p className="text-xs text-(--text-secondary)">
-                        {t("Provider:")} {provider || "—"} ·{" "}
-                        {t("Process: {id}…", { id: id.slice(0, 8) })}
-                        {entry?.result &&
-                          ` · ${Math.max(
-                            1,
-                            Math.round(entry.result.bytes / 1024),
-                          )} KB`}
-                      </p>
-                      {entry?.error && (
-                        <p className="text-xs text-(--badge-inactive-text) mt-1">
-                          {t("Could not fetch the data: {detail}", {
-                            detail: entry.error,
-                          })}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-(--text-primary)">
+                          {name}
                         </p>
-                      )}
+                        <p className="text-xs text-(--text-secondary)">
+                          {t("Provider:")} {provider || "—"} ·{" "}
+                          {t("Process: {id}…", { id: id.slice(0, 8) })}
+                          {entry?.result &&
+                            ` · ${Math.max(
+                              1,
+                              Math.round(entry.result.bytes / 1024),
+                            )} KB`}
+                        </p>
+                        {entry?.error && (
+                          <p className="text-xs text-(--badge-inactive-text) mt-1">
+                            {t("Could not fetch the data: {detail}", {
+                              detail: entry.error,
+                            })}
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void openFhirViewer(id);
+                          document
+                            .getElementById(`transfer-${id}`)
+                            // Not every browser engine has it (jsdom has not).
+                            ?.scrollIntoView?.({ behavior: "smooth" });
+                        }}
+                        className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-(--role-user-bg) text-(--role-user-text) hover:opacity-80"
+                      >
+                        {entry?.loading ? (
+                          <Loader2 size={12} className="animate-spin" />
+                        ) : (
+                          <FileJson2 size={12} />
+                        )}
+                        {t("Open")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          void downloadLiveData(id, (aId as string) || "data")
+                        }
+                        className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-(--border) text-(--text-primary) hover:border-gray-500"
+                      >
+                        <Download size={12} />
+                        {t("Download")}
+                      </button>
+                      <button
+                        type="button"
+                        aria-expanded={detailsOpen.has(id)}
+                        onClick={() => toggleDetails(id)}
+                        className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-(--border) text-(--text-primary) hover:border-gray-500"
+                      >
+                        {detailsOpen.has(id) ? (
+                          <ChevronDown size={12} />
+                        ) : (
+                          <ChevronRight size={12} />
+                        )}
+                        {t("Details")}
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        void openFhirViewer(id);
-                        document
-                          .getElementById(`transfer-${id}`)
-                          // Not every browser engine has it (jsdom has not).
-                          ?.scrollIntoView?.({ behavior: "smooth" });
-                      }}
-                      className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-(--role-user-bg) text-(--role-user-text) hover:opacity-80"
-                    >
-                      {entry?.loading ? (
-                        <Loader2 size={12} className="animate-spin" />
-                      ) : (
-                        <FileJson2 size={12} />
-                      )}
-                      {t("Open")}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        void downloadLiveData(id, (aId as string) || "data")
-                      }
-                      className="flex items-center gap-1 text-xs px-2 py-1 rounded border border-(--border) text-(--text-primary) hover:border-gray-500"
-                    >
-                      <Download size={12} />
-                      {t("Download")}
-                    </button>
+                    {detailsOpen.has(id) && contractId && (
+                      <TransferDetails
+                        participantId={selectedCtx}
+                        contractId={contractId}
+                        openedAt={(tr.stateTimestamp as number) || 0}
+                        providerDid={providerDidOfContract(contractId)}
+                        providerName={provider || "—"}
+                        consumerName={
+                          participants.find((p) => p["@id"] === selectedCtx)
+                            ?.displayName ?? ""
+                        }
+                      />
+                    )}
                   </div>
                 );
               })}

@@ -6,6 +6,8 @@ export const API_GROUP_DESCRIPTIONS: Record<string, string> = {
     "The access body's activity report, Regulation (EU) 2025/327 Art. 59, generated from the graph",
   admin:
     "Operator tools: components and their health, tenants, participants, ODRL policies, audit log and retention. EDC_ADMIN; policies and audit also HDAB_AUTHORITY",
+  agreements:
+    "Contract agreements: when one was signed, until when its policy allows use, and the agreed policy",
   analytics: "OMOP cohort analytics",
   "app-accounts":
     "The Klarbefund app creates a sandbox account for itself, without a session but only with an Apple App Attest attestation (ADR-054)",

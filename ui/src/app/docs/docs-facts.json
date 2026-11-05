@@ -50,6 +50,10 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/agreements/[id]",
+      "methods": ["GET"]
+    },
+    {
       "path": "/api/analytics",
       "methods": ["GET"]
     },
@@ -1268,8 +1272,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 56,
-    "operations": 73
+    "paths": 57,
+    "operations": 74
   },
   "workflowJobs": {
     "test.yml": [

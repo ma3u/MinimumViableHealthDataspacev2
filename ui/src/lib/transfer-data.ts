@@ -82,6 +82,23 @@ export interface PulledData {
   data: unknown;
 }
 
+/**
+ * What a refusal from the data plane means, for the person reading it.
+ * Measured on Azure on 2026-11-05: a token a few minutes old is accepted and
+ * answered 404, because the data plane there is JAD's certificate demo
+ * (`/api/data/certs/...`) and serves no asset's data; a token two hours old
+ * is answered 401, as siglet did not renew it (#876).
+ */
+function dataPlaneRefusal(status: number | undefined): string {
+  if (status === 401 || status === 403) {
+    return `the data plane refused the access token (${status}); it has expired or was revoked, so start a new transfer`;
+  }
+  if (status === 404) {
+    return `the data plane at ${EDR_DATA_URL} accepted the token but serves no data for this asset (404); on this deployment it is JAD's certificate demo, not a data plane for FHIR assets`;
+  }
+  return `the data plane answered ${status ?? "nothing"}`;
+}
+
 /** GET the data endpoint with the token, as a bare token and then as Bearer. */
 export async function pullData(token: string): Promise<PulledData> {
   let res: Response | null = null;
@@ -100,7 +117,7 @@ export async function pullData(token: string): Promise<PulledData> {
   if (!res || !res.ok) {
     throw new TransferDataError(
       "data",
-      `the data plane answered ${res?.status ?? "nothing"}`,
+      dataPlaneRefusal(res?.status),
       res?.status,
     );
   }

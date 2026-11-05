@@ -248,5 +248,20 @@
   "Your data permit binds the use as well": "Su permiso de datos también vincula el uso",
   "Permitted purposes: {list}": "Fines permitidos: {list}",
   "Forbidden: {list}": "Prohibido: {list}",
-  "I have read these terms and agree to them on behalf of {consumer}.": "He leído estas condiciones y las acepto en nombre de {consumer}."
+  "I have read these terms and agree to them on behalf of {consumer}.": "He leído estas condiciones y las acepto en nombre de {consumer}.",
+  "The terms you agreed to": "Las condiciones que aceptó",
+  "{consumer} and {provider} signed this policy; it governs every use of the data.": "{consumer} y {provider} firmaron esta política; rige todo uso de los datos.",
+  "The usage policy (ODRL)": "La política de uso (ODRL)",
+  "Details": "Detalles",
+  "Access open since": "Acceso abierto desde",
+  "Contract signed": "Contrato firmado",
+  "Usable until": "Utilizable hasta",
+  "no end date in the contract": "sin fecha de fin en el contrato",
+  "How to get the data": "Cómo obtener los datos",
+  "Open shows the data here; Download saves it as a JSON file. Each time, the hub fetches it from {provider}'s data plane with a short-lived token your connector holds; the token never reaches your browser.": "Abrir muestra los datos aquí; Descargar los guarda como archivo JSON. Cada vez, el hub los obtiene del plano de datos de {provider} con un token de corta duración que guarda su conector; el token nunca llega a su navegador.",
+  "The access stays open until the transfer is completed or ended, or the contract period runs out; after that a new negotiation is needed.": "El acceso sigue abierto hasta que la transferencia se complete o termine, o venza el plazo del contrato; después hace falta una nueva negociación.",
+  "Access policy": "Política de acceso",
+  "{provider} decides who may see the offer at all. {consumer} saw it, so its connector met that policy, proving its membership with its credentials (DCP); the provider does not disclose the policy itself.": "{provider} decide quién puede ver la oferta. {consumer} la vio, así que su conector cumplió esa política, demostrando su pertenencia con sus credenciales (DCP); el proveedor no revela la política en sí.",
+  "Loading the agreement…": "Cargando el acuerdo…",
+  "The agreement could not be read: {detail}": "No se pudo leer el acuerdo: {detail}"
 }

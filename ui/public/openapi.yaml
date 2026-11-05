@@ -1703,6 +1703,38 @@ paths:
         "502":
           description: The token or the data could not be fetched; `step` says which
 
+  /api/agreements/{id}:
+    get:
+      tags: [Transfers]
+      summary: One contract agreement, with its signing date, period and policy
+      description: >-
+        The agreement as the consumer's connector holds it; `validUntil` is
+        the end of the period its policy allows, counted from the signing
+        (#876).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: "#/components/parameters/ParticipantId"
+      responses:
+        "200":
+          description: The agreement
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  agreementId: { type: string }
+                  assetId: { type: string }
+                  providerId: { type: string }
+                  consumerId: { type: string }
+                  signedAt: { type: string }
+                  validUntil: { type: string }
+                  policy: { type: object }
+        "400": { description: participantId and an agreement id are required }
+        "404": { $ref: "#/components/responses/NotFound" }
+
   /api/assets:
     get:
       tags: [Assets]
