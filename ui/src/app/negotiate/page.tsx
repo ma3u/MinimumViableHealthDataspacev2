@@ -46,6 +46,18 @@ interface CatalogOffer {
   name?: string;
   description?: string;
   contentType?: string;
+  /** The provider's DSP address, as the catalog's distribution names it. */
+  endpoint?: string;
+}
+
+/** The first distribution's DSP endpoint, in either JSON-LD spelling. */
+function datasetEndpoint(ds: Record<string, unknown>): string {
+  const one = (v: unknown) =>
+    (Array.isArray(v) ? v[0] : v) as Record<string, unknown> | undefined;
+  const dist = one(ds["distribution"] ?? ds["dcat:distribution"]);
+  const svc = one(dist?.["accessService"] ?? dist?.["dcat:accessService"]);
+  const url = svc?.["endpointURL"] ?? svc?.["dcat:endpointURL"] ?? "";
+  return typeof url === "string" ? url : "";
 }
 
 interface Negotiation {
@@ -104,6 +116,7 @@ function parseOffers(catalog: Record<string, unknown>): CatalogOffer[] {
       ds["dct:description"] ??
       "") as string;
     const contentType = (ds["contenttype"] ?? "") as string;
+    const endpoint = datasetEndpoint(ds);
 
     let policies = ds["hasPolicy"] ?? ds["odrl:hasPolicy"] ?? [];
     if (!Array.isArray(policies)) policies = [policies];
@@ -123,11 +136,97 @@ function parseOffers(catalog: Record<string, unknown>): CatalogOffer[] {
           name,
           description,
           contentType,
+          ...(endpoint ? { endpoint } : {}),
         });
       }
     }
   }
   return offers;
+}
+
+/** How long the page follows a negotiation: every 3 s for two minutes. */
+const TRACK_INTERVAL_MS = 3000;
+const TRACK_POLLS = 40;
+
+/**
+ * What happens after "Negotiation initiated": who has to act (nobody), the
+ * state the connectors have reached, and the way on to the transfer.
+ */
+function NegotiationProgress({
+  tracked,
+  provider,
+  consumerCtx,
+}: {
+  tracked: {
+    state: string;
+    agreementId: string;
+    error: string;
+    gaveUp: boolean;
+  };
+  provider: string;
+  consumerCtx: string;
+}) {
+  const t = useT("research");
+  const box = "mb-4 p-3 rounded text-sm flex gap-2";
+  if (tracked.state === "FINALIZED" && tracked.agreementId) {
+    return (
+      <div
+        data-testid="negotiation-progress"
+        className={`${box} items-center justify-between bg-(--badge-active-bg) border border-(--badge-active-border) text-(--badge-active-text)`}
+      >
+        <span className="flex gap-2">
+          <CheckCircle2 size={16} className="shrink-0 mt-0.5" />
+          {t("Contract agreed with {provider}. Next step: the transfer.", {
+            provider,
+          })}
+        </span>
+        <Link
+          href={`/data/transfer?participantId=${encodeURIComponent(
+            consumerCtx,
+          )}&contractId=${encodeURIComponent(tracked.agreementId)}`}
+          className="flex items-center gap-1 font-medium hover:underline whitespace-nowrap"
+        >
+          {t("Continue to transfer")} <ArrowRight size={14} />
+        </Link>
+      </div>
+    );
+  }
+  if (tracked.state === "TERMINATED") {
+    return (
+      <div
+        data-testid="negotiation-progress"
+        className={`${box} bg-(--badge-inactive-bg) border border-(--badge-inactive-border) text-(--badge-inactive-text)`}
+      >
+        <XCircle size={16} className="shrink-0 mt-0.5" />
+        {t("The negotiation ended without a contract: {detail}", {
+          detail: tracked.error || tracked.state,
+        })}
+      </div>
+    );
+  }
+  return (
+    <div
+      data-testid="negotiation-progress"
+      className={`${box} bg-(--surface-2) border border-(--border) text-(--text-secondary)`}
+    >
+      {tracked.gaveUp ? (
+        <AlertCircle size={16} className="shrink-0 mt-0.5" />
+      ) : (
+        <Loader2 size={16} className="shrink-0 mt-0.5 animate-spin" />
+      )}
+      <span>
+        {tracked.gaveUp
+          ? t(
+              "No answer from {provider} after two minutes. The negotiation stays in the history below; if it does not move, the provider's connector cannot be reached.",
+              { provider },
+            )
+          : t(
+              "Waiting for {provider} to agree ({state}). Its connector checks the request against its offer and answers on its own: nobody at {provider} has to sign in.",
+              { provider, state: tracked.state },
+            )}
+      </span>
+    </div>
+  );
 }
 
 export default function NegotiatePage() {
@@ -171,7 +270,6 @@ function NegotiateContent() {
   );
   const [providerCtxId, setProviderCtxId] = useState(preProviderId);
   const [providerDid, setProviderDid] = useState(preProviderDid);
-  const [dspBase] = useState("http://controlplane:8082/api/dsp");
   const [catalogLoading, setCatalogLoading] = useState(false);
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [catalogNote, setCatalogNote] = useState<string | null>(null);
@@ -184,6 +282,18 @@ function NegotiateContent() {
   const [initiating, setInitiating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [resultIsError, setResultIsError] = useState(false);
+  // The negotiation just started, followed until the provider answers. The
+  // provider's connector agrees on its own when the request matches its
+  // offer; nobody at the data holder signs in for it. Without this the page
+  // said "Negotiation initiated" and nothing more, and a demo user waited for
+  // a step that does not exist (#876).
+  const [tracked, setTracked] = useState<{
+    id: string;
+    state: string;
+    agreementId: string;
+    error: string;
+    gaveUp: boolean;
+  } | null>(null);
 
   useEffect(() => {
     fetchApi("/api/participants")
@@ -357,11 +467,59 @@ function NegotiateContent() {
   }
 
   /** Step 2: Submit DSP ContractRequest with real offer ID */
+  const trackedId = tracked?.id;
+  useEffect(() => {
+    if (!trackedId) return;
+    let polls = 0;
+    let stopped = false;
+    const check = async () => {
+      polls += 1;
+      try {
+        const res = await fetchApi(
+          `/api/negotiations?participantId=${selectedCtx}`,
+        );
+        const body = await res.json();
+        const list = (
+          Array.isArray(body) ? body : body.negotiations ?? []
+        ) as Negotiation[];
+        const row = list.find((n) => n["@id"] === trackedId);
+        const state = row ? negField(row, "state").toUpperCase() : "";
+        const done = state === "FINALIZED" || state === "TERMINATED";
+        if (stopped) return;
+        setNegotiations(list);
+        setTracked((t) =>
+          t && t.id === trackedId
+            ? {
+                ...t,
+                state: state || t.state,
+                agreementId: row ? negField(row, "contractAgreementId") : "",
+                error: String(row?.errorDetail ?? ""),
+                gaveUp: !done && polls >= TRACK_POLLS,
+              }
+            : t,
+        );
+        if (done || polls >= TRACK_POLLS) stopped = true;
+      } catch {
+        // A failed poll is not an answer; the next one asks again.
+      }
+    };
+    void check();
+    const timer = setInterval(() => {
+      if (stopped) clearInterval(timer);
+      else void check();
+    }, TRACK_INTERVAL_MS);
+    return () => {
+      stopped = true;
+      clearInterval(timer);
+    };
+  }, [trackedId, selectedCtx]);
+
   const handleNegotiate = async (e: React.FormEvent) => {
     e.preventDefault();
     setInitiating(true);
     setResult(null);
     setResultIsError(false);
+    setTracked(null);
 
     try {
       const res = await fetchApi("/api/negotiations", {
@@ -370,7 +528,10 @@ function NegotiateContent() {
         body: JSON.stringify({
           participantId: selectedCtx,
           assetId,
-          counterPartyAddress: dspBase,
+          // The address the provider's catalog gave, else the server's own
+          // DSP base. Never a fixed host: http://controlplane does not
+          // resolve on Azure (#876).
+          counterPartyAddress: selectedOffer?.endpoint,
           counterPartyId: providerCtxId,
           providerDid: selectedOffer?.assignerDid || providerDid,
           offerId,
@@ -389,6 +550,15 @@ function NegotiateContent() {
                 id: String(data["@id"] || JSON.stringify(data)),
               }),
         );
+        if (data.demo !== true && !IS_STATIC && data["@id"]) {
+          setTracked({
+            id: String(data["@id"]),
+            state: "REQUESTED",
+            agreementId: "",
+            error: "",
+            gaveUp: false,
+          });
+        }
         const updated = await fetchApi(
           `/api/negotiations?participantId=${selectedCtx}`,
         );
@@ -670,6 +840,14 @@ function NegotiateContent() {
             >
               {result}
             </div>
+          )}
+
+          {tracked && (
+            <NegotiationProgress
+              tracked={tracked}
+              provider={didToName(providerDid)}
+              consumerCtx={selectedCtx}
+            />
           )}
 
           {!selectedOffer && (

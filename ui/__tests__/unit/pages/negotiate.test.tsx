@@ -521,6 +521,111 @@ describe("NegotiatePage", () => {
     });
   });
 
+  describe("where the contract request is sent (#876)", () => {
+    async function negotiateFirstOffer(catalog: unknown) {
+      setupDefaultMocks({ "catalog=true": () => mockResponse(catalog) });
+      const user = userEvent.setup();
+      render(<NegotiatePage />);
+      await user.click(await screen.findByText("Discover Offers"));
+      await user.click(await screen.findByText("FHIR Patient Bundle"));
+      mockFetchApi.mockImplementation((url: string, init?: RequestInit) =>
+        url === "/api/negotiations" && init?.method === "POST"
+          ? mockResponse({ "@id": "neg-new" })
+          : mockResponse(sampleNegotiations),
+      );
+      await user.click(screen.getByText("Start Negotiation"));
+      await waitFor(() => {
+        expect(
+          mockFetchApi.mock.calls.some(
+            ([u, i]) => u === "/api/negotiations" && i?.method === "POST",
+          ),
+        ).toBe(true);
+      });
+      const [, init] = mockFetchApi.mock.calls.find(
+        ([u, i]) => u === "/api/negotiations" && i?.method === "POST",
+      )!;
+      return JSON.parse(String(init.body)) as Record<string, unknown>;
+    }
+
+    it("sends the address the provider's catalog gives", async () => {
+      const endpoint =
+        "http://mvhd-controlplane:8082/api/dsp/36b1a04b/http-dsp-profile-2025-1";
+      const catalog = structuredClone(sampleCatalog) as {
+        "dcat:dataset": Record<string, unknown>[];
+      };
+      catalog["dcat:dataset"][0].distribution = [
+        { accessService: { endpointURL: endpoint } },
+      ];
+
+      const body = await negotiateFirstOffer(catalog);
+
+      expect(body.counterPartyAddress).toBe(endpoint);
+    });
+
+    it("sends no fixed host when the catalog names none, so the server's base applies", async () => {
+      // It used to send http://controlplane:8082, the compose host, which
+      // does not resolve on Azure: the negotiation stayed REQUESTING.
+      const body = await negotiateFirstOffer(sampleCatalog);
+
+      expect(body).not.toHaveProperty("counterPartyAddress");
+    });
+  });
+
+  describe("after the request: who acts next (#876)", () => {
+    async function startAndAnswer(row: Record<string, unknown>) {
+      setupDefaultMocks();
+      const user = userEvent.setup();
+      render(<NegotiatePage />);
+      await user.click(await screen.findByText("Discover Offers"));
+      await user.click(await screen.findByText("FHIR Patient Bundle"));
+      mockFetchApi.mockImplementation((url: string, init?: RequestInit) =>
+        url === "/api/negotiations" && init?.method === "POST"
+          ? mockResponse({ "@id": "neg-new" })
+          : mockResponse([{ "@id": "neg-new", ...row }, ...sampleNegotiations]),
+      );
+      await user.click(screen.getByText("Start Negotiation"));
+      return screen.findByTestId("negotiation-progress");
+    }
+
+    it("says nobody at the provider has to sign in while it waits", async () => {
+      const box = await startAndAnswer({ state: "REQUESTED" });
+
+      expect(box.textContent).toMatch(
+        /Waiting for AlphaKlinik Berlin to agree/,
+      );
+      expect(box.textContent).toMatch(
+        /nobody at AlphaKlinik Berlin has to sign in/,
+      );
+    });
+
+    it("offers the transfer once the contract is agreed", async () => {
+      await startAndAnswer({
+        state: "FINALIZED",
+        contractAgreementId: "agr-new",
+      });
+
+      const link = await screen.findByRole("link", {
+        name: /Continue to transfer/,
+      });
+      expect(link.getAttribute("href")).toBe(
+        "/data/transfer?participantId=ctx-pharmaco&contractId=agr-new",
+      );
+    });
+
+    it("says why when the negotiation ends without a contract", async () => {
+      await startAndAnswer({
+        state: "TERMINATED",
+        errorDetail: "Policy not satisfied",
+      });
+
+      expect(
+        await screen.findByText(
+          /ended without a contract: Policy not satisfied/,
+        ),
+      ).toBeTruthy();
+    });
+  });
+
   // ── 7. Existing negotiations list ──
   it("renders existing negotiations after loading", async () => {
     setupDefaultMocks();

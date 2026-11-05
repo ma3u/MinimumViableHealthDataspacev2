@@ -115,7 +115,8 @@ async function providerContextId(did: string): Promise<string> {
  *
  * Body: {
  *   participantId:       consumer participant context @id
- *   counterPartyAddress: provider DSP base URL (e.g. http://controlplane:8082/api/dsp)
+ *   counterPartyAddress: provider DSP address; the catalog's endpointURL, or omitted
+ *                        for this deployment's own base (EDC_PROTOCOL_URL)
  *   counterPartyId:      provider participant context @id (their UUID)
  *   providerDid:         provider DID (used as ODRL assigner — required for DCP)
  *   offerId:             ODRL offer @id obtained from catalog (required for valid DSP flow)
@@ -250,11 +251,9 @@ export async function POST(req: NextRequest) {
       policyId,
     } = body;
 
-    if (!participantId || !counterPartyAddress || !assetId) {
+    if (!participantId || !assetId) {
       return NextResponse.json(
-        {
-          error: "participantId, counterPartyAddress, and assetId are required",
-        },
+        { error: "participantId and assetId are required" },
         { status: 400 },
       );
     }
@@ -269,8 +268,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Construct the full DSP endpoint: {dspBase}/{providerCtxId}/{profileId}
-    const dspEndpoint = buildDspEndpoint(counterPartyAddress, counterPartyId);
+    // Construct the full DSP endpoint: {dspBase}/{providerCtxId}/{profileId}.
+    // Without an address, this deployment's own DSP base: the page used to
+    // send a hard-coded http://controlplane:8082, the compose host, which does
+    // not resolve on Azure (mvhd-controlplane), so every negotiation started
+    // there stayed REQUESTING (#876).
+    const dspEndpoint = buildDspEndpoint(
+      counterPartyAddress || DSP_BASE,
+      counterPartyId,
+    );
 
     // The ODRL assigner must be the provider's DID (for DCP credential verification)
     // Fall back to counterPartyId UUID if no DID provided (will fail DCP auth)
