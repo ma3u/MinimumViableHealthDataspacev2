@@ -71,7 +71,7 @@ function Glance({
       <dd>
         <ul className="space-y-0.5 text-(--text-primary)">
           {items.map((i) => (
-            <li key={i.text} title={i.title}>
+            <li key={i.text} title={i.title} className="first-letter:uppercase">
               {i.text}
             </li>
           ))}
