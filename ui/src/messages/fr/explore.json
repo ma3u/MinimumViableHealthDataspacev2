@@ -470,5 +470,17 @@
   "Imported Record": "Enregistrement importé",
   "A transfer's data imported into an SPE workspace": "Les données d'un transfert importées dans un espace de travail EPS",
   "One FHIR resource of an imported transfer, pseudonymised": "Une ressource FHIR d'un transfert importé, pseudonymisée",
-  "A secure processing environment (EHDS Art. 73)": "Un environnement de traitement sécurisé (EEDS art. 73)"
+  "A secure processing environment (EHDS Art. 73)": "Un environnement de traitement sécurisé (EEDS art. 73)",
+  "Back to my data": "Retour à mes données",
+  "My import, in one view": "Mon import, en une vue",
+  "What did this transfer bring into the SPE, from whom, and under which contract?": "Qu'a apporté ce transfert dans l'EPS, de qui et sous quel contrat ?",
+  "Where it came from: provider and contract": "D'où cela vient : fournisseur et contrat",
+  "The secure processing environment and the import": "L'environnement de traitement sécurisé et l'import",
+  "The imported records": "Les enregistrements importés",
+  "the imported dataset": "le jeu de données importé",
+  "the SPE it is in": "l'EPS où il se trouve",
+  "the provider": "le fournisseur",
+  "the contract": "le contrat",
+  "patients": "patients",
+  "observations": "observations"
 }

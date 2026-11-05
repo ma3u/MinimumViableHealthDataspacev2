@@ -34,14 +34,23 @@ export interface SpeImportResult {
   byType: Record<string, number>;
   importedAt: string;
   pseudonymised: boolean;
-  /** The graph viewer, focused on the imported dataset. */
+  /** The 3D overview of the import (/overview?import=…). */
   graphUrl: string;
 }
 
-export function importGraphUrl(datasetId: string, speId: string): string {
-  return `/graph?dataset=${encodeURIComponent(
+/** The 3D overview of one import: its nodes and relations only. */
+export function importViewUrl(datasetId: string, speId: string): string {
+  return `/overview?import=${encodeURIComponent(
     datasetId,
   )}&spe=${encodeURIComponent(speId)}`;
+}
+
+/** A transfer the SPEs hold already, as GET /api/spe-imports reports it. */
+export interface ExistingImport {
+  datasetId: string;
+  speId: string;
+  records: number;
+  importedAt: string;
 }
 
 interface ProxyNode {

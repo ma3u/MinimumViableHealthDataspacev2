@@ -198,16 +198,79 @@ MATCH (a:ImportedRecord {recordKey: ref.from})
 MATCH (b:ImportedRecord {recordKey: ref.to})
 MERGE (a)-[:REFERS_TO {path: ref.path}]->(b)`;
 
-/** Writes the dataset in one transaction: all of it or none. */
+/** A dataset this workspace already holds, as the duplicate check reports it. */
+export interface ExistingImport {
+  datasetId: string;
+  speId: string;
+  records: number;
+  importedAt: string;
+}
+
+/** The import is in this workspace already and the caller did not ask to overwrite it. */
+export class AlreadyImportedError extends Error {
+  constructor(readonly existing: ExistingImport) {
+    super(
+      `${existing.speId} holds this transfer already (${existing.records} records, imported ${existing.importedAt})`,
+    );
+  }
+}
+
+const READ_EXISTING = `
+MATCH (d:ImportedDataset)
+WHERE d.datasetId IN $datasetIds
+RETURN d.datasetId AS datasetId, d.records AS records, d.importedAt AS importedAt`;
+
+const toNumber = (v: unknown) =>
+  neo4j.isInt(v) ? (v as { toNumber(): number }).toNumber() : Number(v ?? 0);
+
+/** Which of these datasets the workspace holds, with when and how many records. */
+export async function readExisting(
+  session: Session,
+  speId: string,
+  datasetIds: string[],
+): Promise<ExistingImport[]> {
+  const res = await session.run(READ_EXISTING, { datasetIds });
+  return res.records.map((r) => ({
+    datasetId: String(r.get("datasetId")),
+    speId,
+    records: toNumber(r.get("records")),
+    importedAt: String(r.get("importedAt") ?? ""),
+  }));
+}
+
+/** An overwrite starts from nothing: the dataset's old records go first. */
+const DELETE_RECORDS = `
+MATCH (:ImportedDataset {datasetId: $datasetId})-[:CONTAINS]->(x:ImportedRecord)
+DETACH DELETE x`;
+
+/**
+ * Writes the dataset in one transaction: all of it or none. A dataset the
+ * workspace holds already is refused unless `overwrite` is set; then its
+ * records are replaced, not merged, so records the new data lacks are gone.
+ */
 export async function writeImport(
   session: Session,
   meta: ImportRequest,
   bundle: unknown,
   now: () => Date = () => new Date(),
+  overwrite = false,
 ): Promise<ImportOutcome> {
   const { records, references: refs } = bundleToRecords(meta.datasetId, bundle);
   const importedAt = now().toISOString();
   await session.executeWrite(async (tx) => {
+    const held = await tx.run(READ_EXISTING, { datasetIds: [meta.datasetId] });
+    if (held.records.length) {
+      if (!overwrite) {
+        const r = held.records[0];
+        throw new AlreadyImportedError({
+          datasetId: meta.datasetId,
+          speId: meta.speId,
+          records: toNumber(r.get("records")),
+          importedAt: String(r.get("importedAt") ?? ""),
+        });
+      }
+      await tx.run(DELETE_RECORDS, { datasetId: meta.datasetId });
+    }
     await tx.run(WRITE_DATASET, {
       meta,
       importedAt,
@@ -260,12 +323,60 @@ RETURN properties(d) AS d, w.speId AS speId`;
 const READ_RECORDS = `
 MATCH (:ImportedDataset {datasetId: $datasetId})-[:CONTAINS]->(x:ImportedRecord)
 WITH x ORDER BY x.resourceType, x.resourceId LIMIT $limit
-RETURN x.recordKey AS key, x.resourceType AS type, x.name AS name`;
+RETURN x.recordKey AS key, x.resourceType AS type, x.name AS name,
+       x.resource AS resource`;
 
 const READ_REFERENCES = `
 MATCH (a:ImportedRecord)-[r:REFERS_TO]->(b:ImportedRecord)
 WHERE a.recordKey IN $keys AND b.recordKey IN $keys
 RETURN a.recordKey AS from, b.recordKey AS to, r.path AS path`;
+
+/** Fields that say nothing to a reader or repeat the node's own name. */
+const HIDDEN_FIELDS = new Set([
+  "resourceType",
+  "id",
+  "fhirId",
+  "resourceId",
+  "subject",
+  "encounter",
+  "meta",
+  "text",
+]);
+
+/**
+ * What the inspector lists for a record: its type and id, then the plain
+ * values of the stored resource (gender, birth year, code, value, date), at
+ * most twelve. Nested structures are left to the raw resource.
+ */
+export function recordFacts(
+  type: string,
+  key: string,
+  resource: unknown,
+): Record<string, string | number | boolean> {
+  const out: Record<string, string | number | boolean> = {
+    resourceType: type,
+    resourceId: key.slice(key.lastIndexOf("/") + 1),
+  };
+  let parsed: Record<string, unknown> = {};
+  try {
+    parsed = JSON.parse(String(resource ?? "{}")) as Record<string, unknown>;
+  } catch {
+    return out;
+  }
+  let n = 0;
+  for (const [k, v] of Object.entries(parsed)) {
+    if (n >= 12 || HIDDEN_FIELDS.has(k)) continue;
+    if (
+      typeof v === "string" ||
+      typeof v === "number" ||
+      typeof v === "boolean"
+    ) {
+      out[k] = v;
+      n++;
+    }
+  }
+  return out;
+}
 
 /** The dataset, its workspace, its records and how they refer to each other. */
 export async function readImportGraph(
@@ -359,10 +470,7 @@ export async function readImportGraph(
       label: "ImportedRecord",
       name: String(r.get("name")),
       resourceType: String(r.get("type")),
-      properties: {
-        resourceType: String(r.get("type")),
-        resourceId: key.slice(key.lastIndexOf("/") + 1),
-      },
+      properties: recordFacts(String(r.get("type")), key, r.get("resource")),
     });
     links.push({ source: datasetNode, target: id, type: "CONTAINS" });
   }

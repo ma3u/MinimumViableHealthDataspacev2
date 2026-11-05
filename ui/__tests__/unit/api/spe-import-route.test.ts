@@ -15,6 +15,7 @@ vi.mock("@/lib/edc", () => ({
 import { requireAuth } from "@/lib/auth-guard";
 import { POST } from "@/app/api/transfers/[id]/import/route";
 import { GET } from "@/app/api/spe-imports/[id]/graph/route";
+import { GET as LIST } from "@/app/api/spe-imports/route";
 
 const CTX = "3386f049-185a-4b5c-a24a-e5719df88412";
 const TP = "824277d3-90cf-4b96-8ad1-ea489ba34775";
@@ -116,7 +117,7 @@ describe("POST /api/transfers/[id]/import", () => {
       speId: "SPE-1",
       records: 1,
       pseudonymised: true,
-      graphUrl: `/graph?dataset=${TP}&spe=SPE-1`,
+      graphUrl: `/overview?import=${TP}&spe=SPE-1`,
     });
   });
 
@@ -175,6 +176,36 @@ describe("POST /api/transfers/[id]/import", () => {
     expect(res.status).toBe(409);
     expect((await res.json()).state).toBe("COMPLETED");
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("passes overwrite on, and the import an SPE holds already as 409", async () => {
+    mockManagement.mockResolvedValue({ state: "STARTED" });
+    const existing = {
+      datasetId: TP,
+      speId: "SPE-1",
+      records: 100,
+      importedAt: "2026-11-05T20:12:36.622Z",
+    };
+    fetchMock
+      .mockResolvedValueOnce(json({ token: "tok" }))
+      .mockResolvedValueOnce(json(BUNDLE))
+      .mockResolvedValueOnce(json({ error: "SPE-1 holds it", existing }, 409));
+
+    const res = await post({ participantId: CTX });
+    const body = await res.json();
+
+    expect(res.status).toBe(409);
+    expect(body.existing).toEqual(existing);
+    expect(JSON.parse(fetchMock.mock.calls[2][1].body).overwrite).toBe(false);
+
+    fetchMock
+      .mockResolvedValueOnce(json({ token: "tok" }))
+      .mockResolvedValueOnce(json(BUNDLE))
+      .mockResolvedValueOnce(json({ datasetId: TP, records: 1 }));
+    const again = await post({ participantId: CTX, overwrite: true });
+
+    expect(again.status).toBe(200);
+    expect(JSON.parse(fetchMock.mock.calls[5][1].body).overwrite).toBe(true);
   });
 
   it("passes on a stopped SPE as 503 with the proxy's reason", async () => {
@@ -255,6 +286,44 @@ describe("GET /api/spe-imports/[id]/graph", () => {
 
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBeDefined();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("GET /api/spe-imports", () => {
+  it("asks the proxy which SPE holds which transfer", async () => {
+    fetchMock.mockResolvedValueOnce(
+      json({
+        imports: [
+          {
+            datasetId: TP,
+            speId: "SPE-2",
+            records: 7,
+            importedAt: "2026-11-05",
+          },
+        ],
+        unreachable: ["SPE-1"],
+      }),
+    );
+
+    const res = await LIST(
+      new NextRequest(`http://localhost/api/spe-imports?ids=${TP},bad id`),
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      `http://localhost:9090/spe/imports?datasetIds=${TP}`,
+    );
+    expect(body.imports[0]).toMatchObject({ speId: "SPE-2", records: 7 });
+    expect(body.unreachable).toEqual(["SPE-1"]);
+  });
+
+  it("needs at least one transfer id", async () => {
+    const res = await LIST(new NextRequest("http://localhost/api/spe-imports"));
+
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toMatch(/ids is required/);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

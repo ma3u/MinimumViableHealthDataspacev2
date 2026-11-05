@@ -3,7 +3,11 @@
  * dataset of records and references, written into the SPE the user chose.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { bundleToRecords, MAX_RECORDS } from "../src/spe-import.js";
+import {
+  bundleToRecords,
+  MAX_RECORDS,
+  recordFacts,
+} from "../src/spe-import.js";
 
 const speDrivers = vi.fn();
 vi.mock("../src/db.js", async (importOriginal) => ({
@@ -141,10 +145,62 @@ describe("POST /spe/:speId/import", () => {
       byType: { Patient: 1, Condition: 1, Observation: 1 },
     });
     expect(spe1.run).not.toHaveBeenCalled();
-    const [cypher, params] = spe2.run.mock.calls[0];
+    // The first call is the duplicate check, then the write.
+    const [cypher, params] = spe2.run.mock.calls[1];
     expect(cypher).toContain("MERGE (d)-[:LOADED_INTO]->(w)");
     expect(params.meta).toMatchObject({ speId: "SPE-2", pseudonymised: true });
     expect(spe2.session.close).toHaveBeenCalled();
+  });
+
+  it("refuses a second import into the same SPE unless asked to overwrite", async () => {
+    const spe1 = fakeDriver();
+    spe1.run.mockImplementation(async (cypher: string) =>
+      cypher.includes("WHERE d.datasetId IN $datasetIds")
+        ? {
+            records: [
+              row({
+                datasetId: "tp-1",
+                records: 3,
+                importedAt: "2026-11-05T19:00:00Z",
+              }),
+            ],
+          }
+        : { records: [] },
+    );
+    speDrivers.mockReturnValue([{ label: "SPE-1", driver: spe1.driver }]);
+
+    const refused = await request
+      .post("/spe/SPE-1/import")
+      .send({ datasetId: "tp-1", bundle: BUNDLE });
+
+    expect(refused.status).toBe(409);
+    expect(refused.body.existing).toEqual({
+      datasetId: "tp-1",
+      speId: "SPE-1",
+      records: 3,
+      importedAt: "2026-11-05T19:00:00Z",
+    });
+    expect(
+      spe1.run.mock.calls.some(([c]: [string]) =>
+        c.includes("MERGE (d)-[:LOADED_INTO]"),
+      ),
+    ).toBe(false);
+
+    spe1.run.mockClear();
+    const replaced = await request
+      .post("/spe/SPE-1/import")
+      .send({ datasetId: "tp-1", bundle: BUNDLE, overwrite: true });
+
+    expect(replaced.status).toBe(200);
+    const cyphers = spe1.run.mock.calls.map(([c]: [string]) => c);
+    const deleted = cyphers.findIndex((c: string) =>
+      c.includes("DETACH DELETE x"),
+    );
+    const written = cyphers.findIndex((c: string) =>
+      c.includes("MERGE (d)-[:LOADED_INTO]"),
+    );
+    expect(deleted).toBeGreaterThan(-1);
+    expect(written).toBeGreaterThan(deleted);
   });
 
   it("answers 422 when the data is not a bundle, and writes nothing", async () => {
@@ -260,5 +316,84 @@ describe("GET /spe/:speId/import/:datasetId/graph", () => {
 
     expect(res.status).toBe(404);
     expect(res.body.error).toBe("Not found");
+  });
+});
+
+describe("GET /spe/imports", () => {
+  beforeEach(() => {
+    speDrivers.mockReset();
+  });
+
+  it("says which SPE holds which transfer, and which SPE did not answer", async () => {
+    const spe1 = fakeDriver();
+    spe1.run.mockResolvedValue({
+      records: [
+        row({
+          datasetId: "tp-1",
+          records: 100,
+          importedAt: "2026-11-05T19:00:00Z",
+        }),
+      ],
+    });
+    const spe2 = fakeDriver();
+    spe2.run.mockRejectedValue(new Error("connection refused"));
+    speDrivers.mockReturnValue([
+      { label: "SPE-1", driver: spe1.driver },
+      { label: "SPE-2", driver: spe2.driver },
+    ]);
+
+    const res = await request.get("/spe/imports?datasetIds=tp-1,tp-2");
+
+    expect(res.status).toBe(200);
+    expect(res.body.imports).toEqual([
+      {
+        datasetId: "tp-1",
+        speId: "SPE-1",
+        records: 100,
+        importedAt: "2026-11-05T19:00:00Z",
+      },
+    ]);
+    expect(res.body.unreachable).toEqual(["SPE-2"]);
+    expect(spe1.run.mock.calls[0][1]).toEqual({ datasetIds: ["tp-1", "tp-2"] });
+  });
+
+  it("needs at least one dataset id", async () => {
+    const res = await request.get("/spe/imports");
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toMatch(/datasetIds/);
+  });
+});
+
+describe("recordFacts", () => {
+  it("lists a record's plain values, not its ids or references", () => {
+    const facts = recordFacts(
+      "Observation",
+      "tp-1/Observation/o1",
+      JSON.stringify({
+        resourceType: "Observation",
+        id: "o1",
+        resourceId: "fhir-obs-1",
+        display: "HbA1c",
+        valueQuantity: 8.1,
+        valueUnit: "%",
+        subject: { reference: "Patient/p-1" },
+        code: { text: "nested" },
+      }),
+    );
+    expect(facts).toEqual({
+      resourceType: "Observation",
+      resourceId: "o1",
+      display: "HbA1c",
+      valueQuantity: 8.1,
+      valueUnit: "%",
+    });
+  });
+
+  it("keeps type and id when the stored resource is not JSON", () => {
+    expect(recordFacts("Patient", "tp-1/Patient/p1", "{oops")).toEqual({
+      resourceType: "Patient",
+      resourceId: "p1",
+    });
   });
 });

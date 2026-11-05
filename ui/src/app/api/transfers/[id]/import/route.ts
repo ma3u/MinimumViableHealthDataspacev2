@@ -5,7 +5,7 @@ import { seesPatientIdentity } from "@/lib/patient-identity";
 import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
 import {
   DEFAULT_IMPORT_SPE,
-  importGraphUrl,
+  importViewUrl,
   importSpeId,
   type SpeImportResult,
 } from "@/lib/spe-import";
@@ -40,14 +40,15 @@ async function providerOfAgreement(
 }
 
 /**
- * POST /api/transfers/[id]/import — body {participantId, speId?}.
+ * POST /api/transfers/[id]/import — body {participantId, speId?, overwrite?}.
  *
  * Ends a transfer where EHDS Art. 73 puts it, in a secure processing
  * environment (#876): pulls the data of the STARTED transfer as
  * GET /api/transfers/[id]/data does, pseudonymised for the roles that do not
  * see identity (#475), and has the neo4j-proxy write it into the chosen SPE's
- * Neo4j, SPE-1 unless the user picks another. Answers what was imported and
- * the graph viewer's link to it.
+ * Neo4j, SPE-1 unless the user picks another. A transfer the SPE holds
+ * already answers 409 with that import, unless `overwrite` is true. Answers
+ * what was imported and the link to its 3D overview.
  */
 export async function POST(
   req: NextRequest,
@@ -60,6 +61,7 @@ export async function POST(
   const body = (await req.json().catch(() => ({}))) as {
     participantId?: unknown;
     speId?: unknown;
+    overwrite?: unknown;
   };
   const participantId = String(body.participantId ?? "");
   const requestedSpe = String(body.speId || DEFAULT_IMPORT_SPE);
@@ -145,6 +147,8 @@ export async function POST(
           consumer: participantId,
           importedBy: auth.session.user.name ?? "",
           pseudonymised,
+          // The SPE refuses a transfer it holds already unless told to replace it.
+          overwrite: body.overwrite === true,
           bundle,
         }),
         signal: AbortSignal.timeout(PROXY_TIMEOUT_MS),
@@ -166,6 +170,16 @@ export async function POST(
     string,
     unknown
   >;
+  if (res.status === 409) {
+    return NextResponse.json(
+      {
+        error: String(answer.error ?? `${speId} holds this transfer already`),
+        step: "import",
+        existing: answer.existing,
+      },
+      { status: 409 },
+    );
+  }
   if (!res.ok) {
     return NextResponse.json(
       {
@@ -183,7 +197,7 @@ export async function POST(
     byType: (answer.byType as Record<string, number>) ?? {},
     importedAt: String(answer.importedAt ?? ""),
     pseudonymised,
-    graphUrl: importGraphUrl(id, speId),
+    graphUrl: importViewUrl(id, speId),
   };
   return NextResponse.json(result);
 }

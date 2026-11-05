@@ -79,6 +79,74 @@ app.get(
 );
 
 /**
+ * GET /fhir/Observation
+ * A FHIR R4 searchset of Observations, newest first, each with its subject
+ * reference, and the Patients they refer to as `search.mode: include` (as
+ * `_include=Observation:subject` would), so a consumer that imports the data
+ * can relate every observation to its patient (#876). The dataset
+ * "fhir-observation-bundle" is read with it. ?_count=N (default 200, at most
+ * 2000) and ?code= narrow it.
+ */
+app.get(
+  "/fhir/Observation",
+  async (req: Request, res: Response, next: NextFunction) => {
+    // Art. 71 (ADR-062): the data plane serves research; persons who opted out are left out.
+    const session = secondaryUseSession(getSession());
+    try {
+      const count = Math.min(Number(req.query._count) || 200, 2000);
+      const code = req.query.code as string | undefined;
+      const result = await session.run(
+        `MATCH (p:Patient)-[:HAS_OBSERVATION]->(o:Observation)
+         ${code ? "WHERE o.code = $code" : ""}
+         RETURN p, o
+         ORDER BY coalesce(toString(o.dateTime), toString(o.effectiveDate), "") DESC
+         LIMIT $limit`,
+        { limit: neo4j.int(count), ...(code ? { code } : {}) },
+      );
+
+      const matches: ReturnType<typeof toFhirEntry>[] = [];
+      const patients = new Map<string, ReturnType<typeof toFhirEntry>>();
+      for (const r of result.records) {
+        const p = r.get("p");
+        const o = r.get("o");
+        if (!releasable(p) || !releasable(o)) continue;
+        const pid = fhirIdOf(p.properties);
+        matches.push({
+          ...toFhirEntry(toFhirResource("Observation", o.properties, pid)),
+          search: { mode: "match" },
+        } as ReturnType<typeof toFhirEntry>);
+        if (pid && !patients.has(pid)) {
+          patients.set(pid, {
+            ...toFhirEntry(toFhirResource("Patient", p.properties)),
+            search: { mode: "include" },
+          } as ReturnType<typeof toFhirEntry>);
+        }
+      }
+
+      res.setHeader("Content-Type", "application/fhir+json");
+      res.json({
+        resourceType: "Bundle",
+        type: "searchset",
+        total: matches.length,
+        entry: [...matches, ...patients.values()],
+      });
+      logTransferEvent(
+        "/fhir/Observation",
+        "GET",
+        req.headers["x-participant"] as string,
+        200,
+        matches.length,
+        auditContext(req, res),
+      );
+    } catch (err) {
+      next(err);
+    } finally {
+      await session.close();
+    }
+  },
+);
+
+/**
  * GET /fhir/Patient/:id/$everything
  *
  * The id is the FHIR id of a loaded patient, or the id or resourceId of a

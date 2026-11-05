@@ -39,7 +39,7 @@ tests {
       expect(body.datasetId).to.equal(bru.getVar("dspTransferId"));
       expect(body.records, "nothing imported").to.be.above(0);
       expect(body.graphUrl).to.equal(
-        `/graph?dataset=${encodeURIComponent(body.datasetId)}&spe=SPE-1`,
+        `/overview?import=${encodeURIComponent(body.datasetId)}&spe=SPE-1`,
       );
     });
     test("a data user's import is pseudonymised (#475)", function () {
