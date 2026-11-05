@@ -2,9 +2,12 @@ import { type NextFunction, type Request, type Response } from "express";
 import { app } from "../app.js";
 import { getSpeDrivers } from "../db.js";
 import {
+  AlreadyImportedError,
   ImportShapeError,
+  readExisting,
   readImportGraph,
   writeImport,
+  type ExistingImport,
   type ImportRequest,
 } from "../spe-import.js";
 
@@ -69,15 +72,69 @@ app.post(
     };
     const session = driver.session({ database: "neo4j" });
     try {
-      res.json(await writeImport(session, meta, body.bundle));
+      res.json(
+        await writeImport(
+          session,
+          meta,
+          body.bundle,
+          undefined,
+          body.overwrite === true,
+        ),
+      );
     } catch (err) {
       if (err instanceof ImportShapeError) {
         res.status(422).json({ error: err.message });
         return;
       }
+      if (err instanceof AlreadyImportedError) {
+        res.status(409).json({ error: err.message, existing: err.existing });
+        return;
+      }
       next(err);
     } finally {
       await session.close();
+    }
+  },
+);
+
+/**
+ * GET /spe/imports?datasetIds=a,b
+ *
+ * The duplicate check: which of these datasets each connected SPE holds,
+ * with when and how many records. {imports: [...], unreachable: [speIds]}.
+ */
+app.get(
+  "/spe/imports",
+  async (req: Request, res: Response, next: NextFunction) => {
+    const datasetIds = String(req.query.datasetIds ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => DATASET_ID.test(s))
+      .slice(0, 100);
+    if (!datasetIds.length) {
+      res.status(400).json({ error: "datasetIds is required" });
+      return;
+    }
+    try {
+      const imports: ExistingImport[] = [];
+      const unreachable: string[] = [];
+      for (const { label, driver } of getSpeDrivers()) {
+        if (!SPE_IDS.has(label)) continue;
+        const session = driver.session({
+          database: "neo4j",
+          defaultAccessMode: "READ",
+        });
+        try {
+          imports.push(...(await readExisting(session, label, datasetIds)));
+        } catch {
+          unreachable.push(label);
+        } finally {
+          await session.close();
+        }
+      }
+      res.json({ imports, unreachable });
+    } catch (err) {
+      next(err);
     }
   },
 );

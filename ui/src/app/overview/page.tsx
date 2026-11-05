@@ -25,6 +25,7 @@ import type {
   Severity,
 } from "@/lib/overview/types";
 import { IS_STATIC } from "@/lib/static-export";
+import { importOverview, type ImportGraph } from "@/lib/overview/import";
 import { T, translate, useT } from "@/lib/i18n/translate";
 import { useLanguage } from "@/lib/use-language";
 
@@ -93,6 +94,9 @@ function OverviewContent() {
         : "patient");
   const patientId = searchParams.get("patientId");
   const sceneParam = searchParams.get("scene");
+  // One imported transfer instead of the persona view (#876).
+  const importId = searchParams.get("import");
+  const importSpe = searchParams.get("spe") ?? "SPE-1";
 
   const [view, setView] = useState<OverviewView | null>(null);
   const [error, setError] = useState<{
@@ -128,7 +132,12 @@ function OverviewContent() {
     setExpandedIds([]);
     const qs = new URLSearchParams({ persona });
     if (patientId) qs.set("patientId", patientId);
-    fetchApi(`/api/overview?${qs.toString()}`)
+    const url = importId
+      ? `/api/spe-imports/${encodeURIComponent(
+          importId,
+        )}/graph?spe=${encodeURIComponent(importSpe)}`
+      : `/api/overview?${qs.toString()}`;
+    fetchApi(url)
       .then(async (r) => {
         const data = await r.json();
         if (cancelled) return;
@@ -140,7 +149,11 @@ function OverviewContent() {
           setView(null);
         } else {
           setError(null);
-          setView(data as OverviewView);
+          setView(
+            importId
+              ? importOverview(data as ImportGraph)
+              : (data as OverviewView),
+          );
         }
       })
       .catch((e) => {
@@ -153,7 +166,7 @@ function OverviewContent() {
     return () => {
       cancelled = true;
     };
-  }, [persona, patientId, sessionStatus]);
+  }, [persona, patientId, sessionStatus, importId, importSpe]);
 
   const showScene =
     sceneOn ??
@@ -220,7 +233,19 @@ function OverviewContent() {
           </p>
         </header>
 
-        {isAdmin && (
+        {importId && (
+          <p className="mb-3 text-sm">
+            <Link
+              href="/data/transfer"
+              className="text-(--accent) underline"
+              data-testid="overview-import-back"
+            >
+              {t("Back to my data")}
+            </Link>
+          </p>
+        )}
+
+        {isAdmin && !importId && (
           <nav
             className="mb-4 flex flex-wrap gap-2 text-sm"
             aria-label={t("Persona")}

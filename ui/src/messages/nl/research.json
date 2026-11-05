@@ -273,7 +273,6 @@
   "The import failed: {detail}": "Het importeren is mislukt: {detail}",
   "Imported {records} records with {relationships} references into {spe}.": "{records} records met {relationships} verwijzingen geïmporteerd in {spe}.",
   "Patients are pseudonymised.": "Patiënten zijn gepseudonimiseerd.",
-  "Show in the graph": "Tonen in de graaf",
   "Allowed for": "Toegestaan voor",
   "Any purpose": "Elk doel",
   "For how long": "Hoe lang",
@@ -284,5 +283,14 @@
   "Read the full terms": "De volledige voorwaarden lezen",
   "You hold a data permit, valid until {date}.": "U hebt een gegevensvergunning, geldig tot {date}.",
   "You hold {n} data permits; the latest is valid until {date}.": "U hebt {n} gegevensvergunningen; de laatste is geldig tot {date}.",
-  "Show the permits ({n})": "De vergunningen tonen ({n})"
+  "Show the permits ({n})": "De vergunningen tonen ({n})",
+  "Imported into {spe} on {date}: {records} records.": "Geïmporteerd in {spe} op {date}: {records} records.",
+  "Show in 3D": "Tonen in 3D",
+  "Import again": "Opnieuw importeren",
+  "Import again?": "Opnieuw importeren?",
+  "{spe} holds this transfer already ({records} records, imported on {date}). Overwrite it? Its records are replaced by the data as it is now.": "{spe} bevat deze overdracht al ({records} records, geïmporteerd op {date}). Overschrijven? De records worden vervangen door de huidige gegevens.",
+  "This transfer is in {others} already. Import it into {spe} as well? It is then held twice.": "Deze overdracht staat al in {others}. Ook importeren in {spe}? Ze wordt dan twee keer bewaard.",
+  "Overwrite": "Overschrijven",
+  "Import as well": "Ook importeren",
+  "Cancel": "Annuleren"
 }

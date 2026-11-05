@@ -273,7 +273,6 @@
   "The import failed: {detail}": "La importación ha fallado: {detail}",
   "Imported {records} records with {relationships} references into {spe}.": "Se importaron {records} registros con {relationships} referencias en {spe}.",
   "Patients are pseudonymised.": "Los pacientes están seudonimizados.",
-  "Show in the graph": "Mostrar en el grafo",
   "Allowed for": "Permitido para",
   "Any purpose": "Cualquier finalidad",
   "For how long": "Durante cuánto tiempo",
@@ -284,5 +283,14 @@
   "Read the full terms": "Leer las condiciones completas",
   "You hold a data permit, valid until {date}.": "Tiene un permiso de datos, válido hasta {date}.",
   "You hold {n} data permits; the latest is valid until {date}.": "Tiene {n} permisos de datos; el último es válido hasta {date}.",
-  "Show the permits ({n})": "Mostrar los permisos ({n})"
+  "Show the permits ({n})": "Mostrar los permisos ({n})",
+  "Imported into {spe} on {date}: {records} records.": "Importado en {spe} el {date}: {records} registros.",
+  "Show in 3D": "Mostrar en 3D",
+  "Import again": "Importar de nuevo",
+  "Import again?": "¿Importar de nuevo?",
+  "{spe} holds this transfer already ({records} records, imported on {date}). Overwrite it? Its records are replaced by the data as it is now.": "{spe} ya contiene esta transferencia ({records} registros, importada el {date}). ¿Sobrescribirla? Sus registros se sustituyen por los datos actuales.",
+  "This transfer is in {others} already. Import it into {spe} as well? It is then held twice.": "Esta transferencia ya está en {others}. ¿Importarla también en {spe}? Quedará guardada dos veces.",
+  "Overwrite": "Sobrescribir",
+  "Import as well": "Importar también",
+  "Cancel": "Cancelar"
 }

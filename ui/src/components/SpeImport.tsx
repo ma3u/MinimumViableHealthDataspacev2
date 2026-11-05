@@ -1,13 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Database, Loader2, Network } from "lucide-react";
+import {
+  AlertTriangle,
+  Box,
+  CheckCircle2,
+  Database,
+  Loader2,
+} from "lucide-react";
 import { fetchApi } from "@/lib/api";
 import {
   DEFAULT_IMPORT_SPE,
   IMPORT_SPES,
-  importGraphUrl,
+  importViewUrl,
+  type ExistingImport,
   type SpeImportResult,
 } from "@/lib/spe-import";
 import { useT } from "@/lib/i18n/translate";
@@ -16,7 +23,8 @@ import { useT } from "@/lib/i18n/translate";
  * Ends an open transfer in a secure processing environment (#876): the user
  * picks the SPE (SPE-1 unless they choose another), the hub imports the
  * transfer's data into that workspace's graph, and the result links to the
- * graph viewer focused on the new dataset.
+ * 3D overview of the import. A transfer an SPE holds already says so, and a
+ * second import asks first: replace it in the same SPE, or add it to another.
  */
 export default function SpeImport({
   transferId,
@@ -30,25 +38,54 @@ export default function SpeImport({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<SpeImportResult | null>(null);
+  const [existing, setExisting] = useState<ExistingImport[]>([]);
+  const [confirming, setConfirming] = useState(false);
 
-  const runImport = async () => {
+  const loadExisting = useCallback(() => {
+    fetchApi(`/api/spe-imports?ids=${encodeURIComponent(transferId)}`)
+      .then((r) => (r.ok ? r.json() : { imports: [] }))
+      .then((b: { imports?: ExistingImport[] }) =>
+        setExisting(
+          (b.imports ?? []).filter((i) => i.datasetId === transferId),
+        ),
+      )
+      .catch(() => setExisting([]));
+  }, [transferId]);
+
+  useEffect(loadExisting, [loadExisting]);
+
+  const inChosen = existing.find((e) => e.speId === speId);
+  const elsewhere = existing.filter((e) => e.speId !== speId);
+
+  const runImport = async (overwrite: boolean) => {
     setBusy(true);
     setError("");
     setResult(null);
+    setConfirming(false);
     try {
       const res = await fetchApi(
         `/api/transfers/${encodeURIComponent(transferId)}/import`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ participantId, speId }),
+          body: JSON.stringify({ participantId, speId, overwrite }),
         },
       );
       const body = (await res.json()) as Partial<SpeImportResult> & {
         error?: string;
         detail?: string;
+        existing?: ExistingImport;
       };
       if (!res.ok) {
+        // Imported in the meantime: show it and ask, as for a known one.
+        if (body.existing) {
+          setExisting((cur) => [
+            ...cur.filter((e) => e.speId !== body.existing!.speId),
+            body.existing!,
+          ]);
+          setConfirming(true);
+          return;
+        }
         setError([body.error, body.detail].filter(Boolean).join(": "));
         return;
       }
@@ -62,8 +99,9 @@ export default function SpeImport({
         byType: body.byType ?? {},
         importedAt: body.importedAt ?? "",
         pseudonymised: body.pseudonymised ?? true,
-        graphUrl: body.graphUrl ?? importGraphUrl(transferId, speId),
+        graphUrl: body.graphUrl ?? importViewUrl(transferId, speId),
       });
+      loadExisting();
     } catch (err) {
       setError(String(err));
     } finally {
@@ -71,8 +109,38 @@ export default function SpeImport({
     }
   };
 
+  const onImport = () => {
+    if (existing.length) setConfirming(true);
+    else void runImport(false);
+  };
+
   return (
     <div data-testid="spe-import" className="mt-3 space-y-2 text-xs">
+      {existing.length > 0 && !result && (
+        <ul data-testid="spe-import-existing" className="space-y-1">
+          {existing.map((e) => (
+            <li
+              key={e.speId}
+              className="flex flex-wrap items-center gap-2 text-(--text-primary)"
+            >
+              <CheckCircle2 size={14} className="text-green-500" />
+              {t("Imported into {spe} on {date}: {records} records.", {
+                spe: e.speId,
+                date: e.importedAt.slice(0, 10),
+                records: String(e.records),
+              })}
+              <Link
+                href={importViewUrl(transferId, e.speId)}
+                className="flex items-center gap-1 underline text-(--accent)"
+              >
+                <Box size={12} />
+                {t("Show in 3D")}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+
       <div className="flex flex-wrap items-center gap-2">
         <label
           htmlFor={`spe-${transferId}`}
@@ -84,7 +152,10 @@ export default function SpeImport({
           id={`spe-${transferId}`}
           data-testid="spe-import-target"
           value={speId}
-          onChange={(e) => setSpeId(e.target.value)}
+          onChange={(e) => {
+            setSpeId(e.target.value);
+            setConfirming(false);
+          }}
           disabled={busy}
           className="px-2 py-1 rounded border border-(--border) bg-(--surface) text-(--text-primary)"
         >
@@ -97,8 +168,8 @@ export default function SpeImport({
         <button
           type="button"
           data-testid="spe-import-run"
-          onClick={() => void runImport()}
-          disabled={busy}
+          onClick={onImport}
+          disabled={busy || confirming}
           className="flex items-center gap-1 px-2 py-1 rounded bg-(--accent) text-white hover:opacity-90 disabled:opacity-50"
         >
           {busy ? (
@@ -106,9 +177,63 @@ export default function SpeImport({
           ) : (
             <Database size={12} />
           )}
-          {busy ? t("Importing…") : t("Import into SPE")}
+          {busy
+            ? t("Importing…")
+            : existing.length
+              ? t("Import again")
+              : t("Import into SPE")}
         </button>
       </div>
+
+      {confirming && (
+        <div
+          data-testid="spe-import-confirm"
+          role="alertdialog"
+          aria-label={t("Import again?")}
+          className="rounded border border-amber-600/50 bg-amber-900/20 px-2 py-2 text-(--text-primary) space-y-2"
+        >
+          <p className="flex items-start gap-1.5">
+            <AlertTriangle
+              size={14}
+              className="mt-0.5 shrink-0 text-amber-500"
+            />
+            {inChosen
+              ? t(
+                  "{spe} holds this transfer already ({records} records, imported on {date}). Overwrite it? Its records are replaced by the data as it is now.",
+                  {
+                    spe: inChosen.speId,
+                    records: String(inChosen.records),
+                    date: inChosen.importedAt.slice(0, 10),
+                  },
+                )
+              : t(
+                  "This transfer is in {others} already. Import it into {spe} as well? It is then held twice.",
+                  {
+                    others: elsewhere.map((e) => e.speId).join(", "),
+                    spe: speId,
+                  },
+                )}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              data-testid="spe-import-confirm-yes"
+              onClick={() => void runImport(!!inChosen)}
+              className="px-2 py-1 rounded bg-amber-600 text-white hover:opacity-90"
+            >
+              {inChosen ? t("Overwrite") : t("Import as well")}
+            </button>
+            <button
+              type="button"
+              data-testid="spe-import-confirm-no"
+              onClick={() => setConfirming(false)}
+              className="px-2 py-1 rounded border border-(--border) text-(--text-primary)"
+            >
+              {t("Cancel")}
+            </button>
+          </div>
+        </div>
+      )}
 
       {error && (
         <p
@@ -141,8 +266,8 @@ export default function SpeImport({
             data-testid="spe-import-graph"
             className="flex items-center gap-1 underline text-(--accent)"
           >
-            <Network size={12} />
-            {t("Show in the graph")}
+            <Box size={12} />
+            {t("Show in 3D")}
           </Link>
         </div>
       )}

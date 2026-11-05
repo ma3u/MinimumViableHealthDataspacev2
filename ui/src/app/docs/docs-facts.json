@@ -330,6 +330,10 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/spe-imports",
+      "methods": ["GET"]
+    },
+    {
       "path": "/api/tasks",
       "methods": ["GET"]
     },
@@ -1280,8 +1284,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 59,
-    "operations": 76
+    "paths": 60,
+    "operations": 77
   },
   "workflowJobs": {
     "test.yml": [

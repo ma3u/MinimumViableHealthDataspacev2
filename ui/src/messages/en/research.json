@@ -273,7 +273,6 @@
   "The import failed: {detail}": "The import failed: {detail}",
   "Imported {records} records with {relationships} references into {spe}.": "Imported {records} records with {relationships} references into {spe}.",
   "Patients are pseudonymised.": "Patients are pseudonymised.",
-  "Show in the graph": "Show in the graph",
   "Allowed for": "Allowed for",
   "Any purpose": "Any purpose",
   "For how long": "For how long",
@@ -284,5 +283,14 @@
   "Read the full terms": "Read the full terms",
   "You hold a data permit, valid until {date}.": "You hold a data permit, valid until {date}.",
   "You hold {n} data permits; the latest is valid until {date}.": "You hold {n} data permits; the latest is valid until {date}.",
-  "Show the permits ({n})": "Show the permits ({n})"
+  "Show the permits ({n})": "Show the permits ({n})",
+  "Imported into {spe} on {date}: {records} records.": "Imported into {spe} on {date}: {records} records.",
+  "Show in 3D": "Show in 3D",
+  "Import again": "Import again",
+  "Import again?": "Import again?",
+  "{spe} holds this transfer already ({records} records, imported on {date}). Overwrite it? Its records are replaced by the data as it is now.": "{spe} holds this transfer already ({records} records, imported on {date}). Overwrite it? Its records are replaced by the data as it is now.",
+  "This transfer is in {others} already. Import it into {spe} as well? It is then held twice.": "This transfer is in {others} already. Import it into {spe} as well? It is then held twice.",
+  "Overwrite": "Overwrite",
+  "Import as well": "Import as well",
+  "Cancel": "Cancel"
 }
