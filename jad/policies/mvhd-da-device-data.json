@@ -1,0 +1,63 @@
+{
+  "@context": [
+    "http://www.w3.org/ns/odrl.jsonld",
+    {
+      "ehds": "https://w3id.org/ehds/",
+      "edc": "https://w3id.org/edc/v0.0.1/ns/"
+    }
+  ],
+  "@type": "Set",
+  "@id": "mvhd-da-device-data",
+  "permission": [
+    {
+      "action": "use",
+      "constraint": [
+        {
+          "leftOperand": "ehds:purpose",
+          "operator": "eq",
+          "rightOperand": "Data Act Art. 5 - the use the user agreed with the recipient"
+        },
+        {
+          "leftOperand": "ehds:legalBasis",
+          "operator": "eq",
+          "rightOperand": "GDPR Art. 6(1)(a) and Art. 9(2)(a), the user's consent"
+        },
+        {
+          "leftOperand": "inForceDate",
+          "operator": "lteq",
+          "rightOperand": "contractAgreement+365d"
+        },
+        {
+          "leftOperand": "spatial",
+          "operator": "isPartOf",
+          "rightOperand": "EU/EEA"
+        }
+      ],
+      "duty": [
+        {
+          "action": "ehds:minimizeData"
+        },
+        {
+          "action": "ehds:maintainAuditTrail"
+        },
+        {
+          "action": "delete"
+        }
+      ]
+    }
+  ],
+  "prohibition": [
+    {
+      "action": "ehds:developCompetingProduct"
+    },
+    {
+      "action": "ehds:shareWithGatekeeper"
+    },
+    {
+      "action": "ehds:profile"
+    },
+    {
+      "action": "ehds:transferOutsideEU"
+    }
+  ]
+}

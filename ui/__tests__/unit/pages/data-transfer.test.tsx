@@ -451,7 +451,8 @@ describe("DataTransferPage", () => {
       const body = JSON.parse((postCalls[0][1] as RequestInit).body as string);
       expect(body.contractId).toBe("agr-002");
       expect(body.assetId).toBe("omop-cohort-data");
-      expect(body.participantId).toBe("ctx-alpha");
+      // The data user transfers by default (#876).
+      expect(body.participantId).toBe("ctx-pharmaco");
     });
 
     // Should show success message
@@ -557,13 +558,124 @@ describe("DataTransferPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("marks agreements that already have a transfer in progress", async () => {
-    setupDefaultMocks();
-    render(<DataTransferPage />);
-    await waitFor(() => {
-      // agr-001 has a matching transfer (tp-001 with contractId agr-001)
+  describe("what an agreement's transfers have reached (#876)", () => {
+    // It said "transfer in progress" for any transfer at all, a failed one
+    // included, and a STARTED pull transfer stays STARTED while its data is
+    // ready.
+    const only = (state: string) => [
+      { "@id": "tp-x", "edc:state": state, "edc:contractId": "agr-001" },
+    ];
+
+    it.each([
+      ["COMPLETED", "(transferred)"],
+      ["STARTED", "(data ready)"],
+      ["REQUESTED", "(transfer in progress)"],
+    ])("%s reads %s", async (state, label) => {
+      setupDefaultMocks({ transfers: only(state) });
+      render(<DataTransferPage />);
+      expect(await screen.findByText(label)).toBeInTheDocument();
+    });
+
+    it("a failed transfer leaves the agreement unlabelled", async () => {
+      setupDefaultMocks({ transfers: only("TERMINATED") });
+      render(<DataTransferPage />);
+      await screen.findAllByText("TERMINATED");
+      expect(screen.queryByText(/transfer in progress|data ready/)).toBeNull();
+    });
+  });
+
+  describe("My data: the data of open connector transfers (#876)", () => {
+    const LIVE = {
+      "@id": "tp-live",
+      state: "STARTED",
+      assetId: "fhir-patient-search",
+      contractId: "agr-001",
+      source: "controlplane",
+      stateTimestamp: 1793887087546,
+    };
+    const BUNDLE = {
+      resourceType: "Bundle",
+      type: "searchset",
+      total: 1,
+      entry: [{ resource: { resourceType: "Patient", id: "p-1a2b3c4d" } }],
+    };
+
+    function mocks(data: () => Promise<unknown>) {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url.startsWith("/api/transfers/tp-live/data")) return data();
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) {
+          return mockResponse([LIVE, ...TRANSFERS]);
+        }
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse(NEGOTIATIONS_FINALIZED);
+        }
+        return mockResponse({});
+      });
+    }
+
+    it("lists the asset of a STARTED connector transfer, and only that", async () => {
+      mocks(() => mockResponse({}));
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("my-data");
+      expect(within(section).getByText("Fhir Patient Search")).toBeTruthy();
+      expect(within(section).getByText(/AlphaKlinik Berlin/)).toBeTruthy();
+      // tp-001 is a COMPLETED sample row: not in My data.
+      expect(within(section).queryByText("Fhir Patient Bundle")).toBeNull();
+    });
+
+    it("Open fetches the transfer's own data and shows its resources", async () => {
+      mocks(() =>
+        mockResponse({
+          bytes: 120,
+          truncated: false,
+          fetchedAt: "2026-11-05T14:00:00Z",
+          data: BUNDLE,
+        }),
+      );
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("my-data");
+      await user.click(within(section).getByText("Open"));
+
+      await waitFor(() => {
+        expect(
+          mockFetchApi.mock.calls.some(([u]) =>
+            String(u).startsWith(
+              "/api/transfers/tp-live/data?participantId=ctx-pharmaco",
+            ),
+          ),
+        ).toBe(true);
+      });
+      expect((await screen.findAllByText(/p-1a2b3c4d/)).length).toBeGreaterThan(
+        0,
+      );
+    });
+
+    it("says why when the data cannot be fetched", async () => {
+      mocks(() =>
+        mockResponse(
+          {
+            error: "Failed to fetch the transfer's data",
+            detail: "siglet answered 404 for flow tp-live",
+          },
+          false,
+        ),
+      );
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("my-data");
+      await user.click(within(section).getByText("Open"));
+
       expect(
-        screen.getAllByText(/transfer in progress/).length,
+        (
+          await screen.findAllByText(
+            /Could not fetch the data: .*siglet answered 404/,
+          )
+        ).length,
       ).toBeGreaterThan(0);
     });
   });

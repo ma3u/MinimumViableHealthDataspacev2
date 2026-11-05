@@ -345,6 +345,48 @@ describe("POST /api/negotiations", () => {
     expect(data.error).toContain("offerId");
   });
 
+  it("sends the offer's own policy back whole, its prohibitions included (ADR-077)", async () => {
+    mockManagement.mockResolvedValue({ "@id": "neg-1" });
+    const offered = {
+      "@type": "Offer",
+      permission: [
+        {
+          action: "use",
+          constraint: [
+            {
+              leftOperand: "spatial",
+              operator: "isPartOf",
+              rightOperand: "EU/EEA",
+            },
+          ],
+        },
+      ],
+      prohibition: [{ action: "ehds:reIdentify" }],
+    };
+    await POST(
+      postReq({
+        participantId: "ctx-1",
+        counterPartyId: "prov",
+        assetId: "a1",
+        offerId: "offer-9",
+        providerDid: "did:web:x",
+        policy: offered,
+      }),
+    );
+
+    const sent = mockManagement.mock.calls.at(-1)?.[2] as {
+      policy: Record<string, unknown>;
+    };
+    expect(sent.policy).toMatchObject({
+      "@id": "offer-9",
+      "@type": "Offer",
+      assigner: "did:web:x",
+      target: "a1",
+      prohibition: [{ action: "ehds:reIdentify" }],
+    });
+    expect(sent.policy.permission).toEqual(offered.permission);
+  });
+
   // ── DSP endpoint building ─────────────────────────────────────────
 
   it("should build DSP endpoint with counterPartyId and profile id", async () => {

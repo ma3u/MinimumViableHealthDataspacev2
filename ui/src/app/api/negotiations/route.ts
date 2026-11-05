@@ -92,6 +92,10 @@ function buildDspEndpoint(base: string, ctxId: string): string {
   return `${clean}/${ctxId}/${DSP_PROTOCOL}`;
 }
 
+function isPlainObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+
 /**
  * The participant context whose identity is this DID. The catalog request
  * takes the provider's DSP address, which carries its context id, while the
@@ -122,6 +126,7 @@ async function providerContextId(did: string): Promise<string> {
  *   offerId:             ODRL offer @id obtained from catalog (required for valid DSP flow)
  *   assetId:             target asset @id
  *   policyId:            alias for offerId (legacy)
+ *   policy:              the offer's ODRL policy as the catalog gave it
  * }
  *
  * GET /api/negotiations?participantId=<id> — List negotiations for participant.
@@ -249,6 +254,7 @@ export async function POST(req: NextRequest) {
       offerId,
       assetId,
       policyId,
+      policy: offeredPolicy,
     } = body;
 
     if (!participantId || !assetId) {
@@ -288,15 +294,20 @@ export async function POST(req: NextRequest) {
       counterPartyAddress: dspEndpoint,
       counterPartyId: counterPartyId || "",
       protocol: DSP_PROTOCOL,
+      // The offer as the catalog gave it: the connector compares the request
+      // with the policy it offered, so an offer with constraints, duties or
+      // prohibitions (the standard policies, ADR-077) must come back whole.
+      // Without one, the bare permission the seeded offers carried.
       policy: {
+        ...(isPlainObject(offeredPolicy)
+          ? offeredPolicy
+          : // EDC-V requires a non-empty permission array.
+            { permission: [{ action: "use" }] }),
         "@context": "http://www.w3.org/ns/odrl.jsonld",
         "@id": offerId || policyId,
         "@type": "Offer",
         assigner,
         target: assetId,
-        // EDC-V requires non-empty permission array; omit prohibition/obligation
-        // (empty arrays fail validation; non-empty ones cause policy mismatch)
-        permission: [{ action: "use" }],
       },
       // Every state the connector moves this negotiation through reaches the
       // audit trail (ADR-045, #418).

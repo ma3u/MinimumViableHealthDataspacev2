@@ -76,7 +76,7 @@ jobs:
           ENV_ID=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query id -o tsv)
           LOCATION=$(az containerapp env show -n "$ACA_ENV" -g "$RESOURCE_GROUP" --query location -o tsv)
           export ENV_ID LOCATION
-          tar -czf /tmp/scripts.tgz -C scripts/azure seed-data-assets-job.sh -C ../../jad seed-data-assets.sh
+          tar -czf /tmp/scripts.tgz -C scripts/azure seed-data-assets-job.sh -C ../../jad seed-data-assets.sh policies
           SCRIPTS_TGZ_B64=$(base64 -w0 < /tmp/scripts.tgz)
           export SCRIPTS_TGZ_B64
           python3 - /tmp/job.yaml <<'PY'

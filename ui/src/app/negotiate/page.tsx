@@ -5,6 +5,7 @@ import { buildDemoCatalog, type DemoAssetEntry } from "@/lib/demo-catalog";
 import { DSP_PROTOCOL } from "@/lib/dsp-protocol";
 import { didToName } from "@/lib/participant-name";
 import { IS_STATIC } from "@/lib/static-export";
+import OfferTerms from "@/components/OfferTerms";
 import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -48,6 +49,8 @@ interface CatalogOffer {
   contentType?: string;
   /** The provider's DSP address, as the catalog's distribution names it. */
   endpoint?: string;
+  /** The ODRL offer itself, shown as the terms the user agrees to (#876). */
+  policy?: Record<string, unknown>;
 }
 
 /** The first distribution's DSP endpoint, in either JSON-LD spelling. */
@@ -137,6 +140,7 @@ function parseOffers(catalog: Record<string, unknown>): CatalogOffer[] {
           description,
           contentType,
           ...(endpoint ? { endpoint } : {}),
+          policy: p,
         });
       }
     }
@@ -279,6 +283,8 @@ function NegotiateContent() {
   // Step 2 — Negotiation form (populated from selected offer)
   const [assetId, setAssetId] = useState(preAssetId);
   const [offerId, setOfferId] = useState("");
+  // The user has read the offer's terms and agrees to them (#876).
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [initiating, setInitiating] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [resultIsError, setResultIsError] = useState(false);
@@ -461,6 +467,8 @@ function NegotiateContent() {
   };
 
   function selectOffer(o: CatalogOffer) {
+    // Agreeing is per offer: a new offer has new terms.
+    if (o.offerId !== selectedOffer?.offerId) setTermsAccepted(false);
     setSelectedOffer(o);
     setAssetId(o.assetId);
     setOfferId(o.offerId);
@@ -535,6 +543,8 @@ function NegotiateContent() {
           counterPartyId: providerCtxId,
           providerDid: selectedOffer?.assignerDid || providerDid,
           offerId,
+          // The terms the user agreed to, sent back whole (ADR-077).
+          policy: selectedOffer?.policy,
         }),
       });
 
@@ -875,13 +885,31 @@ function NegotiateContent() {
             </div>
           )}
 
+          {selectedOffer?.policy && (
+            <OfferTerms
+              policy={selectedOffer.policy}
+              providerDid={selectedOffer.assignerDid || providerDid}
+              providerName={didToName(selectedOffer.assignerDid || providerDid)}
+              consumerName={
+                participants.find((p) => p["@id"] === selectedCtx)
+                  ?.displayName ?? didToName(selectedCtx)
+              }
+              accepted={termsAccepted}
+              onAcceptedChange={setTermsAccepted}
+            />
+          )}
+
           <form onSubmit={handleNegotiate} className="space-y-3">
             {/* Hidden fields — populated automatically from Step 1 */}
             <input type="hidden" value={assetId} />
             <input type="hidden" value={offerId} />
             <button
               type="submit"
-              disabled={initiating || !offerId}
+              disabled={
+                initiating ||
+                !offerId ||
+                (!!selectedOffer?.policy && !termsAccepted)
+              }
               className="flex items-center gap-2 px-4 py-2 bg-(--accent) text-white dark:text-gray-900 rounded-sm text-sm font-medium hover:bg-(--accent-hover) disabled:opacity-50"
             >
               {initiating ? (

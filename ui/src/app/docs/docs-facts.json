@@ -326,6 +326,10 @@
       "methods": ["GET"]
     },
     {
+      "path": "/api/transfers/[id]/data",
+      "methods": ["GET"]
+    },
+    {
       "path": "/api/transfers/[id]",
       "methods": ["GET"]
     },
@@ -1220,6 +1224,12 @@
       "file": "ADR-076-edc-1-runtimes-are-built-here.md",
       "title": "EDC 1.0 runtimes are built here, from released EDC artifacts",
       "status": "Accepted"
+    },
+    {
+      "id": "ADR-077",
+      "file": "ADR-077-a-minimal-set-of-standard-data-sharing-policies.md",
+      "title": "A minimal set of standard data-sharing policies",
+      "status": "Proposed"
     }
   ],
   "complianceFloors": {
@@ -1258,8 +1268,8 @@
   },
   "openapi": {
     "version": "3.1.0",
-    "paths": 55,
-    "operations": 72
+    "paths": 56,
+    "operations": 73
   },
   "workflowJobs": {
     "test.yml": [
@@ -1308,9 +1318,9 @@
     "/docs": "2026-11-02",
     "/docs/user-guide": "2026-11-04",
     "/docs/developer": "2026-11-05",
-    "/docs/developer/quality-gates": "2026-11-04",
-    "/docs/developer/api": "2026-11-02",
-    "/docs/developer/reference": "2026-11-04",
+    "/docs/developer/quality-gates": "2026-11-05",
+    "/docs/developer/api": "2026-11-05",
+    "/docs/developer/reference": "2026-11-05",
     "/docs/developer/[slug]": "2026-11-04",
     "/docs/architecture": "2026-11-05",
     "/docs/security": "2026-11-04",

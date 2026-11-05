@@ -231,5 +231,22 @@
   "Continue to transfer": "Verder naar de overdracht",
   "The negotiation ended without a contract: {detail}": "De onderhandeling eindigde zonder contract: {detail}",
   "No answer from {provider} after two minutes. The negotiation stays in the history below; if it does not move, the provider's connector cannot be reached.": "Geen antwoord van {provider} na twee minuten. De onderhandeling blijft hieronder in de geschiedenis; als ze niet verder komt, is de connector van de aanbieder niet bereikbaar.",
-  "Waiting for {provider} to agree ({state}). Its connector checks the request against its offer and answers on its own: nobody at {provider} has to sign in.": "Wachten op instemming van {provider} ({state}). Zijn connector toetst het verzoek aan zijn aanbod en antwoordt zelf: niemand bij {provider} hoeft in te loggen."
+  "Waiting for {provider} to agree ({state}). Its connector checks the request against its offer and answers on its own: nobody at {provider} has to sign in.": "Wachten op instemming van {provider} ({state}). Zijn connector toetst het verzoek aan zijn aanbod en antwoordt zelf: niemand bij {provider} hoeft in te loggen.",
+  "My data": "Mijn gegevens",
+  "The assets you hold an open transfer for. Their data comes from the provider's data plane when you open or download it; patient identities are pseudonymised for data users.": "De assets waarvoor u een open overdracht hebt. Hun gegevens komen van het dataplane van de aanbieder wanneer u ze opent of downloadt; patiëntidentiteiten zijn gepseudonimiseerd voor datagebruikers.",
+  "Open": "Openen",
+  "Download": "Downloaden",
+  "(data ready)": "(gegevens klaar)",
+  "(transferred)": "(overgedragen)",
+  "Fetching the data from the provider…": "Gegevens worden bij de aanbieder opgehaald…",
+  "Could not fetch the data: {detail}": "De gegevens konden niet worden opgehaald: {detail}",
+  "The terms you agree to": "De voorwaarden waarmee u instemt",
+  "{provider} offers this data under the policy below. Starting the negotiation means {consumer} accepts it.": "{provider} biedt deze gegevens aan onder het onderstaande beleid. Door de onderhandeling te starten aanvaardt {consumer} het.",
+  "The offer's policy (ODRL)": "Het beleid van het aanbod (ODRL)",
+  "What the offer leaves open ({n})": "Wat het aanbod openlaat ({n})",
+  "Show the ODRL policy": "ODRL-beleid tonen",
+  "Your data permit binds the use as well": "Uw gegevensvergunning bindt het gebruik eveneens",
+  "Permitted purposes: {list}": "Toegestane doeleinden: {list}",
+  "Forbidden: {list}": "Verboden: {list}",
+  "I have read these terms and agree to them on behalf of {consumer}.": "Ik heb deze voorwaarden gelezen en ga ermee akkoord namens {consumer}."
 }
