@@ -79,10 +79,11 @@ export async function GET(
     });
   } catch (err) {
     const step = err instanceof TransferDataError ? err.step : "data";
+    const expired = err instanceof TransferDataError && err.expired;
     const detail = err instanceof Error ? err.message : String(err);
     console.error(`Pulling the data of transfer ${id} failed at ${step}:`, err);
     return NextResponse.json(
-      { error: "Failed to fetch the transfer's data", step, detail },
+      { error: "Failed to fetch the transfer's data", step, detail, expired },
       { status: 502 },
     );
   }

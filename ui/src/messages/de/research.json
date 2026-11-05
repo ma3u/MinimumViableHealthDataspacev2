@@ -297,5 +297,7 @@
   "Transfers under this contract ({n})": "Übertragungen unter diesem Vertrag ({n})",
   "No transfer yet.": "Noch keine Übertragung.",
   "agreed {date}": "vereinbart {date}",
-  "imported {date}": "importiert {date}"
+  "imported {date}": "importiert {date}",
+  "The access to this transfer has expired. Start a new transfer to get the data again.": "Der Zugang zu dieser Übertragung ist abgelaufen. Starten Sie eine neue Übertragung, um die Daten erneut zu erhalten.",
+  "Start a new transfer": "Neue Übertragung starten"
 }

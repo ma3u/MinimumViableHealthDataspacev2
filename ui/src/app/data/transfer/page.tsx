@@ -774,7 +774,10 @@ function DataTransferContent() {
       return next;
     });
   const [liveData, setLiveData] = useState<
-    Record<string, { loading: boolean; error?: string; result?: LiveData }>
+    Record<
+      string,
+      { loading: boolean; error?: string; expired?: boolean; result?: LiveData }
+    >
   >({});
 
   useEffect(() => {
@@ -1118,12 +1121,13 @@ function DataTransferContent() {
       const body = (await res.json()) as LiveData & {
         error?: string;
         detail?: string;
+        expired?: boolean;
       };
       if (!res.ok) {
         const error = [body.error, body.detail].filter(Boolean).join(": ");
         setLiveData((m) => ({
           ...m,
-          [transferId]: { loading: false, error },
+          [transferId]: { loading: false, error, expired: !!body.expired },
         }));
         return undefined;
       }
@@ -1461,13 +1465,23 @@ function DataTransferContent() {
                                 Math.round(entry.result.bytes / 1024),
                               )} KB`}
                           </p>
-                          {entry?.error && (
-                            <p className="text-xs text-(--badge-inactive-text) mt-1">
-                              {t("Could not fetch the data: {detail}", {
-                                detail: entry.error,
-                              })}
-                            </p>
-                          )}
+                          {entry?.error &&
+                            (entry.expired ? (
+                              <p
+                                data-testid="transfer-expired"
+                                className="text-xs text-(--badge-inactive-text) mt-1"
+                              >
+                                {t(
+                                  "The access to this transfer has expired. Start a new transfer to get the data again.",
+                                )}
+                              </p>
+                            ) : (
+                              <p className="text-xs text-(--badge-inactive-text) mt-1">
+                                {t("Could not fetch the data: {detail}", {
+                                  detail: entry.error,
+                                })}
+                              </p>
+                            ))}
                         </div>
 
                         {/* The one next action for this stage */}
@@ -1489,6 +1503,20 @@ function DataTransferContent() {
                               {row.stage === "done"
                                 ? t("Transfer again")
                                 : t("Start Transfer")}
+                            </button>
+                          )}
+                        {entry?.expired &&
+                          row.agreement &&
+                          !row.isProviderSide && (
+                            <button
+                              type="button"
+                              data-testid="restart-transfer"
+                              disabled={initiating !== null}
+                              onClick={() => void startTransfers([row.id])}
+                              className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-(--accent) text-white dark:text-gray-900 hover:bg-(--accent-hover) disabled:opacity-50"
+                            >
+                              <ArrowRightLeft size={12} />
+                              {t("Start a new transfer")}
                             </button>
                           )}
                         {row.stage === "progress" && (
@@ -1565,6 +1593,11 @@ function DataTransferContent() {
                           participantId={selectedCtx}
                           known={imports[live["@id"]] ?? NO_IMPORTS}
                           onImported={() => void loadImports()}
+                          onRestart={
+                            row.agreement && !row.isProviderSide
+                              ? () => void startTransfers([row.id])
+                              : undefined
+                          }
                         />
                       )}
 
