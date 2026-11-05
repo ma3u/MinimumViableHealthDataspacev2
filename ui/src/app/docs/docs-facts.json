@@ -506,7 +506,7 @@
     {
       "id": "prettier",
       "name": "prettier",
-      "source": "mirrors-prettier",
+      "source": "local",
       "stage": "pre-commit"
     },
     {
@@ -1258,7 +1258,7 @@
       "max_failed": 0
     },
     "ehds-compliance-results": {
-      "min_passed": 18,
+      "min_passed": 25,
       "max_failed": 0
     },
     "bruno-api-results": {
@@ -1333,8 +1333,8 @@
   "lastUpdated": {
     "/docs": "2026-11-02",
     "/docs/user-guide": "2026-11-04",
-    "/docs/developer": "2026-11-05",
-    "/docs/developer/quality-gates": "2026-11-05",
+    "/docs/developer": "2026-11-06",
+    "/docs/developer/quality-gates": "2026-11-06",
     "/docs/developer/api": "2026-11-05",
     "/docs/developer/reference": "2026-11-05",
     "/docs/developer/[slug]": "2026-11-05",

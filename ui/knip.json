@@ -10,7 +10,8 @@
   "ignore": ["public/**"],
   "ignoreDependencies": [
     "swagger-ui-dist",
-    "@typescript-eslint/typescript-estree"
+    "@typescript-eslint/typescript-estree",
+    "prettier"
   ],
   "rules": {
     "types": "off"
