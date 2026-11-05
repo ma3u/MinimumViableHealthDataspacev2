@@ -16,6 +16,9 @@
 #                       Never printed.
 #   BRUNO_REPORT_DIR    where reports go (default test-results/bruno)
 #   BRUNO_EUDI=1        include "12 EUDI wallet" (needs docker-compose.eudi.yml)
+#   BRUNO_DSP_LIVE=1    run the live DSP checks of "03 Data User" 15 to 22
+#                       (catalogue, negotiation, transfer, data) on this stack too;
+#                       Azure-Dev has them on by its environment (#876)
 #   BRUNO_BIN           bru binary (default: npx --yes @usebruno/cli)
 #
 # Exit status is bru's: non-zero when any request fails an assertion or a test.
@@ -65,6 +68,7 @@ if [ "$ENV_NAME" != "Static-mock" ]; then
     ENV_VARS+=(--env-var "$var=$value")
   done
   echo "[bruno] forged 5 persona sessions for $ENV_NAME (cookie $COOKIE_NAME, 8h)"
+  [ "${BRUNO_DSP_LIVE:-0}" = "1" ] && ENV_VARS+=(--env-var "dspLiveFlow=true")
 
   # One request with the operator's session before the collection runs. A
   # refused session turns every gated request into a 401, and a hundred 401s
