@@ -1,0 +1,34 @@
+meta {
+  name: 22 The agreement behind my transfer (DSP)
+  type: http
+  seq: 22
+}
+
+get {
+  url: {{baseUrl}}/api/agreements/{{dspAgreementId}}?participantId={{dspConsumerCtx}}
+  body: none
+  auth: inherit
+}
+
+headers {
+  Cookie: {{cookieName}}={{sessionTokenResearcher}}
+}
+
+tests {
+  const body = res.getBody() || {};
+  if (bru.getEnvVar("dspLiveFlow") !== "true") {
+    test("SKIPPED live check: this environment does not run the DSP flow end to end (#542)", function () {});
+  } else {
+    test("the connector holds the agreement, signed, with its policy", function () {
+      expect(res.getStatus(), body.detail || body.error || "").to.equal(200);
+      expect(body.agreementId).to.equal(bru.getVar("dspAgreementId"));
+      expect(body.signedAt, "no signing date").to.match(/^\d{4}-\d{2}-\d{2}T/);
+      expect(body.policy, "no policy").to.be.an("object");
+    });
+  }
+}
+
+docs {
+  What the transfer page's Details shows (#876): when the contract was signed, until when its
+  policy allows use (`validUntil`, empty when the policy sets no period) and the agreed policy.
+}

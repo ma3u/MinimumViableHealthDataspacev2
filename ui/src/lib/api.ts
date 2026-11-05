@@ -91,6 +91,8 @@ const STATIC_MOCK_PREFIX: [string, string][] = [
   ["/api/compliance?", "/mock/compliance_check.json"],
   ["/api/negotiations", "/mock/negotiations.json"],
   ["/api/transfers", "/mock/transfers.json"],
+  // One contract agreement, for the transfer details (#876)
+  ["/api/agreements/", "/mock/agreement.json"],
   ["/api/tasks", "/mock/tasks.json"],
   ["/api/admin/audit", "/mock/admin_audit.json"],
   ["/api/participants/", "/mock/credentials.json"],

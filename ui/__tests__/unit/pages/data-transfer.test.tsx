@@ -654,6 +654,73 @@ describe("DataTransferPage", () => {
       );
     });
 
+    it("Details say since when, until when, how, and the agreed policy", async () => {
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url.startsWith("/api/agreements/agr-001")) {
+          return mockResponse({
+            agreementId: "agr-001",
+            assetId: "fhir-patient-search",
+            providerId: "did:web:alpha-klinik.de:participant",
+            consumerId: "did:web:pharmaco.de:research",
+            signedAt: "2026-11-05T13:56:30.000Z",
+            validUntil: "2027-11-05T13:56:30.000Z",
+            policy: {
+              permission: [
+                {
+                  action: "use",
+                  constraint: [
+                    {
+                      leftOperand: "inForceDate",
+                      operator: "lteq",
+                      rightOperand: "contractAgreement+365d",
+                    },
+                  ],
+                },
+              ],
+            },
+          });
+        }
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) {
+          return mockResponse([LIVE, ...TRANSFERS]);
+        }
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse(NEGOTIATIONS_FINALIZED);
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("my-data");
+      await user.click(within(section).getByText("Details"));
+
+      const details = await screen.findByTestId("transfer-details");
+      expect(within(details).getByText("Access open since")).toBeTruthy();
+      expect(
+        within(details).getByTestId("transfer-opened").textContent,
+      ).not.toBe("—");
+      await waitFor(() => {
+        expect(
+          within(details).getByTestId("transfer-until").textContent,
+        ).toMatch(/2027/);
+      });
+      expect(details.textContent).toMatch(/How to get the data/);
+      expect(details.textContent).toMatch(/Access policy/);
+      expect(
+        within(details).getByTestId("offer-policy-description").textContent,
+      ).toMatch(/for 1 year after the contract is agreed/);
+      // A signed agreement has nothing left to tick.
+      expect(within(details).queryByTestId("offer-terms-accept")).toBeNull();
+      expect(
+        mockFetchApi.mock.calls.some(([u]) =>
+          String(u).startsWith(
+            "/api/agreements/agr-001?participantId=ctx-pharmaco",
+          ),
+        ),
+      ).toBe(true);
+    });
+
     it("says why when the data cannot be fetched", async () => {
       mocks(() =>
         mockResponse(
