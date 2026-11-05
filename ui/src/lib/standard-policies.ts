@@ -28,7 +28,7 @@
  * gate, the SPE and audit, not by the negotiation.
  */
 
-export const POLICY_CONTEXT = [
+const POLICY_CONTEXT = [
   "http://www.w3.org/ns/odrl.jsonld",
   { ehds: "https://w3id.org/ehds/", edc: "https://w3id.org/edc/v0.0.1/ns/" },
 ];
