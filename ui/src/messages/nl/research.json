@@ -264,5 +264,7 @@
   "{provider} decides who may see the offer at all. {consumer} saw it, so its connector met that policy, proving its membership with its credentials (DCP); the provider does not disclose the policy itself.": "{provider} bepaalt wie het aanbod überhaupt mag zien. {consumer} zag het, dus zijn connector voldeed aan dat beleid en bewees zijn lidmaatschap met zijn bewijsstukken (DCP); de aanbieder maakt het beleid zelf niet bekend.",
   "Loading the agreement…": "Overeenkomst wordt geladen…",
   "The agreement could not be read: {detail}": "De overeenkomst kon niet worden gelezen: {detail}",
-  "Negotiate this offer again": "Dit aanbod opnieuw onderhandelen"
+  "Negotiate this offer again": "Dit aanbod opnieuw onderhandelen",
+  "no open transfer": "geen open overdracht",
+  "A sample agreement from the demonstrator's fixtures: the connector holds no record of it, so there is no signed policy to show.": "Een voorbeeldovereenkomst uit de testgegevens van de demonstrator: de connector kent haar niet, dus er is geen ondertekend beleid om te tonen."
 }

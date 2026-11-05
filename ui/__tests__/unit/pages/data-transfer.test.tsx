@@ -438,7 +438,7 @@ describe("DataTransferPage", () => {
     await user.click(checkboxes[2]);
 
     // Click start transfer
-    const startBtn = screen.getByRole("button", { name: /Start Transfer/i });
+    const startBtn = screen.getByTestId("start-transfer-bottom");
     await user.click(startBtn);
 
     // Verify the POST was called
@@ -495,7 +495,7 @@ describe("DataTransferPage", () => {
 
     const checkboxes = screen.getAllByRole("checkbox");
     await user.click(checkboxes[2]);
-    await user.click(screen.getByRole("button", { name: /Start Transfer/i }));
+    await user.click(screen.getByTestId("start-transfer-bottom"));
 
     await waitFor(() => {
       expect(
@@ -530,7 +530,7 @@ describe("DataTransferPage", () => {
     const checkboxes = screen.getAllByRole("checkbox");
     await user.click(checkboxes[1]);
 
-    await user.click(screen.getByRole("button", { name: /Start Transfer/i }));
+    await user.click(screen.getByTestId("start-transfer-bottom"));
 
     await waitFor(() => {
       expect(screen.getByText(/Error:/)).toBeInTheDocument();
@@ -553,9 +553,7 @@ describe("DataTransferPage", () => {
     await user.click(selectAllCheckbox);
 
     // Button should indicate multiple transfers
-    expect(
-      screen.getByRole("button", { name: /Start 2 Transfers/ }),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("start-transfer-bottom")).toBeInTheDocument();
   });
 
   describe("what an agreement's transfers have reached (#876)", () => {
@@ -582,6 +580,44 @@ describe("DataTransferPage", () => {
       await screen.findAllByText("TERMINATED");
       expect(screen.queryByText(/transfer in progress|data ready/)).toBeNull();
     });
+  });
+
+  it("offers Start Transfer above the agreement list as well (#876)", async () => {
+    setupDefaultMocks();
+    const user = userEvent.setup();
+    render(<DataTransferPage />);
+    await screen.findByText("Start Transfer from Agreement");
+
+    const top = screen.getByTestId("start-transfer-top");
+    expect((top as HTMLButtonElement).disabled).toBe(true);
+    await user.click(screen.getAllByRole("checkbox")[2]);
+    expect((top as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it("shows Details for an agreement without ticking it; a sample says it is one", async () => {
+    setupDefaultMocks();
+    const user = userEvent.setup();
+    render(<DataTransferPage />);
+    await screen.findByText("Start Transfer from Agreement");
+    const before = screen
+      .getAllByRole("checkbox")
+      .map((c) => (c as HTMLInputElement).checked);
+
+    await user.click(screen.getAllByText("Details")[0]);
+
+    const details = await screen.findByTestId("transfer-details");
+    expect(details.textContent).toMatch(/sample agreement/);
+    expect(
+      screen
+        .getAllByRole("checkbox")
+        .map((c) => (c as HTMLInputElement).checked),
+    ).toEqual(before);
+    // No connector record to read for a sample row.
+    expect(
+      mockFetchApi.mock.calls.some(([u]) =>
+        String(u).startsWith("/api/agreements/"),
+      ),
+    ).toBe(false);
   });
 
   describe("My data: the data of open connector transfers (#876)", () => {
@@ -944,7 +980,7 @@ describe("DataTransferPage", () => {
     setupDefaultMocks();
     render(<DataTransferPage />);
     await waitFor(() => {
-      const btn = screen.getByRole("button", { name: /Start Transfer/i });
+      const btn = screen.getByTestId("start-transfer-bottom");
       expect(btn).toBeDisabled();
     });
   });
