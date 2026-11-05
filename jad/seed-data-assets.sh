@@ -154,10 +154,25 @@ print(json.dumps(policy_def))
 
   if echo "$response" | python3 -c "import json,sys; d=json.load(sys.stdin); assert '@id' in d" 2>/dev/null; then
     ok "Policy '$policy_id' created"
+  elif mgmt_call PUT "${MGMT_V}/participants/$ctx_id/policydefinitions/$policy_id" "$payload" \
+      | python3 -c "import sys; t=sys.stdin.read().strip(); assert not t or 'error' not in t.lower()" 2>/dev/null; then
+    # It existed: a re-seed now replaces it, so a changed policy reaches the
+    # connector (the standard policies, ADR-076). It used to be skipped.
+    ok "Policy '$policy_id' updated"
   else
     echo "  Response: $response"
     warn "Policy '$policy_id' may have failed"
   fi
+}
+
+# --- The standard policies (ADR-076) ---
+# jad/policies/<id>.json, the same files the hub's checker tests
+# (ui/__tests__/unit/lib/standard-policies.test.ts). The Azure job ships the
+# folder next to this script.
+POLICY_DIR="${POLICY_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/policies}"
+standard_policy() {
+  python3 -c "import json,sys; print(json.dumps(json.load(open(sys.argv[1]))))" \
+    "$POLICY_DIR/$1.json"
 }
 
 # --- Create Contract Definition ---
@@ -188,6 +203,9 @@ print(json.dumps(cd))
 
   if echo "$response" | python3 -c "import json,sys; d=json.load(sys.stdin); assert '@id' in d" 2>/dev/null; then
     ok "Contract definition '$contract_def_id' created"
+  elif mgmt_call PUT "${MGMT_V}/participants/$ctx_id/contractdefinitions" "$payload" \
+      | python3 -c "import sys; t=sys.stdin.read().strip(); assert not t or 'error' not in t.lower()" 2>/dev/null; then
+    ok "Contract definition '$contract_def_id' updated"
   else
     echo "  Response: $response"
     warn "Contract definition '$contract_def_id' may have failed"
@@ -275,13 +293,16 @@ AK_POLICY='{
   }]
 }'
 create_policy "$ALPHA_KLINIK_CTX" "open-fhir-access-policy" "$AK_POLICY"
+# Who may see the offer stays open; what a contract binds is the standard
+# policy for record-level data under a permit (ADR-076).
+create_policy "$ALPHA_KLINIK_CTX" "mvhd-ehds-permit-spe" "$(standard_policy mvhd-ehds-permit-spe)"
 
 EDC_ID="https://w3id.org/edc/v0.0.1/ns/id"
 TC_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"fhir-patient-search\"}]"
-create_contract_def "$ALPHA_KLINIK_CTX" "cd-fhir-patient" "open-fhir-access-policy" "open-fhir-access-policy" "$TC_SELECTOR"
+create_contract_def "$ALPHA_KLINIK_CTX" "cd-fhir-patient" "open-fhir-access-policy" "mvhd-ehds-permit-spe" "$TC_SELECTOR"
 
 TC_OBS_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"fhir-observation-bundle\"}]"
-create_contract_def "$ALPHA_KLINIK_CTX" "cd-fhir-observation" "open-fhir-access-policy" "open-fhir-access-policy" "$TC_OBS_SELECTOR"
+create_contract_def "$ALPHA_KLINIK_CTX" "cd-fhir-observation" "open-fhir-access-policy" "mvhd-ehds-permit-spe" "$TC_OBS_SELECTOR"
 
 echo ""
 
@@ -351,6 +372,8 @@ MEMBERSHIP_POLICY='{
 
 create_policy "$LMC_CTX" "open-access-policy" "$OPEN_POLICY"
 create_policy "$LMC_CTX" "membership-access-policy" "$MEMBERSHIP_POLICY"
+create_policy "$LMC_CTX" "mvhd-ehds-permit-spe" "$(standard_policy mvhd-ehds-permit-spe)"
+create_policy "$LMC_CTX" "mvhd-ehds-anonymised-request" "$(standard_policy mvhd-ehds-anonymised-request)"
 
 echo ""
 
@@ -368,11 +391,11 @@ EDC_ID="https://w3id.org/edc/v0.0.1/ns/id"
 
 # Contract for FHIR patient data — requires membership
 FHIR_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"in\",\"operandRight\":[\"fhir-patient-everything\",\"fhir-cohort-bundle\"]}]"
-create_contract_def "$LMC_CTX" "fhir-data-contract" "membership-access-policy" "membership-access-policy" "$FHIR_SELECTOR"
+create_contract_def "$LMC_CTX" "fhir-data-contract" "membership-access-policy" "mvhd-ehds-permit-spe" "$FHIR_SELECTOR"
 
 # Contract for OMOP statistics — requires membership
 OMOP_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"omop-cohort-statistics\"}]"
-create_contract_def "$LMC_CTX" "omop-data-contract" "membership-access-policy" "membership-access-policy" "$OMOP_SELECTOR"
+create_contract_def "$LMC_CTX" "omop-data-contract" "membership-access-policy" "mvhd-ehds-anonymised-request" "$OMOP_SELECTOR"
 
 # Contract for catalog metadata — open access
 CATALOG_SELECTOR="[{\"@type\":\"Criterion\",\"operandLeft\":\"$EDC_ID\",\"operator\":\"=\",\"operandRight\":\"healthdcatap-catalog\"}]"

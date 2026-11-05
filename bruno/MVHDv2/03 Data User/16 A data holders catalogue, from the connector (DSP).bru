@@ -25,6 +25,9 @@ tests {
   const offer = (ds.hasPolicy || [])[0] || {};
   bru.setVar("dspAssetId", ds["@id"] || "");
   bru.setVar("dspOfferId", offer["@id"] || "");
+  // The offer whole: the request repeats it, constraints and prohibitions
+  // included, or the connector refuses it (ADR-076).
+  bru.setVar("dspOfferPolicy", JSON.stringify(offer));
   bru.setVar(
     "dspEndpoint",
     ((ds.distribution || [])[0] || {}).accessService?.endpointURL || "",

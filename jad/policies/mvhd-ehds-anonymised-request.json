@@ -1,0 +1,83 @@
+{
+  "@context": [
+    "http://www.w3.org/ns/odrl.jsonld",
+    {
+      "ehds": "https://w3id.org/ehds/",
+      "edc": "https://w3id.org/edc/v0.0.1/ns/"
+    }
+  ],
+  "@type": "Set",
+  "@id": "mvhd-ehds-anonymised-request",
+  "permission": [
+    {
+      "action": "use",
+      "constraint": [
+        {
+          "leftOperand": "ehds:purpose",
+          "operator": "isAnyOf",
+          "rightOperand": [
+            "EHDS Art. 53(1)(a) - public interest in public or occupational health",
+            "EHDS Art. 53(1)(b) - policymaking and regulatory activities",
+            "EHDS Art. 53(1)(c) - official statistics",
+            "EHDS Art. 53(1)(d) - education or teaching",
+            "EHDS Art. 53(1)(e) - scientific research",
+            "EHDS Art. 53(1)(f) - improvement of the delivery of care"
+          ]
+        },
+        {
+          "leftOperand": "ehds:hdabApproval",
+          "operator": "eq",
+          "rightOperand": "health data request answered by the access body"
+        },
+        {
+          "leftOperand": "inForceDate",
+          "operator": "lteq",
+          "rightOperand": "contractAgreement+365d"
+        },
+        {
+          "leftOperand": "spatial",
+          "operator": "isPartOf",
+          "rightOperand": "EU/EEA"
+        }
+      ],
+      "duty": [
+        {
+          "action": "anonymize",
+          "constraint": [
+            {
+              "leftOperand": "ehds:kAnonymity",
+              "operator": "gteq",
+              "rightOperand": 10
+            }
+          ]
+        },
+        {
+          "action": "ehds:aggregateOnly"
+        },
+        {
+          "action": "attribute"
+        },
+        {
+          "action": "ehds:publishResults"
+        },
+        {
+          "action": "delete"
+        }
+      ]
+    }
+  ],
+  "prohibition": [
+    {
+      "action": "ehds:reIdentify"
+    },
+    {
+      "action": "ehds:advertise"
+    },
+    {
+      "action": "ehds:insuranceDecision"
+    },
+    {
+      "action": "ehds:detrimentalDecision"
+    }
+  ]
+}

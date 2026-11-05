@@ -401,6 +401,20 @@ const ACTION_LABELS: Record<string, string> = {
   thirdPartySharing: "share the data with third parties",
   publishIndividualLevel: "publish individual-level data",
   advertise: "use the data for advertising or marketing",
+  // The standard policies' clauses (lib/standard-policies.ts, ADR-076)
+  attestEnvironment: "prove the environment by remote attestation",
+  publishResults: "publish the results within 18 months",
+  reportIncident:
+    "report incidents and significant findings to the access body",
+  insuranceDecision: "use the data for decisions on insurance or credit",
+  detrimentalDecision: "use the data for decisions to a person's detriment",
+  transferOutsideEU: "transfer the data outside the EU/EEA",
+  documentTrainingData:
+    "document the training data, its origin and the examination for bias",
+  prohibitedAiPractice: "use the data for an AI practice the AI Act prohibits",
+  developCompetingProduct: "develop a product that competes with the device",
+  shareWithGatekeeper: "make the data available to a gatekeeper",
+  profile: "profile persons, unless the service needs it",
 };
 
 /** ODRL 2.2's actions; any other action in the odrl: namespace is unknown. */
@@ -482,6 +496,9 @@ const OPERAND_LABELS: Record<string, string> = {
   permitId: "the data permit",
   hdabApproval: "the approval of the health data access body",
   MembershipCredential: "the membership credential",
+  processingEnvironment: "the processing environment",
+  certification: "the certification",
+  legalBasis: "the legal basis",
 };
 
 /** ODRL 2.2's operators. */

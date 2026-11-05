@@ -125,6 +125,12 @@ const FORBIDDEN_PURPOSE =
 const PRIMARY_USE =
   /article 7\b|art\. ?7\b|primary use|cross-border treatment|treatment continuity|myhealth@eu/i;
 
+/**
+ * Data a user has shared from a connected device under the Data Act (Art. 5):
+ * the user's own choice of recipient, not secondary use under Chapter IV.
+ */
+const DATA_ACT = /\bdata act\b|2023\/2854/i;
+
 function purposeOf(value: string): Purpose | null {
   const v = value.replace(/_/g, " ");
   const upper = value.trim().toUpperCase();
@@ -373,6 +379,18 @@ function checkEhds(policy: ParsedPolicy, out: PolicyFinding[]) {
       "EHDS Chapter II",
       p(
         "A policy for primary use (care of the patient); the checks for secondary use do not apply.",
+      ),
+    );
+    return;
+  }
+
+  if (purposes.length && purposes.every((v) => DATA_ACT.test(v))) {
+    ehds(
+      "ehds.data-act",
+      "info",
+      "Data Act Art. 5",
+      p(
+        "A policy for device data the user shares under the Data Act; the checks for secondary use do not apply.",
       ),
     );
     return;

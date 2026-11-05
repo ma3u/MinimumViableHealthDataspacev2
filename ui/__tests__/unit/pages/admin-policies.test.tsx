@@ -520,13 +520,13 @@ describe("AdminPoliciesPage", () => {
     expect(screen.getByText("Art. 7")).toBeInTheDocument();
   });
 
-  it("shows the first template description by default", async () => {
+  it("shows the first standard policy by default (ADR-076)", async () => {
     const user = userEvent.setup();
     await renderLoaded();
     await user.click(screen.getByRole("button", { name: /Create Policy/ }));
 
     expect(
-      screen.getByText(/Secondary use for scientific research in health/),
+      screen.getByText(/Record-level health data, pseudonymised/),
     ).toBeInTheDocument();
   });
 
@@ -683,7 +683,7 @@ describe("AdminPoliciesPage", () => {
       expect(mockFetchApi).toHaveBeenCalledWith("/api/admin/policies", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: expect.stringContaining("policy-ehds-research-"),
+        body: expect.stringContaining("mvhd-ehds-permit-spe-"),
       });
     });
   });
@@ -919,7 +919,8 @@ describe("AdminPoliciesPage", () => {
       expect(body.participantId).toBe("participant-alpha");
       expect(body.policy).toBeDefined();
       expect(body.policy["@type"]).toBe("edc:PolicyDefinition");
-      expect(body.policy["edc:policy"]["@type"]).toBe("odrl:Set");
+      expect(body.policy["edc:policy"]["@type"]).toBe("Set");
+      expect(body.policy["edc:policy"].prohibition.length).toBeGreaterThan(0);
     });
   });
 
