@@ -1292,7 +1292,8 @@ function DataTransferContent() {
                         void openFhirViewer(id);
                         document
                           .getElementById(`transfer-${id}`)
-                          ?.scrollIntoView({ behavior: "smooth" });
+                          // Not every browser engine has it (jsdom has not).
+                          ?.scrollIntoView?.({ behavior: "smooth" });
                       }}
                       className="flex items-center gap-1 text-xs px-2 py-1 rounded bg-(--role-user-bg) text-(--role-user-text) hover:opacity-80"
                     >
