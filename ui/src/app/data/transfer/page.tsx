@@ -28,6 +28,7 @@ import TransferDetails from "@/components/TransferDetails";
 import SpeImport from "@/components/SpeImport";
 import {
   closedAfterImportInto,
+  closedAfterImportReason,
   importViewUrl,
   type ExistingImport,
 } from "@/lib/spe-import";
@@ -1811,6 +1812,14 @@ function DataTransferContent() {
                                     (tr.stateTimestamp as number) ||
                                     (tr["edc:stateTimestamp"] as number) ||
                                     0;
+                                  // The hub ends a transfer once its data is
+                                  // in an SPE; that TERMINATED is the success.
+                                  const closedInto = closedAfterImportInto(
+                                    f(
+                                      tr as Record<string, unknown>,
+                                      "errorDetail",
+                                    ),
+                                  );
                                   return (
                                     <div
                                       key={tr["@id"]}
@@ -1819,8 +1828,16 @@ function DataTransferContent() {
                                     >
                                       <div className="flex flex-wrap items-center gap-2 text-[11px] text-(--text-secondary)">
                                         <span
+                                          data-testid="transfer-state"
+                                          title={
+                                            closedInto
+                                              ? closedAfterImportReason(
+                                                  closedInto,
+                                                )
+                                              : undefined
+                                          }
                                           className={`text-xs px-2 py-0.5 rounded-full ${stateBg(
-                                            state,
+                                            closedInto ? "COMPLETED" : state,
                                           )}`}
                                         >
                                           {state || "UNKNOWN"}
@@ -1861,12 +1878,7 @@ function DataTransferContent() {
                                       </div>
                                       <DspPipeline
                                         state={state}
-                                        closedInto={closedAfterImportInto(
-                                          f(
-                                            tr as Record<string, unknown>,
-                                            "errorDetail",
-                                          ),
-                                        )}
+                                        closedInto={closedInto}
                                       />
                                     </div>
                                   );

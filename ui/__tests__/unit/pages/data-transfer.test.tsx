@@ -637,6 +637,14 @@ describe("DataTransferPage", () => {
       expect(pipeline.textContent).toMatch(
         /REQUESTED.*STARTED.*CLOSED AFTER IMPORT INTO SPE-1/,
       );
+      // The connector's state stays, in the colour of a finished transfer.
+      const badge = within(rows[0]).getByTestId("transfer-state");
+      expect(badge.textContent).toBe("TERMINATED");
+      expect(badge.getAttribute("title")).toBe(
+        "Closed after import into SPE-1",
+      );
+      expect(badge.className).toContain("role-user-bg");
+      expect(badge.className).not.toContain("role-admin-bg");
     });
 
     it("resolves the provider's DID to its name", async () => {
