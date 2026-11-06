@@ -49,8 +49,10 @@ wait_for_service() {
   for i in $(seq 1 "$max_attempts"); do
     # Accept any HTTP response (including 401/403) as proof the service is up.
     # curl -sf fails on 4xx, so use --write-out to check for a valid HTTP code.
+    # curl prints 000 itself when nothing answers; `|| echo 000` appended a
+    # second one, and "000000" passed every wait on its first attempt.
     local http_code
-    http_code=$(curl -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
+    http_code=$(curl -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null) || http_code=000
     if [ "$http_code" != "000" ]; then
       ok "$service is healthy (attempt $i/$max_attempts, HTTP $http_code)"
       return 0
@@ -58,6 +60,83 @@ wait_for_service() {
     sleep "$interval"
   done
   error "$service did not become healthy after $((max_attempts * interval))s"
+  return 1
+}
+
+# ---------------------------------------------------------------------------
+# Helper: wait for a container's own healthcheck
+# ---------------------------------------------------------------------------
+# For services whose readiness is not an HTTP status: Postgres speaks no HTTP,
+# and the file-backed Vault (2026-09-26) answers 501 while it is uninitialised
+# and sealed, until vault-unseal initialises or unseals it.
+wait_for_healthy() {
+  local container="$1" max_attempts="${2:-30}" interval="${3:-3}" status=""
+  log "Waiting for $container to report healthy ..."
+  for i in $(seq 1 "$max_attempts"); do
+    status=$(docker inspect -f '{{.State.Health.Status}}' "$container" 2>/dev/null) || status=""
+    if [ "$status" = "healthy" ]; then
+      ok "$container is healthy (attempt $i/$max_attempts)"
+      return 0
+    fi
+    sleep "$interval"
+  done
+  error "$container is ${status:-missing} after $((max_attempts * interval))s"
+  return 1
+}
+
+# ---------------------------------------------------------------------------
+# Load the graph into an empty Neo4j
+# ---------------------------------------------------------------------------
+# A fresh neo4j_data volume holds no graph, and the seeds' last step reads
+# patients through the data plane (seed-data-transfer.sh). These are the files
+# compliance.yml loads before the API collection ("Seed Neo4j with the
+# documented minimal data set"). A graph that already holds patients, such as
+# one with the Synthea set, is left as it is.
+load_graph_if_empty() {
+  local neo4j=(docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace)
+  local patients f
+  patients=$("${neo4j[@]}" --format plain "MATCH (p:Patient) RETURN count(p)" | tail -1) || {
+    error "Neo4j does not answer cypher-shell"
+    return 1
+  }
+  if [ "$patients" != "0" ]; then
+    ok "Neo4j holds $patients patients; the graph is left as it is"
+    return 0
+  fi
+  log "Neo4j is empty; loading the schema and the minimal data set ..."
+  "${neo4j[@]}" < neo4j/init-schema.cypher > /dev/null
+  for f in neo4j/insert-synthetic-schema-data.cypher \
+           neo4j/register-eehrxf-profiles.cypher \
+           neo4j/seed-compliance-matrix.cypher \
+           neo4j/participant-source-init.cypher \
+           neo4j/seed-persona-overview.cypher \
+           neo4j/seed-study-results.cypher \
+           neo4j/seed-catalog-translations.cypher; do
+    "${neo4j[@]}" < "$f" > /dev/null
+  done
+  patients=$("${neo4j[@]}" --format plain "MATCH (p:Patient) RETURN count(p)" | tail -1)
+  ok "Graph loaded: $patients patients"
+}
+
+# ---------------------------------------------------------------------------
+# Helper: wait until an API answers at all
+# ---------------------------------------------------------------------------
+# The EDC 1.0 launchers publish their APIs but not their health contexts, and
+# the control plane has no compose healthcheck. Any HTTP status means the API
+# is listening; 401 is the usual one, asking for a token (as compliance.yml
+# waits for them).
+wait_for_api() {
+  local name="$1" url="$2" max_attempts="${3:-60}" interval="${4:-5}" code=000
+  log "Waiting for $name to answer at $url ..."
+  for _ in $(seq 1 "$max_attempts"); do
+    code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$url" 2>/dev/null) || code=000
+    if [ "$code" != "000" ]; then
+      ok "$name answers (HTTP $code)"
+      return 0
+    fi
+    sleep "$interval"
+  done
+  error "$name did not answer after $((max_attempts * interval))s"
   return 1
 }
 
@@ -219,11 +298,14 @@ start_stack() {
   docker compose $COMPOSE_FILES down --remove-orphans 2>/dev/null || true
 
   log "=== Phase 1: Starting infrastructure services ==="
-  docker compose $COMPOSE_FILES up -d postgres vault keycloak nats
+  # vault-unseal belongs here: the file-backed Vault stays sealed, and its
+  # healthcheck fails, until the sidecar initialises or unseals it, so
+  # vault-bootstrap (which needs Vault healthy) could never start without it.
+  docker compose $COMPOSE_FILES up -d postgres vault vault-unseal keycloak nats
 
   # Wait for infrastructure to be healthy
-  wait_for_service "PostgreSQL" "http://localhost:5432" 10 3 || true  # TCP, curl may fail
-  wait_for_service "Vault" "http://localhost:8200/v1/sys/health" 15 3
+  wait_for_healthy health-dataspace-postgres 20 3
+  wait_for_healthy health-dataspace-vault 30 3
   wait_for_service "Keycloak" "http://localhost:9000/health/ready" 30 5
   wait_for_service "NATS" "http://localhost:8222/healthz" 10 3
   # /healthz says the server is up, not that JetStream can store anything —
@@ -263,211 +345,59 @@ start_stack() {
   docker compose $COMPOSE_FILES up -d traefik
   ok "Traefik gateway started"
 
-  log "=== Phase 4: Starting EDC-V / DCore application services ==="
-  docker compose $COMPOSE_FILES up -d controlplane dataplane-fhir dataplane-omop identityhub issuerservice
+  log "=== Phase 4: Starting the EDC 1.0 services and siglet ==="
+  # EDC 1.0 (#881, ADR-078): the launchers from runtimes/edc, which compose
+  # builds on the first run (a few minutes of Gradle); siglet is the data
+  # plane. JAD's data planes and CFM are 0.18 only (profile edc018).
+  docker compose $COMPOSE_FILES up -d controlplane identityhub issuerservice simpl-ga-issuer siglet
 
-  wait_for_service "Control Plane" "http://localhost:11003/api/mgmt/check/readiness" 30 5
-  wait_for_service "Data Plane FHIR" "http://localhost:11002/api/check/readiness" 30 5
-  wait_for_service "Data Plane OMOP" "http://localhost:11012/api/check/readiness" 30 5
-  wait_for_service "Identity Hub" "http://localhost:11005/api/identity/check/readiness" 30 5
-  ok "EDC-V / DCore services are healthy"
+  wait_for_api "Control Plane" "http://localhost:11003/api/mgmt/v5/participants" 60 5 || exit 1
+  wait_for_api "Identity Hub" "http://localhost:11005/api/identity" 60 5 || exit 1
+  wait_for_api "Issuer Service" "http://localhost:10013/api/admin" 60 5 || exit 1
+  ok "EDC 1.0 services are answering"
 
-  log "=== Phase 4b: Starting Neo4j Query Proxy ==="
+  log "=== Phase 4b: Starting Neo4j (from base compose) ==="
+  # Before the proxy, which exits while it cannot reach Neo4j.
+  docker compose $COMPOSE_FILES up -d neo4j
+  wait_for_service "Neo4j" "http://localhost:7474" 40 3
+  ok "Neo4j started"
+  load_graph_if_empty || exit 1
+
+  log "=== Phase 5: Starting Neo4j Query Proxy ==="
   # --build: the proxy is our code; build it from ./services/neo4j-proxy so the
   # running container matches the source, not a stale image (#349, ADR-029 r3).
   docker compose $COMPOSE_FILES up -d --build neo4j-proxy
-  wait_for_service "Neo4j Query Proxy" "http://localhost:9090/health" 15 3
+  wait_for_service "Neo4j Query Proxy" "http://localhost:9090/health" 20 3
   ok "Neo4j Query Proxy is healthy"
 
-  log "=== Phase 5: Starting CFM services ==="
-  docker compose $COMPOSE_FILES up -d tenant-manager provision-manager
-  docker compose $COMPOSE_FILES up -d cfm-agents cfm-edcv-agent cfm-registration-agent cfm-onboarding-agent
-  assert_cfm_agents_running
-  ok "CFM services started"
-
-  log "=== Phase 6: Starting Neo4j (from base compose) ==="
-  docker compose $COMPOSE_FILES up -d neo4j
-  ok "Neo4j started"
-
-  log "=== Phase 6b: Building and starting Live UI (port 3003) ==="
+  log "=== Phase 5b: Building and starting Live UI (port 3003) ==="
   docker compose $COMPOSE_FILES up -d --build graph-explorer
   ok "Live UI started on http://localhost:3003"
 }
 
 # ---------------------------------------------------------------------------
-# Assert the CFM provisioning agents are actually running
+# Assert the participants exist and hold a credential
 # ---------------------------------------------------------------------------
-# These agents drive participant provisioning. When they crash-loop, every VPA
-# stays `pending` and the only symptom downstream is a 180s wait that times out
-# 94 poll lines later (issue #181). Check them where the failure happens.
-# ---------------------------------------------------------------------------
-assert_cfm_agents_running() {
-  local agents=(
-    health-dataspace-cfm-keycloak-agent
-    health-dataspace-cfm-edcv-agent
-    health-dataspace-cfm-registration-agent
-    health-dataspace-cfm-onboarding-agent
-  )
-  local settle=15
-  log "Waiting ${settle}s for CFM agents to settle, then checking they stayed up..."
-  sleep "$settle"
-
-  local failed=0 agent state
-  for agent in "${agents[@]}"; do
-    state=$(docker inspect -f '{{.State.Status}}' "$agent" 2>/dev/null || true)
-    [ -n "$state" ] || state="missing (no such container)"
-    if [ "$state" != "running" ]; then
-      error "CFM agent $agent is '$state', not 'running'"
-      docker logs "$agent" --tail 15 2>&1 | sed 's/^/    /' >&2
-      failed=1
-      continue
-    fi
-    # A restarting container can report "running" between restarts, so also
-    # reject one that has panicked since it last started.
-    if docker logs "$agent" --tail 40 2>&1 | grep -q "^panic:"; then
-      error "CFM agent $agent panicked after starting:"
-      docker logs "$agent" --tail 40 2>&1 | grep -A3 "^panic:" | sed 's/^/    /' >&2
-      failed=1
-    fi
-  done
-
-  if [ "$failed" -ne 0 ]; then
-    error ""
-    error "Participant provisioning cannot work while any CFM agent is down."
-    error "Aborting here rather than timing out later on VPAs that will never"
-    error "leave 'pending'. See issue #181 and docs/gotchas.md."
-    exit 1
-  fi
-  ok "All four CFM agents are running"
-}
-
-# ---------------------------------------------------------------------------
-# Assert participants actually finished provisioning
-# ---------------------------------------------------------------------------
-# The single property that matters after seeding: at least one participant has
-# all of its VPAs active. It is the one check that catches every way this chain
-# breaks, whether the agents are down, the control plane rejects the call, the
-# JetStream volume is unusable, or a store is missing a column (issue #181).
+# The property that matters after seeding (#181): the five demo participants
+# are contexts on the control plane. On EDC 1.0 they stay CREATED, which the
+# hub accepts (#878, #891); their credentials are checked by seed step 1, which
+# requests a MembershipCredential for each and fails when one does not arrive.
 # ---------------------------------------------------------------------------
 assert_participants_active() {
-  local tm="http://localhost:11006"
-  log "Verifying at least one participant reached ACTIVE ..."
-
-  local report
-  report=$(python3 - "$tm" <<'PYEOF' 2>/dev/null || true
-import json, sys, urllib.request
-
-base = sys.argv[1].rstrip("/") + "/api/v1alpha1/tenants"
-try:
-    tenants = json.load(urllib.request.urlopen(base, timeout=10))
-except Exception as exc:
-    print(f"UNREACHABLE:{exc}")
-    raise SystemExit(0)
-
-active = stuck = 0
-detail = []
-for t in tenants:
-    name = t.get("properties", {}).get("displayName", t.get("id"))
-    try:
-        profiles = json.load(urllib.request.urlopen(f"{base}/{t['id']}/participant-profiles", timeout=10))
-    except Exception:
-        continue
-    for prof in profiles:
-        states = [v.get("state") for v in prof.get("vpas", [])]
-        if states and set(states) == {"active"}:
-            active += 1
-        elif states:
-            stuck += 1
-            detail.append(f"{name}: {', '.join(sorted(set(states)))}")
-
-print(f"RESULT:{active}:{stuck}:" + " | ".join(detail[:6]))
-PYEOF
-)
-
-  case "$report" in
-    UNREACHABLE:*)
-      error "TenantManager unreachable at $tm (${report#UNREACHABLE:})"
-      error "Cannot tell whether provisioning worked, so not claiming it did."
-      exit 1
-      ;;
-    RESULT:*)
-      local rest="${report#RESULT:}"
-      local active="${rest%%:*}"; rest="${rest#*:}"
-      local stuck="${rest%%:*}";  local detail="${rest#*:}"
-      if [ "${active:-0}" -gt 0 ]; then
-        ok "Participant provisioning verified: $active fully active, $stuck not"
-        [ "${stuck:-0}" -gt 0 ] && warn "Not active: $detail"
-        return 0
-      fi
-      error "No participant has all VPAs active (${stuck:-0} not active)"
-      [ -n "$detail" ] && error "  $detail"
-      error "Participant provisioning did not complete. See issue #181."
-      exit 1
-      ;;
-    *)
-      error "Could not read participant state from $tm"
-      exit 1
-      ;;
-  esac
-}
-
-# ---------------------------------------------------------------------------
-# Seed and fix IssuerService identity (post-startup)
-# ---------------------------------------------------------------------------
-seed_and_fix() {
-  cd "$PROJECT_DIR"
-
-  log "=== Phase 7: Running JAD seed ==="
-  docker compose $COMPOSE_FILES run --rm jad-seed || {
-    warn "JAD seed may have partially failed — continuing with identity fixup"
-  }
-  ok "JAD seed complete"
-
-  log "=== Phase 8: IssuerService identity fixup ==="
-  log "Applying issuer keypair, DID, and activation records..."
-
-  # Wait for IssuerService tables to be available (Flyway migrations)
-  local max_attempts=10
-  for i in $(seq 1 "$max_attempts"); do
-    if docker exec health-dataspace-postgres psql -U issuer -d issuerservice \
-      -c "SELECT 1 FROM participant_context LIMIT 1" > /dev/null 2>&1; then
-      break
-    fi
-    if [ "$i" -eq "$max_attempts" ]; then
-      error "IssuerService DB not ready after $max_attempts attempts"
-      return 1
-    fi
-    sleep 3
-  done
-
-  docker exec -i health-dataspace-postgres psql -U issuer -d issuerservice \
-    < "$PROJECT_DIR/jad/seed-issuer-identity.sql" && \
-    ok "IssuerService identity fixup applied" || \
-    error "IssuerService identity fixup failed"
-
-  # Restart IssuerService to pick up the new identity records
-  log "Restarting IssuerService to activate identity..."
-  docker restart health-dataspace-issuerservice
-  sleep 5
-  wait_for_service "IssuerService" "http://localhost:10013/api/check/readiness" 15 3 || \
-    wait_for_service "IssuerService (direct)" "http://localhost:10013/api/version" 15 3 || true
-  ok "IssuerService restarted with identity records"
-
-  # Verify DID document is served
-  if docker exec health-dataspace-issuerservice \
-    wget -qO- "http://localhost:10016/issuer/did.json" 2>/dev/null | grep -q "verificationMethod"; then
-    ok "IssuerService DID document verified ✓"
+  log "Verifying the participant contexts on the control plane ..."
+  local token count
+  token=$(curl -s --max-time 20 -X POST "http://localhost:8080/realms/edcv/protocol/openid-connect/token" \
+    -d "grant_type=client_credentials&client_id=admin&client_secret=edc-v-admin-secret" 2>/dev/null \
+    | python3 -c "import json,sys; print(json.load(sys.stdin).get('access_token',''))" 2>/dev/null || true)
+  [ -n "$token" ] || { error "no admin token from the local Keycloak"; exit 1; }
+  count=$(curl -s --max-time 20 -H "Authorization: Bearer $token" \
+    "http://localhost:11003/api/mgmt/v5/participants" 2>/dev/null \
+    | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d) if isinstance(d, list) else 0)" 2>/dev/null || echo 0)
+  if [ "${count:-0}" -ge 5 ]; then
+    ok "$count participant contexts on the control plane"
   else
-    warn "DID document not yet available — may need manual verification"
-  fi
-
-  log "=== Phase 8b: Seeding IssuerService credential definitions ==="
-  if [ -f "$PROJECT_DIR/jad/seed-issuer-defs.sh" ]; then
-    bash "$PROJECT_DIR/jad/seed-issuer-defs.sh" && \
-      ok "IssuerService attestation + credential definitions seeded" || \
-      warn "IssuerService definition seeding had warnings — check output above"
-  else
-    warn "jad/seed-issuer-defs.sh not found — skipping credential definitions"
+    error "only ${count:-0} participant contexts on the control plane, five expected"
+    exit 1
   fi
 }
 
@@ -477,7 +407,7 @@ seed_and_fix() {
 seed_dataspace() {
   cd "$PROJECT_DIR"
 
-  log "=== Phase 9: Seeding dataspace (tenants, credentials, policies, assets, negotiations) ==="
+  log "=== Phase 7: Seeding the dataspace (participants and credentials, policies, assets, negotiations) ==="
 
   if [ ! -f "$PROJECT_DIR/jad/seed-all.sh" ]; then
     error "jad/seed-all.sh not found, cannot seed the dataspace"
@@ -499,7 +429,7 @@ seed_dataspace() {
   # MembershipCredential, and Institut de Recherche Santé's membership from it.
   # The rest of the stack does not need it, so a failure is a warning; the
   # identity checks (TRUST-6.2) then say what is missing.
-  log "=== Phase 9b: Simpl test Governance Authority (#710) ==="
+  log "=== Phase 7b: Simpl test Governance Authority (#710) ==="
   if bash "$PROJECT_DIR/scripts/seed-simpl-ga.sh"; then
     ok "irs holds its membership from the Simpl test Governance Authority"
   else
@@ -524,13 +454,9 @@ show_status() {
   echo "  Vault UI:            http://localhost:8200      (token: root)"
   echo "  NATS Monitor:        http://localhost:8222"
   echo "  Control Plane Mgmt:  http://localhost:11003"
-  echo "  Data Plane FHIR:     http://localhost:11002"
-  echo "  Data Plane OMOP:     http://localhost:11012"
   echo "  Neo4j Query Proxy:   http://localhost:9090"
   echo "  Identity Hub:        http://localhost:11005"
   echo "  Issuer Service:      http://localhost:10013"
-  echo "  Tenant Manager:      http://localhost:11006"
-  echo "  Provision Manager:   http://localhost:11007"
   echo ""
 
   # The *.localhost names stayed dead for months (#190): Traefik v3.4 asked
@@ -542,7 +468,7 @@ show_status() {
   # issue are both about.
   local traefik_code
   traefik_code=$(curl -s --max-time 3 -o /dev/null -w '%{http_code}' \
-    -H 'Host: keycloak.localhost' http://localhost:80 2>/dev/null || echo 000)
+    -H 'Host: keycloak.localhost' http://localhost:80 2>/dev/null) || traefik_code=000
   if [ "$traefik_code" = "200" ]; then
     echo "  Traefik *.localhost routing is live (keycloak.localhost, cp.localhost, ...)"
     echo ""
@@ -586,9 +512,8 @@ main() {
       pull_images
       ;;
     --seed)
-      seed_and_fix
       seed_dataspace
-      ok "Seed and identity fixup complete"
+      ok "Dataspace seeded"
       ;;
     --ui-only)
       log "Rebuilding and restarting UI only (no infrastructure teardown)..."
@@ -604,7 +529,7 @@ main() {
       echo "  --reset     Stop all services and remove volumes"
       echo "  --status    Show service status and endpoints"
       echo "  --pull      Pull latest images"
-      echo "  --seed      Re-run JAD seed, identity fixup, and dataspace seeding"
+      echo "  --seed      Re-run the dataspace seed (jad/seed-all.sh)"
       echo "  --ui-only   Rebuild and restart the UI container only (fast, no downtime for infra)"
       echo "  --help      Show this help"
       ;;
@@ -612,7 +537,6 @@ main() {
       preflight
       pull_images
       start_stack
-      seed_and_fix
       seed_dataspace
       show_status
       ok "JAD stack is ready! 🚀"

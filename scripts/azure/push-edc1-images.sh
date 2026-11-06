@@ -10,7 +10,7 @@
 # tagged mvhd-edc-<runtime>:<EDC_VERSION>-<12 characters of the last commit
 # that changed runtimes/edc>, the tag migrate-edc-to-v1.sh takes as EDC1_TAG,
 # so a tag names its source. siglet 0.1.6 is not built here: 17-siglet.sh
-# imports it by the digest docker-compose.edc1.yml pins.
+# imports it by the digest docker-compose.jad.yml pins.
 #
 # `push` changes no running app: a Container App moves only when its revision
 # names the new tag (migrate-edc-to-v1.sh). It still writes to ACR, so it runs

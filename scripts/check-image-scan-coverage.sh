@@ -7,8 +7,9 @@
 # compose that is not bumped in the workflow means the scan silently keeps
 # checking the OLD image and reports green.
 #
-# Images built from this repository (ghcr.io/ma3u/*) are excluded — they are
-# covered by the source SBOM scan, not the image matrix.
+# Images built from this repository (ghcr.io/ma3u/*, and the EDC launchers
+# mvhd/* from runtimes/edc) are excluded: they are covered by the source scan,
+# not the image matrix.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -26,7 +27,7 @@ while IFS= read -r img; do
   # Skip images built from this repo, and digest-pinned third-party builds
   # (a digest pin cannot drift by definition).
   case "$img" in
-    ghcr.io/ma3u/* | *@sha256:*) continue ;;
+    ghcr.io/ma3u/* | mvhd/* | *@sha256:*) continue ;;
   esac
   if ! grep -qF -- "$img" "$WORKFLOW"; then
     echo "NOT SCANNED: $img"

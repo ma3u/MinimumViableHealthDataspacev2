@@ -93,6 +93,52 @@ jobs:
           esac
 
   # -----------------------------------------------------------------------
+  # The EDC 1.0 launchers (#881, ADR-076, ADR-078)
+  # -----------------------------------------------------------------------
+  # docker-compose.jad.yml runs the control plane, IdentityHub and the
+  # IssuerServices on the launchers built from runtimes/edc, which no registry
+  # holds. Each is built once per run here and handed to the four suite jobs
+  # as an image archive, so no suite job runs Gradle. No layer cache: this runs
+  # once a night, and a cache of the Gradle stage would take a gigabyte of the
+  # ten the npm caches need (#847).
+  edc-images:
+    name: EDC 1.0 launcher (${{ matrix.runtime }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - runtime: controlplane
+            image: mvhd/edc-controlplane:1.0.0-RC5
+          - runtime: identity-hub
+            image: mvhd/edc-identity-hub:1.0.0-RC5
+          - runtime: issuerservice
+            image: mvhd/edc-issuerservice:1.0.0-RC5
+    steps:
+      - uses: actions/checkout@v7
+
+      # The tag docker-compose.jad.yml names; a mismatch would make compose try
+      # to build again in every suite job.
+      - name: The image docker-compose.jad.yml expects
+        run: |
+          grep -qF "image: ${{ matrix.image }}" docker-compose.jad.yml
+
+      - name: Build
+        run: |
+          docker build --build-arg RUNTIME=${{ matrix.runtime }} --build-arg EDC_VERSION=1.0.0-RC5 \
+            --build-arg SOURCE_REVISION=${{ github.sha }} -t ${{ matrix.image }} runtimes/edc
+          docker save ${{ matrix.image }} | gzip -1 > edc-${{ matrix.runtime }}.tar.gz
+          ls -lh edc-${{ matrix.runtime }}.tar.gz
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: edc-image-${{ matrix.runtime }}
+          path: edc-${{ matrix.runtime }}.tar.gz
+          retention-days: 1
+
+  # -----------------------------------------------------------------------
   # DSP 2025-1 Technology Compatibility Kit
   # -----------------------------------------------------------------------
   dsp-tck:
@@ -101,9 +147,20 @@ jobs:
     # 25, not 15: the identity layer seed (#710) adds the issuer restart and
     # credential issuance, about five minutes on a standard runner.
     timeout-minutes: 25
+    needs: [edc-images]
     if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
       - uses: actions/checkout@v7
+
+      - name: Download the EDC 1.0 launcher images
+        uses: actions/download-artifact@v8
+        with:
+          pattern: edc-image-*
+          path: edc-images
+          merge-multiple: true
+
+      - name: Load them
+        run: for f in edc-images/*.tar.gz; do gunzip -c "$f" | docker load; done
 
       - name: Login to GHCR
         uses: docker/login-action@v4
@@ -216,9 +273,20 @@ jobs:
     # 25, not 15: with a DSP path TRUST-6.4 starts a third IssuerService and
     # waits for its credential (#710); the job used 11 minutes without it.
     timeout-minutes: 25
+    needs: [edc-images]
     if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
       - uses: actions/checkout@v7
+
+      - name: Download the EDC 1.0 launcher images
+        uses: actions/download-artifact@v8
+        with:
+          pattern: edc-image-*
+          path: edc-images
+          merge-multiple: true
+
+      - name: Load them
+        run: for f in edc-images/*.tar.gz; do gunzip -c "$f" | docker load; done
 
       - name: Login to GHCR
         uses: docker/login-action@v4
@@ -420,9 +488,20 @@ jobs:
     name: EHDS Health Domain
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    needs: [edc-images]
     if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
       - uses: actions/checkout@v7
+
+      - name: Download the EDC 1.0 launcher images
+        uses: actions/download-artifact@v8
+        with:
+          pattern: edc-image-*
+          path: edc-images
+          merge-multiple: true
+
+      - name: Load them
+        run: for f in edc-images/*.tar.gz; do gunzip -c "$f" | docker load; done
 
       - name: Login to GHCR
         uses: docker/login-action@v4
@@ -571,9 +650,20 @@ jobs:
     name: EHDS API Collection (Bruno)
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    needs: [edc-images]
     if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
     steps:
       - uses: actions/checkout@v7
+
+      - name: Download the EDC 1.0 launcher images
+        uses: actions/download-artifact@v8
+        with:
+          pattern: edc-image-*
+          path: edc-images
+          merge-multiple: true
+
+      - name: Load them
+        run: for f in edc-images/*.tar.gz; do gunzip -c "$f" | docker load; done
 
       - uses: actions/setup-node@v4
         with:
@@ -665,13 +755,27 @@ jobs:
           EDC_ISSUER_URL=http://localhost:10013/api/admin \
             bash scripts/seed-identity-layer.sh
 
+      # EDC 1.0 runs the whole DSP flow here (#881): with the identity layer
+      # seeded, a provider's catalogue comes from its connector, so it needs
+      # assets, and siglet needs each context registered as its data plane. On
+      # 0.18 the catalogue request failed and the hub fell back to its demo
+      # catalogue, which is what 03/16 and 03/17 passed on. Same seed as Azure's
+      # edc-seed-data-assets.yml: the standard policies (ADR-077), assets,
+      # contract definitions, data planes.
+      - name: Seed the data assets (ADR-077)
+        run: |
+          CP_HOST=http://localhost:11003 KC_HOST=http://localhost:8080 \
+            bash jad/seed-data-assets.sh
+
       # The suite step reports either way; the baseline gate in compliance-report
-      # is the assertion (ADR-031).
+      # is the assertion (ADR-031). BRUNO_DSP_LIVE=1 runs 03 Data User 15 to 26
+      # end to end, as on Azure: catalogue, negotiation, transfer, the data.
       - name: Run the Bruno API collection
         continue-on-error: true
         run: |
           BRUNO_REPORT_DIR=${{ env.REPORT_DIR }}/bruno \
           BRUNO_UI_CONTAINER=health-dataspace-ui \
+          BRUNO_DSP_LIVE=1 \
             ./scripts/run-api-tests.sh Local
 
       - name: Upload Bruno results

@@ -34,7 +34,7 @@ NEO4J_USER="${NEO4J_USER:-neo4j}"
 NEO4J_PASS="${NEO4J_PASS:-healthdataspace}"
 PG_CONTAINER="health-dataspace-postgres"
 PG_USER="cp"
-PG_DB="${PG_DB:-controlplane}"  # controlplane_v1 with docker-compose.edc1.yml
+PG_DB="${PG_DB:-controlplane_v1}"  # EDC 1.0's database (#881)
 
 # ANSI colours
 GREEN='\033[0;32m'

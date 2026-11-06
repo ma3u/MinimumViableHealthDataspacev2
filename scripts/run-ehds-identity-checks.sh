@@ -34,8 +34,8 @@ MGMT_V="${EDC_MGMT_API_VERSION:-v5}"
 IDENTITY_API="${EDC_IDENTITY_URL:-http://localhost:11005/api/identity}"
 ISSUER_API="${EDC_ISSUER_URL:-http://localhost:10013/api/admin}"
 MGMT_API="${EDC_MANAGEMENT_URL:-http://localhost:11003/api/mgmt}"
-# The IdentityHub database the trust checks read (identityhub_v1 with docker-compose.edc1.yml, #881).
-IH_DB="${IH_DB:-identityhub}"
+# The IdentityHub database the trust checks read: identityhub_v1 on EDC 1.0 (#881).
+IH_DB="${IH_DB:-identityhub_v1}"
 KEYCLOAK_URL="${KEYCLOAK_URL:-http://keycloak:8080}"
 REALM="${KEYCLOAK_REALM:-edcv}"
 CLIENT_ID="${EDC_CLIENT_ID:-admin}"

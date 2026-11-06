@@ -228,7 +228,7 @@ async function apiRequest<T = unknown>(
  * Measured with a bearer token, not assumed:
  *
  *   EDC 0.18 (Azure until the 1.0 cutover)   /v5beta   200
- *   EDC 1.0.0-RC5 (docker-compose.edc1.yml)  /v5       200, /v5beta 404
+ *   EDC 1.0.0-RC5 (docker-compose.jad.yml)   /v5       200, /v5beta 404
  *
  * A wrong segment is a 404 that GET /api/participants once turned into
  * bundled mock data (#317), so every deployment sets the variable explicitly;

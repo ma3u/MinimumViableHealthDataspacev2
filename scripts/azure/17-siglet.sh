@@ -44,11 +44,11 @@ DB="${SIGLET_DB:-siglet}"
 SECRET_NAME="pg-password"
 IDENTITY_NAME="${SIGLET_IDENTITY:-id-mvhd-claude-federation}"
 
-# EDC 1.0 (#881): SIGLET_COMPOSE=docker-compose.edc1.yml pins 0.1.6, and
-# SIGLET_TOML=jad/siglet-edc1.toml points the pull transfers at the proxy;
-# migrate-edc-to-v1.sh sets both, and SIGLET_DB for a fresh database.
+# EDC 1.0 (#881): docker-compose.jad.yml pins 0.1.6, and jad/siglet-edc1.toml
+# points the pull transfers at the proxy. migrate-edc-to-v1.sh sets SIGLET_DB
+# for a fresh database and the proxy's address as the pull endpoint.
 SIGLET_COMPOSE="${SIGLET_COMPOSE:-docker-compose.jad.yml}"
-SIGLET_TOML="${SIGLET_TOML:-jad/siglet.toml}"
+SIGLET_TOML="${SIGLET_TOML:-jad/siglet-edc1.toml}"
 SRC=$(grep -oE 'ghcr.io/eclipse-dataplane-core/dsdk-facet-rs/siglet:[a-z0-9.-]+@sha256:[0-9a-f]{64}' \
   "${REPO_ROOT}/${SIGLET_COMPOSE}" | head -1)
 [ -n "$SRC" ] || { err "no pinned siglet image in ${SIGLET_COMPOSE}"; exit 1; }

@@ -6,7 +6,9 @@
 # dataspace with tenants, credentials, policies, assets, and negotiations.
 #
 # Execution order:
-#   1. seed-health-tenants.sh   — Create 5 tenants via CFM TenantManager
+#   1. ../scripts/seed-identity-layer.sh: the five participants on EDC 1.0
+#      (control plane contexts, IdentityHub, the issuer's identity, holders, a
+#      MembershipCredential each; ADR-078). CFM's seed-health-tenants.sh is 0.18.
 #   2. seed-ehds-credentials.sh — Register EHDS credential types on IssuerService
 #   3. seed-ehds-policies.sh    — Create ODRL policies for all participants
 #   4. seed-data-assets.sh      — Register data assets + contracts on EDC-V
@@ -21,8 +23,6 @@
 #
 # Prerequisites:
 #   - JAD stack running (bootstrap-jad.sh or docker compose up)
-#   - jad-seed container completed (creates initial tenants + VPAs)
-#   - IssuerService identity fixup applied (seed-issuer-identity.sql)
 # =============================================================================
 set -uo pipefail
 
@@ -147,7 +147,7 @@ echo "╔═══════════════════════�
 echo "║   Health Dataspace v2 — Full Seed Pipeline                 ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 
-run_step 1 "Health-Specific Tenants (CFM)"            "seed-health-tenants.sh"
+run_step 1 "Participants and their identity (EDC 1.0)" "../scripts/seed-identity-layer.sh"
 run_step 2 "EHDS Credential Types (IssuerService)"    "seed-ehds-credentials.sh"
 run_step 3 "EHDS ODRL Policies (EDC-V)"               "seed-ehds-policies.sh"
 run_step 4 "Data Assets & Contracts (EDC-V)"           "seed-data-assets.sh"

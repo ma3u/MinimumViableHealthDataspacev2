@@ -68,7 +68,7 @@ need_tag() {
 
 # The settings per service, as KEY=VALUE lines. A line starting with -D goes
 # into JAVA_TOOL_OPTIONS; UNSET=<name> removes that variable. Values from
-# docker-compose.jad.yml and docker-compose.edc1.yml, the stack the suites
+# docker-compose.jad.yml, the stack the suites
 # passed on locally (#881).
 settings() {
   case "$1" in
@@ -197,7 +197,7 @@ cmd_diff() {
   dir=$(mktemp -d)
   cfg="${dir}/compose.json"
   (cd "${SCRIPT_DIR}/../.." && docker compose -p mvhd-settings-diff \
-    -f docker-compose.yml -f docker-compose.jad.yml -f docker-compose.edc1.yml \
+    -f docker-compose.yml -f docker-compose.jad.yml \
     config --format json) > "$cfg" 2>/dev/null \
     || { rm -rf "$dir"; err "docker compose config failed; run it from a checkout with Docker"; exit 1; }
   for short in controlplane identityhub issuerservice siglet; do
@@ -306,8 +306,7 @@ cmd_siglet() {
   # proxy's /dataspace/data, which checks siglet's token (ADR-078 decision 5).
   [ -f "${BACKUP_DIR}/latest/siglet.yaml" ] || { err "no backup of siglet; run '$0 backup' first"; exit 1; }
   proxy_url
-  SIGLET_COMPOSE=docker-compose.edc1.yml SIGLET_TOML=jad/siglet-edc1.toml \
-    SIGLET_DB=siglet_v1 SIGLET_PULL_ENDPOINT="${NEO4J_PROXY_URL}/dataspace/data" \
+  SIGLET_DB=siglet_v1 SIGLET_PULL_ENDPOINT="${NEO4J_PROXY_URL}/dataspace/data" \
     "${SCRIPT_DIR}/17-siglet.sh"
 }
 
