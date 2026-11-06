@@ -68,7 +68,7 @@ Every step names its gate. A failed gate stops the run; the next step does not s
 
 **7. Seeds.** Three runs, each after the one before it has succeeded. The workflows run from `main`, so step 6 comes first.
 
-1. `scripts/azure/seed-issuer-identity-azure.sh seed`, then `verify` (job `mvhd-issuer-identity`): the issuer's key, context and credential definitions on `issuerservice_v1`. Gate: the issuer's DID resolves.
+1. `scripts/azure/seed-issuer-identity-azure.sh seed`, then `verify` (job `mvhd-issuer-identity`): the issuer's key, context and credential definitions on `issuerservice_v1`. Gate: the issuer's DID resolves. `EDC_LINE=v1` is the default and applies no activation SQL: 1.0 activates the context through the identity API (state 200), and the 0.18 SQL would set it to 300. `EDC_LINE=v018` is for a rollback.
 2. `edc-reseed-identity-layer.yml`, `plan` then `apply`: the five demo participants with `did:web:mvhd-identityhub%3A7083:<slug>`, through the compose sequence (contexts, IdentityHub records, context config with the DSP profile link, STS secrets, holders, a MembershipCredential each). Gate: the job ends with "OK: the five demo participants carry ... DIDs and hold a credential".
 3. `edc-seed-data-assets.yml`, `plan` then `apply`: the standard policies (ADR-077), assets, contract definitions and each context's siglet data plane. Gate: `plan` afterwards lists assets and contract definitions for every context.
 
@@ -76,17 +76,22 @@ Negotiations and the federated catalogue have no Azure seed, as on 0.18: Bruno's
 
 **8. Re-onboard and check.**
 
-- Onboard the former CFM participants through the hub's onboarding page.
+- Onboard the former CFM participants through the hub's onboarding page. On 2026-11-06 CFM held six tenants; two were working participants and were onboarded again (Ostsee Klinikum Rostock, Stadtkrankenhaus Lichtenberg: 201, seven steps, a MembershipCredential each). The other four had no DID on Azure: failed test registrations, as #574 removed.
 - Run the compliance ACA job (`target=azure`) at the Azure floors.
 - Run the hub's own paths, which the #876 work put on `main`:
   - `/api/participants` lists the contexts. They stay `CREATED` on 1.0, and the route falls back to them (#878, #891).
   - `/api/negotiations` sends the offer's policy whole, to the server's DSP address. A stale context id answers 409.
   - `/api/agreements/{id}` gives the period and the policy for Details.
 - Run Bruno `Azure-Dev` `03 Data User` 15 to 22 with the live DSP flow (`dspLiveFlow`, on for Azure-Dev): catalogue, FINALIZED, STARTED, data, agreement.
-  - Drop the skip on 21, the certificate-demo 404, once the proxy serves the data.
+  - The skip on 21, the certificate-demo 404, is gone: the proxy serves the data (2026-11-06).
   - 23 to 26, the SPE import, count on Azure only while the chosen workspace runs (Matthias, 2026-11-06: the import is accepted as a demo for now). A 503 because the workspace is stopped or starting is expected, not a failure. The workspaces start on demand (ADR-072) and keep their store in tmpfs, so an import is lost when the workspace stops; that is accepted. The attested path (a sealed extract loaded after the Trustee releases the key, ADR-068) is a separate issue.
 - Run Playwright J1090 and J1091 (`journeys/53`) in Demo Smoke.
 - Run one transfer whose data opens, and one new onboarding from the UI.
+
+What the first cutover (2026-11-06) found after the seeds, both fixed in the scripts:
+
+- **Every DSP request between participants answered 401.** Azure's control plane still carried `edc.iam.trusted-issuer.*`: #754 moved the scripts to `edc.iam.trustedissuer` but never redeployed the app, and 0.18 kept reading the deprecated key. 1.0 reads only `trustedissuer`, so it trusted no issuer. `migrate-edc-to-v1.sh` now renames the key. Seen as Bruno 03/16 and the DSP suite's CAT-1.1 to 1.3; 1.0 logs nothing about why.
+- **Every transfer ended TERMINATED** with "Refresh endpoint rejected by policy: scheme must be https". siglet's running revision had mounted the 0.18 `siglet.toml`, without `[token.refresh_endpoint_policy] allow_http`: `17-siglet.sh` wrote the new file after starting the revision, and the update that followed started none. The script now restarts the revision after it writes the file.
 
 ## Rollback
 
