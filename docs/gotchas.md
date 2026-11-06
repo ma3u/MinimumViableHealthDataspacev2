@@ -3,6 +3,42 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-06: the compose stack is EDC 1.0, and an old volume lacks its databases
+
+`docker-compose.jad.yml` runs the EDC 1.0 launchers (`mvhd/edc-*:1.0.0-RC5`,
+built from `runtimes/edc` by `docker compose up` when missing) on their own
+`*_v1` databases, and siglet 0.1.6 as the data plane (#881). A fresh
+`postgres_data` volume gets the databases from `jad/init-postgres-edc1.sql`; a
+volume created before that does not, and the control plane then fails at boot
+with `database "controlplane_v1" does not exist`. Run the file once:
+
+    docker exec -i health-dataspace-postgres psql -U cp -d controlplane < jad/init-postgres-edc1.sql
+
+The CFM managers and agents and JAD's two data planes are 0.18 only and sit
+behind the `edc018` profile until #927 removes them; the 2026-03 CFM agents
+call APIs 1.0 no longer has. The 0.18 databases stay as they were.
+
+## 2026-11-06: EDC 1.0 ignores `edc.iam.trusted-issuer`, and says nothing
+
+After the Azure cutover every DSP request between two participants answered
+401, with nothing in the control plane's log. Azure's control plane still
+carried `edc.iam.trusted-issuer.issuer.*`: #754 had moved compose and the
+scripts to `edc.iam.trustedissuer`, but the app was never redeployed, and 0.18
+kept reading the old key with a deprecation warning. 1.0 reads only
+`trustedissuer`, so it trusted no issuer and refused every credential. A green
+local gate cannot see this; `scripts/azure/migrate-edc-to-v1.sh diff` compares
+the setting names on Azure with compose and names the old key.
+
+## 2026-11-06: a Container App reads a secret volume only when its revision starts
+
+siglet ended every transfer TERMINATED on Azure ("Refresh endpoint rejected by
+policy: scheme must be https") although the `siglet-toml` secret held the file
+with `allow_http = true`. `17-siglet.sh` started the new revision, then wrote
+the secret, then sent an update whose template had not changed, which starts
+no revision. The running replica kept the file it had mounted at start, the
+0.18 one. Restart the revision after changing a secret it mounts; the script
+does now.
+
 ## 2026-11-06: ARM answers an ACI start only after 15 to 40 s
 
 `POST .../containerGroups/{name}/start` returns its 202 only once the Container

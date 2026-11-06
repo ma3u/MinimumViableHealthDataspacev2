@@ -1,4 +1,4 @@
-# siglet as the data plane on EDC 1.0 (#881, docker-compose.edc1.yml).
+# siglet as the data plane on EDC 1.0 (#881, docker-compose.jad.yml).
 #
 # On 0.18 a pull transfer's endpoint was the JAD data plane. EDC 1.0 ships no
 # data plane: siglet answers the control plane's Data Plane Signaling and

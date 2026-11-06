@@ -5,22 +5,25 @@ from released `org.eclipse.edc` modules. The EDC version is set once, in
 `gradle/libs.versions.toml`.
 
 ```bash
-docker build --build-arg RUNTIME=controlplane  --build-arg EDC_VERSION=1.0.0-RC5 -t mvhd/edc-controlplane:1.0.0-RC5-local  runtimes/edc
-docker build --build-arg RUNTIME=identity-hub  --build-arg EDC_VERSION=1.0.0-RC5 -t mvhd/edc-identity-hub:1.0.0-RC5-local  runtimes/edc
-docker build --build-arg RUNTIME=issuerservice --build-arg EDC_VERSION=1.0.0-RC5 -t mvhd/edc-issuerservice:1.0.0-RC5-local runtimes/edc
+docker compose -f docker-compose.yml -f docker-compose.jad.yml build controlplane identityhub issuerservice
 ```
 
-The build runs inside the Gradle image, so no local JDK or Gradle is needed.
+`docker-compose.jad.yml` names them `mvhd/edc-<runtime>:1.0.0-RC5` with a
+`build:` section, so `docker compose up` builds them when they are missing. The
+build runs inside the Gradle image, so no local JDK or Gradle is needed. CI
+builds them once per run (`compliance.yml`, job `edc-images`).
 
-## Running them in the compose stack (spike, #881)
+## Running them in the compose stack (#881)
 
-`docker-compose.edc1.yml` swaps the five EDC containers to these images, each on
-a fresh `*_v1` database (`jad/init-postgres-edc1.sql`, applied once). Without
-the overlay the stack is 0.18 again. Back up the `vault_data` and
-`postgres_data` volumes first: seeding writes keys to Vault.
+`docker-compose.jad.yml` runs the five EDC containers on these images, each on
+its own `*_v1` database. A fresh `postgres_data` volume gets them from
+`jad/init-postgres-edc1.sql`; on an existing volume, run that file once with
+psql as `cp`. The 0.18 services (the CFM managers and agents, the JAD data
+planes) are behind the `edc018` profile until #927 removes them. Back up the
+`vault_data` and `postgres_data` volumes before switching an existing stack:
+seeding writes keys to Vault.
 
-What the 1.0 stack needs beyond the image swap, found in the spike and still
-to move into the seeds and the realm file:
+What the 1.0 stack needs beyond the image swap, found in the spike:
 
 - Keycloak: the operator clients (`admin`, `provisioner`) need the scopes
   `management-api:admin`, `identity-api:admin` and `issuer-admin-api:admin`.
