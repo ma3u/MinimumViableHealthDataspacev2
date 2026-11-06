@@ -4,9 +4,7 @@ Desk research on public sources, to decide whether the hub can join
 Simpl-Live wave 1, and where else to look for a consortium. Every fact carries its source;
 **[I]** marks an inference, everything else is stated by the source. Real organisations and
 people appear here because this is partner research; the fictional-organisation policy
-still applies to demo data and the site. No tender material and nothing from
-`docs/sphin-x/` is used. Sibling note (local, not in the repo): EHDS tenders and
-cooperation partners, 2026-10-09.
+still applies to demo data and the site.
 
 ## Answer in six lines
 
