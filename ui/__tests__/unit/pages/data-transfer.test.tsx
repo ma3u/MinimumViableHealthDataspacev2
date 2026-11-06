@@ -460,6 +460,36 @@ describe("DataTransferPage", () => {
       await screen.findByText(/Fhir Patient Bundle: Network error/);
     });
 
+    it("says why the data permit gate refused a transfer", async () => {
+      mockFetchApi.mockImplementation((url: string, init?: RequestInit) => {
+        if (url === "/api/transfers" && init?.method === "POST") {
+          return mockResponse(
+            {
+              error: "No data permit covers this transfer",
+              reason:
+                "Data permit permit-app-pharmaco-1 expired on 2026-11-01.",
+              article: "Regulation (EU) 2025/327, Art. 61(1) and Art. 68",
+            },
+            false,
+          );
+        }
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) return mockResponse([]);
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse([NEGOTIATIONS_FINALIZED[0]]);
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+      const rows = await rowsOf();
+
+      await user.click(within(rows[0]).getByTestId("start-transfer"));
+      await screen.findByText(
+        /No data permit covers this transfer: Data permit permit-app-pharmaco-1 expired on 2026-11-01\./,
+      );
+    });
+
     it("keeps a contract's transfers under Details, with their pipeline", async () => {
       setupDefaultMocks({
         transfers: [TRANSFERS[0], TRANSFER_REQUESTED, TRANSFER_TERMINATED],

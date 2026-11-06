@@ -155,11 +155,41 @@ async function isFixtureAgreement(contractId: string): Promise<boolean> {
 }
 
 /**
+ * The graph DID of a participant context, from the identity the connector
+ * holds for it ("did:web:identityhub%3A7083:pharmaco" is PharmaCo's). Null
+ * when the connector does not answer, has no such context, or names a
+ * participant the graph does not know.
+ */
+async function participantContextDid(
+  participantId: string,
+): Promise<string | null> {
+  try {
+    const contexts = await edcClient.management<
+      { "@id"?: string; identity?: string; participantId?: string }[]
+    >("/v5alpha/participants");
+    const ctx = Array.isArray(contexts)
+      ? contexts.find((c) => c["@id"] === participantId)
+      : undefined;
+    const identity = ctx?.identity ?? ctx?.participantId;
+    if (!identity) return null;
+    // The host differs per deployment; the slug at the end names the
+    // participant on all of them.
+    const slug = decodeURIComponent(identity).split(":").pop() ?? "";
+    return didFromCounterParty(slug) ?? didFromCounterParty(identity);
+  } catch {
+    return null;
+  }
+}
+
+/**
  * The consumer a transfer serves, whose data permit the gate checks. A data
  * user transfers for itself. A data holder transfers for the counterparty of
- * the agreement, which the demo records and the fixtures name. A caller may
- * also name the consumer outright. Null when none of that resolves, and the
- * gate then refuses, because a permit cannot be verified for nobody.
+ * the agreement, which the demo records and the fixtures name. On a connector
+ * agreement the participant context that starts the transfer is the consumer,
+ * whoever is signed in: an operator acting as PharmaCo transfers under
+ * PharmaCo's permit, not under the one its login maps to. A caller may also
+ * name the consumer outright. Null when none of that resolves, and the gate
+ * then refuses, because a permit cannot be verified for nobody.
  */
 async function consumerForTransfer(
   session: AuthSession | undefined,
@@ -200,6 +230,10 @@ async function consumerForTransfer(
     const did = didFromCounterParty(
       agreement.counterPartyId as string | undefined,
     );
+    if (did) return did;
+  } else if (!isInventedContractId(contractId)) {
+    // A minted contract never reached a connector, so it is not asked.
+    const did = await participantContextDid(participantId);
     if (did) return did;
   }
   // A test session's did:web:ci.test:<persona> is kept: the transfer then
