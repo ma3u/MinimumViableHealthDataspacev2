@@ -21,9 +21,10 @@ body:json {
 
 assert {
   res.status: eq 400
-  res.body.error: contains counterPartyAddress
+  res.body.error: contains participantId
 }
 
 docs {
   A real negotiation needs an offer id from the provider's catalogue, which folder 10 shows is not reachable yet (#345).
+  Since #876 the hub finds the provider's address from `providerDid`, so an empty body is refused for the missing `participantId` and `assetId`, not for `counterPartyAddress`.
 }

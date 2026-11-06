@@ -230,6 +230,14 @@ if sorted(got or []) != [8081, 8082, 8083]:
     sys.exit(f"ports not exposed after the update: {got}")
 print("ports 8080 (ingress), 8081, 8082, 8083 (internal)")
 PY
+# A revision reads its secret volume when it starts. Step 3 starts the new
+# revision before 3b writes siglet-toml, and when the volume was already there
+# 3b's update changes nothing and starts none: on 2026-11-06 the 1.0 siglet
+# ran the 0.18 file, without allow_http, and every transfer ended TERMINATED
+# with "Refresh endpoint rejected by policy". So restart it here.
+rev=$(az containerapp show --name "$SIGLET_APP" --resource-group "$RG" --query properties.latestRevisionName -o tsv)
+az containerapp revision restart --name "$SIGLET_APP" --resource-group "$RG" --revision "$rev" -o none
+log "restarted ${rev} so it reads the current siglet.toml"
 # ── 4. Healthy, and the key set answers ─────────────────────────────────────
 rev=$(az containerapp show --name "$SIGLET_APP" --resource-group "$RG" --query properties.latestRevisionName -o tsv)
 for _ in $(seq 1 40); do
