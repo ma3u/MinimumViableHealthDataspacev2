@@ -586,6 +586,59 @@ describe("DataTransferPage", () => {
       expect(within(fhir).getByTestId("start-transfer")).toBeTruthy();
     });
 
+    it("shows a transfer closed after its import as done, in the SPE", async () => {
+      const closed = {
+        "@id": "tp-closed",
+        state: "TERMINATED",
+        assetId: "fhir-patient-bundle",
+        contractId: "agr-001",
+        source: "controlplane",
+        stateTimestamp: 1793966000000,
+        errorDetail: "Closed after import into SPE-1",
+      };
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers?")) return mockResponse([closed]);
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse([NEGOTIATIONS_FINALIZED[0]]);
+        }
+        if (url.startsWith("/api/spe-imports?ids=tp-closed")) {
+          return mockResponse({
+            imports: [
+              {
+                datasetId: "tp-closed",
+                speId: "SPE-1",
+                records: 203,
+                importedAt: "2026-11-06T12:46:00.000Z",
+              },
+            ],
+          });
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+      const rows = await rowsOf();
+
+      await waitFor(() => expect(stageOf(rows[0])).toBe("In an SPE"));
+      expect(rows[0].textContent).not.toMatch(/the last transfer failed/);
+      expect(
+        within(rows[0]).getByTestId("closed-after-import").textContent,
+      ).toMatch(/203 records are in SPE-1\. The transfer is closed/);
+      // A new transfer imports it again.
+      expect(within(rows[0]).getByTestId("start-transfer").textContent).toMatch(
+        /Transfer again/,
+      );
+
+      await user.click(within(rows[0]).getByText("Details"));
+      const pipeline = within(rows[0]).getByTestId(
+        "pipeline-closed-after-import",
+      );
+      expect(pipeline.textContent).toMatch(
+        /REQUESTED.*STARTED.*CLOSED AFTER IMPORT INTO SPE-1/,
+      );
+    });
+
     it("resolves the provider's DID to its name", async () => {
       setupDefaultMocks();
       render(<DataTransferPage />);

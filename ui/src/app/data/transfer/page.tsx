@@ -7,6 +7,7 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ArrowRightLeft,
+  Box,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
@@ -25,7 +26,11 @@ import PageIntro from "@/components/PageIntro";
 import RowSourceBadge from "@/components/RowSourceBadge";
 import TransferDetails from "@/components/TransferDetails";
 import SpeImport from "@/components/SpeImport";
-import type { ExistingImport } from "@/lib/spe-import";
+import {
+  closedAfterImportInto,
+  importViewUrl,
+  type ExistingImport,
+} from "@/lib/spe-import";
 import type { RowSource } from "@/lib/row-provenance";
 import { T, useT } from "@/lib/i18n/translate";
 
@@ -169,7 +174,43 @@ function stateBg(state: DspState) {
 
 /* ── DSP Pipeline Stepper ── */
 
-function DspPipeline({ state }: { state: DspState }) {
+function DspPipeline({
+  state,
+  closedInto = null,
+}: {
+  state: DspState;
+  /** The SPE the hub closed the transfer for, once its data was imported. */
+  closedInto?: string | null;
+}) {
+  const t = useT("research");
+  // Terminated by the hub after the import: requested, started, then closed
+  // with the data in the SPE. Not a failure, so not drawn as one.
+  if (closedInto) {
+    return (
+      <div
+        data-testid="pipeline-closed-after-import"
+        className="flex items-center gap-0.5 w-full"
+      >
+        {["REQUESTED", "STARTED"].map((step) => (
+          <div key={step} className="flex items-center flex-1 min-w-0">
+            <div className="flex flex-col items-center gap-0.5">
+              <CheckCircle2 size={14} className="text-(--role-user-text)" />
+              <span className="text-[10px] text-(--role-user-text) whitespace-nowrap">
+                {step}
+              </span>
+            </div>
+            <div className="flex-1 h-px mx-1 bg-green-700" />
+          </div>
+        ))}
+        <div className="flex flex-col items-center gap-0.5">
+          <CheckCircle2 size={14} className="text-(--role-user-text)" />
+          <span className="text-[10px] text-(--role-user-text) whitespace-nowrap">
+            {t("CLOSED AFTER IMPORT INTO {spe}", { spe: closedInto })}
+          </span>
+        </div>
+      </div>
+    );
+  }
   const current = stateIndex(state);
   const isTerminated =
     state?.toUpperCase().includes("TERMINATED") ||
@@ -278,6 +319,14 @@ function isLiveTransfer(tr: Transfer): boolean {
   return (
     tr.source === "controlplane" &&
     f(tr as Record<string, unknown>, "state").toUpperCase() === "STARTED"
+  );
+}
+
+/** A transfer the hub terminated once its data was in an SPE. */
+function isClosedAfterImport(tr: Transfer): boolean {
+  return (
+    tr.source === "controlplane" &&
+    !!closedAfterImportInto(f(tr as Record<string, unknown>, "errorDetail"))
   );
 }
 
@@ -1004,9 +1053,13 @@ function DataTransferContent() {
     setInitiating(null);
   };
 
-  // The open transfers' imports, for the stage and the import status (#876).
+  // The imports of open transfers and of transfers closed after their import,
+  // for the stage and the import status (#876).
   const liveIds = useMemo(
-    () => transfers.filter(isLiveTransfer).map((tr) => tr["@id"]),
+    () =>
+      transfers
+        .filter((tr) => isLiveTransfer(tr) || isClosedAfterImport(tr))
+        .map((tr) => tr["@id"]),
     [transfers],
   );
   const loadImports = useCallback(async () => {
@@ -1063,6 +1116,9 @@ function DataTransferContent() {
             f(tr as Record<string, unknown>, "state").toUpperCase(),
           );
           const open = trs.find(isLiveTransfer) ?? null;
+          // The latest transfer ended with its import into an SPE.
+          const closedImport =
+            !open && trs[0] && isClosedAfterImport(trs[0]) ? trs[0] : null;
           const started =
             open ??
             trs.find(
@@ -1072,7 +1128,7 @@ function DataTransferContent() {
             ) ??
             null;
           const stage: Stage =
-            open && (imports[open["@id"]]?.length ?? 0) > 0
+            (open && (imports[open["@id"]]?.length ?? 0) > 0) || closedImport
               ? "imported"
               : started
                 ? "ready"
@@ -1109,15 +1165,17 @@ function DataTransferContent() {
             sample: agreement
               ? agreement.source !== "controlplane"
               : trs.every((tr) => tr.source !== "controlplane"),
-            lastFailed: states[0] === "TERMINATED",
+            lastFailed: states[0] === "TERMINATED" && !closedImport,
+            closedImport,
             lastAt: trs[0] ? ts(trs[0]) : 0,
             agreedAt: Number(agreement?.agreedAt) || 0,
-            importedAt: open
-              ? (imports[open["@id"]] ?? [])
-                  .map((i) => i.importedAt)
-                  .sort()
-                  .pop() ?? ""
-              : "",
+            importedAt:
+              open ?? closedImport
+                ? (imports[(open ?? closedImport)!["@id"]] ?? [])
+                    .map((i) => i.importedAt)
+                    .sort()
+                    .pop() ?? ""
+                : "",
           };
         })
         // Newest contract first. A row keeps its place when its stage
@@ -1542,7 +1600,9 @@ function DataTransferContent() {
                         </div>
 
                         {/* The one next action for this stage */}
-                        {(row.stage === "agreed" || row.stage === "done") &&
+                        {(row.stage === "agreed" ||
+                          row.stage === "done" ||
+                          row.closedImport) &&
                           row.agreement &&
                           !row.isProviderSide && (
                             <button
@@ -1557,7 +1617,7 @@ function DataTransferContent() {
                               ) : (
                                 <ArrowRightLeft size={12} />
                               )}
-                              {row.stage === "done"
+                              {row.stage === "done" || row.closedImport
                                 ? t("Transfer again")
                                 : t("Start Transfer")}
                             </button>
@@ -1649,7 +1709,11 @@ function DataTransferContent() {
                           transferId={live["@id"]}
                           participantId={selectedCtx}
                           known={imports[live["@id"]] ?? NO_IMPORTS}
-                          onImported={() => void loadImports()}
+                          onImported={() => {
+                            void loadImports();
+                            // The import closed the transfer: follow it.
+                            void refreshTransfers();
+                          }}
                           onRestart={
                             row.agreement && !row.isProviderSide
                               ? () => void startTransfers([row.id])
@@ -1657,6 +1721,50 @@ function DataTransferContent() {
                           }
                         />
                       )}
+
+                      {row.closedImport &&
+                        (() => {
+                          const closed = row.closedImport;
+                          const spe =
+                            closedAfterImportInto(
+                              f(
+                                closed as Record<string, unknown>,
+                                "errorDetail",
+                              ),
+                            ) ?? "";
+                          const records = (imports[closed["@id"]] ?? []).find(
+                            (i) => i.speId === spe,
+                          )?.records;
+                          return (
+                            <div
+                              data-testid="closed-after-import"
+                              className="mt-2 flex flex-wrap items-center gap-2 rounded border border-green-700/50 bg-green-900/20 px-2 py-1.5 text-xs text-(--text-primary)"
+                            >
+                              <CheckCircle2
+                                size={14}
+                                className="text-green-500"
+                              />
+                              <span>
+                                {records !== undefined
+                                  ? t(
+                                      "{records} records are in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.",
+                                      { records: String(records), spe },
+                                    )
+                                  : t(
+                                      "The data is in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.",
+                                      { spe },
+                                    )}
+                              </span>
+                              <Link
+                                href={importViewUrl(closed["@id"], spe)}
+                                className="flex items-center gap-1 underline text-(--accent)"
+                              >
+                                <Box size={12} />
+                                {t("Show in 3D")}
+                              </Link>
+                            </div>
+                          );
+                        })()}
 
                       {viewing && viewerFor(viewing)}
 
@@ -1751,7 +1859,15 @@ function DataTransferContent() {
                                             </span>
                                           )}
                                       </div>
-                                      <DspPipeline state={state} />
+                                      <DspPipeline
+                                        state={state}
+                                        closedInto={closedAfterImportInto(
+                                          f(
+                                            tr as Record<string, unknown>,
+                                            "errorDetail",
+                                          ),
+                                        )}
+                                      />
                                     </div>
                                   );
                                 })}

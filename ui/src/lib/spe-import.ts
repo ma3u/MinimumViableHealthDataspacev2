@@ -39,8 +39,30 @@ export interface SpeImportResult {
    * not loaded through the Trustee as a sealed extract yet (#915).
    */
   untilStopped: boolean;
+  /**
+   * The transfer was terminated after the import: the data is in the SPE,
+   * the access to the provider's data ends (Art. 73).
+   */
+  closed: boolean;
   /** The 3D overview of the import (/overview?import=…). */
   graphUrl: string;
+}
+
+/**
+ * The reason the hub gives the connector when it closes a transfer after
+ * importing it. EDC 1.0 lets a consumer terminate a transfer, not complete
+ * it (Management API v5 has terminate, suspend and resume only).
+ */
+export function closedAfterImportReason(speId: string): string {
+  return `Closed after import into ${speId}`;
+}
+
+/** The SPE a transfer was closed for, read from its termination reason. */
+export function closedAfterImportInto(errorDetail: unknown): string | null {
+  const m = /Closed after import into (SPE-\d+)/.exec(
+    String(errorDetail ?? ""),
+  );
+  return m ? m[1] : null;
 }
 
 /** The 3D overview of one import: its nodes and relations only. */

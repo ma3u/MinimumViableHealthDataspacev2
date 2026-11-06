@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient } from "@/lib/edc";
+import { EDC_CONTEXT } from "@/lib/edc/client";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { seesPatientIdentity } from "@/lib/patient-identity";
 import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
@@ -10,6 +11,7 @@ import {
 } from "@/lib/spe-power";
 import {
   DEFAULT_IMPORT_SPE,
+  closedAfterImportReason,
   importViewUrl,
   importSpeId,
   type SpeImportResult,
@@ -53,7 +55,8 @@ async function providerOfAgreement(
  * see identity (#475), and has the neo4j-proxy write it into the chosen SPE's
  * Neo4j, SPE-1 unless the user picks another. A transfer the SPE holds
  * already answers 409 with that import, unless `overwrite` is true. Answers
- * what was imported and the link to its 3D overview.
+ * what was imported and the link to its 3D overview. Then it terminates the
+ * transfer, so the access to the provider's data ends with the import.
  *
  * On Azure the workspaces are confidential ACI groups that start on demand
  * (ADR-072): a stopped one is started and the import answers 503 with how
@@ -206,6 +209,25 @@ export async function POST(
       { status: res.status === 422 ? 422 : res.status === 503 ? 503 : 502 },
     );
   }
+  // The data is where Art. 73 wants it: close the access to the provider's
+  // data. EDC lets the consumer terminate a transfer, not complete it. An
+  // import that could not close the transfer still stands.
+  let closed = false;
+  try {
+    await edcClient.management(
+      `/v5/participants/${participantId}/transferprocesses/${id}/terminate`,
+      "POST",
+      {
+        "@context": [EDC_CONTEXT],
+        "@type": "TerminateTransfer",
+        reason: closedAfterImportReason(speId),
+      },
+    );
+    closed = true;
+  } catch (err) {
+    console.error("Closing a transfer after its import failed:", { id }, err);
+  }
+
   const result: SpeImportResult = {
     datasetId: String(answer.datasetId ?? id),
     speId,
@@ -215,6 +237,7 @@ export async function POST(
     importedAt: String(answer.importedAt ?? ""),
     pseudonymised,
     untilStopped: spePowerAvailable(),
+    closed,
     graphUrl: importViewUrl(id, speId),
   };
   return NextResponse.json(result);

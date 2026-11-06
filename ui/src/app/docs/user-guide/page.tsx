@@ -1700,7 +1700,7 @@ export default function UserGuidePage() {
           >
             <p className="text-(--text-secondary) text-sm mb-2">
               {t(
-                "Each agreed contract appears once, with where it stands. Start Transfer asks the provider's connector for the data, after the hub has checked that a data permit covers the participant you act as (Art. 61(1)); when none does, the page says whose permit is missing or expired. The page follows the transfer until the data is ready. Open shows the data, Download saves it, and Import into SPE loads it into a secure processing environment (Art. 73); on the live hub a stopped workspace starts first and keeps the data until it stops. Details holds the agreed terms, folded until you open them, and every transfer under the contract with its DSP state.",
+                "Each agreed contract appears once, with where it stands. Start Transfer asks the provider's connector for the data, after the hub has checked that a data permit covers the participant you act as (Art. 61(1)); when none does, the page says whose permit is missing or expired. The page follows the transfer until the data is ready. Open shows the data, Download saves it, and Import into SPE loads it into a secure processing environment (Art. 73); on the live hub a stopped workspace starts first and keeps the data until it stops. The import then closes the transfer, so the access to the provider's data ends; a new transfer imports it again. Details holds the agreed terms, folded until you open them, and every transfer under the contract with its DSP state.",
               )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">

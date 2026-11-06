@@ -1758,6 +1758,12 @@ paths:
                     description: >-
                       The workspace keeps the import in memory until it
                       stops (Azure); not loaded through the Trustee yet
+                  closed:
+                    type: boolean
+                    description: >-
+                      The hub terminated the transfer after the import, with
+                      the reason "Closed after import into SPE-n": the access
+                      to the provider's data ends
                   graphUrl: { type: string }
         "400":
           {
