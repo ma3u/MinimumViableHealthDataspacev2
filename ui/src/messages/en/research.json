@@ -301,5 +301,9 @@
   "The access to this transfer has expired. Start a new transfer to get the data again.": "The access to this transfer has expired. Start a new transfer to get the data again.",
   "Start a new transfer": "Start a new transfer",
   "{spe} is starting. That takes about {minutes} minutes; import again then.": "{spe} is starting. That takes about {minutes} minutes; import again then.",
-  "The workspace keeps the data in memory until it stops; it is a demo import, not loaded through the Trustee.": "The workspace keeps the data in memory until it stops; it is a demo import, not loaded through the Trustee."
+  "The workspace keeps the data in memory until it stops; it is a demo import, not loaded through the Trustee.": "The workspace keeps the data in memory until it stops; it is a demo import, not loaded through the Trustee.",
+  "The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.",
+  "CLOSED AFTER IMPORT INTO {spe}": "CLOSED AFTER IMPORT INTO {spe}",
+  "{records} records are in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "{records} records are in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.",
+  "The data is in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "The data is in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again."
 }

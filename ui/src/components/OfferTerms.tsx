@@ -5,6 +5,7 @@ import {
   AlertCircle,
   Ban,
   CheckCircle2,
+  ChevronRight,
   Clock,
   ListChecks,
   ScrollText,
@@ -159,29 +160,34 @@ export default function OfferTerms({
     .sort()
     .pop();
 
-  return (
-    <div
-      data-testid="offer-terms"
-      className="mb-4 rounded-lg border border-(--border) bg-(--surface-2)/40 p-4 space-y-4 text-sm"
-    >
-      <div>
-        <h3 className="flex items-center gap-2 font-semibold text-(--text-primary)">
-          <ScrollText size={16} />
-          {agreed ? t("The terms you agreed to") : t("The terms you agree to")}
-        </h3>
-        <p className="text-xs text-(--text-secondary) mt-1">
-          {agreed
-            ? t(
-                "{consumer} and {provider} signed this policy; it governs every use of the data.",
-                { provider: providerName, consumer: consumerName },
-              )
-            : t(
-                "{provider} offers this data under the policy below. Starting the negotiation means {consumer} accepts it.",
-                { provider: providerName, consumer: consumerName },
-              )}
-        </p>
-      </div>
+  const heading = (
+    <div>
+      <h3 className="flex items-center gap-2 font-semibold text-(--text-primary)">
+        {agreed && (
+          <ChevronRight
+            size={14}
+            className="shrink-0 transition-transform group-open:rotate-90"
+          />
+        )}
+        <ScrollText size={16} />
+        {agreed ? t("The terms you agreed to") : t("The terms you agree to")}
+      </h3>
+      <p className="text-xs text-(--text-secondary) mt-1">
+        {agreed
+          ? t(
+              "{consumer} and {provider} signed this policy; it governs every use of the data.",
+              { provider: providerName, consumer: consumerName },
+            )
+          : t(
+              "{provider} offers this data under the policy below. Starting the negotiation means {consumer} accepts it.",
+              { provider: providerName, consumer: consumerName },
+            )}
+      </p>
+    </div>
+  );
 
+  const body = (
+    <>
       <dl data-testid="offer-terms-glance" className="space-y-2">
         <Glance
           testId="terms-purposes"
@@ -346,6 +352,29 @@ export default function OfferTerms({
           </span>
         </label>
       )}
+    </>
+  );
+
+  const frame =
+    "mb-4 rounded-lg border border-(--border) bg-(--surface-2)/40 p-4 text-sm";
+
+  // A signed agreement's terms are there to look up, not to read before
+  // every transfer: they start folded, a click opens them.
+  if (agreed) {
+    return (
+      <details data-testid="offer-terms" className={`group ${frame}`}>
+        <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+          {heading}
+        </summary>
+        <div className="mt-4 space-y-4">{body}</div>
+      </details>
+    );
+  }
+
+  return (
+    <div data-testid="offer-terms" className={`space-y-4 ${frame}`}>
+      {heading}
+      {body}
     </div>
   );
 }

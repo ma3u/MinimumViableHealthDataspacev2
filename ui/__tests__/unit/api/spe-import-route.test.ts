@@ -135,8 +135,53 @@ describe("POST /api/transfers/[id]/import", () => {
       records: 1,
       pseudonymised: true,
       untilStopped: false,
+      closed: true,
       graphUrl: `/overview?import=${TP}&spe=SPE-1`,
     });
+    // The data is in the SPE: the access to the provider's data ends. EDC
+    // lets a consumer terminate a transfer, not complete it.
+    expect(mockManagement).toHaveBeenLastCalledWith(
+      `/v5/participants/${CTX}/transferprocesses/${TP}/terminate`,
+      "POST",
+      expect.objectContaining({
+        "@type": "TerminateTransfer",
+        reason: "Closed after import into SPE-1",
+      }),
+    );
+  });
+
+  it("keeps an import that could not close the transfer, and says so", async () => {
+    asRoles(["DATA_USER"]);
+    mockManagement.mockImplementation((path: string) =>
+      path.endsWith("/terminate")
+        ? Promise.reject(new Error("409 Conflict"))
+        : Promise.resolve({ state: "STARTED" }),
+    );
+    fetchMock
+      .mockResolvedValueOnce(json({ token: "tok" }))
+      .mockResolvedValueOnce(json(BUNDLE))
+      .mockResolvedValueOnce(json({ datasetId: TP, records: 1 }));
+
+    const res = await post({ participantId: CTX });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ records: 1, closed: false });
+  });
+
+  it("leaves the transfer open when the SPE refused the import", async () => {
+    asRoles(["DATA_USER"]);
+    mockManagement.mockResolvedValue({ state: "STARTED" });
+    fetchMock
+      .mockResolvedValueOnce(json({ token: "tok" }))
+      .mockResolvedValueOnce(json(BUNDLE))
+      .mockResolvedValueOnce(json({ error: "SPE-1 is stopped" }, 503));
+
+    const res = await post({ participantId: CTX });
+
+    expect(res.status).toBe(503);
+    expect(
+      mockManagement.mock.calls.some(([p]) => String(p).endsWith("/terminate")),
+    ).toBe(false);
   });
 
   it("on Azure, starts a stopped workspace and answers 503 before pulling", async () => {

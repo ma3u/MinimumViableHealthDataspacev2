@@ -490,6 +490,56 @@ describe("DataTransferPage", () => {
       );
     });
 
+    it("follows a transfer the connector is still working on until it starts", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      try {
+        const transfer = {
+          "@id": "tp-live",
+          state: "INITIAL",
+          assetId: "fhir-patient-bundle",
+          contractId: "agr-001",
+          source: "controlplane",
+          stateTimestamp: 1793966000000,
+        };
+        let reads = 0;
+        mockFetchApi.mockImplementation((url: string) => {
+          if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+          if (url.startsWith("/api/transfers?")) {
+            reads += 1;
+            // The connector moves it on after the page has loaded it once.
+            return mockResponse([
+              reads > 1 ? { ...transfer, state: "STARTED" } : transfer,
+            ]);
+          }
+          if (url.startsWith("/api/negotiations")) {
+            return mockResponse([NEGOTIATIONS_FINALIZED[0]]);
+          }
+          return mockResponse({});
+        });
+        render(<DataTransferPage />);
+        const rows = await rowsOf();
+        expect(stageOf(rows[0])).toBe("Transfer in progress");
+        expect(
+          within(rows[0]).getByText("Waiting for the provider"),
+        ).toBeTruthy();
+
+        await vi.advanceTimersByTimeAsync(3100);
+
+        await waitFor(() =>
+          expect(stageOf(screen.getAllByTestId("contract-row")[0])).toBe(
+            "Data ready",
+          ),
+        );
+        expect(screen.queryByText("Waiting for the provider")).toBeNull();
+        // Settled: no more reloads.
+        const settledAt = reads;
+        await vi.advanceTimersByTimeAsync(10_000);
+        expect(reads).toBe(settledAt);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it("keeps a contract's transfers under Details, with their pipeline", async () => {
       setupDefaultMocks({
         transfers: [TRANSFERS[0], TRANSFER_REQUESTED, TRANSFER_TERMINATED],
@@ -534,6 +584,59 @@ describe("DataTransferPage", () => {
       expect(stageOf(fhir)).toBe("Ready to transfer");
       expect(fhir.textContent).toMatch(/the last transfer failed/);
       expect(within(fhir).getByTestId("start-transfer")).toBeTruthy();
+    });
+
+    it("shows a transfer closed after its import as done, in the SPE", async () => {
+      const closed = {
+        "@id": "tp-closed",
+        state: "TERMINATED",
+        assetId: "fhir-patient-bundle",
+        contractId: "agr-001",
+        source: "controlplane",
+        stateTimestamp: 1793966000000,
+        errorDetail: "Closed after import into SPE-1",
+      };
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers?")) return mockResponse([closed]);
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse([NEGOTIATIONS_FINALIZED[0]]);
+        }
+        if (url.startsWith("/api/spe-imports?ids=tp-closed")) {
+          return mockResponse({
+            imports: [
+              {
+                datasetId: "tp-closed",
+                speId: "SPE-1",
+                records: 203,
+                importedAt: "2026-11-06T12:46:00.000Z",
+              },
+            ],
+          });
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+      const rows = await rowsOf();
+
+      await waitFor(() => expect(stageOf(rows[0])).toBe("In an SPE"));
+      expect(rows[0].textContent).not.toMatch(/the last transfer failed/);
+      expect(
+        within(rows[0]).getByTestId("closed-after-import").textContent,
+      ).toMatch(/203 records are in SPE-1\. The transfer is closed/);
+      // A new transfer imports it again.
+      expect(within(rows[0]).getByTestId("start-transfer").textContent).toMatch(
+        /Transfer again/,
+      );
+
+      await user.click(within(rows[0]).getByText("Details"));
+      const pipeline = within(rows[0]).getByTestId(
+        "pipeline-closed-after-import",
+      );
+      expect(pipeline.textContent).toMatch(
+        /REQUESTED.*STARTED.*CLOSED AFTER IMPORT INTO SPE-1/,
+      );
     });
 
     it("resolves the provider's DID to its name", async () => {

@@ -127,6 +127,7 @@ export default function SpeImport({
         importedAt: body.importedAt ?? "",
         pseudonymised: body.pseudonymised ?? true,
         untilStopped: body.untilStopped ?? false,
+        closed: body.closed ?? false,
         graphUrl: body.graphUrl ?? importViewUrl(transferId, speId),
       });
       loadExisting();
@@ -325,6 +326,10 @@ export default function SpeImport({
             {result.untilStopped &&
               ` ${t(
                 "The workspace keeps the data in memory until it stops; it is a demo import, not loaded through the Trustee.",
+              )}`}
+            {result.closed &&
+              ` ${t(
+                "The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.",
               )}`}
           </span>
           <Link
