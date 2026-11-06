@@ -72,6 +72,9 @@ globs:
 ## Prettier (enforced by pre-commit)
 
 - Runs on: `*.md`, `*.yaml`, `*.json`, `*.ts`, `*.tsx`.
+- One version: `ui/package.json` pins Prettier exactly and the hook runs `ui/node_modules/.bin/prettier`.
+  To format by hand, use that binary or `pre-commit run prettier --files <paths>`, not a bare `npx prettier`
+  outside `ui/`.
 - Files are auto-reformatted by the hook; you must `git add` the modified files and retry the commit.
 - Do not fight Prettier formatting — accept its output.
 
