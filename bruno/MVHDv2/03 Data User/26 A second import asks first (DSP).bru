@@ -25,6 +25,13 @@ tests {
   const body = res.getBody() || {};
   if (!bru.getVar("dspImported")) {
     test("SKIPPED: 23 imported nothing on this run, so there is nothing to import twice", function () {});
+  } else if (bru.getVar("dspImportClosed") === "true") {
+    // 23 closed the transfer (#924): its data cannot be pulled again, and a
+    // new import needs a new transfer.
+    test("a transfer the import closed is refused with its state", function () {
+      expect(res.getStatus(), body.error || "").to.equal(409);
+      expect(["TERMINATING", "TERMINATED"]).to.include(body.state);
+    });
   } else {
     test("SPE-1 refuses to import the same transfer again without overwrite", function () {
       expect(res.getStatus(), body.error || "").to.equal(409);
@@ -35,6 +42,8 @@ tests {
 }
 
 docs {
-  An SPE holds a transfer once (#876). A second import without `overwrite: true` answers 409 with
-  the import it holds; My data asks the user to overwrite it or to cancel.
+  An SPE holds a transfer once (#876). The import closes the transfer (#924), so a second import of
+  it answers 409 with the transfer's state, TERMINATED: a new import needs a new transfer. Where the
+  import could not close the transfer, a second import without `overwrite: true` answers 409 with
+  the import the SPE holds; My data asks the user to overwrite it or to cancel.
 }
