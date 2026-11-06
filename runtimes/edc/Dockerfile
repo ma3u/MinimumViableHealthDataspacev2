@@ -21,7 +21,9 @@ LABEL org.opencontainers.image.source="https://github.com/ma3u/MinimumViableHeal
       org.opencontainers.image.title="edc-${RUNTIME}"
 # curl for the compose healthchecks; the base image is pinned, and so is its package index
 # hadolint ignore=DL3018
-RUN apk --no-cache add curl
+RUN apk --no-cache add curl && addgroup -S -g 10001 edc && adduser -S -u 10001 -G edc edc
 WORKDIR /app
 COPY --from=build /src/${RUNTIME}/build/libs/${RUNTIME}.jar edc-runtime.jar
+# The runtime only reads the jar and writes to stdout, so it needs no root (Trivy DS-0002).
+USER 10001:10001
 CMD ["sh", "-c", "exec java -Djava.security.egd=file:/dev/urandom ${JAVA_OPTS:-} -jar edc-runtime.jar"]
