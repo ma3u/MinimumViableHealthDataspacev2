@@ -84,7 +84,7 @@ Negotiations and the federated catalogue have no Azure seed, as on 0.18: Bruno's
   - `/api/agreements/{id}` gives the period and the policy for Details.
 - Run Bruno `Azure-Dev` `03 Data User` 15 to 22 with the live DSP flow (`dspLiveFlow`, on for Azure-Dev): catalogue, FINALIZED, STARTED, data, agreement.
   - Drop the skip on 21, the certificate-demo 404, once the proxy serves the data.
-  - 23 to 26, the SPE import, are **not a pass criterion** on Azure until Matthias decides how imports reach the ACI workspaces. Those start on demand (ADR-072) and keep their store in tmpfs, and a direct write bypasses the Trustee path of ADR-068.
+  - 23 to 26, the SPE import, count on Azure only while the chosen workspace runs (Matthias, 2026-11-06: the import is accepted as a demo for now). A 503 because the workspace is stopped or starting is expected, not a failure. The workspaces start on demand (ADR-072) and keep their store in tmpfs, so an import is lost when the workspace stops; that is accepted. The attested path (a sealed extract loaded after the Trustee releases the key, ADR-068) is a separate issue.
 - Run Playwright J1090 and J1091 (`journeys/53`) in Demo Smoke.
 - Run one transfer whose data opens, and one new onboarding from the UI.
 
