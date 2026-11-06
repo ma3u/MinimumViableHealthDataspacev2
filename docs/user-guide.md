@@ -114,7 +114,7 @@ describes every page below and shows a screenshot of each on mouse-over.
 | Discover                  | /data/discover      | Federated catalog search                                        | Yes           |
 | Negotiate                 | /negotiate          | DSP contract negotiation lifecycle                              | Yes           |
 | Tasks                     | /tasks              | Transfer task queue                                             | Yes           |
-| Transfer                  | /data/transfer      | Transfer history with audit trail                               | Yes           |
+| Transfer                  | /data/transfer      | Start a transfer, open the data, import it into an SPE          | Yes           |
 | Admin Dashboard           | /admin              | Operator overview                                               | Yes           |
 | EDC Components            | /admin/components   | EDC-V runtime component status                                  | Yes           |
 | SPE attestation           | /admin/attestation  | The evidence behind each SPE's label, for the operator          | No            |

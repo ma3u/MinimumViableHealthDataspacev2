@@ -281,6 +281,33 @@ function isLiveTransfer(tr: Transfer): boolean {
   );
 }
 
+/** States in which a transfer stays until someone acts: nothing to wait for. */
+const SETTLED_STATES = [
+  "STARTED",
+  "SUSPENDED",
+  "COMPLETED",
+  "TERMINATED",
+  "DEPROVISIONED",
+];
+
+/**
+ * A connector's transfer still on its way, INITIAL or REQUESTED: the page
+ * reloads it until it settles, or "Waiting for the provider" stays on a
+ * transfer that has long started.
+ */
+function isSettling(tr: Transfer): boolean {
+  return (
+    tr.source === "controlplane" &&
+    !SETTLED_STATES.includes(
+      f(tr as Record<string, unknown>, "state").toUpperCase(),
+    )
+  );
+}
+
+/** How often, and for how long, a settling transfer is reloaded. */
+const SETTLING_POLL_MS = 3000;
+const SETTLING_POLL_LIMIT = 40;
+
 /** FHIR data as a bundle for the viewer: a Bundle, a list or one resource. */
 function toBundle(data: unknown): FhirBundle | null {
   const isResource = (r: unknown) =>
@@ -842,6 +869,30 @@ function DataTransferContent() {
       setLoading(false);
     });
   }, [selectedCtx]);
+
+  // Follow a transfer the connector is still working on (INITIAL, REQUESTED)
+  // until it settles; give up after two minutes and leave it to Refresh.
+  const settling = useMemo(() => transfers.some(isSettling), [transfers]);
+  useEffect(() => {
+    if (!selectedCtx || !settling) return;
+    let polls = 0;
+    const timer = setInterval(() => {
+      polls += 1;
+      if (polls > SETTLING_POLL_LIMIT) {
+        clearInterval(timer);
+        return;
+      }
+      fetchApi(`/api/transfers?participantId=${selectedCtx}`)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (d) setTransfers(Array.isArray(d) ? d : d.transfers || []);
+        })
+        .catch(() => {
+          /* the next poll tries again */
+        });
+    }, SETTLING_POLL_MS);
+    return () => clearInterval(timer);
+  }, [selectedCtx, settling]);
 
   const refreshTransfers = async () => {
     if (!selectedCtx) return;

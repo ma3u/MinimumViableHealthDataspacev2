@@ -490,6 +490,56 @@ describe("DataTransferPage", () => {
       );
     });
 
+    it("follows a transfer the connector is still working on until it starts", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      try {
+        const transfer = {
+          "@id": "tp-live",
+          state: "INITIAL",
+          assetId: "fhir-patient-bundle",
+          contractId: "agr-001",
+          source: "controlplane",
+          stateTimestamp: 1793966000000,
+        };
+        let reads = 0;
+        mockFetchApi.mockImplementation((url: string) => {
+          if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+          if (url.startsWith("/api/transfers?")) {
+            reads += 1;
+            // The connector moves it on after the page has loaded it once.
+            return mockResponse([
+              reads > 1 ? { ...transfer, state: "STARTED" } : transfer,
+            ]);
+          }
+          if (url.startsWith("/api/negotiations")) {
+            return mockResponse([NEGOTIATIONS_FINALIZED[0]]);
+          }
+          return mockResponse({});
+        });
+        render(<DataTransferPage />);
+        const rows = await rowsOf();
+        expect(stageOf(rows[0])).toBe("Transfer in progress");
+        expect(
+          within(rows[0]).getByText("Waiting for the provider"),
+        ).toBeTruthy();
+
+        await vi.advanceTimersByTimeAsync(3100);
+
+        await waitFor(() =>
+          expect(stageOf(screen.getAllByTestId("contract-row")[0])).toBe(
+            "Data ready",
+          ),
+        );
+        expect(screen.queryByText("Waiting for the provider")).toBeNull();
+        // Settled: no more reloads.
+        const settledAt = reads;
+        await vi.advanceTimersByTimeAsync(10_000);
+        expect(reads).toBe(settledAt);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it("keeps a contract's transfers under Details, with their pipeline", async () => {
       setupDefaultMocks({
         transfers: [TRANSFERS[0], TRANSFER_REQUESTED, TRANSFER_TERMINATED],

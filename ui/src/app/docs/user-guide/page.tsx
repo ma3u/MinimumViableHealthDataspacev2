@@ -1700,12 +1700,12 @@ export default function UserGuidePage() {
           >
             <p className="text-(--text-secondary) text-sm mb-2">
               {t(
-                "View the complete history of data transfers, both initiated and received. Each entry includes timestamps, transfer size, protocol used, and a link to the audit trail. Transfer logging implements the EHDS requirement for full traceability of all health data movements across the dataspace.",
+                "Each agreed contract appears once, with where it stands. Start Transfer asks the provider's connector for the data, after the hub has checked that a data permit covers the participant you act as (Art. 61(1)); when none does, the page says whose permit is missing or expired. The page follows the transfer until the data is ready. Open shows the data, Download saves it, and Import into SPE loads it into a secure processing environment (Art. 73); on the live hub a stopped workspace starts first and keeps the data until it stops. Details holds the agreed terms, folded until you open them, and every transfer under the contract with its DSP state.",
               )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
-                "Example: PharmaCo Research AG reviews its transfer history showing a completed 12 MB FHIR bulk export from AlphaKlinik Berlin, transferred via HTTP-PUSH with full W3C PROV audit trail.",
+                "Example: PharmaCo Research AG starts the transfer of its Fhir Patient Search contract with AlphaKlinik Berlin. A few seconds later the data is ready, and it imports 100 pseudonymised records into SPE-1.",
               )}
             </p>
           </FeatureCard>
