@@ -17,32 +17,30 @@ assert {
 }
 
 tests {
-  // Capture a CFM tenant id for request 14. A tenant id is not a participant
-  // context id: /api/participants/{id}/credentials asks the Tenant Manager for
-  // that tenant's participant profiles, and a context id there lists no profiles
-  // at all. Prefer a tenant that has profiles, so the request downstream has
-  // something to answer with.
+  // Capture a tenant id for request 14. Since ADR-078 a tenant is its control
+  // plane context: its id is the context id, which
+  // /api/participants/{id}/credentials takes. Prefer a tenant that has profiles,
+  // so the request downstream has something to answer with.
   //
   // Report the count. `tenants: isArray` is satisfied by an empty array, and on
   // CI this request passes while request 14 answers 502, which reads as a bug in
   // 14 rather than as "this stack was never given a tenant". Saying the number
   // out loud is what tells the two apart (#375).
-  // `source` says which backend answered: "cfm" when the Tenant Manager is
-  // reachable, "neo4j" when the route backfilled from the graph because it was
-  // not. Nothing asserted it, so an unreachable Tenant Manager looked exactly
-  // like a working one, and the backfilled rows carry graph-layer did:web ids
-  // rather than CFM tenant UUIDs. Request 14 then asked the Tenant Manager for
-  // a did:web, got the same unreachable service, and reported 502 as though the
-  // route were broken (#380).
+  // `source` says which backend answered: "controlplane" when the control plane
+  // listed its contexts, "neo4j" when the route backfilled from the graph
+  // because it did not. Nothing asserted it, so an unreachable backend looked
+  // exactly like a working one, and the backfilled rows carry graph-layer
+  // did:web ids rather than context ids. Request 14 then asked for a did:web
+  // and reported 502 as though the route were broken (#380).
   test("the answer says which backend it came from", function () {
-    expect(res.getBody().source, "source").to.be.oneOf(["cfm", "neo4j", "mixed"]);
+    expect(res.getBody().source, "source").to.be.oneOf(["controlplane", "neo4j"]);
   });
-  test("captures a tenant id only when CFM itself answered", function () {
+  test("captures a tenant id only when the control plane itself answered", function () {
     const body = res.getBody();
     const tenants = body.tenants || [];
     const withProfiles = tenants.filter((t) => (t.participantProfiles || []).length > 0);
     console.log(`[tenants] source=${body.source}, ${tenants.length} tenant(s), ${withProfiles.length} with participant profiles`);
-    if (body.source === "cfm") {
+    if (body.source === "controlplane") {
       const pick = withProfiles[0] || tenants[0];
       if (pick) bru.setVar("tenantId", pick.id);
     }
