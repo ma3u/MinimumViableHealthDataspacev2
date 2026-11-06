@@ -1,6 +1,7 @@
 import { type NextFunction, type Request, type Response } from "express";
 import { app } from "../app.js";
 import { getSpeDrivers } from "../db.js";
+import { noteSpeQueried } from "../spe-status.js";
 import {
   AlreadyImportedError,
   ImportShapeError,
@@ -72,15 +73,16 @@ app.post(
     };
     const session = driver.session({ database: "neo4j" });
     try {
-      res.json(
-        await writeImport(
-          session,
-          meta,
-          body.bundle,
-          undefined,
-          body.overwrite === true,
-        ),
+      const written = await writeImport(
+        session,
+        meta,
+        body.bundle,
+        undefined,
+        body.overwrite === true,
       );
+      // An import is use: the idle stop (ADR-072) counts it as a query.
+      noteSpeQueried([speId]);
+      res.json(written);
     } catch (err) {
       if (err instanceof ImportShapeError) {
         res.status(422).json({ error: err.message });

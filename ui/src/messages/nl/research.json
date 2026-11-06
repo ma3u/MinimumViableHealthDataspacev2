@@ -299,5 +299,7 @@
   "agreed {date}": "overeengekomen {date}",
   "imported {date}": "geïmporteerd {date}",
   "The access to this transfer has expired. Start a new transfer to get the data again.": "De toegang tot deze overdracht is verlopen. Start een nieuwe overdracht om de gegevens opnieuw te krijgen.",
-  "Start a new transfer": "Een nieuwe overdracht starten"
+  "Start a new transfer": "Een nieuwe overdracht starten",
+  "{spe} is starting. That takes about {minutes} minutes; import again then.": "{spe} start op. Dat duurt ongeveer {minutes} minuten; importeer dan opnieuw.",
+  "The workspace keeps the data in memory until it stops; it is a demo import, not loaded through the Trustee.": "De werkruimte houdt de gegevens in het geheugen tot ze stopt; dit is een demo-import, niet geladen via de Trustee."
 }
