@@ -50,6 +50,15 @@ export function importViewUrl(datasetId: string, speId: string): string {
   )}&spe=${encodeURIComponent(speId)}`;
 }
 
+/**
+ * The Retry-After of the proxy's 503 for a workspace that does not answer,
+ * passed on so the caller knows when to ask again; a minute without one.
+ */
+export function proxyRetryAfter(res: Response): string {
+  const seconds = Number(res.headers.get("retry-after"));
+  return seconds > 0 ? String(Math.round(seconds)) : "60";
+}
+
 /** A transfer the SPEs hold already, as GET /api/spe-imports reports it. */
 export interface ExistingImport {
   datasetId: string;

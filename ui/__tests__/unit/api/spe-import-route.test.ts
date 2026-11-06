@@ -15,9 +15,12 @@ vi.mock("@/lib/edc", () => ({
 // On Azure the workspaces start on demand (ADR-072); off it, nothing to gate.
 const coldStartGate = vi.fn();
 const powerAvailable = vi.fn();
-vi.mock("@/lib/spe-power", () => ({
+const notUp = vi.fn();
+vi.mock("@/lib/spe-power", async (orig) => ({
+  ...(await orig<typeof import("@/lib/spe-power")>()),
   speColdStartGate: (...a: unknown[]) => coldStartGate(...a),
   spePowerAvailable: () => powerAvailable(),
+  speNotUp: (...a: unknown[]) => notUp(...a),
 }));
 
 import { requireAuth } from "@/lib/auth-guard";
@@ -78,6 +81,8 @@ beforeEach(() => {
   coldStartGate.mockResolvedValue(null);
   powerAvailable.mockReset();
   powerAvailable.mockReturnValue(false);
+  notUp.mockReset();
+  notUp.mockResolvedValue([]);
   vi.stubGlobal("fetch", fetchMock);
 });
 afterEach(() => {
@@ -276,6 +281,8 @@ describe("POST /api/transfers/[id]/import", () => {
     const body = await res.json();
 
     expect(res.status).toBe(503);
+    // A 503 without Retry-After reads as a server error (bruno collection.bru).
+    expect(res.headers.get("Retry-After")).toBe("60");
     expect(body).toMatchObject({ step: "import" });
     expect(body.error).toMatch(/not connected/);
   });
@@ -327,6 +334,49 @@ describe("GET /api/spe-imports/[id]/graph", () => {
     expect(body.links).toHaveLength(1);
   });
 
+  it("answers 503 with Retry-After while ARM reports the workspace starting, and asks no proxy", async () => {
+    notUp.mockResolvedValueOnce([
+      { id: "SPE-1", state: "starting", etaSeconds: 120 },
+    ]);
+
+    const res = await get();
+    const body = await res.json();
+
+    expect(res.status).toBe(503);
+    expect(res.headers.get("Retry-After")).toBe("120");
+    expect(notUp).toHaveBeenCalledWith(["SPE-1"]);
+    expect(body.spe).toEqual({
+      id: "SPE-1",
+      state: "starting",
+      etaSeconds: 120,
+    });
+    expect(body.started).toBe(false);
+    expect(body.error).toBe(
+      "SPE-1 is starting. An import lasts only while its workspace runs; import the transfer again once SPE-1 runs.",
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("passes on the proxy's 503 for a workspace that does not answer, with its Retry-After", async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({ error: "SPE-1 does not answer; it may be starting" }),
+        {
+          status: 503,
+          headers: { "content-type": "application/json", "retry-after": "45" },
+        },
+      ),
+    );
+
+    const res = await get();
+
+    expect(res.status).toBe(503);
+    expect(res.headers.get("Retry-After")).toBe("45");
+    expect((await res.json()).error).toBe(
+      "SPE-1 does not answer; it may be starting",
+    );
+  });
+
   it("answers 404 for a dataset the SPE does not hold", async () => {
     fetchMock.mockResolvedValueOnce(json({ error: "Not found" }, 404));
 
@@ -372,6 +422,52 @@ describe("GET /api/spe-imports", () => {
     );
     expect(body.imports[0]).toMatchObject({ speId: "SPE-2", records: 7 });
     expect(body.unreachable).toEqual(["SPE-1"]);
+    expect(body.notUp).toEqual([]);
+  });
+
+  it("does not have the proxy wait for a workspace ARM reports stopped", async () => {
+    const stopped = { id: "SPE-2", state: "stopped", etaSeconds: 240 };
+    notUp.mockResolvedValueOnce([stopped]);
+    fetchMock.mockResolvedValueOnce(json({ imports: [], unreachable: [] }));
+
+    const res = await LIST(
+      new NextRequest(`http://localhost/api/spe-imports?ids=${TP}`),
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      `http://localhost:9090/spe/imports?datasetIds=${TP}&skip=SPE-2`,
+    );
+    expect(body).toEqual({
+      imports: [],
+      unreachable: ["SPE-2"],
+      notUp: [stopped],
+    });
+  });
+
+  it("answers that no workspace holds the transfer, without the proxy, while none is up", async () => {
+    // 2026-11-06 on Azure: SPE-1 starting, the proxy waited for it and this
+    // route gave up after 5 s with a 502. A workspace that is not up holds
+    // no import: the store is in memory and went when it stopped.
+    notUp.mockResolvedValueOnce([
+      { id: "SPE-1", state: "starting", etaSeconds: 120 },
+      { id: "SPE-2", state: "stopped", etaSeconds: 240 },
+    ]);
+
+    const res = await LIST(
+      new NextRequest(`http://localhost/api/spe-imports?ids=${TP}`),
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.imports).toEqual([]);
+    expect(body.unreachable).toEqual(["SPE-1", "SPE-2"]);
+    expect(body.notUp.map((e: { state: string }) => e.state)).toEqual([
+      "starting",
+      "stopped",
+    ]);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it("needs at least one transfer id", async () => {

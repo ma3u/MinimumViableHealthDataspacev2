@@ -12,6 +12,7 @@ import {
   DEFAULT_IMPORT_SPE,
   importViewUrl,
   importSpeId,
+  proxyRetryAfter,
   type SpeImportResult,
 } from "@/lib/spe-import";
 import {
@@ -197,13 +198,22 @@ export async function POST(
       { status: 409 },
     );
   }
+  if (res.status === 503) {
+    return NextResponse.json(
+      {
+        error: String(answer.error ?? `${speId} does not answer`),
+        step: "import",
+      },
+      { status: 503, headers: { "Retry-After": proxyRetryAfter(res) } },
+    );
+  }
   if (!res.ok) {
     return NextResponse.json(
       {
         error: String(answer.error ?? `${speId} refused the import`),
         step: "import",
       },
-      { status: res.status === 422 ? 422 : res.status === 503 ? 503 : 502 },
+      { status: res.status === 422 ? 422 : 502 },
     );
   }
   const result: SpeImportResult = {

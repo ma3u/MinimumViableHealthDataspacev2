@@ -4,19 +4,26 @@ import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
 import {
   DEFAULT_IMPORT_SPE,
   importSpeId,
+  proxyRetryAfter,
   toGraphNodes,
 } from "@/lib/spe-import";
+import { speColdStartResponse, speNotUp, type SpeId } from "@/lib/spe-power";
 import { isPlainId } from "@/lib/transfer-data";
 
 export const dynamic = "force-dynamic";
 
-const PROXY_TIMEOUT_MS = 10_000;
+/** Longer than the proxy gives the read (SPE_READ_TIMEOUT_MS, 10 s), so its answer comes first. */
+const PROXY_TIMEOUT_MS = 15_000;
 
 /**
  * GET /api/spe-imports/[id]/graph?spe=SPE-1 — an imported transfer as the
  * graph viewer draws it (#876): the dataset, the SPE workspace it was loaded
  * into, its records and how they refer to each other. /graph?dataset=…&spe=…
  * merges it into the view and focuses on the dataset.
+ *
+ * While ARM reports the workspace stopped or starting (ADR-072) it answers
+ * 503 with Retry-After before asking the proxy, and starts nothing: an
+ * import lives in the workspace's memory, so a start brings none back.
  */
 export async function GET(
   req: NextRequest,
@@ -33,6 +40,15 @@ export async function GET(
     return NextResponse.json(
       { error: "A dataset id and SPE-1 or SPE-2 are required" },
       { status: 400 },
+    );
+  }
+
+  const notUp = await speNotUp([speId as SpeId]);
+  if (notUp.length) {
+    return speColdStartResponse(
+      notUp,
+      false,
+      `${speId} is ${notUp[0].state}. An import lasts only while its workspace runs; import the transfer again once ${speId} runs.`,
     );
   }
 
@@ -57,10 +73,16 @@ export async function GET(
   if (res.status === 404) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
+  if (res.status === 503) {
+    return NextResponse.json(
+      { error: String(body.error ?? `${speId} does not answer`) },
+      { status: 503, headers: { "Retry-After": proxyRetryAfter(res) } },
+    );
+  }
   if (!res.ok || !Array.isArray(body.nodes)) {
     return NextResponse.json(
       { error: String(body.error ?? `${speId} could not draw the import`) },
-      { status: res.status === 503 ? 503 : 502 },
+      { status: 502 },
     );
   }
   return NextResponse.json({

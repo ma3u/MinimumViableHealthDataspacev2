@@ -32,5 +32,7 @@ tests {
 
 docs {
   What /graph?dataset=…&spe=SPE-1 draws after an import (#876): the dataset, the SPE workspace it
-  was loaded into, its records and the references between them.
+  was loaded into, its records and the references between them. While SPE-1 is stopped or starting
+  it answers 503 with Retry-After and starts nothing (ADR-072): an import lasts only while its
+  workspace runs.
 }
