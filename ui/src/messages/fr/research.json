@@ -299,5 +299,7 @@
   "agreed {date}": "conclu le {date}",
   "imported {date}": "importé le {date}",
   "The access to this transfer has expired. Start a new transfer to get the data again.": "L'accès à ce transfert a expiré. Lancez un nouveau transfert pour obtenir à nouveau les données.",
-  "Start a new transfer": "Lancer un nouveau transfert"
+  "Start a new transfer": "Lancer un nouveau transfert",
+  "{spe} is starting. That takes about {minutes} minutes; import again then.": "{spe} démarre. Cela prend environ {minutes} minutes ; importez à nouveau ensuite.",
+  "The workspace keeps the data in memory until it stops; it is a demo import, not loaded through the Trustee.": "L'espace de travail garde les données en mémoire jusqu'à son arrêt ; c'est un import de démonstration, non chargé via le Trustee."
 }

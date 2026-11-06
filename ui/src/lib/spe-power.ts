@@ -178,8 +178,9 @@ export function identityLacksRoleBody(group: string): {
 }
 
 /**
- * The cold-start gate in front of a federated query (ADR-072). On Azure, asks
- * ARM whether both workspaces run. When one does not, starts it if the
+ * The cold-start gate in front of a federated query (ADR-072), or of an
+ * import into one workspace (`ids`, #915). On Azure, asks ARM whether the
+ * workspaces run. When one does not, starts it if the
  * caller's roles allow, and answers 503 with which workspace and how long;
  * otherwise null, and the query goes on. ARM unknown means go on: the proxy
  * leaves a workspace that does not answer out, as before.
@@ -187,15 +188,16 @@ export function identityLacksRoleBody(group: string): {
 export async function speColdStartGate(
   roles: string[],
   now: number = Date.now(),
+  ids: readonly SpeId[] = SPE_IDS,
 ): Promise<NextResponse<SpeColdStartBody> | null> {
   if (!spePowerAvailable()) return null;
-  const arm = await readArmPower();
+  const arm = await readArmPower(ids);
   const mayStart = roles.some((r) =>
     (SPE_QUERY_START_ROLES as string[]).includes(r),
   );
   const notUp: SpeColdStartEntry[] = [];
   let started = false;
-  for (const id of SPE_IDS) {
+  for (const id of ids) {
     const power = arm[id];
     if (!power) continue;
     const state = spePowerState(power, undefined, now);

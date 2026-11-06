@@ -1,0 +1,44 @@
+name: EDC 1.0 databases (#881)
+
+# Creates the four databases the EDC 1.0 launchers and siglet 0.1.6 use on
+# Azure: controlplane_v1, identityhub_v1, issuerservice_v1, siglet_v1. The
+# 0.18 databases stay untouched as the rollback.
+#
+# Runs as the CI identity because creating a database on the Flexible Server
+# needs more than the maintainer's Container Apps Contributor role. The work
+# is scripts/azure/create-edc-v1-databases.sh; running it again is a no-op.
+#
+# Manual trigger only. Runbook: docs/knowledge/runbooks/edc-1-on-azure.md
+# (on the branch feat/edc-1.0-rc until the cutover).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "azure-reset"
+  cancel-in-progress: false
+
+jobs:
+  create:
+    name: Create the 1.0 databases
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Create the databases
+        run: |
+          ./scripts/azure/create-edc-v1-databases.sh </dev/null
+          echo "**EDC 1.0 databases present** on the Flexible Server (#881)." >> "$GITHUB_STEP_SUMMARY"

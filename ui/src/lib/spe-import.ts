@@ -34,6 +34,11 @@ export interface SpeImportResult {
   byType: Record<string, number>;
   importedAt: string;
   pseudonymised: boolean;
+  /**
+   * The workspace keeps it in memory until it stops (Azure, ADR-072); it is
+   * not loaded through the Trustee as a sealed extract yet (#915).
+   */
+  untilStopped: boolean;
   /** The 3D overview of the import (/overview?import=…). */
   graphUrl: string;
 }

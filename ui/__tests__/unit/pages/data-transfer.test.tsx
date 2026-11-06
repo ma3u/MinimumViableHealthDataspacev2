@@ -855,6 +855,58 @@ describe("DataTransferPage", () => {
       );
     });
 
+    it("says a stopped workspace is starting, and that an import lasts until it stops", async () => {
+      let attempt = 0;
+      mockFetchApi.mockImplementation((url: string) => {
+        if (url === "/api/transfers/tp-live/import") {
+          attempt += 1;
+          if (attempt === 1) {
+            return Promise.resolve({
+              json: () =>
+                Promise.resolve({
+                  error: "SPE-1 is starting",
+                  spe: { id: "SPE-1", state: "starting", etaSeconds: 240 },
+                  started: true,
+                }),
+              ok: false,
+              status: 503,
+            });
+          }
+          return mockResponse({
+            datasetId: "tp-live",
+            speId: "SPE-1",
+            records: 3,
+            relationships: 2,
+            pseudonymised: true,
+            untilStopped: true,
+          });
+        }
+        if (url === "/api/participants") return mockResponse(PARTICIPANTS);
+        if (url.startsWith("/api/transfers")) {
+          return mockResponse([LIVE, ...TRANSFERS]);
+        }
+        if (url.startsWith("/api/negotiations")) {
+          return mockResponse(NEGOTIATIONS_FINALIZED);
+        }
+        return mockResponse({});
+      });
+      const user = userEvent.setup();
+      render(<DataTransferPage />);
+
+      const section = await screen.findByTestId("contracts-list");
+      await user.click(within(section).getByTestId("spe-import-run"));
+
+      expect(
+        (await within(section).findByTestId("spe-import-starting")).textContent,
+      ).toMatch(/SPE-1 is starting\. That takes about 4 minutes/);
+      expect(within(section).queryByTestId("spe-import-error")).toBeNull();
+
+      await user.click(within(section).getByTestId("spe-import-run"));
+      const done = await within(section).findByTestId("spe-import-done");
+      expect(done.textContent).toMatch(/in memory until it stops/);
+      expect(within(section).queryByTestId("spe-import-starting")).toBeNull();
+    });
+
     it("says why an import failed", async () => {
       mockFetchApi.mockImplementation((url: string) => {
         if (url === "/api/transfers/tp-live/import") {

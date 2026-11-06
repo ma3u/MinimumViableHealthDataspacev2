@@ -4,6 +4,11 @@ import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { seesPatientIdentity } from "@/lib/patient-identity";
 import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
 import {
+  speColdStartGate,
+  spePowerAvailable,
+  type SpeId,
+} from "@/lib/spe-power";
+import {
   DEFAULT_IMPORT_SPE,
   importViewUrl,
   importSpeId,
@@ -49,6 +54,12 @@ async function providerOfAgreement(
  * Neo4j, SPE-1 unless the user picks another. A transfer the SPE holds
  * already answers 409 with that import, unless `overwrite` is true. Answers
  * what was imported and the link to its 3D overview.
+ *
+ * On Azure the workspaces are confidential ACI groups that start on demand
+ * (ADR-072): a stopped one is started and the import answers 503 with how
+ * long, as a federated query does. Their store is in memory, so the answer
+ * says the import lasts until the workspace stops; loading it as a sealed
+ * extract through the Trustee (ADR-068) is #915.
  */
 export async function POST(
   req: NextRequest,
@@ -78,6 +89,11 @@ export async function POST(
       { status: 400 },
     );
   }
+
+  const coldStart = await speColdStartGate(auth.session.roles, Date.now(), [
+    speId as SpeId,
+  ]);
+  if (coldStart) return coldStart;
 
   let transfer: Record<string, unknown>;
   try {
@@ -198,6 +214,7 @@ export async function POST(
     byType: (answer.byType as Record<string, number>) ?? {},
     importedAt: String(answer.importedAt ?? ""),
     pseudonymised,
+    untilStopped: spePowerAvailable(),
     graphUrl: importViewUrl(id, speId),
   };
   return NextResponse.json(result);

@@ -5,11 +5,19 @@
  * (#876, #475).
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const mockManagement = vi.fn();
 vi.mock("@/lib/edc", () => ({
   edcClient: { management: (...a: unknown[]) => mockManagement(...a) },
+}));
+
+// On Azure the workspaces start on demand (ADR-072); off it, nothing to gate.
+const coldStartGate = vi.fn();
+const powerAvailable = vi.fn();
+vi.mock("@/lib/spe-power", () => ({
+  speColdStartGate: (...a: unknown[]) => coldStartGate(...a),
+  spePowerAvailable: () => powerAvailable(),
 }));
 
 import { requireAuth } from "@/lib/auth-guard";
@@ -66,6 +74,10 @@ const json = (body: unknown, status = 200) =>
 beforeEach(() => {
   mockManagement.mockReset();
   fetchMock.mockReset();
+  coldStartGate.mockReset();
+  coldStartGate.mockResolvedValue(null);
+  powerAvailable.mockReset();
+  powerAvailable.mockReturnValue(false);
   vi.stubGlobal("fetch", fetchMock);
 });
 afterEach(() => {
@@ -117,8 +129,51 @@ describe("POST /api/transfers/[id]/import", () => {
       speId: "SPE-1",
       records: 1,
       pseudonymised: true,
+      untilStopped: false,
       graphUrl: `/overview?import=${TP}&spe=SPE-1`,
     });
+  });
+
+  it("on Azure, starts a stopped workspace and answers 503 before pulling", async () => {
+    asRoles(["DATA_USER"]);
+    coldStartGate.mockResolvedValueOnce(
+      NextResponse.json(
+        {
+          error: "SPE-2 is starting",
+          spe: { id: "SPE-2", state: "starting", etaSeconds: 240 },
+          started: true,
+        },
+        { status: 503 },
+      ),
+    );
+
+    const res = await post({ participantId: CTX, speId: "SPE-2" });
+    const body = await res.json();
+
+    expect(res.status).toBe(503);
+    expect(body.spe).toMatchObject({ state: "starting", etaSeconds: 240 });
+    // Only the chosen workspace is asked about, and nothing is pulled.
+    expect(coldStartGate).toHaveBeenCalledWith(
+      ["DATA_USER"],
+      expect.any(Number),
+      ["SPE-2"],
+    );
+    expect(mockManagement).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("on Azure, says the import lasts until the workspace stops", async () => {
+    powerAvailable.mockReturnValue(true);
+    mockManagement.mockResolvedValue({ state: "STARTED" });
+    fetchMock
+      .mockResolvedValueOnce(json({ token: "tok" }))
+      .mockResolvedValueOnce(json(BUNDLE))
+      .mockResolvedValueOnce(json({ datasetId: TP, records: 1 }));
+
+    const res = await post({ participantId: CTX });
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ untilStopped: true });
   });
 
   it("imports into the SPE the user picked, identified for a data holder", async () => {

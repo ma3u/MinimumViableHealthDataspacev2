@@ -26,9 +26,9 @@
       "note": "RAISED 2026-10-28 from 24/0, runs 40708450227 and 40710803036 on fix/710-ci-dsp-path: 27 passed, 0 failed, 0 skipped, twice. With a DSP path in CI (#710: the participant contexts now carry their STS config), TRUST-6.3 to 6.5 run instead of skipping: irs gets alpha-klinik's catalogue on the Simpl Governance Authority's credential, a MembershipCredential from the rogue issuer is refused with the control plane naming the issuer as untrusted, and after removing it irs is accepted again. Earlier: run 40688391687 (24/0) added TRUST-6.1 and 6.2; run 36267331316 raised it from 19/2. No review_by override: this floor is healthy, so the global date applies."
     },
     "ehds-compliance-results": {
-      "min_passed": 18,
+      "min_passed": 25,
       "max_failed": 0,
-      "note": "run 36259831503: 18 passed, 0 failed, 7 skipped, twice reproduced (fresh-DB proof and CI). At parity with what the seeded graph can show; the 7 skips are rows whose data the minimal set does not carry (OMOP drug/measurement/procedure links, vocabulary source values, VerifiableCredential nodes). No review_by override any more: this floor is healthy, so the global date applies."
+      "note": "RAISED 2026-11-05 from 18/0, Protocol Compliance runs 41653329092 (6e260522) and 41883420290 (eff9122a) on main: 25 passed, 0 failed, 5 skipped, twice. The suite had outgrown the floor by 7 checks, so 7 could have turned red without this gate noticing. Earlier: run 36259831503: 18 passed, 0 failed, 7 skipped, twice reproduced (fresh-DB proof and CI). At parity with what the seeded graph can show; the 7 skips are rows whose data the minimal set does not carry (OMOP drug/measurement/procedure links, vocabulary source values, VerifiableCredential nodes). No review_by override any more: this floor is healthy, so the global date applies."
     },
     "bruno-api-results": {
       "min_passed": 192,
