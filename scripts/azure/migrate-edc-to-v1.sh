@@ -134,7 +134,12 @@ for line in spec:
     else: env[k] = {'name': k, 'value': v}
 # JAVA_TOOL_OPTIONS: keep what is there (the pool cap, the scopes, the trusted
 # issuer), drop the 0.18 spelling `prefix-mapping`, replace our -D keys.
+# The trusted issuer moves to `edc.iam.trustedissuer`: 0.18 still read the
+# deprecated `trusted-issuer`, which Azure kept (#754 changed only the
+# script), and 1.0 does not, so it trusted no issuer and every DSP request
+# between participants answered 401 (2026-11-06).
 jto = env.get('JAVA_TOOL_OPTIONS', {}).get('value', '')
+jto = jto.replace('-Dedc.iam.trusted-issuer.', '-Dedc.iam.trustedissuer.')
 keys = {p.split('=', 1)[0] for p in props}
 kept = [t for t in jto.split()
         if t.split('=', 1)[0] not in keys and '.prefix-mapping=' not in t]
