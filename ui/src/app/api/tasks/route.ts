@@ -87,9 +87,8 @@ export async function GET(request: Request) {
 
   try {
     // 1. List all participant contexts
-    const participants = await edcClient.management<EdcParticipant[]>(
-      "/v5alpha/participants",
-    );
+    const participants =
+      await edcClient.management<EdcParticipant[]>("/v5/participants");
 
     if (!Array.isArray(participants) || participants.length === 0) {
       // The connector answered and holds no participant context: no tasks.
@@ -113,7 +112,7 @@ export async function GET(request: Request) {
         const [negotiations, transfers] = await Promise.all([
           edcClient
             .management<Record<string, unknown>[]>(
-              `/v5alpha/participants/${ctxId}/contractnegotiations/request`,
+              `/v5/participants/${ctxId}/contractnegotiations/request`,
               "POST",
               {
                 "@context": [EDC_CONTEXT],
@@ -124,7 +123,7 @@ export async function GET(request: Request) {
             .catch(() => []),
           edcClient
             .management<Record<string, unknown>[]>(
-              `/v5alpha/participants/${ctxId}/transferprocesses/request`,
+              `/v5/participants/${ctxId}/transferprocesses/request`,
               "POST",
               {
                 "@context": [EDC_CONTEXT],

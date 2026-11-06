@@ -112,7 +112,7 @@ jq -n --arg did "$DID" --arg kid "$KID" --arg x "$X" --arg iss "$ISS" \
   --arg secret "$ISSUER_SECRET" --arg kc "$KC_URL" --arg vault "$VAULT_URL" '{
   roles: ["admin"],
   serviceEndpoints: [{type: "IssuerService", id: "issuer-service-1",
-    serviceEndpoint: ($iss + ":10012/api/issuance/v1alpha/participants/issuer")}],
+    serviceEndpoint: ($iss + ":10012/api/issuance/v1/participants/issuer")}],
   active: true, participantContextId: "issuer", did: $did,
   key: {keyId: $kid, privateKeyAlias: $kid, type: "JsonWebKey2020",
     publicKeyJwk: {kty: "OKP", crv: "Ed25519", kid: $kid, x: $x},
@@ -122,7 +122,7 @@ jq -n --arg did "$DID" --arg kid "$KID" --arg x "$X" --arg iss "$ISS" \
       tokenUrl: ($kc + "/realms/edcv/protocol/openid-connect/token")},
     config: {secretPath: "v1/participants", folderPath: "issuer", vaultUrl: $vault}}}
 }' > /tmp/manifest.json
-code=$(curl -s -m 30 -o /tmp/r.json -w '%{http_code}' -X POST "${ISS}:10015/api/identity/v1alpha/participants" \
+code=$(curl -s -m 30 -o /tmp/r.json -w '%{http_code}' -X POST "${ISS}:10015/api/identity/v1/participants" \
   -H "Authorization: Bearer ${PROV}" -H "Content-Type: application/json" --data @/tmp/manifest.json) || code=000
 rm -f /tmp/manifest.json
 case "$code" in
@@ -145,7 +145,7 @@ fi
 step "Attestation and credential definitions"
 admin_post() {  # admin_post <resource> <json>
   code=$(curl -s -m 20 -o /tmp/r.json -w '%{http_code}' -X POST \
-    "${ISS}/api/admin/v1alpha/participants/issuer/$1" \
+    "${ISS}/api/admin/v1/participants/issuer/$1" \
     -H "Authorization: Bearer ${ISSUER_TOKEN}" -H "Content-Type: application/json" -d "$2") || code=000
   case "$code" in
     2??) echo "  ok    $1 $(printf '%s' "$2" | jq -r .id)" ;;

@@ -27,6 +27,7 @@
     "@opentelemetry/semantic-conventions": "^1.44.0",
     "express": "^5.3.0",
     "express-rate-limit": "^8.7.2",
+    "jose": "^6.2.15",
     "neo4j-driver": "^6.3.0",
     "pg": "^8.23.1",
     "pino": "^10.4.0"

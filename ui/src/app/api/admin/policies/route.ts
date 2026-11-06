@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
   try {
     if (participantId) {
       const policies = await edcClient.management(
-        `/v5alpha/participants/${participantId}/policydefinitions/request`,
+        `/v5/participants/${participantId}/policydefinitions/request`,
         "POST",
         {
           "@context": [EDC_CONTEXT],
@@ -56,15 +56,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ participantId, policies, source: "edc" });
     }
 
-    const participants = await edcClient.management<
-      { "@id": string; identity: string }[]
-    >("/v5alpha/participants");
+    const participants =
+      await edcClient.management<{ "@id": string; identity: string }[]>(
+        "/v5/participants",
+      );
 
     const allPolicies = await Promise.all(
       participants.map(async (p) => {
         try {
           const policies = await edcClient.management(
-            `/v5alpha/participants/${p["@id"]}/policydefinitions/request`,
+            `/v5/participants/${p["@id"]}/policydefinitions/request`,
             "POST",
             {
               "@context": [EDC_CONTEXT],
@@ -176,7 +177,7 @@ export async function POST(request: NextRequest) {
     try {
       // Attempt EDC-V management API
       const result = await edcClient.management(
-        `/v5alpha/participants/${participantId}/policydefinitions`,
+        `/v5/participants/${participantId}/policydefinitions`,
         "POST",
         { "@context": [EDC_CONTEXT], ...policy },
       );
@@ -255,12 +256,12 @@ export async function PUT(request: NextRequest) {
       // EDC-V: delete old + create new (no PATCH in EDC-V Management API)
       if (policyId) {
         await edcClient.management(
-          `/v5alpha/participants/${participantId}/policydefinitions/${policyId}`,
+          `/v5/participants/${participantId}/policydefinitions/${policyId}`,
           "DELETE",
         );
       }
       const result = await edcClient.management(
-        `/v5alpha/participants/${participantId}/policydefinitions`,
+        `/v5/participants/${participantId}/policydefinitions`,
         "POST",
         { "@context": [EDC_CONTEXT], ...policy },
       );
@@ -322,7 +323,7 @@ export async function DELETE(request: NextRequest) {
 
     try {
       await edcClient.management(
-        `/v5alpha/participants/${participantId}/policydefinitions/${policyId}`,
+        `/v5/participants/${participantId}/policydefinitions/${policyId}`,
         "DELETE",
       );
       return NextResponse.json({ deleted: policyId });

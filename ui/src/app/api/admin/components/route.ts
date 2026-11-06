@@ -485,9 +485,10 @@ async function buildComponentsResponse() {
     let edcParticipants: { "@id": string; identity: string; state: string }[] =
       [];
     try {
-      edcParticipants = await edcClient.management<
-        { "@id": string; identity: string; state: string }[]
-      >("/v5alpha/participants");
+      edcParticipants =
+        await edcClient.management<
+          { "@id": string; identity: string; state: string }[]
+        >("/v5/participants");
     } catch {
       /* auth may be unavailable */
     }

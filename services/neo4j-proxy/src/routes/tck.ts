@@ -140,10 +140,10 @@ app.get("/tck", async (_req: Request, res: Response) => {
   // ── Fetch the dataspace participant registry once.
   //
   // Source of truth = IdentityHub. The JAD `jad-controlplane` build does
-  // not expose the multi-tenant `/v5alpha/participants` Management API
+  // not expose the multi-tenant `/v5/participants` Management API
   // (that endpoint only ships in the federation/EDC-V variants), so we
   // can't use the controlplane to enumerate participants on local Docker.
-  // The IdentityHub `/v1alpha/participants` route works on every
+  // The IdentityHub `/v1/participants` route works on every
   // deployment that has a healthy IH and is the canonical way to list
   // who's registered in the dataspace.
   //
@@ -151,7 +151,7 @@ app.get("/tck", async (_req: Request, res: Response) => {
   // is unreachable but CP somehow does expose the API (e.g. the Azure
   // EDC-V multi-tenant build).
   const ihData = await tckProbeJson<unknown[]>(
-    `${TCK_IDENTITY_URL}/v1alpha/participants`,
+    `${TCK_IDENTITY_URL}/v1/participants`,
     { headers: { ...authHeaders, "Content-Type": "application/json" } },
   );
   const ihParticipants = Array.isArray(ihData)
@@ -160,7 +160,7 @@ app.get("/tck", async (_req: Request, res: Response) => {
 
   const cpParticipantContexts = await tckProbeJson<
     Array<{ "@id": string; identity: string }>
-  >(`${TCK_CONTROLPLANE_MGMT_URL}/v5alpha/participants`, {
+  >(`${TCK_CONTROLPLANE_MGMT_URL}/v5/participants`, {
     headers: { ...authHeaders, "Content-Type": "application/json" },
   });
 
@@ -242,7 +242,7 @@ app.get("/tck", async (_req: Request, res: Response) => {
     }
 
     const data = await tckProbeJson<unknown[]>(
-      `${TCK_IDENTITY_URL}/v1alpha/participants/${finalContextId}/keypairs`,
+      `${TCK_IDENTITY_URL}/v1/participants/${finalContextId}/keypairs`,
       { headers: { ...authHeaders, "Content-Type": "application/json" } },
     );
     const hasPairs = Array.isArray(data) && data.length > 0;
@@ -265,7 +265,7 @@ app.get("/tck", async (_req: Request, res: Response) => {
     cpParticipantContexts?.[0]?.["@id"];
   if (firstPcId) {
     const issuerData = await tckProbeJson<unknown[]>(
-      `${TCK_ISSUER_URL}/v1alpha/participants/${firstPcId}/credentialdefinitions/query`,
+      `${TCK_ISSUER_URL}/v1/participants/${firstPcId}/credentialdefinitions/query`,
       {
         method: "POST",
         headers: { ...authHeaders, "Content-Type": "application/json" },

@@ -54,7 +54,7 @@
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/24be78bf13fc4873b503844d908fcbd2/credentials/request/44c9ac53-2ea1-43ad-af68-24fe50cebb2a",
+              "credentialRequest": "http://identityhub:7081/v1/participants/24be78bf13fc4873b503844d908fcbd2/credentials/request/44c9ac53-2ea1-43ad-af68-24fe50cebb2a",
               "holderPid": "44c9ac53-2ea1-43ad-af68-24fe50cebb2a",
               "participantContextId": "24be78bf13fc4873b503844d908fcbd2"
             },
@@ -119,7 +119,7 @@
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/772f6576b2a6472cb2e373dabc928517/credentials/request/a150fe0c-5e8f-46ca-8f2e-328fe44bc509",
+              "credentialRequest": "http://identityhub:7081/v1/participants/772f6576b2a6472cb2e373dabc928517/credentials/request/a150fe0c-5e8f-46ca-8f2e-328fe44bc509",
               "holderPid": "a150fe0c-5e8f-46ca-8f2e-328fe44bc509",
               "participantContextId": "772f6576b2a6472cb2e373dabc928517"
             },
@@ -184,7 +184,7 @@
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/14b071f958e941cfbe04ebb339ef4375/credentials/request/9f59ea18-5f48-4cb2-9aec-64bd13a63ca9",
+              "credentialRequest": "http://identityhub:7081/v1/participants/14b071f958e941cfbe04ebb339ef4375/credentials/request/9f59ea18-5f48-4cb2-9aec-64bd13a63ca9",
               "holderPid": "9f59ea18-5f48-4cb2-9aec-64bd13a63ca9",
               "participantContextId": "14b071f958e941cfbe04ebb339ef4375"
             },
@@ -249,7 +249,7 @@
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/c6ac1eb17d3342e29c726589ad85bace/credentials/request/7d5cd911-91e6-4b07-85f8-fbf39a8c7c3e",
+              "credentialRequest": "http://identityhub:7081/v1/participants/c6ac1eb17d3342e29c726589ad85bace/credentials/request/7d5cd911-91e6-4b07-85f8-fbf39a8c7c3e",
               "holderPid": "7d5cd911-91e6-4b07-85f8-fbf39a8c7c3e",
               "participantContextId": "c6ac1eb17d3342e29c726589ad85bace"
             },
@@ -314,7 +314,7 @@
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/09f8face6982493d82c9c997079c2b4e/credentials/request/e3371048-c0f8-41d2-b9b4-2d98b16c3c5b",
+              "credentialRequest": "http://identityhub:7081/v1/participants/09f8face6982493d82c9c997079c2b4e/credentials/request/e3371048-c0f8-41d2-b9b4-2d98b16c3c5b",
               "holderPid": "e3371048-c0f8-41d2-b9b4-2d98b16c3c5b",
               "participantContextId": "09f8face6982493d82c9c997079c2b4e"
             },
@@ -379,7 +379,7 @@
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/777819c41183544f96d39e9b6297493d/credentials/request/d1614aee-a56f-5720-b805-401cacb4a6b2",
+              "credentialRequest": "http://identityhub:7081/v1/participants/777819c41183544f96d39e9b6297493d/credentials/request/d1614aee-a56f-5720-b805-401cacb4a6b2",
               "holderPid": "d1614aee-a56f-5720-b805-401cacb4a6b2",
               "participantContextId": "777819c41183544f96d39e9b6297493d"
             },
@@ -444,7 +444,7 @@
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/4d23812c36dd5f5bb4049018cc8183ee/credentials/request/e312a548-9a7b-56e2-84bd-911e40768938",
+              "credentialRequest": "http://identityhub:7081/v1/participants/4d23812c36dd5f5bb4049018cc8183ee/credentials/request/e312a548-9a7b-56e2-84bd-911e40768938",
               "holderPid": "e312a548-9a7b-56e2-84bd-911e40768938",
               "participantContextId": "4d23812c36dd5f5bb4049018cc8183ee"
             },
@@ -509,7 +509,7 @@
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/7bfe11c52102520997b42e801c8eaba2/credentials/request/c14b5cf2-3c72-5d0e-9cec-4d801d2141f8",
+              "credentialRequest": "http://identityhub:7081/v1/participants/7bfe11c52102520997b42e801c8eaba2/credentials/request/c14b5cf2-3c72-5d0e-9cec-4d801d2141f8",
               "holderPid": "c14b5cf2-3c72-5d0e-9cec-4d801d2141f8",
               "participantContextId": "7bfe11c52102520997b42e801c8eaba2"
             },
@@ -574,7 +574,7 @@
           ],
           "properties": {
             "cfm.vpa.state": {
-              "credentialRequest": "http://identityhub:7081/v1alpha/participants/operations/credentials/request/operator-pid",
+              "credentialRequest": "http://identityhub:7081/v1/participants/operations/credentials/request/operator-pid",
               "holderPid": "operator-pid",
               "participantContextId": "operations-context"
             },

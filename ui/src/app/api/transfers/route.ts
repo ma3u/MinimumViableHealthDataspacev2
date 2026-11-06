@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
   let realTransfers: unknown[] = [];
   try {
     realTransfers = await edcClient.management<unknown[]>(
-      `/v5alpha/participants/${participantId}/transferprocesses/request`,
+      `/v5/participants/${participantId}/transferprocesses/request`,
       "POST",
       { "@context": [EDC_CONTEXT], "@type": "QuerySpec", filterExpression: [] },
     );
@@ -450,7 +450,7 @@ export async function POST(req: NextRequest) {
 
     try {
       const result = await edcClient.management<Record<string, unknown>>(
-        `/v5alpha/participants/${participantId}/transferprocesses`,
+        `/v5/participants/${participantId}/transferprocesses`,
         "POST",
         transferPayload,
       );

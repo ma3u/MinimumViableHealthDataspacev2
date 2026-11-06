@@ -26,7 +26,7 @@ export async function GET(
 
   try {
     const negotiation = await edcClient.management(
-      `/v5alpha/participants/${participantId}/contractnegotiations/${id}`,
+      `/v5/participants/${participantId}/contractnegotiations/${id}`,
     );
     return NextResponse.json(negotiation);
   } catch (err) {

@@ -26,7 +26,7 @@ set -euo pipefail
 
 # EDC Management API version segment — v5beta since the EDC 0.18 JAD
 # launchers (issue #97 Phase B); override for older stacks.
-MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
+MGMT_V="${EDC_MGMT_API_VERSION:-v5}"
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -34,6 +34,8 @@ MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
 IDENTITY_API="${EDC_IDENTITY_URL:-http://localhost:11005/api/identity}"
 ISSUER_API="${EDC_ISSUER_URL:-http://localhost:10013/api/admin}"
 MGMT_API="${EDC_MANAGEMENT_URL:-http://localhost:11003/api/mgmt}"
+# The IdentityHub database the trust checks read (identityhub_v1 with docker-compose.edc1.yml, #881).
+IH_DB="${IH_DB:-identityhub}"
 KEYCLOAK_URL="${KEYCLOAK_URL:-http://keycloak:8080}"
 REALM="${KEYCLOAK_REALM:-edcv}"
 CLIENT_ID="${EDC_CLIENT_ID:-admin}"
@@ -186,7 +188,7 @@ run_did_tests() {
 
     # Try participant query instead if direct DID endpoint doesn't exist
     if [ -z "$resp" ]; then
-      resp=$(identity_get "/v1alpha/participants/${ctx}/keypairs") || resp=""
+      resp=$(identity_get "/v1/participants/${ctx}/keypairs") || resp=""
     fi
 
     # Responding is not the property under test. DCP 3 requires a resolvable
@@ -197,7 +199,7 @@ run_did_tests() {
     fi
     if [ -z "$did" ]; then
       local part_resp
-      part_resp=$(identity_get "/v1alpha/participants") || part_resp=""
+      part_resp=$(identity_get "/v1/participants") || part_resp=""
       if [ -n "$part_resp" ]; then
         did=$(printf '%s' "$part_resp" | jq -r --arg c "$ctx" \
           '[.[] | select((.participantContextId // .participantId // .["@id"]) == $c)] | .[0].did // empty' 2>/dev/null) || did=""
@@ -222,7 +224,7 @@ run_did_tests() {
   # 1.2 — IdentityHub participant query returns all 4 contexts
   local test_id="DID-1.2"
   local resp
-  resp=$(identity_get "/v1alpha/participants") || resp=""
+  resp=$(identity_get "/v1/participants") || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
     local count
@@ -288,7 +290,7 @@ run_keypair_tests() {
     local ctx="${PARTICIPANT_CTXS[$i]}"
     local test_id="KEY-2.1-${slug}"
     local resp
-    resp=$(identity_get "/v1alpha/participants/${ctx}/keypairs") || resp=""
+    resp=$(identity_get "/v1/participants/${ctx}/keypairs") || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
@@ -307,7 +309,7 @@ run_keypair_tests() {
   # 2.2 — Key pair state is ACTIVATED
   local test_id="KEY-2.2"
   local resp
-  resp=$(identity_get "/v1alpha/participants/${PROVIDER_CTX}/keypairs") || resp=""
+  resp=$(identity_get "/v1/participants/${PROVIDER_CTX}/keypairs") || resp=""
 
   # IdentityHub serialises KeyPairState as its ordinal, not its name:
   # 100 CREATED, 200 ACTIVATED, 300 ROTATED, 400 REVOKED. Comparing against
@@ -390,9 +392,11 @@ run_keypair_tests() {
     local alias enc missing=0 checked=0
     while IFS= read -r alias; do
       [ -n "$alias" ] || continue
-      # EDC url-encodes the alias once more for the vault path: ':' -> %3A,
-      # an existing '%' -> %25, '#' -> %23 (observed: did%3Aweb%3Aidentityhub%253A7083%3Almc%23key1).
-      enc=$(printf '%s' "$alias" | sed -e 's/%/%25/g' -e 's/:/%3A/g' -e 's/#/%23/g')
+      # EDC percent-encodes the alias once more for the vault path: ':' -> %3A,
+      # an existing '%' -> %25, '#' -> %23, '@' -> %40 (observed:
+      # did%3Aweb%3Aidentityhub%253A7083%3Almc%23key1, and on 1.0 the seeds'
+      # ...%23key1%40<context id>, #881 finding 18).
+      enc=$(python3 -c 'import sys, urllib.parse; print(urllib.parse.quote(sys.argv[1], safe=""))' "$alias")
       checked=$((checked + 1))
       # Where IdentityHub put it depends on the participant's Vault config:
       # CFM-created participants carry edc.vault.hashicorp.config with a
@@ -433,7 +437,7 @@ run_credential_tests() {
     local ctx="${PARTICIPANT_CTXS[$i]}"
     local test_id="VC-3.1-${slug}"
     local resp
-    resp=$(identity_get "/v1alpha/participants/${ctx}/credentials") || resp=""
+    resp=$(identity_get "/v1/participants/${ctx}/credentials") || resp=""
 
     if [ -n "$resp" ] && echo "$resp" | jq -e 'type == "array"' >/dev/null 2>&1; then
       local count
@@ -452,7 +456,7 @@ run_credential_tests() {
   # 3.2 — Credentials include EHDS-specific types
   local test_id="VC-3.2"
   local resp
-  resp=$(identity_get "/v1alpha/participants/${PROVIDER_CTX}/credentials") || resp=""
+  resp=$(identity_get "/v1/participants/${PROVIDER_CTX}/credentials") || resp=""
 
   if [ -n "$resp" ] && echo "$resp" | jq -e 'length > 0' >/dev/null 2>&1; then
     local types
@@ -534,8 +538,8 @@ run_issuer_tests() {
   # 4.2 — Credential definitions exist
   local test_id="ISS-4.2"
   local resp
-  # Issuer uses multi-tenant API: /v1alpha/participants/{ctxId}/credentialdefinitions/query
-  resp=$(issuer_post "/v1alpha/participants/issuer/credentialdefinitions/query" \
+  # Issuer uses multi-tenant API: /v1/participants/{ctxId}/credentialdefinitions/query
+  resp=$(issuer_post "/v1/participants/issuer/credentialdefinitions/query" \
     '{"@context":["https://w3id.org/edc/connector/management/v2"],"@type":"QuerySpec"}') || resp=""
 
   # ISS-4.2 check: response may be either an error object or a valid array
@@ -699,7 +703,7 @@ trust_catalog() {
 
 # The issuers of the holder's ISSUED (500) MembershipCredentials, one per line.
 trust_membership_issuers() {
-  docker exec health-dataspace-postgres psql -U ih -d identityhub -At -c \
+  docker exec health-dataspace-postgres psql -U ih -d "$IH_DB" -At -c \
     "select issuer_id from credential_resource where participant_context_id='$1' and vc_state=500 and verifiable_credential::text like '%MembershipCredential%'" 2>/dev/null
 }
 
@@ -791,8 +795,10 @@ print("; ".join(problems))
 
   # 6.3 — On that credential, a DSP request to a hub provider is accepted
   test_id="TRUST-6.3"
+  local accepted_on_authority=0
   res=$(trust_catalog "$holder_ctx" "$provider_ctx" "$provider_did")
   if [ "${res#* }" = "Catalog" ]; then
+    accepted_on_authority=1
     pass "$test_id: ${TRUST_HOLDER_SLUG} gets ${TRUST_PROVIDER_SLUG}'s catalogue on the Governance Authority's credential"
     record_result "$test_id" "trust" "passed"
   else
@@ -804,7 +810,7 @@ print("; ".join(problems))
   test_id="TRUST-6.4"
   local since rogue_ok=1
   since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-  PROFILE=trust-check SERVICE=rogue-issuer CTX=rogue DB=rogueissuer ADMIN_PORT=10033 \
+  PROFILE=trust-check SERVICE=rogue-issuer CTX=rogue DB="${ROGUE_DB:-rogueissuer}" ADMIN_PORT=10033 \
     HOLDERS="did:web:identityhub%3A7083:${TRUST_HOLDER_SLUG}" \
     "${repo_dir}/scripts/seed-test-issuer.sh" >/dev/null 2>&1 || rogue_ok=0
   if [ "$rogue_ok" -eq 1 ]; then
@@ -824,6 +830,12 @@ print("; ".join(problems))
     if [ "${res#* }" != "Catalog" ] && [[ "$cp_log" == *"not supported for issuer '${TRUST_ROGUE_DID}'"* ]]; then
       pass "$test_id: a MembershipCredential from ${TRUST_ROGUE_DID} is refused (answered ${res%% *}: issuer not trusted for the type)"
       record_result "$test_id" "trust" "passed"
+    elif [ "${res#* }" != "Catalog" ] && [ "$accepted_on_authority" -eq 1 ]; then
+      # EDC 1.0 refuses without logging the reason (#881). 6.3 accepted the same
+      # holder a moment ago, and the rogue credential is the only change, so the
+      # refusal is its; 6.5 checks that removing it restores access.
+      pass "$test_id: a MembershipCredential from ${TRUST_ROGUE_DID} is refused (answered ${res%% *}); 6.3 accepted the holder without it"
+      record_result "$test_id" "trust" "passed" "refused once the rogue credential was added; not named in the log"
     else
       fail "$test_id: with a credential from ${TRUST_ROGUE_DID} the request answered ${res}, and the control plane did not name the issuer as untrusted"
       record_result "$test_id" "trust" "failed" "untrusted issuer not refused"
@@ -833,10 +845,10 @@ print("; ".join(problems))
   # Clean up whatever happened above: the holder's rogue credentials and the
   # rogue issuer itself.
   local cred
-  for cred in $(docker exec health-dataspace-postgres psql -U ih -d identityhub -At -c \
+  for cred in $(docker exec health-dataspace-postgres psql -U ih -d "$IH_DB" -At -c \
       "select id from credential_resource where participant_context_id='${holder_ctx}' and issuer_id='${TRUST_ROGUE_DID}'" 2>/dev/null); do
     curl -s -o /dev/null --max-time 20 -X DELETE -H "$(auth_header)" \
-      "${IDENTITY_API}/v1alpha/participants/${holder_ctx}/credentials/${cred}" 2>/dev/null || true
+      "${IDENTITY_API}/v1/participants/${holder_ctx}/credentials/${cred}" 2>/dev/null || true
   done
   docker rm -f health-dataspace-rogue-issuer >/dev/null 2>&1 || true
 

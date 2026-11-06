@@ -39,7 +39,7 @@ set -euo pipefail
 
 KEYCLOAK_URL="${KEYCLOAK_URL:-http://localhost:8080}"
 EDC_MANAGEMENT_URL="${EDC_MANAGEMENT_URL:-http://localhost:11003/api/mgmt}"
-MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
+MGMT_V="${EDC_MGMT_API_VERSION:-v5}"
 STS_TOKEN_URL="${STS_TOKEN_URL:-http://identityhub:7084/api/sts/token}"
 VAULT_CONTAINER="${VAULT_CONTAINER:-health-dataspace-vault}"
 VAULT_TOKEN="${VAULT_TOKEN:-root}"
@@ -134,3 +134,34 @@ if [ "$failed" -gt 0 ] || [ "$missing" -gt 0 ]; then
   exit 1
 fi
 echo -e "${GREEN}OK${NC}: every participant context can fetch its STS token"
+
+# EDC 1.0 (#881): a context speaks only the dataspace profiles it is linked
+# to. EDC 0.18 enabled every profile for everyone (edc.dsp.profiles.enable.all);
+# on 1.0 an unlinked context's catalog request answers 400 "No profile
+# 'http-dsp-profile-2025-1' for participant". The link is a PUT that replaces
+# the context's set, so it is safe to repeat.
+DSP_PROFILE="${DSP_PROFILE:-http-dsp-profile-2025-1}"
+unlinked=0
+while read -r ctx did; do
+  [ -n "$ctx" ] || continue
+  body=$(jq -n --arg c "$EDC_CTX" --arg p "$DSP_PROFILE" \
+    '{"@context": [$c], "@type": "AssociateDataspaceProfile", profiles: [$p]}')
+  code=$(curl -sS --max-time 20 -o /dev/null -w '%{http_code}' -X PUT \
+    -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" \
+    -d "$body" "${MGMT}/participants/${ctx}/profiles" 2>/dev/null) || code="000"
+  linked=$(curl -sS --max-time 20 -H "Authorization: Bearer ${TOKEN}" "${MGMT}/participants/${ctx}/profiles" 2>/dev/null \
+    | jq -r --arg p "$DSP_PROFILE" '[.[] | (.name // .["@id"] // .)] | index($p) // empty' 2>/dev/null || true)
+  if [ -n "$linked" ]; then
+    echo -e "  ${GREEN}+${NC} ${did} speaks ${DSP_PROFILE}"
+  else
+    echo -e "  ${RED}x${NC} ${did}: not linked to ${DSP_PROFILE} (PUT answered ${code})"
+    unlinked=$((unlinked + 1))
+  fi
+done <<EOF
+$contexts
+EOF
+if [ "$unlinked" -gt 0 ]; then
+  echo -e "${RED}FAIL${NC}: ${unlinked} participant context(s) without the ${DSP_PROFILE} profile; their DSP requests answer 400." >&2
+  exit 1
+fi
+echo -e "${GREEN}OK${NC}: every participant context speaks ${DSP_PROFILE}"

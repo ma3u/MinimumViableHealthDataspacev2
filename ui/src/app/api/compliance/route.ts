@@ -154,9 +154,10 @@ export async function GET(req: Request) {
     let finalConsumers = consumers;
     if (consumers.length === 0) {
       try {
-        const participants = await edcClient.management<
-          { "@id": string; identity?: string; state?: string }[]
-        >("/v5alpha/participants");
+        const participants =
+          await edcClient.management<
+            { "@id": string; identity?: string; state?: string }[]
+          >("/v5/participants");
         const active = (Array.isArray(participants) ? participants : []).filter(
           (p) => (p.state ?? "ACTIVATED") === "ACTIVATED",
         );

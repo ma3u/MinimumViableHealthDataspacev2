@@ -2,54 +2,73 @@
  * Tests for participant API routes:
  * - /api/participants/[id]/route.ts (PATCH)
  * - /api/participants/[id]/credentials/route.ts (GET)
+ *
+ * The id is the control plane context id since ADR-078; IdentityHub shares it.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 
 // Mock edcClient
-const mockTenant = vi.fn();
+const mockManagement = vi.fn();
 const mockIdentity = vi.fn();
 vi.mock("@/lib/edc", () => ({
   edcClient: {
-    tenant: (...args: unknown[]) => mockTenant(...args),
+    management: (...args: unknown[]) => mockManagement(...args),
     identity: (...args: unknown[]) => mockIdentity(...args),
   },
+  EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
 }));
 
 import { PATCH } from "@/app/api/participants/[id]/route";
 import { GET as GetCredentials } from "@/app/api/participants/[id]/credentials/route";
 
+const CTX = {
+  "@id": "ctx-1",
+  identity: "did:web:identityhub%3A7083:alpha-klinik",
+  state: "CREATED",
+  properties: { displayName: "Clinic", organization: "Clinic Org" },
+};
+
 describe("/api/participants/[id] PATCH", () => {
   beforeEach(() => {
-    mockTenant.mockReset();
+    mockManagement.mockReset();
   });
 
-  it("updates tenant properties successfully", async () => {
-    mockTenant.mockResolvedValue({ ok: true });
+  it("merges the new properties into the context's and PUTs the context", async () => {
+    mockManagement.mockResolvedValueOnce(CTX).mockResolvedValueOnce(undefined);
 
-    const req = new NextRequest("http://localhost/api/participants/tenant-1", {
+    const req = new NextRequest("http://localhost/api/participants/ctx-1", {
       method: "PATCH",
       body: JSON.stringify({
         properties: { displayName: "Updated Clinic" },
       }),
     });
-    const res = await PATCH(req, { params: { id: "tenant-1" } });
+    const res = await PATCH(req, { params: Promise.resolve({ id: "ctx-1" }) });
     const data = await res.json();
 
     expect(data.ok).toBe(true);
-    expect(mockTenant).toHaveBeenCalledWith(
-      "/v1alpha1/tenants/tenant-1",
-      "PATCH",
-      { properties: { displayName: "Updated Clinic" } },
+    expect(mockManagement).toHaveBeenNthCalledWith(1, "/v5/participants/ctx-1");
+    expect(mockManagement).toHaveBeenNthCalledWith(
+      2,
+      "/v5/participants/ctx-1",
+      "PUT",
+      expect.objectContaining({
+        "@id": "ctx-1",
+        identity: "did:web:identityhub%3A7083:alpha-klinik",
+        properties: {
+          displayName: "Updated Clinic",
+          organization: "Clinic Org",
+        },
+      }),
     );
   });
 
   it("returns 400 when properties is missing", async () => {
-    const req = new NextRequest("http://localhost/api/participants/tenant-1", {
+    const req = new NextRequest("http://localhost/api/participants/ctx-1", {
       method: "PATCH",
       body: JSON.stringify({}),
     });
-    const res = await PATCH(req, { params: { id: "tenant-1" } });
+    const res = await PATCH(req, { params: Promise.resolve({ id: "ctx-1" }) });
 
     expect(res.status).toBe(400);
     const data = await res.json();
@@ -57,68 +76,47 @@ describe("/api/participants/[id] PATCH", () => {
   });
 
   it("returns 400 when properties is not an object", async () => {
-    const req = new NextRequest("http://localhost/api/participants/tenant-1", {
+    const req = new NextRequest("http://localhost/api/participants/ctx-1", {
       method: "PATCH",
       body: JSON.stringify({ properties: "not-object" }),
     });
-    const res = await PATCH(req, { params: { id: "tenant-1" } });
+    const res = await PATCH(req, { params: Promise.resolve({ id: "ctx-1" }) });
 
     expect(res.status).toBe(400);
   });
 
-  it("returns 502 when TenantManager is unreachable", async () => {
-    mockTenant.mockRejectedValue(new Error("ECONNREFUSED"));
+  it("returns 502 when the control plane is unreachable", async () => {
+    mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
 
-    const req = new NextRequest("http://localhost/api/participants/tenant-1", {
+    const req = new NextRequest("http://localhost/api/participants/ctx-1", {
       method: "PATCH",
       body: JSON.stringify({ properties: { name: "test" } }),
     });
-    const res = await PATCH(req, { params: { id: "tenant-1" } });
+    const res = await PATCH(req, { params: Promise.resolve({ id: "ctx-1" }) });
 
     expect(res.status).toBe(502);
     const data = await res.json();
     expect(data.error).toBe("Failed to update participant");
   });
-
-  it("returns result from tenant manager when available", async () => {
-    mockTenant.mockResolvedValue(null);
-
-    const req = new NextRequest("http://localhost/api/participants/tenant-1", {
-      method: "PATCH",
-      body: JSON.stringify({ properties: { enabled: "true" } }),
-    });
-    const res = await PATCH(req, { params: { id: "tenant-1" } });
-    const data = await res.json();
-
-    expect(data.ok).toBe(true);
-  });
 });
 
 describe("/api/participants/[id]/credentials GET", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockManagement.mockReset();
+    mockIdentity.mockReset();
   });
 
-  it("returns credentials for a participant with a context ID", async () => {
-    mockTenant.mockResolvedValue([
-      {
-        id: "profile-1",
-        identifier: "did:web:alpha-klinik.de:participant",
-        properties: {
-          "cfm.vpa.state": { participantContextId: "ctx-abc" },
-        },
-      },
-    ]);
-
+  it("returns the context's credentials from IdentityHub", async () => {
+    mockManagement.mockResolvedValue(CTX);
     mockIdentity.mockResolvedValue([
       {
         id: "vc-1",
         verifiableCredential: {
           credential: {
             id: "urn:vc:ehds-participant-1",
-            type: ["VerifiableCredential", "EHDSParticipantCredential"],
-            issuer: { id: "did:web:issuer.localhost" },
-            issuanceDate: "2025-01-01T00:00:00Z",
+            type: ["VerifiableCredential", "MembershipCredential"],
+            issuer: { id: "did:web:issuerservice%3A10016:issuer" },
+            issuanceDate: "2026-11-05T00:00:00Z",
             credentialSubject: [{ participantId: "alpha-klinik" }],
           },
         },
@@ -126,65 +124,53 @@ describe("/api/participants/[id]/credentials GET", () => {
     ]);
 
     const req = new NextRequest(
-      "http://localhost/api/participants/tenant-1/credentials",
+      "http://localhost/api/participants/ctx-1/credentials",
     );
-    const res = await GetCredentials(req, { params: { id: "tenant-1" } });
+    const res = await GetCredentials(req, {
+      params: Promise.resolve({ id: "ctx-1" }),
+    });
     const data = await res.json();
 
+    expect(mockIdentity).toHaveBeenCalledWith(
+      "/v1/participants/ctx-1/credentials",
+    );
     expect(data).toHaveLength(1);
-    expect(data[0].credentials).toHaveLength(1);
-    expect(data[0].credentials[0].type).toContain("EHDSParticipantCredential");
-    expect(data[0].did).toBe("did:web:alpha-klinik.de:participant");
+    expect(data[0]).toMatchObject({
+      profileId: "ctx-1",
+      participantContextId: "ctx-1",
+      did: "did:web:identityhub:7083:alpha-klinik",
+    });
+    expect(data[0].credentials[0].type).toContain("MembershipCredential");
   });
 
-  it("returns empty credentials when no context ID available", async () => {
-    mockTenant.mockResolvedValue([
-      {
-        id: "profile-2",
-        properties: {},
-      },
-    ]);
-
-    const req = new NextRequest(
-      "http://localhost/api/participants/tenant-2/credentials",
-    );
-    const res = await GetCredentials(req, { params: { id: "tenant-2" } });
-    const data = await res.json();
-
-    expect(data[0].credentials).toEqual([]);
-    expect(data[0].error).toBeDefined();
-  });
-
-  it("handles identity hub fetch errors per profile", async () => {
-    mockTenant.mockResolvedValue([
-      {
-        id: "profile-3",
-        properties: {
-          "cfm.vpa.state": { participantContextId: "ctx-err" },
-        },
-      },
-    ]);
-
+  it("carries an IdentityHub error rather than failing the request", async () => {
+    mockManagement.mockResolvedValue(CTX);
     mockIdentity.mockRejectedValue(new Error("Identity Hub offline"));
 
     const req = new NextRequest(
-      "http://localhost/api/participants/tenant-3/credentials",
+      "http://localhost/api/participants/ctx-1/credentials",
     );
-    const res = await GetCredentials(req, { params: { id: "tenant-3" } });
+    const res = await GetCredentials(req, {
+      params: Promise.resolve({ id: "ctx-1" }),
+    });
     const data = await res.json();
 
+    expect(res.status).toBe(200);
     expect(data[0].credentials).toEqual([]);
     expect(data[0].error).toContain("Identity Hub offline");
   });
 
-  it("returns 502 when TenantManager is completely down", async () => {
-    mockTenant.mockRejectedValue(new Error("ECONNREFUSED"));
+  it("returns 502, with the cause, when the context cannot be read", async () => {
+    mockManagement.mockRejectedValue(new Error("ECONNREFUSED"));
 
     const req = new NextRequest(
-      "http://localhost/api/participants/tenant-4/credentials",
+      "http://localhost/api/participants/ctx-4/credentials",
     );
-    const res = await GetCredentials(req, { params: { id: "tenant-4" } });
+    const res = await GetCredentials(req, {
+      params: Promise.resolve({ id: "ctx-4" }),
+    });
 
     expect(res.status).toBe(502);
+    expect((await res.json()).detail).toContain("ECONNREFUSED");
   });
 });

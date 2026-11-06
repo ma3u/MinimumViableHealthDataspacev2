@@ -24,7 +24,7 @@ set -euo pipefail
 
 KC_HOST="${KC_HOST:-http://localhost:8080}"
 ISSUER_API="${ISSUER_API:-http://localhost:10013}"
-ISSUER_BASE="$ISSUER_API/api/admin/v1alpha/participants/issuer"
+ISSUER_BASE="$ISSUER_API/api/admin/v1/participants/issuer"
 
 ok()   { echo "  ✓ $1"; }
 warn() { echo "  ⚠ $1"; }

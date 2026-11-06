@@ -78,7 +78,7 @@ EDC_ISSUER_URL="https://${ISSUER_APP}.internal.${ACA_DOMAIN}/api/admin"
 # (ui/src/lib/edc/client.ts), so without it every call is a 404. The control
 # plane serves v5beta since ADR-055 (#503); the April build it replaced
 # (jad-controlplane:2026-04-14) served only v4alpha.
-EDC_MGMT_API_VERSION="${EDC_MGMT_API_VERSION:-v5beta}"
+EDC_MGMT_API_VERSION="${EDC_MGMT_API_VERSION:-v5}"
 EDC_TENANT_URL="https://${TENANT_MGR_APP}.internal.${ACA_DOMAIN}/api"
 EDC_PROVISION_URL="https://${PROVISION_MGR_APP}.internal.${ACA_DOMAIN}/api"
 # Keycloak has external ingress only — reach it via public FQDN, not :8080.

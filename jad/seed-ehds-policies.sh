@@ -34,10 +34,10 @@ get_token() {
 # shared library uses, and use whatever answers.
 MGMT_V="${MGMT_V:-${EDC_MGMT_API_VERSION:-}}"
 if [ -z "$MGMT_V" ]; then
-  for _v in v5beta v5alpha v4alpha v3; do
+  for _v in v5; do
     if [ "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $(get_token)" "$CP_MGMT/${_v}/participants")" = "200" ]; then MGMT_V="$_v"; break; fi
   done
-  [ -n "$MGMT_V" ] || { echo "ERROR: no Management API version answered at $CP_MGMT (tried v5beta v5alpha v4alpha v3)" >&2; exit 1; }
+  [ -n "$MGMT_V" ] || { echo "ERROR: no Management API version answered at $CP_MGMT (tried v5)" >&2; exit 1; }
 fi
 echo "Management API version: $MGMT_V"
 

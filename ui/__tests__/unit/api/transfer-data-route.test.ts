@@ -71,8 +71,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-function siglet(token = "tok") {
-  return new Response(JSON.stringify({ token }), { status: 200 });
+function siglet(token = "tok", endpoint?: string) {
+  return new Response(JSON.stringify({ token, endpoint }), { status: 200 });
 }
 function dataPlane(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -96,12 +96,45 @@ describe("GET /api/transfers/[id]/data", () => {
       `http://siglet:8080/tokens/${CTX}/${TP}`,
     );
     expect(fetchMock.mock.calls[1][0]).toBe(
-      "http://dataplane-fhir:8186/api/data",
+      "http://neo4j-proxy:9090/dataspace/data",
     );
     expect(fetchMock.mock.calls[1][1].headers.Authorization).toBe("tok-1");
     expect(body.assetId).toBe("a1");
     expect(body.data.entry).toHaveLength(2);
     expect(JSON.stringify(body)).not.toContain("tok-1");
+  });
+
+  it("calls the endpoint siglet names on EDC 1.0 (#881)", async () => {
+    mockManagement.mockResolvedValue({ state: "STARTED" });
+    fetchMock
+      .mockResolvedValueOnce(
+        siglet("tok-3", "http://neo4j-proxy:9090/dataspace/data"),
+      )
+      .mockResolvedValueOnce(dataPlane(BUNDLE));
+
+    const res = await get();
+
+    expect(res.status).toBe(200);
+    expect(fetchMock.mock.calls[1][0]).toBe(
+      "http://neo4j-proxy:9090/dataspace/data",
+    );
+  });
+
+  it("refuses an endpoint whose host is not in EDR_DATA_HOSTS, before calling it", async () => {
+    mockManagement.mockResolvedValue({ state: "STARTED" });
+    fetchMock.mockResolvedValueOnce(
+      siglet("tok-4", "http://169.254.169.254/latest/meta-data"),
+    );
+
+    const res = await get();
+    const body = await res.json();
+
+    expect(res.status).toBe(502);
+    expect(body.step).toBe("token");
+    expect(body.detail).toMatch(
+      /169\.254\.169\.254, which is not in EDR_DATA_HOSTS/,
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("tries the correlation id when siglet does not know the transfer id", async () => {

@@ -34,9 +34,9 @@ export async function POST(req: NextRequest) {
 
     // Query credential definitions from the IssuerService.
     // Definitions are registered under the "issuer" participant context.
-    // Correct path: POST /v1alpha/participants/{ctxId}/credentialdefinitions/query
+    // Correct path: POST /v1/participants/{ctxId}/credentialdefinitions/query
     const credDefs = await edcClient.issuer<Record<string, unknown>[]>(
-      "/v1alpha/participants/issuer/credentialdefinitions/query",
+      "/v1/participants/issuer/credentialdefinitions/query",
       "POST",
       {}, // empty QuerySpec → return all
     );

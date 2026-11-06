@@ -1,9 +1,9 @@
 /**
  * Extra coverage tests for /api/participants route.
  *
- * Targets uncovered lines: 80-92 (CFM tenant enrichment loop),
- * 141-143 (mock-file fallback success path), and branch fallbacks
- * in the displayName resolution chain.
+ * Targets the displayName resolution chain (the context's own properties,
+ * then the seeded five's names, then the slug), the mock-file fallback, and
+ * POST's defaults for the optional fields.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
@@ -18,7 +18,8 @@ vi.mock("fs", () => ({
 vi.mock("@/lib/edc", () => ({
   edcClient: {
     management: vi.fn(),
-    tenant: vi.fn(),
+    identity: vi.fn(),
+    issuer: vi.fn(),
   },
   EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
 }));
@@ -27,11 +28,38 @@ import { edcClient } from "@/lib/edc";
 import { GET, POST } from "@/app/api/participants/route";
 
 const mockManagement = vi.mocked(edcClient.management);
-const mockTenant = vi.mocked(edcClient.tenant);
+const mockIdentity = vi.mocked(edcClient.identity);
+const mockIssuer = vi.mocked(edcClient.issuer);
+
+/** The 1.0 stack answering every provisioning step (lib/edc/provision.ts). */
+function stackAnswers() {
+  mockManagement.mockImplementation(async (path, method) =>
+    path === "/v5/participants" && method === "POST"
+      ? { "@id": "ctx-new" }
+      : undefined,
+  );
+  mockIdentity.mockResolvedValue(undefined);
+  mockIssuer.mockImplementation(async (path) =>
+    String(path).endsWith("/credentialdefinitions/query")
+      ? [{ id: "membership-def", credentialType: "MembershipCredential" }]
+      : undefined,
+  );
+}
+
+/** The properties the context was created with. */
+function createdProperties() {
+  const call = mockManagement.mock.calls.find(
+    (c) => c[0] === "/v5/participants" && c[1] === "POST",
+  );
+  return (call?.[2] as { properties: Record<string, string> }).properties;
+}
 
 describe("/api/participants – extra coverage", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockManagement.mockReset();
+    mockIdentity.mockReset();
+    mockIssuer.mockReset();
+    mockReadFile.mockReset();
     mockReadFile.mockRejectedValue(new Error("no mock file"));
   });
 
@@ -50,7 +78,6 @@ describe("/api/participants – extra coverage", () => {
         state: "CREATED",
       },
     ]);
-    mockTenant.mockResolvedValue([]);
 
     const data = await (await GET()).json();
 
@@ -73,7 +100,6 @@ describe("/api/participants – extra coverage", () => {
       },
       { "@id": "ctx-gone", identity: "did:web:x", state: "DEACTIVATED" },
     ]);
-    mockTenant.mockResolvedValue([]);
     mockReadFile.mockResolvedValue(JSON.stringify([{ "@id": "mock-ctx" }]));
 
     const data = await (await GET()).json();
@@ -97,7 +123,6 @@ describe("/api/participants – extra coverage", () => {
     mockManagement.mockResolvedValue([
       { "@id": "ctx-gone", identity: "did:web:x", state: "DEACTIVATED" },
     ]);
-    mockTenant.mockResolvedValue([]);
     mockReadFile.mockResolvedValue(JSON.stringify([{ "@id": "mock-ctx" }]));
 
     const data = await (await GET()).json();
@@ -105,23 +130,15 @@ describe("/api/participants – extra coverage", () => {
     expect(data).toEqual([{ "@id": "mock-ctx" }]);
   });
 
-  // ── CFM tenant enrichment (lines 80-92) ────────────────────────────────
+  // ── The context's own properties (ADR-078) ────────────────────────────
 
-  it("GET enriches participants with CFM tenant displayNames via DID slug", async () => {
+  it("GET names a participant onboarded through the hub by its own properties", async () => {
     mockManagement.mockResolvedValue([
       {
         "@id": "ctx-1",
-        identity: "did:web:identityhub%3A7083:alpha-klinik",
-        state: "ACTIVATED",
-      },
-    ]);
-    mockTenant.mockResolvedValue([
-      {
-        id: "t1",
-        properties: {
-          displayName: "AlphaKlinik Berlin",
-          participantDid: "did:web:identityhub%3A7083:alpha-klinik",
-        },
+        identity: "did:web:identityhub%3A7083:riverside-general-4f2a91",
+        state: "CREATED",
+        properties: { displayName: "Riverside General", role: "DATA_HOLDER" },
       },
     ]);
 
@@ -129,94 +146,27 @@ describe("/api/participants – extra coverage", () => {
     const data = await res.json();
 
     expect(res.status).toBe(200);
-    expect(data).toHaveLength(1);
-    expect(data[0].displayName).toBe("AlphaKlinik Berlin");
+    expect(data[0]).toMatchObject({
+      displayName: "Riverside General",
+      role: "DATA_HOLDER",
+      slug: "riverside-general-4f2a91",
+    });
   });
 
-  it("GET skips tenants with no displayName in the enrichment loop", async () => {
-    mockManagement.mockResolvedValue([
-      { "@id": "ctx-1", identity: "did:web:unknown-slug", state: "ACTIVATED" },
-    ]);
-    mockTenant.mockResolvedValue([
-      {
-        id: "t-no-dn",
-        properties: {
-          // displayName is missing → should be skipped
-          participantDid: "did:web:unknown-slug",
-        },
-      },
-    ]);
-
-    const res = await GET();
-    const data = await res.json();
-
-    expect(data).toHaveLength(1);
-    // Falls through to slug-based name since tenant had no displayName
-    expect(data[0].displayName).toBe("unknown-slug");
-  });
-
-  it("GET indexes tenant by displayName slug for looser matching", async () => {
-    mockManagement.mockResolvedValue([
-      {
-        "@id": "ctx-1",
-        identity: "did:web:identityhub:pharmaco",
-        state: "ACTIVATED",
-      },
-    ]);
-    mockTenant.mockResolvedValue([
-      {
-        id: "t2",
-        properties: {
-          displayName: "PharmaCo Research AG",
-          participantDid: "did:web:identityhub:pharmaco",
-        },
-      },
-    ]);
-
-    const res = await GET();
-    const data = await res.json();
-
-    // Should pick up tenantMap entry via slug match
-    expect(data[0].displayName).toBe("PharmaCo Research AG");
-  });
-
-  it("GET handles tenant with empty participantDid gracefully", async () => {
-    mockManagement.mockResolvedValue([
-      { "@id": "ctx-x", identity: "did:web:x", state: "ACTIVATED" },
-    ]);
-    mockTenant.mockResolvedValue([
-      {
-        id: "t3",
-        properties: {
-          displayName: "Some Name",
-          // participantDid missing → slug will be empty, should not crash
-        },
-      },
-    ]);
-
-    const res = await GET();
-    const data = await res.json();
-
-    expect(res.status).toBe(200);
-    expect(data).toHaveLength(1);
-  });
-
-  it("GET falls back to static SLUG_DISPLAY_NAMES when CFM tenant fails", async () => {
+  it("GET falls back to the seeded five's names when the context has none", async () => {
     mockManagement.mockResolvedValue([
       {
         "@id": "ctx-ak",
         identity: "did:web:identityhub%3A7083:alpha-klinik",
         state: "ACTIVATED",
+        properties: {},
       },
     ]);
-    // CFM tenant call fails → falls to catch
-    mockTenant.mockRejectedValue(new Error("CFM offline"));
 
     const res = await GET();
     const data = await res.json();
 
     expect(res.status).toBe(200);
-    // Static fallback for alpha-klinik slug
     expect(data[0].displayName).toBe("AlphaKlinik Berlin");
     expect(data[0].role).toBe("DATA_HOLDER");
   });
@@ -231,7 +181,6 @@ describe("/api/participants – extra coverage", () => {
         state: "ACTIVATED",
       },
     ]);
-    mockTenant.mockRejectedValue(new Error("failed"));
 
     const res = await GET();
     const data = await res.json();
@@ -244,7 +193,6 @@ describe("/api/participants – extra coverage", () => {
     mockManagement.mockResolvedValue([
       { "@id": "abcdefghijklmno", state: "ACTIVATED" },
     ]);
-    mockTenant.mockRejectedValue(new Error("failed"));
 
     const res = await GET();
     const data = await res.json();
@@ -261,7 +209,6 @@ describe("/api/participants – extra coverage", () => {
         state: "ACTIVATED",
       },
     ]);
-    mockTenant.mockRejectedValue(new Error("failed"));
 
     const res = await GET();
     const data = await res.json();
@@ -273,7 +220,6 @@ describe("/api/participants – extra coverage", () => {
 
   it("GET falls through to mock when management returns non-array", async () => {
     mockManagement.mockResolvedValue(null);
-    mockTenant.mockRejectedValue(new Error("down"));
     mockReadFile.mockResolvedValue(
       JSON.stringify([
         { "@id": "mock-1", displayName: "MockClinic", role: "DATA_HOLDER" },
@@ -324,11 +270,7 @@ describe("/api/participants – extra coverage", () => {
   // ── POST: defaults for optional fields ─────────────────────────────────
 
   it("POST defaults organization to displayName when omitted", async () => {
-    mockTenant
-      .mockResolvedValueOnce([{ id: "cell-1" }])
-      .mockResolvedValueOnce([{ id: "profile-1" }])
-      .mockResolvedValueOnce({ id: "tenant-new" })
-      .mockResolvedValueOnce({ id: "part-new" });
+    stackAnswers();
 
     const req = new NextRequest("http://localhost/api/participants", {
       method: "POST",
@@ -338,29 +280,15 @@ describe("/api/participants – extra coverage", () => {
     const data = await res.json();
 
     expect(res.status).toBe(201);
-    expect(data.tenantId).toBe("tenant-new");
-
-    // Verify organization defaulted to displayName
-    expect(mockTenant).toHaveBeenCalledWith(
-      "/v1alpha1/tenants",
-      "POST",
-      expect.objectContaining({
-        properties: expect.objectContaining({
-          organization: "Test",
-          ehdsParticipantType: "DATA_USER",
-        }),
-      }),
-    );
+    expect(data.tenantId).toBe("ctx-new");
+    expect(createdProperties()).toMatchObject({
+      organization: "Test",
+      ehdsParticipantType: "DATA_USER",
+    });
   });
 
-  // #455: the profile carried no DID and a field the manager does not read,
-  // so the EDC-V and registration agents rejected every registration.
-  it("POST sends the participant profile the agents provision from", async () => {
-    mockTenant
-      .mockResolvedValueOnce([{ id: "cell-1" }])
-      .mockResolvedValueOnce([{ id: "profile-1" }])
-      .mockResolvedValueOnce({ id: "tenant-new" })
-      .mockResolvedValueOnce({ id: "part-new" });
+  it("POST gives the participant a fresh did:web under the IdentityHub", async () => {
+    stackAnswers();
 
     const req = new NextRequest("http://localhost/api/participants", {
       method: "POST",
@@ -373,25 +301,19 @@ describe("/api/participants – extra coverage", () => {
     const res = await POST(req);
 
     expect(res.status).toBe(201);
-    const call = mockTenant.mock.calls.find(
-      (c) => c[0] === "/v1alpha1/tenants/tenant-new/participant-profiles",
-    );
-    expect(call?.[1]).toBe("POST");
-    const body = call?.[2] as Record<string, unknown>;
-    expect(body.identifier).toMatch(
+    const { did } = await res.json();
+    expect(did).toMatch(
       /^did:web:identityhub%3A7083:testpraxis-lindenhof-[0-9a-f]{6}$/,
     );
-    expect(body.dataspaceProfileIds).toEqual(["profile-1"]);
-    expect(body.participantRoles).toEqual({ "profile-1": ["provider"] });
-    expect(body).not.toHaveProperty("dataspaceProfileId");
+    expect(mockIdentity).toHaveBeenCalledWith(
+      "/v1/participants",
+      "POST",
+      expect.objectContaining({ participantContextId: "ctx-new", did }),
+    );
   });
 
   it("POST defaults ehdsParticipantType to role when omitted", async () => {
-    mockTenant
-      .mockResolvedValueOnce([{ id: "cell-1" }])
-      .mockResolvedValueOnce([{ id: "profile-1" }])
-      .mockResolvedValueOnce({ id: "t-x" })
-      .mockResolvedValueOnce({ id: "p-x" });
+    stackAnswers();
 
     const req = new NextRequest("http://localhost/api/participants", {
       method: "POST",
@@ -404,13 +326,10 @@ describe("/api/participants – extra coverage", () => {
     const res = await POST(req);
 
     expect(res.status).toBe(201);
-    expect(mockTenant).toHaveBeenCalledWith(
-      "/v1alpha1/tenants",
-      "POST",
-      expect.objectContaining({
-        properties: expect.objectContaining({ ehdsParticipantType: "HDAB" }),
-      }),
-    );
+    expect(createdProperties()).toMatchObject({
+      organization: "Org",
+      ehdsParticipantType: "HDAB",
+    });
   });
 
   it("POST returns 400 when both displayName and role are missing", async () => {

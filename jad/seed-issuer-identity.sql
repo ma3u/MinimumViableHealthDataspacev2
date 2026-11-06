@@ -1,7 +1,7 @@
 -- =============================================================================
 -- IssuerService Identity Fixup — keypair_resource, did_resources, activation
 -- =============================================================================
--- The participant creation API (POST /api/identity/v1alpha/participants) creates
+-- The participant creation API (POST /api/identity/v1/participants) creates
 -- the participant_context record but does not always complete the full activation
 -- lifecycle (keypair_resource, did_resources, state 300). This script ensures
 -- the IssuerService's issuer participant is fully configured for DCP credential
@@ -110,7 +110,7 @@ INSERT INTO did_resources (
         {
           "id": "issuer-service-1",
           "type": "IssuerService",
-          "serviceEndpoint": "http://issuerservice:10012/api/issuance/v1alpha/participants/issuer"
+          "serviceEndpoint": "http://issuerservice:10012/api/issuance/v1/participants/issuer"
         }
       ]
     }',

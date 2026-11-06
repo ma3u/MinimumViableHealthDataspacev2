@@ -23,13 +23,18 @@
 set -euo pipefail
 
 # -- Config -------------------------------------------------------------------
-DATA_PLANE_URL="${DATA_PLANE_URL:-http://localhost:11002}"
+# EDC 1.0 (#881): siglet is the data plane. The consumer's siglet holds the
+# provider's token and the endpoint for a STARTED pull transfer, and both are
+# only reachable inside the stack's network, so the calls go through a
+# container on it that has curl.
+NET_CONTAINER="${NET_CONTAINER:-health-dataspace-controlplane}"
+SIGLET_URL="${SIGLET_URL:-http://siglet:8080}"
 NEO4J_HTTP="${NEO4J_HTTP:-http://localhost:7474}"
 NEO4J_USER="${NEO4J_USER:-neo4j}"
 NEO4J_PASS="${NEO4J_PASS:-healthdataspace}"
 PG_CONTAINER="health-dataspace-postgres"
 PG_USER="cp"
-PG_DB="controlplane"
+PG_DB="${PG_DB:-controlplane}"  # controlplane_v1 with docker-compose.edc1.yml
 
 # ANSI colours
 GREEN='\033[0;32m'
@@ -43,39 +48,26 @@ step()   { echo -e "${YELLOW}→ $1${NC}"; }
 ok()     { echo -e "${GREEN}✓ $1${NC}"; }
 fail()   { echo -e "${RED}✗ $1${NC}"; }
 
-# -- Helper: Extract EDR from PostgreSQL --------------------------------------
-get_edr_token() {
-  local asset_id="$1"
-  local tp_type="${2:-CONSUMER}"
-  docker exec "$PG_CONTAINER" psql -U "$PG_USER" -d "$PG_DB" -t -A -c "
-    SELECT content_data_address
+# -- Helper: the EDR of the newest STARTED consumer transfer of an asset ------
+# Prints "<endpoint> <token>", or nothing. The token is never echoed further.
+get_edr() {
+  local asset_id="$1" row ctx tp
+  row=$(docker exec "$PG_CONTAINER" psql -U "$PG_USER" -d "$PG_DB" -t -A -c "
+    SELECT participant_context_id, transferprocess_id
     FROM edc_transfer_process
-    WHERE asset_id='${asset_id}' AND type='${tp_type}' AND state=600
+    WHERE asset_id='${asset_id}' AND type='CONSUMER' AND state=600
     ORDER BY created_at DESC LIMIT 1;
-  " | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-props = data.get('properties', {})
-token_key = 'https://w3id.org/edc/v0.0.1/ns/authorization'
-print(props.get(token_key, ''))
-" 2>/dev/null
+  ")
+  [ -n "$row" ] || return 0
+  ctx="${row%%|*}"; tp="${row##*|}"
+  docker exec "$NET_CONTAINER" curl -sf "${SIGLET_URL}/tokens/${ctx}/${tp}" 2>/dev/null \
+    | python3 -c "import json,sys; d=json.load(sys.stdin); print(d.get('endpoint',''), d.get('token',''))" 2>/dev/null || true
 }
 
-get_edr_endpoint() {
-  local asset_id="$1"
-  local tp_type="${2:-CONSUMER}"
-  docker exec "$PG_CONTAINER" psql -U "$PG_USER" -d "$PG_DB" -t -A -c "
-    SELECT content_data_address
-    FROM edc_transfer_process
-    WHERE asset_id='${asset_id}' AND type='${tp_type}' AND state=600
-    ORDER BY created_at DESC LIMIT 1;
-  " | python3 -c "
-import json, sys
-data = json.load(sys.stdin)
-props = data.get('properties', {})
-endpoint_key = 'https://w3id.org/edc/v0.0.1/ns/endpoint'
-print(props.get(endpoint_key, ''))
-" 2>/dev/null
+# GET <endpoint><suffix> with the token, from inside the network.
+pull() {
+  local endpoint="$1" token="$2" suffix="${3:-}"
+  docker exec "$NET_CONTAINER" curl -sf -H "Authorization: Bearer ${token}" "${endpoint}${suffix}"
 }
 
 # -- Helper: Query Neo4j HTTP API --------------------------------------------
@@ -114,21 +106,22 @@ done
 # -- Step 2: CRO retrieves FHIR Patient data via data plane ------------------
 header "Step 2 — CRO PharmaCo Research AG: Retrieve FHIR Patient Data"
 
-step "Extracting EDR (Endpoint Data Reference) for fhir-patient-everything..."
-FHIR_TOKEN=$(get_edr_token "fhir-patient-everything" "CONSUMER")
-FHIR_ENDPOINT=$(get_edr_endpoint "fhir-patient-everything" "CONSUMER")
+FHIR_ASSET=""
+for candidate in fhir-patient-everything fhir-patient-search; do
+  step "Asking the consumer's siglet for the EDR of ${candidate}..."
+  read -r FHIR_ENDPOINT FHIR_TOKEN <<<"$(get_edr "$candidate")" || true
+  if [ -n "${FHIR_TOKEN:-}" ]; then FHIR_ASSET="$candidate"; break; fi
+done
 
-if [ -z "$FHIR_TOKEN" ]; then
-  fail "No EDR token found for fhir-patient-everything. Transfer may not be STARTED."
+if [ -z "$FHIR_ASSET" ]; then
+  fail "No EDR for a FHIR patient asset. Is a transfer STARTED, and is siglet up?"
   exit 1
 fi
 
-ok "EDR endpoint: ${FHIR_ENDPOINT}"
-ok "EDR token: ${FHIR_TOKEN:0:40}..."
+ok "EDR for ${FHIR_ASSET}: endpoint ${FHIR_ENDPOINT} (token held, not shown)"
 
 step "Fetching FHIR Patient Bundle via data plane (limit 5)..."
-FHIR_RESPONSE=$(curl -sf "${DATA_PLANE_URL}/api/public?_count=5" \
-  -H "Authorization: ${FHIR_TOKEN}")
+FHIR_RESPONSE=$(pull "$FHIR_ENDPOINT" "$FHIR_TOKEN" "?_count=5")
 
 FHIR_TOTAL=$(echo "$FHIR_RESPONSE" | python3 -c "import json,sys; print(json.load(sys.stdin)['total'])")
 FHIR_TYPE=$(echo "$FHIR_RESPONSE" | python3 -c "import json,sys; print(json.load(sys.stdin)['resourceType'])")
@@ -138,8 +131,7 @@ ok "Response: ${FHIR_TYPE} with ${FHIR_TOTAL} entries"
 ok "First patient: ${FHIR_FIRST}"
 
 step "Fetching full patient list (default 100)..."
-FHIR_FULL=$(curl -sf "${DATA_PLANE_URL}/api/public" \
-  -H "Authorization: ${FHIR_TOKEN}")
+FHIR_FULL=$(pull "$FHIR_ENDPOINT" "$FHIR_TOKEN")
 FHIR_FULL_TOTAL=$(echo "$FHIR_FULL" | python3 -c "import json,sys; print(json.load(sys.stdin)['total'])")
 ok "Full response: ${FHIR_FULL_TOTAL} patients returned"
 
@@ -147,17 +139,16 @@ ok "Full response: ${FHIR_FULL_TOTAL} patients returned"
 header "Step 3 — HDAB MedReg DE: Retrieve HealthDCAT-AP Catalog"
 
 step "Extracting EDR for healthdcatap-catalog..."
-CATALOG_TOKEN=$(get_edr_token "healthdcatap-catalog" "CONSUMER")
+read -r CATALOG_ENDPOINT CATALOG_TOKEN <<<"$(get_edr "healthdcatap-catalog")" || true
 
-if [ -z "$CATALOG_TOKEN" ]; then
+if [ -z "${CATALOG_TOKEN:-}" ]; then
   fail "No EDR token found for healthdcatap-catalog. Run seed-federated-catalog.sh first."
   echo "(Skipping catalog transfer test)"
 else
-  ok "EDR token: ${CATALOG_TOKEN:0:40}..."
+  ok "EDR endpoint: ${CATALOG_ENDPOINT} (token held, not shown)"
 
   step "Fetching HealthDCAT-AP catalog via data plane..."
-  CATALOG_RESPONSE=$(curl -sf "${DATA_PLANE_URL}/api/public" \
-    -H "Authorization: ${CATALOG_TOKEN}")
+  CATALOG_RESPONSE=$(pull "$CATALOG_ENDPOINT" "$CATALOG_TOKEN")
 
   CATALOG_TYPE=$(echo "$CATALOG_RESPONSE" | python3 -c "import json,sys; print(json.load(sys.stdin).get('@type','unknown'))")
   CATALOG_TITLE=$(echo "$CATALOG_RESPONSE" | python3 -c "import json,sys; print(json.load(sys.stdin).get('dct:title','N/A'))")

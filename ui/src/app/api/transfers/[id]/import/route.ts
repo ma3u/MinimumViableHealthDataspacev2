@@ -36,7 +36,7 @@ async function providerOfAgreement(
   if (!isPlainId(agreementId)) return "";
   try {
     const agreement = await edcClient.management<Record<string, unknown>>(
-      `/v5alpha/participants/${participantId}/contractagreements/${agreementId}`,
+      `/v5/participants/${participantId}/contractagreements/${agreementId}`,
     );
     return String(agreement.providerId ?? "");
   } catch {
@@ -98,7 +98,7 @@ export async function POST(
   let transfer: Record<string, unknown>;
   try {
     transfer = await edcClient.management<Record<string, unknown>>(
-      `/v5alpha/participants/${participantId}/transferprocesses/${id}`,
+      `/v5/participants/${participantId}/transferprocesses/${id}`,
     );
   } catch (err) {
     console.error("Transfer not readable:", { id }, err);

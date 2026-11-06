@@ -977,19 +977,19 @@ the provider's catalogue. The protocol is the profile id, `http-dsp-profile-2025
 provider's address ends in it (#542). Red from 2026-09-26 to 2026-10-28: the request named
 `dataspace-protocol-http:2025-1`, for which no dispatcher is registered (#345), and in CI the
 consumer's context had no STS config, so the call could not have left anyway (#710).""")
-req(f, "20 IdentityHub participant contexts", "get", "{{identityUrl}}/v1alpha/participants",
+req(f, "20 IdentityHub participant contexts", "get", "{{identityUrl}}/v1/participants",
     persona="anon", bearer="edcToken",
     asserts=["res.status: eq 200", "res.body: isArray", "res.body[0].did: isDefined"])
-req(f, "21 IdentityHub the provider's context", "get", "{{identityUrl}}/v1alpha/participants/{{providerCtx}}",
+req(f, "21 IdentityHub the provider's context", "get", "{{identityUrl}}/v1/participants/{{providerCtx}}",
     persona="anon", bearer="edcToken",
     asserts=["res.status: eq 200", "res.body.did: isDefined", "res.body.state: isDefined"],
     docs="The path takes the raw context id, not base64.")
 req(f, "22 IdentityHub the provider's key pairs", "get",
-    "{{identityUrl}}/v1alpha/participants/{{providerCtx}}/keypairs", persona="anon", bearer="edcToken",
+    "{{identityUrl}}/v1/participants/{{providerCtx}}/keypairs", persona="anon", bearer="edcToken",
     asserts=["res.status: eq 200", "res.body: isArray", "res.body[0].keyId: isDefined"],
     docs="A key record here is not key material in Vault; KEY-2.4 of the identity suite checks the material (#345).")
 req(f, "23 IdentityHub the credentials the provider holds", "get",
-    "{{identityUrl}}/v1alpha/participants/{{providerCtx}}/credentials", persona="anon", bearer="edcToken",
+    "{{identityUrl}}/v1/participants/{{providerCtx}}/credentials", persona="anon", bearer="edcToken",
     asserts=["res.status: eq 200", "res.body: isArray"],
     tests="""
 test("captures how many credentials the provider holds now", function () {
@@ -997,7 +997,7 @@ test("captures how many credentials the provider holds now", function () {
 });
 """)
 req(f, "30 IssuerService credential definitions", "post",
-    "{{issuerUrl}}/v1alpha/participants/issuer/credentialdefinitions/query",
+    "{{issuerUrl}}/v1/participants/issuer/credentialdefinitions/query",
     persona="anon", bearer="issuerToken", body={},
     asserts=["res.status: eq 200", "res.body: isArray", "res.body[0].id: isDefined"],
     tests="""
@@ -1010,18 +1010,18 @@ test("captures the MembershipCredential definition id", function () {
 """,
     docs="The issuer resolves a request by definition id, not by type; the type alone answers 400 'Credential definition ID null does not exist'.")
 req(f, "31 IssuerService registered holders", "post",
-    "{{issuerUrl}}/v1alpha/participants/issuer/holders/query", persona="anon", bearer="issuerToken", body={},
+    "{{issuerUrl}}/v1/participants/issuer/holders/query", persona="anon", bearer="issuerToken", body={},
     asserts=["res.status: eq 200", "res.body: isArray", "res.body[0].did: isDefined"],
     docs="The issuer only issues to a DID it knows; scripts/seed-issuer-holders.sh registers them.")
 req(f, "32 IssuerService attestation definitions", "post",
-    "{{issuerUrl}}/v1alpha/participants/issuer/attestations/query", persona="anon", bearer="issuerToken", body={},
+    "{{issuerUrl}}/v1/participants/issuer/attestations/query", persona="anon", bearer="issuerToken", body={},
     asserts=["res.status: eq 200", "res.body: isArray"])
 req(f, "33 IssuerService issuance processes", "post",
-    "{{issuerUrl}}/v1alpha/participants/issuer/issuanceprocesses/query",
+    "{{issuerUrl}}/v1/participants/issuer/issuanceprocesses/query",
     persona="anon", bearer="issuerToken", body={},
     asserts=["res.status: eq 200", "res.body: isArray"])
 req(f, "40 DCP the provider requests a MembershipCredential", "post",
-    "{{identityUrl}}/v1alpha/participants/{{providerCtx}}/credentials/request",
+    "{{identityUrl}}/v1/participants/{{providerCtx}}/credentials/request",
     persona="anon", bearer="edcToken",
     body={"issuerDid": "{{issuerDid}}",
           "credentials": [{"id": "{{membershipDefinitionId}}", "type": "MembershipCredential",
@@ -1031,7 +1031,7 @@ req(f, "40 DCP the provider requests a MembershipCredential", "post",
 to the CredentialService endpoint in the holder's DID document. Without that endpoint the process
 sits at APPROVED forever, which is what CI did until #345.""")
 req(f, "41 DCP the credential arrives", "get",
-    "{{identityUrl}}/v1alpha/participants/{{providerCtx}}/credentials", persona="anon", bearer="edcToken",
+    "{{identityUrl}}/v1/participants/{{providerCtx}}/credentials", persona="anon", bearer="edcToken",
     pre="""
 // Issuance is asynchronous; give the issuer a moment to deliver.
 await new Promise((resolve) => setTimeout(resolve, 8000));

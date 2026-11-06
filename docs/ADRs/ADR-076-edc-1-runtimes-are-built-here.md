@@ -1,6 +1,6 @@
 # ADR-076: EDC 1.0 runtimes are built here, from released EDC artifacts
 
-**Status:** Accepted (2026-11-05, Matthias Buchhorn)
+**Status:** Superseded by [ADR-078](ADR-078-edc-1-on-container-apps-without-cfm.md) (2026-11-05). Its premises were wrong: JAD moved to eclipse-dataspace-hub/jad, and eclipse-cfm publishes 1.0 images; decisions 1, 4, 5 and 6 carry over into ADR-078
 **Date:** 2026-11-05
 **Supersedes:** [ADR-005](ADR-005-jad-cfm-source-builds.md)
 **Relates to:** [ADR-002](ADR-002-edc-data-plane-architecture.md), [ADR-029](ADR-029-dependency-version-pinning.md), [ADR-055](ADR-055-azure-runs-the-compose-jad-build.md), [ADR-075](ADR-075-a-minor-release-every-month.md)

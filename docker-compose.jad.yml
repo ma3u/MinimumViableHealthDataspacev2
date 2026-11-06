@@ -354,20 +354,22 @@ services:
       edc.iam.dcp.scopes.manufacturer.id: "manufacturer-scope"
       edc.iam.dcp.scopes.manufacturer.type: "POLICY"
       edc.iam.dcp.scopes.manufacturer.value: "org.eclipse.dspace.dcp.vc.type:ManufacturerCredential:read"
-      edc.iam.dcp.scopes.manufacturer.prefix-mapping: "ManufacturerCredential"
+      # EDC 1.0 reads `prefix.mapping` (0.18: `prefix-mapping`) and will not boot
+      # without it for a POLICY scope (#881).
+      edc.iam.dcp.scopes.manufacturer.prefix.mapping: "ManufacturerCredential"
       # EHDS credential scopes (Phase 2b)
       edc.iam.dcp.scopes.ehds-participant.id: "ehds-participant-scope"
       edc.iam.dcp.scopes.ehds-participant.type: "POLICY"
       edc.iam.dcp.scopes.ehds-participant.value: "org.eclipse.dspace.dcp.vc.type:EHDSParticipantCredential:read"
-      edc.iam.dcp.scopes.ehds-participant.prefix-mapping: "EHDSParticipantCredential"
+      edc.iam.dcp.scopes.ehds-participant.prefix.mapping: "EHDSParticipantCredential"
       edc.iam.dcp.scopes.data-processing-purpose.id: "data-processing-purpose-scope"
       edc.iam.dcp.scopes.data-processing-purpose.type: "POLICY"
       edc.iam.dcp.scopes.data-processing-purpose.value: "org.eclipse.dspace.dcp.vc.type:DataProcessingPurposeCredential:read"
-      edc.iam.dcp.scopes.data-processing-purpose.prefix-mapping: "DataProcessingPurposeCredential"
+      edc.iam.dcp.scopes.data-processing-purpose.prefix.mapping: "DataProcessingPurposeCredential"
       edc.iam.dcp.scopes.data-quality-label.id: "data-quality-label-scope"
       edc.iam.dcp.scopes.data-quality-label.type: "POLICY"
       edc.iam.dcp.scopes.data-quality-label.value: "org.eclipse.dspace.dcp.vc.type:DataQualityLabelCredential:read"
-      edc.iam.dcp.scopes.data-quality-label.prefix-mapping: "DataQualityLabelCredential"
+      edc.iam.dcp.scopes.data-quality-label.prefix.mapping: "DataQualityLabelCredential"
       # Trusted issuers, each for the credential types it may issue (#710,
       # ADR-064). Without supportedtypes an issuer is trusted for every type
       # ("*"), which is what the hub's own issuer was until 2026-10-28. A
@@ -863,10 +865,10 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # CFM control plane shim, Management API v5alpha -> v5beta (issue #181)
+  # CFM control plane shim, Management API v5alpha -> v5 (issue #181, #881)
   # ---------------------------------------------------------------------------
-  # The pinned 2026-03-09 CFM agents have `v5alpha` compiled in and EDC 0.18
-  # serves `v5beta`. Config in jad/cfm-cp-shim.conf. Remove together with the
+  # The pinned 2026-03-09 CFM agents have `v5alpha` compiled in; EDC 0.18
+  # served `v5beta` and EDC 1.0 serves `v5`. Config in jad/cfm-cp-shim.conf. Remove together with the
   # `controlplane.url` override in jad/edcv-agent-config.yaml once CFM is
   # rebuilt against EDC 0.18.
   # ---------------------------------------------------------------------------

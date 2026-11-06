@@ -1,6 +1,6 @@
 name: EDC Probe Controlplane (issue #25 verify)
 
-# Hits the controlplane Management API at /v5alpha/participants to see
+# Hits the controlplane Management API at /v5/participants to see
 # what the UI's /api/participants route would actually receive. We
 # need to know whether (a) the CP knows about our IH-seeded participants
 # at all, and (b) what state value they have, since the UI filters
@@ -84,21 +84,21 @@ jobs:
                   args:
                     - |
                       set -e
-                      echo "=== CP /v5alpha/participants ==="
+                      echo "=== CP /v5/participants ==="
                       curl -sS -H "Authorization: Bearer \$TOKEN" \
                         -H "Content-Type: application/json" \
-                        "\$CP/v5alpha/participants" \
+                        "\$CP/v5/participants" \
                         -w '\nHTTP %{http_code}\n' | head -c 2000
                       echo
-                      echo "=== IH /v1alpha/participants (state field) ==="
+                      echo "=== IH /v1/participants (state field) ==="
                       curl -sS -H "Authorization: Bearer \$TOKEN" \
-                        "\$IH/v1alpha/participants" | head -c 2000
+                        "\$IH/v1/participants" | head -c 2000
                       echo
                       echo "=== IH per-participant keypairs ==="
                       for P in alpha-klinik pharmaco medreg lmc irs; do
                         echo "--- \$P ---"
                         curl -sS -H "Authorization: Bearer \$TOKEN" \
-                          "\$IH/v1alpha/participants/\$P/keypairs" | head -c 600
+                          "\$IH/v1/participants/\$P/keypairs" | head -c 600
                         echo
                       done
           EOF

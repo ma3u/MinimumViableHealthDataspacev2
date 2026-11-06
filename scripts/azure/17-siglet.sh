@@ -44,9 +44,14 @@ DB="${SIGLET_DB:-siglet}"
 SECRET_NAME="pg-password"
 IDENTITY_NAME="${SIGLET_IDENTITY:-id-mvhd-claude-federation}"
 
+# EDC 1.0 (#881): SIGLET_COMPOSE=docker-compose.edc1.yml pins 0.1.6, and
+# SIGLET_TOML=jad/siglet-edc1.toml points the pull transfers at the proxy;
+# migrate-edc-to-v1.sh sets both, and SIGLET_DB for a fresh database.
+SIGLET_COMPOSE="${SIGLET_COMPOSE:-docker-compose.jad.yml}"
+SIGLET_TOML="${SIGLET_TOML:-jad/siglet.toml}"
 SRC=$(grep -oE 'ghcr.io/eclipse-dataplane-core/dsdk-facet-rs/siglet:[a-z0-9.-]+@sha256:[0-9a-f]{64}' \
-  "${REPO_ROOT}/docker-compose.jad.yml" | head -1)
-[ -n "$SRC" ] || { err "no pinned siglet image in docker-compose.jad.yml"; exit 1; }
+  "${REPO_ROOT}/${SIGLET_COMPOSE}" | head -1)
+[ -n "$SRC" ] || { err "no pinned siglet image in ${SIGLET_COMPOSE}"; exit 1; }
 DIGEST="${SRC##*@sha256:}"
 # ACR import refuses a source with both a tag and a digest (InvalidImportImageParameter).
 SRC_REPO="${SRC%@sha256:*}"
@@ -162,9 +167,9 @@ unset VAULT_TOKEN
 # upstream jad mounts its siglet-config ConfigMap. The endpoint goes into the
 # consumer's EDR: the FHIR data plane's data API.
 SIGLET_PULL_ENDPOINT="${SIGLET_PULL_ENDPOINT:-http://${DP_FHIR_APP}:8186/api/data}"
-SIGLET_TOML=$(sed "s#^endpoint = .*#endpoint = \"${SIGLET_PULL_ENDPOINT}\"#" "${REPO_ROOT}/jad/siglet.toml")
+SIGLET_TOML_TEXT=$(sed "s#^endpoint = .*#endpoint = \"${SIGLET_PULL_ENDPOINT}\"#" "${REPO_ROOT}/${SIGLET_TOML}")
 az containerapp secret set --name "$SIGLET_APP" --resource-group "$RG" \
-  --secrets "siglet-toml=${SIGLET_TOML}" -o none
+  --secrets "siglet-toml=${SIGLET_TOML_TEXT}" -o none
 python3 - "$SIGLET_APP" "$RG" <<'PY2'
 import json, subprocess, sys, tempfile
 app, rg = sys.argv[1:3]

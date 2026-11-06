@@ -54,7 +54,7 @@ KC_URL="https://${KEYCLOAK_APP}.${ACA_DOMAIN}"
 # build as compose and CI (ADR-055). It was v4alpha, measured against the
 # April image, and stayed so after the migration; the suites fall back across
 # versions on a 404, but the domain suite does not, and asked v4alpha.
-MGMT_API_VERSION="${EDC_MGMT_API_VERSION:-v5beta}"
+MGMT_API_VERSION="${EDC_MGMT_API_VERSION:-v5}"
 # Bolt, not the transactional HTTP API: mvhd-neo4j has TCP ingress with
 # targetPort and exposedPort 7687 and no additionalPortMappings, so
 # http://mvhd-neo4j:7474 is not routable from inside the environment and every

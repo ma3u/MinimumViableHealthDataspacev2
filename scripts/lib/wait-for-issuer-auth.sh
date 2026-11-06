@@ -50,7 +50,7 @@ while [ "$(date +%s)" -lt "$deadline" ]; do
     tmp=$(mktemp)
     status=$(curl -sS --max-time 15 -o "$tmp" -w '%{http_code}' -X POST \
       -H "Authorization: Bearer ${tok}" -H "Content-Type: application/json" -d '{}' \
-      "${ISSUER_API}/api/admin/v1alpha/participants/${ISSUER_CTX}/holders/query" 2>/dev/null) || status="000"
+      "${ISSUER_API}/api/admin/v1/participants/${ISSUER_CTX}/holders/query" 2>/dev/null) || status="000"
     body=$(head -c 300 "$tmp" 2>/dev/null || true); rm -f "$tmp"
     if [ "$status" = "200" ]; then
       echo "issuer accepts ${CLIENT_ID} tokens (attempt ${attempt})"

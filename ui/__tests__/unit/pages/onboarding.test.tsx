@@ -609,7 +609,10 @@ describe("OnboardingPage", () => {
         expect(screen.getByText("AlphaKlinik Berlin")).toBeInTheDocument();
       });
       await user.click(screen.getByText("AlphaKlinik Berlin"));
-      expect(screen.getByText("Tenant Created")).toBeInTheDocument();
+      expect(screen.getByText("Registered")).toBeInTheDocument();
+      expect(
+        screen.getByText("Organisation registered with the hub"),
+      ).toBeInTheDocument();
       expect(screen.getByText("Participant Context")).toBeInTheDocument();
       expect(screen.getByText("DID Provisioned")).toBeInTheDocument();
       expect(screen.getByText("Credentials Issued")).toBeInTheDocument();
@@ -757,15 +760,15 @@ describe("OnboardingPage", () => {
       await user.click(screen.getByText("Register Participant"));
 
       await waitFor(() => {
-        // Not "DID provisioning will proceed automatically": whether an agent
-        // completes the activities is not something this screen can promise,
-        // and on Azure none does (issue #203).
+        // Not "is active": the context, DID and keys exist when the request
+        // returns, the credential only once the issuer has delivered it
+        // (issue #203, ADR-078).
         expect(
-          screen.getByText(/the provisioning activities are pending/),
+          screen.getByText(/its MembershipCredential was requested/),
         ).toBeInTheDocument();
       });
       expect(
-        screen.getByText(/only once an agent completes them/),
+        screen.getByText(/once the issuer has delivered it/),
       ).toBeInTheDocument();
     });
 
@@ -933,20 +936,20 @@ describe("OnboardingPage", () => {
       ).toBeNull();
     });
 
-    it("names the pending activities when the profile really was created", async () => {
-      // A real create still does not promise a DID: the activities are
-      // pending and nothing here knows whether an agent will complete them.
+    it("says the credential was requested, not issued, when the hub provisioned it", async () => {
+      // ADR-078: the context, DID and keys exist when POST returns; the
+      // credential is on its way, and nothing here can promise it arrives.
       await submit({
-        id: "tenant-real",
+        tenantId: "ctx-new",
+        did: "did:web:identityhub%3A7083:test-clinic-1a2b3c",
         provisioned: true,
-        activityTypes: ["cfm.connector", "cfm.dataplane"],
       });
 
       await waitFor(() => {
         expect(screen.getByText("Registration Submitted")).toBeInTheDocument();
       });
       expect(
-        screen.getByText(/cfm.connector, cfm.dataplane/),
+        screen.getByText(/MembershipCredential was requested from the issuer/),
       ).toBeInTheDocument();
       expect(screen.queryByText(/will proceed automatically/)).toBeNull();
     });

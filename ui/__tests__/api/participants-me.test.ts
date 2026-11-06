@@ -1,36 +1,46 @@
 /**
  * API route tests for GET /api/participants/me
  *
- * Tests the participant profile endpoint (CFM TenantManager).
+ * The control plane's contexts in the tenant shape the onboarding page reads
+ * (ADR-078); the states themselves are in participants.test.ts and
+ * lib/edc-participants.test.ts.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/lib/edc", () => ({
   edcClient: {
-    tenant: vi.fn(),
+    management: vi.fn(),
+    identity: vi.fn(),
   },
+  EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
 }));
 
 import { edcClient } from "@/lib/edc";
 import { GET } from "@/app/api/participants/me/route";
 
-const mockTenant = vi.mocked(edcClient.tenant);
+const mockManagement = vi.mocked(edcClient.management);
+const mockIdentity = vi.mocked(edcClient.identity);
 
 describe("GET /api/participants/me", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockManagement.mockReset();
+    mockIdentity.mockReset();
   });
 
-  it("should return enriched tenant list with participant profiles", async () => {
-    // First call: list tenants
-    mockTenant.mockResolvedValueOnce([
-      { id: "t-1", version: 1, properties: { displayName: "Clinic A" } },
-      { id: "t-2", version: 1, properties: { displayName: "CRO B" } },
+  it("returns every context with its participant profile", async () => {
+    mockManagement.mockResolvedValue([
+      {
+        "@id": "ctx-a",
+        identity: "did:web:identityhub%3A7083:alpha-klinik",
+        state: "CREATED",
+      },
+      {
+        "@id": "ctx-b",
+        identity: "did:web:identityhub%3A7083:pharmaco",
+        state: "CREATED",
+      },
     ]);
-    // Second call: profiles for t-1
-    mockTenant.mockResolvedValueOnce([{ id: "pp-1", cellId: "cell-1" }]);
-    // Third call: profiles for t-2
-    mockTenant.mockResolvedValueOnce([{ id: "pp-2", cellId: "cell-1" }]);
+    mockIdentity.mockResolvedValue([{ id: "vc" }]);
 
     const response = await GET();
     const data = await response.json();
@@ -38,31 +48,35 @@ describe("GET /api/participants/me", () => {
     expect(response.status).toBe(200);
     expect(data).toHaveLength(2);
     expect(data[0].participantProfiles).toHaveLength(1);
-    expect(data[1].participantProfiles).toHaveLength(1);
-    expect(mockTenant).toHaveBeenCalledWith("/v1alpha1/tenants");
+    expect(
+      data.map(
+        (t: { properties: { displayName: string } }) =>
+          t.properties.displayName,
+      ),
+    ).toEqual(["AlphaKlinik Berlin", "PharmaCo Research AG"]);
+    expect(mockManagement).toHaveBeenCalledWith("/v5/participants");
   });
 
-  it("should handle profile fetch failures gracefully", async () => {
-    mockTenant.mockResolvedValueOnce([
-      { id: "t-1", version: 1, properties: { displayName: "Clinic A" } },
+  it("treats a credential lookup that fails as not yet delivered", async () => {
+    mockManagement.mockResolvedValue([
+      {
+        "@id": "ctx-a",
+        identity: "did:web:identityhub%3A7083:alpha-klinik",
+        state: "CREATED",
+      },
     ]);
-    // Profile fetch fails
-    mockTenant.mockRejectedValueOnce(new Error("Not found"));
+    mockIdentity.mockRejectedValue(new Error("Not found"));
 
-    const response = await GET();
-    const data = await response.json();
+    const data = await (await GET()).json();
 
-    expect(response.status).toBe(200);
     expect(data).toHaveLength(1);
-    expect(data[0].participantProfiles).toEqual([]);
+    expect(data[0].provisioningComplete).toBe(false);
   });
 
-  // Issue #203: the Azure deployment runs no CFM Tenant Manager, so an
-  // unreachable manager is the expected state rather than a fault of this
-  // request. The onboarding page renders a non-ok answer as an empty list and
-  // says nothing at all, so a 502 here cost information and gained none.
-  it("lists what it has instead of 502ing when the tenant list fails", async () => {
-    mockTenant.mockRejectedValue(new Error("Connection refused"));
+  // Issue #203: the onboarding page renders a non-ok answer as an empty list
+  // and says nothing at all, so a 502 here cost information and gained none.
+  it("lists what it has instead of 502ing when the control plane is down", async () => {
+    mockManagement.mockRejectedValue(new Error("Connection refused"));
 
     const response = await GET();
 

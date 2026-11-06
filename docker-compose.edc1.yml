@@ -1,0 +1,53 @@
+# EDC 1.0 spike overlay (#881, ADR-076). Swaps the Metaform JAD images for the
+# launchers built from runtimes/edc and points each at a fresh database, so
+# the 0.18 databases stay as they were:
+#
+#   psql -U cp -d controlplane -f jad/init-postgres-edc1.sql   (once, in the postgres container)
+#   docker compose -f docker-compose.yml -f docker-compose.jad.yml -f docker-compose.edc1.yml up -d
+#
+# Without this file the stack is 0.18 again. EDC 1.0 has no data plane of its
+# own: siglet is the data plane (jad/siglet-edc1.toml), and the JAD data
+# planes dataplane-fhir and dataplane-omop are not needed.
+services:
+  siglet:
+    # 0.1.6: the build that speaks the Data Plane Signaling version 1.0 sends;
+    # sha-54382c8 answered its messages with 422.
+    image: ghcr.io/eclipse-dataplane-core/dsdk-facet-rs/siglet:0.1.6@sha256:cb7895dd4d1b924061df0f4aae28dc3e7187e7508bca249e42d438fea8a6022e
+    environment:
+      SIGLET__TOKEN_API_AUTH__MODE: "disabled" # dev, as signaling and management already are
+      SIGLET_CONFIG_FILE: "/config/siglet-edc1.toml"
+    volumes:
+      - ./jad/siglet-edc1.toml:/config/siglet-edc1.toml:ro
+
+  controlplane:
+    image: mvhd/edc-controlplane:1.0.0-RC5-local
+    environment:
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/controlplane_v1"
+      # 1.0 refuses a policy whose actions or left operands are bound to no
+      # policy scope. The launcher's EhdsPolicyVocabularyExtension declares the
+      # EHDS vocabulary of the standard policies (ADR-077) in a scope EDC never
+      # evaluates, so validation stays on (#881, finding 16). The default; kept
+      # here so switching it off is a visible change.
+      edc.policy.validation.enabled: "true"
+
+  identityhub:
+    image: mvhd/edc-identity-hub:1.0.0-RC5-local
+    environment:
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/identityhub_v1"
+
+  issuerservice:
+    image: mvhd/edc-issuerservice:1.0.0-RC5-local
+    environment:
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/issuerservice_v1"
+
+  simpl-ga-issuer:
+    image: mvhd/edc-issuerservice:1.0.0-RC5-local
+    environment:
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/simplga_v1"
+      edc.datasource.membership.url: "jdbc:postgresql://postgres:5432/simplga_v1"
+
+  rogue-issuer:
+    image: mvhd/edc-issuerservice:1.0.0-RC5-local
+    environment:
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/rogueissuer_v1"
+      edc.datasource.membership.url: "jdbc:postgresql://postgres:5432/rogueissuer_v1"

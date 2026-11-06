@@ -2,11 +2,11 @@ name: Vault bootstrap participant keys (issue #25)
 
 # Pre-stages an Ed25519 private JWK in Vault for each of the 5 EHDS
 # participants under secret/data/{pid}-private-key-alias. The seed
-# script's POST /v1alpha/participants includes publicKeyJwk +
+# script's POST /v1/participants includes publicKeyJwk +
 # privateKeyAlias; IH validates by fetching the private key from the
 # alias to derive the public key. If the key isn't there, IH silently
 # skips persisting the KeyPairResource entry — which is exactly why
-# /v1alpha/participants/{pid}/keypairs returned [] for all 5 even
+# /v1/participants/{pid}/keypairs returned [] for all 5 even
 # after a successful seed.
 #
 # Uses the same Ed25519 demo material jad/bootstrap-vault.sh stages

@@ -209,7 +209,7 @@ describe("POST /api/transfers/[id]/import", () => {
 
     expect(res.status).toBe(200);
     expect(mockManagement.mock.calls[1][0]).toBe(
-      `/v5alpha/participants/${CTX}/contractagreements/agr-2`,
+      `/v5/participants/${CTX}/contractagreements/agr-2`,
     );
     const sent = JSON.parse(fetchMock.mock.calls[2][1].body);
     expect(sent.provider).toBe("did:web:alpha-from-agreement");

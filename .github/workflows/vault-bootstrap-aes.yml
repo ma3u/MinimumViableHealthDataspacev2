@@ -3,7 +3,7 @@ name: Vault bootstrap AES key (issue #25)
 # Stores a 256-bit AES key under `secret/data/aes-key-alias` in the live
 # Azure Vault. EDC's IH and Issuer runtimes need this key to encrypt
 # KeyPairResource entries when a participant is created. Without it,
-# every POST /v1alpha/participants that triggers internal keypair
+# every POST /v1/participants that triggers internal keypair
 # generation crashes server-side with:
 #
 #   EdcException: Failed to encrypt entries: Unsupported encryption
