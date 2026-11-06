@@ -587,46 +587,48 @@ export default function ArchitecturePage() {
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
             {t(
-              "This reference implementation aligns with the EU SIMPL-Open programme for federated data spaces. The architecture satisfies EHDS regulation, DSP 2025-1, DCP v1.0, and supply chain transparency requirements.",
+              "The hub connects to the EU's Simpl-Open middleware as an EDC connector outside the Simpl-Open agent, over DSP and DCP, and trusts a Simpl data space's Governance Authority as an issuer (ADR-064). It claims no alignment: a capability counts only with a published Simpl source and a check in the hub that exercises it.",
             )}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div className="border border-(--border) rounded-lg p-4">
               <h4 className="font-semibold text-sm mb-2">
-                {t("SIMPL-Open Alignment")}
+                {t("How the hub connects to Simpl-Open")}
               </h4>
               <ul className="text-(--text-secondary) text-xs space-y-1.5 list-disc ml-4">
                 <li>
                   <T area="docsArchitecture" tags={{ b: <strong /> }}>
                     {
-                      "<b>DSP 2025-1:</b> Sovereign data exchange via Control Plane"
+                      "<b>Connector outside the agent:</b> DSP 2025-1 for catalogue, negotiation and transfer; no x509 or mTLS trust inside a Simpl-Open agent"
                     }
                   </T>
                 </li>
                 <li>
                   <T area="docsArchitecture" tags={{ b: <strong /> }}>
                     {
-                      "<b>DCP v1.0:</b> DID:web identity + Verifiable Credentials"
+                      "<b>Credentials over DCP v1.0:</b> a Governance Authority is a trusted issuer in the IdentityHub for its own credential types; the hub's IssuerService keeps issuing the hub's credentials"
                     }
                   </T>
                 </li>
                 <li>
                   <T area="docsArchitecture" tags={{ b: <strong /> }}>
                     {
-                      "<b>Trust Framework:</b> W3C Verifiable Credentials issued over DCP against the issuer's definitions"
+                      "<b>EHDS rules stay in the hub:</b> data permits, the right to opt out (Art. 71), fees and the gate in front of the secure processing environments"
                     }
                   </T>
                 </li>
                 <li>
                   <T area="docsArchitecture" tags={{ b: <strong /> }}>
                     {
-                      "<b>Federated Catalog:</b> HealthDCAT-AP metadata (Release 8 vocabulary) profiles (ADR-003)"
+                      "<b>Catalogue:</b> HealthDCAT-AP Release 8 (ADR-063), offered as a profile of the DCAT-AP model Simpl adopts in Innsbruck"
                     }
                   </T>
                 </li>
                 <li>
                   <T area="docsArchitecture" tags={{ b: <strong /> }}>
-                    {"<b>SBOM:</b> CycloneDX 1.5 supply chain transparency"}
+                    {
+                      "<b>Still to prove:</b> the DSP compatibility kit against a Simpl connector, and a negotiation with a Governance Authority credential, once the Hamburg 4.1 code is public"
+                    }
                   </T>
                 </li>
               </ul>
