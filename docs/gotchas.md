@@ -3,6 +3,19 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-06: `$(curl -w '%{http_code}' ... || echo 000)` is never 000
+
+curl prints `000` for its `-w` code when nothing answers, and exits non-zero,
+so the fallback appends a second one: the variable holds `000000`, and a
+`!= 000` wait passes on its first attempt. `bootstrap-jad.sh` waited this way
+for months and hid three bugs on a fresh stack: `vault-unseal` was never
+started, so the file-backed Vault stayed sealed and `vault-bootstrap` gave up;
+the Neo4j proxy started before Neo4j and crash-looped until a restart caught
+up; and the Postgres "probe" pointed curl at port 5432, which never answers
+HTTP. Write `code=$(curl ...) || code=000`, or compare with `= 200`, which a
+doubled code cannot fake. `scripts/azure/05-edc-seed.sh` still has the
+pattern.
+
 ## 2026-11-06: the compose stack is EDC 1.0, and an old volume lacks its databases
 
 `docker-compose.jad.yml` runs the EDC 1.0 launchers (`mvhd/edc-*:1.0.0-RC5`,

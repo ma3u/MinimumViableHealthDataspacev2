@@ -49,8 +49,10 @@ wait_for_service() {
   for i in $(seq 1 "$max_attempts"); do
     # Accept any HTTP response (including 401/403) as proof the service is up.
     # curl -sf fails on 4xx, so use --write-out to check for a valid HTTP code.
+    # curl prints 000 itself when nothing answers; `|| echo 000` appended a
+    # second one, and "000000" passed every wait on its first attempt.
     local http_code
-    http_code=$(curl -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null || echo "000")
+    http_code=$(curl -s -o /dev/null -w "%{http_code}" "$url" 2>/dev/null) || http_code=000
     if [ "$http_code" != "000" ]; then
       ok "$service is healthy (attempt $i/$max_attempts, HTTP $http_code)"
       return 0
@@ -59,6 +61,61 @@ wait_for_service() {
   done
   error "$service did not become healthy after $((max_attempts * interval))s"
   return 1
+}
+
+# ---------------------------------------------------------------------------
+# Helper: wait for a container's own healthcheck
+# ---------------------------------------------------------------------------
+# For services whose readiness is not an HTTP status: Postgres speaks no HTTP,
+# and the file-backed Vault (2026-09-26) answers 501 while it is uninitialised
+# and sealed, until vault-unseal initialises or unseals it.
+wait_for_healthy() {
+  local container="$1" max_attempts="${2:-30}" interval="${3:-3}" status=""
+  log "Waiting for $container to report healthy ..."
+  for i in $(seq 1 "$max_attempts"); do
+    status=$(docker inspect -f '{{.State.Health.Status}}' "$container" 2>/dev/null) || status=""
+    if [ "$status" = "healthy" ]; then
+      ok "$container is healthy (attempt $i/$max_attempts)"
+      return 0
+    fi
+    sleep "$interval"
+  done
+  error "$container is ${status:-missing} after $((max_attempts * interval))s"
+  return 1
+}
+
+# ---------------------------------------------------------------------------
+# Load the graph into an empty Neo4j
+# ---------------------------------------------------------------------------
+# A fresh neo4j_data volume holds no graph, and the seeds' last step reads
+# patients through the data plane (seed-data-transfer.sh). These are the files
+# compliance.yml loads before the API collection ("Seed Neo4j with the
+# documented minimal data set"). A graph that already holds patients, such as
+# one with the Synthea set, is left as it is.
+load_graph_if_empty() {
+  local neo4j=(docker exec -i health-dataspace-neo4j cypher-shell -u neo4j -p healthdataspace)
+  local patients f
+  patients=$("${neo4j[@]}" --format plain "MATCH (p:Patient) RETURN count(p)" | tail -1) || {
+    error "Neo4j does not answer cypher-shell"
+    return 1
+  }
+  if [ "$patients" != "0" ]; then
+    ok "Neo4j holds $patients patients; the graph is left as it is"
+    return 0
+  fi
+  log "Neo4j is empty; loading the schema and the minimal data set ..."
+  "${neo4j[@]}" < neo4j/init-schema.cypher > /dev/null
+  for f in neo4j/insert-synthetic-schema-data.cypher \
+           neo4j/register-eehrxf-profiles.cypher \
+           neo4j/seed-compliance-matrix.cypher \
+           neo4j/participant-source-init.cypher \
+           neo4j/seed-persona-overview.cypher \
+           neo4j/seed-study-results.cypher \
+           neo4j/seed-catalog-translations.cypher; do
+    "${neo4j[@]}" < "$f" > /dev/null
+  done
+  patients=$("${neo4j[@]}" --format plain "MATCH (p:Patient) RETURN count(p)" | tail -1)
+  ok "Graph loaded: $patients patients"
 }
 
 # ---------------------------------------------------------------------------
@@ -72,7 +129,7 @@ wait_for_api() {
   local name="$1" url="$2" max_attempts="${3:-60}" interval="${4:-5}" code=000
   log "Waiting for $name to answer at $url ..."
   for _ in $(seq 1 "$max_attempts"); do
-    code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$url" 2>/dev/null || echo 000)
+    code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 5 "$url" 2>/dev/null) || code=000
     if [ "$code" != "000" ]; then
       ok "$name answers (HTTP $code)"
       return 0
@@ -241,11 +298,14 @@ start_stack() {
   docker compose $COMPOSE_FILES down --remove-orphans 2>/dev/null || true
 
   log "=== Phase 1: Starting infrastructure services ==="
-  docker compose $COMPOSE_FILES up -d postgres vault keycloak nats
+  # vault-unseal belongs here: the file-backed Vault stays sealed, and its
+  # healthcheck fails, until the sidecar initialises or unseals it, so
+  # vault-bootstrap (which needs Vault healthy) could never start without it.
+  docker compose $COMPOSE_FILES up -d postgres vault vault-unseal keycloak nats
 
   # Wait for infrastructure to be healthy
-  wait_for_service "PostgreSQL" "http://localhost:5432" 10 3 || true  # TCP, curl may fail
-  wait_for_service "Vault" "http://localhost:8200/v1/sys/health" 15 3
+  wait_for_healthy health-dataspace-postgres 20 3
+  wait_for_healthy health-dataspace-vault 30 3
   wait_for_service "Keycloak" "http://localhost:9000/health/ready" 30 5
   wait_for_service "NATS" "http://localhost:8222/healthz" 10 3
   # /healthz says the server is up, not that JetStream can store anything —
@@ -296,16 +356,19 @@ start_stack() {
   wait_for_api "Issuer Service" "http://localhost:10013/api/admin" 60 5 || exit 1
   ok "EDC 1.0 services are answering"
 
-  log "=== Phase 4b: Starting Neo4j Query Proxy ==="
+  log "=== Phase 4b: Starting Neo4j (from base compose) ==="
+  # Before the proxy, which exits while it cannot reach Neo4j.
+  docker compose $COMPOSE_FILES up -d neo4j
+  wait_for_service "Neo4j" "http://localhost:7474" 40 3
+  ok "Neo4j started"
+  load_graph_if_empty || exit 1
+
+  log "=== Phase 5: Starting Neo4j Query Proxy ==="
   # --build: the proxy is our code; build it from ./services/neo4j-proxy so the
   # running container matches the source, not a stale image (#349, ADR-029 r3).
   docker compose $COMPOSE_FILES up -d --build neo4j-proxy
-  wait_for_service "Neo4j Query Proxy" "http://localhost:9090/health" 15 3
+  wait_for_service "Neo4j Query Proxy" "http://localhost:9090/health" 20 3
   ok "Neo4j Query Proxy is healthy"
-
-  log "=== Phase 5: Starting Neo4j (from base compose) ==="
-  docker compose $COMPOSE_FILES up -d neo4j
-  ok "Neo4j started"
 
   log "=== Phase 5b: Building and starting Live UI (port 3003) ==="
   docker compose $COMPOSE_FILES up -d --build graph-explorer
@@ -405,7 +468,7 @@ show_status() {
   # issue are both about.
   local traefik_code
   traefik_code=$(curl -s --max-time 3 -o /dev/null -w '%{http_code}' \
-    -H 'Host: keycloak.localhost' http://localhost:80 2>/dev/null || echo 000)
+    -H 'Host: keycloak.localhost' http://localhost:80 2>/dev/null) || traefik_code=000
   if [ "$traefik_code" = "200" ]; then
     echo "  Traefik *.localhost routing is live (keycloak.localhost, cp.localhost, ...)"
     echo ""
