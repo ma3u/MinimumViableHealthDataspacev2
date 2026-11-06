@@ -24,7 +24,7 @@ docker compose up -d
 cat neo4j/init-schema.cypher | docker exec -i health-dataspace-neo4j \
   cypher-shell -u neo4j -p healthdataspace
 
-# Full JAD stack (19 services — needs 8 GB Docker RAM)
+# Full JAD stack on EDC 1.0 (15 services, 8 GB Docker RAM; the first run builds the launchers)
 docker compose -f docker-compose.yml -f docker-compose.jad.yml up -d
 ./scripts/bootstrap-jad.sh && ./jad/seed-all.sh      # phases 1–7, strict order
 
