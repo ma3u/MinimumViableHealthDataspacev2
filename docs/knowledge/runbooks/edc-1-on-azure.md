@@ -66,7 +66,13 @@ Every step names its gate. A failed gate stops the run; the next step does not s
 
 **6. UI and proxy.** Merge `feat/edc-1.0-rc` into `main`; `deploy-azure.yml` builds and rolls both apps. Then run `migrate-edc-to-v1.sh proxy` and `ui`, which set the JWKS and the 1.0 addresses. Gate: both revisions are Healthy, and `/api/participants` lists contexts and does not answer 502.
 
-**7. Seeds**, in the order of the local run: participants, IdentityHub, context config and DSP profile, issuer identity, holders, definitions, credentials, policies (the standard set of ADR-077, #889), assets, negotiations, federated catalogue. Gate: each script exits 0. The Azure seed path on 1.0 (`05-cp-participants.sh`, `seed-data-assets-job.sh` with `MGMT_V=v5`) has not been run yet; read each script's 1.0 changes from `scripts/` on the branch first.
+**7. Seeds.** Three runs, each after the one before it has succeeded. The workflows run from `main`, so step 6 comes first.
+
+1. `scripts/azure/seed-issuer-identity-azure.sh seed`, then `verify` (job `mvhd-issuer-identity`): the issuer's key, context and credential definitions on `issuerservice_v1`. Gate: the issuer's DID resolves.
+2. `edc-reseed-identity-layer.yml`, `plan` then `apply`: the five demo participants with `did:web:mvhd-identityhub%3A7083:<slug>`, through the compose sequence (contexts, IdentityHub records, context config with the DSP profile link, STS secrets, holders, a MembershipCredential each). Gate: the job ends with "OK: the five demo participants carry ... DIDs and hold a credential".
+3. `edc-seed-data-assets.yml`, `plan` then `apply`: the standard policies (ADR-077), assets, contract definitions and each context's siglet data plane. Gate: `plan` afterwards lists assets and contract definitions for every context.
+
+Negotiations and the federated catalogue have no Azure seed, as on 0.18: Bruno's live flow and the crawler make them. The IdentityHub contexts come up active from their manifests (`active: true`); the control plane contexts stay `CREATED`, which the hub accepts (#878, #891). The addresses match those `migrate-edc-to-v1.sh ui` sets (checked 2026-11-06).
 
 **8. Re-onboard and check.**
 
