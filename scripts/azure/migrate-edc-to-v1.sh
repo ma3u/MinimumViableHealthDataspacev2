@@ -117,7 +117,14 @@ for line in spec:
     if line.startswith('-D'):
         props.append(line); continue
     k, v = line.split('=', 1)
-    if k == 'IMAGE': c['image'] = v
+    if k == 'IMAGE':
+        c['image'] = v
+        # The 0.18 apps start JAD's jar by name in `args` or `command`
+        # (edc-controlplane.jar, ...), which the 1.0 launcher does not have:
+        # "Unable to access jarfile" (2026-11-06). Both are set, so an update
+        # cannot keep the old one; the line is the image's own CMD.
+        c['command'] = ['sh', '-c']
+        c['args'] = ['exec java -Djava.security.egd=file:/dev/urandom ${JAVA_OPTS:-} -jar edc-runtime.jar']
     elif k == 'DB': env['EDC_DATASOURCE_DEFAULT_URL'] = {'name': 'EDC_DATASOURCE_DEFAULT_URL', 'value': jdbc(v)}
     elif k == 'MEMBERSHIP_DB':
         env['EDC_DATASOURCE_MEMBERSHIP_URL'] = {'name': 'EDC_DATASOURCE_MEMBERSHIP_URL', 'value': jdbc(v)}
