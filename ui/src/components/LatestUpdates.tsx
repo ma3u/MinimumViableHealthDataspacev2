@@ -3,6 +3,7 @@
 import { Sparkles } from "lucide-react";
 import { useT } from "@/lib/i18n/translate";
 import type { CatalogLanguage } from "@/lib/metadata-language";
+import { BASE_PATH } from "@/lib/static-export";
 import { useLanguage } from "@/lib/use-language";
 
 const REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
@@ -22,6 +23,22 @@ const pr = (n: number) => ({ label: `#${n}`, href: `${REPO}/pull/${n}` });
  *  the home dictionary, translated at display (#782); a unit test checks
  *  that every language has them. */
 export const LATEST_UPDATES: Update[] = [
+  {
+    date: "2026-11-06",
+    title: "Open Solution Award at the HL7 AI Challenge",
+    text: "HL7 has published the recording of its 2026 AI Challenge winners webinar of 14 October. Our part starts at 39:45 and shows why the platform's AI would rather say nothing than say it wrong; the slides are here too.",
+    links: [
+      {
+        label: "Video from 39:45",
+        href: "https://vimeo.com/1237616254/7fd639a118#t=39m45s",
+      },
+      {
+        label: "Slides",
+        href: `${BASE_PATH}/presentations/hl7-showcase-2026/`,
+      },
+      { label: "#66", href: `${REPO}/issues/66` },
+    ],
+  },
   {
     date: "2026-11-02",
     title: "The documentation in five languages",
