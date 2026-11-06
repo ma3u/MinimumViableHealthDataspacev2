@@ -112,7 +112,7 @@ export function HealthDetailModal({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={t("{title} detail", { title: source.title })}
+      aria-label={t("{title} detail", { title: t(source.title) })}
       className="fixed inset-0 z-100 flex items-center justify-center p-4"
       onClick={onClose}
     >
@@ -137,12 +137,16 @@ export function HealthDetailModal({
           />
           <div>
             <h2 className="text-xl font-extrabold text-(--text-primary) leading-tight">
-              {source.title}
+              {t(source.title)}
             </h2>
-            <p className="text-xs text-(--text-secondary)">{source.source}</p>
+            <p className="text-xs text-(--text-secondary)">
+              {t(source.source)}
+            </p>
           </div>
         </div>
-        <p className="text-sm text-(--text-secondary) mb-5">{source.detail}</p>
+        <p className="text-sm text-(--text-secondary) mb-5">
+          {t(source.detail)}
+        </p>
 
         {/* Weekly nutrition goals — plant diversity / fibre / protein */}
         {source.weeklyGoals && (
@@ -173,7 +177,7 @@ export function HealthDetailModal({
                           aria-hidden="true"
                           style={{ color: accent }}
                         />
-                        {g.label}
+                        {t(g.label)}
                       </span>
                       {/* Status chip in BOTH states — text cue, not colour alone (WCAG 1.4.1) */}
                       <span
@@ -194,7 +198,7 @@ export function HealthDetailModal({
                         {g.current}
                       </span>
                       <span className="text-xs text-(--text-secondary)">
-                        / {g.target} {g.unit}
+                        / {g.target} {t(g.unit)}
                       </span>
                     </div>
                     <div
@@ -205,11 +209,15 @@ export function HealthDetailModal({
                       aria-valuetext={t("{current} of {target} {unit}", {
                         current: g.current,
                         target: g.target,
-                        unit: g.unit,
+                        unit: t(g.unit),
                       })}
-                      aria-label={`${g.label}: ${t(
+                      aria-label={`${t(g.label)}: ${t(
                         "{current} of {target} {unit}",
-                        { current: g.current, target: g.target, unit: g.unit },
+                        {
+                          current: g.current,
+                          target: g.target,
+                          unit: t(g.unit),
+                        },
                       )}, ${
                         met
                           ? t("goal met")
@@ -223,7 +231,7 @@ export function HealthDetailModal({
                       />
                     </div>
                     <p className="text-[10px] text-(--text-secondary) mt-1">
-                      {g.note}
+                      {t(g.note)}
                     </p>
                   </div>
                 );
@@ -242,13 +250,13 @@ export function HealthDetailModal({
               <div className="flex items-baseline justify-between gap-3 mb-2">
                 <div className="flex items-baseline gap-2">
                   <span className="text-sm font-bold text-(--text-primary)">
-                    {s.label}
+                    {t(s.label)}
                   </span>
                   <span className="text-lg font-black text-(--text-primary)">
                     {s.current}
                   </span>
                   <span className="text-xs text-(--text-secondary)">
-                    {s.unit}
+                    {t(s.unit)}
                   </span>
                 </div>
                 {deltaChip(s, t("3 mo"))}
@@ -278,10 +286,10 @@ export function HealthDetailModal({
                   className="flex items-center justify-between gap-3 rounded-lg border border-(--border) bg-(--surface-2) px-3 py-2"
                 >
                   <span className="text-xs font-bold text-(--text-primary) w-9 shrink-0">
-                    {d.day}
+                    {t(d.day)}
                   </span>
                   <span className="text-xs text-(--text-secondary) flex-1 truncate">
-                    {d.focus}
+                    {t(d.focus)}
                   </span>
                   <span className="text-xs font-semibold text-(--text-primary) tabular-nums">
                     {d.kcal.toLocaleString()} kcal

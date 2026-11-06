@@ -218,7 +218,7 @@ export const personalHealth: PersonalHealthSource[] = [
       { label: "CRP", value: "0.8 mg/l" },
       { label: "Omega-3", value: "9.2 %" },
     ],
-    detail: "Quarterly blood panel — iron stores, vitamin D and inflammation.",
+    detail: "Quarterly blood panel: iron stores, vitamin D and inflammation.",
     trends: [
       {
         label: "Ferritin",
@@ -259,7 +259,7 @@ export const personalHealth: PersonalHealthSource[] = [
       { label: "Adherence", value: "86 %" },
     ],
     detail:
-      "Weekly goals — 30 plants, fibre and protein — plus this week's plan and 3-month trends.",
+      "Weekly goals (30 plants, fibre and protein), plus this week's plan and 3-month trends.",
     trends: [
       {
         label: "Plants",
