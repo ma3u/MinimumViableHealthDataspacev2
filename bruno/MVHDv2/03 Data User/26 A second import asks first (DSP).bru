@@ -25,17 +25,25 @@ tests {
   const body = res.getBody() || {};
   if (!bru.getVar("dspImported")) {
     test("SKIPPED: 23 imported nothing on this run, so there is nothing to import twice", function () {});
-  } else {
-    test("the transfer 23 imported is closed, so it cannot be imported again", function () {
+  } else if (bru.getVar("dspImportClosed") === "true") {
+    // 23 closed the transfer (#924): its data cannot be pulled again, and a
+    // new import needs a new transfer.
+    test("a transfer the import closed is refused with its state", function () {
       expect(res.getStatus(), body.error || "").to.equal(409);
-      expect(body.state, body.error || "").to.be.oneOf(["TERMINATING", "TERMINATED"]);
+      expect(["TERMINATING", "TERMINATED"]).to.include(body.state);
+    });
+  } else {
+    test("SPE-1 refuses to import the same transfer again without overwrite", function () {
+      expect(res.getStatus(), body.error || "").to.equal(409);
+      expect(body.existing.speId).to.equal("SPE-1");
+      expect(body.existing.datasetId).to.equal(bru.getVar("dspTransferId"));
     });
   }
 }
 
 docs {
-  An SPE holds a transfer once (#876). Since #924 the import also terminates the transfer, so the
-  access to the provider's data ends with it, and a second import is refused before it reaches the
-  SPE: 409 with the transfer's state. A STARTED transfer the SPE already holds still answers 409 with
-  that import (`existing`), and My data then asks the user to overwrite it or to cancel.
+  An SPE holds a transfer once (#876). The import closes the transfer (#924), so a second import of
+  it answers 409 with the transfer's state, TERMINATED: a new import needs a new transfer. Where the
+  import could not close the transfer, a second import without `overwrite: true` answers 409 with
+  the import the SPE holds; My data asks the user to overwrite it or to cancel.
 }
