@@ -3,6 +3,28 @@
 Non-obvious pitfalls across the stack. Ordered newest first; add a new
 entry at the top when you hit something that cost you more than 30 minutes.
 
+## 2026-11-06: ARM answers an ACI start only after 15 to 40 s
+
+`POST .../containerGroups/{name}/start` returns its 202 only once the Container
+Instances provider has accepted the start: 15 to 23 s on 2026-11-06, and once
+40 s, when ARM's own gateway gave up (`GatewayTimeout`) and the group started
+anyway. The hub gave every ARM call 8 s and started the two SPE workspaces one
+after the other, so a federated query (`03 Data User/07`) took 16 s, logged
+"a query could not start SPE-1: 502 The operation was aborted due to timeout"
+for both, and answered that both were stopped while ARM was starting them. The
+activity log shows it (`az monitor activity-log list -g rg-mvhd-dev`, operation
+`containerGroups/start/action`: Started, then Accepted or Failed, then
+Succeeded). Now a start or stop gets 60 s at ARM, the hub waits at most 3 s for
+a refusal and takes silence as asked, and the starts run side by side
+(`powerGroup()` in `ui/src/lib/spe-power.ts`).
+
+Same runs: the import reads (`/api/spe-imports`, `/api/spe-imports/[id]/graph`,
+requests 24 and 25) asked the proxy without asking ARM first (ADR-072 decision
+4), the proxy waited 5 s for the starting workspace and answered 500 for the
+driver's `ServiceUnavailable`, and the UI passed that on as 502. They now ask
+ARM first and start nothing, since an import lives in the workspace's memory;
+the proxy answers 503 with Retry-After for a workspace it cannot reach.
+
 ## 2026-11-05: `az containerapp update --set` is `--set-env-vars`
 
 `az containerapp update` has no generic `--set`. Python's argparse accepts a

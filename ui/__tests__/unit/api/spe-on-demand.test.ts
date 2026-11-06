@@ -8,7 +8,11 @@
  *     the proxy wait for a workspace ARM reports stopped;
  *   - a federated query that needs a stopped workspace starts it (when the
  *     caller may) and is answered 503 with {error, spe: {id, state,
- *     etaSeconds}}, instead of waiting for it.
+ *     etaSeconds}}, instead of waiting for it;
+ *   - a start ARM has not answered within a few seconds counts as asked
+ *     (ARM accepts one only after 15 to 40 s);
+ *   - reading what a workspace holds starts nothing and does not wait for
+ *     one ARM reports stopped or starting.
  *
  * The real requireAuth() runs against the mocked getServerSession. fetch is
  * stubbed: it answers the managed identity endpoint, ARM and the proxy.
@@ -34,6 +38,8 @@ import { POST as POWER } from "@/app/api/admin/spe/power/route";
 import { GET as SPE_STATUS } from "@/app/api/admin/spe/route";
 import { GET as FEDERATED } from "@/app/api/federated/route";
 import { POST as NLQ } from "@/app/api/nlq/route";
+import { GET as IMPORT_GRAPH } from "@/app/api/spe-imports/[id]/graph/route";
+import { GET as IMPORTS } from "@/app/api/spe-imports/route";
 import { isSpeColdStart, type SpeStatusResponse } from "@/lib/spe";
 
 const mockFetch = vi.fn();
@@ -59,6 +65,8 @@ interface World {
   startedAgo?: Record<string, number>;
   /** ARM answer to start/stop: 202, or 403 for a missing role. */
   powerStatus?: number;
+  /** ARM keeps start/stop waiting until the test answers (pendingPosts). */
+  powerPending?: boolean;
   /** ARM answer to reading a group, when not 200. */
   readStatus?: number;
   proxy?: (url: string) => Response;
@@ -66,10 +74,12 @@ interface World {
 
 const posts: string[] = [];
 const proxyCalls: string[] = [];
+const pendingPosts: Array<(r: Response) => void> = [];
 
 function world(w: World) {
   posts.length = 0;
   proxyCalls.length = 0;
+  pendingPosts.length = 0;
   mockFetch.mockImplementation(async (url: string, init?: RequestInit) => {
     if (new URL(url).origin === "http://identity.test") {
       return json({
@@ -83,6 +93,9 @@ function world(w: World) {
       const [name, action] = url.slice(ARM.length).split("?")[0].split("/");
       if (init?.method === "POST") {
         posts.push(`${action} ${name}`);
+        if (w.powerPending) {
+          return new Promise<Response>((answer) => pendingPosts.push(answer));
+        }
         const status = w.powerStatus ?? 202;
         return status === 403
           ? json({ error: { code: "AuthorizationFailed" } }, 403)
@@ -457,5 +470,126 @@ describe("the cold start in front of a federated query (ADR-072)", () => {
     const res = await nlq({ question: "How many SPEs can I access?" });
     expect(res.status).toBe(503);
     expect((await res.json()).spe.state).toBe("starting");
+  });
+});
+
+describe("a start ARM is slow to accept (2026-11-06)", () => {
+  // ARM answers an ACI start only once it has accepted it, 15 to 40 s after
+  // the call. The hub gave up after 8 s, one workspace after the other, and
+  // answered "stopped" after 16 s while ARM started both anyway.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("sends both starts at once and calls both starting after a few seconds", async () => {
+    vi.mocked(getServerSession).mockResolvedValue(
+      session(["DATA_USER"]) as never,
+    );
+    world({ groups: BOTH_STOPPED, powerPending: true });
+    const answer = FEDERATED(new NextRequest("http://localhost/api/federated"));
+
+    await vi.advanceTimersByTimeAsync(10);
+    expect(posts).toEqual(["start mvhd-spe-1", "start mvhd-spe-2"]);
+
+    await vi.advanceTimersByTimeAsync(3_000);
+    const res = await answer;
+    expect(res.status).toBe(503);
+    expect(res.headers.get("Retry-After")).toBe("240");
+    const body = await res.json();
+    expect(body.spes).toEqual([
+      { id: "SPE-1", state: "starting", etaSeconds: 240 },
+      { id: "SPE-2", state: "starting", etaSeconds: 240 },
+    ]);
+    expect(body.started).toBe(true);
+    expect(proxyCalls).toEqual([]);
+  });
+
+  it("logs an error ARM answers after the caller was told the workspace starts", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    world({
+      groups: { "mvhd-spe-1": "Stopped", "mvhd-spe-2": "Running" },
+      powerPending: true,
+    });
+    const answer = FEDERATED(new NextRequest("http://localhost/api/federated"));
+    await vi.advanceTimersByTimeAsync(3_000);
+    expect((await answer).status).toBe(503);
+
+    pendingPosts[0](json({ error: { code: "GatewayTimeout" } }, 504));
+
+    await vi.waitFor(() =>
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "ARM answered the start of mvhd-spe-1 (SPE-1) late with an error",
+        ),
+      ),
+    );
+    warn.mockRestore();
+  });
+
+  it("answers the Start button 202 starting without waiting for ARM", async () => {
+    world({ groups: BOTH_STOPPED, powerPending: true });
+    const answer = POWER(powerRequest({ action: "start", spe: "all" }));
+    await vi.advanceTimersByTimeAsync(3_000);
+    const res = await answer;
+    expect(res.status).toBe(202);
+    expect(
+      (await res.json()).spes.map((s: { state: string }) => s.state),
+    ).toEqual(["starting", "starting"]);
+  });
+
+  it("still says the identity lacks the role when ARM refuses at once", async () => {
+    world({ groups: BOTH_STOPPED, powerStatus: 403 });
+    const res = await POWER(powerRequest({ action: "start", spe: "SPE-1" }));
+    expect(res.status).toBe(403);
+    expect((await res.json()).role).toBe(
+      "Azure Container Instances Contributor Role",
+    );
+  });
+});
+
+describe("reading what a workspace holds starts nothing (#876)", () => {
+  beforeEach(() => {
+    vi.mocked(getServerSession).mockResolvedValue(
+      session(["DATA_USER"]) as never,
+    );
+  });
+
+  it("answers the import graph 503 with Retry-After while the workspace is stopped", async () => {
+    world({ groups: BOTH_STOPPED });
+    const res = await IMPORT_GRAPH(
+      new NextRequest("http://localhost/api/spe-imports/tp-1/graph?spe=SPE-1"),
+      { params: Promise.resolve({ id: "tp-1" }) },
+    );
+    expect(res.status).toBe(503);
+    expect(res.headers.get("Retry-After")).toBe("240");
+    const body = await res.json();
+    expect(body.spe).toEqual({
+      id: "SPE-1",
+      state: "stopped",
+      etaSeconds: 240,
+    });
+    expect(body.started).toBe(false);
+    expect(posts).toEqual([]);
+    expect(proxyCalls).toEqual([]);
+  });
+
+  it("has the duplicate check skip the workspace ARM reports stopped", async () => {
+    world({
+      groups: { "mvhd-spe-1": "Running", "mvhd-spe-2": "Stopped" },
+      proxy: () => json({ imports: [], unreachable: [] }),
+    });
+    const res = await IMPORTS(
+      new NextRequest("http://localhost/api/spe-imports?ids=tp-1"),
+    );
+    expect(res.status).toBe(200);
+    expect(proxyCalls).toHaveLength(1);
+    expect(proxyCalls[0]).toMatch(
+      /\/spe\/imports\?datasetIds=tp-1&skip=SPE-2$/,
+    );
+    expect((await res.json()).unreachable).toEqual(["SPE-2"]);
+    expect(posts).toEqual([]);
   });
 });
