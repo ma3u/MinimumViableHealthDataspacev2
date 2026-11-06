@@ -755,13 +755,27 @@ jobs:
           EDC_ISSUER_URL=http://localhost:10013/api/admin \
             bash scripts/seed-identity-layer.sh
 
+      # EDC 1.0 runs the whole DSP flow here (#881): with the identity layer
+      # seeded, a provider's catalogue comes from its connector, so it needs
+      # assets, and siglet needs each context registered as its data plane. On
+      # 0.18 the catalogue request failed and the hub fell back to its demo
+      # catalogue, which is what 03/16 and 03/17 passed on. Same seed as Azure's
+      # edc-seed-data-assets.yml: the standard policies (ADR-077), assets,
+      # contract definitions, data planes.
+      - name: Seed the data assets (ADR-077)
+        run: |
+          CP_HOST=http://localhost:11003 KC_HOST=http://localhost:8080 \
+            bash jad/seed-data-assets.sh
+
       # The suite step reports either way; the baseline gate in compliance-report
-      # is the assertion (ADR-031).
+      # is the assertion (ADR-031). BRUNO_DSP_LIVE=1 runs 03 Data User 15 to 26
+      # end to end, as on Azure: catalogue, negotiation, transfer, the data.
       - name: Run the Bruno API collection
         continue-on-error: true
         run: |
           BRUNO_REPORT_DIR=${{ env.REPORT_DIR }}/bruno \
           BRUNO_UI_CONTAINER=health-dataspace-ui \
+          BRUNO_DSP_LIVE=1 \
             ./scripts/run-api-tests.sh Local
 
       - name: Upload Bruno results

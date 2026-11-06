@@ -480,7 +480,12 @@ echo "────────────────────────�
 # Compose only: Azure has no health-dataspace-postgres container, and there
 # CFM activates the contexts (#328). Without this guard the `|| echo` below
 # turned "no docker" into "already activated".
-if ! command -v docker >/dev/null 2>&1 || ! docker inspect health-dataspace-postgres >/dev/null 2>&1; then
+# EDC 1.0 (the default, EDC_LINE=v1) needs none of this: the contexts stay
+# CREATED, which the hub accepts (#878, #891), and 300 in IdentityHub is not
+# ACTIVATED on 1.0 (200 is). The SQL below is 0.18's and stays for EDC_LINE=v018.
+if [ "${EDC_LINE:-v1}" != "v018" ]; then
+  ok "EDC 1.0: no context activation by SQL"
+elif ! command -v docker >/dev/null 2>&1 || ! docker inspect health-dataspace-postgres >/dev/null 2>&1; then
   warn "No compose Postgres here; context activation skipped (CFM activates them on Azure, #328)"
 else
 
