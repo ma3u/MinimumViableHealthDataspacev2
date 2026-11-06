@@ -3,6 +3,7 @@
 # Move the EDC apps on Azure from 0.18 to the 1.0 launchers (#881, ADR-078)
 # =============================================================================
 #   migrate-edc-to-v1.sh check              read-only: what each app runs
+#   migrate-edc-to-v1.sh diff               read-only: setting names against local
 #   migrate-edc-to-v1.sh backup             save every app's YAML first
 #   migrate-edc-to-v1.sh app <name>         move one EDC app to 1.0
 #   migrate-edc-to-v1.sh siglet             siglet 0.1.6, serving through the proxy
@@ -184,6 +185,92 @@ print(f\"{a['name']:20} {c['image'].split('/')[-1]:44} db={db:18} {extra}\")"
   done
 }
 
+# The names of the settings each app runs with on Azure against those the
+# compose files give the local 1.0 stack, the one the suites passed on.
+# Names only, never values: they differ by host, and some are secrets. On
+# 2026-11-06 the local gate was green while Azure still carried the 0.18 key
+# edc.iam.trusted-issuer, which 1.0 does not read: every DSP request between
+# participants answered 401 (#881 finding 26). A difference that is meant is
+# listed below with its reason; anything else fails.
+cmd_diff() {
+  local cfg short dir
+  dir=$(mktemp -d)
+  cfg="${dir}/compose.json"
+  (cd "${SCRIPT_DIR}/../.." && docker compose -p mvhd-settings-diff \
+    -f docker-compose.yml -f docker-compose.jad.yml -f docker-compose.edc1.yml \
+    config --format json) > "$cfg" 2>/dev/null \
+    || { rm -rf "$dir"; err "docker compose config failed; run it from a checkout with Docker"; exit 1; }
+  for short in controlplane identityhub issuerservice siglet; do
+    az containerapp show --name "$(app_name "$short")" --resource-group "$RG" -o json > "${dir}/${short}.json"
+  done
+  local rc=0
+  python3 - "$dir" <<'PY' || rc=$?
+import json, re, sys
+d = sys.argv[1]
+local = json.load(open(f"{d}/compose.json"))["services"]
+# Meant to differ, by name pattern and reason.
+AZURE_ONLY = {
+    r"^edc\.datasource\.default\.pool\.connections\.max-total$": "the Flexible Server's connection cap",
+    r"^siglet__storage_backend__url$": "postgres-vault on Azure, memory locally",
+    r"^siglet__vault__signing_key_name$": "postgres-vault on Azure, memory locally",
+}
+LOCAL_ONLY = {
+    r"^edc\.iam\.trustedissuer\.simpl-ga\.": "the Simpl test issuer runs only locally",
+    r"^web\.http\.identity\.auth\.key$": "the local stack's API key",
+    r"^edc\.ih\.api\.superuser\.key$": "the local stack's superuser key",
+    r"^edc\.iam\.credentia\.revocation\.mimetype$": "a typo in jad/identityhub.env, read by nothing",
+}
+DEPRECATED = {r"\.trusted-issuer\.": "1.0 reads edc.iam.trustedissuer",
+              r"\.prefix-mapping$": "1.0 reads prefix.mapping"}
+
+def keys(pairs, siglet):
+    out = set()
+    for name, value in pairs:
+        if name == "JAVA_TOOL_OPTIONS":
+            out |= {t[2:].split("=", 1)[0].lower() for t in (value or "").split() if t.startswith("-D")}
+        elif siglet and name.upper().startswith("SIGLET"):
+            out.add(name.lower())
+        elif not siglet and name.upper().startswith(("EDC_", "WEB_", "EDC.", "WEB.")):
+            # EDC reads EDC_A_B as edc.a.b; a dotted name is already a key.
+            out.add(name.lower() if "." in name else name.lower().replace("_", "."))
+    return out
+
+def meant(key, table):
+    return next((why for pat, why in table.items() if re.search(pat, key)), None)
+
+failed = 0
+for short in ("controlplane", "identityhub", "issuerservice", "siglet"):
+    siglet = short == "siglet"
+    c = json.load(open(f"{d}/{short}.json"))["properties"]["template"]["containers"][0]
+    az = keys([(e["name"], e.get("value")) for e in c.get("env") or []], siglet)
+    lo = keys((local.get(short, {}).get("environment") or {}).items(), siglet)
+    problems = []
+    for k in sorted(az):
+        why = meant(k, DEPRECATED)
+        if why: problems.append(f"deprecated on Azure: {k} ({why})")
+    for k in sorted(az - lo):
+        if not meant(k, AZURE_ONLY) and not meant(k, DEPRECATED):
+            problems.append(f"only on Azure: {k}")
+    for k in sorted(lo - az):
+        if not meant(k, LOCAL_ONLY):
+            problems.append(f"only locally: {k}")
+    if problems:
+        failed += 1
+        print(f"  ✗ {short}: {len(az)} settings on Azure, {len(lo)} locally")
+        for p in problems: print(f"      {p}")
+    else:
+        print(f"  ✓ {short}: {len(az)} settings on Azure, {len(lo)} locally; the differences are the meant ones")
+sys.exit(1 if failed else 0)
+PY
+  rm -rf "$dir"
+  if [ "$rc" -eq 0 ]; then
+    ok "Azure's EDC settings match the local 1.0 stack"
+  else
+    err "Azure's EDC settings differ from the local 1.0 stack; fix them before seeding"
+  fi
+  return "$rc"
+}
+
 cmd_backup() {
   local ts dir short
   ts=$(date -u +%Y%m%dT%H%M%SZ); dir="${BACKUP_DIR}/${ts}"
@@ -278,11 +365,12 @@ PY
 
 case "${1:-}" in
   check) cmd_check ;;
+  diff) cmd_diff ;;
   backup) cmd_backup ;;
   app) cmd_app "${2:?name}" ;;
   siglet) cmd_siglet ;;
   proxy) cmd_proxy ;;
   ui) cmd_ui ;;
   rollback) cmd_rollback "${2:?name}" ;;
-  *) sed -n '5,14p' "$0"; exit 2 ;;
+  *) sed -n '5,15p' "$0"; exit 2 ;;
 esac
