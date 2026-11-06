@@ -28,7 +28,7 @@ const EDR_DATA_HOSTS = (
   .filter(Boolean);
 
 /** The endpoint siglet names, if the hub may call it; otherwise EDR_DATA_URL. */
-export function dataEndpoint(fromSiglet: string | undefined): string {
+function dataEndpoint(fromSiglet: string | undefined): string {
   if (!fromSiglet) return EDR_DATA_URL;
   let url: URL;
   try {

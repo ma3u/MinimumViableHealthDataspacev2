@@ -1,5 +1,5 @@
 import { type Request, type Response, type NextFunction } from "express";
-import { app } from "../app.js";
+import { app, heavyLimiter } from "../app.js";
 import { logger } from "../logger.js";
 import { DATASET_ROUTES, verifyDataspaceToken } from "../dataspace-token.js";
 
@@ -11,6 +11,7 @@ import { DATASET_ROUTES, verifyDataspaceToken } from "../dataspace-token.js";
 
 app.all(
   /^\/dataspace\/data(\/.*)?$/,
+  heavyLimiter,
   async (req: Request, res: Response, next: NextFunction) => {
     const header = req.header("authorization") ?? "";
     const token = header.replace(/^Bearer\s+/i, "");

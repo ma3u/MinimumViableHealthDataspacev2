@@ -14,7 +14,7 @@ import { holdsMembership } from "@/lib/edc/provision";
  * five carry no properties on their context, so their names come from here;
  * a participant onboarded through the hub carries its own.
  */
-export const SLUG_DISPLAY_NAMES: Record<
+const SLUG_DISPLAY_NAMES: Record<
   string,
   { displayName: string; org: string; role: string }
 > = {
@@ -42,7 +42,7 @@ export const SLUG_DISPLAY_NAMES: Record<
 };
 
 /** The last segment of a did:web ("did:web:identityhub%3A7083:lmc" is "lmc"). */
-export function didSlug(did: string): string {
+function didSlug(did: string): string {
   return decodeURIComponent(did).split(":").pop()?.toLowerCase() ?? "";
 }
 

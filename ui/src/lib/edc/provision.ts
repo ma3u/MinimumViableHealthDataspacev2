@@ -86,7 +86,7 @@ async function bodyNotNeeded(call: Promise<unknown>): Promise<void> {
 }
 
 /** The registration's details, kept on the control plane's context. */
-export function contextProperties(r: Registration): Record<string, string> {
+function contextProperties(r: Registration): Record<string, string> {
   return {
     displayName: r.displayName,
     organization: r.organization || r.displayName,
@@ -133,7 +133,7 @@ export function identityManifest(contextId: string, did: string) {
 }
 
 /** The STS settings the control plane needs before it can send DSP for the context. */
-export function stsConfig(contextId: string, did: string) {
+function stsConfig(contextId: string, did: string) {
   return {
     "@context": [EDC_CONTEXT],
     "@type": "ParticipantContextConfig",
