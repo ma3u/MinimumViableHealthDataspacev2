@@ -8,6 +8,7 @@ import {
   MAX_RECORDS,
   recordFacts,
 } from "../src/spe-import.js";
+import { resetSpeActivity, speLastQueriedAt } from "../src/spe-status.js";
 
 const speDrivers = vi.fn();
 vi.mock("../src/db.js", async (importOriginal) => ({
@@ -118,6 +119,7 @@ const row = (o: Record<string, unknown>) => ({ get: (k: string) => o[k] });
 describe("POST /spe/:speId/import", () => {
   beforeEach(() => {
     speDrivers.mockReset();
+    resetSpeActivity();
   });
 
   it("writes the dataset into the chosen SPE and says what it holds", async () => {
@@ -150,6 +152,9 @@ describe("POST /spe/:speId/import", () => {
     expect(cypher).toContain("MERGE (d)-[:LOADED_INTO]->(w)");
     expect(params.meta).toMatchObject({ speId: "SPE-2", pseudonymised: true });
     expect(spe2.session.close).toHaveBeenCalled();
+    // The import counts as use, so the idle stop (ADR-072) waits for it.
+    expect(speLastQueriedAt("SPE-2")).not.toBeNull();
+    expect(speLastQueriedAt("SPE-1")).toBeNull();
   });
 
   it("refuses a second import into the same SPE unless asked to overwrite", async () => {
