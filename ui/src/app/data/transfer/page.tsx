@@ -899,10 +899,16 @@ function DataTransferContent() {
             started.push(label);
           }
         } else {
-          const err = await res.json().catch(() => ({}));
+          const err = (await res.json().catch(() => ({}))) as Record<
+            string,
+            string
+          >;
+          // A permit refusal says why (Art. 61(1)): whose permit was missing,
+          // revoked or expired. The bare "No data permit covers this
+          // transfer" left the user guessing.
           const detail =
-            (err as Record<string, string>).detail ||
-            (err as Record<string, string>).error ||
+            err.detail ||
+            [err.error, err.reason].filter(Boolean).join(": ") ||
             `HTTP ${res.status}`;
           errors.push(
             t("Error: {name}: {detail}", {

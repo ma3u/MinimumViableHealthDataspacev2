@@ -33,6 +33,13 @@ import { POST as negotiate } from "@/app/api/negotiations/route";
 import { POST as transfer } from "@/app/api/transfers/route";
 
 const mockManagement = vi.mocked(edcClient.management);
+
+// The transfer route reads the participant contexts to learn whose permit to
+// check (an operator acting as PharmaCo). That read sends nothing; what must
+// wait for the gate and the audit record is the transfer request itself.
+const PARTICIPANTS = "/v5alpha/participants";
+const transferRequests = () =>
+  mockManagement.mock.calls.filter((c) => c[0] !== PARTICIPANTS);
 const mockCheckPermit = vi.mocked(checkPermit);
 const mockRecord = vi.mocked(recordDspEvent);
 const mockRecordAfter = vi.mocked(recordDspEventAfter);
@@ -159,7 +166,7 @@ describe("POST /api/transfers", () => {
     });
     const res = await transfer(post("/api/transfers", TRANSFER));
     expect(res.status).toBe(403);
-    expect(mockManagement).not.toHaveBeenCalled();
+    expect(transferRequests()).toEqual([]);
     expect(mockRecordAfter.mock.calls[0][0]).toMatchObject({
       process: "transfer-process",
       event: "refused",
@@ -173,7 +180,8 @@ describe("POST /api/transfers", () => {
     mockCheckPermit.mockResolvedValue(PERMIT);
     const order: string[] = [];
     mockRecord.mockImplementation(async () => void order.push("audit"));
-    mockManagement.mockImplementation(async () => {
+    mockManagement.mockImplementation(async (path: string) => {
+      if (path === PARTICIPANTS) return [];
       order.push("connector");
       return { "@id": "tp-789" };
     });
@@ -198,15 +206,17 @@ describe("POST /api/transfers", () => {
     mockRecord.mockRejectedValue(new Error("audit trail unreachable"));
     const res = await transfer(post("/api/transfers", TRANSFER));
     expect(res.status).toBe(503);
-    expect(mockManagement).not.toHaveBeenCalled();
+    expect(transferRequests()).toEqual([]);
   });
 
   it("tells the connector to report every transfer state to the audit trail", async () => {
     vi.stubEnv("AUDIT_CALLBACK_URL", "http://neo4j-proxy:9090/audit/dsp");
     mockCheckPermit.mockResolvedValue(PERMIT);
-    mockManagement.mockResolvedValue({ "@id": "tp-789" });
+    mockManagement.mockImplementation(async (path: string) =>
+      path === PARTICIPANTS ? [] : { "@id": "tp-789" },
+    );
     await transfer(post("/api/transfers", TRANSFER));
-    expect(mockManagement.mock.calls[0][2]).toMatchObject({
+    expect(transferRequests()[0][2]).toMatchObject({
       callbackAddresses: [
         expect.objectContaining({ events: ["transfer.process"] }),
       ],

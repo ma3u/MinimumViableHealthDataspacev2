@@ -176,6 +176,48 @@ describe("POST /api/transfers: the data permit gate", () => {
     );
   });
 
+  it("checks the permit of the participant the operator acts as, not the login's (live agreement)", async () => {
+    // The 2026-11-06 journey on ehds.mabu.red: an operator signed in as the
+    // admin, acting as PharmaCo, started a transfer on a connector agreement.
+    // The gate checked the admin login's DID (AlphaKlinik's), which holds no
+    // permit, and refused although PharmaCo holds one.
+    mockRequireAuth.mockResolvedValue({
+      session: {
+        ...ADMIN.session,
+        user: { ...ADMIN.session.user, email: "admin@health-dataspace.local" },
+      },
+    } as never);
+    mockCheckPermit.mockResolvedValue(ALLOWED);
+    mockManagement.mockImplementation(async (path: string) => {
+      if (path === "/v5alpha/participants") {
+        return [
+          {
+            "@id": "alpha-ctx",
+            identity: "did:web:mvhd-identityhub.internal%3A7083:alpha-klinik",
+          },
+          {
+            "@id": "3386f049-185a-4b5c-a24a-e5719df88412",
+            identity: "did:web:mvhd-identityhub.internal%3A7083:pharmaco",
+          },
+        ];
+      }
+      return { "@id": "tp-live", state: "STARTED" };
+    });
+
+    const res = await POST(
+      postTransfer({
+        participantId: "3386f049-185a-4b5c-a24a-e5719df88412",
+        contractId: "3ae34dc5-4e50-43eb-a23c-9fca1dfb4b28",
+        assetId: "fhir-patient-search",
+      }),
+    );
+
+    expect(res.status).toBe(201);
+    expect(mockCheckPermit.mock.calls[0][0].consumerDid).toBe(
+      "did:web:pharmaco.de:research",
+    );
+  });
+
   it("answers 503 when the permit register cannot be reached", async () => {
     mockCheckPermit.mockRejectedValue(new Error("Neo4j unavailable"));
     const res = await POST(postTransfer({}));
