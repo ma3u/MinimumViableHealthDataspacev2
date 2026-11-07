@@ -1,6 +1,6 @@
 ---
 source: docs/klarbefund/user-guide.md
-sourceHash: 24429d590488e64628ed0a7526474932a5704fb0e947dee10cd5df5912d6ba82
+sourceHash: 3278a2f8f333e765cf1f68b22430ff3027cb9b6dc36789f2ecf94d4457a48188
 language: nl
 summary: "De app zoals iemand die gebruikt, scherm voor scherm met schermafbeeldingen: een uitslag invoeren, een waarde met het papier vergelijken, trends, toestemmingen, verbinden met de EHDS, exports en uw rechten op uw gegevens."
 ---
@@ -35,18 +35,18 @@ bij betrokken was. Hoe ze worden gemaakt, staat aan het
 ## Aan de slag
 
 1. Open op de iPhone de [TestFlight-link](https://testflight.apple.com/join/ssADSXX6).
-   TestFlight installeert zichzelf eerst als het ontbreekt en biedt daarna Klarbefund aan.
+   [TestFlight](https://developer.apple.com/testflight/) installeert zichzelf eerst als het ontbreekt en biedt daarna Klarbefund aan.
 2. Open Klarbefund. Er is geen registratie en geen account: de app is klaar voor
    de eerste scan.
 3. Bij de eerste scan vraagt iOS om toegang tot de camera. De app gebruikt die alleen voor
    de pagina’s van een rapport en voor de QR-code die de app aan uw dossier koppelt;
    de foto’s blijven op de telefoon.
 
-**De vergrendeling.** Standaard vraagt de app om Face ID, Touch ID of de toegangscode
+**De vergrendeling.** Standaard vraagt de app om [Face ID](https://developer.apple.com/documentation/localauthentication), Touch ID of de toegangscode
 telkens wanneer hij op de voorgrond komt, zodat uw resultaten niet zichtbaar zijn voor
 wie de ontgrendelde telefoon vasthoudt. De schakelaar staat onder **Analyseaanbieder**
 in het menu **⋯**, sectie **Bescherming**. Een telefoon zonder toegangscode heeft
-niets om naar te vragen, en de vergrendeling opent dan vanzelf.
+niets om naar te vragen, en de vergrendeling opent dan vanzelf ([ADR-060](../ADRs/ADR-060-the-app-locks-with-face-id-and-answers-pinning-and-jailbreak-detection.md)).
 
 ## Uw rapporten
 
@@ -119,12 +119,12 @@ controleerbaar maken:
   lipoproteïne(a) in mg/dL en in nmol/L zijn verschillende metingen met
   verschillende codes. Een grootheid die LOINC niet codeert, zegt dat ronduit in plaats van
   een code te tonen die ongeveer past, en een organisme uit een ontlastingsonderzoek toont in plaats daarvan zijn
-  NCBI Taxonomy-id, omdat LOINC tests benoemt en geen organismen;
+  [NCBI Taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy)-id, omdat LOINC tests benoemt en geen organismen;
 - **het referentiebereik dat uw laboratorium heeft afgedrukt**, precies zoals afgedrukt, nooit
   genormaliseerd;
 - **de pagina en de regel** waarvan ze is gelezen, zodat elk getal kan worden vergeleken
   met het papier dat voor u ligt;
-- **het gepubliceerde bereik**, waar een richtlijn of een genoemde studie er een vermeldt, met
+- **het gepubliceerde bereik**, waar een richtlijn of een genoemde studie er een vermeldt ([ADR-039](../ADRs/ADR-039-published-reference-ranges.md)), met
   woorden en een symbool naast de kleur: “binnen het optimale bereik”, “buiten
   het optimale bereik”, “buiten het richtlijnbereik”. Dit is een vergelijking met een
   getal dat iemand heeft gepubliceerd. Het is geen bevinding.
@@ -174,7 +174,7 @@ en het rapport waartoe het behoort, en tikken op een punt opent dat rapport.
 Een zin onder elke grafiek zegt **wat de meting is**: een definitie van
 de test, in het Engels of het Duits. Het is nooit een interpretatie van uw eigen waarde.
 
-Onderaan leest **Trends uit Apple Health tonen** uw rusthartslag,
+Onderaan leest **Trends uit [Apple Health](https://developer.apple.com/documentation/healthkit) tonen** uw rusthartslag,
 hartslagvariabiliteit, stappen en gewicht, nadat eenmaal om
 toestemming is gevraagd. Ze verschijnen in een eigen sectie, **Van uw apparaten**, als grijze
 stippellijnen van weekgemiddelden over dezelfde maanden als uw rapporten, met een dunne
@@ -230,9 +230,9 @@ pagina staan, die op de telefoon blijft. Welke aanbieder wordt gebruikt, wordt v
 scherm vermeld.
 
 **Analyseaanbieder** in het menu bepaalt waar een antwoord vandaan komt: van deze
-iPhone, van de Klarbefund-dienst in de EU, of van uw eigen Azure OpenAI-resource of
+iPhone, van de Klarbefund-dienst in de EU (standaard [Azure OpenAI in de EU-datazone](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/deployment-types#data-zone-standard)), of van uw eigen Azure OpenAI-resource of
 Anthropic-sleutel. Met uw eigen dienst praat de telefoon er rechtstreeks mee, en
-noch de sleutel noch de waarden bereiken de aanbieder van deze app. Hetzelfde
+noch de sleutel noch de waarden bereiken de aanbieder van deze app ([ADR-034](../ADRs/ADR-034-claude-workload-identity-federation.md), [ADR-035](../ADRs/ADR-035-inference-provider-residency-and-quota.md)). Hetzelfde
 scherm bevat de schakelaar **Bescherming** voor de Face ID-vergrendeling.
 
 ## Toestemmingen
@@ -243,7 +243,7 @@ scherm bevat de schakelaar **Bescherming** voor de Face ID-vergrendeling.
 gemakkelijk te verwarren zijn en nooit één schakelaar mogen zijn:
 
 - **Deelname aan een studie**, uw toestemming voor een studie, bewaard door het studiecentrum;
-- **Elektronisch patiëntendossier (ePA)**, een _bezwaar_, omdat de ePA bestaat
+- **Elektronisch patiëntendossier (ePA)**, een [_bezwaar_](https://www.gesetze-im-internet.de/sgb_5/__342.html), omdat de ePA bestaat
   tenzij u bij uw zorgverzekeraar bezwaar maakt;
 - **Gebruik voor registers en onderzoek**, uw toestemming dat een register of een onderzoeksdatabank
   uw waarden gebruikt.
@@ -262,21 +262,21 @@ geen ePA is om naar te uploaden zolang dat bezwaar geldt.
 
 **Mijn EHDS-dossier**, bovenaan de lijst, toont of de app verbonden is
 en gegevens verstuurt, en opent **Verbinden met EHDS**, waarmee de app wordt gekoppeld aan uw dossier in de
-demohub van de Europese ruimte voor gezondheidsgegevens, zodat hij het kan lezen en, als u daartoe besluit,
+demohub van de [Europese ruimte voor gezondheidsgegevens](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng), zodat hij het kan lezen en, als u daartoe besluit,
 kan aanvullen. Er zijn drie manieren om toegang te krijgen, en op de telefoon wordt geen wachtwoord in een webpagina
 getypt:
 
 - **Een EHDS-account aanmaken** maakt een account met een eigen, leeg dossier aan op
   de demohub en koppelt de telefoon eraan. U krijgt een gebruikersnaam en wachtwoord
-  om ook op de website in te loggen. Apple bevestigt aan de hub dat het verzoek
+  om ook op de website in te loggen. [Apple bevestigt](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity) aan de hub dat het verzoek
   afkomstig is van de echte app op een echt apparaat, en daarom
-  kan een simulator dit niet.
+  kan een simulator dit niet ([ADR-054](../ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md)).
 - **Inloggen met een EHDS-account** dat u al hebt.
-- **Verbinden via QR-code**, vanaf het patiëntenscherm op een computer:
+- **Verbinden via QR-code** ([OAuth device grant](https://www.rfc-editor.org/rfc/rfc8628), [ADR-049](../ADRs/ADR-049-klarbefund-connects-by-device-grant.md)), vanaf het patiëntenscherm op een computer:
   1. Open op de computer het patiëntenscherm (de app toont het adres, om te
      kopiëren, te delen of te openen) en log in als patiënt. Kies **QR-code tonen**.
   2. In de app **QR-code scannen**. Op de computer opent **Keur goed op deze
-     computer** de toestemmingspagina van Keycloak; controleer of de code die daar wordt getoond,
+     computer** de toestemmingspagina van [Keycloak](https://www.keycloak.org/docs/latest/server_admin/#device-authorization-grant); controleer of de code die daar wordt getoond,
      dezelfde is als die de app toont, en keur goed.
   3. De app vermeldt met welk account hij verbinding heeft gemaakt en vraagt **Is dit uw
      account?** Een code die iemand anders u heeft laten zien, zou de telefoon met
@@ -285,7 +285,7 @@ getypt:
 
 Na het verbinden toont **Mijn EHDS-dossier tonen** wat de hub over u bewaart:
 metingen met hun afgedrukte bereiken en data, rapporten, vaccinaties en
-het medicatieoverzicht. Op de demohub is elk dossier synthetisch, en het
+het medicatieoverzicht ([ADR-059](../ADRs/ADR-059-the-record-holds-reports-vaccinations-and-the-medication-plan.md)). Op de demohub is elk dossier synthetisch, en het
 scherm vermeldt dat. Het dossier wordt gelezen wanneer u het opent, nergens bewaard en nooit
 vermengd met uw gescande rapporten.
 
@@ -297,7 +297,7 @@ ze inschakelt:
   gelezen uit een scan. Waarden zonder LOINC-code blijven op de telefoon.
 - **Mijn apparaattrends naar mijn EHDS-dossier sturen**: de weekgemiddelden uit Apple
   Health die het scherm Trends toont, nooit een enkele dag of een enkele
-  meting; elke synchronisatie vervangt de vorige.
+  meting; elke synchronisatie vervangt de vorige ([ADR-057](../ADRs/ADR-057-klarbefund-sends-weekly-device-means.md)).
 
 Als u een van beide uitschakelt, stopt het verdere versturen; wat is verstuurd, blijft in het dossier
 totdat u het account verwijdert. **Ontkoppelen** staat in de app en op het patiëntenscherm,
@@ -311,7 +311,11 @@ gedurende twee minuten.
 Een EUDI Wallet is optioneel. Klarbefund en de hub werken met alleen een gebruikersnaam en
 wachtwoord. Een wallet voegt een tweede manier toe om op de website in te loggen: d-you,
 de Duitse EUDI Wallet, of elke andere gecertificeerde wallet, bewijst wie u bent met
-uw PID (uw digitale identiteitskaart) in plaats van met een wachtwoord.
+uw [PID](https://eu-digital-identity-wallet.github.io/eudi-doc-architecture-and-reference-framework/latest/) (uw digitale identiteitskaart) in plaats van met een wachtwoord.
+d-you wordt [begin januari 2027 voor iedereen gelanceerd](https://www.bundesregierung.de/breg-de/aktuelles/digital-wallet-2452384). Tot dan is de
+hub als vertrouwende partij geregistreerd in de sandbox van SPRIND; de stappen
+hieronder werken dus met de test-wallet-app van d-you uit die sandbox, nog niet
+met de openbare d-you ([ADR-065](../ADRs/ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md), [ADR-066](../ADRs/ADR-066-the-hub-runs-its-own-eudi-verifier-behind-a-wallet-only-gate.md)).
 
 De hub bewaart nooit uw naam of geboortedatum. Hij bewaart er één beveiligde hash
 van bij het account, die alleen zegt “deze PID hoort bij dit account”
@@ -355,19 +359,19 @@ mee verwijderd.
 Alles wat de app bevat, kan hem verlaten, in de vorm die de ontvanger nodig heeft, en
 alleen wanneer u dat zegt.
 
-| Actie                            | Voor                   | Wat u krijgt                                                                                                                                                                               |
-| -------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Delen voor mijn arts             | een praktijk, de ePA   | een pdf-samenvatting met de originele pagina’s als bijlage, plus een FHIR R4-bundel                                                                                                        |
-| Exporteren voor onderzoek (OMOP) | een analyseteam        | OMOP CDM v5.4 `measurement.csv`, `person.csv`, `observation_period.csv`                                                                                                                    |
-| Al mijn gegevens exporteren      | u, op grond van de AVG | elk rapport, elke pagina, elke waarde, elk profielveld en elke toestemming, in één archief                                                                                                 |
-| Al mijn gegevens verwijderen     | u                      | de opslag wordt definitief gewist; het account dat de app op de hub heeft aangemaakt, met het dossier, de waarden en de toestemmingen, verdwijnt ook; de app meldt dit voordat het gebeurt |
-| Diagnostiek exporteren           | de ontwikkelaars       | de herkende tekst en beide doorgangen van de tekstherkenning, om een verkeerd gelezen regel te herstellen                                                                                  |
+| Actie                            | Voor                                                                                                                                                      | Wat u krijgt                                                                                                                                                                                                                                                                    |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Delen voor mijn arts             | een praktijk, de ePA                                                                                                                                      | een pdf-samenvatting met de originele pagina’s als bijlage, plus een [FHIR R4](https://hl7.org/fhir/R4/bundle.html)-bundel                                                                                                                                                      |
+| Exporteren voor onderzoek (OMOP) | een analyseteam                                                                                                                                           | OMOP CDM v5.4 [`measurement.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#measurement), [`person.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#person), [`observation_period.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#observation_period) |
+| Al mijn gegevens exporteren      | u, op grond van [art. 15](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_15) en [20](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_20) AVG | elk rapport, elke pagina, elke waarde, elk profielveld en elke toestemming, in één archief                                                                                                                                                                                      |
+| Al mijn gegevens verwijderen     | u, [art. 17 AVG](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_17)                                                                                | de opslag wordt definitief gewist; het account dat de app op de hub heeft aangemaakt, met het dossier, de waarden en de toestemmingen, verdwijnt ook; de app meldt dit voordat het gebeurt                                                                                      |
+| Diagnostiek exporteren           | de ontwikkelaars                                                                                                                                          | de herkende tekst en beide doorgangen van de tekstherkenning, om een verkeerd gelezen regel te herstellen                                                                                                                                                                       |
 
-De FHIR-bundel bevat elke waarde met haar LOINC-code, haar UCUM-eenheid, het
+De FHIR-bundel bevat elke waarde met haar LOINC-code, haar [UCUM](https://ucum.org/ucum)-eenheid, het
 bereik dat het laboratorium heeft afgedrukt (als getallen waar ze leesbaar zijn, en altijd als
-de afgedrukte tekst in `referenceRange.text`), en de pagina en regel waarvan ze is gelezen.
+de afgedrukte tekst in [`referenceRange.text`](https://hl7.org/fhir/R4/observation-definitions.html#Observation.referenceRange.text)), en de pagina en regel waarvan ze is gelezen.
 Een waarde die van een foto is gelezen, is ook in de bundel als voorlopig gemarkeerd.
-De export voor de arts blijft met de bijgevoegde pagina’s binnen de limiet van 25 MB van de ePA.
+De export voor de arts blijft met de bijgevoegde pagina’s binnen de [limiet van 25 MB](https://www.kbv.de/praxis/tools-und-services/praxisnachrichten/2025/10-09/alles-nur-eine-frage-muessen-befundberichte-arztbriefe-etc-sofort-eingestellt-werden) van de ePA.
 
 Alles gaat via het deelmenu van het systeem: naar de ePA-app, Bestanden,
 AirDrop of e-mail. Er is bewust geen eigen upload, omdat er
@@ -379,14 +383,14 @@ integratiepunt.
 <img src="img/privacy.png" width="300" alt="Privacy en veiligheid: de rapporten blijven op deze telefoon, er wordt niets verstuurd tenzij u het verstuurt, waar een uitleg vandaan komt">
 
 De foto’s verlaten het apparaat nooit. Waarden, pagina’s en diagnostiek worden
-afzonderlijk versleuteld met een sleutel die niet beschikbaar is zolang de telefoon
-vergrendeld is en nooit op een ander apparaat wordt teruggezet. De opslag is uitgesloten van
-iCloud-reservekopie. Wanneer de app niet op de voorgrond staat, wordt de inhoud afgedekt, zodat de
+[afzonderlijk versleuteld met een sleutel die niet beschikbaar is zolang de telefoon
+vergrendeld is](https://developer.apple.com/documentation/security/ksecattraccessiblewhenunlockedthisdeviceonly) en nooit op een ander apparaat wordt teruggezet. De opslag is uitgesloten van
+[iCloud-reservekopie](https://developer.apple.com/documentation/foundation/urlresourcevalues/isexcludedfrombackup). Wanneer de app niet op de voorgrond staat, wordt de inhoud afgedekt, zodat de
 appkiezer niets toont, en bij terugkeer wordt om Face ID of de toegangscode gevraagd.
 
 Dit is gecontroleerd, niet aangenomen: met de telefoon aan een kabel mislukt het kopiëren van een opgeslagen
 dossier, van een export die in de tijdelijke map is achtergebleven of van de eigen momentopname
-die het systeem van de app maakt telkens met een toegangsfout, en zo ziet volledige bestandsbeveiliging
+die het systeem van de app maakt telkens met een toegangsfout, en zo ziet [volledige bestandsbeveiliging](https://developer.apple.com/documentation/foundation/nsfileprotectioncomplete)
 er van buitenaf uit. De volledige beoordeling, doelstelling voor
 doelstelling, is de [zelfbeoordeling](self-assessment.md); wat er is getest en
 hoe, staat in [bewijs](evidence.md).
@@ -399,6 +403,9 @@ afwijkend, geeft scores of adviseert. Een waarde die van een foto is gelezen, ka
 verkeerd zijn gelezen en is gemarkeerd als voorlopig totdat u haar met het papier vergelijkt.
 Referentiebereiken worden precies getoond zoals uw laboratorium ze heeft afgedrukt, en de
 gepubliceerde bereiken ernaast zijn citaten met een bron, geen oordeel.
+
+Waarom de app geen medisch hulpmiddel is in de zin van de [MDR](https://eur-lex.europa.eu/eli/reg/2017/745/oj/eng) en de richtsnoer
+[MDCG 2019-11](https://health.ec.europa.eu/document/download/b45335c5-1679-4c71-a91c-fc7a4d37f12b_en), staat in de [zelfbeoordeling](self-assessment.md#regulation).
 
 Raadpleeg altijd een arts voordat u een beslissing over uw gezondheid neemt.
 

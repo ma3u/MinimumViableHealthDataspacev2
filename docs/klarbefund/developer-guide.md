@@ -13,41 +13,41 @@ say why that is not negotiable.
 
 ## What you need
 
-| Tool               | Version                 | Why                                                                                            |
-| ------------------ | ----------------------- | ---------------------------------------------------------------------------------------------- |
-| macOS with Xcode   | Xcode 27, iOS 26 SDK    | The app targets iOS 26; the Swift package declares macOS 26 for the tools                      |
-| Swift              | 6.0, strict concurrency | `Package.swift` and `project.yml` both pin it                                                  |
-| XcodeGen           | `brew install xcodegen` | The `.xcodeproj` is generated from `project.yml` and never committed                           |
-| Node               | as for `ui/`            | Only to regenerate the dictionary from `services/epa-ingest`                                   |
-| PlantUML, Graphviz | `brew install plantuml` | Only to re-render the diagrams in this guide                                                   |
-| An iPhone          | iOS 26 or later         | Only for the camera, Face ID, App Attest and TestFlight; everything else runs in the simulator |
+| Tool                                                                     | Version                                                                                                                                                                                                                                               | Why                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| macOS with Xcode                                                         | [Xcode 26](https://developer.apple.com/documentation/xcode-release-notes) or later, iOS 26 SDK or later; CI builds with Xcode 26.6 on the [macOS 26 runner](https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md) | The app targets iOS 26; the Swift package declares macOS 26 for the tools                                                                                                                                                            |
+| Swift                                                                    | 6.0, [strict concurrency](https://www.swift.org/documentation/concurrency/)                                                                                                                                                                           | [`Package.swift`](../../clients/ios/Package.swift) and [`project.yml`](../../clients/ios/project.yml) both pin it                                                                                                                    |
+| [XcodeGen](https://github.com/yonaskolb/XcodeGen)                        | `brew install xcodegen`                                                                                                                                                                                                                               | The `.xcodeproj` is generated from `project.yml` and never committed                                                                                                                                                                 |
+| Node                                                                     | as for `ui/`                                                                                                                                                                                                                                          | Only to regenerate the dictionary from [`services/epa-ingest`](../../services/epa-ingest)                                                                                                                                            |
+| [PlantUML](https://www.plantuml.com/), [Graphviz](https://graphviz.org/) | `brew install plantuml`                                                                                                                                                                                                                               | Only to re-render the diagrams in this guide                                                                                                                                                                                         |
+| An iPhone                                                                | iOS 26 or later                                                                                                                                                                                                                                       | Only for the camera, Face ID, [App Attest](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity) and [TestFlight](https://developer.apple.com/testflight/); everything else runs in the simulator |
 
 ## How it is put together
 
 ![Klarbefund as an ArchiMate layered view: the business layer with the person, the doctor and the research team and the six things a person does; the application layer with the four services, the app, the Shared package, the tools, the hub and the generator; the technology layer with the iPhone's frameworks, the Mac and Azure Container Apps](img/klarbefund-architecture.svg)
 
 Source: [`diagrams/klarbefund-architecture.puml`](diagrams/klarbefund-architecture.puml),
-rendered with `scripts/render-plantuml.sh docs/klarbefund/diagrams/*.puml`.
+rendered with [`scripts/render-plantuml.sh`](../../scripts/render-plantuml.sh) `docs/klarbefund/diagrams/*.puml`.
 
-The view follows ArchiMate 3.2: the business layer (yellow) holds who does
+The view follows [ArchiMate 3.2](https://pubs.opengroup.org/architecture/archimate32-doc/): the business layer (yellow) holds who does
 what, the application layer (blue) the services the software provides and
 the components that realise them, the technology layer (green) what it all
 runs on. An arrow from a lower band to an upper one means "serves"; a dotted
 arrow with a hollow head means "realises". Three things to read off it:
 
-- **`Sources/Shared`** is a Swift package that compiles for iOS and macOS. It
+- **[`Sources/Shared`](../../clients/ios/Sources/Shared/)** is a Swift package that compiles for iOS and macOS. It
   holds the parser, the recogniser's post-processing, the generated analyte
   dictionary and reference ranges, the record model with its provenance, and
-  the export formats (FHIR R4, OMOP CDM, the diagnostics bundle). Nothing in
+  the export formats ([FHIR R4](https://hl7.org/fhir/R4/), [OMOP CDM](https://ohdsi.github.io/CommonDataModel/cdm54.html), the diagnostics bundle). Nothing in
   it touches the network, the Keychain or the store, which is why every
   number the app computes can be reproduced on a Mac with `swift test`.
-- **`Sources/MeinBefund`** is the app: SwiftUI views, VisionKit scanning, the
+- **[`Sources/MeinBefund`](../../clients/ios/Sources/MeinBefund/)** is the app: SwiftUI views, [VisionKit](https://developer.apple.com/documentation/visionkit/vndocumentcameraviewcontroller) scanning, the
   sealed store, the exports' share sheet, the EHDS connection, the app lock,
   the analysis providers, and the debug-only demo data and self-test.
-- **`Tools/`** are four command-line programs over the Shared package:
-  `LabFile` imports a PDF or image exactly as the app would, `ScanReplay`
-  re-runs a diagnostics export through the current parser, `AnalyteParity`
-  proves the generated dictionary equals its TypeScript source, and `IconGen`
+- **[`Tools/`](../../clients/ios/Tools)** are four command-line programs over the Shared package:
+  [`LabFile`](../../clients/ios/Tools/LabFile) imports a PDF or image exactly as the app would, [`ScanReplay`](../../clients/ios/Tools/ScanReplay)
+  re-runs a diagnostics export through the current parser, [`AnalyteParity`](../../clients/ios/Tools/AnalyteParity)
+  proves the generated dictionary equals its TypeScript source, and [`IconGen`](../../clients/ios/Tools/IconGen)
   draws the app icon.
 
 ```
@@ -74,7 +74,7 @@ xcodegen generate && open MeinBefund.xcodeproj # then run the MeinBefund scheme 
 ```
 
 From the command line into a simulator, note the **ad-hoc signature**:
-without it every Keychain call fails with `-34018` and the store cannot
+without it every Keychain call fails with [`-34018`](https://developer.apple.com/documentation/security/errsecmissingentitlement) and the store cannot
 create its key.
 
 ```bash
@@ -83,12 +83,12 @@ xcodebuild -project MeinBefund.xcodeproj -scheme MeinBefund \
   CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=YES build
 ```
 
-Onto a connected iPhone: `Scripts/install-device.sh`. The generated project
+Onto a connected iPhone: [`Scripts/install-device.sh`](../../clients/ios/Scripts/install-device.sh). The generated project
 carries no signing team, so a plain `xcodebuild` for a device fails; the
 script supplies one from `TEAM_ID` or from the keychain, and installs what it
-built. TestFlight: `Scripts/archive-and-upload.sh`; its header names the four
+built. TestFlight: [`Scripts/archive-and-upload.sh`](../../clients/ios/Scripts/archive-and-upload.sh); its header names the four
 things that must exist in the Apple Developer account first. The version is
-pinned in `project.yml`: `MARKETING_VERSION` matches the App Store Connect
+pinned in `project.yml`: `MARKETING_VERSION` matches the [App Store Connect](https://developer.apple.com/help/app-store-connect/manage-builds/upload-builds)
 record and `CURRENT_PROJECT_VERSION` rises with every upload, because App
 Store Connect refuses a build number it has already seen, after the upload.
 
@@ -100,20 +100,20 @@ Every launch argument below exists only in a Debug build. The checks are
 `#if DEBUG`, not a flag alone: a flag can be discovered, code that is not
 compiled cannot.
 
-| Argument               | What it does                                                                                                                                        |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `-MBDemoSeed`          | Two fictional reports, in memory only. Enough for a screenshot; what every UI test launches with.                                                   |
-| `-MBDevData`           | Seven fictional reports across three years and four sources, built in code: a trend has shape, the unmatched list has rows, every report has pages. |
-| `-MBShot <screen>`     | Opens a screen directly once the reports are loaded: `list detail scan trends reference history profile consent settings privacy consents connect`. |
-| `-MBSelfTest`          | Drives one synthetic report through the whole pipeline in the app target and logs 27 checks (see [The self-test](#the-self-test)).                  |
-| `-MBExportDiagnostics` | Builds the diagnostics archive into the app's temporary directory for `Scripts/pull-diagnostics.sh`.                                                |
+| Argument               | What it does                                                                                                                                          |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `-MBDemoSeed`          | Two fictional reports, in memory only. Enough for a screenshot; what every UI test launches with.                                                     |
+| `-MBDevData`           | Seven fictional reports across three years and four sources, built in code: a trend has shape, the unmatched list has rows, every report has pages.   |
+| `-MBShot <screen>`     | Opens a screen directly once the reports are loaded: `list detail scan trends reference history profile consent settings privacy consents connect`.   |
+| `-MBSelfTest`          | Drives one synthetic report through the whole pipeline in the app target and logs 27 checks (see [The self-test](#the-self-test)).                    |
+| `-MBExportDiagnostics` | Builds the diagnostics archive into the app's temporary directory for [`Scripts/pull-diagnostics.sh`](../../clients/ios/Scripts/pull-diagnostics.sh). |
 
 The dev dataset is **built, not stored**. A row states the label, the value,
-the unit and the range the laboratory printed, and `Analytes.lookup` codes it
+the unit and the range the laboratory printed, and [`Analytes.lookup`](../../clients/ios/Sources/Shared/Analytes.generated.swift#L2775) codes it
 exactly as it codes a scan. No code in the dataset can be wrong, a row the
 dictionary cannot code lands in the unmatched list of its own accord, and the
 dataset follows the dictionary when the dictionary changes. The pages are
-drawn by `SyntheticSheet`, the same renderer the tests read.
+drawn by [`SyntheticSheet`](../../clients/ios/Sources/Shared/SyntheticSheet.swift), the same renderer the tests read.
 
 A demo launch never locks: the app lock reads the seed flag and stays open,
 so the UI tests and the screenshot script run where nobody can answer a
@@ -137,36 +137,36 @@ Source: [`diagrams/klarbefund-scan-pipeline.puml`](diagrams/klarbefund-scan-pipe
 The order is fixed and each step has one owner
 ([ADR-033](../ADRs/ADR-033-lab-report-extraction-pipeline.md)):
 
-1. **Provenance first.** `LabImport` decides on the file, never its
+1. **Provenance first.** [`LabImport`](../../clients/ios/Sources/Shared/LabImport.swift) decides on the file, never its
    extension: a PDF carrying the laboratory's own text layer is
    `lab-issued-digital` and its Observations are `final`; anything that has to
    go through the recogniser is `ocr-transcribed` and `preliminary`. It is
    strict on purpose, because marking a transcription `final` is the failure
    that matters.
-2. **Recognition.** `VisionDocumentReader` runs two Vision passes, German and
+2. **Recognition.** [`VisionDocumentReader`](../../clients/ios/Sources/Shared/VisionDocumentReader.swift) runs two [Vision](https://developer.apple.com/documentation/vision/recognizing-text-in-images) passes, German and
    English, with language correction **off**: "correcting" `Lp(a)` or a
-   decimal comma is actively harmful. `DocumentReconciler` merges the passes
-   and `TableRoles` infers which column holds the label, the value, the unit
+   decimal comma is actively harmful. [`DocumentReconciler`](../../clients/ios/Sources/Shared/DocumentReconciler.swift) merges the passes
+   and [`TableRoles`](../../clients/ios/Sources/Shared/TableRoles.swift) infers which column holds the label, the value, the unit
    and the range, per table.
-3. **Parsing.** `LabLineParser` reads every row. When the ordinary parse finds
+3. **Parsing.** [`LabLineParser`](../../clients/ios/Sources/Shared/LabLineParser.swift) reads every row. When the ordinary parse finds
    nothing, the sheet readers take their turn: ambulatory blood pressure,
    resting and exercise ECG, Holter, cardiopulmonary exercise test, lactate,
    CGM glucose profile, DXA, and a body-composition scale's screen, which is
    a dashboard and not a report and is read for its headline value only.
-4. **Coding.** `Analytes.lookup(label, unit)` picks the LOINC code. The unit
+4. **Coding.** [`Analytes.lookup(label, unit)`](../../clients/ios/Sources/Shared/Analytes.generated.swift#L2775) picks the LOINC code. The unit
    decides, never the name alone. A quantity LOINC does not code (visceral fat
    as a mass, a water ratio) is carried with its unit, no code and a required
-   reason; an organism from a stool report carries its NCBI Taxonomy id,
+   reason; an organism from a stool report carries its [NCBI Taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) id,
    because LOINC names tests and not organisms.
-5. **The header.** `ReportMetadata` and `PrintedFields` read the laboratory,
+5. **The header.** [`ReportMetadata`](../../clients/ios/Sources/Shared/ReportMetadata.swift) and [`PrintedFields`](../../clients/ios/Sources/Shared/PrintedFields.swift) read the laboratory,
    the lab date, the issue date and the report number from the sheet; the lab
    date is preferred over the receipt and issue dates and the person confirms
    it before saving.
 6. **Conservation.** Every row that looks like a measurement ends up coded,
    unmatched or unread. A row in none of the three is indistinguishable from
    a row that was never printed, and that is exactly how an HbA1c row went
-   missing once (`docs/gotchas.md`, 2026-09-19). The self-test asserts it.
-7. **Review and save.** `ReviewViews` shows what was read; `ReportStore`
+   missing once ([`docs/gotchas.md`](../gotchas.md#2026-09-19-the-measurement-that-justified-the-ocr-hybrid-was-taken-on-the-wrong-os), 2026-09-19). The self-test asserts it.
+7. **Review and save.** [`ReviewViews`](../../clients/ios/Sources/MeinBefund/ReviewViews.swift) shows what was read; [`ReportStore`](../../clients/ios/Sources/MeinBefund/ReportStore.swift)
    seals it.
 
 `swift run LabFile ~/Downloads/befund.pdf` runs steps 1 to 6 on a Mac and
@@ -177,8 +177,8 @@ It refuses a path inside this repository.
 ## The store and the lock
 
 Three sealed files per report under `Application Support/Reports`, each
-AES-GCM under the same Keychain key, complete file protection, excluded from
-backup:
+[AES-GCM](https://developer.apple.com/documentation/cryptokit/aes/gcm) under the same Keychain key, [complete file protection](https://developer.apple.com/documentation/foundation/nsfileprotectioncomplete), [excluded from
+backup](https://developer.apple.com/documentation/foundation/urlresourcevalues/isexcludedfrombackup):
 
 ```
 <id>.sealed         the record (LabReport)
@@ -188,33 +188,33 @@ profile.sealed      sex, date of birth, height (Profile)
 consents.sealed     the three consent decisions (ConsentLedger)
 ```
 
-The key is `ThisDeviceOnly` and unavailable while the phone is locked, so a
+The key is [`ThisDeviceOnly`](https://developer.apple.com/documentation/security/ksecattraccessiblewhenunlockedthisdeviceonly) and unavailable while the phone is locked, so a
 container copy yields ciphertext and the system's own snapshot of the app
-fails with `EPERM`; `SecurityPostureTests` pins the build settings and the
+fails with `EPERM`; [`SecurityPostureTests`](../../clients/ios/Tests/SharedTests/SecurityPostureTests.swift) pins the build settings and the
 [self-assessment](self-assessment.md) records the measurement. Records
 written before a field existed still decode: every later field is optional or
 defaulted.
 
 The app lock ([ADR-060](../ADRs/ADR-060-the-app-locks-with-face-id-and-answers-pinning-and-jailbreak-detection.md))
-is two types. `AppLockPolicy` in Shared decides _whether_ a challenge is due
-and is pure, so `AppLockPolicyTests` runs on a Mac; `AppLock` in the app asks
-LocalAuthentication _how_, Face ID, Touch ID or the passcode, and
-`PrivacyCover` draws the cover the app switcher sees. The same ADR says why
+is two types. [`AppLockPolicy`](../../clients/ios/Sources/Shared/AppLockPolicy.swift) in Shared decides _whether_ a challenge is due
+and is pure, so [`AppLockPolicyTests`](../../clients/ios/Tests/SharedTests/AppLockPolicyTests.swift) runs on a Mac; [`AppLock`](../../clients/ios/Sources/MeinBefund/AppLock.swift) in the app asks
+[LocalAuthentication](https://developer.apple.com/documentation/localauthentication) _how_, Face ID, Touch ID or the passcode, and
+[`PrivacyCover`](../../clients/ios/Sources/MeinBefund/PrivacyCover.swift) draws the cover the app switcher sees. The same ADR says why
 certificate pinning and jailbreak detection were declined.
 
 ## The dictionary is generated, never copied
 
-`Sources/Shared/Analytes.generated.swift`, `ReferenceRanges.generated.swift`
-and `PromptText.generated.swift` are produced from
+[`Sources/Shared/Analytes.generated.swift`](../../clients/ios/Sources/Shared/Analytes.generated.swift), [`ReferenceRanges.generated.swift`](../../clients/ios/Sources/Shared/ReferenceRanges.generated.swift)
+and [`PromptText.generated.swift`](../../clients/ios/Sources/Shared/PromptText.generated.swift) are produced from
 [`services/epa-ingest`](../../services/epa-ingest):
 
 ```bash
 cd services/epa-ingest && npm run generate:swift
-cd clients/ios && swift run AnalyteParity      # 1589 codings, 71 units today
+cd clients/ios && swift run AnalyteParity      # 1760 codings, 96 units on 2026-11-07
 ```
 
-Do not hand-edit them. Add an analyte to `analytes.ts` or a range to
-`reference-ranges.ts`, regenerate, commit both. CI fails when a generated file
+Do not hand-edit them. Add an analyte to [`analytes.ts`](../../services/epa-ingest/src/analytes.ts) or a range to
+[`reference-ranges.ts`](../../services/epa-ingest/src/reference-ranges.ts), regenerate, commit both. CI fails when a generated file
 is out of date with its source, because a stale copy is exactly the silent
 divergence the monorepo was chosen to prevent: an iPhone coding Lp(a) one way
 and the ingest service another, noticed when a value reaches a doctor.
@@ -230,25 +230,25 @@ analyte the Trends screen draws the range the person's own laboratory printed.
 ```bash
 swift test                                     # Swift Testing: what the app computes
 Scripts/run-ui-tests.sh                        # XCUITest: what it shows, and what a tap does
-swift test --filter ExtractionAccuracyTests    # the accuracy benchmark, JSON to docs/klarbefund/accuracy-benchmark.json
+swift test --filter AccuracyBenchmarkTests     # the accuracy benchmark; KLARBEFUND_BENCHMARK_OUT=<file> writes its JSON
 swift test --filter SecurityPostureTests       # the build settings the self-assessment relies on
 ```
 
-**The unit suite** (`Tests/SharedTests/`) is the larger one and catches what
+**The unit suite** ([`Tests/SharedTests/`](../../clients/ios/Tests/SharedTests/), [Swift Testing](https://developer.apple.com/documentation/testing)) is the larger one and catches what
 can be reasoned about: a unit that picks the wrong code, a date read from the
-wrong line, an export column in the wrong place. `FhirBundleParityTests` pins
+wrong line, an export column in the wrong place. [`FhirBundleParityTests`](../../clients/ios/Tests/SharedTests/FhirBundleParityTests.swift) pins
 the bundle to the golden bundle `services/epa-ingest` writes, so both writers
 emit the same FHIR for the same sheet.
 
-**The UI suite** (`Tests/UITests/`) exists because the unit suite caught none
+**The UI suite** ([`Tests/UITests/`](../../clients/ios/Tests/UITests/), [XCUITest](https://developer.apple.com/documentation/xctest/xcuiapplication)) exists because the unit suite caught none
 of the last several defects: a card clipped at the chart's edge, a selection
 that forgot itself on the next render, `LOINC Optional("2093-3")` on the one
 screen a person compares with their own paper. Every test launches with
 `-MBDemoSeed` and reaches its screen with `-MBShot`, so it breaks when what it
 checks changes and not when a button moves. Three things learned the hard way
-are in `docs/gotchas.md`: an `accessibilityIdentifier` on a container renames
+are in [`docs/gotchas.md`](../gotchas.md#2026-09-20--an-accessibilityidentifier-on-a-chart-renames-everything-inside-it): an `accessibilityIdentifier` on a container renames
 everything inside it; a `Button` whose label is `Color.clear` is not in the
-accessibility tree; Swift Charts' selection answers a finger and not a
+accessibility tree; [Swift Charts](https://developer.apple.com/documentation/charts)' selection answers a finger and not a
 synthesised tap, so real buttons sit over the marks.
 
 ### The self-test
@@ -269,9 +269,10 @@ xcrun simctl spawn <udid> log show --last 2m --predicate 'subsystem == "red.mabu
 
 ### The accuracy benchmark
 
-`ExtractionAccuracyTests` reads synthetic sheets of known content and writes
-field-level accuracy to `docs/klarbefund/accuracy-benchmark.json`; the
-[evidence](evidence.md) page quotes it and [run-on-mac](run-on-mac.md)
+[`AccuracyBenchmarkTests`](../../clients/ios/Tests/SharedTests/AccuracyBenchmarkTests.swift) reads synthetic sheets of known content with Vision and, with
+`KLARBEFUND_BENCHMARK_OUT` set, writes field-level accuracy as JSON; the published copy is
+[`docs/klarbefund/accuracy-benchmark.json`](accuracy-benchmark.json), and [`ExtractionAccuracyTests`](../../clients/ios/Tests/SharedTests/ExtractionAccuracyTests.swift)
+tests the measure itself. The [evidence](evidence.md) page quotes it and [run-on-mac](run-on-mac.md)
 reproduces every number. A real report is measured the same way, on the
 person's own Mac and never in the repository, with `ScanReplay --truth`
 against a hand-written `truth.json` beside the export: it prints which fields
@@ -305,62 +306,62 @@ swift run ScanReplay ~/Downloads/klarbefund-diagnostics-<date> --truth  # accura
 ```
 
 The replay prints what the phone coded, what codes now, what is newly coded
-or lost, and every row with its reason. Add an analyte to `analytes.ts`,
+or lost, and every row with its reason. Add an analyte to [`analytes.ts`](../../services/epa-ingest/src/analytes.ts),
 regenerate, replay, and watch the real sheet's rows move from unmatched to
 coded without scanning it again. Both tools refuse a path inside
 `clients/ios/`.
 
 ## The connection to the EHDS hub
 
-The patient screen of the hub starts an OAuth 2.0 device grant for the public
-Keycloak client `klarbefund-app` and shows it as a QR code carrying a
+The patient screen of the hub starts an [OAuth 2.0](https://www.rfc-editor.org/rfc/rfc8628) device grant for the public
+[Keycloak](https://www.keycloak.org/docs/latest/server_admin/#device-authorization-grant) client `klarbefund-app` and shows it as a QR code carrying a
 `klarbefund://connect` link; the app polls Keycloak for the token and
 registers with the hub
 ([ADR-049](../ADRs/ADR-049-klarbefund-connects-by-device-grant.md)).
 
-- `Shared/EHDSConnect.swift`: the link, refused unless its hub and issuer are
+- [`Shared/EHDSConnect.swift`](../../clients/ios/Sources/Shared/EHDSConnect.swift): the link, refused unless its hub and issuer are
   on `TrustedHub.production` (plus `.development` in a debug build), and the
-  poller with its four answers. `EHDSConnectTests` covers each.
-- `EHDSConnection.swift`: tokens and a device id in the Keychain as
+  poller with its four answers. [`EHDSConnectTests`](../../clients/ios/Tests/SharedTests/EHDSConnectTests.swift) covers each.
+- [`EHDSConnection.swift`](../../clients/ios/Sources/MeinBefund/EHDSConnection.swift): tokens and a device id in the Keychain as
   `ThisDeviceOnly`, refresh, register, read the record, disconnect (which
   revokes the refresh token at Keycloak), and the two sync switches.
-- `ConnectView.swift`: the sheet, VisionKit's data scanner for QR codes only,
+- [`ConnectView.swift`](../../clients/ios/Sources/MeinBefund/ConnectView.swift): the sheet, [VisionKit](https://developer.apple.com/documentation/visionkit/datascannerviewcontroller)'s data scanner for QR codes only,
   a paste field, and "Is this your account?".
 - **Create an EHDS account** ([ADR-054](../ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md))
   calls the two routes on the hub that answer without a session; the account
-  is created only for a request whose Apple App Attest attestation verifies,
+  is created only for a request whose Apple [App Attest](https://developer.apple.com/documentation/devicecheck/validating-apps-that-connect-to-your-server) attestation verifies,
   which is why the simulator shows the button disabled with its reason.
 - **Send my reports** and **Send my device trends**
   ([ADR-057](../ADRs/ADR-057-klarbefund-sends-weekly-device-means.md)) post
   to the person's own record; the record itself holds reports, vaccinations
   and the medication plan ([ADR-059](../ADRs/ADR-059-the-record-holds-reports-vaccinations-and-the-medication-plan.md)).
-- `ConnectUITests` and `AccountUITests` run against `DemoEHDSTransport` under
-  `-MBDemoSeed`; `LiveConnectUITests` and `LiveAccountUITests` run against a
+- [`ConnectUITests`](../../clients/ios/Tests/UITests/ConnectUITests.swift) and [`AccountUITests`](../../clients/ios/Tests/UITests/AccountUITests.swift) run against `DemoEHDSTransport` under
+  `-MBDemoSeed`; [`LiveConnectUITests`](../../clients/ios/Tests/UITests/LiveConnectUITests.swift) and [`LiveAccountUITests`](../../clients/ios/Tests/UITests/LiveAccountUITests.swift) run against a
   real hub when given a fresh link
-  (`docs/knowledge/runbooks/klarbefund-connect.md`).
+  ([`docs/knowledge/runbooks/klarbefund-connect.md`](../knowledge/runbooks/klarbefund-connect.md)).
 
 ## Exports
 
-| Action                     | Writer                       | Contents                                                                |
-| -------------------------- | ---------------------------- | ----------------------------------------------------------------------- |
-| Share for my doctor        | `ReportExport`, `FhirBundle` | PDF summary with the original pages appended, plus a FHIR R4 bundle     |
-| Export for research (OMOP) | `OmopExport`                 | OMOP CDM v5.4 `measurement.csv`, `person.csv`, `observation_period.csv` |
-| Export all my data         | `DataExport`                 | every report, page, value, profile field and consent, as JSON and PDFs  |
-| Export diagnostics         | `DiagnosticsBundle`          | the record, both Vision passes, the pages, the session log              |
+| Action                     | Writer                                                                                                                                       | Contents                                                                                                                                                                                                                                                                        |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Share for my doctor        | [`ReportExport`](../../clients/ios/Sources/MeinBefund/ReportExport.swift), [`FhirBundle`](../../clients/ios/Sources/Shared/FhirBundle.swift) | PDF summary with the original pages appended, plus a FHIR R4 bundle                                                                                                                                                                                                             |
+| Export for research (OMOP) | [`OmopExport`](../../clients/ios/Sources/Shared/OmopExport.swift)                                                                            | OMOP CDM v5.4 [`measurement.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#measurement), [`person.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#person), [`observation_period.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#observation_period) |
+| Export all my data         | [`DataExport`](../../clients/ios/Sources/MeinBefund/DataExport.swift)                                                                        | every report, page, value, profile field and consent, as JSON and PDFs                                                                                                                                                                                                          |
+| Export diagnostics         | [`DiagnosticsBundle`](../../clients/ios/Sources/Shared/DiagnosticsBundle.swift)                                                              | the record, both Vision passes, the pages, the session log                                                                                                                                                                                                                      |
 
 The OMOP tables carry `measurement_concept_id = 0` throughout, deliberately:
-mapping LOINC to an OMOP concept needs the Athena vocabulary, which is not on
+mapping LOINC to an OMOP concept needs the [Athena](https://athena.ohdsi.org/) vocabulary, which is not on
 a phone, and inventing an id would put a wrong identifier on a real
-measurement. The printed range is kept verbatim in `RawLabValue.referenceText`
-and travels as `referenceRange.text`; a range with no number in it survives
-only there, and FHIR's rng-2 allows that.
+measurement. The printed range is kept verbatim in [`RawLabValue.referenceText`](../../clients/ios/Sources/Shared/Provenance.swift#L67)
+and travels as [`referenceRange.text`](https://hl7.org/fhir/R4/observation-definitions.html#Observation.referenceRange.text); a range with no number in it survives
+only there, and FHIR's [obs-3](https://hl7.org/fhir/R4/observation.html#invs) allows that: a reference range needs at least a low, a high or a text.
 
 ## Languages
 
 English is the base, German the translation, following the phone's language.
-`Scripts/check-localization.sh` fails when a user-visible string has no
+[`Scripts/check-localization.sh`](../../clients/ios/Scripts/check-localization.sh) fails when a user-visible string has no
 German or when a German sentence was left in the English base; it uses
-`xcodebuild -exportLocalizations`, the same extractor Xcode's editor uses, so
+[`xcodebuild -exportLocalizations`](https://developer.apple.com/documentation/xcode/localization), the same extractor Xcode's editor uses, so
 it sees SwiftUI `Text` literals and `INFOPLIST_KEY_*` values that no grep of
 the sources would find. The camera permission prompt once shipped in German to
 every English phone, which is why the script exists.
@@ -371,11 +372,11 @@ every English phone, which is why the script exists.
 Scripts/codeql-swift.sh                        # CodeQL on the app and Shared, about 15 minutes
 ```
 
-CodeQL needs a real build to see Swift, so on GitHub it runs only when
-`clients/ios/` changes (`.github/workflows/codeql-swift.yml`), on a macOS
+[CodeQL](https://docs.github.com/en/code-security/codeql-cli) needs a real build to see Swift, so on GitHub it runs only when
+`clients/ios/` changes ([`.github/workflows/codeql-swift.yml`](../../.github/workflows/codeql-swift.yml)), on a macOS
 runner. The `codeql-swift` pre-push hook runs the same suite when a push
 changes the Swift sources; it exits 1 on any finding not listed, with its
-reason, in `Scripts/codeql-accepted.txt`. Swift needs a macOS runner, which
+reason, in [`Scripts/codeql-accepted.txt`](../../clients/ios/Scripts/codeql-accepted.txt). Swift needs a macOS runner, which
 has lower concurrency than Linux, so the iOS job is path-filtered to
 `clients/ios/**` and never gates the web or service suites; conversely, the
 `ui/**` and `services/**` workflows exclude `clients/ios/**`.
@@ -390,9 +391,9 @@ and the [self-assessment](self-assessment.md).
 1. **No health data in `clients/ios/`, ever.** No lab reports, no scans, no
    exported HealthKit archives, no screenshots containing real values, not
    even temporarily, not even gitignored. Test fixtures are synthetic, the way
-   `services/epa-ingest/__tests__/fixtures/` already is. The tools refuse a
+   [`services/epa-ingest/__tests__/fixtures/`](../../services/epa-ingest/__tests__/fixtures/) already is. The tools refuse a
    path inside the repository for the same reason.
-2. **No real organisation in demo content.** `CLAUDE.md` forbids it outside
+2. **No real organisation in demo content.** [`CLAUDE.md`](../../CLAUDE.md) forbids it outside
    the `NEXT_PUBLIC_DEMO_TK` flag. The study this app is built for is real;
    the demo centre, the laboratory and the practice in the dev dataset are
    fictional.

@@ -1,6 +1,6 @@
 ---
 source: docs/klarbefund/user-guide.md
-sourceHash: 24429d590488e64628ed0a7526474932a5704fb0e947dee10cd5df5912d6ba82
+sourceHash: 3278a2f8f333e765cf1f68b22430ff3027cb9b6dc36789f2ecf94d4457a48188
 language: de
 summary: "Die App, wie eine Person sie nutzt, Bildschirm für Bildschirm mit Screenshots: einen Befund erfassen, einen Wert mit dem Papier abgleichen, Verläufe, Einwilligungen, die Verbindung zum EHDS, Exporte und Ihre Rechte an Ihren Daten."
 ---
@@ -35,18 +35,18 @@ beteiligt war. Wie sie entstehen, steht am
 ## Erste Schritte
 
 1. Öffnen Sie auf dem iPhone den [TestFlight-Link](https://testflight.apple.com/join/ssADSXX6).
-   TestFlight installiert sich zuerst selbst, falls es fehlt, und bietet dann Klarbefund an.
+   [TestFlight](https://developer.apple.com/testflight/) installiert sich zuerst selbst, falls es fehlt, und bietet dann Klarbefund an.
 2. Öffnen Sie Klarbefund. Es gibt keine Registrierung und kein Konto: Die App ist bereit für
    den ersten Scan.
 3. Beim ersten Scan fragt iOS nach der Kamera. Die App nutzt sie nur für
    die Seiten eines Befunds und für den QR-Code, der sie mit Ihrer Akte verbindet;
    die Fotos bleiben auf dem Telefon.
 
-**Die Sperre.** Standardmäßig verlangt die App Face ID, Touch ID oder den Code
+**Die Sperre.** Standardmäßig verlangt die App [Face ID](https://developer.apple.com/documentation/localauthentication), Touch ID oder den Code
 jedes Mal, wenn sie in den Vordergrund kommt, damit Ihre Ergebnisse nicht für
 jeden sichtbar sind, der das entsperrte Telefon in der Hand hält. Der Schalter befindet sich unter **Analyse-Anbieter**
 im Menü **⋯**, Abschnitt **Schutz**. Ein Telefon ohne Code hat
-nichts, wonach es fragen könnte, und die Sperre öffnet sich dann von selbst.
+nichts, wonach es fragen könnte, und die Sperre öffnet sich dann von selbst ([ADR-060](../ADRs/ADR-060-the-app-locks-with-face-id-and-answers-pinning-and-jailbreak-detection.md)).
 
 ## Ihre Befunde
 
@@ -119,12 +119,12 @@ Dann folgt jeder Messwert und unter jedem die vier Dinge, die ihn
   Lipoprotein(a) in mg/dL und in nmol/L sind verschiedene Messungen mit
   verschiedenen Codes. Eine Größe, die LOINC nicht codiert, sagt das offen, statt
   einen ungefähr passenden Code zu zeigen, und ein Organismus aus einem Stuhlbefund zeigt stattdessen seine
-  NCBI-Taxonomy-ID, weil LOINC Tests benennt und keine Organismen;
+  [NCBI-Taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy)-ID, weil LOINC Tests benennt und keine Organismen;
 - **der Referenzbereich, den Ihr Labor gedruckt hat**, genau so, wie er gedruckt ist, nie
   normalisiert;
 - **Seite und Zeile**, aus der er gelesen wurde, sodass jede Zahl
   mit dem Papier vor Ihnen abgeglichen werden kann;
-- **der veröffentlichte Bereich**, wo eine Leitlinie oder eine benannte Studie einen angibt, mit
+- **der veröffentlichte Bereich**, wo eine Leitlinie oder eine benannte Studie einen angibt ([ADR-039](../ADRs/ADR-039-published-reference-ranges.md)), mit
   Worten und einem Symbol neben der Farbe: „im optimalen Bereich“, „außerhalb
   des optimalen Bereichs“, „außerhalb des Leitlinienbereichs“. Das ist ein Vergleich mit einer
   Zahl, die jemand veröffentlicht hat. Es ist kein Befund.
@@ -174,7 +174,7 @@ und dem Befund, zu dem er gehört, aufgeführt, und das Antippen eines Punkts ö
 Ein Satz unter jedem Diagramm sagt, **was der Messwert ist**: eine Definition
 des Tests, auf Englisch oder Deutsch. Es ist nie eine Bewertung Ihres eigenen Werts.
 
-Ganz unten liest **Verläufe aus Apple Health zeigen** Ihre Ruheherzfrequenz,
+Ganz unten liest **Verläufe aus [Apple Health](https://developer.apple.com/documentation/healthkit) zeigen** Ihre Ruheherzfrequenz,
 Herzfrequenzvariabilität, Schritte und Ihr Gewicht, nachdem einmal um
 Erlaubnis gefragt wurde. Sie erscheinen in einem eigenen Abschnitt, **Von Ihren Geräten**, als graue
 gestrichelte Linien aus Wochenmitteln über dieselben Monate wie Ihre Befunde, mit einer dünnen
@@ -230,9 +230,9 @@ Seite, die auf dem Telefon bleibt. Welcher Anbieter verwendet wird, steht vor de
 Bildschirm.
 
 **Analyse-Anbieter** im Menü legt fest, woher eine Antwort kommt: von diesem
-iPhone, vom Klarbefund-Dienst in der EU oder von Ihrer eigenen Azure-OpenAI-Ressource bzw. Ihrem
+iPhone, vom Klarbefund-Dienst in der EU (standardmäßig [Azure OpenAI in der EU-Datenzone](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/deployment-types#data-zone-standard)) oder von Ihrer eigenen Azure-OpenAI-Ressource bzw. Ihrem
 Anthropic-Schlüssel. Bei Ihrem eigenen Dienst spricht das Telefon direkt mit ihm, und
-weder der Schlüssel noch die Werte erreichen den Anbieter dieser App. Derselbe
+weder der Schlüssel noch die Werte erreichen den Anbieter dieser App ([ADR-034](../ADRs/ADR-034-claude-workload-identity-federation.md), [ADR-035](../ADRs/ADR-035-inference-provider-residency-and-quota.md)). Derselbe
 Bildschirm enthält den Schalter **Schutz** für die Face-ID-Sperre.
 
 ## Einwilligungen
@@ -243,7 +243,7 @@ Bildschirm enthält den Schalter **Schutz** für die Face-ID-Sperre.
 leicht zu verwechseln sind und nie ein einziger Schalter sein dürfen:
 
 - **Studienteilnahme**, Ihre Einwilligung in eine Studie, verwahrt vom Studienzentrum;
-- **Elektronische Patientenakte (ePA)**, ein _Widerspruch_, weil die ePA existiert,
+- **Elektronische Patientenakte (ePA)**, ein [_Widerspruch_](https://www.gesetze-im-internet.de/sgb_5/__342.html), weil die ePA existiert,
   sofern Sie nicht gegenüber Ihrer Krankenkasse widersprechen;
 - **Register und Forschung**, Ihre Einwilligung, dass ein Register oder eine Forschungsdatenbank
   Ihre Werte nutzt.
@@ -262,21 +262,21 @@ es keine ePA zum Hochladen gibt, solange er besteht.
 
 **Meine EHDS-Akte** oben in der Liste zeigt, ob die App verbunden ist
 und sendet, und öffnet **Mit EHDS verbinden**, womit die App mit Ihrer Akte im
-Demo-Hub des Europäischen Gesundheitsdatenraums verbunden wird, damit sie sie lesen und, wenn Sie das möchten,
+Demo-Hub des [Europäischen Gesundheitsdatenraums](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng) verbunden wird, damit sie sie lesen und, wenn Sie das möchten,
 ergänzen kann. Es gibt drei Wege hinein, und auf dem Telefon wird kein Passwort in eine Webseite
 eingegeben:
 
 - **EHDS-Konto anlegen** legt ein Konto mit einer eigenen, leeren Akte auf
   dem Demo-Hub an und verbindet das Telefon damit. Sie erhalten einen Benutzernamen und ein Passwort,
-  um sich auch auf der Website anzumelden. Apple bestätigt dem Hub, dass die Anfrage
+  um sich auch auf der Website anzumelden. [Apple bestätigt](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity) dem Hub, dass die Anfrage
   von der echten App auf einem echten Gerät kommt, weshalb ein Simulator
-  das nicht kann.
+  das nicht kann ([ADR-054](../ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md)).
 - **Mit einem EHDS-Konto anmelden**, das Sie bereits haben.
-- **Per QR-Code verbinden**, vom Patientenbildschirm auf einem Computer aus:
+- **Per QR-Code verbinden** ([OAuth Device Grant](https://www.rfc-editor.org/rfc/rfc8628), [ADR-049](../ADRs/ADR-049-klarbefund-connects-by-device-grant.md)), vom Patientenbildschirm auf einem Computer aus:
   1. Öffnen Sie auf dem Computer den Patientenbildschirm (die App zeigt die Adresse an, zum
      Kopieren, Teilen oder Öffnen) und melden Sie sich als Patientin oder Patient an. Wählen Sie **QR-Code anzeigen**.
   2. In der App **QR-Code scannen**. Auf dem Computer öffnet **Auf diesem
-     Computer bestätigen** die Einwilligungsseite von Keycloak; prüfen Sie, dass der dort angezeigte Code
+     Computer bestätigen** die Einwilligungsseite von [Keycloak](https://www.keycloak.org/docs/latest/server_admin/#device-authorization-grant); prüfen Sie, dass der dort angezeigte Code
      derjenige ist, den die App anzeigt, und bestätigen Sie.
   3. Die App zeigt, mit welchem Konto sie sich verbunden hat, und fragt **Ist das Ihr
      Konto?** Ein Code, den Ihnen jemand anderes gezeigt hat, würde das Telefon mit
@@ -285,7 +285,7 @@ eingegeben:
 
 Nach dem Verbinden listet **Meine EHDS-Akte zeigen** auf, was der Hub für Sie verwahrt:
 Messwerte mit ihren gedruckten Bereichen und Daten, Befundberichte, Impfungen und
-den Medikationsplan. Auf dem Demo-Hub ist jede Akte synthetisch, und der
+den Medikationsplan ([ADR-059](../ADRs/ADR-059-the-record-holds-reports-vaccinations-and-the-medication-plan.md)). Auf dem Demo-Hub ist jede Akte synthetisch, und der
 Bildschirm sagt das. Die Akte wird gelesen, wenn Sie sie öffnen, nirgends gespeichert und nie
 mit Ihren gescannten Befunden vermischt.
 
@@ -297,7 +297,7 @@ sie einschalten:
   aus einem Scan gelesen gekennzeichnet sind. Werte ohne LOINC-Code bleiben auf dem Telefon.
 - **Meine Geräte-Trends an meine EHDS-Akte senden**: die Wochenmittel aus Apple
   Health, die der Bildschirm Verlauf zeigt, nie ein einzelner Tag oder ein einzelner
-  Messwert; jede Synchronisierung ersetzt die vorherige.
+  Messwert; jede Synchronisierung ersetzt die vorherige ([ADR-057](../ADRs/ADR-057-klarbefund-sends-weekly-device-means.md)).
 
 Das Ausschalten eines der beiden beendet weiteres Senden; was gesendet wurde, bleibt in der Akte,
 bis Sie das Konto löschen. **Trennen** gibt es in der App und auf dem Patientenbildschirm,
@@ -311,7 +311,11 @@ zwei Minuten lang.
 Eine EUDI Wallet ist optional. Klarbefund und der Hub funktionieren allein mit Benutzername und
 Passwort. Eine Wallet fügt eine zweite Möglichkeit hinzu, sich auf der Website anzumelden: d-you,
 die deutsche EUDI Wallet, oder jede andere zertifizierte Wallet weist mit
-Ihrer PID (Ihrem digitalen Personalausweis) statt mit einem Passwort nach, wer Sie sind.
+Ihrer [PID](https://eu-digital-identity-wallet.github.io/eudi-doc-architecture-and-reference-framework/latest/) (Ihrem digitalen Personalausweis) statt mit einem Passwort nach, wer Sie sind.
+d-you wird [Anfang Januar 2027 für alle eingeführt](https://www.bundesregierung.de/breg-de/aktuelles/digital-wallet-2452384). Bis dahin ist der
+Hub als vertrauende Partei in der Sandbox der SPRIND registriert; die folgenden
+Schritte funktionieren daher mit der Test-Wallet-App von d-you aus dieser Sandbox,
+noch nicht mit dem öffentlichen d-you ([ADR-065](../ADRs/ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md), [ADR-066](../ADRs/ADR-066-the-hub-runs-its-own-eudi-verifier-behind-a-wallet-only-gate.md)).
 
 Der Hub speichert nie Ihren Namen oder Ihr Geburtsdatum. Er speichert einen sicheren Hash
 davon am Konto, der nur aussagt: „Diese PID gehört zu diesem Konto“
@@ -355,19 +359,19 @@ mit.
 Alles, was die App enthält, kann sie verlassen, in der Form, die die empfangende Stelle braucht, und
 nur, wenn Sie es sagen.
 
-| Aktion                               | Für                  | Was Sie erhalten                                                                                                                                                                                      |
-| ------------------------------------ | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Für meine Praxis teilen              | eine Praxis, die ePA | eine PDF-Zusammenfassung mit den angehängten Originalseiten sowie ein FHIR R4 Bundle                                                                                                                  |
-| Für die Forschung exportieren (OMOP) | ein Analyseteam      | OMOP CDM v5.4 `measurement.csv`, `person.csv`, `observation_period.csv`                                                                                                                               |
-| Alle meine Daten exportieren         | Sie, nach der DSGVO  | jeden Befund, jede Seite, jeden Wert, jedes Profilfeld und jede Einwilligung, in einem Archiv                                                                                                         |
-| Alle meine Daten löschen             | Sie                  | der Speicher wird endgültig gelöscht; das Konto, das die App auf dem Hub angelegt hat, mit seiner Akte, seinen Werten und Einwilligungen, wird ebenfalls gelöscht; die App sagt das, bevor sie es tut |
-| Diagnosedaten exportieren            | die Entwickler       | den erkannten Text und beide Durchläufe der Texterkennung, um eine falsch gelesene Zeile zu beheben                                                                                                   |
+| Aktion                               | Für                                                                                                                                                    | Was Sie erhalten                                                                                                                                                                                                                                                                |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Für meine Praxis teilen              | eine Praxis, die ePA                                                                                                                                   | eine PDF-Zusammenfassung mit den angehängten Originalseiten sowie ein [FHIR R4](https://hl7.org/fhir/R4/bundle.html) Bundle                                                                                                                                                     |
+| Für die Forschung exportieren (OMOP) | ein Analyseteam                                                                                                                                        | OMOP CDM v5.4 [`measurement.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#measurement), [`person.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#person), [`observation_period.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#observation_period) |
+| Alle meine Daten exportieren         | Sie, nach [Art. 15](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_15) und [20](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_20) DSGVO | jeden Befund, jede Seite, jeden Wert, jedes Profilfeld und jede Einwilligung, in einem Archiv                                                                                                                                                                                   |
+| Alle meine Daten löschen             | Sie, [Art. 17 DSGVO](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_17)                                                                         | der Speicher wird endgültig gelöscht; das Konto, das die App auf dem Hub angelegt hat, mit seiner Akte, seinen Werten und Einwilligungen, wird ebenfalls gelöscht; die App sagt das, bevor sie es tut                                                                           |
+| Diagnosedaten exportieren            | die Entwickler                                                                                                                                         | den erkannten Text und beide Durchläufe der Texterkennung, um eine falsch gelesene Zeile zu beheben                                                                                                                                                                             |
 
-Das FHIR Bundle enthält jeden Wert mit seinem LOINC-Code, seiner UCUM-Einheit, dem
+Das FHIR Bundle enthält jeden Wert mit seinem LOINC-Code, seiner [UCUM](https://ucum.org/ucum)-Einheit, dem
 Bereich, den das Labor gedruckt hat (als Zahlen, wo sie sich lesen lassen, und immer als
-gedruckter Text in `referenceRange.text`), sowie Seite und Zeile, aus der er gelesen
+gedruckter Text in [`referenceRange.text`](https://hl7.org/fhir/R4/observation-definitions.html#Observation.referenceRange.text)), sowie Seite und Zeile, aus der er gelesen
 wurde. Ein Wert, der von einem Foto gelesen wurde, ist auch im Bundle als vorläufig gekennzeichnet.
-Der Export für die Praxis passt mit den angehängten Seiten in die 25-MB-Grenze der ePA.
+Der Export für die Praxis passt mit den angehängten Seiten in die [25-MB-Grenze](https://www.kbv.de/praxis/tools-und-services/praxisnachrichten/2025/10-09/alles-nur-eine-frage-muessen-befundberichte-arztbriefe-etc-sofort-eingestellt-werden) der ePA.
 
 Alles läuft über das Teilen-Menü des Systems: an die ePA-App, Dateien,
 AirDrop oder Mail. Es gibt bewusst keinen eigenen Upload, weil es
@@ -379,14 +383,14 @@ Integrationspunkt.
 <img src="img/privacy.png" width="300" alt="Datenschutz und Sicherheit: Die Befunde bleiben auf diesem Telefon, nichts wird gesendet, es sei denn, Sie senden es, und woher eine Erklärung kommt">
 
 Die Fotos verlassen das Gerät nie. Werte, Seiten und Diagnosedaten sind
-einzeln mit einem Schlüssel verschlüsselt, der bei gesperrtem Telefon nicht verfügbar ist
+[einzeln mit einem Schlüssel verschlüsselt, der bei gesperrtem Telefon nicht verfügbar ist](https://developer.apple.com/documentation/security/ksecattraccessiblewhenunlockedthisdeviceonly)
 und nie auf einem anderen Gerät wiederhergestellt wird. Der Speicher ist vom
-iCloud-Backup ausgeschlossen. Wenn die App nicht im Vordergrund ist, wird ihr Inhalt abgedeckt, sodass der
+[iCloud-Backup](https://developer.apple.com/documentation/foundation/urlresourcevalues/isexcludedfrombackup) ausgeschlossen. Wenn die App nicht im Vordergrund ist, wird ihr Inhalt abgedeckt, sodass der
 App-Umschalter nichts zeigt, und bei der Rückkehr werden Face ID oder der Code verlangt.
 
 Das wurde geprüft, nicht angenommen: Mit dem Telefon am Kabel schlagen das Kopieren einer gespeicherten
 Akte, eines im temporären Ordner liegengebliebenen Exports oder des systemeigenen Schnappschusses
-der App jeweils mit einem Berechtigungsfehler fehl, und genau so sieht vollständiger Dateischutz
+der App jeweils mit einem Berechtigungsfehler fehl, und genau so sieht [vollständiger Dateischutz](https://developer.apple.com/documentation/foundation/nsfileprotectioncomplete)
 von außen aus. Die vollständige Bewertung, Ziel für
 Ziel, ist die [Selbstbewertung](self-assessment.md); was wie getestet wurde,
 steht unter [Nachweise](evidence.md).
@@ -399,6 +403,9 @@ auffällig, vergibt Punkte oder gibt Ratschläge. Ein Wert, der von einem Foto g
 falsch gelesen sein und ist als vorläufig gekennzeichnet, bis Sie ihn mit dem Papier abgleichen.
 Referenzbereiche werden genau so angezeigt, wie Ihr Labor sie gedruckt hat, und die
 veröffentlichten Bereiche daneben sind Zitate mit Quelle, kein Urteil.
+
+Warum die App kein Medizinprodukt im Sinne der [MDR](https://eur-lex.europa.eu/eli/reg/2017/745/oj/eng) und der Leitlinie
+[MDCG 2019-11](https://health.ec.europa.eu/document/download/b45335c5-1679-4c71-a91c-fc7a4d37f12b_en) ist, steht in der [Selbstbewertung](self-assessment.md#regulation).
 
 Fragen Sie immer eine Ärztin oder einen Arzt, bevor Sie eine Entscheidung über Ihre Gesundheit treffen.
 
