@@ -1,7 +1,8 @@
 #!/bin/bash
 # Software bills of materials for every deployable part of the repository,
 # in CycloneDX JSON, written to docs/sbom/ so they are reviewed with the code
-# that changes them (BSI TR-03161 O.TrdP, BSI C5 DEV-05).
+# that changes them (BSI TR-03161 O.TrdP; BSI C5:2020 PSS-02, third-party
+# library vulnerabilities, https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf#page=114).
 #
 #   scripts/security/generate-sbom.sh            # write them
 #   scripts/security/generate-sbom.sh --check    # fail if a committed one is stale

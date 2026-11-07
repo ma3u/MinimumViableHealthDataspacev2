@@ -124,7 +124,8 @@ repos:
         pass_filenames: false
         stages: [pre-push]
 
-  # Secret scanning — gitleaks on staged diff (BSI C5 DEV-08)
+  # Secret scanning: gitleaks on the staged diff (BSI C5:2020 CRY-04 secure key management,
+  # https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf#page=83)
   # A finding fails the commit. The entry used to be `gitleaks ... && ... || echo`,
   # so a finding fell through to the echo and the hook passed (2026-10-03).
   # Catches tokens/passwords before they reach CI or remote.
@@ -278,7 +279,8 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
-  # npm dependency audit — HIGH/CRITICAL CVEs on pre-push (BSI C5 DEV-05)
+  # npm dependency audit: HIGH/CRITICAL CVEs on pre-push (BSI C5:2020 PSS-02 and OPS-22,
+  # https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf#page=114 and #page=72)
   # Requires: node/npm in PATH. Strict except for the advisories listed, with
   # a reason, an issue and an expiry date, in docs/npm-audit-exceptions.json
   # (#435: an advisory with no patched version blocked every push).

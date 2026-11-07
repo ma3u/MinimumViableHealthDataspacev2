@@ -94,7 +94,7 @@ spec:
       labels:
         app: health-dataspace-ui
     spec:
-      # Pod-level security context (KSV-0118 / BSI C5 DEV-07)
+      # Pod-level security context (KSV-0118 / BSI C5:2020 OPS-23 system hardening)
       securityContext:
         runAsNonRoot: true
         runAsUser: 10001 # above 10000 so no host account can collide (trivy KSV-0020); the image's files are world-readable
