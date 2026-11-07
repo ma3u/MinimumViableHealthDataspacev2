@@ -117,7 +117,8 @@ DOCS = [
     ("security", "klarbefund-run-on-mac", "docs/klarbefund/run-on-mac.md",
      "How to reproduce every number in the evidence on a Mac with Xcode."),
     ("security", "bsi-c5-gap-analysis", "docs/security/bsi-c5-gap-analysis.md",
-     "The hub against the BSI C5:2020 criteria catalogue, for EHDS Art. 50(6)."),
+     "The hub against the BSI C5:2020 criteria catalogue, measured against the security measures and "
+     "audits of the secure processing environment in EHDS Art. 73."),
     ("security", "sbom", "docs/sbom/README.md",
      "One CycloneDX bill of materials per deployable part, byte-stable; the --check fails when a bill no longer matches its lockfile."),
 ]
