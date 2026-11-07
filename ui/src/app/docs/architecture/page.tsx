@@ -280,6 +280,7 @@ const layerColors: Record<string, string> = {
 
 /** Labels are keys of the docsArchitecture dictionary. */
 const tocItems = [
+  { id: "foundations", label: "0. Foundations" },
   { id: "five-layer-model", label: "1. Five-Layer Knowledge Graph" },
   { id: "data-flow", label: "2. Data Flow Pipeline" },
   { id: "deployment", label: "3. Deployment Topology" },
@@ -390,6 +391,704 @@ export default function ArchitecturePage() {
             ))}
           </ol>
         </nav>
+
+        {/* Foundations */}
+        <section className="mb-12">
+          <h2 className="text-2xl font-semibold mb-3" id="foundations">
+            {t("0. Foundations: what the hub is built on, and why")}
+          </h2>
+          <p className="text-(--text-secondary) text-sm mb-4">
+            {t(
+              "A data space lets organisations share data without a central owner. Three things make that safe: knowing who someone is, deciding what they may do with which data, and keeping that decision apart from the data itself. The hub takes each from a published architecture, protocol or regulation; every card says which, and where the hub implements it.",
+            )}
+          </p>
+          <h3 className="font-semibold mb-3 mt-6">
+            {t("Reference architectures")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">
+                {t("IDSA Reference Architecture Model")}
+              </h4>
+              <p className="text-(--text-secondary) text-xs mb-2">
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    ram: ext(
+                      "https://github.com/International-Data-Spaces-Association/IDS-RAM/blob/2026-3/docs/Introduction/README.md",
+                    ),
+                    dp: ext(
+                      "https://github.com/International-Data-Spaces-Association/IDS-RAM/blob/2026-3/docs/Principles/Data_Transfer.md#data-plane",
+                    ),
+                    ram4: ext(
+                      "https://github.com/International-Data-Spaces-Association/IDS-RAM_4_0/blob/v4.2.0/documentation/3_Layers_of_the_Reference_Architecture_Model/3_Layers.md",
+                    ),
+                    rule: ext(
+                      "https://github.com/International-Data-Spaces-Association/IDSA-Rulebook/blob/2026-3/documentation/007_Decentralization.md",
+                    ),
+                  }}
+                >
+                  {
+                    "The <ram>IDS-RAM 2026-3</ram> (October 2026) is a design space rather than a blueprint, built around the Dataspace Protocol and the Decentralized Claims Protocol, and it leaves the <dp>data plane</dp> outside its scope. Its predecessor <ram4>IDS-RAM 4.2</ram4> described layers and central components such as an identity provider and a broker. The <rule>IDSA Rulebook</rule> recommends decentralised data spaces."
+                  }
+                </T>
+              </p>
+              <p className="text-(--text-secondary) text-xs">
+                <strong>{t("In the hub:")}</strong>{" "}
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    adr78: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md#L62-L72",
+                    ),
+                  }}
+                >
+                  {
+                    "no central identity provider or broker; each participant has its own connector context and credentials (<adr78>ADR-078</adr78>)."
+                  }
+                </T>
+              </p>
+            </div>
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">
+                {t("DSSC Blueprint")}
+              </h4>
+              <p className="text-(--text-secondary) text-xs mb-2">
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    bp: ext("https://blueprint.dssc.eu/"),
+                    ac: ext(
+                      "https://blueprint.dssc.eu/?pane=technical&technical=access-usage-policies-enforcement#Access&UsagePoliciesEnforcement-2.Capabilities",
+                    ),
+                  }}
+                >
+                  {
+                    "The <bp>Data Spaces Blueprint 3.0</bp>, the final version from the Data Spaces Support Centre, sorts a data space into business, governance and legal building blocks and three technical pillars: data interoperability, data sovereignty and trust, and data value creation. Its <ac>access and usage policies</ac> building block asks for policies enforced during the sharing itself."
+                  }
+                </T>
+              </p>
+              <p className="text-(--text-secondary) text-xs">
+                <strong>{t("In the hub:")}</strong>{" "}
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    odrl: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/src/lib/odrl-engine.ts#L172",
+                    ),
+                    pg: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/src/lib/permit-gate.ts#L89",
+                    ),
+                  }}
+                >
+                  {
+                    "an ODRL policy on every offer and an approved data permit before any data moves (<odrl>odrl-engine.ts</odrl>, <pg>permit-gate.ts</pg>)."
+                  }
+                </T>
+              </p>
+            </div>
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">
+                {t("Eclipse Dataspace Working Group")}
+              </h4>
+              <p className="text-(--text-secondary) text-xs mb-2">
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    wg: ext(
+                      "https://www.eclipse.org/org/workinggroups/dataspace-charter.php",
+                    ),
+                    sotd: ext(
+                      "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/#sotd",
+                    ),
+                    dspp: ext(
+                      "https://projects.eclipse.org/projects/technology.dataspace-protocol-base",
+                    ),
+                    dcpp: ext(
+                      "https://projects.eclipse.org/projects/technology.dataspace-dcp",
+                    ),
+                    dpsp: ext(
+                      "https://projects.eclipse.org/projects/technology.dataplane-signaling",
+                    ),
+                    edc: ext(
+                      "https://projects.eclipse.org/projects/technology.edc",
+                    ),
+                    tck: ext(
+                      "https://projects.eclipse.org/projects/technology.dataspacetck",
+                    ),
+                  }}
+                >
+                  {
+                    "The <wg>Eclipse Dataspace Working Group</wg> has governed the Dataspace Protocol since IDSA handed it over after version 2024-1 (<sotd>status of DSP</sotd>). It hosts the <dspp>Dataspace Protocol</dspp>, the <dcpp>Decentralized Claims Protocol</dcpp> and <dpsp>Data Plane Signaling</dpsp>, with <edc>Eclipse Dataspace Components</edc> as an implementation and a <tck>compatibility kit</tck> to test against."
+                  }
+                </T>
+              </p>
+              <p className="text-(--text-secondary) text-xs">
+                <strong>{t("In the hub:")}</strong>{" "}
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    src: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/runtimes/edc",
+                    ),
+                  }}
+                >
+                  {
+                    "the EDC 1.0 control plane, IdentityHub and IssuerService, built from <src>runtimes/edc</src>."
+                  }
+                </T>
+              </p>
+            </div>
+          </div>
+          <h3 className="font-semibold mb-3 mt-6">
+            {t("Protocols: who, what, and how the data moves")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">
+                {t("Dataspace Protocol (DSP 2025-1)")}
+              </h4>
+              <p className="text-(--text-secondary) text-xs mb-2">
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    cat: ext(
+                      "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/#catalog-protocol",
+                    ),
+                    neg: ext(
+                      "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/#negotiation-protocol",
+                    ),
+                    tp: ext(
+                      "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/#transfer-protocol",
+                    ),
+                    oos: ext(
+                      "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/#control-and-data-planes",
+                    ),
+                  }}
+                >
+                  {
+                    "What is offered and on which terms: the <cat>catalog</cat>, <neg>contract negotiation</neg> and <tp>transfer process</tp> protocols let participants publish datasets, agree a contract and start a transfer. DSP runs on the control plane; the data transfer itself is <oos>outside its scope</oos>."
+                  }
+                </T>
+              </p>
+              <p className="text-(--text-secondary) text-xs">
+                <strong>{t("In the hub:")}</strong>{" "}
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    chk: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/run-ehds-dataspace-checks.sh#L5-L9",
+                    ),
+                  }}
+                >
+                  {
+                    "the EDC control plane; <chk>the hub's own checks</chk> exercise the three protocols, the Eclipse compatibility kit has not been run yet."
+                  }
+                </T>
+              </p>
+            </div>
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">
+                {t("Decentralized Claims Protocol (DCP v1.0)")}
+              </h4>
+              <p className="text-(--text-secondary) text-xs mb-2">
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    did: ext(
+                      "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/#identities",
+                    ),
+                    vp: ext(
+                      "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/#trust-model-and-information-flow-architecture",
+                    ),
+                    sit: ext(
+                      "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/#self-issued-id-tokens",
+                    ),
+                    rev: ext(
+                      "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/#presentation-validation",
+                    ),
+                  }}
+                >
+                  {
+                    "Who a participant is: a <did>DID</did> and <vp>verifiable credentials</vp> from issuers the data space trusts, shown with a <sit>self-issued token</sit>, so no central identity provider is needed. A verifier <rev>must check revocation</rev> each time a credential is presented."
+                  }
+                </T>
+              </p>
+              <p className="text-(--text-secondary) text-xs">
+                <strong>{t("In the hub:")}</strong>{" "}
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    i710: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/710",
+                    ),
+                  }}
+                >
+                  {
+                    "IdentityHub and IssuerService; a Simpl Governance Authority as a further trusted issuer (<i710>#710</i710>)."
+                  }
+                </T>
+              </p>
+            </div>
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">
+                {t("Data Plane Signaling (1.0-RC4)")}
+              </h4>
+              <p className="text-(--text-secondary) text-xs mb-2">
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    st: ext(
+                      "https://eclipse-dataplane-signaling.github.io/dataplane-signaling/v1.0-RC4/#start",
+                    ),
+                    su: ext(
+                      "https://eclipse-dataplane-signaling.github.io/dataplane-signaling/v1.0-RC4/#suspend",
+                    ),
+                    te: ext(
+                      "https://eclipse-dataplane-signaling.github.io/dataplane-signaling/v1.0-RC4/#terminate",
+                    ),
+                    pull: ext(
+                      "https://eclipse-dataplane-signaling.github.io/dataplane-signaling/v1.0-RC4/#pull-protocol-messaging",
+                    ),
+                  }}
+                >
+                  {
+                    "How a control plane tells a data plane to <st>start</st>, <su>suspend</su> or <te>terminate</te> a transfer. In a pull transfer the provider's data plane <pull>creates the endpoint address and its token</pull>. The control plane decides, the data plane moves the data, and neither does the other's job."
+                  }
+                </T>
+              </p>
+              <p className="text-(--text-secondary) text-xs">
+                <strong>{t("In the hub:")}</strong>{" "}
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    sig: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/jad/siglet-edc1.toml#L1-L12",
+                    ),
+                    adr78: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md#L62-L72",
+                    ),
+                  }}
+                >
+                  {
+                    "siglet is the data plane: it issues the access token, renewed after its hour, and the Neo4j proxy serves only the dataset the token names (<sig>siglet-edc1.toml</sig>, <adr78>ADR-078</adr78>)."
+                  }
+                </T>
+              </p>
+            </div>
+          </div>
+          <h3 className="font-semibold mb-3 mt-6">
+            {t("Regulation and identity")}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">
+                {t("EHDS: an architecture in the Regulation?")}
+              </h4>
+              <p className="text-(--text-secondary) text-xs mb-2">
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    mh: ext(
+                      "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#023.001",
+                    ),
+                    hd: ext(
+                      "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#075.008",
+                    ),
+                    hdab: ext(
+                      "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#055.001",
+                    ),
+                    permit: ext(
+                      "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#068.003",
+                    ),
+                    cat2: ext(
+                      "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#096.001",
+                    ),
+                    spe: ext(
+                      "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#073.002",
+                    ),
+                    r80: ext(
+                      "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#rct_80",
+                    ),
+                  }}
+                >
+                  {
+                    "Not a technical pattern. Regulation (EU) 2025/327 sets up infrastructures and roles and leaves the technology to implementing acts: <mh>MyHealth@EU</mh> for primary use, <hd>HealthData@EU</hd> with a Commission central platform for secondary use, <hdab>health data access bodies</hdab>, <permit>data permits</permit> and a <cat2>federated EU dataset catalogue</cat2>. Two rules shape every architecture under it: processing happens in a <spe>secure processing environment</spe> from which only non-personal data may be downloaded, and questions go to the data <r80>instead of moving the data</r80>."
+                  }
+                </T>
+              </p>
+              <p className="text-(--text-secondary) text-xs">
+                <strong>{t("In the hub:")}</strong>{" "}
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    adr69: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md",
+                    ),
+                  }}
+                >
+                  {
+                    "the permit gate, two secure processing environments and the HealthDCAT-AP catalogue (<adr69>ADR-069</adr69>)."
+                  }
+                </T>
+              </p>
+            </div>
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">{t("Simpl")}</h4>
+              <p className="text-(--text-secondary) text-xs mb-2">
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    so: ext(
+                      "https://simpl-programme.ec.europa.eu/dashboard/simpl-open",
+                    ),
+                    sl: ext(
+                      "https://simpl-programme.ec.europa.eu/programme/simpl-live",
+                    ),
+                    w1: ext(
+                      "https://simpl-programme.ec.europa.eu/programme/simpl-live/wave-1",
+                    ),
+                    fs: ext(
+                      "https://simpl-programme.ec.europa.eu/system/files/2025-06/Simpl-Live-Feasibility-Study-Report-%28Consolidated%29_Simpl_20250328_V1.2%28A%29.pdf#page=33",
+                    ),
+                    fs22: ext(
+                      "https://simpl-programme.ec.europa.eu/system/files/2025-06/Simpl-Live-Feasibility-Study-Report-%28Consolidated%29_Simpl_20250328_V1.2%28A%29.pdf#page=22",
+                    ),
+                  }}
+                >
+                  {
+                    "The Commission's <so>Simpl-Open</so> is open-source middleware for data spaces, and <sl>Simpl-Live</sl> brings it to real ones, the <w1>EHDS secondary-use data space</w1> among them. Its <fs>feasibility study</fs> finds the integration feasible; for health it says Simpl-Open can support EHDS2, with many requirements of the central platform <fs22>still to be assessed</fs22>."
+                  }
+                </T>
+              </p>
+              <p className="text-(--text-secondary) text-xs">
+                <strong>{t("In the hub:")}</strong>{" "}
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    s7: (
+                      <a
+                        href="#simpl-compliance"
+                        className="text-(--accent) underline hover:opacity-80"
+                      />
+                    ),
+                  }}
+                >
+                  {
+                    "a connector outside the Simpl-Open agent, over DSP and DCP (<s7>section 7</s7>)."
+                  }
+                </T>
+              </p>
+            </div>
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">
+                {t("eIDAS 2.0: wallets for people and organisations")}
+              </h4>
+              <p className="text-(--text-secondary) text-xs mb-2">
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    w5a: ext(
+                      "https://eur-lex.europa.eu/eli/reg/2024/1183/oj/eng#005A.001",
+                    ),
+                    sc: ext(
+                      "https://eur-lex.europa.eu/eli/reg/2024/1183/oj/eng#005A.004",
+                    ),
+                    arf: ext(
+                      "https://eudi.dev/3.0.0/architecture-and-reference-framework-main/",
+                    ),
+                    ebw: ext(
+                      "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52025PC0838",
+                    ),
+                    proc: ext(
+                      "https://oeil.secure.europarl.europa.eu/oeil/en/procedure-file?reference=2025/0358(COD)",
+                    ),
+                  }}
+                >
+                  {
+                    "Regulation (EU) 2024/1183 gives <w5a>natural and legal persons</w5a> a European Digital Identity Wallet, with open-source software and selective disclosure <sc>under the user's sole control</sc>, specified in the <arf>Architecture and Reference Framework 3.0</arf>. For organisations the <ebw>European Business Wallet</ebw> is proposed and not yet adopted (<proc>procedure 2025/0358</proc>)."
+                  }
+                </T>
+              </p>
+              <p className="text-(--text-secondary) text-xs">
+                <strong>{t("In the hub:")}</strong>{" "}
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    adr65: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md",
+                    ),
+                    i709: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/709",
+                    ),
+                  }}
+                >
+                  {
+                    "sign-in with the EUDI Wallet's person identification data (<adr65>ADR-065</adr65>); a person acting for an organisation waits for the Business Wallet (<i709>#709</i709>)."
+                  }
+                </T>
+              </p>
+            </div>
+          </div>
+          <h3 className="font-semibold mb-3 mt-6">
+            {t("Zero Trust across the layers")}
+          </h3>
+          <p className="text-(--text-secondary) text-sm mb-3">
+            <T
+              area="docsArchitecture"
+              tags={{
+                nist: ext("https://csrc.nist.gov/pubs/sp/800/207/final"),
+                ps: ext(
+                  "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-207.pdf#page=15",
+                ),
+                pdp: ext(
+                  "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-207.pdf#page=18",
+                ),
+              }}
+            >
+              {
+                "<nist>NIST SP 800-207</nist> grants no trust for being inside a network: every request is authenticated and authorised <ps>per session</ps>, a <pdp>policy decision point</pdp> decides and an enforcement point enforces. A data space applies the same rule between organisations:"
+              }
+            </T>
+          </p>
+          <div className="overflow-x-auto border border-(--border) rounded-lg mb-4">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="text-left text-(--text-secondary)">
+                  <th className="py-1.5 px-3 font-semibold">{t("Layer")}</th>
+                  <th className="py-1.5 pr-3 font-semibold">{t("Rule")}</th>
+                  <th className="py-1.5 font-semibold">{t("In the hub")}</th>
+                </tr>
+              </thead>
+              <tbody className="text-(--text-secondary)">
+                <tr className="border-t border-(--border)">
+                  <td className="py-1.5 px-3 font-medium">
+                    {t("Identity of organisations")}
+                  </td>
+                  <td className="py-1.5 pr-3">
+                    {t(
+                      "A verifiable credential, checked for revocation at every presentation",
+                    )}
+                  </td>
+                  <td className="py-1.5">
+                    <T
+                      area="docsArchitecture"
+                      tags={{
+                        ih: ext(
+                          "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L652",
+                        ),
+                      }}
+                    >
+                      {"<ih>IdentityHub</ih>"}
+                    </T>
+                  </td>
+                </tr>
+                <tr className="border-t border-(--border)">
+                  <td className="py-1.5 px-3 font-medium">
+                    {t("Identity of persons")}
+                  </td>
+                  <td className="py-1.5 pr-3">
+                    {t(
+                      "A session from Keycloak or the EUDI Wallet, asked for by every API route",
+                    )}
+                  </td>
+                  <td className="py-1.5">
+                    <T
+                      area="docsArchitecture"
+                      tags={{
+                        auth: ext(
+                          "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/src/lib/auth-guard.ts#L22",
+                        ),
+                        adr44: ext(
+                          "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-044-every-api-route-needs-a-session.md",
+                        ),
+                      }}
+                    >
+                      {"<auth>requireAuth()</auth>, <adr44>ADR-044</adr44>"}
+                    </T>
+                  </td>
+                </tr>
+                <tr className="border-t border-(--border)">
+                  <td className="py-1.5 px-3 font-medium">
+                    {t("Access policy")}
+                  </td>
+                  <td className="py-1.5 pr-3">
+                    {t(
+                      "An ODRL offer and an approved, unexpired data permit (Art. 68)",
+                    )}
+                  </td>
+                  <td className="py-1.5">
+                    <T
+                      area="docsArchitecture"
+                      tags={{
+                        odrl: ext(
+                          "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/src/lib/odrl-engine.ts#L172",
+                        ),
+                        pg: ext(
+                          "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/src/lib/permit-gate.ts#L89",
+                        ),
+                      }}
+                    >
+                      {"<odrl>odrl-engine.ts</odrl>, <pg>permit-gate.ts</pg>"}
+                    </T>
+                  </td>
+                </tr>
+                <tr className="border-t border-(--border)">
+                  <td className="py-1.5 px-3 font-medium">
+                    {t("Usage policy")}
+                  </td>
+                  <td className="py-1.5 pr-3">
+                    {t(
+                      "The permitted purpose (Art. 53), the opt-out (Art. 71), no small cells, processing in a secure environment (Art. 73)",
+                    )}
+                  </td>
+                  <td className="py-1.5">
+                    <T
+                      area="docsArchitecture"
+                      tags={{
+                        opt: ext(
+                          "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/services/neo4j-proxy/src/opt-out.ts#L144",
+                        ),
+                        kan: ext(
+                          "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/services/neo4j-proxy/src/k-anonymity.ts#L59",
+                        ),
+                      }}
+                    >
+                      {"<opt>opt-out.ts</opt>, <kan>k-anonymity.ts</kan>"}
+                    </T>
+                  </td>
+                </tr>
+                <tr className="border-t border-(--border)">
+                  <td className="py-1.5 px-3 font-medium">
+                    {t("Control and data plane")}
+                  </td>
+                  <td className="py-1.5 pr-3">
+                    {t(
+                      "The control plane agrees; the data plane issues a short-lived token for one transfer",
+                    )}
+                  </td>
+                  <td className="py-1.5">
+                    <T
+                      area="docsArchitecture"
+                      tags={{
+                        sig: ext(
+                          "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/jad/siglet-edc1.toml#L1-L12",
+                        ),
+                      }}
+                    >
+                      {"<sig>siglet</sig>"}
+                    </T>
+                  </td>
+                </tr>
+                <tr className="border-t border-(--border)">
+                  <td className="py-1.5 px-3 font-medium">{t("Evidence")}</td>
+                  <td className="py-1.5 pr-3">
+                    {t("A tamper-evident log of who read what")}
+                  </td>
+                  <td className="py-1.5">
+                    <T
+                      area="docsArchitecture"
+                      tags={{
+                        aud: ext(
+                          "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/services/neo4j-proxy/src/audit-chain.ts#L191-L206",
+                        ),
+                      }}
+                    >
+                      {"<aud>audit-chain.ts</aud>"}
+                    </T>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <h3 className="font-semibold mb-3 mt-6">
+            {t("Why this matters when there is a breach")}
+          </h3>
+          <p className="text-(--text-secondary) text-sm mb-2">
+            {t(
+              "In an ecosystem of many organisations a breach will happen somewhere. Whether the others keep trusting the data space depends on how far it reaches and how fast it is known:",
+            )}
+          </p>
+          <ul className="text-(--text-secondary) text-sm space-y-1.5 list-disc ml-5 mb-3">
+            <li>
+              <T
+                area="docsArchitecture"
+                tags={{
+                  b: <strong />,
+                  ps: ext(
+                    "https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-207.pdf#page=15",
+                  ),
+                }}
+              >
+                {
+                  "<b>Contained:</b> a stolen session or key opens only what its credential, permit and purpose allow, for as long as its token lives; no position in a network grants more (<ps>NIST SP 800-207, section 2.1</ps>)."
+                }
+              </T>
+            </li>
+            <li>
+              <T
+                area="docsArchitecture"
+                tags={{
+                  b: <strong />,
+                  spe: ext(
+                    "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#073.002",
+                  ),
+                  r77: ext(
+                    "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#rct_77",
+                  ),
+                }}
+              >
+                {
+                  "<b>Data stays put:</b> analyses run in the secure processing environment and only reviewed, non-personal results leave it, so a breach at a data user exposes no records (<spe>Art. 73(2)</spe>, <r77>Recital 77</r77>)."
+                }
+              </T>
+            </li>
+            <li>
+              <T
+                area="docsArchitecture"
+                tags={{
+                  b: <strong />,
+                  rc: ext(
+                    "https://github.com/eclipse-edc/Connector/blob/8354bf5f6960e98f07e0f0255dd7b4c196f46390/extensions/common/iam/verifiable-credentials/src/main/java/org/eclipse/edc/iam/verifiablecredentials/RevocationServiceRegistryExtension.java#L44-L52",
+                  ),
+                  a633: ext(
+                    "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#063.003",
+                  ),
+                }}
+              >
+                {
+                  "<b>Stopped at the source:</b> an issuer revokes a credential and every verifier refuses it, without a central switch; EDC re-reads the status list after at most 15 minutes <rc>by default</rc>. The access body can revoke the permit and stop the processing (<a633>Art. 63(3)</a633>)."
+                }
+              </T>
+            </li>
+            <li>
+              <T
+                area="docsArchitecture"
+                tags={{
+                  b: <strong />,
+                  g33: ext(
+                    "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#033.001",
+                  ),
+                  g34: ext(
+                    "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_34",
+                  ),
+                  n23: ext(
+                    "https://eur-lex.europa.eu/eli/dir/2022/2555/oj/eng#023.004",
+                  ),
+                }}
+              >
+                {
+                  "<b>Known and reported:</b> the audit log shows who read what, which a controller needs to notify the supervisory authority within 72 hours (<g33>GDPR Art. 33</g33>) and the people concerned when the risk is high (<g34>Art. 34</g34>); essential entities give an early warning within 24 hours (<n23>NIS2 Art. 23</n23>)."
+                }
+              </T>
+            </li>
+          </ul>
+          <p className="text-(--text-secondary) text-sm">
+            {t(
+              "None of this prevents a breach. It keeps one participant's breach from becoming the whole data space's, and that is what lets the others keep sharing.",
+            )}
+          </p>
+        </section>
 
         {/* 5-Layer Architecture */}
         <section className="mb-12">

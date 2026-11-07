@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useT } from "@/lib/i18n/translate";
 
 interface MermaidDiagramProps {
   chart: string;
-  caption?: string;
+  /** Text, or a translated sentence with links to its sources. */
+  caption?: ReactNode;
   /** Changes the rendered SVG before it is shown, e.g. to make parts of it
    *  links. Mermaid stays at its default strict security level, so its own
    *  `click` lines do nothing; a caller adds interaction here instead. It runs

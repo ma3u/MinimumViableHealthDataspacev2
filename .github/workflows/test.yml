@@ -502,7 +502,7 @@ jobs:
               process.stdout.write('| '+v.name+' | '+v.severity+' |\n')
             )" >> "$GITHUB_STEP_SUMMARY" || true
 
-      # SBOM (CycloneDX): EU CRA Art. 13, EHDS Art. 50, SIMPL-Open.
+      # SBOM (CycloneDX): EU CRA Art. 13, SIMPL-Open.
       - name: Install dependencies (UI and Neo4j proxy)
         if: ${{ !cancelled() }}
         run: |
@@ -539,7 +539,7 @@ jobs:
           echo "| ui | CycloneDX | 1.5 |" >> $GITHUB_STEP_SUMMARY
           echo "| neo4j-proxy | CycloneDX | 1.5 |" >> $GITHUB_STEP_SUMMARY
 
-      # Licences: EU OSS Strategy, BSI C5 OPS-04, SIMPL-Open.
+      # Licences: EU OSS Strategy, SIMPL-Open.
       # license-checker@25.0.1 (the original) is unmaintained and crashes
       # with TypeError: json.readme.toLowerCase is not a function on some
       # modern package.json shapes. license-checker-rseidelsohn is the
