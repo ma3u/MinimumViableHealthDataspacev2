@@ -73,7 +73,7 @@ export const ehdsArt = (n: number | string) =>
   typeof n === "number" ? `${SRC.ehds}#art_${n}` : `${SRC.ehds}#${n}`;
 
 /** A text with its link tags taken out: what a chart tooltip shows. */
-export const untagged = (text: string) =>
+const untagged = (text: string) =>
   text.replace(/<(\w+)>([\s\S]*?)<\/\1>/g, "$2");
 
 export const ROADMAP_PLANNED_ON = "2026-10-28";
