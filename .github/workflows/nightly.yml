@@ -323,7 +323,9 @@ jobs:
           retention-days: 30
 
   # -----------------------------------------------------------------------
-  # gitleaks over the whole history (BSI C5 DEV-08). Moved from test.yml:
+  # gitleaks over the whole history (BSI C5:2020 CRY-04 secure key management,
+  # https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf#page=83).
+  # Moved from test.yml:
   # pre-commit scans what is staged and PR Gate the pull request's commits,
   # so per push this only repeated them (#847).
   # -----------------------------------------------------------------------
@@ -366,7 +368,8 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY" 2>&1
 
   # -----------------------------------------------------------------------
-  # Dependency Vulnerability Audit (BSI C5 DEV-05 / OWASP A06)
+  # Dependency Vulnerability Audit (BSI C5:2020 PSS-02 and OPS-22 / OWASP A06),
+  # https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf#page=114 and #page=72
   # -----------------------------------------------------------------------
 
   # -----------------------------------------------------------------------

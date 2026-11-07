@@ -18,6 +18,31 @@ const SPEC_URL = IS_STATIC
   ? "/MinimumViableHealthDataspacev2/openapi.yaml"
   : "/openapi.yaml";
 
+/**
+ * The specifications the API implements, each linked to its version. Scalar's
+ * metaData description below names them too, but that is a <meta> tag and
+ * cannot carry links, so the page header shows them.
+ */
+const SPECS: { label: string; href: string }[] = [
+  {
+    label: "DSP 2025-1",
+    href: "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
+  },
+  {
+    label: "DCP v1.0",
+    href: "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/",
+  },
+  { label: "FHIR R4", href: "https://hl7.org/fhir/R4/" },
+  {
+    label: "OMOP CDM v5.4",
+    href: "https://ohdsi.github.io/CommonDataModel/cdm54.html",
+  },
+  {
+    label: "HealthDCAT-AP Release 8",
+    href: "https://data.health.europa.eu/healthdcat-ap/releases/release-8/",
+  },
+];
+
 export default function ApiReferencePage() {
   // Scalar's "Try it" panel would otherwise use the first server in the
   // OpenAPI spec (http://localhost:3000) even when the page is served from
@@ -47,6 +72,24 @@ export default function ApiReferencePage() {
           {t(
             "Interactive, three-column reference for all REST endpoints of the EHDS Integration Hub. Powered by Scalar: try any endpoint directly from the right-hand code panel.",
           )}
+        </p>
+        <p
+          className="text-xs text-(--text-secondary) mt-1"
+          data-testid="api-reference-specs"
+        >
+          {SPECS.map((spec, i) => (
+            <span key={spec.href}>
+              {i > 0 && " · "}
+              <a
+                href={spec.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-(--accent) hover:underline"
+              >
+                {spec.label}
+              </a>
+            </span>
+          ))}
         </p>
       </div>
       <div className="flex-1 bg-white">

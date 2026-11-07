@@ -1,5 +1,5 @@
 @startuml ehds-incident-coordination
-title Incident coordination between the parties: who notifies whom, and the clocks\nGDPR Art. 33 and 34, NIS2 Art. 23 as transposed (BSIG), Regulation (EU) 2025/327 Art. 61, 63 and 73
+title Incident coordination between the parties: who notifies whom, and the clocks\nGDPR Art. 33 and 34, NIS2 Art. 23 as transposed (BSIG), Regulation (EU) 2025/327 Art. 63, 64 and 73
 skinparam defaultFontName Helvetica
 skinparam shadowing false
 skinparam sequenceMessageAlign left
@@ -28,7 +28,7 @@ participant "Affected health\ndata holders" as HOLD
 participant "Persons\naffected" as PERS
 
 == Detect and contain: the first hour ==
-SRC -> OPS : alert, or a report\n(a data user reports its own breach at once, Art. 61)
+SRC -> OPS : alert, or a report\n(a data user's own report of an infringement,\nweighed in any fine, Art. 64(2)(h))
 activate OPS
 OPS -> OPS : triage within the hour:\nscope, data categories, parties affected
 OPS -> OPS : contain: revoke credentials,\nisolate the connector or the SPE session
@@ -50,7 +50,7 @@ else a significant incident (NIS2 Art. 23)
   OPS -> CSIRT : <b>final report within one month</b>
 else data used outside the permit (EHDS Art. 63)
   OPS -> CTRL : SPE operator reports at once
-  CTRL -> USER : <b>permit revoked, processing stopped</b>\nwithout undue delay (Art. 63(2))
+  CTRL -> USER : <b>permit revoked, processing stopped</b>\nwithout undue delay (Art. 63(3))
   CTRL -> CTRL : SPE access of the user closed\nuntil the access body decides
   opt the misuse is a GDPR breach
     CTRL -> DPA : informs the supervisory authority at once (Art. 63(2))

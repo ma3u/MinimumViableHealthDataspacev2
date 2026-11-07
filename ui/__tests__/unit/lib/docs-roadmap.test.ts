@@ -64,6 +64,65 @@ describe("the roadmap data", () => {
     }
     for (const t of targets) expect(t.href).toMatch(/^https:\/\//);
   });
+
+  it("links every tagged part of a title, a note or a lane driver, and uses every link", () => {
+    const texts = [
+      ...LANES.map((l) => ({ id: l.id, texts: [l.driver], links: l.links })),
+      ...ITEMS.map((i) => ({
+        id: `#${i.issue}`,
+        texts: [i.title, i.note],
+        links: i.links,
+      })),
+    ];
+    for (const { id, texts: parts, links } of texts) {
+      const tags = parts.flatMap((t) =>
+        [...t.matchAll(/<(\w+)>[\s\S]*?<\/\1>/g)].map((m) => m[1]),
+      );
+      for (const tag of tags)
+        expect(links, `${id} <${tag}>`).toHaveProperty(tag);
+      for (const [tag, href] of Object.entries(links ?? {})) {
+        expect(tags, `${id} ${tag} is never used`).toContain(tag);
+        expect(href, `${id} ${tag}`).toMatch(/^(https:\/\/|\/docs\/)/);
+      }
+    }
+  });
+
+  it("cites the EHDS by article on EUR-Lex, never by a front page", () => {
+    const item = (n: number) => ITEMS.find((i) => i.issue === n)!;
+    // Art. 53 sets the purposes; Art. 54 is prohibited secondary use.
+    expect(item(717).title).toContain("<a53>Art. 53</a53> purposes");
+    expect(item(717).links?.a53).toBe(
+      "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_53",
+    );
+    expect(item(716).links?.a73).toMatch(/#art_73$/);
+    expect(LANES.find((l) => l.id === "processing")?.links?.a68).toMatch(
+      /#art_68$/,
+    );
+  });
+
+  it("dates the milestones as their sources do", () => {
+    const m = (id: string) => MILESTONES.find((x) => x.id === id)!;
+    // 2026/2099 Art. 4(2): assurance level high "From 26 March 2030".
+    expect(m("assurance-high").date).toBe("2030-03-26");
+    expect(m("assurance-high").href).toBe(
+      "https://eur-lex.europa.eu/eli/reg_impl/2026/2099/oj/eng#004.002",
+    );
+    // eudi-wallet.gov.de says "ab Anfang 2027", no day: the marker sits at
+    // the start of the year and says so.
+    expect(m("d-you").date).toBe("2027-01-01");
+    expect(m("d-you").label).toBe("d-you early 2027");
+    // No source gives a Council position on COM(2025) 838.
+    expect(m("business-wallet").detail).not.toMatch(/Council's position/);
+    expect(m("business-wallet").href).toContain("2025/0358(COD)");
+    expect(m("ehds-2027").detail).not.toMatch(/with the EUDI Wallet/);
+  });
+
+  it("writes the tooltips without the link tags", () => {
+    for (const t of roadmapTargets()) expect(t.label).not.toMatch(/<\/?\w+>/);
+    expect(roadmapTargets().find((t) => t.taskId === "i717")!.label).toContain(
+      "Applications: Art. 53 purposes, Art. 81 complaints",
+    );
+  });
 });
 
 describe("the generated Gantt chart", () => {

@@ -28,18 +28,18 @@ ever being involved. How they are made is at the
 ## Getting started
 
 1. On the iPhone, open the [TestFlight link](https://testflight.apple.com/join/ssADSXX6).
-   TestFlight installs itself first if it is missing, then offers Klarbefund.
+   [TestFlight](https://developer.apple.com/testflight/) installs itself first if it is missing, then offers Klarbefund.
 2. Open Klarbefund. There is no sign-up and no account: the app is ready for
    the first scan.
 3. The first time you scan, iOS asks for the camera. The app uses it only for
    the pages of a report and for the QR code that connects it to your record;
    the photographs stay on the phone.
 
-**The lock.** By default the app asks for Face ID, Touch ID or the passcode
+**The lock.** By default the app asks for [Face ID](https://developer.apple.com/documentation/localauthentication), Touch ID or the passcode
 every time it comes to the front, so your results are not on show to
 whoever holds the unlocked phone. The switch is under **Analysis provider**
 in the **⋯** menu, section **Protection**. A phone without a passcode has
-nothing to ask for, and the lock then opens by itself.
+nothing to ask for, and the lock then opens by itself ([ADR-060](../ADRs/ADR-060-the-app-locks-with-face-id-and-answers-pinning-and-jailbreak-detection.md)).
 
 ## Your reports
 
@@ -113,12 +113,12 @@ checkable:
   lipoprotein(a) in mg/dL and in nmol/L are different measurements with
   different codes. A quantity LOINC does not code says so plainly instead of
   showing a near-enough code, and an organism from a stool report shows its
-  NCBI Taxonomy id instead, because LOINC names tests and not organisms;
+  [NCBI Taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy) id instead, because LOINC names tests and not organisms;
 - **the reference range your laboratory printed**, exactly as printed, never
   normalised;
 - **the page and line** it was read from, so any number can be checked
   against the paper in front of you;
-- **the published band**, where a guideline or a named study states one, with
+- **the published band**, where a guideline or a named study states one ([ADR-039](../ADRs/ADR-039-published-reference-ranges.md)), with
   the words and a symbol beside the colour: "in the optimal band", "outside
   the optimal band", "outside the guideline range". This is a comparison to a
   number somebody published. It is not a finding.
@@ -168,7 +168,7 @@ and which report it belongs to, and tapping a point opens that report.
 A sentence under each chart says **what the measurement is**: a definition of
 the test, in English or German. It is never a reading of your own value.
 
-At the bottom, **Show trends from Apple Health** reads your resting heart
+At the bottom, **Show trends from [Apple Health](https://developer.apple.com/documentation/healthkit)** reads your resting heart
 rate, heart rate variability, steps and weight, after asking once for
 permission. They appear in their own section, **From your devices**, as grey
 dashed lines of weekly means on the same months as your reports, with a thin
@@ -224,9 +224,9 @@ page, which stays on the phone. Whichever provider is in use is named on the
 screen before you send.
 
 **Analysis provider** in the menu chooses where an answer comes from: on this
-iPhone, the Klarbefund service in the EU, or your own Azure OpenAI resource or
+iPhone, the Klarbefund service in the EU (by default [Azure OpenAI in the EU data zone](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/deployment-types#data-zone-standard)), or your own Azure OpenAI resource or
 Anthropic key. With your own service the phone talks to it directly, and
-neither the key nor the values reach the provider of this app. The same
+neither the key nor the values reach the provider of this app ([ADR-034](../ADRs/ADR-034-claude-workload-identity-federation.md), [ADR-035](../ADRs/ADR-035-inference-provider-residency-and-quota.md)). The same
 screen holds the **Protection** switch for the Face ID lock.
 
 ## Consents
@@ -237,7 +237,7 @@ screen holds the **Protection** switch for the Face ID lock.
 easy to confuse and must never be one switch:
 
 - **Study participation**, your consent to a study, held by the study centre;
-- **Electronic patient record (ePA)**, an _objection_, because the ePA exists
+- **Electronic patient record (ePA)**, an [_objection_](https://www.gesetze-im-internet.de/sgb_5/__342.html), because the ePA exists
   unless you object to your health insurer;
 - **Registry and research use**, your consent for a registry or research
   database to use your values.
@@ -256,21 +256,21 @@ there is no ePA to upload to while it stands.
 
 **My EHDS record**, at the top of the list, says whether the app is connected
 and sending, and opens **Connect to EHDS**, which connects the app to your record in the
-European Health Data Space demo hub, so it can read it and, if you decide so,
+[European Health Data Space](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng) demo hub, so it can read it and, if you decide so,
 add to it. There are three ways in, and no password is typed into a web page
 on the phone:
 
 - **Create an EHDS account** makes an account with its own, empty record on
   the demo hub and connects the phone to it. You get a username and password
-  to sign in on the website too. Apple confirms to the hub that the request
+  to sign in on the website too. [Apple confirms](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity) to the hub that the request
   comes from the genuine app on a real device, which is why a simulator
-  cannot do this.
+  cannot do this ([ADR-054](../ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md)).
 - **Sign in with an EHDS account** you already have.
-- **Connect by QR code**, from the patient screen on a computer:
+- **Connect by QR code** ([OAuth device grant](https://www.rfc-editor.org/rfc/rfc8628), [ADR-049](../ADRs/ADR-049-klarbefund-connects-by-device-grant.md)), from the patient screen on a computer:
   1. On the computer, open the patient screen (the app shows the address, to
      copy, share or open) and sign in as a patient. Choose **Show QR code**.
   2. In the app, **Scan QR code**. On the computer, **Approve on this
-     computer** opens Keycloak's consent page; check that the code shown there
+     computer** opens [Keycloak](https://www.keycloak.org/docs/latest/server_admin/#device-authorization-grant)'s consent page; check that the code shown there
      is the one the app shows, and approve.
   3. The app says which account it connected to and asks **Is this your
      account?** A code someone else showed you would connect the phone to
@@ -279,7 +279,7 @@ on the phone:
 
 Once connected, **Show my EHDS record** lists what the hub holds for you:
 measurements with their printed ranges and dates, reports, vaccinations and
-the medication plan. On the demo hub every record is synthetic, and the
+the medication plan ([ADR-059](../ADRs/ADR-059-the-record-holds-reports-vaccinations-and-the-medication-plan.md)). On the demo hub every record is synthetic, and the
 screen says so. The record is read when you open it, kept nowhere, and never
 mixed into your scanned reports.
 
@@ -291,7 +291,7 @@ them on:
   read from a scan. Values without a LOINC code stay on the phone.
 - **Send my device trends to my EHDS record**: the weekly means from Apple
   Health that the Trends screen shows, never a single day or a single
-  reading; each sync replaces the last.
+  reading; each sync replaces the last ([ADR-057](../ADRs/ADR-057-klarbefund-sends-weekly-device-means.md)).
 
 Switching either off stops further sending; what was sent stays in the record
 until you delete the account. **Disconnect** is in the app and on the patient
@@ -305,7 +305,11 @@ for two minutes.
 An EUDI wallet is optional. Klarbefund and the hub work with a username and
 password alone. A wallet adds a second way to sign in on the website: d-you,
 the German EUDI Wallet, or any other certified one, proves who you are with
-your PID (your digital identity card) instead of a password.
+your [PID](https://eu-digital-identity-wallet.github.io/eudi-doc-architecture-and-reference-framework/latest/) (your digital identity card) instead of a password.
+d-you is [launched to the public in early January 2027](https://www.bundesregierung.de/breg-de/aktuelles/digital-wallet-2452384). Until then
+the hub is registered as a relying party in the SPRIND sandbox, so the
+steps below work with the d-you sandbox (test) wallet app, not yet with the
+public d-you ([ADR-065](../ADRs/ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md), [ADR-066](../ADRs/ADR-066-the-hub-runs-its-own-eudi-verifier-behind-a-wallet-only-gate.md)).
 
 The hub never keeps your name or birth date. It keeps one secure hash of
 them on the account, which only says "this PID belongs to this account"
@@ -349,19 +353,19 @@ with it.
 Everything the app holds can leave it, in the form the recipient needs, and
 only when you say so.
 
-| Action                     | For                 | What you get                                                                                                                                        |
-| -------------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Share for my doctor        | a practice, the ePA | a PDF summary with the original pages appended, plus a FHIR R4 bundle                                                                               |
-| Export for research (OMOP) | an analytics team   | OMOP CDM v5.4 `measurement.csv`, `person.csv`, `observation_period.csv`                                                                             |
-| Export all my data         | you, under GDPR     | every report, page, value, profile field and consent, in one archive                                                                                |
-| Delete all my data         | you                 | the store is wiped for good; the account the app made on the hub, with its record, values and consents, goes too; the app says so before it does it |
-| Export diagnostics         | the developers      | the recognised text and both recogniser passes, to fix a misread line                                                                               |
+| Action                     | For                                                                                                                                                    | What you get                                                                                                                                                                                                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Share for my doctor        | a practice, the ePA                                                                                                                                    | a PDF summary with the original pages appended, plus a [FHIR R4](https://hl7.org/fhir/R4/bundle.html) bundle                                                                                                                                                                    |
+| Export for research (OMOP) | an analytics team                                                                                                                                      | OMOP CDM v5.4 [`measurement.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#measurement), [`person.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#person), [`observation_period.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#observation_period) |
+| Export all my data         | you, under GDPR [Art. 15](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_15) and [20](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_20) | every report, page, value, profile field and consent, in one archive                                                                                                                                                                                                            |
+| Delete all my data         | you, [GDPR Art. 17](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_17)                                                                          | the store is wiped for good; the account the app made on the hub, with its record, values and consents, goes too; the app says so before it does it                                                                                                                             |
+| Export diagnostics         | the developers                                                                                                                                         | the recognised text and both recogniser passes, to fix a misread line                                                                                                                                                                                                           |
 
-The FHIR bundle carries every value with its LOINC code, its UCUM unit, the
+The FHIR bundle carries every value with its LOINC code, its [UCUM](https://ucum.org/ucum) unit, the
 range the laboratory printed (as numbers where they can be read, and always as
-the printed text in `referenceRange.text`), and the page and line it was read
+the printed text in [`referenceRange.text`](https://hl7.org/fhir/R4/observation-definitions.html#Observation.referenceRange.text)), and the page and line it was read
 from. A value read from a photograph is marked preliminary in the bundle too.
-The doctor export fits the ePA's 25 MB limit with the pages attached.
+The doctor export fits the ePA's [25 MB limit](https://www.kbv.de/praxis/tools-und-services/praxisnachrichten/2025/10-09/alles-nur-eine-frage-muessen-befundberichte-arztbriefe-etc-sofort-eingestellt-werden) with the pages attached.
 
 Everything goes through the system share sheet: to the ePA app, Files,
 AirDrop, or mail. There is deliberately no upload of its own, because there is
@@ -373,15 +377,15 @@ point.
 <img src="img/privacy.png" width="300" alt="Privacy and safety: the reports stay on this phone, nothing is sent unless you send it, where an explanation comes from">
 
 The photographs never leave the device. Values, pages and diagnostics are
-encrypted individually with a key that is unavailable while the phone is
-locked and is never restored onto another device. The store is excluded from
-iCloud Backup. When the app is not in front, its content is covered, so the
+encrypted individually with [a key that is unavailable while the phone is
+locked](https://developer.apple.com/documentation/security/ksecattraccessiblewhenunlockedthisdeviceonly) and is never restored onto another device. The store is excluded from
+[iCloud Backup](https://developer.apple.com/documentation/foundation/urlresourcevalues/isexcludedfrombackup). When the app is not in front, its content is covered, so the
 app switcher shows nothing, and coming back asks for Face ID or the passcode.
 
 This was checked, not assumed: with the phone on a cable, copying a stored
 record, an export left in the temporary folder, or the system's own snapshot
-of the app all fail with a permission error, which is what complete file
-protection looks like from outside. The full assessment, objective by
+of the app all fail with a permission error, which is what [complete file
+protection](https://developer.apple.com/documentation/foundation/nsfileprotectioncomplete) looks like from outside. The full assessment, objective by
 objective, is the [self-assessment](self-assessment.md); what was tested and
 how is in [evidence](evidence.md).
 
@@ -393,6 +397,9 @@ abnormal, scores anything, or advises. A value read from a photograph can be
 misread and is marked preliminary until you check it against the paper.
 Reference ranges are shown exactly as your laboratory printed them, and the
 published bands beside them are quotations with a source, not a verdict.
+
+Why the app is not a medical device under the [MDR](https://eur-lex.europa.eu/eli/reg/2017/745/oj/eng) and the
+[MDCG 2019-11](https://health.ec.europa.eu/document/download/b45335c5-1679-4c71-a91c-fc7a4d37f12b_en) guidance is set out in the [self-assessment](self-assessment.md#regulation).
 
 Always consult a doctor before making any decision about your health.
 

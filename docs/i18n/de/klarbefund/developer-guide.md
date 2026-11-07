@@ -1,6 +1,6 @@
 ---
 source: docs/klarbefund/developer-guide.md
-sourceHash: 48236d50693674d8724bcd9602038d3c906575395278be36555efd640d0eaf1c
+sourceHash: 6789a3d05981809fb20a7746a513b48f8afc847a07723a7603fabad1c480dd7f
 language: de
 summary: "Die App bauen, starten und testen: die Pipeline von der Kamera bis zum versiegelten Speicher, das gemeinsame Wörterbuch, der Aufbau des Speichers, der Entwicklungsdatensatz, die beiden Testsuiten, Diagnose und TestFlight."
 ---
@@ -20,41 +20,41 @@ sagen, warum das nicht verhandelbar ist.
 
 ## Was Sie brauchen
 
-| Werkzeug           | Version                      | Wozu                                                                                    |
-| ------------------ | ---------------------------- | --------------------------------------------------------------------------------------- |
-| macOS mit Xcode    | Xcode 27, iOS 26 SDK         | Die App zielt auf iOS 26; das Swift-Paket deklariert macOS 26 für die Werkzeuge         |
-| Swift              | 6.0, strikte Nebenläufigkeit | `Package.swift` und `project.yml` legen es beide fest                                   |
-| XcodeGen           | `brew install xcodegen`      | Das `.xcodeproj` wird aus `project.yml` erzeugt und nie committet                       |
-| Node               | wie für `ui/`                | Nur um das Wörterbuch aus `services/epa-ingest` neu zu erzeugen                         |
-| PlantUML, Graphviz | `brew install plantuml`      | Nur um die Diagramme in diesem Handbuch neu zu rendern                                  |
-| Ein iPhone         | iOS 26 oder neuer            | Nur für die Kamera, Face ID, App Attest und TestFlight; alles andere läuft im Simulator |
+| Werkzeug                                                                 | Version                                                                                                                                                                                                                                                     | Wozu                                                                                                                                                                                                                          |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| macOS mit Xcode                                                          | [Xcode 26](https://developer.apple.com/documentation/xcode-release-notes) oder neuer, iOS 26 SDK oder neuer; die CI baut mit Xcode 26.6 auf dem [macOS-26-Runner](https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md) | Die App zielt auf iOS 26; das Swift-Paket deklariert macOS 26 für die Werkzeuge                                                                                                                                               |
+| Swift                                                                    | 6.0, [strikte Nebenläufigkeit](https://www.swift.org/documentation/concurrency/)                                                                                                                                                                            | [`Package.swift`](../../clients/ios/Package.swift) und [`project.yml`](../../clients/ios/project.yml) legen es beide fest                                                                                                     |
+| [XcodeGen](https://github.com/yonaskolb/XcodeGen)                        | `brew install xcodegen`                                                                                                                                                                                                                                     | Das `.xcodeproj` wird aus `project.yml` erzeugt und nie committet                                                                                                                                                             |
+| Node                                                                     | wie für `ui/`                                                                                                                                                                                                                                               | Nur um das Wörterbuch aus [`services/epa-ingest`](../../services/epa-ingest) neu zu erzeugen                                                                                                                                  |
+| [PlantUML](https://www.plantuml.com/), [Graphviz](https://graphviz.org/) | `brew install plantuml`                                                                                                                                                                                                                                     | Nur um die Diagramme in diesem Handbuch neu zu rendern                                                                                                                                                                        |
+| Ein iPhone                                                               | iOS 26 oder neuer                                                                                                                                                                                                                                           | Nur für die Kamera, Face ID, [App Attest](https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity) und [TestFlight](https://developer.apple.com/testflight/); alles andere läuft im Simulator |
 
 ## Wie es aufgebaut ist
 
 ![Klarbefund als geschichtete ArchiMate-Sicht: die Geschäftsschicht mit der Person, der Ärztin oder dem Arzt und dem Forschungsteam sowie den sechs Dingen, die eine Person tut; die Anwendungsschicht mit den vier Diensten, der App, dem Shared-Paket, den Werkzeugen, dem Hub und dem Generator; die Technologieschicht mit den Frameworks des iPhones, dem Mac und Azure Container Apps](img/klarbefund-architecture.svg)
 
 Quelle: [`diagrams/klarbefund-architecture.puml`](diagrams/klarbefund-architecture.puml),
-gerendert mit `scripts/render-plantuml.sh docs/klarbefund/diagrams/*.puml`.
+gerendert mit [`scripts/render-plantuml.sh`](../../scripts/render-plantuml.sh) `docs/klarbefund/diagrams/*.puml`.
 
-Die Sicht folgt ArchiMate 3.2: Die Geschäftsschicht (gelb) zeigt, wer was
+Die Sicht folgt [ArchiMate 3.2](https://pubs.opengroup.org/architecture/archimate32-doc/): Die Geschäftsschicht (gelb) zeigt, wer was
 tut, die Anwendungsschicht (blau) die Dienste, die die Software bereitstellt, und
 die Komponenten, die sie realisieren, die Technologieschicht (grün), worauf alles
 läuft. Ein Pfeil von einem unteren Band zu einem oberen bedeutet „dient“; ein gepunkteter
 Pfeil mit hohler Spitze bedeutet „realisiert“. Drei Dinge lassen sich daraus ablesen:
 
-- **`Sources/Shared`** ist ein Swift-Paket, das für iOS und macOS kompiliert. Es
+- **[`Sources/Shared`](../../clients/ios/Sources/Shared/)** ist ein Swift-Paket, das für iOS und macOS kompiliert. Es
   enthält den Parser, die Nachverarbeitung der Texterkennung, das generierte Wörterbuch der Parameter
   und die Referenzbereiche, das Datensatzmodell mit seiner Herkunft sowie
-  die Exportformate (FHIR R4, OMOP CDM, das Diagnosepaket). Nichts darin
+  die Exportformate ([FHIR R4](https://hl7.org/fhir/R4/), [OMOP CDM](https://ohdsi.github.io/CommonDataModel/cdm54.html), das Diagnosepaket). Nichts darin
   berührt das Netzwerk, den Schlüsselbund oder den Speicher, weshalb jede
   Zahl, die die App berechnet, auf einem Mac mit `swift test` reproduziert werden kann.
-- **`Sources/MeinBefund`** ist die App: SwiftUI-Views, VisionKit-Scannen, der
+- **[`Sources/MeinBefund`](../../clients/ios/Sources/MeinBefund/)** ist die App: SwiftUI-Views, [VisionKit](https://developer.apple.com/documentation/visionkit/vndocumentcameraviewcontroller)-Scannen, der
   versiegelte Speicher, das Teilen-Menü der Exporte, die EHDS-Verbindung, die App-Sperre,
   die Analyse-Anbieter sowie die nur im Debug-Build vorhandenen Demodaten und der Selbsttest.
-- **`Tools/`** sind vier Kommandozeilenprogramme auf Basis des Shared-Pakets:
-  `LabFile` importiert ein PDF oder Bild genau so, wie es die App täte, `ScanReplay`
-  lässt einen Diagnoseexport erneut durch den aktuellen Parser laufen, `AnalyteParity`
-  belegt, dass das generierte Wörterbuch seiner TypeScript-Quelle entspricht, und `IconGen`
+- **[`Tools/`](../../clients/ios/Tools)** sind vier Kommandozeilenprogramme auf Basis des Shared-Pakets:
+  [`LabFile`](../../clients/ios/Tools/LabFile) importiert ein PDF oder Bild genau so, wie es die App täte, [`ScanReplay`](../../clients/ios/Tools/ScanReplay)
+  lässt einen Diagnoseexport erneut durch den aktuellen Parser laufen, [`AnalyteParity`](../../clients/ios/Tools/AnalyteParity)
+  belegt, dass das generierte Wörterbuch seiner TypeScript-Quelle entspricht, und [`IconGen`](../../clients/ios/Tools/IconGen)
   zeichnet das App-Symbol.
 
 ```
@@ -81,7 +81,7 @@ xcodegen generate && open MeinBefund.xcodeproj # then run the MeinBefund scheme 
 ```
 
 Von der Kommandozeile in einen Simulator beachten Sie die **Ad-hoc-Signatur**:
-Ohne sie schlägt jeder Schlüsselbund-Aufruf mit `-34018` fehl, und der Speicher kann
+Ohne sie schlägt jeder Schlüsselbund-Aufruf mit [`-34018`](https://developer.apple.com/documentation/security/errsecmissingentitlement) fehl, und der Speicher kann
 seinen Schlüssel nicht anlegen.
 
 ```bash
@@ -90,12 +90,12 @@ xcodebuild -project MeinBefund.xcodeproj -scheme MeinBefund \
   CODE_SIGN_IDENTITY="-" CODE_SIGNING_REQUIRED=YES build
 ```
 
-Auf ein angeschlossenes iPhone: `Scripts/install-device.sh`. Das generierte Projekt
+Auf ein angeschlossenes iPhone: [`Scripts/install-device.sh`](../../clients/ios/Scripts/install-device.sh). Das generierte Projekt
 enthält kein Signing-Team, daher schlägt ein einfaches `xcodebuild` für ein Gerät fehl; das
 Skript ergänzt eines aus `TEAM_ID` oder aus dem Schlüsselbund und installiert, was es
-gebaut hat. TestFlight: `Scripts/archive-and-upload.sh`; sein Kopf nennt die vier
+gebaut hat. TestFlight: [`Scripts/archive-and-upload.sh`](../../clients/ios/Scripts/archive-and-upload.sh); sein Kopf nennt die vier
 Dinge, die zuvor im Apple-Developer-Konto vorhanden sein müssen. Die Version ist
-in `project.yml` festgelegt: `MARKETING_VERSION` entspricht dem Eintrag in App Store Connect,
+in `project.yml` festgelegt: `MARKETING_VERSION` entspricht dem Eintrag in [App Store Connect](https://developer.apple.com/help/app-store-connect/manage-builds/upload-builds),
 und `CURRENT_PROJECT_VERSION` steigt mit jedem Upload, weil App
 Store Connect eine bereits gesehene Build-Nummer ablehnt, und zwar erst nach dem Upload.
 
@@ -113,14 +113,14 @@ kompiliert ist, nicht.
 | `-MBDevData`           | Sieben fiktive Befunde über drei Jahre und vier Quellen, im Code erzeugt: Ein Verlauf hat eine Form, die Liste der nicht zugeordneten Zeilen hat Einträge, jeder Befund hat Seiten. |
 | `-MBShot <screen>`     | Öffnet einen Bildschirm direkt, sobald die Befunde geladen sind: `list detail scan trends reference history profile consent settings privacy consents connect`.                     |
 | `-MBSelfTest`          | Führt einen synthetischen Befund durch die gesamte Pipeline im App-Target und protokolliert 27 Prüfungen (siehe [Der Selbsttest](#the-self-test)).                                  |
-| `-MBExportDiagnostics` | Erstellt das Diagnosearchiv im temporären Verzeichnis der App für `Scripts/pull-diagnostics.sh`.                                                                                    |
+| `-MBExportDiagnostics` | Erstellt das Diagnosearchiv im temporären Verzeichnis der App für [`Scripts/pull-diagnostics.sh`](../../clients/ios/Scripts/pull-diagnostics.sh).                                   |
 
 Der Entwicklungsdatensatz wird **erzeugt, nicht gespeichert**. Eine Zeile gibt die Bezeichnung, den Wert,
-die Einheit und den vom Labor gedruckten Bereich an, und `Analytes.lookup` codiert sie
+die Einheit und den vom Labor gedruckten Bereich an, und [`Analytes.lookup`](../../clients/ios/Sources/Shared/Analytes.generated.swift#L2775) codiert sie
 genau so, wie es einen Scan codiert. Kein Code im Datensatz kann falsch sein, eine Zeile, die das
 Wörterbuch nicht codieren kann, landet von selbst in der Liste der nicht zugeordneten Zeilen, und der
 Datensatz folgt dem Wörterbuch, wenn sich das Wörterbuch ändert. Die Seiten werden
-von `SyntheticSheet` gezeichnet, demselben Renderer, den die Tests lesen.
+von [`SyntheticSheet`](../../clients/ios/Sources/Shared/SyntheticSheet.swift) gezeichnet, demselben Renderer, den die Tests lesen.
 
 Ein Demostart sperrt nie: Die App-Sperre liest das Seed-Flag und bleibt offen,
 sodass die UI-Tests und das Screenshot-Skript dort laufen, wo niemand eine
@@ -144,36 +144,36 @@ Quelle: [`diagrams/klarbefund-scan-pipeline.puml`](diagrams/klarbefund-scan-pipe
 Die Reihenfolge ist fest, und jeder Schritt hat genau einen Verantwortlichen
 ([ADR-033](../ADRs/ADR-033-lab-report-extraction-pipeline.md)):
 
-1. **Zuerst die Herkunft.** `LabImport` entscheidet anhand der Datei, nie anhand ihrer
+1. **Zuerst die Herkunft.** [`LabImport`](../../clients/ios/Sources/Shared/LabImport.swift) entscheidet anhand der Datei, nie anhand ihrer
    Endung: Ein PDF mit der eigenen Textebene des Labors ist
    `lab-issued-digital`, und seine Observations sind `final`; alles, was
    durch die Texterkennung muss, ist `ocr-transcribed` und `preliminary`. Das ist
    bewusst streng, denn eine Transkription als `final` zu kennzeichnen, ist der Fehler,
    auf den es ankommt.
-2. **Erkennung.** `VisionDocumentReader` führt zwei Vision-Durchläufe aus, Deutsch und
+2. **Erkennung.** [`VisionDocumentReader`](../../clients/ios/Sources/Shared/VisionDocumentReader.swift) führt zwei [Vision](https://developer.apple.com/documentation/vision/recognizing-text-in-images)-Durchläufe aus, Deutsch und
    Englisch, mit **ausgeschalteter** Sprachkorrektur: `Lp(a)` oder ein
-   Dezimalkomma zu „korrigieren“, schadet aktiv. `DocumentReconciler` führt die Durchläufe zusammen,
-   und `TableRoles` leitet je Tabelle ab, welche Spalte die Bezeichnung, den Wert, die Einheit
+   Dezimalkomma zu „korrigieren“, schadet aktiv. [`DocumentReconciler`](../../clients/ios/Sources/Shared/DocumentReconciler.swift) führt die Durchläufe zusammen,
+   und [`TableRoles`](../../clients/ios/Sources/Shared/TableRoles.swift) leitet je Tabelle ab, welche Spalte die Bezeichnung, den Wert, die Einheit
    und den Bereich enthält.
-3. **Parsen.** `LabLineParser` liest jede Zeile. Wenn das gewöhnliche Parsen
+3. **Parsen.** [`LabLineParser`](../../clients/ios/Sources/Shared/LabLineParser.swift) liest jede Zeile. Wenn das gewöhnliche Parsen
    nichts findet, kommen die Blattleser zum Zug: ambulante Blutdruckmessung,
    Ruhe- und Belastungs-EKG, Langzeit-EKG, Spiroergometrie, Laktat,
    CGM-Glukoseprofil, DXA und die Anzeige einer Körperanalysewaage, die
    eine Anzeige und kein Befund ist und nur auf ihren Hauptwert hin gelesen wird.
-4. **Codierung.** `Analytes.lookup(label, unit)` wählt den LOINC-Code. Die Einheit
+4. **Codierung.** [`Analytes.lookup(label, unit)`](../../clients/ios/Sources/Shared/Analytes.generated.swift#L2775) wählt den LOINC-Code. Die Einheit
    entscheidet, nie der Name allein. Eine Größe, die LOINC nicht codiert (viszerales Fett
    als Masse, ein Wasseranteil), wird mit ihrer Einheit, ohne Code und mit einer verpflichtenden
-   Begründung mitgeführt; ein Organismus aus einem Stuhlbefund trägt seine NCBI-Taxonomy-ID,
+   Begründung mitgeführt; ein Organismus aus einem Stuhlbefund trägt seine [NCBI-Taxonomy](https://www.ncbi.nlm.nih.gov/taxonomy)-ID,
    weil LOINC Tests benennt und keine Organismen.
-5. **Der Kopf.** `ReportMetadata` und `PrintedFields` lesen das Labor,
+5. **Der Kopf.** [`ReportMetadata`](../../clients/ios/Sources/Shared/ReportMetadata.swift) und [`PrintedFields`](../../clients/ios/Sources/Shared/PrintedFields.swift) lesen das Labor,
    das Labordatum, das Ausstellungsdatum und die Befundnummer vom Blatt; das Labordatum
    hat Vorrang vor Eingangs- und Ausstellungsdatum, und die Person bestätigt
    es vor dem Speichern.
 6. **Erhaltung.** Jede Zeile, die wie ein Messwert aussieht, endet als codiert,
    nicht zugeordnet oder nicht gelesen. Eine Zeile in keiner der drei Gruppen ist nicht zu unterscheiden von
    einer Zeile, die nie gedruckt wurde, und genau so ist einmal eine HbA1c-Zeile
-   verloren gegangen (`docs/gotchas.md`, 2026-09-19). Der Selbsttest prüft das.
-7. **Prüfen und speichern.** `ReviewViews` zeigt, was gelesen wurde; `ReportStore`
+   verloren gegangen ([`docs/gotchas.md`](../gotchas.md#2026-09-19-the-measurement-that-justified-the-ocr-hybrid-was-taken-on-the-wrong-os), 2026-09-19). Der Selbsttest prüft das.
+7. **Prüfen und speichern.** [`ReviewViews`](../../clients/ios/Sources/MeinBefund/ReviewViews.swift) zeigt, was gelesen wurde; [`ReportStore`](../../clients/ios/Sources/MeinBefund/ReportStore.swift)
    versiegelt es.
 
 `swift run LabFile ~/Downloads/befund.pdf` führt die Schritte 1 bis 6 auf einem Mac aus und
@@ -184,8 +184,8 @@ Es lehnt einen Pfad innerhalb dieses Repositorys ab.
 ## Der Speicher und die Sperre
 
 Drei versiegelte Dateien je Befund unter `Application Support/Reports`, jede
-AES-GCM unter demselben Schlüsselbund-Schlüssel, vollständiger Dateischutz, vom
-Backup ausgeschlossen:
+[AES-GCM](https://developer.apple.com/documentation/cryptokit/aes/gcm) unter demselben Schlüsselbund-Schlüssel, [vollständiger Dateischutz](https://developer.apple.com/documentation/foundation/nsfileprotectioncomplete), [vom
+Backup ausgeschlossen](https://developer.apple.com/documentation/foundation/urlresourcevalues/isexcludedfrombackup):
 
 ```
 <id>.sealed         the record (LabReport)
@@ -195,33 +195,33 @@ profile.sealed      sex, date of birth, height (Profile)
 consents.sealed     the three consent decisions (ConsentLedger)
 ```
 
-Der Schlüssel ist `ThisDeviceOnly` und bei gesperrtem Telefon nicht verfügbar, sodass eine
+Der Schlüssel ist [`ThisDeviceOnly`](https://developer.apple.com/documentation/security/ksecattraccessiblewhenunlockedthisdeviceonly) und bei gesperrtem Telefon nicht verfügbar, sodass eine
 Kopie des Containers nur Chiffretext liefert und der systemeigene Schnappschuss der App
-mit `EPERM` fehlschlägt; `SecurityPostureTests` legt die Build-Einstellungen fest, und die
+mit `EPERM` fehlschlägt; [`SecurityPostureTests`](../../clients/ios/Tests/SharedTests/SecurityPostureTests.swift) legt die Build-Einstellungen fest, und die
 [Selbstbewertung](self-assessment.md) dokumentiert die Messung. Datensätze,
 die geschrieben wurden, bevor ein Feld existierte, lassen sich weiterhin decodieren: Jedes spätere Feld ist optional oder
 hat einen Standardwert.
 
 Die App-Sperre ([ADR-060](../ADRs/ADR-060-the-app-locks-with-face-id-and-answers-pinning-and-jailbreak-detection.md))
-besteht aus zwei Typen. `AppLockPolicy` in Shared entscheidet, _ob_ eine Abfrage fällig ist,
-und ist rein, sodass `AppLockPolicyTests` auf einem Mac läuft; `AppLock` in der App fragt
-LocalAuthentication, _wie_, per Face ID, Touch ID oder Code, und
-`PrivacyCover` zeichnet die Abdeckung, die der App-Umschalter sieht. Dieselbe ADR begründet, warum
+besteht aus zwei Typen. [`AppLockPolicy`](../../clients/ios/Sources/Shared/AppLockPolicy.swift) in Shared entscheidet, _ob_ eine Abfrage fällig ist,
+und ist rein, sodass [`AppLockPolicyTests`](../../clients/ios/Tests/SharedTests/AppLockPolicyTests.swift) auf einem Mac läuft; [`AppLock`](../../clients/ios/Sources/MeinBefund/AppLock.swift) in der App fragt
+[LocalAuthentication](https://developer.apple.com/documentation/localauthentication), _wie_, per Face ID, Touch ID oder Code, und
+[`PrivacyCover`](../../clients/ios/Sources/MeinBefund/PrivacyCover.swift) zeichnet die Abdeckung, die der App-Umschalter sieht. Dieselbe ADR begründet, warum
 Certificate Pinning und Jailbreak-Erkennung abgelehnt wurden.
 
 ## Das Wörterbuch wird generiert, nie kopiert
 
-`Sources/Shared/Analytes.generated.swift`, `ReferenceRanges.generated.swift`
-und `PromptText.generated.swift` werden erzeugt aus
+[`Sources/Shared/Analytes.generated.swift`](../../clients/ios/Sources/Shared/Analytes.generated.swift), [`ReferenceRanges.generated.swift`](../../clients/ios/Sources/Shared/ReferenceRanges.generated.swift)
+und [`PromptText.generated.swift`](../../clients/ios/Sources/Shared/PromptText.generated.swift) werden erzeugt aus
 [`services/epa-ingest`](../../services/epa-ingest):
 
 ```bash
 cd services/epa-ingest && npm run generate:swift
-cd clients/ios && swift run AnalyteParity      # 1589 codings, 71 units today
+cd clients/ios && swift run AnalyteParity      # 1760 codings, 96 units on 2026-11-07
 ```
 
-Bearbeiten Sie sie nicht von Hand. Fügen Sie einen Parameter in `analytes.ts` oder einen Bereich in
-`reference-ranges.ts` hinzu, erzeugen Sie neu und committen Sie beides. Die CI schlägt fehl, wenn eine generierte Datei
+Bearbeiten Sie sie nicht von Hand. Fügen Sie einen Parameter in [`analytes.ts`](../../services/epa-ingest/src/analytes.ts) oder einen Bereich in
+[`reference-ranges.ts`](../../services/epa-ingest/src/reference-ranges.ts) hinzu, erzeugen Sie neu und committen Sie beides. Die CI schlägt fehl, wenn eine generierte Datei
 nicht mehr zu ihrer Quelle passt, denn eine veraltete Kopie ist genau die stille
 Abweichung, die das Monorepo verhindern soll: ein iPhone, das Lp(a) auf eine Weise codiert,
 und der Ingest-Dienst auf eine andere, bemerkt erst, wenn ein Wert bei einer Ärztin oder einem Arzt ankommt.
@@ -237,25 +237,25 @@ Parameter zeichnet der Bildschirm Verlauf den Bereich, den das eigene Labor der 
 ```bash
 swift test                                     # Swift Testing: what the app computes
 Scripts/run-ui-tests.sh                        # XCUITest: what it shows, and what a tap does
-swift test --filter ExtractionAccuracyTests    # the accuracy benchmark, JSON to docs/klarbefund/accuracy-benchmark.json
+swift test --filter AccuracyBenchmarkTests     # the accuracy benchmark; KLARBEFUND_BENCHMARK_OUT=<file> writes its JSON
 swift test --filter SecurityPostureTests       # the build settings the self-assessment relies on
 ```
 
-**Die Unit-Suite** (`Tests/SharedTests/`) ist die größere und fängt ab, was
+**Die Unit-Suite** ([`Tests/SharedTests/`](../../clients/ios/Tests/SharedTests/), [Swift Testing](https://developer.apple.com/documentation/testing)) ist die größere und fängt ab, was
 sich durchdenken lässt: eine Einheit, die den falschen Code wählt, ein Datum, das aus der
-falschen Zeile gelesen wird, eine Exportspalte an der falschen Stelle. `FhirBundleParityTests` bindet
+falschen Zeile gelesen wird, eine Exportspalte an der falschen Stelle. [`FhirBundleParityTests`](../../clients/ios/Tests/SharedTests/FhirBundleParityTests.swift) bindet
 das Bundle an das Referenz-Bundle, das `services/epa-ingest` schreibt, sodass beide Schreiber
 für dasselbe Blatt dasselbe FHIR ausgeben.
 
-**Die UI-Suite** (`Tests/UITests/`) existiert, weil die Unit-Suite keinen
+**Die UI-Suite** ([`Tests/UITests/`](../../clients/ios/Tests/UITests/), [XCUITest](https://developer.apple.com/documentation/xctest/xcuiapplication)) existiert, weil die Unit-Suite keinen
 der letzten Fehler gefunden hat: eine Karte, die am Rand des Diagramms abgeschnitten war, eine Auswahl,
 die sich beim nächsten Rendern vergaß, `LOINC Optional("2093-3")` auf genau dem
 Bildschirm, den eine Person mit ihrem eigenen Papier vergleicht. Jeder Test startet mit
 `-MBDemoSeed` und erreicht seinen Bildschirm mit `-MBShot`, sodass er bricht, wenn sich das ändert, was er
 prüft, und nicht, wenn sich eine Schaltfläche verschiebt. Drei auf die harte Tour gelernte Dinge
-stehen in `docs/gotchas.md`: Ein `accessibilityIdentifier` auf einem Container benennt
+stehen in [`docs/gotchas.md`](../gotchas.md#2026-09-20--an-accessibilityidentifier-on-a-chart-renames-everything-inside-it): Ein `accessibilityIdentifier` auf einem Container benennt
 alles darin um; ein `Button`, dessen Label `Color.clear` ist, ist nicht im
-Accessibility-Baum; die Auswahl in Swift Charts reagiert auf einen Finger und nicht auf einen
+Accessibility-Baum; die Auswahl in [Swift Charts](https://developer.apple.com/documentation/charts) reagiert auf einen Finger und nicht auf einen
 synthetischen Tipp, daher liegen echte Schaltflächen über den Markierungen.
 
 ### Der Selbsttest
@@ -275,9 +275,10 @@ xcrun simctl spawn <udid> log show --last 2m --predicate 'subsystem == "red.mabu
 
 ### Der Genauigkeits-Benchmark
 
-`ExtractionAccuracyTests` liest synthetische Blätter mit bekanntem Inhalt und schreibt
-die Genauigkeit auf Feldebene nach `docs/klarbefund/accuracy-benchmark.json`; die Seite
-[Nachweise](evidence.md) zitiert sie, und [run-on-mac](run-on-mac.md)
+[`AccuracyBenchmarkTests`](../../clients/ios/Tests/SharedTests/AccuracyBenchmarkTests.swift) liest synthetische Blätter mit bekanntem Inhalt mit Vision und schreibt,
+wenn `KLARBEFUND_BENCHMARK_OUT` gesetzt ist, die Genauigkeit auf Feldebene als JSON; die veröffentlichte Fassung ist
+[`docs/klarbefund/accuracy-benchmark.json`](accuracy-benchmark.json), und [`ExtractionAccuracyTests`](../../clients/ios/Tests/SharedTests/ExtractionAccuracyTests.swift)
+prüft das Maß selbst. Die Seite [Nachweise](evidence.md) zitiert sie, und [run-on-mac](run-on-mac.md)
 reproduziert jede Zahl. Ein realer Befund wird auf dieselbe Weise gemessen, auf dem
 eigenen Mac der Person und nie im Repository, mit `ScanReplay --truth`
 gegen eine von Hand geschriebene `truth.json` neben dem Export: Es gibt aus, welche Felder
@@ -311,62 +312,62 @@ swift run ScanReplay ~/Downloads/klarbefund-diagnostics-<date> --truth  # accura
 ```
 
 Die Wiedergabe gibt aus, was das Telefon codiert hat, was jetzt codiert wird, was neu codiert
-oder verloren ist, und jede Zeile mit ihrem Grund. Fügen Sie einen Parameter in `analytes.ts` hinzu,
+oder verloren ist, und jede Zeile mit ihrem Grund. Fügen Sie einen Parameter in [`analytes.ts`](../../services/epa-ingest/src/analytes.ts) hinzu,
 erzeugen Sie neu, spielen Sie erneut ab und sehen Sie zu, wie die Zeilen des echten Blatts von nicht zugeordnet zu
 codiert wandern, ohne es erneut zu scannen. Beide Werkzeuge lehnen einen Pfad innerhalb von
 `clients/ios/` ab.
 
 ## Die Verbindung zum EHDS-Hub
 
-Der Patientenbildschirm des Hubs startet einen OAuth 2.0 Device Grant für den öffentlichen
-Keycloak-Client `klarbefund-app` und zeigt ihn als QR-Code mit einem
+Der Patientenbildschirm des Hubs startet einen [OAuth 2.0](https://www.rfc-editor.org/rfc/rfc8628) Device Grant für den öffentlichen
+[Keycloak](https://www.keycloak.org/docs/latest/server_admin/#device-authorization-grant)-Client `klarbefund-app` und zeigt ihn als QR-Code mit einem
 `klarbefund://connect`-Link an; die App fragt Keycloak nach dem Token ab und
 registriert sich beim Hub
 ([ADR-049](../ADRs/ADR-049-klarbefund-connects-by-device-grant.md)).
 
-- `Shared/EHDSConnect.swift`: der Link, abgelehnt, sofern sein Hub und Aussteller nicht
+- [`Shared/EHDSConnect.swift`](../../clients/ios/Sources/Shared/EHDSConnect.swift): der Link, abgelehnt, sofern sein Hub und Aussteller nicht
   in `TrustedHub.production` (plus `.development` in einem Debug-Build) stehen, und der
-  Poller mit seinen vier Antworten. `EHDSConnectTests` deckt jede ab.
-- `EHDSConnection.swift`: Tokens und eine Geräte-ID im Schlüsselbund als
+  Poller mit seinen vier Antworten. [`EHDSConnectTests`](../../clients/ios/Tests/SharedTests/EHDSConnectTests.swift) deckt jede ab.
+- [`EHDSConnection.swift`](../../clients/ios/Sources/MeinBefund/EHDSConnection.swift): Tokens und eine Geräte-ID im Schlüsselbund als
   `ThisDeviceOnly`, Aktualisieren, Registrieren, Lesen der Akte, Trennen (das
   das Refresh-Token bei Keycloak widerruft) und die zwei Synchronisierungsschalter.
-- `ConnectView.swift`: das Sheet, der Datenscanner von VisionKit nur für QR-Codes,
+- [`ConnectView.swift`](../../clients/ios/Sources/MeinBefund/ConnectView.swift): das Sheet, der Datenscanner von [VisionKit](https://developer.apple.com/documentation/visionkit/datascannerviewcontroller) nur für QR-Codes,
   ein Einfügefeld und „Ist das Ihr Konto?“.
 - **EHDS-Konto anlegen** ([ADR-054](../ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md))
   ruft die zwei Routen des Hubs auf, die ohne Sitzung antworten; das Konto
-  wird nur für eine Anfrage angelegt, deren Apple-App-Attest-Attestierung sich verifizieren lässt,
+  wird nur für eine Anfrage angelegt, deren [Apple-App-Attest](https://developer.apple.com/documentation/devicecheck/validating-apps-that-connect-to-your-server)-Attestierung sich verifizieren lässt,
   weshalb der Simulator die Schaltfläche deaktiviert mit Begründung zeigt.
 - **Meine Befunde senden** und **Meine Geräte-Trends senden**
   ([ADR-057](../ADRs/ADR-057-klarbefund-sends-weekly-device-means.md)) senden
   an die eigene Akte der Person; die Akte selbst enthält Befundberichte, Impfungen
   und den Medikationsplan ([ADR-059](../ADRs/ADR-059-the-record-holds-reports-vaccinations-and-the-medication-plan.md)).
-- `ConnectUITests` und `AccountUITests` laufen gegen `DemoEHDSTransport` unter
-  `-MBDemoSeed`; `LiveConnectUITests` und `LiveAccountUITests` laufen gegen einen
+- [`ConnectUITests`](../../clients/ios/Tests/UITests/ConnectUITests.swift) und [`AccountUITests`](../../clients/ios/Tests/UITests/AccountUITests.swift) laufen gegen `DemoEHDSTransport` unter
+  `-MBDemoSeed`; [`LiveConnectUITests`](../../clients/ios/Tests/UITests/LiveConnectUITests.swift) und [`LiveAccountUITests`](../../clients/ios/Tests/UITests/LiveAccountUITests.swift) laufen gegen einen
   echten Hub, wenn sie einen frischen Link erhalten
-  (`docs/knowledge/runbooks/klarbefund-connect.md`).
+  ([`docs/knowledge/runbooks/klarbefund-connect.md`](../knowledge/runbooks/klarbefund-connect.md)).
 
 ## Exporte
 
-| Aktion                               | Schreiber                    | Inhalt                                                                                          |
-| ------------------------------------ | ---------------------------- | ----------------------------------------------------------------------------------------------- |
-| Für meine Praxis teilen              | `ReportExport`, `FhirBundle` | PDF-Zusammenfassung mit den angehängten Originalseiten sowie ein FHIR R4 Bundle                 |
-| Für die Forschung exportieren (OMOP) | `OmopExport`                 | OMOP CDM v5.4 `measurement.csv`, `person.csv`, `observation_period.csv`                         |
-| Alle meine Daten exportieren         | `DataExport`                 | jeder Befund, jede Seite, jeder Wert, jedes Profilfeld und jede Einwilligung, als JSON und PDFs |
-| Diagnosedaten exportieren            | `DiagnosticsBundle`          | der Datensatz, beide Vision-Durchläufe, die Seiten, das Sitzungsprotokoll                       |
+| Aktion                               | Schreiber                                                                                                                                    | Inhalt                                                                                                                                                                                                                                                                          |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Für meine Praxis teilen              | [`ReportExport`](../../clients/ios/Sources/MeinBefund/ReportExport.swift), [`FhirBundle`](../../clients/ios/Sources/Shared/FhirBundle.swift) | PDF-Zusammenfassung mit den angehängten Originalseiten sowie ein FHIR R4 Bundle                                                                                                                                                                                                 |
+| Für die Forschung exportieren (OMOP) | [`OmopExport`](../../clients/ios/Sources/Shared/OmopExport.swift)                                                                            | OMOP CDM v5.4 [`measurement.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#measurement), [`person.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#person), [`observation_period.csv`](https://ohdsi.github.io/CommonDataModel/cdm54.html#observation_period) |
+| Alle meine Daten exportieren         | [`DataExport`](../../clients/ios/Sources/MeinBefund/DataExport.swift)                                                                        | jeder Befund, jede Seite, jeder Wert, jedes Profilfeld und jede Einwilligung, als JSON und PDFs                                                                                                                                                                                 |
+| Diagnosedaten exportieren            | [`DiagnosticsBundle`](../../clients/ios/Sources/Shared/DiagnosticsBundle.swift)                                                              | der Datensatz, beide Vision-Durchläufe, die Seiten, das Sitzungsprotokoll                                                                                                                                                                                                       |
 
 Die OMOP-Tabellen tragen durchgängig `measurement_concept_id = 0`, mit Absicht:
-LOINC auf ein OMOP-Konzept abzubilden, erfordert das Athena-Vokabular, das nicht auf
+LOINC auf ein OMOP-Konzept abzubilden, erfordert das [Athena](https://athena.ohdsi.org/)-Vokabular, das nicht auf
 einem Telefon liegt, und eine erfundene ID würde einen falschen Bezeichner an einen echten
-Messwert hängen. Der gedruckte Bereich wird wörtlich in `RawLabValue.referenceText` aufbewahrt
-und reist als `referenceRange.text`; ein Bereich ohne Zahl darin überlebt
-nur dort, und rng-2 von FHIR erlaubt das.
+Messwert hängen. Der gedruckte Bereich wird wörtlich in [`RawLabValue.referenceText`](../../clients/ios/Sources/Shared/Provenance.swift#L67) aufbewahrt
+und reist als [`referenceRange.text`](https://hl7.org/fhir/R4/observation-definitions.html#Observation.referenceRange.text); ein Bereich ohne Zahl darin überlebt
+nur dort, und [obs-3](https://hl7.org/fhir/R4/observation.html#invs) von FHIR erlaubt das: Ein Referenzbereich braucht mindestens einen unteren Wert, einen oberen Wert oder einen Text.
 
 ## Sprachen
 
 Englisch ist die Basis, Deutsch die Übersetzung, entsprechend der Sprache des Telefons.
-`Scripts/check-localization.sh` schlägt fehl, wenn ein für Nutzende sichtbarer String kein
+[`Scripts/check-localization.sh`](../../clients/ios/Scripts/check-localization.sh) schlägt fehl, wenn ein für Nutzende sichtbarer String kein
 Deutsch hat oder wenn ein deutscher Satz in der englischen Basis stehen geblieben ist; es verwendet
-`xcodebuild -exportLocalizations`, denselben Extraktor, den der Editor von Xcode verwendet, und
+[`xcodebuild -exportLocalizations`](https://developer.apple.com/documentation/xcode/localization), denselben Extraktor, den der Editor von Xcode verwendet, und
 sieht so SwiftUI-`Text`-Literale und `INFOPLIST_KEY_*`-Werte, die kein grep über
 die Quellen finden würde. Die Kamera-Berechtigungsabfrage wurde einmal auf Deutsch an
 jedes englische Telefon ausgeliefert, und deshalb gibt es das Skript.
@@ -377,11 +378,11 @@ jedes englische Telefon ausgeliefert, und deshalb gibt es das Skript.
 Scripts/codeql-swift.sh                        # CodeQL on the app and Shared, about 15 minutes
 ```
 
-CodeQL braucht einen echten Build, um Swift zu sehen, daher läuft es auf GitHub nur, wenn
-sich `clients/ios/` ändert (`.github/workflows/codeql-swift.yml`), auf einem macOS-Runner.
+[CodeQL](https://docs.github.com/en/code-security/codeql-cli) braucht einen echten Build, um Swift zu sehen, daher läuft es auf GitHub nur, wenn
+sich `clients/ios/` ändert ([`.github/workflows/codeql-swift.yml`](../../.github/workflows/codeql-swift.yml)), auf einem macOS-Runner.
 Der Pre-Push-Hook `codeql-swift` führt dieselbe Suite aus, wenn ein Push
 die Swift-Quellen ändert; er endet mit 1 bei jedem Befund, der nicht mit seiner
-Begründung in `Scripts/codeql-accepted.txt` aufgeführt ist. Swift braucht einen macOS-Runner, der
+Begründung in [`Scripts/codeql-accepted.txt`](../../clients/ios/Scripts/codeql-accepted.txt) aufgeführt ist. Swift braucht einen macOS-Runner, der
 weniger Parallelität bietet als Linux, daher ist der iOS-Job per Pfad auf
 `clients/ios/**` gefiltert und blockiert nie die Web- oder Dienst-Suiten; umgekehrt schließen die
 Workflows für `ui/**` und `services/**` `clients/ios/**` aus.
@@ -396,9 +397,9 @@ und in der [Selbstbewertung](self-assessment.md).
 1. **Keine Gesundheitsdaten in `clients/ios/`, niemals.** Keine Laborbefunde, keine Scans, keine
    exportierten HealthKit-Archive, keine Screenshots mit echten Werten, nicht
    einmal vorübergehend, nicht einmal per gitignore ausgeschlossen. Testfixtures sind synthetisch, so wie
-   es `services/epa-ingest/__tests__/fixtures/` bereits ist. Die Werkzeuge lehnen aus demselben Grund
+   es [`services/epa-ingest/__tests__/fixtures/`](../../services/epa-ingest/__tests__/fixtures/) bereits ist. Die Werkzeuge lehnen aus demselben Grund
    einen Pfad innerhalb des Repositorys ab.
-2. **Keine reale Organisation in Demoinhalten.** `CLAUDE.md` verbietet das außerhalb
+2. **Keine reale Organisation in Demoinhalten.** [`CLAUDE.md`](../../CLAUDE.md) verbietet das außerhalb
    des Flags `NEXT_PUBLIC_DEMO_TK`. Die Studie, für die diese App gebaut ist, ist real;
    das Demozentrum, das Labor und die Praxis im Entwicklungsdatensatz sind
    fiktiv.
