@@ -44,9 +44,20 @@ export default function KlarbefundDocsPage() {
         </h1>
         <DocsLastUpdated page="/docs/klarbefund" />
         <p className="text-(--text-secondary) text-lg">
-          <T area="docsCommon">
+          <T
+            area="docsCommon"
+            tags={{
+              loinc: (
+                <ExternalA href="https://www.nlm.nih.gov/research/umls/sourcereleasedocs/current/LNC/index.html" />
+              ),
+              fhir: <ExternalA href="https://hl7.org/fhir/R4/" />,
+              omop: (
+                <ExternalA href="https://ohdsi.github.io/CommonDataModel/cdm54.html" />
+              ),
+            }}
+          >
             {
-              "Klarbefund is the iPhone app of this project. It scans a paper lab report, reads the values on the device, codes them with LOINC, keeps them encrypted on the phone and exports them as FHIR and OMOP, or sends them to the person's own record on the hub when they say so. Every screenshot shows invented data from the app's own demo dataset."
+              "Klarbefund is the iPhone app of this project. It scans a paper lab report, reads the values on the device, codes them with <loinc>LOINC</loinc>, keeps them encrypted on the phone and exports them as <fhir>FHIR</fhir> and <omop>OMOP</omop>, or sends them to the person's own record on the hub when they say so. Every screenshot shows invented data from the app's own demo dataset."
             }
           </T>
         </p>
@@ -59,9 +70,17 @@ export default function KlarbefundDocsPage() {
           <T area="docsCommon">{"Reports about the app"}</T>
         </h2>
         <p className="text-sm text-(--text-secondary) mb-3">
-          <T area="docsCommon">
+          <T
+            area="docsCommon"
+            tags={{
+              tr: <ExternalA href="https://www.bsi.bund.de/dok/TR-03161" />,
+              mdr: (
+                <ExternalA href="https://eur-lex.europa.eu/eli/reg/2017/745/oj/eng" />
+              ),
+            }}
+          >
             {
-              "Accuracy, data protection, the BSI TR-03161 objectives and the medical-device question are assessed in the security section:"
+              "Accuracy, data protection, the <tr>BSI TR-03161</tr> objectives and the <mdr>medical-device question</mdr> are assessed in the security section:"
             }
           </T>
         </p>

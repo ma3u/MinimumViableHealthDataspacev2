@@ -86,6 +86,46 @@ describe("DocsPage (Hub)", () => {
       "/docs/architecture",
     );
   });
+
+  it("links a source a card cites without putting a link inside the card's link", () => {
+    render(<DocsPage />);
+    const art105 = screen.getByRole("link", { name: "EHDS dates" });
+    expect(art105).toHaveAttribute(
+      "href",
+      "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_105",
+    );
+    expect(art105.parentElement?.closest("a")).toBeNull();
+    expect(screen.getByRole("link", { name: "ArchiMate 3.2" })).toHaveAttribute(
+      "href",
+      "https://pubs.opengroup.org/architecture/archimate32-doc/",
+    );
+  });
+
+  it("calls the hub a demonstrator on EDC 1.0, with CFM only in the edc018 profile (ADR-078)", () => {
+    render(<DocsPage />);
+    expect(screen.queryByText(/EHDS-compliant/)).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/A demonstrator aligned with the/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Eclipse EDC 1.0" }),
+    ).toHaveAttribute(
+      "href",
+      "https://github.com/eclipse-edc/Connector/releases/tag/v1.0.0-RC5",
+    );
+    expect(screen.getByRole("link", { name: "ADR-078" })).toHaveAttribute(
+      "href",
+      expect.stringContaining(
+        "docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md",
+      ),
+    );
+    expect(
+      screen.getByRole("link", { name: "edc018 profile" }),
+    ).toHaveAttribute(
+      "href",
+      expect.stringMatching(/docker-compose\.jad\.yml#L\d+-L\d+$/),
+    );
+  });
 });
 
 describe("DeveloperPage", () => {
