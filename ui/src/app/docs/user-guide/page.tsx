@@ -1664,12 +1664,12 @@ export default function UserGuidePage() {
           >
             <p className="text-(--text-secondary) text-sm mb-2">
               {t(
-                "Initiate and track DSP contract negotiations with data holders. View negotiation state (REQUESTED, AGREED, VERIFIED, FINALIZED), ODRL policy terms, and counter-offer history. Contract negotiation ensures that data access terms are mutually agreed before any transfer occurs, as required by EHDS Art. 34.",
+                "Ask a data holder for a contract before any data moves. Requesting as is the participant you act for. Step 1 lists the providers that offer to it, and Discover Offers fetches their DSP catalog. The offer you select shows its ODRL terms in plain words (what it allows, for how long, on which conditions, what it forbids and what you must do) and the data permits that bind the use as well; once you agree to them on behalf of your participant, Step 2 sends a DSP ContractRequest for that offer. The provider's connector checks the request against its offer and answers on its own: nobody at the provider has to sign in. The page follows the negotiation from REQUESTED to FINALIZED and then offers Continue to transfer; a refused request ends TERMINATED with its reason. The history lists every negotiation of your participant, with a link to the transfer for each agreed one.",
               )}
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
-                "Example: PharmaCo Research AG initiates a contract negotiation with AlphaKlinik Berlin for the diabetes cohort. The negotiation progresses to FINALIZED with an EHDS Art. 33(c) research use policy.",
+                "Example: PharmaCo Research AG asks AlphaKlinik Berlin for Fhir Patient Search. A few seconds later the negotiation is FINALIZED, and Continue to transfer opens the agreed contract on the Data Transfer page.",
               )}
             </p>
           </FeatureCard>

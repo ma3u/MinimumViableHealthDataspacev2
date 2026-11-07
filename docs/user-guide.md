@@ -112,7 +112,7 @@ describes every page below and shows a screenshot of each on mouse-over.
 | Secondary Use Information | /information        | What a person should know about secondary use (Art. 58)         | No            |
 | Share Data                | /data/share         | Publish datasets with ODRL policies (Art. 51, 60)               | Yes           |
 | Discover                  | /data/discover      | Federated catalog search                                        | Yes           |
-| Negotiate                 | /negotiate          | DSP contract negotiation lifecycle                              | Yes           |
+| Negotiate                 | /negotiate          | Ask a provider for a contract, follow it to FINALIZED           | Yes           |
 | Tasks                     | /tasks              | Transfer task queue                                             | Yes           |
 | Transfer                  | /data/transfer      | Start a transfer, open the data, import it into an SPE          | Yes           |
 | Admin Dashboard           | /admin              | Operator overview                                               | Yes           |
