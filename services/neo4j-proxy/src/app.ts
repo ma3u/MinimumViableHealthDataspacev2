@@ -5,6 +5,7 @@ import express, {
 } from "express";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { requestLogging } from "./logger.js";
+import { isRedispatched } from "./redispatch.js";
 
 // ---------------------------------------------------------------------------
 // Express app
@@ -74,11 +75,15 @@ function budget(perUser: string, perParticipant: string, fallback: number) {
     rateLimitKey(req).startsWith("u:") ? user : participant;
 }
 
+/** A pull's second pass through the app was counted by its first (#881). */
+const countedAlready = (_req: Request, res: Response) => isRedispatched(res);
+
 /** General limit: 100 requests per minute per user, 1,000 per participant */
-const generalLimiter = rateLimit({
+export const generalLimiter = rateLimit({
   windowMs: RATE_LIMIT_WINDOW_MS,
   max: budget("RATE_LIMIT_MAX", "RATE_LIMIT_PARTICIPANT_MAX", 100),
   keyGenerator: rateLimitKey,
+  skip: countedAlready,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many requests — please retry after 60 seconds." },
@@ -89,6 +94,7 @@ export const heavyLimiter = rateLimit({
   windowMs: RATE_LIMIT_WINDOW_MS,
   max: budget("RATE_LIMIT_HEAVY_MAX", "RATE_LIMIT_PARTICIPANT_HEAVY_MAX", 20),
   keyGenerator: rateLimitKey,
+  skip: countedAlready,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
@@ -110,14 +116,23 @@ export const auditLimiter = rateLimit({
   message: { error: "Audit rate limit exceeded." },
 });
 
+/** Pull transfers on EDC 1.0 (routes/dataspace.ts). */
+export const PULL_PATH = /^\/dataspace\/data(\/.*)?$/;
+
+// The pull route applies the general limit itself, first in its chain, so that
+// it visibly guards the token check; it is not counted here as well.
 app.use((req: Request, res: Response, next: NextFunction) =>
-  req.path === "/audit/dsp" ? next() : generalLimiter(req, res, next),
+  req.path === "/audit/dsp" || PULL_PATH.test(req.path)
+    ? next()
+    : generalLimiter(req, res, next),
 );
 
 // The audit recorder reports how much left the proxy (Art. 73(1)(e) logs say
 // what was accessed and how much). res.json is wrapped once here so every
-// handler's payload is measured without touching the handlers.
+// handler's payload is measured without touching the handlers. A pull's second
+// pass finds it wrapped already.
 app.use((_req: Request, res: Response, next: NextFunction) => {
+  if (isRedispatched(res)) return next();
   const original = res.json.bind(res);
   res.json = ((body: unknown) => {
     try {

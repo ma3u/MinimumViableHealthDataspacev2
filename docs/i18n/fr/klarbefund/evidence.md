@@ -1,8 +1,8 @@
 ---
 source: docs/klarbefund/evidence.md
-sourceHash: fc5bb296ce79d86a900f5cca02fcf97d746c0622fb87b553939e7d62d0325723
+sourceHash: 7c2b7e94b548f61b7ebe4ed9448a049016bd56c3d61e55467c5ccbc8a16167af
 language: fr
-summary: "Le banc d’essai de précision, le contrôle de parité du dictionnaire, le journal d’exécution et ce qui manque encore."
+summary: Le banc d’essai de précision, le contrôle de parité du dictionnaire, le journal d’exécution et ce qui manque encore.
 ---
 
 # Klarbefund : preuves
@@ -11,10 +11,10 @@ Ce qu’un examinateur extérieur à ce projet peut vérifier au sujet de Klarbe
 de comptes rendus de laboratoire pour iPhone ([#186](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/186)),
 et ce qui manque encore. Rédigé pour la première question d’un assureur, d’un hôpital ou d’un
 auditeur : _l’extraction est-elle correcte, les données sont-elles en sécurité, et s’agit-il
-d’un dispositif médical ?_ La protection des données, la BSI TR-03161 et la réglementation sont
+d’un dispositif médical ?_ La protection des données, la [BSI TR-03161](https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/Publications/TechGuidelines/TR03161/TR-03161-1.pdf?__blob=publicationFile&v=2) et la réglementation sont
 évaluées dans [`self-assessment.md`](self-assessment.md) ; la manière d’exécuter tout cela
 sur un Mac est décrite dans [`run-on-mac.md`](run-on-mac.md). La description destinée aux personnes se trouve dans
-[`README.md`](README.md), le volet développeur dans
+[`user-guide.md`](user-guide.md), le volet développeur dans
 [`clients/ios/README.md`](../../clients/ios/README.md).
 
 Klarbefund est open source sous [licence Apache 2.0](../../LICENSE). Le
@@ -24,32 +24,32 @@ les obligations de protection des données et de sécurité qui en découlent.
 
 ## Statut
 
-- Lors de la soumission au HL7 AI Challenge 2026 (date limite 2026-06-30), Klarbefund
+- Lors de la soumission au [HL7 AI Challenge 2026](https://blog.hl7.org/how-the-2026-hl7-ai-challenge-is-helping-shape-the-future-of-responsible-ai-in-healthcare) (date limite 2026-06-30), Klarbefund
   était un prototype. Le prix ("Open Solution") a été attribué à la plateforme EEDS de
   ce dépôt.
 - Lors de la présentation des lauréats, l’application a été montrée en démonstration en direct.
 - Elle est dans TestFlight, approuvée par la revue bêta d’Apple pour les testeurs externes
   ([ADR-050](../ADRs/ADR-050-klarbefund-beta-by-public-testflight-link.md)).
-- Elle lit Apple Santé (HealthKit, en lecture seule) et se connecte au hub de démonstration,
+- Elle lit Apple Santé ([HealthKit](https://developer.apple.com/documentation/healthkit), en lecture seule) et se connecte au hub de démonstration,
   dont l’utilisation secondaire s’exécute dans l’environnement de traitement sécurisé du hub
-  ([ADR-054](../ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md)).
+  ([ADR-037](../ADRs/ADR-037-secure-processing-environment-confidential-computing.md), [ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md), [ADR-069](../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)).
 
 ## Ce qui est déjà prouvé
 
-| Affirmation                                                                 | Preuve                                                                                                                                                                                                                   |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Une numérisation dégradée perd des lignes, elle n’invente jamais de valeurs | `Tests/SharedTests/ScanningTests.swift` : feuilles synthétiques avec inclinaison, reflets, faible luminosité, flou et basse résolution, lues avec Vision ; toute valeur codée absente de la feuille fait échouer le test |
-| Règles numériques allemandes (virgule décimale, `1.240` = 1240, `0.300`)    | `Tests/SharedTests/LabLineParserTests.swift`                                                                                                                                                                             |
-| L’unité détermine le code LOINC ; l’urine n’est jamais du sérum             | `LabLineParserTests.swift`, `RealScanLessonsTests.swift` (mises en page de 19 numérisations réelles, toutes les valeurs inventées)                                                                                       |
-| Rien n’est écarté silencieusement                                           | Autotest (`-MBSelfTest`, 27 contrôles) : chaque ligne imprimée finit codée, non mise en correspondance ou non lue                                                                                                        |
-| Les valeurs OCR restent provisoires                                         | Modèle de provenance (`Sources/Shared/Provenance.swift`) : seule la couche texte du PDF propre à un laboratoire produit le statut FHIR `final`                                                                           |
-| Une numérisation réelle peut être rejouée sans le téléphone ni l’image      | `swift run ScanReplay`, `swift run LabFile` ; tous deux refusent les chemins situés dans ce dépôt                                                                                                                        |
-| Les exports sont standard                                                   | Bundle FHIR R4 avec LOINC et UCUM (`FhirBundleParityTests.swift`), OMOP CDM v5.4 (`OmopExportTests.swift`)                                                                                                               |
-| Les données restent sur l’appareil par défaut                               | OCR et analyse sur l’appareil, chiffrement par élément, aucune sauvegarde iCloud, consentements distincts, export et suppression ([README](README.md#privacy-and-safety))                                                |
+| Affirmation                                                                 | Preuve                                                                                                                                                                                                                                                                                                                                                           |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Une numérisation dégradée perd des lignes, elle n’invente jamais de valeurs | [`Tests/SharedTests/ScanningTests.swift`](../../clients/ios/Tests/SharedTests/ScanningTests.swift) : feuilles synthétiques avec inclinaison, reflets, faible luminosité, flou et basse résolution, lues avec Vision ; toute valeur codée absente de la feuille fait échouer le test                                                                              |
+| Règles numériques allemandes (virgule décimale, `1.240` = 1240, `0.300`)    | [`Tests/SharedTests/LabLineParserTests.swift`](../../clients/ios/Tests/SharedTests/LabLineParserTests.swift)                                                                                                                                                                                                                                                     |
+| L’unité détermine le code LOINC ; l’urine n’est jamais du sérum             | [`LabLineParserTests.swift`](../../clients/ios/Tests/SharedTests/LabLineParserTests.swift), [`RealScanLessonsTests.swift`](../../clients/ios/Tests/SharedTests/RealScanLessonsTests.swift) (mises en page de 19 numérisations réelles, toutes les valeurs inventées)                                                                                             |
+| Rien n’est écarté silencieusement                                           | Autotest ([`-MBSelfTest`](developer-guide.md#the-self-test), 27 contrôles) : chaque ligne imprimée finit codée, non mise en correspondance ou non lue                                                                                                                                                                                                            |
+| Les valeurs OCR restent provisoires                                         | Modèle de provenance ([`Sources/Shared/Provenance.swift`](../../clients/ios/Sources/Shared/Provenance.swift)) : seule la couche texte du PDF propre à un laboratoire produit le statut [FHIR `final`](https://hl7.org/fhir/R4/valueset-observation-status.html)                                                                                                  |
+| Une numérisation réelle peut être rejouée sans le téléphone ni l’image      | [`swift run ScanReplay`](../../clients/ios/Tools/ScanReplay), [`swift run LabFile`](../../clients/ios/Tools/LabFile) ; tous deux refusent les chemins situés dans ce dépôt                                                                                                                                                                                       |
+| Les exports sont standard                                                   | Bundle [FHIR R4](https://hl7.org/fhir/R4/bundle.html) avec LOINC et [UCUM](https://ucum.org/ucum) ([`FhirBundleParityTests.swift`](../../clients/ios/Tests/SharedTests/FhirBundleParityTests.swift)), [OMOP CDM v5.4](https://ohdsi.github.io/CommonDataModel/cdm54.html) ([`OmopExportTests.swift`](../../clients/ios/Tests/SharedTests/OmopExportTests.swift)) |
+| Les données restent sur l’appareil par défaut                               | OCR et analyse sur l’appareil, chiffrement par élément, aucune sauvegarde iCloud, consentements distincts, export et suppression ([`user-guide.md`](user-guide.md#privacy-and-safety))                                                                                                                                                                           |
 
 ## Mesurer l’exactitude
 
-`ExtractionAccuracy` (`clients/ios/Sources/Shared/ExtractionAccuracy.swift`)
+`ExtractionAccuracy` ([`clients/ios/Sources/Shared/ExtractionAccuracy.swift`](../../clients/ios/Sources/Shared/ExtractionAccuracy.swift))
 compare une extraction à une vérité vérifiée manuellement, champ par champ : la valeur avec
 son comparateur, l’unité, le code LOINC (ou le refus attendu), l’intervalle de référence
 imprimé et la date du laboratoire. Ses chiffres clés :
@@ -63,18 +63,18 @@ imprimé et la date du laboratoire. Ses chiffres clés :
 
 Deux façons de l’exécuter :
 
-1. **Benchmark synthétique, dans la CI.** `AccuracyBenchmarkTests` génère le
+1. **Benchmark synthétique, dans la CI.** [`AccuracyBenchmarkTests`](../../clients/ios/Tests/SharedTests/AccuracyBenchmarkTests.swift) génère le
    panel synthétique dans neuf conditions de numérisation, le lit avec Vision et vérifie
    l’absence d’erreur silencieuse dans chacune. En local : `cd clients/ios && swift test` ; si
    `KLARBEFUND_BENCHMARK_OUT=<file>` est défini, les décomptes y sont écrits au format JSON.
-   Un job `ios-unit-tests` pour `.github/workflows/test.yml` (en attente, YAML dans
+   Un job `ios-unit-tests` pour [`.github/workflows/test.yml`](../../.github/workflows/test.yml) (en attente, YAML dans
    [`run-on-mac.md`](run-on-mac.md#4-put-the-swift-suite-into-ci)) exécute
    toute la suite Swift sur `macos-26` et conserve ce JSON comme
    artefact `klarbefund-accuracy-benchmark` ; tant qu’il n’est pas intégré, la CI ne construit que la
    cible `Shared`. Aucune donnée réelle n’est en jeu, le JSON peut donc être publié
    tel quel.
 2. **Pilote sur des comptes rendus réels, jamais dans le dépôt.** Un participant exporte
-   des diagnostics depuis l’application (ADR-038), et un `truth.json` est rédigé à côté de chaque
+   des diagnostics depuis l’application ([ADR-038](../ADRs/ADR-038-scan-retained-diagnostics-export.md)), et un `truth.json` est rédigé à côté de chaque
    `diagnostics.json` à partir du document papier :
 
    ```json
@@ -124,7 +124,7 @@ d’échantillon du pilote est indiquée à côté de chaque chiffre.
 ## Procès-verbal d’exécution
 
 La liste de contrôle de [`run-on-mac.md`](run-on-mac.md) a été exécutée pour la dernière fois le 2026-10-15 au
-commit `1474295d` de cette branche, sous macOS 26.7.1 avec Xcode 26 (Swift 6.4).
+commit [`1474295d`](https://github.com/ma3u/MinimumViableHealthDataspacev2/commit/1474295d) de la branche `feat/186-klarbefund-accuracy-evidence`, sous macOS 26.7.1 avec Xcode 26 (Swift 6.4).
 Tout ce qui suit relève du benchmark synthétique ; aucun compte rendu réel n’a été utilisé, les
 décomptes sont donc publiés tels quels dans
 [`accuracy-benchmark.json`](accuracy-benchmark.json), le fichier écrit par l’exécution.
@@ -167,10 +167,10 @@ le faisait déjà.
 
 ## Ouvert
 
-| Sujet                                       | Ce qui manque                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Destination (MDR)                           | Une qualification écrite selon le MDCG 2019-11 Rev.1. Le cas limite est l’écran des tendances, qui colore les valeurs par rapport à des plages publiées (ADR-039) ; la position du projet est qu’une comparaison avec un nombre cité n’est pas un résultat d’examen. Un avis externe.                                                                                                                                                                                                                       |
-| Exploitant du service d’explication hébergé | Les explications s’exécutent sur l’appareil par défaut. La personne peut basculer vers le service hébergé (par défaut Azure OpenAI, zone de données de l’UE ; Anthropic sur adhésion, États-Unis) ou vers son propre compte Azure OpenAI ou Anthropic. Quiconque exploite le service hébergé traite des données de santé et doit documenter ce rôle (registre des activités de traitement, contrats de sous-traitance).                                                                                     |
-| Protection des données                      | Diagramme des flux de données et modèle d’analyse d’impact relative à la protection des données pour un exploitant.                                                                                                                                                                                                                                                                                                                                                                                         |
-| Sécurité                                    | Un modèle de menaces, un SBOM et un test de sécurité autoréalisé existent depuis le 2026-10-15 (`docs/security/threat-model-klarbefund.md`, `docs/sbom/`, `docs/security/security-test-report-2026-10-15.md`). L’application se verrouille avec Face ID ou le code d’accès depuis le 2026-10-15 (ADR-060). Ouvert : un test d’intrusion indépendant et la liste des écarts au niveau des exigences par rapport à la BSI TR-03161 partie 1. CodeQL s’exécute à chaque modification iOS (`codeql-swift.yml`). |
-| Exactitude du pilote                        | Fichiers de vérité et décomptes agrégés issus de comptes rendus réels, comme ci-dessus.                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Sujet                                       | Ce qui manque                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Destination (MDR)                           | Une qualification écrite selon le [MDCG 2019-11 Rev.1](https://health.ec.europa.eu/document/download/b45335c5-1679-4c71-a91c-fc7a4d37f12b_en). Le cas limite est l’écran des tendances, qui colore les valeurs par rapport à des plages publiées ([ADR-039](../ADRs/ADR-039-published-reference-ranges.md)) ; la position du projet est qu’une comparaison avec un nombre cité n’est pas un résultat d’examen. Un avis externe.                                                                                                                                                                                                                                                                                                                                       |
+| Exploitant du service d’explication hébergé | Les explications s’exécutent sur l’appareil par défaut. La personne peut basculer vers le service hébergé (par défaut [Azure OpenAI](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/how-to/deployment-types#data-zone-standard), zone de données de l’UE ; Anthropic sur adhésion, États-Unis) ou vers son propre compte Azure OpenAI ou Anthropic. Quiconque exploite le service hébergé traite des données de santé et doit documenter ce rôle (registre des activités de traitement, contrats de sous-traitance).                                                                                                                                                                                                                                       |
+| Protection des données                      | Diagramme des flux de données et modèle d’[analyse d’impact relative à la protection des données](https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_35) pour un exploitant.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Sécurité                                    | Un modèle de menaces, un SBOM et un test de sécurité autoréalisé existent depuis le 2026-10-15 ([`docs/security/threat-model-klarbefund.md`](../security/threat-model-klarbefund.md), [`docs/sbom/`](../sbom/README.md), [`docs/security/security-test-report-2026-10-15.md`](../security/security-test-report-2026-10-15.md)). L’application se verrouille avec Face ID ou le code d’accès depuis le 2026-10-15 ([ADR-060](../ADRs/ADR-060-the-app-locks-with-face-id-and-answers-pinning-and-jailbreak-detection.md)). Ouvert : un test d’intrusion indépendant et la liste des écarts au niveau des exigences par rapport à la BSI TR-03161 partie 1. CodeQL s’exécute à chaque modification iOS ([`codeql-swift.yml`](../../.github/workflows/codeql-swift.yml)). |
+| Exactitude du pilote                        | Fichiers de vérité et décomptes agrégés issus de comptes rendus réels, comme ci-dessus.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |

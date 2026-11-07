@@ -23,9 +23,12 @@ assert {
 }
 
 tests {
-  // The seeded record P1 carries four of the five EHDS Art. 14 categories
-  // (ADR-059). A hub whose seed has not run answers Observations only, which
-  // is a finding for the operator, not a pass.
+  // Art. 14(1) of Regulation (EU) 2025/327 lists six priority categories,
+  // (a) to (f): https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#014.001
+  // The seeded record P1 carries the four resource types below (ADR-059):
+  // test results (e), imaging reports (d), a vaccination record and a
+  // medication plan. A hub whose seed has not run answers Observations only,
+  // which is a finding for the operator, not a pass.
   const types = new Set(res.body.entry.map((e) => e.resource.resourceType));
   test("laboratory results (Observation)", () => expect(types.has("Observation")).to.equal(true));
   test("medical reports (DiagnosticReport)", () => expect(types.has("DiagnosticReport")).to.equal(true));

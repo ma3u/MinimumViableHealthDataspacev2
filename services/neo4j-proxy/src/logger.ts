@@ -22,6 +22,7 @@ import {
 } from "@opentelemetry/api";
 import type { NextFunction, Request, Response } from "express";
 import pino, { type DestinationStream, type Logger } from "pino";
+import { isRedispatched } from "./redispatch.js";
 
 const traceContext = new AsyncLocalStorage<{
   traceId: string;
@@ -187,10 +188,12 @@ export function currentLoadTest(): string | undefined {
  * line when it finishes. The line names the route pattern, never the URL, so
  * `/fhir/Patient/:id` does not put a patient id in the log. Health probes are
  * not logged at all: they are most of the requests and none of the signal.
+ * A pull handed on to its dataset's route is one line, written by its first
+ * pass, which already runs in the trace context.
  */
 export function requestLogging(log: Logger = logger) {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (req.path === "/health") return next();
+    if (req.path === "/health" || isRedispatched(res)) return next();
     // With tracing on (tracing.ts) the server span already continues the
     // caller's trace; without it, read traceparent here.
     const span = trace.getActiveSpan()?.spanContext();

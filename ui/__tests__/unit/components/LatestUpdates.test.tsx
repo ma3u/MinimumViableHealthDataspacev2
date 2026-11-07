@@ -47,6 +47,12 @@ describe("the latest updates", () => {
     expect(new Set(titles).size).toBe(titles.length);
   });
 
+  it("leads with the EDC 1.0 migration and its tracking issue", () => {
+    const [first] = LATEST_UPDATES;
+    expect(first.title).toContain("EDC 1.0");
+    expect(first.links.map((l) => l.label)).toContain("#881");
+  });
+
   it("links every entry to its pull request, issue or decision", () => {
     for (const u of LATEST_UPDATES) {
       expect(u.links.length, u.title).toBeGreaterThan(0);
@@ -62,7 +68,7 @@ describe("the latest updates", () => {
       screen.getByRole("heading", { name: "Latest updates" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("The documentation in five languages"),
+      screen.getByText("The hub and its documentation in five languages"),
     ).toBeInTheDocument();
   });
 
@@ -73,7 +79,7 @@ describe("the latest updates", () => {
       screen.getByRole("heading", { name: "Neuigkeiten" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Die Dokumentation in fünf Sprachen"),
+      screen.getByText("Der Hub und seine Dokumentation in fünf Sprachen"),
     ).toBeInTheDocument();
     expect(screen.queryByText("Latest updates")).toBeNull();
     const first = document.querySelector('time[datetime="2026-11-02"]');
