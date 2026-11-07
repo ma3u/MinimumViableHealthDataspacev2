@@ -1,6 +1,9 @@
 # Simpl-Open and the European Health Data Space: gap analysis
 
 - **Status:** Final, as of 27 October 2026
+- **Updated:** 7 November 2026, with what Simpl-Open's published code shows
+  ([section 2](#what-the-published-code-shows)) and the use case that tests it
+  ([#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934))
 - **Discussion:** [#701, Simpl-Open vs. this EHDS hub](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/701)
 - **Decision:** [ADR-064](ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md)
 - **Plan:** [#725, closing the EHDS and Simpl-Open gaps](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/725), one issue per gap, prioritised
@@ -106,6 +109,34 @@ analysed ([Q&A](https://simpl-programme.ec.europa.eu/landing-page/from-vision-to
   x509 credentials as DID" ([Simpl-Open Q&A](https://simpl-programme.ec.europa.eu/landing-page/simpl-open-qa)).
 - **EHDS2:** the feasibility study lists Keycloak, EU Login and eIDAS login
   for the central platform ([Simpl-Live feasibility study](https://simpl-programme.ec.europa.eu/system/files/2025-06/Simpl-Live-Feasibility-Study-Report-%28Consolidated%29_Simpl_20250328_V1.2%28A%29.pdf)).
+
+### What the published code shows
+
+The Simpl-Open source is public on [code.europa.eu](https://code.europa.eu/simpl/simpl-open).
+Read on 7 November 2026, its build files answer two questions the programme's
+pages leave open:
+
+| Repository                                                                                                                                                                                | What it shows                                                                                                                                                                     |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`simpl-edc`](https://code.europa.eu/simpl/simpl-open/development/gaia-x-edc/simpl-edc), the connector, `main` and `develop`, release 1.0.26 of 10 August 2026                            | Eclipse EDC **0.10.1**, a release from late 2024 that predates DSP 2025-1                                                                                                         |
+| the same repository, branch `feature/SIMPL-24762_update_edc_to_0_16_0`                                                                                                                    | an upgrade to EDC 0.17.0, last commit 12 June 2026, not merged; no branch moves to EDC 1.0                                                                                        |
+| [`edc-connector-adapter-be`](https://code.europa.eu/simpl/simpl-open/integration/resource-sharing/resource-sharing-runtime/connector/edc-connector-adapter-be), 1.20.1 of 4 November 2026 | the management backend in front of the connector; active, with ODRL policy mapping and Kafka streaming, on the same EDC                                                           |
+| [`issuer-service-be`](https://code.europa.eu/simpl/simpl-open/security/credential-management/vc-issuance-verification/issuer-service/issuer-service-be), updated 5 November 2026          | Simpl's own Java service that issues and verifies W3C credentials as JSON-LD with Ed25519 proofs. It is not EDC's IdentityHub or IssuerService and does not implement DCP's flows |
+
+No public Simpl-Open repository implements DCP. Two consequences:
+
+- **Simpl's move to DCP and to EDC 1.0 fit together.** EDC 1.0 ships DCP, the
+  IdentityHub and the IssuerService with the connector. SSI Tier 2 built on
+  EDC 0.10.1 and Simpl's own issuer would build DCP once now and again at the
+  upgrade. The catch is the data plane: EDC 1.0 removes the data plane
+  framework that Simpl's Kafka and object storage transfers extend.
+- **The hub's open question is the credential format, not the EDC version.**
+  ADR-064 assumes the IdentityHub can trust what a Governance Authority
+  issues. #710 proved that with a stand-in authority running EDC's own
+  IssuerService; whether the IdentityHub verifies a JSON-LD credential with an
+  Ed25519 proof from Simpl's issuer service is untested. That test, and the
+  DSP compatibility kit against `simpl-edc`, can run now on the published code
+  rather than waiting for Hamburg 4.1.
 
 ### Catalogue
 
@@ -347,8 +378,11 @@ Simpl source and a check in the hub that exercises it.
 
 Comments on the proposed requirements and questions for the programme:
 
-1. Publish the EDC and DSP versions of the Simpl-Open connector, with
-   conformance evidence from the DSP technology compatibility kit.
+1. Publish the DSP version of the Simpl-Open connector, with conformance
+   evidence from the DSP technology compatibility kit. Its code builds on EDC
+   0.10.1 ([section 2](#what-the-published-code-shows)): move to EDC 1.0 in
+   the same step as SSI Tier 2, since DCP, the IdentityHub and the
+   IssuerService ship with it.
 2. Make HealthDCAT-AP a profile of the DCAT-AP model adopted in Innsbruck, so a
    health data space can meet 2026/2098 without a second catalogue.
 3. Let BP02E express reductions by applicant category and a split between the
@@ -370,8 +404,10 @@ Comments on the proposed requirements and questions for the programme:
 Each gap is an issue in the plan [#725](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/725),
 with its priority (P1 to P3) and the evidence that closes it.
 
-1. When Hamburg 4.1 code is public: trust a Governance Authority as issuer in
-   the IdentityHub, and run the DSP TCK against a Simpl agent.
+1. Now, against the published code: verify a credential from Simpl's issuer
+   service in the IdentityHub and complete a negotiation on it, and run the
+   DSP TCK against `simpl-edc`. Report the gaps to the programme
+   ([#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934)).
 2. Map HealthDCAT-AP Release 8 onto Simpl's DCAT-AP and XFSC resource
    descriptions.
 3. Express the `fees.ts` schedule as a BP02E monetisation model and record what
@@ -409,8 +445,9 @@ Q&A](https://simpl-programme.ec.europa.eu/landing-page/simpl-open-qa), its
 and its [requirement pages](https://simpl-programme.ec.europa.eu/page/requirements-changelog).
 The architecture specification on code.europa.eu could not be read directly; a
 [rendered copy (D1.3.4, version 0.1, December 2025)](https://ssg-website-ad5a79.pages.code.europa.eu/resources/architecture)
-was used. Not found anywhere: the EDC and DSP versions of the Simpl connector,
-a named policy language, support for FHIR, OMOP or HealthDCAT-AP, and the
+was used. The EDC version and the issuer service come from the build files on
+code.europa.eu, read on 7 November 2026. Not found anywhere: the DSP version
+of the Simpl connector, an implementation of DCP, a named policy language, support for FHIR, OMOP or HealthDCAT-AP, and the
 outcome of the eDelivery proof of concept. Requirements marked "proposed" may
 change after the Community Preview. Corrections go to
 [#701](https://github.com/ma3u/MinimumViableHealthDataspacev2/discussions/701).

@@ -606,7 +606,7 @@ export default function ArchitecturePage() {
                 <li>
                   <T area="docsArchitecture" tags={{ b: <strong /> }}>
                     {
-                      "<b>Trust from an authority:</b> a Simpl data space's Governance Authority is a trusted issuer in the hub's IdentityHub, over DCP v1.0, already checked on compose"
+                      "<b>Trust from an authority:</b> a Simpl data space's Governance Authority can be a trusted issuer in the hub's IdentityHub, over DCP v1.0; checked on compose with a stand-in authority"
                     }
                   </T>
                 </li>
@@ -682,6 +682,20 @@ export default function ArchitecturePage() {
               <li>
                 <T area="docsArchitecture" tags={{ b: <strong /> }}>
                   {
+                    "<b>Now:</b> a credential from Simpl's own issuer service in the hub's IdentityHub: Simpl signs JSON-LD credentials with Ed25519, and the test is whether the hub verifies one and a negotiation completes on it"
+                  }
+                </T>
+              </li>
+              <li>
+                <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  {
+                    "<b>Now:</b> the DSP compatibility kit against Simpl's published connector, which builds on EDC 0.10.1 and predates DSP 2025-1; the gaps go to the Simpl programme"
+                  }
+                </T>
+              </li>
+              <li>
+                <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  {
                     "<b>Now:</b> a second data space on compose, whose Governance Authority admits a fictional insurer, AlphaKasse DE"
                   }
                 </T>
@@ -696,14 +710,7 @@ export default function ArchitecturePage() {
               <li>
                 <T area="docsArchitecture" tags={{ b: <strong /> }}>
                   {
-                    "<b>With Hamburg 4.1:</b> the DSP compatibility kit against Simpl's own connector, in both directions"
-                  }
-                </T>
-              </li>
-              <li>
-                <T area="docsArchitecture" tags={{ b: <strong /> }}>
-                  {
-                    "<b>Then:</b> a negotiation end to end on a credential from a real Governance Authority"
+                    "<b>With Simpl's move to DCP:</b> EDC 1.0 in the same step, since DCP, the IdentityHub and the IssuerService ship with it"
                   }
                 </T>
               </li>
