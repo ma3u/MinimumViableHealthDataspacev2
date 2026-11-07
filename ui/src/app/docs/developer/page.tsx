@@ -20,18 +20,100 @@ const implementedOperations = facts.apiRoutes.reduce(
   (n, r) => n + r.methods.length,
   0,
 );
-const COMPOSE_SERVICES = Object.values(facts.composeServices).flat().length;
-const PRE_COMMIT_HOOKS = facts.preCommitHooks.length;
+const ALL_COMPOSE_SERVICES = Object.values(facts.composeServices).flat();
+const COMPOSE_SERVICES = ALL_COMPOSE_SERVICES.length;
+/** The services a plain `docker compose up` starts: those with no profile. */
+const DEFAULT_SERVICES = ALL_COMPOSE_SERVICES.filter(
+  (s) => s.profiles.length === 0,
+);
+/** Host ports of the default services, as `docker compose up` binds them. */
+const DEFAULT_PORTS = [
+  ...new Set(
+    DEFAULT_SERVICES.flatMap((s) =>
+      s.ports.map((p) => Number(p.split(":")[0])),
+    ),
+  ),
+].sort((a, b) => a - b);
 const hooksAt = (stage: string) =>
   facts.preCommitHooks.filter((h) => h.stage === stage).length;
+const PRE_COMMIT_HOOKS = hooksAt("pre-commit");
 
 const PAGES_BASE = "/MinimumViableHealthDataspacev2";
 // A placeholder in the text, so no dictionary holds the host name (FR and
 // ES write EEDS for the Regulation, and the host is not the Regulation).
 const LIVE_HOST = "ehds.mabu.red";
 const GITHUB_REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
+const REPO_BLOB = `${GITHUB_REPO}/blob/main`;
 const basePath =
   process.env.NEXT_PUBLIC_STATIC_EXPORT === "true" ? PAGES_BASE : "";
+
+// The sources the text names, as deep links: the article, the spec section,
+// the release tag, the file and line.
+const EHDS = "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng";
+const DSP =
+  "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/";
+const DCP =
+  "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/";
+const FHIR = "https://hl7.org/fhir/R4/";
+const OMOP = "https://ohdsi.github.io/CommonDataModel/cdm54.html";
+const HEALTHDCAT =
+  "https://healthdataeu.pages.code.europa.eu/healthdcat-ap/releases/release-8/";
+const ODRL = "https://www.w3.org/TR/odrl-model/#policy";
+const DID_WEB = "https://w3c-ccg.github.io/did-method-web/";
+const ARCHIMATE = "https://pubs.opengroup.org/architecture/archimate32-doc/";
+const WCAG = "https://www.w3.org/TR/WCAG22/";
+const OWASP = "https://owasp.org/Top10/2021/";
+const BSI_C5 =
+  "https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf";
+const EDC_RELEASE =
+  "https://github.com/eclipse-edc/Connector/releases/tag/v1.0.0-RC5";
+const IDENTITYHUB_RELEASE =
+  "https://github.com/eclipse-edc/IdentityHub/releases/tag/v1.0.0-RC5";
+const JAD_COMMIT =
+  "https://github.com/Metaform/jad/tree/4a7e5bd096c58814748e956cc9329586ad309698";
+const JAD_README =
+  "https://github.com/Metaform/jad/blob/4a7e5bd096c58814748e956cc9329586ad309698/README.md#L3";
+const CFM = "https://github.com/Metaform/connector-fabric-manager";
+const SYNTHEA =
+  "https://github.com/synthetichealth/synthea/releases/tag/v3.3.0";
+const PLAYWRIGHT = `https://github.com/microsoft/playwright/releases/tag/v${facts.toolVersions.playwright}`;
+
+/** An external link inside a translated sentence; <T> fills in the words. */
+const ext = (href: string) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-(--accent) underline hover:opacity-80"
+  />
+);
+/** The same, for a bold term that is itself the source's name. */
+const extBold = (href: string) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="font-semibold text-(--accent) underline hover:opacity-80"
+  />
+);
+/** A file of this repository on GitHub, `path` with its `#L` anchor. */
+const src = (path: string) => ext(`${REPO_BLOB}/${path}`);
+/** The same, shown as code: a file or command the text names. */
+const srcCode = (path: string) => (
+  <a
+    href={`${REPO_BLOB}/${path}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="font-mono text-[0.9em] text-(--accent) underline hover:opacity-80"
+  />
+);
+const issue = (n: number) => ext(`${GITHUB_REPO}/issues/${n}`);
+const adr = (file: string) => src(`docs/ADRs/${file}`);
+const ADR_001 = "ADR-001-postgresql-neo4j-split.md";
+const ADR_053 = "ADR-053-everything-stops-off-hours.md";
+const ADR_078 = "ADR-078-edc-1-on-container-apps-without-cfm.md";
+/** The tags of a row that runs only under the edc018 profile (#927). */
+const EDC018_TAGS = { c: <code />, i: issue(927) };
 /** An onboarding step that leads to where it is explained or done. */
 const STEP_LINK =
   "underline decoration-dotted underline-offset-2 hover:text-indigo-700 dark:hover:text-indigo-300";
@@ -102,6 +184,12 @@ export default function DeveloperGuidePage() {
   const qualityGatesLink = (
     <Link href="/docs/developer/quality-gates" className="underline" />
   );
+  const releasesLink = (
+    <Link
+      href="/docs/developer/sdlc#8-releases-and-versions"
+      className="underline"
+    />
+  );
   const referenceLink = (
     <Link
       href="/docs/developer/reference"
@@ -128,9 +216,11 @@ export default function DeveloperGuidePage() {
         <h1 className="text-3xl font-bold mb-2">{t("Developer Guide")}</h1>
         <DocsLastUpdated page="/docs/developer" />
         <p className="text-(--text-secondary) mb-6">
-          {t(
-            "Technical documentation for developing, testing, and deploying the Health Dataspace v2 platform, an EHDS regulation reference implementation built on Eclipse Dataspace Components.",
-          )}
+          <T area="docsDeveloper" tags={{ e: ext(EHDS), d: ext(EDC_RELEASE) }}>
+            {
+              "Technical documentation for developing, testing, and deploying the Health Dataspace v2 platform, an <e>EHDS regulation</e> reference implementation built on <d>Eclipse Dataspace Components</d>."
+            }
+          </T>
         </p>
 
         {/* Resources */}
@@ -289,14 +379,35 @@ export default function DeveloperGuidePage() {
                   {
                     href: "/admin/policies",
                     text: t("Review ODRL policies (HDAB role)"),
+                    spec: { name: "ODRL 2.2", href: ODRL },
                   },
-                ].map((step) => (
-                  <li key={step.href}>
-                    <Link href={step.href} className={STEP_LINK}>
-                      {step.text}
-                    </Link>
-                  </li>
-                ))}
+                ].map(
+                  (step: {
+                    href: string;
+                    text: string;
+                    spec?: { name: string; href: string };
+                  }) => (
+                    <li key={step.href}>
+                      <Link href={step.href} className={STEP_LINK}>
+                        {step.text}
+                      </Link>
+                      {step.spec && (
+                        <>
+                          {" ("}
+                          <a
+                            href={step.spec.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-(--accent) underline hover:opacity-80"
+                          >
+                            {step.spec.name}
+                          </a>
+                          {")"}
+                        </>
+                      )}
+                    </li>
+                  ),
+                )}
               </ul>
             </div>
             <div className="border border-(--border) rounded-lg p-4">
@@ -311,9 +422,12 @@ export default function DeveloperGuidePage() {
                       b: concept(
                         "/docs/developer/stack-and-environment#protocols",
                       ),
+                      s: ext(DSP),
                     }}
                   >
-                    {"<b>DSP:</b> Dataspace Protocol, sovereign data exchange"}
+                    {
+                      "<b>DSP:</b> <s>Dataspace Protocol 2025-1</s>, sovereign data exchange"
+                    }
                   </T>
                 </li>
                 <li>
@@ -323,30 +437,40 @@ export default function DeveloperGuidePage() {
                       b: concept(
                         "/docs/developer/stack-and-environment#protocols",
                       ),
+                      s: ext(DCP),
                     }}
                   >
-                    {"<b>DCP:</b> Decentralised Claims, DID + VC identity"}
+                    {
+                      "<b>DCP:</b> <s>Decentralised Claims Protocol v1.0</s>, DID + VC identity"
+                    }
                   </T>
                 </li>
                 <li>
                   <T
                     area="docsDeveloper"
-                    tags={{ b: concept("#graph-schema") }}
+                    tags={{ b: concept("#graph-schema"), s: ext(FHIR) }}
                   >
-                    {"<b>FHIR R4:</b> Clinical data standard (EHR)"}
+                    {"<b>FHIR R4:</b> <s>Clinical data standard</s> (EHR)"}
                   </T>
                 </li>
                 <li>
                   <T
                     area="docsDeveloper"
-                    tags={{ b: concept("#graph-schema") }}
+                    tags={{ b: concept("#graph-schema"), s: ext(OMOP) }}
                   >
-                    {"<b>OMOP CDM:</b> Analytics layer for research"}
+                    {
+                      "<b>OMOP CDM:</b> <s>Common Data Model 5.4</s>, the analytics layer for research"
+                    }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b: concept("/docs/ehds") }}>
-                    {"<b>EHDS:</b> EU regulation for health data sharing"}
+                  <T
+                    area="docsDeveloper"
+                    tags={{ b: concept("/docs/ehds"), s: ext(EHDS) }}
+                  >
+                    {
+                      "<b>EHDS:</b> <s>Regulation (EU) 2025/327</s> for health data sharing"
+                    }
                   </T>
                 </li>
               </ul>
@@ -394,45 +518,80 @@ export default function DeveloperGuidePage() {
               {
                 href: "/docs/developer/stack-and-environment",
                 title: t("The stack and the development environment"),
-                desc: t(
-                  "EDC-V, JAD, CFM, DSP, DCP and the hub's own services in one glossary; the local stacks, the seed phases, the ports and the iPhone app.",
+                // A card holds links to its sources, so only its title is
+                // the link to the page (a link cannot hold another).
+                desc: (
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      e: ext(EDC_RELEASE),
+                      j: ext(JAD_README),
+                      f: ext(CFM),
+                      p: ext(DSP),
+                      d: ext(DCP),
+                    }}
+                  >
+                    {
+                      "<e>EDC-V</e>, <j>JAD</j>, <f>CFM</f>, <p>DSP</p>, <d>DCP</d> and the hub's own services in one glossary; the local stacks, the seed phases, the ports and the iPhone app."
+                    }
+                  </T>
                 ),
               },
               {
                 href: "/docs/developer/secure-processing-environment",
                 title: t("The secure processing environment"),
-                desc: t(
-                  "Confidential containers with AMD SEV-SNP, the Trustee that releases a workspace's key only to the workload its permit names, and what a federated query goes through.",
+                desc: (
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      c: ext(
+                        "https://learn.microsoft.com/en-us/azure/container-instances/container-instances-confidential-overview",
+                      ),
+                      a: ext("https://www.amd.com/en/developer/sev.html"),
+                      k: ext(
+                        "https://github.com/confidential-containers/trustee",
+                      ),
+                    }}
+                  >
+                    {
+                      "<c>Confidential containers</c> with <a>AMD SEV-SNP</a>, the <k>Trustee</k> that releases a workspace's key only to the workload its permit names, and what a federated query goes through."
+                    }
+                  </T>
                 ),
               },
             ].map((card) => (
-              <Link
+              <div
                 key={card.href}
-                href={card.href}
-                className="border border-(--border) rounded-lg p-4 hover:border-indigo-500/50 transition-colors block"
+                className="border border-(--border) rounded-lg p-4 hover:border-indigo-500/50 transition-colors"
               >
                 <h3 className="font-semibold text-sm mb-1 text-indigo-700 dark:text-indigo-400">
-                  {card.title}
+                  <Link href={card.href} className="hover:underline">
+                    {card.title}
+                  </Link>
                 </h3>
                 <p className="text-(--text-secondary) text-xs">{card.desc}</p>
-              </Link>
+              </div>
             ))}
-            <a
-              href={`${GITHUB_REPO}/blob/main/.github/CONTRIBUTING.md`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border border-(--border) rounded-lg p-4 hover:border-indigo-500/50 transition-colors block"
-            >
-              <h3 className="font-semibold text-sm mb-1 text-indigo-700 dark:text-indigo-400 inline-flex items-center gap-1">
-                {t("Contributing")}
-                <ExternalLink size={12} />
+            <div className="border border-(--border) rounded-lg p-4 hover:border-indigo-500/50 transition-colors">
+              <h3 className="font-semibold text-sm mb-1 text-indigo-700 dark:text-indigo-400">
+                <a
+                  href={`${GITHUB_REPO}/blob/main/.github/CONTRIBUTING.md`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 hover:underline"
+                >
+                  {t("Contributing")}
+                  <ExternalLink size={12} />
+                </a>
               </h3>
               <p className="text-(--text-secondary) text-xs">
-                {t(
-                  "Fork, branch, pull request: the short guide for outside contributors, under the Apache License 2.0, with fictional organisations only.",
-                )}
+                <T area="docsDeveloper" tags={{ l: src("LICENSE") }}>
+                  {
+                    "Fork, branch, pull request: the short guide for outside contributors, under the <l>Apache License 2.0</l>, with fictional organisations only."
+                  }
+                </T>
               </p>
-            </a>
+            </div>
           </div>
         </section>
 
@@ -444,11 +603,17 @@ export default function DeveloperGuidePage() {
           <p className="text-(--text-secondary) text-sm mb-4">
             <T
               area="docsDeveloper"
-              tags={{ c: chip }}
-              vars={{ n: COMPOSE_SERVICES }}
+              tags={{
+                c: chip,
+                j: ext(JAD_README),
+                y: srcCode("docker-compose.yml"),
+                z: srcCode("docker-compose.jad.yml"),
+                i: issue(927),
+              }}
+              vars={{ n: COMPOSE_SERVICES, d: DEFAULT_SERVICES.length }}
             >
               {
-                "The full JAD (Java Application Deployment) stack runs {n} Docker Compose services orchestrated via <c>docker-compose.yml</c> + <c>docker-compose.jad.yml</c>. Services are grouped into five layers:"
+                "The full <j>JAD</j> (Just Another Demonstrator) stack defines {n} Docker Compose services in <y>docker-compose.yml</y> and <z>docker-compose.jad.yml</z>; {d} of them start by default. The others sit behind compose profiles, most of them under <c>edc018</c>: the EDC 0.18 services, which <i>#927</i> retires. Services are grouped into five layers:"
               }
             </T>
           </p>
@@ -457,10 +622,17 @@ export default function DeveloperGuidePage() {
             alt={t(
               "The JAD stack as an ArchiMate technology view: the edge, the application, the EDC-V and identity services and the infrastructure as bands, with the run-time dependencies between them",
             )}
-            caption={t(
-              "JAD stack: {n} compose services and their dependencies (ArchiMate 3.2, technology view)",
-              { n: COMPOSE_SERVICES },
-            )}
+            caption={
+              <T
+                area="docsDeveloper"
+                tags={{ a: ext(ARCHIMATE) }}
+                vars={{ n: COMPOSE_SERVICES }}
+              >
+                {
+                  "JAD stack: {n} compose services and their dependencies (<a>ArchiMate 3.2</a>, technology view)"
+                }
+              </T>
+            }
           />
 
           {/* Service table */}
@@ -486,120 +658,289 @@ export default function DeveloperGuidePage() {
                 </tr>
               </thead>
               <tbody className="text-(--text-secondary)">
-                {[
+                {(
                   [
-                    "Traefik",
-                    ":80 / :8090",
-                    "traefik.localhost",
-                    t("API gateway & reverse proxy"),
-                    "—",
-                  ],
-                  [
-                    "PostgreSQL 17",
-                    ":5432",
-                    "—",
-                    t("Runtime store ({n} databases)", {
-                      n: facts.postgresDbs.length,
-                    }),
-                    "—",
-                  ],
-                  [
-                    "Vault",
-                    ":8200",
-                    "vault.localhost",
-                    t(
-                      "Secrets, file storage; vault-unseal unseals it after a restart",
-                    ),
-                    "—",
-                  ],
-                  [
-                    "Keycloak",
-                    ":8080",
-                    "keycloak.localhost",
-                    t("OIDC SSO (realm: edcv, 7 users)"),
-                    "PostgreSQL",
-                  ],
-                  [
-                    "NATS",
-                    ":4222 / :8222",
-                    "—",
-                    t("Async event mesh (JetStream)"),
-                    "—",
-                  ],
-                  [
-                    "Control Plane",
-                    ":11003",
-                    "cp.localhost",
-                    t("DSP protocol + management API"),
-                    "PG, Vault, NATS, KC",
-                  ],
-                  [
-                    "Data Plane FHIR",
-                    ":11002",
-                    "dp-fhir.localhost",
-                    t("FHIR PUSH transfer type"),
-                    "PG, Vault, CP",
-                  ],
-                  [
-                    "Data Plane OMOP",
-                    ":11012",
-                    "dp-omop.localhost",
-                    t("OMOP PULL transfer type"),
-                    "PG, Vault, CP",
-                  ],
-                  [
-                    "Identity Hub",
-                    ":11005",
-                    "ih.localhost",
-                    t("DCP v1.0: DID + VC store"),
-                    "PG, Vault, KC",
-                  ],
-                  [
-                    "Issuer Service",
-                    ":10013",
-                    "issuer.localhost",
-                    t("VC issuance + DID:web"),
-                    "PG, Vault, KC",
-                  ],
-                  [
-                    "Tenant Manager",
-                    ":11006",
-                    "tm.localhost",
-                    t("CFM tenant lifecycle"),
-                    "PG, KC",
-                  ],
-                  [
-                    "Provision Manager",
-                    ":11007",
-                    "pm.localhost",
-                    t("CFM resource provisioning"),
-                    "PG, KC, CP",
-                  ],
-                  [
-                    "Neo4j 5",
-                    ":7474 / :7687",
-                    "—",
-                    t("Knowledge graph (APOC + n10s)"),
-                    "—",
-                  ],
-                  [
-                    "Neo4j Proxy",
-                    ":9090",
-                    "proxy.localhost",
-                    t("Express bridge: UI ↔ Neo4j"),
-                    "CP",
-                  ],
-                  [
-                    "Next.js UI",
-                    ":3000 / :3003",
-                    "—",
-                    t("Application frontend"),
-                    "Neo4j",
-                  ],
-                ].map(([service, port, traefik, purpose, deps]) => (
+                    {
+                      service: "Traefik",
+                      href: "https://github.com/traefik/traefik/releases/tag/v3.7.0",
+                      port: ":80 / :8090",
+                      traefik: "traefik.localhost",
+                      purpose: t("API gateway & reverse proxy"),
+                      deps: "—",
+                    },
+                    {
+                      service: "PostgreSQL 17",
+                      href: "https://www.postgresql.org/docs/17/release-17-7.html",
+                      port: ":5432",
+                      traefik: "—",
+                      purpose: (
+                        <T
+                          area="docsDeveloper"
+                          tags={{
+                            a: src("jad/init-postgres.sql"),
+                            e: src("jad/init-postgres-edc1.sql#L1-L8"),
+                          }}
+                          vars={{ n: facts.postgresDbs.length }}
+                        >
+                          {
+                            "Runtime store (<a>{n} databases</a>, and the EDC 1.0 ones of <e>init-postgres-edc1.sql</e>)"
+                          }
+                        </T>
+                      ),
+                      deps: "—",
+                    },
+                    {
+                      service: "Vault",
+                      href: "https://github.com/hashicorp/vault/releases/tag/v2.0.0",
+                      port: ":8200",
+                      traefik: "vault.localhost",
+                      purpose: (
+                        <T
+                          area="docsDeveloper"
+                          tags={{ a: src("docker-compose.jad.yml#L134-L155") }}
+                        >
+                          {
+                            "Secrets, file storage; <a>vault-unseal</a> unseals it after a restart"
+                          }
+                        </T>
+                      ),
+                      deps: "—",
+                    },
+                    {
+                      service: "Keycloak",
+                      href: "https://github.com/keycloak/keycloak/releases/tag/26.8.0",
+                      port: ":8080",
+                      traefik: "keycloak.localhost",
+                      purpose: (
+                        <T
+                          area="docsDeveloper"
+                          tags={{
+                            o: ext(
+                              "https://openid.net/specs/openid-connect-core-1_0.html",
+                            ),
+                            a: src("jad/keycloak-realm.json#L541-L670"),
+                          }}
+                        >
+                          {
+                            "<o>OIDC</o> SSO (realm: edcv, <a>8 users and 1 service account</a>)"
+                          }
+                        </T>
+                      ),
+                      deps: "PostgreSQL",
+                    },
+                    {
+                      service: "NATS",
+                      href: "https://github.com/nats-io/nats-server/releases/tag/v2.14.3",
+                      port: ":4222 / :8222",
+                      traefik: "—",
+                      purpose: (
+                        <T
+                          area="docsDeveloper"
+                          tags={{
+                            a: ext(
+                              "https://docs.nats.io/nats-concepts/jetstream",
+                            ),
+                          }}
+                        >
+                          {"Async event mesh (<a>JetStream</a>)"}
+                        </T>
+                      ),
+                      deps: "—",
+                    },
+                    {
+                      service: "Control Plane",
+                      href: EDC_RELEASE,
+                      port: ":11003",
+                      traefik: "cp.localhost",
+                      purpose: (
+                        <T area="docsDeveloper" tags={{ a: ext(DSP) }}>
+                          {"<a>DSP</a> protocol + management API"}
+                        </T>
+                      ),
+                      deps: "PG, Vault, NATS, KC",
+                    },
+                    {
+                      service: "Siglet",
+                      href: "https://github.com/eclipse-dataplane-core/dsdk-facet-rs/releases/tag/siglet-v0.1.6",
+                      port: "—",
+                      traefik: "—",
+                      purpose: (
+                        <T area="docsDeveloper" tags={{ a: adr(ADR_078) }}>
+                          {
+                            "The data plane on EDC 1.0: answers the control plane's signaling and issues the access token; the Neo4j proxy serves the data (<a>ADR-078</a>)"
+                          }
+                        </T>
+                      ),
+                      deps: "Vault",
+                    },
+                    {
+                      service: "Data Plane FHIR",
+                      href: JAD_COMMIT,
+                      port: ":11002",
+                      traefik: "dp-fhir.localhost",
+                      purpose: (
+                        <T
+                          area="docsDeveloper"
+                          tags={{ ...EDC018_TAGS, f: ext(FHIR) }}
+                        >
+                          {
+                            "<f>FHIR</f> PUSH transfer type; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
+                          }
+                        </T>
+                      ),
+                      deps: "PG, Vault, CP",
+                    },
+                    {
+                      service: "Data Plane OMOP",
+                      href: JAD_COMMIT,
+                      port: ":11012",
+                      traefik: "dp-omop.localhost",
+                      purpose: (
+                        <T
+                          area="docsDeveloper"
+                          tags={{ ...EDC018_TAGS, f: ext(OMOP) }}
+                        >
+                          {
+                            "<f>OMOP</f> PULL transfer type; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
+                          }
+                        </T>
+                      ),
+                      deps: "PG, Vault, CP",
+                    },
+                    {
+                      service: "Identity Hub",
+                      href: IDENTITYHUB_RELEASE,
+                      port: ":11005",
+                      traefik: "ih.localhost",
+                      purpose: (
+                        <T area="docsDeveloper" tags={{ a: ext(DCP) }}>
+                          {"<a>DCP v1.0</a>: DID + VC store"}
+                        </T>
+                      ),
+                      deps: "PG, Vault, KC",
+                    },
+                    {
+                      service: "Issuer Service",
+                      href: IDENTITYHUB_RELEASE,
+                      port: ":10013",
+                      traefik: "issuer.localhost",
+                      purpose: (
+                        <T
+                          area="docsDeveloper"
+                          tags={{
+                            a: ext(`${DCP}#credential-issuance-protocol`),
+                            d: ext(DID_WEB),
+                          }}
+                        >
+                          {"<a>VC issuance</a> + <d>did:web</d>"}
+                        </T>
+                      ),
+                      deps: "PG, Vault, KC",
+                    },
+                    {
+                      service: "Tenant Manager",
+                      href: CFM,
+                      port: ":11006",
+                      traefik: "tm.localhost",
+                      purpose: (
+                        <T
+                          area="docsDeveloper"
+                          tags={{ ...EDC018_TAGS, a: ext(CFM) }}
+                        >
+                          {
+                            "<a>CFM</a> tenant lifecycle; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
+                          }
+                        </T>
+                      ),
+                      deps: "PG, KC",
+                    },
+                    {
+                      service: "Provision Manager",
+                      href: CFM,
+                      port: ":11007",
+                      traefik: "pm.localhost",
+                      purpose: (
+                        <T
+                          area="docsDeveloper"
+                          tags={{ ...EDC018_TAGS, a: ext(CFM) }}
+                        >
+                          {
+                            "<a>CFM</a> resource provisioning; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
+                          }
+                        </T>
+                      ),
+                      deps: "PG, KC, CP",
+                    },
+                    {
+                      service: "Neo4j 5",
+                      href: "https://github.com/neo4j/neo4j/releases/tag/5.26.28",
+                      port: ":7474 / :7687",
+                      traefik: "—",
+                      purpose: (
+                        <T
+                          area="docsDeveloper"
+                          tags={{
+                            a: ext("https://neo4j.com/docs/apoc/current/"),
+                            g: ext(
+                              "https://neo4j.com/docs/graph-data-science/current/",
+                            ),
+                            n: ext("https://neo4j.com/labs/neosemantics/"),
+                            p: src("docker-compose.yml#L12"),
+                          }}
+                        >
+                          {
+                            "Knowledge graph (<a>APOC</a>, <g>GDS</g>, <n>n10s</n>; <p>plugins</p>)"
+                          }
+                        </T>
+                      ),
+                      deps: "—",
+                    },
+                    {
+                      service: "Neo4j Proxy",
+                      href: `${GITHUB_REPO}/tree/main/services/neo4j-proxy`,
+                      port: ":9090",
+                      traefik: "proxy.localhost",
+                      purpose: (
+                        <T
+                          area="docsDeveloper"
+                          tags={{
+                            a: ext(
+                              "https://github.com/expressjs/express/releases/tag/v5.3.0",
+                            ),
+                          }}
+                        >
+                          {"<a>Express</a> bridge: UI ↔ Neo4j"}
+                        </T>
+                      ),
+                      deps: "CP",
+                    },
+                    {
+                      service: "Next.js UI",
+                      href: `https://github.com/vercel/next.js/releases/tag/v${facts.toolVersions.next}`,
+                      port: ":3000 / :3003",
+                      traefik: "—",
+                      purpose: t("Application frontend"),
+                      deps: "Neo4j",
+                    },
+                  ] as {
+                    service: string;
+                    href: string;
+                    port: string;
+                    traefik: string;
+                    purpose: React.ReactNode;
+                    deps: string;
+                  }[]
+                ).map(({ service, href, port, traefik, purpose, deps }) => (
                   <tr key={service} className="border-t border-(--border)">
                     <td className="px-3 py-1.5 font-medium text-(--text-primary)">
-                      {service}
+                      <a
+                        href={href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:opacity-80"
+                      >
+                        {service}
+                      </a>
                     </td>
                     <td className="px-3 py-1.5 font-mono">{port}</td>
                     <td className="px-3 py-1.5 font-mono">{traefik}</td>
@@ -611,9 +952,18 @@ export default function DeveloperGuidePage() {
             </table>
           </div>
           <p className="text-(--text-secondary) text-xs mt-2">
-            {t(
-              "Plus 4 background CFM agents (keycloak, edcv, registration, onboarding) and 1 one-shot seed container. Vault-bootstrap runs as a sidecar.",
-            )}
+            <T
+              area="docsDeveloper"
+              tags={{
+                ...EDC018_TAGS,
+                a: ext(CFM),
+                v: src("docker-compose.jad.yml#L245-L272"),
+              }}
+            >
+              {
+                "Only under the <c>edc018</c> profile, for EDC 0.18 and retired with <i>#927</i>: 4 <a>CFM</a> agents (keycloak, edcv, registration, onboarding), the nginx shim cfm-cp-shim and the one-shot seed container jad-seed. <v>vault-bootstrap</v> runs as a sidecar."
+              }
+            </T>
           </p>
         </section>
 
@@ -629,23 +979,47 @@ export default function DeveloperGuidePage() {
               </h4>
               <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
-                    {"<b>Node.js 20+</b>: runtime for UI and proxy"}
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b: extBold("https://nodejs.org/en/blog/release/v22.0.0"),
+                      a: src("services/neo4j-proxy/package.json#L46-L48"),
+                    }}
+                  >
+                    {
+                      "<b>Node.js 22+</b>: runtime for UI and proxy; <a>the proxy requires it</a>"
+                    }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
-                    {"<b>Docker Desktop</b>: with Docker Compose V2"}
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b: extBold("https://docs.docker.com/desktop/"),
+                      a: ext(
+                        "https://docs.docker.com/compose/releases/migrate/",
+                      ),
+                    }}
+                  >
+                    {"<b>Docker Desktop</b>: with <a>Docker Compose V2</a>"}
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
-                    {"<b>8 GB Docker RAM</b>: required for full JAD stack"}
+                  <T
+                    area="docsDeveloper"
+                    tags={{ b, a: src("scripts/bootstrap-jad.sh#L245-L251") }}
+                  >
+                    {
+                      "<b>8 GB Docker RAM</b>: required for full JAD stack (<a>the bootstrap checks it</a>)"
+                    }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
-                    {"<b>Git</b>: with pre-commit hooks enabled"}
+                  <T
+                    area="docsDeveloper"
+                    tags={{ b, a: src(".pre-commit-config.yaml") }}
+                  >
+                    {"<b>Git</b>: with <a>pre-commit hooks</a> enabled"}
                   </T>
                 </li>
               </ul>
@@ -656,26 +1030,54 @@ export default function DeveloperGuidePage() {
               </h4>
               <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
-                    {"<b>Python 3.11+</b>: for Synthea FHIR data loading"}
-                  </T>
-                </li>
-                <li>
-                  <T area="docsDeveloper" tags={{ b, c }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b: extBold(
+                        "https://docs.python.org/3/whatsnew/3.11.html",
+                      ),
+                      l: src("scripts/load_fhir_neo4j.py#L1-L14"),
+                      s: ext(SYNTHEA),
+                      j: src("scripts/generate-synthea.sh#L26-L35"),
+                    }}
+                  >
                     {
-                      "<b>gitleaks</b>: local secret scanning (<c>brew install gitleaks</c>)"
+                      "<b>Python 3.11+</b>: for <l>load_fhir_neo4j.py</l>, which loads the FHIR bundles <s>Synthea</s> generates; Synthea itself needs <j>Java 21+</j>"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b, c }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b: extBold(
+                        `https://github.com/gitleaks/gitleaks/releases/tag/v${facts.toolVersions.gitleaks}`,
+                      ),
+                      c,
+                      a: src(".pre-commit-config.yaml#L127-L139"),
+                    }}
+                  >
                     {
-                      "<b>lychee</b>: broken link checker (<c>brew install lychee</c>)"
+                      "<b>gitleaks</b>: local secret scanning in <a>the pre-commit hook</a> (<c>brew install gitleaks</c>)"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b, c }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b: extBold("https://github.com/lycheeverse/lychee"),
+                      c,
+                      a: src(".pre-commit-config.yaml#L163-L176"),
+                    }}
+                  >
+                    {
+                      "<b>lychee</b>: broken link checker for <a>the Markdown hook</a> (<c>brew install lychee</c>)"
+                    }
+                  </T>
+                </li>
+                <li>
+                  <T area="docsDeveloper" tags={{ b: extBold(PLAYWRIGHT), c }}>
                     {
                       "<b>Playwright browsers</b>: for E2E tests (<c>npx playwright install</c>)"
                     }
@@ -689,10 +1091,19 @@ export default function DeveloperGuidePage() {
               {t("Port Requirements")}
             </h4>
             <p className="text-(--text-secondary) text-xs">
-              {t("The JAD stack requires these ports to be free:")}{" "}
+              <T
+                area="docsDeveloper"
+                tags={{
+                  y: srcCode("docker-compose.yml"),
+                  z: srcCode("docker-compose.jad.yml"),
+                }}
+              >
+                {
+                  "The default services bind these host ports, so they must be free (<y>docker-compose.yml</y>, <z>docker-compose.jad.yml</z>):"
+                }
+              </T>{" "}
               <code className="text-(--text-primary)">
-                80, 3000, 3003, 4222, 5432, 7474, 7687, 8080, 8090, 8200, 8222,
-                9090, 10013, 11002, 11003, 11005, 11006, 11007, 11012
+                {DEFAULT_PORTS.join(", ")}
               </code>
             </p>
           </div>
@@ -746,10 +1157,19 @@ npm run lint         # ESLint (max 55 warnings)`}</pre>
             {t("Quick Start: Full JAD Stack")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            {t(
-              "The bootstrap script starts all {n} services with health checks, initializes Vault secrets, imports the Keycloak realm, and runs the 7-phase seed pipeline.",
-              { n: COMPOSE_SERVICES },
-            )}
+            <T
+              area="docsDeveloper"
+              tags={{
+                a: src("scripts/bootstrap-jad.sh#L293-L376"),
+                k: src("jad/keycloak-realm.json"),
+                s: src("jad/seed-all.sh#L150-L156"),
+              }}
+              vars={{ n: DEFAULT_SERVICES.length }}
+            >
+              {
+                "The <a>bootstrap script</a> starts the {n} default services with health checks, initializes Vault secrets, imports the <k>Keycloak realm</k>, and runs the 7-phase <s>seed pipeline</s>."
+              }
+            </T>
           </p>
           <div className="space-y-4">
             <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
@@ -813,9 +1233,14 @@ open http://traefik.localhost`}</pre>
             {t("Data Seeding Pipeline")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            {t(
-              "The 7-phase seed pipeline populates the dataspace with tenants, credentials, policies, assets, and contracts. Phases must run in strict order; each depends on the previous.",
-            )}
+            <T
+              area="docsDeveloper"
+              tags={{ a: src("jad/seed-all.sh#L150-L156") }}
+            >
+              {
+                "The 7-phase <a>seed pipeline</a> populates the dataspace with participants, credentials, policies, assets, and contracts. Phases must run in strict order; each depends on the previous."
+              }
+            </T>
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-xs border border-(--border) rounded-lg">
@@ -836,55 +1261,79 @@ open http://traefik.localhost`}</pre>
                 </tr>
               </thead>
               <tbody className="text-(--text-secondary)">
-                {[
+                {(
                   [
-                    "1",
-                    "seed-health-tenants.sh",
-                    "Tenant Manager",
-                    t("Create 5 participant tenants via CFM"),
-                  ],
-                  [
-                    "2",
-                    "seed-ehds-credentials.sh",
-                    "Issuer Service",
-                    t("Register EHDS credential types"),
-                  ],
-                  [
-                    "3",
-                    "seed-ehds-policies.sh",
-                    "Control Plane",
-                    t("Create ODRL policies for all participants"),
-                  ],
-                  [
-                    "4",
-                    "seed-data-assets.sh",
-                    "Control Plane",
-                    t("Register data assets + contracts"),
-                  ],
-                  [
-                    "5",
-                    "seed-contract-negotiation.sh",
-                    "Control Plane",
-                    t("PharmaCo ↔ AlphaKlinik negotiations + data planes"),
-                  ],
-                  [
-                    "6",
-                    "seed-federated-catalog.sh",
-                    "Control Plane",
-                    t("MedReg ↔ LMC federated catalog negotiation"),
-                  ],
-                  [
-                    "7",
-                    "seed-data-transfer.sh",
-                    "Data Plane",
-                    t("Verify EDR tokens and data plane transfers"),
-                  ],
-                ].map(([phase, script, target, desc]) => (
+                    [
+                      "1",
+                      "scripts/seed-identity-layer.sh",
+                      "Control Plane, Identity Hub, Issuer Service",
+                      <T
+                        key="1"
+                        area="docsDeveloper"
+                        tags={{
+                          ...EDC018_TAGS,
+                          a: src("jad/seed-health-tenants.sh#L5-L6"),
+                        }}
+                      >
+                        {
+                          "The five participants on EDC 1.0: control plane contexts, IdentityHub, holders and a MembershipCredential each. CFM's <a>seed-health-tenants.sh</a> (9 tenants) is EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>."
+                        }
+                      </T>,
+                    ],
+                    [
+                      "2",
+                      "jad/seed-ehds-credentials.sh",
+                      "Issuer Service",
+                      t("Register EHDS credential types"),
+                    ],
+                    [
+                      "3",
+                      "jad/seed-ehds-policies.sh",
+                      "Control Plane",
+                      <T key="3" area="docsDeveloper" tags={{ a: ext(ODRL) }}>
+                        {"Create <a>ODRL</a> policies for all participants"}
+                      </T>,
+                    ],
+                    [
+                      "4",
+                      "jad/seed-data-assets.sh",
+                      "Control Plane",
+                      t("Register data assets + contracts"),
+                    ],
+                    [
+                      "5",
+                      "jad/seed-contract-negotiation.sh",
+                      "Control Plane",
+                      t("PharmaCo ↔ AlphaKlinik negotiations + data planes"),
+                    ],
+                    [
+                      "6",
+                      "jad/seed-federated-catalog.sh",
+                      "Control Plane",
+                      t("MedReg ↔ LMC federated catalog negotiation"),
+                    ],
+                    [
+                      "7",
+                      "jad/seed-data-transfer.sh",
+                      "Data Plane",
+                      t("Verify EDR tokens and data plane transfers"),
+                    ],
+                  ] as [string, string, string, React.ReactNode][]
+                ).map(([phase, script, target, desc]) => (
                   <tr key={phase} className="border-t border-(--border)">
                     <td className="px-3 py-1.5 font-mono font-bold text-(--text-primary)">
                       {phase}
                     </td>
-                    <td className="px-3 py-1.5 font-mono">{script}</td>
+                    <td className="px-3 py-1.5 font-mono">
+                      <a
+                        href={`${REPO_BLOB}/${script}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline hover:opacity-80"
+                      >
+                        {script.split("/").pop()}
+                      </a>
+                    </td>
                     <td className="px-3 py-1.5">{target}</td>
                     <td className="px-3 py-1.5">{desc}</td>
                   </tr>
@@ -894,9 +1343,16 @@ open http://traefik.localhost`}</pre>
           </div>
           <div className="mt-3 border border-amber-500/20 bg-amber-500/5 rounded-lg p-3">
             <p className="text-(--text-secondary) text-xs">
-              <T area="docsDeveloper" tags={{ b: warn, c: small }}>
+              <T
+                area="docsDeveloper"
+                tags={{
+                  b: warn,
+                  c: small,
+                  a: src("docker-compose.jad.yml#L100-L155"),
+                }}
+              >
                 {
-                  "<b>Important:</b> Vault keeps its secrets on disk (volumes <c>vault_data</c> and <c>vault_keys</c>; the <c>vault-unseal</c> sidecar unseals it on every start), so a restart or a <c>docker compose down</c> keeps every secret. Only removing the volumes (<c>docker compose down -v</c> or <c>./scripts/bootstrap-jad.sh --reset</c>) deletes them; bootstrap and seed the stack again after that. If IdentityHub logs <c>Private key ... not found</c>, check that <c>health-dataspace-vault-unseal</c> reported <c>ready</c>."
+                  "<b>Important:</b> Vault keeps its secrets on disk (<a>volumes</a> <c>vault_data</c> and <c>vault_keys</c>; the <c>vault-unseal</c> sidecar unseals it on every start), so a restart or a <c>docker compose down</c> keeps every secret. Only removing the volumes (<c>docker compose down -v</c> or <c>./scripts/bootstrap-jad.sh --reset</c>) deletes them; bootstrap and seed the stack again after that. If IdentityHub logs <c>Private key ... not found</c>, check that <c>health-dataspace-vault-unseal</c> reported <c>ready</c>."
                 }
               </T>
             </p>
@@ -909,39 +1365,199 @@ open http://traefik.localhost`}</pre>
             {t("Project Structure")}
           </h2>
           <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
-            <pre className="text-xs text-(--text-primary) overflow-x-auto whitespace-pre">{`├── .github/workflows/         # CI/CD (pr-gate, test, compliance, security-scan, deploy-azure, pages, ...)
-├── connector/                 # EDC-V connector (Gradle multi-module)
-│   ├── controlplane/          # DSP + Management API
-│   ├── dataplane/             # FHIR + OMOP data planes
-│   └── identityhub/           # DCP Identity Hub
-├── docs/                      # Architecture docs, journeys, ADRs, reports
-├── jad/                       # JAD infrastructure configs
-│   ├── keycloak-realm.json    # Keycloak realm (edcv, 7 users, 6 roles)
-│   ├── edcv-assets/           # Contract definitions & ODRL policies
-│   ├── seed-*.sh              # 7-phase seed scripts
-│   └── openapi/               # OpenAPI specifications
-├── k8s/                       # Kubernetes / OrbStack manifests
-├── neo4j/                     # Cypher scripts & data
-│   ├── init-schema.cypher     # Constraints, indexes, vector indexes
-│   ├── insert-synthetic-schema-data.cypher
-│   └── fhir-to-omop-transform.cypher
-├── scripts/                   # Automation (bootstrap, synthea, compliance)
-├── services/neo4j-proxy/      # Express bridge (Neo4j ↔ UI)
-├── ui/                        # Next.js ${
-              facts.toolVersions.next.split(".")[0]
-            } application
-│   ├── src/app/               # ${facts.uiPages.length} pages, ${
-              facts.apiRoutes.length
-            } API routes
-│   ├── src/components/        # Shared React components
-│   ├── src/lib/               # auth.ts, api.ts, graph-constants.ts
-│   ├── __tests__/unit/        # Vitest unit tests
-│   ├── __tests__/e2e/         # Playwright specs (journeys/)
-│   └── public/mock/           # 38 JSON fixtures for static export
-├── docker-compose.yml         # Minimal stack (Neo4j + UI)
-└── docker-compose.jad.yml     # Full JAD stack (${
-              facts.composeServices["docker-compose.jad.yml"].length
-            } services)`}</pre>
+            {/* Each entry links to its folder or file on GitHub. */}
+            <pre className="text-xs text-(--text-primary) overflow-x-auto whitespace-pre">
+              {(
+                [
+                  [
+                    "├── ",
+                    ".github/workflows/",
+                    "tree",
+                    "# CI/CD (pr-gate, test, nightly, compliance, security-scan, deploy-azure, pages, ...)",
+                  ],
+                  [
+                    "├── ",
+                    "runtimes/edc/",
+                    "tree",
+                    "# EDC 1.0 launchers (Gradle), version in gradle/libs.versions.toml",
+                  ],
+                  [
+                    "│   ├── ",
+                    "controlplane/",
+                    "tree",
+                    "# DSP + Management API",
+                    "runtimes/edc/controlplane",
+                  ],
+                  [
+                    "│   ├── ",
+                    "identity-hub/",
+                    "tree",
+                    "# DCP Identity Hub",
+                    "runtimes/edc/identity-hub",
+                  ],
+                  [
+                    "│   └── ",
+                    "issuerservice/",
+                    "tree",
+                    "# DCP credential issuance",
+                    "runtimes/edc/issuerservice",
+                  ],
+                  [
+                    "├── ",
+                    "docs/",
+                    "tree",
+                    "# Architecture docs, journeys, ADRs, reports",
+                  ],
+                  ["├── ", "jad/", "tree", "# JAD infrastructure configs"],
+                  [
+                    "│   ├── ",
+                    "keycloak-realm.json",
+                    "blob",
+                    "# Keycloak realm (edcv, 8 users + 1 service account, 10 realm roles)",
+                    "jad/keycloak-realm.json",
+                  ],
+                  [
+                    "│   ├── ",
+                    "edcv-assets/",
+                    "tree",
+                    "# Contract definitions & ODRL policies",
+                    "jad/edcv-assets",
+                  ],
+                  [
+                    "│   ├── ",
+                    "seed-all.sh",
+                    "blob",
+                    "# The 7-phase seed, calling seed-*.sh",
+                    "jad/seed-all.sh",
+                  ],
+                  [
+                    "│   └── ",
+                    "openapi/",
+                    "tree",
+                    "# OpenAPI specifications",
+                    "jad/openapi",
+                  ],
+                  ["├── ", "k8s/", "tree", "# Kubernetes / OrbStack manifests"],
+                  ["├── ", "neo4j/", "tree", "# Cypher scripts & data"],
+                  [
+                    "│   ├── ",
+                    "init-schema.cypher",
+                    "blob",
+                    "# Constraints, indexes, vector indexes",
+                    "neo4j/init-schema.cypher",
+                  ],
+                  [
+                    "│   ├── ",
+                    "insert-synthetic-schema-data.cypher",
+                    "blob",
+                    "",
+                    "neo4j/insert-synthetic-schema-data.cypher",
+                  ],
+                  [
+                    "│   └── ",
+                    "fhir-to-omop-transform.cypher",
+                    "blob",
+                    "",
+                    "neo4j/fhir-to-omop-transform.cypher",
+                  ],
+                  [
+                    "├── ",
+                    "scripts/",
+                    "tree",
+                    "# Automation (bootstrap, synthea, compliance)",
+                  ],
+                  [
+                    "├── ",
+                    "services/neo4j-proxy/",
+                    "tree",
+                    "# Express bridge (Neo4j ↔ UI)",
+                  ],
+                  [
+                    "├── ",
+                    "ui/",
+                    "tree",
+                    `# Next.js ${
+                      facts.toolVersions.next.split(".")[0]
+                    } application`,
+                  ],
+                  [
+                    "│   ├── ",
+                    "src/app/",
+                    "tree",
+                    `# ${facts.uiPages.length} pages, ${facts.apiRoutes.length} API routes`,
+                    "ui/src/app",
+                  ],
+                  [
+                    "│   ├── ",
+                    "src/components/",
+                    "tree",
+                    "# Shared React components",
+                    "ui/src/components",
+                  ],
+                  [
+                    "│   ├── ",
+                    "src/lib/",
+                    "tree",
+                    "# auth.ts, api.ts, graph-constants.ts",
+                    "ui/src/lib",
+                  ],
+                  [
+                    "│   ├── ",
+                    "__tests__/unit/",
+                    "tree",
+                    "# Vitest unit tests",
+                    "ui/__tests__/unit",
+                  ],
+                  [
+                    "│   ├── ",
+                    "__tests__/e2e/",
+                    "tree",
+                    "# Playwright specs (journeys/)",
+                    "ui/__tests__/e2e",
+                  ],
+                  [
+                    "│   └── ",
+                    "public/mock/",
+                    "tree",
+                    "# 67 JSON fixtures for static export",
+                    "ui/public/mock",
+                  ],
+                  [
+                    "├── ",
+                    "docker-compose.yml",
+                    "blob",
+                    "# Minimal stack (Neo4j + UI)",
+                  ],
+                  [
+                    "└── ",
+                    "docker-compose.jad.yml",
+                    "blob",
+                    `# Full JAD stack (${facts.composeServices["docker-compose.jad.yml"].length} services, profiles included)`,
+                  ],
+                ] as [string, string, "tree" | "blob", string, string?][]
+              ).map(([branch, name, kind, comment, path]) => (
+                <span key={path ?? name}>
+                  {branch}
+                  <a
+                    href={`${GITHUB_REPO}/${kind}/main/${(path ?? name).replace(
+                      /\/$/,
+                      "",
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline decoration-dotted underline-offset-2 hover:text-indigo-700 dark:hover:text-indigo-300"
+                  >
+                    {name}
+                  </a>
+                  {comment
+                    ? " ".repeat(
+                        Math.max(1, 31 - branch.length - name.length),
+                      ) + comment
+                    : ""}
+                  {"\n"}
+                </span>
+              ))}
+            </pre>
           </div>
         </section>
 
@@ -951,9 +1567,12 @@ open http://traefik.localhost`}</pre>
             {t("Neo4j Graph Schema")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            <T area="docsDeveloper" tags={{ c: chip }}>
+            <T
+              area="docsDeveloper"
+              tags={{ c: chip, a: src("neo4j/init-schema.cypher#L8-L238") }}
+            >
               {
-                "The 5-layer knowledge graph spans 27 node labels with 70+ indexes and 3 vector indexes for GraphRAG. Schema defined in <c>neo4j/init-schema.cypher</c> (idempotent, safe to re-run)."
+                "The 5-layer knowledge graph has <a>constraints or indexes on 63 node labels</a>, 3 fulltext and 3 vector indexes for GraphRAG. Schema defined in <c>neo4j/init-schema.cypher</c> (idempotent, safe to re-run)."
               }
             </T>
           </p>
@@ -962,9 +1581,16 @@ open http://traefik.localhost`}</pre>
             alt={t(
               "The core graph schema as a UML entity relationship diagram: the dataset, the FHIR record of a patient, the OMOP counterpart of each resource, and the SNOMED, ICD-10, LOINC and RxNorm codes both are coded by",
             )}
-            caption={t(
-              "Core entity relationships: the FHIR record, its OMOP mapping and the codes (UML)",
-            )}
+            caption={
+              <T
+                area="docsDeveloper"
+                tags={{ a: ext("https://www.omg.org/spec/UML/2.5.1") }}
+              >
+                {
+                  "Core entity relationships: the FHIR record, its OMOP mapping and the codes (<a>UML</a>)"
+                }
+              </T>
+            }
           />
 
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -972,37 +1598,121 @@ open http://traefik.localhost`}</pre>
               <h4 className="font-semibold text-sm mb-2">
                 {t("5 Semantic Layers")}
               </h4>
+              {/* Each layer and each label links to the standard it follows. */}
               <ul className="text-(--text-secondary) text-xs space-y-1.5">
-                <li>
-                  <span className="text-[#2471A3] dark:text-[#85C1E9] font-medium">
-                    {t("L1 Marketplace:")}
-                  </span>{" "}
-                  Participant, DataProduct, Contract, HDABApproval, OdrlPolicy
-                </li>
-                <li>
-                  <span className="text-[#0F766E] dark:text-[#76D7C4] font-medium">
-                    L2 HealthDCAT-AP:
-                  </span>{" "}
-                  Catalogue, HealthDataset, Distribution, DataService
-                </li>
-                <li>
-                  <span className="text-[#157A3C] dark:text-[#82E0AA] font-medium">
-                    L3 FHIR R4:
-                  </span>{" "}
-                  Patient, Encounter, Condition, Observation, MedicationRequest
-                </li>
-                <li>
-                  <span className="text-[#9A5512] dark:text-[#F5B041] font-medium">
-                    L4 OMOP CDM:
-                  </span>{" "}
-                  OMOPPerson, ConditionOccurrence, DrugExposure, Measurement
-                </li>
-                <li>
-                  <span className="text-[#7D3C98] dark:text-[#C39BD3] font-medium">
-                    {t("L5 Ontology:")}
-                  </span>{" "}
-                  SnomedConcept, ICD10Code, RxNormConcept, LoincCode
-                </li>
+                {(
+                  [
+                    {
+                      label: t("L1 Marketplace:"),
+                      color: "text-[#2471A3] dark:text-[#85C1E9]",
+                      labels: [
+                        ["Participant", `${DSP}#catalog-protocol-0`],
+                        ["DataProduct", `${DSP}#catalog-protocol-0`],
+                        ["Contract", `${DSP}#contract-negotiation-protocol`],
+                        ["HDABApproval", `${EHDS}#art_68`],
+                        ["OdrlPolicy", ODRL],
+                      ],
+                    },
+                    {
+                      label: "L2 HealthDCAT-AP:",
+                      href: HEALTHDCAT,
+                      color: "text-[#0F766E] dark:text-[#76D7C4]",
+                      labels: [
+                        ["Catalogue"],
+                        ["HealthDataset"],
+                        ["Distribution"],
+                        ["DataService"],
+                      ],
+                    },
+                    {
+                      label: "L3 FHIR R4:",
+                      href: FHIR,
+                      color: "text-[#157A3C] dark:text-[#82E0AA]",
+                      labels: [
+                        ["Patient", `${FHIR}patient.html`],
+                        ["Encounter", `${FHIR}encounter.html`],
+                        ["Condition", `${FHIR}condition.html`],
+                        ["Observation", `${FHIR}observation.html`],
+                        ["MedicationRequest", `${FHIR}medicationrequest.html`],
+                      ],
+                    },
+                    {
+                      label: "L4 OMOP CDM:",
+                      href: OMOP,
+                      color: "text-[#9A5512] dark:text-[#F5B041]",
+                      labels: [
+                        ["OMOPPerson", `${OMOP}#person`],
+                        [
+                          "OMOPConditionOccurrence",
+                          `${OMOP}#condition_occurrence`,
+                        ],
+                        ["OMOPDrugExposure", `${OMOP}#drug_exposure`],
+                        ["OMOPMeasurement", `${OMOP}#measurement`],
+                      ],
+                    },
+                    {
+                      label: t("L5 Ontology:"),
+                      color: "text-[#7D3C98] dark:text-[#C39BD3]",
+                      labels: [
+                        [
+                          "SnomedConcept",
+                          "https://www.snomed.org/what-is-snomed-ct",
+                        ],
+                        [
+                          "ICD10Code",
+                          "https://www.nlm.nih.gov/research/umls/sourcereleasedocs/current/ICD10CM/index.html",
+                        ],
+                        [
+                          "RxNormConcept",
+                          "https://www.nlm.nih.gov/research/umls/rxnorm/docs/index.html",
+                        ],
+                        [
+                          "LoincCode",
+                          "https://www.nlm.nih.gov/research/umls/sourcereleasedocs/current/LNC/index.html",
+                        ],
+                      ],
+                    },
+                  ] as {
+                    label: string;
+                    href?: string;
+                    color: string;
+                    labels: [string, string?][];
+                  }[]
+                ).map((layer) => (
+                  <li key={layer.label}>
+                    <span className={`${layer.color} font-medium`}>
+                      {layer.href ? (
+                        <a
+                          href={layer.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline hover:opacity-80"
+                        >
+                          {layer.label}
+                        </a>
+                      ) : (
+                        layer.label
+                      )}
+                    </span>{" "}
+                    {layer.labels.map(([name, href], i) => (
+                      <span key={name}>
+                        {i > 0 && ", "}
+                        {href ? (
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline decoration-dotted underline-offset-2 hover:opacity-80"
+                          >
+                            {name}
+                          </a>
+                        ) : (
+                          name
+                        )}
+                      </span>
+                    ))}
+                  </li>
+                ))}
               </ul>
             </div>
             <div className="border border-(--border) rounded-lg p-4">
@@ -1036,9 +1746,23 @@ open http://traefik.localhost`}</pre>
                   </T>
                 </li>
                 <li>
-                  {t("3 fulltext indexes (clinical, catalog, ontology search)")}
+                  <T
+                    area="docsDeveloper"
+                    tags={{ a: src("neo4j/init-schema.cypher#L240-L251") }}
+                  >
+                    {
+                      "<a>3 fulltext indexes</a> (clinical, catalog, ontology search)"
+                    }
+                  </T>
                 </li>
-                <li>{t("3 vector indexes (384-dim, cosine, for GraphRAG)")}</li>
+                <li>
+                  <T
+                    area="docsDeveloper"
+                    tags={{ a: src("neo4j/init-schema.cypher#L253-L266") }}
+                  >
+                    {"<a>3 vector indexes</a> (384-dim, cosine, for GraphRAG)"}
+                  </T>
+                </li>
               </ul>
             </div>
           </div>
@@ -1050,9 +1774,18 @@ open http://traefik.localhost`}</pre>
             {t("PostgreSQL Schema")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            <T area="docsDeveloper" tags={{ b }}>
+            <T
+              area="docsDeveloper"
+              tags={{
+                a: adr(ADR_001),
+                i: srcCode("jad/init-postgres.sql"),
+                e: srcCode("jad/init-postgres-edc1.sql#L1-L8"),
+                c: chip,
+              }}
+              vars={{ n: facts.postgresDbs.length }}
+            >
               {
-                "PostgreSQL serves as the runtime store for all JAD services: EDC-V state machines, Keycloak identity, and CFM tenant metadata. Neo4j holds the health knowledge graph. This split follows <b>ADR-1</b>."
+                "PostgreSQL serves as the runtime store for all JAD services: EDC-V state machines, Keycloak identity, and, on EDC 0.18 only, CFM tenant metadata. Neo4j holds the health knowledge graph. This split follows <a>ADR-001</a>. <i>jad/init-postgres.sql</i> creates the {n} databases below; on EDC 1.0 the control plane, IdentityHub and the issuers use their own <c>_v1</c> databases from <e>jad/init-postgres-edc1.sql</e>, and the 0.18 ones stay untouched."
               }
             </T>
           </p>
@@ -1072,63 +1805,133 @@ open http://traefik.localhost`}</pre>
                 </tr>
               </thead>
               <tbody className="text-(--text-secondary)">
-                {[
+                {(
                   [
-                    "controlplane",
-                    "EDC-V Control Plane",
-                    t(
-                      "Contract negotiations, transfer processes, asset definitions, policy store",
-                    ),
-                  ],
-                  [
-                    "dataplane",
-                    "DCore FHIR",
-                    t("FHIR data plane state, EDR tokens, transfer tracking"),
-                  ],
-                  [
-                    "dataplane_omop",
-                    "DCore OMOP",
-                    t("OMOP data plane state, EDR tokens, transfer tracking"),
-                  ],
-                  [
-                    "identityhub",
-                    "Identity Hub",
-                    t("DID documents, verifiable credential store, key pairs"),
-                  ],
-                  [
-                    "issuerservice",
-                    "Issuer Service",
-                    t(
-                      "Credential definitions, attestation records, issued VCs",
-                    ),
-                  ],
-                  [
-                    "keycloak",
-                    "Keycloak",
-                    t("Users, roles, realm config, sessions, client scopes"),
-                  ],
-                  [
-                    "cfm",
-                    "Tenant Manager, Provision Manager, CFM agents",
-                    t(
-                      "Tenant records, VPAs (Virtual Participant Agents), provisioning tasks",
-                    ),
-                  ],
-                  [
-                    "redlinedb",
-                    "—",
-                    t(
-                      "Created by jad/init-postgres.sql; no service in either compose stack uses it today",
-                    ),
-                  ],
-                  [
-                    "taskdb",
-                    "Neo4j proxy",
-                    t(
-                      "Persistent task list behind the proxy's /tasks endpoints (phase 13d)",
-                    ),
-                  ],
-                ].map(([db, service, contents]) => (
+                    [
+                      "controlplane",
+                      "EDC-V Control Plane",
+                      t(
+                        "Contract negotiations, transfer processes, asset definitions, policy store",
+                      ),
+                    ],
+                    [
+                      "dataplane",
+                      "DCore FHIR",
+                      <T
+                        key="dataplane"
+                        area="docsDeveloper"
+                        tags={EDC018_TAGS}
+                      >
+                        {
+                          "FHIR data plane state, EDR tokens, transfer tracking; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
+                        }
+                      </T>,
+                    ],
+                    [
+                      "dataplane_omop",
+                      "DCore OMOP",
+                      <T
+                        key="dataplane_omop"
+                        area="docsDeveloper"
+                        tags={EDC018_TAGS}
+                      >
+                        {
+                          "OMOP data plane state, EDR tokens, transfer tracking; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
+                        }
+                      </T>,
+                    ],
+                    [
+                      "identityhub",
+                      "Identity Hub",
+                      t(
+                        "DID documents, verifiable credential store, key pairs",
+                      ),
+                    ],
+                    [
+                      "issuerservice",
+                      "Issuer Service",
+                      t(
+                        "Credential definitions, attestation records, issued VCs",
+                      ),
+                    ],
+                    [
+                      "keycloak",
+                      "Keycloak",
+                      t("Users, roles, realm config, sessions, client scopes"),
+                    ],
+                    [
+                      "cfm",
+                      "Tenant Manager, Provision Manager, CFM agents",
+                      <T key="cfm" area="docsDeveloper" tags={EDC018_TAGS}>
+                        {
+                          "Tenant records, VPAs (Virtual Participant Agents), provisioning tasks; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
+                        }
+                      </T>,
+                    ],
+                    [
+                      "redlinedb",
+                      "—",
+                      <T
+                        key="redlinedb"
+                        area="docsDeveloper"
+                        tags={{ a: src("jad/init-postgres.sql#L47-L51") }}
+                      >
+                        {
+                          "Created by <a>jad/init-postgres.sql</a>; no service in either compose stack uses it today"
+                        }
+                      </T>,
+                    ],
+                    [
+                      "taskdb",
+                      "Neo4j proxy",
+                      <T
+                        key="taskdb"
+                        area="docsDeveloper"
+                        tags={{
+                          a: src(
+                            "docs/planning/roadmap-phases-11-20.md?plain=1#L276",
+                          ),
+                        }}
+                      >
+                        {
+                          "Persistent task list behind the proxy's /tasks endpoints (<a>phase 13d</a>)"
+                        }
+                      </T>,
+                    ],
+                    [
+                      "simplga",
+                      "Simpl GA Issuer",
+                      <T
+                        key="simplga"
+                        area="docsDeveloper"
+                        tags={{
+                          a: src("jad/init-postgres.sql#L91-L99"),
+                          i: issue(710),
+                        }}
+                      >
+                        {
+                          "<a>The IssuerService of a fictional Simpl Governance Authority</a>, a trusted issuer for MembershipCredential (<i>#710</i>)"
+                        }
+                      </T>,
+                    ],
+                    [
+                      "rogueissuer",
+                      "Rogue Issuer",
+                      <T
+                        key="rogueissuer"
+                        area="docsDeveloper"
+                        tags={{
+                          a: src("jad/init-postgres.sql#L91-L105"),
+                          c,
+                        }}
+                      >
+                        {
+                          "<a>An issuer on no trust list</a>, which the identity checks start (profile <c>trust-check</c>) only to see it refused"
+                        }
+                      </T>,
+                    ],
+                  ] as [string, string, React.ReactNode][]
+                ).map(([db, service, contents]) => (
                   <tr key={db} className="border-t border-(--border)">
                     <td className="px-3 py-1.5 font-mono font-medium text-(--text-primary)">
                       {db}
@@ -1160,9 +1963,9 @@ open http://traefik.localhost`}</pre>
                 </T>
               </li>
               <li>
-                <T area="docsDeveloper" tags={{ b }}>
+                <T area="docsDeveloper" tags={{ b, a: adr(ADR_001) }}>
                   {
-                    "<b>Rationale:</b> Graph queries for clinical relationships are orders of magnitude faster in Neo4j; EDC-V requires PostgreSQL for its state machine persistence"
+                    "<b>Rationale:</b> Graph queries for clinical relationships are orders of magnitude faster in Neo4j; EDC-V requires PostgreSQL for its state machine persistence (<a>ADR-001</a>)"
                   }
                 </T>
               </li>
@@ -1198,37 +2001,64 @@ open http://traefik.localhost`}</pre>
               </p>
               <ol className="text-xs text-(--text-secondary) space-y-2 list-decimal ml-4">
                 <li>
-                  <T area="docsDeveloper" tags={{ b, c: flowCode }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{ b, c: flowCode, a: ext(HEALTHDCAT) }}
+                  >
                     {
-                      "<b>Discover</b> → <c>GET /api/catalog</c> returns HealthDCAT-AP datasets"
+                      "<b>Discover</b> → <c>GET /api/catalog</c> returns <a>HealthDCAT-AP</a> datasets"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b, c: flowCode }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{ b, c: flowCode, a: ext(ODRL) }}
+                  >
                     {
-                      "<b>Inspect</b> → <c>GET /api/assets</c> for access policies (ODRL)"
+                      "<b>Inspect</b> → <c>GET /api/assets</c> for access policies (<a>ODRL</a>)"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b, c: flowCode }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b,
+                      c: flowCode,
+                      a: ext(`${DSP}#contract-negotiation-protocol`),
+                    }}
+                  >
                     {
-                      "<b>Negotiate</b> → <c>POST /api/negotiations</c> opens a DSP 2025-1 contract"
+                      "<b>Negotiate</b> → <c>POST /api/negotiations</c> opens a <a>DSP 2025-1</a> contract"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b, c: flowCode }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b,
+                      c: flowCode,
+                      a: ext(`${DCP}#verifiable-presentation-protocol`),
+                    }}
+                  >
                     {
-                      "<b>Attest</b> → <c>POST /api/credentials/present</c> proves role via DCP VC"
+                      "<b>Attest</b> → <c>POST /api/credentials/present</c> proves role via <a>DCP</a> VC"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b, c: flowCode }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b,
+                      c: flowCode,
+                      a: ext(`${DSP}#transfer-process-protocol`),
+                    }}
+                  >
                     {
-                      "<b>Transfer</b> → <c>GET /api/transfers/:id</c> monitors the data plane"
+                      "<b>Transfer</b> → <c>GET /api/transfers/:id</c> monitors the data plane (<a>DSP transfer process</a>)"
                     }
                   </T>
                 </li>
@@ -1264,30 +2094,47 @@ open http://traefik.localhost`}</pre>
               </p>
               <ol className="text-xs text-(--text-secondary) space-y-2 list-decimal ml-4">
                 <li>
-                  <T area="docsDeveloper" tags={{ b, c: flowCode }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{ b, c: flowCode, a: ext(DID_WEB) }}
+                  >
                     {
-                      "<b>Register</b> → <c>POST /api/participants</c> creates a did:web identity"
+                      "<b>Register</b> → <c>POST /api/participants</c> creates a <a>did:web</a> identity"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b, c: flowCode }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{ b, c: flowCode, a: ext(HEALTHDCAT) }}
+                  >
                     {
-                      "<b>Publish</b> → <c>POST /api/catalog</c> adds a HealthDCAT-AP dataset"
+                      "<b>Publish</b> → <c>POST /api/catalog</c> adds a <a>HealthDCAT-AP</a> dataset"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b, c: flowCode }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{ b, c: flowCode, a: ext(ODRL) }}
+                  >
                     {
-                      "<b>Policy</b> → <c>POST /api/admin/policies</c> creates an ODRL policy (EDC_ADMIN)"
+                      "<b>Policy</b> → <c>POST /api/admin/policies</c> creates an <a>ODRL</a> policy (EDC_ADMIN)"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b, c: flowCode }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b,
+                      c: flowCode,
+                      h: ext(`${EHDS}#art_55`),
+                      p: ext(`${EHDS}#art_68`),
+                    }}
+                  >
                     {
-                      "<b>HDAB approval</b> → <c>GET /api/compliance</c> tracks approval state"
+                      "<b>HDAB approval</b> → <c>GET /api/compliance</c> tracks approval state (<h>Art. 55</h>, <p>Art. 68</p>)"
                     }
                   </T>
                 </li>
@@ -1299,9 +2146,12 @@ open http://traefik.localhost`}</pre>
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{ b, f: ext(`${FHIR}bundle.html`), o: ext(OMOP) }}
+                  >
                     {
-                      "<b>Deliver</b> → data plane pushes FHIR/OMOP bundles to the consumer"
+                      "<b>Deliver</b> → data plane pushes <f>FHIR</f>/<o>OMOP</o> bundles to the consumer"
                     }
                   </T>
                 </li>
@@ -1325,14 +2175,27 @@ open http://traefik.localhost`}</pre>
           <p className="text-(--text-secondary) text-sm mb-4">
             <T
               area="docsDeveloper"
-              tags={{ c, k: chip }}
+              tags={{
+                c,
+                k: chip,
+                n: ext(
+                  `https://github.com/vercel/next.js/releases/tag/v${facts.toolVersions.next}`,
+                ),
+                s: adr("ADR-044-every-api-route-needs-a-session.md"),
+                p: ext(
+                  "https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity",
+                ),
+                a: adr(
+                  "ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md",
+                ),
+              }}
               vars={{
                 routes: facts.apiRoutes.length,
                 ops: implementedOperations,
               }}
             >
               {
-                "{routes} Next.js API routes ({ops} operations) proxy to Neo4j and the EDC-V services; the table is generated from <c>ui/src/app/api/</c>. Every route needs a session (ADR-044) except the sign-in flows, the Keycloak address for the sign-in banner, the health probe, and the Klarbefund app's account creation, which answers only a verified Apple App Attest attestation (ADR-054). Routes are disabled in the static export; mock data is served from <k>ui/public/mock/*.json</k>."
+                "{routes} <n>Next.js</n> API routes ({ops} operations) proxy to Neo4j and the EDC-V services; the table is generated from <c>ui/src/app/api/</c>. Every route needs a session (<s>ADR-044</s>) except the sign-in flows, the Keycloak address for the sign-in banner, the health probe, and the Klarbefund app's account creation, which answers only a verified <p>Apple App Attest</p> attestation (<a>ADR-054</a>). Routes are disabled in the static export; mock data is served from <k>ui/public/mock/*.json</k>."
               }
             </T>
           </p>
@@ -1423,17 +2286,47 @@ open http://traefik.localhost`}</pre>
               </h4>
               <ul className="text-(--text-secondary) text-xs space-y-1">
                 <li>
-                  <T area="docsDeveloper" tags={{ b, c }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      b,
+                      c,
+                      v: ext(
+                        `https://github.com/vitest-dev/vitest/releases/tag/v${facts.toolVersions.vitest}`,
+                      ),
+                    }}
+                  >
                     {
-                      "<b>UI and Neo4j proxy</b> suites, the UI's mirroring <c>ui/src/</c> under <c>ui/__tests__/unit/</c>"
+                      "<b>UI and Neo4j proxy</b> suites in <v>Vitest</v>, the UI's mirroring <c>ui/src/</c> under <c>ui/__tests__/unit/</c>"
                     }
                   </T>
                 </li>
-                <li>{t("v8 coverage, published with the test report")}</li>
                 <li>
-                  <T area="docsDeveloper" tags={{ c }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      a: ext("https://vitest.dev/guide/coverage"),
+                      f: src("ui/vitest.config.ts"),
+                    }}
+                  >
                     {
-                      "Testing Library for components; a test that needs the network stubs <c>fetch</c> itself, and Neo4j is mocked at <c>@/lib/neo4j</c> (MSW was removed in #404)"
+                      "<a>v8 coverage</a> with the thresholds in <f>vitest.config.ts</f>, published with the test report"
+                    }
+                  </T>
+                </li>
+                <li>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      c,
+                      l: ext(
+                        "https://github.com/testing-library/react-testing-library/releases/tag/v16.3.3",
+                      ),
+                      i: issue(404),
+                    }}
+                  >
+                    {
+                      "<l>Testing Library</l> for components; a test that needs the network stubs <c>fetch</c> itself, and Neo4j is mocked at <c>@/lib/neo4j</c> (MSW was removed in <i>#404</i>)"
                     }
                   </T>
                 </li>
@@ -1458,23 +2351,40 @@ npm run test:coverage  # With v8 coverage`}</pre>
               </h4>
               <ul className="text-(--text-secondary) text-xs space-y-1">
                 <li>
-                  <T area="docsDeveloper" tags={{ b, c }}>
+                  <T area="docsDeveloper" tags={{ b, c, p: ext(PLAYWRIGHT) }}>
                     {
-                      "<b>Journey specs</b> in <c>ui/__tests__/e2e/journeys/</c> (IDs J001 onward)"
+                      "<b>Journey specs</b> for <p>Playwright</p> in <c>ui/__tests__/e2e/journeys/</c> (IDs J001 onward)"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ c }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      w: ext(WCAG),
+                      a: srcCode(
+                        "ui/__tests__/e2e/journeys/27-wcag-accessibility.spec.ts",
+                      ),
+                    }}
+                  >
                     {
-                      "WCAG 2.2 AA accessibility audit (<c>27-wcag-accessibility</c>)"
+                      "<w>WCAG 2.2 AA</w> accessibility audit (<a>27-wcag-accessibility</a>)"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ c }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      o: ext(OWASP),
+                      b: ext(BSI_C5),
+                      a: srcCode(
+                        "ui/__tests__/e2e/journeys/28-security-pentest.spec.ts",
+                      ),
+                    }}
+                  >
                     {
-                      "OWASP/BSI security & pentest (<c>28-security-pentest</c>)"
+                      "<o>OWASP</o>/<b>BSI</b> security & pentest (<a>28-security-pentest</a>)"
                     }
                   </T>
                 </li>
@@ -1498,29 +2408,67 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
 
           <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="border border-(--border) rounded-lg p-4">
-              <h4 className="font-semibold text-sm mb-2">DSP 2025-1 TCK</h4>
+              <h4 className="font-semibold text-sm mb-2">
+                {t("EHDS dataspace checks (DSP 2025-1)")}
+              </h4>
               <p className="text-(--text-secondary) text-xs">
-                {t(
-                  "Validates EDC connector implements Dataspace Protocol correctly: catalog queries, contract negotiations, transfer processes.",
-                )}
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    c,
+                    h: src("scripts/run-ehds-dataspace-checks.sh#L5-L9"),
+                    d: ext(DSP),
+                    k: ext("https://github.com/eclipse-dataspacetck/dsp-tck"),
+                    i: issue(338),
+                  }}
+                >
+                  {
+                    "Our own checks, not a conformance kit, as <h>the script's header</h> says: they drive the EDC Management API with <c>curl</c> and never act as a <d>DSP 2025-1</d> peer, covering catalog, contract negotiation and transfer process. The Eclipse <k>DSP TCK</k> is not run yet (<i>#338</i>)."
+                  }
+                </T>
               </p>
-              <pre className="text-xs text-(--text-secondary) mt-2 bg-(--surface) p-2 rounded-sm">{`./scripts/run-dsp-tck.sh`}</pre>
+              <pre className="text-xs text-(--text-secondary) mt-2 bg-(--surface) p-2 rounded-sm">{`./scripts/run-ehds-dataspace-checks.sh`}</pre>
             </div>
             <div className="border border-(--border) rounded-lg p-4">
-              <h4 className="font-semibold text-sm mb-2">DCP v1.0</h4>
+              <h4 className="font-semibold text-sm mb-2">
+                {t("EHDS identity checks (DCP v1.0)")}
+              </h4>
               <p className="text-(--text-secondary) text-xs">
-                {t(
-                  "Verifies Decentralized Claims Protocol: DID resolution, credential presentation, trust framework.",
-                )}
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    c,
+                    h: src("scripts/run-ehds-identity-checks.sh#L5-L9"),
+                    d: ext(DCP),
+                    k: ext("https://github.com/eclipse-dataspacetck/dcp-tck"),
+                    i: issue(338),
+                  }}
+                >
+                  {
+                    "Our own checks, not a conformance kit, as <h>the script's header</h> says: they drive the IdentityHub and IssuerService admin APIs with <c>curl</c> and never act as a <d>DCP v1.0</d> peer, covering did:web resolution, credential presentation and issuance. The Eclipse <k>DCP TCK</k> is not run yet (<i>#338</i>)."
+                  }
+                </T>
               </p>
-              <pre className="text-xs text-(--text-secondary) mt-2 bg-(--surface) p-2 rounded-sm">{`./scripts/run-dcp-tests.sh`}</pre>
+              <pre className="text-xs text-(--text-secondary) mt-2 bg-(--surface) p-2 rounded-sm">{`./scripts/run-ehds-identity-checks.sh`}</pre>
             </div>
             <div className="border border-(--border) rounded-lg p-4">
               <h4 className="font-semibold text-sm mb-2">{t("EHDS Domain")}</h4>
               <p className="text-(--text-secondary) text-xs">
-                {t(
-                  "Health domain compliance: FHIR R4 bundles, OMOP transformation, HDAB approval chains, patient rights.",
-                )}
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    p: ext(`${EHDS}#art_53`),
+                    h: ext(HEALTHDCAT),
+                    f: ext(FHIR),
+                    o: ext(OMOP),
+                    x: ext(`${EHDS}#art_71`),
+                    a: src("scripts/run-ehds-tests.sh#L195-L835"),
+                  }}
+                >
+                  {
+                    "Our own health-domain checks against the graph: the <p>Art. 53</p> purposes on the approvals, <h>HealthDCAT-AP</h>, the EEHRxF profiles, the <f>FHIR</f> to <o>OMOP</o> mapping and the <x>Art. 71</x> opt-out (<a>the six categories</a>)."
+                  }
+                </T>
               </p>
               <pre className="text-xs text-(--text-secondary) mt-2 bg-(--surface) p-2 rounded-sm">{`./scripts/run-ehds-tests.sh`}</pre>
             </div>
@@ -1552,9 +2500,19 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
             {t("Quality Gates")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            {t(
-              "Four-stage quality pipeline aligned with BSI C5, OWASP Top 10, EHDS regulation, and WCAG 2.2 AA.",
-            )}
+            <T
+              area="docsDeveloper"
+              tags={{
+                c5: ext(BSI_C5),
+                o: ext(OWASP),
+                e: ext(EHDS),
+                w: ext(WCAG),
+              }}
+            >
+              {
+                "Four-stage quality pipeline aligned with <c5>BSI C5</c5>, <o>OWASP Top 10</o>, <e>EHDS regulation</e>, and <w>WCAG 2.2 AA</w>."
+              }
+            </T>
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
             {[
@@ -1594,17 +2552,31 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
             alt={t(
               "CI/CD as an ArchiMate technology process view: the workstation hooks, the five pull request checks, and the deploy, the static export and the smoke test that run on main",
             )}
-            caption={t(
-              "CI/CD: the {n} pre-commit hooks and the pre-push suite on the workstation, the pull request checks, and what runs on main (ArchiMate 3.2)",
-              { n: PRE_COMMIT_HOOKS },
-            )}
+            caption={
+              <T
+                area="docsDeveloper"
+                tags={{ a: ext(ARCHIMATE) }}
+                vars={{ n: PRE_COMMIT_HOOKS }}
+              >
+                {
+                  "CI/CD: the {n} pre-commit hooks and the pre-push suite on the workstation, the pull request checks, and what runs on main (<a>ArchiMate 3.2</a>)"
+                }
+              </T>
+            }
           />
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="border border-(--border) rounded-lg p-4">
               <h4 className="font-semibold text-sm mb-2">
-                {t("test.yml: {n} jobs on every push", {
-                  n: facts.workflowJobs["test.yml"].length,
-                })}
+                <a
+                  href={`${REPO_BLOB}/.github/workflows/test.yml`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:opacity-80"
+                >
+                  {t("test.yml: {n} jobs on every push", {
+                    n: facts.workflowJobs["test.yml"].length,
+                  })}
+                </a>
               </h4>
               <ul className="text-(--text-secondary) text-xs space-y-1 list-disc ml-4">
                 {facts.workflowJobs["test.yml"].map((job) => (
@@ -1614,7 +2586,14 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
             </div>
             <div className="border border-(--border) rounded-lg p-4">
               <h4 className="font-semibold text-sm mb-2">
-                {t("pages.yml: Deploy to GitHub Pages")}
+                <a
+                  href={`${REPO_BLOB}/.github/workflows/pages.yml`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:opacity-80"
+                >
+                  {t("pages.yml: Deploy to GitHub Pages")}
+                </a>
               </h4>
               <ol className="text-(--text-secondary) text-xs space-y-1 list-decimal ml-4">
                 <li>
@@ -1644,50 +2623,118 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="border border-(--border) rounded-lg p-4">
               <h4 className="font-semibold text-sm mb-2">
-                {t("nightly.yml: once a night when main changed")}
+                <a
+                  href={`${REPO_BLOB}/.github/workflows/nightly.yml`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:opacity-80"
+                >
+                  {t("nightly.yml: once a night when main changed")}
+                </a>
               </h4>
               <p className="text-(--text-secondary) text-xs">
                 <T
                   area="docsDeveloper"
-                  tags={{ c }}
+                  tags={{
+                    w: ext(WCAG),
+                    o: ext(OWASP),
+                    l: ext(
+                      "https://developer.chrome.com/docs/lighthouse/overview",
+                    ),
+                    f: srcCode("scripts/compliance-baseline.json"),
+                    a: adr(
+                      "ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md",
+                    ),
+                  }}
                   vars={{
                     jobs: facts.workflowJobs["compliance.yml"].join(", "),
                   }}
                 >
                   {
-                    "Playwright E2E with the WCAG 2.2 AA and OWASP/BSI checks against a seeded Neo4j, the Lighthouse budget, and on the full JAD stack: {jobs}. Each compliance suite is held to the floor in <c>scripts/compliance-baseline.json</c>. Skipped when main has no commit since the last green run; a red night opens an issue."
+                    "Playwright E2E with the <w>WCAG 2.2 AA</w> and <o>OWASP</o>/BSI checks against a seeded Neo4j, the <l>Lighthouse</l> budget, and on the full JAD stack: {jobs}. Each compliance suite is held to the floor in <f>scripts/compliance-baseline.json</f>. Skipped when main has no commit since the last green run; a red night opens an issue (<a>ADR-074</a>)."
                   }
                 </T>
               </p>
             </div>
             <div className="border border-(--border) rounded-lg p-4">
               <h4 className="font-semibold text-sm mb-2">
-                {t("deploy-azure.yml: Azure Deployment")}
+                <a
+                  href={`${REPO_BLOB}/.github/workflows/deploy-azure.yml`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:opacity-80"
+                >
+                  {t("deploy-azure.yml: Azure Deployment")}
+                </a>
               </h4>
               <p className="text-(--text-secondary) text-xs">
-                {t(
-                  "Deploys the 21 Container Apps and their jobs to Azure via OIDC federation. Includes E2E smoke tests against the live Azure environment.",
-                )}
-              </p>
-            </div>
-            <div className="border border-(--border) rounded-lg p-4">
-              <h4 className="font-semibold text-sm mb-2">
-                {t("reset-demo.yml: Demo Reset (manual)")}
-              </h4>
-              <p className="text-(--text-secondary) text-xs">
-                {t(
-                  "Restarts stateful services, re-bootstraps Vault and Keycloak, reseeds data and runs smoke tests. Manual dispatch only since 2026-09-13: the Keycloak realm now holds the Klarbefund client and real accounts, which a scheduled reset would delete.",
-                )}
-              </p>
-            </div>
-            <div className="border border-(--border) rounded-lg p-4">
-              <h4 className="font-semibold text-sm mb-2">
-                {t("aca-schedule.yml: Off-Hours Stop and Start")}
-              </h4>
-              <p className="text-(--text-secondary) text-xs">
-                <T area="docsDeveloper" tags={{ a: offHoursLink }}>
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    u: src(".github/workflows/deploy-azure.yml#L118-L155"),
+                    j: src(".github/workflows/deploy-azure.yml#L157-L177"),
+                    o: ext(
+                      "https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-azure",
+                    ),
+                    s: src(".github/workflows/deploy-azure.yml#L342-L374"),
+                  }}
+                >
                   {
-                    "Stops every Container App except the UI, then the PostgreSQL Flexible Server, daily at 18:00 UTC; starts them in dependency order Monday to Friday at 05:00 UTC, skipping Berlin public holidays (ADR-053). See <a>Live Stack Off Hours</a>."
+                    "Builds the UI and Neo4j proxy images, <u>rolls them out to their two Container Apps</u> and <j>points the off-hours jobs at the commit</j>, signed in to Azure through <o>OIDC federation</o>; then runs <s>E2E smoke, WCAG and security tests</s> against the live Azure environment."
+                  }
+                </T>
+              </p>
+            </div>
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">
+                <a
+                  href={`${REPO_BLOB}/.github/workflows/reset-demo.yml`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:opacity-80"
+                >
+                  {t("reset-demo.yml: Demo Reset (manual)")}
+                </a>
+              </h4>
+              <p className="text-(--text-secondary) text-xs">
+                <T
+                  area="docsDeveloper"
+                  tags={{ a: src(".github/workflows/reset-demo.yml#L3-L15") }}
+                >
+                  {
+                    "Restarts stateful services, re-bootstraps Vault and Keycloak, reseeds data and runs smoke tests. <a>Manual dispatch only since 2026-09-13</a>: the Keycloak realm now holds the Klarbefund client and real accounts, which a scheduled reset would delete."
+                  }
+                </T>
+              </p>
+            </div>
+            <div className="border border-(--border) rounded-lg p-4">
+              <h4 className="font-semibold text-sm mb-2">
+                <a
+                  href={`${REPO_BLOB}/.github/workflows/aca-schedule.yml`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:opacity-80"
+                >
+                  {t("aca-schedule.yml: Off-Hours Stop and Start")}
+                </a>
+              </h4>
+              <p className="text-(--text-secondary) text-xs">
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    a: offHoursLink,
+                    j: adr(
+                      "ADR-058-azure-triggers-the-off-hours-schedule.md?plain=1#L28-L31",
+                    ),
+                    p: ext(
+                      "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-stop-start-server-portal",
+                    ),
+                    s: adr(ADR_053),
+                    w: src(".github/workflows/aca-schedule.yml#L24-L27"),
+                  }}
+                >
+                  {
+                    "<j>Two Container Apps jobs in Azure</j> stop every Container App except the UI, then the <p>PostgreSQL Flexible Server</p>, daily at 18:13 UTC, and start them in dependency order Monday to Friday at 05:17 UTC, skipping Berlin public holidays (<s>ADR-053</s>). This workflow is the manual start and stop, and <w>the fallback an hour later</w>. See <a>Live Stack Off Hours</a>."
                   }
                 </T>
               </p>
@@ -1701,9 +2748,17 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
             {t("Live Stack Off Hours")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            <T area="docsDeveloper" tags={{ c }} vars={{ host: LIVE_HOST }}>
+            <T
+              area="docsDeveloper"
+              tags={{
+                c,
+                s: adr(ADR_053),
+                a: srcCode("ui/src/lib/offline-mode.ts#L1-L18"),
+              }}
+              vars={{ host: LIVE_HOST }}
+            >
               {
-                "Outside office hours the Azure stack is stopped, database included, and <c>{host}</c> answers every page with an offline notice and every data route with <c>503</c>. Local development is not affected: <c>docker compose</c> and <c>npm run dev</c> know nothing of the schedule. To see the notice locally, start the UI with <c>LIVE_DEMO_OFFLINE=true</c>."
+                "Outside office hours the Azure stack is stopped, database included (<s>ADR-053</s>), and <c>{host}</c> answers every page with an offline notice and every data route with <c>503</c>. Local development is not affected: <c>docker compose</c> and <c>npm run dev</c> know nothing of the schedule. To see the notice locally, start the UI with <c>LIVE_DEMO_OFFLINE=true</c> (<a>offline-mode.ts</a>)."
               }
             </T>
           </p>
@@ -1712,8 +2767,12 @@ PLAYWRIGHT_BASE_URL=http://localhost:3003 \\
               <h4 className="font-semibold text-sm mb-2 text-(--success-text)">
                 {t("Working on the live stack at night or at the weekend")}
               </h4>
-              <pre className="text-xs text-(--text-primary) overflow-x-auto">{`# 1. Hold it: no scheduled stop before this instant (UTC)
-gh variable set LIVE_DEMO_HOLD_UNTIL --body "2026-10-10T22:00Z"
+              <pre className="text-xs text-(--text-primary) overflow-x-auto">{`# 1. Hold it: no scheduled stop before this instant (UTC). The tag holds
+#    the Azure job and the workflow; the GitHub variable LIVE_DEMO_HOLD_UNTIL
+#    holds only the workflow (ADR-058)
+az resource update -g rg-mvhd-dev -n mvhd-ui \\
+  --resource-type Microsoft.App/containerApps \\
+  --set tags.live-demo-hold-until=2026-10-10T22:00Z -o none
 
 # 2. Start it (any day, about ten minutes, green only if a login works)
 gh workflow run aca-schedule.yml -f action=start
@@ -1722,7 +2781,9 @@ gh workflow run aca-schedule.yml -f action=start
 az containerapp job start --name mvhd-catalog-crawler --resource-group rg-mvhd-dev
 
 # 4. Done: release the hold and stop it again
-gh variable delete LIVE_DEMO_HOLD_UNTIL
+az resource update -g rg-mvhd-dev -n mvhd-ui \\
+  --resource-type Microsoft.App/containerApps \\
+  --remove tags.live-demo-hold-until -o none
 gh workflow run aca-schedule.yml -f action=stop`}</pre>
             </div>
             <ul className="text-(--text-secondary) text-sm space-y-1 list-disc ml-5">
@@ -1774,14 +2835,20 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
               },
               {
                 title: t("Compliance Runs"),
-                href: `${GITHUB_REPO}/actions/workflows/compliance.yml`,
-                desc: t("DSP TCK, DCP, EHDS compliance results"),
+                // compliance.yml runs inside nightly.yml (workflow_call),
+                // so its runs are listed under the nightly workflow.
+                href: `${GITHUB_REPO}/actions/workflows/nightly.yml`,
+                desc: t(
+                  "The nightly EHDS dataspace, identity and domain checks: our own, not the Eclipse TCKs",
+                ),
                 external: true,
               },
               {
                 title: t("Security Advisories"),
                 href: `${GITHUB_REPO}/security`,
-                desc: t("Trivy SARIF findings and dependency alerts"),
+                desc: t(
+                  "Trivy and grype SARIF findings, CodeQL alerts and dependency alerts",
+                ),
                 external: true,
               },
               {
@@ -1814,9 +2881,17 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
             {t("Security and Data Protection")}
           </h2>
           <p className="text-(--text-secondary) mb-4">
-            <T area="docsDeveloper" tags={{ a: securityLink }}>
+            <T
+              area="docsDeveloper"
+              tags={{
+                a: securityLink,
+                r: src(
+                  "docs/security/security-test-report-2026-10-15.md?plain=1#L54-L65",
+                ),
+              }}
+            >
               {
-                "Tested by the project itself with tools anyone can run on the repository; every finding is fixed or named as open. The test of 2026-10-15 found ten findings, F1 to F10: after the fixes nine are closed and one is reviewed and accepted (F3, the published development default key of the local compose stack). None of this is an independent penetration test or a certification. The reports are published under <a>/docs/security</a>."
+                "Tested by the project itself with tools anyone can run on the repository; every finding is fixed or named as open. <r>The test of 2026-10-15</r> found ten findings, F1 to F10: after the fixes eight are closed and two are reviewed and accepted (F3, the published development default key of the local compose stack, and F4, a public search key the guideline register publishes itself). None of this is an independent penetration test or a certification. The reports are published under <a>/docs/security</a>."
               }
             </T>
           </p>
@@ -1847,30 +2922,67 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
               {
                 title: t("Security scans in CI"),
                 href: `${GITHUB_REPO}/actions/workflows/security-scan.yml`,
-                desc: t(
-                  "grype over the bills and trivy over the images on every push; CodeQL for TypeScript and Swift in their own workflows",
+                // The title is the link, so the sources can be links too.
+                desc: (
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      g: ext(
+                        "https://github.com/anchore/scan-action/releases/tag/v6.0.0",
+                      ),
+                      t: ext(
+                        `https://github.com/aquasecurity/trivy/releases/tag/v${facts.toolVersions.trivy}`,
+                      ),
+                      w: src(".github/workflows/security-scan.yml#L15-L37"),
+                      q: src(".github/workflows/codeql.yml"),
+                      s: src(".github/workflows/codeql-swift.yml"),
+                    }}
+                  >
+                    {
+                      "<g>grype</g> over the bills and <t>trivy</t> over the images <w>every Monday and on a pull request that changes a dependency or an image</w>; CodeQL for <q>TypeScript</q> and <s>Swift</s> in their own workflows"
+                    }
+                  </T>
                 ),
               },
             ].map((r) => (
-              <a
-                key={r.title}
-                href={r.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="border border-(--border) rounded-lg p-4 hover:border-indigo-500/50 transition-colors block"
+              <div
+                key={r.href}
+                className="border border-(--border) rounded-lg p-4 hover:border-indigo-500/50 transition-colors"
               >
-                <h4 className="font-semibold text-sm mb-1 text-indigo-700 dark:text-indigo-400 inline-flex items-center gap-1">
-                  {r.title}
-                  <ExternalLink size={12} />
+                <h4 className="font-semibold text-sm mb-1 text-indigo-700 dark:text-indigo-400">
+                  <a
+                    href={r.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 hover:underline"
+                  >
+                    {r.title}
+                    <ExternalLink size={12} />
+                  </a>
                 </h4>
                 <p className="text-(--text-secondary) text-xs">{r.desc}</p>
-              </a>
+              </div>
             ))}
           </div>
           <p className="text-(--text-secondary) text-sm mt-4">
-            <T area="docsDeveloper" tags={{ c }}>
+            <T
+              area="docsDeveloper"
+              tags={{
+                c,
+                g: srcCode("scripts/security/generate-sbom.sh"),
+                s: srcCode("scripts/security/scan-repo.sh"),
+                h: srcCode("scripts/security/check-hub-blackbox.sh"),
+                p: srcCode(
+                  "clients/ios/Tests/SharedTests/SecurityPostureTests.swift",
+                ),
+                x: adr("ADR-011-security-testing.md"),
+                y: adr(
+                  "ADR-060-the-app-locks-with-face-id-and-answers-pinning-and-jailbreak-detection.md",
+                ),
+              }}
+            >
               {
-                "Run it again: <c>scripts/security/generate-sbom.sh --check</c>, <c>scripts/security/scan-repo.sh</c>, <c>scripts/security/check-hub-blackbox.sh</c> and <c>swift test --filter SecurityPostureTests</c> in <c>clients/ios</c>. Decisions: ADR-011 (testing strategy) and ADR-060 (the app lock; why pinning and jailbreak detection were declined)."
+                "Run it again: <g>scripts/security/generate-sbom.sh</g> <c>--check</c>, <s>scripts/security/scan-repo.sh</s>, <h>scripts/security/check-hub-blackbox.sh</h> and <c>swift test --filter</c> <p>SecurityPostureTests</p> in <c>clients/ios</c>. Decisions: <x>ADR-011</x> (security testing) and <y>ADR-060</y> (the app lock; why pinning and jailbreak detection were declined)."
               }
             </T>
           </p>
@@ -1926,9 +3038,16 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ c }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      c,
+                      p: srcCode("ui/src/content/published-docs.json"),
+                      k: src(".pre-commit-config.yaml#L226-L231"),
+                    }}
+                  >
                     {
-                      "Run <c>python3 scripts/gen-docs-content.py</c> and stage <c>ui/src/content/published-docs.json</c>; pre-commit runs its <c>--check</c>, so the copy never drifts from the source."
+                      "Run <c>python3 scripts/gen-docs-content.py</c> and stage <p>ui/src/content/published-docs.json</p>; pre-commit runs <k>its --check</k>, so the copy never drifts from the source."
                     }
                   </T>
                 </li>
@@ -1962,10 +3081,12 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
                     c,
                     a: repoFile("ui/src/app/docs/developer/page.tsx"),
                     m: repoFile("ui/src/messages", "tree"),
+                    u: srcCode("ui/src/lib/i18n/translate.tsx"),
+                    i: srcCode("ui/__tests__/unit/lib/i18n-messages.test.ts"),
                   }}
                 >
                   {
-                    "A page under <c>ui/src/app/docs/</c> is a React component, like this guide, <a>developer/page.tsx</a>. Its texts go through <c>useT()</c> and the dictionaries in <m>ui/src/messages/</m>, one per language; <c>i18n-messages.test.ts</c> fails on a text without an entry."
+                    "A page under <c>ui/src/app/docs/</c> is a React component, like this guide, <a>developer/page.tsx</a>. Its texts go through <u>useT()</u> and the dictionaries in <m>ui/src/messages/</m>, one per language; <i>i18n-messages.test.ts</i> fails on a text without an entry."
                   }
                 </T>
               </p>
@@ -2019,17 +3140,26 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
                       b: repoFile(
                         "docs/architecture/diagrams/cicd-pipeline.labels.json",
                       ),
+                      r: srcCode("scripts/render-plantuml.sh"),
+                      p: srcCode("scripts/render-plantuml-i18n.py"),
                     }}
                   >
                     {
-                      "Render it with <c>scripts/render-plantuml.sh</c> (needs <c>brew install plantuml</c>) to <a>img/cicd-pipeline.svg</a>; translate its labels in <b>cicd-pipeline.labels.json</b> and run <c>python3 scripts/render-plantuml-i18n.py</c> for the German, French, Dutch and Spanish variants."
+                      "Render it with <r>scripts/render-plantuml.sh</r> (needs <c>brew install plantuml</c>) to <a>img/cicd-pipeline.svg</a>; translate its labels in <b>cicd-pipeline.labels.json</b> and run <c>python3</c> <p>scripts/render-plantuml-i18n.py</p> for the German, French, Dutch and Spanish variants."
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ c, a: cicdLink }}>
+                  <T
+                    area="docsDeveloper"
+                    tags={{
+                      a: cicdLink,
+                      f: srcCode("ui/src/components/docs/DocFigure.tsx"),
+                      v: srcCode("ui/src/components/docs/DocFigureViewer.tsx"),
+                    }}
+                  >
                     {
-                      "Embed it with <c>DocFigure</c> inside a <c>DocFigureViewer</c>, as <a>the CI/CD section</a> of this page does; a click opens it full screen with zoom."
+                      "Embed it with <f>DocFigure</f> inside a <v>DocFigureViewer</v>, as <a>the CI/CD section</a> of this page does; a click opens it full screen with zoom."
                     }
                   </T>
                 </li>
@@ -2053,10 +3183,11 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
                       "ui/__tests__/e2e/capture-guide-screenshots.spec.ts",
                     ),
                     g: repoFile("scripts/gen-localized-images.py"),
+                    l: srcCode("ui/src/components/docs/LocalizedImage.tsx"),
                   }}
                 >
                   {
-                    "The user guide's previews are taken from the public demo by <a>capture-guide-screenshots.spec.ts</a> (<c>CAPTURE_GUIDE=1</c>, one WebP per page, <c>SCREENSHOT_LANG=de</c> for a language) and shown through <c>LocalizedImage</c>; <g>gen-localized-images.py</g> lists the translated variants."
+                    "The user guide's previews are taken from the public demo by <a>capture-guide-screenshots.spec.ts</a> (<c>CAPTURE_GUIDE=1</c>, one WebP per page, <c>SCREENSHOT_LANG=de</c> for a language) and shown through <l>LocalizedImage</l>; <g>gen-localized-images.py</g> lists the translated variants."
                   }
                 </T>
               </p>
@@ -2081,16 +3212,30 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
                 {t("Facts and dates")}
               </h4>
               <p className="text-(--text-secondary) text-xs mb-2">
-                <T area="docsDeveloper" tags={{ c }}>
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    c,
+                    j: srcCode("ui/src/app/docs/docs-facts.json"),
+                    g: srcCode("scripts/gen-docs-facts.py"),
+                  }}
+                >
                   {
-                    "Numbers on these pages (routes, services, hooks, versions) come from <c>ui/src/app/docs/docs-facts.json</c>, written by <c>scripts/gen-docs-facts.py</c> from the repository; the same script keeps each page's last-updated date, and its check fails a commit whose page changed without it. Run <c>python3 scripts/gen-docs-facts.py</c> after editing a docs page."
+                    "Numbers on these pages (routes, services, hooks, versions) come from <j>ui/src/app/docs/docs-facts.json</j>, written by <g>scripts/gen-docs-facts.py</g> from the repository; the same script keeps each page's last-updated date, and its check fails a commit whose page changed without it. Run <c>python3 scripts/gen-docs-facts.py</c> after editing a docs page."
                   }
                 </T>
               </p>
               <p className="text-(--text-secondary) text-xs">
-                <T area="docsDeveloper" tags={{ c, a: cicdLink }}>
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    c,
+                    a: cicdLink,
+                    t: srcCode(".github/workflows/test.yml"),
+                  }}
+                >
                   {
-                    "Example: the job list under <a>CI/CD Pipeline</a> is <c>facts.workflowJobs</c>, so a new job in <c>test.yml</c> appears there by itself."
+                    "Example: the job list under <a>CI/CD Pipeline</a> is <c>facts.workflowJobs</c>, so a new job in <t>test.yml</t> appears there by itself."
                   }
                 </T>
               </p>
@@ -2108,10 +3253,11 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
                       "docs/ADRs/ADR-071-the-documentation-follows-the-language-picker.md",
                     ),
                     e: repoFile("docs/i18n/de/ehds-article-numbering.md"),
+                    s: srcCode("scripts/gen-docs-content.py#L396-L419"),
                   }}
                 >
                   {
-                    "Every page follows the language picker (<a>ADR-071</a>). A published document's translation is <c>docs/i18n/<lang>/<path></c>, stamped with the English file's hash by <c>gen-docs-content.py --stamp</c>, for example <e>the German article numbering</e>; <c>--report-i18n</c> lists what is missing or stale. A page's texts live in the dictionaries, a diagram's in its <c>.labels.json</c>, a screenshot's variant in a <c><lang>/</c> folder next to it."
+                    "Every page follows the language picker (<a>ADR-071</a>). A published document's translation is <c>docs/i18n/<lang>/<path></c>, stamped with the English file's hash by <s>gen-docs-content.py --stamp</s>, for example <e>the German article numbering</e>; <c>--report-i18n</c> lists what is missing or stale. A page's texts live in the dictionaries, a diagram's in its <c>.labels.json</c>, a screenshot's variant in a <c><lang>/</c> folder next to it."
                   }
                 </T>
               </p>
@@ -2129,9 +3275,13 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
             alt={t(
               "The data pipeline as a sequence diagram: Synthea loads 127 patients into Neo4j, the Cypher transform maps them to OMOP and copies the codes, then the UI asks the proxy, which runs parameterised Cypher and answers JSON",
             )}
-            caption={t(
-              "Data pipeline: Synthea to Neo4j, then the proxy to the UI (sequence)",
-            )}
+            caption={
+              <T area="docsDeveloper" tags={{ s: ext(SYNTHEA) }}>
+                {
+                  "Data pipeline: <s>Synthea</s> to Neo4j, then the proxy to the UI (sequence)"
+                }
+              </T>
+            }
           />
         </section>
 
@@ -2144,17 +3294,13 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
             <T
               area="docsDeveloper"
               tags={{
-                c,
-                a: (
-                  <Link
-                    href="/docs/developer/sdlc#8-releases-and-versions"
-                    className="underline"
-                  />
-                ),
+                a: releasesLink,
+                p: srcCode("ui/package.json#L3"),
+                r: srcCode(".github/workflows/release.yml"),
               }}
             >
               {
-                "The version is the one in <c>ui/package.json</c>; when a merge to main changes it, <c>release.yml</c> tags it and publishes the release. <a>How releases and the TestFlight builds of the iPhone app work</a>"
+                "The version is the one in <p>ui/package.json</p>; when a merge to main changes it, <r>release.yml</r> tags it and publishes the release. <a>How releases and the TestFlight builds of the iPhone app work</a>"
               }
             </T>
           </p>
@@ -2256,7 +3402,9 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
               {
                 title: "CI/CD Workflows",
                 href: `${GITHUB_REPO}/actions`,
-                desc: "test.yml, pages.yml, compliance.yml, deploy-azure.yml, reset-demo.yml",
+                desc: t(
+                  "pr-gate.yml, test.yml, nightly.yml with compliance.yml, security-scan.yml, codeql.yml, codeql-swift.yml, pages.yml, deploy-azure.yml, release.yml, aca-schedule.yml, reset-demo.yml, and one-off operations workflows",
+                ),
               },
               {
                 title: t("SIMPL-Open Gap Analysis"),
@@ -2298,9 +3446,15 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
           <div className="border border-(--border) rounded-lg p-4">
             <ul className="text-(--text-secondary) text-sm space-y-2">
               <li>
-                <T area="docsDeveloper" tags={{ b }}>
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    b,
+                    a: ext("https://www.conventionalcommits.org/en/v1.0.0/"),
+                  }}
+                >
                   {
-                    "<b>Commit messages:</b> Conventional Commits format (feat:, fix:, docs:, chore:)"
+                    "<b>Commit messages:</b> <a>Conventional Commits</a> format (feat:, fix:, docs:, chore:)"
                   }
                 </T>
               </li>
@@ -2312,18 +3466,38 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
               <li>
                 <T
                   area="docsDeveloper"
-                  tags={{ b, a: qualityGatesLink }}
+                  tags={{
+                    b,
+                    a: qualityGatesLink,
+                    f: srcCode(".pre-commit-config.yaml"),
+                    p: ext(
+                      "https://github.com/prettier/prettier/releases/tag/3.1.0",
+                    ),
+                    s: ext("https://semgrep.dev/docs/"),
+                    g: ext(
+                      `https://github.com/gitleaks/gitleaks/releases/tag/v${facts.toolVersions.gitleaks}`,
+                    ),
+                  }}
                   vars={{ n: PRE_COMMIT_HOOKS }}
                 >
                   {
-                    "<b>Pre-commit:</b> {n} hooks, listed on the <a>quality gates page</a>: Prettier, ESLint, TypeScript, Semgrep, gitleaks, the API collection check and more"
+                    "<b>Pre-commit:</b> {n} hooks in <f>.pre-commit-config.yaml</f>, listed on the <a>quality gates page</a>: <p>Prettier</p>, ESLint, TypeScript, <s>Semgrep</s>, <g>gitleaks</g>, the API collection check and more"
                   }
                 </T>
               </li>
               <li>
-                <T area="docsDeveloper" tags={{ b }}>
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    b,
+                    v: src(".pre-commit-config.yaml#L83-L92"),
+                    n: src(".pre-commit-config.yaml#L281-L292"),
+                    p: src(".pre-commit-config.yaml#L94-L108"),
+                    q: src(".pre-commit-config.yaml#L110-L125"),
+                  }}
+                >
                   {
-                    "<b>Pre-push:</b> Full Vitest suite (--bail), npm audit (HIGH+), and CodeQL on the iPhone app when it changed"
+                    "<b>Pre-push:</b> <v>Full Vitest suite (--bail)</v>, <n>npm audit (HIGH+)</n>, and, when the iPhone app changed, <p>its analyte parity check</p> and <q>CodeQL</q>"
                   }
                 </T>
               </li>
@@ -2335,9 +3509,16 @@ gh workflow run aca-schedule.yml -f action=stop`}</pre>
                 </T>
               </li>
               <li>
-                <T area="docsDeveloper" tags={{ b }}>
+                <T
+                  area="docsDeveloper"
+                  tags={{
+                    b,
+                    s: src("ui/tsconfig.json#L6"),
+                    p: src("ui/tsconfig.json#L20-L22"),
+                  }}
+                >
                   {
-                    "<b>TypeScript:</b> Strict mode, no any, @/* path alias → ui/src/*"
+                    "<b>TypeScript:</b> <s>Strict mode</s>, no any, <p>@/* path alias → ui/src/*</p>"
                   }
                 </T>
               </li>
