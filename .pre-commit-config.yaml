@@ -46,15 +46,19 @@ repos:
         # matches the hook's file pattern but is not a Dockerfile.
         exclude: \.dockerignore$
 
-  # Flexible linter/formatter suitable for Markdown, JS, TS, YAML, and JSON.
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.1.0
+  # Formatter for Markdown, JS, TS, YAML and JSON. It runs the Prettier that
+  # ui/package.json pins, so the hook and `npx prettier` in ui/ are the same
+  # version. The hook used to fetch its own copy (mirrors-prettier, archived),
+  # and ui/ had none, so npx took the newest release, which formats about 70
+  # files differently and the hook then undid it.
+  - repo: local
     hooks:
       - id: prettier
+        name: prettier
+        language: system
+        entry: bash -c '[ -x ui/node_modules/.bin/prettier ] || { echo "prettier is not installed, run npm ci in ui/"; exit 1; }; exec ui/node_modules/.bin/prettier --write --ignore-unknown "$@"' --
         types_or: [javascript, jsx, ts, tsx, json, yaml, markdown]
         exclude: ^jad/openapi/
-        additional_dependencies:
-          - prettier@3.1.0
 
   # TypeScript type-checking — catches type errors in source files before commit
   - repo: local
@@ -120,7 +124,8 @@ repos:
         pass_filenames: false
         stages: [pre-push]
 
-  # Secret scanning — gitleaks on staged diff (BSI C5 DEV-08)
+  # Secret scanning: gitleaks on the staged diff (BSI C5:2020 CRY-04 secure key management,
+  # https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf#page=83)
   # A finding fails the commit. The entry used to be `gitleaks ... && ... || echo`,
   # so a finding fell through to the echo and the hook passed (2026-10-03).
   # Catches tokens/passwords before they reach CI or remote.
@@ -274,7 +279,8 @@ repos:
         pass_filenames: false
         stages: [pre-commit]
 
-  # npm dependency audit — HIGH/CRITICAL CVEs on pre-push (BSI C5 DEV-05)
+  # npm dependency audit: HIGH/CRITICAL CVEs on pre-push (BSI C5:2020 PSS-02 and OPS-22,
+  # https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf#page=114 and #page=72)
   # Requires: node/npm in PATH. Strict except for the advisories listed, with
   # a reason, an issue and an expiry date, in docs/npm-audit-exceptions.json
   # (#435: an advisory with no patched version blocked every push).

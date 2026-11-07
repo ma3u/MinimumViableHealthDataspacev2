@@ -21,7 +21,6 @@ import {
   stopContainerGroup,
 } from "@/lib/azure-arm";
 import {
-  SPE_COLD_START_SECONDS,
   speEtaSeconds,
   spePowerState,
   type SpeArmPower,
@@ -118,6 +117,32 @@ export type PowerOutcome =
   | { ok: true; id: SpeId; group: string; state: "starting" | "stopped" }
   | { ok: false; id: SpeId; group: string; status: number; message: string };
 
+/**
+ * How long a caller waits for ARM's answer to a start or stop. ARM refuses at
+ * once (403 without the role, 404 without the group) and answers a stop
+ * within a second, but accepts a start only after 15 to 40 s (lib/azure-arm.ts,
+ * ARM_POWER_TIMEOUT_MS). A start it has not refused by then counts as asked:
+ * nobody waits half a minute to be told a workspace is starting.
+ */
+const POWER_ANSWER_WAIT_MS = 3_000;
+
+const NO_ANSWER = Symbol("no answer");
+
+/** `p`'s value, or NO_ANSWER when it has not settled within `ms`. */
+function answeredWithin<T>(
+  p: Promise<T>,
+  ms: number,
+): Promise<T | typeof NO_ANSWER> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const late = new Promise<typeof NO_ANSWER>((resolve) => {
+    timer = setTimeout(() => resolve(NO_ANSWER), ms);
+  });
+  return Promise.race([p, late]).finally(() => clearTimeout(timer));
+}
+
+const errorText = (err: unknown) =>
+  err instanceof Error ? err.message : String(err);
+
 /** Starts or stops one group; never throws, the outcome says what happened. */
 export async function powerGroup(
   action: "start" | "stop",
@@ -134,29 +159,45 @@ export async function powerGroup(
       message: "not on the Azure deployment",
     };
   }
-  try {
-    if (action === "start") {
-      await startContainerGroup(target.sub, target.rg, group);
-    } else {
-      await stopContainerGroup(target.sub, target.rg, group);
-    }
-    console.warn(`[spe-power] ${action} ${group} (${id}) from the hub`);
+  const call = (
+    action === "start"
+      ? startContainerGroup(target.sub, target.rg, group)
+      : stopContainerGroup(target.sub, target.rg, group)
+  ).then(
+    () => {
+      console.warn(`[spe-power] ${action} ${group} (${id}) from the hub`);
+      return null;
+    },
+    (err: unknown) => ({ err }),
+  );
+  const answer = await answeredWithin(call, POWER_ANSWER_WAIT_MS);
+  if (answer === NO_ANSWER) {
+    // ARM has the request and has not refused it; it goes on without us.
+    void call.then((late) => {
+      if (late) {
+        console.warn(
+          `[spe-power] ARM answered the ${action} of ${group} (${id}) late with an error: ${errorText(
+            late.err,
+          )}`,
+        );
+      }
+    });
+  }
+  if (answer === NO_ANSWER || answer === null) {
     return {
       ok: true,
       id,
       group,
       state: action === "start" ? "starting" : "stopped",
     };
-  } catch (err) {
-    const status = err instanceof ArmError ? err.status : 502;
-    return {
-      ok: false,
-      id,
-      group,
-      status,
-      message: err instanceof Error ? err.message : String(err),
-    };
   }
+  return {
+    ok: false,
+    id,
+    group,
+    status: answer.err instanceof ArmError ? answer.err.status : 502,
+    message: errorText(answer.err),
+  };
 }
 
 /** The answer to an ARM 403: the hub's identity lacks the role, and the fix. */
@@ -177,65 +218,89 @@ export function identityLacksRoleBody(group: string): {
   };
 }
 
+/** A workspace ARM reports stopped or starting; null when it runs or ARM cannot tell. */
+function notUpEntry(
+  id: SpeId,
+  power: SpeArmPower | null,
+  now: number,
+): SpeColdStartEntry | null {
+  if (!power) return null;
+  const state = spePowerState(power, undefined, now);
+  if (state === "running" || state === "unreachable") return null;
+  return { id, state, etaSeconds: speEtaSeconds(state, power, now) };
+}
+
 /**
- * The cold-start gate in front of a federated query (ADR-072). On Azure, asks
- * ARM whether both workspaces run. When one does not, starts it if the
- * caller's roles allow, and answers 503 with which workspace and how long;
- * otherwise null, and the query goes on. ARM unknown means go on: the proxy
- * leaves a workspace that does not answer out, as before.
+ * The workspaces among `ids` that ARM reports stopped or starting, without
+ * starting any. Empty off Azure and when ARM cannot tell: then the proxy
+ * answers for them, leaving out one that does not answer, as before.
  */
-export async function speColdStartGate(
-  roles: string[],
+export async function speNotUp(
+  ids: readonly SpeId[] = SPE_IDS,
   now: number = Date.now(),
-): Promise<NextResponse<SpeColdStartBody> | null> {
-  if (!spePowerAvailable()) return null;
-  const arm = await readArmPower();
-  const mayStart = roles.some((r) =>
-    (SPE_QUERY_START_ROLES as string[]).includes(r),
-  );
-  const notUp: SpeColdStartEntry[] = [];
-  let started = false;
-  for (const id of SPE_IDS) {
-    const power = arm[id];
-    if (!power) continue;
-    const state = spePowerState(power, undefined, now);
-    if (state === "running" || state === "unreachable") continue;
-    if (state === "stopped" && mayStart) {
-      const outcome = await powerGroup("start", id);
-      if (outcome.ok) {
-        started = true;
-        notUp.push({
-          id,
-          state: "starting",
-          etaSeconds: SPE_COLD_START_SECONDS,
-        });
-        continue;
-      }
-      console.warn(
-        `[spe-power] a query could not start ${id}: ${outcome.status} ${outcome.message}`,
-      );
-    }
-    notUp.push({
-      id,
-      state: state === "starting" ? "starting" : "stopped",
-      etaSeconds: speEtaSeconds(state, power, now),
-    });
-  }
-  if (notUp.length === 0) return null;
+): Promise<SpeColdStartEntry[]> {
+  if (!spePowerAvailable()) return [];
+  const arm = await readArmPower(ids);
+  return ids
+    .map((id) => notUpEntry(id, arm[id], now))
+    .filter((e): e is SpeColdStartEntry => e !== null);
+}
+
+function coldStartError(first: SpeColdStartEntry): string {
+  return first.state === "starting"
+    ? `${first.id} is starting (cold start, about 3 to 4 minutes): attesting, releasing the key, loading the data. Try again in a few minutes.`
+    : `${first.id} is stopped. An operator or the access body starts it on /admin/attestation.`;
+}
+
+/** The 503 with Retry-After a request gets while workspaces it needs are not up. */
+export function speColdStartResponse(
+  notUp: SpeColdStartEntry[],
+  started: boolean,
+  error: string = coldStartError(notUp[0]),
+): NextResponse<SpeColdStartBody> {
   const first = notUp[0];
   return NextResponse.json(
-    {
-      error:
-        first.state === "starting"
-          ? `${first.id} is starting (cold start, about 3 to 4 minutes): attesting, releasing the key, loading the data. Try again in a few minutes.`
-          : `${first.id} is stopped. An operator or the access body starts it on /admin/attestation.`,
-      spe: first,
-      spes: notUp,
-      started,
-    },
+    { error, spe: first, spes: notUp, started },
     {
       status: 503,
       headers: { "Retry-After": String(first.etaSeconds) },
     },
   );
+}
+
+/**
+ * The cold-start gate in front of a federated query (ADR-072), or of an
+ * import into one workspace (`ids`, #915). On Azure, asks ARM whether the
+ * workspaces run. When one does not, starts it if the caller's roles allow,
+ * and answers 503 with which workspace and how long; otherwise null, and the
+ * query goes on. ARM unknown means go on: the proxy leaves a workspace that
+ * does not answer out, as before. The starts run side by side, each waiting
+ * at most POWER_ANSWER_WAIT_MS for ARM.
+ */
+export async function speColdStartGate(
+  roles: string[],
+  now: number = Date.now(),
+  ids: readonly SpeId[] = SPE_IDS,
+): Promise<NextResponse<SpeColdStartBody> | null> {
+  const notUp = await speNotUp(ids, now);
+  if (notUp.length === 0) return null;
+  const mayStart = roles.some((r) =>
+    (SPE_QUERY_START_ROLES as string[]).includes(r),
+  );
+  let started = false;
+  const entries = await Promise.all(
+    notUp.map(async (entry): Promise<SpeColdStartEntry> => {
+      if (entry.state !== "stopped" || !mayStart) return entry;
+      const outcome = await powerGroup("start", entry.id as SpeId);
+      if (outcome.ok) {
+        started = true;
+        return { ...entry, state: "starting" };
+      }
+      console.warn(
+        `[spe-power] a query could not start ${entry.id}: ${outcome.status} ${outcome.message}`,
+      );
+      return entry;
+    }),
+  );
+  return speColdStartResponse(entries, started);
 }

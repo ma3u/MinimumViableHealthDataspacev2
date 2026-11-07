@@ -1,19 +1,21 @@
 /**
- * The two participant routes driven against a real HTTP Tenant Manager rather
- * than a mocked edcClient, with the exact payloads read from the Azure
- * deployment on 2026-09-26 (issue #203).
+ * /api/participants/me driven against a real HTTP control plane and
+ * IdentityHub rather than a mocked edcClient, with the payloads read from the
+ * local EDC 1.0 stack on 2026-11-05 (ADR-078, #881).
  *
- * The unit tests above mock `edcClient`, so they prove the logic but not that
- * it survives the wire format. This one starts a server, points EDC_TENANT_URL
- * at it, and checks that a tenant whose activities have been pending since
- * 2026-09-17 comes back labelled stalled.
+ * The unit tests mock `edcClient`, so they prove the logic but not that it
+ * survives the wire format. This one starts a server, points the management
+ * and identity URLs at it, and checks that a seeded context and one
+ * onboarded through the hub come back in the shape the onboarding page reads.
  */
 import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { createServer, type Server } from "http";
 import { AddressInfo } from "net";
 
 // Auth is the only thing stubbed: these routes are behind a Keycloak session
-// and this test is about the Tenant Manager, not about the guard.
+// and this test is about the wire format, not about the guard. The client's
+// service-token request reaches this server too, gets no token, and the
+// client goes on without one.
 vi.mock("@/lib/auth-guard", () => ({
   requireAuth: vi.fn().mockResolvedValue({
     session: { user: { id: "u" }, roles: ["EDC_ADMIN"], accessToken: "t" },
@@ -21,55 +23,29 @@ vi.mock("@/lib/auth-guard", () => ({
   isAuthError: () => false,
 }));
 
-/** Verbatim from `GET /api/v1alpha1/tenants` on mvhd-tenant-mgr. */
-const TENANTS = [
+/** `GET /api/mgmt/v5/participants` on the 1.0 control plane: every context CREATED. */
+const CONTEXTS = [
   {
-    id: "3ff36995-3fb0-4298-8daa-fb119565f1f9",
-    version: 0,
-    properties: {
-      displayName: "Madrid Hospital",
-      ehdsParticipantType: "data-holder",
-      organization: "Madrid Hospital",
-      role: "data-holder",
-    },
+    "@type": "ParticipantContext",
+    "@id": "32d56110-e68a-4c1f-9d2e-6f0a8b7c5d41",
+    identity: "did:web:identityhub%3A7083:alpha-klinik",
+    properties: {},
+    state: "CREATED",
+    "@context": ["https://w3id.org/edc/connector/management/v2"],
   },
-];
-
-/** Verbatim from `GET .../participant-profiles`, pending for nine days. */
-const PROFILES = [
   {
-    id: "c4d96f14-d4bf-4cfc-a93c-cd88c0f0efef",
-    version: 0,
-    identifier: "",
-    tenantId: "3ff36995-3fb0-4298-8daa-fb119565f1f9",
-    participantRoles: {},
-    vpas: [
-      {
-        id: "1644796b-6ee2-41e5-a882-01492c723ecd",
-        version: 0,
-        state: "pending",
-        stateTimestamp: "2026-09-17T19:53:20.110489769Z",
-        type: "cfm.connector",
-        cellId: "89d97b22-9474-4223-a5bc-d5f7510e651b",
-      },
-      {
-        id: "4c117f29-7e6b-41c5-a229-23338f517d17",
-        version: 0,
-        state: "pending",
-        stateTimestamp: "2026-09-17T19:53:20.110491569Z",
-        type: "cfm.credentialservice",
-        cellId: "89d97b22-9474-4223-a5bc-d5f7510e651b",
-      },
-      {
-        id: "d6953caf-f4e9-4cd0-a51d-090b3161429f",
-        version: 0,
-        state: "pending",
-        stateTimestamp: "2026-09-17T19:53:20.110492969Z",
-        type: "cfm.dataplane",
-        cellId: "89d97b22-9474-4223-a5bc-d5f7510e651b",
-      },
-    ],
-    error: false,
+    "@type": "ParticipantContext",
+    "@id": "cfb1ffeb-25f7-48d7-bab2-d991f91fa5c6",
+    identity: "did:web:identityhub%3A7083:riverside-general-4f2a91",
+    properties: {
+      displayName: "Riverside General",
+      organization: "Riverside General",
+      role: "data-holder",
+      ehdsParticipantType: "data-holder",
+      registeredAt: "2026-09-17T19:53:20.110Z",
+    },
+    state: "CREATED",
+    "@context": ["https://w3id.org/edc/connector/management/v2"],
   },
 ];
 
@@ -77,30 +53,43 @@ let server: Server;
 
 beforeAll(async () => {
   server = createServer((req, res) => {
-    const body = req.url?.includes("/participant-profiles")
-      ? PROFILES
-      : TENANTS;
+    let body: unknown = [];
+    if (req.url?.startsWith("/api/mgmt/v5/participants")) body = CONTEXTS;
+    // IdentityHub holds AlphaKlinik's MembershipCredential, not Riverside's.
+    else if (req.url?.includes(`${CONTEXTS[0]["@id"]}/credentials`))
+      body = [{ id: "vc-1", state: 500 }];
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify(body));
   });
   await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
   const { port } = server.address() as AddressInfo;
-  process.env.EDC_TENANT_URL = `http://127.0.0.1:${port}/api`;
+  process.env.EDC_MANAGEMENT_URL = `http://127.0.0.1:${port}/api/mgmt`;
+  process.env.EDC_IDENTITY_URL = `http://127.0.0.1:${port}/api/identity`;
+  process.env.KEYCLOAK_INTERNAL_URL = `http://127.0.0.1:${port}`;
 });
 
 afterAll(() => new Promise<void>((r) => server.close(() => r())));
 
-describe("/api/participants/me against a real Tenant Manager", () => {
-  it("labels the nine-day-old registration stalled, over the wire", async () => {
+describe("/api/participants/me against a real control plane", () => {
+  it("lists the seeded context active and the stuck registration stalled, over the wire", async () => {
     const { GET } = await import("@/app/api/participants/me/route");
     const listed = await (await GET()).json();
 
-    expect(listed).toHaveLength(1);
-    expect(listed[0].properties.displayName).toBe("Madrid Hospital");
-    expect(listed[0].vpaSummary.total).toBe(3);
-    expect(listed[0].vpaSummary.pending).toBe(3);
-    expect(listed[0].provisioningStalled).toBe(true);
-    expect(listed[0].stalledReason).toContain("cfm.connector");
-    expect(listed[0].stalledReason).toContain("no DID was registered");
+    expect(listed).toHaveLength(2);
+    const byName = Object.fromEntries(
+      listed.map((t: { properties: { displayName: string } }) => [
+        t.properties.displayName,
+        t,
+      ]),
+    );
+    expect(byName["AlphaKlinik Berlin"].provisioningComplete).toBe(true);
+    const riverside = byName["Riverside General"];
+    expect(riverside.id).toBe("cfb1ffeb-25f7-48d7-bab2-d991f91fa5c6");
+    expect(riverside.provisioningComplete).toBe(false);
+    expect(riverside.provisioningStalled).toBe(true);
+    expect(riverside.stalledReason).toContain("MembershipCredential");
+    expect(riverside.participantProfiles[0].identifier).toBe(
+      "did:web:identityhub%3A7083:riverside-general-4f2a91",
+    );
   });
 });

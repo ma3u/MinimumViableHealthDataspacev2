@@ -86,10 +86,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const outcomes = [];
-  for (const id of ids) {
-    outcomes.push(await powerGroup(action, id));
-  }
+  // Side by side: each may wait a few seconds for ARM (powerGroup).
+  const outcomes = await Promise.all(ids.map((id) => powerGroup(action, id)));
   const failed = outcomes.find((o) => !o.ok);
   if (failed && !failed.ok) {
     if (failed.status === 403) {

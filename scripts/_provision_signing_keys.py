@@ -148,7 +148,7 @@ def main():
 
         # Get existing keypair info
         kps = http_req(
-            f"{IDENTITY_API}/v1alpha/participants/{ctx_id}/keypairs",
+            f"{IDENTITY_API}/v1/participants/{ctx_id}/keypairs",
             headers=mgmt_headers,
         )
         if isinstance(kps, dict) and "error" in kps:
@@ -179,7 +179,7 @@ def main():
 
         # Also get participant vault folder and store there too
         p = http_req(
-            f"{IDENTITY_API}/v1alpha/participants/{ctx_id}",
+            f"{IDENTITY_API}/v1/participants/{ctx_id}",
             headers=mgmt_headers,
         )
         vault_config = p.get("properties", {}).get("edc.vault.hashicorp.config", {})

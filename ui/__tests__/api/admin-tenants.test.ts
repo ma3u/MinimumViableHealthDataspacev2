@@ -1,14 +1,15 @@
 /**
  * API route tests for /api/admin/tenants
  *
- * Tests the admin tenant listing endpoint.
+ * Tests the admin tenant listing endpoint. A participant is its control plane
+ * context since ADR-078; Neo4j backs the list when the control plane is down.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/lib/edc", () => ({
   edcClient: {
     management: vi.fn(),
-    tenant: vi.fn(),
+    identity: vi.fn(),
   },
   EDC_CONTEXT: "https://w3id.org/edc/connector/management/v2",
 }));
@@ -22,43 +23,67 @@ import { runQuery } from "@/lib/neo4j";
 import { GET } from "@/app/api/admin/tenants/route";
 
 const mockManagement = vi.mocked(edcClient.management);
-const mockTenant = vi.mocked(edcClient.tenant);
+const mockIdentity = vi.mocked(edcClient.identity);
 const mockRunQuery = vi.mocked(runQuery);
 
 describe("GET /api/admin/tenants", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    mockManagement.mockReset();
+    mockIdentity.mockReset();
+    mockRunQuery.mockReset();
   });
 
-  it("should return enriched tenants with participant data", async () => {
-    const mockTenants = [
+  it("lists the control plane's contexts as tenants and participants", async () => {
+    mockManagement.mockResolvedValue([
       {
-        id: "t-1",
-        version: 1,
+        "@id": "ctx-1",
+        identity: "did:web:identityhub%3A7083:test-clinic-1a2b3c",
+        state: "CREATED",
         properties: { displayName: "Test Clinic", role: "data_holder" },
       },
-    ];
-    const mockParticipants = [
-      { "@id": "ctx-1", identity: "did:web:spe-1", state: "ACTIVE" },
-    ];
-
-    mockTenant
-      .mockResolvedValueOnce(mockTenants) // /v1alpha1/tenants
-      .mockResolvedValueOnce([{ profileId: "p1" }]); // profiles for t-1
-    mockManagement.mockResolvedValue(mockParticipants);
+      {
+        "@id": "ctx-lmc",
+        identity: "did:web:identityhub%3A7083:lmc",
+        state: "CREATED",
+        properties: {},
+      },
+    ]);
+    mockIdentity.mockResolvedValue([{ id: "vc" }]);
 
     const response = await GET();
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    expect(data.tenants).toHaveLength(1);
-    expect(data.participants).toHaveLength(1);
-    expect(data.summary.totalTenants).toBe(1);
-    expect(data.summary.byRole.data_holder).toBe(1);
+    expect(data.source).toBe("controlplane");
+    expect(data.tenants.map((t: { id: string }) => t.id)).toEqual([
+      "ctx-1",
+      "ctx-lmc",
+    ]);
+    expect(data.tenants[1].properties.displayName).toBe(
+      "Limburg Medical Centre",
+    );
+    expect(data.participants).toEqual([
+      {
+        "@id": "ctx-1",
+        identity: "did:web:identityhub%3A7083:test-clinic-1a2b3c",
+        state: "CREATED",
+      },
+      {
+        "@id": "ctx-lmc",
+        identity: "did:web:identityhub%3A7083:lmc",
+        state: "CREATED",
+      },
+    ]);
+    expect(data.summary).toMatchObject({
+      totalTenants: 2,
+      totalParticipants: 2,
+      byRole: { data_holder: 1, DATA_HOLDER: 1 },
+    });
+    expect(mockRunQuery).not.toHaveBeenCalled();
   });
 
-  it("should return 502 when CFM and Neo4j fallback are both unavailable", async () => {
-    mockTenant.mockRejectedValue(new Error("Connection refused"));
+  it("returns 502 when the control plane and the Neo4j fallback are both unavailable", async () => {
+    mockManagement.mockRejectedValue(new Error("Connection refused"));
     mockRunQuery.mockRejectedValue(new Error("Neo4j unreachable"));
 
     const response = await GET();

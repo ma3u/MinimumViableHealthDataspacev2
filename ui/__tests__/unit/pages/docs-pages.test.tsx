@@ -23,7 +23,13 @@ vi.mock("next/link", () => ({
 
 // Mock MermaidDiagram for pages that use it
 vi.mock("@/components/MermaidDiagram", () => ({
-  default: ({ chart, caption }: { chart: string; caption?: string }) => (
+  default: ({
+    chart,
+    caption,
+  }: {
+    chart: string;
+    caption?: React.ReactNode;
+  }) => (
     <div data-testid="mermaid-diagram">{caption && <span>{caption}</span>}</div>
   ),
 }));
@@ -201,5 +207,67 @@ describe("UserGuidePage", () => {
       screen.getByRole("button", { name: "Show screenshot: Protocol TCK" }),
     );
     expect(dialog).toHaveAttribute("open");
+  });
+
+  const EHDS = "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng";
+  const hrefsOf = (name: string) =>
+    screen.getAllByRole("link", { name }).map((a) => a.getAttribute("href"));
+
+  it("cites the Trust Center's duties where the Regulation states them", () => {
+    render(<UserGuidePage />);
+    // Reversible pseudonyms are Art. 66(3); 73(1)(e) is the access log.
+    expect(hrefsOf("Art. 66(3)")).toContain(`${EHDS}#066.003`);
+    expect(hrefsOf("Art. 73(1)(e)")).toContain(`${EHDS}#073.001`);
+    expect(hrefsOf("Art. 53(1)(e)")).toContain(`${EHDS}#053.001`);
+    expect(hrefsOf("Art. 68(4)")).toContain(`${EHDS}#068.004`);
+  });
+
+  it("names no article that does not say what the text claims", () => {
+    const { container } = render(<UserGuidePage />);
+    const text = container.textContent ?? "";
+    // The proposal's numbers and an operator role the Regulation lacks.
+    expect(text).not.toMatch(/Art\. 3[34]\b|Art\. 52\b|EHDS Art\. 75:/);
+    expect(text).not.toContain("Credential Federated Manager");
+    expect(screen.getAllByText("Not in the Regulation").length).toBe(1);
+  });
+
+  it("says the protocol checks are the hub's own, not the Eclipse TCK", () => {
+    const { container } = render(<UserGuidePage />);
+    expect(hrefsOf("DSP Technology Compatibility Kit")).toEqual([
+      "https://github.com/eclipse-dataspacetck/dsp-tck/releases/tag/v1.0.2",
+    ]);
+    expect(container.textContent).toContain("which has not yet been run");
+    expect(hrefsOf("run-ehds-dataspace-checks.sh")[0]).toMatch(
+      /scripts\/run-ehds-dataspace-checks\.sh#L5-L9$/,
+    );
+  });
+
+  it("dates HealthDCAT-AP by the implementing act, not by Release 8", () => {
+    render(<UserGuidePage />);
+    expect(hrefsOf("latest release")).toEqual([
+      "https://data.health.europa.eu/healthdcat-ap/releases/latest/",
+    ]);
+    expect(hrefsOf("Art. 4")).toEqual([
+      "https://eur-lex.europa.eu/eli/reg_impl/2026/2098/oj/eng#art_4",
+    ]);
+  });
+
+  it("links the sources in the diagram captions", () => {
+    render(<UserGuidePage />);
+    const [workflow, compliance] = screen.getAllByTestId("mermaid-diagram");
+    expect(
+      within(workflow).getByRole("link", { name: "EHDS Art. 57" }),
+    ).toHaveAttribute("href", `${EHDS}#art_57`);
+    expect(
+      within(compliance).getByRole("link", { name: "Art. 67" }),
+    ).toHaveAttribute("href", `${EHDS}#art_67`);
+  });
+
+  it("says the hub provisions participants, CFM only under edc018", () => {
+    const { container } = render(<UserGuidePage />);
+    expect(container.textContent).toContain(
+      "On the default stack the hub provisions it itself",
+    );
+    expect(hrefsOf("ADR-078")[0]).toMatch(/ADR-078-.*#L62-L72$/);
   });
 });

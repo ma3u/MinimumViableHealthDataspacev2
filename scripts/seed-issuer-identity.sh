@@ -15,9 +15,10 @@
 #                           sidecar, at participants/issuer/<url-encoded alias>
 #   2. the participant      jad/seed-jad.sh Step 2, POST to the issuer's own
 #      context              identity API on 10015 from inside the network
-#   3. activation           jad/seed-issuer-identity.sql, then a restart, because
-#                           the API create "does not always complete the full
-#                           activation lifecycle" (the SQL's own words)
+#   3. activation           on 0.18, jad/seed-issuer-identity.sql, then a restart,
+#                           because the API create "does not always complete the
+#                           full activation lifecycle" (the SQL's own words); on
+#                           1.0 the API create is enough (see step 3 below)
 #
 # jad-seed cannot simply run here: it is `set -e` and waits for the CFM
 # TenantManager and ProvisionManager, which a standard runner does not have.
@@ -95,7 +96,7 @@ MANIFEST=$(cat <<JSON
   "roles": ["admin"],
   "serviceEndpoints": [{
     "type": "IssuerService",
-    "serviceEndpoint": "http://issuerservice:10012/api/issuance/v1alpha/participants/issuer",
+    "serviceEndpoint": "http://issuerservice:10012/api/issuance/v1/participants/issuer",
     "id": "issuer-service-1"
   }],
   "active": true,
@@ -130,7 +131,7 @@ MANIFEST=$(cat <<JSON
 JSON
 )
 out=$(printf '%s' "$MANIFEST" | incurl -sS --max-time 30 -o /dev/stderr -w '%{http_code}' \
-  -X POST "http://issuerservice:10015/api/identity/v1alpha/participants" \
+  -X POST "http://issuerservice:10015/api/identity/v1/participants" \
   -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" -d @- 2>/tmp/issuer-identity.body) || out="000"
 body=$(head -c 300 /tmp/issuer-identity.body 2>/dev/null || true); rm -f /tmp/issuer-identity.body
 case "$out" in
@@ -140,10 +141,19 @@ case "$out" in
 esac
 
 # --- 3. Activation records, then a restart to load them ----------------------
-log "applying jad/seed-issuer-identity.sql"
-docker exec -i "$PG_CONTAINER" psql -v ON_ERROR_STOP=1 -q -U issuer -d issuerservice \
-  < "${REPO_DIR}/jad/seed-issuer-identity.sql" \
-  || die "seed-issuer-identity.sql did not apply cleanly"
+# EDC 1.0 (the default, EDC_LINE=v1) activates the context and publishes the DID
+# through the identity API alone: context state 200, DID 300 on the local stack
+# (2026-11-06). The 0.18 SQL would set the context to 300, which 1.0 reads as
+# another state, and in CI it hits an empty 0.18 database and fails. It stays
+# for EDC_LINE=v018. The restart stays too: it is what the 1.0 suites passed with.
+if [ "${EDC_LINE:-v1}" = "v018" ]; then
+  log "applying jad/seed-issuer-identity.sql"
+  docker exec -i "$PG_CONTAINER" psql -v ON_ERROR_STOP=1 -q -U issuer -d issuerservice \
+    < "${REPO_DIR}/jad/seed-issuer-identity.sql" \
+    || die "seed-issuer-identity.sql did not apply cleanly"
+else
+  log "EDC 1.0: the identity API activated the issuer; no activation SQL"
+fi
 if [ "$SKIP_RESTART" = "1" ]; then
   echo -e "  ${YELLOW}~${NC} SKIP_RESTART=1: not restarting ${ISSUER_CONTAINER}"
 else

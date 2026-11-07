@@ -506,7 +506,7 @@
     {
       "id": "prettier",
       "name": "prettier",
-      "source": "mirrors-prettier",
+      "source": "local",
       "stage": "pre-commit"
     },
     {
@@ -697,12 +697,12 @@
       },
       {
         "name": "dataplane-fhir",
-        "profiles": [],
+        "profiles": ["edc018"],
         "ports": ["11002:11002"]
       },
       {
         "name": "dataplane-omop",
-        "profiles": [],
+        "profiles": ["edc018"],
         "ports": ["11012:11012"]
       },
       {
@@ -732,42 +732,42 @@
       },
       {
         "name": "tenant-manager",
-        "profiles": [],
+        "profiles": ["edc018"],
         "ports": ["11006:8080"]
       },
       {
         "name": "provision-manager",
-        "profiles": [],
+        "profiles": ["edc018"],
         "ports": ["11007:8080"]
       },
       {
         "name": "cfm-cp-shim",
-        "profiles": [],
+        "profiles": ["edc018"],
         "ports": []
       },
       {
         "name": "cfm-agents",
-        "profiles": [],
+        "profiles": ["edc018"],
         "ports": []
       },
       {
         "name": "cfm-edcv-agent",
-        "profiles": [],
+        "profiles": ["edc018"],
         "ports": []
       },
       {
         "name": "cfm-registration-agent",
-        "profiles": [],
+        "profiles": ["edc018"],
         "ports": []
       },
       {
         "name": "cfm-onboarding-agent",
-        "profiles": [],
+        "profiles": ["edc018"],
         "ports": []
       },
       {
         "name": "jad-seed",
-        "profiles": ["seed"],
+        "profiles": ["seed", "edc018"],
         "ports": []
       },
       {
@@ -1239,13 +1239,19 @@
       "id": "ADR-076",
       "file": "ADR-076-edc-1-runtimes-are-built-here.md",
       "title": "EDC 1.0 runtimes are built here, from released EDC artifacts",
-      "status": "Accepted"
+      "status": "Superseded"
     },
     {
       "id": "ADR-077",
       "file": "ADR-077-a-minimal-set-of-standard-data-sharing-policies.md",
       "title": "A minimal set of standard data-sharing policies",
       "status": "Proposed"
+    },
+    {
+      "id": "ADR-078",
+      "file": "ADR-078-edc-1-on-container-apps-without-cfm.md",
+      "title": "EDC 1.0 stays on Container Apps, and the hub provisions participants without CFM",
+      "status": "Accepted"
     }
   ],
   "complianceFloors": {
@@ -1258,11 +1264,11 @@
       "max_failed": 0
     },
     "ehds-compliance-results": {
-      "min_passed": 18,
+      "min_passed": 25,
       "max_failed": 0
     },
     "bruno-api-results": {
-      "min_passed": 192,
+      "min_passed": 205,
       "max_failed": 0
     },
     "bruno-api-azure-results": {
@@ -1300,6 +1306,7 @@
     ],
     "compliance.yml": [
       "Image platforms",
+      "edc-images",
       "DSP 2025-1 TCK",
       "DCP v1.0 Compliance",
       "EHDS Health Domain",
@@ -1332,13 +1339,13 @@
   },
   "lastUpdated": {
     "/docs": "2026-11-02",
-    "/docs/user-guide": "2026-11-04",
-    "/docs/developer": "2026-11-05",
-    "/docs/developer/quality-gates": "2026-11-05",
-    "/docs/developer/api": "2026-11-05",
-    "/docs/developer/reference": "2026-11-05",
+    "/docs/user-guide": "2026-11-07",
+    "/docs/developer": "2026-11-07",
+    "/docs/developer/quality-gates": "2026-11-07",
+    "/docs/developer/api": "2026-11-07",
+    "/docs/developer/reference": "2026-11-07",
     "/docs/developer/[slug]": "2026-11-05",
-    "/docs/architecture": "2026-11-05",
+    "/docs/architecture": "2026-11-07",
     "/docs/security": "2026-11-05",
     "/docs/security/[slug]": "2026-11-05",
     "/docs/klarbefund": "2026-11-05",

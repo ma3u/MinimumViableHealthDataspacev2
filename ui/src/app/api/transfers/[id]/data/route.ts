@@ -41,7 +41,7 @@ export async function GET(
   let transfer: Record<string, unknown>;
   try {
     transfer = await edcClient.management<Record<string, unknown>>(
-      `/v5alpha/participants/${participantId}/transferprocesses/${id}`,
+      `/v5/participants/${participantId}/transferprocesses/${id}`,
     );
   } catch (err) {
     console.error(`Transfer ${id} not readable:`, err);

@@ -56,6 +56,11 @@ updates:
         update-types: [version-update:semver-major]
       - dependency-name: eslint-config-next
         update-types: [version-update:semver-major]
+      # Prettier is the pre-commit formatter, pinned exactly. A minor release
+      # changes formatting: 3.1 to 3.9 reformats about 70 files. Move it in a
+      # PR that reformats the repo in one commit, not as part of a group.
+      - dependency-name: prettier
+        update-types: [version-update:semver-major, version-update:semver-minor]
       # Next 16 removed `next lint`, so the lint script needs the eslint CLI
       # and the flat config above; it also changes the request APIs (#609).
       # It moves with eslint-config-next 16 in the same migration.

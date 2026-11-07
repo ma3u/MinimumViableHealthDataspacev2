@@ -2,12 +2,29 @@
  * A transfer's data into an SPE workspace (#876): the bundle becomes one
  * dataset of records and references, written into the SPE the user chose.
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterAll } from "vitest";
+
+// A workspace that hangs is given up on after SPE_CONNECT_TIMEOUT_MS; short
+// here, so the test does not wait the real 5 s. Read when config.ts loads.
+const connectTimeoutBefore = vi.hoisted(() => {
+  const before = process.env.SPE_CONNECT_TIMEOUT_MS;
+  process.env.SPE_CONNECT_TIMEOUT_MS = "50";
+  return before;
+});
+afterAll(() => {
+  if (connectTimeoutBefore === undefined) {
+    delete process.env.SPE_CONNECT_TIMEOUT_MS;
+  } else {
+    process.env.SPE_CONNECT_TIMEOUT_MS = connectTimeoutBefore;
+  }
+});
+
 import {
   bundleToRecords,
   MAX_RECORDS,
   recordFacts,
 } from "../src/spe-import.js";
+import { resetSpeActivity, speLastQueriedAt } from "../src/spe-status.js";
 
 const speDrivers = vi.fn();
 vi.mock("../src/db.js", async (importOriginal) => ({
@@ -115,9 +132,19 @@ function fakeDriver() {
 
 const row = (o: Record<string, unknown>) => ({ get: (k: string) => o[k] });
 
+/** What neo4j-driver throws when a workspace does not take the connection. */
+const serviceUnavailable = () =>
+  Object.assign(
+    new Error(
+      "Failed to connect to server. Caused by: Failed to establish connection in 5000ms",
+    ),
+    { code: "ServiceUnavailable" },
+  );
+
 describe("POST /spe/:speId/import", () => {
   beforeEach(() => {
     speDrivers.mockReset();
+    resetSpeActivity();
   });
 
   it("writes the dataset into the chosen SPE and says what it holds", async () => {
@@ -150,6 +177,9 @@ describe("POST /spe/:speId/import", () => {
     expect(cypher).toContain("MERGE (d)-[:LOADED_INTO]->(w)");
     expect(params.meta).toMatchObject({ speId: "SPE-2", pseudonymised: true });
     expect(spe2.session.close).toHaveBeenCalled();
+    // The import counts as use, so the idle stop (ADR-072) waits for it.
+    expect(speLastQueriedAt("SPE-2")).not.toBeNull();
+    expect(speLastQueriedAt("SPE-1")).toBeNull();
   });
 
   it("refuses a second import into the same SPE unless asked to overwrite", async () => {
@@ -227,6 +257,21 @@ describe("POST /spe/:speId/import", () => {
 
     expect(res.status).toBe(503);
     expect(res.body.error).toMatch(/SPE-2 is not connected/);
+    expect(res.headers["retry-after"]).toBe("60");
+  });
+
+  it("answers 503 with Retry-After, not 500, when the workspace does not take the connection", async () => {
+    const spe1 = fakeDriver();
+    spe1.run.mockRejectedValue(serviceUnavailable());
+    speDrivers.mockReturnValue([{ label: "SPE-1", driver: spe1.driver }]);
+
+    const res = await request
+      .post("/spe/SPE-1/import")
+      .send({ datasetId: "tp-1", bundle: BUNDLE });
+
+    expect(res.status).toBe(503);
+    expect(res.headers["retry-after"]).toBe("60");
+    expect(res.body.error).toBe("SPE-1 does not answer; it may be starting");
   });
 
   it("refuses an unknown SPE", async () => {
@@ -317,6 +362,35 @@ describe("GET /spe/:speId/import/:datasetId/graph", () => {
     expect(res.status).toBe(404);
     expect(res.body.error).toBe("Not found");
   });
+
+  it("answers 503 with Retry-After, not 500, while the workspace does not answer", async () => {
+    // 2026-11-06 on Azure: SPE-1 starting, the driver gave up after 5 s and
+    // the error handler answered 500, which the UI passed on as 502.
+    const spe1 = fakeDriver();
+    spe1.run.mockRejectedValue(serviceUnavailable());
+    speDrivers.mockReturnValue([{ label: "SPE-1", driver: spe1.driver }]);
+
+    const res = await request.get("/spe/SPE-1/import/tp-1/graph");
+
+    expect(res.status).toBe(503);
+    expect(res.headers["retry-after"]).toBe("60");
+    expect(res.body.error).toBe("SPE-1 does not answer; it may be starting");
+    expect(spe1.session.close).toHaveBeenCalled();
+  });
+
+  it("still answers 500 for a failure that is not the workspace being away", async () => {
+    const spe1 = fakeDriver();
+    spe1.run.mockRejectedValue(
+      Object.assign(new Error("Invalid input"), {
+        code: "Neo.ClientError.Statement.SyntaxError",
+      }),
+    );
+    speDrivers.mockReturnValue([{ label: "SPE-1", driver: spe1.driver }]);
+
+    const res = await request.get("/spe/SPE-1/import/tp-1/graph");
+
+    expect(res.status).toBe(500);
+  });
 });
 
 describe("GET /spe/imports", () => {
@@ -355,6 +429,49 @@ describe("GET /spe/imports", () => {
     ]);
     expect(res.body.unreachable).toEqual(["SPE-2"]);
     expect(spe1.run.mock.calls[0][1]).toEqual({ datasetIds: ["tp-1", "tp-2"] });
+  });
+
+  it("does not ask a workspace the UI names in skip, and lists it unreachable", async () => {
+    const spe1 = fakeDriver();
+    const spe2 = fakeDriver();
+    speDrivers.mockReturnValue([
+      { label: "SPE-1", driver: spe1.driver },
+      { label: "SPE-2", driver: spe2.driver },
+    ]);
+
+    const res = await request.get("/spe/imports?datasetIds=tp-1&skip=SPE-2");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ imports: [], unreachable: ["SPE-2"] });
+    expect(spe1.run).toHaveBeenCalledTimes(1);
+    expect(spe2.driver.session).not.toHaveBeenCalled();
+  });
+
+  it("answers within the connect timeout when a workspace hangs, asking the others meanwhile", async () => {
+    const spe1 = fakeDriver();
+    spe1.run.mockReturnValue(new Promise(() => undefined));
+    const spe2 = fakeDriver();
+    spe2.run.mockResolvedValue({
+      records: [
+        row({
+          datasetId: "tp-1",
+          records: 7,
+          importedAt: "2026-11-06T12:00:00Z",
+        }),
+      ],
+    });
+    speDrivers.mockReturnValue([
+      { label: "SPE-1", driver: spe1.driver },
+      { label: "SPE-2", driver: spe2.driver },
+    ]);
+
+    const res = await request.get("/spe/imports?datasetIds=tp-1");
+
+    expect(res.status).toBe(200);
+    expect(res.body.imports.map((i: { speId: string }) => i.speId)).toEqual([
+      "SPE-2",
+    ]);
+    expect(res.body.unreachable).toEqual(["SPE-1"]);
   });
 
   it("needs at least one dataset id", async () => {

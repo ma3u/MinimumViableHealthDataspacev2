@@ -134,16 +134,6 @@ export function provisioningComplete(profiles: ProfileWithVpas[] | undefined) {
   );
 }
 
-/** The sentence the UI shows for a profile the agents gave up on. */
-export function failedReason(): string {
-  return (
-    "A provisioning agent reported an error and the Tenant Manager rolled " +
-    "the participant back, so no DID was registered and no credential " +
-    "issued. The agents' logs name the cause; register again once it is " +
-    "fixed."
-  );
-}
-
 /** The sentence the UI shows for a stalled profile. */
 export function stalledReason(summary: VpaSummary): string {
   const types = summary.pendingTypes.length

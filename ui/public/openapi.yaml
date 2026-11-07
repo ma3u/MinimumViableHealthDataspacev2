@@ -1712,7 +1712,11 @@ paths:
         for roles that do not see patient identity (#475), and has the
         neo4j-proxy write it into the chosen SPE's graph as one dataset,
         SPE-1 unless `speId` names another (EHDS Art. 73, #876). A second
-        import of the same transfer merges onto the first.
+        import of the same transfer merges onto the first. On Azure the
+        workspaces start on demand (ADR-072): a stopped one is started and
+        the import answers 503 with how long. Their store is in memory, so
+        an import lasts until the workspace stops (`untilStopped`); loading
+        it as a sealed extract through the Trustee is #915.
       parameters:
         - name: id
           in: path
@@ -1749,6 +1753,17 @@ paths:
                     additionalProperties: { type: integer }
                   importedAt: { type: string, format: date-time }
                   pseudonymised: { type: boolean }
+                  untilStopped:
+                    type: boolean
+                    description: >-
+                      The workspace keeps the import in memory until it
+                      stops (Azure); not loaded through the Trustee yet
+                  closed:
+                    type: boolean
+                    description: >-
+                      The hub terminated the transfer after the import, with
+                      the reason "Closed after import into SPE-n": the access
+                      to the provider's data ends
                   graphUrl: { type: string }
         "400":
           {
@@ -1764,7 +1779,11 @@ paths:
         "422": { description: The data is not a FHIR Bundle }
         "502":
           description: The token, the data or the import failed; `step` says which
-        "503": { description: The SPE workspace is not connected }
+        "503":
+          description: >-
+            The SPE workspace is not connected, or (Azure) is stopped or
+            starting; then `spe` gives its state and `etaSeconds`, and
+            `started` says whether this call started it
 
   /api/spe-imports:
     get:

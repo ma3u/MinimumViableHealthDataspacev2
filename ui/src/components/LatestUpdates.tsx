@@ -3,6 +3,7 @@
 import { Sparkles } from "lucide-react";
 import { useT } from "@/lib/i18n/translate";
 import type { CatalogLanguage } from "@/lib/metadata-language";
+import { BASE_PATH } from "@/lib/static-export";
 import { useLanguage } from "@/lib/use-language";
 
 const REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
@@ -24,7 +25,7 @@ const pr = (n: number) => ({ label: `#${n}`, href: `${REPO}/pull/${n}` });
  *  that every language has them. */
 export const LATEST_UPDATES: Update[] = [
   {
-    date: "2026-11-05",
+    date: "2026-11-06",
     title: "EDC 1.0, tested before it goes live",
     text: "On the local stack the connector, the identity hub and the issuer run on Eclipse Dataspace Components 1.0 (release candidate 5), with siglet as the data plane, and the hub provisions a new participant itself. The identity, dataspace and health checks pass there as they do on 0.18. The live hub, on EDC 0.18 since October with onboarding on Azure, moves once the final 1.0 is released.",
     links: [
@@ -34,6 +35,22 @@ export const LATEST_UPDATES: Update[] = [
         href: `${REPO}/blob/main/docs/ADRs/ADR-055-azure-runs-the-compose-jad-build.md`,
       },
       ...[593, 615, 878].map(pr),
+    ],
+  },
+  {
+    date: "2026-11-06",
+    title: "Open Solution Award at the HL7 AI Challenge",
+    text: "HL7 has published the recording of its 2026 AI Challenge winners webinar of 14 October. Our part starts at 39:45 and shows why the platform's AI would rather say nothing than say it wrong; the slides are here too.",
+    links: [
+      {
+        label: "Video from 39:45",
+        href: "https://vimeo.com/1237616254/7fd639a118#t=39m45s",
+      },
+      {
+        label: "Slides",
+        href: `${BASE_PATH}/presentations/hl7-showcase-2026/`,
+      },
+      { label: "#66", href: `${REPO}/issues/66` },
     ],
   },
   {

@@ -41,7 +41,7 @@ export function newDidSlug(displayName: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
+    .replace(/^-|-$/g, "") // runs are one hyphen after the line above
     .slice(0, 40);
   const suffix = crypto.randomUUID().slice(0, 6);
   return `${base || "participant"}-${suffix}`;

@@ -49,6 +49,33 @@
   },
   "clientScopes": [
     {
+      "name": "management-api:admin",
+      "description": "Every participant's objects in the Management API of the EDC Control Plane; EDC 1.0 authorizes an operator by this scope (#881)",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      }
+    },
+    {
+      "name": "identity-api:admin",
+      "description": "Every participant's objects in the Identity API of the IdentityHub (EDC 1.0, #881)",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      }
+    },
+    {
+      "name": "issuer-admin-api:admin",
+      "description": "Every participant's objects in the Admin API of the IssuerService (EDC 1.0, #881)",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "false"
+      }
+    },
+    {
       "name": "identity-api:read",
       "description": "Read access to Identity API",
       "protocol": "openid-connect",
@@ -211,7 +238,10 @@
         "identity-api:write",
         "identity-api:read",
         "management-api:write",
-        "management-api:read"
+        "management-api:read",
+        "management-api:admin",
+        "identity-api:admin",
+        "issuer-admin-api:admin"
       ]
     },
     {
@@ -248,7 +278,10 @@
         "identity-api:write",
         "identity-api:read",
         "management-api:write",
-        "management-api:read"
+        "management-api:read",
+        "management-api:admin",
+        "identity-api:admin",
+        "issuer-admin-api:admin"
       ]
     },
     {
@@ -264,6 +297,21 @@
       "directAccessGrantsEnabled": false,
       "fullScopeAllowed": true,
       "protocolMappers": [
+        {
+          "name": "sub-is-participant-context",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-hardcoded-claim-mapper",
+          "consentRequired": false,
+          "config": {
+            "claim.name": "sub",
+            "claim.value": "issuer",
+            "jsonType.label": "String",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "userinfo.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        },
         {
           "name": "participantContextId",
           "protocol": "openid-connect",

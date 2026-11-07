@@ -29,7 +29,7 @@ set -uo pipefail
 
 # EDC Management API version segment — v5beta since the EDC 0.18 JAD
 # launchers (issue #97 Phase B); override for older stacks.
-MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
+MGMT_V="${EDC_MGMT_API_VERSION:-v5}"
 # Note: -e removed intentionally — transfer failures (data plane key issues) should
 # not abort the entire script; negotiations still succeed and provide demo data.
 
@@ -288,22 +288,27 @@ catalog_request() {
 
 CATALOG=$(catalog_request "$PHARMACO_CTX" "$ALPHAKLINIK_DSP" "$ALPHAKLINIK_DID")
 
-# Parse datasets, offers, and permission arrays from catalog
+# Parse datasets, offers and each offer's whole policy from the catalog. Each
+# policy goes to a file of its own, so neither a '|' in a constraint nor the
+# command line carries it.
+OFFER_DIR=$(mktemp -d)
+trap 'rm -rf "$OFFER_DIR"' EXIT
 OFFERS=$(echo "$CATALOG" | python3 -c "
-import json, sys
+import json, os, sys
 d = json.load(sys.stdin)
 datasets = d.get('dataset', d.get('dcat:dataset', []))
 if isinstance(datasets, dict): datasets = [datasets]
+n = 0
 for ds in datasets:
     asset_id = ds.get('@id', ds.get('id', 'unknown'))
     policies = ds.get('hasPolicy', ds.get('odrl:hasPolicy', []))
     if isinstance(policies, dict): policies = [policies]
     for p in policies:
-        offer_id = p.get('@id', '')
-        # Extract permission array as compact JSON (pipe-delimited with asset/offer)
-        perms = json.dumps(p.get('permission', [{'action': 'use'}]))
-        print(f'{asset_id}|{offer_id}|{perms}')
-")
+        n += 1
+        path = os.path.join(sys.argv[1], f'offer-{n}.json')
+        json.dump(p, open(path, 'w'))
+        print(f\"{asset_id}|{p.get('@id', '')}|{path}\")
+" "$OFFER_DIR")
 
 # `grep -c` already prints a count; it just exits 1 when that count is zero.
 # The old `|| echo 0` therefore appended a SECOND zero, making DATASET_COUNT the
@@ -321,7 +326,7 @@ fi
 
 echo ""
 echo "  Available datasets:"
-echo "$OFFERS" | while IFS='|' read -r asset_id offer_id _perms; do
+echo "$OFFERS" | while IFS='|' read -r asset_id offer_id _policy; do
   echo "    - $asset_id"
   echo "      Offer: ${offer_id:0:60}..."
 done
@@ -351,32 +356,35 @@ FAILED=0
 #   bash -c 'F=0; while read x; do F=$((F+1)); done < <(printf "a\nb\n"); echo $F' -> 2
 # (zsh does not subshell the last pipeline stage, so this reads as correct when
 # tested interactively there — the shebang is bash.)
-while IFS='|' read -r asset_id offer_id perms_json; do
+while IFS='|' read -r asset_id offer_id policy_file; do
   echo ""
   echo "  [$asset_id]"
   echo "    Initiating contract negotiation..."
 
-  # Ensure permission JSON is valid; default to [{"action":"use"}]
-  if [ -z "$perms_json" ] || [ "$perms_json" = "[]" ]; then
-    perms_json='[{"action":"use"}]'
-  fi
-
   # --- 3a: Negotiate contract ---
-  # EDC-V ContractRequest: include permission only — omit prohibition/obligation
-  # (empty arrays fail validation; non-empty arrays cause policy mismatch)
+  # The offer goes back whole, as the UI sends it (#879, #883): the provider
+  # builds the agreement from the policy it offered, and the consumer refuses an
+  # agreement that differs from its request ("Policy in the contract agreement
+  # is not equal to the one in the contract offer", #881 finding 17). This sent
+  # the permission alone, which on 0.18 passed for the bare seeded offers and
+  # lost the prohibitions of the standard policies (ADR-077). Empty prohibition
+  # and obligation arrays are left out, as EDC refuses them.
+  OFFER_POLICY=$(python3 -c '
+import json, sys
+policy = json.load(open(sys.argv[1]))
+policy = {k: v for k, v in policy.items() if k != "@context" and v != []}
+policy.setdefault("permission", [{"action": "use"}])
+policy.update({"@context": "http://www.w3.org/ns/odrl.jsonld", "@id": sys.argv[2],
+               "@type": "Offer", "assigner": sys.argv[3], "target": sys.argv[4]})
+print(json.dumps(policy))
+' "$policy_file" "$offer_id" "$ALPHAKLINIK_DID" "$asset_id")
   NEG_RESPONSE=$(mgmt_call POST "${MGMT_V}/participants/$PHARMACO_CTX/contractnegotiations" "{
     \"@context\": [\"$EDC_CTX\"],
     \"@type\": \"ContractRequest\",
     \"counterPartyAddress\": \"$ALPHAKLINIK_DSP\",
     \"protocol\": \"$DSP_PROTOCOL\",
     \"callbackAddresses\": $(callback_addresses contract.negotiation),
-    \"policy\": {
-      \"@type\": \"Offer\",
-      \"@id\": \"$offer_id\",
-      \"assigner\": \"$ALPHAKLINIK_DID\",
-      \"target\": \"$asset_id\",
-      \"permission\": $perms_json
-    }
+    \"policy\": $OFFER_POLICY
   }")
 
   NEG_ID=$(echo "$NEG_RESPONSE" | python3 -c "

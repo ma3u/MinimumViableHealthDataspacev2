@@ -36,7 +36,7 @@
 set -uo pipefail
 MODE="${MODE:-plan}"
 SLUGS=(alpha-klinik pharmaco medreg lmc irs)
-MGMT_V="${EDC_MGMT_API_VERSION:-v5beta}"
+MGMT_V="${EDC_MGMT_API_VERSION:-v5}"
 
 log()  { printf '[reseed] %s\n' "$*"; }
 fail() { printf '[reseed] FAIL %s\n' "$*"; exit 1; }
@@ -63,7 +63,7 @@ target_did() { printf 'did:web:%s:%s' "$DID_HOST" "$1"; }
 inventory() {
   local cp ih
   cp=$(curl -sS --max-time 30 -H "Authorization: Bearer ${ADMIN_TOKEN}" "${CP}/${MGMT_V}/participants")
-  ih=$(curl -sS --max-time 30 -H "Authorization: Bearer ${ADMIN_TOKEN}" "${IH}/v1alpha/participants")
+  ih=$(curl -sS --max-time 30 -H "Authorization: Bearer ${ADMIN_TOKEN}" "${IH}/v1/participants")
   CP_JSON="$cp" IH_JSON="$ih" SLUG_LIST="${SLUGS[*]}" python3 - <<'PY'
 import json, os
 slugs = os.environ["SLUG_LIST"].split()
@@ -110,7 +110,7 @@ while read -r store id did slug; do
   [ -n "$store" ] || continue
   [ "$did" = "$(target_did "$slug")" ] && continue
   case "$store" in
-    ih) url="${IH}/v1alpha/participants/${id}" ;;
+    ih) url="${IH}/v1/participants/${id}" ;;
     cp) url="${CP}/${MGMT_V}/participants/${id}" ;;
     *) continue ;;
   esac

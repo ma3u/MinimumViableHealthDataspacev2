@@ -44,9 +44,14 @@ DB="${SIGLET_DB:-siglet}"
 SECRET_NAME="pg-password"
 IDENTITY_NAME="${SIGLET_IDENTITY:-id-mvhd-claude-federation}"
 
+# EDC 1.0 (#881): docker-compose.jad.yml pins 0.1.6, and jad/siglet-edc1.toml
+# points the pull transfers at the proxy. migrate-edc-to-v1.sh sets SIGLET_DB
+# for a fresh database and the proxy's address as the pull endpoint.
+SIGLET_COMPOSE="${SIGLET_COMPOSE:-docker-compose.jad.yml}"
+SIGLET_TOML="${SIGLET_TOML:-jad/siglet-edc1.toml}"
 SRC=$(grep -oE 'ghcr.io/eclipse-dataplane-core/dsdk-facet-rs/siglet:[a-z0-9.-]+@sha256:[0-9a-f]{64}' \
-  "${REPO_ROOT}/docker-compose.jad.yml" | head -1)
-[ -n "$SRC" ] || { err "no pinned siglet image in docker-compose.jad.yml"; exit 1; }
+  "${REPO_ROOT}/${SIGLET_COMPOSE}" | head -1)
+[ -n "$SRC" ] || { err "no pinned siglet image in ${SIGLET_COMPOSE}"; exit 1; }
 DIGEST="${SRC##*@sha256:}"
 # ACR import refuses a source with both a tag and a digest (InvalidImportImageParameter).
 SRC_REPO="${SRC%@sha256:*}"
@@ -162,9 +167,9 @@ unset VAULT_TOKEN
 # upstream jad mounts its siglet-config ConfigMap. The endpoint goes into the
 # consumer's EDR: the FHIR data plane's data API.
 SIGLET_PULL_ENDPOINT="${SIGLET_PULL_ENDPOINT:-http://${DP_FHIR_APP}:8186/api/data}"
-SIGLET_TOML=$(sed "s#^endpoint = .*#endpoint = \"${SIGLET_PULL_ENDPOINT}\"#" "${REPO_ROOT}/jad/siglet.toml")
+SIGLET_TOML_TEXT=$(sed "s#^endpoint = .*#endpoint = \"${SIGLET_PULL_ENDPOINT}\"#" "${REPO_ROOT}/${SIGLET_TOML}")
 az containerapp secret set --name "$SIGLET_APP" --resource-group "$RG" \
-  --secrets "siglet-toml=${SIGLET_TOML}" -o none
+  --secrets "siglet-toml=${SIGLET_TOML_TEXT}" -o none
 python3 - "$SIGLET_APP" "$RG" <<'PY2'
 import json, subprocess, sys, tempfile
 app, rg = sys.argv[1:3]
@@ -225,6 +230,14 @@ if sorted(got or []) != [8081, 8082, 8083]:
     sys.exit(f"ports not exposed after the update: {got}")
 print("ports 8080 (ingress), 8081, 8082, 8083 (internal)")
 PY
+# A revision reads its secret volume when it starts. Step 3 starts the new
+# revision before 3b writes siglet-toml, and when the volume was already there
+# 3b's update changes nothing and starts none: on 2026-11-06 the 1.0 siglet
+# ran the 0.18 file, without allow_http, and every transfer ended TERMINATED
+# with "Refresh endpoint rejected by policy". So restart it here.
+rev=$(az containerapp show --name "$SIGLET_APP" --resource-group "$RG" --query properties.latestRevisionName -o tsv)
+az containerapp revision restart --name "$SIGLET_APP" --resource-group "$RG" --revision "$rev" -o none
+log "restarted ${rev} so it reads the current siglet.toml"
 # ── 4. Healthy, and the key set answers ─────────────────────────────────────
 rev=$(az containerapp show --name "$SIGLET_APP" --resource-group "$RG" --query properties.latestRevisionName -o tsv)
 for _ in $(seq 1 40); do

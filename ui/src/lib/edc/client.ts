@@ -10,7 +10,7 @@
  *
  *   // List all assets for a participant
  *   const assets = await edcClient.management(
- *     '/v5alpha/participants/{ctxId}/assets/request', 'POST',
+ *     '/v5/participants/{ctxId}/assets/request', 'POST',
  *     { '@context': [EDC_CONTEXT], '@type': 'QuerySpec' }
  *   );
  *
@@ -220,26 +220,24 @@ async function apiRequest<T = unknown>(
 // ---------------------------------------------------------------------------
 
 /**
- * Management API version segment. Callers keep writing '/v5alpha/…' paths and
- * the client rewrites the segment, so the cutover is a single env flip
- * (issue #97 Phase B).
+ * Management API version segment. Callers write '/v5/…' paths, the stable
+ * Management API of EDC 1.0 (#881), which serves no other version. A
+ * deployment still on EDC 0.18 sets EDC_MGMT_API_VERSION=v5beta and the client
+ * rewrites the segment, so the cutover is a single env flip.
  *
- * Measured on 2026-09-26 with a bearer token, not assumed:
+ * Measured with a bearer token, not assumed:
  *
- *   deployed jad-controlplane:2026-04-14   /v4alpha   200
- *   docker-compose.jad.yml (EDC 0.18)      /v5beta    200
- *   this default                           /v5alpha   404 on both
+ *   EDC 0.18 (Azure until the 1.0 cutover)   /v5beta   200
+ *   EDC 1.0.0-RC5 (docker-compose.jad.yml)   /v5       200, /v5beta 404
  *
- * The default is wrong for every environment we actually run, which is why
- * GET /api/participants 404'd on Azure and silently fell back to bundled mock
- * data (#317). Set EDC_MGMT_API_VERSION per environment; 05-cfm-ui.sh does.
- * The default stays v5alpha only because changing it would move the breakage
- * rather than remove it — every deployment should be explicit.
+ * A wrong segment is a 404 that GET /api/participants once turned into
+ * bundled mock data (#317), so every deployment sets the variable explicitly;
+ * 05-cfm-ui.sh does.
  */
-const MGMT_API_VERSION = process.env.EDC_MGMT_API_VERSION || "v5alpha";
+const MGMT_API_VERSION = process.env.EDC_MGMT_API_VERSION || "v5";
 
 function withMgmtVersion(path: string): string {
-  return path.replace(/^\/v5(alpha|beta)\//, `/${MGMT_API_VERSION}/`);
+  return path.replace(/^\/v5(alpha|beta)?\//, `/${MGMT_API_VERSION}/`);
 }
 
 /** Type-safe EDC-V / CFM API client */

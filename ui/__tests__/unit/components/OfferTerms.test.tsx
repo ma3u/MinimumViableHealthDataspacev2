@@ -4,6 +4,7 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 const mockFetchApi = vi.fn();
 vi.mock("@/lib/api", () => ({
@@ -110,5 +111,47 @@ describe("OfferTerms", () => {
     expect(
       within(permit).getByText("permit-a").closest("details"),
     ).not.toBeNull();
+  });
+
+  it("folds a signed agreement's terms until they are clicked open", async () => {
+    mockFetchApi.mockReturnValue(ok({}));
+    const user = userEvent.setup();
+    render(
+      <OfferTerms
+        policy={POLICY}
+        providerDid="did:web:alpha"
+        providerName="AlphaKlinik Berlin"
+        consumerName="PharmaCo Research AG"
+        agreed
+      />,
+    );
+
+    const terms = screen.getByTestId("offer-terms") as HTMLDetailsElement;
+    expect(terms.tagName).toBe("DETAILS");
+    expect(terms.open).toBe(false);
+    // The heading is what shows, and what opens it.
+    await user.click(screen.getByText("The terms you agreed to"));
+    expect(terms.open).toBe(true);
+    expect(within(terms).getByTestId("terms-purposes").textContent).toMatch(
+      /Scientific research/,
+    );
+  });
+
+  it("keeps an offer's terms open: they are read before agreeing", () => {
+    mockFetchApi.mockReturnValue(ok({}));
+    render(
+      <OfferTerms
+        policy={POLICY}
+        providerDid="did:web:alpha"
+        providerName="AlphaKlinik Berlin"
+        consumerName="PharmaCo Research AG"
+        accepted={false}
+        onAcceptedChange={() => {}}
+      />,
+    );
+
+    const terms = screen.getByTestId("offer-terms");
+    expect(terms.tagName).toBe("DIV");
+    expect(terms.closest("details")).toBeNull();
   });
 });

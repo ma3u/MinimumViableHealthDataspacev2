@@ -66,7 +66,7 @@ echo "── Step 2: Verify existing AttestationDefinitions ──"
 
 # Verify membership attestation exists (created by seed-jad.sh)
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-  "$ISSUER_HOST:10013/api/admin/v1alpha/participants/issuer/attestations" \
+  "$ISSUER_HOST:10013/api/admin/v1/participants/issuer/attestations" \
   -H "Authorization: Bearer $ISSUER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -79,7 +79,7 @@ HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
 
 # Verify manufacturer attestation exists
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-  "$ISSUER_HOST:10013/api/admin/v1alpha/participants/issuer/attestations" \
+  "$ISSUER_HOST:10013/api/admin/v1/participants/issuer/attestations" \
   -H "Authorization: Bearer $ISSUER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -99,7 +99,7 @@ echo "── Step 3: Create EHDS CredentialDefinitions ──"
 # 3a. EHDSParticipantCredential
 echo "Creating EHDSParticipantCredential definition..."
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-  "$ISSUER_HOST:10013/api/admin/v1alpha/participants/issuer/credentialdefinitions" \
+  "$ISSUER_HOST:10013/api/admin/v1/participants/issuer/credentialdefinitions" \
   -H "Authorization: Bearer $ISSUER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -126,7 +126,7 @@ HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
 # 3b. DataProcessingPurposeCredential
 echo "Creating DataProcessingPurposeCredential definition..."
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-  "$ISSUER_HOST:10013/api/admin/v1alpha/participants/issuer/credentialdefinitions" \
+  "$ISSUER_HOST:10013/api/admin/v1/participants/issuer/credentialdefinitions" \
   -H "Authorization: Bearer $ISSUER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -153,7 +153,7 @@ HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
 # 3c. DataQualityLabelCredential
 echo "Creating DataQualityLabelCredential definition..."
 HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
-  "$ISSUER_HOST:10013/api/admin/v1alpha/participants/issuer/credentialdefinitions" \
+  "$ISSUER_HOST:10013/api/admin/v1/participants/issuer/credentialdefinitions" \
   -H "Authorization: Bearer $ISSUER_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{

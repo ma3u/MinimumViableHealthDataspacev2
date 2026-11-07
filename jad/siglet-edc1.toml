@@ -1,0 +1,16 @@
+# siglet as the data plane on EDC 1.0 (#881, docker-compose.jad.yml).
+#
+# On 0.18 a pull transfer's endpoint was the JAD data plane. EDC 1.0 ships no
+# data plane: siglet answers the control plane's Data Plane Signaling and
+# issues the access token, and the endpoint is the neo4j-proxy, which serves
+# the dataset the token names after checking the token against siglet's JWKS.
+
+[[transfer_types]]
+transfer_type = "HttpData-PULL"
+endpoint_type = "HTTP"
+token_source = "provider"
+endpoint = "http://neo4j-proxy:9090/dataspace/data"
+
+# Consumer side: the provider's refresh endpoint is plain HTTP inside compose.
+[token.refresh_endpoint_policy]
+allow_http = true

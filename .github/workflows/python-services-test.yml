@@ -74,17 +74,34 @@ jobs:
       # asserted nothing — precisely the failure ADR-031 exists to prevent.
       matrix:
         include: ${{ fromJSON(
-          inputs.service == 'catalog-crawler' && '[{"name":"catalog-crawler","path":"services/catalog-crawler","install":".[dev]"}]'
-          || inputs.service == 'catalog-enricher' && '[{"name":"catalog-enricher","path":"services/catalog-enricher","install":".[dev]"}]'
-          || inputs.service == 'leitlinien' && '[{"name":"leitlinien","path":"scripts/leitlinien","install":"uv"}]'
-          || '[{"name":"catalog-crawler","path":"services/catalog-crawler","install":".[dev]"},{"name":"catalog-enricher","path":"services/catalog-enricher","install":".[dev]"},{"name":"leitlinien","path":"scripts/leitlinien","install":"uv"}]'
+          inputs.service == 'catalog-crawler' && '[{"name":"catalog-crawler","path":"services/catalog-crawler","install":".[dev]","python":"3.15"}]'
+          || inputs.service == 'catalog-enricher' && '[{"name":"catalog-enricher","path":"services/catalog-enricher","install":".[dev]","python":"3.15"}]'
+          || inputs.service == 'leitlinien' && '[{"name":"leitlinien","path":"scripts/leitlinien","install":"uv","python":"3.12"}]'
+          || '[{"name":"catalog-crawler","path":"services/catalog-crawler","install":".[dev]","python":"3.15"},{"name":"catalog-enricher","path":"services/catalog-enricher","install":".[dev]","python":"3.15"},{"name":"leitlinien","path":"scripts/leitlinien","install":"uv","python":"3.12"}]'
           ) }}
     steps:
       - uses: actions/checkout@v7
 
+      # The catalog services run on the Python of their image, so a base image
+      # bump is tested on the version it ships (#886). leitlinien has no image
+      # and stays on 3.12.
       - uses: actions/setup-python@v7
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python }}
+
+      - name: Assert the Python matches the image
+        if: matrix.install != 'uv'
+        working-directory: ${{ matrix.path }}
+        run: |
+          # Dependabot bumps the Dockerfile's FROM line and nothing else; this
+          # fails that PR until the matrix above moves with it, so the tests
+          # never run on a Python the image no longer ships.
+          image=$(sed -n '1s/^FROM python:\([0-9.]*\)-slim.*/\1/p' Dockerfile)
+          echo "image: python $image, tests: python ${{ matrix.python }}"
+          if [ "$image" != "${{ matrix.python }}" ]; then
+            echo "::error::Dockerfile runs python $image, the tests run ${{ matrix.python }}. Update the matrix in python-services-test.yml."
+            exit 1
+          fi
 
       - name: Install uv
         run: pipx install uv
@@ -98,7 +115,7 @@ jobs:
           if [ "${{ matrix.install }}" = "uv" ]; then
             uv sync --frozen --all-extras
           else
-            uv venv .venv
+            uv venv -p "${{ matrix.python }}" .venv
             uv pip install -e "${{ matrix.install }}"
           fi
 

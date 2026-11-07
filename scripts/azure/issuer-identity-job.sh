@@ -1,7 +1,7 @@
 #!/bin/sh
 # =============================================================================
 # Runs INSIDE the ACA environment, as the job seed-issuer-identity-azure.sh
-# creates. Gives the 0.18 IssuerService its identity (ADR-055, #503).
+# creates. Gives the IssuerService its identity (ADR-055, #503, #881).
 # =============================================================================
 # The Azure port of what compose and CI do in jad/bootstrap-vault.sh,
 # jad/seed-jad.sh steps 2 to 4 and scripts/seed-issuer-identity.sh, with the
@@ -11,8 +11,9 @@
 #   1. the signing key, in Vault under participants/issuer/ and secret/
 #      (generated once; a later run reads it back);
 #   2. the participant context, through the identity API on 10015;
-#   3. the activation records (keypair, DID document, state 300), the SQL of
-#      jad/seed-issuer-identity.sql with the key's x substituted;
+#   3. 0.18 only: the activation records (keypair, DID document, state 300),
+#      the SQL of jad/seed-issuer-identity.sql with the key's x substituted.
+#      For 1.0 the wrapper sends no SQL: the identity API activates;
 #   4. the attestation and credential definitions of jad/seed-jad.sh;
 #   5. MODE=verify only: the DID document must resolve with a key. It does so
 #      only after the IssuerService restarted and loaded steps 2 and 3, which
@@ -112,7 +113,7 @@ jq -n --arg did "$DID" --arg kid "$KID" --arg x "$X" --arg iss "$ISS" \
   --arg secret "$ISSUER_SECRET" --arg kc "$KC_URL" --arg vault "$VAULT_URL" '{
   roles: ["admin"],
   serviceEndpoints: [{type: "IssuerService", id: "issuer-service-1",
-    serviceEndpoint: ($iss + ":10012/api/issuance/v1alpha/participants/issuer")}],
+    serviceEndpoint: ($iss + ":10012/api/issuance/v1/participants/issuer")}],
   active: true, participantContextId: "issuer", did: $did,
   key: {keyId: $kid, privateKeyAlias: $kid, type: "JsonWebKey2020",
     publicKeyJwk: {kty: "OKP", crv: "Ed25519", kid: $kid, x: $x},
@@ -122,7 +123,7 @@ jq -n --arg did "$DID" --arg kid "$KID" --arg x "$X" --arg iss "$ISS" \
       tokenUrl: ($kc + "/realms/edcv/protocol/openid-connect/token")},
     config: {secretPath: "v1/participants", folderPath: "issuer", vaultUrl: $vault}}}
 }' > /tmp/manifest.json
-code=$(curl -s -m 30 -o /tmp/r.json -w '%{http_code}' -X POST "${ISS}:10015/api/identity/v1alpha/participants" \
+code=$(curl -s -m 30 -o /tmp/r.json -w '%{http_code}' -X POST "${ISS}:10015/api/identity/v1/participants" \
   -H "Authorization: Bearer ${PROV}" -H "Content-Type: application/json" --data @/tmp/manifest.json) || code=000
 rm -f /tmp/manifest.json
 case "$code" in
@@ -133,7 +134,9 @@ esac
 
 # --- 3. Activation records -----------------------------------------------------
 step "Activation records in ${PG_DB}"
-if printf '%s' "$SQL_B64" | base64 -d | sed "s/__X__/${X}/g" |
+if [ -z "$SQL_B64" ]; then
+  echo "  skip  1.0: the identity API activated the context and published the DID"
+elif printf '%s' "$SQL_B64" | base64 -d | sed "s/__X__/${X}/g" |
    PGPASSWORD="$PG_PASSWORD" psql -v ON_ERROR_STOP=1 -q \
      "host=${PG_HOST} port=5432 dbname=${PG_DB} user=${PG_USER} sslmode=require" > /tmp/sql.out 2>&1; then
   sed 's/^/  /' /tmp/sql.out | tail -5
@@ -145,7 +148,7 @@ fi
 step "Attestation and credential definitions"
 admin_post() {  # admin_post <resource> <json>
   code=$(curl -s -m 20 -o /tmp/r.json -w '%{http_code}' -X POST \
-    "${ISS}/api/admin/v1alpha/participants/issuer/$1" \
+    "${ISS}/api/admin/v1/participants/issuer/$1" \
     -H "Authorization: Bearer ${ISSUER_TOKEN}" -H "Content-Type: application/json" -d "$2") || code=000
   case "$code" in
     2??) echo "  ok    $1 $(printf '%s' "$2" | jq -r .id)" ;;

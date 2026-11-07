@@ -62,10 +62,10 @@ get_token() {
 # shared library uses, and use whatever answers.
 MGMT_V="${MGMT_V:-${EDC_MGMT_API_VERSION:-}}"
 if [ -z "$MGMT_V" ]; then
-  for _v in v5beta v5alpha v4alpha v3; do
+  for _v in v5; do
     if [ "$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $(get_token)" "$CP_MGMT/${_v}/participants")" = "200" ]; then MGMT_V="$_v"; break; fi
   done
-  [ -n "$MGMT_V" ] || { echo "ERROR: no Management API version answered at $CP_MGMT (tried v5beta v5alpha v4alpha v3)" >&2; exit 1; }
+  [ -n "$MGMT_V" ] || { echo "ERROR: no Management API version answered at $CP_MGMT (tried v5)" >&2; exit 1; }
 fi
 echo "Management API version: $MGMT_V"
 
@@ -480,7 +480,12 @@ echo "────────────────────────�
 # Compose only: Azure has no health-dataspace-postgres container, and there
 # CFM activates the contexts (#328). Without this guard the `|| echo` below
 # turned "no docker" into "already activated".
-if ! command -v docker >/dev/null 2>&1 || ! docker inspect health-dataspace-postgres >/dev/null 2>&1; then
+# EDC 1.0 (the default, EDC_LINE=v1) needs none of this: the contexts stay
+# CREATED, which the hub accepts (#878, #891), and 300 in IdentityHub is not
+# ACTIVATED on 1.0 (200 is). The SQL below is 0.18's and stays for EDC_LINE=v018.
+if [ "${EDC_LINE:-v1}" != "v018" ]; then
+  ok "EDC 1.0: no context activation by SQL"
+elif ! command -v docker >/dev/null 2>&1 || ! docker inspect health-dataspace-postgres >/dev/null 2>&1; then
   warn "No compose Postgres here; context activation skipped (CFM activates them on Azure, #328)"
 else
 

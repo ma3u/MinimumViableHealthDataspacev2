@@ -299,5 +299,11 @@
   "agreed {date}": "vereinbart {date}",
   "imported {date}": "importiert {date}",
   "The access to this transfer has expired. Start a new transfer to get the data again.": "Der Zugang zu dieser Übertragung ist abgelaufen. Starten Sie eine neue Übertragung, um die Daten erneut zu erhalten.",
-  "Start a new transfer": "Neue Übertragung starten"
+  "Start a new transfer": "Neue Übertragung starten",
+  "{spe} is starting. That takes about {minutes} minutes; import again then.": "{spe} startet. Das dauert etwa {minutes} Minuten; importieren Sie dann erneut.",
+  "The workspace keeps the data in memory until it stops; it is a demo import, not loaded through the Trustee.": "Der Arbeitsbereich hält die Daten im Arbeitsspeicher, bis er stoppt; es ist ein Demo-Import, nicht über den Trustee geladen.",
+  "The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "Der Transfer ist geschlossen: Der Zugriff auf die Daten des Anbieters ist beendet. Starten Sie einen neuen Transfer, um sie erneut zu importieren.",
+  "CLOSED AFTER IMPORT INTO {spe}": "NACH IMPORT IN {spe} GESCHLOSSEN",
+  "{records} records are in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "{records} Datensätze sind in {spe}. Der Transfer ist geschlossen: Der Zugriff auf die Daten des Anbieters ist beendet. Starten Sie einen neuen Transfer, um sie erneut zu importieren.",
+  "The data is in {spe}. The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.": "Die Daten sind in {spe}. Der Transfer ist geschlossen: Der Zugriff auf die Daten des Anbieters ist beendet. Starten Sie einen neuen Transfer, um sie erneut zu importieren."
 }

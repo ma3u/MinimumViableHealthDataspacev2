@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { edcClient } from "@/lib/edc";
+import { listContexts, listTenantViews } from "@/lib/edc/participants";
 import { runQuery } from "@/lib/neo4j";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
@@ -38,8 +38,8 @@ interface Neo4jProfile {
 }
 
 /**
- * Backfill tenants/participants from Neo4j when CFM tenant-manager and
- * EDC-V management API are unreachable (Azure deployment, or any environment
+ * Backfill tenants/participants from Neo4j when the EDC management API is
+ * unreachable (Azure deployment, or any environment
  * where the JAD services aren't yet wired). Mirrors the fallback already used
  * by /api/admin/components so the operator dashboard never shows zero
  * participants while the seeded knowledge graph clearly has them.
@@ -163,64 +163,25 @@ export async function GET() {
 
   let tenants: TenantRow[] = [];
   let participants: ParticipantRow[] = [];
-  let source: "cfm" | "neo4j" | "mixed" = "cfm";
+  let source: "controlplane" | "neo4j" = "controlplane";
 
+  // A participant is its control plane context (ADR-078); CFM's tenants and
+  // participant profiles are gone. One read gives both columns.
   try {
-    tenants = await edcClient.tenant<TenantRow[]>("/v1alpha1/tenants");
-
-    try {
-      participants = await edcClient.management<ParticipantRow[]>(
-        "/v5alpha/participants",
-      );
-    } catch (err) {
-      console.warn(
-        "Could not fetch participants from EDC-V (auth may be unavailable):",
-        err,
-      );
-    }
-
-    tenants = await Promise.all(
-      tenants.map(async (t) => {
-        let profiles: unknown[] = [];
-        try {
-          profiles = await edcClient.tenant<unknown[]>(
-            `/v1alpha1/tenants/${t.id}/participant-profiles`,
-          );
-        } catch {
-          /* no profiles yet */
-        }
-        // CFM may return zero profiles even though the tenant is fully
-        // registered (Azure deployment hasn't run the participant-profile
-        // seed yet). The operator UI counts every tenant that has at
-        // least one profile entry as "active", so synthesize a minimal
-        // entry from the tenant's own metadata when CFM gives us nothing.
-        // Marker `synthetic: true` lets future deltas distinguish these
-        // from real CFM-provisioned profiles.
-        if (!Array.isArray(profiles) || profiles.length === 0) {
-          profiles = [
-            {
-              id: `${t.id}-synthetic`,
-              participantContextId: t.id,
-              displayName: t.properties?.displayName ?? t.id,
-              role:
-                t.properties?.ehdsParticipantType ??
-                t.properties?.role ??
-                "Unknown",
-              vpas: [],
-              synthetic: true,
-            },
-          ];
-        }
-        return { ...t, participantProfiles: profiles };
-      }),
-    );
+    const contexts = await listContexts();
+    participants = contexts.map((c) => ({
+      "@id": c["@id"],
+      identity: c.identity ?? "",
+      state: c.state ?? "",
+    }));
+    tenants = (await listTenantViews()) as TenantRow[];
   } catch (err) {
-    console.warn("CFM tenant-manager unreachable, falling back to Neo4j:", err);
+    console.warn("Control plane unreachable, falling back to Neo4j:", err);
     source = "neo4j";
   }
 
-  // If CFM returned nothing — either it errored above or the deployment hasn't
-  // provisioned tenants yet — backfill from the seeded knowledge graph.
+  // If the control plane returned nothing (it errored above, or nothing is
+  // seeded yet), backfill from the seeded knowledge graph.
   if (tenants.length === 0) {
     try {
       const fallback = await loadFromNeo4j();
@@ -233,16 +194,6 @@ export async function GET() {
         { error: "Failed to list tenants" },
         { status: 502 },
       );
-    }
-  } else if (participants.length === 0) {
-    // CFM has tenants but EDC-V participants endpoint failed — pull DIDs from
-    // Neo4j so the participants column is at least populated.
-    try {
-      const fallback = await loadFromNeo4j();
-      participants = fallback.participants;
-      source = "mixed";
-    } catch {
-      /* leave participants empty */
     }
   }
 

@@ -24,6 +24,7 @@ body:json {
 tests {
   const body = res.getBody() || {};
   bru.setVar("dspImported", "");
+  bru.setVar("dspImportClosed", "");
   if (bru.getEnvVar("dspLiveFlow") !== "true") {
     test("SKIPPED live check: this environment does not run the DSP flow end to end (#542)", function () {});
   } else if (res.getStatus() === 502 && /certificate demo/.test(body.detail || "")) {
@@ -46,12 +47,15 @@ tests {
       expect(body.pseudonymised).to.equal(true);
     });
     bru.setVar("dspImported", body.datasetId);
+    // The import closes the transfer it came from (#924); 26 needs to know.
+    bru.setVar("dspImportClosed", body.closed === true ? "true" : "");
   }
 }
 
 docs {
   A transfer ends in a secure processing environment (EHDS Art. 73, #876): the hub pulls the data
   of the STARTED transfer as 21 does, pseudonymised for a data user, and the neo4j-proxy writes it
-  into the chosen SPE's graph (`services/neo4j-proxy/src/spe-import.ts`), SPE-1 by default. A
-  second import of the same transfer merges onto the first.
+  into the chosen SPE's graph (`services/neo4j-proxy/src/spe-import.ts`), SPE-1 by default. Then it
+  terminates the transfer, so the access to the provider's data ends with the import (#924), and
+  answers `closed: true`.
 }

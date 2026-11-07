@@ -85,7 +85,7 @@ detect_version() {
   local v code
   # Deliberate word splitting: the candidate list is space separated.
   # shellcheck disable=SC2086
-  for v in ${MGMT_V_CANDIDATES:-v4alpha v5beta v5alpha v3}; do
+  for v in ${MGMT_V_CANDIDATES:-v5}; do
     code=$(curl -sS --max-time 20 -o /dev/null -w '%{http_code}' \
       -H "Authorization: Bearer $TOKEN" "$CP/$v/participants" || echo 000)
     if [ "$code" = "200" ]; then

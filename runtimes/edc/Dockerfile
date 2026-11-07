@@ -1,0 +1,29 @@
+# Builds one EDC launcher image (ADR-076):
+#   docker build --build-arg RUNTIME=controlplane -t edc-controlplane runtimes/edc
+# RUNTIME is controlplane, identity-hub or issuerservice.
+# The jar is the same on every platform, so it builds on the builder's own
+# (a linux/amd64 image for Azure builds on an arm64 laptop without emulating
+# Gradle); only the runtime stage is the target platform.
+FROM --platform=$BUILDPLATFORM gradle:9.8.2-jdk21-alpine AS build
+ARG RUNTIME
+WORKDIR /src
+COPY . .
+RUN --mount=type=cache,target=/home/gradle/.gradle/caches \
+    gradle --no-daemon -q ":${RUNTIME}:shadowJar"
+
+FROM eclipse-temurin:21.0.13_9-jre-alpine
+ARG RUNTIME
+ARG EDC_VERSION
+ARG SOURCE_REVISION=unknown
+LABEL org.opencontainers.image.source="https://github.com/ma3u/MinimumViableHealthDataspacev2" \
+      org.opencontainers.image.revision="${SOURCE_REVISION}" \
+      org.opencontainers.image.version="${EDC_VERSION}" \
+      org.opencontainers.image.title="edc-${RUNTIME}"
+# curl for the compose healthchecks; the base image is pinned, and so is its package index
+# hadolint ignore=DL3018
+RUN apk --no-cache add curl && addgroup -S -g 10001 edc && adduser -S -u 10001 -G edc edc
+WORKDIR /app
+COPY --from=build /src/${RUNTIME}/build/libs/${RUNTIME}.jar edc-runtime.jar
+# The runtime only reads the jar and writes to stdout, so it needs no root (Trivy DS-0002).
+USER 10001:10001
+CMD ["sh", "-c", "exec java -Djava.security.egd=file:/dev/urandom ${JAVA_OPTS:-} -jar edc-runtime.jar"]

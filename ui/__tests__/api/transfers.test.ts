@@ -87,7 +87,7 @@ describe("/api/transfers", () => {
         })),
       );
       expect(mockManagement).toHaveBeenCalledWith(
-        "/v5alpha/participants/spe-1/transferprocesses/request",
+        "/v5/participants/spe-1/transferprocesses/request",
         "POST",
         expect.objectContaining({ "@type": "QuerySpec" }),
       );
@@ -142,7 +142,7 @@ describe("/api/transfers", () => {
       // The permit stamp (issue #206) rides along with the connector's answer.
       expect(data).toMatchObject(mockResult);
       expect(mockManagement).toHaveBeenCalledWith(
-        "/v5alpha/participants/spe-1/transferprocesses",
+        "/v5/participants/spe-1/transferprocesses",
         "POST",
         expect.objectContaining({
           "@type": "TransferRequest",

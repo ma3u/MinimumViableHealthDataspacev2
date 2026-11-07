@@ -1,0 +1,45 @@
+meta {
+  name: 31 I start a transfer as PharmaCo (DSP)
+  type: http
+  seq: 31
+}
+
+post {
+  url: {{baseUrl}}/api/transfers
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "participantId": "{{dspConsumerCtx}}",
+    "contractId": "{{dspAgreementId}}",
+    "assetId": "{{dspAssetId}}",
+    "counterPartyAddress": "{{dspEndpoint}}"
+  }
+}
+
+docs {
+  The operator, signed in as the admin, acts as PharmaCo on the agreement that
+  03 Data User/17 negotiated. The data permit gate checks the permit of the
+  participant that starts the transfer, PharmaCo's, not the one the admin login
+  maps to. On 2026-11-06 it checked the login's and answered 403 "No data
+  permit covers this transfer" although PharmaCo holds a permit.
+}
+
+tests {
+  const body = res.getBody() || {};
+  if (bru.getEnvVar("dspLiveFlow") !== "true" || !bru.getVar("dspAgreementId")) {
+    test("SKIPPED live check: this environment does not run the DSP flow end to end, so there is no agreement to transfer under (#542)", function () {});
+  } else {
+    test("the gate checks PharmaCo's permit, and the connector takes the transfer", function () {
+      expect(res.getStatus(), JSON.stringify(body)).to.equal(201);
+      expect(body["@id"], "no transfer process id").to.be.a("string").that.does.not.match(/^demo-/);
+      expect(body.permitId, "no permit stamped on the transfer").to.be.a("string").and.not.empty;
+    });
+  }
+}

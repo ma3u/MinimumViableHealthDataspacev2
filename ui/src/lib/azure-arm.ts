@@ -332,7 +332,11 @@ export function azureResourceGroup(): string | null {
 // Container App actions (restart, scale)
 // ───────────────────────────────────────────────────────────────────────────
 
-async function armPost<T>(path: string, body?: unknown): Promise<T | null> {
+async function armPost<T>(
+  path: string,
+  body?: unknown,
+  timeoutMs: number = ARM_FETCH_TIMEOUT_MS,
+): Promise<T | null> {
   const token = await getArmAccessToken();
   const url = path.startsWith("http") ? path : `${ARM_BASE}${path}`;
   const res = await fetch(url, {
@@ -343,7 +347,7 @@ async function armPost<T>(path: string, body?: unknown): Promise<T | null> {
     },
     body: body ? JSON.stringify(body) : undefined,
     cache: "no-store",
-    signal: AbortSignal.timeout(ARM_FETCH_TIMEOUT_MS),
+    signal: AbortSignal.timeout(timeoutMs),
   });
   if (!res.ok) {
     throw new ArmError(
@@ -417,6 +421,14 @@ export async function setContainerAppMinReplicas(
 
 const ACI_API_VERSION = "2023-05-01";
 
+/**
+ * ARM answers an ACI start only once the resource provider has accepted it:
+ * 15 to 23 s on 2026-11-06, and once its own gateway gave up after 40 s
+ * (GatewayTimeout) while the group started anyway. With the 8 s of every
+ * other call the hub gave up first and called a starting workspace stopped.
+ */
+const ARM_POWER_TIMEOUT_MS = 60_000;
+
 function containerGroupPath(
   subscriptionId: string,
   resourceGroup: string,
@@ -480,8 +492,9 @@ export async function getContainerGroupState(
 }
 
 /**
- * Starts a stopped container group. ARM answers 202 and runs the start in
- * the background; the group then pulls, attests and loads (ADR-069).
+ * Starts a stopped container group. ARM answers 202 once it has accepted the
+ * start, which takes seconds (ARM_POWER_TIMEOUT_MS), and runs it in the
+ * background; the group then pulls, attests and loads (ADR-069).
  * Needs Microsoft.ContainerInstance/containerGroups/start/action.
  */
 export async function startContainerGroup(
@@ -491,6 +504,8 @@ export async function startContainerGroup(
 ): Promise<void> {
   await armPost(
     containerGroupPath(subscriptionId, resourceGroup, groupName, "start"),
+    undefined,
+    ARM_POWER_TIMEOUT_MS,
   );
 }
 
@@ -506,5 +521,7 @@ export async function stopContainerGroup(
 ): Promise<void> {
   await armPost(
     containerGroupPath(subscriptionId, resourceGroup, groupName, "stop"),
+    undefined,
+    ARM_POWER_TIMEOUT_MS,
   );
 }

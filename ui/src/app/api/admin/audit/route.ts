@@ -46,7 +46,7 @@ interface AuditFilters {
 /**
  * Build a parameterised Cypher WHERE clause from the active filters.
  * All user-supplied values are passed as $params — never interpolated into
- * the query string — to prevent Cypher injection (OWASP A03 / BSI C5 DEV-07).
+ * the query string, to prevent Cypher injection (OWASP A03).
  */
 function buildWhere(
   alias: string,

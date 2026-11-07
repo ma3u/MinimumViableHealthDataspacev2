@@ -4,9 +4,7 @@ Desk research on public sources, to decide whether the hub can join
 Simpl-Live wave 1, and where else to look for a consortium. Every fact carries its source;
 **[I]** marks an inference, everything else is stated by the source. Real organisations and
 people appear here because this is partner research; the fictional-organisation policy
-still applies to demo data and the site. No tender material and nothing from
-`docs/sphin-x/` is used. Sibling note (local, not in the repo): EHDS tenders and
-cooperation partners, 2026-10-09.
+still applies to demo data and the site.
 
 ## Answer in six lines
 
@@ -551,7 +549,7 @@ The comment as posted:
 > | [EUCAIM](https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/projects-details/43152860/101100633/DIGITAL)   | DIGITAL        | to Dec 2026               | EIBIR (AT), 97 partners                     | federated cancer imaging                                                 |
 > | [INDICATE](https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/projects-details/43152860/101167778/DIGITAL) | DIGITAL        | to May 2028               | Erasmus MC (NL)                             | federated ICU data, OMOP and FHIR                                        |
 >
-> - **Most frequent participants:** Sciensano 12, Erasmus MC 11, Barcelona Supercomputing Center 10, Masaryk University 10, EMBL 9, Health-RI 9, THL 9, Charité 8, Health Data Hub 8, BfArM 6, IACS 6 plus the HDAB community of practice contract (with IDOM).
+> - **Most frequent participants:** Sciensano 12, Erasmus MC 11, Barcelona Supercomputing Center 10, Masaryk University 10, EMBL 9, Health-RI 9, THL 9, Charité 8, Health Data Hub 8, BfArM 6, IACS 6, plus, with IDOM, the HaDEA contract supporting stakeholders on secondary use (Stakeholder Forum and Community, HADEA/2024/OP/0034).
 > - **Companies:** empirica (4), The Hyve, IQVIA, Odysseus, Lynkeus, SRDC, Aridhia, Decentriq, BC Platforms, Bahia Software, Siemens Healthineers, Philips. Large IT integrators are absent from these consortia; they compete for the Commission's tenders instead.
 > - **Countries by participations:** Spain 111, France 83, Germany 79, Netherlands 75, Italy 61, Belgium 57. Repeat coordinators: EMBL, Erasmus MC, Health Data Hub, IACS, PNED.
 >

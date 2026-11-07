@@ -50,6 +50,8 @@ export default function SpeImport({
   const [existing, setExisting] = useState<ExistingImport[]>([]);
   const [confirming, setConfirming] = useState(false);
   const [expired, setExpired] = useState(false);
+  /** Minutes until a workspace that is starting can take the import (ADR-072). */
+  const [startingIn, setStartingIn] = useState<number | null>(null);
 
   const loadExisting = useCallback(() => {
     fetchApi(`/api/spe-imports?ids=${encodeURIComponent(transferId)}`)
@@ -74,6 +76,7 @@ export default function SpeImport({
     setBusy(true);
     setError("");
     setExpired(false);
+    setStartingIn(null);
     setResult(null);
     setConfirming(false);
     try {
@@ -90,6 +93,7 @@ export default function SpeImport({
         detail?: string;
         existing?: ExistingImport;
         expired?: boolean;
+        spe?: { state?: string; etaSeconds?: number };
       };
       if (!res.ok) {
         // Imported in the meantime: show it and ask, as for a known one.
@@ -99,6 +103,13 @@ export default function SpeImport({
             body.existing!,
           ]);
           setConfirming(true);
+          return;
+        }
+        // A stopped workspace was started for this import (Azure, ADR-072).
+        if (res.status === 503 && body.spe?.state === "starting") {
+          setStartingIn(
+            Math.max(1, Math.ceil((body.spe.etaSeconds ?? 240) / 60)),
+          );
           return;
         }
         setExpired(!!body.expired);
@@ -115,6 +126,8 @@ export default function SpeImport({
         byType: body.byType ?? {},
         importedAt: body.importedAt ?? "",
         pseudonymised: body.pseudonymised ?? true,
+        untilStopped: body.untilStopped ?? false,
+        closed: body.closed ?? false,
         graphUrl: body.graphUrl ?? importViewUrl(transferId, speId),
       });
       loadExisting();
@@ -252,6 +265,19 @@ export default function SpeImport({
         </div>
       )}
 
+      {startingIn !== null && (
+        <p
+          data-testid="spe-import-starting"
+          className="flex items-center gap-1.5 text-(--text-secondary)"
+        >
+          <Loader2 size={12} className="animate-spin" />
+          {t(
+            "{spe} is starting. That takes about {minutes} minutes; import again then.",
+            { spe: speId, minutes: String(startingIn) },
+          )}
+        </p>
+      )}
+
       {error &&
         (expired ? (
           <p
@@ -297,6 +323,14 @@ export default function SpeImport({
               },
             )}
             {result.pseudonymised && ` ${t("Patients are pseudonymised.")}`}
+            {result.untilStopped &&
+              ` ${t(
+                "The workspace keeps the data in memory until it stops; it is a demo import, not loaded through the Trustee.",
+              )}`}
+            {result.closed &&
+              ` ${t(
+                "The transfer is closed: the access to the provider's data has ended. Start a new transfer to import it again.",
+              )}`}
           </span>
           <Link
             href={result.graphUrl}

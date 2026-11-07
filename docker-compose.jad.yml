@@ -75,7 +75,11 @@ services:
       POSTGRES_PASSWORD: cp
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./jad/init-postgres.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      # Run in name order on a fresh volume: the users first, then the EDC 1.0
+      # databases they own. An existing volume needs jad/init-postgres-edc1.sql
+      # once by hand (docs/gotchas.md).
+      - ./jad/init-postgres.sql:/docker-entrypoint-initdb.d/10-init.sql:ro
+      - ./jad/init-postgres-edc1.sql:/docker-entrypoint-initdb.d/20-init-edc1.sql:ro
     ports:
       - "5432:5432"
     networks:
@@ -271,9 +275,15 @@ services:
   # EDC-V Control Plane — DSP protocol + management APIs
   # ---------------------------------------------------------------------------
   controlplane:
-    # EDC 0.18-era jad launcher — Metaform's public per-commit build
-    # (issue #97 Phase B; edc 0.18.0-SNAPSHOT, OCI source label upstream).
-    image: ghcr.io/metaform/jad/controlplane:4a7e5bd096c58814748e956cc9329586ad309698
+    # The EDC 1.0 launcher built here from runtimes/edc (ADR-076, ADR-078).
+    # `docker compose up` builds it when the image is missing; CI builds the
+    # three launchers once per run (compliance.yml, job edc-images).
+    image: mvhd/edc-controlplane:1.0.0-RC5
+    build:
+      context: ./runtimes/edc
+      args:
+        RUNTIME: controlplane
+        EDC_VERSION: 1.0.0-RC5
     container_name: health-dataspace-controlplane
     environment:
       # Base config
@@ -335,10 +345,17 @@ services:
       edc.events.nats.stream: "edc-events"
       edc.events.nats.stream.create: "true"
       # Database
-      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/controlplane"
+      # A database of its own: EDC ships no migration from 0.18 to 1.0 (#881).
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/controlplane_v1"
       edc.datasource.default.user: "cp"
       edc.datasource.default.password: "cp"
       edc.sql.schema.autocreate: "true"
+      # 1.0 refuses a policy whose actions or left operands are bound to no
+      # policy scope. The launcher's EhdsPolicyVocabularyExtension declares the
+      # EHDS vocabulary of the standard policies (ADR-077) in a scope EDC never
+      # evaluates, so validation stays on (#881, finding 16). The default; kept
+      # here so switching it off is a visible change.
+      edc.policy.validation.enabled: "true"
       edc.encryption.aes.key.alias: "aes-key-alias"
       # OAuth2 / Keycloak — issuer must match KC_HOSTNAME (iss claim in tokens)
       edc.iam.oauth2.issuer: "http://localhost:8080/realms/edcv"
@@ -354,20 +371,22 @@ services:
       edc.iam.dcp.scopes.manufacturer.id: "manufacturer-scope"
       edc.iam.dcp.scopes.manufacturer.type: "POLICY"
       edc.iam.dcp.scopes.manufacturer.value: "org.eclipse.dspace.dcp.vc.type:ManufacturerCredential:read"
-      edc.iam.dcp.scopes.manufacturer.prefix-mapping: "ManufacturerCredential"
+      # EDC 1.0 reads `prefix.mapping` (0.18: `prefix-mapping`) and will not boot
+      # without it for a POLICY scope (#881).
+      edc.iam.dcp.scopes.manufacturer.prefix.mapping: "ManufacturerCredential"
       # EHDS credential scopes (Phase 2b)
       edc.iam.dcp.scopes.ehds-participant.id: "ehds-participant-scope"
       edc.iam.dcp.scopes.ehds-participant.type: "POLICY"
       edc.iam.dcp.scopes.ehds-participant.value: "org.eclipse.dspace.dcp.vc.type:EHDSParticipantCredential:read"
-      edc.iam.dcp.scopes.ehds-participant.prefix-mapping: "EHDSParticipantCredential"
+      edc.iam.dcp.scopes.ehds-participant.prefix.mapping: "EHDSParticipantCredential"
       edc.iam.dcp.scopes.data-processing-purpose.id: "data-processing-purpose-scope"
       edc.iam.dcp.scopes.data-processing-purpose.type: "POLICY"
       edc.iam.dcp.scopes.data-processing-purpose.value: "org.eclipse.dspace.dcp.vc.type:DataProcessingPurposeCredential:read"
-      edc.iam.dcp.scopes.data-processing-purpose.prefix-mapping: "DataProcessingPurposeCredential"
+      edc.iam.dcp.scopes.data-processing-purpose.prefix.mapping: "DataProcessingPurposeCredential"
       edc.iam.dcp.scopes.data-quality-label.id: "data-quality-label-scope"
       edc.iam.dcp.scopes.data-quality-label.type: "POLICY"
       edc.iam.dcp.scopes.data-quality-label.value: "org.eclipse.dspace.dcp.vc.type:DataQualityLabelCredential:read"
-      edc.iam.dcp.scopes.data-quality-label.prefix-mapping: "DataQualityLabelCredential"
+      edc.iam.dcp.scopes.data-quality-label.prefix.mapping: "DataQualityLabelCredential"
       # Trusted issuers, each for the credential types it may issue (#710,
       # ADR-064). Without supportedtypes an issuer is trusted for every type
       # ("*"), which is what the hub's own issuer was until 2026-10-28. A
@@ -416,8 +435,10 @@ services:
   # Pushes FHIR Bundle JSON to consumer endpoints via Neo4j Query Proxy.
   # ---------------------------------------------------------------------------
   dataplane-fhir:
-    # EDC 0.18-era jad launcher — Metaform's public per-commit build
-    # (issue #97 Phase B; edc 0.18.0-SNAPSHOT, OCI source label upstream).
+    # EDC 0.18 only. 1.0 has no data plane of its own: siglet is the data
+    # plane and the neo4j-proxy serves the data (ADR-078). Behind the edc018
+    # profile, so the default stack does not start it; removed with #927.
+    profiles: ["edc018"]
     image: ghcr.io/metaform/jad/dataplane:4a7e5bd096c58814748e956cc9329586ad309698
     container_name: health-dataspace-dataplane-fhir
     environment:
@@ -493,8 +514,10 @@ services:
   # Consumer pulls query results from provider via Neo4j Query Proxy.
   # ---------------------------------------------------------------------------
   dataplane-omop:
-    # EDC 0.18-era jad launcher — Metaform's public per-commit build
-    # (issue #97 Phase B; edc 0.18.0-SNAPSHOT, OCI source label upstream).
+    # EDC 0.18 only. 1.0 has no data plane of its own: siglet is the data
+    # plane and the neo4j-proxy serves the data (ADR-078). Behind the edc018
+    # profile, so the default stack does not start it; removed with #927.
+    profiles: ["edc018"]
     image: ghcr.io/metaform/jad/dataplane:4a7e5bd096c58814748e956cc9329586ad309698
     container_name: health-dataspace-dataplane-omop
     environment:
@@ -627,12 +650,20 @@ services:
   # IdentityHub — DCP v1.0 credential storage & presentation
   # ---------------------------------------------------------------------------
   identityhub:
-    # EDC 0.18-era jad launcher — Metaform's public per-commit build
-    # (issue #97 Phase B; edc 0.18.0-SNAPSHOT, OCI source label upstream).
-    image: ghcr.io/metaform/jad/identity-hub:4a7e5bd096c58814748e956cc9329586ad309698
+    # The EDC 1.0 launcher built here from runtimes/edc (ADR-076, ADR-078).
+    # `docker compose up` builds it when the image is missing; CI builds the
+    # three launchers once per run (compliance.yml, job edc-images).
+    image: mvhd/edc-identity-hub:1.0.0-RC5
+    build:
+      context: ./runtimes/edc
+      args:
+        RUNTIME: identity-hub
+        EDC_VERSION: 1.0.0-RC5
     container_name: health-dataspace-identityhub
     env_file:
       - ./jad/identityhub.env
+    environment:
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/identityhub_v1"
     ports:
       - "11005:7081" # Identity API (external port from planning doc)
     networks:
@@ -668,12 +699,22 @@ services:
   # IssuerService — Verifiable Credential issuance (trust anchor)
   # ---------------------------------------------------------------------------
   issuerservice:
-    # EDC 0.18-era jad launcher — Metaform's public per-commit build
-    # (issue #97 Phase B; edc 0.18.0-SNAPSHOT, OCI source label upstream).
-    image: ghcr.io/metaform/jad/issuerservice:4a7e5bd096c58814748e956cc9329586ad309698
+    # The EDC 1.0 launcher built here from runtimes/edc (ADR-076, ADR-078).
+    # `docker compose up` builds it when the image is missing; CI builds the
+    # three launchers once per run (compliance.yml, job edc-images).
+    image: mvhd/edc-issuerservice:1.0.0-RC5
+    build:
+      context: ./runtimes/edc
+      args:
+        RUNTIME: issuerservice
+        EDC_VERSION: 1.0.0-RC5
     container_name: health-dataspace-issuerservice
     env_file:
       - ./jad/issuerservice.env
+    environment:
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/issuerservice_v1"
+      # As on Azure (migrate-edc-to-v1.sh): the membership store moves too.
+      edc.datasource.membership.url: "jdbc:postgresql://postgres:5432/issuerservice_v1"
     ports:
       - "10013:10013" # Issuer Admin API
     networks:
@@ -721,16 +762,21 @@ services:
   # MembershipCredential only. scripts/seed-test-issuer.sh gives it its
   # identity; Institut de Recherche Santé (irs) holds its membership from it.
   simpl-ga-issuer:
-    image: ghcr.io/metaform/jad/issuerservice:4a7e5bd096c58814748e956cc9329586ad309698
+    image: mvhd/edc-issuerservice:1.0.0-RC5
+    build:
+      context: ./runtimes/edc
+      args:
+        RUNTIME: issuerservice
+        EDC_VERSION: 1.0.0-RC5
     container_name: health-dataspace-simpl-ga-issuer
     env_file:
       - ./jad/issuerservice.env
     environment: &test-issuer-env
       edc.hostname: "simpl-ga-issuer"
-      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/simplga"
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/simplga_v1"
       edc.datasource.default.user: "simplga"
       edc.datasource.default.password: "simplga"
-      edc.datasource.membership.url: "jdbc:postgresql://postgres:5432/simplga"
+      edc.datasource.membership.url: "jdbc:postgresql://postgres:5432/simplga_v1"
       edc.datasource.membership.user: "simplga"
       edc.datasource.membership.password: "simplga"
     ports:
@@ -760,7 +806,12 @@ services:
   # (profile trust-check) to show that a MembershipCredential it signs is
   # refused, then stopped again.
   rogue-issuer:
-    image: ghcr.io/metaform/jad/issuerservice:4a7e5bd096c58814748e956cc9329586ad309698
+    image: mvhd/edc-issuerservice:1.0.0-RC5
+    build:
+      context: ./runtimes/edc
+      args:
+        RUNTIME: issuerservice
+        EDC_VERSION: 1.0.0-RC5
     container_name: health-dataspace-rogue-issuer
     profiles: ["trust-check"]
     env_file:
@@ -768,10 +819,10 @@ services:
     environment:
       <<: *test-issuer-env
       edc.hostname: "rogue-issuer"
-      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/rogueissuer"
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/rogueissuer_v1"
       edc.datasource.default.user: "rogueissuer"
       edc.datasource.default.password: "rogueissuer"
-      edc.datasource.membership.url: "jdbc:postgresql://postgres:5432/rogueissuer"
+      edc.datasource.membership.url: "jdbc:postgresql://postgres:5432/rogueissuer_v1"
       edc.datasource.membership.user: "rogueissuer"
       edc.datasource.membership.password: "rogueissuer"
     ports:
@@ -800,6 +851,11 @@ services:
   # CFM Tenant Manager — Multi-tenant participant lifecycle
   # ---------------------------------------------------------------------------
   tenant-manager:
+    # EDC 0.18 only: the 2026-03 CFM agents call IdentityHub and IssuerService
+    # APIs 1.0 no longer has (#881 finding 22), and the hub provisions
+    # participants itself (ADR-078). Behind the edc018 profile, so the default
+    # stack does not start it; removed with #927.
+    profiles: ["edc018"]
     # Built from source and multi-arch since 2026-09-29 (#380), see the agents
     # below for why. GHCR :latest
     # was overwritten 2026-04-11 by the shared CFM *agent* image, which
@@ -837,6 +893,11 @@ services:
   # CFM Provision Manager — Automated resource provisioning
   # ---------------------------------------------------------------------------
   provision-manager:
+    # EDC 0.18 only: the 2026-03 CFM agents call IdentityHub and IssuerService
+    # APIs 1.0 no longer has (#881 finding 22), and the hub provisions
+    # participants itself (ADR-078). Behind the edc018 profile, so the default
+    # stack does not start it; removed with #927.
+    profiles: ["edc018"]
     # Built from source and multi-arch since 2026-09-29 (#380), see the agents
     # below for why. GHCR :latest
     # was overwritten 2026-04-11 by the shared CFM *agent* image, which
@@ -863,14 +924,19 @@ services:
     restart: unless-stopped
 
   # ---------------------------------------------------------------------------
-  # CFM control plane shim, Management API v5alpha -> v5beta (issue #181)
+  # CFM control plane shim, Management API v5alpha -> v5 (issue #181, #881)
   # ---------------------------------------------------------------------------
-  # The pinned 2026-03-09 CFM agents have `v5alpha` compiled in and EDC 0.18
-  # serves `v5beta`. Config in jad/cfm-cp-shim.conf. Remove together with the
+  # The pinned 2026-03-09 CFM agents have `v5alpha` compiled in; EDC 0.18
+  # served `v5beta` and EDC 1.0 serves `v5`. Config in jad/cfm-cp-shim.conf. Remove together with the
   # `controlplane.url` override in jad/edcv-agent-config.yaml once CFM is
   # rebuilt against EDC 0.18.
   # ---------------------------------------------------------------------------
   cfm-cp-shim:
+    # EDC 0.18 only: the 2026-03 CFM agents call IdentityHub and IssuerService
+    # APIs 1.0 no longer has (#881 finding 22), and the hub provisions
+    # participants itself (ADR-078). Behind the edc018 profile, so the default
+    # stack does not start it; removed with #927.
+    profiles: ["edc018"]
     image: nginx:1.29-alpine
     container_name: health-dataspace-cfm-cp-shim
     volumes:
@@ -895,6 +961,11 @@ services:
   # CFM Agents — Background provisioning agents (Keycloak, EDC-V, Registration, Onboarding)
   # ---------------------------------------------------------------------------
   cfm-agents:
+    # EDC 0.18 only: the 2026-03 CFM agents call IdentityHub and IssuerService
+    # APIs 1.0 no longer has (#881 finding 22), and the hub provisions
+    # participants itself (ADR-078). Behind the edc018 profile, so the default
+    # stack does not start it; removed with #927.
+    profiles: ["edc018"]
     # Built from source and multi-arch since 2026-09-29 (#380): linux/amd64 and
     # linux/arm64, from Metaform/connector-fabric-manager at 9aa627f38, by
     # scripts/build-cfm-images.sh. The digest that was here before was arm64
@@ -919,6 +990,11 @@ services:
     restart: unless-stopped
 
   cfm-edcv-agent:
+    # EDC 0.18 only: the 2026-03 CFM agents call IdentityHub and IssuerService
+    # APIs 1.0 no longer has (#881 finding 22), and the hub provisions
+    # participants itself (ADR-078). Behind the edc018 profile, so the default
+    # stack does not start it; removed with #927.
+    profiles: ["edc018"]
     # Built from source and multi-arch since 2026-09-29 (#380): linux/amd64 and
     # linux/arm64, from Metaform/connector-fabric-manager at 9aa627f38, by
     # scripts/build-cfm-images.sh. The digest that was here before was arm64
@@ -943,6 +1019,11 @@ services:
     restart: unless-stopped
 
   cfm-registration-agent:
+    # EDC 0.18 only: the 2026-03 CFM agents call IdentityHub and IssuerService
+    # APIs 1.0 no longer has (#881 finding 22), and the hub provisions
+    # participants itself (ADR-078). Behind the edc018 profile, so the default
+    # stack does not start it; removed with #927.
+    profiles: ["edc018"]
     # Built from source and multi-arch since 2026-09-29 (#380): linux/amd64 and
     # linux/arm64, from Metaform/connector-fabric-manager at 9aa627f38, by
     # scripts/build-cfm-images.sh. The digest that was here before was arm64
@@ -969,6 +1050,11 @@ services:
     restart: unless-stopped
 
   cfm-onboarding-agent:
+    # EDC 0.18 only: the 2026-03 CFM agents call IdentityHub and IssuerService
+    # APIs 1.0 no longer has (#881 finding 22), and the hub provisions
+    # participants itself (ADR-078). Behind the edc018 profile, so the default
+    # stack does not start it; removed with #927.
+    profiles: ["edc018"]
     # Built from source and multi-arch since 2026-09-29 (#380): linux/amd64 and
     # linux/arm64, from Metaform/connector-fabric-manager at 9aa627f38, by
     # scripts/build-cfm-images.sh. The digest that was here before was arm64
@@ -1029,23 +1115,25 @@ services:
         condition: service_started
       provision-manager:
         condition: service_started
+    # Needs CFM, so EDC 0.18 only (see tenant-manager); the 1.0 seed is
+    # scripts/seed-identity-layer.sh.
     profiles:
       - seed
+      - edc018
 
   # ---------------------------------------------------------------------------
-  # Siglet — cert-exchange / token signing for EDC 0.18 dataplanes
-  # (eclipse-dataplane-core/dsdk-facet-rs; issue #97 Phase B). Memory backend
-  # for local dev; Vault transit engine + signing-siglet key are created by
-  # scripts/bootstrap-jad.sh. postgres-vault backend is the Azure path.
+  # Siglet: the data plane on EDC 1.0 (eclipse-dataplane-core/dsdk-facet-rs,
+  # ADR-078). It answers the control plane's Data Plane Signaling and issues
+  # the access token; the neo4j-proxy serves the data after checking it
+  # (jad/siglet-edc1.toml). Memory backend for local dev; the Vault transit
+  # engine and signing-siglet key come from scripts/bootstrap-jad.sh.
+  # postgres-vault is the Azure path.
   # ---------------------------------------------------------------------------
   siglet:
-    # Pinned to the last build before the dataplane SDK update of 2026-06-16
-    # (dsdk-facet-rs 797cfac), which made `profile` a required field of the
-    # signaling start message. The jad 4a7e5bd control plane (2026-05-18) does
-    # not send it, so the newer build answered every transfer with 422
-    # "missing field `profile`" (#542). Move this together with the jad images.
+    # 0.1.6: the build that speaks the Data Plane Signaling version 1.0 sends;
+    # sha-54382c8, the 0.18 pin, answered its messages with 422 (#881).
     # scripts/azure/17-siglet.sh imports the digest from this line.
-    image: ghcr.io/eclipse-dataplane-core/dsdk-facet-rs/siglet:sha-54382c8@sha256:abaeb9f6ebace23450a4024f1bd92f48453ed4a2c77b7950d060925bace687c3
+    image: ghcr.io/eclipse-dataplane-core/dsdk-facet-rs/siglet:0.1.6@sha256:cb7895dd4d1b924061df0f4aae28dc3e7187e7508bca249e42d438fea8a6022e
     container_name: health-dataspace-siglet
     environment:
       SIGLET__STORAGE_BACKEND__TYPE: "memory"
@@ -1054,9 +1142,10 @@ services:
       SIGLET__VAULT__TOKEN: "root" # dev-mode Vault root token (compose only)
       SIGLET__SIGNALING_AUTH__MODE: "disabled" # dev: skip JWT verification
       SIGLET__MANAGEMENT_API_AUTH__MODE: "disabled"
-      SIGLET_CONFIG_FILE: "/config/siglet.toml"
+      SIGLET__TOKEN_API_AUTH__MODE: "disabled" # dev, as signaling and management already are
+      SIGLET_CONFIG_FILE: "/config/siglet-edc1.toml"
     volumes:
-      - ./jad/siglet.toml:/config/siglet.toml:ro
+      - ./jad/siglet-edc1.toml:/config/siglet-edc1.toml:ro
     depends_on:
       vault:
         condition: service_healthy

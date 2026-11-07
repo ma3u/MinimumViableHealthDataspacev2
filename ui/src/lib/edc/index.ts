@@ -5,7 +5,7 @@
  *   import { edcClient, EDC_CONTEXT } from '@/lib/edc';
  *
  *   // List catalog
- *   const catalog = await edcClient.management('/v5alpha/participants/{ctxId}/catalog/request', 'POST', {
+ *   const catalog = await edcClient.management('/v5/participants/{ctxId}/catalog/request', 'POST', {
  *     '@context': [EDC_CONTEXT],
  *     '@type': 'QuerySpec',
  *     counterPartyAddress: 'http://health-dataspace-controlplane:8082/api/dsp',

@@ -58,7 +58,7 @@ COMPOSE_PROJECT="${COMPOSE_PROJECT:-$(docker inspect "$PG_CONTAINER" \
 HOST="$SERVICE"
 DID="did:web:${HOST}%3A10016:${CTX}"
 CONTAINER="health-dataspace-${SERVICE}"
-ADMIN="http://localhost:${ADMIN_PORT}/api/admin/v1alpha/participants/${CTX}"
+ADMIN="http://localhost:${ADMIN_PORT}/api/admin/v1/participants/${CTX}"
 
 CYAN='\033[0;36m'; GREEN='\033[0;32m'; RED='\033[0;31m'; NC='\033[0m'
 log() { echo -e "${CYAN}[test-issuer ${CTX}]${NC} $*"; }
@@ -106,13 +106,13 @@ log "${CONTAINER} healthy"
 PTOKEN=$(token provisioner provisioner-secret)
 [ -n "$PTOKEN" ] || die "no provisioner token from ${KEYCLOAK_URL}/realms/${REALM}"
 manifest=$(python3 - "$DID" "$HOST" "$CTX" <<'PY'
-import json, sys
+import json, sys, time
 did, host, ctx = sys.argv[1:4]
 print(json.dumps({
     "roles": ["admin"],
     "serviceEndpoints": [{
         "type": "IssuerService",
-        "serviceEndpoint": f"http://{host}:10012/api/issuance/v1alpha/participants/{ctx}",
+        "serviceEndpoint": f"http://{host}:10012/api/issuance/v1/participants/{ctx}",
         "id": "issuer-service-1",
     }],
     "active": True,
@@ -120,7 +120,10 @@ print(json.dumps({
     "did": did,
     "key": {
         "keyId": f"{did}#key-1",
-        "privateKeyAlias": f"{did}#key-1",
+        # A fresh Vault alias for every key the service generates: EDC 1.0 will
+        # not generate a key under an alias Vault already holds, and answers 500
+        # "No configuration found" (#881, finding 18). The key id stays #key-1.
+        "privateKeyAlias": f"{did}#key-1@{int(time.time())}",
         "keyGeneratorParams": {"algorithm": "EdDSA", "curve": "Ed25519"},
         "type": "JsonWebKey2020",
         "usage": ["sign_credentials", "sign_token", "sign_presentation"],
@@ -137,7 +140,7 @@ print(json.dumps({
 PY
 )
 status=$(printf '%s' "$manifest" | incurl -sS --max-time 30 -o /dev/null -w '%{http_code}' \
-  -X POST "http://${HOST}:10015/api/identity/v1alpha/participants" \
+  -X POST "http://${HOST}:10015/api/identity/v1/participants" \
   -H "Authorization: Bearer ${PTOKEN}" -H "Content-Type: application/json" -d @- 2>/dev/null) || status="000"
 case "$status" in
   2??) log "participant context ${CTX} created" ;;

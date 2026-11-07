@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { edcClient } from "@/lib/edc";
+import { EDC_CONTEXT } from "@/lib/edc/client";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { seesPatientIdentity } from "@/lib/patient-identity";
 import { NEO4J_PROXY_URL, callerHeaders } from "@/lib/proxy";
 import {
+  speColdStartGate,
+  spePowerAvailable,
+  type SpeId,
+} from "@/lib/spe-power";
+import {
   DEFAULT_IMPORT_SPE,
+  closedAfterImportReason,
   importViewUrl,
   importSpeId,
+  proxyRetryAfter,
   type SpeImportResult,
 } from "@/lib/spe-import";
 import {
@@ -31,7 +39,7 @@ async function providerOfAgreement(
   if (!isPlainId(agreementId)) return "";
   try {
     const agreement = await edcClient.management<Record<string, unknown>>(
-      `/v5alpha/participants/${participantId}/contractagreements/${agreementId}`,
+      `/v5/participants/${participantId}/contractagreements/${agreementId}`,
     );
     return String(agreement.providerId ?? "");
   } catch {
@@ -48,7 +56,14 @@ async function providerOfAgreement(
  * see identity (#475), and has the neo4j-proxy write it into the chosen SPE's
  * Neo4j, SPE-1 unless the user picks another. A transfer the SPE holds
  * already answers 409 with that import, unless `overwrite` is true. Answers
- * what was imported and the link to its 3D overview.
+ * what was imported and the link to its 3D overview. Then it terminates the
+ * transfer, so the access to the provider's data ends with the import.
+ *
+ * On Azure the workspaces are confidential ACI groups that start on demand
+ * (ADR-072): a stopped one is started and the import answers 503 with how
+ * long, as a federated query does. Their store is in memory, so the answer
+ * says the import lasts until the workspace stops; loading it as a sealed
+ * extract through the Trustee (ADR-068) is #915.
  */
 export async function POST(
   req: NextRequest,
@@ -79,10 +94,15 @@ export async function POST(
     );
   }
 
+  const coldStart = await speColdStartGate(auth.session.roles, Date.now(), [
+    speId as SpeId,
+  ]);
+  if (coldStart) return coldStart;
+
   let transfer: Record<string, unknown>;
   try {
     transfer = await edcClient.management<Record<string, unknown>>(
-      `/v5alpha/participants/${participantId}/transferprocesses/${id}`,
+      `/v5/participants/${participantId}/transferprocesses/${id}`,
     );
   } catch (err) {
     console.error("Transfer not readable:", { id }, err);
@@ -181,15 +201,43 @@ export async function POST(
       { status: 409 },
     );
   }
+  if (res.status === 503) {
+    return NextResponse.json(
+      {
+        error: String(answer.error ?? `${speId} does not answer`),
+        step: "import",
+      },
+      { status: 503, headers: { "Retry-After": proxyRetryAfter(res) } },
+    );
+  }
   if (!res.ok) {
     return NextResponse.json(
       {
         error: String(answer.error ?? `${speId} refused the import`),
         step: "import",
       },
-      { status: res.status === 422 ? 422 : res.status === 503 ? 503 : 502 },
+      { status: res.status === 422 ? 422 : 502 },
     );
   }
+  // The data is where Art. 73 wants it: close the access to the provider's
+  // data. EDC lets the consumer terminate a transfer, not complete it. An
+  // import that could not close the transfer still stands.
+  let closed = false;
+  try {
+    await edcClient.management(
+      `/v5/participants/${participantId}/transferprocesses/${id}/terminate`,
+      "POST",
+      {
+        "@context": [EDC_CONTEXT],
+        "@type": "TerminateTransfer",
+        reason: closedAfterImportReason(speId),
+      },
+    );
+    closed = true;
+  } catch (err) {
+    console.error("Closing a transfer after its import failed:", { id }, err);
+  }
+
   const result: SpeImportResult = {
     datasetId: String(answer.datasetId ?? id),
     speId,
@@ -198,6 +246,8 @@ export async function POST(
     byType: (answer.byType as Record<string, number>) ?? {},
     importedAt: String(answer.importedAt ?? ""),
     pseudonymised,
+    untilStopped: spePowerAvailable(),
+    closed,
     graphUrl: importViewUrl(id, speId),
   };
   return NextResponse.json(result);

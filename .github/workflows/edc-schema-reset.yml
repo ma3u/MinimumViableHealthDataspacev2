@@ -49,7 +49,7 @@ jobs:
         if: ${{ github.event.inputs.seed_participants == 'true' }}
         run: |
           # IH takes ~30-60s for clean cold-start with autocreate. Poll the
-          # internal /api/identity/v1alpha/participants endpoint via a one-shot
+          # internal /api/identity/v1/participants endpoint via a one-shot
           # curl job (since IH is internal-only).
           for i in $(seq 1 24); do
             sleep 5
@@ -99,7 +99,7 @@ jobs:
                       set -e
                       echo "Probing IH base..."
                       for i in 1 2 3 4 5; do
-                        if curl -fsS -o /dev/null -w 'IH base %{http_code}\n' "\${IH}/v1alpha/participants" -H "x-api-key: \${AUTH}"; then
+                        if curl -fsS -o /dev/null -w 'IH base %{http_code}\n' "\${IH}/v1/participants" -H "x-api-key: \${AUTH}"; then
                           break
                         fi
                         echo "wait \$i"; sleep 5
@@ -108,7 +108,7 @@ jobs:
                       echo "Seeding 5 participants..."
                       for P in alpha-klinik pharmaco medreg lmc irs; do
                         echo "POST \$P"
-                        curl -fsS -X POST "\${IH}/v1alpha/participants" \\
+                        curl -fsS -X POST "\${IH}/v1/participants" \\
                           -H "Content-Type: application/json" \\
                           -H "x-api-key: \${AUTH}" \\
                           -d "{
@@ -128,7 +128,7 @@ jobs:
                       done
                       echo
                       echo "Final state:"
-                      curl -fsS "\${IH}/v1alpha/participants" -H "x-api-key: \${AUTH}" | head -c 2000
+                      curl -fsS "\${IH}/v1/participants" -H "x-api-key: \${AUTH}" | head -c 2000
                       echo
                       echo DONE
           EOF

@@ -156,6 +156,14 @@ export interface WorkspaceRead {
 const str = (v: unknown): string | null =>
   v === null || v === undefined ? null : String(v);
 
+/** What withTimeout() rejects with, so a caller can tell silence from a failure. */
+export class NoAnswerError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NoAnswerError";
+  }
+}
+
 /** Rejects when `p` takes longer than `ms`: a hung workspace must not hang a caller. */
 export function withTimeout<T>(
   p: Promise<T>,
@@ -165,7 +173,7 @@ export function withTimeout<T>(
   let timer: NodeJS.Timeout | undefined;
   const late = new Promise<never>((_, reject) => {
     timer = setTimeout(
-      () => reject(new Error(`${what}: no answer within ${ms} ms`)),
+      () => reject(new NoAnswerError(`${what}: no answer within ${ms} ms`)),
       ms,
     );
     timer.unref();

@@ -1,12 +1,17 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Give the 0.18 IssuerService on Azure its identity (ADR-055, #503)
+# Give the IssuerService on Azure its identity (ADR-055, #503, #881)
 # =============================================================================
 #   seed-issuer-identity-azure.sh seed     key, context, activation, definitions
 #   seed-issuer-identity-azure.sh verify   restart the issuer, then check that
 #                                          its DID document resolves with a key
 #
-# Run after migrate-edc-to-v018.sh has moved mvhd-issuerservice. The work is
+# EDC_LINE=v1 (the default) seeds the 1.0 issuer on issuerservice_v1, after
+# migrate-edc-to-v1.sh; EDC_LINE=v018 the 0.18 one, for a rollback. 1.0
+# activates the context and publishes the DID through the identity API alone
+# (context 200, DID 300 on the local stack, 2026-11-06), so the 0.18 activation
+# SQL is not applied: it sets the context to 300, which 1.0 reads as another
+# state. The work is
 # scripts/azure/issuer-identity-job.sh, which runs inside the environment as
 # the one-shot job mvhd-issuer-identity: the issuer's identity and DID ports
 # are internal, and so are Vault and the database's firewall rule.
@@ -27,6 +32,8 @@ eval "$(get_aca_fqdns)"
 
 MODE="${1:-}"
 case "$MODE" in seed|verify) ;; *) sed -n '2,8p' "$0"; exit 2 ;; esac
+EDC_LINE="${EDC_LINE:-v1}"
+case "$EDC_LINE" in v1|v018) ;; *) err "EDC_LINE is v1 or v018, not '${EDC_LINE}'"; exit 2 ;; esac
 JOB="mvhd-issuer-identity"
 KC_URL="https://${KEYCLOAK_PUBLIC_HOSTNAME_OVERRIDE:-auth.ehds.mabu.red}"
 COMPOSE_X="I8dt08pwP4nQPv4MacRU5u5KsroVa3ESkWmyQEDn36A"
@@ -58,10 +65,14 @@ done
 log "read the provisioner (${#PROV_SECRET}), issuer (${#ISSUER_SECRET}) and database (${#PG_PW}) secrets"
 
 # ── The activation SQL, with Azure's DID and the key's x left to the job ────
-SQL_B64=$(sed -e "s/issuerservice%3A10016/${ISSUER_APP}%3A10016/g" \
-              -e "s#http://issuerservice:10012#http://${ISSUER_APP}:10012#g" \
-              -e "s/${COMPOSE_X}/__X__/g" \
-              "${REPO_DIR}/jad/seed-issuer-identity.sql" | base64 | tr -d '\n')
+# 0.18 only; an empty SQL_B64 tells the job to skip the step.
+SQL_B64=""
+if [ "$EDC_LINE" = v018 ]; then
+  SQL_B64=$(sed -e "s/issuerservice%3A10016/${ISSUER_APP}%3A10016/g" \
+                -e "s#http://issuerservice:10012#http://${ISSUER_APP}:10012#g" \
+                -e "s/${COMPOSE_X}/__X__/g" \
+                "${REPO_DIR}/jad/seed-issuer-identity.sql" | base64 | tr -d '\n')
+fi
 
 # ── verify: the issuer loads its identity at start ──────────────────────────
 if [ "$MODE" = verify ]; then
@@ -91,7 +102,7 @@ out, script = sys.argv[1], open(sys.argv[2]).read()
 env = {
   "MODE": "${MODE}", "ISSUER_HOST": "${ISSUER_APP}", "VAULT_URL": "${VAULT_URL}",
   "KC_URL": "${KC_URL}", "PG_HOST": "${PG_HOST}", "PG_USER": "${PG_ADMIN}",
-  "PG_DB": "issuerservice_v018", "SQL_B64": "${SQL_B64}",
+  "PG_DB": "issuerservice_${EDC_LINE}", "SQL_B64": "${SQL_B64}",
 }
 secrets = {"vault-token": "VAULT_TOKEN", "provisioner-secret": "PROVISIONER_SECRET",
            "issuer-secret": "ISSUER_SECRET", "pg-password": "PG_PASSWORD"}

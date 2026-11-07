@@ -157,6 +157,10 @@ def images_in(paths: list[Path]) -> dict[str, list[str]]:
             # A ${VAR} in an image line is resolved at runtime, not here.
             if "${" in ref:
                 continue
+            # The EDC launchers are built from this repository (runtimes/edc)
+            # on the runner itself, never pulled, so no registry has them.
+            if ref.startswith("mvhd/"):
+                continue
             found.setdefault(ref, []).append(path.name)
     return found
 

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { edcClient } from "@/lib/edc";
+import { updateContextProperties } from "@/lib/edc/participants";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
 /**
- * PATCH /api/participants/[id] — Update tenant properties (display name,
- * contact details, etc.) via CFM TenantManager.
+ * PATCH /api/participants/[id] — Update a participant's properties (display
+ * name, contact details, etc.), kept on its control plane context (ADR-078).
  */
 export async function PATCH(
   req: NextRequest,
@@ -27,13 +27,10 @@ export async function PATCH(
       );
     }
 
-    const result = await edcClient.tenant(`/v1alpha1/tenants/${id}`, "PATCH", {
-      properties,
-    });
-
-    return NextResponse.json(result ?? { ok: true });
+    await updateContextProperties(id, properties);
+    return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("Failed to PATCH tenant:", err);
+    console.error("Failed to PATCH participant:", err);
     return NextResponse.json(
       { error: "Failed to update participant" },
       { status: 502 },

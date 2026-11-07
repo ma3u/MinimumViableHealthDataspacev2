@@ -1,88 +1,43 @@
 import { NextResponse } from "next/server";
-import { edcClient } from "@/lib/edc";
 import { requireAuth, isAuthError } from "@/lib/auth-guard";
 import { listDemo, DEMO_ONBOARDING_SCOPE } from "@/lib/demo-records";
-import {
-  summariseVpas,
-  stalledReason,
-  provisioningFailed,
-  provisioningComplete,
-  failedReason,
-  type ProfileWithVpas,
-} from "@/lib/provisioning";
+import { listTenantViews } from "@/lib/edc/participants";
 
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/participants/me — Get the current user's tenant profile.
+ * GET /api/participants/me — The participants, in the tenant shape the
+ * onboarding page reads.
  *
- * Lists all tenants from CFM TenantManager. In a production system this
- * would look up the tenant matching the authenticated user's DID; in the
- * demo we return all tenants with their profiles.
+ * In a production system this would look up the participant matching the
+ * authenticated user's DID; in the demo it lists every control plane context
+ * (ADR-078: a participant is its context, CFM's tenants are gone), each with
+ * whether the issuer has delivered its MembershipCredential yet.
  *
- * Tenants the demonstrator recorded itself come first, and an unavailable
- * TenantManager yields just those rather than a 502 (issue #203).
+ * Registrations this process recorded without provisioning them come first,
+ * and an unreachable control plane yields just those rather than a 502
+ * (issue #203).
  */
 export async function GET() {
   const auth = await requireAuth();
   if (isAuthError(auth)) return auth;
 
-  // Registrations this process recorded because nothing could provision them
-  // (see lib/demo-records.ts). They come first: the newest is the one the user
-  // just submitted, and the page reloads this list right after submitting.
   const demoTenants = listDemo("participant", DEMO_ONBOARDING_SCOPE);
 
   try {
-    const tenants = await edcClient.tenant<
-      {
-        id: string;
-        version: number;
-        properties: Record<string, string>;
-      }[]
-    >("/v1alpha1/tenants");
-
-    // Enrich each tenant with its participant profiles, and with a reading of
-    // how far their provisioning activities actually got. A profile whose
-    // activities are all still pending long after creation is not
-    // provisioning: nothing is going to complete it, and the page has to say
-    // that rather than animate a clock (issue #203).
-    const enriched = await Promise.all(
-      tenants.map(async (t) => {
-        let profiles: ProfileWithVpas[] = [];
-        try {
-          profiles = await edcClient.tenant<ProfileWithVpas[]>(
-            `/v1alpha1/tenants/${t.id}/participant-profiles`,
-          );
-        } catch {
-          profiles = [];
-        }
-        const vpaSummary = summariseVpas(profiles);
-        // A profile the agents gave up on carries its DID all the same (the
-        // route sends it), so the identifier says nothing about success. Read
-        // the outcome off the profile and its activities (2026-10-03).
-        const failed = provisioningFailed(profiles);
-        return {
-          ...t,
-          participantProfiles: profiles,
-          vpaSummary,
-          provisioningStalled: vpaSummary.stalled,
-          ...(vpaSummary.stalled
-            ? { stalledReason: stalledReason(vpaSummary) }
-            : {}),
-          provisioningFailed: failed,
-          ...(failed ? { failedReason: failedReason() } : {}),
-          provisioningComplete: provisioningComplete(profiles),
-        };
-      }),
+    // Newest registration first: the page reloads this list right after
+    // submitting, and the one just submitted is the one to show.
+    const views = (await listTenantViews()).sort((a, b) =>
+      (b.properties.registeredAt ?? "").localeCompare(
+        a.properties.registeredAt ?? "",
+      ),
     );
-
-    return NextResponse.json([...demoTenants, ...enriched]);
+    return NextResponse.json([...demoTenants, ...views]);
   } catch (err) {
-    // The Tenant Manager is absent on the Azure deployment (issue #203), which
-    // is not a fault of this request. The page renders a non-ok answer as an
-    // empty list and says nothing, so returning what we do have, rather than a
-    // 502, is both more honest and more useful.
-    console.warn("CFM Tenant Manager unavailable, listing demo tenants:", err);
+    // The page renders a non-ok answer as an empty list and says nothing, so
+    // returning what we do have, rather than a 502, is both more honest and
+    // more useful.
+    console.warn("Control plane unavailable, listing demo tenants:", err);
     return NextResponse.json(demoTenants);
   }
 }

@@ -296,30 +296,30 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
   const profiles = tenant.participantProfiles || [];
   const hasProfile = profiles.length > 0;
   const status = deriveStatus(tenant);
-  // Live tenants have activities, and only their completion means a DID was
-  // registered; the static mock data has none and states its DID directly.
-  const live = (tenant.vpaSummary?.total ?? 0) > 0;
-  const hasDid = live
-    ? status === "active"
-    : profiles.some(
-        (p) =>
-          (p.identifier && p.identifier !== "null") ||
-          (p.did && p.did !== "null"),
-      );
+  // The hub provisions a participant in one request and undoes it on failure
+  // (ADR-078), so a context that is listed has its DID and keys; what can
+  // still be outstanding is the credential, which "active" waits for.
+  const hasDid =
+    status !== "failed" &&
+    profiles.some(
+      (p) =>
+        (p.identifier && p.identifier !== "null") ||
+        (p.did && p.did !== "null"),
+    );
   // Nothing is in progress on a registration that failed or stalled; a
   // pulsing clock there promises what is not coming.
   const moving = status !== "failed" && status !== "stalled";
 
   const steps = [
     {
-      label: t("Tenant Created"),
+      label: t("Registered"),
       done: true,
       inProgress: false,
-      desc: t("Organisation registered in CFM TenantManager"),
+      desc: t("Organisation registered with the hub"),
     },
     {
       label: t("Participant Context"),
-      done: hasProfile && (!live || status !== "failed"),
+      done: hasProfile && status !== "failed",
       inProgress: !hasProfile && moving,
       desc: t("EDC-V participant context provisioned"),
     },
@@ -331,7 +331,7 @@ function OnboardingSteps({ tenant }: { tenant: Tenant }) {
     },
     {
       label: t("Credentials Issued"),
-      done: hasDid,
+      done: status === "active",
       inProgress: hasDid && status !== "active" && moving,
       desc: t("EHDS Verifiable Credentials available"),
     },
@@ -645,10 +645,6 @@ function OnboardingContent() {
   // Set when the registration was recorded without being provisioned, so the
   // success screen can say so instead of promising a DID (issue #203).
   const [notProvisioned, setNotProvisioned] = useState<string | null>(null);
-  // The provisioning activities the Tenant Manager created, so the success
-  // screen can name them instead of promising what they will produce. This
-  // request cannot know whether an agent will complete them (issue #203).
-  const [activityTypes, setActivityTypes] = useState<string[]>([]);
 
   const [displayName, setDisplayName] = useState("");
   const [organization, setOrganization] = useState("");
@@ -688,7 +684,6 @@ function OnboardingContent() {
     setStep("submitting");
     setError(null);
     setNotProvisioned(null);
-    setActivityTypes([]);
 
     try {
       const res = await fetchApi("/api/participants", {
@@ -717,8 +712,6 @@ function OnboardingContent() {
               "This deployment cannot provision a participant, so the registration was recorded for the demonstration only.",
             ),
         );
-      } else if (Array.isArray(data.activityTypes)) {
-        setActivityTypes(data.activityTypes as string[]);
       }
 
       setStep("done");
@@ -740,7 +733,7 @@ function OnboardingContent() {
           )}
           nextStep={{ href: "/catalog", label: t("Explore Datasets") }}
           infoText={t(
-            "After onboarding, your organisation can share or consume health data under EHDS Regulation (EU) 2025/327. The registration creates a tenant, participant context, and DID:web identity.",
+            "After onboarding, your organisation can share or consume health data under EHDS Regulation (EU) 2025/327. The registration creates a participant context, a DID:web identity with its keys, and a membership credential.",
           )}
           docLink={{
             href: "/docs/user-guide",
@@ -791,27 +784,17 @@ function OnboardingContent() {
             </h2>
             <p className="text-(--text-secondary) text-sm max-w-md">
               {notProvisioned ??
-                // Not "will proceed automatically": the tenant and the profile
-                // are real, the activities are pending, and whether an agent
-                // completes them is not something this page can promise.
-                // Issue #203.
-                (activityTypes.length
-                  ? t(
-                      "The tenant and the participant profile were created, and {n} provisioning activities ({list}) are pending. A DID and a credential appear on the participant card only once an agent completes them; if they stay pending, the card says so.",
-                      {
-                        n: activityTypes.length,
-                        list: activityTypes.join(", "),
-                      },
-                    )
-                  : t(
-                      "The tenant and the participant profile were created, and the provisioning activities are pending. A DID and a credential appear on the participant card only once an agent completes them; if they stay pending, the card says so.",
-                    ))}
+                // Not "is active": the context, DID and keys exist when the
+                // request returns, the credential only once the issuer has
+                // delivered it, which this page cannot promise (#203, ADR-078).
+                t(
+                  "The participant context, its DID and keys were created, and its MembershipCredential was requested from the issuer. The card shows the participant as active once the issuer has delivered it; if it does not arrive, the card says so.",
+                )}
             </p>
             <button
               onClick={() => {
                 setStep("form");
                 setNotProvisioned(null);
-                setActivityTypes([]);
                 setDisplayName("");
                 setOrganization("");
                 setRole("data-holder");

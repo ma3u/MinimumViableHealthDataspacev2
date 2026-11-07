@@ -55,7 +55,7 @@ describe("GET /api/agreements/[id]", () => {
 
     expect(res.status).toBe(200);
     expect(mockManagement).toHaveBeenCalledWith(
-      "/v5alpha/participants/ctx-1/contractagreements/agr-1",
+      "/v5/participants/ctx-1/contractagreements/agr-1",
     );
     expect(body).toMatchObject({
       agreementId: "agr-1",
