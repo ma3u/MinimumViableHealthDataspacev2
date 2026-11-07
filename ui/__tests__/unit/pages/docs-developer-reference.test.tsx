@@ -34,6 +34,22 @@ describe("the API reference's Scalar configuration", () => {
     expect(scalar.configuration?.hideClientButton).toBe(true);
   });
 
+  it("links each specification the API implements", () => {
+    const { getByTestId } = render(<ApiReferencePage />);
+    const hrefs = [...getByTestId("api-reference-specs").querySelectorAll("a")]
+      .map((a) => a.getAttribute("href"))
+      .sort();
+    expect(hrefs).toEqual(
+      [
+        "https://data.health.europa.eu/healthdcat-ap/releases/release-8/",
+        "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/",
+        "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
+        "https://hl7.org/fhir/R4/",
+        "https://ohdsi.github.io/CommonDataModel/cdm54.html",
+      ].sort(),
+    );
+  });
+
   it("points the in-page client at the page's own origin", () => {
     render(<ApiReferencePage />);
     expect(scalar.configuration?.baseServerURL).toBe(window.location.origin);
