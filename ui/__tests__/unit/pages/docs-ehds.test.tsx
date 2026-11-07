@@ -53,7 +53,8 @@ describe("the EHDS documents", () => {
   it("cite the adopted Regulation and every chapter the hub touches", () => {
     const page = docsInSection("ehds")[0].markdown;
     expect(page).toContain("Regulation (EU) 2025/327");
-    // one table row per article, its number in the first column
+    // one table row per article, its number in the first column, linked to
+    // that article of the Regulation on EUR-Lex
     for (const article of [
       "3",
       "16",
@@ -65,7 +66,12 @@ describe("the EHDS documents", () => {
       "73",
       "77",
     ]) {
-      expect(page).toMatch(new RegExp(`^\\| ${article}\\s+\\|`, "m"));
+      expect(page).toMatch(
+        new RegExp(
+          `^\\| \\[${article}\\]\\(https://eur-lex\\.europa\\.eu/eli/reg/2025/327/oj/eng#art_${article}\\)\\s+\\|`,
+          "m",
+        ),
+      );
     }
     // the proposal's numbering is never presented as the Regulation's
     expect(page).not.toMatch(/\bEHDS Art\. 50\b/);
