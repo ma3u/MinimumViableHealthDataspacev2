@@ -586,9 +586,18 @@ export default function ArchitecturePage() {
             {t("7. SIMPL-Open & Compliance")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            {t(
-              "The hub and the EU's Simpl-Open middleware stand on the same foundation: both run Eclipse EDC connectors, speak the Dataspace Protocol and admit participants with credentials from an authority they trust. The hub joins a Simpl data space as an EDC connector outside the Simpl-Open agent (ADR-064) and brings what health adds on top: FHIR and OMOP semantics, data permits, the right to opt out (Art. 71), fees and the gate in front of the secure processing environments.",
-            )}
+            <T
+              area="docsArchitecture"
+              tags={{
+                adr: ext(
+                  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md",
+                ),
+              }}
+            >
+              {
+                "The hub and the EU's Simpl-Open middleware stand on the same foundation: both run Eclipse EDC connectors, speak the Dataspace Protocol and admit participants with credentials from an authority they trust. The hub joins a Simpl data space as an EDC connector outside the Simpl-Open agent (<adr>ADR-064</adr>) and brings what health adds on top: FHIR and OMOP semantics, data permits, the right to opt out (Art. 71), fees and the gate in front of the secure processing environments."
+              }
+            </T>
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div className="border border-(--border) rounded-lg p-4">
@@ -597,37 +606,93 @@ export default function ArchitecturePage() {
               </h4>
               <ul className="text-(--text-secondary) text-xs space-y-1.5 list-disc ml-4">
                 <li>
-                  <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  <T
+                    area="docsArchitecture"
+                    tags={{
+                      b: <strong />,
+                      edc: ext("https://github.com/eclipse-edc/Connector"),
+                      simpl: ext(
+                        "https://code.europa.eu/simpl/simpl-open/development/gaia-x-edc/simpl-edc/-/blob/v1.0.26/pom.xml#L16",
+                      ),
+                      dsp: ext(
+                        "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
+                      ),
+                    }}
+                  >
                     {
-                      "<b>One connector:</b> both run Eclipse EDC and speak the Dataspace Protocol for catalogue, negotiation and transfer"
+                      "<b>One connector:</b> both run <edc>Eclipse EDC</edc>, Simpl in its <simpl>simpl-edc</simpl> connector, and speak the <dsp>Dataspace Protocol</dsp> for catalogue, negotiation and transfer"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  <T
+                    area="docsArchitecture"
+                    tags={{
+                      b: <strong />,
+                      dcp: ext(
+                        "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/",
+                      ),
+                      trust: ext(
+                        "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/710",
+                      ),
+                    }}
+                  >
                     {
-                      "<b>Trust from an authority:</b> a Simpl data space's Governance Authority can be a trusted issuer in the hub's IdentityHub, over DCP v1.0; checked on compose with a stand-in authority"
+                      "<b>Trust from an authority:</b> a Simpl data space's Governance Authority can be a trusted issuer in the hub's IdentityHub, over <dcp>DCP v1.0</dcp>; checked on compose with a stand-in authority (<trust>#710</trust>)"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  <T
+                    area="docsArchitecture"
+                    tags={{
+                      b: <strong />,
+                      qa: ext(
+                        "https://simpl-programme.ec.europa.eu/landing-page/code-and-impact-qa",
+                      ),
+                    }}
+                  >
                     {
-                      "<b>Bilateral agreements:</b> a provider and a consumer agree, and the provider's connector enforces the policy"
+                      "<b>Bilateral agreements:</b> a provider and a consumer agree, and the provider's connector enforces the policy (<qa>Simpl Q&A</qa>)"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  <T
+                    area="docsArchitecture"
+                    tags={{
+                      b: <strong />,
+                      dcatap: ext(
+                        "https://semiceu.github.io/DCAT-AP/releases/3.0.0/",
+                      ),
+                      roadmap: ext(
+                        "https://simpl-programme.ec.europa.eu/development/development-status/simpl-open-roadmap-items-q4",
+                      ),
+                      hdcat: ext(
+                        "https://healthdataeu.pages.code.europa.eu/healthdcat-ap/releases/release-8/",
+                      ),
+                      adr63: ext(
+                        "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-063-healthdcat-ap-release-8-and-its-namespace.md",
+                      ),
+                    }}
+                  >
                     {
-                      "<b>DCAT-AP catalogues:</b> Simpl adopts DCAT-AP in Innsbruck, and the hub's HealthDCAT-AP Release 8 is its health profile (ADR-063)"
+                      "<b>DCAT-AP catalogues:</b> Simpl adopts <dcatap>DCAT-AP</dcatap> in <roadmap>Innsbruck</roadmap>, and the hub's <hdcat>HealthDCAT-AP Release 8</hdcat> is its health profile (<adr63>ADR-063</adr63>)"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  <T
+                    area="docsArchitecture"
+                    tags={{
+                      b: <strong />,
+                      arch: ext(
+                        "https://simpl-programme.ec.europa.eu/documentation/architecture",
+                      ),
+                    }}
+                  >
                     {
-                      "<b>Data stays with its holder:</b> both federate, and neither copies data into a central store"
+                      "<b>Data stays with its holder:</b> both federate, and neither copies data into a central store (<arch>Simpl architecture</arch>)"
                     }
                   </T>
                 </li>
@@ -680,44 +745,115 @@ export default function ArchitecturePage() {
             </h4>
             <ol className="text-(--text-secondary) text-xs space-y-1.5 list-decimal ml-4 mb-3">
               <li>
-                <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    b: <strong />,
+                    issuer: ext(
+                      "https://code.europa.eu/simpl/simpl-open/security/credential-management/vc-issuance-verification/issuer-service/issuer-service-be/-/blob/v1.6.0/README.md#L29-32",
+                    ),
+                    ih: ext("https://github.com/eclipse-edc/IdentityHub"),
+                  }}
+                >
                   {
-                    "<b>Now:</b> a credential from Simpl's own issuer service in the hub's IdentityHub: Simpl signs JSON-LD credentials with Ed25519, and the test is whether the hub verifies one and a negotiation completes on it"
+                    "<b>Now:</b> a credential from Simpl's own <issuer>issuer service</issuer> in the hub's <ih>IdentityHub</ih>: Simpl signs JSON-LD credentials with Ed25519, and the test is whether the hub verifies one and a negotiation completes on it"
                   }
                 </T>
               </li>
               <li>
-                <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    b: <strong />,
+                    tck: ext("https://github.com/eclipse-dataspacetck/dsp-tck"),
+                    pom: ext(
+                      "https://code.europa.eu/simpl/simpl-open/development/gaia-x-edc/simpl-edc/-/blob/v1.0.26/pom.xml#L16",
+                    ),
+                    dsp: ext(
+                      "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
+                    ),
+                    branch: ext(
+                      "https://code.europa.eu/simpl/simpl-open/development/gaia-x-edc/simpl-edc/-/blob/feature/SIMPL-24762_update_edc_to_0_16_0/pom.xml#L16",
+                    ),
+                  }}
+                >
                   {
-                    "<b>Now:</b> the DSP compatibility kit against Simpl's published connector, which builds on EDC 0.10.1 and predates DSP 2025-1; the gaps go to the Simpl programme"
+                    "<b>Now:</b> the <tck>DSP compatibility kit</tck> against Simpl's published connector: <pom>release 1.0.26 builds on EDC 0.10.1</pom>, older than <dsp>DSP 2025-1</dsp>, and the <branch>upgrade to EDC 0.17.0</branch> is not merged; the gaps go to the Simpl programme"
                   }
                 </T>
               </li>
               <li>
-                <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    b: <strong />,
+                    ak: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/src/lib/journey-config.ts#L36-L41",
+                    ),
+                    trust: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/710",
+                    ),
+                  }}
+                >
                   {
-                    "<b>Now:</b> a second data space on compose, whose Governance Authority admits a fictional insurer, AlphaKasse DE"
+                    "<b>Now:</b> a second data space on compose, whose Governance Authority admits a fictional insurer, <ak>AlphaKasse DE</ak>, on the trust built in <trust>#710</trust>"
                   }
                 </T>
               </li>
               <li>
-                <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    b: <strong />,
+                    plan: ext(
+                      "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934",
+                    ),
+                  }}
+                >
                   {
-                    "<b>Now:</b> a use case across both sectors: AlphaKasse rewards an active year with a bonus and receives only a yes or no, never the data behind it"
+                    "<b>Now:</b> a use case across both sectors: AlphaKasse rewards an active year with a bonus and receives only a yes or no, never the data behind it (<plan>#934</plan>)"
                   }
                 </T>
               </li>
               <li>
-                <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    b: <strong />,
+                    roadmap: ext(
+                      "https://simpl-programme.ec.europa.eu/development/development-status/simpl-open-roadmap-items-q4",
+                    ),
+                    edc1: ext(
+                      "https://github.com/eclipse-edc/Connector/releases/tag/v1.0.0-RC5",
+                    ),
+                    dcp: ext(
+                      "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/",
+                    ),
+                    ihr: ext(
+                      "https://github.com/eclipse-edc/IdentityHub/releases/tag/v1.0.0-RC5",
+                    ),
+                  }}
+                >
                   {
-                    "<b>With Simpl's move to DCP:</b> EDC 1.0 in the same step, since DCP, the IdentityHub and the IssuerService ship with it"
+                    "<b>With Simpl's move to DCP</b> (<roadmap>SSI Tier 2, Innsbruck</roadmap>): <edc1>EDC 1.0</edc1> in the same step, since <dcp>DCP v1.0</dcp>, the IdentityHub and the IssuerService <ihr>ship with it</ihr>"
                   }
                 </T>
               </li>
               <li>
-                <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                <T
+                  area="docsArchitecture"
+                  tags={{
+                    b: <strong />,
+                    dcatap: ext(
+                      "https://semiceu.github.io/DCAT-AP/releases/3.0.0/",
+                    ),
+                    roadmap: ext(
+                      "https://simpl-programme.ec.europa.eu/development/development-status/simpl-open-roadmap-items-q4",
+                    ),
+                  }}
+                >
                   {
-                    "<b>With Innsbruck:</b> the hub's catalogue as the health profile of Simpl's DCAT-AP model, and search across both data spaces"
+                    "<b>With Innsbruck:</b> the hub's catalogue as the health profile of Simpl's <dcatap>DCAT-AP</dcatap> model (<roadmap>roadmap</roadmap>), and search across both data spaces"
                   }
                 </T>
               </li>
@@ -725,10 +861,17 @@ export default function ArchitecturePage() {
             <p className="text-(--text-secondary) text-xs">
               <T
                 area="docsArchitecture"
-                tags={{ a: ext(`${GITHUB_REPO}/issues/934`) }}
+                tags={{
+                  a: ext(
+                    "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934",
+                  ),
+                  art54: ext(
+                    "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_54",
+                  ),
+                }}
               >
                 {
-                  "The plan, the use case and its legal guardrails are in <a>issue #934</a>. EHDS Art. 54 keeps the bonus on the person's side: no premium or exclusion is ever decided from secondary-use data."
+                  "The plan, the use case and its legal guardrails are in <a>issue #934</a>. <art54>EHDS Art. 54</art54> keeps the bonus on the person's side: no premium or exclusion is ever decided from secondary-use data."
                 }
               </T>
             </p>
