@@ -6,27 +6,33 @@ Technical documentation for developing, testing, and deploying the Health Datasp
 
 ## JAD Stack Architecture
 
-The full JAD stack runs **19 Docker services** via `docker-compose.yml` + `docker-compose.jad.yml`.
+The full JAD stack runs **15 Docker services** via `docker-compose.yml` + `docker-compose.jad.yml`, on EDC 1.0.0-RC5 with siglet as the data plane and no CFM, as Azure does ([ADR-078](ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md)). The three EDC launchers are built from `runtimes/edc` (`mvhd/edc-<runtime>:1.0.0-RC5`).
 
-| Service           | Port          | Traefik Route      | Purpose                         | Depends On          |
-| ----------------- | ------------- | ------------------ | ------------------------------- | ------------------- |
-| Traefik           | :80 / :8090   | traefik.localhost  | API gateway & reverse proxy     | —                   |
-| PostgreSQL 17     | :5432         | —                  | Runtime store (8 databases)     | —                   |
-| Vault             | :8200         | vault.localhost    | Secret management (dev mode)    | —                   |
-| Keycloak          | :8080         | keycloak.localhost | OIDC SSO (realm: edcv, 7 users) | PostgreSQL          |
-| NATS              | :4222 / :8222 | —                  | Async event mesh (JetStream)    | —                   |
-| Control Plane     | :11003        | cp.localhost       | DSP protocol + management API   | PG, Vault, NATS, KC |
-| Data Plane FHIR   | :11002        | dp-fhir.localhost  | FHIR PUSH transfer type         | PG, Vault, CP       |
-| Data Plane OMOP   | :11012        | dp-omop.localhost  | OMOP PULL transfer type         | PG, Vault, CP       |
-| Identity Hub      | :11005        | ih.localhost       | DCP v1.0 — DID + VC store       | PG, Vault, KC       |
-| Issuer Service    | :10013        | issuer.localhost   | VC issuance + DID:web           | PG, Vault, KC       |
-| Tenant Manager    | :11006        | tm.localhost       | CFM tenant lifecycle            | PG, KC              |
-| Provision Manager | :11007        | pm.localhost       | CFM resource provisioning       | PG, KC, CP          |
-| Neo4j 5           | :7474 / :7687 | —                  | Knowledge graph (APOC + n10s)   | —                   |
-| Neo4j Proxy       | :9090         | proxy.localhost    | Express bridge: UI ↔ Neo4j     | CP                  |
-| Next.js UI        | :3000 / :3003 | —                  | Application frontend            | Neo4j               |
+| Service         | Port          | Traefik Route      | Purpose                                                         | Depends On          |
+| --------------- | ------------- | ------------------ | --------------------------------------------------------------- | ------------------- |
+| Traefik         | :80 / :8090   | traefik.localhost  | API gateway & reverse proxy                                     | none                |
+| PostgreSQL 17   | :5432         | none               | Runtime store (databases below)                                 | none                |
+| Vault           | :8200         | vault.localhost    | Secrets, file storage; `vault-unseal` unseals it on start       | none                |
+| Keycloak        | :8080 / :9000 | keycloak.localhost | OIDC SSO (realm: edcv, 7 users)                                 | PostgreSQL          |
+| NATS            | :4222 / :8222 | nats.localhost     | Async event mesh (JetStream)                                    | none                |
+| Control Plane   | :11003        | cp.localhost       | DSP 2025-1 + Management API `v5`                                | PG, Vault, NATS, KC |
+| siglet          | internal      | none               | Data plane: signalling, and the access tokens of pull transfers | Vault               |
+| Identity Hub    | :11005        | ih.localhost       | DCP v1.0: DID + VC store (Identity API `v1`)                    | PG, Vault, KC       |
+| Issuer Service  | :10013        | issuer.localhost   | VC issuance + DID:web                                           | PG, Vault, KC       |
+| Simpl GA issuer | :10023        | none               | The fictional Simpl Governance Authority's issuer (ADR-064)     | PG, Vault, KC       |
+| Neo4j 5         | :7474 / :7687 | none               | Knowledge graph (APOC + n10s)                                   | none                |
+| Neo4j Proxy     | :9090         | proxy.localhost    | Express bridge: UI ↔ Neo4j; serves pulls at `/dataspace/data`  | CP                  |
+| Next.js UI      | :3000 / :3003 | none               | Application frontend                                            | Neo4j               |
 
-Plus 4 background CFM agents (keycloak, edcv, registration, onboarding), 1 vault-bootstrap sidecar, and 1 one-shot seed container.
+Plus two Vault sidecars: `vault-unseal` initialises and unseals Vault, `vault-bootstrap` writes the secrets the services read.
+
+A pull transfer runs like this: the consumer's control plane negotiates, siglet issues the access token, and the consumer reads the token from its siglet (`GET /tokens/{participantContextId}/{transferId}`) and sends it to the provider's Neo4j Proxy at `/dataspace/data`, which serves the dataset the token names (`jad/siglet-edc1.toml`). siglet keeps its tokens in memory on this stack, so a restart of siglet loses every issued token; start the transfer again.
+
+Three compose profiles hold what the default stack leaves out:
+
+- `edc018`: the EDC 0.18 services, the two DCore data planes (FHIR :11002, OMOP :11012), CFM's Tenant Manager (:11006) and Provision Manager (:11007), its four agents and shim, and the one-shot `jad-seed`. They are kept until #927 retires them; nothing in CI starts them.
+- `trust-check`: `rogue-issuer` (:10033), the untrusted issuer the identity checks must refuse.
+- `federated`: `neo4j-spe2` (:7475 / :7688), the second SPE.
 
 ## Prerequisites
 
@@ -44,7 +50,7 @@ Plus 4 background CFM agents (keycloak, edcv, registration, onboarding), 1 vault
 - lychee — broken link checker (`brew install lychee`)
 - Playwright browsers — E2E tests (`npx playwright install`)
 
-**Port requirements:** 80, 3000, 3003, 4222, 5432, 7474, 7687, 8080, 8090, 8200, 8222, 9090, 10013, 11002, 11003, 11005, 11006, 11007, 11012
+**Port requirements:** 80, 3000, 3003, 4222, 5432, 7474, 7687, 8080, 8090, 8200, 8222, 9000, 9090, 10013, 10023, 11003, 11005
 
 ## Quick Start — Minimal Stack
 
@@ -94,15 +100,17 @@ open http://traefik.localhost        # Traefik Dashboard
 
 ## Data Seeding Pipeline
 
-| Phase | Script                       | Target Service | What It Does                                |
-| ----- | ---------------------------- | -------------- | ------------------------------------------- |
-| 1     | seed-health-tenants.sh       | Tenant Manager | Create 5 participant tenants via CFM        |
-| 2     | seed-ehds-credentials.sh     | Issuer Service | Register EHDS credential types              |
-| 3     | seed-ehds-policies.sh        | Control Plane  | Create ODRL policies for all participants   |
-| 4     | seed-data-assets.sh          | Control Plane  | Register data assets + contracts            |
-| 5     | seed-contract-negotiation.sh | Control Plane  | PharmaCo ↔ AlphaKlinik negotiations        |
-| 6     | seed-federated-catalog.sh    | Control Plane  | MedReg ↔ LMC federated catalog negotiation |
-| 7     | seed-data-transfer.sh        | Data Plane     | Verify EDR tokens and data plane transfers  |
+| Phase | Script                            | Target Service           | What It Does                                                                        |
+| ----- | --------------------------------- | ------------------------ | ----------------------------------------------------------------------------------- |
+| 1     | ../scripts/seed-identity-layer.sh | Identity Hub, Issuer, CP | The 5 participants: contexts, DIDs, keys, a DCP MembershipCredential each (ADR-078) |
+| 2     | seed-ehds-credentials.sh          | Issuer Service           | Register EHDS credential types                                                      |
+| 3     | seed-ehds-policies.sh             | Control Plane            | Create ODRL policies for all participants                                           |
+| 4     | seed-data-assets.sh               | Control Plane            | Register data assets + contracts                                                    |
+| 5     | seed-contract-negotiation.sh      | Control Plane            | PharmaCo ↔ AlphaKlinik negotiations, transfers to STARTED                          |
+| 6     | seed-federated-catalog.sh         | Control Plane            | MedReg ↔ LMC federated catalog negotiation                                         |
+| 7     | seed-data-transfer.sh             | siglet, Neo4j Proxy      | Pull patients and the catalogue with siglet's tokens; record the TransferEvents     |
+
+`bootstrap-jad.sh` loads the graph (`init-schema.cypher` and the files CI loads) only when Neo4j holds no patients, so a graph you filled yourself stays as it is. Phase 7 rewrites three tracked fixtures, `ui/public/mock/{fhir_bundles,negotiations,transfers}.json`; restore them with `git checkout --` when you did not mean to refresh them. Phase 1 reports `HTTP 400` for the attestation types `ehds-participant` and `ehds-quality`, which no issuer launcher registers, and for the credential types defined on them (finding 7 in #881); phase 2 registers the EHDS credential types anyway.
 
 > **Important:** Vault keeps its secrets on disk (volumes `vault_data` and `vault_keys`; the `vault-unseal` sidecar unseals it on every start), so a restart or a `docker compose down` keeps every secret. Only removing the volumes (`docker compose down -v` or `./scripts/bootstrap-jad.sh --reset`) deletes them; bootstrap and seed the stack again after that. If IdentityHub logs `Private key ... not found`, check that `health-dataspace-vault-unseal` reported `ready`.
 
@@ -124,16 +132,17 @@ The 5-layer knowledge graph spans **27 node labels** with **70+ indexes** and **
 
 PostgreSQL serves as the runtime store for all JAD services. Neo4j holds the health knowledge graph. (ADR-1)
 
-| Database       | Service             | Contents                                                |
-| -------------- | ------------------- | ------------------------------------------------------- |
-| controlplane   | EDC-V Control Plane | Contract negotiations, transfer processes, policy store |
-| dataplane_fhir | DCore FHIR          | FHIR data plane state, EDR tokens                       |
-| dataplane_omop | DCore OMOP          | OMOP data plane state, EDR tokens                       |
-| identityhub    | Identity Hub        | DID documents, VC store, key pairs                      |
-| issuerservice  | Issuer Service      | Credential definitions, attestation records             |
-| keycloak       | Keycloak            | Users, roles, realm config, sessions                    |
-| cfm_tenant     | Tenant Manager      | Tenant records, VPA                                     |
-| cfm_provision  | Provision Manager   | Provisioning tasks, resource allocation                 |
+| Database         | Service         | Contents                                                |
+| ---------------- | --------------- | ------------------------------------------------------- |
+| controlplane_v1  | Control Plane   | Contract negotiations, transfer processes, policy store |
+| identityhub_v1   | Identity Hub    | DID documents, VC store, key pairs                      |
+| issuerservice_v1 | Issuer Service  | Credential definitions, attestation records             |
+| simplga_v1       | Simpl GA issuer | The Simpl Governance Authority's credentials            |
+| rogueissuer_v1   | rogue-issuer    | The untrusted issuer of the identity checks             |
+| keycloak         | Keycloak        | Users, roles, realm config, sessions                    |
+| taskdb           | Neo4j Proxy     | The task store                                          |
+
+The image creates `controlplane` (`POSTGRES_DB`); `jad/init-postgres.sql` creates the users, `keycloak`, `taskdb` and the other EDC 0.18 databases (`identityhub`, `issuerservice`, `dataplane`, `dataplane_omop`, `cfm`, `redlinedb`, ...), which the 1.0 services no longer use. `jad/init-postgres-edc1.sql` creates the `_v1` databases after it, on a fresh `postgres_data` volume only; on an existing volume, run that file once with `psql` as `cp` (see `docs/gotchas.md`).
 
 ## Testing
 
@@ -201,7 +210,7 @@ Runs on push to main: seed Neo4j and refresh the mock fixtures → disable API r
 
 ### nightly.yml: once a night when main changed
 
-Vitest with coverage, Playwright E2E with WCAG and the OWASP/BSI checks against a seeded Neo4j, Lighthouse, and `compliance.yml`: DSP 2025-1 TCK, DCP v1.0 and EHDS domain tests against the full JAD stack ([ADR-074](ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md)).
+Vitest with coverage, Playwright E2E with WCAG and the OWASP/BSI checks against a seeded Neo4j, Lighthouse, and `compliance.yml`: DSP 2025-1 TCK, DCP v1.0 and EHDS domain tests against the full JAD stack on EDC 1.0 ([ADR-074](ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md)).
 
 ## Latest Reports
 
