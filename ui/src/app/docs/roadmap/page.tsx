@@ -1,13 +1,16 @@
 import Link from "next/link";
 import { ArrowLeft, ChartGantt, ExternalLink } from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
+import { LinkedText } from "@/components/docs/LinkedText";
 import RoadmapGantt from "@/components/docs/RoadmapGantt";
 import {
   ITEMS,
   LANES,
   REPO,
   ROADMAP_PLANNED_ON,
+  SRC,
   STATUS_LABEL,
+  ehdsArt,
   issueUrl,
 } from "@/lib/docs/roadmap";
 import { T } from "@/lib/i18n/translate";
@@ -18,61 +21,86 @@ export const metadata = {
     "The roadmap to 2031 as a Gantt chart: the dates of the EHDS Regulation and its implementing acts, the EUDI and Business Wallets, Simpl-Open, and the issues each one sets, with the drivers behind them.",
 };
 
-const EURLEX = "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=";
+/** A link in a text, opened in a new tab. */
+function inlineLink(href: string) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-(--accent) underline"
+    />
+  );
+}
 
 /** The six drivers, each with the sources it rests on. Titles, texts and
- *  link labels are keys of the docsCommon dictionary (ADR-071). */
+ *  link labels are keys of the docsCommon dictionary (ADR-071); a part of a
+ *  text in <tag>...</tag> links to tags[tag], deep to the article, section,
+ *  release or file it cites. */
 const DRIVERS: {
   title: string;
   text: string;
+  tags: Record<string, string>;
   links: { label: string; href: string }[];
 }[] = [
   {
     title: "The EHDS Regulation, to 2031",
-    text: "Regulation (EU) 2025/327 applies in stages (Art. 105): generally from 26 March 2027, secondary use in full from 26 March 2029, further data categories from 26 March 2031. The 2026 implementing acts turn articles into specifications: dataset descriptions (2026/2098), health data in the EUDI Wallet with assurance levels (2026/2099), MyHealth@EU (2026/2083).",
+    text: "Regulation (EU) 2025/327 applies in stages (<art>Art. 105</art>): generally from 26 March 2027, secondary use in full from 26 March 2029, further data categories from 26 March 2031. The 2026 implementing acts turn articles into specifications: dataset descriptions (<a98>2026/2098</a98>), cross-border identification and authentication of persons and health professionals, with assurance levels (<a99>2026/2099</a99>), MyHealth@EU (<a83>2026/2083</a83>).",
+    tags: {
+      art: ehdsArt(105),
+      a98: SRC.a2098,
+      a99: SRC.a2099,
+      a83: SRC.a2083,
+    },
     links: [
-      { label: "Regulation (EU) 2025/327", href: `${EURLEX}CELEX:32025R0327` },
-      { label: "2026/2098", href: `${EURLEX}OJ:L_202602098` },
-      { label: "2026/2099", href: `${EURLEX}OJ:L_202602099` },
-      { label: "2026/2083", href: `${EURLEX}OJ:L_202602083` },
+      { label: "Regulation (EU) 2025/327", href: SRC.ehds },
+      { label: "2026/2098", href: SRC.a2098 },
+      { label: "2026/2099", href: SRC.a2099 },
+      { label: "2026/2083", href: SRC.a2083 },
       {
         label: "The Commission's EHDS page",
         href: "https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space-regulation-ehds_en",
       },
-      { label: "TEHDAS2 guidance", href: "https://tehdas.eu/" },
+      {
+        label: "TEHDAS2 guidance",
+        href: "https://tehdas.eu/results-by-user-group/",
+      },
       { label: "What the hub implements", href: "/docs/ehds" },
     ],
   },
   {
     title: "Simpl, the EU's data space middleware",
-    text: "Simpl-Open is the Commission's open-source middleware for European data spaces; the EHDS secondary-use data space is in its first wave. The hub meets it as a connector outside its agent, over DSP and DCP, and keeps the health rules in its own extension (ADR-064).",
+    text: "Simpl-Open is the Commission's open-source middleware for European data spaces; the EHDS secondary-use data space is one of the six data spaces of <w1>Simpl-Live wave 1</w1>. The hub meets it as a connector outside its agent, over <dsp>DSP</dsp> and <dcp>DCP</dcp>, and keeps the health rules in its own extension (<adr>ADR-064</adr>).",
+    tags: {
+      w1: SRC.simplWave1,
+      dsp: SRC.dsp,
+      dcp: SRC.dcp,
+      adr: SRC.adr064,
+    },
     links: [
       {
         label: "Simpl programme",
         href: "https://simpl-programme.ec.europa.eu/",
       },
-      {
-        label: "Development status",
-        href: "https://simpl-programme.ec.europa.eu/development/development-status",
-      },
+      { label: "Development status", href: SRC.simplStatus },
       {
         label: "Gap analysis",
         href: `${REPO}/blob/main/docs/simpl-ehds-gap-analysis.md`,
       },
-      {
-        label: "ADR-064",
-        href: `${REPO}/blob/main/docs/ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md`,
-      },
+      { label: "ADR-064", href: SRC.adr064 },
     ],
   },
   {
     title: "eIDAS 2.0: the EUDI Wallet and the Business Wallet",
-    text: "eIDAS 2.0 obliges every Member State to offer a wallet; 2026/2099 makes it how persons identify for the EHDS, at assurance level substantial from 2027 and high from 2030. The German wallet d-you goes into production on 2 January 2027. The European Business Wallet, still in negotiation, lets a person act for an organisation, as a researcher applying for a permit does.",
+    text: "<eidas>eIDAS 2.0</eidas> obliges every Member State to offer a wallet. <a99>2026/2099, Art. 4(2)</a99> asks, for an online request through MyHealth@EU, for electronic identification means under eIDAS at assurance level substantial from 26 March 2027 and high from 26 March 2030; it does not single out the EUDI Wallet. The German wallet <dyou>d-you</dyou> is to be available from early 2027. The <ebw>European Business Wallet</ebw>, still in negotiation, lets a person act for an organisation, as a researcher applying for a permit does.",
+    tags: {
+      eidas: SRC.eidas,
+      a99: `${SRC.a2099}#004.002`,
+      dyou: SRC.dyou,
+      ebw: SRC.businessWallet,
+    },
     links: [
-      {
-        label: "Regulation (EU) 2024/1183",
-        href: "https://eur-lex.europa.eu/eli/reg/2024/1183/oj",
-      },
+      { label: "Regulation (EU) 2024/1183", href: SRC.eidas },
       {
         label: "Architecture and Reference Framework",
         href: "https://github.com/eu-digital-identity-wallet/eudi-doc-architecture-and-reference-framework",
@@ -85,59 +113,52 @@ const DRIVERS: {
         label: "HAIP 1.0",
         href: "https://openid.net/specs/openid4vc-high-assurance-interoperability-profile-1_0.html",
       },
-      { label: "d-you", href: "https://eudi-wallet.gov.de/" },
-      {
-        label: "European Business Wallet",
-        href: "https://digital-strategy.ec.europa.eu/en/policies/european-business-wallet",
-      },
-      {
-        label: "ADR-065",
-        href: `${REPO}/blob/main/docs/ADRs/ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md`,
-      },
+      { label: "d-you", href: SRC.dyou },
+      { label: "European Business Wallet", href: SRC.businessWallet },
+      { label: "ADR-065", href: SRC.adr065 },
     ],
   },
   {
     title: "Health standards: HL7 FHIR, OMOP, HealthDCAT-AP",
-    text: "HL7 FHIR R4 with the HL7 Europe guides carries the record and the European exchange format; OMOP CDM 5.4 is the research model; HealthDCAT-AP Release 8 describes datasets as 2026/2098 requires. The hub follows the version each act names, never an older one.",
+    text: "<fhir>HL7 FHIR R4</fhir> with the HL7 Europe guides carries the record and the European exchange format; <omop>OMOP CDM 5.4</omop> is the research model. <a98>2026/2098</a98> points dataset descriptions to the latest HealthDCAT-AP release without naming a number; the hub follows <r8>Release 8</r8>, the release that address led to when it was checked on 2026-10-27 (<adr>ADR-063</adr>).",
+    tags: {
+      fhir: SRC.fhir,
+      omop: SRC.omop,
+      a98: `${SRC.a2098}#anx_1`,
+      r8: SRC.healthDcatR8,
+      adr: `${SRC.adr063}?plain=1#L27-L33`,
+    },
     links: [
-      { label: "HL7 FHIR R4", href: "https://hl7.org/fhir/R4/" },
+      { label: "HL7 FHIR R4", href: SRC.fhir },
       { label: "HL7 Europe", href: "https://hl7.eu/fhir/" },
       { label: "Xt-EHR", href: "https://www.xt-ehr.eu/" },
-      { label: "OMOP CDM", href: "https://ohdsi.github.io/CommonDataModel/" },
-      {
-        label: "HealthDCAT-AP Release 8",
-        href: "https://data.health.europa.eu/healthdcat-ap/releases/release-8/",
-      },
-      {
-        label: "ADR-063",
-        href: `${REPO}/blob/main/docs/ADRs/ADR-063-healthdcat-ap-release-8-and-its-namespace.md`,
-      },
+      { label: "OMOP CDM", href: SRC.omop },
+      { label: "HealthDCAT-AP Release 8", href: SRC.healthDcatR8 },
+      { label: "ADR-063", href: SRC.adr063 },
     ],
   },
   {
     title: "Eclipse Dataspace: DSP, DCP and DPS",
-    text: "The Dataspace Protocol came from IDSA and is standardised by the Eclipse Dataspace Working Group. DSP negotiates contracts and transfers, DCP proves identity with verifiable credentials, Data Plane Signaling lets the control plane start and stop a data plane. Simpl-Open runs Eclipse EDC too, so these are where the two meet.",
+    text: "The Dataspace Protocol came from IDSA and is standardised by the Eclipse Dataspace Working Group. <dsp>DSP</dsp> negotiates contracts and transfers, <dcp>DCP</dcp> proves identity with verifiable credentials, <dps>Data Plane Signaling</dps> lets the control plane start and stop a data plane. <simpl>Simpl-Open runs Eclipse EDC too</simpl>, so these are where the two meet.",
+    tags: {
+      dsp: SRC.dsp,
+      dcp: SRC.dcp,
+      dps: SRC.dps,
+      simpl: SRC.simplArchitecture,
+    },
     links: [
-      {
-        label: "Dataspace Protocol",
-        href: "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/",
-      },
-      {
-        label: "Decentralized Claims Protocol",
-        href: "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/",
-      },
-      {
-        label: "Data Plane Signaling",
-        href: "https://eclipse-dataplane-signaling.github.io/dataplane-signaling/",
-      },
+      { label: "Dataspace Protocol", href: SRC.dsp },
+      { label: "Decentralized Claims Protocol", href: SRC.dcp },
+      { label: "Data Plane Signaling", href: SRC.dps },
       { label: "Eclipse Dataspace", href: "https://dataspace.eclipse.org/" },
       { label: "IDSA", href: "https://internationaldataspaces.org/" },
-      { label: "Eclipse EDC", href: "https://github.com/eclipse-edc" },
+      { label: "Eclipse EDC", href: SRC.edc },
     ],
   },
   {
     title: "Apache Iceberg and the lakehouse formats",
-    text: "Open table formats are how the large data platforms store analytical data. In the hub they belong inside the secure processing environment: OMOP as Iceberg tables behind a REST catalog, with storage credentials handed out only under a valid agreement. That is the spike #649, under #716.",
+    text: "Open table formats are how the large data platforms store analytical data. In the hub they belong inside the secure processing environment: OMOP as Iceberg tables behind a REST catalog, with storage credentials handed out only under a valid agreement. That is the spike <i649>#649</i649>, under <i716>#716</i716>.",
+    tags: { i649: issueUrl(649), i716: issueUrl(716) },
     links: [
       { label: "Apache Iceberg", href: "https://iceberg.apache.org/" },
       { label: "Apache Parquet", href: "https://parquet.apache.org/" },
@@ -168,18 +189,12 @@ export default function RoadmapDocsPage() {
             area="docsCommon"
             vars={{ date: ROADMAP_PLANNED_ON }}
             tags={{
-              a: (
-                <a
-                  href={issueUrl(725)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-(--accent) underline"
-                />
-              ),
+              e: inlineLink(ehdsArt(105)),
+              a: inlineLink(issueUrl(725)),
             }}
           >
             {
-              "The roadmap to 2031, set by the dates of the EHDS Regulation and its implementing acts, the EUDI and Business Wallets and Simpl-Open. The diamonds are dates set by law or by the programmes; the bars are planning windows set on {date}. P1 is due by 26 March 2027, P2 by 26 March 2029; P3 is a comment, not a build. The plan is <a>#725</a>."
+              "The roadmap to 2031, set by the dates of the <e>EHDS Regulation</e> and its implementing acts, the EUDI and Business Wallets and Simpl-Open. The diamonds are dates set by law or by the programmes; the bars are planning windows set on {date}. P1 is due by 26 March 2027, P2 by 26 March 2029; P3 is a comment, not a build. The plan is <a>#725</a>."
             }
           </T>
         </p>
@@ -226,7 +241,7 @@ export default function RoadmapDocsPage() {
                 <T area="docsCommon">{d.title}</T>
               </h3>
               <p className="text-sm text-(--text-secondary) mb-3">
-                <T area="docsCommon">{d.text}</T>
+                <LinkedText area="docsCommon" text={d.text} links={d.tags} />
               </p>
               <ul className="flex flex-wrap gap-x-3 gap-y-1 text-sm">
                 {d.links.map((l) => (
@@ -267,7 +282,11 @@ export default function RoadmapDocsPage() {
                 <T area="docsCommon">{lane.label}</T>
               </h3>
               <p className="text-xs text-(--text-secondary) mb-2">
-                <T area="docsCommon">{lane.driver}</T>
+                <LinkedText
+                  area="docsCommon"
+                  text={lane.driver}
+                  links={lane.links}
+                />
               </p>
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[40rem] table-fixed text-sm">
@@ -314,9 +333,17 @@ export default function RoadmapDocsPage() {
                           </a>
                         </td>
                         <td className="py-1.5 pr-3">
-                          <T area="docsCommon">{i.title}</T>
+                          <LinkedText
+                            area="docsCommon"
+                            text={i.title}
+                            links={i.links}
+                          />
                           <span className="block text-xs text-(--text-secondary)">
-                            <T area="docsCommon">{i.note}</T>
+                            <LinkedText
+                              area="docsCommon"
+                              text={i.note}
+                              links={i.links}
+                            />
                           </span>
                         </td>
                         <td className="py-1.5 pr-3">{i.priority}</td>

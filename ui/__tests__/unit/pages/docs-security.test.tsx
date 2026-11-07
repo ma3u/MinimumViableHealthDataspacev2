@@ -107,6 +107,31 @@ describe("SecurityDocsPage", () => {
     render(<SecurityDocsPage />);
     expect(screen.getByText(/nine are closed/)).toBeInTheDocument();
   });
+
+  it("links each command to the file it runs, and the Vault decision and CodeQL workflows", () => {
+    render(<SecurityDocsPage />);
+    const blob =
+      "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main";
+    expect(
+      screen.getByText("scripts/security/scan-repo.sh").closest("a"),
+    ).toHaveAttribute("href", `${blob}/scripts/security/scan-repo.sh`);
+    expect(
+      screen
+        .getByText("cd clients/ios && swift test --filter SecurityPostureTests")
+        .closest("a"),
+    ).toHaveAttribute(
+      "href",
+      `${blob}/clients/ios/Tests/SharedTests/SecurityPostureTests.swift`,
+    );
+    expect(screen.getByRole("link", { name: /^Vault/ })).toHaveAttribute(
+      "href",
+      `${blob}/docs/ADRs/ADR-046-vault-keeps-its-state-on-the-flexible-server.md`,
+    );
+    expect(screen.getByRole("link", { name: "Swift" })).toHaveAttribute(
+      "href",
+      `${blob}/.github/workflows/codeql-swift.yml`,
+    );
+  });
 });
 
 describe("SecurityDocPage", () => {

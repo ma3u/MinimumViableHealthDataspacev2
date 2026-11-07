@@ -34,6 +34,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import EhdsDocsPage from "@/app/docs/ehds/page";
+import EhdsGlossaryPage from "@/app/docs/ehds/glossary/page";
 import EhdsDocPage, { generateStaticParams } from "@/app/docs/ehds/[slug]/page";
 import { docsInSection } from "@/lib/docs/published-docs";
 
@@ -80,7 +81,32 @@ describe("the EHDS documents", () => {
     ]);
     expect(
       screen.getByText(/Regulation \(EU\) 2025\/327 on EUR-Lex/).closest("a"),
-    ).toHaveAttribute("href", expect.stringContaining("CELEX:32025R0327"));
+    ).toHaveAttribute(
+      "href",
+      "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng",
+    );
+  });
+
+  it("links every article it cites to its anchor on EUR-Lex", () => {
+    render(<EhdsDocsPage />);
+    const eli = "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng";
+    expect(screen.getByRole("link", { name: "Art. 73(1)(e)" })).toHaveAttribute(
+      "href",
+      `${eli}#073.001`,
+    );
+    expect(screen.getByRole("link", { name: "Art. 58" })).toHaveAttribute(
+      "href",
+      `${eli}#art_58`,
+    );
+    for (const a of screen.getAllByRole("link", { name: "Art. 71" }))
+      expect(a).toHaveAttribute("href", `${eli}#art_71`);
+    expect(screen.getByRole("link", { name: "67" })).toHaveAttribute(
+      "href",
+      `${eli}#art_67`,
+    );
+    expect(
+      screen.getByRole("link", { name: "numbering page" }),
+    ).toHaveAttribute("href", "/docs/ehds/article-numbering");
   });
 
   it("renders a document and refuses an unknown one", async () => {
@@ -93,5 +119,40 @@ describe("the EHDS documents", () => {
     await expect(
       EhdsDocPage({ params: Promise.resolve({ slug: "nope" }) }),
     ).rejects.toThrow("NEXT_NOT_FOUND");
+  });
+});
+
+describe("the EHDS glossary", () => {
+  it("links each term's article, the GDPR right a note names and the check that keeps the list", () => {
+    render(<EhdsGlossaryPage />);
+    const eli = "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng";
+    const table = screen.getByTestId("glossary");
+    expect(
+      within(table).getByRole("link", { name: "Art. 55" }),
+    ).toHaveAttribute("href", `${eli}#art_55`);
+    // EUR-Lex anchors paragraphs, not points: Art. 2(2)(e) is #002.002.
+    expect(
+      within(table).getByRole("link", { name: "Art. 2(2)(e)" }),
+    ).toHaveAttribute("href", `${eli}#002.002`);
+    expect(within(table).getByRole("link", { name: "Title" })).toHaveAttribute(
+      "href",
+      eli,
+    );
+    expect(screen.getByRole("link", { name: "Art. 21" })).toHaveAttribute(
+      "href",
+      "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_21",
+    );
+    expect(
+      screen.getByRole("link", {
+        name: "scripts/i18n/check-ehds-terminology.py",
+      }),
+    ).toHaveAttribute(
+      "href",
+      "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/i18n/check-ehds-terminology.py",
+    );
+    expect(screen.getByRole("link", { name: "Cellar" })).toHaveAttribute(
+      "href",
+      "https://op.europa.eu/en/web/cellar",
+    );
   });
 });
