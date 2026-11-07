@@ -10,6 +10,72 @@
 export const REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
 const issue = (n: number) => `${REPO}/issues/${n}`;
 
+/** The sources the roadmap cites, as deep links: an article, a section, a
+ *  release tag or a file and its lines. */
+export const SRC = {
+  /** Regulation (EU) 2025/327, the EHDS, on EUR-Lex (ELI). */
+  ehds: "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng",
+  /** Implementing Regulation (EU) 2026/2098, dataset descriptions. */
+  a2098: "https://eur-lex.europa.eu/eli/reg_impl/2026/2098/oj/eng",
+  /** Implementing Regulation (EU) 2026/2099, cross-border identification. */
+  a2099: "https://eur-lex.europa.eu/eli/reg_impl/2026/2099/oj/eng",
+  /** Implementing Regulation (EU) 2026/2083, MyHealth@EU. */
+  a2083: "https://eur-lex.europa.eu/eli/reg_impl/2026/2083/oj/eng",
+  /** Regulation (EU) 2024/1183, eIDAS 2.0. */
+  eidas: "https://eur-lex.europa.eu/eli/reg/2024/1183/oj/eng",
+  /** The Commission's proposal for the European Business Wallet. */
+  businessWallet:
+    "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52025PC0838",
+  /** Its procedure in the Parliament's Legislative Observatory. */
+  businessWalletProcedure:
+    "https://oeil.secure.europarl.europa.eu/oeil/en/procedure-file?reference=2025/0358(COD)",
+  dyou: "https://eudi-wallet.gov.de/",
+  dsp: "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
+  dcp: "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/",
+  dps: "https://eclipse-dataplane-signaling.github.io/dataplane-signaling/",
+  edc: "https://github.com/eclipse-edc/Connector/releases/tag/v1.0.0-RC5",
+  dspTck: "https://github.com/eclipse-dataspacetck/dsp-tck/releases/tag/v1.0.2",
+  fhir: "https://hl7.org/fhir/R4/",
+  omop: "https://ohdsi.github.io/CommonDataModel/cdm54.html",
+  healthDcatR8:
+    "https://data.health.europa.eu/healthdcat-ap/releases/release-8/",
+  eDelivery:
+    "https://ec.europa.eu/digital-building-blocks/sites/display/DIGITAL/eDelivery",
+  simplStatus:
+    "https://simpl-programme.ec.europa.eu/development/development-status",
+  simplWave1:
+    "https://simpl-programme.ec.europa.eu/programme/simpl-live/wave-1",
+  /** Simpl-Open's architecture specification, which names its EDC connector. */
+  simplArchitecture:
+    "https://ssg-website-ad5a79.pages.code.europa.eu/resources/architecture",
+  hamburg:
+    "https://simpl-programme.ec.europa.eu/development/development-status/simpl-open-roadmap-items-hamburg-4.1",
+  innsbruck:
+    "https://simpl-programme.ec.europa.eu/development/development-status/simpl-open-roadmap-items-innsbruck-5.0",
+  communityPreview:
+    "https://simpl-programme.ec.europa.eu/event/simpl-open-community-preview",
+  bp02e:
+    "https://simpl-programme.ec.europa.eu/book-page/bp02e-governance-authority-monetisation-model-configuration",
+  /** BP14 has no page of its own; the requirements changelog lists it. */
+  bp14: "https://simpl-programme.ec.europa.eu/page/requirements-changelog",
+  bp02f:
+    "https://simpl-programme.ec.europa.eu/book-page/bp02f-governance-authority-onboards-data-space-dome-marketplace",
+  bp02g:
+    "https://simpl-programme.ec.europa.eu/book-page/bp02g-governance-authority-allows-dome-marketplace-discovery-its-data-space",
+  sa12: "https://simpl-programme.ec.europa.eu/book-page/sa12-governance-authority-publishes-data-space-ai-services-dome-marketplace",
+  adr063: `${REPO}/blob/main/docs/ADRs/ADR-063-healthdcat-ap-release-8-and-its-namespace.md`,
+  adr064: `${REPO}/blob/main/docs/ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md`,
+  adr065: `${REPO}/blob/main/docs/ADRs/ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md`,
+} as const;
+
+/** An article of the EHDS (73), or one of its paragraphs ("073.001" is Art. 73(1)). */
+export const ehdsArt = (n: number | string) =>
+  typeof n === "number" ? `${SRC.ehds}#art_${n}` : `${SRC.ehds}#${n}`;
+
+/** A text with its link tags taken out: what a chart tooltip shows. */
+export const untagged = (text: string) =>
+  text.replace(/<(\w+)>([\s\S]*?)<\/\1>/g, "$2");
+
 export const ROADMAP_PLANNED_ON = "2026-10-28";
 
 export type LaneId =
@@ -23,20 +89,25 @@ export type LaneId =
 export interface Lane {
   id: LaneId;
   label: string;
-  /** The driver that sets this lane's work, in a few words. */
+  /** The driver that sets this lane's work, in a few words. A part in
+   *  <tag>...</tag> links to links[tag]. */
   driver: string;
+  links?: Readonly<Record<string, string>>;
 }
 
 export const LANES: readonly Lane[] = [
   {
     id: "regulation",
     label: "EHDS regulation",
-    driver: "Regulation (EU) 2025/327 and its implementing acts",
+    driver: "<e>Regulation (EU) 2025/327</e> and its implementing acts",
+    links: { e: SRC.ehds },
   },
   {
     id: "identity",
     label: "Identity and wallets",
-    driver: "eIDAS 2.0: EUDI Wallet, European Business Wallet",
+    driver:
+      "<eidas>eIDAS 2.0</eidas>: EUDI Wallet, <ebw>European Business Wallet</ebw>",
+    links: { eidas: SRC.eidas, ebw: SRC.businessWallet },
   },
   {
     id: "simpl",
@@ -46,17 +117,21 @@ export const LANES: readonly Lane[] = [
   {
     id: "protocols",
     label: "Dataspace protocols",
-    driver: "Eclipse Dataspace: DSP, DCP, DPS",
+    driver: "Eclipse Dataspace: <dsp>DSP</dsp>, <dcp>DCP</dcp>, <dps>DPS</dps>",
+    links: { dsp: SRC.dsp, dcp: SRC.dcp, dps: SRC.dps },
   },
   {
     id: "standards",
     label: "Health standards",
-    driver: "HL7 FHIR, OMOP, HealthDCAT-AP",
+    driver:
+      "<fhir>HL7 FHIR</fhir>, <omop>OMOP</omop>, <hdcat>HealthDCAT-AP</hdcat>",
+    links: { fhir: SRC.fhir, omop: SRC.omop, hdcat: SRC.healthDcatR8 },
   },
   {
     id: "processing",
     label: "Permits and processing",
-    driver: "Art. 68 to 73; Apache Iceberg",
+    driver: "<a68>Art. 68</a68> to <a73>73</a73>; Apache Iceberg",
+    links: { a68: ehdsArt(68), a73: ehdsArt(73) },
   },
 ];
 
@@ -99,6 +174,8 @@ export interface RoadmapItem {
   end: string;
   /** One sentence: where it stands or what it waits on. */
   note: string;
+  /** Where a part of the title or the note in <tag>...</tag> links to. */
+  links?: Readonly<Record<string, string>>;
 }
 
 export const ITEMS: readonly RoadmapItem[] = [
@@ -107,24 +184,26 @@ export const ITEMS: readonly RoadmapItem[] = [
     issue: 708,
     lane: "identity",
     short: "EUDI Wallet sign-in",
-    title: "EUDI Wallet sign-in to 2026/2099",
+    title: "EUDI Wallet sign-in to <a99>2026/2099</a99>",
     priority: "P1",
     status: "in-progress",
     start: "2026-10-27",
     end: "2027-03-26",
-    note: "Live since 2026-10-27 (ADR-065); d-you after the SPRIND sandbox registration.",
+    note: "Live since 2026-10-27 (<adr>ADR-065</adr>); <dyou>d-you</dyou> after the SPRIND sandbox registration.",
+    links: { a99: SRC.a2099, adr: SRC.adr065, dyou: SRC.dyou },
   },
   {
     issue: 709,
     lane: "identity",
     short: "Business Wallet mandate",
     title:
-      "European Business Wallet: apply for a permit on behalf of an organisation",
+      "<ebw>European Business Wallet</ebw>: apply for a permit on behalf of an organisation",
     priority: "P1",
     status: "planned",
     start: "2026-11-01",
     end: "2027-03-26",
     note: "ADR and spike now; built once the regulation is adopted.",
+    links: { ebw: SRC.businessWallet },
   },
   {
     issue: 712,
@@ -135,7 +214,8 @@ export const ITEMS: readonly RoadmapItem[] = [
     status: "planned",
     start: "2027-04-01",
     end: "2028-06-30",
-    note: "After #708.",
+    note: "After <i708>#708</i708>.",
+    links: { i708: issue(708) },
   },
   // Simpl-Open
   {
@@ -147,7 +227,8 @@ export const ITEMS: readonly RoadmapItem[] = [
     status: "planned",
     start: "2026-11-01",
     end: "2027-03-26",
-    note: "ADR-064, decision 2.",
+    note: "<adr>ADR-064, decision 2</adr>.",
+    links: { adr: `${SRC.adr064}?plain=1#L48-L51` },
   },
   {
     issue: 719,
@@ -158,7 +239,8 @@ export const ITEMS: readonly RoadmapItem[] = [
     status: "planned",
     start: "2027-01-01",
     end: "2027-12-31",
-    note: "After the Innsbruck schema.",
+    note: "After the <inn>Innsbruck schema</inn>.",
+    links: { inn: SRC.innsbruck },
   },
   {
     issue: 722,
@@ -169,18 +251,20 @@ export const ITEMS: readonly RoadmapItem[] = [
     status: "planned",
     start: "2027-04-01",
     end: "2028-03-31",
-    note: "After #710.",
+    note: "After <i710>#710</i710>.",
+    links: { i710: issue(710) },
   },
   {
     issue: 723,
     lane: "simpl",
     short: "Fees vs BP02E (comment)",
-    title: "Art. 62 fees against Simpl's monetisation model",
+    title: "<a62>Art. 62</a62> fees against Simpl's monetisation model",
     priority: "P3",
     status: "planned",
     start: "2026-10-28",
     end: "2027-03-31",
-    note: "Comment on BP02E and BP14; don't build.",
+    note: "Comment on <bp02e>BP02E</bp02e> and <bp14>BP14</bp14>; don't build.",
+    links: { a62: ehdsArt(62), bp02e: SRC.bp02e, bp14: SRC.bp14 },
   },
   {
     issue: 724,
@@ -191,41 +275,46 @@ export const ITEMS: readonly RoadmapItem[] = [
     status: "planned",
     start: "2026-10-28",
     end: "2027-03-31",
-    note: "Comment on BP02F, BP02G and SA12; don't build.",
+    note: "Comment on <bp02f>BP02F</bp02f>, <bp02g>BP02G</bp02g> and <sa12>SA12</sa12>; don't build.",
+    links: { bp02f: SRC.bp02f, bp02g: SRC.bp02g, sa12: SRC.sa12 },
   },
   // Dataspace protocols
   {
     issue: 711,
     lane: "protocols",
     short: "DSP kit vs Simpl",
-    title: "DSP compatibility kit against a Simpl-Open connector",
+    title: "<tck>DSP compatibility kit</tck> against a Simpl-Open connector",
     priority: "P1",
     status: "blocked",
     start: "2026-11-01",
     end: "2027-03-26",
-    note: "Blocked until the Hamburg 4.1 code is public.",
+    note: "Blocked until the <h41>Hamburg 4.1</h41> code is public.",
+    links: { tck: SRC.dspTck, h41: SRC.hamburg },
   },
   {
     issue: 720,
     lane: "protocols",
     short: "Permit as DSP agreements",
-    title: "One Art. 68 permit, one DSP agreement per holder",
+    title:
+      "One <a68>Art. 68</a68> permit, one <dsp>DSP</dsp> agreement per holder",
     priority: "P2",
     status: "planned",
     start: "2027-04-01",
     end: "2028-06-30",
     note: "A permit the access body issues, carried out as bilateral contracts.",
+    links: { a68: ehdsArt(68), dsp: SRC.dsp },
   },
   {
     issue: 721,
     lane: "protocols",
     short: "Opt-out at the holder",
-    title: "The Art. 71 opt-out at the holder's connector",
+    title: "The <a71>Art. 71</a71> opt-out at the holder's connector",
     priority: "P2",
     status: "planned",
     start: "2027-06-01",
     end: "2028-06-30",
     note: "A person filter when data is handed over.",
+    links: { a71: ehdsArt(71) },
   },
   {
     issue: 204,
@@ -236,74 +325,84 @@ export const ITEMS: readonly RoadmapItem[] = [
     status: "planned",
     start: "2027-07-01",
     end: "2028-09-30",
-    note: "Used by #709 and #720.",
+    note: "Used by <i709>#709</i709> and <i720>#720</i720>.",
+    links: { i709: issue(709), i720: issue(720) },
   },
   // Health standards
   {
     issue: 694,
     lane: "standards",
     short: "Adopted articles",
-    title: "The adopted article numbers and the 2026 implementing acts",
+    title:
+      "The <num>adopted article numbers</num> and the 2026 implementing acts",
     priority: "P1",
     status: "done",
     start: "2026-10-01",
     end: "2026-10-27",
     note: "Closed 2026-10-27.",
+    links: { num: "/docs/ehds/article-numbering" },
   },
   {
     issue: 700,
     lane: "standards",
     short: "HealthDCAT-AP R8",
-    title: "HealthDCAT-AP Release 8, valid against the official shapes",
+    title:
+      "<r8>HealthDCAT-AP Release 8</r8>, valid against the official shapes",
     priority: "P1",
     status: "done",
     start: "2026-10-13",
     end: "2026-10-28",
-    note: "On Azure since 2026-10-28 (ADR-063).",
+    note: "On Azure since 2026-10-28 (<adr>ADR-063</adr>).",
+    links: { r8: SRC.healthDcatR8, adr: SRC.adr063 },
   },
   {
     issue: 714,
     lane: "standards",
     short: "Art. 79 harvesting",
-    title: "Art. 79: publish the catalogue for harvesting",
+    title: "<a79>Art. 79</a79>: publish the catalogue for harvesting",
     priority: "P2",
     status: "planned",
     start: "2027-01-01",
     end: "2027-12-31",
     note: "The EU dataset catalogue reads HealthDCAT-AP.",
+    links: { a79: ehdsArt(79) },
   },
   {
     issue: 715,
     lane: "standards",
     short: "Art. 78 quality label",
-    title: "Art. 78: the quality and utility label in the metadata",
+    title: "<a78>Art. 78</a78>: the quality and utility label in the metadata",
     priority: "P2",
     status: "planned",
     start: "2027-06-01",
     end: "2028-06-30",
     note: "In the dataset description.",
+    links: { a78: ehdsArt(78) },
   },
   {
     issue: 713,
     lane: "standards",
     short: "Art. 75 NCP adapter",
-    title: "Art. 75: a national contact point adapter over eDelivery",
+    title:
+      "<a75>Art. 75</a75>: a national contact point adapter over <ed>eDelivery</ed>",
     priority: "P2",
     status: "planned",
     start: "2027-03-01",
     end: "2028-12-31",
     note: "After the HealthData@EU implementing act.",
+    links: { a75: ehdsArt(75), ed: SRC.eDelivery },
   },
   {
     issue: 718,
     lane: "standards",
     short: "Art. 7 portability",
-    title: "Art. 7 portability on the HL7 Europe guides",
+    title: "<a7>Art. 7</a7> portability on the HL7 Europe guides",
     priority: "P2",
     status: "planned",
     start: "2027-09-01",
     end: "2028-12-31",
-    note: "FHIR in the European exchange format.",
+    note: "<fhir>FHIR</fhir> in the European exchange format.",
+    links: { a7: ehdsArt(7), fhir: SRC.fhir },
   },
   // Permits and processing
   {
@@ -315,30 +414,34 @@ export const ITEMS: readonly RoadmapItem[] = [
     status: "planned",
     start: "2026-11-01",
     end: "2027-02-28",
-    note: "Gravitino or Polaris; credentials vended only under a valid agreement. Sub-issue of #716.",
+    note: "Gravitino or Polaris; credentials vended only under a valid agreement. Sub-issue of <i716>#716</i716>.",
+    links: { i716: issue(716) },
   },
   {
     issue: 716,
     lane: "processing",
     short: "Art. 73 SPE workspace",
-    title: "Art. 73 secure processing environment: a workspace per permit",
+    title:
+      "<a73>Art. 73</a73> secure processing environment: a workspace per permit",
     priority: "P2",
     status: "planned",
     start: "2027-03-01",
     end: "2029-03-26",
     note: "Results leave only after review.",
+    links: { a73: ehdsArt(73) },
   },
   {
     issue: 717,
     lane: "processing",
     short: "Chapter IV applications",
     title:
-      "Applications: Art. 54 purposes, Art. 81 complaints, Art. 70 templates",
+      "Applications: <a53>Art. 53</a53> purposes, <a81>Art. 81</a81> complaints, <a70>Art. 70</a70> templates",
     priority: "P2",
     status: "planned",
     start: "2027-03-26",
     end: "2028-09-30",
     note: "Templates after their implementing act.",
+    links: { a53: ehdsArt(53), a81: ehdsArt(81), a70: ehdsArt(70) },
   },
 ];
 
@@ -352,8 +455,6 @@ export interface Milestone {
   href: string;
 }
 
-const EURLEX = "https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=";
-
 export const MILESTONES: readonly Milestone[] = [
   {
     id: "ehds-2027",
@@ -361,8 +462,8 @@ export const MILESTONES: readonly Milestone[] = [
     date: "2027-03-26",
     label: "EHDS applies",
     detail:
-      "The Regulation applies generally; access bodies and national contact points are designated. Persons identify with the EUDI Wallet at assurance level substantial (2026/2099).",
-    href: `${EURLEX}CELEX:32025R0327`,
+      "The Regulation applies generally; access bodies and national contact points are designated. For an online request through MyHealth@EU, persons identify with electronic identification means under eIDAS at assurance level substantial (2026/2099, Art. 4(2)).",
+    href: ehdsArt(105),
   },
   {
     id: "healthdata-eu-act",
@@ -380,15 +481,16 @@ export const MILESTONES: readonly Milestone[] = [
     label: "Secondary use in full",
     detail:
       "Chapter IV in full and Chapter II for the first priority categories; dataset descriptions under 2026/2098.",
-    href: `${EURLEX}OJ:L_202602098`,
+    href: `${SRC.a2098}#art_4`,
   },
   {
     id: "assurance-high",
     lane: "regulation",
-    date: "2030-01-01",
+    date: "2030-03-26",
     label: "Assurance high",
-    detail: "2026/2099: assurance level high from 2030.",
-    href: `${EURLEX}OJ:L_202602099`,
+    detail:
+      "2026/2099, Art. 4(2): from 26 March 2030 the electronic identification means for an online request through MyHealth@EU provide assurance level high.",
+    href: `${SRC.a2099}#004.002`,
   },
   {
     id: "ehds-2031",
@@ -397,7 +499,7 @@ export const MILESTONES: readonly Milestone[] = [
     label: "More categories",
     detail:
       "Further data categories of Art. 51(1); Chapter III for EHR systems in service. Third countries follow in 2035.",
-    href: `${EURLEX}CELEX:32025R0327`,
+    href: ehdsArt(105),
   },
   {
     id: "business-wallet",
@@ -405,16 +507,17 @@ export const MILESTONES: readonly Milestone[] = [
     date: "2026-12-31",
     label: "Business Wallet agreement",
     detail:
-      "COM(2025) 838: the Council's position of 9 June 2026; Parliament and Council aim to agree by the end of 2026.",
-    href: "https://digital-strategy.ec.europa.eu/en/policies/european-business-wallet",
+      "COM(2025) 838, procedure 2025/0358(COD): Parliament confirmed on 7 October 2026 that it enters negotiations with the Council. The end of 2026 is this plan's assumption for an agreement, not a date set by the procedure.",
+    href: SRC.businessWalletProcedure,
   },
   {
     id: "d-you",
     lane: "identity",
-    date: "2027-01-02",
-    label: "d-you in production",
-    detail: "The German EUDI Wallet goes into production.",
-    href: "https://eudi-wallet.gov.de/",
+    date: "2027-01-01",
+    label: "d-you early 2027",
+    detail:
+      "The German EUDI Wallet is to be available on smartphones from early 2027; no day is set, so the marker stands at the start of the year.",
+    href: SRC.dyou,
   },
   {
     id: "hamburg",
@@ -422,7 +525,7 @@ export const MILESTONES: readonly Milestone[] = [
     date: "2026-10-15",
     label: "Hamburg 4.1",
     detail: "Simpl-Open release Hamburg 4.1, targeted for October 2026.",
-    href: "https://simpl-programme.ec.europa.eu/development/development-status",
+    href: SRC.hamburg,
   },
   {
     id: "community-preview",
@@ -431,7 +534,7 @@ export const MILESTONES: readonly Milestone[] = [
     label: "Community Preview",
     detail:
       "The proposed DOME integration and monetisation requirements (BP02E, BP02F, BP02G, SA12), open for comment.",
-    href: "https://simpl-programme.ec.europa.eu/event/simpl-open-community-preview",
+    href: SRC.communityPreview,
   },
   {
     id: "innsbruck",
@@ -439,7 +542,7 @@ export const MILESTONES: readonly Milestone[] = [
     date: "2026-12-15",
     label: "Innsbruck 5.0",
     detail: "Simpl-Open release Innsbruck 5.0, targeted for Q4 2026.",
-    href: "https://simpl-programme.ec.europa.eu/development/development-status",
+    href: SRC.simplStatus,
   },
 ];
 
@@ -462,10 +565,10 @@ export function roadmapTargets(tr?: Translate): {
     ...ITEMS.map((i) => ({
       taskId: itemTaskId(i.issue),
       href: issueUrl(i.issue),
-      label: `#${i.issue} ${t(i.title)} (${i.priority}, ${status(
+      label: `#${i.issue} ${untagged(t(i.title))} (${i.priority}, ${status(
         i.status,
-      )}, ${t("{start} to {end}", { start: i.start, end: i.end })}). ${t(
-        i.note,
+      )}, ${t("{start} to {end}", { start: i.start, end: i.end })}). ${untagged(
+        t(i.note),
       )}`,
     })),
     ...MILESTONES.map((m) => ({

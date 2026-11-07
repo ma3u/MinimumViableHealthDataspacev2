@@ -124,6 +124,24 @@ describe("OperationsDocsPage", () => {
       "https://grafana.ehds.mabu.red/d/mvhd-edc-dsp/edc-contracts-and-transfers",
     );
   });
+
+  it("names the BSI standards it reads against and links each", () => {
+    render(<OperationsDocsPage />);
+    expect(screen.getByRole("link", { name: /^C5/ })).toHaveAttribute(
+      "href",
+      expect.stringContaining("C5_2020.pdf"),
+    );
+    expect(screen.getByRole("link", { name: /^TR-02102/ })).toHaveAttribute(
+      "href",
+      "https://www.bsi.bund.de/dok/TR-02102",
+    );
+    expect(
+      screen.getByRole("link", { name: /^Well-Architected Framework/ }),
+    ).toHaveAttribute(
+      "href",
+      "https://learn.microsoft.com/en-us/azure/well-architected/",
+    );
+  });
 });
 
 describe("OperationsDocPage", () => {
