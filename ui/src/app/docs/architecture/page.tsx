@@ -587,47 +587,47 @@ export default function ArchitecturePage() {
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
             {t(
-              "The hub connects to the EU's Simpl-Open middleware as an EDC connector outside the Simpl-Open agent, over DSP and DCP, and trusts a Simpl data space's Governance Authority as an issuer (ADR-064). It claims no alignment: a capability counts only with a published Simpl source and a check in the hub that exercises it.",
+              "The hub and the EU's Simpl-Open middleware stand on the same foundation: both run Eclipse EDC connectors, speak the Dataspace Protocol and admit participants with credentials from an authority they trust. The hub joins a Simpl data space as an EDC connector outside the Simpl-Open agent (ADR-064) and brings what health adds on top: FHIR and OMOP semantics, data permits, the right to opt out (Art. 71), fees and the gate in front of the secure processing environments.",
             )}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div className="border border-(--border) rounded-lg p-4">
               <h4 className="font-semibold text-sm mb-2">
-                {t("How the hub connects to Simpl-Open")}
+                {t("What the hub and Simpl-Open share")}
               </h4>
               <ul className="text-(--text-secondary) text-xs space-y-1.5 list-disc ml-4">
                 <li>
                   <T area="docsArchitecture" tags={{ b: <strong /> }}>
                     {
-                      "<b>Connector outside the agent:</b> DSP 2025-1 for catalogue, negotiation and transfer; no x509 or mTLS trust inside a Simpl-Open agent"
+                      "<b>One connector:</b> both run Eclipse EDC and speak the Dataspace Protocol for catalogue, negotiation and transfer"
                     }
                   </T>
                 </li>
                 <li>
                   <T area="docsArchitecture" tags={{ b: <strong /> }}>
                     {
-                      "<b>Credentials over DCP v1.0:</b> a Governance Authority is a trusted issuer in the IdentityHub for its own credential types; the hub's IssuerService keeps issuing the hub's credentials"
+                      "<b>Trust from an authority:</b> a Simpl data space's Governance Authority is a trusted issuer in the hub's IdentityHub, over DCP v1.0, already checked on compose"
                     }
                   </T>
                 </li>
                 <li>
                   <T area="docsArchitecture" tags={{ b: <strong /> }}>
                     {
-                      "<b>EHDS rules stay in the hub:</b> data permits, the right to opt out (Art. 71), fees and the gate in front of the secure processing environments"
+                      "<b>Bilateral agreements:</b> a provider and a consumer agree, and the provider's connector enforces the policy"
                     }
                   </T>
                 </li>
                 <li>
                   <T area="docsArchitecture" tags={{ b: <strong /> }}>
                     {
-                      "<b>Catalogue:</b> HealthDCAT-AP Release 8 (ADR-063), offered as a profile of the DCAT-AP model Simpl adopts in Innsbruck"
+                      "<b>DCAT-AP catalogues:</b> Simpl adopts DCAT-AP in Innsbruck, and the hub's HealthDCAT-AP Release 8 is its health profile (ADR-063)"
                     }
                   </T>
                 </li>
                 <li>
                   <T area="docsArchitecture" tags={{ b: <strong /> }}>
                     {
-                      "<b>Still to prove:</b> the DSP compatibility kit against a Simpl connector, and a negotiation with a Governance Authority credential, once the Hamburg 4.1 code is public"
+                      "<b>Data stays with its holder:</b> both federate, and neither copies data into a central store"
                     }
                   </T>
                 </li>
@@ -673,6 +673,58 @@ export default function ArchitecturePage() {
                 </li>
               </ul>
             </div>
+          </div>
+          <div className="border border-(--border) rounded-lg p-4 mb-4">
+            <h4 className="font-semibold text-sm mb-2">
+              {t("Next steps toward interoperability")}
+            </h4>
+            <ol className="text-(--text-secondary) text-xs space-y-1.5 list-decimal ml-4 mb-3">
+              <li>
+                <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  {
+                    "<b>Now:</b> a second data space on compose, whose Governance Authority admits a fictional insurer, AlphaKasse DE"
+                  }
+                </T>
+              </li>
+              <li>
+                <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  {
+                    "<b>Now:</b> a use case across both sectors: AlphaKasse rewards an active year with a bonus and receives only a yes or no, never the data behind it"
+                  }
+                </T>
+              </li>
+              <li>
+                <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  {
+                    "<b>With Hamburg 4.1:</b> the DSP compatibility kit against Simpl's own connector, in both directions"
+                  }
+                </T>
+              </li>
+              <li>
+                <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  {
+                    "<b>Then:</b> a negotiation end to end on a credential from a real Governance Authority"
+                  }
+                </T>
+              </li>
+              <li>
+                <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  {
+                    "<b>With Innsbruck:</b> the hub's catalogue as the health profile of Simpl's DCAT-AP model, and search across both data spaces"
+                  }
+                </T>
+              </li>
+            </ol>
+            <p className="text-(--text-secondary) text-xs">
+              <T
+                area="docsArchitecture"
+                tags={{ a: ext(`${GITHUB_REPO}/issues/934`) }}
+              >
+                {
+                  "The plan, the use case and its legal guardrails are in <a>issue #934</a>. EHDS Art. 54 keeps the bonus on the person's side: no premium or exclusion is ever decided from secondary-use data."
+                }
+              </T>
+            </p>
           </div>
           <div className="flex flex-wrap gap-3">
             <a
