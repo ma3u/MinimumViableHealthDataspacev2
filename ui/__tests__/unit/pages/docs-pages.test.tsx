@@ -228,9 +228,6 @@ describe("UserGuidePage", () => {
     // The proposal's numbers and an operator role the Regulation lacks.
     expect(text).not.toMatch(/Art\. 3[34]\b|Art\. 52\b|EHDS Art\. 75:/);
     expect(text).not.toContain("Credential Federated Manager");
-    expect(text).toContain(
-      "The Regulation does not ask for a contract negotiation",
-    );
     expect(screen.getAllByText("Not in the Regulation").length).toBe(1);
   });
 

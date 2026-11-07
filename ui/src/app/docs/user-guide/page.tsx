@@ -2149,21 +2149,19 @@ export default function UserGuidePage() {
                 area="docsGuide"
                 tags={{
                   d: ext(`${DSP_URL}#negotiation-protocol`),
+                  o: ext(ODRL_URL),
                   a: art(68),
-                  b: para("061.001"),
                 }}
               >
                 {
-                  "Initiate and track <d>DSP contract negotiations</d> with data holders. View negotiation state (REQUESTED, AGREED, VERIFIED, FINALIZED), ODRL policy terms, and counter-offer history. The Regulation does not ask for a contract negotiation: access rests on the data permit (<a>Art. 68</a>), and a data user may process the data only in accordance with it (<b>Art. 61(1)</b>). The DSP negotiation is how the hub implements that, agreeing the terms before any transfer occurs."
+                  "Ask a data holder for a contract before any data moves. Requesting as is the participant you act for. Step 1 lists the providers that offer to it, and Discover Offers fetches their DSP catalog. The offer you select shows its <o>ODRL terms</o> in plain words (what it allows, for how long, on which conditions, what it forbids and what you must do) and the <a>data permits</a> that bind the use as well; once you agree to them on behalf of your participant, Step 2 sends a <d>DSP ContractRequest</d> for that offer. The provider's connector checks the request against its offer and answers on its own: nobody at the provider has to sign in. The page follows the negotiation from REQUESTED to FINALIZED and then offers Continue to transfer; a refused request ends TERMINATED with its reason. The history lists every negotiation of your participant, with a link to the transfer for each agreed one."
                 }
               </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              <T area="docsGuide" tags={{ a: para("053.001") }}>
-                {
-                  "Example: PharmaCo Research AG initiates a contract negotiation with AlphaKlinik Berlin for the diabetes cohort. The negotiation progresses to FINALIZED with a scientific research policy under EHDS <a>Art. 53(1)(e)</a>."
-                }
-              </T>
+              {t(
+                "Example: PharmaCo Research AG asks AlphaKlinik Berlin for Fhir Patient Search. A few seconds later the negotiation is FINALIZED, and Continue to transfer opens the agreed contract on the Data Transfer page.",
+              )}
             </p>
           </FeatureCard>
 
