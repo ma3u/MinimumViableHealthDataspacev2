@@ -429,22 +429,22 @@
       "de": {
         "status": "current",
         "title": "BSI-C5-Lückenanalyse: EHDS Integration Hub",
-        "summary": "Der Hub gegen den Kriterienkatalog BSI C5:2020, für Art. 50 Abs. 6 EHDS."
+        "summary": "Der Hub gegen den Kriterienkatalog BSI C5:2020, gemessen an den Sicherheitsmaßnahmen und Audits der sicheren Verarbeitungsumgebung nach Art. 73 EHDS."
       },
       "fr": {
         "status": "current",
         "title": "Analyse des écarts BSI C5 : hub d’intégration EEDS",
-        "summary": "Le hub face au catalogue de critères BSI C5:2020, pour l’article 50, paragraphe 6, de l’EEDS."
+        "summary": "Le hub face au catalogue de critères BSI C5:2020, mesuré aux mesures de sécurité et aux audits de l’environnement de traitement sécurisé de l’article 73 de l’EEDS."
       },
       "nl": {
         "status": "current",
         "title": "BSI C5-gapanalyse: EHDS-integratiehub",
-        "summary": "De hub tegen de criteriacatalogus BSI C5:2020, voor art. 50, lid 6, EHDS."
+        "summary": "De hub tegen de criteriacatalogus BSI C5:2020, gemeten aan de beveiligingsmaatregelen en audits van de beveiligde verwerkingsomgeving van art. 73 EHDS."
       },
       "es": {
         "status": "current",
         "title": "Análisis de brechas BSI C5: hub de integración EEDS",
-        "summary": "El hub frente al catálogo de criterios BSI C5:2020, para el art. 50, apartado 6, del EEDS."
+        "summary": "El hub frente al catálogo de criterios BSI C5:2020, medido con las medidas de seguridad y las auditorías del entorno de tratamiento seguro del art. 73 del EEDS."
       }
     },
     "security/sbom": {

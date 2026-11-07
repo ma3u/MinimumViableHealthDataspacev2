@@ -11,10 +11,30 @@ import {
   ChartGantt,
 } from "lucide-react";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
+import { REPO, SRC, ehdsArt } from "@/lib/docs/roadmap";
 import { T } from "@/lib/i18n/translate";
 
-/** `label` is the menu's (nav area), `desc` a key of docsCommon. */
-const sections = [
+/** A source cited in a card or the callout, opened in a new tab. Above the
+ *  card's own link (z-10), so a click on it does not open the card. */
+const source = (href: string) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="relative z-10 text-(--accent) underline hover:opacity-80"
+  />
+);
+
+/** `label` is the menu's (nav area), `desc` a key of docsCommon; a part of
+ *  `desc` in <tag>...</tag> links to `sources[tag]`. */
+const sections: {
+  href: string;
+  icon: typeof Users;
+  label: string;
+  desc: string;
+  sources?: Record<string, string>;
+  color: string;
+}[] = [
   {
     href: "/docs/user-guide",
     icon: Users,
@@ -33,7 +53,8 @@ const sections = [
     href: "/docs/architecture",
     icon: Layers,
     label: "Architecture",
-    desc: "ArchiMate 3.2 views and sequence diagrams: 5-layer graph model, data flow, deployment topology, data permit and negotiation, and identity and trust.",
+    desc: "<am>ArchiMate 3.2</am> views and sequence diagrams: 5-layer graph model, data flow, deployment topology, data permit and negotiation, and identity and trust.",
+    sources: { am: "https://pubs.opengroup.org/architecture/archimate32-doc/" },
     color: "border-layer3 hover:bg-layer3/10",
   },
   {
@@ -54,14 +75,21 @@ const sections = [
     href: "/docs/ehds",
     icon: Scale,
     label: "EHDS Regulation",
-    desc: "What the hub implements of Regulation (EU) 2025/327, article by article, with the page, the code and the test for each, the gaps with their issues, and the proposal-to-adopted numbering.",
+    desc: "What the hub implements of <e>Regulation (EU) 2025/327</e>, article by article, with the page, the code and the test for each, the gaps with their issues, and the proposal-to-adopted numbering.",
+    sources: { e: SRC.ehds },
     color: "border-layer2 hover:bg-layer2/10",
   },
   {
     href: "/docs/roadmap",
     icon: ChartGantt,
     label: "Roadmap",
-    desc: "The roadmap to 2031 as a clickable Gantt chart: the EHDS dates, the EUDI and Business Wallets, Simpl-Open, and the issues each one sets, with the drivers behind them.",
+    desc: "The roadmap to 2031 as a clickable Gantt chart: the <e>EHDS dates</e>, the <eudi>EUDI</eudi> and <ebw>Business Wallets</ebw>, <simpl>Simpl-Open</simpl>, and the issues each one sets, with the drivers behind them.",
+    sources: {
+      e: ehdsArt(105),
+      eudi: SRC.eidas,
+      ebw: SRC.businessWallet,
+      simpl: SRC.simplStatus,
+    },
     color: "border-layer3 hover:bg-layer3/10",
   },
   {
@@ -92,25 +120,42 @@ export default function DocsPage() {
 
       {/* Main sections */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
-        {sections.map(({ href, icon: Icon, label, desc, color }) => (
-          <Link
+        {sections.map(({ href, icon: Icon, label, desc, sources, color }) => (
+          // The card is one link (its title's, stretched over the card by
+          // after:inset-0); a source cited in the text sits above it.
+          <div
             key={href}
-            href={href}
-            className={`flex flex-col border rounded-xl p-6 transition-colors group ${color}`}
+            className={`relative flex flex-col border rounded-xl p-6 transition-colors group ${color}`}
           >
             <div className="flex items-center gap-2 mb-3">
               <Icon size={22} />
-              <span className="font-semibold text-lg">
+              <Link
+                href={href}
+                className="font-semibold text-lg after:absolute after:inset-0 after:rounded-xl"
+              >
                 <T area="nav">{label}</T>
-              </span>
+              </Link>
             </div>
             <p className="text-sm text-(--text-secondary) mb-4 flex-1">
-              <T area="docsCommon">{desc}</T>
+              <T
+                area="docsCommon"
+                tags={
+                  sources &&
+                  Object.fromEntries(
+                    Object.entries(sources).map(([tag, url]) => [
+                      tag,
+                      source(url),
+                    ]),
+                  )
+                }
+              >
+                {desc}
+              </T>
             </p>
             <span className="inline-flex items-center gap-1 text-sm text-(--accent) group-hover:underline mt-auto">
               <T area="docsCommon">{"Read more"}</T> <ArrowRight size={14} />
             </span>
-          </Link>
+          </div>
         ))}
       </div>
 
@@ -123,6 +168,18 @@ export default function DocsPage() {
           <T
             area="docsCommon"
             tags={{
+              e: source(SRC.ehds),
+              edc: source(SRC.edc),
+              neo: source(
+                "https://neo4j.com/release-notes/database/neo4j-5-26-28/",
+              ),
+              fhir: source(SRC.fhir),
+              omop: source(SRC.omop),
+              p: source(`${REPO}/blob/main/docker-compose.jad.yml#L853-L858`),
+              adr: source(
+                `${REPO}/blob/main/docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md`,
+              ),
+              dsp: source(SRC.dsp),
               a: (
                 <Link
                   href="/docs/architecture"
@@ -132,7 +189,7 @@ export default function DocsPage() {
             }}
           >
             {
-              "An EHDS-compliant demonstration platform built with Eclipse EDC-V, DCore, CFM, Neo4j, FHIR R4, and OMOP CDM. The project implements the European Health Data Space regulation through a 5-layer knowledge graph architecture, from DSP Marketplace discovery to Ontology alignment, enabling sovereign health data exchange between data holders and approved research users. <a>Explore the architecture →</a>"
+              "A demonstrator aligned with the <e>European Health Data Space Regulation</e>, built on <edc>Eclipse EDC 1.0</edc>, <neo>Neo4j</neo>, <fhir>FHIR R4</fhir> and <omop>OMOP CDM</omop>. CFM and the DCore data planes run only in the stack's <p>edc018 profile</p> (<adr>ADR-078</adr>). A 5-layer knowledge graph carries the Regulation's data, from <dsp>DSP</dsp> marketplace discovery to ontology alignment, for sovereign health data exchange between data holders and approved research users. <a>Explore the architecture →</a>"
             }
           </T>
         </p>

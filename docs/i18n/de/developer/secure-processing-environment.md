@@ -1,6 +1,6 @@
 ---
 source: docs/developer/secure-processing-environment.md
-sourceHash: 22e2633f418342a4ea8fcf8382d4df4a62cfc914278f6cc10693b081e3c24827
+sourceHash: 8a16f3ca6fa46d92f0edf447deef7cc3e5dcecba032c0317bb0b299141734a75
 language: de
 summary: "Wie der Hub die sichere Verarbeitungsumgebung nach Art. 73 aus Confidential Containers aufbaut: die beiden SPE-Workspaces auf ACI mit AMD SEV-SNP, der Trustee, den die Zugangsstelle betreibt, wie ein Workspace seinen Schlüssel erhält, was eine föderierte Abfrage durchläuft, wie Sie alles auf einem Laptop ausführen und was noch fehlt."
 ---
@@ -10,7 +10,7 @@ summary: "Wie der Hub die sichere Verarbeitungsumgebung nach Art. 73 aus Confide
 Ein Gesundheitsdatennutzer erhält nie die Zeilen der Patientinnen und Patienten. Er stellt eine Frage, die
 Frage läuft in einer **sicheren Verarbeitungsumgebung** (SPE) direkt bei den
 Daten, und zurück kommen nur Aggregate, die die Ausgabeprüfungen bestehen (Verordnung
-(EU) 2025/327, Art. 73). Diese Seite erklärt, wie der Hub diese
+(EU) 2025/327, [Art. 73](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_73)). Diese Seite erklärt, wie der Hub diese
 Umgebung aus Confidential Containers aufbaut, sodass die Aussage „auch der Betreiber
 kann die Daten nicht lesen“ auf Hardware beruht statt auf Vertrauen. Sie
 behandelt, was wo läuft, wie ein Workspace seinen Schlüssel erhält, was eine Abfrage
@@ -27,7 +27,7 @@ Die Entscheidungen sind [ADR-037](../ADRs/ADR-037-secure-processing-environment-
 
 Jeder der beiden Gesundheitsdateninhaber hat einen **Workspace**: SPE-1 für AlphaKlinik
 Berlin, SPE-2 für Limburg Medical Centre. Ein Workspace ist eine vertrauliche
-Containergruppe: Ihr Arbeitsspeicher wird von der CPU verschlüsselt (AMD SEV-SNP), und die
+Containergruppe: Ihr Arbeitsspeicher wird von der CPU verschlüsselt ([AMD SEV-SNP](https://docs.kernel.org/arch/x86/amd-memory-encryption.html#secure-nested-paging-snp)), und die
 CPU signiert einen Bericht darüber, was genau darin gestartet wurde. Die Daten des Workspaces
 kommen versiegelt an, und den Schlüssel hält ein **Trustee**, den die Zugangsstelle für
 Gesundheitsdaten (MedReg DE) betreibt. Der Trustee gibt den Schlüssel nur frei, wenn der signierte
@@ -43,44 +43,44 @@ Hardware-TEEs und gibt Geheimnisse nur an Workloads heraus, die nachweisen,
 was sie sind ([ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md), Entscheidung 1). CoCo hat drei Teile; der
 Hub nutzt heute zwei davon:
 
-| CoCo-Teil                                                                           | Was er ist                                                                                                                                                                      | Hier genutzt                                                                                                                                                                                                                                                                                                                                                      |
-| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **[Trustee](https://github.com/confidential-containers/trustee)**                   | Der Key Broker Service (KBS), der Attestierungsdienst (AS) und der Referenzwertdienst (RVPS): Er prüft die Nachweise eines TEE und gibt Geheimnisse nach einer Richtlinie frei. | Ja, v0.22.0, betrieben von der Zugangsstelle: ACA-App `mvhd-trustee` auf Azure, lokal der Dienst `trustee` in `docker-compose.trustee.yml`.                                                                                                                                                                                                                       |
-| **[Guest Components](https://github.com/confidential-containers/guest-components)** | Was im TEE läuft, um die Nachweise zu sammeln und mit dem Trustee zu sprechen: die Attester und `kbs-client`.                                                                   | Ja: Der Init-Container `spe-unlock` nutzt `kbs-client` mit dem SEV-SNP-Attester, gepatcht, damit er ACI nach dem einfachen Bericht fragt ([`kbs-client.aci.Dockerfile`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/services/spe-loader/kbs-client.aci.Dockerfile)).                                                                         |
-| **[Kata Containers](https://katacontainers.io/) als Laufzeit**                      | Startet jeden Pod in einer eigenen vertraulichen Micro-VM, über eine Kubernetes-`RuntimeClass` oder als Peer Pods in einer Cloud.                                               | Nicht auf Azure: Die Tenant-Richtlinie hat AKS abgelehnt, und die Azure-Tests der Peer Pods sind abgeschaltet. Stattdessen stellen die vertraulichen Containergruppen von ACI die SEV-SNP-Utility-VM ([ADR-069](../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)). Auf dem Mac ist Kata eine optionale lokale Laufzeitprüfung (ADR-068, M2). |
+| CoCo-Teil                                                                           | Was er ist                                                                                                                                                                                                                                                                                                                                                                                                            | Hier genutzt                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[Trustee](https://github.com/confidential-containers/trustee)**                   | Der Key Broker Service ([KBS](https://github.com/confidential-containers/trustee/tree/v0.22.0/kbs)), der Attestierungsdienst ([AS](https://github.com/confidential-containers/trustee/tree/v0.22.0/attestation-service)) und der Referenzwertdienst ([RVPS](https://github.com/confidential-containers/trustee/tree/v0.22.0/rvps)): Er prüft die Nachweise eines TEE und gibt Geheimnisse nach einer Richtlinie frei. | Ja, [v0.22.0](https://github.com/confidential-containers/trustee/releases/tag/v0.22.0), betrieben von der Zugangsstelle: ACA-App `mvhd-trustee` auf Azure, lokal der Dienst `trustee` in [`docker-compose.trustee.yml`](../../docker-compose.trustee.yml#L61).                                                                                                                                                                                                       |
+| **[Guest Components](https://github.com/confidential-containers/guest-components)** | Was im TEE läuft, um die Nachweise zu sammeln und mit dem Trustee zu sprechen: die [Attester](https://github.com/confidential-containers/guest-components/tree/v0.22.0/attestation-agent/attester) und [`kbs-client`](https://github.com/confidential-containers/trustee/tree/v0.22.0/tools/kbs-client).                                                                                                              | Ja: Der Init-Container `spe-unlock` nutzt `kbs-client` mit dem SEV-SNP-Attester, gepatcht, damit er ACI nach dem einfachen Bericht fragt ([`kbs-client.aci.Dockerfile`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/services/spe-loader/kbs-client.aci.Dockerfile)).                                                                                                                                                                            |
+| **[Kata Containers](https://katacontainers.io/) als Laufzeit**                      | Startet jeden Pod in einer eigenen vertraulichen Micro-VM, über eine Kubernetes-[`RuntimeClass`](https://kubernetes.io/docs/concepts/containers/runtime-class/) oder als [Peer Pods](https://github.com/confidential-containers/cloud-api-adaptor) in einer Cloud.                                                                                                                                                    | Nicht auf Azure: Die Tenant-Richtlinie hat AKS abgelehnt, und die Azure-Tests der Peer Pods sind abgeschaltet. Stattdessen stellen die vertraulichen Containergruppen von ACI die SEV-SNP-Utility-VM ([ADR-069](../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md)). Auf dem Mac ist Kata eine optionale lokale Laufzeitprüfung ([ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md#decision), M2). |
 
 Auf Azure kommt die Isolation also von ACI, und die Vertrauensentscheidung
 (welche Workload einen Schlüssel bekommt) vom Trustee aus CoCo. Ein späterer
 Wechsel zu Kata auf Kubernetes ändert die Laufzeit und den Richtliniengenerator
-(`genpolicy` statt `az confcom`), nicht den Trustee, die Genehmigung oder
+([`genpolicy`](https://github.com/kata-containers/kata-containers/tree/main/src/tools/genpolicy) statt [`az confcom`](https://learn.microsoft.com/en-us/cli/azure/confcom)), nicht den Trustee, die Genehmigung oder
 ihren Policy-Hash.
 
 ## 3. Begriffe
 
-| Begriff                    | Was es ist                                                                                                                                                                                                                              |
-| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Confidential Computing** | Code in einer vertrauenswürdigen Ausführungsumgebung (TEE) ausführen, deren Arbeitsspeicher weder Host noch Hypervisor noch Cloud-Betreiber lesen können.                                                                               |
-| **AMD SEV-SNP**            | Die TEE, die die Workspaces nutzen (EPYC 9V74, Genoa). Sie verschlüsselt den Arbeitsspeicher der VM und erzeugt einen Attestierungsbericht, signiert mit einem Schlüssel, dessen Kette bis zu AMD reicht. Intel TDX wird nicht genutzt. |
-| **Confidential Container** | Eine Containergruppe, die in ihrer eigenen SEV-SNP-Utility-VM läuft. Auf Azure: eine Gruppe in Azure Container Instances (ACI) mit `sku: Confidential`.                                                                                 |
-| **ccePolicy**              | Die Confidential Computing Enforcement Policy einer ACI-Gruppe: die Images per Digest, die Befehle, die Umgebung und die Mounts, die laufen dürfen. Erzeugt mit `az confcom acipolicygen`.                                              |
-| **HOST_DATA**              | Ein Feld des SEV-SNP-Berichts, das beim Start gesetzt wird. ACI legt dort den SHA-256 der ccePolicy ab, sodass die Hardware dafür bürgt, mit welcher Policy die Gruppe gestartet ist.                                                   |
-| **Policy-Hash**            | Dieser SHA-256, festgehalten in der Datengenehmigung (`HDABApproval.policyHash`) und in der Ressourcen-Policy des Trustee. Er bindet eine Datengenehmigung an genau eine Workload.                                                      |
-| **Trustee**                | Der Key Broker von [CNCF Confidential Containers](https://confidentialcontainers.org/): KBS (Key Broker Service), AS (Attestation Service) und RVPS (Referenzwerte). Version v0.22.0, betrieben von der Zugangsstelle.                  |
-| **Referenzwerte**          | Womit der Trustee den Bericht vergleicht: die Startmessung der Utility-VM von Microsoft und die Mindest-TCB (Firmware- und Microcode-Versionen).                                                                                        |
-| **Versiegelter Extrakt**   | Die Hälfte der synthetischen Patientinnen und Patienten, die ein Workspace erhält, Format `mvhd-spe-extract/1`: JSON Lines, gzip-komprimiert, mit AES-256-GCM verschlüsselt unter einem neuen Schlüssel je Datengenehmigung.            |
+| Begriff                                                                                                                                                            | Was es ist                                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Confidential Computing**                                                                                                                                         | Code in einer vertrauenswürdigen Ausführungsumgebung (TEE) ausführen, deren Arbeitsspeicher weder Host noch Hypervisor noch Cloud-Betreiber lesen können.                                                                                                                                                     |
+| **[AMD SEV-SNP](https://docs.kernel.org/arch/x86/amd-memory-encryption.html#secure-nested-paging-snp)**                                                            | Die TEE, die die Workspaces nutzen (EPYC 9V74, Genoa). Sie verschlüsselt den Arbeitsspeicher der VM und erzeugt einen Attestierungsbericht, signiert mit einem Schlüssel, dessen Kette bis zu AMD reicht. Intel TDX wird nicht genutzt.                                                                       |
+| **Confidential Container**                                                                                                                                         | Eine Containergruppe, die in ihrer eigenen SEV-SNP-Utility-VM läuft. Auf Azure: eine Gruppe in [Azure Container Instances](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-confidential-overview) (ACI) mit `sku: Confidential`.                                              |
+| **[ccePolicy](https://learn.microsoft.com/en-us/azure/container-instances/container-instances-confidential-overview#confidential-computing-enforcement-policies)** | Die Confidential Computing Enforcement Policy einer ACI-Gruppe: die Images per Digest, die Befehle, die Umgebung und die Mounts, die laufen dürfen. Erzeugt mit [`az confcom acipolicygen`](https://learn.microsoft.com/en-us/cli/azure/confcom#az-confcom-acipolicygen).                                     |
+| **HOST_DATA**                                                                                                                                                      | Ein Feld des SEV-SNP-Berichts, das beim Start gesetzt wird. ACI legt dort den [SHA-256](https://csrc.nist.gov/pubs/fips/180-4/upd1/final) der ccePolicy ab, sodass die Hardware dafür bürgt, mit welcher Policy die Gruppe gestartet ist.                                                                     |
+| **Policy-Hash**                                                                                                                                                    | Dieser SHA-256, festgehalten in der Datengenehmigung (`HDABApproval.policyHash`) und in der Ressourcen-Policy des Trustee. Er bindet eine Datengenehmigung an genau eine Workload.                                                                                                                            |
+| **Trustee**                                                                                                                                                        | Der Key Broker von [CNCF Confidential Containers](https://confidentialcontainers.org/): KBS (Key Broker Service), AS (Attestation Service) und RVPS (Referenzwerte). Version [v0.22.0](https://github.com/confidential-containers/trustee/releases/tag/v0.22.0), betrieben von der Zugangsstelle.             |
+| **Referenzwerte**                                                                                                                                                  | Womit der Trustee den Bericht vergleicht: die Startmessung der Utility-VM von Microsoft und die Mindest-TCB (Firmware- und Microcode-Versionen).                                                                                                                                                              |
+| **Versiegelter Extrakt**                                                                                                                                           | Die Hälfte der synthetischen Patientinnen und Patienten, die ein Workspace erhält, Format `mvhd-spe-extract/1`: JSON Lines, gzip-komprimiert, mit [AES-256-GCM](https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38d.pdf) verschlüsselt unter einem neuen Schlüssel je Datengenehmigung. |
 
 ## 4. Wo es läuft und was jeder Ort belegt
 
 Der Entwurf ist überall derselbe; der Unterschied liegt darin, ob echte Hardware
 die Nachweise signiert. Die UI sagt, welcher Fall vorliegt, mit einem von drei Labels
 ([`ui/src/lib/spe.ts`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/src/lib/spe.ts)),
-und behauptet nie mehr, als die Nachweise zeigen (ADR-068, Entscheidung 5).
+und behauptet nie mehr, als die Nachweise zeigen ([ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md#decision), Entscheidung 5).
 
 | Wo                             | Was echt ist                                                                                                                                                                                                                          | Label                             |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
 | **Laptop, CI, statische Demo** | Trustee, der Hash der Datengenehmigung in seiner Policy, die Schlüsselfreigabe, der versiegelte Extrakt, Neo4j, das ihn lädt, der Audit-Trail. Die Nachweise kommen vom Beispiel-Attester des Trustee, weil ein Laptop keine TEE hat. | "Simulated attestation"           |
 | **Azure, Knotenebene (A1)**    | SEV-SNP-Hardware mit gemessenem Boot, aber nicht, welcher Container lief. Nicht bereitgestellt.                                                                                                                                       | "Attested: SEV-SNP node"          |
-| **Azure, je Workload (A2)**    | ACI Confidential Containers in westeurope: Die Policy je Workload wird von der Hardware geprüft. Lief am 2026-11-02 durchgängig (#774).                                                                                               | "Attested: confidential workload" |
+| **Azure, je Workload (A2)**    | ACI Confidential Containers in westeurope: Die Policy je Workload wird von der Hardware geprüft. Lief am 2026-11-02 durchgängig ([#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774)).                          | "Attested: confidential workload" |
 
 Die geseedeten `SPESession`-Knoten im Trust-Center-Graphen
 ([`neo4j/seed-trust-center.cypher`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/neo4j/seed-trust-center.cypher))
@@ -100,10 +100,10 @@ tragen `simulated: true`; sie veranschaulichen das Modell und sind keine Nachwei
 Die Gruppenvorlage ist
 [`scripts/azure/aci/spe-workspace.template.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/azure/aci/spe-workspace.template.json).
 Alles andere im Hub bleibt auf Azure Container Apps (ACA), das in einer EU-Region
-noch kein vertrauliches Workload-Profil hat. Azure Attestation und Secure Key Release
-aus Key Vault wurden erwogen und sind bewusst **nicht** im Schlüsselpfad:
+noch kein vertrauliches Workload-Profil hat. [Azure Attestation](https://learn.microsoft.com/en-us/azure/attestation/overview) und [Secure Key Release
+aus Key Vault](https://learn.microsoft.com/en-us/azure/confidential-computing/concept-skr-attestation) wurden erwogen und sind bewusst **nicht** im Schlüsselpfad:
 Die Zugangsstelle entscheidet, wer einen Schlüssel erhält, nicht der Cloud-Betreiber
-(ADR-068, Entscheidung 1, ADR-069 „Alternatives considered“).
+([ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md#decision), Entscheidung 1, [ADR-069](../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md#alternatives-considered) „Alternatives considered“).
 
 ## 6. Die Vertrauenskette
 
@@ -127,13 +127,13 @@ sequenceDiagram
     end
 ```
 
-1. **Die Datengenehmigung legt die Workload fest.** `21-aci-confidential-spe.sh --policy`
+1. **Die Datengenehmigung legt die Workload fest.** [`21-aci-confidential-spe.sh --policy`](../../scripts/azure/21-aci-confidential-spe.sh)
    erzeugt die ccePolicy aus der Vorlage. Ihr SHA-256 wird in die
    Datengenehmigung (`HDABApproval`) und in die Ressourcen-Policy des Trustee geschrieben
    ([`trustee/policies/resource-azure.rego.tmpl`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/trustee/policies/resource-azure.rego.tmpl)).
 2. **Die Hardware bürgt dafür.** ACI startet die Gruppe in einer SEV-SNP-Utility-VM
    und legt den Hash der Policy in HOST_DATA des signierten Berichts ab.
-3. **Der Trustee prüft vier Dinge:** die Signatur zurück bis zu AMD (VCEK aus dem
+3. **Der Trustee prüft vier Dinge:** die Signatur zurück bis zu AMD ([VCEK](https://kdsintf.amd.com/) aus dem
    Key Distribution Service von AMD), die Startmessung der Utility-VM
    gegen einen fixierten Referenzwert, die TCB gegen ein Minimum je Komponente
    ([ADR-073](../ADRs/ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md),
@@ -153,23 +153,23 @@ Jede Gruppe hat drei Container, gebaut aus
 - **`spe-unlock`** (Init-Container): attestiert mit `kbs-client`, gebaut mit dem
   Feature `snp-attester`, holt den Schlüssel und entschlüsselt den Extrakt in das
   `emptyDir`-Volume `work`.
-- **`neo4j`**: Neo4j 5.26 Community, 1,5 vCPU und 4 GiB, Speicher im
+- **`neo4j`**: [Neo4j 5.26](https://neo4j.com/release-notes/database/neo4j-5/) Community, [1,5 vCPU](../../scripts/azure/aci/spe-workspace.template.json#L126) und 4 GiB, Speicher im
   `emptyDir`-Volume `neo4j-data`, Bolt mit verpflichtendem TLS, HTTP aus. Neo4j ist
-  **ein Workspace je Datengenehmigung, kein langlebiger Speicher** (ADR-068, Entscheidung 3): Es
+  **ein Workspace je Datengenehmigung, kein langlebiger Speicher** ([ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md#decision), Entscheidung 3): Es
   hält die Daten nur im Arbeitsspeicher und auf flüchtigem Speicher innerhalb der TEE.
 - **`spe-ingest`** (Sidecar): lädt den Extrakt, wendet
-  `neo4j/init-schema.cypher` und die HealthDCAT-AP-Registrierung der SPE an,
+  [`neo4j/init-schema.cypher`](../../neo4j/init-schema.cypher) und die HealthDCAT-AP-Registrierung der SPE an,
   löscht den Klartext, protokolliert die Attestierung und läuft weiter.
 
 **Die Daten.** Jeder Workspace erhält die Hälfte der synthetischen Patientinnen und Patienten des Hubs: die
-FHIR-Datensätze (Patient, Condition, Observation und der Rest), die passende
-OMOP-CDM-Person mit ihren Datensätzen und die Konzepte, mit denen sie kodiert sind. Sandbox-Patientinnen
+FHIR-Datensätze ([Patient](https://hl7.org/fhir/R4/patient.html), [Condition](https://hl7.org/fhir/R4/condition.html), [Observation](https://hl7.org/fhir/R4/observation.html) und der Rest), die passende
+[OMOP-CDM-Person](https://ohdsi.github.io/CommonDataModel/cdm54.html#person) mit ihren Datensätzen und die Konzepte, mit denen sie kodiert sind. Sandbox-Patientinnen
 und -Patienten sowie die der Klarbefund-App bleiben außen vor. Das Label
-`OptedOut` einer Person reist mit den Daten (Art. 71).
+`OptedOut` einer Person reist mit den Daten ([Art. 71](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_71)).
 
 **Stoppen heißt Löschen.** Die Speicher liegen im Arbeitsspeicher, daher verliert eine
 gestoppte oder gelöschte Gruppe jede Zeile. Jeder Start attestiert erneut und lädt erneut. Eine Falle:
-`az container restart` führt den Init-Container nicht erneut aus, daher fragt eine neu gestartete
+[`az container restart`](https://learn.microsoft.com/en-us/cli/azure/container#az-container-restart) führt den Init-Container nicht erneut aus, daher fragt eine neu gestartete
 Gruppe den Trustee nie wieder; stoppen und starten Sie sie stattdessen
 ([`docs/gotchas.md`](../gotchas.md), 2026-11-01).
 
@@ -182,27 +182,27 @@ dass eine Datenbank oder der Trustee nicht geantwortet hat.
 
 1. Ein Gesundheitsdatennutzer fragt auf `/query` oder in natürlicher Sprache. Die UI ruft
    [`/api/federated`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/ui/src/app/api/federated/route.ts)
-   auf (oder `/api/nlq` mit `federated: true`).
+   auf (oder [`/api/nlq`](../../ui/src/app/api/nlq/route.ts) mit `federated: true`).
 2. **Kaltstart** ([ADR-072](../ADRs/ADR-072-spe-workspaces-start-on-demand.md)).
    Die Workspaces sind standardmäßig gestoppt, um Kosten zu sparen. Eine föderierte Abfrage durch
    `EDC_ADMIN`, `HDAB_AUTHORITY` oder `DATA_USER` startet sie; bis sie laufen,
    lautet die Antwort **503** mit `state` `starting` oder `stopped`,
-   `etaSeconds` (240 aus dem gestoppten Zustand) und einem `Retry-After`-Header. Gemessen: Der
+   `etaSeconds` (240 aus dem gestoppten Zustand) und einem [`Retry-After`](https://www.rfc-editor.org/rfc/rfc9110#section-10.2.3)-Header. Gemessen: Der
    Schlüssel kommt nach etwa einer Minute, die Daten sind nach etwa drei geladen,
    SPE-2 antwortet nach etwa vier. Der Job `mvhd-spe-idle-stop` läuft alle
    15 Minuten und stoppt einen Workspace, der 30 Minuten untätig war.
-3. **Der Proxy verteilt die Frage.** `services/neo4j-proxy` schickt die Frage an beide
+3. **Der Proxy verteilt die Frage.** [`services/neo4j-proxy`](../../services/neo4j-proxy) schickt die Frage an beide
    Workspaces über Bolt mit TLS (`POST /federated/query`,
    `GET /federated/stats`).
 4. **Ausgabeprüfungen, bevor etwas hinausgeht.** Gruppen kleiner als k werden
-   verworfen, und Zellen unter k werden zu `<k`, mit k = 5 (`MIN_COHORT_SIZE`,
+   verworfen, und Zellen unter k werden zu `<k`, mit k = 5 ([`MIN_COHORT_SIZE`](../../services/neo4j-proxy/src/config.ts#L94),
    [`k-anonymity.ts`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/services/neo4j-proxy/src/k-anonymity.ts));
    Personen mit Widerspruch werden ausgeschlossen
    ([`opt-out.ts`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/services/neo4j-proxy/src/opt-out.ts)).
 5. **Nur Aggregate kommen zurück** zur UI, über den Proxy.
 
 **Der Audit-Trail.** Der Proxy liest jede Minute die Ereignisse jedes Workspaces und
-hängt sie an die Audit-Kette `spe` des Hubs an (ADR-045): `spe.attestation`,
+hängt sie an die Audit-Kette `spe` des Hubs an ([ADR-045](../ADRs/ADR-045-observability-and-regulatory-audit-trail.md)): `spe.attestation`,
 `key_release`, `key_refused`, `workspace_loaded`, `workspace_destroyed` und
 `optout_synced`.
 
@@ -232,7 +232,7 @@ Hub fest, verlegt die Speicher beider Workspaces auf `tmpfs` und führt `spe-loa
 `spe-loader-spe2` aus, um zu attestieren, zu entsperren und zu laden. Prüfen Sie das Ergebnis mit
 `GET http://localhost:9090/spe/status` des Proxys oder auf `/admin/attestation`.
 
-Die Tests, die es absichern, in der CI und lokal:
+Die Tests, die es absichern, in der CI und lokal: [Vitest](https://vitest.dev/) in [`services/spe-loader`](../../services/spe-loader) und [`opa test`](https://www.openpolicyagent.org/docs/policy-testing) über [`trustee/policies/`](../../trustee/policies) mit [`scripts/test-trustee-policies.sh`](../../scripts/test-trustee-policies.sh):
 
 ```bash
 cd services/spe-loader && npm test        # Vitest: extract, seal, unlock, ingest
@@ -241,7 +241,7 @@ cd services/spe-loader && npm test        # Vitest: extract, seal, unlock, inges
 
 Beide laufen in [`test.yml`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/test.yml)
 (SPE Loader Tests, Trustee Policy Tests). Die Policy-Tests fixieren jeden Fall
-der Ressourcen-Policy, einschließlich HOST_DATA an der Stelle, an der Trustee v0.22.0
+der Ressourcen-Policy, einschließlich HOST_DATA an der Stelle, an der [Trustee v0.22.0](https://github.com/confidential-containers/trustee/releases/tag/v0.22.0)
 es ablegt.
 
 ## 10. Auf Azure bereitstellen
@@ -249,7 +249,7 @@ es ablegt.
 [`scripts/azure/21-aci-confidential-spe.sh`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/azure/21-aci-confidential-spe.sh)
 erledigt das in Phasen, in dieser Reihenfolge: `--trustee`, `--extracts`, `--policy`,
 `--workspaces`, `--wire-proxy`, `--check`. Das Runbook nennt die
-Voraussetzungen (eine PIM-Rolle, aktiviert vor `az login`, die einstündige Sitzung)
+Voraussetzungen (eine [PIM](https://learn.microsoft.com/en-us/entra/id-governance/privileged-identity-management/pim-configure)-Rolle, aktiviert vor `az login`, die einstündige Sitzung)
 und was jede Phase ausgibt; lesen Sie es vor dem ersten Lauf. Zwei Phasen schützen
 sich selbst: `--extracts` verweigert ein Neuverschlüsseln, solange der Trustee Schlüssel hält, außer mit
 `--rekey`, und `--trustee` behält eine Ressourcen-Policy, die der Trustee bereits hält.
@@ -259,16 +259,16 @@ sich selbst: `--extracts` verweigert ein Neuverschlüsseln, solange der Trustee 
 - **Die Zugangsstelle betreibt noch keinen eigenen Trustee.** Die Freigaben des Trustee liegen
   im Abonnement des Hubs, sodass der Inhaber des Abonnements sie lesen könnte. Damit
   die Aussage zur Souveränität trägt, betreibt MedReg DE den Trustee in einem eigenen
-  Abonnement (ADR-069, Entscheidung 3).
+  Abonnement ([ADR-069](../ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md#decision), Entscheidung 3).
 - **Das Vertrauen in AMD und in die Utility-VM von Microsoft bleibt.** Die Bestätigung
   der Messung der Utility-VM durch Microsoft wird vom Betreiber verglichen,
-  ihre COSE-Signatur wird aber noch nicht kryptografisch geprüft.
-- **ADR-073 ist vorgeschlagen.** Das TCB-Minimum und seine Tests sind auf `main`
-  (#836); das ADR sagt, dass es auf Azure noch nicht angewandt wird.
+  ihre [COSE](https://datatracker.ietf.org/doc/html/rfc9052)-Signatur wird aber noch nicht kryptografisch geprüft.
+- **[ADR-073](../ADRs/ADR-073-the-spe-tcb-is-a-minimum-not-a-list.md) ist vorgeschlagen.** Das TCB-Minimum und seine Tests sind auf `main`
+  ([#836](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/836)); das ADR sagt, dass es auf Azure noch nicht angewandt wird.
 - **AKS ist heute keine Option.** Die Tenant-Policy hat es abgelehnt
   (`RequestDisallowedByPolicy`); eine Ausnahme ist beantragt. AKS Confidential
-  Containers wurden zudem von Microsoft eingestellt (ADR-068).
-- **Nicht entschieden** (ADR-068): welcher EU-Anbieter den Fall je Workload
+  Containers wurden zudem [von Microsoft eingestellt](https://github.com/Azure/AKS/issues/3781) ([ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md#decision)).
+- **Nicht entschieden** ([ADR-068](../ADRs/ADR-068-a-sovereign-confidential-spe-on-confidential-containers-and-trustee.md#not-decided-here)): welcher EU-Anbieter den Fall je Workload
   außerhalb von Azure betreibt, und der Trustee in einem eigenen Abonnement.
 
 Issues: [#774](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774)

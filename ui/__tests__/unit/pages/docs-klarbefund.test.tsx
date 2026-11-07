@@ -121,6 +121,24 @@ describe("KlarbefundDocsPage", () => {
       screen.getByText(/Join the beta on TestFlight/).closest("a"),
     ).toHaveAttribute("href", "https://testflight.apple.com/join/ssADSXX6");
   });
+
+  it("links the codes, the formats and the rules it names", () => {
+    render(<KlarbefundDocsPage />);
+    expect(screen.getByRole("link", { name: /^OMOP/ })).toHaveAttribute(
+      "href",
+      "https://ohdsi.github.io/CommonDataModel/cdm54.html",
+    );
+    expect(screen.getByRole("link", { name: /^BSI TR-03161/ })).toHaveAttribute(
+      "href",
+      "https://www.bsi.bund.de/dok/TR-03161",
+    );
+    expect(
+      screen.getByRole("link", { name: /^medical-device question/ }),
+    ).toHaveAttribute(
+      "href",
+      "https://eur-lex.europa.eu/eli/reg/2017/745/oj/eng",
+    );
+  });
 });
 
 describe("KlarbefundDocPage", () => {

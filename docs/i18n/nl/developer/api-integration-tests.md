@@ -1,42 +1,42 @@
 ---
 source: docs/developer/api-integration-tests.md
-sourceHash: 73ea4c43140a195c8743ad059aea7d2badba3731a9c248dae581d3fabd99ac50
+sourceHash: 0367043d7487f01912d6553af1519b396aaa727692440c7b99590d3323686d3e
 language: nl
-summary: De Bruno-collectie en de controles voor de dataspace, de identiteit en het domein: wat elke suite dekt, hoe u die uitvoert en of ze actueel is, met gemeten getallen.
+summary: "De Bruno-collectie en de controles voor de dataspace, de identiteit en het domein: wat elke suite dekt, hoe u die uitvoert en of ze actueel is, met gemeten getallen."
 ---
 
 # Integratietests via de API's
 
 De hub wordt van buitenaf getest, zoals een partner hem zou gebruiken, door drie
-suites die zijn HTTP-API's aanroepen: de Bruno-collectie voor de eigen routes van de hub,
+suites die zijn HTTP-API's aanroepen: de [Bruno](https://www.usebruno.com/)-collectie voor de eigen routes van de hub,
 en twee shell-suites voor het dataspaceprotocol en de identiteitslaag. Deze
 pagina zegt wat elke suite dekt, hoe u die uitvoert en hoe actueel ze is, met de
 getallen gemeten op 2026-11-03.
 
 ## De drie suites
 
-| Suite                     | Wat ze aanroept                                                       | Uitvoeren met                              | Draait in CI                                                                     |
-| ------------------------- | --------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------- |
-| Bruno-collectie           | de `/api/*`-routes van de hub, plus de EDC-diensten en de Neo4j-proxy | `./scripts/run-api-tests.sh <environment>` | `bruno-smoke.yml` (PR's), `compliance.yml` (nachtelijk), `demo-smoke.yml` (live) |
-| EHDS-dataspacecontroles   | de Management API en de DSP 2025-1-endpoints van het EDC-controlevlak | `./scripts/run-ehds-dataspace-checks.sh`   | `compliance.yml`, job "DSP 2025-1 TCK"                                           |
-| EHDS-identiteitscontroles | IdentityHub, IssuerService en het controlevlak (DCP 1.0)              | `./scripts/run-ehds-identity-checks.sh`    | `compliance.yml`, job "DCP v1.0 Compliance"                                      |
+| Suite                     | Wat ze aanroept                                                                                                                                                                                               | Uitvoeren met                                                                          | Draait in CI                                                                                                                                                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bruno-collectie           | de `/api/*`-routes van de hub, plus de EDC-diensten en de Neo4j-proxy                                                                                                                                         | [`./scripts/run-api-tests.sh <environment>`](../../scripts/run-api-tests.sh)           | [`bruno-smoke.yml`](../../.github/workflows/bruno-smoke.yml) (PR's), [`compliance.yml`](../../.github/workflows/compliance.yml) (nachtelijk), [`demo-smoke.yml`](../../.github/workflows/demo-smoke.yml) (live) |
+| EHDS-dataspacecontroles   | de Management API en de DSP 2025-1-endpoints van het EDC-controlevlak                                                                                                                                         | [`./scripts/run-ehds-dataspace-checks.sh`](../../scripts/run-ehds-dataspace-checks.sh) | `compliance.yml`, job "[DSP 2025-1](https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/) TCK"                                                                                           |
+| EHDS-identiteitscontroles | [IdentityHub](https://github.com/eclipse-edc/IdentityHub/releases/tag/v1.0.0-RC5), IssuerService en het controlevlak ([DCP 1.0](https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/)) | [`./scripts/run-ehds-identity-checks.sh`](../../scripts/run-ehds-identity-checks.sh)   | `compliance.yml`, job "DCP v1.0 Compliance"                                                                                                                                                                     |
 
-Een vierde suite, `scripts/run-ehds-tests.sh`, controleert het gezondheidsdomein in de
-graaf (FHIR, OMOP, HealthDCAT-AP, de toegangsketen van art. 53) via Neo4j
+Een vierde suite, [`scripts/run-ehds-tests.sh`](../../scripts/run-ehds-tests.sh), controleert het gezondheidsdomein in de
+graaf ([FHIR](https://hl7.org/fhir/R4/), [OMOP](https://ohdsi.github.io/CommonDataModel/cdm54.html), [HealthDCAT-AP](https://data.health.europa.eu/healthdcat-ap/releases/release-8/), de toegangsketen van [art. 53](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_53)) via Neo4j
 in plaats van via HTTP; `compliance.yml` voert die uit als "EHDS Health Domain".
 
 Geen van de suites is de Eclipse TCK. Ze zijn van ons, ze sturen de API's aan met
 `curl` of Bruno, en de DSP- en DCP-suites treden nooit op als protocolpeer, dus het
 zijn controles op beschikbaarheid en vorm van onze eigen stack, geen bewijzen van conformiteit.
-De echte [Eclipse DSP- en DCP-TCK's](https://github.com/eclipse-dataspacetck) invoeren
+De echte Eclipse-TCK's voor [DSP](https://github.com/eclipse-dataspacetck/dsp-tck) en [DCP](https://github.com/eclipse-dataspacetck/dcp-tck) invoeren
 is fase 1 van [#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338).
 De [SDLC](../SDLC.md#63-protocol-compliance) bevat de geschiedenis van het waarom.
 
 ## De Bruno-collectie
 
-`bruno/MVHDv2/` is geordend naar de persona die een verzoek verstuurt, één map
-per rol van Verordening (EU) 2025/327, plus de tweezijdige procedures van
-hoofdstuk IV, de rolgrenzen, en de protocol- en platformoppervlakken
+[`bruno/MVHDv2/`](../../bruno/MVHDv2) is geordend naar de persona die een verzoek verstuurt, één map
+per rol van [Verordening (EU) 2025/327](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng), plus de tweezijdige procedures van
+[hoofdstuk IV](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#cpt_IV), de rolgrenzen, en de protocol- en platformoppervlakken
 ([ADR-032](../ADRs/ADR-032-persona-organised-api-collection.md)). Een partner
 gebruikt de collectie om tegen de hub te oefenen.
 
@@ -69,7 +69,7 @@ Een Local-run verstuurt dus 192 verzoeken, een Azure-Dev-run 166 en een Static-m
 ./scripts/run-api-tests.sh Local "07 Journey - Data permit"   # one folder
 ```
 
-De runner smeedt per persona één NextAuth-sessie (`ui/scripts/forge-bruno-session.mjs`)
+De runner smeedt per persona één [NextAuth](https://next-auth.js.org/)-sessie ([`ui/scripts/forge-bruno-session.mjs`](../../ui/scripts/forge-bruno-session.mjs))
 uit `NEXTAUTH_SECRET`, zodat geen enkel `.bru`-bestand ooit een cookie bevat. Voor `Local`
 leest hij het geheim uit de UI-container als de variabele niet is gezet; voor
 `Azure-Dev` exporteert u het zelf en het wordt nooit afgedrukt. Rapporten komen in
@@ -91,39 +91,39 @@ en [ADR-031](../ADRs/ADR-031-checks-must-assert.md):
 
 Drie scripts dwingen dit af in pre-commit en de PR Gate:
 
-| Controle                          | Wat ervoor zorgt dat ze faalt                                                                                        |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `scripts/check-bruno-coverage.py` | een route zonder verzoek, een verzoek waarvan de route weg is, een verzoek zonder assert, inloggegevens              |
-| `scripts/check-bruno-strength.py` | een 2xx-verzoek dat zwakker is dan `docs/bruno-soft-assertion-allowlist.txt` toestaat (alleen containertypen)        |
-| `scripts/check-workflow-paths.py` | een workflow waarvan het `paths`-filter een script mist dat hij uitvoert, zodat een fix hem niet opnieuw zou starten |
+| Controle                                                                   | Wat ervoor zorgt dat ze faalt                                                                                                                          |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [`scripts/check-bruno-coverage.py`](../../scripts/check-bruno-coverage.py) | een route zonder verzoek, een verzoek waarvan de route weg is, een verzoek zonder assert, inloggegevens                                                |
+| [`scripts/check-bruno-strength.py`](../../scripts/check-bruno-strength.py) | een 2xx-verzoek dat zwakker is dan [`docs/bruno-soft-assertion-allowlist.txt`](../bruno-soft-assertion-allowlist.txt) toestaat (alleen containertypen) |
+| [`scripts/check-workflow-paths.py`](../../scripts/check-workflow-paths.py) | een workflow waarvan het `paths`-filter een script mist dat hij uitvoert, zodat een fix hem niet opnieuw zou starten                                   |
 
 ### Zijn ze actueel?
 
-Gemeten op 2026-11-03 tegen `main` op `b0586238`:
+Gemeten op 2026-11-03 tegen `main` op [`b0586238`](https://github.com/ma3u/MinimumViableHealthDataspacev2/commit/b0586238):
 
-| Vraag                                     | Antwoord                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Heeft elke route een verzoek?             | **Ja.** `check-bruno-coverage.py`: 109 geïmplementeerde routes, 109 met een verzoek (100 %), 0 op de allowlist zonder verzoek.                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| Kan elk verzoek falen?                    | **Ja.** Geen enkel verzoek mist een assert of een test.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Zijn de succespaden sterk?                | **Gedeeltelijk.** `check-bruno-strength.py`: van 127 live 2xx-verzoeken controleren er 49 alleen een containertype; alle 49 staan op de allowlist, die als ratel werkt.                                                                                                                                                                                                                                                                                                                                                                             |
-| Antwoordt de statische demo?              | **Ja.** `run-api-tests.sh Static-mock`: 32 geslaagd, 0 mislukt, 0 overgeslagen van 32 (99 asserties) tegen GitHub Pages.                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| Antwoordt de compose-stack? (CI, `main`)  | **Bijna.** `compliance.yml`-run [41586005794](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/41586005794): 191 geslaagd, 1 mislukt van 192. De fout is `03 Data User/13 A dataset described in German` ("de titel staat er in het Engels en in het Duits"). De ondergrens is 179/0, dus de job Compliance Report faalt.                                                                                                                                                                                                        |
-| Antwoordt de live hub? (`demo-smoke.yml`) | **Pas na de fix van 2026-11-03.** Run [41586005885](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/41586005885): 30 geslaagd, 136 mislukt van 166, waarvan 163 met 401. Het geheim was juist; de cookie-jar van Bruno verving de sessieheader door de `acaAffinity`-cookie van de ingress ([gotchas](../gotchas.md), 2026-11-03). Met `--disable-cookies` haalde dezelfde run 165 van 166; de enige die overbleef is `03 Data User/07 Federated cohort statistics`, een 503 van de gefedereerde query. De ondergrens is 153/0. |
-| DSP-controles (CI)                        | 25 geslaagd, 0 mislukt, 8 overgeslagen van 33, op de ondergrens van 25/0.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| DCP-controles (CI)                        | 27 geslaagd, 0 mislukt, 0 overgeslagen van 27, op de ondergrens van 27/0.                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| EHDS-domeincontroles (CI)                 | 25 geslaagd, 0 mislukt, 5 overgeslagen van 30, boven de ondergrens van 18/0.                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Vraag                                                                               | Antwoord                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Heeft elke route een verzoek?                                                       | **Ja.** [`check-bruno-coverage.py`](../../scripts/check-bruno-coverage.py): 109 geïmplementeerde routes, 109 met een verzoek (100 %), 0 op de allowlist zonder verzoek.                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Kan elk verzoek falen?                                                              | **Ja.** Geen enkel verzoek mist een assert of een test.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Zijn de succespaden sterk?                                                          | **Gedeeltelijk.** [`check-bruno-strength.py`](../../scripts/check-bruno-strength.py): van 127 live 2xx-verzoeken controleren er 49 alleen een containertype; alle 49 staan op de allowlist, die als ratel werkt.                                                                                                                                                                                                                                                                                                                                                                                        |
+| Antwoordt de statische demo?                                                        | **Ja.** [`run-api-tests.sh Static-mock`](../../scripts/run-api-tests.sh): 32 geslaagd, 0 mislukt, 0 overgeslagen van 32 (99 asserties) tegen GitHub Pages.                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| Antwoordt de compose-stack? (CI, `main`)                                            | **Bijna.** [`compliance.yml`](../../.github/workflows/compliance.yml)-run [41586005794](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/41586005794): 191 geslaagd, 1 mislukt van 192. De fout is `03 Data User/13 A dataset described in German` ("de titel staat er in het Engels en in het Duits"). De ondergrens is 179/0, dus de job Compliance Report faalt.                                                                                                                                                                                                                  |
+| Antwoordt de live hub? ([`demo-smoke.yml`](../../.github/workflows/demo-smoke.yml)) | **Pas na de fix van 2026-11-03.** Run [41586005885](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/41586005885): 30 geslaagd, 136 mislukt van 166, waarvan 163 met 401. Het geheim was juist; de cookie-jar van Bruno verving de sessieheader door de `acaAffinity`-cookie van de ingress ([gotchas](../gotchas.md), 2026-11-03). Met [`--disable-cookies`](https://docs.usebruno.com/bru-cli/commandOptions) haalde dezelfde run 165 van 166; de enige die overbleef is `03 Data User/07 Federated cohort statistics`, een 503 van de gefedereerde query. De ondergrens is 153/0. |
+| DSP-controles (CI)                                                                  | 25 geslaagd, 0 mislukt, 8 overgeslagen van 33, op de ondergrens van 25/0.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| DCP-controles (CI)                                                                  | 27 geslaagd, 0 mislukt, 0 overgeslagen van 27, op de ondergrens van 27/0.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| EHDS-domeincontroles (CI)                                                           | 25 geslaagd, 0 mislukt, 5 overgeslagen van 30, boven de ondergrens van 18/0.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 De collectie is dus actueel ten opzichte van de code: elke route is gedekt en de
 dekkingspoort houdt dat zo. Op 2026-11-03 waren beide resultaten op `main` rood; beide
 zijn opgelost en worden gevolgd in
 [#839](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/839). De
-live run haalt 166 van 166 sinds #853, en de ondergrens ervan is 166/0 sinds #856.
+live run haalt 166 van 166 sinds [#853](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/853), en de ondergrens ervan is 166/0 sinds [#856](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/856).
 
 ## De compliance-baseline
 
 Het resultaat van elke suite wordt vergeleken met een ondergrens in
 [`scripts/compliance-baseline.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/compliance-baseline.json)
-door `scripts/check-compliance-baseline.py`. De job faalt wanneer `passed` onder
+door [`scripts/check-compliance-baseline.py`](../../scripts/check-compliance-baseline.py). De job faalt wanneer `passed` onder
 de ondergrens zakt of `failed` erboven uitkomt, zodat een suite die nog niet slaagt
 toch kan voorkomen dat het slechter wordt. Verhoog een ondergrens telkens wanneer een suite
 verbetert; voor het verlagen ervan is een reden in de `note` nodig, en `review_by` laat een
@@ -135,7 +135,7 @@ python3 scripts/check-compliance-baseline.py --results test-results
 
 ## De dataspace- en identiteitscontroles
 
-Beide hebben de volledige JAD-stack nodig (zie [de stack en de omgeving](stack-and-environment.md))
+Beide hebben de volledige [JAD](https://github.com/eclipse-dataspace-hub/jad)-stack nodig (zie [de stack en de omgeving](stack-and-environment.md))
 met seedfasen 1 tot en met 7 afgerond.
 
 ```bash
@@ -145,8 +145,8 @@ met seedfasen 1 tot en met 7 afgerond.
 
 Ze lezen `EDC_MANAGEMENT_URL`, `EDC_IDENTITY_URL` en `EDC_ISSUER_URL`, en
 gebruiken standaard de compose-poorten. De identiteitscontroles starten en stoppen de
-container `rogue-issuer` (compose-profiel `trust-check`) om te laten zien dat een
+container [`rogue-issuer`](../../docker-compose.jad.yml#L808) (compose-profiel `trust-check`) om te laten zien dat een
 credential van een uitgever die op geen enkele vertrouwenslijst staat, wordt geweigerd. Op Azure draaien dezelfde
-suites vanuit een ACA-job (`scripts/azure/08-compliance-runner.sh`,
-`compliance.yml` gestart met `target: azure`), waar de controles die
+suites vanuit een [ACA](https://learn.microsoft.com/en-us/azure/container-apps/jobs)-job ([`scripts/azure/08-compliance-runner.sh`](../../scripts/azure/08-compliance-runner.sh),
+[`compliance.yml`](../../.github/workflows/compliance.yml) gestart met `target: azure`), waar de controles die
 in een container moeten kijken, worden overgeslagen.

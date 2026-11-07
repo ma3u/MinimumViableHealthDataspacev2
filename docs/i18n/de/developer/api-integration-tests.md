@@ -1,6 +1,6 @@
 ---
 source: docs/developer/api-integration-tests.md
-sourceHash: 73ea4c43140a195c8743ad059aea7d2badba3731a9c248dae581d3fabd99ac50
+sourceHash: 0367043d7487f01912d6553af1519b396aaa727692440c7b99590d3323686d3e
 language: de
 summary: "Die Bruno-Sammlung und die Datenraum-, Identitäts- und Domänenprüfungen: was jede abdeckt, wie Sie sie ausführen und ob sie aktuell ist, mit gemessenen Zahlen."
 ---
@@ -8,35 +8,35 @@ summary: "Die Bruno-Sammlung und die Datenraum-, Identitäts- und Domänenprüfu
 # Integrationstests über die APIs
 
 Der Hub wird von außen getestet, so wie ein Partner ihn nutzen würde, und zwar durch drei
-Suiten, die seine HTTP-APIs aufrufen: die Bruno-Sammlung für die eigenen Routen des Hubs
+Suiten, die seine HTTP-APIs aufrufen: die [Bruno](https://www.usebruno.com/)-Sammlung für die eigenen Routen des Hubs
 und zwei Shell-Suiten für das Datenraumprotokoll und die Identitätsschicht. Diese
 Seite beschreibt, was jede abdeckt, wie Sie sie ausführen und wie aktuell sie ist, mit den
 am 2026-11-03 gemessenen Zahlen.
 
 ## Die drei Suiten
 
-| Suite                    | Was sie aufruft                                                        | Ausführen mit                              | Läuft in CI                                                                    |
-| ------------------------ | ---------------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------ |
-| Bruno-Sammlung           | die `/api/*`-Routen des Hubs, dazu die EDC-Dienste und den Neo4j-Proxy | `./scripts/run-api-tests.sh <environment>` | `bruno-smoke.yml` (PRs), `compliance.yml` (nächtlich), `demo-smoke.yml` (live) |
-| EHDS-Datenraumprüfungen  | die Management API und die DSP-2025-1-Endpunkte der EDC-Control-Plane  | `./scripts/run-ehds-dataspace-checks.sh`   | `compliance.yml`, Job "DSP 2025-1 TCK"                                         |
-| EHDS-Identitätsprüfungen | IdentityHub, IssuerService und die Control Plane (DCP 1.0)             | `./scripts/run-ehds-identity-checks.sh`    | `compliance.yml`, Job "DCP v1.0 Compliance"                                    |
+| Suite                    | Was sie aufruft                                                                                                                                                                                                 | Ausführen mit                                                                          | Läuft in CI                                                                                                                                                                                                   |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bruno-Sammlung           | die `/api/*`-Routen des Hubs, dazu die EDC-Dienste und den Neo4j-Proxy                                                                                                                                          | [`./scripts/run-api-tests.sh <environment>`](../../scripts/run-api-tests.sh)           | [`bruno-smoke.yml`](../../.github/workflows/bruno-smoke.yml) (PRs), [`compliance.yml`](../../.github/workflows/compliance.yml) (nächtlich), [`demo-smoke.yml`](../../.github/workflows/demo-smoke.yml) (live) |
+| EHDS-Datenraumprüfungen  | die Management API und die DSP-2025-1-Endpunkte der EDC-Control-Plane                                                                                                                                           | [`./scripts/run-ehds-dataspace-checks.sh`](../../scripts/run-ehds-dataspace-checks.sh) | `compliance.yml`, Job "[DSP 2025-1](https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/) TCK"                                                                                         |
+| EHDS-Identitätsprüfungen | [IdentityHub](https://github.com/eclipse-edc/IdentityHub/releases/tag/v1.0.0-RC5), IssuerService und die Control Plane ([DCP 1.0](https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/)) | [`./scripts/run-ehds-identity-checks.sh`](../../scripts/run-ehds-identity-checks.sh)   | `compliance.yml`, Job "DCP v1.0 Compliance"                                                                                                                                                                   |
 
-Eine vierte Suite, `scripts/run-ehds-tests.sh`, prüft die Gesundheitsdomäne im
-Graphen (FHIR, OMOP, HealthDCAT-AP, die Zugangskette nach Art. 53) über Neo4j
+Eine vierte Suite, [`scripts/run-ehds-tests.sh`](../../scripts/run-ehds-tests.sh), prüft die Gesundheitsdomäne im
+Graphen ([FHIR](https://hl7.org/fhir/R4/), [OMOP](https://ohdsi.github.io/CommonDataModel/cdm54.html), [HealthDCAT-AP](https://data.health.europa.eu/healthdcat-ap/releases/release-8/), die Zugangskette nach [Art. 53](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_53)) über Neo4j
 statt über HTTP; `compliance.yml` führt sie als "EHDS Health Domain" aus.
 
 Keine der Suiten ist das Eclipse TCK. Es sind unsere eigenen, sie steuern die APIs mit
 `curl` oder Bruno, und die DSP- und DCP-Suiten treten nie als Protokollgegenstelle auf. Sie
 sind daher Erreichbarkeits- und Strukturprüfungen unseres eigenen Stacks, keine Konformitätsnachweise.
-Die Einführung der echten [Eclipse-DSP- und -DCP-TCKs](https://github.com/eclipse-dataspacetck)
+Die Einführung der echten Eclipse-TCKs für [DSP](https://github.com/eclipse-dataspacetck/dsp-tck) und [DCP](https://github.com/eclipse-dataspacetck/dcp-tck)
 ist Phase 1 von [#338](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338).
 Der [SDLC](../SDLC.md#63-protocol-compliance) erläutert die Vorgeschichte.
 
 ## Die Bruno-Sammlung
 
-`bruno/MVHDv2/` ist nach der Persona geordnet, die eine Anfrage sendet: ein Ordner
-je Rolle der Verordnung (EU) 2025/327, dazu die zweiseitigen Verfahren aus
-Kapitel IV, die Rollengrenzen sowie die Protokoll- und Plattformschnittstellen
+[`bruno/MVHDv2/`](../../bruno/MVHDv2) ist nach der Persona geordnet, die eine Anfrage sendet: ein Ordner
+je Rolle der [Verordnung (EU) 2025/327](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng), dazu die zweiseitigen Verfahren aus
+[Kapitel IV](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#cpt_IV), die Rollengrenzen sowie die Protokoll- und Plattformschnittstellen
 ([ADR-032](../ADRs/ADR-032-persona-organised-api-collection.md)). Ein Partner
 nutzt sie, um gegen den Hub zu proben.
 
@@ -69,7 +69,7 @@ Ein Local-Lauf sendet also 192 Anfragen, ein Azure-Dev-Lauf 166 und ein Static-m
 ./scripts/run-api-tests.sh Local "07 Journey - Data permit"   # one folder
 ```
 
-Der Runner erzeugt je Persona eine NextAuth-Sitzung (`ui/scripts/forge-bruno-session.mjs`)
+Der Runner erzeugt je Persona eine [NextAuth](https://next-auth.js.org/)-Sitzung ([`ui/scripts/forge-bruno-session.mjs`](../../ui/scripts/forge-bruno-session.mjs))
 aus `NEXTAUTH_SECRET`, sodass keine `.bru`-Datei je ein Cookie enthält. Für `Local`
 liest er das Secret aus dem UI-Container, wenn die Variable nicht gesetzt ist; für
 `Azure-Dev` exportieren Sie es selbst, und es wird nie ausgegeben. Berichte landen in
@@ -91,39 +91,39 @@ und [ADR-031](../ADRs/ADR-031-checks-must-assert.md):
 
 Drei Skripte setzen dies in pre-commit und im PR Gate durch:
 
-| Prüfung                           | Was sie scheitern lässt                                                                                           |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `scripts/check-bruno-coverage.py` | eine Route ohne Anfrage, eine Anfrage ohne Route, eine Anfrage ohne Assertion, eine Anmeldeinformation            |
-| `scripts/check-bruno-strength.py` | eine 2xx-Anfrage, die schwächer prüft, als `docs/bruno-soft-assertion-allowlist.txt` erlaubt (nur Containertypen) |
-| `scripts/check-workflow-paths.py` | ein Workflow, dessen `paths`-Filter ein Skript auslässt, das er ausführt, sodass ein Fix ihn nicht erneut startet |
+| Prüfung                                                                    | Was sie scheitern lässt                                                                                                                                    |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`scripts/check-bruno-coverage.py`](../../scripts/check-bruno-coverage.py) | eine Route ohne Anfrage, eine Anfrage ohne Route, eine Anfrage ohne Assertion, eine Anmeldeinformation                                                     |
+| [`scripts/check-bruno-strength.py`](../../scripts/check-bruno-strength.py) | eine 2xx-Anfrage, die schwächer prüft, als [`docs/bruno-soft-assertion-allowlist.txt`](../bruno-soft-assertion-allowlist.txt) erlaubt (nur Containertypen) |
+| [`scripts/check-workflow-paths.py`](../../scripts/check-workflow-paths.py) | ein Workflow, dessen `paths`-Filter ein Skript auslässt, das er ausführt, sodass ein Fix ihn nicht erneut startet                                          |
 
 ### Sind sie aktuell?
 
-Gemessen am 2026-11-03 gegen `main` bei `b0586238`:
+Gemessen am 2026-11-03 gegen `main` bei [`b0586238`](https://github.com/ma3u/MinimumViableHealthDataspacev2/commit/b0586238):
 
-| Frage                                      | Antwort                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Hat jede Route eine Anfrage?               | **Ja.** `check-bruno-coverage.py`: 109 implementierte Routen, 109 mit Anfrage (100 %), 0 ohne Anfrage auf der Allowlist.                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Kann jede Anfrage fehlschlagen?            | **Ja.** Keiner Anfrage fehlt eine Assertion oder ein Test.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| Sind die Erfolgspfade streng geprüft?      | **Teilweise.** `check-bruno-strength.py`: Von 127 aktiven 2xx-Anfragen prüfen 49 nur einen Containertyp; alle 49 stehen auf der Allowlist, die als Ratsche dient.                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| Antwortet die statische Demo?              | **Ja.** `run-api-tests.sh Static-mock`: 32 bestanden, 0 fehlgeschlagen, 0 übersprungen von 32 (99 Assertions) gegen GitHub Pages.                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| Antwortet der Compose-Stack? (CI, `main`)  | **Fast.** `compliance.yml`-Lauf [41586005794](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/41586005794): 191 bestanden, 1 fehlgeschlagen von 192. Der Fehlschlag ist `03 Data User/13 A dataset described in German` ("the title is there in English and in German"). Die Untergrenze liegt bei 179/0, daher schlägt der Job Compliance Report fehl.                                                                                                                                                                                                          |
-| Antwortet der Live-Hub? (`demo-smoke.yml`) | **Erst seit dem Fix vom 2026-11-03.** Lauf [41586005885](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/41586005885): 30 bestanden, 136 fehlgeschlagen von 166, davon 163 mit 401. Das Secret war richtig; Brunos Cookie-Speicher ersetzte den Sitzungsheader durch das `acaAffinity`-Cookie des Ingress ([Gotchas](../gotchas.md), 2026-11-03). Mit `--disable-cookies` erreichte derselbe Lauf 165 von 166; die verbleibende Anfrage ist `03 Data User/07 Federated cohort statistics`, ein 503 aus der föderierten Abfrage. Die Untergrenze liegt bei 153/0. |
-| DSP-Prüfungen (CI)                         | 25 bestanden, 0 fehlgeschlagen, 8 übersprungen von 33, auf der Untergrenze von 25/0.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| DCP-Prüfungen (CI)                         | 27 bestanden, 0 fehlgeschlagen, 0 übersprungen von 27, auf der Untergrenze von 27/0.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| EHDS-Domänenprüfungen (CI)                 | 25 bestanden, 0 fehlgeschlagen, 5 übersprungen von 30, über der Untergrenze von 18/0.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Frage                                                                                | Antwort                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hat jede Route eine Anfrage?                                                         | **Ja.** [`check-bruno-coverage.py`](../../scripts/check-bruno-coverage.py): 109 implementierte Routen, 109 mit Anfrage (100 %), 0 ohne Anfrage auf der Allowlist.                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Kann jede Anfrage fehlschlagen?                                                      | **Ja.** Keiner Anfrage fehlt eine Assertion oder ein Test.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Sind die Erfolgspfade streng geprüft?                                                | **Teilweise.** [`check-bruno-strength.py`](../../scripts/check-bruno-strength.py): Von 127 aktiven 2xx-Anfragen prüfen 49 nur einen Containertyp; alle 49 stehen auf der Allowlist, die als Ratsche dient.                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Antwortet die statische Demo?                                                        | **Ja.** [`run-api-tests.sh Static-mock`](../../scripts/run-api-tests.sh): 32 bestanden, 0 fehlgeschlagen, 0 übersprungen von 32 (99 Assertions) gegen GitHub Pages.                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Antwortet der Compose-Stack? (CI, `main`)                                            | **Fast.** [`compliance.yml`](../../.github/workflows/compliance.yml)-Lauf [41586005794](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/41586005794): 191 bestanden, 1 fehlgeschlagen von 192. Der Fehlschlag ist `03 Data User/13 A dataset described in German` ("the title is there in English and in German"). Die Untergrenze liegt bei 179/0, daher schlägt der Job Compliance Report fehl.                                                                                                                                                                                                                    |
+| Antwortet der Live-Hub? ([`demo-smoke.yml`](../../.github/workflows/demo-smoke.yml)) | **Erst seit dem Fix vom 2026-11-03.** Lauf [41586005885](https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/runs/41586005885): 30 bestanden, 136 fehlgeschlagen von 166, davon 163 mit 401. Das Secret war richtig; Brunos Cookie-Speicher ersetzte den Sitzungsheader durch das `acaAffinity`-Cookie des Ingress ([Gotchas](../gotchas.md), 2026-11-03). Mit [`--disable-cookies`](https://docs.usebruno.com/bru-cli/commandOptions) erreichte derselbe Lauf 165 von 166; die verbleibende Anfrage ist `03 Data User/07 Federated cohort statistics`, ein 503 aus der föderierten Abfrage. Die Untergrenze liegt bei 153/0. |
+| DSP-Prüfungen (CI)                                                                   | 25 bestanden, 0 fehlgeschlagen, 8 übersprungen von 33, auf der Untergrenze von 25/0.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| DCP-Prüfungen (CI)                                                                   | 27 bestanden, 0 fehlgeschlagen, 0 übersprungen von 27, auf der Untergrenze von 27/0.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| EHDS-Domänenprüfungen (CI)                                                           | 25 bestanden, 0 fehlgeschlagen, 5 übersprungen von 30, über der Untergrenze von 18/0.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 Die Sammlung ist also auf dem Stand des Codes: Jede Route ist abgedeckt, und das
 Abdeckungs-Gate hält das so. Am 2026-11-03 waren beide Ergebnisse auf `main` rot; beide
 sind behoben und werden in
 [#839](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/839) verfolgt. Der
-Live-Lauf erreicht seit #853 166 von 166, und seine Untergrenze liegt seit #856 bei 166/0.
+Live-Lauf erreicht seit [#853](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/853) 166 von 166, und seine Untergrenze liegt seit [#856](https://github.com/ma3u/MinimumViableHealthDataspacev2/pull/856) bei 166/0.
 
 ## Die Compliance-Baseline
 
 Das Ergebnis jeder Suite wird mit einer Untergrenze in
 [`scripts/compliance-baseline.json`](https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/compliance-baseline.json)
-verglichen, und zwar durch `scripts/check-compliance-baseline.py`. Der Job schlägt fehl, wenn `passed` unter die
+verglichen, und zwar durch [`scripts/check-compliance-baseline.py`](../../scripts/check-compliance-baseline.py). Der Job schlägt fehl, wenn `passed` unter die
 Untergrenze fällt oder `failed` darüber steigt; so kann eine Suite, die noch nicht besteht,
 trotzdem eine Verschlechterung verhindern. Heben Sie eine Untergrenze an, sobald sich eine Suite
 verbessert; eine Absenkung braucht eine Begründung in ihrem `note`, und `review_by` lässt eine
@@ -135,7 +135,7 @@ python3 scripts/check-compliance-baseline.py --results test-results
 
 ## Die Datenraum- und Identitätsprüfungen
 
-Beide brauchen den vollständigen JAD-Stack (siehe [den Stack und die Umgebung](stack-and-environment.md))
+Beide brauchen den vollständigen [JAD](https://github.com/eclipse-dataspace-hub/jad)-Stack (siehe [den Stack und die Umgebung](stack-and-environment.md))
 mit abgeschlossenen Seed-Phasen 1 bis 7.
 
 ```bash
@@ -145,8 +145,8 @@ mit abgeschlossenen Seed-Phasen 1 bis 7.
 
 Sie lesen `EDC_MANAGEMENT_URL`, `EDC_IDENTITY_URL` und `EDC_ISSUER_URL` und
 verwenden standardmäßig die Compose-Ports. Die Identitätsprüfungen starten und stoppen den
-Container `rogue-issuer` (Compose-Profil `trust-check`), um zu zeigen, dass ein
+Container [`rogue-issuer`](../../docker-compose.jad.yml#L808) (Compose-Profil `trust-check`), um zu zeigen, dass ein
 Nachweis eines Ausstellers, der auf keiner Vertrauensliste steht, abgelehnt wird. Auf Azure laufen dieselben
-Suiten aus einem ACA-Job (`scripts/azure/08-compliance-runner.sh`,
-`compliance.yml` mit `target: azure` gestartet), wobei die Prüfungen übersprungen werden, die
+Suiten aus einem [ACA](https://learn.microsoft.com/en-us/azure/container-apps/jobs)-Job ([`scripts/azure/08-compliance-runner.sh`](../../scripts/azure/08-compliance-runner.sh),
+[`compliance.yml`](../../.github/workflows/compliance.yml) mit `target: azure` gestartet), wobei die Prüfungen übersprungen werden, die
 in einen Container hineinsehen müssen.

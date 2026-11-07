@@ -157,7 +157,7 @@ describe("the docs pages' texts are in their dictionaries", () => {
     const toc = strings(page, /label: "((?:[^"\\]|\\.)*)"/g);
     const purposes = strings(page, /purpose:\s*"((?:[^"\\]|\\.)*)"/g);
     const layers = strings(page, /layer: "((?:[^"\\]|\\.)*)"/g);
-    expect(toc).toHaveLength(8);
+    expect(toc).toHaveLength(9);
     expect(purposes.length).toBeGreaterThan(25);
     const statuses = [...new Set(facts.adrs.map((a) => a.status))].filter(
       Boolean,
