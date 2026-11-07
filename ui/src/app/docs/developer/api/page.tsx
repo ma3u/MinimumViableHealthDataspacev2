@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -24,6 +24,39 @@ const OPENAPI_URL = `${BASE_PATH}/openapi.yaml`;
 const SWAGGER_CSS = `${BASE_PATH}/swagger-ui/swagger-ui.css`;
 const SWAGGER_BUNDLE = `${BASE_PATH}/swagger-ui/swagger-ui-bundle.js`;
 const SWAGGER_PRESET = `${BASE_PATH}/swagger-ui/swagger-ui-standalone-preset.js`;
+
+const REPO_BLOB =
+  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/";
+const OPENAPI_SPEC_URL = `https://spec.openapis.org/oas/v${facts.openapi.version}.html`;
+const DSP_URL =
+  "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/";
+const DCP_URL =
+  "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/";
+const FHIR_URL = "https://hl7.org/fhir/R4/";
+const OMOP_URL = "https://ohdsi.github.io/CommonDataModel/cdm54.html";
+const HEALTHDCAT_URL =
+  "https://data.health.europa.eu/healthdcat-ap/releases/release-8/";
+/** The PR Gate's spec drift step. */
+const SPEC_DRIFT_URL = `${REPO_BLOB}.github/workflows/pr-gate.yml#L72-L80`;
+const ADR_044_URL = `${REPO_BLOB}docs/ADRs/ADR-044-every-api-route-needs-a-session.md`;
+const ADR_054_URL = `${REPO_BLOB}docs/ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md`;
+/** The Keycloak release docker-compose.jad.yml runs. */
+const KEYCLOAK_URL = "https://github.com/keycloak/keycloak/releases/tag/26.8.0";
+const APP_ATTEST_URL =
+  "https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity";
+
+function Src({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-(--accent) hover:underline"
+    >
+      {children}
+    </a>
+  );
+}
 
 declare global {
   interface Window {
@@ -146,16 +179,24 @@ export default function ApiReferencePage() {
           <h1 className="text-3xl font-bold mb-2">Interactive API Reference</h1>
           <DocsLastUpdated page="/docs/developer/api" />
           <p className="text-(--text-secondary)">
-            OpenAPI {facts.openapi.version} specification of the Next.js API:{" "}
-            {facts.openapi.operations} of the {implementedOperations}{" "}
-            implemented operations are documented so far (DSP 2025-1, DCP v1.0,
-            FHIR R4, OMOP CDM, HealthDCAT-AP). The PR Gate blocks any new route
-            that is not in the spec, and the backlog only shrinks. Use{" "}
+            <Src href={OPENAPI_SPEC_URL}>OpenAPI {facts.openapi.version}</Src>{" "}
+            specification of the Next.js API: {facts.openapi.operations} of the{" "}
+            {implementedOperations} implemented operations are documented so far
+            (<Src href={DSP_URL}>DSP 2025-1</Src>,{" "}
+            <Src href={DCP_URL}>DCP v1.0</Src>,{" "}
+            <Src href={FHIR_URL}>FHIR R4</Src>,{" "}
+            <Src href={OMOP_URL}>OMOP CDM v5.4</Src>,{" "}
+            <Src href={HEALTHDCAT_URL}>HealthDCAT-AP Release 8</Src>). The{" "}
+            <Src href={SPEC_DRIFT_URL}>PR Gate</Src> blocks any new route that
+            is not in the spec, and the backlog only shrinks. Use{" "}
             <strong>Try it out</strong> to call live endpoints. Every route
-            needs a session cookie (ADR-044) except the sign-in flows, the
-            Keycloak address for the sign-in banner, the health probe, and the
-            Klarbefund app&apos;s account creation, which answers only a
-            verified Apple App Attest attestation (ADR-054).
+            needs a session cookie (<Src href={ADR_044_URL}>ADR-044</Src>)
+            except the sign-in flows, the{" "}
+            <Src href={KEYCLOAK_URL}>Keycloak</Src> address for the sign-in
+            banner, the health probe, and the Klarbefund app&apos;s account
+            creation, which answers only a verified{" "}
+            <Src href={APP_ATTEST_URL}>Apple App Attest</Src> attestation (
+            <Src href={ADR_054_URL}>ADR-054</Src>).
           </p>
         </div>
 
