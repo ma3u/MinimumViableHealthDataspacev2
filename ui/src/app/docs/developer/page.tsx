@@ -20,20 +20,23 @@ const implementedOperations = facts.apiRoutes.reduce(
   (n, r) => n + r.methods.length,
   0,
 );
-const ALL_COMPOSE_SERVICES = Object.values(facts.composeServices).flat();
-const COMPOSE_SERVICES = ALL_COMPOSE_SERVICES.length;
-/** The services a plain `docker compose up` starts: those with no profile. */
-const DEFAULT_SERVICES = ALL_COMPOSE_SERVICES.filter(
-  (s) => s.profiles.length === 0,
-);
-/** Host ports of the default services, as `docker compose up` binds them. */
-const DEFAULT_PORTS = [
+// What `docker compose up` starts: the services in no profile. The edc018,
+// trust-check and federated profiles hold the rest.
+const inDefaultProfile = (s: { profiles: string[] }) => s.profiles.length === 0;
+const STACK_SERVICES = Object.values(facts.composeServices)
+  .flat()
+  .filter(inDefaultProfile);
+const JAD_SERVICES = facts.composeServices["docker-compose.jad.yml"];
+// The host side of each published port, "7474:7474" -> 7474.
+const STACK_PORTS = [
   ...new Set(
-    DEFAULT_SERVICES.flatMap((s) =>
-      s.ports.map((p) => Number(p.split(":")[0])),
+    STACK_SERVICES.flatMap((s) =>
+      s.ports.map((p) => Number(p.split(":").slice(-2)[0])),
     ),
   ),
-].sort((a, b) => a - b);
+]
+  .sort((a, b) => a - b)
+  .join(", ");
 const hooksAt = (stage: string) =>
   facts.preCommitHooks.filter((h) => h.stage === stage).length;
 const PRE_COMMIT_HOOKS = hooksAt("pre-commit");
@@ -69,8 +72,6 @@ const EDC_RELEASE =
   "https://github.com/eclipse-edc/Connector/releases/tag/v1.0.0-RC5";
 const IDENTITYHUB_RELEASE =
   "https://github.com/eclipse-edc/IdentityHub/releases/tag/v1.0.0-RC5";
-const JAD_COMMIT =
-  "https://github.com/Metaform/jad/tree/4a7e5bd096c58814748e956cc9329586ad309698";
 const JAD_README =
   "https://github.com/Metaform/jad/blob/4a7e5bd096c58814748e956cc9329586ad309698/README.md#L3";
 const CFM = "https://github.com/Metaform/connector-fabric-manager";
@@ -111,9 +112,6 @@ const issue = (n: number) => ext(`${GITHUB_REPO}/issues/${n}`);
 const adr = (file: string) => src(`docs/ADRs/${file}`);
 const ADR_001 = "ADR-001-postgresql-neo4j-split.md";
 const ADR_053 = "ADR-053-everything-stops-off-hours.md";
-const ADR_078 = "ADR-078-edc-1-on-container-apps-without-cfm.md";
-/** The tags of a row that runs only under the edc018 profile (#927). */
-const EDC018_TAGS = { c: <code />, i: issue(927) };
 /** An onboarding step that leads to where it is explained or done. */
 const STEP_LINK =
   "underline decoration-dotted underline-offset-2 hover:text-indigo-700 dark:hover:text-indigo-300";
@@ -605,34 +603,26 @@ export default function DeveloperGuidePage() {
               area="docsDeveloper"
               tags={{
                 c: chip,
-                j: ext(JAD_README),
-                y: srcCode("docker-compose.yml"),
-                z: srcCode("docker-compose.jad.yml"),
-                i: issue(927),
+                a: repoFile(
+                  "docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md",
+                ),
               }}
-              vars={{ n: COMPOSE_SERVICES, d: DEFAULT_SERVICES.length }}
+              vars={{ n: STACK_SERVICES.length }}
             >
               {
-                "The full <j>JAD</j> (Just Another Demonstrator) stack defines {n} Docker Compose services in <y>docker-compose.yml</y> and <z>docker-compose.jad.yml</z>; {d} of them start by default. The others sit behind compose profiles, most of them under <c>edc018</c>: the EDC 0.18 services, which <i>#927</i> retires. Services are grouped into five layers:"
+                "The JAD (Joint Architecture Demo) stack runs {n} Docker Compose services from <c>docker-compose.yml</c> + <c>docker-compose.jad.yml</c>, on EDC 1.0.0-RC5 with siglet as the data plane and no CFM, as Azure does (<a>ADR-078</a>). Compose builds the three EDC launchers from <c>runtimes/edc</c> on the first run."
               }
             </T>
           </p>
           <DocFigure
             file="deployment.svg"
             alt={t(
-              "The JAD stack as an ArchiMate technology view: the edge, the application, the EDC-V and identity services and the infrastructure as bands, with the run-time dependencies between them",
+              "The JAD stack as an ArchiMate technology view: the edge, the application, EDC 1.0, the identity services and the infrastructure as bands with the run-time dependencies between them, and the three compose profiles in a band of their own",
             )}
-            caption={
-              <T
-                area="docsDeveloper"
-                tags={{ a: ext(ARCHIMATE) }}
-                vars={{ n: COMPOSE_SERVICES }}
-              >
-                {
-                  "JAD stack: {n} compose services and their dependencies (<a>ArchiMate 3.2</a>, technology view)"
-                }
-              </T>
-            }
+            caption={t(
+              "JAD stack: the {n} services of the default profile, their dependencies and the three profiles (ArchiMate 3.2, technology view)",
+              { n: STACK_SERVICES.length },
+            )}
           />
 
           {/* Service table */}
@@ -666,157 +656,68 @@ export default function DeveloperGuidePage() {
                       port: ":80 / :8090",
                       traefik: "traefik.localhost",
                       purpose: t("API gateway & reverse proxy"),
-                      deps: "—",
+                      deps: t("none"),
                     },
                     {
                       service: "PostgreSQL 17",
                       href: "https://www.postgresql.org/docs/17/release-17-7.html",
                       port: ":5432",
-                      traefik: "—",
-                      purpose: (
-                        <T
-                          area="docsDeveloper"
-                          tags={{
-                            a: src("jad/init-postgres.sql"),
-                            e: src("jad/init-postgres-edc1.sql#L1-L8"),
-                          }}
-                          vars={{ n: facts.postgresDbs.length }}
-                        >
-                          {
-                            "Runtime store (<a>{n} databases</a>, and the EDC 1.0 ones of <e>init-postgres-edc1.sql</e>)"
-                          }
-                        </T>
-                      ),
-                      deps: "—",
+                      traefik: t("none"),
+                      purpose: t("Runtime store ({n} databases)", {
+                        n: facts.postgresDbs.length,
+                      }),
+                      deps: t("none"),
                     },
                     {
                       service: "Vault",
                       href: "https://github.com/hashicorp/vault/releases/tag/v2.0.0",
                       port: ":8200",
                       traefik: "vault.localhost",
-                      purpose: (
-                        <T
-                          area="docsDeveloper"
-                          tags={{ a: src("docker-compose.jad.yml#L134-L155") }}
-                        >
-                          {
-                            "Secrets, file storage; <a>vault-unseal</a> unseals it after a restart"
-                          }
-                        </T>
+                      purpose: t(
+                        "Secrets, file storage; vault-unseal unseals it after a restart",
                       ),
-                      deps: "—",
+                      deps: t("none"),
                     },
                     {
                       service: "Keycloak",
                       href: "https://github.com/keycloak/keycloak/releases/tag/26.8.0",
-                      port: ":8080",
+                      port: ":8080 / :9000",
                       traefik: "keycloak.localhost",
-                      purpose: (
-                        <T
-                          area="docsDeveloper"
-                          tags={{
-                            o: ext(
-                              "https://openid.net/specs/openid-connect-core-1_0.html",
-                            ),
-                            a: src("jad/keycloak-realm.json#L541-L670"),
-                          }}
-                        >
-                          {
-                            "<o>OIDC</o> SSO (realm: edcv, <a>8 users and 1 service account</a>)"
-                          }
-                        </T>
-                      ),
+                      purpose: t("OIDC SSO (realm: edcv, 8 demo users)"),
                       deps: "PostgreSQL",
                     },
                     {
                       service: "NATS",
                       href: "https://github.com/nats-io/nats-server/releases/tag/v2.14.3",
                       port: ":4222 / :8222",
-                      traefik: "—",
-                      purpose: (
-                        <T
-                          area="docsDeveloper"
-                          tags={{
-                            a: ext(
-                              "https://docs.nats.io/nats-concepts/jetstream",
-                            ),
-                          }}
-                        >
-                          {"Async event mesh (<a>JetStream</a>)"}
-                        </T>
-                      ),
-                      deps: "—",
+                      traefik: "nats.localhost",
+                      purpose: t("Async event mesh (JetStream)"),
+                      deps: t("none"),
                     },
                     {
                       service: "Control Plane",
                       href: EDC_RELEASE,
                       port: ":11003",
                       traefik: "cp.localhost",
-                      purpose: (
-                        <T area="docsDeveloper" tags={{ a: ext(DSP) }}>
-                          {"<a>DSP</a> protocol + management API"}
-                        </T>
-                      ),
+                      purpose: t("DSP 2025-1 + Management API v5"),
                       deps: "PG, Vault, NATS, KC",
                     },
                     {
-                      service: "Siglet",
+                      service: "siglet",
                       href: "https://github.com/eclipse-dataplane-core/dsdk-facet-rs/releases/tag/siglet-v0.1.6",
-                      port: "—",
-                      traefik: "—",
-                      purpose: (
-                        <T area="docsDeveloper" tags={{ a: adr(ADR_078) }}>
-                          {
-                            "The data plane on EDC 1.0: answers the control plane's signaling and issues the access token; the Neo4j proxy serves the data (<a>ADR-078</a>)"
-                          }
-                        </T>
+                      port: t("internal"),
+                      traefik: t("none"),
+                      purpose: t(
+                        "Data plane: signalling, and the access tokens of pull transfers",
                       ),
                       deps: "Vault",
-                    },
-                    {
-                      service: "Data Plane FHIR",
-                      href: JAD_COMMIT,
-                      port: ":11002",
-                      traefik: "dp-fhir.localhost",
-                      purpose: (
-                        <T
-                          area="docsDeveloper"
-                          tags={{ ...EDC018_TAGS, f: ext(FHIR) }}
-                        >
-                          {
-                            "<f>FHIR</f> PUSH transfer type; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
-                          }
-                        </T>
-                      ),
-                      deps: "PG, Vault, CP",
-                    },
-                    {
-                      service: "Data Plane OMOP",
-                      href: JAD_COMMIT,
-                      port: ":11012",
-                      traefik: "dp-omop.localhost",
-                      purpose: (
-                        <T
-                          area="docsDeveloper"
-                          tags={{ ...EDC018_TAGS, f: ext(OMOP) }}
-                        >
-                          {
-                            "<f>OMOP</f> PULL transfer type; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
-                          }
-                        </T>
-                      ),
-                      deps: "PG, Vault, CP",
                     },
                     {
                       service: "Identity Hub",
                       href: IDENTITYHUB_RELEASE,
                       port: ":11005",
                       traefik: "ih.localhost",
-                      purpose: (
-                        <T area="docsDeveloper" tags={{ a: ext(DCP) }}>
-                          {"<a>DCP v1.0</a>: DID + VC store"}
-                        </T>
-                      ),
+                      purpose: t("DCP v1.0: DID + VC store (Identity API v1)"),
                       deps: "PG, Vault, KC",
                     },
                     {
@@ -824,93 +725,34 @@ export default function DeveloperGuidePage() {
                       href: IDENTITYHUB_RELEASE,
                       port: ":10013",
                       traefik: "issuer.localhost",
-                      purpose: (
-                        <T
-                          area="docsDeveloper"
-                          tags={{
-                            a: ext(`${DCP}#credential-issuance-protocol`),
-                            d: ext(DID_WEB),
-                          }}
-                        >
-                          {"<a>VC issuance</a> + <d>did:web</d>"}
-                        </T>
-                      ),
+                      purpose: t("VC issuance + DID:web"),
                       deps: "PG, Vault, KC",
                     },
                     {
-                      service: "Tenant Manager",
-                      href: CFM,
-                      port: ":11006",
-                      traefik: "tm.localhost",
-                      purpose: (
-                        <T
-                          area="docsDeveloper"
-                          tags={{ ...EDC018_TAGS, a: ext(CFM) }}
-                        >
-                          {
-                            "<a>CFM</a> tenant lifecycle; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
-                          }
-                        </T>
+                      service: "Simpl GA issuer",
+                      href: IDENTITYHUB_RELEASE,
+                      port: ":10023",
+                      traefik: t("none"),
+                      purpose: t(
+                        "The fictional Simpl Governance Authority's issuer (ADR-064)",
                       ),
-                      deps: "PG, KC",
-                    },
-                    {
-                      service: "Provision Manager",
-                      href: CFM,
-                      port: ":11007",
-                      traefik: "pm.localhost",
-                      purpose: (
-                        <T
-                          area="docsDeveloper"
-                          tags={{ ...EDC018_TAGS, a: ext(CFM) }}
-                        >
-                          {
-                            "<a>CFM</a> resource provisioning; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
-                          }
-                        </T>
-                      ),
-                      deps: "PG, KC, CP",
+                      deps: "PG, Vault, KC",
                     },
                     {
                       service: "Neo4j 5",
                       href: "https://github.com/neo4j/neo4j/releases/tag/5.26.28",
                       port: ":7474 / :7687",
-                      traefik: "—",
-                      purpose: (
-                        <T
-                          area="docsDeveloper"
-                          tags={{
-                            a: ext("https://neo4j.com/docs/apoc/current/"),
-                            g: ext(
-                              "https://neo4j.com/docs/graph-data-science/current/",
-                            ),
-                            n: ext("https://neo4j.com/labs/neosemantics/"),
-                            p: src("docker-compose.yml#L12"),
-                          }}
-                        >
-                          {
-                            "Knowledge graph (<a>APOC</a>, <g>GDS</g>, <n>n10s</n>; <p>plugins</p>)"
-                          }
-                        </T>
-                      ),
-                      deps: "—",
+                      traefik: t("none"),
+                      purpose: t("Knowledge graph (APOC + n10s)"),
+                      deps: t("none"),
                     },
                     {
                       service: "Neo4j Proxy",
                       href: `${GITHUB_REPO}/tree/main/services/neo4j-proxy`,
                       port: ":9090",
                       traefik: "proxy.localhost",
-                      purpose: (
-                        <T
-                          area="docsDeveloper"
-                          tags={{
-                            a: ext(
-                              "https://github.com/expressjs/express/releases/tag/v5.3.0",
-                            ),
-                          }}
-                        >
-                          {"<a>Express</a> bridge: UI ↔ Neo4j"}
-                        </T>
+                      purpose: t(
+                        "Express bridge: UI ↔ Neo4j; serves pulls at /dataspace/data",
                       ),
                       deps: "CP",
                     },
@@ -918,7 +760,7 @@ export default function DeveloperGuidePage() {
                       service: "Next.js UI",
                       href: `https://github.com/vercel/next.js/releases/tag/v${facts.toolVersions.next}`,
                       port: ":3000 / :3003",
-                      traefik: "—",
+                      traefik: t("none"),
                       purpose: t("Application frontend"),
                       deps: "Neo4j",
                     },
@@ -952,19 +794,69 @@ export default function DeveloperGuidePage() {
             </table>
           </div>
           <p className="text-(--text-secondary) text-xs mt-2">
-            <T
-              area="docsDeveloper"
-              tags={{
-                ...EDC018_TAGS,
-                a: ext(CFM),
-                v: src("docker-compose.jad.yml#L245-L272"),
-              }}
-            >
+            <T area="docsDeveloper" tags={{ c: small }}>
               {
-                "Only under the <c>edc018</c> profile, for EDC 0.18 and retired with <i>#927</i>: 4 <a>CFM</a> agents (keycloak, edcv, registration, onboarding), the nginx shim cfm-cp-shim and the one-shot seed container jad-seed. <v>vault-bootstrap</v> runs as a sidecar."
+                "Plus two Vault sidecars: <c>vault-unseal</c> initialises and unseals Vault, <c>vault-bootstrap</c> writes the secrets the services read."
               }
             </T>
           </p>
+
+          <h3 className="text-lg font-semibold mt-6 mb-2" id="pull-path">
+            {t("The pull path")}
+          </h3>
+          <p className="text-(--text-secondary) text-sm">
+            <T
+              area="docsDeveloper"
+              tags={{ c: chip }}
+              vars={{
+                tokens: "GET /tokens/{participantContextId}/{transferId}",
+              }}
+            >
+              {
+                "A pull transfer runs like this: the consumer's control plane negotiates, siglet issues the access token, and the consumer reads the token from its siglet (<c>{tokens}</c>) and sends it to the provider's Neo4j Proxy at <c>/dataspace/data</c>, which serves the dataset the token names (<c>jad/siglet-edc1.toml</c>). siglet keeps its tokens in memory on this stack, so a restart of siglet loses every issued token; start the transfer again."
+              }
+            </T>
+          </p>
+
+          <h3 className="text-lg font-semibold mt-6 mb-2" id="compose-profiles">
+            {t("Compose profiles")}
+          </h3>
+          <p className="text-(--text-secondary) text-sm mb-2">
+            {t(
+              "Three compose profiles hold the {n} services the default stack leaves out:",
+              {
+                n:
+                  Object.values(facts.composeServices).flat().length -
+                  STACK_SERVICES.length,
+              },
+            )}
+          </p>
+          <ul className="text-(--text-secondary) text-sm space-y-1 list-disc ml-5">
+            <li>
+              <T
+                area="docsDeveloper"
+                tags={{ c: chip, a: externalLink(`${GITHUB_REPO}/issues/927`) }}
+              >
+                {
+                  "<c>edc018</c>: what only EDC 0.18 used, the two DCore data planes (FHIR :11002, OMOP :11012), CFM's Tenant Manager (:11006) and Provision Manager (:11007), its four agents and the shim, and the one-shot <c>jad-seed</c>. They stay until <a>#927</a> retires them; nothing in CI starts them."
+                }
+              </T>
+            </li>
+            <li>
+              <T area="docsDeveloper" tags={{ c: chip }}>
+                {
+                  "<c>trust-check</c>: <c>rogue-issuer</c> (:10033), the untrusted issuer the identity checks must refuse."
+                }
+              </T>
+            </li>
+            <li>
+              <T area="docsDeveloper" tags={{ c: chip }}>
+                {
+                  "<c>federated</c>: <c>neo4j-spe2</c> (:7475 / :7688), the second SPE."
+                }
+              </T>
+            </li>
+          </ul>
         </section>
 
         {/* Prerequisites */}
@@ -1091,20 +983,8 @@ export default function DeveloperGuidePage() {
               {t("Port Requirements")}
             </h4>
             <p className="text-(--text-secondary) text-xs">
-              <T
-                area="docsDeveloper"
-                tags={{
-                  y: srcCode("docker-compose.yml"),
-                  z: srcCode("docker-compose.jad.yml"),
-                }}
-              >
-                {
-                  "The default services bind these host ports, so they must be free (<y>docker-compose.yml</y>, <z>docker-compose.jad.yml</z>):"
-                }
-              </T>{" "}
-              <code className="text-(--text-primary)">
-                {DEFAULT_PORTS.join(", ")}
-              </code>
+              {t("The JAD stack requires these ports to be free:")}{" "}
+              <code className="text-(--text-primary)">{STACK_PORTS}</code>
             </p>
           </div>
         </section>
@@ -1126,7 +1006,7 @@ export default function DeveloperGuidePage() {
               </h4>
               <pre className="text-xs text-(--text-primary) overflow-x-auto">{`docker compose up -d
 
-# Initialize schema (idempotent — safe to re-run)
+# Initialize schema (idempotent, safe to re-run)
 cat neo4j/init-schema.cypher | \\
   docker exec -i health-dataspace-neo4j \\
   cypher-shell -u neo4j -p healthdataspace
@@ -1157,26 +1037,17 @@ npm run lint         # ESLint (max 55 warnings)`}</pre>
             {t("Quick Start: Full JAD Stack")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            <T
-              area="docsDeveloper"
-              tags={{
-                a: src("scripts/bootstrap-jad.sh#L293-L376"),
-                k: src("jad/keycloak-realm.json"),
-                s: src("jad/seed-all.sh#L150-L156"),
-              }}
-              vars={{ n: DEFAULT_SERVICES.length }}
-            >
-              {
-                "The <a>bootstrap script</a> starts the {n} default services with health checks, initializes Vault secrets, imports the <k>Keycloak realm</k>, and runs the 7-phase <s>seed pipeline</s>."
-              }
-            </T>
+            {t(
+              "The bootstrap script starts the {n} services in dependency order with health checks, waits for vault-bootstrap to write the secrets, loads the graph when Neo4j is empty, runs the 7-phase seed pipeline and then seeds the Simpl test Governance Authority.",
+              { n: STACK_SERVICES.length },
+            )}
           </p>
           <div className="space-y-4">
             <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
               <h4 className="font-semibold text-sm mb-2 text-(--success-text)">
                 {t("1. Bootstrap everything")}
               </h4>
-              <pre className="text-xs text-(--text-primary) overflow-x-auto">{`# Full stack — takes ~3-5 min on first run
+              <pre className="text-xs text-(--text-primary) overflow-x-auto">{`# Full stack; the first run also builds the three EDC launchers
 ./scripts/bootstrap-jad.sh
 
 # Check status & endpoints
@@ -1233,14 +1104,9 @@ open http://traefik.localhost`}</pre>
             {t("Data Seeding Pipeline")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            <T
-              area="docsDeveloper"
-              tags={{ a: src("jad/seed-all.sh#L150-L156") }}
-            >
-              {
-                "The 7-phase <a>seed pipeline</a> populates the dataspace with participants, credentials, policies, assets, and contracts. Phases must run in strict order; each depends on the previous."
-              }
-            </T>
+            {t(
+              "The 7-phase seed pipeline populates the dataspace with participants, credentials, policies, assets, contracts and transfers. Phases must run in strict order; each depends on the previous.",
+            )}
           </p>
           <div className="overflow-x-auto">
             <table className="w-full text-xs border border-(--border) rounded-lg">
@@ -1266,19 +1132,10 @@ open http://traefik.localhost`}</pre>
                     [
                       "1",
                       "scripts/seed-identity-layer.sh",
-                      "Control Plane, Identity Hub, Issuer Service",
-                      <T
-                        key="1"
-                        area="docsDeveloper"
-                        tags={{
-                          ...EDC018_TAGS,
-                          a: src("jad/seed-health-tenants.sh#L5-L6"),
-                        }}
-                      >
-                        {
-                          "The five participants on EDC 1.0: control plane contexts, IdentityHub, holders and a MembershipCredential each. CFM's <a>seed-health-tenants.sh</a> (9 tenants) is EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>."
-                        }
-                      </T>,
+                      "Identity Hub, Issuer, CP",
+                      t(
+                        "The 5 participants: contexts, DIDs, keys, a DCP MembershipCredential each (ADR-078)",
+                      ),
                     ],
                     [
                       "2",
@@ -1290,9 +1147,7 @@ open http://traefik.localhost`}</pre>
                       "3",
                       "jad/seed-ehds-policies.sh",
                       "Control Plane",
-                      <T key="3" area="docsDeveloper" tags={{ a: ext(ODRL) }}>
-                        {"Create <a>ODRL</a> policies for all participants"}
-                      </T>,
+                      t("Create ODRL policies for all participants"),
                     ],
                     [
                       "4",
@@ -1304,7 +1159,9 @@ open http://traefik.localhost`}</pre>
                       "5",
                       "jad/seed-contract-negotiation.sh",
                       "Control Plane",
-                      t("PharmaCo ↔ AlphaKlinik negotiations + data planes"),
+                      t(
+                        "PharmaCo ↔ AlphaKlinik negotiations, transfers to STARTED",
+                      ),
                     ],
                     [
                       "6",
@@ -1315,8 +1172,10 @@ open http://traefik.localhost`}</pre>
                     [
                       "7",
                       "jad/seed-data-transfer.sh",
-                      "Data Plane",
-                      t("Verify EDR tokens and data plane transfers"),
+                      "siglet, Neo4j Proxy",
+                      t(
+                        "Pull patients and the catalogue with siglet's tokens; record the TransferEvents",
+                      ),
                     ],
                   ] as [string, string, string, React.ReactNode][]
                 ).map(([phase, script, target, desc]) => (
@@ -1341,6 +1200,23 @@ open http://traefik.localhost`}</pre>
               </tbody>
             </table>
           </div>
+          <p className="text-(--text-secondary) text-xs mt-3">
+            <T
+              area="docsDeveloper"
+              tags={{
+                c: small,
+                a: externalLink(`${GITHUB_REPO}/issues/881`),
+              }}
+              vars={{
+                participant: "ehds-participant",
+                quality: "ehds-quality",
+              }}
+            >
+              {
+                "<c>bootstrap-jad.sh</c> loads the graph (<c>init-schema.cypher</c> and the files CI loads) only when Neo4j holds no patients, so a graph you filled yourself stays as it is. Phase 7 rewrites three tracked fixtures, <c>ui/public/mock/{fhir_bundles,negotiations,transfers}.json</c>; restore them with <c>git checkout --</c> when you did not mean to refresh them. Phase 1 reports <c>HTTP 400</c> for the attestation types <c>{participant}</c> and <c>{quality}</c>, which no issuer launcher registers, and for the credential types defined on them (finding 7 in <a>#881</a>); phase 2 registers the EHDS credential types anyway."
+              }
+            </T>
+          </p>
           <div className="mt-3 border border-amber-500/20 bg-amber-500/5 rounded-lg p-3">
             <p className="text-(--text-secondary) text-xs">
               <T
@@ -1377,33 +1253,6 @@ open http://traefik.localhost`}</pre>
                   ],
                   [
                     "├── ",
-                    "runtimes/edc/",
-                    "tree",
-                    "# EDC 1.0 launchers (Gradle), version in gradle/libs.versions.toml",
-                  ],
-                  [
-                    "│   ├── ",
-                    "controlplane/",
-                    "tree",
-                    "# DSP + Management API",
-                    "runtimes/edc/controlplane",
-                  ],
-                  [
-                    "│   ├── ",
-                    "identity-hub/",
-                    "tree",
-                    "# DCP Identity Hub",
-                    "runtimes/edc/identity-hub",
-                  ],
-                  [
-                    "│   └── ",
-                    "issuerservice/",
-                    "tree",
-                    "# DCP credential issuance",
-                    "runtimes/edc/issuerservice",
-                  ],
-                  [
-                    "├── ",
                     "docs/",
                     "tree",
                     "# Architecture docs, journeys, ADRs, reports",
@@ -1413,7 +1262,7 @@ open http://traefik.localhost`}</pre>
                     "│   ├── ",
                     "keycloak-realm.json",
                     "blob",
-                    "# Keycloak realm (edcv, 8 users + 1 service account, 10 realm roles)",
+                    "# Keycloak realm (edcv, 8 demo users, 10 roles)",
                     "jad/keycloak-realm.json",
                   ],
                   [
@@ -1422,6 +1271,20 @@ open http://traefik.localhost`}</pre>
                     "tree",
                     "# Contract definitions & ODRL policies",
                     "jad/edcv-assets",
+                  ],
+                  [
+                    "│   ├── ",
+                    "init-postgres-edc1.sql",
+                    "blob",
+                    "# The databases: EDC 0.18, then the _v1 ones of EDC 1.0",
+                    "jad/init-postgres-edc1.sql",
+                  ],
+                  [
+                    "│   ├── ",
+                    "siglet-edc1.toml",
+                    "blob",
+                    "# siglet, the data plane",
+                    "jad/siglet-edc1.toml",
                   ],
                   [
                     "│   ├── ",
@@ -1459,6 +1322,33 @@ open http://traefik.localhost`}</pre>
                     "blob",
                     "",
                     "neo4j/fhir-to-omop-transform.cypher",
+                  ],
+                  [
+                    "├── ",
+                    "runtimes/edc/",
+                    "tree",
+                    "# EDC 1.0 launchers (ADR-076)",
+                  ],
+                  [
+                    "│   ├── ",
+                    "controlplane/",
+                    "tree",
+                    "# DSP + Management API",
+                    "runtimes/edc/controlplane",
+                  ],
+                  [
+                    "│   ├── ",
+                    "identity-hub/",
+                    "tree",
+                    "# DCP Identity Hub",
+                    "runtimes/edc/identity-hub",
+                  ],
+                  [
+                    "│   └── ",
+                    "issuerservice/",
+                    "tree",
+                    "# VC issuance",
+                    "runtimes/edc/issuerservice",
                   ],
                   [
                     "├── ",
@@ -1519,7 +1409,7 @@ open http://traefik.localhost`}</pre>
                     "│   └── ",
                     "public/mock/",
                     "tree",
-                    "# 67 JSON fixtures for static export",
+                    "# JSON fixtures for static export",
                     "ui/public/mock",
                   ],
                   [
@@ -1532,7 +1422,11 @@ open http://traefik.localhost`}</pre>
                     "└── ",
                     "docker-compose.jad.yml",
                     "blob",
-                    `# Full JAD stack (${facts.composeServices["docker-compose.jad.yml"].length} services, profiles included)`,
+                    `# JAD stack: ${
+                      JAD_SERVICES.filter(inDefaultProfile).length
+                    } services, ${
+                      JAD_SERVICES.filter((s) => !inDefaultProfile(s)).length
+                    } more in profiles`,
                   ],
                 ] as [string, string, "tree" | "blob", string, string?][]
               ).map(([branch, name, kind, comment, path]) => (
@@ -1774,18 +1668,9 @@ open http://traefik.localhost`}</pre>
             {t("PostgreSQL Schema")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            <T
-              area="docsDeveloper"
-              tags={{
-                a: adr(ADR_001),
-                i: srcCode("jad/init-postgres.sql"),
-                e: srcCode("jad/init-postgres-edc1.sql#L1-L8"),
-                c: chip,
-              }}
-              vars={{ n: facts.postgresDbs.length }}
-            >
+            <T area="docsDeveloper" tags={{ b }}>
               {
-                "PostgreSQL serves as the runtime store for all JAD services: EDC-V state machines, Keycloak identity, and, on EDC 0.18 only, CFM tenant metadata. Neo4j holds the health knowledge graph. This split follows <a>ADR-001</a>. <i>jad/init-postgres.sql</i> creates the {n} databases below; on EDC 1.0 the control plane, IdentityHub and the issuers use their own <c>_v1</c> databases from <e>jad/init-postgres-edc1.sql</e>, and the 0.18 ones stay untouched."
+                "PostgreSQL serves as the runtime store for all JAD services: EDC state machines, Keycloak identity and the proxy's task store. Neo4j holds the health knowledge graph. This split follows <b>ADR-1</b>."
               }
             </T>
           </p>
@@ -1805,133 +1690,49 @@ open http://traefik.localhost`}</pre>
                 </tr>
               </thead>
               <tbody className="text-(--text-secondary)">
-                {(
+                {[
                   [
-                    [
-                      "controlplane",
-                      "EDC-V Control Plane",
-                      t(
-                        "Contract negotiations, transfer processes, asset definitions, policy store",
-                      ),
-                    ],
-                    [
-                      "dataplane",
-                      "DCore FHIR",
-                      <T
-                        key="dataplane"
-                        area="docsDeveloper"
-                        tags={EDC018_TAGS}
-                      >
-                        {
-                          "FHIR data plane state, EDR tokens, transfer tracking; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
-                        }
-                      </T>,
-                    ],
-                    [
-                      "dataplane_omop",
-                      "DCore OMOP",
-                      <T
-                        key="dataplane_omop"
-                        area="docsDeveloper"
-                        tags={EDC018_TAGS}
-                      >
-                        {
-                          "OMOP data plane state, EDR tokens, transfer tracking; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
-                        }
-                      </T>,
-                    ],
-                    [
-                      "identityhub",
-                      "Identity Hub",
-                      t(
-                        "DID documents, verifiable credential store, key pairs",
-                      ),
-                    ],
-                    [
-                      "issuerservice",
-                      "Issuer Service",
-                      t(
-                        "Credential definitions, attestation records, issued VCs",
-                      ),
-                    ],
-                    [
-                      "keycloak",
-                      "Keycloak",
-                      t("Users, roles, realm config, sessions, client scopes"),
-                    ],
-                    [
-                      "cfm",
-                      "Tenant Manager, Provision Manager, CFM agents",
-                      <T key="cfm" area="docsDeveloper" tags={EDC018_TAGS}>
-                        {
-                          "Tenant records, VPAs (Virtual Participant Agents), provisioning tasks; EDC 0.18 only (profile <c>edc018</c>), retired with <i>#927</i>"
-                        }
-                      </T>,
-                    ],
-                    [
-                      "redlinedb",
-                      "—",
-                      <T
-                        key="redlinedb"
-                        area="docsDeveloper"
-                        tags={{ a: src("jad/init-postgres.sql#L47-L51") }}
-                      >
-                        {
-                          "Created by <a>jad/init-postgres.sql</a>; no service in either compose stack uses it today"
-                        }
-                      </T>,
-                    ],
-                    [
-                      "taskdb",
-                      "Neo4j proxy",
-                      <T
-                        key="taskdb"
-                        area="docsDeveloper"
-                        tags={{
-                          a: src(
-                            "docs/planning/roadmap-phases-11-20.md?plain=1#L276",
-                          ),
-                        }}
-                      >
-                        {
-                          "Persistent task list behind the proxy's /tasks endpoints (<a>phase 13d</a>)"
-                        }
-                      </T>,
-                    ],
-                    [
-                      "simplga",
-                      "Simpl GA Issuer",
-                      <T
-                        key="simplga"
-                        area="docsDeveloper"
-                        tags={{
-                          a: src("jad/init-postgres.sql#L91-L99"),
-                          i: issue(710),
-                        }}
-                      >
-                        {
-                          "<a>The IssuerService of a fictional Simpl Governance Authority</a>, a trusted issuer for MembershipCredential (<i>#710</i>)"
-                        }
-                      </T>,
-                    ],
-                    [
-                      "rogueissuer",
-                      "Rogue Issuer",
-                      <T
-                        key="rogueissuer"
-                        area="docsDeveloper"
-                        tags={{
-                          a: src("jad/init-postgres.sql#L91-L105"),
-                          c,
-                        }}
-                      >
-                        {
-                          "<a>An issuer on no trust list</a>, which the identity checks start (profile <c>trust-check</c>) only to see it refused"
-                        }
-                      </T>,
-                    ],
-                  ] as [string, string, React.ReactNode][]
-                ).map(([db, service, contents]) => (
+                    "controlplane_v1",
+                    "Control Plane",
+                    t(
+                      "Contract negotiations, transfer processes, asset definitions, policy store",
+                    ),
+                  ],
+                  [
+                    "identityhub_v1",
+                    "Identity Hub",
+                    t("DID documents, verifiable credential store, key pairs"),
+                  ],
+                  [
+                    "issuerservice_v1",
+                    "Issuer Service",
+                    t(
+                      "Credential definitions, attestation records, issued VCs",
+                    ),
+                  ],
+                  [
+                    "simplga_v1",
+                    "Simpl GA issuer",
+                    t("The Simpl Governance Authority's credentials"),
+                  ],
+                  [
+                    "rogueissuer_v1",
+                    "rogue-issuer",
+                    t("The untrusted issuer of the identity checks"),
+                  ],
+                  [
+                    "keycloak",
+                    "Keycloak",
+                    t("Users, roles, realm config, sessions, client scopes"),
+                  ],
+                  [
+                    "taskdb",
+                    "Neo4j proxy",
+                    t(
+                      "Persistent task list behind the proxy's /tasks endpoints (phase 13d)",
+                    ),
+                  ],
+                ].map(([db, service, contents]) => (
                   <tr key={db} className="border-t border-(--border)">
                     <td className="px-3 py-1.5 font-mono font-medium text-(--text-primary)">
                       {db}
@@ -1943,6 +1744,17 @@ open http://traefik.localhost`}</pre>
               </tbody>
             </table>
           </div>
+          <p className="text-(--text-secondary) text-xs mt-3">
+            <T
+              area="docsDeveloper"
+              tags={{ c: small }}
+              vars={{ n: facts.postgresDbs.length }}
+            >
+              {
+                "A fresh <c>postgres_data</c> volume holds {n} databases. The image creates <c>controlplane</c> (<c>POSTGRES_DB</c>); <c>jad/init-postgres.sql</c> creates the users, <c>keycloak</c>, <c>taskdb</c> and the other EDC 0.18 databases (<c>identityhub</c>, <c>issuerservice</c>, <c>dataplane</c>, <c>dataplane_omop</c>, <c>cfm</c>, <c>redlinedb</c>, ...), which the 1.0 services no longer use. <c>jad/init-postgres-edc1.sql</c> creates the <c>_v1</c> databases after it, on a fresh volume only; on an existing volume, run that file once with <c>psql</c> as <c>cp</c> (see <c>docs/gotchas.md</c>)."
+              }
+            </T>
+          </p>
           <div className="mt-4 border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">
               {t("Neo4j vs PostgreSQL Split")}
@@ -1958,7 +1770,7 @@ open http://traefik.localhost`}</pre>
               <li>
                 <T area="docsDeveloper" tags={{ b }}>
                   {
-                    "<b>PostgreSQL:</b> EDC-V runtime state machines, OIDC sessions, tenant metadata, credential storage; transactional ACID workloads"
+                    "<b>PostgreSQL:</b> EDC runtime state machines, OIDC sessions, credential storage, the task store; transactional ACID workloads"
                   }
                 </T>
               </li>
@@ -2146,12 +1958,9 @@ open http://traefik.localhost`}</pre>
                   </T>
                 </li>
                 <li>
-                  <T
-                    area="docsDeveloper"
-                    tags={{ b, f: ext(`${FHIR}bundle.html`), o: ext(OMOP) }}
-                  >
+                  <T area="docsDeveloper" tags={{ b, c: flowCode }}>
                     {
-                      "<b>Deliver</b> → data plane pushes <f>FHIR</f>/<o>OMOP</o> bundles to the consumer"
+                      "<b>Deliver</b> → the consumer pulls with siglet's token from <c>/dataspace/data</c> on the provider's Neo4j Proxy"
                     }
                   </T>
                 </li>

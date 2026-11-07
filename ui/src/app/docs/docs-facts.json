@@ -780,14 +780,19 @@
   "postgresDbs": [
     "cfm",
     "controlplane",
+    "controlplane_v1",
     "dataplane",
     "dataplane_omop",
     "identityhub",
+    "identityhub_v1",
     "issuerservice",
+    "issuerservice_v1",
     "keycloak",
     "redlinedb",
     "rogueissuer",
+    "rogueissuer_v1",
     "simplga",
+    "simplga_v1",
     "taskdb"
   ],
   "adrs": [

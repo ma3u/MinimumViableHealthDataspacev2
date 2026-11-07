@@ -11,6 +11,10 @@ import { T, useT } from "@/lib/i18n/translate";
 
 /** Services in docker-compose.yml + docker-compose.jad.yml, profiles included. */
 const COMPOSE_SERVICES = Object.values(facts.composeServices).flat().length;
+/** The ones `docker compose up` starts: the services in no profile. */
+const STACK_SERVICES = Object.values(facts.composeServices)
+  .flat()
+  .filter((s) => s.profiles.length === 0).length;
 
 const GITHUB_REPO = "https://github.com/ma3u/MinimumViableHealthDataspacev2";
 const STATIC_SITE = "https://ma3u.github.io/MinimumViableHealthDataspacev2";
@@ -1221,11 +1225,11 @@ export default function ArchitecturePage() {
           <DocFigure
             file="deployment.svg"
             alt={t(
-              "The deployment topology as an ArchiMate technology view: the edge, the application, the EDC-V and identity services and the infrastructure as bands, with the run-time dependencies between them",
+              "The deployment topology as an ArchiMate technology view: the edge, the application, EDC 1.0, the identity services and the infrastructure as bands with the run-time dependencies between them, and the three compose profiles in a band of their own",
             )}
             caption={t(
-              "Fig 3. Full deployment topology, {count} services with their dependencies",
-              { count: COMPOSE_SERVICES },
+              "Fig 3. Deployment topology: the {count} services of the default profile with their dependencies, and the three profiles",
+              { count: STACK_SERVICES },
             )}
           />
           <div
