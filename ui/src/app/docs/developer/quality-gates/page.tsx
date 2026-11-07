@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   ArrowLeft,
   ShieldCheck,
@@ -21,7 +22,7 @@ import { localizedChart } from "@/lib/i18n/diagrams";
 import { useLanguage } from "@/lib/use-language";
 
 /* ------------------------------------------------------------------ */
-/*  Data                                                               */
+/*  Sources                                                            */
 /* ------------------------------------------------------------------ */
 
 const CI_WORKFLOW_URL =
@@ -31,118 +32,508 @@ const COMPLIANCE_WORKFLOW_URL =
 const PAGES_WORKFLOW_URL =
   "https://github.com/ma3u/MinimumViableHealthDataspacev2/actions/workflows/pages.yml";
 
-const ciGates = [
+const REPO_BLOB =
+  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/";
+const ISSUES = "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/";
+
+/** A file in this repository, at a line or a range (`L12-L20`). */
+const repo = (path: string, lines?: string) =>
+  `${REPO_BLOB}${path}${lines ? `#${lines}` : ""}`;
+
+/** BSI C5:2020, the English catalogue; a criterion links to its PDF page. */
+const C5_URL =
+  "https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf?__blob=publicationFile&v=3";
+const C5_PAGES = {
+  "AM-01": 48, // Asset Inventory
+  "OPS-22": 72, // Testing and Documentation of known Vulnerabilities
+  "OPS-23": 73, // Managing Vulnerabilities ... System Hardening
+  "CRY-04": 83, // Secure key management
+  "DEV-01": 91, // Policies for the development/procurement of information systems
+  "DEV-06": 94, // Testing changes
+  "DEV-09": 95, // Approvals for provision in the production environment
+  "PSS-02": 114, // Identification of Vulnerabilities of the Cloud Service
+} as const;
+type C5Id = keyof typeof C5_PAGES;
+
+/** Cyber Resilience Act, Regulation (EU) 2024/2847. */
+const CRA_URL = "https://eur-lex.europa.eu/eli/reg/2024/2847/oj/eng";
+/** EHDS, Regulation (EU) 2025/327, as adopted. */
+const EHDS_URL = "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng";
+
+/** OWASP Top 10, the 2021 edition: its numbering is the one used here. */
+const OWASP_TOP10_2021 = "https://top10.owasp.org/2021/";
+const OWASP_2021 = {
+  A01: "https://top10.owasp.org/2021/A01_2021-Broken_Access_Control/",
+  A05: "https://top10.owasp.org/2021/A05_2021-Security_Misconfiguration/",
+  A06: "https://top10.owasp.org/2021/A06_2021-Vulnerable_and_Outdated_Components/",
+  A07: "https://top10.owasp.org/2021/A07_2021-Identification_and_Authentication_Failures/",
+} as const;
+type OwaspId = keyof typeof OWASP_2021;
+
+const WCAG22_URL = "https://www.w3.org/TR/WCAG22/";
+const EN_301_549_URL =
+  "https://www.etsi.org/deliver/etsi_en/301500_301599/301549/03.02.01_60/en_301549v030201p.pdf";
+const WAD_URL = "https://eur-lex.europa.eu/eli/dir/2016/2102/oj/eng";
+const NSA_K8S_URL =
+  "https://www.cisa.gov/news-events/alerts/2022/03/15/updated-kubernetes-hardening-guide";
+const CIS_K8S_URL = "https://www.cisecurity.org/benchmark/kubernetes";
+const CORE_WEB_VITALS_URL = "https://web.dev/articles/vitals";
+const NTIA_SBOM_URL =
+  "https://www.ntia.gov/sites/default/files/publications/sbom_minimum_elements_report_0.pdf";
+const CYCLONEDX_15_URL = "https://cyclonedx.org/docs/1.5/json/";
+const CYCLONEDX_17_URL = "https://cyclonedx.org/docs/1.7/json/";
+const DSP_URL =
+  "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/";
+const DCP_URL =
+  "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/";
+const DSP_TCK_URL =
+  "https://github.com/eclipse-dataspacetck/dsp-tck/releases/tag/v1.0.2";
+const DCP_TCK_URL = "https://github.com/eclipse-dataspacetck/dcp-tck/releases";
+const ODRL_MODEL_URL =
+  "https://www.w3.org/TR/odrl-model/#x2-odrl-information-model";
+const OPENAPI_URL = `https://spec.openapis.org/oas/v${facts.openapi.version}.html`;
+const JAD_URL =
+  "https://github.com/Metaform/jad/tree/4a7e5bd096c58814748e956cc9329586ad309698";
+const ADR_074_URL = repo(
+  "docs/ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md",
+);
+const ADR_078_URL = repo(
+  "docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md",
+);
+
+const release = (repoPath: string, tag: string) =>
+  `https://github.com/${repoPath}/releases/tag/${tag}`;
+
+/* ------------------------------------------------------------------ */
+/*  Link helpers                                                       */
+/* ------------------------------------------------------------------ */
+
+function Src({
+  href,
+  children,
+  mono = false,
+}: {
+  href: string;
+  children: ReactNode;
+  mono?: boolean;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`text-(--accent) hover:underline${mono ? " font-mono" : ""}`}
+    >
+      {children}
+    </a>
+  );
+}
+
+/** A repository file, shown by name, linked at its line. */
+function RepoFile({
+  path,
+  lines,
+  children,
+}: {
+  path: string;
+  lines?: string;
+  children?: ReactNode;
+}) {
+  return (
+    <Src href={repo(path, lines)} mono>
+      {children ?? path}
+    </Src>
+  );
+}
+
+function C5({ id }: { id: C5Id }) {
+  return <Src href={`${C5_URL}#page=${C5_PAGES[id]}`}>C5 {id}</Src>;
+}
+
+function Owasp({ id }: { id: OwaspId }) {
+  return <Src href={OWASP_2021[id]}>OWASP {id}:2021</Src>;
+}
+
+function Cra({ anchor, children }: { anchor: string; children: ReactNode }) {
+  return <Src href={`${CRA_URL}#${anchor}`}>{children}</Src>;
+}
+
+function Ehds({ art }: { art: number }) {
+  return <Src href={`${EHDS_URL}#art_${art}`}>EHDS Art. {art}</Src>;
+}
+
+/** Elements joined with ", " in a table cell. */
+function List({ items }: { items: ReactNode[] }) {
+  return (
+    <>
+      {items.map((item, i) => (
+        <span key={i}>
+          {i > 0 && ", "}
+          {item}
+        </span>
+      ))}
+    </>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Data                                                               */
+/* ------------------------------------------------------------------ */
+
+interface CiGate {
+  job: string;
+  tests: string;
+  tool: ReactNode;
+  blocking: boolean;
+  standard: ReactNode;
+}
+
+const ciGates: CiGate[] = [
   {
     job: "PR Gate",
     tests: "—",
-    tool: "pre-commit on the diff, API spec drift, Bruno coverage, knip, gitleaks",
+    tool: (
+      <>
+        <RepoFile path=".github/workflows/pr-gate.yml" lines="L29-L123">
+          pr-gate.yml
+        </RepoFile>
+        : pre-commit on the diff, API spec drift, Bruno coverage, knip, gitleaks
+        over the pull request&apos;s commits
+      </>
+    ),
     blocking: true,
-    standard: "BSI C5 DEV-02",
+    standard: <C5 id="DEV-09" />,
   },
   {
     job: "CodeQL",
     tests: "—",
-    tool: "codeql.yml (JS/TS, Python, Actions) on every PR; codeql-swift.yml when clients/ios changes, or locally with Scripts/codeql-swift.sh",
+    tool: (
+      <>
+        <RepoFile path=".github/workflows/codeql.yml" lines="L44-L56">
+          codeql.yml
+        </RepoFile>{" "}
+        (JS/TS, Python, Actions) on every PR;{" "}
+        <RepoFile path=".github/workflows/codeql-swift.yml" lines="L36-L38">
+          codeql-swift.yml
+        </RepoFile>{" "}
+        when clients/ios changes, or locally with{" "}
+        <RepoFile path="clients/ios/Scripts/codeql-swift.sh">
+          Scripts/codeql-swift.sh
+        </RepoFile>
+      </>
+    ),
     blocking: false,
-    standard: "OWASP Top 10",
+    standard: (
+      <List
+        items={[
+          <C5 key="c5" id="PSS-02" />,
+          <Src key="owasp" href={OWASP_TOP10_2021}>
+            OWASP Top 10 (2021)
+          </Src>,
+        ]}
+      />
+    ),
   },
   {
     job: "Security scan",
     tests: "—",
-    tool: "Source SBOM, image and deployed-image CVEs (security-scan.yml)",
-    blocking: true,
-    standard: "EU CRA Art. 13",
+    tool: (
+      <>
+        Source SBOM, image and deployed-image CVEs (
+        <RepoFile path=".github/workflows/security-scan.yml" lines="L50-L90">
+          security-scan.yml
+        </RepoFile>
+        ). CVEs fail a run only when a manual run asks for it (
+        <RepoFile path=".github/workflows/security-scan.yml" lines="L317-L329">
+          severity gate
+        </RepoFile>
+        )
+      </>
+    ),
+    blocking: false,
+    standard: (
+      <List
+        items={[
+          <C5 key="c5" id="OPS-22" />,
+          <Cra key="cra" anchor="anx_I">
+            CRA Annex I, Part II (1)
+          </Cra>,
+        ]}
+      />
+    ),
   },
   {
     job: "UI Tests (Vitest)",
     tests: "—",
-    tool: `Vitest ${facts.toolVersions.vitest} + v8 coverage`,
+    tool: (
+      <>
+        <Src
+          href={release("vitest-dev/vitest", `v${facts.toolVersions.vitest}`)}
+        >
+          Vitest {facts.toolVersions.vitest}
+        </Src>{" "}
+        + v8 coverage (
+        <RepoFile path=".github/workflows/test.yml" lines="L112-L155">
+          test.yml
+        </RepoFile>
+        )
+      </>
+    ),
     blocking: true,
-    standard: "BSI C5 DEV-03",
+    standard: <C5 id="DEV-06" />,
   },
   {
     job: "Neo4j Proxy Tests",
     tests: "—",
-    tool: "Vitest",
+    tool: (
+      <>
+        Vitest (
+        <RepoFile path=".github/workflows/test.yml" lines="L156-L201">
+          test.yml
+        </RepoFile>
+        )
+      </>
+    ),
     blocking: true,
-    standard: "BSI C5 DEV-03",
+    standard: <C5 id="DEV-06" />,
   },
   {
     job: "Lint",
     tests: "—",
-    tool: "Next.js ESLint",
+    tool: (
+      <>
+        Next.js ESLint, a pre-commit hook the PR Gate runs (
+        <RepoFile path=".pre-commit-config.yaml" lines="L75-L79">
+          .pre-commit-config.yaml
+        </RepoFile>
+        )
+      </>
+    ),
     blocking: true,
-    standard: "BSI C5 DEV-02",
+    standard: <C5 id="DEV-06" />,
   },
   {
     job: "Secret Scan",
     tests: "—",
-    tool: `Gitleaks v${facts.toolVersions.gitleaks}`,
+    tool: (
+      <>
+        <Src
+          href={release("gitleaks/gitleaks", `v${facts.toolVersions.gitleaks}`)}
+        >
+          Gitleaks v{facts.toolVersions.gitleaks}
+        </Src>{" "}
+        over the whole history each night (
+        <RepoFile path=".github/workflows/nightly.yml" lines="L330-L354">
+          nightly.yml
+        </RepoFile>
+        ); the PR Gate scans the pull request&apos;s commits
+      </>
+    ),
     blocking: true,
-    standard: "BSI C5 DEV-08",
+    standard: (
+      <List items={[<C5 key="c5" id="CRY-04" />, <Owasp key="o" id="A07" />]} />
+    ),
   },
   {
     job: "Dependency Audit",
     tests: "—",
-    tool: "npm audit (HIGH+)",
+    tool: (
+      <>
+        npm audit, HIGH+ (
+        <RepoFile path=".github/workflows/test.yml" lines="L478-L486">
+          test.yml
+        </RepoFile>
+        , through{" "}
+        <RepoFile path="scripts/check-npm-audit.py">
+          check-npm-audit.py
+        </RepoFile>
+        )
+      </>
+    ),
     blocking: true,
-    standard: "OWASP A06",
+    standard: (
+      <List items={[<C5 key="c5" id="PSS-02" />, <Owasp key="o" id="A06" />]} />
+    ),
   },
   {
     job: "Trivy Scan",
     tests: "—",
-    tool: `Trivy v${facts.toolVersions.trivy}`,
+    tool: (
+      <>
+        <Src
+          href={release("aquasecurity/trivy", `v${facts.toolVersions.trivy}`)}
+        >
+          Trivy v{facts.toolVersions.trivy}
+        </Src>{" "}
+        (
+        <RepoFile path=".github/workflows/test.yml" lines="L345-L398">
+          test.yml
+        </RepoFile>
+        )
+      </>
+    ),
     blocking: false,
-    standard: "OWASP A06",
+    standard: (
+      <List items={[<C5 key="c5" id="OPS-22" />, <Owasp key="o" id="A06" />]} />
+    ),
   },
   {
     job: "K8s Posture",
     tests: "—",
-    tool: "Kubescape (NSA + CIS)",
+    tool: (
+      <>
+        Kubescape, NSA and CIS frameworks, critical findings (
+        <RepoFile path=".github/workflows/test.yml" lines="L399-L445">
+          test.yml
+        </RepoFile>
+        )
+      </>
+    ),
     blocking: true,
-    standard: "NSA K8s Guide",
+    standard: (
+      <List
+        items={[
+          <C5 key="c5" id="OPS-23" />,
+          <Src key="nsa" href={NSA_K8S_URL}>
+            NSA/CISA Kubernetes Hardening Guide
+          </Src>,
+          <Src key="cis" href={CIS_K8S_URL}>
+            CIS Kubernetes Benchmark
+          </Src>,
+        ]}
+      />
+    ),
   },
   {
     job: "E2E Tests",
     tests: "—",
-    tool: `Playwright v${facts.toolVersions.playwright}`,
+    tool: (
+      <>
+        <Src
+          href={release(
+            "microsoft/playwright",
+            `v${facts.toolVersions.playwright}`,
+          )}
+        >
+          Playwright v{facts.toolVersions.playwright}
+        </Src>
+        , nightly (
+        <RepoFile path=".github/workflows/nightly.yml" lines="L177-L185">
+          nightly.yml
+        </RepoFile>
+        )
+      </>
+    ),
     blocking: false,
     standard: "—",
   },
   {
     job: "WCAG 2.2 AA Audit",
     tests: "—",
-    tool: "axe-core/playwright",
-    blocking: true,
-    standard: "EN 301 549",
+    tool: (
+      <>
+        axe-core/playwright, nightly (
+        <RepoFile path=".github/workflows/nightly.yml" lines="L197-L199">
+          nightly.yml
+        </RepoFile>
+        , continue-on-error)
+      </>
+    ),
+    blocking: false,
+    standard: (
+      <List
+        items={[
+          <Src key="wcag" href={WCAG22_URL}>
+            WCAG 2.2 AA
+          </Src>,
+          <Src key="en" href={EN_301_549_URL}>
+            EN 301 549
+          </Src>,
+        ]}
+      />
+    ),
   },
   {
     job: "Security Pentest",
     tests: "—",
-    tool: "OWASP/BSI patterns",
+    tool: (
+      <>
+        OWASP/BSI patterns,{" "}
+        <RepoFile path="ui/__tests__/e2e/journeys/28-security-pentest.spec.ts">
+          28-security-pentest.spec.ts
+        </RepoFile>
+        , nightly (
+        <RepoFile path=".github/workflows/nightly.yml" lines="L208-L210">
+          nightly.yml
+        </RepoFile>
+        )
+      </>
+    ),
     blocking: false,
-    standard: "OWASP Top 10",
+    standard: (
+      <List
+        items={[
+          <C5 key="c5" id="PSS-02" />,
+          <Src key="owasp" href={OWASP_TOP10_2021}>
+            OWASP Top 10 (2021)
+          </Src>,
+        ]}
+      />
+    ),
   },
   {
     job: "SBOM Generation",
     tests: "2",
-    tool: "CycloneDX npm",
+    tool: (
+      <>
+        CycloneDX npm, <Src href={CYCLONEDX_15_URL}>CycloneDX 1.5</Src> (
+        <RepoFile path=".github/workflows/test.yml" lines="L512-L531">
+          test.yml
+        </RepoFile>
+        )
+      </>
+    ),
     blocking: true,
-    standard: "EU CRA Art. 13",
+    standard: (
+      <List
+        items={[
+          <Cra key="cra" anchor="anx_I">
+            CRA Annex I, Part II (1)
+          </Cra>,
+          <C5 key="c5" id="AM-01" />,
+        ]}
+      />
+    ),
   },
   {
     job: "Licence Compliance",
     tests: "—",
-    tool: "license-checker",
+    tool: (
+      <>
+        license-checker-rseidelsohn 4.4.2 with an allowlist (
+        <RepoFile path=".github/workflows/test.yml" lines="L559-L565">
+          test.yml
+        </RepoFile>
+        )
+      </>
+    ),
     blocking: true,
-    standard: "BSI C5 OPS-04",
+    standard: "No C5 criterion or CRA article requires it",
   },
   {
     job: "Lighthouse CI",
     tests: "12",
-    tool: "Lighthouse CI (4 pages × 3 runs)",
+    tool: (
+      <>
+        Lighthouse CI (4 pages × 3 runs), nightly (
+        <RepoFile path=".github/workflows/nightly.yml" lines="L254-L310">
+          nightly.yml
+        </RepoFile>
+        )
+      </>
+    ),
     blocking: false,
-    standard: "Core Web Vitals",
+    standard: <Src href={CORE_WEB_VITALS_URL}>Core Web Vitals</Src>,
   },
 ];
 
@@ -153,12 +544,41 @@ const coverageData = Object.entries(facts.coverageThresholds).map(
   }),
 );
 
-const SUITE_NAMES: Record<string, [string, string]> = {
-  "dsp-tck-results": ["DSP 2025-1 TCK", "Dataspace Protocol"],
-  "dcp-compliance-results": ["DCP v1.0", "Decentralised Claims"],
-  "ehds-compliance-results": ["EHDS Domain", "EHDS Art. 3–51"],
+const DSP_CHECKS: ReactNode = (
+  <>
+    <Src href={DSP_URL}>Dataspace Protocol</Src>: the hub&apos;s own checks (
+    <RepoFile path="scripts/run-ehds-dataspace-checks.sh" lines="L5-L9">
+      run-ehds-dataspace-checks.sh
+    </RepoFile>
+    ), not the <Src href={DSP_TCK_URL}>Eclipse DSP TCK</Src>
+  </>
+);
+const DCP_CHECKS: ReactNode = (
+  <>
+    <Src href={DCP_URL}>Decentralised Claims</Src>: the hub&apos;s own checks (
+    <RepoFile path="scripts/run-ehds-identity-checks.sh" lines="L5-L9">
+      run-ehds-identity-checks.sh
+    </RepoFile>
+    ), not the <Src href={DCP_TCK_URL}>Eclipse DCP TCK</Src>
+  </>
+);
+const EHDS_CHECKS: ReactNode = (
+  <>
+    <Ehds art={53} /> purposes, <Ehds art={71} /> opt-out, HealthDCAT-AP,
+    EEHRxF, OMOP (
+    <RepoFile path="scripts/run-ehds-tests.sh">run-ehds-tests.sh</RepoFile>)
+  </>
+);
+
+const SUITE_NAMES: Record<string, [string, ReactNode]> = {
+  "dsp-tck-results": ["DSP 2025-1 checks", DSP_CHECKS],
+  "dcp-compliance-results": ["DCP v1.0 checks", DCP_CHECKS],
+  "ehds-compliance-results": ["EHDS Domain", EHDS_CHECKS],
   "bruno-api-results": ["API collection (CI)", "Bruno, persona folders"],
   "bruno-api-azure-results": ["API collection (Azure)", "Bruno, ehds.mabu.red"],
+  "dsp-azure-results": ["DSP 2025-1 checks (Azure)", DSP_CHECKS],
+  "dcp-azure-results": ["DCP v1.0 checks (Azure)", DCP_CHECKS],
+  "ehds-azure-results": ["EHDS Domain (Azure)", EHDS_CHECKS],
 };
 
 const complianceSuites = Object.entries(facts.complianceFloors).map(
@@ -174,9 +594,9 @@ interface FutureGate {
   priority: number;
   title: string;
   icon: React.ElementType;
-  description: string;
-  standard: string;
-  rationale: string;
+  description: ReactNode;
+  standard: ReactNode;
+  rationale: ReactNode;
   effort: string;
 }
 
@@ -185,109 +605,416 @@ const futureGates: FutureGate[] = [
     priority: 1,
     title: "Enforce Coverage Thresholds",
     icon: FlaskConical,
-    description: `Minimum coverage thresholds in vitest.config.ts: ${facts.coverageThresholds.statements}% statements, ${facts.coverageThresholds.branches}% branches, ${facts.coverageThresholds.functions}% functions, ${facts.coverageThresholds.lines}% lines. Vitest fails if coverage drops below.`,
-    standard: "BSI C5 DEV-03",
+    description: (
+      <>
+        Minimum coverage thresholds in{" "}
+        <RepoFile path="ui/vitest.config.ts" lines="L36-L41">
+          vitest.config.ts
+        </RepoFile>
+        : {facts.coverageThresholds.statements}% statements,{" "}
+        {facts.coverageThresholds.branches}% branches,{" "}
+        {facts.coverageThresholds.functions}% functions,{" "}
+        {facts.coverageThresholds.lines}% lines. Vitest fails if coverage drops
+        below.
+      </>
+    ),
+    standard: <C5 id="DEV-06" />,
     rationale:
       "Enforcement prevents silent regression; raise a floor whenever coverage rises.",
-    effort: "Done — vitest.config.ts",
+    effort: "Done: vitest.config.ts",
   },
   {
     priority: 2,
     title: "Mutation Testing",
     icon: FlaskConical,
-    description:
-      "Add Stryker Mutator to measure test effectiveness. Target mutation score > 60%.",
-    standard: "OWASP Testing Guide v4.2",
+    description: (
+      <>
+        Add <Src href="https://stryker-mutator.io/">Stryker Mutator</Src> to
+        measure test effectiveness. Target mutation score &gt; 60%.
+      </>
+    ),
+    standard: <C5 id="DEV-06" />,
     rationale:
       "Line coverage does not guarantee tests catch bugs. Mutation testing verifies tests detect real defects.",
-    effort: "Medium — new tool + CI job",
+    effort: "Medium: new tool + CI job",
   },
   {
     priority: 3,
     title: "Licence Compliance Scanning",
     icon: Scale,
-    description:
-      "license-checker in CI with allowlist: MIT, Apache-2.0, ISC, BSD-2/3-Clause, 0BSD, CC0-1.0, CC-BY-4.0. Blocks build on copyleft violations.",
-    standard: "EU CRA Art. 13, BSI C5 OPS-04, SIMPL-Open",
+    description: (
+      <>
+        license-checker-rseidelsohn in CI with an allowlist (
+        <RepoFile path=".github/workflows/test.yml" lines="L559-L565">
+          test.yml
+        </RepoFile>
+        ): MIT, Apache-2.0, ISC, BSD-2/3-Clause, 0BSD, CC0-1.0, CC-BY-4.0,
+        Unlicense, Python-2.0, BlueOak-1.0.0, LGPL-3.0-or-later. The job fails
+        on any production dependency under another licence.
+      </>
+    ),
+    standard: "No C5 criterion or CRA article requires it",
     rationale:
-      "EU CRA and SIMPL-Open require licence transparency. EUPL compatibility must be verified for all transitive dependencies.",
-    effort: "Done — implemented in test.yml",
+      "Neither the CRA nor BSI C5 asks for a licence check. It keeps the dependencies compatible with the hub's Apache-2.0 licence.",
+    effort: "Done: implemented in test.yml",
   },
   {
     priority: 4,
     title: "API Contract Testing",
     icon: FileCheck,
-    description: `scripts/check-api-spec-drift.py already blocks any new route missing from openapi.yaml (${facts.openapi.operations} operations documented). Next: validate response shapes against the spec with swagger-parser or Prism.`,
-    standard: "DSP 2025-1 §4.2",
+    description: (
+      <>
+        <RepoFile path="scripts/check-api-spec-drift.py" /> already blocks any
+        new route missing from openapi.yaml ({facts.openapi.operations}{" "}
+        operations documented). Next: validate response shapes against the spec
+        with swagger-parser or Prism.
+      </>
+    ),
+    standard: <Src href={OPENAPI_URL}>OpenAPI {facts.openapi.version}</Src>,
     rationale:
       "No formal schema enforces response shapes. Contract tests prevent frontend/backend drift.",
-    effort: "Partly done — spec drift ratchet in the PR Gate",
+    effort: "Partly done: spec drift ratchet in the PR Gate",
   },
   {
     priority: 5,
     title: "SBOM Generation",
     icon: Boxes,
-    description:
-      "CycloneDX 1.5 SBOM generated on every CI run for UI and Neo4j Proxy. Uploaded as 90-day artifact. Required by EU CRA Art. 13(5) and critical for SIMPL-Open supply chain transparency.",
-    standard: "EU CRA Art. 13, NTIA SBOM, SIMPL-Open",
-    rationale:
-      "Supply chain attacks (XZ Utils, Trivy compromise) make SBOMs non-negotiable. SIMPL-Open must provide SBOMs for downstream consumers. EU CRA mandates machine-readable SBOMs by 2027.",
-    effort: "Done — implemented in test.yml",
+    description: (
+      <>
+        <Src href={CYCLONEDX_15_URL}>CycloneDX 1.5</Src> SBOM generated on every
+        CI run for UI and Neo4j Proxy, uploaded as a 90-day artifact (
+        <RepoFile path=".github/workflows/test.yml" lines="L512-L531">
+          test.yml
+        </RepoFile>
+        ). The bills committed in{" "}
+        <RepoFile path="docs/sbom/README.md">docs/sbom</RepoFile> are{" "}
+        <Src href={CYCLONEDX_17_URL}>CycloneDX 1.7</Src>, made by syft (
+        <RepoFile path="scripts/security/generate-sbom.sh" lines="L68">
+          generate-sbom.sh
+        </RepoFile>
+        ); the iPhone app&apos;s is 1.5. The CRA asks for a software bill of
+        materials in a commonly used, machine-readable format (
+        <Cra anchor="anx_I">Annex I, Part II (1)</Cra>); the Commission may fix
+        its format by implementing act (<Cra anchor="013.024">Art. 13(24)</Cra>
+        ).
+      </>
+    ),
+    standard: (
+      <List
+        items={[
+          <Cra key="cra" anchor="anx_I">
+            CRA Annex I, Part II (1)
+          </Cra>,
+          <Src key="ntia" href={NTIA_SBOM_URL}>
+            NTIA SBOM minimum elements
+          </Src>,
+          <C5 key="c5" id="AM-01" />,
+        ]}
+      />
+    ),
+    rationale: (
+      <>
+        Supply chain attacks (XZ Utils,{" "}
+        <Src href="https://www.cve.org/CVERecord?id=CVE-2024-3094">
+          CVE-2024-3094
+        </Src>
+        ; the Trivy compromise,{" "}
+        <Src href="https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23">
+          GHSA-69fq-xp46-6x23
+        </Src>
+        ) make SBOMs non-negotiable. The CRA&apos;s Annex I applies from 11
+        December 2027 (<Cra anchor="071.002">Art. 71(2)</Cra>).
+      </>
+    ),
+    effort: "Done: implemented in test.yml",
   },
   {
     priority: 6,
     title: "Performance Regression Testing",
     icon: Gauge,
-    description:
-      "Lighthouse CI with Core Web Vitals budgets: LCP < 4s (error), CLS < 0.1 (error), TBT < 300ms (warn), bundle < 500 KB (warn). Runs on 4 key pages.",
-    standard: "WCAG 2.2 SC 2.2.1, Core Web Vitals",
-    rationale:
-      "Healthcare professionals use the platform under time pressure. Performance regressions now blocked in CI.",
-    effort: "Done — Lighthouse CI in test.yml",
+    description: (
+      <>
+        Lighthouse CI with Core Web Vitals budgets: LCP &lt; 4s (error), CLS
+        &lt; 0.1 (error), TBT &lt; 300ms (warn), script size &lt; 500 KB (warn)
+        (
+        <RepoFile path=".github/workflows/nightly.yml" lines="L306-L310">
+          nightly.yml
+        </RepoFile>
+        ). Runs on 4 key pages.
+      </>
+    ),
+    standard: <Src href={CORE_WEB_VITALS_URL}>Core Web Vitals</Src>,
+    rationale: (
+      <>
+        Healthcare professionals use the platform under time pressure. A budget
+        error turns the nightly run red, which opens an issue; it does not block
+        a merge (<Src href={ADR_074_URL}>ADR-074</Src>).
+      </>
+    ),
+    effort: "Done: Lighthouse CI in nightly.yml",
   },
   {
     priority: 7,
     title: "Runtime ODRL Policy Enforcement",
     icon: Lock,
     description:
-      "Implement ODRL engine — validate API responses respect the caller's permitted datasets and temporal limits.",
-    standard: "EHDS Art. 44, ODRL 2.2 §3",
+      "Implement ODRL engine: validate API responses respect the caller's permitted datasets and temporal limits.",
+    standard: (
+      <List
+        items={[
+          <Ehds key="ehds" art={66} />,
+          <Src key="odrl" href={ODRL_MODEL_URL}>
+            ODRL 2.2 §2
+          </Src>,
+        ]}
+      />
+    ),
     rationale:
       "Currently ODRL policies are decorative. Any authenticated user can query any dataset. This is the largest EHDS compliance gap.",
-    effort: "High — new engine + tests",
+    effort: "High: new engine + tests",
   },
   {
     priority: 8,
     title: "WCAG Blocking Gate",
     icon: Accessibility,
-    description:
-      "WCAG 2.2 AA audit promoted to blocking gate — zero-violation budget enforced. Build fails on accessibility regressions.",
-    standard: "EN 301 549, EU Directive 2016/2102",
+    description: (
+      <>
+        WCAG 2.2 AA audit with a zero-violation budget. Since it moved to the
+        nightly run (<Src href={ADR_074_URL}>ADR-074</Src>) it runs with
+        continue-on-error (
+        <RepoFile path=".github/workflows/nightly.yml" lines="L197-L199">
+          nightly.yml
+        </RepoFile>
+        ), so a violation shows in the report but fails nothing.
+      </>
+    ),
+    standard: (
+      <List
+        items={[
+          <Src key="en" href={EN_301_549_URL}>
+            EN 301 549
+          </Src>,
+          <Src key="wad" href={WAD_URL}>
+            Directive (EU) 2016/2102
+          </Src>,
+        ]}
+      />
+    ),
     rationale:
-      "Current state is zero violations. Now enforced — any new component that introduces violations will block the build.",
-    effort: "Done — removed continue-on-error",
+      "The audit found zero violations when it last blocked. To block again it needs a step that fails the nightly job.",
+    effort: "Partly done: runs nightly, does not block",
   },
   {
     priority: 9,
     title: "IaC Policy Enforcement",
     icon: Server,
-    description:
-      "Kubescape promoted to blocking on critical findings (--severity-threshold critical). NSA and CIS frameworks enforced.",
-    standard: "BSI C5 OPS-01, NSA K8s Guide",
+    description: (
+      <>
+        Kubescape blocks on critical findings (--severity-threshold critical)
+        under the NSA and CIS frameworks (
+        <RepoFile path=".github/workflows/test.yml" lines="L419-L445">
+          test.yml
+        </RepoFile>
+        ).
+      </>
+    ),
+    standard: (
+      <List
+        items={[
+          <C5 key="c5" id="OPS-23" />,
+          <Src key="nsa" href={NSA_K8S_URL}>
+            NSA/CISA Kubernetes Hardening Guide
+          </Src>,
+        ]}
+      />
+    ),
     rationale:
       "K8s manifests define production topology. Critical security findings now block the build.",
-    effort: "Done — blocking in test.yml",
+    effort: "Done: blocking in test.yml",
   },
   {
     priority: 10,
     title: "Dependency Freshness",
     icon: RefreshCw,
-    description:
-      "Renovate Bot configured: auto-merge patches, weekly PRs for minor, manual review for major. Security updates bypass schedule.",
-    standard: "OWASP A06, EU CRA Art. 14",
-    rationale:
-      "Automated dependency updates prevent CVE accumulation. Supply chain freshness is critical for CRA compliance.",
-    effort: "Done — renovate.json",
+    description: (
+      <>
+        Renovate Bot configured (
+        <RepoFile path="renovate.json" lines="L5-L42">
+          renovate.json
+        </RepoFile>
+        ): auto-merge patches, weekly PRs for minor, manual review for major.
+        Security updates bypass schedule.
+      </>
+    ),
+    standard: (
+      <List
+        items={[
+          <Owasp key="o" id="A06" />,
+          <C5 key="c5" id="OPS-22" />,
+          <Cra key="cra" anchor="anx_I">
+            CRA Annex I, Part II (2)
+          </Cra>,
+        ]}
+      />
+    ),
+    rationale: (
+      <>
+        Automated dependency updates prevent CVE accumulation. The CRA asks
+        manufacturers to remediate vulnerabilities without delay, including by
+        security updates (<Cra anchor="anx_I">Annex I, Part II (2)</Cra>).
+      </>
+    ),
+    effort: "Done: renovate.json",
+  },
+];
+
+/** The compliance mapping: each cell names the criterion and links it. */
+const DASH = "—";
+const complianceMatrix: {
+  gate: string;
+  c5: ReactNode;
+  owasp: ReactNode;
+  cra: ReactNode;
+  ehds: ReactNode;
+  wcag: ReactNode;
+}[] = [
+  {
+    gate: "TypeScript strict",
+    c5: <C5 id="DEV-01" />,
+    owasp: DASH,
+    cra: DASH,
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "ESLint",
+    c5: <C5 id="DEV-06" />,
+    owasp: DASH,
+    cra: DASH,
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "Unit tests + coverage thresholds",
+    c5: <C5 id="DEV-06" />,
+    owasp: DASH,
+    cra: DASH,
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "Secret scan (Gitleaks)",
+    c5: <C5 id="CRY-04" />,
+    owasp: <Owasp id="A07" />,
+    cra: DASH,
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "Dependency audit",
+    c5: <C5 id="PSS-02" />,
+    owasp: <Owasp id="A06" />,
+    cra: <Cra anchor="anx_I">Annex I, Part II (1)</Cra>,
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "Trivy vuln scan",
+    c5: <C5 id="OPS-22" />,
+    owasp: <Owasp id="A06" />,
+    cra: <Cra anchor="anx_I">Annex I, Part II (1)</Cra>,
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "Security headers",
+    c5: <C5 id="OPS-23" />,
+    owasp: <Owasp id="A05" />,
+    cra: DASH,
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "WCAG 2.2 AA (nightly, reports)",
+    c5: DASH,
+    owasp: DASH,
+    cra: DASH,
+    ehds: DASH,
+    wcag: <Src href={WCAG22_URL}>2.2 AA</Src>,
+  },
+  {
+    gate: "DSP 2025-1 checks (own, not the TCK)",
+    c5: DASH,
+    owasp: DASH,
+    cra: DASH,
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "DCP v1.0 checks (own, not the TCK)",
+    c5: DASH,
+    owasp: DASH,
+    cra: DASH,
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "EHDS domain tests",
+    c5: DASH,
+    owasp: DASH,
+    cra: DASH,
+    ehds: (
+      <List items={[<Ehds key="53" art={53} />, <Ehds key="71" art={71} />]} />
+    ),
+    wcag: DASH,
+  },
+  {
+    gate: "SBOM (CycloneDX 1.5 in CI)",
+    c5: <C5 id="AM-01" />,
+    owasp: <Owasp id="A06" />,
+    cra: <Cra anchor="anx_I">Annex I, Part II (1)</Cra>,
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "Licence compliance",
+    c5: "No C5 criterion",
+    owasp: DASH,
+    cra: "No CRA article",
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "Lighthouse perf budget",
+    c5: DASH,
+    owasp: DASH,
+    cra: DASH,
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "Kubescape (blocking)",
+    c5: <C5 id="OPS-23" />,
+    owasp: DASH,
+    cra: DASH,
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "Renovate freshness",
+    c5: <C5 id="OPS-22" />,
+    owasp: <Owasp id="A06" />,
+    cra: <Cra anchor="anx_I">Annex I, Part II (2)</Cra>,
+    ehds: DASH,
+    wcag: DASH,
+  },
+  {
+    gate: "ODRL enforcement (planned)",
+    c5: DASH,
+    owasp: <Owasp id="A01" />,
+    cra: DASH,
+    ehds: <Ehds art={66} />,
+    wcag: DASH,
   },
 ];
 
@@ -345,8 +1072,13 @@ export default function QualityGatesPage() {
       </div>
       <DocsLastUpdated page="/docs/developer/quality-gates" />
       <p className="text-(--text-secondary) mb-8">
-        Every check enforced from developer workstation to production deployment
-        — aligned with BSI C5, OWASP Top 10, EHDS regulation, and WCAG 2.2 AA.
+        Every check enforced from developer workstation to production
+        deployment, mapped to <Src href={C5_URL}>BSI C5:2020</Src>, the{" "}
+        <Src href={OWASP_TOP10_2021}>OWASP Top 10 (2021)</Src>, the{" "}
+        <Src href={CRA_URL}>Cyber Resilience Act</Src>, the{" "}
+        <Src href={EHDS_URL}>EHDS regulation</Src> and{" "}
+        <Src href={WCAG22_URL}>WCAG 2.2 AA</Src> where a criterion fits, and
+        left unmapped where none does.
       </p>
 
       {/* TOC */}
@@ -390,11 +1122,11 @@ export default function QualityGatesPage() {
         </h2>
         <p className="text-sm text-(--text-secondary) mb-4">
           The {facts.preCommitHooks.length} hooks configured in{" "}
-          <code className="text-(--accent)">.pre-commit-config.yaml</code>, in
-          the order they run. They run before every <code>git commit</code>, and
-          the PR Gate runs them again on the pull request&apos;s diff. Hooks
-          that rewrite a file (Prettier, end-of-file) fail the commit; stage the
-          file again and commit.
+          <RepoFile path=".pre-commit-config.yaml" />, in the order they run.
+          They run before every <code>git commit</code>, and the PR Gate runs
+          them again on the pull request&apos;s diff. Hooks that rewrite a file
+          (Prettier, end-of-file) fail the commit; stage the file again and
+          commit.
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-sm border border-(--border) rounded-lg">
@@ -437,14 +1169,23 @@ export default function QualityGatesPage() {
           <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-1">Unit Tests</h4>
             <p className="text-xs text-(--text-secondary) mb-2">
-              <code>vitest run --bail 1</code> — stops on first failure
+              <code>vitest run --bail 1</code>: stops on first failure (
+              <RepoFile path=".pre-commit-config.yaml" lines="L86-L92">
+                .pre-commit-config.yaml
+              </RepoFile>
+              )
             </p>
             <Badge blocking={true} />
           </div>
           <div className="border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-1">Dependency Audit</h4>
             <p className="text-xs text-(--text-secondary) mb-2">
-              <code>npm audit --audit-level=high</code> — HIGH + CRITICAL CVEs
+              <code>scripts/check-npm-audit.py ui --omit=dev</code>: npm audit,
+              HIGH and CRITICAL fail unless excepted with an expiry (
+              <RepoFile path=".pre-commit-config.yaml" lines="L287-L292">
+                .pre-commit-config.yaml
+              </RepoFile>
+              )
             </p>
             <Badge blocking={true} />
           </div>
@@ -466,7 +1207,11 @@ export default function QualityGatesPage() {
           >
             .github/workflows/test.yml
           </a>{" "}
-          — {facts.workflowJobs["test.yml"].length} jobs on every push.{" "}
+          runs {facts.workflowJobs["test.yml"].length} jobs on every push. The
+          other rows run in the PR Gate, CodeQL, the security scan and the
+          nightly run (<Src href={ADR_074_URL}>ADR-074</Src>); each row links
+          the lines that run it. C5 criteria link to their page in the BSI
+          C5:2020 catalogue; OWASP numbers are the 2021 edition.{" "}
           <a
             href={CI_WORKFLOW_URL}
             target="_blank"
@@ -517,16 +1262,41 @@ export default function QualityGatesPage() {
           <h4 className="font-semibold text-sm mb-2">Supply-Chain Hardening</h4>
           <ul className="text-xs text-(--text-secondary) space-y-1 list-disc ml-4">
             <li>
-              Gitleaks and Trivy binaries pinned to exact versions with SHA-256
-              checksum verification
+              Trivy (
+              <RepoFile path=".github/workflows/test.yml" lines="L345-L354">
+                test.yml
+              </RepoFile>
+              ) and the nightly gitleaks (
+              <RepoFile path=".github/workflows/nightly.yml" lines="L341-L351">
+                nightly.yml
+              </RepoFile>
+              ) are pinned to exact versions and checked against their SHA-256
+              checksums; the PR Gate pins its gitleaks version without a
+              checksum check (
+              <RepoFile path=".github/workflows/pr-gate.yml" lines="L53-L58">
+                pr-gate.yml
+              </RepoFile>
+              )
             </li>
             <li>
-              Trivy v0.69.3 used explicitly — versions 0.69.4–0.69.6 were
-              compromised (CVE-2026-33634)
+              <Src href={release("aquasecurity/trivy", "v0.69.3")}>
+                Trivy v0.69.3
+              </Src>{" "}
+              used explicitly: versions 0.69.4 to 0.69.6 were compromised (
+              <Src href="https://www.cve.org/CVERecord?id=CVE-2026-33634">
+                CVE-2026-33634
+              </Src>
+              ,{" "}
+              <Src href="https://github.com/aquasecurity/trivy/security/advisories/GHSA-69fq-xp46-6x23">
+                GHSA-69fq-xp46-6x23
+              </Src>
+              )
             </li>
             <li>
-              Two dev-only secrets allowlisted in <code>.gitleaksignore</code>{" "}
-              (JAD stack in-memory credentials)
+              Ten fingerprints allowlisted in{" "}
+              <RepoFile path=".gitleaksignore" />, each with the reason: local
+              dev-stack credentials, false positives, and one dead session token
+              kept in history
             </li>
           </ul>
         </div>
@@ -536,19 +1306,33 @@ export default function QualityGatesPage() {
             Security Headers (Runtime)
           </h4>
           <p className="text-xs text-(--text-secondary) mb-2">
-            Configured in <code>next.config.js</code> (BSI C5 DEV-07 / OWASP
-            A05):
+            Set in{" "}
+            <RepoFile path="ui/next.config.js" lines="L76-L123">
+              next.config.js
+            </RepoFile>
+            ; the Content-Security-Policy is built per request, with a nonce, in{" "}
+            <RepoFile path="ui/src/middleware.ts" lines="L92-L98">
+              middleware.ts
+            </RepoFile>
+            . Not set in the static GitHub Pages build, which has no server (
+            <C5 id="OPS-23" /> system hardening, <Owasp id="A05" /> Security
+            Misconfiguration):
           </p>
           <div className="font-mono text-xs text-(--text-secondary) space-y-0.5">
             <div>X-Frame-Options: DENY</div>
             <div>X-Content-Type-Options: nosniff</div>
             <div>Referrer-Policy: strict-origin-when-cross-origin</div>
             <div>
-              Permissions-Policy: camera=(), microphone=(), geolocation=()
+              Permissions-Policy: camera=(), microphone=(), geolocation=(),
+              interest-cohort=()
             </div>
             <div>
-              Content-Security-Policy: default-src &apos;self&apos; + scoped
-              allowlist
+              Strict-Transport-Security: max-age=63072000; includeSubDomains;
+              preload
+            </div>
+            <div>
+              Content-Security-Policy: default-src &apos;self&apos;; script-src
+              &apos;self&apos; with a per-request nonce
             </div>
           </div>
         </div>
@@ -560,10 +1344,20 @@ export default function QualityGatesPage() {
           Stage 4 — Protocol Compliance
         </h2>
         <p className="text-sm text-(--text-secondary) mb-4">
-          Weekly and on pushes to main. Each suite must stay at or above the
-          floor recorded in <code>scripts/compliance-baseline.json</code>; a
-          floor is raised when a suite improves and never lowered without a
-          reason. Workflow:{" "}
+          Once a night, when main has changed (
+          <RepoFile path=".github/workflows/nightly.yml" lines="L376-L385">
+            nightly.yml
+          </RepoFile>
+          , <Src href={ADR_074_URL}>ADR-074</Src>), and on manual dispatch. Each
+          suite must stay at or above the floor recorded in{" "}
+          <RepoFile path="scripts/compliance-baseline.json" lines="L16-L59">
+            scripts/compliance-baseline.json
+          </RepoFile>
+          ; a floor is raised when a suite improves and never lowered without a
+          reason. The DSP and DCP suites are the hub&apos;s own checks of its
+          reading of the specifications, not the Eclipse TCKs; neither TCK has
+          run against the hub yet (<Src href={`${ISSUES}338`}>#338</Src>).
+          Workflow:{" "}
           <a
             href={COMPLIANCE_WORKFLOW_URL}
             target="_blank"
@@ -607,17 +1401,37 @@ export default function QualityGatesPage() {
             Infrastructure Requirements
           </h4>
           <p className="text-xs text-(--text-secondary) mb-2">
-            Protocol compliance tests require the full JAD stack (
-            {facts.composeServices["docker-compose.jad.yml"].length} services, 8
-            GB RAM). In CI, the workflow starts JAD infrastructure with graceful
-            fallback — tests produce results only when the controlplane is
-            healthy.
+            Protocol compliance tests require the full{" "}
+            <Src href={JAD_URL}>JAD</Src> stack (
+            <RepoFile path="docker-compose.jad.yml">
+              {facts.composeServices["docker-compose.jad.yml"].length} services
+            </RepoFile>
+            , 8 GB RAM), on EDC 1.0 (<Src href={ADR_078_URL}>ADR-078</Src>). In
+            CI, the workflow starts JAD infrastructure with graceful fallback:
+            tests produce results only when the controlplane is healthy.
           </p>
           <p className="text-xs text-(--text-secondary)">
             Local execution:{" "}
-            <code className="text-(--accent)">./scripts/run-dsp-tck.sh</code>,{" "}
-            <code className="text-(--accent)">./scripts/run-dcp-tests.sh</code>,{" "}
-            <code className="text-(--accent)">./scripts/run-ehds-tests.sh</code>
+            <RepoFile path="scripts/run-ehds-dataspace-checks.sh">
+              ./scripts/run-ehds-dataspace-checks.sh
+            </RepoFile>
+            ,{" "}
+            <RepoFile path="scripts/run-ehds-identity-checks.sh">
+              ./scripts/run-ehds-identity-checks.sh
+            </RepoFile>
+            ,{" "}
+            <RepoFile path="scripts/run-ehds-tests.sh">
+              ./scripts/run-ehds-tests.sh
+            </RepoFile>
+            . The old names{" "}
+            <RepoFile path="scripts/run-dsp-tck.sh" lines="L2-L5">
+              run-dsp-tck.sh
+            </RepoFile>{" "}
+            and{" "}
+            <RepoFile path="scripts/run-dcp-tests.sh" lines="L2-L5">
+              run-dcp-tests.sh
+            </RepoFile>{" "}
+            are shims for the first two; despite the name, neither is a TCK.
           </p>
         </div>
       </section>
@@ -628,9 +1442,9 @@ export default function QualityGatesPage() {
           Coverage Floors
         </h2>
         <p className="text-sm text-(--text-secondary) mb-4">
-          Enforced by <code>ui/vitest.config.ts</code>: the UI suite fails when
-          coverage drops below these. The measured numbers are in the published
-          test report.
+          Enforced by <RepoFile path="ui/vitest.config.ts" lines="L36-L41" />:
+          the UI suite fails when coverage drops below these. The measured
+          numbers are in the published test report.
         </p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           {coverageData.map((c) => (
@@ -733,10 +1547,13 @@ export default function QualityGatesPage() {
                   Quality Gate
                 </th>
                 <th className="px-3 py-2 text-left text-(--text-primary)">
-                  BSI C5
+                  BSI C5:2020
                 </th>
                 <th className="px-3 py-2 text-left text-(--text-primary)">
-                  OWASP
+                  OWASP 2021
+                </th>
+                <th className="px-3 py-2 text-left text-(--text-primary)">
+                  CRA
                 </th>
                 <th className="px-3 py-2 text-left text-(--text-primary)">
                   EHDS
@@ -747,31 +1564,14 @@ export default function QualityGatesPage() {
               </tr>
             </thead>
             <tbody className="text-(--text-secondary) text-xs">
-              {[
-                ["TypeScript strict", "DEV-01", "—", "—", "—"],
-                ["ESLint", "DEV-02", "A03", "—", "—"],
-                ["Unit tests + coverage thresholds", "DEV-03", "—", "—", "—"],
-                ["Secret scan (Gitleaks)", "DEV-08", "A07", "—", "—"],
-                ["Dependency audit", "DEV-05", "A06", "—", "—"],
-                ["Trivy vuln scan", "DEV-05", "A06", "—", "—"],
-                ["Security headers", "DEV-07", "A05", "—", "—"],
-                ["WCAG 2.2 AA (blocking)", "—", "—", "—", "2.2 AA"],
-                ["DSP 2025-1 TCK", "—", "—", "Art. 50", "—"],
-                ["DCP v1.0 compliance", "—", "—", "Art. 50", "—"],
-                ["EHDS domain tests", "—", "—", "Art. 3–51", "—"],
-                ["SBOM (CycloneDX 1.5)", "OPS-04", "A06", "Art. 50", "—"],
-                ["Licence compliance", "OPS-04", "—", "Art. 50", "—"],
-                ["Lighthouse perf budget", "—", "—", "—", "2.2 SC2.2.1"],
-                ["Kubescape (blocking)", "OPS-01", "—", "—", "—"],
-                ["Renovate freshness", "DEV-05", "A06", "—", "—"],
-                ["ODRL enforcement (planned)", "—", "A01", "Art. 44", "—"],
-              ].map(([gate, bsi, owasp, ehds, wcag]) => (
-                <tr key={gate} className="border-t border-(--border)">
-                  <td className="px-3 py-2 font-semibold">{gate}</td>
-                  <td className="px-3 py-2">{bsi}</td>
-                  <td className="px-3 py-2">{owasp}</td>
-                  <td className="px-3 py-2">{ehds}</td>
-                  <td className="px-3 py-2">{wcag}</td>
+              {complianceMatrix.map((row) => (
+                <tr key={row.gate} className="border-t border-(--border)">
+                  <td className="px-3 py-2 font-semibold">{row.gate}</td>
+                  <td className="px-3 py-2">{row.c5}</td>
+                  <td className="px-3 py-2">{row.owasp}</td>
+                  <td className="px-3 py-2">{row.cra}</td>
+                  <td className="px-3 py-2">{row.ehds}</td>
+                  <td className="px-3 py-2">{row.wcag}</td>
                 </tr>
               ))}
             </tbody>

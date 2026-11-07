@@ -167,9 +167,7 @@ describe("the docs pages' texts are in their dictionaries", () => {
         ...toc,
         ...purposes,
         ...statuses,
-        ...[...new Set(layers)].filter(
-          (l) => !["EDC-V / DCore", "CFM"].includes(l),
-        ),
+        ...[...new Set(layers)].filter((l) => !["EDC", "CFM"].includes(l)),
         "All services",
         "Next.js UI (static export)",
       ]),
