@@ -79,7 +79,7 @@ function budget(perUser: string, perParticipant: string, fallback: number) {
 const countedAlready = (_req: Request, res: Response) => isRedispatched(res);
 
 /** General limit: 100 requests per minute per user, 1,000 per participant */
-const generalLimiter = rateLimit({
+export const generalLimiter = rateLimit({
   windowMs: RATE_LIMIT_WINDOW_MS,
   max: budget("RATE_LIMIT_MAX", "RATE_LIMIT_PARTICIPANT_MAX", 100),
   keyGenerator: rateLimitKey,
@@ -116,8 +116,15 @@ export const auditLimiter = rateLimit({
   message: { error: "Audit rate limit exceeded." },
 });
 
+/** Pull transfers on EDC 1.0 (routes/dataspace.ts). */
+export const PULL_PATH = /^\/dataspace\/data(\/.*)?$/;
+
+// The pull route applies the general limit itself, first in its chain, so that
+// it visibly guards the token check; it is not counted here as well.
 app.use((req: Request, res: Response, next: NextFunction) =>
-  req.path === "/audit/dsp" ? next() : generalLimiter(req, res, next),
+  req.path === "/audit/dsp" || PULL_PATH.test(req.path)
+    ? next()
+    : generalLimiter(req, res, next),
 );
 
 // The audit recorder reports how much left the proxy (Art. 73(1)(e) logs say

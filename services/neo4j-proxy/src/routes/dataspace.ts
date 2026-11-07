@@ -1,5 +1,5 @@
 import { type Request, type Response, type NextFunction } from "express";
-import { app, heavyLimiter } from "../app.js";
+import { app, generalLimiter, heavyLimiter, PULL_PATH } from "../app.js";
 import { logger } from "../logger.js";
 import { DATASET_ROUTES, verifyDataspaceToken } from "../dataspace-token.js";
 import { markRedispatched } from "../redispatch.js";
@@ -12,7 +12,8 @@ import { markRedispatched } from "../redispatch.js";
 
 type DatasetRoute = (typeof DATASET_ROUTES)[string];
 
-// The token is read before the heavy limit: the consumer it names acts for its
+// The general limit, by caller, comes first and guards the token check. The
+// token is read before the heavy limit: the consumer it names acts for its
 // organisation, so a pull counts against that participant's budget rather than
 // the address it came from (every pull from the hub comes from a UI replica).
 async function authorise(req: Request, res: Response, next: NextFunction) {
@@ -68,4 +69,4 @@ function handOn(req: Request, res: Response, next: NextFunction) {
   ).handle(req, res, next);
 }
 
-app.all(/^\/dataspace\/data(\/.*)?$/, authorise, heavyLimiter, handOn);
+app.all(PULL_PATH, generalLimiter, authorise, heavyLimiter, handOn);

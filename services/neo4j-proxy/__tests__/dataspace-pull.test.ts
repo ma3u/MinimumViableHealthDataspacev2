@@ -101,4 +101,18 @@ describe("a pull through /dataspace/data", () => {
       "Dataset healthdcatap-catalog is read with GET",
     );
   });
+
+  it("limits a caller without a token before it checks one", async () => {
+    for (let i = 1; i <= 4; i++) {
+      const res = await request
+        .get("/dataspace/data")
+        .set("X-Forwarded-For", "10.0.5.1");
+      expect(res.status, `request ${i}`).toBe(401);
+    }
+    const fifth = await request
+      .get("/dataspace/data")
+      .set("X-Forwarded-For", "10.0.5.1");
+    expect(fifth.status).toBe(429);
+    expect(fifth.body.error).toMatch(/^Too many requests/);
+  });
 });
