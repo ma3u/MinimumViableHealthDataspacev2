@@ -26,18 +26,22 @@ interface ServiceInfo {
   purpose: string;
   vars?: Record<string, string | number>;
   layer: string;
+  /** Where the name comes from: a release tag or the compose definition. */
+  href: string;
 }
 
 const services: ServiceInfo[] = [
   {
-    name: "Traefik",
+    name: "Traefik v3.7",
+    href: "https://github.com/traefik/traefik/releases/tag/v3.7.0",
     port: ":80 / :8090",
     depends: "--",
     purpose: "API gateway, reverse proxy, *.localhost routing",
     layer: "Infrastructure",
   },
   {
-    name: "PostgreSQL 17",
+    name: "PostgreSQL 17.7",
+    href: "https://www.postgresql.org/docs/17/release-17-7.html",
     port: ":5432",
     depends: "--",
     purpose: "Shared database ({count} DBs: {names})",
@@ -48,29 +52,34 @@ const services: ServiceInfo[] = [
     layer: "Infrastructure",
   },
   {
-    name: "HashiCorp Vault",
+    name: "HashiCorp Vault 2.0",
+    href: "https://github.com/hashicorp/vault/releases/tag/v2.0.0",
     port: ":8200",
     depends: "--",
     purpose:
-      "Secrets store with file storage, so a restart keeps every key (since 2026-09-26; on Azure it stores in the Flexible Server, ADR-046)",
+      "Secrets store with file storage, so a restart keeps every key (since 2026-09-26; on Azure it stores in the Flexible Server, <adr46>ADR-046</adr46>)",
     layer: "Infrastructure",
   },
   {
-    name: "NATS JetStream",
+    name: "NATS JetStream 2.14.3",
+    href: "https://github.com/nats-io/nats-server/releases/tag/v2.14.3",
     port: ":4222 / :8222",
     depends: "--",
-    purpose: "Async event mesh for DSP protocol events",
+    purpose: "Async event mesh for <dsp>DSP</dsp> protocol events",
     layer: "Infrastructure",
   },
   {
-    name: "Keycloak",
+    name: "Keycloak 26.8.0",
+    href: "https://github.com/keycloak/keycloak/releases/tag/26.8.0",
     port: ":8080 / :9000",
     depends: "PostgreSQL",
-    purpose: "OIDC SSO provider, realm edcv, 8 demo users across 5 roles",
+    purpose:
+      "<oidc>OIDC</oidc> SSO provider, realm edcv: <realm>8 demo users and a service account</realm>, 6 roles",
     layer: "Infrastructure",
   },
   {
     name: "vault-bootstrap",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L251",
     port: "--",
     depends: "Vault, Keycloak",
     purpose: "Init sidecar: seeds Vault secrets and Keycloak config",
@@ -78,6 +87,7 @@ const services: ServiceInfo[] = [
   },
   {
     name: "vault-unseal",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L138",
     port: "--",
     depends: "Vault",
     purpose:
@@ -85,107 +95,131 @@ const services: ServiceInfo[] = [
     layer: "Infrastructure",
   },
   {
-    name: "siglet",
+    name: "siglet 0.1.6",
+    href: "https://github.com/eclipse-dataplane-core/dsdk-facet-rs/releases/tag/siglet-v0.1.6",
     port: "--",
     depends: "Vault",
     purpose:
-      "Token signing and certificate exchange for the EDC 0.18 data planes (#97)",
-    layer: "Infrastructure",
+      "The data plane on EDC 1.0: answers the control plane's Data Plane Signaling and issues the access token; the Neo4j proxy serves the data (<adr78>ADR-078</adr78>)",
+    layer: "EDC",
   },
   {
     name: "Control Plane",
+    href: "https://github.com/eclipse-edc/Connector/releases/tag/v1.0.0-RC5",
     port: ":11003",
     depends: "PostgreSQL, Vault, NATS, Keycloak",
-    purpose: "EDC-V runtime: DSP negotiation, management API, policy engine",
-    layer: "EDC-V / DCore",
+    purpose:
+      "EDC 1.0 control plane built from <src>runtimes/edc</src>: <dsp>DSP</dsp> negotiation, management API, policy engine (<adr78>ADR-078</adr78>)",
+    layer: "EDC",
   },
   {
     name: "Data Plane FHIR",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L437",
     port: ":11002",
     depends: "PostgreSQL, Vault, Control Plane",
-    purpose: "DCore data plane for FHIR R4 resource transfer",
-    layer: "EDC-V / DCore",
+    purpose:
+      "Only with the edc018 profile: the EDC 0.18 data plane for <fhir>FHIR R4</fhir> transfers, retired with <issue927>#927</issue927>",
+    layer: "EDC",
   },
   {
     name: "Data Plane OMOP",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L516",
     port: ":11012",
     depends: "PostgreSQL, Vault, Control Plane",
-    purpose: "DCore data plane for OMOP CDM data transfer",
-    layer: "EDC-V / DCore",
+    purpose:
+      "Only with the edc018 profile: the EDC 0.18 data plane for <omop>OMOP CDM</omop> transfers, retired with <issue927>#927</issue927>",
+    layer: "EDC",
   },
   {
     name: "Identity Hub",
+    href: "https://github.com/eclipse-edc/IdentityHub/releases/tag/v1.0.0-RC5",
     port: ":11005",
     depends: "PostgreSQL, Vault, Keycloak",
-    purpose: "DCP: DID resolution, Verifiable Credential storage",
+    purpose: "<dcp>DCP</dcp>: DID resolution, Verifiable Credential storage",
     layer: "Identity",
   },
   {
     name: "Issuer Service",
+    href: "https://github.com/eclipse-edc/IdentityHub/releases/tag/v1.0.0-RC5",
     port: ":10013",
     depends: "PostgreSQL, Vault, Keycloak",
-    purpose: "VC issuance: EHDS membership, data permits, org credentials",
+    purpose:
+      "VC issuance: EHDS membership, <permit>data permits</permit>, org credentials",
     layer: "Identity",
   },
   {
     name: "Tenant Manager",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L853",
     port: ":11006",
     depends: "PostgreSQL, Keycloak",
-    purpose: "CFM: multi-tenant participant management",
+    purpose:
+      "Only with the edc018 profile: <cfm>CFM</cfm> multi-tenant participant management, retired with <issue927>#927</issue927>",
     layer: "CFM",
   },
   {
     name: "Provision Manager",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L895",
     port: ":11007",
     depends: "PostgreSQL, Keycloak, Control Plane",
-    purpose: "CFM: automated resource provisioning",
+    purpose:
+      "Only with the edc018 profile: <cfm>CFM</cfm> resource provisioning, retired with <issue927>#927</issue927>",
     layer: "CFM",
   },
   {
     name: "cfm-cp-shim",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L934",
     port: "--",
     depends: "Control Plane",
     purpose:
-      "nginx shim: the CFM agents call Management API v5alpha, EDC 0.18 serves v5beta (#181)",
+      "Only with the edc018 profile: nginx shim, the 2026-03 CFM agents call Management API v5alpha, EDC 0.18 serves v5beta (<issue181>#181</issue181>)",
     layer: "CFM",
   },
   {
     name: "cfm-keycloak-agent",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L963",
     port: "--",
     depends: "Keycloak",
-    purpose: "Background: syncs Keycloak realm configuration",
+    purpose:
+      "Only with the edc018 profile: syncs the Keycloak realm configuration",
     layer: "CFM",
   },
   {
     name: "cfm-edcv-agent",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L992",
     port: "--",
     depends: "Control Plane",
-    purpose: "Background: manages EDC-V connector lifecycle",
+    purpose:
+      "Only with the edc018 profile: manages the EDC 0.18 connector lifecycle",
     layer: "CFM",
   },
   {
     name: "cfm-registration-agent",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L1021",
     port: "--",
     depends: "Identity Hub",
-    purpose: "Background: handles participant DID registration",
+    purpose: "Only with the edc018 profile: registers participant DIDs",
     layer: "CFM",
   },
   {
     name: "cfm-onboarding-agent",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L1052",
     port: "--",
     depends: "Tenant Manager",
-    purpose: "Background: automates tenant onboarding workflows",
+    purpose: "Only with the edc018 profile: automates tenant onboarding",
     layer: "CFM",
   },
   {
-    name: "Neo4j 5",
+    name: "Neo4j 5.26.28",
+    href: "https://github.com/neo4j/neo4j/releases/tag/5.26.28",
     port: ":7474 / :7687",
     depends: "--",
-    purpose: "Knowledge graph: 5-layer model, APOC + n10s plugins",
+    purpose:
+      "Knowledge graph: 5-layer model, with the <apoc>APOC</apoc>, <apocx>APOC Extended</apocx>, <gds>Graph Data Science</gds> and <n10s>n10s</n10s> plugins",
     layer: "Application",
   },
   {
     name: "Neo4j SPE2",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.yml#L29",
     port: ":7475 / :7688",
     depends: "--",
     purpose: "Secondary graph instance (federated profile)",
@@ -193,13 +227,16 @@ const services: ServiceInfo[] = [
   },
   {
     name: "Neo4j Proxy",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L596",
     port: ":9090",
     depends: "Neo4j, Control Plane",
-    purpose: "Express bridge: FHIR/OMOP REST endpoints over Neo4j",
+    purpose:
+      "<express>Express</express> bridge: <fhir>FHIR</fhir>/<omop>OMOP</omop> REST endpoints over Neo4j",
     layer: "Application",
   },
   {
     name: "Next.js UI",
+    href: "https://github.com/vercel/next.js/releases/tag/v15.5.28",
     port: ":3000 / :3003",
     depends: "Neo4j Proxy",
     purpose:
@@ -209,13 +246,16 @@ const services: ServiceInfo[] = [
   },
   {
     name: "jad-seed",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L1092",
     port: "--",
     depends: "All services",
-    purpose: "One-shot: phases 1-7 data seeding (Synthea, FHIR, OMOP, DSP)",
+    purpose:
+      "Only with the seed and edc018 profiles: one-shot seeding through CFM; on EDC 1.0, <seed>seed-identity-layer.sh</seed> creates the participants",
     layer: "Seed",
   },
   {
     name: "GitHub Pages",
+    href: "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/.github/workflows/pages.yml",
     port: "--",
     depends: "Next.js UI (static export)",
     purpose: "Public demo site with mock data fixtures",
@@ -228,8 +268,7 @@ const layerColors: Record<string, string> = {
   // keeps the original light-on-dark badge styling.
   Infrastructure:
     "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  "EDC-V / DCore":
-    "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",
+  EDC: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300",
   Identity:
     "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
   CFM: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
@@ -261,6 +300,47 @@ const ext = (href: string) => (
   />
 );
 
+/** Links inside the service table's purpose texts, by tag name. */
+const SERVICE_TAGS = {
+  adr46: ext(
+    "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-046-vault-keeps-its-state-on-the-flexible-server.md",
+  ),
+  dsp: ext(
+    "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
+  ),
+  dcp: ext(
+    "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/",
+  ),
+  permit: ext("https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_68"),
+  express: ext("https://github.com/expressjs/express/releases/tag/v5.3.0"),
+  fhir: ext("https://hl7.org/fhir/R4/"),
+  omop: ext("https://ohdsi.github.io/CommonDataModel/cdm54.html"),
+  oidc: ext("https://openid.net/specs/openid-connect-core-1_0.html"),
+  realm: ext(
+    "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/jad/keycloak-realm.json#L541-L670",
+  ),
+  adr78: ext(
+    "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md",
+  ),
+  src: ext(
+    "https://github.com/ma3u/MinimumViableHealthDataspacev2/tree/main/runtimes/edc",
+  ),
+  issue927: ext(
+    "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/927",
+  ),
+  cfm: ext("https://github.com/Metaform/connector-fabric-manager"),
+  issue181: ext(
+    "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/181",
+  ),
+  apoc: ext("https://neo4j.com/docs/apoc/5/"),
+  apocx: ext("https://github.com/neo4j-contrib/neo4j-apoc-procedures"),
+  gds: ext("https://neo4j.com/docs/graph-data-science/current/"),
+  n10s: ext("https://neo4j.com/labs/neosemantics/"),
+  seed: ext(
+    "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/seed-identity-layer.sh",
+  ),
+};
+
 export default function ArchitecturePage() {
   const t = useT("docsArchitecture");
   const tc = useT("docsCommon");
@@ -278,9 +358,18 @@ export default function ArchitecturePage() {
         </h1>
         <DocsLastUpdated page="/docs/architecture" />
         <p className="text-(--text-secondary) mb-8">
-          {t(
-            "The Health Dataspace v2 architecture in ArchiMate 3.2 views, with a sequence diagram wherever an order of messages matters: the five-layer graph model, the data flow, the deployment topology, the service dependencies, the permit and negotiation procedure, and the identity and trust framework. Click a diagram to open it full screen and zoom.",
-          )}
+          <T
+            area="docsArchitecture"
+            tags={{
+              archimate: ext(
+                "https://pubs.opengroup.org/architecture/archimate32-doc/",
+              ),
+            }}
+          >
+            {
+              "The Health Dataspace v2 architecture in <archimate>ArchiMate 3.2</archimate> views, with a sequence diagram wherever an order of messages matters: the five-layer graph model, the data flow, the deployment topology, the service dependencies, the permit and negotiation procedure, and the identity and trust framework. Click a diagram to open it full screen and zoom."
+            }
+          </T>
         </p>
 
         {/* Table of Contents */}
@@ -308,18 +397,44 @@ export default function ArchitecturePage() {
             {t("1. Five-Layer Knowledge Graph")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            {t(
-              "The Neo4j knowledge graph organises health data across five architectural layers: DSP Marketplace (connector discovery), HealthDCAT-AP (dataset metadata), FHIR R4 (clinical data), OMOP CDM (research analytics), and Ontology (terminology alignment).",
-            )}
+            <T
+              area="docsArchitecture"
+              tags={{
+                neo: ext("https://github.com/neo4j/neo4j/releases/tag/5.26.28"),
+                dsp: ext(
+                  "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
+                ),
+                hdcat: ext(
+                  "https://data.health.europa.eu/healthdcat-ap/releases/release-8/",
+                ),
+                fhir: ext("https://hl7.org/fhir/R4/"),
+                omop: ext("https://ohdsi.github.io/CommonDataModel/cdm54.html"),
+              }}
+            >
+              {
+                "The <neo>Neo4j</neo> knowledge graph organises health data across five architectural layers: <dsp>DSP</dsp> Marketplace (connector discovery), <hdcat>HealthDCAT-AP</hdcat> (dataset metadata), <fhir>FHIR R4</fhir> (clinical data), <omop>OMOP CDM</omop> (research analytics), and Ontology (terminology alignment)."
+              }
+            </T>
           </p>
           <DocFigure
             file="knowledge-graph-layers.svg"
             alt={t(
               "The five-layer knowledge graph as an ArchiMate information structure view: one band per layer, the node labels as data objects and the Neo4j relationship types as labelled associations",
             )}
-            caption={t(
-              "Fig 1. Five-layer knowledge graph, with the labels and relationships the seeds create. The FHIR nodes carry the same CODED_BY links as their OMOP counterparts; ICD-10 codes exist on Condition only.",
-            )}
+            caption=<T
+              area="docsArchitecture"
+              tags={{
+                fhir: ext("https://hl7.org/fhir/R4/"),
+                omop: ext("https://ohdsi.github.io/CommonDataModel/cdm54.html"),
+                icd: ext(
+                  "https://www.nlm.nih.gov/research/umls/sourcereleasedocs/current/ICD10CM/index.html",
+                ),
+              }}
+            >
+              {
+                "Fig 1. Five-layer knowledge graph, with the labels and relationships the seeds create. The <fhir>FHIR</fhir> nodes carry the same CODED_BY links as their <omop>OMOP</omop> counterparts; <icd>ICD-10</icd> codes exist on Condition only."
+              }
+            </T>
           />
         </section>
 
@@ -329,16 +444,38 @@ export default function ArchitecturePage() {
             {t("2. Data Flow Pipeline")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            {t(
-              "Synthetic patient data flows from Synthea generation through FHIR R4 resource loading into Neo4j, then transforms to OMOP CDM for research analytics. Each stage preserves full provenance through graph relationships.",
-            )}
+            <T
+              area="docsArchitecture"
+              tags={{
+                synthea: ext(
+                  "https://github.com/synthetichealth/synthea/releases/tag/v3.3.0",
+                ),
+                fhir: ext("https://hl7.org/fhir/R4/"),
+                omop: ext("https://ohdsi.github.io/CommonDataModel/cdm54.html"),
+              }}
+            >
+              {
+                "Synthetic patient data flows from <synthea>Synthea</synthea> generation through <fhir>FHIR R4</fhir> resource loading into Neo4j, then transforms to <omop>OMOP CDM</omop> for research analytics. Each stage preserves full provenance through graph relationships."
+              }
+            </T>
           </p>
           <DocFigure
             file="data-flow-sequence.svg"
             alt={t(
               "The same data flow as a sequence diagram: Synthea generates the bundles, the loader writes the FHIR nodes, the Cypher transform maps them to OMOP and copies the codings, the dashboard queries the cohorts",
             )}
-            caption={t("Fig 2. End-to-end data flow from Synthea to analytics")}
+            caption=<T
+              area="docsArchitecture"
+              tags={{
+                synthea: ext(
+                  "https://github.com/synthetichealth/synthea/releases/tag/v3.3.0",
+                ),
+              }}
+            >
+              {
+                "Fig 2. End-to-end data flow from <synthea>Synthea</synthea> to analytics"
+              }
+            </T>
           />
         </section>
 
@@ -352,15 +489,33 @@ export default function ArchitecturePage() {
               area="docsArchitecture"
               vars={{ count: COMPOSE_SERVICES, host: "ehds.mabu.red" }}
               tags={{
+                jad: ext(
+                  "https://github.com/Metaform/jad/blob/4a7e5bd096c58814748e956cc9329586ad309698/README.md#L3",
+                ),
+                siglet: ext(
+                  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L1124-L1132",
+                ),
+                adr78: ext(
+                  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md",
+                ),
                 a: ext(STATIC_SITE),
+                edc018: ext(
+                  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml#L437-L441",
+                ),
+                aca: ext(
+                  "https://learn.microsoft.com/en-us/azure/container-apps/overview",
+                ),
                 code: <code />,
                 adr: ext(
                   `${GITHUB_REPO}/blob/main/docs/ADRs/ADR-012-azure-container-apps.md`,
                 ),
+                apps: ext(
+                  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/azure/offhours.sh#L68-L76",
+                ),
               }}
             >
               {
-                "The full JAD stack runs {count} Docker Compose services (profiles included) across six layers: infrastructure (Traefik, PostgreSQL, Vault, NATS, Keycloak), EDC-V / DCore (Control Plane, dual Data Planes), Identity (Identity Hub, Issuer Service), CFM (Tenant/Provision Managers, 4 background agents), Application (Neo4j, Proxy, UI), and a <a>static GitHub Pages export</a>. The same topology is deployed to Azure Container Apps at <code>{host}</code> (21 Container Apps and 9 Container Apps jobs on 2026-10-04, see <adr>ADR-012</adr>). Arrows show runtime dependencies."
+                "The stack grew out of <jad>JAD</jad> and runs {count} Docker Compose services, profiles included: infrastructure (Traefik, PostgreSQL, Vault, NATS, Keycloak), EDC 1.0 (the control plane, with <siglet>siglet</siglet> as its data plane, <adr78>ADR-078</adr78>), identity (Identity Hub, Issuer Service), application (Neo4j, proxy, UI) and a <a>static GitHub Pages export</a>. The CFM services and the EDC 0.18 data planes start only with the <edc018>edc018 profile</edc018>. The same topology runs on <aca>Azure Container Apps</aca> at <code>{host}</code> (<adr>ADR-012</adr>); the apps there are the ones the <apps>off-hours script</apps> stops and starts. Arrows show runtime dependencies."
               }
             </T>
           </p>
@@ -388,10 +543,16 @@ export default function ArchitecturePage() {
                   a: ext(
                     `${GITHUB_REPO}/blob/main/docs/ADRs/ADR-053-everything-stops-off-hours.md`,
                   ),
+                  adr58: ext(
+                    "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-058-azure-triggers-the-off-hours-schedule.md#L29-L31",
+                  ),
+                  api: ext(
+                    "https://learn.microsoft.com/en-us/rest/api/resource-manager/containerapps/container-apps/stop",
+                  ),
                 }}
               >
                 {
-                  "The Azure deployment runs Monday to Friday, 05:00 to 18:00 UTC, and is stopped outside those hours (<a>ADR-053</a>). Stopping is a real stop through the Container Apps API, not scale-to-zero, because nearly every service is called by another one and would never reach zero replicas. The UI is the exception: it sleeps at zero replicas, wakes for a visitor and serves an offline notice that links the static export."
+                  "The Azure deployment runs Monday to Friday, 05:17 to 18:13 UTC, and is stopped outside those hours (<a>ADR-053</a>); two Container Apps jobs trigger the stop and the start (<adr58>ADR-058</adr58>). Stopping is a real stop through the <api>Container Apps API</api>, not scale-to-zero, because nearly every service is called by another one and would never reach zero replicas. The UI is the exception: it sleeps at zero replicas, wakes for a visitor and serves an offline notice that links the static export."
                 }
               </T>
             </p>
@@ -401,10 +562,14 @@ export default function ArchitecturePage() {
                   <tr className="text-left text-(--text-secondary)">
                     <th className="py-1 pr-3 font-semibold">{t("Step")}</th>
                     <th className="py-1 pr-3 font-semibold">
-                      {t("Evening stop (18:00 UTC)")}
+                      <T area="docsArchitecture" tags={{}}>
+                        {"Evening stop (18:13 UTC)"}
+                      </T>
                     </th>
                     <th className="py-1 font-semibold">
-                      {t("Morning start (05:00 UTC, Mon to Fri)")}
+                      <T area="docsArchitecture" tags={{}}>
+                        {"Morning start (05:17 UTC, Mon to Fri)"}
+                      </T>
                     </th>
                   </tr>
                 </thead>
@@ -415,25 +580,78 @@ export default function ArchitecturePage() {
                       {t("UI to offline mode, min 0")}
                     </td>
                     <td className="py-1">
-                      {t("PostgreSQL Flexible Server, wait until Ready")}
+                      <T
+                        area="docsArchitecture"
+                        tags={{
+                          pg: ext(
+                            "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-stop-start-server-portal",
+                          ),
+                        }}
+                      >
+                        {
+                          "<pg>PostgreSQL Flexible Server</pg>, wait until Ready"
+                        }
+                      </T>
                     </td>
                   </tr>
                   <tr className="border-t border-(--border)">
                     <td className="py-1 pr-3">2</td>
                     <td className="py-1 pr-3">
-                      {t("20 Container Apps stopped, consumers first")}
+                      <T
+                        area="docsArchitecture"
+                        tags={{
+                          apps: ext(
+                            "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/azure/offhours.sh#L68-L76",
+                          ),
+                        }}
+                      >
+                        {
+                          "<apps>21 Container Apps</apps> stopped, consumers first"
+                        }
+                      </T>
                     </td>
                     <td className="py-1">
-                      {t("Vault, Keycloak, Neo4j, NATS, proxy, enricher")}
+                      <T
+                        area="docsArchitecture"
+                        tags={{
+                          core: ext(
+                            "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/azure/offhours.sh#L77-L78",
+                          ),
+                        }}
+                      >
+                        {
+                          "<core>Vault, Keycloak, Neo4j, NATS, proxy, enricher, federation, observability</core>"
+                        }
+                      </T>
                     </td>
                   </tr>
                   <tr className="border-t border-(--border)">
                     <td className="py-1 pr-3">3</td>
                     <td className="py-1 pr-3">
-                      {t("PostgreSQL Flexible Server stopped")}
+                      <T
+                        area="docsArchitecture"
+                        tags={{
+                          pg: ext(
+                            "https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-stop-start-server-portal",
+                          ),
+                        }}
+                      >
+                        {"<pg>PostgreSQL Flexible Server</pg> stopped"}
+                      </T>
                     </td>
                     <td className="py-1">
-                      {t("EDC control plane, data planes, identity, CFM")}
+                      <T
+                        area="docsArchitecture"
+                        tags={{
+                          edcapps: ext(
+                            "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/azure/offhours.sh#L79-L81",
+                          ),
+                        }}
+                      >
+                        {
+                          "<edcapps>EDC control plane, data planes, identity, CFM</edcapps>"
+                        }
+                      </T>
                     </td>
                   </tr>
                   <tr className="border-t border-(--border)">
@@ -450,6 +668,12 @@ export default function ArchitecturePage() {
               <T
                 area="docsArchitecture"
                 tags={{
+                  hol: ext(
+                    "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/scripts/azure/offhours.sh#L172",
+                  ),
+                  crawl: ext(
+                    "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-053-everything-stops-off-hours.md#L51",
+                  ),
                   code: <code />,
                   a: ext(
                     `${GITHUB_REPO}/blob/main/docs/knowledge/runbooks/live-demo-off-hours.md`,
@@ -457,7 +681,7 @@ export default function ArchitecturePage() {
                 }}
               >
                 {
-                  "Berlin public holidays skip the start. The catalog crawler runs in office hours only. A night or weekend session holds the stack with the repository variable <code>LIVE_DEMO_HOLD_UNTIL</code>; see the <a>off-hours runbook</a>."
+                  "<hol>Berlin public holidays</hol> skip the start. The catalog crawler runs in <crawl>office hours only</crawl>. A night or weekend session holds the stack with the repository variable <code>LIVE_DEMO_HOLD_UNTIL</code>; see the <a>off-hours runbook</a>."
                 }
               </T>
             </p>
@@ -470,9 +694,21 @@ export default function ArchitecturePage() {
             {t("4. Service Dependencies")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            {t(
-              "Complete inventory of all services in the docker-compose.yml and docker-compose.jad.yml stacks, their exposed ports, upstream dependencies, and purpose.",
-            )}
+            <T
+              area="docsArchitecture"
+              tags={{
+                c1: ext(
+                  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.yml",
+                ),
+                c2: ext(
+                  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docker-compose.jad.yml",
+                ),
+              }}
+            >
+              {
+                "Complete inventory of all services in the <c1>docker-compose.yml</c1> and <c2>docker-compose.jad.yml</c2> stacks, their exposed ports, upstream dependencies, and purpose."
+              }
+            </T>
           </p>
           <div className="overflow-x-auto border border-(--border) rounded-xl">
             <table className="w-full text-sm">
@@ -504,7 +740,14 @@ export default function ArchitecturePage() {
                     }`}
                   >
                     <td className="px-4 py-2.5 font-medium text-(--text-primary) whitespace-nowrap">
-                      {svc.name}
+                      <a
+                        href={svc.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline decoration-dotted hover:text-(--accent)"
+                      >
+                        {svc.name}
+                      </a>
                     </td>
                     <td className="px-4 py-2.5">
                       <span
@@ -522,7 +765,13 @@ export default function ArchitecturePage() {
                       {t(svc.depends)}
                     </td>
                     <td className="px-4 py-2.5 text-(--text-secondary) text-xs">
-                      {t(svc.purpose, svc.vars)}
+                      <T
+                        area="docsArchitecture"
+                        vars={svc.vars}
+                        tags={SERVICE_TAGS}
+                      >
+                        {svc.purpose}
+                      </T>
                     </td>
                   </tr>
                 ))}
@@ -537,18 +786,45 @@ export default function ArchitecturePage() {
             {t("5. DSP Contract Negotiation")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            {t(
-              "The Dataspace Protocol (DSP) governs how data holders and data users negotiate access to health datasets. The EHDS regulation adds HDAB approval as a pre-requisite for data permit issuance before contract negotiation can proceed.",
-            )}
+            <T
+              area="docsArchitecture"
+              tags={{
+                dsp: ext(
+                  "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
+                ),
+                hdab: ext(
+                  "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_55",
+                ),
+                permit: ext(
+                  "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_68",
+                ),
+              }}
+            >
+              {
+                "The <dsp>Dataspace Protocol</dsp> (DSP) governs how data holders and data users negotiate access to health datasets. The EHDS regulation adds <hdab>HDAB approval</hdab> as a pre-requisite for <permit>data permit</permit> issuance before contract negotiation can proceed."
+              }
+            </T>
           </p>
           <DocFigure
             file="dsp-negotiation-sequence.svg"
             alt={t(
               "DSP contract negotiation as a sequence diagram: the user queries the catalogue, applies to the access body and receives the permit as a credential, then negotiates the contract with the holder, who verifies the permit and evaluates the policy before agreeing and transferring the data",
             )}
-            caption={t(
-              "Fig 4. DSP contract negotiation with the EHDS data permit",
-            )}
+            caption=<T
+              area="docsArchitecture"
+              tags={{
+                dsp: ext(
+                  "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/",
+                ),
+                permit: ext(
+                  "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_68",
+                ),
+              }}
+            >
+              {
+                "Fig 4. <dsp>DSP</dsp> contract negotiation with the <permit>EHDS data permit</permit>"
+              }
+            </T>
           />
           <DocFigure
             file="dsp-negotiation.svg"
@@ -567,16 +843,43 @@ export default function ArchitecturePage() {
             {t("6. Identity & Trust Framework")}
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
-            {t(
-              "The Decentralized Claims Protocol (DCP) manages identity, credentials, and trust. Identity Hub stores DIDs and Verifiable Credentials, the Issuer Service mints EHDS-specific credentials, and Keycloak provides SSO/OIDC authentication.",
-            )}
+            <T
+              area="docsArchitecture"
+              tags={{
+                dcp: ext(
+                  "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/",
+                ),
+                ih: ext(
+                  "https://github.com/eclipse-edc/IdentityHub/releases/tag/v1.0.0-RC5",
+                ),
+                kc: ext(
+                  "https://github.com/keycloak/keycloak/releases/tag/26.8.0",
+                ),
+                oidc: ext(
+                  "https://openid.net/specs/openid-connect-core-1_0.html",
+                ),
+              }}
+            >
+              {
+                "The <dcp>Decentralized Claims Protocol</dcp> (DCP) manages identity, credentials, and trust. <ih>Identity Hub</ih> stores DIDs and Verifiable Credentials, the Issuer Service mints EHDS-specific credentials, and <kc>Keycloak</kc> provides SSO/<oidc>OIDC</oidc> authentication."
+              }
+            </T>
           </p>
           <DocFigure
             file="identity-trust.svg"
             alt={t(
               "Identity and trust as an ArchiMate application cooperation view: the trust anchors, the DCP identity layer with Identity Hub, Issuer Service and the Secure Token Service, the five credentials the issuer defines, and the interfaces the tokens protect",
             )}
-            caption={t("Fig 6. DCP identity and trust architecture")}
+            caption=<T
+              area="docsArchitecture"
+              tags={{
+                dcp: ext(
+                  "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/",
+                ),
+              }}
+            >
+              {"Fig 6. <dcp>DCP</dcp> identity and trust architecture"}
+            </T>
           />
         </section>
 
@@ -592,10 +895,13 @@ export default function ArchitecturePage() {
                 adr: ext(
                   "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/docs/ADRs/ADR-064-simpl-open-through-the-outside-agent-dcp-path.md",
                 ),
+                art71: ext(
+                  "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_71",
+                ),
               }}
             >
               {
-                "The hub and the EU's Simpl-Open middleware stand on the same foundation: both run Eclipse EDC connectors, speak the Dataspace Protocol and admit participants with credentials from an authority they trust. The hub joins a Simpl data space as an EDC connector outside the Simpl-Open agent (<adr>ADR-064</adr>) and brings what health adds on top: FHIR and OMOP semantics, data permits, the right to opt out (Art. 71), fees and the gate in front of the secure processing environments."
+                "The hub and the EU's Simpl-Open middleware stand on the same foundation: both run Eclipse EDC connectors, speak the Dataspace Protocol and admit participants with credentials from an authority they trust. The hub joins a Simpl data space as an EDC connector outside the Simpl-Open agent (<adr>ADR-064</adr>) and brings what health adds on top: FHIR and OMOP semantics, data permits, the right to opt out (<art71>Art. 71</art71>), fees and the gate in front of the secure processing environments."
               }
             </T>
           </p>
@@ -704,35 +1010,98 @@ export default function ArchitecturePage() {
               </h4>
               <ul className="text-(--text-secondary) text-xs space-y-1.5 list-disc ml-4">
                 <li>
-                  <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  <T
+                    area="docsArchitecture"
+                    tags={{
+                      b: <strong />,
+                      art3: ext(
+                        "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_3",
+                      ),
+                    }}
+                  >
                     {
-                      "<b>EHDS Art. 3-12:</b> Patient rights (access, rectification, portability)"
+                      "<b>EHDS, primary use:</b> rights of natural persons (<art3>Art. 3 to 10</art3>): access, insertion, rectification, portability, restriction, information on access, opt-out"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  <T
+                    area="docsArchitecture"
+                    tags={{
+                      b: <strong />,
+                      art53: ext(
+                        "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_53",
+                      ),
+                      art55: ext(
+                        "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_55",
+                      ),
+                      art67: ext(
+                        "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_67",
+                      ),
+                      art68: ext(
+                        "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#art_68",
+                      ),
+                    }}
+                  >
                     {
-                      "<b>EHDS Art. 50-51:</b> Secondary use, HDAB approval, data permits"
+                      "<b>EHDS, secondary use:</b> permitted purposes (<art53>Art. 53</art53>), health data access bodies (<art55>Art. 55</art55>), applications and data permits (<art67>Art. 67</art67>, <art68>68</art68>)"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsArchitecture" tags={{ b: <strong /> }}>
-                    {"<b>GDPR Art. 15-22:</b> Data subject rights enforcement"}
-                  </T>
-                </li>
-                <li>
-                  <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  <T
+                    area="docsArchitecture"
+                    tags={{
+                      b: <strong />,
+                      gdpr: ext(
+                        "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng#art_15",
+                      ),
+                    }}
+                  >
                     {
-                      "<b>EU CRA Art. 13:</b> SBOM mandate, vulnerability disclosure"
+                      "<b>GDPR:</b> rights of the data subject (<gdpr>Art. 15 to 22</gdpr>)"
                     }
                   </T>
                 </li>
                 <li>
-                  <T area="docsArchitecture" tags={{ b: <strong /> }}>
+                  <T
+                    area="docsArchitecture"
+                    tags={{
+                      b: <strong />,
+                      cra13: ext(
+                        "https://eur-lex.europa.eu/eli/reg/2024/2847/oj/eng#art_13",
+                      ),
+                      anx: ext(
+                        "https://eur-lex.europa.eu/eli/reg/2024/2847/oj/eng#anx_I",
+                      ),
+                      cra14: ext(
+                        "https://eur-lex.europa.eu/eli/reg/2024/2847/oj/eng#art_14",
+                      ),
+                    }}
+                  >
                     {
-                      "<b>BSI C5:</b> Cloud security baseline (DEV, OPS controls)"
+                      "<b>Cyber Resilience Act:</b> a software bill of materials and a coordinated vulnerability disclosure policy (<cra13>Art. 13</cra13>, <anx>Annex I Part II</anx>); reporting under <cra14>Art. 14</cra14>"
+                    }
+                  </T>
+                </li>
+                <li>
+                  <T
+                    area="docsArchitecture"
+                    tags={{
+                      b: <strong />,
+                      c5: ext(
+                        "https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf",
+                      ),
+                      gap: (
+                        <Link
+                          href="/docs/security/bsi-c5-gap-analysis"
+                          className="text-(--accent) underline hover:opacity-80"
+                        />
+                      ),
+                    }}
+                  >
+                    {
+                      "<b>BSI C5:</b> the cloud security criteria of <c5>C5:2020</c5>, domains DEV and OPS (<gap>the hub against C5</gap>)"
                     }
                   </T>
                 </li>
@@ -960,7 +1329,16 @@ export default function ArchitecturePage() {
         {/* Legend */}
         <section className="border border-(--border) rounded-xl p-6">
           <h3 className="font-semibold mb-3">
-            {t("Diagram legend (ArchiMate 3.2)")}
+            <T
+              area="docsArchitecture"
+              tags={{
+                archimate: ext(
+                  "https://pubs.opengroup.org/architecture/archimate32-doc/",
+                ),
+              }}
+            >
+              {"Diagram legend (<archimate>ArchiMate 3.2</archimate>)"}
+            </T>
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-(--text-secondary)">
             <div>
@@ -983,11 +1361,14 @@ export default function ArchitecturePage() {
               <T
                 area="docsArchitecture"
                 tags={{
+                  rel: ext(
+                    "https://pubs.opengroup.org/architecture/archimate32-doc/chap05.html",
+                  ),
                   a: ext(`${GITHUB_REPO}/tree/main/docs/architecture/diagrams`),
                 }}
               >
                 {
-                  "Open arrow: serving. Hollow dotted head: realization. Filled head: triggering. Dashed: flow. Dotted without head: access. Dot: assignment. Each diagram repeats its legend; the sources are in <a>docs/architecture/diagrams</a>."
+                  "<rel>Open arrow</rel>: serving. Hollow dotted head: realization. Filled head: triggering. Dashed: flow. Dotted without head: access. Dot: assignment. Each diagram repeats its legend; the sources are in <a>docs/architecture/diagrams</a>."
                 }
               </T>
             </div>
