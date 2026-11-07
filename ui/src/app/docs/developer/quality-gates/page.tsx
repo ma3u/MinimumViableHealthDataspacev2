@@ -1404,7 +1404,12 @@ export default function QualityGatesPage() {
             Protocol compliance tests require the full{" "}
             <Src href={JAD_URL}>JAD</Src> stack (
             <RepoFile path="docker-compose.jad.yml">
-              {facts.composeServices["docker-compose.jad.yml"].length} services
+              {
+                facts.composeServices["docker-compose.jad.yml"].filter(
+                  (s) => s.profiles.length === 0,
+                ).length
+              }{" "}
+              services
             </RepoFile>
             , 8 GB RAM), on EDC 1.0 (<Src href={ADR_078_URL}>ADR-078</Src>). In
             CI, the workflow starts JAD infrastructure with graceful fallback:

@@ -780,14 +780,19 @@
   "postgresDbs": [
     "cfm",
     "controlplane",
+    "controlplane_v1",
     "dataplane",
     "dataplane_omop",
     "identityhub",
+    "identityhub_v1",
     "issuerservice",
+    "issuerservice_v1",
     "keycloak",
     "redlinedb",
     "rogueissuer",
+    "rogueissuer_v1",
     "simplga",
+    "simplga_v1",
     "taskdb"
   ],
   "adrs": [
@@ -1340,7 +1345,7 @@
   "lastUpdated": {
     "/docs": "2026-11-02",
     "/docs/user-guide": "2026-11-07",
-    "/docs/developer": "2026-11-06",
+    "/docs/developer": "2026-11-07",
     "/docs/developer/quality-gates": "2026-11-07",
     "/docs/developer/api": "2026-11-07",
     "/docs/developer/reference": "2026-11-07",

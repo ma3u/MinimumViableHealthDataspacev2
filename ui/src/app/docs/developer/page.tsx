@@ -20,7 +20,23 @@ const implementedOperations = facts.apiRoutes.reduce(
   (n, r) => n + r.methods.length,
   0,
 );
-const COMPOSE_SERVICES = Object.values(facts.composeServices).flat().length;
+// What `docker compose up` starts: the services in no profile. The edc018,
+// trust-check and federated profiles hold the rest.
+const inDefaultProfile = (s: { profiles: string[] }) => s.profiles.length === 0;
+const STACK_SERVICES = Object.values(facts.composeServices)
+  .flat()
+  .filter(inDefaultProfile);
+const JAD_SERVICES = facts.composeServices["docker-compose.jad.yml"];
+// The host side of each published port, "7474:7474" -> 7474.
+const STACK_PORTS = [
+  ...new Set(
+    STACK_SERVICES.flatMap((s) =>
+      s.ports.map((p) => Number(p.split(":").slice(-2)[0])),
+    ),
+  ),
+]
+  .sort((a, b) => a - b)
+  .join(", ");
 const PRE_COMMIT_HOOKS = facts.preCommitHooks.length;
 const hooksAt = (stage: string) =>
   facts.preCommitHooks.filter((h) => h.stage === stage).length;
@@ -444,22 +460,27 @@ export default function DeveloperGuidePage() {
           <p className="text-(--text-secondary) text-sm mb-4">
             <T
               area="docsDeveloper"
-              tags={{ c: chip }}
-              vars={{ n: COMPOSE_SERVICES }}
+              tags={{
+                c: chip,
+                a: repoFile(
+                  "docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md",
+                ),
+              }}
+              vars={{ n: STACK_SERVICES.length }}
             >
               {
-                "The full JAD (Java Application Deployment) stack runs {n} Docker Compose services orchestrated via <c>docker-compose.yml</c> + <c>docker-compose.jad.yml</c>. Services are grouped into five layers:"
+                "The JAD (Joint Architecture Demo) stack runs {n} Docker Compose services from <c>docker-compose.yml</c> + <c>docker-compose.jad.yml</c>, on EDC 1.0.0-RC5 with siglet as the data plane and no CFM, as Azure does (<a>ADR-078</a>). Compose builds the three EDC launchers from <c>runtimes/edc</c> on the first run."
               }
             </T>
           </p>
           <DocFigure
             file="deployment.svg"
             alt={t(
-              "The JAD stack as an ArchiMate technology view: the edge, the application, the EDC-V and identity services and the infrastructure as bands, with the run-time dependencies between them",
+              "The JAD stack as an ArchiMate technology view: the edge, the application, EDC 1.0, the identity services and the infrastructure as bands with the run-time dependencies between them, and the three compose profiles in a band of their own",
             )}
             caption={t(
-              "JAD stack: {n} compose services and their dependencies (ArchiMate 3.2, technology view)",
-              { n: COMPOSE_SERVICES },
+              "JAD stack: the {n} services of the default profile, their dependencies and the three profiles (ArchiMate 3.2, technology view)",
+              { n: STACK_SERVICES.length },
             )}
           />
 
@@ -492,16 +513,16 @@ export default function DeveloperGuidePage() {
                     ":80 / :8090",
                     "traefik.localhost",
                     t("API gateway & reverse proxy"),
-                    "—",
+                    t("none"),
                   ],
                   [
                     "PostgreSQL 17",
                     ":5432",
-                    "—",
+                    t("none"),
                     t("Runtime store ({n} databases)", {
                       n: facts.postgresDbs.length,
                     }),
-                    "—",
+                    t("none"),
                   ],
                   [
                     "Vault",
@@ -510,48 +531,43 @@ export default function DeveloperGuidePage() {
                     t(
                       "Secrets, file storage; vault-unseal unseals it after a restart",
                     ),
-                    "—",
+                    t("none"),
                   ],
                   [
                     "Keycloak",
-                    ":8080",
+                    ":8080 / :9000",
                     "keycloak.localhost",
-                    t("OIDC SSO (realm: edcv, 7 users)"),
+                    t("OIDC SSO (realm: edcv, 8 demo users)"),
                     "PostgreSQL",
                   ],
                   [
                     "NATS",
                     ":4222 / :8222",
-                    "—",
+                    "nats.localhost",
                     t("Async event mesh (JetStream)"),
-                    "—",
+                    t("none"),
                   ],
                   [
                     "Control Plane",
                     ":11003",
                     "cp.localhost",
-                    t("DSP protocol + management API"),
+                    t("DSP 2025-1 + Management API v5"),
                     "PG, Vault, NATS, KC",
                   ],
                   [
-                    "Data Plane FHIR",
-                    ":11002",
-                    "dp-fhir.localhost",
-                    t("FHIR PUSH transfer type"),
-                    "PG, Vault, CP",
-                  ],
-                  [
-                    "Data Plane OMOP",
-                    ":11012",
-                    "dp-omop.localhost",
-                    t("OMOP PULL transfer type"),
-                    "PG, Vault, CP",
+                    "siglet",
+                    t("internal"),
+                    t("none"),
+                    t(
+                      "Data plane: signalling, and the access tokens of pull transfers",
+                    ),
+                    "Vault",
                   ],
                   [
                     "Identity Hub",
                     ":11005",
                     "ih.localhost",
-                    t("DCP v1.0: DID + VC store"),
+                    t("DCP v1.0: DID + VC store (Identity API v1)"),
                     "PG, Vault, KC",
                   ],
                   [
@@ -562,37 +578,34 @@ export default function DeveloperGuidePage() {
                     "PG, Vault, KC",
                   ],
                   [
-                    "Tenant Manager",
-                    ":11006",
-                    "tm.localhost",
-                    t("CFM tenant lifecycle"),
-                    "PG, KC",
-                  ],
-                  [
-                    "Provision Manager",
-                    ":11007",
-                    "pm.localhost",
-                    t("CFM resource provisioning"),
-                    "PG, KC, CP",
+                    "Simpl GA issuer",
+                    ":10023",
+                    t("none"),
+                    t(
+                      "The fictional Simpl Governance Authority's issuer (ADR-064)",
+                    ),
+                    "PG, Vault, KC",
                   ],
                   [
                     "Neo4j 5",
                     ":7474 / :7687",
-                    "—",
+                    t("none"),
                     t("Knowledge graph (APOC + n10s)"),
-                    "—",
+                    t("none"),
                   ],
                   [
                     "Neo4j Proxy",
                     ":9090",
                     "proxy.localhost",
-                    t("Express bridge: UI ↔ Neo4j"),
+                    t(
+                      "Express bridge: UI ↔ Neo4j; serves pulls at /dataspace/data",
+                    ),
                     "CP",
                   ],
                   [
                     "Next.js UI",
                     ":3000 / :3003",
-                    "—",
+                    t("none"),
                     t("Application frontend"),
                     "Neo4j",
                   ],
@@ -611,10 +624,69 @@ export default function DeveloperGuidePage() {
             </table>
           </div>
           <p className="text-(--text-secondary) text-xs mt-2">
+            <T area="docsDeveloper" tags={{ c: small }}>
+              {
+                "Plus two Vault sidecars: <c>vault-unseal</c> initialises and unseals Vault, <c>vault-bootstrap</c> writes the secrets the services read."
+              }
+            </T>
+          </p>
+
+          <h3 className="text-lg font-semibold mt-6 mb-2" id="pull-path">
+            {t("The pull path")}
+          </h3>
+          <p className="text-(--text-secondary) text-sm">
+            <T
+              area="docsDeveloper"
+              tags={{ c: chip }}
+              vars={{
+                tokens: "GET /tokens/{participantContextId}/{transferId}",
+              }}
+            >
+              {
+                "A pull transfer runs like this: the consumer's control plane negotiates, siglet issues the access token, and the consumer reads the token from its siglet (<c>{tokens}</c>) and sends it to the provider's Neo4j Proxy at <c>/dataspace/data</c>, which serves the dataset the token names (<c>jad/siglet-edc1.toml</c>). siglet keeps its tokens in memory on this stack, so a restart of siglet loses every issued token; start the transfer again."
+              }
+            </T>
+          </p>
+
+          <h3 className="text-lg font-semibold mt-6 mb-2" id="compose-profiles">
+            {t("Compose profiles")}
+          </h3>
+          <p className="text-(--text-secondary) text-sm mb-2">
             {t(
-              "Plus 4 background CFM agents (keycloak, edcv, registration, onboarding) and 1 one-shot seed container. Vault-bootstrap runs as a sidecar.",
+              "Three compose profiles hold the {n} services the default stack leaves out:",
+              {
+                n:
+                  Object.values(facts.composeServices).flat().length -
+                  STACK_SERVICES.length,
+              },
             )}
           </p>
+          <ul className="text-(--text-secondary) text-sm space-y-1 list-disc ml-5">
+            <li>
+              <T
+                area="docsDeveloper"
+                tags={{ c: chip, a: externalLink(`${GITHUB_REPO}/issues/927`) }}
+              >
+                {
+                  "<c>edc018</c>: what only EDC 0.18 used, the two DCore data planes (FHIR :11002, OMOP :11012), CFM's Tenant Manager (:11006) and Provision Manager (:11007), its four agents and the shim, and the one-shot <c>jad-seed</c>. They stay until <a>#927</a> retires them; nothing in CI starts them."
+                }
+              </T>
+            </li>
+            <li>
+              <T area="docsDeveloper" tags={{ c: chip }}>
+                {
+                  "<c>trust-check</c>: <c>rogue-issuer</c> (:10033), the untrusted issuer the identity checks must refuse."
+                }
+              </T>
+            </li>
+            <li>
+              <T area="docsDeveloper" tags={{ c: chip }}>
+                {
+                  "<c>federated</c>: <c>neo4j-spe2</c> (:7475 / :7688), the second SPE."
+                }
+              </T>
+            </li>
+          </ul>
         </section>
 
         {/* Prerequisites */}
@@ -690,10 +762,7 @@ export default function DeveloperGuidePage() {
             </h4>
             <p className="text-(--text-secondary) text-xs">
               {t("The JAD stack requires these ports to be free:")}{" "}
-              <code className="text-(--text-primary)">
-                80, 3000, 3003, 4222, 5432, 7474, 7687, 8080, 8090, 8200, 8222,
-                9090, 10013, 11002, 11003, 11005, 11006, 11007, 11012
-              </code>
+              <code className="text-(--text-primary)">{STACK_PORTS}</code>
             </p>
           </div>
         </section>
@@ -715,7 +784,7 @@ export default function DeveloperGuidePage() {
               </h4>
               <pre className="text-xs text-(--text-primary) overflow-x-auto">{`docker compose up -d
 
-# Initialize schema (idempotent — safe to re-run)
+# Initialize schema (idempotent, safe to re-run)
 cat neo4j/init-schema.cypher | \\
   docker exec -i health-dataspace-neo4j \\
   cypher-shell -u neo4j -p healthdataspace
@@ -747,8 +816,8 @@ npm run lint         # ESLint (max 55 warnings)`}</pre>
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
             {t(
-              "The bootstrap script starts all {n} services with health checks, initializes Vault secrets, imports the Keycloak realm, and runs the 7-phase seed pipeline.",
-              { n: COMPOSE_SERVICES },
+              "The bootstrap script starts the {n} services in dependency order with health checks, waits for vault-bootstrap to write the secrets, loads the graph when Neo4j is empty, runs the 7-phase seed pipeline and then seeds the Simpl test Governance Authority.",
+              { n: STACK_SERVICES.length },
             )}
           </p>
           <div className="space-y-4">
@@ -756,7 +825,7 @@ npm run lint         # ESLint (max 55 warnings)`}</pre>
               <h4 className="font-semibold text-sm mb-2 text-(--success-text)">
                 {t("1. Bootstrap everything")}
               </h4>
-              <pre className="text-xs text-(--text-primary) overflow-x-auto">{`# Full stack — takes ~3-5 min on first run
+              <pre className="text-xs text-(--text-primary) overflow-x-auto">{`# Full stack; the first run also builds the three EDC launchers
 ./scripts/bootstrap-jad.sh
 
 # Check status & endpoints
@@ -814,7 +883,7 @@ open http://traefik.localhost`}</pre>
           </h2>
           <p className="text-(--text-secondary) text-sm mb-4">
             {t(
-              "The 7-phase seed pipeline populates the dataspace with tenants, credentials, policies, assets, and contracts. Phases must run in strict order; each depends on the previous.",
+              "The 7-phase seed pipeline populates the dataspace with participants, credentials, policies, assets, contracts and transfers. Phases must run in strict order; each depends on the previous.",
             )}
           </p>
           <div className="overflow-x-auto">
@@ -839,9 +908,11 @@ open http://traefik.localhost`}</pre>
                 {[
                   [
                     "1",
-                    "seed-health-tenants.sh",
-                    "Tenant Manager",
-                    t("Create 5 participant tenants via CFM"),
+                    "../scripts/seed-identity-layer.sh",
+                    "Identity Hub, Issuer, CP",
+                    t(
+                      "The 5 participants: contexts, DIDs, keys, a DCP MembershipCredential each (ADR-078)",
+                    ),
                   ],
                   [
                     "2",
@@ -865,7 +936,9 @@ open http://traefik.localhost`}</pre>
                     "5",
                     "seed-contract-negotiation.sh",
                     "Control Plane",
-                    t("PharmaCo ↔ AlphaKlinik negotiations + data planes"),
+                    t(
+                      "PharmaCo ↔ AlphaKlinik negotiations, transfers to STARTED",
+                    ),
                   ],
                   [
                     "6",
@@ -876,8 +949,10 @@ open http://traefik.localhost`}</pre>
                   [
                     "7",
                     "seed-data-transfer.sh",
-                    "Data Plane",
-                    t("Verify EDR tokens and data plane transfers"),
+                    "siglet, Neo4j Proxy",
+                    t(
+                      "Pull patients and the catalogue with siglet's tokens; record the TransferEvents",
+                    ),
                   ],
                 ].map(([phase, script, target, desc]) => (
                   <tr key={phase} className="border-t border-(--border)">
@@ -892,6 +967,23 @@ open http://traefik.localhost`}</pre>
               </tbody>
             </table>
           </div>
+          <p className="text-(--text-secondary) text-xs mt-3">
+            <T
+              area="docsDeveloper"
+              tags={{
+                c: small,
+                a: externalLink(`${GITHUB_REPO}/issues/881`),
+              }}
+              vars={{
+                participant: "ehds-participant",
+                quality: "ehds-quality",
+              }}
+            >
+              {
+                "<c>bootstrap-jad.sh</c> loads the graph (<c>init-schema.cypher</c> and the files CI loads) only when Neo4j holds no patients, so a graph you filled yourself stays as it is. Phase 7 rewrites three tracked fixtures, <c>ui/public/mock/{fhir_bundles,negotiations,transfers}.json</c>; restore them with <c>git checkout --</c> when you did not mean to refresh them. Phase 1 reports <c>HTTP 400</c> for the attestation types <c>{participant}</c> and <c>{quality}</c>, which no issuer launcher registers, and for the credential types defined on them (finding 7 in <a>#881</a>); phase 2 registers the EHDS credential types anyway."
+              }
+            </T>
+          </p>
           <div className="mt-3 border border-amber-500/20 bg-amber-500/5 rounded-lg p-3">
             <p className="text-(--text-secondary) text-xs">
               <T area="docsDeveloper" tags={{ b: warn, c: small }}>
@@ -910,14 +1002,12 @@ open http://traefik.localhost`}</pre>
           </h2>
           <div className="bg-(--surface) border border-(--border) rounded-lg p-4">
             <pre className="text-xs text-(--text-primary) overflow-x-auto whitespace-pre">{`├── .github/workflows/         # CI/CD (pr-gate, test, compliance, security-scan, deploy-azure, pages, ...)
-├── connector/                 # EDC-V connector (Gradle multi-module)
-│   ├── controlplane/          # DSP + Management API
-│   ├── dataplane/             # FHIR + OMOP data planes
-│   └── identityhub/           # DCP Identity Hub
 ├── docs/                      # Architecture docs, journeys, ADRs, reports
 ├── jad/                       # JAD infrastructure configs
-│   ├── keycloak-realm.json    # Keycloak realm (edcv, 7 users, 6 roles)
+│   ├── keycloak-realm.json    # Keycloak realm (edcv, 8 demo users, 10 roles)
 │   ├── edcv-assets/           # Contract definitions & ODRL policies
+│   ├── init-postgres*.sql     # The databases: EDC 0.18, then the _v1 ones of EDC 1.0
+│   ├── siglet-edc1.toml       # siglet, the data plane
 │   ├── seed-*.sh              # 7-phase seed scripts
 │   └── openapi/               # OpenAPI specifications
 ├── k8s/                       # Kubernetes / OrbStack manifests
@@ -925,6 +1015,10 @@ open http://traefik.localhost`}</pre>
 │   ├── init-schema.cypher     # Constraints, indexes, vector indexes
 │   ├── insert-synthetic-schema-data.cypher
 │   └── fhir-to-omop-transform.cypher
+├── runtimes/edc/              # EDC 1.0 launchers (ADR-076)
+│   ├── controlplane/          # DSP + Management API
+│   ├── identity-hub/          # DCP Identity Hub
+│   └── issuerservice/         # VC issuance
 ├── scripts/                   # Automation (bootstrap, synthea, compliance)
 ├── services/neo4j-proxy/      # Express bridge (Neo4j ↔ UI)
 ├── ui/                        # Next.js ${
@@ -937,11 +1031,13 @@ open http://traefik.localhost`}</pre>
 │   ├── src/lib/               # auth.ts, api.ts, graph-constants.ts
 │   ├── __tests__/unit/        # Vitest unit tests
 │   ├── __tests__/e2e/         # Playwright specs (journeys/)
-│   └── public/mock/           # 38 JSON fixtures for static export
+│   └── public/mock/           # JSON fixtures for static export
 ├── docker-compose.yml         # Minimal stack (Neo4j + UI)
-└── docker-compose.jad.yml     # Full JAD stack (${
-              facts.composeServices["docker-compose.jad.yml"].length
-            } services)`}</pre>
+└── docker-compose.jad.yml     # JAD stack: ${
+              JAD_SERVICES.filter(inDefaultProfile).length
+            } services, ${
+              JAD_SERVICES.filter((s) => !inDefaultProfile(s)).length
+            } more in profiles`}</pre>
           </div>
         </section>
 
@@ -1052,7 +1148,7 @@ open http://traefik.localhost`}</pre>
           <p className="text-(--text-secondary) text-sm mb-4">
             <T area="docsDeveloper" tags={{ b }}>
               {
-                "PostgreSQL serves as the runtime store for all JAD services: EDC-V state machines, Keycloak identity, and CFM tenant metadata. Neo4j holds the health knowledge graph. This split follows <b>ADR-1</b>."
+                "PostgreSQL serves as the runtime store for all JAD services: EDC state machines, Keycloak identity and the proxy's task store. Neo4j holds the health knowledge graph. This split follows <b>ADR-1</b>."
               }
             </T>
           </p>
@@ -1074,52 +1170,38 @@ open http://traefik.localhost`}</pre>
               <tbody className="text-(--text-secondary)">
                 {[
                   [
-                    "controlplane",
-                    "EDC-V Control Plane",
+                    "controlplane_v1",
+                    "Control Plane",
                     t(
                       "Contract negotiations, transfer processes, asset definitions, policy store",
                     ),
                   ],
                   [
-                    "dataplane",
-                    "DCore FHIR",
-                    t("FHIR data plane state, EDR tokens, transfer tracking"),
-                  ],
-                  [
-                    "dataplane_omop",
-                    "DCore OMOP",
-                    t("OMOP data plane state, EDR tokens, transfer tracking"),
-                  ],
-                  [
-                    "identityhub",
+                    "identityhub_v1",
                     "Identity Hub",
                     t("DID documents, verifiable credential store, key pairs"),
                   ],
                   [
-                    "issuerservice",
+                    "issuerservice_v1",
                     "Issuer Service",
                     t(
                       "Credential definitions, attestation records, issued VCs",
                     ),
                   ],
                   [
+                    "simplga_v1",
+                    "Simpl GA issuer",
+                    t("The Simpl Governance Authority's credentials"),
+                  ],
+                  [
+                    "rogueissuer_v1",
+                    "rogue-issuer",
+                    t("The untrusted issuer of the identity checks"),
+                  ],
+                  [
                     "keycloak",
                     "Keycloak",
                     t("Users, roles, realm config, sessions, client scopes"),
-                  ],
-                  [
-                    "cfm",
-                    "Tenant Manager, Provision Manager, CFM agents",
-                    t(
-                      "Tenant records, VPAs (Virtual Participant Agents), provisioning tasks",
-                    ),
-                  ],
-                  [
-                    "redlinedb",
-                    "—",
-                    t(
-                      "Created by jad/init-postgres.sql; no service in either compose stack uses it today",
-                    ),
                   ],
                   [
                     "taskdb",
@@ -1140,6 +1222,17 @@ open http://traefik.localhost`}</pre>
               </tbody>
             </table>
           </div>
+          <p className="text-(--text-secondary) text-xs mt-3">
+            <T
+              area="docsDeveloper"
+              tags={{ c: small }}
+              vars={{ n: facts.postgresDbs.length }}
+            >
+              {
+                "A fresh <c>postgres_data</c> volume holds {n} databases. The image creates <c>controlplane</c> (<c>POSTGRES_DB</c>); <c>jad/init-postgres.sql</c> creates the users, <c>keycloak</c>, <c>taskdb</c> and the other EDC 0.18 databases (<c>identityhub</c>, <c>issuerservice</c>, <c>dataplane</c>, <c>dataplane_omop</c>, <c>cfm</c>, <c>redlinedb</c>, ...), which the 1.0 services no longer use. <c>jad/init-postgres-edc1.sql</c> creates the <c>_v1</c> databases after it, on a fresh volume only; on an existing volume, run that file once with <c>psql</c> as <c>cp</c> (see <c>docs/gotchas.md</c>)."
+              }
+            </T>
+          </p>
           <div className="mt-4 border border-(--border) rounded-lg p-4">
             <h4 className="font-semibold text-sm mb-2">
               {t("Neo4j vs PostgreSQL Split")}
@@ -1155,7 +1248,7 @@ open http://traefik.localhost`}</pre>
               <li>
                 <T area="docsDeveloper" tags={{ b }}>
                   {
-                    "<b>PostgreSQL:</b> EDC-V runtime state machines, OIDC sessions, tenant metadata, credential storage; transactional ACID workloads"
+                    "<b>PostgreSQL:</b> EDC runtime state machines, OIDC sessions, credential storage, the task store; transactional ACID workloads"
                   }
                 </T>
               </li>
@@ -1299,9 +1392,9 @@ open http://traefik.localhost`}</pre>
                   </T>
                 </li>
                 <li>
-                  <T area="docsDeveloper" tags={{ b }}>
+                  <T area="docsDeveloper" tags={{ b, c: flowCode }}>
                     {
-                      "<b>Deliver</b> → data plane pushes FHIR/OMOP bundles to the consumer"
+                      "<b>Deliver</b> → the consumer pulls with siglet's token from <c>/dataspace/data</c> on the provider's Neo4j Proxy"
                     }
                   </T>
                 </li>
