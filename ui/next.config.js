@@ -73,7 +73,9 @@ const nextConfig = {
       ];
     },
   }),
-  // Security headers (BSI C5 DEV-07 / OWASP A05) — skipped for static export
+  // Security headers (BSI C5:2020 OPS-23 system hardening / OWASP A05), see
+  // https://www.bsi.bund.de/SharedDocs/Downloads/EN/BSI/CloudComputing/ComplianceControlsCatalogue/2020/C5_2020.pdf#page=73
+  // Skipped for static export
   // because GitHub Pages serves pre-built HTML without a Next.js server.
   //
   // Content-Security-Policy is *not* set here — it's emitted by middleware.ts
