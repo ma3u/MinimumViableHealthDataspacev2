@@ -52,6 +52,93 @@ const SPE_RUNBOOK_URL =
 const ISSUE_774_URL =
   "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/774";
 
+/** The sources the guide cites, each as deep as it goes: the article, the
+ *  release tag, the file and line. */
+const EHDS_URL = "https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng";
+const GDPR_URL = "https://eur-lex.europa.eu/eli/reg/2016/679/oj/eng";
+const EIDAS_URL = "https://eur-lex.europa.eu/eli/reg/2024/1183/oj/eng";
+/** eIDAS Art. 8(2)(c), assurance level high (Regulation (EU) No 910/2014). */
+const EIDAS_LEVEL_HIGH_URL =
+  "https://eur-lex.europa.eu/eli/reg/2014/910/oj/eng#008.002";
+const IMPL_2098_URL = "https://eur-lex.europa.eu/eli/reg_impl/2026/2098/oj/eng";
+const REPO_URL =
+  "https://github.com/ma3u/MinimumViableHealthDataspacev2/blob/main/";
+const ISSUE_338_URL =
+  "https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/338";
+const DSP_URL =
+  "https://eclipse-dataspace-protocol-base.github.io/DataspaceProtocol/2025-1/";
+const DSP_TCK_URL =
+  "https://github.com/eclipse-dataspacetck/dsp-tck/releases/tag/v1.0.2";
+const DCP_URL =
+  "https://eclipse-dataspace-dcp.github.io/decentralized-claims-protocol/v1.0/";
+const DID_WEB_URL = "https://w3c-ccg.github.io/did-method-web/";
+const OPENID4VP_URL =
+  "https://openid.net/specs/openid-4-verifiable-presentations-1_0.html";
+const D_YOU_URL = "https://eudi-wallet.gov.de/";
+const FHIR_URL = "https://hl7.org/fhir/R4/";
+const FHIR_RESOURCES_URL = "https://hl7.org/fhir/R4/resourcelist.html";
+const OMOP_URL = "https://ohdsi.github.io/CommonDataModel/cdm54.html";
+const ODRL_URL = "https://www.w3.org/TR/odrl-model/#x2-odrl-information-model";
+const DQV_URL = "https://www.w3.org/TR/vocab-dqv/";
+const HEALTHDCAT_AP_URL =
+  "https://data.health.europa.eu/healthdcat-ap/releases/release-8/";
+const HEALTHDCAT_AP_LATEST_URL =
+  "https://data.health.europa.eu/healthdcat-ap/releases/latest/";
+const SNOMED_URL = "https://browser.ihtsdotools.org/";
+const SNOMED_HYPERTENSION_URL =
+  "https://browser.ihtsdotools.org/?perspective=full&conceptId1=38341003";
+const ICD10_URL = "https://icd.who.int/browse10/2019/en";
+const RXNORM_URL = "https://www.nlm.nih.gov/research/umls/rxnorm/index.html";
+const LOINC_URL =
+  "https://www.nlm.nih.gov/research/umls/sourcereleasedocs/current/LNC/index.html";
+const CYPHER_URL = "https://neo4j.com/docs/cypher-manual/5/";
+const NEO4J_URL = "https://neo4j.com/release-notes/database/neo4j-5-26-28/";
+const KEYCLOAK_URL = "https://github.com/keycloak/keycloak/releases/tag/26.8.0";
+const EDC_URL =
+  "https://github.com/eclipse-edc/Connector/releases/tag/v1.0.0-RC5";
+const IDENTITY_HUB_URL =
+  "https://github.com/eclipse-edc/IdentityHub/releases/tag/v1.0.0-RC5";
+const CFM_URL = "https://github.com/eclipse-cfm/cfm/releases/tag/v0.0.7";
+const TRUSTEE_URL =
+  "https://github.com/confidential-containers/trustee/releases/tag/v0.22.0";
+const ACI_CONFIDENTIAL_URL =
+  "https://learn.microsoft.com/en-us/azure/container-instances/container-instances-confidential-overview";
+/** Microsoft: the CCE policy's SHA-256 is the report's HostData, enforced
+ *  by the utility VM. */
+const ACI_ATTESTATION_URL =
+  "https://learn.microsoft.com/en-us/azure/container-instances/confidential-containers-attestation-concepts#full-attestation";
+const APP_ATTEST_URL =
+  "https://developer.apple.com/documentation/devicecheck/establishing-your-app-s-integrity";
+const TESTFLIGHT_URL = "https://developer.apple.com/testflight/";
+
+const LINK_CLASS =
+  "text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline";
+
+/** An external link inside a translated sentence; <T> fills in the words. */
+const ext = (href: string) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className={LINK_CLASS}
+  />
+);
+/** The same for a file name, set in the code font. */
+const extCode = (href: string) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className={`${LINK_CLASS} font-mono text-xs`}
+  />
+);
+/** An article of Regulation (EU) 2025/327, or one of its paragraphs
+ *  ("068.004" is Art. 68(4)). */
+const art = (n: number) => ext(`${EHDS_URL}#art_${n}`);
+const para = (id: string) => ext(`${EHDS_URL}#${id}`);
+/** A file in this repository, at a line range where one says it. */
+const repo = (path: string) => ext(`${REPO_URL}${path}`);
+
 import MermaidDiagram from "@/components/MermaidDiagram";
 import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 import { LocalizedImage } from "@/components/docs/LocalizedImage";
@@ -352,8 +439,6 @@ export default function UserGuidePage() {
   const te = useT("explore");
 
   // The marked parts of a translated text (<T tags>), made once here.
-  const LINK_CLASS =
-    "text-indigo-700 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 underline";
   const liveLink = (
     <a
       href={LIVE_URL}
@@ -482,23 +567,23 @@ export default function UserGuidePage() {
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
               <li>
-                <T area="docsGuide" tags={{ b: strong }}>
+                <T area="docsGuide" tags={{ b: strong, k: ext(KEYCLOAK_URL) }}>
                   {
-                    "<b>Keycloak SSO login</b>: the static demo uses a persona switcher instead"
+                    "<b>Single sign-on</b> through <k>Keycloak</k>: the static demo uses a persona switcher instead"
                   }
                 </T>
               </li>
               <li>
-                <T area="docsGuide" tags={{ b: strong }}>
+                <T area="docsGuide" tags={{ b: strong, n: ext(NEO4J_URL) }}>
                   {
-                    "<b>Live Neo4j graph queries</b>: the persona overview and the other views read pre-loaded mock data"
+                    "<b>Live graph queries</b> on <n>Neo4j</n>: the persona overview and the other views read pre-loaded mock data"
                   }
                 </T>
               </li>
               <li>
-                <T area="docsGuide" tags={{ b: strong }}>
+                <T area="docsGuide" tags={{ b: strong, e: ext(EDC_URL) }}>
                   {
-                    "<b>Contract negotiation & transfers</b>: require EDC connectors"
+                    "<b>Contract negotiation & transfers</b>: require <e>EDC connectors</e>"
                   }
                 </T>
               </li>
@@ -533,9 +618,19 @@ export default function UserGuidePage() {
         <h2 className="text-2xl font-semibold mb-3">{t("Purpose")}</h2>
         <div className="border border-(--border) rounded-xl p-5 bg-(--surface-2)/20">
           <p className="text-(--text-secondary) text-sm mb-3">
-            <T area="docsGuide" tags={{ b: strongPrimary }}>
+            <T
+              area="docsGuide"
+              tags={{
+                b: strongPrimary,
+                r: ext(EHDS_URL),
+                d: ext(DSP_URL),
+                f: ext(FHIR_URL),
+                o: ext(OMOP_URL),
+                n: ext(NEO4J_URL),
+              }}
+            >
               {
-                "This platform is a <b>reference implementation of the European Health Data Space (EHDS) regulation</b>. Its purpose is to demonstrate how sovereign health data exchange works in practice, combining the Dataspace Protocol (DSP 2025-1), FHIR R4 clinical resources, OMOP CDM analytics, and biomedical ontologies into a unified Neo4j knowledge graph."
+                "This platform is a <b>reference implementation</b> of the European Health Data Space (EHDS) regulation, <r>Regulation (EU) 2025/327</r>. Its purpose is to demonstrate how sovereign health data exchange works in practice, combining the Dataspace Protocol (<d>DSP 2025-1</d>), <f>FHIR R4</f> clinical resources, <o>OMOP CDM</o> analytics, and biomedical ontologies into a unified <n>Neo4j</n> knowledge graph."
               }
             </T>
           </p>
@@ -566,37 +661,46 @@ export default function UserGuidePage() {
           </p>
           <ol className="text-(--text-secondary) text-sm space-y-1 ml-4 list-decimal">
             <li>
-              <T area="docsGuide" tags={{ b: l1 }}>
+              <T area="docsGuide" tags={{ b: l1, o: ext(ODRL_URL) }}>
                 {
-                  "<b>L1 Dataspace Marketplace</b>: Participants, DataProducts, ODRL policies, contracts, HDAB approvals"
+                  "<b>L1 Dataspace Marketplace</b>: Participants, DataProducts, <o>ODRL policies</o>, contracts, HDAB approvals"
                 }
               </T>
             </li>
             <li>
-              <T area="docsGuide" tags={{ b: l2 }}>
+              <T area="docsGuide" tags={{ b: l2, h: ext(HEALTHDCAT_AP_URL) }}>
                 {
-                  "<b>L2 HealthDCAT-AP Metadata</b>: Catalogues, datasets, distributions, data services"
+                  "<b>L2 HealthDCAT-AP Metadata</b>: Catalogues, datasets, distributions, data services, as <h>HealthDCAT-AP Release 8</h> describes them"
                 }
               </T>
             </li>
             <li>
-              <T area="docsGuide" tags={{ b: l3 }}>
+              <T area="docsGuide" tags={{ b: l3, f: ext(FHIR_RESOURCES_URL) }}>
                 {
-                  "<b>L3 FHIR R4 Clinical</b>: Patients, encounters, conditions, observations, medications"
+                  "<b>L3 FHIR R4 Clinical</b>: Patients, encounters, conditions, observations, medications, as <f>FHIR R4 resources</f>"
                 }
               </T>
             </li>
             <li>
-              <T area="docsGuide" tags={{ b: l4 }}>
+              <T area="docsGuide" tags={{ b: l4, o: ext(OMOP_URL) }}>
                 {
-                  "<b>L4 OMOP CDM Analytics</b>: Persons, condition occurrences, drug exposures, measurements"
+                  "<b>L4 OMOP CDM Analytics</b>: Persons, condition occurrences, drug exposures, measurements, in <o>OMOP CDM v5.4</o> tables"
                 }
               </T>
             </li>
             <li>
-              <T area="docsGuide" tags={{ b: l5 }}>
+              <T
+                area="docsGuide"
+                tags={{
+                  b: l5,
+                  s: ext(SNOMED_URL),
+                  i: ext(ICD10_URL),
+                  r: ext(RXNORM_URL),
+                  l: ext(LOINC_URL),
+                }}
+              >
                 {
-                  "<b>L5 Biomedical Ontology</b>: SNOMED CT, ICD-10, RxNorm, LOINC concept mappings"
+                  "<b>L5 Biomedical Ontology</b>: <s>SNOMED CT</s>, <i>ICD-10</i>, <r>RxNorm</r>, <l>LOINC</l> concept mappings"
                 }
               </T>
             </li>
@@ -615,9 +719,9 @@ export default function UserGuidePage() {
           {t("Personas & Roles: Who Uses What?")}
         </h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          <T area="docsGuide" tags={{ c: signinCode }}>
+          <T area="docsGuide" tags={{ c: signinCode, e: para("002.002") }}>
             {
-              "The EHDS regulation defines distinct participant roles to ensure accountability, data sovereignty, and patient rights across the health data ecosystem. This platform adapts its navigation, persona overview, and available actions to the signed-in user's EHDS role. Sign in at <c>/auth/signin</c> with any demo account: password equals username in local dev."
+              "The EHDS regulation defines distinct participant roles (<e>Art. 2(2)</e>) to ensure accountability, data sovereignty, and patient rights across the health data ecosystem. This platform adapts its navigation, persona overview, and available actions to the signed-in user's EHDS role. Sign in at <c>/auth/signin</c> with any demo account: password equals username in local dev."
             }
           </T>
         </p>
@@ -658,7 +762,7 @@ export default function UserGuidePage() {
                     graph: te("Access body"),
                     q: t("Who are my participants? What contracts are active?"),
                     ehds: t(
-                      "EHDS Art. 75: operates the dataspace infrastructure and ensures interoperability between participants",
+                      "No EHDS article defines this role: it runs the dataspace infrastructure and ensures interoperability between participants",
                     ),
                   },
                   {
@@ -668,8 +772,12 @@ export default function UserGuidePage() {
                     color: "text-(--accent)",
                     graph: te("Data holder"),
                     q: t("Who has approved access to my datasets?"),
-                    ehds: t(
-                      "EHDS Art. 60: health data holders must make electronic health data available for secondary use when authorized",
+                    ehds: (
+                      <T area="docsGuide" tags={{ a: art(60) }}>
+                        {
+                          "<a>EHDS Art. 60</a>: health data holders must make electronic health data available for secondary use when authorized"
+                        }
+                      </T>
                     ),
                   },
                   {
@@ -679,8 +787,12 @@ export default function UserGuidePage() {
                     color: "text-(--accent)",
                     graph: te("Data holder"),
                     q: t("What contracts are active for my NL datasets?"),
-                    ehds: t(
-                      "EHDS Art. 60: cross-border data holder demonstrating multi-country interoperability",
+                    ehds: (
+                      <T area="docsGuide" tags={{ a: art(60) }}>
+                        {
+                          "<a>EHDS Art. 60</a>: cross-border data holder demonstrating multi-country interoperability"
+                        }
+                      </T>
                     ),
                   },
                   {
@@ -690,8 +802,12 @@ export default function UserGuidePage() {
                     color: "text-(--success-text)",
                     graph: te("Researcher"),
                     q: t("What datasets match my study protocol?"),
-                    ehds: t(
-                      "EHDS Art. 53(1): data users access health data for permitted secondary use purposes (research, innovation, public health)",
+                    ehds: (
+                      <T area="docsGuide" tags={{ a: para("053.001") }}>
+                        {
+                          "<a>EHDS Art. 53(1)</a>: data users access health data for permitted secondary use purposes (research, innovation, public health)"
+                        }
+                      </T>
                     ),
                   },
                   {
@@ -701,8 +817,12 @@ export default function UserGuidePage() {
                     color: "text-amber-700 dark:text-amber-400",
                     graph: te("Access body"),
                     q: t("What approvals are pending? Is the chain complete?"),
-                    ehds: t(
-                      "EHDS Art. 55 and 57: Health Data Access Bodies are designated by each Member State to authorize secondary use of health data",
+                    ehds: (
+                      <T area="docsGuide" tags={{ a: art(55), b: art(57) }}>
+                        {
+                          "EHDS <a>Art. 55</a> and <b>57</b>: Health Data Access Bodies are designated by each Member State to authorize secondary use of health data"
+                        }
+                      </T>
                     ),
                   },
                 ].map((p) => (
@@ -751,25 +871,53 @@ export default function UserGuidePage() {
                 id: "holder",
                 role: tc("Data Holder"),
                 color: "text-(--accent)",
-                article: t("Art. 60"),
-                why: t(
-                  "Healthcare providers, insurers, and registries that hold electronic health data are legally required to make it available for authorized secondary use. They retain sovereignty over their data and control access through ODRL policies and contract negotiation.",
+                article: (
+                  <a
+                    href={`${EHDS_URL}#art_60`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={LINK_CLASS}
+                  >
+                    {t("Art. 60")}
+                  </a>
+                ),
+                why: (
+                  <T area="docsGuide" tags={{ o: ext(ODRL_URL) }}>
+                    {
+                      "Healthcare providers, insurers, and registries that hold electronic health data are legally required to make it available for authorized secondary use. They retain sovereignty over their data and control access through <o>ODRL policies</o> and contract negotiation."
+                    }
+                  </T>
                 ),
               },
               {
                 id: "user",
                 role: t("Data User (Researcher)"),
                 color: "text-(--success-text)",
-                article: t("Art. 53(1), Art. 67-68"),
-                why: t(
-                  "Researchers, public health agencies, and innovators who need health data for permitted purposes must apply through an HDAB, receive a data permit, and access data only in a secure processing environment. They never receive raw patient data directly.",
+                article: (
+                  <T
+                    area="docsGuide"
+                    tags={{ a: para("053.001"), b: art(67), c: art(68) }}
+                  >
+                    {"<a>Art. 53(1)</a>, <b>Art. 67</b>, <c>Art. 68</c>"}
+                  </T>
+                ),
+                why: (
+                  <T area="docsGuide" tags={{ s: art(73) }}>
+                    {
+                      "Researchers, public health agencies, and innovators who need health data for permitted purposes must apply through an HDAB, receive a data permit, and access data only in a secure processing environment (<s>Art. 73</s>). They never receive raw patient data directly."
+                    }
+                  </T>
                 ),
               },
               {
                 id: "hdab",
                 role: tc("HDAB Authority"),
                 color: "text-amber-700 dark:text-amber-400",
-                article: t("Art. 55, 57"),
+                article: (
+                  <T area="docsGuide" tags={{ a: art(55), b: art(57) }}>
+                    {"<a>Art. 55</a>, <b>57</b>"}
+                  </T>
+                ),
                 why: t(
                   "Each EU Member State must designate one or more Health Data Access Bodies (HDABs) as the national authority that reviews data access applications, issues data permits, and ensures compliance. MedReg DE represents the German HDAB in this implementation.",
                 ),
@@ -778,18 +926,36 @@ export default function UserGuidePage() {
                 id: "operator",
                 role: t("EDC Admin / Dataspace Operator"),
                 color: "text-(--danger-text)",
-                article: t("Art. 75"),
-                why: t(
-                  "The dataspace operator runs the technical infrastructure: participant onboarding, connector management, federated catalog, and transfer monitoring. They ensure interoperability across all participants but do not access health data directly.",
+                article: t("Not in the Regulation"),
+                why: (
+                  <T area="docsGuide" tags={{ a: para("075.008") }}>
+                    {
+                      "The dataspace operator runs the technical infrastructure: participant onboarding, connector management, federated catalog, and transfer monitoring. They ensure interoperability across all participants but do not access health data directly. No article of the Regulation defines this role; the nearest is the Commission, which operates the central platform of HealthData@EU (<a>Art. 75(8)</a>)."
+                    }
+                  </T>
                 ),
               },
               {
                 id: "trust-center",
                 role: t("Trust Center Operator"),
                 color: "text-violet-700 dark:text-violet-400",
-                article: t("Art. 73(1)(e)"),
-                why: t(
-                  "The EHDS mandates pseudonymisation and re-identification controls. The Trust Center manages pseudonym resolution, secure processing environment (SPE) sessions, and ensures that data users only access de-identified data. This role enforces the technical privacy safeguards the regulation requires.",
+                article: (
+                  <T
+                    area="docsGuide"
+                    tags={{ a: para("066.003"), b: para("073.001") }}
+                  >
+                    {"<a>Art. 66(3)</a>, <b>Art. 73(1)(e)</b>"}
+                  </T>
+                ),
+                why: (
+                  <T
+                    area="docsGuide"
+                    tags={{ a: para("066.003"), b: para("073.001") }}
+                  >
+                    {
+                      "The EHDS gives data users pseudonymised data only where anonymised data cannot serve the purpose, and keeps the information to reverse the pseudonymisation with the access body or a trusted third party (<a>Art. 66(3)</a>). The secure processing environment keeps identifiable logs of access for at least a year (<b>Art. 73(1)(e)</b>). The Trust Center manages pseudonym resolution and secure processing environment (SPE) sessions, and ensures that data users only access de-identified data."
+                    }
+                  </T>
                 ),
               },
             ].map((r) => (
@@ -859,9 +1025,18 @@ export default function UserGuidePage() {
             </table>
           </div>
           <p className="text-(--text-secondary) text-xs mt-3">
-            {t(
-              "Generated from the navigation itself, so it shows exactly what each persona's menu holds. Every page except the start page and this documentation needs a sign-in (ADR-044); a page missing from a menu is not necessarily forbidden, the middleware decides that.",
-            )}
+            <T
+              area="docsGuide"
+              tags={{
+                a: repo(
+                  "docs/ADRs/ADR-044-every-api-route-needs-a-session.md?plain=1#L27-L45",
+                ),
+              }}
+            >
+              {
+                "Generated from the navigation itself, so it shows exactly what each persona's menu holds. Every page except the start page and this documentation needs a sign-in (<a>ADR-044</a>); a page missing from a menu is not necessarily forbidden, the middleware decides that."
+              }
+            </T>
           </p>
         </div>
 
@@ -885,7 +1060,23 @@ export default function UserGuidePage() {
                 q: te(
                   "Which parameters put me at risk, what should I do about them, and who is using my data?",
                 ),
-                articles: t("Regulation (EU) 2025/327 Art. 3, 8, 14, 71, 73"),
+                articles: (
+                  <T
+                    area="docsGuide"
+                    tags={{
+                      r: ext(EHDS_URL),
+                      a: art(3),
+                      b: art(8),
+                      c: art(14),
+                      d: art(71),
+                      e: art(73),
+                    }}
+                  >
+                    {
+                      "<r>Regulation (EU) 2025/327</r> Art. <a>3</a>, <b>8</b>, <c>14</c>, <d>71</d>, <e>73</e>"
+                    }
+                  </T>
+                ),
               },
               {
                 id: "researcher",
@@ -895,8 +1086,23 @@ export default function UserGuidePage() {
                 q: te(
                   "What am I allowed to use today, what is pending or blocked, and what am I missing?",
                 ),
-                articles: t(
-                  "Regulation (EU) 2025/327 Art. 53, 61, 67, 68, 69, 73",
+                articles: (
+                  <T
+                    area="docsGuide"
+                    tags={{
+                      r: ext(EHDS_URL),
+                      a: art(53),
+                      b: art(61),
+                      c: art(67),
+                      d: art(68),
+                      e: art(69),
+                      f: art(73),
+                    }}
+                  >
+                    {
+                      "<r>Regulation (EU) 2025/327</r> Art. <a>53</a>, <b>61</b>, <c>67</c>, <d>68</d>, <e>69</e>, <f>73</f>"
+                    }
+                  </T>
                 ),
               },
               {
@@ -907,8 +1113,23 @@ export default function UserGuidePage() {
                 q: te(
                   "Which operations are non-compliant right now, and are my own decisions on time?",
                 ),
-                articles: t(
-                  "Regulation (EU) 2025/327 Art. 57, 61, 63, 68, 73, 78",
+                articles: (
+                  <T
+                    area="docsGuide"
+                    tags={{
+                      r: ext(EHDS_URL),
+                      a: art(57),
+                      b: art(61),
+                      c: art(63),
+                      d: art(68),
+                      e: art(73),
+                      f: art(78),
+                    }}
+                  >
+                    {
+                      "<r>Regulation (EU) 2025/327</r> Art. <a>57</a>, <b>61</b>, <c>63</c>, <d>68</d>, <e>73</e>, <f>78</f>"
+                    }
+                  </T>
                 ),
               },
               {
@@ -919,7 +1140,23 @@ export default function UserGuidePage() {
                 q: te(
                   "Which consumers are trusted, what is flowing without cover, and are my own duties in order?",
                 ),
-                articles: t("Regulation (EU) 2025/327 Art. 60, 61, 73, 77, 78"),
+                articles: (
+                  <T
+                    area="docsGuide"
+                    tags={{
+                      r: ext(EHDS_URL),
+                      a: art(60),
+                      b: art(61),
+                      c: art(73),
+                      d: art(77),
+                      e: art(78),
+                    }}
+                  >
+                    {
+                      "<r>Regulation (EU) 2025/327</r> Art. <a>60</a>, <b>61</b>, <c>73</c>, <d>77</d>, <e>78</e>"
+                    }
+                  </T>
+                ),
               },
             ].map((p) => (
               <div
@@ -957,7 +1194,13 @@ export default function UserGuidePage() {
         <h2 className="text-2xl font-semibold mb-3">{t("Getting Started")}</h2>
         <MermaidDiagram
           chart={localizedChart("user-guide-workflow", lang)}
-          caption={t("User workflow overview")}
+          caption={
+            <T area="docsGuide" tags={{ a: art(57), b: art(69) }}>
+              {
+                "User workflow overview; governance follows <a>EHDS Art. 57</a> to <b>69</b>"
+              }
+            </T>
+          }
         />
         <p className="text-(--text-secondary) text-sm mt-3 mb-6">
           <T area="docsGuide" tags={{ b: strong }}>
@@ -992,14 +1235,26 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "The onboarding wizard guides new participants through dataspace registration: creating a DID identity, registering with the Credential Federated Manager, and enrolling in the federated catalog. This process implements the EHDS requirement for authorised participation (Art. 75) with verifiable credentials.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{
+                  a: repo(
+                    "docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md?plain=1#L62-L72",
+                  ),
+                  i: ext(IDENTITY_HUB_URL),
+                  d: ext(DCP_URL),
+                  f: ext(CFM_URL),
+                }}
+              >
+                {
+                  "The onboarding wizard registers a new participant. On the default stack the hub provisions it itself (<a>ADR-078</a>): a control plane context, a DID with its keys in the <i>IdentityHub</i>, and a MembershipCredential requested over <d>DCP v1.0</d>. The <f>Connector Fabric Manager</f> did this before and still does under the edc018 profile only."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              <T area="docsGuide" tags={{ c: codeXs }}>
+              <T area="docsGuide" tags={{ c: codeXs, w: ext(DID_WEB_URL) }}>
                 {
-                  "Example: Limburg Medical Centre joins the EHDS dataspace by providing its organization details, generating <c>did:web:lmc.nl:clinic</c>, and obtaining a MembershipCredential."
+                  "Example: Limburg Medical Centre joins the EHDS dataspace by providing its organization details, generating a <w>did:web</w> identifier such as <c>did:web:lmc.nl:clinic</c>, and obtaining a MembershipCredential."
                 }
               </T>
             </p>
@@ -1012,10 +1267,15 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "View and manage your participant profile, verifiable credentials (MembershipCredential, {credential}), connector endpoints, and Keycloak SSO configuration.",
-                { credential: PARTICIPANT_CREDENTIAL },
-              )}
+              <T
+                area="docsGuide"
+                tags={{ v: ext(DCP_URL), k: ext(KEYCLOAK_URL) }}
+                vars={{ credential: PARTICIPANT_CREDENTIAL }}
+              >
+                {
+                  "View and manage your participant profile, <v>verifiable credentials</v> (MembershipCredential, {credential}), connector endpoints, and <k>Keycloak</k> SSO configuration."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1032,14 +1292,26 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "A patient signs in with the person identification data (PID) in an EUDI Wallet, such as the German d-you wallet, instead of a password: the sign-in page shows a QR code, the wallet presents the PID over OpenID4VP, and the hub checks it with its own verifier (EHDS Art. 16, eIDAS). An account the Klarbefund app created can be linked to a PID once under My Health, Connect your EUDI wallet; the hub keeps a keyed fingerprint of the PID, never the name or birth date.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{
+                  w: ext(D_YOU_URL),
+                  o: ext(OPENID4VP_URL),
+                  a: art(16),
+                  e: ext(EIDAS_URL),
+                }}
+              >
+                {
+                  "A patient signs in with the person identification data (PID) in an EUDI Wallet, such as the German <w>d-you wallet</w>, instead of a password: the sign-in page shows a QR code, the wallet presents the PID over <o>OpenID4VP</o>, and the hub checks it with its own verifier (EHDS <a>Art. 16</a>, <e>eIDAS</e>). An account the Klarbefund app created can be linked to a PID once under My Health, Connect your EUDI wallet; the hub keeps a keyed fingerprint of the PID, never the name or birth date."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              {t(
-                "Example: A patient scans the QR code with d-you, approves the presentation and lands in their own record at assurance level high. The static demo shows the flow with a simulated phone.",
-              )}
+              <T area="docsGuide" tags={{ l: ext(EIDAS_LEVEL_HIGH_URL) }}>
+                {
+                  "Example: A patient scans the QR code with d-you, approves the presentation and lands in their own record at <l>assurance level high</l>. The static demo shows the flow with a simulated phone."
+                }
+              </T>
             </p>
           </FeatureCard>
         </div>
@@ -1084,9 +1356,21 @@ export default function UserGuidePage() {
               <tr className="border-t border-(--border)">
                 <td className="px-3 py-2 font-medium">{t("Available")}</td>
                 <td className="px-3 py-2">
-                  {t(
-                    "Monday to Friday, 07:00 to 20:00 Berlin time in summer and 06:00 to 19:00 in winter. Closed on Berlin public holidays.",
-                  )}
+                  <T
+                    area="docsGuide"
+                    tags={{
+                      s: repo(
+                        "docs/knowledge/runbooks/live-demo-off-hours.md?plain=1#L16-L25",
+                      ),
+                      a: repo(
+                        "docs/ADRs/ADR-053-everything-stops-off-hours.md?plain=1#L35-L56",
+                      ),
+                    }}
+                  >
+                    {
+                      "Monday to Friday, 07:00 to 20:00 Berlin time in summer and 06:00 to 19:00 in winter. Closed on Berlin public holidays (<s>schedule</s>, <a>ADR-053</a>)."
+                    }
+                  </T>
                 </td>
                 <td className="px-3 py-2">{t("Always")}</td>
               </tr>
@@ -1130,9 +1414,11 @@ export default function UserGuidePage() {
             icon={Globe}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "One view per role that answers the role's primary question. On the left, what needs attention right now, most urgent first, each with the article of Regulation (EU) 2025/327 it concerns. On the right, a layered 3D scene of the knowledge graph behind it: the role's own decisions and their clocks, credentials, permits and contracts, data users and holders, datasets, and the months unfolded over time.",
-              )}
+              <T area="docsGuide" tags={{ r: ext(EHDS_URL) }}>
+                {
+                  "One view per role that answers the role's primary question. On the left, what needs attention right now, most urgent first, each with the article of <r>Regulation (EU) 2025/327</r> it concerns. On the right, a layered 3D scene of the knowledge graph behind it: the role's own decisions and their clocks, credentials, permits and contracts, data users and holders, datasets, and the months unfolded over time."
+                }
+              </T>
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
               <li>
@@ -1150,9 +1436,11 @@ export default function UserGuidePage() {
               </li>
             </ul>
             <p className="text-(--text-secondary) text-xs italic mt-2">
-              {t(
-                "Example: MedReg DE sees that three applications passed the three-month decision deadline of Art. 68(4) and opens the queue by month.",
-              )}
+              <T area="docsGuide" tags={{ a: para("068.004") }}>
+                {
+                  "Example: MedReg DE sees that three applications passed the three-month decision deadline of <a>Art. 68(4)</a> and opens the queue by month."
+                }
+              </T>
             </p>
           </FeatureCard>
 
@@ -1162,16 +1450,25 @@ export default function UserGuidePage() {
             icon={Database}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "Browse and search HealthDCAT-AP metadata records for all published datasets. Each entry shows title, description, publisher, temporal/spatial coverage, and distribution formats. The catalog implements the EHDS metadata requirements (Art. 77) for discoverable, machine-readable dataset descriptions.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{ h: ext(HEALTHDCAT_AP_URL), a: art(77) }}
+              >
+                {
+                  "Browse and search <h>HealthDCAT-AP</h> metadata records for all published datasets. Each entry shows title, description, publisher, temporal/spatial coverage, and distribution formats. The catalog implements the EHDS metadata requirements (<a>Art. 77</a>) for discoverable, machine-readable dataset descriptions."
+                }
+              </T>
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
               <li>{t("Filter by publisher, theme, or keyword")}</li>
               <li>
                 {t("View distribution endpoints (FHIR, OMOP, bulk export)")}
               </li>
-              <li>{t("Check data quality metrics (DQV dimensions)")}</li>
+              <li>
+                <T area="docsGuide" tags={{ d: ext(DQV_URL) }}>
+                  {"Check data quality metrics (<d>DQV</d> dimensions)"}
+                </T>
+              </li>
               <li>{t("Initiate data access requests from catalog entries")}</li>
             </ul>
             <p className="text-(--text-secondary) text-xs italic mt-2">
@@ -1187,14 +1484,29 @@ export default function UserGuidePage() {
             icon={PencilLine}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "Data holders create and edit their dataset descriptions here. The hub serves them as HealthDCAT-AP Release 8, the form Implementing Regulation (EU) 2026/2098 sets for every dataset description. Mandatory fields are marked, and a saved entry carries what Release 8 requires (access body, distribution, variables, contact point), so it passes the official validation at once.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{
+                  h: ext(HEALTHDCAT_AP_URL),
+                  a: repo(
+                    "docs/ADRs/ADR-063-healthdcat-ap-release-8-and-its-namespace.md?plain=1#L42-L64",
+                  ),
+                  i: ext(`${IMPL_2098_URL}#anx_1`),
+                  d: ext(`${IMPL_2098_URL}#art_4`),
+                  l: ext(HEALTHDCAT_AP_LATEST_URL),
+                }}
+              >
+                {
+                  "Data holders create and edit their dataset descriptions here. The hub serves them as <h>HealthDCAT-AP Release 8</h> (<a>ADR-063</a>). <i>Implementing Regulation (EU) 2026/2098</i> requires every dataset description to express its minimum metadata in HealthDCAT-AP from 26 March 2029 (<d>Art. 4</d>), and cites the <l>latest release</l> rather than a release number. Mandatory fields are marked, and a saved entry carries what Release 8 requires (access body, distribution, variables, contact point), so it passes the official validation at once."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic mt-2">
-              {t(
-                "Example: AlphaKlinik Berlin adds its Type 2 Diabetes Cohort with an Art. 68 data permit as the legal basis, then exports the catalogue as Turtle.",
-              )}
+              <T area="docsGuide" tags={{ a: art(68) }}>
+                {
+                  "Example: AlphaKlinik Berlin adds its Type 2 Diabetes Cohort with an <a>Art. 68</a> data permit as the legal basis, then exports the catalogue as Turtle."
+                }
+              </T>
             </p>
           </FeatureCard>
 
@@ -1204,9 +1516,18 @@ export default function UserGuidePage() {
             icon={Search}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "View the clinical timeline for synthetic patients, showing FHIR R4 resources (Encounters, Conditions, Observations, Medications, Procedures) mapped to their OMOP CDM equivalents. This dual-view demonstrates how primary-use clinical data (EHDS Chapter II) can be transformed for secondary-use analytics while preserving semantic integrity.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{
+                  f: ext(FHIR_RESOURCES_URL),
+                  o: ext(OMOP_URL),
+                  c: ext(`${EHDS_URL}#cpt_II`),
+                }}
+              >
+                {
+                  "View the clinical timeline for synthetic patients, showing <f>FHIR R4 resources</f> (Encounters, Conditions, Observations, Medications, Procedures) mapped to their <o>OMOP CDM</o> equivalents. This dual-view demonstrates how primary-use clinical data (<c>EHDS Chapter II</c>) can be transformed for secondary-use analytics while preserving semantic integrity."
+                }
+              </T>
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
               <li>{t("Select patients from the patient list")}</li>
@@ -1215,9 +1536,17 @@ export default function UserGuidePage() {
               <li>{t("Explore SNOMED/LOINC/RxNorm concept mappings")}</li>
             </ul>
             <p className="text-(--text-secondary) text-xs italic mt-2">
-              {t(
-                "Example: A data steward reviews the timeline for a synthetic patient with hypertension, verifying that the FHIR Condition correctly maps to OMOP condition_occurrence with SNOMED code 38341003.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{
+                  o: ext(`${OMOP_URL}#condition_occurrence`),
+                  s: ext(SNOMED_HYPERTENSION_URL),
+                }}
+              >
+                {
+                  "Example: A data steward reviews the timeline for a synthetic patient with hypertension, verifying that the FHIR Condition correctly maps to OMOP <o>condition_occurrence</o> with <s>SNOMED code 38341003</s>."
+                }
+              </T>
             </p>
           </FeatureCard>
 
@@ -1227,9 +1556,11 @@ export default function UserGuidePage() {
             icon={BarChart3}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "Cohort-level research analytics powered by the OMOP CDM layer. Run aggregate queries across conditions, measurements, drug exposures, and procedures. This implements the EHDS secondary-use analytics capability (Art. 53) where researchers work with de-identified, standardised data.",
-              )}
+              <T area="docsGuide" tags={{ o: ext(OMOP_URL), a: art(53) }}>
+                {
+                  "Cohort-level research analytics powered by the <o>OMOP CDM</o> layer. Run aggregate queries across conditions, measurements, drug exposures, and procedures. This implements the EHDS secondary-use analytics capability (<a>Art. 53</a>) where researchers work with de-identified, standardised data."
+                }
+              </T>
             </p>
             <ul className="text-(--text-secondary) text-sm space-y-1 ml-4 list-disc">
               <li>{t("View condition prevalence and demographics")}</li>
@@ -1251,9 +1582,11 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "A researcher with a data permit asks a question in plain language. A prepared question, a fulltext search or, where one is configured, a language model turns it into Cypher, which runs inside the secure processing environment; the page shows the Cypher, the permit it ran under and the rows that came back. The Federated button asks every SPE and merges the answers. Every answer about persons is k-anonymous: a count below 5 is shown as <5, and a share computed from it with it.",
-              )}
+              <T area="docsGuide" tags={{ c: ext(CYPHER_URL) }}>
+                {
+                  "A researcher with a data permit asks a question in plain language. A prepared question, a fulltext search or, where one is configured, a language model turns it into <c>Cypher</c>, which runs inside the secure processing environment; the page shows the Cypher, the permit it ran under and the rows that came back. The Federated button asks every SPE and merges the answers. Every answer about persons is k-anonymous: a count below 5 is shown as <5, and a share computed from it with it."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1271,9 +1604,14 @@ export default function UserGuidePage() {
               {t("Two secure processing environments")}
             </h3>
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "Row-level data is processed only inside a secure processing environment (EHDS Art. 73); only answers leave it. SPE-1 holds AlphaKlinik Berlin's patients, SPE-2 Limburg Medical Centre's, each a Neo4j workspace loaded for the permit, so a federated question has two contributors. Both apply the same rules before anything leaves: the data permit, the ODRL policy, the Art. 71 opt-out (persons who opted out are never counted) and k = 5, including the rule that a contributor with fewer than 5 records withholds the whole answer, since a missing contributor would identify people. Every question is recorded on the audit chain.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{ a: art(73), o: ext(ODRL_URL), b: art(71) }}
+              >
+                {
+                  "Row-level data is processed only inside a secure processing environment (EHDS <a>Art. 73</a>); only answers leave it. SPE-1 holds AlphaKlinik Berlin's patients, SPE-2 Limburg Medical Centre's, each a Neo4j workspace loaded for the permit, so a federated question has two contributors. Both apply the same rules before anything leaves: the data permit, the <o>ODRL policy</o>, the <b>Art. 71</b> opt-out (persons who opted out are never counted) and k = 5, including the rule that a contributor with fewer than 5 records withholds the whole answer, since a missing contributor would identify people. Every question is recorded on the audit chain."
+                }
+              </T>
             </p>
             <ul className="text-(--text-secondary) text-sm mb-2 list-disc pl-5 space-y-1">
               <li>
@@ -1282,26 +1620,53 @@ export default function UserGuidePage() {
                 )}
               </li>
               <li>
-                <T area="docsGuide" tags={{ c: code, d: code }}>
+                <T
+                  area="docsGuide"
+                  tags={{
+                    c: extCode(`${REPO_URL}docker-compose.trustee.yml#L1-L7`),
+                    d: code,
+                    t: ext(TRUSTEE_URL),
+                  }}
+                >
                   {
-                    "Locally both run as workspaces loaded per permit from an encrypted extract (<c>docker-compose.trustee.yml</c> with the <d>federated</d> profile), with the access body's Trustee and its sample attester: labelled “Simulated attestation”. The static demo shows the same."
-                  }
-                </T>
-              </li>
-              <li>
-                <T area="docsGuide" tags={{ c: code, d: code, e: code }}>
-                  {
-                    "On Azure both run as ACI confidential container groups, <c>mvhd-spe-1</c> and <d>mvhd-spe-2</d>, once <e>scripts/azure/21-aci-confidential-spe.sh</e> has run. Each proves its own container group on AMD SEV-SNP hardware: labelled “Attested: confidential workload”, and the permit's policy hash is checked by hardware."
+                    "Locally both run as workspaces loaded per permit from an encrypted extract (<c>docker-compose.trustee.yml</c> with the <d>federated</d> profile), with the access body's <t>Trustee</t> and its sample attester: labelled “Simulated attestation”. The static demo shows the same."
                   }
                 </T>
               </li>
               <li>
                 <T
                   area="docsGuide"
-                  tags={{ l: attestationLink, a: adr068Link }}
+                  tags={{
+                    c: code,
+                    d: code,
+                    e: extCode(
+                      `${REPO_URL}scripts/azure/21-aci-confidential-spe.sh#L3-L6`,
+                    ),
+                    g: ext(ACI_CONFIDENTIAL_URL),
+                    h: repo(
+                      "docs/ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md?plain=1#L113-L127",
+                    ),
+                  }}
                 >
                   {
-                    "The operator sees the evidence behind each label on <l>SPE attestation</l>. The design is <a>ADR-068</a>; where it runs on Azure is ADR-069 (#774)."
+                    "On Azure both run as <g>ACI confidential container groups</g>, <c>mvhd-spe-1</c> and <d>mvhd-spe-2</d>, once <e>scripts/azure/21-aci-confidential-spe.sh</e> has run. Each proves its own container group on AMD SEV-SNP hardware: labelled “Attested: confidential workload”, and <h>the permit's policy hash is checked by hardware</h>."
+                  }
+                </T>
+              </li>
+              <li>
+                <T
+                  area="docsGuide"
+                  tags={{
+                    l: attestationLink,
+                    a: adr068Link,
+                    n: repo(
+                      "docs/ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md?plain=1#L90-L233",
+                    ),
+                    i: issue774Link,
+                  }}
+                >
+                  {
+                    "The operator sees the evidence behind each label on <l>SPE attestation</l>. The design is <a>ADR-068</a>; where it runs on Azure is <n>ADR-069</n> (<i>#774</i>)."
                   }
                 </T>
               </li>
@@ -1321,9 +1686,11 @@ export default function UserGuidePage() {
             icon={FileCheck}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "European EHR Exchange Format profile alignment view. Analyse which FHIR profiles satisfy EHDS priority categories (Patient Summary, ePrescription, Laboratory Results, Medical Imaging, Hospital Discharge) and identify coverage gaps. The EEHRxF is mandated by EHDS Art. 15 to ensure interoperability of primary-use health data across Member States.",
-              )}
+              <T area="docsGuide" tags={{ a: art(15) }}>
+                {
+                  "European EHR Exchange Format profile alignment view. Analyse which FHIR profiles satisfy EHDS priority categories (Patient Summary, ePrescription, Laboratory Results, Medical Imaging, Hospital Discharge) and identify coverage gaps. The EEHRxF is mandated by EHDS <a>Art. 15</a> to ensure interoperability of primary-use health data across Member States."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1338,9 +1705,14 @@ export default function UserGuidePage() {
       <section className="mb-12" id="my-health">
         <h2 className="text-2xl font-semibold mb-3">{tn("My Health")}</h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          {t(
-            "A signed-in patient gets their own menu: one overview, their records, and the pages below. Each shows that patient's own record only; any other patient's record is refused (EHDS Art. 3, GDPR Art. 15).",
-          )}
+          <T
+            area="docsGuide"
+            tags={{ a: art(3), g: ext(`${GDPR_URL}#art_15`) }}
+          >
+            {
+              "A signed-in patient gets their own menu: one overview, their records, and the pages below. Each shows that patient's own record only; any other patient's record is refused (EHDS <a>Art. 3</a>, GDPR <g>Art. 15</g>)."
+            }
+          </T>
         </p>
         <div className="space-y-6">
           <FeatureCard
@@ -1349,9 +1721,14 @@ export default function UserGuidePage() {
             icon={Search}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "A natural-language question over the patient's own record (EHDS Art. 3, GDPR Art. 15): trends from fitness, lab and nutrition data, together with the relevant ePA events, computed only from that patient's data.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{ a: art(3), g: ext(`${GDPR_URL}#art_15`) }}
+              >
+                {
+                  "A natural-language question over the patient's own record (EHDS <a>Art. 3</a>, GDPR <g>Art. 15</g>): trends from fitness, lab and nutrition data, together with the relevant ePA events, computed only from that patient's data."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1381,9 +1758,14 @@ export default function UserGuidePage() {
             icon={TestTube}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "The opt-out from all secondary use (EHDS Art. 71), at any time and reversible, and, separately, the research programmes the patient can join or leave, with the history of every consent given or withdrawn (GDPR Art. 7(3)).",
-              )}
+              <T
+                area="docsGuide"
+                tags={{ a: art(71), g: ext(`${GDPR_URL}#007.003`) }}
+              >
+                {
+                  "The opt-out from all secondary use (EHDS <a>Art. 71</a>), at any time and reversible, and, separately, the research programmes the patient can join or leave, with the history of every consent given or withdrawn (GDPR <g>Art. 7(3)</g>)."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1413,9 +1795,23 @@ export default function UserGuidePage() {
             icon={Smartphone}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "Klarbefund turns a paper lab report into checkable values on the phone. Connected to the hub, it either creates its own sandbox account with an empty record (gated by Apple App Attest) or connects to an existing one: Health Profile shows a QR code, the app scans it and is connected. It sends the reports, vaccinations and medication plan the person chooses, and weekly device means behind a switch of their own. Delete all my data in the app also deletes the account it created on the hub. The beta is open through TestFlight.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{
+                  a: ext(APP_ATTEST_URL),
+                  d: repo(
+                    "docs/ADRs/ADR-054-klarbefund-creates-a-sandbox-account-with-app-attest.md?plain=1#L29-L66",
+                  ),
+                  m: repo(
+                    "docs/ADRs/ADR-057-klarbefund-sends-weekly-device-means.md?plain=1#L24-L46",
+                  ),
+                  t: ext(TESTFLIGHT_URL),
+                }}
+              >
+                {
+                  "Klarbefund turns a paper lab report into checkable values on the phone. Connected to the hub, it either creates its own sandbox account with an empty record (gated by Apple <a>App Attest</a>, <d>ADR-054</d>) or connects to an existing one: Health Profile shows a QR code, the app scans it and is connected. It sends the reports, vaccinations and medication plan the person chooses, and weekly device means behind a switch of their own (<m>ADR-057</m>). Delete all my data in the app also deletes the account it created on the hub. The beta is open through <t>TestFlight</t>."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1430,13 +1826,24 @@ export default function UserGuidePage() {
       <section className="mb-12" id="governance">
         <h2 className="text-2xl font-semibold mb-3">{tn("Governance")}</h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          {t(
-            "The governance modules manage EHDS compliance, protocol testing, and verifiable credential issuance as required by the European Health Data Space regulation (Chapter IV, Art. 50 to 81). These modules ensure that every data access follows the legally mandated approval chain: application, HDAB review, data permit issuance, contract negotiation, and audited transfer.",
-          )}
+          <T
+            area="docsGuide"
+            tags={{ c: ext(`${EHDS_URL}#cpt_IV`), a: art(67), b: art(68) }}
+          >
+            {
+              "The governance modules cover EHDS compliance, protocol testing, and verifiable credential issuance under the European Health Data Space regulation (<c>Chapter IV</c>, Art. 50 to 81). Every data access follows the approval chain the Regulation sets: application, HDAB review and data permit (<a>Art. 67</a> and <b>68</b>). The hub then adds a contract negotiation and an audited transfer."
+            }
+          </T>
         </p>
         <MermaidDiagram
           chart={localizedChart("user-guide-compliance", lang)}
-          caption={t("EHDS data access compliance workflow")}
+          caption={
+            <T area="docsGuide" tags={{ a: art(67), b: art(68) }}>
+              {
+                "EHDS data access compliance workflow: the application of <a>Art. 67</a> and the permit of <b>Art. 68</b>"
+              }
+            </T>
+          }
         />
 
         <div className="space-y-6 mt-6">
@@ -1447,14 +1854,21 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "Manage data access permits as required by EHDS Art. 67 and 68. Data users submit applications specifying the purpose, scope, and duration of data access. HDABs review applications against the permitted purposes in Art. 53(1) and issue verifiable credentials as proof of authorization.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{ a: art(67), b: art(68), c: para("053.001") }}
+              >
+                {
+                  "Manage data access permits as required by EHDS <a>Art. 67</a> and <b>68</b>. Data users submit applications specifying the purpose, scope, and duration of data access. HDABs review applications against the permitted purposes in <c>Art. 53(1)</c> and issue verifiable credentials as proof of authorization."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              {t(
-                "Example: PharmaCo Research AG submits a data access application for the diabetes cohort. MedReg DE (HDAB) reviews the request, approves it under Art. 68, and a DataPermitCredential is issued.",
-              )}
+              <T area="docsGuide" tags={{ a: art(68) }}>
+                {
+                  "Example: PharmaCo Research AG submits a data access application for the diabetes cohort. MedReg DE (HDAB) reviews the request, approves it under <a>Art. 68</a>, and a DataPermitCredential is issued."
+                }
+              </T>
             </p>
           </FeatureCard>
 
@@ -1465,14 +1879,35 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "The Technology Compatibility Kit validates that your EDC connector implements the Dataspace Protocol (DSP 2025-1) correctly. Tests cover catalog queries, contract negotiations, and transfer processes. Passing the TCK is a prerequisite for interoperability within the EHDS ecosystem.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{
+                  p: repo("services/neo4j-proxy/src/routes/tck.ts#L6-L15"),
+                  d: ext(DSP_URL),
+                  s: extCode(
+                    `${REPO_URL}scripts/run-ehds-dataspace-checks.sh#L5-L9`,
+                  ),
+                  k: ext(DSP_TCK_URL),
+                  i: ext(ISSUE_338_URL),
+                }}
+                vars={{ script: "run-ehds-dataspace-checks.sh" }}
+              >
+                {
+                  "The page runs the hub's own checks through the <p>neo4j-proxy</p>: the Dataspace Protocol (<d>DSP 2025-1</d>) catalog and message schemas, DID resolution, keys and the issuer service, and the graph's EHDS integrity. The compliance workflow also checks contract negotiation and transfer (<s>{script}</s>). None of them is the Eclipse <k>DSP Technology Compatibility Kit</k>, which has not yet been run against the hub (<i>#338</i>)."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              <T area="docsGuide" tags={{ c: code }}>
+              <T
+                area="docsGuide"
+                tags={{
+                  c: extCode(
+                    `${REPO_URL}scripts/compliance-baseline.json#L17-L22`,
+                  ),
+                }}
+              >
                 {
-                  "Example: The operator runs the TCK suite and compares the result with the floor recorded in <c>scripts/compliance-baseline.json</c>; a drop below it fails the compliance workflow."
+                  "Example: The operator runs these checks and compares the result with the floor recorded in <c>scripts/compliance-baseline.json</c>; a drop below it fails the compliance workflow."
                 }
               </T>
             </p>
@@ -1484,10 +1919,15 @@ export default function UserGuidePage() {
             icon={Shield}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "View and manage verifiable credentials across all dataspace participants. Each participant holds a MembershipCredential and an {credential}, issued by the trusted issuer service. Credentials follow the DCP v1.0 standard for decentralised claims, enabling trust without a central authority.",
-                { credential: PARTICIPANT_CREDENTIAL },
-              )}
+              <T
+                area="docsGuide"
+                tags={{ d: ext(DCP_URL) }}
+                vars={{ credential: PARTICIPANT_CREDENTIAL }}
+              >
+                {
+                  "View and manage verifiable credentials across all dataspace participants. Each participant holds a MembershipCredential and an {credential}, issued by the trusted issuer service. Credentials follow the <d>DCP v1.0</d> standard for decentralised claims, enabling trust without a central authority."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1501,9 +1941,18 @@ export default function UserGuidePage() {
             icon={FileCheck}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "A data user applies for a data permit with the eleven items of Regulation (EU) 2025/327 Art. 67(2), then follows what becomes of it: the access body's clock (Art. 68(4)), a notice that items are missing, the permit or the refusal, and the results the user communicates afterwards (Art. 61(4)).",
-              )}
+              <T
+                area="docsGuide"
+                tags={{
+                  a: para("067.002"),
+                  b: para("068.004"),
+                  c: para("061.004"),
+                }}
+              >
+                {
+                  "A data user applies for a data permit with the eleven items of Regulation (EU) 2025/327 <a>Art. 67(2)</a>, then follows what becomes of it: the access body's clock (<b>Art. 68(4)</b>), a notice that items are missing, the permit or the refusal, and the results the user communicates afterwards (<c>Art. 61(4)</c>)."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1517,9 +1966,11 @@ export default function UserGuidePage() {
             icon={BarChart3}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "A health data request under Art. 69: the data user asks a question and, if the access body approves, receives an anonymised statistic and nothing else. The access body decides on the same page.",
-              )}
+              <T area="docsGuide" tags={{ a: art(69) }}>
+                {
+                  "A health data request under <a>Art. 69</a>: the data user asks a question and, if the access body approves, receives an anonymised statistic and nothing else. The access body decides on the same page."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1533,9 +1984,11 @@ export default function UserGuidePage() {
             icon={Shield}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "Art. 63: the access body records a finding of non-compliance against a data user or holder, the party states its views within four weeks, the body takes a measure and publishes it; the body can also ask a party for information, answered on record.",
-              )}
+              <T area="docsGuide" tags={{ a: art(63), f: para("063.002") }}>
+                {
+                  "<a>Art. 63</a>: the access body records a finding of non-compliance against a data user or holder, the party states its views within <f>four weeks</f>, the body takes a measure and publishes it; the body can also ask a party for information, answered on record."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1549,9 +2002,11 @@ export default function UserGuidePage() {
             icon={ClipboardList}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "The access body's register of applications received and permits granted, refused or revoked (Art. 57). Any signed-in participant can read it.",
-              )}
+              <T area="docsGuide" tags={{ a: art(57) }}>
+                {
+                  "The access body's register of applications received and permits granted, refused or revoked (<a>Art. 57</a>). Any signed-in participant can read it."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1565,9 +2020,11 @@ export default function UserGuidePage() {
             icon={BarChart3}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "The access body's activity report under Art. 59(1)(a) to (k), generated from the graph for a chosen period, with a Markdown export.",
-              )}
+              <T area="docsGuide" tags={{ a: para("059.001") }}>
+                {
+                  "The access body's activity report under <a>Art. 59(1)(a) to (k)</a>, generated from the graph for a chosen period, with a Markdown export."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1581,9 +2038,11 @@ export default function UserGuidePage() {
             icon={BookOpen}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "What the access body tells the public about secondary use (Art. 58(1)): the legal basis, the safeguards, people's rights and how to exercise them, who has access to which datasets and why, and the results of the projects.",
-              )}
+              <T area="docsGuide" tags={{ a: para("058.001") }}>
+                {
+                  "What the access body tells the public about secondary use (<a>Art. 58(1)</a>): the legal basis, the safeguards, people's rights and how to exercise them, who has access to which datasets and why, and the results of the projects."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1597,9 +2056,11 @@ export default function UserGuidePage() {
             icon={Scale}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "How Germany, Austria, Belgium, France, the Netherlands and Spain implement secondary use: the legal role of the access body, the national law it acts under, how a person objects (Art. 71), the fees (Art. 62) and the dates, each with its official source. The laws are real, the organisations on the hub fictional.",
-              )}
+              <T area="docsGuide" tags={{ a: art(71), b: art(62) }}>
+                {
+                  "How Germany, Austria, Belgium, France, the Netherlands and Spain implement secondary use: the legal role of the access body, the national law it acts under, how a person objects (<a>Art. 71</a>), the fees (<b>Art. 62</b>) and the dates, each with its official source. The laws are real, the organisations on the hub fictional."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1614,9 +2075,14 @@ export default function UserGuidePage() {
       <section className="mb-12" id="data-exchange">
         <h2 className="text-2xl font-semibold mb-3">{t("Data Exchange")}</h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          {t(
-            "The sovereign data exchange pipeline follows the Dataspace Protocol (DSP 2025-1): share assets, discover via federated catalog, negotiate contracts, manage tasks, and transfer data. This pipeline implements EHDS Art. 51 and 60 requirements for making health data available while preserving data holder sovereignty through policy-controlled access.",
-          )}
+          <T
+            area="docsGuide"
+            tags={{ d: ext(DSP_URL), a: art(51), b: art(60) }}
+          >
+            {
+              "The sovereign data exchange pipeline follows the Dataspace Protocol (<d>DSP 2025-1</d>): share assets, discover via federated catalog, negotiate contracts, manage tasks, and transfer data. This pipeline implements EHDS <a>Art. 51</a> and <b>60</b> requirements for making health data available while preserving data holder sovereignty through policy-controlled access."
+            }
+          </T>
         </p>
 
         <div className="space-y-6">
@@ -1627,14 +2093,28 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "Publish datasets with HealthDCAT-AP metadata and ODRL access policies for the federated catalog. Define distribution endpoints, data quality attributes, and usage constraints. Data holders use this page to fulfil their obligation under EHDS Art. 60 to make data available for secondary use.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{
+                  h: ext(HEALTHDCAT_AP_URL),
+                  o: ext(ODRL_URL),
+                  a: art(60),
+                }}
+              >
+                {
+                  "Publish datasets with <h>HealthDCAT-AP</h> metadata and <o>ODRL</o> access policies for the federated catalog. Define distribution endpoints, data quality attributes, and usage constraints. Data holders use this page to fulfil their obligation under EHDS <a>Art. 60</a> to make data available for secondary use."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              {t(
-                "Example: AlphaKlinik Berlin publishes a “Synthetic Diabetes Cohort” dataset with FHIR R4 bulk export distribution, EHDS Art. 33 usage policy, and spatial coverage set to DE.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{ f: ext(FHIR_URL), a: para("053.001") }}
+              >
+                {
+                  "Example: AlphaKlinik Berlin publishes a “Synthetic Diabetes Cohort” dataset with <f>FHIR R4</f> bulk export distribution, a usage policy for scientific research under EHDS <a>Art. 53(1)(e)</a>, and spatial coverage set to DE."
+                }
+              </T>
             </p>
           </FeatureCard>
 
@@ -1645,9 +2125,11 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "Search the federated catalog across all connected dataspace participants. Results aggregate datasets from multiple EDC connectors, showing availability and access terms. The federated catalog enables cross-border dataset discovery without centralising metadata.",
-              )}
+              <T area="docsGuide" tags={{ e: ext(EDC_URL) }}>
+                {
+                  "Search the federated catalog across all connected dataspace participants. Results aggregate datasets from multiple <e>EDC connectors</e>, showing availability and access terms. The federated catalog enables cross-border dataset discovery without centralising metadata."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1663,14 +2145,25 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "Initiate and track DSP contract negotiations with data holders. View negotiation state (REQUESTED, AGREED, VERIFIED, FINALIZED), ODRL policy terms, and counter-offer history. Contract negotiation ensures that data access terms are mutually agreed before any transfer occurs, as required by EHDS Art. 34.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{
+                  d: ext(`${DSP_URL}#negotiation-protocol`),
+                  a: art(68),
+                  b: para("061.001"),
+                }}
+              >
+                {
+                  "Initiate and track <d>DSP contract negotiations</d> with data holders. View negotiation state (REQUESTED, AGREED, VERIFIED, FINALIZED), ODRL policy terms, and counter-offer history. The Regulation does not ask for a contract negotiation: access rests on the data permit (<a>Art. 68</a>), and a data user may process the data only in accordance with it (<b>Art. 61(1)</b>). The DSP negotiation is how the hub implements that, agreeing the terms before any transfer occurs."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
-              {t(
-                "Example: PharmaCo Research AG initiates a contract negotiation with AlphaKlinik Berlin for the diabetes cohort. The negotiation progresses to FINALIZED with an EHDS Art. 33(c) research use policy.",
-              )}
+              <T area="docsGuide" tags={{ a: para("053.001") }}>
+                {
+                  "Example: PharmaCo Research AG initiates a contract negotiation with AlphaKlinik Berlin for the diabetes cohort. The negotiation progresses to FINALIZED with a scientific research policy under EHDS <a>Art. 53(1)(e)</a>."
+                }
+              </T>
             </p>
           </FeatureCard>
 
@@ -1681,9 +2174,11 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "Monitor the task queue for pending and active data transfer operations. Tasks track the full lifecycle from initiation through provisioning to completion, providing the audit trail required by EHDS for accountability.",
-              )}
+              <T area="docsGuide" tags={{ a: para("073.001") }}>
+                {
+                  "Monitor the task queue for pending and active data transfer operations. Tasks track the full lifecycle from initiation through provisioning to completion, providing an audit trail for accountability; in the secure processing environment the EHDS requires identifiable access logs (<a>Art. 73(1)(e)</a>)."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1699,9 +2194,11 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "Each agreed contract appears once, with where it stands. Start Transfer asks the provider's connector for the data, after the hub has checked that a data permit covers the participant you act as (Art. 61(1)); when none does, the page says whose permit is missing or expired. The page follows the transfer until the data is ready. Open shows the data, Download saves it, and Import into SPE loads it into a secure processing environment (Art. 73); on the live hub a stopped workspace starts first and keeps the data until it stops. The import then closes the transfer, so the access to the provider's data ends; a new transfer imports it again. Details holds the agreed terms, folded until you open them, and every transfer under the contract with its DSP state.",
-              )}
+              <T area="docsGuide" tags={{ a: para("061.001"), b: art(73) }}>
+                {
+                  "Each agreed contract appears once, with where it stands. Start Transfer asks the provider's connector for the data, after the hub has checked that a data permit covers the participant you act as (<a>Art. 61(1)</a>); when none does, the page says whose permit is missing or expired. The page follows the transfer until the data is ready. Open shows the data, Download saves it, and Import into SPE loads it into a secure processing environment (<b>Art. 73</b>); on the live hub a stopped workspace starts first and keeps the data until it stops. The import then closes the transfer, so the access to the provider's data ends; a new transfer imports it again. Details holds the agreed terms, folded until you open them, and every transfer under the contract with its DSP state."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1716,9 +2213,11 @@ export default function UserGuidePage() {
       <section className="mb-12" id="admin">
         <h2 className="text-2xl font-semibold mb-3">{t("Administration")}</h2>
         <p className="text-(--text-secondary) text-sm mb-4">
-          {t(
-            "Platform administrators manage participants, access policies, and audit logs. The admin dashboard provides an overview of system health, active connections, and recent activity. Access requires the EDC_ADMIN role assigned through Keycloak. The operator role is defined by EHDS Art. 52 as responsible for ensuring the technical infrastructure supports interoperable, sovereign data exchange.",
-          )}
+          <T area="docsGuide" tags={{ k: ext(KEYCLOAK_URL) }}>
+            {
+              "Platform administrators manage participants, access policies, and audit logs. The admin dashboard provides an overview of system health, active connections, and recent activity. Access requires the EDC_ADMIN role assigned through <k>Keycloak</k>. No article of the Regulation defines a dataspace operator; the role is the hub's own, responsible for a technical infrastructure that supports interoperable, sovereign data exchange."
+            }
+          </T>
         </p>
 
         <div className="space-y-6">
@@ -1747,13 +2246,22 @@ export default function UserGuidePage() {
             requiresJAD
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "Inspect the runtime status of Eclipse Dataspace Connector components: Control Plane, Data Plane, Identity Hub, Issuer Service, and the Connector Fabric Manager. View health checks, versions, and configuration details.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{
+                  e: ext(EDC_URL),
+                  i: ext(IDENTITY_HUB_URL),
+                  f: ext(CFM_URL),
+                }}
+              >
+                {
+                  "Inspect the runtime status of <e>Eclipse Dataspace Connector</e> components: Control Plane, Data Plane, <i>Identity Hub</i>, Issuer Service, and, under the edc018 profile only, the <f>Connector Fabric Manager</f>. View health checks, versions, and configuration details."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
-                "Example: The operator checks that the Control Plane (port 11003), the FHIR Data Plane (port 11002) and the Identity Hub (port 11005) all report healthy on the local stack.",
+                "Example: The operator checks that the Control Plane (port 11003) and the Identity Hub (port 11005) both report healthy on the local stack.",
               )}
             </p>
           </FeatureCard>
@@ -1804,16 +2312,28 @@ export default function UserGuidePage() {
                 </T>
               </li>
               <li>
-                <T area="docsGuide" tags={{ b: strongPrimary }}>
+                <T
+                  area="docsGuide"
+                  tags={{
+                    b: strongPrimary,
+                    h: ext(ACI_ATTESTATION_URL),
+                    p: repo(
+                      "docs/ADRs/ADR-069-two-spe-workspaces-as-aci-confidential-containers.md?plain=1#L113-L127",
+                    ),
+                  }}
+                >
                   {
-                    "<b>Scope and host data.</b> Scope “Workload level” means the report's HOST_DATA is the SHA-256 of the container group's policy, which is the data permit's policy hash: the hardware checks that the workspace runs exactly what the permit allows."
+                    "<b>Scope and host data.</b> Scope “Workload level” means the report's <h>HOST_DATA</h> is the SHA-256 of the container group's policy, which is <p>the data permit's policy hash</p>: the hardware checks that the workspace runs exactly what the permit allows."
                   }
                 </T>
               </li>
               <li>
-                <T area="docsGuide" tags={{ b: strongPrimary }}>
+                <T
+                  area="docsGuide"
+                  tags={{ b: strongPrimary, u: ext(ACI_ATTESTATION_URL) }}
+                >
                   {
-                    "<b>Measurement.</b> The launch measurement of Microsoft's utility VM, which runs the containers. The operator pinned it after comparing it with Microsoft's signed endorsement."
+                    "<b>Measurement.</b> The launch measurement of Microsoft's <u>utility VM</u>, which runs the containers. The operator pinned it after comparing it with Microsoft's signed endorsement."
                   }
                 </T>
               </li>
@@ -1842,19 +2362,29 @@ export default function UserGuidePage() {
               </li>
             </ul>
             <p className="text-(--text-secondary) text-sm mb-2">
-              <T area="docsGuide" tags={{ b: strongPrimary }}>
+              <T
+                area="docsGuide"
+                tags={{ b: strongPrimary, u: ext(ACI_ATTESTATION_URL) }}
+              >
                 {
-                  "<b>Residual trust.</b> The evidence rests on AMD's root of trust, and the utility VM image is trusted because Microsoft endorses its measurement; the endorsement's issuer and content were checked, its signature not yet cryptographically. The Trustee runs in the hub's own subscription, operated as if by MedReg DE; for the claim to hold fully, the access body runs it in a subscription of its own."
+                  "<b>Residual trust.</b> The evidence rests on AMD's root of trust, and the <u>utility VM image</u> is trusted because Microsoft endorses its measurement; the endorsement's issuer and content were checked, its signature not yet cryptographically. The Trustee runs in the hub's own subscription, operated as if by MedReg DE; for the claim to hold fully, the access body runs it in a subscription of its own."
                 }
               </T>
             </p>
             <p className="text-(--text-secondary) text-sm">
               <T
                 area="docsGuide"
-                tags={{ i: issue774Link, r: speRunbookLink, s: speDocLink }}
+                tags={{
+                  a: repo(
+                    "docs/ADRs/ADR-072-spe-workspaces-start-on-demand.md?plain=1#L44-L131",
+                  ),
+                  i: issue774Link,
+                  r: speRunbookLink,
+                  s: speDocLink,
+                }}
               >
                 {
-                  "On Azure the workspaces are stopped by default and start on demand (ADR-072, <i>#774</i>): a federated query or Start on the admin page starts them, which takes about a minute until attestation and key release and three to four minutes until both answer queries; after 30 minutes without a query they stop again. How the attestation is set up, pinned and checked: the <r>runbook</r>. The concepts behind it: <s>the secure processing environment</s>."
+                  "On Azure the workspaces are stopped by default and start on demand (<a>ADR-072</a>, <i>#774</i>): a federated query or Start on the admin page starts them, which takes about a minute until attestation and key release and three to four minutes until both answer queries; after 30 minutes without a query they stop again. How the attestation is set up, pinned and checked: the <r>runbook</r>. The concepts behind it: <s>the secure processing environment</s>."
                 }
               </T>
             </p>
@@ -1865,9 +2395,19 @@ export default function UserGuidePage() {
             icon={Users}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "The participants' tenants in the Connector Fabric Manager: their virtual participant agents and provisioning state.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{
+                  a: repo(
+                    "docs/ADRs/ADR-078-edc-1-on-container-apps-without-cfm.md?plain=1#L62-L72",
+                  ),
+                  f: ext(CFM_URL),
+                }}
+              >
+                {
+                  "Each participant's control plane context and its provisioning state: whether its MembershipCredential has arrived. The hub provisions participants itself (<a>ADR-078</a>); the tenants and virtual participant agents of the <f>Connector Fabric Manager</f> exist only under the edc018 profile."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
@@ -1897,9 +2437,14 @@ export default function UserGuidePage() {
             icon={ScrollText}
           >
             <p className="text-(--text-secondary) text-sm mb-2">
-              {t(
-                "The ODRL policies each participant offers its data under, grouped by participant. New policies start from a template for a permitted purpose of Art. 53 (scientific research, public health, official statistics, AI training and more), with the permitted purposes, the duration of use and the duties attached; the JSON can be edited directly.",
-              )}
+              <T
+                area="docsGuide"
+                tags={{ o: ext(ODRL_URL), a: para("053.001") }}
+              >
+                {
+                  "The <o>ODRL policies</o> each participant offers its data under, grouped by participant. New policies start from a template for a permitted purpose of <a>Art. 53</a> (scientific research, public health, official statistics, AI training and more), with the permitted purposes, the duration of use and the duties attached; the JSON can be edited directly."
+                }
+              </T>
             </p>
             <p className="text-(--text-secondary) text-xs italic">
               {t(
