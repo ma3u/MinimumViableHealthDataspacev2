@@ -74,7 +74,7 @@ const services: ServiceInfo[] = [
     port: ":8080 / :9000",
     depends: "PostgreSQL",
     purpose:
-      "<oidc>OIDC</oidc> SSO provider, realm edcv: <realm>8 demo users and a service account</realm>, 6 roles",
+      "<oidc>OIDC</oidc> SSO provider, realm edcv: <realm>8 demo users and a service account</realm>, holding 6 of the realm's 10 roles",
     layer: "Infrastructure",
   },
   {

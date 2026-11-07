@@ -80,7 +80,7 @@
   "Shared database ({count} DBs: {names})": "Gedeelde database ({count} databases: {names})",
   "Secrets store with file storage, so a restart keeps every key (since 2026-09-26; on Azure it stores in the Flexible Server, <adr46>ADR-046</adr46>)": "Geheimenkluis met bestandsopslag, zodat een herstart elke sleutel behoudt (sinds 2026-09-26; op Azure slaat hij op in de Flexible Server, <adr46>ADR-046</adr46>)",
   "Async event mesh for <dsp>DSP</dsp> protocol events": "Asynchrone event-mesh voor gebeurtenissen van het <dsp>DSP</dsp>-protocol",
-  "<oidc>OIDC</oidc> SSO provider, realm edcv: <realm>8 demo users and a service account</realm>, 6 roles": "<oidc>OIDC</oidc>-SSO-provider, realm edcv: <realm>8 demogebruikers en een serviceaccount</realm>, 6 rollen",
+  "<oidc>OIDC</oidc> SSO provider, realm edcv: <realm>8 demo users and a service account</realm>, holding 6 of the realm's 10 roles": "<oidc>OIDC</oidc>-SSO-provider, realm edcv: <realm>8 demogebruikers en een serviceaccount</realm>, met 6 van de 10 rollen van de realm",
   "Init sidecar: seeds Vault secrets and Keycloak config": "Init-sidecar: vult Vault-geheimen en de Keycloak-configuratie",
   "Sidecar: initialises Vault once, then unseals it after every restart": "Sidecar: initialiseert Vault één keer en ontzegelt het daarna na elke herstart",
   "The data plane on EDC 1.0: answers the control plane's Data Plane Signaling and issues the access token; the Neo4j proxy serves the data (<adr78>ADR-078</adr78>)": "De data plane onder EDC 1.0: beantwoordt de Data Plane Signaling van de control plane en geeft het toegangstoken uit; de Neo4j-proxy levert de gegevens (<adr78>ADR-078</adr78>)",
