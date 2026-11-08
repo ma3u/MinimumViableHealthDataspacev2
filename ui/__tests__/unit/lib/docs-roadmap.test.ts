@@ -1,15 +1,14 @@
 /**
  * The roadmap behind /docs/roadmap (ui/src/lib/docs/roadmap.ts): its data must
- * stay consistent with the plan (#725), and the Mermaid source generated from
- * it must parse, or the page shows a render error where the chart should be.
+ * stay consistent with the plan (#725) and with the GitHub Project the plan
+ * is edited in (scripts/sync-roadmap-project.mjs).
  */
 import { describe, it, expect } from "vitest";
-import mermaid from "mermaid";
 import {
   ITEMS,
   LANES,
   MILESTONES,
-  roadmapGantt,
+  ROADMAP_PROJECT,
   roadmapTargets,
 } from "@/lib/docs/roadmap";
 
@@ -47,9 +46,20 @@ describe("the roadmap data", () => {
     expect(spike?.note).toContain("#716");
   });
 
-  it("keeps labels free of the characters Mermaid's Gantt syntax uses", () => {
-    for (const i of ITEMS) expect(i.short, `#${i.issue}`).not.toMatch(/[:;#]/);
-    for (const m of MILESTONES) expect(m.label, m.id).not.toMatch(/[:;#]/);
+  it("keeps the bar labels short", () => {
+    for (const i of ITEMS)
+      expect(i.short.length, `#${i.issue}`).toBeLessThan(40);
+    for (const m of MILESTONES) expect(m.label.length, m.id).toBeLessThan(30);
+  });
+
+  it("names the GitHub Project the plan is edited in", () => {
+    expect(ROADMAP_PROJECT).toBe("https://github.com/users/ma3u/projects/1");
+  });
+
+  it("gives every bar and marker an id of its own, usable as an anchor", () => {
+    const ids = roadmapTargets().map((t) => t.taskId);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const id of ids) expect(id).toMatch(/^(i\d+|m_\w+)$/);
   });
 
   it("links every bar to its issue and every milestone to an https source", () => {
@@ -127,44 +137,5 @@ describe("the roadmap data", () => {
     expect(roadmapTargets().find((t) => t.taskId === "i717")!.label).toContain(
       "Applications: Art. 53 purposes, Art. 81 complaints",
     );
-  });
-});
-
-describe("the generated Gantt chart", () => {
-  const chart = roadmapGantt();
-
-  it("parses", async () => {
-    mermaid.initialize({ startOnLoad: false });
-    await expect(mermaid.parse(chart)).resolves.toBeTruthy();
-  });
-
-  it("has a section per lane, a bar per item and a marker per milestone", () => {
-    for (const l of LANES) expect(chart).toContain(`  section ${l.label}\n`);
-    for (const i of ITEMS)
-      expect(chart).toContain(`i${i.issue}, ${i.start}, ${i.end}`);
-    expect(chart.match(/:milestone, /g)).toHaveLength(MILESTONES.length);
-  });
-
-  it("marks status the way the legend says: active, crit, done", () => {
-    expect(chart).toMatch(/708 EUDI Wallet sign-in :active, i708,/);
-    expect(chart).toMatch(/710 Simpl issuer trust :done, i710,/);
-    expect(chart).toMatch(/711 DSP kit vs Simpl :i711,/);
-    // Nothing is blocked since Simpl's code went public (#711); a blocked
-    // item would be drawn crit.
-    const tag = {
-      done: "done, ",
-      "in-progress": "active, ",
-      blocked: "crit, ",
-      planned: "",
-    };
-    for (const i of ITEMS) {
-      expect(chart, `#${i.issue}`).toContain(`:${tag[i.status]}i${i.issue},`);
-    }
-    expect(chart).toMatch(/700 HealthDCAT-AP R8 :done, i700,/);
-  });
-
-  it("draws at a fixed width, since Mermaid measures 0 for its render element", () => {
-    expect(chart).toMatch(/useWidth: \d{4}/);
-    expect(chart).toContain("todayMarker");
   });
 });

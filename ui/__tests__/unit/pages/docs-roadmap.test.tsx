@@ -1,5 +1,5 @@
 /**
- * /docs/roadmap: the Gantt chart of the roadmap to 2031, the drivers behind it
+ * /docs/roadmap: the timeline of the roadmap to 2031, the drivers behind it
  * with their sources, and every item as a table with its issue.
  */
 import { describe, it, expect, vi } from "vitest";
@@ -20,24 +20,25 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-vi.mock("@/components/MermaidDiagram", () => ({
-  default: ({ chart }: { chart: string }) => (
-    <pre data-testid="mermaid-diagram">{chart}</pre>
-  ),
+// vis-timeline draws on a canvas jsdom does not lay out; the component's own
+// test checks what it hands over (RoadmapTimeline.test.tsx).
+vi.mock("@/components/docs/RoadmapTimeline", () => ({
+  default: () => <div data-testid="roadmap-timeline" />,
 }));
 
 import RoadmapDocsPage from "@/app/docs/roadmap/page";
 import { ITEMS } from "@/lib/docs/roadmap";
 
 describe("/docs/roadmap", () => {
-  it("renders the chart from the roadmap data", () => {
+  it("renders the timeline and links the GitHub Project the plan is edited in", () => {
     render(<RoadmapDocsPage />);
     expect(
       screen.getByRole("heading", { level: 1, name: /Roadmap/ }),
     ).toBeInTheDocument();
-    const chart = screen.getByTestId("mermaid-diagram");
-    expect(chart.textContent).toMatch(/^---\nconfig:/);
-    expect(chart.textContent).toContain("section Identity and wallets");
+    expect(screen.getByTestId("roadmap-timeline")).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "GitHub Project" }),
+    ).toHaveAttribute("href", "https://github.com/users/ma3u/projects/1");
   });
 
   it("names the six drivers, each with its sources", () => {
