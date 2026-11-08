@@ -11,7 +11,10 @@
  *   node scripts/sync-roadmap-project.mjs create  a new Project with its fields
  *
  * What travels: per issue its Start, Target, Priority, Status and Lane; per
- * milestone (a draft item marked <!-- roadmap:<id> -->) its date. Needs
+ * milestone (a draft item marked <!-- roadmap:<id> -->) its date. push also
+ * gives every issue the GitHub milestone of the deadline its priority sets
+ * (DEADLINES), so the Project groups the epics under it and draws it as a
+ * marker. Needs
  * Node 23.6 or later (it imports roadmap.ts as it is) and `gh` with the
  * project scope (`gh auth refresh -s project`).
  */
@@ -43,6 +46,67 @@ const STATUS_BACK = Object.fromEntries(
   Object.entries(STATUS).map(([k, v]) => [v, k]),
 );
 const MARK = (id) => `<!-- roadmap:${id} -->`;
+
+/** The deadline each priority sets, as a GitHub milestone (the page's
+ *  intro: P1 due by 26 March 2027, P2 by 26 March 2029, P3 a comment). */
+const DEADLINES = {
+  P1: {
+    title: "P1: EHDS applies",
+    due_on: "2027-03-26T23:59:59Z",
+    description:
+      "Regulation (EU) 2025/327 applies generally (Art. 105). The P1 items of the roadmap are due by then. https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/roadmap",
+  },
+  P2: {
+    title: "P2: Secondary use in full",
+    due_on: "2029-03-26T23:59:59Z",
+    description:
+      "Chapter IV in full and dataset descriptions under 2026/2098 (Art. 105). The P2 items of the roadmap are due by then. https://ma3u.github.io/MinimumViableHealthDataspacev2/docs/roadmap",
+  },
+  P3: {
+    title: "P3: Comments on Simpl-Open",
+    due_on: "2027-03-31T23:59:59Z",
+    description:
+      "The hub's comments on the requirements Simpl-Open proposed at its Community Preview of 28 October 2026 (BP02E, BP02F, BP02G, SA12). Comments, not builds.",
+  },
+};
+
+function rest(method, route, body) {
+  const out = execFileSync(
+    "gh",
+    ["api", "-X", method, route, ...(body ? ["--input", "-"] : [])],
+    { input: body ? JSON.stringify(body) : undefined, encoding: "utf8" },
+  );
+  return out ? JSON.parse(out) : null;
+}
+
+/** The repository's milestones by title, the deadlines' created if missing. */
+function deadlines(createMissing) {
+  const repo = `repos/${OWNER}/${REPO_NAME}`;
+  const have = Object.fromEntries(
+    rest("GET", `${repo}/milestones?state=all&per_page=100`).map((m) => [
+      m.title,
+      m,
+    ]),
+  );
+  for (const d of Object.values(DEADLINES)) {
+    if (have[d.title] || !createMissing) continue;
+    have[d.title] = rest("POST", `${repo}/milestones`, d);
+    console.log(`created milestone ${d.title}`);
+  }
+  return have;
+}
+
+/** Issues whose GitHub milestone is not their priority's deadline. */
+function milestoneDrift() {
+  return ITEMS.map((i) => {
+    const issue = rest("GET", `repos/${OWNER}/${REPO_NAME}/issues/${i.issue}`);
+    return {
+      issue: i.issue,
+      want: DEADLINES[i.priority].title,
+      have: issue.milestone?.title ?? null,
+    };
+  }).filter((r) => r.want !== r.have);
+}
 
 function gql(query, variables = {}) {
   const out = execFileSync("gh", ["api", "graphql", "--input", "-"], {
@@ -214,6 +278,13 @@ function push() {
     setValue(project, project.items[r.w.key].id, r.field, r.repo);
     console.log(`${r.w.label}: ${r.field} ${r.project ?? "-"} -> ${r.repo}`);
   }
+  const milestones = deadlines(true);
+  for (const r of milestoneDrift()) {
+    rest("PATCH", `repos/${OWNER}/${REPO_NAME}/issues/${r.issue}`, {
+      milestone: milestones[r.want].number,
+    });
+    console.log(`#${r.issue}: milestone ${r.have ?? "-"} -> ${r.want}`);
+  }
   console.log(project.url);
 }
 
@@ -268,8 +339,12 @@ function check() {
     console.log(
       `${r.w.label}: ${r.field} repo=${r.repo} project=${r.project ?? "-"}`,
     );
-  console.log(rows.length ? `${rows.length} difference(s)` : "in step");
-  process.exitCode = rows.length ? 1 : 0;
+  const drift = milestoneDrift();
+  for (const r of drift)
+    console.log(`#${r.issue}: milestone ${r.have ?? "-"}, due ${r.want}`);
+  const n = rows.length + drift.length;
+  console.log(n ? `${n} difference(s)` : "in step");
+  process.exitCode = n ? 1 : 0;
 }
 
 function create() {
