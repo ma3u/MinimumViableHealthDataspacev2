@@ -14,7 +14,7 @@
  */
 import { test, expect, type Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
-import { T, skipIfKeycloakDown, loginAs } from "./helpers";
+import { T, skipIfKeycloakDown, loginAs, logout } from "./helpers";
 
 test.skip(
   process.env.NEXT_PUBLIC_STATIC_EXPORT === "true",
@@ -129,20 +129,6 @@ async function setTheme(page: Page, mode: "light" | "dark") {
     }
   }, mode);
   await page.waitForTimeout(300);
-}
-
-async function logout(page: Page) {
-  const userMenu = page
-    .locator("nav")
-    .getByRole("button", { name: /user menu/i });
-  if (await userMenu.isVisible({ timeout: 2_000 }).catch(() => false)) {
-    await userMenu.click();
-    const signOut = page.getByRole("button", { name: /sign out/i });
-    if (await signOut.isVisible({ timeout: 2_000 }).catch(() => false)) {
-      await signOut.click();
-    }
-  }
-  await page.goto("/", { waitUntil: "domcontentloaded" });
 }
 
 function formatViolations(

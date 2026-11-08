@@ -7,19 +7,20 @@
  */
 import { test, expect } from "@playwright/test";
 import {
-  PARTICIPANT_NAMES,
   T,
   expectHeading,
   expectSigninRedirect,
   waitForDataLoad,
   apiGet,
+  apiGetPoliciesOrSkip,
 } from "./helpers";
 import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("C · Policy Definition & Catalog Offering", () => {
   /* ── J16: Policies API returns policies for multiple participants ── */
   test("J16 — Policies exist for multiple participants", async ({ page }) => {
-    const data = await apiGet(page, "/api/admin/policies");
+    await signInOrSkip(page, test.skip, "edcadmin");
+    const data = await apiGetPoliciesOrSkip(page);
     const participants = data.participants || [];
     expect(participants.length).toBeGreaterThanOrEqual(3);
 
@@ -34,7 +35,8 @@ test.describe("C · Policy Definition & Catalog Offering", () => {
   test("J17 — Policies include ODRL permission and prohibition fields", async ({
     page,
   }) => {
-    const data = await apiGet(page, "/api/admin/policies");
+    await signInOrSkip(page, test.skip, "edcadmin");
+    const data = await apiGetPoliciesOrSkip(page);
     const participants = data.participants || [];
 
     // Find a participant with at least 1 policy
@@ -61,7 +63,8 @@ test.describe("C · Policy Definition & Catalog Offering", () => {
 
   /* ── J19: MedReg has regulatory policies ──────────────── */
   test("J19 — MedReg participant has registered policies", async ({ page }) => {
-    const data = await apiGet(page, "/api/admin/policies");
+    await signInOrSkip(page, test.skip, "edcadmin");
+    const data = await apiGetPoliciesOrSkip(page);
     const participants = data.participants || [];
 
     const medreg = participants.find(
@@ -89,6 +92,7 @@ test.describe("C · Policy Definition & Catalog Offering", () => {
   test("J21 — Catalog API has at least 15 registered datasets", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const datasets = await apiGet(page, "/api/catalog");
     expect(Array.isArray(datasets)).toBe(true);
     expect(datasets.length).toBeGreaterThanOrEqual(15);
@@ -98,6 +102,7 @@ test.describe("C · Policy Definition & Catalog Offering", () => {
   test("J22 — At least one catalog dataset is SyntheticData type", async ({
     page,
   }) => {
+    await signInOrSkip(page, test.skip, "edcadmin");
     const datasets = await apiGet(page, "/api/catalog");
     const synthetic = datasets.find(
       (d: { datasetType?: string }) => d.datasetType === "SyntheticData",

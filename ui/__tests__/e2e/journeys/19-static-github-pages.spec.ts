@@ -846,7 +846,11 @@ test.describe("S · EDC Admin — admin pages with data", () => {
     page,
   }) => {
     await gotoAs(page, "/admin", "edcadmin");
-    await expect(page.getByText("Operator Dashboard")).toBeVisible({
+    // The page is headed "System Overview" since the design system (e08da18e);
+    // "Operator Dashboard" is only the menu entry that leads here.
+    await expect(
+      page.getByRole("heading", { level: 1, name: "System Overview" }),
+    ).toBeVisible({
       timeout: T,
     });
     // Mock data has tenants — should show count cards
@@ -1205,7 +1209,8 @@ test.describe("S · Persona graph views (static)", () => {
     page,
   }) => {
     await gotoAs(page, "/graph", "clinicuser");
-    await expect(page.getByText("Structural layers")).toBeVisible({
+    // "Structural layers" became "Layers" inside a "Legend" disclosure (fa5165b3).
+    await expect(page.getByText("Layers", { exact: true })).toBeVisible({
       timeout: T,
     });
     await expect(page.getByText("Contracts & Access")).toBeVisible({
@@ -1324,6 +1329,10 @@ test.describe("S · Patient data isolation (static)", () => {
  * fictional-vs-real gating itself is locked by the WalletFlow unit test.
  */
 test.describe("S · Patient EUDI Wallet journey (static)", () => {
+  test.skip(
+    process.env.NEXT_PUBLIC_STATIC_EXPORT !== "true",
+    "Requires NEXT_PUBLIC_STATIC_EXPORT=true",
+  );
   const next = (page: Page) =>
     page.getByRole("button", { name: "Next step" }).click();
 
@@ -1437,6 +1446,10 @@ test.describe("S · Patient EUDI Wallet journey (static)", () => {
  * assertions (labels identical in the public and DEMO_TK builds).
  */
 test.describe("S · Interactive EUDI Wallet approval (static)", () => {
+  test.skip(
+    process.env.NEXT_PUBLIC_STATIC_EXPORT !== "true",
+    "Requires NEXT_PUBLIC_STATIC_EXPORT=true",
+  );
   const tap = (page: Page, name: string) =>
     page.getByRole("button", { name, exact: true }).first().click();
 
@@ -1476,7 +1489,8 @@ test.describe("S · Interactive EUDI Wallet approval (static)", () => {
     await tap(page, "Next");
     await tap(page, "Transfer data");
     await tap(page, "Close");
-    await page.waitForURL(/\/patient(\/|$|\?)/, { timeout: T });
+    // A login without a callbackUrl lands on the persona overview (#271).
+    await page.waitForURL(/\/overview(\/|$|\?)/, { timeout: T });
   });
 
   test("J321 — /patient shows the personal health record (fitness · labs · nutrition)", async ({

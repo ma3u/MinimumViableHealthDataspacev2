@@ -15,6 +15,15 @@
 
 import { test, expect } from "@playwright/test";
 
+/** WCAG relative luminance of a #rrggbb colour: 0 is black, 1 is white. */
+function relativeLuminance(hex: string): number {
+  const [r, g, b] = [1, 3, 5].map((i) => {
+    const c = parseInt(hex.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
 test.describe("Theme Toggle (J301–J320)", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
@@ -82,17 +91,23 @@ test.describe("Theme Toggle (J301–J320)", () => {
     expect(isDark).toBe(true);
   });
 
-  test("J307 — light mode: --bg CSS var is white", async ({ page }) => {
+  // The palette is the design system's (globals.css) and changes with it;
+  // what these two hold is that light mode is light and dark mode is dark.
+  // Until 2026-11-07 they pinned #ffffff and #0f172a, the palette before the
+  // design system's #f9f9ff and #0b1326.
+  test("J307 — light mode: --bg CSS var is a light colour", async ({
+    page,
+  }) => {
     await page.goto("/");
     const bg = await page.evaluate(() =>
       getComputedStyle(document.documentElement)
         .getPropertyValue("--bg")
         .trim(),
     );
-    expect(bg).toBe("#ffffff");
+    expect(relativeLuminance(bg)).toBeGreaterThan(0.9);
   });
 
-  test("J308 — dark mode: --bg CSS var is dark slate", async ({ page }) => {
+  test("J308 — dark mode: --bg CSS var is a dark colour", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: /switch to dark mode/i }).click();
     const bg = await page.evaluate(() =>
@@ -100,7 +115,7 @@ test.describe("Theme Toggle (J301–J320)", () => {
         .getPropertyValue("--bg")
         .trim(),
     );
-    expect(bg).toBe("#0f172a");
+    expect(relativeLuminance(bg)).toBeLessThan(0.02);
   });
 
   test("J309 — toggle button aria-label updates when mode changes", async ({

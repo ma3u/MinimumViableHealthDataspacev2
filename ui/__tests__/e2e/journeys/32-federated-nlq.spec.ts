@@ -5,7 +5,7 @@
  *   - /admin/participants — dynamic participant directory (26a)
  *   - /data/discover      — federated HealthDCAT-AP datasets in search
  *   - /federated/query    — contributor k-anonymity via the proxy (26e),
- *     exercised through the public /api/federated stats endpoint
+ *     exercised through the /api/federated stats endpoint
  *
  * Needs a running UI + seeded Neo4j (and Keycloak for the admin login);
  * every test self-skips when its backend dependency is down, matching the
@@ -13,6 +13,7 @@
  */
 import { test, expect } from "@playwright/test";
 import { T, loginAs, skipIfKeycloakDown, waitForDataLoad } from "./helpers";
+import { signInOrSkip } from "../helpers/forged-session";
 
 test.describe("Federated discovery — participant directory (J730–J739)", () => {
   test.beforeAll(async () => {
@@ -132,10 +133,22 @@ test.describe("Federated discovery — datasets in Discover (J740–J744)", () =
   test("J741 diabetes search returns datasets from multiple publishers", async ({
     page,
   }) => {
+    // Limburg's diabetes cohort is a federated dataset: the catalog crawler
+    // and enricher write it from the participants' DSP catalogues (seeded
+    // only by that pipeline, see neo4j/seed-catalog-translations.cypher).
+    // A stack without them has AlphaKlinik's and Riverside's alone.
+    const catalog = await page.request.get("/api/catalog");
+    expect(catalog.ok()).toBe(true);
+    const ids = ((await catalog.json()) as { id: string }[]).map((d) => d.id);
+    test.skip(
+      !ids.some((id) => id.startsWith("dataset:lmc:")),
+      "No federated datasets: the catalog crawler and enricher have not run",
+    );
     await page.goto("/data/discover");
     await waitForDataLoad(page);
 
-    await page.getByRole("textbox").first().fill("Diabetes");
+    // The search field is type="search", so a searchbox, not a textbox.
+    await page.getByRole("searchbox").first().fill("Diabetes");
     // Publisher names render under each matched dataset title.
     await expect(page.getByText("AlphaKlinik Berlin").first()).toBeVisible({
       timeout: T,
@@ -148,9 +161,19 @@ test.describe("Federated discovery — datasets in Discover (J740–J744)", () =
 
 test.describe("Federated query — k-anonymity surface (J745–J749)", () => {
   test("J745 /api/federated stats endpoint responds", async ({ page }) => {
+    // Every API route needs a session since #404 (ADR-044).
+    await signInOrSkip(page, test.skip, "researcher");
     const res = await page.request.get("/api/federated");
-    // 200 with stats when the proxy is up; the mock fallback also returns 200.
-    // Anything else means the federated path regressed.
+    // The route asks the neo4j-proxy and answers 502 when it cannot reach
+    // it; there is no mock fallback in a server build. The nightly runs
+    // without a proxy.
+    test.skip(
+      res.status() === 502,
+      "The UI cannot reach the neo4j-proxy (NEO4J_PROXY_URL)",
+    );
+    // 200 with stats when the proxy is up. Anything else means the federated
+    // path regressed.
     expect(res.status()).toBe(200);
+    expect(await res.json()).toHaveProperty("speCount");
   });
 });

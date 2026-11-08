@@ -398,8 +398,12 @@ test.describe("P · Patient Portal UI", () => {
     page,
   }) => {
     await page.goto("/patient/research");
+    // The panel's heading; the page intro now says the same words in a
+    // sentence ("Decide about the secondary use of your health data").
     await expect(
-      page.getByText(/Secondary use of your health data \(EHDS Art\. 71\)/i),
+      page.getByRole("heading", {
+        name: /Secondary use of your health data \(EHDS Art\. 71\)/i,
+      }),
     ).toBeVisible({ timeout: T });
   });
 

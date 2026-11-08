@@ -16,8 +16,31 @@
  * the agreement that the transfer page reads. This asserts the whole path, so the
  * next such break shows up here rather than in front of an audience.
  */
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { loginAs, skipIfKeycloakDown, T } from "./helpers";
+
+/**
+ * PharmaCo consumes, AlphaKlinik provides. The other way round returns
+ * nothing even when everything works, because a data user holds no datasets.
+ *
+ * The selects are found by their labels. The first <select> on the page is
+ * the language picker in the navigation (#782), so picking by position chose
+ * a language and waited for an option that list never has.
+ */
+async function pickParties(page: Page) {
+  for (const [name, needle] of [
+    [/Requesting as/i, "PharmaCo Research AG"],
+    [/^Data Provider$/i, "AlphaKlinik Berlin"],
+  ] as const) {
+    const select = page.getByRole("combobox", { name });
+    const value = await select
+      .locator("option", { hasText: needle })
+      .first()
+      .getAttribute("value");
+    expect(value, `no option matching ${needle}`).toBeTruthy();
+    await select.selectOption(value!);
+  }
+}
 
 test.describe("Contract negotiation, catalog discovery", () => {
   test("J900 Discover Offers returns offers, never a raw connector error", async ({
@@ -31,22 +54,7 @@ test.describe("Contract negotiation, catalog discovery", () => {
       page.getByRole("heading", { name: /Contract Negotiation/i }),
     ).toBeVisible({ timeout: T });
 
-    const selects = page.locator("select");
-
-    async function pick(index: number, needle: string) {
-      const select = selects.nth(index);
-      const value = await select
-        .locator("option", { hasText: needle })
-        .first()
-        .getAttribute("value");
-      expect(value, `no option matching ${needle}`).toBeTruthy();
-      await select.selectOption(value!);
-    }
-
-    // PharmaCo consumes, AlphaKlinik provides. The other way round returns
-    // nothing even when everything works, because a data user holds no datasets.
-    await pick(0, "PharmaCo Research AG");
-    await pick(1, "AlphaKlinik Berlin");
+    await pickParties(page);
 
     const [response] = await Promise.all([
       page.waitForResponse((r) => r.url().includes("catalog=true"), {
@@ -69,18 +77,7 @@ test.describe("Contract negotiation, catalog discovery", () => {
     await loginAs(page, "researcher", "researcher");
     await page.goto("/negotiate");
 
-    const selects = page.locator("select");
-    for (const [index, needle] of [
-      [0, "PharmaCo Research AG"],
-      [1, "AlphaKlinik Berlin"],
-    ] as const) {
-      const select = selects.nth(index);
-      const value = await select
-        .locator("option", { hasText: needle })
-        .first()
-        .getAttribute("value");
-      await select.selectOption(value!);
-    }
+    await pickParties(page);
 
     const [response] = await Promise.all([
       page.waitForResponse((r) => r.url().includes("catalog=true"), {
@@ -96,22 +93,13 @@ test.describe("Contract negotiation, catalog discovery", () => {
   });
 
   test("J902 a negotiation leads on to the transfer step", async ({ page }) => {
+    // A connector's negotiation takes seconds to be agreed; room for that.
+    test.setTimeout(90_000);
     await skipIfKeycloakDown();
     await loginAs(page, "researcher", "researcher");
     await page.goto("/negotiate");
 
-    const selects = page.locator("select");
-    for (const [index, needle] of [
-      [0, "PharmaCo Research AG"],
-      [1, "AlphaKlinik Berlin"],
-    ] as const) {
-      const select = selects.nth(index);
-      const value = await select
-        .locator("option", { hasText: needle })
-        .first()
-        .getAttribute("value");
-      await select.selectOption(value!);
-    }
+    await pickParties(page);
 
     await Promise.all([
       page.waitForResponse((r) => r.url().includes("catalog=true"), {
@@ -129,6 +117,15 @@ test.describe("Contract negotiation, catalog discovery", () => {
       .last();
     await offerList.getByRole("button").first().click();
     const negotiate = page.getByRole("button", { name: /Start Negotiation/i });
+
+    // The offer's terms gate the negotiation (#876, ADR-077): Start Negotiation
+    // stays disabled until the user agrees to them.
+    const agree = page.getByRole("checkbox", {
+      name: /I have read these terms and agree/i,
+    });
+    await expect(agree).toBeVisible({ timeout: T });
+    await expect(negotiate).toBeDisabled();
+    await agree.check();
     await expect(negotiate).toBeEnabled({ timeout: T });
 
     const [response] = await Promise.all([
@@ -158,20 +155,44 @@ test.describe("Contract negotiation, catalog discovery", () => {
       expect(body.contractAgreementId).toContain("demo-agreement:");
     }
 
-    const transferLink = page
-      .locator(`a[href*="contractId="]`, { hasText: /Transfer/i })
-      .first();
-    await expect(transferLink).toBeVisible({ timeout: T });
+    // The link to this negotiation's agreement, not the first of the history:
+    // on a stack with a connector the history holds earlier agreements too.
+    // A connector's negotiation is followed until it is agreed and then offers
+    // "Continue to transfer" (#879); a demo one is agreed at once and its row
+    // links its demo agreement.
+    const transferLink =
+      body.demo === true
+        ? page
+            .locator(
+              `a[href*="contractId=${encodeURIComponent(
+                body.contractAgreementId,
+              )}"]`,
+            )
+            .first()
+        : page
+            .getByTestId("negotiation-progress")
+            .getByRole("link", { name: /Continue to transfer/i });
+    await expect(transferLink).toBeVisible({ timeout: 60_000 });
+    const contractId = new URL(
+      (await transferLink.getAttribute("href")) ?? "",
+      page.url(),
+    ).searchParams.get("contractId");
+    expect(contractId).toBeTruthy();
 
     await transferLink.click();
     await expect(
       page.getByRole("heading", { name: /Data Transfer/i }).first(),
     ).toBeVisible({ timeout: T });
 
-    // The agreement the negotiation produced is selectable here, not absent.
-    await expect(
-      page.locator('input[type="checkbox"]:checked').first(),
-    ).toBeVisible({ timeout: T });
+    // The agreement the negotiation produced is listed here and can be
+    // transferred, not absent. The page lists agreements with their next
+    // action since #876, where it had a checkbox per agreement before; the
+    // linked one is the row the page scrolls to.
+    const linked = page.locator(`[id="contract-${contractId}"]`);
+    await expect(linked).toBeVisible({ timeout: T });
+    await expect(linked.getByTestId("start-transfer")).toBeVisible({
+      timeout: T,
+    });
     await expect(page.getByText(/EDC API error/i)).toHaveCount(0);
   });
 });
