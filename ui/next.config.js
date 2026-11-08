@@ -130,7 +130,6 @@ const nextConfig = {
   ...(!isStaticExport && {
     async rewrites() {
       return [
-        { source: "/e2e-report", destination: "/e2e-report/index.html" },
         { source: "/test-reports", destination: "/test-reports/index.html" },
       ];
     },

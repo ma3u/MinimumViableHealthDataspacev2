@@ -54,7 +54,9 @@ describe("the API collection cleans up after itself on the live hub", () => {
 
   it("seed.sh runs it as the api-cleanup phase and fails if any are left", () => {
     expect(seedSh).toMatch(/SEED_PHASE:-\}" = "api-cleanup"/);
-    expect(seedSh).toContain("/seed/remove-api-collection-runs.cypher");
+    expect(seedSh).toContain(
+      'run_file "$SEED_DIR"/remove-api-collection-runs.cypher',
+    );
     expect(seedSh).toMatch(/failed\+=\("API collection runs left/);
   });
 

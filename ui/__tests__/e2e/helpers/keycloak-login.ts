@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { forgedSessions, loginAs } from "../journeys/helpers";
 
 export interface KeycloakLoginOptions {
   username: string;
@@ -16,6 +17,12 @@ export async function keycloakLogin(
   page: Page,
   { username, password, protectedPath = "/onboarding" }: KeycloakLoginOptions,
 ): Promise<void> {
+  // Without Keycloak (CI), the session loginAs() forges for the realm user.
+  if (forgedSessions()) {
+    await loginAs(page, username, password);
+    await page.goto(protectedPath);
+    return;
+  }
   await page.goto(protectedPath);
   await page.waitForURL(/\/auth\/signin/);
   await page.click('button:has-text("Sign in with Keycloak")');

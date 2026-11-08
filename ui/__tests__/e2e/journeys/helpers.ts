@@ -22,6 +22,7 @@
  * satisfies all of them.
  */
 import { type Page, expect, test } from "@playwright/test";
+import { isForgeablePersona, signInPage } from "../helpers/forged-session";
 
 /* ── Participant display names (stable across live & mock) ───── */
 
@@ -84,10 +85,70 @@ export async function apiGet(page: Page, path: string) {
 }
 
 /**
+ * GET /api/tasks, or skip the test saying why.
+ *
+ * The negotiations and transfers come from the EDC connector, else from the
+ * task store (Postgres behind the neo4j-proxy). The CI stack has neither, and
+ * since #571 the route serves no fixture, so it answers 502 there.
+ */
+export async function apiGetTasksOrSkip(page: Page) {
+  const response = await page.request.get("/api/tasks");
+  test.skip(
+    response.status() === 502,
+    "/api/tasks needs an EDC connector or the task store (Postgres); this stack has neither",
+  );
+  expect(response.ok(), `GET /api/tasks → ${response.status()}`).toBe(true);
+  return response.json();
+}
+
+/**
+ * GET /api/admin/policies, or skip the test saying why.
+ *
+ * Policy definitions live in the EDC control plane. Without one the route
+ * answers from Neo4j (`offline: true`), where the demo graph holds a single
+ * policy on a data product, not the participants' definitions these journeys
+ * are about.
+ */
+export async function apiGetPoliciesOrSkip(page: Page) {
+  const data = await apiGet(page, "/api/admin/policies");
+  test.skip(
+    data.offline === true,
+    "Policy definitions live in the EDC control plane; this stack has none",
+  );
+  return data;
+}
+
+/**
+ * Whether loginAs() forges the session instead of signing in at Keycloak.
+ *
+ * The nightly and the pull request E2E run against a seeded Neo4j and no
+ * Keycloak. Until 2026-11-07 every spec that signs in skipped there (572
+ * tests), so what a signed-in persona sees was never tested in CI. With
+ * E2E_FORGED_SESSIONS=1 and NEXTAUTH_SECRET set, loginAs() puts a session
+ * with the realm user's roles on the browser context
+ * (helpers/forged-session.ts), the cookie a real sign-in sets. The Keycloak
+ * flow itself is still tested wherever a Keycloak answers:
+ * skipIfKeycloakDown({ realKeycloak: true }).
+ */
+export function forgedSessions(): boolean {
+  return (
+    process.env.E2E_FORGED_SESSIONS === "1" && !!process.env.NEXTAUTH_SECRET
+  );
+}
+
+/**
  * Log in via the Keycloak OIDC flow (browser-based).
  * After this call, `page.request` shares the authenticated session cookies.
  */
 export async function loginAs(page: Page, username: string, password: string) {
+  if (forgedSessions()) {
+    if (!isForgeablePersona(username)) {
+      throw new Error(`No forged session for "${username}"`);
+    }
+    await signInPage(page, username, { realmMail: true });
+    await page.goto("/", { waitUntil: "networkidle" });
+    return;
+  }
   // Wait for networkidle so NextAuth's SessionProvider has finished
   // initializing (fetched /api/auth/session + /api/keycloak-config). Clicking
   // "Sign in with Keycloak" before this is established causes signIn() to
@@ -174,6 +235,38 @@ export async function loginAsAdmin(page: Page) {
   }
 }
 
+/**
+ * Sign out and land on the start page.
+ *
+ * A forged session is only a cookie. Signing out through the menu sends the
+ * browser on to Keycloak's end-session endpoint, which is not there, and that
+ * navigation aborted the page.goto() that followed (ERR_ABORTED in 18, 28 and
+ * 29, each of which had its own copy of this function until 2026-11-08).
+ */
+export async function logout(page: Page) {
+  if (forgedSessions()) {
+    await page.context().clearCookies();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    return;
+  }
+  const userMenu = page
+    .locator("nav")
+    .getByRole("button", { name: /user menu/i });
+  if (await userMenu.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    await userMenu.click();
+    const signOut = page.getByRole("button", { name: /sign out/i });
+    if (await signOut.isVisible({ timeout: 2_000 }).catch(() => false)) {
+      await signOut.click();
+    }
+  }
+  try {
+    await page.goto("/", { waitUntil: "domcontentloaded", timeout: 10_000 });
+  } catch {
+    // The Keycloak end-session redirect can abort this on the JAD stack.
+    await page.waitForTimeout(1_000);
+  }
+}
+
 /* ── Service-availability checks ─────────────────────────────── */
 
 /**
@@ -209,8 +302,17 @@ export async function skipIfNeo4jDown(page: Page, path = "/api/graph") {
   test.skip(true, `Neo4j unavailable (${path} → ${res.status()})`);
 }
 
-/** Skip the current test if Keycloak is unreachable. */
-export async function skipIfKeycloakDown() {
+/**
+ * Skip the current test if Keycloak is unreachable.
+ *
+ * With forged sessions (forgedSessions()) a spec that only needs a signed-in
+ * persona runs without Keycloak; pass realKeycloak for one that tests the
+ * sign-in or sign-out at Keycloak itself.
+ */
+export async function skipIfKeycloakDown({
+  realKeycloak = false,
+}: { realKeycloak?: boolean } = {}) {
+  if (!realKeycloak && forgedSessions()) return;
   // Defaults to localhost, which is right for a local stack and a trap against
   // a remote one: point PLAYWRIGHT_BASE_URL at a deployment without also
   // setting KEYCLOAK_PUBLIC_URL and every test here skips while reporting

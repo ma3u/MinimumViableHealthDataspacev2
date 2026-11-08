@@ -208,9 +208,13 @@ ESLint, `tsc` and gitleaks over the pull request's commits run in PR Gate; E2E, 
 
 Runs on push to main: seed Neo4j and refresh the mock fixtures → disable API routes → static export with the latest nightly test reports → deploy.
 
+### e2e.yml: pull requests that touch ui/
+
+The Playwright specs the change can break, picked by `scripts/select-e2e-specs.sh`: the changed specs and those that visit a changed route, or every spec on three runners when shared code changed. A seeded Neo4j (`neo4j/seed.sh`) and the neo4j-proxy, no EDC connector and no Keycloak, forged sessions for the realm users. A failure is a red check ([ADR-079](ADRs/ADR-079-e2e-runs-on-pull-requests-and-fails-visibly.md)). Locally, the same run: `scripts/run-e2e-local.sh --changed`.
+
 ### nightly.yml: once a night when main changed
 
-Vitest with coverage, Playwright E2E with WCAG and the OWASP/BSI checks against a seeded Neo4j, Lighthouse, and `compliance.yml`: DSP 2025-1 TCK, DCP v1.0 and EHDS domain tests against the full JAD stack on EDC 1.0 ([ADR-074](ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md)).
+Vitest with coverage, every Playwright spec (WCAG 2.2 AA and the OWASP/BSI checks included) against the demo graph, spec 19 against the published GitHub Pages site, Lighthouse, and `compliance.yml`: DSP 2025-1 TCK, DCP v1.0 and EHDS domain tests against the full JAD stack on EDC 1.0 ([ADR-074](ADRs/ADR-074-e2e-and-compliance-suites-run-nightly-when-main-changed.md)). A failing suite opens the "Nightly suites failed" issue; no step has `continue-on-error` ([ADR-079](ADRs/ADR-079-e2e-runs-on-pull-requests-and-fails-visibly.md)).
 
 ## Latest Reports
 
