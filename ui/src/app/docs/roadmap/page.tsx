@@ -4,6 +4,7 @@ import { DocsLastUpdated } from "@/components/docs/DocsLastUpdated";
 import { LinkedText } from "@/components/docs/LinkedText";
 import RoadmapTimeline from "@/components/docs/RoadmapTimeline";
 import {
+  EPICS,
   ITEMS,
   LANES,
   REPO,
@@ -12,6 +13,10 @@ import {
   SRC,
   STATUS_LABEL,
   ehdsArt,
+  epicOf,
+  epicStatus,
+  epicTaskId,
+  epicWindow,
   issueUrl,
 } from "@/lib/docs/roadmap";
 import { T } from "@/lib/i18n/translate";
@@ -19,7 +24,7 @@ import { T } from "@/lib/i18n/translate";
 export const metadata = {
   title: "Roadmap",
   description:
-    "The roadmap to 2031 as an interactive timeline: the dates of the EHDS Regulation and its implementing acts, the EUDI and Business Wallets, Simpl-Open, and the issues each one sets, with the drivers behind them.",
+    "The roadmap to 2031 as an interactive timeline: the dates of the EHDS Regulation and its implementing acts, the EUDI and Business Wallets, Simpl-Open, the epics every open issue belongs to, and the drivers behind them.",
 };
 
 /** A link in a text, opened in a new tab. */
@@ -206,6 +211,16 @@ export default function RoadmapDocsPage() {
             }
           </T>
         </p>
+        <p className="text-(--text-secondary) mt-2">
+          <T
+            area="docsCommon"
+            tags={{ e: inlineLink(`${ROADMAP_PROJECT}/views/6`) }}
+          >
+            {
+              "Every open issue belongs to one of nine <e>epics</e>, a parent issue on GitHub with the work as its sub-issues. An epic's hatched bar runs from its first issue to the deadline its issues' priorities set."
+            }
+          </T>
+        </p>
       </div>
 
       <section aria-labelledby="chart">
@@ -226,6 +241,9 @@ export default function RoadmapDocsPage() {
             <T area="docsCommon">{"Grey bar: done"}</T>
           </li>
           <li>
+            <T area="docsCommon">{"Hatched bar: an epic"}</T>
+          </li>
+          <li>
             <T area="docsCommon">{"Diamond: a fixed date"}</T>
           </li>
           <li>
@@ -233,6 +251,112 @@ export default function RoadmapDocsPage() {
           </li>
         </ul>
         <RoadmapTimeline />
+      </section>
+
+      <section aria-labelledby="epics" className="mt-10">
+        <h2 id="epics" className="text-xl font-semibold mb-4">
+          <T area="docsCommon">{"The epics"}</T>
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {EPICS.map((e) => {
+            const w = epicWindow(e);
+            const open = (["P1", "P2", "P3"] as const).filter(
+              (p) => e.open[p].length,
+            );
+            const total =
+              open.reduce((n, p) => n + e.open[p].length, 0) + e.done.length;
+            return (
+              <article
+                key={e.issue}
+                id={epicTaskId(e.issue)}
+                data-testid="roadmap-epic"
+                className="border border-(--border) rounded-xl p-5"
+              >
+                <p className="text-xs text-(--text-secondary)">
+                  <T area="docsCommon">{"Epic"}</T> #{e.issue} ·{" "}
+                  <T area="docsCommon">
+                    {LANES.find((l) => l.id === e.lane)!.label}
+                  </T>
+                </p>
+                <h3 className="font-semibold mt-1 mb-2">
+                  <T area="docsCommon">{e.title}</T>
+                </h3>
+                <p className="mb-2 flex flex-wrap gap-1 text-xs">
+                  <span className="rounded-full border border-(--border-ui) px-2">
+                    {e.priority}
+                  </span>
+                  <span className="rounded-full border border-(--border-ui) px-2">
+                    <T area="docsCommon">{STATUS_LABEL[epicStatus(e)]}</T>
+                  </span>
+                  <span className="rounded-full border border-(--border-ui) px-2">
+                    <T area="docsCommon" vars={w}>
+                      {"{start} to {end}"}
+                    </T>
+                  </span>
+                  <span className="rounded-full border border-(--border-ui) px-2">
+                    <T area="docsCommon" vars={{ done: e.done.length, total }}>
+                      {"{done} of {total} done"}
+                    </T>
+                  </span>
+                </p>
+                <p className="text-sm text-(--text-secondary) mb-3">
+                  <LinkedText area="docsCommon" text={e.note} links={e.links} />
+                </p>
+                <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm mb-3">
+                  {open.map((p) => (
+                    <div key={p} className="contents">
+                      <dt className="font-medium">{p}</dt>
+                      <dd className="flex flex-wrap gap-x-2">
+                        {e.open[p].map((n) => (
+                          <a
+                            key={n}
+                            href={issueUrl(n)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-(--accent) underline"
+                          >
+                            #{n}
+                          </a>
+                        ))}
+                      </dd>
+                    </div>
+                  ))}
+                  {e.done.length > 0 && (
+                    <div className="contents">
+                      <dt className="font-medium">
+                        <T area="docsCommon">{"Done"}</T>
+                      </dt>
+                      <dd className="flex flex-wrap gap-x-2">
+                        {e.done.map((n) => (
+                          <a
+                            key={n}
+                            href={issueUrl(n)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-(--accent) underline line-through"
+                          >
+                            #{n}
+                          </a>
+                        ))}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+                <a
+                  href={issueUrl(e.issue)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-(--accent) underline inline-flex items-center gap-1"
+                >
+                  <T area="docsCommon" vars={{ n: e.issue }}>
+                    {"Open epic #{n}"}
+                  </T>{" "}
+                  <ExternalLink size={11} aria-hidden="true" />
+                </a>
+              </article>
+            );
+          })}
+        </div>
       </section>
 
       <section aria-labelledby="drivers" className="mt-10">
@@ -353,6 +477,19 @@ export default function RoadmapDocsPage() {
                               links={i.links}
                             />
                           </span>
+                          {epicOf(i.issue) && (
+                            <a
+                              href={`#${epicTaskId(epicOf(i.issue)!.issue)}`}
+                              className="text-xs text-(--accent) underline"
+                            >
+                              <T
+                                area="docsCommon"
+                                vars={{ n: epicOf(i.issue)!.issue }}
+                              >
+                                {"Epic #{n}"}
+                              </T>
+                            </a>
+                          )}
                         </td>
                         <td className="py-1.5 pr-3">{i.priority}</td>
                         <td className="py-1.5 pr-3">

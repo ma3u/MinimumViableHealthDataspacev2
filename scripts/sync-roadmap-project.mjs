@@ -15,8 +15,11 @@
  * gives every issue the GitHub milestone of the deadline its priority sets
  * (DEADLINES), so the Project groups the epics under it and draws it as a
  * marker. The Project also holds every other open issue, with a Priority
- * and under its epic (a parent issue labelled "epic"), edited there only:
- * an issue that roadmap.ts does not name is left alone. Needs
+ * and under its epic (a parent issue labelled "epic"). roadmap.ts names the
+ * epics (EPICS) with their sub-issues by priority: check compares those with
+ * GitHub and the Project, pull writes them back, and push gives each epic
+ * its bar (epicWindow(), derived from its issues, never edited by hand), its
+ * Priority and its Lane. Any other issue is left alone. Needs
  * Node 23.6 or later (it imports roadmap.ts as it is) and `gh` with the
  * project scope (`gh auth refresh -s project`).
  */
@@ -35,7 +38,9 @@ const REPO_NAME = "MinimumViableHealthDataspacev2";
 const TITLE = "Roadmap to 2031";
 
 const roadmap = await import(ROADMAP_TS);
-const { ITEMS, MILESTONES, LANES, ROADMAP_PROJECT } = roadmap;
+const { ITEMS, EPICS, MILESTONES, LANES, ROADMAP_PROJECT, epicWindow } =
+  roadmap;
+const PRIORITIES = ["P1", "P2", "P3"];
 
 /** roadmap.ts's statuses and the Project's Status options, both ways. */
 const STATUS = {
@@ -109,6 +114,51 @@ function milestoneDrift() {
     };
   }).filter((r) => r.want !== r.have);
 }
+
+/** Each epic's sub-issues as GitHub and the Project hold them: the open ones
+ *  by their Project priority, the closed ones apart. */
+function epicMembers(project) {
+  return EPICS.map((e) => {
+    const subs = rest(
+      "GET",
+      `repos/${OWNER}/${REPO_NAME}/issues/${e.issue}/sub_issues?per_page=100`,
+    );
+    const open = { P1: [], P2: [], P3: [] };
+    const done = [];
+    for (const s of subs) {
+      if (s.state === "closed") done.push(s.number);
+      else {
+        const p = project.items[`i${s.number}`]?.values.Priority;
+        if (!PRIORITIES.includes(p))
+          throw new Error(
+            `#${s.number} under #${e.issue} has no Priority in the Project`,
+          );
+        open[p].push(s.number);
+      }
+    }
+    for (const p of PRIORITIES) open[p].sort((a, b) => a - b);
+    done.sort((a, b) => a - b);
+    return { epic: e, open, done };
+  });
+}
+
+/** Epics whose sub-issues in roadmap.ts differ from GitHub's. */
+function epicDrift(project) {
+  const same = (a, b) =>
+    a.length === b.length &&
+    [...a].sort((x, y) => x - y).every((n, i) => n === b[i]);
+  return epicMembers(project).filter(
+    (m) =>
+      !same(m.epic.done, m.done) ||
+      PRIORITIES.some((p) => !same(m.epic.open[p], m.open[p])),
+  );
+}
+
+const members = (m) =>
+  [
+    ...PRIORITIES.map((p) => `${p} ${m.open[p].join(" ") || "-"}`),
+    `done ${m.done.join(" ") || "-"}`,
+  ].join("; ");
 
 function gql(query, variables = {}) {
   const out = execFileSync("gh", ["api", "graphql", "--input", "-"], {
@@ -197,6 +247,21 @@ function wanted() {
         Kind: "Issue",
       },
     })),
+    ...EPICS.map((e) => {
+      const w = epicWindow(e);
+      return {
+        key: `i${e.issue}`,
+        label: `#${e.issue} epic ${e.short}`,
+        issue: e.issue,
+        epic: e,
+        values: {
+          Start: w.start,
+          Target: w.end,
+          Priority: e.priority,
+          Lane: lane(e.lane),
+        },
+      };
+    }),
     ...MILESTONES.map((m) => ({
       key: `m_${m.id}`,
       label: `◆ ${m.label}`,
@@ -325,6 +390,12 @@ function pull() {
   let changed = 0;
   for (const r of diff(project)) {
     if (!r.have || r.project === null) continue;
+    if (r.w.epic && (r.field === "Start" || r.field === "Target")) {
+      console.log(
+        `${r.w.label}: ${r.field} follows its issues (${r.repo}); move them instead`,
+      );
+      continue;
+    }
     if (r.w.issue && back[r.field]) {
       const value = r.field === "Status" ? STATUS_BACK[r.project] : r.project;
       src = editBlock(src, `issue: ${r.w.issue},`, back[r.field], value);
@@ -339,6 +410,22 @@ function pull() {
     console.log(`${r.w.label}: ${r.field} ${r.repo} -> ${r.project}`);
     changed++;
   }
+  for (const m of epicDrift(project)) {
+    const at = src.indexOf(`issue: ${m.epic.issue},`);
+    const end = src.indexOf("\n  },", at);
+    const block = src
+      .slice(at, end)
+      .replace(
+        /open: \{[\s\S]*?\},\n(\s*)done: \[[^\]]*\],/,
+        (_, indent) =>
+          `open: { ${PRIORITIES.map(
+            (p) => `${p}: [${m.open[p].join(", ")}]`,
+          ).join(", ")} },\n${indent}done: [${m.done.join(", ")}],`,
+      );
+    src = src.slice(0, at) + block + src.slice(end);
+    console.log(`#${m.epic.issue} epic: ${members(m)}`);
+    changed++;
+  }
   if (changed) writeFileSync(ROADMAP_TS, src);
   console.log(
     changed
@@ -348,7 +435,8 @@ function pull() {
 }
 
 function check() {
-  const rows = diff(readProject());
+  const project = readProject();
+  const rows = diff(project);
   for (const r of rows)
     console.log(
       `${r.w.label}: ${r.field} repo=${r.repo} project=${r.project ?? "-"}`,
@@ -356,7 +444,10 @@ function check() {
   const drift = milestoneDrift();
   for (const r of drift)
     console.log(`#${r.issue}: milestone ${r.have ?? "-"}, due ${r.want}`);
-  const n = rows.length + drift.length;
+  const epics = epicDrift(project);
+  for (const m of epics)
+    console.log(`#${m.epic.issue} epic: GitHub has ${members(m)}`);
+  const n = rows.length + drift.length + epics.length;
   console.log(n ? `${n} difference(s)` : "in step");
   process.exitCode = n ? 1 : 0;
 }
