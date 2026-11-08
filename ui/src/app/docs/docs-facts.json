@@ -1313,6 +1313,7 @@
       "Image platforms",
       "edc-images",
       "DSP 2025-1 TCK",
+      "Eclipse DSP TCK",
       "DCP v1.0 Compliance",
       "EHDS Health Domain",
       "EHDS API Collection (Bruno)",
@@ -1345,8 +1346,8 @@
   "lastUpdated": {
     "/docs": "2026-11-07",
     "/docs/user-guide": "2026-11-07",
-    "/docs/developer": "2026-11-07",
-    "/docs/developer/quality-gates": "2026-11-07",
+    "/docs/developer": "2026-11-08",
+    "/docs/developer/quality-gates": "2026-11-08",
     "/docs/developer/api": "2026-11-07",
     "/docs/developer/reference": "2026-11-07",
     "/docs/developer/[slug]": "2026-11-07",

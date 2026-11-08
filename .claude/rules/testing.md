@@ -12,16 +12,17 @@ globs:
 
 ## Frameworks
 
-| Scope            | Framework      | Config                                 |
-| ---------------- | -------------- | -------------------------------------- |
-| Unit / component | Vitest 5       | `ui/vitest.config.ts`                  |
-| E2E browser      | Playwright     | `ui/playwright.config.ts`              |
-| iOS unit         | Swift Testing  | `cd clients/ios && swift test`         |
-| iOS on screen    | XCUITest       | `clients/ios/Scripts/run-ui-tests.sh`  |
-| EHDS dataspace   | Our own checks | `scripts/run-ehds-dataspace-checks.sh` |
-| EHDS identity    | Our own checks | `scripts/run-ehds-identity-checks.sh`  |
-| EHDS API by role | Bruno          | `scripts/run-api-tests.sh <env>`       |
-| EHDS domain      | Custom         | `scripts/run-ehds-tests.sh`            |
+| Scope            | Framework       | Config                                 |
+| ---------------- | --------------- | -------------------------------------- |
+| Unit / component | Vitest 5        | `ui/vitest.config.ts`                  |
+| E2E browser      | Playwright      | `ui/playwright.config.ts`              |
+| iOS unit         | Swift Testing   | `cd clients/ios && swift test`         |
+| iOS on screen    | XCUITest        | `clients/ios/Scripts/run-ui-tests.sh`  |
+| DSP conformance  | Eclipse DSP TCK | `scripts/run-eclipse-dsp-tck.sh`       |
+| EHDS dataspace   | Our own checks  | `scripts/run-ehds-dataspace-checks.sh` |
+| EHDS identity    | Our own checks  | `scripts/run-ehds-identity-checks.sh`  |
+| EHDS API by role | Bruno           | `scripts/run-api-tests.sh <env>`       |
+| EHDS domain      | Custom          | `scripts/run-ehds-tests.sh`            |
 
 ## API Collection (Bruno)
 

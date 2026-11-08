@@ -265,6 +265,35 @@ jobs:
         run: docker compose -f docker-compose.jad.yml down -v
 
   # -----------------------------------------------------------------------
+  # The Eclipse DSP TCK (#338 phase 1, #711)
+  # -----------------------------------------------------------------------
+  # The job above runs our own checks; this one runs the official TCK
+  # (eclipsedataspacetck/dsp-tck-runtime) as a protocol peer against the
+  # hub's control plane with EDC's connector-under-test pieces
+  # (runtimes/edc/controlplane-tck, docker-compose.tck.yml). 65 tests: catalog,
+  # metadata, negotiation and transfer, as provider and as consumer; all passed
+  # locally on 2026-11-08. No continue-on-error: a failure fails the run, so
+  # the nightly reports it (#951).
+  eclipse-dsp-tck:
+    name: Eclipse DSP TCK
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    if: github.event_name != 'workflow_dispatch' || inputs.target == 'local'
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run the TCK
+        run: REPORT_DIR=${{ env.REPORT_DIR }}/eclipse-dsp-tck ./scripts/run-eclipse-dsp-tck.sh
+
+      - name: Upload the TCK log
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: eclipse-dsp-tck-results
+          path: ${{ env.REPORT_DIR }}/eclipse-dsp-tck/
+          retention-days: 30
+
+  # -----------------------------------------------------------------------
   # DCP v1.0 Compliance
   # -----------------------------------------------------------------------
   dcp-compliance:

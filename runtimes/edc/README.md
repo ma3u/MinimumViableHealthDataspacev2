@@ -13,6 +13,25 @@ docker compose -f docker-compose.yml -f docker-compose.jad.yml build controlplan
 build runs inside the Gradle image, so no local JDK or Gradle is needed. CI
 builds them once per run (`compliance.yml`, job `edc-images`).
 
+## The official DSP TCK (#338, #711)
+
+`controlplane-tck` is a fourth launcher, never deployed: the same virtual
+control plane and EHDS policy vocabulary as `controlplane`, with EDC's own
+connector-under-test modules in place of DCP (`iam-mock`, and
+`tasks-tck-extension`, which seeds the TCK's offers and agreements and opens
+the `/tck` endpoint the TCK uses to start a negotiation or a transfer). EDC
+builds its TCK connector the same way, in
+`system-tests/tck/dsp-tck-virtual-connector-under-test`.
+
+```bash
+./scripts/run-eclipse-dsp-tck.sh      # build, run eclipsedataspacetck/dsp-tck-runtime, report, clean up
+```
+
+`docker-compose.tck.yml` is standalone (own project, network and database), so
+it runs next to the JAD stack. On 2026-11-08 the TCK 1.0.2 passed all 65 tests
+against EDC 1.0.0-RC5. The nightly runs it (`compliance.yml`, job
+`eclipse-dsp-tck`).
+
 ## Running them in the compose stack (#881)
 
 `docker-compose.jad.yml` runs the five EDC containers on these images, each on

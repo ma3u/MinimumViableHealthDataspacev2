@@ -1,0 +1,95 @@
+# The official DSP 2025-1 TCK against the hub's control plane (#711).
+#
+# Standalone, not an overlay: its own project, network and throwaway database,
+# so it can run next to the JAD stack and leaves nothing behind.
+#
+#   scripts/run-eclipse-dsp-tck.sh                  # build, run, report, clean up
+#
+# controlplane-tck is the hub's control plane with EDC's connector-under-test
+# pieces (runtimes/edc/controlplane-tck): it answers DSP on 8282 and lets the
+# TCK start negotiations and transfers on 8687. dsp-tck runs the test plan once
+# against it and exits; its log ends with "Test run complete".
+name: mvhd-dsp-tck
+
+services:
+  postgres:
+    image: postgres:17.7-alpine
+    environment:
+      POSTGRES_USER: cut
+      POSTGRES_PASSWORD: cut
+      POSTGRES_DB: cut
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cut -d cut"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  nats:
+    image: nats:2.14.3-alpine
+    command: ["-js"]
+
+  controlplane-tck:
+    image: mvhd/edc-controlplane-tck:1.0.0-RC5
+    build:
+      context: ./runtimes/edc
+      args:
+        RUNTIME: controlplane-tck
+        EDC_VERSION: 1.0.0-RC5
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_started
+    environment:
+      # as EDC's VirtualDspTckDockerTest at v1.0.0-RC5, with compose hostnames
+      edc.participant.id: "participantContextId"
+      edc.hostname: "controlplane-tck"
+      edc.component.id: "DSP-compatibility-test"
+      web.http.port: "8080"
+      web.http.path: "/api"
+      web.http.management.port: "8081"
+      web.http.management.path: "/management"
+      web.http.protocol.port: "8282"
+      web.http.protocol.path: "/api/dsp"
+      web.http.tck.port: "8687"
+      web.http.tck.path: "/tck"
+      edc.dsp.callback.address: "http://controlplane-tck:8282/api/dsp/%s"
+      # the upstream test's key and the one the hub's own compose uses (#542)
+      edc.dataspace.enable.profiles.all: "true"
+      edc.dsp.profiles.enable.all: "true"
+      edc.transfer.proxy.token.signer.privatekey.alias: "private-key"
+      edc.transfer.proxy.token.verifier.publickey.alias: "public-key"
+      # the Management API is not used by the TCK; these only let it start
+      edc.iam.oauth2.jwks.url: "https://example.com/jwks"
+      edc.iam.oauth2.issuer: "test-issuer"
+      edc.datasource.default.url: "jdbc:postgresql://postgres:5432/cut"
+      edc.datasource.default.user: "cut"
+      edc.datasource.default.password: "cut"
+      edc.sql.schema.autocreate: "true"
+      edc.nats.cn.subscriber.url: "nats://nats:4222"
+      edc.nats.cn.subscriber.autocreate: "true"
+      edc.nats.cn.publisher.url: "nats://nats:4222"
+      edc.nats.tp.subscriber.url: "nats://nats:4222"
+      edc.nats.tp.subscriber.autocreate: "true"
+      edc.nats.tp.publisher.url: "nats://nats:4222"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -o /dev/null http://localhost:8282/api/dsp/participantContextId/.well-known/dspace-version || exit 1",
+        ]
+      interval: 3s
+      timeout: 3s
+      retries: 60
+
+  dsp-tck:
+    # the latest TCK release; EDC's own run at v1.0.0-RC5 pins 1.0.0-RC6
+    image: eclipsedataspacetck/dsp-tck-runtime:${DSP_TCK_VERSION:-1.0.2}
+    depends_on:
+      controlplane-tck:
+        condition: service_healthy
+    volumes:
+      - ./jad/dsp-tck/config.properties:/etc/tck/config.properties:ro
+      # EDC's JSON-LD context for its own terms, from the same EDC test
+      # resources (Apache-2.0)
+      - ./jad/dsp-tck/dspace-edc-context-v1.jsonld:/etc/tck/dspace-edc-context-v1.jsonld:ro
