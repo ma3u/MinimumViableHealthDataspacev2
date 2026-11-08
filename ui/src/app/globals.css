@@ -799,6 +799,16 @@
   background: var(--surface-2);
   border-color: var(--border-ui);
 }
+/* An epic: hatched over its status colour, a thicker border, bold label. */
+.roadmap-timeline .vis-item.rt-epic {
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 6px,
+    color-mix(in srgb, var(--text-primary) 10%, transparent) 6px 8px
+  );
+  border-width: 2px;
+  font-weight: 600;
+}
 .roadmap-timeline .vis-item.vis-selected {
   box-shadow: 0 0 0 3px #facc15;
   z-index: 5;

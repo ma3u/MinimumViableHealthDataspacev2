@@ -14,6 +14,7 @@ import path from "node:path";
 import { MESSAGES, type Area } from "@/messages";
 import { translate } from "@/lib/i18n/translate";
 import {
+  EPICS,
   ITEMS,
   LANES,
   MILESTONES,
@@ -181,7 +182,10 @@ describe("the docs pages' texts are in their dictionaries", () => {
         ...LANES.flatMap((l) => [l.label, l.driver]),
         ...ITEMS.flatMap((i) => [i.short, i.title, i.note]),
         ...MILESTONES.flatMap((m) => [m.label, m.detail]),
+        ...EPICS.flatMap((e) => [e.short, e.title, e.note]),
         ...Object.values(STATUS_LABEL),
+        "Epic",
+        "{done} of {total} done",
         "{start} to {end}",
         "Drag to pan, Ctrl or ⌘ and the wheel to zoom. Click a bar or a diamond for its details; a double click opens its issue or source. The red line is today.",
         "Edit in the GitHub Project",
@@ -200,6 +204,7 @@ describe("the roadmap's chart in every language", () => {
         ...LANES.map((l) => l.label),
         ...ITEMS.map((i) => i.short),
         ...MILESTONES.map((m) => m.label),
+        ...EPICS.flatMap((e) => [e.short, e.title]),
       ]) {
         expect(MESSAGES[lang].docsCommon, `${lang}: ${t}`).toHaveProperty([t]);
       }
@@ -251,6 +256,17 @@ describe("the pages in German", () => {
     expect(
       screen.getByRole("link", { name: "GitHub-Projekt" }),
     ).toHaveAttribute("href", "https://github.com/users/ma3u/projects/1");
+    const epics = screen.getByRole("heading", { level: 2, name: "Die Epics" })
+      .parentElement!;
+    expect(
+      within(epics).getByRole("heading", {
+        level: 3,
+        name: "Connector-Plattform: EDC 1.0 und die Data Planes",
+      }),
+    ).toBeInTheDocument();
+    expect(within(epics).getAllByText(/von \d+ erledigt/)).toHaveLength(
+      EPICS.length,
+    );
   });
 
   it("shows the architecture page's headings and service table in German", async () => {
