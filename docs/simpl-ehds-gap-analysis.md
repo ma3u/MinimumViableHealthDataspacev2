@@ -166,6 +166,20 @@ No public Simpl-Open repository implements DCP. Two consequences:
   exits 3 while the hub refuses. The
   [DSP compatibility kit](https://github.com/eclipse-dataspacetck/dsp-tck) against `simpl-edc` is #711.
 
+  Removing the four barriers lets the hub accept a Simpl credential. It does
+  not make Simpl's connector present one. `simpl-edc` 1.0.26 has no DCP: its
+  build carries no DCP module ([`pom.xml` at `v1.0.26`](https://code.europa.eu/simpl/simpl-open/development/gaia-x-edc/simpl-edc/-/blob/v1.0.26/pom.xml)),
+  and its `IdentityService` sends a plain JSON token (`region`, `audience`,
+  `clientId` and the `identityAttributes` it fetches from
+  `client.authenticationprovider.url`) and accepts such a token without
+  checking any signature
+  ([`SimplIdentityService.java` lines 39 to 83 at `v1.0.26`](https://code.europa.eu/simpl/simpl-open/development/gaia-x-edc/simpl-edc/-/blob/v1.0.26/src/main/java/eu/europa/ec/simpl/iam/service/SimplIdentityService.java#L39-83)).
+  The connector never asks for a presentation; authentication presumably sits
+  at Simpl's gateway, which was not checked. On compose a token without
+  `identityAttributes` makes it answer 500 (#711). A negotiation between the
+  hub and `simpl-edc` on a Governance Authority credential (#934, step 8)
+  therefore needs DCP in `simpl-edc` as well as the hub's half of the fix.
+
 ### Catalogue
 
 Gdynia brought resource description, schema and vocabulary management for the
@@ -437,7 +451,9 @@ Comments on the proposed requirements and questions for the programme:
    context of its membership credential at a stable address. Today a
    credential from `issuer-service-be` 1.6.0 reaches an EDC 1.0 connector only
    by hand and fails verification there
-   ([section 2](#what-the-published-code-shows); #934, step 0a).
+   ([section 2](#what-the-published-code-shows); #934, step 0a). Give
+   `simpl-edc` DCP too: 1.0.26 neither presents a credential nor checks a
+   signature on the token it receives.
 
 ### For the hub
 
@@ -451,6 +467,7 @@ with its priority (P1 to P3) and the evidence that closes it.
    The first half ran on 8 November 2026 and is refused at the barriers in
    [section 2](#what-the-published-code-shows); the hub's half of the fix is
    context preloading and an `Ed25519Signature2020` and `did:key` extension.
+   The negotiation also needs DCP in `simpl-edc`, which 1.0.26 lacks.
 2. Map HealthDCAT-AP Release 8 onto Simpl's DCAT-AP and XFSC resource
    descriptions.
 3. Express the `fees.ts` schedule as a BP02E monetisation model and record what
