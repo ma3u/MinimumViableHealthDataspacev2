@@ -31,10 +31,12 @@ export default function ImpressumPage() {
       <li>
         E-Mail: <a href={`mailto:${p.email}`}>{p.email}</a>
       </li>
-      <li>
-        Telefon / Phone:{" "}
-        <a href={`tel:${p.phone.replace(/\s/g, "")}`}>{p.phone}</a>
-      </li>
+      {p.phone && (
+        <li>
+          Telefon / Phone:{" "}
+          <a href={`tel:${p.phone.replace(/\s/g, "")}`}>{p.phone}</a>
+        </li>
+      )}
     </ul>
   );
 

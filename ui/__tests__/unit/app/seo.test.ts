@@ -98,14 +98,14 @@ describe("llms.txt", () => {
 
 describe("legal notice", () => {
   it("names the provider", () => {
-    expect(PROVIDER.name).toBe("Matthias Buchhorn");
+    expect(PROVIDER.name).toBe("Matthias Buchhorn-Roth");
   });
 
   // A placeholder must not be published. Locally the pages can be built and
   // looked at with placeholders; CI refuses them, so a pull request with one
   // cannot be merged.
   it.runIf(process.env.CI === "true")(
-    "has no placeholder left (§ 5 DDG: address, email, phone)",
+    "has no placeholder left (§ 5 DDG: address and email)",
     () => {
       expect(isComplete()).toBe(true);
     },
