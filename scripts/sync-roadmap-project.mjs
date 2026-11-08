@@ -14,7 +14,9 @@
  * milestone (a draft item marked <!-- roadmap:<id> -->) its date. push also
  * gives every issue the GitHub milestone of the deadline its priority sets
  * (DEADLINES), so the Project groups the epics under it and draws it as a
- * marker. Needs
+ * marker. The Project also holds every other open issue, with a Priority
+ * and under its epic (a parent issue labelled "epic"), edited there only:
+ * an issue that roadmap.ts does not name is left alone. Needs
  * Node 23.6 or later (it imports roadmap.ts as it is) and `gh` with the
  * project scope (`gh auth refresh -s project`).
  */
@@ -125,35 +127,47 @@ function projectNumber() {
   return Number(m[1]);
 }
 
-/** The Project, its fields by name and its items keyed "i<issue>" or "m_<id>". */
+/** The Project, its fields by name and its items keyed "i<issue>" or "m_<id>".
+ *  It holds every open issue under its epic, not only roadmap.ts's, so the
+ *  items come a page of 100 at a time. */
 function readProject() {
-  const data = gql(
-    `query($owner: String!, $number: Int!) {
-      user(login: $owner) { projectV2(number: $number) {
-        id url
-        fields(first: 50) { nodes {
-          ... on ProjectV2FieldCommon { id name dataType }
-          ... on ProjectV2SingleSelectField { options { id name } }
-        } }
-        items(first: 100) { nodes {
-          id
-          content {
-            ... on Issue { number }
-            ... on DraftIssue { id title body }
-          }
-          fieldValues(first: 20) { nodes {
-            ... on ProjectV2ItemFieldDateValue { date field { ... on ProjectV2FieldCommon { name } } }
-            ... on ProjectV2ItemFieldSingleSelectValue { name field { ... on ProjectV2FieldCommon { name } } }
+  let p;
+  const nodes = [];
+  for (let after = null; ; ) {
+    const data = gql(
+      `query($owner: String!, $number: Int!, $after: String) {
+        user(login: $owner) { projectV2(number: $number) {
+          id url
+          fields(first: 50) { nodes {
+            ... on ProjectV2FieldCommon { id name dataType }
+            ... on ProjectV2SingleSelectField { options { id name } }
           } }
+          items(first: 100, after: $after) {
+            pageInfo { hasNextPage endCursor }
+            nodes {
+              id
+              content {
+                ... on Issue { number }
+                ... on DraftIssue { id title body }
+              }
+              fieldValues(first: 20) { nodes {
+                ... on ProjectV2ItemFieldDateValue { date field { ... on ProjectV2FieldCommon { name } } }
+                ... on ProjectV2ItemFieldSingleSelectValue { name field { ... on ProjectV2FieldCommon { name } } }
+              } }
+            }
+          }
         } }
-      } }
-    }`,
-    { owner: OWNER, number: projectNumber() },
-  );
-  const p = data.user.projectV2;
+      }`,
+      { owner: OWNER, number: projectNumber(), after },
+    );
+    p = data.user.projectV2;
+    nodes.push(...p.items.nodes);
+    if (!p.items.pageInfo.hasNextPage) break;
+    after = p.items.pageInfo.endCursor;
+  }
   const fields = Object.fromEntries(p.fields.nodes.map((f) => [f.name, f]));
   const items = {};
-  for (const n of p.items.nodes) {
+  for (const n of nodes) {
     const values = Object.fromEntries(
       n.fieldValues.nodes
         .filter((v) => v.field)
