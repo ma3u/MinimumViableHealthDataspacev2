@@ -124,7 +124,7 @@ services:
         condition: service_completed_successfully
 
   neo4j-spe1:
-    image: neo4j:5.26.28-community
+    image: neo4j:5.26.32-community
     container_name: health-dataspace-neo4j-spe1
     ports:
       - "7476:7474"
