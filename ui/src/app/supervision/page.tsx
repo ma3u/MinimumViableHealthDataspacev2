@@ -427,12 +427,15 @@ function InformationRequestCard({
           >
             {busy ? t("Sending…") : t("Send answer")}
           </button>
-          {msg && (
-            <p className="text-(--text-primary)" role="status">
-              {msg}
-            </p>
-          )}
         </form>
+      )}
+      {/* Outside the form: once answered, the refreshed request closes the
+          form, and the confirmation went with it before anyone, or a screen
+          reader, could read it (2026-11-08, J998). */}
+      {msg && (
+        <p className="mt-2 text-xs text-(--text-primary)" role="status">
+          {msg}
+        </p>
       )}
     </article>
   );

@@ -370,11 +370,7 @@ export default function CredentialsPage() {
                 >
                   <button
                     className="w-full text-left p-4"
-                    aria-label={
-                      isOpen
-                        ? t("Collapse {name}", { name: vc.type })
-                        : t("Expand {name}", { name: vc.type })
-                    }
+                    aria-expanded={isOpen}
                     onClick={() => setExpanded(isOpen ? null : vc.id)}
                   >
                     <div className="flex items-center justify-between">

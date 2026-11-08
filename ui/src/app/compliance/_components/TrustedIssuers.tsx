@@ -44,10 +44,13 @@ export function TrustedIssuers() {
               className="flex flex-wrap gap-1.5 mt-2"
               aria-label={t("May issue")}
             >
+              {/* The layer colour on the border, the text in the theme's: teal
+                  text on its own tint was 3.87:1 in the light theme (WCAG
+                  1.4.3). */}
               {issuer.types.map((type) => (
                 <span
                   key={type}
-                  className="text-xs px-2 py-0.5 rounded-sm bg-layer2/15 text-layer2-safe"
+                  className="text-xs px-2 py-0.5 rounded-sm border border-layer2/50 text-(--text-primary)"
                 >
                   {type}
                 </span>

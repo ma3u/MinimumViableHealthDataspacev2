@@ -478,9 +478,12 @@ function draftFrom(app: Application): Draft {
 function CompleteForm({
   app,
   onDone,
+  onReceived,
 }: {
   app: Application;
   onDone: () => Promise<void>;
+  /** The confirmation, shown by the card: this form closes once complete. */
+  onReceived: (msg: string) => void;
 }) {
   const t = useT("access");
   const [draft, setDraft] = useState<Draft>(() => draftFrom(app));
@@ -507,16 +510,23 @@ function CompleteForm({
         return;
       }
       const c = body.completeness as Completeness | undefined;
-      setMsg(
-        c?.complete
-          ? t(
-              "Complete application received; the access body decides by {date} (Art. 68(4)).",
-              { date: shortDate(String(body.decisionDue ?? "")) },
-            )
-          : t("Still missing: {items}", {
-              items: (c?.missing ?? []).map((m) => `(${m.item})`).join(" "),
-            }),
-      );
+      if (c?.complete) {
+        // The refresh below closes this form, and a message kept here went
+        // with it before anyone, or a screen reader, could read it
+        // (2026-11-08, J992).
+        onReceived(
+          t(
+            "Complete application received; the access body decides by {date} (Art. 68(4)).",
+            { date: shortDate(String(body.decisionDue ?? "")) },
+          ),
+        );
+      } else {
+        setMsg(
+          t("Still missing: {items}", {
+            items: (c?.missing ?? []).map((m) => `(${m.item})`).join(" "),
+          }),
+        );
+      }
       await onDone();
     } catch (e) {
       setMsg(e instanceof Error ? e.message : String(e));
@@ -717,6 +727,7 @@ function ApplicationCard({
 }) {
   const t = useT("access");
   const tp = useT("public");
+  const [received, setReceived] = useState<string | null>(null);
   const c = app.completeness;
   const days = (n: number | null | undefined) =>
     typeof n === "number" ? ` (${t("{days} days", { days: n })})` : "";
@@ -868,7 +879,16 @@ function ApplicationCard({
         </ol>
       </details>
       {app.clockState === "paused" && !IS_STATIC && (
-        <CompleteForm app={app} onDone={onChanged} />
+        <CompleteForm app={app} onDone={onChanged} onReceived={setReceived} />
+      )}
+      {received && (
+        <p
+          className="mt-3 text-xs text-(--text-primary)"
+          role="status"
+          data-testid="complete-received"
+        >
+          {received}
+        </p>
       )}
       {app.decision === "APPROVED" && app.permitId && !IS_STATIC && (
         <ResultsForm app={app} onDone={onChanged} />
