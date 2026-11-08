@@ -158,10 +158,17 @@ No public Simpl-Open repository implements DCP. Two consequences:
   for its membership terms at a stable https address.
 
   Barrier 1 is configuration on the hub's side (preload the authority's
-  contexts rather than fetch them at verification). Barriers 2 and 3 need an
-  extension in the hub's EDC runtime, an `Ed25519Signature2020` suite and a
-  `did:key` resolver, or a Simpl issuer that signs JWT credentials under a
-  resolvable `did:web`, which DCP 1.0 and EDC 1.0 already verify. Rerun with
+  contexts rather than fetch them at verification). Barriers 2 and 3 could be
+  closed by an extension in the hub's EDC runtime, an `Ed25519Signature2020`
+  suite and a `did:key` resolver, or by a Simpl issuer that signs JWT
+  credentials under a resolvable `did:web`, which DCP 1.0 and EDC 1.0 already
+  verify. Decided on 9 November 2026: the hub does not build the extension.
+  It would keep a signature format alive that the hub does not otherwise
+  need, against the roadmap's principle of building only toward the
+  specifications that carry the EHDS, and it would not help with Simpl's own
+  connector, which presents no credential at all (below). The hub asks the
+  programme for JWT credentials under `did:web` instead
+  ([For the Simpl programme](#for-the-simpl-programme), 8). Rerun with
   `./scripts/run-simpl-issuer-interop.sh` (`--diagnose` shows barrier 2); it
   exits 3 while the hub refuses. The
   [DSP compatibility kit](https://github.com/eclipse-dataspacetck/dsp-tck) against `simpl-edc` is #711.
@@ -429,7 +436,12 @@ Comments on the proposed requirements and questions for the programme:
    evidence from the DSP technology compatibility kit. Its code builds on EDC
    0.10.1 ([section 2](#what-the-published-code-shows)): move to EDC 1.0 in
    the same step as SSI Tier 2, since DCP, the IdentityHub and the
-   IssuerService ship with it.
+   IssuerService ship with it. The
+   [DSP TCK 1.0.2](https://github.com/eclipse-dataspacetck/dsp-tck/releases/tag/v1.0.2)
+   passes 1 of 65 tests against `simpl-edc` 1.0.26, which announces DSP
+   `2024/1` and `v0.8` only; 46 of the failures need a test hook the
+   connector does not have, the other 17 are the protocol version
+   ([#711](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/711)).
 2. Make HealthDCAT-AP a profile of the DCAT-AP model adopted in Innsbruck, so a
    health data space can meet 2026/2098 without a second catalogue.
 3. Let BP02E express reductions by applicant category and a split between the
@@ -466,8 +478,12 @@ with its priority (P1 to P3) and the evidence that closes it.
    ([#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934)).
    The first half ran on 8 November 2026 and is refused at the barriers in
    [section 2](#what-the-published-code-shows); the hub's half of the fix is
-   context preloading and an `Ed25519Signature2020` and `did:key` extension.
-   The negotiation also needs DCP in `simpl-edc`, which 1.0.26 lacks.
+   context preloading only, and the hub asks Simpl for JWT credentials under
+   `did:web` rather than build an `Ed25519Signature2020` and `did:key`
+   extension. The negotiation also needs DCP in `simpl-edc`, which 1.0.26
+   lacks. The DSP TCK ran the same day: 65 of 65 against the hub, 1 of 65
+   against `simpl-edc` 1.0.26, which offers DSP 2024/1 and v0.8 only
+   ([#711](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/711)).
 2. Map HealthDCAT-AP Release 8 onto Simpl's DCAT-AP and XFSC resource
    descriptions.
 3. Express the `fees.ts` schedule as a BP02E monetisation model and record what

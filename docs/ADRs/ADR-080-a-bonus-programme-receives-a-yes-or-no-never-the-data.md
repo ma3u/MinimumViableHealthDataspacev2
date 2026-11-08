@@ -2,7 +2,7 @@
 
 Date: 2026-11-08
 
-**Status:** Proposed (2026-11-08)
+**Status:** Accepted (2026-11-09)
 **Relates to:** [ADR-062](ADR-062-the-art-71-opt-out-is-a-record-and-a-label.md), [ADR-064](ADR-064-simpl-open-through-the-outside-agent-dcp-path.md), [ADR-065](ADR-065-the-eudi-wallet-sign-in-identifies-the-person.md), [ADR-077](ADR-077-a-minimal-set-of-standard-data-sharing-policies.md)
 **Tracks:** [#934](https://github.com/ma3u/MinimumViableHealthDataspacev2/issues/934), step 1
 
@@ -38,6 +38,17 @@ opt-out (ADR-062), which governs secondary use, and study consent
    can stop it. It never runs under a data permit, and an access body is not
    involved in the payout. AlphaKasse's legal basis for what it receives is
    the person's explicit consent to that programme (GDPR Art. 9(2)(a)).
+   The EHDS article it rests on: "primary use" includes "relevant social,
+   administrative or reimbursement services" ([Art. 2(2)(d)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#002.002)),
+   and a person may ask a healthcare provider to transmit part of their data
+   "to a clearly identified recipient in the social security or reimbursement
+   services sector", one way only ([Art. 7(3)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#007.003)). That covers a
+   statutory health insurer's bonus, which is how AlphaKasse DE is modelled.
+   It does not cover a private insurer or any other recipient outside that
+   sector; there, only the GDPR consent applies, and the use case needs its
+   own review before it is built. The wallet path (decision 4) is the
+   person's own sharing of a copy she holds ([Art. 3(2)](https://eur-lex.europa.eu/eli/reg/2025/327/oj/eng#003.002)), under
+   the same consent.
 2. **One yes or no leaves the record, per programme and year.** What AlphaKasse
    receives is the programme, the year and "goal met: yes" or "no", tied to
    the member reference it already holds. Steps, heart rate, Observation
