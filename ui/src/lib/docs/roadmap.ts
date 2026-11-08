@@ -255,8 +255,8 @@ export const ITEMS: readonly RoadmapItem[] = [
     title:
       "One use case across two data spaces: <ak>AlphaKasse DE</ak> rewards an active year",
     priority: "P1",
-    status: "planned",
-    start: "2026-11-09",
+    status: "in-progress",
+    start: "2026-11-08",
     end: "2027-03-26",
     note: "First a credential from <iss>Simpl's own issuer</iss> in the IdentityHub, then a second data space; the insurer receives a yes or no, never the data (<a54>Art. 54</a54>).",
     links: { ak: SRC.alphaKasse, iss: SRC.simplIssuer, a54: ehdsArt(54) },
