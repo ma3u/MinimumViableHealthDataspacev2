@@ -69,9 +69,13 @@ SUMMARY="${OUT_DIR}/summary.txt"
 mkdir -p "$DATA_DIR" "$OUT_DIR"
 : >"$SUMMARY"
 
+# The project the running stack was started under, so `up` joins it rather
+# than starting a second stack beside it (as scripts/seed-test-issuer.sh does).
+COMPOSE_PROJECT="${COMPOSE_PROJECT:-$(docker inspect health-dataspace-postgres \
+  --format '{{index .Config.Labels "com.docker.compose.project"}}' 2>/dev/null || true)}"
 compose=(docker compose)
 for f in ${COMPOSE_FILES:-docker-compose.yml docker-compose.jad.yml}; do compose+=(-f "${REPO_DIR}/${f}"); done
-[ -n "${COMPOSE_PROJECT:-}" ] && compose+=(-p "$COMPOSE_PROJECT")
+[ -n "$COMPOSE_PROJECT" ] && compose+=(-p "$COMPOSE_PROJECT")
 
 say() { echo "$*" | tee -a "$SUMMARY"; }
 die() { say "ERROR: $*"; exit 1; }
